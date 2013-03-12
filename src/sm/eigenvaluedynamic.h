@@ -42,6 +42,14 @@
 #include "flotarry.h"
 #include "geneigvalsolvertype.h"
 
+///@name Input fields for EigenValueDynamic
+//@{
+#define _IFT_EigenValueDynamic_nroot "nroot"
+#define _IFT_EigenValueDynamic_rtolv "rtolv"
+#define _IFT_EigenValueDynamic_stype "stype"
+#define _IFT_EigenValueDynamic_smtype "smtype"
+//@}
+
 namespace oofem {
 /**
  * This class implements way for examining eigenvalues and eigenvectors in

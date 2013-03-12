@@ -39,6 +39,13 @@
 #include "gausspnt.h"
 #include "flotarry.h"
 
+///@name Input fields for LinearEdgeLoad
+//@{
+#define _IFT_LinearEdgeLoad_formulation "formulation"
+#define _IFT_LinearEdgeLoad_startcoord "startcoord"
+#define _IFT_LinearEdgeLoad_endcoord "endcoord"
+//@}
+
 namespace oofem {
 class TimeStep;
 

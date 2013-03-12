@@ -38,10 +38,16 @@
 #include "fluiddynamicmaterial.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-
 #include "matconst.h"
-#include "structuralelement.h"
 #include "matstatus.h"
+
+///@name Input fields for BinghamFluidMaterial
+//@{
+#define _IFT_BinghamFluidMaterial_mu0 "mu0"
+#define _IFT_BinghamFluidMaterial_tau0 "tau0"
+#define _IFT_BinghamFluidMaterial_muinf "muinf"
+#define _IFT_BinghamFluidMaterial_stressGrowthRate "stressgrowthrate"
+//@}
 
 namespace oofem {
 class GaussPoint;

@@ -89,10 +89,10 @@ HydratingConcreteMat :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, massCement, IFT_HydratingConcreteMat_massCement, "masscement");
 
     maxModelIntegrationTime = 36000;
-    IR_GIVE_OPTIONAL_FIELD(ir, maxModelIntegrationTime, IFT_maxModelIntegrationTime, "maxmodelintegrationtime"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, maxModelIntegrationTime, IFT_HydratingConcreteMat_maxModelIntegrationTime, "maxmodelintegrationtime"); // Macro
 
     minModelTimeStepIntegrations = 30.;
-    IR_GIVE_OPTIONAL_FIELD(ir, minModelTimeStepIntegrations, IFT_minModelTimeStepIntegrations, "minmodeltimestepintegrations"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, minModelTimeStepIntegrations, IFT_HydratingConcreteMat_minModelTimeStepIntegrations, "minmodeltimestepintegrations"); // Macro
 
 
     conductivityType = 0;

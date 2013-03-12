@@ -51,6 +51,11 @@
 #include "macrolspace.h"
 #include "error.h"
 
+///@name Input fields for MicroMaterial
+//@{
+#define _IFT_MicroMaterial_fileName "filename"
+//@}
+
 namespace oofem {
 
 class UnknownNumberingScheme;

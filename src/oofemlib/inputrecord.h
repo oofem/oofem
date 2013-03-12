@@ -315,10 +315,8 @@ enum InputFieldType {
     IFT_MixedGradientPressure_pressure,
     IFT_MixedGradientPressure_centerCoords,
 
-    IFT_StressTensorLoad_stressTensor,
-
-    IFT_PrescribedTensor_centercoords,
-    IFT_PrescribedTensor_gradient,
+    IFT_PrescribedGradient_centercoords,
+    IFT_PrescribedGradient_gradient,
 
     IFT_Load_components,
     IFT_Load_dofexcludemask,
@@ -494,10 +492,6 @@ enum InputFieldType {
     IFT_SimpleCrossSection_shearareay, // shear area y direction
     IFT_SimpleCrossSection_shearareaz, // shear area z direction
 
-
-    IFT_HeatCrossSection_thick,
-    IFT_HeatCrossSection_width,
-
     IFT_LayeredCrossSection_nlayers,
     IFT_LayeredCrossSection_layermaterials,
     IFT_LayeredCrossSection_thicks,
@@ -526,9 +520,6 @@ enum InputFieldType {
     IFT_AbaqusUserMaterial_userMaterial,
 
     IFT_SurfaceTensionMaterial_isotropic,
-
-    IFT_IsotropicLinearHeatMaterial_k, // conductivity
-    IFT_IsotropicLinearHeatMaterial_c, // specific heat
 
     IFT_IsotropicHeatTransferMaterial_k,
     IFT_IsotropicHeatTransferMaterial_c,
@@ -585,7 +576,6 @@ enum InputFieldType {
     IFT_HeMoTKMaterial_por,
     IFT_HeMoTKMaterial_rho_gws,
 
-    IFT_CemhydMatInputFileName,
     IFT_CemhydMat_conductivitytype,
     IFT_CemhydMat_capacitytype,
     IFT_CemhydMat_densitytype,
@@ -960,7 +950,7 @@ enum InputFieldType {
     IFT_CohSur3d_kz,
 
     IFT_LsMasterMat_m,
-    IFT_LsMasterMat_slavemat,
+    IFT_LsMasterMat_slaveMat,
 
     IFT_HydrationModel_hydration,
     IFT_HydrationModel_c60mix,
@@ -985,8 +975,8 @@ enum InputFieldType {
     IFT_HydratingConcreteMat_referenceTemperature,
     IFT_HydratingConcreteMat_castAt,
     IFT_HydratingConcreteMat_hydrationModelType,
-    IFT_maxModelIntegrationTime,
-    IFT_minModelTimeStepIntegrations,
+    IFT_HydratingConcreteMat_maxModelIntegrationTime,
+    IFT_HydratingConcreteMat_minModelTimeStepIntegrations,
     IFT_HydratingConcreteMat_conductivitytype,
     IFT_HydratingConcreteMat_capacitytype,
     IFT_HydratingConcreteMat_densitytype,
@@ -1185,11 +1175,6 @@ enum InputFieldType {
     IFT_DustMaterial_wHard,
     IFT_DustMaterial_dHard,
 
-    IFT_LsMasterMat_slaveMat,
-
-    IFT_ConcreteDPMnlMaterial_r,
-    IFT_ConcreteDPMnlMaterial_m,
-
     IFT_NewtonianFluidMaterial_mu,
 
     IFT_BinghamFluidMaterial_mu0,
@@ -1199,8 +1184,8 @@ enum InputFieldType {
 
     IFT_TwoFluidMaterial_mat,
 
-    IFT_CompRowPrecond_droptol,
-    IFT_CompRowPrecond_partfill,
+    IFT_CompRow_ILUPrecond_droptol,
+    IFT_CompRow_ILUPrecond_partfill,
 
     IFT_NonlocalMaterialExtensionInterface_regionmap,
     IFT_NonlocalMaterialExtensionInterface_permanentNonlocTableFlag,
@@ -1308,15 +1293,15 @@ enum InputFieldType {
 
     IFT_LEPLIC_refVol,
 
-    IFT_LSPCS_levelSetValues,
-    IFT_LSPCS_refmatpoly_x,
-    IFT_LSPCS_refmatpoly_y,
-    IFT_LSPCS_reinit_dt,
-    IFT_LSPCS_reinit_err,
-    IFT_LSPCS_reinit_alg,
-    IFT_LSPCS_nsd,
-    IFT_LSPCS_ci1,
-    IFT_LSPCS_ci2,
+    IFT_LevelSetPCS_levelSetValues,
+    IFT_LevelSetPCS_refmatpoly_x,
+    IFT_LevelSetPCS_refmatpoly_y,
+    IFT_LevelSetPCS_reinit_dt,
+    IFT_LevelSetPCS_reinit_err,
+    IFT_LevelSetPCS_reinit_alg,
+    IFT_LevelSetPCS_nsd,
+    IFT_LevelSetPCS_ci1,
+    IFT_LevelSetPCS_ci2,
 
     IFT_LoadBalancer_wtp,
     IFT_LoadBalancerMonitor_nodeWeightMode,

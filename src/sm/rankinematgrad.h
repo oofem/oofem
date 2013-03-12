@@ -44,6 +44,12 @@
  #include "conTable.h"
 #endif
 
+///@name Input fields for RankineMatGrad
+//@{
+#define _IFT_RankineMatGrad_r "r"
+#define _IFT_RankineMatGrad_m "m"
+//@}
+
 namespace oofem {
 /**
  * Gradient rankine material status.

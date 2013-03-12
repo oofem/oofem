@@ -45,6 +45,12 @@
 #include "domain.h"
 #include "flotarry.h"
 
+///@name Input fields for Node
+//@{
+#define _IFT_Node_coords "coords"
+#define _IFT_Node_lcs "lcs"
+//@}
+
 namespace oofem {
 class Dof;
 class NodalLoad;

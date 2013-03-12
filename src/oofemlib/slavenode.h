@@ -37,6 +37,12 @@
 
 #include "node.h"
 
+///@name Input fields for SlaveNode
+//@{
+#define _IFT_SlaveNode_masterDofManagers "masterdofmanagers"
+#define _IFT_SlaveNode_weights "weights"
+//@}
+
 namespace oofem {
 
 /**

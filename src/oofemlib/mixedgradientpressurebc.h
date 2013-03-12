@@ -38,6 +38,13 @@
 #include "activebc.h"
 #include "valuemodetype.h"
 
+///@name Input fields for MixedGradientPressure
+//@{
+#define _IFT_MixedGradientPressure_devGradient "devgradient"
+#define _IFT_MixedGradientPressure_pressure "pressure"
+#define _IFT_MixedGradientPressure_centerCoords "centercoords"
+//@}
+
 namespace oofem {
 
 /**

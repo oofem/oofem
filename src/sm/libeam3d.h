@@ -38,6 +38,11 @@
 #include "structuralelement.h"
 #include "fiberedcs.h"
 
+///@name Input fields for LIBeam3d
+//@{
+#define _IFT_LIBeam3d_refnode "refnode"
+//@}
+
 namespace oofem {
 /**
  * This class implements a 3-dimensional mindlin theory Linear Isoparametric

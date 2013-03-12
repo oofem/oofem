@@ -39,11 +39,15 @@
 #include "sparsemtrx.h"
 #include "engngm.h"
 #include "structengngmodel.h"
-//#include "micromaterial.h"
 #include "metastep.h"
 #include "oofem_limits.h"
-//#include "nlstructuralelement.h"
-//#include "fei3dhexalin.h"
+
+///@name Input fields for MacroLspace
+//@{
+#define _IFT_MacroLspace_microMasterNodes "micromasternodes"
+#define _IFT_MacroLspace_microBoundaryNodes "microboundarynodes"
+#define _IFT_MacroLspace_stiffMatrxFileName "stiffmatrxfilename"
+//@}
 
 namespace oofem {
 class MicroMaterial;

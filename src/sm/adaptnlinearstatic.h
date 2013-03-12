@@ -40,6 +40,16 @@
 #include "errorestimator.h"
 #include "meshpackagetype.h"
 
+///@name Input fields for AdaptiveNonLinearStatic
+//@{
+#define _IFT_AdaptiveNonLinearStatic_meshpackage "meshpackage"
+#define _IFT_AdaptiveNonLinearStatic_equilmc "equilmc"
+#define _IFT_AdaptiveNonLinearStatic_controlmode "controlmode"
+#define _IFT_AdaptiveNonLinearStatic_ddm "ddm"
+#define _IFT_AdaptiveNonLinearStatic_refloadmode "refloadmode"
+#define _IFT_AdaptiveNonLinearStatic_preMappingLoadBalancingFlag "premappingloadbalancingflag"
+//@}
+
 namespace oofem {
 /**
  * This class implements Adaptive Non-LinearStatic Engineering problem.

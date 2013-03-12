@@ -39,6 +39,11 @@
 #include "datareader.h"
 #include "oofem_limits.h"
 
+///@name Input fields for module managers
+//@{
+#define _IFT_ModuleManager_nmodules "nmodules"
+//@}
+
 namespace oofem {
 class EngngModel;
 

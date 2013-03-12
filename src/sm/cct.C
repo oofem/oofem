@@ -472,7 +472,7 @@ CCTPlate :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answ
 double 
 CCTPlate :: ZZRemeshingCriteriaI_giveCharacteristicSize() 
 {
-  return sqrt(this->computeArea() * 2.0);
+    return sqrt(this->computeArea() * 2.0);
 }
 
 

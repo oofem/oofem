@@ -87,6 +87,7 @@
 #define _IFT_EngngModel_parallelflag "parallelflag"
 #define _IFT_EngngModel_loadBalancingFlag "lbflag"
 #define _IFT_EngngModel_forceloadBalancingFlag "forcelb1"
+#define _IFT_EngngModel_initialGuess "initialGuess"
 //@}
 
 namespace oofem {

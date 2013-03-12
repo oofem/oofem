@@ -45,6 +45,24 @@
  #include "processcomm.h"
 #endif
 
+///@name Input fields for NonLinearDynamic
+//@{
+#define _IFT_NonLinearDynamic_lstype "lstype"
+#define _IFT_NonLinearDynamic_smtype "smtype"
+#define _IFT_NonLinearDynamic_deltat "deltat"
+#define _IFT_NonLinearDynamic_rtolv "rtolv"
+#define _IFT_NonLinearDynamic_refloadmode "refloadmode"
+#define _IFT_NonLinearDynamic_nonlocstiff "nonlocstiff"
+#define _IFT_NonLinearDynamic_nonlocalext "nonlocalext"
+#define _IFT_NonLinearDynamic_loadBalancingFlag "loadbalancingflag"
+#define _IFT_NonLinearDynamic_forceloadBalancingFlag "forceloadbalancingflag"
+#define _IFT_NonLinearDynamic_ddtScheme "ddtscheme"
+#define _IFT_NonLinearDynamic_gamma "gamma"
+#define _IFT_NonLinearDynamic_beta "beta"
+#define _IFT_NonLinearDynamic_eta "eta"
+#define _IFT_NonLinearDynamic_delta "delta"
+//@}
+
 namespace oofem {
 /**
  * This class implements nonlinear dynamic engineering problem.

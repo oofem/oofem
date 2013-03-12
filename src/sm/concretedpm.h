@@ -45,6 +45,31 @@
 #include "stressvector.h"
 #include "isolinearelasticmaterial.h"
 
+///@name Input fields for ConcreteDPM
+//@{
+#define _IFT_ConcreteDPM_fc "fc"
+#define _IFT_ConcreteDPM_ft "ft"
+#define _IFT_ConcreteDPM_ecc "ecc"
+#define _IFT_ConcreteDPM_kinit "kinit"
+#define _IFT_ConcreteDPM_ahard "ahard"
+#define _IFT_ConcreteDPM_bhard "bhard"
+#define _IFT_ConcreteDPM_chard "chard"
+#define _IFT_ConcreteDPM_dhard "dhard"
+#define _IFT_ConcreteDPM_asoft "asoft"
+#define _IFT_ConcreteDPM_bsoft "bsoft"
+#define _IFT_ConcreteDPM_dilation "dilation"
+#define _IFT_ConcreteDPM_yieldtol "yieldtol"
+#define _IFT_ConcreteDPM_newtoniter "newtoniter"
+#define _IFT_ConcreteDPM_ef "ef"
+#define _IFT_ConcreteDPM_gf "gf"
+#define _IFT_ConcreteDPM_cycmode "cycmode"
+#define _IFT_ConcreteDPM_cycpar "cycpar"
+#define _IFT_ConcreteDPM_reltime "reltime"
+#define _IFT_ConcreteDPM_rateexp "rateexp"
+#define _IFT_ConcreteDPM_href "href"
+#define _IFT_ConcreteDPM_helem "helem"
+//@}
+
 namespace oofem {
 /**
  * This class implements the material status associated to ConcreteDPM.

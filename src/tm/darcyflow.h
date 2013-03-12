@@ -23,6 +23,12 @@
 #include "processcomm.h"
 #endif
 
+///@name Input fields for DarcyFlow
+//@{
+#define _IFT_DarcyFlow_lstype "lstype"
+#define _IFT_DarcyFlow_smtype "smtype"
+//@}
+
 namespace oofem {
 
 /**

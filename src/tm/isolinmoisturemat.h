@@ -39,6 +39,12 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
+///@name Input fields for IsotropicLinMoistureTransferMaterial
+//@{
+#define _IFT_IsotropicLinMoistureTransferMaterial_perm "perm"
+#define _IFT_IsotropicLinMoistureTransferMaterial_capa "capa"
+//@}
+
 namespace oofem {
 /**
  * This class implements a isotropic moisture tranport material. A material

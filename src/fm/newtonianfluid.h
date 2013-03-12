@@ -43,6 +43,11 @@
 #include "structuralelement.h"
 #include "matstatus.h"
 
+///@name Input fields for NewtonianFluidMaterial
+//@{
+#define _IFT_NewtonianFluidMaterial_mu "mu"
+//@}
+
 namespace oofem {
 class GaussPoint;
 

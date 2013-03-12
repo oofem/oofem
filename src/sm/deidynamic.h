@@ -37,6 +37,12 @@
 
 #include "structengngmodel.h"
 
+///@name Input fields for DEIDynamic
+//@{
+#define _IFT_DEIDynamic_dumpcoef "dumpcoef"
+#define _IFT_DEIDynamic_deltat "deltat"
+//@}
+
 namespace oofem {
 
 /**

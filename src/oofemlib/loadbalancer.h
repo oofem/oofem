@@ -47,6 +47,25 @@
   #include "range.h"
  #endif
 
+ ///@name Input fields for LoadBalancer
+//@{
+#define _IFT_LoadBalancer_wtp "wtp"
+#define _IFT_LoadBalancerMonitor_nodeWeightMode "nodeweightmode"
+#define _IFT_LoadBalancerMonitor_initialnodeweights "initialnodeweights"
+//@}
+
+///@name Input fields for WallClockLoadBalancerMonitor
+//@{
+#define _IFT_WallClockLoadBalancerMonitor_relwct "relwct"
+#define _IFT_WallClockLoadBalancerMonitor_abswct "abswct"
+#define _IFT_WallClockLoadBalancerMonitor_minwct "minwct"
+#define _IFT_WallClockLoadBalancerMonitor_lbstep "lbstep"
+#define _IFT_WallClockLoadBalancerMonitor_perturbedsteps "perturbedsteps"
+#define _IFT_WallClockLoadBalancerMonitor_perturbfactor "perturbfactor"
+#define _IFT_WallClockLoadBalancerMonitor_recoveredsteps "recoveredsteps"
+#define _IFT_WallClockLoadBalancerMonitor_processingweights "processingweights"
+//@}
+
 namespace oofem {
 
 class Domain;

@@ -73,6 +73,7 @@
 #define _IFT_Element_partitions "partitions"
 #define _IFT_Element_remote "remote"
 #define _IFT_Element_activityltf "activityltf"
+#define _IFT_Element_nip "nip"
 //@}
 
 namespace oofem {

@@ -47,6 +47,12 @@
 #include "matresponsemode.h"
 #include "dictionr.h"
 
+///@name Input fields for Material
+//@{
+#define _IFT_Material_density "density"
+#define _IFT_Material_castingtime "castingtime"
+//@}
+
 namespace oofem {
 #define STRAIN_STEPS 10.0
 

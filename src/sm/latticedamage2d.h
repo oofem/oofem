@@ -44,6 +44,24 @@
 #include "strainvector.h"
 #include "stressvector.h"
 
+///@name Input fields for LatticeDamage2d
+//@{
+#define _IFT_LatticeDamage2d_eNormal "enormal"
+#define _IFT_LatticeDamage2d_alphaOne "alphaone"
+#define _IFT_LatticeDamage2d_alphaTwo "alphatwo"
+#define _IFT_LatticeDamage2d_softeningType "softeningtype"
+#define _IFT_LatticeDamage2d_wf "wf"
+#define _IFT_LatticeDamage2d_wfOne "wfone"
+#define _IFT_LatticeDamage2d_localrandomtype "localrandomtype"
+#define _IFT_LatticeDamage2d_coefficientOfVariation "coefficientofvariation"
+#define _IFT_LatticeDamage2d_equivType "equivtype"
+#define _IFT_LatticeDamage2d_e0Mean "e0mean"
+#define _IFT_LatticeDamage2d_e0OneMean "e0onemean"
+#define _IFT_LatticeDamage2d_coh "coh"
+#define _IFT_LatticeDamage2d_ec "ec"
+#define _IFT_LatticeDamage2d_paramDuct "paramduct"
+//@}
+
 namespace oofem {
 /**
  * This class implements associated Material Status to LatticeDamage2d.

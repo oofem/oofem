@@ -39,6 +39,15 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
+///@name Input fields for BazantNajjarMoistureTransferMaterial
+//@{
+#define _IFT_BazantNajjarMoistureTransferMaterial_c1 "c1"
+#define _IFT_BazantNajjarMoistureTransferMaterial_n "n"
+#define _IFT_BazantNajjarMoistureTransferMaterial_alpha0 "alpha0"
+#define _IFT_BazantNajjarMoistureTransferMaterial_hc "hc"
+#define _IFT_BazantNajjarMoistureTransferMaterial_capa "capa"
+//@}
+
 namespace oofem {
 /**
  * This class implements a isotropic moisture tranport material. A material

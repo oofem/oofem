@@ -37,6 +37,23 @@
 
 #include "transportmaterial.h"
 
+///@name Input fields for HeMoTKMaterial
+//@{
+#define _IFT_HeMoTKMaterial_a_0 "a_0"
+#define _IFT_HeMoTKMaterial_nn "nn"
+#define _IFT_HeMoTKMaterial_phi_c "phi_c"
+#define _IFT_HeMoTKMaterial_delta_wet "delta_wet"
+#define _IFT_HeMoTKMaterial_w_h "w_h"
+#define _IFT_HeMoTKMaterial_n "n"
+#define _IFT_HeMoTKMaterial_a "a"
+#define _IFT_HeMoTKMaterial_latent "latent"
+#define _IFT_HeMoTKMaterial_c "c"
+#define _IFT_HeMoTKMaterial_rho "rho"
+#define _IFT_HeMoTKMaterial_chi_eff "chi_eff"
+#define _IFT_HeMoTKMaterial_por "por"
+#define _IFT_HeMoTKMaterial_rho_gws "rho_gws"
+//@}
+
 namespace oofem {
 /**
  * This class implements a coupled heat and mass transfer material model. It computes conductivity and capacity

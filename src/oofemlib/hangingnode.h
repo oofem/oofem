@@ -37,6 +37,12 @@
 
 #include "node.h"
 
+///@name Input fields for HangingNode
+//@{
+#define _IFT_HangingNode_masterElement "masterelement"
+#define _IFT_HangingNode_masterRegion "masterregion"
+//@}
+
 namespace oofem {
 
 /**

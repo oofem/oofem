@@ -43,6 +43,34 @@
 #include "flotarry.h"
 #include "statecountertype.h"
 
+///@name Input fields for HuertaErrorEstimator
+//@{
+#define _IFT_HuertaErrorEstimator_normtype "normtype"
+#define _IFT_HuertaErrorEstimator_refinelevel "refinelevel"
+#define _IFT_HuertaErrorEstimator_requirederror "requirederror"
+#define _IFT_HuertaErrorEstimator_skipsteps "skipsteps"
+#define _IFT_HuertaErrorEstimator_initialskipsteps "initialskipsteps"
+#define _IFT_HuertaErrorEstimator_werror "werror"
+#define _IFT_HuertaErrorEstimator_permat "permat"
+#define _IFT_HuertaErrorEstimator_impmat "impmat"
+#define _IFT_HuertaErrorEstimator_imppos "imppos"
+#define _IFT_HuertaErrorEstimator_exact "exact"
+//@}
+
+///@name Input fields for HuertaRemeshingCriteria
+//@{
+#define _IFT_HuertaRemeshingCriteria_requirederror "requirederror"
+#define _IFT_HuertaRemeshingCriteria_minelemsize "minelemsize"
+#define _IFT_HuertaRemeshingCriteria_noremesh "noremesh"
+#define _IFT_HuertaRemeshingCriteria_werror "werror"
+#define _IFT_HuertaRemeshingCriteria_refinecoeff "refinecoeff"
+//@}
+
+///@name Input fields for HuertaErrorEstimatorInterface
+//@{
+#define _IFT_HuertaErrorEstimatorInterface_coords "coords"
+//@}
+
 namespace oofem {
 class Element;
 class GaussPoint;

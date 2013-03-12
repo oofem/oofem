@@ -41,6 +41,12 @@
 #include "activebc.h"
 #include "inputrecord.h"
 
+///@name Input fields for WeakPeriodicBoundaryCondition
+//@{
+#define _IFT_WeakPeriodicBoundaryCondition_order "order"
+#define _IFT_WeakPeriodicBoundaryCondition_descritization "descritization"
+//@}
+
 namespace oofem {
 enum basisType { monomial=0, trigonometric=1, legendre=2 };
 /**

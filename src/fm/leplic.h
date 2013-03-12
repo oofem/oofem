@@ -40,6 +40,11 @@
 #include "mathfem.h"
 #include "interface.h"
 
+///@name Input fields for LEPLIC
+//@{
+#define _IFT_LEPLIC_refVol "refvol"
+//@}
+
 namespace oofem {
 class LEPlic;
 class Polygon;

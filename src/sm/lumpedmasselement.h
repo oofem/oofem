@@ -37,6 +37,11 @@
 
 #include "structuralelement.h"
 
+///@name Input fields for lumped mass element
+//@{
+#define _IFT_LumpedMassElement_components "components"
+//@}
+
 namespace oofem {
 
 /**

@@ -40,6 +40,11 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
+///@name Input fields for AnisotropicMassTransferMaterial
+//@{
+#define _IFT_AnisotropicMassTransferMaterial_c "c"
+//@}
+
 namespace oofem {
 class GaussPoint;
 

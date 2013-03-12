@@ -37,6 +37,11 @@
 
 #include "loadtime.h"
 
+///@name Input fields for UserDefinedLoadTimeFunction
+//@{
+#define _IFT_UserDefinedLoadTimeFunction_ft "ft"
+//@}
+
 namespace oofem {
 
 /**

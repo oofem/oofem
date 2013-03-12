@@ -37,6 +37,19 @@
 
 #include "mplasticmaterial2.h"
 
+///@name Input fields for DruckerPragerCutMat
+//@{
+#define _IFT_DruckerPragerCutMat_alpha "alpha"
+#define _IFT_DruckerPragerCutMat_alphapsi "alphapsi"
+#define _IFT_DruckerPragerCutMat_h "h"
+#define _IFT_DruckerPragerCutMat_sigT "sigt"
+#define _IFT_DruckerPragerCutMat_omegaCrit "omegacrit"
+#define _IFT_DruckerPragerCutMat_a "a"
+#define _IFT_DruckerPragerCutMat_yieldTol "yieldtol"
+#define _IFT_DruckerPragerCutMat_newtonIter "newtoniter"
+#define _IFT_DruckerPragerCutMat_tau0 "tau0"
+//@}
+
 namespace oofem {
 class GaussPoint;
 class Domain;

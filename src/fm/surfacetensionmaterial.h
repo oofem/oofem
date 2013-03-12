@@ -39,10 +39,14 @@
 #include "dictionr.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-
 #include "matconst.h"
 #include "structuralelement.h"
 #include "matstatus.h"
+
+///@name Input fields for SurfaceTensionMaterial
+//@{
+#define _IFT_SurfaceTensionMaterial_isotropic "isotropic"
+//@}
 
 namespace oofem {
 class GaussPoint;
@@ -65,6 +69,7 @@ public:
 /**
  * Material model for surface tension.
  * Currently the model only stores the surface tension energy.
+ * @deprecated This material will be removed.
  */
 class SurfaceTensionMaterial : public Material
 {

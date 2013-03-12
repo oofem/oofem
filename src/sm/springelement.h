@@ -37,6 +37,13 @@
 
 #include "structuralelement.h"
 
+///@name Input fields for spring element
+//@{
+#define _IFT_SpringElement_mode "mode"
+#define _IFT_SpringElement_orientation "orientation"
+#define _IFT_SpringElement_springConstant "springconstant"
+//@}
+
 namespace oofem {
 
 /**

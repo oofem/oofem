@@ -38,6 +38,12 @@
 #include "flotarry.h"
 #include "piecewis.h"
 
+///@name Input fields for PeriodicPiecewiseLinFunction
+//@{
+#define _IFT_PeriodicPiecewiseLinFunction_period "period"
+#define _IFT_PeriodicPiecewiseLinFunction_addtf "addtf"
+//@}
+
 namespace oofem {
 /**
  * This class implements an enhanced piecewise linear function with periodicity.

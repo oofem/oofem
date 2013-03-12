@@ -39,6 +39,19 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 
+///@name Input fields for DIIDynamic
+//@{
+#define _IFT_DIIDynamic_lstype "lstype"
+#define _IFT_DIIDynamic_smtype "smtype"
+#define _IFT_DIIDynamic_deltat "deltat"
+#define _IFT_DIIDynamic_ddtScheme "ddtscheme"
+#define _IFT_DIIDynamic_gamma "gamma"
+#define _IFT_DIIDynamic_beta "beta"
+#define _IFT_DIIDynamic_eta "eta"
+#define _IFT_DIIDynamic_delta "delta"
+#define _IFT_DIIDynamic_psi "psi"
+//@}
+
 namespace oofem {
 /**
  * This class implements Direct Implicit Integration of Dynamic problem

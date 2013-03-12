@@ -38,6 +38,13 @@
 #include "flotarry.h"
 #include "loadtime.h"
 
+///@name Input fields for PiecewiseLinFunction
+//@{
+#define _IFT_PiecewiseLinFunction_npoints "npoints"
+#define _IFT_PiecewiseLinFunction_t "t"
+#define _IFT_PiecewiseLinFunction_ft "ft"
+//@}
+
 namespace oofem {
 
 /**

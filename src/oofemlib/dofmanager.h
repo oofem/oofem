@@ -47,6 +47,23 @@
 #include "contextioresulttype.h"
 #include "unknowntype.h"
 
+///@name Input fields for DofManager
+//@{
+#define _IFT_DofManager_ndofs "ndofs"
+#define _IFT_DofManager_dofidmask "dofidmask"
+#define _IFT_DofManager_load "load"
+#define _IFT_DofManager_bc "bc"
+#define _IFT_DofManager_ic "ic"
+#define _IFT_DofManager_mastermask "mastermask"
+#define _IFT_DofManager_doftypemask "doftypemask"
+#define _IFT_DofManager_boundaryflag "boundaryflag"
+#define _IFT_DofManager_globnum "globnum"
+#define _IFT_DofManager_partitions "partitions"
+#define _IFT_DofManager_sharedflag "sharedflag"
+#define _IFT_DofManager_remoteflag "remoteflag"
+#define _IFT_DofManager_nullflag "nullflag"
+//@}
+
 namespace oofem {
 
 class DataStream;

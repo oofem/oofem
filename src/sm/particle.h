@@ -37,6 +37,11 @@
 
 #include "node.h"
 
+///@name Input fields for Particle
+//@{
+#define _IFT_Particle_rad "rad"
+//@}
+
 namespace oofem {
 
 /**

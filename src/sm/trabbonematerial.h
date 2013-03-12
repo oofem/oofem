@@ -41,12 +41,23 @@
 #include "matconst.h"
 #include "matstatus.h"
 #include "strainvector.h"
-
-#include "linearelasticmaterial.h"
-#include "dictionr.h"
-
 #include "structuralms.h"
 #include "cltypes.h"
+
+///@name Input fields for TrabBoneMaterial
+//@{
+#define _IFT_TrabBoneMaterial_E0 "e0"
+#define _IFT_TrabBoneMaterial_Eil "eil"
+#define _IFT_TrabBoneMaterial_Eie "eie"
+#define _IFT_TrabBoneMaterial_kie "kie"
+#define _IFT_TrabBoneMaterial_Ek "ek"
+#define _IFT_TrabBoneMaterial_Cc "cc"
+#define _IFT_TrabBoneMaterial_Cc2 "cc2"
+#define _IFT_TrabBoneMaterial_EpsC "epsc"
+#define _IFT_TrabBoneMaterial_SigYp "sigyp"
+#define _IFT_TrabBoneMaterial_SigYn "sigyn"
+#define _IFT_TrabBoneMaterial_adam "adam"
+//@}
 
 namespace oofem {
 

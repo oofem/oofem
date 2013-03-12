@@ -40,6 +40,13 @@
 #include "flotmtrx.h"
 #include "enrichmentfunction.h"
 
+///@name Input fields for EnrichmentItem
+//@{
+#define _IFT_EnrichmentItem_geometryItemNr "geometryitemnr"
+#define _IFT_EnrichmentItem_enrichmentFunctionNr "enrichmentfunctionnr"
+#define _IFT_EnrichmentItem_materialNr "materialnr"
+//@}
+
 namespace oofem {
 class BasicGeometry;
 

@@ -40,6 +40,16 @@
 #include "flotmtrx.h"
 #include "interface.h"
 
+///@name Input fields for LayeredCrossSection
+//@{
+#define _IFT_LayeredCrossSection_nlayers "nlayers"
+#define _IFT_LayeredCrossSection_layermaterials "layermaterials"
+#define _IFT_LayeredCrossSection_thicks "thicks"
+#define _IFT_LayeredCrossSection_widths "widths"
+#define _IFT_LayeredCrossSection_midsurf "midsurf"
+#define _IFT_LayeredCrossSection_nintegrationpoints "nintegrationpoints"
+//@}
+
 namespace oofem {
 class StructuralMaterial;
 

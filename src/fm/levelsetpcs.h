@@ -41,6 +41,20 @@
 
 #include <vector>
 
+///@name Input fields for LSPCS
+//@{
+#define _IFT_LevelSetPCS_levelSetValues "levelsetvalues"
+#define _IFT_LevelSetPCS_refmatpoly_x "refmatpoly_x"
+#define _IFT_LevelSetPCS_refmatpoly_y "refmatpoly_y"
+#define _IFT_LevelSetPCS_reinit_dt "reinit_dt"
+#define _IFT_LevelSetPCS_reinit_err "reinit_err"
+#define _IFT_LevelSetPCS_reinit_alg "reinit_alg"
+#define _IFT_LevelSetPCS_nsd "nsd"
+#define _IFT_LevelSetPCS_ci1 "ci1"
+#define _IFT_LevelSetPCS_ci2 "ci2"
+//@}
+
+
 namespace oofem {
 #define LevelSetPCS_CACHE_ELEMENT_VOF 0
 

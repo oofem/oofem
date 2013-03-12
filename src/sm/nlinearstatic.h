@@ -38,6 +38,22 @@
 #include "linearstatic.h"
 #include "sparsenonlinsystemnm.h"
 
+///@name Input fields for NonLinearStatic
+//@{
+#define _IFT_NonLinearStatic_controlmode "controlmode"
+#define _IFT_NonLinearStatic_deltat "deltat"
+#define _IFT_NonLinearStatic_deltatltf "deltatltf"
+#define _IFT_NonLinearStatic_rtolv "rtolv"
+#define _IFT_NonLinearStatic_stiffmode "stiffmode"
+#define _IFT_NonLinearStatic_refloadmode "refloadmode"
+#define _IFT_NonLinearStatic_keepll "keepll"
+#define _IFT_NonLinearStatic_donotfixload "donotfixload"
+#define _IFT_NonLinearStatic_nonlocstiff "nonlocstiff"
+#define _IFT_NonLinearStatic_nonlocalext "nonlocalext"
+#define _IFT_NonLinearStatic_loadBalancingFlag "loadbalancingflag"
+#define _IFT_NonLinearStatic_forceloadBalancingFlag "forceloadbalancingflag"
+//@}
+
 namespace oofem {
 /// Type determining the stiffness mode.
 enum NonLinearStatic_stiffnessMode {

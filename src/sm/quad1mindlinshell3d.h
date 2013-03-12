@@ -37,6 +37,11 @@
 
 #include "nlstructuralelement.h"
 
+///@name Input fields for Quad1MindlinShell3D element
+//@{
+#define _IFT_Quad1MindlinShell3D_alpha "alpha"
+//@}
+
 namespace oofem {
 
 class FEI2dQuadLin;

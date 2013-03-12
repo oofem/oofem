@@ -44,6 +44,13 @@
 #include "flotarry.h"
 #include "nummet.h"
 
+///@name Input fields for LinearStability
+//@{
+#define _IFT_LinearStability_nroot "nroot"
+#define _IFT_LinearStability_rtolv "rtolv"
+#define _IFT_LinearStability_stype "stype"
+//@}
+
 namespace oofem {
 /**
  * This class implements way for examining critical load of structure.

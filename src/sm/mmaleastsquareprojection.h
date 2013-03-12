@@ -42,6 +42,12 @@
 
 #include <list>
 
+///@name Input fields for MMALeastSquareProjection
+//@{
+#define _IFT_MMALeastSquareProjection_statefilter "statefilter"
+#define _IFT_MMALeastSquareProjection_regionfilter "regionfilter"
+//@}
+
 namespace oofem {
 class Domain;
 class Element;

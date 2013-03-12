@@ -40,6 +40,14 @@
 #include "valuemodetype.h"
 #include "dictionr.h"
 
+///@name Input fields for BoundaryLoad
+//@{
+#define _IFT_BoundaryLoad_ndofs "ndofs"
+#define _IFT_BoundaryLoad_loadtype "loadtype"
+#define _IFT_BoundaryLoad_cstype "cstype"
+#define _IFT_BoundaryLoad_properties "properties"
+//@}
+
 namespace oofem {
 class TimeStep;
 

@@ -41,6 +41,18 @@
 #include "structuralms.h"
 #include "cltypes.h"
 
+///@name Input fields for CompoDamageMat
+//@{
+#define _IFT_CompoDamageMat_ex "ex"
+#define _IFT_CompoDamageMat_ez "ez"
+#define _IFT_CompoDamageMat_nyxy "nyxy"
+#define _IFT_CompoDamageMat_nyyz "nyyz"
+#define _IFT_CompoDamageMat_Gxy "gxy"
+#define _IFT_CompoDamageMat_components "components"
+#define _IFT_CompoDamageMat_afteriter "afteriter"
+#define _IFT_CompoDamageMat_allowSnapBack "allowsnapback"
+//@}
+
 namespace oofem {
 
 /**

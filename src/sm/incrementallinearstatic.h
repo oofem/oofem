@@ -39,6 +39,15 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrxtype.h"
 
+///@name Input fields for IncrementalLinearStatic
+//@{
+#define _IFT_IncrementalLinearStatic_endoftimeofinterest "endoftimeofinterest"
+#define _IFT_IncrementalLinearStatic_prescribedtimes "prescribedtimes"
+#define _IFT_IncrementalLinearStatic_deltat "deltat"
+#define _IFT_IncrementalLinearStatic_lstype "lstype"
+#define _IFT_IncrementalLinearStatic_smtype "smtype"
+//@}
+
 namespace oofem {
 /**
  * This class implements Incremental LinearStatic Engineering problem.

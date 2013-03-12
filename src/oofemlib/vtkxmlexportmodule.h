@@ -51,6 +51,17 @@
 #include <string>
 #include <list>
 
+///@name Input fields for VTK XML export module
+//@{
+#define _IFT_VTKXMLExportModule_cellvars "cellvars"
+#define _IFT_VTKXMLExportModule_vars "vars"
+#define _IFT_VTKXMLExportModule_primvars "primvars"
+#define _IFT_VTKXMLExportModule_stype "stype"
+#define _IFT_VTKXMLExportModule_regionstoskip "regionstoskip"
+#define _IFT_VTKXMLExportModule_nvr "nvr"
+#define _IFT_VTKXMLExportModule_vrmap "vrmap"
+//@}
+
 namespace oofem {
 /**
  * Represents VTK (Visualization Toolkit) export module. It uses VTK (.vtu) file format, Unstructured grid dataset.

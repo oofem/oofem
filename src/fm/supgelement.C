@@ -39,6 +39,7 @@
 #include "intarray.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
+#include "fluiddynamicmaterial.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

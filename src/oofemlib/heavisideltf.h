@@ -38,6 +38,12 @@
 #include "flotarry.h"
 #include "loadtime.h"
 
+///@name Input fields for HeavisideLTF
+//@{
+#define _IFT_HeavisideLTF_origin "origin"
+#define _IFT_HeavisideLTF_value "value"
+//@}
+
 namespace oofem {
 /**
  * This class implements a Heaviside step load time function.

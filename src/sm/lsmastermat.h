@@ -42,6 +42,12 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
+///@name Input fields for LsMasterMat
+//@{
+#define _IFT_LsMasterMat_m "m"
+#define _IFT_LsMasterMat_slaveMat "slavemat"
+//@}
+
 namespace oofem {
 class GaussPoint;
 class Domain;

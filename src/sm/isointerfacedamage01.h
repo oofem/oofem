@@ -38,6 +38,16 @@
 #include "structuralmaterial.h"
 #include "structuralms.h"
 
+///@name Input fields for IsoInterfaceDamageMaterial
+//@{
+#define _IFT_IsoInterfaceDamageMaterial_kn "kn"
+#define _IFT_IsoInterfaceDamageMaterial_ks "ks"
+#define _IFT_IsoInterfaceDamageMaterial_ft "ft"
+#define _IFT_IsoInterfaceDamageMaterial_gf "gf"
+#define _IFT_IsoInterfaceDamageMaterial_maxOmega "maxomega"
+#define _IFT_IsoInterfaceDamageMaterial_talpha "talpha"
+//@}
+
 namespace oofem {
 class GaussPoint;
 

@@ -36,7 +36,13 @@
 #define supgelement_h
 
 #include "fmelement.h"
-#include "fluiddynamicmaterial.h"
+#include "matresponsemode.h"
+
+///@name Input fields for SUPG elements
+//@{
+#define _IFT_SUPGElement_bsides "bsides"
+#define _IFT_SUPGElement_bcodes "bcodes"
+//@}
 
 namespace oofem {
 class TimeStep;
@@ -44,6 +50,7 @@ class GaussPoint;
 class FloatMatrix;
 class FloatArray;
 class IntArray;
+class Load;
 
 /**
  * General stabilized SUPG/PSPG element for CFD analysis.
@@ -152,32 +159,32 @@ public:
      * Computes Lhs term due to applied slip with friction bc.
      */
     virtual void computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime) {
-      _warning("computeSlipWithFrictionBCTerm_MB not implemented");
-      answer.resize(0,0);
+        _warning("computeSlipWithFrictionBCTerm_MB not implemented");
+        answer.resize(0,0);
     }
     /**
      * Computes Lhs contribution due to applied Penetration bc.
      */
     virtual void computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime){
-      _warning("computePenetrationWithResistanceBCTerm_MB not implemented");
-      answer.resize(0,0);
+        _warning("computePenetrationWithResistanceBCTerm_MB not implemented");
+        answer.resize(0,0);
     }
     /**
      * Computes Lhs contribution due to outflow BC.
      */
     virtual void computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime){
-      _warning("computeOutFlowBCTerm_MB not implemented");
-      answer.resize(0,0);
+        _warning("computeOutFlowBCTerm_MB not implemented");
+        answer.resize(0,0);
     }
     
 
     virtual void computeHomogenizedReinforceTerm_MB(FloatMatrix &answer,  Load * load, TimeStep *atTime){
-      _warning("computeHomogenizedReinforceTerm_MB");
-      answer.resize(0,0); 
+        _warning("computeHomogenizedReinforceTerm_MB");
+        answer.resize(0,0); 
     }
     virtual void computeHomogenizedReinforceTerm_MC(FloatMatrix &answer,  Load * load, TimeStep *atTime){
-      _warning("computeHomogenizedReinforceTerm_MB");
-      answer.resize(0,0); 
+        _warning("computeHomogenizedReinforceTerm_MB");
+        answer.resize(0,0); 
     }
 
 

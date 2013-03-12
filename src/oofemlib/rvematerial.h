@@ -43,6 +43,12 @@
 #include "flotmtrx.h"
 #include "oofem_limits.h"
 
+///@name Input fields for RVEMaterial
+//@{
+#define _IFT_RVEMaterial_bctype "bctype"
+#define _IFT_RVEMaterial_supressoutput "supressoutput"
+//@}
+
 namespace oofem {
 
 /**

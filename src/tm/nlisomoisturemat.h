@@ -38,6 +38,33 @@
 #include "isomoisturemat.h"
 #include "flotarry.h"
 
+///@name Input fields for NlIsoMoistureMaterial
+//@{
+#define _IFT_NlIsoMoistureMaterial_isothermtype "isothermtype"
+#define _IFT_NlIsoMoistureMaterial_permeabilitytype "permeabilitytype"
+#define _IFT_NlIsoMoistureMaterial_rhodry "rhodry"
+#define _IFT_NlIsoMoistureMaterial_capa "capa"
+#define _IFT_NlIsoMoistureMaterial_iso_h "iso_h"
+#define _IFT_NlIsoMoistureMaterial_iso_wh "iso_wh"
+#define _IFT_NlIsoMoistureMaterial_dd "dd"
+#define _IFT_NlIsoMoistureMaterial_wf "wf"
+#define _IFT_NlIsoMoistureMaterial_b "b"
+#define _IFT_NlIsoMoistureMaterial_uh "uh"
+#define _IFT_NlIsoMoistureMaterial_a "a"
+#define _IFT_NlIsoMoistureMaterial_nn "nn"
+#define _IFT_NlIsoMoistureMaterial_c "c"
+#define _IFT_NlIsoMoistureMaterial_k "k"
+#define _IFT_NlIsoMoistureMaterial_vm "vm"
+#define _IFT_NlIsoMoistureMaterial_perm_h "perm_h"
+#define _IFT_NlIsoMoistureMaterial_perm_ch "perm_ch"
+#define _IFT_NlIsoMoistureMaterial_hc "hc"
+#define _IFT_NlIsoMoistureMaterial_alpha0 "alpha0"
+#define _IFT_NlIsoMoistureMaterial_c1 "c1"
+#define _IFT_NlIsoMoistureMaterial_n "n"
+#define _IFT_NlIsoMoistureMaterial_alphah "alphah"
+#define _IFT_NlIsoMoistureMaterial_betah "betah"
+#define _IFT_NlIsoMoistureMaterial_gammah "gammah"
+//@}
 
 namespace oofem {
 /**

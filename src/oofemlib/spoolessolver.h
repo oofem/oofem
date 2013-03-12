@@ -37,8 +37,13 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "flotarry.h"
-
 #include "spoolesinterface.h"
+
+///@name Input fields for SpoolesSolver
+//@{
+#define _IFT_SpoolesSolver_msglvl "msglvl"
+#define _IFT_SpoolesSolver_msgfile "msgfile"
+//@}
 
 namespace oofem {
 class Domain;

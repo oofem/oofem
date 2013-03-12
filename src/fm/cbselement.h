@@ -37,6 +37,12 @@
 
 #include "fmelement.h"
 
+///@name Input fields for CBS elements
+//@{
+#define _IFT_CBSElement_bsides "bsides"
+#define _IFT_CBSElement_bcodes "bcodes"
+//@}
+
 namespace oofem {
 class TimeStep;
 class GaussPoint;

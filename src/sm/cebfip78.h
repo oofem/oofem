@@ -37,6 +37,16 @@
 
 #include "maxwellChM.h"
 
+///@name Input fields for CebFip78Material
+//@{
+#define _IFT_CebFip78Material_e28 "e28"
+#define _IFT_CebFip78Material_fibf "fibf"
+#define _IFT_CebFip78Material_kap_a "kap_a"
+#define _IFT_CebFip78Material_kap_c "kap_c"
+#define _IFT_CebFip78Material_kap_tt "kap_tt"
+#define _IFT_CebFip78Material_u "u"
+//@}
+
 namespace oofem {
 
 /**

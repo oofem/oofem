@@ -21,6 +21,50 @@
  #include "hydram.h"                     // hydration model
 #endif
 
+///@name Input fields for HellmichMaterial
+//@{
+#define _IFT_HellmichMaterial_E "e"
+#define _IFT_HellmichMaterial_nu "nu"
+#define _IFT_HellmichMaterial_linearE "lineare"
+#define _IFT_HellmichMaterial_epscu "epscu"
+#define _IFT_HellmichMaterial_fc "fc"
+#define _IFT_HellmichMaterial_tAlpha "talpha"
+#define _IFT_HellmichMaterial_isoT "isot"
+#define _IFT_HellmichMaterial_Tltf "tltf"
+#define _IFT_HellmichMaterial_hltf "hltf"
+#define _IFT_HellmichMaterial_iniT "init"
+#define _IFT_HellmichMaterial_baseT "baset"
+#define _IFT_HellmichMaterial_flatT "flatt"
+#define _IFT_HellmichMaterial_hemomat "hemomat"
+#define _IFT_HellmichMaterial_hydration "hydration"
+#define _IFT_HellmichMaterial_timeScale "timescale"
+#define _IFT_HellmichMaterial_shr "shr"
+#define _IFT_HellmichMaterial_noshr "noshr"
+#define _IFT_HellmichMaterial_ashr "ashr"
+#define _IFT_HellmichMaterial_bshr "bshr"
+#define _IFT_HellmichMaterial_kshr "kshr"
+#define _IFT_HellmichMaterial_dryingc "dryingc"
+#define _IFT_HellmichMaterial_nocreep "nocreep"
+#define _IFT_HellmichMaterial_modulusH "modulush"
+#define _IFT_HellmichMaterial_ur "ur"
+#define _IFT_HellmichMaterial_jv "jv"
+#define _IFT_HellmichMaterial_tw "tw"
+#define _IFT_HellmichMaterial_devc "devc"
+#define _IFT_HellmichMaterial_noplast "noplast"
+#define _IFT_HellmichMaterial_zeroalpha "zeroalpha"
+#define _IFT_HellmichMaterial_nohardening "nohardening"
+#define _IFT_HellmichMaterial_approxnewton "approxnewton"
+#define _IFT_HellmichMaterial_computedl "computedl"
+#define _IFT_HellmichMaterial_plotss "plotss"
+#define _IFT_HellmichMaterial_pssiter "pssiter"
+#define _IFT_HellmichMaterial_psselem "psselem"
+#define _IFT_HellmichMaterial_pssgp "pssgp"
+#define _IFT_HellmichMaterial_prestress "prestress"
+#define _IFT_HellmichMaterial_prestressFrom "prestressfrom"
+#define _IFT_HellmichMaterial_prestressTo "prestressto"
+#define _IFT_HellmichMaterial_c60mix "c60mix"
+//@}
+
 namespace oofem {
 #ifdef __TM_MODULE
 

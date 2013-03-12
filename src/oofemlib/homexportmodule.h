@@ -41,6 +41,12 @@
 #include "intarray.h"
 #include "linearelasticmaterial.h"
 
+///@name Input fields for Homogenization export module
+//@{
+#define _IFT_HOMExportModule_scale "scale"
+#define _IFT_HOMExportModule_matnum "matnum"
+//@}
+
 namespace oofem {
 /**
  * Represents HOM (Homogenization) export module. It averages strain and stress tensors over the whole domain
