@@ -105,6 +105,9 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, nvr, IFT_VTKXMLExportModule_nvr, "nvr"); // Macro
     IR_GIVE_OPTIONAL_FIELD(ir, vrmap, IFT_VTKXMLExportModule_vrmap, "vrmap"); // Macro
 
+    this->timeScale = 1.;
+    IR_GIVE_OPTIONAL_FIELD(ir, timeScale, IFT_VTKXMLExportModule_timeScale, "timescale"); // Macro
+    
     return IRRT_OK;
 }
 
@@ -335,7 +338,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
     time_t now;
     time(&now);
     current = localtime(&now);
-    fprintf(stream, "<!-- TimeStep %e Computed %d-%02d-%02d at %02d:%02d:%02d -->\n", tStep->giveIntrinsicTime(), current->tm_year+1900, current->tm_mon+1, current->tm_mday, current->tm_hour,  current->tm_min,  current->tm_sec);
+    fprintf(stream, "<!-- TimeStep %e scaled_to %e Computed %d-%02d-%02d at %02d:%02d:%02d -->\n", tStep->giveIntrinsicTime(), tStep->giveIntrinsicTime()*timeScale, current->tm_year+1900, current->tm_mon+1, current->tm_mday, current->tm_hour,  current->tm_min,  current->tm_sec);
     fprintf(stream, "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n");
     fprintf(stream, "<UnstructuredGrid>\n");
 #endif
@@ -593,7 +596,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
             } else {
                 sprintf( fext, "m%d.%d", this->number, tStep->giveNumber() );
             }
-            pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << "\" group=\"\" part=\"" << i << "\" file=\""
+            pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime()*timeScale << "\" group=\"\" part=\"" << i << "\" file=\""
                     << this->emodel->giveOutputBaseFileName() << fext << ".vtu\"/>";
             this->pvdBuffer.push_back(pvdEntry.str());
         }
@@ -602,7 +605,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 #endif
     if ( !emodel->isParallel() && tStep->giveNumber() >= 1 ) { // For non-parallel enabled OOFEM, then we only check for multiple steps.
         std::ostringstream pvdEntry;
-        pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
+        pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime()*timeScale << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
         this->pvdBuffer.push_back(pvdEntry.str());
         this->writeVTKCollection();
     }
