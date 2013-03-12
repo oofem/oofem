@@ -142,7 +142,6 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual void updateDomainLinks();
-    virtual int checkConsistency();
 
     // Identification
     virtual const char *giveClassName() const { return "NonLinearDynamic"; }

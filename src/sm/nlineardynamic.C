@@ -1084,39 +1084,7 @@ NonLinearDynamic :: initializeCommMaps(bool forceInit)
     }
 }
 
-#endif
 
-int
-NonLinearDynamic :: checkConsistency()
-{
-    // check internal consistency
-    // if success returns nonzero
-    int i, nelem;
-    Element *ePtr;
-    NLStructuralElement *sePtr;
-    StructuralElementEvaluator *see;
-    Domain *domain = this->giveDomain(1);
-
-    nelem = domain->giveNumberOfElements();
-    // check for proper element type
-
-    for ( i = 1; i <= nelem; i++ ) {
-        ePtr = domain->giveElement(i);
-        sePtr = dynamic_cast< NLStructuralElement * >( ePtr );
-        see   = dynamic_cast< StructuralElementEvaluator * >( ePtr );
-
-        if ( ( sePtr == NULL ) && ( see == NULL ) ) {
-            _warning2("checkConsistency: element %d has no Structural support", i);
-            return 0;
-        }
-    }
-
-    EngngModel :: checkConsistency();
-
-    return 1;
-}
-
-#ifdef __PARALLEL_MODE
 LoadBalancer *
 NonLinearDynamic :: giveLoadBalancer()
 {
@@ -1131,6 +1099,8 @@ NonLinearDynamic :: giveLoadBalancer()
         return NULL;
     }
 }
+
+
 LoadBalancerMonitor *
 NonLinearDynamic :: giveLoadBalancerMonitor()
 {
@@ -1145,6 +1115,7 @@ NonLinearDynamic :: giveLoadBalancerMonitor()
         return NULL;
     }
 }
+
 
 void
 NonLinearDynamic :: packMigratingData(TimeStep *atTime)

@@ -38,6 +38,8 @@
 #include "element.h"
 #include "timestep.h"
 #include "outputmanager.h"
+#include "structuralelement.h"
+#include "structuralelementevaluator.h"
 
 namespace oofem {
 
@@ -179,6 +181,30 @@ StructuralEngngModel :: updateYourself(TimeStep *stepN)
 {
     this->updateInternalState(stepN);
     EngngModel :: updateYourself(stepN);
+}
+
+
+int
+StructuralEngngModel :: checkConsistency()
+{
+    Domain *domain = this->giveDomain(1);
+    int nelem = domain->giveNumberOfElements();
+    // check for proper element type
+
+    for ( int i = 1; i <= nelem; i++ ) {
+        Element *ePtr = domain->giveElement(i);
+        StructuralElement *sePtr = dynamic_cast< StructuralElement * >(ePtr);
+        StructuralElementEvaluator *see = dynamic_cast< StructuralElementEvaluator * >(ePtr);
+
+        if ( sePtr == NULL && see == NULL ) {
+            _warning2("checkConsistency: element %d has no Structural support", i);
+            return 0;
+        }
+    }
+
+    EngngModel :: checkConsistency();
+
+    return 1;
 }
 
 

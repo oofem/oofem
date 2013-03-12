@@ -611,34 +611,6 @@ DIIDynamic :: determineConstants(TimeStep *tStep)
     }
 }
 
-int
-DIIDynamic :: checkConsistency()
-{
-    // Check internal consistency
-    int i, nelem;
-    Element *ePtr;
-    StructuralElement *sePtr;
-    StructuralElementEvaluator *see;
-    Domain *domain = this->giveDomain(1);
-
-    nelem = domain->giveNumberOfElements();
-
-    // check for proper element type
-    for ( i = 1; i <= nelem; i++ ) {
-        ePtr = domain->giveElement(i);
-        sePtr = dynamic_cast< StructuralElement * >( ePtr );
-        see   = dynamic_cast< StructuralElementEvaluator * >( ePtr );
-
-        if ( ( sePtr == NULL ) && ( see == NULL ) ) {
-            _warning2("checkConsistency: element %d has no Structural support", i);
-            return 0;
-        }
-    }
-
-    EngngModel :: checkConsistency();
-
-    return 1;
-}
 
 contextIOResultType DIIDynamic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {

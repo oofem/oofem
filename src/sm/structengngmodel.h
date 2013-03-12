@@ -97,7 +97,7 @@ protected:
      * @param tStep Solution step.
      */
     virtual void giveInternalForces(FloatArray &answer, bool normFlag, int di, TimeStep *tStep);
-    
+
     /**
      * Updates nodal values
      * (calls also this->updateDofUnknownsDictionary for updating dofs unknowns dictionaries
@@ -114,6 +114,8 @@ public:
     virtual ~StructuralEngngModel();
 
     virtual void updateYourself(TimeStep *tStep);
+
+    virtual int checkConsistency();
 
     // identification
     virtual const char *giveClassName() const { return "StructuralEngngModel"; }

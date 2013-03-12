@@ -46,6 +46,7 @@
 
 #ifdef __PARALLEL_MODE
  #include "fetisolver.h"
+ #include "sparsemtrx.h"
 #endif
 
 namespace oofem {
@@ -369,37 +370,6 @@ LinearStatic :: terminate(TimeStep *tStep)
     StructuralEngngModel :: terminate(tStep);
     this->printReactionForces(tStep, 1);
     fflush(this->giveOutputStream());
-}
-
-
-int
-LinearStatic :: checkConsistency()
-{
-    // check internal consistency
-    // if success returns nonzero
-    int i, nelem;
-    Element *ePtr;
-    StructuralElement *sePtr;
-    StructuralElementEvaluator *see;
-    Domain *domain = this->giveDomain(1);
-
-    nelem = domain->giveNumberOfElements();
-    // check for proper element type
-
-    for ( i = 1; i <= nelem; i++ ) {
-        ePtr = domain->giveElement(i);
-        sePtr = dynamic_cast< StructuralElement * >(ePtr);
-        see   = dynamic_cast< StructuralElementEvaluator * >(ePtr);
-
-        if ( ( sePtr == NULL ) && ( see == NULL ) ) {
-            _warning2("checkConsistency: element %d has no Structural support", i);
-            return 0;
-        }
-    }
-
-    EngngModel :: checkConsistency();
-
-    return 1;
 }
 
 

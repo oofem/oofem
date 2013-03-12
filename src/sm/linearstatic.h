@@ -39,10 +39,6 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrxtype.h"
 
-#ifdef __PARALLEL_MODE
- #include "sparsemtrx.h"
-#endif
-
 namespace oofem {
 
 class SparseMtrx;
@@ -95,7 +91,6 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual int checkConsistency();
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
     // identification
