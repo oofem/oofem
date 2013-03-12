@@ -81,7 +81,7 @@ bool DofManList :: isDofManagerEnriched(DofManager *dMan)
 bool 
 EDBGCircle :: isDofManagerEnriched(DofManager *dMan)
 { 
-#if 0
+#if 1
     FloatArray coords; 
     coords = *(dMan->giveCoordinates());
     return this->bg->isInside(coords);

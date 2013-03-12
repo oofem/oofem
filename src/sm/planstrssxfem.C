@@ -44,17 +44,24 @@
 #include "structuralcrosssection.h"
 #include "enrichmentitem.h"
 #include "xfemmanager.h"
-
+#include "vtkxmlexportmodule.h"
 namespace oofem {
+
 Interface *
-PlaneStress2dXfem :: giveInterface(InterfaceType interface)
+PlaneStress2dXfem :: giveInterface(InterfaceType it)
 {
-    if ( interface != XfemElementInterfaceType ) {
-        return PlaneStress2d :: giveInterface(interface);
-    } else if ( interface == XfemElementInterfaceType ) {
+    /*
+    switch ( it ) {
+    case XfemElementInterfaceType:
+        return static_cast< XfemElementInterfaceType * > (this);
+    */
+
+    if ( it == XfemElementInterfaceType ) {
         return ( XfemElementInterface * ) this;
+    } else if ( it == VTKXMLExportModuleElementInterfaceType ) {
+        return ( VTKXMLExportModuleElementInterface * ) this;
     } else {
-        return NULL;
+        return PlaneStress2d :: giveInterface(it);
     }
 }
 
@@ -121,7 +128,7 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     }
 }
 
-#else
+#elif 0
 
     FloatMatrix dNdx;
     FloatArray N;
@@ -173,6 +180,7 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
                 double efnode = ef->evaluateFunctionAt(nodecoords, ei);
 
                 // matrix to be added anytime a node is enriched
+                // Creates nabla*(ef*N)
                 FloatMatrix *toAdd = new FloatMatrix(3, erndofs);
                 toAdd->zero();
                 FloatArray help;
@@ -211,8 +219,93 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
             columns++;
         }
     }
-}
+#else
+    FloatMatrix dNdx;
+    FloatArray N;
+    interpolation.evaldNdx( dNdx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interpolation.evalN(     N  , * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+ 
+
+    FloatMatrix Bc[4];
+
+    // assemble standard FEM part of strain-displacement matrix
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
+        FloatMatrix &BNode = Bc[i-1];
+        BNode.resize(3, 2);
+        BNode.zero();
+        BNode.at(1, 1) = dNdx.at(i, 1);
+        BNode.at(2, 2) = dNdx.at(i, 2);
+        BNode.at(3, 1) = dNdx.at(i, 2);
+        BNode.at(3, 2) = dNdx.at(i, 1);
+    }
+
+
+    // assemble xfem part of strain-displacement matrix
+    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+    FloatMatrix Bd[4];
+
+    int counter = 8;
+    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+        EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+                
+        // Enrichment function and its gradient evaluated at the gauss point     
+        EnrichmentFunction *ef = ei->giveEnrichmentFunction(1);
+        double efgp = ef->evaluateFunctionAt(gp, ei);
+        FloatArray efgpD;
+        ef->evaluateDerivativeAt(efgpD, gp, ei);
+
+        // adds up the number of the dofs from an enrichment item
+        // this part is used for the construction of a shifted enrichment
+        for ( int j = 1; j <= this->giveNumberOfDofManagers(); j++ ) {
+
+            DofManager *dMan = this->giveDofManager(j);
+            if ( ei->isDofManEnriched( dMan ) ) {
+                FloatMatrix &BdNode = Bd[j-1];
+                BdNode.resize(3, 2);
+                BdNode.zero();
+
+                FloatArray *nodecoords = dMan->giveCoordinates();
+                // should ask after specific EF in a loop
+                double efnode = ef->evaluateFunctionAt(nodecoords, ei);
+
+                // matrix to be added anytime a node is enriched
+                // Creates nabla*(ef*N)
+                FloatArray help;
+                help.resize(2);
+                for ( int p = 1; p <= 2; p++ ) {
+                    help.at(p) = dNdx.at(j, p) * ( efgp - efnode ) + N.at(j) * efgpD.at(p);
+                }
+
+                for ( int k = 1; k <= 2; k++ ) {
+                    BdNode.at(k, k) = help.at(k);
+                    if ( k == 1 ) {
+                        BdNode.at(3, k) = help.at(2);
+                    } else if ( k == 2 ) {
+                        BdNode.at(3, k) = help.at(1);
+                    }
+                }
+                counter += 2;
+        }
+    }
+
+    // Create the total B-matrix by appending each contribution to B after one another.
+    answer.resize(3, counter);
+    answer.zero();
+    int column = 1;
+    for ( int i = 0; i < 4; i++ ) {
+        answer.setSubMatrix(Bc[i],1,column);
+        column += 2;
+        if ( Bd[i].isNotEmpty() ) {
+            answer.setSubMatrix(Bd[i],1,column);
+            column += 2;
+        }
+        
+    }
+
+    }  
 #endif
+}
+
 
 
 int PlaneStress2dXfem :: computeNumberOfDofs(EquationID ut)
@@ -237,8 +330,12 @@ PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer
 void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
-    if ( xMan->isElementEnriched(this) ) {
-        Inclusion *ei = static_cast< Inclusion * > ( xMan->giveEnrichmentItem(1) );
+    EDBGCircle *edc = static_cast< EDBGCircle * > ( xMan->giveEnrichmentItem(1)->giveEnrichmentDomain(1) );
+    
+    FloatArray coords;
+    this->computeGlobalCoordinates(coords, *(gp->giveCoordinates()) );
+    if ( edc->bg->isInside( coords ) ) {
+        Inclusion *ei = static_cast< Inclusion * > ( xMan->giveEnrichmentItem(1) );    
         StructuralMaterial *sm = static_cast< StructuralMaterial * >( ei->giveMaterial() );
         sm->giveCharacteristicMatrix(answer, ReducedForm, rMode, gp, tStep);
     } else {
@@ -251,7 +348,7 @@ PlaneStress2dXfem :: computeVectorOf(EquationID type, ValueModeType u, TimeStep 
 // Forms the vector containing the values of the unknown. Reorders them such that the regular (continuous) dofs
 // comes first and then the enriched dofs.
 {
-    int k, m, nDofs, size;
+    int k, m, size;
     IntArray elementNodeMask;
     FloatArray vec;
     answer.resize( size = this->computeNumberOfGlobalDofs(type) );
@@ -261,7 +358,7 @@ PlaneStress2dXfem :: computeVectorOf(EquationID type, ValueModeType u, TimeStep 
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
         this->giveDofManDofIDMask(i, type, elementNodeMask);
         this->giveDofManager(i)->giveUnknownVector(vec, elementNodeMask, type, u, stepN);
-        nDofs = vec.giveSize();
+        int nDofs = vec.giveSize();
         for ( int j = 1; j <= nDofs; j++ ) {
             if ( j <= 2 ) {
                 answer.at(++k) = vec.at(j);
@@ -285,7 +382,10 @@ PlaneStress2dXfem :: computeStressVector(FloatArray &answer, GaussPoint *gp, Tim
     FloatArray Epsilon;
     this->computeStrainVector(Epsilon, gp, stepN);
     XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
-    if ( xMan->isElementEnriched(this) ) {
+    EDBGCircle *edc = static_cast< EDBGCircle * > ( xMan->giveEnrichmentItem(1)->giveEnrichmentDomain(1) );
+    FloatArray coords;
+    this->computeGlobalCoordinates(coords, *(gp->giveCoordinates()) );
+    if ( edc->bg->isInside( coords ) ) {
         Inclusion *ei = static_cast< Inclusion * > ( xMan->giveEnrichmentItem(1) );
         StructuralMaterial *sm = static_cast< StructuralMaterial * >( ei->giveMaterial() );
         sm->giveRealStressVector(answer, ReducedForm, gp, Epsilon, stepN);
@@ -312,8 +412,56 @@ PlaneStress2dXfem :: giveGeometryType() const
     XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
     if ( xMan->isElementEnriched(this) ) {
         return EGT_Composite;
+        //return EGT_quad_1; 
     } else {
         return EGT_quad_1; 
+    }
+    
+}
+
+
+void 
+PlaneStress2dXfem :: giveCompositeExportData( std::vector<FloatArray> &nodeCoords, std::vector<IntArray> &cellNodes  )
+{   
+    // This element considers each gp to be a subcell and each such subcell will be exported as a linear quad
+    int numCells = 4; //this->giveIntegrationRule(1)->getNumberOfIntegrationPoints();
+    int numXi1 = numCells/2+1;
+    int numXi2 = numCells/2+1;
+    FloatArray lcoords(2);
+    nodeCoords.resize(numXi1*numXi2);
+    
+    double xi1 = -1.0, xi2 = -1.0;
+    int pos = 0;
+    for ( int i = 0; i < numXi2; i++ ){
+        xi1 = -1.0;
+        for ( int j = 0; j < numXi1; j++ ){ // nnodes
+            
+            lcoords.at(1) = xi1;
+            lcoords.at(2) = xi2;
+            this->computeGlobalCoordinates(nodeCoords.at(pos), lcoords);
+            pos++;
+            xi1 += 2.0/double(numXi1-1);
+        }
+        xi2 += 2.0/double(numXi2-1);
+    }
+
+    // Create connectivity of the elements
+    int nCellsXi1 = numCells/2, nCellsXi2 = numCells/2;
+    cellNodes.resize(numCells);
+    pos = 0;
+    int shift1 = 0, shift2 = numXi2;
+    for ( int i = 0; i < nCellsXi2; i++ ){
+        for ( int j = 0; j < nCellsXi1; j++ ){
+            cellNodes.at(pos).resize(4);
+            cellNodes.at(pos).at(1) = 0+j+shift1;
+            cellNodes.at(pos).at(2) = 1+j+shift1;
+            cellNodes.at(pos).at(3) = 1+j+shift2;
+            cellNodes.at(pos).at(4) = 0+j+shift2;   
+            pos++;
+            
+        }
+        shift1 += numXi1;
+        shift2 += numXi2;
     }
     
 }

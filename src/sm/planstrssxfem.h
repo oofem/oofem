@@ -37,18 +37,18 @@
 
 #include "planstrss.h"
 #include "xfemelementinterface.h"
-
+#include "vtkxmlexportmodule.h"
 namespace oofem {
 /**
  * Temporary class for testing
  * in the usual case instead of PlaneStress2dXfem
  * there will be the standard PlaneStress2d
  */
-class PlaneStress2dXfem : public PlaneStress2d, public XfemElementInterface
+class PlaneStress2dXfem : public PlaneStress2d, public XfemElementInterface, public VTKXMLExportModuleElementInterface
 {
 public:
     /// Constructor
-    PlaneStress2dXfem(int n, Domain *d) : PlaneStress2d(n, d), XfemElementInterface(this) { }
+    PlaneStress2dXfem(int n, Domain *d) : PlaneStress2d(n, d), XfemElementInterface(this), VTKXMLExportModuleElementInterface() { }
     /// Destructor
     virtual ~PlaneStress2dXfem() { };
 
@@ -67,6 +67,7 @@ public:
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
 
     virtual Element_Geometry_Type giveGeometryType() const;
+    virtual void giveCompositeExportData( std::vector<FloatArray> &nodeCoords, std::vector<IntArray> &cellNodes );
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);

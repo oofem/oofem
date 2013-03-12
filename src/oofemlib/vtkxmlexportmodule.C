@@ -547,7 +547,8 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
                     static_cast< VTKXMLExportModuleElementInterface * >( elem->giveInterface(VTKXMLExportModuleElementInterfaceType) );
                 if ( interface ) {
                     // passing this to access general piece related methods like exportPointDataHeader, etc.
-                    interface->_export(stream, this, primaryVarsToExport, internalVarsToExport, tStep);
+                    //interface->_export(stream, this, primaryVarsToExport, internalVarsToExport, tStep);
+                    interface->exportCompositeElement(stream, this, primaryVarsToExport, internalVarsToExport, tStep);
                 }
 #endif
             }
@@ -1440,6 +1441,108 @@ void VTKXMLExportModule::writeVTKCollection()
 
     outfile.close();
 }
+
+
+
+
+
+
+// Export interface for composite elements
+void 
+VTKXMLExportModuleElementInterface :: exportCompositeElement(FILE *stream, VTKXMLExportModule *expModule, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep) 
+{
+    // should ask element for nodes and cells
+    std::vector<FloatArray> nodeCoords;
+    std::vector<IntArray> cellNodes; 
+    this->giveCompositeExportData(nodeCoords, cellNodes);
+
+    int numCells      = cellNodes.size(); 
+    int regionDofMans = nodeCoords.size(); 
+    
+    fprintf(stream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", regionDofMans, numCells);
+
+    // export nodes in region as vtk vertices
+    fprintf(stream, "<Points>\n <DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\"> ");
+
+    
+    // compute fictious node coords
+    for ( int cell = 1; cell <= numCells; cell++ ) {
+        for ( int inode = 1; inode <= regionDofMans; inode++ ) {
+            
+            FloatArray &coords = nodeCoords [inode-1]; 
+            for ( int i = 1; i <= coords.giveSize(); i++ ) {
+                fprintf( stream, "%e ", coords.at(i) );
+            }
+            if ( coords.giveSize() < 3 ) { // fix for 1d
+                fprintf( stream, "%e ", 0.0 );
+            }
+            
+        }
+    }
+    fprintf(stream, "</DataArray>\n</Points>\n");
+    
+
+    // output all cells of the piece
+    fprintf(stream, "<Cells>\n");
+    // output the connectivity data
+    fprintf(stream, " <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> ");
+    int pos = 0;
+    
+    for ( int cell = 0; cell < numCells; cell++ ) {
+        for ( int i = 1; i <= cellNodes.at(cell).giveSize(); i++ ) {
+            fprintf(stream, "%d ", cellNodes.at(cell).at(i) );
+        }
+        fprintf(stream, " ");
+    }
+
+
+    // Output the offsets (index of individual element data in connectivity array)
+    fprintf(stream, "</DataArray>\n");
+    fprintf(stream, " <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\"> ");
+    int offset = 0;
+    for ( int cell = 0; cell < numCells; cell++ ) {
+        offset += cellNodes.at(cell).giveSize();
+        fprintf(stream, "%d ", offset);
+    }
+    fprintf(stream, "</DataArray>\n");
+
+
+    // Output cell types
+    fprintf(stream, " <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\"> ");
+    for ( int cell = 0; cell < numCells; cell++ ) {
+        int vtkCellType = 9;
+        fprintf(stream, "%d ", vtkCellType);
+    }
+    fprintf(stream, "</DataArray>\n");
+    fprintf(stream, "</Cells>\n");
+/*
+
+
+    // Export primary and internal variables
+    
+    expModule->exportPointDataHeader(stream, tStep);
+    for (int i = 1, n = primaryVarsToExport.giveSize(); i <= n; i++ ) {
+        UnknownType type = ( UnknownType ) primaryVarsToExport.at(i);
+        this->exportPrimVarAs(type, regionDofMans, 0, stream, tStep);
+    }
+    //expModule->exportPrimaryVars(stream, mapG2L, mapL2G, regionDofMans, ireg, tStep);
+    //expModule->exportIntVars(stream, mapG2L, mapL2G, regionDofMans, ireg, tStep);
+    fprintf(stream, "</PointData>\n");
+
+
+    //export cell data
+    //this->exportCellVars(stream, ireg, tStep);
+
+
+*/
+    // end of piece record
+    fprintf(stream, "</Piece>\n");
+    
+}
+
+
+
+
 
 
 } // end namespace oofem

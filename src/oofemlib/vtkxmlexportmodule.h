@@ -242,6 +242,8 @@ public:
     VTKXMLExportModuleElementInterface() : Interface() {}
     virtual const char *giveClassName() const { return "VTKXMLExportModuleElementInterface"; }
     virtual void _export(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep) {};
+    virtual void exportCompositeElement(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep);
+    virtual void giveCompositeExportData(std::vector<FloatArray> &nodeCoords, std::vector<IntArray> &cellNodes ){};
 };
 } // end namespace oofem
 #endif // vtkxmlexportmodule_h
