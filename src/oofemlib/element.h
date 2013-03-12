@@ -62,6 +62,19 @@
 
 #include <cstdio>
 
+///@name Input fields for general element.
+//@{
+#define _IFT_Element_mat "mat"
+#define _IFT_Element_crosssect "crosssect"
+#define _IFT_Element_nodes "nodes"
+#define _IFT_Element_bodyload "bodyloads"
+#define _IFT_Element_boundaryload "boundaryloads"
+#define _IFT_Element_lcs "lcs"
+#define _IFT_Element_partitions "partitions"
+#define _IFT_Element_remote "remote"
+#define _IFT_Element_activityltf "activityltf"
+//@}
+
 namespace oofem {
 class TimeStep;
 class Node;

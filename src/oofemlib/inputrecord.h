@@ -51,7 +51,7 @@ class Range;
  * IRRT_OK the corresponding value to given keyword was successfully read.
  *       the answer parameter contains the value.
  * IRRT_NOTFOUND the keyword is not found; the answer is not modified
- * IRRT_BAD_FORMAT the keyword was found but the record is not correctly formated.
+ * IRRT_BAD_FORMAT the keyword was found but the record is not correctly formatted.
  */
 enum IRResultType { IRRT_OK = 0, IRRT_NOTFOUND, IRRT_BAD_FORMAT };
 
@@ -781,8 +781,6 @@ enum InputFieldType {
     IFT_CompoDamageMat_components,
     IFT_CompoDamageMat_afteriter,
     IFT_CompoDamageMat_allowSnapBack,
-
-    IFT_FE2SinteringMaterial_porosity,
 
     IFT_MicroMaterialFileName,
     IFT_MacroLspace_microMasterNodes,

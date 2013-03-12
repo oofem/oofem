@@ -74,6 +74,20 @@
 
 #include <string>
 
+///@name Input fields for general Engineering models.
+//@{
+#define _IFT_EngngModel_nsteps "nsteps"
+#define _IFT_EngngModel_contextoutputstep "contextoutputstep"
+#define _IFT_EngngModel_renumberFlag "renumber"
+#define _IFT_EngngModel_profileOpt "profileopt"
+#define _IFT_EngngModel_nmsteps "nmsteps"
+#define _IFT_EngngModel_nxfemman "nxfemman"
+#define _IFT_EngngModel_nonLinFormulation "nonlinform"
+#define _IFT_EngngModel_eetype "eetype"
+#define _IFT_EngngModel_parallelflag "parallelflag"
+#define _IFT_EngngModel_loadBalancingFlag "lbflag"
+#define _IFT_EngngModel_forceloadBalancingFlag "forcelb1"
+//@}
 
 namespace oofem {
 
