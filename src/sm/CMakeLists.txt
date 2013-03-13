@@ -25,8 +25,8 @@ set (sm_element
     qplanestressgrad.C
     latticestructuralelement.C
     lattice2d.C
-	shell7base.C
-	tr2shell7.C
+    shell7base.C
+    tr2shell7.C
     shell7basexfem.C
     tr2shell7xfem.C
     )
@@ -48,13 +48,14 @@ set (sm_emodel
     diidynamic.C
     nldeidynamic.C
     incrementallinearstatic.C
+    staticfracture.C
     )
 
 set (sm_loads
     tf1.C
     usrdeftempfield.C
     rotatingboundary.C
-	constantpressureload.C
+    constantpressureload.C
     )
 
 set (sm_material

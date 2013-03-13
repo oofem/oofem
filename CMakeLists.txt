@@ -16,7 +16,7 @@ set (oofem_EMAIL "info@oofem.org")
 
 # Default is debug build
 if (NOT CMAKE_BUILD_TYPE)
-	set (CMAKE_BUILD_TYPE Debug)
+    set (CMAKE_BUILD_TYPE Debug)
 endif ()
 
 if (MSVC)
@@ -572,7 +572,7 @@ else:
 command.extend(sys.argv[4:])
 print('Executing: ', command)
 if subprocess.call(command):
-	exit(1)
+    exit(1)
 else:
     for f in files:
         python=\"${PYTHON_EXECUTABLE}\"

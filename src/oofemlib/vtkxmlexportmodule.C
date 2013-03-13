@@ -547,8 +547,8 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
                     static_cast< VTKXMLExportModuleElementInterface * >( elem->giveInterface(VTKXMLExportModuleElementInterfaceType) );
                 if ( interface ) {
                     // passing this to access general piece related methods like exportPointDataHeader, etc.
-                    //interface->_export(stream, this, primaryVarsToExport, internalVarsToExport, tStep);
-                    interface->exportCompositeElement(stream, this, primaryVarsToExport, internalVarsToExport, tStep);
+                    interface->_export(stream, this, primaryVarsToExport, internalVarsToExport, tStep);
+                    //interface->exportCompositeElement(stream, this, primaryVarsToExport, internalVarsToExport, tStep);
                 }
 #endif
             }
