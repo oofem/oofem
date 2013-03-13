@@ -325,11 +325,11 @@ Lattice2d :: initializeFrom(InputRecord *ir)
     // first call parent
     LatticeStructuralElement :: initializeFrom(ir);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, thickness, IFT_Lattice2d_thick, "thick"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, thickness, IFT_Lattice2d_thick, "thick");
 
-    IR_GIVE_OPTIONAL_FIELD(ir, width, IFT_Lattice2d_width, "width"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, width, IFT_Lattice2d_width, "width");
 
-    IR_GIVE_OPTIONAL_FIELD(ir, gpCoords, IFT_Lattice2d_gpcoords, "gpcoords"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, gpCoords, IFT_Lattice2d_gpcoords, "gpcoords");
 
     this->computeGaussPoints();
     return IRRT_OK;

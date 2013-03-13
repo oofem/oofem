@@ -382,7 +382,7 @@ Beam2d :: initializeFrom(InputRecord *ir)
 
     if ( ir->hasField(IFT_Beam2d_dofstocondense, "dofstocondense") ) {
         IntArray val;
-        IR_GIVE_FIELD(ir, val, IFT_Beam2d_dofstocondense, "dofstocondense"); // Macro
+        IR_GIVE_FIELD(ir, val, IFT_Beam2d_dofstocondense, "dofstocondense");
         if ( val.giveSize() >= 6 ) {
             _error("instanciateFrom: wrong input data for condensed dofs");
         }

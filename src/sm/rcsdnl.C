@@ -366,11 +366,11 @@ RCSDNLMaterial :: initializeFrom(InputRecord *ir)
 
     //RCSDEMaterial::instanciateFrom (ir);
     this->giveLinearElasticMaterial()->initializeFrom(ir);
-    IR_GIVE_FIELD(ir, Ft, IFT_RCSDNLMaterial_ft, "ft"); // Macro
+    IR_GIVE_FIELD(ir, Ft, IFT_RCSDNLMaterial_ft, "ft");
     StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, SDTransitionCoeff, IFT_RCSDNLMaterial_sdtransitioncoeff, "sdtransitioncoeff"); // Macro
-    IR_GIVE_FIELD(ir, SDTransitionCoeff2, IFT_RCSDNLMaterial_sdtransitioncoeff2, "sdtransitioncoeff2"); // Macro
+    IR_GIVE_FIELD(ir, SDTransitionCoeff, IFT_RCSDNLMaterial_sdtransitioncoeff, "sdtransitioncoeff");
+    IR_GIVE_FIELD(ir, SDTransitionCoeff2, IFT_RCSDNLMaterial_sdtransitioncoeff2, "sdtransitioncoeff2");
     if ( SDTransitionCoeff2 > 1.0 ) {
         SDTransitionCoeff2 = 1.0;
     }
@@ -379,16 +379,16 @@ RCSDNLMaterial :: initializeFrom(InputRecord *ir)
         SDTransitionCoeff2 = 0.0;
     }
 
-    IR_GIVE_FIELD(ir, R, IFT_RCSDNLMaterial_r, "r"); // Macro
+    IR_GIVE_FIELD(ir, R, IFT_RCSDNLMaterial_r, "r");
     if ( R < 0.0 ) {
         R = 0.0;
     }
 
     if ( ir->hasField(IFT_RCSDNLMaterial_ef, "ef") ) { // if ef is specified, Gf is computed acordingly
-        IR_GIVE_FIELD(ir, this->ef, IFT_RCSDNLMaterial_ef, "ef"); // Macro
+        IR_GIVE_FIELD(ir, this->ef, IFT_RCSDNLMaterial_ef, "ef");
         this->Gf = this->Ft * this->ef;
     } else if ( ir->hasField(IFT_RCSDNLMaterial_gf, "gf") ) { // otherwise if Gf is specified, ef is computed acordingly
-        IR_GIVE_FIELD(ir, this->Gf, IFT_RCSDNLMaterial_gf, "gf"); // Macro
+        IR_GIVE_FIELD(ir, this->Gf, IFT_RCSDNLMaterial_gf, "gf");
         this->ef = this->Gf / this->Ft;
     } else {
         _error("initializeFrom: cannont determine Gf and ef from input data");

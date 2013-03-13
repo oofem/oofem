@@ -76,7 +76,7 @@ HTSelement :: initializeFrom(InputRecord *ir)
     //IRResultType result;                 // Required by IR_GIVE_FIELD macro
     this->StructuralElement :: initializeFrom(ir);    
     numberOfGaussPoints = 8;
-    //IR_GIVE_FIELD(ir, numberOfEdges, IFT_HTSelement_numberOfEdges, "numberOfEdges"); // Macro
+    //IR_GIVE_FIELD(ir, numberOfEdges, IFT_HTSelement_numberOfEdges, "numberOfEdges");
     //numberOfEdges = 3;
 
 #if 0  

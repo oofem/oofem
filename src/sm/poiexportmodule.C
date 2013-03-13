@@ -70,15 +70,15 @@ POIExportModule :: initializeFrom(InputRecord *ir)
     int val;
 
     ExportModule :: initializeFrom(ir);
-    IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, IFT_POIExportModule_vars, "vars"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, IFT_POIExportModule_primvars, "primvars"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, IFT_POIExportModule_vars, "vars");
+    IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, IFT_POIExportModule_primvars, "primvars");
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_POIExportModule_mtype, "mtype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_POIExportModule_mtype, "mtype");
     mtype = ( POIEM_MapperType ) val;
 
     std::string poiFileName;
-    IR_GIVE_OPTIONAL_FIELD(ir, poiFileName, IFT_POIExportModule_poifilename, "poifilename"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, poiFileName, IFT_POIExportModule_poifilename, "poifilename");
     this->readPOIFile(poiFileName); // parse poi file
 
     return IRRT_OK;

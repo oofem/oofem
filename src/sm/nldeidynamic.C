@@ -94,11 +94,11 @@ NlDEIDynamic :: initializeFrom(InputRecord *ir)
 
     StructuralEngngModel :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, dumpingCoef, IFT_NlDEIDynamic_dumpcoef, "dumpcoef"); // C = dumpingCoef * M // Macro
-    IR_GIVE_FIELD(ir, deltaT, IFT_NlDEIDynamic_deltat, "deltat"); // Macro
+    IR_GIVE_FIELD(ir, dumpingCoef, IFT_NlDEIDynamic_dumpcoef, "dumpcoef"); // C = dumpingCoef * M
+    IR_GIVE_FIELD(ir, deltaT, IFT_NlDEIDynamic_deltat, "deltat");
 
     drFlag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, drFlag, IFT_NlDEIDynamic_drflag, "drflag"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, drFlag, IFT_NlDEIDynamic_drflag, "drflag");
     if ( drFlag ) {
         IR_GIVE_FIELD(ir, Tau, IFT_NlDEIDynamic_tau, "tau");
         IR_GIVE_FIELD(ir, pyEstimate, IFT_NlDEIDynamic_py, "py");

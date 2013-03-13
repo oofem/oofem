@@ -94,7 +94,7 @@ Tr1_ht :: initializeFrom(InputRecord *ir)
     this->TransportElement :: initializeFrom(ir);
 
     numberOfGaussPoints = 1;
-    //IR_GIVE_OPTIONAL_FIELD (ir, numberOfGaussPoints, "nip"); // Macro
+    //IR_GIVE_OPTIONAL_FIELD (ir, numberOfGaussPoints, "nip");
     //if ( numberOfGaussPoints != 1) numberOfGaussPoints = 1;
 
     this->computeGaussPoints();

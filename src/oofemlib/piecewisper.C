@@ -108,9 +108,9 @@ PeriodicPiecewiseLinFunction :: initializeFrom(InputRecord *ir)
     PiecewiseLinFunction :: initializeFrom(ir);
 
     period = -1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, period, IFT_PeriodicPiecewiseLinFunction_period, "period"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, period, IFT_PeriodicPiecewiseLinFunction_period, "period");
     addTF = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, addTF, IFT_PeriodicPiecewiseLinFunction_addtf, "addtf"); // Macroo
+    IR_GIVE_OPTIONAL_FIELD(ir, addTF, IFT_PeriodicPiecewiseLinFunction_addtf, "addtf");
 
     return IRRT_OK;
 }

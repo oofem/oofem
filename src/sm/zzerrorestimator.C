@@ -218,7 +218,7 @@ ZZErrorEstimator :: initializeFrom(InputRecord *ir)
 
     ErrorEstimator :: initializeFrom(ir);
     n = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, n, IFT_ZZErrorEstimator_normtype, "normtype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, n, IFT_ZZErrorEstimator_normtype, "normtype");
     if ( n == 1 ) {
         this->normType = EnergyNorm;
     } else {
@@ -226,7 +226,7 @@ ZZErrorEstimator :: initializeFrom(InputRecord *ir)
     }
 
     n = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, n, IFT_ZZErrorEstimator_recoverytype, "recoverytype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, n, IFT_ZZErrorEstimator_recoverytype, "recoverytype");
     if ( n == 1 ) {
         this->nodalRecoveryType = SPRRecovery;
     } else {
@@ -470,8 +470,8 @@ ZZRemeshingCriteria :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, this->requiredError, IFT_ZZRemeshingCriteria_requirederror, "requirederror"); // Macro
-    IR_GIVE_FIELD(ir, this->minElemSize, IFT_ZZRemeshingCriteria_minelemsize, "minelemsize"); // Macro
+    IR_GIVE_FIELD(ir, this->requiredError, IFT_ZZRemeshingCriteria_requirederror, "requirederror");
+    IR_GIVE_FIELD(ir, this->minElemSize, IFT_ZZRemeshingCriteria_minelemsize, "minelemsize");
 
     return IRRT_OK;
 }

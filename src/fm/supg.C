@@ -105,7 +105,7 @@ SUPG :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
     sparseMtrxType = ( SparseMtrxType ) val;
 
-    IR_GIVE_FIELD(ir, deltaT, IFT_SUPG_deltat, "deltat"); // Macro
+    IR_GIVE_FIELD(ir, deltaT, IFT_SUPG_deltat, "deltat");
     deltaTLTF = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, deltaTLTF, IFT_SUPG_deltatltf, "deltatltf");
 

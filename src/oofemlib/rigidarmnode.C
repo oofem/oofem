@@ -89,9 +89,9 @@ RigidArmNode :: initializeFrom(InputRecord *ir)
     // allocate auxiliary arrays
     allocAuxArrays();
 
-    IR_GIVE_FIELD(ir, masterDofMngr, IFT_RigidArmNode_master, "master"); // Macro
+    IR_GIVE_FIELD(ir, masterDofMngr, IFT_RigidArmNode_master, "master");
 
-    IR_GIVE_FIELD(ir, * masterMask, IFT_DofManager_mastermask, "mastermask"); // Macro
+    IR_GIVE_FIELD(ir, * masterMask, IFT_DofManager_mastermask, "mastermask");
     if ( masterMask->giveSize() != this->giveNumberOfDofs() ) {
         _error("initializeFrom: mastermask size mismatch");
     }

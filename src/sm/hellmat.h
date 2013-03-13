@@ -43,7 +43,7 @@
 #define _IFT_HellmichMaterial_ashr "ashr"
 #define _IFT_HellmichMaterial_bshr "bshr"
 #define _IFT_HellmichMaterial_kshr "kshr"
-#define _IFT_HellmichMaterial_dryingc "dryingc"
+#define _IFT_HellmichMaterial_dryingc "dc"
 #define _IFT_HellmichMaterial_nocreep "nocreep"
 #define _IFT_HellmichMaterial_modulusH "modulush"
 #define _IFT_HellmichMaterial_ur "ur"

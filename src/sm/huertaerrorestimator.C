@@ -567,7 +567,7 @@ HuertaErrorEstimator :: initializeFrom(InputRecord *ir)
 
     ErrorEstimator :: initializeFrom(ir);
     n = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, n, IFT_HuertaErrorEstimator_normtype, "normtype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, n, IFT_HuertaErrorEstimator_normtype, "normtype");
     if ( n == 0 ) {
         this->normType = L2Norm;
     } else {
@@ -575,14 +575,14 @@ HuertaErrorEstimator :: initializeFrom(InputRecord *ir)
     }
 
     level = this->refineLevel;
-    IR_GIVE_OPTIONAL_FIELD(ir, level, IFT_HuertaErrorEstimator_refinelevel, "refinelevel"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, level, IFT_HuertaErrorEstimator_refinelevel, "refinelevel");
     if ( level >= 0 ) {
         this->refineLevel = level;
     }
 
-    IR_GIVE_FIELD(ir, this->requiredError, IFT_HuertaErrorEstimator_requirederror, "requirederror"); // Macro
+    IR_GIVE_FIELD(ir, this->requiredError, IFT_HuertaErrorEstimator_requirederror, "requirederror");
 
-    IR_GIVE_OPTIONAL_FIELD(ir, maxSkipSteps, IFT_HuertaErrorEstimator_skipsteps, "skipsteps"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, maxSkipSteps, IFT_HuertaErrorEstimator_skipsteps, "skipsteps");
     if ( maxSkipSteps < 0 ) {
         maxSkipSteps = 0;
     }
@@ -591,12 +591,12 @@ HuertaErrorEstimator :: initializeFrom(InputRecord *ir)
         maxSkipSteps = 5;
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, initialSkipSteps, IFT_HuertaErrorEstimator_initialskipsteps, "initialskipsteps"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, initialSkipSteps, IFT_HuertaErrorEstimator_initialskipsteps, "initialskipsteps");
     if ( initialSkipSteps < 0 ) {
         initialSkipSteps = 0;
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, wErrorFlag, IFT_HuertaErrorEstimator_werror, "werror"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, wErrorFlag, IFT_HuertaErrorEstimator_werror, "werror");
     if ( wErrorFlag != 0 ) {
         wError = true;
     }
@@ -605,11 +605,11 @@ HuertaErrorEstimator :: initializeFrom(InputRecord *ir)
         masterRun = false;
 
         perMat = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, perMat, IFT_HuertaErrorEstimator_permat, "permat"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, perMat, IFT_HuertaErrorEstimator_permat, "permat");
 
         impMat = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, impMat, IFT_HuertaErrorEstimator_impmat, "impmat"); // Macro
-        IR_GIVE_OPTIONAL_FIELD(ir, impPos, IFT_HuertaErrorEstimator_imppos, "imppos"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, impMat, IFT_HuertaErrorEstimator_impmat, "impmat");
+        IR_GIVE_OPTIONAL_FIELD(ir, impPos, IFT_HuertaErrorEstimator_imppos, "imppos");
 
         if ( impMat != 0 && perMat == 0 ) {
             _error("initializeFrom: Missing perfect material specification");
@@ -617,7 +617,7 @@ HuertaErrorEstimator :: initializeFrom(InputRecord *ir)
 
 #ifdef EXACT_ERROR
         n = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, n, IFT_HuertaErrorEstimator_exact, "exact"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, n, IFT_HuertaErrorEstimator_exact, "exact"); 
         if ( n > 0 ) {
             exactFlag = true;
             if ( n != 1 ) {
@@ -1002,22 +1002,22 @@ HuertaRemeshingCriteria :: initializeFrom(InputRecord *ir)
     double coeff;
     int noRemeshFlag = 0, wErrorFlag = 0;
 
-    IR_GIVE_FIELD(ir, this->requiredError, IFT_HuertaRemeshingCriteria_requirederror, "requirederror"); // Macro
-    IR_GIVE_FIELD(ir, this->minElemSize, IFT_HuertaRemeshingCriteria_minelemsize, "minelemsize"); // Macro
+    IR_GIVE_FIELD(ir, this->requiredError, IFT_HuertaRemeshingCriteria_requirederror, "requirederror");
+    IR_GIVE_FIELD(ir, this->minElemSize, IFT_HuertaRemeshingCriteria_minelemsize, "minelemsize");
 
-    IR_GIVE_OPTIONAL_FIELD(ir, noRemeshFlag, IFT_HuertaRemeshingCriteria_noremesh, "noremesh"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, noRemeshFlag, IFT_HuertaRemeshingCriteria_noremesh, "noremesh");
     if ( noRemeshFlag != 0 ) {
         this->noRemesh = true;
     }
 
 
-    IR_GIVE_OPTIONAL_FIELD(ir, wErrorFlag, IFT_HuertaRemeshingCriteria_werror, "werror"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, wErrorFlag, IFT_HuertaRemeshingCriteria_werror, "werror");
     if ( wErrorFlag != 0 ) {
         this->wError = true;
     }
 
     coeff = this->refineCoeff;
-    IR_GIVE_OPTIONAL_FIELD(ir, coeff, IFT_HuertaRemeshingCriteria_refinecoeff, "refinecoeff"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, coeff, IFT_HuertaRemeshingCriteria_refinecoeff, "refinecoeff");
     if ( coeff > 0.0 && coeff <= 1.0 ) {
         this->refineCoeff = coeff;
     }
@@ -1038,19 +1038,18 @@ HuertaRemeshingCriteria :: giveDofManDensity(int num)
     con = ct->giveDofManConnectivityArray(num);
     isize = con->giveSize();
 
-    /*
-     * // Minimum density
-     *
-     * for(i = 1; i <= isize; i++) {
-     * interface = (HuertaRemeshingCriteriaInterface*)
-     * domain -> giveElement(con -> at(i)) -> giveInterface(HuertaRemeshingCriteriaInterfaceType);
-     * if (!interface) {
-     * _error ("giveDofManDensity: element does not support HuertaRemeshingCriteriaInterface");
-     * }
-     * if (i==1) density = interface -> HuertaRemeshingCriteriaI_giveCharacteristicSize();
-     * else density = min (density, interface -> HuertaRemeshingCriteriaI_giveCharacteristicSize());
-     * }
-     */
+#if 0
+     // Minimum density
+     for(i = 1; i <= isize; i++) {
+        interface = (HuertaRemeshingCriteriaInterface*)
+        domain->giveElement(con->at(i))->giveInterface(HuertaRemeshingCriteriaInterfaceType);
+        if (!interface) {
+        _error ("giveDofManDensity: element does not support HuertaRemeshingCriteriaInterface");
+        }
+        if (i==1) density = interface->HuertaRemeshingCriteriaI_giveCharacteristicSize();
+        else density = min (density, interface->HuertaRemeshingCriteriaI_giveCharacteristicSize());
+     }
+#endif
 
     // Average density
 
@@ -1072,7 +1071,7 @@ HuertaRemeshingCriteria :: giveDofManDensity(int num)
 
 
 void
-HuertaErrorEstimator :: buildRefinedMesh(void)
+HuertaErrorEstimator :: buildRefinedMesh()
 {
     // Element *element;
     RefinedElement *refinedElement;
@@ -1359,11 +1358,11 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
 
                     refinedReader.seek(nd1 + 6);
                     InputRecord *ir = refinedReader.giveInputRecord(DataReader :: IR_dofmanRec, nd1);
-                    IR_GIVE_FIELD(ir, coordinates1, IFT_HuertaErrorEstimatorInterface_coords, "coords"); // Macro
+                    IR_GIVE_FIELD(ir, coordinates1, IFT_HuertaErrorEstimatorInterface_coords, "coords");
 
                     refinedReader.seek(nd2 + 6);
                     ir = refinedReader.giveInputRecord(DataReader :: IR_dofmanRec, nd2);
-                    IR_GIVE_FIELD(ir, coordinates2, IFT_HuertaErrorEstimatorInterface_coords, "coords"); // Macro
+                    IR_GIVE_FIELD(ir, coordinates2, IFT_HuertaErrorEstimatorInterface_coords, "coords");
 
                     material = impMat;
                     for ( i = 1; i <= impPos.giveSize(); i++ ) {
@@ -4165,33 +4164,33 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
 
         switch ( controlMode ) {
         case 0:
-            IR_GIVE_OPTIONAL_FIELD(ir, maxIter, IFT_CylindricalALM_maxiter, "maxiter"); // Macro
-            IR_GIVE_OPTIONAL_FIELD(ir, reqIter, IFT_CylindricalALM_reqiterations, "reqiterations"); // Macro
-            IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, IFT_CylindricalALM_minsteplength, "minsteplength"); // Macro
-            IR_GIVE_OPTIONAL_FIELD(ir, manrmsteps, IFT_CylindricalALM_manrmsteps, "manrmsteps"); // Macro
-            IR_GIVE_FIELD(ir, stepLength, IFT_CylindricalALM_steplength, "steplength"); // Macro
+            IR_GIVE_OPTIONAL_FIELD(ir, maxIter, IFT_CylindricalALM_maxiter, "maxiter");
+            IR_GIVE_OPTIONAL_FIELD(ir, reqIter, IFT_CylindricalALM_reqiterations, "reqiterations");
+            IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, IFT_CylindricalALM_minsteplength, "minsteplength");
+            IR_GIVE_OPTIONAL_FIELD(ir, manrmsteps, IFT_CylindricalALM_manrmsteps, "manrmsteps");
+            IR_GIVE_FIELD(ir, stepLength, IFT_CylindricalALM_steplength, "steplength");
 
             initialStepLength = stepLength;
-            IR_GIVE_OPTIONAL_FIELD(ir, initialStepLength, IFT_CylindricalALM_initialsteplength, "initialsteplength"); // Macro
+            IR_GIVE_OPTIONAL_FIELD(ir, initialStepLength, IFT_CylindricalALM_initialsteplength, "initialsteplength");
 
-            IR_GIVE_OPTIONAL_FIELD(ir, psi, IFT_CylindricalALM_psi, "psi"); // Macro
-            IR_GIVE_OPTIONAL_FIELD(ir, hpcMode, IFT_CylindricalALM_hpcmode, "hpcmode"); // Macro
+            IR_GIVE_OPTIONAL_FIELD(ir, psi, IFT_CylindricalALM_psi, "psi");
+            IR_GIVE_OPTIONAL_FIELD(ir, hpcMode, IFT_CylindricalALM_hpcmode, "hpcmode");
 
-            IR_GIVE_OPTIONAL_FIELD(ir, hpc, IFT_CylindricalALM_hpc, "hpc"); // Macro
-            IR_GIVE_OPTIONAL_FIELD(ir, hpcw, IFT_CylindricalALM_hpcw, "hpcw"); // Macro
+            IR_GIVE_OPTIONAL_FIELD(ir, hpc, IFT_CylindricalALM_hpc, "hpc");
+            IR_GIVE_OPTIONAL_FIELD(ir, hpcw, IFT_CylindricalALM_hpcw, "hpcw");
             IR_GIVE_FIELD(ir, rtolv, IFT_CylindricalALM_rtolv, "rtolv"); //macro
 
             hpcSize = hpc.giveSize();
             hpcwSize = hpcw.giveSize();
             break;
         case 1:
-            IR_GIVE_OPTIONAL_FIELD(ir, maxIter, IFT_NRSolver_maxiter, "maxiter"); // Macro
-            IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, IFT_NRSolver_minsteplength, "minsteplength"); // Macro
-            IR_GIVE_OPTIONAL_FIELD(ir, manrmsteps, IFT_NRSolver_manrmsteps, "manrmsteps"); // Macro
+            IR_GIVE_OPTIONAL_FIELD(ir, maxIter, IFT_NRSolver_maxiter, "maxiter");
+            IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, IFT_NRSolver_minsteplength, "minsteplength");
+            IR_GIVE_OPTIONAL_FIELD(ir, manrmsteps, IFT_NRSolver_manrmsteps, "manrmsteps");
 
-            IR_GIVE_OPTIONAL_FIELD(ir, ddm, IFT_NRSolver_ddm, "ddm"); // Macro
-            IR_GIVE_OPTIONAL_FIELD(ir, ddv, IFT_NRSolver_ddv, "ddv"); // Macro
-            IR_GIVE_OPTIONAL_FIELD(ir, ddltf, IFT_NRSolver_ddltf, "ddltf"); // Macro
+            IR_GIVE_OPTIONAL_FIELD(ir, ddm, IFT_NRSolver_ddm, "ddm");
+            IR_GIVE_OPTIONAL_FIELD(ir, ddv, IFT_NRSolver_ddv, "ddv");
+            IR_GIVE_OPTIONAL_FIELD(ir, ddltf, IFT_NRSolver_ddltf, "ddltf");
             IR_GIVE_FIELD(ir, rtolv, IFT_NRSolver_rtolv, "rtolv"); //macro
 
             ddmSize = ddm.giveSize();

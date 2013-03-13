@@ -799,16 +799,16 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, numberOfLayers, IFT_LayeredCrossSection_nlayers, "nlayers"); // Macro
-    IR_GIVE_FIELD(ir, layerMaterials, IFT_LayeredCrossSection_layermaterials, "layermaterials"); // Macro
-    IR_GIVE_FIELD(ir, layerThicks, IFT_LayeredCrossSection_thicks, "thicks"); // Macro
-    IR_GIVE_FIELD(ir, layerWidths, IFT_LayeredCrossSection_widths, "widths"); // Macro
+    IR_GIVE_FIELD(ir, numberOfLayers, IFT_LayeredCrossSection_nlayers, "nlayers");
+    IR_GIVE_FIELD(ir, layerMaterials, IFT_LayeredCrossSection_layermaterials, "layermaterials");
+    IR_GIVE_FIELD(ir, layerThicks, IFT_LayeredCrossSection_thicks, "thicks");
+    IR_GIVE_FIELD(ir, layerWidths, IFT_LayeredCrossSection_widths, "widths");
 
     numberOfIntegrationPoints = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfIntegrationPoints, IFT_LayeredCrossSection_nintegrationpoints, "nintegrationpoints");
 
     // read z - coordinate of mid-surface measured from bottom layer
-    IR_GIVE_FIELD(ir, midSurfaceZcoordFromBottom, IFT_LayeredCrossSection_midsurf, "midsurf"); // Macro
+    IR_GIVE_FIELD(ir, midSurfaceZcoordFromBottom, IFT_LayeredCrossSection_midsurf, "midsurf");
 
     if ( ( numberOfLayers != layerMaterials.giveSize() ) ||
          ( numberOfLayers != layerThicks.giveSize() )    ||
@@ -817,7 +817,7 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
     }
 
     if ( numberOfLayers <= 0 ) {
-        _error("instanciateFrom : numberOfLayers<= 0 is not alloved");
+        _error("instanciateFrom : numberOfLayers<= 0 is not allowed");
     }
 
     this->setupLayerMidPlanes();

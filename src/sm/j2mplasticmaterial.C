@@ -70,16 +70,16 @@ J2MPlasticMaterial :: initializeFrom(InputRecord *ir)
     MPlasticMaterial :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, value, IFT_J2MPlasticMaterial_ry, "ry"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_J2MPlasticMaterial_ry, "ry");
     k = value / sqrt(3.0);
 
     //  E = readDouble (initString,"e");
     // nu = readDouble (initString,"nu");
     kinematicModuli = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, kinematicModuli, IFT_J2MPlasticMaterial_khm, "khm"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, kinematicModuli, IFT_J2MPlasticMaterial_khm, "khm");
 
     isotropicModuli = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, isotropicModuli, IFT_J2MPlasticMaterial_ihm, "ihm"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, isotropicModuli, IFT_J2MPlasticMaterial_ihm, "ihm");
 
     if ( fabs(kinematicModuli) > 1.e-12 ) {
         kinematicHardeningFlag = 1;
@@ -90,7 +90,7 @@ J2MPlasticMaterial :: initializeFrom(InputRecord *ir)
     }
 
     int rma = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, rma, IFT_J2MPlasticMaterial_rma, "rma"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, rma, IFT_J2MPlasticMaterial_rma, "rma");
     if ( rma == 0 ) {
         this->rmType = mpm_ClosestPoint;
     } else {

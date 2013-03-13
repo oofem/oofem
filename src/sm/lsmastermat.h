@@ -74,7 +74,7 @@ protected:
 public:
     LsMasterMat(int n, Domain *d);
     virtual ~LsMasterMat();
-    
+
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual IRResultType initializeFrom(InputRecord *ir);
 

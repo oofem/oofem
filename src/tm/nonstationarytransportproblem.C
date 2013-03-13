@@ -101,7 +101,7 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
     } else if ( ir->hasField(IFT_NonStationaryTransportProblem_deltatfunction, "deltatfunction") ) {
         IR_GIVE_FIELD(ir, dtTimeFunction, IFT_NonStationaryTransportProblem_deltatfunction, "deltatfunction");
     } else if ( ir->hasField(IFT_NonStationaryTransportProblem_prescribedtimes, "prescribedtimes") ) {
-        IR_GIVE_FIELD(ir, discreteTimes, IFT_NonStationaryTransportProblem_prescribedtimes, "prescribedtimes"); // Macro
+        IR_GIVE_FIELD(ir, discreteTimes, IFT_NonStationaryTransportProblem_prescribedtimes, "prescribedtimes");
     } else {
         OOFEM_ERROR("Time step not defined");
     }

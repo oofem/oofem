@@ -424,7 +424,7 @@ TrPlaneStress2d :: initializeFrom(InputRecord *ir)
 
     this->NLStructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
     if ( numberOfGaussPoints != 1 ) {
         numberOfGaussPoints = 1;

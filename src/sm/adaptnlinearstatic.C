@@ -86,13 +86,13 @@ AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
 
     NonLinearStatic :: initializeFrom(ir);
     int meshPackageId = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, meshPackageId, IFT_AdaptiveNonLinearStatic_meshpackage, "meshpackage"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, meshPackageId, IFT_AdaptiveNonLinearStatic_meshpackage, "meshpackage");
     meshPackage = ( MeshPackageType ) meshPackageId;
 
     equilibrateMappedConfigurationFlag =  0;
-    IR_GIVE_OPTIONAL_FIELD(ir, equilibrateMappedConfigurationFlag, IFT_AdaptiveNonLinearStatic_equilmc, "equilmc"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, equilibrateMappedConfigurationFlag, IFT_AdaptiveNonLinearStatic_equilmc, "equilmc");
     _val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_AdaptiveNonLinearStatic_preMappingLoadBalancingFlag, "premaplbflag"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_AdaptiveNonLinearStatic_preMappingLoadBalancingFlag, "premaplbflag");
     preMappingLoadBalancingFlag = _val;
 
     return IRRT_OK;
@@ -859,7 +859,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
             // But there is NO WAY HOW TO TEST IF THIS HAPPEN
 
             mode = 0;
-            IR_GIVE_OPTIONAL_FIELD(ir, mode, IFT_AdaptiveNonLinearStatic_controlmode, "controlmode"); // Macro
+            IR_GIVE_OPTIONAL_FIELD(ir, mode, IFT_AdaptiveNonLinearStatic_controlmode, "controlmode");
 
             // check if displacement control takes place
             if ( ir->hasField(IFT_AdaptiveNonLinearStatic_ddm, "ddm") ) {
@@ -870,7 +870,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
             int laststep  = iMStep->giveLastStepNumber();
 
             int _val = 0;
-            IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_AdaptiveNonLinearStatic_refloadmode, "refloadmode"); // Macro
+            IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_AdaptiveNonLinearStatic_refloadmode, "refloadmode");
             rlm = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
 
             if ( mode == ( int ) nls_directControl ) { // and only load control
@@ -906,11 +906,11 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
     iMStep = this->giveMetaStep(mstepNum);
     ir = iMStep->giveAttributesRecord();
     mode = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, mode, IFT_AdaptiveNonLinearStatic_controlmode, "controlmode"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, mode, IFT_AdaptiveNonLinearStatic_controlmode, "controlmode");
     int firststep = iMStep->giveFirstStepNumber();
     int laststep  = atTime->giveNumber();
     int _val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_AdaptiveNonLinearStatic_refloadmode, "refloadmode"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_AdaptiveNonLinearStatic_refloadmode, "refloadmode");
     rlm = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
 
     if ( mode == ( int ) nls_directControl ) { // and only load control
@@ -956,13 +956,13 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
  * ir = mStep->giveAttributesRecord();
  *
  * mode = 0;
- * IR_GIVE_OPTIONAL_FIELD (ir, mode, IFT_AdaptiveNonLinearStatic_controlmode, "controlmode"); // Macro
+ * IR_GIVE_OPTIONAL_FIELD (ir, mode, IFT_AdaptiveNonLinearStatic_controlmode, "controlmode");
  *
  * // check if displacement control takes place
  * if (ir->hasField(IFT_AdaptiveNonLinearStatic_ddm, "ddm"))
  * _error ("assembleCurrentTotalLoadVector: fixload recovery not supported for direct displacement control");
  * int _val = 0;
- * IR_GIVE_OPTIONAL_FIELD (ir, _val, IFT_AdaptiveNonLinearStatic_refloadmode, "refloadmode"); // Macro
+ * IR_GIVE_OPTIONAL_FIELD (ir, _val, IFT_AdaptiveNonLinearStatic_refloadmode, "refloadmode");
  *
  * int firststep = mStep->giveFirstStepNumber();
  * int laststep  = atTime->giveNumber()-1;

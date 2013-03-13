@@ -60,13 +60,13 @@ TR_SHELL01 :: initializeFrom(InputRecord *ir)
     this->StructuralElement :: initializeFrom(ir);
 
     /*
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_Element_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_Element_nip, "nip");
     if ( val != -1 ) {
         _error("key word NIP is not allowed for element TR_SHELL01");
     }
 
 
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_TrPlaneStrRot_niprot, "niprot"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_TrPlaneStrRot_niprot, "niprot");
     if ( val != -1 ) {
         _error("key word NIProt is not allowed for element TR_SHELL01");
     }

@@ -266,9 +266,9 @@ Q4Axisymm :: initializeFrom(InputRecord *ir)
 
     this->StructuralElement :: initializeFrom(ir);
     numberOfGaussPoints          = 4;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
     numberOfFiAndShGaussPoints   = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, IFT_Q4Axisymm_nipfish, "nipfish"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, IFT_Q4Axisymm_nipfish, "nipfish");
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
            ( numberOfGaussPoints == 4 ) ||

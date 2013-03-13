@@ -453,11 +453,11 @@ IDNLMaterial :: initializeFrom(InputRecord *ir)
     }
 
     if ( averType == 2 || averType == 3 ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, exponent, IFT_IDNLMaterial_averagingtype, "exp");
+        IR_GIVE_OPTIONAL_FIELD(ir, exponent, IFT_IDNLMaterial_exp, "exp");
     }
 
     if ( averType >= 2 && averType <= 5 ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, Rf, IFT_IDNLMaterial_averagingtype, "rf");
+        IR_GIVE_OPTIONAL_FIELD(ir, Rf, IFT_IDNLMaterial_rf, "rf");
     }
 
     return IRRT_OK;

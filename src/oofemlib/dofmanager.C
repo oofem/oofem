@@ -453,7 +453,7 @@ DofManager :: initializeFrom(InputRecord *ir)
     IntArray bc, ic, masterMask, dofTypeMask;
 
     loadArray.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, loadArray, IFT_DofManager_load, "load"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, loadArray, IFT_DofManager_load, "load");
 
     if ( this->resolveDofIDArray(ir, dofIDArry) != IRRT_OK ) {
         IR_IOERR(giveClassName(), __proc,  IFT_Unknown, "", ir, result);
@@ -461,17 +461,17 @@ DofManager :: initializeFrom(InputRecord *ir)
 
     // numberOfDofs = domain->giveNumberOfDofs () ;
     bc.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, bc, IFT_DofManager_bc, "bc"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, bc, IFT_DofManager_bc, "bc");
 
     ic.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, ic, IFT_DofManager_ic, "ic"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, ic, IFT_DofManager_ic, "ic");
     // reads master mask - in this array are numbers of master dofManagers
     // to which are connected dofs in receiver.
     // if master mask index is zero then dof is created as master (i.e., having own equation number)
     // othervise slave dof connected to master DofManager is created.
     // by default if masterMask is not specifyed, all dofs are created as masters.
     dofTypeMask.resize(0); // termitovo
-    IR_GIVE_OPTIONAL_FIELD(ir, dofTypeMask, IFT_DofManager_doftypemask, "doftype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, dofTypeMask, IFT_DofManager_doftypemask, "doftype");
 
     // read boundary flag
     if ( ir->hasField(IFT_DofManager_boundaryflag, "boundary") ) {
@@ -481,7 +481,7 @@ DofManager :: initializeFrom(InputRecord *ir)
 
 #ifdef __PARALLEL_MODE
     partitions.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, partitions, IFT_DofManager_partitions, "partitions"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, partitions, IFT_DofManager_partitions, "partitions");
 
     if ( ir->hasField(IFT_DofManager_sharedflag, "shared") ) {
         parallel_mode = DofManager_shared;
@@ -551,7 +551,7 @@ DofManager :: initializeFrom(InputRecord *ir)
                 dofArray [ j ] = new ActiveDof( j + 1, this, dofBc, ( DofIDItem ) dofIDArry.at(j + 1) );
             } else if ( dtype == DT_simpleSlave ) { // Simple slave dof
                 if ( masterMask.giveSize() == 0 ) {
-                    IR_GIVE_FIELD(ir, masterMask, IFT_DofManager_mastermask, "mastermask"); // Macro
+                    IR_GIVE_FIELD(ir, masterMask, IFT_DofManager_mastermask, "mastermask");
                     if ( masterMask.giveSize() != numberOfDofs ) {
                         _error("initializeFrom: mastermask size mismatch");
                     }

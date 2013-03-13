@@ -247,20 +247,20 @@ NRSolver2 :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     nsmax = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, nsmax, IFT_NRSolver_maxiter, "maxiter"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, nsmax, IFT_NRSolver_maxiter, "maxiter");
     if ( nsmax < 30 ) {
         nsmax = 30;
     }
 
     minIterations = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, minIterations, IFT_NRSolver_miniterations, "miniter"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, minIterations, IFT_NRSolver_miniterations, "miniter");
 
     minStepLength = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, IFT_NRSolver_minsteplength, "minsteplength"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, IFT_NRSolver_minsteplength, "minsteplength");
 
     // read if MANRM method is used
     MANRMSteps = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, MANRMSteps, IFT_NRSolver_manrmsteps, "manrmsteps"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, MANRMSteps, IFT_NRSolver_manrmsteps, "manrmsteps");
     if ( MANRMSteps > 0 ) {
         NR_Mode = NR_OldMode = nrsolverAccelNRM;
     } else {
@@ -268,15 +268,15 @@ NRSolver2 :: initializeFrom(InputRecord *ir)
     }
 
     int _val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NRSolver_lstype, "lstype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NRSolver_lstype, "lstype");
     solverType = ( LinSystSolverType ) _val;
     this->giveLinearSolver()->initializeFrom(ir);
 
     // read relative error tolerances of the solver fo each cc
-    IR_GIVE_FIELD(ir, rtol, IFT_NRSolver_rtolv, "rtolv"); // Macro
+    IR_GIVE_FIELD(ir, rtol, IFT_NRSolver_rtolv, "rtolv");
 
     this->lsFlag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, lsFlag, IFT_NRSolver_linesearch, "linesearch"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, lsFlag, IFT_NRSolver_linesearch, "linesearch");
 
     if ( this->lsFlag ) {
         this->giveLineSearchSolver()->initializeFrom(ir);

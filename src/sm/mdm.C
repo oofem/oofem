@@ -881,34 +881,34 @@ MDM :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, this->tempDillatCoeff, IFT_MDM_talpha, "talpha"); // Macro
-    IR_GIVE_FIELD(ir, this->ParMd, IFT_MDM_parmd, "parmd"); // Macro
-    IR_GIVE_FIELD(ir, this->nonlocal, IFT_MDM_nonloc, "nonloc"); // Macro
+    IR_GIVE_FIELD(ir, this->tempDillatCoeff, IFT_MDM_talpha, "talpha");
+    IR_GIVE_FIELD(ir, this->ParMd, IFT_MDM_parmd, "parmd");
+    IR_GIVE_FIELD(ir, this->nonlocal, IFT_MDM_nonloc, "nonloc");
 
     if ( this->nonlocal ) {
-        IR_GIVE_FIELD(ir, R, IFT_MDM_r, "r"); // Macro
+        IR_GIVE_FIELD(ir, R, IFT_MDM_r, "r");
         if ( R < 0.0 ) {
             R = 0.0;
         }
 
         if ( ( ir->hasField(IFT_MDM_efp, "efp") ) && ( ir->hasField(IFT_MDM_ep, "ep") ) ) {
             // read raw_params if available
-            IR_GIVE_FIELD(ir, this->mdm_Efp, IFT_MDM_efp, "efp"); // Macro
-            IR_GIVE_FIELD(ir, this->mdm_Ep, IFT_MDM_ep, "ep"); // Macro
+            IR_GIVE_FIELD(ir, this->mdm_Efp, IFT_MDM_efp, "efp");
+            IR_GIVE_FIELD(ir, this->mdm_Ep, IFT_MDM_ep, "ep");
         } else if ( ( ir->hasField(IFT_MDM_gf, "gf") ) && ( ir->hasField(IFT_MDM_ft, "ft") ) ) {
-            IR_GIVE_FIELD(ir, this->Gf, IFT_MDM_gf, "gf"); // Macro
-            IR_GIVE_FIELD(ir, this->Ft, IFT_MDM_ft, "ft"); // Macro
+            IR_GIVE_FIELD(ir, this->Gf, IFT_MDM_gf, "gf");
+            IR_GIVE_FIELD(ir, this->Ft, IFT_MDM_ft, "ft");
         } else {
             _error("instanciateFrom: unknown set of parameters");
         }
     } else { // local case
         if ( ( ir->hasField(IFT_MDM_efp, "efp") ) && ( ir->hasField(IFT_MDM_ep, "ep") ) ) {
             // read raw_params if available
-            IR_GIVE_FIELD(ir, this->mdm_Efp, IFT_MDM_efp, "efp"); // Macro
-            IR_GIVE_FIELD(ir, this->mdm_Ep, IFT_MDM_ep, "ep"); // Macro
+            IR_GIVE_FIELD(ir, this->mdm_Efp, IFT_MDM_efp, "efp");
+            IR_GIVE_FIELD(ir, this->mdm_Ep, IFT_MDM_ep, "ep");
         } else if ( ( ir->hasField(IFT_MDM_gf, "gf") ) && ( ir->hasField(IFT_MDM_ep, "ep") ) ) {
-            IR_GIVE_FIELD(ir, this->Gf, IFT_MDM_gf, "gf"); // Macro
-            IR_GIVE_FIELD(ir, this->mdm_Ep, IFT_MDM_ep, "ep"); // Macro
+            IR_GIVE_FIELD(ir, this->Gf, IFT_MDM_gf, "gf");
+            IR_GIVE_FIELD(ir, this->mdm_Ep, IFT_MDM_ep, "ep");
         } else {
             _error("instanciateFrom: unknown set of parameters");
         }
@@ -916,10 +916,10 @@ MDM :: initializeFrom(InputRecord *ir)
 
     // read formulation
     int _val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_MDM_formulation, "formulation"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_MDM_formulation, "formulation");
     this->formulation = ( MDMFormulatrionType ) _val;
 
-    IR_GIVE_FIELD(ir, _val, IFT_MDM_mode, "mode"); // Macro
+    IR_GIVE_FIELD(ir, _val, IFT_MDM_mode, "mode");
     this->mdmMode     = ( MDMModeType ) _val;
 
     if ( this->mdmMode == mdm_3d ) {
@@ -933,7 +933,7 @@ MDM :: initializeFrom(InputRecord *ir)
 
 #ifdef MDM_MAPPING_DEBUG
     _val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_MDM_mapper, "mapper"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_MDM_mapper, "mapper");
     this->mapperType = ( MDMMapperType ) _val;
     OOFEM_LOG_INFO("MDM: using optional mapper %d\n", mapperType);
 #endif

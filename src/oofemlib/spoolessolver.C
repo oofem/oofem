@@ -125,9 +125,9 @@ SpoolesSolver :: initializeFrom(InputRecord *ir)
     std::string msgFileName;
 
     val = -3;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_SpoolesSolver_msglvl, "msglvl"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_SpoolesSolver_msglvl, "msglvl");
     msglvl = val;
-    IR_GIVE_OPTIONAL_FIELD(ir, msgFileName, IFT_SpoolesSolver_msgfile, "msgfile"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, msgFileName, IFT_SpoolesSolver_msgfile, "msgfile");
     if ( !msgFileName.empty() ) {
         msgFile = fopen(msgFileName.c_str(), "w");
         msgFileCloseFlag = 1;
@@ -137,10 +137,10 @@ SpoolesSolver :: initializeFrom(InputRecord *ir)
     }
 
     /*
-     * IR_GIVE_OPTIONAL_FIELD (ir, tol, "lstol"); // Macro
-     * IR_GIVE_OPTIONAL_FIELD (ir, maxite, "lsiter"); // Macro
+     * IR_GIVE_OPTIONAL_FIELD (ir, tol, "lstol");
+     * IR_GIVE_OPTIONAL_FIELD (ir, maxite, "lsiter");
      * val = 0;
-     * IR_GIVE_OPTIONAL_FIELD (ir, val, "lsprecond"); // Macro
+     * IR_GIVE_OPTIONAL_FIELD (ir, val, "lsprecond");
      * precondType= (IMLPrecondType) val;
      *
      * this->precondAttributes = ir;

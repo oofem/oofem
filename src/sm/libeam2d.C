@@ -375,8 +375,8 @@ LIBeam2d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
     answer.resize(3, 3);
     answer.zero();
 
-    sine           = sin( this->givePitch() );
-    cosine         = cos(pitch);
+    sine = sin( this->givePitch() );
+    cosine = cos( pitch );
 
     answer.at(1, 1) = cosine;
     answer.at(1, 2) = -sine;

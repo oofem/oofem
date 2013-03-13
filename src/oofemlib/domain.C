@@ -469,14 +469,14 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read domain description
     ir = dr->giveInputRecord(DataReader :: IR_domainCompRec, 1);
-    IR_GIVE_FIELD(ir, nnode, IFT_Domain_ndofman, "ndofman"); // Macro
-    IR_GIVE_FIELD(ir, nelem, IFT_Domain_nelem, "nelem"); // Macro
-    IR_GIVE_FIELD(ir, ncrossSections, IFT_Domain_ncrosssect, "ncrosssect"); // Macro
-    IR_GIVE_FIELD(ir, nmat, IFT_Domain_nmat, "nmat"); // Macro
-    IR_GIVE_FIELD(ir, nload, IFT_Domain_nbc, "nbc"); // Macro
-    IR_GIVE_FIELD(ir, nic, IFT_Domain_nic, "nic"); // Macro
-    IR_GIVE_FIELD(ir, nloadtimefunc, IFT_Domain_nloadtimefunct, "nltf"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, topologytype, IFT_Domain_topology, "topology"); // Macro
+    IR_GIVE_FIELD(ir, nnode, IFT_Domain_ndofman, "ndofman");
+    IR_GIVE_FIELD(ir, nelem, IFT_Domain_nelem, "nelem");
+    IR_GIVE_FIELD(ir, ncrossSections, IFT_Domain_ncrosssect, "ncrosssect");
+    IR_GIVE_FIELD(ir, nmat, IFT_Domain_nmat, "nmat");
+    IR_GIVE_FIELD(ir, nload, IFT_Domain_nbc, "nbc");
+    IR_GIVE_FIELD(ir, nic, IFT_Domain_nic, "nic");
+    IR_GIVE_FIELD(ir, nloadtimefunc, IFT_Domain_nloadtimefunct, "nltf");
+    IR_GIVE_OPTIONAL_FIELD(ir, topologytype, IFT_Domain_topology, "topology");
 
     // read optional number of nonlocalBarriers
     nbarrier = 0;

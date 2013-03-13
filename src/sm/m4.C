@@ -244,9 +244,9 @@ M4Material :: initializeFrom(InputRecord *ir)
     c1 = 6.20e-1;
     c2 = 2.76;
     // c3 = 4.0;
-    IR_GIVE_FIELD(ir, c3, IFT_M4Material_c3, "c3"); // Macro
+    IR_GIVE_FIELD(ir, c3, IFT_M4Material_c3, "c3");
     c4 = 70.;
-    IR_GIVE_OPTIONAL_FIELD(ir, c4, IFT_M4Material_c4, "c4"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, c4, IFT_M4Material_c4, "c4");
     c5 = 2.50;
     c6 = 1.30;
     c7 = 50.;
@@ -263,17 +263,17 @@ M4Material :: initializeFrom(InputRecord *ir)
     c18 = 1.0;
     c19 = 0.4;
     //c20 = 14.0e-2;
-    IR_GIVE_FIELD(ir, c20, IFT_M4Material_c20, "c20"); // Macro
+    IR_GIVE_FIELD(ir, c20, IFT_M4Material_c20, "c20");
 
-    IR_GIVE_FIELD(ir, k1, IFT_M4Material_k1, "k1"); // Macro
-    IR_GIVE_FIELD(ir, k2, IFT_M4Material_k2, "k2"); // Macro
-    IR_GIVE_FIELD(ir, k3, IFT_M4Material_k3, "k3"); // Macro
-    IR_GIVE_FIELD(ir, k4, IFT_M4Material_k4, "k4"); // Macro
+    IR_GIVE_FIELD(ir, k1, IFT_M4Material_k1, "k1");
+    IR_GIVE_FIELD(ir, k2, IFT_M4Material_k2, "k2");
+    IR_GIVE_FIELD(ir, k3, IFT_M4Material_k3, "k3");
+    IR_GIVE_FIELD(ir, k4, IFT_M4Material_k4, "k4");
     //k5   = this->readDouble (initString,"k5");
     // k6   = this->readDouble (initString,"k6");
-    IR_GIVE_FIELD(ir, E, IFT_M4Material_e, "e"); // Macro
-    IR_GIVE_FIELD(ir, nu, IFT_M4Material_n, "n"); // Macro
-    IR_GIVE_FIELD(ir, talpha, IFT_M4Material_talpha, "talpha"); // Macro
+    IR_GIVE_FIELD(ir, E, IFT_M4Material_e, "e");
+    IR_GIVE_FIELD(ir, nu, IFT_M4Material_n, "n");
+    IR_GIVE_FIELD(ir, talpha, IFT_M4Material_talpha, "talpha");
     //mu   = this->readDouble (initString,"mu");
     mu = 1.0;
     EV = E / ( 1 - 2 * nu );

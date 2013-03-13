@@ -103,7 +103,7 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
     }
 
     int _val = 0;
-    IR_GIVE_OPTIONAL_FIELD( ( mStep->giveAttributesRecord() ), _val, IFT_NonLinearStatic_controlmode, "controlmode" ); // Macro
+    IR_GIVE_OPTIONAL_FIELD( ( mStep->giveAttributesRecord() ), _val, IFT_NonLinearStatic_controlmode, "controlmode" );
     IR_GIVE_OPTIONAL_FIELD( ( mStep->giveAttributesRecord() ), _val, IFT_NonLinearStatic_controlmode, "controllmode" ); // for backward compatibility
     NonLinearStatic_controlType mode = ( NonLinearStatic_controlType ) _val;
 
@@ -172,7 +172,7 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
      * }
      */
     int _val = nls_indirectControl;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_controlmode, "controlmode"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_controlmode, "controlmode");
     IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_controlmode, "controllmode"); // for backward compatibility
     this->controlMode = ( NonLinearStatic_controlType ) _val;
 
@@ -181,17 +181,17 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
     this->initialGuessType = ( InitialGuess ) _val;
 
     deltaT = 1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_NonLinearStatic_deltat, "deltat"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_NonLinearStatic_deltat, "deltat");
     if ( deltaT < 0. ) {
         _error("updateAttributes: deltaT < 0");
     }
 
     _val = nls_tangentStiffness;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_stiffmode, "stiffmode"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_stiffmode, "stiffmode");
     this->stiffMode = ( NonLinearStatic_stiffnessMode ) _val;
 
     _val = SparseNonLinearSystemNM :: rlm_total;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_refloadmode, "refloadmode"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_refloadmode, "refloadmode");
     this->refLoadInputMode = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
 
     if ( ir->hasField(IFT_NonLinearStatic_keepll, "keepll") ) {
@@ -213,7 +213,7 @@ NonLinearStatic :: initializeFrom(InputRecord *ir)
 
     LinearStatic :: initializeFrom(ir);
     nonlocalStiffnessFlag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, IFT_NonLinearStatic_nonlocstiff, "nonlocstiff"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, IFT_NonLinearStatic_nonlocstiff, "nonlocstiff");
 
 #ifdef __PARALLEL_MODE
     //if (ir->hasField ("nodecutmode")) commMode = ProblemCommunicator::ProblemCommMode__NODE_CUT;

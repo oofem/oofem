@@ -119,10 +119,10 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
 
     LoadTimeFunction :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, numberOfPoints, IFT_PiecewiseLinFunction_npoints, "npoints"); // Macro
+    IR_GIVE_FIELD(ir, numberOfPoints, IFT_PiecewiseLinFunction_npoints, "npoints");
 
-    IR_GIVE_FIELD(ir, dates, IFT_PiecewiseLinFunction_t, "t"); // Macro
-    IR_GIVE_FIELD(ir, values, IFT_PiecewiseLinFunction_ft, "f(t)"); // Macro
+    IR_GIVE_FIELD(ir, dates, IFT_PiecewiseLinFunction_t, "t");
+    IR_GIVE_FIELD(ir, values, IFT_PiecewiseLinFunction_ft, "f(t)");
 
     return IRRT_OK;
 }

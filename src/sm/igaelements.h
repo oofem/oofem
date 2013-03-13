@@ -46,12 +46,6 @@
 #include "matresponsemode.h"
 #include "mathfem.h"
 
-///@name Input fields for IGAElement
-//@{
-#define _IFT_IGAElement_NIP "nip"
-#define _IFT_IGAElement_KnotSpanParallelMode "knotspanparallelmode"
-//@}
-
 namespace oofem {
 class BsplinePlaneStressElement : public IGAElement, public PlaneStressStructuralElementEvaluator
 {

@@ -161,7 +161,7 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
         _error("NonLinearDynamic: Time-stepping scheme not found!\n");
     }
 
-    IR_GIVE_FIELD(ir, deltaT, IFT_DIIDynamic_deltat, "deltat"); // Macro
+    IR_GIVE_FIELD(ir, deltaT, IFT_DIIDynamic_deltat, "deltat");
 
     return IRRT_OK;
 }

@@ -82,9 +82,9 @@ B3Material :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, rprime, IFT_B3Material_rprime, "rprime");
         IR_GIVE_FIELD(ir, at, IFT_B3Material_at, "at");
         // read sorption isotherm data
-        IR_GIVE_FIELD(ir, w_h, IFT_B3Material_wh, "w_h"); // Macro
-        IR_GIVE_FIELD(ir, n, IFT_B3Material_ncoeff, "ncoeff"); // Macro
-        IR_GIVE_FIELD(ir, a, IFT_B3Material_a, "a"); // Macro
+        IR_GIVE_FIELD(ir, w_h, IFT_B3Material_wh, "w_h");
+        IR_GIVE_FIELD(ir, n, IFT_B3Material_ncoeff, "ncoeff");
+        IR_GIVE_FIELD(ir, a, IFT_B3Material_a, "a");
     } else if ( this->shMode == B3_AverageShrinkage ) {
         if ( mode == 0 ) { // default mode
             IR_GIVE_FIELD(ir, alpha1, IFT_B3Material_alpha1, "alpha1"); // shrinkage parameter
@@ -109,7 +109,7 @@ B3Material :: initializeFrom(InputRecord *ir)
         }
     }
 
-    IR_GIVE_FIELD(ir, talpha, IFT_B3Material_talpha, "talpha"); // Macro
+    IR_GIVE_FIELD(ir, talpha, IFT_B3Material_talpha, "talpha");
 
 
     w = wc * c;

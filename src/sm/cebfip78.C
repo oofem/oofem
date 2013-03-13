@@ -46,12 +46,12 @@ CebFip78Material :: initializeFrom(InputRecord *ir)
 
     MaxwellChainMaterial :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, E28, IFT_CebFip78Material_e28, "e28"); // Macro
-    IR_GIVE_FIELD(ir, fibf, IFT_CebFip78Material_fibf, "fibf"); // Macro
-    IR_GIVE_FIELD(ir, kap_a, IFT_CebFip78Material_kap_a, "kap_a"); // Macro
-    IR_GIVE_FIELD(ir, kap_c, IFT_CebFip78Material_kap_c, "kap_c"); // Macro
-    IR_GIVE_FIELD(ir, kap_tt, IFT_CebFip78Material_kap_tt, "kap_tt"); // Macro
-    IR_GIVE_FIELD(ir, u, IFT_CebFip78Material_u, "u"); // Macro
+    IR_GIVE_FIELD(ir, E28, IFT_CebFip78Material_e28, "e28");
+    IR_GIVE_FIELD(ir, fibf, IFT_CebFip78Material_fibf, "fibf");
+    IR_GIVE_FIELD(ir, kap_a, IFT_CebFip78Material_kap_a, "kap_a");
+    IR_GIVE_FIELD(ir, kap_c, IFT_CebFip78Material_kap_c, "kap_c");
+    IR_GIVE_FIELD(ir, kap_tt, IFT_CebFip78Material_kap_tt, "kap_tt");
+    IR_GIVE_FIELD(ir, u, IFT_CebFip78Material_u, "u");
 
     // t0   = readDouble (initString,"curringendtime");
     return IRRT_OK;

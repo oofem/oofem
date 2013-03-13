@@ -262,7 +262,7 @@ LSpace :: initializeFrom(InputRecord *ir)
 
     this->NLStructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 8;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
     if ( !( ( numberOfGaussPoints == 1 ) || ( numberOfGaussPoints == 8 ) || ( numberOfGaussPoints == 27 ) ) ) {
         numberOfGaussPoints = 8;

@@ -243,8 +243,8 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir) {
         OOFEM_ERROR("XfemManager::instanciateFrom: bad record");
     }
 
-    IR_GIVE_FIELD(ir, numberOfEnrichmentFunctions, IFT_XfemManager_numberOfEnrichmentFunctions, "numberofenrichmentfunctions"); // Macro// Macro
-    IR_GIVE_FIELD(ir, numberOfEnrichmentItems, IFT_XfemManager_numberOfEnrichmentItems, "numberofenrichmentitems"); // Macro
+    IR_GIVE_FIELD(ir, numberOfEnrichmentFunctions, IFT_XfemManager_numberOfEnrichmentFunctions, "numberofenrichmentfunctions");
+    IR_GIVE_FIELD(ir, numberOfEnrichmentItems, IFT_XfemManager_numberOfEnrichmentItems, "numberofenrichmentitems");
     IR_GIVE_FIELD(ir, numberOfGeometryItems, IFT_XfemManager_numberOfGeometryItems, "numberofgeometryitems");
     return IRRT_OK;
 }

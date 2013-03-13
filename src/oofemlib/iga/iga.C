@@ -68,7 +68,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
     this->numberOfDofMans = dofManArray.giveSize();
     this->giveInterpolation()->initializeFrom(ir); // read geometry
 
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_IGAElement_NIP, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_IGAElement_NIP, "nip");
 
     // generate individual IntegrationElements; one for each nonzero knot span
     nsd = this->giveNsd();
@@ -179,7 +179,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
     this->knotSpanParallelMode.resize(numberOfKnotSpans);
     // set Element_local as default
     for ( int i = 1; i <= numberOfKnotSpans; i++) knotSpanParallelMode.at(i) = Element_local;
-    IR_GIVE_OPTIONAL_FIELD(ir, knotSpanParallelMode, IFT_IGAElement_KnotSpanParallelMode, "knotspanparmode"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, knotSpanParallelMode, IFT_IGAElement_KnotSpanParallelMode, "knotspanparmode");
 #endif
 
 
@@ -227,7 +227,7 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
     interpol->setNumberOfControlPoints(this->numberOfDofMans);
     this->giveInterpolation()->initializeFrom(ir); // read geometry
 
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_IGAElement_NIP, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_IGAElement_NIP, "nip");
 
     // generate individual IntegrationElements; one for each nonzero knot span
     nsd = giveNsd();

@@ -66,7 +66,7 @@ LWedge :: initializeFrom(InputRecord *ir)
 
     this->NLStructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 2;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
     if ( ( numberOfGaussPoints != 2 ) && ( numberOfGaussPoints != 9 ) ) {
         numberOfGaussPoints = 2;
@@ -142,7 +142,6 @@ LWedge :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i
 // evaluated at aGaussPoint
 
 {
-    int j, k, l;
     FloatMatrix dnx;
 
     // compute the derivatives of shape functions
@@ -154,33 +153,33 @@ LWedge :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i
     // put the products of derivatives of shape functions into the "nonlinear B matrix",
     // depending on parameter i, which is the number of the strain component
     if ( i <= 3 ) {
-        for ( k = 0; k < 6; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 18; j += 3 ) {
+        for ( int k = 0; k < 6; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 18; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, i) * dnx.at( ( j - 1 ) / 3 + 1, i );
                 }
             }
         }
-    } else if ( i == 4 )        {
-        for ( k = 0; k < 6; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 18; j += 3 ) {
+    } else if ( i == 4 ) {
+        for ( int k = 0; k < 6; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 18; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 2 );
                 }
             }
         }
-    } else if ( i == 5 )        {
-        for ( k = 0; k < 6; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 18; j += 3 ) {
+    } else if ( i == 5 ) {
+        for ( int k = 0; k < 6; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 18; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
                 }
             }
         }
-    } else if ( i == 6 )        {
-        for ( k = 0; k < 6; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 18; j += 3 ) {
+    } else if ( i == 6 ) {
+        for ( int k = 0; k < 6; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 18; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 2 ) + dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
                 }
             }
@@ -230,7 +229,7 @@ void
 LWedge :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 {
     FloatMatrix dnx;
-    
+
     this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(9, 18);
@@ -244,7 +243,7 @@ LWedge :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
         }
     }
 }
-    
+
 
 Interface *
 LWedge :: giveInterface(InterfaceType interface)

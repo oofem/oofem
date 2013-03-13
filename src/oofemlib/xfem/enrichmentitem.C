@@ -69,8 +69,8 @@ IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
     this->geometry = 0;
     this->enrichmentFunction = 0;
 
-    IR_GIVE_FIELD(ir, geometry, IFT_EnrichmentItem_geometryItemNr, "geometryitem"); // Macro
-    IR_GIVE_FIELD(ir, enrichmentFunction, IFT_EnrichmentItem_enrichmentFunctionNr, "enrichmentfunction"); // Macro
+    IR_GIVE_FIELD(ir, geometry, IFT_EnrichmentItem_geometryItemNr, "geometryitem");
+    IR_GIVE_FIELD(ir, enrichmentFunction, IFT_EnrichmentItem_enrichmentFunctionNr, "enrichmentfunction");
     // this->setEnrichmentFunction(enrItemFunction);
     // this should go into enrichmentfunction probably
     // enrItemFunction->insertEnrichmentItem(this);
@@ -120,7 +120,7 @@ IRResultType Inclusion :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
     int material = 0;
-    IR_GIVE_FIELD(ir, material, IFT_EnrichmentItem_materialNr, "material"); // Macro
+    IR_GIVE_FIELD(ir, material, IFT_EnrichmentItem_materialNr, "material");
     this->mat = this->giveDomain()->giveMaterial(material);
     return IRRT_OK;
 }

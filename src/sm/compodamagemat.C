@@ -108,10 +108,10 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
     }
 
     this->afterIter = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->afterIter, IFT_CompoDamageMat_afteriter, "afteriter"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, this->afterIter, IFT_CompoDamageMat_afteriter, "afteriter");
 
     this->afterIter = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->allowSnapBack, IFT_CompoDamageMat_allowSnapBack, "allowsnapback"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, this->allowSnapBack, IFT_CompoDamageMat_allowSnapBack, "allowsnapback");
 
     //
     //OOFEM_LOG_INFO("READ \n");

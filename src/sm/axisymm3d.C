@@ -239,10 +239,10 @@ Axisymm3d :: initializeFrom(InputRecord *ir)
     this->StructuralElement :: initializeFrom(ir);
 
     numberOfGaussPoints      = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
     numberOfFiAndShGaussPoints    = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, IFT_Axisymm3d_nipfish, "nipfish"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, IFT_Axisymm3d_nipfish, "nipfish");
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
            ( numberOfGaussPoints == 4 ) ||

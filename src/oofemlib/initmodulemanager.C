@@ -50,7 +50,7 @@ InitModuleManager :: initializeFrom(InputRecord *ir)
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
     this->numberOfModules = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfModules, IFT_InitModuleManager_nmodules, "ninitmodules"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfModules, IFT_InitModuleManager_nmodules, "ninitmodules");
     return IRRT_OK;
 }
 

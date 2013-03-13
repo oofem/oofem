@@ -73,7 +73,7 @@ LumpedMassElement :: initializeFrom(InputRecord *ir)
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     this->StructuralElement :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, components, IFT_LumpedMassElement_components, _IFT_LumpedMassElement_components); // Macro
+    IR_GIVE_FIELD(ir, components, IFT_LumpedMassElement_components, _IFT_LumpedMassElement_components);
 
     return IRRT_OK;
 }

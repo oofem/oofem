@@ -394,22 +394,22 @@ int
 LinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
 {
     int mapSize = commMap.giveSize();
-    int i, j, ndofs, count = 0, pcount = 0;
+    int ndofs, count = 0, pcount = 0;
     IntArray locationArray;
     Domain *domain = this->giveDomain(1);
     DofManager *dman;
     Dof *jdof;
 
     if ( packUnpackType == ProblemCommMode__ELEMENT_CUT ) {
-        for ( i = 1; i <= mapSize; i++ ) {
+        for ( int i = 1; i <= mapSize; i++ ) {
             count += domain->giveDofManager( commMap.at(i) )->giveNumberOfDofs();
         }
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * count );
     } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
-        for ( i = 1; i <= mapSize; i++ ) {
+        for ( int i = 1; i <= mapSize; i++ ) {
             ndofs = ( dman = domain->giveDofManager( commMap.at(i) ) )->giveNumberOfDofs();
-            for ( j = 1; j <= ndofs; j++ ) {
+            for ( int j = 1; j <= ndofs; j++ ) {
                 jdof = dman->giveDof(j);
                 if ( jdof->isPrimaryDof() && ( jdof->__giveEquationNumber() ) ) {
                     count++;
@@ -425,7 +425,7 @@ LinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * pcount );
     } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
-        for ( i = 1; i <= mapSize; i++ ) {
+        for ( int i = 1; i <= mapSize; i++ ) {
             count += domain->giveElement( commMap.at(i) )->estimatePackSize(buff);
         }
 

@@ -308,13 +308,13 @@ TrabBoneGrad3D :: initializeFrom(InputRecord *ir)
 
     TrabBone3D :: initializeFrom(ir);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, l, IFT_TrabBoneGrad3D_l, "l"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, l, IFT_TrabBoneGrad3D_l, "l");
     if ( l < 0.0 ) {
         l = 0.0;
     }
 
     mParam = 2.;
-    IR_GIVE_OPTIONAL_FIELD(ir, mParam, IFT_TrabBoneGrad3D_m, "m"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, mParam, IFT_TrabBoneGrad3D_m, "m");
 
     return IRRT_OK;
 }

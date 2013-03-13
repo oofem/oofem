@@ -87,7 +87,7 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
     numberOfKnotSpans = new int [ nsd ];
     numberOfControlPoints = new int  [ nsd ];
 
-    IR_GIVE_FIELD(ir, degree_tmp, IFT_BSplineInterpolation_degree, "degree"); // Macro
+    IR_GIVE_FIELD(ir, degree_tmp, IFT_BSplineInterpolation_degree, "degree");
     if ( degree_tmp.giveSize() != nsd ) {
         OOFEM_ERROR("BSplineInterpolation::initializeFrom - degree size mismatch");
     }
@@ -97,7 +97,7 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
     }
 
     for ( n = 0; n < nsd; n++ ) {
-        IR_GIVE_FIELD(ir, knotValues [ n ], IFT_knotVectorType [ n ], IFT_knotVectorString [ n ]); // Macro
+        IR_GIVE_FIELD(ir, knotValues [ n ], IFT_knotVectorType [ n ], IFT_knotVectorString [ n ]);
         size = knotValues [ n ].giveSize();
         if ( size < 2 ) {
             OOFEM_ERROR2("BSplineInterpolation::initializeFrom - invalid size of knot vector %s", IFT_knotVectorString [ n ]);
@@ -117,7 +117,7 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
         double span = knotVal - knotValues [ n ].at(1);
         for ( i = 1; i <= size; i++ ) knotValues [ n ].at(i) = knotValues [ n ].at(i) / span;
 
-        IR_GIVE_OPTIONAL_FIELD(ir, knotMultiplicity [ n ], IFT_knotMultiplicityType [ n ], IFT_knotMultiplicityString [ n ]); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, knotMultiplicity [ n ], IFT_knotMultiplicityType [ n ], IFT_knotMultiplicityString [ n ]);
         if ( knotMultiplicity [ n ].giveSize() == 0 ) {
             // default multiplicity
             knotMultiplicity [ n ].resize(size);

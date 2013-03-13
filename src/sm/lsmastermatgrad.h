@@ -63,7 +63,7 @@ class LsMasterMatGrad : public LsMasterMat
 public:
     LsMasterMatGrad(int n, Domain *d);
     virtual ~LsMasterMatGrad();
-    
+
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual IRResultType initializeFrom(InputRecord *ir);
 
@@ -82,7 +82,6 @@ public:
 
     virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
                               const FloatArray &, TimeStep *);
-   
 };
 
 //=============================================================================
