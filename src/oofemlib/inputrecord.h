@@ -133,8 +133,6 @@ enum InputFieldType {
 
     IFT_NonLinearStatic_controlmode,
     IFT_NonLinearStatic_deltat,
-    IFT_NonLinearStatic_deltatltf,
-    IFT_NonLinearStatic_rtolv,
     IFT_NonLinearStatic_stiffmode,
     IFT_NonLinearStatic_refloadmode,
     IFT_NonLinearStatic_keepll,
@@ -145,12 +143,9 @@ enum InputFieldType {
     IFT_NonLinearStatic_forceloadBalancingFlag,
 
     IFT_NonLinearDynamic_deltat,
-    IFT_NonLinearDynamic_rtolv,
     IFT_NonLinearDynamic_refloadmode,
     IFT_NonLinearDynamic_nonlocstiff,
     IFT_NonLinearDynamic_nonlocalext,
-    IFT_NonLinearDynamic_loadBalancingFlag,
-    IFT_NonLinearDynamic_forceloadBalancingFlag,
     IFT_NonLinearDynamic_ddtScheme,
     IFT_NonLinearDynamic_gamma,
     IFT_NonLinearDynamic_beta,
@@ -881,6 +876,8 @@ enum InputFieldType {
     IFT_MisesMatGrad_m,
 
     IFT_MisesMatNl_averagingtype,
+    IFT_MisesMatNl_exp,
+    IFT_MisesMatNl_rf,
 
     IFT_RankineMat_sig0,
     IFT_RankineMat_h,
@@ -888,9 +885,11 @@ enum InputFieldType {
     IFT_RankineMat_plasthardtype,
     IFT_RankineMat_delsigy,
     IFT_RankineMat_yieldtol,
+    IFT_RankineMat_gf,
 
     IFT_RankineMatGrad_r,
     IFT_RankineMatGrad_m,
+    IFT_RankineMatGrad_negligibleDamage,
 
     IFT_CohSur3d_kx,
     IFT_CohSur3d_ky,
@@ -1006,8 +1005,6 @@ enum InputFieldType {
 
     IFT_TrabBoneEmbed_eps0,
     IFT_TrabBoneEmbed_nu0,
-    IFT_TrabBoneEmbed_mu0,
-    IFT_TrabBoneEmbed_rho,
 
     IFT_TrabBoneNLEmbed_r,
     IFT_TrabBoneNLEmbed_m,

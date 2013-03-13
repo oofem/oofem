@@ -38,7 +38,6 @@
 #include "structuralelement.h"
 #include "zznodalrecoverymodel.h"
 #include "zzerrorestimator.h"
-
 #include "cct3d.h"
 #include "trplanrot3d.h"
 

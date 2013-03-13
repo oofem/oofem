@@ -56,6 +56,7 @@
 #define _IFT_RankineMat_plasthardtype "plasthardtype"
 #define _IFT_RankineMat_delsigy "delsigy"
 #define _IFT_RankineMat_yieldtol "yieldtol"
+#define _IFT_RankineMat_gf "gf"
 //@}
 
 namespace oofem {

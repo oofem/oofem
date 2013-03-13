@@ -48,7 +48,7 @@
 //@{
 #define _IFT_SimpleInterfaceMaterial_kn "kn"
 #define _IFT_SimpleInterfaceMaterial_knt "knt"
-#define _IFT_SimpleInterfaceMaterial_frictCoeff "frictcoeff"
+#define _IFT_SimpleInterfaceMaterial_frictCoeff "fc"
 #define _IFT_SimpleInterfaceMaterial_stiffCoeff "stiffcoeff"
 #define _IFT_SimpleInterfaceMaterial_normalClearance "normalclearance"
 //@}

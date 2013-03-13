@@ -41,6 +41,11 @@
 
 #include "rcm2.h"
 
+///@name Input fields for RCSDEMaterial
+//@{
+#define _IFT_RCSDEMaterial_sdtransitioncoeff "sdtransitioncoeff"
+//@}
+
 namespace oofem {
 #define rcsd_Omega 300
 #define pscm_SDTransitionCoeff 306

@@ -42,8 +42,6 @@
 //@{
 #define _IFT_NonLinearStatic_controlmode "controlmode"
 #define _IFT_NonLinearStatic_deltat "deltat"
-#define _IFT_NonLinearStatic_deltatltf "deltatltf"
-#define _IFT_NonLinearStatic_rtolv "rtolv"
 #define _IFT_NonLinearStatic_stiffmode "stiffmode"
 #define _IFT_NonLinearStatic_refloadmode "refloadmode"
 #define _IFT_NonLinearStatic_keepll "keepll"

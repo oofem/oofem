@@ -187,6 +187,8 @@ MisesMatGrad :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
         answer.at(1, 1) = answer.at(1, 1) - ( 1. - mParam ) * computeDamageParamPrime(kappa) * E / ( E + H ) * sig(stress) * stress;
     }
 }
+
+
 void
 MisesMatGrad :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
@@ -369,7 +371,6 @@ MisesMatGrad :: give3dKappaMatrix(FloatMatrix &answer, MatResponseForm form, Mat
 }
 
 
-
 void
 MisesMatGrad :: give1dGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
@@ -393,6 +394,7 @@ MisesMatGrad :: give1dGprime(FloatMatrix &answer, MatResponseForm form, MatRespo
         answer.zero();
     }
 }
+
 void
 MisesMatGrad :: givePlaneStrainGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
@@ -420,6 +422,7 @@ MisesMatGrad :: givePlaneStrainGprime(FloatMatrix &answer, MatResponseForm form,
         answer.zero();
     }
 }
+
 void
 MisesMatGrad :: give3dGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {

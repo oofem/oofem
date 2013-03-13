@@ -40,6 +40,7 @@
 #include "intarray.h"
 #include "crosssection.h"
 #include "gaussintegrationrule.h"
+#include "mathfem.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

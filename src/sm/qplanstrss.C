@@ -40,6 +40,7 @@
 #include "flotarry.h"
 #include "intarray.h"
 #include "engngm.h"
+#include "mathfem.h"
 
 namespace oofem {
 FEI2dQuadQuad QPlaneStress2d :: interpolation(1, 2);

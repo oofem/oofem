@@ -44,8 +44,8 @@
 
 ///@name Input fields for MMALeastSquareProjection
 //@{
-#define _IFT_MMALeastSquareProjection_statefilter "statefilter"
-#define _IFT_MMALeastSquareProjection_regionfilter "regionfilter"
+#define _IFT_MMALeastSquareProjection_statefilter "mmalsp_statefilter"
+#define _IFT_MMALeastSquareProjection_regionfilter "mmalsp_regionfilter"
 //@}
 
 namespace oofem {
@@ -54,7 +54,7 @@ class Element;
 class TimeStep;
 
 enum MMALeastSquareProjectionPatchType { MMALSPPatchType_1dq, MMALSPPatchType_2dq };
-/**
+/*
  * Defines, whether only the necessary number of closest points will be used
  * to fit a polynomial. If not defined, more points from gp neighborhood will
  * be used, based on element connectivity.

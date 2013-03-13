@@ -295,7 +295,7 @@ RankineMatGrad :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, mParam, IFT_RankineMatGrad_m, "m");
 
     negligible_damage = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, negligible_damage, IFT_RankineMatGrad_m, "negligible_damage");
+    IR_GIVE_OPTIONAL_FIELD(ir, negligible_damage, IFT_RankineMatGrad_negligibleDamage, "negligible_damage");
 
     return IRRT_OK;
 }

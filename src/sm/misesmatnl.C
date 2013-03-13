@@ -320,11 +320,11 @@ MisesMatNl :: initializeFrom(InputRecord *ir)
     }
 
     if ( averType == 2 || averType == 3 ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, exponent, IFT_MisesMatNl_averagingtype, "exp");
+        IR_GIVE_OPTIONAL_FIELD(ir, exponent, IFT_MisesMatNl_exp, "exp");
     }
 
     if ( averType >= 2 && averType <= 5 ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, Rf, IFT_MisesMatNl_averagingtype, "rf");
+        IR_GIVE_OPTIONAL_FIELD(ir, Rf, IFT_MisesMatNl_rf, "rf");
     }
 
     return IRRT_OK;

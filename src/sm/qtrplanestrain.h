@@ -40,10 +40,8 @@
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
-
 #include "directerrorindicatorrc.h"
 #include "eleminterpmapperinterface.h"
-
 #include "mathfem.h"
 
 namespace oofem {

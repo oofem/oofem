@@ -131,9 +131,6 @@ NlDEIDynamic :: initializeFrom(InputRecord *ir)
 }
 
 
-
-
-
 double NlDEIDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
                                               TimeStep *tStep, Domain *d, Dof *dof)
 // Returns unknown quantity like displacement, velocity of equation eq.
@@ -510,7 +507,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
         prevIncrOfDisplacement = previousIncrementOfDisplacementVector.at(i);
         incrOfDisplacement = loadVector.at(i) /
                              ( massMatrix.at(i) * ( 1. / ( deltaT * deltaT ) + dumpingCoef / ( 2. * deltaT ) ) );
-        
+
         accelerationVector.at(i) = ( incrOfDisplacement - prevIncrOfDisplacement ) / ( deltaT * deltaT );
         velocityVector.at(i)     = ( incrOfDisplacement + prevIncrOfDisplacement ) / ( 2. * deltaT );
         previousIncrementOfDisplacementVector.at(i) = incrOfDisplacement;
@@ -754,7 +751,6 @@ NlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff
 #endif
 
 
-
 contextIOResultType NlDEIDynamic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
@@ -803,7 +799,6 @@ contextIOResultType NlDEIDynamic :: saveContext(DataStream *stream, ContextMode 
 
     return CIO_OK;
 }
-
 
 
 contextIOResultType NlDEIDynamic :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
@@ -857,7 +852,6 @@ contextIOResultType NlDEIDynamic :: restoreContext(DataStream *stream, ContextMo
 
     return CIO_OK;
 }
-
 
 
 void

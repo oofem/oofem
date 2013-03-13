@@ -397,7 +397,7 @@ LIBeam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
     ly.beVectorProductOf(lz, lx);
     ly.normalize();
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(1, i) = lx.at(i);
         answer.at(2, i) = ly.at(i);
         answer.at(3, i) = lz.at(i);

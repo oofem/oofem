@@ -35,11 +35,9 @@
 #ifndef Tr2Shell7_h
 #define Tr2Shell7_h
 
-
 #include "eleminterpmapperinterface.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "layeredcrosssection.h"
-
 #include "nlstructuralelement.h"
 #include "shell7base.h"
 

@@ -431,7 +431,7 @@ LIBeam3d2 :: giveLocalCoordinateSystem(FloatMatrix &answer)
     nodeB  = this->giveNode(2);
     refNode = this->giveDomain()->giveNode(this->referenceNode);
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         lx.at(i) = ( nodeB->giveCoordinate(i) - nodeA->giveCoordinate(i) ) / length;
         help.at(i) = ( refNode->giveCoordinate(i) - nodeA->giveCoordinate(i) );
     }

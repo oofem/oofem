@@ -41,7 +41,7 @@
 //@{
 #define _IFT_SpringElement_mode "mode"
 #define _IFT_SpringElement_orientation "orientation"
-#define _IFT_SpringElement_springConstant "springconstant"
+#define _IFT_SpringElement_springConstant "k"
 //@}
 
 namespace oofem {

@@ -82,19 +82,21 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
 
     microBoundaryDofManager.resize( 3 * microBoundaryNodes.giveSize() );
 
-    //val = IR_GIVE_OPTIONAL_FIELD2(ir, this->stiffMatrxFileName, IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename"); //Macro
+#if 0
+    val = IR_GIVE_OPTIONAL_FIELD2(ir, this->stiffMatrxFileName, IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename");
 
-    //     if( ir->hasField(IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename")){
-    //       if (fopen(this->stiffMatrxFileName,"r") != NULL){//if the file exist
-    //         stiffMatrxFile = fopen(this->stiffMatrxFileName,"r");
-    //         this->stiffMatrxFileNoneReadingWriting=1;
-    //       }
-    //       else {//or create a new one
-    //         if((stiffMatrxFile = fopen(this->stiffMatrxFileName,"w")) == NULL)
-    //           OOFEM_ERROR2("Can not create a new file %s\n", this->stiffMatrxFileName);
-    //         this->stiffMatrxFileNoneReadingWriting=2;
-    //       }
-    //     }
+    if( ir->hasField(IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename") ) {
+        if ( fopen(this->stiffMatrxFileName,"r") != NULL ) { //if the file exist
+            stiffMatrxFile = fopen(this->stiffMatrxFileName,"r");
+            this->stiffMatrxFileNoneReadingWriting=1;
+        }
+        else { //or create a new one
+            if((stiffMatrxFile = fopen(this->stiffMatrxFileName,"w")) == NULL)
+            OOFEM_ERROR2("Can not create a new file %s\n", this->stiffMatrxFileName);
+            this->stiffMatrxFileNoneReadingWriting=2;
+        }
+    }
+#endif
     return IRRT_OK;
 }
 

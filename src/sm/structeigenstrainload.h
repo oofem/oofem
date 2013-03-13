@@ -35,7 +35,6 @@
 #ifndef structeigenstrainload_h
 #define structeigenstrainload_h
 
-
 #include "load.h"
 
 namespace oofem {
