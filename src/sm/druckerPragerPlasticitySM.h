@@ -45,9 +45,9 @@
 
 ///@name Input fields for DruckerPragerPlasticitySM
 //@{
-#define _IFT_DruckerPragerPlasticitySM_iys "iys"
-#define _IFT_DruckerPragerPlasticitySM_alpha "alpha"
-#define _IFT_DruckerPragerPlasticitySM_alphapsi "alphapsi"
+#define _IFT_DruckerPragerPlasticitySM_iys "iys" ///< Initial yield stress under pure shear
+#define _IFT_DruckerPragerPlasticitySM_alpha "alpha" ///< Friction coefficient
+#define _IFT_DruckerPragerPlasticitySM_alphapsi "alphapsi" ///< Dilatancy coefficient
 #define _IFT_DruckerPragerPlasticitySM_ht "ht"
 #define _IFT_DruckerPragerPlasticitySM_hm "hm"
 #define _IFT_DruckerPragerPlasticitySM_kc "kc"

@@ -61,7 +61,7 @@ B3Material :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, fc, IFT_B3Material_fc, "fc"); // 28-day standard cylinder compression strength in MPa
         IR_GIVE_FIELD(ir, c, IFT_B3Material_cc, "cc"); // cement content of concrete  in kg m^-3.
         IR_GIVE_FIELD(ir, wc, IFT_B3Material_wc, "w/c"); // ratio (by weight) of water to cementitious material
-        IR_GIVE_FIELD(ir, ac, IFT_B3Material_ac, "a/c"); // ratio (by weight) of agregate to cement
+        IR_GIVE_FIELD(ir, ac, IFT_B3Material_ac, "a/c"); // ratio (by weight) of aggregate to cement
         IR_GIVE_FIELD(ir, t0, IFT_B3Material_t0, "t0"); // age when drying begins (in days)
     } else { // read raw Basic creep parameters
         IR_GIVE_FIELD(ir, q1, IFT_B3Material_q1, "q1");

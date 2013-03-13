@@ -300,7 +300,6 @@ CohesiveSurface3d :: evaluateLocalCoordinateSystem()
 //
 {
     FloatArray lx(3), ly(3), lz(3);
-    int i;
 
     Node *nodeA, *nodeB;
     nodeA  = this->giveNode(1);
@@ -335,7 +334,7 @@ CohesiveSurface3d :: evaluateLocalCoordinateSystem()
     ly.normalize();
 
     lcs.resize(3, 3);
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         lcs.at(1, i) = lx.at(i);
         lcs.at(2, i) = ly.at(i);
         lcs.at(3, i) = lz.at(i);

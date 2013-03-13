@@ -43,8 +43,8 @@
 
 ///@name Input fields for CompoDamageMat
 //@{
-#define _IFT_CompoDamageMat_ex "ex"
-#define _IFT_CompoDamageMat_ez "ez"
+#define _IFT_CompoDamageMat_exx "exx"
+#define _IFT_CompoDamageMat_eyyezz "eyyezz"
 #define _IFT_CompoDamageMat_nyxy "nyxy"
 #define _IFT_CompoDamageMat_nyyz "nyyz"
 #define _IFT_CompoDamageMat_Gxy "gxy"

@@ -96,13 +96,13 @@ IRResultType
 FETISolver :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                            // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, ni, IFT_FETISolver_maxiter, "maxiter"); // Macro
-    IR_GIVE_FIELD(ir, err, IFT_FETISolver_maxerr, "maxerr"); // Macro
-    IR_GIVE_FIELD(ir, limit, IFT_FETISolver_limit, "limit"); // Macro
+    IR_GIVE_FIELD(ir, ni, IFT_FETISolver_maxiter, "maxiter");
+    IR_GIVE_FIELD(ir, err, IFT_FETISolver_maxerr, "maxerr");
+    IR_GIVE_FIELD(ir, limit, IFT_FETISolver_limit, "limit");
     energyNorm_comput_flag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, energyNorm_comput_flag, IFT_FETISolver_energynormflag, "energynormflag"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, energyNorm_comput_flag, IFT_FETISolver_energynormflag, "energynormflag");
 
     if ( fabs(limit) < 1.e-20 ) {
         limit = 1.e-20;

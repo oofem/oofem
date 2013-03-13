@@ -245,14 +245,14 @@ DirectErrorIndicatorRC :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, minIndicatorLimit, IFT_DirectErrorIndicatorRC_minlim, "minlim"); // Macro
-    IR_GIVE_FIELD(ir, maxIndicatorLimit, IFT_DirectErrorIndicatorRC_maxlim, "maxlim"); // Macro
-    IR_GIVE_FIELD(ir, minIndicatorDensity, IFT_DirectErrorIndicatorRC_mindens, "mindens"); // Macro
-    IR_GIVE_FIELD(ir, maxIndicatorDensity, IFT_DirectErrorIndicatorRC_maxdens, "maxdens"); // Macro
-    IR_GIVE_FIELD(ir, zeroIndicatorDensity, IFT_DirectErrorIndicatorRC_defdens, "defdens"); // Macro
+    IR_GIVE_FIELD(ir, minIndicatorLimit, IFT_DirectErrorIndicatorRC_minlim, "minlim");
+    IR_GIVE_FIELD(ir, maxIndicatorLimit, IFT_DirectErrorIndicatorRC_maxlim, "maxlim");
+    IR_GIVE_FIELD(ir, minIndicatorDensity, IFT_DirectErrorIndicatorRC_mindens, "mindens");
+    IR_GIVE_FIELD(ir, maxIndicatorDensity, IFT_DirectErrorIndicatorRC_maxdens, "maxdens");
+    IR_GIVE_FIELD(ir, zeroIndicatorDensity, IFT_DirectErrorIndicatorRC_defdens, "defdens");
 
     remeshingDensityRatioToggle = 0.80;
-    IR_GIVE_OPTIONAL_FIELD(ir, remeshingDensityRatioToggle, IFT_DirectErrorIndicatorRC_remeshingdensityratio, "remeshingdensityratio"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, remeshingDensityRatioToggle, IFT_DirectErrorIndicatorRC_remeshingdensityratio, "remeshingdensityratio");
 
 #ifdef __PARALLEL_MODE
     EngngModel *emodel = domain->giveEngngModel();

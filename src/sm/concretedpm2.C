@@ -530,7 +530,7 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
     timeFactor = 1.;
     if ( strainRateFlag == 1 ) {
         IR_GIVE_FIELD(ir, fcZero, IFT_ConcreteDPM2_fcZero, "fczero");
-        IR_GIVE_OPTIONAL_FIELD(ir, timeFactor, IFT_ConcreteDPM2_newtoniter, "timefactor");
+        IR_GIVE_OPTIONAL_FIELD(ir, timeFactor, IFT_ConcreteDPM2_timeFactor, "timefactor");
     }
 
     return IRRT_OK;

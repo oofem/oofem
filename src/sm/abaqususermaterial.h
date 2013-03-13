@@ -44,7 +44,8 @@
 //@{
 #define _IFT_AbaqusUserMaterial_numState "numstate"
 #define _IFT_AbaqusUserMaterial_properties "properties"
-#define _IFT_AbaqusUserMaterial_userMaterial "usermaterial"
+#define _IFT_AbaqusUserMaterial_userMaterial "umat"
+#define _IFT_AbaqusUserMaterial_name "name"
 //@}
 
 namespace oofem {

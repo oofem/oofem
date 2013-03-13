@@ -47,7 +47,7 @@
 #define _IFT_AdaptiveNonLinearStatic_controlmode "controlmode"
 #define _IFT_AdaptiveNonLinearStatic_ddm "ddm"
 #define _IFT_AdaptiveNonLinearStatic_refloadmode "refloadmode"
-#define _IFT_AdaptiveNonLinearStatic_preMappingLoadBalancingFlag "premappingloadbalancingflag"
+#define _IFT_AdaptiveNonLinearStatic_preMappingLoadBalancingFlag "premaplbflag"
 //@}
 
 namespace oofem {
