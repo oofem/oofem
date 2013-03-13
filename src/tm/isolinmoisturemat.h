@@ -41,8 +41,8 @@
 
 ///@name Input fields for IsotropicLinMoistureTransferMaterial
 //@{
-#define _IFT_IsotropicLinMoistureTransferMaterial_perm "perm"
-#define _IFT_IsotropicLinMoistureTransferMaterial_capa "capa"
+#define _IFT_IsotropicLinMoistureTransferMaterial_perm "perm" ///< Moisture permeability
+#define _IFT_IsotropicLinMoistureTransferMaterial_capa "capa" ///< Moisture capacity
 //@}
 
 namespace oofem {
@@ -67,10 +67,6 @@ public:
     virtual classType giveClassID() const { return IsotropicLinMoistureTransferMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-
-    /*
-     * virtual double give(int aProperty, GaussPoint *gp);
-     */
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp);  }
 };

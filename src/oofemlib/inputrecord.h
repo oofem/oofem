@@ -187,7 +187,7 @@ enum InputFieldType {
 
     IFT_NonStationaryTransportProblem_initt,
     IFT_NonStationaryTransportProblem_deltat,
-    IFT_NonStationaryTransportProblem_dtf,
+    IFT_NonStationaryTransportProblem_deltatfunction,
     IFT_NonStationaryTransportProblem_prescribedtimes,
     IFT_NonStationaryTransportProblem_alpha,
     IFT_NonStationaryTransportProblem_lumpedcapa,

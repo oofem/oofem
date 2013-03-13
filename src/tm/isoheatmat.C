@@ -46,8 +46,8 @@ IsotropicHeatTransferMaterial :: initializeFrom(InputRecord *ir)
 
     this->Material :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, conductivity, IFT_IsotropicHeatTransferMaterial_k, "k"); // Macro// conductivity
-    IR_GIVE_FIELD(ir, capacity, IFT_IsotropicHeatTransferMaterial_c, "c"); // Macro// specific heat capacity
+    IR_GIVE_FIELD(ir, conductivity, IFT_IsotropicHeatTransferMaterial_k, "k");
+    IR_GIVE_FIELD(ir, capacity, IFT_IsotropicHeatTransferMaterial_c, "c");
 
     return IRRT_OK;
 }

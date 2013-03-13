@@ -58,18 +58,18 @@ IRResultType
 NLTransientTransportProblem :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     NonStationaryTransportProblem :: initializeFrom(ir);
     int val = 30;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NLTransientTransportProblem_nsmax, "nsmax"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NLTransientTransportProblem_nsmax, "nsmax");
     nsmax = val;
 
-    IR_GIVE_FIELD(ir, rtol, IFT_NLTransientTransportProblem_rtol, "rtol"); // Macro
+    IR_GIVE_FIELD(ir, rtol, IFT_NLTransientTransportProblem_rtol, "rtol");
 
     NR_Mode = nrsolverModifiedNRM;
     MANRMSteps = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, MANRMSteps, IFT_NLTransientTransportProblem_manrmsteps, "manrmsteps"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, MANRMSteps, IFT_NLTransientTransportProblem_manrmsteps, "manrmsteps");
     if ( MANRMSteps > 0 ) {
         NR_Mode = nrsolverAccelNRM;
     } else {
@@ -80,8 +80,8 @@ NLTransientTransportProblem :: initializeFrom(InputRecord *ir)
 }
 
 
-
-void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
+void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
+{
     // creates system of governing eq's and solves them at given time step
     // first assemble problem at current time step
 

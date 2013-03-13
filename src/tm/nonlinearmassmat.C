@@ -43,12 +43,12 @@ IRResultType
 NonlinearMassTransferMaterial :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                  // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     this->Material :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, C, IFT_NonlinearMassTransferMaterial_c, "c");                     // Constant C
-    IR_GIVE_FIELD(ir, alpha, IFT_NonlinearMassTransferMaterial_alpha, "alpha"); // Constant alpha
+    IR_GIVE_FIELD(ir, C, IFT_NonlinearMassTransferMaterial_c, "c");
+    IR_GIVE_FIELD(ir, alpha, IFT_NonlinearMassTransferMaterial_alpha, "alpha");
 
     return IRRT_OK;
 }
