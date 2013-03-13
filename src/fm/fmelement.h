@@ -54,12 +54,6 @@ namespace oofem {
  */
 class FMElement : public Element
 {
-protected:
-    /// Array of boundary sides.
-    IntArray boundarySides;
-    /// Boundary sides codes.
-    IntArray boundaryCodes;
-
 public:
     FMElement(int n, Domain *aDomain);
     virtual ~FMElement();
@@ -70,7 +64,6 @@ public:
      */
     virtual void updateStabilizationCoeffs(TimeStep *tStep) { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "FMElement"; }
     virtual classType giveClassID() const { return FMElementClass; }
 };

@@ -39,11 +39,11 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "matconst.h"
-#include "structuralelement.h"
 #include "matstatus.h"
 
 ///@name Input fields for NonlinearFluidMaterial
 //@{
+#define _IFT_NonlinearFluidMaterial_mu "mu"
 #define _IFT_NonlinearFluidMaterial_alpha "alpha"
 #define _IFT_NonlinearFluidMaterial_C "c"
 //@}

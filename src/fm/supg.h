@@ -43,8 +43,6 @@
 
 ///@name Input fields for SUPG
 //@{
-#define _IFT_SUPG_lstype "lstype"
-#define _IFT_SUPG_smtype "smtype"
 #define _IFT_SUPG_deltat "deltat"
 #define _IFT_SUPG_deltatltf "deltatltf"
 #define _IFT_SUPG_cmflag "cmflag"

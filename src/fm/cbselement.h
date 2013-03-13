@@ -55,6 +55,12 @@ class FloatArray;
  */
 class CBSElement : public FMElement
 {
+protected:
+    /// Array of boundary sides.
+    IntArray boundarySides;
+    /// Boundary sides codes.
+    IntArray boundaryCodes;
+
 public:
     CBSElement(int n, Domain *aDomain);
     virtual ~CBSElement();

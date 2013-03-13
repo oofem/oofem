@@ -38,9 +38,7 @@
 #include "fluiddynamicmaterial.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-
 #include "matconst.h"
-#include "structuralelement.h"
 #include "matstatus.h"
 
 ///@name Input fields for NewtonianFluidMaterial

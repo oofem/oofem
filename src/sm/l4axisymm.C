@@ -225,7 +225,7 @@ L4Axisymm :: initializeFrom(InputRecord *ir)
     this->NLStructuralElement :: initializeFrom(ir);
 
     numberOfGaussPoints          = 4;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_L4Axisymm_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip"); // Macro
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
            ( numberOfGaussPoints == 4 ) ||

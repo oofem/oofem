@@ -107,7 +107,7 @@ QTrPlaneStrain :: initializeFrom(InputRecord *ir)
 
     this->StructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 4;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_QTrPlaneStrain_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip"); // Macro
 
 
     this->computeGaussPoints();
@@ -121,7 +121,6 @@ QTrPlaneStrain :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer,
 // Returns the [3x12] strain-displacement matrix {B} of the receiver, eva-
 // luated at aGaussPoint.
 {
-    int i;
     FloatMatrix dnx;
 
     this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
@@ -129,7 +128,7 @@ QTrPlaneStrain :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer,
     answer.resize(4, 12);
     answer.zero();
 
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         answer.at(1, 2 * i - 1) = dnx.at(i, 1);
         answer.at(2, 2 * i - 0) = dnx.at(i, 2);
 

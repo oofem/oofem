@@ -122,11 +122,11 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
 
     StructuralEngngModel :: initializeFrom(ir);
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_DIIDynamic_lstype, "lstype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_DIIDynamic_smtype, "smtype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
     sparseMtrxType = ( SparseMtrxType ) val;
 
     val = 0;
@@ -152,7 +152,7 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
         OOFEM_LOG_INFO( "Selecting Three-point Backward Euler metod\n" );
     } else if ( initialTimeDiscretization == TD_Wilson ) {
         OOFEM_LOG_INFO( "Selecting Wilson-theta metod\n" );
-        IR_GIVE_OPTIONAL_FIELD(ir, theta, IFT_DIIDynamic_psi, "theta"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, theta, IFT_DIIDynamic_theta, "theta");
         if ( theta < 1.37 ) {
             OOFEM_LOG_WARNING("Found theta < 1.37. Performing correction, theta = 1.37");
             theta = 1.37;

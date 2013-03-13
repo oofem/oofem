@@ -73,6 +73,8 @@ enum InputFieldType {
     IFT_EngngModel_nonLinFormulation,
     IFT_EngngModel_eetype,
     IFT_EngngModel_initialGuess,
+    IFT_EngngModel_lstype,
+    IFT_EngngModel_smtype,
 
     IFT_MetaStep_nsteps,
 
@@ -117,20 +119,17 @@ enum InputFieldType {
     IFT_IncrementalLinearStatic_prescribedtimes,
     IFT_IncrementalLinearStatic_deltat,
     IFT_IncrementalLinearStatic_lstype,
-    IFT_IncrementalLinearStatic_smtype,
 
     IFT_DEIDynamic_dumpcoef,
     IFT_DEIDynamic_deltat,
 
-    IFT_DIIDynamic_lstype,
-    IFT_DIIDynamic_smtype,
     IFT_DIIDynamic_deltat,
     IFT_DIIDynamic_ddtScheme,
     IFT_DIIDynamic_gamma,
     IFT_DIIDynamic_beta,
     IFT_DIIDynamic_eta,
     IFT_DIIDynamic_delta,
-    IFT_DIIDynamic_psi,
+    IFT_DIIDynamic_theta,
 
     IFT_NonLinearStatic_controlmode,
     IFT_NonLinearStatic_deltat,
@@ -145,8 +144,6 @@ enum InputFieldType {
     IFT_NonLinearStatic_loadBalancingFlag,
     IFT_NonLinearStatic_forceloadBalancingFlag,
 
-    IFT_NonLinearDynamic_lstype,
-    IFT_NonLinearDynamic_smtype,
     IFT_NonLinearDynamic_deltat,
     IFT_NonLinearDynamic_rtolv,
     IFT_NonLinearDynamic_refloadmode,
@@ -163,7 +160,6 @@ enum InputFieldType {
     IFT_EigenValueDynamic_nroot,
     IFT_EigenValueDynamic_rtolv,
     IFT_EigenValueDynamic_stype,
-    IFT_EigenValueDynamic_smtype,
 
     IFT_LinearStability_nroot,
     IFT_LinearStability_rtolv,
@@ -178,9 +174,6 @@ enum InputFieldType {
     IFT_NlDEIDynamic_elementcutmode,
     IFT_NlDEIDynamic_nonlocalext,
 
-    IFT_LinearStatic_lstype,
-    IFT_LinearStatic_smtype,
-
     IFT_AdaptiveLinearStatic_meshpackage,
 
     IFT_AdaptiveNonLinearStatic_meshpackage,
@@ -190,8 +183,6 @@ enum InputFieldType {
     IFT_AdaptiveNonLinearStatic_refloadmode,
     IFT_AdaptiveNonLinearStatic_preMappingLoadBalancingFlag,
 
-    IFT_StationaryTransportProblem_lstype,
-    IFT_StationaryTransportProblem_smtype,
     IFT_StationaryTransportProblem_exportfields,
 
     IFT_NonStationaryTransportProblem_initt,
@@ -214,8 +205,6 @@ enum InputFieldType {
     IFT_StaggeredProblem_prob1,
     IFT_StaggeredProblem_prob2,
 
-    IFT_CBS_lstype,
-    IFT_CBS_smtype,
     IFT_CBS_deltat,
     IFT_CBS_mindeltat,
     IFT_CBS_cmflag,
@@ -227,8 +216,6 @@ enum InputFieldType {
     IFT_CBS_dscale,
     IFT_CBS_miflag,
 
-    IFT_SUPG_lstype,
-    IFT_SUPG_smtype,
     IFT_SUPG_deltat,
     IFT_SUPG_deltatltf,
     IFT_SUPG_cmflag,
@@ -243,9 +230,6 @@ enum InputFieldType {
     IFT_SUPG_maxiter,
     IFT_SUPG_stopmaxiter,
     IFT_SUPG_fsflag,
-
-    IFT_DARCYFLOW_lstype,
-    IFT_DARCYFLOW_smtype,
 
     IFT_CylindricalALM_psi,
     IFT_CylindricalALM_maxiter,
@@ -269,7 +253,6 @@ enum InputFieldType {
     IFT_CylindricalALM_rtolv,
     IFT_CylindricalALM_rtolf,
     IFT_CylindricalALM_rtold,
-
 
     IFT_NRSolver_maxiter,
     IFT_NRSolver_miniterations,
@@ -394,6 +377,7 @@ enum InputFieldType {
     IFT_HangingNode_masterElement,
     IFT_HangingNode_masterRegion,
 
+    IFT_Element_nip,
     IFT_Element_mat,
     IFT_Element_crosssect,
     IFT_Element_nodes,
@@ -412,46 +396,24 @@ enum InputFieldType {
     IFT_SUPGElement_bsides,
     IFT_SUPGElement_bcodes,
 
-    IFT_StokesFlow_lstype,
-    IFT_StokesFlow_smtype,
     IFT_StokesFlow_deltat,
 
+    IFT_FE2FluidMaterial_fileName,
+
+    IFT_NonlinearFluidMaterial_mu,
     IFT_NonlinearFluidMaterial_alpha,
     IFT_NonlinearFluidMaterial_C,
 
     IFT_NLStructuralElement_nlgeoflag,
 
-    IFT_Axisymm3d_nip,
     IFT_Axisymm3d_nipfish,
-    IFT_CCTPlate_nip,
-    IFT_Quad1Mindlin_nip,
     IFT_Quad1MindlinShell3D_alpha,
-    IFT_LSpace_nip,
-    IFT_LTrElementPPDE_nip,
-    IFT_L4Axisymm_nip,
-    IFT_PlaneStress2d_nip,
-    IFT_Quad1PlaneStrain_nip,
-    IFT_RerShell_nip,
-    IFT_QPlaneStress2d_nip,
-    IFT_QSpace_nip,
-    IFT_QSpaceGrad_nip,
-    IFT_QTrPlaneStress2d_nip,
-    IFT_Q4Axisymm_nip,
     IFT_Q4Axisymm_nipfish,
-    IFT_TrPlaneStress2d_nip,
-    IFT_TrPlaneStrRot_nip,
     IFT_TrPlaneStrRot_niprot,
-    IFT_LTRSpace_nip,
-    IFT_QTRSpace_nip,
-    IFT_QTRSpaceGrad_nip,
-    IFT_LWedge_nip,
-    IFT_QWedge_nip,
-    IFT_QWedgeGrad_nip, 
     IFT_Beam2d_dofstocondense,
     IFT_Beam3d_refnode,
     IFT_Beam3d_dofstocondense,
     IFT_LIBeam3dNL_refnode,
-    IFT_TrPlaneStrain_nip,
     IFT_LIBeam3dNL2_refnode,
     IFT_LIBeam3d_refnode,
     IFT_LIBeam3d2_refnode,
@@ -460,24 +422,14 @@ enum InputFieldType {
     IFT_SpringElement_mode,
     IFT_SpringElement_orientation,
     IFT_SpringElement_springConstant,
-    IFT_QPlaneStrain_nip,
-    IFT_QTrPlaneStrain_nip,
-    IFT_QTruss1d_nip,
-    IFT_QTruss1dGrad_nip,
 
+    IFT_Tr1CBS_vof,
+    IFT_Tr1CBS_pvof,
 
-    IFT_Quad1_ht_nip,
-    IFT_Brick1_ht_nip,
-    IFT_QBrick1_ht_nip,
-    IFT_Tetrah1_ht_nip,
-
-    IFT_TR12DCBS_vof,
-    IFT_TR12DCBS_pvof,
-
-    IFT_TR12DSUPG_pvof,
-    IFT_TR12DSUPG_vof,
-    IFT_TR12DSUPG2_mat0,
-    IFT_TR12DSUPG2_mat1,
+    IFT_Tr1SUPG_pvof,
+    IFT_Tr1SUPG_vof,
+    IFT_Tr1SUPG2_mat0,
+    IFT_Tr1SUPG2_mat1,
 
     IFT_Lattice2d_thick,
     IFT_Lattice2d_width,
@@ -773,7 +725,7 @@ enum InputFieldType {
     IFT_CompoDamageMat_afteriter,
     IFT_CompoDamageMat_allowSnapBack,
 
-    IFT_MicroMaterialFileName,
+    IFT_MicroMaterial_fileName,
     IFT_MacroLspace_microMasterNodes,
     IFT_MacroLspace_microBoundaryNodes,
     IFT_MacroLspace_stiffMatrxFileName,

@@ -67,7 +67,6 @@ BinghamFluidMaterial2 :: hasMaterialModeCapability(MaterialMode mode)
     if ( ( mode == _2dFlow ) || ( mode == _3dFlow ) ) {
         return 1;
     } 
-      
 
     return 0;
 }
@@ -82,11 +81,10 @@ BinghamFluidMaterial2 :: initializeFrom(InputRecord *ir)
     this->FluidDynamicMaterial :: initializeFrom(ir);
     // we use rather object's member data than to store data into slow
     // key-val dictionary with lot of memory allocations
-
-    IR_GIVE_FIELD(ir, mu_0, IFT_BinghamFluidMaterial_mu0, "mu0"); // Macro
-    IR_GIVE_FIELD(ir, tau_0, IFT_BinghamFluidMaterial_tau0, "tau0"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, mu_inf, IFT_BinghamFluidMaterial_muinf, "muinf"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, stressGrowthRate, IFT_BinghamFluidMaterial_stressGrowthRate, "stressgrowthrate"); // Macro
+    IR_GIVE_FIELD(ir, mu_0, IFT_BinghamFluidMaterial_mu0, _IFT_BinghamFluidMaterial_mu0);
+    IR_GIVE_FIELD(ir, tau_0, IFT_BinghamFluidMaterial_tau0, _IFT_BinghamFluidMaterial_tau0);
+    IR_GIVE_OPTIONAL_FIELD(ir, mu_inf, IFT_BinghamFluidMaterial_muinf, _IFT_BinghamFluidMaterial_muinf);
+    IR_GIVE_OPTIONAL_FIELD(ir, stressGrowthRate, IFT_BinghamFluidMaterial_stressGrowthRate, _IFT_BinghamFluidMaterial_stressGrowthRate);
     tau_c = tau_0 * mu_inf / ( mu_inf - mu_0 );
     //tau_c = tau_0;
     return IRRT_OK;

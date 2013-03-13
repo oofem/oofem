@@ -120,13 +120,13 @@ TR1_2D_SUPG :: initializeFrom(InputRecord *ir)
     this->SUPGElement :: initializeFrom(ir);
 
     this->vof = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, vof, IFT_TR12DSUPG_pvof, "pvof");
+    IR_GIVE_OPTIONAL_FIELD(ir, vof, IFT_Tr1SUPG_pvof, "pvof");
     if ( vof > 0.0 ) {
         setPermanentVolumeFraction(vof);
         this->temp_vof = vof;
     } else {
         this->vof = 0.0;
-        IR_GIVE_OPTIONAL_FIELD(ir, vof, IFT_TR12DSUPG_vof, "vof");
+        IR_GIVE_OPTIONAL_FIELD(ir, vof, IFT_Tr1SUPG_vof, "vof");
         this->temp_vof = this->vof;
     }
 

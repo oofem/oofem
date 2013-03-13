@@ -39,12 +39,6 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrxtype.h"
 
-///@name Input fields for LinearStatic
-//@{
-#define _IFT_LinearStatic_lstype "lstype"
-#define _IFT_LinearStatic_smtype "smtype"
-//@}
-
 namespace oofem {
 
 class SparseMtrx;

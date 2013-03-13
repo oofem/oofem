@@ -39,6 +39,11 @@
 #include "matstatus.h"
 #include "mixedgradientpressurebc.h"
 
+///@name Input fields for FE^2 fluid material
+//@{
+#define _IFT_FE2FluidMaterial_fileName "inputfile"
+//@}
+
 namespace oofem {
 
 class StokesFlow;

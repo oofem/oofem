@@ -99,7 +99,7 @@ Brick1_ht :: initializeFrom(InputRecord *ir)
 
     this->TransportElement :: initializeFrom(ir);
     numberOfGaussPoints = 8;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Brick1_ht_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip"); // Macro
 
     if ( !( ( numberOfGaussPoints == 8 ) ||
            ( numberOfGaussPoints == 27 ) ) ) {

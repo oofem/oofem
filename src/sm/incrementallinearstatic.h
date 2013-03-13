@@ -44,8 +44,6 @@
 #define _IFT_IncrementalLinearStatic_endoftimeofinterest "endoftimeofinterest"
 #define _IFT_IncrementalLinearStatic_prescribedtimes "prescribedtimes"
 #define _IFT_IncrementalLinearStatic_deltat "deltat"
-#define _IFT_IncrementalLinearStatic_lstype "lstype"
-#define _IFT_IncrementalLinearStatic_smtype "smtype"
 //@}
 
 namespace oofem {

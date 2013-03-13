@@ -38,9 +38,7 @@
 #include "material.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-
 #include "matconst.h"
-#include "structuralelement.h"
 #include "matstatus.h"
 #include "transportelement.h"
 

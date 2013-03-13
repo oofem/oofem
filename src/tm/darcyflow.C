@@ -44,11 +44,11 @@ IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
     EngngModel :: initializeFrom(ir);
 
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_DARCYFLOW_lstype, "lstype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_DARCYFLOW_smtype, "smtype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
     sparseMtrxType = ( SparseMtrxType ) val;
 
     // Create solution space for EID_ConservationEquation

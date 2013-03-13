@@ -45,8 +45,6 @@
 
 ///@name Input fields for CBS
 //@{
-#define _IFT_CBS_lstype "lstype"
-#define _IFT_CBS_smtype "smtype"
 #define _IFT_CBS_deltat "deltat"
 #define _IFT_CBS_mindeltat "mindeltat"
 #define _IFT_CBS_cmflag "cmflag"

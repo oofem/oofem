@@ -15,6 +15,7 @@
 #include "oofemtxtinputrecord.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "structuralelement.h"
 
 namespace oofem {
 #ifdef __TM_MODULE

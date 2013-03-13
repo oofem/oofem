@@ -40,12 +40,11 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "matconst.h"
-#include "structuralelement.h"
 #include "matstatus.h"
 
 ///@name Input fields for SurfaceTensionMaterial
 //@{
-#define _IFT_SurfaceTensionMaterial_isotropic "isotropic"
+#define _IFT_SurfaceTensionMaterial_isotropic "g"
 //@}
 
 namespace oofem {

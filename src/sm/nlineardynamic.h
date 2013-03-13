@@ -47,8 +47,6 @@
 
 ///@name Input fields for NonLinearDynamic
 //@{
-#define _IFT_NonLinearDynamic_lstype "lstype"
-#define _IFT_NonLinearDynamic_smtype "smtype"
 #define _IFT_NonLinearDynamic_deltat "deltat"
 #define _IFT_NonLinearDynamic_rtolv "rtolv"
 #define _IFT_NonLinearDynamic_refloadmode "refloadmode"

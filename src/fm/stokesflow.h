@@ -43,8 +43,6 @@
 
 ///@name Input fields for Stokes' Flow
 //@{
-#define _IFT_StokesFlow_lstype "lstype"
-#define _IFT_StokesFlow_smtype "smtype"
 #define _IFT_StokesFlow_deltat "deltat"
 //@}
 

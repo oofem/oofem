@@ -58,6 +58,11 @@ class Load;
 class SUPGElement : public FMElement
 {
 protected:
+    /// Array of boundary sides.
+    IntArray boundarySides;
+    /// Boundary sides codes.
+    IntArray boundaryCodes;
+
     /**
      * Stabilization coefficients, updated for each solution step
      * in updateStabilizationCoeffs()

@@ -328,7 +328,7 @@ Quad1MindlinShell3D :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, this->alpha, IFT_Quad1MindlinShell3D_alpha, "alpha");
     this->alpha = 1.0;
 
-    IR_GIVE_OPTIONAL_FIELD(ir, this->numberOfGaussPoints, IFT_Quad1Mindlin_nip, "nip");
+    IR_GIVE_OPTIONAL_FIELD(ir, this->numberOfGaussPoints, IFT_Element_nip, "nip");
 
     return this->NLStructuralElement :: initializeFrom(ir);
 }

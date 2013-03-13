@@ -5,29 +5,20 @@
  *      Author: carl
  */
 
-
-
-#ifndef DARCYFLOW_H_
-#define DARCYFLOW_H_
+#ifndef darcyflow_h
+#define darcyflow_h
 
 #include "engngm.h"
 #include "inputrecord.h"
 #include "sparsemtrxtype.h"
 #include "linsystsolvertype.h"
 #include "sparselinsystemnm.h"
-// #include "LinearFlowBase.h"
 #include "sparsenonlinsystemnm.h"
 
 #ifdef __PARALLEL_MODE
 #include "problemcomm.h"
 #include "processcomm.h"
 #endif
-
-///@name Input fields for DarcyFlow
-//@{
-#define _IFT_DarcyFlow_lstype "lstype"
-#define _IFT_DarcyFlow_smtype "smtype"
-//@}
 
 namespace oofem {
 
@@ -102,4 +93,4 @@ public:
 
 }
 
-#endif /* DARCYFLOW_H_ */
+#endif // darcyflow_h
