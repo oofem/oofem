@@ -66,7 +66,7 @@ void plague(struct mesh *m, struct behavior *b);
 void poolinit(struct memorypool *pool, int bytecount, int itemcount, int firstitemcount, int alignment);
 void pooldeinit(struct memorypool *pool);
 
-s from triangle.c
+// Macros from triangle.c
 #define setelemattribute(otri, attnum, value)                                 \
   ((REAL *) (otri).tri)[m->elemattribindex + (attnum)] = value
 #define elemattribute(otri, attnum)                                           \
