@@ -46,10 +46,10 @@
 
 ///@name Input fields for a general boundary condition
 //@{
-#define _IFT_GeneralBoundaryCondition_LoadTimeFunct "loadtimefunct"
+#define _IFT_GeneralBoundaryCondition_LoadTimeFunct "loadtimefunction"
 #define _IFT_GeneralBoundaryCondition_valType "valtype"
 #define _IFT_GeneralBoundaryCondition_defaultDofs "defaultdofs"
-#define _IFT_GeneralBoundaryCondition_IsImposedTimeFunct "isimposedtimefunct"
+#define _IFT_GeneralBoundaryCondition_IsImposedTimeFunct "isimposedtimefunction"
 //@}
 
 namespace oofem {

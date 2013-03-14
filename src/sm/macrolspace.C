@@ -187,7 +187,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     }
 
     ir_ltf.setRecordKeywordField("constantfunction", 1);
-    ir_ltf.setField(1.0, IFT_LoadTimeFunction_ft);
+    ir_ltf.setField(1.0, _IFT_LoadTimeFunction_ft);
     if ( ( LoadTimeFunct = CreateUsrDefLoadTimeFunctionOfType("constantfunction", 1, microDomain) ) == NULL ) {
         OOFEM_ERROR("MacroLSpace :: changeMicroBoundaryConditions - Couldn't create constant time function");
     }
@@ -213,8 +213,8 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
                 DofMan->giveDof(j)->setBcId(counter);
                 displ = n.dotProduct( j == 1 ? displ_x : ( j == 2 ? displ_y : displ_z ) );
                 ir_bc.setRecordKeywordField("boundarycondition", counter);
-                ir_bc.setField(1, IFT_GeneralBoundaryCondition_LoadTimeFunct);
-                ir_bc.setField(displ, IFT_BoundaryCondition_PrescribedValue);
+                ir_bc.setField(1, _IFT_GeneralBoundaryCondition_LoadTimeFunct);
+                ir_bc.setField(displ, _IFT_BoundaryCondition_PrescribedValue);
                 if ( ( GeneralBoundaryCond = CreateUsrDefBoundaryConditionOfType("boundarycondition", counter, microDomain) ) == NULL ) {
                     OOFEM_ERROR("MacroLSpace :: changeMicroBoundaryConditions - Couldn't create boundary condition.");
                 }

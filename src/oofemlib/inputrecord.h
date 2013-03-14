@@ -1163,6 +1163,8 @@ enum InputFieldType {
     IFT_PeriodicPiecewiseLinFunction_addtf,
 
     IFT_UserDefinedLoadTimeFunction_ft,
+    IFT_UserDefinedLoadTimeFunction_dfdt,
+    IFT_UserDefinedLoadTimeFunction_d2fdt2,
 
     IFT_UserDefinedTemperatureField_size,
     IFT_UserDefinedTemperatureField_t1,

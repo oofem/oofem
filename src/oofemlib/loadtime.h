@@ -48,7 +48,7 @@
 ///@name Input fields for LoadTimeFunction
 //@{
 #define _IFT_LoadTimeFunction_initialvalue "initialvalue"
-#define _IFT_LoadTimeFunction_ft "ft"
+#define _IFT_LoadTimeFunction_ft "f(t)"
 //@}
 
 namespace oofem {
