@@ -53,7 +53,7 @@
 
 ///@name Input fields for MicroMaterial
 //@{
-#define _IFT_MicroMaterial_fileName "filename"
+#define _IFT_MicroMaterial_fileName "file"
 //@}
 
 namespace oofem {
