@@ -57,7 +57,6 @@
 
 // Nonlinear solvers
 #include "nrsolver.h"
-#include "nrsolver2.h"
 #include "calmls.h"
 
 // export modules
@@ -70,7 +69,7 @@
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 
-#if 0 // Soon
+#if 1 // Soon
  #include "particletopologydescription.h" // Soon
 #endif
 // end __OOFEMLIB_MODULE
@@ -302,7 +301,7 @@ std :: map < std :: string, TopologyDescription * ( * )(Domain *), CaseComp > to
 
 TopologyDescription *CreateUsrDefTopologyOfType(const char *aClass, Domain *domain)
 {
-#if 0
+#if 1
     if ( topologyNameList.empty() ) { topologyNameList["particletopology"] = topologyCreator< ParticleTopologyDescription >; }
 #endif
 
@@ -330,9 +329,7 @@ std :: map < std :: string, SparseNonLinearSystemNM * ( * )(int, Domain *, Engng
 SparseNonLinearSystemNM *CreateUsrDefNonLinearSolver(const char *aClass, int number, Domain *d, EngngModel *emodel, EquationID eid)
 {
     if ( nonlinList.empty() ) {
-        //nonlinList["snes"]       = nonlinCreator< PETScSNES >;
         nonlinList [ "nrsolver" ]   = nonlinCreator< NRSolver >;
-        nonlinList [ "nrsolver2" ]  = nonlinCreator< NRSolver2 >;
         nonlinList [ "calm" ]       = nonlinCreator< CylindricalALM >;
     }
 

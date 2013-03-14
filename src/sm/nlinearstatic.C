@@ -41,7 +41,6 @@
 #include "verbose.h"
 #include "sparsenonlinsystemnm.h"
 #include "nrsolver.h"
-#include "nrsolver2.h"
 #include "calmls.h"
 #include "outputmanager.h"
 #include "datastream.h"
@@ -127,16 +126,6 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
         }
 
         this->nMethod = new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance);
-    } else if ( mode == nls_directControl2 ) {
-        if ( nMethod ) {
-            if ( dynamic_cast< NRSolver2 * >( nMethod ) ) {
-                return nMethod;
-            } else {
-                delete nMethod;
-            }
-        }
-
-        this->nMethod = new NRSolver2(1, this->giveDomain(1), this, EID_MomentumBalance);
     } else {
         _error("giveNumericalMethod: unsupported controlMode");
     }
@@ -505,7 +494,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
      }
 #endif
 
-    if ( loadInitFlag || ( controlMode == nls_directControl ) || ( controlMode == nls_directControl2 ) ) {
+    if ( loadInitFlag || controlMode == nls_directControl ) {
 #ifdef VERBOSE
         OOFEM_LOG_DEBUG("Assembling reference load\n");
 #endif

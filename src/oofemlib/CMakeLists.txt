@@ -59,7 +59,6 @@ set (core_dofs
 set (core_nm
     sparselinsystemnm.C
     nrsolver.C
-    nrsolver2.C
     linesearch.C
     spoolessolver.C
     calmls.C
@@ -93,7 +92,7 @@ set (core_cs
     )
 
 set (core_td
-    #particletopologydescription.C
+    particletopologydescription.C
     )
 
 set (core_dofman

@@ -12,9 +12,9 @@
 #include "usrdefsub.h"
 #include "sparselinsystemnm.h"
 #include "mathfem.h"
-#include "nrsolver.h"
-#include "nrsolver2.h"
 #include "tr1darcy.h"
+#include "sparsemtrx.h"
+#include "nrsolver.h"
 
 #include <iostream>
 #include <fstream>
@@ -157,7 +157,7 @@ void DarcyFlow :: DumpMatricesToFile(FloatMatrix *LHS, FloatArray *RHS, FloatArr
 
     FILE *lhsFile = fopen("LHS.txt", "w");
 
-    for ( int i= 1; i <= this->giveNumberOfEquations(EID_ConservationEquation); i++ ) {
+    for ( int i = 1; i <= this->giveNumberOfEquations(EID_ConservationEquation); i++ ) {
         for ( int j = 1; j <= this->giveNumberOfEquations(EID_ConservationEquation); j++ ) {
             fprintf(lhsFile, "%0.15e\t", LHS->at(i,j));
         }
