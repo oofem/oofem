@@ -43,6 +43,7 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 #include "timestep.h"
+#include "enrichmentitem.h"
 
 namespace oofem {
 class EngngModel;
@@ -76,6 +77,8 @@ protected:
     int startOfDofIdPool;
     int numberOfEnrichmentItems;
 
+    
+
 public:
     enum XfemType {
         SPLIT = 1, TIP = 4, STANDARD = 0
@@ -105,6 +108,7 @@ public:
     
     /// Computes for each node position of its fictitious node. - What is this used for?
     void createEnrichedDofs();
+    void addEnrichedDofsTo( DofManager *dMan, IntArray &dofIdArray );
 
     /// Computes the type of node enrichment, returns zero if the node is not enriched.
     XfemType computeNodeEnrichmentType(int nodeNumber); // ask node for EI and then type. but could be several?

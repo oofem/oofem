@@ -35,7 +35,7 @@
 #ifndef staticfracture_h
 #define staticfracture_h
 #include "nlinearstatic.h"
-
+#include "xfemmanager.h"
 namespace oofem {
 /**
  * This class implements a nonlinear static fracture problem.
@@ -44,6 +44,10 @@ namespace oofem {
 class StaticFracture : public NonLinearStatic
 {
 protected:
+
+    virtual void solveYourselfAt(TimeStep *tStep);
+    virtual void terminate(TimeStep *tStep);
+    void evaluatePropagationLaw(TimeStep *tStep);
 
 public:
     StaticFracture(int i, EngngModel *_master = NULL);

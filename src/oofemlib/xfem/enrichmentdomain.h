@@ -103,6 +103,7 @@ public:
     virtual ~DofManList(){};
     virtual IRResultType initializeFrom(InputRecord *ir) ;
     virtual bool isDofManagerEnriched(DofManager *dMan);
+    void addDofManagers(IntArray &dofManNumbers);
 };
 
 

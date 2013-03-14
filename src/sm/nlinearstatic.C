@@ -430,6 +430,9 @@ NonLinearStatic :: updateLoadVectors(TimeStep *stepN)
         OOFEM_LOG_DEBUG("Fixed load level\n");
 
         incrementalLoadVector.times(loadLevel);
+        if ( initialLoadVector.giveSize() != incrementalLoadVector.giveSize() ) {
+            initialLoadVector.resize( incrementalLoadVector.giveSize() );
+        }
         initialLoadVector.add(incrementalLoadVector);
 
         incrementalLoadVectorOfPrescribed.times(loadLevel);
@@ -516,13 +519,13 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         loadInitFlag = 0;
     }
 
-    if ( tStep->giveNumber() == 1 ) {
+    //if ( tStep->giveNumber() == 1 ) {
         int neq = this->giveNumberOfEquations(EID_MomentumBalance);
         totalDisplacement.resize(neq);
         totalDisplacement.zero();
         incrementOfDisplacement.resize(neq);
         incrementOfDisplacement.zero();
-    }
+    //}
 
     //
     //    ->   BEGINNING OF LOAD (OR DISPLACEMENT) STEP  <-
@@ -559,7 +562,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         incrementOfDisplacement.zero();
     }
 
-    if ( initialLoadVector.isNotEmpty() ) {
+    if ( initialLoadVector.isNotEmpty() && initialLoadVector.giveSize() == incrementalLoadVector.giveSize() ) {
         numMetStatus = nMethod->solve(stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
                                       & totalDisplacement, & incrementOfDisplacement, & internalForces,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);

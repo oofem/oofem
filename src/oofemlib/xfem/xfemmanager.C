@@ -41,7 +41,7 @@
 #include "flotarry.h"
 #include "alist.h"
 #include "domain.h"
-#include "enrichmentitem.h"
+//#include "enrichmentitem.h"
 #include "integrationrule.h"
 #include "xfemmanager.h"
 #include "element.h"
@@ -204,6 +204,16 @@ XfemManager :: createEnrichedDofs()
 
 }
 
+
+void 
+XfemManager :: addEnrichedDofsTo( DofManager *dMan, IntArray &dofIdArray )
+{   
+    int nDofs = dMan->giveNumberOfDofs();
+    for ( int j = 1; j <= dofIdArray.giveSize(); j++ ) {                      
+            dMan->appendDof( new MasterDof( nDofs + j, dMan, ( DofIDItem ) ( dofIdArray.at(j) ) ) );   
+    }
+
+}
 
 
 IRResultType XfemManager :: initializeFrom(InputRecord *ir) {

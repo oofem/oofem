@@ -75,6 +75,18 @@ bool DofManList :: isDofManagerEnriched(DofManager *dMan)
 }
 
 
+void
+DofManList :: addDofManagers(IntArray &dofManNumbers)
+{
+    for ( int i = 1; i <= dofManNumbers.giveSize(); i++) {
+        std::list< int > :: iterator p;
+        p = std::find(this->dofManList.begin( ), this->dofManList.end( ), dofManNumbers.at(i));
+        if ( p == this->dofManList.end( ) ) { // if new node
+            this->dofManList.push_back( dofManNumbers.at(i) );
+        }       
+    }
+}
+
 
 
 // Circle
