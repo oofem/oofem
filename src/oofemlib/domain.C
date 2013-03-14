@@ -799,9 +799,11 @@ Domain :: instanciateYourself(DataReader *dr)
 void
 Domain :: postInitialize()
 {
+    for ( int i = 1; i <= this->dofManagerList->giveSize(); i++ ) {
+        this->dofManagerList->at(i)->postInitialize();
+    }
     for ( int i = 1; i <= this->elementList->giveSize(); i++ ) {
-        Element *e = this->elementList->at(i);
-        e->postInitialize();
+        this->elementList->at(i)->postInitialize();
     }
 }
 
@@ -1186,22 +1188,22 @@ Domain :: checkConsistency()
 // are having required support
 //
 {
-    int i, result = 1;
+    int result = 1;
     int nnode, nelem, nmat;
 
     nnode = this->giveNumberOfDofManagers();
     nelem = this->giveNumberOfElements();
     nmat  = this->giveNumberOfMaterialModels();
 
-    for ( i = 1; i <= nnode; i++ ) {
+    for ( int i = 1; i <= nnode; i++ ) {
         result &= this->giveDofManager(i)->checkConsistency();
     }
 
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         result &= this->giveElement(i)->checkConsistency();
     }
 
-    for ( i = 1; i <= nmat; i++ ) {
+    for ( int i = 1; i <= nmat; i++ ) {
         result &= this->giveMaterial(i)->checkConsistency();
     }
 

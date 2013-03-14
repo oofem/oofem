@@ -305,7 +305,6 @@ Truss2d :: initializeFrom(InputRecord *ir)
         _error("Unsupported value of cs_mode");
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 
@@ -325,7 +324,7 @@ Truss2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 void
 Truss2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) );
+    this->computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) );
 }
 
 void

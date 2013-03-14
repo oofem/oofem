@@ -290,9 +290,7 @@ LIBeam2d :: givePitch()
 IRResultType
 LIBeam2d :: initializeFrom(InputRecord *ir)
 {
-    this->StructuralElement :: initializeFrom(ir);
-    this->computeGaussPoints();
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 

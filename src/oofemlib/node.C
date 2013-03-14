@@ -325,11 +325,11 @@ Node :: checkConsistency()
      * Current implementation checks (when receiver has slave dofs) if receiver has the same
      * coordinate system as master dofManager of slave dof.
      */
-    int result = 1;
+    int result;
     int ndofs = this->giveNumberOfDofs();
     int nslaves = 0;
 
-    result = result && DofManager :: checkConsistency();
+    result = DofManager :: checkConsistency();
 
     for ( int i = 1; i <= ndofs; i++ ) {
         if ( dynamic_cast< SimpleSlaveDof * >( this->giveDof(i) ) ) {

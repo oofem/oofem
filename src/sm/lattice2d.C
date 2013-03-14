@@ -331,7 +331,6 @@ Lattice2d :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, gpCoords, IFT_Lattice2d_gpcoords, "gpcoords");
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 

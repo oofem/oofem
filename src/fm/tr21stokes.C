@@ -65,7 +65,6 @@ Tr21Stokes :: Tr21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
         this->numberOfGaussPoints = 3;
     else 
         this->numberOfGaussPoints = 4;
-    this->computeGaussPoints();
 }
 
 Tr21Stokes :: ~Tr21Stokes()

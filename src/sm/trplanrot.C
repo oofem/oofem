@@ -560,7 +560,6 @@ TrPlaneStrRot :: initializeFrom(InputRecord *ir)
         numberOfRotGaussPoints = 1;
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 

@@ -67,9 +67,6 @@ QSpaceGrad :: initializeFrom (InputRecord* ir)
 
     if ((numberOfGaussPoints != 8) && (numberOfGaussPoints != 14) && (numberOfGaussPoints != 27) && (numberOfGaussPoints != 64)) numberOfGaussPoints = 27;
 
-    // set - up Gaussian integration points
-    this -> computeGaussPoints();
-
     return IRRT_OK;
 }
 

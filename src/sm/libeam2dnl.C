@@ -469,9 +469,7 @@ double LIBeam2dNL :: givePitch()
 IRResultType
 LIBeam2dNL :: initializeFrom(InputRecord *ir)
 {
-    this->NLStructuralElement :: initializeFrom(ir);
-    this->computeGaussPoints();
-    return IRRT_OK;
+    return NLStructuralElement :: initializeFrom(ir);
 }
 
 

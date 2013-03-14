@@ -58,11 +58,9 @@ IRResultType SlaveNode :: initializeFrom(InputRecord *ir)
 }
 
 
-int SlaveNode :: checkConsistency()
+void SlaveNode :: postInitialize()
 {
-    bool result = true;
-
-    result = result && Node :: checkConsistency();
+    Node :: postInitialize();
 
     // initialize slave dofs (inside check of consistency of receiver and master dof)
     for ( int i = 1; i <= numberOfDofs; ++i ) {
@@ -71,7 +69,6 @@ int SlaveNode :: checkConsistency()
             sdof->initialize(masterDofManagers.giveSize(), masterDofManagers, NULL, masterWeights);
         }
     }
-    return result;
 }
 
 

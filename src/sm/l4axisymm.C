@@ -236,8 +236,6 @@ L4Axisymm :: initializeFrom(InputRecord *ir)
 
     numberOfFiAndShGaussPoints = 1;
 
-    this->computeGaussPoints();
-
     return IRRT_OK;
 }
 

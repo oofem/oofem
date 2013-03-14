@@ -96,7 +96,6 @@ QBrick1_ht :: initializeFrom(InputRecord *ir)
         numberOfGaussPoints = 27;
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 

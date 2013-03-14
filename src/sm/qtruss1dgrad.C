@@ -64,7 +64,7 @@ QTruss1dGrad :: QTruss1dGrad(int n, Domain *aDomain) : QTruss1d(n, aDomain),Grad
 void
 QTruss1dGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    if ( inode<3 ) {
+    if ( inode < 3 ) {
         answer.setValues(2, D_u, G_0);
     }
     else {
@@ -81,7 +81,6 @@ QTruss1dGrad :: initializeFrom(InputRecord *ir)
     this->StructuralElement :: initializeFrom(ir);
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 

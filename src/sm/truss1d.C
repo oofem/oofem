@@ -135,9 +135,7 @@ Truss1d :: computeVolumeAround(GaussPoint *gp)
 IRResultType
 Truss1d :: initializeFrom(InputRecord *ir)
 {
-    this->StructuralElement :: initializeFrom(ir);
-    this->computeGaussPoints();
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 

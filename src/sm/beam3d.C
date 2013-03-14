@@ -438,7 +438,6 @@ Beam3d :: initializeFrom(InputRecord *ir)
         dofsToCondense = NULL;
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 

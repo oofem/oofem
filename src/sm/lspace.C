@@ -268,9 +268,6 @@ LSpace :: initializeFrom(InputRecord *ir)
         numberOfGaussPoints = 8;
     }
 
-    // set up Gaussian integration points
-    this->computeGaussPoints();
-
     return IRRT_OK;
 }
 

@@ -78,9 +78,6 @@ QWedgeGrad :: initializeFrom (InputRecord* ir)
     if ((numberOfGaussPoints != 2) && (numberOfGaussPoints != 9))
         numberOfGaussPoints = 9;
 
-    // set - up Gaussian integration points
-    this->computeGaussPoints();
-
     return IRRT_OK;
 }
 

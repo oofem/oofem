@@ -130,7 +130,6 @@ TR1_2D_SUPG :: initializeFrom(InputRecord *ir)
         this->temp_vof = this->vof;
     }
 
-    this->computeGaussPoints();
     this->initGeometry();
     return IRRT_OK;
 }

@@ -63,10 +63,7 @@ SUPGElement2 :: initializeFrom(InputRecord *ir)
     //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                               // Required by IR_GIVE_FIELD macro
 
-    //FMElement :: initializeFrom (ir);
-    SUPGElement :: initializeFrom(ir);
-    this->computeGaussPoints();
-    return IRRT_OK;
+    return SUPGElement :: initializeFrom(ir);
 }
 
 

@@ -188,16 +188,15 @@ Quad10_2D_SUPG :: computeGaussPoints()
 void
 Quad10_2D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    int i;
     FloatArray n;
 
     this->velocityInterpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
     answer.resize(2, 8);
     answer.zero();
 
-    for ( i = 1; i <= 4; i++ ) {
-        answer.at(1, 2 * i - 1)  = n.at(i);
-        answer.at(2, 2 * i - 0)  = n.at(i);
+    for ( int i = 1; i <= 4; i++ ) {
+        answer.at(1, 2 * i - 1) = n.at(i);
+        answer.at(2, 2 * i - 0) = n.at(i);
     }
 }
 
@@ -205,7 +204,6 @@ Quad10_2D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
 void
 Quad10_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
 {
-    int i;
     FloatMatrix n, dn;
     FloatArray u, un;
     this->velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
@@ -216,41 +214,39 @@ Quad10_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Ti
 
     answer.resize(2, 8);
     answer.zero();
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, 2 * i - 1) = dn.at(i, 1) * u.at(1) + dn.at(i, 2) * u.at(2);
-        answer.at(2, 2 * i)   = dn.at(i, 1) * u.at(1) + dn.at(i, 2) * u.at(2);
+        answer.at(2, 2 * i)     = dn.at(i, 1) * u.at(1) + dn.at(i, 2) * u.at(2);
     }
 }
 
 void
 Quad10_2D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    int i;
     FloatMatrix dn(4, 2);
     this->velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(3, 8);
     answer.zero();
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, 2 * i - 1) = dn.at(i, 1);
-        answer.at(2, 2 * i)   = dn.at(i, 2);
+        answer.at(2, 2 * i)     = dn.at(i, 2);
         answer.at(3, 2 * i - 1) = dn.at(i, 2);
-        answer.at(3, 2 * i)   = dn.at(i, 1);
+        answer.at(3, 2 * i)     = dn.at(i, 1);
     }
 }
 
 void
 Quad10_2D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    int i;
     FloatMatrix dn(4, 2);
     velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(1, 8);
     answer.zero();
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, 2 * i - 1) = dn.at(i, 1);
         answer.at(1, 2 * i) = dn.at(i, 2);
     }
@@ -265,14 +261,13 @@ Quad10_2D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
     answer.resize(1, 1);
     answer.zero();
 
-    answer.at(1, 1)  = n.at(1);
+    answer.at(1, 1) = n.at(1);
 }
 
 
 void
 Quad10_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
 {
-    int i;
     FloatArray dnx(4), dny(4), u, u1(4), u2(4);
     FloatMatrix dn;
 
@@ -282,7 +277,7 @@ Quad10_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeSt
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
     velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         dnx.at(i) = dn.at(i, 1);
         dny.at(i) = dn.at(i, 2);
 
@@ -322,14 +317,13 @@ Quad10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     FloatMatrix dn, N, N_d, M_d, LSIC, G_c, M_c, N_c;
     FloatArray dN, s, lcoords_nodes, u, lcn, dn_a(2), n, u1(8), u2(8);
     GaussPoint *gp;
-    int j;
     IntegrationRule *iRule;
 
 
     iRule = integrationRulesArray [ 1 ];
     mu_min = 1;
     rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
-    for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+    for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
         gp = iRule->getIntegrationPoint(j);
         mu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, atTime);
         if ( mu_min > mu ) {
@@ -410,7 +404,7 @@ Quad10_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *atTime)
 {
     FloatMatrix n, b;
     double dV, rho;
-    int k, undofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
     GaussPoint *gp;
 
     answer.resize(undofs, undofs);
@@ -418,7 +412,7 @@ Quad10_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *atTime)
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* consistent part + supg stabilization term */
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
@@ -434,7 +428,7 @@ Quad10_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *atTim
 {
     FloatMatrix n, b;
     double dV, rho;
-    int k, undofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
     GaussPoint *gp;
 
     answer.resize(undofs, undofs);
@@ -442,7 +436,7 @@ Quad10_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *atTim
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* consistent part + supg stabilization term */
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
@@ -459,14 +453,14 @@ Quad10_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
 {
     FloatMatrix n, b;
     double dV, rho;
-    int k, undofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
     GaussPoint *gp;
 
     answer.resize(undofs, undofs);
     answer.zero();
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* mtrx for computing t_supg, norm of this mtrx is computed */
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
@@ -480,7 +474,7 @@ Quad10_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
 void
 Quad10_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *atTime)
 {
-    int k, undofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
     double dV, rho;
     GaussPoint *gp;
     FloatMatrix b;
@@ -489,7 +483,7 @@ Quad10_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *atTime)
     answer.zero();
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
         rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
@@ -511,14 +505,13 @@ Quad10_2D_SUPG :: computeAdvectionEpsilonTerm(FloatMatrix &answer, TimeStep *atT
     GaussPoint *gp;
     FloatMatrix g, b;
     double dV;
-    int k;
 
     answer.resize(pndofs, undofs);
     answer.zero();
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
 
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeGradPMatrix(g, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
@@ -534,7 +527,6 @@ Quad10_2D_SUPG :: computeMassEpsilonTerm(FloatMatrix &answer, TimeStep *atTime)
     // to compute t_pspg
     int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
     int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    int k;
     double dV;
     FloatMatrix g, n;
     GaussPoint *gp;
@@ -544,7 +536,7 @@ Quad10_2D_SUPG :: computeMassEpsilonTerm(FloatMatrix &answer, TimeStep *atTime)
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
 
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeGradPMatrix(g, gp);
         this->computeNuMatrix(n, gp);
@@ -564,23 +556,22 @@ Quad10_2D_SUPG :: giveNumberOfSpatialDimensions()
 double
 Quad10_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
 {
-    /*
-     * int i;
-     * double answer;
-     * FloatArray fi(3), un(6);
-     *
-     * this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
-     * for ( i = 1; i <= 3; i++ ) {
-     *    fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
-     * }
-     *
-     * double fix = b [ 0 ] * fi.at(1) + b [ 1 ] * fi.at(2) + b [ 2 ] * fi.at(3);
-     * double fiy = c [ 0 ] * fi.at(1) + c [ 1 ] * fi.at(2) + c [ 2 ] * fi.at(3);
-     * double norm = sqrt(fix * fix + fiy * fiy);
-     *
-     * answer = ( 1. / 3. ) * ( fix * ( un.at(1) + un.at(3) + un.at(5) ) + fiy * ( un.at(2) + un.at(4) + un.at(6) ) ) / norm;
-     * return answer;
-     */
+#if 0
+    double answer;
+    FloatArray fi(3), un(6);
+
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
+    for ( int i = 1; i <= 3; i++ ) {
+        fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
+    }
+
+    double fix = b [ 0 ] * fi.at(1) + b [ 1 ] * fi.at(2) + b [ 2 ] * fi.at(3);
+    double fiy = c [ 0 ] * fi.at(1) + c [ 1 ] * fi.at(2) + c [ 2 ] * fi.at(3);
+    double norm = sqrt(fix * fix + fiy * fiy);
+
+    answer = ( 1. / 3. ) * ( fix * ( un.at(1) + un.at(3) + un.at(5) ) + fiy * ( un.at(2) + un.at(4) + un.at(6) ) ) / norm;
+    return answer;
+#endif
     return 0.0;
 }
 
@@ -754,8 +745,8 @@ Quad10_2D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
     determinant = fabs( this->velocityInterpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this)) );
 
 
-    weight      = aGaussPoint->giveWeight();
-    volume      = determinant * weight;
+    weight = aGaussPoint->giveWeight();
+    volume = determinant * weight;
 
     return volume;
 }

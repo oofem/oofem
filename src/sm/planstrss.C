@@ -416,7 +416,6 @@ PlaneStress2d :: initializeFrom(InputRecord *ir)
         OOFEM_WARNING1("Number of Gauss points enforced to 4");
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 

@@ -166,8 +166,8 @@ Quad1Mindlin :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
+    this->numberOfGaussPoints = 4;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
-    this->computeGaussPoints();
     return this->NLStructuralElement :: initializeFrom(ir);
 }
 

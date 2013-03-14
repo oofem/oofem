@@ -76,9 +76,6 @@ QTRSpace :: initializeFrom(InputRecord *ir)
         numberOfGaussPoints = 4;
     }
 
-    // set - up Gaussian integration points
-    this->computeGaussPoints();
-
     return IRRT_OK;
 }
 
@@ -102,9 +99,9 @@ double
 QTRSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
-  double determinant =fabs ((this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this))));
+  double determinant = fabs ((this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this))));
   
-  double weight      = aGaussPoint->giveWeight();
+  double weight = aGaussPoint->giveWeight();
   
   return ( determinant * weight);
 }

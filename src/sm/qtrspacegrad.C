@@ -76,9 +76,6 @@ QTRSpaceGrad :: initializeFrom (InputRecord* ir)
     IR_GIVE_OPTIONAL_FIELD (ir, numberOfGaussPoints, IFT_Element_nip, "nip");
         numberOfGaussPoints = 4;
 
-    // set - up Gaussian integration points
-    this->computeGaussPoints();
-
     return IRRT_OK;
 }
 

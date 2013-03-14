@@ -285,8 +285,6 @@ Q4Axisymm :: initializeFrom(InputRecord *ir)
     }
 
 
-    this->computeGaussPoints();
-
     return IRRT_OK;
 }
 

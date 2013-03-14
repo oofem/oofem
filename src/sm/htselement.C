@@ -87,7 +87,6 @@ HTSelement :: initializeFrom(InputRecord *ir)
         numberOfGaussPoints = 4;
     }
 #endif
-    this->computeGaussPoints();
     this->computeCenterOfGravity();
     return IRRT_OK;
 }

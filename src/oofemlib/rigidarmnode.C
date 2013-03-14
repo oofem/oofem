@@ -45,7 +45,6 @@ RigidArmNode :: RigidArmNode(int n, Domain *aDomain) : Node(n, aDomain)
 void
 RigidArmNode :: allocAuxArrays()
 {
-    masterMask = new IntArray( this->giveNumberOfDofs() );
     countOfMasterDofs = new IntArray(numberOfDofs);
 
     masterDofID = new IntArray * [ numberOfDofs ];
@@ -65,7 +64,6 @@ RigidArmNode :: allocAuxArrays()
 void
 RigidArmNode :: deallocAuxArrays()
 {
-    delete masterMask;
     delete countOfMasterDofs;
 
     for ( int i = 0; i < numberOfDofs; i++ ) {
@@ -86,72 +84,45 @@ RigidArmNode :: initializeFrom(InputRecord *ir)
 
     Node :: initializeFrom(ir);
 
-    // allocate auxiliary arrays
-    allocAuxArrays();
-
     IR_GIVE_FIELD(ir, masterDofMngr, IFT_RigidArmNode_master, "master");
 
-    IR_GIVE_FIELD(ir, * masterMask, IFT_DofManager_mastermask, "mastermask"); ///< Is this really necessary, dofmanager should have read this already.
-    if ( masterMask->giveSize() != this->giveNumberOfDofs() ) {
+    IR_GIVE_FIELD(ir, masterMask, IFT_DofManager_mastermask, "mastermask"); ///< Is this really necessary, dofmanager should have read this already.
+    if ( masterMask.giveSize() != this->giveNumberOfDofs() ) {
         _error("initializeFrom: mastermask size mismatch");
     }
 
     return IRRT_OK;
 }
 
-
-int
-RigidArmNode :: checkConsistency()
-// Checks internal data consistency in node.
-// Current implementation checks (when receiver has slave dofs) if receiver has the same
-// coordinate system as master dofManager of slave dof.
-// If requested, computes natural coordinates on element-like masternodes
-
+void
+RigidArmNode :: postInitialize()
 {
-    int result = 1;
-    int ndofs;
-    Node *master;
+    Node :: postInitialize();
+    
+    // allocate auxiliary arrays
+    allocAuxArrays();
+    
+    this->masterNode = dynamic_cast< Node * >( this->domain->giveDofManager(masterDofMngr) );
+    if ( !masterNode ) {
+        OOFEM_WARNING("RigidArmNode :: postInitialize: master dofManager is not a node");
+    }
+    
+    int masterNdofs = masterNode->giveNumberOfDofs();
 
-    result = result && Node :: checkConsistency();
-
-    // finds master node
-    master = dynamic_cast< Node * >( this->domain->giveDofManager(masterDofMngr) );
-    if ( !master ) {
-        _warning2("checkConsistency: master dofManager is not compatible", 1);
-        result = 0;
+    IntArray masterNodes(masterNdofs);
+    for ( int i = 1; i <= masterNdofs; i++ ) {
+        masterNodes.at(i) = this->masterNode->giveNumber();
     }
 
-    // check if receiver has the same coordinate system as master dofManager
-    if ( !this->hasSameLCS(master) ) {
-        _warning2("checkConsistency: different lcs for master/slave nodes", 1);
-        result = 0;
-    }
-
-    // check if created DOFs (dofType) compatible with mastermask
-    ndofs = master->giveNumberOfDofs();
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        if ( masterMask->at(i) && dofArray [ i - 1 ]->isPrimaryDof() ) {
-            _error("checkConsistency: incompatible mastermask and doftype data");
-        }
-    }
-
-
-    // allocate
     for ( int i = 1; i <= numberOfDofs; i++ ) {
         if ( masterDofID [ i - 1 ] ) {
             countOfMasterDofs->at(i) = 0;
-            masterDofID [ i - 1 ]->resize(ndofs);
-            masterContribution [ i - 1 ]->resize(ndofs);
+            masterDofID [ i - 1 ]->resize(masterNdofs);
+            masterContribution [ i - 1 ]->resize(masterNdofs);
         }
     }
 
-    IntArray masterNodes(ndofs);
-    masterNode = master;
-    for ( int i = 1; i <= ndofs; i++ ) {
-        masterNodes.at(i) = master->giveNumber();
-    }
-
-    result = result && computeMasterContribution();
+    this->computeMasterContribution();
 
     // initialize slave dofs (inside check of consistency of receiver and master dof)
     for ( int i = 1; i <= numberOfDofs; i++ ) {
@@ -161,27 +132,49 @@ RigidArmNode :: checkConsistency()
         }
     }
 
-    /*
-     * #ifdef __PARALLEL_MODE
-     *  // check if master in same mode
-     *  if ( parallel_mode != DofManager_local ) {
-     *      if ( ( * masterNode )->giveParallelMode() != parallel_mode ) {
-     *          _warning2("checkConsistency: mismatch in parallel mode of RigidArmNode and master", 1);
-     *          result = 0;
-     *      }
-     *  }
-     *
-     * #endif
-     */
+#if 0
+#ifdef __PARALLEL_MODE
+    // check if master in same mode
+    if ( parallel_mode != DofManager_local ) {
+        if ( ( * masterNode )->giveParallelMode() != parallel_mode ) {
+        _warning2("checkConsistency: mismatch in parallel mode of RigidArmNode and master", 1);
+        result = 0;
+        }
+    }
+#endif
+#endif
 
     // deallocate auxiliary arrays
     deallocAuxArrays();
+
+}
+
+
+int
+RigidArmNode :: checkConsistency()
+{
+    int result;
+
+    result = Node :: checkConsistency();
+
+    // check if receiver has the same coordinate system as master dofManager
+    if ( !this->hasSameLCS(this->masterNode) ) {
+        _warning2("checkConsistency: different lcs for master/slave nodes", 1);
+        result = 0;
+    }
+
+    // check if created DOFs (dofType) compatible with mastermask
+    for ( int i = 1; i <= this->giveNumberOfDofs(); i++ ) {
+        if ( this->masterMask.at(i) && this->dofArray [ i - 1 ]->isPrimaryDof() ) {
+            _error("checkConsistency: incompatible mastermask and doftype data");
+        }
+    }
 
     return result;
 }
 
 
-int
+void
 RigidArmNode :: computeMasterContribution()
 {
     int k, sign;
@@ -207,57 +200,54 @@ RigidArmNode :: computeMasterContribution()
         id = this->giveDof(i)->giveDofID();
         R_uvw.zero();
 
-        switch ( masterMask->at(i) ) {
+        switch ( masterMask.at(i) ) {
         case 0: continue;
             break;
         case 1:
             if ( id == D_u ) {
-                if ( uvw.at(2) && masterMask->at( uvw.at(2) ) ) {
+                if ( uvw.at(2) && masterMask.at( uvw.at(2) ) ) {
                     R_uvw.at(3) =  ( ( int ) R_v );
                 }
 
-                if ( uvw.at(3) && masterMask->at( uvw.at(3) ) ) {
+                if ( uvw.at(3) && masterMask.at( uvw.at(3) ) ) {
                     R_uvw.at(2) = -( ( int ) R_w );
                 }
             } else if ( id == D_v ) {
-                if ( uvw.at(1) && masterMask->at( uvw.at(1) ) ) {
+                if ( uvw.at(1) && masterMask.at( uvw.at(1) ) ) {
                     R_uvw.at(3) = -( ( int ) R_u );
                 }
 
-                if ( uvw.at(3) && masterMask->at( uvw.at(3) ) ) {
+                if ( uvw.at(3) && masterMask.at( uvw.at(3) ) ) {
                     R_uvw.at(1) =  ( ( int ) R_w );
                 }
             } else if ( id == D_w ) {
-                if ( uvw.at(1) && masterMask->at( uvw.at(1) ) ) {
+                if ( uvw.at(1) && masterMask.at( uvw.at(1) ) ) {
                     R_uvw.at(2) =  ( ( int ) R_u );
                 }
 
-                if ( uvw.at(2) && masterMask->at( uvw.at(2) ) ) {
+                if ( uvw.at(2) && masterMask.at( uvw.at(2) ) ) {
                     R_uvw.at(1) = -( ( int ) R_v );
                 }
             }
 
             break;
         default:
-            _warning("computeMasterContribution: unknown value in masterMask");
-            return 0;
+            _error("computeMasterContribution: unknown value in masterMask");
         }
 
-        k = ++countOfMasterDofs->at(i);
-        masterDofID [ i - 1 ]->at(k) = ( int ) id;
-        masterContribution [ i - 1 ]->at(k) = 1.0;
+        k = ++ this->countOfMasterDofs->at(i);
+        this->masterDofID [ i - 1 ]->at(k) = ( int ) id;
+        this->masterContribution [ i - 1 ]->at(k) = 1.0;
 
         for ( int j = 1; j <= 3; j++ ) {
             if ( R_uvw.at(j) != 0 ) {
                 sign = R_uvw.at(j) < 0 ? -1 : 1;
 
-                k = ++countOfMasterDofs->at(i);
-                masterDofID [ i - 1 ]->at(k) = sign * R_uvw.at(j);
-                masterContribution [ i - 1 ]->at(k) = sign * xyz.at(j);
+                k = ++ this->countOfMasterDofs->at(i);
+                this->masterDofID [ i - 1 ]->at(k) = sign * R_uvw.at(j);
+                this->masterContribution [ i - 1 ]->at(k) = sign * xyz.at(j);
             }
         }
     }
-
-    return 1;
 }
 } // end namespace oofem

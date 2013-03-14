@@ -65,7 +65,6 @@ CBSElement :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, boundaryCodes, IFT_CBSElement_bcodes, _IFT_CBSElement_bcodes);
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 

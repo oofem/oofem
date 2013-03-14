@@ -936,10 +936,7 @@ bool DofManager :: giveMasterDofMans(IntArray &masters)
 }
 
 
-int DofManager :: checkConsistency()
-// Checks internal data consistency in node.
-// Current implementation checks (when receiver has simple slave dofs) if receiver
-// has the same coordinate system as master dofManager of slave dof.
+void DofManager :: postInitialize()
 {
     hasSlaveDofs = false;
     for ( int i = 1; i <= numberOfDofs; i++ ) {
@@ -948,8 +945,6 @@ int DofManager :: checkConsistency()
             continue;
         }
     }
-
-    return 1;
 }
 
 

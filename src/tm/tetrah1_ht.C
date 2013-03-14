@@ -109,7 +109,6 @@ Tetrah1_ht :: initializeFrom(InputRecord *ir)
         numberOfGaussPoints = 1;
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 

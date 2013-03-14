@@ -64,7 +64,6 @@ Tet21Stokes :: Tet21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 {
     this->numberOfDofMans = 10;
     this->numberOfGaussPoints = 4;
-    this->computeGaussPoints();
 }
 
 Tet21Stokes :: ~Tet21Stokes()

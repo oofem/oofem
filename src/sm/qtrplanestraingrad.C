@@ -79,8 +79,6 @@ QTrPlaneStrainGrad :: initializeFrom(InputRecord *ir)
     numberOfGaussPoints = 4;
     //IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
-
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 

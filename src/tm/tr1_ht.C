@@ -97,7 +97,6 @@ Tr1_ht :: initializeFrom(InputRecord *ir)
     //IR_GIVE_OPTIONAL_FIELD (ir, numberOfGaussPoints, "nip");
     //if ( numberOfGaussPoints != 1) numberOfGaussPoints = 1;
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 

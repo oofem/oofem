@@ -290,7 +290,6 @@ CCTPlate :: initializeFrom(InputRecord *ir)
     //if ( numberOfGaussPoints != 1 ) {
     //    numberOfGaussPoints = 1;
     //}
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 

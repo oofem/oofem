@@ -134,7 +134,6 @@ TR1_2D_CBS :: initializeFrom(InputRecord *ir)
 
     //</RESTRICTED_SECTION>
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 

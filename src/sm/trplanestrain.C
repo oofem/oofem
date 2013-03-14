@@ -279,9 +279,6 @@ TrPlaneStrain :: initializeFrom(InputRecord *ir)
         numberOfGaussPoints = 1;
     }
 
-    // set - up Gaussian integration points
-    this->computeGaussPoints();
-
     return IRRT_OK;
 }
 

@@ -69,7 +69,6 @@ SUPGElement :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, boundaryCodes, IFT_SUPGElement_bcodes, _IFT_SUPGElement_bcodes);
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 

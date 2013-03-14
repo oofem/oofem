@@ -459,13 +459,13 @@ LIBeam3dNL2 :: initializeFrom(InputRecord *ir)
      * }
      */
 
+    ///@todo Move this to postInitialize?
     // compute initial triad at centre - requires nodal coordinates
     FloatMatrix lcs, tc;
     this->giveLocalCoordinateSystem(lcs);
     tc.beTranspositionOf(lcs);
 
     this->computeQuaternionFromRotMtrx(q, tc);
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 

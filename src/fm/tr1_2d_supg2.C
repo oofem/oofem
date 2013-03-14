@@ -151,7 +151,6 @@ TR1_2D_SUPG2 :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, mat [ 1 ], IFT_Tr1SUPG2_mat1, "mat1");
     this->material = this->mat [ 0 ];
 
-    this->computeGaussPoints();
     this->initGeometry();
     this->updateIntegrationRules();
     return IRRT_OK;

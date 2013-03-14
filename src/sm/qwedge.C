@@ -74,9 +74,6 @@ QWedge :: initializeFrom(InputRecord *ir)
         numberOfGaussPoints = 9;
     }
 
-    // set - up Gaussian integration points
-    this->computeGaussPoints();
-
     return IRRT_OK;
 }
 
@@ -93,8 +90,6 @@ QWedge :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
     answer.at(1) = D_u;
     answer.at(2) = D_v;
     answer.at(3) = D_w;
-
-    return;
 }
 
 
@@ -146,7 +141,6 @@ QWedge :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i
 // evaluated at aGaussPoint
 
 {
-    int j, k, l;
     FloatMatrix dnx;
 
     // compute the derivatives of shape functions
@@ -158,33 +152,33 @@ QWedge :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i
     // put the products of derivatives of shape functions into the "nonlinear B matrix",
     // depending on parameter i, which is the number of the strain component
     if ( i <= 3 ) {
-        for ( k = 0; k < 15; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 45; j += 3 ) {
+        for ( int k = 0; k < 15; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 45; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, i) * dnx.at( ( j - 1 ) / 3 + 1, i );
                 }
             }
         }
     } else if ( i == 4 )        {
-        for ( k = 0; k < 15; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 45; j += 3 ) {
+        for ( int k = 0; k < 15; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 45; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 2 );
                 }
             }
         }
     } else if ( i == 5 )        {
-        for ( k = 0; k < 15; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 45; j += 3 ) {
+        for ( int k = 0; k < 15; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 45; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
                 }
             }
         }
     } else if ( i == 6 )        {
-        for ( k = 0; k < 15; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 45; j += 3 ) {
+        for ( int k = 0; k < 15; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 45; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 2 ) + dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
                 }
             }

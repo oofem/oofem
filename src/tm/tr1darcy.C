@@ -54,9 +54,7 @@ FEI2dTrLin Tr1Darcy :: interpolation_lin(1, 2);
 
 Tr1Darcy :: Tr1Darcy(int n, Domain *aDomain) : TransportElement(n, aDomain)
 {
-    numberOfDofMans  = 3;
-    numberOfGaussPoints = 1;
-    this->computeGaussPoints();
+    numberOfDofMans = 3;
 }
 
 Tr1Darcy :: ~Tr1Darcy()   
@@ -65,8 +63,8 @@ Tr1Darcy :: ~Tr1Darcy()
 
 IRResultType Tr1Darcy :: initializeFrom(InputRecord *ir)
 {
-    this->TransportElement :: initializeFrom(ir);
-    return IRRT_OK;
+    this->numberOfGaussPoints = 1;
+    return TransportElement :: initializeFrom(ir);
 }
 
 void Tr1Darcy :: computeGaussPoints()

@@ -426,12 +426,9 @@ public:
     /// Returns true if dof of given type is allowed to be associated to receiver
     virtual bool isDofTypeCompatible(dofType type) const { return false; }
     /**
-     * Checks internal data consistency in node.
-     * Current implementation checks (when receiver has slave dofs) if receiver has the same
-     * coordinate system as master dofManager of slave dof.
-     * @return Nonzero if receiver check is o.k.
+     * Performs post-initialization such like checking if there are any slave dofs etc.
      */
-    virtual int checkConsistency();
+    virtual void postInitialize();
     /**
      * Local renumbering support. For some tasks (parallel load balancing, for example) it is necessary to
      * renumber the entities. The various FEM components (such as nodes or elements) typically contain

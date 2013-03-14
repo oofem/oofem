@@ -64,7 +64,6 @@ QTruss1d :: initializeFrom(InputRecord *ir)
     this->StructuralElement :: initializeFrom(ir);
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 

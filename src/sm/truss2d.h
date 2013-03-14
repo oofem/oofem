@@ -62,6 +62,7 @@ protected:
     double length;
     double pitch;
     int cs_mode;
+    ///@todo Use interpolator class for lines in 2D
 
 public:
     Truss2d(int n, Domain *d);

@@ -72,9 +72,6 @@ LWedge :: initializeFrom(InputRecord *ir)
         numberOfGaussPoints = 2;
     }
 
-    // set - up Gaussian integration points
-    this->computeGaussPoints();
-
     return IRRT_OK;
 }
 

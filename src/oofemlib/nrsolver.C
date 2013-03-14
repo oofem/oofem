@@ -50,6 +50,8 @@
  #include "petscordering.h"
 #endif
 
+#include <cstdio>
+
 namespace oofem {
 #define nrsolver_ERROR_NORM_SMALL_NUM 1.e-6
 #define NRSOLVER_MAX_REL_ERROR_BOUND 1.e20

@@ -73,7 +73,7 @@ public:
     virtual ~SlaveNode(void) { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int checkConsistency();
+    virtual void postInitialize();
     virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); }
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 

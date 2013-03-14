@@ -273,8 +273,7 @@ InterfaceElem1d :: initializeFrom(InputRecord *ir)
         _error("instanciateFrom: wrong reference node or normal specified");
     }
 
-    this->computeGaussPoints();
-    this->computeLocalSlipDir(normal);
+    this->computeLocalSlipDir(normal); ///@todo Move into postInitialize ?
     return IRRT_OK;
 }
 

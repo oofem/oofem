@@ -430,9 +430,6 @@ TrPlaneStress2d :: initializeFrom(InputRecord *ir)
         numberOfGaussPoints = 1;
     }
 
-    // set - up Gaussian integration points
-    this->computeGaussPoints();
-
     return IRRT_OK;
 }
 
@@ -475,10 +472,9 @@ TrPlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCr
         // (standard or modified - no difference for constant-strain element)
 
         // nodal coordinates and coordinates of the element center
-        int i;
         FloatArray x(3), y(3);
         double cx = 0., cy = 0.;
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             x.at(i) = giveNode(i)->giveCoordinate(1);
             y.at(i) = giveNode(i)->giveCoordinate(2);
             cx += x.at(i);
@@ -490,7 +486,7 @@ TrPlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCr
 
         // nodal values of function phi (0 or 1)
         FloatArray phi(3);
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             if ( ( ( x.at(i) - cx ) * normalToCrackPlane.at(1) + ( y.at(i) - cy ) * normalToCrackPlane.at(2) ) > 0. ) {
                 phi.at(i) = 1.;
             } else {
@@ -511,14 +507,14 @@ TrPlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCr
         // gradient of function phi
         FloatArray gradPhi(2);
         gradPhi.zero();
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             gradPhi.at(1) += phi.at(i) * dnx.at(i, 1);
             gradPhi.at(2) += phi.at(i) * dnx.at(i, 2);
         }
 
         // scalar product of the gradient with crack normal
         double dPhidN = 0.;
-        for ( i = 1; i <= 2; i++ ) {
+        for ( int i = 1; i <= 2; i++ ) {
             dPhidN += gradPhi.at(i) * normalToCrackPlane.at(i);
         }
 
@@ -800,7 +796,6 @@ void TrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
 void
 TrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
 {
-    int i;
     WCRec l [ 2 ];
     GraphicObj *tr;
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
@@ -819,7 +814,7 @@ TrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
         double ax, ay, bx, by, norm, xc, yc, length;
         FloatArray crackDir;
 
-        for ( i = 1; i <= numberOfGaussPoints; i++ ) {
+        for ( int i = 1; i <= numberOfGaussPoints; i++ ) {
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(i - 1);
             if ( mat->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
@@ -1107,7 +1102,8 @@ TrPlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 
 
 int
-TrPlaneStress2d :: SpatialLocalizerI_containsPoint(const FloatArray &coords) {
+TrPlaneStress2d :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
+{
     FloatArray lcoords;
     return this->computeLocalCoordinates(lcoords, coords);
 }
@@ -1140,7 +1136,8 @@ TrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Floa
 
 
 double
-TrPlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize() {
+TrPlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
+{
     return sqrt(this->giveArea() * 2.0);
 }
 
@@ -1183,7 +1180,7 @@ TrPlaneStress2d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArr
                                                                         coordType ct, nodalValContainerType &list,
                                                                         InternalStateType type, TimeStep *tStep)
 {
-    int i, n;
+    int n;
     double l1, l2, l3;
     FloatArray lcoords;
     if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
@@ -1198,7 +1195,7 @@ TrPlaneStress2d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArr
     n = list.at(1)->giveSize();
     answer.resize(n);
 
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= n; i++ ) {
         answer.at(i) = l1 * list.at(1)->at(i) + l2 *list.at(2)->at(i) + l3 *list.at(3)->at(i);
     }
 }

@@ -61,41 +61,11 @@ IRResultType HangingNode :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-
 int HangingNode :: checkConsistency()
 {
-    Element *e;
-    FEInterpolation *fei;
-    FloatArray lcoords, masterContribution;
-    bool result = true;
+    Element *e = this->domain->giveElement(this->masterElement);
+    int result = Node :: checkConsistency();
 
-#ifdef __OOFEG
-    if (consistencyChecked) return result;
-    consistencyChecked = true;
-#endif
-
-    result = result && Node :: checkConsistency();
-
-    // First check element and interpolation
-    if (masterElement == -1) { // Then we find it by taking the closest (probably containing element)
-        FloatArray closest;
-        SpatialLocalizer *sp = this->domain->giveSpatialLocalizer();
-        sp->init();
-        // Closest point or containing point? It should be contained, but with numerical errors it might be slightly outside
-        // so the closest point is more robust.
-        if ( !(e = sp->giveElementClosestToPoint(lcoords, closest, coordinates, this->masterRegion)) ) {
-            OOFEM_WARNING("HangingNode :: checkConsistency - Couldn't find closest element (automatically).");
-            return false;
-        }
-        this->masterElement = e->giveNumber();
-    } else if ( !(e = this->giveDomain()->giveElement(this->masterElement)) ) {
-        OOFEM_WARNING2("HangingNode :: checkConsistency - Requested element %d doesn't exist.", this->masterElement);
-        return false;
-    }
-    if ( !(fei = e->giveInterpolation()) ) {
-        OOFEM_WARNING2("HangingNode :: checkConsistency - Requested element %d doesn't have a interpolator.", this->masterElement);
-        return false;
-    }
 #if 0
 #ifdef __PARALLEL_MODE
     // Check if master is in same mode
@@ -109,12 +79,46 @@ int HangingNode :: checkConsistency()
     }
 #endif
 #endif
+
     // Check local coordinate systems
     for ( int i = 1; i <= e->giveNumberOfNodes(); ++i ) {
         if ( !this->hasSameLCS(e->giveNode(i)) ) {
             OOFEM_WARNING("HangingNode :: checkConsistency - Different lcs for master/slave nodes.");
             result = false;
         }
+    }
+    return result;
+}
+
+void HangingNode :: postInitialize()
+{
+    Node :: postInitialize();
+
+    Element *e;
+    FEInterpolation *fei;
+    FloatArray lcoords, masterContribution;
+
+#ifdef __OOFEG
+    if (initialized) return;
+    initialized = true;
+#endif
+
+    // First check element and interpolation
+    if (masterElement == -1) { // Then we find it by taking the closest (probably containing element)
+        FloatArray closest;
+        SpatialLocalizer *sp = this->domain->giveSpatialLocalizer();
+        sp->init();
+        // Closest point or containing point? It should be contained, but with numerical errors it might be slightly outside
+        // so the closest point is more robust.
+        if ( !(e = sp->giveElementClosestToPoint(lcoords, closest, coordinates, this->masterRegion)) ) {
+            OOFEM_ERROR("HangingNode :: postInitialize - Couldn't find closest element (automatically).");
+        }
+        this->masterElement = e->giveNumber();
+    } else if ( !(e = this->giveDomain()->giveElement(this->masterElement)) ) {
+        OOFEM_ERROR2("HangingNode :: postInitialize - Requested element %d doesn't exist.", this->masterElement);
+    }
+    if ( !(fei = e->giveInterpolation()) ) {
+        OOFEM_ERROR2("HangingNode :: postInitialize - Requested element %d doesn't have a interpolator.", this->masterElement);
     }
 
     if (lcoords.giveSize() == 0) { // we don't need to do this again if the spatial localizer was used.
@@ -129,9 +133,8 @@ int HangingNode :: checkConsistency()
             DofIDItem id = sdof->giveDofID();
             fei = e->giveInterpolation(id);
             if (!fei) {
-                OOFEM_WARNING3("HangingNode :: checkConsistency - Requested interpolation for dof id %d doesn't exist in element %d.",
+                OOFEM_ERROR3("HangingNode :: postInitialize - Requested interpolation for dof id %d doesn't exist in element %d.",
                         id, this->masterElement);
-                return false;
             }
 #if 0// This won't work (yet), as it requires some more general FEI classes, or something similar.
             if (fei->hasMultiField()) {
@@ -156,8 +159,6 @@ int HangingNode :: checkConsistency()
 #endif
         }
     }
-
-    return true;
 }
 
 } // end namespace oofem

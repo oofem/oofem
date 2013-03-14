@@ -305,8 +305,6 @@ LIBeam3d2 :: initializeFrom(InputRecord *ir)
     this->giveLocalCoordinateSystem(lcs);
     this->tc.beTranspositionOf(lcs);
 
-    this->computeGaussPoints();
-
     return IRRT_OK;
 }
 
