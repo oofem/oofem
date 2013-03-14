@@ -44,7 +44,7 @@
 //@{
 #define _IFT_EnrichmentItem_geometryItemNr "geometryitemnr"
 #define _IFT_EnrichmentItem_enrichmentFunctionNr "enrichmentfunctionnr"
-#define _IFT_EnrichmentItem_materialNr "materialnr"
+#define _IFT_EnrichmentItem_materialNr "material"
 //@}
 
 namespace oofem {

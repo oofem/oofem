@@ -411,14 +411,13 @@ int DofManager :: giveNumberOfPrimaryMasterDofs(IntArray &dofArray) const
 
 IRResultType DofManager ::  resolveDofIDArray(InputRecord *ir, IntArray &dofIDArry)
 {
-    const char *__keyword, *__proc = "resolveDofIDArray";
+    const char *__proc = "resolveDofIDArray";
     IRResultType result;
 
     numberOfDofs = -1;
-    __keyword = "ndofs";
-    result = ir->giveOptionalField(numberOfDofs, IFT_DofManager_ndofs, __keyword);
+    result = ir->giveOptionalField(numberOfDofs, IFT_DofManager_ndofs, "ndofs");
     if ( result != IRRT_OK ) {
-        IR_IOERR(giveClassName(), __proc, IFT_DofManager_ndofs, __keyword, ir, result);
+        IR_IOERR(giveClassName(), __proc, IFT_DofManager_ndofs, "ndofs", ir, result);
     }
 
     // returns nonzero if succes
@@ -429,10 +428,9 @@ IRResultType DofManager ::  resolveDofIDArray(InputRecord *ir, IntArray &dofIDAr
         // if ndofs is prescribed, read the physical meaning of particular dofs
         // for detailed values of DofMask array see cltypes.h file
         // for exaple 1 is for D_u (displacemet in u dir), 2 for D_v, 3 for D_w, ...
-        __keyword = "dofidmask";
-        result = ir->giveField(dofIDArry, IFT_DofManager_dofidmask, __keyword);
+        result = ir->giveField(dofIDArry, IFT_DofManager_dofidmask, "dofidmask");
         if ( result != IRRT_OK ) {
-            IR_IOERR(giveClassName(), __proc, IFT_DofManager_dofidmask, __keyword, ir, result);
+            IR_IOERR(giveClassName(), __proc, IFT_DofManager_dofidmask, "dofidmask", ir, result);
         }
 
         if ( dofIDArry.giveSize() != numberOfDofs ) {

@@ -267,8 +267,8 @@ InterfaceElem1d :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     this->StructuralElement :: initializeFrom(ir);
-    IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, IFT_Beam3d_refnode, "refnode");
-    IR_GIVE_OPTIONAL_FIELD(ir, normal, IFT_Node_coords, "normal");
+    IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, IFT_InterfaceElem1d_refnode, "refnode");
+    IR_GIVE_OPTIONAL_FIELD(ir, normal, IFT_InterfaceElem1d_normal, "normal");
     if ( referenceNode == 0 && normal.at(1) == 0 && normal.at(2) == 0 && normal.at(1) == 0 && normal.at(3) == 0 ) {
         _error("instanciateFrom: wrong reference node or normal specified");
     }

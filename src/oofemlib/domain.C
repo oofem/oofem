@@ -483,7 +483,7 @@ Domain :: instanciateYourself(DataReader *dr)
     ir->giveOptionalField(nbarrier,  IFT_Domain_nbarrier, "nbarrier");
     // read optional number of RandomFieldGenerator
     nrfg = 0;
-    ir->giveOptionalField(nrfg,  IFT_Domain_nrfg, "nrandgen");
+    ir->giveOptionalField(nrfg,  IFT_Domain_nrandgen, "nrandgen");
 
 
 

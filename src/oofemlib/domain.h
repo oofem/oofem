@@ -52,16 +52,16 @@
 
 ///@name Input fields for domains
 //@{
-#define _IFT_Domain_type "type"
+#define _IFT_Domain_type "domain" ///< This is trouble, will not work with dynamic input record
 #define _IFT_Domain_ndofman "ndofman"
 #define _IFT_Domain_nelem "nelem"
 #define _IFT_Domain_nmat "nmat"
 #define _IFT_Domain_ncrosssect "ncrosssect"
 #define _IFT_Domain_nbc "nbc"
 #define _IFT_Domain_nic "nic"
-#define _IFT_Domain_nloadtimefunct "nloadtimefunct"
+#define _IFT_Domain_nloadtimefunct "nlft"
 #define _IFT_Domain_nbarrier "nbarrier"
-#define _IFT_Domain_nrfg "nrfg"
+#define _IFT_Domain_nrandgen "nrandgen"
 #define _IFT_Domain_topology "topology"
 //@}
 

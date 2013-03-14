@@ -45,7 +45,7 @@
 
 ///@name Input fields for PrescribedTensor
 //@{
-#define _IFT_PrescribedGradient_centercoords "centercoords"
+#define _IFT_PrescribedGradient_centercoords "ccoord"
 #define _IFT_PrescribedGradient_gradient "gradient"
 //@}
 

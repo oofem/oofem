@@ -44,7 +44,11 @@
 ///@name Input fields for WeakPeriodicBoundaryCondition
 //@{
 #define _IFT_WeakPeriodicBoundaryCondition_order "order"
-#define _IFT_WeakPeriodicBoundaryCondition_descritization "descritization"
+#define _IFT_WeakPeriodicBoundaryCondition_descritizationType "descritizationtype"
+#define _IFT_WeakPeriodicBoundaryCondition_dofid "dofid"
+#define _IFT_WeakPeriodicBoundaryCondition_ngp "ngp"
+#define _IFT_WeakPeriodicBoundaryCondition_elementSidesPositive "elementsidespositive"
+#define _IFT_WeakPeriodicBoundaryCondition_elementSidesNegative "elementsidesnegative"
 //@}
 
 namespace oofem {

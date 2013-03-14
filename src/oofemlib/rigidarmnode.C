@@ -91,7 +91,7 @@ RigidArmNode :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, masterDofMngr, IFT_RigidArmNode_master, "master");
 
-    IR_GIVE_FIELD(ir, * masterMask, IFT_DofManager_mastermask, "mastermask");
+    IR_GIVE_FIELD(ir, * masterMask, IFT_DofManager_mastermask, "mastermask"); ///< Is this really necessary, dofmanager should have read this already.
     if ( masterMask->giveSize() != this->giveNumberOfDofs() ) {
         _error("initializeFrom: mastermask size mismatch");
     }
@@ -109,7 +109,7 @@ RigidArmNode :: checkConsistency()
 
 {
     int result = 1;
-    int i, ndofs;
+    int ndofs;
     Node *master;
 
     result = result && Node :: checkConsistency();
@@ -129,7 +129,7 @@ RigidArmNode :: checkConsistency()
 
     // check if created DOFs (dofType) compatible with mastermask
     ndofs = master->giveNumberOfDofs();
-    for ( i = 1; i <= numberOfDofs; i++ ) {
+    for ( int i = 1; i <= numberOfDofs; i++ ) {
         if ( masterMask->at(i) && dofArray [ i - 1 ]->isPrimaryDof() ) {
             _error("checkConsistency: incompatible mastermask and doftype data");
         }
@@ -137,7 +137,7 @@ RigidArmNode :: checkConsistency()
 
 
     // allocate
-    for ( i = 1; i <= numberOfDofs; i++ ) {
+    for ( int i = 1; i <= numberOfDofs; i++ ) {
         if ( masterDofID [ i - 1 ] ) {
             countOfMasterDofs->at(i) = 0;
             masterDofID [ i - 1 ]->resize(ndofs);
@@ -147,14 +147,14 @@ RigidArmNode :: checkConsistency()
 
     IntArray masterNodes(ndofs);
     masterNode = master;
-    for ( i = 1; i <= ndofs; i++ ) {
+    for ( int i = 1; i <= ndofs; i++ ) {
         masterNodes.at(i) = master->giveNumber();
     }
 
     result = result && computeMasterContribution();
 
     // initialize slave dofs (inside check of consistency of receiver and master dof)
-    for ( i = 1; i <= numberOfDofs; i++ ) {
+    for ( int i = 1; i <= numberOfDofs; i++ ) {
         SlaveDof *sdof = dynamic_cast< SlaveDof* >( dofArray [ i - 1 ] );
         if ( sdof ) {
             sdof->initialize(countOfMasterDofs->at(i), masterNodes, masterDofID [ i - 1 ], *masterContribution [ i - 1 ]);
@@ -184,7 +184,7 @@ RigidArmNode :: checkConsistency()
 int
 RigidArmNode :: computeMasterContribution()
 {
-    int i, j, k, sign;
+    int k, sign;
     IntArray R_uvw(3), uvw(3);
     FloatArray xyz(3);
     DofIDItem id;
@@ -194,7 +194,7 @@ RigidArmNode :: computeMasterContribution()
     uvw.at(2) = this->findDofWithDofId(R_v);
     uvw.at(3) = this->findDofWithDofId(R_w);
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         xyz.at(i) = this->giveCoordinate(i) - masterNode->giveCoordinate(i);
     }
 
@@ -203,7 +203,7 @@ RigidArmNode :: computeMasterContribution()
         xyz.rotatedWith(* this->localCoordinateSystem, 'n');
     }
 
-    for ( i = 1; i <= numberOfDofs; i++ ) {
+    for ( int i = 1; i <= numberOfDofs; i++ ) {
         id = this->giveDof(i)->giveDofID();
         R_uvw.zero();
 
@@ -247,7 +247,7 @@ RigidArmNode :: computeMasterContribution()
         masterDofID [ i - 1 ]->at(k) = ( int ) id;
         masterContribution [ i - 1 ]->at(k) = 1.0;
 
-        for ( j = 1; j <= 3; j++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             if ( R_uvw.at(j) != 0 ) {
                 sign = R_uvw.at(j) < 0 ? -1 : 1;
 

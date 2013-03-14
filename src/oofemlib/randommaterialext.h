@@ -41,7 +41,7 @@
 
 ///@name Input fields for RandomMaterialExt
 //@{
-#define _IFT_RandomMaterialExt_randVariables "randvariables"
+#define _IFT_RandomMaterialExt_randVariables "randvars"
 #define _IFT_RandomMaterialExt_randGen "randgen"
 //@}
 

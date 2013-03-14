@@ -55,12 +55,12 @@
 #define _IFT_DofManager_bc "bc"
 #define _IFT_DofManager_ic "ic"
 #define _IFT_DofManager_mastermask "mastermask"
-#define _IFT_DofManager_doftypemask "doftypemask"
-#define _IFT_DofManager_boundaryflag "boundaryflag"
+#define _IFT_DofManager_doftypemask "doftype"
+#define _IFT_DofManager_boundaryflag "boundary"
 #define _IFT_DofManager_globnum "globnum"
 #define _IFT_DofManager_partitions "partitions"
-#define _IFT_DofManager_sharedflag "sharedflag"
-#define _IFT_DofManager_remoteflag "remoteflag"
+#define _IFT_DofManager_sharedflag "shared"
+#define _IFT_DofManager_remoteflag "remote"
 #define _IFT_DofManager_nullflag "nullflag"
 //@}
 

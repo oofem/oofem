@@ -69,24 +69,24 @@ WeakPeriodicbc :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, orderOfPolygon, IFT_WeakPeriodicBoundaryCondition_order, "order");
 
     int t = ( int ) trigonometric;
-    IR_GIVE_OPTIONAL_FIELD(ir, t, IFT_WeakPeriodicBoundaryCondition_descritization, "descritizationtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, t, IFT_WeakPeriodicBoundaryCondition_descritizationType, "descritizationtype");
     useBasisType = ( basisType ) t;  // Fourierseries by default
 
     dofid = P_f;    // Pressure as default
-    IR_GIVE_OPTIONAL_FIELD(ir, dofid, IFT_WeakPeriodicBoundaryCondition_order, "dofid");
+    IR_GIVE_OPTIONAL_FIELD(ir, dofid, IFT_WeakPeriodicBoundaryCondition_dofid, "dofid");
 
     ngp = -1;    // Pressure as default
-    IR_GIVE_OPTIONAL_FIELD(ir, ngp, IFT_WeakPeriodicBoundaryCondition_order, "ngp");
+    IR_GIVE_OPTIONAL_FIELD(ir, ngp, IFT_WeakPeriodicBoundaryCondition_ngp, "ngp");
 
     IntArray temp;
-    IR_GIVE_OPTIONAL_FIELD(ir, temp, IFT_ActiveBoundaryCondition_elementSides, "elementsidespositive");
+    IR_GIVE_OPTIONAL_FIELD(ir, temp, IFT_WeakPeriodicBoundaryCondition_elementSidesPositive, "elementsidespositive");
     for ( int i = 0; i < temp.giveSize() / 2; i++ ) {
         //printf("Add positive edge, element %u, side %u\n", temp.at(2*i+2), temp.at(2*i+1));
         side [ 0 ].push_back( temp.at(2 * i + 1) );
         element [ 0 ].push_back( temp.at(2 * i + 2) );
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, temp, IFT_ActiveBoundaryCondition_elementSides, "elementsidesnegative");
+    IR_GIVE_OPTIONAL_FIELD(ir, temp, IFT_WeakPeriodicBoundaryCondition_elementSidesNegative, "elementsidesnegative");
     for ( int i = 0; i < temp.giveSize() / 2; i++ ) {
         //printf("Add negative edge, element %u, side %u\n", temp.at(2*i+2), temp.at(2*i+1));
         side [ 1 ].push_back( temp.at(2 * i + 1) );

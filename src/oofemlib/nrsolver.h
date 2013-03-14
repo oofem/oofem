@@ -43,8 +43,8 @@
 #include "sparsenonlinsystemnm.h"
 #include "sparsemtrx.h"
 #include "flotarry.h"
-
 #include "linesearch.h"
+
 #ifdef __PETSC_MODULE
  #include <petscksp.h>
 #endif
@@ -52,7 +52,7 @@
 ///@name Input fields for NRSolver
 //@{
 #define _IFT_NRSolver_maxiter "maxiter"
-#define _IFT_NRSolver_miniterations "miniterations"
+#define _IFT_NRSolver_miniterations "miniter"
 #define _IFT_NRSolver_minsteplength "minsteplength"
 #define _IFT_NRSolver_manrmsteps "manrmsteps"
 #define _IFT_NRSolver_lstype "lstype"
@@ -60,8 +60,6 @@
 #define _IFT_NRSolver_ddv "ddv"
 #define _IFT_NRSolver_ddltf "ddltf"
 #define _IFT_NRSolver_linesearch "linesearch"
-#define _IFT_NRSolver_nccdg "nccdg"
-#define _IFT_NRSolver_ccdg "ccdg"
 #define _IFT_NRSolver_rtolv "rtolv"
 #define _IFT_NRSolver_rtolf "rtolf"
 #define _IFT_NRSolver_rtold "rtold"

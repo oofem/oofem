@@ -36,7 +36,6 @@
 #define engngm_h
 
 #include "inputrecord.h"
-
 #include "alist.h"
 #include "intarray.h"
 #include "fieldmanager.h"

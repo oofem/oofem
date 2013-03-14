@@ -49,9 +49,9 @@
 #define _IFT_NonlocalMaterialExtensionInterface_wft "wft"
 #define _IFT_NonlocalMaterialExtensionInterface_averagingtype "averagingtype"
 #define _IFT_NonlocalMaterialExtensionInterface_m "m"
-#define _IFT_NonlocalMaterialExtensionInterface_scalingtype "scalingtype"
-#define _IFT_NonlocalMaterialExtensionInterface_averagedquantity "averagedquantity"
-#define _IFT_NonlocalMaterialExtensionInterface_nonlocalvariation "nonlocalvariation"
+#define _IFT_NonlocalMaterialExtensionInterface_scalingtype "scaling"
+#define _IFT_NonlocalMaterialExtensionInterface_averagedquantity "averagedvar"
+#define _IFT_NonlocalMaterialExtensionInterface_nonlocalvariation "nlvariation"
 #define _IFT_NonlocalMaterialExtensionInterface_beta "beta"
 #define _IFT_NonlocalMaterialExtensionInterface_zeta "zeta"
 //@}

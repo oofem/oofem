@@ -39,18 +39,7 @@
 
 ///@name Input fields for RigidArmNode
 //@{
-#define _IFT_RigidArmNode_coords "coords"
 #define _IFT_RigidArmNode_master "master"
-#define _IFT_RigidArmNode_load "load"
-#define _IFT_RigidArmNode_bc "bc"
-#define _IFT_RigidArmNode_ic "ic"
-#define _IFT_RigidArmNode_mastermask "mastermask"
-#define _IFT_RigidArmNode_lcs "lcs"
-#define _IFT_RigidArmNode_globnum "globnum"
-#define _IFT_RigidArmNode_partitions "partitions"
-#define _IFT_RigidArmNode_shared "shared"
-#define _IFT_RigidArmNode_remote "remote"
-#define _IFT_RigidArmNode_null "null"
 //@}
 
 namespace oofem {

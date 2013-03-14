@@ -32,8 +32,8 @@
  */
 
 
-#ifndef RVEENGNGMODEL_H_
-#define RVEENGNGMODEL_H_
+#ifndef rveengngmodel_h
+#define rveengngmodel_h
 
 #include "flotarry.h"
 #include "timestep.h"
@@ -67,4 +67,4 @@ public:
 
 }
 
-#endif /* RVEENGNGMODEL_H_ */
+#endif // rveengngmodel_h

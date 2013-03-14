@@ -42,7 +42,7 @@
 //@{
 #define _IFT_MixedGradientPressure_devGradient "devgradient"
 #define _IFT_MixedGradientPressure_pressure "pressure"
-#define _IFT_MixedGradientPressure_centerCoords "centercoords"
+#define _IFT_MixedGradientPressure_centerCoords "ccoord"
 //@}
 
 namespace oofem {

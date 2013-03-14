@@ -51,7 +51,7 @@
 //@{
 #define _IFT_LoadBalancer_wtp "wtp"
 #define _IFT_LoadBalancerMonitor_nodeWeightMode "nodeweightmode"
-#define _IFT_LoadBalancerMonitor_initialnodeweights "initialnodeweights"
+#define _IFT_LoadBalancerMonitor_initialnodeweights "nw"
 //@}
 
 ///@name Input fields for WallClockLoadBalancerMonitor
@@ -60,10 +60,10 @@
 #define _IFT_WallClockLoadBalancerMonitor_abswct "abswct"
 #define _IFT_WallClockLoadBalancerMonitor_minwct "minwct"
 #define _IFT_WallClockLoadBalancerMonitor_lbstep "lbstep"
-#define _IFT_WallClockLoadBalancerMonitor_perturbedsteps "perturbedsteps"
-#define _IFT_WallClockLoadBalancerMonitor_perturbfactor "perturbfactor"
-#define _IFT_WallClockLoadBalancerMonitor_recoveredsteps "recoveredsteps"
-#define _IFT_WallClockLoadBalancerMonitor_processingweights "processingweights"
+#define _IFT_WallClockLoadBalancerMonitor_perturbedsteps "lbperturbedsteps"
+#define _IFT_WallClockLoadBalancerMonitor_perturbfactor "lbperturbfactor"
+#define _IFT_WallClockLoadBalancerMonitor_recoveredsteps "lbrecoveredsteps"
+#define _IFT_WallClockLoadBalancerMonitor_processingweights "lbprocessingweights"
 //@}
 
 namespace oofem {

@@ -78,8 +78,7 @@ enum InputFieldType {
 
     IFT_MetaStep_nsteps,
 
-    IFT_ExportModuleManager_nmodules,
-    IFT_InitModuleManager_nmodules,
+    IFT_ModuleManager_nmodules,
 
     IFT_ExportModule_tstepall,
     IFT_ExportModule_tstepstep,
@@ -114,6 +113,11 @@ enum InputFieldType {
 
     IFT_GPExportModule_vartypes,
     IFT_GPExportModule_ncoords,
+
+    IFT_MatlabExportModule_mesh,
+    IFT_MatlabExportModule_data,
+    IFT_MatlabExportModule_area,
+    IFT_MatlabExportModule_specials,
 
     IFT_IncrementalLinearStatic_endoftimeofinterest,
     IFT_IncrementalLinearStatic_prescribedtimes,
@@ -258,8 +262,6 @@ enum InputFieldType {
     IFT_NRSolver_ddv,
     IFT_NRSolver_ddltf,
     IFT_NRSolver_linesearch,
-    IFT_NRSolver_nccdg,
-    IFT_NRSolver_ccdg,
     IFT_NRSolver_rtolv,
     IFT_NRSolver_rtolf,
     IFT_NRSolver_rtold,
@@ -335,7 +337,7 @@ enum InputFieldType {
     IFT_Domain_nic,
     IFT_Domain_nloadtimefunct,
     IFT_Domain_nbarrier,
-    IFT_Domain_nrfg,
+    IFT_Domain_nrandgen,
     IFT_Domain_topology,
 
     IFT_DofManager_ndofs,
@@ -355,18 +357,7 @@ enum InputFieldType {
     IFT_Node_coords,
     IFT_Node_lcs,
     IFT_Particle_rad,
-    IFT_RigidArmNode_coords,
     IFT_RigidArmNode_master,
-    IFT_RigidArmNode_load,
-    IFT_RigidArmNode_bc,
-    IFT_RigidArmNode_ic,
-    IFT_RigidArmNode_mastermask,
-    IFT_RigidArmNode_lcs,
-    IFT_RigidArmNode_globnum,
-    IFT_RigidArmNode_partitions,
-    IFT_RigidArmNode_shared,
-    IFT_RigidArmNode_remote,
-    IFT_RigidArmNode_null,
     IFT_SlaveNode_masterDofManagers,
     IFT_SlaveNode_weights,
     IFT_HangingNode_masterElement,
@@ -417,6 +408,9 @@ enum InputFieldType {
     IFT_SpringElement_mode,
     IFT_SpringElement_orientation,
     IFT_SpringElement_springConstant,
+
+    IFT_InterfaceElem1d_refnode,
+    IFT_InterfaceElem1d_normal,
 
     IFT_Tr1CBS_vof,
     IFT_Tr1CBS_pvof,
@@ -1306,14 +1300,17 @@ enum InputFieldType {
     IFT_TSplineInterpolation_localIndexKnotVectorV,
     IFT_TSplineInterpolation_localIndexKnotVectorW,
 
-    IFT_IGAElement_NIP,
     IFT_IGAElement_KnotSpanParallelMode,
 
     IFT_RVEMaterial_bctype,
     IFT_RVEMaterial_supressoutput,
 
     IFT_WeakPeriodicBoundaryCondition_order,
-    IFT_WeakPeriodicBoundaryCondition_descritization,
+    IFT_WeakPeriodicBoundaryCondition_descritizationType,
+    IFT_WeakPeriodicBoundaryCondition_dofid,
+    IFT_WeakPeriodicBoundaryCondition_ngp,
+    IFT_WeakPeriodicBoundaryCondition_elementSidesPositive,
+    IFT_WeakPeriodicBoundaryCondition_elementSidesNegative,
 
     IFT_Unknown
 };

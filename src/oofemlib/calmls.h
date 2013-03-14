@@ -53,7 +53,7 @@
 #define _IFT_CylindricalALM_initialsteplength "initialsteplength"
 #define _IFT_CylindricalALM_forcedinitialsteplength "forcedinitialsteplength"
 #define _IFT_CylindricalALM_reqiterations "reqiterations"
-#define _IFT_CylindricalALM_miniterations "miniterations"
+#define _IFT_CylindricalALM_miniterations "miniter"
 #define _IFT_CylindricalALM_manrmsteps "manrmsteps"
 #define _IFT_CylindricalALM_hpcmode "hpcmode"
 #define _IFT_CylindricalALM_hpc "hpc"

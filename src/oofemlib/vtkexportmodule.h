@@ -44,7 +44,6 @@
 
 ///@name Input fields for VTK export module
 //@{
-#define _IFT_InitModule_initfilename "initfile"
 #define _IFT_VTKExportModule_cellvars "cellvars"
 #define _IFT_VTKExportModule_vars "vars"
 #define _IFT_VTKExportModule_primvars "primvars"
