@@ -13,12 +13,9 @@ html: pdf
 
 #latex2html -local_icons -dir html -mkdir elementlibmanual
 
-ps:
-	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
-	rm -f *.toc *.lot *.aux
-	latex \\nonstopmode\\input elementlibmanual
-	latex \\nonstopmode\\input elementlibmanual
-	dvips -o 	elementlibmanual.ps elementlibmanual
+ps: pdf
+	pdftops elementlibmanual.pdf
+
 
 pdf:
 	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
