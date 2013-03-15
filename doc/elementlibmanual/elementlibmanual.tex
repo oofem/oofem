@@ -1038,7 +1038,6 @@ The knot multiplicity can be set using optional parameters \param{knotmultiplici
 The degree of approximation for each parametric direction is determined from \param{degree} array, dimension of which is equal to number of spatial dimensions of the problem.\\
 In case of elements with BSpline or Nurbs interpolation, the nodes forming the rectangular array of control points of the element are ordered in a such way, that u-index is changing most quickly, and w-index (or v-index in case of 2d problems) most slowly. In case of elements with T-spline interpolation, the nodes forming the T-mesh of the element are ordered arbitrarily.
 
-
 The supported \entKeyword{IGAElement} values are following:\\
 \elemkeyword{bsplineplanestresselement}\\
 \descitem{Parameters} None.\\
@@ -1056,28 +1055,29 @@ The parameters \param{localindexknotvectoru}, \param{localindexknotvectorv},\\ a
 \subsection{Special elements}
 \subsubsection{LumpedMass element}
 This element, defined by a single node, allows to introduce additional concentrated mass and/or rotational inertias in a node.
-A different mass and rotary inertia may be assigned to each coordinate direction. At present, individual mass/inertia components can be specified for  every degree of freedom of element node. Only displacement and rotational degrees od freedom are considered. 
+A different mass and rotary inertia may be assigned to each coordinate direction. At present, individual mass/inertia components can be specified for  every degree of freedom of element node. Only displacement and rotational degrees od freedom are considered.  The element features are summarized in Table~\ref{LumpedMasssummary}.
 
-\elemkeyword{LumpedMass}\\
-\descitem{Parameters} \field{components}{ra}\\
-The \param{components} allows to specify additional concentrated mass components (Force*Time$^2$/Length) and rotary inertias (Force*Length*Time$^2$) about the nodal coordinate axes. Only displacement and rotational degrees of freedom are considered. The individual DOFs are ordered according to following rule: first, displacement degrees of freedom in the direction of x,y, and z axes (if any), followed by rotational DOFs around x,y, and z axes (if any).\\
-\descitem{Unknowns}
-Only displacement and roational DOFs are considered ($D_u$, $D_v$, $D_w$, $R_u$, $R_v$, and $R_w$).\\
-\descitem{Approximation} None.\\
-\descitem{Integration}
-None.\\
-\descitem{Features} None.\\
-\descitem{Loads} \\
-\descitem{Status} 
+\begin{elementsummary}{LumpedMass}{Lumped mass element}{\field{components}{ra}}{LumpedMass element summary}{LumpedMasssummary}
+\elementParam{\param{components}: allows to specify additional concentrated mass components (Force*Time$^2$/Length) and rotary inertias (Force*Length*Time$^2$) about the nodal coordinate axes. Only displacement and rotational degrees of freedom are considered. The individual DOFs are ordered according to following rule: first, displacement degrees of freedom in the direction of x,y, and z axes (if any), followed by rotational DOFs around x,y, and z axes (if any).}
+\elementDescription{Unknowns}{Only displacement and roational DOFs are considered ($D_u$, $D_v$, $D_w$, $R_u$, $R_v$, and $R_w$).}
+\elementDescription{Approximation}{-}
+\elementDescription{Integration}{-}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Loads}{-}
+\elementDescription{Status}{Reliable}
+\end{elementsummary}
 
 \subsubsection{Spring element}
 This element represent longitudial or torsional spring element. It is defined by two nodes, orientation and a spring constant.
-The spring element has no mass associated, the mass can be added using LumpedMass element. The spring is linear and works the same way in tension or in compression. 
+The spring element has no mass associated, the mass can be added using LumpedMass element. The spring is linear and works the same way in tension or in compression. The element features are summarized in Table~\ref{Springsummary}.
 
-\elemkeyword{Spring}\\
-\descitem{Parameters} \field{mode}{in} \field{k}{rn} \field{orientation}{ra}\\
-The \param{mode} parameter defines the type of spring element (see Table~\ref{spring_mode_table}). The spring constant is defined by \param{k} parameter, corresponding units are [Force/Length] for longitudinal spring and [Force*Length/Radian] for torsional spring. The \param{orientation} defines orientation vector of spring element (of size 3) - for longitudinal spring it defines the direction of spring, for torsional spring it defines the axis of rotation.\\
-Note: the spring element nodes doesn't need to be coincident, but the spring orientation is always determined by \param{orientation} vector.
+\begin{elementsummary}{Spring}{Spring element}{\field{mode}{in} \field{k}{rn} \field{orientation}{ra}}{Spring element summary}{Springsummary}
+\elementParam{\param{mode}: defines the type of spring element (see Table~\ref{spring_mode_table}).}
+\elementParam{\param{k}:  determines the spring constant, corresponding units are [Force/Length] for longitudinal spring and [Force*Length/Radian] for torsional spring.}
+\elementParam{\param{orientation}:defines orientation vector of spring element (of size 3) - for longitudinal spring it defines the direction of spring, for torsional spring it defines the axis of rotation.}
+\elementDescription{Note}{the spring element nodes doesn't need to be coincident, but the spring orientation is always determined by \param{orientation} vector.}
+\end{elementsummary}
 
 \begin{table}
   \centering
@@ -1130,7 +1130,7 @@ heat transfer problems. Each node has 1 degree of freedom.
 Problem should be defined in x,y plane. The cross section thickness
 property is requested form cross section model.
 The nodes should be numbered anti-clockwise (positive rotation around
-z-axis). 
+z-axis).  The element features are summarized in Table~\ref{Quad1htsummary}.
 
 \begin{figure}[htb]
  \centering
@@ -1143,25 +1143,25 @@ z-axis).
  \label{Quad1htfig}
 \end{figure}
 
-\elemkeyword{Quad1ht}\\
-\descitem{Parameters} \optField{NIP}{in}\\
-\descitem{Unknowns}
-Single dof (T\_f - temperature) is required in each node.
-
-\descitem{Approximation} Linear approximation of temperature.
-
-\descitem{Integration}
-Integration using gauss integration formula
+\begin{elementsummary}{Quad1ht}{Isoparametric four-node quadrilateral linear interpolation element for
+heat transfer problems}{\optField{NIP}{in}}{Quad1ht element summary}{Quad1htsummary}
+\elementParam{\param{NIP}: allows to change the default number of integration point used.}
+\elementDescription{Unknowns}{Single dof (T\_f - temperature) is required in each node.}
+\elementDescription{Approximation}{Linear approximation of temperature.}
+\elementDescription{Integration}{Integration using gauss integration formula
 in 4 (the default), 9, or 16 integration points. The default number of
-integration point used can be overloaded using \param{NIP} parameter.
-
-\descitem{Loads} Body loads are supported. Boundary loads are
+integration point used can be overloaded using \param{NIP} parameter.}
+\elementDescription{Loads}{ Body loads are supported. Boundary loads are
 supported and computed using numerical integration. The side numbering is
 following. Each i-th element side begins in i-th element node and
 ends on next element node (i+1-th node or 1-st node, in the case of 
 side number 4). The local positive edge x-axis coincides with side
 direction, the positive local edge y-axis is rotated 90 degrees
-anti-clockwise (see fig. (\ref{Quad1htfig})).
+anti-clockwise (see fig. (\ref{Quad1htfig})).}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Status}{}
+\end{elementsummary}
 
 \subsubsection{Quad1hmt element}
 Represents isoparametric four-node quadrilateral finite element for
@@ -1174,7 +1174,7 @@ Other features are similar to Quad1 element, see section \ref{Quad1ht}.
 \label{Tr1ht}
 Implements the linear triangular finite element for heat transfer problems. Each node has 1 degree of freedom.
 The cross section thickness property is requested form cross section model.
-The node numbering is anti-clockwise
+The node numbering is anti-clockwise. The element features are summarized in Table~\ref{Tr1htsummary}.
 
 \begin{figure}[htb]
  \centering
@@ -1185,19 +1185,22 @@ The node numbering is anti-clockwise
  \label{Tr1htfig}
 \end{figure}
 
-\elemkeyword{Tr1ht}\\
-\descitem{Parameters} none.\\
-\descitem{Unknowns} Single dof (T\_f temperature) is  required in each node.\\
-\descitem{Approximation} Linear approximation of temperature.\\
-\descitem{Integration} Integration using one point gauss integration formula.\\
-\descitem{Loads} Body loads are supported. Boundary loads are
+\begin{elementsummary}{Tr1ht}{triangular finite element with linear approximation for heat transfer problems}{-}{Tr1ht element summary}{Tr1htsummary}
+%\elementParam{\param{NIP}: allows to change the default number of integration point used.}
+\elementDescription{Unknowns}{Single dof (T\_f - temperature) is required in each node.}
+\elementDescription{Approximation}{Linear approximation of temperature.}
+\elementDescription{Integration}{Integration using one point gauss integration formula.}
+\elementDescription{Loads}{Body loads are supported. Boundary loads are
 supported and are computed  using numerical integration. The side numbering is
 following. Each i-th element side begins in i-th element node and
 ends on next element node (i+1-th node or 1-st node, in the case of 
 side number 3). The local positive edge x-axis coincides with side
 direction, the positive local edge y-axis is rotated 90 degrees
-anti-clockwise (see fig. (\ref{Tr1htfig})).
-
+anti-clockwise (see fig. (\ref{Tr1htfig})).}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Status}{}
+\end{elementsummary}
 
 %-----------------------------------------------------------------------------------------------
 \clearpage
@@ -1218,25 +1221,29 @@ similar to Tr1ht element, see section \ref{Tr1ht}.
 \subsection{3D Elements}
 \subsubsection{Tetrah1ht - tetrahedral 3D element}
 Represents isoparametric four-node tetrahedral element. Each node has 1 degree of freedom.
-The same numbering convection is adopted as in mechanics, see Fig.~\ref{lintetrahedron_fig}.
+The same numbering convection is adopted as in mechanics, see Fig.~\ref{lintetrahedron_fig}. The element features are summarized in Table~\ref{Tetrah1htsummary}.
 
-\elemkeyword{Tetrah1ht}\\
-\descitem{Parameters} \optField{NIP}{in}\\
-\descitem{Unknowns} Single dof (T\_f - temperature) is required in each node.\\
-\descitem{Approximation} Linear approximation of temperature using linear volume coordinates.\\
-\descitem{Integration}
-Integration using gauss integration formula
+\begin{elementsummary}{Tetrah1ht}{Isoparametric, four-node tetrahedral element with linear approximation for heat transfer problems}{\optField{NIP}{in}}{Tetrah1ht element summary}{Tetrah1htsummary}
+\elementParam{\param{NIP}: allows to change the default number of integration point used.}
+\elementDescription{Unknowns}{Single dof (T\_f - temperature) is required in each node.}
+\elementDescription{Approximation}{Linear approximation of temperature.}
+\elementDescription{Integration}{Integration using gauss integration formula
 in 1 (the default), or 4 integration points. The default number of
-integration point used can be overloaded using \param{NIP} parameter.\\
-\descitem{Loads} Body loads are supported. Boundary loads are
+integration point used can be overloaded using \param{NIP} parameter.}
+\elementDescription{Loads}{Body loads are supported. Boundary loads are
 supported and computed using numerical integration. The side and
-surface numbering is shown in Fig.~\ref{lintetrahedron_fig}.
+surface numbering is shown in Fig.~\ref{lintetrahedron_fig}.}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Status}{}
+\end{elementsummary}
 
 
 \subsubsection{Brick1ht - hexahedral 3D element}
 \label{Brick1ht}
 Represents isoparametric eight-node brick/hexahedron finite element for
-heat transfer problems. Each node has 1 degree of freedom.
+heat transfer problems. Each node has 1 degree of freedom. The element features are summarized in Table~\ref{Brick1htsummary}.
+
 \begin{figure}[htb]
  \centering
  \begin{makeimage}
@@ -1247,21 +1254,20 @@ heat transfer problems. Each node has 1 degree of freedom.
  \label{Brick1htfig}
 \end{figure}
 
-\elemkeyword{Brick1ht - hexahedral 3D element}\\
-\descitem{Parameters} \optField{NIP}{in}\\
-\descitem{Unknowns}
-Single dof (T\_f - temperature) is required in each node.
-
-\descitem{Approximation} Linear approximation of temperature.
-
-\descitem{Integration}
-Integration using gauss integration formula
+\begin{elementsummary}{Brick1ht}{Isoparametric, hexahedral 3D element with linear approximation for heat transfer problems}{\optField{NIP}{in}}{Brick1ht element summary}{Brick1htsummary}
+\elementParam{\param{NIP}: allows to change the default number of integration point used.}
+\elementDescription{Unknowns}{Single dof (T\_f - temperature) is required in each node.}
+\elementDescription{Approximation}{Linear approximation of temperature.}
+\elementDescription{Integration}{Integration using gauss integration formula
 in 8 (the default), or 27 integration points. The default number of
-integration point used can be overloaded using \param{NIP} parameter.
-
-\descitem{Loads} Body loads are supported. Boundary loads are
+integration point used can be overloaded using \param{NIP} parameter.}
+\elementDescription{Loads}{Body loads are supported. Boundary loads are
 supported and computed using numerical integration. The side and
-surface numbering is shown in fig. (\ref{Brick1htfig})).
+surface numbering is shown in fig. (\ref{Brick1htfig})).}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Status}{}
+\end{elementsummary}
 
 \subsubsection{Brick1hmt - hexahedral 3D element}
 Represents isoparametric eight-node quadrilateral finite element for
@@ -1274,16 +1280,21 @@ Other features are similar to Brick1 element, see section \ref{Brick1ht}.
 \subsubsection{QBrick1ht - quadratic hexahedral 3D element}\label{QBrick1ht_element}
 Implementation of quadratic 3d 20-node 
 finite element. Each node has 1 degree of freedom. See section ~\ref{QSpace_element} 
-for node numbering order and order of faces.
+for node numbering order and order of faces. The element features are summarized in Table~\ref{QBrick1htsummary}.
 
-\elemkeyword{QBrick1ht}\\
-\descitem{Parameters} \optField{NIP}{in}\\
-\descitem{Unknowns} \\
-\descitem{Approximation} Quadratic approximation of temperature and
-geometry.\\
-\param{NIP} number of integration points, possible values are 8, 27 (default) and 64.\\
-\descitem{Features} None.\\
-\descitem{Status} 
+\begin{elementsummary}{QBrick1ht}{Isoparametric, hexahedral 3D element with quadratic approximation for heat transfer problems}{\optField{NIP}{in}}{QBrick1ht element summary}{QBrick1htsummary}
+\elementParam{\param{NIP}: allows to change the default number of integration point used, possible values are 8, 27 (default) and 64.}
+\elementDescription{Unknowns}{Single dof (T\_f - temperature) is required in each node.}
+\elementDescription{Approximation}{Quadratic approximation of temperature and
+geometry..}
+\elementDescription{Integration}{Integration using gauss integration formula
+in 8, 27 (default), or 64 integration points. The default number of
+integration point used can be overloaded using \param{NIP} parameter.}
+\elementDescription{Loads}{-}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Status}{}
+\end{elementsummary}
 
 \subsubsection{QBrick1hmt - quadratic hexahedral 3D element}
 The same element as QBrick1ht for
@@ -1302,37 +1313,54 @@ Stokes' flow elements neglect acceleration, and thus requires no additional stab
 \subsubsection{Tr21Stokes element}
 Standard 6 node triangular element for stokes flow, with quadratic geometry, velocity and linear pressure.
 Both compressible and incompressible material behavior is supported (and also the seamless transition between the two).
+The element features are summarized in Table~\ref{Tr121Stokessummary}.
 
-\elemkeyword{Tr121Stokes}\\
-\descitem{Parameters} none. \\
-\descitem{Unknowns} Unknown pressure in nodes 1--3 with unknown velocity (V\_u and V\_v) in all 6 nodes. \\
-\descitem{Status} Reliable.
+\begin{elementsummary}{Tr121Stokes}{Standard 6 node triangular element for stokes flow, with quadratic geometry, velocity and linear pressure}{-}{Tr121Stokes element summary}{Tr121Stokessummary}
+%\elementParam{\param{NIP}: allows to change the default number of integration point used, possible values are 8, 27 (default) and 64.}
+\elementDescription{Unknowns}{Unknown pressure in nodes 1--3 with unknown velocity (V\_u and V\_v) in all 6 nodes.}
+\elementDescription{Approximation}{Quadratic approximation of geometry and velocity, linear pressure approximation.}
+\elementDescription{Integration}{}
+\elementDescription{Features}{-}
+\elementDescription{Status}{Reliable}
+\end{elementsummary}
 
 \subsubsection{Tet21Stokes element}
-Standard 10 node tetrahedral element for stokes flow, with quadratic geometry, velocity and linear pressure.
+Standard 10 node tetrahedral element for stokes flow, with quadratic geometry, velocity and linear pressure. The element features are summarized in Table~\ref{Tet21Stokessummary}.
 
-\elemkeyword{Tr121Stokes}\\
-\descitem{Parameters} none. \\
-\descitem{Unknowns} Unknown pressure (P\_f) in nodes 1--4, and unknown velocity (V\_u, V\_v, V\_w) in all nodes. \\
-\descitem{Status} Untested.
+\begin{elementsummary}{Tet21Stokes}{Standard 10 node tetrahedral element for stokes flow, with quadratic geometry, velocity and linear pressure}{-}{Tet21Stokes element summary}{Tet21Stokessummary}
+%\elementParam{\param{NIP}: allows to change the default number of integration point used, possible values are 8, 27 (default) and 64.}
+\elementDescription{Unknowns}{Unknown pressure (P\_f) in nodes 1--4, and unknown velocity (V\_u, V\_v, V\_w) in all nodes.}
+\elementDescription{Approximation}{Quadratic approximation of geometry and velocity, linear pressure approximation.}
+\elementDescription{Integration}{}
+\elementDescription{Features}{-}
+\elementDescription{Status}{Untested}
+\end{elementsummary}
 
 \subsubsection{Tr1BubbleStokes element}
 So called ``Mini'' element in 2D. A 3 node triangular element for stokes flow, with linear geometry and pressure. Velocity is enriched by a bubble function.
-Should not be used with materials that have memory (which is uncommon for flow problems).
+Should not be used with materials that have memory (which is uncommon for flow problems). The element features are summarized in Table~\ref{Tr1BubbleStokessummary}.
 
-\elemkeyword{Tr1BubbleStokes}\\
-\descitem{Parameters} none. \\
-\descitem{Unknowns} Unknown pressure (P\_f) in all nodes, and unknown velocity (V\_u, V\_v) in all nodes and one internal dof manager. \\
-\descitem{Status} Untested.
+\begin{elementsummary}{Tr1BubbleStokes}{So called ``Mini'' 2D element}{-}{Tr1BubbleStokes element summary}{Tr1BubbleStokessummary}
+%\elementParam{\param{NIP}: allows to change the default number of integration point used, possible values are 8, 27 (default) and 64.}
+\elementDescription{Unknowns}{Unknown pressure (P\_f) in all nodes, and unknown velocity (V\_u, V\_v) in all nodes and one internal dof manager.}
+\elementDescription{Approximation}{Linear geometry and pressure. Velocity is enriched by a bubble function.}
+\elementDescription{Integration}{}
+\elementDescription{Features}{-}
+\elementDescription{Status}{Untested}
+\end{elementsummary}
 
 \subsubsection{Tet1BubbleStokes element}
 So called ``Mini'' element in 3D. A 4 node tetrahedral element for stokes flow, with linear geometry and pressure. Velocity is enriched by a bubble function.
-Should not be used with materials that have memory (which is uncommon for flow problems).
+Should not be used with materials that have memory (which is uncommon for flow problems). The element features are summarized in Table~\ref{Tet1BubbleStokessummary}.
 
-\elemkeyword{Tet1BubbleStokes}\\
-\descitem{Parameters} none. \\
-\descitem{Unknowns} Unknown pressure (P\_f) in all nodes, and unknown velocity (V\_u, V\_v) in all nodes and one internal dof manager. \\
-\descitem{Status} Untested.
+\begin{elementsummary}{Tet1BubbleStokes}{So called ``Mini'' 3D element}{-}{Tet1BubbleStokes element summary}{Tet1BubbleStokessummary}
+%\elementParam{\param{NIP}: allows to change the default number of integration point used, possible values are 8, 27 (default) and 64.}
+\elementDescription{Unknowns}{Unknown pressure (P\_f) in all nodes, and unknown velocity (V\_u, V\_v) in all nodes and one internal dof manager.}
+\elementDescription{Approximation}{Linear geometry and pressure. Velocity is enriched by a bubble function.}
+\elementDescription{Integration}{}
+\elementDescription{Features}{-}
+\elementDescription{Status}{Untested}
+\end{elementsummary}
 
 %-----------------------------------------------------------------------------------------------
 \clearpage
@@ -1343,7 +1371,7 @@ Represents the linear triangular finite element for transient
 incompressible flow analysis using cbs algorithm with equal order
 approximation of velocity and pressure fields. Each node has 3 degrees
 of freedoms (two components of velocity and pressure).
-The node numbering is anti-clockwise
+The node numbering is anti-clockwise. The element features are summarized in Table~\ref{Tr1CBSsummary}.
 
 \begin{figure}[htb]
  \centering
@@ -1355,13 +1383,9 @@ The node numbering is anti-clockwise
  \label{Tr1CBSfig}
 \end{figure}
 
-\elemkeyword{Tr1CBS}\\
-\descitem{Parameters} \optField{bsides}{ia} \optField{bcodes}{ia}\\
-\descitem{Unknowns}
-Two velocity components (V\_u and V\_v) and pressure (P\_f) are required in each node.
-
-\descitem{Boundary specification}
-Since the problem formulation requires to evaluate some boundary terms,
+\begin{elementsummary}{Tr1CBS}{linear triangular finite element for transient
+incompressible flow analysis using cbs algorithm}{\optField{bsides}{ia} \optField{bcodes}{ia}}{Tr1CBS element summary}{Tr1CBSsummary}
+\elementParam{Since the problem formulation requires to evaluate some boundary terms,
 the element boundary edges should be specified as well as the types of
 boundary conditions applied at these boundary edges. The boundary
 edges (their numbers) are specified using \param{bsides} array. The
@@ -1371,20 +1395,20 @@ boundary codes are following: 1 for prescribed traction, 2 for
 prescribed normal velocity, 4 for prescribed tangential velocity, and
 8 for prescribed pressure. If the element side is subjected to a
 combination of these fundamental types boundary conditions, the
-corresponding code is obtained by summing up the corresponding codes.
-
-\descitem{Approximation} Linear approximation of velocity and pressure
-fields.
-
-\descitem{Integration}
-exact
-
-\descitem{Loads} Constant boundary tractions are supported\footnote{In CBS algorithm formulation the prescribed traction
+corresponding code is obtained by summing up the corresponding codes.}
+\elementDescription{Unknowns}{Two velocity components (V\_u and V\_v) and pressure (P\_f) are required in each node.}
+\elementDescription{Approximation}{Equal order
+approximation of velocity and pressure fields.}
+\elementDescription{Integration}{exact}
+\elementDescription{Features}{Constant boundary tractions are supported\footnote{In CBS algorithm formulation the prescribed traction
 boundary condition leads indirectly to pressure boundary condition in
 nodes associated to loaded edge. Such boundary condition is
 represented by PrescribedTractionPressureBC. See section on boundary
 conditions in OOFEM input manual.}. Body loads
-representing the self-weight load are supported.
+representing the self-weight load are supported.}
+\elementDescription{Status}{Untested}
+\end{elementsummary}
+
 
 %-----------------------------------------------------------------------------------------------
 \clearpage
@@ -1395,7 +1419,7 @@ Represents the linear triangular finite element for transient
 incompressible flow analysis using SUPG/PSPG stabilization with equal order
 approximation of velocity and pressure fields. Each node has 3 degrees
 of freedoms (two components of velocity and pressure).
-The node numbering is anti-clockwise
+The node numbering is anti-clockwise. The element features are summarized in Table~\ref{Tr1SUPGsummary}.
 
 \begin{figure}[htb]
  \centering
@@ -1407,22 +1431,14 @@ The node numbering is anti-clockwise
  \label{Tr1SUPG2fig}
 \end{figure}
 
-\elemkeyword{Tr1SUPG}\\
-\descitem{Parameters} \optField{vof}{rn}
-\optField{pvof}{rn}\\
-\descitem{Unknowns}
-Two velocity components (V\_u and V\_v) and pressure (P\_f) are required in each node.
-
-\descitem{Approximation} Linear approximation of velocity and pressure
-fields.
-
-\descitem{Integration}
-exact
-
-\descitem{Loads} Constant boundary tractions are supported. Body loads
-representing the self-weight load are supported.
-
-\descitem{Multi-fluid analysis} The element has support for solving
+\begin{elementsummary}{Tr1SUPG}{linear triangular finite element for transient
+incompressible flow analysis using SUPG/PSPG algorithm}{\optField{vof}{rn} \optField{pvof}{rn}}{Tr1SUPG element summary}{Tr1SUPGsummary}
+\elementDescription{Unknowns}{Two velocity components (V\_u and V\_v) and pressure (P\_f) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of velocity and pressure fields.}
+\elementDescription{Integration}{exact}
+\elementDescription{Loads}{Constant boundary tractions are supported. Body loads
+representing the self-weight load are supported.}
+\elementDescription{Multi-fluid analysis}{The element has support for solving
 problems with two immiscible fluids in
 a fixed spatial domain. In the present implementation, a VOF and LevelSet tracking algorithms
 are used to track the position of interface. In case of VOF tracking, an initial VOF fraction
@@ -1432,7 +1448,10 @@ filled with reference fluid (some form of source) using parameter
 \param{pvof} which specifies the permanent VOF value. In case of LevelSet tracking, the initial levelset is specified using 
 reference polygon (see corresponding levelset record in oofem input manual).
 The material model should be of type \elemkeyword{twofluidmat}, that
-supports modelling of two immiscible fluids.
+supports modelling of two immiscible fluids.}
+\elementDescription{Status}{Reliable}
+\end{elementsummary}
+
 
 \subsubsection{Tr21SUPG element}
 \label{Tr21SUPG}
@@ -1442,7 +1461,7 @@ approximation in velocity space and globally continuous, piecewise linear functi
 approximation in pressure space. LBB condition is satisfied. There are 3 degrees
 of freedom in vertices (two components of velocity and pressure), and 2 degrees of freedom
 in edge nodes (two components of velocity only).
-The node numbering is anti-clockwise, vertices are numbered first.
+The node numbering is anti-clockwise, vertices are numbered first. The element features are summarized in Table~\ref{Tr21SUPGsummary}.
 
 \begin{figure}[htb]
  \centering
@@ -1453,24 +1472,19 @@ The node numbering is anti-clockwise, vertices are numbered first.
  \label{Tr21SUPGfig}
 \end{figure}
 
-\elemkeyword{Tr21SUPG}\\
-\descitem{Parameters}
-
-\descitem{Unknowns}
-Two velocity components (V\_u and V\_v) and pressure (P\_f) in vertices and two velocity components (V\_u and V\_v) in edge nodes are required.
-
-\descitem{Approximation} Quadratic approximation of velocity and linear approximation of pressure fields.
-
-\descitem{Integration}
-Integration is exact, each submatrix of element stiffness matrix is evaluated in proper number of
+\begin{elementsummary}{Tr21SUPG}{P2P1 Taylor Hood element}{-}{Tr21SUPG element summary}{Tr21SUPGsummary}
+\elementDescription{Unknowns}{Two velocity components (V\_u and V\_v) and pressure (P\_f) in vertices and two velocity components (V\_u and V\_v) in edge nodes are required.}
+\elementDescription{Approximation}{Quadratic approximation of velocity and linear approximation of pressure fields.}
+\elementDescription{Integration}{Integration is exact, each submatrix of element stiffness matrix is evaluated in proper number of
 Gauss points. Submatrices connected with velocity are evaluated in 7 or 13 points, mixed velocity-pressure
-submatrices in 3 or 7 points, submatrices connected with pressure in 3 points.
+submatrices in 3 or 7 points, submatrices connected with pressure in 3 points.}
+\elementDescription{Loads}{Constant boundary tractions are supported. Body loads
+representing the self-weight load are supported.}
+\elementDescription{Multi-fluid analysis}{The element has no support for solving
+problems with two immiscible fluids in a fixed spatial domain.}
+\elementDescription{Status}{Reliable}
+\end{elementsummary}
 
-\descitem{Loads} Constant boundary tractions are supported. Body loads
-representing the self-weight load are supported.
-
-\descitem{Multi-fluid analysis} The element has no support for solving
-problems with two immiscible fluids in a fixed spatial domain.
 
 \subsubsection{Tr1SUPGAxi element}
 \label{Tr1SUPGAxi}
@@ -1478,7 +1492,7 @@ Represents the linear triangular finite element for transient
 incompressible flow analysis using SUPG/PSPG stabilization with equal order
 approximation of velocity and pressure fields in 2d-axisymmetric setting. Each node has 3 degrees
 of freedoms (two components of velocity and pressure). The y-axis is
-axis of ratational symmetry. The node numbering is anti-clockwise
+axis of ratational symmetry. The node numbering is anti-clockwise. The element features are summarized in Table~\ref{Tr1SUPGAxisummary}.
 
 \begin{figure}[htb]
  \centering
@@ -1490,22 +1504,14 @@ axis of ratational symmetry. The node numbering is anti-clockwise
  \label{Tr1SUPGAxifig}
 \end{figure}
 
-\elemkeyword{Tr1SUPGAxi}\\
-\descitem{Parameters} \optField{vof}{rn}
-\optField{pvof}{rn}\\
-\descitem{Unknowns}
-Two velocity components (V\_u and V\_v) and pressure (P\_f) are required in each node.
-
-\descitem{Approximation} Linear approximation of velocity and pressure
-fields.
-
-\descitem{Integration}
-Sevent point Gauss integration.
-
-\descitem{Loads} Constant boundary tractions are supported. Body loads
-representing the self-weight load are supported.
-
-\descitem{Multi-fluid analysis} The element has support for solving
+\begin{elementsummary}{Tr1SUPGAxi}{linear equal order approximation axisymmetric element}
+  {\optField{vof}{rn}\optField{pvof}{rn}}{Tr1SUPGAxi element summary}{Tr1SUPGAxisummary}
+\elementDescription{Unknowns}{Two velocity components (V\_u and V\_v) and pressure (P\_f) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of velocity and pressure fields.}
+\elementDescription{Integration}{Gauss integration in seven point employed.}
+\elementDescription{Loads}{Constant boundary tractions are supported. Body loads
+representing the self-weight load are supported.}
+\elementDescription{Multi-fluid analysis}{The element has support for solving
 problems with two immiscible fluids in
 a fixed spatial domain. In the present implementation, a VOF tracking algorithm
 is used to track the position of interface. An initial VOF fraction
@@ -1514,7 +1520,10 @@ is used to track the position of interface. An initial VOF fraction
 filled with reference fluid (some form of source) using parameter
 \param{pvof} which specifies the permanent VOF value. In this case,
 the material model should be of type \elemkeyword{twofluidmat}, that
-supports modelling of two immiscible fluids.
+supports modelling of two immiscible fluids.}
+\elementDescription{Status}{}
+\end{elementsummary}
+
 
 %-----------------------------------------------------------------------------------------------
 \clearpage
@@ -1524,7 +1533,7 @@ supports modelling of two immiscible fluids.
 Represents 3D linear pyramid element for transient
 incompressible flow analysis using SUPG/PSPG stabilization with equal order
 approximation of velocity and pressure fields. Each node has 3 degrees
-of freedoms (two components of velocity and pressure).
+of freedoms (two components of velocity and pressure). The element features are summarized in Table~\ref{TET1SUPGsummary}.
 
 \begin{figure}[htb]
  \centering
@@ -1535,26 +1544,22 @@ of freedoms (two components of velocity and pressure).
  \label{PY1_3D_SUPGfig}
 \end{figure}
 
-\elemkeyword{TET1SUPG}\\
-\descitem{Parameters} \\
-\descitem{Unknowns}
-Two velocity components (V\_u and V\_v) and pressure (P\_f) are required in each node.
-
-\descitem{Approximation} Linear approximation of velocity and pressure
-fields.
-
-\descitem{Integration}
-exact
-
-\descitem{Loads} Constant boundary tractions are supported. Body loads
-representing the self-weight load are supported.
-
-\descitem{Multi-fluid analysis} The element has support for solving
+\begin{elementsummary}{TET1SUPG}{linear equal order approximation axisymmetric element}
+  {\optField{vof}{rn}\optField{pvof}{rn}}{TET1SUPG element summary}{TET1SUPGsummary}
+\elementDescription{Unknowns}{Three velocity components (V\_u, V\_v, and V\_w) and pressure (P\_f) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of velocity and pressure fields.}
+\elementDescription{Integration}{exact}
+\elementDescription{Loads}{Constant boundary tractions are supported. Body loads
+representing the self-weight load are supported.}
+\elementDescription{Multi-fluid analysis}{The element has support for solving
 problems with two immiscible fluids in
 a fixed spatial domain. In the present implementation, a LevelSet tracking algorithm
 is used to track the position of interface. 
 The material model should be of type \elemkeyword{twofluidmat}, that
-supports modelling of two immiscible fluids.
+supports modelling of two immiscible fluids.}
+\elementDescription{Status}{}
+\end{elementsummary}
+
 
 % References;
 \printbibliography
