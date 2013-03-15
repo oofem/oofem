@@ -243,7 +243,11 @@ public:
     virtual const char *giveClassName() const { return "VTKXMLExportModuleElementInterface"; }
     virtual void _export(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep) {};
     virtual void exportCompositeElement(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep);
-    virtual void giveCompositeExportData(std::vector<FloatArray> &nodeCoords, std::vector<IntArray> &cellNodes ){};
+    virtual void giveCompositeExportData(IntArray &primaryVarsToExport, IntArray &internalVarsToExport,
+        std::vector<FloatArray> &nodeCoords, std::vector<IntArray> &cellNodes, IntArray &cellTypes, 
+        std::vector<FloatArray> &primaryVars, std::vector<FloatArray> &cellVars, TimeStep *tStep ){};
+    void exportPrimVarAs(UnknownType valID, int regionDofMans, int ireg, FILE *stream, std::vector<FloatArray> &primaryVars, TimeStep *tStep);
+    void exportCellVarAs(InternalStateType type, std::vector<FloatArray> &cellVars, FILE *stream, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // vtkxmlexportmodule_h

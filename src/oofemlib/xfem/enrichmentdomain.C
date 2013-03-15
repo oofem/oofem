@@ -106,6 +106,14 @@ EDBGCircle :: isDofManagerEnriched(DofManager *dMan)
 bool
 EDBGCircle :: isElementEnriched(const Element *element) 
 {
+#if 1
+    for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
+        if ( this->isDofManagerEnriched( element->giveDofManager(i) ) ) {
+            return true;
+        }
+    }
+    return false;
+#else
     Circle *c = static_cast < Circle * > ( this->bg );
     int numIntersections = c->computeNumberOfIntersectionPoints(element);
     //int numIntersections = this->bg->computeNumberOfIntersectionPoints(element);
@@ -114,6 +122,7 @@ EDBGCircle :: isElementEnriched(const Element *element)
     } else {
         return false;
     }
+#endif
 };
 
 } // end namespace oofem
