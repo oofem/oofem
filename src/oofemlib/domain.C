@@ -62,6 +62,11 @@
 #include "errorestimator.h"
 #include "compiler.h"
 
+ // For automatic dof creation, (should try to do without this) (move that stuff into DofManager class)
+#include "activebc.h"
+#include "activedof.h"
+#include "masterdof.h"
+
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
  #include "processcomm.h"
@@ -72,6 +77,8 @@
 
 #include <cstdarg>
 #include <cstring>
+#include <vector>
+#include <set>
 
 namespace oofem {
 Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
@@ -1176,6 +1183,60 @@ Domain ::  giveCorrespondingCoordinateIndex(int idof)
     }
 
     return 0;
+}
+
+
+void Domain :: createDofs(const IntArray &nodeBCs, EquationID eid)
+{
+    IntArray dofids;
+
+    // Scan all required nodal dofs.
+    std::vector< std::set<int> > node_dofs( this->giveNumberOfDofManagers() );
+
+    for (int i = 1; i <= this->giveNumberOfElements(); ++i) {
+        // Scan for all dofs needed.
+        Element *element = this->giveElement(i);
+        for (int j = 1; j <= element->giveNumberOfNodes(); ++j) {
+            element->giveDofManDofIDMask(j, eid, dofids);
+            for (int k = 1; k <= dofids.giveSize(); k++) {
+                node_dofs[element->giveNode(j)->giveNumber()-1].insert(dofids.at(k));
+            }
+        }
+    }
+
+    int dnumber = 0;
+    for (int i = 1; i <= this->giveNumberOfDofManagers(); ++i) {
+        DofManager *dman = this->giveDofManager(i);
+        int bcid = nodeBCs.at(i);
+        int c = 0;
+        ///@todo How do we reconcile this with none-node dofmanagers, like hangingnode etc. ?  We should pass the information to the dof manager and let it deal with it.
+        dman->setNumberOfDofs(node_dofs[i-1].size());
+        if (bcid > 0) {
+            GeneralBoundaryCondition *bc = this->giveBc(bcid);
+            const IntArray &defaultDofs = bc->giveDefaultDofs();
+            for (std::set<int>::iterator it = node_dofs[i-1].begin(); it != node_dofs[i-1].end(); ++it) {
+                DofIDItem id = (DofIDItem)*it;
+                Dof *dof;
+                if ( defaultDofs.contains(id) ) {
+                    ActiveBoundaryCondition *active_bc = dynamic_cast<ActiveBoundaryCondition*>(bc);
+                    if (active_bc && active_bc->requiresActiveDofs()) {
+                        dof = new ActiveDof(++dnumber, dman, bcid, id);
+                    } else {
+                        dof = new MasterDof(++dnumber, dman, bcid, 0, id);
+                    }
+                } else {
+                    dof = new MasterDof(++dnumber, dman, id);
+                }
+                dman->setDof(++c, dof);
+            }
+        } else {
+            for (std::set<int>::iterator it = node_dofs[i-1].begin(); it != node_dofs[i-1].end(); ++it) {
+                Dof *dof = new MasterDof(++dnumber, dman, (DofIDItem)*it);
+                dman->setDof(++c, dof);
+            }
+        }
+        dman->checkConsistency();
+    }
 }
 
 
