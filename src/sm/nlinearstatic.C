@@ -562,7 +562,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         incrementOfDisplacement.zero();
     }
 
-    if ( initialLoadVector.isNotEmpty() && initialLoadVector.giveSize() == incrementalLoadVector.giveSize() ) {
+    if ( initialLoadVector.isNotEmpty() ) {
         numMetStatus = nMethod->solve(stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
                                       & totalDisplacement, & incrementOfDisplacement, & internalForces,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);

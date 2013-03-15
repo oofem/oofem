@@ -45,14 +45,22 @@ class StaticFracture : public NonLinearStatic
 {
 protected:
 
+    // from nlinearstatic
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual void terminate(TimeStep *tStep);
+    virtual double giveUnknownComponent(EquationID chc, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    
+    // for updating structure
+    void createPreviousSolutionInDofUnknownsDictionary(TimeStep *tStep);
+
     void evaluatePropagationLaw(TimeStep *tStep);
 
+    bool crackGrowthFlag;
 public:
     StaticFracture(int i, EngngModel *_master = NULL);
     virtual ~StaticFracture(){};
-
+    virtual int requiresUnknownsDictionaryUpdate() { return crackGrowthFlag; }
+    virtual bool requiresEquationRenumbering(TimeStep *) { return crackGrowthFlag; }
 };
 
 } // end namespace oofem
