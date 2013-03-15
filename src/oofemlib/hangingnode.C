@@ -44,7 +44,7 @@ namespace oofem {
 HangingNode :: HangingNode(int n, Domain *aDomain) : Node(n, aDomain)
 {
 #ifdef __OOFEG
-    consistencyChecked = false;
+    initialized = false;
 #endif
 }
 
