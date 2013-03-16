@@ -40,7 +40,6 @@
 #include "engngm.h"
 #include "structengngmodel.h"
 #include "metastep.h"
-#include "oofem_limits.h"
 
 ///@name Input fields for MacroLspace
 //@{

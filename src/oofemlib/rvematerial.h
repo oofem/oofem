@@ -68,14 +68,13 @@ protected:
     int BCType;
 
 public:
-
     EngngModel *rve;
 
     // Constructor
     RVEMaterial(int n, Domain *d) { };// : Material(n, d) { };
 
     // Destructor
-    virtual ~RVEMaterial() { free (rve); };
+    ~RVEMaterial() { free (rve); };
 
     int SupressRVEoutput;
 

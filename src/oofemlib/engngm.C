@@ -60,6 +60,7 @@
 #include "exportmodulemanager.h"
 #include "initmodulemanager.h"
 #include "usrdefsub.h"
+#include "oofem_limits.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"

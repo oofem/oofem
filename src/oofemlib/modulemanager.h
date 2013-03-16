@@ -37,7 +37,6 @@
 
 #include "alist.h"
 #include "datareader.h"
-#include "oofem_limits.h"
 
 ///@name Input fields for module managers
 //@{

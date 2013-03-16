@@ -49,15 +49,13 @@ SpoolesSolver :: initializeFrom(InputRecord *ir) { return IRRT_OK; }
 NM_Status
 SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSuccess; }
 } // end namespace oofem
-#endif
 
-#ifdef __SPOOLES_MODULE
+#else
 
  #include "spoolessolver.h"
  #include "spoolessparsemtrx.h"
  #include "flotarry.h"
  #include "verbose.h"
- #include "oofem_limits.h"
  #include "timer.h"
 
 // Spooles includes

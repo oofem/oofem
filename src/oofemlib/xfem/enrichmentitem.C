@@ -40,7 +40,6 @@
 #include "enrichmentfunction.h"
 #include "cltypes.h"
 #include "conTable.h"
-#include "oofem_limits.h"
 #include "usrdefsub.h"
 
 namespace oofem {

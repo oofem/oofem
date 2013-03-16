@@ -54,7 +54,6 @@
 #include "gaussintegrationrule.h"
 #include "fei2dquadlin.h"
 #include "xfemelementinterface.h"
-#include "oofem_limits.h"
 #include "usrdefsub.h"
 #include "masterdof.h"
 #include "patchintegrationrule.h"
