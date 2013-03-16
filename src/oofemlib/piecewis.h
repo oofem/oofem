@@ -43,6 +43,7 @@
 #define _IFT_PiecewiseLinFunction_npoints "npoints"
 #define _IFT_PiecewiseLinFunction_t "t"
 #define _IFT_PiecewiseLinFunction_ft "f(t)"
+#define _IFT_PiecewiseLinFunction_timeDataFile "timedatafile"
 //@}
 
 namespace oofem {
@@ -55,13 +56,11 @@ namespace oofem {
 class PiecewiseLinFunction : public LoadTimeFunction
 {
 protected:
-    int numberOfPoints;
     FloatArray dates;
     FloatArray values;
 
 public:
-    PiecewiseLinFunction(int i, Domain *d) : LoadTimeFunction(i, d), dates(), values()
-    { numberOfPoints = 0; }
+    PiecewiseLinFunction(int i, Domain *d);
     virtual ~PiecewiseLinFunction() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

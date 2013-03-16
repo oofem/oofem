@@ -1156,8 +1156,7 @@ enum InputFieldType {
     IFT_PiecewiseLinFunction_npoints,
     IFT_PiecewiseLinFunction_t,
     IFT_PiecewiseLinFunction_ft,
-
-    IFT_PiecewiseLinFunctionBlock_npoints,
+    IFT_PiecewiseLinFunction_timeDataFile,
 
     IFT_PeriodicPiecewiseLinFunction_period,
     IFT_PeriodicPiecewiseLinFunction_addtf,

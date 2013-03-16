@@ -35,8 +35,15 @@
 #include "piecewis.h"
 #include "mathfem.h"
 
+#include <fstream>
+#include <ios>
+
 namespace oofem {
 #define PiecewiseLinFunction_PRECISION 1.e-12
+
+PiecewiseLinFunction::PiecewiseLinFunction ( int i, Domain* d ) : LoadTimeFunction ( i, d ), dates(), values()
+{
+}
 
 double PiecewiseLinFunction :: __at(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be
@@ -45,26 +52,24 @@ double PiecewiseLinFunction :: __at(double time)
 {
     const double precision = PiecewiseLinFunction_PRECISION;
     double xa, xb, ya, yb;
-    int i;
 
-    if ( !numberOfPoints ) {
-        //      this -> getPoints() ;
+    if ( this->dates.giveSize() == 0 ) {
         _error("at: Undefined dates and values");
     }
 
-    for ( i = 1; i <= numberOfPoints; i++ ) {
-        if ( fabs(dates.at(i) - time) < precision ) {
-            return values.at(i);
-        } else if ( dates.at(i) > time ) {
+    for ( int i = 1; i <= this->dates.giveSize(); i++ ) {
+        if ( fabs(this->dates.at(i) - time) < precision ) {
+            return this->values.at(i);
+        } else if ( this->dates.at(i) > time ) {
             if ( i == 1 ) {
                 OOFEM_WARNING3("PiecewiseLinFunction :: __at: computational time %f is out of given time %f, extrapolating value(s)", time, dates.at(i) );
                 return 0.;
             }
 
-            xa = dates.at(i - 1);
-            xb = dates.at(i);
-            ya = values.at(i - 1);
-            yb = values.at(i);
+            xa = this->dates.at(i - 1);
+            xb = this->dates.at(i);
+            ya = this->values.at(i - 1);
+            yb = this->values.at(i);
 
             return ya + ( time - xa ) * ( yb - ya ) / ( xb - xa );
         }
@@ -80,29 +85,27 @@ double PiecewiseLinFunction :: __derAt(double time)
 {
     const double precision = PiecewiseLinFunction_PRECISION;
     double xa, xb, ya, yb;
-    int i;
 
-    if ( !numberOfPoints ) {
-        //      this -> getPoints() ;
+    if ( this->dates.giveSize() == 0 ) {
         _error("at: Undefined dates and values");
     }
 
-    for ( i = 1; i <= numberOfPoints; i++ ) {
+    for ( int i = 1; i <= this->dates.giveSize(); i++ ) {
         if ( fabs(dates.at(i) - time) < precision ) {
-            if ( i < numberOfPoints ) {
-                return ( values.at(i + 1) - values.at(i) ) / ( dates.at(i + 1) - dates.at(i) );
+            if ( i < this->dates.giveSize() ) {
+                return ( this->values.at(i + 1) - this->values.at(i) ) / ( this->dates.at(i + 1) - this->dates.at(i) );
             } else {
-                return ( values.at(i) - values.at(i - 1) ) / ( dates.at(i) - dates.at(i - 1) );
+                return ( this->values.at(i) - this->values.at(i - 1) ) / ( this->dates.at(i) - this->dates.at(i - 1) );
             }
         } else if ( dates.at(i) > time ) {
             if ( i == 1 ) {
                 return 0.;
             }
 
-            xa = dates.at(i - 1);
-            xb = dates.at(i);
-            ya = values.at(i - 1);
-            yb = values.at(i);
+            xa = this->dates.at(i - 1);
+            xb = this->dates.at(i);
+            ya = this->values.at(i - 1);
+            yb = this->values.at(i);
 
             return ( yb - ya ) / ( xb - xa );
         }
@@ -119,10 +122,34 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
 
     LoadTimeFunction :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, numberOfPoints, IFT_PiecewiseLinFunction_npoints, "npoints");
-
-    IR_GIVE_FIELD(ir, dates, IFT_PiecewiseLinFunction_t, "t");
-    IR_GIVE_FIELD(ir, values, IFT_PiecewiseLinFunction_ft, "f(t)");
+    // Optional means, read data from external file (useful for very large sets of data)
+    if ( ir->hasField( IFT_PiecewiseLinFunction_timeDataFile, "timedatafile") ) {
+        std::list< double > t, ft;
+        // Open the file;
+        std::string fname;
+        IR_GIVE_FIELD(ir, fname, IFT_PiecewiseLinFunction_timeDataFile, "timedatafile");
+        std::ifstream file (fname.c_str(), std::ios::in);
+        if ( !file.is_open() ) OOFEM_ERROR2("PieceWiseLinFunction :: initializeFrom - Failed to open time data file: %s\n", fname.c_str());
+        // Data should be stored in two columns (or just interleaved)
+        double temp_t, temp_ft;
+        while ( file >> temp_t >> temp_ft ) {
+            t.push_back(temp_t);
+            ft.push_back(temp_ft);
+        }
+        // Copy data over the float arrays
+        dates.resize(t.size());
+        values.resize(ft.size());
+        std::list< double >::iterator it_t = t.begin(), it_ft = ft.begin();
+        for ( int i = 1; i <= (int)t.size(); ++i, ++it_t, ++it_ft ) {
+            dates.at(i) = *it_t;
+            values.at(i) = *it_ft;
+        }
+    } else {
+        int numberOfPoints;
+        IR_GIVE_FIELD(ir, numberOfPoints, IFT_PiecewiseLinFunction_npoints, "npoints");
+        IR_GIVE_FIELD(ir, dates, IFT_PiecewiseLinFunction_t, "t");
+        IR_GIVE_FIELD(ir, values, IFT_PiecewiseLinFunction_ft, "f(t)");
+    }
 
     return IRRT_OK;
 }
@@ -132,25 +159,25 @@ int
 PiecewiseLinFunction :: giveInputRecordString(std :: string &str, bool keyword)
 {
     char buff [ 1024 ];
-    int i;
 
     LoadTimeFunction :: giveInputRecordString(str, keyword);
-    sprintf(buff, " npoints %d", this->numberOfPoints);
+    sprintf(buff, " npoints %d", this->dates.giveSize());
     str += buff;
     sprintf( buff, " t %d", this->dates.giveSize() );
     str += buff;
-    for ( i = 1; i <= this->dates.giveSize(); i++ ) {
+    for ( int i = 1; i <= this->dates.giveSize(); i++ ) {
         sprintf( buff, " %e", this->dates.at(i) );
         str += buff;
     }
 
     sprintf( buff, " f(t) %d", this->values.giveSize() );
     str += buff;
-    for ( i = 1; i <= this->values.giveSize(); i++ ) {
+    for ( int i = 1; i <= this->values.giveSize(); i++ ) {
         sprintf( buff, " %e", this->values.at(i) );
         str += buff;
     }
 
     return 1;
 }
+
 } // end namespace oofem

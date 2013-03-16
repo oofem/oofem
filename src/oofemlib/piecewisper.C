@@ -43,7 +43,7 @@ double PeriodicPiecewiseLinFunction :: __at(double time)
 {
     double add, last;
 
-    if ( !numberOfPoints ) {
+    if ( !this->dates.giveSize() ) {
         _error("at: Undefined dates and values!");
     }
 
@@ -58,7 +58,7 @@ double PeriodicPiecewiseLinFunction :: __at(double time)
     }
 
     // periodicity
-    last = dates.at(numberOfPoints); // time of last date
+    last = dates.at(this->dates.giveSize()); // time of last date
     if ( ( period >= 0.0 ) && ( time > last ) ) {
         double d = ( time - last ) / period; // periods after last
         time = last + ( d - floor(d) - 1. ) * period;
@@ -75,7 +75,7 @@ double PeriodicPiecewiseLinFunction :: __derAt(double time)
 {
     double add, last;
 
-    if ( !numberOfPoints ) {
+    if ( !this->dates.giveSize() ) {
         _error("derAt: Undefined dates and values!");
     }
 
@@ -90,7 +90,7 @@ double PeriodicPiecewiseLinFunction :: __derAt(double time)
     }
 
     // periodicity
-    last = dates.at(numberOfPoints); // time of last date
+    last = dates.at(this->dates.giveSize()); // time of last date
     if ( ( period >= 0.0 ) && ( time > last ) ) {
         double d = ( time - last ) / period; // periods after last
         time = last + ( d - floor(d) - 1. ) * period;
