@@ -314,6 +314,8 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
         answer.zero();
         return;
     }
+
+
 }
 
 

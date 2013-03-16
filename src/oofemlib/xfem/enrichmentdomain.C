@@ -42,7 +42,18 @@
 
 namespace oofem {
 
+// General 
 
+bool 
+EnrichmentDomain :: isElementEnriched(Element *element) 
+{
+    for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
+        if ( this->isDofManagerEnriched( element->giveDofManager(i) ) ) {
+            return true;
+        }
+    }
+    return false;
+}
 
 // Node list
 

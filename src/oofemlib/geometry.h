@@ -165,6 +165,7 @@ public:
     virtual bool intersects(Element *element);
     virtual void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints);
     virtual void computeIntersectionPoints(Line *l, AList< FloatArray > *intersecPoints);
+    virtual int computeNumberOfIntersectionPoints(Element *element);
     virtual bool isOutside(BasicGeometry *bg);
     virtual bool isInside(Element *element);
     virtual bool isInside(FloatArray &point);

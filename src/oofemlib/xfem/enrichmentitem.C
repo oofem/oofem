@@ -141,23 +141,6 @@ bool EnrichmentItem :: isDofManEnrichedByEnrichmentDomain(DofManager *dMan, int 
 
 
 
-// Spatial query metods
-#if 1
-bool EnrichmentItem :: isOutside(BasicGeometry *bg)
-{
-    return this->giveGeometry()->isOutside(bg);
-}
-
-void EnrichmentItem :: computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element)
-{
-    this->giveGeometry()->computeIntersectionPoints(element, intersectionPoints);
-}
-
-int EnrichmentItem :: computeNumberOfIntersectionPoints(Element *element)
-{
-    return this->giveGeometry()->computeNumberOfIntersectionPoints(element);
-}
-#endif
 
 
 

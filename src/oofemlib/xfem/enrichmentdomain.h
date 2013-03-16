@@ -63,8 +63,11 @@ public:
     // should be pure virtual and thus be supported by all representations
     //virtual bool isDofManagerEnriched(const DofManager *dMan) { return false; };
     virtual bool isDofManagerEnriched(DofManager *dMan) = 0 {};
-    virtual bool isElementEnriched(Element *element) { return false; };
+    virtual bool isElementEnriched(Element *element);
 
+    // Spatial search metohds
+    virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element){};
+    virtual int computeNumberOfIntersectionPoints(Element *element){return 0;};
 };
 
 class EnrichmentDomain_BG : public EnrichmentDomain
@@ -72,25 +75,29 @@ class EnrichmentDomain_BG : public EnrichmentDomain
 private:
     
 public:
-BasicGeometry *bg;
+    BasicGeometry *bg;
     EnrichmentDomain_BG(){}; 
     virtual ~EnrichmentDomain_BG() { }
     virtual IRResultType initializeFrom(InputRecord *ir) { return this->bg->initializeFrom(ir); };
-
-    //void setGeometry(BasicGeometry *geom) { this->bg = geom;}
+    //virtual IRResultType initializeFrom(InputRecord *ir) {};
     virtual bool isDofManagerEnriched(DofManager *dMan){ return false; };
-   
+
+    virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element) { bg->computeIntersectionPoints(element, intersectionPoints); }
+    virtual int computeNumberOfIntersectionPoints(Element *element) { return bg->computeNumberOfIntersectionPoints(element); };
+
 };
 
 class EDBGCircle : public EnrichmentDomain_BG
 {
 public:
+    //Circle *bgc;
     EDBGCircle(){ bg = new Circle; }; 
     virtual ~EDBGCircle() { }
-    virtual IRResultType initializeFrom(InputRecord *ir) { return this->bg->initializeFrom(ir);  };
+    virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir);  };
     virtual bool isDofManagerEnriched(DofManager *dMan);
     virtual bool isElementEnriched(const Element *element);
-   
+    virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element) { bg->computeIntersectionPoints(element, intersectionPoints); }
+    virtual int computeNumberOfIntersectionPoints(Element *element) { return static_cast<Circle *>(bg)->computeNumberOfIntersectionPoints(element); };
 };
 
 
