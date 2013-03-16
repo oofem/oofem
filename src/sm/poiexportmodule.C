@@ -43,9 +43,10 @@
 #include "util.h"
 #include "internalstatevaluetype.h"
 #include "element.h"
-#include "oofem_limits.h"
 
 #include <string>
+#include <fstream>
+#include <ios>
 
 namespace oofem {
 POIExportModule :: POIExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport(), POIList()
@@ -87,25 +88,18 @@ POIExportModule :: initializeFrom(InputRecord *ir)
 void
 POIExportModule :: readPOIFile(const std::string &poiFileName)
 {
-    char line [ OOFEM_MAX_LINE_LENGTH ];
-    int i, nPOI;
     POI_dataType poi;
-    FILE *in = fopen(poiFileName.c_str(), "r");
-    if ( in == NULL ) {
-        OOFEM_ERROR2("POIExportModule::readPOIFile: failed to open input file %s", poiFileName.c_str());
-    }
+    int nPOI;
+    // Open the file;
+    std::ifstream file( poiFileName.c_str(), std::ios::in);
+    if ( !file.is_open() ) OOFEM_ERROR2("POIExportModule :: readPOIFile - Failed to open time data file: %s\n", poiFileName.c_str());
 
-    giveLineFromInput(in, line, OOFEM_MAX_LINE_LENGTH);
-    sscanf(line, "%d", & nPOI);
+    file >> nPOI; // Not actually needed.
 
-    // read POIs
-    for ( i = 0; i < nPOI; i++ ) {
-        giveLineFromInput(in, line, OOFEM_MAX_LINE_LENGTH);
-        sscanf(line, "%d %lf %lf %lf %d", & poi.id, & poi.x, & poi.y, & poi.z, & poi.region);
+    while ( file >>  poi.id >> poi.x >> poi.y >> poi.z >> poi.region ) {
         POIList.push_back(poi);
     }
 }
-
 
 
 void
@@ -238,7 +232,7 @@ POIExportModule :: exportPrimaryVars(FILE *stream, TimeStep *tStep)
 {
     // should be performed over regions
 
-    int i, n = primaryVarsToExport.giveSize();
+    int n = primaryVarsToExport.giveSize();
     int nnodes;
     Domain *d = emodel->giveDomain(1);
     UnknownType type;
@@ -251,7 +245,7 @@ POIExportModule :: exportPrimaryVars(FILE *stream, TimeStep *tStep)
 
     fprintf(stream, "\n\nPOINT_DATA %d\n", nnodes);
 
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= n; i++ ) {
         type = ( UnknownType ) primaryVarsToExport.at(i);
         this->exportPrimVarAs(type, stream, tStep);
     }
@@ -262,7 +256,6 @@ void
 POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
-    int j;
     FloatArray pv, coords(3);
     InternalStateValueType type = ISVT_UNDEFINED;
 
@@ -308,7 +301,7 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
 
             fprintf(stream, "%10d ", ( * PoiIter ).id);
             if ( pv.giveSize() ) {
-                for ( j = 1; j <= pv.giveSize(); j++ ) {
+                for ( int j = 1; j <= pv.giveSize(); j++ ) {
                     fprintf( stream, " %15e ", pv.at(j) );
                 }
             }
