@@ -35,7 +35,9 @@
 #ifndef staticfracture_h
 #define staticfracture_h
 #include "nlinearstatic.h"
+#include "metastep.h"
 #include "xfemmanager.h"
+
 namespace oofem {
 /**
  * This class implements a nonlinear static fracture problem.
@@ -48,10 +50,14 @@ protected:
     // from nlinearstatic
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual void terminate(TimeStep *tStep);
+    virtual void updateLoadVectors(TimeStep *stepN);
+
     virtual double giveUnknownComponent(EquationID chc, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
     
     // for updating structure
-    void createPreviousSolutionInDofUnknownsDictionary(TimeStep *tStep);
+    void setTotalDisplacementFromUnknownsInDictionary(EquationID type, ValueModeType mode, TimeStep *tStep);
+    void initializeDofUnknownsDictionary(TimeStep *tStep);
+    virtual void updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep);
 
     void evaluatePropagationLaw(TimeStep *tStep);
 

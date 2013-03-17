@@ -37,15 +37,32 @@
 namespace oofem {
 StaticFracture :: StaticFracture(int i, EngngModel *_master) : NonLinearStatic(i, _master)
 {
-    crackGrowthFlag = false;
+    crackGrowthFlag = true; // if true, then the internal structure needs to be updated
 }
 
 
 void
 StaticFracture :: solveYourselfAt(TimeStep *tStep)
 {
-    NonLinearStatic :: solveYourselfAt(tStep);
 
+    // Initiates the total displacement to zero in the UnknownsDictionary.
+    if ( tStep->isTheFirstStep() ) {
+        this->initializeDofUnknownsDictionary(tStep);
+    }
+    
+    // Initialization
+    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+    if ( totalDisplacement.giveSize() != neq ) {
+        totalDisplacement.resize(neq);
+        totalDisplacement.zero();
+        incrementOfDisplacement.resize(neq);
+        incrementOfDisplacement.zero();
+        this->setTotalDisplacementFromUnknownsInDictionary(EID_MomentumBalance, VM_Total, tStep);
+    }
+    
+    crackGrowthFlag = false;
+    NonLinearStatic :: solveYourselfAt(tStep);
+    //crackGrowthFlag = true;
     /* 1) Compute fracture mechanics quantities
           What should be included
           - Element wise evaluation for cohesive zones
@@ -57,16 +74,10 @@ StaticFracture :: solveYourselfAt(TimeStep *tStep)
 
        Need some class to keep track of the active propagation models and such
     */
-    //this->evaluatePropagationLaw(tStep);
+    this->evaluatePropagationLaw(tStep);
     //this->forceEquationNumbering();
 
 }
-
-
-
-
-
-
 
 
 
@@ -74,23 +85,81 @@ void
 StaticFracture :: terminate(TimeStep *tStep)
 {
     NonLinearStatic :: terminate(tStep);
+}
 
 
-    this->evaluatePropagationLaw(tStep);
-    /*
-    this->forceEquationNumbering();
+
+void
+StaticFracture :: updateLoadVectors(TimeStep *stepN)
+{
+    MetaStep *mstep = this->giveMetaStep( stepN->giveMetaStepNumber() );
+    bool isLastMetaStep = ( stepN->giveNumber() == mstep->giveLastStepNumber() );
+
+    if ( controlMode == nls_indirectControl ) { //todo@: not checked 
+        //if ((stepN->giveNumber() == mstep->giveLastStepNumber()) && ir->hasField("fixload")) {
+        if ( isLastMetaStep ) {
+            if ( !mstep->giveAttributesRecord()->hasField(IFT_NonLinearStatic_donotfixload, "donotfixload") ) {
+                OOFEM_LOG_INFO("Fixed load level\n");
+
+                //update initialLoadVector
+                if ( initialLoadVector.isEmpty() ) {
+                    initialLoadVector.resize( incrementalLoadVector.giveSize() );
+                }
+
+                incrementalLoadVector.times(loadLevel);
+                initialLoadVector.add(incrementalLoadVector);
+
+                incrementalLoadVectorOfPrescribed.times(loadLevel);
+                initialLoadVectorOfPrescribed.add(incrementalLoadVectorOfPrescribed);
+
+                incrementalLoadVector.zero();
+                incrementalLoadVectorOfPrescribed.zero();
+
+                this->loadInitFlag = 1;
+            }
+
+            //if (!mstep->giveAttributesRecord()->hasField("keepll")) this->loadLevelInitFlag = 1;
+        }
+    } else { // direct control
+        //update initialLoadVector after each step of direct control
+        //(here the loading is not proportional)
+        
+        /*if ( initialLoadVector.isEmpty() ) {
+            initialLoadVector.resize( incrementalLoadVector.giveSize() );
+        }
+        */
+        OOFEM_LOG_DEBUG("Fixed load level\n");
+
+        incrementalLoadVector.times(loadLevel);
+        if ( initialLoadVector.giveSize() != incrementalLoadVector.giveSize() ) {
+            //initialLoadVector.resize( incrementalLoadVector.giveSize() );
+            initialLoadVector.resize( 0 );
+        }
+        //initialLoadVector.add(incrementalLoadVector);
+
+        incrementalLoadVectorOfPrescribed.times(loadLevel);
+        initialLoadVectorOfPrescribed.add(incrementalLoadVectorOfPrescribed);
+
+        incrementalLoadVector.zero();
+        incrementalLoadVectorOfPrescribed.zero();
+
+        this->loadInitFlag = 1;
+    }
 
 
-    // Just to make the simulation run through at the moment
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
-    totalDisplacement.resize(neq);
-    totalDisplacement.zero();
-    incrementOfDisplacement.resize(neq);
-    incrementOfDisplacement.zero();
+    // if (isLastMetaStep) {
+    if ( isLastMetaStep && !mstep->giveAttributesRecord()->hasField(IFT_NonLinearStatic_donotfixload, "donotfixload") ) {
+#ifdef VERBOSE
+        OOFEM_LOG_INFO("Reseting load level\n");
+#endif
+        if ( mstepCumulateLoadLevelFlag ) {
+            cumulatedLoadLevel += loadLevel;
+        } else {
+            cumulatedLoadLevel = 0.0;
+        }
 
-    initialLoadVector.resize(neq); 
-    */
-
+        this->loadLevel = 0.0;
+    }
 }
 
 
@@ -101,19 +170,16 @@ StaticFracture ::  giveUnknownComponent(EquationID type, ValueModeType mode,
 // returns unknown quantity like displacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
-    return NonLinearStatic ::  giveUnknownComponent(type, mode, tStep, d, dof);
-
-    
     if ( this->requiresUnknownsDictionaryUpdate() ) {
-       if (mode == VM_Incremental) { //get difference between current and previous time variable
-            return dof->giveUnknowns()->at(0) - dof->giveUnknowns()->at(1);
-        }
         int hash = this->giveUnknownDictHashIndx(type, mode, tStep);
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
         } else {
-            OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
+            return 0.0; ///@todo: how should one treat newly created dofs?
+            //OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
         }
+    } else {
+        return NonLinearStatic ::  giveUnknownComponent(type, mode, tStep, d, dof);
     }
     
 }
@@ -123,8 +189,8 @@ StaticFracture ::  giveUnknownComponent(EquationID type, ValueModeType mode,
 
 
 void
-StaticFracture :: createPreviousSolutionInDofUnknownsDictionary(TimeStep *tStep) {
-    //Copy the last known temperature to be a previous solution
+StaticFracture :: initializeDofUnknownsDictionary(TimeStep *tStep) {
+    //
     int nnodes, nDofs;
     double val;
     Domain *domain;
@@ -134,16 +200,14 @@ StaticFracture :: createPreviousSolutionInDofUnknownsDictionary(TimeStep *tStep)
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
         domain = this->giveDomain(idomain);
         nnodes = domain->giveNumberOfDofManagers();
-        if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( int inode = 1; inode <= nnodes; inode++ ) {
-                node = domain->giveDofManager(inode);
-                nDofs = node->giveNumberOfDofs();
-                for ( int i = 1; i <= nDofs; i++ ) {
-                    iDof = node->giveDof(i);
-                    val = iDof->giveUnknown(EID_ConservationEquation, VM_Total, tStep); //get number on hash=0(current)
-                    iDof->updateUnknownsDictionary(tStep->givePreviousStep(), EID_MomentumBalance, VM_Total, val);
-                }
+        for ( int inode = 1; inode <= nnodes; inode++ ) {
+            node = domain->giveDofManager(inode);
+            nDofs = node->giveNumberOfDofs();
+            for ( int i = 1; i <= nDofs; i++ ) {
+                iDof = node->giveDof(i);
+                iDof->updateUnknownsDictionary(tStep->givePreviousStep(), EID_MomentumBalance, VM_Total, 0.0);
             }
+        
         }
     }
 }
@@ -168,54 +232,59 @@ NLTransientTransportProblem :: giveUnknownDictHashIndx(EquationID type, ValueMod
 
     return 0;
 }
+*/
 
 void
-NLTransientTransportProblem :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
+StaticFracture :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
 {
-    // update DoF unknowns dictionary. Store the last and previous temperature only, see giveUnknownDictHashIndx
-    int i, ndofs = inode->giveNumberOfDofs();
-    int eqNum;
+    // update DoF unknowns dictionary. 
     Dof *iDof;
     double val;
-    FloatArray *vect;
-
-    for ( i = 1; i <= ndofs; i++ ) {
+    for ( int i = 1; i <= inode->giveNumberOfDofs(); i++ ) {
         iDof = inode->giveDof(i);
-        eqNum = iDof->__giveEquationNumber();
-        if ( iDof->hasBc(tStep) ) { // boundary condition
+        int eqNum = iDof->__giveEquationNumber();
+        if ( iDof->hasBc(tStep) ) { 
             val = iDof->giveBcValue(VM_Total, tStep);
+        //} else if ( tStep->isTheFirstStep() ) { // initialize to zero
+        //     val = 0.0;
         } else {
-            vect = this->UnknownsField->giveSolutionVector(tStep);
-            val = vect->at(eqNum);
+            if ( eqNum > 0 ) {
+                val = totalDisplacement.at(eqNum);
+            } else { // new eq number
+                val = 0.0;
+            }
         }
 
-        //update temperature, which is present in every node
         iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Total, val);
     }
 }
 
 
 void
-NLTransientTransportProblem :: copyUnknownsInDictionary(EquationID type, ValueModeType mode, TimeStep *fromTime, TimeStep *toTime) {
-    int i, j, ndofs;
-    double val;
-    Domain *domain = this->giveDomain(1);
-    int nnodes = domain->giveNumberOfDofManagers();
+StaticFracture :: setTotalDisplacementFromUnknownsInDictionary(EquationID type, ValueModeType mode, TimeStep *tStep) 
+{
+    Domain *domain;
     DofManager *inode;
     Dof *iDof;
-
-    for ( j = 1; j <= nnodes; j++ ) {
-        inode = domain->giveDofManager(j);
-        ndofs = inode->giveNumberOfDofs();
-        for ( i = 1; i <= ndofs; i++ ) {
-            iDof = inode->giveDof(i);
-            val = iDof->giveUnknown(type, mode, fromTime);
-            iDof->updateUnknownsDictionary(toTime, type, mode, val);
-        }
+    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
+        domain = this->giveDomain(idomain);
+        for ( int j = 1; j <= domain->giveNumberOfDofManagers(); j++ ) {
+            inode = domain->giveDofManager(j);
+            int eqNum;
+            for ( int i = 1; i <= inode->giveNumberOfDofs(); i++ ) {
+                iDof = inode->giveDof(i);
+                eqNum = iDof->giveEqn();
+                if ( eqNum > 0 ) {
+                    double val = iDof->giveUnknown(type, mode, tStep);
+                    totalDisplacement.at(eqNum) = val;
+                }
+            }
+        }   
     }
+
 }
 
-
+/*
 void
 NLTransientTransportProblem :: updateInternalState(TimeStep *stepN)
 {

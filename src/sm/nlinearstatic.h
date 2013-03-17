@@ -171,7 +171,7 @@ protected:
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type,
                   const UnknownNumberingScheme &, Domain *domain);
     void proceedStep(int di, TimeStep *tStep);
-    void updateLoadVectors(TimeStep *tStep);
+    virtual void updateLoadVectors(TimeStep *tStep);
     virtual void computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di);
     void assembleIncrementalReferenceLoadVectors(FloatArray &_incrementalLoadVector,
                                                  FloatArray &_incrementalLoadVectorOfPrescribed,
