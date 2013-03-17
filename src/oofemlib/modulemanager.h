@@ -94,14 +94,13 @@ public:
         const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
         IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-        int i;
         std::string name;
         M *module;
         InputRecord *mir;
 
         // read modules
         moduleList->growTo(numberOfModules);
-        for ( i = 0; i < numberOfModules; i++ ) {
+        for ( int i = 0; i < numberOfModules; i++ ) {
             mir = dr->giveInputRecord(DataReader :: IR_expModuleRec, i + 1);
             result = mir->giveRecordKeywordField(name);
             if ( result != IRRT_OK ) {

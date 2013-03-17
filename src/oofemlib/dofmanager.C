@@ -415,10 +415,7 @@ IRResultType DofManager ::  resolveDofIDArray(InputRecord *ir, IntArray &dofIDAr
     IRResultType result;
 
     numberOfDofs = -1;
-    result = ir->giveOptionalField(numberOfDofs, IFT_DofManager_ndofs, "ndofs");
-    if ( result != IRRT_OK ) {
-        IR_IOERR(giveClassName(), __proc, IFT_DofManager_ndofs, "ndofs", ir, result);
-    }
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfDofs, IFT_DofManager_ndofs, "ndofs");
 
     // returns nonzero if succes
     if ( numberOfDofs == -1 ) {
@@ -428,10 +425,7 @@ IRResultType DofManager ::  resolveDofIDArray(InputRecord *ir, IntArray &dofIDAr
         // if ndofs is prescribed, read the physical meaning of particular dofs
         // for detailed values of DofMask array see cltypes.h file
         // for exaple 1 is for D_u (displacemet in u dir), 2 for D_v, 3 for D_w, ...
-        result = ir->giveField(dofIDArry, IFT_DofManager_dofidmask, "dofidmask");
-        if ( result != IRRT_OK ) {
-            IR_IOERR(giveClassName(), __proc, IFT_DofManager_dofidmask, "dofidmask", ir, result);
-        }
+        IR_GIVE_FIELD(ir, dofIDArry, IFT_DofManager_dofidmask, "dofidmask");
 
         if ( dofIDArry.giveSize() != numberOfDofs ) {
             _error("resolveDofIDArray : DofIDMask size mismatch");
@@ -453,9 +447,7 @@ DofManager :: initializeFrom(InputRecord *ir)
     loadArray.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, loadArray, IFT_DofManager_load, "load");
 
-    if ( this->resolveDofIDArray(ir, dofIDArry) != IRRT_OK ) {
-        IR_IOERR(giveClassName(), __proc,  IFT_Unknown, "", ir, result);
-    }
+    this->resolveDofIDArray(ir, dofIDArry);
 
     // numberOfDofs = domain->giveNumberOfDofs () ;
     bc.resize(0);

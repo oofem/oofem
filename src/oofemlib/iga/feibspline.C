@@ -62,11 +62,11 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
 
     IntArray degree_tmp;
     double *knotVec, knotVal;
-    int i, j, n, sum, pos, size;
+    int sum, pos, size;
     const char *IFT_knotVectorString [ 3 ] = {
         "knotvectoru", "knotvectorv", "knotvectorw"
     };
-    InputFieldType IFT_knotVectorType [ 3 ] = {
+    _InputFieldType IFT_knotVectorType [ 3 ] = {
         IFT_BSplineInterpolation_knotVectorU,
         IFT_BSplineInterpolation_knotVectorV,
         IFT_BSplineInterpolation_knotVectorW
@@ -74,7 +74,7 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
     const char *IFT_knotMultiplicityString [ 3 ] = {
         "knotmultiplicityu", "knotmultiplicityv", "knotmultiplicityw"
     };
-    InputFieldType IFT_knotMultiplicityType [ 3 ] = {
+    _InputFieldType IFT_knotMultiplicityType [ 3 ] = {
         IFT_BSplineInterpolation_knotMultiplicityU,
         IFT_BSplineInterpolation_knotMultiplicityV,
         IFT_BSplineInterpolation_knotMultiplicityW
@@ -92,11 +92,11 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
         OOFEM_ERROR("BSplineInterpolation::initializeFrom - degree size mismatch");
     }
 
-    for ( i = 0; i < nsd; i++ ) {
+    for ( int i = 0; i < nsd; i++ ) {
         degree [ i ] = degree_tmp.at(i + 1);
     }
 
-    for ( n = 0; n < nsd; n++ ) {
+    for ( int n = 0; n < nsd; n++ ) {
         IR_GIVE_FIELD(ir, knotValues [ n ], IFT_knotVectorType [ n ], IFT_knotVectorString [ n ]);
         size = knotValues [ n ].giveSize();
         if ( size < 2 ) {
@@ -105,7 +105,7 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
 
         // check for monotonicity of knot vector without multiplicity
         knotVal = knotValues [ n ].at(1);
-        for ( i = 1; i < size; i++ ) {
+        for ( int i = 1; i < size; i++ ) {
             if ( knotValues [ n ].at(i + 1) <= knotVal ) {
                 OOFEM_ERROR2("BSplineInterpolation::initializeFrom - knot vector %s is not monotonic", IFT_knotVectorString [ n ]);
             }
@@ -115,14 +115,14 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
 
         // transform knot vector to interval <0;1>
         double span = knotVal - knotValues [ n ].at(1);
-        for ( i = 1; i <= size; i++ ) knotValues [ n ].at(i) = knotValues [ n ].at(i) / span;
+        for ( int i = 1; i <= size; i++ ) knotValues [ n ].at(i) = knotValues [ n ].at(i) / span;
 
         IR_GIVE_OPTIONAL_FIELD(ir, knotMultiplicity [ n ], IFT_knotMultiplicityType [ n ], IFT_knotMultiplicityString [ n ]);
         if ( knotMultiplicity [ n ].giveSize() == 0 ) {
             // default multiplicity
             knotMultiplicity [ n ].resize(size);
             // skip the first and last one
-            for ( i = 1; i < size - 1; i++ ) {
+            for ( int i = 1; i < size - 1; i++ ) {
                 knotMultiplicity [ n ].at(i + 1) = 1;
             }
         } else {
@@ -131,7 +131,7 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
             }
 
             // check for multiplicity range (skip the first and last one)
-            for ( i = 1; i < size - 1; i++ ) {
+            for ( int i = 1; i < size - 1; i++ ) {
                 if ( knotMultiplicity [ n ].at(i + 1) < 1 || knotMultiplicity [ n ].at(i + 1) > degree [ n ] ) {
                     OOFEM_ERROR3( "BSplineInterpolation::initializeFrom - knot multiplicity %s out of range - value %d",
                                  IFT_knotMultiplicityString [ n ], knotMultiplicity [ n ].at(i + 1) );
@@ -153,7 +153,7 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
 
         // sum the size of knot vector with multiplicity values
         sum = 0;
-        for ( i = 0; i < size; i++ ) {
+        for ( int i = 0; i < size; i++ ) {
             sum += knotMultiplicity [ n ].at(i + 1);
         }
 
@@ -161,8 +161,8 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
 
         // fill knot vector including multiplicity values
         pos = 0;
-        for ( i = 0; i < size; i++ ) {
-            for ( j = 0; j < knotMultiplicity [ n ].at(i + 1); j++ ) {
+        for ( int i = 0; i < size; i++ ) {
+            for ( int j = 0; j < knotMultiplicity [ n ].at(i + 1); j++ ) {
                 knotVec [ pos++ ] = knotValues [ n ].at(i + 1);
             }
         }
@@ -398,7 +398,7 @@ void BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
                     tmp1(2) = ders [ 0 ](0, k) * ders [ 1 ](0, l) * ders [ 2 ](1, m);       // dN/dt=Nu*Nv*dNt/dt
                     answer(cnt, 0) = ( ( jacobian(1, 1) * jacobian(2, 2) - jacobian(1, 2) * jacobian(2, 1) ) * tmp1(0) +
                                       ( jacobian(0, 2) * jacobian(2, 1) - jacobian(0, 1) * jacobian(2, 2) ) * tmp1(1) +
-                                      ( jacobian(0, 1) * jacobian(1, 2) - jacobian(0, 2) * jacobian(1, 1) ) * tmp1(2) ) / Jacob;                                                      // dN/dx
+                                      ( jacobian(0, 1) * jacobian(1, 2) - jacobian(0, 2) * jacobian(1, 1) ) * tmp1(2) ) / Jacob; // dN/dx
                     answer(cnt, 1) = ( ( jacobian(1, 2) * jacobian(2, 0) - jacobian(1, 0) * jacobian(2, 2) ) * tmp1(0) +
                                       ( jacobian(0, 0) * jacobian(2, 2) - jacobian(0, 2) * jacobian(2, 0) ) * tmp1(1) +
                                       ( jacobian(0, 2) * jacobian(1, 0) - jacobian(0, 0) * jacobian(1, 2) ) * tmp1(2) ) / Jacob;                                                      // dN/dy

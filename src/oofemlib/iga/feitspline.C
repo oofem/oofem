@@ -75,7 +75,7 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
     const char *IFT_localIndexKnotVectorString [ 3 ] = {
         "localindexknotvectoru", "localindexknotvectorv", "localindexknotvectorw"
     };
-    InputFieldType IFT_localIndexKnotVectorType [ 3 ] = {
+    _InputFieldType IFT_localIndexKnotVectorType [ 3 ] = {
         IFT_TSplineInterpolation_localIndexKnotVectorU,
         IFT_TSplineInterpolation_localIndexKnotVectorV,
         IFT_TSplineInterpolation_localIndexKnotVectorW

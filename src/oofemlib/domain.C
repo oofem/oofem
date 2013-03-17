@@ -434,7 +434,7 @@ Domain :: instanciateYourself(DataReader *dr)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                            // Required by IR_GIVE_FIELD macro
 
-    int i, num;
+    int num;
     std :: string name, topologytype;
     int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg;
     DofManager *node;
@@ -454,10 +454,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read type of Domain to be solved
     InputRecord *ir = dr->giveInputRecord(DataReader :: IR_domainRec, 1);
-    result = ir->giveField(name, IFT_Domain_type, "domain");
-    if ( result != IRRT_OK ) {
-        IR_IOERR(giveClassName(), __proc, IFT_Domain_type, "domain", ir, result);
-    }
+    IR_GIVE_FIELD(ir, name, IFT_Domain_type, "domain");
 
     ir->finish();
 
@@ -487,16 +484,16 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read optional number of nonlocalBarriers
     nbarrier = 0;
-    ir->giveOptionalField(nbarrier,  IFT_Domain_nbarrier, "nbarrier");
+    IR_GIVE_OPTIONAL_FIELD(ir, nbarrier,  IFT_Domain_nbarrier, "nbarrier");
     // read optional number of RandomFieldGenerator
     nrfg = 0;
-    ir->giveOptionalField(nrfg,  IFT_Domain_nrandgen, "nrandgen");
+    IR_GIVE_OPTIONAL_FIELD(ir, nrfg, IFT_Domain_nrandgen, "nrandgen");
 
 
 
     // read nodes
     dofManagerList->growTo(nnode);
-    for ( i = 0; i < nnode; i++ ) {
+    for ( int i = 0; i < nnode; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_dofmanRec, i + 1);
         // read type of dofManager
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -518,7 +515,6 @@ Domain :: instanciateYourself(DataReader *dr)
         node->setGlobalNumber(num);    // set label
         dofManagerList->put(i + 1, node);
 
-        //dofManagerList->put(i+1,node) ;
         ir->finish();
     }
 
@@ -528,7 +524,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read elements
     elementList->growTo(nelem);
-    for ( i = 0; i < nelem; i++ ) {
+    for ( int i = 0; i < nelem; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_elemRec, i + 1);
         // read type of element
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -559,7 +555,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read cross sections
     crossSectionList->growTo(ncrossSections);
-    for ( i = 0; i < ncrossSections; i++ ) {
+    for ( int i = 0; i < ncrossSections; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_crosssectRec, i + 1);
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
@@ -590,7 +586,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read materials
     materialList->growTo(nmat);
-    for ( i = 0; i < nmat; i++ ) {
+    for ( int i = 0; i < nmat; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_matRec, i + 1);
         // read type of material
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -623,7 +619,7 @@ Domain :: instanciateYourself(DataReader *dr)
     if ( nbarrier ) {
         // read barriers
         nonlocalBarierList->growTo(nbarrier);
-        for ( i = 0; i < nbarrier; i++ ) {
+        for ( int i = 0; i < nbarrier; i++ ) {
             ir = dr->giveInputRecord(DataReader :: IR_nlocBarRec, i + 1);
             // read type of load
             IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -654,7 +650,7 @@ Domain :: instanciateYourself(DataReader *dr)
     if ( nrfg ) {
         // read random field generators
         randomFieldGeneratorList->growTo(nrfg);
-        for ( i = 0; i < nrfg; i++ ) {
+        for ( int i = 0; i < nrfg; i++ ) {
             ir = dr->giveInputRecord(DataReader :: IR_nRandomFieldGenRec, i + 1);
             // read type of load
             IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -685,7 +681,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read boundary conditions
     bcList->growTo(nload);
-    for ( i = 0; i < nload; i++ ) {
+    for ( int i = 0; i < nload; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_bcRec, i + 1);
         // read type of load
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -717,7 +713,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read initial conditions
     icList->growTo(nic);
-    for ( i = 0; i < nic; i++ ) {
+    for ( int i = 0; i < nic; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_icRec, i + 1);
         // read type of load
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -750,7 +746,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read load time functions
     loadTimeFunctionList->growTo(nloadtimefunc);
-    for ( i = 0; i < nloadtimefunc; i++ ) {
+    for ( int i = 0; i < nloadtimefunc; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_ltfRec, i + 1);
         // read type of ltf
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -782,11 +778,11 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // change internal component references from labels to assigned local numbers
     MapBasedEntityRenumberingFunctor labelToLocNumFunctor(dofManLabelMap, elemLabelMap);
-    for ( i = 1; i <= nnode; i++ ) {
+    for ( int i = 1; i <= nnode; i++ ) {
         this->giveDofManager(i)->updateLocalNumbering(labelToLocNumFunctor);
     }
 
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         this->giveElement(i)->updateLocalNumbering(labelToLocNumFunctor);
     }
 
