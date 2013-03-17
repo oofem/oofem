@@ -45,6 +45,9 @@ OOFEMTXTDataReader :: OOFEMTXTDataReader(const char *inputfilename) : DataReader
     }
     dataSourceName = inputfilename;
     lineNumber = 0;
+
+    this->giveRawLineFromInput(outputFileName);
+    this->giveRawLineFromInput(description);
 }
 
 OOFEMTXTDataReader :: OOFEMTXTDataReader(const OOFEMTXTDataReader &x) : DataReader(),
@@ -55,6 +58,9 @@ OOFEMTXTDataReader :: OOFEMTXTDataReader(const OOFEMTXTDataReader &x) : DataRead
         OOFEM_ERROR2("OOFEMTXTDataReader::OOFEMTXTDataReader: Can't copy open input stream (%s)", dataSourceName.c_str());
     }
     lineNumber = 0;
+
+    this->giveRawLineFromInput(outputFileName);
+    this->giveRawLineFromInput(description);
 }
 
 OOFEMTXTDataReader :: ~OOFEMTXTDataReader()
@@ -66,11 +72,7 @@ InputRecord *
 OOFEMTXTDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
 {
     std::string line;
-    if ( typeId == IR_outFileRec ) {
-        this->giveRawLineFromInput(line);
-    } else {
-        this->giveLineFromInput(line);
-    }
+    this->giveLineFromInput(line);
 
     ir.setRecordString(line);
     ir.setLineNumber(this->lineNumber);

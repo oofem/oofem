@@ -4135,6 +4135,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
 #else
     sprintf(line, "/dev/null");
 #endif
+    refinedReader.setOutputFileName(line);
 
     /* sprintf(skipUpdateString, "skipUpdate %d ", skipUpdate); */
 
@@ -4146,10 +4147,8 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
     sprintf(parallelFlagString, "parallelFlag 0 ");
 #endif
 
-    refinedReader.appendInputString(line);
-
     sprintf(line, "Refined problem on %s %d", problemName, problemId);
-    refinedReader.appendInputString(line);
+    refinedReader.setDescription(line);
 
     if ( dynamic_cast< AdaptiveLinearStatic * >( problem ) ) {
         sprintf(line, "LinearStatic nsteps 1 renumber %d %s %s %s",
