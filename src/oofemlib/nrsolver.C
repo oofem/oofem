@@ -701,10 +701,9 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                     int eq = dof->giveEquationNumber(dn);
                     int dofid = dof->giveDofID();
                     
- #if ( defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE ) )
-                    if ( !eq || !n2l->giveNewEq(eq) ) continue;
- #else
                     if ( !eq ) continue;
+ #if ( defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE ) )
+                    if ( engngModel->isParallel() && !n2l->giveNewEq(eq) ) continue;
  #endif
                     dg_forceErr.at(dofid) += rhs.at(eq) * rhs.at(eq);
                     dg_dispErr.at(dofid) += ddX.at(eq) * ddX.at(eq);
@@ -729,10 +728,9 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                     int eq = dof->giveEquationNumber(dn);
                     int dofid = dof->giveDofID();
 
- #if ( defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE ) )
-                    if ( !eq || !n2l->giveNewEq(eq) ) continue;
- #else
                     if ( !eq ) continue;
+ #if ( defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE ) )
+                    if ( engngModel->isParallel() && !n2l->giveNewEq(eq) ) continue;
  #endif
                     dg_forceErr.at(dofid) += rhs.at(eq) * rhs.at(eq);
                     dg_dispErr.at(dofid) += ddX.at(eq) * ddX.at(eq);
