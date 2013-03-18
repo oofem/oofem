@@ -566,7 +566,7 @@ public:
     int giveRegionNumber();
 
     /// Performs post initialization steps.
-    void postInitialize();
+    virtual void postInitialize();
 
     /**
      * Updates element state after equilibrium in time step has been reached.

@@ -151,10 +151,18 @@ TR1_2D_SUPG2 :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, mat [ 1 ], IFT_Tr1SUPG2_mat1, "mat1");
     this->material = this->mat [ 0 ];
 
-    this->initGeometry();
-    this->updateIntegrationRules();
     return IRRT_OK;
 }
+
+
+void
+TR1_2D_SUPG2 :: postInitialize()
+{
+    this->computeGaussPoints();
+    this->initGeometry();
+    this->updateIntegrationRules();
+}
+
 
 void
 TR1_2D_SUPG2 :: computeGaussPoints()
@@ -1833,7 +1841,7 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
 
     double __err = fabs(__area - area) / area;
     if ( __err > 1.e-6 ) {
-        _warning2("updateIntegrationRules: volume inconsistency (%5.2f)", __err * 100);
+        _error2("updateIntegrationRules: volume inconsistency (%5.2f)", __err * 100);
 
         __area = 0.0;
         for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
