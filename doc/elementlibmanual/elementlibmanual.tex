@@ -367,7 +367,7 @@ z-axis).  The element features are summarized in Table~\ref{planestress2dsummary
  \begin{makeimage}
   \input{planestress2d.tikz}
  \end{makeimage}
- \caption{PlaneStress2d element. Node numbering, Side numbering and definition of local edge c.s.(a).}
+ \caption{PlaneStress2d element. Node numbering, edge numbering and definition of local edge c.s.(a).}
  \label{Planestress2dfig}
 \end{figure}
 
@@ -696,22 +696,38 @@ Implements the lumped mass matrix. The element features are summarized in Table~
 %-----------------------------------------------------------------------------------------------
 \clearpage
 \subsection{Axisymmetric Elements}
+Implementation relies on elements located exclusively in $x,y$ plane. The coordinate $x$ corresponds to radius, $y$ is the axis of rotation. Approximation of displacement functions $u,v$ is carried out on a particular finite element. Nonzero strains read
+\begin{eqnarray}
+\varepsilon_{x}=\varepsilon_{r}&=&\frac{\partial u}{\partial x}\\
+\varepsilon_{y}=\varepsilon_{z}&=&\frac{\partial v}{\partial y}\\
+\varepsilon_{\theta}&=&\frac{u}{r}\\
+\gamma_{xy}=\gamma_{rz}&=&\frac{\partial u}{\partial y} + \frac{\partial v}{\partial x}
+\end{eqnarray}
+Stress components can be computed from elasticity matrix. Note that this matrix corresponds to a submatrix of the full 3D elasticity matrix.
+\begin{eqnarray}
+\left\{\begin{array}{c} \sigma_x \\ \sigma_y \\ \sigma_\theta \\ \sigma_{xy} \end{array} \right\} = 
+\frac{E}{(1+\nu)(1-2\nu)}\left[ \begin{array}{cccc} 1-\nu & \nu & \nu & 0 \\ \nu & 1-\nu & \nu & 0 \\ \nu & \nu & 1-\nu & 0 \\ 0 & 0 & 0 & (1-2\nu)/2 \end{array} \right] = 
+\left\{\begin{array}{c} \varepsilon_x \\ \varepsilon_y \\ \varepsilon_\theta \\ \gamma_{xy} \end{array} \right\} 
+\end{eqnarray}
+In OOFEM, the strain vector is arranged as $\{\varepsilon_{x}, \varepsilon_{y}, \varepsilon_{\theta}, 0, 0, \gamma_{xy}\}^T$ and the stress vector $\{\sigma_{x}, \sigma_{y}, \sigma_{\theta}, 0, 0, \tau_{xy}\}^T$.
+
+Implementation assumes a segment of 1 rad.
+
 \subsubsection{Axisymm3d element}
 Implementation of triangular three-node finite element 
 for axisymmetric continuum. Each node has 2 degrees of freedom. 
-The element should blocated in $x,y$ plane, where $x$ direction is the radial direction.
-The element features are summarized in Table~\ref{axisymm3dsummary}.
-
-
+The element should be located in $x,y$ plane, where $x$ direction is the radial direction.
+Node numbering and edge position is the same as in Fig.~\ref{TrPlanestressfig}. 
+The element features are summarized in Table~\ref{axisymm3dsummary}. 
 
 \begin{elementsummary}{axisymm3d}{Triangular axisymmetric linear element}{\optField{NIP}{in} \optField{NIPfish}{in}}{axisymm3d element summary}{axisymm3dsummary}
 \elementParam{\param{NIP}: allows to set the number of integration points for integration of terms corresponding to $\varepsilon_x$ and $\varepsilon_y$ strains (possible completions are 1 (default), 4 and 7 point integration rule).}
-\elementParam{\param{NIPfish}: allows to set the number of integration points for integration of remain terms (corresponding to $\varepsilon_\phi$ and
+\elementParam{\param{NIPfish}: allows to set the number of integration points for integration of remain terms (corresponding to $\varepsilon_\theta$ and
 $\gamma_{rz}$) (Supported values include 1 (default), 4 and 7 integration point formula).}
 \elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
 \elementDescription{Approximation}{Linear approximation of displacement and geometry.}
 \elementDescription{Integration}{The integration of $\varepsilon_x$ and $\varepsilon_y$ strains can be altered using
-\param{NIP} paramter (default is 1 point integration).  The remaining terms corresponding to strain components $\varepsilon_\phi$ and
+\param{NIP} paramter (default is 1 point integration).  The remaining terms corresponding to strain components $\varepsilon_\theta$ and
 $\gamma_{rz}$ are by default evaluated at 1 integration point, this can be changed by \param{NIPfish} parameter.}
 \elementDescription{Features}{-}
 \elementDescription{CS properties}{-}
@@ -723,17 +739,17 @@ $\gamma_{rz}$ are by default evaluated at 1 integration point, this can be chang
 \subsubsection{Q4axisymm element}
 Implementation of quadratic isoparametric eight-node quadrilateral -
 finite element for axisymmetric 3d continuum. 
-The element should blocated in $x,y$ plane, where $x$ direction is the radial direction.
+The element should be located in $x,y$ plane, where $x$ direction is the radial direction.
 Each node has 2 degrees of freedom. The element features are summarized in Table~\ref{q4axisymmsummary}.
 
 
 \begin{elementsummary}{q4axisymm}{Quadratic isoparametric eight-node quadrilateral for axisymmetric analysis}{\optField{NIP}{in} \optField{NIPfish}{in}}{q4axisymm element summary}{q4axisymmsummary}
 \elementParam{\param{NIP}: allows to set the number of integration points for integration of terms corresponding to $\varepsilon_x$ and $\varepsilon_y$ strains (possible completions are 1, 4 (default), 9, and 16).}
-\elementParam{\param{NIPfish}: allows to set the number of integration points for integration of remain terms (corresponding to $\varepsilon_\phi$ and
+\elementParam{\param{NIPfish}: allows to set the number of integration points for integration of remain terms (corresponding to $\varepsilon_\theta$ and
 $\gamma_{rz}$) (Supported values include 1 (default), 4, 9, and 16 integration point formula).}
 \elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
 \elementDescription{Approximation}{Quadratic approximation of displacement and geometry.}
-\elementDescription{Integration}{The integration of terms corresponding to $\varepsilon_x$ and $\varepsilon_y$ strains can be altered using \param{NIP} parameter (default is 4 point formula). The remaining terms (creesponding to $\varepsilon_\phi$ and $\gamma_{rz}$) are integrated by default using 1 point formula (see \param{NIPfish} parameter).}
+\elementDescription{Integration}{The integration of terms corresponding to $\varepsilon_x$ and $\varepsilon_y$ strains can be altered using \param{NIP} parameter (default is 4 point formula). The remaining terms (creesponding to $\varepsilon_\theta$ and $\gamma_{rz}$) are integrated by default using 1 point formula (see \param{NIPfish} parameter).}
 \elementDescription{Features}{-}
 \elementDescription{CS properties}{-}
 \elementDescription{Loads}{No boundary and body loads are supported.}
@@ -744,8 +760,8 @@ $\gamma_{rz}$) (Supported values include 1 (default), 4, 9, and 16 integration p
 
 \subsubsection{L4axisymm element}
 Implementation of isoparametric four-node quadrilateral axisymmetric
-finite element. The element should blocated in $x,y$ plane, where $x$ direction is the radial direction.
-Each node has 2 degrees of freedom. The element features are summarized in Table~\ref{l4axisymmsummary}.
+finite element. The element should be located in $x,y$ plane, where $x$ direction is the radial direction.
+Each node has 2 degrees of freedom. Node numbering and edge position is the same as in Fig.~\ref{Planestress2dfig}. The element features are summarized in Table~\ref{l4axisymmsummary}.
 
 \begin{elementsummary}{l4axisymm}{Isoparametric four-node quadrilateral element for axisymmetric analysis}{\optField{NIP}{in}}{l4axisymm element summary}{l4axisymmsummary}
 \elementParam{\param{NIP}: allows to set the number of integration points for integration of terms corresponding to $\varepsilon_x$ and $\varepsilon_y$ strains (possible completions are 1, 4 (default), 9, and 16).}
@@ -753,7 +769,7 @@ Each node has 2 degrees of freedom. The element features are summarized in Table
 \elementDescription{Approximation}{Linear approximation of displacement and geometry.}
 \elementDescription{Integration}{The integration of $\varepsilon_x$ and $\varepsilon_y$ strains can be altered using
 \param{NIP} parameter (possible completions are 1, 4 (default), 9 or 16
-point integration rule). The remaining strain components ($\varepsilon_\phi$ and
+point integration rule). The remaining strain components ($\varepsilon_\theta$ and
 $\gamma_{rz}$) are integrated using one point integration formula.}
 \elementDescription{Features}{-}
 \elementDescription{CS properties}{-}
