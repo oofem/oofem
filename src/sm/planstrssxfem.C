@@ -113,12 +113,12 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     int counter = 8;
     for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
         EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-                
+        EnrichmentDomain *ed = ei->giveEnrichmentDomain(1);        
         // Enrichment function and its gradient evaluated at the gauss point     
         EnrichmentFunction *ef = ei->giveEnrichmentFunction(1);
-        double efgp = ef->evaluateFunctionAt(gp, ei);
+        double efgp = ef->evaluateFunctionAt(gp, ed);
         FloatArray efgpD;
-        ef->evaluateDerivativeAt(efgpD, gp, ei);
+        ef->evaluateDerivativeAt(efgpD, gp, ed);
 
         // adds up the number of the dofs from an enrichment item
         // this part is used for the construction of a shifted enrichment
@@ -132,7 +132,7 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
 
                 FloatArray *nodecoords = dMan->giveCoordinates();
                 // should ask after specific EF in a loop
-                double efnode = ef->evaluateFunctionAt(nodecoords, ei);
+                double efnode = ef->evaluateFunctionAt(nodecoords, ed);
 
                 // matrix to be added anytime a node is enriched
                 // Creates nabla*(ef*N)
@@ -186,11 +186,12 @@ void PlaneStress2dXfem :: computeNmatrixAt(FloatArray &lcoords, FloatMatrix &ans
     FloatArray N, coords;
     for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
         EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-                
+        EnrichmentDomain *ed = ei->giveEnrichmentDomain(1);    
+
         // Enrichment function and its gradient evaluated at the gauss point     
         EnrichmentFunction *ef = ei->giveEnrichmentFunction(1);
         this->computeGlobalCoordinates(coords,lcoords);
-        double efgp = ef->evaluateFunctionAt(&coords, ei);
+        double efgp = ef->evaluateFunctionAt(&coords, ed);
 
         // adds up the number of the dofs from an enrichment item
         // this part is used for the construction of a shifted enrichment
@@ -200,7 +201,7 @@ void PlaneStress2dXfem :: computeNmatrixAt(FloatArray &lcoords, FloatMatrix &ans
             if ( ei->isDofManEnriched( dMan ) ) {
                 
                 FloatArray *nodecoords = dMan->giveCoordinates();
-                double efnode = ef->evaluateFunctionAt(nodecoords, ei);
+                double efnode = ef->evaluateFunctionAt(nodecoords, ed);
                 Nd.at(j) = ( efgp - efnode ) * Nc.at(j) ;
                 
                 counter++;
