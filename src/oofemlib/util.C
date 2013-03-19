@@ -86,7 +86,7 @@ void giveInputDataFileName(std::string &dataInputFileName)
 
 EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *_master, bool parallelFlag)
 {
-    const char *__keyword, *__proc = "InstanciateProblem"; // Required by IR_GIVE_FIELD macro
+    const char *__proc = "InstanciateProblem"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                                 // Required by IR_GIVE_FIELD macro
     EngngModel *problem;
     std::string problemName, dataOutputFileName, desc;

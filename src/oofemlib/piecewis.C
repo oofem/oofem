@@ -37,6 +37,7 @@
 
 #include <fstream>
 #include <ios>
+#include <sstream>
 
 namespace oofem {
 #define PiecewiseLinFunction_PRECISION 1.e-12
@@ -123,19 +124,27 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
     LoadTimeFunction :: initializeFrom(ir);
 
     // Optional means, read data from external file (useful for very large sets of data)
-    if ( ir->hasField( IFT_PiecewiseLinFunction_timeDataFile, "timedatafile") ) {
+    if ( ir->hasField( IFT_PiecewiseLinFunction_dataFile, "datafile") ) {
         std::list< double > t, ft;
         // Open the file;
         std::string fname;
-        IR_GIVE_FIELD(ir, fname, IFT_PiecewiseLinFunction_timeDataFile, "timedatafile");
+        IR_GIVE_FIELD(ir, fname, IFT_PiecewiseLinFunction_dataFile, "datafile");
         std::ifstream file (fname.c_str(), std::ios::in);
-        if ( !file.is_open() ) OOFEM_ERROR2("PieceWiseLinFunction :: initializeFrom - Failed to open time data file: %s\n", fname.c_str());
+        if ( !file.is_open() ) OOFEM_ERROR2("PieceWiseLinFunction :: initializeFrom - Failed to open data file: %s\n", fname.c_str());
         // Data should be stored in two columns (or just interleaved)
         double temp_t, temp_ft;
-        while ( file >> temp_t >> temp_ft ) {
+        std :: string sLine = "";
+        while ( !file.eof() ){
+            getline(file, sLine);
+            if(sLine[0]=='#'){
+                continue;
+            }
+            std :: stringstream ss1(sLine);
+            ss1 >> temp_t >> temp_ft;
             t.push_back(temp_t);
             ft.push_back(temp_ft);
         }
+        
         // Copy data over the float arrays
         dates.resize(t.size());
         values.resize(ft.size());

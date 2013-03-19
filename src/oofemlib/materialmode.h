@@ -55,7 +55,7 @@ namespace oofem {
     ENUM_ITEM(_2dBeam) \
     ENUM_ITEM(_3dBeam) \
     ENUM_ITEM(_3dShell) \
-    ENUM_ITEM(_3dRotContinuum) /* Axisymmetry */ \
+    ENUM_ITEM(_3dRotContinuum) /* Axisymmetry, use _3dMat if possible */ \
   \
     ENUM_ITEM(_2dPlateLayer) \
     ENUM_ITEM(_2dBeamLayer) \
@@ -72,8 +72,8 @@ namespace oofem {
     ENUM_ITEM(_1dHeMo) /* 1d heat and mass (one component) transfer */ \
     ENUM_ITEM(_2dHeat) /* 2d heat */ \
     ENUM_ITEM(_2dHeMo) /* 2d heat and mass (one component) transfer */ \
-    ENUM_ITEM(_3dHeat) \
-    ENUM_ITEM(_3dHeMo) \
+    ENUM_ITEM(_3dHeat) /* 3d heat */ \
+    ENUM_ITEM(_3dHeMo) /* 3d heat and mass (one component) transfer */ \
   \
     ENUM_ITEM(_2dFlow) \
     ENUM_ITEM(_2dAxiFlow) \
