@@ -81,13 +81,13 @@ SUPG :: initializeFrom(InputRecord *ir)
 
     EngngModel :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, rtolv, IFT_SUPG_rtolv, "rtolv"); // Macro
+    IR_GIVE_FIELD(ir, rtolv, IFT_SUPG_rtolv, "rtolv");
     atolv = 1.e-15;
-    IR_GIVE_OPTIONAL_FIELD(ir, atolv, IFT_SUPG_atolv, "atolv"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, atolv, IFT_SUPG_atolv, "atolv");
 
 
     int __val = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, __val, IFT_SUPG_stopmaxiter, "stopmaxiter"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, __val, IFT_SUPG_stopmaxiter, "stopmaxiter");
     if ( __val ) {
         stopmaxiter = true;
     } else {
@@ -95,17 +95,17 @@ SUPG :: initializeFrom(InputRecord *ir)
     }
 
     maxiter = 200;
-    IR_GIVE_OPTIONAL_FIELD(ir, maxiter, IFT_SUPG_maxiter, "maxiter"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, maxiter, IFT_SUPG_maxiter, "maxiter");
 
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_SUPG_lstype, "lstype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_SUPG_smtype, "smtype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
     sparseMtrxType = ( SparseMtrxType ) val;
 
-    IR_GIVE_FIELD(ir, deltaT, IFT_SUPG_deltat, "deltat"); // Macro
+    IR_GIVE_FIELD(ir, deltaT, IFT_SUPG_deltat, "deltat");
     deltaTLTF = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, deltaTLTF, IFT_SUPG_deltatltf, "deltatltf");
 
@@ -118,9 +118,9 @@ SUPG :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_SUPG_scaleflag, "scaleflag");
     equationScalingFlag = val;
     if ( equationScalingFlag ) {
-        IR_GIVE_FIELD(ir, lscale, IFT_SUPG_lscale, "lscale"); // Macro
-        IR_GIVE_FIELD(ir, uscale, IFT_SUPG_uscale, "uscale"); // Macro
-        IR_GIVE_FIELD(ir, dscale, IFT_SUPG_dscale, "dscale"); // Macro
+        IR_GIVE_FIELD(ir, lscale, IFT_SUPG_lscale, "lscale");
+        IR_GIVE_FIELD(ir, uscale, IFT_SUPG_uscale, "uscale");
+        IR_GIVE_FIELD(ir, dscale, IFT_SUPG_dscale, "dscale");
         double vref = 1.0; // reference viscosity
         Re = dscale * uscale * lscale / vref;
     } else {

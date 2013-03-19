@@ -41,7 +41,6 @@
 #include "feibspline.h"
 #include "feinurbs.h"
 #include "feitspline.h"
-
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "matresponsemode.h"

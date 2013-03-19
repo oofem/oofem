@@ -44,6 +44,14 @@
 #include "contextmode.h"
 #include "timestep.h"
 
+///@name Input fields for XfemManager
+//@{
+#define _IFT_XfemManager_numberOfGeometryItems "numberofgeometryitems"
+#define _IFT_XfemManager_numberOfEnrichmentItems "numberofenrichmentitems"
+#define _IFT_XfemManager_numberOfEnrichmentFunctions "numberofenrichmentfunctions"
+#define _IFT_XfemManager_name "xfemmanagername" ///< @todo Should this exist? / Mikael
+//@}
+
 namespace oofem {
 class EngngModel;
 class Domain;

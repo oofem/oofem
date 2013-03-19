@@ -73,11 +73,8 @@ QTRSpaceGrad :: initializeFrom (InputRecord* ir)
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     this->NLStructuralElement :: initializeFrom (ir);
-    IR_GIVE_OPTIONAL_FIELD (ir, numberOfGaussPoints, IFT_QTRSpaceGrad_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD (ir, numberOfGaussPoints, IFT_Element_nip, "nip");
         numberOfGaussPoints = 4;
-
-    // set - up Gaussian integration points
-    this->computeGaussPoints();
 
     return IRRT_OK;
 }

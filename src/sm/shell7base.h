@@ -35,12 +35,11 @@
 #ifndef Shell7Base_h
 #define Shell7Base_h
 
-
 #include "eleminterpmapperinterface.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "layeredcrosssection.h"
-
 #include "nlstructuralelement.h"
+
 #include <vector>
 #include "vtkxmlexportmodule.h"
 namespace oofem {
@@ -49,7 +48,7 @@ class BoundaryLoad;
 /**
  * This class represent a 7 parameter shell element.
  * Each node has 7 degrees of freedom (displ. vec., director vec., inhomogeneous thickness strain ).
- * Add ref. to paper!
+ * @todo Add ref. to paper!
  * @author Jim Brouzoulis
  * @date 2012-11-01
  */

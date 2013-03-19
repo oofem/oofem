@@ -43,6 +43,13 @@
 
 #include "enrichmentdomain.h"
 #include "dofiditem.h"
+///@name Input fields for EnrichmentItem
+//@{
+#define _IFT_EnrichmentItem_geometryItemNr "geometryitemnr"
+#define _IFT_EnrichmentItem_enrichmentFunctionNr "enrichmentfunctionnr"
+#define _IFT_EnrichmentItem_materialNr "material"
+//@}
+
 namespace oofem {
 class BasicGeometry;
 

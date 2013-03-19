@@ -64,14 +64,14 @@ J2Mat :: initializeFrom(InputRecord *ir)
     MPlasticMaterial2 :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, value, IFT_J2Mat_ry, "ry"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_J2Mat_ry, "ry");
     k = value / sqrt(3.0);
 
     kinematicModuli = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, kinematicModuli, IFT_J2Mat_khm, "khm"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, kinematicModuli, IFT_J2Mat_khm, "khm");
 
     isotropicModuli = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, isotropicModuli, IFT_J2Mat_ihm, "ihm"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, isotropicModuli, IFT_J2Mat_ihm, "ihm");
 
     if ( fabs(kinematicModuli) > 1.e-12 ) {
         kinematicHardeningFlag = 1;
@@ -82,7 +82,7 @@ J2Mat :: initializeFrom(InputRecord *ir)
     }
 
     int rma = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, rma, IFT_J2Mat_rma, "rma"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, rma, IFT_J2Mat_rma, "rma");
     if ( rma == 0 ) {
         this->rmType = mpm_ClosestPoint;
     } else {

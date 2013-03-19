@@ -1,4 +1,10 @@
 set (sm_element
+    structuralelementevaluator.C
+    space3delementevaluator.C
+    planestresselementevaluator.C
+    igaelements.C
+    structuralelement.C
+    nlstructuralelement.C
     lspace.C lspacebb.C qspace.C qspacegrad.C
     ltrspace.C qtrspace.C qtrspacegrad.C
     lwedge.C qwedge.C qwedgegrad.C
@@ -18,6 +24,7 @@ set (sm_element
     cohsur3d.C
     cct3d.C
     quad1mindlin.C
+    quad1mindlinshell3d.C
     trplanrot3d.C
     lumpedmasselement.C
     springelement.C
@@ -32,11 +39,13 @@ set (sm_element
     )
 
 set (sm_crosssection
+    structuralcrosssection.C
     layeredcrosssection.C
     fiberedcs.C
     )
 
 set (sm_emodel
+    structengngmodel.C
     linearstatic.C
     nlinearstatic.C
     nlineardynamic.C
@@ -59,6 +68,9 @@ set (sm_loads
 
 set (sm_material
     abaqususermaterial.C
+    structuralmaterial.C
+    linearelasticmaterial.C
+    isolinearelasticmaterial.C
     ortholinearelasticmaterial.C
     concrete2.C concrete3.C concretedpm.C concretedpm2.C
     cebfip78.C
@@ -107,7 +119,6 @@ set (sm_error
 set (sm_export
     dmexportmodule.C
     poiexportmodule.C
-    gpexportmodule.C
     )
 
 set (sm_barrier
@@ -123,6 +134,7 @@ set (sm_mesher
     )
 
 set (sm_status
+    structuralms.C
     rheoChM.C maxwellChM.C kelvinChM.C
     rcm2.C
     isodamagemodel.C

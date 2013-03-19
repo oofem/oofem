@@ -63,9 +63,9 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
 
     this->Material :: initializeFrom(ir);
     //define transversely othotropic material stiffness parameters
-    IR_GIVE_FIELD(ir, value, IFT_CompoDamageMat_ex, "exx"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_CompoDamageMat_exx, "exx");
     propertyDictionary->add(Ex, value);
-    IR_GIVE_FIELD(ir, value, IFT_CompoDamageMat_ez, "eyyezz");
+    IR_GIVE_FIELD(ir, value, IFT_CompoDamageMat_eyyezz, "eyyezz");
     propertyDictionary->add(Ey, value);
     propertyDictionary->add(Ez, value);
     IR_GIVE_FIELD(ir, value, IFT_CompoDamageMat_nyxy, "nuxynuxz");
@@ -108,10 +108,10 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
     }
 
     this->afterIter = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->afterIter, IFT_CompoDamageMat_afteriter, "afteriter"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, this->afterIter, IFT_CompoDamageMat_afteriter, "afteriter");
 
     this->afterIter = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->allowSnapBack, IFT_CompoDamageMat_allowSnapBack, "allowsnapback"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, this->allowSnapBack, IFT_CompoDamageMat_allowSnapBack, "allowsnapback");
 
     //
     //OOFEM_LOG_INFO("READ \n");

@@ -34,6 +34,7 @@
 
 #ifndef qtrplstrgrad_h
 #define qtrplstrgrad_h
+
 #include "nlstructuralelement.h"
 #include "gaussintegrationrule.h"
 #include "graddpelement.h"

@@ -44,6 +44,13 @@
 
 #include <vector>
 
+///@name Input fields for active boundary condition
+//@{
+#define _IFT_ActiveBoundaryCondition_elements "elements"
+#define _IFT_ActiveBoundaryCondition_elementSides "elementsides"
+#define _IFT_ActiveBoundaryCondition_dofManagers "dofmanagers"
+//@}
+
 namespace oofem {
 class SparseMtrx;
 class UnknownNumberingScheme;

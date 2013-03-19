@@ -91,21 +91,8 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
     EngngModel *problem;
     std::string problemName, dataOutputFileName, desc;
 
-    InputRecord *ir = dr->giveInputRecord(DataReader :: IR_outFileRec, 1);
-    __keyword = NULL;
-    result = ir->giveField(dataOutputFileName, IFT_EngngModel_outfile, __keyword);
-    if ( result != IRRT_OK ) {
-        IR_IOERR("", __proc, IFT_EngngModel_outfile, "Output file record", ir, result);
-    }
-
-    ir->finish();
-
-    ir = dr->giveInputRecord(DataReader :: IR_jobRec, 1);
-    __keyword = NULL;
-    result = ir->giveField(desc, IFT_EngngModel_probdescription, __keyword);
-    if ( result != IRRT_OK ) {
-        IR_IOERR("", __proc, IFT_EngngModel_probdescription, "Problem description", ir, result);
-    }
+    dataOutputFileName = dr->giveOutputFileName();
+    desc = dr->giveDescription();
 
     /* here we need copy of input record. The pointer returned by dr->giveInputRecord can (and will)
      * be updated as reading e-model components (nodes, etc). But we need this record being available
@@ -130,8 +117,8 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
     }
 
     problem->instanciateYourself(dr, emodelir, dataOutputFileName.c_str(), desc.c_str());
-    //emodelir.finish();
-    delete(emodelir);
+
+    delete emodelir;
 
     return problem;
 }

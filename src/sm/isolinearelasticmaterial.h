@@ -40,6 +40,13 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
+///@name Input fields for IsotropicLinearElasticMaterial
+//@{
+#define _IFT_IsotropicLinearElasticMaterial_e "e"
+#define _IFT_IsotropicLinearElasticMaterial_n "n"
+#define _IFT_IsotropicLinearElasticMaterial_talpha "talpha"
+//@}
+
 namespace oofem {
 class GaussPoint;
 

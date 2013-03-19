@@ -32,15 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   *****************************
-//   *** CLASS NumericalMethod ***
-//   *****************************
-
-
 #ifndef nummet_h
 #define nummet_h
-
 
 #include "femcmpnn.h"
 #include "alist.h"

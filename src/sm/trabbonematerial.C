@@ -254,17 +254,17 @@ TrabBoneMaterial :: initializeFrom(InputRecord *ir)
 
     // Read material properties here
 
-    IR_GIVE_FIELD(ir, E0, IFT_TrabBoneMaterial_E0, "e0"); // Macro
-    IR_GIVE_FIELD(ir, Eil, IFT_TrabBoneMaterial_Eil, "eil"); // Macro
-    IR_GIVE_FIELD(ir, Eie, IFT_TrabBoneMaterial_Eie, "eie"); // Macro
-    IR_GIVE_FIELD(ir, kie, IFT_TrabBoneMaterial_kie, "kie"); // Macro
-    IR_GIVE_FIELD(ir, Ek, IFT_TrabBoneMaterial_Ek, "ek"); // Macro
-    IR_GIVE_FIELD(ir, Cc, IFT_TrabBoneMaterial_Cc, "cc"); // Macro
-    IR_GIVE_FIELD(ir, Cc2, IFT_TrabBoneMaterial_Cc2, "cc2"); // Macro
-    IR_GIVE_FIELD(ir, EpsC, IFT_TrabBoneMaterial_EpsC, "epsc"); // Macro
-    IR_GIVE_FIELD(ir, SigYp, IFT_TrabBoneMaterial_SigYp, "sigyp"); // Macro
-    IR_GIVE_FIELD(ir, SigYn, IFT_TrabBoneMaterial_SigYn, "sigyn"); // Macro
-    IR_GIVE_FIELD(ir, adam, IFT_TrabBoneMaterial_adam, "adam"); // Macro
+    IR_GIVE_FIELD(ir, E0, IFT_TrabBoneMaterial_E0, "e0");
+    IR_GIVE_FIELD(ir, Eil, IFT_TrabBoneMaterial_Eil, "eil");
+    IR_GIVE_FIELD(ir, Eie, IFT_TrabBoneMaterial_Eie, "eie");
+    IR_GIVE_FIELD(ir, kie, IFT_TrabBoneMaterial_kie, "kie");
+    IR_GIVE_FIELD(ir, Ek, IFT_TrabBoneMaterial_Ek, "ek");
+    IR_GIVE_FIELD(ir, Cc, IFT_TrabBoneMaterial_Cc, "cc");
+    IR_GIVE_FIELD(ir, Cc2, IFT_TrabBoneMaterial_Cc2, "cc2");
+    IR_GIVE_FIELD(ir, EpsC, IFT_TrabBoneMaterial_EpsC, "epsc");
+    IR_GIVE_FIELD(ir, SigYp, IFT_TrabBoneMaterial_SigYp, "sigyp");
+    IR_GIVE_FIELD(ir, SigYn, IFT_TrabBoneMaterial_SigYn, "sigyn");
+    IR_GIVE_FIELD(ir, adam, IFT_TrabBoneMaterial_adam, "adam");
 
     return StructuralMaterial :: initializeFrom(ir);
 }

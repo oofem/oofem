@@ -39,6 +39,14 @@
 #include "structuralnonlocalmaterialext.h"
 #include "nonlocmatstiffinterface.h"
 
+///@name Input fields for IDNLMaterial
+//@{
+#define _IFT_IDNLMaterial_r "r"
+#define _IFT_IDNLMaterial_averagingtype "averagingtype"
+#define _IFT_IDNLMaterial_exp "exp"
+#define _IFT_IDNLMaterial_rf "rf"
+//@}
+
 namespace oofem {
 class GaussPoint;
 

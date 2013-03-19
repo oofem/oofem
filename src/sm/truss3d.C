@@ -282,9 +282,7 @@ Truss3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 IRResultType
 Truss3d :: initializeFrom(InputRecord *ir)
 {
-    this->NLStructuralElement :: initializeFrom(ir);
-    this->computeGaussPoints();
-    return IRRT_OK;
+    return NLStructuralElement :: initializeFrom(ir);
 }
 
 
@@ -298,20 +296,6 @@ Truss3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 void
 Truss3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
-    /*
-     *
-     * computes interpolation matrix for element edge.
-     * we assemble locally this matrix for only nonzero
-     * shape functions.
-     * (for example only two nonzero shape functions for 2 dofs are
-     * necessary for linear plane stress triangle edge).
-     * These nonzero shape functions are then mapped to
-     * global element functions.
-     *
-     * Using mapping technique will allow to assemble shape functions
-     * without regarding particular side
-     */
-
     this->computeNmatrixAt(gp, answer);
 }
 

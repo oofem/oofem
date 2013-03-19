@@ -73,13 +73,10 @@ QWedgeGrad :: initializeFrom (InputRecord* ir)
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     this->NLStructuralElement :: initializeFrom (ir);
-    IR_GIVE_OPTIONAL_FIELD (ir, numberOfGaussPoints, IFT_QWedgeGrad_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD (ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
     if ((numberOfGaussPoints != 2) && (numberOfGaussPoints != 9))
         numberOfGaussPoints = 9;
-
-    // set - up Gaussian integration points
-    this->computeGaussPoints();
 
     return IRRT_OK;
 }

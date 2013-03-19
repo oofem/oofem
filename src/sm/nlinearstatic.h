@@ -38,6 +38,20 @@
 #include "linearstatic.h"
 #include "sparsenonlinsystemnm.h"
 
+///@name Input fields for NonLinearStatic
+//@{
+#define _IFT_NonLinearStatic_controlmode "controlmode"
+#define _IFT_NonLinearStatic_deltat "deltat"
+#define _IFT_NonLinearStatic_stiffmode "stiffmode"
+#define _IFT_NonLinearStatic_refloadmode "refloadmode"
+#define _IFT_NonLinearStatic_keepll "keepll"
+#define _IFT_NonLinearStatic_donotfixload "donotfixload"
+#define _IFT_NonLinearStatic_nonlocstiff "nonlocstiff"
+#define _IFT_NonLinearStatic_nonlocalext "nonlocalext"
+#define _IFT_NonLinearStatic_loadBalancingFlag "loadbalancingflag"
+#define _IFT_NonLinearStatic_forceloadBalancingFlag "forceloadbalancingflag"
+//@}
+
 namespace oofem {
 /// Type determining the stiffness mode.
 enum NonLinearStatic_stiffnessMode {
@@ -50,7 +64,6 @@ enum NonLinearStatic_stiffnessMode {
 enum NonLinearStatic_controlType {
     nls_indirectControl = 0, ///< A generalized norm of displacement and loading vectors is controlled. In current implementation, the CALM solver is used, the reference load vector is FIXED.
     nls_directControl = 1,   ///< Describes the direct control where load or displacement (or both) are controlled.
-    nls_directControl2 = 2,  ///<
 };
 
 /**
@@ -126,7 +139,6 @@ public:
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    virtual void updateYourself(TimeStep *tStep);
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn, Domain *d);
     virtual void updateAttributes(MetaStep *mStep);
 

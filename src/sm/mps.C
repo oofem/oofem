@@ -165,8 +165,8 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, q4, IFT_MPSMaterial_q4, "q4");
     }
 
-    IR_GIVE_FIELD(ir, talpha, IFT_MPSMaterial_talpha, "talpha"); // Macro
-    IR_GIVE_FIELD(ir, lambda0, IFT_MPSMaterial_lambda0, "lambda0"); // Macro
+    IR_GIVE_FIELD(ir, talpha, IFT_MPSMaterial_talpha, "talpha");
+    IR_GIVE_FIELD(ir, lambda0, IFT_MPSMaterial_lambda0, "lambda0");
 
     int type = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, type, IFT_MPSMaterial_coupledanalysistype, "coupledanalysistype");

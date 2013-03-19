@@ -384,13 +384,13 @@ TrabBoneNL3D :: initializeFrom(InputRecord *ir)
     TrabBone3D :: initializeFrom(ir);
     StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, R, IFT_TrabBoneNL3D_r, "r"); // Macro
+    IR_GIVE_FIELD(ir, R, IFT_TrabBoneNL3D_r, "r");
     if ( R < 0.0 ) {
         R = 0.0;
     }
 
     mParam = 2.;
-    IR_GIVE_OPTIONAL_FIELD(ir, mParam, IFT_TrabBoneNL3D_m, "m"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, mParam, IFT_TrabBoneNL3D_m, "m");
 
     return IRRT_OK;
 }

@@ -82,19 +82,21 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
 
     microBoundaryDofManager.resize( 3 * microBoundaryNodes.giveSize() );
 
-    //val = IR_GIVE_OPTIONAL_FIELD2(ir, this->stiffMatrxFileName, IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename"); //Macro
+#if 0
+    val = IR_GIVE_OPTIONAL_FIELD2(ir, this->stiffMatrxFileName, IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename");
 
-    //     if( ir->hasField(IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename")){
-    //       if (fopen(this->stiffMatrxFileName,"r") != NULL){//if the file exist
-    //         stiffMatrxFile = fopen(this->stiffMatrxFileName,"r");
-    //         this->stiffMatrxFileNoneReadingWriting=1;
-    //       }
-    //       else {//or create a new one
-    //         if((stiffMatrxFile = fopen(this->stiffMatrxFileName,"w")) == NULL)
-    //           OOFEM_ERROR2("Can not create a new file %s\n", this->stiffMatrxFileName);
-    //         this->stiffMatrxFileNoneReadingWriting=2;
-    //       }
-    //     }
+    if( ir->hasField(IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename") ) {
+        if ( fopen(this->stiffMatrxFileName,"r") != NULL ) { //if the file exist
+            stiffMatrxFile = fopen(this->stiffMatrxFileName,"r");
+            this->stiffMatrxFileNoneReadingWriting=1;
+        }
+        else { //or create a new one
+            if((stiffMatrxFile = fopen(this->stiffMatrxFileName,"w")) == NULL)
+            OOFEM_ERROR2("Can not create a new file %s\n", this->stiffMatrxFileName);
+            this->stiffMatrxFileNoneReadingWriting=2;
+        }
+    }
+#endif
     return IRRT_OK;
 }
 
@@ -185,7 +187,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     }
 
     ir_ltf.setRecordKeywordField("constantfunction", 1);
-    ir_ltf.setField(1.0, IFT_LoadTimeFunction_ft);
+    ir_ltf.setField(1.0, _IFT_LoadTimeFunction_ft);
     if ( ( LoadTimeFunct = CreateUsrDefLoadTimeFunctionOfType("constantfunction", 1, microDomain) ) == NULL ) {
         OOFEM_ERROR("MacroLSpace :: changeMicroBoundaryConditions - Couldn't create constant time function");
     }
@@ -211,8 +213,8 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
                 DofMan->giveDof(j)->setBcId(counter);
                 displ = n.dotProduct( j == 1 ? displ_x : ( j == 2 ? displ_y : displ_z ) );
                 ir_bc.setRecordKeywordField("boundarycondition", counter);
-                ir_bc.setField(1, IFT_GeneralBoundaryCondition_LoadTimeFunct);
-                ir_bc.setField(displ, IFT_BoundaryCondition_PrescribedValue);
+                ir_bc.setField(1, _IFT_GeneralBoundaryCondition_LoadTimeFunct);
+                ir_bc.setField(displ, _IFT_BoundaryCondition_PrescribedValue);
                 if ( ( GeneralBoundaryCond = CreateUsrDefBoundaryConditionOfType("boundarycondition", counter, microDomain) ) == NULL ) {
                     OOFEM_ERROR("MacroLSpace :: changeMicroBoundaryConditions - Couldn't create boundary condition.");
                 }

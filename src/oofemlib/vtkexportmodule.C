@@ -87,16 +87,16 @@ VTKExportModule :: initializeFrom(InputRecord *ir)
     int val;
 
     ExportModule :: initializeFrom(ir);
-    IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, IFT_VTKExportModule_cellvars, "cellvars"); // Macro - see internalstatetype.h
-    IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, IFT_VTKExportModule_vars, "vars"); // Macro - see internalstatetype.h
-    IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, IFT_VTKExportModule_primvars, "primvars");  // Macro - see unknowntype.h
+    IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, IFT_VTKExportModule_cellvars, "cellvars");
+    IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, IFT_VTKExportModule_vars, "vars");
+    IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, IFT_VTKExportModule_primvars, "primvars");
 
     val = NodalRecoveryModel::NRM_ZienkiewiczZhu;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_VTKExportModule_stype, "stype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_VTKExportModule_stype, "stype");
     stype = ( NodalRecoveryModel::NodalRecoveryModelType ) val;
 
     regionsToSkip.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, regionsToSkip, IFT_VTKExportModule_regionstoskip, "regionstoskip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, regionsToSkip, IFT_VTKExportModule_regionstoskip, "regionstoskip");
 
     return IRRT_OK;
 }

@@ -38,6 +38,13 @@
 #include "randomfieldgenerator.h"
 #include "gausspnt.h"
 
+///@name Input fields for LocalGaussianRandomGenerator
+//@{
+#define _IFT_LocalGaussianRandomGenerator_mean "mean"
+#define _IFT_LocalGaussianRandomGenerator_variance "variance"
+#define _IFT_LocalGaussianRandomGenerator_seed "seed"
+//@}
+
 namespace oofem {
 /**
  * This class implements a local (no spatial correlation) random generator using Gaussian distribution.

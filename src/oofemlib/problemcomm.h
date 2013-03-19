@@ -37,8 +37,9 @@
 
 #ifdef __PARALLEL_MODE
 
- #include "problemcommunicatormode.h"
  #include "communicator.h"
+ #include "problemcommunicatormode.h"
+ #include "engngm.h"
  #include "error.h"
 
 namespace oofem {

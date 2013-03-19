@@ -91,7 +91,10 @@ public:
     void printYourself();
 
     virtual std::string giveLine();
-    
+
+    void setOutputFileName(const std::string &fname) { this->outputFileName = fname; }
+    void setDescription(const std::string &desc) { this->description = desc; }
+
     /**
      * Dumps buffer to file.
      * @param fileName Name of file to dump data to.

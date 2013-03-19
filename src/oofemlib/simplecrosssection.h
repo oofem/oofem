@@ -37,9 +37,21 @@
 
 #include "structuralcrosssection.h"
 #include "structuralmaterial.h"
-#include "dictionr.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
+
+///@name Input fields for SimpleCrossSection
+//@{
+#define _IFT_SimpleCrossSection_thick "thick"
+#define _IFT_SimpleCrossSection_width "width"
+#define _IFT_SimpleCrossSection_area "area"
+#define _IFT_SimpleCrossSection_iy "iy" ///< Inertia moment y
+#define _IFT_SimpleCrossSection_iz "iz" ///< Inertia moment z
+#define _IFT_SimpleCrossSection_ik "ik" ///< Torsion moment x
+#define _IFT_SimpleCrossSection_shearcoeff "beamshearcoeff"
+#define _IFT_SimpleCrossSection_shearareay "shearareay" ///< Shear area y direction
+#define _IFT_SimpleCrossSection_shearareaz "shearareaz" ///< Shear area z direction
+//@}
 
 namespace oofem {
 class GaussPoint;

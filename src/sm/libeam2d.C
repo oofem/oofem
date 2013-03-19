@@ -290,9 +290,7 @@ LIBeam2d :: givePitch()
 IRResultType
 LIBeam2d :: initializeFrom(InputRecord *ir)
 {
-    this->StructuralElement :: initializeFrom(ir);
-    this->computeGaussPoints();
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 
@@ -375,8 +373,8 @@ LIBeam2d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
     answer.resize(3, 3);
     answer.zero();
 
-    sine           = sin( this->givePitch() );
-    cosine         = cos(pitch);
+    sine = sin( this->givePitch() );
+    cosine = cos( pitch );
 
     answer.at(1, 1) = cosine;
     answer.at(1, 2) = -sine;

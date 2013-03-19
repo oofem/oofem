@@ -86,6 +86,7 @@
  #include "tr2shell7xfem.h" 
  #include "rershell.h"
  #include "quad1mindlin.h"
+ #include "quad1mindlinshell3d.h"
  #include "interfaceelem2dquad.h"
  #include "interfaceelement1d.h"
  #include "interfaceelem3dtrlin.h"
@@ -156,6 +157,7 @@ REGISTER_CLASS(LSpace, "lspace", LSpaceClass)
 REGISTER_CLASS(QSpaceGrad, "qspacegrad", QSpaceGradClass)
 REGISTER_CLASS(QSpace, "qspace", QSpaceClass)
 REGISTER_CLASS(Quad1Mindlin, "quad1mindlin", Quad1MindlinClass)
+REGISTER_CLASS(Quad1MindlinShell3D, "quad1mindlinshell3d", Quad1MindlinShell3DClass)
 REGISTER_CLASS(CCTPlate3d, "cctplate3d", CCTPlate3dClass)
 REGISTER_CLASS(CCTPlate, "cctplate", CCTPlateClass)
 //REGISTER_CLASS(LTRSpaceWithEmbeddedCrack, "ltrspaceec", )

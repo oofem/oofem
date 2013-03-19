@@ -40,6 +40,12 @@
 #include "structuralmaterial.h"
 #include "structuralms.h"
 
+///@name Input fields for RCM2Material
+//@{
+#define _IFT_RCM2Material_gf "gf"
+#define _IFT_RCM2Material_ft "ft"
+//@}
+
 namespace oofem {
 // material contant's keys for give()
 #define pscm_Ee 300

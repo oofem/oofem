@@ -46,8 +46,8 @@ UserDefinedLoadTimeFunction :: initializeFrom(InputRecord *ir)
     IRResultType result;
 
     IR_GIVE_FIELD(ir, ftExpression, IFT_UserDefinedLoadTimeFunction_ft, "f(t)");
-    IR_GIVE_OPTIONAL_FIELD(ir, dfdtExpression, IFT_UserDefinedLoadTimeFunction_ft, "dfdt(t)");
-    IR_GIVE_OPTIONAL_FIELD(ir, d2fdt2Expression, IFT_UserDefinedLoadTimeFunction_ft, "d2fdt2(t)");
+    IR_GIVE_OPTIONAL_FIELD(ir, dfdtExpression, IFT_UserDefinedLoadTimeFunction_dfdt, "dfdt(t)");
+    IR_GIVE_OPTIONAL_FIELD(ir, d2fdt2Expression, IFT_UserDefinedLoadTimeFunction_d2fdt2, "d2fdt2(t)");
 
     return LoadTimeFunction :: initializeFrom(ir);
 }

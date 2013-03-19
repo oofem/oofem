@@ -38,6 +38,11 @@
 #include "structuralelement.h"
 #include "fei2dquadquad.h"
 
+///@name Input fields for Q4Axisymm
+//@{
+#define _IFT_Q4Axisymm_nipfish "nipfish"
+//@}
+
 namespace oofem {
 
 /**

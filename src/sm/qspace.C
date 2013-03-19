@@ -63,14 +63,11 @@ QSpace :: initializeFrom(InputRecord *ir)
 
     this->StructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 27;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_QSpace_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
     if ( ( numberOfGaussPoints != 8 ) && ( numberOfGaussPoints != 14 ) && ( numberOfGaussPoints != 27 ) && ( numberOfGaussPoints != 64 ) ) {
         numberOfGaussPoints = 27;
     }
-
-    // set - up Gaussian integration points
-    this->computeGaussPoints();
 
     return IRRT_OK;
 }
@@ -85,10 +82,10 @@ QSpace :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 MaterialMode
 QSpace :: giveMaterialMode()
 {
-  if(this->nlGeometry > 1)
-    return _3dMat_F;
-  else
-    return _3dMat;
+    if(this->nlGeometry > 1)
+        return _3dMat_F;
+    else
+        return _3dMat;
 }
 
 
@@ -231,18 +228,18 @@ QSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i
 void
 QSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer) 
 {
-  FloatMatrix dnx;
-  
-  this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    FloatMatrix dnx;
+    
+    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
-  answer.resize(9, 60);
-  answer.zero();
+    answer.resize(9, 60);
+    answer.zero();
 
     for ( int i = 1; i <= 3; i++ ) { // 3 spatial dimensions
         for ( int j = 1; j <= 20; j++ ) { // 8 nodes
             answer.at(3 * i - 2, 3 * j - 2) =
                 answer.at(3 * i - 1, 3 * j - 1) =
-                    answer.at(3 * i, 3 * j) = dnx.at(j, i); // derivative of Nj wrt Xi
+                answer.at(3 * i, 3 * j) = dnx.at(j, i); // derivative of Nj wrt Xi
         }
     }
 }

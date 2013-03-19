@@ -72,14 +72,28 @@
 #ifndef hydram_h
 #define hydram_h
 
-// oofem includes
-// cltypes.h entry: classType HellmichMaterialStatusClass, HellmichMaterialClass
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "timestep.h"
 #include "structuralms.h"
 #include "structuralmaterial.h"
 #include "interface.h"
+
+///@name Input fields for HydrationModel
+//@{
+#define _IFT_HydrationModel_hydration "hydration"
+#define _IFT_HydrationModel_c60mix "c60mix"
+#define _IFT_HydrationModel_timeScale "timescale"
+#define _IFT_HydrationModel_hheat "hheat"
+#define _IFT_HydrationModel_cv "cv"
+#define _IFT_HydrationModel_water "water"
+//@}
+
+///@name Input fields for HydrationModelInterface
+//@{
+#define _IFT_HydrationModelInterface_hydration "hydration"
+#define _IFT_HydrationModelInterface_castAt "castat"
+//@}
 
 namespace oofem {
 #define ROOT_PRECISION_DKSI 1e-14

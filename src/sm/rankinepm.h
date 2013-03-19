@@ -37,6 +37,11 @@
 
 #include "mplasticmaterial.h"
 
+///@name Input fields for RankinePlasticMaterial
+//@{
+#define _IFT_RankinePlasticMaterial_ry "ry"
+//@}
+
 namespace oofem {
 class Domain;
 

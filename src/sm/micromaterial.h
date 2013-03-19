@@ -39,7 +39,6 @@
 #include "structuralms.h"
 #include "gausspnt.h"
 #include "timestep.h"
-#include "oofem_limits.h"
 #include "dictionr.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
@@ -50,6 +49,11 @@
 #include "boundary.h"
 #include "macrolspace.h"
 #include "error.h"
+
+///@name Input fields for MicroMaterial
+//@{
+#define _IFT_MicroMaterial_fileName "file"
+//@}
 
 namespace oofem {
 

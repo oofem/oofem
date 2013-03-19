@@ -41,6 +41,18 @@
 #include "flotarry.h"
 #include "statecountertype.h"
 
+///@name Input fields for ZZErrorEstimator
+//@{
+#define _IFT_ZZErrorEstimator_normtype "normtype"
+#define _IFT_ZZErrorEstimator_recoverytype "recoverytype"
+//@}
+
+///@name Input fields for ZZRemeshingCriteria
+//@{
+#define _IFT_ZZRemeshingCriteria_requirederror "requirederror"
+#define _IFT_ZZRemeshingCriteria_minelemsize "minelemsize"
+//@}
+
 namespace oofem {
 #define ZZErrorEstimator_ElementResultCashed
 

@@ -36,12 +36,28 @@
 
 #include "flotarry.h"
 #include "flotmtrx.h"
-
 #include "structuralms.h"
 #include "strainvector.h"
 #include "stressvector.h"
 #include "structuralmaterial.h"
 #include "isolinearelasticmaterial.h"
+
+///@name Input fields for DustMaterial
+//@{
+#define _IFT_DustMaterial_alpha "alpha"
+#define _IFT_DustMaterial_beta "beta"
+#define _IFT_DustMaterial_lambda "lambda"
+#define _IFT_DustMaterial_theta "theta"
+#define _IFT_DustMaterial_ft "ft"
+#define _IFT_DustMaterial_hardeningType "hardeningtype"
+#define _IFT_DustMaterial_mStiff "mstiff"
+#define _IFT_DustMaterial_rEll "rell"
+#define _IFT_DustMaterial_x0 "x0"
+#define _IFT_DustMaterial_newtonTol "newtontol"
+#define _IFT_DustMaterial_newtonIter "newtoniter"
+#define _IFT_DustMaterial_wHard "whard"
+#define _IFT_DustMaterial_dHard "dhard"
+//@}
 
 namespace oofem {
 /**

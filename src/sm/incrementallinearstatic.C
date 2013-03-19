@@ -86,7 +86,6 @@ IRResultType IncrementalLinearStatic :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom";
     IRResultType result;
 
-    //StructuralEngngModel::initializeFrom (ir);
     IR_GIVE_OPTIONAL_FIELD(ir, discreteTimes, IFT_IncrementalLinearStatic_prescribedtimes, "prescribedtimes");
     if ( discreteTimes.giveSize() > 0 ) {
         numberOfSteps = discreteTimes.giveSize();
@@ -102,13 +101,14 @@ IRResultType IncrementalLinearStatic :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, IFT_IncrementalLinearStatic_endoftimeofinterest, "endoftimeofinterest");
 
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_IncrementalLinearStatic_lstype, "lstype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_IncrementalLinearStatic_smtype, "smtype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
     sparseMtrxType = ( SparseMtrxType ) val;
 
+    //StructuralEngngModel::initializeFrom (ir);
     return IRRT_OK;
 }
 
@@ -245,15 +245,6 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
         OOFEM_ERROR("IncrementalLinearStatic :: solverYourselfAt - No success in solving system.");
     }
 }
-
-
-void IncrementalLinearStatic :: updateYourself(TimeStep *stepN)
-{
-    // updates internal state to reached one
-    this->updateInternalState(stepN);
-    StructuralEngngModel :: updateYourself(stepN);
-}
-
 
 
 double IncrementalLinearStatic :: giveUnknownComponent(EquationID type, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)

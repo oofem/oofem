@@ -39,6 +39,13 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 
+///@name Input fields for NLTransientTransportProblem
+//@{
+#define _IFT_NLTransientTransportProblem_nsmax "nsmax"
+#define _IFT_NLTransientTransportProblem_rtol "rtol"
+#define _IFT_NLTransientTransportProblem_manrmsteps "manrmsteps"
+//@}
+
 namespace oofem {
 /**
  * This class represents nonlinear transient transport problem. The problem can be growing/decreasing, signalized by flag "changingproblemsize"

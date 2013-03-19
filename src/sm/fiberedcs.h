@@ -44,6 +44,18 @@
 #include "flotmtrx.h"
 #include "interface.h"
 
+///@name Input fields for FiberedCrossSection
+//@{
+#define _IFT_FiberedCrossSection_nfibers "nfibers"
+#define _IFT_FiberedCrossSection_fibermaterials "fibermaterials"
+#define _IFT_FiberedCrossSection_thicks "thicks"
+#define _IFT_FiberedCrossSection_widths "widths"
+#define _IFT_FiberedCrossSection_fiberycentrecoords "fiberycentrecoords"
+#define _IFT_FiberedCrossSection_fiberzcentrecoords "fiberzcentrecoords"
+#define _IFT_FiberedCrossSection_thick "thick"
+#define _IFT_FiberedCrossSection_width "width"
+//@}
+
 namespace oofem {
 class GaussPoint;
 class FiberedCrossSectionModelInterface;

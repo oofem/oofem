@@ -41,7 +41,6 @@
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
-
 #include "directerrorindicatorrc.h"
 #include "eleminterpmapperinterface.h"
 #include "zzerrorestimator.h"

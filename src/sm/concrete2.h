@@ -41,8 +41,28 @@
 #include "deformationtheorymaterial.h"
 #include "isolinearelasticmaterial.h"
 #include "flotarry.h"
-
 #include "structuralms.h"
+
+///@name Input fields for Concrete2
+//@{
+#define _IFT_Concrete2_e "e"
+#define _IFT_Concrete2_n "n"
+#define _IFT_Concrete2_sccc "sccc"
+#define _IFT_Concrete2_scct "scct"
+#define _IFT_Concrete2_epp "epp"
+#define _IFT_Concrete2_epu "epu"
+#define _IFT_Concrete2_eopp "eopp"
+#define _IFT_Concrete2_eopu "eopu"
+#define _IFT_Concrete2_sheartol "sheartol"
+#define _IFT_Concrete2_is_plastic_flow "is_plastic_flow"
+#define _IFT_Concrete2_ifad "ifad"
+#define _IFT_Concrete2_stirr_e "stirr_e"
+#define _IFT_Concrete2_stirr_ft "stirr_ft"
+#define _IFT_Concrete2_stirr_a "stirr_a"
+#define _IFT_Concrete2_stirr_tol "stirr_tol"
+#define _IFT_Concrete2_stirr_eref "stirr_eref"
+#define _IFT_Concrete2_stirr_lambda "stirr_lambda"
+//@}
 
 namespace oofem {
 #define c2_SCCC  300

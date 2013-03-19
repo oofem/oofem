@@ -37,6 +37,11 @@
 
 #include "node.h"
 
+///@name Input fields for RigidArmNode
+//@{
+#define _IFT_RigidArmNode_master "master"
+//@}
+
 namespace oofem {
 class FloatArray;
 class IntArray;
@@ -64,7 +69,7 @@ class RigidArmNode : public Node
 {
 protected:
     ///
-    IntArray *masterMask;
+    IntArray masterMask;
     /// Count of Master Dofs
     IntArray *countOfMasterDofs;
     /// Number of master DofManager (Node)
@@ -91,11 +96,12 @@ public:
     virtual ~RigidArmNode(void) { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void postInitialize();
     virtual int checkConsistency();
     /**
      * Compute vector of master contribution coefficients - SUMA of contributions == 1.0
      */
-    int computeMasterContribution();
+    void computeMasterContribution();
 
     virtual const char *giveClassName() const { return "RigidArmNode"; }
     virtual classType giveClassID() const { return RigidArmNodeClass; }

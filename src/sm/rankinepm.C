@@ -61,7 +61,7 @@ RankinePlasticMaterial :: initializeFrom(InputRecord *ir)
     MPlasticMaterial :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, k, IFT_RankinePlasticMaterial_ry, "ry"); // Macro
+    IR_GIVE_FIELD(ir, k, IFT_RankinePlasticMaterial_ry, "ry");
     return IRRT_OK;
 }
 

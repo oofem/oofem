@@ -72,6 +72,20 @@
 #include "mmashapefunctprojection.h"
 #include "mmaleastsquareprojection.h"
 
+///@name Input fields for MDM
+//@{
+#define _IFT_MDM_talpha "talpha"
+#define _IFT_MDM_parmd "parmd"
+#define _IFT_MDM_nonloc "nonloc"
+#define _IFT_MDM_r "r"
+#define _IFT_MDM_efp "efp"
+#define _IFT_MDM_ep "ep"
+#define _IFT_MDM_gf "gf"
+#define _IFT_MDM_ft "ft"
+#define _IFT_MDM_formulation "formulation"
+#define _IFT_MDM_mode "mode"
+#define _IFT_MDM_mapper "mapper"
+//@}
 
 namespace oofem {
 class Microplane;

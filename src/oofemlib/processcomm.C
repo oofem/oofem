@@ -57,13 +57,12 @@ ProcessCommunicatorBuff :: ProcessCommunicatorBuff(CommBuffType t)
 }
 
 
-ProcessCommunicator :: ProcessCommunicator(EngngModel *d, ProcessCommunicatorBuff *b, int rank, CommunicatorMode m) :
+ProcessCommunicator :: ProcessCommunicator(ProcessCommunicatorBuff *b, int rank, CommunicatorMode m) :
     toSend(), toReceive()
 {
-    this->localProblem = d;
-    this->rank         = rank;
+    this->rank = rank;
     this->pcBuffer =  b;
-    this->mode         = m;
+    this->mode = m;
 }
 
 

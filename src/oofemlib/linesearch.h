@@ -40,6 +40,13 @@
 #include "nmstatus.h"
 #include "flotarry.h"
 
+///@name Input fields for LineSearchNM
+//@{
+#define _IFT_LineSearchNM_lsearchtol "lsearchtol"
+#define _IFT_LineSearchNM_lsearchamp "lsearchamp"
+#define _IFT_LineSearchNM_lsearchmaxeta "lsearchmaxeta"
+//@}
+
 namespace oofem {
 class EngngModel;
 class SparseMtrx;

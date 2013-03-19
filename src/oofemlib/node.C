@@ -97,7 +97,7 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
 #  endif
 
     DofManager :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, coordinates, IFT_Node_coords, "coords"); // Macro
+    IR_GIVE_FIELD(ir, coordinates, IFT_Node_coords, "coords");
 
     //
     // scaling of coordinates if necessary
@@ -110,7 +110,7 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
 
     // Read if available local coordinate system in this node
     triplets.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, triplets, IFT_Node_lcs, "lcs"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, triplets, IFT_Node_lcs, "lcs");
     size = triplets.giveSize();
     if ( !( ( size == 0 ) || ( size == 6 ) ) ) {
         _warning2( "initializeFrom: lcs in node %d is not properly defined, will be ignored", this->giveNumber() );
@@ -219,15 +219,15 @@ void
 Node :: updateYourself(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
-    int ic;
+    DofManager :: updateYourself(tStep);
 
     fMode mode = domain->giveEngngModel()->giveFormulation();
 
     double dt = tStep->giveTimeIncrement();
 
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        if ( mode == AL ) { // updated Lagrange
-            ic = domain->giveCorrespondingCoordinateIndex(i);
+    if ( mode == AL ) { // updated Lagrange
+        for ( int i = 1; i <= numberOfDofs; i++ ) {
+            int ic = domain->giveCorrespondingCoordinateIndex(i);
             if ( ic != 0 ) {
                 Dof *d = this->giveDof(i);
                 DofIDItem id = d->giveDofID();
@@ -325,11 +325,11 @@ Node :: checkConsistency()
      * Current implementation checks (when receiver has slave dofs) if receiver has the same
      * coordinate system as master dofManager of slave dof.
      */
-    int result = 1;
+    int result;
     int ndofs = this->giveNumberOfDofs();
     int nslaves = 0;
 
-    result = result && DofManager :: checkConsistency();
+    result = DofManager :: checkConsistency();
 
     for ( int i = 1; i <= ndofs; i++ ) {
         if ( dynamic_cast< SimpleSlaveDof * >( this->giveDof(i) ) ) {

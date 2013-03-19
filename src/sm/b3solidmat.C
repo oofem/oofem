@@ -168,7 +168,7 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
         }
     }
 
-    IR_GIVE_FIELD(ir, talpha, IFT_B3Material_talpha, "talpha"); // Macro
+    IR_GIVE_FIELD(ir, talpha, IFT_B3Material_talpha, "talpha");
 
     // evaluate the total water content [kg/m^3]
     w = wc * c;

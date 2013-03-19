@@ -299,13 +299,12 @@ Truss2d :: initializeFrom(InputRecord *ir)
     this->NLStructuralElement :: initializeFrom(ir);
 
     cs_mode = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, cs_mode, IFT_Truss2d_cs, "cs"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, cs_mode, IFT_Truss2d_cs, "cs");
 
     if ( cs_mode != 0 && cs_mode != 1 && cs_mode != 2 ) {
         _error("Unsupported value of cs_mode");
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 
@@ -325,7 +324,7 @@ Truss2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 void
 Truss2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) );
+    this->computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) );
 }
 
 void

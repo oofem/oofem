@@ -37,6 +37,11 @@
 
 #include "nlstructuralelement.h"
 
+///@name Input fields for 2D truss element
+//@{
+#define _IFT_Truss2d_cs "cs"
+//@}
+
 namespace oofem {
 
 /**
@@ -57,6 +62,7 @@ protected:
     double length;
     double pitch;
     int cs_mode;
+    ///@todo Use interpolator class for lines in 2D
 
 public:
     Truss2d(int n, Domain *d);

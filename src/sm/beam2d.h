@@ -40,6 +40,11 @@
 #include "fei2dlinelin.h"
 #include "fei2dlinehermite.h"
 
+///@name Input fields for Beam2d
+//@{
+#define _IFT_Beam2d_dofstocondense "dofstocondense"
+//@}
+
 namespace oofem {
 /**
  * This class implements a 2-dimensional beam element

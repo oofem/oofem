@@ -145,6 +145,7 @@ enum classType {
     CCTPlateClass,
     CCTPlate3dClass,
     Quad1MindlinClass,
+    Quad1MindlinShell3DClass,
     LSpaceClass,
     LSpaceBBClass,
     QSpaceClass,

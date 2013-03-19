@@ -35,13 +35,13 @@
 #ifndef datastream_h
 #define datastream_h
 
-#include "combuff.h"
-#include "processcomm.h"
-
 #include <sstream>
 #include <cstdio>
 
 namespace oofem {
+
+class CommunicationBuffer;
+class ProcessCommunicatorBuff;
 
 /**
  * The purpose of DataStream abstract class is to allow to store/restore context to different streams,

@@ -2776,7 +2776,7 @@ StructuralMaterial :: initializeFrom(InputRecord *ir)
     this->Material :: initializeFrom(ir);
 
     referenceTemperature = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, referenceTemperature, IFT_StructuralMaterial_referencetemperature, "referencetemperature"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, referenceTemperature, IFT_StructuralMaterial_referencetemperature, "referencetemperature");
 
     return IRRT_OK;
 }

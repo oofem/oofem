@@ -50,6 +50,18 @@
 
 #define LOCAL_ZERO_MASS_REPLACEMENT 1
 
+///@name Input fields for NlDEIDynamic
+//@{
+#define _IFT_NlDEIDynamic_dumpcoef "dumpcoef"
+#define _IFT_NlDEIDynamic_deltat "deltat"
+#define _IFT_NlDEIDynamic_drflag "drflag"
+#define _IFT_NlDEIDynamic_tau "tau"
+#define _IFT_NlDEIDynamic_py "py"
+#define _IFT_NlDEIDynamic_nodecutmode "nodecutmode"
+#define _IFT_NlDEIDynamic_elementcutmode "elementcutmode"
+#define _IFT_NlDEIDynamic_nonlocalext "nonlocalext"
+//@}
+
 namespace oofem {
 /**
  * This class implements NonLinear (- may be changed) solution of dynamic

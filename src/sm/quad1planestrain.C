@@ -286,7 +286,7 @@ Quad1PlaneStrain :: initializeFrom(InputRecord *ir)
 
     this->StructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 4;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Quad1PlaneStrain_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
     if ( !( ( numberOfGaussPoints == 4 ) ||
            ( numberOfGaussPoints == 9 ) ||
@@ -294,7 +294,6 @@ Quad1PlaneStrain :: initializeFrom(InputRecord *ir)
         numberOfGaussPoints = 4;
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 

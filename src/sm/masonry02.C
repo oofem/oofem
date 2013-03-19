@@ -78,29 +78,29 @@ Masonry02 :: initializeFrom(InputRecord *ir)
     MPlasticMaterial2 :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, ft0, IFT_Masonry02_ft0, "ft0"); // Macro
-    IR_GIVE_FIELD(ir, gfI, IFT_Masonry02_gfi, "gfi"); // Macro
-    IR_GIVE_FIELD(ir, gfII, IFT_Masonry02_gfii, "gfii"); // Macro
-    IR_GIVE_FIELD(ir, kn, IFT_Masonry02_kn, "kn"); // Macro
-    IR_GIVE_FIELD(ir, ks, IFT_Masonry02_ks, "ks"); // Macro
-    IR_GIVE_FIELD(ir, c0, IFT_Masonry02_c0, "c0"); // Macro
-    IR_GIVE_FIELD(ir, tanfi0, IFT_Masonry02_tanfi0, "tanfi0"); // Macro
-    IR_GIVE_FIELD(ir, tanfir, IFT_Masonry02_tanfir, "tanfir"); // Macro
-    IR_GIVE_FIELD(ir, tanpsi, IFT_Masonry02_tanpsi, "tanpsi"); // Macro
+    IR_GIVE_FIELD(ir, ft0, IFT_Masonry02_ft0, "ft0");
+    IR_GIVE_FIELD(ir, gfI, IFT_Masonry02_gfi, "gfi");
+    IR_GIVE_FIELD(ir, gfII, IFT_Masonry02_gfii, "gfii");
+    IR_GIVE_FIELD(ir, kn, IFT_Masonry02_kn, "kn");
+    IR_GIVE_FIELD(ir, ks, IFT_Masonry02_ks, "ks");
+    IR_GIVE_FIELD(ir, c0, IFT_Masonry02_c0, "c0");
+    IR_GIVE_FIELD(ir, tanfi0, IFT_Masonry02_tanfi0, "tanfi0");
+    IR_GIVE_FIELD(ir, tanfir, IFT_Masonry02_tanfir, "tanfir");
+    IR_GIVE_FIELD(ir, tanpsi, IFT_Masonry02_tanpsi, "tanpsi");
 
     // cap mode params
-    // IR_GIVE_FIELD (ir, fm, "fm"); // Macro
-    IR_GIVE_FIELD(ir, Cnn, IFT_Masonry02_cnn, "cnn"); // Macro
-    IR_GIVE_FIELD(ir, Css, IFT_Masonry02_css, "css"); // Macro
-    IR_GIVE_FIELD(ir, Cn, IFT_Masonry02_cn, "cn"); // Macro
+    // IR_GIVE_FIELD (ir, fm, "fm");
+    IR_GIVE_FIELD(ir, Cnn, IFT_Masonry02_cnn, "cnn");
+    IR_GIVE_FIELD(ir, Css, IFT_Masonry02_css, "css");
+    IR_GIVE_FIELD(ir, Cn, IFT_Masonry02_cn, "cn");
 
-    IR_GIVE_FIELD(ir, sic, IFT_Masonry02_si, "si"); // Macro
-    IR_GIVE_FIELD(ir, spc, IFT_Masonry02_sp, "sp"); // Macro
-    IR_GIVE_FIELD(ir, smc, IFT_Masonry02_sm, "sm"); // Macro
-    IR_GIVE_FIELD(ir, src, IFT_Masonry02_sr, "sr"); // Macro
-    IR_GIVE_FIELD(ir, kp, IFT_Masonry02_kp, "kp"); // Macro
-    IR_GIVE_FIELD(ir, km, IFT_Masonry02_km, "km"); // Macro
-    IR_GIVE_FIELD(ir, kr, IFT_Masonry02_kr, "kr"); // Macro
+    IR_GIVE_FIELD(ir, sic, IFT_Masonry02_si, "si");
+    IR_GIVE_FIELD(ir, spc, IFT_Masonry02_sp, "sp");
+    IR_GIVE_FIELD(ir, smc, IFT_Masonry02_sm, "sm");
+    IR_GIVE_FIELD(ir, src, IFT_Masonry02_sr, "sr");
+    IR_GIVE_FIELD(ir, kp, IFT_Masonry02_kp, "kp");
+    IR_GIVE_FIELD(ir, km, IFT_Masonry02_km, "km");
+    IR_GIVE_FIELD(ir, kr, IFT_Masonry02_kr, "kr");
 
 
 

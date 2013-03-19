@@ -178,7 +178,7 @@ Steel1 :: initializeFrom(InputRecord *ir)
     double value;
 
     PerfectlyPlasticMaterial :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, value, IFT_Steel1_ry, "ry"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_Steel1_ry, "ry");
     propertyDictionary->add( 'k', value / sqrt(3.) );
 
     return IRRT_OK;

@@ -41,6 +41,16 @@
 #include "activebc.h"
 #include "inputrecord.h"
 
+///@name Input fields for WeakPeriodicBoundaryCondition
+//@{
+#define _IFT_WeakPeriodicBoundaryCondition_order "order"
+#define _IFT_WeakPeriodicBoundaryCondition_descritizationType "descritizationtype"
+#define _IFT_WeakPeriodicBoundaryCondition_dofid "dofid"
+#define _IFT_WeakPeriodicBoundaryCondition_ngp "ngp"
+#define _IFT_WeakPeriodicBoundaryCondition_elementSidesPositive "elementsidespositive"
+#define _IFT_WeakPeriodicBoundaryCondition_elementSidesNegative "elementsidesnegative"
+//@}
+
 namespace oofem {
 enum basisType { monomial=0, trigonometric=1, legendre=2 };
 /**
@@ -110,6 +120,9 @@ public:
     virtual DofManager *giveInternalDofManager(int i);
 
     virtual void addElementSide(int elem, int side);
+
+protected:
+    void computeElementTangent(FloatMatrix &answer, Element *e, int boundary);
 };
 }
 #endif /* WEAKPERIODICBC_H_ */

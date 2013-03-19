@@ -39,6 +39,13 @@
 #include "bcgeomtype.h"
 #include "valuemodetype.h"
 
+///@name Input fields for Reinforcement
+//@{
+#define _IFT_Reinforcement_porosity "porosity"
+#define _IFT_Reinforcement_permeability "permeability"
+#define _IFT_Reinforcement_shapeFactor "shapefactor"
+//@}
+
 namespace oofem {
 /**
  * This class implements an influence of reinforcement into flow problems, especially concrete (binhamfluid).

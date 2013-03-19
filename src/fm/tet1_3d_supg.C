@@ -124,11 +124,7 @@ Tet1_3D_SUPG :: initializeFrom(InputRecord *ir)
 {
     //const char*__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                  // Required by IR_GIVE_FIELD macro
-
-    this->SUPGElement2 :: initializeFrom(ir);
-
-    this->computeGaussPoints();
-    return IRRT_OK;
+    return SUPGElement2 :: initializeFrom(ir);
 }
 
 void

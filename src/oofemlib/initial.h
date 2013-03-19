@@ -42,6 +42,11 @@
 #include "bcvaltype.h"
 #include "valuemodetype.h"
 
+///@name Input fields for initial condition
+//@{
+#define _IFT_InitialCondition_conditions "conditions"
+//@}
+
 namespace oofem {
 /**
  * Class implementing general initial condition. Initial condition is usually attribute of

@@ -57,7 +57,6 @@
 
 // Nonlinear solvers
 #include "nrsolver.h"
-#include "nrsolver2.h"
 #include "calmls.h"
 
 // export modules
@@ -330,9 +329,7 @@ std :: map < std :: string, SparseNonLinearSystemNM * ( * )(int, Domain *, Engng
 SparseNonLinearSystemNM *CreateUsrDefNonLinearSolver(const char *aClass, int number, Domain *d, EngngModel *emodel, EquationID eid)
 {
     if ( nonlinList.empty() ) {
-        //nonlinList["snes"]       = nonlinCreator< PETScSNES >;
         nonlinList [ "nrsolver" ]   = nonlinCreator< NRSolver >;
-        nonlinList [ "nrsolver2" ]  = nonlinCreator< NRSolver2 >;
         nonlinList [ "calm" ]       = nonlinCreator< CylindricalALM >;
     }
 

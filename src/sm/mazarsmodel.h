@@ -39,6 +39,21 @@
 #include "idm1.h"
 #include "structuralms.h"
 
+///@name Input fields for MazarsMaterial
+//@{
+#define _IFT_MazarsMaterial_version "version"
+#define _IFT_MazarsMaterial_e0 "e0"
+#define _IFT_MazarsMaterial_ac "ac"
+#define _IFT_MazarsMaterial_bc "bc"
+#define _IFT_MazarsMaterial_beta "beta"
+#define _IFT_MazarsMaterial_at "at"
+#define _IFT_MazarsMaterial_bt "bt"
+#define _IFT_MazarsMaterial_ef "ef"
+#define _IFT_MazarsMaterial_r "r"
+#define _IFT_MazarsMaterial_hreft "hreft"
+#define _IFT_MazarsMaterial_hrefc "hrefc"
+//@}
+
 namespace oofem {
 /**
  * This class implements associated Material Status to MazarsMaterial.

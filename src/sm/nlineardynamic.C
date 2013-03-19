@@ -144,11 +144,11 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
 
     StructuralEngngModel :: initializeFrom(ir);
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NonLinearDynamic_lstype, "lstype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NonLinearDynamic_smtype, "smtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
     sparseMtrxType = ( SparseMtrxType ) val;
 
     nonlocalStiffnessFlag = 0;
@@ -323,7 +323,8 @@ NonLinearDynamic :: solveYourselfAt(TimeStep *tStep) {
 }
 
 void
-NonLinearDynamic :: terminate(TimeStep *tStep) {
+NonLinearDynamic :: terminate(TimeStep *tStep)
+{
     this->doStepOutput(tStep);
     this->printReactionForces(tStep, 1);
     fflush(this->giveOutputStream());
@@ -394,7 +395,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
             }
         }
 
-        this->giveInternalForces(internalForces, true, 1, tStep);
+        this->giveInternalForces(internalForces, true, di, tStep);
     }
 
     if ( initFlag ) {
@@ -611,11 +612,6 @@ void NonLinearDynamic :: updateYourself(TimeStep *stepN)
         previousInternalForces.at(i)          = internalForces.at(i);
     }
 
-    // The following line is potentially serious performance leak.
-    // The numerical method may compute their internal forces - thus causing
-    // internal state to be updated, while checking equilibrium.
-    // update internal state only if necessary
-    this->updateInternalState(stepN);
     StructuralEngngModel :: updateYourself(stepN);
 }
 
@@ -1088,39 +1084,7 @@ NonLinearDynamic :: initializeCommMaps(bool forceInit)
     }
 }
 
-#endif
 
-int
-NonLinearDynamic :: checkConsistency()
-{
-    // check internal consistency
-    // if success returns nonzero
-    int i, nelem;
-    Element *ePtr;
-    NLStructuralElement *sePtr;
-    StructuralElementEvaluator *see;
-    Domain *domain = this->giveDomain(1);
-
-    nelem = domain->giveNumberOfElements();
-    // check for proper element type
-
-    for ( i = 1; i <= nelem; i++ ) {
-        ePtr = domain->giveElement(i);
-        sePtr = dynamic_cast< NLStructuralElement * >( ePtr );
-        see   = dynamic_cast< StructuralElementEvaluator * >( ePtr );
-
-        if ( ( sePtr == NULL ) && ( see == NULL ) ) {
-            _warning2("checkConsistency: element %d has no Structural support", i);
-            return 0;
-        }
-    }
-
-    EngngModel :: checkConsistency();
-
-    return 1;
-}
-
-#ifdef __PARALLEL_MODE
 LoadBalancer *
 NonLinearDynamic :: giveLoadBalancer()
 {
@@ -1135,6 +1099,8 @@ NonLinearDynamic :: giveLoadBalancer()
         return NULL;
     }
 }
+
+
 LoadBalancerMonitor *
 NonLinearDynamic :: giveLoadBalancerMonitor()
 {
@@ -1149,6 +1115,7 @@ NonLinearDynamic :: giveLoadBalancerMonitor()
         return NULL;
     }
 }
+
 
 void
 NonLinearDynamic :: packMigratingData(TimeStep *atTime)

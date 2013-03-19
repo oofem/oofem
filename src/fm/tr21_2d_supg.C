@@ -188,14 +188,13 @@ TR21_2D_SUPG :: computeGaussPoints()
 void
 TR21_2D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    int i;
     FloatArray n;
 
     this->velocityInterpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
     answer.resize(2, 12);
     answer.zero();
 
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         answer.at(1, 2 * i - 1)  = n.at(i);
         answer.at(2, 2 * i - 0)  = n.at(i);
     }
@@ -204,7 +203,6 @@ TR21_2D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
 void
 TR21_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
 {
-    int i;
     FloatMatrix n, dn;
     FloatArray u, un;
     this->velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
@@ -215,7 +213,7 @@ TR21_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Time
 
     answer.resize(2, 12);
     answer.zero();
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         answer.at(1, 2 * i - 1) = dn.at(i, 1) * u.at(1) + dn.at(i, 2) * u.at(2);
         answer.at(2, 2 * i)   = dn.at(i, 1) * u.at(1) + dn.at(i, 2) * u.at(2);
     }
@@ -224,14 +222,13 @@ TR21_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Time
 void
 TR21_2D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    int i;
     FloatMatrix dn(6, 2);
     this->velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(3, 12);
     answer.zero();
 
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         answer.at(1, 2 * i - 1) = dn.at(i, 1);
         answer.at(2, 2 * i)   = dn.at(i, 2);
         answer.at(3, 2 * i - 1) = dn.at(i, 2);
@@ -242,14 +239,13 @@ TR21_2D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 void
 TR21_2D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    int i;
     FloatMatrix dn(6, 2);
     velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(1, 12);
     answer.zero();
 
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         answer.at(1, 2 * i - 1) = dn.at(i, 1);
         answer.at(1, 2 * i) = dn.at(i, 2);
     }
@@ -377,7 +373,7 @@ TR21_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *atTime)
 {
     FloatMatrix n, b;
     double dV, rho;
-    int k, undofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
     GaussPoint *gp;
 
     answer.resize(undofs, undofs);
@@ -385,7 +381,7 @@ TR21_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *atTime)
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* consistent part + supg stabilization term */
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
@@ -401,7 +397,7 @@ TR21_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
 {
     FloatMatrix n, b;
     double dV, rho;
-    int k, undofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
     GaussPoint *gp;
 
     answer.resize(undofs, undofs);
@@ -409,7 +405,7 @@ TR21_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* consistent part + supg stabilization term */
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
@@ -427,14 +423,14 @@ TR21_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
 {
     FloatMatrix n, b;
     double dV, rho;
-    int k, undofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
     GaussPoint *gp;
 
     answer.resize(undofs, undofs);
     answer.zero();
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* mtrx for computing t_supg, norm of this mtrx is computed */
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
@@ -448,7 +444,7 @@ TR21_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
 void
 TR21_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *atTime)
 {
-    int k, undofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
     double dV, rho;
     GaussPoint *gp;
     FloatMatrix b;
@@ -457,7 +453,7 @@ TR21_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *atTime)
     answer.zero();
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
         rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
@@ -470,16 +466,11 @@ TR21_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *atTime)
 }
 
 
-
-
 int
 TR21_2D_SUPG :: giveNumberOfSpatialDimensions()
 {
     return 2;
 }
-
-
-
 
 
 double
@@ -492,7 +483,6 @@ TR21_2D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
 double
 TR21_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
 {
-    int i, k;
     double answer = 0.0, norm, dV, vol = 0.0;
     FloatMatrix n(2, 12), dn(6, 2);
     FloatArray fi(6), u, un, gfi;
@@ -500,12 +490,12 @@ TR21_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
 
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
     }
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
         velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
@@ -524,8 +514,6 @@ TR21_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
 void
 TR21_2D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
 {
-    int k;
-
     FloatMatrix dn(6, 2);
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     GaussPoint *gp;
@@ -533,7 +521,7 @@ TR21_2D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
     answer.resize(6, 2);
     answer.zero();
 
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
 
         velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
@@ -545,25 +533,23 @@ TR21_2D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
 void
 TR21_2D_SUPG :: LS_PCS_computeVolume(double &answer, const FloatArray **coordinates)
 {
-    int k;
     //double answer = 0.0;
     GaussPoint *gp;
 
     answer = 0.0;
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         //answer += this->computeVolumeAround(gp);
-
 
         double determinant, weight, volume;
         FloatArray dxi(6), deta(6), lcoords;
 
         determinant = fabs( this->velocityInterpolation.giveTransformationJacobian(* gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
 
-        weight      = gp->giveWeight();
-        volume      = determinant * weight;
+        weight = gp->giveWeight();
+        volume = determinant * weight;
 
         answer += volume;
     }
@@ -573,12 +559,11 @@ TR21_2D_SUPG :: LS_PCS_computeVolume(double &answer, const FloatArray **coordina
 double
 TR21_2D_SUPG :: LS_PCS_computeVolume()
 {
-    int k;
     double answer = 0.0;
     GaussPoint *gp;
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         answer += this->computeVolumeAround(gp);
     }
@@ -589,18 +574,17 @@ TR21_2D_SUPG :: LS_PCS_computeVolume()
 double
 TR21_2D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *atTime)
 {
-    int i, k;
     FloatArray voff(2), fi(6), un, n;
     GaussPoint *gp;
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
 
     double vol = 0.0, eps = 0.0, _fi, dV, S = 0.0;
 
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
     }
 
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
         velocityInterpolation.evalN(n,  * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
@@ -617,12 +601,12 @@ TR21_2D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *atTime)
 void
 TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 {
-    int i, neg = 0, pos = 0, zero = 0, si = 0, sqi = 0;
+    int neg = 0, pos = 0, zero = 0, si = 0, sqi = 0;
 
 
     answer.resize(2);
 
-    for ( i = 1; i <= 3; i++ ) {  //comparing values of fi in vertices
+    for ( int i = 1; i <= 3; i++ ) {  //comparing values of fi in vertices
         if ( fi.at(i) > 0. ) {
             pos++;
         }
@@ -659,7 +643,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
         int inter_case, negq = 0, posq = 0, zeroq = 0; //inter_case is variable that differs type of which fi crosses the triangle
 
-        for ( i = 4; i <= 6; i++ ) { //loop over edge nodes
+        for ( int i = 4; i <= 6; i++ ) { //loop over edge nodes
             if ( fi.at(i) > 0. ) {
                 posq++;
             }
@@ -673,7 +657,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             }
         }
 
-        for ( i = 1; i <= 3; i++ ) { //loop over vertex nodes, searching for which vertex has different value of fi
+        for ( int i = 1; i <= 3; i++ ) { //loop over vertex nodes, searching for which vertex has different value of fi
             if ( ( pos > neg ) && ( fi.at(i) < 0.0 ) ) {
                 si = i;
                 break;
@@ -687,7 +671,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
 
 
-        for ( i = 4; i <= 6; i++ ) { //loop over edge nodes, searching for which edge node has different value of fi
+        for ( int i = 4; i <= 6; i++ ) { //loop over edge nodes, searching for which edge node has different value of fi
             if ( ( posq > negq ) && ( fi.at(i) < 0.0 ) ) {
                 sqi = i;
                 break;

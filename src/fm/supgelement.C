@@ -39,6 +39,7 @@
 #include "intarray.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
+#include "fluiddynamicmaterial.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -58,11 +59,16 @@ SUPGElement :: ~SUPGElement()
 IRResultType
 SUPGElement :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    //IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     FMElement :: initializeFrom(ir);
-    this->computeGaussPoints();
+
+    IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, IFT_SUPGElement_bsides, _IFT_SUPGElement_bsides);
+    if ( !boundarySides.isEmpty() ) {
+        IR_GIVE_FIELD(ir, boundaryCodes, IFT_SUPGElement_bcodes, _IFT_SUPGElement_bcodes);
+    }
+
     return IRRT_OK;
 }
 

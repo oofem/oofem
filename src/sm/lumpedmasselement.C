@@ -56,12 +56,12 @@ LumpedMassElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
 // Returns the lumped mass matrix of the receiver. This expression is
 // valid in both local and global axes.
 {
-    int _i, _ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    answer.resize(_ndofs, _ndofs);
+    int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    answer.resize(ndofs, ndofs);
     answer.zero();
 
-    for ( _i = 1; _i <= _ndofs; _i++ ) {
-        answer.at(_i, _i) = this->components.at(_i);
+    for ( int i = 1; i <= ndofs; i++ ) {
+        answer.at(i, i) = this->components.at(i);
     }
 }
 
@@ -73,7 +73,7 @@ LumpedMassElement :: initializeFrom(InputRecord *ir)
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     this->StructuralElement :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, components, IFT_LumpedMassElement_components, "components"); // Macro
+    IR_GIVE_FIELD(ir, components, IFT_LumpedMassElement_components, _IFT_LumpedMassElement_components);
 
     return IRRT_OK;
 }

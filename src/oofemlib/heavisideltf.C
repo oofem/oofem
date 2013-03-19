@@ -60,8 +60,8 @@ HeavisideLTF :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     LoadTimeFunction :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, origin, IFT_HeavisideLTF_origin, "origin"); // Macro
-    IR_GIVE_FIELD(ir, value, IFT_HeavisideLTF_value, "value"); // Macro
+    IR_GIVE_FIELD(ir, origin, IFT_HeavisideLTF_origin, "origin");
+    IR_GIVE_FIELD(ir, value, IFT_HeavisideLTF_value, "value");
 
     return IRRT_OK;
 }

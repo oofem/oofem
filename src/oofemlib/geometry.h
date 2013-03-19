@@ -41,7 +41,6 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
-
 namespace oofem {
 /**
  * Abstract representation of Geometry

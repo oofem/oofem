@@ -77,7 +77,7 @@ LoadTimeFunction :: initializeFrom(InputRecord *ir)
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
 
-    IR_GIVE_OPTIONAL_FIELD(ir, initialValue, IFT_LoadTimeFunction_initialvalue, "initialvalue"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, initialValue, IFT_LoadTimeFunction_initialvalue, "initialvalue");
 
     return IRRT_OK;
 }

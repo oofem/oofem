@@ -38,10 +38,13 @@
 #include "fluiddynamicmaterial.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-
 #include "matconst.h"
-#include "structuralelement.h"
 #include "matstatus.h"
+
+///@name Input fields for NewtonianFluidMaterial
+//@{
+#define _IFT_NewtonianFluidMaterial_mu "mu"
+//@}
 
 namespace oofem {
 class GaussPoint;

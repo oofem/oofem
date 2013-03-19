@@ -41,13 +41,14 @@
 #include "matconst.h"
 #include "matstatus.h"
 #include "strainvector.h"
-
-
-#include "linearelasticmaterial.h"
-#include "dictionr.h"
-
 #include "structuralms.h"
 #include "cltypes.h"
+
+///@name Input fields for TrabBoneEmbed
+//@{
+#define _IFT_TrabBoneEmbed_eps0 "eps0"
+#define _IFT_TrabBoneEmbed_nu0 "nu0"
+//@}
 
 namespace oofem {
 

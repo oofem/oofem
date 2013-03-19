@@ -39,6 +39,11 @@
 #include "errorestimator.h"
 #include "internalstatetype.h"
 
+///@name Input fields for ScalarErrorIndicator
+//@{
+#define _IFT_ScalarErrorIndicator_vartype "vartype"
+//@}
+
 namespace oofem {
 class RemeshingCriteria;
 

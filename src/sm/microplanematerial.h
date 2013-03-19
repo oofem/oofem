@@ -39,6 +39,11 @@
 #include "gausspnt.h"
 #include "matconst.h"
 
+///@name Input fields for MicroplaneMaterial
+//@{
+#define _IFT_MicroplaneMaterial_nmp "nmp"
+//@}
+
 namespace oofem {
 class Microplane;
 

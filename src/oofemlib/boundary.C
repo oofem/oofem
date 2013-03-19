@@ -60,9 +60,9 @@ BoundaryCondition :: initializeFrom(InputRecord *ir)
     GeneralBoundaryCondition :: initializeFrom(ir);
 
     if ( ir->hasField(IFT_BoundaryCondition_PrescribedValue, "prescribedvalue") ) {
-        IR_GIVE_FIELD(ir, prescribedValue, IFT_BoundaryCondition_PrescribedValue, "prescribedvalue"); // Macro
+        IR_GIVE_FIELD(ir, prescribedValue, IFT_BoundaryCondition_PrescribedValue, "prescribedvalue");
     } else {
-        IR_GIVE_FIELD(ir, prescribedValue, IFT_BoundaryCondition_PrescribedValue, "d"); // Macro
+        IR_GIVE_FIELD(ir, prescribedValue, IFT_BoundaryCondition_PrescribedValue, "d");
     }
 
     return IRRT_OK;

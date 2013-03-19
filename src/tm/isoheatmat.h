@@ -39,6 +39,12 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
+///@name Input fields for IsotropicHeatTransferMaterial
+//@{
+#define _IFT_IsotropicHeatTransferMaterial_k "k" ///< Conductivity
+#define _IFT_IsotropicHeatTransferMaterial_c "c" ///< Specific heat
+//@}
+
 namespace oofem {
 /**
  * This class implements a isotropic linear heat  material. A material
@@ -61,7 +67,7 @@ public:
                                           TimeStep *atTime);
 
     virtual double giveIsotropicConductivity(GaussPoint *gp) {return conductivity;};
-                                          
+
     virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *atTime);

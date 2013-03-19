@@ -37,6 +37,12 @@
 
 #include "node.h"
 
+///@name Input fields for SlaveNode
+//@{
+#define _IFT_SlaveNode_masterDofManagers "masterdofman"
+#define _IFT_SlaveNode_weights "weights"
+//@}
+
 namespace oofem {
 
 /**
@@ -67,7 +73,7 @@ public:
     virtual ~SlaveNode(void) { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int checkConsistency();
+    virtual void postInitialize();
     virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); }
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 

@@ -72,6 +72,34 @@
  #include "mmaleastsquareprojection.h"
 #endif
 
+///@name Input fields for IsotropicDamageMaterial1
+//@{
+#define _IFT_IsotropicDamageMaterial1_e0 "e0"
+#define _IFT_IsotropicDamageMaterial1_ef "ef"
+#define _IFT_IsotropicDamageMaterial1_wf "wf"
+#define _IFT_IsotropicDamageMaterial1_equivstraintype "equivstraintype"
+#define _IFT_IsotropicDamageMaterial1_damageLaw "damlaw"
+#define _IFT_IsotropicDamageMaterial1_k "k"
+#define _IFT_IsotropicDamageMaterial1_md "md"
+#define _IFT_IsotropicDamageMaterial1_ecsm "ecsm"
+#define _IFT_IsotropicDamageMaterial1_At "at"
+#define _IFT_IsotropicDamageMaterial1_Bt "bt"
+#define _IFT_IsotropicDamageMaterial1_ft "ft"
+#define _IFT_IsotropicDamageMaterial1_w1wf "w1wf"
+#define _IFT_IsotropicDamageMaterial1_e1ef "e1ef"
+#define _IFT_IsotropicDamageMaterial1_s1ft "s1ft"
+#define _IFT_IsotropicDamageMaterial1_s1 "s1"
+#define _IFT_IsotropicDamageMaterial1_w1 "w1"
+#define _IFT_IsotropicDamageMaterial1_e1 "e1"
+#define _IFT_IsotropicDamageMaterial1_ek "ek"
+#define _IFT_IsotropicDamageMaterial1_gf "gf"
+#define _IFT_IsotropicDamageMaterial1_gft "gft"
+#define _IFT_IsotropicDamageMaterial1_ep "ep"
+#define _IFT_IsotropicDamageMaterial1_e2 "e2"
+#define _IFT_IsotropicDamageMaterial1_nd "nd"
+#define _IFT_IsotropicDamageMaterial1_checkSnapBack "checksnapback"
+//@}
+
 namespace oofem {
 #define IDM1_ITERATION_LIMIT 1.e-9
 

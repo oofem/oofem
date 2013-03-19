@@ -57,11 +57,6 @@ protected:
     /// All record types will be appended to this list, no split in terms of InputRecordType is implemented yet.
     std::list<InputRecord*> recordList;
 
-    /// Output file name (first line in OOFEM input files).
-    std::string outputFileName;
-    /// Description line (second line in OOFEM input files).
-    std::string description;
-
 public:
     /// Constructor.
     DynamicDataReader();

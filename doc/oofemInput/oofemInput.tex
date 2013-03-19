@@ -1612,6 +1612,7 @@ Currently, the supported export modules are following
   \recentry{}{\optField{regionstoskip}{ia}}
   \recentry{}{\optField{nvr}{in}}
   \recentry{}{\optField{vrmap}{ia}}
+  \recentry{}{\optField{timeScale}{rn}}
 \end{record}
 
 \begin{itemize}
@@ -1642,6 +1643,8 @@ in integration points.
 
 \item The array \param{vrmap} defines the mapping from real (true) regions to virtual regions. The size of this array
 should equal to number of true regions and values should be in a range $\langle 1, nvr \rangle$. When \param{nvr} is zero or negative, this parameter is ignored. The i-th value defines mapping of true region number to virtual region number. Zero or negative value causes region to be ignored. For example, to disregard all elements associated with a cross-section 2, use the line (relevant are \param{nvr} and \param{vrmap})
+
+\item \param{timeScale} scales time in output. In transport problem, basic units are seconds. Setting timeScale = 2.777777e-4 (=1/3600.) converts all time data in vtkXML from seconds to hours.
 
 {\footnotesize vtkxml tstep\_all cellvars 1 46 vars 1 1 primvars 1 1 stype 2 nvr 1 vrmap 2 1 0}
 

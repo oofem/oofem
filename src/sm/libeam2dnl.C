@@ -252,7 +252,6 @@ LIBeam2dNL :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, i
 void
 LIBeam2dNL :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
-    int i, j, n;
     double dV;
     GaussPoint *gp;
     IntegrationRule *iRule;
@@ -265,13 +264,12 @@ LIBeam2dNL :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 
     iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     // assemble initial stress matrix
-    for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         dV = this->computeVolumeAround(gp);
         stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
-        n = stress.giveSize();
-        if ( n ) {
-            for ( j = 1; j <= n; j++ ) {
+        if ( stress.giveSize() ) {
+            for ( int j = 1; j <= stress.giveSize(); j++ ) {
                 // loop over each component of strain vector
                 this->computeNLBMatrixAt(A, gp, j);
                 if ( A.isNotEmpty() ) {
@@ -471,9 +469,7 @@ double LIBeam2dNL :: givePitch()
 IRResultType
 LIBeam2dNL :: initializeFrom(InputRecord *ir)
 {
-    this->NLStructuralElement :: initializeFrom(ir);
-    this->computeGaussPoints();
-    return IRRT_OK;
+    return NLStructuralElement :: initializeFrom(ir);
 }
 
 

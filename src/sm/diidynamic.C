@@ -122,11 +122,11 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
 
     StructuralEngngModel :: initializeFrom(ir);
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_DIIDynamic_lstype, "lstype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_DIIDynamic_smtype, "smtype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
     sparseMtrxType = ( SparseMtrxType ) val;
 
     val = 0;
@@ -152,7 +152,7 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
         OOFEM_LOG_INFO( "Selecting Three-point Backward Euler metod\n" );
     } else if ( initialTimeDiscretization == TD_Wilson ) {
         OOFEM_LOG_INFO( "Selecting Wilson-theta metod\n" );
-        IR_GIVE_OPTIONAL_FIELD(ir, theta, IFT_DIIDynamic_psi, "theta"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, theta, IFT_DIIDynamic_theta, "theta");
         if ( theta < 1.37 ) {
             OOFEM_LOG_WARNING("Found theta < 1.37. Performing correction, theta = 1.37");
             theta = 1.37;
@@ -161,7 +161,7 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
         _error("NonLinearDynamic: Time-stepping scheme not found!\n");
     }
 
-    IR_GIVE_FIELD(ir, deltaT, IFT_DIIDynamic_deltat, "deltat"); // Macro
+    IR_GIVE_FIELD(ir, deltaT, IFT_DIIDynamic_deltat, "deltat");
 
     return IRRT_OK;
 }
@@ -465,7 +465,6 @@ void DIIDynamic :: updateYourself(TimeStep *tStep)
         previousLoadVector.at(i)              = loadVector.at(i);
     }
 
-    this->updateInternalState(tStep);
     StructuralEngngModel :: updateYourself(tStep);
 }
 
@@ -612,34 +611,6 @@ DIIDynamic :: determineConstants(TimeStep *tStep)
     }
 }
 
-int
-DIIDynamic :: checkConsistency()
-{
-    // Check internal consistency
-    int i, nelem;
-    Element *ePtr;
-    StructuralElement *sePtr;
-    StructuralElementEvaluator *see;
-    Domain *domain = this->giveDomain(1);
-
-    nelem = domain->giveNumberOfElements();
-
-    // check for proper element type
-    for ( i = 1; i <= nelem; i++ ) {
-        ePtr = domain->giveElement(i);
-        sePtr = dynamic_cast< StructuralElement * >( ePtr );
-        see   = dynamic_cast< StructuralElementEvaluator * >( ePtr );
-
-        if ( ( sePtr == NULL ) && ( see == NULL ) ) {
-            _warning2("checkConsistency: element %d has no Structural support", i);
-            return 0;
-        }
-    }
-
-    EngngModel :: checkConsistency();
-
-    return 1;
-}
 
 contextIOResultType DIIDynamic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {

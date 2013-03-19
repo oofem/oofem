@@ -39,6 +39,13 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
+///@name Input fields for RotatingBoundary
+//@{
+#define _IFT_RotatingBoundary_axis "axis"
+#define _IFT_RotatingBoundary_center "center"
+#define _IFT_RotatingBoundary_frequency "frequency" ///< @todo Unused ( But it makes sense that you'd have this, can you check it Andreas? ) / Mikael
+//@}
+
 namespace oofem {
 /**
  * Class implementing rotating boundary surface.

@@ -41,6 +41,24 @@
 #include "primaryfield.h"
 #include "materialinterface.h"
 
+///@name Input fields for SUPG
+//@{
+#define _IFT_SUPG_deltat "deltat"
+#define _IFT_SUPG_deltatltf "deltatltf"
+#define _IFT_SUPG_cmflag "cmflag"
+#define _IFT_SUPG_alpha "alpha"
+#define _IFT_SUPG_scaleflag "scaleflag"
+#define _IFT_SUPG_lscale "lscale"
+#define _IFT_SUPG_uscale "uscale"
+#define _IFT_SUPG_dscale "dscale"
+#define _IFT_SUPG_miflag "miflag"
+#define _IFT_SUPG_rtolv "rtolv"
+#define _IFT_SUPG_atolv "atolv"
+#define _IFT_SUPG_maxiter "maxiter"
+#define _IFT_SUPG_stopmaxiter "stopmaxiter"
+#define _IFT_SUPG_fsflag "fsflag"
+//@}
+
 namespace oofem {
 /**
  * This class represents transient incompressible flow problem. Solution is based on

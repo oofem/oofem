@@ -443,12 +443,12 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
 
     double value;
     // elastic parameters
-    IR_GIVE_FIELD(ir, eM, IFT_IsotropicLinearElasticMaterial_e, "e"); // Macro
-    IR_GIVE_FIELD(ir, nu, IFT_IsotropicLinearElasticMaterial_n, "n"); // Macro
+    IR_GIVE_FIELD(ir, eM, IFT_IsotropicLinearElasticMaterial_e, "e");
+    IR_GIVE_FIELD(ir, nu, IFT_IsotropicLinearElasticMaterial_n, "n");
     propertyDictionary->add('E', eM);
     propertyDictionary->add('n', nu);
 
-    IR_GIVE_FIELD(ir, value, IFT_IsotropicLinearElasticMaterial_talpha, "talpha"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_IsotropicLinearElasticMaterial_talpha, "talpha");
     propertyDictionary->add(tAlpha, value);
 
     gM = eM / ( 2. * ( 1. + nu ) );
@@ -489,7 +489,7 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, dilationConst, IFT_ConcreteDPM2_dilation, "dilation");
 
     softeningType = 0; //0-Linear softening; 1-Bilinear softening
-    IR_GIVE_OPTIONAL_FIELD(ir, softeningType, IFT_ConcreteDPM2_softeningType, "stype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, softeningType, IFT_ConcreteDPM2_softeningType, "stype");
 
     if ( softeningType > 1 ) {
         _error("softening type not implemented\n");
@@ -530,7 +530,7 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
     timeFactor = 1.;
     if ( strainRateFlag == 1 ) {
         IR_GIVE_FIELD(ir, fcZero, IFT_ConcreteDPM2_fcZero, "fczero");
-        IR_GIVE_OPTIONAL_FIELD(ir, timeFactor, IFT_ConcreteDPM2_newtoniter, "timefactor");
+        IR_GIVE_OPTIONAL_FIELD(ir, timeFactor, IFT_ConcreteDPM2_timeFactor, "timefactor");
     }
 
     return IRRT_OK;

@@ -60,15 +60,15 @@ PointLoad :: initializeFrom(InputRecord *ir)
         IR_IOERR(giveClassName(), __proc, IFT_Unknown, "", ir, result);
     }
 
-    IR_GIVE_FIELD(ir, nDofs, IFT_PointLoad_ndofs, "ndofs"); // Macro
-    IR_GIVE_FIELD(ir, coords, IFT_PointLoad_coords, "coords"); // Macro
+    IR_GIVE_FIELD(ir, nDofs, IFT_PointLoad_ndofs, "ndofs");
+    IR_GIVE_FIELD(ir, coords, IFT_PointLoad_coords, "coords");
 
     int value = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_PointLoad_loadtype, "loadtype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_PointLoad_loadtype, "loadtype");
     lType = ( bcType ) value;
 
     value = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_PointLoad_cstype, "cstype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_PointLoad_cstype, "cstype");
     coordSystemType = ( PL_CoordSystType ) value;
 
     return IRRT_OK;

@@ -37,6 +37,45 @@
 
 #include "maxwellChM.h"
 
+///@name Input fields for B3Material
+//@{
+#define _IFT_B3Material_mode "mode"
+#define _IFT_B3Material_emodulimode "emodulimode"
+#define _IFT_B3Material_shmode "shmode"
+#define _IFT_B3Material_fc "fc"
+#define _IFT_B3Material_cc "cc"
+#define _IFT_B3Material_wc "w/c"
+#define _IFT_B3Material_ac "a/c"
+#define _IFT_B3Material_t0 "t0"
+#define _IFT_B3Material_es0 "es0"
+#define _IFT_B3Material_r "r"
+#define _IFT_B3Material_rprime "rprime"
+#define _IFT_B3Material_at "at"
+#define _IFT_B3Material_wh "w_h"
+#define _IFT_B3Material_ncoeff "ncoeff"
+#define _IFT_B3Material_a "a"
+#define _IFT_B3Material_alpha1 "alpha1"
+#define _IFT_B3Material_alpha2 "alpha2"
+#define _IFT_B3Material_ks "ks"
+#define _IFT_B3Material_hum "hum"
+#define _IFT_B3Material_vs "vs"
+#define _IFT_B3Material_talpha "talpha"
+#define _IFT_B3Material_q1 "q1"
+#define _IFT_B3Material_q2 "q2"
+#define _IFT_B3Material_q3 "q3"
+#define _IFT_B3Material_q4 "q4"
+#define _IFT_B3Material_q5 "q5"
+#define _IFT_B3Material_kt "kt"
+#define _IFT_B3Material_EpsSinf "epssinf"
+#define _IFT_B3Material_microprestress "microprestress"
+#define _IFT_B3Material_c0 "c0"
+#define _IFT_B3Material_c1 "c1"
+#define _IFT_B3Material_ksh "ksh"
+#define _IFT_B3Material_ts0 "ts0"
+#define _IFT_B3Material_finalhumidity "finalhumidity"
+#define _IFT_B3Material_initialhumidity "initialhumidity"
+//@}
+
 namespace oofem {
 /**
  * This class implements the B3 model for concrete creep and shrinkage.

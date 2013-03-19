@@ -41,7 +41,6 @@
 #include "verbose.h"
 #include "sparsenonlinsystemnm.h"
 #include "nrsolver.h"
-#include "nrsolver2.h"
 #include "calmls.h"
 #include "outputmanager.h"
 #include "datastream.h"
@@ -103,7 +102,7 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
     }
 
     int _val = 0;
-    IR_GIVE_OPTIONAL_FIELD( ( mStep->giveAttributesRecord() ), _val, IFT_NonLinearStatic_controlmode, "controlmode" ); // Macro
+    IR_GIVE_OPTIONAL_FIELD( ( mStep->giveAttributesRecord() ), _val, IFT_NonLinearStatic_controlmode, "controlmode" );
     IR_GIVE_OPTIONAL_FIELD( ( mStep->giveAttributesRecord() ), _val, IFT_NonLinearStatic_controlmode, "controllmode" ); // for backward compatibility
     NonLinearStatic_controlType mode = ( NonLinearStatic_controlType ) _val;
 
@@ -127,16 +126,6 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
         }
 
         this->nMethod = new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance);
-    } else if ( mode == nls_directControl2 ) {
-        if ( nMethod ) {
-            if ( dynamic_cast< NRSolver2 * >( nMethod ) ) {
-                return nMethod;
-            } else {
-                delete nMethod;
-            }
-        }
-
-        this->nMethod = new NRSolver2(1, this->giveDomain(1), this, EID_MomentumBalance);
     } else {
         _error("giveNumericalMethod: unsupported controlMode");
     }
@@ -172,7 +161,7 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
      * }
      */
     int _val = nls_indirectControl;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_controlmode, "controlmode"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_controlmode, "controlmode");
     IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_controlmode, "controllmode"); // for backward compatibility
     this->controlMode = ( NonLinearStatic_controlType ) _val;
 
@@ -181,17 +170,17 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
     this->initialGuessType = ( InitialGuess ) _val;
 
     deltaT = 1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_NonLinearStatic_deltat, "deltat"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_NonLinearStatic_deltat, "deltat");
     if ( deltaT < 0. ) {
         _error("updateAttributes: deltaT < 0");
     }
 
     _val = nls_tangentStiffness;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_stiffmode, "stiffmode"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_stiffmode, "stiffmode");
     this->stiffMode = ( NonLinearStatic_stiffnessMode ) _val;
 
     _val = SparseNonLinearSystemNM :: rlm_total;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_refloadmode, "refloadmode"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_refloadmode, "refloadmode");
     this->refLoadInputMode = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
 
     if ( ir->hasField(IFT_NonLinearStatic_keepll, "keepll") ) {
@@ -213,7 +202,7 @@ NonLinearStatic :: initializeFrom(InputRecord *ir)
 
     LinearStatic :: initializeFrom(ir);
     nonlocalStiffnessFlag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, IFT_NonLinearStatic_nonlocstiff, "nonlocstiff"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, IFT_NonLinearStatic_nonlocstiff, "nonlocstiff");
 
 #ifdef __PARALLEL_MODE
     //if (ir->hasField ("nodecutmode")) commMode = ProblemCommunicator::ProblemCommMode__NODE_CUT;
@@ -503,7 +492,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
      }
 #endif
 
-    if ( loadInitFlag || ( controlMode == nls_directControl ) || ( controlMode == nls_directControl2 ) ) {
+    if ( loadInitFlag || controlMode == nls_directControl ) {
 #ifdef VERBOSE
         OOFEM_LOG_DEBUG("Assembling reference load\n");
 #endif
@@ -576,19 +565,6 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
 
 
 void
-NonLinearStatic :: updateYourself(TimeStep *stepN)
-{
-    //
-    // The following line is potentially serious performance leak.
-    // The numerical method may compute their internal forces - thus causing
-    // internal state to be updated, while checking equilibrium.
-    // update internal state only if necessary
-    this->updateInternalState(stepN);
-    StructuralEngngModel :: updateYourself(stepN);
-}
-
-
-void
 NonLinearStatic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 //
 // updates some component, which is used by numerical method
@@ -636,7 +612,7 @@ NonLinearStatic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain 
         OOFEM_LOG_DEBUG("Updating internal forces\n");
 #endif
         // update internalForces and internalForcesEBENorm concurrently
-        this->giveInternalForces(internalForces, true, 1, tStep);
+        this->giveInternalForces(internalForces, true, d->giveNumber(), tStep);
         break;
     case NonLinearRhs_Incremental:
 #ifdef VERBOSE

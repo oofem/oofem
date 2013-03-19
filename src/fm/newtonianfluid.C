@@ -64,7 +64,7 @@ NewtonianFluidMaterial :: initializeFrom(InputRecord *ir)
     // we use rather object's member data than to store data into slow
     // key-val dictionary with lot of memory allocations
 
-    IR_GIVE_FIELD(ir, viscosity, IFT_NewtonianFluidMaterial_mu, "mu"); // Macro
+    IR_GIVE_FIELD(ir, viscosity, IFT_NewtonianFluidMaterial_mu, "mu");
 
     return IRRT_OK;
 }

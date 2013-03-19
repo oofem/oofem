@@ -39,6 +39,12 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
+///@name Input fields for IsotropicLinMoistureTransferMaterial
+//@{
+#define _IFT_IsotropicLinMoistureTransferMaterial_perm "perm" ///< Moisture permeability
+#define _IFT_IsotropicLinMoistureTransferMaterial_capa "capa" ///< Moisture capacity
+//@}
+
 namespace oofem {
 /**
  * This class implements a isotropic moisture tranport material. A material
@@ -61,10 +67,6 @@ public:
     virtual classType giveClassID() const { return IsotropicLinMoistureTransferMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-
-    /*
-     * virtual double give(int aProperty, GaussPoint *gp);
-     */
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp);  }
 };

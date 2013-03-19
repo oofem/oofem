@@ -38,6 +38,11 @@
 #include "perfectlyplasticmaterial.h"
 #include "isolinearelasticmaterial.h"
 
+///@name Input fields for Steel1
+//@{
+#define _IFT_Steel1_ry "ry"
+//@}
+
 namespace oofem {
 class Domain;
 /**

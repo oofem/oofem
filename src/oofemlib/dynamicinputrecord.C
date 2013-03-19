@@ -113,107 +113,107 @@ IRResultType DynamicInputRecord :: giveRecordKeywordField(std::string &answer)
     return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(int &answer, InputFieldType fieldID, const char *idString)
+IRResultType DynamicInputRecord :: giveField(int &answer, InputFieldType fieldID, const char *id)
 {
-    std::map<InputFieldType, int>::iterator it = this->intRecord.find(fieldID);
+    std::map< std::string, int>::iterator it = this->intRecord.find(id);
     if (it == this->intRecord.end())
         return IRRT_NOTFOUND;
     answer = it->second;
     return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(double &answer, InputFieldType fieldID, const char *idString)
+IRResultType DynamicInputRecord :: giveField(double &answer, InputFieldType fieldID, const char *id)
 {
-    std::map<InputFieldType, double>::iterator it = this->doubleRecord.find(fieldID);
+    std::map< std::string, double>::iterator it = this->doubleRecord.find(id);
     if (it == this->doubleRecord.end())
         return IRRT_NOTFOUND;
     answer = it->second;
     return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(bool &answer, InputFieldType fieldID, const char *idString)
+IRResultType DynamicInputRecord :: giveField(bool &answer, InputFieldType fieldID, const char *id)
 {
-    std::map<InputFieldType, bool>::iterator it = this->boolRecord.find(fieldID);
+    std::map< std::string, bool>::iterator it = this->boolRecord.find(id);
     if (it == this->boolRecord.end())
         return IRRT_NOTFOUND;
     answer = it->second;
     return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(std::string &answer, InputFieldType fieldID, const char *idString)
+IRResultType DynamicInputRecord :: giveField(std::string &answer, InputFieldType fieldID, const char *id)
 {
-    std::map<InputFieldType, std::string>::iterator it = this->stringRecord.find(fieldID);
+    std::map< std::string, std::string>::iterator it = this->stringRecord.find(id);
     if (it == this->stringRecord.end())
         return IRRT_NOTFOUND;
     answer = it->second;
     return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(FloatArray &answer, InputFieldType fieldID, const char *idString)
+IRResultType DynamicInputRecord :: giveField(FloatArray &answer, InputFieldType fieldID, const char *id)
 {
-    std::map<InputFieldType, FloatArray>::iterator it = this->floatArrayRecord.find(fieldID);
+    std::map< std::string, FloatArray>::iterator it = this->floatArrayRecord.find(id);
     if (it == this->floatArrayRecord.end())
         return IRRT_NOTFOUND;
     answer = it->second;
     return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(IntArray &answer, InputFieldType fieldID, const char *idString)
+IRResultType DynamicInputRecord :: giveField(IntArray &answer, InputFieldType fieldID, const char *id)
 {
-    std::map<InputFieldType, IntArray>::iterator it = this->intArrayRecord.find(fieldID);
+    std::map< std::string, IntArray>::iterator it = this->intArrayRecord.find(id);
     if (it == this->intArrayRecord.end())
         return IRRT_NOTFOUND;
     answer = it->second;
     return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(FloatMatrix &answer, InputFieldType fieldID, const char *idString)
+IRResultType DynamicInputRecord :: giveField(FloatMatrix &answer, InputFieldType fieldID, const char *id)
 {
-    std::map<InputFieldType, FloatMatrix>::iterator it = this->matrixRecord.find(fieldID);
+    std::map< std::string, FloatMatrix>::iterator it = this->matrixRecord.find(id);
     if (it == this->matrixRecord.end())
         return IRRT_NOTFOUND;
     answer = it->second;
     return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(std::vector< std::string > &answer, InputFieldType fieldID, const char *idString)
+IRResultType DynamicInputRecord :: giveField(std::vector< std::string > &answer, InputFieldType fieldID, const char *id)
 {
-    std::map<InputFieldType, std::vector< std::string> >::iterator it = this->stringListRecord.find(fieldID);
+    std::map< std::string, std::vector< std::string> >::iterator it = this->stringListRecord.find(id);
     if (it == this->stringListRecord.end())
         return IRRT_NOTFOUND;
     answer = it->second;
     return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(Dictionary &answer, InputFieldType fieldID, const char *idString)
+IRResultType DynamicInputRecord :: giveField(Dictionary &answer, InputFieldType fieldID, const char *id)
 {
-    std::map<InputFieldType, Dictionary>::iterator it = this->dictionaryRecord.find(fieldID);
+    std::map< std::string, Dictionary>::iterator it = this->dictionaryRecord.find(id);
     if (it == this->dictionaryRecord.end())
         return IRRT_NOTFOUND;
     answer = it->second;
     return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(std::list< Range > &answer, InputFieldType fieldID, const char *idString)
+IRResultType DynamicInputRecord :: giveField(std::list< Range > &answer, InputFieldType fieldID, const char *id)
 {
-    std::map<InputFieldType, std::list< Range > >::iterator it = this->rangeRecord.find(fieldID);
+    std::map< std::string, std::list< Range > >::iterator it = this->rangeRecord.find(id);
     if (it == this->rangeRecord.end())
         return IRRT_NOTFOUND;
     answer = it->second;
     return IRRT_OK;
 }
 
-bool DynamicInputRecord :: hasField(InputFieldType fieldID, const char *idString)
+bool DynamicInputRecord :: hasField(InputFieldType fieldID, const char *id)
 {
-    return this->intRecord.find(fieldID) != this->intRecord.end() ||
-           this->doubleRecord.find(fieldID) != this->doubleRecord.end() ||
-           this->boolRecord.find(fieldID) != this->boolRecord.end() ||
-           this->floatArrayRecord.find(fieldID) != this->floatArrayRecord.end() ||
-           this->intArrayRecord.find(fieldID) != this->intArrayRecord.end() ||
-           this->matrixRecord.find(fieldID) != this->matrixRecord.end() ||
-           this->stringListRecord.find(fieldID) != this->stringListRecord.end() ||
-           this->dictionaryRecord.find(fieldID) != this->dictionaryRecord.end() ||
-           this->rangeRecord.find(fieldID) != this->rangeRecord.end();
+    return this->intRecord.find(id) != this->intRecord.end() ||
+           this->doubleRecord.find(id) != this->doubleRecord.end() ||
+           this->boolRecord.find(id) != this->boolRecord.end() ||
+           this->floatArrayRecord.find(id) != this->floatArrayRecord.end() ||
+           this->intArrayRecord.find(id) != this->intArrayRecord.end() ||
+           this->matrixRecord.find(id) != this->matrixRecord.end() ||
+           this->stringListRecord.find(id) != this->stringListRecord.end() ||
+           this->dictionaryRecord.find(id) != this->dictionaryRecord.end() ||
+           this->rangeRecord.find(id) != this->rangeRecord.end();
 }
 
 void
@@ -229,54 +229,54 @@ void DynamicInputRecord :: setRecordKeywordField(const std::string &keyword, int
     this->recordNumber = value;
 }
 
-void DynamicInputRecord :: setField(int item, InputFieldType fieldID)
+void DynamicInputRecord :: setField(int item, const char *id)
 {
-    this->intRecord[fieldID] = item;
+    this->intRecord[id] = item;
 }
 
-void DynamicInputRecord :: setField(double item, InputFieldType fieldID)
+void DynamicInputRecord :: setField(double item, const char *id)
 {
-    this->doubleRecord[fieldID] = item;
+    this->doubleRecord[id] = item;
 }
 
-void DynamicInputRecord :: setField(bool item, InputFieldType fieldID)
+void DynamicInputRecord :: setField(bool item, const char *id)
 {
-    this->boolRecord[fieldID] = item;
+    this->boolRecord[id] = item;
 }
 
-void DynamicInputRecord :: setField(const std::string &item, InputFieldType fieldID)
+void DynamicInputRecord :: setField(const std::string &item, const char *id)
 {
-    this->stringRecord[fieldID] = item;
+    this->stringRecord[id] = item;
 }
 
-void DynamicInputRecord :: setField(const FloatArray &item, InputFieldType fieldID)
+void DynamicInputRecord :: setField(const FloatArray &item, const char *id)
 {
-    this->floatArrayRecord[fieldID] = item;
+    this->floatArrayRecord[id] = item;
 }
 
-void DynamicInputRecord :: setField(const IntArray &item, InputFieldType fieldID)
+void DynamicInputRecord :: setField(const IntArray &item, const char *id)
 {
-    this->intArrayRecord[fieldID] = item;
+    this->intArrayRecord[id] = item;
 }
 
-void DynamicInputRecord :: setField(const FloatMatrix &item, InputFieldType fieldID)
+void DynamicInputRecord :: setField(const FloatMatrix &item, const char *id)
 {
-    this->matrixRecord[fieldID] = item;
+    this->matrixRecord[id] = item;
 }
 
-void DynamicInputRecord :: setField(const std::vector< std::string > &item, InputFieldType fieldID)
+void DynamicInputRecord :: setField(const std::vector< std::string > &item, const char *id)
 {
-    this->stringListRecord[fieldID] = item;
+    this->stringListRecord[id] = item;
 }
 
-void DynamicInputRecord :: setField(const Dictionary &item, InputFieldType fieldID)
+void DynamicInputRecord :: setField(const Dictionary &item, const char *id)
 {
-    this->dictionaryRecord[fieldID] = item;
+    this->dictionaryRecord[id] = item;
 }
 
-void DynamicInputRecord :: setField(const std::list< Range > &item, InputFieldType fieldID)
+void DynamicInputRecord :: setField(const std::list< Range > &item, const char *id)
 {
-    this->rangeRecord[fieldID] = item;
+    this->rangeRecord[id] = item;
 }
 
 };

@@ -43,6 +43,12 @@
 #include "flotmtrx.h"
 #include "oofem_limits.h"
 
+///@name Input fields for RVEMaterial
+//@{
+#define _IFT_RVEMaterial_bctype "bctype"
+#define _IFT_RVEMaterial_supressoutput "supressoutput"
+//@}
+
 namespace oofem {
 
 /**
@@ -62,14 +68,13 @@ protected:
     int BCType;
 
 public:
-
     EngngModel *rve;
 
     // Constructor
     RVEMaterial(int n, Domain *d) { };// : Material(n, d) { };
 
     // Destructor
-    virtual ~RVEMaterial() { free (rve); };
+    ~RVEMaterial() { free (rve); };
 
     int SupressRVEoutput;
 
