@@ -82,15 +82,11 @@ XfemManager :: clear()
 }
 
 
-
 void XfemManager :: giveActiveEIsFor(IntArray &answer, const Element *elem)
 {
-    int count = 0;
     for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ) {
         if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ) {
-            count++;
-            answer.resize(count); //is this the proper way to expand an array dynamically? 
-            answer.at(count) = enrichmentItemList->at(i)->giveNumber();
+            answer.followedBy( enrichmentItemList->at(i)->giveNumber() );
         }
     }
 }
@@ -106,30 +102,6 @@ bool XfemManager :: isElementEnriched(const Element *elem)
     return false;
 }
 
-
-bool XfemManager :: isNodeEnriched(int nodeNumber)
-{
-    // Rewrite!
-
-    // not trivial to answer. element may be enriched but not neccessarily the node. depends on the EI and the geom.
-    // 1. Check if neigh. el. are enriched
-    // 2. if so, say that all nodes are E. even though some of the dofs may be prescribed to zero. A simple solution.
-    // Give elsements surrounding the given node
-    const IntArray *neighborEl = emodel->giveDomain(domainIndex)->giveConnectivityTable()->giveDofManConnectivityArray(nodeNumber);
-
-    // Check if any of the elements are enriched
-    for ( int i = 1; i <= neighborEl->giveSize(); i++ ) {
-        Element *elem = emodel->giveDomain(domainIndex)->giveElement( neighborEl->at(i) );
-        if ( this->isElementEnriched(elem) ){
-            // Ask the EI if the node is enriched
-            //if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ){ 
-            //    return true; 
-            //break;   
-        }
-        
-    }
-    return false;
-}
 
 EnrichmentItem *XfemManager :: giveEnrichmentItem(int n)
 // Returns the n-th enrichment item.
@@ -183,6 +155,7 @@ void
 XfemManager :: createEnrichedDofs()
 {   
     // Creates new dofs due to enrichment and appends them to the dof managers
+    ///@todo: need to add check if dof already exists
     int nrDofMan = emodel->giveDomain(1)->giveNumberOfDofManagers();
     IntArray dofIdArray;
  

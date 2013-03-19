@@ -105,7 +105,6 @@ double RampFunction :: evaluateFunctionAt(GaussPoint *gp, EnrichmentItem *ei)
     for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {
         if ( EnrichmentDomain_BG *edbg = dynamic_cast< EnrichmentDomain_BG * > ( ei->giveEnrichmentDomain(1) ) ) {;  
             dist = edbg->bg->computeDistanceTo( el->giveDofManager(i)->giveCoordinates() );
-            //dist = ei->giveGeometry()->computeDistanceTo( el->giveDofManager(i)->giveCoordinates() );
             member += N.at(i) * dist;
         } else {
             OOFEM_ERROR("RampFunction :: evaluateFunctionAt - only supports enrichment domains of type Basic Geometry");

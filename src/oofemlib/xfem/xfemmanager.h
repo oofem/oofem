@@ -55,8 +55,7 @@ class Element;
 class DataStream;
 
 /**
- * This class manages the xfem part as well as takes over some functions which would appear
- * in the Domain and Node class.
+ * This class manages the xfem part
  *
  * @author Ruzena Chamrova
  * @author Jim Brouzoulis
@@ -84,18 +83,15 @@ public:
     XfemManager(EngngModel *emodel, int index);
     /// Destructor.
     ~XfemManager();
-    /**
-     * Gets interacted enrichment items for a particular element, the enrichment items
-     * are referenced by a number from the domain - Don't like the name 'interacted' // JB
-     */
+    
+  
+    // Returns the active enrichment items for a particular element, the enrichment items
+    // are referenced by a number from the domain
+     
     void giveActiveEIsFor(IntArray &answer, const Element *elem);
     
     /// Checks whether an element is interacted.
     bool isElementEnriched(const Element *elem);
-
-    /// Checks whether a node is interacted. or 'isEnriched'
-    bool isEnriched(int nodeNumber){ return isNodeEnriched(nodeNumber); };
-    bool isNodeEnriched(int nodeNumber);
 
     /// Accessor.
     EnrichmentItem *giveEnrichmentItem(int n);
@@ -103,19 +99,18 @@ public:
     /// Accessor.
     int giveNumberOfEnrichmentItems() { return enrichmentItemList->giveSize(); }
     
-    /// Computes for each node position of its fictitious node. - What is this used for?
     void createEnrichedDofs();
 
     /// Computes the type of node enrichment, returns zero if the node is not enriched.
-    XfemType computeNodeEnrichmentType(int nodeNumber); // ask node for EI and then type. but could be several?
+    // Old method: should instead return an array if there are several active
+    XfemType computeNodeEnrichmentType(int nodeNumber); 
 
     /// Initializes receiver according to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
 
     /// Instantiates the Xfem components.
     int instanciateYourself(DataReader *dr);
-   // const char *giveClassName() const { return "XfemManager"; }
-     const char *giveClassName() const { return ""; }
+    const char *giveClassName() const { return "XfemManager"; }
     const char *giveInputRecordName() const { return "XfemManager"; }
     
     /// Wrapper for updating the integration rule.
