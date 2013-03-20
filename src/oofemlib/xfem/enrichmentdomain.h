@@ -65,7 +65,7 @@ public:
     virtual bool isDofManagerEnriched(DofManager *dMan) = 0 {};
     virtual bool isElementEnriched(Element *element);
     int giveNumber() { return number; };
-
+    void setNumber(int i) { this->number = i; };
     // Update of description
     virtual void updateEnrichmentDomain();
 

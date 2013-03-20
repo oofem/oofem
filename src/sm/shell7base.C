@@ -1238,10 +1238,10 @@ Shell7Base :: computeStressVector(FloatArray &answer, FloatArray &genEps, GaussP
     this->computeStrainVector(E, gp, stepN, genEps);     // Green-Lagrange strain vector
     static_cast< StructuralMaterial * >( mat )->giveRealStressVector(answer, ReducedForm, gp, E, stepN);
 
-    // temporary test
-    FloatArray test;
-    computeCauchyStressVector( test,  genEps, gp, mat, stepN);
-    test.printYourself();
+    
+    //FloatArray test;
+    //computeCauchyStressVector( test,  genEps, gp, mat, stepN);
+    //test.printYourself();
 }
 
 

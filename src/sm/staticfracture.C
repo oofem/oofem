@@ -312,7 +312,7 @@ StaticFracture :: evaluatePropagationLawForDelamination(Element *el, EnrichmentD
 {
     // temporary 
     crackGrowthFlag = true;  
-    if ( el->giveNumber()== 1 && tStep->isTheFirstStep() ) {
+    if ( el->giveNumber()== 1 && tStep->isTheFirstStep() && ed->giveNumber()==1) {
 
         // updateEnrichmentDomain
         // prop law gives:
@@ -335,7 +335,7 @@ StaticFracture :: evaluatePropagationLawForDelamination(Element *el, EnrichmentD
                 dofManNumbers.followedBy(i);
                 }
         }
-
+            dofManNumbers.printYourself();
         if ( DofManList *ded = dynamic_cast< DofManList * > (ed) )  {
             ded->updateEnrichmentDomain(dofManNumbers);
         }
