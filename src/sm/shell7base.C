@@ -46,8 +46,9 @@
 #include "constantpressureload.h"
 #include "constantsurfaceload.h"
 #include "vtkxmlexportmodule.h"
+
 namespace oofem {
-Shell7Base :: Shell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomain),  LayeredCrossSectionInterface(), VTKXMLExportModuleElementInterface()
+Shell7Base :: Shell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomain),  LayeredCrossSectionInterface(), VTKXMLExportModuleElementInterface(), ZZNodalRecoveryModelInterface()
 {}
 
 IRResultType Shell7Base :: initializeFrom(InputRecord *ir)
@@ -81,6 +82,9 @@ Interface *Shell7Base :: giveInterface(InterfaceType it)
 
     case VTKXMLExportModuleElementInterfaceType:
         return static_cast< VTKXMLExportModuleElementInterface * >( this );
+
+    case ZZNodalRecoveryModelInterfaceType:
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
 
     default:
         return StructuralElement :: giveInterface(it);
@@ -869,7 +873,7 @@ Shell7Base :: computeLinearizedStiffness(GaussPoint *gp, Material *mat, TimeStep
 
     this->computeStressVector(cartStressVector, genEps, gp, mat, tStep);
     this->transInitialCartesianToInitialContravar(gp, cartStressVector, contravarStressVector);
-    S.beMatrixForm(contravarStressVector);
+    S.beMatrixFormOfStress(contravarStressVector);
 
     this->computeStressResultantsAt(gp, contravarStressVector, S1g, S2g, S3g, genEps);
     this->evalCovarBaseVectorsAt(gp, g1, g2, g3, genEps);
@@ -1207,24 +1211,24 @@ Shell7Base :: computeFAt(GaussPoint *gp, FloatMatrix &answer, FloatArray &genEps
 }
 
 void
+Shell7Base :: computeE(FloatMatrix &answer, FloatMatrix &F)
+{
+    // Computes the Green-Lagrange strain tensor: E=0.5(C-I)
+    answer.beTProductOf(F, F);    // C-Right Caucy-Green deformation tensor
+    answer.at(1, 1) += -1;
+    answer.at(2, 2) += -1;
+    answer.at(3, 3) += -1;
+    answer.times(0.5);
+}
+
+void
 Shell7Base :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &genEps)
 {
     // Computes the Green-Lagrange strain tensor: E=0.5(C-I)
     FloatMatrix F, E;
-    this->computeFAt(gp, F, genEps);     // Deformation gradient
-
-    E.beTProductOf(F, F);    // C-Right Caucy-Green deformation tensor
-    E.at(1, 1) += -1;
-    E.at(2, 2) += -1;
-    E.at(3, 3) += -1;
-    E.times(0.5);
-
-    FloatArray temp(6);
-    temp.beReducedVectorForm(E);     // Convert to Voight form Todo: add enum strain/stress
-    answer = temp;
-    answer.at(4) = temp.at(4) * 2.0;   // correction of shear strains
-    answer.at(5) = temp.at(5) * 2.0;
-    answer.at(6) = temp.at(6) * 2.0;
+    this->computeFAt(gp, F, genEps);       // Deformation gradient
+    this->computeE(E, F);                  // Green-Lagrange strain tensor
+    answer.beReducedVectorFormOfStrain(E); // Convert to Voight form
 }
 
 void
@@ -1233,7 +1237,32 @@ Shell7Base :: computeStressVector(FloatArray &answer, FloatArray &genEps, GaussP
     FloatArray E;
     this->computeStrainVector(E, gp, stepN, genEps);     // Green-Lagrange strain vector
     static_cast< StructuralMaterial * >( mat )->giveRealStressVector(answer, ReducedForm, gp, E, stepN);
+
+    // temporary test
+    FloatArray test;
+    computeCauchyStressVector( test,  genEps, gp, mat, stepN);
+    test.printYourself();
 }
+
+
+void
+Shell7Base :: computeCauchyStressVector(FloatArray &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *stepN)
+{
+    // Compute Cauchy stress from 2nd Piola stress
+    FloatMatrix F, E;
+    this->computeFAt(gp, F, genEps);   
+    this->computeE(E, F);   
+    FloatArray vS, vE;
+    vE.beReducedVectorFormOfStrain(E);
+    static_cast< StructuralMaterial * >( mat )->giveRealStressVector(vS, ReducedForm, gp, vE, stepN);
+    FloatMatrix S, temp, sigma;
+    S.beMatrixFormOfStress(vS);
+    temp.beProductTOf(S,F); 
+    sigma.beProductOf(F,temp);
+    sigma.times( 1.0/F.giveDeterminant() );
+    answer.beReducedVectorFormOfStress(sigma);
+}
+
 
 void
 Shell7Base :: computeStressResultantsAt(GaussPoint *gp, FloatArray &Svec, FloatArray &S1g, FloatArray &S2g, FloatArray &S3g, FloatArray &genEps)
@@ -1241,7 +1270,7 @@ Shell7Base :: computeStressResultantsAt(GaussPoint *gp, FloatArray &Svec, FloatA
     FloatArray g1, g2, g3;
     this->evalCovarBaseVectorsAt(gp, g1, g2, g3, genEps);
     FloatMatrix S;
-    S.beMatrixForm(Svec);
+    S.beMatrixFormOfStress(Svec);
 
     // Sig =S(i,j)*g_j, - stress vectors on the surfaces given by g_j?
     for ( int j = 1; j <= 3; j++ ) {
@@ -1250,6 +1279,9 @@ Shell7Base :: computeStressResultantsAt(GaussPoint *gp, FloatArray &Svec, FloatA
         S3g.at(j) = S.at(3, 1) * g1.at(j) + S.at(3, 2) * g2.at(j) + S.at(3, 3) * g3.at(j);
     }
 }
+
+
+
 
 #endif
 
@@ -2229,6 +2261,93 @@ void Shell7Base :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
         answer.resize(0);
     }
 }
+
+
+
+
+/*
+void
+ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, InternalStateType type,
+                                                                      TimeStep *tStep)
+{  // evaluates N^T sigma over element volume
+   // N(nsigma, nsigma*nnodes)
+   // Definition : sigmaVector = N * nodalSigmaVector
+    int i, j, k, size;
+    double dV;
+    FloatArray stressVector, help, n;
+    Element *elem  = this->ZZNodalRecoveryMI_giveElement();
+    IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
+    GaussPoint *gp;
+
+    size = ZZNodalRecoveryMI_giveDofManRecordSize(type);
+    answer.resize(elem->giveNumberOfDofManagers(), size);
+
+    answer.zero();
+    for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        gp  = iRule->getIntegrationPoint(i);
+        dV  = elem->computeVolumeAround(gp);
+        //this-> computeStressVector(stressVector, gp, stepN);
+        if ( !elem->giveIPValue(stressVector, gp, type, tStep) ) {
+            stressVector.resize(size);
+            stressVector.zero();
+        }
+
+        this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(n, gp, type);
+        for ( j = 1; j <= elem->giveNumberOfDofManagers(); j++ ) {
+            for ( k = 1; k <= size; k++ ) {
+                answer.at(j, k) += n.at(j) * stressVector.at(k) * dV;
+            }
+        }
+
+        //  help.beTProductOf(n,stressVector);
+        //  answer.add(help.times(dV));
+    }
+}
+
+void
+ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, InternalStateType type)
+{
+    //
+    // Returns NTN matrix (lumped) for Zienkiewicz-Zhu
+    // The size of N mtrx is (nstresses, nnodes*nstreses)
+    // Definition : sigmaVector = N * nodalSigmaVector
+    //
+    int size;
+    double sum, dV, volume = 0.0;
+    FloatMatrix fullAnswer;
+    FloatArray n;
+    Element *elem  = this->ZZNodalRecoveryMI_giveElement();
+    IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
+    GaussPoint *gp;
+
+    size = elem->giveNumberOfDofManagers(); //ZZNodalRecoveryMI_giveDofManRecordSize (type);
+    fullAnswer.resize(size, size);
+    fullAnswer.zero();
+    double pok = 0.0;
+
+    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        gp  = iRule->getIntegrationPoint(i);
+        dV  = elem->computeVolumeAround(gp);
+        this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(n, gp, type);
+        fullAnswer.plusDyadSymmUpper(n, n, dV);
+        pok += ( n.at(1) * dV ); ///@todo What is this? Completely unused.
+        volume += dV;
+    }
+
+
+    fullAnswer.symmetrized();
+    answer.resize(size);
+    for ( int i = 1; i <= size; i++ ) {
+        sum = 0.0;
+        for ( int j = 1; j <= size; j++ ) {
+            sum += fullAnswer.at(i, j);
+        }
+
+        answer.at(i) = sum;
+    }
+}
+*/
+
 
 #endif
 

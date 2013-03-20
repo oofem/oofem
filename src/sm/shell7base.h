@@ -43,6 +43,7 @@
 #include "nlstructuralelement.h"
 #include <vector>
 #include "vtkxmlexportmodule.h"
+#include "zznodalrecoverymodel.h"
 namespace oofem {
 class BoundaryLoad;
 
@@ -53,7 +54,7 @@ class BoundaryLoad;
  * @author Jim Brouzoulis
  * @date 2012-11-01
  */
-class Shell7Base : public NLStructuralElement, public NodalAveragingRecoveryModelInterface, public LayeredCrossSectionInterface, public VTKXMLExportModuleElementInterface
+class Shell7Base : public NLStructuralElement, public NodalAveragingRecoveryModelInterface, public LayeredCrossSectionInterface, public VTKXMLExportModuleElementInterface, public ZZNodalRecoveryModelInterface
 {
 public:
     Shell7Base(int n, Domain *d); // constructor
@@ -79,6 +80,7 @@ public:
     virtual FEInterpolation *giveInterpolation() = 0;
     virtual integrationDomain  giveIntegrationDomain() const = 0;
 
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
 protected:
     virtual Interface *giveInterface(InterfaceType it);
@@ -136,13 +138,14 @@ protected:
 
     // Stress and strain
     void computeFAt(GaussPoint *gp, FloatMatrix &answer, FloatArray &genEps);
+    void computeE(FloatMatrix &answer, FloatMatrix &F);
     void computeCovarStressAt(GaussPoint *gp, FloatArray &answer);
     void giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &dphidxi1, FloatArray &dphidxi2, FloatArray &dmdxi1,
                                          FloatArray &dmdxi2, FloatArray &m, double &dgamdxi1, double &dgamdxi2, double &gam);
     void computeStressResultantsAt(GaussPoint *gp, FloatArray &Svec, FloatArray &S1g, FloatArray &S2g, FloatArray &S3g, FloatArray &solVec);
     void computeStressVector(FloatArray &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *stepN);
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &genEps);
-
+    virtual void computeCauchyStressVector(FloatArray &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *stepN);
 
     // Mass matrices
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
