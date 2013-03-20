@@ -88,17 +88,16 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
     this->number = n;
     this->serialNumber = serNum;
 
-    elementList           = new AList< Element >(0);
-    dofManagerList        = new AList< DofManager >(0);
-    materialList          = new AList< Material >(0);
-    bcList                = new AList< GeneralBoundaryCondition >(0);
-    icList                = new AList< InitialCondition >(0);
-    loadTimeFunctionList  = new AList< LoadTimeFunction >(0);
-    crossSectionList      = new AList< CrossSection >(0);
-    nonlocalBarierList    = new AList< NonlocalBarrier >(0);
+    elementList              = new AList< Element >(0);
+    dofManagerList           = new AList< DofManager >(0);
+    materialList             = new AList< Material >(0);
+    bcList                   = new AList< GeneralBoundaryCondition >(0);
+    icList                   = new AList< InitialCondition >(0);
+    loadTimeFunctionList     = new AList< LoadTimeFunction >(0);
+    crossSectionList         = new AList< CrossSection >(0);
+    nonlocalBarierList       = new AList< NonlocalBarrier >(0);
     randomFieldGeneratorList = new AList< RandomFieldGenerator >(0);
-    xfemManagerList = new AList< XfemManager >(0);
-    xfemManager           = NULL;
+    xfemManagerList          = new AList< XfemManager >(0);
 
     dType                 = _unknownMode;
 
@@ -131,7 +130,7 @@ Domain :: ~Domain()
     delete crossSectionList;
     delete nonlocalBarierList;
     delete randomFieldGeneratorList;
-    delete xfemManager;
+    delete xfemManagerList;
     delete connectivityTable;
     delete spatialLocalizer;
     delete outputManager;
@@ -164,10 +163,7 @@ Domain :: clear()
     crossSectionList->clear();
     nonlocalBarierList->clear();
     randomFieldGeneratorList->clear();
-
-    if ( xfemManager ) {
-        xfemManager->clear();
-    }
+    xfemManagerList->clear();
 
     if ( connectivityTable ) {
         connectivityTable->reset();
@@ -447,7 +443,7 @@ Domain :: instanciateYourself(DataReader *dr)
     CrossSection *crossSection;
     NonlocalBarrier *barrier;
     RandomFieldGenerator *rfg;
-    XfemManager *xMan;
+    //XfemManager *xMan;
     // mapping from label to local numbers for dofmans and elements
     std :: map< int, int >dofManLabelMap, elemLabelMap;
 
@@ -779,22 +775,17 @@ Domain :: instanciateYourself(DataReader *dr)
 
 
 // instantiate xfemmanager
-    XfemManager *xm;
+    XfemManager *xMan;
     xfemManagerList->growTo(nxfemman);
     for ( int i = 1; i <= nxfemman; i++ ) {
-        xm =  new XfemManager(this->giveEngngModel(), i);
+        //xMan =  new XfemManager(this->giveEngngModel(), i);
+        xMan =  new XfemManager(this);
         ir = dr->giveInputRecord(DataReader :: IR_xfemManRec, 1);
         // XfemManager has to be put into xfemManagerList before xm->initializeFrom, otherwise Enrichmentitem cannot access XfemManager
         // or we have to make a reference from EnrichmentItem also
-        xfemManagerList->put(i, xm);
-        xm->initializeFrom(ir);
-        xm->instanciateYourself(dr);
-        
-        //xm->createEnrichedDofs();
-        //int last = xm->computeFictPosition();
-        //this->setNumberOfEquations(1, last);
-        //Jim - removed
-        //xm->updateIntegrationRule();
+        xfemManagerList->put(i, xMan);
+        xMan->initializeFrom(ir);
+        xMan->instanciateYourself(dr);
     }
 
 
@@ -1908,11 +1899,7 @@ Domain :: elementGlobal2Local(int _globnum)
 }
 
 
-void
-Domain :: setXfemManager(XfemManager *xfemManager)
-{
-    this->xfemManager = xfemManager;
-}
+
 
 
 

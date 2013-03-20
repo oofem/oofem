@@ -176,8 +176,7 @@ private:
      * because in case of multiple domains stateCounter should be kept independently for each domain.
      */
     StateCounterType nonlocalUpdateStateCounter;
-    /// XFEM Manager.
-    XfemManager *xfemManager;
+    /// XFEM Manager  ///@todo: currently only supports one since most methods assumes there to be one xMan
     AList< XfemManager > *xfemManagerList;
      
     /// Topology description

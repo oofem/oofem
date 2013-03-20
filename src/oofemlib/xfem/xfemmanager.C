@@ -60,10 +60,10 @@
 #include "contextioerr.h"
 
 namespace oofem {
-XfemManager :: XfemManager(EngngModel *emodel, int domainIndex)
+//XfemManager :: XfemManager(EngngModel *emodel, int domainIndex)
+XfemManager :: XfemManager(Domain *domain)
 {
-    this->emodel = emodel;
-    this->domainIndex = domainIndex;
+    this->domain = domain;
     this->enrichmentItemList = new AList< EnrichmentItem >(0);
     numberOfEnrichmentItems = -1;
 }
@@ -116,21 +116,22 @@ EnrichmentItem *XfemManager :: giveEnrichmentItem(int n)
 }
 
 
-// Old: strange workflow in this method
+// Old method: strange workflow in this method
+// broken but not in use and should be rewritten
 XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
 {
     XfemType ret;
     int intersectionCount = 0;
 
     // elements surrounding one node
-    const IntArray *neighbours = emodel->giveDomain(domainIndex)->giveConnectivityTable()->giveDofManConnectivityArray(nodeNumber);
+    const IntArray *neighbours = this->giveDomain()->giveConnectivityTable()->giveDofManConnectivityArray(nodeNumber);
     for ( int i = 1; i <= neighbours->giveSize(); i++ ) {
         IntArray interactedEnrEl;
         // list of the EI's that are active in the element
-        giveActiveEIsFor( interactedEnrEl, emodel->giveDomain(domainIndex)->giveElement( neighbours->at(i) ) );
+        giveActiveEIsFor( interactedEnrEl, this->giveDomain()->giveElement( neighbours->at(i) ) );
         for ( int j = 1; j <= interactedEnrEl.giveSize(); j++ ) {
             // sums up number of intersections the geometry have with a given element
-            //intersectionCount += this->giveEnrichmentItem( interactedEnrEl.at(j) )->computeNumberOfIntersectionPoints( emodel->giveDomain(domainIndex)->giveElement( neighbours->at(i) ) );
+            //intersectionCount += this->giveEnrichmentItem( interactedEnrEl.at(j) )->computeNumberOfIntersectionPoints( this->giveDomain()->giveElement( neighbours->at(i) ) );
         }
 
         interactedEnrEl.zero();
@@ -156,7 +157,7 @@ XfemManager :: createEnrichedDofs()
 {   
     // Creates new dofs due to enrichment and appends them to the dof managers
     ///@todo: need to add check if dof already exists
-    int nrDofMan = emodel->giveDomain(1)->giveNumberOfDofManagers();
+    int nrDofMan = this->giveDomain()->giveNumberOfDofManagers();
     IntArray dofIdArray;
  
     for (int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ ) {
@@ -198,22 +199,22 @@ int XfemManager :: instanciateYourself(DataReader *dr)
     std :: string name;
 
     enrichmentItemList->growTo(numberOfEnrichmentItems);
-    for ( int i = 0; i < numberOfEnrichmentItems; i++ ) {
-        InputRecord *mir = dr->giveInputRecord(DataReader :: IR_enrichItemRec, i + 1);
+    for ( int i = 1; i <= numberOfEnrichmentItems; i++ ) {
+        InputRecord *mir = dr->giveInputRecord(DataReader :: IR_enrichItemRec, i);
         result = mir->giveRecordKeywordField(name);
 
         if ( result != IRRT_OK ) {
             IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
         }
 
-        EnrichmentItem *ei = CreateUsrDefEnrichmentItem( name.c_str(), i + 1, this, emodel->giveDomain(1) );
+        EnrichmentItem *ei = CreateUsrDefEnrichmentItem( name.c_str(), i, this, this->giveDomain() );
         if ( ei == NULL ) {
             OOFEM_ERROR2( "XfemManager::instanciateYourself: unknown enrichment item (%s)", name.c_str() );
         }
 
         ei->initializeFrom(mir);
         ei->instanciateYourself(dr);
-        this->enrichmentItemList->put(i + 1, ei);
+        this->enrichmentItemList->put(i, ei);
         this->createEnrichedDofs();
     }
     return 1;
@@ -344,7 +345,7 @@ contextIOResultType XfemManager:: restoreContext(DataStream *stream, ContextMode
                     THROW_CIOERR(CIO_IOERR);
                 }
                 compId = ( classType ) ct;
-                obj = CreateUsrDefEnrichmentItem(compId, i, this, emodel->giveDomain(domainIndex));
+                obj = CreateUsrDefEnrichmentItem(compId, i, this, this->giveDomain());
             } else {
                 obj = this->giveEnrichmentItem(i);
             }
@@ -369,7 +370,7 @@ contextIOResultType XfemManager:: restoreContext(DataStream *stream, ContextMode
                     THROW_CIOERR(CIO_IOERR);
                 }
                 compId = ( classType ) ct;
-                obj = CreateUsrDefEnrichmentFunction(compId, i, emodel->giveDomain(domainIndex));
+                obj = CreateUsrDefEnrichmentFunction(compId, i, this->giveDomain());
             } else {
                 obj = this->giveEnrichmentFunction(i);
             }

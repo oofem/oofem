@@ -58,12 +58,9 @@ public:
     virtual const char *giveClassName() const { return NULL; }
     virtual classType giveClassID() const { return EnrichmentDomainClass; }
 
-
-    // What does it need to be able to answer?
-    // should be pure virtual and thus be supported by all representations
-    //virtual bool isDofManagerEnriched(const DofManager *dMan) { return false; };
     virtual bool isDofManagerEnriched(DofManager *dMan) = 0 {};
-    virtual bool isElementEnriched(Element *element);
+    // Default is to loop through the dofman and check if any of them are enriched
+    virtual bool isElementEnriched(Element *element); 
 
     // Spatial search metohds
     virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element){};
@@ -79,7 +76,6 @@ public:
     EnrichmentDomain_BG(){}; 
     virtual ~EnrichmentDomain_BG() { }
     virtual IRResultType initializeFrom(InputRecord *ir) { return this->bg->initializeFrom(ir); };
-    //virtual IRResultType initializeFrom(InputRecord *ir) {};
     virtual bool isDofManagerEnriched(DofManager *dMan){ return false; };
 
     virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element) { bg->computeIntersectionPoints(element, intersectionPoints); }
@@ -90,7 +86,6 @@ public:
 class EDBGCircle : public EnrichmentDomain_BG
 {
 public:
-    //Circle *bgc;
     EDBGCircle(){ bg = new Circle; }; 
     virtual ~EDBGCircle() { }
     virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir);  };

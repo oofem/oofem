@@ -331,8 +331,8 @@ std::vector<FloatArray> &primaryVars, std::vector<FloatArray> &cellVars, TimeSte
 {   
     // This element considers each gp to be a subcell and each such subcell will be exported as a linear quad
     int numCells = 4; //this->giveIntegrationRule(1)->getNumberOfIntegrationPoints();
-    int numXi1 = sqrt(double(numCells))+1;
-    int numXi2 = sqrt(double(numCells))+1;
+    int numXi1 = (int) sqrt(double(numCells))+1;
+    int numXi2 = (int) sqrt(double(numCells))+1;
     FloatArray lcoords(2);
     nodeCoords.resize(numXi1*numXi2);
     primaryVars.resize(numXi1*numXi2);
@@ -369,7 +369,7 @@ std::vector<FloatArray> &primaryVars, std::vector<FloatArray> &cellVars, TimeSte
     }
 
     // Create connectivity of the elements
-    int nCellsXi1 = sqrt(double(numCells)), nCellsXi2 = sqrt(double(numCells));
+    int nCellsXi1 = (int) sqrt(double(numCells)), nCellsXi2 = sqrt(double(numCells));
     cellNodes.resize(numCells);
     pos = 0;
     int shift1 = 0, shift2 = numXi2;

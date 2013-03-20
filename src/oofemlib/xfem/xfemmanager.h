@@ -72,9 +72,11 @@ class XfemManager
 {
 protected:
     /// Associated Engineering Model.
-    EngngModel *emodel;
+    //EngngModel *emodel;
     /// Index of the associated domain.
-    int domainIndex;
+    //int domainIndex;
+
+    Domain *domain;
     /// Enrichment item list.
     AList< EnrichmentItem > *enrichmentItemList;
 
@@ -88,7 +90,8 @@ public:
         SPLIT = 1, TIP = 4, STANDARD = 0
     };
     /// Constructor.
-    XfemManager(EngngModel *emodel, int index);
+    //XfemManager(EngngModel *emodel, int index);
+    XfemManager(Domain *domain);
     /// Destructor.
     ~XfemManager();
     
@@ -116,7 +119,6 @@ public:
     /// Initializes receiver according to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
 
-    /// Instantiates the Xfem components.
     int instanciateYourself(DataReader *dr);
     const char *giveClassName() const { return "XfemManager"; }
     const char *giveInputRecordName() const { return "XfemManager"; }
@@ -124,7 +126,8 @@ public:
     /// Wrapper for updating the integration rule.
     void updateIntegrationRule();
 
-    Domain *giveDomain() { return emodel->giveDomain(domainIndex); }
+    //Domain *giveDomain() { return emodel->giveDomain(domainIndex); }
+    Domain *giveDomain() { return this->domain; }
 
 
     /// Clear the receiver
