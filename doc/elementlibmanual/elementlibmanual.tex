@@ -95,8 +95,8 @@
         {\bf Keyword} & \bf{#1}\\ %
         {Description} & {#2}\\ %
         {Specific parameters} & {#3}\\ \hline %
-}{%
-  \hline %
+}{
+  \\ \hline % newline needs to be there, htlatex will fail otherwise
       \end{tabular}%
       \caption{\tempcaption}% use the stored caption
       \label{\templabel}% use the stored label (*after* the caption)
