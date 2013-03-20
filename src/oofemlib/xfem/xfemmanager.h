@@ -82,7 +82,6 @@ protected:
 
 
     /// Index of next available dofId from pool.
-    int startOfDofIdPool;
     int numberOfEnrichmentItems;
 
 public:
