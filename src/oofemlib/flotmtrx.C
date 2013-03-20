@@ -1513,7 +1513,7 @@ double FloatMatrix :: computeReciprocalCondition(char p) const
     return 1.0/(inv.computeNorm(p)*anorm);
 }
 
-void FloatMatrix ::beMatrixForm(const FloatArray &aArray)
+void FloatMatrix ::beMatrixFormOfStress(const FloatArray &aArray)
 {
     // Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
 #  ifdef DEBUG

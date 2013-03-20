@@ -482,7 +482,7 @@ public:
      * If size(aArray) = 6, a symmetric matrix will be created.
      * @param aArray Array to transform.
      */
-    void beMatrixForm(const FloatArray &aArray);
+    void beMatrixFormOfStress(const FloatArray &aArray);
 
     // Overloaded methods:
     contextIOResultType storeYourself(DataStream *stream, ContextMode mode);

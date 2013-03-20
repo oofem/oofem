@@ -1014,7 +1014,7 @@ void FloatArray :: beFullVectorForm(const FloatMatrix &aMatrix)
     this->at(7) = aMatrix.at(3,2); this->at(8) = aMatrix.at(3,1); this->at(9) = aMatrix.at(2,1);
 }
 
-void FloatArray :: beReducedVectorForm(const FloatMatrix &aMatrix)
+void FloatArray :: beReducedVectorFormOfStress(const FloatMatrix &aMatrix)
 {
     // Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
 #  ifdef DEBUG
@@ -1029,6 +1029,24 @@ void FloatArray :: beReducedVectorForm(const FloatMatrix &aMatrix)
     this->at(4) = 0.5*( aMatrix.at(2,3) + aMatrix.at(3,2) );
     this->at(5) = 0.5*( aMatrix.at(1,3) + aMatrix.at(3,1) );
     this->at(6) = 0.5*( aMatrix.at(1,2) + aMatrix.at(2,1) );
+}
+
+
+void FloatArray :: beReducedVectorFormOfStrain(const FloatMatrix &aMatrix)
+{
+    // Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
+#  ifdef DEBUG
+    if (  aMatrix.giveNumberOfColumns() !=3 || aMatrix.giveNumberOfColumns() !=3) {
+        OOFEM_ERROR("FloatArray :: beReducedVectorForm : matrix dimension is not 3x3");
+    }
+
+#  endif
+    
+    this->resize(6);
+    this->at(1) = aMatrix.at(1,1); this->at(2) = aMatrix.at(2,2); this->at(3) = aMatrix.at(3,3);
+    this->at(4) = ( aMatrix.at(2,3) + aMatrix.at(3,2) ); // Shear strains multiplied with a factor of 2
+    this->at(5) = ( aMatrix.at(1,3) + aMatrix.at(3,1) );
+    this->at(6) = ( aMatrix.at(1,2) + aMatrix.at(2,1) );
 }
 
 
