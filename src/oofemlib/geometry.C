@@ -512,6 +512,14 @@ void Circle :: computeIntersectionPoints(Line *l, AList< FloatArray > *intersecP
     }
 }
 
+int 
+Circle :: computeNumberOfIntersectionPoints(Element *element) { 
+    AList< FloatArray > intersecPoints;
+
+    this->computeIntersectionPoints(element, &intersecPoints);
+    return intersecPoints.giveSize();
+    };
+
 bool Circle :: isOutside(BasicGeometry *bg)
 {
     int count = 0;

@@ -158,7 +158,7 @@ XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
         giveActiveEIsFor( interactedEnrEl, emodel->giveDomain(domainIndex)->giveElement( neighbours->at(i) ) );
         for ( int j = 1; j <= interactedEnrEl.giveSize(); j++ ) {
             // sums up number of intersections the geometry have with a given element
-            intersectionCount += this->giveEnrichmentItem( interactedEnrEl.at(j) )->computeNumberOfIntersectionPoints( emodel->giveDomain(domainIndex)->giveElement( neighbours->at(i) ) );
+            //intersectionCount += this->giveEnrichmentItem( interactedEnrEl.at(j) )->computeNumberOfIntersectionPoints( emodel->giveDomain(domainIndex)->giveElement( neighbours->at(i) ) );
         }
 
         interactedEnrEl.zero();

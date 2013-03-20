@@ -74,20 +74,8 @@ public:
     BasicGeometry *giveGeometry();
     EnrichmentDomain *giveEnrichmentDomain(int i) { return this->enrDomainList->at(i); };
     int giveNumberOfEnrichmentDomains() { return this->numberOfEnrichmentDomains; };      
+   
     
-
-    // Spatial search queries - some of theses queries are not valid for some enrichment domain descriptions
-    
-    /// Computes intersection points with Element. - based on the geometry of the enrichment
-    void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element);
-    
-    /// Computes number of intersection points with Element.
-    int computeNumberOfIntersectionPoints(Element *element);
-    
-    /// Checks whether a Geometry is inside or outside.
-    bool isOutside(BasicGeometry *bg);
-    
-
     // Enrichment functions
     EnrichmentFunction *giveEnrichmentFunction(int n);
     int giveNumberOfEnrichmentfunctions() { return this->numberOfEnrichmentFunctions; }
