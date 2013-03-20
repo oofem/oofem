@@ -60,6 +60,8 @@ protected:
     virtual void updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep);
 
     void evaluatePropagationLaw(TimeStep *tStep);
+    void evaluatePropagationLawForDelamination(Element *el, EnrichmentDomain *ed, TimeStep *tStep);
+
 
     bool crackGrowthFlag;
 public:

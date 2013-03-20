@@ -64,7 +64,13 @@ public:
     //virtual bool isDofManagerEnriched(const DofManager *dMan) { return false; };
     virtual bool isDofManagerEnriched(DofManager *dMan) = 0 {};
     virtual bool isElementEnriched(Element *element) { return false; };
+    int giveNumber() { return number; };
 
+    // Update of description
+    virtual void updateEnrichmentDomain();
+
+private:
+    int number;
 };
 
 class EnrichmentDomain_BG : public EnrichmentDomain
@@ -81,6 +87,7 @@ BasicGeometry *bg;
     virtual bool isDofManagerEnriched(DofManager *dMan){ return false; };
    
 };
+
 
 class EDBGCircle : public EnrichmentDomain_BG
 {
@@ -104,6 +111,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir) ;
     virtual bool isDofManagerEnriched(DofManager *dMan);
     void addDofManagers(IntArray &dofManNumbers);
+    virtual void updateEnrichmentDomain(IntArray &dofManNumbers);
 };
 
 

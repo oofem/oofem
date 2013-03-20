@@ -44,7 +44,17 @@ namespace oofem {
 
 
 
-// Node list
+void
+EnrichmentDomain :: updateEnrichmentDomain()
+{
+    if ( DofManList *ded = dynamic_cast< DofManList * > (this) )  {
+//        ded->updateEnrichmentDomain();    
+    }
+}
+
+
+
+// DofMan list
 
 IRResultType DofManList :: initializeFrom(InputRecord *ir)
 {
@@ -87,6 +97,13 @@ DofManList :: addDofManagers(IntArray &dofManNumbers)
     }
 }
 
+
+void
+DofManList :: updateEnrichmentDomain(IntArray &dofManNumbers)
+{
+    this->addDofManagers(dofManNumbers);
+
+}
 
 
 // Circle

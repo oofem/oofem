@@ -194,13 +194,20 @@ XfemManager :: createEnrichedDofs()
                 if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,k) ) {
                     ei->computeDofManDofIdArray(dofIdArray, dMan, k);
                     int nDofs = dMan->giveNumberOfDofs();
-                    for ( int m = 1; m<= dofIdArray.giveSize(); m++ ) {                      
-                        dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );   
+                    int count = 1;
+                    for ( int m = 1; m <= dofIdArray.giveSize(); m++ ) { 
+                        // check if dof already exists
+                        if ( dMan->findDofWithDofId( ( DofIDItem ) ( dofIdArray.at(m) ) ) == 0 ) { // new dof
+                            dMan->appendDof( new MasterDof( nDofs + count, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );   
+                            count++;
+                        }
+                        
                     }
                 }
             }        
         }
     }
+
 
 }
 

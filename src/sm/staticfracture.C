@@ -214,26 +214,6 @@ StaticFracture :: initializeDofUnknownsDictionary(TimeStep *tStep) {
 
 
 
-
-/*
-int
-NLTransientTransportProblem :: giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN) {
-    if ( mode == VM_Total ) { //Nodal temperature
-        if ( stepN->giveNumber() == this->giveCurrentStep()->giveNumber() ) { //current time
-            return 0;
-        } else if ( stepN->giveNumber() == this->giveCurrentStep()->giveNumber() - 1 ) { //previous time
-            return 1;
-        } else {
-            _error5( "No history available at TimeStep %d = %f, called from TimeStep %d = %f", stepN->giveNumber(), stepN->giveTargetTime(), this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveTargetTime() );
-        }
-    } else {
-        _error2( "ValueModeType %s undefined", __ValueModeTypeToString(mode) );
-    }
-
-    return 0;
-}
-*/
-
 void
 StaticFracture :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
 {
@@ -284,33 +264,6 @@ StaticFracture :: setTotalDisplacementFromUnknownsInDictionary(EquationID type, 
 
 }
 
-/*
-void
-NLTransientTransportProblem :: updateInternalState(TimeStep *stepN)
-{
-    int j, nnodes;
-    Domain *domain;
-
-    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        domain = this->giveDomain(idomain);
-        nnodes = domain->giveNumberOfDofManagers();
-        if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( j = 1; j <= nnodes; j++ ) {
-                //update dictionary entry or add a new pair if the position is missing
-                this->updateDofUnknownsDictionary(domain->giveDofManager(j), stepN);
-            }
-        }
-
-        int nelem = domain->giveNumberOfElements();
-        for ( j = 1; j <= nelem; j++ ) {
-            domain->giveElement(j)->updateInternalState(stepN);
-        }
-    }
-}
-
-
-
-*/
 
 
 
@@ -320,53 +273,71 @@ void
 StaticFracture :: evaluatePropagationLaw(TimeStep *tStep)
 {
     // For element wise evaluation of prop. law
-    int ndomains = this->giveNumberOfDomains();
-    int nnodes;
     Domain *domain;
     XfemManager *xMan; 
+    Element *el;
 
-
-    for ( int idomain = 1; idomain <= ndomains; idomain++ ) {
+    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
         domain = this->giveDomain(idomain);        
         xMan = domain->giveXfemManager(1);
         
-        EnrichmentItem *ei;
-        for ( int j = 1; j <= xMan->giveNumberOfEnrichmentItems(); j++ ) {    
-            ei = xMan->giveEnrichmentItem(j);
-            // Different actions depending on ei
-
-            // Delamination 
-            if ( Delamination *dei = dynamic_cast< Delamination * > (ei) )  {
-                EnrichmentDomain *ed; 
-                for ( int k = 1; k <= ei->giveNumberOfEnrichmentDomains(); k++ ) {
-                    ed = ei->giveEnrichmentDomain(k);
-                    Element *el;
-                    for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
-                        el = domain->giveElement(i);
-
-                        crackGrowthFlag = true;  
-                        if ( i== 1 && tStep->isTheFirstStep() ) {
-                            // updateEnrichmentDomain
-                            IntArray dofManNumbers;
-                            dofManNumbers.setValues(3, 3,5,6 );
-                            if ( DofManList *ded = dynamic_cast< DofManList * > (ed) )  {
-                                ded->addDofManagers(dofManNumbers);
-                                IntArray dofIdArray;
-                                for ( int m = 1; m <= dofManNumbers.giveSize(); m++ ) {
-                                    DofManager *dMan = domain->giveDofManager( dofManNumbers.at(m) );
-                                    ei->computeDofManDofIdArray(dofIdArray, dMan, k);
-                                    xMan->addEnrichedDofsTo( dMan, dofIdArray );
-                                }
-
-                            }
-                        }
-
+        for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
+            el = domain->giveElement(i);
+            EnrichmentItem *ei;
+            for ( int j = 1; j <= xMan->giveNumberOfEnrichmentItems(); j++ ) {    
+                ei = xMan->giveEnrichmentItem(j);
+                // Different actions depending on ei
+                // Delamination 
+                if ( Delamination *dei = dynamic_cast< Delamination * > (ei) )  {
+                    for ( int k = 1; k <= ei->giveNumberOfEnrichmentDomains(); k++ ) {                
+                        EnrichmentDomain *ed; 
+                        ed = ei->giveEnrichmentDomain(k);
+                        this->evaluatePropagationLawForDelamination(el, ed, tStep);                        
                     }
-
                 }
-
             }
+        }
 
+    }
+
+    // Create additional dofs if any Enrichment Domain is updated
+    if ( this->requiresUnknownsDictionaryUpdate() ) {
+        xMan->createEnrichedDofs();
+    }
+}
+
+
+void 
+StaticFracture :: evaluatePropagationLawForDelamination(Element *el, EnrichmentDomain *ed, TimeStep *tStep)
+{
+    // temporary 
+    crackGrowthFlag = true;  
+    if ( el->giveNumber()== 1 && tStep->isTheFirstStep() ) {
+
+        // updateEnrichmentDomain
+        // prop law gives:
+        IntArray dofManNumbers;
+        
+
+        // for example compute average stress and compare to criteria
+        //for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {
+            for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {     
+                // ugly piece of code that will skip enrichment of dofmans that have any bc's
+                // which is not generally what you want
+                bool hasBc= false;
+                for ( int j = 1; j <= el->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
+                    if ( el->giveDofManager(i)->giveDof(j)->hasBc(tStep) ) {
+                        hasBc = true;
+                        continue;
+                    }
+                }
+                if ( !hasBc) {
+                dofManNumbers.followedBy(i);
+                }
+        }
+
+        if ( DofManList *ded = dynamic_cast< DofManList * > (ed) )  {
+            ded->updateEnrichmentDomain(dofManNumbers);
         }
     }
 
