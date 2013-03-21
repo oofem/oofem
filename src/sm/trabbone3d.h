@@ -253,6 +253,11 @@ public:
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
+
+#ifdef __PARALLEL_MODE
+    virtual double predictRelativeComputationalCost(GaussPoint *gp) ;
+    virtual double predictRelativeRedistributionCost(GaussPoint *gp) ;
+#endif
 };
 } //end namespace oofem
 #endif
