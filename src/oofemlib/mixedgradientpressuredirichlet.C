@@ -420,12 +420,7 @@ bool MixedGradientPressureDirichlet :: hasBc(ActiveDof *dof, TimeStep *tStep)
 
 bool MixedGradientPressureDirichlet :: isDevDof(ActiveDof *dof)
 {
-    for (int i = 1; i <= this->devdman->giveNumberOfDofs(); ++i) {
-        if (devdman->giveDof(i) == dof) {
-            return true;
-        }
-    }
-    return false;
+    return devdman == dof->giveDofManager();
 }
 
 

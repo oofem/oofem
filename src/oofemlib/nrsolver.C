@@ -669,6 +669,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             int ndof = dofman->giveNumberOfDofs();
             for ( int idof = 1; idof <= ndof; idof++ ) {
                 Dof *dof = dofman->giveDof(idof);
+                if ( !dof->isPrimaryDof() ) continue;
                 int eq = dof->giveEquationNumber(dn);
                 int dofid = dof->giveDofID();
                 if ( !eq ) continue;
@@ -698,6 +699,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                 // loop over individual dofs
                 for ( int idof = 1; idof <= ndof; idof++ ) {
                     Dof *dof = dofman->giveDof(idof);
+                    if ( !dof->isPrimaryDof() ) continue;
                     int eq = dof->giveEquationNumber(dn);
                     int dofid = dof->giveDofID();
                     
@@ -725,6 +727,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                 // loop over individual dofs
                 for ( int idof = 1; idof <= ndof; idof++ ) {
                     Dof *dof = dofman->giveDof(idof);
+                    if ( !dof->isPrimaryDof() ) continue;
                     int eq = dof->giveEquationNumber(dn);
                     int dofid = dof->giveDofID();
 
