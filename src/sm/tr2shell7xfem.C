@@ -251,6 +251,7 @@ Tr2Shell7XFEM :: compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &
 
 
 // VTK export interface for custom (composite) geometry 
+#if 0
 void 
 Tr2Shell7XFEM :: _export(FILE *stream, VTKXMLExportModule *expModule, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep) 
 {
@@ -382,6 +383,8 @@ Tr2Shell7XFEM :: exportPrimVarAs(UnknownType valID, int regionDofMans, int ireg,
 
 }
 
+#endif
+
 void 
 Tr2Shell7XFEM :: vtkGiveFictiousNodeCoords(FloatArray nodeCoords[15], int layer)
 {
@@ -503,6 +506,121 @@ Tr2Shell7XFEM :: vtkGiveUpdatedFictiousNodeCoords(FloatArray nodeCoords[15], int
 
 
 
+void 
+Tr2Shell7XFEM :: giveCompositeExportData( IntArray &primaryVarsToExport, IntArray &cellVarsToExport, TimeStep *tStep  )
+{   
+    int numCells = this->layeredCS->giveNumberOfLayers();
+    const int numCellNodes  = 15; // quadratic wedge
+
+    this->compositeEl.elements.resize(numCells);
+    this->compositeEl.numSubEl = numCells;   
+    this->compositeEl.numTotalNodes = numCellNodes*numCells;
+
+    int val    = 0;
+    int offset = 0;
+    // Compute fictious node coords
+    for ( int layer = 1; layer <= numCells; layer++ ) {
+        VTKElement &el = this->compositeEl.elements[layer-1];
+
+        // Node coordinates
+        this->giveFictiousNodeCoordsForExport(el.nodeCoords, layer);       
+        
+        // Connectivity
+        el.connectivity.resize(numCellNodes);
+        for ( int i = 1; i <= numCellNodes; i++ ) {
+            el.connectivity.at(i) = val++;
+        }
+        
+        // Offset
+        offset += numCellNodes;
+        el.offset = offset;
+
+        // Cell types
+        el.cellType = 26; // Quadratic wedge
+
+        // Export nodal variables
+        el.nodeVars.resize( primaryVarsToExport.giveSize() );
+
+        FloatArray X[15], x[15], u(3);
+        this->vtkGiveFictiousNodeCoords(X, layer);
+        this->vtkGiveUpdatedFictiousNodeCoords(x, layer, tStep);
+        for ( int i = 1; i <= primaryVarsToExport.giveSize(); i++ ) {
+            el.nodeVars[i-1].resize(numCellNodes);
+            for ( int j = 1; j <= numCellNodes; j++ ) {
+                u = x[j-1];
+                u.subtract(X[j-1]);
+                el.nodeVars[i-1][j-1].resize(3);
+                el.nodeVars[i-1][j-1] = u;
+            }
+
+        }
+    }
+
+
+    
+
+
+
+}
+
+#if 1
+void 
+Tr2Shell7XFEM :: giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer)
+{
+    // compute fictious node coords
+    FloatArray nodeLocalXiCoords, nodeLocalEtaCoords;
+    this->giveLocalNodeCoords( nodeLocalXiCoords, nodeLocalEtaCoords);
+    nodes.resize(15);
+    for ( int i = 1; i <= 3; i++ ){
+        FloatArray coords, localCoords(3);
+        localCoords.at(1) = nodeLocalXiCoords.at(i);
+        localCoords.at(2) = nodeLocalEtaCoords.at(i);
+
+        localCoords.at(3) = -.99;
+        this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, coords);
+        nodes[i-1].resize(3); 
+        nodes[i-1].at(1) = coords.at(1);
+        nodes[i-1].at(2) = coords.at(2);
+        nodes[i-1].at(3) = coords.at(3);
+
+        localCoords.at(3) = .99;
+        this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, coords);
+        nodes[i+3-1].resize(3); 
+        nodes[i+3-1].at(1) = coords.at(1);
+        nodes[i+3-1].at(2) = coords.at(2);
+        nodes[i+3-1].at(3) = coords.at(3);
+    }
+
+    for ( int i = 1; i <= 3; i++ ){
+        FloatArray coords, localCoords(3);
+        localCoords.at(1) = nodeLocalXiCoords.at(i+3);
+        localCoords.at(2) = nodeLocalEtaCoords.at(i+3);
+
+        localCoords.at(3) = -.99;
+        this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, coords);
+        nodes[i+6-1].resize(3); 
+        nodes[i+6-1].at(1) = coords.at(1);
+        nodes[i+6-1].at(2) = coords.at(2);
+        nodes[i+6-1].at(3) = coords.at(3);
+
+        localCoords.at(3) = .99;
+        this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, coords);
+        nodes[i+6+3-1].resize(3); 
+        nodes[i+6+3-1].at(1) = coords.at(1);
+        nodes[i+6+3-1].at(2) = coords.at(2);
+        nodes[i+6+3-1].at(3) = coords.at(3);
+    }
+    
+
+    //Middle nodes - linear variation in the thickness direction -> mean value of top and bottom
+    for ( int i = 1; i <= 3; i++ ){
+        nodes[12+i-1].resize(3);
+        nodes[12+i-1].at(1) = 0.5 * ( nodes[i-1].at(1) + nodes[i+3-1].at(1) );
+        nodes[12+i-1].at(2) = 0.5 * ( nodes[i-1].at(2) + nodes[i+3-1].at(2) );
+        nodes[12+i-1].at(3) = 0.5 * ( nodes[i-1].at(3) + nodes[i+3-1].at(3) );
+    }
+}
+#endif
 
 } // end namespace oofem
 

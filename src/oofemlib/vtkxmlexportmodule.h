@@ -230,6 +230,31 @@ protected:
     void writeVTKCollection();
 };
 
+
+
+// New 
+class VTKElement 
+{
+public:
+    VTKElement(){};
+    int cellType;
+    std::vector<FloatArray> nodeCoords;
+    IntArray connectivity;
+    IntArray primVarsToExport;
+    std::vector< std::vector<FloatArray> > nodeVars;
+    int offset;
+};
+
+class VTKCompositeElement 
+{
+public:
+    VTKCompositeElement(){}; 
+    int numSubEl;
+    int numTotalNodes;
+    std::vector<VTKElement> elements;
+};
+
+
 /**
  * Elements with geometry defined as EGT_Composite are exported using individual pieces.
  * The VTKXMLExportModuleElementInterface serves for this purpose, defining abstract
@@ -243,11 +268,12 @@ public:
     virtual const char *giveClassName() const { return "VTKXMLExportModuleElementInterface"; }
     virtual void _export(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep) {};
     virtual void exportCompositeElement(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep);
-    virtual void giveCompositeExportData(IntArray &primaryVarsToExport, IntArray &internalVarsToExport,
-        std::vector<FloatArray> &nodeCoords, std::vector<IntArray> &cellNodes, IntArray &cellTypes, 
-        std::vector<FloatArray> &primaryVars, std::vector<FloatArray> &cellVars, TimeStep *tStep ){};
-    void exportPrimVarAs(UnknownType valID, int regionDofMans, int ireg, FILE *stream, std::vector<FloatArray> &primaryVars, TimeStep *tStep);
+    virtual void giveCompositeExportData(IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep ){};
     void exportCellVarAs(InternalStateType type, std::vector<FloatArray> &cellVars, FILE *stream, TimeStep *tStep);
+    VTKCompositeElement compositeEl;
 };
+
+
+
 } // end namespace oofem
 #endif // vtkxmlexportmodule_h

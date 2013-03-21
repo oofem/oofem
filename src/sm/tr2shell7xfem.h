@@ -103,9 +103,10 @@ protected:
     // VTK
     void vtkGiveFictiousNodeCoords(FloatArray nodeCoords[15], int layer);
     void vtkGiveUpdatedFictiousNodeCoords(FloatArray nodeCoords[15], int layer, TimeStep *tStep);
-    virtual void _export(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep);
-    void exportPrimVarAs(UnknownType valID, int regionDofMans, int ireg, FILE *stream, TimeStep *tStep);
+    //virtual void _export(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep);
+    //void exportPrimVarAs(UnknownType valID, int regionDofMans, int ireg, FILE *stream, TimeStep *tStep);
 
+    void giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer);
     
 public:
     Tr2Shell7XFEM(int n, Domain *d);	// constructor
@@ -124,6 +125,11 @@ public:
     virtual integrationDomain  giveIntegrationDomain() const { return _Triangle; } // write new wedge-like type 'layeredWedge'
 
 
+    virtual void giveCompositeExportData( IntArray &primaryVarsToExport, IntArray &cellVarsToExport,
+                 std::vector<FloatArray> &nodeCoords, std::vector<IntArray> &cellNodes, IntArray &cellTypes, 
+                 std::vector<FloatArray> &primaryVars, std::vector<FloatArray> &cellVars, TimeStep *tStep ){};
+
+    virtual void giveCompositeExportData( IntArray &primaryVarsToExport, IntArray &cellVarsToExport, TimeStep *tStep );
 };
 
 
