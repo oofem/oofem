@@ -554,6 +554,39 @@ Tr2Shell7XFEM :: giveCompositeExportData( IntArray &primaryVarsToExport, IntArra
             }
 
         }
+
+
+        // Export element (cell) variables
+        int numElVars = cellVarsToExport.giveSize();
+        el.elVars.resize( numElVars );
+        for ( int i = 1; i <= numElVars; i++ ) {
+            InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
+
+            // stress
+            FloatArray average(6);
+            average.zero();
+            
+            IntegrationRule *iRuleL = layerIntegrationRulesArray [ layer - 1 ];
+            GaussPoint *gp;
+            
+            FloatArray stressVecRed, stressVec, temp;
+            double gptot = 0.0;
+            
+            for (int j = 0; j < iRuleL->getNumberOfIntegrationPoints(); ++j) {
+                gp = iRuleL->getIntegrationPoint(j);
+                
+                //this->giveIPValue(temp, gp, type, tStep);
+                this->giveIPValue(temp, gp, IST_StressTensor, tStep);
+                temp.printYourself();
+                gptot += gp->giveWeight();
+                average.add(gp->giveWeight(), temp);
+                average.times(1./gptot);
+            }          
+           
+            stressVec = convV6ToV9Stress(average);
+            el.elVars[0] = stressVec;
+
+        }
     }
 
 

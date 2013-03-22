@@ -145,7 +145,7 @@ protected:
     void computeStressResultantsAt(GaussPoint *gp, FloatArray &Svec, FloatArray &S1g, FloatArray &S2g, FloatArray &S3g, FloatArray &solVec);
     void computeStressVector(FloatArray &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *stepN);
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &genEps);
-    virtual void computeCauchyStressVector(FloatArray &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *stepN);
+    virtual void computeCauchyStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
 
     // Mass matrices
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
@@ -233,6 +233,10 @@ protected:
     int giveVoigtIndex(int ind1, int ind2);
     void giveTensorForm(const FloatMatrix &matrix, FloatArray &tensor);
     void compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matrix2, FloatMatrix &answer);
+
+    FloatArray convV6ToV9Stress(const FloatArray &V6);
+
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif

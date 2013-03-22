@@ -242,6 +242,7 @@ public:
     IntArray connectivity;
     IntArray primVarsToExport;
     std::vector< std::vector<FloatArray> > nodeVars;
+    std::vector<FloatArray> elVars;
     int offset;
 };
 

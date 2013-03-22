@@ -45,6 +45,7 @@ char cltypesGiveUnknownTypeModeKey(ValueModeType mode);
 
 /// @return The value type of corresponding InternalStateType
 InternalStateValueType giveInternalStateValueType(InternalStateType type);
+int giveInternalStateTypeSize(InternalStateType type);
 } // end namespace oofem
 #endif // cltypes_h
 

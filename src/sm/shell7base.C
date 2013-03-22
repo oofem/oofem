@@ -1246,15 +1246,24 @@ Shell7Base :: computeStressVector(FloatArray &answer, FloatArray &genEps, GaussP
 
 
 void
-Shell7Base :: computeCauchyStressVector(FloatArray &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *stepN)
+Shell7Base :: computeCauchyStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     // Compute Cauchy stress from 2nd Piola stress
-    FloatMatrix F, E;
+    FloatArray solVec;
+    this->giveUpdatedSolutionVector(solVec, tStep); 
+    FloatMatrix B11, B22, B32, B43, B53;
+    this->computeBmatricesAt(gp, B11, B22, B32, B43, B53);
+    FloatArray genEps;
+    this->computeGeneralizedStrainVector(genEps, solVec, B11, B22, B32, B43, B53);
+    FloatMatrix F;
     this->computeFAt(gp, F, genEps);   
-    this->computeE(E, F);   
-    FloatArray vS, vE;
-    vE.beReducedVectorFormOfStrain(E);
-    static_cast< StructuralMaterial * >( mat )->giveRealStressVector(vS, ReducedForm, gp, vE, stepN);
+
+    FloatArray vS;
+    int error = giveIPValue(vS, gp, IST_StressTensor, tStep);
+    //vS.printYourself();
+    
+    //vE.beReducedVectorFormOfStrain(E);
+    //static_cast< StructuralMaterial * >( mat )->giveRealStressVector(vS, ReducedForm, gp, vE, stepN);
     FloatMatrix S, temp, sigma;
     S.beMatrixFormOfStress(vS);
     temp.beProductTOf(S,F); 
@@ -1280,6 +1289,20 @@ Shell7Base :: computeStressResultantsAt(GaussPoint *gp, FloatArray &Svec, FloatA
     }
 }
 
+int 
+Shell7Base :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    switch (type) {
+    case IST_CauchyStressTensor:
+        this->computeCauchyStressVector(answer, gp, tStep);
+        return 1;
+
+    default:
+        return Element :: giveIPValue(answer, gp, type, tStep);
+    }
+
+    
+}
 
 
 
@@ -2930,6 +2953,20 @@ Shell7Base :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int laye
 
 
 // Misc functions
+
+FloatArray 
+Shell7Base :: convV6ToV9Stress(const FloatArray &V6)
+{
+    FloatArray answer(9);
+    answer.at(1) = V6.at(1);
+    answer.at(5) = V6.at(2);
+    answer.at(9) = V6.at(3);
+    answer.at(6) = answer.at(8) = V6.at(4);
+    answer.at(3) = answer.at(7) = V6.at(5);
+    answer.at(2) = answer.at(4) = V6.at(6);
+    return answer;
+};
+
 
 int
 Shell7Base :: giveVoigtIndex(int ind1, int ind2)
