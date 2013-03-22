@@ -66,7 +66,7 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
     const char *IFT_knotVectorString [ 3 ] = {
         "knotvectoru", "knotvectorv", "knotvectorw"
     };
-    InputFieldType IFT_knotVectorType [ 3 ] = {
+    _InputFieldType IFT_knotVectorType [ 3 ] = {
         IFT_BSplineInterpolation_knotVectorU,
         IFT_BSplineInterpolation_knotVectorV,
         IFT_BSplineInterpolation_knotVectorW
@@ -74,7 +74,7 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
     const char *IFT_knotMultiplicityString [ 3 ] = {
         "knotmultiplicityu", "knotmultiplicityv", "knotmultiplicityw"
     };
-    InputFieldType IFT_knotMultiplicityType [ 3 ] = {
+    _InputFieldType IFT_knotMultiplicityType [ 3 ] = {
         IFT_BSplineInterpolation_knotMultiplicityU,
         IFT_BSplineInterpolation_knotMultiplicityV,
         IFT_BSplineInterpolation_knotMultiplicityW

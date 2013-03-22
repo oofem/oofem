@@ -55,10 +55,14 @@ class Range;
  */
 enum IRResultType { IRRT_OK = 0, IRRT_NOTFOUND, IRRT_BAD_FORMAT };
 
+/// Identifier of fields in input records.
+typedef const char * InputFieldType;
+
 /**
  * Enumeration type used to determine particular field in record.
+ * @deprecated
  */
-enum InputFieldType {
+enum _InputFieldType {
     IFT_RecordIDField,
     IFT_EngngModel_nsteps,
     IFT_EngngModel_contextoutputstep,
@@ -1320,8 +1324,8 @@ enum InputFieldType {
 /**
  * Macro simplifying the error reporting.
  */
-#define IR_IOERR(__class, __proc, __id, __keyword, __ir, __result) \
-    __ir->report_error(__class, __proc, __id, __keyword, __result, __FILE__, __LINE__);
+#define IR_IOERR(__class, __proc, __enum, __keyword, __ir, __result) \
+    __ir->report_error(__class, __proc, __keyword, __result, __FILE__, __LINE__);
 
 /**
  * Macro facilitating the use of input record reading methods.
@@ -1329,8 +1333,8 @@ enum InputFieldType {
  * field identified by __kwd and stores the  result into __value parameter.
  * Includes also the error reporting.
  */
-#define IR_GIVE_FIELD(__ir, __value, __id, __kwd) result = __ir->giveField(__value, __id, __kwd); \
-    if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, __id, __kwd, __ir, result); }
+#define IR_GIVE_FIELD(__ir, __value, __id, __kwd) result = __ir->giveField(__value, __kwd); \
+    if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, foo, __kwd, __ir, result); }
 
 /**
  * Macro facilitating the use of input record reading methods.
@@ -1338,8 +1342,8 @@ enum InputFieldType {
  * field identified by __kwd and stores the  result into __value parameter.
  * Includes also the error reporting.
  */
-#define IR_GIVE_OPTIONAL_FIELD(__ir, __value, __id, __kwd) result = __ir->giveOptionalField(__value, __id, __kwd); \
-    if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, __id, __kwd, __ir, result); }
+#define IR_GIVE_OPTIONAL_FIELD(__ir, __value, __id, __kwd) result = __ir->giveOptionalField(__value, __kwd); \
+    if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, foo, __kwd, __ir, result); }
 
 /**
  * Macro facilitating the use of input record reading methods.
@@ -1348,7 +1352,7 @@ enum InputFieldType {
  */
 #define IR_GIVE_RECORD_KEYWORD_FIELD(__ir, __name, __value) \
     result = __ir->giveRecordKeywordField(__name, __value); \
-    if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "RecordIDField", __ir, result); }
+    if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, foo, "RecordIDField", __ir, result); }
 
 
 
@@ -1388,25 +1392,25 @@ public:
     /// Reads the record id field  (type of record).
     virtual IRResultType giveRecordKeywordField(std :: string &answer) = 0;
     /// Reads the integer field value.
-    virtual IRResultType giveField(int &answer, InputFieldType fieldID, const char *idString) = 0;
+    virtual IRResultType giveField(int &answer, InputFieldType id) = 0;
     /// Reads the double field value.
-    virtual IRResultType giveField(double &answer, InputFieldType fieldID, const char *idString) = 0;
+    virtual IRResultType giveField(double &answer, InputFieldType id) = 0;
     /// Reads the bool field value.
-    virtual IRResultType giveField(bool &answer, InputFieldType fieldID, const char *idString) = 0;
+    virtual IRResultType giveField(bool &answer, InputFieldType id) = 0;
     /// Reads the string field value.
-    virtual IRResultType giveField(std :: string &answer, InputFieldType fieldI, const char *idString) = 0;
+    virtual IRResultType giveField(std :: string &answer, InputFieldType id) = 0;
     /// Reads the FloatArray field value.
-    virtual IRResultType giveField(FloatArray &answer, InputFieldType fieldI, const char *idString) = 0;
+    virtual IRResultType giveField(FloatArray &answer, InputFieldType id) = 0;
     /// Reads the IntArray field value.
-    virtual IRResultType giveField(IntArray &answer, InputFieldType fieldID, const char *idString) = 0;
+    virtual IRResultType giveField(IntArray &answer, InputFieldType id) = 0;
     /// Reads the FloatMatrix field value.
-    virtual IRResultType giveField(FloatMatrix &answer, InputFieldType fieldI, const char *idString) = 0;
+    virtual IRResultType giveField(FloatMatrix &answer, InputFieldType id) = 0;
     /// Reads the vector of strings.
-    virtual IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType fieldID, const char *idString) = 0;
+    virtual IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType id) = 0;
     /// Reads the Dictionary field value.
-    virtual IRResultType giveField(Dictionary &answer, InputFieldType fieldID, const char *idString) = 0;
+    virtual IRResultType giveField(Dictionary &answer, InputFieldType id) = 0;
     /// Reads the std::list<Range> field value.
-    virtual IRResultType giveField(std :: list< Range > &answer, InputFieldType fieldID, const char *idString) = 0;
+    virtual IRResultType giveField(std :: list< Range > &answer, InputFieldType id) = 0;
     //@}
 
     /**@name Optional field extraction methods
@@ -1417,29 +1421,32 @@ public:
      */
     //@{
     /// Reads the integer field value.
-    IRResultType giveOptionalField(int &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(int &answer, InputFieldType id);
     /// Reads the double field value.
-    IRResultType giveOptionalField(double &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(double &answer, InputFieldType id);
     /// Reads the bool field value.
-    IRResultType giveOptionalField(bool &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(bool &answer, InputFieldType id);
     /// Reads the string field value.
-    IRResultType giveOptionalField(std :: string &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(std :: string &answer, InputFieldType id);
     /// Reads the FloatArray field value.
-    IRResultType giveOptionalField(FloatArray &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(FloatArray &answer, InputFieldType id);
     /// Reads the IntArray field value.
-    IRResultType giveOptionalField(IntArray &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(IntArray &answer, InputFieldType id);
     /// Reads the FloatMatrix field value.
-    IRResultType giveOptionalField(FloatMatrix &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(FloatMatrix &answer, InputFieldType id);
     /// Reads the vector of strings.
-    IRResultType giveOptionalField(std :: vector< std :: string > &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(std :: vector< std :: string > &answer, InputFieldType id);
     /// Reads the Dictionary field value.
-    IRResultType giveOptionalField(Dictionary &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(Dictionary &answer, InputFieldType id);
     /// Reads the std::list<Range> field value.
-    IRResultType giveOptionalField(std :: list< Range > &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(std :: list< Range > &answer, InputFieldType id);
     //@}
 
+    ///@todo Temporary wrapper (!)
+    virtual bool hasField(_InputFieldType _id, InputFieldType id) { return this->hasField(id); }
+
     /// Returns true if record contains field identified by idString keyword.
-    virtual bool hasField(InputFieldType fieldID, const char *idString) = 0;
+    virtual bool hasField(InputFieldType id) = 0;
 
     /// Returns error string corresponding to given value of IRResultType type.
     const char *strerror(IRResultType);
@@ -1447,17 +1454,11 @@ public:
     virtual void printYourself() = 0;
 
     /// Prints the error message.
-    void report_error(const char *_class, const char *proc, InputFieldType fieldID, const char *kwd,
-                      IRResultType result, const char *file, int line);
+    virtual void report_error(const char *_class, const char *proc, InputFieldType id,
+                      IRResultType result, const char *file, int line) = 0;
 
     /// Terminates the current record session and if the flag is true, warning is printed for unscanned tokens.
     virtual void finish(bool wrn = true) = 0;
-    /// Sets line number from dataReader.
-    void setLineNumber(const int lineNumber) { this->lineNumber = lineNumber; };
-
-protected:
-    /// Keep track of read line
-    int lineNumber;
 };
 } // end namespace oofem
 #endif // inputrecord_h

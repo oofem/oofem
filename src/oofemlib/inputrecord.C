@@ -36,15 +36,9 @@
 #include "error.h"
 
 namespace oofem {
-InputRecord :: InputRecord()
-{
-    this->lineNumber = 0;
-}
+InputRecord :: InputRecord() { }
 
-InputRecord :: InputRecord(const InputRecord &src)
-{ 
-    this->lineNumber = src.lineNumber;
-}
+InputRecord :: InputRecord(const InputRecord &src) {  }
 
 InputRecord &
 InputRecord :: operator = ( const InputRecord & src )
@@ -67,18 +61,10 @@ InputRecord :: strerror(IRResultType rt)
     }
 }
 
-void
-InputRecord :: report_error(const char *_class, const char *proc, InputFieldType fieldID, const char *kwd,
-                            IRResultType result, const char *file, int line)
-{
-    __OOFEM_ERROR7(file, line, "Input error on line %d: \"%s\", field keyword \"%s\" (fieldID=%d)\n%s::%s", lineNumber, strerror(result), kwd, fieldID, _class, proc);
-}
-
-
 IRResultType
-InputRecord :: giveOptionalField(int &answer, InputFieldType fieldID, const char *idString)
+InputRecord :: giveOptionalField(int &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, fieldID, idString);
+    IRResultType r = this->giveField(answer, id);
     if ( r == IRRT_NOTFOUND ) {
         return IRRT_OK;
     } else {
@@ -87,9 +73,9 @@ InputRecord :: giveOptionalField(int &answer, InputFieldType fieldID, const char
 }
 
 IRResultType
-InputRecord :: giveOptionalField(double &answer, InputFieldType fieldID, const char *idString)
+InputRecord :: giveOptionalField(double &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, fieldID, idString);
+    IRResultType r = this->giveField(answer, id);
     if ( r == IRRT_NOTFOUND ) {
         return IRRT_OK;
     } else {
@@ -98,9 +84,9 @@ InputRecord :: giveOptionalField(double &answer, InputFieldType fieldID, const c
 }
 
 IRResultType
-InputRecord :: giveOptionalField(bool &answer, InputFieldType fieldID, const char *idString)
+InputRecord :: giveOptionalField(bool &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, fieldID, idString);
+    IRResultType r = this->giveField(answer, id);
     if ( r == IRRT_NOTFOUND ) {
         return IRRT_OK;
     } else {
@@ -109,9 +95,9 @@ InputRecord :: giveOptionalField(bool &answer, InputFieldType fieldID, const cha
 }
 
 IRResultType
-InputRecord :: giveOptionalField(std::string &answer, InputFieldType fieldID, const char *idString)
+InputRecord :: giveOptionalField(std::string &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, fieldID, idString);
+    IRResultType r = this->giveField(answer, id);
     if ( r == IRRT_NOTFOUND ) {
         return IRRT_OK;
     } else {
@@ -120,9 +106,9 @@ InputRecord :: giveOptionalField(std::string &answer, InputFieldType fieldID, co
 }
 
 IRResultType
-InputRecord :: giveOptionalField(FloatArray &answer, InputFieldType fieldID, const char *idString)
+InputRecord :: giveOptionalField(FloatArray &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, fieldID, idString);
+    IRResultType r = this->giveField(answer, id);
     if ( r == IRRT_NOTFOUND ) {
         return IRRT_OK;
     } else {
@@ -131,9 +117,9 @@ InputRecord :: giveOptionalField(FloatArray &answer, InputFieldType fieldID, con
 }
 
 IRResultType
-InputRecord :: giveOptionalField(IntArray &answer, InputFieldType fieldID, const char *idString)
+InputRecord :: giveOptionalField(IntArray &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, fieldID, idString);
+    IRResultType r = this->giveField(answer, id);
     if ( r == IRRT_NOTFOUND ) {
         return IRRT_OK;
     } else {
@@ -142,9 +128,9 @@ InputRecord :: giveOptionalField(IntArray &answer, InputFieldType fieldID, const
 }
 
 IRResultType
-InputRecord :: giveOptionalField(FloatMatrix &answer, InputFieldType fieldID, const char *idString)
+InputRecord :: giveOptionalField(FloatMatrix &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, fieldID, idString);
+    IRResultType r = this->giveField(answer, id);
     if ( r == IRRT_NOTFOUND ) {
         return IRRT_OK;
     } else {
@@ -153,9 +139,9 @@ InputRecord :: giveOptionalField(FloatMatrix &answer, InputFieldType fieldID, co
 }
 
 IRResultType
-InputRecord :: giveOptionalField(std::vector< std::string > &answer, InputFieldType fieldID, const char *idString)
+InputRecord :: giveOptionalField(std::vector< std::string > &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, fieldID, idString);
+    IRResultType r = this->giveField(answer, id);
     if ( r == IRRT_NOTFOUND ) {
         return IRRT_OK;
     } else {
@@ -164,9 +150,9 @@ InputRecord :: giveOptionalField(std::vector< std::string > &answer, InputFieldT
 }
 
 IRResultType
-InputRecord :: giveOptionalField(Dictionary &answer, InputFieldType fieldID, const char *idString)
+InputRecord :: giveOptionalField(Dictionary &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, fieldID, idString);
+    IRResultType r = this->giveField(answer, id);
     if ( r == IRRT_NOTFOUND ) {
         return IRRT_OK;
     } else {
@@ -175,9 +161,9 @@ InputRecord :: giveOptionalField(Dictionary &answer, InputFieldType fieldID, con
 }
 
 IRResultType
-InputRecord :: giveOptionalField(std::list< Range > &answer, InputFieldType fieldID, const char *idString)
+InputRecord :: giveOptionalField(std::list< Range > &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, fieldID, idString);
+    IRResultType r = this->giveField(answer, id);
     if ( r == IRRT_NOTFOUND ) {
         return IRRT_OK;
     } else {
