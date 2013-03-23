@@ -43,20 +43,15 @@
 #include "usrdefsub.h"
 
 namespace oofem {
-EnrichmentItem :: EnrichmentItem(int n, XfemManager *xm, Domain *aDomain) : FEMComponent(n, aDomain)
+EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FEMComponent(n, aDomain)
 {
-    xmanager = xm;
-    enrichmentFunction = 0;
-
-    //new JB
+    this->xMan = xMan;
     this->enrichmentFunctionList = new AList< EnrichmentFunction >(0);
-    this->enrichementDomainList = new AList< BasicGeometry >(0); // Should be an enrichmentdomain type or something similar
-    this->enrDomainList = new AList< EnrichmentDomain >(0); 
+    this->enrichmentDomainList = new AList< EnrichmentDomain >(0); 
     this->numberOfEnrichmentFunctions = 1;    
     this->numberOfEnrichmentDomains = 1;  
     this->startOfDofIdPool = -1;
     this->enrichesDofsWithIdArray = new IntArray;
-    
 }
 
 EnrichmentItem :: ~EnrichmentItem()
@@ -65,29 +60,9 @@ EnrichmentItem :: ~EnrichmentItem()
 }
 
 
-// remove - should ask for specific geom. can be multiple?
-BasicGeometry *EnrichmentItem :: giveGeometry()
-{
-    return this->enrichementDomainList->at(1);
-}
-
-BasicGeometry *EnrichmentItem :: giveGeometry(int n)
-// Returns the n-th geometry.
-{
-    if ( this->enrichementDomainList->includes(n) ) {
-        return this->enrichementDomainList->at(n);
-    } else {
-        OOFEM_ERROR2("giveGeometry: undefined geometry (%d)", n);
-    }
-
-    return NULL;
-}
-
-
-
 EnrichmentFunction *EnrichmentItem :: giveEnrichmentFunction(int n)
-// Returns the n-th geometry.
 {
+    // Returns the n-th geometry.
     if ( enrichmentFunctionList->includes(n) ) {
         return enrichmentFunctionList->at(n);
     } else {
@@ -96,8 +71,6 @@ EnrichmentFunction *EnrichmentItem :: giveEnrichmentFunction(int n)
 
     return NULL;
 }
-
-
 
 bool EnrichmentItem :: isElementEnriched(const Element *element) 
 {
@@ -120,10 +93,9 @@ bool EnrichmentItem :: isElementEnrichedByEnrichmentDomain(const Element *elemen
     return false;
 }
 
-
 bool EnrichmentItem :: isDofManEnriched(DofManager *dMan)
 {
-    for ( int i = 1; i <= this->enrichementDomainList->giveSize() ; i++ ) {
+    for ( int i = 1; i <= this->enrichmentDomainList->giveSize() ; i++ ) {
         if ( isDofManEnrichedByEnrichmentDomain(dMan, i) ){
             return true;
         }
@@ -133,17 +105,9 @@ bool EnrichmentItem :: isDofManEnriched(DofManager *dMan)
 
 bool EnrichmentItem :: isDofManEnrichedByEnrichmentDomain(DofManager *dMan, int edNumber)
 {
-    EnrichmentDomain *ed = this->enrDomainList->at(edNumber);
+    EnrichmentDomain *ed = this->enrichmentDomainList->at(edNumber);
     return ed->isDofManagerEnriched(dMan);
 }
-
-
-
-
-
-
-
-
 
 
 IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
@@ -163,12 +127,13 @@ IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
 IRResultType Inclusion :: initializeFrom(InputRecord *ir)
 {
     EnrichmentItem :: initializeFrom(ir);
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result; // Required by IR_GIVE_FIELD macro
+    const char *__proc = "initializeFrom"; 
+    IRResultType result; 
     int material = 0;
-    IR_GIVE_FIELD(ir, material, IFT_RecordIDField, "material"); // Macro
+    IR_GIVE_FIELD(ir, material, IFT_RecordIDField, "material"); 
     this->mat = this->giveDomain()->giveMaterial(material);
     this->numberOfEnrichmentFunctions = 1;
+    // Not sure this should be input at but instead be determined by the ei which describes the physical model /JB
     //IR_GIVE_OPTIONAL_FIELD(ir, numberOfEnrichmentFunctions, IFT_XfemManager_numberOfEnrichmentFunctions, "numberofenrichmentfunctions"); // Macro
     return IRRT_OK;
 }
@@ -191,7 +156,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
             IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
         }
         
-        EnrichmentFunction *ef = CreateUsrDefEnrichmentFunction( name.c_str(), i, this->xmanager->giveDomain() );
+        EnrichmentFunction *ef = CreateUsrDefEnrichmentFunction( name.c_str(), i, this->xMan->giveDomain() );
         if ( ef == NULL ) {
             OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment function (%s)", name.c_str() );
         }
@@ -200,8 +165,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     }
 
     // Instanciate enrichment domains
-    enrichementDomainList->growTo(numberOfEnrichmentDomains);
-    enrDomainList->growTo(numberOfEnrichmentDomains);
+    enrichmentDomainList->growTo(numberOfEnrichmentDomains);
 
     for ( int i = 1; i <= numberOfEnrichmentDomains; i++ ) {
         InputRecord *mir = dr->giveInputRecord(DataReader :: IR_geoRec, i);
@@ -214,7 +178,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
         if ( ed == NULL ) {
             OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment domain (%s)", name.c_str() );
         }
-        this->enrDomainList->put(i, ed);
+        this->enrichmentDomainList->put(i, ed);
         ed->initializeFrom(mir);
 
     }

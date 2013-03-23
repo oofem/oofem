@@ -60,7 +60,6 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeNumberOfDofs(EquationID ut) { return this->giveNumberOfDofs(); }
-    //virtual int checkConsistency(){return 1;};
     virtual int checkConsistency();
 
     // Definition & identification
@@ -70,7 +69,6 @@ public:
 
 
     // Element specific
-    //virtual int giveNumberOfDofs() = 0;
     virtual int giveNumberOfDofs();
     virtual int giveNumberOfEdgeDofs() = 0;
     virtual int giveNumberOfEdgeDofManagers() = 0;

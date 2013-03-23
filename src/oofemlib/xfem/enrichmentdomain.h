@@ -40,13 +40,13 @@
 #include "node.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
-
-
 #include "geometry.h"
 
 namespace oofem {
 /**
- * Abstract representation of enrichment domain
+ * Abstract representation of enrichment domain - the geometry description of the particular 
+ * enrichment item. Includes BasicGeometry as one type of description, list of enriched dofmanagers etc.
+ * Should be extended to handle implicit geometry descriptions like e.g. level-sets. 
  * @author Jim Brouzoulis
  */
 class EnrichmentDomain 
@@ -67,10 +67,13 @@ public:
     virtual int computeNumberOfIntersectionPoints(Element *element){return 0;};
 };
 
+
+/**
+ * Base class for EnrichmentDomains that derive from BasicGeometry
+ * ///@todo: Add additional basic geometry descriptions like polygon
+ */
 class EnrichmentDomain_BG : public EnrichmentDomain
 {
-private:
-    
 public:
     BasicGeometry *bg;
     EnrichmentDomain_BG(){}; 
@@ -95,7 +98,10 @@ public:
     virtual int computeNumberOfIntersectionPoints(Element *element) { return static_cast<Circle *>(bg)->computeNumberOfIntersectionPoints(element); };
 };
 
-
+/**
+ * List of DofManagers 
+ * ///@todo: Add additional basic geometry descriptions like polygon
+ */
 class DofManList : public EnrichmentDomain
 {
 protected:
@@ -109,7 +115,11 @@ public:
 
 
 
-// The whole computational domain is enriched.
+/**
+ * The whole computational domain is enriched which thus is a global enrichment
+ * Mostly intended for debuging but may easily lead to a singular problem if the
+ * solution is enriched with strong discontinuities.
+ */
 class WholeDomain : public EnrichmentDomain
 {
 public:

@@ -36,7 +36,6 @@
 #include "structuralmaterial.h"
 #include "xfemelementinterface.h"
 #include "structuralcrosssection.h"
-//#include "xfemmanager.h"
 #include "vtkxmlexportmodule.h"
 namespace oofem {
 
@@ -77,10 +76,8 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     interpolation.evaldNdx( dNdx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     interpolation.evalN(     N  , * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
  
-
     FloatMatrix Bc[4];
-
-    // assemble standard FEM part of strain-displacement matrix
+    // Assemble standard FEM part of strain-displacement matrix
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         FloatMatrix &BNode = Bc[i-1];
         BNode.resize(3, 2);
@@ -91,8 +88,7 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
         BNode.at(3, 2) = dNdx.at(i, 1);
     }
 
-
-    // assemble xfem part of strain-displacement matrix
+    // Assemble xfem part of strain-displacement matrix
     XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
     FloatMatrix Bd[4];
 
@@ -182,7 +178,6 @@ void PlaneStress2dXfem :: computeNmatrixAt(FloatArray &lcoords, FloatMatrix &ans
         // adds up the number of the dofs from an enrichment item
         // this part is used for the construction of a shifted enrichment
         for ( int j = 1; j <= this->giveNumberOfDofManagers(); j++ ) {
-
             DofManager *dMan = this->giveDofManager(j);
             if ( ei->isDofManEnriched( dMan ) ) {
                 
@@ -198,7 +193,6 @@ void PlaneStress2dXfem :: computeNmatrixAt(FloatArray &lcoords, FloatMatrix &ans
         }
 
         // Create the total B-matrix by appending each contribution to B after one another.
-
         N.resize(counter);
         int column = 1;
 

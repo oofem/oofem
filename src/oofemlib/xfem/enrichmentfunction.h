@@ -35,7 +35,6 @@
 #ifndef enrichmentfunction_h
 #define enrichmentfunction_h
 
-#include "femcmpnn.h"
 #include "intarray.h"
 #include "enrichmentdomain.h"
 
@@ -50,6 +49,7 @@ class GaussPoint;
  * Particularly, evaluateAt() and evaluateDerivativeAt() services are declared
  * to evaluate the value and spatial derivatives at a given point of the receiver.
  * @author chamrova
+ * @author Jim Brouzoulis
  */
 class EnrichmentFunction : public FEMComponent
 {
@@ -92,7 +92,6 @@ protected:
 class DiscontinuousFunction : public EnrichmentFunction
 {
 public:
-
     DiscontinuousFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
         this->numberOfDofs = 1;
     }
