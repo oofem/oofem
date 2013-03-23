@@ -2502,7 +2502,7 @@ StructuralMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGauss
     if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ||
         ( type == IST_StressTensorTemp ) || ( type == IST_StrainTensorTemp ) ||
         ( type == IST_CylindricalStressTensor ) || ( type == IST_CylindricalStrainTensor ) ||
-        ( type == IST_ShellForceMomentumTensor ) ) {
+        ( type == IST_ShellForceMomentumTensor )  || ( type == IST_CauchyStressTensor )) {
         return this->giveSizeOfReducedStressStrainVector( aGaussPoint->giveMaterialMode() );
     } else if ( ( type == IST_PrincipalStressTensor ) || ( type == IST_PrincipalStrainTensor ) || ( type == IST_PrincipalPlasticStrainTensor ) ||
                ( type == IST_PrincipalStressTempTensor ) || ( type == IST_PrincipalStrainTempTensor ) ) {

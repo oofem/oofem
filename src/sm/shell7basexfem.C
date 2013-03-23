@@ -319,7 +319,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
     f1.zero(); f2.zero(); f3.zero();
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        IntegrationRule *iRuleL = layerIntegrationRulesArray [ layer - 1 ];
+        IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
         for ( int j = 1; j <= iRuleL->getNumberOfIntegrationPoints(); j++ ) {
@@ -535,7 +535,7 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        IntegrationRule *iRule = layerIntegrationRulesArray [ layer - 1 ];
+        IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
@@ -620,7 +620,7 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep) {
     M33.zero();
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        IntegrationRule *iRuleL = layerIntegrationRulesArray [ layer - 1 ];
+        IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( layeredCS->giveLayerMaterial(layer) );
 
         for ( int j = 1; j <= iRuleL->getNumberOfIntegrationPoints(); j++ ) {
@@ -794,7 +794,7 @@ Shell7BaseXFEM :: setupGPDelaminationGroupList()
   if ( this->gpDelaminationGroupList.size()==0 ) {
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();  
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        IntegrationRule *iRule = layerIntegrationRulesArray [ layer - 1 ];
+        IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
 
         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
@@ -919,17 +919,6 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int 
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

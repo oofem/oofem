@@ -99,11 +99,6 @@ protected:
 
     virtual FEInterpolation *giveInterpolation();
 
-    // VTK
-    void vtkGiveFictiousNodeCoords(FloatArray nodeCoords[15], int layer);
-    void vtkGiveUpdatedFictiousNodeCoords(FloatArray nodeCoords[15], int layer, TimeStep *tStep);
-    virtual void _export(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep);
-    void exportPrimVarAs(UnknownType valID, int regionDofMans, int ireg, FILE *stream, TimeStep *tStep);
 
 public:
     Tr2Shell7(int n, Domain *d);        // constructor

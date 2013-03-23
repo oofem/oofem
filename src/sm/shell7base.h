@@ -41,9 +41,11 @@
 #include "layeredcrosssection.h"
 
 #include "nlstructuralelement.h"
-#include <vector>
 #include "vtkxmlexportmodule.h"
 #include "zznodalrecoverymodel.h"
+#include "fei3dwedgequad.h"
+#include <vector>
+
 namespace oofem {
 class BoundaryLoad;
 
@@ -54,15 +56,15 @@ class BoundaryLoad;
  * @author Jim Brouzoulis
  * @date 2012-11-01
  */
-class Shell7Base : public NLStructuralElement, public NodalAveragingRecoveryModelInterface, public LayeredCrossSectionInterface, public VTKXMLExportModuleElementInterface, public ZZNodalRecoveryModelInterface
+class Shell7Base : public NLStructuralElement, public NodalAveragingRecoveryModelInterface, public LayeredCrossSectionInterface, 
+    public VTKXMLExportModuleElementInterface, public ZZNodalRecoveryModelInterface
 {
 public:
     Shell7Base(int n, Domain *d); // constructor
-    virtual ~Shell7Base() {}    // destructor -> declaring as virtual will make each subclass call their respective destr.
+    virtual ~Shell7Base() {}
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeNumberOfDofs(EquationID ut) { return this->giveNumberOfDofs(); }
-    //virtual int checkConsistency(){return 1;};
     virtual int checkConsistency();
 
     // Definition & identification
@@ -72,7 +74,6 @@ public:
 
 
     // Element specific
-    //virtual int giveNumberOfDofs() = 0;
     virtual int giveNumberOfDofs();
     virtual int giveNumberOfEdgeDofs() = 0;
     virtual int giveNumberOfEdgeDofManagers() = 0;
@@ -85,8 +86,9 @@ public:
 protected:
     virtual Interface *giveInterface(InterfaceType it);
     int numberOfGaussPoints;
-    IntegrationRule **layerIntegrationRulesArray;
+    IntegrationRule **specialIntegrationRulesArray;
     LayeredCrossSection *layeredCS;
+    static FEI3dWedgeQuad interpolationForExport;
 
     enum SolutionField {
         Midplane,       ///< phi_bar 7 x_bar (3 dofs)
@@ -210,12 +212,22 @@ protected:
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
     virtual int  NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type);
 
+    // ZZ recovery
+    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *gp, InternalStateType type);
+    void ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, int layer, InternalStateType type, TimeStep *tStep);
+    void ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, int layer, InternalStateType type);
+    void ZZNodalRecoveryMI_recoverValues(std::vector<FloatArray> &recoveredValues, int layer, InternalStateType type, TimeStep *tStep);
+
     // VTK interface
-    void vtkEvalInitialGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords);
-    void vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
+    virtual void vtkEvalInitialGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords);
+    virtual void vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
+    
+    void giveCompositeExportData( IntArray &primaryVarsToExport, IntArray &cellVarsToExport, TimeStep *tStep  );
+    void giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer);
+    void giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep);
+    void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords);
 
     // N and B matrices
-
     int giveFieldSize(SolutionField fieldType);
     int giveNumberOfFieldDofs(SolutionField fieldType);
     virtual void computeFieldBmatrix(FloatMatrix & answer, FloatMatrix & dNdxi, SolutionField);

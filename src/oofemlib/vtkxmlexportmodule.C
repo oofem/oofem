@@ -1521,28 +1521,34 @@ VTKXMLExportModuleElementInterface :: exportCompositeElement(FILE *stream, VTKXM
 
 
     // Export primary and internal variables
-    ///@todo: Only supports one at the moment
+    int nodeVarNum = 0;
     expModule->exportPointDataHeader(stream, tStep);
+    int numNodeVars = primaryVarsToExport.giveSize() + internalVarsToExport.giveSize();
     for (int i = 1; i <= primaryVarsToExport.giveSize(); i++ ) {
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(i);
         FloatArray val;
-        int varSize = 3;
+        int varSize = this->compositeEl.elements[0].nodeVars[nodeVarNum][0].giveSize();  // assumes they all have the same size
         val.resize(varSize);
         fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%i\" format=\"ascii\"> ", __UnknownTypeToString(type), varSize );
         for ( int cell = 0; cell < numSubEl; cell++ ) {
             VTKElement &el = this->compositeEl.elements[cell];
             for ( int j = 1; j <= el.connectivity.giveSize(); j++ ) {
                 
-                val = el.nodeVars[i-1][j-1];
-                if (val.giveSize() == 3 ) {
-                    fprintf( stream, "%e %e %e ", val.at(1), val.at(2), val.at(3) );
-                } else {
-                    fprintf( stream, "%e %e %e ", val.at(1), val.at(2), 0.0 );
+                val = el.nodeVars[nodeVarNum][j-1];
+                for ( int component = 1; component <= val.giveSize(); component++ ) {
+                    fprintf( stream, "%e ", val.at(component) );
                 }
             }    
         }
         fprintf(stream, "</DataArray>\n");
-    }   
+        nodeVarNum++;
+    }
+
+    for (int i = 1; i <= internalVarsToExport.giveSize(); i++ ) {
+        InternalStateType type = ( InternalStateType ) internalVarsToExport.at(i);
+        exportNodalVarAs(type, nodeVarNum, stream, tStep);
+        nodeVarNum++;
+    }
     fprintf(stream, "</PointData>\n");
 
 
@@ -1564,9 +1570,9 @@ VTKXMLExportModuleElementInterface :: exportCompositeElement(FILE *stream, VTKXM
         }
 
         fprintf(stream, "</DataArray>\n");
-        fprintf(stream, "</CellData>\n");
+        
     }
-
+    fprintf(stream, "</CellData>\n");
 
     
     // end of piece record
@@ -1574,6 +1580,29 @@ VTKXMLExportModuleElementInterface :: exportCompositeElement(FILE *stream, VTKXM
     
 }
 
+void 
+VTKXMLExportModuleElementInterface :: exportNodalVarAs(InternalStateType type, int nodeVarNum, FILE *stream, TimeStep *tStep)
+{
+    
+    //InternalStateType type = ( InternalStateType ) internalVarsToExport.at(i);
+    FloatArray val;
+    int varSize = this->compositeEl.elements[0].nodeVars[nodeVarNum][0].giveSize();  // assumes they all have the same size
+    val.resize(varSize);
+    fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%i\" format=\"ascii\"> ", __InternalStateTypeToString(type), varSize );
+    for ( int cell = 0; cell < this->compositeEl.elements.size(); cell++ ) {
+        VTKElement &el = this->compositeEl.elements[cell];
+        for ( int j = 1; j <= el.connectivity.giveSize(); j++ ) {
+                
+            val = el.nodeVars[nodeVarNum][j-1];
+            for ( int component = 1; component <= val.giveSize(); component++ ) {
+                fprintf( stream, "%e ", val.at(component) );
+            }
+        }    
+    }
+    fprintf(stream, "</DataArray>\n");
+    nodeVarNum++;
+       
+}
 
 
 

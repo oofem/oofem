@@ -47,7 +47,10 @@
 #include "constantsurfaceload.h"
 #include "vtkxmlexportmodule.h"
 
+
 namespace oofem {
+FEI3dWedgeQuad Shell7Base :: interpolationForExport;
+
 Shell7Base :: Shell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomain),  LayeredCrossSectionInterface(), VTKXMLExportModuleElementInterface(), ZZNodalRecoveryModelInterface()
 {}
 
@@ -506,7 +509,7 @@ Shell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solV
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        IntegrationRule *iRule = layerIntegrationRulesArray [ layer - 1 ];
+        IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
@@ -591,7 +594,7 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, 
     int numberOfLayers = layeredCS->giveNumberOfLayers();     // conversion from double to int - fix!
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        IntegrationRule *iRule = layerIntegrationRulesArray [ layer - 1 ];
+        IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( layeredCS->giveLayerMaterial(layer) );
 
         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
@@ -1027,7 +1030,7 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
 {
     // Computes tangent matrix associated with the linearization of pressure loading. Assumes constant pressure.
     GaussPoint *gp;
-    IntegrationRule *iRule = integrationRulesArray [ 1 ];   // rule #2 for mid-plane integration only
+    IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];   // rule #2 for mid-plane integration only
 
     double dA, a, b;
     FloatMatrix N, B, NtL, NtLB, L(7, 18);
@@ -1342,7 +1345,7 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
     f2.zero();
     f3.zero();
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        IntegrationRule *iRuleL = layerIntegrationRulesArray [ layer - 1 ];
+        IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
         for ( int j = 1; j <= iRuleL->getNumberOfIntegrationPoints(); j++ ) {
@@ -1561,7 +1564,7 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     // Analytically integrated over the thickness. Constant density assumed.
     // => integration rule #2 = midplane only
-    IntegrationRule *iRule = integrationRulesArray [ 1 ];
+    IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];
 
     //------------------------------
     FloatMatrix N, Ntm, NtmN, temp;
@@ -1697,7 +1700,7 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
     M33.zero();
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        IntegrationRule *iRuleL = layerIntegrationRulesArray [ layer - 1 ];
+        IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
         for ( int j = 1; j <= iRuleL->getNumberOfIntegrationPoints(); j++ ) {
@@ -1822,7 +1825,7 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
     //@todo: very old version should be checked
     // Analytically integrated over the thickness. Constant density assumed.
 
-    IntegrationRule *iRule = integrationRulesArray [ 1 ];   // rule 2 for mid-plane integration only
+    IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];   // rule 2 for mid-plane integration only
     GaussPoint *gp;
     FloatMatrix N;
     FloatArray lcoords, a, da, m, dm, aVec, daVec, fm(7), fM;
@@ -1953,7 +1956,7 @@ Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const 
     // Computes pressure loading. Acts normal to the current (deformed) surface.
 
     // Should be special integration rule for top and bottom surface!!
-    IntegrationRule *iRule = integrationRulesArray [ 1 ];   // rule #2 for mid-plane integration only
+    IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];   // rule #2 for mid-plane integration only
     GaussPoint *gp;
 
     FloatMatrix N, B;
@@ -2033,7 +2036,7 @@ void
 Shell7Base :: computeTractionForce(FloatArray &answer, const int iedge, BoundaryLoad *edgeLoad, TimeStep *tStep)
 {
     // fix such that one can specify if the load should follow the deformed coord sys
-    IntegrationRule *iRule = integrationRulesArray [ 2 ];   // rule #3 for edge integration of distributed loads given in [*/m]
+    IntegrationRule *iRule = specialIntegrationRulesArray [ 2 ];   // rule #3 for edge integration of distributed loads given in [*/m]
     GaussPoint *gp;
 
     FloatMatrix N, Q;
@@ -2288,72 +2291,64 @@ void Shell7Base :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
 
 
 
-/*
+
 void
-ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, InternalStateType type,
+Shell7Base :: ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, int layer, InternalStateType type,
                                                                       TimeStep *tStep)
 {  // evaluates N^T sigma over element volume
    // N(nsigma, nsigma*nnodes)
    // Definition : sigmaVector = N * nodalSigmaVector
-    int i, j, k, size;
-    double dV;
     FloatArray stressVector, help, n;
     Element *elem  = this->ZZNodalRecoveryMI_giveElement();
-    IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
+    IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
     GaussPoint *gp;
 
-    size = ZZNodalRecoveryMI_giveDofManRecordSize(type);
-    answer.resize(elem->giveNumberOfDofManagers(), size);
+    int size = ZZNodalRecoveryMI_giveDofManRecordSize(type);
+    int numDofMans = 15;
+    answer.resize(numDofMans, size);
 
     answer.zero();
-    for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
-        dV  = elem->computeVolumeAround(gp);
-        //this-> computeStressVector(stressVector, gp, stepN);
+        double dV = this->computeVolumeAroundLayer(gp, layer);
+
         if ( !elem->giveIPValue(stressVector, gp, type, tStep) ) {
             stressVector.resize(size);
             stressVector.zero();
         }
 
         this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(n, gp, type);
-        for ( j = 1; j <= elem->giveNumberOfDofManagers(); j++ ) {
-            for ( k = 1; k <= size; k++ ) {
+        for ( int j = 1; j <= numDofMans; j++ ) {
+            for ( int k = 1; k <= size; k++ ) {
                 answer.at(j, k) += n.at(j) * stressVector.at(k) * dV;
             }
         }
 
-        //  help.beTProductOf(n,stressVector);
-        //  answer.add(help.times(dV));
     }
 }
 
 void
-ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, InternalStateType type)
+Shell7Base :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, int layer, InternalStateType type)
 {
     //
     // Returns NTN matrix (lumped) for Zienkiewicz-Zhu
     // The size of N mtrx is (nstresses, nnodes*nstreses)
     // Definition : sigmaVector = N * nodalSigmaVector
     //
-    int size;
-    double sum, dV, volume = 0.0;
+    double volume = 0.0;
     FloatMatrix fullAnswer;
     FloatArray n;
-    Element *elem  = this->ZZNodalRecoveryMI_giveElement();
-    IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
+    IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
     GaussPoint *gp;
 
-    size = elem->giveNumberOfDofManagers(); //ZZNodalRecoveryMI_giveDofManRecordSize (type);
+    int size = 15;
     fullAnswer.resize(size, size);
     fullAnswer.zero();
-    double pok = 0.0;
-
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
-        dV  = elem->computeVolumeAround(gp);
+        double dV = this->computeVolumeAroundLayer(gp, layer);
         this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(n, gp, type);
         fullAnswer.plusDyadSymmUpper(n, n, dV);
-        pok += ( n.at(1) * dV ); ///@todo What is this? Completely unused.
         volume += dV;
     }
 
@@ -2361,16 +2356,68 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
     fullAnswer.symmetrized();
     answer.resize(size);
     for ( int i = 1; i <= size; i++ ) {
-        sum = 0.0;
+        double sum = 0.0;
         for ( int j = 1; j <= size; j++ ) {
             sum += fullAnswer.at(i, j);
         }
-
         answer.at(i) = sum;
     }
 }
-*/
 
+void
+Shell7Base :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *gp, InternalStateType type)
+{
+    // evaluates N matrix (interpolation estimated stress matrix)
+    // according to Zienkiewicz & Zhu paper
+    // N(nsigma, nsigma*nnodes)
+    // Definition : sigmaVector = N * nodalSigmaVector
+    FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
+
+    // test if underlying element provides interpolation
+    if ( interpol ) {
+        if ( !this->giveIPValueSize(type, gp) ) {
+            OOFEM_ERROR3("ZZNodalRecoveryMI_computeNNMatrix: Element %d not supporting type %d", this->giveNumber(), type);
+            return;
+        }
+
+        interpol->evalN( answer, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    } else {
+        // ok default implementation can not work, as element is not providing valid interpolation
+        // to resolve this, one can overload this method for element implementing ZZNodalRecoveryModelInterface
+        // or element should provide interpolation.
+        OOFEM_ERROR2( "ZZNodalRecoveryMI_computeNNMatrix: Element %d not providing valid interpolation", this->giveNumber() );
+    }
+}
+
+
+void 
+Shell7Base :: ZZNodalRecoveryMI_recoverValues(std::vector<FloatArray> &recoveredValues, int layer, InternalStateType type, TimeStep *tStep)
+{
+    // ZZ recovery
+    FloatArray nnMatrix;
+    FloatMatrix nValProd;
+    ZZNodalRecoveryMI_computeNValProduct(nValProd, layer, type, tStep);
+    ZZNodalRecoveryMI_computeNNMatrix(nnMatrix, layer, type);
+    int recoveredSize = nValProd.giveNumberOfColumns();
+    int numNodes = nValProd.giveNumberOfRows();
+    recoveredValues.resize(numNodes);
+    
+    for ( int i = 1; i <= numNodes; i++ ) {
+        //recoveredValues[i-1].resize(recoveredSize);
+        FloatArray temp(6);
+        recoveredValues[i-1].resize(9);
+        
+        for ( int j = 1; j <= recoveredSize; j++ ) {
+            temp.at(j) = nValProd.at(i,j)/nnMatrix.at(i);
+            //recoveredValues[i-1].at(j) = nValProd.at(i,j)/nnMatrix.at(i);
+        }
+        
+        recoveredValues[i-1] = convV6ToV9Stress(temp);
+    }
+
+
+
+}
 
 #endif
 
@@ -2425,10 +2472,11 @@ Shell7Base :: temp_computeBoundaryVectorOf(IntArray &dofIdArray, int boundary, V
     // Routine to extract vector given an array of dofid items
     // If a certain dofId does not exist a zero is used as value
 
-
+    FEInterpolation3d *fei = static_cast< FEInterpolation3d * >( this->giveInterpolation() );
     IntArray bNodes;
-    this->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-
+    //this->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+    fei->computeLocalEdgeMapping(bNodes, boundary);
+    
     answer.resize( dofIdArray.giveSize() * bNodes.giveSize() );
     answer.zero();
     int k = 0;
@@ -2948,6 +2996,154 @@ Shell7Base :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int laye
 }
 
 
+
+void 
+Shell7Base :: giveCompositeExportData( IntArray &primaryVarsToExport, IntArray &cellVarsToExport, TimeStep *tStep  )
+{   
+    int numCells = this->layeredCS->giveNumberOfLayers();
+    const int numCellNodes  = 15; // quadratic wedge
+
+    this->compositeEl.elements.resize(numCells);
+    this->compositeEl.numSubEl = numCells;   
+    this->compositeEl.numTotalNodes = numCellNodes*numCells;
+
+    int val    = 0;
+    int offset = 0;
+    // Compute fictious node coords
+    for ( int layer = 1; layer <= numCells; layer++ ) {
+        VTKElement &el = this->compositeEl.elements[layer-1];
+
+        // Node coordinates
+        this->giveFictiousNodeCoordsForExport(el.nodeCoords, layer);       
+        
+        // Connectivity
+        el.connectivity.resize(numCellNodes);
+        for ( int i = 1; i <= numCellNodes; i++ ) {
+            el.connectivity.at(i) = val++;
+        }
+        
+        // Offset
+        offset += numCellNodes;
+        el.offset = offset;
+
+        // Cell types
+        el.cellType = 26; // Quadratic wedge
+
+        // Export nodal variables
+        el.nodeVars.resize( primaryVarsToExport.giveSize() + cellVarsToExport.giveSize() );
+
+        
+        int nodeVarNum = 0;
+        for ( int i = 1; i <= primaryVarsToExport.giveSize(); i++ ) {
+            UnknownType type = ( UnknownType ) primaryVarsToExport.at(i);
+            if ( type == DisplacementVector ) {
+                std::vector<FloatArray> updatedNodeCoords;
+                giveFictiousUpdatedNodeCoordsForExport(updatedNodeCoords, layer, tStep);
+                FloatArray u(3);
+                el.nodeVars[nodeVarNum].resize(numCellNodes);
+                for ( int j = 1; j <= numCellNodes; j++ ) {
+                    u = updatedNodeCoords[j-1];
+                    u.subtract(el.nodeCoords[j-1]);
+                    el.nodeVars[nodeVarNum][j-1].resize(3);
+                    el.nodeVars[nodeVarNum][j-1] = u;
+                }
+            } else {
+                ZZNodalRecoveryMI_recoverValues(el.nodeVars[i-1], layer, ( InternalStateType ) 1, tStep);
+            }
+            nodeVarNum++;
+        }
+
+
+        for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
+            InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);;
+            ZZNodalRecoveryMI_recoverValues(el.nodeVars[nodeVarNum], layer, type, tStep);
+
+            nodeVarNum++;
+        }        
+
+
+        // Export element (cell) variables
+        IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
+        int numElVars = cellVarsToExport.giveSize();
+        el.elVars.resize( numElVars );
+        for ( int i = 1; i <= numElVars; i++ ) {
+            InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
+            GaussPoint *gp;
+
+            // stress
+            FloatArray average(6), temp;
+            average.zero();
+            double gptot = 0.0;
+            
+            for (int j = 0; j < iRuleL->getNumberOfIntegrationPoints(); j++) {
+                gp = iRuleL->getIntegrationPoint(j);
+                
+                this->giveIPValue(temp, gp, type, tStep);
+                //this->giveIPValue(temp, gp, IST_StressTensor, tStep);
+                
+                gptot += gp->giveWeight();
+                average.add(gp->giveWeight(), temp);
+            }          
+            average.times(1./gptot);
+
+            el.elVars[i-1] = convV6ToV9Stress(average);
+
+        }
+    }
+}
+
+
+
+#if 1
+void 
+Shell7Base :: giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer)
+{
+    // compute fictious node coords
+    FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords;
+    giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords);
+    nodes.resize(15);
+    for ( int i = 1; i <= 15; i++ ){
+        FloatArray coords, localCoords(3);
+        localCoords.at(1) = nodeLocalXi1Coords.at(i);
+        localCoords.at(2) = nodeLocalXi2Coords.at(i);
+        localCoords.at(3) = nodeLocalXi3Coords.at(i);
+        
+        this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, coords);
+        nodes[i-1].resize(3); 
+        nodes[i-1] = coords;
+    }
+
+}
+
+void 
+Shell7Base :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep)
+{
+    // compute fictious node coords
+    FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords;
+    giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords);
+    nodes.resize(15);
+    for ( int i = 1; i <= 15; i++ ){
+        FloatArray coords, localCoords(3);
+        localCoords.at(1) = nodeLocalXi1Coords.at(i);
+        localCoords.at(2) = nodeLocalXi2Coords.at(i);
+        localCoords.at(3) = nodeLocalXi3Coords.at(i);
+        
+        this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, layer, coords, tStep);
+        nodes[i-1].resize(3); 
+        nodes[i-1] = coords;
+    }
+}
+
+#endif
+
+void
+Shell7Base :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords) {
+    // Local coords for a quadratic wedge element (VTK cell type 26)
+    double z = 0.99;
+    nodeLocalXi1Coords.setValues(15, 1., 0., 0., 1., 0., 0., .5, 0., .5, .5, 0., .5, 1., 0., 0.);      
+    nodeLocalXi2Coords.setValues(15, 0., 1., 0., 0., 1., 0., .5, .5, 0., .5, .5, 0., 0., 1., 0.);
+    nodeLocalXi3Coords.setValues(15, -z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.);
+}
 
 
 

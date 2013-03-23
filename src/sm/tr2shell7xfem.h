@@ -101,20 +101,13 @@ protected:
     virtual FEInterpolation *giveInterpolation();
 
     // VTK
-    void vtkGiveFictiousNodeCoords(FloatArray nodeCoords[15], int layer);
     void vtkGiveUpdatedFictiousNodeCoords(FloatArray nodeCoords[15], int layer, TimeStep *tStep);
-    //virtual void _export(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep);
-    //void exportPrimVarAs(UnknownType valID, int regionDofMans, int ireg, FILE *stream, TimeStep *tStep);
 
-    void giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer);
-    
 public:
     Tr2Shell7XFEM(int n, Domain *d);	// constructor
     virtual ~Tr2Shell7XFEM() { }		// destructor -> declaring as virtual will make each subclass call their respective destr.
     // definition & identification
     //virtual int giveNumberOfDofs()           { return 42; }
-    //virtual int giveNumberOfDofs()           { return 42+14; }///@todo temporary! remove!
-    //virtual int giveNumberOfDofs()           { return 42+14; }///@todo temporary! remove!
     virtual int giveNumberOfEdgeDofs()       { return 21; }
     //virtual int giveNumberOfEdgeDofs()       { return 35; } ///@todo temporary! remove!
     virtual int giveNumberOfEdgeDofManagers(){ return 3;  }
@@ -129,7 +122,7 @@ public:
                  std::vector<FloatArray> &nodeCoords, std::vector<IntArray> &cellNodes, IntArray &cellTypes, 
                  std::vector<FloatArray> &primaryVars, std::vector<FloatArray> &cellVars, TimeStep *tStep ){};
 
-    virtual void giveCompositeExportData( IntArray &primaryVarsToExport, IntArray &cellVarsToExport, TimeStep *tStep );
+    //virtual void giveCompositeExportData( IntArray &primaryVarsToExport, IntArray &cellVarsToExport, TimeStep *tStep );
 };
 
 

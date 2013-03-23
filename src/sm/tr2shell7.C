@@ -103,18 +103,18 @@ Tr2Shell7 :: computeGaussPoints()
     if ( !integrationRulesArray ) {
         int nPointsTri = 6;                     // points in the plane
         int nPointsEdge = 2;
-        integrationRulesArray = new IntegrationRule * [ 3 ];
+        specialIntegrationRulesArray = new IntegrationRule * [ 3 ];
 
         // Midplane and thickness
 
         // Midplane only (Mass matrix integrated analytically through the thickness)
-        integrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
-        integrationRulesArray [ 1 ]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat);
+        specialIntegrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
+        specialIntegrationRulesArray [ 1 ]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat);
 
 
         // Edge
-        integrationRulesArray [ 2 ] = new GaussIntegrationRule(1, this);
-        integrationRulesArray [ 2 ]->SetUpPointsOnLine(nPointsEdge, _3dMat);
+        specialIntegrationRulesArray [ 2 ] = new GaussIntegrationRule(1, this);
+        specialIntegrationRulesArray [ 2 ]->SetUpPointsOnLine(nPointsEdge, _3dMat);
 
 
         // Layered cross section
@@ -124,15 +124,16 @@ Tr2Shell7 :: computeGaussPoints()
         }
 
         int numberOfLayers = layeredCS->giveNumberOfLayers();
-        layerIntegrationRulesArray = new IntegrationRule * [ numberOfLayers ];
-
+        integrationRulesArray = new IntegrationRule * [ numberOfLayers ];
+        this->numberOfIntegrationRules = numberOfLayers;
+        this->numberOfGaussPoints = numberOfLayers*nPointsTri*layeredCS->giveNumIntegrationPointsInLayer();
         // may need to extend this to handle Newton-Cotes integration in the thickness direction
         for ( int i = 1; i <= numberOfLayers; i++ ) {
-            layerIntegrationRulesArray [ i - 1 ] = new GaussIntegrationRule(1, this);
-            layerIntegrationRulesArray [ i - 1 ]->SetUpPointsOnWedge(nPointsTri, layeredCS->giveNumIntegrationPointsInLayer(), _3dMat);
+            integrationRulesArray [ i - 1 ] = new GaussIntegrationRule(1, this);
+            integrationRulesArray [ i - 1 ]->SetUpPointsOnWedge(nPointsTri, layeredCS->giveNumIntegrationPointsInLayer(), _3dMat);
         }
 
-        layeredCS->mapLayerGpCoordsToShellCoords(layeredCS, layerIntegrationRulesArray);
+        layeredCS->mapLayerGpCoordsToShellCoords(layeredCS, integrationRulesArray);
         //layeredCS->printYourself();
     }
 }
@@ -240,262 +241,6 @@ Tr2Shell7 :: compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matr
         }
     }
 }
-
-
-
-// VTK export interface
-void 
-Tr2Shell7 :: _export(FILE *stream, VTKXMLExportModule *expModule, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep) 
-{
-    // export as quadratic wedge
-    int numCells      = this->layeredCS->giveNumberOfLayers();
-    int numCellNodes  = 15;
-    int regionDofMans = numCellNodes*numCells;
-    
-    fprintf(stream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", regionDofMans, numCells);
-
-    // export nodes in region as vtk vertices
-    fprintf(stream, "<Points>\n <DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\"> ");
-
-    // compute fictious node coords
-    FloatArray nodeCoords[15];
-    for ( int layer = 1; layer <= numCells; layer++ ) {
-        this->vtkGiveFictiousNodeCoords(nodeCoords, layer);
-        //this->vtkGiveUpdatedFictiousNodeCoords(nodeCoords, layer, tStep);
-        for ( int inode = 1; inode <= numCellNodes; inode++ ) {
-            FloatArray coords = nodeCoords [inode-1]; 
-            for ( int i = 1; i <= coords.giveSize(); i++ ) {
-                fprintf( stream, "%e ", coords.at(i) );
-            }
-        }
-    }
-    fprintf(stream, "</DataArray>\n</Points>\n");
-
-
-    // output all cells of the piece
-
-    fprintf(stream, "<Cells>\n");
-    // output the connectivity data
-    fprintf(stream, " <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> ");
-    int pos = 0;
-    for ( int cell = 1; cell <= numCells; cell++ ) {
-        for ( int i = 1; i <= numCellNodes; i++ ) {
-            fprintf(stream, "%d ", pos + i - 1);
-        }
-        fprintf(stream, " ");
-        pos += numCellNodes;
-    }
-
-
-    // Output the offsets (index of individual element data in connectivity array)
-    fprintf(stream, "</DataArray>\n");
-    fprintf(stream, " <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\"> ");
-    int offset = 0;
-    for ( int cell = 1; cell <= numCells; cell++ ) {
-        offset += numCellNodes;
-        fprintf(stream, "%d ", offset);
-    }
-    fprintf(stream, "</DataArray>\n");
-
-
-    // Output cell types
-    fprintf(stream, " <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\"> ");
-    for ( int cell = 1; cell <= numCells; cell++ ) {
-        int vtkCellType = 26;
-        fprintf(stream, "%d ", vtkCellType);
-    }
-    fprintf(stream, "</DataArray>\n");
-    fprintf(stream, "</Cells>\n");
-
-
-
-    // Export primary and internal variables
-    
-    expModule->exportPointDataHeader(stream, tStep);
-    for (int i = 1, n = primaryVarsToExport.giveSize(); i <= n; i++ ) {
-        UnknownType type = ( UnknownType ) primaryVarsToExport.at(i);
-        this->exportPrimVarAs(type, regionDofMans, 0, stream, tStep);
-    }
-    //expModule->exportPrimaryVars(stream, mapG2L, mapL2G, regionDofMans, ireg, tStep);
-    //expModule->exportIntVars(stream, mapG2L, mapL2G, regionDofMans, ireg, tStep);
-    fprintf(stream, "</PointData>\n");
-
-
-    //export cell data
-    //this->exportCellVars(stream, ireg, tStep);
-
-
-
-    // end of piece record
-    fprintf(stream, "</Piece>\n");
-
-}
-
-
-
-void
-Tr2Shell7 :: exportPrimVarAs(UnknownType valID, int regionDofMans, int ireg, FILE *stream, TimeStep *tStep)
-{
-
-    InternalStateValueType type = ISVT_UNDEFINED;
-
-    if ( ( valID == DisplacementVector ) || ( valID == DirectorField ) ) {
-        type = ISVT_VECTOR;
-    } else {
-        OOFEM_ERROR2( "Tr2Shell7::exportPrimVarAs: unsupported UnknownType %s", __UnknownTypeToString(valID) );
-    }
-
-
-    if ( type == ISVT_VECTOR ) {
-        fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"3\" format=\"ascii\"> ", __UnknownTypeToString(valID) );
-    } else {
-        fprintf( stderr, "Tr2Shell7::exportPrimVarAs: unsupported variable type %s\n", __UnknownTypeToString(valID) );
-    }
-
-    FloatArray iVal;
-    int numCells     = this->layeredCS->giveNumberOfLayers();
-    int numCellNodes = 15;
-    for ( int inode = 1; inode <= regionDofMans; inode++ ) {
-
-        //this->getPrimaryVariable(iVal, dman, tStep, valID, ireg);
-        FloatArray X[15], x[15];
-        for ( int layer = 1; layer <= numCells; layer++ ) {
-            this->vtkGiveFictiousNodeCoords(X, layer);
-            this->vtkGiveUpdatedFictiousNodeCoords(x, layer, tStep);
-            for ( int inode = 1; inode <= numCellNodes; inode++ ) {
-                FloatArray coordsX = X [inode-1];
-                FloatArray coordsx = x [inode-1];
-                if ( type == ISVT_VECTOR ) {
-                    //fprintf( stream, "%e %e %e ", iVal.at(1), iVal.at(2), iVal.at(3) );
-                    fprintf( stream, "%e %e %e ", coordsx.at(1)-coordsX.at(1), coordsx.at(2)-coordsX.at(2), coordsx.at(3)-coordsX.at(3) );
-                }
-            }
-        }
-    } // end loop over nodes
-
-    fprintf(stream, "</DataArray>\n");
-
-}
-
-void 
-Tr2Shell7 :: vtkGiveFictiousNodeCoords(FloatArray nodeCoords[15], int layer)
-{
-    // compute fictious node coords
-    FloatArray nodeLocalXiCoords, nodeLocalEtaCoords;
-    this->giveLocalNodeCoords( nodeLocalXiCoords, nodeLocalEtaCoords);
-
-    for ( int i = 1; i <= 3; i++ ){
-        FloatArray coords, localCoords(3);
-        localCoords.at(1) = nodeLocalXiCoords.at(i);
-        localCoords.at(2) = nodeLocalEtaCoords.at(i);
-
-        localCoords.at(3) = -1.0;
-        this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, coords);
-        nodeCoords[i-1].resize(3); 
-        nodeCoords[i-1].at(1) = coords.at(1);
-        nodeCoords[i-1].at(2) = coords.at(2);
-        nodeCoords[i-1].at(3) = coords.at(3);
-
-        localCoords.at(3) = 1.0;
-        this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, coords);
-        nodeCoords[i+3-1].resize(3); 
-        nodeCoords[i+3-1].at(1) = coords.at(1);
-        nodeCoords[i+3-1].at(2) = coords.at(2);
-        nodeCoords[i+3-1].at(3) = coords.at(3);
-    }
-
-    for ( int i = 1; i <= 3; i++ ){
-        FloatArray coords, localCoords(3);
-        localCoords.at(1) = nodeLocalXiCoords.at(i+3);
-        localCoords.at(2) = nodeLocalEtaCoords.at(i+3);
-
-        localCoords.at(3) = -1.0;
-        this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, coords);
-        nodeCoords[i+6-1].resize(3); 
-        nodeCoords[i+6-1].at(1) = coords.at(1);
-        nodeCoords[i+6-1].at(2) = coords.at(2);
-        nodeCoords[i+6-1].at(3) = coords.at(3);
-
-        localCoords.at(3) = 1.0;
-        this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, coords);
-        nodeCoords[i+6+3-1].resize(3); 
-        nodeCoords[i+6+3-1].at(1) = coords.at(1);
-        nodeCoords[i+6+3-1].at(2) = coords.at(2);
-        nodeCoords[i+6+3-1].at(3) = coords.at(3);
-    }
-    
-
-    //Middle nodes - linear variation in the thickness direction -> mean value of top and bottom
-        for ( int i = 1; i <= 3; i++ ){
-        nodeCoords[12+i-1].resize(3);
-        nodeCoords[12+i-1].at(1) = 0.5 * ( nodeCoords[i-1].at(1) + nodeCoords[i+3-1].at(1) );
-        nodeCoords[12+i-1].at(2) = 0.5 * ( nodeCoords[i-1].at(2) + nodeCoords[i+3-1].at(2) );
-        nodeCoords[12+i-1].at(3) = 0.5 * ( nodeCoords[i-1].at(3) + nodeCoords[i+3-1].at(3) );
-        }
-}
-
-
-void 
-Tr2Shell7 :: vtkGiveUpdatedFictiousNodeCoords(FloatArray nodeCoords[15], int layer, TimeStep *tStep)
-{
-    // compute fictious node coords
-    FloatArray nodeLocalXiCoords, nodeLocalEtaCoords;
-    this->giveLocalNodeCoords( nodeLocalXiCoords, nodeLocalEtaCoords);
-
-    for ( int i = 1; i <= 3; i++ ){
-        FloatArray coords, localCoords(3);
-        localCoords.at(1) = nodeLocalXiCoords.at(i);
-        localCoords.at(2) = nodeLocalEtaCoords.at(i);
-
-        localCoords.at(3) = -1.0;
-        this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, layer, coords, tStep);
-        nodeCoords[i-1].resize(3); 
-        nodeCoords[i-1].at(1) = coords.at(1);
-        nodeCoords[i-1].at(2) = coords.at(2);
-        nodeCoords[i-1].at(3) = coords.at(3);
-
-        localCoords.at(3) = 1.0;
-        this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, layer, coords, tStep);
-        nodeCoords[i+3-1].resize(3); 
-        nodeCoords[i+3-1].at(1) = coords.at(1);
-        nodeCoords[i+3-1].at(2) = coords.at(2);
-        nodeCoords[i+3-1].at(3) = coords.at(3);
-    }
-
-    for ( int i = 1; i <= 3; i++ ){
-        FloatArray coords, localCoords(3);
-        localCoords.at(1) = nodeLocalXiCoords.at(i+3);
-        localCoords.at(2) = nodeLocalEtaCoords.at(i+3);
-
-        localCoords.at(3) = -1.0;
-        this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, layer, coords, tStep);
-        nodeCoords[i+6-1].resize(3); 
-        nodeCoords[i+6-1].at(1) = coords.at(1);
-        nodeCoords[i+6-1].at(2) = coords.at(2);
-        nodeCoords[i+6-1].at(3) = coords.at(3);
-
-        localCoords.at(3) = 1.0;
-        this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, layer, coords, tStep);
-        nodeCoords[i+6+3-1].resize(3); 
-        nodeCoords[i+6+3-1].at(1) = coords.at(1);
-        nodeCoords[i+6+3-1].at(2) = coords.at(2);
-        nodeCoords[i+6+3-1].at(3) = coords.at(3);
-    }
-    
-
-    //Middle nodes - linear variation in the thickness direction -> mean value of top and bottom
-        for ( int i = 1; i <= 3; i++ ){
-        nodeCoords[12+i-1].resize(3);
-        nodeCoords[12+i-1].at(1) = 0.5 * ( nodeCoords[i-1].at(1) + nodeCoords[i+3-1].at(1) );
-        nodeCoords[12+i-1].at(2) = 0.5 * ( nodeCoords[i-1].at(2) + nodeCoords[i+3-1].at(2) );
-        nodeCoords[12+i-1].at(3) = 0.5 * ( nodeCoords[i-1].at(3) + nodeCoords[i+3-1].at(3) );
-        }
-    
-        
-     
-
-}
-
 
 
 

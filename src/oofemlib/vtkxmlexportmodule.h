@@ -271,6 +271,7 @@ public:
     virtual void exportCompositeElement(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep);
     virtual void giveCompositeExportData(IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep ){};
     void exportCellVarAs(InternalStateType type, std::vector<FloatArray> &cellVars, FILE *stream, TimeStep *tStep);
+    void exportNodalVarAs(InternalStateType type, int nodeVarNum, FILE *stream, TimeStep *tStep);
     VTKCompositeElement compositeEl;
 };
 

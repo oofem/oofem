@@ -121,7 +121,7 @@ protected:
     void computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep); 
 
     // VTK
-    void vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
+    virtual void vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
 
 public:
     // constructor
