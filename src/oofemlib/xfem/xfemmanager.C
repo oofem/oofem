@@ -32,35 +32,26 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include "xfemmanager.h"
 #include "inputrecord.h"
 #include "intarray.h"
-#include "femcmpnn.h"
-#include "engngm.h"
-#include "geometry.h"
 #include "conTable.h"
 #include "flotarry.h"
 #include "alist.h"
 #include "domain.h"
 #include "enrichmentitem.h"
-#include "integrationrule.h"
-#include "xfemmanager.h"
+#include "enrichmentdomain.h"
 #include "element.h"
 #include "dofmanager.h"
-#include "delaunay.h"
 #include "cltypes.h"
-#include "patch.h"
-#include "enrichmentfunction.h"
-#include "gaussintegrationrule.h"
 #include "xfemelementinterface.h"
 #include "usrdefsub.h"
 #include "masterdof.h"
-#include "patchintegrationrule.h"
 #include "datareader.h"
 #include "datastream.h"
 #include "contextioerr.h"
 
 namespace oofem {
-//XfemManager :: XfemManager(EngngModel *emodel, int domainIndex)
 XfemManager :: XfemManager(Domain *domain)
 {
     this->domain = domain;
@@ -93,7 +84,7 @@ void XfemManager :: giveActiveEIsFor(IntArray &answer, const Element *elem)
 
 bool XfemManager :: isElementEnriched(const Element *elem)
 {
-    // Loop over all EI which asks if el is E. 
+    // Loop over all EI which asks if el is enriched. 
     for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ){
         if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ){ 
             return true; 
@@ -104,20 +95,19 @@ bool XfemManager :: isElementEnriched(const Element *elem)
 
 
 EnrichmentItem *XfemManager :: giveEnrichmentItem(int n)
-// Returns the n-th enrichment item.
 {
+    // Returns the n-th enrichment item.
     if ( enrichmentItemList->includes(n) ) {
         return enrichmentItemList->at(n);
     } else {
         OOFEM_ERROR2("giveEnrichmentItem: undefined enrichmentItem (%d)", n);
     }
-
     return NULL;
 }
 
 
 // Old method: strange workflow in this method
-// broken but not in use and should be rewritten
+///@todo: Broken but not in use and should be rewritten anyway
 XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
 {
     XfemType ret;
@@ -137,7 +127,7 @@ XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
         interactedEnrEl.zero();
     }
     // very specialized
-    // only for 2d. Won't wok if several ei are active in the neighboring element to a node.
+    // only for 2d. Won't work if several ei are active in the neighboring element to a node.
     // one node could also have several TYPEs, Tip + inclusion etc.
     if ( intersectionCount == 0 ) {
         ret = STANDARD;
@@ -156,7 +146,7 @@ void
 XfemManager :: createEnrichedDofs()
 {   
     // Creates new dofs due to enrichment and appends them to the dof managers
-    ///@todo: need to add check if dof already exists
+    ///@todo: need to add check if dof already exists in the dofmanager
     int nrDofMan = this->giveDomain()->giveNumberOfDofManagers();
     IntArray dofIdArray;
  
@@ -277,6 +267,7 @@ void XfemManager :: updateIntegrationRule()
     }                                       \
   }
 
+///@todo: not fixed yet
 #if 0
 contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {

@@ -151,7 +151,7 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatAr
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
         Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
-        EnrichmentFunction *ef = dei->giveEnrichmentFunction(1);
+        //EnrichmentFunction *ef = dei->giveEnrichmentFunction(1);
 
         for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
             if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
@@ -893,7 +893,7 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int 
     // Discontinuous part
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
         Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
-        EnrichmentFunction *ef = dei->giveEnrichmentFunction(1);
+        //EnrichmentFunction *ef = dei->giveEnrichmentFunction(1);
 
         for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
             if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {

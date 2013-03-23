@@ -37,27 +37,23 @@
 
 #include "alist.h"
 #include "datareader.h"
-#include "dofiditem.h"
 #include "inputrecord.h"
 #include "classtype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
-#include "timestep.h"
 
 ///@name Input fields for XfemManager
 //@{
-#define _IFT_XfemManager_numberOfGeometryItems "numberofgeometryitems"
+#define _IFT_XfemManager_numberOfGeometryItems "numberofgeometryitems"  // -> numberOfEnrichmentDomains
 #define _IFT_XfemManager_numberOfEnrichmentItems "numberofenrichmentitems"
 #define _IFT_XfemManager_numberOfEnrichmentFunctions "numberofenrichmentfunctions"
-#define _IFT_XfemManager_name "xfemmanagername" ///< @todo Should this exist? / Mikael
+#define _IFT_XfemManager_name "xfemmanagername" ///< @todo Should this exist? / Mikael - No /JB
 //@}
 
 namespace oofem {
-class EngngModel;
 class Domain;
-class BasicGeometry;
 class EnrichmentItem;
-class EnrichmentFunction;
+//class EnrichmentFunction;
 class IntArray;
 class Element;
 class DataStream;
@@ -71,25 +67,18 @@ class DataStream;
 class XfemManager
 {
 protected:
-    /// Associated Engineering Model.
-    //EngngModel *emodel;
-    /// Index of the associated domain.
-    //int domainIndex;
-
     Domain *domain;
     /// Enrichment item list.
     AList< EnrichmentItem > *enrichmentItemList;
-
 
     /// Index of next available dofId from pool.
     int numberOfEnrichmentItems;
 
 public:
-    enum XfemType {
+    enum XfemType { // not in use right now
         SPLIT = 1, TIP = 4, STANDARD = 0
     };
     /// Constructor.
-    //XfemManager(EngngModel *emodel, int index);
     XfemManager(Domain *domain);
     /// Destructor.
     ~XfemManager();
@@ -97,22 +86,18 @@ public:
   
     // Returns the active enrichment items for a particular element, the enrichment items
     // are referenced by a number from the domain
-     
     void giveActiveEIsFor(IntArray &answer, const Element *elem);
     
-    /// Checks whether an element is interacted.
     bool isElementEnriched(const Element *elem);
 
     /// Accessor.
     EnrichmentItem *giveEnrichmentItem(int n);
-    
-    /// Accessor.
     int giveNumberOfEnrichmentItems() { return enrichmentItemList->giveSize(); }
     
     void createEnrichedDofs();
 
     /// Computes the type of node enrichment, returns zero if the node is not enriched.
-    // Old method: should instead return an array if there are several active
+    // Old method: should instead return an array if there are several active /JB
     XfemType computeNodeEnrichmentType(int nodeNumber); 
 
     /// Initializes receiver according to object description stored in input record.

@@ -77,7 +77,7 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 
         AList< IntegrationRule >irlist;
         EnrichmentItem *ei = xMan->giveEnrichmentItem( activeEI.at(1) );
-        EnrichmentDomain *ed = ei->giveEnrichmentDomain(1);
+        //EnrichmentDomain *ed = ei->giveEnrichmentDomain(1);
         
         for ( int i = 1; i <= triangles.giveSize(); i++ ) {
             /*

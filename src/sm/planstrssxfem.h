@@ -58,21 +58,17 @@ public:
     virtual classType giveClassID() const { return PlaneStress2dXfemClass; }
     virtual int computeNumberOfDofs(EquationID ut);
     virtual void computeGaussPoints();
-            void computeNmatrixAt(FloatArray &lcoords, FloatMatrix &answer);
+    virtual void computeNmatrixAt(FloatArray &lcoords, FloatMatrix &answer);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                           int lowerIndx = 1, int upperIndx = ALL_STRAINS);
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray & answer) const;
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
-    //virtual void computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
 
     virtual Element_Geometry_Type giveGeometryType() const;
-    virtual void giveCompositeExportData( IntArray &primaryVarsToExport, IntArray &internalVarsToExport,
-        std::vector<FloatArray> &nodeCoords, std::vector<IntArray> &cellNodes, IntArray &cellTypes, 
-        std::vector<FloatArray> &primaryVars, std::vector<FloatArray> &cellVars, TimeStep *tStep );
-
+    
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
     //void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
