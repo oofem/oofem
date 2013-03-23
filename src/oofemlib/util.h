@@ -42,29 +42,6 @@ class DataReader;
 class EngngModel;
 
 /**
- * Reads the input line from file and converts all characters to lower case.
- * @param inputStream Stream to read from.
- * @param line Contains read line.
- * @param len Determines max number of read characters including terminating '\0'.
- * @return Newly allocated pointer containing string.
- */
-char *giveLineFromInput(FILE *inputStream, char *line, int len);
-/**
- * Reads the input line from file.
- * @param inputStream Stream to read from.
- * @param line Contains read line.
- * @param len Determines max number of read characters including terminating '\0'.
- * @return Newly allocated pointer containing string.
- */
-char *giveRawLineFromInput(FILE *inputStream, char *line, int len);
-
-/**
- * Returns the name of the file containing the data of the problem.
- * @param dataInputFileName Input file name read from stdin.
- */
-void giveInputDataFileName(std::string &dataInputFileName);
-
-/**
  * Instanciates the new problem.
  * @param dr DataReader containing the problem data.
  * @param mode Mode determining macro or micro problem.

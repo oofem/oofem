@@ -39,55 +39,13 @@
 #include "datareader.h"
 
 #include <cstring>
-#include <iostream>
 
 namespace oofem {
-char *giveLineFromInput(FILE *inputStream, char *line, int len)
-//
-// reads one line from inputStream - for private use only.
-//
-{
-    char *ptr;
-
-    giveRawLineFromInput(inputStream, line, len);
-    // convert line to lowercase
-    for ( ptr = line; ( * ptr = tolower(* ptr) ); ptr++ ) {
-        ;
-    }
-
-    return line;
-}
-
-char *giveRawLineFromInput(FILE *inputStream, char *line, int len)
-//
-// reads one line from inputStream - for private use only.
-//
-{
-    char *_res;
-    do {
-        _res = fgets(line, len, inputStream);
-        if ( _res == NULL ) {
-            OOFEM_ERROR("giveRawLineFromInput : End of file encountered");
-        }
-    } while ( * line == '#' ); // skip comments
-
-    return line;
-}
-
-
-void giveInputDataFileName(std::string &dataInputFileName)
-
-{
-    // Returns the name of the file containing the data of the problem.
-    printf("Please enter the name of the input data file : \n");
-    std::getline(std::cin, dataInputFileName);
-}
-
 
 EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *_master, bool parallelFlag)
 {
-    const char *__keyword, *__proc = "InstanciateProblem"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                                 // Required by IR_GIVE_FIELD macro
+    const char *__proc = "InstanciateProblem"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                       // Required by IR_GIVE_FIELD macro
     EngngModel *problem;
     std::string problemName, dataOutputFileName, desc;
 
@@ -100,7 +58,6 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
      */
     InputRecord *emodelir = dr->giveInputRecord(DataReader :: IR_emodelRec, 1)->GiveCopy();
     result = emodelir->giveRecordKeywordField(problemName);
-    //result = IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
     if ( result != IRRT_OK ) {
         IR_IOERR("", __proc, IFT_EngngModel_probname, "", emodelir, result);
     }

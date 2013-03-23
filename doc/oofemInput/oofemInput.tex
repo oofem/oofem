@@ -2555,26 +2555,18 @@ otherwise zero value is returned.
 \item Piecewise function
 
 \begin{record}[0.9\textwidth]
-  \recentry{\entKeywordInst{PiecewiseLinFunction}}{\field{nPoints}{in}}
-  \recentry{}{\field{t}{ra} \field{f(t)}{ra}}
+  \recentry{\entKeywordInst{PiecewiseLinFunction}}{[\field{nPoints}{in} {\field{t}{ra} \field{f(t)}{ra}}] [ \field{datafile}{"string"}]}
 \end{record}
 
 Represents the piecewise time function. The particular time values in
-\param{t} array  should be sorted according to time scale. Corresponding time
+\param{t} array should be sorted according to time scale. Corresponding time
 function values are in \param{f(t)} array. Value for time, which
 is not present in \param{t} is computed using liner interpolation scheme.
 Number of time-value pairs is in \param{nPoints} parameter.
 
-\item Piecewise function - data in a block
+The second alternative allows reading input data from an external ASCII file. A hash commented line (\#) is 
+skipped during reading. File name should be eclosed with " ".
 
-\begin{record}[0.9\textwidth]
-  \recentry{\entKeywordInst{PiecewiseLinFunctionBlock}}{\field{nPoints}{in}}\\
-  On every line: {(rn) (rn)}
-\end{record}
-
-This function only stores data differently than the {\it PiecewiseLinFunction}. 
-The \param{nPoints} specifies number of rows in a block. A hash commented line (\#) is 
-skipped during block reading.
 
 \item Heaviside-like time function
 

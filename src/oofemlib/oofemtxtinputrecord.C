@@ -130,9 +130,9 @@ OOFEMTXTInputRecord :: giveRecordKeywordField(std::string &answer)
 }
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(int &answer, InputFieldType fieldID, const char *idString)
+OOFEMTXTInputRecord :: giveField(int &answer, InputFieldType id)
 {
-    int indx = this->giveKeywordIndx(idString);
+    int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         if ( scanInteger(tokenizer.giveToken(indx + 1), answer) == 0 ) {
             return IRRT_BAD_FORMAT;
@@ -147,9 +147,9 @@ OOFEMTXTInputRecord :: giveField(int &answer, InputFieldType fieldID, const char
 }
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(double &answer, InputFieldType fieldID, const char *idString)
+OOFEMTXTInputRecord :: giveField(double &answer, InputFieldType id)
 {
-    int indx = this->giveKeywordIndx(idString);
+    int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         if ( scanDouble(tokenizer.giveToken(indx + 1), answer) == 0 ) {
             return IRRT_BAD_FORMAT;
@@ -164,10 +164,10 @@ OOFEMTXTInputRecord :: giveField(double &answer, InputFieldType fieldID, const c
 }
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(bool &answer, InputFieldType fieldID, const char *idString)
+OOFEMTXTInputRecord :: giveField(bool &answer, InputFieldType id)
 {
     int val;
-    int indx = this->giveKeywordIndx(idString);
+    int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         if ( scanInteger(tokenizer.giveToken(indx + 1), val) == 0 ) {
             return IRRT_BAD_FORMAT;
@@ -183,11 +183,11 @@ OOFEMTXTInputRecord :: giveField(bool &answer, InputFieldType fieldID, const cha
 }
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(std::string &answer, InputFieldType fieldI, const char *idString)
+OOFEMTXTInputRecord :: giveField(std::string &answer, InputFieldType id)
 {
     int indx = 0;
-    if ( idString ) {
-        if ( ( indx = this->giveKeywordIndx(idString) ) == 0 ) {
+    if ( id ) {
+        if ( ( indx = this->giveKeywordIndx(id) ) == 0 ) {
             return IRRT_NOTFOUND;
         }
 
@@ -209,10 +209,10 @@ OOFEMTXTInputRecord :: giveField(std::string &answer, InputFieldType fieldI, con
 }
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(IntArray &answer, InputFieldType fieldID, const char *idString)
+OOFEMTXTInputRecord :: giveField(IntArray &answer, InputFieldType id)
 {
     int value, size;
-    int indx = this->giveKeywordIndx(idString);
+    int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         setReadFlag(indx);
         if ( scanInteger(tokenizer.giveToken(++indx), size) == 0 ) {
@@ -239,11 +239,11 @@ OOFEMTXTInputRecord :: giveField(IntArray &answer, InputFieldType fieldID, const
 
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(FloatArray &answer, InputFieldType fieldID, const char *idString)
+OOFEMTXTInputRecord :: giveField(FloatArray &answer, InputFieldType id)
 {
     double value;
     int size;
-    int indx = this->giveKeywordIndx(idString);
+    int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         setReadFlag(indx);
         if ( scanInteger(tokenizer.giveToken(++indx), size) == 0 ) {
@@ -270,10 +270,10 @@ OOFEMTXTInputRecord :: giveField(FloatArray &answer, InputFieldType fieldID, con
 
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(FloatMatrix &answer, InputFieldType fieldID, const char *idString)
+OOFEMTXTInputRecord :: giveField(FloatMatrix &answer, InputFieldType id)
 {
     int nrows, ncols;
-    int indx = this->giveKeywordIndx(idString);
+    int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         setReadFlag(indx);
 
@@ -301,10 +301,10 @@ OOFEMTXTInputRecord :: giveField(FloatMatrix &answer, InputFieldType fieldID, co
 
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(std::vector< std::string > &answer, InputFieldType fieldID, const char *idString)
+OOFEMTXTInputRecord :: giveField(std::vector< std::string > &answer, InputFieldType id)
 {
     int size;
-    int indx = this->giveKeywordIndx(idString);
+    int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         setReadFlag(indx);
         if ( scanInteger(tokenizer.giveToken(++indx), size) == 0 ) {
@@ -325,12 +325,12 @@ OOFEMTXTInputRecord :: giveField(std::vector< std::string > &answer, InputFieldT
 
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(Dictionary &answer, InputFieldType fieldID, const char *idString)
+OOFEMTXTInputRecord :: giveField(Dictionary &answer, InputFieldType id)
 {
     double value;
     int size;
     char key;
-    int indx = this->giveKeywordIndx(idString);
+    int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         setReadFlag(indx);
         if ( scanInteger(tokenizer.giveToken(++indx), size) == 0 ) {
@@ -358,11 +358,11 @@ OOFEMTXTInputRecord :: giveField(Dictionary &answer, InputFieldType fieldID, con
 }
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(std::list< Range > &list, InputFieldType fieldID, const char *idString)
+OOFEMTXTInputRecord :: giveField(std::list< Range > &list, InputFieldType id)
 {
     int li, hi;
     const char *rec;
-    int indx = this->giveKeywordIndx(idString);
+    int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         setReadFlag(indx);
         rec = tokenizer.giveToken(++indx);
@@ -399,10 +399,10 @@ OOFEMTXTInputRecord :: giveField(std::list< Range > &list, InputFieldType fieldI
 }
 
 bool
-OOFEMTXTInputRecord :: hasField(InputFieldType fieldID, const char *idString)
+OOFEMTXTInputRecord :: hasField(InputFieldType id)
 {
-    //returns nonzero if idString is present in source
-    int indx = this->giveKeywordIndx(idString);
+    //returns nonzero if id is present in source
+    int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         setReadFlag(indx);
     }
@@ -571,21 +571,21 @@ OOFEMTXTInputRecord :: __readKeyAndVal(const char *source, char *key, double *va
 }
 
 const char *
-OOFEMTXTInputRecord :: __getPosAfter(const char *source, const char *idString)
+OOFEMTXTInputRecord :: __getPosAfter(const char *source, const char *id)
 //
-// returns position of substring idString in source
-// return value pointer at the end of occurrence idString in source
-// (idString must be separated from rest by blank or by tabulator
+// returns position of substring id in source
+// return value pointer at the end of occurrence id in source
+// (id must be separated from rest by blank or by tabulator
 // if string not found, returns NULL
 //
 {
     const char *str1;
     const char *helpSource = source;
-    int len = strlen(idString);
+    int len = strlen(id);
     int whitespaceBefore, whitespaceAfter;
 
     do {
-        if ( ( str1 = strstr(helpSource, idString) ) == NULL ) {
+        if ( ( str1 = strstr(helpSource, id) ) == NULL ) {
             return NULL;
         }
 
@@ -769,4 +769,14 @@ OOFEMTXTInputRecord :: readMatrix(const char *helpSource, int r, int c, FloatMat
 
     return 0;
 }
+
+
+void
+OOFEMTXTInputRecord :: report_error(const char *_class, const char *proc, InputFieldType id,
+                            IRResultType result, const char *file, int line)
+{
+    __OOFEM_ERROR6(file, line, "Input error on line %d: \"%s\", field keyword \"%s\"\n%s::%s", lineNumber, strerror(result), id, _class, proc);
+}
+
+
 } // end namespace oofem

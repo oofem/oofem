@@ -694,7 +694,7 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
         }
 
     default:
-        printf("IsotropicDamageMaterial1::damageFunction ... undefined softening type %d\n", softType);
+        OOFEM_WARNING2("IsotropicDamageMaterial1::damageFunction ... undefined softening type %d\n", softType);
     }
 
     return 0.;         // to make the compiler happy
@@ -727,7 +727,7 @@ IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp)
         }
 
     default:
-        printf("IsotropicDamageMaterial1::damageFunction ... undefined softening type %d\n", softType);
+        OOFEM_WARNING2("IsotropicDamageMaterial1::damageFunctionPrime ... undefined softening type %d\n", softType);
     }
 
     return 0.;         // to make the compiler happy
