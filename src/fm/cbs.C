@@ -133,10 +133,12 @@ CBS :: giveUnknownComponent(EquationID chc, ValueModeType mode,
 // returns unknown quantity like displaacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
+#if DEBUG
     int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
+#endif
 
     if ( chc == EID_ConservationEquation ) { // pressures
         return PressureField.giveUnknownValue(dof, mode, tStep);
@@ -146,7 +148,7 @@ CBS :: giveUnknownComponent(EquationID chc, ValueModeType mode,
         switch ( mode ) {
         case VM_Incremental:
             if ( deltaAuxVelocity.isNotEmpty() ) {
-                return deltaAuxVelocity.at(eq);
+                return deltaAuxVelocity.at(dof->__giveEquationNumber());
             } else {
                 return 0.;
             }
@@ -263,9 +265,10 @@ CBS :: giveNextStep()
 void
 CBS :: solveYourselfAt(TimeStep *tStep)
 {
-    int momneq = this->giveNumberOfEquations(EID_MomentumBalance);
-    int presneq = this->giveNumberOfEquations(EID_ConservationEquation);
-    int presneq_prescribed = this->giveNumberOfPrescribedEquations(EID_ConservationEquation);
+    this->giveNumberOfEquations(EID_MomentumBalance);
+    int momneq = this->numberOfMomentumEqs;
+    int presneq = this->numberOfConservationEqs;
+    int presneq_prescribed = this->numberOfPrescribedMomentumEqs;
     double deltaT = tStep->giveTimeIncrement();
 
     FloatArray rhs(momneq);
@@ -350,11 +353,11 @@ CBS :: solveYourselfAt(TimeStep *tStep)
 
     /* STEP 1 - calculates auxiliary velocities*/
     rhs.zero();
-    this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, IntermediateConvectionTerm, VM_Total,
+    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, IntermediateConvectionTerm, VM_Total,
                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, IntermediateDiffusionTerm, VM_Total,
+    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, IntermediateDiffusionTerm, VM_Total,
                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    //this->assembleVectorFromElements(mm, tStep, EID_AuxMomentumBalance, LumpedMassMatrix, VM_Total, this->giveDomain(1));
+    //this->assembleVectorFromElements(mm, tStep, EID_MomentumBalance, LumpedMassMatrix, VM_Total, this->giveDomain(1));
 
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
@@ -445,7 +448,7 @@ CBS :: updateYourself(TimeStep *stepN)
 void
 CBS :: updateInternalState(TimeStep *stepN)
 {
-    int j, nnodes;
+    int nnodes;
     Domain *domain;
 
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
@@ -453,13 +456,13 @@ CBS :: updateInternalState(TimeStep *stepN)
 
         nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( j = 1; j <= nnodes; j++ ) {
+            for ( int j = 1; j <= nnodes; j++ ) {
                 this->updateDofUnknownsDictionary(domain->giveDofManager(j), stepN);
             }
         }
 
         int nelem = domain->giveNumberOfElements();
-        for ( j = 1; j <= nelem; j++ ) {
+        for ( int j = 1; j <= nelem; j++ ) {
             domain->giveElement(j)->updateInternalState(stepN);
         }
     }
@@ -566,17 +569,15 @@ CBS :: checkConsistency()
 {
     // check internal consistency
     // if success returns nonzero
-    int i, nelem;
     Element *ePtr;
     CBSElement *sePtr;
     GeneralBoundaryCondition *bcPtr;
     InitialCondition *icPtr;
     Domain *domain = this->giveDomain(1);
 
-    nelem = domain->giveNumberOfElements();
     // check for proper element type
-
-    for ( i = 1; i <= nelem; i++ ) {
+    int nelem = domain->giveNumberOfElements();
+    for ( int i = 1; i <= nelem; i++ ) {
         ePtr = domain->giveElement(i);
         sePtr = dynamic_cast< CBSElement * >(ePtr);
         if ( sePtr == NULL ) {
@@ -591,7 +592,7 @@ CBS :: checkConsistency()
     // scale boundary and initial conditions
     if ( equationScalingFlag ) {
         int nbc = domain->giveNumberOfBoundaryConditions();
-        for ( i = 1; i <= nbc; i++ ) {
+        for ( int i = 1; i <= nbc; i++ ) {
             bcPtr = domain->giveBc(i);
             if ( bcPtr->giveBCValType() == VelocityBVT ) {
                 bcPtr->scale(1. / uscale);
@@ -605,7 +606,7 @@ CBS :: checkConsistency()
         }
 
         int nic = domain->giveNumberOfInitialConditions();
-        for ( i = 1; i <= nic; i++ ) {
+        for ( int i = 1; i <= nic; i++ ) {
             icPtr = domain->giveIc(i);
             if ( icPtr->giveICValType() == VelocityBVT ) {
                 icPtr->scale(VM_Total, 1. / uscale);
@@ -649,8 +650,9 @@ void
 CBS :: applyIC(TimeStep *stepWhenIcApply)
 {
     Domain *domain = this->giveDomain(1);
-    int mbneq =  this->giveNumberOfEquations(EID_MomentumBalance);
-    int pdneq =  this->giveNumberOfEquations(EID_ConservationEquation);
+    this->giveNumberOfEquations(EID_MomentumBalance);
+    int mbneq = this->numberOfMomentumEqs;
+    int pdneq = this->numberOfConservationEqs;
     FloatArray *velocityVector, *pressureVector;
 
 #ifdef VERBOSE
@@ -753,7 +755,7 @@ CBS :: giveNumberOfEquations(EquationID id)
         this->forceEquationNumbering();
     }
 
-    if ( ( id == EID_MomentumBalance ) || ( id == EID_AuxMomentumBalance ) ) {
+    if ( id == EID_MomentumBalance ) {
         return numberOfMomentumEqs;
     } else if ( id == EID_ConservationEquation ) {
         return numberOfConservationEqs;
@@ -777,7 +779,7 @@ int CBS :: giveNumberOfPrescribedEquations(EquationID id)
         this->forceEquationNumbering();
     }
 
-    if ( ( id == EID_MomentumBalance ) || ( id == EID_AuxMomentumBalance ) ) {
+    if ( id == EID_MomentumBalance ) {
         return numberOfPrescribedMomentumEqs;
     } else if ( id == EID_ConservationEquation ) {
         return numberOfPrescribedConservationEqs;
@@ -801,7 +803,7 @@ int CBS :: giveNumberOfDomainEquations(int d, EquationID id)
         this->forceEquationNumbering();
     }
 
-    if ( ( id == EID_MomentumBalance ) || ( id == EID_AuxMomentumBalance ) ) {
+    if ( id == EID_MomentumBalance ) {
         return numberOfMomentumEqs;
     } else if ( id == EID_ConservationEquation ) {
         return numberOfConservationEqs;
@@ -825,7 +827,7 @@ int CBS :: giveNumberOfPrescribedDomainEquations(int d, EquationID id)
         this->forceEquationNumbering();
     }
 
-    if ( ( id == EID_MomentumBalance ) || ( id == EID_AuxMomentumBalance ) ) {
+    if ( id == EID_MomentumBalance ) {
         return numberOfPrescribedMomentumEqs;
     } else if ( id == EID_ConservationEquation ) {
         return numberOfPrescribedConservationEqs;
@@ -860,30 +862,27 @@ double CBS :: giveVariableScale(VarScaleType varID)
     return 0.0;
 }
 
-/*
- * CBS :: printOutputAt (FILE * File,TimeStep* stepN)
- * {
- * //FILE* File = this -> giveDomain() -> giveOutputStream() ;
- * int domCount = 0, idomain;
- * Domain* domain;
- *
- * // fprintf (File,"\nOutput for time step number %d \n\n",stepN->giveNumber());
- * for (idomain = 1; idomain <= this->ndomains; idomain++) {
- * domain= this->giveDomain(idomain);
- * domCount += domain->giveOutputManager()->testTimeStepOutput (stepN);
- * }
- * if (domCount == 0) return;  // do not print even Solution step header
- *
- * fprintf (File,"\nOutput for time % .8e \n\n",stepN->giveTime()/this->giveVariableScale (VST_Time));
- * for (idomain = 1; idomain <= this->ndomains; idomain++) {
- *
- * domain= this->giveDomain(idomain);
- * fprintf (File,"\nOutput for domain %3d\n",domain->giveNumber());
- *
- * domain->giveOutputManager()->doDofManOutput  (File, stepN);
- * domain->giveOutputManager()->doElementOutput (File, stepN);
- * }
- * }
- *
- */
+#if 0
+void CBS :: printOutputAt (FILE * File,TimeStep* stepN)
+{
+    //FILE* File = this->giveDomain()->giveOutputStream();
+    int domCount = 0, idomain;
+    Domain* domain;
+
+    // fprintf (File,"\nOutput for time step number %d \n\n",stepN->giveNumber());
+    for (idomain = 1; idomain <= this->ndomains; idomain++) {
+        domain= this->giveDomain(idomain);
+        domCount += domain->giveOutputManager()->testTimeStepOutput (stepN);
+    }
+    if (domCount == 0) return;  // do not print even Solution step header
+    fprintf (File,"\nOutput for time % .8e \n\n",stepN->giveTime()/this->giveVariableScale (VST_Time));
+    for (idomain = 1; idomain <= this->ndomains; idomain++) {
+        domain= this->giveDomain(idomain);
+        fprintf (File,"\nOutput for domain %3d\n",domain->giveNumber());
+        domain->giveOutputManager()->doDofManOutput  (File, stepN);
+        domain->giveOutputManager()->doElementOutput (File, stepN);
+    }
+}
+#endif
+
 } // end namespace oofem
