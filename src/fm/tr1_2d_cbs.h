@@ -49,6 +49,13 @@
 #include "leplic.h"
 //</RESTRICTED_SECTION>
 
+///@name Input fields for TR12DCBS
+//@{
+#define _IFT_Tr1CBS_vof "vof"
+#define _IFT_Tr1CBS_pvof "pvof"
+//@}
+
+
 namespace oofem {
 class TimeStep;
 class Node;

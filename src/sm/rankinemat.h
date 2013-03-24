@@ -48,6 +48,17 @@
 #define keep_track_of_dissipated_energy
 //#undefine keep_track_of_dissipated_energy
 
+///@name Input fields for RankineMat
+//@{
+#define _IFT_RankineMat_sig0 "sig0"
+#define _IFT_RankineMat_h "h"
+#define _IFT_RankineMat_a "a"
+#define _IFT_RankineMat_plasthardtype "plasthardtype"
+#define _IFT_RankineMat_delsigy "delsigy"
+#define _IFT_RankineMat_yieldtol "yieldtol"
+#define _IFT_RankineMat_gf "gf"
+//@}
+
 namespace oofem {
 class RankineMatStatus;
 

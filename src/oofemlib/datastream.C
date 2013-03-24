@@ -33,7 +33,9 @@
  */
 
 #include "datastream.h"
-#include "logger.h"
+#include "processcomm.h"
+#include "combuff.h"
+#include "error.h"
 
 namespace oofem
 {

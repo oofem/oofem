@@ -38,6 +38,11 @@
 #include "mazarsmodel.h"
 #include "structuralnonlocalmaterialext.h"
 
+///@name Input fields for MazarsNLMaterial
+//@{
+#define _IFT_MazarsNLMaterial_r "r"
+//@}
+
 namespace oofem {
 class GaussPoint;
 

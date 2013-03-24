@@ -44,6 +44,57 @@
 #include "structuralms.h"
 #include "cltypes.h"
 
+///@name Input fields for TrabBone3D
+//@{
+#define _IFT_TrabBone3D_eps0 "eps0"
+#define _IFT_TrabBone3D_nu0 "nu0"
+#define _IFT_TrabBone3D_mu0 "mu0"
+#define _IFT_TrabBone3D_expk "expk"
+#define _IFT_TrabBone3D_expl "expl"
+
+#define _IFT_TrabBone3D_m1 "m1"
+#define _IFT_TrabBone3D_m2 "m2"
+#define _IFT_TrabBone3D_rho "rho"
+
+#define _IFT_TrabBone3D_sig0Pos "sig0pos"
+#define _IFT_TrabBone3D_sig0Neg "sig0neg"
+#define _IFT_TrabBone3D_chi0Pos "chi0pos"
+#define _IFT_TrabBone3D_chi0Neg "chi0neg"
+#define _IFT_TrabBone3D_tau0 "tau0"
+#define _IFT_TrabBone3D_expp "expp"
+#define _IFT_TrabBone3D_expq "expq"
+#define _IFT_TrabBone3D_plasHardFactor "plashardfactor"
+#define _IFT_TrabBone3D_expPlasHard "expplashard"
+
+#define _IFT_TrabBone3D_expDam "expdam"
+#define _IFT_TrabBone3D_critDam "critdam"
+
+#define _IFT_TrabBone3D_x1 "x1"
+#define _IFT_TrabBone3D_x2 "x2"
+#define _IFT_TrabBone3D_x3 "x3"
+#define _IFT_TrabBone3D_y1 "y1"
+#define _IFT_TrabBone3D_y2 "y2"
+#define _IFT_TrabBone3D_y3 "y3"
+#define _IFT_TrabBone3D_viscosity "viscosity"  
+#define _IFT_TrabBone3D_yR "yr"
+#define _IFT_TrabBone3D_kappaMax "kappamax"
+#define _IFT_TrabBone3D_kappaMin "kappamin"
+#define _IFT_TrabBone3D_kappaSlope "kappaslope"
+#define _IFT_TrabBone3D_N "n"
+#define _IFT_TrabBone3D_gMin "gmin"
+#define _IFT_TrabBone3D_formulation "formulation"
+#define _IFT_TrabBone3D_gammaL "gammal"
+#define _IFT_TrabBone3D_gammaP "gammap"
+#define _IFT_TrabBone3D_tDens "tdens"
+#define _IFT_TrabBone3D_densCrit "denscrit"
+#define _IFT_TrabBone3D_printflag "printflag"
+#define _IFT_TrabBone3D_max_num_iter "max_num_iter"
+#define _IFT_TrabBone3D_max_num_substeps "max_num_substeps"
+#define _IFT_TrabBone3D_rel_yield_tol "rel_yield_tol"
+#define _IFT_TrabBone3D_strain_tol "strain_tol"
+#define _IFT_TrabBone3D_abaqus "abaqus"
+//@}
+
 namespace oofem {
 
 /**
@@ -202,6 +253,11 @@ public:
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
+
+#ifdef __PARALLEL_MODE
+    virtual double predictRelativeComputationalCost(GaussPoint *gp) ;
+    virtual double predictRelativeRedistributionCost(GaussPoint *gp) ;
+#endif
 };
 } //end namespace oofem
 #endif

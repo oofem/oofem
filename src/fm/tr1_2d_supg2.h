@@ -184,6 +184,7 @@ public:
 
 protected:
     virtual void computeGaussPoints();
+    virtual void postInitialize();
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
     void computeNVector(FloatArray &answer, GaussPoint *gp);
     virtual void updateVolumePolygons(Polygon &referenceFluidPoly, Polygon &secondFluidPoly, int &rfPoints, int &sfPoints,

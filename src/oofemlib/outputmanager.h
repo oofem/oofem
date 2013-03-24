@@ -42,6 +42,20 @@
 
 #include <list>
 
+///@name Input fields for OutputManager
+//@{
+#define _IFT_OutputManager_name "name"
+#define _IFT_OutputManager_tstepall "tstep_all"
+#define _IFT_OutputManager_tstepstep "tstep_step"
+#define _IFT_OutputManager_dofmanall "dofman_all"
+#define _IFT_OutputManager_elementall "element_all"
+#define _IFT_OutputManager_tstepsout "tsteps_out"
+#define _IFT_OutputManager_dofmanoutput "dofman_output"
+#define _IFT_OutputManager_dofmanexcept "dofman_except"
+#define _IFT_OutputManager_elementoutput "element_output"
+#define _IFT_OutputManager_elementexcept "element_except"
+//@}
+
 namespace oofem {
 /**
  * Represents output manager. It controls and manages the time step output.

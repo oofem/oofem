@@ -571,12 +571,12 @@ RheoChainMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     StructuralMaterial :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, nu, IFT_RheoChainMaterial_n, "n"); // Macro
-    IR_GIVE_FIELD(ir, relMatAge, IFT_RheoChainMaterial_relmatage, "relmatage"); // Macro
+    IR_GIVE_FIELD(ir, nu, IFT_RheoChainMaterial_n, "n");
+    IR_GIVE_FIELD(ir, relMatAge, IFT_RheoChainMaterial_relmatage, "relmatage");
     this->begOfTimeOfInterest = -1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, begOfTimeOfInterest, IFT_RheoChainMaterial_begoftimeofinterest, "begoftimeofinterest"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, begOfTimeOfInterest, IFT_RheoChainMaterial_begoftimeofinterest, "begoftimeofinterest");
     this->endOfTimeOfInterest = -1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, IFT_RheoChainMaterial_endoftimeofinterest, "endoftimeofinterest"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, IFT_RheoChainMaterial_endoftimeofinterest, "endoftimeofinterest");
     IR_GIVE_FIELD(ir, timeFactor, IFT_RheoChainMaterial_timefactor, "timefactor"); // solution time/timeFactor should give time in days
 
     this->computeCharTimes(); // sets up nUnits variable

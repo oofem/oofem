@@ -39,7 +39,6 @@
 #include "fei2dquadquad.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
-#include "mathfem.h"
 
 namespace oofem {
 /**

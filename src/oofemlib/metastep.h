@@ -38,6 +38,11 @@
 #include "classtype.h"
 #include "inputrecord.h"
 
+///@name Input fields for meta step
+//@{
+#define _IFT_MetaStep_nsteps "nsteps"
+//@}
+
 namespace oofem {
 class EngngModel;
 

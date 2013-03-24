@@ -103,19 +103,17 @@ MicroMaterial :: MicroMaterial(int n, Domain *d) : StructuralMaterial(n, d), Unk
 
 MicroMaterial :: ~MicroMaterial()
 {
-    int i;
-
     if ( this->problemMicro ) {
         delete this->problemMicro;
     }
 
-    for ( i = 1; i <= 8; i++ ) { //8 nodes
+    for ( int i = 1; i <= 8; i++ ) { //8 nodes
         if ( this->microMasterCoords [ i - 1 ] != NULL ) {
             delete this->microMasterCoords [ i - 1 ];
         }
     }
 
-    for ( i = 0; i < this->NumberOfDofManagers; i++ ) {
+    for ( int i = 0; i < this->NumberOfDofManagers; i++ ) {
         if ( this->microBoundaryDofs ) {
             delete [] microBoundaryDofs [ i ];
         }
@@ -148,7 +146,7 @@ IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
 
-    IR_GIVE_FIELD(ir, this->inputFileNameMicro, IFT_MicroMaterialFileName, "file");
+    IR_GIVE_FIELD(ir, this->inputFileNameMicro, IFT_MicroMaterial_fileName, _IFT_MicroMaterial_fileName);
 
     OOFEM_LOG_INFO("** Instanciating microproblem with BC from file %s\n", inputFileNameMicro.c_str());
     OOFEMTXTDataReader drMicro(inputFileNameMicro.c_str());
@@ -164,7 +162,8 @@ IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
 
 //original pure virtual function has to be declared here
 //this function should not be used, internal forces are calculated based on reactions not stresses in GPs
-void MicroMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime) {
+void MicroMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+{
     //perform average over microproblem
     //     int j, index, ielem;
     //     Element *elem;
@@ -240,8 +239,7 @@ void MicroMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm f
 MaterialStatus *
 MicroMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    MicroMaterialStatus *status =
-        new  MicroMaterialStatus(1, StructuralMaterial :: giveDomain(), gp);
+    MicroMaterialStatus *status = new MicroMaterialStatus(1, StructuralMaterial :: giveDomain(), gp);
     return status;
 }
 
@@ -249,7 +247,6 @@ MicroMaterial :: CreateStatus(GaussPoint *gp) const
 //answer must be of size 24x24 (linear brick 3*8=24)
 void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep, MatResponseMode rMode, const IntArray &microMasterNodes, const IntArray &microBoundaryNodes)
 {
-    int b, i, j, k;
     int row, col;
     double tmpDouble;
     Domain *microDomain = this->problemMicro->giveDomain(1);
@@ -314,8 +311,8 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     microEngngModel->assemble(stiffnessMatrixMicro, tStep, EID_MomentumBalance, type, * this, microDomain);
 
 
-    for ( i = 1; i <= totalBoundaryDofs; i++ ) {
-        for ( j = 1; j <= totalBoundaryDofs; j++ ) { //Kbb
+    for ( int i = 1; i <= totalBoundaryDofs; i++ ) {
+        for ( int j = 1; j <= totalBoundaryDofs; j++ ) { //Kbb
             row = microBoundaryDofsArr.at(i);
             col = microBoundaryDofsArr.at(j);
             if ( stiffnessMatrixMicro->isAllocatedAt(row, col) ) {
@@ -324,7 +321,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
             }
         }
 
-        for ( j = 1; j <= totalInternalDofs; j++ ) { //Kbi
+        for ( int j = 1; j <= totalInternalDofs; j++ ) { //Kbi
             row = microBoundaryDofsArr.at(i);
             col = microInternalDofsArr.at(j);
             if ( stiffnessMatrixMicro->isAllocatedAt(row, col) ) {
@@ -340,14 +337,14 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
         //Kii->printYourself();
         Kii->factorized();
 
-        for ( i = 1; i <= totalInternalDofs; i++ ) {
+        for ( int i = 1; i <= totalInternalDofs; i++ ) {
             xVector.zero();
             xVector.at(i) = 1.;
             Kii->backSubstitutionWith(xVector);
             //xVector.printYourself();
-            for ( b = 1; b <= totalBoundaryDofs; b++ ) { //do not store Kii^-1, it is a dense matrix, compute multiplication directly
+            for ( int b = 1; b <= totalBoundaryDofs; b++ ) { //do not store Kii^-1, it is a dense matrix, compute multiplication directly
                 tmpDouble = 0.;
-                for ( j = 1; j <= totalInternalDofs; j++ ) {
+                for ( int j = 1; j <= totalInternalDofs; j++ ) {
                     tmpDouble += xVector.at(j) * Kbi->at(b, j);
                 }
 
@@ -361,8 +358,8 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
 
         Kbb_1 = new FloatMatrix();
         Kbb_1->beProductOf( ( FloatMatrix const & ) * Kbi, ( FloatMatrix const & ) * Kii1KbiT );
-        for ( i = 1; i <= totalBoundaryDofs; i++ ) {
-            for ( j = 1; j <= totalBoundaryDofs; j++ ) {
+        for ( int i = 1; i <= totalBoundaryDofs; i++ ) {
+            for ( int j = 1; j <= totalBoundaryDofs; j++ ) {
                 Kbb.at(i, j) -= Kbb_1->at(i, j);
             }
         }
@@ -474,7 +471,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
 
 
     //boundary nodes
-    for ( i = 1; i <= microBoundaryNodes.giveSize(); i++ ) {
+    for ( int i = 1; i <= microBoundaryNodes.giveSize(); i++ ) {
         node = microBoundaryNodes.at(i);
         DofMan = microDomain->giveDofManager(node);
         dof = DofMan->giveDof(1);
@@ -488,8 +485,8 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
         //construct transformation matrix relating displacement of slave boundary nodes to macroelement nodes
         //the answer is returned to macroelement so the columns correspond to x,y,z DOFs of each macroelement node
 
-        for ( j = 1; j <= this->macroLSpaceElement->giveNumberOfNodes(); j++ ) { //linhex - 8 nodes
-            for ( k = 0; k < 3; k++ ) { //the same interpolation for x,y,z
+        for ( int j = 1; j <= this->macroLSpaceElement->giveNumberOfNodes(); j++ ) { //linhex - 8 nodes
+            for ( int k = 0; k < 3; k++ ) { //the same interpolation for x,y,z
                 row = nodePos + k;
                 col = 3 * j + k - 2;
                 if ( row > slaveMasterOnBoundary.giveNumberOfRows() ) {
@@ -509,9 +506,9 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
 #  ifdef DEBUG
     //check of the transformation matrix - the sum of each third column must be either zero or one
     double sum;
-    for ( i = 1; i <= slaveMasterOnBoundary.giveNumberOfRows(); i++ ) {
+    for ( int i = 1; i <= slaveMasterOnBoundary.giveNumberOfRows(); i++ ) {
         sum = 0;
-        for ( j = 1; j <= slaveMasterOnBoundary.giveNumberOfColumns(); j++ ) {
+        for ( int j = 1; j <= slaveMasterOnBoundary.giveNumberOfColumns(); j++ ) {
             if ( j % 3 == 0 ) {
                 sum += slaveMasterOnBoundary.at(i, j);
             }

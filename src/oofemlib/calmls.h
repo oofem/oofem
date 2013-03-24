@@ -44,6 +44,33 @@
 #include "intarray.h"
 #include "dofiditem.h"
 
+///@name Input fields for CylindricalALM
+//@{
+#define _IFT_CylindricalALM_psi "psi"
+#define _IFT_CylindricalALM_maxiter "maxiter"
+#define _IFT_CylindricalALM_minsteplength "minsteplength"
+#define _IFT_CylindricalALM_steplength "steplength"
+#define _IFT_CylindricalALM_initialsteplength "initialsteplength"
+#define _IFT_CylindricalALM_forcedinitialsteplength "forcedinitialsteplength"
+#define _IFT_CylindricalALM_reqiterations "reqiterations"
+#define _IFT_CylindricalALM_miniterations "miniter"
+#define _IFT_CylindricalALM_manrmsteps "manrmsteps"
+#define _IFT_CylindricalALM_hpcmode "hpcmode"
+#define _IFT_CylindricalALM_hpc "hpc"
+#define _IFT_CylindricalALM_hpcw "hpcw"
+#define _IFT_CylindricalALM_lstype "lstype"
+#define _IFT_CylindricalALM_linesearch "linesearch"
+#define _IFT_CylindricalALM_lsearchtol "lsearchtol"
+#define _IFT_CylindricalALM_lsearchamp "lsearchamp"
+#define _IFT_CylindricalALM_lsearchmaxeta "lsearchmaxeta"
+#define _IFT_CylindricalALM_nccdg "nccdg"
+#define _IFT_CylindricalALM_ccdg "ccdg"
+#define _IFT_CylindricalALM_rtolv "rtolv"
+#define _IFT_CylindricalALM_rtolf "rtolf"
+#define _IFT_CylindricalALM_rtold "rtold"
+//@}
+
+
 namespace oofem {
 class Domain;
 class EngngModel;

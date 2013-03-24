@@ -286,11 +286,10 @@ CCTPlate :: initializeFrom(InputRecord *ir)
 
     this->NLStructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_CCTPlate_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
     //if ( numberOfGaussPoints != 1 ) {
     //    numberOfGaussPoints = 1;
     //}
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 
@@ -470,9 +469,9 @@ CCTPlate :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answ
 }
 
 double 
-CCTPlate::ZZRemeshingCriteriaI_giveCharacteristicSize() 
+CCTPlate :: ZZRemeshingCriteriaI_giveCharacteristicSize() 
 {
-  return sqrt(this->computeArea() * 2.0);
+    return sqrt(this->computeArea() * 2.0);
 }
 
 

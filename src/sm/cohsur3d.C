@@ -300,7 +300,6 @@ CohesiveSurface3d :: evaluateLocalCoordinateSystem()
 //
 {
     FloatArray lx(3), ly(3), lz(3);
-    int i;
 
     Node *nodeA, *nodeB;
     nodeA  = this->giveNode(1);
@@ -335,7 +334,7 @@ CohesiveSurface3d :: evaluateLocalCoordinateSystem()
     ly.normalize();
 
     lcs.resize(3, 3);
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         lcs.at(1, i) = lx.at(i);
         lcs.at(2, i) = ly.at(i);
         lcs.at(3, i) = lz.at(i);
@@ -383,9 +382,6 @@ CohesiveSurface3d :: initializeFrom(InputRecord *ir)
         kzc = this->kz * nodeC->giveCoordinate(3);
     }
 
-    // initialize one Gauss point
-    this->computeGaussPoints();
-
     // evaluate the length
     giveLength();
     if ( length <= 0. ) {
@@ -413,14 +409,12 @@ void
 CohesiveSurface3d :: printOutputAt(FILE *File, TimeStep *stepN)
 {
     // Performs end-of-step operations.
-
-    int i;
     FloatArray rg, rl, Fg, Fl;
     FloatMatrix T;
 
     fprintf(File, "element %d :\n", number);
 
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         integrationRulesArray [ i ]->printOutputAt(File, stepN);
     }
 

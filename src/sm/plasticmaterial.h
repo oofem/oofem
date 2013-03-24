@@ -39,7 +39,6 @@
 #include "linearelasticmaterial.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-
 #include "structuralms.h"
 
 namespace oofem {

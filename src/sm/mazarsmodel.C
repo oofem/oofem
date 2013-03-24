@@ -84,7 +84,7 @@ MazarsMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, nu, IFT_IsotropicLinearElasticMaterial_n, "n");
 
     ver = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, ver, IFT_MazarsMaterial_version, "version"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, ver, IFT_MazarsMaterial_version, "version");
     if ( ver == 1 ) {
         this->modelVersion = maz_modTension;
     } else if ( ver == 0 ) {

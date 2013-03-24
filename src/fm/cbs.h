@@ -43,6 +43,20 @@
 #include "materialinterface.h"
 //</RESTRICTED_SECTION>
 
+///@name Input fields for CBS
+//@{
+#define _IFT_CBS_deltat "deltat"
+#define _IFT_CBS_mindeltat "mindeltat"
+#define _IFT_CBS_cmflag "cmflag"
+#define _IFT_CBS_theta1 "theta1"
+#define _IFT_CBS_theta2 "theta2"
+#define _IFT_CBS_scaleflag "scaleflag"
+#define _IFT_CBS_lscale "lscale"
+#define _IFT_CBS_uscale "uscale"
+#define _IFT_CBS_dscale "dscale"
+#define _IFT_CBS_miflag "miflag"
+//@}
+
 namespace oofem {
 /**
  * This class represents CBS algorithm for solving incompressible Navier-Stokes equations

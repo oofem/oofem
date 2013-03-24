@@ -42,6 +42,15 @@
 #include "nodalrecoverymodel.h"
 #include "internalstatevaluetype.h"
 
+///@name Input fields for VTK export module
+//@{
+#define _IFT_VTKExportModule_cellvars "cellvars"
+#define _IFT_VTKExportModule_vars "vars"
+#define _IFT_VTKExportModule_primvars "primvars"
+#define _IFT_VTKExportModule_stype "stype"
+#define _IFT_VTKExportModule_regionstoskip "regionstoskip"
+//@}
+
 namespace oofem {
 /**
  * Represents VTK (Visualization Toolkit) export module. It uses VTK file format, Unstructured grid dataset.

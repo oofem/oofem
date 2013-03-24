@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -35,11 +35,9 @@
 #ifndef Tr2Shell7_h
 #define Tr2Shell7_h
 
-
 #include "eleminterpmapperinterface.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "layeredcrosssection.h"
-
 #include "nlstructuralelement.h"
 #include "shell7base.h"
 //#include "vtkxmlexportmodule.h"
@@ -81,7 +79,7 @@ protected:
         return true;
     }
 
-    virtual IntArray giveOrdering(SolutionField fieldType) const;
+    virtual const IntArray &giveOrdering(SolutionField fieldType) const;
 
     //specific
     void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;

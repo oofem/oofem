@@ -40,6 +40,7 @@
 #include "flotarry.h"
 #include "intarray.h"
 #include "engngm.h"
+#include "mathfem.h"
 
 namespace oofem {
 FEI2dQuadQuad QPlaneStress2d :: interpolation(1, 2);
@@ -70,7 +71,6 @@ QPlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer,
 // Returns the [3x16] strain-displacement matrix {B} of the receiver,
 // evaluated at aGaussPoint.
 {
-    int i;
     FloatMatrix dnx;
 
     this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
@@ -78,7 +78,7 @@ QPlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer,
     answer.resize(3, 16);
     answer.zero();
 
-    for ( i = 1; i <= 8; i++ ) {
+    for ( int i = 1; i <= 8; i++ ) {
         answer.at(1, 2 * i - 1) = dnx.at(i, 1);
         answer.at(2, 2 * i - 0) = dnx.at(i, 2);
 
@@ -92,7 +92,6 @@ QPlaneStress2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
 // evaluated at aGaussPoint.
 {
-    int i;
     FloatArray n(8);
 
     answer.resize(2, 16);
@@ -100,7 +99,7 @@ QPlaneStress2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 
     this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
-    for ( i = 1; i <= 8; i++ ) {
+    for ( int i = 1; i <= 8; i++ ) {
         answer.at(1, 2 * i - 1) = n.at(i);
         answer.at(2, 2 * i - 0) = n.at(i);
     }
@@ -114,7 +113,7 @@ QPlaneStress2d :: initializeFrom(InputRecord *ir)
 
     this->Element :: initializeFrom(ir);
     numberOfGaussPoints = 4;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_QPlaneStress2d_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
            ( numberOfGaussPoints == 4 ) ||
@@ -123,7 +122,6 @@ QPlaneStress2d :: initializeFrom(InputRecord *ir)
         numberOfGaussPoints = 4;
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 

@@ -38,6 +38,20 @@
 #include "microplanematerial_bazant.h"
 #include "structuralms.h"
 
+///@name Input fields for M4Material
+//@{
+#define _IFT_M4Material_c3 "c3"
+#define _IFT_M4Material_c4 "c4"
+#define _IFT_M4Material_c20 "c20"
+#define _IFT_M4Material_k1 "k1"
+#define _IFT_M4Material_k2 "k2"
+#define _IFT_M4Material_k3 "k3"
+#define _IFT_M4Material_k4 "k4"
+#define _IFT_M4Material_e "e"
+#define _IFT_M4Material_n "n"
+#define _IFT_M4Material_talpha "talpha"
+//@}
+
 namespace oofem {
 /**
  * Related material model status to BazantMBCMaterial class

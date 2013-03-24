@@ -100,10 +100,10 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
     linearElasticMaterial->initializeFrom(ir);
 
     checkSnapBack = 1; //check by default
-    IR_GIVE_OPTIONAL_FIELD(ir, checkSnapBack, IFT_IsotropicDamageMaterial1_checkSnapBack, "checksnapback");     // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, checkSnapBack, IFT_IsotropicDamageMaterial1_checkSnapBack, "checksnapback");
 
     // specify the type of formula for equivalent strain
-    IR_GIVE_OPTIONAL_FIELD(ir, equivStrainType, IFT_IsotropicDamageMaterial1_equivstraintype, "equivstraintype");     // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, equivStrainType, IFT_IsotropicDamageMaterial1_equivstraintype, "equivstraintype");
     if ( equivStrainType == 1 ) {
         this->equivStrainType = EST_Rankine_Smooth;
     } else if ( equivStrainType == 2 ) {
@@ -122,7 +122,7 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
     }
 
     // specify the type of formula for damage evolution law
-    IR_GIVE_OPTIONAL_FIELD(ir, damageLaw, IFT_IsotropicDamageMaterial1_softeningtype, "damlaw");
+    IR_GIVE_OPTIONAL_FIELD(ir, damageLaw, IFT_IsotropicDamageMaterial1_damageLaw, "damlaw");
     if ( damageLaw != 7 ) {
         IR_GIVE_FIELD(ir, e0, IFT_IsotropicDamageMaterial1_e0, "e0");
     }
@@ -135,7 +135,7 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
             IR_GIVE_FIELD(ir, wf, IFT_IsotropicDamageMaterial1_wf, "wf");
         } else if ( ir->hasField(IFT_IsotropicDamageMaterial1_gf, "gf") ) {
             this->softType = ST_Exponential_Cohesive_Crack;
-            IR_GIVE_FIELD(ir, gf, IFT_IsotropicDamageMaterial1_ef, "gf");
+            IR_GIVE_FIELD(ir, gf, IFT_IsotropicDamageMaterial1_gf, "gf");
         } else {
             this->softType = ST_Exponential;
             IR_GIVE_FIELD(ir, ef, IFT_IsotropicDamageMaterial1_ef, "ef");
@@ -148,7 +148,7 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
             IR_GIVE_FIELD(ir, wf, IFT_IsotropicDamageMaterial1_wf, "wf");
         } else if ( ir->hasField(IFT_IsotropicDamageMaterial1_gf, "gf") ) {
             this->softType = ST_Linear_Cohesive_Crack;
-            IR_GIVE_FIELD(ir, gf, IFT_IsotropicDamageMaterial1_ef, "gf");
+            IR_GIVE_FIELD(ir, gf, IFT_IsotropicDamageMaterial1_gf, "gf");
         } else {
             this->softType = ST_Linear;
             IR_GIVE_FIELD(ir, ef, IFT_IsotropicDamageMaterial1_ef, "ef");
@@ -158,11 +158,11 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
     case 2:     // bilinear softening
         if ( ir->hasField(IFT_IsotropicDamageMaterial1_gf, "gf") ) {
             this->softType = ST_BiLinear_Cohesive_Crack;
-            IR_GIVE_FIELD(ir, gf, IFT_IsotropicDamageMaterial1_ef, "gf");
+            IR_GIVE_FIELD(ir, gf, IFT_IsotropicDamageMaterial1_gf, "gf");
             // ek is for the bilinear law, and corresponds to the strain at the knee point
-            IR_GIVE_FIELD(ir, ek, IFT_IsotropicDamageMaterial1_ek, "ek");         // Macro
+            IR_GIVE_FIELD(ir, ek, IFT_IsotropicDamageMaterial1_ek, "ek");
             // Gft is for the bilinear law, and corresponds to the total energy required to fail the specimen
-            IR_GIVE_FIELD(ir, gft, IFT_IsotropicDamageMaterial1_gft, "gft");         // Macro
+            IR_GIVE_FIELD(ir, gft, IFT_IsotropicDamageMaterial1_gft, "gft");
         } else {
             OOFEM_ERROR("Bilinear softening for wf and ef not implemented");
         }
@@ -203,7 +203,7 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
 
     if ( ( softType == ST_Exponential_Cohesive_Crack ) || ( softType == ST_Linear_Cohesive_Crack ) || ( softType == ST_BiLinear_Cohesive_Crack ) ) {
         int ecsm = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, ecsm, IFT_IsotropicDamageMaterial1_md, "ecsm");
+        IR_GIVE_OPTIONAL_FIELD(ir, ecsm, IFT_IsotropicDamageMaterial1_ecsm, "ecsm");
         switch ( ecsm ) {
         case 1: ecsMethod = ECSM_SquareRootOfArea;
             break;
@@ -694,7 +694,7 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
         }
 
     default:
-        printf("IsotropicDamageMaterial1::damageFunction ... undefined softening type %d\n", softType);
+        OOFEM_WARNING2("IsotropicDamageMaterial1::damageFunction ... undefined softening type %d\n", softType);
     }
 
     return 0.;         // to make the compiler happy
@@ -727,7 +727,7 @@ IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp)
         }
 
     default:
-        printf("IsotropicDamageMaterial1::damageFunction ... undefined softening type %d\n", softType);
+        OOFEM_WARNING2("IsotropicDamageMaterial1::damageFunctionPrime ... undefined softening type %d\n", softType);
     }
 
     return 0.;         // to make the compiler happy

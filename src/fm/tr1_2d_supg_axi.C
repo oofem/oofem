@@ -45,6 +45,7 @@
 #include "timestep.h"
 #include "load.h"
 #include "boundaryload.h"
+#include "fluiddynamicmaterial.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

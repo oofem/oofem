@@ -45,6 +45,12 @@
 #include "structuralmaterial.h"
 #include "structuralms.h"
 
+///@name Input fields for IsotropicDamageMaterial
+//@{
+#define _IFT_IsotropicDamageMaterial_talpha "talpha"
+#define _IFT_IsotropicDamageMaterial_maxOmega "maxomega"
+//@}
+
 namespace oofem {
 class GaussPoint;
 

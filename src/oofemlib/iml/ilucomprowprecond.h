@@ -38,9 +38,14 @@
 
 #include "flotarry.h"
 #include "intarray.h"
-//#include "compcol.h"
 #include "dyncomprow.h"
 #include "precond.h"
+
+///@name Input fields for CompRowPrecond
+//@{
+#define _IFT_CompRow_ILUPrecond_droptol "droptol"
+#define _IFT_CompRow_ILUPrecond_partfill "partfill"
+//@}
 
 namespace oofem {
 /**

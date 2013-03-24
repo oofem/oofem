@@ -56,11 +56,17 @@ protected:
     std::ifstream inputStream;
     std::string dataSourceName;
 
+    /// Keep track of read line from stream. Used for error repors.
+    int lineNumber;
+
 public:
     /// Constructor.
     OOFEMTXTDataReader(const char *inputfilename);
     OOFEMTXTDataReader(const OOFEMTXTDataReader &x);
     virtual ~OOFEMTXTDataReader();
+
+    /// Return a line number, which is helpful for tracking errors.
+    int giveLineNumber() { return lineNumber; }
 
     virtual InputRecord *giveInputRecord(InputRecordType, int recordId);
     virtual std::string giveLine();

@@ -121,20 +121,24 @@ DofManList :: updateEnrichmentDomain(IntArray &dofManNumbers)
 bool 
 EDBGCircle :: isDofManagerEnriched(DofManager *dMan)
 { 
-#if 1
+#if 0
+    // Only enrich the dofmans that are actually inside the domain
     FloatArray coords; 
     coords = *(dMan->giveCoordinates());
     return this->bg->isInside(coords);
 #else
-    
+    // If any dofman of the neighboring elements is inside then the current dofman wil be enriched
+    // => all dofmans of an element will be enriched if one dofman is inside.
     int node = dMan->giveGlobalNumber();
-    // gets neighbouring elements of a node
     Domain *d = dMan->giveDomain();
+    Element *el;
     const IntArray *neighbours = d->giveConnectivityTable()->giveDofManConnectivityArray(node);
     for ( int i = 1; i <= neighbours->giveSize(); i++ ) {
-        // for each of the neighbouring elements finds out whether it interacts with this EnrichmentItem
-        if ( isElementEnriched( d->giveElement( neighbours->at(i) ) ) ) {
-            return true;
+        el = d->giveElement( neighbours->at(i) );
+        for ( int j = 1; j <= el->giveNumberOfDofManagers(); j++ ) {
+            if ( this->bg->isInside( * el->giveDofManager(j)->giveCoordinates() ) ) {
+                return true;
+            }
         }
     }
 
@@ -146,23 +150,12 @@ EDBGCircle :: isDofManagerEnriched(DofManager *dMan)
 bool
 EDBGCircle :: isElementEnriched(const Element *element) 
 {
-#if 1
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
         if ( this->isDofManagerEnriched( element->giveDofManager(i) ) ) {
             return true;
         }
     }
     return false;
-#else
-    Circle *c = static_cast < Circle * > ( this->bg );
-    int numIntersections = c->computeNumberOfIntersectionPoints(element);
-    //int numIntersections = this->bg->computeNumberOfIntersectionPoints(element);
-    if ( numIntersections > 0 ) {
-        return true;
-    } else {
-        return false;
-    }
-#endif
 };
 
 } // end namespace oofem

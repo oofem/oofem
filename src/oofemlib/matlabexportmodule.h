@@ -37,6 +37,14 @@
 
 #include "exportmodule.h"
 
+///@name Input fields for MatlabExportModule
+//@{
+#define _IFT_MatlabExportModule_mesh "mesh"
+#define _IFT_MatlabExportModule_data "data"
+#define _IFT_MatlabExportModule_area "area"
+#define _IFT_MatlabExportModule_specials "specials"
+//@}
+
 namespace oofem {
 /**
  * (Under development) The Matlab export module enables oofem to export the results to a textfile containing the description of the mesh used

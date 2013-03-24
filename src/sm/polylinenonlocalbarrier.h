@@ -37,8 +37,14 @@
 
 #include "nonlocalbarrier.h"
 #include "domain.h"
-
 #include "flotarry.h"
+
+///@name Input fields for PolylineNonlocalBarrier
+//@{
+#define _IFT_PolylineNonlocalBarrier_vertexnodes "vertexnodes"
+#define _IFT_PolylineNonlocalBarrier_xcoordindx "xcoordindx"
+#define _IFT_PolylineNonlocalBarrier_ycoordindx "ycoordindx"
+//@}
 
 namespace oofem {
 /**

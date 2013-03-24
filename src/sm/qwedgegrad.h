@@ -44,7 +44,6 @@
 #include "huertaerrorestimator.h"
 #include "sprnodalrecoverymodel.h"
 
-
 namespace oofem {
 
 /**

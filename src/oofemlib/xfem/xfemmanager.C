@@ -32,38 +32,29 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include "xfemmanager.h"
 #include "inputrecord.h"
 #include "intarray.h"
-#include "femcmpnn.h"
-#include "engngm.h"
-#include "geometry.h"
 #include "conTable.h"
 #include "flotarry.h"
 #include "alist.h"
 #include "domain.h"
 //#include "enrichmentitem.h"
-#include "integrationrule.h"
-#include "xfemmanager.h"
+#include "enrichmentdomain.h"
 #include "element.h"
 #include "dofmanager.h"
-#include "delaunay.h"
 #include "cltypes.h"
-#include "patch.h"
-#include "enrichmentfunction.h"
-#include "gaussintegrationrule.h"
 #include "xfemelementinterface.h"
 #include "usrdefsub.h"
 #include "masterdof.h"
-#include "patchintegrationrule.h"
 #include "datareader.h"
 #include "datastream.h"
 #include "contextioerr.h"
 
 namespace oofem {
-XfemManager :: XfemManager(EngngModel *emodel, int domainIndex)
+XfemManager :: XfemManager(Domain *domain)
 {
-    this->emodel = emodel;
-    this->domainIndex = domainIndex;
+    this->domain = domain;
     this->enrichmentItemList = new AList< EnrichmentItem >(0);
     numberOfEnrichmentItems = -1;
 }
@@ -82,22 +73,18 @@ XfemManager :: clear()
 }
 
 
-
 void XfemManager :: giveActiveEIsFor(IntArray &answer, const Element *elem)
 {
-    int count = 0;
     for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ) {
         if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ) {
-            count++;
-            answer.resize(count); //is this the proper way to expand an array dynamically? 
-            answer.at(count) = enrichmentItemList->at(i)->giveNumber();
+            answer.followedBy( enrichmentItemList->at(i)->giveNumber() );
         }
     }
 }
 
 bool XfemManager :: isElementEnriched(const Element *elem)
 {
-    // Loop over all EI which asks if el is E. 
+    // Loop over all EI which asks if el is enriched. 
     for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ){
         if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ){ 
             return true; 
@@ -107,64 +94,40 @@ bool XfemManager :: isElementEnriched(const Element *elem)
 }
 
 
-bool XfemManager :: isNodeEnriched(int nodeNumber)
-{
-    // Rewrite!
-
-    // not trivial to answer. element may be enriched but not neccessarily the node. depends on the EI and the geom.
-    // 1. Check if neigh. el. are enriched
-    // 2. if so, say that all nodes are E. even though some of the dofs may be prescribed to zero. A simple solution.
-    // Give elsements surrounding the given node
-    const IntArray *neighborEl = emodel->giveDomain(domainIndex)->giveConnectivityTable()->giveDofManConnectivityArray(nodeNumber);
-
-    // Check if any of the elements are enriched
-    for ( int i = 1; i <= neighborEl->giveSize(); i++ ) {
-        Element *elem = emodel->giveDomain(domainIndex)->giveElement( neighborEl->at(i) );
-        if ( this->isElementEnriched(elem) ){
-            // Ask the EI if the node is enriched
-            //if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ){ 
-            //    return true; 
-            //break;   
-        }
-        
-    }
-    return false;
-}
-
 EnrichmentItem *XfemManager :: giveEnrichmentItem(int n)
-// Returns the n-th enrichment item.
 {
+    // Returns the n-th enrichment item.
     if ( enrichmentItemList->includes(n) ) {
         return enrichmentItemList->at(n);
     } else {
         OOFEM_ERROR2("giveEnrichmentItem: undefined enrichmentItem (%d)", n);
     }
-
     return NULL;
 }
 
 
-// Old: strange workflow in this method
+// Old method: strange workflow in this method
+///@todo: Broken but not in use and should be rewritten anyway
 XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
 {
     XfemType ret;
     int intersectionCount = 0;
 
     // elements surrounding one node
-    const IntArray *neighbours = emodel->giveDomain(domainIndex)->giveConnectivityTable()->giveDofManConnectivityArray(nodeNumber);
+    const IntArray *neighbours = this->giveDomain()->giveConnectivityTable()->giveDofManConnectivityArray(nodeNumber);
     for ( int i = 1; i <= neighbours->giveSize(); i++ ) {
         IntArray interactedEnrEl;
         // list of the EI's that are active in the element
-        giveActiveEIsFor( interactedEnrEl, emodel->giveDomain(domainIndex)->giveElement( neighbours->at(i) ) );
+        giveActiveEIsFor( interactedEnrEl, this->giveDomain()->giveElement( neighbours->at(i) ) );
         for ( int j = 1; j <= interactedEnrEl.giveSize(); j++ ) {
             // sums up number of intersections the geometry have with a given element
-            //intersectionCount += this->giveEnrichmentItem( interactedEnrEl.at(j) )->computeNumberOfIntersectionPoints( emodel->giveDomain(domainIndex)->giveElement( neighbours->at(i) ) );
+            //intersectionCount += this->giveEnrichmentItem( interactedEnrEl.at(j) )->computeNumberOfIntersectionPoints( this->giveDomain()->giveElement( neighbours->at(i) ) );
         }
 
         interactedEnrEl.zero();
     }
     // very specialized
-    // only for 2d. Won't wok if several ei are active in the neighboring element to a node.
+    // only for 2d. Won't work if several ei are active in the neighboring element to a node.
     // one node could also have several TYPEs, Tip + inclusion etc.
     if ( intersectionCount == 0 ) {
         ret = STANDARD;
@@ -183,7 +146,8 @@ void
 XfemManager :: createEnrichedDofs()
 {   
     // Creates new dofs due to enrichment and appends them to the dof managers
-    int nrDofMan = emodel->giveDomain(1)->giveNumberOfDofManagers();
+    ///@todo: need to add check if dof already exists in the dofmanager
+    int nrDofMan = this->giveDomain()->giveNumberOfDofManagers();
     IntArray dofIdArray;
  
     for (int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ ) {
@@ -242,22 +206,22 @@ int XfemManager :: instanciateYourself(DataReader *dr)
     std :: string name;
 
     enrichmentItemList->growTo(numberOfEnrichmentItems);
-    for ( int i = 0; i < numberOfEnrichmentItems; i++ ) {
-        InputRecord *mir = dr->giveInputRecord(DataReader :: IR_enrichItemRec, i + 1);
+    for ( int i = 1; i <= numberOfEnrichmentItems; i++ ) {
+        InputRecord *mir = dr->giveInputRecord(DataReader :: IR_enrichItemRec, i);
         result = mir->giveRecordKeywordField(name);
 
         if ( result != IRRT_OK ) {
             IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
         }
 
-        EnrichmentItem *ei = CreateUsrDefEnrichmentItem( name.c_str(), i + 1, this, emodel->giveDomain(1) );
+        EnrichmentItem *ei = CreateUsrDefEnrichmentItem( name.c_str(), i, this, this->giveDomain() );
         if ( ei == NULL ) {
             OOFEM_ERROR2( "XfemManager::instanciateYourself: unknown enrichment item (%s)", name.c_str() );
         }
 
         ei->initializeFrom(mir);
         ei->instanciateYourself(dr);
-        this->enrichmentItemList->put(i + 1, ei);
+        this->enrichmentItemList->put(i, ei);
         this->createEnrichedDofs();
     }
     return 1;
@@ -320,6 +284,7 @@ void XfemManager :: updateIntegrationRule()
     }                                       \
   }
 
+///@todo: not fixed yet
 #if 0
 contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
@@ -388,7 +353,7 @@ contextIOResultType XfemManager:: restoreContext(DataStream *stream, ContextMode
                     THROW_CIOERR(CIO_IOERR);
                 }
                 compId = ( classType ) ct;
-                obj = CreateUsrDefEnrichmentItem(compId, i, this, emodel->giveDomain(domainIndex));
+                obj = CreateUsrDefEnrichmentItem(compId, i, this, this->giveDomain());
             } else {
                 obj = this->giveEnrichmentItem(i);
             }
@@ -413,7 +378,7 @@ contextIOResultType XfemManager:: restoreContext(DataStream *stream, ContextMode
                     THROW_CIOERR(CIO_IOERR);
                 }
                 compId = ( classType ) ct;
-                obj = CreateUsrDefEnrichmentFunction(compId, i, emodel->giveDomain(domainIndex));
+                obj = CreateUsrDefEnrichmentFunction(compId, i, this->giveDomain());
             } else {
                 obj = this->giveEnrichmentFunction(i);
             }

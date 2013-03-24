@@ -51,14 +51,18 @@ class Range;
  * IRRT_OK the corresponding value to given keyword was successfully read.
  *       the answer parameter contains the value.
  * IRRT_NOTFOUND the keyword is not found; the answer is not modified
- * IRRT_BAD_FORMAT the keyword was found but the record is not correctly formated.
+ * IRRT_BAD_FORMAT the keyword was found but the record is not correctly formatted.
  */
 enum IRResultType { IRRT_OK = 0, IRRT_NOTFOUND, IRRT_BAD_FORMAT };
 
+/// Identifier of fields in input records.
+typedef const char * InputFieldType;
+
 /**
  * Enumeration type used to determine particular field in record.
+ * @deprecated
  */
-enum InputFieldType {
+enum _InputFieldType {
     IFT_RecordIDField,
     IFT_EngngModel_nsteps,
     IFT_EngngModel_contextoutputstep,
@@ -73,11 +77,12 @@ enum InputFieldType {
     IFT_EngngModel_nonLinFormulation,
     IFT_EngngModel_eetype,
     IFT_EngngModel_initialGuess,
+    IFT_EngngModel_lstype,
+    IFT_EngngModel_smtype,
 
     IFT_MetaStep_nsteps,
 
-    IFT_ExportModuleManager_nmodules,
-    IFT_InitModuleManager_nmodules,
+    IFT_ModuleManager_nmodules,
 
     IFT_ExportModule_tstepall,
     IFT_ExportModule_tstepstep,
@@ -100,6 +105,7 @@ enum InputFieldType {
     IFT_VTKXMLExportModule_regionstoskip,
     IFT_VTKXMLExportModule_nvr,
     IFT_VTKXMLExportModule_vrmap,
+    IFT_VTKXMLExportModule_timeScale,
 
     IFT_POIExportModule_vars,
     IFT_POIExportModule_primvars,
@@ -112,29 +118,29 @@ enum InputFieldType {
     IFT_GPExportModule_vartypes,
     IFT_GPExportModule_ncoords,
 
+    IFT_MatlabExportModule_mesh,
+    IFT_MatlabExportModule_data,
+    IFT_MatlabExportModule_area,
+    IFT_MatlabExportModule_specials,
+
     IFT_IncrementalLinearStatic_endoftimeofinterest,
     IFT_IncrementalLinearStatic_prescribedtimes,
     IFT_IncrementalLinearStatic_deltat,
     IFT_IncrementalLinearStatic_lstype,
-    IFT_IncrementalLinearStatic_smtype,
 
     IFT_DEIDynamic_dumpcoef,
     IFT_DEIDynamic_deltat,
 
-    IFT_DIIDynamic_lstype,
-    IFT_DIIDynamic_smtype,
     IFT_DIIDynamic_deltat,
     IFT_DIIDynamic_ddtScheme,
     IFT_DIIDynamic_gamma,
     IFT_DIIDynamic_beta,
     IFT_DIIDynamic_eta,
     IFT_DIIDynamic_delta,
-    IFT_DIIDynamic_psi,
+    IFT_DIIDynamic_theta,
 
     IFT_NonLinearStatic_controlmode,
     IFT_NonLinearStatic_deltat,
-    IFT_NonLinearStatic_deltatltf,
-    IFT_NonLinearStatic_rtolv,
     IFT_NonLinearStatic_stiffmode,
     IFT_NonLinearStatic_refloadmode,
     IFT_NonLinearStatic_keepll,
@@ -144,15 +150,10 @@ enum InputFieldType {
     IFT_NonLinearStatic_loadBalancingFlag,
     IFT_NonLinearStatic_forceloadBalancingFlag,
 
-    IFT_NonLinearDynamic_lstype,
-    IFT_NonLinearDynamic_smtype,
     IFT_NonLinearDynamic_deltat,
-    IFT_NonLinearDynamic_rtolv,
     IFT_NonLinearDynamic_refloadmode,
     IFT_NonLinearDynamic_nonlocstiff,
     IFT_NonLinearDynamic_nonlocalext,
-    IFT_NonLinearDynamic_loadBalancingFlag,
-    IFT_NonLinearDynamic_forceloadBalancingFlag,
     IFT_NonLinearDynamic_ddtScheme,
     IFT_NonLinearDynamic_gamma,
     IFT_NonLinearDynamic_beta,
@@ -162,7 +163,6 @@ enum InputFieldType {
     IFT_EigenValueDynamic_nroot,
     IFT_EigenValueDynamic_rtolv,
     IFT_EigenValueDynamic_stype,
-    IFT_EigenValueDynamic_smtype,
 
     IFT_LinearStability_nroot,
     IFT_LinearStability_rtolv,
@@ -177,9 +177,6 @@ enum InputFieldType {
     IFT_NlDEIDynamic_elementcutmode,
     IFT_NlDEIDynamic_nonlocalext,
 
-    IFT_LinearStatic_lstype,
-    IFT_LinearStatic_smtype,
-
     IFT_AdaptiveLinearStatic_meshpackage,
 
     IFT_AdaptiveNonLinearStatic_meshpackage,
@@ -189,13 +186,11 @@ enum InputFieldType {
     IFT_AdaptiveNonLinearStatic_refloadmode,
     IFT_AdaptiveNonLinearStatic_preMappingLoadBalancingFlag,
 
-    IFT_StationaryTransportProblem_lstype,
-    IFT_StationaryTransportProblem_smtype,
     IFT_StationaryTransportProblem_exportfields,
 
     IFT_NonStationaryTransportProblem_initt,
     IFT_NonStationaryTransportProblem_deltat,
-    IFT_NonStationaryTransportProblem_dtf,
+    IFT_NonStationaryTransportProblem_deltatfunction,
     IFT_NonStationaryTransportProblem_prescribedtimes,
     IFT_NonStationaryTransportProblem_alpha,
     IFT_NonStationaryTransportProblem_lumpedcapa,
@@ -213,8 +208,6 @@ enum InputFieldType {
     IFT_StaggeredProblem_prob1,
     IFT_StaggeredProblem_prob2,
 
-    IFT_CBS_lstype,
-    IFT_CBS_smtype,
     IFT_CBS_deltat,
     IFT_CBS_mindeltat,
     IFT_CBS_cmflag,
@@ -226,8 +219,6 @@ enum InputFieldType {
     IFT_CBS_dscale,
     IFT_CBS_miflag,
 
-    IFT_SUPG_lstype,
-    IFT_SUPG_smtype,
     IFT_SUPG_deltat,
     IFT_SUPG_deltatltf,
     IFT_SUPG_cmflag,
@@ -242,9 +233,6 @@ enum InputFieldType {
     IFT_SUPG_maxiter,
     IFT_SUPG_stopmaxiter,
     IFT_SUPG_fsflag,
-
-    IFT_DARCYFLOW_lstype,
-    IFT_DARCYFLOW_smtype,
 
     IFT_CylindricalALM_psi,
     IFT_CylindricalALM_maxiter,
@@ -269,7 +257,6 @@ enum InputFieldType {
     IFT_CylindricalALM_rtolf,
     IFT_CylindricalALM_rtold,
 
-
     IFT_NRSolver_maxiter,
     IFT_NRSolver_miniterations,
     IFT_NRSolver_minsteplength,
@@ -279,8 +266,6 @@ enum InputFieldType {
     IFT_NRSolver_ddv,
     IFT_NRSolver_ddltf,
     IFT_NRSolver_linesearch,
-    IFT_NRSolver_nccdg,
-    IFT_NRSolver_ccdg,
     IFT_NRSolver_rtolv,
     IFT_NRSolver_rtolf,
     IFT_NRSolver_rtold,
@@ -315,10 +300,8 @@ enum InputFieldType {
     IFT_MixedGradientPressure_pressure,
     IFT_MixedGradientPressure_centerCoords,
 
-    IFT_StressTensorLoad_stressTensor,
-
-    IFT_PrescribedTensor_centercoords,
-    IFT_PrescribedTensor_gradient,
+    IFT_PrescribedGradient_centercoords,
+    IFT_PrescribedGradient_gradient,
 
     IFT_Load_components,
     IFT_Load_dofexcludemask,
@@ -358,7 +341,7 @@ enum InputFieldType {
     IFT_Domain_nic,
     IFT_Domain_nloadtimefunct,
     IFT_Domain_nbarrier,
-    IFT_Domain_nrfg,
+    IFT_Domain_nrandgen,
     IFT_Domain_topology,
     IFT_Domain_nxfemman,
 
@@ -379,23 +362,13 @@ enum InputFieldType {
     IFT_Node_coords,
     IFT_Node_lcs,
     IFT_Particle_rad,
-    IFT_RigidArmNode_coords,
     IFT_RigidArmNode_master,
-    IFT_RigidArmNode_load,
-    IFT_RigidArmNode_bc,
-    IFT_RigidArmNode_ic,
-    IFT_RigidArmNode_mastermask,
-    IFT_RigidArmNode_lcs,
-    IFT_RigidArmNode_globnum,
-    IFT_RigidArmNode_partitions,
-    IFT_RigidArmNode_shared,
-    IFT_RigidArmNode_remote,
-    IFT_RigidArmNode_null,
     IFT_SlaveNode_masterDofManagers,
     IFT_SlaveNode_weights,
     IFT_HangingNode_masterElement,
     IFT_HangingNode_masterRegion,
 
+    IFT_Element_nip,
     IFT_Element_mat,
     IFT_Element_crosssect,
     IFT_Element_nodes,
@@ -414,45 +387,24 @@ enum InputFieldType {
     IFT_SUPGElement_bsides,
     IFT_SUPGElement_bcodes,
 
-    IFT_StokesFlow_lstype,
-    IFT_StokesFlow_smtype,
     IFT_StokesFlow_deltat,
 
+    IFT_FE2FluidMaterial_fileName,
+
+    IFT_NonlinearFluidMaterial_mu,
     IFT_NonlinearFluidMaterial_alpha,
     IFT_NonlinearFluidMaterial_C,
 
     IFT_NLStructuralElement_nlgeoflag,
 
-    IFT_Axisymm3d_nip,
     IFT_Axisymm3d_nipfish,
-    IFT_CCTPlate_nip,
-    IFT_Quad1Mindlin_nip,
-    IFT_LSpace_nip,
-    IFT_LTrElementPPDE_nip,
-    IFT_L4Axisymm_nip,
-    IFT_PlaneStress2d_nip,
-    IFT_Quad1PlaneStrain_nip,
-    IFT_RerShell_nip,
-    IFT_QPlaneStress2d_nip,
-    IFT_QSpace_nip,
-    IFT_QSpaceGrad_nip,
-    IFT_QTrPlaneStress2d_nip,
-    IFT_Q4Axisymm_nip,
+    IFT_Quad1MindlinShell3D_alpha,
     IFT_Q4Axisymm_nipfish,
-    IFT_TrPlaneStress2d_nip,
-    IFT_TrPlaneStrRot_nip,
     IFT_TrPlaneStrRot_niprot,
-    IFT_LTRSpace_nip,
-    IFT_QTRSpace_nip,
-    IFT_QTRSpaceGrad_nip,
-    IFT_LWedge_nip,
-    IFT_QWedge_nip,
-    IFT_QWedgeGrad_nip, 
     IFT_Beam2d_dofstocondense,
     IFT_Beam3d_refnode,
     IFT_Beam3d_dofstocondense,
     IFT_LIBeam3dNL_refnode,
-    IFT_TrPlaneStrain_nip,
     IFT_LIBeam3dNL2_refnode,
     IFT_LIBeam3d_refnode,
     IFT_LIBeam3d2_refnode,
@@ -461,24 +413,17 @@ enum InputFieldType {
     IFT_SpringElement_mode,
     IFT_SpringElement_orientation,
     IFT_SpringElement_springConstant,
-    IFT_QPlaneStrain_nip,
-    IFT_QTrPlaneStrain_nip,
-    IFT_QTruss1d_nip,
-    IFT_QTruss1dGrad_nip,
 
+    IFT_InterfaceElem1d_refnode,
+    IFT_InterfaceElem1d_normal,
 
-    IFT_Quad1_ht_nip,
-    IFT_Brick1_ht_nip,
-    IFT_QBrick1_ht_nip,
-    IFT_Tetrah1_ht_nip,
+    IFT_Tr1CBS_vof,
+    IFT_Tr1CBS_pvof,
 
-    IFT_TR12DCBS_vof,
-    IFT_TR12DCBS_pvof,
-
-    IFT_TR12DSUPG_pvof,
-    IFT_TR12DSUPG_vof,
-    IFT_TR12DSUPG2_mat0,
-    IFT_TR12DSUPG2_mat1,
+    IFT_Tr1SUPG_pvof,
+    IFT_Tr1SUPG_vof,
+    IFT_Tr1SUPG2_mat0,
+    IFT_Tr1SUPG2_mat1,
 
     IFT_Lattice2d_thick,
     IFT_Lattice2d_width,
@@ -493,10 +438,6 @@ enum InputFieldType {
     IFT_SimpleCrossSection_shearcoeff,
     IFT_SimpleCrossSection_shearareay, // shear area y direction
     IFT_SimpleCrossSection_shearareaz, // shear area z direction
-
-
-    IFT_HeatCrossSection_thick,
-    IFT_HeatCrossSection_width,
 
     IFT_LayeredCrossSection_nlayers,
     IFT_LayeredCrossSection_layermaterials,
@@ -524,11 +465,9 @@ enum InputFieldType {
     IFT_AbaqusUserMaterial_numState,
     IFT_AbaqusUserMaterial_properties,
     IFT_AbaqusUserMaterial_userMaterial,
+    IFT_AbaqusUserMaterial_name,
 
     IFT_SurfaceTensionMaterial_isotropic,
-
-    IFT_IsotropicLinearHeatMaterial_k, // conductivity
-    IFT_IsotropicLinearHeatMaterial_c, // specific heat
 
     IFT_IsotropicHeatTransferMaterial_k,
     IFT_IsotropicHeatTransferMaterial_c,
@@ -585,7 +524,6 @@ enum InputFieldType {
     IFT_HeMoTKMaterial_por,
     IFT_HeMoTKMaterial_rho_gws,
 
-    IFT_CemhydMatInputFileName,
     IFT_CemhydMat_conductivitytype,
     IFT_CemhydMat_capacitytype,
     IFT_CemhydMat_densitytype,
@@ -598,7 +536,6 @@ enum InputFieldType {
     IFT_B3Material_mode,
     IFT_B3Material_emodulimode,
     IFT_B3Material_shmode,
-    IFT_B3Material_b3type,
     IFT_B3Material_fc,
     IFT_B3Material_cc,
     IFT_B3Material_wc,
@@ -631,13 +568,6 @@ enum InputFieldType {
     IFT_B3Material_ts0,
     IFT_B3Material_finalhumidity,
     IFT_B3Material_initialhumidity,
-    IFT_B3Material_qetor,
-    IFT_B3Material_qrtor,
-    IFT_B3Material_qstor,
-    IFT_B3Material_alphae,
-    IFT_B3Material_alphar,
-    IFT_B3Material_alphas,
-    IFT_B3Material_k2,
 
     IFT_MPSMaterial_talpha,
     IFT_MPSMaterial_mode,
@@ -753,9 +683,10 @@ enum InputFieldType {
     IFT_IsotropicDamageMaterial1_ef,
     IFT_IsotropicDamageMaterial1_wf,
     IFT_IsotropicDamageMaterial1_equivstraintype,
-    IFT_IsotropicDamageMaterial1_softeningtype,
+    IFT_IsotropicDamageMaterial1_damageLaw,
     IFT_IsotropicDamageMaterial1_k,
     IFT_IsotropicDamageMaterial1_md,
+    IFT_IsotropicDamageMaterial1_ecsm,
     IFT_IsotropicDamageMaterial1_At,
     IFT_IsotropicDamageMaterial1_Bt,
     IFT_IsotropicDamageMaterial1_ft,
@@ -773,8 +704,8 @@ enum InputFieldType {
     IFT_IsotropicDamageMaterial1_nd,
     IFT_IsotropicDamageMaterial1_checkSnapBack,
 
-    IFT_CompoDamageMat_ex,
-    IFT_CompoDamageMat_ez,
+    IFT_CompoDamageMat_exx,
+    IFT_CompoDamageMat_eyyezz,
     IFT_CompoDamageMat_nyxy,
     IFT_CompoDamageMat_nyyz,
     IFT_CompoDamageMat_Gxy,
@@ -782,9 +713,7 @@ enum InputFieldType {
     IFT_CompoDamageMat_afteriter,
     IFT_CompoDamageMat_allowSnapBack,
 
-    IFT_FE2SinteringMaterial_porosity,
-
-    IFT_MicroMaterialFileName,
+    IFT_MicroMaterial_fileName,
     IFT_MacroLspace_microMasterNodes,
     IFT_MacroLspace_microBoundaryNodes,
     IFT_MacroLspace_stiffMatrxFileName,
@@ -946,6 +875,8 @@ enum InputFieldType {
     IFT_MisesMatGrad_m,
 
     IFT_MisesMatNl_averagingtype,
+    IFT_MisesMatNl_exp,
+    IFT_MisesMatNl_rf,
 
     IFT_RankineMat_sig0,
     IFT_RankineMat_h,
@@ -953,16 +884,18 @@ enum InputFieldType {
     IFT_RankineMat_plasthardtype,
     IFT_RankineMat_delsigy,
     IFT_RankineMat_yieldtol,
+    IFT_RankineMat_gf,
 
     IFT_RankineMatGrad_r,
     IFT_RankineMatGrad_m,
+    IFT_RankineMatGrad_negligibleDamage,
 
     IFT_CohSur3d_kx,
     IFT_CohSur3d_ky,
     IFT_CohSur3d_kz,
 
     IFT_LsMasterMat_m,
-    IFT_LsMasterMat_slavemat,
+    IFT_LsMasterMat_slaveMat,
 
     IFT_HydrationModel_hydration,
     IFT_HydrationModel_c60mix,
@@ -987,8 +920,8 @@ enum InputFieldType {
     IFT_HydratingConcreteMat_referenceTemperature,
     IFT_HydratingConcreteMat_castAt,
     IFT_HydratingConcreteMat_hydrationModelType,
-    IFT_maxModelIntegrationTime,
-    IFT_minModelTimeStepIntegrations,
+    IFT_HydratingConcreteMat_maxModelIntegrationTime,
+    IFT_HydratingConcreteMat_minModelTimeStepIntegrations,
     IFT_HydratingConcreteMat_conductivitytype,
     IFT_HydratingConcreteMat_capacitytype,
     IFT_HydratingConcreteMat_densitytype,
@@ -1071,8 +1004,6 @@ enum InputFieldType {
 
     IFT_TrabBoneEmbed_eps0,
     IFT_TrabBoneEmbed_nu0,
-    IFT_TrabBoneEmbed_mu0,
-    IFT_TrabBoneEmbed_rho,
 
     IFT_TrabBoneNLEmbed_r,
     IFT_TrabBoneNLEmbed_m,
@@ -1086,16 +1017,11 @@ enum InputFieldType {
     IFT_ConcreteDPM_chard,
     IFT_ConcreteDPM_dhard,
     IFT_ConcreteDPM_asoft,
-    IFT_ConcreteDPM_bsoft,
     IFT_ConcreteDPM_dilation,
     IFT_ConcreteDPM_yieldtol,
     IFT_ConcreteDPM_newtoniter,
-    IFT_ConcreteDPM_ef,
+    IFT_ConcreteDPM_wf,
     IFT_ConcreteDPM_gf,
-    IFT_ConcreteDPM_cycmode,
-    IFT_ConcreteDPM_cycpar,
-    IFT_ConcreteDPM_reltime,
-    IFT_ConcreteDPM_rateexp,
     IFT_ConcreteDPM_href,
     IFT_ConcreteDPM_helem,
 
@@ -1135,9 +1061,6 @@ enum InputFieldType {
     IFT_ConcreteDPM2_fcZero,
     IFT_ConcreteDPM2_ft,
     IFT_ConcreteDPM2_ecc,
-    IFT_ConcreteDPM2_tinit,
-    IFT_ConcreteDPM2_sinit,
-    IFT_ConcreteDPM2_cinit,
     IFT_ConcreteDPM2_kinit,
     IFT_ConcreteDPM2_ahard,
     IFT_ConcreteDPM2_bhard,
@@ -1171,7 +1094,6 @@ enum InputFieldType {
     IFT_LatticeDamage2d_e0OneMean,
     IFT_LatticeDamage2d_coh,
     IFT_LatticeDamage2d_ec,
-    IFT_LatticeDamage2d_paramDuct,
 
     IFT_DustMaterial_alpha,
     IFT_DustMaterial_beta,
@@ -1187,11 +1109,6 @@ enum InputFieldType {
     IFT_DustMaterial_wHard,
     IFT_DustMaterial_dHard,
 
-    IFT_LsMasterMat_slaveMat,
-
-    IFT_ConcreteDPMnlMaterial_r,
-    IFT_ConcreteDPMnlMaterial_m,
-
     IFT_NewtonianFluidMaterial_mu,
 
     IFT_BinghamFluidMaterial_mu0,
@@ -1201,8 +1118,8 @@ enum InputFieldType {
 
     IFT_TwoFluidMaterial_mat,
 
-    IFT_CompRowPrecond_droptol,
-    IFT_CompRowPrecond_partfill,
+    IFT_CompRow_ILUPrecond_droptol,
+    IFT_CompRow_ILUPrecond_partfill,
 
     IFT_NonlocalMaterialExtensionInterface_regionmap,
     IFT_NonlocalMaterialExtensionInterface_permanentNonlocTableFlag,
@@ -1244,13 +1161,14 @@ enum InputFieldType {
     IFT_PiecewiseLinFunction_npoints,
     IFT_PiecewiseLinFunction_t,
     IFT_PiecewiseLinFunction_ft,
-
-    IFT_PiecewiseLinFunctionBlock_npoints,
+    IFT_PiecewiseLinFunction_dataFile,
 
     IFT_PeriodicPiecewiseLinFunction_period,
     IFT_PeriodicPiecewiseLinFunction_addtf,
 
     IFT_UserDefinedLoadTimeFunction_ft,
+    IFT_UserDefinedLoadTimeFunction_dfdt,
+    IFT_UserDefinedLoadTimeFunction_d2fdt2,
 
     IFT_UserDefinedTemperatureField_size,
     IFT_UserDefinedTemperatureField_t1,
@@ -1310,15 +1228,15 @@ enum InputFieldType {
 
     IFT_LEPLIC_refVol,
 
-    IFT_LSPCS_levelSetValues,
-    IFT_LSPCS_refmatpoly_x,
-    IFT_LSPCS_refmatpoly_y,
-    IFT_LSPCS_reinit_dt,
-    IFT_LSPCS_reinit_err,
-    IFT_LSPCS_reinit_alg,
-    IFT_LSPCS_nsd,
-    IFT_LSPCS_ci1,
-    IFT_LSPCS_ci2,
+    IFT_LevelSetPCS_levelSetValues,
+    IFT_LevelSetPCS_refmatpoly_x,
+    IFT_LevelSetPCS_refmatpoly_y,
+    IFT_LevelSetPCS_reinit_dt,
+    IFT_LevelSetPCS_reinit_err,
+    IFT_LevelSetPCS_reinit_alg,
+    IFT_LevelSetPCS_nsd,
+    IFT_LevelSetPCS_ci1,
+    IFT_LevelSetPCS_ci2,
 
     IFT_LoadBalancer_wtp,
     IFT_LoadBalancerMonitor_nodeWeightMode,
@@ -1391,14 +1309,17 @@ enum InputFieldType {
     IFT_TSplineInterpolation_localIndexKnotVectorV,
     IFT_TSplineInterpolation_localIndexKnotVectorW,
 
-    IFT_IGAElement_NIP,
     IFT_IGAElement_KnotSpanParallelMode,
 
     IFT_RVEMaterial_bctype,
     IFT_RVEMaterial_supressoutput,
 
     IFT_WeakPeriodicBoundaryCondition_order,
-    IFT_WeakPeriodicBoundaryCondition_descritization,
+    IFT_WeakPeriodicBoundaryCondition_descritizationType,
+    IFT_WeakPeriodicBoundaryCondition_dofid,
+    IFT_WeakPeriodicBoundaryCondition_ngp,
+    IFT_WeakPeriodicBoundaryCondition_elementSidesPositive,
+    IFT_WeakPeriodicBoundaryCondition_elementSidesNegative,
 
     IFT_Unknown
 };
@@ -1407,8 +1328,8 @@ enum InputFieldType {
 /**
  * Macro simplifying the error reporting.
  */
-#define IR_IOERR(__class, __proc, __id, __keyword, __ir, __result) \
-    __ir->report_error(__class, __proc, __id, __keyword, __result, __FILE__, __LINE__);
+#define IR_IOERR(__class, __proc, __enum, __keyword, __ir, __result) \
+    __ir->report_error(__class, __proc, __keyword, __result, __FILE__, __LINE__);
 
 /**
  * Macro facilitating the use of input record reading methods.
@@ -1416,8 +1337,8 @@ enum InputFieldType {
  * field identified by __kwd and stores the  result into __value parameter.
  * Includes also the error reporting.
  */
-#define IR_GIVE_FIELD(__ir, __value, __id, __kwd) result = __ir->giveField(__value, __id, __kwd); \
-    if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, __id, __kwd, __ir, result); }
+#define IR_GIVE_FIELD(__ir, __value, __id, __kwd) result = __ir->giveField(__value, __kwd); \
+    if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, foo, __kwd, __ir, result); }
 
 /**
  * Macro facilitating the use of input record reading methods.
@@ -1425,8 +1346,8 @@ enum InputFieldType {
  * field identified by __kwd and stores the  result into __value parameter.
  * Includes also the error reporting.
  */
-#define IR_GIVE_OPTIONAL_FIELD(__ir, __value, __id, __kwd) result = __ir->giveOptionalField(__value, __id, __kwd); \
-    if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, __id, __kwd, __ir, result); }
+#define IR_GIVE_OPTIONAL_FIELD(__ir, __value, __id, __kwd) result = __ir->giveOptionalField(__value, __kwd); \
+    if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, foo, __kwd, __ir, result); }
 
 /**
  * Macro facilitating the use of input record reading methods.
@@ -1435,7 +1356,7 @@ enum InputFieldType {
  */
 #define IR_GIVE_RECORD_KEYWORD_FIELD(__ir, __name, __value) \
     result = __ir->giveRecordKeywordField(__name, __value); \
-    if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "RecordIDField", __ir, result); }
+    if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, foo, "RecordIDField", __ir, result); }
 
 
 
@@ -1475,25 +1396,25 @@ public:
     /// Reads the record id field  (type of record).
     virtual IRResultType giveRecordKeywordField(std :: string &answer) = 0;
     /// Reads the integer field value.
-    virtual IRResultType giveField(int &answer, InputFieldType fieldID, const char *idString) = 0;
+    virtual IRResultType giveField(int &answer, InputFieldType id) = 0;
     /// Reads the double field value.
-    virtual IRResultType giveField(double &answer, InputFieldType fieldID, const char *idString) = 0;
+    virtual IRResultType giveField(double &answer, InputFieldType id) = 0;
     /// Reads the bool field value.
-    virtual IRResultType giveField(bool &answer, InputFieldType fieldID, const char *idString) = 0;
+    virtual IRResultType giveField(bool &answer, InputFieldType id) = 0;
     /// Reads the string field value.
-    virtual IRResultType giveField(std :: string &answer, InputFieldType fieldI, const char *idString) = 0;
+    virtual IRResultType giveField(std :: string &answer, InputFieldType id) = 0;
     /// Reads the FloatArray field value.
-    virtual IRResultType giveField(FloatArray &answer, InputFieldType fieldI, const char *idString) = 0;
+    virtual IRResultType giveField(FloatArray &answer, InputFieldType id) = 0;
     /// Reads the IntArray field value.
-    virtual IRResultType giveField(IntArray &answer, InputFieldType fieldID, const char *idString) = 0;
+    virtual IRResultType giveField(IntArray &answer, InputFieldType id) = 0;
     /// Reads the FloatMatrix field value.
-    virtual IRResultType giveField(FloatMatrix &answer, InputFieldType fieldI, const char *idString) = 0;
+    virtual IRResultType giveField(FloatMatrix &answer, InputFieldType id) = 0;
     /// Reads the vector of strings.
-    virtual IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType fieldID, const char *idString) = 0;
+    virtual IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType id) = 0;
     /// Reads the Dictionary field value.
-    virtual IRResultType giveField(Dictionary &answer, InputFieldType fieldID, const char *idString) = 0;
+    virtual IRResultType giveField(Dictionary &answer, InputFieldType id) = 0;
     /// Reads the std::list<Range> field value.
-    virtual IRResultType giveField(std :: list< Range > &answer, InputFieldType fieldID, const char *idString) = 0;
+    virtual IRResultType giveField(std :: list< Range > &answer, InputFieldType id) = 0;
     //@}
 
     /**@name Optional field extraction methods
@@ -1504,29 +1425,32 @@ public:
      */
     //@{
     /// Reads the integer field value.
-    IRResultType giveOptionalField(int &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(int &answer, InputFieldType id);
     /// Reads the double field value.
-    IRResultType giveOptionalField(double &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(double &answer, InputFieldType id);
     /// Reads the bool field value.
-    IRResultType giveOptionalField(bool &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(bool &answer, InputFieldType id);
     /// Reads the string field value.
-    IRResultType giveOptionalField(std :: string &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(std :: string &answer, InputFieldType id);
     /// Reads the FloatArray field value.
-    IRResultType giveOptionalField(FloatArray &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(FloatArray &answer, InputFieldType id);
     /// Reads the IntArray field value.
-    IRResultType giveOptionalField(IntArray &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(IntArray &answer, InputFieldType id);
     /// Reads the FloatMatrix field value.
-    IRResultType giveOptionalField(FloatMatrix &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(FloatMatrix &answer, InputFieldType id);
     /// Reads the vector of strings.
-    IRResultType giveOptionalField(std :: vector< std :: string > &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(std :: vector< std :: string > &answer, InputFieldType id);
     /// Reads the Dictionary field value.
-    IRResultType giveOptionalField(Dictionary &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(Dictionary &answer, InputFieldType id);
     /// Reads the std::list<Range> field value.
-    IRResultType giveOptionalField(std :: list< Range > &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(std :: list< Range > &answer, InputFieldType id);
     //@}
 
+    ///@todo Temporary wrapper (!)
+    virtual bool hasField(_InputFieldType _id, InputFieldType id) { return this->hasField(id); }
+
     /// Returns true if record contains field identified by idString keyword.
-    virtual bool hasField(InputFieldType fieldID, const char *idString) = 0;
+    virtual bool hasField(InputFieldType id) = 0;
 
     /// Returns error string corresponding to given value of IRResultType type.
     const char *strerror(IRResultType);
@@ -1534,17 +1458,11 @@ public:
     virtual void printYourself() = 0;
 
     /// Prints the error message.
-    void report_error(const char *_class, const char *proc, InputFieldType fieldID, const char *kwd,
-                      IRResultType result, const char *file, int line);
+    virtual void report_error(const char *_class, const char *proc, InputFieldType id,
+                      IRResultType result, const char *file, int line) = 0;
 
     /// Terminates the current record session and if the flag is true, warning is printed for unscanned tokens.
     virtual void finish(bool wrn = true) = 0;
-    /// Sets line number from dataReader.
-    void setLineNumber(const int lineNumber) { this->lineNumber = lineNumber; };
-
-protected:
-    /// Keep track of read line
-    int lineNumber;
 };
 } // end namespace oofem
 #endif // inputrecord_h

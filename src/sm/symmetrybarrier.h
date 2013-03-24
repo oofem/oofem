@@ -37,9 +37,15 @@
 
 #include "nonlocalbarrier.h"
 #include "domain.h"
-
 #include "flotarry.h"
 #include "flotmtrx.h"
+
+///@name Input fields for SymmetryBarrier
+//@{
+#define _IFT_SymmetryBarrier_origin "origin"
+#define _IFT_SymmetryBarrier_normals "normals"
+#define _IFT_SymmetryBarrier_activemask "activemask"
+//@}
 
 namespace oofem {
 /**

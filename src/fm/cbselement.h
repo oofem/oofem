@@ -37,6 +37,12 @@
 
 #include "fmelement.h"
 
+///@name Input fields for CBS elements
+//@{
+#define _IFT_CBSElement_bsides "bsides"
+#define _IFT_CBSElement_bcodes "bcodes"
+//@}
+
 namespace oofem {
 class TimeStep;
 class GaussPoint;
@@ -49,6 +55,12 @@ class FloatArray;
  */
 class CBSElement : public FMElement
 {
+protected:
+    /// Array of boundary sides.
+    IntArray boundarySides;
+    /// Boundary sides codes.
+    IntArray boundaryCodes;
+
 public:
     CBSElement(int n, Domain *aDomain);
     virtual ~CBSElement();

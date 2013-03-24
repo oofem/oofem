@@ -38,6 +38,17 @@
 #include "feinterpol.h"
 #include "flotarry.h"
 
+///@name Input fields for BSplineInterpolation
+//@{
+#define _IFT_BSplineInterpolation_degree "degree"
+#define _IFT_BSplineInterpolation_knotVectorU "knotvectoru"
+#define _IFT_BSplineInterpolation_knotVectorV "knotvectorv"
+#define _IFT_BSplineInterpolation_knotVectorW "knotvectorw"
+#define _IFT_BSplineInterpolation_knotMultiplicityU "knotmultiplicityu"
+#define _IFT_BSplineInterpolation_knotMultiplicityV "knotmultiplicityv"
+#define _IFT_BSplineInterpolation_knotMultiplicityW "knotmultiplicityw"
+//@}
+
 namespace oofem {
 
 class FloatMatrix;

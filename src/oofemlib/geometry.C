@@ -217,8 +217,8 @@ IRResultType Line :: initializeFrom(InputRecord *ir)
 
     FloatArray *start = new FloatArray(2);
     FloatArray *end = new FloatArray(2);
-    IR_GIVE_FIELD(ir, * start, IFT_Line_start, "start"); // Macro
-    IR_GIVE_FIELD(ir, * end, IFT_Line_end, "end"); // Macro
+    IR_GIVE_FIELD(ir, * start, IFT_Line_start, "start");
+    IR_GIVE_FIELD(ir, * end, IFT_Line_end, "end");
     vertices->put(1, start);
     vertices->put(2, end);
     return IRRT_OK;
@@ -375,8 +375,8 @@ IRResultType Circle :: initializeFrom(InputRecord *ir)
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
     FloatArray *center = new FloatArray(2);
-    IR_GIVE_FIELD(ir, * center, IFT_Circle_center, "center"); // Macro
-    IR_GIVE_FIELD(ir, radius, IFT_Circle_radius, "radius"); // Macro
+    IR_GIVE_FIELD(ir, * center, IFT_Circle_center, "center");
+    IR_GIVE_FIELD(ir, radius, IFT_Circle_radius, "radius");
     vertices->put(1, center);
     return IRRT_OK;
 }

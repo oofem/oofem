@@ -136,7 +136,7 @@ MazarsNLMaterial :: initializeFrom(InputRecord *ir)
     MazarsMaterial :: initializeFrom(ir);
     StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, R, IFT_MazarsNLMaterial_r, "r"); // Macro
+    IR_GIVE_FIELD(ir, R, IFT_MazarsNLMaterial_r, "r");
     if ( R < 0.0 ) {
         R = 0.0;
     }
@@ -145,6 +145,7 @@ MazarsNLMaterial :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
+
 
 double
 MazarsNLMaterial :: computeWeightFunction(const FloatArray &src, const FloatArray &coord)
@@ -162,7 +163,6 @@ MazarsNLMaterial :: computeWeightFunction(const FloatArray &src, const FloatArra
 }
 
 
-
 void
 MazarsNLMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp)
 {
@@ -177,8 +177,6 @@ MazarsNLMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, Gau
     status->setLe(1.0);
     status->setLec(1.0);
 }
-
-
 
 
 MazarsNLMaterialStatus :: MazarsNLMaterialStatus(int n, Domain *d, GaussPoint *g) :
@@ -216,7 +214,6 @@ MazarsNLMaterialStatus :: initTempStatus()
 }
 
 
-
 void
 MazarsNLMaterialStatus :: updateYourself(TimeStep *atTime)
 //
@@ -227,7 +224,6 @@ MazarsNLMaterialStatus :: updateYourself(TimeStep *atTime)
 {
     MazarsMaterialStatus :: updateYourself(atTime);
 }
-
 
 
 contextIOResultType

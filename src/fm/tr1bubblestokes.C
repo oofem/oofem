@@ -58,7 +58,6 @@ Tr1BubbleStokes :: Tr1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomai
 {
     this->numberOfDofMans = 3;
     this->numberOfGaussPoints = 7;
-    this->computeGaussPoints();
     
     this->bubble = new ElementDofManager(1, aDomain, this);
     this->bubble->appendDof(new MasterDof(1, this->bubble, V_u));
@@ -100,7 +99,7 @@ int Tr1BubbleStokes :: computeNumberOfDofs(EquationID ut)
 
 void Tr1BubbleStokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
+    if ( ut == EID_MomentumBalance ) {
         answer.setValues(2, V_u, V_v);
     } else if ( ut == EID_ConservationEquation ) {
         answer.setValues(1, P_f);

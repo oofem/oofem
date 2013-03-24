@@ -40,7 +40,6 @@
 #include "domain.h"
 #include "flotmtrx.h"
 #include "loadtime.h"
-
 #include "matresponseform.h"
 #include "matresponsemode.h"
 #include "valuemodetype.h"

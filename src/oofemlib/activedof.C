@@ -40,7 +40,7 @@
 #include "engngm.h"
 
 namespace oofem {
-ActiveDof :: ActiveDof(int n, DofManager *aNode, int bc, DofIDItem id) : Dof(n, aNode, id), bc(bc), activeBC(NULL)
+ActiveDof :: ActiveDof(int n, DofManager *aNode, int bc, DofIDItem id) : Dof(n, aNode, id), equationNumber(0), bc(bc), activeBC(NULL)
 {
 }
 

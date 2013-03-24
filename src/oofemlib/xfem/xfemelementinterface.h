@@ -38,7 +38,8 @@
 #include "interface.h"
 #include "alist.h"
 #include "xfemmanager.h"
-
+#include "enrichmentdomain.h"
+#include "enrichmentitem.h"
 namespace oofem {
 class FloatArray;
 class FloatMatrix;

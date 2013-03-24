@@ -44,7 +44,6 @@ namespace oofem {
 DynamicDataReader :: DynamicDataReader() : DataReader()
 {
     this->it = recordList.end();
-    lineNumber = 0;
 }
 
 DynamicDataReader :: ~DynamicDataReader()

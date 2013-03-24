@@ -47,6 +47,13 @@
  * basis function and its derivatives (computed by BSpline methods)
  */
 
+///@name Input fields for TSplineInterpolation
+//@{
+#define _IFT_TSplineInterpolation_localIndexKnotVectorU "localindexknotvectoru"
+#define _IFT_TSplineInterpolation_localIndexKnotVectorV "localindexknotvectorv"
+#define _IFT_TSplineInterpolation_localIndexKnotVectorW "localindexknotvectorw"
+//@}
+
 namespace oofem {
 /**
  * Interpolation for T-splines.

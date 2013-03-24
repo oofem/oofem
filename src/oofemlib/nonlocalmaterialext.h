@@ -41,12 +41,22 @@
 
 #include <list>
 
+///@name Input fields for NonlocalMaterialExtensionInterface
+//@{
+#define _IFT_NonlocalMaterialExtensionInterface_regionmap "regionmap"
+#define _IFT_NonlocalMaterialExtensionInterface_permanentNonlocTableFlag "permanentnonloctableflag"
+#define _IFT_NonlocalMaterialExtensionInterface_r "r"
+#define _IFT_NonlocalMaterialExtensionInterface_wft "wft"
+#define _IFT_NonlocalMaterialExtensionInterface_averagingtype "averagingtype"
+#define _IFT_NonlocalMaterialExtensionInterface_m "m"
+#define _IFT_NonlocalMaterialExtensionInterface_scalingtype "scaling"
+#define _IFT_NonlocalMaterialExtensionInterface_averagedquantity "averagedvar"
+#define _IFT_NonlocalMaterialExtensionInterface_nonlocalvariation "nlvariation"
+#define _IFT_NonlocalMaterialExtensionInterface_beta "beta"
+#define _IFT_NonlocalMaterialExtensionInterface_zeta "zeta"
+//@}
+
 namespace oofem {
-//
-// local integration record - stores pointer to gp and its integration weight
-// Also remote integration record should be defined in case of parallel scheme
-// using domain decomposition.
-//
 /**
  * Structure containing reference to integration point and its corresponding nonlocal integration weight.
  * Used by nonlocal constitutive models based on integral averaging procedure, where in each integration

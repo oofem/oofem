@@ -491,19 +491,19 @@ IsoInterfaceDamageMaterial :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, kn, IFT_IsoInterfaceDamageMaterial_kn, "kn"); // Macro
-    IR_GIVE_FIELD(ir, ks, IFT_IsoInterfaceDamageMaterial_ks, "ks"); // Macro
+    IR_GIVE_FIELD(ir, kn, IFT_IsoInterfaceDamageMaterial_kn, "kn");
+    IR_GIVE_FIELD(ir, ks, IFT_IsoInterfaceDamageMaterial_ks, "ks");
 
-    IR_GIVE_FIELD(ir, ft, IFT_IsoInterfaceDamageMaterial_ft, "ft"); // Macro
-    IR_GIVE_FIELD(ir, gf, IFT_IsoInterfaceDamageMaterial_gf, "gf"); // Macro
+    IR_GIVE_FIELD(ir, ft, IFT_IsoInterfaceDamageMaterial_ft, "ft");
+    IR_GIVE_FIELD(ir, gf, IFT_IsoInterfaceDamageMaterial_gf, "gf");
     this->e0 = ft / kn;
 
     //Set limit on the maximum isotropic damage parameter if needed
-    IR_GIVE_OPTIONAL_FIELD(ir, maxOmega, IFT_IsotropicDamageMaterial_maxOmega, "maxomega"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, maxOmega, IFT_IsotropicDamageMaterial_maxOmega, "maxomega");
     maxOmega = min(maxOmega, 0.999999);
     maxOmega = max(maxOmega, 0.0);
 
-    IR_GIVE_FIELD(ir, tempDillatCoeff, IFT_IsoInterfaceDamageMaterial_talpha, "talpha"); // Macro
+    IR_GIVE_FIELD(ir, tempDillatCoeff, IFT_IsoInterfaceDamageMaterial_talpha, "talpha");
     return StructuralMaterial :: initializeFrom(ir);
 }
 

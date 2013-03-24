@@ -35,8 +35,8 @@
 #ifndef enrichmentfunction_h
 #define enrichmentfunction_h
 
-#include "femcmpnn.h"
 #include "intarray.h"
+#include "enrichmentdomain.h"
 
 namespace oofem {
 class EnrichmentItem;
@@ -49,6 +49,7 @@ class GaussPoint;
  * Particularly, evaluateAt() and evaluateDerivativeAt() services are declared
  * to evaluate the value and spatial derivatives at a given point of the receiver.
  * @author chamrova
+ * @author Jim Brouzoulis
  */
 class EnrichmentFunction : public FEMComponent
 {
@@ -62,13 +63,13 @@ public:
     /// Destructor
     virtual ~EnrichmentFunction() { };
     /// Evaluates a function at a particular point
-    virtual double evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei) = 0;
+    virtual double evaluateFunctionAt(FloatArray *point, EnrichmentDomain *ed) = 0;
     /// Evaluates a function derivative at a particular point
-    virtual void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei) = 0;
+    virtual void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentDomain *ed) = 0;
     /// Evaluates a function at a particular point
-    virtual double evaluateFunctionAt(GaussPoint *gp, EnrichmentItem *ei);
+    virtual double evaluateFunctionAt(GaussPoint *gp, EnrichmentDomain *ed);
     /// Evaluates a function derivative at a particular point
-    virtual void evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentItem *ei);
+    virtual void evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentDomain *ed);
     // Inserts EnrichmentItem into associatedEnrItem array
     // void insertEnrichmentItem(EnrichmentItem *er);
     // Sets a particular EnrichmentItem active
@@ -91,12 +92,11 @@ protected:
 class DiscontinuousFunction : public EnrichmentFunction
 {
 public:
-
     DiscontinuousFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
         this->numberOfDofs = 1;
     }
-    double evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei);
-    void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei);
+    double evaluateFunctionAt(FloatArray *point, EnrichmentDomain *ed);
+    void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentDomain *ed);
 };
 
 /** Class representing Branch EnrichmentFunction. */
@@ -107,8 +107,8 @@ public:
     BranchFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
         this->numberOfDofs = 4;
     }
-    double evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei);
-    void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei);
+    double evaluateFunctionAt(FloatArray *point, EnrichmentDomain *ed);
+    void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentDomain *ed);
 };
 
 /** Class representing bimaterial interface. */
@@ -119,10 +119,10 @@ public:
     RampFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
         this->numberOfDofs =1;
     }
-    double evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei);
-    void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei);
-    double evaluateFunctionAt(GaussPoint *gp, EnrichmentItem *ei);
-    void evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentItem *ei);
+    double evaluateFunctionAt(FloatArray *point, EnrichmentDomain *ed);
+    void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentDomain *ed);
+    double evaluateFunctionAt(GaussPoint *gp, EnrichmentDomain *ed);
+    void evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentDomain *ed);
 };
 } // end namespace oofem
 #endif  // enrichmentfunction_h

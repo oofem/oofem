@@ -37,7 +37,6 @@
 
 #include "dof.h"
 #include "compiler.h"
-#include "dictionr.h"
 #include "error.h"
 
 namespace oofem {

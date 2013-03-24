@@ -200,7 +200,7 @@ oofegGraphicContext :: setElementFilterState(char *initString)
 {
     OOFEMTXTInputRecord parser(initString);
     element_filter.clear();
-    parser.giveField(element_filter, IFT_Unknown, "element_filter");
+    parser.giveField(element_filter, "element_filter");
 }
 
 int

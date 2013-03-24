@@ -39,6 +39,7 @@
 #include "domaintype.h"
 #include "statecountertype.h"
 #include "intarray.h"
+#include "equationid.h"
 
 #include <map>
 #ifdef __PARALLEL_MODE
@@ -49,6 +50,21 @@
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
+
+///@name Input fields for domains
+//@{
+#define _IFT_Domain_type "domain" ///< This is trouble, will not work with dynamic input record
+#define _IFT_Domain_ndofman "ndofman"
+#define _IFT_Domain_nelem "nelem"
+#define _IFT_Domain_nmat "nmat"
+#define _IFT_Domain_ncrosssect "ncrosssect"
+#define _IFT_Domain_nbc "nbc"
+#define _IFT_Domain_nic "nic"
+#define _IFT_Domain_nloadtimefunct "nlft"
+#define _IFT_Domain_nbarrier "nbarrier"
+#define _IFT_Domain_nrandgen "nrandgen"
+#define _IFT_Domain_topology "topology"
+//@}
 
 namespace oofem {
 class Element;
@@ -160,8 +176,7 @@ private:
      * because in case of multiple domains stateCounter should be kept independently for each domain.
      */
     StateCounterType nonlocalUpdateStateCounter;
-    /// XFEM Manager.
-    XfemManager *xfemManager;
+    /// XFEM Manager  ///@todo: currently only supports one since most methods assumes there to be one xMan
     AList< XfemManager > *xfemManagerList;
      
     /// Topology description
@@ -312,6 +327,15 @@ public:
      * Currently, it only calls Element::postInitialize.
      */
     void postInitialize();
+    /**
+     * Automatically detects necessary nodal dofs and creates them accordingly.
+     * Scans every element after its requested dof's and picks the union of all those dof types.
+     * Intenal DOF managers are not affected, as those are created by the corresponding element/bc.
+     * @todo Nodal BCs currently have a very limited implementation. Should be replaced in favor of some more flexible node-sets/element-sets etc.
+     * @param nodeBCs The boundary conditions for each node
+     * @param eid Equation ID for dofs.
+     */
+    void createDofs(const IntArray &nodeBCs, EquationID eid);
     //int giveNumberOfNodes () {return nodeList->giveSize();}
     //int giveNumberOfSides () {return elementSideList->giveSize();}
     /// Returns number of dof managers in domain.

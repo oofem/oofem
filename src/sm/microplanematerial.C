@@ -309,7 +309,7 @@ MicroplaneMaterial :: initializeFrom(InputRecord *ir)
 
     StructuralMaterial :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, numberOfMicroplanes, IFT_MicroplaneMaterial_nmp, "nmp"); // Macro
+    IR_GIVE_FIELD(ir, numberOfMicroplanes, IFT_MicroplaneMaterial_nmp, "nmp");
     this->initializeData(numberOfMicroplanes);
     return IRRT_OK;
 }

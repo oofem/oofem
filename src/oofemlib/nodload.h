@@ -65,8 +65,8 @@ public:
      * Type determining the type of formulation (entity local or global one).
      */
     enum BL_CoordSystType {
-        BL_GlobalMode, // global mode i.e. load is specified in global c.s.
-        BL_LocalMode // local entity (edge or surface) coordinate system
+        BL_GlobalMode, ///< Global mode i.e. load is specified in global c.s.
+        BL_LocalMode ///< Local entity (edge or surface) coordinate system
     };
 
 protected:

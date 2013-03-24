@@ -416,10 +416,10 @@ MMALeastSquareProjection :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     this->stateFilter = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->stateFilter, IFT_MMALeastSquareProjection_statefilter, "mmalsp_statefilter"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, this->stateFilter, IFT_MMALeastSquareProjection_statefilter, "mmalsp_statefilter");
 
     this->regionFilter = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->regionFilter, IFT_MMALeastSquareProjection_regionfilter, "mmalsp_regionfilter"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, this->regionFilter, IFT_MMALeastSquareProjection_regionfilter, "mmalsp_regionfilter");
 
     return IRRT_OK;
 }

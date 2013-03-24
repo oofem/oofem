@@ -102,14 +102,13 @@ Tetrah1_ht :: initializeFrom(InputRecord *ir)
 
     this->TransportElement :: initializeFrom(ir);
     numberOfGaussPoints = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Tetrah1_ht_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
            ( numberOfGaussPoints == 4 ) ) ) {
         numberOfGaussPoints = 1;
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 

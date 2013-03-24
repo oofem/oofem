@@ -40,7 +40,6 @@
 #include "materialmode.h"
 #include "matresponsemode.h"
 #include "material.h"
-
 #include "classtype.h"
 #include "internalstatetype.h"
 #include "internalstatevaluetype.h"

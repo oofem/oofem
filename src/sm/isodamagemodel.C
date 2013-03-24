@@ -407,11 +407,11 @@ IsotropicDamageMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     //Set limit on the maximum isotropic damage parameter if needed
-    IR_GIVE_OPTIONAL_FIELD(ir, maxOmega, IFT_IsotropicDamageMaterial_maxOmega, "maxomega"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, maxOmega, IFT_IsotropicDamageMaterial_maxOmega, "maxomega");
     maxOmega = min(maxOmega, 0.999999);
     maxOmega = max(maxOmega, 0.0);
 
-    IR_GIVE_FIELD(ir, tempDillatCoeff, IFT_IsotropicDamageMaterial_talpha, "talpha"); // Macro
+    IR_GIVE_FIELD(ir, tempDillatCoeff, IFT_IsotropicDamageMaterial_talpha, "talpha");
     return StructuralMaterial :: initializeFrom(ir);
 }
 

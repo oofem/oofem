@@ -43,6 +43,19 @@
 #include "structuralmaterial.h"
 #include "isolinearelasticmaterial.h"
 
+///@name Input fields for DruckerPragerPlasticitySM
+//@{
+#define _IFT_DruckerPragerPlasticitySM_iys "iys" ///< Initial yield stress under pure shear
+#define _IFT_DruckerPragerPlasticitySM_alpha "alpha" ///< Friction coefficient
+#define _IFT_DruckerPragerPlasticitySM_alphapsi "alphapsi" ///< Dilatancy coefficient
+#define _IFT_DruckerPragerPlasticitySM_ht "ht"
+#define _IFT_DruckerPragerPlasticitySM_hm "hm"
+#define _IFT_DruckerPragerPlasticitySM_kc "kc"
+#define _IFT_DruckerPragerPlasticitySM_lys "lys"
+#define _IFT_DruckerPragerPlasticitySM_yieldtol "yieldtol"
+#define _IFT_DruckerPragerPlasticitySM_newtoniter "newtoniter"
+//@}
+
 namespace oofem {
 /**
  * This class implements the material status associated to DruckerPragerPlasticitySM.

@@ -66,9 +66,9 @@ Shell7Base :: checkConsistency()
 {
     NLStructuralElement :: checkConsistency();
 
-    this->layeredCS = static_cast< LayeredCrossSection * >( this->giveCrossSection() );
+    this->layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection() );
 
-    return 1;
+    return this->layeredCS != NULL;
 }
 
 
@@ -550,12 +550,11 @@ Shell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solV
         }
     }
 
-    
     FloatMatrix test;
     test.beSubMatrixOf(tempAnswer,29,36,29,36);
     //test.printYourself();
 
-    IntArray ordering = giveOrdering(All);
+    const IntArray &ordering = this->giveOrdering(All);
     answer.assemble(tempAnswer, ordering, ordering);
 
 
@@ -590,12 +589,11 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, 
     //answer.resize(ndofs, ndofs);
     //answer.zero();
 
-    LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection() );
-    int numberOfLayers = layeredCS->giveNumberOfLayers();     // conversion from double to int - fix!
+    int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion from double to int - fix!
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
-        Material *mat = domain->giveMaterial( layeredCS->giveLayerMaterial(layer) );
+        Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
@@ -837,9 +835,9 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, 
     K22.symmetrized();
     K33.symmetrized();
 
-    IntArray ordering_phibar = giveOrdering(Midplane);
-    IntArray ordering_m = giveOrdering(Director);
-    IntArray ordering_gam = giveOrdering(InhomStrain);
+    const IntArray &ordering_phibar = this->giveOrdering(Midplane);
+    const IntArray &ordering_m = this->giveOrdering(Director);
+    const IntArray &ordering_gam = this->giveOrdering(InhomStrain);
 
     answer.assemble(K11, ordering_phibar, ordering_phibar);
     answer.assemble(K12, ordering_phibar, ordering_m);
@@ -1202,6 +1200,8 @@ Shell7Base :: computeFAt(GaussPoint *gp, FloatMatrix &answer, FloatArray &genEps
     this->evalCovarBaseVectorsAt(gp, gcov1, gcov2, gcov3, genEps);
     this->evalInitialContravarBaseVectorsAt(gp, Gcon1, Gcon2, Gcon3);
 
+    //answer.beProductTOf(gcov, Gcon);
+
     FloatMatrix F1, F2, F3;
     F1.beDyadicProductOf(gcov1, Gcon1);
     F2.beDyadicProductOf(gcov2, Gcon2);
@@ -1284,6 +1284,7 @@ Shell7Base :: computeStressResultantsAt(GaussPoint *gp, FloatArray &Svec, FloatA
     FloatMatrix S;
     S.beMatrixFormOfStress(Svec);
 
+    //Sig.beProductOf(S,g);
     // Sig =S(i,j)*g_j, - stress vectors on the surfaces given by g_j?
     for ( int j = 1; j <= 3; j++ ) {
         S1g.at(j) = S.at(1, 1) * g1.at(j) + S.at(1, 2) * g2.at(j) + S.at(1, 3) * g3.at(j);
@@ -1387,13 +1388,12 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
             f3.add(dV, f3temp);
         }
     }
-    IntArray ordering_phibar = giveOrdering(Midplane);
-    IntArray ordering_m = giveOrdering(Director);
-    IntArray ordering_gam = giveOrdering(InhomStrain);
+    const IntArray &ordering_phibar = this->giveOrdering(Midplane);
+    const IntArray &ordering_m = this->giveOrdering(Director);
+    const IntArray &ordering_gam = this->giveOrdering(InhomStrain);
     answer.assemble(f1, ordering_phibar);
     answer.assemble(f2, ordering_m);
     answer.assemble(f3, ordering_gam);
-    
 }
 
 
@@ -1618,7 +1618,7 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
     answer.resize(ndofs, ndofs);
     answer.zero();
-    IntArray ordering_all = giveOrdering(All);
+    const IntArray &ordering_all = this->giveOrdering(All);
     answer.assemble(temp, ordering_all);
     answer.symmetrized();
 
@@ -1777,9 +1777,9 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
         answer.resize(ndofs, ndofs);
         answer.zero();
 
-        IntArray ordering_phibar = giveOrdering(Midplane);
-        IntArray ordering_m = giveOrdering(Director);
-        IntArray ordering_gam = giveOrdering(InhomStrain);
+        const IntArray &ordering_phibar = this->giveOrdering(Midplane);
+        const IntArray &ordering_m = this->giveOrdering(Director);
+        const IntArray &ordering_gam = this->giveOrdering(InhomStrain);
         answer.assemble(M11, ordering_phibar, ordering_phibar);
         answer.assemble(M12, ordering_phibar, ordering_m);
         answer.assemble(M13, ordering_phibar, ordering_gam);
@@ -1940,8 +1940,7 @@ Shell7Base :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         this->giveSurfaceDofMapping(mask, 1);         // same dofs regardless of iSurf
         answer.resize( this->computeNumberOfDofs(EID_MomentumBalance) );
         answer.zero();
-        IntArray ordering_all = giveOrdering(All);
-        answer.assemble(force, ordering_all);
+        answer.assemble(force, this->giveOrdering(All));
 
         return;
     } else {
@@ -2125,8 +2124,7 @@ Shell7Base :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
     double detJ;
     this->evalInitialCovarBaseVectorsAt(gp, G1, G2, G3);
     temp.beVectorProductOf(G1, G2);
-    LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection() );
-    detJ = temp.dotProduct(G3) * 0.5 * layeredCS->giveLayerThickness(layer);
+    detJ = temp.dotProduct(G3) * 0.5 * this->layeredCS->giveLayerThickness(layer);
     return detJ * gp->giveWeight();
 }
 #endif
@@ -2185,6 +2183,9 @@ Shell7Base :: giveCoordTransMatrix(FloatMatrix &answer, FloatArray &g1, FloatArr
     // Assumes transformation from a cartesian system
     // Q_ij = dotproduct(g_i, E_j) with E1 = [1 0 0]^T etc
     answer.resize(3, 3);
+    answer.setColumn(g1, 1);
+    answer.setColumn(g2, 2);
+    answer.setColumn(g3, 3);
     answer.at(1, 1) = g1.at(1);
     answer.at(1, 2) = g1.at(2);
     answer.at(1, 3) = g1.at(3);
@@ -2438,6 +2439,7 @@ Shell7Base :: giveSolutionVector(FloatArray &answer, const IntArray &dofIdArray,
     answer.zero();
     answer.assemble( temp, this->giveOrdering(AllInv) );
 }
+
 
 void
 Shell7Base :: computeVectorOf(const IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer)
@@ -2990,11 +2992,10 @@ Shell7Base :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int laye
 
     double zeta = localCoords.at(3)*this->layeredCS->giveLayerThickness(layer)*0.5 + this->layeredCS->giveLayerMidZ(layer);
     double fac = ( zeta + 0.5 * gam * zeta * zeta );
-    globalCoords = x;    
+    globalCoords = x;
     globalCoords.add(fac,m);
 
 }
-
 
 
 void 
@@ -3144,9 +3145,6 @@ Shell7Base :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, Float
     nodeLocalXi2Coords.setValues(15, 0., 1., 0., 0., 1., 0., .5, .5, 0., .5, .5, 0., 0., 1., 0.);
     nodeLocalXi3Coords.setValues(15, -z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.);
 }
-
-
-
 
 // Misc functions
 

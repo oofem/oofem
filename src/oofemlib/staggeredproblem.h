@@ -37,8 +37,18 @@
 
 #include "engngm.h"
 #include "alist.h"
-
 #include "inputrecord.h"
+
+///@name Input fields for StaggeredProblem
+//@{
+#define _IFT_StaggeredProblem_deltat "deltat"
+#define _IFT_StaggeredProblem_dtf "dtf"
+#define _IFT_StaggeredProblem_timeDefinedByProb "timedefinedbyprob"
+#define _IFT_StaggeredProblem_stepmultiplier "stepmultiplier"
+#define _IFT_StaggeredProblem_prescribedtimes "prescribedtimes"
+#define _IFT_StaggeredProblem_prob1 "prob1"
+#define _IFT_StaggeredProblem_prob2 "prob2"
+//@}
 
 namespace oofem {
 /**

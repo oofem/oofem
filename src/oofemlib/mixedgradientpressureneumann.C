@@ -32,7 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 #include "mixedgradientpressureneumann.h"
 #include "dofiditem.h"
 #include "dofmanager.h"
@@ -50,7 +49,6 @@
 #include "usrdefsub.h" // For sparse matrix creation.
 #include "sparsemtrxtype.h"
 #include "mathfem.h"
-
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
 
@@ -690,17 +688,7 @@ void MixedGradientPressureNeumann :: computeTangents(
 
 IRResultType MixedGradientPressureNeumann :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
-    IRResultType result;
-
-    ActiveBoundaryCondition :: initializeFrom(ir);
-
-    FloatArray gradient;
-    IR_GIVE_FIELD(ir, gradient, IFT_MixedGradientPressure_devGradient, "devgradient");
-    this->setPrescribedDeviatoricGradientFromVoigt(gradient);
-    IR_GIVE_FIELD(ir, this->pressure, IFT_MixedGradientPressure_pressure, "pressure");
-
-    return IRRT_OK;
+    return MixedGradientPressureBC :: initializeFrom(ir);
 }
 
 

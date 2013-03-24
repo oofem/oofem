@@ -56,13 +56,13 @@ IRResultType
 HydratingConcreteMat :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                            // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     // set conductivity k and capacity c
     IsotropicHeatTransferMaterial :: initializeFrom(ir);
 
     referenceTemperature = 25.;
-    IR_GIVE_OPTIONAL_FIELD(ir, referenceTemperature, IFT_HydratingConcreteMat_referenceTemperature, "referencetemperature"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, referenceTemperature, IFT_HydratingConcreteMat_referenceTemperature, "referencetemperature");
 
     IR_GIVE_FIELD(ir, hydrationModelType, IFT_HydratingConcreteMat_hydrationModelType, "hydrationmodeltype");
 
@@ -89,24 +89,24 @@ HydratingConcreteMat :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, massCement, IFT_HydratingConcreteMat_massCement, "masscement");
 
     maxModelIntegrationTime = 36000;
-    IR_GIVE_OPTIONAL_FIELD(ir, maxModelIntegrationTime, IFT_maxModelIntegrationTime, "maxmodelintegrationtime"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, maxModelIntegrationTime, IFT_HydratingConcreteMat_maxModelIntegrationTime, "maxmodelintegrationtime");
 
     minModelTimeStepIntegrations = 30.;
-    IR_GIVE_OPTIONAL_FIELD(ir, minModelTimeStepIntegrations, IFT_minModelTimeStepIntegrations, "minmodeltimestepintegrations"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, minModelTimeStepIntegrations, IFT_HydratingConcreteMat_minModelTimeStepIntegrations, "minmodeltimestepintegrations");
 
 
     conductivityType = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, conductivityType, IFT_HydratingConcreteMat_conductivitytype, "conductivitytype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, conductivityType, IFT_HydratingConcreteMat_conductivitytype, "conductivitytype");
     capacityType = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, capacityType, IFT_HydratingConcreteMat_capacitytype, "capacitytype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, capacityType, IFT_HydratingConcreteMat_capacitytype, "capacitytype");
     densityType = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, densityType, IFT_HydratingConcreteMat_densitytype, "densitytype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, densityType, IFT_HydratingConcreteMat_densitytype, "densitytype");
 
     activationEnergy = 38400; //J/mol/K
-    IR_GIVE_OPTIONAL_FIELD(ir, activationEnergy, IFT_HydratingConcreteMat_activationEnergy, "activationenergy"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, activationEnergy, IFT_HydratingConcreteMat_activationEnergy, "activationenergy");
 
     reinforcementDegree = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, reinforcementDegree, IFT_HydratingConcreteMat_reinforcementDegree, "reinforcementdegree"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, reinforcementDegree, IFT_HydratingConcreteMat_reinforcementDegree, "reinforcementdegree");
 
     return IRRT_OK;
 }

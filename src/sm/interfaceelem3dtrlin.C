@@ -107,7 +107,7 @@ InterfaceElement3dTrLin :: computeGlobalCoordinates(FloatArray &answer, const Fl
 
     answer.resize(3);
     answer.zero();
-    for (int i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(1) += n.at(i) * this->giveNode(i)->giveCoordinate(1);
         answer.at(2) += n.at(i) * this->giveNode(i)->giveCoordinate(2);
         answer.at(3) += n.at(i) * this->giveNode(i)->giveCoordinate(3);
@@ -132,12 +132,11 @@ InterfaceElement3dTrLin :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
     double determinant, weight, thickness, volume;
     // first compute local nodal coordinates in element plane
-    int i;
     FloatArray gnc(3), lnc [ 3 ];
     const FloatArray *lncp [ 3 ];
     FloatMatrix lcs(3, 3);
     this->computeLCS(lcs);
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         gnc.at(1) = this->giveNode(i)->giveCoordinate(1);
         gnc.at(2) = this->giveNode(i)->giveCoordinate(2);
         gnc.at(3) = this->giveNode(i)->giveCoordinate(3);
@@ -158,9 +157,7 @@ InterfaceElement3dTrLin :: computeVolumeAround(GaussPoint *aGaussPoint)
 IRResultType
 InterfaceElement3dTrLin :: initializeFrom(InputRecord *ir)
 {
-    this->StructuralElement :: initializeFrom(ir);
-    this->computeGaussPoints();
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 
@@ -176,7 +173,6 @@ InterfaceElement3dTrLin :: computeLCS(FloatMatrix &answer)
 {
     // computes local coordinate system unit vectors (expressed in global cs)
     // unit vectors are stored rowwise
-    int i;
     FloatArray xl(3), yl(3), zl(3), t2(3);
 
     // compute local x-axis xl (node(2)-node(1))
@@ -199,7 +195,7 @@ InterfaceElement3dTrLin :: computeLCS(FloatMatrix &answer)
     yl.beVectorProductOf(zl, xl);
 
     answer.resize(3, 3);
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(1, i) = xl.at(i);
         answer.at(2, i) = yl.at(i);
         answer.at(3, i) = zl.at(i);
@@ -211,13 +207,12 @@ bool
 InterfaceElement3dTrLin :: computeGtoLRotationMatrix(FloatMatrix &answer)
 {
     // planar geometry is assumed
-    int i, j;
     FloatMatrix lcs(3, 3);
     this->computeLCS(lcs);
 
     answer.resize(18, 18);
-    for ( i = 0; i < 6; i++ ) {
-        for ( j = 1; j <= 3; j++ ) {
+    for ( int i = 0; i < 6; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             answer.at(i * 3 + 1, i * 3 + j) = lcs.at(3, j);
             answer.at(i * 3 + 2, i * 3 + j) = lcs.at(1, j);
             answer.at(i * 3 + 3, i * 3 + j) = lcs.at(2, j);

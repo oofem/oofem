@@ -128,28 +128,28 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
 
     if ( ir->hasField(IFT_StaggeredProblem_deltat, "deltat") ) {
         EngngModel :: initializeFrom(ir);
-        IR_GIVE_FIELD(ir, deltaT, IFT_StaggeredProblem_deltat, "deltat"); // Macro
+        IR_GIVE_FIELD(ir, deltaT, IFT_StaggeredProblem_deltat, "deltat");
         dtTimeFunction = 0;
     } else if ( ir->hasField(IFT_StaggeredProblem_prescribedtimes, "prescribedtimes") ) {
         EngngModel :: initializeFrom(ir);
-        IR_GIVE_FIELD(ir, discreteTimes, IFT_StaggeredProblem_prescribedtimes, "prescribedtimes"); // Macro
+        IR_GIVE_FIELD(ir, discreteTimes, IFT_StaggeredProblem_prescribedtimes, "prescribedtimes");
         dtTimeFunction = 0;
     } else {
-        IR_GIVE_FIELD(ir, timeDefinedByProb, IFT_StaggeredProblem_timeDefinedByProb, "timedefinedbyprob"); // Macro
+        IR_GIVE_FIELD(ir, timeDefinedByProb, IFT_StaggeredProblem_timeDefinedByProb, "timedefinedbyprob");
     }
 
     if ( dtTimeFunction < 1 ) {
         ndomains = 0;
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, dtTimeFunction, IFT_StaggeredProblem_dtf, "dtf"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, IFT_StaggeredProblem_stepmultiplier, "stepmultiplier"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, dtTimeFunction, IFT_StaggeredProblem_dtf, "dtf");
+    IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, IFT_StaggeredProblem_stepmultiplier, "stepmultiplier");
     if ( stepMultiplier < 0 ) {
         _error("stepMultiplier must be > 0")
     }
 
-    IR_GIVE_FIELD(ir, inputStreamNames [ 0 ], IFT_StaggeredProblem_prob1, "prob1"); // Macro
-    IR_GIVE_FIELD(ir, inputStreamNames [ 1 ], IFT_StaggeredProblem_prob2, "prob2"); // Macro
+    IR_GIVE_FIELD(ir, inputStreamNames [ 0 ], IFT_StaggeredProblem_prob1, "prob1");
+    IR_GIVE_FIELD(ir, inputStreamNames [ 1 ], IFT_StaggeredProblem_prob2, "prob2");
 
     renumberFlag = true; // The staggered problem itself should always try to check if the sub-problems needs renumbering.
 
@@ -174,14 +174,14 @@ StaggeredProblem :: updateAttributes(MetaStep *mStep)
 
     if ( !timeDefinedByProb ) {
         if ( ir->hasField(IFT_StaggeredProblem_deltat, "deltat") ) {
-            IR_GIVE_FIELD(ir, deltaT, IFT_StaggeredProblem_deltat, "deltat"); // Macro
-            IR_GIVE_OPTIONAL_FIELD(ir, dtTimeFunction, IFT_StaggeredProblem_dtf, "dtf"); // Macro
-            IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, IFT_StaggeredProblem_stepmultiplier, "stepmultiplier"); // Macro
+            IR_GIVE_FIELD(ir, deltaT, IFT_StaggeredProblem_deltat, "deltat");
+            IR_GIVE_OPTIONAL_FIELD(ir, dtTimeFunction, IFT_StaggeredProblem_dtf, "dtf");
+            IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, IFT_StaggeredProblem_stepmultiplier, "stepmultiplier");
             if ( stepMultiplier < 0 ) {
                 _error("stepMultiplier must be > 0")
             }
         } else if ( ir->hasField(IFT_StaggeredProblem_prescribedtimes, "prescribedtimes") ) {
-            IR_GIVE_FIELD(ir, discreteTimes, IFT_StaggeredProblem_prescribedtimes, "prescribedtimes"); // Macro
+            IR_GIVE_FIELD(ir, discreteTimes, IFT_StaggeredProblem_prescribedtimes, "prescribedtimes");
         }
     }
 }

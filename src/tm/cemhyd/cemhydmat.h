@@ -52,6 +52,18 @@ using namespace tinyxml2;
  #include "../isoheatmat.h"
 #endif
 
+///@name Input fields for CemhydMat
+//@{
+#define _IFT_CemhydMat_conductivitytype "conductivitytype"
+#define _IFT_CemhydMat_capacitytype "capacitytype"
+#define _IFT_CemhydMat_densitytype "densitytype"
+#define _IFT_CemhydMat_eachgp "eachgp"
+#define _IFT_CemhydMat_nowarnings "nowarnings"
+#define _IFT_CemhydMat_scaling "scaling"
+#define _IFT_CemhydMat_reinforcementDegree "reinforcementdegree"
+#define _IFT_CemhydMat_inputFileName "inputfilename"
+//@}
+
 namespace oofem {
 
 typedef struct FCOMPLEX {

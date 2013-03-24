@@ -367,13 +367,13 @@ IDNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain,
         computeAngleAndSigmaRatio(eigenVectorAngle, sigmaRatio, gp, flag);
     }
 
-    //Loop over all Gauss Points which are in gp's integration domain
+    //Loop over all Gauss points which are in gp's integration domain
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        GaussPoint *gp = pos->nearGp;
-        nonlocStatus = static_cast< IDNLMaterialStatus * >( gp->giveMaterialStatus( gp->giveMaterial()->giveNumber() ) );
+        GaussPoint *neargp = pos->nearGp;
+        nonlocStatus = static_cast< IDNLMaterialStatus * >( neargp->giveMaterialStatus( neargp->giveMaterial()->giveNumber() ) );
         nonlocalContribution = nonlocStatus->giveLocalEquivalentStrainForAverage();
         if ( this->nlvar == NLVT_StressBased && flag == 1 ) { //Check if Stress Based Averaging is requested and calculate nonlocal contribution
-            double stressBasedWeight = computeStressBasedWeight(eigenVectorAngle, sigmaRatio, gp, pos->nearGp, pos->weight); //Compute New Weight
+            double stressBasedWeight = computeStressBasedWeight(eigenVectorAngle, sigmaRatio, gp, neargp, pos->weight); //Compute new weight
             updatedIntegrationVolume +=  stressBasedWeight;
             nonlocalContribution *= stressBasedWeight;
         } else {
@@ -453,11 +453,11 @@ IDNLMaterial :: initializeFrom(InputRecord *ir)
     }
 
     if ( averType == 2 || averType == 3 ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, exponent, IFT_IDNLMaterial_averagingtype, "exp");
+        IR_GIVE_OPTIONAL_FIELD(ir, exponent, IFT_IDNLMaterial_exp, "exp");
     }
 
     if ( averType >= 2 && averType <= 5 ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, Rf, IFT_IDNLMaterial_averagingtype, "rf");
+        IR_GIVE_OPTIONAL_FIELD(ir, Rf, IFT_IDNLMaterial_rf, "rf");
     }
 
     return IRRT_OK;

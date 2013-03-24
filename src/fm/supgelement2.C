@@ -63,10 +63,7 @@ SUPGElement2 :: initializeFrom(InputRecord *ir)
     //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                               // Required by IR_GIVE_FIELD macro
 
-    //FMElement :: initializeFrom (ir);
-    SUPGElement :: initializeFrom(ir);
-    this->computeGaussPoints();
-    return IRRT_OK;
+    return SUPGElement :: initializeFrom(ir);
 }
 
 
@@ -359,25 +356,6 @@ SUPGElement2 :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
         return Element :: giveIntVarCompFullIndx(answer, type);
     }
 }
-
-/*
- * void
- * SUPGElement2::computeVectorOfPrescribed (EquationID ut, ValueModeType type, TimeStep* stepN, FloatArray& answer)
- * {
- * double scale;
- *
- * Element::computeVectorOfPrescribed (ut, type, stepN, answer);
- *
- * if (domain->giveEngngModel()->giveEquationScalingFlag()) {
- *  if (ut == EID_MomentumBalance) {
- *    scale = domain->giveEngngModel()->giveVariableScale(VST_Velocity);
- *  } else if (ut == EID_ConservationEquation) {
- *    scale = domain->giveEngngModel()->giveVariableScale(VST_Pressure);
- *  } else scale = 1.0;
- *  answer.times (1.0/scale);
- * }
- * }
- */
 
 void
 SUPGElement2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime)

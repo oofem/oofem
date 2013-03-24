@@ -34,6 +34,7 @@
 
 #ifndef qspacegrad_h
 #define qspacegrad_h
+
 #include "qspace.h"
 #include "fei3dhexalin.h"
 #include "graddpelement.h"

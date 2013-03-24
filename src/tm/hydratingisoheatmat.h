@@ -38,6 +38,14 @@
 #include "isoheatmat.h"
 #include "../sm/hydram.h"
 
+///@name Input fields for HydratingIsoHeatMaterial
+//@{
+#define _IFT_HydratingIsoHeatMaterial_hydration "hydration"
+#define _IFT_HydratingIsoHeatMaterial_mix "mix"
+#define _IFT_HydratingIsoHeatMaterial_noHeat "noheat"
+#define _IFT_HydratingIsoHeatMaterial_noLHS "nolhs"
+//@}
+
 namespace oofem {
 /**
  * Isotropic material for heat with hydration.

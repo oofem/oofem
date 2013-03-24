@@ -14,7 +14,6 @@ set (tm_emodel
     stationarytransportproblem.C
     nonstationarytransportproblem.C
     nltransienttransportproblem.C
-    staggeredproblem.C
     darcyflow.C
     )
 

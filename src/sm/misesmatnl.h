@@ -44,6 +44,13 @@
  #include "conTable.h"
 #endif
 
+///@name Input fields for MisesMatNl
+//@{
+#define _IFT_MisesMatNl_averagingtype "averagingtype"
+#define _IFT_MisesMatNl_exp "exp"
+#define _IFT_MisesMatNl_rf "rf"
+//@}
+
 namespace oofem {
 
 /**

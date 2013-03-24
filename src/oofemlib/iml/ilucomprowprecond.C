@@ -50,10 +50,10 @@ CompRow_ILUPreconditioner :: initializeFrom(InputRecord *ir)
     Preconditioner :: initializeFrom(ir);
 
     this->drop_tol = 1.e-8;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->drop_tol, IFT_CompRowPrecond_droptol, "droptol"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, this->drop_tol, IFT_CompRow_ILUPrecond_droptol, "droptol");
 
     part_fill = 5;
-    IR_GIVE_OPTIONAL_FIELD(ir, part_fill, IFT_CompRowPrecond_partfill, "partfill"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, part_fill, IFT_CompRow_ILUPrecond_partfill, "partfill");
 
     return IRRT_OK;
 }

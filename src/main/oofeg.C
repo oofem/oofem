@@ -62,6 +62,8 @@
 #include "classfactory.h"
 
 #include <sstream>
+#include <iostream>
+
 //
 // for c++ compiler to be successful on some c files
 //
@@ -332,7 +334,8 @@ main(int argc, char *argv[])
 
     if ( !inputFileFlag ) {
         std :: string input;
-        :: giveInputDataFileName(input);
+        printf("Please enter the name of the input data file : \n");
+        std::getline(std::cin, input);
         inputFileName << input;
     }
 

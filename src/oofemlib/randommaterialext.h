@@ -39,6 +39,12 @@
 #include "dictionr.h"
 #include "interface.h"
 
+///@name Input fields for RandomMaterialExt
+//@{
+#define _IFT_RandomMaterialExt_randVariables "randvars"
+#define _IFT_RandomMaterialExt_randGen "randgen"
+//@}
+
 namespace oofem {
 /**
  * Abstract base class for all random constitutive model statuses.

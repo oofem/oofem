@@ -69,16 +69,16 @@ J2plasticMaterial :: initializeFrom(InputRecord *ir)
     PlasticMaterial :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, value, IFT_J2plasticMaterial_ry, "ry"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_J2plasticMaterial_ry, "ry");
     k = value / sqrt(3.0);
 
     //  E = readDouble (initString,"e");
     // nu = readDouble (initString,"nu");
     kinematicModuli = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, kinematicModuli, IFT_J2plasticMaterial_khm, "khm"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, kinematicModuli, IFT_J2plasticMaterial_khm, "khm");
 
     isotropicModuli = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, isotropicModuli, IFT_J2plasticMaterial_ihm, "ihm"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, isotropicModuli, IFT_J2plasticMaterial_ihm, "ihm");
 
     if ( fabs(kinematicModuli) > 1.e-12 ) {
         kinematicHardeningFlag = 1;
@@ -111,7 +111,6 @@ J2plasticMaterial :: ComputeStressSpaceHardeningVars(GaussPoint *gp,
 {
     // in full stress strain space
 
-    int i;
     int count = 0, size = this->giveSizeOfFullHardeningVarsVector(), isize, rSize;
     IntArray mask;
 
@@ -126,7 +125,7 @@ J2plasticMaterial :: ComputeStressSpaceHardeningVars(GaussPoint *gp,
 
     /* kinematic hardening variables are first */
     if ( this->kinematicHardeningFlag ) {
-        for ( i = 1; i <= isize; i++ ) {
+        for ( int i = 1; i <= isize; i++ ) {
             // to be consistent with equivalent plastic strain formulation
             // we multiply by (sqrt(2.)*2./3.)
             answer->at( mask.at(i) ) = ( sqrt(2.) * 2. / 3. ) * this->kinematicModuli * strainSpaceHardeningVariables->at(i);
@@ -178,8 +177,6 @@ J2plasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer,
                                                    TimeStep *atTime)
 {
     /* computes hardening moduli in reduced stress strain space (for kinematic back-stress)*/
-
-    int i;
     int size = this->giveSizeOfReducedHardeningVarsVector(gp);
 
     if ( !hasHardening() ) {
@@ -193,7 +190,7 @@ J2plasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer,
     /* kinematic hardening variables are first */
     if ( this->kinematicHardeningFlag ) {
         int ksize = this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
-        for ( i = 1; i <= ksize; i++ ) {
+        for ( int i = 1; i <= ksize; i++ ) {
             answer.at(i, i) = this->kinematicModuli;
         }
     }

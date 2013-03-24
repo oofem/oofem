@@ -62,15 +62,15 @@ ExportModule :: initializeFrom(InputRecord *ir)
     tstep_all_out_flag = ir->hasField(IFT_ExportModule_tstepall, "tstep_all");
 
     tstep_step_out = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, tstep_step_out, IFT_ExportModule_tstepstep, "tstep_step"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, tstep_step_out, IFT_ExportModule_tstepstep, "tstep_step");
 
-    IR_GIVE_OPTIONAL_FIELD(ir, tsteps_out, IFT_ExportModule_tstepsout, "tsteps_out"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, tsteps_out, IFT_ExportModule_tstepsout, "tsteps_out");
 
     domain_all_flag = ir->hasField(IFT_ExportModule_domainall, "domain_all");
 
     if ( !domain_all_flag ) {
         domainMask.resize(0);
-        IR_GIVE_OPTIONAL_FIELD(ir, domainMask, IFT_ExportModule_domainmask, "domain_mask"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, domainMask, IFT_ExportModule_domainmask, "domain_mask");
     }
 
     return IRRT_OK;

@@ -38,6 +38,28 @@
 #include "isoheatmat.h"
 #include "hydratingisoheatmat.h"
 
+///@name Input fields for HydratingConcreteMat
+//@{
+#define _IFT_HydratingConcreteMat_referenceTemperature "referencetemperature"
+#define _IFT_HydratingConcreteMat_castAt "castat"
+#define _IFT_HydratingConcreteMat_hydrationModelType "hydrationmodeltype"
+#define _IFT_HydratingConcreteMat_maxModelIntegrationTime "maxmodelintegrationtime"
+#define _IFT_HydratingConcreteMat_minModelTimeStepIntegrations "minmodeltimestepintegrations"
+#define _IFT_HydratingConcreteMat_conductivitytype "conductivitytype"
+#define _IFT_HydratingConcreteMat_capacitytype "capacitytype"
+#define _IFT_HydratingConcreteMat_densitytype "densitytype"
+#define _IFT_HydratingConcreteMat_activationEnergy "activationenergy"
+#define _IFT_HydratingConcreteMat_massCement "masscement"
+#define _IFT_HydratingConcreteMat_reinforcementDegree "reinforcementdegree"
+#define _IFT_HydratingConcreteMat_tau "tau"
+#define _IFT_HydratingConcreteMat_beta "beta"
+#define _IFT_HydratingConcreteMat_B1 "b1"
+#define _IFT_HydratingConcreteMat_B2 "b2"
+#define _IFT_HydratingConcreteMat_eta "eta"
+#define _IFT_HydratingConcreteMat_DoHInf "dohinf"
+#define _IFT_HydratingConcreteMat_qpot "qpot"
+//@}
+
 namespace oofem {
 /**
  * This class implements various phenomenological and affinity hydration models. No coupling with relative humidity

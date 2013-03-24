@@ -62,6 +62,11 @@
 #include "errorestimator.h"
 #include "compiler.h"
 
+ // For automatic dof creation, (should try to do without this) (move that stuff into DofManager class)
+#include "activebc.h"
+#include "activedof.h"
+#include "masterdof.h"
+
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
  #include "processcomm.h"
@@ -72,6 +77,8 @@
 
 #include <cstdarg>
 #include <cstring>
+#include <vector>
+#include <set>
 
 namespace oofem {
 Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
@@ -81,17 +88,16 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
     this->number = n;
     this->serialNumber = serNum;
 
-    elementList           = new AList< Element >(0);
-    dofManagerList        = new AList< DofManager >(0);
-    materialList          = new AList< Material >(0);
-    bcList                = new AList< GeneralBoundaryCondition >(0);
-    icList                = new AList< InitialCondition >(0);
-    loadTimeFunctionList  = new AList< LoadTimeFunction >(0);
-    crossSectionList      = new AList< CrossSection >(0);
-    nonlocalBarierList    = new AList< NonlocalBarrier >(0);
+    elementList              = new AList< Element >(0);
+    dofManagerList           = new AList< DofManager >(0);
+    materialList             = new AList< Material >(0);
+    bcList                   = new AList< GeneralBoundaryCondition >(0);
+    icList                   = new AList< InitialCondition >(0);
+    loadTimeFunctionList     = new AList< LoadTimeFunction >(0);
+    crossSectionList         = new AList< CrossSection >(0);
+    nonlocalBarierList       = new AList< NonlocalBarrier >(0);
     randomFieldGeneratorList = new AList< RandomFieldGenerator >(0);
-    xfemManagerList = new AList< XfemManager >(0);
-    xfemManager           = NULL;
+    xfemManagerList          = new AList< XfemManager >(0);
 
     dType                 = _unknownMode;
 
@@ -124,7 +130,7 @@ Domain :: ~Domain()
     delete crossSectionList;
     delete nonlocalBarierList;
     delete randomFieldGeneratorList;
-    delete xfemManager;
+    delete xfemManagerList;
     delete connectivityTable;
     delete spatialLocalizer;
     delete outputManager;
@@ -157,10 +163,7 @@ Domain :: clear()
     crossSectionList->clear();
     nonlocalBarierList->clear();
     randomFieldGeneratorList->clear();
-
-    if ( xfemManager ) {
-        xfemManager->clear();
-    }
+    xfemManagerList->clear();
 
     if ( connectivityTable ) {
         connectivityTable->reset();
@@ -428,7 +431,7 @@ Domain :: instanciateYourself(DataReader *dr)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                            // Required by IR_GIVE_FIELD macro
 
-    int i, num;
+    int num;
     std :: string name, topologytype;
     int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg, nxfemman=0;
     DofManager *node;
@@ -440,7 +443,7 @@ Domain :: instanciateYourself(DataReader *dr)
     CrossSection *crossSection;
     NonlocalBarrier *barrier;
     RandomFieldGenerator *rfg;
-    XfemManager *xMan;
+    //XfemManager *xMan;
     // mapping from label to local numbers for dofmans and elements
     std :: map< int, int >dofManLabelMap, elemLabelMap;
 
@@ -448,10 +451,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read type of Domain to be solved
     InputRecord *ir = dr->giveInputRecord(DataReader :: IR_domainRec, 1);
-    result = ir->giveField(name, IFT_Domain_type, "domain");
-    if ( result != IRRT_OK ) {
-        IR_IOERR(giveClassName(), __proc, IFT_Domain_type, "domain", ir, result);
-    }
+    IR_GIVE_FIELD(ir, name, IFT_Domain_type, "domain");
 
     ir->finish();
 
@@ -470,28 +470,28 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read domain description
     ir = dr->giveInputRecord(DataReader :: IR_domainCompRec, 1);
-    IR_GIVE_FIELD(ir, nnode, IFT_Domain_ndofman, "ndofman"); // Macro
-    IR_GIVE_FIELD(ir, nelem, IFT_Domain_nelem, "nelem"); // Macro
-    IR_GIVE_FIELD(ir, ncrossSections, IFT_Domain_ncrosssect, "ncrosssect"); // Macro
-    IR_GIVE_FIELD(ir, nmat, IFT_Domain_nmat, "nmat"); // Macro
-    IR_GIVE_FIELD(ir, nload, IFT_Domain_nbc, "nbc"); // Macro
-    IR_GIVE_FIELD(ir, nic, IFT_Domain_nic, "nic"); // Macro
-    IR_GIVE_FIELD(ir, nloadtimefunc, IFT_Domain_nloadtimefunct, "nltf"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, nxfemman, IFT_Domain_nxfemman, "nxfemman"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, topologytype, IFT_Domain_topology, "topology"); // Macro
+    IR_GIVE_FIELD(ir, nnode, IFT_Domain_ndofman, "ndofman");
+    IR_GIVE_FIELD(ir, nelem, IFT_Domain_nelem, "nelem");
+    IR_GIVE_FIELD(ir, ncrossSections, IFT_Domain_ncrosssect, "ncrosssect");
+    IR_GIVE_FIELD(ir, nmat, IFT_Domain_nmat, "nmat");
+    IR_GIVE_FIELD(ir, nload, IFT_Domain_nbc, "nbc");
+    IR_GIVE_FIELD(ir, nic, IFT_Domain_nic, "nic");
+    IR_GIVE_FIELD(ir, nloadtimefunc, IFT_Domain_nloadtimefunct, "nltf");
+    IR_GIVE_OPTIONAL_FIELD(ir, nxfemman, IFT_Domain_nxfemman, "nxfemman");
+    IR_GIVE_OPTIONAL_FIELD(ir, topologytype, IFT_Domain_topology, "topology");
 
     // read optional number of nonlocalBarriers
     nbarrier = 0;
-    ir->giveOptionalField(nbarrier,  IFT_Domain_nbarrier, "nbarrier");
+    IR_GIVE_OPTIONAL_FIELD(ir, nbarrier,  IFT_Domain_nbarrier, "nbarrier");
     // read optional number of RandomFieldGenerator
     nrfg = 0;
-    ir->giveOptionalField(nrfg,  IFT_Domain_nrfg, "nrandgen");
+    IR_GIVE_OPTIONAL_FIELD(ir, nrfg, IFT_Domain_nrandgen, "nrandgen");
 
 
 
     // read nodes
     dofManagerList->growTo(nnode);
-    for ( i = 0; i < nnode; i++ ) {
+    for ( int i = 0; i < nnode; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_dofmanRec, i + 1);
         // read type of dofManager
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -513,7 +513,6 @@ Domain :: instanciateYourself(DataReader *dr)
         node->setGlobalNumber(num);    // set label
         dofManagerList->put(i + 1, node);
 
-        //dofManagerList->put(i+1,node) ;
         ir->finish();
     }
 
@@ -523,7 +522,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read elements
     elementList->growTo(nelem);
-    for ( i = 0; i < nelem; i++ ) {
+    for ( int i = 0; i < nelem; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_elemRec, i + 1);
         // read type of element
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -554,7 +553,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read cross sections
     crossSectionList->growTo(ncrossSections);
-    for ( i = 0; i < ncrossSections; i++ ) {
+    for ( int i = 0; i < ncrossSections; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_crosssectRec, i + 1);
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
@@ -585,7 +584,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read materials
     materialList->growTo(nmat);
-    for ( i = 0; i < nmat; i++ ) {
+    for ( int i = 0; i < nmat; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_matRec, i + 1);
         // read type of material
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -618,7 +617,7 @@ Domain :: instanciateYourself(DataReader *dr)
     if ( nbarrier ) {
         // read barriers
         nonlocalBarierList->growTo(nbarrier);
-        for ( i = 0; i < nbarrier; i++ ) {
+        for ( int i = 0; i < nbarrier; i++ ) {
             ir = dr->giveInputRecord(DataReader :: IR_nlocBarRec, i + 1);
             // read type of load
             IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -649,7 +648,7 @@ Domain :: instanciateYourself(DataReader *dr)
     if ( nrfg ) {
         // read random field generators
         randomFieldGeneratorList->growTo(nrfg);
-        for ( i = 0; i < nrfg; i++ ) {
+        for ( int i = 0; i < nrfg; i++ ) {
             ir = dr->giveInputRecord(DataReader :: IR_nRandomFieldGenRec, i + 1);
             // read type of load
             IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -680,7 +679,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read boundary conditions
     bcList->growTo(nload);
-    for ( i = 0; i < nload; i++ ) {
+    for ( int i = 0; i < nload; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_bcRec, i + 1);
         // read type of load
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -712,7 +711,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read initial conditions
     icList->growTo(nic);
-    for ( i = 0; i < nic; i++ ) {
+    for ( int i = 0; i < nic; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_icRec, i + 1);
         // read type of load
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -745,7 +744,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read load time functions
     loadTimeFunctionList->growTo(nloadtimefunc);
-    for ( i = 0; i < nloadtimefunc; i++ ) {
+    for ( int i = 0; i < nloadtimefunc; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_ltfRec, i + 1);
         // read type of ltf
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -776,22 +775,17 @@ Domain :: instanciateYourself(DataReader *dr)
 
 
 // instantiate xfemmanager
-    XfemManager *xm;
+    XfemManager *xMan;
     xfemManagerList->growTo(nxfemman);
     for ( int i = 1; i <= nxfemman; i++ ) {
-        xm =  new XfemManager(this->giveEngngModel(), i);
+        //xMan =  new XfemManager(this->giveEngngModel(), i);
+        xMan =  new XfemManager(this);
         ir = dr->giveInputRecord(DataReader :: IR_xfemManRec, 1);
         // XfemManager has to be put into xfemManagerList before xm->initializeFrom, otherwise Enrichmentitem cannot access XfemManager
         // or we have to make a reference from EnrichmentItem also
-        xfemManagerList->put(i, xm);
-        xm->initializeFrom(ir);
-        xm->instanciateYourself(dr);
-        
-        //xm->createEnrichedDofs();
-        //int last = xm->computeFictPosition();
-        //this->setNumberOfEquations(1, last);
-        //Jim - removed
-        //xm->updateIntegrationRule();
+        xfemManagerList->put(i, xMan);
+        xMan->initializeFrom(ir);
+        xMan->instanciateYourself(dr);
     }
 
 
@@ -799,11 +793,11 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // change internal component references from labels to assigned local numbers
     MapBasedEntityRenumberingFunctor labelToLocNumFunctor(dofManLabelMap, elemLabelMap);
-    for ( i = 1; i <= nnode; i++ ) {
+    for ( int i = 1; i <= nnode; i++ ) {
         this->giveDofManager(i)->updateLocalNumbering(labelToLocNumFunctor);
     }
 
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         this->giveElement(i)->updateLocalNumbering(labelToLocNumFunctor);
     }
 
@@ -841,9 +835,11 @@ Domain :: hasXfemManager(int i)
 void
 Domain :: postInitialize()
 {
+    for ( int i = 1; i <= this->dofManagerList->giveSize(); i++ ) {
+        this->dofManagerList->at(i)->postInitialize();
+    }
     for ( int i = 1; i <= this->elementList->giveSize(); i++ ) {
-        Element *e = this->elementList->at(i);
-        e->postInitialize();
+        this->elementList->at(i)->postInitialize();
     }
 }
 
@@ -1219,6 +1215,60 @@ Domain ::  giveCorrespondingCoordinateIndex(int idof)
 }
 
 
+void Domain :: createDofs(const IntArray &nodeBCs, EquationID eid)
+{
+    IntArray dofids;
+
+    // Scan all required nodal dofs.
+    std::vector< std::set<int> > node_dofs( this->giveNumberOfDofManagers() );
+
+    for (int i = 1; i <= this->giveNumberOfElements(); ++i) {
+        // Scan for all dofs needed.
+        Element *element = this->giveElement(i);
+        for (int j = 1; j <= element->giveNumberOfNodes(); ++j) {
+            element->giveDofManDofIDMask(j, eid, dofids);
+            for (int k = 1; k <= dofids.giveSize(); k++) {
+                node_dofs[element->giveNode(j)->giveNumber()-1].insert(dofids.at(k));
+            }
+        }
+    }
+
+    int dnumber = 0;
+    for (int i = 1; i <= this->giveNumberOfDofManagers(); ++i) {
+        DofManager *dman = this->giveDofManager(i);
+        int bcid = nodeBCs.at(i);
+        int c = 0;
+        ///@todo How do we reconcile this with none-node dofmanagers, like hangingnode etc. ?  We should pass the information to the dof manager and let it deal with it.
+        dman->setNumberOfDofs(node_dofs[i-1].size());
+        if (bcid > 0) {
+            GeneralBoundaryCondition *bc = this->giveBc(bcid);
+            const IntArray &defaultDofs = bc->giveDefaultDofs();
+            for (std::set<int>::iterator it = node_dofs[i-1].begin(); it != node_dofs[i-1].end(); ++it) {
+                DofIDItem id = (DofIDItem)*it;
+                Dof *dof;
+                if ( defaultDofs.contains(id) ) {
+                    ActiveBoundaryCondition *active_bc = dynamic_cast<ActiveBoundaryCondition*>(bc);
+                    if (active_bc && active_bc->requiresActiveDofs()) {
+                        dof = new ActiveDof(++dnumber, dman, bcid, id);
+                    } else {
+                        dof = new MasterDof(++dnumber, dman, bcid, 0, id);
+                    }
+                } else {
+                    dof = new MasterDof(++dnumber, dman, id);
+                }
+                dman->setDof(++c, dof);
+            }
+        } else {
+            for (std::set<int>::iterator it = node_dofs[i-1].begin(); it != node_dofs[i-1].end(); ++it) {
+                Dof *dof = new MasterDof(++dnumber, dman, (DofIDItem)*it);
+                dman->setDof(++c, dof);
+            }
+        }
+        dman->checkConsistency();
+    }
+}
+
+
 int
 Domain :: checkConsistency()
 // this function transverse tree of all objects and invokes
@@ -1228,22 +1278,22 @@ Domain :: checkConsistency()
 // are having required support
 //
 {
-    int i, result = 1;
+    int result = 1;
     int nnode, nelem, nmat;
 
     nnode = this->giveNumberOfDofManagers();
     nelem = this->giveNumberOfElements();
     nmat  = this->giveNumberOfMaterialModels();
 
-    for ( i = 1; i <= nnode; i++ ) {
+    for ( int i = 1; i <= nnode; i++ ) {
         result &= this->giveDofManager(i)->checkConsistency();
     }
 
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         result &= this->giveElement(i)->checkConsistency();
     }
 
-    for ( i = 1; i <= nmat; i++ ) {
+    for ( int i = 1; i <= nmat; i++ ) {
         result &= this->giveMaterial(i)->checkConsistency();
     }
 
@@ -1849,11 +1899,7 @@ Domain :: elementGlobal2Local(int _globnum)
 }
 
 
-void
-Domain :: setXfemManager(XfemManager *xfemManager)
-{
-    this->xfemManager = xfemManager;
-}
+
 
 
 

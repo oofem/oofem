@@ -32,16 +32,18 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef Q1TRBASE_H_
-#define Q1TRBASE_H_
+#ifndef tr1darcy_h_
+#define tr1darcy_h_
+
 #include "transportelement.h"
 #include "fei2dtrlin.h"
 #include "domain.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "transportmaterial.h"
-   
+
 namespace oofem {
-/** Element class for the DarcyFlow engineering model. Linear description of seepage
+/**
+ * Element class for the DarcyFlow engineering model. Linear description of seepage
  * @author Carl Sandström
  */
 class Tr1Darcy : public TransportElement, public NodalAveragingRecoveryModelInterface
@@ -54,7 +56,7 @@ public:
     Tr1Darcy(int, Domain *);
     virtual ~Tr1Darcy();
     virtual IRResultType initializeFrom(InputRecord *ir);
-    
+
     virtual FEInterpolation *giveInterpolation() { return &interpolation_lin; }
 
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
@@ -81,4 +83,4 @@ public:
 };
 }
 
-#endif /* Q1TRBASE_H_ */
+#endif // tr1darcy_h_

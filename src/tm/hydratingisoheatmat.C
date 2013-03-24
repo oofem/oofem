@@ -42,7 +42,7 @@ IRResultType
 HydratingIsoHeatMaterial :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                            // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
     int value;
     double dvalue;
 
@@ -52,7 +52,7 @@ HydratingIsoHeatMaterial :: initializeFrom(InputRecord *ir)
     HydrationModelInterface :: initializeFrom(ir);
 
     dvalue = -2.;
-    IR_GIVE_OPTIONAL_FIELD(ir, dvalue, IFT_HydratingIsoHeatMaterial_hydration, "hydration"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, dvalue, IFT_HydratingIsoHeatMaterial_hydration, "hydration");
     if ( dvalue >= 0. ) {
         hydration = 1;
     } else {
@@ -62,7 +62,7 @@ HydratingIsoHeatMaterial :: initializeFrom(InputRecord *ir)
     if ( hydration ) {
         // mixture type: 1 - mtLafarge, 2 - mtHuber, 3 - mtC60
         value = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HydratingIsoHeatMaterial_mix, "mix"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HydratingIsoHeatMaterial_mix, "mix");
         if ( !value ) {
             value = mtLafarge;
         }

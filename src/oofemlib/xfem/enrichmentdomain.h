@@ -40,13 +40,13 @@
 #include "node.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
-
-
 #include "geometry.h"
 
 namespace oofem {
 /**
- * Abstract representation of enrichment domain
+ * Abstract representation of enrichment domain - the geometry description of the particular 
+ * enrichment item. Includes BasicGeometry as one type of description, list of enriched dofmanagers etc.
+ * Should be extended to handle implicit geometry descriptions like e.g. level-sets. 
  * @author Jim Brouzoulis
  */
 class EnrichmentDomain 
@@ -58,12 +58,9 @@ public:
     virtual const char *giveClassName() const { return NULL; }
     virtual classType giveClassID() const { return EnrichmentDomainClass; }
 
-
-    // What does it need to be able to answer?
-    // should be pure virtual and thus be supported by all representations
-    //virtual bool isDofManagerEnriched(const DofManager *dMan) { return false; };
-    virtual bool isDofManagerEnriched(DofManager *dMan) = 0 {};
-    virtual bool isElementEnriched(Element *element);
+    virtual bool isDofManagerEnriched(DofManager *dMan) = 0;
+    // Default is to loop through the dofman and check if any of them are enriched
+    virtual bool isElementEnriched(Element *element); 
     int giveNumber() { return number; };
     void setNumber(int i) { this->number = i; };
     // Update of description
@@ -76,16 +73,18 @@ private:
     int number;
 };
 
+
+/**
+ * Base class for EnrichmentDomains that derive from BasicGeometry
+ * ///@todo: Add additional basic geometry descriptions like polygon
+ */
 class EnrichmentDomain_BG : public EnrichmentDomain
 {
-private:
-    
 public:
     BasicGeometry *bg;
     EnrichmentDomain_BG(){}; 
     virtual ~EnrichmentDomain_BG() { }
     virtual IRResultType initializeFrom(InputRecord *ir) { return this->bg->initializeFrom(ir); };
-    //virtual IRResultType initializeFrom(InputRecord *ir) {};
     virtual bool isDofManagerEnriched(DofManager *dMan){ return false; };
 
     virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element) { bg->computeIntersectionPoints(element, intersectionPoints); }
@@ -97,7 +96,6 @@ public:
 class EDBGCircle : public EnrichmentDomain_BG
 {
 public:
-    //Circle *bgc;
     EDBGCircle(){ bg = new Circle; }; 
     virtual ~EDBGCircle() { }
     virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir);  };
@@ -107,7 +105,10 @@ public:
     virtual int computeNumberOfIntersectionPoints(Element *element) { return static_cast<Circle *>(bg)->computeNumberOfIntersectionPoints(element); };
 };
 
-
+/**
+ * List of DofManagers 
+ * ///@todo: Add additional basic geometry descriptions like polygon
+ */
 class DofManList : public EnrichmentDomain
 {
 protected:
@@ -123,7 +124,11 @@ public:
 
 
 
-// The whole computational domain is enriched.
+/**
+ * The whole computational domain is enriched which thus is a global enrichment
+ * Mostly intended for debugging but may easily lead to a singular problem if the
+ * solution is enriched with strong discontinuities.
+ */
 class WholeDomain : public EnrichmentDomain
 {
 public:

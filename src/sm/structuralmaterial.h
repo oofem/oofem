@@ -42,6 +42,11 @@
 #include "matstatus.h"
 #include "stressstrainprincmode.h"
 
+///@name Input fields for StructuralMaterial
+//@{
+#define _IFT_StructuralMaterial_referencetemperature "referencetemperature"
+//@}
+
 namespace oofem {
 #define STRAIN_STEPS 10.0
 

@@ -44,6 +44,7 @@
 #include "mathfem.h"
 #include "gausspnt.h"
 #include "weakperiodicbc.h"
+#include "timestep.h"
 
 #ifdef __FM_MODULE
 #include "tr21stokes.h"
@@ -62,10 +63,10 @@ MatlabExportModule :: ~MatlabExportModule()
 IRResultType
 MatlabExportModule :: initializeFrom(InputRecord *ir)
 {
-    exportMesh = ir->hasField(IFT_ExportModule_tstepall, "mesh");
-    exportData = ir->hasField(IFT_ExportModule_tstepall, "data");
-    exportArea = ir->hasField(IFT_ExportModule_tstepall, "area");
-    exportSpecials = ir->hasField(IFT_ExportModule_tstepall, "specials");
+    exportMesh = ir->hasField(IFT_MatlabExportModule_mesh, "mesh");
+    exportData = ir->hasField(IFT_MatlabExportModule_data, "data");
+    exportArea = ir->hasField(IFT_MatlabExportModule_area, "area");
+    exportSpecials = ir->hasField(IFT_MatlabExportModule_specials, "specials");
 
     return IRRT_OK;
 }

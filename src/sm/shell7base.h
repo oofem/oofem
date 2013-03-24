@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -35,11 +35,9 @@
 #ifndef Shell7Base_h
 #define Shell7Base_h
 
-
 #include "eleminterpmapperinterface.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "layeredcrosssection.h"
-
 #include "nlstructuralelement.h"
 #include "vtkxmlexportmodule.h"
 #include "zznodalrecoverymodel.h"
@@ -52,7 +50,7 @@ class BoundaryLoad;
 /**
  * This class represent a 7 parameter shell element.
  * Each node has 7 degrees of freedom (displ. vec., director vec., inhomogeneous thickness strain ).
- * Add ref. to paper!
+ * @todo Add ref. to paper!
  * @author Jim Brouzoulis
  * @date 2012-11-01
  */
@@ -99,13 +97,13 @@ protected:
         EdgeInv,
     };
 
-    virtual IntArray giveOrdering(SolutionField fieldType) const = 0;
+    virtual const IntArray &giveOrdering(SolutionField fieldType) const = 0;
 
     std :: vector< FloatArray >initialNodeDirectors;
 
     FloatArray &giveInitialNodeDirector(int i) {
         return this->initialNodeDirectors [ i - 1 ];
-    };
+    }
 
     // Element specific methods
     virtual void computeGaussPoints() = 0;

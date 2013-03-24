@@ -40,6 +40,11 @@
 
 #define NAME_MAX_LENGTH 200
 
+///@name Input fields for ExternalFieldGenerator
+//@{
+#define _IFT_ExternalFieldGenerator_name "name"
+//@}
+
 namespace oofem {
 /**
  * This class implements a randomfieldgenerator which reads 

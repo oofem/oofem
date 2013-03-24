@@ -60,13 +60,13 @@ TR_SHELL01 :: initializeFrom(InputRecord *ir)
     this->StructuralElement :: initializeFrom(ir);
 
     /*
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_TrPlaneStrRot_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_Element_nip, "nip");
     if ( val != -1 ) {
         _error("key word NIP is not allowed for element TR_SHELL01");
     }
 
 
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_TrPlaneStrRot_niprot, "niprot"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_TrPlaneStrRot_niprot, "niprot");
     if ( val != -1 ) {
         _error("key word NIProt is not allowed for element TR_SHELL01");
     }
@@ -170,32 +170,32 @@ TR_SHELL01 :: giveInterface(InterfaceType interface)
 double
 TR_SHELL01 :: computeVolumeAround(GaussPoint *gp) 
 {
-  return plate->computeVolumeAround(gp);
+    return plate->computeVolumeAround(gp);
 }
 
 int
 TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 {
     if ( type == IST_ShellForceMomentumTensor ) {
-      FloatArray aux;
-      // gp is from plate part (the plate irule is used as default rule for this master element)
-      GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
-      
-      plate->giveIPValue(answer, gp, IST_ShellForceMomentumTensor, atTime);
-      membrane->giveIPValue(aux, membraneGP, IST_ShellForceMomentumTensor, atTime);
-      answer.add(aux);
-      return 1;
+        FloatArray aux;
+        // gp is from plate part (the plate irule is used as default rule for this master element)
+        GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
+        
+        plate->giveIPValue(answer, gp, IST_ShellForceMomentumTensor, atTime);
+        membrane->giveIPValue(aux, membraneGP, IST_ShellForceMomentumTensor, atTime);
+        answer.add(aux);
+        return 1;
     } else if ( type == IST_ShellStrainCurvatureTensor ) {
-      FloatArray aux;
-      GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
+        FloatArray aux;
+        GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
 
-      plate->giveIPValue(answer, gp, IST_ShellStrainCurvatureTensor, atTime);
-      membrane->giveIPValue(aux, membraneGP, IST_ShellStrainCurvatureTensor, atTime);
-      answer.add(aux);
+        plate->giveIPValue(answer, gp, IST_ShellStrainCurvatureTensor, atTime);
+        membrane->giveIPValue(aux, membraneGP, IST_ShellStrainCurvatureTensor, atTime);
+        answer.add(aux);
 
-      return 1;
+        return 1;
     } else {
-      return StructuralElement::giveIPValue(answer, gp, type, atTime);
+        return StructuralElement::giveIPValue(answer, gp, type, atTime);
     }
 }
 
@@ -203,13 +203,13 @@ TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 int
 TR_SHELL01 :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
-  if ( ( type == IST_ShellForceMomentumTensor || type == IST_ShellStrainCurvatureTensor ) ) {
-    return 12;
-  } else if ((type == IST_ErrorIndicatorLevel) || (type == IST_InternalStressError)) {
-    return 1;
-  } else {
-    return StructuralElement::giveIPValueSize(type, gp);
-  }
+    if ( ( type == IST_ShellForceMomentumTensor || type == IST_ShellStrainCurvatureTensor ) ) {
+        return 12;
+    } else if ((type == IST_ErrorIndicatorLevel) || (type == IST_InternalStressError)) {
+        return 1;
+    } else {
+        return StructuralElement::giveIPValueSize(type, gp);
+    }
 }
 
 
@@ -258,7 +258,7 @@ TR_SHELL01 :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &an
 double 
 TR_SHELL01::ZZRemeshingCriteriaI_giveCharacteristicSize() 
 {
-  return sqrt(plate->computeArea() * 2.0);
+    return sqrt(plate->computeArea() * 2.0);
 }
 
 
@@ -270,7 +270,7 @@ void
 TR_SHELL01 :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                        InternalStateType type, TimeStep *tStep)
 {
-  this->giveIPValue(answer, NULL, type, tStep);
+    this->giveIPValue(answer, NULL, type, tStep);
 }
 
 
@@ -278,7 +278,7 @@ void
 TR_SHELL01 :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                       InternalStateType type, TimeStep *tStep)
 {
-  answer.resize(0);
+    answer.resize(0);
 }
 
 
@@ -345,17 +345,17 @@ TR_SHELL01 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 contextIOResultType
 TR_SHELL01 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
-  contextIOResultType iores;
-  if ( ( iores =  StructuralElement::restoreContext (stream, mode, obj) ) != CIO_OK ) {;
-    THROW_CIOERR(iores);
-  }
-    if ( ( iores =   this->plate->restoreContext(stream, mode, obj) ) != CIO_OK ) {;
-     THROW_CIOERR(iores);
-  }
-   if ( ( iores =  this->membrane->restoreContext(stream, mode, obj) ) != CIO_OK ) {;
-    THROW_CIOERR(iores);
-  }
-  return iores;
+    contextIOResultType iores;
+    if ( ( iores =  StructuralElement::restoreContext (stream, mode, obj) ) != CIO_OK ) {;
+        THROW_CIOERR(iores);
+    }
+        if ( ( iores =   this->plate->restoreContext(stream, mode, obj) ) != CIO_OK ) {;
+        THROW_CIOERR(iores);
+    }
+    if ( ( iores =  this->membrane->restoreContext(stream, mode, obj) ) != CIO_OK ) {;
+        THROW_CIOERR(iores);
+    }
+    return iores;
 }
 
 

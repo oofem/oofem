@@ -34,6 +34,7 @@
 
 #ifndef qtrplanestraingrad_h
 #define qtrplanestraingrad_h
+
 #include "structuralelement.h"
 #include "gaussintegrationrule.h"
 #include "graddpelement.h"

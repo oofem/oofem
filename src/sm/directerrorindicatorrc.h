@@ -40,6 +40,16 @@
 #include "flotarry.h"
 #include "statecountertype.h"
 
+///@name Input fields for DirectErrorIndicatorRC
+//@{
+#define _IFT_DirectErrorIndicatorRC_minlim "minlim"
+#define _IFT_DirectErrorIndicatorRC_maxlim "maxlim"
+#define _IFT_DirectErrorIndicatorRC_mindens "mindens"
+#define _IFT_DirectErrorIndicatorRC_maxdens "maxdens"
+#define _IFT_DirectErrorIndicatorRC_defdens "defdens"
+#define _IFT_DirectErrorIndicatorRC_remeshingdensityratio "remeshingdensityratio"
+//@}
+
 namespace oofem {
 class Domain;
 class Element;

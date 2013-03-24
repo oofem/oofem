@@ -70,14 +70,11 @@ QTRSpace :: initializeFrom(InputRecord *ir)
 
     this->NLStructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 4;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_QTRSpace_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
     if ( ( numberOfGaussPoints != 1 ) && ( numberOfGaussPoints != 4 )&& ( numberOfGaussPoints != 5 ) ) {
         numberOfGaussPoints = 4;
     }
-
-    // set - up Gaussian integration points
-    this->computeGaussPoints();
 
     return IRRT_OK;
 }
@@ -102,9 +99,9 @@ double
 QTRSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
-  double determinant =fabs ((this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this))));
+  double determinant = fabs ((this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this))));
   
-  double weight      = aGaussPoint->giveWeight();
+  double weight = aGaussPoint->giveWeight();
   
   return ( determinant * weight);
 }

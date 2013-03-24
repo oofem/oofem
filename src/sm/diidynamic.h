@@ -40,17 +40,28 @@
 #include "sparsemtrx.h"
 #include "timediscretizationtype.h"
 
+///@name Input fields for DIIDynamic
+//@{
+#define _IFT_DIIDynamic_deltat "deltat"
+#define _IFT_DIIDynamic_ddtScheme "ddtscheme"
+#define _IFT_DIIDynamic_gamma "gamma"
+#define _IFT_DIIDynamic_beta "beta"
+#define _IFT_DIIDynamic_eta "eta"
+#define _IFT_DIIDynamic_delta "delta"
+#define _IFT_DIIDynamic_theta "theta"
+//@}
+
 namespace oofem {
 /**
  * This class implements Direct Implicit Integration of Dynamic problem
  *
  * Solution of this problem is series of loading cases, maintained as sequence of
- * time-steps. This solution is in form of linear equation system Ax=b.
- * The damping Matrix is assumed to be modeled as Rayleigh damping ( C = eta*M + delta*K)
+ * time-steps. This solution is in form of linear equation system @f$ A\cdot x = b @f$.
+ * The damping Matrix is assumed to be modeled as Rayleigh damping ( @f$ C = \eta M + \delta K @f$)
  *
  * Initial conditions is specified at time 0.
  *
- * Solution proceedure described in:
+ * Solution procedure described in:
  * A SURVEY OF DIRECT TIME-INTEGRATION METHODS IN COMPUTATIONAL STRUCTURAL DYNAMICS - II. IMPLICIT METHODS
  * K. Subbaraj and M. A. Dokainish
  * Computers & Structures Vol. 32. No. 6. pp. 1387-1401, 1989
@@ -58,7 +69,6 @@ namespace oofem {
  * @author Andreas Feymark
  *
  */
-
 class DIIDynamic : public StructuralEngngModel
 {
 protected:
@@ -109,7 +119,6 @@ public:
     void timesMtrx(FloatArray &answer, FloatArray &vec, CharType type, Domain *domain, TimeStep *tStep);
     void assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueModeType mode, TimeStep *tStep);
     void determineConstants(TimeStep *tStep);
-    virtual int checkConsistency();
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };

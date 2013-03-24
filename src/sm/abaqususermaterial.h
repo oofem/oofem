@@ -40,6 +40,14 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
+///@name Input fields for AbaqusUserMaterial
+//@{
+#define _IFT_AbaqusUserMaterial_numState "numstate"
+#define _IFT_AbaqusUserMaterial_properties "properties"
+#define _IFT_AbaqusUserMaterial_userMaterial "umat"
+#define _IFT_AbaqusUserMaterial_name "name"
+//@}
+
 namespace oofem {
 
 /**

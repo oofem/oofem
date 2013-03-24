@@ -59,7 +59,6 @@ Tet1BubbleStokes :: Tet1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDom
 {
     this->numberOfDofMans = 4;
     this->numberOfGaussPoints = 24;
-    this->computeGaussPoints();
     
     this->bubble = new ElementDofManager(1, aDomain, this);
     this->bubble->appendDof(new MasterDof(1, this->bubble, V_u));
@@ -102,7 +101,7 @@ int Tet1BubbleStokes :: computeNumberOfDofs(EquationID ut)
 
 void Tet1BubbleStokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
+    if ( ut == EID_MomentumBalance ) {
         answer.setValues(3, V_u, V_v, V_w);
     } else if ( ut == EID_ConservationEquation ) {
         answer.setValues(1, P_f);

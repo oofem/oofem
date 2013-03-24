@@ -39,6 +39,12 @@
 
 #include <cstdio>
 
+///@name Input fields for Gausspoint export module
+//@{
+#define _IFT_GPExportModule_vartypes "vars"
+#define _IFT_GPExportModule_ncoords "ncoords"
+//@}
+
 namespace oofem {
 /**
  * Represents GP (Gauss point) export module.

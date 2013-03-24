@@ -843,8 +843,8 @@ RCM2Material :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, Gf, IFT_RCM2Material_gf, "gf"); // Macro
-    IR_GIVE_FIELD(ir, Ft, IFT_RCM2Material_ft, "ft"); // Macro
+    IR_GIVE_FIELD(ir, Gf, IFT_RCM2Material_gf, "gf");
+    IR_GIVE_FIELD(ir, Ft, IFT_RCM2Material_ft, "ft");
 
     this->giveLinearElasticMaterial()->initializeFrom(ir);
 

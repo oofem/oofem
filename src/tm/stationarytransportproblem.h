@@ -40,6 +40,11 @@
 #include "sparsemtrx.h"
 #include "primaryfield.h"
 
+///@name Input fields for StationaryTransportProblem
+//@{
+#define _IFT_StationaryTransportProblem_exportfields "exportfields"
+//@}
+
 namespace oofem {
 /**
  * This class represents stationary transport problem.

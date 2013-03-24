@@ -208,37 +208,30 @@ DustMaterial :: initializeFrom(InputRecord *ir)
         OOFEM_ERROR("parameter 'ft' must be positive")
     }
 
-    ;
     if ( x0 < 0 ) {
         OOFEM_ERROR("parameter 'x0' must be positive")
     }
 
-    ;
     if ( rEll < 0 ) {
         OOFEM_ERROR("parameter 'rEll' must be positive")
     }
 
-    ;
     if ( theta < 0 ) {
         OOFEM_ERROR("parameter 'theta' must be positive")
     }
 
-    ;
     if ( beta < 0 ) {
         OOFEM_ERROR("parameter 'beta' must be positive")
     }
 
-    ;
     if ( lambda < 0 ) {
         OOFEM_ERROR("parameter 'lambda' must be positive")
     }
 
-    ;
     if ( alpha < lambda ) {
         OOFEM_ERROR("parameter 'alpha' must be greater than parameter 'lambda'")
     }
 
-    ;
     x0 = -x0; // compressive strength is negative, although on input it is a positive number
 
     hardeningType = 0;

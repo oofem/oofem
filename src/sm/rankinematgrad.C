@@ -286,16 +286,16 @@ RankineMatGrad :: initializeFrom(InputRecord *ir)
 
     RankineMat :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, R, IFT_RankineMatGrad_r, "r"); // Macro
+    IR_GIVE_FIELD(ir, R, IFT_RankineMatGrad_r, "r");
     if ( R < 0.0 ) {
         R = 0.0;
     }
 
     mParam = 2.;
-    IR_GIVE_OPTIONAL_FIELD(ir, mParam, IFT_RankineMatGrad_m, "m"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, mParam, IFT_RankineMatGrad_m, "m");
 
     negligible_damage = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, negligible_damage, IFT_RankineMatGrad_m, "negligible_damage");
+    IR_GIVE_OPTIONAL_FIELD(ir, negligible_damage, IFT_RankineMatGrad_negligibleDamage, "negligible_damage");
 
     return IRRT_OK;
 }

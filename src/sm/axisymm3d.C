@@ -238,11 +238,11 @@ Axisymm3d :: initializeFrom(InputRecord *ir)
 
     this->StructuralElement :: initializeFrom(ir);
 
-    numberOfGaussPoints      = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Axisymm3d_nip, "nip"); // Macro
+    numberOfGaussPoints = 1;
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
-    numberOfFiAndShGaussPoints    = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, IFT_Axisymm3d_nipfish, "nipfish"); // Macro
+    numberOfFiAndShGaussPoints = 1;
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, IFT_Axisymm3d_nipfish, "nipfish");
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
            ( numberOfGaussPoints == 4 ) ||
@@ -256,8 +256,6 @@ Axisymm3d :: initializeFrom(InputRecord *ir)
         numberOfFiAndShGaussPoints = 1;
     }
 
-    this->computeGaussPoints();
-
     return IRRT_OK;
 }
 
@@ -268,7 +266,6 @@ Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
 // the receiver, at time step stepN. The nature of these strains depends
 // on the element's type.
 {
-    int i;
     FloatMatrix b, A;
     FloatArray u, Epsilon, help;
     fMode mode = domain->giveEngngModel()->giveFormulation();
@@ -305,7 +302,7 @@ Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
         answer.at(6) = Epsilon.at(4);
 
         if ( nlGeometry ) {
-            for ( i = 1; i <= 6; i++ ) {
+            for ( int i = 1; i <= 6; i++ ) {
                 // nonlin part of strain vector
                 this->computeNLBMatrixAt(A, gp, i);
                 if ( A.isNotEmpty() ) {

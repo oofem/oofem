@@ -44,6 +44,14 @@
 #include "bcgeomtype.h"
 #include "bctype.h"
 
+///@name Input fields for a general boundary condition
+//@{
+#define _IFT_GeneralBoundaryCondition_LoadTimeFunct "loadtimefunction"
+#define _IFT_GeneralBoundaryCondition_valType "valtype"
+#define _IFT_GeneralBoundaryCondition_defaultDofs "defaultdofs"
+#define _IFT_GeneralBoundaryCondition_IsImposedTimeFunct "isimposedtimefunction"
+//@}
+
 namespace oofem {
 /**
  * Abstract base class for all boundary conditions of problem.

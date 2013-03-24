@@ -259,7 +259,7 @@ IRResultType FE2FluidMaterial :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom";
     IRResultType result;
-    IR_GIVE_FIELD(ir, this->inputfile, IFT_MicroMaterialFileName, "inputfile");
+    IR_GIVE_FIELD(ir, this->inputfile, IFT_FE2FluidMaterial_fileName, _IFT_FE2FluidMaterial_fileName);
     return this->FluidDynamicMaterial::initializeFrom(ir);
 }
 

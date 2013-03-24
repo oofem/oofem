@@ -79,7 +79,7 @@ UserDefinedTemperatureField :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, size, IFT_UserDefinedTemperatureField_size, "size"); // Macro
+    IR_GIVE_FIELD(ir, size, IFT_UserDefinedTemperatureField_size, "size");
     if ( size > 3 ) {
         size = 3;
     }

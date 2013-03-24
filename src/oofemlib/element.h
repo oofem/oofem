@@ -62,6 +62,20 @@
 
 #include <cstdio>
 
+///@name Input fields for general element.
+//@{
+#define _IFT_Element_mat "mat"
+#define _IFT_Element_crosssect "crosssect"
+#define _IFT_Element_nodes "nodes"
+#define _IFT_Element_bodyload "bodyloads"
+#define _IFT_Element_boundaryload "boundaryloads"
+#define _IFT_Element_lcs "lcs"
+#define _IFT_Element_partitions "partitions"
+#define _IFT_Element_remote "remote"
+#define _IFT_Element_activityltf "activityltf"
+#define _IFT_Element_nip "nip"
+//@}
+
 namespace oofem {
 class TimeStep;
 class Node;
@@ -552,7 +566,7 @@ public:
     int giveRegionNumber();
 
     /// Performs post initialization steps.
-    void postInitialize();
+    virtual void postInitialize();
 
     /**
      * Updates element state after equilibrium in time step has been reached.

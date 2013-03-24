@@ -47,6 +47,23 @@
 #include "contextioresulttype.h"
 #include "unknowntype.h"
 
+///@name Input fields for DofManager
+//@{
+#define _IFT_DofManager_ndofs "ndofs"
+#define _IFT_DofManager_dofidmask "dofidmask"
+#define _IFT_DofManager_load "load"
+#define _IFT_DofManager_bc "bc"
+#define _IFT_DofManager_ic "ic"
+#define _IFT_DofManager_mastermask "mastermask"
+#define _IFT_DofManager_doftypemask "doftype"
+#define _IFT_DofManager_boundaryflag "boundary"
+#define _IFT_DofManager_globnum "globnum"
+#define _IFT_DofManager_partitions "partitions"
+#define _IFT_DofManager_sharedflag "shared"
+#define _IFT_DofManager_remoteflag "remote"
+#define _IFT_DofManager_nullflag "nullflag"
+//@}
+
 namespace oofem {
 
 class DataStream;
@@ -377,7 +394,7 @@ public:
      * Updates receiver after equilibrium in time step has been reached.
      * @param tStep Active time step.
      */
-    void updateYourself(TimeStep *tStep);
+    virtual void updateYourself(TimeStep *tStep);
 
     // Miscellaneous
     /// @return True if dofmanager is on boundary.
@@ -409,12 +426,9 @@ public:
     /// Returns true if dof of given type is allowed to be associated to receiver
     virtual bool isDofTypeCompatible(dofType type) const { return false; }
     /**
-     * Checks internal data consistency in node.
-     * Current implementation checks (when receiver has slave dofs) if receiver has the same
-     * coordinate system as master dofManager of slave dof.
-     * @return Nonzero if receiver check is o.k.
+     * Performs post-initialization such like checking if there are any slave dofs etc.
      */
-    virtual int checkConsistency();
+    virtual void postInitialize();
     /**
      * Local renumbering support. For some tasks (parallel load balancing, for example) it is necessary to
      * renumber the entities. The various FEM components (such as nodes or elements) typically contain

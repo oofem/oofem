@@ -60,21 +60,21 @@ OutputManager :: initializeFrom(InputRecord *ir)
 
     tstep_all_out_flag  = ir->hasField(IFT_OutputManager_tstepall, "tstep_all");
     tstep_step_out      = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, tstep_step_out, IFT_OutputManager_tstepstep, "tstep_step"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, tstep_step_out, IFT_OutputManager_tstepstep, "tstep_step");
 
     dofman_all_out_flag = ir->hasField(IFT_OutputManager_dofmanall, "dofman_all");
     element_all_out_flag = ir->hasField(IFT_OutputManager_elementall, "element_all");
 
     tsteps_out.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, tsteps_out, IFT_OutputManager_tstepsout, "tsteps_out"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, tsteps_out, IFT_OutputManager_tstepsout, "tsteps_out");
     dofman_out.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, dofman_out, IFT_OutputManager_dofmanoutput, "dofman_output"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, dofman_out, IFT_OutputManager_dofmanoutput, "dofman_output");
     dofman_except.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, dofman_except, IFT_OutputManager_dofmanexcept, "dofman_except"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, dofman_except, IFT_OutputManager_dofmanexcept, "dofman_except");
     element_out.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, element_out, IFT_OutputManager_elementoutput, "element_output"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, element_out, IFT_OutputManager_elementoutput, "element_output");
     element_except.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, element_except, IFT_OutputManager_elementexcept, "element_except"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, element_except, IFT_OutputManager_elementexcept, "element_except");
 
     return IRRT_OK;
 }

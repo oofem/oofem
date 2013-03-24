@@ -93,7 +93,7 @@ ScalarErrorIndicator :: initializeFrom(InputRecord *ir)
 
     ErrorEstimator :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, indicatorType, IFT_ScalarErrorIndicator_vartype, "vartype"); // Macro
+    IR_GIVE_FIELD(ir, indicatorType, IFT_ScalarErrorIndicator_vartype, "vartype");
     if ( indicatorType != 1 ) {
         _error("instanciateFrom: usupported varType");
     }

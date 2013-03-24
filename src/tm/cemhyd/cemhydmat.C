@@ -40,7 +40,7 @@
  * the public domain. CEMHYD3D is an experimental system. NIST
  * assumes no responsibility whatsoever for its use by other
  * parties, and makes no guarantees, expressed or implied,
- * about its quality, reliabi#define OUTFILESlity, or any other characteristic.
+ * about its quality, reliability, or any other characteristic.
  * We would appreciate acknowledgement if the software is used.
  * This software can be redistributed and/or modified freely
  * provided that any derivative works bear some notice that
@@ -59,7 +59,6 @@
  #include "domain.h"
  #include "flotmtrx.h"
  #include "gausspnt.h"
- #include "oofem_limits.h"
 #endif
 
 namespace oofem {
@@ -474,21 +473,21 @@ IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
 
     reinforcementDegree = 0.;
     //if you want computation of material properties directly from CEMHYD3D, sum up 1 for density, 2 for conductivity, 4 for capacity
-    IR_GIVE_OPTIONAL_FIELD(ir, conductivityType, IFT_CemhydMat_conductivitytype, "conductivitytype"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, capacityType, IFT_CemhydMat_capacitytype, "capacitytype"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, densityType, IFT_CemhydMat_densitytype, "densitytype"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, eachGP, IFT_CemhydMat_eachgp, "eachgp"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, nowarnings, IFT_CemhydMat_nowarnings, "nowarnings"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, conductivityType, IFT_CemhydMat_conductivitytype, "conductivitytype");
+    IR_GIVE_OPTIONAL_FIELD(ir, capacityType, IFT_CemhydMat_capacitytype, "capacitytype");
+    IR_GIVE_OPTIONAL_FIELD(ir, densityType, IFT_CemhydMat_densitytype, "densitytype");
+    IR_GIVE_OPTIONAL_FIELD(ir, eachGP, IFT_CemhydMat_eachgp, "eachgp");
+    IR_GIVE_OPTIONAL_FIELD(ir, nowarnings, IFT_CemhydMat_nowarnings, "nowarnings");
     if ( nowarnings.giveSize() != 4 ) {
         OOFEM_ERROR2( "Incorrect size %d of nowarnings", nowarnings.giveSize() );
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, scaling, IFT_CemhydMat_scaling, "scaling"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, scaling, IFT_CemhydMat_scaling, "scaling");
     if ( scaling.giveSize() != 3 ) {
         OOFEM_ERROR2( "Incorrect size %d of scaling", nowarnings.giveSize() );
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, reinforcementDegree, IFT_CemhydMat_reinforcementDegree, "reinforcementdegree"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, reinforcementDegree, IFT_CemhydMat_reinforcementDegree, "reinforcementdegree");
     IR_GIVE_FIELD(ir, XMLfileName, IFT_CemhydMat_inputFileName, "file");
 
     return IRRT_OK;
@@ -911,8 +910,9 @@ void CemhydMatStatus :: initializeMicrostructure()
 
 
 
-///destructor
-CemhydMatStatus :: ~CemhydMatStatus(void) {
+// destructor
+CemhydMatStatus :: ~CemhydMatStatus()
+{
 #ifdef OUTFILES
     if ( fileperc != NULL ) {
         fclose(fileperc);
@@ -1027,7 +1027,8 @@ CemhydMatStatus :: ~CemhydMatStatus(void) {
     dealloc_shortint_3D(faces, SYSIZE);
 }
 
-void CemhydMatStatus :: alloc_char_3D(char ***( & mic ), long SYSIZE) {
+void CemhydMatStatus :: alloc_char_3D(char ***( & mic ), long SYSIZE)
+{
     mic = new char ** [ SYSIZE ];
     for ( int x = 0; x < SYSIZE; x++ ) {
         mic [ x ] = new char * [ SYSIZE ];
@@ -1040,7 +1041,8 @@ void CemhydMatStatus :: alloc_char_3D(char ***( & mic ), long SYSIZE) {
     }
 }
 
-void CemhydMatStatus :: dealloc_char_3D(char ***( & mic ), long SYSIZE) {
+void CemhydMatStatus :: dealloc_char_3D(char ***( & mic ), long SYSIZE)
+{
     if ( mic != NULL ) {
         for ( int x = 0; x < SYSIZE; x++ ) {
             for ( int y = 0; y < SYSIZE; y++ ) {
@@ -1054,7 +1056,8 @@ void CemhydMatStatus :: dealloc_char_3D(char ***( & mic ), long SYSIZE) {
     }
 }
 
-void CemhydMatStatus :: alloc_long_3D(long ***( & mic ), long SYSIZE) {
+void CemhydMatStatus :: alloc_long_3D(long ***( & mic ), long SYSIZE)
+{
     mic = new long ** [ SYSIZE ];
     for ( int x = 0; x < SYSIZE; x++ ) {
         mic [ x ] = new long * [ SYSIZE ];
@@ -1068,7 +1071,8 @@ void CemhydMatStatus :: alloc_long_3D(long ***( & mic ), long SYSIZE) {
 }
 
 
-void CemhydMatStatus :: dealloc_long_3D(long ***( & mic ), long SYSIZE) {
+void CemhydMatStatus :: dealloc_long_3D(long ***( & mic ), long SYSIZE)
+{
     if ( mic != NULL ) {
         for ( int x = 0; x < SYSIZE; x++ ) {
             for ( int y = 0; y < SYSIZE; y++ ) {
@@ -1082,7 +1086,8 @@ void CemhydMatStatus :: dealloc_long_3D(long ***( & mic ), long SYSIZE) {
     }
 }
 
-void CemhydMatStatus :: alloc_int_3D(int ***( & mic ), long SYSIZE) {
+void CemhydMatStatus :: alloc_int_3D(int ***( & mic ), long SYSIZE)
+{
     mic = new int ** [ SYSIZE ];
     for ( int x = 0; x < SYSIZE; x++ ) {
         mic [ x ] = new int * [ SYSIZE ];
@@ -1096,7 +1101,8 @@ void CemhydMatStatus :: alloc_int_3D(int ***( & mic ), long SYSIZE) {
 }
 
 
-void CemhydMatStatus :: dealloc_int_3D(int ***( & mic ), long SYSIZE) {
+void CemhydMatStatus :: dealloc_int_3D(int ***( & mic ), long SYSIZE)
+{
     if ( mic != NULL ) {
         for ( int x = 0; x < SYSIZE; x++ ) {
             for ( int y = 0; y < SYSIZE; y++ ) {
@@ -1110,7 +1116,8 @@ void CemhydMatStatus :: dealloc_int_3D(int ***( & mic ), long SYSIZE) {
     }
 }
 
-void CemhydMatStatus :: alloc_shortint_3D(short int ***( & mic ), long SYSIZE) {
+void CemhydMatStatus :: alloc_shortint_3D(short int ***( & mic ), long SYSIZE)
+{
     mic = new short int ** [ SYSIZE ];
     for ( int x = 0; x < SYSIZE; x++ ) {
         mic [ x ] = new short int * [ SYSIZE ];
@@ -1124,7 +1131,8 @@ void CemhydMatStatus :: alloc_shortint_3D(short int ***( & mic ), long SYSIZE) {
 }
 
 
-void CemhydMatStatus :: dealloc_shortint_3D(short int ***( & mic ), long SYSIZE) {
+void CemhydMatStatus :: dealloc_shortint_3D(short int ***( & mic ), long SYSIZE)
+{
     if ( mic != NULL ) {
         for ( int x = 0; x < SYSIZE; x++ ) {
             for ( int y = 0; y < SYSIZE; y++ ) {
@@ -1138,7 +1146,8 @@ void CemhydMatStatus :: dealloc_shortint_3D(short int ***( & mic ), long SYSIZE)
     }
 }
 
-void CemhydMatStatus :: alloc_double_3D(double ***( & mic ), long SYSIZE) {
+void CemhydMatStatus :: alloc_double_3D(double ***( & mic ), long SYSIZE)
+{
     mic = new double ** [ SYSIZE ];
     for ( int x = 0; x < SYSIZE; x++ ) {
         mic [ x ] = new double * [ SYSIZE ];
@@ -1152,7 +1161,8 @@ void CemhydMatStatus :: alloc_double_3D(double ***( & mic ), long SYSIZE) {
 }
 
 
-void CemhydMatStatus :: dealloc_double_3D(double ***( & mic ), long SYSIZE) {
+void CemhydMatStatus :: dealloc_double_3D(double ***( & mic ), long SYSIZE)
+{
     if ( mic != NULL ) {
         for ( int x = 0; x < SYSIZE; x++ ) {
             for ( int y = 0; y < SYSIZE; y++ ) {
@@ -1168,7 +1178,8 @@ void CemhydMatStatus :: dealloc_double_3D(double ***( & mic ), long SYSIZE) {
 
 #ifdef TINYXML
 //functions to read int, double and string with error checking
-void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, int &val) {
+void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, int &val)
+{
     int success;
     char key [ 256 ];
     XMLHandle docHandle = XMLHandle(xmlFile);
@@ -1186,13 +1197,15 @@ void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *e
     }
 }
 
-void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, long int &val) {
+void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, long int &val)
+{
     int temp;
     QueryNumAttributeExt(xmlFile, elementName, position, temp);
     val = static_cast< long int >(temp);
 }
 
-void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, const char *key, int &val) {
+void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, const char *key, int &val)
+{
     int success;
     XMLHandle docHandle = XMLHandle(xmlFile);
     XMLElement *elemSelected = docHandle.FirstChildElement("cemhyd").FirstChildElement(elementName).ToElement();
@@ -1209,7 +1222,8 @@ void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *e
 }
 
 
-void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, double &val) {
+void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, double &val)
+{
     int success;
     char key [ 256 ];
     XMLHandle docHandle = XMLHandle(xmlFile);
@@ -1227,7 +1241,8 @@ void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *e
     }
 }
 
-void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, const char *key, double &val) {
+void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, const char *key, double &val)
+{
     int success;
     XMLHandle docHandle = XMLHandle(xmlFile);
     XMLElement *elemSelected = docHandle.FirstChildElement("cemhyd").FirstChildElement(elementName).ToElement();
@@ -1243,7 +1258,8 @@ void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *e
     }
 }
 
-void CemhydMatStatus :: QueryStringAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, char *chars) {
+void CemhydMatStatus :: QueryStringAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, char *chars)
+{
     int success;
     char key [ 256 ];
     XMLHandle docHandle = XMLHandle(xmlFile);
@@ -1522,7 +1538,7 @@ double CemhydMatStatus :: ran1(int *idum)
 
 
 /* routine to add a flat plate aggregate in the microstructure */
-void CemhydMatStatus :: addagg(void)
+void CemhydMatStatus :: addagg()
 /* Calls: no other routines */
 /* Called by: main program */
 {
@@ -1646,7 +1662,8 @@ int CemhydMatStatus :: chksph(int xin, int yin, int zin, int radd, int wflg, int
 /* numeach holds the number of each size class */
 /* sizeeach holds the radius of each size class */
 /* pheach holds the phase of each size class */
-int CemhydMatStatus :: gsphere(int numgen, long int *numeach, int *sizeeach, int *pheach) {
+int CemhydMatStatus :: gsphere(int numgen, long int *numeach, int *sizeeach, int *pheach)
+{
     /* Calls: makesph, ran1 */
     /* Called by: create */
     int count, x, y, z, radius, ig, tries, phnow;
@@ -1757,7 +1774,8 @@ int CemhydMatStatus :: gsphere(int numgen, long int *numeach, int *sizeeach, int
 
 
 /* routine to obtain user input and create a starting microstructure */
-int CemhydMatStatus :: create(void) {
+int CemhydMatStatus :: create()
+{
     /* Calls: gsphere */
     /* Called by: main program */
     int numsize;
@@ -1929,7 +1947,8 @@ int CemhydMatStatus :: create(void) {
 
 /* Routine to draw a particle during flocculation routine */
 /* See routine chksph for definition of parameters */
-void CemhydMatStatus :: drawfloc(int xin, int yin, int zin, int radd, int phasein, int phase2) {
+void CemhydMatStatus :: drawfloc(int xin, int yin, int zin, int radd, int phasein, int phase2)
+{
     /* Calls: no other routines */
     /* Called by: makefloc */
     int xp, yp, zp, i, j, k;
@@ -1986,7 +2005,8 @@ void CemhydMatStatus :: drawfloc(int xin, int yin, int zin, int radd, int phasei
 /* Routine to check particle placement during flocculation */
 /* for particle of size radd centered at (xin,yin,zin) */
 /* Returns flag indicating if placement is possible */
-int CemhydMatStatus :: chkfloc(int xin, int yin, int zin, int radd) {
+int CemhydMatStatus :: chkfloc(int xin, int yin, int zin, int radd)
+{
     /* Calls: no other routines */
     /* Called by: makefloc */
     int nofits, xp, yp, zp, i, j, k;
@@ -2052,7 +2072,7 @@ int CemhydMatStatus :: chkfloc(int xin, int yin, int zin, int radd) {
 
 
 /* routine to perform flocculation of particles */
-void CemhydMatStatus :: makefloc(void)
+void CemhydMatStatus :: makefloc()
 /* Calls: drawfloc, chkfloc, ran1 */
 /* Called by: main program */
 {
@@ -2213,7 +2233,7 @@ void CemhydMatStatus :: makefloc(void)
 
 
 /* routine to assess global phase fractions present in 3-D system */
-void CemhydMatStatus :: measure(void)
+void CemhydMatStatus :: measure()
 /* Calls: no other routines */
 /* Called by: main program */
 {
@@ -2287,7 +2307,7 @@ void CemhydMatStatus :: measure(void)
 
 /* Routine to measure phase fractions as a function of distance from */
 /* aggregate surface*/
-void CemhydMatStatus :: measagg(void)
+void CemhydMatStatus :: measagg()
 /* Calls: no other routines */
 /* Called by: main program */
 {
@@ -2343,7 +2363,7 @@ void CemhydMatStatus :: measagg(void)
 /* routine to assess the connectivity (percolation) of a single phase */
 /* Two matrices are used here: one for the current burnt locations */
 /* the other to store the newly found burnt locations */
-void CemhydMatStatus :: connect(void)
+void CemhydMatStatus :: connect()
 /* Calls: no other routines */
 /* Called by: main program */
 {
@@ -2489,7 +2509,7 @@ void CemhydMatStatus :: connect(void)
 
 
 /* Routine to output final microstructure to file */
-void CemhydMatStatus :: outmic(void)
+void CemhydMatStatus :: outmic()
 /* Calls: no other routines */
 /* Called by: main program */
 {
@@ -2547,7 +2567,8 @@ void CemhydMatStatus :: outmic(void)
 }
 
 
-int CemhydMatStatus :: genpartnew(void) {
+int CemhydMatStatus :: genpartnew()
+{
     int userc;    /* User choice from menu */
     int ig, jg, kg;
 
@@ -2747,7 +2768,8 @@ int CemhydMatStatus :: maketemp(int size)
 /* routine to count phase fractions (porosity and solids) */
 /* Called by main routine */
 /* Calls no other routines */
-void CemhydMatStatus :: phcount(void) {
+void CemhydMatStatus :: phcount()
+{
     long int npore, nsolid [ 37 ];
     int ix, iy, iz;
 
@@ -2778,7 +2800,8 @@ void CemhydMatStatus :: phcount(void) {
 /* for pixel located at (xin,yin,zin) */
 /* Called by rhcalc */
 /* Calls no other routines */
-int CemhydMatStatus :: surfpix(int xin, int yin, int zin) {
+int CemhydMatStatus :: surfpix(int xin, int yin, int zin)
+{
     int npix, ix1, iy1, iz1;
 
     npix = 0;
@@ -2845,7 +2868,8 @@ int CemhydMatStatus :: surfpix(int xin, int yin, int zin) {
 /* routine to return the current hydraulic radius for phase phin */
 /* Calls surfpix */
 /* Called by runsint */
-float CemhydMatStatus :: rhcalc(int phin) {
+float CemhydMatStatus :: rhcalc(int phin)
+{
     int ix, iy, iz;
     long int porc, surfc;
     float rhval;
@@ -2875,7 +2899,8 @@ float CemhydMatStatus :: rhcalc(int phin) {
 /* phin or porosity (phase=0) */
 /* Calls no other routines */
 /* Called by sysinit */
-int CemhydMatStatus :: countem(int xp, int yp, int zp, int phin) {
+int CemhydMatStatus :: countem(int xp, int yp, int zp, int phin)
+{
     int xc, yc, zc;
     int cumnum, ic;
 
@@ -2917,7 +2942,8 @@ int CemhydMatStatus :: countem(int xp, int yp, int zp, int phin) {
 /* of all phase 1 and phase 2 pixels */
 /* Calls countem */
 /* Called by runsint */
-void CemhydMatStatus :: sysinit(int ph1, int ph2) {
+void CemhydMatStatus :: sysinit(int ph1, int ph2)
+{
     int count, xl, yl, zl;
 
     count = 0;
@@ -2968,7 +2994,8 @@ void CemhydMatStatus :: sysinit(int ph1, int ph2) {
 /* histograms based on values in phase and curvature arrays */
 /* Calls no other routines */
 /* Called by runsint */
-void CemhydMatStatus :: sysscan(int ph1, int ph2) {
+void CemhydMatStatus :: sysscan(int ph1, int ph2)
+{
     int xd, yd, zd, curvval;
 
     /* Scan all pixels in 3-D system */
@@ -2992,7 +3019,8 @@ void CemhydMatStatus :: sysscan(int ph1, int ph2) {
 /* want to use highest values first */
 /* Calls no other routines */
 /* Called by movepix */
-int CemhydMatStatus :: procsol(int nsearch) {
+int CemhydMatStatus :: procsol(int nsearch)
+{
     int valfound, i, stop;
     long int nsofar;
 
@@ -3018,7 +3046,8 @@ int CemhydMatStatus :: procsol(int nsearch) {
 /* Calls no other routines */
 /* Called by movepix */
 
-int CemhydMatStatus :: procair(int nsearch) {
+int CemhydMatStatus :: procair(int nsearch)
+{
     int valfound, i, stop;
     long int nsofar;
 
@@ -3042,7 +3071,8 @@ int CemhydMatStatus :: procair(int nsearch) {
 /* curvature phase 1 (ph1) sites to lowest curvature phase 2 (ph2) sites */
 /* Calls procsol and procair */
 /* Called by runsint */
-int CemhydMatStatus :: movepix(int ntomove, int ph1, int ph2) {
+int CemhydMatStatus :: movepix(int ntomove, int ph1, int ph2)
+{
     int count1, count2, ntot, countc, i, xp, yp, zp;
     int cmin, cmax, cfg;
     int alldone;
@@ -3187,7 +3217,8 @@ int CemhydMatStatus :: movepix(int ntomove, int ph1, int ph2) {
 /* routine to execute user input number of cycles of sintering algorithm */
 /* Calls maketemp, rhcalc, sysinit, sysscan, and movepix */
 /* Called by main routine */
-void CemhydMatStatus :: sinter3d(int ph1id, int ph2id, float rhtarget) {
+void CemhydMatStatus :: sinter3d(int ph1id, int ph2id, float rhtarget)
+{
     int natonce, i, rade, j, rflag;
     int keepgo;
     long int curvsum1, curvsum2, pixsum1, pixsum2;
@@ -3246,7 +3277,8 @@ void CemhydMatStatus :: sinter3d(int ph1id, int ph2id, float rhtarget) {
     }
 }
 
-void CemhydMatStatus :: stat3d(void) {
+void CemhydMatStatus :: stat3d()
+{
     int valin, ix, iy, iz;
     int ix1, iy1, iz1, k;
     long int voltot, surftot;
@@ -3378,10 +3410,10 @@ void CemhydMatStatus :: stat3d(void) {
 #endif
     (void)surftot;
     (void)voltot;
-    
 }
 
-void CemhydMatStatus :: rand3d(int phasein, int phaseout, float xpt) {
+void CemhydMatStatus :: rand3d(int phasein, int phaseout, float xpt)
+{
     float s2, ss, sdiff, xtmp, ytmp;
     //static float normm[SYSIZE+1][SYSIZE+1][SYSIZE+1];
     //static float res[SYSIZE+1][SYSIZE+1][SYSIZE+1];
@@ -3623,7 +3655,7 @@ void CemhydMatStatus :: rand3d(int phasein, int phaseout, float xpt) {
 
 
 /*disabled sintering*/
-void CemhydMatStatus :: distrib3d(void)
+void CemhydMatStatus :: distrib3d()
 {
     int i, j, k, alumval, alum2, valin;
     int output_img;
@@ -3899,7 +3931,7 @@ void CemhydMatStatus :: distrib3d(void)
 /*************DISREALNEW***********************************/
 /**********************************************************/
 
-void CemhydMatStatus :: init(void)
+void CemhydMatStatus :: init()
 {
     int i;
     double slagin, CHperslag;
@@ -4337,7 +4369,8 @@ void CemhydMatStatus :: init(void)
 /* (in contact with pore space) in 3-D system */
 /* Called by passone */
 /* Calls no other routines */
-int CemhydMatStatus :: chckedge(int xck, int yck, int zck) {
+int CemhydMatStatus :: chckedge(int xck, int yck, int zck)
+{
     int edgeback, x2, y2, z2;
     int ip;
 
@@ -4385,7 +4418,8 @@ int CemhydMatStatus :: chckedge(int xck, int yck, int zck) {
 /* low and high indicate phase ID range to check for surface sites */
 /* Called by dissolve */
 /* Calls chckedge */
-void CemhydMatStatus :: passone(int low, int high, int cycid, int cshexflag) {
+void CemhydMatStatus :: passone(int low, int high, int cycid, int cshexflag)
+{
     int i, xid, yid, zid, phid, edgef, phread, cshcyc;
 
     /* gypready used to determine if any soluble gypsum remains */
@@ -4482,7 +4516,8 @@ void CemhydMatStatus :: passone(int low, int high, int cycid, int cshexflag) {
 /* at (xcur,ycur,zcur) */
 /* Called by dissolve */
 /* Calls no other routines */
-int CemhydMatStatus :: loccsh(int xcur, int ycur, int zcur, int extent) {
+int CemhydMatStatus :: loccsh(int xcur, int ycur, int zcur, int extent)
+{
     int effort, tries, xmod, ymod, zmod;
     struct ants *antnew;
 
@@ -4555,7 +4590,8 @@ int CemhydMatStatus :: loccsh(int xcur, int ycur, int zcur, int extent) {
 /* centered at (qx,qy,qz) */
 /* Called by makeinert */
 /* Calls no other routines */
-int CemhydMatStatus :: countbox(int boxsize, int qx, int qy, int qz) {
+int CemhydMatStatus :: countbox(int boxsize, int qx, int qy, int qz)
+{
     int nfound, ix, iy, iz, qxlo, qxhi, qylo, qyhi, qzlo, qzhi;
     int hx, hy, hz, boxhalf;
 
@@ -4610,7 +4646,8 @@ int CemhydMatStatus :: countbox(int boxsize, int qx, int qy, int qz) {
 /* calcium sulfate, or pozzolanic mineral admixture phases */
 /* Called by addrand */
 /* Calls no other routines */
-int CemhydMatStatus :: countboxc(int boxsize, int qx, int qy, int qz) {
+int CemhydMatStatus :: countboxc(int boxsize, int qx, int qy, int qz)
+{
     int nfound, ix, iy, iz, qxlo, qxhi, qylo, qyhi, qzlo, qzhi;
     int hx, hy, hz, boxhalf;
 
@@ -4884,7 +4921,8 @@ void CemhydMatStatus :: extslagcsh(int xpres, int ypres, int zpres) {
 /* routine to implement a cycle of dissolution */
 /* Called by main program */
 /* Calls passone, loccsh, and makeinert */
-void CemhydMatStatus :: dissolve(int cycle) {
+void CemhydMatStatus :: dissolve(int cycle)
+{
     int nc3aext, ncshext, nchext, ngypext, nanhext, plok;
     int nsum5, nsum4, nsum3, nsum2, nhemext, nsum6, nc4aext;
     int phid, phnew, plnew, cread;
@@ -6225,7 +6263,8 @@ void CemhydMatStatus :: dissolve(int cycle) {
 /* added 5/26/2004 */
 /* Called by main program */
 /* Calls no other routines */
-void CemhydMatStatus :: addrand(int randid, long int nneed) {
+void CemhydMatStatus :: addrand(int randid, long int nneed)
+{
     int ix, iy, iz;
     long int ic;
     int success, cpores;
@@ -6268,7 +6307,7 @@ void CemhydMatStatus :: addrand(int randid, long int nneed) {
 }
 /* Routine measuresurf to measure initial surface counts for cement */
 /* and for all phases (cement= C3S, C2S, C3A, C4AF, and calcium sulfates */
-void CemhydMatStatus :: measuresurf(void)
+void CemhydMatStatus :: measuresurf()
 {
     int sx, sy, sz, jx=0, jy=0, jz=0, faceid;
 
@@ -6356,7 +6395,7 @@ void CemhydMatStatus :: measuresurf(void)
 
 /* Routine to resaturate all empty porosity */
 /* and continue with hydration under saturated conditions */
-void CemhydMatStatus :: resaturate(void)
+void CemhydMatStatus :: resaturate()
 {
     int sx, sy, sz;
     long int nresat = 0;
@@ -6382,7 +6421,8 @@ void CemhydMatStatus :: resaturate(void)
 
 
 /*called from main loop*/
-void CemhydMatStatus :: outputImageFileUnperc(char ***m) {
+void CemhydMatStatus :: outputImageFileUnperc(char ***m)
+{
     FILE *imgout;
     char extension [ 10 ];
     //char outputname[80];
@@ -6978,7 +7018,7 @@ void CemhydMatStatus :: readhydrparam()
 
 
 /* Calls init, dissolve and addrand */
-void CemhydMatStatus :: disrealnew_init(void)
+void CemhydMatStatus :: disrealnew_init()
 {
 #ifdef OUTFILES
     char fileo [ 80 ];
@@ -7136,7 +7176,8 @@ void CemhydMatStatus :: disrealnew_init(void)
  * flag != 0 - perform exactly flag cycles
  * GiveTemp is effective in the first cycle of adiabatic regime only
  */
-void CemhydMatStatus :: disrealnew(double GiveTemp, double hydrationTime, int flag) {
+void CemhydMatStatus :: disrealnew(double GiveTemp, double hydrationTime, int flag)
+{
     int counter = 0;
 
     if ( adiabatic_curing != 1 ) {
@@ -7377,8 +7418,9 @@ void CemhydMatStatus :: disrealnew(double GiveTemp, double hydrationTime, int fl
  * time_cur, PrevHydrTime, LastHydrTime is hydration time, ofset with the castingTime
  */
 
-///GiveTemp in [C], TargTime in [s]
-double CemhydMatStatus :: GivePower(double GiveTemp, double TargTime) {
+// GiveTemp in [C], TargTime in [s]
+double CemhydMatStatus :: GivePower(double GiveTemp, double TargTime)
+{
 #ifdef __TM_MODULE //OOFEM transport module
     double castingTime = this->gp->giveMaterial()->giveCastingTime();
 #else
@@ -7465,7 +7507,8 @@ double CemhydMatStatus :: GivePower(double GiveTemp, double TargTime) {
 
 
 //move hydration model by several steps and update all internal variables
-double CemhydMatStatus :: MoveCycles(double GiveTemp, int cycles) {
+double CemhydMatStatus :: MoveCycles(double GiveTemp, int cycles)
+{
     double PartHeat;
     double castingTime = 0.;
 #ifdef __TM_MODULE
@@ -7502,7 +7545,8 @@ double CemhydMatStatus :: MoveCycles(double GiveTemp, int cycles) {
 
 //move to desired DoH (the next DoH in CEMHYD3D cycle) limited by maxcyc
 //return 1 if the number of cycles was exceeded
-int CemhydMatStatus :: MoveToDoH(double GiveTemp, double DesiredDoH, int maxcyc) {
+int CemhydMatStatus :: MoveToDoH(double GiveTemp, double DesiredDoH, int maxcyc)
+{
     int cycle = 1;
 
     while ( alpha_cur < DesiredDoH ) {
@@ -7523,33 +7567,34 @@ int CemhydMatStatus :: MoveToDoH(double GiveTemp, double DesiredDoH, int maxcyc)
 //TargTime in [h]
 //move to desired Time[h] (the next time in CEMHYD3D cycle, no interpolation)
 //no cycle limit is specified (any time can be reached)
-int CemhydMatStatus :: MoveToTime(double GiveTemp, double TargTime) {
+int CemhydMatStatus :: MoveToTime(double GiveTemp, double TargTime)
+{
     GivePower(GiveTemp, 3600. * TargTime);
     return 0;
 }
 
 
 //return total released heat from cement in kJ/kg_cement_solids at TargTime
-double CemhydMatStatus :: GiveTotCemHeat(void)
+double CemhydMatStatus :: GiveTotCemHeat()
 {
     return LastTotHeat;
 }
 
 //return total heat in J/m3_of_concrete at TargTime
-double CemhydMatStatus :: GiveTotHeat(void)
+double CemhydMatStatus :: GiveTotHeat()
 {
     return 1000 * LastTotHeat * Mass_cement_concrete;
 }
 
 //return heat capacity in kJ/K/kg_of_everything in the last CEMHYD cycle
-double CemhydMatStatus :: GiveCp(void)
+double CemhydMatStatus :: GiveCp()
 {
     return Cp_now;
 }
 
 
 //see D. P. Bentz: Transient Plane Source Measurements of the Thermal Properties of Hydrating Cement Pastes, Materials and Structures, 1073-1080, 2007
-double CemhydMatStatus :: computeConcreteCapacityBentz(void)
+double CemhydMatStatus :: computeConcreteCapacityBentz()
 {
     double capacityPaste, capacityConcrete;
     capacityPaste = ( 4180. * Vol_water * 1.0 + Cp_cement * 1000. * Mass_cement_concrete ) / Mass_tot_concrete; //capacity of cement paste [J/kg/K]
@@ -7559,19 +7604,19 @@ double CemhydMatStatus :: computeConcreteCapacityBentz(void)
     return capacityConcrete;
 }
 
-double CemhydMatStatus :: GiveDensity(void)
+double CemhydMatStatus :: GiveDensity()
 {
     return Concrete_bulk_density;
 }
 
 //return degree of hydration in the last CEMHYD cycle, corresponding to time_cur
-double CemhydMatStatus :: GiveDoHLastCyc(void)
+double CemhydMatStatus :: GiveDoHLastCyc()
 {
     return alpha_cur;
 }
 
 //return actual degree of hydration (interpolated)
-double CemhydMatStatus :: GiveDoHActual(void)
+double CemhydMatStatus :: GiveDoHActual()
 {
     double castingTime = 0;
 
@@ -7588,13 +7633,13 @@ double CemhydMatStatus :: GiveDoHActual(void)
 
 
 //return cycle in the last CEMHYD cycle (higher or the same as actual time)
-int CemhydMatStatus :: GiveCycNum(void)
+int CemhydMatStatus :: GiveCycNum()
 {
     return icyc;
 }
 
 //return actual time of the last cycle (higher or the same as actual time)
-double CemhydMatStatus :: GiveCycTime(void)
+double CemhydMatStatus :: GiveCycTime()
 {
     return time_cur;
 }
@@ -8139,7 +8184,8 @@ int CemhydMatStatus :: burnset(int d1, int d2, int d3)
 
 
 /* Routine to assess relative particle hydration */
-void CemhydMatStatus :: parthyd(void) {
+void CemhydMatStatus :: parthyd()
+{
     int norig [ 100000 ], nleft [ 100000 ];
     int ix, iy, iz;
     char valmic, valmicorig;
@@ -8358,7 +8404,7 @@ int CemhydMatStatus :: edgecnt(int xck, int yck, int zck, int ph1, int ph2, int 
 /* routine to add extra CSH when diffusing CSH reacts */
 /* Called by movecsh */
 /* Calls edgecnt */
-void CemhydMatStatus :: extcsh(void)
+void CemhydMatStatus :: extcsh()
 {
     int numnear, xchr, ychr, zchr, fchr, check, msface;
     long int tries;
@@ -8770,14 +8816,13 @@ int CemhydMatStatus :: extettr(int xpres, int ypres, int zpres, int etype)
 
     return ( newact );
     (void)multf;
-    
 }
 
 /* routine to add extra CH when gypsum, hemihydrate, anhydrite, CaCl2, or */
 /* diffusing CAS2  reacts with C4AF */
 /* Called by movegyp, movehem, moveanh, moveettr, movecas2, and movecacl2 */
 /* Calls edgecnt */
-void CemhydMatStatus :: extch(void)
+void CemhydMatStatus :: extch()
 {
     int numnear, xchr, ychr, zchr, fchr, check;
     long int tries;
@@ -12485,7 +12530,8 @@ void CemhydMatStatus :: hydrate(int fincyc, int stepmax, float chpar1, float chp
 }
 
 
-void CemhydMatStatus :: laguer(fcomplex_cem a[], int m, fcomplex_cem *x, float eps, int polish) {
+void CemhydMatStatus :: laguer(fcomplex_cem a[], int m, fcomplex_cem *x, float eps, int polish)
+{
     int j, iter;
     float err, dxold, cdx, abx;
     fcomplex_cem sq, h, gp, gm, g2, g, b, d, dx, f, x1;
@@ -12543,7 +12589,8 @@ void CemhydMatStatus :: laguer(fcomplex_cem a[], int m, fcomplex_cem *x, float e
 
 
 
-void CemhydMatStatus :: zroots(fcomplex_cem a[], int m, fcomplex_cem roots[], int polish) {
+void CemhydMatStatus :: zroots(fcomplex_cem a[], int m, fcomplex_cem roots[], int polish)
+{
     int jj, j, i;
     fcomplex_cem x, b, c;
     fcomplex_cem *ad;
@@ -12594,7 +12641,8 @@ void CemhydMatStatus :: zroots(fcomplex_cem a[], int m, fcomplex_cem roots[], in
 
 
 
-void CemhydMatStatus :: pHpred(void) { //dangerous function - can lead to zero division etc.
+void CemhydMatStatus :: pHpred()
+{ //dangerous function - can lead to zero division etc.
     int j, syngen_change = 0, syn_old = 0, counter = 0;
     double concnaplus, conckplus;
     double concohminus = 0., A, B, C, conctest, concsulfate1;
@@ -12832,7 +12880,8 @@ void CemhydMatStatus :: pHpred(void) { //dangerous function - can lead to zero d
 }
 
 
-int CemhydMatStatus :: IsSolidPhase(int phase) {
+int CemhydMatStatus :: IsSolidPhase(int phase)
+{
     if ( ( phase >= C3S && phase <= ABSGYP ) || ( phase == HDCSH ) ) {
         return 1;
     } else {
@@ -12840,7 +12889,8 @@ int CemhydMatStatus :: IsSolidPhase(int phase) {
     }
 }
 
-void CemhydMatStatus :: burn_phases(int d1, int d2, int d3) {
+void CemhydMatStatus :: burn_phases(int d1, int d2, int d3)
+{
     long int icur, inew, ncur, nnew;
     int i, j, k, cnt_perc, cnt_tot, kh;
     int *nmatx, *nmaty, *nmatz;
@@ -13194,7 +13244,8 @@ void CemhydMatStatus :: burn_phases(int d1, int d2, int d3) {
  * Return 2 if phases are solid and connected.
  */
 
-int CemhydMatStatus :: IsConnected(int cx, int cy, int cz, int dx, int dy, int dz) {
+int CemhydMatStatus :: IsConnected(int cx, int cy, int cz, int dx, int dy, int dz)
+{
     int CentPhase, NeighPhase;
 
     CentPhase = ArrPerc [ AdjCoord(cx) ] [ AdjCoord(cy) ] [ AdjCoord(cz) ];
@@ -13285,7 +13336,8 @@ int CemhydMatStatus :: IsConnected(int cx, int cy, int cz, int dx, int dy, int d
  * /x
  * coordinates transformation is irrelevant, used x,y,z loop
  */
-void CemhydMatStatus :: GenerateConnNumbers(void) {
+void CemhydMatStatus :: GenerateConnNumbers()
+{
     int cx, cy, cz;
     int CentPhase;
 
@@ -13538,7 +13590,8 @@ void CemhydMatStatus :: GenerateConnNumbers(void) {
     //loop cz
 }
 
-void CemhydMatStatus :: outputImageFilePerc(void) {
+void CemhydMatStatus :: outputImageFilePerc()
+{
     FILE *perc_img;
     char extension [ 10 ];
     //char outputname[80];
@@ -13583,7 +13636,8 @@ void CemhydMatStatus :: outputImageFilePerc(void) {
 
 
 
-void CemhydMatStatus :: WriteUnsortedList(int px, int py, int pz) {
+void CemhydMatStatus :: WriteUnsortedList(int px, int py, int pz)
+{
     current = new percolatedpath;
     if ( last != NULL ) {
         last->next = current;
@@ -13600,7 +13654,8 @@ void CemhydMatStatus :: WriteUnsortedList(int px, int py, int pz) {
 
 
 
-inline int CemhydMatStatus :: AdjCoord(int coord) {
+inline int CemhydMatStatus :: AdjCoord(int coord)
+{
     if ( coord < 0 ) {
         coord += SYSIZE;
     }
@@ -13613,7 +13668,8 @@ inline int CemhydMatStatus :: AdjCoord(int coord) {
 }
 
 
-int CemhydMatStatus :: NumSol(int cx, int cy, int cz) {
+int CemhydMatStatus :: NumSol(int cx, int cy, int cz)
+{
     int cnt = 0;
     int *p_arr;
 
@@ -13659,7 +13715,8 @@ int CemhydMatStatus :: NumSol(int cx, int cy, int cz) {
 /*use pointer to array as argument*/
 /*CSH_vicinity[(2*BoxSize+1)*(2*BoxSize+1)*(2*BoxSize+1)]*/
 
-void CemhydMatStatus :: CSHbox(unsigned int *CSH_vicinity) {
+void CemhydMatStatus :: CSHbox(unsigned int *CSH_vicinity)
+{
     int TotPhase = 0;
     int cx, cy, cz;
 
@@ -13695,7 +13752,8 @@ void CemhydMatStatus :: CSHbox(unsigned int *CSH_vicinity) {
 
 
 
-void CemhydMatStatus :: nrerror(const char *error_text) {
+void CemhydMatStatus :: nrerror(const char *error_text)
+{
     printf("\nNumerical Recipes run-time error...\n");
     printf("%s\n", error_text);
     printf("...now exiting to system...\n");
@@ -13703,7 +13761,8 @@ void CemhydMatStatus :: nrerror(const char *error_text) {
 }
 
 
-float *CemhydMatStatus :: vector(int nl, int nh) {
+float *CemhydMatStatus :: vector(int nl, int nh)
+{
     float *v;
 
     v = ( float * ) malloc( ( unsigned ) ( nh - nl + 1 ) * sizeof( float ) );
@@ -13714,7 +13773,8 @@ float *CemhydMatStatus :: vector(int nl, int nh) {
     return v - nl;
 }
 
-int *CemhydMatStatus :: ivector(int nl, int nh) {
+int *CemhydMatStatus :: ivector(int nl, int nh)
+{
     int *v;
 
     v = ( int * ) malloc( ( unsigned ) ( nh - nl + 1 ) * sizeof( int ) );
@@ -13725,7 +13785,8 @@ int *CemhydMatStatus :: ivector(int nl, int nh) {
     return v - nl;
 }
 
-double *CemhydMatStatus :: dvector(int nl, int nh) {
+double *CemhydMatStatus :: dvector(int nl, int nh)
+{
     double *v;
 
     v = ( double * ) malloc( ( unsigned ) ( nh - nl + 1 ) * sizeof( double ) );
@@ -13739,7 +13800,8 @@ double *CemhydMatStatus :: dvector(int nl, int nh) {
 
 
 //float** CemhydMat::matrix(int nrl,int nrh,int ncl,int nch){
-float **CemhydMatStatus :: matrix_cem(int nrl, int nrh, int ncl, int nch) {
+float **CemhydMatStatus :: matrix_cem(int nrl, int nrh, int ncl, int nch)
+{
     int i;
     float **m;
 
@@ -13762,7 +13824,8 @@ float **CemhydMatStatus :: matrix_cem(int nrl, int nrh, int ncl, int nch) {
     return m;
 }
 
-double **CemhydMatStatus :: dmatrix(int nrl, int nrh, int ncl, int nch) {
+double **CemhydMatStatus :: dmatrix(int nrl, int nrh, int ncl, int nch)
+{
     int i;
     double **m;
 
@@ -13785,7 +13848,8 @@ double **CemhydMatStatus :: dmatrix(int nrl, int nrh, int ncl, int nch) {
     return m;
 }
 
-int **CemhydMatStatus :: imatrix(int nrl, int nrh, int ncl, int nch) {
+int **CemhydMatStatus :: imatrix(int nrl, int nrh, int ncl, int nch)
+{
     int i, **m;
 
     m = ( int ** ) malloc( ( unsigned ) ( nrh - nrl + 1 ) * sizeof( int * ) );
@@ -13809,7 +13873,8 @@ int **CemhydMatStatus :: imatrix(int nrl, int nrh, int ncl, int nch) {
 
 
 
-float **CemhydMatStatus :: submatrix(float **a, int oldrl, int oldrh, int oldcl, int, int newrl, int newcl) {
+float **CemhydMatStatus :: submatrix(float **a, int oldrl, int oldrh, int oldcl, int, int newrl, int newcl)
+{
     int i, j;
     float **m;
 
@@ -13828,22 +13893,15 @@ float **CemhydMatStatus :: submatrix(float **a, int oldrl, int oldrh, int oldcl,
 }
 
 
+void free_vector(float *v, int nl) { free( ( char * ) ( v + nl ) ); }
 
-void free_vector(float *v, int nl) {
-    free( ( char * ) ( v + nl ) );
-}
+void free_ivector(int *v, int nl) { free( ( char * ) ( v + nl ) ); }
 
-void free_ivector(int *v, int nl) {
-    free( ( char * ) ( v + nl ) );
-}
-
-void free_dvector(double *v, int nl) {
-    free( ( char * ) ( v + nl ) );
-}
+void free_dvector(double *v, int nl) { free( ( char * ) ( v + nl ) ); }
 
 
-
-void free_matrix(float **m, int nrl, int nrh, int ncl) {
+void free_matrix(float **m, int nrl, int nrh, int ncl)
+{
     int i;
 
     for ( i = nrh; i >= nrl; i-- ) {
@@ -13853,7 +13911,8 @@ void free_matrix(float **m, int nrl, int nrh, int ncl) {
     free( ( char * ) ( m + nrl ) );
 }
 
-void free_dmatrix(double **m, int nrl, int nrh, int ncl) {
+void free_dmatrix(double **m, int nrl, int nrh, int ncl)
+{
     int i;
 
     for ( i = nrh; i >= nrl; i-- ) {
@@ -13863,7 +13922,8 @@ void free_dmatrix(double **m, int nrl, int nrh, int ncl) {
     free( ( char * ) ( m + nrl ) );
 }
 
-void free_imatrix(int **m, int nrl, int nrh, int ncl) {
+void free_imatrix(int **m, int nrl, int nrh, int ncl)
+{
     int i;
 
     for ( i = nrh; i >= nrl; i-- ) {
@@ -13873,11 +13933,13 @@ void free_imatrix(int **m, int nrl, int nrh, int ncl) {
     free( ( char * ) ( m + nrl ) );
 }
 
-void free_submatrix(float *b, int nrl) {
+void free_submatrix(float *b, int nrl)
+{
     free( ( char * ) ( b + nrl ) );
 }
 
-float **CemhydMatStatus :: convert_matrix(float *a, int nrl, int nrh, int ncl, int nch) {
+float **CemhydMatStatus :: convert_matrix(float *a, int nrl, int nrh, int ncl, int nch)
+{
     int i, j, nrow, ncol;
     float **m;
 
@@ -13896,46 +13958,53 @@ float **CemhydMatStatus :: convert_matrix(float *a, int nrl, int nrh, int ncl, i
     return m;
 }
 
-void free_convert_matrix(float **b, int nrl) {
+void free_convert_matrix(float **b, int nrl)
+{
     free( ( char * ) ( b + nrl ) );
 }
 
-fcomplex_cem CemhydMatStatus :: Cadd(fcomplex_cem a, fcomplex_cem b) {
+fcomplex_cem CemhydMatStatus :: Cadd(fcomplex_cem a, fcomplex_cem b)
+{
     fcomplex_cem c;
     c.r = a.r + b.r;
     c.i = a.i + b.i;
     return c;
 }
 
-fcomplex_cem CemhydMatStatus :: Csub(fcomplex_cem a, fcomplex_cem b) {
+fcomplex_cem CemhydMatStatus :: Csub(fcomplex_cem a, fcomplex_cem b)
+{
     fcomplex_cem c;
     c.r = a.r - b.r;
     c.i = a.i - b.i;
     return c;
 }
 
-fcomplex_cem CemhydMatStatus :: Cmul(fcomplex_cem a, fcomplex_cem b) {
+fcomplex_cem CemhydMatStatus :: Cmul(fcomplex_cem a, fcomplex_cem b)
+{
     fcomplex_cem c;
     c.r = a.r * b.r - a.i * b.i;
     c.i = a.i * b.r + a.r * b.i;
     return c;
 }
 
-fcomplex_cem CemhydMatStatus :: ComplexCemhyd(float re, float im) {
+fcomplex_cem CemhydMatStatus :: ComplexCemhyd(float re, float im)
+{
     fcomplex_cem c;
     c.r = re;
     c.i = im;
     return c;
 }
 
-fcomplex_cem CemhydMatStatus :: Conjg(fcomplex_cem z) {
+fcomplex_cem CemhydMatStatus :: Conjg(fcomplex_cem z)
+{
     fcomplex_cem c;
     c.r = z.r;
     c.i = -z.i;
     return c;
 }
 
-fcomplex_cem CemhydMatStatus :: Cdiv(fcomplex_cem a, fcomplex_cem b) {
+fcomplex_cem CemhydMatStatus :: Cdiv(fcomplex_cem a, fcomplex_cem b)
+{
     fcomplex_cem c;
     float r, den;
     if ( fabs(b.r) >= fabs(b.i) ) {
@@ -13953,7 +14022,8 @@ fcomplex_cem CemhydMatStatus :: Cdiv(fcomplex_cem a, fcomplex_cem b) {
     return c;
 }
 
-float CemhydMatStatus :: Cabs(fcomplex_cem z) {
+float CemhydMatStatus :: Cabs(fcomplex_cem z)
+{
     float x, y, ans, temp;
     x = fabs(z.r);
     y = fabs(z.i);
@@ -13972,7 +14042,8 @@ float CemhydMatStatus :: Cabs(fcomplex_cem z) {
     return ans;
 }
 
-fcomplex_cem CemhydMatStatus :: Csqrt(fcomplex_cem z) {
+fcomplex_cem CemhydMatStatus :: Csqrt(fcomplex_cem z)
+{
     fcomplex_cem c;
     float x, y, w, r;
     if ( ( z.r == 0.0 ) && ( z.i == 0.0 ) ) {
@@ -14002,7 +14073,8 @@ fcomplex_cem CemhydMatStatus :: Csqrt(fcomplex_cem z) {
     }
 }
 
-fcomplex_cem CemhydMatStatus :: RCmul(float x, fcomplex_cem a) {
+fcomplex_cem CemhydMatStatus :: RCmul(float x, fcomplex_cem a)
+{
     fcomplex_cem c;
     c.r = x * a.r;
     c.i = x * a.i;
@@ -14011,17 +14083,20 @@ fcomplex_cem CemhydMatStatus :: RCmul(float x, fcomplex_cem a) {
 
 
 //public function to call the routine for HDCSH creation
-void CemhydMatStatus :: CreateHDCSH(void) {
+void CemhydMatStatus :: CreateHDCSH()
+{
     CSHbox(CSH_vicinity);
 }
 
 //public function to call the routine for solid percolation
-void CemhydMatStatus :: PercolateForOutput(void) {
+void CemhydMatStatus :: PercolateForOutput()
+{
     burn_phases(1, 0, 0);
 }
 
 //public function to access w/c ratio
-double CemhydMatStatus :: GiveWcr(void) {
+double CemhydMatStatus :: GiveWcr()
+{
     return w_to_c;
 }
 
@@ -14029,25 +14104,30 @@ double CemhydMatStatus :: GiveWcr(void) {
  * int rand_seed_num, double fineness, double dihydrate, double hemihydrate, double anhydrite, double C3S_mass, double C2S_mass, double C3A_mass, double C4AF_mass, double wcr, int satur_sealed
  */
 
-void CemhydMatStatus :: GetInputParams(char *my_string) {
+void CemhydMatStatus :: GetInputParams(char *my_string)
+{
     sprintf(my_string, "%d", iseed);
 }
 
-long CemhydMatStatus :: cx(int x, int y, int z, int a, int b, int c) {
+long CemhydMatStatus :: cx(int x, int y, int z, int a, int b, int c)
+{
     return ( 1 - b - c ) * x + ( 1 - a - c ) * y + ( 1 - a - b ) * z;
 }
 
 
-long CemhydMatStatus :: cy(int x, int y, int z, int a, int b, int c) {
+long CemhydMatStatus :: cy(int x, int y, int z, int a, int b, int c)
+{
     return ( 1 - a - b ) * x + ( 1 - b - c ) * y + ( 1 - a - c ) * z;
 }
 
-long CemhydMatStatus :: cz(int x, int y, int z, int a, int b, int c) {
+long CemhydMatStatus :: cz(int x, int y, int z, int a, int b, int c)
+{
     return ( 1 - a - c ) * x + ( 1 - a - b ) * y + ( 1 - b - c ) * z;
 }
 
 //homogenization of plain cement paste without filler
-void CemhydMatStatus :: AnalyticHomogenizationPaste(double &E, double &nu, int perc_unperc_flag) {
+void CemhydMatStatus :: AnalyticHomogenizationPaste(double &E, double &nu, int perc_unperc_flag)
+{
     //flag 0 - percolated phases are is in phase[]
     //flag 1 - unpercolated phases are in count[]
     int index, x, i;
@@ -14229,12 +14309,14 @@ void CemhydMatStatus :: AnalyticHomogenizationPaste(double &E, double &nu, int p
 
     E = Paste_level.E_hmg;
     nu =  Paste_level.nu_hmg;
+    ///@todo What is this supposed to do?
     (void)E_CSH_hmg;
     (void)nu_CSH_hmg;
 }
 
 //use results from cement paste level and add SCM, inert filler, entrained air, ITZ, FA, CA
-void CemhydMatStatus :: AnalyticHomogenizationConcrete(double E_paste_inp, double nu_paste_inp, double *E_paste, double *nu_paste, double *E_mortar, double *nu_mortar, double &E_concrete, double &nu_concrete) {
+void CemhydMatStatus :: AnalyticHomogenizationConcrete(double E_paste_inp, double nu_paste_inp, double *E_paste, double *nu_paste, double *E_mortar, double *nu_mortar, double &E_concrete, double &nu_concrete)
+{
     Homogenize Paste_level, Mortar_level, Concrete_level;
 
     //CEMENT PASTE LEVEL - homogenize cement paste with SCM, inert filler, entrained and entrapped air using Mori-Tanaka with cement paste as reference via MT scheme
@@ -14307,7 +14389,8 @@ void CemhydMatStatus :: AnalyticHomogenizationConcrete(double E_paste_inp, doubl
 }
 
 //at least one cycle has to pass, volume fraction
-void CemhydMatStatus :: GetInitClinkerPhases(double &c3s, double &c2s, double &c3a, double &c4af, double &gypsum, double &hemi, double &anh) {
+void CemhydMatStatus :: GetInitClinkerPhases(double &c3s, double &c2s, double &c3a, double &c4af, double &gypsum, double &hemi, double &anh)
+{
     double sum = c3sinit + c2sinit + c3ainit + c4afinit + ncsbar + heminit + anhinit;
 
     if ( icyc > 1 ) {
@@ -14324,11 +14407,12 @@ void CemhydMatStatus :: GetInitClinkerPhases(double &c3s, double &c2s, double &c
 
 #ifdef __TM_MODULE  //transport module for OOFEM
 void
-CemhydMatStatus :: updateYourself(TimeStep *atTime) {
+CemhydMatStatus :: updateYourself(TimeStep *atTime)
+{
     TransportMaterialStatus :: updateYourself(atTime);
 };
 
-double CemhydMatStatus :: giveAverageTemperature(void) {
+double CemhydMatStatus :: giveAverageTemperature() {
     CemhydMat *cemhydmat = ( CemhydMat * ) this->gp->giveMaterial();
     CemhydMatStatus *ms = ( CemhydMatStatus * ) cemhydmat->giveStatus(gp);
     double ret;
@@ -14376,7 +14460,7 @@ CemhydMatStatus :: printOutputAt(FILE *file, TimeStep *atTime)
 
 
 #ifdef CEMPY
-///constructors
+// constructors
 CemhydMatStatus :: CemhydMatStatus()
 {
     PartHeat = 0.;
@@ -14389,7 +14473,8 @@ CemhydMatStatus :: CemhydMatStatus()
 
 
 void
-CemhydMatStatus :: InitializePy(const char *inp) {
+CemhydMatStatus :: InitializePy(const char *inp)
+{
     initializeMicrostructure();
     readInputFileAndInitialize(inp, ( bool ) 1);
 }

@@ -45,9 +45,14 @@
  #include "conTable.h"
 #endif
 
+///@name Input fields for TrabBoneNLEmbed
+//@{
+#define _IFT_TrabBoneNLEmbed_r "r"
+#define _IFT_TrabBoneNLEmbed_m "m"
+//@}
+
 namespace oofem {
 class GaussPoint;
-
 
 /**
  * Trabecular bone nonlocal material status.

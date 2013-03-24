@@ -36,9 +36,13 @@
 #define nlstructuralelement_h
 
 #include "structuralelement.h"
-#include "femcmpnn.h"
 #include "domain.h"
 #include "flotmtrx.h"
+
+///@name Input fields for NLStructuralElement
+//@{
+#define _IFT_NLStructuralElement_nlgeoflag "nlgeoflag"
+//@}
 
 namespace oofem {
 class TimeStep;

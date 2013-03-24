@@ -4120,7 +4120,7 @@ Parameters &- \param{num} material model number\\
 &- \param{densityType} 0 (default) get density from OOFEM input file, 1 get it from XML input file\\
 &- \param{conductivityType} 0 (default) get constant conductivity from OOFEM input file, 1 compute as $\lambda = \textrm{k} (1.33-0.33\alpha)$ \cite{Ruiz:01}\\
 &- \param{capacityType} 0 (default) get capacity, 1 according to Bentz, 2 according to XML and CEMHYD3D routines\\
-&- \param{castingtime} optional casting time of concrete, from which hydration takes place\\
+&- \param{castingtime} optional casting time of concrete, from which hydration takes place. Absolute time is used.\\
 &- \param{nowarnings} supresses warnings when material data are out of standard ranges. The array of size 4 represent entries for density, conductivity, capacity, temperature. Nonzero values mean supression.\\
 &- \param{scaling} components in the array scale density, conductivity, capacity in this order. \param{nowarnings} are checked before scaling.\\
 &- \param{reinforcementDegree} specifies the area fraction of reinforcement. Typical values is 0.015. Steel reinforcement slightly increases concrete conductivity and slightly decreases its capacity. Thermal properties of steel are considered 20~W/m/K and 500~J/kg/K.\\

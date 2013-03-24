@@ -43,17 +43,4 @@ FMElement :: FMElement(int n, Domain *aDomain) :
 FMElement :: ~FMElement()
 { }
 
-IRResultType
-FMElement :: initializeFrom(InputRecord *ir)
-{
-    const char *__proc = "initializeFrom";
-    IRResultType result;
-
-    IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, IFT_SUPGElement_bsides, "bsides"); // Macro
-    // if ( !boundarySides.isEmpty() ) {
-    //  IR_GIVE_FIELD(ir, boundaryCodes, IFT_SUPGElement_bcodes, "bcodes"); // Macro
-    //}
-
-    return Element :: initializeFrom(ir);
-}
 } // end namespace oofem

@@ -93,7 +93,7 @@ TR1_2D_SUPG :: computeNumberOfDofs(EquationID ut)
 void
 TR1_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
+    if ( ut == EID_MomentumBalance ) {
         answer.setValues(2, V_u, V_v);
     } else if ( ut == EID_ConservationEquation ) {
         answer.setValues(1, P_f);
@@ -120,17 +120,16 @@ TR1_2D_SUPG :: initializeFrom(InputRecord *ir)
     this->SUPGElement :: initializeFrom(ir);
 
     this->vof = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, vof, IFT_TR12DSUPG_pvof, "pvof");
+    IR_GIVE_OPTIONAL_FIELD(ir, vof, IFT_Tr1SUPG_pvof, "pvof");
     if ( vof > 0.0 ) {
         setPermanentVolumeFraction(vof);
         this->temp_vof = vof;
     } else {
         this->vof = 0.0;
-        IR_GIVE_OPTIONAL_FIELD(ir, vof, IFT_TR12DSUPG_vof, "vof");
+        IR_GIVE_OPTIONAL_FIELD(ir, vof, IFT_Tr1SUPG_vof, "vof");
         this->temp_vof = this->vof;
     }
 
-    this->computeGaussPoints();
     this->initGeometry();
     return IRRT_OK;
 }

@@ -476,23 +476,23 @@ FiberedCrossSection :: initializeFrom(InputRecord *ir)
 //
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
 #  ifdef VERBOSE
     // VERBOSE_PRINT1 ("Instanciating cross section ",this->giveNumber())
 #  endif
 
-    IR_GIVE_FIELD(ir, numberOfFibers, IFT_FiberedCrossSection_nfibers, "nfibers"); // Macro
-    IR_GIVE_FIELD(ir, fiberMaterials, IFT_FiberedCrossSection_fibermaterials, "fibermaterials"); // Macro
-    IR_GIVE_FIELD(ir, fiberThicks, IFT_FiberedCrossSection_thicks, "thicks"); // Macro
-    IR_GIVE_FIELD(ir, fiberWidths, IFT_FiberedCrossSection_widths, "widths"); // Macro
+    IR_GIVE_FIELD(ir, numberOfFibers, IFT_FiberedCrossSection_nfibers, "nfibers");
+    IR_GIVE_FIELD(ir, fiberMaterials, IFT_FiberedCrossSection_fibermaterials, "fibermaterials");
+    IR_GIVE_FIELD(ir, fiberThicks, IFT_FiberedCrossSection_thicks, "thicks");
+    IR_GIVE_FIELD(ir, fiberWidths, IFT_FiberedCrossSection_widths, "widths");
 
     // read coordinates of fiber centers from (main pprincipal axes) mid-section
-    IR_GIVE_FIELD(ir, fiberYcoords, IFT_FiberedCrossSection_fiberycentrecoords, "fiberycentrecoords"); // Macro
-    IR_GIVE_FIELD(ir, fiberZcoords, IFT_FiberedCrossSection_fiberzcentrecoords, "fiberzcentrecoords"); // Macro
+    IR_GIVE_FIELD(ir, fiberYcoords, IFT_FiberedCrossSection_fiberycentrecoords, "fiberycentrecoords");
+    IR_GIVE_FIELD(ir, fiberZcoords, IFT_FiberedCrossSection_fiberzcentrecoords, "fiberzcentrecoords");
 
-    IR_GIVE_FIELD(ir, thick, IFT_FiberedCrossSection_thick, "thick"); // Macro
-    IR_GIVE_FIELD(ir, width, IFT_FiberedCrossSection_width, "width"); // Macro
+    IR_GIVE_FIELD(ir, thick, IFT_FiberedCrossSection_thick, "thick");
+    IR_GIVE_FIELD(ir, width, IFT_FiberedCrossSection_width, "width");
 
     if ( ( numberOfFibers != fiberMaterials.giveSize() ) ||
         ( numberOfFibers != fiberThicks.giveSize() )    ||
@@ -503,7 +503,7 @@ FiberedCrossSection :: initializeFrom(InputRecord *ir)
     }
 
     if ( numberOfFibers <= 0 ) {
-        _error("instanciateFrom : numberOfFibers <= 0 is not alloved");
+        _error("instanciateFrom : numberOfFibers <= 0 is not allowed");
     }
 
     return IRRT_OK;

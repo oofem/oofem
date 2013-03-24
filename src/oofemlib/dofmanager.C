@@ -411,15 +411,11 @@ int DofManager :: giveNumberOfPrimaryMasterDofs(IntArray &dofArray) const
 
 IRResultType DofManager ::  resolveDofIDArray(InputRecord *ir, IntArray &dofIDArry)
 {
-    const char *__keyword, *__proc = "resolveDofIDArray";
+    const char *__proc = "resolveDofIDArray";
     IRResultType result;
 
     numberOfDofs = -1;
-    __keyword = "ndofs";
-    result = ir->giveOptionalField(numberOfDofs, IFT_DofManager_ndofs, __keyword);
-    if ( result != IRRT_OK ) {
-        IR_IOERR(giveClassName(), __proc, IFT_DofManager_ndofs, __keyword, ir, result);
-    }
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfDofs, IFT_DofManager_ndofs, "ndofs");
 
     // returns nonzero if succes
     if ( numberOfDofs == -1 ) {
@@ -429,11 +425,7 @@ IRResultType DofManager ::  resolveDofIDArray(InputRecord *ir, IntArray &dofIDAr
         // if ndofs is prescribed, read the physical meaning of particular dofs
         // for detailed values of DofMask array see cltypes.h file
         // for exaple 1 is for D_u (displacemet in u dir), 2 for D_v, 3 for D_w, ...
-        __keyword = "dofidmask";
-        result = ir->giveField(dofIDArry, IFT_DofManager_dofidmask, __keyword);
-        if ( result != IRRT_OK ) {
-            IR_IOERR(giveClassName(), __proc, IFT_DofManager_dofidmask, __keyword, ir, result);
-        }
+        IR_GIVE_FIELD(ir, dofIDArry, IFT_DofManager_dofidmask, "dofidmask");
 
         if ( dofIDArry.giveSize() != numberOfDofs ) {
             _error("resolveDofIDArray : DofIDMask size mismatch");
@@ -453,25 +445,23 @@ DofManager :: initializeFrom(InputRecord *ir)
     IntArray bc, ic, masterMask, dofTypeMask;
 
     loadArray.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, loadArray, IFT_DofManager_load, "load"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, loadArray, IFT_DofManager_load, "load");
 
-    if ( this->resolveDofIDArray(ir, dofIDArry) != IRRT_OK ) {
-        IR_IOERR(giveClassName(), __proc,  IFT_Unknown, "", ir, result);
-    }
+    this->resolveDofIDArray(ir, dofIDArry);
 
     // numberOfDofs = domain->giveNumberOfDofs () ;
     bc.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, bc, IFT_DofManager_bc, "bc"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, bc, IFT_DofManager_bc, "bc");
 
     ic.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, ic, IFT_DofManager_ic, "ic"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, ic, IFT_DofManager_ic, "ic");
     // reads master mask - in this array are numbers of master dofManagers
     // to which are connected dofs in receiver.
     // if master mask index is zero then dof is created as master (i.e., having own equation number)
     // othervise slave dof connected to master DofManager is created.
     // by default if masterMask is not specifyed, all dofs are created as masters.
     dofTypeMask.resize(0); // termitovo
-    IR_GIVE_OPTIONAL_FIELD(ir, dofTypeMask, IFT_DofManager_doftypemask, "doftype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, dofTypeMask, IFT_DofManager_doftypemask, "doftype");
 
     // read boundary flag
     if ( ir->hasField(IFT_DofManager_boundaryflag, "boundary") ) {
@@ -481,7 +471,7 @@ DofManager :: initializeFrom(InputRecord *ir)
 
 #ifdef __PARALLEL_MODE
     partitions.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, partitions, IFT_DofManager_partitions, "partitions"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, partitions, IFT_DofManager_partitions, "partitions");
 
     if ( ir->hasField(IFT_DofManager_sharedflag, "shared") ) {
         parallel_mode = DofManager_shared;
@@ -551,7 +541,7 @@ DofManager :: initializeFrom(InputRecord *ir)
                 dofArray [ j ] = new ActiveDof( j + 1, this, dofBc, ( DofIDItem ) dofIDArry.at(j + 1) );
             } else if ( dtype == DT_simpleSlave ) { // Simple slave dof
                 if ( masterMask.giveSize() == 0 ) {
-                    IR_GIVE_FIELD(ir, masterMask, IFT_DofManager_mastermask, "mastermask"); // Macro
+                    IR_GIVE_FIELD(ir, masterMask, IFT_DofManager_mastermask, "mastermask");
                     if ( masterMask.giveSize() != numberOfDofs ) {
                         _error("initializeFrom: mastermask size mismatch");
                     }
@@ -938,10 +928,7 @@ bool DofManager :: giveMasterDofMans(IntArray &masters)
 }
 
 
-int DofManager :: checkConsistency()
-// Checks internal data consistency in node.
-// Current implementation checks (when receiver has simple slave dofs) if receiver
-// has the same coordinate system as master dofManager of slave dof.
+void DofManager :: postInitialize()
 {
     hasSlaveDofs = false;
     for ( int i = 1; i <= numberOfDofs; i++ ) {
@@ -950,8 +937,6 @@ int DofManager :: checkConsistency()
             continue;
         }
     }
-
-    return 1;
 }
 
 

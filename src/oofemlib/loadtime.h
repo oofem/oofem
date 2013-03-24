@@ -45,6 +45,12 @@
 #include "classtype.h"
 #include "valuemodetype.h"
 
+///@name Input fields for LoadTimeFunction
+//@{
+#define _IFT_LoadTimeFunction_initialvalue "initialvalue"
+#define _IFT_LoadTimeFunction_ft "f(t)"
+//@}
+
 namespace oofem {
 /**
  * Abstract base class representing load time function. Classes derived from Load class typically

@@ -39,6 +39,13 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrxtype.h"
 
+///@name Input fields for IncrementalLinearStatic
+//@{
+#define _IFT_IncrementalLinearStatic_endoftimeofinterest "endoftimeofinterest"
+#define _IFT_IncrementalLinearStatic_prescribedtimes "prescribedtimes"
+#define _IFT_IncrementalLinearStatic_deltat "deltat"
+//@}
+
 namespace oofem {
 /**
  * This class implements Incremental LinearStatic Engineering problem.
@@ -79,7 +86,6 @@ public:
     virtual void solveYourself();
     virtual void solveYourselfAt(TimeStep *tStep);
 
-    virtual void updateYourself(TimeStep *tStep);
     virtual double giveUnknownComponent(EquationID type, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);

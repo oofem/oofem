@@ -38,6 +38,12 @@
 #include "structuralelement.h"
 #include "fiberedcs.h"
 
+///@name Input fields for Beam3d
+//@{
+#define _IFT_Beam3d_dofstocondense "dofstocondense"
+#define _IFT_Beam3d_refnode "refnode"
+//@}
+
 namespace oofem {
 /**
  * This class implements a 2-dimensional beam element

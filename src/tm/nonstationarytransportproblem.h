@@ -43,6 +43,17 @@
 #include "transportmaterial.h"
 #include "stationarytransportproblem.h"
 
+///@name Input fields for NonStationaryTransportProblem
+//@{
+#define _IFT_NonStationaryTransportProblem_initt "initt"
+#define _IFT_NonStationaryTransportProblem_deltat "deltat"
+#define _IFT_NonStationaryTransportProblem_deltatfunction "deltatfunction"
+#define _IFT_NonStationaryTransportProblem_prescribedtimes "prescribedtimes"
+#define _IFT_NonStationaryTransportProblem_alpha "alpha"
+#define _IFT_NonStationaryTransportProblem_lumpedcapa "lumpedcapa"
+#define _IFT_NonStationaryTransportProblem_changingproblemsize "changingproblemsize"
+//@}
+
 namespace oofem {
 /**
  * This class represents linear nonstationary transport problem.

@@ -1046,39 +1046,39 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // Mandatory parameters
-    IR_GIVE_FIELD(ir, eps0, IFT_TrabBone3D_eps0, "eps0"); // Macro
-    IR_GIVE_FIELD(ir, nu0, IFT_TrabBone3D_nu0, "nu0"); // Macro
-    IR_GIVE_FIELD(ir, mu0, IFT_TrabBone3D_mu0, "mu0"); // Macro
-    IR_GIVE_FIELD(ir, expk, IFT_TrabBone3D_expk, "expk"); // Macro
-    IR_GIVE_FIELD(ir, expl, IFT_TrabBone3D_expl, "expl"); // Macro
+    IR_GIVE_FIELD(ir, eps0, IFT_TrabBone3D_eps0, "eps0");
+    IR_GIVE_FIELD(ir, nu0, IFT_TrabBone3D_nu0, "nu0");
+    IR_GIVE_FIELD(ir, mu0, IFT_TrabBone3D_mu0, "mu0");
+    IR_GIVE_FIELD(ir, expk, IFT_TrabBone3D_expk, "expk");
+    IR_GIVE_FIELD(ir, expl, IFT_TrabBone3D_expl, "expl");
 
     eps0 = eps0*0.1069;
     mu0 = mu0*0.1069;
     
 
-    IR_GIVE_FIELD(ir, m1, IFT_TrabBone3D_m1, "m1"); // Macro
-    IR_GIVE_FIELD(ir, m2, IFT_TrabBone3D_m2, "m2"); // Macro
-    IR_GIVE_FIELD(ir, rho, IFT_TrabBone3D_rho, "rho"); // Macro  
+    IR_GIVE_FIELD(ir, m1, IFT_TrabBone3D_m1, "m1");
+    IR_GIVE_FIELD(ir, m2, IFT_TrabBone3D_m2, "m2");
+    IR_GIVE_FIELD(ir, rho, IFT_TrabBone3D_rho, "rho");  
 
-    IR_GIVE_FIELD(ir, sig0Pos, IFT_TrabBone3D_sig0Pos, "sig0pos"); // Macro
-    IR_GIVE_FIELD(ir, sig0Neg, IFT_TrabBone3D_sig0Neg, "sig0neg"); // Macro
-    IR_GIVE_FIELD(ir, chi0Pos, IFT_TrabBone3D_chi0Pos, "chi0pos"); // Macro
-    IR_GIVE_FIELD(ir, tau0, IFT_TrabBone3D_tau0, "tau0"); // Macro
+    IR_GIVE_FIELD(ir, sig0Pos, IFT_TrabBone3D_sig0Pos, "sig0pos");
+    IR_GIVE_FIELD(ir, sig0Neg, IFT_TrabBone3D_sig0Neg, "sig0neg");
+    IR_GIVE_FIELD(ir, chi0Pos, IFT_TrabBone3D_chi0Pos, "chi0pos");
+    IR_GIVE_FIELD(ir, tau0, IFT_TrabBone3D_tau0, "tau0");
     sig0Pos = sig0Pos*0.15;
     sig0Neg = sig0Neg*0.15;
     tau0 = tau0*0.15;
 
 
-    IR_GIVE_FIELD(ir, expq, IFT_TrabBone3D_expq, "expq"); // Macro
-    IR_GIVE_FIELD(ir, expp, IFT_TrabBone3D_expp, "expp"); // Macro
+    IR_GIVE_FIELD(ir, expq, IFT_TrabBone3D_expq, "expq");
+    IR_GIVE_FIELD(ir, expp, IFT_TrabBone3D_expp, "expp");
 
 
 
-    IR_GIVE_FIELD(ir, plasHardFactor, IFT_TrabBone3D_plasHardFactor, "plashardfactor"); // Macro
-    IR_GIVE_FIELD(ir, expPlasHard, IFT_TrabBone3D_expPlasHard, "expplashard"); // Macro
+    IR_GIVE_FIELD(ir, plasHardFactor, IFT_TrabBone3D_plasHardFactor, "plashardfactor");
+    IR_GIVE_FIELD(ir, expPlasHard, IFT_TrabBone3D_expPlasHard, "expplashard");
 
-    IR_GIVE_FIELD(ir, expDam, IFT_TrabBone3D_expDam, "expdam"); // Macro
-    IR_GIVE_FIELD(ir, critDam, IFT_TrabBone3D_critDam, "critdam"); // Macro
+    IR_GIVE_FIELD(ir, expDam, IFT_TrabBone3D_expDam, "expdam");
+    IR_GIVE_FIELD(ir, critDam, IFT_TrabBone3D_critDam, "critdam");
 
     // evaluation of dependent parameter
     chi0Neg = ( sig0Neg * sig0Neg ) / ( sig0Pos * sig0Pos ) * ( chi0Pos + 1 ) - 1;
@@ -1102,13 +1102,13 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
 
 
 
-    IR_GIVE_OPTIONAL_FIELD(ir, x1, IFT_TrabBone3D_x1, "x1"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, x2, IFT_TrabBone3D_x2, "x2"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, x3, IFT_TrabBone3D_x3, "x3"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, x1, IFT_TrabBone3D_x1, "x1");
+    IR_GIVE_OPTIONAL_FIELD(ir, x2, IFT_TrabBone3D_x2, "x2");
+    IR_GIVE_OPTIONAL_FIELD(ir, x3, IFT_TrabBone3D_x3, "x3");
 
-    IR_GIVE_OPTIONAL_FIELD(ir, y1, IFT_TrabBone3D_y1, "y1"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, y2, IFT_TrabBone3D_y2, "y2"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, y3, IFT_TrabBone3D_y3, "y3"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, y1, IFT_TrabBone3D_y1, "y1");
+    IR_GIVE_OPTIONAL_FIELD(ir, y2, IFT_TrabBone3D_y2, "y2");
+    IR_GIVE_OPTIONAL_FIELD(ir, y3, IFT_TrabBone3D_y3, "y3");
 
      double normX = sqrt(x1*x1 + x2*x2 + x3*x3);
      x1 = x1/normX;
@@ -1138,7 +1138,7 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
     viscosity = 0.05;
     //    viscosity = 0.01;
     //    viscosity = 0.015;
-    IR_GIVE_OPTIONAL_FIELD(ir, viscosity, IFT_TrabBone3D_viscosity, "viscosity"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, viscosity, IFT_TrabBone3D_viscosity, "viscosity");
     // Hadi post-yield function parameters
     yR = 0.7;
     kappaMax = 0.01;
@@ -1150,9 +1150,9 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
 
 
 
-    IR_GIVE_OPTIONAL_FIELD(ir, yR, IFT_TrabBone3D_yR, "yR"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, kappaMax, IFT_TrabBone3D_kappaMax, "kappaMax"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, kappaMin, IFT_TrabBone3D_kappaMin, "kappaMin"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, yR, IFT_TrabBone3D_yR, "yR");
+    IR_GIVE_OPTIONAL_FIELD(ir, kappaMax, IFT_TrabBone3D_kappaMax, "kappaMax");
+    IR_GIVE_OPTIONAL_FIELD(ir, kappaMin, IFT_TrabBone3D_kappaMin, "kappaMin");
     IR_GIVE_OPTIONAL_FIELD(ir, kappaSlope, IFT_TrabBone3D_kappaSlope, "kappaSlope");
     IR_GIVE_OPTIONAL_FIELD(ir, N, IFT_TrabBone3D_N, "N");
     IR_GIVE_OPTIONAL_FIELD(ir, gMin, IFT_TrabBone3D_gMin, "gMin");
@@ -1171,10 +1171,10 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
     rP = 2.77;
     
 
-    IR_GIVE_OPTIONAL_FIELD(ir, gammaL0, IFT_TrabBone3D_gammaL, "gammal"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, gammaP0, IFT_TrabBone3D_gammaP, "gammap"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, tDens, IFT_TrabBone3D_tDens, "tdens"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, densCrit, IFT_TrabBone3D_densCrit, "denscrit"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, gammaL0, IFT_TrabBone3D_gammaL, "gammal");
+    IR_GIVE_OPTIONAL_FIELD(ir, gammaP0, IFT_TrabBone3D_gammaP, "gammap");
+    IR_GIVE_OPTIONAL_FIELD(ir, tDens, IFT_TrabBone3D_tDens, "tdens");
+    IR_GIVE_OPTIONAL_FIELD(ir, densCrit, IFT_TrabBone3D_densCrit, "denscrit");
 
     
 
@@ -1324,6 +1324,26 @@ TrabBone3D :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
     }
 }
 
+#ifdef __PARALLEL_MODE
+double TrabBone3D::predictRelativeComputationalCost(GaussPoint *gp) 
+{
+  TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
+
+  if (status->giveTempDam() > 0.0) {
+    return 15.0;
+  } else {
+    return 1.0;
+  }
+}
+double TrabBone3D::predictRelativeRedistributionCost(GaussPoint *gp) 
+{
+  return 1.0;
+}
+#endif
+
+
+
+
 
 
 TrabBone3DStatus :: TrabBone3DStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
@@ -1448,6 +1468,11 @@ TrabBone3DStatus :: initTempStatus()
 {
     StructuralMaterialStatus :: initTempStatus();
     densG = 200;
+    this->tempKappa = this->kappa;
+    this->tempDam = this->dam;
+    this->tempTSED = this->tsed;
+    this->tempPlasDef = this->plasDef;
+    nss = 1;
 }
 
 
@@ -1481,7 +1506,35 @@ TrabBone3DStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(CIO_IOERR);
     }
 
-   
+    if ( !stream->write(&kappa, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+    if ( !stream->write(&beta, 1) ) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+ 
+    if ( ( iores = effectiveStress.storeYourself(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
+    }
+    if ( ( iores = plasFlowDirec.storeYourself(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
+    }
+
+    /*
+    if ( ( iores = smtrx.storeYourself(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
+    }
+    if ( ( iores = tangentMatrix.storeYourself(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
+    }
+    if ( ( iores = SSaTensor.storeYourself(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = tempStrain.storeYourself(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
+    }
+    */
     return CIO_OK;
 }
 
@@ -1505,7 +1558,40 @@ TrabBone3DStatus :: restoreContext(DataStream *stream, ContextMode mode, void *o
         THROW_CIOERR(CIO_IOERR);
     }
 
-    return CIO_OK;
+    if ( !stream->read(&kappa, 1) ) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream->read(&beta, 1) ) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+   
+
+    if ( ( iores = effectiveStress.restoreYourself(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
+    }
+    if ( ( iores = plasFlowDirec.restoreYourself(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
+    }
+
+    /*
+    if ( ( iores = smtrx.restoreYourself(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
+    }
+    if ( ( iores = tangentMatrix.restoreYourself(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
+    }
+    if ( ( iores = SSaTensor.restoreYourself(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
+    }
+    if ( ( iores = tempStrain.restoreYourself(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
+    }
+    */
+    
+
+
+   return CIO_OK;
 }
 
 
@@ -1514,5 +1600,5 @@ MaterialStatus *TrabBone3D :: CreateStatus(GaussPoint *gp) const
     return new TrabBone3DStatus(1, StructuralMaterial :: giveDomain(), gp);
 }
 
-}
+} //end namespace oofem
 

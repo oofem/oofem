@@ -97,7 +97,7 @@ RankineMat :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, a, IFT_RankineMat_a, "a"); // coefficient in damage law
 
     double gf = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, gf, IFT_RankineMat_a, "gf"); // dissipated energy per unit VOLUME
+    IR_GIVE_OPTIONAL_FIELD(ir, gf, IFT_RankineMat_gf, "gf"); // dissipated energy per unit VOLUME
 
     if ( ( a != 0. ) && ( gf != 0 ) ) {
         OOFEM_ERROR("RankineMat: parameters a and gf cannot be prescribed simultaneously");

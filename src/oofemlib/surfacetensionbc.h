@@ -40,6 +40,12 @@
 #include <utility>
 #include <list>
 
+///@name Input fields for surface tension boundary condition
+//@{
+#define _IFT_SurfaceTensionBoundaryCondition_gamma "gamma"
+#define _IFT_SurfaceTensionBoundaryCondition_useTangent "usetangent"
+//@}
+
 namespace oofem {
 class Element;
 class ElementSide;

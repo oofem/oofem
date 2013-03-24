@@ -393,8 +393,8 @@ ConcreteDPM :: initializeFrom(InputRecord *ir)
 
     // damage parameters - only exponential softening
     // [in ef variable the wf (crack opening) is stored]
-    if ( ir->hasField(IFT_ConcreteDPM_ef, "wf") ) {
-        IR_GIVE_FIELD(ir, ef, IFT_ConcreteDPM_ef, "wf");
+    if ( ir->hasField(IFT_ConcreteDPM_wf, "wf") ) {
+        IR_GIVE_FIELD(ir, ef, IFT_ConcreteDPM_wf, "wf");
         // fracture energy
     } else {
         double Gf;

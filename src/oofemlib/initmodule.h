@@ -39,6 +39,11 @@
 
 #include <cstdio>
 
+///@name Input fields for init module
+//@{
+#define _IFT_InitModule_initfilename "initfile"
+//@}
+
 namespace oofem {
 class EngngModel;
 class TimeStep;

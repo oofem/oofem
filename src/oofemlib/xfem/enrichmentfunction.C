@@ -33,12 +33,8 @@
  */
 
 #include "enrichmentfunction.h"
-#include "enrichmentitem.h"
-#include "domain.h"
 #include "gausspnt.h"
-#include "xfemmanager.h"
 #include "mathfem.h"
-#include "geometry.h"
 #include "feinterpol.h"
 
 namespace oofem {
@@ -47,37 +43,40 @@ IRResultType EnrichmentFunction :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-double EnrichmentFunction :: evaluateFunctionAt(GaussPoint *gp, EnrichmentItem *ei)
+double EnrichmentFunction :: evaluateFunctionAt(GaussPoint *gp, EnrichmentDomain *ed)
 {
     FloatArray gcoords;
     gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
-    return this->evaluateFunctionAt(& gcoords, ei);
+    return this->evaluateFunctionAt(& gcoords, ed);
 }
 
-void EnrichmentFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentItem *ei)
+void EnrichmentFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentDomain *ed)
 {
     FloatArray gc;
     gp->giveElement()->computeGlobalCoordinates( gc, * gp->giveCoordinates() );
-    this->evaluateDerivativeAt(answer, & gc, ei);
+    this->evaluateDerivativeAt(answer, & gc, ed);
 }
 
 
-double DiscontinuousFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei)
+double DiscontinuousFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentDomain *ed)
 {
-    double dist = ei->giveGeometry()->computeDistanceTo(point);
-    return sgn(dist);
+    if ( EnrichmentDomain_BG *edbg = dynamic_cast< EnrichmentDomain_BG * > (ed) ) {  
+        return sgn( edbg->bg->computeDistanceTo( point ) );
+    } else {
+        OOFEM_ERROR("DiscontinuousFunction :: evaluateFunctionAt - only supports enrichment domains of type Basic Geometry");
+        return 0.;
+    }
 }
 
-void DiscontinuousFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei)
+void DiscontinuousFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentDomain *ed)
 {
     answer.resize(2);
     answer.zero();
 }
 
-double RampFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei)
+double RampFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentDomain *ed)
 {
-    //return fabs( ei->giveGeometry()->computeDistanceTo(point) );
-    if ( EnrichmentDomain_BG *edbg = dynamic_cast< EnrichmentDomain_BG * > ( ei->giveEnrichmentDomain(1) ) ) {;  
+    if ( EnrichmentDomain_BG *edbg = dynamic_cast< EnrichmentDomain_BG * > (ed) ) {  
         return fabs( edbg->bg->computeDistanceTo( point ) );
     } else {
         OOFEM_ERROR("RampFunction :: evaluateFunctionAt - only supports enrichment domains of type Basic Geometry");
@@ -86,16 +85,19 @@ double RampFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei)
 
 }
 
-void RampFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei)
+void RampFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentDomain *ed)
 {
-    double dist = ei->giveGeometry()->computeDistanceTo(point);
-
-    answer.resize(2);
-    answer.zero();
-    answer.at(1) = answer.at(2) = sgn(dist);
+    if ( EnrichmentDomain_BG *edbg = dynamic_cast< EnrichmentDomain_BG * > (ed) ) {  
+        double dist = edbg->bg->computeDistanceTo( point );
+        answer.resize(2);
+        answer.zero();
+        answer.at(1) = answer.at(2) = sgn(dist);
+    } else {
+        OOFEM_ERROR("RampFunction :: evaluateDerivativeAt - only supports enrichment domains of type Basic Geometry");
+    }
 }
 
-double RampFunction :: evaluateFunctionAt(GaussPoint *gp, EnrichmentItem *ei)
+double RampFunction :: evaluateFunctionAt(GaussPoint *gp, EnrichmentDomain *ed)
 {
     FloatArray N;
     Element *el = gp->giveElement();
@@ -103,9 +105,8 @@ double RampFunction :: evaluateFunctionAt(GaussPoint *gp, EnrichmentItem *ei)
     double dist = 0;
     double member = 0;
     for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {
-        if ( EnrichmentDomain_BG *edbg = dynamic_cast< EnrichmentDomain_BG * > ( ei->giveEnrichmentDomain(1) ) ) {;  
+        if ( EnrichmentDomain_BG *edbg = dynamic_cast< EnrichmentDomain_BG * > (ed) ) {;  
             dist = edbg->bg->computeDistanceTo( el->giveDofManager(i)->giveCoordinates() );
-            //dist = ei->giveGeometry()->computeDistanceTo( el->giveDofManager(i)->giveCoordinates() );
             member += N.at(i) * dist;
         } else {
             OOFEM_ERROR("RampFunction :: evaluateFunctionAt - only supports enrichment domains of type Basic Geometry");
@@ -115,7 +116,7 @@ double RampFunction :: evaluateFunctionAt(GaussPoint *gp, EnrichmentItem *ei)
     return fabs(member);
 }
 
-void RampFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentItem *ei)
+void RampFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentDomain *ed)
 {
     FloatArray N;
     Element *el = gp->giveElement();
@@ -132,8 +133,7 @@ void RampFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, En
     double dfdy = 0;
     double phi = 0;
     for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {
-        if ( EnrichmentDomain_BG *edbg = dynamic_cast< EnrichmentDomain_BG * > ( ei->giveEnrichmentDomain(1) ) ) {;  
-            //dist = ei->giveGeometry()->computeDistanceTo( el->giveDofManager(i)->giveCoordinates() );
+        if ( EnrichmentDomain_BG *edbg = dynamic_cast< EnrichmentDomain_BG * > (ed) ) {;  
             dist = edbg->bg->computeDistanceTo( el->giveDofManager(i)->giveCoordinates() );
             phi += N.at(i) * dist;
             dfdx += dNdx.at(i, 1) * dist;
@@ -149,12 +149,12 @@ void RampFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, En
     answer.at(2) = dfdy * sgn(phi);
 }
 
-double BranchFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei)
+double BranchFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentDomain *ed)
 {
     ///@todo change
 #if 0
     double ret = 0;
-    CrackTip *cr = (CrackTip*) ei;
+    CrackTip *cr = (CrackTip*) ed;
     FloatArray transfCoor;
     Line *l = (Line*) cr->giveGeometry();
     l->transformIntoPolar(point, transfCoor);
@@ -171,12 +171,12 @@ double BranchFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem *e
     return 0.0;
 }
 
-void BranchFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei)
+void BranchFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentDomain *ed)
 {
     ///@todo change
 #if 0
     answer.resize(2);
-    CrackTip *cr = (CrackTip*) ei;
+    CrackTip *cr = (CrackTip*) ed;
     Line *l = (Line*) cr->giveGeometry();
     FloatArray transfCoor;
     l->transformIntoPolar(point, transfCoor);

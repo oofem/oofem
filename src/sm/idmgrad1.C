@@ -79,7 +79,7 @@ IDGMaterial :: initializeFrom(InputRecord *ir)
     IsotropicDamageMaterial1 :: initializeFrom(ir);
 
     //internal Length parameter    
-    //IR_GIVE_OPTIONAL_FIELD(ir, internalLength, IFT_IDGMaterial_internalLength, "internallength");     // Macro
+    //IR_GIVE_OPTIONAL_FIELD(ir, internalLength, IFT_IDGMaterial_internalLength, "internallength");
     averType = 1;
     // averaging type approach 0-standard else stress based averaging
     //IR_GIVE_OPTIONAL_FIELD(ir, averType, IFT_IDGMaterial_averType, "avertype");

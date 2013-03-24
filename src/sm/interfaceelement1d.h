@@ -38,6 +38,12 @@
 #include "structuralelement.h"
 #include "gaussintegrationrule.h"
 
+///@name Input fields for Material
+//@{
+#define _IFT_InterfaceElem1d_refnode "refnode"
+#define _IFT_InterfaceElem1d_normal "normal"
+//@}
+
 namespace oofem {
 /**
  * This class implements a one-dimensional interface element connecting two nodes (with the same position)
@@ -45,7 +51,6 @@ namespace oofem {
  */
 class InterfaceElem1d : public StructuralElement
 {
-
 protected:
     enum cmode { ie1d_1d, ie1d_2d, ie1d_3d } mode;
     int referenceNode;

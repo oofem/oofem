@@ -42,6 +42,11 @@
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
 
+///@name Input fields for Axisymm3d
+//@{
+#define _IFT_Axisymm3d_nipfish "nipfish"
+//@}
+
 namespace oofem {
 /**
  * This class implements an triangular three-node finite element for axisymmetric continuum.

@@ -45,6 +45,7 @@
 #include "usrdefsub.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "loadtime.h"
 
 #ifdef __CEMHYD_MODULE
  #include "cemhydmat.h"
@@ -87,25 +88,25 @@ IRResultType
 NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     EngngModel :: initializeFrom(ir);
 
     if ( ir->hasField(IFT_NonStationaryTransportProblem_initt, "initt") ) {
-        IR_GIVE_FIELD(ir, initT, IFT_NonStationaryTransportProblem_initt, "initt"); // Macro
+        IR_GIVE_FIELD(ir, initT, IFT_NonStationaryTransportProblem_initt, "initt");
     }
 
     if ( ir->hasField(IFT_NonStationaryTransportProblem_deltat, "deltat") ) {
-        IR_GIVE_FIELD(ir, deltaT, IFT_NonStationaryTransportProblem_deltat, "deltat"); // Macro
-    } else if ( ir->hasField(IFT_NonStationaryTransportProblem_deltat, "deltatfunction") ) {
-        IR_GIVE_FIELD(ir, dtTimeFunction, IFT_NonStationaryTransportProblem_dtf, "deltatfunction"); // Macro
+        IR_GIVE_FIELD(ir, deltaT, IFT_NonStationaryTransportProblem_deltat, "deltat");
+    } else if ( ir->hasField(IFT_NonStationaryTransportProblem_deltatfunction, "deltatfunction") ) {
+        IR_GIVE_FIELD(ir, dtTimeFunction, IFT_NonStationaryTransportProblem_deltatfunction, "deltatfunction");
     } else if ( ir->hasField(IFT_NonStationaryTransportProblem_prescribedtimes, "prescribedtimes") ) {
-        IR_GIVE_FIELD(ir, discreteTimes, IFT_NonStationaryTransportProblem_prescribedtimes, "prescribedtimes"); // Macro
+        IR_GIVE_FIELD(ir, discreteTimes, IFT_NonStationaryTransportProblem_prescribedtimes, "prescribedtimes");
     } else {
         OOFEM_ERROR("Time step not defined");
     }
 
-    IR_GIVE_FIELD(ir, alpha, IFT_NonStationaryTransportProblem_alpha, "alpha"); // Macro
+    IR_GIVE_FIELD(ir, alpha, IFT_NonStationaryTransportProblem_alpha, "alpha");
     /* The following done in updateAttributes
      * if (this->giveNumericalMethod (giveCurrentStep())) nMethod -> instanciateFrom (ir);
      */

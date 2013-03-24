@@ -47,6 +47,33 @@
 
 #define DYNCON_TOL 1.e-6
 
+///@name Input fields for ConcreteDPM2
+//@{
+#define _IFT_ConcreteDPM2_fc "fc"
+#define _IFT_ConcreteDPM2_fcZero "fczero"
+#define _IFT_ConcreteDPM2_ft "ft"
+#define _IFT_ConcreteDPM2_ecc "ecc"
+#define _IFT_ConcreteDPM2_kinit "kinit"
+#define _IFT_ConcreteDPM2_ahard "ahard"
+#define _IFT_ConcreteDPM2_bhard "bhard"
+#define _IFT_ConcreteDPM2_chard "chard"
+#define _IFT_ConcreteDPM2_dhard "dhard"
+#define _IFT_ConcreteDPM2_dilation "dilation"
+#define _IFT_ConcreteDPM2_asoft "asoft"
+#define _IFT_ConcreteDPM2_bsoft "bsoft"
+#define _IFT_ConcreteDPM2_hp "hp"
+#define _IFT_ConcreteDPM2_yieldtol "yieldtol"
+#define _IFT_ConcreteDPM2_newtoniter "newtoniter"
+#define _IFT_ConcreteDPM2_wf "wf"
+#define _IFT_ConcreteDPM2_softeningType "stype"
+#define _IFT_ConcreteDPM2_ftOne "ft1"
+#define _IFT_ConcreteDPM2_wfOne "wf1"
+#define _IFT_ConcreteDPM2_rateFlag "rateflag"
+#define _IFT_ConcreteDPM2_timeFactor "timefactor"
+#define _IFT_ConcreteDPM2_helem "helem"
+#define _IFT_ConcreteDPM2_isoflag "isoflag"
+//@}
+
 namespace oofem {
 /**
  * This class implements the material status associated to ConcreteDPM2.

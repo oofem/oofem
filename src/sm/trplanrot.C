@@ -543,10 +543,10 @@ TrPlaneStrRot :: initializeFrom(InputRecord *ir)
 
     this->StructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 4;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_TrPlaneStrRot_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
     numberOfRotGaussPoints = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfRotGaussPoints, IFT_TrPlaneStrRot_niprot, "niprot"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfRotGaussPoints, IFT_TrPlaneStrRot_niprot, "niprot");
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
            ( numberOfGaussPoints == 4 ) ||
@@ -560,7 +560,6 @@ TrPlaneStrRot :: initializeFrom(InputRecord *ir)
         numberOfRotGaussPoints = 1;
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 

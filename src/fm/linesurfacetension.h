@@ -36,9 +36,7 @@
 #define linesurfacetension_h
 
 #include "fmelement.h"
-#include "structuralelement.h"
 #include "domain.h"
-
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
 

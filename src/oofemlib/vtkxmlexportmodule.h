@@ -52,6 +52,17 @@
 #include <string>
 #include <list>
 
+///@name Input fields for VTK XML export module
+//@{
+#define _IFT_VTKXMLExportModule_cellvars "cellvars"
+#define _IFT_VTKXMLExportModule_vars "vars"
+#define _IFT_VTKXMLExportModule_primvars "primvars"
+#define _IFT_VTKXMLExportModule_stype "stype"
+#define _IFT_VTKXMLExportModule_regionstoskip "regionstoskip"
+#define _IFT_VTKXMLExportModule_nvr "nvr"
+#define _IFT_VTKXMLExportModule_vrmap "vrmap"
+//@}
+
 namespace oofem {
 /**
  * Represents VTK (Visualization Toolkit) export module. It uses VTK (.vtu) file format, Unstructured grid dataset.
@@ -85,6 +96,8 @@ protected:
     int nvr;
     /// Real->virtual region map.
     IntArray vrmap;
+    /// Scaling time in output, e.g. conversion from seconds to hours
+    double timeScale;
 
     /// Buffer for earlier time steps exported to *.pvd file.
     std::list< std::string > pvdBuffer;

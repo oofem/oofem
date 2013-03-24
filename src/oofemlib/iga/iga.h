@@ -46,6 +46,11 @@
 #include "mathfem.h"
 #include "feinterpol.h"
 
+///@name Input fields for IGAElement
+//@{
+#define _IFT_IGAElement_KnotSpanParallelMode "knotspanparmode"
+//@}
+
 namespace oofem {
 #ifdef __OOFEG
 class StructuralElementEvaluator;

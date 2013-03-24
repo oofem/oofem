@@ -39,10 +39,13 @@
 #include "dictionr.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-
 #include "matconst.h"
-#include "structuralelement.h"
 #include "matstatus.h"
+
+///@name Input fields for SurfaceTensionMaterial
+//@{
+#define _IFT_SurfaceTensionMaterial_isotropic "g"
+//@}
 
 namespace oofem {
 class GaussPoint;
@@ -65,6 +68,7 @@ public:
 /**
  * Material model for surface tension.
  * Currently the model only stores the surface tension energy.
+ * @deprecated This material will be removed.
  */
 class SurfaceTensionMaterial : public Material
 {
@@ -83,7 +87,7 @@ public:
         const char *__proc = "initializeFrom";
         IRResultType result;
         double value = 0.0;
-        IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SurfaceTensionMaterial_isotropic, "g"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SurfaceTensionMaterial_isotropic, "g");
         this->propertyDictionary->add('g', value);
         return result;
     }
