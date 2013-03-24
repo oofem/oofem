@@ -133,7 +133,7 @@ Quad10_2D_SUPG :: computeNumberOfDofs(EquationID ut)
 void
 Quad10_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) || ( ut == EID_MomentumBalance_ConservationEquation ) ) {
+    if ( ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
         answer.setValues(2, V_u, V_v);
     } else if ( ut == EID_ConservationEquation ) {
         answer.resize(0);
@@ -146,9 +146,9 @@ Quad10_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer
 void
 Quad10_2D_SUPG ::   giveInternalDofManDofIDMask(int i, EquationID ut, IntArray &answer) const
 {
-    if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
+    if ( ut == EID_MomentumBalance ) {
         answer.resize(0);
-    } else if ( ( ut == EID_ConservationEquation ) || ( ut == EID_MomentumBalance_ConservationEquation ) ) {
+    } else if ( ut == EID_ConservationEquation || ut == EID_MomentumBalance_ConservationEquation ) {
         answer.setValues(1, P_f);
     } else {
         _error("giveDofManDofIDMask: Unknown equation id encountered");

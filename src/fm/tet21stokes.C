@@ -107,7 +107,7 @@ void Tet21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answ
     // in six nodes and pressure in three nodes the answer depends on which node is requested.
 
     if ( inode <= 4 ) {
-        if ( ut == EID_MomentumBalance || ut == EID_AuxMomentumBalance ) {
+        if ( ut == EID_MomentumBalance ) {
             answer.setValues(3, V_u, V_v, V_w);
         } else if ( ut == EID_ConservationEquation ) {
             answer.setValues(1, P_f);
@@ -116,8 +116,8 @@ void Tet21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answ
         } else {
             OOFEM_ERROR("Tet21Stokes :: giveDofManDofIDMask: Unknown equation id encountered");
         }
-    } else if ( inode <= 10 ) {
-        if ( ut == EID_MomentumBalance || ut == EID_AuxMomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
+    } else {
+        if ( ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
             answer.setValues(3, V_u, V_v, V_w);
         } else if ( ut == EID_ConservationEquation ) {
             answer.resize(0);
@@ -125,7 +125,6 @@ void Tet21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answ
             OOFEM_ERROR("Tet21Stokes :: giveDofManDofIDMask: Unknown equation id encountered");
         }
     }
-    answer.resize(0);
 }
 
 void Tet21Stokes :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,

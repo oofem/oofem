@@ -357,25 +357,6 @@ SUPGElement2 :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
     }
 }
 
-/*
- * void
- * SUPGElement2::computeVectorOfPrescribed (EquationID ut, ValueModeType type, TimeStep* stepN, FloatArray& answer)
- * {
- * double scale;
- *
- * Element::computeVectorOfPrescribed (ut, type, stepN, answer);
- *
- * if (domain->giveEngngModel()->giveEquationScalingFlag()) {
- *  if (ut == EID_MomentumBalance) {
- *    scale = domain->giveEngngModel()->giveVariableScale(VST_Velocity);
- *  } else if (ut == EID_ConservationEquation) {
- *    scale = domain->giveEngngModel()->giveVariableScale(VST_Pressure);
- *  } else scale = 1.0;
- *  answer.times (1.0/scale);
- * }
- * }
- */
-
 void
 SUPGElement2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 {

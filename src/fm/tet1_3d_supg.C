@@ -101,7 +101,7 @@ Tet1_3D_SUPG :: computeNumberOfDofs(EquationID ut)
 void
 Tet1_3D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
+    if ( ut == EID_MomentumBalance ) {
         answer.setValues(3, V_u, V_v, V_w);
     } else if ( ut == EID_ConservationEquation ) {
         answer.setValues(1, P_f);

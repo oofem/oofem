@@ -109,7 +109,7 @@ TR1_2D_SUPG2 :: computeNumberOfDofs(EquationID ut)
 void
 TR1_2D_SUPG2 :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
+    if ( ut == EID_MomentumBalance ) {
         answer.setValues(2, V_u, V_v);
     } else if ( ut == EID_ConservationEquation ) {
         answer.setValues(1, P_f);

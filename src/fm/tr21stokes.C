@@ -107,8 +107,8 @@ void Tr21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answe
     // are held by each node. Since this element holds velocities (both in x and y direction),
     // in six nodes and pressure in three nodes the answer depends on which node is requested.
 
-    if ( ( inode == 1 ) || ( inode == 2 ) || ( inode == 3 ) ) {
-        if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
+    if ( inode <= 3 ) {
+        if ( ut == EID_MomentumBalance ) {
             answer.setValues(2, V_u, V_v);
         } else if ( ut == EID_ConservationEquation ) {
             answer.setValues(1, P_f);
@@ -117,8 +117,8 @@ void Tr21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answe
         } else {
             _error("giveDofManDofIDMask: Unknown equation id encountered");
         }
-    } else if ( ( inode == 4 ) || ( inode == 5 ) || ( inode == 6 ) ) {
-        if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
+    } else {
+        if ( ut == EID_MomentumBalance ) {
             answer.setValues(2, V_u, V_v);
         } else if ( ut == EID_ConservationEquation ) {
             answer.resize(0);
