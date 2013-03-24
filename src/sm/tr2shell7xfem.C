@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -46,16 +46,16 @@
 
 
 namespace oofem {
-    FEI3dTrQuad Tr2Shell7XFEM :: interpolation;
+FEI3dTrQuad Tr2Shell7XFEM :: interpolation;
 
-    IntArray Tr2Shell7XFEM :: ordering_phibar(18);
-    IntArray Tr2Shell7XFEM :: ordering_m(18);
-    IntArray Tr2Shell7XFEM :: ordering_gam(6);
-    IntArray Tr2Shell7XFEM :: ordering_all(42);
-    IntArray Tr2Shell7XFEM :: ordering_gr(42);
-    IntArray Tr2Shell7XFEM :: ordering_gr_edge(21);
-    bool Tr2Shell7XFEM :: __initialized = Tr2Shell7XFEM :: initOrdering();
-    
+IntArray Tr2Shell7XFEM :: ordering_phibar(18);
+IntArray Tr2Shell7XFEM :: ordering_m(18);
+IntArray Tr2Shell7XFEM :: ordering_gam(6);
+IntArray Tr2Shell7XFEM :: ordering_all(42);
+IntArray Tr2Shell7XFEM :: ordering_gr(42);
+IntArray Tr2Shell7XFEM :: ordering_gr_edge(21);
+bool Tr2Shell7XFEM :: __initialized = Tr2Shell7XFEM :: initOrdering();
+
 
 
 Tr2Shell7XFEM :: Tr2Shell7XFEM(int n, Domain *aDomain) : Shell7BaseXFEM(n, aDomain)
@@ -63,38 +63,34 @@ Tr2Shell7XFEM :: Tr2Shell7XFEM(int n, Domain *aDomain) : Shell7BaseXFEM(n, aDoma
     this->numberOfDofMans = 6;
 }
 
-IntArray
-Tr2Shell7XFEM :: giveOrdering(SolutionField fieldType) const {
+const IntArray &
+Tr2Shell7XFEM :: giveOrdering(SolutionField fieldType) const
+{
     if ( fieldType == Midplane ) {
         return this->ordering_phibar;
-    } else if ( fieldType == Director  )   {
+    } else if ( fieldType == Director ) {
         return this->ordering_m;
-    } else if ( fieldType == InhomStrain  )   {
+    } else if ( fieldType == InhomStrain ) {
         return this->ordering_gam;
-    } else if ( fieldType == All  )   {
+    } else if ( fieldType == All ) {
         return this->ordering_all;
-    } else if ( fieldType == AllInv  )   {
+    } else if ( fieldType == AllInv ) {
         return this->ordering_gr;
-    } else if ( fieldType == EdgeInv  )   {
+    } else /*if ( fieldType == EdgeInv  )*/ {
         return this->ordering_gr_edge;
-    } else {
-        _error("giveOrdering: unknown fieldType");
-        return NULL;
     }
 }
 
 
 void 
-Tr2Shell7XFEM :: giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords){
+Tr2Shell7XFEM :: giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords)
+{
     nodeLocalXiCoords.setValues( 6, 1., 0., 0., .5, 0., .5); // corner nodes then midnodes, uncertain of node numbering
     nodeLocalEtaCoords.setValues(6, 0., 1., 0., .5, .5, 0.);
 }
 
 
 FEInterpolation* Tr2Shell7XFEM :: giveInterpolation() { return &interpolation;}
-
-
-
 
 
 void 
@@ -141,8 +137,6 @@ Tr2Shell7XFEM :: computeGaussPoints()
 }
 
 
-
-
 void
 Tr2Shell7XFEM :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
@@ -165,11 +159,7 @@ Tr2Shell7XFEM :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     } else {
         _error("giveEdgeDofMapping: wrong edge number");
     }
-    
-
 }
-
-
 
 
 void 
@@ -182,12 +172,11 @@ Tr2Shell7XFEM :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 }
 
 
-
-
 // Integration
 
 double 
-Tr2Shell7XFEM :: computeVolumeAround(GaussPoint *gp){
+Tr2Shell7XFEM :: computeVolumeAround(GaussPoint *gp)
+{
     FloatArray G1, G2, G3, temp;
     double detJ;
     this->evalInitialCovarBaseVectorsAt(gp,G1, G2, G3);
@@ -197,7 +186,8 @@ Tr2Shell7XFEM :: computeVolumeAround(GaussPoint *gp){
 }
 
 double 
-Tr2Shell7XFEM :: computeAreaAround(GaussPoint *gp){
+Tr2Shell7XFEM :: computeAreaAround(GaussPoint *gp)
+{
     FloatArray G1, G2, G3, temp;
     this->evalInitialCovarBaseVectorsAt(gp, G1, G2, G3);
     temp.beVectorProductOf(G1, G2);
@@ -206,10 +196,9 @@ Tr2Shell7XFEM :: computeAreaAround(GaussPoint *gp){
 }
 
 
-
-
 double 
-Tr2Shell7XFEM :: computeVolumeAroundLayer(GaussPoint *gp, int layer){
+Tr2Shell7XFEM :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
+{
     FloatArray G1, G2, G3, temp;
     double detJ;
     this->evalInitialCovarBaseVectorsAt(gp,G1, G2, G3);
@@ -223,30 +212,29 @@ Tr2Shell7XFEM :: computeVolumeAroundLayer(GaussPoint *gp, int layer){
 
 
 void 
-Tr2Shell7XFEM :: compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matrix2, FloatMatrix &answer){
-
-    
+Tr2Shell7XFEM :: compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matrix2, FloatMatrix &answer)
+{
     int ndofs = 42;
     answer.resize(ndofs,ndofs);
-   for( int i = 1; i<=ndofs; i++ ){
-       for( int j = 1; j<=18; j++ ){
+    for( int i = 1; i <= ndofs; i++ ){
+        for( int j = 1; j <= 18; j++ ){
 
-           if( abs(matrix1.at(i,j)) > 1.0e-12 ){
-               double diff = ( matrix1.at(i,j)-matrix2.at(i,j) );
-               double relDiff =  diff / matrix1.at(i,j);
-               if( abs(relDiff)<1.0e-4){
-                   answer.at(i,j) = 0.0;
-               }else if( abs(diff)<1.0e3 ){
-                   answer.at(i,j) = 0.0;
-               }else
-                   answer.at(i,j) = relDiff;
-           }else{
-               answer.at(i,j) = -1.0;
-           }
+            if( abs(matrix1.at(i,j)) > 1.0e-12 ) {
+                double diff = ( matrix1.at(i,j)-matrix2.at(i,j) );
+                double relDiff =  diff / matrix1.at(i,j);
+                if ( abs(relDiff)<1.0e-4) {
+                    answer.at(i,j) = 0.0;
+                } else if( abs(diff)<1.0e3 ) {
+                    answer.at(i,j) = 0.0;
+                } else {
+                    answer.at(i,j) = relDiff;
+                }
+            }else{
+                answer.at(i,j) = -1.0;
+            }
 
-       }
-   }
-
+        }
+    }
 }
 
 
@@ -496,9 +484,6 @@ Tr2Shell7XFEM :: vtkGiveUpdatedFictiousNodeCoords(FloatArray nodeCoords[15], int
         nodeCoords[12+i-1].at(2) = 0.5 * ( nodeCoords[i-1].at(2) + nodeCoords[i+3-1].at(2) );
         nodeCoords[12+i-1].at(3) = 0.5 * ( nodeCoords[i-1].at(3) + nodeCoords[i+3-1].at(3) );
         }
-    
-        
-     
 
 }
 

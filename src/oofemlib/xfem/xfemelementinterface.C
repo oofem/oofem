@@ -54,7 +54,7 @@ void XfemElementInterface :: XfemElementInterface_partitionElement(AList< Triang
 }
 
 void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
-{   
+{
     // This will only work for one active ei
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager(1);
     if ( xMan->isElementEnriched(element) ) { // unneccessary but extra check
@@ -76,7 +76,7 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
         }
 
         AList< IntegrationRule >irlist;
-        EnrichmentItem *ei = xMan->giveEnrichmentItem( activeEI.at(1) );
+        //EnrichmentItem *ei = xMan->giveEnrichmentItem( activeEI.at(1) );
         //EnrichmentDomain *ed = ei->giveEnrichmentDomain(1);
         
         for ( int i = 1; i <= triangles.giveSize(); i++ ) {

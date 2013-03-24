@@ -203,7 +203,7 @@ EnrichmentItem :: giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber)
     int xDofAllocSize = eiEnrSize * this->giveNumberOfEnrDofs(); // number of new dof id's the ei will allocate
     for ( int i = 1; i <= eiEnrSize; i++ ) {
         answer.at(i) = this->giveStartOfDofIdPool() + (enrichmentDomainNumber-1)*xDofAllocSize + (i-1); 
-    }   
+    }
 }
 
 void
@@ -245,7 +245,7 @@ EnrichmentItem :: giveNumberOfEnrDofs()
     }
     return temp; 
 } 
-    
+
 
 Inclusion :: Inclusion(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
 { 
@@ -254,9 +254,8 @@ Inclusion :: Inclusion(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem
 
 
 
-/**
- * DELAMINATION
- */
+// DELAMINATION
+
 Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
 { 
     //this->enrichesDofsWithIdArray->setValues(7, D_u, D_v, D_w, W_u, W_v, W_w, Gamma);
@@ -278,19 +277,16 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     }
 
     //write an instanciate method
-    
+
     return IRRT_OK;
 }
 
 
 
 
-    
-
-
 double 
 Delamination :: giveDelaminationZCoord(int n, Element *element) 
-{ 
+{
     AList<double> *xiCoordList;
     int nDelam = this->giveNumberOfEnrichmentDomains(); // max possible number
     int pos = 1;
@@ -300,11 +296,8 @@ Delamination :: giveDelaminationZCoord(int n, Element *element)
             pos++;
         } 
     }
-    return 0.;;//
-    
-
-    
-}; 
+    return 0.;
+};
 
 // Remove!
 int
@@ -316,12 +309,11 @@ Delamination :: giveDelaminationGroupAt(double zeta)
         //double zDelam = this->giveDelaminationZCoord(j);
         double zDelam = 0.;
         if ( zeta  < zDelam ) { //belong to the delamination group just below delamination #j. How to deal with poins that lie onthe boundary?
-            return j;            
+            return j;
         }
 
     }
     return nDelam + 1;
-            
 }
 
 double 

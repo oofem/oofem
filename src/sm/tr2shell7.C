@@ -63,37 +63,34 @@ Tr2Shell7 :: Tr2Shell7(int n, Domain *aDomain) : Shell7Base(n, aDomain)
     this->numberOfDofMans = 6;
 }
 
-IntArray
-Tr2Shell7 :: giveOrdering(SolutionField fieldType) const {
+const IntArray &
+Tr2Shell7 :: giveOrdering(SolutionField fieldType) const
+{
     if ( fieldType == Midplane ) {
         return this->ordering_phibar;
-    } else if ( fieldType == Director  ) {
+    } else if ( fieldType == Director ) {
         return this->ordering_m;
-    } else if ( fieldType == InhomStrain  ) {
+    } else if ( fieldType == InhomStrain ) {
         return this->ordering_gam;
-    } else if ( fieldType == All  ) {
+    } else if ( fieldType == All ) {
         return this->ordering_all;
-    } else if ( fieldType == AllInv  ) {
+    } else if ( fieldType == AllInv ) {
         return this->ordering_gr;
-    } else if ( fieldType == EdgeInv  ) {
+    } else /*if ( fieldType == EdgeInv )*/ {
         return this->ordering_gr_edge;
-    } else {
-        _error("giveOrdering: unknown fieldType");
-        return -1;
     }
 }
 
 
 void
-Tr2Shell7 :: giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords) {
+Tr2Shell7 :: giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords)
+{
     nodeLocalXiCoords.setValues(6, 1., 0., 0., .5, 0., .5);      // corner nodes then midnodes, uncertain of node numbering
     nodeLocalEtaCoords.setValues(6, 0., 1., 0., .5, .5, 0.);
 }
 
 
 FEInterpolation *Tr2Shell7 :: giveInterpolation() { return & interpolation; }
-
-
 
 
 
@@ -163,8 +160,6 @@ Tr2Shell7 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 }
 
 
-
-
 void
 Tr2Shell7 :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 {
@@ -173,8 +168,6 @@ Tr2Shell7 :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
         answer.at(i) = i;
     }
 }
-
-
 
 
 // Integration
@@ -490,14 +483,8 @@ Tr2Shell7 :: vtkGiveUpdatedFictiousNodeCoords(FloatArray nodeCoords[15], int lay
         nodeCoords[12+i-1].at(2) = 0.5 * ( nodeCoords[i-1].at(2) + nodeCoords[i+3-1].at(2) );
         nodeCoords[12+i-1].at(3) = 0.5 * ( nodeCoords[i-1].at(3) + nodeCoords[i+3-1].at(3) );
         }
-    
-        
-     
 
 }
-
-
-
 
 
 } // end namespace oofem

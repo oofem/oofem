@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -79,7 +79,7 @@ protected:
         return true;
     }
 
-    virtual IntArray giveOrdering(SolutionField fieldType) const;
+    virtual const IntArray &giveOrdering(SolutionField fieldType) const;
 
     //specific
     void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;

@@ -58,7 +58,7 @@ public:
     virtual const char *giveClassName() const { return NULL; }
     virtual classType giveClassID() const { return EnrichmentDomainClass; }
 
-    virtual bool isDofManagerEnriched(DofManager *dMan) = 0 {};
+    virtual bool isDofManagerEnriched(DofManager *dMan) = 0;
     // Default is to loop through the dofman and check if any of them are enriched
     virtual bool isElementEnriched(Element *element); 
 
@@ -117,7 +117,7 @@ public:
 
 /**
  * The whole computational domain is enriched which thus is a global enrichment
- * Mostly intended for debuging but may easily lead to a singular problem if the
+ * Mostly intended for debugging but may easily lead to a singular problem if the
  * solution is enriched with strong discontinuities.
  */
 class WholeDomain : public EnrichmentDomain

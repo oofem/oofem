@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -39,9 +39,10 @@
 #include "nodalaveragingrecoverymodel.h"
 #include "layeredcrosssection.h"
 #include "nlstructuralelement.h"
+#include "vtkxmlexportmodule.h"
 
 #include <vector>
-#include "vtkxmlexportmodule.h"
+
 namespace oofem {
 class BoundaryLoad;
 
@@ -92,13 +93,13 @@ protected:
         EdgeInv,
     };
 
-    virtual IntArray giveOrdering(SolutionField fieldType) const = 0;
+    virtual const IntArray &giveOrdering(SolutionField fieldType) const = 0;
 
     std :: vector< FloatArray >initialNodeDirectors;
 
     FloatArray &giveInitialNodeDirector(int i) {
         return this->initialNodeDirectors [ i - 1 ];
-    };
+    }
 
     // Element specific methods
     virtual void computeGaussPoints() = 0;

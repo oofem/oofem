@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -39,10 +39,11 @@
 #include "constantpressureload.h"
 
 namespace oofem {
-    IntArray Shell7BaseXFEM :: dofId_Midplane(3);
-    IntArray Shell7BaseXFEM :: dofId_Director(3);
-    IntArray Shell7BaseXFEM :: dofId_InhomStrain(1); 
-    bool Shell7BaseXFEM :: __initializedFieldDofId = Shell7BaseXFEM :: initDofId();
+IntArray Shell7BaseXFEM :: dofId_Midplane(3);
+IntArray Shell7BaseXFEM :: dofId_Director(3);
+IntArray Shell7BaseXFEM :: dofId_InhomStrain(1); 
+bool Shell7BaseXFEM :: __initializedFieldDofId = Shell7BaseXFEM :: initDofId();
+
 Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain), XfemElementInterface(this) 
 {
 
@@ -61,8 +62,7 @@ IRResultType Shell7BaseXFEM :: initializeFrom(InputRecord *ir)
 {
     Shell7Base :: initializeFrom(ir);
     return IRRT_OK; 
-};
-
+}
 
 
 Interface
@@ -93,8 +93,6 @@ Shell7BaseXFEM :: giveGlobalZcoord(GaussPoint *gp)
     return (xiRef - xiMid)*layeredCS->computeIntegralThick()*0.5; // new xi-coord measured from dGroup c.s. 
     
 }
-
-
 
 
 void
@@ -137,7 +135,7 @@ Shell7BaseXFEM :: discGiveDofManDofIDMask(int inode,  int enrichmentdomainNumber
                     ei->giveEIDofIdArray(answer, enrichmentdomainNumber);
             }
         }
-    }    
+    }
 }
 
 
@@ -158,10 +156,10 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatAr
                 double xi0 = dei->enrichmentDomainXiCoords.at(j);
                 double H = dei->heaviside(gp->giveCoordinate(3), xi0);        
                 if ( H > 0.1 ) {
-                FloatArray g1d_temp, g2d_temp, g3d_temp, dGenEps;
-                computeDiscGeneralizedStrainVector(dGenEps, gp, dei, j, tStep);
-                Shell7Base :: evalCovarBaseVectorsAt(gp, g1d_temp, g2d_temp, g3d_temp, dGenEps);
-                
+                    FloatArray g1d_temp, g2d_temp, g3d_temp, dGenEps;
+                    computeDiscGeneralizedStrainVector(dGenEps, gp, dei, j, tStep);
+                    Shell7Base :: evalCovarBaseVectorsAt(gp, g1d_temp, g2d_temp, g3d_temp, dGenEps);
+                    
                     g1.add(H,g1d_temp); g2.add(H,g2d_temp); g3.add(H,g3d_temp);
                 }
 
@@ -182,8 +180,6 @@ Shell7BaseXFEM :: computeDiscGeneralizedStrainVector(FloatArray &answer, GaussPo
     Shell7Base :: computeBmatricesAt(gp, B11, B22, B32, B43, B53);
     Shell7Base :: computeGeneralizedStrainVector(answer, solVecD, B11, B22, B32, B43, B53);
 }
-
-
 
 
 int
@@ -210,15 +206,14 @@ Shell7BaseXFEM :: giveNumberOfDofs()
 }
 
 
-
 void 
 Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activeDofsArray,  int enrichmentDomainNumber, SolutionField field)
 {
     // Routine to extract vector given an array of dofid items
     // If a certain dofId does not exist a zero is used as value
 
-    IntArray ordering_cont = this->giveOrdering(field);
-    IntArray fieldDofId    = this->giveFieldDofId(field);
+    const IntArray &ordering_cont = this->giveOrdering(field);
+    const IntArray &fieldDofId    = this->giveFieldDofId(field);
 
     IntArray ordering_temp, activeDofsArrayTemp;
     ordering_temp.resize(ordering_cont.giveSize());
@@ -235,7 +230,7 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
             EnrichmentItem *ei = this->xMan->giveEnrichmentItem(1); ///@todo: *ei should be input
             if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,enrichmentDomainNumber) ) {
                 ei->giveEIDofIdArray(dofManDofIdMask, enrichmentDomainNumber);
-            }  
+            }
         }
     
 
@@ -250,8 +245,9 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
         activeDofIndex   += fieldDofId.giveSize();
 
     }
-     
-    // Reduce arrays to actual size ///@todo will not work if there are several ei
+    
+    // Reduce arrays to actual size 
+    ///@todo will not work if there are several ei
     int numActiveDofs = activeDofPos;
     orderingArray.resize(numActiveDofs), activeDofsArray.resize(numActiveDofs);
     
@@ -312,7 +308,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
         xi0 = -1.0e6;
     } else {
         xi0 = dei->enrichmentDomainXiCoords.at(enrichmentDomainNumber);
-    }    
+    }
 
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of types
     FloatArray f1(18), f2(18), f3(6);
@@ -365,9 +361,9 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
         }
     }
 
-    IntArray ordering_phibar = giveOrdering(Midplane);
-    IntArray ordering_m      = giveOrdering(Director);
-    IntArray ordering_gam    = giveOrdering(InhomStrain);
+    const IntArray &ordering_phibar = this->giveOrdering(Midplane);
+    const IntArray &ordering_m      = this->giveOrdering(Director);
+    const IntArray &ordering_gam    = this->giveOrdering(InhomStrain);
     
     answer.resize( Shell7Base :: giveNumberOfDofs() );
     answer.zero();
@@ -376,9 +372,6 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
     answer.assemble(f3, ordering_gam);
 
 }
-
-
-
 
 
 void
@@ -508,7 +501,6 @@ void
 Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec,  FloatArray &solVecI, FloatArray &solVecJ, MatResponseMode rMode, TimeStep *tStep,
                     EnrichmentItem *ei, int enrichmentDomainNumberI, int enrichmentDomainNumberJ)
 {
- 
     FloatMatrix A [ 3 ] [ 3 ], lambdaI [ 3 ], lambdaJ [ 3 ];
     FloatMatrix L(18,18);
     FloatMatrix B11, B22, B32, B43, B53, B;
@@ -528,8 +520,6 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &
     } else {
         xi0J = dei->enrichmentDomainXiCoords.at(enrichmentDomainNumberJ);
     }
-    
-
 
 
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     
@@ -583,19 +573,15 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &
     int ndofs = Shell7Base :: giveNumberOfDofs();
     answer.resize(ndofs, ndofs);
     answer.zero();
-    IntArray ordering = this->giveOrdering(All);
+    const IntArray &ordering = this->giveOrdering(All);
     answer.assemble(tempAnswer, ordering, ordering);
 
 }
 
 
-
-
-
-
-
 void
-Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep) {
+Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
+{
     // Num refers in this case to  numerical integration in both in-plane and through the thickness.
     // For analytically integrated throught he thickness, see computeMassMatrix
 
@@ -703,9 +689,9 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep) {
         answer.resize(ndofs, ndofs);
         answer.zero();
 
-        IntArray ordering_phibar = giveOrdering(Midplane);
-        IntArray ordering_m = giveOrdering(Director);
-        IntArray ordering_gam = giveOrdering(InhomStrain);
+        const IntArray &ordering_phibar = this->giveOrdering(Midplane);
+        const IntArray &ordering_m = this->giveOrdering(Director);
+        const IntArray &ordering_gam = this->giveOrdering(InhomStrain);
         answer.assemble(M11, ordering_phibar, ordering_phibar);
         answer.assemble(M12, ordering_phibar, ordering_m);
         answer.assemble(M13, ordering_phibar, ordering_gam);
@@ -726,15 +712,9 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep) {
 }
 
 
-
-
-
-
-
-
-
 IntArray
-Shell7BaseXFEM :: giveFieldDofId(SolutionField fieldType) const {
+Shell7BaseXFEM :: giveFieldDofId(SolutionField fieldType) const
+{
     if ( fieldType == Midplane ) {
         return this->dofId_Midplane;
     } else if ( fieldType == Director  )   {
@@ -746,12 +726,10 @@ Shell7BaseXFEM :: giveFieldDofId(SolutionField fieldType) const {
         Shell7Base::giveDofManDofIDMask(0, EID_MomentumBalance, dofId);
         return dofId;
     } else {
-        _error("giveOrdering: unknown fieldType");
+        _error("giveFieldDofId: unknown fieldType");
         return 0;
     }
 }
-
-
 
 
 
@@ -763,68 +741,69 @@ void
 Shell7BaseXFEM :: setupDelaminationXiCoordList()
 {
     if ( this->delaminationXiCoordList.size()==0 ) {
-    // Stores a paired list with the EnrichmentDomain# and the corresponding xi-coord of the delamination.
-    int numEI = xMan->giveNumberOfEnrichmentItems();
-    for ( int i = 1; i <= numEI; i++ ) {
-        Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) );
-        if ( dei ) {
-            int numED = dei->giveNumberOfEnrichmentDomains(); // numEnrDomains max possible number
-            int pos = 1;
-            for ( int j = 1; j <= numED; j++ ) {
-                if( dei->isElementEnrichedByEnrichmentDomain(this->element, j) ) { 
-                    std::pair<int, double> pid;
-                    pid.first  = pos;
-                    pid.second = dei->enrichmentDomainXiCoords.at(j); 
-                    this->delaminationXiCoordList.push_back(pid); 
-                    pos++;
+        // Stores a paired list with the EnrichmentDomain# and the corresponding xi-coord of the delamination.
+        int numEI = xMan->giveNumberOfEnrichmentItems();
+        for ( int i = 1; i <= numEI; i++ ) {
+            Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) );
+            if ( dei ) {
+                int numED = dei->giveNumberOfEnrichmentDomains(); // numEnrDomains max possible number
+                int pos = 1;
+                for ( int j = 1; j <= numED; j++ ) {
+                    if( dei->isElementEnrichedByEnrichmentDomain(this->element, j) ) { 
+                        std::pair<int, double> pid;
+                        pid.first  = pos;
+                        pid.second = dei->enrichmentDomainXiCoords.at(j); 
+                        this->delaminationXiCoordList.push_back(pid); 
+                        pos++;
+                    }
                 }
-            }
-        } 
-    }
+            } 
+        }
 
-    // Sort xi-coords in acending order.
-    this->delaminationXiCoordList.sort(sortFunc);
-    
+        // Sort xi-coords in acending order.
+        this->delaminationXiCoordList.sort(sortFunc);
+
     }
 }
 
 void 
 Shell7BaseXFEM :: setupGPDelaminationGroupList() 
-{   // Creates a list wich stores the gp# and the dGroup# for quick access later.
-  if ( this->gpDelaminationGroupList.size()==0 ) {
-    int numberOfLayers = this->layeredCS->giveNumberOfLayers();  
-    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        IntegrationRule *iRule = layerIntegrationRulesArray [ layer - 1 ];
+{
+    // Creates a list wich stores the gp# and the dGroup# for quick access later.
+    if ( this->gpDelaminationGroupList.size()==0 ) {
+        int numberOfLayers = this->layeredCS->giveNumberOfLayers();  
+        for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+            IntegrationRule *iRule = layerIntegrationRulesArray [ layer - 1 ];
 
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(i);
-            std::pair<int, int> pid;
-            pid.first  = gp->giveNumber();
-            pid.second = giveDelaminationGroupAt( gp->giveCoordinate(3));
-            this->gpDelaminationGroupList.push_back(pid); 
+            for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+                GaussPoint *gp = iRule->getIntegrationPoint(i);
+                std::pair<int, int> pid;
+                pid.first  = gp->giveNumber();
+                pid.second = giveDelaminationGroupAt( gp->giveCoordinate(3));
+                this->gpDelaminationGroupList.push_back(pid); 
+            }
         }
     }
-  }
 }
 
 
 int
 Shell7BaseXFEM :: giveDelaminationGroupAt(double xi) 
-{   
+{
     // Starts ordering from 0
     std::list< std::pair<int, double> >::const_iterator iter;
     iter = this->delaminationXiCoordList.begin();
 
     size_t nDelam = this->delaminationXiCoordList.size();
-    for ( int j = 1; j <= nDelam; j++ ) {
+    for ( int j = 1; j <= (int)nDelam; j++ ) {
         double xiDelam = (*iter).second;
-        if ( xi < xiDelam ) { //belong to the delamination group just below delamination #j. How to deal with poins that lie onthe boundary?
-            return j-1;            
+        if ( xi < xiDelam ) { //belong to the delamination group just below delamination #j. How to deal with points that lie on the boundary?
+            return j-1;
         }
         iter++;
     }
     return (int) nDelam;
-            
+
 }
 
 
@@ -841,7 +820,7 @@ Shell7BaseXFEM :: giveDelaminationGroupXiLimits(int &dGroup, double &xiTop, doub
         if ( dGroup == 0 ) {
             xiBottom = - this->layeredCS->giveMidSurfaceXiCoordFromBottom();
             xiTop = (*iter).second;
-        } else if (dGroup == nDelam) {
+        } else if (dGroup == (int)nDelam) {
             std::advance(iter, dGroup-1);
             xiBottom = (*iter).second;
             xiTop    = -this->layeredCS->giveMidSurfaceXiCoordFromBottom() + 2.0;
@@ -872,12 +851,9 @@ Shell7BaseXFEM :: giveDelaminationGroupMidXi(int dGroup)
 #endif
 
 
-
 void
 Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep)
 {
-
-
     double zeta = localCoords.at(3)*this->layeredCS->giveLayerThickness(layer)*0.5 + this->layeredCS->giveLayerMidZ(layer);
 
     // Continuous part
@@ -920,18 +896,4 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int 
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 } // end namespace oofem
-
