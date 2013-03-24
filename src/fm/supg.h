@@ -158,15 +158,7 @@ public:
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
-    virtual int giveNumberOfEquations(EquationID);
-    virtual int giveNumberOfPrescribedEquations(EquationID);
-    virtual int giveNumberOfDomainEquations(int, EquationID);
-    virtual int giveNumberOfPrescribedDomainEquations(int, EquationID);
-
     virtual int requiresUnknownsDictionaryUpdate() { return renumberFlag; }
-
-    virtual int giveNewEquationNumber(int domain, DofIDItem);
-    virtual int giveNewPrescribedEquationNumber(int domain, DofIDItem);
 
     virtual int forceEquationNumbering(int id);
     virtual int forceEquationNumbering() { return EngngModel :: forceEquationNumbering(); }

@@ -242,14 +242,13 @@ TimeStep *
 SUPG :: giveNextStep()
 {
     int istep = this->giveNumberOfFirstStep();
-    int i, nelem;
     double totalTime = 0;
     double dt = deltaT;
     StateCounterType counter = 1;
     delete previousStep;
 
     Domain *domain = this->giveDomain(1);
-    nelem = domain->giveNumberOfElements();
+    int nelem = domain->giveNumberOfElements();
 
     if ( currentStep == NULL ) {
         // first step -> generate initial step
@@ -269,7 +268,7 @@ SUPG :: giveNextStep()
     }
 
     // check for critical time step
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         dt = min( dt, static_cast< SUPGElement * >( domain->giveElement(i) )->computeCriticalTimeStep(previousStep) );
     }
 
@@ -295,12 +294,12 @@ SUPG :: giveNextStep()
 void
 SUPG :: solveYourselfAt(TimeStep *tStep)
 {
-    int i, nite = 0;
+    int nite = 0;
     int neq =  this->giveNumberOfEquations(EID_MomentumBalance_ConservationEquation);
     double _absErrResid, err, avn = 0.0, aivn = 0.0, rnorm;
     FloatArray *solutionVector = NULL, *prevSolutionVector = NULL;
     FloatArray rhs(neq);
-    int j,jj,ndofs, nnodes = this->giveDomain(1)->giveNumberOfDofManagers();
+    int jj,ndofs, nnodes = this->giveDomain(1)->giveNumberOfDofManagers();
     double val,rnorm_mb, rnorm_mc;
     DofManager* inode;
     Dof* jDof;
@@ -353,7 +352,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
 
     if ( !requiresUnknownsDictionaryUpdate() ) {
-        for ( i = 1; i <= neq; i++ ) {
+        for ( int i = 1; i <= neq; i++ ) {
             solutionVector->at(i) = prevSolutionVector->at(i);
         }
     }
@@ -473,7 +472,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         FloatArray __rhs(neq);
         double __absErr = 0., __relErr = 0.;
         __lhs->times(incrementalSolutionVector, __rhs);
-        for ( i = 1; i <= neq; i++ ) {
+        for ( int i = 1; i <= neq; i++ ) {
             if ( fabs( __rhs.at(i) - rhs.at(i) ) > __absErr ) {
                 __absErr = fabs( __rhs.at(i) - rhs.at(i) );
             }
@@ -548,10 +547,10 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
         // check convergence and repeat iteration if desired
         rnorm_mb = rnorm_mc = 0.0;
-        for ( i = 1; i <= nnodes; i++ ) {
+        for ( int i = 1; i <= nnodes; i++ ) {
             inode = this->giveDomain(1)->giveDofManager(i);
             ndofs = inode->giveNumberOfDofs();
-            for ( j = 1; j <= ndofs; j++ ) {
+            for ( int j = 1; j <= ndofs; j++ ) {
                 jDof  =  inode->giveDof(j);
                 type  =  jDof->giveDofID();
                 if ((jj = jDof->__giveEquationNumber())) {
@@ -570,7 +569,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         rnorm = rhs.computeNorm();
 
         _absErrResid = 0.0;
-        for ( i = 1; i <= neq; i++ ) {
+        for ( int i = 1; i <= neq; i++ ) {
             _absErrResid = max( _absErrResid, fabs( rhs.at(i) ) );
         }
 
@@ -648,21 +647,18 @@ SUPG :: updateYourself(TimeStep *stepN)
 void
 SUPG :: updateInternalState(TimeStep *stepN)
 {
-    int j, nnodes;
-    Domain *domain;
-
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        domain = this->giveDomain(idomain);
+        Domain *domain = this->giveDomain(idomain);
 
-        nnodes = domain->giveNumberOfDofManagers();
+        int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( j = 1; j <= nnodes; j++ ) {
+            for ( int j = 1; j <= nnodes; j++ ) {
                 this->updateDofUnknownsDictionary(domain->giveDofManager(j), stepN);
             }
         }
 
         int nelem = domain->giveNumberOfElements();
-        for ( j = 1; j <= nelem; j++ ) {
+        for ( int j = 1; j <= nelem; j++ ) {
             domain->giveElement(j)->updateInternalState(stepN);
         }
     }
@@ -673,12 +669,6 @@ int
 SUPG :: forceEquationNumbering(int id)
 {
     // Necessary to number DOFs in special order to guarantee that Skyline matrix factorization to work.
-
-    int i, j, k, innodes, nnodes, nelem, nbc, ndofs;
-    Element *elem;
-    DofManager *dman;
-    Dof *jDof;
-    DofIDItem type;
     Domain *domain = this->giveDomain(id);
     TimeStep *currStep = this->giveCurrentStep();
     IntArray loc;
@@ -686,46 +676,46 @@ SUPG :: forceEquationNumbering(int id)
     this->domainNeqs.at(id) = 0;
     this->domainPrescribedNeqs.at(id) = 0;
 
-    nnodes = domain->giveNumberOfDofManagers();
-    nelem  = domain->giveNumberOfElements();
-    nbc    = domain->giveNumberOfBoundaryConditions();
+    int nnodes = domain->giveNumberOfDofManagers();
+    int nelem  = domain->giveNumberOfElements();
+    int nbc    = domain->giveNumberOfBoundaryConditions();
 
     // First velocity.
-    for ( i = 1; i <= nnodes; i++ ) {
-        dman = domain->giveDofManager(i);
-        ndofs = dman->giveNumberOfDofs();
-        for ( j = 1; j <= ndofs; j++ ) {
-            jDof = dman->giveDof(j);
-            type = jDof->giveDofID();
+    for ( int i = 1; i <= nnodes; i++ ) {
+        DofManager *dman = domain->giveDofManager(i);
+        int ndofs = dman->giveNumberOfDofs();
+        for ( int j = 1; j <= ndofs; j++ ) {
+            Dof *jDof = dman->giveDof(j);
+            DofIDItem type = jDof->giveDofID();
             if ( (type == V_u) || (type == V_v) || (type == V_w) ) {
                 jDof->askNewEquationNumber(currStep);
             }
         }
     }
-    for ( i = 1; i <= nelem; ++i ) {
-        elem = domain->giveElement(i);
-        innodes = elem->giveNumberOfInternalDofManagers();
-        for ( k = 1; k <= innodes; k++ ) {
-            dman = elem->giveInternalDofManager(k);
-            ndofs = dman->giveNumberOfDofs();
-            for ( j = 1; j <= ndofs; j++ ) {
-                jDof = dman->giveDof(j);
-                type = jDof->giveDofID();
+    for ( int i = 1; i <= nelem; ++i ) {
+        Element *elem = domain->giveElement(i);
+        int innodes = elem->giveNumberOfInternalDofManagers();
+        for ( int k = 1; k <= innodes; k++ ) {
+            DofManager *dman = elem->giveInternalDofManager(k);
+            int ndofs = dman->giveNumberOfDofs();
+            for ( int j = 1; j <= ndofs; j++ ) {
+                Dof *jDof = dman->giveDof(j);
+                DofIDItem type = jDof->giveDofID();
                 if ( (type == V_u) || (type == V_v) || (type == V_w) ) {
                     jDof->askNewEquationNumber(currStep);
                 }
             }
         }
     }
-    for ( i = 1; i <= nbc; ++i ) {
+    for ( int i = 1; i <= nbc; ++i ) {
         GeneralBoundaryCondition *bc = domain->giveBc(i);
-        innodes = bc->giveNumberOfInternalDofManagers();
-        for ( k = 1; k <= innodes; k++ ) {
-            dman = bc->giveInternalDofManager(k);
-            ndofs = dman->giveNumberOfDofs();
-            for ( j = 1; j <= ndofs; j++ ) {
-                jDof = dman->giveDof(j);
-                type = jDof->giveDofID();
+        int innodes = bc->giveNumberOfInternalDofManagers();
+        for ( int k = 1; k <= innodes; k++ ) {
+            DofManager *dman = bc->giveInternalDofManager(k);
+            int ndofs = dman->giveNumberOfDofs();
+            for ( int j = 1; j <= ndofs; j++ ) {
+                Dof *jDof = dman->giveDof(j);
+                DofIDItem type = jDof->giveDofID();
                 if ( (type == V_u) || (type == V_v) || (type == V_w) ) {
                     jDof->askNewEquationNumber(currStep);
                 }
@@ -733,41 +723,41 @@ SUPG :: forceEquationNumbering(int id)
         }
     }
     // Then the rest
-    for ( i = 1; i <= nnodes; i++ ) {
-        dman = domain->giveDofManager(i);
-        ndofs = dman->giveNumberOfDofs();
-        for ( j = 1; j <= ndofs; j++ ) {
-            jDof = dman->giveDof(j);
-            type = jDof->giveDofID();
+    for ( int i = 1; i <= nnodes; i++ ) {
+        DofManager *dman = domain->giveDofManager(i);
+        int ndofs = dman->giveNumberOfDofs();
+        for ( int j = 1; j <= ndofs; j++ ) {
+            Dof *jDof = dman->giveDof(j);
+            DofIDItem type = jDof->giveDofID();
             if ( !( (type == V_u) || (type == V_v) || (type == V_w) ) ) {
                 jDof->askNewEquationNumber(currStep);
             }
         }
     }
-    for ( i = 1; i <= nelem; ++i ) {
-        elem = domain->giveElement(i);
-        innodes = elem->giveNumberOfInternalDofManagers();
-        for ( k = 1; k <= innodes; k++ ) {
-            dman = elem->giveInternalDofManager(k);
-            ndofs = dman->giveNumberOfDofs();
-            for ( j = 1; j <= ndofs; j++ ) {
-                jDof = dman->giveDof(j);
-                type = jDof->giveDofID();
+    for ( int i = 1; i <= nelem; ++i ) {
+        Element *elem = domain->giveElement(i);
+        int innodes = elem->giveNumberOfInternalDofManagers();
+        for ( int k = 1; k <= innodes; k++ ) {
+            DofManager *dman = elem->giveInternalDofManager(k);
+            int ndofs = dman->giveNumberOfDofs();
+            for ( int j = 1; j <= ndofs; j++ ) {
+                Dof *jDof = dman->giveDof(j);
+                DofIDItem type = jDof->giveDofID();
                 if ( !( type == V_u || type == V_v || type == V_w ) ) {
                     jDof->askNewEquationNumber(currStep);
                 }
             }
         }
     }
-    for ( i = 1; i <= nbc; ++i ) {
+    for ( int i = 1; i <= nbc; ++i ) {
         GeneralBoundaryCondition *bc = domain->giveBc(i);
-        innodes = bc->giveNumberOfInternalDofManagers();
-        for ( k = 1; k <= innodes; k++ ) {
-            dman = bc->giveInternalDofManager(k);
-            ndofs = dman->giveNumberOfDofs();
-            for ( j = 1; j <= ndofs; j++ ) {
-                jDof = dman->giveDof(j);
-                type = jDof->giveDofID();
+        int innodes = bc->giveNumberOfInternalDofManagers();
+        for ( int k = 1; k <= innodes; k++ ) {
+            DofManager *dman = bc->giveInternalDofManager(k);
+            int ndofs = dman->giveNumberOfDofs();
+            for ( int j = 1; j <= ndofs; j++ ) {
+                Dof *jDof = dman->giveDof(j);
+                DofIDItem type = jDof->giveDofID();
                 if ( !( type == V_u || type == V_v || type == V_w ) ) {
                     jDof->askNewEquationNumber(currStep);
                 }
@@ -821,7 +811,7 @@ SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         fclose(file);
         delete stream;
         stream = NULL;
-    }                                                        // ensure consistent records
+    } // ensure consistent records
 
     return CIO_OK;
 }
@@ -872,7 +862,7 @@ SUPG :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         fclose(file);
         delete stream;
         stream = NULL;
-    }                                                        // ensure consistent records
+    } // ensure consistent records
 
     return CIO_OK;
 }
@@ -970,11 +960,7 @@ SUPG :: applyIC(TimeStep *stepWhenIcApply)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Applying initial conditions\n");
 #endif
-    int nDofs, j, k, jj;
     int nman  = domain->giveNumberOfDofManagers();
-    DofManager *node;
-    Dof *iDof;
-    DofIDItem type;
 
     if ( !requiresUnknownsDictionaryUpdate() ) {
         VelocityPressureField->advanceSolution(stepWhenIcApply);
@@ -987,20 +973,20 @@ SUPG :: applyIC(TimeStep *stepWhenIcApply)
     accelerationVector.zero();
 
     if ( !requiresUnknownsDictionaryUpdate() ) {
-        for ( j = 1; j <= nman; j++ ) {
-            node = domain->giveDofManager(j);
-            nDofs = node->giveNumberOfDofs();
+        for ( int j = 1; j <= nman; j++ ) {
+            DofManager *node = domain->giveDofManager(j);
+            int nDofs = node->giveNumberOfDofs();
 
-            for ( k = 1; k <= nDofs; k++ ) {
+            for ( int k = 1; k <= nDofs; k++ ) {
                 // ask for initial values obtained from
                 // bc (boundary conditions) and ic (initial conditions)
-                iDof  =  node->giveDof(k);
+                Dof *iDof = node->giveDof(k);
                 if ( !iDof->isPrimaryDof() ) {
                     continue;
                 }
 
-                jj = iDof->__giveEquationNumber();
-                type = iDof->giveDofID();
+                int jj = iDof->__giveEquationNumber();
+                DofIDItem type = iDof->giveDofID();
                 if ( jj ) {
                     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
                         vp_vector->at(jj) = iDof->giveUnknown(EID_MomentumBalance, VM_Total, stepWhenIcApply);
@@ -1016,135 +1002,18 @@ SUPG :: applyIC(TimeStep *stepWhenIcApply)
     //vp_vector->times(1./this->giveVariableScale(VST_Velocity));
 
     // update element state according to given ic
-    int nelem = domain->giveNumberOfElements();
-    SUPGElement *element;
 
     //this->initElementsForNewStep (stepWhenIcApply);
     if ( materialInterface ) {
         this->updateElementsForNewInterfacePosition(stepWhenIcApply);
     }
 
-    for ( j = 1; j <= nelem; j++ ) {
-        element = static_cast< SUPGElement * >( domain->giveElement(j) );
+    int nelem = domain->giveNumberOfElements();
+    for ( int j = 1; j <= nelem; j++ ) {
+        SUPGElement *element = static_cast< SUPGElement * >( domain->giveElement(j) );
         element->updateInternalState(stepWhenIcApply);
         element->updateYourself(stepWhenIcApply);
     }
-}
-
-int
-SUPG :: giveNewEquationNumber(int domain, DofIDItem id)
-{
-    if ( ( id == V_u ) || ( id == V_v ) || ( id == V_w ) ) {
-        return ++domainNeqs.at(domain);
-    } else if ( id == P_f ) {
-        return ++domainNeqs.at(domain);
-    } else {
-        _error("giveNewEquationNumber:: Unknown DofIDItem");
-    }
-
-    return 0;
-}
-
-int
-SUPG :: giveNewPrescribedEquationNumber(int domain, DofIDItem id)
-{
-    if ( ( id == V_u ) || ( id == V_v ) || ( id == V_w ) ) {
-        return ++domainPrescribedNeqs.at(domain);
-    } else if ( id == P_f ) {
-        return ++domainPrescribedNeqs.at(domain);
-    } else {
-        _error("giveNewPrescribedEquationNumber:: Unknown DofIDItem");
-    }
-
-    return 0;
-}
-
-int
-SUPG :: giveNumberOfEquations(EquationID id)
-{
-    //
-    // returns number of equations of current problem
-    // this method is implemented here, because some method may add some
-    // conditions in to system and this may results into increased number of
-    // equations.
-    //
-    if ( !equationNumberingCompleted ) {
-        this->forceEquationNumbering();
-    }
-
-    if ( ( id == EID_MomentumBalance ) || ( id == EID_ConservationEquation ) || ( id == EID_MomentumBalance_ConservationEquation ) ) {
-        return numberOfEquations;
-    } else {
-        _error("giveNumberOfEquations: unknown equation id");
-    }
-
-    return 0;
-}
-
-int
-SUPG :: giveNumberOfPrescribedEquations(EquationID id)
-{
-    //
-    // returns number of equations of current problem
-    // this method is implemented here, because some method may add some
-    // conditions in to system and this may results into increased number of
-    // equations.
-    //
-    if ( !equationNumberingCompleted ) {
-        this->forceEquationNumbering();
-    }
-
-    if ( ( id == EID_MomentumBalance ) || ( id == EID_ConservationEquation ) || ( id == EID_MomentumBalance_ConservationEquation ) ) {
-        return numberOfPrescribedEquations;
-    } else {
-        _error("giveNumberOfPrescribedEquations: unknown equation id");
-    }
-
-    return 0;
-}
-
-int
-SUPG :: giveNumberOfDomainEquations(int d, EquationID id)
-{
-    //
-    // returns number of equations of current problem
-    // this method is implemented here, because some method may add some
-    // conditions in to system and this may results into increased number of
-    // equations.
-    //
-    if ( !equationNumberingCompleted ) {
-        this->forceEquationNumbering();
-    }
-
-    if ( ( id == EID_MomentumBalance ) || ( id == EID_ConservationEquation ) || ( id == EID_MomentumBalance_ConservationEquation ) ) {
-        return numberOfEquations;
-    } else {
-        _error("giveNumberOfDomainEquations: unknown equation id");
-    }
-
-    return 0;
-}
-
-int
-SUPG :: giveNumberOfPrescribedDomainEquations(int d, EquationID id)
-{
-    //
-    // returns number of equations of current problem
-    // this method is implemented here, because some method may add some
-    // conditions in to system and this may results into increased number of
-    // equations.
-    //
-    if ( !equationNumberingCompleted ) {
-        this->forceEquationNumbering();
-    }
-
-    if ( ( id == EID_MomentumBalance ) || ( id == EID_ConservationEquation ) || ( id == EID_MomentumBalance_ConservationEquation ) ) {
-        return numberOfPrescribedEquations;
-    } else {
-        _error("giveNumberOfPrescribedDomainEquations: unknown equation id");
-    }
-
-    return 0;
 }
 
 double
@@ -1328,23 +1197,19 @@ SUPG :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
 void
 SUPG :: updateDofUnknownsDictionary_predictor(TimeStep *tStep)
 {
-    int i, j, ndofs;
-    Dof *iDof;
-    DofManager *inode;
-    DofIDItem type;
-    double val, prev_val, accel;
     double deltaT = tStep->giveTimeIncrement();
     Domain *domain = this->giveDomain(1);
 
     int nnodes = domain->giveNumberOfDofManagers();
 
     if ( requiresUnknownsDictionaryUpdate() ) {
-        for ( j = 1; j <= nnodes; j++ ) {
-            inode = domain->giveDofManager(j);
-            ndofs = inode->giveNumberOfDofs();
-            for ( i = 1; i <= ndofs; i++ ) {
-                iDof = inode->giveDof(i);
-                type = iDof->giveDofID();
+        for ( int j = 1; j <= nnodes; j++ ) {
+            DofManager *inode = domain->giveDofManager(j);
+            int ndofs = inode->giveNumberOfDofs();
+            for ( int i = 1; i <= ndofs; i++ ) {
+                double val, prev_val, accel;
+                Dof *iDof = inode->giveDof(i);
+                DofIDItem type = iDof->giveDofID();
                 if ( !iDof->hasBc(tStep) ) {
                     prev_val = iDof->giveUnknown( EID_MomentumBalance_ConservationEquation, VM_Total, tStep->givePreviousStep() );
                     accel   = iDof->giveUnknown( EID_MomentumBalance_ConservationEquation, VM_Acceleration, tStep->givePreviousStep() );
@@ -1371,24 +1236,19 @@ SUPG :: updateDofUnknownsDictionary_predictor(TimeStep *tStep)
 void
 SUPG :: updateDofUnknownsDictionary_corrector(TimeStep *tStep)
 {
-    int i, j, ndofs;
-    Dof *iDof;
-    DofManager *inode;
-    DofIDItem type;
-    double val, prev_val;
     double deltaT = tStep->giveTimeIncrement();
     Domain *domain = this->giveDomain(1);
     int nnodes = domain->giveNumberOfDofManagers();
 
-
     if ( requiresUnknownsDictionaryUpdate() ) {
-        for ( j = 1; j <= nnodes; j++ ) {
-            inode = domain->giveDofManager(j);
-            ndofs = inode->giveNumberOfDofs();
-            for ( i = 1; i <= ndofs; i++ ) {
-                iDof = inode->giveDof(i);
-                type = iDof->giveDofID();
+        for ( int j = 1; j <= nnodes; j++ ) {
+            DofManager *inode = domain->giveDofManager(j);
+            int ndofs = inode->giveNumberOfDofs();
+            for ( int i = 1; i <= ndofs; i++ ) {
+                Dof *iDof = inode->giveDof(i);
+                DofIDItem type = iDof->giveDofID();
                 if ( !iDof->hasBc(tStep) ) {
+                    double val, prev_val;
                     prev_val = iDof->giveUnknown(EID_MomentumBalance_ConservationEquation, VM_Total, tStep);
                     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
                         val = prev_val +  deltaT *alpha *incrementalSolutionVector.at( iDof->__giveEquationNumber() );
@@ -1422,28 +1282,22 @@ SUPG :: giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *s
 void
 SUPG:: updateSolutionVectors_predictor(FloatArray& solutionVector, FloatArray& accelerationVector, TimeStep* tStep)
 {
-    int j, k, jj,ji, nDofs, ndofman;
     double deltaT = tStep->giveTimeIncrement();
-    DofManager *node, *dofman;
-    Dof *iDof;
-    DofIDItem type;
     Domain *domain = this->giveDomain(1);
     int nman =  this->giveDomain(1)->giveNumberOfDofManagers();
-    Element *elem;
 
+    for ( int j = 1; j <= nman; j++ ) {
+        DofManager *node = domain->giveDofManager(j);
+        int nDofs = node->giveNumberOfDofs();
 
-    for ( j = 1; j <= nman; j++ ) {
-        node = domain->giveDofManager(j);
-        nDofs = node->giveNumberOfDofs();
-
-        for ( k = 1; k <= nDofs; k++ ) {
-            iDof  =  node->giveDof(k);
+        for ( int k = 1; k <= nDofs; k++ ) {
+            Dof *iDof = node->giveDof(k);
             if ( !iDof->isPrimaryDof() ) {
                 continue;
             }
 
-            jj = iDof->__giveEquationNumber();
-            type = iDof->giveDofID();
+            int jj = iDof->__giveEquationNumber();
+            DofIDItem type = iDof->giveDofID();
 
             if ( jj ) {
                 if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT)*a
@@ -1453,20 +1307,20 @@ SUPG:: updateSolutionVectors_predictor(FloatArray& solutionVector, FloatArray& a
         }
     }
 
-    for (j=1; j<= domain->giveNumberOfElements(); j++) {
-        elem = domain->giveElement(j);
-        ndofman = elem->giveNumberOfInternalDofManagers();
-        for (ji=1; ji<=ndofman; ji++) {
-            dofman = elem->giveInternalDofManager(ji);
-            nDofs = dofman->giveNumberOfDofs();
-            for ( k = 1; k <= nDofs; k++ ) {
-                iDof  =  dofman->giveDof(k);
+    for ( int j = 1; j <= domain->giveNumberOfElements(); j++ ) {
+        Element *elem = domain->giveElement(j);
+        int ndofman = elem->giveNumberOfInternalDofManagers();
+        for ( int ji = 1; ji <= ndofman; ji++ ) {
+            DofManager *dofman = elem->giveInternalDofManager(ji);
+            int nDofs = dofman->giveNumberOfDofs();
+            for ( int k = 1; k <= nDofs; k++ ) {
+                Dof *iDof = dofman->giveDof(k);
                 if ( !iDof->isPrimaryDof() ) {
                     continue;
                 }
 
-                jj = iDof->__giveEquationNumber();
-                type = iDof->giveDofID();
+                int jj = iDof->__giveEquationNumber();
+                DofIDItem type = iDof->giveDofID();
 
                 if ( jj ) {
                     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT*alpha)*da
@@ -1482,29 +1336,24 @@ SUPG:: updateSolutionVectors_predictor(FloatArray& solutionVector, FloatArray& a
 void
 SUPG:: updateSolutionVectors(FloatArray& solutionVector, FloatArray& accelerationVector, FloatArray& incrementalSolutionVector, TimeStep* tStep)
 {
-    int j, k, jj,ji, nDofs, ndofman;
     double deltaT = tStep->giveTimeIncrement();
-    DofManager *node, *dofman;
-    Dof *iDof;
-    DofIDItem type;
     Domain *domain = this->giveDomain(1);
-    int nman =  this->giveDomain(1)->giveNumberOfDofManagers();
-    Element *elem;
+    int nman = this->giveDomain(1)->giveNumberOfDofManagers();
 
     accelerationVector.add(incrementalSolutionVector);
 
-    for ( j = 1; j <= nman; j++ ) {
-        node = domain->giveDofManager(j);
-        nDofs = node->giveNumberOfDofs();
+    for ( int j = 1; j <= nman; j++ ) {
+        DofManager *node = domain->giveDofManager(j);
+        int nDofs = node->giveNumberOfDofs();
 
-        for ( k = 1; k <= nDofs; k++ ) {
-            iDof  =  node->giveDof(k);
+        for ( int k = 1; k <= nDofs; k++ ) {
+            Dof *iDof = node->giveDof(k);
             if ( !iDof->isPrimaryDof() ) {
                 continue;
             }
 
-            jj = iDof->__giveEquationNumber();
-            type = iDof->giveDofID();
+            int jj = iDof->__giveEquationNumber();
+            DofIDItem type = iDof->giveDofID();
 
             if ( jj ) {
                 if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT*alpha)*da
@@ -1517,20 +1366,20 @@ SUPG:: updateSolutionVectors(FloatArray& solutionVector, FloatArray& acceleratio
     } // end loop over dnam
 
 
-    for (j=1; j<= domain->giveNumberOfElements(); j++) {
-        elem = domain->giveElement(j);
-        ndofman = elem->giveNumberOfInternalDofManagers();
-        for (ji=1; ji<=ndofman; ji++) {
-            dofman = elem->giveInternalDofManager(ji);
-            nDofs = dofman->giveNumberOfDofs();
-            for ( k = 1; k <= nDofs; k++ ) {
-                iDof  =  dofman->giveDof(k);
+    for ( int j = 1; j <= domain->giveNumberOfElements(); j++ ) {
+        Element *elem = domain->giveElement(j);
+        int ndofman = elem->giveNumberOfInternalDofManagers();
+        for ( int ji = 1; ji <= ndofman; ji++ ) {
+            DofManager *dofman = elem->giveInternalDofManager(ji);
+            int nDofs = dofman->giveNumberOfDofs();
+            for ( int k = 1; k <= nDofs; k++ ) {
+                Dof *iDof = dofman->giveDof(k);
                 if ( !iDof->isPrimaryDof() ) {
                     continue;
                 }
 
-                jj = iDof->__giveEquationNumber();
-                type = iDof->giveDofID();
+                int jj = iDof->__giveEquationNumber();
+                DofIDItem type = iDof->giveDofID();
 
                 if ( jj ) {
                     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT*alpha)*da
