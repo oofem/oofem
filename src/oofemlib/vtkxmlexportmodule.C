@@ -1492,7 +1492,6 @@ VTKXMLExportModuleElementInterface :: exportCompositeElement(FILE *stream, VTKXM
     fprintf(stream, "<Cells>\n");
     // output the connectivity data
     fprintf(stream, " <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> ");
-    int pos = 0;
     
     for ( int cell = 0; cell < numCells; cell++ ) {
         for ( int i = 1; i <= cells.at(cell).giveSize(); i++ ) {
@@ -1540,15 +1539,14 @@ VTKXMLExportModuleElementInterface :: exportCompositeElement(FILE *stream, VTKXM
 
     //export cell data
     ///@todo: Only supports one at the moment
-    for ( int  i = 1; i <= internalVarsToExport.giveSize(); i++ ) {
-        InternalStateType type = ( InternalStateType ) internalVarsToExport.at(i);
+    //for ( int  i = 1; i <= internalVarsToExport.giveSize(); i++ ) {
+    //    InternalStateType type = ( InternalStateType ) internalVarsToExport.at(i);
         //this->exportCellVarAs( type, cellVars, stream, tStep);
-    }
+    //}
 
-fprintf(stream, "</PointData>\n");
+    fprintf(stream, "</PointData>\n");
     // end of piece record
     fprintf(stream, "</Piece>\n");
-    
 }
 
 void
@@ -1597,7 +1595,7 @@ VTKXMLExportModuleElementInterface :: exportCellVarAs(InternalStateType type, st
 
     fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\">\n", __InternalStateTypeToString(type), ncomponents );
 
-    for ( int cell = 0; cell < cellVars.size(); cell++ ) {
+    for ( int cell = 0; cell < (int)cellVars.size(); cell++ ) {
         for (int i = 1; i <= cellVars.at(cell).giveSize(); i++) {
 
             fprintf( stream, "%e ", cellVars.at(cell).at(i) );
@@ -1605,8 +1603,7 @@ VTKXMLExportModuleElementInterface :: exportCellVarAs(InternalStateType type, st
         
 
     }
-fprintf( stream, "\n" );
-    fprintf(stream, "</DataArray>\n");
+    fprintf(stream, "\n</DataArray>\n");
 
 }
 
