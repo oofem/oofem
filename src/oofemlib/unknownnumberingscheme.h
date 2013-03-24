@@ -52,7 +52,7 @@ public:
     /**
      * Initializes the receiver, if necessary.
      */
-    virtual void init() = 0;
+    virtual void init() { };
     /**
      * Returns true, if receiver is the default engngModel equation numbering scheme;
      * This is useful for some components (typically elements), that cache their code numbers
@@ -81,7 +81,6 @@ class EModelDefaultEquationNumbering : public UnknownNumberingScheme
 public:
     EModelDefaultEquationNumbering(void) : UnknownNumberingScheme() {}
 
-    virtual void init() {}
     virtual bool isDefault() const { return true; }
     virtual int giveDofEquationNumber(Dof *dof) const {
         return dof->__giveEquationNumber();
@@ -99,7 +98,6 @@ class EModelDefaultPrescribedEquationNumbering : public UnknownNumberingScheme
 public:
     EModelDefaultPrescribedEquationNumbering(void) : UnknownNumberingScheme() {}
 
-    virtual void init() {}
     virtual int giveDofEquationNumber(Dof *dof) const {
         return dof->__givePrescribedEquationNumber();
     }

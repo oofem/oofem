@@ -43,6 +43,8 @@
 #include "materialinterface.h"
 //</RESTRICTED_SECTION>
 
+#include "unknownnumberingscheme.h"
+
 ///@name Input fields for CBS
 //@{
 #define _IFT_CBS_deltat "deltat"
@@ -58,6 +60,49 @@
 //@}
 
 namespace oofem {
+
+/**
+ * Specialized numbering scheme for CBS algorithm, since it needs velocities separately.
+ */
+class VelocityEquationNumbering : public UnknownNumberingScheme
+{
+protected:
+    bool prescribed;
+
+public:
+    VelocityEquationNumbering(bool prescribed) : UnknownNumberingScheme(), prescribed(prescribed) {}
+
+    virtual bool isDefault() const { return !prescribed; }
+    virtual int giveDofEquationNumber(Dof *dof) const {
+        DofIDItem id = dof->giveDofID();
+        if ( id == V_u || id == V_v || id == V_w ) {
+            return prescribed ? dof->__givePrescribedEquationNumber() : dof->__giveEquationNumber();
+        }
+        return 0;
+    }
+};
+
+/**
+ * Specialized numbering scheme for CBS algorithm, since it needs pressures separately.
+ */
+class PressureEquationNumbering : public UnknownNumberingScheme
+{
+protected:
+    bool prescribed;
+
+public:
+    PressureEquationNumbering(bool prescribed) : UnknownNumberingScheme(), prescribed(prescribed) {}
+
+    virtual bool isDefault() const { return !prescribed; }
+    virtual int giveDofEquationNumber(Dof *dof) const {
+        DofIDItem id = dof->giveDofID();
+        if ( id == P_f ) {
+            return prescribed ? dof->__givePrescribedEquationNumber() : dof->__giveEquationNumber();
+        }
+        return 0;
+    }
+};
+
 /**
  * This class represents CBS algorithm for solving incompressible Navier-Stokes equations
  */
