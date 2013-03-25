@@ -1050,4 +1050,21 @@ void FloatArray :: beReducedVectorFormOfStrain(const FloatMatrix &aMatrix)
 }
 
 
+void FloatArray :: beColumnOf(const FloatMatrix &mat, int col)
+{
+#  ifdef DEBUG
+    if (  col > mat.giveNumberOfColumns() ) {
+        OOFEM_ERROR2("FloatArray :: beColumnOf: column index (%d) exceeds number of columns in input matrix (%d)", col, mat.giveNumberOfColumns() );
+    }
+#  endif
+
+    int nRows = mat.giveNumberOfRows();
+    this->resize(nRows);
+    for ( int i = 1; i <= nRows; i++ ) {
+        this->at(i) = mat.at(i,col);
+    }
+
+}
+
+
 } // end namespace oofem

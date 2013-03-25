@@ -392,6 +392,10 @@ public:
     void beReducedVectorFormOfStress(const FloatMatrix &aMatrix);
     void beReducedVectorFormOfStrain(const FloatMatrix &aMatrix);
 
+    /**
+     * Reciever will be set to a given column in a matrix 
+     */
+    void beColumnOf(const FloatMatrix &mat, int col);
 
 
 #ifdef __PARALLEL_MODE
