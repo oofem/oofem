@@ -140,30 +140,11 @@ CBS :: giveUnknownComponent(EquationID chc, ValueModeType mode,
     }
 #endif
 
-    if ( chc == EID_ConservationEquation ) { // pressures
+    if ( dof->giveDofID() == P_f ) { // pressures
         return PressureField.giveUnknownValue(dof, mode, tStep);
-    } else if ( chc == EID_MomentumBalance ) { // velocities
+    } else { // velocities
         return VelocityField.giveUnknownValue(dof, mode, tStep);
-    } else if ( chc == EID_AuxMomentumBalance ) { // aux velocities
-        switch ( mode ) {
-        case VM_Incremental:
-            if ( deltaAuxVelocity.isNotEmpty() ) {
-                return deltaAuxVelocity.at(dof->__giveEquationNumber());
-            } else {
-                return 0.;
-            }
-
-        case VM_Total:
-            _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
-        default:
-            _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
-        }
-    } else {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-        return 0.;
     }
-
-    return 0;
 }
 
 
@@ -350,9 +331,14 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     FloatArray *velocityVector = VelocityField.giveSolutionVector(tStep);
     FloatArray *prevVelocityVector = VelocityField.giveSolutionVector( tStep->givePreviousStep() );
     FloatArray *pressureVector = PressureField.giveSolutionVector(tStep);
+    FloatArray *prevPressureVector = PressureField.giveSolutionVector( tStep->givePreviousStep() );
+
+    velocityVector->resize(momneq);
+    pressureVector->resize(presneq);
 
     /* STEP 1 - calculates auxiliary velocities*/
     rhs.zero();
+    // Depends on old v:
     this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, IntermediateConvectionTerm, VM_Total,
                                       vnum, this->giveDomain(1) );
     this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, IntermediateDiffusionTerm, VM_Total,
@@ -361,6 +347,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
 
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
+        // Depends on prescribed v
         this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, PrescribedVelocityRhsVector, VM_Incremental,
                                           vnum, this->giveDomain(1) );
         nMethod->solve(mss, & rhs, & deltaAuxVelocity);
@@ -380,20 +367,25 @@ CBS :: solveYourselfAt(TimeStep *tStep)
         prescribedTractionPressure.at(i) /= nodalPrescribedTractionPressureConnectivity.at(i);
     }
 
+    // DensityRhsVelocityTerms needs this: Current velocity without correction;
+    *velocityVector = *prevVelocityVector;
+    velocityVector->add(this->theta [ 0 ], deltaAuxVelocity);
+
+    // Depends on old V + deltaAuxV * theta1:
     this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, DensityRhsVelocityTerms, VM_Total,
                                       pnum, this->giveDomain(1) );
+    // Depends on p:
     this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, DensityRhsPressureTerms, VM_Total,
                                       pnum, this->giveDomain(1) );
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
-    pressureVector->resize(presneq);
     nMethod->solve(lhs, & rhs, pressureVector);
     pressureVector->times(this->theta [ 1 ]);
-    pressureVector->add(*PressureField.giveSolutionVector( tStep->givePreviousStep() ) );
+    pressureVector->add(*prevPressureVector);
 
     /* STEP 3 - velocity correction step */
     rhs.resize(momneq);
     rhs.zero();
-    velocityVector->resize(momneq);
+    // Depends on p:
     this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, CorrectionRhs, VM_Total,
                                       vnum, this->giveDomain(1) );
     if ( consistentMassFlag ) {

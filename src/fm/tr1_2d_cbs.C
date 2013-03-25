@@ -80,7 +80,7 @@ TR1_2D_CBS :: ~TR1_2D_CBS()
 int
 TR1_2D_CBS :: computeNumberOfDofs(EquationID ut)
 {
-    if ( ut == EID_MomentumBalance || ut == EID_AuxMomentumBalance ) {
+    if ( ut == EID_MomentumBalance ) {
         return 6;
     } else if ( ut == EID_ConservationEquation ) {
         return 3;
@@ -96,7 +96,7 @@ TR1_2D_CBS :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) co
 {
     if ( ut == EID_MomentumBalance_ConservationEquation ) {
         answer.setValues(3, V_u, V_v, P_f);
-    } else if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
+    } else if ( ut == EID_MomentumBalance ) {
         answer.setValues(2, V_u, V_v);
     } else if ( ut == EID_ConservationEquation ) {
         answer.setValues(1, P_f);
@@ -392,27 +392,36 @@ void
 TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep)
 {
     // computes velocity terms on RHS for density equation
-
-    int uadr, vadr;
     double velu = 0.0, velv = 0.0; // dudx=0.0, dvdy=0.0;
-    double theta1 = domain->giveEngngModel()->giveUnknownComponent(Theta_1, VM_Unknown, tStep, domain, NULL);
     //double rho = this->giveMaterial()->give('d');
+    double theta1 = domain->giveEngngModel()->giveUnknownComponent(Theta_1, VM_Unknown, tStep, domain, NULL);
     double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
     FloatArray u(6), ustar(6);
 
     answer.resize(9);
     answer.zero();
 
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    // Should we really want to add this term?
+    // This will produce velocities that differs from their actual Dirichlet b.c.s;
+    // The patch05.in test has a Dirichlet V_v = 1.0 on node 2, but this will produce the value V_v 1.5 for that dof.
+    // It is added for now to mirror the old code below.
+    this->computeVectorOfPrescribed(EID_MomentumBalance, VM_Incremental, tStep, ustar);
+    u.add(theta1, ustar);
+
+    //this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, ustar);
+    //u.add((theta1-1, ustar);
+/*
+    printf("u_new = "); u.printYourself();
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), u);
     this->computeVectorOf(EID_AuxMomentumBalance, VM_Incremental, tStep, ustar);
-    ustar.times(theta1);
-    u.add(ustar);
+    u.add(theta1, ustar);
+    printf("u_corr = "); u.printYourself();
+*/
 
     for ( int i = 0; i < 3; i++ ) {
-        uadr = i * 2 + 1;
-        vadr = ( i + 1 ) * 2;
-        velu += u.at(uadr);
-        velv += u.at(vadr);
+        velu += u.at(i * 2 + 1);
+        velv += u.at(i * 2 + 2);
     }
 
     for ( int i = 0; i < 3; i++ ) {

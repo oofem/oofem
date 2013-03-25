@@ -44,7 +44,6 @@ namespace oofem {
 #define EquationID_DEF \
     ENUM_ITEM_WITH_VALUE(EID_Undefined, 0) \
     ENUM_ITEM_WITH_VALUE(EID_MomentumBalance, 1) \
-    ENUM_ITEM_WITH_VALUE(EID_AuxMomentumBalance, 2) \
     ENUM_ITEM_WITH_VALUE(EID_ConservationEquation, 3) \
     ENUM_ITEM_WITH_VALUE(EID_MomentumBalance_ConservationEquation, 4) \
 
@@ -57,7 +56,6 @@ enum EquationID {
 
 // enum EquationID {
 //     EID_MomentumBalance, ///< Momentum balance equation.
-//     EID_AuxMomentumBalance, ///< @todo{What is this?}
 //     EID_ConservationEquation, ///< Conservation equation.
 //     EID_MomentumBalance_ConservationEquation, ///< Coupled momentum balance and conservation equation.
 // };
