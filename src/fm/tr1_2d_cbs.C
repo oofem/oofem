@@ -94,7 +94,9 @@ TR1_2D_CBS :: computeNumberOfDofs(EquationID ut)
 void
 TR1_2D_CBS :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
+    if ( ut == EID_MomentumBalance_ConservationEquation ) {
+        answer.setValues(3, V_u, V_v, P_f);
+    } else if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
         answer.setValues(2, V_u, V_v);
     } else if ( ut == EID_ConservationEquation ) {
         answer.setValues(1, P_f);
@@ -152,7 +154,7 @@ TR1_2D_CBS :: computeGaussPoints()
 void
 TR1_2D_CBS :: computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *atTime)
 {
-    answer.resize(6, 6);
+    answer.resize(9, 9);
     answer.zero();
     //double rho = this->giveMaterial()->give('d');
     double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
@@ -160,29 +162,32 @@ TR1_2D_CBS :: computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *atTime)
     double ar6 = rho * area / 6.0;
     double ar12 = rho * area / 12.0;
 
-    answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = ar6;
-    answer.at(4, 4) = answer.at(5, 5) = answer.at(6, 6) = ar6;
+    answer.at(1, 1) = answer.at(2, 2) = ar6;
+    answer.at(4, 4) = answer.at(5, 5) = ar6;
+    answer.at(7, 7) = answer.at(8, 8) = ar6;
 
-    answer.at(1, 3) = answer.at(1, 5) = ar12;
-    answer.at(3, 1) = answer.at(3, 5) = ar12;
-    answer.at(5, 1) = answer.at(5, 3) = ar12;
+    answer.at(1, 4) = answer.at(1, 7) = ar12;
+    answer.at(4, 1) = answer.at(4, 7) = ar12;
+    answer.at(7, 1) = answer.at(7, 4) = ar12;
 
-    answer.at(2, 4) = answer.at(2, 6) = ar12;
-    answer.at(4, 2) = answer.at(4, 6) = ar12;
-    answer.at(6, 2) = answer.at(6, 4) = ar12;
+    answer.at(2, 5) = answer.at(2, 8) = ar12;
+    answer.at(5, 2) = answer.at(5, 8) = ar12;
+    answer.at(8, 2) = answer.at(8, 5) = ar12;
 }
 
 
 void
 TR1_2D_CBS :: computeDiagonalMassMtrx(FloatArray &answer, TimeStep *atTime)
 {
-    answer.resize(6);
+    answer.resize(9);
+    answer.zero();
 
     //double rho = this->giveMaterial()->give('d');
     double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
     double mm = rho * this->area / 3.0;
-    for ( int i = 1; i <= 6; i++ ) {
-        answer.at(i) = mm;
+    for ( int i = 0; i < 3; i++ ) {
+        answer.at(i * 3 + 1) = mm;
+        answer.at(i * 3 + 2) = mm;
     }
 }
 
@@ -240,14 +245,15 @@ TR1_2D_CBS :: computeConvectionTermsI(FloatArray &answer, TimeStep *stepN)
     adv22 = dt * 0.5 * ar12 * ( b [ 1 ] * dvdx * uu + b [ 1 ] * dvdy * uv + c [ 1 ] * dvdx * uv + c [ 1 ] * dvdy * vv );
     adv32 = dt * 0.5 * ar12 * ( b [ 2 ] * dvdx * uu + b [ 2 ] * dvdy * uv + c [ 2 ] * dvdx * uv + c [ 2 ] * dvdy * vv );
 
-    answer.resize(6);
+    answer.resize(9);
+    answer.zero();
 
     answer.at(1) = -adu11 - adu12;
-    answer.at(3) = -adu21 - adu22;
-    answer.at(5) = -adu31 - adu32;
     answer.at(2) = -adv11 - adv12;
-    answer.at(4) = -adv21 - adv22;
-    answer.at(6) = -adv31 - adv32;
+    answer.at(4) = -adu21 - adu22;
+    answer.at(5) = -adv21 - adv22;
+    answer.at(7) = -adu31 - adu32;
+    answer.at(8) = -adv31 - adv32;
 
 
     // body load (gravity effects)
@@ -260,10 +266,10 @@ TR1_2D_CBS :: computeConvectionTermsI(FloatArray &answer, TimeStep *stepN)
             if ( gVector.giveSize() ) {
                 answer.at(1) -= dt * 0.5 * ar3 * ( b [ 0 ] * usum + c [ 0 ] * vsum ) * gVector.at(1);
                 answer.at(2) -= dt * 0.5 * ar3 * ( b [ 0 ] * usum + c [ 0 ] * vsum ) * gVector.at(2);
-                answer.at(3) -= dt * 0.5 * ar3 * ( b [ 1 ] * usum + c [ 1 ] * vsum ) * gVector.at(1);
-                answer.at(4) -= dt * 0.5 * ar3 * ( b [ 1 ] * usum + c [ 1 ] * vsum ) * gVector.at(2);
-                answer.at(5) -= dt * 0.5 * ar3 * ( b [ 2 ] * usum + c [ 2 ] * vsum ) * gVector.at(1);
-                answer.at(6) -= dt * 0.5 * ar3 * ( b [ 2 ] * usum + c [ 2 ] * vsum ) * gVector.at(2);
+                answer.at(4) -= dt * 0.5 * ar3 * ( b [ 1 ] * usum + c [ 1 ] * vsum ) * gVector.at(1);
+                answer.at(5) -= dt * 0.5 * ar3 * ( b [ 1 ] * usum + c [ 1 ] * vsum ) * gVector.at(2);
+                answer.at(7) -= dt * 0.5 * ar3 * ( b [ 2 ] * usum + c [ 2 ] * vsum ) * gVector.at(1);
+                answer.at(8) -= dt * 0.5 * ar3 * ( b [ 2 ] * usum + c [ 2 ] * vsum ) * gVector.at(2);
             }
         }
     }
@@ -290,10 +296,11 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
     stress.times(1. / Re);
 
     // \int dNu/dxj \Tau_ij
-    answer.resize(6);
+    answer.resize(9);
+    answer.zero();
     for ( int i = 0; i < 3; i++ ) {
-        answer.at( ( i ) * 2 + 1 ) = -area * ( stress.at(1) * b [ i ] + stress.at(3) * c [ i ] );
-        answer.at( ( i + 1 ) * 2 ) = -area * ( stress.at(3) * b [ i ] + stress.at(2) * c [ i ] );
+        answer.at( i * 3 + 1 ) = -area * ( stress.at(1) * b [ i ] + stress.at(3) * c [ i ] );
+        answer.at( i * 3 + 2 ) = -area * ( stress.at(3) * b [ i ] + stress.at(2) * c [ i ] );
     }
 
     // add boundary termms
@@ -308,10 +315,10 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
             if ( gVector.giveSize() ) {
                 answer.at(1) += coeff * gVector.at(1);
                 answer.at(2) += coeff * gVector.at(2);
-                answer.at(3) += coeff * gVector.at(1);
-                answer.at(4) += coeff * gVector.at(2);
-                answer.at(5) += coeff * gVector.at(1);
-                answer.at(6) += coeff * gVector.at(2);
+                answer.at(4) += coeff * gVector.at(1);
+                answer.at(5) += coeff * gVector.at(2);
+                answer.at(7) += coeff * gVector.at(1);
+                answer.at(8) += coeff * gVector.at(2);
             }
         }
     }
@@ -350,11 +357,11 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
 
                     //printf ("TR1_2D_CBS :: computeDiffusionTermsI traction (%e,%e) detected\n", t.at(1), t.at(2));
 
-                    answer.at( ( n1 - 1 ) * 2 + 1 ) += 0.5 * l * ( t.at(1) * nx );
-                    answer.at( ( n1 ) * 2 )    += 0.5 * l * ( t.at(2) * ny );
+                    answer.at( ( n1 - 1 ) * 3 + 1 ) += 0.5 * l * ( t.at(1) * nx );
+                    answer.at( ( n1 - 1 ) * 3 + 2 ) += 0.5 * l * ( t.at(2) * ny );
 
-                    answer.at( ( n2 - 1 ) * 2 + 1 ) += 0.5 * l * ( t.at(1) * nx );
-                    answer.at( ( n2 ) * 2 )    += 0.5 * l * ( t.at(2) * ny );
+                    answer.at( ( n2 - 1 ) * 3 + 1 ) += 0.5 * l * ( t.at(1) * nx );
+                    answer.at( ( n2 - 1 ) * 3 + 2 ) += 0.5 * l * ( t.at(2) * ny );
                 }
             }
         } else if ( !( ( code & FMElement_PrescribedUnBC ) && ( code & FMElement_PrescribedUsBC ) ) ) {
@@ -370,11 +377,11 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
              * nx = ty/l; ny = -tx/l;
              *
              * // normal displacement precribed
-             * answer.at((n1-1)*2+1)+=l*0.5*(stress.at(1)*nx + stress.at(3)*ny);
-             * answer.at((n1)*2)    +=l*0.5*(stress.at(3)*nx + stress.at(2)*ny);
+             * answer.at((n1-1)*3+1)+=l*0.5*(stress.at(1)*nx + stress.at(3)*ny);
+             * answer.at((n1-1)*3+2)+=l*0.5*(stress.at(3)*nx + stress.at(2)*ny);
              *
-             * answer.at((n2-1)*2+1)+=l*0.5*(stress.at(1)*nx + stress.at(3)*ny);
-             * answer.at((n2)*2)    +=l*0.5*(stress.at(3)*nx + stress.at(2)*ny);
+             * answer.at((n2-1)*3+1)+=l*0.5*(stress.at(1)*nx + stress.at(3)*ny);
+             * answer.at((n2-1)*3+2)+=l*0.5*(stress.at(3)*nx + stress.at(2)*ny);
              * //}
              */
         }
@@ -393,7 +400,8 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
     double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
     FloatArray u(6), ustar(6);
 
-    answer.resize(3);
+    answer.resize(9);
+    answer.zero();
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), u);
     this->computeVectorOf(EID_AuxMomentumBalance, VM_Incremental, tStep, ustar);
@@ -408,7 +416,7 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
     }
 
     for ( int i = 0; i < 3; i++ ) {
-        answer.at(i + 1) = area * ( ( b [ i ] * velu + c [ i ] * velv ) ) / 3.0;
+        answer.at((i + 1) * 3) = area * ( ( b [ i ] * velu + c [ i ] * velv ) ) / 3.0;
     }
 
     /* account for normal prescribed velocity on boundary*/
@@ -440,8 +448,8 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
             un2 = nx * u.at( ( n2 - 1 ) * 2 + 1 ) + ny *u.at(n2 * 2);
             //if ((un1 != 0.) && (un2 != 0.)) {
             // normal displacement precribed
-            answer.at(n1) -= ( un1 * l / 3. + un2 * l / 6. );
-            answer.at(n2) -= ( un2 * l / 3. + un1 * l / 6. );
+            answer.at(n1 * 3) -= ( un1 * l / 3. + un2 * l / 6. );
+            answer.at(n2 * 3) -= ( un2 * l / 3. + un1 * l / 6. );
             //}
             //}
         } else if ( ( code & FMElement_PrescribedTractionBC ) ) {
@@ -467,7 +475,7 @@ TR1_2D_CBS :: computePrescribedTractionPressure(FloatArray &answer, TimeStep *tS
     stress = static_cast< FluidDynamicMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveDeviatoricStressVector();
     stress.times(1. / Re);
 
-    answer.resize(3);
+    answer.resize(9);
     answer.zero();
 
     // loop over sides
@@ -495,8 +503,8 @@ TR1_2D_CBS :: computePrescribedTractionPressure(FloatArray &answer, TimeStep *tS
             //nodecounter.at(n1)++;
             //nodecounter.at(n2)++;
             pcoeff = stress.at(1) * nx * nx + stress.at(2) * ny * ny + 2.0 * stress.at(3) * nx * ny;
-            answer.at(n1) += pcoeff;
-            answer.at(n2) += pcoeff;
+            answer.at(n1 * 3) += pcoeff;
+            answer.at(n2 * 3) += pcoeff;
 
             // if no traction bc applied but side marked as with traction load
             // then zero traction is assumed !!!
@@ -514,8 +522,8 @@ TR1_2D_CBS :: computePrescribedTractionPressure(FloatArray &answer, TimeStep *tS
                 if ( load ) {
                     load->computeValueAt(t, tStep, coords, VM_Total);
 
-                    answer.at(n1) -= t.at(1) * nx + t.at(2) * ny;
-                    answer.at(n2) -= t.at(1) * nx + t.at(2) * ny;
+                    answer.at(n1 * 3) -= t.at(1) * nx + t.at(2) * ny;
+                    answer.at(n2 * 3) -= t.at(1) * nx + t.at(2) * ny;
                 }
             }
         }
@@ -535,7 +543,7 @@ TR1_2D_CBS :: computeNumberOfNodalPrescribedTractionPressureContributions(FloatA
      * p = tau(i,j)*n(i)*n(j) - traction(i)*n(i)
      * this pressure is enforced as dirichlet bc in density/pressure equation
      */
-    answer.resize(3);
+    answer.resize(9);
     answer.zero();
 
     // loop over sides
@@ -546,8 +554,8 @@ TR1_2D_CBS :: computeNumberOfNodalPrescribedTractionPressureContributions(FloatA
         if ( ( code & FMElement_PrescribedTractionBC ) ) {
             n1 = boundarySides.at(j);
             n2 = ( n1 == 3 ? 1 : n1 + 1 );
-            answer.at(n1)++;
-            answer.at(n2)++;
+            answer.at(n1 * 3)++;
+            answer.at(n2 * 3)++;
         }
     }
 }
@@ -560,20 +568,20 @@ TR1_2D_CBS :: computeDensityRhsPressureTerms(FloatArray &answer, TimeStep *tStep
 {
     // computes pressure terms on RHS for density equation
     FloatArray p(3);
-    int i;
     double theta1 = domain->giveEngngModel()->giveUnknownComponent(Theta_1, VM_Unknown, tStep, domain, NULL);
 
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep->givePreviousStep(), p);
-    answer.resize(3);
+    answer.resize(9);
+    answer.zero();
 
     double dpdx = 0.0, dpdy = 0.0;
-    for ( i = 0; i < 3; i++ ) {
+    for ( int i = 0; i < 3; i++ ) {
         dpdx += b [ i ] * p.at(i + 1);
         dpdy += c [ i ] * p.at(i + 1);
     }
 
-    for ( i = 0; i < 3; i++ ) {
-        answer.at(i + 1) = -theta1 *tStep->giveTimeIncrement() * area * ( b [ i ] * dpdx + c [ i ] * dpdy );
+    for ( int i = 0; i < 3; i++ ) {
+        answer.at((i + 1) * 3) = -theta1 *tStep->giveTimeIncrement() * area * ( b [ i ] * dpdx + c [ i ] * dpdy );
     }
 }
 
@@ -583,15 +591,16 @@ TR1_2D_CBS :: computePressureLhs(FloatMatrix &answer, TimeStep *tStep)
 {
     // calculates the pressure LHS
 
-    answer.resize(3, 3);
+    answer.resize(9, 9);
+    answer.zero();
 
-    answer.at(1, 1) = area * ( b [ 0 ] * b [ 0 ] + c [ 0 ] * c [ 0 ] );
-    answer.at(2, 2) = area * ( b [ 1 ] * b [ 1 ] + c [ 1 ] * c [ 1 ] );
-    answer.at(3, 3) = area * ( b [ 2 ] * b [ 2 ] + c [ 2 ] * c [ 2 ] );
+    answer.at(3, 3) = area * ( b [ 0 ] * b [ 0 ] + c [ 0 ] * c [ 0 ] );
+    answer.at(6, 6) = area * ( b [ 1 ] * b [ 1 ] + c [ 1 ] * c [ 1 ] );
+    answer.at(9, 9) = area * ( b [ 2 ] * b [ 2 ] + c [ 2 ] * c [ 2 ] );
 
-    answer.at(1, 2) = answer.at(2, 1) = area * ( b [ 0 ] * b [ 1 ] + c [ 0 ] * c [ 1 ] );
-    answer.at(1, 3) = answer.at(3, 1) = area * ( b [ 0 ] * b [ 2 ] + c [ 0 ] * c [ 2 ] );
-    answer.at(2, 3) = answer.at(3, 2) = area * ( b [ 1 ] * b [ 2 ] + c [ 1 ] * c [ 2 ] );
+    answer.at(3, 6) = answer.at(6, 3) = area * ( b [ 0 ] * b [ 1 ] + c [ 0 ] * c [ 1 ] );
+    answer.at(3, 9) = answer.at(9, 3) = area * ( b [ 0 ] * b [ 2 ] + c [ 0 ] * c [ 2 ] );
+    answer.at(6, 9) = answer.at(9, 6) = area * ( b [ 1 ] * b [ 2 ] + c [ 1 ] * c [ 2 ] );
 }
 
 
@@ -600,7 +609,6 @@ TR1_2D_CBS :: computeCorrectionRhs(FloatArray &answer, TimeStep *tStep)
 {
     //Evaluates the RHS of velocity correction step
     FloatArray p(3), u(6);
-    int i;
     double pn1, ar3;
     double usum, vsum, coeff;
 
@@ -608,23 +616,24 @@ TR1_2D_CBS :: computeCorrectionRhs(FloatArray &answer, TimeStep *tStep)
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, p);
 
     double dpdx = 0.0, dpdy = 0.0;
-    for ( i = 0; i < 3; i++ ) {
+    for ( int i = 0; i < 3; i++ ) {
         pn1 = p.at(i + 1);
         dpdx += b [ i ] * pn1;
         dpdy += c [ i ] * pn1;
     }
 
-    answer.resize(6);
+    answer.resize(9);
+    answer.zero();
 
     ar3 = area / 3.0;
-    answer.at(1) = answer.at(3) = answer.at(5) = -ar3 * dpdx;
-    answer.at(2) = answer.at(4) = answer.at(6) = -ar3 * dpdy;
+    answer.at(1) = answer.at(4) = answer.at(7) = -ar3 * dpdx;
+    answer.at(2) = answer.at(5) = answer.at(8) = -ar3 * dpdy;
 
 
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep->givePreviousStep(), p);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), u);
     dpdx = 0.0, dpdy = 0.0;
-    for ( i = 0; i < 3; i++ ) {
+    for ( int i = 0; i < 3; i++ ) {
         pn1 = p.at(i + 1);
         dpdx += b [ i ] * pn1;
         dpdy += c [ i ] * pn1;
@@ -634,12 +643,12 @@ TR1_2D_CBS :: computeCorrectionRhs(FloatArray &answer, TimeStep *tStep)
     vsum = u.at(2) + u.at(4) + u.at(6);
     coeff = ar3 * tStep->giveTimeIncrement() / 2.0;
     answer.at(1) -= coeff * dpdx * ( b [ 0 ] * usum + c [ 0 ] * vsum );
-    answer.at(3) -= coeff * dpdx * ( b [ 1 ] * usum + c [ 1 ] * vsum );
-    answer.at(5) -= coeff * dpdx * ( b [ 2 ] * usum + c [ 2 ] * vsum );
+    answer.at(4) -= coeff * dpdx * ( b [ 1 ] * usum + c [ 1 ] * vsum );
+    answer.at(7) -= coeff * dpdx * ( b [ 2 ] * usum + c [ 2 ] * vsum );
 
     answer.at(2) -= coeff * dpdy * ( b [ 0 ] * usum + c [ 0 ] * vsum );
-    answer.at(4) -= coeff * dpdy * ( b [ 1 ] * usum + c [ 1 ] * vsum );
-    answer.at(6) -= coeff * dpdy * ( b [ 2 ] * usum + c [ 2 ] * vsum );
+    answer.at(5) -= coeff * dpdy * ( b [ 1 ] * usum + c [ 1 ] * vsum );
+    answer.at(8) -= coeff * dpdy * ( b [ 2 ] * usum + c [ 2 ] * vsum );
 }
 
 
@@ -706,8 +715,6 @@ TR1_2D_CBS :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeSt
 {
     /* one should call material driver instead */
     FloatArray u(6), eps(3);
-    answer.resize(3);
-
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 

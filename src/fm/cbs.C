@@ -265,10 +265,6 @@ CBS :: giveNextStep()
 void
 CBS :: solveYourselfAt(TimeStep *tStep)
 {
-    VelocityEquationNumbering vnum(false);
-    PressureEquationNumbering pnum(false);
-    PressureEquationNumbering pnumPrescribed(true);
-
     this->giveNumberOfEquations(EID_MomentumBalance);
     int momneq = this->numberOfMomentumEqs;
     int presneq = this->numberOfConservationEqs;
@@ -283,7 +279,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
 
         prescribedTractionPressure.resize(presneq_prescribed);
         nodalPrescribedTractionPressureConnectivity.resize(presneq_prescribed);
-        this->assembleVectorFromElements( nodalPrescribedTractionPressureConnectivity, tStep, EID_ConservationEquation,
+        this->assembleVectorFromElements( nodalPrescribedTractionPressureConnectivity, tStep, EID_MomentumBalance_ConservationEquation,
                                           NumberOfNodalPrescribedTractionPressureContributions, VM_Total,
                                           pnumPrescribed, this->giveDomain(1) );
 
@@ -295,7 +291,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
 
         lhs->buildInternalStructure( this, 1, EID_ConservationEquation, pnum );
 
-        this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, PressureLhs,
+        this->assemble( lhs, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, PressureLhs,
                         pnum, this->giveDomain(1) );
         lhs->times(deltaT * theta [ 0 ] * theta [ 1 ]);
 
@@ -305,13 +301,13 @@ CBS :: solveYourselfAt(TimeStep *tStep)
                 _error("solveYourselfAt: sparse matrix creation failed");
             }
 
-            mss->buildInternalStructure( this, 1, EID_MomentumBalance, vnum );
-            this->assemble( mss, stepWhenIcApply, EID_MomentumBalance, MassMatrix,
+            mss->buildInternalStructure( this, 1, EID_MomentumBalance_ConservationEquation, vnum );
+            this->assemble( mss, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, MassMatrix,
                             vnum, this->giveDomain(1) );
         } else {
             mm.resize(momneq);
             mm.zero();
-            this->assembleVectorFromElements( mm, tStep, EID_MomentumBalance, LumpedMassMatrix, VM_Total,
+            this->assembleVectorFromElements( mm, tStep, EID_MomentumBalance_ConservationEquation, LumpedMassMatrix, VM_Total,
                                               vnum, this->giveDomain(1) );
         }
 
@@ -327,17 +323,17 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     //<RESTRICTED_SECTION>
     else if ( materialInterface ) {
         lhs->zero();
-        this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, PressureLhs,
+        this->assemble( lhs, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, PressureLhs,
                         pnum, this->giveDomain(1) );
         lhs->times(deltaT * theta [ 0 ] * theta [ 1 ]);
 
         if ( consistentMassFlag ) {
             mss->zero();
-            this->assemble( mss, stepWhenIcApply, EID_MomentumBalance, MassMatrix,
+            this->assemble( mss, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, MassMatrix,
                             vnum, this->giveDomain(1) );
         } else {
             mm.zero();
-            this->assembleVectorFromElements( mm, tStep, EID_MomentumBalance, LumpedMassMatrix, VM_Total,
+            this->assembleVectorFromElements( mm, tStep, EID_MomentumBalance_ConservationEquation, LumpedMassMatrix, VM_Total,
                                               vnum, this->giveDomain(1) );
         }
     }
@@ -357,15 +353,15 @@ CBS :: solveYourselfAt(TimeStep *tStep)
 
     /* STEP 1 - calculates auxiliary velocities*/
     rhs.zero();
-    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, IntermediateConvectionTerm, VM_Total,
+    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, IntermediateConvectionTerm, VM_Total,
                                       vnum, this->giveDomain(1) );
-    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, IntermediateDiffusionTerm, VM_Total,
+    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, IntermediateDiffusionTerm, VM_Total,
                                       vnum, this->giveDomain(1) );
-    //this->assembleVectorFromElements(mm, tStep, EID_MomentumBalance, LumpedMassMatrix, VM_Total, this->giveDomain(1));
+    //this->assembleVectorFromElements(mm, tStep, EID_MomentumBalance_ConservationEquation, LumpedMassMatrix, VM_Total, this->giveDomain(1));
 
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
-        this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, PrescribedVelocityRhsVector, VM_Incremental,
+        this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, PrescribedVelocityRhsVector, VM_Incremental,
                                           vnum, this->giveDomain(1) );
         nMethod->solve(mss, & rhs, & deltaAuxVelocity);
     } else {
@@ -377,17 +373,16 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     /* STEP 2 - calculates pressure (implicit solver) */
     rhs.resize(presneq);
     rhs.zero();
-    this->assembleVectorFromElements( prescribedTractionPressure, tStep, EID_ConservationEquation,
+    this->assembleVectorFromElements( prescribedTractionPressure, tStep, EID_MomentumBalance_ConservationEquation,
                                       DensityPrescribedTractionPressure, VM_Total,
                                       pnumPrescribed, this->giveDomain(1) );
     for ( int i = 1; i <= presneq_prescribed; i++ ) {
         prescribedTractionPressure.at(i) /= nodalPrescribedTractionPressureConnectivity.at(i);
     }
 
-    //prescribedTractionPressure.printYourself();
-    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DensityRhsVelocityTerms, VM_Total,
+    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, DensityRhsVelocityTerms, VM_Total,
                                       pnum, this->giveDomain(1) );
-    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DensityRhsPressureTerms, VM_Total,
+    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, DensityRhsPressureTerms, VM_Total,
                                       pnum, this->giveDomain(1) );
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
     pressureVector->resize(presneq);
@@ -399,11 +394,11 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     rhs.resize(momneq);
     rhs.zero();
     velocityVector->resize(momneq);
-    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, CorrectionRhs, VM_Total,
+    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, CorrectionRhs, VM_Total,
                                       vnum, this->giveDomain(1) );
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
-        //this->assembleVectorFromElements(rhs, tStep, EID_MomentumBalance, PrescribedRhsVector, VM_Incremental, vnum, this->giveDomain(1));
+        //this->assembleVectorFromElements(rhs, tStep, EID_MomentumBalance_ConservationEquation, PrescribedRhsVector, VM_Incremental, vnum, this->giveDomain(1));
         nMethod->solve(mss, & rhs, velocityVector);
         velocityVector->add(deltaAuxVelocity);
         velocityVector->add(*prevVelocityVector);
@@ -696,9 +691,9 @@ CBS :: applyIC(TimeStep *stepWhenIcApply)
 
             if ( jj ) {
                 if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-                    velocityVector->at(jj) = iDof->giveUnknown(EID_MomentumBalance, VM_Total, stepWhenIcApply);
+                    velocityVector->at(jj) = iDof->giveUnknown(EID_MomentumBalance_ConservationEquation, VM_Total, stepWhenIcApply);
                 } else {
-                    pressureVector->at(jj) = iDof->giveUnknown(EID_ConservationEquation, VM_Total, stepWhenIcApply);
+                    pressureVector->at(jj) = iDof->giveUnknown(EID_MomentumBalance_ConservationEquation, VM_Total, stepWhenIcApply);
                 }
             }
         }

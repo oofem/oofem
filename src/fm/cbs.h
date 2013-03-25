@@ -138,6 +138,10 @@ protected:
     /// Consistent mass flag.
     int consistentMassFlag;
 
+    VelocityEquationNumbering vnum;
+    PressureEquationNumbering pnum;
+    PressureEquationNumbering pnumPrescribed;
+
     int numberOfMomentumEqs, numberOfConservationEqs;
     int numberOfPrescribedMomentumEqs, numberOfPrescribedConservationEqs;
 
@@ -156,8 +160,10 @@ protected:
     MaterialInterface *materialInterface;
     //</RESTRICTED_SECTION>
 public:
-    CBS(int i, EngngModel *_master = NULL) : EngngModel(i, _master), PressureField(this, 1, FT_Pressure, EID_ConservationEquation, 1),
-        VelocityField(this, 1, FT_Velocity, EID_MomentumBalance, 1) {
+    CBS(int i, EngngModel *_master = NULL) : EngngModel(i, _master),
+            PressureField(this, 1, FT_Pressure, EID_ConservationEquation, 1),
+            VelocityField(this, 1, FT_Velocity, EID_MomentumBalance, 1),
+            vnum(false), pnum(false), pnumPrescribed(true) {
         initFlag = 1;
         lhs = NULL;
         ndomains = 1;
