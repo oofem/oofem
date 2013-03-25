@@ -37,6 +37,10 @@
 #include "xfemelementinterface.h"
 #include "structuralcrosssection.h"
 #include "vtkxmlexportmodule.h"
+#ifdef __OOFEG
+#include "patchintegrationrule.h"
+#endif
+
 namespace oofem {
 
 Interface *
@@ -133,24 +137,22 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
                     }
                 }
                 counter += 2;
+            }
         }
-    }
 
-    // Create the total B-matrix by appending each contribution to B after one another.
-    answer.resize(3, counter);
-    answer.zero();
-    int column = 1;
-    for ( int i = 0; i < 4; i++ ) {
-        answer.setSubMatrix(Bc[i],1,column);
-        column += 2;
-        if ( Bd[i].isNotEmpty() ) {
-            answer.setSubMatrix(Bd[i],1,column);
+        // Create the total B-matrix by appending each contribution to B after one another.
+        answer.resize(3, counter);
+        answer.zero();
+        int column = 1;
+        for ( int i = 0; i < 4; i++ ) {
+            answer.setSubMatrix(Bc[i],1,column);
             column += 2;
+            if ( Bd[i].isNotEmpty() ) {
+                answer.setSubMatrix(Bd[i],1,column);
+                column += 2;
+            }
         }
-        
     }
-
-    }  
 }
 
 
@@ -286,10 +288,7 @@ PlaneStress2dXfem :: giveGeometryType() const
     } else {
         return EGT_quad_1; 
     }
-    
 }
-
-
 
 
 
@@ -300,7 +299,7 @@ void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &context)
         return;
     }
 
-    XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
+    XfemManager *xf = this->giveDomain()->giveXfemManager(1);
     if ( !xf->isElementEnriched(this) ) {
         PlaneStress2d :: drawRawGeometry(context);
     } else {
@@ -325,7 +324,7 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
+    XfemManager *xf = this->giveDomain()->giveXfemManager(1);
     if ( !xf->isElementEnriched(this) ) {
         PlaneStress2d :: drawScalar(context);
     } else {
