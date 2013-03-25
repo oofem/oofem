@@ -87,6 +87,7 @@ protected:
     IntegrationRule **specialIntegrationRulesArray;
     LayeredCrossSection *layeredCS;
     static FEI3dWedgeQuad interpolationForExport;
+    FEInterpolation3d *fei;
 
     enum SolutionField {
         Midplane,       ///< phi_bar 7 x_bar (3 dofs)
@@ -100,7 +101,7 @@ protected:
     virtual const IntArray &giveOrdering(SolutionField fieldType) const = 0;
 
     std :: vector< FloatArray >initialNodeDirectors;
-
+    
     FloatArray &giveInitialNodeDirector(int i) {
         return this->initialNodeDirectors [ i - 1 ];
     }
@@ -125,11 +126,11 @@ protected:
     // Base vectors and directors
     virtual void setupInitialNodeDirectors();
     void evalInitialDirectorAt(GaussPoint *gp, FloatArray &answer);
-    void evalInitialCovarBaseVectorsAt(GaussPoint *gp, FloatArray &G1, FloatArray &G2, FloatArray &G3);
-    void evalInitialContravarBaseVectorsAt(GaussPoint *gp, FloatArray &G1, FloatArray &G2, FloatArray &G3);
-    void giveDualBase(const FloatArray &G1, const FloatArray &G2, const FloatArray &G3, FloatArray &g1, FloatArray &g2, FloatArray &g3);
-    virtual void evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, FloatArray &solVec);
-    void evalContravarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, FloatArray &solVec);
+    void evalInitialCovarBaseVectorsAt(GaussPoint *gp, FloatMatrix &Gcov);
+    void evalInitialContravarBaseVectorsAt(GaussPoint *gp, FloatMatrix &Gcon);
+    void giveDualBase(FloatMatrix &base1, FloatMatrix &base2);
+    virtual void evalCovarBaseVectorsAt(GaussPoint *gp, FloatMatrix &gcon, FloatArray &solVec);
+    void evalContravarBaseVectorsAt(GaussPoint *gp, FloatMatrix &gcon,  FloatArray &solVec);
     void edgeEvalInitialDirectorAt(GaussPoint *gp, FloatArray &answer, const int iEdge);
     void edgeEvalInitialCovarBaseVectorsAt(GaussPoint *gp, const int iedge, FloatArray &G1, FloatArray &G3);
     void edgeEvalCovarBaseVectorsAt(GaussPoint *gp, const int iedge, FloatArray &g1, FloatArray &g3, TimeStep *tStep);
@@ -158,7 +159,7 @@ protected:
 
     // Tangent matrices
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    virtual void computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, MatResponseMode rMode, TimeStep *tStep);
+    //virtual void computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, MatResponseMode rMode, TimeStep *tStep);
     virtual void new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, FloatArray &solVecI, FloatArray &solVecJ, MatResponseMode rMode, TimeStep *tStep);
     void computeLinearizedStiffness(GaussPoint * gp,  Material * mat, TimeStep * tStep,
                                     FloatArray & S1g, FloatArray & S2g, FloatArray & S3g, FloatMatrix A [ 3 ] [ 3 ], FloatArray & solVec);

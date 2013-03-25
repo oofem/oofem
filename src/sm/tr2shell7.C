@@ -177,8 +177,12 @@ double
 Tr2Shell7 :: computeVolumeAround(GaussPoint *gp)
 {
     FloatArray G1, G2, G3, temp;
+    FloatMatrix Gcov;
     double detJ;
-    this->evalInitialCovarBaseVectorsAt(gp, G1, G2, G3);
+    this->evalInitialCovarBaseVectorsAt(gp, Gcov);
+    G1.beColumnOf(Gcov,1);
+    G2.beColumnOf(Gcov,2);
+    G3.beColumnOf(Gcov,3);
     temp.beVectorProductOf(G1, G2);
     detJ = temp.dotProduct(G3) * 0.5 * this->giveCrossSection()->give(CS_Thickness);
     return detJ * gp->giveWeight();
@@ -188,7 +192,11 @@ double
 Tr2Shell7 :: computeAreaAround(GaussPoint *gp)
 {
     FloatArray G1, G2, G3, temp;
-    this->evalInitialCovarBaseVectorsAt(gp, G1, G2, G3);
+    FloatMatrix Gcov;
+    this->evalInitialCovarBaseVectorsAt(gp, Gcov);
+    G1.beColumnOf(Gcov,1);
+    G2.beColumnOf(Gcov,2);
+    G3.beColumnOf(Gcov,3);
     temp.beVectorProductOf(G1, G2);
     double detJ = temp.computeNorm();
     return detJ * gp->giveWeight() * 0.5;
@@ -196,19 +204,23 @@ Tr2Shell7 :: computeAreaAround(GaussPoint *gp)
 
 
 
-
 double
 Tr2Shell7 :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
 {
-    FloatArray G1, G2, G3, temp;
+    //FloatArray G1, G2, G3, temp;
     double detJ;
-    this->evalInitialCovarBaseVectorsAt(gp, G1, G2, G3);
+    FloatMatrix Gcov;
+    this->evalInitialCovarBaseVectorsAt(gp, Gcov);
+    /*
+    G1.beColumnOf(Gcov,1);
+    G2.beColumnOf(Gcov,2);
+    G3.beColumnOf(Gcov,3);
     temp.beVectorProductOf(G1, G2);
-    LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection() );
-    detJ = temp.dotProduct(G3) * 0.5 * layeredCS->giveLayerThickness(layer);
+    //detJ = temp.dotProduct(G3) * 0.5 * this->layeredCS->giveLayerThickness(layer);
+    */
+    detJ = Gcov.giveDeterminant() * 0.5 * this->layeredCS->giveLayerThickness(layer);
     return detJ * gp->giveWeight();
 }
-
 
 
 void

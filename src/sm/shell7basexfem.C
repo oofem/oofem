@@ -143,8 +143,11 @@ void
 Shell7BaseXFEM :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, FloatArray &genEpsC)
 {
     // Continuous part
-    Shell7Base :: evalCovarBaseVectorsAt(gp, g1, g2, g3, genEpsC);
-    
+    FloatMatrix gcov; 
+    Shell7Base :: evalCovarBaseVectorsAt(gp, gcov, genEpsC);
+    g1.beColumnOf(gcov,1);
+    g2.beColumnOf(gcov,2);
+    g3.beColumnOf(gcov,3);
     // Discontinuous part - ///@todo bad implementation regarding enr. functions - should be changed
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
@@ -157,9 +160,12 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatAr
                 double H = dei->heaviside(gp->giveCoordinate(3), xi0);        
                 if ( H > 0.1 ) {
                     FloatArray g1d_temp, g2d_temp, g3d_temp, dGenEps;
+                    FloatMatrix gcovd; 
                     computeDiscGeneralizedStrainVector(dGenEps, gp, dei, j, tStep);
-                    Shell7Base :: evalCovarBaseVectorsAt(gp, g1d_temp, g2d_temp, g3d_temp, dGenEps);
-                    
+                    Shell7Base :: evalCovarBaseVectorsAt(gp, gcovd, dGenEps);
+                    g1d_temp.beColumnOf(gcovd,1);
+                    g2d_temp.beColumnOf(gcovd,2);
+                    g3d_temp.beColumnOf(gcovd,3);
                     g1.add(H,g1d_temp); g2.add(H,g2d_temp); g3.add(H,g3d_temp);
                 }
 
