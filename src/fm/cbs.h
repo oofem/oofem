@@ -68,9 +68,10 @@ class VelocityEquationNumbering : public UnknownNumberingScheme
 {
 protected:
     bool prescribed;
+    int numEqs;
 
 public:
-    VelocityEquationNumbering(bool prescribed) : UnknownNumberingScheme(), prescribed(prescribed) {}
+    VelocityEquationNumbering(bool prescribed) : UnknownNumberingScheme(), prescribed(prescribed), numEqs(0) {}
 
     virtual bool isDefault() const { return !prescribed; }
     virtual int giveDofEquationNumber(Dof *dof) const {
@@ -80,6 +81,9 @@ public:
         }
         return 0;
     }
+    virtual int giveRequiredNumberOfDomainEquation() const { return numEqs; }
+
+    int askNewEquationNumber() { return ++numEqs; }
 };
 
 /**
@@ -89,9 +93,10 @@ class PressureEquationNumbering : public UnknownNumberingScheme
 {
 protected:
     bool prescribed;
+    int numEqs;
 
 public:
-    PressureEquationNumbering(bool prescribed) : UnknownNumberingScheme(), prescribed(prescribed) {}
+    PressureEquationNumbering(bool prescribed) : UnknownNumberingScheme(), prescribed(prescribed), numEqs(0) {}
 
     virtual bool isDefault() const { return !prescribed; }
     virtual int giveDofEquationNumber(Dof *dof) const {
@@ -101,6 +106,9 @@ public:
         }
         return 0;
     }
+    virtual int giveRequiredNumberOfDomainEquation() const { return numEqs; }
+
+    int askNewEquationNumber() { return ++numEqs; }
 };
 
 /**
@@ -139,11 +147,9 @@ protected:
     int consistentMassFlag;
 
     VelocityEquationNumbering vnum;
+    VelocityEquationNumbering vnumPrescribed;
     PressureEquationNumbering pnum;
     PressureEquationNumbering pnumPrescribed;
-
-    int numberOfMomentumEqs, numberOfConservationEqs;
-    int numberOfPrescribedMomentumEqs, numberOfPrescribedConservationEqs;
 
     bool equationScalingFlag;
     /// Length scale.
@@ -163,12 +169,11 @@ public:
     CBS(int i, EngngModel *_master = NULL) : EngngModel(i, _master),
             PressureField(this, 1, FT_Pressure, EID_ConservationEquation, 1),
             VelocityField(this, 1, FT_Velocity, EID_MomentumBalance, 1),
-            vnum(false), pnum(false), pnumPrescribed(true) {
+            vnum(false), vnumPrescribed(true), pnum(false), pnumPrescribed(true) {
         initFlag = 1;
         lhs = NULL;
         ndomains = 1;
         nMethod = NULL;
-        numberOfMomentumEqs = numberOfConservationEqs = numberOfPrescribedMomentumEqs = numberOfPrescribedConservationEqs = 0;
         consistentMassFlag = 0;
         equationScalingFlag = false;
         lscale = uscale = dscale = 1.0;

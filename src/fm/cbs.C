@@ -202,7 +202,6 @@ TimeStep *
 CBS :: giveNextStep()
 {
     int istep = this->giveNumberOfFirstStep();
-    int nelem;
     double totalTime = 0;
     double dt = deltaT;
     StateCounterType counter = 1;
@@ -221,7 +220,7 @@ CBS :: giveNextStep()
     // FORCE EQUATION NUMBERING
     this->giveNumberOfEquations(EID_MomentumBalance);
     Domain *domain = this->giveDomain(1);
-    nelem = domain->giveNumberOfElements();
+    int nelem = domain->giveNumberOfElements();
     // check for critical time step
     for ( int i = 1; i <= nelem; i++ ) {
         dt = min( dt, static_cast< CBSElement * >( domain->giveElement(i) )->computeCriticalTimeStep(previousStep) );
@@ -247,13 +246,12 @@ void
 CBS :: solveYourselfAt(TimeStep *tStep)
 {
     this->giveNumberOfEquations(EID_MomentumBalance);
-    int momneq = this->numberOfMomentumEqs;
-    int presneq = this->numberOfConservationEqs;
-    int presneq_prescribed = this->numberOfPrescribedMomentumEqs;
+    int momneq = this->vnum.giveRequiredNumberOfDomainEquation();
+    int presneq = this->pnum.giveRequiredNumberOfDomainEquation();
+    int presneq_prescribed = this->pnumPrescribed.giveRequiredNumberOfDomainEquation();
     double deltaT = tStep->giveTimeIncrement();
 
     FloatArray rhs(momneq);
-
 
     if ( initFlag ) {
         deltaAuxVelocity.resize(momneq);
@@ -439,13 +437,10 @@ CBS :: updateYourself(TimeStep *stepN)
 void
 CBS :: updateInternalState(TimeStep *stepN)
 {
-    int nnodes;
-    Domain *domain;
-
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        domain = this->giveDomain(idomain);
+        Domain *domain = this->giveDomain(idomain);
 
-        nnodes = domain->giveNumberOfDofManagers();
+        int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
             for ( int j = 1; j <= nnodes; j++ ) {
                 this->updateDofUnknownsDictionary(domain->giveDofManager(j), stepN);
@@ -642,8 +637,8 @@ CBS :: applyIC(TimeStep *stepWhenIcApply)
 {
     Domain *domain = this->giveDomain(1);
     this->giveNumberOfEquations(EID_MomentumBalance);
-    int mbneq = this->numberOfMomentumEqs;
-    int pdneq = this->numberOfConservationEqs;
+    int mbneq = this->vnum.giveRequiredNumberOfDomainEquation();
+    int pdneq = this->pnum.giveRequiredNumberOfDomainEquation();
     FloatArray *velocityVector, *pressureVector;
 
 #ifdef VERBOSE
@@ -707,9 +702,9 @@ int
 CBS :: giveNewEquationNumber(int domain, DofIDItem id)
 {
     if ( ( id == V_u ) || ( id == V_v ) || ( id == V_w ) ) {
-        return ++numberOfMomentumEqs;
+        return this->vnum.askNewEquationNumber();
     } else if ( id == P_f ) {
-        return ++numberOfConservationEqs;
+        return this->pnum.askNewEquationNumber();
     } else {
         _error("giveNewEquationNumber:: Unknown DofIDItem");
     }
@@ -722,9 +717,9 @@ int
 CBS :: giveNewPrescribedEquationNumber(int domain, DofIDItem id)
 {
     if ( ( id == V_u ) || ( id == V_v ) || ( id == V_w ) ) {
-        return ++numberOfPrescribedMomentumEqs;
+        return this->vnumPrescribed.askNewEquationNumber();
     } else if ( id == P_f ) {
-        return ++numberOfPrescribedConservationEqs;
+        return this->pnumPrescribed.askNewEquationNumber();
     } else {
         _error("giveNewPrescribedEquationNumber:: Unknown DofIDItem");
     }
@@ -747,9 +742,9 @@ CBS :: giveNumberOfEquations(EquationID id)
     }
 
     if ( id == EID_MomentumBalance ) {
-        return numberOfMomentumEqs;
+        return this->vnum.giveRequiredNumberOfDomainEquation();
     } else if ( id == EID_ConservationEquation ) {
-        return numberOfConservationEqs;
+        return this->pnum.giveRequiredNumberOfDomainEquation();
     } else {
         _error("giveNumberOfEquations: unknown equation id");
     }
@@ -771,9 +766,9 @@ int CBS :: giveNumberOfPrescribedEquations(EquationID id)
     }
 
     if ( id == EID_MomentumBalance ) {
-        return numberOfPrescribedMomentumEqs;
+        return this->vnumPrescribed.giveRequiredNumberOfDomainEquation();
     } else if ( id == EID_ConservationEquation ) {
-        return numberOfPrescribedConservationEqs;
+        return this->pnumPrescribed.giveRequiredNumberOfDomainEquation();
     } else {
         _error("giveNumberOfPrescribedEquations: unknown equation id");
     }
@@ -784,49 +779,13 @@ int CBS :: giveNumberOfPrescribedEquations(EquationID id)
 
 int CBS :: giveNumberOfDomainEquations(int d, EquationID id)
 {
-    //
-    // returns number of equations of current problem
-    // this method is implemented here, because some method may add some
-    // conditions in to system and this may results into increased number of
-    // equations.
-    //
-    if ( !equationNumberingCompleted ) {
-        this->forceEquationNumbering();
-    }
-
-    if ( id == EID_MomentumBalance ) {
-        return numberOfMomentumEqs;
-    } else if ( id == EID_ConservationEquation ) {
-        return numberOfConservationEqs;
-    } else {
-        _error("giveNumberOfDomainEquations: unknown equation id");
-    }
-
-    return 0;
+    return this->giveNumberOfEquations(id);
 }
 
 
 int CBS :: giveNumberOfPrescribedDomainEquations(int d, EquationID id)
 {
-    //
-    // returns number of equations of current problem
-    // this method is implemented here, because some method may add some
-    // conditions in to system and this may results into increased number of
-    // equations.
-    //
-    if ( !equationNumberingCompleted ) {
-        this->forceEquationNumbering();
-    }
-
-    if ( id == EID_MomentumBalance ) {
-        return numberOfPrescribedMomentumEqs;
-    } else if ( id == EID_ConservationEquation ) {
-        return numberOfPrescribedConservationEqs;
-    } else {
-        _error("giveNumberOfPrescribedDomainEquations: unknown equation id");
-    }
-
-    return 0;
+    return this->giveNumberOfPrescribedEquations(id);
 }
 
 
