@@ -542,18 +542,15 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
  #endif
 
             if ( this->isElementComposite(elem) ) {
-#ifndef __VTK_MODULE
-                ///@todo Not sure how to deal with this.
                 // multi cell (composite) elements should support vtkxmlexportmoduleinterface
                 // and are exported as individual pieces (see VTKXMLExportModuleElementInterface)
                 VTKXMLExportModuleElementInterface *interface =
                     static_cast< VTKXMLExportModuleElementInterface * >( elem->giveInterface(VTKXMLExportModuleElementInterfaceType) );
                 if ( interface ) {
                     // passing this to access general piece related methods like exportPointDataHeader, etc.
-                    interface->_export(stream, this, primaryVarsToExport, internalVarsToExport, tStep);
+                    //interface->_export(stream, this, primaryVarsToExport, internalVarsToExport, tStep);
                     //interface->exportCompositeElement(stream, this, primaryVarsToExport, internalVarsToExport, tStep);
                 }
-#endif
             }
         } // end loop over multi-cell elements
 #endif
@@ -676,12 +673,7 @@ VTKXMLExportModule :: exportPointDataHeader(FILE *stream, TimeStep *tStep)
 
 //keyword "vars" in OOFEM input file
 void
-VTKXMLExportModule :: exportIntVars(
-#ifdef __VTK_MODULE
-    vtkSmartPointer<vtkUnstructuredGrid> &stream,
-#else
-    FILE *stream,
-#endif
+VTKXMLExportModule :: exportIntVars( VTKStream stream,
     IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int region, TimeStep *tStep)
 {
     int n = internalVarsToExport.giveSize();
@@ -777,12 +769,7 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
 void
 VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueType type,
                                      IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int ireg,
-#ifdef __VTK_MODULE
-                                     vtkSmartPointer<vtkUnstructuredGrid> &stream,
-#else
-                                     FILE *stream,
-#endif
-                                     TimeStep *tStep)
+                                     VTKStream stream, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     int inode;
@@ -972,12 +959,7 @@ VTKXMLExportModule :: givePrimVarSmoother()
 
 
 void
-VTKXMLExportModule :: exportPrimaryVars(
-#ifdef __VTK_MODULE
-    vtkSmartPointer<vtkUnstructuredGrid> &stream,
-#else
-    FILE *stream,
-#endif
+VTKXMLExportModule :: exportPrimaryVars(VTKStream stream,
     IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int region, TimeStep *tStep)
 {
     // should be performed over regions
@@ -993,13 +975,7 @@ VTKXMLExportModule :: exportPrimaryVars(
 
 void
 VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntArray &mapL2G,
-                                      int regionDofMans, int ireg,
-#ifdef __VTK_MODULE
-                                      vtkSmartPointer<vtkUnstructuredGrid> &stream,
-#else
-                                      FILE *stream,
-#endif
-                                      TimeStep *tStep)
+                                      int regionDofMans, int ireg, VTKStream stream, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     InternalStateValueType type = ISVT_UNDEFINED;
@@ -1180,13 +1156,7 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
 }
 
 
-void VTKXMLExportModule :: exportCellVars(
-#ifdef __VTK_MODULE
-    vtkSmartPointer<vtkUnstructuredGrid> &stream,
-#else
-    FILE *stream,
-#endif
-    int region, TimeStep *tStep)
+void VTKXMLExportModule :: exportCellVars(VTKStream stream, int region, TimeStep *tStep)
 {
     int i, n = cellVarsToExport.giveSize();
     InternalStateType type;
@@ -1214,13 +1184,7 @@ void VTKXMLExportModule :: exportCellVars(
 
 //keyword "cellvars" in OOFEM input file
 void
-VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region,
-#ifdef __VTK_MODULE
-    vtkSmartPointer<vtkUnstructuredGrid> &stream,
-#else
-    FILE *stream,
-#endif
-    TimeStep *tStep)
+VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, VTKStream stream, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     int ielem, nelem = d->giveNumberOfElements();
@@ -1452,8 +1416,13 @@ void VTKXMLExportModule::writeVTKCollection()
 
 // Export interface for composite elements
 void 
-VTKXMLExportModuleElementInterface :: exportCompositeElement(FILE *stream, VTKXMLExportModule *expModule, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep) 
+VTKXMLExportModuleElementInterface :: exportCompositeElement( VTKStream stream,
+    VTKXMLExportModule *expModule, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep) 
 {
+#ifdef __VTK_MODULE
+    vtkSmartPointer<vtkPoints> nodes = vtkSmartPointer<vtkPoints>::New();
+    vtkSmartPointer<vtkIdList> cellNodeArray = vtkSmartPointer<vtkIdList>::New();
+#endif
     // should ask element for nodes and cells
     std::vector<FloatArray> nodeCoords;
     std::vector<IntArray> cells; 
@@ -1464,29 +1433,53 @@ VTKXMLExportModuleElementInterface :: exportCompositeElement(FILE *stream, VTKXM
 
     int numCells      = cells.size(); 
     int regionDofMans = nodeCoords.size(); 
-    
-    fprintf(stream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", regionDofMans, numCells);
 
+#ifdef __VTK_MODULE
+    // Export nodes
+    for ( int inode = 1; inode <= regionDofMans; inode++ ) {
+        int dims = nodeCoords[inode].giveSize();
+        nodes->InsertNextPoint(nodeCoords[inode].at(1), dims >= 2 ? nodeCoords[inode].at(2) : 0.0, dims >= 3 ? nodeCoords[inode].at(3) : 0.0);
+    }
+    stream->SetPoints(nodes);
+
+    // Export cells
+    stream->Allocate(numCells);
+    for ( int cell = 0; cell < numCells; cell++ ) {
+        cellNodeArray->Reset();
+        cellNodeArray->SetNumberOfIds(cells.at(cell).giveSize());
+        for ( int i = 1; i <= cells.at(cell).giveSize(); i++ ) {
+            cellNodeArray->SetId(i-1, cells.at(cell).at(i));
+        }
+        stream->InsertNextCell(cellTypes(cell), cellNodeArray);
+    }
+
+    // Export primary variables
+    for ( int i = 1, n = primaryVarsToExport.giveSize(); i <= n; i++ ) {
+        UnknownType type = ( UnknownType ) primaryVarsToExport.at(i);
+        this->exportPrimVarAs(type, regionDofMans, 0, stream, primaryVars, tStep);
+    }
+    
+    //for ( int  i = 1; i <= internalVarsToExport.giveSize(); i++ ) {
+    //    InternalStateType type = ( InternalStateType ) internalVarsToExport.at(i);
+    //this->exportCellVarAs( type, cellVars, stream, tStep);
+    //}
+#else
+    fprintf(stream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", regionDofMans, numCells);
     // export nodes in region as vtk vertices
     fprintf(stream, "<Points>\n <DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\"> ");
-
-    
     // compute fictious node coords
     for ( int cell = 1; cell <= numCells; cell++ ) {
-        for ( int inode = 1; inode <= regionDofMans; inode++ ) {
-            
-            FloatArray &coords = nodeCoords [inode-1]; 
-            for ( int i = 1; i <= coords.giveSize(); i++ ) {
-                fprintf( stream, "%e ", coords.at(i) );
+        for ( int inode = 0; inode < regionDofMans; inode++ ) {
+            for ( int i = 1; i <= nodeCoords[inode].giveSize(); i++ ) {
+                fprintf( stream, "%e ", nodeCoords[inode].at(i) );
             }
-            if ( coords.giveSize() < 3 ) { // fix for 1d
-                fprintf( stream, "%e ", 0.0 );
+            for ( int i = nodeCoords[]inode].giveSize() + 1; i <= 3; i++ ) {
+                fprintf(stream, "%e ", 0.0);
             }
             
         }
     }
     fprintf(stream, "</DataArray>\n</Points>\n");
-    
 
     // output all cells of the piece
     fprintf(stream, "<Cells>\n");
@@ -1495,11 +1488,10 @@ VTKXMLExportModuleElementInterface :: exportCompositeElement(FILE *stream, VTKXM
     
     for ( int cell = 0; cell < numCells; cell++ ) {
         for ( int i = 1; i <= cells.at(cell).giveSize(); i++ ) {
-            fprintf(stream, "%d ", cells.at(cell).at(i) );
+            fprintf(stream, "%d ", cells.at(cell).at(i));
         }
         fprintf(stream, " ");
     }
-
 
     // Output the offsets (index of individual element data in connectivity array)
     fprintf(stream, "</DataArray>\n");
@@ -1520,91 +1512,116 @@ VTKXMLExportModuleElementInterface :: exportCompositeElement(FILE *stream, VTKXM
     }
     fprintf(stream, "</DataArray>\n");
     fprintf(stream, "</Cells>\n");
-
-
-
+    
     // Export primary and internal variables
     ///@todo: Only supports one at the moment
     expModule->exportPointDataHeader(stream, tStep);
-    for (int i = 1, n = primaryVarsToExport.giveSize(); i <= n; i++ ) {
+    for ( int i = 1, n = primaryVarsToExport.giveSize(); i <= n; i++ ) {
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(i);
         this->exportPrimVarAs(type, regionDofMans, 0, stream, primaryVars, tStep);
-
-
     }
-    //expModule->exportPrimaryVars(stream, mapG2L, mapL2G, regionDofMans, ireg, tStep);
-    //expModule->exportIntVars(stream, mapG2L, mapL2G, regionDofMans, ireg, tStep);
     
-
-
     //export cell data
     ///@todo: Only supports one at the moment
     //for ( int  i = 1; i <= internalVarsToExport.giveSize(); i++ ) {
     //    InternalStateType type = ( InternalStateType ) internalVarsToExport.at(i);
         //this->exportCellVarAs( type, cellVars, stream, tStep);
     //}
-
     fprintf(stream, "</PointData>\n");
     // end of piece record
     fprintf(stream, "</Piece>\n");
+#endif
 }
 
 void
-VTKXMLExportModuleElementInterface :: exportPrimVarAs(UnknownType valID, int regionDofMans, int ireg, FILE *stream, std::vector<FloatArray> &primaryVars, TimeStep *tStep)
+VTKXMLExportModuleElementInterface :: exportPrimVarAs(UnknownType valID, int regionDofMans, int ireg, VTKStream stream,
+                                                      std::vector<FloatArray> &primaryVars, TimeStep *tStep)
 {
 
     InternalStateValueType type = ISVT_UNDEFINED;
 
-    if ( ( valID == DisplacementVector ) || ( valID == DirectorField ) ) {
+    if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) || ( valID == DirectorField ) ) {
         type = ISVT_VECTOR;
+    } else if ( ( valID == FluxVector ) || ( valID == PressureVector ) || ( valID == Temperature ) ) {
+        type = ISVT_SCALAR;
     } else {
-        OOFEM_ERROR2( "Tr2Shell7::exportPrimVarAs: unsupported UnknownType %s", __UnknownTypeToString(valID) );
+        OOFEM_ERROR2( "VTKXMLExportModule::exportPrimVarAs: unsupported UnknownType %s", __UnknownTypeToString(valID) );
     }
 
+#ifdef __VTK_MODULE
+    vtkSmartPointer<vtkDoubleArray> primVarArray = vtkSmartPointer<vtkDoubleArray>::New();
 
+    if ( type == ISVT_SCALAR ) {
+        primVarArray->SetNumberOfComponents(1);
+    } else if ( type == ISVT_VECTOR ) {
+        primVarArray->SetNumberOfComponents(3);
+    } else {
+        fprintf( stderr, "VTKXMLExportModule::exportPrimVarAs: unsupported variable type %s\n", __UnknownTypeToString(valID) );
+    }
+    primVarArray->SetName(__UnknownTypeToString(valID));
+    primVarArray->SetNumberOfTuples(regionDofMans);
+
+
+    FloatArray val;
+    for ( int inode = 1; inode <= regionDofMans; inode++ ) {
+        val = primaryVars.at(inode-1);
+        if ( type == ISVT_VECTOR ) {
+            primVarArray->SetTuple3(inode-1, val.giveSize() >= 1 ? val.at(1) : 0.,
+                                             val.giveSize() >= 2 ? val.at(2) : 0.,
+                                             val.giveSize() >= 3 ? val.at(3) : 0. );
+        }
+    }
+#else
     if ( type == ISVT_VECTOR ) {
         fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"3\" format=\"ascii\"> ", __UnknownTypeToString(valID) );
     } else {
-        fprintf( stderr, "Tr2Shell7::exportPrimVarAs: unsupported variable type %s\n", __UnknownTypeToString(valID) );
+        fprintf( stderr, "VTKXMLExportModuleElementInterface::exportPrimVarAs: unsupported variable type %s\n", __UnknownTypeToString(valID) );
     }
 
     FloatArray val;
     for ( int inode = 1; inode <= regionDofMans; inode++ ) {
+        val = primaryVars.at(inode-1);
         if ( type == ISVT_VECTOR ) {
-            val = primaryVars.at(inode-1);
-            if (val.giveSize() == 3 ) {
-                fprintf( stream, "%e %e %e ", val.at(1), val.at(2), val.at(3) );
-            } else {
-                fprintf( stream, "%e %e %e ", val.at(1), val.at(2), 0.0 );
-            }
+            fprintf( stream, "%e %e %e ", val.giveSize() >= 1 ? val.at(1) : 0.,
+                                          val.giveSize() >= 2 ? val.at(2) : 0.,
+                                          val.giveSize() >= 3 ? val.at(3) : 0. );
         }
     } // end loop over nodes
-
     fprintf(stream, "</DataArray>\n");
-
+#endif
 }
 
 
 
-
 void
-VTKXMLExportModuleElementInterface :: exportCellVarAs(InternalStateType type, std::vector<FloatArray> &cellVars, FILE *stream, TimeStep *tStep)
+VTKXMLExportModuleElementInterface :: exportCellVarAs(InternalStateType type, std::vector<FloatArray> &cellVars, 
+                                                      VTKStream stream, TimeStep *tStep)
 {
 
     int ncomponents = cellVars.at(0).giveSize();
-
-    fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\">\n", __InternalStateTypeToString(type), ncomponents );
+#if __VTK_MODULE
+    vtkSmartPointer<vtkDoubleArray> cellVarsArray = vtkSmartPointer<vtkDoubleArray>::New();
+    cellVarsArray->SetName(__InternalStateTypeToString(type));
+    
+    cellVarsArray->SetNumberOfComponents(ncomponents);
+    cellVarsArray->SetNumberOfTuples(cellVars.size());
 
     for ( int cell = 0; cell < (int)cellVars.size(); cell++ ) {
         for (int i = 1; i <= cellVars.at(cell).giveSize(); i++) {
+            cellVarsArray->SetComponent( cell, i-1, cellVars.at(cell).at(i) );
+        }
+    }
+#else
+    fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\">\n",
+            __InternalStateTypeToString(type), ncomponents );
 
+    for ( int cell = 0; cell < (int)cellVars.size(); cell++ ) {
+        for (int i = 1; i <= cellVars.at(cell).giveSize(); i++) {
             fprintf( stream, "%e ", cellVars.at(cell).at(i) );
         }
-        
-
     }
     fprintf(stream, "\n</DataArray>\n");
-
+#endif
 }
 
 
