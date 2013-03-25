@@ -1054,7 +1054,7 @@ void FloatArray :: beColumnOf(const FloatMatrix &mat, int col)
 {
 #  ifdef DEBUG
     if (  col > mat.giveNumberOfColumns() ) {
-        OOFEM_ERROR2("FloatArray :: beColumnOf: column index (%d) exceeds number of columns in input matrix (%d)", col, mat.giveNumberOfColumns() );
+        OOFEM_ERROR3("FloatArray :: beColumnOf: column index (%d) exceeds number of columns in input matrix (%d)", col, mat.giveNumberOfColumns() );
     }
 #  endif
 

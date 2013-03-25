@@ -135,6 +135,7 @@ protected:
     void edgeEvalInitialCovarBaseVectorsAt(GaussPoint *gp, const int iedge, FloatArray &G1, FloatArray &G3);
     void edgeEvalCovarBaseVectorsAt(GaussPoint *gp, const int iedge, FloatArray &g1, FloatArray &g3, TimeStep *tStep);
     virtual double giveGlobalZcoord(GaussPoint *gp);
+    double giveGlobalZcoordInLayer(double xi, int layer);
 
 
     // Stress and strain
