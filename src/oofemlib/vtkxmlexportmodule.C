@@ -548,7 +548,6 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
                     static_cast< VTKXMLExportModuleElementInterface * >( elem->giveInterface(VTKXMLExportModuleElementInterfaceType) );
                 if ( interface ) {
                     // passing this to access general piece related methods like exportPointDataHeader, etc.
-                    //interface->_export(stream, this, primaryVarsToExport, internalVarsToExport, tStep);
                     //interface->exportCompositeElement(stream, this, primaryVarsToExport, internalVarsToExport, tStep);
                 }
             }
@@ -1461,7 +1460,7 @@ VTKXMLExportModuleElementInterface :: exportCompositeElement( VTKStream stream,
     
     //for ( int  i = 1; i <= internalVarsToExport.giveSize(); i++ ) {
     //    InternalStateType type = ( InternalStateType ) internalVarsToExport.at(i);
-    //this->exportCellVarAs( type, cellVars, stream, tStep);
+    //    this->exportCellVarAs( type, cellVars, stream, tStep);
     //}
 #else
     fprintf(stream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", regionDofMans, numCells);
@@ -1525,7 +1524,7 @@ VTKXMLExportModuleElementInterface :: exportCompositeElement( VTKStream stream,
     ///@todo: Only supports one at the moment
     //for ( int  i = 1; i <= internalVarsToExport.giveSize(); i++ ) {
     //    InternalStateType type = ( InternalStateType ) internalVarsToExport.at(i);
-        //this->exportCellVarAs( type, cellVars, stream, tStep);
+    //    this->exportCellVarAs( type, cellVars, stream, tStep);
     //}
     fprintf(stream, "</PointData>\n");
     // end of piece record

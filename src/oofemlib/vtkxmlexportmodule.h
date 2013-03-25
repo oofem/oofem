@@ -117,10 +117,12 @@ public:
     virtual void initialize();
     virtual void terminate();
     virtual const char *giveClassName() const { return "VTKXMLExportModule"; }
+#ifndef __VTK_MODULE
     /**
      * Prints point data header.
      */
     void exportPointDataHeader(FILE *stream, TimeStep *tStep);
+#endif
 protected:
     /// Gives the full form of given symmetrically stored tensors, missing components are filled with zeros.
     void makeFullForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType type, const IntArray &redIndx);
@@ -219,12 +221,14 @@ class VTKXMLExportModuleElementInterface : public Interface
 public:
     VTKXMLExportModuleElementInterface() : Interface() {}
     virtual const char *giveClassName() const { return "VTKXMLExportModuleElementInterface"; }
-    virtual void _export(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep) {};
+    ///@todo Move this into vtkxml, see if it's possible to reuse functions as well
     virtual void exportCompositeElement(VTKStream stream,
         VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep);
+    ///@todo Make this pure virtual
     virtual void giveCompositeExportData(IntArray &primaryVarsToExport, IntArray &internalVarsToExport,
         std::vector<FloatArray> &nodeCoords, std::vector<IntArray> &cellNodes, IntArray &cellTypes, 
-        std::vector<FloatArray> &primaryVars, std::vector<FloatArray> &cellVars, TimeStep *tStep ){};
+        std::vector<FloatArray> &primaryVars, std::vector<FloatArray> &cellVars, TimeStep *tStep ) { };
+    ///@todo Move this into vtkxml, see if it's possible to reuse functions as well
     void exportPrimVarAs(UnknownType valID, int regionDofMans, int ireg, VTKStream stream, std::vector<FloatArray> &primaryVars, TimeStep *tStep);
     void exportCellVarAs(InternalStateType type, std::vector<FloatArray> &cellVars, VTKStream stream, TimeStep *tStep);
 };
