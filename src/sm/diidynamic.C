@@ -236,12 +236,13 @@ void DIIDynamic :: solveYourself()
     StructuralEngngModel :: solveYourself();
 }
 
-void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
+void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
+{
     // Determine the constants.
     this->determineConstants(tStep);
 
     Domain *domain = this->giveDomain(1);
-    int neq =  this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq =  this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 
     if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
         TimeStep *stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
@@ -455,7 +456,7 @@ DIIDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
 
 void DIIDynamic :: updateYourself(TimeStep *tStep)
 {
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 
     for ( int i = 1; i <= neq; i++ ) {
         previousIncrementOfDisplacement.at(i) = displacementVector.at(i) - previousDisplacementVector.at(i);
@@ -485,7 +486,7 @@ void
 DIIDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type, Domain *domain, TimeStep *tStep)
 {
     int nelem = domain->giveNumberOfElements();
-    int neq   = this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq   = this->giveNumberOfDomainEquations(domain->giveNumber(), EModelDefaultEquationNumbering());
     int i, j, k, jj, kk, n;
     FloatMatrix charMtrx;
     IntArray loc;
@@ -534,7 +535,7 @@ DIIDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type, Doma
 void
 DIIDynamic :: assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueModeType mode, TimeStep *tStep)
 {
-    _loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
+    _loadVector.resize( this->giveNumberOfDomainEquations(domain->giveNumber(), EModelDefaultEquationNumbering()) );
     _loadVector.zero();
 
     this->assembleVector( _loadVector, tStep, EID_MomentumBalance, ExternalForcesVector, mode,

@@ -201,7 +201,7 @@ void NlDEIDynamic :: solveYourself()
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
     // Force equation numbering before setting up comm maps.
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
     OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
 
@@ -222,7 +222,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     //
 
     Domain *domain = this->giveDomain(1);
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
     int nman  = domain->giveNumberOfDofManagers();
 
     DofManager *node;
@@ -431,7 +431,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
             pt += c * ( 1.0 - exp( dumpingCoef * ( tStep->giveTargetTime() - Tau ) ) ) / dumpingCoef / Tau;
         }
 
-        loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
+        loadVector.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
         for ( k = 1; k <= neq; k++ ) {
             loadVector.at(k) = pt * loadRefVector.at(k) - internalForces.at(k);
         }
@@ -529,7 +529,7 @@ void NlDEIDynamic :: updateYourself(TimeStep *stepN)
 void
 NlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *stepN)
 {
-    answer.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
+    answer.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     answer.zero();
 
     //
@@ -552,7 +552,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
 {
     Domain *domain = this->giveDomain(1);
     int nelem = domain->giveNumberOfElements();
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
     int i, j, jj, n;
     double maxOmi, maxOmEl;
     FloatMatrix charMtrx, charMtrx2;

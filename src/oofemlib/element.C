@@ -79,6 +79,37 @@ Element :: ~Element()
     }
 }
 
+#if 0
+void
+Element :: computeVectorOf(const IntArray &dofIDMask, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+{
+    int k, nDofs;
+    FloatMatrix G2L;
+    FloatArray vec;
+    answer.resize( dofIDMask.giveSize() * ( this->giveNumberOfDofManagers() + this->giveNumberOfInternalDofManagers() ) );
+
+    k = 0;
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
+        this->giveDofManager(i)->giveUnknownVector(vec, dofIDMask, u, stepN);
+        nDofs = vec.giveSize();
+        for ( int j = 1; j <= nDofs; j++ ) {
+            answer.at(++k) = vec.at(j);
+        }
+    }
+
+    for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
+        this->giveInternalDofManager(i)->giveUnknownVector(vec, dofIDMask, u, stepN);
+        nDofs = vec.giveSize();
+        for ( int j = 1; j <= nDofs; j++ ) {
+            answer.at(++k) = vec.at(j);
+        }
+    }
+
+    if (this->computeGtoLRotationMatrix(G2L)) {
+        answer.rotatedWith(G2L, 'n');
+    }
+}
+#endif
 
 void
 Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer)

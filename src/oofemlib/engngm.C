@@ -499,39 +499,7 @@ EngngModel :: instanciateDefaultMetaStep(InputRecord *ir)
 
 
 int
-EngngModel :: giveNumberOfEquations(EquationID)
-{
-    //
-    // returns number of equations of current problem
-    // this method is implemented here, because some method may add some
-    // conditions in to system and this may results into increased number of
-    // equations.
-    //
-    if ( equationNumberingCompleted ) {
-        return numberOfEquations;
-    }
-
-    return this->forceEquationNumbering();
-}
-
-int
-EngngModel :: giveNumberOfPrescribedEquations(EquationID)
-{
-    //
-    // returns number of equations of current problem
-    // this method is implemented here, because some method may add some
-    // conditions in to system and this may results into increased number of
-    // equations.
-    //
-    if ( !equationNumberingCompleted ) {
-        this->forceEquationNumbering();
-    }
-
-    return numberOfPrescribedEquations;
-}
-
-int
-EngngModel :: giveNumberOfDomainEquations(int id, EquationID)
+EngngModel :: giveNumberOfDomainEquations(int id, const UnknownNumberingScheme &num)
 {
     //
     // returns number of equations of current problem
@@ -543,26 +511,9 @@ EngngModel :: giveNumberOfDomainEquations(int id, EquationID)
         this->forceEquationNumbering();
     }
 
-    return domainNeqs.at(id);
+    return num.isDefault() ? domainNeqs.at(id) : domainPrescribedNeqs.at(id);
 }
 
-
-int
-EngngModel :: giveNumberOfPrescribedDomainEquations(int id, EquationID)
-{
-    //
-    // returns number of equations of current problem
-    // this method is implemented here, because some method may add some
-    // conditions in to system and this may results into increased number of
-    // equations.
-    //
-    if ( equationNumberingCompleted ) {
-        return domainPrescribedNeqs.at(id);
-    }
-
-    this->forceEquationNumbering();
-    return domainPrescribedNeqs.at(id);
-}
 
 int
 EngngModel :: forceEquationNumbering(int id)
@@ -654,7 +605,6 @@ EngngModel :: forceEquationNumbering()
     equationNumberingCompleted = 1;
 
     for ( int i = 1; i <= this->ndomains; i++ ) {
-        //this->numberOfPrescribedEquations+=giveNumberOfPrescribedDomainEquations(i);
         this->numberOfPrescribedEquations += domainPrescribedNeqs.at(i);
     }
 
@@ -1263,7 +1213,7 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Eq
     int nelems;
     EModelDefaultEquationNumbering dn;
 
-    answer.resize( this->giveNumberOfEquations(eid) );
+    answer.resize( this->giveNumberOfDomainEquations(domain->giveNumber(), EModelDefaultEquationNumbering()) );
     answer.zero();
 
     nelems = domain->giveNumberOfElements();

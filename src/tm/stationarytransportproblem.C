@@ -187,7 +187,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
         // allocate space for solution vector
         FloatArray *solutionVector = UnknownsField->giveSolutionVector(tStep);
-        solutionVector->resize( this->giveNumberOfEquations(EID_ConservationEquation) );
+        solutionVector->resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
         solutionVector->zero();
 
         conductivityMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
@@ -210,7 +210,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     //
     // assembling the element part of load vector
     //
-    rhsVector.resize( this->giveNumberOfEquations(EID_ConservationEquation) );
+    rhsVector.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     rhsVector.zero();
 
     this->assembleVectorFromElements( rhsVector, tStep, EID_ConservationEquation, ElementInternalSourceVector, VM_Total,

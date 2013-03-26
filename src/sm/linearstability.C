@@ -234,11 +234,11 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
         //
         // allocate space for displacement Vector
         //
-        displacementVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
+        displacementVector.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
         //
         // allocate space for load vector
         //
-        loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
+        loadVector.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     }
 
 #ifndef LIN_STAB_COMPATIBILITY_MODE
@@ -305,7 +305,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
     //
     // create resulting objects eigVec and eigVal
     //
-    eigVec.resize(this->giveNumberOfEquations(EID_MomentumBalance), numberOfRequiredEigenValues);
+    eigVec.resize(this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()), numberOfRequiredEigenValues);
     eigVal.resize(numberOfRequiredEigenValues);
     eigVec.zero();
     eigVal.zero();

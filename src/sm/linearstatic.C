@@ -193,7 +193,7 @@ void LinearStatic :: solveYourself()
     if (this->isParallel()) {
  #ifdef __VERBOSE_PARALLEL
         // force equation numbering before setting up comm maps
-        int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+        int neq = this->giveNumberOfDomainEquations(EID_MomentumBalance);
         OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
 
@@ -246,13 +246,13 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     //
     // allocate space for displacementVector
     //
-    displacementVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
+    displacementVector.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     displacementVector.zero();
 
     //
     // assembling the load vector
     //
-    loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
+    loadVector.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     loadVector.zero();
     this->assembleVector( loadVector, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
@@ -260,7 +260,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     //
     // internal forces (from Dirichlet b.c's, or thermal expansion, etc.)
     //
-    FloatArray internalForces( this->giveNumberOfEquations(EID_MomentumBalance) );
+    FloatArray internalForces( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     internalForces.zero();
     this->assembleVector( internalForces, tStep, EID_MomentumBalance, InternalForcesVector, VM_Total,
                           EModelDefaultEquationNumbering(), this->giveDomain(1) );

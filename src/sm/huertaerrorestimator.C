@@ -3123,7 +3123,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     patchError.resize(size);
 
     // map coarse solution
-    uCoarse.resize( refinedProblem->giveNumberOfDomainEquations(1, EID_MomentumBalance) );
+    uCoarse.resize( refinedProblem->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     uCoarse.zero();
     mapper.mapAndUpdate(uCoarse, VM_Total, EID_MomentumBalance, domain, refinedDomain, tStep);
 
@@ -3915,7 +3915,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     errorSolution.resize(size);
 
     // map coarse solution
-    uCoarse.resize( refinedProblem->giveNumberOfDomainEquations(1, EID_MomentumBalance) );
+    uCoarse.resize( refinedProblem->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     uCoarse.zero();
     mapper.mapAndUpdate(uCoarse, VM_Total, EID_MomentumBalance, domain, refinedDomain, tStep);
 

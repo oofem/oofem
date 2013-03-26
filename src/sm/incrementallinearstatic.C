@@ -194,7 +194,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 
     if (neq == 0) { // Allows for fully prescribed/empty problems.
         return;

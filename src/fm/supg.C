@@ -260,9 +260,6 @@ SUPG :: giveNextStep()
 
     previousStep = currentStep;
 
-    // FORCE EQUATION NUMBERING
-    this->giveNumberOfEquations(EID_MomentumBalance_ConservationEquation);
-
     if ( deltaTLTF ) {
         dt *= domain->giveLoadTimeFunction(deltaTLTF)->__at(istep);
     }
@@ -295,7 +292,7 @@ void
 SUPG :: solveYourselfAt(TimeStep *tStep)
 {
     int nite = 0;
-    int neq =  this->giveNumberOfEquations(EID_MomentumBalance_ConservationEquation);
+    int neq =  this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
     double _absErrResid, err, avn = 0.0, aivn = 0.0, rnorm;
     FloatArray *solutionVector = NULL, *prevSolutionVector = NULL;
     FloatArray rhs(neq);
@@ -954,7 +951,7 @@ void
 SUPG :: applyIC(TimeStep *stepWhenIcApply)
 {
     Domain *domain = this->giveDomain(1);
-    int neq =  this->giveNumberOfEquations(EID_MomentumBalance_ConservationEquation);
+    int neq =  this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
     FloatArray *vp_vector = NULL;
 
 #ifdef VERBOSE
@@ -1565,7 +1562,7 @@ SUPG :: initPetscContexts()
  * SUPG::__debug (TimeStep* atTime)
  * {
  * int i, in, id, nincr = 1000;
- * int neq =  this -> giveNumberOfEquations (EID_MomentumBalance_ConservationEquation);
+ * int neq =  this -> giveNumberOfDomainEquations (EID_MomentumBalance_ConservationEquation);
  * IntArray loc;
  * SUPGElement* element = (SUPGElement*) giveDomain(1)->giveElement(1);
  * FloatArray vincr(6), F(6), fi(6), fprev(6), fapprox(6), *solutionVector;

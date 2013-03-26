@@ -345,7 +345,7 @@ void NonLinearStatic :: solveYourself()
     if (this->isParallel()) {
  #ifdef __VERBOSE_PARALLEL
         // force equation numbering before setting up comm maps
-        int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+        int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
         OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
 
@@ -460,7 +460,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         //
         // first step  create space for stiffness Matrix
         //
-        int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+        int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
         internalForces.resize(neq);
         internalForces.zero();
 
@@ -506,7 +506,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     }
 
     if ( tStep->giveNumber() == 1 ) {
-        int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+        int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
         totalDisplacement.resize(neq);
         totalDisplacement.zero();
         incrementOfDisplacement.resize(neq);
@@ -890,9 +890,9 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
                                                            SparseNonLinearSystemNM :: referenceLoadInputModeType _refMode,
                                                            Domain *sourceDomain, EquationID ut, TimeStep *tStep)
 {
-    _incrementalLoadVector.resize( sourceDomain->giveEngngModel()->giveNumberOfEquations(EID_MomentumBalance) );
+    _incrementalLoadVector.resize( sourceDomain->giveEngngModel()->giveNumberOfDomainEquations(sourceDomain->giveNumber(), EModelDefaultEquationNumbering()) );
     _incrementalLoadVector.zero();
-    _incrementalLoadVectorOfPrescribed.resize( sourceDomain->giveEngngModel()->giveNumberOfPrescribedEquations(EID_MomentumBalance) );
+    _incrementalLoadVectorOfPrescribed.resize( sourceDomain->giveEngngModel()->giveNumberOfDomainEquations(sourceDomain->giveNumber(), EModelDefaultPrescribedEquationNumbering()) );
     _incrementalLoadVectorOfPrescribed.zero();
 
     if ( _refMode == SparseNonLinearSystemNM :: rlm_incremental ) {
@@ -1047,13 +1047,13 @@ NonLinearStatic :: unpackMigratingData(TimeStep *atTime)
     Dof *_dof;
 
     // resize target arrays
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
     totalDisplacement.resize(neq);
     incrementOfDisplacement.resize(neq);
     incrementalLoadVector.resize(neq);
     initialLoadVector.resize(neq);
-    initialLoadVectorOfPrescribed.resize( giveNumberOfPrescribedEquations(EID_MomentumBalance) );
-    incrementalLoadVectorOfPrescribed.resize( giveNumberOfPrescribedEquations(EID_MomentumBalance) );
+    initialLoadVectorOfPrescribed.resize( giveNumberOfDomainEquations(1, EModelDefaultPrescribedEquationNumbering()) );
+    incrementalLoadVectorOfPrescribed.resize( giveNumberOfDomainEquations(1, EModelDefaultPrescribedEquationNumbering()) );
 
     for ( idofman = 1; idofman <= ndofman; idofman++ ) {
         _dm = domain->giveDofManager(idofman);

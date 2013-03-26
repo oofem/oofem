@@ -175,7 +175,7 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
      */
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
-    int neq = eModel->giveNumberOfDomainEquations(di, ut);
+    int neq = eModel->giveNumberOfDomainEquations(di, s);
     int nelem = domain->giveNumberOfElements();
     int i, ii, j, jj, n, indx;
     Element *elem;

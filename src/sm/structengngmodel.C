@@ -85,7 +85,7 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
     //
     fprintf(outputStream, "\n\n\tR E A C T I O N S  O U T P U T:\n\t_______________________________\n\n\n");
 
-    numRestrDofs = this->giveNumberOfPrescribedDomainEquations(di, EID_MomentumBalance);
+    numRestrDofs = this->giveNumberOfDomainEquations(di, EModelDefaultPrescribedEquationNumbering());
     // compute reaction forces
     this->computeReaction(reactions, tStep, di);
     //
@@ -109,7 +109,7 @@ StructuralEngngModel :: computeReaction(FloatArray &answer, TimeStep *tStep, int
     FloatArray contribution;
     FloatArray EquivForces;
 
-    numRestrDofs = this->giveNumberOfPrescribedDomainEquations(di, EID_MomentumBalance);
+    numRestrDofs = this->giveNumberOfDomainEquations(di, EModelDefaultPrescribedEquationNumbering());
     answer.resize(numRestrDofs);
     answer.zero();
 
@@ -133,11 +133,11 @@ StructuralEngngModel :: computeReaction(FloatArray &answer, TimeStep *tStep, int
 void
 StructuralEngngModel :: computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di)
 {
-    int numRestrDofs = this->giveNumberOfPrescribedDomainEquations(di, EID_MomentumBalance);
+    int numRestrDofs = this->giveNumberOfDomainEquations(di, EModelDefaultPrescribedEquationNumbering());
     reactions.resize(numRestrDofs);
     reactions.zero();
 
-    reactions.resize( this->giveNumberOfPrescribedDomainEquations(di, EID_MomentumBalance) );
+    reactions.resize( this->giveNumberOfDomainEquations(di, EModelDefaultPrescribedEquationNumbering()) );
     reactions.zero();
     this->assembleVector( reactions, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
                           EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
@@ -160,7 +160,7 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
     }
 #endif
 
-    answer.resize( this->giveNumberOfDomainEquations(di, EID_MomentumBalance) );
+answer.resize( this->giveNumberOfDomainEquations(di, EModelDefaultEquationNumbering()) );
     answer.zero();
     this->assembleVector( answer, stepN, EID_MomentumBalance, InternalForcesVector, VM_Total,
                           EModelDefaultEquationNumbering(), domain, normFlag ? &this->internalForcesEBENorm : NULL );
@@ -242,7 +242,7 @@ StructuralEngngModel :: buildReactionTable(IntArray &restrDofMans, IntArray &res
 {
     // determine number of restrained dofs
     Domain *domain = this->giveDomain(di);
-    int numRestrDofs = this->giveNumberOfPrescribedDomainEquations(di, EID_MomentumBalance);
+    int numRestrDofs = this->giveNumberOfDomainEquations(di, EModelDefaultPrescribedEquationNumbering());
     int ndofMan = domain->giveNumberOfDofManagers();
     int indofs, rindex, count = 0;
     DofManager *inode;

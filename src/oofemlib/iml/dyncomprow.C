@@ -290,7 +290,7 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
      * return true;
      */
 
-    int neq = eModel->giveNumberOfDomainEquations(di, ut);
+    int neq = eModel->giveNumberOfDomainEquations(di, s);
 
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);

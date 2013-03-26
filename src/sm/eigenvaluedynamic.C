@@ -203,7 +203,7 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
         //
         // create resulting objects eigVec and eigVal
         //
-        eigVec.resize(this->giveNumberOfEquations(EID_MomentumBalance), numberOfRequiredEigenValues);
+        eigVec.resize(this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()), numberOfRequiredEigenValues);
         eigVec.zero();
         eigVal.resize(numberOfRequiredEigenValues);
         eigVal.zero();

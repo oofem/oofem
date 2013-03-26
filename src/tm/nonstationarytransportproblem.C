@@ -246,7 +246,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     //Right hand side
     FloatArray rhs;
 
-    int neq = this->giveNumberOfEquations(EID_ConservationEquation);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 #ifdef VERBOSE
     OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
@@ -302,7 +302,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
     //obtain the last Rhs vector from DoFs directly
     if ( !tStep->isTheFirstStep() && this->changingProblemSize ) {
-        UnknownsField->initialize(VM_RhsTotal, tStep, bcRhs);
+        UnknownsField->initialize(VM_RhsTotal, tStep, bcRhs, EModelDefaultEquationNumbering());
     }
 
     //prepare position in UnknownsField to store the results
@@ -641,7 +641,7 @@ void
 NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 {
     Domain *domain = this->giveDomain(1);
-    int neq =  this->giveNumberOfEquations(EID_ConservationEquation);
+    int neq =  this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
     FloatArray *solutionVector;
     double val;
 

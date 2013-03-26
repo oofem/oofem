@@ -88,7 +88,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
     // Right hand side
     FloatArray rhs;
     double solutionErr, incrementErr;
-    int neq =  this->giveNumberOfEquations(EID_ConservationEquation);
+    int neq =  this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 
 #ifdef VERBOSE
     OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
@@ -135,7 +135,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
             copyUnknownsInDictionary( EID_ConservationEquation, VM_Total, tStep, tStep->givePreviousStep() );
         }
 
-        UnknownsField->initialize(VM_Total, tStep->givePreviousStep(), * solutionVector);
+        UnknownsField->initialize(VM_Total, tStep->givePreviousStep(), * solutionVector, EModelDefaultEquationNumbering());
     } else {
         //copy previous solution vector to actual
         * solutionVector = * UnknownsField->giveSolutionVector( tStep->givePreviousStep() );

@@ -287,7 +287,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
 double 
 Delamination :: giveDelaminationZCoord(int n, Element *element) 
 {
-    AList<double> *xiCoordList;
+    //AList<double> *xiCoordList;
     int nDelam = this->giveNumberOfEnrichmentDomains(); // max possible number
     int pos = 1;
     for ( int i = 1; i <= nDelam; i++ ) {

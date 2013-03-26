@@ -130,8 +130,7 @@ CBS :: initializeFrom(InputRecord *ir)
 double
 CBS :: giveUnknownComponent(EquationID chc, ValueModeType mode,
                             TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displaacement, velocity of equation eq
-// This function translates this request to numerical method language
+// returns unknown quantity like displacement, velocity of dof
 {
 #if DEBUG
     int eq = dof->__giveEquationNumber();
@@ -151,8 +150,7 @@ CBS :: giveUnknownComponent(EquationID chc, ValueModeType mode,
 double
 CBS :: giveUnknownComponent(UnknownType chc, ValueModeType mode,
                             TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displaacement, velocity of equation eq
-// This function translates this request to numerical method language
+// returns unknown quantity
 {
     if ( chc == ReynoldsNumber ) {
         if ( equationScalingFlag ) {
@@ -217,8 +215,6 @@ CBS :: giveNextStep()
 
     previousStep = currentStep;
 
-    // FORCE EQUATION NUMBERING
-    this->giveNumberOfEquations(EID_MomentumBalance);
     Domain *domain = this->giveDomain(1);
     int nelem = domain->giveNumberOfElements();
     // check for critical time step
@@ -245,10 +241,9 @@ CBS :: giveNextStep()
 void
 CBS :: solveYourselfAt(TimeStep *tStep)
 {
-    this->giveNumberOfEquations(EID_MomentumBalance);
-    int momneq = this->vnum.giveRequiredNumberOfDomainEquation();
-    int presneq = this->pnum.giveRequiredNumberOfDomainEquation();
-    int presneq_prescribed = this->pnumPrescribed.giveRequiredNumberOfDomainEquation();
+    int momneq = this->giveNumberOfDomainEquations(1, vnum);
+    int presneq = this->giveNumberOfDomainEquations(1, pnum);
+    int presneq_prescribed = this->giveNumberOfDomainEquations(1, pnumPrescribed);
     double deltaT = tStep->giveTimeIncrement();
 
     FloatArray rhs(momneq);
@@ -636,9 +631,8 @@ void
 CBS :: applyIC(TimeStep *stepWhenIcApply)
 {
     Domain *domain = this->giveDomain(1);
-    this->giveNumberOfEquations(EID_MomentumBalance);
-    int mbneq = this->vnum.giveRequiredNumberOfDomainEquation();
-    int pdneq = this->pnum.giveRequiredNumberOfDomainEquation();
+    int mbneq = this->giveNumberOfDomainEquations(1, vnum);
+    int pdneq = this->giveNumberOfDomainEquations(1, pnum);
     FloatArray *velocityVector, *pressureVector;
 
 #ifdef VERBOSE
@@ -728,64 +722,10 @@ CBS :: giveNewPrescribedEquationNumber(int domain, DofIDItem id)
 }
 
 
-int
-CBS :: giveNumberOfEquations(EquationID id)
+int CBS :: giveNumberOfDomainEquations(int d, const UnknownNumberingScheme &num)
 {
-    //
-    // returns number of equations of current problem
-    // this method is implemented here, because some method may add some
-    // conditions in to system and this may results into increased number of
-    // equations.
-    //
-    if ( !equationNumberingCompleted ) {
-        this->forceEquationNumbering();
-    }
-
-    if ( id == EID_MomentumBalance ) {
-        return this->vnum.giveRequiredNumberOfDomainEquation();
-    } else if ( id == EID_ConservationEquation ) {
-        return this->pnum.giveRequiredNumberOfDomainEquation();
-    } else {
-        _error("giveNumberOfEquations: unknown equation id");
-    }
-
-    return 0;
-}
-
-
-int CBS :: giveNumberOfPrescribedEquations(EquationID id)
-{
-    //
-    // returns number of equations of current problem
-    // this method is implemented here, because some method may add some
-    // conditions in to system and this may results into increased number of
-    // equations.
-    //
-    if ( !equationNumberingCompleted ) {
-        this->forceEquationNumbering();
-    }
-
-    if ( id == EID_MomentumBalance ) {
-        return this->vnumPrescribed.giveRequiredNumberOfDomainEquation();
-    } else if ( id == EID_ConservationEquation ) {
-        return this->pnumPrescribed.giveRequiredNumberOfDomainEquation();
-    } else {
-        _error("giveNumberOfPrescribedEquations: unknown equation id");
-    }
-
-    return 0;
-}
-
-
-int CBS :: giveNumberOfDomainEquations(int d, EquationID id)
-{
-    return this->giveNumberOfEquations(id);
-}
-
-
-int CBS :: giveNumberOfPrescribedDomainEquations(int d, EquationID id)
-{
-    return this->giveNumberOfPrescribedEquations(id);
+    if ( !equationNumberingCompleted ) this->forceEquationNumbering();
+    return num.giveRequiredNumberOfDomainEquation();
 }
 
 

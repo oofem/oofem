@@ -53,7 +53,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode, E
                                        Domain *oldd, Domain *newd,  TimeStep *tStep)
 {
     int inode, nd_nnodes = newd->giveNumberOfDofManagers();
-    int nsize = newd->giveEngngModel()->giveNumberOfDomainEquations(newd->giveNumber(), ut);
+    int nsize = newd->giveEngngModel()->giveNumberOfDomainEquations(newd->giveNumber(), EModelDefaultEquationNumbering());
     FloatArray unknownValues;
     IntArray dofMask, locationArray;
     IntArray reglist;

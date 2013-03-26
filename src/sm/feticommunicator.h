@@ -84,7 +84,7 @@ public:
     /// Destructor
     virtual ~FETICommunicator();
 
-    int giveNumberOfEquations() { return numberOfEquations; }
+    int giveNumberOfDomainEquations() { return numberOfEquations; }
 
     void setUpCommunicationMaps(EngngModel *pm);
     /**

@@ -121,7 +121,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
         }
     }
 
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance_ConservationEquation);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 
     // Move solution space to current time step
     if ( !hasAdvanced ) {

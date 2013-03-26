@@ -65,9 +65,9 @@ PrimaryField :: ~PrimaryField()
 { }
 
 void
-PrimaryField :: initialize(ValueModeType mode, TimeStep *atTime, FloatArray &answer)
+PrimaryField :: initialize(ValueModeType mode, TimeStep *atTime, FloatArray &answer, const UnknownNumberingScheme &s)
 {
-    int neq =  emodel->giveNumberOfEquations(this->ut);
+    int neq =  emodel->giveNumberOfDomainEquations(domainIndx, s);
     answer.resize(neq);
     answer.zero();
 

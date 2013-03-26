@@ -239,7 +239,7 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
     FloatArray averagev;
 
     Domain *domain = this->giveDomain(1);
-    ndof = this->giveNumberOfEquations(EID_MomentumBalance_ConservationEquation);
+    ndof = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 
     // Build F matrix
     FloatMatrix F, Fe;

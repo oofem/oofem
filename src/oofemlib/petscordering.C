@@ -77,7 +77,7 @@ void
 PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, EquationType et)
 {
     Domain *d = emodel->giveDomain(di);
-    int i, j, k, p, ndofs, ndofman = d->giveNumberOfDofManagers();
+    int ndofs, ndofman = d->giveNumberOfDofManagers();
     int myrank = emodel->giveRank();
     DofManager *dman;
     // determine number of local eqs + number of those shared DOFs which are numbered by receiver
@@ -90,36 +90,36 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
 #endif
 
     l_neqs = 0;
-    for ( i = 1; i <= ndofman; i++ ) {
+    for ( int i = 1; i <= ndofman; i++ ) {
         dman = d->giveDofManager(i);
-        /*
-         *  if (dman->giveParallelMode() == DofManager_local) { // count all dofman eqs
-         *    ndofs = dman->giveNumberOfDofs ();
-         *    for (j=1; j<=ndofs; j++) {
-         *      if (dman->giveDof(j)->isPrimaryDof()) {
-         *        if (dman->giveDof(j)->giveEquationNumber()) l_neqs++;
-         *      }
-         *    }
-         *  } else if (dman->giveParallelMode() == DofManager_shared) {
-         *    // determine if problem is the lowest one sharing the dofman; if yes the receiver is responsible to
-         *    // deliver number
-         *    IntArray *plist = dman->givePartitionList();
-         *    int n = plist->giveSize();
-         *    int minrank = myrank;
-         *    for (j=1; j<=n; j++) minrank = min (minrank, plist->at(j));
-         *    if (minrank == myrank) { // count eqs
-         *      ndofs = dman->giveNumberOfDofs ();
-         *      for (j=1; j<=ndofs; j++) {
-         *        if (dman->giveDof(j)->isPrimaryDof()) {
-         *          if (dman->giveDof(j)->giveEquationNumber()) l_neqs++;
-         *        }
-         *      }
-         *    }
-         *  } // end shared dman
-         */
+#if 0
+           if (dman->giveParallelMode() == DofManager_local) { // count all dofman eqs
+             ndofs = dman->giveNumberOfDofs ();
+             for (j=1; j<=ndofs; j++) {
+               if (dman->giveDof(j)->isPrimaryDof()) {
+                 if (dman->giveDof(j)->giveEquationNumber()) l_neqs++;
+               }
+             }
+           } else if (dman->giveParallelMode() == DofManager_shared) {
+             // determine if problem is the lowest one sharing the dofman; if yes the receiver is responsible to
+             // deliver number
+             IntArray *plist = dman->givePartitionList();
+             int n = plist->giveSize();
+             int minrank = myrank;
+             for (j=1; j<=n; j++) minrank = min (minrank, plist->at(j));
+             if (minrank == myrank) { // count eqs
+               ndofs = dman->giveNumberOfDofs ();
+               for (j=1; j<=ndofs; j++) {
+                 if (dman->giveDof(j)->isPrimaryDof()) {
+                   if (dman->giveDof(j)->giveEquationNumber()) l_neqs++;
+                 }
+               }
+             }
+          } // end shared dman
+#endif
         if ( isLocal(dman) ) {
             ndofs = dman->giveNumberOfDofs();
-            for ( j = 1; j <= ndofs; j++ ) {
+            for ( int j = 1; j <= ndofs; j++ ) {
                 if ( dman->giveDof(j)->isPrimaryDof() ) {
                     if ( et == et_standard ) {
                         if ( dman->giveDof(j)->giveEquationNumber(dn) ) {
@@ -140,20 +140,21 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
     MPI_Allgather(& l_neqs, 1, MPI_INT, leqs, 1, MPI_INT, MPI_COMM_WORLD);
     // compute local offset
     int offset = 0;
-    for ( j = 0; j < myrank; j++ ) {
+    for ( int j = 0; j < myrank; j++ ) {
         offset += leqs [ j ];
     }
 
     // count global number of eqs
-    for ( g_neqs = 0, j = 0; j < emodel->giveNumberOfProcesses(); j++ ) {
+    g_neqs = 0;
+    for ( int j = 0; j < emodel->giveNumberOfProcesses(); j++ ) {
         g_neqs += leqs [ j ];
     }
 
     // send numbered shared ones
     if ( et == et_standard ) {
-        locGlobMap.resize( emodel->giveNumberOfEquations(ut) );
+        locGlobMap.resize( emodel->giveNumberOfDomainEquations(di, dn) );
     } else {
-        locGlobMap.resize( emodel->giveNumberOfPrescribedEquations(ut) );
+        locGlobMap.resize( emodel->giveNumberOfDomainEquations(di, dpn) );
     }
 
     // determine shared dofs
@@ -163,19 +164,19 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
     IntArray nrecToSend(nproc);
 #endif
     const IntArray *plist;
-    for ( i = 1; i <= ndofman; i++ ) {
+    for ( int i = 1; i <= ndofman; i++ ) {
         // if (domain->giveDofManager(i)->giveParallelMode() == DofManager_shared) {
         if ( isShared( d->giveDofManager(i) ) ) {
             int n = d->giveDofManager(i)->giveNumberOfDofs();
             plist = d->giveDofManager(i)->givePartitionList();
             psize = plist->giveSize();
             int minrank = myrank;
-            for ( j = 1; j <= psize; j++ ) {
+            for ( int j = 1; j <= psize; j++ ) {
                 minrank = min( minrank, plist->at(j) );
             }
 
             if ( minrank == myrank ) { // count to send
-                for ( j = 1; j <= psize; j++ ) {
+                for ( int j = 1; j <= psize; j++ ) {
 #ifdef __VERBOSE_PARALLEL
                     nrecToSend( plist->at(j) )++;
 #endif
@@ -189,7 +190,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
     }
 
 #ifdef __VERBOSE_PARALLEL
-    for ( i = 0; i < nproc; i++ ) {
+    for ( int i = 0; i < nproc; i++ ) {
         OOFEM_LOG_INFO("[%d] Record Statistics: Sending %d Receiving %d to %d\n",
                        myrank, nrecToSend(i), nrecToReceive(i), i);
     }
@@ -197,11 +198,10 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
 #endif
 
 
-
     std :: map< int, int >globloc; //  global->local mapping for shared
     // number local guys
     int globeq = offset;
-    for ( i = 1; i <= ndofman; i++ ) {
+    for ( int i = 1; i <= ndofman; i++ ) {
         dman = d->giveDofManager(i);
         //if (dman->giveParallelMode() == DofManager_shared) {
         if ( isShared(dman) ) {
@@ -210,13 +210,13 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
             plist = dman->givePartitionList();
             psize = plist->giveSize();
             int minrank = myrank;
-            for ( j = 1; j <= psize; j++ ) {
+            for ( int j = 1; j <= psize; j++ ) {
                 minrank = min( minrank, plist->at(j) );
             }
 
             if ( minrank == myrank ) { // local
                 ndofs = dman->giveNumberOfDofs();
-                for ( j = 1; j <= ndofs; j++ ) {
+                for ( int j = 1; j <= ndofs; j++ ) {
                     if ( dman->giveDof(j)->isPrimaryDof() ) {
                         int eq;
                         if ( et == et_standard ) {
@@ -235,7 +235,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
             //} else if (dman->giveParallelMode() == DofManager_local) {
         } else {
             ndofs = dman->giveNumberOfDofs();
-            for ( j = 1; j <= ndofs; j++ ) {
+            for ( int j = 1; j <= ndofs; j++ ) {
                 if ( dman->giveDof(j)->isPrimaryDof() ) {
                     int eq;
                     if ( et == et_standard ) {
@@ -261,7 +261,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
 
     // pack data for remote procs
     CommunicationBuffer **buffs = new CommunicationBuffer * [ nproc ];
-    for ( p = 0; p < nproc; p++ ) {
+    for ( int p = 0; p < nproc; p++ ) {
         buffs [ p ] = new StaticCommunicationBuffer(MPI_COMM_WORLD, 0);
         buffs [ p ]->resize( buffs [ p ]->givePackSize(MPI_INT, 1) * sizeToSend(p) );
 
@@ -272,19 +272,19 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
     }
 
 
-    for ( i = 1; i <= ndofman; i++ ) {
+    for ( int i = 1; i <= ndofman; i++ ) {
         if ( isShared( d->giveDofManager(i) ) ) {
             dman = d->giveDofManager(i);
             plist = dman->givePartitionList();
             psize = plist->giveSize();
             int minrank = myrank;
-            for ( j = 1; j <= psize; j++ ) {
+            for ( int j = 1; j <= psize; j++ ) {
                 minrank = min( minrank, plist->at(j) );
             }
 
             if ( minrank == myrank ) { // do send
-                for ( j = 1; j <= psize; j++ ) {
-                    p = plist->at(j);
+                for ( int j = 1; j <= psize; j++ ) {
+                    int p = plist->at(j);
                     if ( p == myrank ) {
                         continue;
                     }
@@ -295,7 +295,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
 #endif
                     buffs [ p ]->packInt( dman->giveGlobalNumber() );
                     ndofs = dman->giveNumberOfDofs();
-                    for ( k = 1; k <= ndofs; k++ ) {
+                    for ( int k = 1; k <= ndofs; k++ ) {
                         if ( dman->giveDof(k)->isPrimaryDof() ) {
                             int eq;
                             if ( et == et_standard ) {
@@ -317,44 +317,43 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
 
     //fprintf (stderr, "[%d] Sending glob nums ...", myrank);
     // send buffers
-    for ( p = 0; p < nproc; p++ ) {
+    for ( int p = 0; p < nproc; p++ ) {
         if ( p != myrank ) {
             buffs [ p ]->iSend(p, 999);
         }
     }
 
 
-    /****
-    *
-    *  for (p=0; p<nproc; p++) {
-    *   if (p == myrank) continue;
-    *   for (i=1;  i<= ndofman; i++) {
-    *     //if (domain->giveDofManager(i)->giveParallelMode() == DofManager_shared) {
-    *     if (isShared(d->giveDofManager(i))) {
-    *       dman = d->giveDofManager(i);
-    *       plist = dman->givePartitionList();
-    *       psize = plist->giveSize();
-    *       int minrank = myrank;
-    *       for (j=1; j<=psize; j++) minrank = min (minrank, plist->at(j));
-    *       if (minrank == myrank) { // do send
-    *         buffs[p]->packInt(dman->giveGlobalNumber());
-    *         ndofs = dman->giveNumberOfDofs ();
-    *         for (j=1; j<=ndofs; j++) {
-    *           if (dman->giveDof(j)->isPrimaryDof()) {
-    *             buffs[p]->packInt(locGlobMap.at(dman->giveDof(j)->giveEquationNumber()));
-    *           }
-    *         }
-    *       }
-    *     }
-    *   }
-    *   // send buffer
-    *   buffs[p]->iSend(p, 999);
-    *  }
-    ****/
+#if 0
+    for ( int p = 0; p < nproc; p++ ) {
+        if (p == myrank) continue;
+        for ( int i = 1;  i <= ndofman; i++ ) {
+            //if (domain->giveDofManager(i)->giveParallelMode() == DofManager_shared) {
+            if (isShared(d->giveDofManager(i))) {
+                dman = d->giveDofManager(i);
+                plist = dman->givePartitionList();
+                psize = plist->giveSize();
+                int minrank = myrank;
+                for (j=1; j<=psize; j++) minrank = min (minrank, plist->at(j));
+                if (minrank == myrank) { // do send
+                    buffs[p]->packInt(dman->giveGlobalNumber());
+                    ndofs = dman->giveNumberOfDofs ();
+                    for (j=1; j<=ndofs; j++) {
+                        if (dman->giveDof(j)->isPrimaryDof()) {
+                            buffs[p]->packInt(locGlobMap.at(dman->giveDof(j)->giveEquationNumber()));
+                        }
+                    }
+                }
+            }
+        }
+        // send buffer
+        buffs[p]->iSend(p, 999);
+    }
+#endif
 
     // receive remote eqs and complete global numbering
     CommunicationBuffer **rbuffs = new CommunicationBuffer * [ nproc ];
-    for ( p = 0; p < nproc; p++ ) {
+    for ( int p = 0; p < nproc; p++ ) {
         rbuffs [ p ] = new StaticCommunicationBuffer(MPI_COMM_WORLD, 0);
         rbuffs [ p ]->resize( rbuffs [ p ]->givePackSize(MPI_INT, 1) * sizeToRecv(p) );
 #if 0
@@ -365,7 +364,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
 
 
     //fprintf (stderr, "[%d] Receiving glob nums ...", myrank);
-    for ( p = 0; p < nproc; p++ ) {
+    for ( int p = 0; p < nproc; p++ ) {
         if ( p != myrank ) {
             rbuffs [ p ]->iRecv(p, 999);
         }
@@ -377,14 +376,14 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
     int fin = 1;
     finished.at(emodel->giveRank() + 1) = 1;
     do {
-        for ( p = 0; p < nproc; p++ ) {
+        for ( int p = 0; p < nproc; p++ ) {
             if ( finished.at(p + 1) == 0 ) {
                 if ( rbuffs [ p ]->testCompletion() ) {
                     // data are here
                     // unpack them
                     int nite = nrecToReceive(p);
                     int shdm, ldm;
-                    for ( i = 1; i <= nite; i++ ) {
+                    for ( int i = 1; i <= nite; i++ ) {
                         rbuffs [ p ]->unpackInt(shdm);
 
 #if 0
@@ -402,7 +401,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
 
                         dman = d->giveDofManager(ldm);
                         ndofs = dman->giveNumberOfDofs();
-                        for ( j = 1; j <= ndofs; j++ ) {
+                        for ( int j = 1; j <= ndofs; j++ ) {
                             if ( dman->giveDof(j)->isPrimaryDof() ) {
                                 int eq;
                                 if ( et == et_standard ) {
@@ -441,7 +440,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
         int _eq;
         char *ptr;
         char *locname = "local", *shname = "shared", *unkname = "unknown";
-        for ( i = 1; i <= ndofman; i++ ) {
+        for ( int i = 1; i <= ndofman; i++ ) {
             dman = d->giveDofManager(i);
             if ( dman->giveParallelMode() == DofManager_local ) {
                 ptr = locname;
@@ -452,7 +451,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
             }
 
             ndofs = dman->giveNumberOfDofs();
-            for ( j = 1; j <= ndofs; j++ ) {
+            for ( int j = 1; j <= ndofs; j++ ) {
                 if ( ( _eq = dman->giveDof(j)->giveEquationNumber(dn) ) ) {
                     fprintf( stderr, "[%d] n:%6s %d[%d] (%d), leq = %d, geq = %d\n", emodel->giveRank(), ptr, i, dman->giveGlobalNumber(), j, _eq, locGlobMap.at(_eq) );
                 } else {
@@ -468,17 +467,17 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
     // build reverse map
     int lneq;
     if ( et == et_standard ) {
-        lneq = emodel->giveNumberOfEquations(ut);
+        lneq = emodel->giveNumberOfDomainEquations(di, dn);
     } else {
-        lneq = emodel->giveNumberOfPrescribedEquations(ut);
+        lneq = emodel->giveNumberOfDomainEquations(di, dpn);
     }
 
     globLocMap.clear();
-    for ( i = 1; i <= lneq; i++ ) {
+    for ( int i = 1; i <= lneq; i++ ) {
         globLocMap [ locGlobMap.at(i) ] = i;
     }
 
-    for ( p = 0; p < nproc; p++ ) {
+    for ( int p = 0; p < nproc; p++ ) {
         delete rbuffs [ p ];
         delete buffs [ p ];
     }
@@ -514,11 +513,11 @@ PetscNatural2GlobalOrdering :: giveOldEq(int eq)
 void
 PetscNatural2GlobalOrdering :: map2New(IntArray &answer, const IntArray &src, int baseOffset)
 {
-    int i, indx, n = src.giveSize();
+    int indx, n = src.giveSize();
     answer.resize(n);
 
     //for (i=1; i<=n; i++) answer.at(i)=locGlobMap.at(src.at(i))-baseOffset;
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= n; i++ ) {
         if ( ( indx = src.at(i) ) ) {
             answer.at(i) = locGlobMap.at(indx) + baseOffset;
         } else {
@@ -531,10 +530,10 @@ PetscNatural2GlobalOrdering :: map2New(IntArray &answer, const IntArray &src, in
 void
 PetscNatural2GlobalOrdering :: map2Old(IntArray &answer, const IntArray &src, int baseOffset)
 {
-    int i, n = src.giveSize();
+    int n = src.giveSize();
     int offset = baseOffset - 1;
     answer.resize(n);
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= n; i++ ) {
         answer.at(i) = giveOldEq( src.at(i) ) + offset;
     }
 }
@@ -548,7 +547,7 @@ void
 PetscNatural2LocalOrdering :: init(EngngModel *emodel, EquationID ut, int di,  EquationType et)
 {
     Domain *d = emodel->giveDomain(di);
-    int i, j, n_eq = 0, ndofs, ndofman = d->giveNumberOfDofManagers(), loc_eq = 1;
+    int n_eq = 0, ndofs, ndofman = d->giveNumberOfDofManagers(), loc_eq = 1;
     bool lFlag;
     DofManager *dman;
     EModelDefaultEquationNumbering dn;
@@ -559,16 +558,16 @@ PetscNatural2LocalOrdering :: init(EngngModel *emodel, EquationID ut, int di,  E
     // shared dofman is numbered on partition with lovest rank number
 
     if ( et == et_standard ) {
-        n2l.resize( emodel->giveNumberOfEquations(ut) );
+        n2l.resize( emodel->giveNumberOfDomainEquations(di, dn) );
     } else {
-        n2l.resize( emodel->giveNumberOfPrescribedEquations(ut) );
+        n2l.resize( emodel->giveNumberOfDomainEquations(di, dpn) );
     }
 
-    for ( i = 1; i <= ndofman; i++ ) {
+    for ( int i = 1; i <= ndofman; i++ ) {
         dman = d->giveDofManager(i);
         lFlag = isLocal(dman);
         ndofs = dman->giveNumberOfDofs();
-        for ( j = 1; j <= ndofs; j++ ) {
+        for ( int j = 1; j <= ndofs; j++ ) {
             if ( dman->giveDof(j)->isPrimaryDof() ) {
                 if ( et == et_standard ) {
                     n_eq = dman->giveDof(j)->giveEquationNumber(dn);
@@ -608,9 +607,9 @@ PetscNatural2LocalOrdering :: giveOldEq(int eq)
 void
 PetscNatural2LocalOrdering :: map2New(IntArray &answer, const IntArray &src, int baseOffset)
 {
-    int i, indx, n = src.giveSize();
+    int indx, n = src.giveSize();
     answer.resize(n);
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= n; i++ ) {
         if ( ( indx = src.at(i) ) ) {
             answer.at(i) = n2l.at(indx) - baseOffset;
         } else {
@@ -622,9 +621,9 @@ PetscNatural2LocalOrdering :: map2New(IntArray &answer, const IntArray &src, int
 void
 PetscNatural2LocalOrdering :: map2Old(IntArray &answer, const IntArray &src, int baseOffset)
 {
-    int i, n = src.giveSize();
+    int n = src.giveSize();
     answer.resize(n);
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= n; i++ ) {
         answer.at(i) = giveOldEq( src.at(i) ) - baseOffset;
     }
 }

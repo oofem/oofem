@@ -395,7 +395,7 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
     int i, ac1;
     int neq;
     if ( s.isDefault() ) {
-        neq = eModel->giveNumberOfDomainEquations(di, ut);
+        neq = eModel->giveNumberOfDomainEquations(di, s);
     } else {
         neq = s.giveRequiredNumberOfDomainEquation();
     }

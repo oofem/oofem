@@ -283,7 +283,7 @@ void NonLinearDynamic :: solveYourself()
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
         // Force equation numbering before setting up comm maps.
-        int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+        int neq = this->giveNumberOfDomainEquations(EID_MomentumBalance);
         OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
         if ( isParallel() ) {
@@ -304,7 +304,7 @@ NonLinearDynamic :: solveYourselfAt(TimeStep *tStep) {
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
         // Force equation numbering before setting up comm maps.
-        int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+        int neq = this->giveNumberOfDomainEquations(EID_MomentumBalance);
         OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
         if ( isParallel() ) {
@@ -337,7 +337,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     // creates system of governing eq's and solves them at given time step
     // first assemble problem at current time step
 
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 
     // Time-stepping constants
     this->determineConstants(tStep);
@@ -600,7 +600,7 @@ NonLinearDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num
 
 void NonLinearDynamic :: updateYourself(TimeStep *stepN)
 {
-    int neq =  this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 
     totIterations = 0;
 
@@ -623,7 +623,7 @@ void NonLinearDynamic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, D
 // of new equlibrium stage.
 //
 {
-    int neq =  this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 
 #ifdef TIME_REPORT
     Timer timer;
@@ -947,9 +947,9 @@ NonLinearDynamic :: assembleIncrementalReferenceLoadVectors(FloatArray &_increme
 {
     EModelDefaultEquationNumbering en;
 
-    _incrementalLoadVector.resize( sourceDomain->giveEngngModel()->giveNumberOfEquations(EID_MomentumBalance) );
+    _incrementalLoadVector.resize( sourceDomain->giveEngngModel()->giveNumberOfDomainEquations(sourceDomain->giveNumber(), EModelDefaultEquationNumbering()) );
     _incrementalLoadVector.zero();
-    _incrementalLoadVectorOfPrescribed.resize( sourceDomain->giveEngngModel()->giveNumberOfPrescribedEquations(EID_MomentumBalance) );
+    _incrementalLoadVectorOfPrescribed.resize( sourceDomain->giveEngngModel()->giveNumberOfDomainEquations(sourceDomain->giveNumber(), EModelDefaultPrescribedEquationNumbering()) );
     _incrementalLoadVectorOfPrescribed.zero();
 
     if ( _refMode == SparseNonLinearSystemNM :: rlm_incremental ) {
@@ -975,14 +975,14 @@ void
 NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type, Domain *domain, TimeStep *tStep)
 {
     int nelem = domain->giveNumberOfElements();
-    //int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+    //int neq = this->giveNumberOfDomainEquations(EID_MomentumBalance);
     int jj, kk, n;
     FloatMatrix charMtrx;
     IntArray loc;
     Element *element;
     EModelDefaultEquationNumbering en;
 
-    answer.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
+    answer.resize( this->giveNumberOfDomainEquations(domain->giveNumber(), en) );
     answer.zero();
     for ( int i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
@@ -1168,13 +1168,13 @@ NonLinearDynamic :: unpackMigratingData(TimeStep *atTime)
     Dof *_dof;
 
     // resize target arrays
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
     totalDisplacement.resize(neq);
     incrementOfDisplacement.resize(neq);
     incrementalLoadVector.resize(neq);
     initialLoadVector.resize(neq);
-    initialLoadVectorOfPrescribed.resize( giveNumberOfPrescribedEquations(EID_MomentumBalance) );
-    incrementalLoadVectorOfPrescribed.resize( giveNumberOfPrescribedEquations(EID_MomentumBalance) );
+    initialLoadVectorOfPrescribed.resize( giveNumberOfDomainEquations(1, EModelDefaultPrescribedEquationNumbering()) );
+    incrementalLoadVectorOfPrescribed.resize( giveNumberOfDomainEquations(1, EModelDefaultPrescribedEquationNumbering()) );
 
     for ( idofman = 1; idofman <= ndofman; idofman++ ) {
         _dm = domain->giveDofManager(idofman);

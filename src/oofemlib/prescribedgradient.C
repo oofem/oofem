@@ -143,7 +143,7 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
     }
 
     int nsd = domain->giveNumberOfSpatialDimensions();
-    int npeq = domain->giveEngngModel()->giveNumberOfPrescribedDomainEquations(1, EID_MomentumBalance);
+    int npeq = domain->giveEngngModel()->giveNumberOfDomainEquations(domain->giveNumber(), EModelDefaultPrescribedEquationNumbering() );
     C.resize(npeq, nsd*(nsd+1)/2);
     C.zero();
 
@@ -222,7 +222,7 @@ double PrescribedGradient :: domainSize()
 void PrescribedGradient :: computeField(FloatArray &sigma, EquationID eid, TimeStep *tStep)
 {
     EngngModel *emodel = this->domain->giveEngngModel();
-    int npeq = emodel->giveNumberOfPrescribedDomainEquations(this->giveDomain()->giveNumber(), eid);
+    int npeq = emodel->giveNumberOfDomainEquations(this->giveDomain()->giveNumber(), EModelDefaultPrescribedEquationNumbering());
     FloatArray R_c(npeq), R_ext(npeq);
 
     R_c.zero();

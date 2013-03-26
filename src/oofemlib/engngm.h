@@ -489,31 +489,10 @@ public:
     virtual int initializeAdaptive(int stepNumber) { return 0; }
 
     /**
-     * Returns total number of equations in active (current time step) time step.
-     * The UnknownType parameter allows to distinguish between several possible governing equations, that
-     * can be numbered separately.
-     * @todo This function is misleading, it will sum equations from all domains which isn't very useful 
-     * (it works because all problems calling this only has one domain).
-     */
-    virtual int giveNumberOfEquations(EquationID eid);
-    /**
-     * Returns total number of prescribed equations in active (current time step) time step.
-     * The UnknownType parameter allows to distinguish between several possible governing equations, that
-     * can be numbered separately.
-     */
-    virtual int giveNumberOfPrescribedEquations(EquationID eid);
-    /**
      * Returns number of equations for given domain in active (current time step) time step.
-     * The EquationID parameter allows to distinguish between several possible governing equations, that
-     * can be numbered separately.
+     * The numbering scheme determines which system the result is requested for.
      */
-    virtual int giveNumberOfDomainEquations(int di, EquationID eid);
-    /**
-     * Returns number of prescribed equations for given domain in active (current time step) time step.
-     * The UnknownType parameter allows to distinguish between several possible governing equations, that
-     * can be numbered separately.
-     */
-    virtual int giveNumberOfPrescribedDomainEquations(int di, EquationID eid);
+    virtual int giveNumberOfDomainEquations(int di, const UnknownNumberingScheme &num);
 
     // management components
     /**

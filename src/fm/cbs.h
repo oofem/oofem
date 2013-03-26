@@ -212,10 +212,7 @@ public:
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
-    virtual int giveNumberOfEquations(EquationID eid);
-    virtual int giveNumberOfPrescribedEquations(EquationID eid);
-    virtual int giveNumberOfDomainEquations(int, EquationID eid);
-    virtual int giveNumberOfPrescribedDomainEquations(int, EquationID eid);
+    virtual int giveNumberOfDomainEquations(int, const UnknownNumberingScheme &num);
 
     virtual int giveNewEquationNumber(int domain, DofIDItem);
     virtual int giveNewPrescribedEquationNumber(int domain, DofIDItem);

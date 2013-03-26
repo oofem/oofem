@@ -248,8 +248,8 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
     // map primary unknowns
     EIPrimaryUnknownMapper mapper;
 
-    totalDisplacement.resize( this->giveNumberOfDomainEquations(1, EID_MomentumBalance) );
-    incrementOfDisplacement.resize( this->giveNumberOfDomainEquations(1, EID_MomentumBalance) );
+    totalDisplacement.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
+    incrementOfDisplacement.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     totalDisplacement.zero();
     incrementOfDisplacement.zero();
 
@@ -474,8 +474,8 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     // map primary unknowns
     EIPrimaryUnknownMapper mapper;
 
-    d2_totalDisplacement.resize( this->giveNumberOfDomainEquations(2, EID_MomentumBalance) );
-    d2_incrementOfDisplacement.resize( this->giveNumberOfDomainEquations(2, EID_MomentumBalance) );
+    d2_totalDisplacement.resize( this->giveNumberOfDomainEquations(2, EModelDefaultEquationNumbering()) );
+    d2_incrementOfDisplacement.resize( this->giveNumberOfDomainEquations(2, EModelDefaultEquationNumbering()) );
     d2_totalDisplacement.zero();
     d2_incrementOfDisplacement.zero();
 
@@ -833,12 +833,12 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
     SparseNonLinearSystemNM :: referenceLoadInputModeType rlm;
     //Domain* sourceDomain = sourceProblem->giveDomain(domainIndx);
 
-    loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
-    loadVectorOfPrescribed.resize( this->giveNumberOfPrescribedEquations(EID_MomentumBalance) );
+    loadVector.resize( this->giveNumberOfDomainEquations(domainIndx, EModelDefaultEquationNumbering()) );
+    loadVectorOfPrescribed.resize( this->giveNumberOfDomainEquations(domainIndx, EModelDefaultPrescribedEquationNumbering()) );
     loadVector.zero();
     loadVectorOfPrescribed.zero();
-    _incrementalLoadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
-    _incrementalLoadVectorOfPrescribed.resize( this->giveNumberOfPrescribedEquations(EID_MomentumBalance) );
+    _incrementalLoadVector.resize( this->giveNumberOfDomainEquations(domainIndx, EModelDefaultEquationNumbering()) );
+    _incrementalLoadVectorOfPrescribed.resize( this->giveNumberOfDomainEquations(domainIndx, EModelDefaultPrescribedEquationNumbering()) );
     _incrementalLoadVector.zero();
     _incrementalLoadVectorOfPrescribed.zero();
 
@@ -945,11 +945,11 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
  * SparseNonLinearSystemNM::referenceLoadInputModeType rlm;
  * //Domain* sourceDomain = sourceProblem->giveDomain(domainIndx);
  *
- * loadVector.resize(this->giveNumberOfEquations(EID_MomentumBalance));
- * loadVectorOfPrescribed.resize(this->giveNumberOfPrescribedEquations(EID_MomentumBalance));
+ * loadVector.resize(this->giveNumberOfDomainEquations(EID_MomentumBalance));
+ * loadVectorOfPrescribed.resize(this->giveNumberOfPrescribedDomainEquations(EID_MomentumBalance));
  * loadVector.zero(); loadVectorOfPrescribed.zero();
- * _incrementalLoadVector.resize(this->giveNumberOfEquations(EID_MomentumBalance));
- * _incrementalLoadVectorOfPrescribed.resize(this->giveNumberOfPrescribedEquations(EID_MomentumBalance));
+ * _incrementalLoadVector.resize(this->giveNumberOfDomainEquations(EID_MomentumBalance));
+ * _incrementalLoadVectorOfPrescribed.resize(this->giveNumberOfPrescribedDomainEquations(EID_MomentumBalance));
  * _incrementalLoadVector.zero(); _incrementalLoadVectorOfPrescribed.zero();
  *
  * // ASK CURRENT MSTEP FOR ITS RECORD

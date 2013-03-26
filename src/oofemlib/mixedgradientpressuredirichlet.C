@@ -221,7 +221,7 @@ void MixedGradientPressureDirichlet :: computeFields(FloatArray &sigmaDev, doubl
     EngngModel *emodel = this->giveDomain()->giveEngngModel();
     FloatArray tmp;
     vol = this->giveVolDof()->giveUnknown(eid, VM_Total, tStep);
-    int npeq = emodel->giveNumberOfPrescribedDomainEquations(this->giveDomain()->giveNumber(), eid);
+    int npeq = emodel->giveNumberOfDomainEquations(this->giveDomain()->giveNumber(), EModelDefaultPrescribedEquationNumbering());
     // sigma = residual (since we use the slave dofs) = f_ext - f_int
     sigmaDev.resize(npeq);
     sigmaDev.zero();

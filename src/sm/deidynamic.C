@@ -155,7 +155,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     FloatArray previousDisplacementVector;
 
 
-    neq = this->giveNumberOfEquations(EID_MomentumBalance);
+    neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
     if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
         init = 1;
 #ifdef VERBOSE
@@ -284,7 +284,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     //
     // assembling the element part of load vector
     //
-    loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
+    loadVector.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     loadVector.zero();
     this->assembleVector(loadVector, tStep, EID_MomentumBalance, ExternalForcesVector,
                          VM_Total, EModelDefaultEquationNumbering(), domain);

@@ -39,6 +39,7 @@
 #include "interface.h"
 #include "flotarry.h"
 #include "equationid.h"
+#include "unknownnumberingscheme.h"
 #include "valuemodetype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
@@ -127,7 +128,7 @@ public:
      * @param atTime Time of interest.
      * @param answer Resulting vector.
      */
-    virtual void initialize(ValueModeType mode, TimeStep *atTime, FloatArray &answer);
+    virtual void initialize(ValueModeType mode, TimeStep *atTime, FloatArray &answer, const UnknownNumberingScheme &s);
 
     /**
      * @param dof Pointer to DOF.
