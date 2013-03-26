@@ -129,11 +129,11 @@ protected:
     void evalInitialCovarBaseVectorsAt(GaussPoint *gp, FloatMatrix &Gcov);
     void evalInitialContravarBaseVectorsAt(GaussPoint *gp, FloatMatrix &Gcon);
     void giveDualBase(FloatMatrix &base1, FloatMatrix &base2);
-    virtual void evalCovarBaseVectorsAt(GaussPoint *gp, FloatMatrix &gcon, FloatArray &solVec);
+    virtual void evalCovarBaseVectorsAt(GaussPoint *gp, FloatMatrix &gcov, FloatArray &solVec);
     void evalContravarBaseVectorsAt(GaussPoint *gp, FloatMatrix &gcon,  FloatArray &solVec);
     void edgeEvalInitialDirectorAt(GaussPoint *gp, FloatArray &answer, const int iEdge);
     void edgeEvalInitialCovarBaseVectorsAt(GaussPoint *gp, const int iedge, FloatArray &G1, FloatArray &G3);
-    void edgeEvalCovarBaseVectorsAt(GaussPoint *gp, const int iedge, FloatArray &g1, FloatArray &g3, TimeStep *tStep);
+    void edgeEvalCovarBaseVectorsAt(GaussPoint *gp, const int iedge, FloatMatrix &gcov, TimeStep *tStep);
     virtual double giveGlobalZcoord(GaussPoint *gp);
     double giveGlobalZcoordInLayer(double xi, int layer);
 

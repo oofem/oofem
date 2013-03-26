@@ -189,17 +189,17 @@ StaticFracture ::  giveUnknownComponent(EquationID type, ValueModeType mode,
 
 
 void
-StaticFracture :: initializeDofUnknownsDictionary(TimeStep *tStep) {
-    //
-    int nnodes, nDofs;
-    double val;
+StaticFracture :: initializeDofUnknownsDictionary(TimeStep *tStep) 
+{
+    // Initializes all dof values to zero
     Domain *domain;
     Dof *iDof;
     DofManager *node;
-
+    
+    int nDofs;
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
         domain = this->giveDomain(idomain);
-        nnodes = domain->giveNumberOfDofManagers();
+        int nnodes = domain->giveNumberOfDofManagers();
         for ( int inode = 1; inode <= nnodes; inode++ ) {
             node = domain->giveDofManager(inode);
             nDofs = node->giveNumberOfDofs();
@@ -207,7 +207,6 @@ StaticFracture :: initializeDofUnknownsDictionary(TimeStep *tStep) {
                 iDof = node->giveDof(i);
                 iDof->updateUnknownsDictionary(tStep->givePreviousStep(), EID_MomentumBalance, VM_Total, 0.0);
             }
-        
         }
     }
 }
@@ -225,8 +224,6 @@ StaticFracture :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep
         int eqNum = iDof->__giveEquationNumber();
         if ( iDof->hasBc(tStep) ) { 
             val = iDof->giveBcValue(VM_Total, tStep);
-        //} else if ( tStep->isTheFirstStep() ) { // initialize to zero
-        //     val = 0.0;
         } else {
             if ( eqNum > 0 ) {
                 val = totalDisplacement.at(eqNum);
@@ -320,20 +317,21 @@ StaticFracture :: evaluatePropagationLawForDelamination(Element *el, EnrichmentD
         
 
         // for example compute average stress and compare to criteria
-        //for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {
-            for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {     
-                // ugly piece of code that will skip enrichment of dofmans that have any bc's
-                // which is not generally what you want
-                bool hasBc= false;
-                for ( int j = 1; j <= el->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
-                    if ( el->giveDofManager(i)->giveDof(j)->hasBc(tStep) ) {
-                        hasBc = true;
-                        continue;
-                    }
+        for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {     
+            // ugly piece of code that will skip enrichment of dofmans that have any bc's
+            // which is not generally what you want
+            #if 1
+            bool hasBc= false;
+            for ( int j = 1; j <= el->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
+                if ( el->giveDofManager(i)->giveDof(j)->hasBc(tStep) ) {
+                    hasBc = true;
+                    continue;
                 }
-                if ( !hasBc) {
+            }
+            #endif
+            if ( !hasBc) {
                 dofManNumbers.followedBy(i);
-                }
+            }
         }
             dofManNumbers.printYourself();
         if ( DofManList *ded = dynamic_cast< DofManList * > (ed) )  {

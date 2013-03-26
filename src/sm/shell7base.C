@@ -311,33 +311,43 @@ Shell7Base :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatMatrix &gcov, FloatArr
 }
 
 void
-Shell7Base :: edgeEvalCovarBaseVectorsAt(GaussPoint *gp, const int iedge, FloatArray &g1, FloatArray &g3, TimeStep *tStep)
+Shell7Base :: edgeEvalCovarBaseVectorsAt(GaussPoint *gp, const int iedge, FloatMatrix &gcov, TimeStep *tStep)
 {
     double zeta = 0.0; //@todo fix integration rule for arbitrary z-coord
     
-    FloatArray a;
+    FloatArray solVecEdge;
     FloatMatrix B;
     IntArray edgeNodes;
     this->fei->computeLocalEdgeMapping(edgeNodes, iedge);
     this->edgeComputeBmatrixAt(gp, B, 1, ALL_STRAINS);
-    this->edgeGiveUpdatedSolutionVector(a, iedge, tStep);
+    this->edgeGiveUpdatedSolutionVector(solVecEdge, iedge, tStep);
 
-    FloatArray eps;           // generalized strain
-    eps.beProductOf(B, a);    // [dxdxi, dmdxi, m, dgamdxi, gam]^T
+    FloatArray genEpsEdge;                 // generalized strain
+    genEpsEdge.beProductOf(B, solVecEdge); // [dxdxi, dmdxi, m, dgamdxi, gam]^T
 
     FloatArray dxdxi, m, dmdxi;
-    dxdxi.setValues( 3, eps.at(1), eps.at(2), eps.at(3) );
-    dmdxi.setValues( 3, eps.at(4), eps.at(5), eps.at(6) );
-    m.setValues( 3, eps.at(7), eps.at(8), eps.at(9) );
-    double dgamdxi = eps.at(10);
-    double gam = eps.at(11);
+    dxdxi.setValues( 3, genEpsEdge.at(1), genEpsEdge.at(2), genEpsEdge.at(3) );
+    dmdxi.setValues( 3, genEpsEdge.at(4), genEpsEdge.at(5), genEpsEdge.at(6) );
+        m.setValues( 3, genEpsEdge.at(7), genEpsEdge.at(8), genEpsEdge.at(9) );
+    double dgamdxi = genEpsEdge.at(10);
+    double gam     = genEpsEdge.at(11);
 
     double fac1 = ( zeta + 0.5 * gam * zeta * zeta );
     double fac2 = ( 0.5 * zeta * zeta );
     double fac3 = ( 1.0 + zeta * gam );
     
-    g1 = dxdxi + fac1*dmdxi + fac2*dgamdxi*m;
-    g3 = fac3*m;
+    FloatArray g1, g2, g3;
+    g2 = dxdxi + fac1*dmdxi + fac2*dgamdxi*m; // base vector along the edge
+    g3 = fac3*m;                              // director field
+
+    g2.normalize();
+    g3.normalize();
+    g1.beVectorProductOf(g2, g3);
+    g1.normalize();
+    gcov.resize(3,3);
+    gcov.setColumn(g1,1);
+    gcov.setColumn(g2,2);
+    gcov.setColumn(g3,3);
 }
 
 #endif
@@ -1449,12 +1459,7 @@ Shell7Base :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge,
     BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
     if ( edgeLoad ) {
         FloatArray fT;
-        this->computeTractionForce(fT, iEdge, edgeLoad, tStep);
-        IntArray mask;
-        this->giveEdgeDofMapping(mask, iEdge);
-        answer.resize( this->computeNumberOfDofs(EID_MomentumBalance) );
-        answer.zero();
-        answer.assemble(fT, mask);
+        this->computeTractionForce(answer, iEdge, edgeLoad, tStep);
         return;
     } else {
         _error("Shell7Base :: computeEdgeLoadVectorAt: load type not supported");
@@ -1545,7 +1550,6 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &answer, const i
         this->evalCovarBaseVectorsAt(gp, gcov, genEps);         // m=g3
         g1.beColumnOf(gcov,1);
         g2.beColumnOf(gcov,2);
-        g3.beColumnOf(gcov,3);
         surfLoad->computeValueAt(load, tStep, * ( gp->giveCoordinates() ), VM_Total);        // pressure components
         traction.beVectorProductOf(g1, g2);        // normal vector (unnormalized)
         traction.times( -load.at(1) );
@@ -1574,53 +1578,63 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &answer, const i
 
 
 void
-Shell7Base :: computeTractionForce(FloatArray &answer, const int iedge, BoundaryLoad *edgeLoad, TimeStep *tStep)
+Shell7Base :: computeTractionForce(FloatArray &answer, const int iEdge, BoundaryLoad *edgeLoad, TimeStep *tStep)
 {
     // fix such that one can specify if the load should follow the deformed coord sys
     IntegrationRule *iRule = specialIntegrationRulesArray [ 2 ];   // rule #3 for edge integration of distributed loads given in [*/m]
     GaussPoint *gp;
 
     FloatMatrix N, Q;
-    FloatArray g1, g2, g3, FT, fT(7), components, lcoords;
-    double dA;
-    answer.resize( this->giveNumberOfEdgeDofs() );
-    answer.zero();
-
+    FloatArray fT(7), components, lcoords;
+    //answer.resize( this->giveNumberOfEdgeDofs() );
+    //answer.zero();
+    
+    BoundaryLoad :: BL_CoordSystType coordSystType = edgeLoad->giveCoordSystMode();
+    FloatArray Nftemp(21), Nf(21);
+    Nf.zero();
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         lcoords = * gp->giveCoordinates();
 
         edgeLoad->computeValueAt(components, tStep, lcoords, VM_Total);
         this->edgeComputeNmatrixAt(gp, N);
-        this->edgeEvalCovarBaseVectorsAt(gp, iedge, g2, g3, tStep);
-        g2.normalize();
-        g3.normalize();
-        g1.beVectorProductOf(g2, g3);
-        g1.normalize();
-        this->giveCoordTransMatrix(Q, g1, g2, g3);
 
-        FloatArray c1(3), c2(3), t1, t2;
-        c1.at(1) = components.at(1);
-        c1.at(2) = components.at(2);
-        c1.at(3) = components.at(3);
-        c2.at(1) = components.at(4);
-        c2.at(2) = components.at(5);
-        c2.at(3) = components.at(6);
-        t1.beTProductOf(Q, c1);
-        t2.beTProductOf(Q, c2);
+        if ( coordSystType ==  BoundaryLoad :: BL_UpdatedGlobalMode ) {
+            // Updated global coord system
+            FloatMatrix gcov;
+            this->edgeEvalCovarBaseVectorsAt(gp, iEdge, gcov, tStep); 
+            Q.beTranspositionOf(gcov);
 
-        fT.at(1) = t1.at(1);
-        fT.at(2) = t1.at(2);
-        fT.at(3) = t1.at(3);
-        fT.at(4) = t2.at(1);
-        fT.at(5) = t2.at(2);
-        fT.at(6) = t2.at(3);
-        fT.at(7) = components.at(7);
-        fT = components;
-        dA = this->edgeComputeLengthAround(gp, iedge);        
-        FT.beTProductOf(N, fT*dA);
-        answer.add(FT);
+            FloatArray distrForces(3), distrMoments(3), t1, t2;
+            distrForces .setValues(3, components.at(1), components.at(2), components.at(3) );
+            distrMoments.setValues(3, components.at(4), components.at(5), components.at(6) );
+            t1.beTProductOf(Q, distrForces);
+            t2.beTProductOf(Q, distrMoments);
+            fT.addSubVector(t1,1);
+            fT.addSubVector(t2,4);
+            fT.at(7) = components.at(7); // don't do anything with the 'gamma'-load
+
+        } else if( coordSystType == BoundaryLoad :: BL_GlobalMode ) { 
+            // Undeformed global coord system
+            for ( int i = 1; i <= 7; i++) {
+                fT.at(i) = components.at(i);
+            }
+        } else {
+            OOFEM_ERROR("Shell7Base :: computeTractionForce - does not support local coordinate system");
+        }
+
+        double dA = this->edgeComputeLengthAround(gp, iEdge);        
+        
+        Nftemp.beTProductOf(N, fT*dA);
+        Nf.add(Nftemp);
     }
+
+    IntArray mask;
+    this->giveEdgeDofMapping(mask, iEdge);
+    answer.resize( Shell7Base :: giveNumberOfDofs()  );
+    answer.zero();
+    answer.assemble(Nf, mask);
+
 }
 
 

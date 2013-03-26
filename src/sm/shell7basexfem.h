@@ -92,30 +92,25 @@ protected:
     }
     
 
-
-    virtual void evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, FloatArray &genEpsC);
-    //void discEvalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &gd1, FloatArray &gd2, FloatArray &gd3, FloatArray &genEps);
-    //void discGiveGeneralizedStrainComponents(FloatArray &genEps, FloatArray &dxdxi1, FloatArray &dxdxi2, FloatArray &dmdxi1, 
-    //     FloatArray &dmdxi2, FloatArray &m);
-    //void discComputeGeneralizedStrainVector(FloatArray &dGenEps, const FloatArray &dSolVec, const FloatMatrix &B11,
-    //     const FloatMatrix &B22, const FloatMatrix &B32);
+    virtual void evalCovarBaseVectorsAt(GaussPoint *gp, FloatMatrix &gcon, FloatArray &solVec);
     void discGiveInitialSolutionVector(FloatArray &answer, IntArray &eiDofIdArray);
     void computeDiscGeneralizedStrainVector(FloatArray &dGenEps, GaussPoint *gp, EnrichmentItem *ei, int enrichmentDomainNumber, TimeStep *tStep);
 
     // compute solution vector
-    //void temp_computeVectorOf(IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
     void discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, int useUpdatedGpRecord,  
           EnrichmentItem *ei, int enrichmentDomainNumber);
 
     void computeOrderingArray(IntArray &orderingArray, IntArray &activeDofsArray, int enrichmentDomainNumber, SolutionField field);
-
+    //void edgeComputeOrderingArray( IntArray &orderingArray, IntArray &activeDofsArray, int iEdge, int enrichmentDomainNumber, SolutionField field);
 
     // Tangent matrices
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, FloatArray &solVecI, FloatArray &solVecJ, MatResponseMode rMode, TimeStep *tStep,
          EnrichmentItem *ei, int enrichmentDomainNumberI, int enrichmentDomainNumberJ);
 
+    // Loads
+    virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode);
 
     // Mass matrices
     void computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep); 
