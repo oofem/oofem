@@ -775,6 +775,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
 
 // instantiate xfemmanager
+    ///@todo Do we actually need multiple xfemmanagers per domain? This made sense when they were stored in EngngModel, but not now.
     XfemManager *xMan;
     xfemManagerList->growTo(nxfemman);
     for ( int i = 1; i <= nxfemman; i++ ) {

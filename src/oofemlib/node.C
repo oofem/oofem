@@ -55,6 +55,7 @@
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "enrichmentitem.h"
+ #include "xfemmanager.h"
 #endif
 
 namespace oofem {
@@ -652,10 +653,9 @@ Node :: drawYourself(oofegGraphicContext &gc)
         EASValsSetLayer(OOFEG_NODE_ANNOTATION_LAYER);
         EASValsSetMType(FILLED_CIRCLE_MARKER);
  #if 1
-        if ( this->giveDomain()->giveEngngModel()->hasXfemManager(1) ) {
-            XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
-            int i;
-            for ( i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
+        if ( this->giveDomain()->hasXfemManager(1) ) {
+            XfemManager *xf = this->giveDomain()->giveXfemManager(1);
+            for ( int i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
                 if ( xf->giveEnrichmentItem(i)->isDofManEnriched(this->number) ) {
                     EASValsSetMType(SQUARE_MARKER);
                 }
