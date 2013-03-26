@@ -1472,7 +1472,7 @@ VTKXMLExportModuleElementInterface :: exportCompositeElement( VTKStream stream,
             for ( int i = 1; i <= nodeCoords[inode].giveSize(); i++ ) {
                 fprintf( stream, "%e ", nodeCoords[inode].at(i) );
             }
-            for ( int i = nodeCoords[]inode].giveSize() + 1; i <= 3; i++ ) {
+            for ( int i = nodeCoords[inode].giveSize() + 1; i <= 3; i++ ) {
                 fprintf(stream, "%e ", 0.0);
             }
             

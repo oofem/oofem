@@ -49,7 +49,7 @@
  #include <vtkSmartPointer.h>
  typedef vtkSmartPointer<vtkUnstructuredGrid>& VTKStream;
 #else
- typedef FILE * VTKStream,
+ typedef FILE * VTKStream;
 #endif
 
 #include <string>
