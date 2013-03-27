@@ -882,7 +882,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                     iVal.resize(3);
                     val = & iVal;
                     for ( j = 1; j <= 3; j++ ) {
-                        iVal.at(j) = d->giveNode( regionNodalNumbers.at(inode) )->giveUpdatedCoordinate(j, tStep, EID_MomentumBalance, 1.0) -
+                        iVal.at(j) = d->giveNode( regionNodalNumbers.at(inode) )->giveUpdatedCoordinate(j, tStep, 1.0) -
                                      d->giveNode( regionNodalNumbers.at(inode) )->giveCoordinate(j);
                     }
                 } else if ( valID == IST_MaterialInterfaceVal ) {
@@ -990,7 +990,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                         iVal.resize(3);
                         val = & iVal;
                         for ( j = 1; j <= 3; j++ ) {
-                            iVal.at(j) = d->giveNode( regionNodalNumbers.at(inode) )->giveUpdatedCoordinate(j, tStep, EID_MomentumBalance, 1.0) -
+                            iVal.at(j) = d->giveNode( regionNodalNumbers.at(inode) )->giveUpdatedCoordinate(j, tStep, 1.0) -
                                          d->giveNode( regionNodalNumbers.at(inode) )->giveCoordinate(j);
                         }
                     } else if ( valID == IST_MaterialInterfaceVal ) {
@@ -1185,18 +1185,18 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
                 for ( j = 1; j <= numberOfDofs; j++ ) {
                     id = dman->giveDof(j)->giveDofID();
                     if ( ( id == V_u ) || ( id == D_u ) ) {
-                        iVal.at(1) = dman->giveDof(j)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+                        iVal.at(1) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
                     } else if ( ( id == V_v ) || ( id == D_v ) ) {
-                        iVal.at(2) = dman->giveDof(j)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+                        iVal.at(2) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
                     } else if ( ( id == V_w ) || ( id == D_w ) ) {
-                        iVal.at(3) = dman->giveDof(j)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+                        iVal.at(3) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
                     }
                 }
 
                 /*
                  * iVal.resize(3);
                  * for (j=1; j<= 3 ; j++) {
-                 * iVal.at(j) = d->giveNode(regionNodalNumbers.at(inode))->giveUpdatedCoordinate(j, tStep,EID_MomentumBalance, 1.0) -
+                 * iVal.at(j) = d->giveNode(regionNodalNumbers.at(inode))->giveUpdatedCoordinate(j, tStep, 1.0) -
                  * d->giveNode(regionNodalNumbers.at(inode))->giveCoordinate(j);
                  * }
                  */
@@ -1206,7 +1206,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
                 for ( j = 1; j <= numberOfDofs; j++ ) {
                     id = dman->giveDof(j)->giveDofID();
                     if ( id == C_1 ) {
-                        iVal.at(1) = dman->giveDof(j)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
+                        iVal.at(1) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
                     }
                 }
             } else if ( valID == Temperature ) {
@@ -1215,13 +1215,12 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
                 for ( j = 1; j <= numberOfDofs; j++ ) {
                     id = dman->giveDof(j)->giveDofID();
                     if ( id == T_f ) {
-                        iVal.at(1) = dman->giveDof(j)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
+                        iVal.at(1) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
                     }
                 }
             } else if ( valID == PressureVector ) {
                 dofIDMask.setValues(1, P_f);
-                this->getDofManPrimaryVariable(iVal, dman, dofIDMask, EID_ConservationEquation,
-                                               VM_Total, tStep, IST_Pressure);
+                this->getDofManPrimaryVariable(iVal, dman, dofIDMask, VM_Total, tStep, IST_Pressure);
             } else {
                 OOFEM_ERROR2( "VTKExportModule: unsupported unknownType (%s)", __UnknownTypeToString(valID) );
                 //d->giveDofManager(regionNodalNumbers.at(inode))->giveUnknownVector(iVal, d->giveDefaultNodeDofIDArry(), valID, VM_Total, tStep);
@@ -1277,18 +1276,18 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
                     for ( j = 1; j <= numberOfDofs; j++ ) {
                         id = dman->giveDof(j)->giveDofID();
                         if ( ( id == V_u ) || ( id == D_u ) ) {
-                            iVal.at(1) = dman->giveDof(j)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+                            iVal.at(1) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
                         } else if ( ( id == V_v ) || ( id == D_v ) ) {
-                            iVal.at(2) = dman->giveDof(j)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+                            iVal.at(2) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
                         } else if ( ( id == V_w ) || ( id == D_w ) ) {
-                            iVal.at(3) = dman->giveDof(j)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+                            iVal.at(3) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
                         }
                     }
 
                     /*
                      * iVal.resize(3);
                      * for (j=1; j<= 3 ; j++) {
-                     * iVal.at(j) = d->giveNode(regionNodalNumbers.at(inode))->giveUpdatedCoordinate(j, tStep,EID_MomentumBalance, 1.0) -
+                     * iVal.at(j) = d->giveNode(regionNodalNumbers.at(inode))->giveUpdatedCoordinate(j, tStep, 1.0) -
                      * d->giveNode(regionNodalNumbers.at(inode))->giveCoordinate(j);
                      * }
                      */
@@ -1298,7 +1297,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
                     for ( j = 1; j <= numberOfDofs; j++ ) {
                         id = dman->giveDof(j)->giveDofID();
                         if ( id == C_1 ) {
-                            iVal.at(1) = dman->giveDof(j)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
+                            iVal.at(1) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
                         }
                     }
                 } else if ( valID == Temperature ) {
@@ -1307,7 +1306,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
                     for ( j = 1; j <= numberOfDofs; j++ ) {
                         id = dman->giveDof(j)->giveDofID();
                         if ( id == T_f ) {
-                            iVal.at(1) = dman->giveDof(j)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
+                            iVal.at(1) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
                         }
                     }
                 } else if ( valID == PressureVector ) {
@@ -1316,7 +1315,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
                     for ( j = 1; j <= numberOfDofs; j++ ) {
                         id = dman->giveDof(j)->giveDofID();
                         if ( id == P_f ) {
-                            iVal.at(1) = dman->giveDof(j)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
+                            iVal.at(1) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
                         }
                     }
                 } else {
@@ -1354,7 +1353,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
 }
 
 void
-VTKExportModule :: getDofManPrimaryVariable(FloatArray &answer, DofManager *dman, IntArray &dofIDMask, EquationID type,
+VTKExportModule :: getDofManPrimaryVariable(FloatArray &answer, DofManager *dman, IntArray &dofIDMask,
                                             ValueModeType mode, TimeStep *tStep, InternalStateType iType)
 {
     int j, indx, size = dofIDMask.giveSize();
@@ -1366,7 +1365,7 @@ VTKExportModule :: getDofManPrimaryVariable(FloatArray &answer, DofManager *dman
     for ( j = 1; j <= size; j++ ) {
         if ( ( indx = dman->findDofWithDofId( (DofIDItem)dofIDMask.at(j) ) ) ) {
             // primary variable available directly in dof manager
-            answer.at(j) = dman->giveDof(indx)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+            answer.at(j) = dman->giveDof(indx)->giveUnknown(VM_Total, tStep);
         } else if ( iType != IST_Undefined ) {
             // ok primary variable not directly available
             // but equivalent InternalStateType provided

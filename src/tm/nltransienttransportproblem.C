@@ -132,7 +132,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
     if ( changingProblemSize ) {
         if ( !tStep->isTheFirstStep() ) {
             //copy recent solution to previous position, copy from hash=0 to hash=1(previous)
-            copyUnknownsInDictionary( EID_ConservationEquation, VM_Total, tStep, tStep->givePreviousStep() );
+            copyUnknownsInDictionary( VM_Total, tStep, tStep->givePreviousStep() );
         }
 
         UnknownsField->initialize(VM_Total, tStep->givePreviousStep(), * solutionVector, EModelDefaultEquationNumbering());
@@ -214,21 +214,15 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 }
 
 
-double NLTransientTransportProblem ::  giveUnknownComponent(EquationID type, ValueModeType mode,
-                                                            TimeStep *tStep, Domain *d, Dof *dof)
+double NLTransientTransportProblem :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displacement, velocity of equation
 // This function translates this request to numerical method language
 {
-    if ( type != EID_ConservationEquation ) { // heat and mass concetration vector
-        OOFEM_ERROR2( "giveUnknownComponent: EquationID %s is undefined for this problem", __EquationIDToString(type) );
-        return 0.;
-    }
-
     if ( this->requiresUnknownsDictionaryUpdate() ) {
         if (mode == VM_Incremental) { //get difference between current and previous time variable
             return dof->giveUnknowns()->at(0) - dof->giveUnknowns()->at(1);
         }
-        int hash = this->giveUnknownDictHashIndx(type, mode, tStep);
+        int hash = this->giveUnknownDictHashIndx(mode, tStep);
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
         } else {
@@ -298,8 +292,8 @@ NLTransientTransportProblem :: createPreviousSolutionInDofUnknownsDictionary(Tim
                 nDofs = node->giveNumberOfDofs();
                 for ( int i = 1; i <= nDofs; i++ ) {
                     iDof = node->giveDof(i);
-                    val = iDof->giveUnknown(EID_ConservationEquation, VM_Total, tStep); //get number on hash=0(current)
-                    iDof->updateUnknownsDictionary(tStep->givePreviousStep(), EID_MomentumBalance, VM_Total, val);
+                    val = iDof->giveUnknown(VM_Total, tStep); //get number on hash=0(current)
+                    iDof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, val);
                 }
             }
         }
@@ -315,7 +309,8 @@ NLTransientTransportProblem :: updateYourself(TimeStep *stepN)
 }
 
 int
-NLTransientTransportProblem :: giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN) {
+NLTransientTransportProblem :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN)
+{
     if ( mode == VM_Total ) { //Nodal temperature
         if ( stepN->giveNumber() == this->giveCurrentStep()->giveNumber() ) { //current time
             return 0;
@@ -335,44 +330,38 @@ void
 NLTransientTransportProblem :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
 {
     // update DoF unknowns dictionary. Store the last and previous temperature only, see giveUnknownDictHashIndx
-    int i, ndofs = inode->giveNumberOfDofs();
-    int eqNum;
-    Dof *iDof;
-    double val;
-    FloatArray *vect;
+    int ndofs = inode->giveNumberOfDofs();
 
-    for ( i = 1; i <= ndofs; i++ ) {
-        iDof = inode->giveDof(i);
-        eqNum = iDof->__giveEquationNumber();
+    for ( int i = 1; i <= ndofs; i++ ) {
+        Dof *iDof = inode->giveDof(i);
+        int eqNum = iDof->__giveEquationNumber();
+        double val;
         if ( iDof->hasBc(tStep) ) { // boundary condition
             val = iDof->giveBcValue(VM_Total, tStep);
         } else {
-            vect = this->UnknownsField->giveSolutionVector(tStep);
+            FloatArray *vect = this->UnknownsField->giveSolutionVector(tStep);
             val = vect->at(eqNum);
         }
 
         //update temperature, which is present in every node
-        iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Total, val);
+        iDof->updateUnknownsDictionary(tStep, VM_Total, val);
     }
 }
 
 
 void
-NLTransientTransportProblem :: copyUnknownsInDictionary(EquationID type, ValueModeType mode, TimeStep *fromTime, TimeStep *toTime) {
-    int i, j, ndofs;
-    double val;
+NLTransientTransportProblem :: copyUnknownsInDictionary(ValueModeType mode, TimeStep *fromTime, TimeStep *toTime)
+{
     Domain *domain = this->giveDomain(1);
     int nnodes = domain->giveNumberOfDofManagers();
-    DofManager *inode;
-    Dof *iDof;
 
-    for ( j = 1; j <= nnodes; j++ ) {
-        inode = domain->giveDofManager(j);
-        ndofs = inode->giveNumberOfDofs();
-        for ( i = 1; i <= ndofs; i++ ) {
-            iDof = inode->giveDof(i);
-            val = iDof->giveUnknown(type, mode, fromTime);
-            iDof->updateUnknownsDictionary(toTime, type, mode, val);
+    for ( int j = 1; j <= nnodes; j++ ) {
+        DofManager *inode = domain->giveDofManager(j);
+        int ndofs = inode->giveNumberOfDofs();
+        for ( int i = 1; i <= ndofs; i++ ) {
+            Dof *iDof = inode->giveDof(i);
+            double val = iDof->giveUnknown(mode, fromTime);
+            iDof->updateUnknownsDictionary(toTime, mode, val);
         }
     }
 }
@@ -381,21 +370,18 @@ NLTransientTransportProblem :: copyUnknownsInDictionary(EquationID type, ValueMo
 void
 NLTransientTransportProblem :: updateInternalState(TimeStep *stepN)
 {
-    int j, nnodes;
-    Domain *domain;
-
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        domain = this->giveDomain(idomain);
-        nnodes = domain->giveNumberOfDofManagers();
+        Domain *domain = this->giveDomain(idomain);
+        int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( j = 1; j <= nnodes; j++ ) {
+            for ( int j = 1; j <= nnodes; j++ ) {
                 //update dictionary entry or add a new pair if the position is missing
                 this->updateDofUnknownsDictionary(domain->giveDofManager(j), stepN);
             }
         }
 
         int nelem = domain->giveNumberOfElements();
-        for ( j = 1; j <= nelem; j++ ) {
+        for ( int j = 1; j <= nelem; j++ ) {
             domain->giveElement(j)->updateInternalState(stepN);
         }
     }
@@ -408,7 +394,6 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
     //
     // Computes right hand side on all nodes
     //
-    int i;
     double t = tStep->giveTargetTime();
     IntArray loc;
     FloatMatrix charMtrxCond, charMtrxCap, bcMtrx;
@@ -420,7 +405,7 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
     Domain *domain = this->giveDomain(1);
     int nelem = domain->giveNumberOfElements();
 
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
 #ifdef __PARALLEL_MODE
         // skip remote elements (these are used as mirrors of remote elements on other domains
@@ -466,16 +451,16 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
 
 
         if ( lumpedCapacityStab ) {
-            int i, j, size = charMtrxCap.giveNumberOfRows();
+            int size = charMtrxCap.giveNumberOfRows();
             double s;
-            for ( i = 1; i <= size; i++ ) {
+            for ( int j = 1; j <= size; j++ ) {
                 s = 0.0;
-                for ( j = 1; j <= size; j++ ) {
-                    s += charMtrxCap.at(i, j);
-                    charMtrxCap.at(i, j) = 0.0;
+                for ( int k = 1; k <= size; k++ ) {
+                    s += charMtrxCap.at(j, k);
+                    charMtrxCap.at(j, k) = 0.0;
                 }
 
-                charMtrxCap.at(i, i) = s;
+                charMtrxCap.at(j, j) = s;
             }
         }
 

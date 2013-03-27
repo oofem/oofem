@@ -196,7 +196,7 @@ MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
                 values = valuesList.at(pos);
             }
 
-            double value = thisDof->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+            double value = thisDof->giveUnknown(VM_Total, tStep);
             values->push_back(value);
         }
     }
@@ -272,7 +272,7 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
                 for ( int k = 1; k <= wpbc->giveInternalDofManager(j)->giveNumberOfDofs(); k++ ) {
                     FloatArray unknowns;
                     IntArray DofMask;
-                    double X = wpbc->giveInternalDofManager(j)->giveDof(k)->giveUnknown(EID_MomentumBalance_ConservationEquation, VM_Total, tStep);
+                    double X = wpbc->giveInternalDofManager(j)->giveDof(k)->giveUnknown(VM_Total, tStep);
                     fprintf(FID, "%e\t", X);
                 }
 

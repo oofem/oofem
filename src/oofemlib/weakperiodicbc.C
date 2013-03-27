@@ -353,7 +353,7 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
     // Fetch unknowns of this boundary condition
     IntArray gammaLoc, gammaDofIDs;
     FloatArray gamma;
-    gammaDman->giveCompleteUnknownVector( gamma, eid, mode, tStep);
+    gammaDman->giveCompleteUnknownVector( gamma, mode, tStep);
     gammaDman->giveCompleteLocationArray( gammaLoc, s );
     gammaDman->giveCompleteMasterDofIDArray( gammaDofIDs );
 
@@ -406,7 +406,7 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
                         thisElement->giveDofManager( bNodes.at(i) )->giveMasterDofIDArray(periodicDofIDMask, nodalArray);
                         masterDofIDs.followedBy(nodalArray);
 
-                        double value = thisElement->giveDofManager( bNodes.at(i) )->giveDof(j)->giveUnknown(eid, mode, tStep);
+                        double value = thisElement->giveDofManager( bNodes.at(i) )->giveDof(j)->giveUnknown(mode, tStep);
                         a.resize( sideLocation.giveSize() );
                         a.at( sideLocation.giveSize() ) = value;
                         dofCountOnBoundary++;

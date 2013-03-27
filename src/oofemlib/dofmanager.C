@@ -767,8 +767,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
 }
 
 
-void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDArry,
-                                EquationID type, ValueModeType mode, TimeStep *stepN)
+void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDArry, ValueModeType mode, TimeStep *stepN)
 {
     int size;
     IntArray dofArray;
@@ -782,7 +781,7 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
             OOFEM_ERROR2("DofManager :: giveUnknownVector - Couldn't find dof with Dof ID %d", dofIDArry.at(i));
         }
 #endif
-        answer.at(i) = this->giveDof(pos)->giveUnknown(type, mode, stepN);
+        answer.at(i) = this->giveDof(pos)->giveUnknown(mode, stepN);
     }
 
     // Transform to global c.s.
@@ -819,12 +818,11 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
 }
 
 
-void DofManager :: giveCompleteUnknownVector(FloatArray &answer,
-                                EquationID type, ValueModeType mode, TimeStep *stepN)
+void DofManager :: giveCompleteUnknownVector(FloatArray &answer, ValueModeType mode, TimeStep *stepN)
 {
     answer.resize( this->numberOfDofs );
     for ( int i = 1; i <= this->numberOfDofs; i++ ) {
-        answer.at(i) = this->giveDof(i)->giveUnknown(type, mode, stepN);
+        answer.at(i) = this->giveDof(i)->giveUnknown(mode, stepN);
     }
 }
 
@@ -832,13 +830,13 @@ void DofManager :: giveCompleteUnknownVector(FloatArray &answer,
 void DofManager :: givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofIDArry,
                                           ValueModeType mode, TimeStep *stepN)
 {
-    int j, size;
+    int size;
     IntArray dofArray;
 
     answer.resize( size = dofIDArry.giveSize() );
     this->giveDofArray(dofIDArry, dofArray);
 
-    for ( j = 1; j <= size; j++ ) {
+    for ( int j = 1; j <= size; j++ ) {
         answer.at(j) = this->giveDof( dofArray.at(j) )->giveBcValue(mode, stepN);
     }
 
@@ -855,13 +853,12 @@ void DofManager :: giveUnknownVectorOfType(FloatArray &answer, UnknownType ut, V
     int k = 1;
     FloatArray localVector(3);
     IntArray dofIDArry(3);
-    
 
     // This is a bit cumbersome. I first construct the local vector, which might have a odd order, e.g [D_w, D_u], which is later added to the global vector "answer"
     // I also store the dof id's, so that I can construct the local 2 global transformation afterwards (if its necessary). / Mikael
     for ( int i = 1; i <= this->numberOfDofs; i++ ) {
         Dof *d = this->giveDof(i);
-        double val = d->giveUnknown(EID_MomentumBalance, mode, tStep);
+        double val = d->giveUnknown(mode, tStep);
         if (ut == DisplacementVector || ut == EigenVector) { // Just treat eigenvectors as displacement vectors (they are redundant)
             if      (d->giveDofID() == D_u) { dofIDArry.at(k) = D_u; localVector.at(k) = val; k++; }
             else if (d->giveDofID() == D_v) { dofIDArry.at(k) = D_v; localVector.at(k) = val; k++; }
@@ -892,7 +889,6 @@ void DofManager :: giveUnknownVectorOfType(FloatArray &answer, UnknownType ut, V
                 answer.at(3) = localVector.at(i);
         }
     }
-    
 }
 
 
@@ -1029,12 +1025,12 @@ void DofManager :: mergePartitionList(IntArray &_p)
 
 
 int
-DofManager :: packDOFsUnknowns(CommunicationBuffer &buff, EquationID type,
+DofManager :: packDOFsUnknowns(CommunicationBuffer &buff,
                                ValueModeType mode, TimeStep *stepN)
 {
-    int i, result = 1;
-    for ( i = 1; i <= numberOfDofs; i++ ) {
-        result &= this->giveDof(i)->packUnknowns(buff, type, mode, stepN);
+    int result = 1;
+    for ( int i = 1; i <= numberOfDofs; i++ ) {
+        result &= this->giveDof(i)->packUnknowns(buff, mode, stepN);
     }
 
     return result;

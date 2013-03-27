@@ -157,7 +157,7 @@ public:
 
     double giveUnknown(double vol, const FloatArray &dev, ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
     virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
-    virtual double giveUnknown(EquationID type, ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
+    virtual double giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
 
     virtual const char *giveClassName() const { return "MixedGradientPressureDirichlet"; }
     virtual classType giveClassID() const { return MixedGradientPressureDirichletClass; }

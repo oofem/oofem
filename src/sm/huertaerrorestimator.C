@@ -3125,14 +3125,13 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     // map coarse solution
     uCoarse.resize( refinedProblem->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     uCoarse.zero();
-    mapper.mapAndUpdate(uCoarse, VM_Total, EID_MomentumBalance, domain, refinedDomain, tStep);
+    mapper.mapAndUpdate(uCoarse, VM_Total, domain, refinedDomain, tStep);
 
     // get coarse solution and element and patch error (including BC !!!)
     pos = 1;
     for ( inode = 1; inode <= localNodeId; inode++ ) {
         node = refinedDomain->giveNode(inode);
-        node->giveUnknownVector(nodeSolution, dofIdArray,
-                                EID_MomentumBalance, VM_Total, refinedTStep);
+        node->giveUnknownVector(nodeSolution, dofIdArray, VM_Total, refinedTStep);
         for ( idof = 1; idof <= dofs; idof++, pos++ ) {
             nodeDof = node->giveDof(idof);
             if ( nodeDof->hasBc(refinedTStep) == 0 ) {
@@ -3689,9 +3688,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
 
     // store fine solution in primaryUnknownError
     for ( inode = 1; inode <= localNodeId; inode++ ) {
-        refinedDomain->giveNode(inode)->giveUnknownVector(nodeSolution, dofIdArray,
-                                                          EID_MomentumBalance, VM_Total,
-                                                          refinedTStep);
+        refinedDomain->giveNode(inode)->giveUnknownVector(nodeSolution, dofIdArray, VM_Total, refinedTStep);
         pos = globalNodeIdArray.at(inode);
         for ( idof = 1; idof <= dofs; idof++ ) {
             primaryUnknownError.at( ( pos - 1 ) * dofs + idof ) = nodeSolution.at(idof);
@@ -3917,14 +3914,13 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     // map coarse solution
     uCoarse.resize( refinedProblem->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     uCoarse.zero();
-    mapper.mapAndUpdate(uCoarse, VM_Total, EID_MomentumBalance, domain, refinedDomain, tStep);
+    mapper.mapAndUpdate(uCoarse, VM_Total, domain, refinedDomain, tStep);
 
     // get exact and coarse solution (including BC !!!)
     pos = 1;
     for ( inode = 1; inode <= localNodeId; inode++ ) {
         node = refinedDomain->giveNode(inode);
-        node->giveUnknownVector(nodeSolution, dofIdArray,
-                                EID_MomentumBalance, VM_Total, refinedTStep);
+        node->giveUnknownVector(nodeSolution, dofIdArray, VM_Total, refinedTStep);
         for ( idof = 1; idof <= dofs; idof++, pos++ ) {
             fineSolution.at(pos) = nodeSolution.at(idof);
             nodeDof = node->giveDof(idof);

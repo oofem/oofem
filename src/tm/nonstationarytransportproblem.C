@@ -130,17 +130,12 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
 }
 
 
-double NonStationaryTransportProblem :: giveUnknownComponent(EquationID type, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
+double NonStationaryTransportProblem :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
-    if ( type != EID_ConservationEquation ) { // heat and mass concetration vector
-        OOFEM_ERROR2( "giveUnknownComponent: EquationID %s is undefined for this problem", __EquationIDToString(type) );
-        return 0.;
-    }
-
     if ( this->requiresUnknownsDictionaryUpdate() ) {
-        int hash = this->giveUnknownDictHashIndx(type, mode, tStep);
+        int hash = this->giveUnknownDictHashIndx(mode, tStep);
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
         } else {
@@ -531,7 +526,7 @@ NonStationaryTransportProblem :: updateDomainLinks()
 }
 
 int
-NonStationaryTransportProblem :: giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN)
+NonStationaryTransportProblem :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN)
 {
     if ( mode == VM_Total ) { //Nodal temperature
         return 0;
@@ -634,7 +629,7 @@ NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer
 void
 NonStationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
-    iDof->printSingleOutputAt(stream, atTime, 'f', EID_ConservationEquation, VM_Total);
+    iDof->printSingleOutputAt(stream, atTime, 'f', VM_Total);
 }
 
 void
@@ -670,11 +665,11 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 
             jj = iDof->__giveEquationNumber();
             if ( jj ) {
-                val = iDof->giveUnknown(EID_ConservationEquation, VM_Total, stepWhenIcApply);
+                val = iDof->giveUnknown(VM_Total, stepWhenIcApply);
                 solutionVector->at(jj) = val;
                 //update in dictionary, if the problem is growing/decreasing
                 if ( this->changingProblemSize ) {
-                    iDof->updateUnknownsDictionary(stepWhenIcApply, EID_MomentumBalance, VM_Total, val);
+                    iDof->updateUnknownsDictionary(stepWhenIcApply, VM_Total, val);
                 }
             }
         }

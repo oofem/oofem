@@ -80,19 +80,18 @@ int
 Dof :: giveDofManGlobalNumber() const { return this->dofManager->giveGlobalNumber(); }
 #endif
 
-void Dof :: printSingleOutputAt(FILE *File, TimeStep *stepN, char ch,
-                                EquationID type, ValueModeType mode, double scale)
+void Dof :: printSingleOutputAt(FILE *File, TimeStep *stepN, char ch, ValueModeType mode, double scale)
 // Prints in the data file the unknown 'u' (for example, the displacement
 // 'd') of the receiver, at stepN.
 {
-    double x = scale * this->giveUnknown(type, mode, stepN);
+    double x = scale * this->giveUnknown(mode, stepN);
     fprintf(File, "  dof %d   %c % .8e\n", number, ch, x);
 }
 
 
 
 void Dof :: printMultipleOutputAt(FILE *File, TimeStep *stepN, char *ch,
-                                  EquationID type, ValueModeType *mode, int nite)
+                                  ValueModeType *mode, int nite)
 // Prints in the data file the unknown 'u' (for example, the displacement
 // 'd') of the receiver, at stepN.
 {
@@ -100,7 +99,7 @@ void Dof :: printMultipleOutputAt(FILE *File, TimeStep *stepN, char *ch,
 
     fprintf(File, "  dof %d", number);
     for (int i = 1; i <= nite; i++ ) {
-        x = this->giveUnknown(type, mode [ i - 1 ], stepN);
+        x = this->giveUnknown(mode [ i - 1 ], stepN);
         fprintf(File, "   %c % .8e", ch [ i - 1 ], x);
     }
 
@@ -229,6 +228,34 @@ Dof :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     }
 
     return CIO_OK;
+}
+
+void
+Dof::giveUnknowns ( FloatArray& masterUnknowns, ValueModeType mode, TimeStep* stepN )
+{
+    masterUnknowns.resize ( 1 );
+    masterUnknowns.at ( 1 ) = this->giveUnknown ( mode, stepN );
+}
+
+void
+Dof::giveUnknowns ( FloatArray& masterUnknowns, PrimaryField& field, ValueModeType mode, TimeStep* stepN )
+{
+    masterUnknowns.resize ( 1 );
+    masterUnknowns.at ( 1 ) = this->giveUnknown ( field, mode, stepN );
+}
+
+void
+Dof::computeDofTransformation ( FloatArray& masterContribs )
+{
+    masterContribs.resize ( 1 );
+    masterContribs.at ( 1 ) = 1.0;
+}
+
+void
+Dof::giveMasterDofManArray ( IntArray& answer )
+{
+    answer.resize ( 1 );
+    answer.at ( 1 ) = this->giveDofManNumber();
 }
 
 } // end namespace oofem

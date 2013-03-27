@@ -128,8 +128,7 @@ CBS :: initializeFrom(InputRecord *ir)
 }
 
 double
-CBS :: giveUnknownComponent(EquationID chc, ValueModeType mode,
-                            TimeStep *tStep, Domain *d, Dof *dof)
+CBS :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displacement, velocity of dof
 {
 #if DEBUG
@@ -618,9 +617,9 @@ CBS :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 
     DofIDItem type = iDof->giveDofID();
     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-        iDof->printSingleOutputAt(stream, atTime, 'v', EID_MomentumBalance, VM_Total, uscale);
+        iDof->printSingleOutputAt(stream, atTime, 'v', VM_Total, uscale);
     } else if ( type == P_f ) {
-        iDof->printSingleOutputAt(stream, atTime, 'p', EID_ConservationEquation, VM_Total, pscale);
+        iDof->printSingleOutputAt(stream, atTime, 'p', VM_Total, pscale);
     } else {
         _error("printDofOutputAt: unsupported dof type");
     }
@@ -672,9 +671,9 @@ CBS :: applyIC(TimeStep *stepWhenIcApply)
 
             if ( jj ) {
                 if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-                    velocityVector->at(jj) = iDof->giveUnknown(EID_MomentumBalance_ConservationEquation, VM_Total, stepWhenIcApply);
+                    velocityVector->at(jj) = iDof->giveUnknown(VM_Total, stepWhenIcApply);
                 } else {
-                    pressureVector->at(jj) = iDof->giveUnknown(EID_MomentumBalance_ConservationEquation, VM_Total, stepWhenIcApply);
+                    pressureVector->at(jj) = iDof->giveUnknown(VM_Total, stepWhenIcApply);
                 }
             }
         }

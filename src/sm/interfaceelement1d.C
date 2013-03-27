@@ -381,12 +381,12 @@ void InterfaceElem1d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownTyp
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
     EASValsSetColor( gc.getDeformedElementColor() );
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
-    p [ 0 ].x = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale) +
-                                 this->giveNode(2)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale) );
-    p [ 0 ].y = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale) +
-                                 this->giveNode(2)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale) );
-    p [ 0 ].z = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(3, tStep, EID_MomentumBalance, defScale) +
-                                 this->giveNode(2)->giveUpdatedCoordinate(3, tStep, EID_MomentumBalance, defScale) );
+    p [ 0 ].x = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale) +
+                                  this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale) );
+    p [ 0 ].y = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(2, tStep, defScale) +
+                                  this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale) );
+    p [ 0 ].z = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(3, tStep, defScale) +
+                                  this->giveNode(2)->giveUpdatedCoordinate(3, tStep, defScale) );
 
     EASValsSetMType(CIRCLE_MARKER);
     go = CreateMarker3D(p);
@@ -413,12 +413,12 @@ void InterfaceElem1d :: drawScalar(oofegGraphicContext &context)
 
     if ( context.getInternalVarsDefGeoFlag() ) {
         double defScale = context.getDefScale();
-        p [ 0 ].x = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale) +
-                                     this->giveNode(2)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale) );
-        p [ 0 ].y = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale) +
-                                     this->giveNode(2)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale) );
-        p [ 0 ].z = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(3, tStep, EID_MomentumBalance, defScale) +
-                                     this->giveNode(2)->giveUpdatedCoordinate(3, tStep, EID_MomentumBalance, defScale) );
+        p [ 0 ].x = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale) +
+                                      this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale) );
+        p [ 0 ].y = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(2, tStep, defScale) +
+                                      this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale) );
+        p [ 0 ].z = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(3, tStep,  defScale) +
+                                      this->giveNode(2)->giveUpdatedCoordinate(3, tStep, defScale) );
     } else {
         p [ 0 ].x = ( FPNum )( this->giveNode(1)->giveCoordinate(1) );
         p [ 0 ].y = ( FPNum )( this->giveNode(1)->giveCoordinate(2) );

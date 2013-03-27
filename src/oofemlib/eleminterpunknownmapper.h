@@ -57,9 +57,9 @@ public:
     /// Destructor
     virtual ~EIPrimaryUnknownMapper() { }
 
-    virtual int mapAndUpdate(FloatArray &answer, ValueModeType mode, EquationID ut,
+    virtual int mapAndUpdate(FloatArray &answer, ValueModeType mode,
                              Domain *oldd, Domain *newd,  TimeStep *tStep);
-    virtual int evaluateAt(FloatArray &answer, IntArray &dofMask, EquationID ut, ValueModeType mode,
+    virtual int evaluateAt(FloatArray &answer, IntArray &dofMask, ValueModeType mode,
                            Domain *oldd, FloatArray &coords, IntArray &regList, TimeStep *tStep);
 };
 } // end namespace oofem

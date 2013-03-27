@@ -829,7 +829,7 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
             iVal.resize(3);
             val = & iVal;
             for ( j = 1; j <= 3; j++ ) {
-                iVal.at(j) = d->giveNode( mapL2G.at(inode) )->giveUpdatedCoordinate(j, tStep, EID_MomentumBalance, 1.0) -
+                iVal.at(j) = d->giveNode( mapL2G.at(inode) )->giveUpdatedCoordinate(j, tStep, 1.0) -
                              d->giveNode( mapL2G.at(inode) )->giveCoordinate(j);
             }
         } else if ( valID == IST_MaterialInterfaceVal ) {
@@ -1064,7 +1064,6 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
 
     // This code is not perfect. It should be rewritten to handle all cases more gracefully.
 
-    EquationID eid = EID_MomentumBalance; // Shouldn't be necessary
     InternalStateType iState = IST_DisplacementVector; // Shouldn't be necessary
 
     dofIDMask.resize(0);
@@ -1083,17 +1082,14 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
         answer.resize(3);
     } else if ( type == FluxVector ) {
         dofIDMask.followedBy(C_1);
-        eid = EID_ConservationEquation;
         iState = IST_MassConcentration_1;
         answer.resize(1);
     } else if ( type == Temperature ) {
         dofIDMask.followedBy(T_f);
-        eid = EID_ConservationEquation;
         iState = IST_Temperature;
         answer.resize(1);
     } else if ( type == PressureVector ) {
         dofIDMask.followedBy(P_f);
-        eid = EID_ConservationEquation;
         iState = IST_Pressure;
         answer.resize(1);
     } else if ( type == DirectorField ) {
@@ -1103,7 +1099,6 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
             if ( ( id == W_u ) || ( id == W_v ) || ( id == W_w )  ) {
                 dofIDMask.followedBy(id);
             }
-            //eid = EID_ConservationEquation;
             //iState = IST_DirectorField;
             answer.resize(3);
         }
@@ -1121,7 +1116,7 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
             answer.at(j) = 0.;
         } else if ( iState == IST_DirectorField ) {
             indx = dman->findDofWithDofId( (DofIDItem)dofIDMask.at(j) );
-            answer.at(j) = dman->giveDof(indx)->giveUnknown(eid, VM_Total, tStep);
+            answer.at(j) = dman->giveDof(indx)->giveUnknown(VM_Total, tStep);
             
             this->givePrimVarSmoother()->recoverValues(iState, tStep); // recover values if not done before
             this->givePrimVarSmoother()->giveNodalVector(recoveredVal, dman->giveNumber(), ireg);
@@ -1133,7 +1128,7 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
             }
         } else if ( ( indx = dman->findDofWithDofId( id ) ) ) {
             // primary variable available directly in DOF-manager
-            answer.at(j) = dman->giveDof(indx)->giveUnknown(eid, VM_Total, tStep);
+            answer.at(j) = dman->giveDof(indx)->giveUnknown(VM_Total, tStep);
         } else if ( iState != IST_Undefined ) {
             // primary variable not directly available
             // but equivalent InternalStateType provided
@@ -1241,7 +1236,7 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, VTKStr
             } else if (type == IST_Pressure) { ///@todo Why this special treatment for pressure? / Mikael
                 if (elem->giveNumberOfInternalDofManagers() == 1) {
                     IntArray pmask(1); pmask.at(1) = P_f;
-                    elem->giveInternalDofManager(1)->giveUnknownVector (answer, pmask,EID_ConservationEquation, VM_Total, tStep);
+                    elem->giveInternalDofManager(1)->giveUnknownVector(answer, pmask, VM_Total, tStep);
 #ifdef __VTK_MODULE
                     cellVarsArray->SetTuple1(ielem-1,  answer.at(1) ); // Should be integer..
 #else

@@ -181,7 +181,7 @@ void DarcyFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 
     DofIDItem type = iDof->giveDofID();
     if ( type == P_f ) {
-        iDof->printSingleOutputAt(stream, atTime, 'p', EID_ConservationEquation, VM_Total, 1);
+        iDof->printSingleOutputAt(stream, atTime, 'p', VM_Total, 1);
     } else {
         _error("printDofOutputAt: unsupported dof type");
     }
@@ -195,18 +195,9 @@ void DarcyFlow :: updateYourself (TimeStep *tStep)
 
 }
 
-double DarcyFlow :: giveUnknownComponent(EquationID chc, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
+double DarcyFlow :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
-    /*
-     * Return value of argument dof
-     */
-
-    if ( chc == EID_ConservationEquation ) {
-        return PressureField->giveUnknownValue(dof, mode, tStep);
-    } else {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-        return 0.;
-    }
+    return PressureField->giveUnknownValue(dof, mode, tStep);
 }
 
 void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)

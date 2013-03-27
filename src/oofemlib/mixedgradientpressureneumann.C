@@ -459,7 +459,7 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
         FloatArray s_dev, e_v;
         
         // Fetch the current values of the stress;
-        this->sigmaDev->giveCompleteUnknownVector(s_dev, eid, mode, tStep);
+        this->sigmaDev->giveCompleteUnknownVector(s_dev, mode, tStep);
         // and the master dof ids for sigmadev used for the internal norms
         this->sigmaDev->giveCompleteMasterDofIDArray(sigmaMasterDofIDs);
 
@@ -539,7 +539,7 @@ void MixedGradientPressureNeumann :: computeFields(FloatArray &sigmaDev, double 
     // Fetch the current values of the stress in deviatoric base;
     sigmaDevBase.resize(this->sigmaDev->giveNumberOfDofs());
     for ( int i = 1; i <= this->sigmaDev->giveNumberOfDofs(); i++ ) {
-        sigmaDevBase.at(i) = this->sigmaDev->giveDof(i)->giveUnknown(eid, VM_Total, tStep);
+        sigmaDevBase.at(i) = this->sigmaDev->giveDof(i)->giveUnknown(VM_Total, tStep);
     }
     // Convert it back from deviatoric base:
     if (nsd == 3) {

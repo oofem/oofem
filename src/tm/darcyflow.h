@@ -66,7 +66,7 @@ public:
 
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
 
-    virtual double giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *);
+    virtual double giveUnknownComponent(ValueModeType, TimeStep *, Domain *, Dof *);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);

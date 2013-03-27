@@ -83,7 +83,7 @@ DofManExportModule :: doOutput(TimeStep *tStep)
         ndofs = dm->giveNumberOfDofs();
         for ( idof = 1; idof <= ndofs; idof++ ) {
             dof = dm->giveDof(idof);
-            displacement = dof->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+            displacement = dof->giveUnknown(VM_Total, tStep);
             fprintf(stream, " %g", displacement);
         }
 

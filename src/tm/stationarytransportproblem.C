@@ -130,23 +130,15 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
 
 
 
-double StationaryTransportProblem :: giveUnknownComponent(EquationID chc, ValueModeType mode,
-                                                          TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displacement, velocity of equation eq
-// This function translates this request to numerical method language
+double StationaryTransportProblem :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
+#if DEBUG
     int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
-
-    if ( chc == EID_ConservationEquation ) { // heat and mass concetration vector
-        return UnknownsField->giveUnknownValue(dof, mode, tStep);
-    } else {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-    }
-
-    return 0.;
+#endif
+    return UnknownsField->giveUnknownValue(dof, mode, tStep);
 }
 
 
@@ -402,7 +394,7 @@ StationaryTransportProblem :: updateDomainLinks()
 void
 StationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
-    iDof->printSingleOutputAt(stream, atTime, 'f', EID_ConservationEquation, VM_Total);
+    iDof->printSingleOutputAt(stream, atTime, 'f', VM_Total);
 }
 
 void

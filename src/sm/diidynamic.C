@@ -167,23 +167,19 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
 }
 
 
-double DIIDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
-                                           TimeStep *tStep, Domain *d, Dof *dof)
+double DIIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 // Returns unknown quantity displacement, velocity or acceleration of equation eq.
 // This function translates this request to numerical method language.
 {
     int eq = dof->__giveEquationNumber();
+#if DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
+#endif
 
     if ( tStep != this->giveCurrentStep() ) {
         _error("giveUnknownComponent: unknown time step encountered");
-        return 0.;
-    }
-
-    if ( chc != EID_MomentumBalance ) {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
         return 0.;
     }
 
@@ -281,9 +277,9 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
 
                 jj = iDof->__giveEquationNumber();
                 if ( jj ) {
-                    displacementVector.at(jj) = iDof->giveUnknown(EID_MomentumBalance, VM_Total, stepWhenIcApply);
-                    velocityVector.at(jj)     = iDof->giveUnknown(EID_MomentumBalance, VM_Velocity, stepWhenIcApply);
-                    accelerationVector.at(jj) = iDof->giveUnknown(EID_MomentumBalance, VM_Acceleration, stepWhenIcApply);
+                    displacementVector.at(jj) = iDof->giveUnknown(VM_Total, stepWhenIcApply);
+                    velocityVector.at(jj)     = iDof->giveUnknown(VM_Velocity, stepWhenIcApply);
+                    accelerationVector.at(jj) = iDof->giveUnknown(VM_Acceleration, stepWhenIcApply);
                 }
             }
         }
@@ -478,7 +474,7 @@ DIIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
         VM_Total, VM_Velocity, VM_Acceleration
     };
 
-    iDof->printMultipleOutputAt(stream, atTime, dofchar, EID_MomentumBalance, dofmodes, 3);
+    iDof->printMultipleOutputAt(stream, atTime, dofchar, dofmodes, 3);
 }
 
 

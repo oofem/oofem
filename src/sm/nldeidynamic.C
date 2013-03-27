@@ -131,24 +131,19 @@ NlDEIDynamic :: initializeFrom(InputRecord *ir)
 }
 
 
-double NlDEIDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
-                                              TimeStep *tStep, Domain *d, Dof *dof)
+double NlDEIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 // Returns unknown quantity like displacement, velocity of equation eq.
 // This function translates this request to numerical method language.
 {
     int eq = dof->__giveEquationNumber();
+#if DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
+#endif
 
     if ( tStep != this->giveCurrentStep() ) {
         _error("giveUnknownComponent: unknown time step encountered");
-        return 0.;
-    }
-
-
-    if ( chc != EID_MomentumBalance ) {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
         return 0.;
     }
 
@@ -329,9 +324,9 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
 
                 jj = iDof->__giveEquationNumber();
                 if ( jj ) {
-                    displacementVector.at(jj) = iDof->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-                    velocityVector.at(jj)     = iDof->giveUnknown(EID_MomentumBalance, VM_Velocity, tStep);
-                    accelerationVector.at(jj)    = iDof->giveUnknown(EID_MomentumBalance, VM_Acceleration, tStep) ;
+                    displacementVector.at(jj) = iDof->giveUnknown(VM_Total, tStep);
+                    velocityVector.at(jj)     = iDof->giveUnknown(VM_Velocity, tStep);
+                    accelerationVector.at(jj) = iDof->giveUnknown(VM_Acceleration, tStep) ;
                 }
             }
         }
@@ -862,7 +857,7 @@ NlDEIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
         VM_Total, VM_Velocity, VM_Acceleration
     };
 
-    iDof->printMultipleOutputAt(stream, atTime, dofchar, EID_MomentumBalance, dofmodes, 3);
+    iDof->printMultipleOutputAt(stream, atTime, dofchar, dofmodes, 3);
 }
 
 void

@@ -643,14 +643,14 @@ void Axisymm3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type
     EASValsSetEdgeColor( gc.getElementEdgeColor() );
     EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
-    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
-    p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
+    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale);
+    p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(2, tStep, defScale);
     p [ 0 ].z = 0.;
-    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
-    p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
+    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale);
+    p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale);
     p [ 1 ].z = 0.;
-    p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
-    p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
+    p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveUpdatedCoordinate(1, tStep, defScale);
+    p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveUpdatedCoordinate(2, tStep, defScale);
     p [ 2 ].z = 0.;
 
     go =  CreateTriangle3D(p);
@@ -706,8 +706,8 @@ Axisymm3d :: drawScalar(oofegGraphicContext &context)
             if ( context.getInternalVarsDefGeoFlag() ) {
                 // use deformed geometry
                 defScale = context.getDefScale();
-                p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
-                p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
+                p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
+                p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                 p [ i ].z = 0.;
             } else {
                 p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
@@ -728,8 +728,8 @@ Axisymm3d :: drawScalar(oofegGraphicContext &context)
             if ( context.getInternalVarsDefGeoFlag() ) {
                 // use deformed geometry
                 defScale = context.getDefScale();
-                p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
-                p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
+                p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
+                p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                 p [ i ].z = s [ i ] * landScale;
             } else {
                 p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
@@ -790,14 +790,14 @@ Axisymm3d :: drawScalar(oofegGraphicContext &context)
  * EASValsSetLayer(OOFEG_YIELD_PATTERN_LAYER);
  * if (gc.getInternalVarsDefGeoFlag()) {
  * // use deformed geometry
- * p[0].x = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(1,tStep,DisplacementVector,defScale);
- * p[0].y = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(2,tStep,DisplacementVector,defScale);
+ * p[0].x = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(1,tStep,defScale);
+ * p[0].y = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(2,tStep,defScale);
  * p[0].z = 0.;
- * p[1].x = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(1,tStep,DisplacementVector,defScale);
- * p[1].y = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(2,tStep,DisplacementVector,defScale);
+ * p[1].x = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(1,tStep,defScale);
+ * p[1].y = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(2,tStep,defScale);
  * p[1].z = 0.;
- * p[2].x = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(1,tStep,DisplacementVector,defScale);
- * p[2].y = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(2,tStep,DisplacementVector,defScale);
+ * p[2].x = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(1,tStep,defScale);
+ * p[2].y = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(2,tStep,defScale);
  * p[2].z = 0.;
  *
  * } else {
@@ -850,12 +850,12 @@ Axisymm3d :: drawScalar(oofegGraphicContext &context)
  *    // it is in centre of gravity.
  *    if (gc.getInternalVarsDefGeoFlag()) {
  *     // use deformed geometry
- *     xc = (this->giveNode(1)->giveUpdatedCoordinate(1,tStep,DisplacementVector,defScale)+
- *        this->giveNode(2)->giveUpdatedCoordinate(1,tStep,DisplacementVector,defScale)+
- *        this->giveNode(3)->giveUpdatedCoordinate(1,tStep,DisplacementVector,defScale)) / 3.0 ;
- *     yc = (this->giveNode(1)->giveUpdatedCoordinate(2,tStep,DisplacementVector,defScale) +
- *        this->giveNode(2)->giveUpdatedCoordinate(2,tStep,DisplacementVector,defScale) +
- *        this->giveNode(3)->giveUpdatedCoordinate(2,tStep,DisplacementVector,defScale)) / 3.0 ;
+ *     xc = (this->giveNode(1)->giveUpdatedCoordinate(1,tStep,defScale)+
+ *        this->giveNode(2)->giveUpdatedCoordinate(1,tStep,defScale)+
+ *        this->giveNode(3)->giveUpdatedCoordinate(1,tStep,defScale)) / 3.0 ;
+ *     yc = (this->giveNode(1)->giveUpdatedCoordinate(2,tStep,defScale) +
+ *        this->giveNode(2)->giveUpdatedCoordinate(2,tStep,defScale) +
+ *        this->giveNode(3)->giveUpdatedCoordinate(2,tStep,defScale)) / 3.0 ;
  *
  *    } else {
  *     xc = (this->giveNode(1)->giveCoordinate(1) +
@@ -921,14 +921,14 @@ Axisymm3d :: drawScalar(oofegGraphicContext &context)
  * EASValsSetLayer(OOFEG_STRESS_CONTOUR_LAYER);
  * if (gc.getInternalVarsDefGeoFlag()) {
  * // use deformed geometry
- * p[0].x = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(1,tStep,DisplacementVector,defScale);
- * p[0].y = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(2,tStep,DisplacementVector,defScale);
+ * p[0].x = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(1,tStep,defScale);
+ * p[0].y = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(2,tStep,defScale);
  * p[0].z = 0.;
- * p[1].x = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(1,tStep,DisplacementVector,defScale);
- * p[1].y = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(2,tStep,DisplacementVector,defScale);
+ * p[1].x = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(1,tStep,defScale);
+ * p[1].y = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(2,tStep,defScale);
  * p[1].z = 0.;                    // delete help;
- * p[2].x = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(1,tStep,DisplacementVector,defScale);
- * p[2].y = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(2,tStep,DisplacementVector,defScale);
+ * p[2].x = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(1,tStep,defScale);
+ * p[2].y = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(2,tStep,defScale);
  * p[2].z = 0.;
  * } else {
  * p[0].x = (FPNum) this->giveNode(1)->giveCoordinate(1);

@@ -151,7 +151,7 @@ void Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLoc
     answer.zero();
     for (int i = 1; i <= n.giveSize(); ++i) {
         for (int j = 1; j <= dofIDs.giveSize(); ++j) {
-            answer.at(j) += n.at(i)*this->giveNode(i)->giveDofWithID(dofIDs.at(j))->giveUnknown(EID_MomentumBalance, mode, tStep);
+            answer.at(j) += n.at(i)*this->giveNode(i)->giveDofWithID(dofIDs.at(j))->giveUnknown(mode, tStep);
         }
     }
 }

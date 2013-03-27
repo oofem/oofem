@@ -50,7 +50,7 @@ DofDistributedPrimaryField :: ~DofDistributedPrimaryField()
 double
 DofDistributedPrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *atTime)
 {
-    return dof->giveUnknown(this->ut, mode, atTime);
+    return dof->giveUnknown(mode, atTime);
 }
 
 FloatArray *
@@ -77,9 +77,9 @@ DofDistributedPrimaryField :: initialize(ValueModeType mode, TimeStep *atTime, F
             int eqNum = iDof->__giveEquationNumber();
             double val;
             if ( eqNum ) {
-                iDof->giveUnknownsDictionaryValue(atTime, this->ut, mode, val);
+                iDof->giveUnknownsDictionaryValue(atTime, mode, val);
                 answer.at(eqNum) = val;
-                //answer.at(eqNum) = iDof->giveUnknown(this->ut, mode, atTime);
+                //answer.at(eqNum) = iDof->giveUnknown( mode, atTime);
             }
         }
     }
@@ -114,7 +114,7 @@ DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *atTime, Float
                 }
             }
 
-            iDof->updateUnknownsDictionary(atTime, this->ut, mode, val);
+            iDof->updateUnknownsDictionary(atTime, mode, val);
         }
     }
 }

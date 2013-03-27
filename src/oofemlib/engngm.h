@@ -506,7 +506,7 @@ public:
      * their associated unknowns.
      * @see Dof::giveUnknown
      */
-    virtual double giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
+    virtual double giveUnknownComponent(ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
     virtual double giveUnknownComponent(UnknownType, ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
 
 #ifdef __PARALLEL_MODE
@@ -827,7 +827,7 @@ public:
      * Usually the hash algorithm should produce index that depend on time step relatively to
      * actual one to avoid storage of complete history.
      */
-    virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN) { return 0; }
+    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN) { return 0; }
     /**
      * Returns UnknownNUmberingScheme related to given EquationID
      */

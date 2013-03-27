@@ -125,7 +125,7 @@ Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, Fl
     k = 0;
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
         this->giveDofManDofIDMask(i, type, dofIDMask);
-        this->giveDofManager(i)->giveUnknownVector(vec, dofIDMask, type, u, stepN);
+        this->giveDofManager(i)->giveUnknownVector(vec, dofIDMask, u, stepN);
         nDofs = vec.giveSize();
         for ( int j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
@@ -134,7 +134,7 @@ Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, Fl
 
     for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
         this->giveInternalDofManDofIDMask(i, type, dofIDMask);
-        this->giveInternalDofManager(i)->giveUnknownVector(vec, dofIDMask, type, u, stepN);
+        this->giveInternalDofManager(i)->giveUnknownVector(vec, dofIDMask, u, stepN);
         nDofs = vec.giveSize();
         for ( int j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
@@ -170,7 +170,7 @@ Element :: computeBoundaryVectorOf(int boundary, EquationID type, ValueModeType 
     k = 0;
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
         this->giveDofManDofIDMask(bNodes.at(i), type, dofIDMask);
-        this->giveDofManager(bNodes.at(i))->giveUnknownVector(vec, dofIDMask, type, u, stepN);
+        this->giveDofManager(bNodes.at(i))->giveUnknownVector(vec, dofIDMask, u, stepN);
         for ( int j = 1; j <= vec.giveSize(); j++ ) {
             answer.at(++k) = vec.at(j);
         }

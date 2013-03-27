@@ -169,7 +169,7 @@ LevelSetPCS :: updatePosition(TimeStep *atTime)
                     mask.setValues(3, V_u, V_v, V_w);
                 }
 
-                domain->giveDofManager(inode)->giveUnknownVector( un, mask, EID_MomentumBalance, VM_Total, atTime->givePreviousStep() );
+                domain->giveDofManager(inode)->giveUnknownVector( un, mask, VM_Total, atTime->givePreviousStep() );
                 elems = contable->giveDofManConnectivityArray(inode);
                 // loop over shared elements
                 volume = 0.0;

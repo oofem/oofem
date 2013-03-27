@@ -220,7 +220,7 @@ void MixedGradientPressureDirichlet :: computeFields(FloatArray &sigmaDev, doubl
 {
     EngngModel *emodel = this->giveDomain()->giveEngngModel();
     FloatArray tmp;
-    vol = this->giveVolDof()->giveUnknown(eid, VM_Total, tStep);
+    vol = this->giveVolDof()->giveUnknown(VM_Total, tStep);
     int npeq = emodel->giveNumberOfDomainEquations(this->giveDomain()->giveNumber(), EModelDefaultPrescribedEquationNumbering());
     // sigma = residual (since we use the slave dofs) = f_ext - f_int
     sigmaDev.resize(npeq);
@@ -358,12 +358,12 @@ double MixedGradientPressureDirichlet :: giveUnknown(PrimaryField &field, ValueM
 }
 
 
-double MixedGradientPressureDirichlet :: giveUnknown(EquationID eid, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
+double MixedGradientPressureDirichlet :: giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
 {
     if (this->isDevDof(dof)) {
         return this->devGradient(dof->giveNumber());
     }
-    return this->giveUnknown(this->giveVolDof()->giveUnknown(eid, mode, tStep), this->devGradient, mode, tStep, dof);
+    return this->giveUnknown(this->giveVolDof()->giveUnknown(mode, tStep), this->devGradient, mode, tStep, dof);
 }
 
 

@@ -266,7 +266,7 @@ void Quad1_ht :: drawScalar(oofegGraphicContext &context)
 
         FloatArray r;
         for ( i = 0; i < 4; i++ ) {
-            this->giveNode(i + 1)->giveUnknownVector(r, dofMask, EID_ConservationEquation, VM_Total, tStep);
+            this->giveNode(i + 1)->giveUnknownVector(r, dofMask, VM_Total, tStep);
             s [ i ] = r.at(1);
 
             p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);

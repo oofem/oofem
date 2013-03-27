@@ -49,7 +49,7 @@ EIPrimaryUnknownMapper :: EIPrimaryUnknownMapper() : PrimaryUnknownMapper()
 #define OOFEM_MAPPING_CHECK_REGIONS
 
 int
-EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode, EquationID ut,
+EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
                                        Domain *oldd, Domain *newd,  TimeStep *tStep)
 {
     int inode, nd_nnodes = newd->giveNumberOfDofManagers();
@@ -86,7 +86,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode, E
 
 #endif
 
-        if ( this->evaluateAt(unknownValues, dofMask, ut, mode, oldd, * newd->giveNode(inode)->giveCoordinates(), reglist, tStep) ) {
+        if ( this->evaluateAt(unknownValues, dofMask, mode, oldd, * newd->giveNode(inode)->giveCoordinates(), reglist, tStep) ) {
             //
             //  WARNING !! LIMITED IMPLEMENTATION HERE !!
             //
@@ -116,7 +116,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode, E
 
 
 int
-EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, EquationID ut, ValueModeType mode,
+EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, ValueModeType mode,
                                      Domain *oldd, FloatArray &coords, IntArray &regList, TimeStep *tStep)
 {
     Element *oelem;

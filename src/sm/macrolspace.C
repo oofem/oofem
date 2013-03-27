@@ -176,9 +176,9 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     for ( int i = 1; i <= this->giveNumberOfNodes(); i++ ) { //8 nodes
         DofMan = microDomain->giveDofManager(i);
         //global displacements
-        displ_x.at(i) = this->giveNode(i)->giveDof(1)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-        displ_y.at(i) = this->giveNode(i)->giveDof(2)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-        displ_z.at(i) = this->giveNode(i)->giveDof(3)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+        displ_x.at(i) = this->giveNode(i)->giveDof(1)->giveUnknown(VM_Total, tStep);
+        displ_y.at(i) = this->giveNode(i)->giveDof(2)->giveUnknown(VM_Total, tStep);
+        displ_z.at(i) = this->giveNode(i)->giveDof(3)->giveUnknown(VM_Total, tStep);
     }
 
     //overrides the first load-time function to be a constant

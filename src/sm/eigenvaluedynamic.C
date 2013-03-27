@@ -99,20 +99,16 @@ EigenValueDynamic :: initializeFrom(InputRecord *ir)
 }
 
 
-double EigenValueDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
-                                                  TimeStep *tStep, Domain *d, Dof *dof)
+double EigenValueDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displacement, eigenvalue.
 // This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
+#if DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
-
-    if ( chc != EID_MomentumBalance ) {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-        return 0.;
-    }
+#endif
 
     switch ( mode ) {
     case VM_Total:  // EigenVector
@@ -412,7 +408,7 @@ int EigenValueDynamic :: resolveCorrespondingEigenStepNumber(void *obj)
 void
 EigenValueDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
-    iDof->printSingleOutputAt(stream, atTime, 'd', EID_MomentumBalance, VM_Total);
+    iDof->printSingleOutputAt(stream, atTime, 'd', VM_Total);
 }
 
 #ifdef __SLEPC_MODULE

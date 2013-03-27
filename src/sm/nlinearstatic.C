@@ -228,15 +228,16 @@ NonLinearStatic :: initializeFrom(InputRecord *ir)
 }
 
 
-double NonLinearStatic :: giveUnknownComponent(EquationID chc, ValueModeType mode,
-                                               TimeStep *tStep, Domain *d, Dof *dof)
+double NonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
+#if DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
+#endif
 
 
     if ( tStep != this->giveCurrentStep() ) {
@@ -244,30 +245,25 @@ double NonLinearStatic :: giveUnknownComponent(EquationID chc, ValueModeType mod
         return 0.;
     }
 
-    if ( chc == EID_MomentumBalance ) {
-        switch ( mode ) {
-        case VM_Incremental:
-            // return incrementOfDisplacement -> at(eq);
-            // return nMethod-> giveUnknownComponent(IncrementOfSolution, eq);
-            if ( incrementOfDisplacement.isNotEmpty() ) {
-                return incrementOfDisplacement.at(eq);
-            } else {
-                return 0.;
-            }
-
-        case VM_Total:
-            if ( totalDisplacement.isNotEmpty() ) {
-                return totalDisplacement.at(eq);
-            } else {
-                return 0.;
-            }
-
-        default:
-            _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
+    switch ( mode ) {
+    case VM_Incremental:
+        // return incrementOfDisplacement -> at(eq);
+        // return nMethod-> giveUnknownComponent(IncrementOfSolution, eq);
+        if ( incrementOfDisplacement.isNotEmpty() ) {
+            return incrementOfDisplacement.at(eq);
+        } else {
+            return 0.;
         }
-    } else {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-        return 0.;
+
+    case VM_Total:
+        if ( totalDisplacement.isNotEmpty() ) {
+            return totalDisplacement.at(eq);
+        } else {
+            return 0.;
+        }
+
+    default:
+        _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
     }
 
     return 0.0;
@@ -1010,23 +1006,23 @@ NonLinearStatic :: packMigratingData(TimeStep *atTime)
             if ( _dof->isPrimaryDof() ) {
                 if ( ( _eq = _dof->__giveEquationNumber() ) ) {
                     // pack values in solution vectors
-                    _dof->updateUnknownsDictionary( atTime, EID_MomentumBalance, VM_Total, totalDisplacement.at(_eq) );
+                    _dof->updateUnknownsDictionary( atTime, VM_Total, totalDisplacement.at(_eq) );
                     if ( initialLoadVectorEmpty ) {
-                        _dof->updateUnknownsDictionary(atTime, EID_MomentumBalance, VM_RhsInitial, 0.0);
+                        _dof->updateUnknownsDictionary(atTime, VM_RhsInitial, 0.0);
                     } else {
-                        _dof->updateUnknownsDictionary( atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVector.at(_eq) );
+                        _dof->updateUnknownsDictionary( atTime, VM_RhsInitial, initialLoadVector.at(_eq) );
                     }
 
-                    _dof->updateUnknownsDictionary( atTime, EID_MomentumBalance, VM_RhsIncremental, incrementalLoadVector.at(_eq) );
+                    _dof->updateUnknownsDictionary( atTime, VM_RhsIncremental, incrementalLoadVector.at(_eq) );
                 } else if ( ( _eq = _dof->__givePrescribedEquationNumber() ) ) {
                     // pack values in prescribed solution vectors
                     if ( initialLoadVectorOfPrescribedEmpty ) {
-                        _dof->updateUnknownsDictionary(atTime, EID_MomentumBalance, VM_RhsInitial, 0.0);
+                        _dof->updateUnknownsDictionary(atTime, VM_RhsInitial, 0.0);
                     } else {
-                        _dof->updateUnknownsDictionary( atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq) );
+                        _dof->updateUnknownsDictionary( atTime, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq) );
                     }
 
-                    _dof->updateUnknownsDictionary( atTime, EID_MomentumBalance, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq) );
+                    _dof->updateUnknownsDictionary( atTime, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq) );
                 }
             } // end primary dof
 
@@ -1063,9 +1059,9 @@ NonLinearStatic :: unpackMigratingData(TimeStep *atTime)
             if ( _dof->isPrimaryDof() ) {
                 if ( ( _eq = _dof->__giveEquationNumber() ) ) {
                     // pack values in solution vectors
-                    _dof->giveUnknownsDictionaryValue( atTime, EID_MomentumBalance, VM_Total, totalDisplacement.at(_eq) );
-                    _dof->giveUnknownsDictionaryValue( atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVector.at(_eq) );
-                    _dof->giveUnknownsDictionaryValue( atTime, EID_MomentumBalance, VM_RhsIncremental, incrementalLoadVector.at(_eq) );
+                    _dof->giveUnknownsDictionaryValue( atTime, VM_Total, totalDisplacement.at(_eq) );
+                    _dof->giveUnknownsDictionaryValue( atTime, VM_RhsInitial, initialLoadVector.at(_eq) );
+                    _dof->giveUnknownsDictionaryValue( atTime, VM_RhsIncremental, incrementalLoadVector.at(_eq) );
 
  #if 0
                     // debug print
@@ -1078,8 +1074,8 @@ NonLinearStatic :: unpackMigratingData(TimeStep *atTime)
  #endif
                 } else if ( ( _eq = _dof->__givePrescribedEquationNumber() ) ) {
                     // pack values in prescribed solution vectors
-                    _dof->giveUnknownsDictionaryValue( atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq) );
-                    _dof->giveUnknownsDictionaryValue( atTime, EID_MomentumBalance, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq) );
+                    _dof->giveUnknownsDictionaryValue( atTime, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq) );
+                    _dof->giveUnknownsDictionaryValue( atTime, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq) );
 
  #if 0
                     // debug print

@@ -73,7 +73,7 @@ public:
 
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
-    virtual double giveUnknownComponent(EquationID eid, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
@@ -81,16 +81,15 @@ public:
     virtual const char *giveClassName() const { return "NLTransientTransportProblem"; }
     virtual classType giveClassID() const { return NLTransientTransportProblemClass; }
     virtual fMode giveFormulation() { return nonLinFormulation; }
-    virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN);
+    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN);
     virtual void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep);
     /**
      * Copy unknowns in DOF's from previous to current position.
-     * @param type Determines type of equation
      * @param mode What the unknown describes (increment, total value etc.).
      * @param fromTime From which time step to obtain value.
      * @param toTime To which time to copy.
      */
-    virtual void copyUnknownsInDictionary(EquationID type, ValueModeType mode, TimeStep *fromTime, TimeStep *toTime);
+    virtual void copyUnknownsInDictionary(ValueModeType mode, TimeStep *fromTime, TimeStep *toTime);
 
 protected:
     virtual void updateInternalState(TimeStep *tStep);

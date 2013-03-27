@@ -179,15 +179,16 @@ AdaptiveNonLinearStatic :: updateYourself(TimeStep *atTime)
 
 
 
-double AdaptiveNonLinearStatic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
-                                                        TimeStep *tStep, Domain *d, Dof *dof)
+double AdaptiveNonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
+#if DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
+#endif
 
     if ( tStep != this->giveCurrentStep() ) {
         _error("giveUnknownComponent: unknown time step encountered");
@@ -195,31 +196,26 @@ double AdaptiveNonLinearStatic ::  giveUnknownComponent(EquationID chc, ValueMod
     }
 
     if ( d->giveNumber() == 2 ) {
-        if ( chc == EID_MomentumBalance ) {
-            switch ( mode ) {
-            case VM_Incremental:
-                if ( d2_incrementOfDisplacement.isNotEmpty() ) {
-                    return d2_incrementOfDisplacement.at(eq);
-                } else {
-                    return 0.;
-                }
-
-            case VM_Total:
-                if ( d2_totalDisplacement.isNotEmpty() ) {
-                    return d2_totalDisplacement.at(eq);
-                } else {
-                    return 0.;
-                }
-
-            default:
-                _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
+        switch ( mode ) {
+        case VM_Incremental:
+            if ( d2_incrementOfDisplacement.isNotEmpty() ) {
+                return d2_incrementOfDisplacement.at(eq);
+            } else {
+                return 0.;
             }
-        } else {
-            _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-            return 0.;
+
+        case VM_Total:
+            if ( d2_totalDisplacement.isNotEmpty() ) {
+                return d2_totalDisplacement.at(eq);
+            } else {
+                return 0.;
+            }
+
+        default:
+            _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
         }
     } else {
-        return NonLinearStatic :: giveUnknownComponent(chc, mode, tStep, d, dof);
+        return NonLinearStatic :: giveUnknownComponent(mode, tStep, d, dof);
     }
 
     return 0.0;
@@ -253,10 +249,10 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
     totalDisplacement.zero();
     incrementOfDisplacement.zero();
 
-    result &= mapper.mapAndUpdate( totalDisplacement, VM_Total, EID_MomentumBalance,
+    result &= mapper.mapAndUpdate( totalDisplacement, VM_Total,
                                   sourceProblem->giveDomain(1), this->giveDomain(1), sourceProblem->giveCurrentStep() );
 
-    result &= mapper.mapAndUpdate( incrementOfDisplacement, VM_Incremental, EID_MomentumBalance,
+    result &= mapper.mapAndUpdate( incrementOfDisplacement, VM_Incremental,
                                   sourceProblem->giveDomain(1), this->giveDomain(1), sourceProblem->giveCurrentStep() );
 
     timer.stopTimer();
@@ -479,10 +475,10 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     d2_totalDisplacement.zero();
     d2_incrementOfDisplacement.zero();
 
-    result &= mapper.mapAndUpdate( d2_totalDisplacement, VM_Total, EID_MomentumBalance,
+    result &= mapper.mapAndUpdate( d2_totalDisplacement, VM_Total,
                                   this->giveDomain(1), this->giveDomain(2), this->giveCurrentStep() );
 
-    result &= mapper.mapAndUpdate( d2_incrementOfDisplacement, VM_Incremental, EID_MomentumBalance,
+    result &= mapper.mapAndUpdate( d2_incrementOfDisplacement, VM_Incremental,
                                   this->giveDomain(1), this->giveDomain(2), this->giveCurrentStep() );
 
     timer.stopTimer();

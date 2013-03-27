@@ -201,39 +201,35 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
 }
 
 
-double NonLinearDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
-                                                 TimeStep *tStep, Domain *d, Dof *dof)
+double NonLinearDynamic ::  giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
     int eq = dof->__giveEquationNumber();
+#if DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
+#endif
 
     if ( tStep != this->giveCurrentStep() ) {
         _error("giveUnknownComponent: unknown time step encountered");
         return 0.;
     }
 
-    if ( chc == EID_MomentumBalance ) {
-        switch ( mode ) {
-        case VM_Incremental:
-            return incrementOfDisplacement.at(eq);
+    switch ( mode ) {
+    case VM_Incremental:
+        return incrementOfDisplacement.at(eq);
 
-        case VM_Total:
-            return totalDisplacement.at(eq);
+    case VM_Total:
+        return totalDisplacement.at(eq);
 
-        case VM_Velocity:
-            return velocityVector.at(eq);
+    case VM_Velocity:
+        return velocityVector.at(eq);
 
-        case VM_Acceleration:
-            return accelerationVector.at(eq);
+    case VM_Acceleration:
+        return accelerationVector.at(eq);
 
-        default:
-            _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
-        }
-    } else {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-        return 0.;
+    default:
+        _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
     }
 
     return 0.0;
@@ -388,9 +384,9 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
 
                 jj = iDof->__giveEquationNumber();
                 if ( jj ) {
-                    totalDisplacement.at(jj)  = iDof->giveUnknown(EID_MomentumBalance, VM_Total, stepWhenIcApply);
-                    velocityVector.at(jj)     = iDof->giveUnknown(EID_MomentumBalance, VM_Velocity, stepWhenIcApply);
-                    accelerationVector.at(jj) = iDof->giveUnknown(EID_MomentumBalance, VM_Acceleration, stepWhenIcApply);
+                    totalDisplacement.at(jj)  = iDof->giveUnknown(VM_Total, stepWhenIcApply);
+                    velocityVector.at(jj)     = iDof->giveUnknown(VM_Velocity, stepWhenIcApply);
+                    accelerationVector.at(jj) = iDof->giveUnknown(VM_Acceleration, stepWhenIcApply);
                 }
             }
         }
@@ -729,7 +725,7 @@ NonLinearDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
         VM_Total, VM_Velocity, VM_Acceleration
     };
 
-    iDof->printMultipleOutputAt(stream, atTime, dofchar, EID_MomentumBalance, dofmodes, 3);
+    iDof->printMultipleOutputAt(stream, atTime, dofchar, dofmodes, 3);
 }
 
 contextIOResultType NonLinearDynamic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
@@ -1135,23 +1131,23 @@ NonLinearDynamic :: packMigratingData(TimeStep *atTime)
             if ( _dof->isPrimaryDof() ) {
                 if ( ( _eq = _dof->__giveEquationNumber() ) ) {
                     // pack values in solution vectors
-                    _dof->updateUnknownsDictionary( atTime, EID_MomentumBalance, VM_Total, totalDisplacement.at(_eq) );
+                    _dof->updateUnknownsDictionary( atTime, VM_Total, totalDisplacement.at(_eq) );
                     if ( initialLoadVectorEmpty ) {
-                        _dof->updateUnknownsDictionary(atTime, EID_MomentumBalance, VM_RhsInitial, 0.0);
+                        _dof->updateUnknownsDictionary(atTime, VM_RhsInitial, 0.0);
                     } else {
-                        _dof->updateUnknownsDictionary( atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVector.at(_eq) );
+                        _dof->updateUnknownsDictionary( atTime, VM_RhsInitial, initialLoadVector.at(_eq) );
                     }
 
-                    _dof->updateUnknownsDictionary( atTime, EID_MomentumBalance, VM_RhsIncremental, incrementalLoadVector.at(_eq) );
+                    _dof->updateUnknownsDictionary( atTime, VM_RhsIncremental, incrementalLoadVector.at(_eq) );
                 } else if ( ( _eq = _dof->__givePrescribedEquationNumber() ) ) {
                     // pack values in prescribed solution vectors
                     if ( initialLoadVectorOfPrescribedEmpty ) {
-                        _dof->updateUnknownsDictionary(atTime, EID_MomentumBalance, VM_RhsInitial, 0.0);
+                        _dof->updateUnknownsDictionary(atTime, VM_RhsInitial, 0.0);
                     } else {
-                        _dof->updateUnknownsDictionary( atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq) );
+                        _dof->updateUnknownsDictionary( atTime, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq) );
                     }
 
-                    _dof->updateUnknownsDictionary( atTime, EID_MomentumBalance, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq) );
+                    _dof->updateUnknownsDictionary( atTime, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq) );
                 }
             } // end primary dof
         } // end dof loop
@@ -1184,9 +1180,9 @@ NonLinearDynamic :: unpackMigratingData(TimeStep *atTime)
             if ( _dof->isPrimaryDof() ) {
                 if ( ( _eq = _dof->__giveEquationNumber() ) ) {
                     // pack values in solution vectors
-                    _dof->giveUnknownsDictionaryValue( atTime, EID_MomentumBalance, VM_Total, totalDisplacement.at(_eq) );
-                    _dof->giveUnknownsDictionaryValue( atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVector.at(_eq) );
-                    _dof->giveUnknownsDictionaryValue( atTime, EID_MomentumBalance, VM_RhsIncremental, incrementalLoadVector.at(_eq) );
+                    _dof->giveUnknownsDictionaryValue( atTime, VM_Total, totalDisplacement.at(_eq) );
+                    _dof->giveUnknownsDictionaryValue( atTime, VM_RhsInitial, initialLoadVector.at(_eq) );
+                    _dof->giveUnknownsDictionaryValue( atTime, VM_RhsIncremental, incrementalLoadVector.at(_eq) );
 
  #if 0
                     // debug print
@@ -1199,8 +1195,8 @@ NonLinearDynamic :: unpackMigratingData(TimeStep *atTime)
  #endif
                 } else if ( ( _eq = _dof->__givePrescribedEquationNumber() ) ) {
                     // pack values in prescribed solution vectors
-                    _dof->giveUnknownsDictionaryValue( atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq) );
-                    _dof->giveUnknownsDictionaryValue( atTime, EID_MomentumBalance, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq) );
+                    _dof->giveUnknownsDictionaryValue( atTime, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq) );
+                    _dof->giveUnknownsDictionaryValue( atTime, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq) );
 
  #if 0
                     // debug print

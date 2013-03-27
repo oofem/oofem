@@ -215,15 +215,15 @@ CBSElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type
         answer.resize( this->giveSpatialDimension() );
         int dofindx;
         if ( ( dofindx = n->findDofWithDofId(V_u) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(EID_MomentumBalance, VM_Total, atTime);
+            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
         }
 
         if ( ( dofindx = n->findDofWithDofId(V_v) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(EID_MomentumBalance, VM_Total, atTime);
+            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
         }
 
         if ( ( dofindx = n->findDofWithDofId(V_w) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(EID_MomentumBalance, VM_Total, atTime);
+            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
         }
 
         return 1;
@@ -231,7 +231,7 @@ CBSElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type
         int dofindx;
         if ( ( dofindx = n->findDofWithDofId(P_f) ) ) {
             answer.resize(1);
-            answer.at(1) = n->giveDof(dofindx)->giveUnknown(EID_ConservationEquation, VM_Total, atTime);
+            answer.at(1) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
             return 1;
         } else {
             return 0;

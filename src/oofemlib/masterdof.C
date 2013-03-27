@@ -138,34 +138,13 @@ InitialCondition *MasterDof :: giveIc()
 }
 
 
-double MasterDof :: giveUnknown(EquationID type, ValueModeType mode, TimeStep *stepN)
+double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *stepN)
 // The key method of class Dof. Returns the value of the unknown 'u'
 // (e.g., the displacement) of the receiver, at stepN. This value may,
 // or may not be already available. It may depend on a boundary (if it
 // is not a predicted unknown) or initial condition. stepN is not the
 // current time step n, it is assumed to be the previous one (n-1).
 {
-    /*   double value ;
-     *
-     *  if (stepN -> isTheCurrentTimeStep()) {
-     *     if (unknowns -> includes(u))                       // already known
-     *  value = unknowns -> at(u) ;
-     *     else {
-     *  if (stepN->giveNumber()==0) {                   // step 0
-     *    if (this->hasIcOn(u))                        //   init. cond.
-     *       value = this -> giveIc() -> give(u) ;
-     *    else                                         //   no init. cond.
-     *       value = 0. ;}
-     *  else if (this->hasBc() && islower(u))           // bound . cond.
-     *    value = this -> giveBc() -> give(u,stepN) ;
-     *  else                                            // compute it !
-     *    value = this -> computeUnknown(u,stepN) ;
-     *  unknowns -> add(u,value) ;}}
-     *
-     *  else
-     *     value = this -> givePastUnknown(u,stepN) ;         // the previous step
-     *
-     *  return value ;   */
     double value;
 
 #ifdef DEBUG
@@ -201,9 +180,9 @@ double MasterDof :: giveUnknown(EquationID type, ValueModeType mode, TimeStep *s
     // directly since dictionaries keep the history.
 
     //    return ( dofManager->giveDomain()->giveEngngModel()->
-    //         giveUnknownComponent(type, mode, stepN, dofManager->giveDomain(), this) );
+    //         giveUnknownComponent(mode, stepN, dofManager->giveDomain(), this) );
 
-    //         int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(type, mode, stepN);
+    //         int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(mode, stepN);
     //         if ( unknowns->includes(hash) ) {
     //             return unknowns->at(hash);
     //         } else {
@@ -217,7 +196,7 @@ double MasterDof :: giveUnknown(EquationID type, ValueModeType mode, TimeStep *s
     }
 
     return ( dofManager->giveDomain()->giveEngngModel()->
-            giveUnknownComponent(type, mode, stepN, dofManager->giveDomain(), this) );
+            giveUnknownComponent(mode, stepN, dofManager->giveDomain(), this) );
 }
 
 double MasterDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *stepN)
@@ -324,31 +303,21 @@ void MasterDof :: updateYourself(TimeStep *tStep)
      * unknowns     = new Dictionary() ; */
 }
 
-void MasterDof :: updateUnknownsDictionary(TimeStep *tStep, EquationID type,
-                                           ValueModeType mode, double dofValue)
+void MasterDof :: updateUnknownsDictionary(TimeStep *tStep, ValueModeType mode, double dofValue)
 {
     // Updates the receiver's unknown dictionary at end of step.
     // to value dofValue.
-#ifdef DEBUG
-    // if (type != this->giveUnknownType ())
-    //  _error ("giveUnknown: Noncompatible Request");
-#endif
 
-    int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(type, mode, tStep);
+    int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(mode, tStep);
     unknowns->at(hash) = dofValue;
 }
 
-void MasterDof :: giveUnknownsDictionaryValue(TimeStep *tStep, EquationID type,
-                                              ValueModeType mode, double &dofValue)
+void MasterDof :: giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode, double &dofValue)
 {
     // Updates the receiver's unknown dictionary at end of step.
     // to value dofValue.
-#ifdef DEBUG
-    // if (type != this->giveUnknownType ())
-    //  _error ("giveUnknown: Noncompatible Request");
-#endif
 
-    int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(type, mode, tStep);
+    int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(mode, tStep);
     dofValue = unknowns->at(hash);
 }
 

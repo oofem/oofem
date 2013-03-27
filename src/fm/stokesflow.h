@@ -105,7 +105,7 @@ public:
      */
     virtual void updateYourself(TimeStep *tStep);
 
-    virtual double giveUnknownComponent(EquationID eid, ValueModeType mode, TimeStep *tStep, Domain *domain, Dof *dof);
+    virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *domain, Dof *dof);
     virtual double giveUnknownComponent(UnknownType ut, ValueModeType mode, TimeStep *tStep, Domain *domain, Dof *dof);
 
     virtual int forceEquationNumbering(int id);

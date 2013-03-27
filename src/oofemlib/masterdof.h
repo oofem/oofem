@@ -131,7 +131,7 @@ public:
 
     virtual int askNewEquationNumber(TimeStep *tStep);
 
-    virtual double giveUnknown(EquationID eid, ValueModeType mode, TimeStep *stepN);
+    virtual double giveUnknown(ValueModeType mode, TimeStep *stepN);
     virtual double giveUnknown(PrimaryField & field, ValueModeType, TimeStep *stepN);
 
     virtual bool hasBc(TimeStep *tStep);
@@ -146,9 +146,9 @@ public:
     virtual void printYourself();
     virtual void updateYourself(TimeStep *tStep);
 
-    virtual void updateUnknownsDictionary(TimeStep *tStep, EquationID type, ValueModeType mode, double dofValue);
+    virtual void updateUnknownsDictionary(TimeStep *tStep, ValueModeType mode, double dofValue);
 
-    virtual void giveUnknownsDictionaryValue(TimeStep *tStep, EquationID type, ValueModeType mode, double &dofValue);
+    virtual void giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode, double &dofValue);
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);

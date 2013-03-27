@@ -159,14 +159,13 @@ SUPG :: initializeFrom(InputRecord *ir)
 
 
 double
-SUPG :: giveUnknownComponent(EquationID chc, ValueModeType mode,
-                             TimeStep *tStep, Domain *d, Dof *dof)
+SUPG :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displaacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
 
     if ( this->requiresUnknownsDictionaryUpdate() ) {
-        int hash = this->giveUnknownDictHashIndx(chc, mode, tStep);
+        int hash = this->giveUnknownDictHashIndx(mode, tStep);
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
         } else {
@@ -179,26 +178,19 @@ SUPG :: giveUnknownComponent(EquationID chc, ValueModeType mode,
             _error("giveUnknownComponent: invalid equation number");
         }
 
-        if ( chc == EID_ConservationEquation ) { // pressures
-            return VelocityPressureField->giveUnknownValue(dof, mode, tStep);
-        } else if ( chc == EID_MomentumBalance ) { // velocities & accelerations
-            if ( mode == VM_Acceleration ) {
-                return accelerationVector.at(eq);
-                /*
-                * if (tStep->isTheCurrentTimeStep()) {
-                * return accelerationVector.at(eq);
-                * } else if (tStep == givePreviousStep()) {
-                * return previousAccelerationVector.at(eq);
-                * } else _error ("giveUnknownComponent: VM_Acceleration history past previous step not supported");
-                */
-            } else if ( mode == VM_Velocity ) {
-                return VelocityPressureField->giveUnknownValue(dof, VM_Total, tStep);
-            } else {
-                return VelocityPressureField->giveUnknownValue(dof, mode, tStep);
-            }
+        if ( mode == VM_Acceleration ) {
+            return accelerationVector.at(eq);
+            /*
+            * if (tStep->isTheCurrentTimeStep()) {
+            * return accelerationVector.at(eq);
+            * } else if (tStep == givePreviousStep()) {
+            * return previousAccelerationVector.at(eq);
+            * } else _error ("giveUnknownComponent: VM_Acceleration history past previous step not supported");
+            */
+        } else if ( mode == VM_Velocity ) {
+            return VelocityPressureField->giveUnknownValue(dof, VM_Total, tStep);
         } else {
-            _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-            return 0.;
+            return VelocityPressureField->giveUnknownValue(dof, mode, tStep);
         }
     }
     return 0;
@@ -939,9 +931,9 @@ SUPG :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 
     DofIDItem type = iDof->giveDofID();
     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-        iDof->printSingleOutputAt(stream, atTime, 'v', EID_MomentumBalance, VM_Total, uscale);
+        iDof->printSingleOutputAt(stream, atTime, 'v', VM_Total, uscale);
     } else if ( type == P_f ) {
-        iDof->printSingleOutputAt(stream, atTime, 'p', EID_ConservationEquation, VM_Total, pscale);
+        iDof->printSingleOutputAt(stream, atTime, 'p', VM_Total, pscale);
     } else {
         _error("printDofOutputAt: unsupported dof type");
     }
@@ -986,9 +978,9 @@ SUPG :: applyIC(TimeStep *stepWhenIcApply)
                 DofIDItem type = iDof->giveDofID();
                 if ( jj ) {
                     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-                        vp_vector->at(jj) = iDof->giveUnknown(EID_MomentumBalance, VM_Total, stepWhenIcApply);
+                        vp_vector->at(jj) = iDof->giveUnknown(VM_Total, stepWhenIcApply);
                     } else {
-                        vp_vector->at(jj) = iDof->giveUnknown(EID_ConservationEquation, VM_Total, stepWhenIcApply);
+                        vp_vector->at(jj) = iDof->giveUnknown(VM_Total, stepWhenIcApply);
                     }
                 }
             }
@@ -1208,21 +1200,21 @@ SUPG :: updateDofUnknownsDictionary_predictor(TimeStep *tStep)
                 Dof *iDof = inode->giveDof(i);
                 DofIDItem type = iDof->giveDofID();
                 if ( !iDof->hasBc(tStep) ) {
-                    prev_val = iDof->giveUnknown( EID_MomentumBalance_ConservationEquation, VM_Total, tStep->givePreviousStep() );
-                    accel   = iDof->giveUnknown( EID_MomentumBalance_ConservationEquation, VM_Acceleration, tStep->givePreviousStep() );
+                    prev_val = iDof->giveUnknown( VM_Total, tStep->givePreviousStep() );
+                    accel    = iDof->giveUnknown( VM_Acceleration, tStep->givePreviousStep() );
                     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
                         val = prev_val +  deltaT * accel;
                     } else {
                         val = prev_val;
                     }
 
-                    iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance_ConservationEquation, VM_Total, val); // velocity
-                    iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance_ConservationEquation, VM_Acceleration, accel); // acceleration
+                    iDof->updateUnknownsDictionary(tStep, VM_Total, val); // velocity
+                    iDof->updateUnknownsDictionary(tStep, VM_Acceleration, accel); // acceleration
                 } else {
                     val = iDof->giveBcValue(VM_Total, tStep);
-                    iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance_ConservationEquation, VM_Total, val); // velocity
+                    iDof->updateUnknownsDictionary(tStep, VM_Total, val); // velocity
                     //val = iDof -> giveBcValue (VM_Velocity,tStep) ; //velocity of velocity is acceleration
-                    iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance_ConservationEquation, VM_Acceleration, 0.0); // acceleration
+                    iDof->updateUnknownsDictionary(tStep, VM_Acceleration, 0.0); // acceleration
                 }
             }
         }
@@ -1246,18 +1238,18 @@ SUPG :: updateDofUnknownsDictionary_corrector(TimeStep *tStep)
                 DofIDItem type = iDof->giveDofID();
                 if ( !iDof->hasBc(tStep) ) {
                     double val, prev_val;
-                    prev_val = iDof->giveUnknown(EID_MomentumBalance_ConservationEquation, VM_Total, tStep);
+                    prev_val = iDof->giveUnknown(VM_Total, tStep);
                     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
                         val = prev_val +  deltaT *alpha *incrementalSolutionVector.at( iDof->__giveEquationNumber() );
                     } else {
                         val = prev_val +  incrementalSolutionVector.at( iDof->__giveEquationNumber() );
                     }
 
-                    iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance_ConservationEquation, VM_Total, val); // velocity
+                    iDof->updateUnknownsDictionary(tStep, VM_Total, val); // velocity
 
-                    prev_val = iDof->giveUnknown(EID_MomentumBalance_ConservationEquation, VM_Acceleration, tStep);
+                    prev_val = iDof->giveUnknown(VM_Acceleration, tStep);
                     val = prev_val +  incrementalSolutionVector.at( iDof->__giveEquationNumber() );
-                    iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance_ConservationEquation, VM_Acceleration, val); // acceleration
+                    iDof->updateUnknownsDictionary(tStep, VM_Acceleration, val); // acceleration
                 }
             }
         }
@@ -1265,7 +1257,7 @@ SUPG :: updateDofUnknownsDictionary_corrector(TimeStep *tStep)
 }
 
 int
-SUPG :: giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN)
+SUPG :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN)
 {
     if ( ( stepN == this->giveCurrentStep() ) || ( stepN == this->givePreviousStep() ) ) {
         return ( stepN->giveNumber() % 2 ) * 100 + mode;
@@ -1503,7 +1495,7 @@ SUPG :: initPetscContexts()
  *      for (_k=1; _k<=_je->giveNumberOfNodes(); _k++) {
  *        int _code = __DofManActivityMask.at(_je->giveNode(_k)->giveNumber());
  *        if ((_code == __NODE_IN) || (_code == __NODE_OUT_ACTIVE)) { // active node (not candidate)
- *          _je->giveNode(_k)->giveUnknownVector(vv, dofMask, EID_MomentumBalance, VM_Total, tStep);
+ *          _je->giveNode(_k)->giveUnknownVector(vv, dofMask, VM_Total, tStep);
  *          vx += vv.at(1); vy += vv.at(2);
  *          _cnt++;
  *        }
@@ -1517,13 +1509,13 @@ SUPG :: initPetscContexts()
  *      DofIDItem type = iDof->giveDofID();
  *      if (!iDof->hasBc(tStep)) {
  *        if (type == V_u)
- *          iDof->updateUnknownsDictionary (tStep, EID_MomentumBalance_ConservationEquation, VM_Total, vx); // velocity
+ *          iDof->updateUnknownsDictionary (tStep, VM_Total, vx); // velocity
  *        else if (type == V_v)
- *          iDof->updateUnknownsDictionary (tStep, EID_MomentumBalance_ConservationEquation, VM_Total, vy); // velocity
+ *          iDof->updateUnknownsDictionary (tStep, VM_Total, vy); // velocity
  *          else if (type == V_w) {
  *            _error ("3d not yet supported");
  *          } else if (type == P_f) {
- *          //iDof->updateUnknownsDictionary (tStep, EID_MomentumBalance_ConservationEquation, VM_Total, 0.0);
+ *          //iDof->updateUnknownsDictionary (tStep, VM_Total, 0.0);
  *          } else {_error2 ("unknown DOF type encountered (%s)", __DofIDItemToString (type));}
  *      }
  *    }

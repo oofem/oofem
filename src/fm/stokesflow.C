@@ -240,15 +240,9 @@ int StokesFlow :: forceEquationNumbering(int id)
 }
 
 
-double StokesFlow :: giveUnknownComponent(EquationID chc, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
+double StokesFlow :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
-    if ( ( chc == EID_ConservationEquation ) || ( chc == EID_MomentumBalance ) || ( chc == EID_MomentumBalance_ConservationEquation ) ) {
-        return velocityPressureField->giveUnknownValue(dof, mode, tStep);
-    } else {
-        OOFEM_ERROR("giveUnknownComponent: Unknown is of undefined equation id for this problem");
-    }
-
-    return 0;
+    return velocityPressureField->giveUnknownValue(dof, mode, tStep);
 }
 
 double StokesFlow::giveUnknownComponent(UnknownType ut, ValueModeType vmt, TimeStep *atTime, Domain *d, Dof *dof)
@@ -294,10 +288,11 @@ int StokesFlow :: checkConsistency()
 void StokesFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
     DofIDItem type = iDof->giveDofID();
+    ///@todo This won't work with slave dofs, xfem etc.
     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-        iDof->printSingleOutputAt(stream, atTime, 'v', EID_MomentumBalance, VM_Total, 1);
+        iDof->printSingleOutputAt(stream, atTime, 'v', VM_Total, 1);
     } else if ( type == P_f ) {
-        iDof->printSingleOutputAt(stream, atTime, 'p', EID_ConservationEquation, VM_Total, 1);
+        iDof->printSingleOutputAt(stream, atTime, 'p', VM_Total, 1);
     } else {
         OOFEM_ERROR("printDofOutputAt: unsupported dof type");
     }

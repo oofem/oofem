@@ -112,29 +112,27 @@ LinearStability :: initializeFrom(InputRecord *ir)
 }
 
 
-double LinearStability ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
-                                                TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displaacement, eigen value.
-// This function translates this request to numerical method language
+double LinearStability :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
+// returns unknown quantity like displacement, eigen value.
 {
     int eq = dof->__giveEquationNumber();
+#if DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
+#endif
 
     int activeVector = ( int ) tStep->giveTargetTime();
-    if ( chc == EID_MomentumBalance ) {
-        switch ( mode ) {
-        case VM_Total: // EigenVector
-            if ( activeVector ) {
-                return eigVec.at(eq, activeVector);
-            }
-
-            return displacementVector.at(eq);
-
-        default:
-            _error("giveUnknownComponent: Unknown is of undefined type for this problem");
+    switch ( mode ) {
+    case VM_Total: // EigenVector
+        if ( activeVector ) {
+            return eigVec.at(eq, activeVector);
         }
+
+        return displacementVector.at(eq);
+
+    default:
+        _error("giveUnknownComponent: Unknown is of undefined type for this problem");
     }
 
     return 0.;
@@ -555,6 +553,6 @@ contextIOResultType LinearStability :: restoreContext(DataStream *stream, Contex
 void
 LinearStability :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
-    iDof->printSingleOutputAt(stream, atTime, 'd', EID_MomentumBalance, VM_Total);
+    iDof->printSingleOutputAt(stream, atTime, 'd', VM_Total);
 }
 } // end namespace oofem

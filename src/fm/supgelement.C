@@ -420,15 +420,11 @@ SUPGElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
         answer.resize( this->giveSpatialDimension() );
         int dofindx;
         if ( ( dofindx = n->findDofWithDofId(V_u) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(EID_MomentumBalance, VM_Total, atTime);
-        }
-
-        if ( ( dofindx = n->findDofWithDofId(V_v) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(EID_MomentumBalance, VM_Total, atTime);
-        }
-
-        if ( ( dofindx = n->findDofWithDofId(V_w) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(EID_MomentumBalance, VM_Total, atTime);
+            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
+        } else if ( ( dofindx = n->findDofWithDofId(V_v) ) ) {
+            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
+        } else if ( ( dofindx = n->findDofWithDofId(V_w) ) ) {
+            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
         }
 
         return 1;
@@ -436,7 +432,7 @@ SUPGElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
         int dofindx;
         if ( ( dofindx = n->findDofWithDofId(P_f) ) ) {
             answer.resize(1);
-            answer.at(1) = n->giveDof(dofindx)->giveUnknown(EID_ConservationEquation, VM_Total, atTime);
+            answer.at(1) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
             return 1;
         } else {
             return 0;
