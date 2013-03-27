@@ -205,7 +205,7 @@ GaussIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
             coord->at(1) = coords_xi1.at(i);
             coord->at(2) = coords_xi2.at(i);
             coord->at(3) = coords_xi3.at(j);
-            this->gaussPointArray [ ind ] = new GaussPoint(this, 1, coord, weightsTri.at(i) * weightsDepth.at(j), mode);
+            this->gaussPointArray [ ind ] = new GaussPoint(this, ind+1, coord, weightsTri.at(i) * weightsDepth.at(j), mode);
             ind++;
         }
     }
