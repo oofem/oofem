@@ -52,6 +52,10 @@ protected:
     virtual void terminate(TimeStep *tStep);
     virtual void updateLoadVectors(TimeStep *stepN);
 
+
+    virtual void updateYourself(TimeStep *stepN);
+
+
     virtual double giveUnknownComponent(EquationID chc, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
     
     // for updating structure
@@ -61,8 +65,8 @@ protected:
 
     void evaluatePropagationLaw(TimeStep *tStep);
     void evaluatePropagationLawForDelamination(Element *el, EnrichmentDomain *ed, TimeStep *tStep);
-
-
+    void computeInterLaminarStressesAt(int layer, Element *el, TimeStep *tStep, std::vector < FloatArray > &interLamStresses);
+    void evaluateFractureCriterion(std::vector < FloatArray > &interLamStresses, bool &propagateFlag);
     bool crackGrowthFlag;
 public:
     StaticFracture(int i, EngngModel *_master = NULL);

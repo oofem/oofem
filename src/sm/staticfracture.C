@@ -34,6 +34,10 @@
 
 #include "staticfracture.h"
 
+// Should be moved to future FractureManager class later
+//#include "gausspnt.h"
+#include <vector>
+
 namespace oofem {
 StaticFracture :: StaticFracture(int i, EngngModel *_master) : NonLinearStatic(i, _master)
 {
@@ -47,6 +51,7 @@ StaticFracture :: solveYourselfAt(TimeStep *tStep)
 
     // Initiates the total displacement to zero in the UnknownsDictionary.
     if ( tStep->isTheFirstStep() ) {
+        printf("Initializing DofUnknownsDictionary... \n");
         this->initializeDofUnknownsDictionary(tStep);
     }
     
@@ -62,7 +67,7 @@ StaticFracture :: solveYourselfAt(TimeStep *tStep)
     
     crackGrowthFlag = false;
     NonLinearStatic :: solveYourselfAt(tStep);
-    //crackGrowthFlag = true;
+
     /* 1) Compute fracture mechanics quantities
           What should be included
           - Element wise evaluation for cohesive zones
@@ -74,11 +79,30 @@ StaticFracture :: solveYourselfAt(TimeStep *tStep)
 
        Need some class to keep track of the active propagation models and such
     */
-    this->evaluatePropagationLaw(tStep);
-    //this->forceEquationNumbering();
 
 }
 
+void 
+StaticFracture :: updateYourself(TimeStep *stepN)
+{
+    
+    NonLinearStatic :: updateYourself(stepN);
+
+    this->evaluatePropagationLaw(stepN); 
+
+    // Update the UnknownsDictionary if needed
+    if ( this->requiresUnknownsDictionaryUpdate() ) {
+        printf(" Updating DofUnknownsDictionary... \n");
+        for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
+            Domain *domain = this->giveDomain(idomain);
+            int nnodes = domain->giveNumberOfDofManagers();
+            for ( int inode = 1; inode <= nnodes; inode++ ) {
+                this->updateDofUnknownsDictionary(domain->giveDofManager(inode), stepN);
+            }
+        }
+    }
+   
+}
 
 
 void
@@ -164,17 +188,18 @@ StaticFracture :: updateLoadVectors(TimeStep *stepN)
 
 
 
+// Updating dofs and evaluating unknowns
+#if 1
+
 double 
-StaticFracture ::  giveUnknownComponent(EquationID type, ValueModeType mode,
-                                               TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displacement, velocity of equation eq
-// This function translates this request to numerical method language
+StaticFracture ::  giveUnknownComponent(EquationID type, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
+    // Returns the unknown quantity corresponding to the dof
     if ( this->requiresUnknownsDictionaryUpdate() ) {
         int hash = this->giveUnknownDictHashIndx(type, mode, tStep);
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
-        } else {
+        } else { // Value is not initiated in UnknownsDictionary
             return 0.0; ///@todo: how should one treat newly created dofs?
             //OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
         }
@@ -185,13 +210,11 @@ StaticFracture ::  giveUnknownComponent(EquationID type, ValueModeType mode,
 }
 
 
-
-
-
 void
 StaticFracture :: initializeDofUnknownsDictionary(TimeStep *tStep) 
 {
     // Initializes all dof values to zero
+    
     Domain *domain;
     Dof *iDof;
     DofManager *node;
@@ -216,6 +239,7 @@ StaticFracture :: initializeDofUnknownsDictionary(TimeStep *tStep)
 void
 StaticFracture :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
 {
+
     // update DoF unknowns dictionary. 
     Dof *iDof;
     double val;
@@ -240,6 +264,8 @@ StaticFracture :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep
 void
 StaticFracture :: setTotalDisplacementFromUnknownsInDictionary(EquationID type, ValueModeType mode, TimeStep *tStep) 
 {
+    // Sets the values in the displacement vector based on stored values in the unknowns dictionaries.
+    // Used in the beginning of each time step.
     Domain *domain;
     DofManager *inode;
     Dof *iDof;
@@ -261,10 +287,12 @@ StaticFracture :: setTotalDisplacementFromUnknownsInDictionary(EquationID type, 
 
 }
 
+#endif
 
 
 
-
+// Fracture mechanics evaluation 
+// Should be in a searate class probably - FractureManager maybe
 
 void 
 StaticFracture :: evaluatePropagationLaw(TimeStep *tStep)
@@ -289,7 +317,7 @@ StaticFracture :: evaluatePropagationLaw(TimeStep *tStep)
                     for ( int k = 1; k <= ei->giveNumberOfEnrichmentDomains(); k++ ) {                
                         EnrichmentDomain *ed; 
                         ed = ei->giveEnrichmentDomain(k);
-                        this->evaluatePropagationLawForDelamination(el, ed, tStep);                        
+                        this->evaluatePropagationLawForDelamination(el, ed, tStep); 
                     }
                 }
             }
@@ -307,17 +335,23 @@ StaticFracture :: evaluatePropagationLaw(TimeStep *tStep)
 void 
 StaticFracture :: evaluatePropagationLawForDelamination(Element *el, EnrichmentDomain *ed, TimeStep *tStep)
 {
-    // temporary 
-    crackGrowthFlag = true;  
-    if ( el->giveNumber()== 1 && tStep->isTheFirstStep() && ed->giveNumber()==1) {
+    
+    int interfaceNum = 1;
+    std::vector < FloatArray > interLamStresses;
+    this->computeInterLaminarStressesAt(interfaceNum, el, tStep, interLamStresses);
+    bool propagateFlag = false;
+    this->evaluateFractureCriterion( interLamStresses, propagateFlag );
 
-        // updateEnrichmentDomain
-        // prop law gives:
-        IntArray dofManNumbers;
+    if ( propagateFlag ) {
+        crackGrowthFlag = true;
+        printf( "\n -------------------------------\n");
+        printf( "Crack growth in element %d \n", el->giveNumber() );
         
 
-        // for example compute average stress and compare to criteria
-        for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {     
+        
+        IntArray dofManNumbers, elDofMans;
+        elDofMans = el->giveDofManArray();
+        for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {  
             // ugly piece of code that will skip enrichment of dofmans that have any bc's
             // which is not generally what you want
             #if 1
@@ -330,10 +364,11 @@ StaticFracture :: evaluatePropagationLawForDelamination(Element *el, EnrichmentD
             }
             #endif
             if ( !hasBc) {
-                dofManNumbers.followedBy(i);
+                dofManNumbers.followedBy(elDofMans.at(i));
             }
         }
-            dofManNumbers.printYourself();
+        
+        //dofManNumbers.printYourself();
         if ( DofManList *ded = dynamic_cast< DofManList * > (ed) )  {
             ded->updateEnrichmentDomain(dofManNumbers);
         }
@@ -341,5 +376,81 @@ StaticFracture :: evaluatePropagationLawForDelamination(Element *el, EnrichmentD
 
 
 }
+
+
+
+
+void 
+StaticFracture :: computeInterLaminarStressesAt(int interfaceNum, Element *el, TimeStep *tStep, std::vector < FloatArray > &interLamStresses)
+{
+    
+    IntegrationRule *irLower = el->giveIntegrationRule(interfaceNum-1); // index from 0
+    IntegrationRule *irUpper = el->giveIntegrationRule(interfaceNum);
+    GaussPoint *gp;
+
+    // find gp-pairs at the interface - should be simplified by storing this info during gp creation
+    // assumes that the number of points are the same and the ordering is the same for each layer
+    int numGP = irLower->getNumberOfIntegrationPoints();
+    double xiMax = -1.0;
+    double xiMin =  1.0;
+    
+    // find min and max xi coord
+    for ( int i = 1; i <= numGP; i++ ) {
+        gp = irLower->getIntegrationPoint(i-1);
+        if ( gp->giveCoordinate(3) > xiMax ) {
+            xiMax = gp->giveCoordinate(3); 
+        }
+        gp = irUpper->getIntegrationPoint(i-1);
+        if ( gp->giveCoordinate(3) < xiMin ) {
+            xiMin = gp->giveCoordinate(3); 
+        }
+    }
+
+    const double tol = 1.0e-8;
+    IntArray upper(0), lower(0);
+    for ( int i = 0; i < numGP; i++ ) {
+        gp = irLower->getIntegrationPoint(i);
+        if ( abs( gp->giveCoordinate(3)-xiMax) < tol ) { // upper gp
+            upper.followedBy(i);   
+        }
+        gp = irUpper->getIntegrationPoint(i);
+        if ( abs( gp->giveCoordinate(3)-xiMin) < tol ) { // lower gp
+            lower.followedBy(i); 
+        }
+    }
+
+    // compute stresses
+    int numInterfaceGP = lower.giveSize();
+    interLamStresses.resize(numInterfaceGP);
+    FloatArray vSLower, vSUpper;
+    // compute mean interface stress for a gp-pair
+    for ( int i = 1; i <= numInterfaceGP; i++ ) {
+        gp = irUpper->getIntegrationPoint( upper.at(i) );
+        el->giveIPValue(vSUpper, gp, IST_CauchyStressTensor, tStep);
+        gp = irLower->getIntegrationPoint( lower.at(i) );
+        el->giveIPValue(vSLower, gp, IST_CauchyStressTensor, tStep);
+
+        interLamStresses.at(i-1).resize( vSUpper.giveSize() );
+        interLamStresses.at(i-1) = 0.5 * ( vSUpper + vSLower );
+    }
+
+}
+
+
+
+void 
+StaticFracture :: evaluateFractureCriterion(std::vector < FloatArray > &interLamStresses, bool &propagateFlag)
+{
+    propagateFlag = false;
+    for (int  i = 1; i <= interLamStresses.size(); i++ ) {
+
+        if ( interLamStresses[i-1].at(3) > 0.0009 ) {
+            propagateFlag = true;
+            
+            return;
+        }
+    }
+}
+
 
 } // end namespace oofem
