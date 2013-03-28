@@ -61,7 +61,7 @@
 #define _IFT_DofManager_partitions "partitions"
 #define _IFT_DofManager_sharedflag "shared"
 #define _IFT_DofManager_remoteflag "remote"
-#define _IFT_DofManager_nullflag "nullflag"
+#define _IFT_DofManager_nullflag "null"
 //@}
 
 namespace oofem {
