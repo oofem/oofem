@@ -191,9 +191,10 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
     answer.resize(3);
     answer(0) = lcoords_guess(0);
     answer(1) = lcoords_guess(1);
+    answer(2) = 1.0 - lcoords_guess(0) - lcoords_guess(1);
 
     bool inside = true;
-    for ( int  i = 0; i < 2; i++ ) {
+    for ( int  i = 0; i < 3; i++ ) {
         if ( answer(i) < ( 0. - POINT_TOL ) ) {
             answer(i) = 0.;
             inside = false;
@@ -203,8 +204,6 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
         }
     }
 
-    answer(2) = 1.0 - lcoords_guess(0) - lcoords_guess(1);
-    
     return inside;
 }
 
