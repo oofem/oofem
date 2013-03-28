@@ -625,9 +625,9 @@ be used during the whole solution process.
 \item[-] The \param{refloadmode} parameter determines how the reference force load vector
 is obtained from given totalLoadVector and initialLoadVector.
 The initialLoadVector describes the part of loading which does not scale. Works only for force loading, other non-force components (temperature, prescribed displacements should always given in total values).
-If refLoadInputMode is 0 (rlm\_total, default) then the reference incremental load vector is defined as
+If \param{refloadmode} is 0 (rlm\_total, default) then the reference incremental load vector is defined as
 totalLoadVector assembled at given time.
-If refLoadInputMode is 1 (rlm\_inceremental) then the reference load vector is
+If \param{refloadmode} is 1 (rlm\_inceremental) then the reference load vector is
 obtained as incremental load vector at given time.
 \item[-] \param{solverParams} - parameters of solver. The solver type
 is determined using \param{controlmode}.
