@@ -69,16 +69,16 @@ J2plasticMaterial :: initializeFrom(InputRecord *ir)
     PlasticMaterial :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, value, IFT_J2plasticMaterial_ry, "ry");
+    IR_GIVE_FIELD(ir, value, _IFT_J2plasticMaterial_ry);
     k = value / sqrt(3.0);
 
     //  E = readDouble (initString,"e");
     // nu = readDouble (initString,"nu");
     kinematicModuli = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, kinematicModuli, IFT_J2plasticMaterial_khm, "khm");
+    IR_GIVE_OPTIONAL_FIELD(ir, kinematicModuli, _IFT_J2plasticMaterial_khm);
 
     isotropicModuli = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, isotropicModuli, IFT_J2plasticMaterial_ihm, "ihm");
+    IR_GIVE_OPTIONAL_FIELD(ir, isotropicModuli, _IFT_J2plasticMaterial_ihm);
 
     if ( fabs(kinematicModuli) > 1.e-12 ) {
         kinematicHardeningFlag = 1;

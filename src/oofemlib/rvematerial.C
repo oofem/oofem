@@ -51,7 +51,7 @@ IRResultType RVEMaterial :: initializeFrom(InputRecord *ir)
 
     // Read filename and instanciate RVE problem
 
-    IR_GIVE_FIELD(ir, this->rveFilename, IFT_MicroMaterial_fileName, "file");
+    IR_GIVE_FIELD(ir, this->rveFilename, _IFT_RVEMaterial_fileName);
 
     OOFEM_LOG_INFO("************************** Instanciating microproblem from file %s\n", rveFilename.c_str());
     OOFEMTXTDataReader drMicro(rveFilename.c_str());
@@ -70,7 +70,7 @@ IRResultType RVEMaterial :: initializeFrom(InputRecord *ir)
 
     SupressRVEoutput=0;
 
-    IR_GIVE_OPTIONAL_FIELD(ir, SupressRVEoutput, IFT_RVEMaterial_supressoutput, "supressoutput");
+    IR_GIVE_OPTIONAL_FIELD(ir, SupressRVEoutput, _IFT_RVEMaterial_supressoutput);
 
     return IRRT_OK;
 }

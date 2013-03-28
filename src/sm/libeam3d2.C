@@ -288,7 +288,7 @@ LIBeam3d2 :: initializeFrom(InputRecord *ir)
     // first call parent
     NLStructuralElement :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, referenceNode, IFT_LIBeam3d2_refnode, "refnode");
+    IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3d2_refnode);
     if ( referenceNode == 0 ) {
         _error("instanciateFrom: wrong reference node specified");
     }

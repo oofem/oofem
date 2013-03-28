@@ -81,13 +81,13 @@ SUPG :: initializeFrom(InputRecord *ir)
 
     EngngModel :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, rtolv, IFT_SUPG_rtolv, "rtolv");
+    IR_GIVE_FIELD(ir, rtolv, _IFT_SUPG_rtolv);
     atolv = 1.e-15;
-    IR_GIVE_OPTIONAL_FIELD(ir, atolv, IFT_SUPG_atolv, "atolv");
+    IR_GIVE_OPTIONAL_FIELD(ir, atolv, _IFT_SUPG_atolv);
 
 
     int __val = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, __val, IFT_SUPG_stopmaxiter, "stopmaxiter");
+    IR_GIVE_OPTIONAL_FIELD(ir, __val, _IFT_SUPG_stopmaxiter);
     if ( __val ) {
         stopmaxiter = true;
     } else {
@@ -95,32 +95,32 @@ SUPG :: initializeFrom(InputRecord *ir)
     }
 
     maxiter = 200;
-    IR_GIVE_OPTIONAL_FIELD(ir, maxiter, IFT_SUPG_maxiter, "maxiter");
+    IR_GIVE_OPTIONAL_FIELD(ir, maxiter, _IFT_SUPG_maxiter);
 
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
-    IR_GIVE_FIELD(ir, deltaT, IFT_SUPG_deltat, "deltat");
+    IR_GIVE_FIELD(ir, deltaT, _IFT_SUPG_deltat);
     deltaTLTF = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, deltaTLTF, IFT_SUPG_deltatltf, "deltatltf");
+    IR_GIVE_OPTIONAL_FIELD(ir, deltaTLTF, _IFT_SUPG_deltatltf);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, consistentMassFlag, IFT_SUPG_cmflag, "cmflag");
+    IR_GIVE_OPTIONAL_FIELD(ir, consistentMassFlag, _IFT_SUPG_cmflag);
 
     alpha = 0.5;
-    IR_GIVE_OPTIONAL_FIELD(ir, alpha, IFT_SUPG_alpha, "alpha");
+    IR_GIVE_OPTIONAL_FIELD(ir, alpha, _IFT_SUPG_alpha);
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_SUPG_scaleflag, "scaleflag");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_SUPG_scaleflag);
     equationScalingFlag = val;
     if ( equationScalingFlag ) {
-        IR_GIVE_FIELD(ir, lscale, IFT_SUPG_lscale, "lscale");
-        IR_GIVE_FIELD(ir, uscale, IFT_SUPG_uscale, "uscale");
-        IR_GIVE_FIELD(ir, dscale, IFT_SUPG_dscale, "dscale");
+        IR_GIVE_FIELD(ir, lscale, _IFT_SUPG_lscale);
+        IR_GIVE_FIELD(ir, uscale, _IFT_SUPG_uscale);
+        IR_GIVE_FIELD(ir, dscale, _IFT_SUPG_dscale);
         double vref = 1.0; // reference viscosity
         Re = dscale * uscale * lscale / vref;
     } else {
@@ -135,7 +135,7 @@ SUPG :: initializeFrom(InputRecord *ir)
     }
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_SUPG_miflag, "miflag");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_SUPG_miflag);
     if ( val == 1 ) {
         this->materialInterface = new LEPlic( 1, this->giveDomain(1) );
         this->materialInterface->initializeFrom(ir);
@@ -147,7 +147,7 @@ SUPG :: initializeFrom(InputRecord *ir)
         fm->registerField(_velocityField, FT_Velocity, true);
 
         //fsflag = 0;
-        //IR_GIVE_OPTIONAL_FIELD (ir, fsflag, IFT_SUPG_fsflag, "fsflag");
+        //IR_GIVE_OPTIONAL_FIELD (ir, fsflag, _IFT_SUPG_fsflag, "fsflag");
     } else if ( val == 2 ) {
         // positive coefficient scheme level set alg
         this->materialInterface = new LevelSetPCS( 1, this->giveDomain(1) );

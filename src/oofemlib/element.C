@@ -594,26 +594,26 @@ Element :: initializeFrom(InputRecord *ir)
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Instanciating element ",number);
 #  endif
-    IR_GIVE_FIELD(ir, material, IFT_Element_mat, _IFT_Element_mat);
+    IR_GIVE_FIELD(ir, material, _IFT_Element_mat);
 
-    IR_GIVE_FIELD(ir, crossSection, IFT_Element_crosssect, _IFT_Element_crosssect);
+    IR_GIVE_FIELD(ir, crossSection, _IFT_Element_crosssect);
 
-    IR_GIVE_FIELD(ir, dofManArray, IFT_Element_nodes, _IFT_Element_nodes);
+    IR_GIVE_FIELD(ir, dofManArray, _IFT_Element_nodes);
 
     bodyLoadArray.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, bodyLoadArray, IFT_Element_bodyload, _IFT_Element_bodyload);
+    IR_GIVE_OPTIONAL_FIELD(ir, bodyLoadArray, _IFT_Element_bodyload);
 
     boundaryLoadArray.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, boundaryLoadArray, IFT_Element_boundaryload, _IFT_Element_boundaryload);
+    IR_GIVE_OPTIONAL_FIELD(ir, boundaryLoadArray, _IFT_Element_boundaryload);
 
     elemLocalCS.resize(0, 0);
 
-    if ( ir->hasField(IFT_Element_lcs, _IFT_Element_lcs) ) { //local coordinate system
+    if ( ir->hasField(_IFT_Element_lcs) ) { //local coordinate system
         double n1 = 0.0, n2 = 0.0;
         int j;
         FloatArray triplets;
         triplets.resize(0);
-        IR_GIVE_OPTIONAL_FIELD(ir, triplets, IFT_Element_lcs, _IFT_Element_lcs);
+        IR_GIVE_OPTIONAL_FIELD(ir, triplets, _IFT_Element_lcs);
         elemLocalCS.resize(3, 3);
         for ( j = 1; j <= 3; j++ ) {
             elemLocalCS.at(j, 1) = triplets.at(j);
@@ -638,8 +638,8 @@ Element :: initializeFrom(InputRecord *ir)
 
 #ifdef __PARALLEL_MODE
     partitions.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, partitions, IFT_Element_partitions, _IFT_Element_partitions);
-    if ( ir->hasField(IFT_Element_remote, _IFT_Element_remote) ) {
+    IR_GIVE_OPTIONAL_FIELD(ir, partitions, _IFT_Element_partitions);
+    if ( ir->hasField(_IFT_Element_remote) ) {
         parallel_mode = Element_remote;
     } else {
         parallel_mode = Element_local;
@@ -647,7 +647,7 @@ Element :: initializeFrom(InputRecord *ir)
 
 #endif
 
-    IR_GIVE_OPTIONAL_FIELD(ir, activityLtf, IFT_Element_activityltf, _IFT_Element_activityltf);
+    IR_GIVE_OPTIONAL_FIELD(ir, activityLtf, _IFT_Element_activityltf);
 
     return IRRT_OK;
 }

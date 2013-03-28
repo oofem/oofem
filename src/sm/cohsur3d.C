@@ -352,15 +352,16 @@ CohesiveSurface3d :: initializeFrom(InputRecord *ir)
     StructuralElement :: initializeFrom(ir);
 
     // read the area from the input file
-    IR_GIVE_FIELD(ir, area, IFT_Beam3d_refnode, "area");
+    IR_GIVE_FIELD(ir, area, _IFT_CohSur3d_area);
     if ( area < 0. ) {
         _error("CohesiveSurface3d::instanciateFrom: negative area specified");
     }
 
     // read shift constants of second (periodic) particle form the input file (if defined)
-    IR_GIVE_OPTIONAL_FIELD(ir, kx, IFT_CohSur3d_kx, "kx");
-    IR_GIVE_OPTIONAL_FIELD(ir, ky, IFT_CohSur3d_ky, "ky");
-    IR_GIVE_OPTIONAL_FIELD(ir, kz, IFT_CohSur3d_kz, "kz");
+    ///@todo Why not a vector input instead?
+    IR_GIVE_OPTIONAL_FIELD(ir, kx, _IFT_CohSur3d_kx);
+    IR_GIVE_OPTIONAL_FIELD(ir, ky, _IFT_CohSur3d_ky);
+    IR_GIVE_OPTIONAL_FIELD(ir, kz, _IFT_CohSur3d_kz);
 
     // evaluate number of Dof Managers
     numberOfDofMans = dofManArray.giveSize();

@@ -55,7 +55,7 @@ HydratingHeMoMaterial :: initializeFrom(InputRecord *ir)
     HydrationModelInterface :: initializeFrom(ir);
 
     dvalue = -2.;
-    IR_GIVE_OPTIONAL_FIELD(ir, dvalue, IFT_HydratingHeMoMaterial_hydration, "hydration");
+    IR_GIVE_OPTIONAL_FIELD(ir, dvalue, _IFT_HydratingHeMoMaterial_hydration);
     if ( dvalue >= 0. ) {
         hydration = 1;
     } else {
@@ -70,7 +70,7 @@ HydratingHeMoMaterial :: initializeFrom(InputRecord *ir)
     if ( hydration ) {
         // mixture type: 1 - mtLafarge, 2 - mtHuber, 3 - mtC60
         value = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HydratingHeMoMaterial_mix, "mix");
+        IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_HydratingHeMoMaterial_mix);
         if ( !value ) {
             value = mtLafarge;
         }
@@ -78,7 +78,7 @@ HydratingHeMoMaterial :: initializeFrom(InputRecord *ir)
         setMixture( ( MixtureType ) value );
         printf("\nHydratingHeMoMat %d: using mixture %d.\n", giveNumber(), value);
 
-        if ( ir->hasField(IFT_HydratingHeMoMaterial_noHeat, "noheat") ) {
+        if ( ir->hasField(_IFT_HydratingHeMoMaterial_noHeat) ) {
             hydrationHeat = 0;
             printf( "HydratingHeMoMat %d: hydration heat neglected.\n", giveNumber() );
         } else {
@@ -87,7 +87,7 @@ HydratingHeMoMaterial :: initializeFrom(InputRecord *ir)
 
         if ( hydrationHeat ) {
             // include hydration internal source in LHS?
-            if ( ir->hasField(IFT_HydratingHeMoMaterial_noLHS, "nolhs") ) {
+            if ( ir->hasField(_IFT_HydratingHeMoMaterial_noLHS) ) {
                 hydrationLHS = 0;
                 printf( "HydratingHeMoMat %d: hydration heat not included in LHS.\n", giveNumber() );
             } else {

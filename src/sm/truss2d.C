@@ -299,7 +299,7 @@ Truss2d :: initializeFrom(InputRecord *ir)
     this->NLStructuralElement :: initializeFrom(ir);
 
     cs_mode = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, cs_mode, IFT_Truss2d_cs, "cs");
+    IR_GIVE_OPTIONAL_FIELD(ir, cs_mode, _IFT_Truss2d_cs);
 
     if ( cs_mode != 0 && cs_mode != 1 && cs_mode != 2 ) {
         _error("Unsupported value of cs_mode");

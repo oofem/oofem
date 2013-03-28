@@ -44,7 +44,7 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     int type = 0;
-    IR_GIVE_FIELD ( ir, type, IFT_NlIsoMoistureMaterial_isothermtype, "isothermtype" );
+    IR_GIVE_FIELD ( ir, type, _IFT_NlIsoMoistureMaterial_isothermtype );
 
     if ( type >= 6 ) {
         _error ( "initializeFrom: isothermType must be equal to 0, 1, 2 ... 5" );
@@ -53,10 +53,10 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
     this->Isotherm = ( isothermType ) type;
 
     if ( this->Isotherm == linear ) { // linear isotherm = type 0
-        IR_GIVE_FIELD ( ir, moistureCapacity, IFT_NlIsoMoistureMaterial_capa, "capa" );
+        IR_GIVE_FIELD ( ir, moistureCapacity, _IFT_NlIsoMoistureMaterial_capa );
     } else if ( this->Isotherm == multilinear ) { // multilinear isotherm = type 1
-        IR_GIVE_FIELD ( ir, iso_h, IFT_NlIsoMoistureMaterial_iso_h, "iso_h" );
-        IR_GIVE_FIELD ( ir, iso_wh, IFT_NlIsoMoistureMaterial_iso_wh, "iso_w(h)" );
+        IR_GIVE_FIELD ( ir, iso_h, _IFT_NlIsoMoistureMaterial_iso_h );
+        IR_GIVE_FIELD ( ir, iso_wh, _IFT_NlIsoMoistureMaterial_iso_wh );
 
         if ( ! ( iso_h.giveSize() == iso_wh.giveSize() ) )
             _error ( "initializeFrom: the size of 'iso_h' and 'iso_w(h)' must be the same" );
@@ -66,25 +66,25 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
                 _error ( "initializeFrom: iso_h must be in the range <0; 1>" );
         }
     } else if ( this->Isotherm == Ricken ) { // reference mentioned in Kuenzel
-        IR_GIVE_FIELD ( ir, dd, IFT_NlIsoMoistureMaterial_dd, "dd" );
+        IR_GIVE_FIELD ( ir, dd, _IFT_NlIsoMoistureMaterial_dd );
     } else if ( this->Isotherm == Kuenzel ) {
-        IR_GIVE_FIELD ( ir, wf, IFT_NlIsoMoistureMaterial_wf, "wf" );
-        IR_GIVE_FIELD ( ir, b, IFT_NlIsoMoistureMaterial_b, "b" );
+        IR_GIVE_FIELD ( ir, wf, _IFT_NlIsoMoistureMaterial_wf );
+        IR_GIVE_FIELD ( ir, b, _IFT_NlIsoMoistureMaterial_b );
     } else if ( this->Isotherm == Hansen ) {
-        IR_GIVE_FIELD ( ir, uh, IFT_NlIsoMoistureMaterial_uh, "uh" );
-        IR_GIVE_FIELD ( ir, A, IFT_NlIsoMoistureMaterial_a, "a" );
-        IR_GIVE_FIELD ( ir, nn, IFT_NlIsoMoistureMaterial_nn, "nn" );
-        IR_GIVE_FIELD ( ir, rhodry, IFT_NlIsoMoistureMaterial_rhodry, "rhodry" );
+        IR_GIVE_FIELD ( ir, uh, _IFT_NlIsoMoistureMaterial_uh );
+        IR_GIVE_FIELD ( ir, A, _IFT_NlIsoMoistureMaterial_a );
+        IR_GIVE_FIELD ( ir, nn, _IFT_NlIsoMoistureMaterial_nn );
+        IR_GIVE_FIELD ( ir, rhodry, _IFT_NlIsoMoistureMaterial_rhodry );
     } else if ( this->Isotherm == BSB ) {
-        IR_GIVE_FIELD ( ir, c, IFT_NlIsoMoistureMaterial_c, "c" );
-        IR_GIVE_FIELD ( ir, k, IFT_NlIsoMoistureMaterial_k, "k" );
-        IR_GIVE_FIELD ( ir, Vm, IFT_NlIsoMoistureMaterial_vm, "vm" );
-        IR_GIVE_FIELD ( ir, rhodry, IFT_NlIsoMoistureMaterial_rhodry, "rhodry" );
+        IR_GIVE_FIELD ( ir, c, _IFT_NlIsoMoistureMaterial_c );
+        IR_GIVE_FIELD ( ir, k, _IFT_NlIsoMoistureMaterial_k );
+        IR_GIVE_FIELD ( ir, Vm, _IFT_NlIsoMoistureMaterial_vm );
+        IR_GIVE_FIELD ( ir, rhodry, _IFT_NlIsoMoistureMaterial_rhodry );
     } else {
         _error ( "initializeFrom: isothermType must be equal to 0, 1, 2 ... 5" );
     }
 
-    IR_GIVE_FIELD ( ir, type, IFT_NlIsoMoistureMaterial_permeabilitytype, "permeabilitytype" );
+    IR_GIVE_FIELD ( ir, type, _IFT_NlIsoMoistureMaterial_permeabilitytype );
 
     if ( type >= 3 ) {
         _error ( "initializeFrom: isothermType must be equal to 0, 1, 2" );
@@ -94,8 +94,8 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
 
     if ( this->Permeability == multilin ) {
 
-        IR_GIVE_FIELD ( ir, perm_h, IFT_NlIsoMoistureMaterial_perm_h, "perm_h" );
-        IR_GIVE_FIELD ( ir, perm_ch, IFT_NlIsoMoistureMaterial_perm_ch, "perm_c(h)" );
+        IR_GIVE_FIELD ( ir, perm_h, _IFT_NlIsoMoistureMaterial_perm_h );
+        IR_GIVE_FIELD ( ir, perm_ch, _IFT_NlIsoMoistureMaterial_perm_ch );
 
         if ( ! ( perm_h.giveSize() == perm_ch.giveSize() ) )
             _error ( "initializeFrom: the size of 'perm_h' and 'perm_c(h)' must be the same" );
@@ -106,14 +106,14 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
         }
 
     } else if ( this->Permeability == Bazant ) {
-        IR_GIVE_FIELD ( ir, C1, IFT_NlIsoMoistureMaterial_c1, "c1" );
-        IR_GIVE_FIELD ( ir, n, IFT_NlIsoMoistureMaterial_n, "n" );
-        IR_GIVE_FIELD ( ir, alpha0, IFT_NlIsoMoistureMaterial_alpha0, "alpha0" );
-        IR_GIVE_FIELD ( ir, hC, IFT_NlIsoMoistureMaterial_hc, "hc" );
+        IR_GIVE_FIELD ( ir, C1, _IFT_NlIsoMoistureMaterial_c1 );
+        IR_GIVE_FIELD ( ir, n, _IFT_NlIsoMoistureMaterial_n );
+        IR_GIVE_FIELD ( ir, alpha0, _IFT_NlIsoMoistureMaterial_alpha0 );
+        IR_GIVE_FIELD ( ir, hC, _IFT_NlIsoMoistureMaterial_hc );
     } else if ( this->Permeability == Xi ) {
-        IR_GIVE_FIELD ( ir, alphah, IFT_NlIsoMoistureMaterial_alphah, "alphah" );
-        IR_GIVE_FIELD ( ir, betah, IFT_NlIsoMoistureMaterial_betah, "betah" );
-        IR_GIVE_FIELD ( ir, gammah, IFT_NlIsoMoistureMaterial_gammah, "gammah" );
+        IR_GIVE_FIELD ( ir, alphah, _IFT_NlIsoMoistureMaterial_alphah );
+        IR_GIVE_FIELD ( ir, betah, _IFT_NlIsoMoistureMaterial_betah );
+        IR_GIVE_FIELD ( ir, gammah, _IFT_NlIsoMoistureMaterial_gammah );
     } else {
         _error ( "initializeFrom: permeabilityType must be equal to 0, 1 or 2" );
     }

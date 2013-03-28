@@ -40,6 +40,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "mathfem.h"
+#include "isolinearelasticmaterial.h"
 
 namespace oofem {
 LatticeDamage2d :: LatticeDamage2d(int n, Domain *d) : StructuralMaterial(n, d), RandomMaterialExtensionInterface()
@@ -70,51 +71,51 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
     RandomMaterialExtensionInterface :: initializeFrom(ir);
 
     double value = 0.;
-    IR_GIVE_FIELD(ir, value, IFT_IsotropicLinearElasticMaterial_talpha, "talpha");
+    IR_GIVE_FIELD(ir, value, _IFT_IsotropicLinearElasticMaterial_talpha);
     propertyDictionary->add(tAlpha, value);
 
-    IR_GIVE_FIELD(ir, eNormal, IFT_LatticeDamage2d_eNormal, "e");
+    IR_GIVE_FIELD(ir, eNormal, _IFT_LatticeDamage2d_eNormal);
 
     //factor which relates the shear stiffness to the normal stiffness. Default is 1
     alphaOne = 1.;
-    IR_GIVE_OPTIONAL_FIELD(ir, alphaOne, IFT_LatticeDamage2d_alphaOne, "a1");
+    IR_GIVE_OPTIONAL_FIELD(ir, alphaOne, _IFT_LatticeDamage2d_alphaOne);
     eShear = alphaOne * eNormal;
 
     //Parameter which is used for the definition of the moment.
     alphaTwo = 1.;
-    IR_GIVE_OPTIONAL_FIELD(ir, alphaTwo, IFT_LatticeDamage2d_alphaTwo, "a2");
+    IR_GIVE_OPTIONAL_FIELD(ir, alphaTwo, _IFT_LatticeDamage2d_alphaTwo);
 
     eTorsion = alphaTwo * eNormal / 12.;
 
     softeningType = 0;
-    IR_GIVE_FIELD(ir, softeningType, IFT_LatticeDamage2d_softeningType, "stype");
+    IR_GIVE_FIELD(ir, softeningType, _IFT_LatticeDamage2d_softeningType);
 
     if ( softeningType == 1 || softeningType == 3 ) { //linear or exponential softening
-        IR_GIVE_FIELD(ir, wf, IFT_LatticeDamage2d_wf, "wf");
+        IR_GIVE_FIELD(ir, wf, _IFT_LatticeDamage2d_wf);
     } else if ( softeningType == 2 ) {      //bilinear softening
-        IR_GIVE_FIELD(ir, wf, IFT_LatticeDamage2d_wf, "wf");
+        IR_GIVE_FIELD(ir, wf, _IFT_LatticeDamage2d_wf);
         wfOne = 0.15 * wf;
-        IR_GIVE_OPTIONAL_FIELD(ir, wfOne, IFT_LatticeDamage2d_wfOne, "wf1");
+        IR_GIVE_OPTIONAL_FIELD(ir, wfOne, _IFT_LatticeDamage2d_wfOne);
         e0OneMean = 0.3 * e0Mean;
-        IR_GIVE_OPTIONAL_FIELD(ir, e0OneMean, IFT_LatticeDamage2d_e0OneMean, "e01");
+        IR_GIVE_OPTIONAL_FIELD(ir, e0OneMean, _IFT_LatticeDamage2d_e0OneMean);
     } else {
         _error("Unknown softening type");
     }
 
     localRandomType = 0; //Default: No local random field
-    IR_GIVE_OPTIONAL_FIELD(ir, localRandomType, IFT_LatticeDamage2d_localrandomtype, "randomtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, localRandomType, _IFT_LatticeDamage2d_localrandomtype);
     if ( localRandomType == 1 ) { //Gaussian random generator
         coefficientOfVariation = 0.;
-        IR_GIVE_FIELD(ir, coefficientOfVariation, IFT_LatticeDamage2d_coefficientOfVariation, "cov");
+        IR_GIVE_FIELD(ir, coefficientOfVariation, _IFT_LatticeDamage2d_coefficientOfVariation);
     }
 
     int equivType = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, equivType, IFT_LatticeDamage2d_equivType, "equivtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, equivType, _IFT_LatticeDamage2d_equivType);
     e0Mean = 0;
-    IR_GIVE_FIELD(ir, e0Mean, IFT_LatticeDamage2d_e0Mean, "e0");
+    IR_GIVE_FIELD(ir, e0Mean, _IFT_LatticeDamage2d_e0Mean);
 
-    IR_GIVE_FIELD(ir, coh, IFT_LatticeDamage2d_coh, "coh");
-    IR_GIVE_FIELD(ir, ec, IFT_LatticeDamage2d_ec, "ec");
+    IR_GIVE_FIELD(ir, coh, _IFT_LatticeDamage2d_coh);
+    IR_GIVE_FIELD(ir, ec, _IFT_LatticeDamage2d_ec);
 
     return IRRT_OK;
 }

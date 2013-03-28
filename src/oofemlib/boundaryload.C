@@ -97,17 +97,17 @@ BoundaryLoad :: initializeFrom(InputRecord *ir)
 
     result = Load :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, nDofs, IFT_BoundaryLoad_ndofs, "ndofs");
+    IR_GIVE_FIELD(ir, nDofs, _IFT_BoundaryLoad_ndofs);
 
     int value = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_BoundaryLoad_loadtype, "loadtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_BoundaryLoad_loadtype);
     lType = ( bcType ) value;
 
     value = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_BoundaryLoad_cstype, "cstype");
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_BoundaryLoad_cstype);
     coordSystemType = ( BL_CoordSystType ) value;
 
-    IR_GIVE_OPTIONAL_FIELD(ir, propertyDictionary, IFT_BoundaryLoad_properties, "properties");
+    IR_GIVE_OPTIONAL_FIELD(ir, propertyDictionary, _IFT_BoundaryLoad_properties);
 
     return result;
 }

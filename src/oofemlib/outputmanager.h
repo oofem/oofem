@@ -44,7 +44,7 @@
 
 ///@name Input fields for OutputManager
 //@{
-#define _IFT_OutputManager_name "name"
+#define _IFT_OutputManager_name "outputmanager"
 #define _IFT_OutputManager_tstepall "tstep_all"
 #define _IFT_OutputManager_tstepstep "tstep_step"
 #define _IFT_OutputManager_dofmanall "dofman_all"

@@ -79,17 +79,17 @@ IDGMaterial :: initializeFrom(InputRecord *ir)
     IsotropicDamageMaterial1 :: initializeFrom(ir);
 
     //internal Length parameter    
-    //IR_GIVE_OPTIONAL_FIELD(ir, internalLength, IFT_IDGMaterial_internalLength, "internallength");
+    //IR_GIVE_OPTIONAL_FIELD(ir, internalLength, _IFT_IDGMaterial_internalLength, "internallength");
     averType = 1;
     // averaging type approach 0-standard else stress based averaging
-    //IR_GIVE_OPTIONAL_FIELD(ir, averType, IFT_IDGMaterial_averType, "avertype");
+    //IR_GIVE_OPTIONAL_FIELD(ir, averType, _IFT_IDGMaterial_averType, "avertype");
    
     // parameter for avetType = 1
     if(averType == 1) {
         beta = 0.5;
-        //IR_GIVE_FIELD(ir, beta, IFT_IDGMaterial_beta, "beta");
+        //IR_GIVE_FIELD(ir, beta, _IFT_IDGMaterial_beta);
         t = 1;
-        //IR_GIVE_FIELD(ir, t, IFT_IDGMaterial_t, "t");
+        //IR_GIVE_FIELD(ir, t, _IFT_IDGMaterial_t, "t");
     }
 
     this->mapper.initializeFrom(ir);

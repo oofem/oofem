@@ -124,13 +124,13 @@ TR1_2D_CBS :: initializeFrom(InputRecord *ir)
 
     //<RESTRICTED_SECTION>
     this->vof = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, vof, IFT_Tr1CBS_pvof, "pvof");
+    IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1CBS_pvof);
     if ( vof > 0.0 ) {
         setPermanentVolumeFraction(vof);
         this->temp_vof = vof;
     } else {
         this->vof = 0.0;
-        IR_GIVE_OPTIONAL_FIELD(ir, vof, IFT_Tr1CBS_vof, "vof");
+        IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1CBS_vof);
         this->temp_vof = this->vof;
     }
 

@@ -380,9 +380,9 @@ Beam2d :: initializeFrom(InputRecord *ir)
     // first call parent
     StructuralElement :: initializeFrom(ir);
 
-    if ( ir->hasField(IFT_Beam2d_dofstocondense, "dofstocondense") ) {
+    if ( ir->hasField(_IFT_Beam2d_dofstocondense) ) {
         IntArray val;
-        IR_GIVE_FIELD(ir, val, IFT_Beam2d_dofstocondense, "dofstocondense");
+        IR_GIVE_FIELD(ir, val, _IFT_Beam2d_dofstocondense);
         if ( val.giveSize() >= 6 ) {
             _error("instanciateFrom: wrong input data for condensed dofs");
         }

@@ -45,10 +45,11 @@
 //@{
 #define _IFT_CompoDamageMat_exx "exx"
 #define _IFT_CompoDamageMat_eyyezz "eyyezz"
-#define _IFT_CompoDamageMat_nyxy "nyxy"
-#define _IFT_CompoDamageMat_nyyz "nyyz"
-#define _IFT_CompoDamageMat_Gxy "gxy"
-#define _IFT_CompoDamageMat_components "components"
+#define _IFT_CompoDamageMat_nuxynuxz "nuxynuxz"
+#define _IFT_CompoDamageMat_nuyz "nuyz"
+#define _IFT_CompoDamageMat_Gxy "gxygxz"
+#define _IFT_CompoDamageMat_tension_f0_gf "tension_f0_gf"
+#define _IFT_CompoDamageMat_compres_f0_gf "compres_f0_gf"
 #define _IFT_CompoDamageMat_afteriter "afteriter"
 #define _IFT_CompoDamageMat_allowSnapBack "allowsnapback"
 //@}

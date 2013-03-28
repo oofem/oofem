@@ -46,12 +46,12 @@
 
 ///@name Input fields for LatticeDamage2d
 //@{
-#define _IFT_LatticeDamage2d_eNormal "enormal"
-#define _IFT_LatticeDamage2d_alphaOne "alphaone"
-#define _IFT_LatticeDamage2d_alphaTwo "alphatwo"
+#define _IFT_LatticeDamage2d_eNormal "e"
+#define _IFT_LatticeDamage2d_alphaOne "a1"
+#define _IFT_LatticeDamage2d_alphaTwo "a2"
 #define _IFT_LatticeDamage2d_softeningType "stype"
 #define _IFT_LatticeDamage2d_wf "wf"
-#define _IFT_LatticeDamage2d_wfOne "wfone"
+#define _IFT_LatticeDamage2d_wfOne "wf1"
 #define _IFT_LatticeDamage2d_localrandomtype "randomtype"
 #define _IFT_LatticeDamage2d_coefficientOfVariation "cov"
 #define _IFT_LatticeDamage2d_equivType "equivtype"

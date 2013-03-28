@@ -79,21 +79,21 @@ UserDefinedTemperatureField :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, size, IFT_UserDefinedTemperatureField_size, "size");
+    IR_GIVE_FIELD(ir, size, _IFT_UserDefinedTemperatureField_size);
     if ( size > 3 ) {
         size = 3;
     }
 
     if ( size > 0 ) {
-        IR_GIVE_FIELD(ir, ftExpression [ 0 ], IFT_UserDefinedTemperatureField_t1, "t1(txyz)");
+        IR_GIVE_FIELD(ir, ftExpression [ 0 ], _IFT_UserDefinedTemperatureField_t1);
     }
 
     if ( size > 1 ) {
-        IR_GIVE_FIELD(ir, ftExpression [ 1 ], IFT_UserDefinedTemperatureField_t1, "t2(txyz)");
+        IR_GIVE_FIELD(ir, ftExpression [ 1 ], _IFT_UserDefinedTemperatureField_t2);
     }
 
     if ( size > 2 ) {
-        IR_GIVE_FIELD(ir, ftExpression [ 2 ], IFT_UserDefinedTemperatureField_t1, "t3(txyz)");
+        IR_GIVE_FIELD(ir, ftExpression [ 2 ], _IFT_UserDefinedTemperatureField_t3);
     }
 
     return IRRT_OK;

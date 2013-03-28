@@ -40,6 +40,7 @@
 #include "mathfem.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "isolinearelasticmaterial.h"
 
 namespace oofem {
 #define _MAZARS_MODEL_ITER_TOL 1.e-15
@@ -80,11 +81,11 @@ MazarsMaterial :: initializeFrom(InputRecord *ir)
 
     linearElasticMaterial->initializeFrom(ir);
     // E and nu are made available for direct access
-    IR_GIVE_FIELD(ir, E, IFT_IsotropicLinearElasticMaterial_e, "e");
-    IR_GIVE_FIELD(ir, nu, IFT_IsotropicLinearElasticMaterial_n, "n");
+    IR_GIVE_FIELD(ir, E, _IFT_IsotropicLinearElasticMaterial_e);
+    IR_GIVE_FIELD(ir, nu, _IFT_IsotropicLinearElasticMaterial_n);
 
     ver = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, ver, IFT_MazarsMaterial_version, "version");
+    IR_GIVE_OPTIONAL_FIELD(ir, ver, _IFT_MazarsMaterial_version);
     if ( ver == 1 ) {
         this->modelVersion = maz_modTension;
     } else if ( ver == 0 ) {
@@ -93,27 +94,27 @@ MazarsMaterial :: initializeFrom(InputRecord *ir)
         _error("instanciateFrom: unknown version");
     }
 
-    IR_GIVE_FIELD(ir, this->e0, IFT_MazarsMaterial_e0, "e0");
-    IR_GIVE_FIELD(ir, this->Ac, IFT_MazarsMaterial_ac, "ac");
+    IR_GIVE_FIELD(ir, this->e0, _IFT_MazarsMaterial_e0);
+    IR_GIVE_FIELD(ir, this->Ac, _IFT_MazarsMaterial_ac);
 
     this->Bc = ( Ac - 1.0 ) / ( Ac * e0 ); // default value, ensures smooth curve
-    IR_GIVE_OPTIONAL_FIELD(ir, this->Bc, IFT_MazarsMaterial_bc, "bc");
+    IR_GIVE_OPTIONAL_FIELD(ir, this->Bc, _IFT_MazarsMaterial_bc);
 
     beta = 1.06;
-    IR_GIVE_OPTIONAL_FIELD(ir, beta, IFT_MazarsMaterial_beta, "beta");
+    IR_GIVE_OPTIONAL_FIELD(ir, beta, _IFT_MazarsMaterial_beta);
 
     if ( this->modelVersion == maz_original ) {
-        IR_GIVE_FIELD(ir, this->At, IFT_MazarsMaterial_at, "at");
-        IR_GIVE_FIELD(ir, this->Bt, IFT_MazarsMaterial_bt, "bt");
+        IR_GIVE_FIELD(ir, this->At, _IFT_MazarsMaterial_at);
+        IR_GIVE_FIELD(ir, this->Bt, _IFT_MazarsMaterial_bt);
     } else if ( this->modelVersion == maz_modTension ) {
         // in case of modified model read ef instead of At, Bt
-        IR_GIVE_FIELD(ir, this->ef, IFT_MazarsMaterial_ef, "ef");
+        IR_GIVE_FIELD(ir, this->ef, _IFT_MazarsMaterial_ef);
     }
 
     // ask for optional "reference length"
     hReft = hRefc = 0.; // default values 0 => no adjustment for element size is used
-    IR_GIVE_OPTIONAL_FIELD(ir, this->hReft, IFT_MazarsMaterial_hreft, "hreft");
-    IR_GIVE_OPTIONAL_FIELD(ir, this->hRefc, IFT_MazarsMaterial_hrefc, "hrefc");
+    IR_GIVE_OPTIONAL_FIELD(ir, this->hReft, _IFT_MazarsMaterial_hreft);
+    IR_GIVE_OPTIONAL_FIELD(ir, this->hRefc, _IFT_MazarsMaterial_hrefc);
 
     this->mapper.initializeFrom(ir);
 

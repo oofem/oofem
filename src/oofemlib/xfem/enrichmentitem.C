@@ -115,10 +115,10 @@ IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, this->enrichmentDomainNumbers, IFT_RecordIDField, "enrichmentdomains"); // Macro
+    IR_GIVE_FIELD(ir, this->enrichmentDomainNumbers, _IFT_EnrichmentItem_domains);
     this->numberOfEnrichmentDomains = this->enrichmentDomainNumbers.giveSize();
 
-    IR_GIVE_OPTIONAL_FIELD(ir, enrichmentFunction, IFT_RecordIDField, "enrichmentfunction"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, enrichmentFunction, _IFT_EnrichmentItem_function);
     
     return IRRT_OK;
 }
@@ -130,11 +130,11 @@ IRResultType Inclusion :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; 
     IRResultType result; 
     int material = 0;
-    IR_GIVE_FIELD(ir, material, IFT_RecordIDField, "material"); 
+    IR_GIVE_FIELD(ir, material, _IFT_Inclusion_material); 
     this->mat = this->giveDomain()->giveMaterial(material);
     this->numberOfEnrichmentFunctions = 1;
     // Not sure this should be input at but instead be determined by the ei which describes the physical model /JB
-    //IR_GIVE_OPTIONAL_FIELD(ir, numberOfEnrichmentFunctions, IFT_XfemManager_numberOfEnrichmentFunctions, "numberofenrichmentfunctions"); // Macro
+    //IR_GIVE_OPTIONAL_FIELD(ir, numberOfEnrichmentFunctions, _IFT_XfemManager_numberOfEnrichmentFunctions, "numberofenrichmentfunctions");
     return IRRT_OK;
 }
 
@@ -153,7 +153,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
         result = mir->giveRecordKeywordField(name);
 
         if ( result != IRRT_OK ) {
-            IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
+            IR_IOERR(giveClassName(), __proc, "", mir, result);
         }
         
         EnrichmentFunction *ef = CreateUsrDefEnrichmentFunction( name.c_str(), i, this->xMan->giveDomain() );
@@ -171,7 +171,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
         InputRecord *mir = dr->giveInputRecord(DataReader :: IR_geoRec, i);
         result = mir->giveRecordKeywordField(name);
         if ( result != IRRT_OK ) {
-            IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
+            IR_IOERR(giveClassName(), __proc, "", mir, result);
         }
 
         EnrichmentDomain *ed = CreateUsrDefEnrichmentDomain( name.c_str() ); 
@@ -270,7 +270,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, this->enrichmentDomainXiCoords, IFT_RecordIDField, "delaminationxicoords"); // Macro
+    IR_GIVE_FIELD(ir, this->enrichmentDomainXiCoords, _IFT_Delamination_xiCoords);
     if ( this->numberOfEnrichmentDomains != this->enrichmentDomainXiCoords.giveSize() ) {
         OOFEM_ERROR3( "EnrichmentItem :: initializeFrom: size of enrichmentDomainXiCoords (%i) differs from numberOfEnrichmentDomains (%i)", 
                        this->enrichmentDomainXiCoords.giveSize(), this->numberOfEnrichmentDomains );

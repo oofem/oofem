@@ -90,23 +90,23 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
 
     ExportModule :: initializeFrom(ir);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, IFT_VTKXMLExportModule_cellvars, "cellvars"); // see internalstatetype.h
-    IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, IFT_VTKXMLExportModule_vars, "vars"); // see internalstatetype.h
-    IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, IFT_VTKXMLExportModule_primvars, "primvars"); // see unknowntype.h
+    IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, _IFT_VTKXMLExportModule_cellvars); // see internalstatetype.h
+    IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, _IFT_VTKXMLExportModule_vars); // see internalstatetype.h
+    IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, _IFT_VTKXMLExportModule_primvars); // see unknowntype.h
 
     val = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_VTKXMLExportModule_stype, "stype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_VTKXMLExportModule_stype);
     stype = ( NodalRecoveryModel::NodalRecoveryModelType ) val;
 
     regionsToSkip.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, regionsToSkip, IFT_VTKXMLExportModule_regionstoskip, "regionstoskip");
+    IR_GIVE_OPTIONAL_FIELD(ir, regionsToSkip, _IFT_VTKXMLExportModule_regionstoskip);
 
     this->nvr = 0; // number of virtual regions
-    IR_GIVE_OPTIONAL_FIELD(ir, nvr, IFT_VTKXMLExportModule_nvr, "nvr");
-    IR_GIVE_OPTIONAL_FIELD(ir, vrmap, IFT_VTKXMLExportModule_vrmap, "vrmap");
+    IR_GIVE_OPTIONAL_FIELD(ir, nvr, _IFT_VTKXMLExportModule_nvr);
+    IR_GIVE_OPTIONAL_FIELD(ir, vrmap, _IFT_VTKXMLExportModule_vrmap);
 
     this->timeScale = 1.;
-    IR_GIVE_OPTIONAL_FIELD(ir, timeScale, IFT_VTKXMLExportModule_timeScale, "timescale");
+    IR_GIVE_OPTIONAL_FIELD(ir, timeScale, _IFT_VTKXMLExportModule_timeScale);
     
     return IRRT_OK;
 }

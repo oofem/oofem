@@ -119,19 +119,19 @@ NonLinearDynamic :: updateAttributes(MetaStep *mStep)
     StructuralEngngModel :: updateAttributes(mStep);
 
     deltaT = 1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_NonLinearDynamic_deltat, "deltat");
+    IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_NonLinearDynamic_deltat);
     if ( deltaT < 0. ) {
         _error("updateAttributes: deltaT < 0");
     }
 
     eta = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, eta, IFT_NonLinearDynamic_eta, "eta");
+    IR_GIVE_OPTIONAL_FIELD(ir, eta, _IFT_NonLinearDynamic_eta);
 
     delta = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, delta, IFT_NonLinearDynamic_delta, "delta");
+    IR_GIVE_OPTIONAL_FIELD(ir, delta, _IFT_NonLinearDynamic_delta);
 
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NonLinearDynamic_refloadmode, "refloadmode");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_NonLinearDynamic_refloadmode);
     refLoadInputMode = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) val;
 }
 
@@ -144,32 +144,32 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
 
     StructuralEngngModel :: initializeFrom(ir);
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
     nonlocalStiffnessFlag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, IFT_NonLinearDynamic_nonlocstiff, "nonlocstiff");
+    IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, _IFT_NonLinearDynamic_nonlocstiff);
 
     deltaT = 1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_NonLinearDynamic_deltat, "deltat");
+    IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_NonLinearDynamic_deltat);
     if ( deltaT < 0. ) {
         _error("updateAttributes: deltaT < 0");
     }
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NonLinearDynamic_ddtScheme, "ddtscheme");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_NonLinearDynamic_ddtScheme);
 
     initialTimeDiscretization = ( TimeDiscretizationType ) val;
 
     gamma = 0.5; beta = 0.25; // Default Newmark parameters.
     if ( initialTimeDiscretization == TD_Newmark ) {
         OOFEM_LOG_INFO( "Selecting Newmark-beta metod\n" );
-        IR_GIVE_OPTIONAL_FIELD(ir, gamma, IFT_NonLinearDynamic_gamma, "gamma");
-        IR_GIVE_OPTIONAL_FIELD(ir, beta, IFT_NonLinearDynamic_beta, "beta");
+        IR_GIVE_OPTIONAL_FIELD(ir, gamma, _IFT_NonLinearDynamic_gamma);
+        IR_GIVE_OPTIONAL_FIELD(ir, beta, _IFT_NonLinearDynamic_beta);
     } else if ( initialTimeDiscretization == TD_TwoPointBackward ) {
         OOFEM_LOG_INFO( "Selecting Two-point Backward Euler method\n" );
     } else if ( initialTimeDiscretization == TD_ThreePointBackward ) {
@@ -179,7 +179,7 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
     }
 
     MANRMSteps = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, MANRMSteps, IFT_NRSolver_manrmsteps, "manrmsteps");
+    IR_GIVE_OPTIONAL_FIELD(ir, MANRMSteps, _IFT_NRSolver_manrmsteps);
 
 #ifdef __PARALLEL_MODE
     if ( isParallel() ) {
@@ -188,7 +188,7 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
                                                this->giveNumberOfProcesses(),
                                                this->commMode);
 
-        if ( ir->hasField(IFT_NonLinearDynamic_nonlocalext, "nonlocalext") ) {
+        if ( ir->hasField(_IFT_NonLinearDynamic_nonlocalext) ) {
             nonlocalExt = 1;
             nonlocCommunicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
                                                          this->giveNumberOfProcesses(),

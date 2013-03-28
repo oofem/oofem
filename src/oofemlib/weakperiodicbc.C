@@ -66,27 +66,27 @@ WeakPeriodicbc :: initializeFrom(InputRecord *ir)
     ActiveBoundaryCondition :: initializeFrom(ir); ///@todo Carl, remove this line and use elementsidespositive/negative instead.
 
     orderOfPolygon = 2;
-    IR_GIVE_OPTIONAL_FIELD(ir, orderOfPolygon, IFT_WeakPeriodicBoundaryCondition_order, "order");
+    IR_GIVE_OPTIONAL_FIELD(ir, orderOfPolygon, _IFT_WeakPeriodicBoundaryCondition_order);
 
     int t = ( int ) trigonometric;
-    IR_GIVE_OPTIONAL_FIELD(ir, t, IFT_WeakPeriodicBoundaryCondition_descritizationType, "descritizationtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, t, _IFT_WeakPeriodicBoundaryCondition_descritizationType);
     useBasisType = ( basisType ) t;  // Fourierseries by default
 
     dofid = P_f;    // Pressure as default
-    IR_GIVE_OPTIONAL_FIELD(ir, dofid, IFT_WeakPeriodicBoundaryCondition_dofid, "dofid");
+    IR_GIVE_OPTIONAL_FIELD(ir, dofid, _IFT_WeakPeriodicBoundaryCondition_dofid);
 
     ngp = -1;    // Pressure as default
-    IR_GIVE_OPTIONAL_FIELD(ir, ngp, IFT_WeakPeriodicBoundaryCondition_ngp, "ngp");
+    IR_GIVE_OPTIONAL_FIELD(ir, ngp, _IFT_WeakPeriodicBoundaryCondition_ngp);
 
     IntArray temp;
-    IR_GIVE_OPTIONAL_FIELD(ir, temp, IFT_WeakPeriodicBoundaryCondition_elementSidesPositive, "elementsidespositive");
+    IR_GIVE_OPTIONAL_FIELD(ir, temp, _IFT_WeakPeriodicBoundaryCondition_elementSidesPositive);
     for ( int i = 0; i < temp.giveSize() / 2; i++ ) {
         //printf("Add positive edge, element %u, side %u\n", temp.at(2*i+2), temp.at(2*i+1));
         side [ 0 ].push_back( temp.at(2 * i + 1) );
         element [ 0 ].push_back( temp.at(2 * i + 2) );
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, temp, IFT_WeakPeriodicBoundaryCondition_elementSidesNegative, "elementsidesnegative");
+    IR_GIVE_OPTIONAL_FIELD(ir, temp, _IFT_WeakPeriodicBoundaryCondition_elementSidesNegative);
     for ( int i = 0; i < temp.giveSize() / 2; i++ ) {
         //printf("Add negative edge, element %u, side %u\n", temp.at(2*i+2), temp.at(2*i+1));
         side [ 1 ].push_back( temp.at(2 * i + 1) );

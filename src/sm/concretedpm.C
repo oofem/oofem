@@ -374,66 +374,66 @@ ConcreteDPM :: initializeFrom(InputRecord *ir)
 
     double value;
     // elastic parameters
-    IR_GIVE_FIELD(ir, eM, IFT_IsotropicLinearElasticMaterial_e, "e");
-    IR_GIVE_FIELD(ir, nu, IFT_IsotropicLinearElasticMaterial_n, "n");
+    IR_GIVE_FIELD(ir, eM, _IFT_IsotropicLinearElasticMaterial_e);
+    IR_GIVE_FIELD(ir, nu, _IFT_IsotropicLinearElasticMaterial_n);
     propertyDictionary->add('E', eM);
     propertyDictionary->add('n', nu);
 
-    IR_GIVE_FIELD(ir, value, IFT_IsotropicLinearElasticMaterial_talpha, "talpha");
+    IR_GIVE_FIELD(ir, value, _IFT_IsotropicLinearElasticMaterial_talpha);
     propertyDictionary->add(tAlpha, value);
 
     gM = eM / ( 2. * ( 1. + nu ) );
     kM = eM / ( 3. * ( 1. - 2. * nu ) );
 
     // instanciate the variables of the plasticity model
-    IR_GIVE_FIELD(ir, fc, IFT_ConcreteDPM_fc, "fc");
-    IR_GIVE_FIELD(ir, ft, IFT_ConcreteDPM_ft, "ft");
+    IR_GIVE_FIELD(ir, fc, _IFT_ConcreteDPM_fc);
+    IR_GIVE_FIELD(ir, ft, _IFT_ConcreteDPM_ft);
     propertyDictionary->add(ft_strength, ft);
     propertyDictionary->add(fc_strength, fc);
 
     // damage parameters - only exponential softening
     // [in ef variable the wf (crack opening) is stored]
-    if ( ir->hasField(IFT_ConcreteDPM_wf, "wf") ) {
-        IR_GIVE_FIELD(ir, ef, IFT_ConcreteDPM_wf, "wf");
+    if ( ir->hasField(_IFT_ConcreteDPM_wf) ) {
+        IR_GIVE_FIELD(ir, ef, _IFT_ConcreteDPM_wf);
         // fracture energy
     } else {
         double Gf;
-        IR_GIVE_FIELD(ir, Gf, IFT_ConcreteDPM_gf, "gf");
+        IR_GIVE_FIELD(ir, Gf, _IFT_ConcreteDPM_gf);
         ef = Gf / ft; // convert fracture energy to crack opening
     }
 
     // default parameters
     ecc = 0.525;
-    IR_GIVE_OPTIONAL_FIELD(ir, ecc, IFT_ConcreteDPM_ecc, "ecc");
+    IR_GIVE_OPTIONAL_FIELD(ir, ecc, _IFT_ConcreteDPM_ecc);
     yieldHardInitial = 0.1;
-    IR_GIVE_OPTIONAL_FIELD(ir, yieldHardInitial, IFT_ConcreteDPM_kinit, "kinit");
+    IR_GIVE_OPTIONAL_FIELD(ir, yieldHardInitial, _IFT_ConcreteDPM_kinit);
     AHard = 8.e-2;
-    IR_GIVE_OPTIONAL_FIELD(ir, AHard, IFT_ConcreteDPM_ahard, "ahard");
+    IR_GIVE_OPTIONAL_FIELD(ir, AHard, _IFT_ConcreteDPM_ahard);
     BHard = 3.e-3;
-    IR_GIVE_OPTIONAL_FIELD(ir, BHard, IFT_ConcreteDPM_bhard, "bhard");
+    IR_GIVE_OPTIONAL_FIELD(ir, BHard, _IFT_ConcreteDPM_bhard);
     CHard = 2.;
-    IR_GIVE_OPTIONAL_FIELD(ir, CHard, IFT_ConcreteDPM_chard, "chard");
+    IR_GIVE_OPTIONAL_FIELD(ir, CHard, _IFT_ConcreteDPM_chard);
     DHard = 1.e-6;
-    IR_GIVE_OPTIONAL_FIELD(ir, DHard, IFT_ConcreteDPM_dhard, "dhard");
+    IR_GIVE_OPTIONAL_FIELD(ir, DHard, _IFT_ConcreteDPM_dhard);
     ASoft = 15.;
-    IR_GIVE_OPTIONAL_FIELD(ir, ASoft, IFT_ConcreteDPM_asoft, "asoft");
+    IR_GIVE_OPTIONAL_FIELD(ir, ASoft, _IFT_ConcreteDPM_asoft);
     helem = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, helem, IFT_ConcreteDPM_helem, "helem");
+    IR_GIVE_OPTIONAL_FIELD(ir, helem, _IFT_ConcreteDPM_helem);
 #ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
     href = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, href, IFT_ConcreteDPM_href, "href");
+    IR_GIVE_OPTIONAL_FIELD(ir, href, _IFT_ConcreteDPM_href);
 #endif
 
     //Compute m
     m = 3. * ( pow(fc, 2.) - pow(ft, 2.) ) / ( fc * ft ) * ecc / ( ecc + 1. );
     //Compute default value of dilationConst
     dilationConst = -0.85;
-    IR_GIVE_OPTIONAL_FIELD(ir, dilationConst, IFT_ConcreteDPM_dilation, "dilation");
+    IR_GIVE_OPTIONAL_FIELD(ir, dilationConst, _IFT_ConcreteDPM_dilation);
 
     yieldTol = 1.e-10;
-    IR_GIVE_OPTIONAL_FIELD(ir, yieldTol, IFT_ConcreteDPM_yieldtol, "yieldtol");
+    IR_GIVE_OPTIONAL_FIELD(ir, yieldTol, _IFT_ConcreteDPM_yieldtol);
     newtonIter = 100;
-    IR_GIVE_OPTIONAL_FIELD(ir, newtonIter, IFT_ConcreteDPM_newtoniter, "newtoniter");
+    IR_GIVE_OPTIONAL_FIELD(ir, newtonIter, _IFT_ConcreteDPM_newtoniter);
 
     return IRRT_OK;
 }

@@ -254,7 +254,7 @@ LIBeam3d :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, referenceNode, IFT_LIBeam3d_refnode, "refnode");
+    IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3d_refnode);
     if ( referenceNode == 0 ) {
         _error("instanciateFrom: wrong reference node specified");
     }

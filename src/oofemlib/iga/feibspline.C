@@ -63,21 +63,17 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
     IntArray degree_tmp;
     double *knotVec, knotVal;
     int sum, pos, size;
-    const char *IFT_knotVectorString [ 3 ] = {
-        "knotvectoru", "knotvectorv", "knotvectorw"
+
+    InputFieldType IFT_knotVector [ 3 ] = {
+        _IFT_BSplineInterpolation_knotVectorU,
+        _IFT_BSplineInterpolation_knotVectorV,
+        _IFT_BSplineInterpolation_knotVectorW
     };
-    _InputFieldType IFT_knotVectorType [ 3 ] = {
-        IFT_BSplineInterpolation_knotVectorU,
-        IFT_BSplineInterpolation_knotVectorV,
-        IFT_BSplineInterpolation_knotVectorW
-    };
-    const char *IFT_knotMultiplicityString [ 3 ] = {
-        "knotmultiplicityu", "knotmultiplicityv", "knotmultiplicityw"
-    };
-    _InputFieldType IFT_knotMultiplicityType [ 3 ] = {
-        IFT_BSplineInterpolation_knotMultiplicityU,
-        IFT_BSplineInterpolation_knotMultiplicityV,
-        IFT_BSplineInterpolation_knotMultiplicityW
+
+    InputFieldType IFT_knotMultiplicity [ 3 ] = {
+        _IFT_BSplineInterpolation_knotMultiplicityU,
+        _IFT_BSplineInterpolation_knotMultiplicityV,
+        _IFT_BSplineInterpolation_knotMultiplicityW
     };
 
     knotValues = new FloatArray [ nsd ];
@@ -87,7 +83,7 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
     numberOfKnotSpans = new int [ nsd ];
     numberOfControlPoints = new int  [ nsd ];
 
-    IR_GIVE_FIELD(ir, degree_tmp, IFT_BSplineInterpolation_degree, "degree");
+    IR_GIVE_FIELD(ir, degree_tmp, _IFT_BSplineInterpolation_degree);
     if ( degree_tmp.giveSize() != nsd ) {
         OOFEM_ERROR("BSplineInterpolation::initializeFrom - degree size mismatch");
     }
@@ -97,17 +93,17 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
     }
 
     for ( int n = 0; n < nsd; n++ ) {
-        IR_GIVE_FIELD(ir, knotValues [ n ], IFT_knotVectorType [ n ], IFT_knotVectorString [ n ]);
+        IR_GIVE_FIELD(ir, knotValues [ n ], IFT_knotVector [ n ]);
         size = knotValues [ n ].giveSize();
         if ( size < 2 ) {
-            OOFEM_ERROR2("BSplineInterpolation::initializeFrom - invalid size of knot vector %s", IFT_knotVectorString [ n ]);
+            OOFEM_ERROR2("BSplineInterpolation::initializeFrom - invalid size of knot vector %s", IFT_knotVector [ n ]);
         }
 
         // check for monotonicity of knot vector without multiplicity
         knotVal = knotValues [ n ].at(1);
         for ( int i = 1; i < size; i++ ) {
             if ( knotValues [ n ].at(i + 1) <= knotVal ) {
-                OOFEM_ERROR2("BSplineInterpolation::initializeFrom - knot vector %s is not monotonic", IFT_knotVectorString [ n ]);
+                OOFEM_ERROR2("BSplineInterpolation::initializeFrom - knot vector %s is not monotonic", IFT_knotVector [ n ]);
             }
 
             knotVal = knotValues [ n ].at(i + 1);
@@ -117,7 +113,7 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
         double span = knotVal - knotValues [ n ].at(1);
         for ( int i = 1; i <= size; i++ ) knotValues [ n ].at(i) = knotValues [ n ].at(i) / span;
 
-        IR_GIVE_OPTIONAL_FIELD(ir, knotMultiplicity [ n ], IFT_knotMultiplicityType [ n ], IFT_knotMultiplicityString [ n ]);
+        IR_GIVE_OPTIONAL_FIELD(ir, knotMultiplicity [ n ], IFT_knotMultiplicity [ n ]);
         if ( knotMultiplicity [ n ].giveSize() == 0 ) {
             // default multiplicity
             knotMultiplicity [ n ].resize(size);
@@ -127,24 +123,24 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
             }
         } else {
             if ( knotMultiplicity [ n ].giveSize() != size ) {
-                OOFEM_ERROR2("BSplineInterpolation::initializeFrom - knot multiplicity %s size mismatch", IFT_knotMultiplicityString [ n ]);
+                OOFEM_ERROR2("BSplineInterpolation::initializeFrom - knot multiplicity %s size mismatch", IFT_knotMultiplicity [ n ]);
             }
 
             // check for multiplicity range (skip the first and last one)
             for ( int i = 1; i < size - 1; i++ ) {
                 if ( knotMultiplicity [ n ].at(i + 1) < 1 || knotMultiplicity [ n ].at(i + 1) > degree [ n ] ) {
                     OOFEM_ERROR3( "BSplineInterpolation::initializeFrom - knot multiplicity %s out of range - value %d",
-                                 IFT_knotMultiplicityString [ n ], knotMultiplicity [ n ].at(i + 1) );
+                                 IFT_knotMultiplicity [ n ], knotMultiplicity [ n ].at(i + 1) );
                 }
             }
 
             // check for multiplicity of the first and last one
             if ( knotMultiplicity [ n ].at(1) != degree [ n ] + 1 ) {
-                OOFEM_LOG_RELEVANT("Multiplicity of the first knot in knot vector %s changed to %d\n", IFT_knotVectorString [ n ], degree [ n ] + 1);
+                OOFEM_LOG_RELEVANT("Multiplicity of the first knot in knot vector %s changed to %d\n", IFT_knotVector [ n ], degree [ n ] + 1);
             }
 
             if ( knotMultiplicity [ n ].at(size) != degree [ n ] + 1 ) {
-                OOFEM_LOG_RELEVANT("Multiplicity of the last knot in knot vector %s changed to %d\n", IFT_knotVectorString [ n ], degree [ n ] + 1);
+                OOFEM_LOG_RELEVANT("Multiplicity of the last knot in knot vector %s changed to %d\n", IFT_knotVector [ n ], degree [ n ] + 1);
             }
         }
 

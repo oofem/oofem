@@ -82,10 +82,10 @@ InitialCondition :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, initialValueDictionary, IFT_InitialCondition_conditions, "conditions");
+    IR_GIVE_FIELD(ir, initialValueDictionary, _IFT_InitialCondition_conditions);
 
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_GeneralBoundaryCondition_valType, "valtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_GeneralBoundaryCondition_valType);
     valType = ( bcValType ) val;
 
     return IRRT_OK;

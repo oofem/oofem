@@ -122,21 +122,21 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
 
     StructuralEngngModel :: initializeFrom(ir);
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_DIIDynamic_ddtScheme, "ddtscheme");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_DIIDynamic_ddtScheme);
 
     eta = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, eta, IFT_DIIDynamic_eta, "eta");
+    IR_GIVE_OPTIONAL_FIELD(ir, eta, _IFT_DIIDynamic_eta);
 
     delta = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, delta, IFT_DIIDynamic_delta, "delta");
+    IR_GIVE_OPTIONAL_FIELD(ir, delta, _IFT_DIIDynamic_delta);
 
     initialTimeDiscretization = ( TimeDiscretizationType ) val;
 
@@ -144,15 +144,15 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
     theta = 1.37; // Default Wilson parameter.
     if ( initialTimeDiscretization == TD_Newmark ) {
         OOFEM_LOG_INFO( "Selecting Newmark-beta metod\n" );
-        IR_GIVE_OPTIONAL_FIELD(ir, gamma, IFT_DIIDynamic_gamma, "gamma");
-        IR_GIVE_OPTIONAL_FIELD(ir, beta, IFT_DIIDynamic_beta, "beta");
+        IR_GIVE_OPTIONAL_FIELD(ir, gamma, _IFT_DIIDynamic_gamma);
+        IR_GIVE_OPTIONAL_FIELD(ir, beta, _IFT_DIIDynamic_beta);
     } else if ( initialTimeDiscretization == TD_TwoPointBackward ) {
         OOFEM_LOG_INFO( "Selecting Two-point Backward Euler method\n" );
     } else if ( initialTimeDiscretization == TD_ThreePointBackward ) {
         OOFEM_LOG_INFO( "Selecting Three-point Backward Euler metod\n" );
     } else if ( initialTimeDiscretization == TD_Wilson ) {
         OOFEM_LOG_INFO( "Selecting Wilson-theta metod\n" );
-        IR_GIVE_OPTIONAL_FIELD(ir, theta, IFT_DIIDynamic_theta, "theta");
+        IR_GIVE_OPTIONAL_FIELD(ir, theta, _IFT_DIIDynamic_theta);
         if ( theta < 1.37 ) {
             OOFEM_LOG_WARNING("Found theta < 1.37. Performing correction, theta = 1.37");
             theta = 1.37;
@@ -161,7 +161,7 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
         _error("NonLinearDynamic: Time-stepping scheme not found!\n");
     }
 
-    IR_GIVE_FIELD(ir, deltaT, IFT_DIIDynamic_deltat, "deltat");
+    IR_GIVE_FIELD(ir, deltaT, _IFT_DIIDynamic_deltat);
 
     return IRRT_OK;
 }

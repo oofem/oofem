@@ -64,9 +64,9 @@ SUPGElement :: initializeFrom(InputRecord *ir)
 
     FMElement :: initializeFrom(ir);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, IFT_SUPGElement_bsides, _IFT_SUPGElement_bsides);
+    IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, _IFT_SUPGElement_bsides);
     if ( !boundarySides.isEmpty() ) {
-        IR_GIVE_FIELD(ir, boundaryCodes, IFT_SUPGElement_bcodes, _IFT_SUPGElement_bcodes);
+        IR_GIVE_FIELD(ir, boundaryCodes, _IFT_SUPGElement_bcodes);
     }
 
     return IRRT_OK;

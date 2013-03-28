@@ -86,13 +86,13 @@ LinearStability :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     //StructuralEngngModel::instanciateFrom(ir);
-    IR_GIVE_FIELD(ir, numberOfRequiredEigenValues, IFT_LinearStability_nroot, "nroot");
+    IR_GIVE_FIELD(ir, numberOfRequiredEigenValues, _IFT_LinearStability_nroot);
     // numberOfSteps set artifficially to numberOfRequiredEigenValues
     // in order to allow
     // use restoreContext function for different eigenValues
     numberOfSteps = numberOfRequiredEigenValues;
 
-    IR_GIVE_FIELD(ir, rtolv, IFT_LinearStability_rtolv, "rtolv");
+    IR_GIVE_FIELD(ir, rtolv, _IFT_LinearStability_rtolv);
     if ( rtolv < 1.e-12 ) {
         rtolv =  1.e-12;
     }
@@ -102,7 +102,7 @@ LinearStability :: initializeFrom(InputRecord *ir)
     }
 
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_LinearStability_stype, "stype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_LinearStability_stype);
     solverType = ( GenEigvalSolverType ) val;
 
 

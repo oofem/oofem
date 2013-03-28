@@ -42,7 +42,8 @@
 
 ///@name Input fields for Dirichlet boundary condition
 //@{
-#define _IFT_BoundaryCondition_PrescribedValue "d"
+#define _IFT_BoundaryCondition_PrescribedValue "prescribedvalue"
+#define _IFT_BoundaryCondition_PrescribedValue_d "d" ///< Alternative input field
 //@}
 
 namespace oofem {

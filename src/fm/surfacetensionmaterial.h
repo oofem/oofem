@@ -87,7 +87,7 @@ public:
         const char *__proc = "initializeFrom";
         IRResultType result;
         double value = 0.0;
-        IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SurfaceTensionMaterial_isotropic, "g");
+        IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SurfaceTensionMaterial_isotropic);
         this->propertyDictionary->add('g', value);
         return result;
     }

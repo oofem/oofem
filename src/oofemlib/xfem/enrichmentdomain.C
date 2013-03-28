@@ -63,7 +63,7 @@ IRResultType DofManList :: initializeFrom(InputRecord *ir)
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
     IntArray idList;
-    IR_GIVE_FIELD(ir, idList, IFT_RecordIDField, "list"); // Macro
+    IR_GIVE_FIELD(ir, idList, _IFT_DofManList_list);
     for ( int i = 1; i<=idList.giveSize(); i++) {
         this->dofManList.push_back( idList.at(i) );
     }

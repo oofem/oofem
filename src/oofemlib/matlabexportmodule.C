@@ -63,10 +63,10 @@ MatlabExportModule :: ~MatlabExportModule()
 IRResultType
 MatlabExportModule :: initializeFrom(InputRecord *ir)
 {
-    exportMesh = ir->hasField(IFT_MatlabExportModule_mesh, "mesh");
-    exportData = ir->hasField(IFT_MatlabExportModule_data, "data");
-    exportArea = ir->hasField(IFT_MatlabExportModule_area, "area");
-    exportSpecials = ir->hasField(IFT_MatlabExportModule_specials, "specials");
+    exportMesh = ir->hasField(_IFT_MatlabExportModule_mesh);
+    exportData = ir->hasField(_IFT_MatlabExportModule_data);
+    exportArea = ir->hasField(_IFT_MatlabExportModule_area);
+    exportSpecials = ir->hasField(_IFT_MatlabExportModule_specials);
 
     return IRRT_OK;
 }

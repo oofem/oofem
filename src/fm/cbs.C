@@ -78,30 +78,30 @@ CBS :: initializeFrom(InputRecord *ir)
 
     EngngModel :: initializeFrom(ir);
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, _IFT_EngngModel_lstype);
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, _IFT_EngngModel_smtype);
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
-    IR_GIVE_FIELD(ir, deltaT, IFT_CBS_deltat, _IFT_CBS_deltat);
+    IR_GIVE_FIELD(ir, deltaT, _IFT_CBS_deltat);
     minDeltaT = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, minDeltaT, IFT_CBS_mindeltat, _IFT_CBS_mindeltat);
+    IR_GIVE_OPTIONAL_FIELD(ir, minDeltaT, _IFT_CBS_mindeltat);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, consistentMassFlag, IFT_CBS_cmflag, _IFT_CBS_cmflag);
+    IR_GIVE_OPTIONAL_FIELD(ir, consistentMassFlag, _IFT_CBS_cmflag);
 
     theta [ 0 ] = theta [ 1 ] = 1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, theta [ 0 ], IFT_CBS_theta1, _IFT_CBS_theta1);
-    IR_GIVE_OPTIONAL_FIELD(ir, theta [ 1 ], IFT_CBS_theta2, _IFT_CBS_theta2);
+    IR_GIVE_OPTIONAL_FIELD(ir, theta [ 0 ], _IFT_CBS_theta1);
+    IR_GIVE_OPTIONAL_FIELD(ir, theta [ 1 ], _IFT_CBS_theta2);
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_CBS_scaleflag, _IFT_CBS_scaleflag);
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_CBS_scaleflag);
     equationScalingFlag = val;
     if ( equationScalingFlag ) {
-        IR_GIVE_FIELD(ir, lscale, IFT_CBS_lscale, _IFT_CBS_lscale);
-        IR_GIVE_FIELD(ir, uscale, IFT_CBS_uscale, _IFT_CBS_uscale);
-        IR_GIVE_FIELD(ir, dscale, IFT_CBS_dscale, _IFT_CBS_dscale);
+        IR_GIVE_FIELD(ir, lscale, _IFT_CBS_lscale);
+        IR_GIVE_FIELD(ir, uscale, _IFT_CBS_uscale);
+        IR_GIVE_FIELD(ir, dscale, _IFT_CBS_dscale);
         double vref = 1.0; // reference viscosity
         Re = dscale * uscale * lscale / vref;
     } else {
@@ -111,7 +111,7 @@ CBS :: initializeFrom(InputRecord *ir)
 
     //<RESTRICTED_SECTION>
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_CBS_miflag, _IFT_CBS_miflag);
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_CBS_miflag);
     if ( val ) {
         this->materialInterface = new LEPlic( 1, this->giveDomain(1) );
         // export velocity field

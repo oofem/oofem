@@ -86,26 +86,26 @@ IRResultType IncrementalLinearStatic :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom";
     IRResultType result;
 
-    IR_GIVE_OPTIONAL_FIELD(ir, discreteTimes, IFT_IncrementalLinearStatic_prescribedtimes, "prescribedtimes");
+    IR_GIVE_OPTIONAL_FIELD(ir, discreteTimes, _IFT_IncrementalLinearStatic_prescribedtimes);
     if ( discreteTimes.giveSize() > 0 ) {
         numberOfSteps = discreteTimes.giveSize();
         endOfTimeOfInterest = discreteTimes.at(discreteTimes.giveSize());
         fixedSteps = false;
     } else {
         deltaT = 1.0;
-        IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_IncrementalLinearStatic_deltat, "deltat");
-        IR_GIVE_FIELD(ir, numberOfSteps, IFT_EngngModel_nsteps, "nsteps");
+        IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_IncrementalLinearStatic_deltat);
+        IR_GIVE_FIELD(ir, numberOfSteps, _IFT_EngngModel_nsteps);
         endOfTimeOfInterest = deltaT*numberOfSteps;
         fixedSteps = true;
     }
-    IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, IFT_IncrementalLinearStatic_endoftimeofinterest, "endoftimeofinterest");
+    IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, _IFT_IncrementalLinearStatic_endoftimeofinterest);
 
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
     //StructuralEngngModel::initializeFrom (ir);

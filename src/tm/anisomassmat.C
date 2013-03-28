@@ -66,7 +66,7 @@ AnisotropicMassTransferMaterial :: initializeFrom(InputRecord *ir)
 
     FloatArray temp;
 
-    IR_GIVE_FIELD(ir, temp, IFT_AnisotropicMassTransferMaterial_c, "c");     // Read permeability matrix c from input file
+    IR_GIVE_FIELD(ir, temp, _IFT_AnisotropicMassTransferMaterial_c);     // Read permeability matrix c from input file
     k.resize(2, 2);
     k.at(1, 1) = temp.at(1);
     k.at(1, 2) = temp.at(2);

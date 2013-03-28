@@ -47,6 +47,7 @@
 //@{
 #define _IFT_RVEMaterial_bctype "bctype"
 #define _IFT_RVEMaterial_supressoutput "supressoutput"
+#define _IFT_RVEMaterial_fileName "file"
 //@}
 
 namespace oofem {

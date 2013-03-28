@@ -451,7 +451,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read type of Domain to be solved
     InputRecord *ir = dr->giveInputRecord(DataReader :: IR_domainRec, 1);
-    IR_GIVE_FIELD(ir, name, IFT_Domain_type, "domain");
+    IR_GIVE_FIELD(ir, name, _IFT_Domain_type); // This is inconsistent, "domain" isn't  exactly a field, but the actual record keyword.
 
     ir->finish();
 
@@ -470,22 +470,22 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read domain description
     ir = dr->giveInputRecord(DataReader :: IR_domainCompRec, 1);
-    IR_GIVE_FIELD(ir, nnode, IFT_Domain_ndofman, "ndofman");
-    IR_GIVE_FIELD(ir, nelem, IFT_Domain_nelem, "nelem");
-    IR_GIVE_FIELD(ir, ncrossSections, IFT_Domain_ncrosssect, "ncrosssect");
-    IR_GIVE_FIELD(ir, nmat, IFT_Domain_nmat, "nmat");
-    IR_GIVE_FIELD(ir, nload, IFT_Domain_nbc, "nbc");
-    IR_GIVE_FIELD(ir, nic, IFT_Domain_nic, "nic");
-    IR_GIVE_FIELD(ir, nloadtimefunc, IFT_Domain_nloadtimefunct, "nltf");
-    IR_GIVE_OPTIONAL_FIELD(ir, nxfemman, IFT_Domain_nxfemman, "nxfemman");
-    IR_GIVE_OPTIONAL_FIELD(ir, topologytype, IFT_Domain_topology, "topology");
+    IR_GIVE_FIELD(ir, nnode, _IFT_Domain_ndofman);
+    IR_GIVE_FIELD(ir, nelem, _IFT_Domain_nelem);
+    IR_GIVE_FIELD(ir, ncrossSections, _IFT_Domain_ncrosssect);
+    IR_GIVE_FIELD(ir, nmat, _IFT_Domain_nmat);
+    IR_GIVE_FIELD(ir, nload, _IFT_Domain_nbc);
+    IR_GIVE_FIELD(ir, nic, _IFT_Domain_nic);
+    IR_GIVE_FIELD(ir, nloadtimefunc, _IFT_Domain_nloadtimefunct);
+    IR_GIVE_OPTIONAL_FIELD(ir, nxfemman, _IFT_Domain_nxfemman);
+    IR_GIVE_OPTIONAL_FIELD(ir, topologytype, _IFT_Domain_topology);
 
     // read optional number of nonlocalBarriers
     nbarrier = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, nbarrier,  IFT_Domain_nbarrier, "nbarrier");
+    IR_GIVE_OPTIONAL_FIELD(ir, nbarrier,  _IFT_Domain_nbarrier);
     // read optional number of RandomFieldGenerator
     nrfg = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, nrfg, IFT_Domain_nrandgen, "nrandgen");
+    IR_GIVE_OPTIONAL_FIELD(ir, nrfg, _IFT_Domain_nrandgen);
 
 
 

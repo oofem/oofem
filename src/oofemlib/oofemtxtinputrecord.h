@@ -111,6 +111,11 @@ protected:
     int scanDouble(const char *source, double &value);
     void setReadFlag(int itok) { readFlag [ itok - 1 ] = true; }
 
+    /**
+     * Returns position of substring id in source.
+     * Id must be separated from rest by blank or by tabulator.
+     * @return Value pointer at the end of occurrence id in source. If string not found, returns NULL.
+     */
     const char *__getPosAfter(const char *, const char *);
     const char *__scanInteger(const char *source, int *value);
     const char *__scanDouble(const char *source, double *value);

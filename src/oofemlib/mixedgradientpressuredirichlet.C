@@ -431,7 +431,7 @@ IRResultType MixedGradientPressureDirichlet :: initializeFrom(InputRecord *ir)
 
     MixedGradientPressureBC :: initializeFrom(ir);
 
-    IRResultType rt = IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, IFT_MixedGradientPressure_centerCoords, "ccoord")
+    IRResultType rt = IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, _IFT_MixedGradientPressure_centerCoords)
     if ( rt != IRRT_OK ) {
         this->centerCoord.resize( domain->giveNumberOfSpatialDimensions() );
         this->centerCoord.zero();

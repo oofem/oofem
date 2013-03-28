@@ -72,20 +72,20 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
 
     this->LSpace :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, this->microMasterNodes, IFT_MacroLspace_microMasterNodes, "micromasternodes");
+    IR_GIVE_FIELD(ir, this->microMasterNodes, _IFT_MacroLspace_microMasterNodes);
 
     if ( this->microMasterNodes.giveSize() != 8 ) {
         OOFEM_ERROR("Need 8 master nodes from the microproblem defined on macroLspace element\n");
     }
 
-    IR_GIVE_FIELD(ir, this->microBoundaryNodes, IFT_MacroLspace_microBoundaryNodes, "microboundarynodes");
+    IR_GIVE_FIELD(ir, this->microBoundaryNodes, _IFT_MacroLspace_microBoundaryNodes);
 
     microBoundaryDofManager.resize( 3 * microBoundaryNodes.giveSize() );
 
 #if 0
-    val = IR_GIVE_OPTIONAL_FIELD2(ir, this->stiffMatrxFileName, IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename");
+    val = IR_GIVE_OPTIONAL_FIELD2(ir, this->stiffMatrxFileName, _IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename");
 
-    if( ir->hasField(IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename") ) {
+    if( ir->hasField(_IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename") ) {
         if ( fopen(this->stiffMatrxFileName,"r") != NULL ) { //if the file exist
             stiffMatrxFile = fopen(this->stiffMatrxFileName,"r");
             this->stiffMatrxFileNoneReadingWriting=1;

@@ -56,9 +56,9 @@ Reinforcement :: initializeFrom(InputRecord *ir)
     // VERBOSE_PRINT1 ("Instanciating load ",number)
 #  endif
     //Load :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, porosity, IFT_Reinfocement_porosity, "porosity");
-    IR_GIVE_FIELD(ir, shapefactor,  IFT_Reinfocement_permeability, "shapefactor");
-    IR_GIVE_FIELD(ir, permeability, IFT_Reinfocement_shapeFactor, "permeability");
+    IR_GIVE_FIELD(ir, porosity, _IFT_Reinforcement_porosity);
+    IR_GIVE_FIELD(ir, shapefactor,  _IFT_Reinforcement_shapeFactor);
+    IR_GIVE_FIELD(ir, permeability, _IFT_Reinforcement_permeability);
     
     return IRRT_OK;
 }

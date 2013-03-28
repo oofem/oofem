@@ -56,11 +56,11 @@ LocalGaussianRandomGenerator :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, mean, IFT_LocalGaussianRandomGenerator_mean, "mean");
-    IR_GIVE_FIELD(ir, variance, IFT_LocalGaussianRandomGenerator_variance, "variance");
+    IR_GIVE_FIELD(ir, mean, _IFT_LocalGaussianRandomGenerator_mean);
+    IR_GIVE_FIELD(ir, variance, _IFT_LocalGaussianRandomGenerator_variance);
     randomInteger = -time(NULL);
     int seed = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, seed, IFT_LocalGaussianRandomGenerator_seed, "seed");
+    IR_GIVE_OPTIONAL_FIELD(ir, seed, _IFT_LocalGaussianRandomGenerator_seed);
     if ( seed ) {
         randomInteger = seed;
     }
@@ -81,7 +81,6 @@ LocalGaussianRandomGenerator :: initializeFrom(InputRecord *ir)
 
 double LocalGaussianRandomGenerator :: ran1(long *idum)
 {
-    int j;
     long k;
     static long iy = 0;
     static long iv [ NTAB ];
@@ -94,7 +93,7 @@ double LocalGaussianRandomGenerator :: ran1(long *idum)
             * idum = -( * idum );
         }
 
-        for ( j = NTAB + 7; j >= 0; j-- ) {
+        for ( int j = NTAB + 7; j >= 0; j-- ) {
             k = ( * idum ) / IQ;
             * idum = IA * ( * idum - k * IQ ) - IR * k;
             if ( * idum < 0 ) {
@@ -115,7 +114,7 @@ double LocalGaussianRandomGenerator :: ran1(long *idum)
         * idum += IM;
     }
 
-    j = iy / NDIV;
+    int j = iy / NDIV;
     iy = iv [ j ];
     iv [ j ] = * idum;
     if ( ( temp = AM * iy ) > RNMX ) {

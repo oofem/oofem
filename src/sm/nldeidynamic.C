@@ -94,20 +94,20 @@ NlDEIDynamic :: initializeFrom(InputRecord *ir)
 
     StructuralEngngModel :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, dumpingCoef, IFT_NlDEIDynamic_dumpcoef, "dumpcoef"); // C = dumpingCoef * M
-    IR_GIVE_FIELD(ir, deltaT, IFT_NlDEIDynamic_deltat, "deltat");
+    IR_GIVE_FIELD(ir, dumpingCoef, _IFT_NlDEIDynamic_dumpcoef); // C = dumpingCoef * M
+    IR_GIVE_FIELD(ir, deltaT, _IFT_NlDEIDynamic_deltat);
 
     drFlag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, drFlag, IFT_NlDEIDynamic_drflag, "drflag");
+    IR_GIVE_OPTIONAL_FIELD(ir, drFlag, _IFT_NlDEIDynamic_drflag);
     if ( drFlag ) {
-        IR_GIVE_FIELD(ir, Tau, IFT_NlDEIDynamic_tau, "tau");
-        IR_GIVE_FIELD(ir, pyEstimate, IFT_NlDEIDynamic_py, "py");
+        IR_GIVE_FIELD(ir, Tau, _IFT_NlDEIDynamic_tau);
+        IR_GIVE_FIELD(ir, pyEstimate, _IFT_NlDEIDynamic_py);
     }
 
 #ifdef __PARALLEL_MODE
-    if ( ir->hasField(IFT_NlDEIDynamic_nodecutmode, "nodecutmode") ) {
+    if ( ir->hasField(_IFT_NlDEIDynamic_nodecutmode) ) {
         commMode = ProblemCommMode__NODE_CUT;
-    } else if ( ir->hasField(IFT_NlDEIDynamic_elementcutmode, "elementcutmode") ) {
+    } else if ( ir->hasField(_IFT_NlDEIDynamic_elementcutmode) ) {
         commMode = ProblemCommMode__ELEMENT_CUT;
     } else {
         _error("instanciateFrom: NlDEIDynamicCommunicatorMode not specified");
@@ -118,7 +118,7 @@ NlDEIDynamic :: initializeFrom(InputRecord *ir)
                                            this->giveNumberOfProcesses(),
                                            this->commMode);
 
-    if ( ir->hasField(IFT_NlDEIDynamic_nonlocalext, "nonlocalext") ) {
+    if ( ir->hasField(_IFT_NlDEIDynamic_nonlocalext) ) {
         nonlocalExt = 1;
         nonlocCommunicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
                                                      this->giveNumberOfProcesses(),

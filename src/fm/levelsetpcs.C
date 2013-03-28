@@ -77,14 +77,14 @@ LevelSetPCS :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;
 
-    IR_GIVE_OPTIONAL_FIELD(ir, previousLevelSetValues, IFT_LevelSetPCS_levelSetValues, "levelset");
+    IR_GIVE_OPTIONAL_FIELD(ir, previousLevelSetValues, _IFT_LevelSetPCS_levelSetValues);
     if ( !previousLevelSetValues.giveSize() ) {
         FloatArray refmatpoly_x, refmatpoly_y;
-        IR_GIVE_OPTIONAL_FIELD(ir, refmatpoly_x, IFT_LevelSetPCS_refmatpoly_x, "refmatpolyx");
-        IR_GIVE_OPTIONAL_FIELD(ir, refmatpoly_y, IFT_LevelSetPCS_refmatpoly_y, "refmatpolyy");
+        IR_GIVE_OPTIONAL_FIELD(ir, refmatpoly_x, _IFT_LevelSetPCS_refmatpoly_x);
+        IR_GIVE_OPTIONAL_FIELD(ir, refmatpoly_y, _IFT_LevelSetPCS_refmatpoly_y);
         ci1 = 1, ci2 = 2;
-        IR_GIVE_OPTIONAL_FIELD(ir, ci1, IFT_LevelSetPCS_ci1, "ci1");
-        IR_GIVE_OPTIONAL_FIELD(ir, ci2, IFT_LevelSetPCS_ci2, "ci2");
+        IR_GIVE_OPTIONAL_FIELD(ir, ci1, _IFT_LevelSetPCS_ci1);
+        IR_GIVE_OPTIONAL_FIELD(ir, ci2, _IFT_LevelSetPCS_ci2);
 
         int nvert = refmatpoly_x.giveSize();
         if ( nvert ) {
@@ -104,19 +104,19 @@ LevelSetPCS :: initializeFrom(InputRecord *ir)
     }
 
     reinit_alg = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, reinit_alg, IFT_LevelSetPCS_reinit_alg, "lsra");
+    IR_GIVE_OPTIONAL_FIELD(ir, reinit_alg, _IFT_LevelSetPCS_reinit_alg);
 
     reinit_dt = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, reinit_dt, IFT_LevelSetPCS_reinit_dt, "rdt");
+    IR_GIVE_OPTIONAL_FIELD(ir, reinit_dt, _IFT_LevelSetPCS_reinit_dt);
     if ( reinit_dt > 0. ) {
         reinit_dt_flag = true;
     }
 
     reinit_err = 1.e-6;
-    IR_GIVE_OPTIONAL_FIELD(ir, reinit_err, IFT_LevelSetPCS_reinit_err, "rerr");
+    IR_GIVE_OPTIONAL_FIELD(ir, reinit_err, _IFT_LevelSetPCS_reinit_err);
 
     nsd = 2;
-    IR_GIVE_OPTIONAL_FIELD(ir, nsd, IFT_LevelSetPCS_nsd, "nsd");
+    IR_GIVE_OPTIONAL_FIELD(ir, nsd, _IFT_LevelSetPCS_nsd);
 
     return IRRT_OK;
 }

@@ -42,6 +42,16 @@
 #include "contextmode.h"
 
 namespace oofem {
+
+///@name Input fields for geometries
+//@{
+#define _IFT_Circle_radius "radius"
+#define _IFT_Circle_center "center"
+#define _IFT_PointSwarm_nodeID "nodeid"
+#define _IFT_Line_start "start"
+#define _IFT_Line_end "end"
+//@}
+
 /**
  * Abstract representation of Geometry
  * Patch inherits from this class

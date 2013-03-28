@@ -42,11 +42,15 @@
 #include "layeredcrosssection.h"
 #include "enrichmentdomain.h"
 #include "dofiditem.h"
-///@name Input fields for EnrichmentItem
+
+///@name Input fields for XFEM
 //@{
-#define _IFT_EnrichmentItem_geometryItemNr "geometryitemnr"
-#define _IFT_EnrichmentItem_enrichmentFunctionNr "enrichmentfunctionnr"
-#define _IFT_EnrichmentItem_materialNr "material"
+#define _IFT_Inclusion_material "material"
+
+#define _IFT_EnrichmentItem_domains "enrichmentdomains"
+#define _IFT_EnrichmentItem_function "enrichmentfunction"
+
+#define _IFT_Delamination_xiCoords "delaminationxicoords"
 //@}
 
 namespace oofem {

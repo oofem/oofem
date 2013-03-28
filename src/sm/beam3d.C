@@ -421,14 +421,14 @@ Beam3d :: initializeFrom(InputRecord *ir)
     // first call parent
     StructuralElement :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, referenceNode, IFT_Beam3d_refnode, "refnode");
+    IR_GIVE_FIELD(ir, referenceNode, _IFT_Beam3d_refnode);
     if ( referenceNode == 0 ) {
         _error("instanciateFrom: wrong reference node specified");
     }
 
-    if ( ir->hasField(IFT_Beam3d_dofstocondense, "dofstocondense") ) {
+    if ( ir->hasField(_IFT_Beam3d_dofstocondense) ) {
         IntArray val;
-        IR_GIVE_FIELD(ir, val, IFT_Beam3d_dofstocondense, "dofstocondense");
+        IR_GIVE_FIELD(ir, val, _IFT_Beam3d_dofstocondense);
         if ( val.giveSize() >= 12 ) {
             _error("instanciateFrom: wrong input data for condensed dofs");
         }

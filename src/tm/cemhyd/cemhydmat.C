@@ -473,22 +473,22 @@ IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
 
     reinforcementDegree = 0.;
     //if you want computation of material properties directly from CEMHYD3D, sum up 1 for density, 2 for conductivity, 4 for capacity
-    IR_GIVE_OPTIONAL_FIELD(ir, conductivityType, IFT_CemhydMat_conductivitytype, "conductivitytype");
-    IR_GIVE_OPTIONAL_FIELD(ir, capacityType, IFT_CemhydMat_capacitytype, "capacitytype");
-    IR_GIVE_OPTIONAL_FIELD(ir, densityType, IFT_CemhydMat_densitytype, "densitytype");
-    IR_GIVE_OPTIONAL_FIELD(ir, eachGP, IFT_CemhydMat_eachgp, "eachgp");
-    IR_GIVE_OPTIONAL_FIELD(ir, nowarnings, IFT_CemhydMat_nowarnings, "nowarnings");
+    IR_GIVE_OPTIONAL_FIELD(ir, conductivityType, _IFT_CemhydMat_conductivitytype);
+    IR_GIVE_OPTIONAL_FIELD(ir, capacityType, _IFT_CemhydMat_capacitytype);
+    IR_GIVE_OPTIONAL_FIELD(ir, densityType, _IFT_CemhydMat_densitytype);
+    IR_GIVE_OPTIONAL_FIELD(ir, eachGP, _IFT_CemhydMat_eachgp);
+    IR_GIVE_OPTIONAL_FIELD(ir, nowarnings, _IFT_CemhydMat_nowarnings);
     if ( nowarnings.giveSize() != 4 ) {
         OOFEM_ERROR2( "Incorrect size %d of nowarnings", nowarnings.giveSize() );
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, scaling, IFT_CemhydMat_scaling, "scaling");
+    IR_GIVE_OPTIONAL_FIELD(ir, scaling, _IFT_CemhydMat_scaling);
     if ( scaling.giveSize() != 3 ) {
         OOFEM_ERROR2( "Incorrect size %d of scaling", nowarnings.giveSize() );
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, reinforcementDegree, IFT_CemhydMat_reinforcementDegree, "reinforcementdegree");
-    IR_GIVE_FIELD(ir, XMLfileName, IFT_CemhydMat_inputFileName, "file");
+    IR_GIVE_OPTIONAL_FIELD(ir, reinforcementDegree, _IFT_CemhydMat_reinforcementDegree);
+    IR_GIVE_FIELD(ir, XMLfileName, _IFT_CemhydMat_inputFileName);
 
     return IRRT_OK;
 }

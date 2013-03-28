@@ -305,8 +305,8 @@ IRResultType PrescribedGradient :: initializeFrom(InputRecord *ir)
 
     GeneralBoundaryCondition :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, this->gradient, IFT_PrescribedGradient_gradient, "gradient");
-    IRResultType rt = IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, IFT_PrescribedGradient_centercoords, "ccoord")
+    IR_GIVE_FIELD(ir, this->gradient, _IFT_PrescribedGradient_gradient);
+    IRResultType rt = IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, _IFT_PrescribedGradient_centercoords)
     if ( rt != IRRT_OK ) {
         this->centerCoord.resize( this->gradient.giveNumberOfColumns() );
         this->centerCoord.zero();

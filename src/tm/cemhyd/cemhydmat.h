@@ -61,7 +61,7 @@ using namespace tinyxml2;
 #define _IFT_CemhydMat_nowarnings "nowarnings"
 #define _IFT_CemhydMat_scaling "scaling"
 #define _IFT_CemhydMat_reinforcementDegree "reinforcementdegree"
-#define _IFT_CemhydMat_inputFileName "inputfilename"
+#define _IFT_CemhydMat_inputFileName "file"
 //@}
 
 namespace oofem {

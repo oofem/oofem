@@ -45,9 +45,9 @@ UserDefinedLoadTimeFunction :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom";
     IRResultType result;
 
-    IR_GIVE_FIELD(ir, ftExpression, IFT_UserDefinedLoadTimeFunction_ft, "f(t)");
-    IR_GIVE_OPTIONAL_FIELD(ir, dfdtExpression, IFT_UserDefinedLoadTimeFunction_dfdt, "dfdt(t)");
-    IR_GIVE_OPTIONAL_FIELD(ir, d2fdt2Expression, IFT_UserDefinedLoadTimeFunction_d2fdt2, "d2fdt2(t)");
+    IR_GIVE_FIELD(ir, ftExpression, _IFT_UserDefinedLoadTimeFunction_ft);
+    IR_GIVE_OPTIONAL_FIELD(ir, dfdtExpression, _IFT_UserDefinedLoadTimeFunction_dfdt);
+    IR_GIVE_OPTIONAL_FIELD(ir, d2fdt2Expression, _IFT_UserDefinedLoadTimeFunction_d2fdt2);
 
     return LoadTimeFunction :: initializeFrom(ir);
 }

@@ -480,8 +480,8 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
-    if ( ir->hasField(IFT_NonlocalMaterialExtensionInterface_regionmap, "regionmap") ) {
-        IR_GIVE_FIELD(ir, regionMap, IFT_NonlocalMaterialExtensionInterface_regionmap, "regionmap");
+    if ( ir->hasField(_IFT_NonlocalMaterialExtensionInterface_regionmap) ) {
+        IR_GIVE_FIELD(ir, regionMap, _IFT_NonlocalMaterialExtensionInterface_regionmap);
         if ( regionMap.giveSize() != this->giveDomain()->giveNumberOfRegions() ) {
             OOFEM_ERROR("NonlocalMaterialExtensionInterface::instanciateFrom: regionMap size mismatch");
         }
@@ -491,18 +491,18 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
 
     int _permanentNonlocTableFlag = this->permanentNonlocTableFlag;
     IR_GIVE_OPTIONAL_FIELD(ir, _permanentNonlocTableFlag,
-                           IFT_NonlocalMaterialExtensionInterface_permanentNonlocTableFlag, "permanentnonloctableflag");
+                           _IFT_NonlocalMaterialExtensionInterface_permanentNonlocTableFlag);
     this->permanentNonlocTableFlag = _permanentNonlocTableFlag;
 
     // read the characteristic length
-    IR_GIVE_FIELD(ir, cl, IFT_NonlocalMaterialExtensionInterface_r, "r");
+    IR_GIVE_FIELD(ir, cl, _IFT_NonlocalMaterialExtensionInterface_r);
     if ( cl < 0.0 ) {
         cl = 0.0;
     }
 
     // read the type of weight function
     int wft = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, wft, IFT_NonlocalMaterialExtensionInterface_wft, "wft");
+    IR_GIVE_OPTIONAL_FIELD(ir, wft, _IFT_NonlocalMaterialExtensionInterface_wft);
     if ( wft == 2 ) {
         weightFun = WFT_Gauss;
     } else if ( wft == 3 ) {
@@ -520,7 +520,7 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     //   should be uniform over an element,
     //   which can now be described as "wft 5")
     int avt = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, avt, IFT_NonlocalMaterialExtensionInterface_averagingtype, "averagingtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, avt, _IFT_NonlocalMaterialExtensionInterface_averagingtype);
     if ( avt == 1 ) {
         weightFun = WFT_UniformOverElement;
     }
@@ -530,11 +530,11 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
 
     // read the optional parameter for overnonlocal formulation
     mm = 1.;
-    IR_GIVE_OPTIONAL_FIELD(ir, mm, IFT_NonlocalMaterialExtensionInterface_m, "m");
+    IR_GIVE_OPTIONAL_FIELD(ir, mm, _IFT_NonlocalMaterialExtensionInterface_m);
 
     // read the type of scaling
     int st = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, st, IFT_NonlocalMaterialExtensionInterface_scalingtype, "scaling");
+    IR_GIVE_OPTIONAL_FIELD(ir, st, _IFT_NonlocalMaterialExtensionInterface_scalingtype);
     if ( st == 2 ) {
         scaling = ST_Noscaling;
     } else if ( st == 3 ) {
@@ -545,7 +545,7 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
 
     // read the type of averaged variable
     int av = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, av, IFT_NonlocalMaterialExtensionInterface_averagedquantity, "averagedvar");
+    IR_GIVE_OPTIONAL_FIELD(ir, av, _IFT_NonlocalMaterialExtensionInterface_averagedquantity);
     if ( av == 2 ) {
         averagedVar = AVT_Compliance;
     } else {
@@ -555,14 +555,14 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     //Read the nonlocal variation type (default is zero)
     cl0 = cl;
     int nlvariation = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, nlvariation, IFT_NonlocalMaterialExtensionInterface_nonlocalvariation, "nlvariation");
+    IR_GIVE_OPTIONAL_FIELD(ir, nlvariation, _IFT_NonlocalMaterialExtensionInterface_nonlocalvariation);
     if ( nlvariation == 1 ) {
         nlvar = NLVT_DistanceBased;
-        IR_GIVE_FIELD(ir, beta, IFT_NonlocalMaterialExtensionInterface_beta, "beta");
-        IR_GIVE_FIELD(ir, zeta, IFT_NonlocalMaterialExtensionInterface_zeta, "zeta");
+        IR_GIVE_FIELD(ir, beta, _IFT_NonlocalMaterialExtensionInterface_beta);
+        IR_GIVE_FIELD(ir, zeta, _IFT_NonlocalMaterialExtensionInterface_zeta);
     } else if ( nlvariation == 2 ) {
         nlvar = NLVT_StressBased;
-        IR_GIVE_FIELD(ir, beta, IFT_NonlocalMaterialExtensionInterface_beta, "beta");
+        IR_GIVE_FIELD(ir, beta, _IFT_NonlocalMaterialExtensionInterface_beta);
     }
 
     return IRRT_OK;

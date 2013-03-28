@@ -81,12 +81,12 @@ Load :: initializeFrom(InputRecord *ir)
     // VERBOSE_PRINT1 ("Instanciating load ",number)
 #  endif
     GeneralBoundaryCondition :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, componentArray, IFT_Load_components, "components");
+    IR_GIVE_FIELD(ir, componentArray, _IFT_Load_components);
 
     int size = componentArray.giveSize();
     dofExcludeMask.resize(size);
     dofExcludeMask.zero();
-    IR_GIVE_OPTIONAL_FIELD(ir, dofExcludeMask, IFT_Load_dofexcludemask, "dofexcludemask");
+    IR_GIVE_OPTIONAL_FIELD(ir, dofExcludeMask, _IFT_Load_dofexcludemask);
     if ( dofExcludeMask.giveSize() != size ) {
         _error("initializeFrom: dofExcludeMask and componentArray size mismatch");
     } else {

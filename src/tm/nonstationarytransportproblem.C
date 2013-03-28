@@ -92,31 +92,31 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
 
     EngngModel :: initializeFrom(ir);
 
-    if ( ir->hasField(IFT_NonStationaryTransportProblem_initt, "initt") ) {
-        IR_GIVE_FIELD(ir, initT, IFT_NonStationaryTransportProblem_initt, "initt");
+    if ( ir->hasField(_IFT_NonStationaryTransportProblem_initt) ) {
+        IR_GIVE_FIELD(ir, initT, _IFT_NonStationaryTransportProblem_initt);
     }
 
-    if ( ir->hasField(IFT_NonStationaryTransportProblem_deltat, "deltat") ) {
-        IR_GIVE_FIELD(ir, deltaT, IFT_NonStationaryTransportProblem_deltat, "deltat");
-    } else if ( ir->hasField(IFT_NonStationaryTransportProblem_deltatfunction, "deltatfunction") ) {
-        IR_GIVE_FIELD(ir, dtTimeFunction, IFT_NonStationaryTransportProblem_deltatfunction, "deltatfunction");
-    } else if ( ir->hasField(IFT_NonStationaryTransportProblem_prescribedtimes, "prescribedtimes") ) {
-        IR_GIVE_FIELD(ir, discreteTimes, IFT_NonStationaryTransportProblem_prescribedtimes, "prescribedtimes");
+    if ( ir->hasField(_IFT_NonStationaryTransportProblem_deltat) ) {
+        IR_GIVE_FIELD(ir, deltaT, _IFT_NonStationaryTransportProblem_deltat);
+    } else if ( ir->hasField(_IFT_NonStationaryTransportProblem_deltatfunction) ) {
+        IR_GIVE_FIELD(ir, dtTimeFunction, _IFT_NonStationaryTransportProblem_deltatfunction);
+    } else if ( ir->hasField(_IFT_NonStationaryTransportProblem_prescribedtimes) ) {
+        IR_GIVE_FIELD(ir, discreteTimes, _IFT_NonStationaryTransportProblem_prescribedtimes);
     } else {
         OOFEM_ERROR("Time step not defined");
     }
 
-    IR_GIVE_FIELD(ir, alpha, IFT_NonStationaryTransportProblem_alpha, "alpha");
+    IR_GIVE_FIELD(ir, alpha, _IFT_NonStationaryTransportProblem_alpha);
     /* The following done in updateAttributes
      * if (this->giveNumericalMethod (giveCurrentStep())) nMethod -> instanciateFrom (ir);
      */
     // read lumped capacity stabilization flag
-    if ( ir->hasField(IFT_NonStationaryTransportProblem_lumpedcapa, "lumpedcapa") ) {
+    if ( ir->hasField(_IFT_NonStationaryTransportProblem_lumpedcapa) ) {
         lumpedCapacityStab = 1;
     }
 
     //secure equation renumbering, otherwise keep efficient algorithms
-    if ( ir->hasField(IFT_NonStationaryTransportProblem_changingproblemsize, "changingproblemsize") ) {
+    if ( ir->hasField(_IFT_NonStationaryTransportProblem_changingproblemsize) ) {
         changingProblemSize = true;
         UnknownsField = new DofDistributedPrimaryField(this, 1, FT_TransportProblemUnknowns, EID_ConservationEquation, 1);
     } else {

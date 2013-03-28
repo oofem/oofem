@@ -64,6 +64,7 @@
 #define _IFT_VTKXMLExportModule_regionstoskip "regionstoskip"
 #define _IFT_VTKXMLExportModule_nvr "nvr"
 #define _IFT_VTKXMLExportModule_vrmap "vrmap"
+#define _IFT_VTKXMLExportModule_timeScale "timescale"
 //@}
 
 

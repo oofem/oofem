@@ -51,7 +51,7 @@ ExportModuleManager :: initializeFrom(InputRecord *ir)
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
     this->numberOfModules = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfModules, IFT_ModuleManager_nmodules, "nmodules");
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfModules, _IFT_ModuleManager_nmodules);
     return IRRT_OK;
 }
 

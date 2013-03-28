@@ -123,10 +123,10 @@ RotatingBoundary :: initializeFrom(InputRecord *ir)
 
     GeneralBoundaryCondition :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, axis, IFT_RotatingBoundary_axis, "axis");
+    IR_GIVE_FIELD(ir, axis, _IFT_RotatingBoundary_axis);
     axis.normalize();
 
-    IR_GIVE_OPTIONAL_FIELD(ir, center, IFT_RotatingBoundary_center, "center");
+    IR_GIVE_OPTIONAL_FIELD(ir, center, _IFT_RotatingBoundary_center);
 
     return IRRT_OK;
 }

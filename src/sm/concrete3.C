@@ -449,7 +449,7 @@ Concrete3 :: initializeFrom(InputRecord *ir)
 
     RCM2Material :: initializeFrom(ir);
     exmode = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, exmode, IFT_Concrete3_exp_soft, "exp_soft");
+    IR_GIVE_OPTIONAL_FIELD(ir, exmode, _IFT_Concrete3_exp_soft);
     if ( exmode ) {
         softeningMode = exponentialSoftening;
     } else {

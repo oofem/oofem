@@ -521,13 +521,13 @@ MisesMatGrad :: initializeFrom(InputRecord *ir)
 
     MisesMat :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, R, IFT_MisesMatGrad_r, "r");
+    IR_GIVE_FIELD(ir, R, _IFT_MisesMatGrad_r);
     if ( R < 0.0 ) {
         R = 0.0;
     }
 
     mParam = 2.;
-    IR_GIVE_OPTIONAL_FIELD(ir, mParam, IFT_MisesMatGrad_m, "m");
+    IR_GIVE_OPTIONAL_FIELD(ir, mParam, _IFT_MisesMatGrad_m);
 
     return IRRT_OK;
 }

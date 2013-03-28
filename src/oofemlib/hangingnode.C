@@ -55,9 +55,9 @@ IRResultType HangingNode :: initializeFrom(InputRecord *ir)
 
     Node :: initializeFrom(ir);
     this->masterElement = -1;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->masterElement, IFT_HangingNode_masterElement, "masterelement");
+    IR_GIVE_OPTIONAL_FIELD(ir, this->masterElement, _IFT_HangingNode_masterElement);
     this->masterRegion = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->masterRegion, IFT_HangingNode_masterRegion, "masterregion");
+    IR_GIVE_OPTIONAL_FIELD(ir, this->masterRegion, _IFT_HangingNode_masterRegion);
     return IRRT_OK;
 }
 

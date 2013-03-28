@@ -139,37 +139,37 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
 
     // checking timefactor - for MPS material must be equal to 1.
     double tf;
-    IR_GIVE_FIELD(ir, tf, IFT_RheoChainMaterial_timefactor, "timefactor");
+    IR_GIVE_FIELD(ir, tf, _IFT_RheoChainMaterial_timefactor);
     if ( tf != 1. ) {
         _error("initializeFrom: for MPS material timefactor must be equal to 1.");
     }
 
     int mode = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, mode, IFT_MPSMaterial_mode, "mode");
+    IR_GIVE_OPTIONAL_FIELD(ir, mode, _IFT_MPSMaterial_mode);
 
     if ( mode == 0 ) { // default - estimate model parameters q1,..,q4 from composition
-        IR_GIVE_FIELD(ir, fc, IFT_MPSMaterial_fc, "fc"); // 28-day standard cylinder compression strength [MPa]
-        IR_GIVE_FIELD(ir,  c, IFT_MPSMaterial_cc, "cc"); // cement content of concrete [kg/m^3]
-        IR_GIVE_FIELD(ir, wc, IFT_MPSMaterial_wc, "w/c"); // ratio (by weight) of water to cementitious material
-        IR_GIVE_FIELD(ir, ac, IFT_MPSMaterial_ac, "a/c"); // ratio (by weight) of aggregate to cement
+        IR_GIVE_FIELD(ir, fc, _IFT_MPSMaterial_fc); // 28-day standard cylinder compression strength [MPa]
+        IR_GIVE_FIELD(ir,  c, _IFT_MPSMaterial_cc); // cement content of concrete [kg/m^3]
+        IR_GIVE_FIELD(ir, wc, _IFT_MPSMaterial_wc); // ratio (by weight) of water to cementitious material
+        IR_GIVE_FIELD(ir, ac, _IFT_MPSMaterial_ac); // ratio (by weight) of aggregate to cement
 
         stiffnessFactor = 1.;
-        IR_GIVE_OPTIONAL_FIELD(ir, stiffnessFactor, IFT_MPSMaterial_stiffnessfactor, "stiffnessfactor"); // ratio (by weight) of aggregate to cement
+        IR_GIVE_OPTIONAL_FIELD(ir, stiffnessFactor, _IFT_MPSMaterial_stiffnessfactor); // ratio (by weight) of aggregate to cement
 
         this->predictParametersFrom(fc, c, wc, ac, stiffnessFactor);
 
     } else { // read model parameters for creep
-        IR_GIVE_FIELD(ir, q1, IFT_MPSMaterial_q1, "q1");
-        IR_GIVE_FIELD(ir, q2, IFT_MPSMaterial_q2, "q2");
-        IR_GIVE_FIELD(ir, q3, IFT_MPSMaterial_q3, "q3");
-        IR_GIVE_FIELD(ir, q4, IFT_MPSMaterial_q4, "q4");
+        IR_GIVE_FIELD(ir, q1, _IFT_MPSMaterial_q1);
+        IR_GIVE_FIELD(ir, q2, _IFT_MPSMaterial_q2);
+        IR_GIVE_FIELD(ir, q3, _IFT_MPSMaterial_q3);
+        IR_GIVE_FIELD(ir, q4, _IFT_MPSMaterial_q4);
     }
 
-    IR_GIVE_FIELD(ir, talpha, IFT_MPSMaterial_talpha, "talpha");
-    IR_GIVE_FIELD(ir, lambda0, IFT_MPSMaterial_lambda0, "lambda0");
+    IR_GIVE_FIELD(ir, talpha, _IFT_MPSMaterial_talpha);
+    IR_GIVE_FIELD(ir, lambda0, _IFT_MPSMaterial_lambda0);
 
     int type = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, type, IFT_MPSMaterial_coupledanalysistype, "coupledanalysistype");
+    IR_GIVE_OPTIONAL_FIELD(ir, type, _IFT_MPSMaterial_coupledanalysistype);
     if ( type >= 2 ) {
         _error("initializeFrom: CoupledAnalysisType must be equal to 0 or 1");
     }
@@ -180,36 +180,36 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
     if ( this->CoupledAnalysis == MPS ) {
         // muS- the only parameter necessary for evaluation of the flow-term viscosity
         // muS = c0 * c1 * q4 [1/(Pa*s)]
-        IR_GIVE_FIELD(ir, muS, IFT_MPSMaterial_mus, "mus");
-        IR_GIVE_FIELD(ir, kappaT, IFT_MPSMaterial_kappat, "kappat"); //[-] replaces ln(h) in diff equation for MPS
+        IR_GIVE_FIELD(ir, muS, _IFT_MPSMaterial_mus);
+        IR_GIVE_FIELD(ir, kappaT, _IFT_MPSMaterial_kappat); //[-] replaces ln(h) in diff equation for MPS
         this->ct = 0.;
-        IR_GIVE_OPTIONAL_FIELD(ir, ct, IFT_MPSMaterial_ct, "ct");
+        IR_GIVE_OPTIONAL_FIELD(ir, ct, _IFT_MPSMaterial_ct);
 
         // age when drying or thermal changes begin [days] - necessary to determine initial viscosity
-        IR_GIVE_FIELD(ir, t0, IFT_MPSMaterial_t0, "t0");
-        IR_GIVE_OPTIONAL_FIELD(ir, kSh, IFT_MPSMaterial_ksh, "ksh");
+        IR_GIVE_FIELD(ir, t0, _IFT_MPSMaterial_t0);
+        IR_GIVE_OPTIONAL_FIELD(ir, kSh, _IFT_MPSMaterial_ksh);
 
         // Parameters for desorption isotherm
-        IR_GIVE_FIELD(ir, w_h, IFT_MPSMaterial_wh, "w_h");
-        IR_GIVE_FIELD(ir, n, IFT_MPSMaterial_ncoeff, "ncoeff");
-        IR_GIVE_FIELD(ir, a, IFT_MPSMaterial_a, "a");
+        IR_GIVE_FIELD(ir, w_h, _IFT_MPSMaterial_wh);
+        IR_GIVE_FIELD(ir, n, _IFT_MPSMaterial_ncoeff);
+        IR_GIVE_FIELD(ir, a, _IFT_MPSMaterial_a);
 
         this->roomTemperature = 298.; // reference room temperature for MPS algorithm [K]
 
         // ACTIVATION ENERGIES
         this->QEtoR = 2700.; // [K] value according to Bazant 1995
-        IR_GIVE_OPTIONAL_FIELD(ir, QEtoR, IFT_MPSMaterial_qetor, "qetor");
+        IR_GIVE_OPTIONAL_FIELD(ir, QEtoR, _IFT_MPSMaterial_qetor);
         this->QRtoR = 5000.; // [K] value according to Bazant 1995
-        IR_GIVE_OPTIONAL_FIELD(ir, QRtoR, IFT_MPSMaterial_qrtor, "qrtor");
+        IR_GIVE_OPTIONAL_FIELD(ir, QRtoR, _IFT_MPSMaterial_qrtor);
         this->QStoR = 3000.; // [K] value according to Bazant 1995
-        IR_GIVE_OPTIONAL_FIELD(ir, QStoR, IFT_MPSMaterial_qstor, "qstor");
+        IR_GIVE_OPTIONAL_FIELD(ir, QStoR, _IFT_MPSMaterial_qstor);
 
         this->alphaE = 10.; // according to Bazant 1995
-        IR_GIVE_OPTIONAL_FIELD(ir, alphaE, IFT_MPSMaterial_alphae, "alphae");
+        IR_GIVE_OPTIONAL_FIELD(ir, alphaE, _IFT_MPSMaterial_alphae);
         this->alphaR = 0.1; // according to Bazant 1995
-        IR_GIVE_OPTIONAL_FIELD(ir, alphaR, IFT_MPSMaterial_alphar, "alphar");
+        IR_GIVE_OPTIONAL_FIELD(ir, alphaR, _IFT_MPSMaterial_alphar);
         this->alphaS = 0.1; // according to Bazant 1995
-        IR_GIVE_OPTIONAL_FIELD(ir, alphaS, IFT_MPSMaterial_alphas, "alphas");
+        IR_GIVE_OPTIONAL_FIELD(ir, alphaS, _IFT_MPSMaterial_alphas);
     }
 
     return IRRT_OK;

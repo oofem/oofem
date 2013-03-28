@@ -439,34 +439,34 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
 
     //isotropic flag
     isotropicFlag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, isotropicFlag, IFT_ConcreteDPM2_isoflag, "isoflag");
+    IR_GIVE_OPTIONAL_FIELD(ir, isotropicFlag, _IFT_ConcreteDPM2_isoflag);
 
     double value;
     // elastic parameters
-    IR_GIVE_FIELD(ir, eM, IFT_IsotropicLinearElasticMaterial_e, "e");
-    IR_GIVE_FIELD(ir, nu, IFT_IsotropicLinearElasticMaterial_n, "n");
+    IR_GIVE_FIELD(ir, eM, _IFT_IsotropicLinearElasticMaterial_e)
+    IR_GIVE_FIELD(ir, nu, _IFT_IsotropicLinearElasticMaterial_n);
     propertyDictionary->add('E', eM);
     propertyDictionary->add('n', nu);
 
-    IR_GIVE_FIELD(ir, value, IFT_IsotropicLinearElasticMaterial_talpha, "talpha");
+    IR_GIVE_FIELD(ir, value, _IFT_IsotropicLinearElasticMaterial_talpha);
     propertyDictionary->add(tAlpha, value);
 
     gM = eM / ( 2. * ( 1. + nu ) );
     kM = eM / ( 3. * ( 1. - 2. * nu ) );
 
-    IR_GIVE_FIELD(ir, fc, IFT_ConcreteDPM2_fc, "fc");
-    IR_GIVE_FIELD(ir, ft, IFT_ConcreteDPM2_ft, "ft");
+    IR_GIVE_FIELD(ir, fc, _IFT_ConcreteDPM2_fc);
+    IR_GIVE_FIELD(ir, ft, _IFT_ConcreteDPM2_ft);
 
     this->e0 = this->ft / this->eM;
 
     // default parameters
     this->ecc = 0.525;
-    IR_GIVE_OPTIONAL_FIELD(ir, ecc, IFT_ConcreteDPM2_ecc, "ecc");
+    IR_GIVE_OPTIONAL_FIELD(ir, ecc, _IFT_ConcreteDPM2_ecc);
     yieldHardInitial = 0.3;
-    IR_GIVE_OPTIONAL_FIELD(ir, yieldHardInitial, IFT_ConcreteDPM2_kinit, "kinit");
+    IR_GIVE_OPTIONAL_FIELD(ir, yieldHardInitial, _IFT_ConcreteDPM2_kinit);
     //Inclination at transition point
     yieldHardPrimePeak = 0.5;
-    IR_GIVE_OPTIONAL_FIELD(ir, yieldHardPrimePeak, IFT_ConcreteDPM2_hp, "hp");
+    IR_GIVE_OPTIONAL_FIELD(ir, yieldHardPrimePeak, _IFT_ConcreteDPM2_hp);
 
     if ( yieldHardPrimePeak < 0 ) {
         yieldHardPrimePeak = 0.;
@@ -477,41 +477,41 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
     }
 
     AHard = 8.e-2;
-    IR_GIVE_OPTIONAL_FIELD(ir, AHard, IFT_ConcreteDPM2_ahard, "ahard");
+    IR_GIVE_OPTIONAL_FIELD(ir, AHard, _IFT_ConcreteDPM2_ahard);
     BHard = 3.e-3;
-    IR_GIVE_OPTIONAL_FIELD(ir, BHard, IFT_ConcreteDPM2_bhard, "bhard");
+    IR_GIVE_OPTIONAL_FIELD(ir, BHard, _IFT_ConcreteDPM2_bhard);
     CHard = 2.;
-    IR_GIVE_OPTIONAL_FIELD(ir, CHard, IFT_ConcreteDPM2_chard, "chard");
+    IR_GIVE_OPTIONAL_FIELD(ir, CHard, _IFT_ConcreteDPM2_chard);
     DHard = 1.e-6;
-    IR_GIVE_OPTIONAL_FIELD(ir, DHard, IFT_ConcreteDPM2_dhard, "dhard");
+    IR_GIVE_OPTIONAL_FIELD(ir, DHard, _IFT_ConcreteDPM2_dhard);
 
     dilationConst = 0.85;
-    IR_GIVE_OPTIONAL_FIELD(ir, dilationConst, IFT_ConcreteDPM2_dilation, "dilation");
+    IR_GIVE_OPTIONAL_FIELD(ir, dilationConst, _IFT_ConcreteDPM2_dilation);
 
     softeningType = 0; //0-Linear softening; 1-Bilinear softening
-    IR_GIVE_OPTIONAL_FIELD(ir, softeningType, IFT_ConcreteDPM2_softeningType, "stype");
+    IR_GIVE_OPTIONAL_FIELD(ir, softeningType, _IFT_ConcreteDPM2_softeningType);
 
     if ( softeningType > 1 ) {
         _error("softening type not implemented\n");
     }
 
-    IR_GIVE_FIELD(ir, this->wf, IFT_ConcreteDPM2_wf, "wf");
+    IR_GIVE_FIELD(ir, this->wf, _IFT_ConcreteDPM2_wf);
 
     if ( softeningType == 1 ) {
         this->ftOne = 0.3 * this->ft;
-        IR_GIVE_OPTIONAL_FIELD(ir, ftOne, IFT_ConcreteDPM2_ftOne, "ft1");
+        IR_GIVE_OPTIONAL_FIELD(ir, ftOne, _IFT_ConcreteDPM2_ftOne);
         this->wfOne = 0.15 * this->wf;
-        IR_GIVE_OPTIONAL_FIELD(ir, this->wfOne, IFT_ConcreteDPM2_wfOne, "wf1");
+        IR_GIVE_OPTIONAL_FIELD(ir, this->wfOne, _IFT_ConcreteDPM2_wfOne);
     }
 
     this->ASoft = 15;
-    IR_GIVE_OPTIONAL_FIELD(ir, ASoft, IFT_ConcreteDPM2_asoft, "asoft");
+    IR_GIVE_OPTIONAL_FIELD(ir, ASoft, _IFT_ConcreteDPM2_asoft);
 
     this->BSoft = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, BSoft, IFT_ConcreteDPM2_bsoft, "bsoft");
+    IR_GIVE_OPTIONAL_FIELD(ir, BSoft, _IFT_ConcreteDPM2_bsoft);
 
     helem = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, helem, IFT_ConcreteDPM2_helem, "helem");
+    IR_GIVE_OPTIONAL_FIELD(ir, helem, _IFT_ConcreteDPM2_helem);
 
 
     //Compute m
@@ -519,18 +519,18 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
 
     //Compute default value of dilationConst
     yieldTol = 1.e-10;
-    IR_GIVE_OPTIONAL_FIELD(ir, yieldTol, IFT_ConcreteDPM2_yieldtol, "yieldtol");
+    IR_GIVE_OPTIONAL_FIELD(ir, yieldTol, _IFT_ConcreteDPM2_yieldtol);
     newtonIter = 100;
-    IR_GIVE_OPTIONAL_FIELD(ir, newtonIter, IFT_ConcreteDPM2_newtoniter, "newtoniter");
+    IR_GIVE_OPTIONAL_FIELD(ir, newtonIter, _IFT_ConcreteDPM2_newtoniter);
 
     //parameters for rate dependence
     strainRateFlag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, strainRateFlag, IFT_ConcreteDPM2_rateFlag, "rateflag");
+    IR_GIVE_OPTIONAL_FIELD(ir, strainRateFlag, _IFT_ConcreteDPM2_rateFlag);
 
     timeFactor = 1.;
     if ( strainRateFlag == 1 ) {
-        IR_GIVE_FIELD(ir, fcZero, IFT_ConcreteDPM2_fcZero, "fczero");
-        IR_GIVE_OPTIONAL_FIELD(ir, timeFactor, IFT_ConcreteDPM2_timeFactor, "timefactor");
+        IR_GIVE_FIELD(ir, fcZero, _IFT_ConcreteDPM2_fcZero);
+        IR_GIVE_OPTIONAL_FIELD(ir, timeFactor, _IFT_ConcreteDPM2_timeFactor);
     }
 
     return IRRT_OK;

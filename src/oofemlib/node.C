@@ -98,7 +98,7 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
 #  endif
 
     DofManager :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, coordinates, IFT_Node_coords, "coords");
+    IR_GIVE_FIELD(ir, coordinates, _IFT_Node_coords);
 
     //
     // scaling of coordinates if necessary
@@ -111,7 +111,7 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
 
     // Read if available local coordinate system in this node
     triplets.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, triplets, IFT_Node_lcs, "lcs");
+    IR_GIVE_OPTIONAL_FIELD(ir, triplets, _IFT_Node_lcs);
     size = triplets.giveSize();
     if ( !( ( size == 0 ) || ( size == 6 ) ) ) {
         _warning2( "initializeFrom: lcs in node %d is not properly defined, will be ignored", this->giveNumber() );

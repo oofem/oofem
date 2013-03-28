@@ -54,27 +54,27 @@ OutputManager :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // test if record is of OutputManager
-    if ( !ir->hasField(IFT_OutputManager_name, "outputmanager") ) {
+    if ( !ir->hasField(_IFT_OutputManager_name) ) {
         OOFEM_ERROR("OutputManager::instanciateFrom: bad record");
     }
 
-    tstep_all_out_flag  = ir->hasField(IFT_OutputManager_tstepall, "tstep_all");
+    tstep_all_out_flag  = ir->hasField(_IFT_OutputManager_tstepall);
     tstep_step_out      = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, tstep_step_out, IFT_OutputManager_tstepstep, "tstep_step");
+    IR_GIVE_OPTIONAL_FIELD(ir, tstep_step_out, _IFT_OutputManager_tstepstep);
 
-    dofman_all_out_flag = ir->hasField(IFT_OutputManager_dofmanall, "dofman_all");
-    element_all_out_flag = ir->hasField(IFT_OutputManager_elementall, "element_all");
+    dofman_all_out_flag = ir->hasField(_IFT_OutputManager_dofmanall);
+    element_all_out_flag = ir->hasField(_IFT_OutputManager_elementall);
 
     tsteps_out.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, tsteps_out, IFT_OutputManager_tstepsout, "tsteps_out");
+    IR_GIVE_OPTIONAL_FIELD(ir, tsteps_out, _IFT_OutputManager_tstepsout);
     dofman_out.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, dofman_out, IFT_OutputManager_dofmanoutput, "dofman_output");
+    IR_GIVE_OPTIONAL_FIELD(ir, dofman_out, _IFT_OutputManager_dofmanoutput);
     dofman_except.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, dofman_except, IFT_OutputManager_dofmanexcept, "dofman_except");
+    IR_GIVE_OPTIONAL_FIELD(ir, dofman_except, _IFT_OutputManager_dofmanexcept);
     element_out.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, element_out, IFT_OutputManager_elementoutput, "element_output");
+    IR_GIVE_OPTIONAL_FIELD(ir, element_out, _IFT_OutputManager_elementoutput);
     element_except.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, element_except, IFT_OutputManager_elementexcept, "element_except");
+    IR_GIVE_OPTIONAL_FIELD(ir, element_except, _IFT_OutputManager_elementexcept);
 
     return IRRT_OK;
 }

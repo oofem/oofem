@@ -60,9 +60,9 @@ CBSElement :: initializeFrom(InputRecord *ir)
 
     FMElement :: initializeFrom(ir);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, IFT_CBSElement_bsides, _IFT_CBSElement_bsides);
+    IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, _IFT_CBSElement_bsides);
     if ( !boundarySides.isEmpty() ) {
-        IR_GIVE_FIELD(ir, boundaryCodes, IFT_CBSElement_bcodes, _IFT_CBSElement_bcodes);
+        IR_GIVE_FIELD(ir, boundaryCodes, _IFT_CBSElement_bcodes);
     }
 
     return IRRT_OK;

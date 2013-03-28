@@ -231,21 +231,21 @@ DruckerPragerPlasticitySM :: initializeFrom(InputRecord *ir)
     //kM = eM / ( 3. * ( 1. - 2. * nu ) );
 
     // instanciate the variables defined in DruckerPragerPlasticitySM
-    IR_GIVE_FIELD(ir, initialYieldStress, IFT_DruckerPragerPlasticitySM_iys, "iys"); // initial yield stress under pure shear
-    IR_GIVE_FIELD(ir, alpha, IFT_DruckerPragerPlasticitySM_alpha, "alpha"); // friction coefficient
-    IR_GIVE_FIELD(ir, alphaPsi, IFT_DruckerPragerPlasticitySM_alphapsi, "alphapsi"); //dilatancy coefficient
+    IR_GIVE_FIELD(ir, initialYieldStress, _IFT_DruckerPragerPlasticitySM_iys); // initial yield stress under pure shear
+    IR_GIVE_FIELD(ir, alpha, _IFT_DruckerPragerPlasticitySM_alpha); // friction coefficient
+    IR_GIVE_FIELD(ir, alphaPsi, _IFT_DruckerPragerPlasticitySM_alphapsi); //dilatancy coefficient
     // this is valid for strain hardening/softening only (not for work hardening/softening)
     kFactor = sqrt(1. / 3. + 2. * alphaPsi * alphaPsi);
 
-    IR_GIVE_FIELD(ir, hardeningType, IFT_DruckerPragerPlasticitySM_ht, "ht");
+    IR_GIVE_FIELD(ir, hardeningType, _IFT_DruckerPragerPlasticitySM_ht);
 
     switch ( hardeningType ) {
     case 1:     // linear hardening/softening
-        IR_GIVE_FIELD(ir, hardeningModulus, IFT_DruckerPragerPlasticitySM_hm, "hm");
+        IR_GIVE_FIELD(ir, hardeningModulus, _IFT_DruckerPragerPlasticitySM_hm);
         break;
     case 2:     // exponential hardening/softening
-        IR_GIVE_FIELD(ir, kappaC, IFT_DruckerPragerPlasticitySM_kc, "kc");
-        IR_GIVE_FIELD(ir, limitYieldStress, IFT_DruckerPragerPlasticitySM_lys, "lys");
+        IR_GIVE_FIELD(ir, kappaC, _IFT_DruckerPragerPlasticitySM_kc);
+        IR_GIVE_FIELD(ir, limitYieldStress, _IFT_DruckerPragerPlasticitySM_lys);
         break;
     default:
         _error("Choose hardeningType 1 (linear hardening/softening), 2 (exponential hardening/softening) in input file!");
@@ -253,9 +253,9 @@ DruckerPragerPlasticitySM :: initializeFrom(InputRecord *ir)
     }
 
     yieldTol = 1.e-14;
-    IR_GIVE_OPTIONAL_FIELD(ir, yieldTol, IFT_DruckerPragerPlasticitySM_yieldtol, "yieldtol");
+    IR_GIVE_OPTIONAL_FIELD(ir, yieldTol, _IFT_DruckerPragerPlasticitySM_yieldtol);
     newtonIter = 30;
-    IR_GIVE_OPTIONAL_FIELD(ir, newtonIter, IFT_DruckerPragerPlasticitySM_newtoniter, "newtoniter");
+    IR_GIVE_OPTIONAL_FIELD(ir, newtonIter, _IFT_DruckerPragerPlasticitySM_newtoniter);
 
     return IRRT_OK;
 }

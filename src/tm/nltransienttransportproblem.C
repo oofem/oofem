@@ -62,14 +62,14 @@ NLTransientTransportProblem :: initializeFrom(InputRecord *ir)
 
     NonStationaryTransportProblem :: initializeFrom(ir);
     int val = 30;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NLTransientTransportProblem_nsmax, "nsmax");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_NLTransientTransportProblem_nsmax);
     nsmax = val;
 
-    IR_GIVE_FIELD(ir, rtol, IFT_NLTransientTransportProblem_rtol, "rtol");
+    IR_GIVE_FIELD(ir, rtol, _IFT_NLTransientTransportProblem_rtol);
 
     NR_Mode = nrsolverModifiedNRM;
     MANRMSteps = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, MANRMSteps, IFT_NLTransientTransportProblem_manrmsteps, "manrmsteps");
+    IR_GIVE_OPTIONAL_FIELD(ir, MANRMSteps, _IFT_NLTransientTransportProblem_manrmsteps);
     if ( MANRMSteps > 0 ) {
         NR_Mode = nrsolverAccelNRM;
     } else {

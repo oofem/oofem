@@ -59,18 +59,18 @@ ExportModule :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    tstep_all_out_flag = ir->hasField(IFT_ExportModule_tstepall, "tstep_all");
+    tstep_all_out_flag = ir->hasField(_IFT_ExportModule_tstepall);
 
     tstep_step_out = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, tstep_step_out, IFT_ExportModule_tstepstep, "tstep_step");
+    IR_GIVE_OPTIONAL_FIELD(ir, tstep_step_out, _IFT_ExportModule_tstepstep);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, tsteps_out, IFT_ExportModule_tstepsout, "tsteps_out");
+    IR_GIVE_OPTIONAL_FIELD(ir, tsteps_out, _IFT_ExportModule_tstepsout);
 
-    domain_all_flag = ir->hasField(IFT_ExportModule_domainall, "domain_all");
+    domain_all_flag = ir->hasField(_IFT_ExportModule_domainall);
 
     if ( !domain_all_flag ) {
         domainMask.resize(0);
-        IR_GIVE_OPTIONAL_FIELD(ir, domainMask, IFT_ExportModule_domainmask, "domain_mask");
+        IR_GIVE_OPTIONAL_FIELD(ir, domainMask, _IFT_ExportModule_domainmask);
     }
 
     return IRRT_OK;

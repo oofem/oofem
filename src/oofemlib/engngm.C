@@ -383,45 +383,45 @@ EngngModel :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, numberOfSteps, IFT_EngngModel_nsteps, _IFT_EngngModel_nsteps);
+    IR_GIVE_FIELD(ir, numberOfSteps, _IFT_EngngModel_nsteps);
     if ( numberOfSteps <= 0 ) {
         _error("instanciateFrom: nsteps not specified, bad format");
     }
 
     contextOutputStep =  0;
-    IR_GIVE_OPTIONAL_FIELD(ir, contextOutputStep, IFT_EngngModel_contextoutputstep, _IFT_EngngModel_contextoutputstep);
+    IR_GIVE_OPTIONAL_FIELD(ir, contextOutputStep, _IFT_EngngModel_contextoutputstep);
     if ( contextOutputStep ) {
         this->setUDContextOutputMode(contextOutputStep);
     }
 
     renumberFlag = false;
-    IR_GIVE_OPTIONAL_FIELD(ir, renumberFlag, IFT_EngngModel_renumberFlag, _IFT_EngngModel_renumberFlag);
+    IR_GIVE_OPTIONAL_FIELD(ir, renumberFlag, _IFT_EngngModel_renumberFlag);
     profileOpt = false;
-    IR_GIVE_OPTIONAL_FIELD(ir, profileOpt, IFT_EngngModel_profileOpt, _IFT_EngngModel_profileOpt);
+    IR_GIVE_OPTIONAL_FIELD(ir, profileOpt, _IFT_EngngModel_profileOpt);
     nMetaSteps   = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, nMetaSteps, IFT_EngngModel_nmsteps, _IFT_EngngModel_nmsteps);
+    IR_GIVE_OPTIONAL_FIELD(ir, nMetaSteps, _IFT_EngngModel_nmsteps);
     int _val = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_EngngModel_nonLinFormulation, _IFT_EngngModel_nonLinFormulation);
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_EngngModel_nonLinFormulation);
     nonLinFormulation = ( fMode ) _val;
 
     int eeTypeId = -1;
-    IR_GIVE_OPTIONAL_FIELD(ir, eeTypeId, IFT_EngngModel_eetype, _IFT_EngngModel_eetype);
+    IR_GIVE_OPTIONAL_FIELD(ir, eeTypeId, _IFT_EngngModel_eetype);
     if ( eeTypeId >= 0 ) {
         this->defaultErrEstimator = CreateUsrDefErrorEstimator( ( ErrorEstimatorType ) eeTypeId, 1, this->giveDomain(1) );
         this->defaultErrEstimator->initializeFrom(ir);
     }
 
 #ifdef __PARALLEL_MODE
-    IR_GIVE_OPTIONAL_FIELD(ir, parallelFlag, IFT_EngngModel_parallelflag, _IFT_EngngModel_parallelflag);
+    IR_GIVE_OPTIONAL_FIELD(ir, parallelFlag, _IFT_EngngModel_parallelflag);
     // fprintf (stderr, "Parallel mode is %d\n", parallelFlag);
 
     /* Load balancing support */
     _val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_loadBalancingFlag, _IFT_EngngModel_loadBalancingFlag);
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_EngngModel_loadBalancingFlag);
     loadBalancingFlag = _val;
 
     _val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_forceloadBalancingFlag, _IFT_EngngModel_forceloadBalancingFlag);
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_EngngModel_forceloadBalancingFlag);
     force_load_rebalance_in_first_step = _val;
 
 #endif

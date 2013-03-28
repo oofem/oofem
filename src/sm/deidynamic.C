@@ -62,8 +62,8 @@ DEIDynamic :: initializeFrom(InputRecord *ir)
 
     StructuralEngngModel :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, dumpingCoef, IFT_DEIDynamic_dumpcoef, "dumpcoef"); // C = dumpingCoef * M
-    IR_GIVE_FIELD(ir, deltaT, IFT_DEIDynamic_deltat, "deltat");
+    IR_GIVE_FIELD(ir, dumpingCoef, _IFT_DEIDynamic_dumpcoef); // C = dumpingCoef * M
+    IR_GIVE_FIELD(ir, deltaT, _IFT_DEIDynamic_deltat);
 
     return IRRT_OK;
 }

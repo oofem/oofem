@@ -113,9 +113,9 @@ IsotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     // we use rather object's member data than to store data into slow
     // key-val dictionary with lot of memory allocations
 
-    IR_GIVE_FIELD(ir, E, IFT_IsotropicLinearElasticMaterial_e, "e");
-    IR_GIVE_FIELD(ir, nu, IFT_IsotropicLinearElasticMaterial_n, "n");
-    IR_GIVE_FIELD(ir, value, IFT_IsotropicLinearElasticMaterial_talpha, "talpha");
+    IR_GIVE_FIELD(ir, E, _IFT_IsotropicLinearElasticMaterial_e);
+    IR_GIVE_FIELD(ir, nu, _IFT_IsotropicLinearElasticMaterial_n);
+    IR_GIVE_FIELD(ir, value, _IFT_IsotropicLinearElasticMaterial_talpha);
     propertyDictionary->add(tAlpha, value);
     // compute  value of shear modulus
     G = E / ( 2.0 * ( 1. + nu ) );

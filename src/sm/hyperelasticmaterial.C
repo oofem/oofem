@@ -177,8 +177,8 @@ HyperElasticMaterial :: initializeFrom(InputRecord *ir)
 
     // Read material properties here
 
-    IR_GIVE_FIELD(ir, K, IFT_HyperElasticMaterial_k, "k");
-    IR_GIVE_FIELD(ir, G, IFT_HyperElasticMaterial_g, "g");
+    IR_GIVE_FIELD(ir, K, _IFT_HyperElasticMaterial_k);
+    IR_GIVE_FIELD(ir, G, _IFT_HyperElasticMaterial_g);
 
     return IRRT_OK;
 }

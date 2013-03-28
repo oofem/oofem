@@ -133,7 +133,7 @@ AdaptiveLinearStatic :: initializeFrom(InputRecord *ir)
     LinearStatic :: initializeFrom(ir);
 
     int meshPackageId = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, meshPackageId, IFT_AdaptiveLinearStatic_meshpackage, "meshpackage");
+    IR_GIVE_OPTIONAL_FIELD(ir, meshPackageId, _IFT_AdaptiveLinearStatic_meshpackage);
 
     if ( meshPackageId == 1 ) {
         meshPackage = MPT_TARGE2;

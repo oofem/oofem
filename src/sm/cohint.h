@@ -42,6 +42,13 @@
 #include "cltypes.h"
 
 namespace oofem {
+
+///@name Input fields for RankineMat
+//@{
+#define _IFT_IsoInterfaceDamageMaterial_kn "kn"
+#define _IFT_IsoInterfaceDamageMaterial_ks "ks"
+//@}
+
 /**
  * This class implements associated Material Status to CohesiveInterfaceMaterial.
  * It is attribute of matStatusDictionary at every GaussPoint, for which this material

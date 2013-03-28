@@ -124,21 +124,21 @@ HydrationModel :: initializeFrom(InputRecord *ir)
 
     //hydration>0  ->  initial hydration degree
     initialHydrationDegree = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, initialHydrationDegree, IFT_HydrationModel_hydration, "hydration");
+    IR_GIVE_OPTIONAL_FIELD(ir, initialHydrationDegree, _IFT_HydrationModel_hydration);
     if ( initialHydrationDegree >= 0. ) {
         OOFEM_LOG_INFO("HydrationModel: Hydration from %.2f.", initialHydrationDegree);
     } else {
         _error("Hydration degree input incorrect, use 0..1 to set initial material hydration degree.");
     }
 
-    if ( ir->hasField(IFT_HydrationModel_c60mix, "c60mix") ) {
+    if ( ir->hasField(_IFT_HydrationModel_c60mix) ) {
         OOFEM_LOG_INFO("HydrationModel: Model parameters for Skanska C60/75 mixture.");
         setMixture(mtC60);
     }
 
     timeScale = 1.;
     value = -1.;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HydrationModel_timeScale, "timescale");
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_HydrationModel_timeScale);
     if ( value >= 0. ) {
         timeScale = value;
         OOFEM_LOG_INFO("HydrationModel: Time scale set to %.0f", timeScale);
@@ -147,14 +147,14 @@ HydrationModel :: initializeFrom(InputRecord *ir)
     // Optional direct input of material parameters
     le = 0;
     value = -1.;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HydrationModel_hheat, "hheat");
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_HydrationModel_hheat);
     if ( value >= 0 ) {
         le = value;
         OOFEM_LOG_INFO("HydrationModel: Latent heat of hydration set to %.0f", le);
     }
 
     value = -1;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HydrationModel_cv, "cv");
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_HydrationModel_cv);
     if ( value >= 0 ) {
         cv = value;
         OOFEM_LOG_INFO("HydrationModel: Cement content set to %.0f kg/m3", cv);
@@ -162,7 +162,7 @@ HydrationModel :: initializeFrom(InputRecord *ir)
     }
 
     value = -1.;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HydrationModel_water, "water");
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_HydrationModel_water);
     if ( value >= 0 ) {
         we = value;
     }
@@ -605,7 +605,7 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
     // Hydration>0  ->  Model starting at value, hydration<0 -> Constant at given value
     value = -2.;
     constantHydrationDegree = 1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HydrationModelInterface_hydration, "hydration");
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_HydrationModelInterface_hydration);
     if ( value >= 0. ) {
         OOFEM_LOG_INFO("HydratingMaterial: creating HydrationModel.");
         if ( !( hydrationModel = new HydrationModel() ) ) {
@@ -625,7 +625,7 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
     // Material cast time - start of hydration
     // 11/3/2004 OK *unfinished in Hellmat, needs to be checked in hm_Interface->updateInternalState
     castAt = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, castAt, IFT_HydrationModelInterface_castAt, "castat");
+    IR_GIVE_OPTIONAL_FIELD(ir, castAt, _IFT_HydrationModelInterface_castAt);
     if ( castAt >= 0. ) {
         OOFEM_LOG_INFO("HydratingMaterial: Hydration starts at time %.2g.", castAt);
     }

@@ -84,14 +84,14 @@ MisesMat :: initializeFrom(InputRecord *ir)
     G = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveShearModulus();
     K = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveBulkModulus();
 
-    IR_GIVE_FIELD(ir, sig0, IFT_MisesMat_sig0, "sig0"); // uniaxial yield stress
+    IR_GIVE_FIELD(ir, sig0, _IFT_MisesMat_sig0); // uniaxial yield stress
 
     H = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, H, IFT_MisesMat_h, "h"); // hardening modulus
+    IR_GIVE_OPTIONAL_FIELD(ir, H, _IFT_MisesMat_h); // hardening modulus
     /*********************************************************************************************************/
-    IR_GIVE_FIELD(ir, omega_crit, IFT_MisesMat_omega_crit, "omega_crit"); // critical damage
+    IR_GIVE_FIELD(ir, omega_crit, _IFT_MisesMat_omega_crit); // critical damage
 
-    IR_GIVE_OPTIONAL_FIELD(ir, a, IFT_MisesMat_a, "a"); // exponent in damage law
+    IR_GIVE_OPTIONAL_FIELD(ir, a, _IFT_MisesMat_a); // exponent in damage law
     /********************************************************************************************************/
 
 

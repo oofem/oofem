@@ -275,7 +275,7 @@ RCSDMaterial :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, SDTransitionCoeff, IFT_RCSDMaterial_sdtransitioncoeff, "sdtransitioncoeff");
+    IR_GIVE_FIELD(ir, SDTransitionCoeff, _IFT_RCSDMaterial_sdtransitioncoeff);
 
     return RCM2Material :: initializeFrom(ir);
 }

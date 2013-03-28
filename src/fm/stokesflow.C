@@ -79,15 +79,15 @@ IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
     int val;
 
     val = ( int ) SMT_PetscMtrx;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     this->sparseMtrxType = ( SparseMtrxType ) val;
 
     val = ( int ) ST_Petsc;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     this->solverType = ( LinSystSolverType ) val;
 
     this->deltaT = 1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_StokesFlow_deltat, "deltat");
+    IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_StokesFlow_deltat);
 
     this->velocityPressureField = new PrimaryField(this, 1, FT_VelocityPressure, EID_MomentumBalance_ConservationEquation, 1);
 

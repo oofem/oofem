@@ -415,7 +415,7 @@ IRResultType DofManager ::  resolveDofIDArray(InputRecord *ir, IntArray &dofIDAr
     IRResultType result;
 
     numberOfDofs = -1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfDofs, IFT_DofManager_ndofs, "ndofs");
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfDofs, _IFT_DofManager_ndofs);
 
     // returns nonzero if succes
     if ( numberOfDofs == -1 ) {
@@ -425,7 +425,7 @@ IRResultType DofManager ::  resolveDofIDArray(InputRecord *ir, IntArray &dofIDAr
         // if ndofs is prescribed, read the physical meaning of particular dofs
         // for detailed values of DofMask array see cltypes.h file
         // for exaple 1 is for D_u (displacemet in u dir), 2 for D_v, 3 for D_w, ...
-        IR_GIVE_FIELD(ir, dofIDArry, IFT_DofManager_dofidmask, "dofidmask");
+        IR_GIVE_FIELD(ir, dofIDArry, _IFT_DofManager_dofidmask);
 
         if ( dofIDArry.giveSize() != numberOfDofs ) {
             _error("resolveDofIDArray : DofIDMask size mismatch");
@@ -445,39 +445,39 @@ DofManager :: initializeFrom(InputRecord *ir)
     IntArray bc, ic, masterMask, dofTypeMask;
 
     loadArray.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, loadArray, IFT_DofManager_load, "load");
+    IR_GIVE_OPTIONAL_FIELD(ir, loadArray, _IFT_DofManager_load);
 
     this->resolveDofIDArray(ir, dofIDArry);
 
     // numberOfDofs = domain->giveNumberOfDofs () ;
     bc.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, bc, IFT_DofManager_bc, "bc");
+    IR_GIVE_OPTIONAL_FIELD(ir, bc, _IFT_DofManager_bc);
 
     ic.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, ic, IFT_DofManager_ic, "ic");
+    IR_GIVE_OPTIONAL_FIELD(ir, ic, _IFT_DofManager_ic);
     // reads master mask - in this array are numbers of master dofManagers
     // to which are connected dofs in receiver.
     // if master mask index is zero then dof is created as master (i.e., having own equation number)
     // othervise slave dof connected to master DofManager is created.
     // by default if masterMask is not specifyed, all dofs are created as masters.
     dofTypeMask.resize(0); // termitovo
-    IR_GIVE_OPTIONAL_FIELD(ir, dofTypeMask, IFT_DofManager_doftypemask, "doftype");
+    IR_GIVE_OPTIONAL_FIELD(ir, dofTypeMask, _IFT_DofManager_doftypemask);
 
     // read boundary flag
-    if ( ir->hasField(IFT_DofManager_boundaryflag, "boundary") ) {
+    if ( ir->hasField(_IFT_DofManager_boundaryflag) ) {
         isBoundaryFlag = true;
     }
 
 
 #ifdef __PARALLEL_MODE
     partitions.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, partitions, IFT_DofManager_partitions, "partitions");
+    IR_GIVE_OPTIONAL_FIELD(ir, partitions, _IFT_DofManager_partitions);
 
-    if ( ir->hasField(IFT_DofManager_sharedflag, "shared") ) {
+    if ( ir->hasField(_IFT_DofManager_sharedflag) ) {
         parallel_mode = DofManager_shared;
-    } else if ( ir->hasField(IFT_DofManager_remoteflag, "remote") ) {
+    } else if ( ir->hasField(_IFT_DofManager_remoteflag) ) {
         parallel_mode = DofManager_remote;
-    } else if ( ir->hasField(IFT_DofManager_nullflag, "null") ) {
+    } else if ( ir->hasField(_IFT_DofManager_nullflag) ) {
         parallel_mode = DofManager_null;
     } else {
         parallel_mode = DofManager_local;
@@ -541,7 +541,7 @@ DofManager :: initializeFrom(InputRecord *ir)
                 dofArray [ j ] = new ActiveDof( j + 1, this, dofBc, ( DofIDItem ) dofIDArry.at(j + 1) );
             } else if ( dtype == DT_simpleSlave ) { // Simple slave dof
                 if ( masterMask.giveSize() == 0 ) {
-                    IR_GIVE_FIELD(ir, masterMask, IFT_DofManager_mastermask, "mastermask");
+                    IR_GIVE_FIELD(ir, masterMask, _IFT_DofManager_mastermask);
                     if ( masterMask.giveSize() != numberOfDofs ) {
                         _error("initializeFrom: mastermask size mismatch");
                     }

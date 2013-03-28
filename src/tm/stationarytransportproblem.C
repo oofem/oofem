@@ -90,11 +90,11 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
 
     EngngModel :: initializeFrom(ir);
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
     /* The following done in updateAttributes
@@ -104,7 +104,7 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
     // read field export flag
     IntArray exportFields;
     exportFields.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, exportFields, IFT_StationaryTransportProblem_exportfields, "exportfields");
+    IR_GIVE_OPTIONAL_FIELD(ir, exportFields, _IFT_StationaryTransportProblem_exportfields);
     if ( exportFields.giveSize() ) {
         IntArray mask(1);
         FieldManager *fm = this->giveContext()->giveFieldManager();

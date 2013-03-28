@@ -77,27 +77,27 @@ RankineMat :: initializeFrom(InputRecord *ir)
     E = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveYoungsModulus();
     nu = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->givePoissonsRatio();
 
-    IR_GIVE_FIELD(ir, sig0, IFT_RankineMat_sig0, "sig0"); // uniaxial yield stress
+    IR_GIVE_FIELD(ir, sig0, _IFT_RankineMat_sig0); // uniaxial yield stress
 
     H0 = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, H0, IFT_RankineMat_h, "h"); // hardening modulus
+    IR_GIVE_OPTIONAL_FIELD(ir, H0, _IFT_RankineMat_h); // hardening modulus
 
     plasthardtype = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, plasthardtype, IFT_RankineMat_plasthardtype, "plasthardtype"); // type of plastic hardening (0=linear, 1=exponential)
+    IR_GIVE_OPTIONAL_FIELD(ir, plasthardtype, _IFT_RankineMat_plasthardtype); // type of plastic hardening (0=linear, 1=exponential)
 
     delSigY = 0.;
     if ( plasthardtype == 1 ){
-      IR_GIVE_FIELD(ir, delSigY, IFT_RankineMat_delsigy, "delsigy"); // final increment of yield stress (at infinite cumulative plastic strain)
+      IR_GIVE_FIELD(ir, delSigY, _IFT_RankineMat_delsigy); // final increment of yield stress (at infinite cumulative plastic strain)
     }
 
     yieldtol = 1.e-10;
-    IR_GIVE_OPTIONAL_FIELD(ir, yieldtol, IFT_RankineMat_yieldtol, "yieldtol"); // relative tolerance in yield condition
+    IR_GIVE_OPTIONAL_FIELD(ir, yieldtol, _IFT_RankineMat_yieldtol); // relative tolerance in yield condition
 
     a = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, a, IFT_RankineMat_a, "a"); // coefficient in damage law
+    IR_GIVE_OPTIONAL_FIELD(ir, a, _IFT_RankineMat_a); // coefficient in damage law
 
     double gf = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, gf, IFT_RankineMat_gf, "gf"); // dissipated energy per unit VOLUME
+    IR_GIVE_OPTIONAL_FIELD(ir, gf, _IFT_RankineMat_gf); // dissipated energy per unit VOLUME
 
     if ( ( a != 0. ) && ( gf != 0 ) ) {
         OOFEM_ERROR("RankineMat: parameters a and gf cannot be prescribed simultaneously");

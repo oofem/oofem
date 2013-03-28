@@ -115,11 +115,11 @@ Material :: initializeFrom(InputRecord *ir)
     // VERBOSE_PRINT1 ("Instanciating material ",this->giveNumber())
 #  endif
 
-    IR_GIVE_FIELD(ir, value, IFT_Material_density, "d");
+    IR_GIVE_FIELD(ir, value, _IFT_Material_density);
     propertyDictionary->add('d', value);
 
     this->castingTime = -1.e10;
-    IR_GIVE_OPTIONAL_FIELD(ir, castingTime, IFT_Material_castingtime, "castingtime");
+    IR_GIVE_OPTIONAL_FIELD(ir, castingTime, _IFT_Material_castingtime);
 
     return IRRT_OK;
 }

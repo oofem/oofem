@@ -81,15 +81,15 @@ public:
         const char *__proc = "initializeFrom";
         IRResultType result;
         IntArray tempA, tempB, tempC;
-        IR_GIVE_OPTIONAL_FIELD(ir, tempA, IFT_ActiveBoundaryCondition_elements, "elements");
+        IR_GIVE_OPTIONAL_FIELD(ir, tempA, _IFT_ActiveBoundaryCondition_elements);
         for (int i = 0; i < tempA.giveSize(); ++i) {
             this->addElement(tempA(i));
         }
-        IR_GIVE_OPTIONAL_FIELD(ir, tempB, IFT_ActiveBoundaryCondition_elementSides, "elementsides");
+        IR_GIVE_OPTIONAL_FIELD(ir, tempB, _IFT_ActiveBoundaryCondition_elementSides);
         for (int i = 0; i < tempB.giveSize()/2; ++i) {
             this->addElementSide(tempB(i*2),tempB(i*2+1));
         }
-        IR_GIVE_OPTIONAL_FIELD(ir, tempC, IFT_ActiveBoundaryCondition_dofManagers, "dofmans");
+        IR_GIVE_OPTIONAL_FIELD(ir, tempC, _IFT_ActiveBoundaryCondition_dofManagers);
         for (int i = 0; i < tempC.giveSize(); ++i) {
             this->addDofman(tempC(i));
         }

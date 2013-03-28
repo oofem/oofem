@@ -24,7 +24,7 @@
 ///@name Input fields for HellmichMaterial
 //@{
 #define _IFT_HellmichMaterial_E "e"
-#define _IFT_HellmichMaterial_nu "nu"
+#define _IFT_HellmichMaterial_nu "n"
 #define _IFT_HellmichMaterial_linearE "lineare"
 #define _IFT_HellmichMaterial_epscu "epscu"
 #define _IFT_HellmichMaterial_fc "fc"

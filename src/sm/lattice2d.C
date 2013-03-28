@@ -325,11 +325,11 @@ Lattice2d :: initializeFrom(InputRecord *ir)
     // first call parent
     LatticeStructuralElement :: initializeFrom(ir);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, thickness, IFT_Lattice2d_thick, "thick");
+    IR_GIVE_OPTIONAL_FIELD(ir, thickness, _IFT_Lattice2d_thick);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, width, IFT_Lattice2d_width, "width");
+    IR_GIVE_OPTIONAL_FIELD(ir, width, _IFT_Lattice2d_width);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, gpCoords, IFT_Lattice2d_gpcoords, "gpcoords");
+    IR_GIVE_OPTIONAL_FIELD(ir, gpCoords, _IFT_Lattice2d_gpcoords);
 
     return IRRT_OK;
 }

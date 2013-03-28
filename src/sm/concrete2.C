@@ -70,25 +70,25 @@ Concrete2 :: initializeFrom(InputRecord *ir)
 
     this->Material :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, E, IFT_Concrete2_e, "e");
-    IR_GIVE_FIELD(ir, n, IFT_Concrete2_n, "n");
-    IR_GIVE_FIELD(ir, SCCC, IFT_Concrete2_sccc, "sccc");
-    IR_GIVE_FIELD(ir, SCCT, IFT_Concrete2_scct, "scct");
-    IR_GIVE_FIELD(ir, EPP, IFT_Concrete2_epp, "epp");
-    IR_GIVE_FIELD(ir, EPU, IFT_Concrete2_epu, "epu");
-    IR_GIVE_FIELD(ir, EOPP, IFT_Concrete2_eopp, "eopp");
-    IR_GIVE_FIELD(ir, EOPU, IFT_Concrete2_eopu, "eopu");
-    IR_GIVE_FIELD(ir, SHEARTOL, IFT_Concrete2_sheartol, "sheartol");
-    IR_GIVE_FIELD(ir, IS_PLASTIC_FLOW, IFT_Concrete2_is_plastic_flow, "is_plastic_flow");
-    IR_GIVE_FIELD(ir, IFAD, IFT_Concrete2_ifad, "ifad");
+    IR_GIVE_FIELD(ir, E, _IFT_Concrete2_e);
+    IR_GIVE_FIELD(ir, n, _IFT_Concrete2_n);
+    IR_GIVE_FIELD(ir, SCCC, _IFT_Concrete2_sccc);
+    IR_GIVE_FIELD(ir, SCCT, _IFT_Concrete2_scct);
+    IR_GIVE_FIELD(ir, EPP, _IFT_Concrete2_epp);
+    IR_GIVE_FIELD(ir, EPU, _IFT_Concrete2_epu);
+    IR_GIVE_FIELD(ir, EOPP, _IFT_Concrete2_eopp);
+    IR_GIVE_FIELD(ir, EOPU, _IFT_Concrete2_eopu);
+    IR_GIVE_FIELD(ir, SHEARTOL, _IFT_Concrete2_sheartol);
+    IR_GIVE_FIELD(ir, IS_PLASTIC_FLOW, _IFT_Concrete2_is_plastic_flow);
+    IR_GIVE_FIELD(ir, IFAD, _IFT_Concrete2_ifad);
 
     // stirrups constants
-    IR_GIVE_FIELD(ir, stirrE, IFT_Concrete2_stirr_e, "stirr_e");
-    IR_GIVE_FIELD(ir, stirrFt, IFT_Concrete2_stirr_ft, "stirr_ft");
-    IR_GIVE_FIELD(ir, stirrA, IFT_Concrete2_stirr_a, "stirr_a");
-    IR_GIVE_FIELD(ir, stirrTOL, IFT_Concrete2_stirr_tol, "stirr_tol");
-    IR_GIVE_FIELD(ir, stirrEREF, IFT_Concrete2_stirr_eref, "stirr_eref");
-    IR_GIVE_FIELD(ir, stirrLAMBDA, IFT_Concrete2_stirr_lambda, "stirr_lambda");
+    IR_GIVE_FIELD(ir, stirrE, _IFT_Concrete2_stirr_e);
+    IR_GIVE_FIELD(ir, stirrFt, _IFT_Concrete2_stirr_ft);
+    IR_GIVE_FIELD(ir, stirrA, _IFT_Concrete2_stirr_a);
+    IR_GIVE_FIELD(ir, stirrTOL, _IFT_Concrete2_stirr_tol);
+    IR_GIVE_FIELD(ir, stirrEREF, _IFT_Concrete2_stirr_eref);
+    IR_GIVE_FIELD(ir, stirrLAMBDA, _IFT_Concrete2_stirr_lambda);
 
     this->linearElasticMaterial->initializeFrom(ir);
     return IRRT_OK;

@@ -87,16 +87,16 @@ VTKExportModule :: initializeFrom(InputRecord *ir)
     int val;
 
     ExportModule :: initializeFrom(ir);
-    IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, IFT_VTKExportModule_cellvars, "cellvars");
-    IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, IFT_VTKExportModule_vars, "vars");
-    IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, IFT_VTKExportModule_primvars, "primvars");
+    IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, _IFT_VTKExportModule_cellvars);
+    IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, _IFT_VTKExportModule_vars);
+    IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, _IFT_VTKExportModule_primvars);
 
     val = NodalRecoveryModel::NRM_ZienkiewiczZhu;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_VTKExportModule_stype, "stype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_VTKExportModule_stype);
     stype = ( NodalRecoveryModel::NodalRecoveryModelType ) val;
 
     regionsToSkip.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, regionsToSkip, IFT_VTKExportModule_regionstoskip, "regionstoskip");
+    IR_GIVE_OPTIONAL_FIELD(ir, regionsToSkip, _IFT_VTKExportModule_regionstoskip);
 
     return IRRT_OK;
 }

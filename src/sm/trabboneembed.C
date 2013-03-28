@@ -177,8 +177,8 @@ TrabBoneEmbed :: initializeFrom(InputRecord *ir)
 
     // Read material properties here
 
-    IR_GIVE_FIELD(ir, eps0, IFT_TrabBoneEmbed_eps0, "eps0");
-    IR_GIVE_FIELD(ir, nu0, IFT_TrabBoneEmbed_nu0, "nu0");
+    IR_GIVE_FIELD(ir, eps0, _IFT_TrabBoneEmbed_eps0);
+    IR_GIVE_FIELD(ir, nu0, _IFT_TrabBoneEmbed_nu0);
 
     return StructuralMaterial :: initializeFrom(ir);
 }

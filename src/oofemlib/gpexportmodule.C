@@ -59,8 +59,8 @@ GPExportModule :: initializeFrom(InputRecord *ir)
 
     ExportModule :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, vartypes, IFT_GPExportModule_vartypes, "vars");
-    IR_GIVE_OPTIONAL_FIELD(ir, ncoords, IFT_GPExportModule_ncoords, "ncoords");
+    IR_GIVE_FIELD(ir, vartypes, _IFT_GPExportModule_vartypes);
+    IR_GIVE_OPTIONAL_FIELD(ir, ncoords, _IFT_GPExportModule_ncoords);
     return IRRT_OK;
 }
 

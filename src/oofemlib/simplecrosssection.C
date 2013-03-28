@@ -226,48 +226,48 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
     this->CrossSection :: initializeFrom(ir);
 
     double thick = 0.0;
-    if ( ir->hasField(IFT_SimpleCrossSection_thick, "thick")) {
-        IR_GIVE_OPTIONAL_FIELD(ir, thick, IFT_SimpleCrossSection_thick, "thick");
+    if ( ir->hasField(_IFT_SimpleCrossSection_thick)) {
+        IR_GIVE_OPTIONAL_FIELD(ir, thick, _IFT_SimpleCrossSection_thick);
         propertyDictionary->add(CS_Thickness, thick);
     }
 
     double width = 0.0;
-    if ( ir->hasField(IFT_SimpleCrossSection_width, "width")) {
-        IR_GIVE_OPTIONAL_FIELD(ir, width, IFT_SimpleCrossSection_width, "width");
+    if ( ir->hasField(_IFT_SimpleCrossSection_width)) {
+        IR_GIVE_OPTIONAL_FIELD(ir, width, _IFT_SimpleCrossSection_width);
         propertyDictionary->add(CS_Width, width);
     }
 
     double area = 0.0;
-    if ( ir->hasField(IFT_SimpleCrossSection_area, "area") ) {
-        IR_GIVE_FIELD(ir, area, IFT_SimpleCrossSection_area, "area");
+    if ( ir->hasField(_IFT_SimpleCrossSection_area) ) {
+        IR_GIVE_FIELD(ir, area, _IFT_SimpleCrossSection_area);
     } else {
         area = thick*width;
     }
     propertyDictionary->add(CS_Area, area);
 
     value = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_iy, "iy");
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_iy);
     propertyDictionary->add(CS_InertiaMomentY, value);
 
     value = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_iz, "iz");
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_iz);
     propertyDictionary->add(CS_InertiaMomentZ, value);
 
     value = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_ik, "ik");
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_ik);
     propertyDictionary->add(CS_TorsionMomentX, value);
 
     double beamshearcoeff=0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, beamshearcoeff, IFT_SimpleCrossSection_shearcoeff, "beamshearcoeff");
+    IR_GIVE_OPTIONAL_FIELD(ir, beamshearcoeff, _IFT_SimpleCrossSection_shearcoeff);
     propertyDictionary->add(CS_BeamShearCoeff, beamshearcoeff);
 
     value = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_shearareay, "shearareay");
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_shearareay);
     if (value == 0.0) value=beamshearcoeff * area;
     propertyDictionary->add(CS_SHEAR_AREA_Y, value);
 
     value = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_shearareaz, "shearareaz");
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_shearareaz);
     if (value == 0.0) value=beamshearcoeff * area;
     propertyDictionary->add(CS_SHEAR_AREA_Z, value);
 

@@ -79,7 +79,6 @@
 #define _IFT_EngngModel_renumberFlag "renumber"
 #define _IFT_EngngModel_profileOpt "profileopt"
 #define _IFT_EngngModel_nmsteps "nmsteps"
-#define _IFT_EngngModel_nxfemman "nxfemman"
 #define _IFT_EngngModel_nonLinFormulation "nonlinform"
 #define _IFT_EngngModel_eetype "eetype"
 #define _IFT_EngngModel_parallelflag "parallelflag"

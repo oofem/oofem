@@ -188,14 +188,14 @@ PolylineNonlocalBarrier :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, vertexNodes, IFT_PolylineNonlocalBarrier_vertexnodes, "vertexnodes");
+    IR_GIVE_FIELD(ir, vertexNodes, _IFT_PolylineNonlocalBarrier_vertexnodes);
 
     // default: polyline in xy plane
     localXCoordIndx = 1;
     localYCoordIndx = 2;
 
-    IR_GIVE_OPTIONAL_FIELD(ir, localXCoordIndx, IFT_PolylineNonlocalBarrier_xcoordindx, "xcoordindx");
-    IR_GIVE_OPTIONAL_FIELD(ir, localYCoordIndx, IFT_PolylineNonlocalBarrier_ycoordindx, "ycoordindx");
+    IR_GIVE_OPTIONAL_FIELD(ir, localXCoordIndx, _IFT_PolylineNonlocalBarrier_xcoordindx);
+    IR_GIVE_OPTIONAL_FIELD(ir, localYCoordIndx, _IFT_PolylineNonlocalBarrier_ycoordindx);
 
     return IRRT_OK;
 }
