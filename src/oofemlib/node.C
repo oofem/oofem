@@ -91,7 +91,6 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     int size;
-    FloatArray triplets;
 
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Instanciating node ",number)
@@ -110,14 +109,14 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
 
 
     // Read if available local coordinate system in this node
-    triplets.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, triplets, _IFT_Node_lcs);
-    size = triplets.giveSize();
-    if ( !( ( size == 0 ) || ( size == 6 ) ) ) {
-        _warning2( "initializeFrom: lcs in node %d is not properly defined, will be ignored", this->giveNumber() );
-    }
+    if ( ir->hasField(_IFT_Node_lcs) ) {
+        FloatArray triplets;
+        IR_GIVE_FIELD(ir, triplets, _IFT_Node_lcs);
+        size = triplets.giveSize();
+        if ( size != 6 ) {
+            _warning2( "initializeFrom: lcs in node %d is not properly defined, will be ignored", this->giveNumber() );
+        }
 
-    if ( size == 6 ) {
         double n1 = 0.0, n2 = 0.0;
         localCoordinateSystem = new FloatMatrix(3, 3);
 
@@ -158,16 +157,16 @@ void
 Node :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
 // Computes the vector of the nodal loads of the receiver.
 {
-    int n, nLoads;
-    NodalLoad *loadN;
-    FloatArray contribution;
-    IntArray dofIDarry(0);
-    FloatMatrix L2G;
-
     if ( this->giveLoadArray()->isEmpty() ) {
         answer.resize(0);
         return;
     } else {
+        int n, nLoads;
+        NodalLoad *loadN;
+        FloatArray contribution;
+        IntArray dofIDarry(0);
+        FloatMatrix L2G;
+
         answer.resize(0);
         nLoads = loadArray.giveSize();       // the node may be subjected
         for ( int i = 1; i <= nLoads; i++ ) {     // to more than one load

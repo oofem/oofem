@@ -440,19 +440,15 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *s
 // in this vector a real forces are stored (temperature part is subtracted).
 // so we need further subtract part corresponding to non-nodal loading.
 {
-    int nLoads;
-    bcGeomType ltype;
-    Load *load;
-    FloatArray helpLoadVector;
-
+    FloatArray helpLoadVector(1);
     answer.resize(0);
 
     // loop over body load array first
-    nLoads = this->giveBodyLoadArray()->giveSize();
-    for ( int i = 1; i <= nLoads; i++ ) {
+    int nBodyLoads = this->giveBodyLoadArray()->giveSize();
+    for ( int i = 1; i <= nBodyLoads; i++ ) {
         int id = bodyLoadArray.at(i);
-        load = domain->giveLoad(id);
-        ltype = load->giveBCGeoType();
+        Load *load = domain->giveLoad(id);
+        bcGeomType ltype = load->giveBCGeoType();
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
             this->computeBodyLoadVectorAt(helpLoadVector, load, stepN, mode);
             if ( helpLoadVector.giveSize() ) {
@@ -467,12 +463,12 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *s
     }
 
     // loop over boundary load array
-    nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
-    for ( int i = 1; i <= nLoads; i++ ) {
+    int nBoundaryLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
+    for ( int i = 1; i <= nBoundaryLoads; i++ ) {
         int n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
         int id = boundaryLoadArray.at(i * 2);
-        load = domain->giveLoad(n);
-        ltype = load->giveBCGeoType();
+        Load *load = domain->giveLoad(n);
+        bcGeomType ltype = load->giveBCGeoType();
         if ( ltype == EdgeLoadBGT ) {
             this->computeEdgeLoadVectorAt(helpLoadVector, load, id, stepN, mode);
             if ( helpLoadVector.giveSize() ) {

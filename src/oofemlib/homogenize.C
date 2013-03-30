@@ -356,10 +356,9 @@ void Homogenize :: herveZaoui(FloatMatrix &PhaseMatrix)
 {
     int i, j, phi;
     int NumPhases = PhaseMatrix.giveNumberOfRows() + 1; //need to extend for an equivalent homogeneous medium
-    FloatMatrix PhaseMatrix1;
+    FloatMatrix PhaseMatrix1( NumPhases, PhaseMatrix.giveNumberOfColumns() );
     checkVolFraction(PhaseMatrix);
-    PhaseMatrix1 = PhaseMatrix;
-    PhaseMatrix1.resizeWithData( NumPhases, PhaseMatrix.giveNumberOfColumns() );
+    PhaseMatrix1.setSubMatrix(PhaseMatrix, 1, 1);
     //add arbitrary values for a reference medium
     PhaseMatrix1(NumPhases - 1, 0) = 0.1;
     PhaseMatrix1(NumPhases - 1, 1) = 10.;
