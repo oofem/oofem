@@ -147,7 +147,6 @@ NRSolver :: initializeFrom(InputRecord *ir)
     rtolf.resize(1);
     rtolf.at(1) = 1.e-3; // Default value.
     IR_GIVE_OPTIONAL_FIELD(ir, rtolf.at(1), _IFT_NRSolver_rtolv);
-    OOFEM_WARNING("CHECK!");
     rtold = rtolf;
     // read optional force and displacement tolerances
     IR_GIVE_OPTIONAL_FIELD(ir, rtolf.at(1), _IFT_NRSolver_rtolf);
