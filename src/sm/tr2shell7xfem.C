@@ -131,7 +131,7 @@ Tr2Shell7XFEM :: computeGaussPoints()
 
         }
 
-        layeredCS->mapLayerGpCoordsToShellCoords(layeredCS, integrationRulesArray);
+        layeredCS->mapLayerGpCoordsToShellCoords(integrationRulesArray);
         //layeredCS->printYourself();
 
     }

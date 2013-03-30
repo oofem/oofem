@@ -98,15 +98,15 @@ void
 Tr2Shell7 :: computeGaussPoints()
 {
     if ( !integrationRulesArray ) {
-        int nPointsTri = 6;                     // points in the plane
-        int nPointsEdge = 2;
+        int nPointsTri  = 6;   // points in the plane
+        int nPointsEdge = 2;   // edge integration
         specialIntegrationRulesArray = new IntegrationRule * [ 3 ];
 
         // Midplane and thickness
 
-        // Midplane only (Mass matrix integrated analytically through the thickness)
+        // Midplane (Mass matrix integrated analytically through the thickness)
         specialIntegrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
-        specialIntegrationRulesArray [ 1 ]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat);
+        specialIntegrationRulesArray [ 1 ]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
 
 
         // Edge
@@ -114,24 +114,17 @@ Tr2Shell7 :: computeGaussPoints()
         specialIntegrationRulesArray [ 2 ]->SetUpPointsOnLine(nPointsEdge, _3dMat);
 
 
-        // Layered cross section
+        // Layered cross section for bulk integration
+        //@todo - must use a cast here since check consistency has not been called yet
         LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( Tr2Shell7 :: giveCrossSection() );
         if ( layeredCS == NULL ) {
             OOFEM_ERROR("Tr2Shell7 only supports layered cross section");
         }
-
-        int numberOfLayers = layeredCS->giveNumberOfLayers();
-        integrationRulesArray = new IntegrationRule * [ numberOfLayers ];
-        this->numberOfIntegrationRules = numberOfLayers;
-        this->numberOfGaussPoints = numberOfLayers*nPointsTri*layeredCS->giveNumIntegrationPointsInLayer();
-        // may need to extend this to handle Newton-Cotes integration in the thickness direction
-        for ( int i = 1; i <= numberOfLayers; i++ ) {
-            integrationRulesArray [ i - 1 ] = new GaussIntegrationRule(1, this);
-            integrationRulesArray [ i - 1 ]->SetUpPointsOnWedge(nPointsTri, layeredCS->giveNumIntegrationPointsInLayer(), _3dMat);
-        }
-
-        layeredCS->mapLayerGpCoordsToShellCoords(layeredCS, integrationRulesArray);
+        this->numberOfIntegrationRules = layeredCS->giveNumberOfLayers();
+        this->numberOfGaussPoints = layeredCS->giveNumberOfLayers()*nPointsTri*layeredCS->giveNumIntegrationPointsInLayer();
+        layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
         //layeredCS->printYourself();
+
     }
 }
 
