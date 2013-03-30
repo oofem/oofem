@@ -68,6 +68,9 @@ Shell7Base :: checkConsistency()
     this->fei       = dynamic_cast< FEInterpolation3d   * >( this->giveInterpolation() );
     this->setupInitialNodeDirectors();
 
+    if ( layeredCS == NULL ) {
+        OOFEM_ERROR("Elements derived from Shell7Base only supports layered cross section");
+    }
     return ( this->layeredCS != NULL  &&  this->fei != NULL);
 }
 

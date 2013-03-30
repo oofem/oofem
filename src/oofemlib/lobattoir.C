@@ -51,6 +51,84 @@ LobattoIntegrationRule :: ~LobattoIntegrationRule()
 
 
 int
+LobattoIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode)
+{
+    FloatArray coords_xi, weights;
+    this->giveLineCoordsAndWeights(nPoints, coords_xi, weights);
+    this->numberOfIntegrationPoints = nPoints;
+    this->gaussPointArray  = new GaussPoint * [ nPoints ];
+
+    for ( int i = 1; i <= nPoints; i++ ) {
+        FloatArray *coord = new FloatArray(1);
+        coord->at(1) = coords_xi.at(i);
+        this->gaussPointArray [ i - 1 ] = new GaussPoint(this, i, coord, weights.at(i), mode);
+    }
+
+    this->intdomain = _Line;
+    return numberOfIntegrationPoints;
+}
+
+
+int
+LobattoIntegrationRule :: SetUpPointsOnSquare(int nPoints, MaterialMode mode)
+//GaussIntegrationRule :: SetUpPointsOnSquare(int nPoints_xi1, int nPoints_xi2, MaterialMode mode)
+{
+    int nPoints_xi1 = floor( sqrt( double( nPoints ) ) );
+    int nPoints_xi2 = nPoints_xi1;
+    FloatArray coords_xi1, weights1, coords_xi2, weights2;
+    this->giveLineCoordsAndWeights(nPoints_xi1, coords_xi1, weights1);
+    this->giveLineCoordsAndWeights(nPoints_xi2, coords_xi2, weights2);
+    this->numberOfIntegrationPoints = nPoints_xi1 * nPoints_xi2;
+    this->gaussPointArray  = new GaussPoint * [ this->numberOfIntegrationPoints ];
+    int count = 0;
+    for ( int i = 1; i <= nPoints_xi1; i++ ) {
+        for ( int j = 1; j <= nPoints_xi2; j++ ) {
+            count++;
+            FloatArray *coord = new FloatArray(2);
+            coord->at(1) = coords_xi1.at(i);
+            coord->at(2) = coords_xi2.at(j);
+            this->gaussPointArray [ count - 1 ] = new GaussPoint(this, count, coord, weights1.at(i) * weights2.at(j), mode);
+        }
+    }
+
+    this->intdomain = _Square;
+    return this->numberOfIntegrationPoints;
+}
+
+
+int
+LobattoIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode)
+//GaussIntegrationRule :: SetUpPointsOnCube(int nPoints_xi1, int nPoints_xi2, int nPoints_xi3, MaterialMode mode)
+{
+    int nPoints_xi1 = floor(cbrt( double( nPoints ) ) + 0.5);
+    int nPoints_xi2 = nPoints_xi1;
+    int nPoints_xi3 = nPoints_xi1;
+    FloatArray coords_xi1, weights1, coords_xi2, weights2, coords_xi3, weights3;
+    this->giveLineCoordsAndWeights(nPoints_xi1, coords_xi1, weights1);
+    this->giveLineCoordsAndWeights(nPoints_xi2, coords_xi2, weights2);
+    this->giveLineCoordsAndWeights(nPoints_xi3, coords_xi3, weights3);
+    this->numberOfIntegrationPoints = nPoints_xi1 * nPoints_xi2 * nPoints_xi3;
+    this->gaussPointArray  = new GaussPoint * [ this->numberOfIntegrationPoints ];
+    int count = 0;
+    for ( int i = 1; i <= nPoints_xi1; i++ ) {
+        for ( int j = 1; j <= nPoints_xi2; j++ ) {
+            for ( int k = 1; k <= nPoints_xi3; k++ ) {
+                count++;
+                FloatArray *coord = new FloatArray(3);
+                coord->at(1) = coords_xi1.at(i);
+                coord->at(2) = coords_xi2.at(j);
+                coord->at(3) = coords_xi3.at(k);
+                this->gaussPointArray [ count - 1 ] = new GaussPoint(this, count, coord, weights1.at(i) * weights2.at(j) * weights3.at(k), mode);
+            }
+        }
+    }
+
+    this->intdomain = _Cube;
+    return this->numberOfIntegrationPoints;
+}
+
+
+int
 LobattoIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode, GaussPoint ***arry)
 // creates array of nPoints Lobatto Integration Points
 // ( don't confuse with GaussPoint - elem is only the container where to
@@ -287,4 +365,113 @@ LobattoIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain
 
     return -1;
 }
+
+
+void
+LobattoIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords_xi, FloatArray &weights)
+// Create arrays of coordinates and weights for Lobatto Integration Points of a line with 'nPoints' integrationpoints
+{
+    coords_xi.resize(nPoints);
+    weights.resize(nPoints);
+
+    switch ( nPoints ) {
+    case 1:
+
+        coords_xi.setValues(1, 0.0);
+        weights.setValues(1, 2.0);
+
+        break;
+
+    case 2:
+
+        coords_xi.setValues(2,
+                            -1.0,
+                             1.0
+                            );
+
+        weights.setValues(2,
+                          1.0,
+                          1.0
+                          );
+
+        break;
+
+    case 3:
+
+        coords_xi.setValues(3,
+                            -1.0,
+                             0.0,
+                             1.0
+                            );
+
+        weights.setValues(3,
+                          0.333333333333333,
+                          1.333333333333333,
+                          0.333333333333333
+                          );
+
+        break;
+    case 4:
+
+        coords_xi.setValues(4,
+                            -1.0,
+                            -0.447213595499958,
+                             0.447213595499958,
+                             1.0
+                            );
+
+        weights.setValues(4,
+                          0.166666666666667,
+                          0.833333333333333,
+                          0.833333333333333,
+                          0.166666666666667
+                          );
+        break;
+
+    case 5:
+
+        coords_xi.setValues(5,
+                            -1.0,
+                            -0.654653670707977,
+                             0.0,
+                             0.654653670707977,
+                             1.0
+                             );
+
+        weights.setValues(5,
+                          0.1,
+                          0.544444444444444,
+                          0.711111111111111,
+                          0.544444444444444,
+                          0.1
+                          );
+        break;
+
+    case 6:
+
+        coords_xi.setValues(6,
+                            -1.0,
+                            -0.765055323929465,
+                            -0.285231516480645,
+                             0.285231516480645,
+                             0.765055323929465,
+                             1.0
+                             );
+
+        weights.setValues(6,
+                          0.066666666666667,
+                          0.378474956297847,
+                          0.554858377035486,
+                          0.554858377035486,
+                          0.378474956297847,
+                          0.066666666666667
+                          );
+        break;
+
+    default:
+        OOFEM_ERROR2("LobattoIntegrationRule :: giveLineCoordsAndWeights - unsupported number of IPs (%d)", nPoints);
+    }
+}
+
+
 } // end namespace oofem
