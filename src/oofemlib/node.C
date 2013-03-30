@@ -55,6 +55,7 @@
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "enrichmentitem.h"
+ #include "xfemmanager.h"
 #endif
 
 namespace oofem {
@@ -97,7 +98,7 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
 #  endif
 
     DofManager :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, coordinates, IFT_Node_coords, "coords");
+    IR_GIVE_FIELD(ir, coordinates, _IFT_Node_coords);
 
     //
     // scaling of coordinates if necessary
@@ -110,7 +111,7 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
 
     // Read if available local coordinate system in this node
     triplets.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, triplets, IFT_Node_lcs, "lcs");
+    IR_GIVE_OPTIONAL_FIELD(ir, triplets, _IFT_Node_lcs);
     size = triplets.giveSize();
     if ( !( ( size == 0 ) || ( size == 6 ) ) ) {
         _warning2( "initializeFrom: lcs in node %d is not properly defined, will be ignored", this->giveNumber() );
@@ -232,9 +233,9 @@ Node :: updateYourself(TimeStep *tStep)
                 Dof *d = this->giveDof(i);
                 DofIDItem id = d->giveDofID();
                 if ( id == D_u || id == D_v || id == D_w ) {
-                    coordinates.at(ic) += d->giveUnknown(EID_MomentumBalance, VM_Incremental, tStep);
+                    coordinates.at(ic) += d->giveUnknown(VM_Incremental, tStep);
                 } else if ( id == V_u || id == V_v || id == V_w ) {
-                    coordinates.at(ic) += d->giveUnknown(EID_MomentumBalance, VM_Total, tStep) * dt;
+                    coordinates.at(ic) += d->giveUnknown(VM_Total, tStep) * dt;
                 }
             }
         }
@@ -243,7 +244,7 @@ Node :: updateYourself(TimeStep *tStep)
 
 
 double
-Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, EquationID type, double scale)
+Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, double scale)
 //
 // returns coordinate + scale * displacement
 //
@@ -263,7 +264,7 @@ Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, EquationID type, double s
                 int j = domain->giveCorrespondingCoordinateIndex(i);
                 if ( ( j != 0 ) && ( j == ic ) ) {
                     coordinate +=
-                        scale * this->giveDof(i)->giveUnknown(type, VM_Total, tStep);
+                        scale * this->giveDof(i)->giveUnknown(VM_Total, tStep);
                     break;
                 }
             }
@@ -281,7 +282,7 @@ Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, EquationID type, double s
                 int j = domain->giveCorrespondingCoordinateIndex(i);
                 if ( j != 0 ) { // && (this->giveDof(i)->giveUnknownType()==DisplacementVector))
                     displacements.at(j) = scale * this->giveDof(i)->
-                                          giveUnknown(type, VM_Total, tStep);
+                                          giveUnknown(VM_Total, tStep);
                 }
             }
 
@@ -301,7 +302,7 @@ Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, EquationID type, double s
 
 
 void
-Node :: giveUpdatedCoordinates(FloatArray &coord, TimeStep *tStep, EquationID type, double scale)
+Node :: giveUpdatedCoordinates(FloatArray &coord, TimeStep *tStep, double scale)
 //
 // returns coordinate + scale * displacement
 //
@@ -652,11 +653,10 @@ Node :: drawYourself(oofegGraphicContext &gc)
         EASValsSetLayer(OOFEG_NODE_ANNOTATION_LAYER);
         EASValsSetMType(FILLED_CIRCLE_MARKER);
  #if 1
-        if ( this->giveDomain()->giveEngngModel()->hasXfemManager(1) ) {
-            XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
-            int i;
-            for ( i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
-                if ( xf->giveEnrichmentItem(i)->isDofManEnriched(this->number) ) {
+        if ( this->giveDomain()->hasXfemManager(1) ) {
+            XfemManager *xf = this->giveDomain()->giveXfemManager(1);
+            for ( int i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
+                if ( xf->giveEnrichmentItem(i)->isDofManEnriched(this) ) {
                     EASValsSetMType(SQUARE_MARKER);
                 }
             }
@@ -881,11 +881,11 @@ Node :: drawYourself(oofegGraphicContext &gc)
             //p[1].x = p[1].y = p[1].z = 0.0;
             for ( i = 1; i <= numberOfDofs; i++ ) {
                 if ( this->giveDof(i)->giveDofID() == V_u ) {
-                    p [ 1 ].x = defScale * this->giveDof(i)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+                    p [ 1 ].x = defScale * this->giveDof(i)->giveUnknown(VM_Total, tStep);
                 } else if ( this->giveDof(i)->giveDofID() == V_v ) {
-                    p [ 1 ].y = defScale * this->giveDof(i)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+                    p [ 1 ].y = defScale * this->giveDof(i)->giveUnknown(VM_Total, tStep);
                 } else if ( this->giveDof(i)->giveDofID() == V_w ) {
-                    p [ 1 ].z = defScale * this->giveDof(i)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+                    p [ 1 ].z = defScale * this->giveDof(i)->giveUnknown(VM_Total, tStep);
                 }
             }
 

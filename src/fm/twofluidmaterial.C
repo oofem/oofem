@@ -62,7 +62,7 @@ TwoFluidMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IntArray mats(2);
-    IR_GIVE_FIELD(ir, mats, IFT_TwoFluidMaterial_mat, "mat");
+    IR_GIVE_FIELD(ir, mats, _IFT_TwoFluidMaterial_mat);
     if ( mats.giveSize() != 2 ) {
         _error("initializeFrom: mat array should have two values\n");
     }

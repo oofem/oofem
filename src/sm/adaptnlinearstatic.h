@@ -102,7 +102,7 @@ public:
     virtual void updateYourself(TimeStep *tStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual double giveUnknownComponent(EquationID eid, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
 
     /**
      * Returns the load level corresponding to given solution step number.

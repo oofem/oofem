@@ -81,15 +81,15 @@ public:
         const char *__proc = "initializeFrom";
         IRResultType result;
         IntArray tempA, tempB, tempC;
-        IR_GIVE_OPTIONAL_FIELD(ir, tempA, IFT_ActiveBoundaryCondition_elements, "elements");
+        IR_GIVE_OPTIONAL_FIELD(ir, tempA, _IFT_ActiveBoundaryCondition_elements);
         for (int i = 0; i < tempA.giveSize(); ++i) {
             this->addElement(tempA(i));
         }
-        IR_GIVE_OPTIONAL_FIELD(ir, tempB, IFT_ActiveBoundaryCondition_elementSides, "elementsides");
+        IR_GIVE_OPTIONAL_FIELD(ir, tempB, _IFT_ActiveBoundaryCondition_elementSides);
         for (int i = 0; i < tempB.giveSize()/2; ++i) {
             this->addElementSide(tempB(i*2),tempB(i*2+1));
         }
-        IR_GIVE_OPTIONAL_FIELD(ir, tempC, IFT_ActiveBoundaryCondition_dofManagers, "dofmans");
+        IR_GIVE_OPTIONAL_FIELD(ir, tempC, _IFT_ActiveBoundaryCondition_dofManagers);
         for (int i = 0; i < tempC.giveSize(); ++i) {
             this->addDofman(tempC(i));
         }
@@ -225,13 +225,12 @@ public:
     }
     /**
      * Computes the value of the dof.
-     * @param eid Equation ID for the unknown value.
      * @param mode Mode of unknown value.
      * @param tStep Time step.
      * @param dof Active dof for which to obtain the value.
      * @return Value of dof.
      */
-    virtual double giveUnknown(EquationID eid, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
+    virtual double giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
     {
         OOFEM_ERROR2("%s :: giveUnknown - Not supported by bc.", giveClassName());
         return 0.0;

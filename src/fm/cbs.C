@@ -78,30 +78,30 @@ CBS :: initializeFrom(InputRecord *ir)
 
     EngngModel :: initializeFrom(ir);
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, _IFT_EngngModel_lstype);
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, _IFT_EngngModel_smtype);
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
-    IR_GIVE_FIELD(ir, deltaT, IFT_CBS_deltat, _IFT_CBS_deltat);
+    IR_GIVE_FIELD(ir, deltaT, _IFT_CBS_deltat);
     minDeltaT = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, minDeltaT, IFT_CBS_mindeltat, _IFT_CBS_mindeltat);
+    IR_GIVE_OPTIONAL_FIELD(ir, minDeltaT, _IFT_CBS_mindeltat);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, consistentMassFlag, IFT_CBS_cmflag, _IFT_CBS_cmflag);
+    IR_GIVE_OPTIONAL_FIELD(ir, consistentMassFlag, _IFT_CBS_cmflag);
 
     theta [ 0 ] = theta [ 1 ] = 1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, theta [ 0 ], IFT_CBS_theta1, _IFT_CBS_theta1);
-    IR_GIVE_OPTIONAL_FIELD(ir, theta [ 1 ], IFT_CBS_theta2, _IFT_CBS_theta2);
+    IR_GIVE_OPTIONAL_FIELD(ir, theta [ 0 ], _IFT_CBS_theta1);
+    IR_GIVE_OPTIONAL_FIELD(ir, theta [ 1 ], _IFT_CBS_theta2);
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_CBS_scaleflag, _IFT_CBS_scaleflag);
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_CBS_scaleflag);
     equationScalingFlag = val;
     if ( equationScalingFlag ) {
-        IR_GIVE_FIELD(ir, lscale, IFT_CBS_lscale, _IFT_CBS_lscale);
-        IR_GIVE_FIELD(ir, uscale, IFT_CBS_uscale, _IFT_CBS_uscale);
-        IR_GIVE_FIELD(ir, dscale, IFT_CBS_dscale, _IFT_CBS_dscale);
+        IR_GIVE_FIELD(ir, lscale, _IFT_CBS_lscale);
+        IR_GIVE_FIELD(ir, uscale, _IFT_CBS_uscale);
+        IR_GIVE_FIELD(ir, dscale, _IFT_CBS_dscale);
         double vref = 1.0; // reference viscosity
         Re = dscale * uscale * lscale / vref;
     } else {
@@ -111,7 +111,7 @@ CBS :: initializeFrom(InputRecord *ir)
 
     //<RESTRICTED_SECTION>
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_CBS_miflag, _IFT_CBS_miflag);
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_CBS_miflag);
     if ( val ) {
         this->materialInterface = new LEPlic( 1, this->giveDomain(1) );
         // export velocity field
@@ -128,48 +128,28 @@ CBS :: initializeFrom(InputRecord *ir)
 }
 
 double
-CBS :: giveUnknownComponent(EquationID chc, ValueModeType mode,
-                            TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displaacement, velocity of equation eq
-// This function translates this request to numerical method language
+CBS :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
+// returns unknown quantity like displacement, velocity of dof
 {
+#if DEBUG
     int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
+#endif
 
-    if ( chc == EID_ConservationEquation ) { // pressures
+    if ( dof->giveDofID() == P_f ) { // pressures
         return PressureField.giveUnknownValue(dof, mode, tStep);
-    } else if ( chc == EID_MomentumBalance ) { // velocities
+    } else { // velocities
         return VelocityField.giveUnknownValue(dof, mode, tStep);
-    } else if ( chc == EID_AuxMomentumBalance ) { // aux velocities
-        switch ( mode ) {
-        case VM_Incremental:
-            if ( deltaAuxVelocity.isNotEmpty() ) {
-                return deltaAuxVelocity.at(eq);
-            } else {
-                return 0.;
-            }
-
-        case VM_Total:
-            _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
-        default:
-            _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
-        }
-    } else {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-        return 0.;
     }
-
-    return 0;
 }
 
 
 double
 CBS :: giveUnknownComponent(UnknownType chc, ValueModeType mode,
                             TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displaacement, velocity of equation eq
-// This function translates this request to numerical method language
+// returns unknown quantity
 {
     if ( chc == ReynoldsNumber ) {
         if ( equationScalingFlag ) {
@@ -219,7 +199,6 @@ TimeStep *
 CBS :: giveNextStep()
 {
     int istep = this->giveNumberOfFirstStep();
-    int nelem;
     double totalTime = 0;
     double dt = deltaT;
     StateCounterType counter = 1;
@@ -235,10 +214,8 @@ CBS :: giveNextStep()
 
     previousStep = currentStep;
 
-    // FORCE EQUATION NUMBERING
-    this->giveNumberOfEquations(EID_MomentumBalance);
     Domain *domain = this->giveDomain(1);
-    nelem = domain->giveNumberOfElements();
+    int nelem = domain->giveNumberOfElements();
     // check for critical time step
     for ( int i = 1; i <= nelem; i++ ) {
         dt = min( dt, static_cast< CBSElement * >( domain->giveElement(i) )->computeCriticalTimeStep(previousStep) );
@@ -263,22 +240,21 @@ CBS :: giveNextStep()
 void
 CBS :: solveYourselfAt(TimeStep *tStep)
 {
-    int momneq = this->giveNumberOfEquations(EID_MomentumBalance);
-    int presneq = this->giveNumberOfEquations(EID_ConservationEquation);
-    int presneq_prescribed = this->giveNumberOfPrescribedEquations(EID_ConservationEquation);
+    int momneq = this->giveNumberOfDomainEquations(1, vnum);
+    int presneq = this->giveNumberOfDomainEquations(1, pnum);
+    int presneq_prescribed = this->giveNumberOfDomainEquations(1, pnumPrescribed);
     double deltaT = tStep->giveTimeIncrement();
 
     FloatArray rhs(momneq);
-
 
     if ( initFlag ) {
         deltaAuxVelocity.resize(momneq);
 
         prescribedTractionPressure.resize(presneq_prescribed);
         nodalPrescribedTractionPressureConnectivity.resize(presneq_prescribed);
-        this->assembleVectorFromElements( nodalPrescribedTractionPressureConnectivity, tStep, EID_ConservationEquation,
+        this->assembleVectorFromElements( nodalPrescribedTractionPressureConnectivity, tStep, EID_MomentumBalance_ConservationEquation,
                                           NumberOfNodalPrescribedTractionPressureContributions, VM_Total,
-                                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain(1) );
+                                          pnumPrescribed, this->giveDomain(1) );
 
 
         lhs = CreateUsrDefSparseMtrx(sparseMtrxType);
@@ -286,10 +262,10 @@ CBS :: solveYourselfAt(TimeStep *tStep)
             _error("solveYourselfAt: sparse matrix creation failed");
         }
 
-        lhs->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
+        lhs->buildInternalStructure( this, 1, EID_ConservationEquation, pnum );
 
-        this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, PressureLhs,
-                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assemble( lhs, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, PressureLhs,
+                        pnum, this->giveDomain(1) );
         lhs->times(deltaT * theta [ 0 ] * theta [ 1 ]);
 
         if ( consistentMassFlag ) {
@@ -298,14 +274,14 @@ CBS :: solveYourselfAt(TimeStep *tStep)
                 _error("solveYourselfAt: sparse matrix creation failed");
             }
 
-            mss->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
-            this->assemble( mss, stepWhenIcApply, EID_MomentumBalance, MassMatrix,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            mss->buildInternalStructure( this, 1, EID_MomentumBalance_ConservationEquation, vnum );
+            this->assemble( mss, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, MassMatrix,
+                            vnum, this->giveDomain(1) );
         } else {
             mm.resize(momneq);
             mm.zero();
-            this->assembleVectorFromElements( mm, tStep, EID_MomentumBalance, LumpedMassMatrix, VM_Total,
-                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assembleVectorFromElements( mm, tStep, EID_MomentumBalance_ConservationEquation, LumpedMassMatrix, VM_Total,
+                                              vnum, this->giveDomain(1) );
         }
 
         //<RESTRICTED_SECTION>
@@ -320,18 +296,18 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     //<RESTRICTED_SECTION>
     else if ( materialInterface ) {
         lhs->zero();
-        this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, PressureLhs,
-                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assemble( lhs, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, PressureLhs,
+                        pnum, this->giveDomain(1) );
         lhs->times(deltaT * theta [ 0 ] * theta [ 1 ]);
 
         if ( consistentMassFlag ) {
             mss->zero();
-            this->assemble( mss, stepWhenIcApply, EID_MomentumBalance, MassMatrix,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( mss, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, MassMatrix,
+                            vnum, this->giveDomain(1) );
         } else {
             mm.zero();
-            this->assembleVectorFromElements( mm, tStep, EID_MomentumBalance, LumpedMassMatrix, VM_Total,
-                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assembleVectorFromElements( mm, tStep, EID_MomentumBalance_ConservationEquation, LumpedMassMatrix, VM_Total,
+                                              vnum, this->giveDomain(1) );
         }
     }
 
@@ -347,19 +323,25 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     FloatArray *velocityVector = VelocityField.giveSolutionVector(tStep);
     FloatArray *prevVelocityVector = VelocityField.giveSolutionVector( tStep->givePreviousStep() );
     FloatArray *pressureVector = PressureField.giveSolutionVector(tStep);
+    FloatArray *prevPressureVector = PressureField.giveSolutionVector( tStep->givePreviousStep() );
+
+    velocityVector->resize(momneq);
+    pressureVector->resize(presneq);
 
     /* STEP 1 - calculates auxiliary velocities*/
     rhs.zero();
-    this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, IntermediateConvectionTerm, VM_Total,
-                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, IntermediateDiffusionTerm, VM_Total,
-                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    //this->assembleVectorFromElements(mm, tStep, EID_AuxMomentumBalance, LumpedMassMatrix, VM_Total, this->giveDomain(1));
+    // Depends on old v:
+    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, IntermediateConvectionTerm, VM_Total,
+                                      vnum, this->giveDomain(1) );
+    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, IntermediateDiffusionTerm, VM_Total,
+                                      vnum, this->giveDomain(1) );
+    //this->assembleVectorFromElements(mm, tStep, EID_MomentumBalance_ConservationEquation, LumpedMassMatrix, VM_Total, this->giveDomain(1));
 
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
-        this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, PrescribedVelocityRhsVector, VM_Incremental,
-                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        // Depends on prescribed v
+        this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, PrescribedVelocityRhsVector, VM_Incremental,
+                                          vnum, this->giveDomain(1) );
         nMethod->solve(mss, & rhs, & deltaAuxVelocity);
     } else {
         for ( int i = 1; i <= momneq; i++ ) {
@@ -370,33 +352,37 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     /* STEP 2 - calculates pressure (implicit solver) */
     rhs.resize(presneq);
     rhs.zero();
-    this->assembleVectorFromElements( prescribedTractionPressure, tStep, EID_ConservationEquation,
+    this->assembleVectorFromElements( prescribedTractionPressure, tStep, EID_MomentumBalance_ConservationEquation,
                                       DensityPrescribedTractionPressure, VM_Total,
-                                      EModelDefaultPrescribedEquationNumbering(), this->giveDomain(1) );
+                                      pnumPrescribed, this->giveDomain(1) );
     for ( int i = 1; i <= presneq_prescribed; i++ ) {
         prescribedTractionPressure.at(i) /= nodalPrescribedTractionPressureConnectivity.at(i);
     }
 
-    //prescribedTractionPressure.printYourself();
-    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DensityRhsVelocityTerms, VM_Total,
-                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DensityRhsPressureTerms, VM_Total,
-                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    // DensityRhsVelocityTerms needs this: Current velocity without correction;
+    *velocityVector = *prevVelocityVector;
+    velocityVector->add(this->theta [ 0 ], deltaAuxVelocity);
+
+    // Depends on old V + deltaAuxV * theta1:
+    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, DensityRhsVelocityTerms, VM_Total,
+                                      pnum, this->giveDomain(1) );
+    // Depends on p:
+    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, DensityRhsPressureTerms, VM_Total,
+                                      pnum, this->giveDomain(1) );
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
-    pressureVector->resize(presneq);
     nMethod->solve(lhs, & rhs, pressureVector);
     pressureVector->times(this->theta [ 1 ]);
-    pressureVector->add(*PressureField.giveSolutionVector( tStep->givePreviousStep() ) );
+    pressureVector->add(*prevPressureVector);
 
     /* STEP 3 - velocity correction step */
     rhs.resize(momneq);
     rhs.zero();
-    velocityVector->resize(momneq);
-    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, CorrectionRhs, VM_Total,
-                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    // Depends on p:
+    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, CorrectionRhs, VM_Total,
+                                      vnum, this->giveDomain(1) );
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
-        //this->assembleVectorFromElements(rhs, tStep, EID_MomentumBalance, PrescribedRhsVector, VM_Incremental, this->giveDomain(1));
+        //this->assembleVectorFromElements(rhs, tStep, EID_MomentumBalance_ConservationEquation, PrescribedRhsVector, VM_Incremental, vnum, this->giveDomain(1));
         nMethod->solve(mss, & rhs, velocityVector);
         velocityVector->add(deltaAuxVelocity);
         velocityVector->add(*prevVelocityVector);
@@ -445,21 +431,18 @@ CBS :: updateYourself(TimeStep *stepN)
 void
 CBS :: updateInternalState(TimeStep *stepN)
 {
-    int j, nnodes;
-    Domain *domain;
-
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        domain = this->giveDomain(idomain);
+        Domain *domain = this->giveDomain(idomain);
 
-        nnodes = domain->giveNumberOfDofManagers();
+        int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( j = 1; j <= nnodes; j++ ) {
+            for ( int j = 1; j <= nnodes; j++ ) {
                 this->updateDofUnknownsDictionary(domain->giveDofManager(j), stepN);
             }
         }
 
         int nelem = domain->giveNumberOfElements();
-        for ( j = 1; j <= nelem; j++ ) {
+        for ( int j = 1; j <= nelem; j++ ) {
             domain->giveElement(j)->updateInternalState(stepN);
         }
     }
@@ -566,17 +549,15 @@ CBS :: checkConsistency()
 {
     // check internal consistency
     // if success returns nonzero
-    int i, nelem;
     Element *ePtr;
     CBSElement *sePtr;
     GeneralBoundaryCondition *bcPtr;
     InitialCondition *icPtr;
     Domain *domain = this->giveDomain(1);
 
-    nelem = domain->giveNumberOfElements();
     // check for proper element type
-
-    for ( i = 1; i <= nelem; i++ ) {
+    int nelem = domain->giveNumberOfElements();
+    for ( int i = 1; i <= nelem; i++ ) {
         ePtr = domain->giveElement(i);
         sePtr = dynamic_cast< CBSElement * >(ePtr);
         if ( sePtr == NULL ) {
@@ -591,7 +572,7 @@ CBS :: checkConsistency()
     // scale boundary and initial conditions
     if ( equationScalingFlag ) {
         int nbc = domain->giveNumberOfBoundaryConditions();
-        for ( i = 1; i <= nbc; i++ ) {
+        for ( int i = 1; i <= nbc; i++ ) {
             bcPtr = domain->giveBc(i);
             if ( bcPtr->giveBCValType() == VelocityBVT ) {
                 bcPtr->scale(1. / uscale);
@@ -605,7 +586,7 @@ CBS :: checkConsistency()
         }
 
         int nic = domain->giveNumberOfInitialConditions();
-        for ( i = 1; i <= nic; i++ ) {
+        for ( int i = 1; i <= nic; i++ ) {
             icPtr = domain->giveIc(i);
             if ( icPtr->giveICValType() == VelocityBVT ) {
                 icPtr->scale(VM_Total, 1. / uscale);
@@ -636,9 +617,9 @@ CBS :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 
     DofIDItem type = iDof->giveDofID();
     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-        iDof->printSingleOutputAt(stream, atTime, 'v', EID_MomentumBalance, VM_Total, uscale);
+        iDof->printSingleOutputAt(stream, atTime, 'v', VM_Total, uscale);
     } else if ( type == P_f ) {
-        iDof->printSingleOutputAt(stream, atTime, 'p', EID_ConservationEquation, VM_Total, pscale);
+        iDof->printSingleOutputAt(stream, atTime, 'p', VM_Total, pscale);
     } else {
         _error("printDofOutputAt: unsupported dof type");
     }
@@ -649,8 +630,8 @@ void
 CBS :: applyIC(TimeStep *stepWhenIcApply)
 {
     Domain *domain = this->giveDomain(1);
-    int mbneq =  this->giveNumberOfEquations(EID_MomentumBalance);
-    int pdneq =  this->giveNumberOfEquations(EID_ConservationEquation);
+    int mbneq = this->giveNumberOfDomainEquations(1, vnum);
+    int pdneq = this->giveNumberOfDomainEquations(1, pnum);
     FloatArray *velocityVector, *pressureVector;
 
 #ifdef VERBOSE
@@ -690,9 +671,9 @@ CBS :: applyIC(TimeStep *stepWhenIcApply)
 
             if ( jj ) {
                 if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-                    velocityVector->at(jj) = iDof->giveUnknown(EID_MomentumBalance, VM_Total, stepWhenIcApply);
+                    velocityVector->at(jj) = iDof->giveUnknown(VM_Total, stepWhenIcApply);
                 } else {
-                    pressureVector->at(jj) = iDof->giveUnknown(EID_ConservationEquation, VM_Total, stepWhenIcApply);
+                    pressureVector->at(jj) = iDof->giveUnknown(VM_Total, stepWhenIcApply);
                 }
             }
         }
@@ -714,9 +695,9 @@ int
 CBS :: giveNewEquationNumber(int domain, DofIDItem id)
 {
     if ( ( id == V_u ) || ( id == V_v ) || ( id == V_w ) ) {
-        return ++numberOfMomentumEqs;
+        return this->vnum.askNewEquationNumber();
     } else if ( id == P_f ) {
-        return ++numberOfConservationEqs;
+        return this->pnum.askNewEquationNumber();
     } else {
         _error("giveNewEquationNumber:: Unknown DofIDItem");
     }
@@ -729,9 +710,9 @@ int
 CBS :: giveNewPrescribedEquationNumber(int domain, DofIDItem id)
 {
     if ( ( id == V_u ) || ( id == V_v ) || ( id == V_w ) ) {
-        return ++numberOfPrescribedMomentumEqs;
+        return this->vnumPrescribed.askNewEquationNumber();
     } else if ( id == P_f ) {
-        return ++numberOfPrescribedConservationEqs;
+        return this->pnumPrescribed.askNewEquationNumber();
     } else {
         _error("giveNewPrescribedEquationNumber:: Unknown DofIDItem");
     }
@@ -740,100 +721,10 @@ CBS :: giveNewPrescribedEquationNumber(int domain, DofIDItem id)
 }
 
 
-int
-CBS :: giveNumberOfEquations(EquationID id)
+int CBS :: giveNumberOfDomainEquations(int d, const UnknownNumberingScheme &num)
 {
-    //
-    // returns number of equations of current problem
-    // this method is implemented here, because some method may add some
-    // conditions in to system and this may results into increased number of
-    // equations.
-    //
-    if ( !equationNumberingCompleted ) {
-        this->forceEquationNumbering();
-    }
-
-    if ( ( id == EID_MomentumBalance ) || ( id == EID_AuxMomentumBalance ) ) {
-        return numberOfMomentumEqs;
-    } else if ( id == EID_ConservationEquation ) {
-        return numberOfConservationEqs;
-    } else {
-        _error("giveNumberOfEquations: unknown equation id");
-    }
-
-    return 0;
-}
-
-
-int CBS :: giveNumberOfPrescribedEquations(EquationID id)
-{
-    //
-    // returns number of equations of current problem
-    // this method is implemented here, because some method may add some
-    // conditions in to system and this may results into increased number of
-    // equations.
-    //
-    if ( !equationNumberingCompleted ) {
-        this->forceEquationNumbering();
-    }
-
-    if ( ( id == EID_MomentumBalance ) || ( id == EID_AuxMomentumBalance ) ) {
-        return numberOfPrescribedMomentumEqs;
-    } else if ( id == EID_ConservationEquation ) {
-        return numberOfPrescribedConservationEqs;
-    } else {
-        _error("giveNumberOfPrescribedEquations: unknown equation id");
-    }
-
-    return 0;
-}
-
-
-int CBS :: giveNumberOfDomainEquations(int d, EquationID id)
-{
-    //
-    // returns number of equations of current problem
-    // this method is implemented here, because some method may add some
-    // conditions in to system and this may results into increased number of
-    // equations.
-    //
-    if ( !equationNumberingCompleted ) {
-        this->forceEquationNumbering();
-    }
-
-    if ( ( id == EID_MomentumBalance ) || ( id == EID_AuxMomentumBalance ) ) {
-        return numberOfMomentumEqs;
-    } else if ( id == EID_ConservationEquation ) {
-        return numberOfConservationEqs;
-    } else {
-        _error("giveNumberOfDomainEquations: unknown equation id");
-    }
-
-    return 0;
-}
-
-
-int CBS :: giveNumberOfPrescribedDomainEquations(int d, EquationID id)
-{
-    //
-    // returns number of equations of current problem
-    // this method is implemented here, because some method may add some
-    // conditions in to system and this may results into increased number of
-    // equations.
-    //
-    if ( !equationNumberingCompleted ) {
-        this->forceEquationNumbering();
-    }
-
-    if ( ( id == EID_MomentumBalance ) || ( id == EID_AuxMomentumBalance ) ) {
-        return numberOfPrescribedMomentumEqs;
-    } else if ( id == EID_ConservationEquation ) {
-        return numberOfPrescribedConservationEqs;
-    } else {
-        _error("giveNumberOfPrescribedDomainEquations: unknown equation id");
-    }
-
-    return 0;
+    if ( !equationNumberingCompleted ) this->forceEquationNumbering();
+    return num.giveRequiredNumberOfDomainEquation();
 }
 
 
@@ -860,30 +751,27 @@ double CBS :: giveVariableScale(VarScaleType varID)
     return 0.0;
 }
 
-/*
- * CBS :: printOutputAt (FILE * File,TimeStep* stepN)
- * {
- * //FILE* File = this -> giveDomain() -> giveOutputStream() ;
- * int domCount = 0, idomain;
- * Domain* domain;
- *
- * // fprintf (File,"\nOutput for time step number %d \n\n",stepN->giveNumber());
- * for (idomain = 1; idomain <= this->ndomains; idomain++) {
- * domain= this->giveDomain(idomain);
- * domCount += domain->giveOutputManager()->testTimeStepOutput (stepN);
- * }
- * if (domCount == 0) return;  // do not print even Solution step header
- *
- * fprintf (File,"\nOutput for time % .8e \n\n",stepN->giveTime()/this->giveVariableScale (VST_Time));
- * for (idomain = 1; idomain <= this->ndomains; idomain++) {
- *
- * domain= this->giveDomain(idomain);
- * fprintf (File,"\nOutput for domain %3d\n",domain->giveNumber());
- *
- * domain->giveOutputManager()->doDofManOutput  (File, stepN);
- * domain->giveOutputManager()->doElementOutput (File, stepN);
- * }
- * }
- *
- */
+#if 0
+void CBS :: printOutputAt (FILE * File,TimeStep* stepN)
+{
+    //FILE* File = this->giveDomain()->giveOutputStream();
+    int domCount = 0, idomain;
+    Domain* domain;
+
+    // fprintf (File,"\nOutput for time step number %d \n\n",stepN->giveNumber());
+    for (idomain = 1; idomain <= this->ndomains; idomain++) {
+        domain= this->giveDomain(idomain);
+        domCount += domain->giveOutputManager()->testTimeStepOutput (stepN);
+    }
+    if (domCount == 0) return;  // do not print even Solution step header
+    fprintf (File,"\nOutput for time % .8e \n\n",stepN->giveTime()/this->giveVariableScale (VST_Time));
+    for (idomain = 1; idomain <= this->ndomains; idomain++) {
+        domain= this->giveDomain(idomain);
+        fprintf (File,"\nOutput for domain %3d\n",domain->giveNumber());
+        domain->giveOutputManager()->doDofManOutput  (File, stepN);
+        domain->giveOutputManager()->doElementOutput (File, stepN);
+    }
+}
+#endif
+
 } // end namespace oofem

@@ -310,7 +310,7 @@ MisesMatNl :: initializeFrom(InputRecord *ir)
     StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
 
     averType = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, averType, IFT_MisesMatNl_averagingtype, "averagingtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, averType, _IFT_MisesMatNl_averagingtype);
     if ( averType == 2 ) {
         exponent = 0.5; // default value for averaging type 2
     }
@@ -320,11 +320,11 @@ MisesMatNl :: initializeFrom(InputRecord *ir)
     }
 
     if ( averType == 2 || averType == 3 ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, exponent, IFT_MisesMatNl_exp, "exp");
+        IR_GIVE_OPTIONAL_FIELD(ir, exponent, _IFT_MisesMatNl_exp);
     }
 
     if ( averType >= 2 && averType <= 5 ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, Rf, IFT_MisesMatNl_rf, "rf");
+        IR_GIVE_OPTIONAL_FIELD(ir, Rf, _IFT_MisesMatNl_rf);
     }
 
     return IRRT_OK;

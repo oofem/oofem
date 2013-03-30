@@ -968,7 +968,7 @@ TransportElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateTyp
         int dofindx;
         if ( ( dofindx = n->findDofWithDofId(T_f) ) ) {
             answer.resize(1);
-            answer.at(1) = n->giveDof(dofindx)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
+            answer.at(1) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
             return 1;
         } else {
             return 0;
@@ -977,7 +977,7 @@ TransportElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateTyp
         int dofindx;
         if ( ( dofindx = n->findDofWithDofId(C_1) ) ) {
             answer.resize(1);
-            answer.at(1) = n->giveDof(dofindx)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
+            answer.at(1) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
             return 1;
         } else {
             return 0;

@@ -1303,9 +1303,9 @@ StructuralElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateTy
     if ( type == IST_DisplacementVector ) {
         Node *n = this->giveNode(node);
         answer.resize(3);
-        answer.at(1) = n->giveUpdatedCoordinate(1, atTime, EID_MomentumBalance) - n->giveCoordinate(1);
-        answer.at(2) = n->giveUpdatedCoordinate(2, atTime, EID_MomentumBalance) - n->giveCoordinate(2);
-        answer.at(3) = n->giveUpdatedCoordinate(3, atTime, EID_MomentumBalance) - n->giveCoordinate(3);
+        answer.at(1) = n->giveUpdatedCoordinate(1, atTime) - n->giveCoordinate(1);
+        answer.at(2) = n->giveUpdatedCoordinate(2, atTime) - n->giveCoordinate(2);
+        answer.at(3) = n->giveUpdatedCoordinate(3, atTime) - n->giveCoordinate(3);
         return 1;
     } else {
         return Element :: giveInternalStateAtNode(answer, type, mode, node, atTime);

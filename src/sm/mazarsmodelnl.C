@@ -136,7 +136,7 @@ MazarsNLMaterial :: initializeFrom(InputRecord *ir)
     MazarsMaterial :: initializeFrom(ir);
     StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, R, IFT_MazarsNLMaterial_r, "r");
+    IR_GIVE_FIELD(ir, R, _IFT_MazarsNLMaterial_r);
     if ( R < 0.0 ) {
         R = 0.0;
     }

@@ -217,8 +217,8 @@ IRResultType Line :: initializeFrom(InputRecord *ir)
 
     FloatArray *start = new FloatArray(2);
     FloatArray *end = new FloatArray(2);
-    IR_GIVE_FIELD(ir, * start, IFT_Line_start, "start");
-    IR_GIVE_FIELD(ir, * end, IFT_Line_end, "end");
+    IR_GIVE_FIELD(ir, * start, _IFT_Line_start);
+    IR_GIVE_FIELD(ir, * end, _IFT_Line_end);
     vertices->put(1, start);
     vertices->put(2, end);
     return IRRT_OK;
@@ -375,8 +375,8 @@ IRResultType Circle :: initializeFrom(InputRecord *ir)
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
     FloatArray *center = new FloatArray(2);
-    IR_GIVE_FIELD(ir, * center, IFT_Circle_center, "center");
-    IR_GIVE_FIELD(ir, radius, IFT_Circle_radius, "radius");
+    IR_GIVE_FIELD(ir, * center, _IFT_Circle_center);
+    IR_GIVE_FIELD(ir, radius, _IFT_Circle_radius);
     vertices->put(1, center);
     return IRRT_OK;
 }
@@ -551,7 +551,7 @@ IRResultType PointSwarm :: initializeFrom(InputRecord *ir)
     IRResultType result; // Required by IR_GIVE_FIELD macro
     IntArray idList;
     
-    IR_GIVE_FIELD(ir, idList, IFT_Identification, "nodeid"); // Macro
+    IR_GIVE_FIELD(ir, idList, _IFT_PointSwarm_nodeID); // Macro
     
     for (int i=1; i<=idList.giveSize(); i++) {
         this->idList.push_back( idList.at(i) );

@@ -46,7 +46,7 @@ ConstantFunction :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     LoadTimeFunction :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, value, IFT_LoadTimeFunction_ft, "f(t)");
+    IR_GIVE_FIELD(ir, value, _IFT_LoadTimeFunction_ft);
 
     return IRRT_OK;
 }

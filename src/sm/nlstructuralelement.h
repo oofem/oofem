@@ -41,7 +41,7 @@
 
 ///@name Input fields for NLStructuralElement
 //@{
-#define _IFT_NLStructuralElement_nlgeoflag "nlgeoflag"
+#define _IFT_NLStructuralElement_nlgeoflag "nlgeo"
 //@}
 
 namespace oofem {

@@ -352,15 +352,16 @@ CohesiveSurface3d :: initializeFrom(InputRecord *ir)
     StructuralElement :: initializeFrom(ir);
 
     // read the area from the input file
-    IR_GIVE_FIELD(ir, area, IFT_Beam3d_refnode, "area");
+    IR_GIVE_FIELD(ir, area, _IFT_CohSur3d_area);
     if ( area < 0. ) {
         _error("CohesiveSurface3d::instanciateFrom: negative area specified");
     }
 
     // read shift constants of second (periodic) particle form the input file (if defined)
-    IR_GIVE_OPTIONAL_FIELD(ir, kx, IFT_CohSur3d_kx, "kx");
-    IR_GIVE_OPTIONAL_FIELD(ir, ky, IFT_CohSur3d_ky, "ky");
-    IR_GIVE_OPTIONAL_FIELD(ir, kz, IFT_CohSur3d_kz, "kz");
+    ///@todo Why not a vector input instead?
+    IR_GIVE_OPTIONAL_FIELD(ir, kx, _IFT_CohSur3d_kx);
+    IR_GIVE_OPTIONAL_FIELD(ir, ky, _IFT_CohSur3d_ky);
+    IR_GIVE_OPTIONAL_FIELD(ir, kz, _IFT_CohSur3d_kz);
 
     // evaluate number of Dof Managers
     numberOfDofMans = dofManArray.giveSize();
@@ -484,13 +485,13 @@ void CohesiveSurface3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownT
     //  get the displaced particle coordinates
     Particle *nodeA = ( Particle * ) giveNode(1);
     Particle *nodeB = ( Particle * ) giveNode(2);
-    p [ 0 ].x = nodeA->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
-    p [ 0 ].y = nodeA->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
-    p [ 0 ].z = nodeA->giveUpdatedCoordinate(3, tStep, EID_MomentumBalance, defScale);
+    p [ 0 ].x = nodeA->giveUpdatedCoordinate(1, tStep, defScale);
+    p [ 0 ].y = nodeA->giveUpdatedCoordinate(2, tStep, defScale);
+    p [ 0 ].z = nodeA->giveUpdatedCoordinate(3, tStep, defScale);
 
-    p [ 1 ].x = nodeB->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
-    p [ 1 ].y = nodeB->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
-    p [ 1 ].z = nodeB->giveUpdatedCoordinate(3, tStep, EID_MomentumBalance, defScale);
+    p [ 1 ].x = nodeB->giveUpdatedCoordinate(1, tStep, defScale);
+    p [ 1 ].y = nodeB->giveUpdatedCoordinate(2, tStep, defScale);
+    p [ 1 ].z = nodeB->giveUpdatedCoordinate(3, tStep, defScale);
 
     // plot the displaced particles
     EASValsSetMType(FILLED_CIRCLE_MARKER);
@@ -505,9 +506,9 @@ void CohesiveSurface3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownT
     // take into account periodic conditions
     if ( giveNumberOfNodes() == 3 ) {
         Node *nodeC = ( Particle * ) giveNode(3);
-        p [ 1 ].x += kxa + kxa * defScale * ( nodeC->giveDof(1)->giveUnknown(EID_MomentumBalance, VM_Total, tStep) ) + kyb * defScale * ( nodeC->giveDof(4)->giveUnknown(EID_MomentumBalance, VM_Total, tStep) );
-        p [ 1 ].y += kyb + kyb * defScale * ( nodeC->giveDof(2)->giveUnknown(EID_MomentumBalance, VM_Total, tStep) ) + kzc * defScale * ( nodeC->giveDof(5)->giveUnknown(EID_MomentumBalance, VM_Total, tStep) );
-        p [ 1 ].z += kzc + kzc * defScale * ( nodeC->giveDof(3)->giveUnknown(EID_MomentumBalance, VM_Total, tStep) ) + kxa * defScale * ( nodeC->giveDof(6)->giveUnknown(EID_MomentumBalance, VM_Total, tStep) );
+        p [ 1 ].x += kxa + kxa * defScale * ( nodeC->giveDof(1)->giveUnknown(VM_Total, tStep) ) + kyb * defScale * ( nodeC->giveDof(4)->giveUnknown(VM_Total, tStep) );
+        p [ 1 ].y += kyb + kyb * defScale * ( nodeC->giveDof(2)->giveUnknown(VM_Total, tStep) ) + kzc * defScale * ( nodeC->giveDof(5)->giveUnknown(VM_Total, tStep) );
+        p [ 1 ].z += kzc + kzc * defScale * ( nodeC->giveDof(3)->giveUnknown(VM_Total, tStep) ) + kxa * defScale * ( nodeC->giveDof(6)->giveUnknown(VM_Total, tStep) );
         EASValsSetMType(CIRCLE_MARKER);
     }
 
@@ -554,18 +555,18 @@ CohesiveSurface3d :: drawScalar(oofegGraphicContext &context)
     if ( context.getInternalVarsDefGeoFlag() ) {
         // use deformed geometry
         double defScale = context.getDefScale();
-        p [ 0 ].x = nodeA->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
-        p [ 0 ].y = nodeA->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
-        p [ 0 ].z = nodeA->giveUpdatedCoordinate(3, tStep, EID_MomentumBalance, defScale);
-        p [ 2 ].x = nodeB->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
-        p [ 2 ].y = nodeB->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
-        p [ 2 ].z = nodeB->giveUpdatedCoordinate(3, tStep, EID_MomentumBalance, defScale);
+        p [ 0 ].x = nodeA->giveUpdatedCoordinate(1, tStep, defScale);
+        p [ 0 ].y = nodeA->giveUpdatedCoordinate(2, tStep, defScale);
+        p [ 0 ].z = nodeA->giveUpdatedCoordinate(3, tStep, defScale);
+        p [ 2 ].x = nodeB->giveUpdatedCoordinate(1, tStep, defScale);
+        p [ 2 ].y = nodeB->giveUpdatedCoordinate(2, tStep, defScale);
+        p [ 2 ].z = nodeB->giveUpdatedCoordinate(3, tStep, defScale);
         // handle special elements crossing the boundary of the periodic cell
         if ( giveNumberOfNodes() == 3 ) {
             Node *nodeC = ( Particle * ) giveNode(3);
-            p [ 2 ].x += kxa + kxa * defScale * ( nodeC->giveDof(1)->giveUnknown(EID_MomentumBalance, VM_Total, tStep) ) + kyb * defScale * ( nodeC->giveDof(4)->giveUnknown(EID_MomentumBalance, VM_Total, tStep) );
-            p [ 2 ].y += kyb + kyb * defScale * ( nodeC->giveDof(2)->giveUnknown(EID_MomentumBalance, VM_Total, tStep) ) + kzc * defScale * ( nodeC->giveDof(5)->giveUnknown(EID_MomentumBalance, VM_Total, tStep) );
-            p [ 2 ].z += kzc + kzc * defScale * ( nodeC->giveDof(3)->giveUnknown(EID_MomentumBalance, VM_Total, tStep) ) + kxa * defScale * ( nodeC->giveDof(6)->giveUnknown(EID_MomentumBalance, VM_Total, tStep) );
+            p [ 2 ].x += kxa + kxa * defScale * ( nodeC->giveDof(1)->giveUnknown(VM_Total, tStep) ) + kyb * defScale * ( nodeC->giveDof(4)->giveUnknown(VM_Total, tStep) );
+            p [ 2 ].y += kyb + kyb * defScale * ( nodeC->giveDof(2)->giveUnknown(VM_Total, tStep) ) + kzc * defScale * ( nodeC->giveDof(5)->giveUnknown(VM_Total, tStep) );
+            p [ 2 ].z += kzc + kzc * defScale * ( nodeC->giveDof(3)->giveUnknown(VM_Total, tStep) ) + kxa * defScale * ( nodeC->giveDof(6)->giveUnknown(VM_Total, tStep) );
         }
     } else {
         // use initial geometry

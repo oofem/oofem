@@ -571,13 +571,13 @@ RheoChainMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     StructuralMaterial :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, nu, IFT_RheoChainMaterial_n, "n");
-    IR_GIVE_FIELD(ir, relMatAge, IFT_RheoChainMaterial_relmatage, "relmatage");
+    IR_GIVE_FIELD(ir, nu, _IFT_RheoChainMaterial_n);
+    IR_GIVE_FIELD(ir, relMatAge, _IFT_RheoChainMaterial_relmatage);
     this->begOfTimeOfInterest = -1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, begOfTimeOfInterest, IFT_RheoChainMaterial_begoftimeofinterest, "begoftimeofinterest");
+    IR_GIVE_OPTIONAL_FIELD(ir, begOfTimeOfInterest, _IFT_RheoChainMaterial_begoftimeofinterest);
     this->endOfTimeOfInterest = -1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, IFT_RheoChainMaterial_endoftimeofinterest, "endoftimeofinterest");
-    IR_GIVE_FIELD(ir, timeFactor, IFT_RheoChainMaterial_timefactor, "timefactor"); // solution time/timeFactor should give time in days
+    IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, _IFT_RheoChainMaterial_endoftimeofinterest);
+    IR_GIVE_FIELD(ir, timeFactor, _IFT_RheoChainMaterial_timefactor); // solution time/timeFactor should give time in days
 
     this->computeCharTimes(); // sets up nUnits variable
     this->giveDiscreteTimes(); // sets up discrete times

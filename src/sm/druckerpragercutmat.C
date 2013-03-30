@@ -91,16 +91,16 @@ DruckerPragerCutMat :: initializeFrom(InputRecord *ir)
     G = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveShearModulus();
     K = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveBulkModulus();
 
-    IR_GIVE_FIELD(ir, tau0, IFT_DruckerPragerCutMat_tau0, "tau0"); // initial yield stress under pure shear (DP model)
-    IR_GIVE_FIELD(ir, sigT, IFT_DruckerPragerCutMat_sigT, "sigt"); // uniaxial tensile strength for cut-off, (Rankine plasticity model)
-    IR_GIVE_FIELD(ir, alpha, IFT_DruckerPragerCutMat_alpha, "alpha"); // friction coefficient (DP model)
+    IR_GIVE_FIELD(ir, tau0, _IFT_DruckerPragerCutMat_tau0); // initial yield stress under pure shear (DP model)
+    IR_GIVE_FIELD(ir, sigT, _IFT_DruckerPragerCutMat_sigT); // uniaxial tensile strength for cut-off, (Rankine plasticity model)
+    IR_GIVE_FIELD(ir, alpha, _IFT_DruckerPragerCutMat_alpha); // friction coefficient (DP model)
     alphaPsi=alpha;
-    IR_GIVE_OPTIONAL_FIELD(ir, alphaPsi, IFT_DruckerPragerCutMat_alphapsi, "alphapsi"); //dilatancy coefficient (DP model)
-    IR_GIVE_OPTIONAL_FIELD(ir, H, IFT_DruckerPragerCutMat_h, "h"); // hardening modulus  (DP model)
-    IR_GIVE_OPTIONAL_FIELD(ir, omegaCrit, IFT_DruckerPragerCutMat_omegaCrit, "omega_crit"); // critical damage
-    IR_GIVE_OPTIONAL_FIELD(ir, a, IFT_DruckerPragerCutMat_a, "a"); // exponent in damage law
-    IR_GIVE_OPTIONAL_FIELD(ir, yieldTol, IFT_DruckerPragerCutMat_yieldTol, "yieldtol"); //tolerance of the error in the yield criterion
-    IR_GIVE_OPTIONAL_FIELD(ir, newtonIter, IFT_DruckerPragerCutMat_newtonIter, "newtoniter"); //Maximum number of iterations in lambda search
+    IR_GIVE_OPTIONAL_FIELD(ir, alphaPsi, _IFT_DruckerPragerCutMat_alphapsi); //dilatancy coefficient (DP model)
+    IR_GIVE_OPTIONAL_FIELD(ir, H, _IFT_DruckerPragerCutMat_h); // hardening modulus  (DP model)
+    IR_GIVE_OPTIONAL_FIELD(ir, omegaCrit, _IFT_DruckerPragerCutMat_omegaCrit); // critical damage
+    IR_GIVE_OPTIONAL_FIELD(ir, a, _IFT_DruckerPragerCutMat_a); // exponent in damage law
+    IR_GIVE_OPTIONAL_FIELD(ir, yieldTol, _IFT_DruckerPragerCutMat_yieldTol); //tolerance of the error in the yield criterion
+    IR_GIVE_OPTIONAL_FIELD(ir, newtonIter, _IFT_DruckerPragerCutMat_newtonIter); //Maximum number of iterations in lambda search
     
     return IRRT_OK;
 }

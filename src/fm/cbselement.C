@@ -60,9 +60,9 @@ CBSElement :: initializeFrom(InputRecord *ir)
 
     FMElement :: initializeFrom(ir);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, IFT_CBSElement_bsides, _IFT_CBSElement_bsides);
+    IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, _IFT_CBSElement_bsides);
     if ( !boundarySides.isEmpty() ) {
-        IR_GIVE_FIELD(ir, boundaryCodes, IFT_CBSElement_bcodes, _IFT_CBSElement_bcodes);
+        IR_GIVE_FIELD(ir, boundaryCodes, _IFT_CBSElement_bcodes);
     }
 
     return IRRT_OK;
@@ -139,7 +139,7 @@ CBSElement :: computePrescribedTermsI(FloatArray &answer, ValueModeType mode, Ti
     FloatMatrix mass;
     FloatArray usp;
     this->computeConsistentMassMtrx(mass, tStep);
-    this->computeVectorOfPrescribed(EID_AuxMomentumBalance, mode, tStep, usp);
+    this->computeVectorOfPrescribed(EID_MomentumBalance, mode, tStep, usp);
     answer.beProductOf(mass, usp);
     answer.negated();
 }
@@ -174,14 +174,13 @@ CBSElement :: checkConsistency()
 void
 CBSElement :: updateInternalState(TimeStep *stepN)
 {
-    int i, j;
     IntegrationRule *iRule;
     FloatArray stress;
 
     // force updating strains & stresses
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
             computeDeviatoricStress(stress, iRule->getIntegrationPoint(j), stepN);
         }
     }
@@ -192,15 +191,13 @@ void
 CBSElement :: printOutputAt(FILE *file, TimeStep *stepN)
 // Performs end-of-step operations.
 {
-    int i;
-
 #ifdef __PARALLEL_MODE
     fprintf( file, "element %d [%8d] :\n", this->giveNumber(), this->giveGlobalNumber() );
 #else
     fprintf(file, "element %d :\n", number);
 #endif
 
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         integrationRulesArray [ i ]->printOutputAt(file, stepN);
     }
 }
@@ -218,15 +215,15 @@ CBSElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type
         answer.resize( this->giveSpatialDimension() );
         int dofindx;
         if ( ( dofindx = n->findDofWithDofId(V_u) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(EID_MomentumBalance, VM_Total, atTime);
+            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
         }
 
         if ( ( dofindx = n->findDofWithDofId(V_v) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(EID_MomentumBalance, VM_Total, atTime);
+            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
         }
 
         if ( ( dofindx = n->findDofWithDofId(V_w) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(EID_MomentumBalance, VM_Total, atTime);
+            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
         }
 
         return 1;
@@ -234,7 +231,7 @@ CBSElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type
         int dofindx;
         if ( ( dofindx = n->findDofWithDofId(P_f) ) ) {
             answer.resize(1);
-            answer.at(1) = n->giveDof(dofindx)->giveUnknown(EID_ConservationEquation, VM_Total, atTime);
+            answer.at(1) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
             return 1;
         } else {
             return 0;

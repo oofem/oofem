@@ -106,11 +106,11 @@ LinearStatic :: initializeFrom(InputRecord *ir)
 
     StructuralEngngModel :: initializeFrom(ir);
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
 #ifdef __PARALLEL_MODE
@@ -128,23 +128,19 @@ LinearStatic :: initializeFrom(InputRecord *ir)
 }
 
 
-double LinearStatic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
-                                             TimeStep *tStep, Domain *d, Dof *dof)
+double LinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
+#if DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
+#endif
 
     if ( tStep != this->giveCurrentStep() ) {
         _error("giveUnknownComponent: unknown time step encountered");
-        return 0.;
-    }
-
-    if ( chc != EID_MomentumBalance ) {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
         return 0.;
     }
 
@@ -193,7 +189,7 @@ void LinearStatic :: solveYourself()
     if (this->isParallel()) {
  #ifdef __VERBOSE_PARALLEL
         // force equation numbering before setting up comm maps
-        int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+        int neq = this->giveNumberOfDomainEquations(EID_MomentumBalance);
         OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
 
@@ -246,13 +242,13 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     //
     // allocate space for displacementVector
     //
-    displacementVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
+    displacementVector.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     displacementVector.zero();
 
     //
     // assembling the load vector
     //
-    loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
+    loadVector.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     loadVector.zero();
     this->assembleVector( loadVector, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
@@ -260,7 +256,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     //
     // internal forces (from Dirichlet b.c's, or thermal expansion, etc.)
     //
-    FloatArray internalForces( this->giveNumberOfEquations(EID_MomentumBalance) );
+    FloatArray internalForces( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     internalForces.zero();
     this->assembleVector( internalForces, tStep, EID_MomentumBalance, InternalForcesVector, VM_Total,
                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
@@ -385,7 +381,7 @@ LinearStatic :: updateDomainLinks()
 void
 LinearStatic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
-    iDof->printSingleOutputAt(stream, atTime, 'd', EID_MomentumBalance, VM_Total);
+    iDof->printSingleOutputAt(stream, atTime, 'd', VM_Total);
 }
 
 

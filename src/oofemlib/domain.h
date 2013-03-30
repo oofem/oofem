@@ -60,10 +60,11 @@
 #define _IFT_Domain_ncrosssect "ncrosssect"
 #define _IFT_Domain_nbc "nbc"
 #define _IFT_Domain_nic "nic"
-#define _IFT_Domain_nloadtimefunct "nlft"
+#define _IFT_Domain_nloadtimefunct "nltf"
 #define _IFT_Domain_nbarrier "nbarrier"
 #define _IFT_Domain_nrandgen "nrandgen"
 #define _IFT_Domain_topology "topology"
+#define _IFT_Domain_nxfemman "nxfemman"
 //@}
 
 namespace oofem {

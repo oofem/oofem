@@ -57,15 +57,15 @@ PointLoad :: initializeFrom(InputRecord *ir)
 
     result = Load :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, nDofs, IFT_PointLoad_ndofs, "ndofs");
-    IR_GIVE_FIELD(ir, coords, IFT_PointLoad_coords, "coords");
+    IR_GIVE_FIELD(ir, nDofs, _IFT_PointLoad_ndofs);
+    IR_GIVE_FIELD(ir, coords, _IFT_PointLoad_coords);
 
     int value = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_PointLoad_loadtype, "loadtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_PointLoad_loadtype);
     lType = ( bcType ) value;
 
     value = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_PointLoad_cstype, "cstype");
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_PointLoad_cstype);
     coordSystemType = ( PL_CoordSystType ) value;
 
     return result;

@@ -190,18 +190,18 @@ DustMaterial :: initializeFrom(InputRecord *ir)
     newtonTol = 1e-8;
     newtonIter = 200;
 
-    IR_GIVE_OPTIONAL_FIELD(ir, alpha, IFT_DustMaterial_alpha, "alpha");
-    IR_GIVE_OPTIONAL_FIELD(ir, beta, IFT_DustMaterial_beta, "beta");
-    IR_GIVE_OPTIONAL_FIELD(ir, lambda, IFT_DustMaterial_lambda, "lambda");
-    IR_GIVE_OPTIONAL_FIELD(ir, theta, IFT_DustMaterial_theta, "theta");
-    IR_GIVE_OPTIONAL_FIELD(ir, ft, IFT_DustMaterial_ft, "ft");
-    IR_GIVE_OPTIONAL_FIELD(ir, rEll, IFT_DustMaterial_rEll, "rell");
-    IR_GIVE_OPTIONAL_FIELD(ir, x0, IFT_DustMaterial_x0, "x0");
-    IR_GIVE_OPTIONAL_FIELD(ir, wHard, IFT_DustMaterial_wHard, "whard");
-    IR_GIVE_OPTIONAL_FIELD(ir, dHard, IFT_DustMaterial_dHard, "dhard");
-    IR_GIVE_OPTIONAL_FIELD(ir, mStiff, IFT_DustMaterial_mStiff, "mstiff");
-    IR_GIVE_OPTIONAL_FIELD(ir, mStiff, IFT_DustMaterial_newtonTol, "newtontol");
-    IR_GIVE_OPTIONAL_FIELD(ir, newtonIter, IFT_DustMaterial_newtonIter, "newtoniter");
+    IR_GIVE_OPTIONAL_FIELD(ir, alpha, _IFT_DustMaterial_alpha);
+    IR_GIVE_OPTIONAL_FIELD(ir, beta, _IFT_DustMaterial_beta);
+    IR_GIVE_OPTIONAL_FIELD(ir, lambda, _IFT_DustMaterial_lambda);
+    IR_GIVE_OPTIONAL_FIELD(ir, theta, _IFT_DustMaterial_theta);
+    IR_GIVE_OPTIONAL_FIELD(ir, ft, _IFT_DustMaterial_ft);
+    IR_GIVE_OPTIONAL_FIELD(ir, rEll, _IFT_DustMaterial_rEll);
+    IR_GIVE_OPTIONAL_FIELD(ir, x0, _IFT_DustMaterial_x0);
+    IR_GIVE_OPTIONAL_FIELD(ir, wHard, _IFT_DustMaterial_wHard);
+    IR_GIVE_OPTIONAL_FIELD(ir, dHard, _IFT_DustMaterial_dHard);
+    IR_GIVE_OPTIONAL_FIELD(ir, mStiff, _IFT_DustMaterial_mStiff);
+    IR_GIVE_OPTIONAL_FIELD(ir, mStiff, _IFT_DustMaterial_newtonTol);
+    IR_GIVE_OPTIONAL_FIELD(ir, newtonIter, _IFT_DustMaterial_newtonIter);
 
     // check parameters admissibility
     if ( ft < 0 ) {
@@ -235,7 +235,7 @@ DustMaterial :: initializeFrom(InputRecord *ir)
     x0 = -x0; // compressive strength is negative, although on input it is a positive number
 
     hardeningType = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, hardeningType, IFT_DustMaterial_hardeningType, "ht");
+    IR_GIVE_OPTIONAL_FIELD(ir, hardeningType, _IFT_DustMaterial_hardeningType);
 
     q0 = x0;
     solveQ0(q0);

@@ -86,7 +86,7 @@ public:
     virtual void solveYourself();
     virtual void solveYourselfAt(TimeStep *tStep);
 
-    virtual double giveUnknownComponent(EquationID type, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual TimeStep *giveNextStep();
@@ -121,7 +121,7 @@ public:
     virtual bool requiresEquationRenumbering(TimeStep *) { return true; }
     virtual void updateDofUnknownsDictionary(DofManager *, TimeStep *);
     // Here we store only total and incremental value; so hash is computed from mode value only
-    virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN) { return (int) mode; }
+    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN) { return (int) mode; }
 };
 } // end namespace oofem
 #endif // incrementallinearstatic_h

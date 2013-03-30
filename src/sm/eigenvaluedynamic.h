@@ -96,7 +96,7 @@ public:
     virtual void terminate(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
 
-    virtual double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     virtual double giveUnknownComponent(UnknownType ut, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);

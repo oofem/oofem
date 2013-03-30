@@ -86,13 +86,13 @@ LinearStability :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     //StructuralEngngModel::instanciateFrom(ir);
-    IR_GIVE_FIELD(ir, numberOfRequiredEigenValues, IFT_LinearStability_nroot, "nroot");
+    IR_GIVE_FIELD(ir, numberOfRequiredEigenValues, _IFT_LinearStability_nroot);
     // numberOfSteps set artifficially to numberOfRequiredEigenValues
     // in order to allow
     // use restoreContext function for different eigenValues
     numberOfSteps = numberOfRequiredEigenValues;
 
-    IR_GIVE_FIELD(ir, rtolv, IFT_LinearStability_rtolv, "rtolv");
+    IR_GIVE_FIELD(ir, rtolv, _IFT_LinearStability_rtolv);
     if ( rtolv < 1.e-12 ) {
         rtolv =  1.e-12;
     }
@@ -102,7 +102,7 @@ LinearStability :: initializeFrom(InputRecord *ir)
     }
 
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_LinearStability_stype, "stype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_LinearStability_stype);
     solverType = ( GenEigvalSolverType ) val;
 
 
@@ -112,29 +112,27 @@ LinearStability :: initializeFrom(InputRecord *ir)
 }
 
 
-double LinearStability ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
-                                                TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displaacement, eigen value.
-// This function translates this request to numerical method language
+double LinearStability :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
+// returns unknown quantity like displacement, eigen value.
 {
     int eq = dof->__giveEquationNumber();
+#if DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
+#endif
 
     int activeVector = ( int ) tStep->giveTargetTime();
-    if ( chc == EID_MomentumBalance ) {
-        switch ( mode ) {
-        case VM_Total: // EigenVector
-            if ( activeVector ) {
-                return eigVec.at(eq, activeVector);
-            }
-
-            return displacementVector.at(eq);
-
-        default:
-            _error("giveUnknownComponent: Unknown is of undefined type for this problem");
+    switch ( mode ) {
+    case VM_Total: // EigenVector
+        if ( activeVector ) {
+            return eigVec.at(eq, activeVector);
         }
+
+        return displacementVector.at(eq);
+
+    default:
+        _error("giveUnknownComponent: Unknown is of undefined type for this problem");
     }
 
     return 0.;
@@ -234,11 +232,11 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
         //
         // allocate space for displacement Vector
         //
-        displacementVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
+        displacementVector.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
         //
         // allocate space for load vector
         //
-        loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
+        loadVector.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     }
 
 #ifndef LIN_STAB_COMPATIBILITY_MODE
@@ -305,7 +303,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
     //
     // create resulting objects eigVec and eigVal
     //
-    eigVec.resize(this->giveNumberOfEquations(EID_MomentumBalance), numberOfRequiredEigenValues);
+    eigVec.resize(this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()), numberOfRequiredEigenValues);
     eigVal.resize(numberOfRequiredEigenValues);
     eigVec.zero();
     eigVal.zero();
@@ -555,6 +553,6 @@ contextIOResultType LinearStability :: restoreContext(DataStream *stream, Contex
 void
 LinearStability :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
-    iDof->printSingleOutputAt(stream, atTime, 'd', EID_MomentumBalance, VM_Total);
+    iDof->printSingleOutputAt(stream, atTime, 'd', VM_Total);
 }
 } // end namespace oofem

@@ -436,11 +436,11 @@ void Tr21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueMo
     answer.resize(3);
     answer.zero();
     for (int i = 1; i <= n.giveSize(); i++) {
-        answer(0) += n.at(i)*this->giveNode(i)->giveDofWithID(V_u)->giveUnknown(EID_MomentumBalance_ConservationEquation, mode, tStep);
-        answer(1) += n.at(i)*this->giveNode(i)->giveDofWithID(V_v)->giveUnknown(EID_MomentumBalance_ConservationEquation, mode, tStep);
+        answer(0) += n.at(i)*this->giveNode(i)->giveDofWithID(V_u)->giveUnknown(mode, tStep);
+        answer(1) += n.at(i)*this->giveNode(i)->giveDofWithID(V_v)->giveUnknown(mode, tStep);
     }
     for (int i = 1; i <= n_lin.giveSize(); i++) {
-        answer(2) += n_lin.at(i)*this->giveNode(i)->giveDofWithID(P_f)->giveUnknown(EID_MomentumBalance_ConservationEquation, mode, tStep);
+        answer(2) += n_lin.at(i)*this->giveNode(i)->giveDofWithID(P_f)->giveUnknown(mode, tStep);
     }
 }
 
@@ -490,18 +490,18 @@ void Tr21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
     if ( type == IST_Pressure ) {
         answer.resize(1);
         if ( node == 1 || node == 2 || node == 3 ) {
-            answer.at(1) = this->giveNode(node)->giveDofWithID(P_f)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
+            answer.at(1) = this->giveNode(node)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
         } else {
             double a, b;
             if ( node == 4 ) {
-                a = this->giveNode(1)->giveDofWithID(P_f)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
-                b = this->giveNode(2)->giveDofWithID(P_f)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
+                a = this->giveNode(1)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
+                b = this->giveNode(2)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
             } else if ( node == 5 ) {
-                a = this->giveNode(2)->giveDofWithID(P_f)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
-                b = this->giveNode(3)->giveDofWithID(P_f)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
+                a = this->giveNode(2)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
+                b = this->giveNode(3)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
             } else /*if ( node == 6 )*/ {
-                a = this->giveNode(3)->giveDofWithID(P_f)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
-                b = this->giveNode(1)->giveDofWithID(P_f)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
+                a = this->giveNode(3)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
+                b = this->giveNode(1)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
             }
 
             answer.at(1) = ( a + b ) / 2;
@@ -525,7 +525,7 @@ void Tr21Stokes :: giveGradP(FloatMatrix &answer, TimeStep * tStep )
     answer.resize(2,1);
     answer.zero();
 
-/*
+#if 0
     GaussIntegrationRule iRuleEdge(1, this, 1, 1);
     GaussPoint *gpEdge;
     FloatArray Normal, N, *lcoords, p;
@@ -559,7 +559,7 @@ void Tr21Stokes :: giveGradP(FloatMatrix &answer, TimeStep * tStep )
         }
         answer.add(temp);
     }
-*/
+#endif
 }
 
 void Tr21Stokes :: giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep )
@@ -586,11 +586,11 @@ void Tr21Stokes :: giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep )
             d = this->giveDofManager(i)->giveDof(j);
             if ((d->giveDofID()==V_u) || (d->giveDofID()==V_v)) {
                 k=k+1;
-                v.at(k,1)=d->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
+                v.at(k,1)=d->giveUnknown(VM_Total, tStep);
             /*} else if (d->giveDofID()==A_x) {
-                boundaryV.at(1,1)=d->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
+                boundaryV.at(1,1)=d->giveUnknown(VM_Total, tStep);
             } else if (d->giveDofID()==A_y) {
-                boundaryV.at(2,1)=d->giveUnknown(EID_ConservationEquation, VM_Total, tStep);*/
+                boundaryV.at(2,1)=d->giveUnknown(VM_Total, tStep);*/
             }
         }
     }

@@ -66,7 +66,7 @@ LoadBalancer :: initializeFrom(InputRecord *ir)
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
     IntArray wtp;
-    IR_GIVE_OPTIONAL_FIELD(ir, wtp, IFT_LoadBalancer_wtp, "wtp");
+    IR_GIVE_OPTIONAL_FIELD(ir, wtp, _IFT_LoadBalancer_wtp);
 
     this->initializeWtp(wtp);
 
@@ -701,13 +701,13 @@ LoadBalancerMonitor :: initializeFrom(InputRecord *ir)
         nodeWeights(i) = 1.0 / nproc;
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, nodeWeightMode, IFT_LoadBalancerMonitor_nodeWeightMode, "nodeweightmode");
+    IR_GIVE_OPTIONAL_FIELD(ir, nodeWeightMode, _IFT_LoadBalancerMonitor_nodeWeightMode);
     if ( nodeWeightMode == 0 ) { // default, dynamic weights
         staticNodeWeightFlag = false;
     } else if ( nodeWeightMode == 1 ) { // equal weights for all nodes
         staticNodeWeightFlag = true;
     } else if ( nodeWeightMode == 2 ) { // user defined static weights
-        IR_GIVE_OPTIONAL_FIELD(ir, nodeWeights, IFT_LoadBalancerMonitor_initialnodeweights, "nw");
+        IR_GIVE_OPTIONAL_FIELD(ir, nodeWeights, _IFT_LoadBalancerMonitor_initialnodeweights);
         if ( nodeWeights.giveSize() != nproc ) {
             OOFEM_ERROR("nodeWeights size not equal to number of processors");
         }
@@ -731,21 +731,21 @@ WallClockLoadBalancerMonitor :: initializeFrom(InputRecord *ir)
 
 
 
-    IR_GIVE_OPTIONAL_FIELD(ir, relWallClockImbalanceTreshold, IFT_WallClockLoadBalancerMonitor_relwct, "relwct");
-    IR_GIVE_OPTIONAL_FIELD(ir, absWallClockImbalanceTreshold, IFT_WallClockLoadBalancerMonitor_abswct, "abswct");
-    IR_GIVE_OPTIONAL_FIELD(ir, minAbsWallClockImbalanceTreshold, IFT_WallClockLoadBalancerMonitor_minwct, "minwct");
-    IR_GIVE_OPTIONAL_FIELD(ir, lbstep, IFT_WallClockLoadBalancerMonitor_lbstep, "lbstep");
+    IR_GIVE_OPTIONAL_FIELD(ir, relWallClockImbalanceTreshold, _IFT_WallClockLoadBalancerMonitor_relwct);
+    IR_GIVE_OPTIONAL_FIELD(ir, absWallClockImbalanceTreshold, _IFT_WallClockLoadBalancerMonitor_abswct);
+    IR_GIVE_OPTIONAL_FIELD(ir, minAbsWallClockImbalanceTreshold, _IFT_WallClockLoadBalancerMonitor_minwct);
+    IR_GIVE_OPTIONAL_FIELD(ir, lbstep, _IFT_WallClockLoadBalancerMonitor_lbstep);
 
 #ifdef __LB_DEBUG
     perturbedSteps.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, perturbedSteps, IFT_WallClockLoadBalancerMonitor_perturbedsteps, "lbperturbedsteps");
+    IR_GIVE_OPTIONAL_FIELD(ir, perturbedSteps, _IFT_WallClockLoadBalancerMonitor_perturbedsteps);
     perturbFactor = 1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, perturbFactor, IFT_WallClockLoadBalancerMonitor_perturbfactor, "lbperturbfactor");
+    IR_GIVE_OPTIONAL_FIELD(ir, perturbFactor, _IFT_WallClockLoadBalancerMonitor_perturbfactor);
 
     recoveredSteps.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, recoveredSteps, IFT_WallClockLoadBalancerMonitor_recoveredsteps, "lbrecoveredsteps");
+    IR_GIVE_OPTIONAL_FIELD(ir, recoveredSteps, _IFT_WallClockLoadBalancerMonitor_recoveredsteps);
     processingWeights.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, processingWeights, IFT_WallClockLoadBalancerMonitor_processingweights, "lbprocessingweights");
+    IR_GIVE_OPTIONAL_FIELD(ir, processingWeights, _IFT_WallClockLoadBalancerMonitor_processingweights);
     if ( recoveredSteps.giveSize() != processingWeights.giveSize() ) {
         OOFEM_ERROR("WallClockLoadBalancerMonitor::initializeFrom - mismatch size of lbrecoveredsteps and lbprocessingweights");
     }

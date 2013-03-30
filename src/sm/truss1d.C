@@ -229,11 +229,11 @@ void Truss1d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
     EASValsSetColor( gc.getDeformedElementColor() );
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
-    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
+    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale);
     p [ 0 ].y = 0.;
     p [ 0 ].z = 0.;
 
-    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
+    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale);
     p [ 1 ].y = 0.;
     p [ 1 ].z = 0.;
     go = CreateLine3D(p);
@@ -286,7 +286,7 @@ void Truss1d :: drawScalar(oofegGraphicContext &context)
             if ( context.getInternalVarsDefGeoFlag() ) {
                 // use deformed geometry
                 defScale = context.getDefScale();
-                p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
+                p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                 p [ i ].y = 0.;
                 p [ i ].z = 0.;
             } else {
@@ -307,7 +307,7 @@ void Truss1d :: drawScalar(oofegGraphicContext &context)
             if ( context.getInternalVarsDefGeoFlag() ) {
                 // use deformed geometry
                 defScale = context.getDefScale();
-                p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
+                p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                 p [ i ].y = 0.0;
                 p [ i ].z = s [ i ] * landScale;
             } else {

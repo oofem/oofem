@@ -46,13 +46,13 @@ BazantNajjarMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
 
     IsotropicMoistureTransferMaterial :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, C1, IFT_BazantNajjarMoistureTransferMaterial_c1, "c1");
-    IR_GIVE_FIELD(ir, n, IFT_BazantNajjarMoistureTransferMaterial_n, "n");
-    IR_GIVE_FIELD(ir, alpha0, IFT_BazantNajjarMoistureTransferMaterial_alpha0, "alpha0");
-    IR_GIVE_FIELD(ir, hC, IFT_BazantNajjarMoistureTransferMaterial_hc, "hc");
+    IR_GIVE_FIELD(ir, C1, _IFT_BazantNajjarMoistureTransferMaterial_c1);
+    IR_GIVE_FIELD(ir, n, _IFT_BazantNajjarMoistureTransferMaterial_n);
+    IR_GIVE_FIELD(ir, alpha0, _IFT_BazantNajjarMoistureTransferMaterial_alpha0);
+    IR_GIVE_FIELD(ir, hC, _IFT_BazantNajjarMoistureTransferMaterial_hc);
 
     this->moistureCapacity = 1.;
-    IR_GIVE_OPTIONAL_FIELD(ir, moistureCapacity, IFT_BazantNajjarMoistureTransferMaterial_capa, "capa");
+    IR_GIVE_OPTIONAL_FIELD(ir, moistureCapacity, _IFT_BazantNajjarMoistureTransferMaterial_capa);
 
 
     return IRRT_OK;

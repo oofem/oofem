@@ -333,12 +333,12 @@ CebFipSlip90Material :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, tmax, IFT_CebFipSlip90Material_tmax, "tmax");
-    IR_GIVE_FIELD(ir, tres, IFT_CebFipSlip90Material_tres, "tres");
+    IR_GIVE_FIELD(ir, tmax, _IFT_CebFipSlip90Material_tmax);
+    IR_GIVE_FIELD(ir, tres, _IFT_CebFipSlip90Material_tres);
 
-    IR_GIVE_FIELD(ir, s1, IFT_CebFipSlip90Material_s1, "s1");
-    IR_GIVE_FIELD(ir, s2, IFT_CebFipSlip90Material_s2, "s2");
-    IR_GIVE_FIELD(ir, s3, IFT_CebFipSlip90Material_s3, "s3");
+    IR_GIVE_FIELD(ir, s1, _IFT_CebFipSlip90Material_s1);
+    IR_GIVE_FIELD(ir, s2, _IFT_CebFipSlip90Material_s2);
+    IR_GIVE_FIELD(ir, s3, _IFT_CebFipSlip90Material_s3);
 
     alpha = 0.4;
     return StructuralMaterial :: initializeFrom(ir);

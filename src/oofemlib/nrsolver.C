@@ -117,20 +117,20 @@ NRSolver :: initializeFrom(InputRecord *ir)
 
     // Choosing a big "enough" number. (Alternative: Force input of maxinter)
     nsmax = 1e8;
-    IR_GIVE_OPTIONAL_FIELD(ir, nsmax, IFT_NRSolver_maxiter, "maxiter");
+    IR_GIVE_OPTIONAL_FIELD(ir, nsmax, _IFT_NRSolver_maxiter);
     if ( nsmax < 0 ) {
         _error("initializeFrom: nsmax < 0");
     }
 
     minIterations = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, minIterations, IFT_NRSolver_miniterations, "miniter");
+    IR_GIVE_OPTIONAL_FIELD(ir, minIterations, _IFT_NRSolver_miniterations);
 
     minStepLength = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, IFT_NRSolver_minsteplength, "minsteplength");
+    IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, _IFT_NRSolver_minsteplength);
 
     // read if MANRM method is used
     MANRMSteps = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, MANRMSteps, IFT_NRSolver_manrmsteps, "manrmsteps");
+    IR_GIVE_OPTIONAL_FIELD(ir, MANRMSteps, _IFT_NRSolver_manrmsteps);
     if ( MANRMSteps > 0 ) {
         NR_Mode = NR_OldMode = nrsolverAccelNRM;
     } else {
@@ -138,7 +138,7 @@ NRSolver :: initializeFrom(InputRecord *ir)
     }
 
     int _val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NRSolver_lstype, "lstype");
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_NRSolver_lstype);
     solverType = ( LinSystSolverType ) _val;
     this->giveLinearSolver()->initializeFrom(ir);
 
@@ -146,18 +146,19 @@ NRSolver :: initializeFrom(InputRecord *ir)
     // if rtolv provided set to this tolerance both rtolf and rtold
     rtolf.resize(1);
     rtolf.at(1) = 1.e-3; // Default value.
-    IR_GIVE_OPTIONAL_FIELD(ir, rtolf.at(1), IFT_NRSolver_rtolv, "rtolv");
+    IR_GIVE_OPTIONAL_FIELD(ir, rtolf.at(1), _IFT_NRSolver_rtolv);
+    //OOFEM_WARNING("CHECK!");
     rtold = rtolf;
     // read optional force and displacement tolerances
-    IR_GIVE_OPTIONAL_FIELD(ir, rtolf.at(1), IFT_NRSolver_rtolf, "rtolf");
-    IR_GIVE_OPTIONAL_FIELD(ir, rtold.at(1), IFT_NRSolver_rtold, "rtold");
+    IR_GIVE_OPTIONAL_FIELD(ir, rtolf.at(1), _IFT_NRSolver_rtolf);
+    IR_GIVE_OPTIONAL_FIELD(ir, rtold.at(1), _IFT_NRSolver_rtold);
 
     prescribedDofs.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, prescribedDofs, IFT_NRSolver_ddm, "ddm");
+    IR_GIVE_OPTIONAL_FIELD(ir, prescribedDofs, _IFT_NRSolver_ddm);
     prescribedDofsValues.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, prescribedDofsValues, IFT_NRSolver_ddv, "ddv");
+    IR_GIVE_OPTIONAL_FIELD(ir, prescribedDofsValues, _IFT_NRSolver_ddv);
     prescribedDisplacementLTF = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, prescribedDisplacementLTF, IFT_NRSolver_ddltf, "ddltf");
+    IR_GIVE_OPTIONAL_FIELD(ir, prescribedDisplacementLTF, _IFT_NRSolver_ddltf);
 
     numberOfPrescribedDofs = prescribedDofs.giveSize() / 2;
     if ( numberOfPrescribedDofs != prescribedDofsValues.giveSize() ) {
@@ -171,7 +172,7 @@ NRSolver :: initializeFrom(InputRecord *ir)
     }
 
     this->lsFlag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, lsFlag, IFT_NRSolver_linesearch, "linesearch");
+    IR_GIVE_OPTIONAL_FIELD(ir, lsFlag, _IFT_NRSolver_linesearch);
 
     if ( this->lsFlag ) {
         this->giveLineSearchSolver()->initializeFrom(ir);

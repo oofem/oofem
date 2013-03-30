@@ -56,40 +56,40 @@ B3Material :: initializeFrom(InputRecord *ir)
     MaxwellChainMaterial :: initializeFrom(ir);
 
     int mode = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, mode, IFT_B3Material_mode, "mode");
+    IR_GIVE_OPTIONAL_FIELD(ir, mode, _IFT_B3Material_mode);
     if ( mode == 0 ) { // default, determine raw params q1,..,q5 from composition
-        IR_GIVE_FIELD(ir, fc, IFT_B3Material_fc, "fc"); // 28-day standard cylinder compression strength in MPa
-        IR_GIVE_FIELD(ir, c, IFT_B3Material_cc, "cc"); // cement content of concrete  in kg m^-3.
-        IR_GIVE_FIELD(ir, wc, IFT_B3Material_wc, "w/c"); // ratio (by weight) of water to cementitious material
-        IR_GIVE_FIELD(ir, ac, IFT_B3Material_ac, "a/c"); // ratio (by weight) of aggregate to cement
-        IR_GIVE_FIELD(ir, t0, IFT_B3Material_t0, "t0"); // age when drying begins (in days)
+        IR_GIVE_FIELD(ir, fc, _IFT_B3Material_fc); // 28-day standard cylinder compression strength in MPa
+        IR_GIVE_FIELD(ir, c, _IFT_B3Material_cc); // cement content of concrete  in kg m^-3.
+        IR_GIVE_FIELD(ir, wc, _IFT_B3Material_wc); // ratio (by weight) of water to cementitious material
+        IR_GIVE_FIELD(ir, ac, _IFT_B3Material_ac); // ratio (by weight) of aggregate to cement
+        IR_GIVE_FIELD(ir, t0, _IFT_B3Material_t0); // age when drying begins (in days)
     } else { // read raw Basic creep parameters
-        IR_GIVE_FIELD(ir, q1, IFT_B3Material_q1, "q1");
-        IR_GIVE_FIELD(ir, q2, IFT_B3Material_q2, "q2");
-        IR_GIVE_FIELD(ir, q3, IFT_B3Material_q3, "q3");
-        IR_GIVE_FIELD(ir, q4, IFT_B3Material_q4, "q4");
+        IR_GIVE_FIELD(ir, q1, _IFT_B3Material_q1);
+        IR_GIVE_FIELD(ir, q2, _IFT_B3Material_q2);
+        IR_GIVE_FIELD(ir, q3, _IFT_B3Material_q3);
+        IR_GIVE_FIELD(ir, q4, _IFT_B3Material_q4);
     }
 
     // read shrinkage mode
     int shm = 0;
-    IR_GIVE_FIELD(ir, shm, IFT_B3Material_shmode, "shmode");
+    IR_GIVE_FIELD(ir, shm, _IFT_B3Material_shmode);
     this->shMode = ( b3ShModeType ) shm;
 
     if ( this->shMode == B3_PointShrinkage ) {
         // read additional shrinkage params required
-        IR_GIVE_FIELD(ir, es0, IFT_B3Material_es0, "es0");
-        IR_GIVE_FIELD(ir, r, IFT_B3Material_r, "r");
-        IR_GIVE_FIELD(ir, rprime, IFT_B3Material_rprime, "rprime");
-        IR_GIVE_FIELD(ir, at, IFT_B3Material_at, "at");
+        IR_GIVE_FIELD(ir, es0, _IFT_B3Material_es0);
+        IR_GIVE_FIELD(ir, r, _IFT_B3Material_r);
+        IR_GIVE_FIELD(ir, rprime, _IFT_B3Material_rprime);
+        IR_GIVE_FIELD(ir, at, _IFT_B3Material_at);
         // read sorption isotherm data
-        IR_GIVE_FIELD(ir, w_h, IFT_B3Material_wh, "w_h");
-        IR_GIVE_FIELD(ir, n, IFT_B3Material_ncoeff, "ncoeff");
-        IR_GIVE_FIELD(ir, a, IFT_B3Material_a, "a");
+        IR_GIVE_FIELD(ir, w_h, _IFT_B3Material_wh);
+        IR_GIVE_FIELD(ir, n, _IFT_B3Material_ncoeff);
+        IR_GIVE_FIELD(ir, a, _IFT_B3Material_a);
     } else if ( this->shMode == B3_AverageShrinkage ) {
         if ( mode == 0 ) { // default mode
-            IR_GIVE_FIELD(ir, alpha1, IFT_B3Material_alpha1, "alpha1"); // shrinkage parameter
-            IR_GIVE_FIELD(ir, alpha2, IFT_B3Material_alpha2, "alpha2"); // shrinkage parameter
-            IR_GIVE_FIELD(ir, ks, IFT_B3Material_ks, "ks"); //cross section shape factor
+            IR_GIVE_FIELD(ir, alpha1, _IFT_B3Material_alpha1); // shrinkage parameter
+            IR_GIVE_FIELD(ir, alpha2, _IFT_B3Material_alpha2); // shrinkage parameter
+            IR_GIVE_FIELD(ir, ks, _IFT_B3Material_ks); //cross section shape factor
             /*
              * use ks = 1.0 for an infinite slab
              * = 1.15 for an infinite cylinder
@@ -97,19 +97,19 @@ B3Material :: initializeFrom(InputRecord *ir)
              * = 1.30 for a sphere
              * = 1.55 for a cube
              */
-            IR_GIVE_FIELD(ir, hum, IFT_B3Material_hum, "hum"); // relative humidity of the environment
-            IR_GIVE_FIELD(ir, vs, IFT_B3Material_vs, "vs"); // volume to surface ratio (in m)
+            IR_GIVE_FIELD(ir, hum, _IFT_B3Material_hum); // relative humidity of the environment
+            IR_GIVE_FIELD(ir, vs, _IFT_B3Material_vs); // volume to surface ratio (in m)
         } else { // read raw params
-            IR_GIVE_FIELD(ir, kt, IFT_B3Material_kt, "kt"); // shrinkage parameter
-            IR_GIVE_FIELD(ir, EpsSinf, IFT_B3Material_EpsSinf, "EpsSinf"); // shrinkage parameter
-            IR_GIVE_FIELD(ir, q5, IFT_B3Material_q5, "q5"); // shrinkage parameter
-            IR_GIVE_FIELD(ir, vs, IFT_B3Material_vs, "vs"); // volume to surface ratio (in m)
-            IR_GIVE_FIELD(ir, ks, IFT_B3Material_ks, "ks"); //cross section shape factor
-            IR_GIVE_FIELD(ir, hum, IFT_B3Material_hum, "hum"); // relative humidity of the environment
+            IR_GIVE_FIELD(ir, kt, _IFT_B3Material_kt); // shrinkage parameter
+            IR_GIVE_FIELD(ir, EpsSinf, _IFT_B3Material_EpsSinf); // shrinkage parameter
+            IR_GIVE_FIELD(ir, q5, _IFT_B3Material_q5); // shrinkage parameter
+            IR_GIVE_FIELD(ir, vs, _IFT_B3Material_vs); // volume to surface ratio (in m)
+            IR_GIVE_FIELD(ir, ks, _IFT_B3Material_ks); //cross section shape factor
+            IR_GIVE_FIELD(ir, hum, _IFT_B3Material_hum); // relative humidity of the environment
         }
     }
 
-    IR_GIVE_FIELD(ir, talpha, IFT_B3Material_talpha, "talpha");
+    IR_GIVE_FIELD(ir, talpha, _IFT_B3Material_talpha);
 
 
     w = wc * c;

@@ -86,13 +86,13 @@ AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
 
     NonLinearStatic :: initializeFrom(ir);
     int meshPackageId = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, meshPackageId, IFT_AdaptiveNonLinearStatic_meshpackage, "meshpackage");
+    IR_GIVE_OPTIONAL_FIELD(ir, meshPackageId, _IFT_AdaptiveNonLinearStatic_meshpackage);
     meshPackage = ( MeshPackageType ) meshPackageId;
 
     equilibrateMappedConfigurationFlag =  0;
-    IR_GIVE_OPTIONAL_FIELD(ir, equilibrateMappedConfigurationFlag, IFT_AdaptiveNonLinearStatic_equilmc, "equilmc");
+    IR_GIVE_OPTIONAL_FIELD(ir, equilibrateMappedConfigurationFlag, _IFT_AdaptiveNonLinearStatic_equilmc);
     _val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_AdaptiveNonLinearStatic_preMappingLoadBalancingFlag, "premaplbflag");
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_AdaptiveNonLinearStatic_preMappingLoadBalancingFlag);
     preMappingLoadBalancingFlag = _val;
 
     return IRRT_OK;
@@ -179,15 +179,16 @@ AdaptiveNonLinearStatic :: updateYourself(TimeStep *atTime)
 
 
 
-double AdaptiveNonLinearStatic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
-                                                        TimeStep *tStep, Domain *d, Dof *dof)
+double AdaptiveNonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
+#if DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
+#endif
 
     if ( tStep != this->giveCurrentStep() ) {
         _error("giveUnknownComponent: unknown time step encountered");
@@ -195,31 +196,26 @@ double AdaptiveNonLinearStatic ::  giveUnknownComponent(EquationID chc, ValueMod
     }
 
     if ( d->giveNumber() == 2 ) {
-        if ( chc == EID_MomentumBalance ) {
-            switch ( mode ) {
-            case VM_Incremental:
-                if ( d2_incrementOfDisplacement.isNotEmpty() ) {
-                    return d2_incrementOfDisplacement.at(eq);
-                } else {
-                    return 0.;
-                }
-
-            case VM_Total:
-                if ( d2_totalDisplacement.isNotEmpty() ) {
-                    return d2_totalDisplacement.at(eq);
-                } else {
-                    return 0.;
-                }
-
-            default:
-                _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
+        switch ( mode ) {
+        case VM_Incremental:
+            if ( d2_incrementOfDisplacement.isNotEmpty() ) {
+                return d2_incrementOfDisplacement.at(eq);
+            } else {
+                return 0.;
             }
-        } else {
-            _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-            return 0.;
+
+        case VM_Total:
+            if ( d2_totalDisplacement.isNotEmpty() ) {
+                return d2_totalDisplacement.at(eq);
+            } else {
+                return 0.;
+            }
+
+        default:
+            _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
         }
     } else {
-        return NonLinearStatic :: giveUnknownComponent(chc, mode, tStep, d, dof);
+        return NonLinearStatic :: giveUnknownComponent(mode, tStep, d, dof);
     }
 
     return 0.0;
@@ -248,15 +244,15 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
     // map primary unknowns
     EIPrimaryUnknownMapper mapper;
 
-    totalDisplacement.resize( this->giveNumberOfDomainEquations(1, EID_MomentumBalance) );
-    incrementOfDisplacement.resize( this->giveNumberOfDomainEquations(1, EID_MomentumBalance) );
+    totalDisplacement.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
+    incrementOfDisplacement.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     totalDisplacement.zero();
     incrementOfDisplacement.zero();
 
-    result &= mapper.mapAndUpdate( totalDisplacement, VM_Total, EID_MomentumBalance,
+    result &= mapper.mapAndUpdate( totalDisplacement, VM_Total,
                                   sourceProblem->giveDomain(1), this->giveDomain(1), sourceProblem->giveCurrentStep() );
 
-    result &= mapper.mapAndUpdate( incrementOfDisplacement, VM_Incremental, EID_MomentumBalance,
+    result &= mapper.mapAndUpdate( incrementOfDisplacement, VM_Incremental,
                                   sourceProblem->giveDomain(1), this->giveDomain(1), sourceProblem->giveCurrentStep() );
 
     timer.stopTimer();
@@ -474,15 +470,15 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     // map primary unknowns
     EIPrimaryUnknownMapper mapper;
 
-    d2_totalDisplacement.resize( this->giveNumberOfDomainEquations(2, EID_MomentumBalance) );
-    d2_incrementOfDisplacement.resize( this->giveNumberOfDomainEquations(2, EID_MomentumBalance) );
+    d2_totalDisplacement.resize( this->giveNumberOfDomainEquations(2, EModelDefaultEquationNumbering()) );
+    d2_incrementOfDisplacement.resize( this->giveNumberOfDomainEquations(2, EModelDefaultEquationNumbering()) );
     d2_totalDisplacement.zero();
     d2_incrementOfDisplacement.zero();
 
-    result &= mapper.mapAndUpdate( d2_totalDisplacement, VM_Total, EID_MomentumBalance,
+    result &= mapper.mapAndUpdate( d2_totalDisplacement, VM_Total,
                                   this->giveDomain(1), this->giveDomain(2), this->giveCurrentStep() );
 
-    result &= mapper.mapAndUpdate( d2_incrementOfDisplacement, VM_Incremental, EID_MomentumBalance,
+    result &= mapper.mapAndUpdate( d2_incrementOfDisplacement, VM_Incremental,
                                   this->giveDomain(1), this->giveDomain(2), this->giveCurrentStep() );
 
     timer.stopTimer();
@@ -804,7 +800,7 @@ AdaptiveNonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, 
         fclose(file);
         delete stream;
         stream = NULL;
-    }                                                       // ensure consistent records
+    } // ensure consistent records
 
     return CIO_OK;
 }
@@ -833,12 +829,12 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
     SparseNonLinearSystemNM :: referenceLoadInputModeType rlm;
     //Domain* sourceDomain = sourceProblem->giveDomain(domainIndx);
 
-    loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
-    loadVectorOfPrescribed.resize( this->giveNumberOfPrescribedEquations(EID_MomentumBalance) );
+    loadVector.resize( this->giveNumberOfDomainEquations(domainIndx, EModelDefaultEquationNumbering()) );
+    loadVectorOfPrescribed.resize( this->giveNumberOfDomainEquations(domainIndx, EModelDefaultPrescribedEquationNumbering()) );
     loadVector.zero();
     loadVectorOfPrescribed.zero();
-    _incrementalLoadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
-    _incrementalLoadVectorOfPrescribed.resize( this->giveNumberOfPrescribedEquations(EID_MomentumBalance) );
+    _incrementalLoadVector.resize( this->giveNumberOfDomainEquations(domainIndx, EModelDefaultEquationNumbering()) );
+    _incrementalLoadVectorOfPrescribed.resize( this->giveNumberOfDomainEquations(domainIndx, EModelDefaultPrescribedEquationNumbering()) );
     _incrementalLoadVector.zero();
     _incrementalLoadVectorOfPrescribed.zero();
 
@@ -859,10 +855,10 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
             // But there is NO WAY HOW TO TEST IF THIS HAPPEN
 
             mode = 0;
-            IR_GIVE_OPTIONAL_FIELD(ir, mode, IFT_AdaptiveNonLinearStatic_controlmode, "controlmode");
+            IR_GIVE_OPTIONAL_FIELD(ir, mode, _IFT_AdaptiveNonLinearStatic_controlmode);
 
             // check if displacement control takes place
-            if ( ir->hasField(IFT_AdaptiveNonLinearStatic_ddm, "ddm") ) {
+            if ( ir->hasField(_IFT_AdaptiveNonLinearStatic_ddm) ) {
                 _error("assembleInitialLoadVector: fixload recovery not supported for direct displacement control");
             }
 
@@ -870,7 +866,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
             int laststep  = iMStep->giveLastStepNumber();
 
             int _val = 0;
-            IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_AdaptiveNonLinearStatic_refloadmode, "refloadmode");
+            IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_AdaptiveNonLinearStatic_refloadmode);
             rlm = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
 
             if ( mode == ( int ) nls_directControl ) { // and only load control
@@ -887,7 +883,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
                 }
             } else if ( mode == ( int ) nls_indirectControl ) {
                 // bad practise here
-                if ( !ir->hasField(IFT_NonLinearStatic_donotfixload, "donotfixload") ) {
+                if ( !ir->hasField(_IFT_NonLinearStatic_donotfixload) ) {
                     TimeStep *old = new TimeStep(firststep, this, imstep, firststep - 1.0, deltaT, 0);
                     this->assembleIncrementalReferenceLoadVectors(_incrementalLoadVector, _incrementalLoadVectorOfPrescribed,
                                                                   rlm, this->giveDomain(domainIndx), EID_MomentumBalance, old);
@@ -906,11 +902,11 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
     iMStep = this->giveMetaStep(mstepNum);
     ir = iMStep->giveAttributesRecord();
     mode = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, mode, IFT_AdaptiveNonLinearStatic_controlmode, "controlmode");
+    IR_GIVE_OPTIONAL_FIELD(ir, mode, _IFT_AdaptiveNonLinearStatic_controlmode);
     int firststep = iMStep->giveFirstStepNumber();
     int laststep  = atTime->giveNumber();
     int _val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_AdaptiveNonLinearStatic_refloadmode, "refloadmode");
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_AdaptiveNonLinearStatic_refloadmode);
     rlm = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
 
     if ( mode == ( int ) nls_directControl ) { // and only load control
@@ -945,24 +941,24 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
  * SparseNonLinearSystemNM::referenceLoadInputModeType rlm;
  * //Domain* sourceDomain = sourceProblem->giveDomain(domainIndx);
  *
- * loadVector.resize(this->giveNumberOfEquations(EID_MomentumBalance));
- * loadVectorOfPrescribed.resize(this->giveNumberOfPrescribedEquations(EID_MomentumBalance));
+ * loadVector.resize(this->giveNumberOfDomainEquations(EID_MomentumBalance));
+ * loadVectorOfPrescribed.resize(this->giveNumberOfPrescribedDomainEquations(EID_MomentumBalance));
  * loadVector.zero(); loadVectorOfPrescribed.zero();
- * _incrementalLoadVector.resize(this->giveNumberOfEquations(EID_MomentumBalance));
- * _incrementalLoadVectorOfPrescribed.resize(this->giveNumberOfPrescribedEquations(EID_MomentumBalance));
+ * _incrementalLoadVector.resize(this->giveNumberOfDomainEquations(EID_MomentumBalance));
+ * _incrementalLoadVectorOfPrescribed.resize(this->giveNumberOfPrescribedDomainEquations(EID_MomentumBalance));
  * _incrementalLoadVector.zero(); _incrementalLoadVectorOfPrescribed.zero();
  *
  * // ASK CURRENT MSTEP FOR ITS RECORD
  * ir = mStep->giveAttributesRecord();
  *
  * mode = 0;
- * IR_GIVE_OPTIONAL_FIELD (ir, mode, IFT_AdaptiveNonLinearStatic_controlmode, "controlmode");
+ * IR_GIVE_OPTIONAL_FIELD (ir, mode, _IFT_AdaptiveNonLinearStatic_controlmode, "controlmode");
  *
  * // check if displacement control takes place
- * if (ir->hasField(IFT_AdaptiveNonLinearStatic_ddm, "ddm"))
+ * if (ir->hasField(_IFT_AdaptiveNonLinearStatic_ddm, "ddm"))
  * _error ("assembleCurrentTotalLoadVector: fixload recovery not supported for direct displacement control");
  * int _val = 0;
- * IR_GIVE_OPTIONAL_FIELD (ir, _val, IFT_AdaptiveNonLinearStatic_refloadmode, "refloadmode");
+ * IR_GIVE_OPTIONAL_FIELD (ir, _val, _IFT_AdaptiveNonLinearStatic_refloadmode, "refloadmode");
  *
  * int firststep = mStep->giveFirstStepNumber();
  * int laststep  = atTime->giveNumber()-1;

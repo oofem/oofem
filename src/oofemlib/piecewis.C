@@ -124,11 +124,11 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
     LoadTimeFunction :: initializeFrom(ir);
 
     // Optional means, read data from external file (useful for very large sets of data)
-    if ( ir->hasField( IFT_PiecewiseLinFunction_dataFile, "datafile") ) {
+    if ( ir->hasField( _IFT_PiecewiseLinFunction_dataFile) ) {
         std::list< double > t, ft;
         // Open the file;
         std::string fname;
-        IR_GIVE_FIELD(ir, fname, IFT_PiecewiseLinFunction_dataFile, "datafile");
+        IR_GIVE_FIELD(ir, fname, _IFT_PiecewiseLinFunction_dataFile);
         std::ifstream file (fname.c_str(), std::ios::in);
         if ( !file.is_open() ) OOFEM_ERROR2("PieceWiseLinFunction :: initializeFrom - Failed to open data file: %s\n", fname.c_str());
         // Data should be stored in two columns (or just interleaved)
@@ -155,9 +155,9 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
         }
     } else {
         int numberOfPoints;
-        IR_GIVE_FIELD(ir, numberOfPoints, IFT_PiecewiseLinFunction_npoints, "npoints");
-        IR_GIVE_FIELD(ir, dates, IFT_PiecewiseLinFunction_t, "t");
-        IR_GIVE_FIELD(ir, values, IFT_PiecewiseLinFunction_ft, "f(t)");
+        IR_GIVE_FIELD(ir, numberOfPoints, _IFT_PiecewiseLinFunction_npoints);
+        IR_GIVE_FIELD(ir, dates, _IFT_PiecewiseLinFunction_t);
+        IR_GIVE_FIELD(ir, values, _IFT_PiecewiseLinFunction_ft);
     }
 
     return IRRT_OK;

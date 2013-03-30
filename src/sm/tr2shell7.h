@@ -41,6 +41,7 @@
 #include "nlstructuralelement.h"
 #include "shell7base.h"
 //#include "vtkxmlexportmodule.h"
+
 namespace oofem {
 class FEI3dTrQuad;
 class BoundaryLoad;

@@ -59,6 +59,7 @@ class DofManager;
 class PetscContext
 {
 protected:
+    int di;
     EngngModel *emodel;
     EquationID ut;
     VecScatter n2gvecscat;

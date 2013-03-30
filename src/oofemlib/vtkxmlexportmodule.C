@@ -90,20 +90,20 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
 
     ExportModule :: initializeFrom(ir);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, IFT_VTKXMLExportModule_cellvars, "cellvars"); // Macro - see internalstatetype.h
-    IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, IFT_VTKXMLExportModule_vars, "vars"); // Macro - see internalstatetype.h
-    IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, IFT_VTKXMLExportModule_primvars, "primvars"); // Macro - see unknowntype.h
+    IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, _IFT_VTKXMLExportModule_cellvars); // Macro - see internalstatetype.h
+    IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, _IFT_VTKXMLExportModule_vars); // Macro - see internalstatetype.h
+    IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, _IFT_VTKXMLExportModule_primvars); // Macro - see unknowntype.h
 
     val = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_VTKXMLExportModule_stype, "stype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_VTKXMLExportModule_stype); // Macro
     stype = ( NodalRecoveryModel::NodalRecoveryModelType ) val;
 
     regionsToSkip.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, regionsToSkip, IFT_VTKXMLExportModule_regionstoskip, "regionstoskip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, regionsToSkip, _IFT_VTKXMLExportModule_regionstoskip); // Macro
 
     this->nvr = 0; // number of virtual regions
-    IR_GIVE_OPTIONAL_FIELD(ir, nvr, IFT_VTKXMLExportModule_nvr, "nvr"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, vrmap, IFT_VTKXMLExportModule_vrmap, "vrmap"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, nvr, _IFT_VTKXMLExportModule_nvr); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, vrmap, _IFT_VTKXMLExportModule_vrmap); // Macro
 
     return IRRT_OK;
 }
@@ -840,7 +840,7 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
             iVal.resize(3);
             val = & iVal;
             for ( j = 1; j <= 3; j++ ) {
-                iVal.at(j) = d->giveNode( mapL2G.at(inode) )->giveUpdatedCoordinate(j, tStep, EID_MomentumBalance, 1.0) -
+                iVal.at(j) = d->giveNode( mapL2G.at(inode) )->giveUpdatedCoordinate(j, tStep, 1.0) -
                              d->giveNode( mapL2G.at(inode) )->giveCoordinate(j);
             }
         } else if ( valID == IST_MaterialInterfaceVal ) {
@@ -1143,7 +1143,7 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
             answer.at(j) = 0.;
         } else if ( iState == IST_DirectorField ) {
             indx = dman->findDofWithDofId( (DofIDItem)dofIDMask.at(j) );
-            answer.at(j) = dman->giveDof(indx)->giveUnknown(eid, VM_Total, tStep);
+            answer.at(j) = dman->giveDof(indx)->giveUnknown(VM_Total, tStep);
             
             this->givePrimVarSmoother()->recoverValues(iState, tStep); // recover values if not done before
             this->givePrimVarSmoother()->giveNodalVector(recoveredVal, dman->giveNumber(), ireg);
@@ -1155,7 +1155,7 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
             }
         } else if ( ( indx = dman->findDofWithDofId( id ) ) ) {
             // primary variable available directly in DOF-manager
-            answer.at(j) = dman->giveDof(indx)->giveUnknown(eid, VM_Total, tStep);
+            answer.at(j) = dman->giveDof(indx)->giveUnknown(VM_Total, tStep);
         } else if ( iState != IST_Undefined ) {
             // primary variable not directly available
             // but equivalent InternalStateType provided
@@ -1275,7 +1275,7 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region,
             } else if (type == IST_Pressure) { ///@todo Why this special treatment for pressure? / Mikael
                 if (elem->giveNumberOfInternalDofManagers() == 1) {
                     IntArray pmask(1); pmask.at(1) = P_f;
-                    elem->giveInternalDofManager(1)->giveUnknownVector (answer, pmask,EID_ConservationEquation, VM_Total, tStep);
+                    //elem->giveInternalDofManager(1)->giveUnknownVector (answer, pmask,EID_ConservationEquation, VM_Total, tStep);
 #ifdef __VTK_MODULE
                     cellVarsArray->SetTuple1(ielem-1,  answer.at(1) ); // Should be integer..
 #else

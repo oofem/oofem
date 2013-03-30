@@ -122,21 +122,21 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
 
     StructuralEngngModel :: initializeFrom(ir);
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_DIIDynamic_ddtScheme, "ddtscheme");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_DIIDynamic_ddtScheme);
 
     eta = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, eta, IFT_DIIDynamic_eta, "eta");
+    IR_GIVE_OPTIONAL_FIELD(ir, eta, _IFT_DIIDynamic_eta);
 
     delta = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, delta, IFT_DIIDynamic_delta, "delta");
+    IR_GIVE_OPTIONAL_FIELD(ir, delta, _IFT_DIIDynamic_delta);
 
     initialTimeDiscretization = ( TimeDiscretizationType ) val;
 
@@ -144,15 +144,15 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
     theta = 1.37; // Default Wilson parameter.
     if ( initialTimeDiscretization == TD_Newmark ) {
         OOFEM_LOG_INFO( "Selecting Newmark-beta metod\n" );
-        IR_GIVE_OPTIONAL_FIELD(ir, gamma, IFT_DIIDynamic_gamma, "gamma");
-        IR_GIVE_OPTIONAL_FIELD(ir, beta, IFT_DIIDynamic_beta, "beta");
+        IR_GIVE_OPTIONAL_FIELD(ir, gamma, _IFT_DIIDynamic_gamma);
+        IR_GIVE_OPTIONAL_FIELD(ir, beta, _IFT_DIIDynamic_beta);
     } else if ( initialTimeDiscretization == TD_TwoPointBackward ) {
         OOFEM_LOG_INFO( "Selecting Two-point Backward Euler method\n" );
     } else if ( initialTimeDiscretization == TD_ThreePointBackward ) {
         OOFEM_LOG_INFO( "Selecting Three-point Backward Euler metod\n" );
     } else if ( initialTimeDiscretization == TD_Wilson ) {
         OOFEM_LOG_INFO( "Selecting Wilson-theta metod\n" );
-        IR_GIVE_OPTIONAL_FIELD(ir, theta, IFT_DIIDynamic_theta, "theta");
+        IR_GIVE_OPTIONAL_FIELD(ir, theta, _IFT_DIIDynamic_theta);
         if ( theta < 1.37 ) {
             OOFEM_LOG_WARNING("Found theta < 1.37. Performing correction, theta = 1.37");
             theta = 1.37;
@@ -161,29 +161,25 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
         _error("NonLinearDynamic: Time-stepping scheme not found!\n");
     }
 
-    IR_GIVE_FIELD(ir, deltaT, IFT_DIIDynamic_deltat, "deltat");
+    IR_GIVE_FIELD(ir, deltaT, _IFT_DIIDynamic_deltat);
 
     return IRRT_OK;
 }
 
 
-double DIIDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
-                                           TimeStep *tStep, Domain *d, Dof *dof)
+double DIIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 // Returns unknown quantity displacement, velocity or acceleration of equation eq.
 // This function translates this request to numerical method language.
 {
     int eq = dof->__giveEquationNumber();
+#if DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
+#endif
 
     if ( tStep != this->giveCurrentStep() ) {
         _error("giveUnknownComponent: unknown time step encountered");
-        return 0.;
-    }
-
-    if ( chc != EID_MomentumBalance ) {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
         return 0.;
     }
 
@@ -236,12 +232,13 @@ void DIIDynamic :: solveYourself()
     StructuralEngngModel :: solveYourself();
 }
 
-void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
+void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
+{
     // Determine the constants.
     this->determineConstants(tStep);
 
     Domain *domain = this->giveDomain(1);
-    int neq =  this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq =  this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 
     if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
         TimeStep *stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
@@ -280,9 +277,9 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
 
                 jj = iDof->__giveEquationNumber();
                 if ( jj ) {
-                    displacementVector.at(jj) = iDof->giveUnknown(EID_MomentumBalance, VM_Total, stepWhenIcApply);
-                    velocityVector.at(jj)     = iDof->giveUnknown(EID_MomentumBalance, VM_Velocity, stepWhenIcApply);
-                    accelerationVector.at(jj) = iDof->giveUnknown(EID_MomentumBalance, VM_Acceleration, stepWhenIcApply);
+                    displacementVector.at(jj) = iDof->giveUnknown(VM_Total, stepWhenIcApply);
+                    velocityVector.at(jj)     = iDof->giveUnknown(VM_Velocity, stepWhenIcApply);
+                    accelerationVector.at(jj) = iDof->giveUnknown(VM_Acceleration, stepWhenIcApply);
                 }
             }
         }
@@ -455,7 +452,7 @@ DIIDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
 
 void DIIDynamic :: updateYourself(TimeStep *tStep)
 {
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 
     for ( int i = 1; i <= neq; i++ ) {
         previousIncrementOfDisplacement.at(i) = displacementVector.at(i) - previousDisplacementVector.at(i);
@@ -477,7 +474,7 @@ DIIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
         VM_Total, VM_Velocity, VM_Acceleration
     };
 
-    iDof->printMultipleOutputAt(stream, atTime, dofchar, EID_MomentumBalance, dofmodes, 3);
+    iDof->printMultipleOutputAt(stream, atTime, dofchar, dofmodes, 3);
 }
 
 
@@ -485,7 +482,7 @@ void
 DIIDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type, Domain *domain, TimeStep *tStep)
 {
     int nelem = domain->giveNumberOfElements();
-    int neq   = this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq   = this->giveNumberOfDomainEquations(domain->giveNumber(), EModelDefaultEquationNumbering());
     int i, j, k, jj, kk, n;
     FloatMatrix charMtrx;
     IntArray loc;
@@ -534,7 +531,7 @@ DIIDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type, Doma
 void
 DIIDynamic :: assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueModeType mode, TimeStep *tStep)
 {
-    _loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
+    _loadVector.resize( this->giveNumberOfDomainEquations(domain->giveNumber(), EModelDefaultEquationNumbering()) );
     _loadVector.zero();
 
     this->assembleVector( _loadVector, tStep, EID_MomentumBalance, ExternalForcesVector, mode,

@@ -136,19 +136,19 @@ TR1_2D_SUPG2 :: initializeFrom(InputRecord *ir)
     this->SUPGElement :: initializeFrom(ir);
 
     this->vof = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, vof, IFT_Tr1SUPG_pvof, "pvof");
+    IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1SUPG_pvof);
     if ( vof > 0.0 ) {
         setPermanentVolumeFraction(vof);
         this->temp_vof = this->vof;
     } else {
         this->vof = 0.0;
-        IR_GIVE_OPTIONAL_FIELD(ir, vof, IFT_Tr1SUPG_vof, "vof");
+        IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1SUPG_vof);
         this->temp_vof = this->vof;
     }
 
     this->mat [ 0 ] = this->mat [ 1 ] = this->material;
-    IR_GIVE_OPTIONAL_FIELD(ir, mat [ 0 ], IFT_Tr1SUPG2_mat0, "mat0");
-    IR_GIVE_OPTIONAL_FIELD(ir, mat [ 1 ], IFT_Tr1SUPG2_mat1, "mat1");
+    IR_GIVE_OPTIONAL_FIELD(ir, mat [ 0 ], _IFT_Tr1SUPG2_mat0);
+    IR_GIVE_OPTIONAL_FIELD(ir, mat [ 1 ], _IFT_Tr1SUPG2_mat1);
     this->material = this->mat [ 0 ];
 
     return IRRT_OK;

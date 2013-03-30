@@ -229,8 +229,8 @@ void Line2SurfaceTension :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLoca
     answer.resize(2);
     answer.zero();
     for (int i = 1; i <= n.giveSize(); i++) {
-        answer(0) += n.at(i)*this->giveNode(i)->giveDofWithID(V_u)->giveUnknown(EID_MomentumBalance, mode, tStep);
-        answer(1) += n.at(i)*this->giveNode(i)->giveDofWithID(V_v)->giveUnknown(EID_MomentumBalance, mode, tStep);
+        answer(0) += n.at(i)*this->giveNode(i)->giveDofWithID(V_u)->giveUnknown(mode, tStep);
+        answer(1) += n.at(i)*this->giveNode(i)->giveDofWithID(V_v)->giveUnknown(mode, tStep);
     }
 }
 

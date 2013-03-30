@@ -56,7 +56,7 @@ StaticFracture :: solveYourselfAt(TimeStep *tStep)
     }
     
     // Initialization
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
     if ( totalDisplacement.giveSize() != neq ) {
         totalDisplacement.resize(neq);
         totalDisplacement.zero();
@@ -122,7 +122,7 @@ StaticFracture :: updateLoadVectors(TimeStep *stepN)
     if ( controlMode == nls_indirectControl ) { //todo@: not checked 
         //if ((stepN->giveNumber() == mstep->giveLastStepNumber()) && ir->hasField("fixload")) {
         if ( isLastMetaStep ) {
-            if ( !mstep->giveAttributesRecord()->hasField(IFT_NonLinearStatic_donotfixload, "donotfixload") ) {
+            if ( !mstep->giveAttributesRecord()->hasField(_IFT_NonLinearStatic_donotfixload) ) {
                 OOFEM_LOG_INFO("Fixed load level\n");
 
                 //update initialLoadVector
@@ -172,7 +172,7 @@ StaticFracture :: updateLoadVectors(TimeStep *stepN)
 
 
     // if (isLastMetaStep) {
-    if ( isLastMetaStep && !mstep->giveAttributesRecord()->hasField(IFT_NonLinearStatic_donotfixload, "donotfixload") ) {
+    if ( isLastMetaStep && !mstep->giveAttributesRecord()->hasField(_IFT_NonLinearStatic_donotfixload) ) {
 #ifdef VERBOSE
         OOFEM_LOG_INFO("Reseting load level\n");
 #endif
@@ -196,7 +196,7 @@ StaticFracture ::  giveUnknownComponent(EquationID type, ValueModeType mode, Tim
 {
     // Returns the unknown quantity corresponding to the dof
     if ( this->requiresUnknownsDictionaryUpdate() ) {
-        int hash = this->giveUnknownDictHashIndx(type, mode, tStep);
+        int hash = this->giveUnknownDictHashIndx(mode, tStep);
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
         } else { // Value is not initiated in UnknownsDictionary
@@ -204,7 +204,7 @@ StaticFracture ::  giveUnknownComponent(EquationID type, ValueModeType mode, Tim
             //OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
         }
     } else {
-        return NonLinearStatic ::  giveUnknownComponent(type, mode, tStep, d, dof);
+        return NonLinearStatic ::  giveUnknownComponent(mode, tStep, d, dof);
     }
     
 }
@@ -228,7 +228,7 @@ StaticFracture :: initializeDofUnknownsDictionary(TimeStep *tStep)
             nDofs = node->giveNumberOfDofs();
             for ( int i = 1; i <= nDofs; i++ ) {
                 iDof = node->giveDof(i);
-                iDof->updateUnknownsDictionary(tStep->givePreviousStep(), EID_MomentumBalance, VM_Total, 0.0);
+                iDof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, 0.0);
             }
         }
     }
@@ -256,7 +256,7 @@ StaticFracture :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep
             }
         }
 
-        iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Total, val);
+        iDof->updateUnknownsDictionary(tStep, VM_Total, val);
     }
 }
 
@@ -278,7 +278,7 @@ StaticFracture :: setTotalDisplacementFromUnknownsInDictionary(EquationID type, 
                 iDof = inode->giveDof(i);
                 eqNum = iDof->giveEqn();
                 if ( eqNum > 0 ) {
-                    double val = iDof->giveUnknown(type, mode, tStep);
+                    double val = iDof->giveUnknown(mode, tStep);
                     totalDisplacement.at(eqNum) = val;
                 }
             }

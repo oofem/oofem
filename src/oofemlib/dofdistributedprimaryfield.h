@@ -63,7 +63,7 @@ public:
     DofDistributedPrimaryField(EngngModel *a, int idomain, FieldType ft, EquationID ut, int nHist);
     virtual ~DofDistributedPrimaryField();
 
-    virtual void initialize(ValueModeType mode, TimeStep *atTime, FloatArray &answer);
+    virtual void initialize(ValueModeType mode, TimeStep *atTime, FloatArray &answer, const UnknownNumberingScheme &s);
 
     virtual double giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *atTime);
 

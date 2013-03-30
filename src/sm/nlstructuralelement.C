@@ -612,7 +612,7 @@ NLStructuralElement :: initializeFrom(InputRecord *ir)
     this->StructuralElement :: initializeFrom(ir);
 
     nlGeometry = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, nlGeometry, IFT_NLStructuralElement_nlgeoflag, "nlgeo");
+    IR_GIVE_OPTIONAL_FIELD(ir, nlGeometry, _IFT_NLStructuralElement_nlgeoflag);
 
     return IRRT_OK;
 }

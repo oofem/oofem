@@ -371,7 +371,7 @@ int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
      *
      * return true;
      */
-    int neq = eModel->giveNumberOfDomainEquations(di, ut);
+    int neq = eModel->giveNumberOfDomainEquations(di, s);
 
 #ifndef DynCompCol_USE_STL_SETS
     IntArray loc;

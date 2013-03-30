@@ -66,6 +66,7 @@ PetscContext :: ~PetscContext()
 void
 PetscContext :: init(int di)
 {
+    this->di = di;
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
         n2g.init(emodel, ut, di);
@@ -96,7 +97,7 @@ PetscContext :: giveNumberOfLocalEqs()
         return n2g.giveNumberOfLocalEqs();
     } else {
 #endif
-    return emodel->giveNumberOfEquations(ut);
+    return emodel->giveNumberOfDomainEquations(di, EModelDefaultEquationNumbering());
 
 #ifdef __PARALLEL_MODE
 }
@@ -112,7 +113,7 @@ PetscContext :: giveNumberOfGlobalEqs()
         return n2g.giveNumberOfGlobalEqs();
     } else {
 #endif
-    return emodel->giveNumberOfEquations(ut);
+    return emodel->giveNumberOfDomainEquations(di, EModelDefaultEquationNumbering());
 
 #ifdef __PARALLEL_MODE
 }
@@ -122,7 +123,7 @@ PetscContext :: giveNumberOfGlobalEqs()
 int
 PetscContext :: giveNumberOfNaturalEqs()
 {
-    return emodel->giveNumberOfEquations(ut);
+    return emodel->giveNumberOfDomainEquations(di, EModelDefaultEquationNumbering());
 }
 
 
@@ -170,7 +171,6 @@ int
 PetscContext :: scatterG2N(Vec src, FloatArray *dest, InsertMode mode)
 {
     PetscScalar *ptr;
-    int i;
 
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
@@ -182,7 +182,7 @@ PetscContext :: scatterG2N(Vec src, FloatArray *dest, InsertMode mode)
 
         dest->resize( giveNumberOfNaturalEqs() );
         VecGetArray(natVec, & ptr);
-        for ( i = 0; i < neqs; i++ ) {
+        for ( int i = 0; i < neqs; i++ ) {
             dest->at(i + 1) = ptr [ i ];
         }
 
@@ -193,7 +193,7 @@ PetscContext :: scatterG2N(Vec src, FloatArray *dest, InsertMode mode)
     int neqs = giveNumberOfNaturalEqs();
     dest->resize(neqs);
     VecGetArray(src, & ptr);
-    for ( i = 0; i < neqs; i++ ) {
+    for ( int i = 0; i < neqs; i++ ) {
         dest->at(i + 1) = ptr [ i ];
     }
 

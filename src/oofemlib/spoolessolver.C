@@ -123,9 +123,9 @@ SpoolesSolver :: initializeFrom(InputRecord *ir)
     std::string msgFileName;
 
     val = -3;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_SpoolesSolver_msglvl, "msglvl");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_SpoolesSolver_msglvl, "msglvl");
     msglvl = val;
-    IR_GIVE_OPTIONAL_FIELD(ir, msgFileName, IFT_SpoolesSolver_msgfile, "msgfile");
+    IR_GIVE_OPTIONAL_FIELD(ir, msgFileName, _IFT_SpoolesSolver_msgfile, "msgfile");
     if ( !msgFileName.empty() ) {
         msgFile = fopen(msgFileName.c_str(), "w");
         msgFileCloseFlag = 1;

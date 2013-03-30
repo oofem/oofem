@@ -92,31 +92,31 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
 
     EngngModel :: initializeFrom(ir);
 
-    if ( ir->hasField(IFT_NonStationaryTransportProblem_initt, "initt") ) {
-        IR_GIVE_FIELD(ir, initT, IFT_NonStationaryTransportProblem_initt, "initt");
+    if ( ir->hasField(_IFT_NonStationaryTransportProblem_initt) ) {
+        IR_GIVE_FIELD(ir, initT, _IFT_NonStationaryTransportProblem_initt);
     }
 
-    if ( ir->hasField(IFT_NonStationaryTransportProblem_deltat, "deltat") ) {
-        IR_GIVE_FIELD(ir, deltaT, IFT_NonStationaryTransportProblem_deltat, "deltat");
-    } else if ( ir->hasField(IFT_NonStationaryTransportProblem_deltatfunction, "deltatfunction") ) {
-        IR_GIVE_FIELD(ir, dtTimeFunction, IFT_NonStationaryTransportProblem_deltatfunction, "deltatfunction");
-    } else if ( ir->hasField(IFT_NonStationaryTransportProblem_prescribedtimes, "prescribedtimes") ) {
-        IR_GIVE_FIELD(ir, discreteTimes, IFT_NonStationaryTransportProblem_prescribedtimes, "prescribedtimes");
+    if ( ir->hasField(_IFT_NonStationaryTransportProblem_deltat) ) {
+        IR_GIVE_FIELD(ir, deltaT, _IFT_NonStationaryTransportProblem_deltat);
+    } else if ( ir->hasField(_IFT_NonStationaryTransportProblem_deltatfunction) ) {
+        IR_GIVE_FIELD(ir, dtTimeFunction, _IFT_NonStationaryTransportProblem_deltatfunction);
+    } else if ( ir->hasField(_IFT_NonStationaryTransportProblem_prescribedtimes) ) {
+        IR_GIVE_FIELD(ir, discreteTimes, _IFT_NonStationaryTransportProblem_prescribedtimes);
     } else {
         OOFEM_ERROR("Time step not defined");
     }
 
-    IR_GIVE_FIELD(ir, alpha, IFT_NonStationaryTransportProblem_alpha, "alpha");
+    IR_GIVE_FIELD(ir, alpha, _IFT_NonStationaryTransportProblem_alpha);
     /* The following done in updateAttributes
      * if (this->giveNumericalMethod (giveCurrentStep())) nMethod -> instanciateFrom (ir);
      */
     // read lumped capacity stabilization flag
-    if ( ir->hasField(IFT_NonStationaryTransportProblem_lumpedcapa, "lumpedcapa") ) {
+    if ( ir->hasField(_IFT_NonStationaryTransportProblem_lumpedcapa) ) {
         lumpedCapacityStab = 1;
     }
 
     //secure equation renumbering, otherwise keep efficient algorithms
-    if ( ir->hasField(IFT_NonStationaryTransportProblem_changingproblemsize, "changingproblemsize") ) {
+    if ( ir->hasField(_IFT_NonStationaryTransportProblem_changingproblemsize) ) {
         changingProblemSize = true;
         UnknownsField = new DofDistributedPrimaryField(this, 1, FT_TransportProblemUnknowns, EID_ConservationEquation, 1);
     } else {
@@ -130,17 +130,12 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
 }
 
 
-double NonStationaryTransportProblem :: giveUnknownComponent(EquationID type, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
+double NonStationaryTransportProblem :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
-    if ( type != EID_ConservationEquation ) { // heat and mass concetration vector
-        OOFEM_ERROR2( "giveUnknownComponent: EquationID %s is undefined for this problem", __EquationIDToString(type) );
-        return 0.;
-    }
-
     if ( this->requiresUnknownsDictionaryUpdate() ) {
-        int hash = this->giveUnknownDictHashIndx(type, mode, tStep);
+        int hash = this->giveUnknownDictHashIndx(mode, tStep);
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
         } else {
@@ -246,7 +241,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     //Right hand side
     FloatArray rhs;
 
-    int neq = this->giveNumberOfEquations(EID_ConservationEquation);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 #ifdef VERBOSE
     OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
@@ -302,7 +297,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
     //obtain the last Rhs vector from DoFs directly
     if ( !tStep->isTheFirstStep() && this->changingProblemSize ) {
-        UnknownsField->initialize(VM_RhsTotal, tStep, bcRhs);
+        UnknownsField->initialize(VM_RhsTotal, tStep, bcRhs, EModelDefaultEquationNumbering());
     }
 
     //prepare position in UnknownsField to store the results
@@ -531,7 +526,7 @@ NonStationaryTransportProblem :: updateDomainLinks()
 }
 
 int
-NonStationaryTransportProblem :: giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN)
+NonStationaryTransportProblem :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN)
 {
     if ( mode == VM_Total ) { //Nodal temperature
         return 0;
@@ -634,14 +629,14 @@ NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer
 void
 NonStationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
-    iDof->printSingleOutputAt(stream, atTime, 'f', EID_ConservationEquation, VM_Total);
+    iDof->printSingleOutputAt(stream, atTime, 'f', VM_Total);
 }
 
 void
 NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 {
     Domain *domain = this->giveDomain(1);
-    int neq =  this->giveNumberOfEquations(EID_ConservationEquation);
+    int neq =  this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
     FloatArray *solutionVector;
     double val;
 
@@ -670,11 +665,11 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 
             jj = iDof->__giveEquationNumber();
             if ( jj ) {
-                val = iDof->giveUnknown(EID_ConservationEquation, VM_Total, stepWhenIcApply);
+                val = iDof->giveUnknown(VM_Total, stepWhenIcApply);
                 solutionVector->at(jj) = val;
                 //update in dictionary, if the problem is growing/decreasing
                 if ( this->changingProblemSize ) {
-                    iDof->updateUnknownsDictionary(stepWhenIcApply, EID_MomentumBalance, VM_Total, val);
+                    iDof->updateUnknownsDictionary(stepWhenIcApply, VM_Total, val);
                 }
             }
         }

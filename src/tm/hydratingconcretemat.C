@@ -62,9 +62,9 @@ HydratingConcreteMat :: initializeFrom(InputRecord *ir)
     IsotropicHeatTransferMaterial :: initializeFrom(ir);
 
     referenceTemperature = 25.;
-    IR_GIVE_OPTIONAL_FIELD(ir, referenceTemperature, IFT_HydratingConcreteMat_referenceTemperature, "referencetemperature");
+    IR_GIVE_OPTIONAL_FIELD(ir, referenceTemperature, _IFT_HydratingConcreteMat_referenceTemperature);
 
-    IR_GIVE_FIELD(ir, hydrationModelType, IFT_HydratingConcreteMat_hydrationModelType, "hydrationmodeltype");
+    IR_GIVE_FIELD(ir, hydrationModelType, _IFT_HydratingConcreteMat_hydrationModelType);
 
     /*hydrationModelType==1:exponential hydration model, summarized in A.K. Schindler and K.J. Folliard: Heat of Hydration Models for Cementitious
      *  Materials, ACI Materials Journal, 2005
@@ -72,41 +72,41 @@ HydratingConcreteMat :: initializeFrom(InputRecord *ir)
      *  for concrete. I: Hydration and aging, Journal of Engineering Mechanics ASCE, 125(9), 1018-1027, 1999
      */
     if ( hydrationModelType == 1 ) {
-        IR_GIVE_FIELD(ir, tau, IFT_HydratingConcreteMat_tau, "tau"); // [s]
-        IR_GIVE_FIELD(ir, beta, IFT_HydratingConcreteMat_beta, "beta"); // [-]
-        IR_GIVE_FIELD(ir, DoHInf, IFT_HydratingConcreteMat_DoHInf, "dohinf");
+        IR_GIVE_FIELD(ir, tau, _IFT_HydratingConcreteMat_tau); // [s]
+        IR_GIVE_FIELD(ir, beta, _IFT_HydratingConcreteMat_beta); // [-]
+        IR_GIVE_FIELD(ir, DoHInf, _IFT_HydratingConcreteMat_DoHInf);
     } else if ( hydrationModelType == 2 ) {
-        IR_GIVE_FIELD(ir, B1, IFT_HydratingConcreteMat_B1, "b1"); // [1/s]
-        IR_GIVE_FIELD(ir, B2, IFT_HydratingConcreteMat_B2, "b2");
-        IR_GIVE_FIELD(ir, eta, IFT_HydratingConcreteMat_eta, "eta");
-        IR_GIVE_FIELD(ir, DoHInf, IFT_HydratingConcreteMat_DoHInf, "dohinf");
+        IR_GIVE_FIELD(ir, B1, _IFT_HydratingConcreteMat_B1); // [1/s]
+        IR_GIVE_FIELD(ir, B2, _IFT_HydratingConcreteMat_B2);
+        IR_GIVE_FIELD(ir, eta, _IFT_HydratingConcreteMat_eta);
+        IR_GIVE_FIELD(ir, DoHInf, _IFT_HydratingConcreteMat_DoHInf);
     } else {
         OOFEM_ERROR2("Unknown hdyration model type %d", hydrationModelType);
     }
 
-    IR_GIVE_FIELD(ir, Qpot, IFT_HydratingConcreteMat_qpot, "qpot"); // [1/s]
+    IR_GIVE_FIELD(ir, Qpot, _IFT_HydratingConcreteMat_qpot); // [1/s]
 
-    IR_GIVE_FIELD(ir, massCement, IFT_HydratingConcreteMat_massCement, "masscement");
+    IR_GIVE_FIELD(ir, massCement, _IFT_HydratingConcreteMat_massCement);
 
     maxModelIntegrationTime = 36000;
-    IR_GIVE_OPTIONAL_FIELD(ir, maxModelIntegrationTime, IFT_HydratingConcreteMat_maxModelIntegrationTime, "maxmodelintegrationtime");
+    IR_GIVE_OPTIONAL_FIELD(ir, maxModelIntegrationTime, _IFT_HydratingConcreteMat_maxModelIntegrationTime);
 
     minModelTimeStepIntegrations = 30.;
-    IR_GIVE_OPTIONAL_FIELD(ir, minModelTimeStepIntegrations, IFT_HydratingConcreteMat_minModelTimeStepIntegrations, "minmodeltimestepintegrations");
+    IR_GIVE_OPTIONAL_FIELD(ir, minModelTimeStepIntegrations, _IFT_HydratingConcreteMat_minModelTimeStepIntegrations);
 
 
     conductivityType = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, conductivityType, IFT_HydratingConcreteMat_conductivitytype, "conductivitytype");
+    IR_GIVE_OPTIONAL_FIELD(ir, conductivityType, _IFT_HydratingConcreteMat_conductivitytype);
     capacityType = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, capacityType, IFT_HydratingConcreteMat_capacitytype, "capacitytype");
+    IR_GIVE_OPTIONAL_FIELD(ir, capacityType, _IFT_HydratingConcreteMat_capacitytype);
     densityType = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, densityType, IFT_HydratingConcreteMat_densitytype, "densitytype");
+    IR_GIVE_OPTIONAL_FIELD(ir, densityType, _IFT_HydratingConcreteMat_densitytype);
 
     activationEnergy = 38400; //J/mol/K
-    IR_GIVE_OPTIONAL_FIELD(ir, activationEnergy, IFT_HydratingConcreteMat_activationEnergy, "activationenergy");
+    IR_GIVE_OPTIONAL_FIELD(ir, activationEnergy, _IFT_HydratingConcreteMat_activationEnergy);
 
     reinforcementDegree = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, reinforcementDegree, IFT_HydratingConcreteMat_reinforcementDegree, "reinforcementdegree");
+    IR_GIVE_OPTIONAL_FIELD(ir, reinforcementDegree, _IFT_HydratingConcreteMat_reinforcementDegree);
 
     return IRRT_OK;
 }

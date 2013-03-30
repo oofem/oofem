@@ -43,6 +43,8 @@
 #include "materialinterface.h"
 //</RESTRICTED_SECTION>
 
+#include "unknownnumberingscheme.h"
+
 ///@name Input fields for CBS
 //@{
 #define _IFT_CBS_deltat "deltat"
@@ -58,6 +60,57 @@
 //@}
 
 namespace oofem {
+
+/**
+ * Specialized numbering scheme for CBS algorithm, since it needs velocities separately.
+ */
+class VelocityEquationNumbering : public UnknownNumberingScheme
+{
+protected:
+    bool prescribed;
+    int numEqs;
+
+public:
+    VelocityEquationNumbering(bool prescribed) : UnknownNumberingScheme(), prescribed(prescribed), numEqs(0) {}
+
+    virtual bool isDefault() const { return !prescribed; }
+    virtual int giveDofEquationNumber(Dof *dof) const {
+        DofIDItem id = dof->giveDofID();
+        if ( id == V_u || id == V_v || id == V_w ) {
+            return prescribed ? dof->__givePrescribedEquationNumber() : dof->__giveEquationNumber();
+        }
+        return 0;
+    }
+    virtual int giveRequiredNumberOfDomainEquation() const { return numEqs; }
+
+    int askNewEquationNumber() { return ++numEqs; }
+};
+
+/**
+ * Specialized numbering scheme for CBS algorithm, since it needs pressures separately.
+ */
+class PressureEquationNumbering : public UnknownNumberingScheme
+{
+protected:
+    bool prescribed;
+    int numEqs;
+
+public:
+    PressureEquationNumbering(bool prescribed) : UnknownNumberingScheme(), prescribed(prescribed), numEqs(0) {}
+
+    virtual bool isDefault() const { return !prescribed; }
+    virtual int giveDofEquationNumber(Dof *dof) const {
+        DofIDItem id = dof->giveDofID();
+        if ( id == P_f ) {
+            return prescribed ? dof->__givePrescribedEquationNumber() : dof->__giveEquationNumber();
+        }
+        return 0;
+    }
+    virtual int giveRequiredNumberOfDomainEquation() const { return numEqs; }
+
+    int askNewEquationNumber() { return ++numEqs; }
+};
+
 /**
  * This class represents CBS algorithm for solving incompressible Navier-Stokes equations
  */
@@ -93,8 +146,10 @@ protected:
     /// Consistent mass flag.
     int consistentMassFlag;
 
-    int numberOfMomentumEqs, numberOfConservationEqs;
-    int numberOfPrescribedMomentumEqs, numberOfPrescribedConservationEqs;
+    VelocityEquationNumbering vnum;
+    VelocityEquationNumbering vnumPrescribed;
+    PressureEquationNumbering pnum;
+    PressureEquationNumbering pnumPrescribed;
 
     bool equationScalingFlag;
     /// Length scale.
@@ -111,13 +166,14 @@ protected:
     MaterialInterface *materialInterface;
     //</RESTRICTED_SECTION>
 public:
-    CBS(int i, EngngModel *_master = NULL) : EngngModel(i, _master), PressureField(this, 1, FT_Pressure, EID_ConservationEquation, 1),
-        VelocityField(this, 1, FT_Velocity, EID_MomentumBalance, 1) {
+    CBS(int i, EngngModel *_master = NULL) : EngngModel(i, _master),
+            PressureField(this, 1, FT_Pressure, EID_ConservationEquation, 1),
+            VelocityField(this, 1, FT_Velocity, EID_MomentumBalance, 1),
+            vnum(false), vnumPrescribed(true), pnum(false), pnumPrescribed(true) {
         initFlag = 1;
         lhs = NULL;
         ndomains = 1;
         nMethod = NULL;
-        numberOfMomentumEqs = numberOfConservationEqs = numberOfPrescribedMomentumEqs = numberOfPrescribedConservationEqs = 0;
         consistentMassFlag = 0;
         equationScalingFlag = false;
         lscale = uscale = dscale = 1.0;
@@ -135,7 +191,7 @@ public:
 
     virtual void updateYourself(TimeStep *tStep);
 
-    virtual double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     virtual double giveUnknownComponent(UnknownType ut, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
@@ -156,10 +212,7 @@ public:
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
-    virtual int giveNumberOfEquations(EquationID eid);
-    virtual int giveNumberOfPrescribedEquations(EquationID eid);
-    virtual int giveNumberOfDomainEquations(int, EquationID eid);
-    virtual int giveNumberOfPrescribedDomainEquations(int, EquationID eid);
+    virtual int giveNumberOfDomainEquations(int, const UnknownNumberingScheme &num);
 
     virtual int giveNewEquationNumber(int domain, DofIDItem);
     virtual int giveNewPrescribedEquationNumber(int domain, DofIDItem);

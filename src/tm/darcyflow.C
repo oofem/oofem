@@ -44,11 +44,11 @@ IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
     EngngModel :: initializeFrom(ir);
 
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
     // Create solution space for EID_ConservationEquation
@@ -81,7 +81,7 @@ void DarcyFlow :: solveYourselfAt (TimeStep *tStep)
     OOFEM_LOG_INFO("Parallelflag: %u\n", parallelFlag);
 
     FloatArray *solutionVector = NULL;
-    int neq = this->giveNumberOfEquations(EID_ConservationEquation);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 
     // Move solution space to current timestep
     if ( !hasAdvanced ) {
@@ -157,8 +157,8 @@ void DarcyFlow :: DumpMatricesToFile(FloatMatrix *LHS, FloatArray *RHS, FloatArr
 
     FILE *lhsFile = fopen("LHS.txt", "w");
 
-    for ( int i = 1; i <= this->giveNumberOfEquations(EID_ConservationEquation); i++ ) {
-        for ( int j = 1; j <= this->giveNumberOfEquations(EID_ConservationEquation); j++ ) {
+    for ( int i = 1; i <= this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()); i++ ) {
+        for ( int j = 1; j <= this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()); j++ ) {
             fprintf(lhsFile, "%0.15e\t", LHS->at(i,j));
         }
         fprintf(lhsFile, "\n");
@@ -181,7 +181,7 @@ void DarcyFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 
     DofIDItem type = iDof->giveDofID();
     if ( type == P_f ) {
-        iDof->printSingleOutputAt(stream, atTime, 'p', EID_ConservationEquation, VM_Total, 1);
+        iDof->printSingleOutputAt(stream, atTime, 'p', VM_Total, 1);
     } else {
         _error("printDofOutputAt: unsupported dof type");
     }
@@ -195,18 +195,9 @@ void DarcyFlow :: updateYourself (TimeStep *tStep)
 
 }
 
-double DarcyFlow :: giveUnknownComponent(EquationID chc, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
+double DarcyFlow :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
-    /*
-     * Return value of argument dof
-     */
-
-    if ( chc == EID_ConservationEquation ) {
-        return PressureField->giveUnknownValue(dof, mode, tStep);
-    } else {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-        return 0.;
-    }
+    return PressureField->giveUnknownValue(dof, mode, tStep);
 }
 
 void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)

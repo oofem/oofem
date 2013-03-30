@@ -423,13 +423,12 @@ OOFEMTXTInputRecord :: scanInteger(const char *source, int &value)
     //
     // reads integer value from source, returns nonzero if o.k.
     //
-    int i;
     if ( source == NULL ) {
         value = 0;
         return 0;
     }
 
-    i = sscanf(source, "%d", & value);
+    int i = sscanf(source, "%d", & value);
     if ( ( i == EOF ) || ( i == 0 ) ) {
         value = 0;
         return 0;
@@ -445,14 +444,13 @@ OOFEMTXTInputRecord :: scanDouble(const char *source, double &value)
     //
     // reads integer value from source, returns pointer to char after this number
     //
-    int i;
 
     if ( source == NULL ) {
         value = 0.0;
         return 0;
     }
 
-    i = sscanf(source, "%lf", & value);
+    int i = sscanf(source, "%lf", & value);
     if ( ( i == EOF ) || ( i == 0 ) ) {
         value = 0.0;
         return 0;
@@ -550,9 +548,6 @@ OOFEMTXTInputRecord :: __readSimpleString(const char *source, char *simpleString
 
 const char *
 OOFEMTXTInputRecord :: __readKeyAndVal(const char *source, char *key, int *val, int maxchar, const char **remain)
-//
-//
-//
 {
     key = __readSimpleString(source, key, maxchar, remain);
     * remain = __scanInteger(* remain, val);
@@ -561,9 +556,6 @@ OOFEMTXTInputRecord :: __readKeyAndVal(const char *source, char *key, int *val, 
 
 const char *
 OOFEMTXTInputRecord :: __readKeyAndVal(const char *source, char *key, double *val, int maxchar, const char **remain)
-//
-//
-//
 {
     key = __readSimpleString(source, key, maxchar, remain);
     * remain = __scanDouble(* remain, val);
@@ -572,12 +564,6 @@ OOFEMTXTInputRecord :: __readKeyAndVal(const char *source, char *key, double *va
 
 const char *
 OOFEMTXTInputRecord :: __getPosAfter(const char *source, const char *id)
-//
-// returns position of substring id in source
-// return value pointer at the end of occurrence id in source
-// (id must be separated from rest by blank or by tabulator
-// if string not found, returns NULL
-//
 {
     const char *str1;
     const char *helpSource = source;
@@ -711,7 +697,6 @@ int
 OOFEMTXTInputRecord :: readMatrix(const char *helpSource, int r, int c, FloatMatrix &ans)
 {
     const char *endptr = helpSource;
-    int i, j;
 
     if ( helpSource == NULL ) {
         ans.resize(0, 0);
@@ -728,8 +713,8 @@ OOFEMTXTInputRecord :: readMatrix(const char *helpSource, int r, int c, FloatMat
         // range left parenthesis found
         ( endptr )++;
         // read row by row separated by semicolon
-        for ( i = 1; i <= r; i++ ) {
-            for ( j = 1; j <= c; j++ ) {
+        for ( int i = 1; i <= r; i++ ) {
+            for ( int j = 1; j <= c; j++ ) {
                 endptr = __scanDouble( endptr, & ans.at(i, j) );
             }
 

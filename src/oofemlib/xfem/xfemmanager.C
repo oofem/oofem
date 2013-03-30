@@ -187,14 +187,12 @@ XfemManager :: addEnrichedDofsTo( DofManager *dMan, IntArray &dofIdArray )
 }
 
 
-IRResultType XfemManager :: initializeFrom(InputRecord *ir) {
+IRResultType XfemManager :: initializeFrom(InputRecord *ir)
+{
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
-    if ( !ir->hasField(IFT_RecordIDField, "xfemmanager") ) {
-        OOFEM_ERROR("XfemManager::instanciateFrom: bad record");
-    }
-    IR_GIVE_FIELD(ir, numberOfEnrichmentItems, IFT_RecordIDField, "numberofenrichmentitems"); // Macro
+    IR_GIVE_FIELD(ir, numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
     return IRRT_OK;
 }
 
@@ -211,7 +209,7 @@ int XfemManager :: instanciateYourself(DataReader *dr)
         result = mir->giveRecordKeywordField(name);
 
         if ( result != IRRT_OK ) {
-            IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
+            IR_IOERR(giveClassName(), __proc, "", mir, result);
         }
 
         EnrichmentItem *ei = CreateUsrDefEnrichmentItem( name.c_str(), i, this, this->giveDomain() );

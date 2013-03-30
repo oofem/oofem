@@ -380,9 +380,9 @@ Beam2d :: initializeFrom(InputRecord *ir)
     // first call parent
     StructuralElement :: initializeFrom(ir);
 
-    if ( ir->hasField(IFT_Beam2d_dofstocondense, "dofstocondense") ) {
+    if ( ir->hasField(_IFT_Beam2d_dofstocondense) ) {
         IntArray val;
-        IR_GIVE_FIELD(ir, val, IFT_Beam2d_dofstocondense, "dofstocondense");
+        IR_GIVE_FIELD(ir, val, _IFT_Beam2d_dofstocondense);
         if ( val.giveSize() >= 6 ) {
             _error("instanciateFrom: wrong input data for condensed dofs");
         }
@@ -797,13 +797,13 @@ void Beam2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
     EASValsSetColor( gc.getDeformedElementColor() );
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
-    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
+    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale);
     p [ 0 ].y = 0.;
-    p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(3, tStep, EID_MomentumBalance, defScale);
+    p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(3, tStep, defScale);
 
-    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
+    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale);
     p [ 1 ].y = 0.;
-    p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(3, tStep, EID_MomentumBalance, defScale);
+    p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(3, tStep, defScale);
     go = CreateLine3D(p);
     EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);
     EMAddGraphicsToModel(ESIModel(), go);

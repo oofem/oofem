@@ -49,12 +49,12 @@ LinearEdgeLoad :: initializeFrom(InputRecord *ir)
     }
 
     int fType = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, fType, IFT_LinearEdgeLoad_formulation, "formulation");
+    IR_GIVE_OPTIONAL_FIELD(ir, fType, _IFT_LinearEdgeLoad_formulation);
     if ( fType == 1 ) {
         this->formulation = BL_GlobalFormulation;
         // read start and end coordinates
-        IR_GIVE_FIELD(ir, startCoords, IFT_LinearEdgeLoad_startcoord, "sc");
-        IR_GIVE_FIELD(ir, endCoords, IFT_LinearEdgeLoad_endcoord, "ec");
+        IR_GIVE_FIELD(ir, startCoords, _IFT_LinearEdgeLoad_startcoord);
+        IR_GIVE_FIELD(ir, endCoords, _IFT_LinearEdgeLoad_endcoord);
         if ( startCoords.isEmpty() || endCoords.isEmpty() ) {
             _error("instanciateFrom: coordinates not specified");
         }

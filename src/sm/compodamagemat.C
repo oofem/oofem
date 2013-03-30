@@ -63,18 +63,18 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
 
     this->Material :: initializeFrom(ir);
     //define transversely othotropic material stiffness parameters
-    IR_GIVE_FIELD(ir, value, IFT_CompoDamageMat_exx, "exx");
+    IR_GIVE_FIELD(ir, value, _IFT_CompoDamageMat_exx);
     propertyDictionary->add(Ex, value);
-    IR_GIVE_FIELD(ir, value, IFT_CompoDamageMat_eyyezz, "eyyezz");
+    IR_GIVE_FIELD(ir, value, _IFT_CompoDamageMat_eyyezz);
     propertyDictionary->add(Ey, value);
     propertyDictionary->add(Ez, value);
-    IR_GIVE_FIELD(ir, value, IFT_CompoDamageMat_nyxy, "nuxynuxz");
+    IR_GIVE_FIELD(ir, value, _IFT_CompoDamageMat_nuxynuxz);
     propertyDictionary->add(NYxy, value);
     propertyDictionary->add(NYxz, value);
-    IR_GIVE_FIELD(ir, value, IFT_CompoDamageMat_nyyz, "nuyz");
+    IR_GIVE_FIELD(ir, value, _IFT_CompoDamageMat_nuyz);
     propertyDictionary->add(NYyz, value);
     propertyDictionary->add(NYzy, value);
-    IR_GIVE_FIELD(ir, value, IFT_CompoDamageMat_Gxy, "gxygxz");
+    IR_GIVE_FIELD(ir, value, _IFT_CompoDamageMat_Gxy);
     propertyDictionary->add(Gxy, value);
     propertyDictionary->add(Gxz, value);
 
@@ -84,10 +84,10 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
     //propertyDictionary -> add(Gzy,this->give(Gyz,NULL));
     propertyDictionary->add( NYzx, this->give(NYyx, NULL) );
 
-    IR_GIVE_FIELD(ir, this->inputTension, IFT_CompoDamageMat_components, "tension_f0_gf");
+    IR_GIVE_FIELD(ir, this->inputTension, _IFT_CompoDamageMat_tension_f0_gf);
 
     //this->inputTension.printYourself();
-    IR_GIVE_FIELD(ir, this->inputCompression, IFT_CompoDamageMat_components, "compres_f0_gf");
+    IR_GIVE_FIELD(ir, this->inputCompression, _IFT_CompoDamageMat_compres_f0_gf);
 
     if ( this->inputTension.giveSize() != 12 ) {
         _error("instanciateFrom: need 12 components for tension in pairs f0 Gf for all 6 directions");
@@ -108,10 +108,10 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
     }
 
     this->afterIter = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->afterIter, IFT_CompoDamageMat_afteriter, "afteriter");
+    IR_GIVE_OPTIONAL_FIELD(ir, this->afterIter, _IFT_CompoDamageMat_afteriter);
 
     this->afterIter = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->allowSnapBack, IFT_CompoDamageMat_allowSnapBack, "allowsnapback");
+    IR_GIVE_OPTIONAL_FIELD(ir, this->allowSnapBack, _IFT_CompoDamageMat_allowSnapBack);
 
     //
     //OOFEM_LOG_INFO("READ \n");

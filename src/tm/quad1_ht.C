@@ -99,7 +99,7 @@ Quad1_ht :: initializeFrom(InputRecord *ir)
 
     this->TransportElement :: initializeFrom(ir);
     numberOfGaussPoints = 4;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
 
     if ( !( ( numberOfGaussPoints == 4 ) ||
            ( numberOfGaussPoints == 9 ) ||
@@ -266,7 +266,7 @@ void Quad1_ht :: drawScalar(oofegGraphicContext &context)
 
         FloatArray r;
         for ( i = 0; i < 4; i++ ) {
-            this->giveNode(i + 1)->giveUnknownVector(r, dofMask, EID_ConservationEquation, VM_Total, tStep);
+            this->giveNode(i + 1)->giveUnknownVector(r, dofMask, VM_Total, tStep);
             s [ i ] = r.at(1);
 
             p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);

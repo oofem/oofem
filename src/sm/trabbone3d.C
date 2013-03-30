@@ -1046,39 +1046,39 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // Mandatory parameters
-    IR_GIVE_FIELD(ir, eps0, IFT_TrabBone3D_eps0, "eps0");
-    IR_GIVE_FIELD(ir, nu0, IFT_TrabBone3D_nu0, "nu0");
-    IR_GIVE_FIELD(ir, mu0, IFT_TrabBone3D_mu0, "mu0");
-    IR_GIVE_FIELD(ir, expk, IFT_TrabBone3D_expk, "expk");
-    IR_GIVE_FIELD(ir, expl, IFT_TrabBone3D_expl, "expl");
+    IR_GIVE_FIELD(ir, eps0, _IFT_TrabBone3D_eps0);
+    IR_GIVE_FIELD(ir, nu0, _IFT_TrabBone3D_nu0);
+    IR_GIVE_FIELD(ir, mu0, _IFT_TrabBone3D_mu0);
+    IR_GIVE_FIELD(ir, expk, _IFT_TrabBone3D_expk);
+    IR_GIVE_FIELD(ir, expl, _IFT_TrabBone3D_expl);
 
     eps0 = eps0*0.1069;
     mu0 = mu0*0.1069;
     
 
-    IR_GIVE_FIELD(ir, m1, IFT_TrabBone3D_m1, "m1");
-    IR_GIVE_FIELD(ir, m2, IFT_TrabBone3D_m2, "m2");
-    IR_GIVE_FIELD(ir, rho, IFT_TrabBone3D_rho, "rho");  
+    IR_GIVE_FIELD(ir, m1, _IFT_TrabBone3D_m1);
+    IR_GIVE_FIELD(ir, m2, _IFT_TrabBone3D_m2);
+    IR_GIVE_FIELD(ir, rho, _IFT_TrabBone3D_rho);
 
-    IR_GIVE_FIELD(ir, sig0Pos, IFT_TrabBone3D_sig0Pos, "sig0pos");
-    IR_GIVE_FIELD(ir, sig0Neg, IFT_TrabBone3D_sig0Neg, "sig0neg");
-    IR_GIVE_FIELD(ir, chi0Pos, IFT_TrabBone3D_chi0Pos, "chi0pos");
-    IR_GIVE_FIELD(ir, tau0, IFT_TrabBone3D_tau0, "tau0");
+    IR_GIVE_FIELD(ir, sig0Pos, _IFT_TrabBone3D_sig0Pos);
+    IR_GIVE_FIELD(ir, sig0Neg, _IFT_TrabBone3D_sig0Neg);
+    IR_GIVE_FIELD(ir, chi0Pos, _IFT_TrabBone3D_chi0Pos);
+    IR_GIVE_FIELD(ir, tau0, _IFT_TrabBone3D_tau0);
     sig0Pos = sig0Pos*0.15;
     sig0Neg = sig0Neg*0.15;
     tau0 = tau0*0.15;
 
 
-    IR_GIVE_FIELD(ir, expq, IFT_TrabBone3D_expq, "expq");
-    IR_GIVE_FIELD(ir, expp, IFT_TrabBone3D_expp, "expp");
+    IR_GIVE_FIELD(ir, expq, _IFT_TrabBone3D_expq);
+    IR_GIVE_FIELD(ir, expp, _IFT_TrabBone3D_expp);
 
 
 
-    IR_GIVE_FIELD(ir, plasHardFactor, IFT_TrabBone3D_plasHardFactor, "plashardfactor");
-    IR_GIVE_FIELD(ir, expPlasHard, IFT_TrabBone3D_expPlasHard, "expplashard");
+    IR_GIVE_FIELD(ir, plasHardFactor, _IFT_TrabBone3D_plasHardFactor);
+    IR_GIVE_FIELD(ir, expPlasHard, _IFT_TrabBone3D_expPlasHard);
 
-    IR_GIVE_FIELD(ir, expDam, IFT_TrabBone3D_expDam, "expdam");
-    IR_GIVE_FIELD(ir, critDam, IFT_TrabBone3D_critDam, "critdam");
+    IR_GIVE_FIELD(ir, expDam, _IFT_TrabBone3D_expDam);
+    IR_GIVE_FIELD(ir, critDam, _IFT_TrabBone3D_critDam);
 
     // evaluation of dependent parameter
     chi0Neg = ( sig0Neg * sig0Neg ) / ( sig0Pos * sig0Pos ) * ( chi0Pos + 1 ) - 1;
@@ -1101,14 +1101,14 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
 
 
 
+    ///@todo Why not use vectors?
+    IR_GIVE_OPTIONAL_FIELD(ir, x1, _IFT_TrabBone3D_x1);
+    IR_GIVE_OPTIONAL_FIELD(ir, x2, _IFT_TrabBone3D_x2);
+    IR_GIVE_OPTIONAL_FIELD(ir, x3, _IFT_TrabBone3D_x3);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, x1, IFT_TrabBone3D_x1, "x1");
-    IR_GIVE_OPTIONAL_FIELD(ir, x2, IFT_TrabBone3D_x2, "x2");
-    IR_GIVE_OPTIONAL_FIELD(ir, x3, IFT_TrabBone3D_x3, "x3");
-
-    IR_GIVE_OPTIONAL_FIELD(ir, y1, IFT_TrabBone3D_y1, "y1");
-    IR_GIVE_OPTIONAL_FIELD(ir, y2, IFT_TrabBone3D_y2, "y2");
-    IR_GIVE_OPTIONAL_FIELD(ir, y3, IFT_TrabBone3D_y3, "y3");
+    IR_GIVE_OPTIONAL_FIELD(ir, y1, _IFT_TrabBone3D_y1);
+    IR_GIVE_OPTIONAL_FIELD(ir, y2, _IFT_TrabBone3D_y2);
+    IR_GIVE_OPTIONAL_FIELD(ir, y3, _IFT_TrabBone3D_y3);
 
      double normX = sqrt(x1*x1 + x2*x2 + x3*x3);
      x1 = x1/normX;
@@ -1138,7 +1138,7 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
     viscosity = 0.05;
     //    viscosity = 0.01;
     //    viscosity = 0.015;
-    IR_GIVE_OPTIONAL_FIELD(ir, viscosity, IFT_TrabBone3D_viscosity, "viscosity");
+    IR_GIVE_OPTIONAL_FIELD(ir, viscosity, _IFT_TrabBone3D_viscosity);
     // Hadi post-yield function parameters
     yR = 0.7;
     kappaMax = 0.01;
@@ -1150,13 +1150,13 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
 
 
 
-    IR_GIVE_OPTIONAL_FIELD(ir, yR, IFT_TrabBone3D_yR, "yR");
-    IR_GIVE_OPTIONAL_FIELD(ir, kappaMax, IFT_TrabBone3D_kappaMax, "kappaMax");
-    IR_GIVE_OPTIONAL_FIELD(ir, kappaMin, IFT_TrabBone3D_kappaMin, "kappaMin");
-    IR_GIVE_OPTIONAL_FIELD(ir, kappaSlope, IFT_TrabBone3D_kappaSlope, "kappaSlope");
-    IR_GIVE_OPTIONAL_FIELD(ir, N, IFT_TrabBone3D_N, "N");
-    IR_GIVE_OPTIONAL_FIELD(ir, gMin, IFT_TrabBone3D_gMin, "gMin");
-    IR_GIVE_OPTIONAL_FIELD(ir, formulation, IFT_TrabBone3D_formulation, "formulation");
+    IR_GIVE_OPTIONAL_FIELD(ir, yR, _IFT_TrabBone3D_yR);
+    IR_GIVE_OPTIONAL_FIELD(ir, kappaMax, _IFT_TrabBone3D_kappaMax);
+    IR_GIVE_OPTIONAL_FIELD(ir, kappaMin, _IFT_TrabBone3D_kappaMin);
+    IR_GIVE_OPTIONAL_FIELD(ir, kappaSlope, _IFT_TrabBone3D_kappaSlope);
+    IR_GIVE_OPTIONAL_FIELD(ir, N, _IFT_TrabBone3D_N);
+    IR_GIVE_OPTIONAL_FIELD(ir, gMin, _IFT_TrabBone3D_gMin);
+    IR_GIVE_OPTIONAL_FIELD(ir, formulation, _IFT_TrabBone3D_formulation);
 
 
     // optional densificator parameters
@@ -1171,10 +1171,10 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
     rP = 2.77;
     
 
-    IR_GIVE_OPTIONAL_FIELD(ir, gammaL0, IFT_TrabBone3D_gammaL, "gammal");
-    IR_GIVE_OPTIONAL_FIELD(ir, gammaP0, IFT_TrabBone3D_gammaP, "gammap");
-    IR_GIVE_OPTIONAL_FIELD(ir, tDens, IFT_TrabBone3D_tDens, "tdens");
-    IR_GIVE_OPTIONAL_FIELD(ir, densCrit, IFT_TrabBone3D_densCrit, "denscrit");
+    IR_GIVE_OPTIONAL_FIELD(ir, gammaL0, _IFT_TrabBone3D_gammaL);
+    IR_GIVE_OPTIONAL_FIELD(ir, gammaP0, _IFT_TrabBone3D_gammaP);
+    IR_GIVE_OPTIONAL_FIELD(ir, tDens, _IFT_TrabBone3D_tDens);
+    IR_GIVE_OPTIONAL_FIELD(ir, densCrit, _IFT_TrabBone3D_densCrit);
 
     
 
@@ -1182,17 +1182,17 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
 
     // optional control parameters for printing and convergence
     printflag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, printflag, IFT_TrabBone3D_printflag, "printflag");
+    IR_GIVE_OPTIONAL_FIELD(ir, printflag, _IFT_TrabBone3D_printflag);
     max_num_iter = 100;
-    IR_GIVE_OPTIONAL_FIELD(ir, max_num_iter, IFT_TrabBone3D_max_num_iter, "max_num_iter");
+    IR_GIVE_OPTIONAL_FIELD(ir, max_num_iter, _IFT_TrabBone3D_max_num_iter);
     max_num_substeps = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, max_num_substeps, IFT_TrabBone3D_max_num_substeps, "max_num_substeps");
+    IR_GIVE_OPTIONAL_FIELD(ir, max_num_substeps, _IFT_TrabBone3D_max_num_substeps);
     rel_yield_tol = 1.e-9;
-    IR_GIVE_OPTIONAL_FIELD(ir, rel_yield_tol, IFT_TrabBone3D_rel_yield_tol, "rel_yield_tol");
+    IR_GIVE_OPTIONAL_FIELD(ir, rel_yield_tol, _IFT_TrabBone3D_rel_yield_tol);
     strain_tol = 1.e-9;
-    IR_GIVE_OPTIONAL_FIELD(ir, strain_tol, IFT_TrabBone3D_strain_tol, "strain_tol");
+    IR_GIVE_OPTIONAL_FIELD(ir, strain_tol, _IFT_TrabBone3D_strain_tol);
     abaqus = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, abaqus, IFT_TrabBone3D_abaqus, "abaqus");
+    IR_GIVE_OPTIONAL_FIELD(ir, abaqus, _IFT_TrabBone3D_abaqus);
 
 
     ////////////////////////////////

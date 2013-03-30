@@ -55,8 +55,8 @@ PeakFunction :: initializeFrom(InputRecord *ir)
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     LoadTimeFunction :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, t, IFT_PeakFunction_t, "t");
-    IR_GIVE_FIELD(ir, value, IFT_PeakFunction_ft, "f(t)");
+    IR_GIVE_FIELD(ir, t, _IFT_PeakFunction_t);
+    IR_GIVE_FIELD(ir, value, _IFT_PeakFunction_ft);
 
     return IRRT_OK;
 }

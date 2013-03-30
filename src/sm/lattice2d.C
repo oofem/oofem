@@ -325,11 +325,11 @@ Lattice2d :: initializeFrom(InputRecord *ir)
     // first call parent
     LatticeStructuralElement :: initializeFrom(ir);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, thickness, IFT_Lattice2d_thick, "thick");
+    IR_GIVE_OPTIONAL_FIELD(ir, thickness, _IFT_Lattice2d_thick);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, width, IFT_Lattice2d_width, "width");
+    IR_GIVE_OPTIONAL_FIELD(ir, width, _IFT_Lattice2d_width);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, gpCoords, IFT_Lattice2d_gpcoords, "gpcoords");
+    IR_GIVE_OPTIONAL_FIELD(ir, gpCoords, _IFT_Lattice2d_gpcoords);
 
     return IRRT_OK;
 }
@@ -413,12 +413,12 @@ Lattice2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
     EASValsSetColor( gc.getDeformedElementColor() );
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
 
-    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
-    p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
+    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale);
+    p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(2, tStep, defScale);
     p [ 0 ].z = 0.;
 
-    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
-    p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
+    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale);
+    p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale);
     p [ 1 ].z = 0.;
 
     go = CreateLine3D(p);

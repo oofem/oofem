@@ -104,7 +104,7 @@ public:
             mir = dr->giveInputRecord(DataReader :: IR_expModuleRec, i + 1);
             result = mir->giveRecordKeywordField(name);
             if ( result != IRRT_OK ) {
-                IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
+                IR_IOERR(giveClassName(), __proc, "", mir, result);
             }
 
             // read type of module

@@ -86,26 +86,26 @@ IRResultType IncrementalLinearStatic :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom";
     IRResultType result;
 
-    IR_GIVE_OPTIONAL_FIELD(ir, discreteTimes, IFT_IncrementalLinearStatic_prescribedtimes, "prescribedtimes");
+    IR_GIVE_OPTIONAL_FIELD(ir, discreteTimes, _IFT_IncrementalLinearStatic_prescribedtimes);
     if ( discreteTimes.giveSize() > 0 ) {
         numberOfSteps = discreteTimes.giveSize();
         endOfTimeOfInterest = discreteTimes.at(discreteTimes.giveSize());
         fixedSteps = false;
     } else {
         deltaT = 1.0;
-        IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_IncrementalLinearStatic_deltat, "deltat");
-        IR_GIVE_FIELD(ir, numberOfSteps, IFT_EngngModel_nsteps, "nsteps");
+        IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_IncrementalLinearStatic_deltat);
+        IR_GIVE_FIELD(ir, numberOfSteps, _IFT_EngngModel_nsteps);
         endOfTimeOfInterest = deltaT*numberOfSteps;
         fixedSteps = true;
     }
-    IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, IFT_IncrementalLinearStatic_endoftimeofinterest, "endoftimeofinterest");
+    IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, _IFT_IncrementalLinearStatic_endoftimeofinterest);
 
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
     //StructuralEngngModel::initializeFrom (ir);
@@ -166,10 +166,10 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
         for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
             DofManager *dofman = d->giveDofManager(i);
             for ( int j = 1; j <= dofman->giveNumberOfDofs(); j++ ) {
-                dofman->giveDof(j)->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Total_Old, 0);
-                dofman->giveDof(j)->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Total, 0);
+                dofman->giveDof(j)->updateUnknownsDictionary(tStep, VM_Total_Old, 0.);
+                dofman->giveDof(j)->updateUnknownsDictionary(tStep, VM_Total, 0.);
                 // This is actually redundant now;
-                //dofman->giveDof(j)->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Incremental, 0);
+                //dofman->giveDof(j)->updateUnknownsDictionary(tStep, VM_Incremental, 0.);
             }
         }
     }
@@ -180,12 +180,12 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
         DofManager *dofman = d->giveDofManager(i);
         for ( int j = 1; j <= dofman->giveNumberOfDofs(); j++ ) {
             Dof *d = dofman->giveDof(j);
-            double tot = d->giveUnknown(EID_MomentumBalance, VM_Total_Old, tStep);
+            double tot = d->giveUnknown(VM_Total_Old, tStep);
             if ( d->hasBc(tStep) ) {
                 tot += d->giveBcValue(VM_Incremental, tStep);
             }
 
-            d->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Total, tot);
+            d->updateUnknownsDictionary(tStep, VM_Total, tot);
         }
     }
 
@@ -194,7 +194,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 
     if (neq == 0) { // Allows for fully prescribed/empty problems.
         return;
@@ -247,15 +247,10 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 }
 
 
-double IncrementalLinearStatic :: giveUnknownComponent(EquationID type, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
+double IncrementalLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
-    if ( type != EID_MomentumBalance ) { // heat and mass concetration vector
-        OOFEM_ERROR2( "giveUnknownComponent: EquationID %s is undefined for this problem", __EquationIDToString(type) );
-        return 0.;
-    }
-
     if ( this->requiresUnknownsDictionaryUpdate() ) {
-        int hash = this->giveUnknownDictHashIndx(type, mode, tStep);
+        int hash = this->giveUnknownDictHashIndx(mode, tStep);
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
         } else {
@@ -286,20 +281,20 @@ void IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, T
         iDof = inode->giveDof(i);
         // skip slave DOFs (only master (primary) DOFs have to be updated).
         if (!iDof->isPrimaryDof()) continue;
-        val = iDof->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+        val = iDof->giveUnknown(VM_Total, tStep);
         if ( !iDof->hasBc(tStep) ) {
             val += this->incrementOfDisplacementVector.at( iDof->__giveEquationNumber() );
         }
 
-        iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Total_Old, val);
-        iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Total, val);
+        iDof->updateUnknownsDictionary(tStep, VM_Total_Old, val);
+        iDof->updateUnknownsDictionary(tStep, VM_Total, val);
     }
 }
 
 
 void IncrementalLinearStatic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
-    iDof->printSingleOutputAt(stream, atTime, 'd', EID_MomentumBalance, VM_Total);
+    iDof->printSingleOutputAt(stream, atTime, 'd', VM_Total);
 }
 
 

@@ -60,12 +60,12 @@ HOMExportModule :: initializeFrom(InputRecord *ir)
     IRResultType val;
     this->scale = 1.;
     ExportModule :: initializeFrom(ir);
-    val = IR_GIVE_OPTIONAL_FIELD(ir, this->scale, IFT_HOMExportModule_scale, "scale");
+    val = IR_GIVE_OPTIONAL_FIELD(ir, this->scale, _IFT_HOMExportModule_scale);
     if ( val == IRRT_NOTFOUND ) {
         this->scale = 1.;
     }
 
-    val = IR_GIVE_OPTIONAL_FIELD(ir, this->matnum, IFT_HOMExportModule_matnum, "matnum");
+    val = IR_GIVE_OPTIONAL_FIELD(ir, this->matnum, _IFT_HOMExportModule_matnum);
     return IRRT_OK;
 }
 

@@ -122,7 +122,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
 {
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
-    int neq = eModel->giveNumberOfDomainEquations(di, ut);
+    int neq = eModel->giveNumberOfDomainEquations(di, s);
     int nelem = domain->giveNumberOfElements();
     int i, ii, j, jj, n;
     unsigned long indx;

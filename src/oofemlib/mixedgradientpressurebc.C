@@ -75,8 +75,8 @@ IRResultType MixedGradientPressureBC :: initializeFrom(InputRecord *ir)
     FloatArray devGradient;
     double pressure;
 
-    IR_GIVE_FIELD(ir, devGradient, IFT_MixedGradientPressure_devGradient, "devgradient");
-    IR_GIVE_FIELD(ir, pressure, IFT_MixedGradientPressure_pressure, "pressure");
+    IR_GIVE_FIELD(ir, devGradient, _IFT_MixedGradientPressure_devGradient);
+    IR_GIVE_FIELD(ir, pressure, _IFT_MixedGradientPressure_pressure);
 
     this->setPrescribedDeviatoricGradientFromVoigt(devGradient);
     this->setPrescribedPressure(pressure);

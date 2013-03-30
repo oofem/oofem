@@ -162,7 +162,7 @@ protected:
      * If such variable not directly available in dofman dofs, can use
      * smoother to recover this nodal value.
      */
-    void getDofManPrimaryVariable(FloatArray &answer, DofManager *dman, IntArray &dofIDMask, EquationID type,
+    void getDofManPrimaryVariable(FloatArray &answer, DofManager *dman, IntArray &dofIDMask,
                                   ValueModeType mode, TimeStep *tStep, InternalStateType iType);
 };
 } // end namespace oofem

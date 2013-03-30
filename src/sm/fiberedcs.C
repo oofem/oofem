@@ -482,17 +482,17 @@ FiberedCrossSection :: initializeFrom(InputRecord *ir)
     // VERBOSE_PRINT1 ("Instanciating cross section ",this->giveNumber())
 #  endif
 
-    IR_GIVE_FIELD(ir, numberOfFibers, IFT_FiberedCrossSection_nfibers, "nfibers");
-    IR_GIVE_FIELD(ir, fiberMaterials, IFT_FiberedCrossSection_fibermaterials, "fibermaterials");
-    IR_GIVE_FIELD(ir, fiberThicks, IFT_FiberedCrossSection_thicks, "thicks");
-    IR_GIVE_FIELD(ir, fiberWidths, IFT_FiberedCrossSection_widths, "widths");
+    IR_GIVE_FIELD(ir, numberOfFibers, _IFT_FiberedCrossSection_nfibers);
+    IR_GIVE_FIELD(ir, fiberMaterials, _IFT_FiberedCrossSection_fibermaterials);
+    IR_GIVE_FIELD(ir, fiberThicks, _IFT_FiberedCrossSection_thicks);
+    IR_GIVE_FIELD(ir, fiberWidths, _IFT_FiberedCrossSection_widths);
 
     // read coordinates of fiber centers from (main pprincipal axes) mid-section
-    IR_GIVE_FIELD(ir, fiberYcoords, IFT_FiberedCrossSection_fiberycentrecoords, "fiberycentrecoords");
-    IR_GIVE_FIELD(ir, fiberZcoords, IFT_FiberedCrossSection_fiberzcentrecoords, "fiberzcentrecoords");
+    IR_GIVE_FIELD(ir, fiberYcoords, _IFT_FiberedCrossSection_fiberycentrecoords);
+    IR_GIVE_FIELD(ir, fiberZcoords, _IFT_FiberedCrossSection_fiberzcentrecoords);
 
-    IR_GIVE_FIELD(ir, thick, IFT_FiberedCrossSection_thick, "thick");
-    IR_GIVE_FIELD(ir, width, IFT_FiberedCrossSection_width, "width");
+    IR_GIVE_FIELD(ir, thick, _IFT_FiberedCrossSection_thick);
+    IR_GIVE_FIELD(ir, width, _IFT_FiberedCrossSection_width);
 
     if ( ( numberOfFibers != fiberMaterials.giveSize() ) ||
         ( numberOfFibers != fiberThicks.giveSize() )    ||

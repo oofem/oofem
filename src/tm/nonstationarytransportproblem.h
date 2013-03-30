@@ -97,7 +97,7 @@ public:
 
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
-    virtual double giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *);
+    virtual double giveUnknownComponent(ValueModeType, TimeStep *, Domain *, Dof *);
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
@@ -121,7 +121,7 @@ public:
     //Store solution vector to involved DoFs
     //virtual void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep);
 
-    virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN);
+    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN);
 
     virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
                                                  CharType type, TimeStep *tStep, Domain *domain);

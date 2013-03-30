@@ -69,11 +69,11 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
 
     this->Material :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, this->numState, IFT_AbaqusUserMaterial_numState, "numstate");
-    IR_GIVE_FIELD(ir, this->properties, IFT_AbaqusUserMaterial_properties, "properties");
-    IR_GIVE_FIELD(ir, umatfile, IFT_AbaqusUserMaterial_userMaterial, "umat");
+    IR_GIVE_FIELD(ir, this->numState, _IFT_AbaqusUserMaterial_numState);
+    IR_GIVE_FIELD(ir, this->properties, _IFT_AbaqusUserMaterial_properties);
+    IR_GIVE_FIELD(ir, umatfile, _IFT_AbaqusUserMaterial_userMaterial);
     umatname = "umat";
-    IR_GIVE_OPTIONAL_FIELD(ir, umatname, IFT_AbaqusUserMaterial_name, "name");
+    IR_GIVE_OPTIONAL_FIELD(ir, umatname, _IFT_AbaqusUserMaterial_name);
     strncpy(this->cmname, umatname.c_str(), 80);
 
 #ifdef _WIN32

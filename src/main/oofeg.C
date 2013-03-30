@@ -1075,7 +1075,7 @@ void  defAutoScale(Widget wid, XtPointer cl, XtPointer cd)
 
                 for ( j = 1; j <= 3; j++ ) {
                     coord = domain->giveNode(i)->giveCoordinate(j);
-                    maxdef = max( maxdef, fabs(domain->giveNode(i)->giveUpdatedCoordinate(j, tStep, EID_MomentumBalance, 1.0) - coord) );
+                    maxdef = max( maxdef, fabs(domain->giveNode(i)->giveUpdatedCoordinate(j, tStep, 1.0) - coord) );
                     maxcoords [ j - 1 ] = max(maxcoords [ j - 1 ], coord);
                     mincoords [ j - 1 ] = min(mincoords [ j - 1 ], coord);
                 }

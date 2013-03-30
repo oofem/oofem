@@ -415,7 +415,7 @@ IRResultType DofManager ::  resolveDofIDArray(InputRecord *ir, IntArray &dofIDAr
     IRResultType result;
 
     numberOfDofs = -1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfDofs, IFT_DofManager_ndofs, "ndofs");
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfDofs, _IFT_DofManager_ndofs);
 
     // returns nonzero if succes
     if ( numberOfDofs == -1 ) {
@@ -425,7 +425,7 @@ IRResultType DofManager ::  resolveDofIDArray(InputRecord *ir, IntArray &dofIDAr
         // if ndofs is prescribed, read the physical meaning of particular dofs
         // for detailed values of DofMask array see cltypes.h file
         // for exaple 1 is for D_u (displacemet in u dir), 2 for D_v, 3 for D_w, ...
-        IR_GIVE_FIELD(ir, dofIDArry, IFT_DofManager_dofidmask, "dofidmask");
+        IR_GIVE_FIELD(ir, dofIDArry, _IFT_DofManager_dofidmask);
 
         if ( dofIDArry.giveSize() != numberOfDofs ) {
             _error("resolveDofIDArray : DofIDMask size mismatch");
@@ -445,39 +445,39 @@ DofManager :: initializeFrom(InputRecord *ir)
     IntArray bc, ic, masterMask, dofTypeMask;
 
     loadArray.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, loadArray, IFT_DofManager_load, "load");
+    IR_GIVE_OPTIONAL_FIELD(ir, loadArray, _IFT_DofManager_load);
 
     this->resolveDofIDArray(ir, dofIDArry);
 
     // numberOfDofs = domain->giveNumberOfDofs () ;
     bc.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, bc, IFT_DofManager_bc, "bc");
+    IR_GIVE_OPTIONAL_FIELD(ir, bc, _IFT_DofManager_bc);
 
     ic.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, ic, IFT_DofManager_ic, "ic");
+    IR_GIVE_OPTIONAL_FIELD(ir, ic, _IFT_DofManager_ic);
     // reads master mask - in this array are numbers of master dofManagers
     // to which are connected dofs in receiver.
     // if master mask index is zero then dof is created as master (i.e., having own equation number)
     // othervise slave dof connected to master DofManager is created.
     // by default if masterMask is not specifyed, all dofs are created as masters.
     dofTypeMask.resize(0); // termitovo
-    IR_GIVE_OPTIONAL_FIELD(ir, dofTypeMask, IFT_DofManager_doftypemask, "doftype");
+    IR_GIVE_OPTIONAL_FIELD(ir, dofTypeMask, _IFT_DofManager_doftypemask);
 
     // read boundary flag
-    if ( ir->hasField(IFT_DofManager_boundaryflag, "boundary") ) {
+    if ( ir->hasField(_IFT_DofManager_boundaryflag) ) {
         isBoundaryFlag = true;
     }
 
 
 #ifdef __PARALLEL_MODE
     partitions.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, partitions, IFT_DofManager_partitions, "partitions");
+    IR_GIVE_OPTIONAL_FIELD(ir, partitions, _IFT_DofManager_partitions);
 
-    if ( ir->hasField(IFT_DofManager_sharedflag, "shared") ) {
+    if ( ir->hasField(_IFT_DofManager_sharedflag) ) {
         parallel_mode = DofManager_shared;
-    } else if ( ir->hasField(IFT_DofManager_remoteflag, "remote") ) {
+    } else if ( ir->hasField(_IFT_DofManager_remoteflag) ) {
         parallel_mode = DofManager_remote;
-    } else if ( ir->hasField(IFT_DofManager_nullflag, "null") ) {
+    } else if ( ir->hasField(_IFT_DofManager_nullflag) ) {
         parallel_mode = DofManager_null;
     } else {
         parallel_mode = DofManager_local;
@@ -541,7 +541,7 @@ DofManager :: initializeFrom(InputRecord *ir)
                 dofArray [ j ] = new ActiveDof( j + 1, this, dofBc, ( DofIDItem ) dofIDArry.at(j + 1) );
             } else if ( dtype == DT_simpleSlave ) { // Simple slave dof
                 if ( masterMask.giveSize() == 0 ) {
-                    IR_GIVE_FIELD(ir, masterMask, IFT_DofManager_mastermask, "mastermask");
+                    IR_GIVE_FIELD(ir, masterMask, _IFT_DofManager_mastermask);
                     if ( masterMask.giveSize() != numberOfDofs ) {
                         _error("initializeFrom: mastermask size mismatch");
                     }
@@ -767,8 +767,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
 }
 
 
-void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDArry,
-                                EquationID type, ValueModeType mode, TimeStep *stepN)
+void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDArry, ValueModeType mode, TimeStep *stepN)
 {
     int size;
     IntArray dofArray;
@@ -782,7 +781,7 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
             OOFEM_ERROR2("DofManager :: giveUnknownVector - Couldn't find dof with Dof ID %d", dofIDArry.at(i));
         }
 #endif
-        answer.at(i) = this->giveDof(pos)->giveUnknown(type, mode, stepN);
+        answer.at(i) = this->giveDof(pos)->giveUnknown(mode, stepN);
     }
 
     // Transform to global c.s.
@@ -819,12 +818,11 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
 }
 
 
-void DofManager :: giveCompleteUnknownVector(FloatArray &answer,
-                                EquationID type, ValueModeType mode, TimeStep *stepN)
+void DofManager :: giveCompleteUnknownVector(FloatArray &answer, ValueModeType mode, TimeStep *stepN)
 {
     answer.resize( this->numberOfDofs );
     for ( int i = 1; i <= this->numberOfDofs; i++ ) {
-        answer.at(i) = this->giveDof(i)->giveUnknown(type, mode, stepN);
+        answer.at(i) = this->giveDof(i)->giveUnknown(mode, stepN);
     }
 }
 
@@ -832,13 +830,13 @@ void DofManager :: giveCompleteUnknownVector(FloatArray &answer,
 void DofManager :: givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofIDArry,
                                           ValueModeType mode, TimeStep *stepN)
 {
-    int j, size;
+    int size;
     IntArray dofArray;
 
     answer.resize( size = dofIDArry.giveSize() );
     this->giveDofArray(dofIDArry, dofArray);
 
-    for ( j = 1; j <= size; j++ ) {
+    for ( int j = 1; j <= size; j++ ) {
         answer.at(j) = this->giveDof( dofArray.at(j) )->giveBcValue(mode, stepN);
     }
 
@@ -855,13 +853,12 @@ void DofManager :: giveUnknownVectorOfType(FloatArray &answer, UnknownType ut, V
     int k = 1;
     FloatArray localVector(3);
     IntArray dofIDArry(3);
-    
 
     // This is a bit cumbersome. I first construct the local vector, which might have a odd order, e.g [D_w, D_u], which is later added to the global vector "answer"
     // I also store the dof id's, so that I can construct the local 2 global transformation afterwards (if its necessary). / Mikael
     for ( int i = 1; i <= this->numberOfDofs; i++ ) {
         Dof *d = this->giveDof(i);
-        double val = d->giveUnknown(EID_MomentumBalance, mode, tStep);
+        double val = d->giveUnknown(mode, tStep);
         if (ut == DisplacementVector || ut == EigenVector) { // Just treat eigenvectors as displacement vectors (they are redundant)
             if      (d->giveDofID() == D_u) { dofIDArry.at(k) = D_u; localVector.at(k) = val; k++; }
             else if (d->giveDofID() == D_v) { dofIDArry.at(k) = D_v; localVector.at(k) = val; k++; }
@@ -892,7 +889,6 @@ void DofManager :: giveUnknownVectorOfType(FloatArray &answer, UnknownType ut, V
                 answer.at(3) = localVector.at(i);
         }
     }
-    
 }
 
 
@@ -1029,12 +1025,12 @@ void DofManager :: mergePartitionList(IntArray &_p)
 
 
 int
-DofManager :: packDOFsUnknowns(CommunicationBuffer &buff, EquationID type,
+DofManager :: packDOFsUnknowns(CommunicationBuffer &buff,
                                ValueModeType mode, TimeStep *stepN)
 {
-    int i, result = 1;
-    for ( i = 1; i <= numberOfDofs; i++ ) {
-        result &= this->giveDof(i)->packUnknowns(buff, type, mode, stepN);
+    int result = 1;
+    for ( int i = 1; i <= numberOfDofs; i++ ) {
+        result &= this->giveDof(i)->packUnknowns(buff, mode, stepN);
     }
 
     return result;

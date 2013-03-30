@@ -123,11 +123,9 @@ public:
      * Useful mainly for postprocessing.
      * @param ic Index of coordinate.
      * @param tStep Time step for the displacement.
-     * @param type Equation ID for displacement of node.
      * @param scale Scaling of displacement.
      */
-    virtual double giveUpdatedCoordinate(int ic, TimeStep *tStep,
-                                               EquationID type, double scale = 1.);
+    virtual double giveUpdatedCoordinate(int ic, TimeStep *tStep, double scale = 1.);
     /**
      * Returns updated coordinate of receiver. Return value is computed
      * as coordinate + scale * displacement, where corresponding displacement is obtained
@@ -138,7 +136,7 @@ public:
      * @param type Equation ID for displacement of node.
      * @param scale Scaling of displacement.
      */
-    virtual void giveUpdatedCoordinates(FloatArray &answer, TimeStep *tStep, EquationID type, double scale = 1.);
+    virtual void giveUpdatedCoordinates(FloatArray &answer, TimeStep *tStep, double scale = 1.);
 
     // local coordinate system
     /// Returns nonzero if node has prescribed local coordinate system.

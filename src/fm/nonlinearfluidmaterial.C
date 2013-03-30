@@ -63,9 +63,9 @@ NonlinearFluidMaterial :: initializeFrom(InputRecord *ir)
 
     this->FluidDynamicMaterial :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, viscosity, IFT_NonlinearFluidMaterial_mu, "mu");
-    IR_GIVE_FIELD(ir, alpha, IFT_NonlinearFluidMaterial_alpha, "alpha");
-    IR_GIVE_FIELD(ir, c, IFT_NonlinearFluidMaterial_C, "c");
+    IR_GIVE_FIELD(ir, viscosity, _IFT_NonlinearFluidMaterial_mu);
+    IR_GIVE_FIELD(ir, alpha, _IFT_NonlinearFluidMaterial_alpha);
+    IR_GIVE_FIELD(ir, c, _IFT_NonlinearFluidMaterial_C);
 
     return IRRT_OK;
 }

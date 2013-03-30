@@ -64,18 +64,18 @@ GeneralBoundaryCondition :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;           // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, loadTimeFunction, IFT_GeneralBoundaryCondition_LoadTimeFunct, "loadtimefunction");
+    IR_GIVE_FIELD(ir, loadTimeFunction, _IFT_GeneralBoundaryCondition_LoadTimeFunct);
     if ( loadTimeFunction <= 0 ) {
         _error("initializeFrom: bad loadtimefunction id");
     }
 
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_GeneralBoundaryCondition_valType, "valtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_GeneralBoundaryCondition_valType);
     valType = ( bcValType ) val;
 
-    IR_GIVE_OPTIONAL_FIELD(ir, defaultDofs, IFT_GeneralBoundaryCondition_defaultDofs, "defaultdofs");
+    IR_GIVE_OPTIONAL_FIELD(ir, defaultDofs, _IFT_GeneralBoundaryCondition_defaultDofs);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, isImposedTimeFunction, IFT_GeneralBoundaryCondition_IsImposedTimeFunct, "isimposedtimefunction");
+    IR_GIVE_OPTIONAL_FIELD(ir, isImposedTimeFunction, _IFT_GeneralBoundaryCondition_IsImposedTimeFunct);
     
     return IRRT_OK;
 }

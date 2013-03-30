@@ -221,7 +221,7 @@ public:
      * @return Value of unknown. If activeBC exist then returns value prescribed by BC. If stepN is time step
      * when IC apply, returns value given by this IC.
      */
-    virtual double giveUnknown(EquationID type, ValueModeType mode, TimeStep *stepN) = 0;
+    virtual double giveUnknown(ValueModeType mode, TimeStep *stepN) = 0;
     /**
      * The key method of class Dof. Returns the value of the unknown of the receiver
      * at given time step associated to given field.
@@ -243,11 +243,7 @@ public:
      * @param mode Value mode for unknowns.
      * @param stepN Time step for when unknowns are requested.
      */
-    virtual void giveUnknowns(FloatArray &masterUnknowns, EquationID eid, ValueModeType mode, TimeStep *stepN)
-    {
-        masterUnknowns.resize(1);
-        masterUnknowns.at(1) = this->giveUnknown(eid, mode, stepN);
-    }
+    virtual void giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, TimeStep *stepN);
     /**
      * The key method of class Dof. Returns the value of the unknown of the receiver
      * at given time step associated to given field. For primary dof it returns is associated unknown value,
@@ -257,11 +253,7 @@ public:
      * @param mode Value mode for unknowns.
      * @param stepN Time step for when unknowns are requested.
      */
-    virtual void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *stepN)
-    {
-        masterUnknowns.resize(1);
-        masterUnknowns.at(1) = this->giveUnknown(field, mode, stepN);
-    }
+    virtual void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *stepN);
 
     /**
      * Computes dof transformation array, which describes the dependence of receiver value on values of master dofs.
@@ -269,11 +261,7 @@ public:
      * corresponding master DOF values to obtain slave value.
      * @param masterContribs Contributions of master dofs for receiver.
      */
-    virtual void computeDofTransformation(FloatArray &masterContribs)
-    {
-        masterContribs.resize(1);
-        masterContribs.at(1) = 1.0;
-    }
+    virtual void computeDofTransformation(FloatArray &masterContribs);
     /**
      * @return Number of primary dofs, on which receiver value depends on (even recursively).
      */
@@ -334,11 +322,7 @@ public:
     /**
      * @return Array of master DofManagers to which the receiver is linked.
      */
-    virtual void giveMasterDofManArray(IntArray &answer)
-    {
-        answer.resize(1);
-        answer.at(1) = this->giveDofManNumber();
-    }
+    virtual void giveMasterDofManArray(IntArray &answer);
     /**
      * Local renumbering support. For some tasks (parallel load balancing, for example) it is necessary to
      * renumber the entities. The various FEM components (such as nodes or elements) typically contain
@@ -354,13 +338,13 @@ public:
      * The format of output depends on analysis type.
      * Called from corresponding e-model.
      */
-    virtual void printSingleOutputAt(FILE *file, TimeStep *stepN, char ch, EquationID type, ValueModeType mode, double scale = 1.0);
+    virtual void printSingleOutputAt(FILE *file, TimeStep *stepN, char ch, ValueModeType mode, double scale = 1.0);
     /**
      * Prints Dof output (it prints value of unknown related to dof at given timeStep).
      * The format of output depends on analysis type.
      * Called from corresponding e-model.
      */
-    virtual void printMultipleOutputAt(FILE *File, TimeStep *stepN, char *ch, EquationID type, ValueModeType *mode, int nite);
+    virtual void printMultipleOutputAt(FILE *File, TimeStep *stepN, char *ch, ValueModeType *mode, int nite);
 
     /// Prints the receiver state on stdout.
     virtual void printYourself();
@@ -402,8 +386,7 @@ public:
      * @param dofValue Value of unknown. Old value will generally be lost.
      * @see EngngModel::requiresUnknownsDictionaryUpdate
      */
-    virtual void updateUnknownsDictionary(TimeStep *tStep, EquationID type,
-                                           ValueModeType mode, double dofValue) { }
+    virtual void updateUnknownsDictionary(TimeStep *tStep, ValueModeType mode, double dofValue) { }
     /**
      * Access dictionary value, if not present zero is returned.
      * @param tStep Time step.
@@ -411,8 +394,7 @@ public:
      * @param mode Mode of value.
      * @param dofValue Value of the dof.
      */
-    virtual void giveUnknownsDictionaryValue(TimeStep *tStep, EquationID type,
-                                             ValueModeType mode, double &dofValue) { }
+    virtual void giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode, double &dofValue) { }
 
     /// Prints simple error message and exits.
     void error(const char *file, int line, const char *format, ...) const;
@@ -452,14 +434,14 @@ public:
      * If dof is slave, then no packing is done, this is maintained by master. This requires master
      * be available at same partition as slave.
      * @param buff Communication buffer to pack data.
-     * @param type Id of equation that unknown belongs to.
      * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
      * @param stepN Time step when unknown requested. See documentation of particular EngngModel
      * class for valid stepN values (most implementations can return only values for current
      * and possibly for previous time step).
      * @return Nonzero if successful.
+     * @todo Remove this? It is not inherited by MasterDof. Is this leftovers? / Mikael
      */
-    virtual int packUnknowns(CommunicationBuffer &buff, EquationID type, ValueModeType mode, TimeStep *stepN)
+    virtual int packUnknowns(CommunicationBuffer &buff, ValueModeType mode, TimeStep *stepN)
     { return 1; }
     /**
      * Unpacks DOF unknown from communication buffer and updates unknown if necessary.
@@ -471,14 +453,14 @@ public:
      * If do is slave, then no unpacking and updating is done. This is left on master, which must be
      * available on same partition.
      * @param buff Buffer containing packed message.
-     * @param type Id of equation that unknown belongs to.
      * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
      * @param stepN Time step when unknown requested. See documentation of particular EngngModel
      * class for valid stepN values (most implementations can return only values for current
      * and possibly for previous time step).
      * @return Nonzero if successful.
+     * @todo Remove this? It is not inherited by MasterDof. Is this leftovers? / Mikael
      */
-    virtual int unpackAndUpdateUnknown(CommunicationBuffer &buff, EquationID type,
+    virtual int unpackAndUpdateUnknown(CommunicationBuffer &buff,
                                        ValueModeType mode, TimeStep *stepN) { return 1; }
 #endif
 

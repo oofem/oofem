@@ -197,9 +197,9 @@ LEPlic :: doLagrangianPhase(TimeStep *atTime)
 
 #if 1
         /* Original version */
-        dman->giveUnknownVector( v_t, velocityMask, EID_MomentumBalance, VM_Total, atTime->givePreviousStep() );
+        dman->giveUnknownVector( v_t, velocityMask, VM_Total, atTime->givePreviousStep() );
         /* Modified version */
-        //dman->giveUnknownVector(v_t, velocityMask, EID_MomentumBalance, VM_Total, atTime);
+        //dman->giveUnknownVector(v_t, velocityMask, VM_Total, atTime);
 
         // Original version
         // compute updated position x(tn)+0.5*dt*v(tn,x(tn))
@@ -229,7 +229,7 @@ LEPlic :: doLagrangianPhase(TimeStep *atTime)
 
 #else
         // pure explicit version
-        dman->giveUnknownVector(v_t, velocityMask, EID_MomentumBalance, VM_Total, atTime);
+        dman->giveUnknownVector(v_t, velocityMask, VM_Total, atTime);
 
         for ( ci = 1; ci <= nsd; ci++ ) {
             x2.at(ci) = x.at(ci) + dt *v_t.at(ci);
@@ -657,7 +657,7 @@ LEPlic :: initializeFrom(InputRecord *ir)
     IRResultType result;
 
     orig_reference_fluid_volume = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, orig_reference_fluid_volume, IFT_LEPLIC_refVol, _IFT_LEPLIC_refVol);
+    IR_GIVE_OPTIONAL_FIELD(ir, orig_reference_fluid_volume, _IFT_LEPLIC_refVol);
     return IRRT_OK;
 }
 

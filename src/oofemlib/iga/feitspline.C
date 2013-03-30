@@ -72,13 +72,10 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
     int *indexKnotVec, indexKnotVal;
     int pos, p;
 
-    const char *IFT_localIndexKnotVectorString [ 3 ] = {
-        "localindexknotvectoru", "localindexknotvectorv", "localindexknotvectorw"
-    };
-    _InputFieldType IFT_localIndexKnotVectorType [ 3 ] = {
-        IFT_TSplineInterpolation_localIndexKnotVectorU,
-        IFT_TSplineInterpolation_localIndexKnotVectorV,
-        IFT_TSplineInterpolation_localIndexKnotVectorW
+    InputFieldType IFT_localIndexKnotVector [ 3 ] = {
+        _IFT_TSplineInterpolation_localIndexKnotVectorU,
+        _IFT_TSplineInterpolation_localIndexKnotVectorV,
+        _IFT_TSplineInterpolation_localIndexKnotVectorW
     };
     int max_deg = 0;
     for ( int i = 0; i < nsd; i++ ) {
@@ -96,9 +93,9 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
 
     for ( int n = 0; n < nsd; n++ ) {
         localIndexKnotVector_tmp.resize(0);
-        IR_GIVE_FIELD(ir, localIndexKnotVector_tmp, IFT_localIndexKnotVectorType [ n ], IFT_localIndexKnotVectorString [ n ]);
+        IR_GIVE_FIELD(ir, localIndexKnotVector_tmp, IFT_localIndexKnotVector [ n ]);
         if ( localIndexKnotVector_tmp.giveSize() != totalNumberOfControlPoints * ( degree [ n ] + 2 ) ) {
-            OOFEM_ERROR2("BSplineInterpolation::initializeFrom - invalid size of knot vector %s", IFT_localIndexKnotVectorString [ n ]);
+            OOFEM_ERROR2("BSplineInterpolation::initializeFrom - invalid size of knot vector %s", IFT_localIndexKnotVector [ n ]);
         }
 
         pos = 0;
@@ -115,7 +112,7 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
             for ( int j = 1; j < degree [ n ] + 2; j++ ) {
                 if ( indexKnotVal > indexKnotVec [ j ] ) {
                     OOFEM_ERROR3("TSplineInterpolation::initializeFrom - local index knot vector %s of control point %d is not monotonic",
-                                 IFT_localIndexKnotVectorString [ n ], i + 1);
+                                 IFT_localIndexKnotVector [ n ], i + 1);
                 }
 
                 /* this is only for the case when TSpline = NURBS
@@ -129,13 +126,13 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
             // check for nondegeneracy of local index knot vector
             if ( indexKnotVal == indexKnotVec [ 0 ] ) {
                 OOFEM_ERROR3("TSplineInterpolation::initializeFrom - local index knot vector %s of control point %d is degenerated",
-                             IFT_localIndexKnotVectorString [ n ], i + 1);
+                             IFT_localIndexKnotVector [ n ], i + 1);
             }
 
             // check for range of local index knot vector
             if ( indexKnotVec [ 0 ] <= 0 || indexKnotVal > knotValues [ n ].giveSize() ) {
                 OOFEM_ERROR3("TSplineInterpolation::initializeFrom - local index knot vector %s of control point %d out of range",
-                             IFT_localIndexKnotVectorString [ n ], i + 1);
+                             IFT_localIndexKnotVector [ n ], i + 1);
             }
         }
     }

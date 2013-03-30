@@ -76,8 +76,8 @@ LsMasterMat :: initializeFrom(InputRecord *ir)
 
 
     
-    IR_GIVE_OPTIONAL_FIELD(ir, slaveMat, IFT_LsMasterMat_slaveMat, "slavemat"); // number of slave material
-    IR_GIVE_OPTIONAL_FIELD(ir, m, IFT_LsMasterMat_m, "m"); // type of Set-Hill strain tensor
+    IR_GIVE_OPTIONAL_FIELD(ir, slaveMat, _IFT_LsMasterMat_slaveMat); // number of slave material
+    IR_GIVE_OPTIONAL_FIELD(ir, m, _IFT_LsMasterMat_m); // type of Set-Hill strain tensor
 
     return IRRT_OK;
 }

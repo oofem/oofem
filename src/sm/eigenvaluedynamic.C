@@ -70,7 +70,7 @@ EigenValueDynamic :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     //EngngModel::instanciateFrom (ir);
 
-    IR_GIVE_FIELD(ir, numberOfRequiredEigenValues, IFT_EigenValueDynamic_nroot, "nroot");
+    IR_GIVE_FIELD(ir, numberOfRequiredEigenValues, _IFT_EigenValueDynamic_nroot);
 
     // numberOfSteps set artificially to numberOfRequiredEigenValues
     // in order to allow
@@ -78,7 +78,7 @@ EigenValueDynamic :: initializeFrom(InputRecord *ir)
     // numberOfSteps = numberOfRequiredEigenValues;
     numberOfSteps = 1;
 
-    IR_GIVE_FIELD(ir, rtolv, IFT_EigenValueDynamic_rtolv, "rtolv");
+    IR_GIVE_FIELD(ir, rtolv, _IFT_EigenValueDynamic_rtolv);
     if ( rtolv < 1.e-12 ) {
         rtolv =  1.e-12;
     }
@@ -88,31 +88,27 @@ EigenValueDynamic :: initializeFrom(InputRecord *ir)
     }
 
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EigenValueDynamic_stype, "stype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EigenValueDynamic_stype);
     solverType = ( GenEigvalSolverType ) val;
 
     val = 0; //Default Skyline
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
     return IRRT_OK;
 }
 
 
-double EigenValueDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
-                                                  TimeStep *tStep, Domain *d, Dof *dof)
+double EigenValueDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displacement, eigenvalue.
 // This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
+#if DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
-
-    if ( chc != EID_MomentumBalance ) {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-        return 0.;
-    }
+#endif
 
     switch ( mode ) {
     case VM_Total:  // EigenVector
@@ -203,7 +199,7 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
         //
         // create resulting objects eigVec and eigVal
         //
-        eigVec.resize(this->giveNumberOfEquations(EID_MomentumBalance), numberOfRequiredEigenValues);
+        eigVec.resize(this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()), numberOfRequiredEigenValues);
         eigVec.zero();
         eigVal.resize(numberOfRequiredEigenValues);
         eigVal.zero();
@@ -412,7 +408,7 @@ int EigenValueDynamic :: resolveCorrespondingEigenStepNumber(void *obj)
 void
 EigenValueDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
-    iDof->printSingleOutputAt(stream, atTime, 'd', EID_MomentumBalance, VM_Total);
+    iDof->printSingleOutputAt(stream, atTime, 'd', VM_Total);
 }
 
 #ifdef __SLEPC_MODULE

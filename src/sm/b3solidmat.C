@@ -39,6 +39,7 @@
 #include "timestep.h"
 #include "contextioerr.h"
 #include "datastream.h"
+#include "b3mat.h" // For the input record keywords.
 
 namespace oofem {
 IRResultType
@@ -61,62 +62,62 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
     // EmoduliMode has to be set first because characteristic times are computed from RheoChM initialization
     this->EmoduliMode = 0;
     // retardation spectrum or least square method is used. Retardation spectrum is default (EmoduliMode==0)
-    IR_GIVE_OPTIONAL_FIELD(ir, EmoduliMode, IFT_B3Material_emodulimode, "emodulimode");
+    IR_GIVE_OPTIONAL_FIELD(ir, EmoduliMode, _IFT_B3Material_emodulimode);
 
     KelvinChainMaterial :: initializeFrom(ir);
 
     int mode = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, mode, IFT_B3Material_mode, "mode");
+    IR_GIVE_OPTIONAL_FIELD(ir, mode, _IFT_B3Material_mode);
 
     if ( mode == 0 ) { // default - estimate model parameters q1,..,q5 from composition
-        IR_GIVE_FIELD(ir, fc, IFT_B3Material_fc, "fc"); // 28-day standard cylinder compression strength [MPa]
-        IR_GIVE_FIELD(ir,  c, IFT_B3Material_cc, "cc"); // cement content of concrete [kg/m^3]
-        IR_GIVE_FIELD(ir, wc, IFT_B3Material_wc, "w/c"); // ratio (by weight) of water to cementitious material
-        IR_GIVE_FIELD(ir, ac, IFT_B3Material_ac, "a/c"); // ratio (by weight) of aggregate to cement
-        IR_GIVE_FIELD(ir, t0, IFT_B3Material_t0, "t0"); // age when drying begins [days]
+        IR_GIVE_FIELD(ir, fc, _IFT_B3Material_fc); // 28-day standard cylinder compression strength [MPa]
+        IR_GIVE_FIELD(ir,  c, _IFT_B3Material_cc); // cement content of concrete [kg/m^3]
+        IR_GIVE_FIELD(ir, wc, _IFT_B3Material_wc); // ratio (by weight) of water to cementitious material
+        IR_GIVE_FIELD(ir, ac, _IFT_B3Material_ac); // ratio (by weight) of aggregate to cement
+        IR_GIVE_FIELD(ir, t0, _IFT_B3Material_t0); // age when drying begins [days]
     } else { // read model parameters for creep
-        IR_GIVE_FIELD(ir, q1, IFT_B3Material_q1, "q1");
-        IR_GIVE_FIELD(ir, q2, IFT_B3Material_q2, "q2");
-        IR_GIVE_FIELD(ir, q3, IFT_B3Material_q3, "q3");
-        IR_GIVE_FIELD(ir, q4, IFT_B3Material_q4, "q4");
+        IR_GIVE_FIELD(ir, q1, _IFT_B3Material_q1);
+        IR_GIVE_FIELD(ir, q2, _IFT_B3Material_q2);
+        IR_GIVE_FIELD(ir, q3, _IFT_B3Material_q3);
+        IR_GIVE_FIELD(ir, q4, _IFT_B3Material_q4);
     }
 
     // default value = 0; it can be used for basic creep without any external fields
     this->MicroPrestress = 0; //if = 1 computation exploiting Microprestress solidification theory is done;
-    IR_GIVE_OPTIONAL_FIELD(ir, MicroPrestress, IFT_B3Material_microprestress, "microprestress");
+    IR_GIVE_OPTIONAL_FIELD(ir, MicroPrestress, _IFT_B3Material_microprestress);
     // is MPS theory used?
     if ( this->MicroPrestress == 1 ) {
         //?????????????????????????? co z nize uvedenych parametru dat volitelne a jake hodnoty?
         // microprestress-sol-theory: read data for microprestress evaluation
         // constant c0 [MPa^-1 * day^-1]
-        IR_GIVE_FIELD(ir, c0, IFT_B3Material_c0, "c0");
+        IR_GIVE_FIELD(ir, c0, _IFT_B3Material_c0);
         // constant c1 (=C1*R*T/M)
-        IR_GIVE_FIELD(ir, c1, IFT_B3Material_c1, "c1");
+        IR_GIVE_FIELD(ir, c1, _IFT_B3Material_c1);
         // tS0- necessary for the initial value of microprestress = S0 (age when drying begins)
-        IR_GIVE_FIELD(ir, tS0, IFT_B3Material_ts0, "ts0");
+        IR_GIVE_FIELD(ir, tS0, _IFT_B3Material_ts0);
 
         // microprestress-sol-theory: read data for inverse desorption isotherm
-        IR_GIVE_FIELD(ir, w_h, IFT_B3Material_wh, "w_h");
-        IR_GIVE_FIELD(ir, n, IFT_B3Material_ncoeff, "ncoeff");
-        IR_GIVE_FIELD(ir, a, IFT_B3Material_a, "a");
+        IR_GIVE_FIELD(ir, w_h, _IFT_B3Material_wh);
+        IR_GIVE_FIELD(ir, n, _IFT_B3Material_ncoeff);
+        IR_GIVE_FIELD(ir, a, _IFT_B3Material_a);
         //?????????????????????????? co z vyse uvedenych parametru dat volitelne a jake hodnoty?
     }
 
     // read shrinkage mode
     int shm = 0;
-    IR_GIVE_FIELD(ir, shm, IFT_B3Material_shmode, "shmode");
+    IR_GIVE_FIELD(ir, shm, _IFT_B3Material_shmode);
     this->shMode = ( b3ShModeType ) shm;
 
     if ( this->shMode == B3_PointShrinkage ) {   // #2 in enumerator
         // read additional shrinkage parameters
-        IR_GIVE_FIELD(ir, es0, IFT_B3Material_es0, "es0");
-        IR_GIVE_FIELD(ir, r, IFT_B3Material_r, "r");
-        IR_GIVE_FIELD(ir, rprime, IFT_B3Material_rprime, "rprime");
-        IR_GIVE_FIELD(ir, at, IFT_B3Material_at, "at");
+        IR_GIVE_FIELD(ir, es0, _IFT_B3Material_es0);
+        IR_GIVE_FIELD(ir, r, _IFT_B3Material_r);
+        IR_GIVE_FIELD(ir, rprime, _IFT_B3Material_rprime);
+        IR_GIVE_FIELD(ir, at, _IFT_B3Material_at);
         // read sorption isotherm data
-        IR_GIVE_FIELD(ir, w_h, IFT_B3Material_wh, "w_h");
-        IR_GIVE_FIELD(ir, n, IFT_B3Material_ncoeff, "ncoeff");
-        IR_GIVE_FIELD(ir, a, IFT_B3Material_a, "a");
+        IR_GIVE_FIELD(ir, w_h, _IFT_B3Material_wh);
+        IR_GIVE_FIELD(ir, n, _IFT_B3Material_ncoeff);
+        IR_GIVE_FIELD(ir, a, _IFT_B3Material_a);
     } else if ( this->shMode == B3_PointShrinkageMPS ) {   // #3 in enumerator
         // microprestress-sol-theory: read data for shrinkage evaluation
         if ( this->MicroPrestress == 0 ) {
@@ -127,9 +128,9 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
         initHum = -1;
         finalHum = -1;
 
-        IR_GIVE_OPTIONAL_FIELD(ir, kSh, IFT_B3Material_ksh, "ksh");
-        IR_GIVE_OPTIONAL_FIELD(ir, initHum, IFT_B3Material_initialhumidity, "inithum");
-        IR_GIVE_OPTIONAL_FIELD(ir, finalHum, IFT_B3Material_finalhumidity, "finalhum");
+        IR_GIVE_OPTIONAL_FIELD(ir, kSh, _IFT_B3Material_ksh);
+        IR_GIVE_OPTIONAL_FIELD(ir, initHum, _IFT_B3Material_initialhumidity);
+        IR_GIVE_OPTIONAL_FIELD(ir, finalHum, _IFT_B3Material_finalhumidity);
         // either kSh or initHum and finalHum must be given in input record
         if ( !( ( this->kSh != -1 ) || ( ( initHum != -1 ) && ( finalHum != -1 ) ) ) ) {
             _error("either kSh or initHum and finalHum must be given in input record");
@@ -142,12 +143,12 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
          */
 
         if ( this->kSh == -1 ) {
-            IR_GIVE_OPTIONAL_FIELD(ir, alpha1, IFT_B3Material_alpha1, "alpha1");       // influence of cement type
-            IR_GIVE_OPTIONAL_FIELD(ir, alpha2, IFT_B3Material_alpha2, "alpha2");       // influence of curing type
+            IR_GIVE_OPTIONAL_FIELD(ir, alpha1, _IFT_B3Material_alpha1);       // influence of cement type
+            IR_GIVE_OPTIONAL_FIELD(ir, alpha2, _IFT_B3Material_alpha2);       // influence of curing type
             this->kSh = alpha1 * alpha2 * ( 1 - pow(finalHum, 3.) ) * ( 0.019 * pow(wc * c, 2.1) * pow(fc, -0.28) + 270 ) * 1.e-6 / fabs(initHum - finalHum);
         }
     } else if ( this->shMode == B3_AverageShrinkage ) {
-        IR_GIVE_FIELD(ir, ks, IFT_B3Material_ks, "ks");   // cross-section shape factor
+        IR_GIVE_FIELD(ir, ks, _IFT_B3Material_ks);   // cross-section shape factor
         /*
          * use ks = 1.0 for an infinite slab
          *        = 1.15 for an infinite cylinder
@@ -155,20 +156,20 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
          *        = 1.30 for a sphere
          *        = 1.55 for a cube
          */
-        IR_GIVE_FIELD(ir, hum, IFT_B3Material_hum, "hum");         // relative humidity of the environment
-        IR_GIVE_FIELD(ir, vs, IFT_B3Material_vs, "vs");         // volume-to-surface ratio (in m???)
+        IR_GIVE_FIELD(ir, hum, _IFT_B3Material_hum);         // relative humidity of the environment
+        IR_GIVE_FIELD(ir, vs, _IFT_B3Material_vs);         // volume-to-surface ratio (in m???)
         if ( mode == 0 ) {       // default mode - estimate model parameters kt, EpsSinf, q5 from composition
-            IR_GIVE_OPTIONAL_FIELD(ir, alpha1, IFT_B3Material_alpha1, "alpha1");             // influence of cement type
-            IR_GIVE_OPTIONAL_FIELD(ir, alpha2, IFT_B3Material_alpha2, "alpha2");             // influence of curing type
+            IR_GIVE_OPTIONAL_FIELD(ir, alpha1, _IFT_B3Material_alpha1);             // influence of cement type
+            IR_GIVE_OPTIONAL_FIELD(ir, alpha2, _IFT_B3Material_alpha2);             // influence of curing type
         } else {         // read model parameters
-            IR_GIVE_FIELD(ir, t0, IFT_B3Material_t0, "t0"); // age when drying begins [days]
-            IR_GIVE_FIELD(ir, kt, IFT_B3Material_kt, "kt");
-            IR_GIVE_FIELD(ir, EpsSinf, IFT_B3Material_EpsSinf, "epssinf");
-            IR_GIVE_FIELD(ir, q5, IFT_B3Material_q5, "q5");
+            IR_GIVE_FIELD(ir, t0, _IFT_B3Material_t0); // age when drying begins [days]
+            IR_GIVE_FIELD(ir, kt, _IFT_B3Material_kt);
+            IR_GIVE_FIELD(ir, EpsSinf, _IFT_B3Material_EpsSinf);
+            IR_GIVE_FIELD(ir, q5, _IFT_B3Material_q5);
         }
     }
 
-    IR_GIVE_FIELD(ir, talpha, IFT_B3Material_talpha, "talpha");
+    IR_GIVE_FIELD(ir, talpha, _IFT_B3Material_talpha);
 
     // evaluate the total water content [kg/m^3]
     w = wc * c;

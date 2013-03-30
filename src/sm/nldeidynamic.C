@@ -94,20 +94,20 @@ NlDEIDynamic :: initializeFrom(InputRecord *ir)
 
     StructuralEngngModel :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, dumpingCoef, IFT_NlDEIDynamic_dumpcoef, "dumpcoef"); // C = dumpingCoef * M
-    IR_GIVE_FIELD(ir, deltaT, IFT_NlDEIDynamic_deltat, "deltat");
+    IR_GIVE_FIELD(ir, dumpingCoef, _IFT_NlDEIDynamic_dumpcoef); // C = dumpingCoef * M
+    IR_GIVE_FIELD(ir, deltaT, _IFT_NlDEIDynamic_deltat);
 
     drFlag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, drFlag, IFT_NlDEIDynamic_drflag, "drflag");
+    IR_GIVE_OPTIONAL_FIELD(ir, drFlag, _IFT_NlDEIDynamic_drflag);
     if ( drFlag ) {
-        IR_GIVE_FIELD(ir, Tau, IFT_NlDEIDynamic_tau, "tau");
-        IR_GIVE_FIELD(ir, pyEstimate, IFT_NlDEIDynamic_py, "py");
+        IR_GIVE_FIELD(ir, Tau, _IFT_NlDEIDynamic_tau);
+        IR_GIVE_FIELD(ir, pyEstimate, _IFT_NlDEIDynamic_py);
     }
 
 #ifdef __PARALLEL_MODE
-    if ( ir->hasField(IFT_NlDEIDynamic_nodecutmode, "nodecutmode") ) {
+    if ( ir->hasField(_IFT_NlDEIDynamic_nodecutmode) ) {
         commMode = ProblemCommMode__NODE_CUT;
-    } else if ( ir->hasField(IFT_NlDEIDynamic_elementcutmode, "elementcutmode") ) {
+    } else if ( ir->hasField(_IFT_NlDEIDynamic_elementcutmode) ) {
         commMode = ProblemCommMode__ELEMENT_CUT;
     } else {
         _error("instanciateFrom: NlDEIDynamicCommunicatorMode not specified");
@@ -118,7 +118,7 @@ NlDEIDynamic :: initializeFrom(InputRecord *ir)
                                            this->giveNumberOfProcesses(),
                                            this->commMode);
 
-    if ( ir->hasField(IFT_NlDEIDynamic_nonlocalext, "nonlocalext") ) {
+    if ( ir->hasField(_IFT_NlDEIDynamic_nonlocalext) ) {
         nonlocalExt = 1;
         nonlocCommunicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
                                                      this->giveNumberOfProcesses(),
@@ -131,24 +131,19 @@ NlDEIDynamic :: initializeFrom(InputRecord *ir)
 }
 
 
-double NlDEIDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
-                                              TimeStep *tStep, Domain *d, Dof *dof)
+double NlDEIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 // Returns unknown quantity like displacement, velocity of equation eq.
 // This function translates this request to numerical method language.
 {
     int eq = dof->__giveEquationNumber();
+#if DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
+#endif
 
     if ( tStep != this->giveCurrentStep() ) {
         _error("giveUnknownComponent: unknown time step encountered");
-        return 0.;
-    }
-
-
-    if ( chc != EID_MomentumBalance ) {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
         return 0.;
     }
 
@@ -201,7 +196,7 @@ void NlDEIDynamic :: solveYourself()
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
     // Force equation numbering before setting up comm maps.
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
     OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
 
@@ -222,7 +217,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     //
 
     Domain *domain = this->giveDomain(1);
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
     int nman  = domain->giveNumberOfDofManagers();
 
     DofManager *node;
@@ -329,9 +324,9 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
 
                 jj = iDof->__giveEquationNumber();
                 if ( jj ) {
-                    displacementVector.at(jj) = iDof->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-                    velocityVector.at(jj)     = iDof->giveUnknown(EID_MomentumBalance, VM_Velocity, tStep);
-                    accelerationVector.at(jj)    = iDof->giveUnknown(EID_MomentumBalance, VM_Acceleration, tStep) ;
+                    displacementVector.at(jj) = iDof->giveUnknown(VM_Total, tStep);
+                    velocityVector.at(jj)     = iDof->giveUnknown(VM_Velocity, tStep);
+                    accelerationVector.at(jj) = iDof->giveUnknown(VM_Acceleration, tStep) ;
                 }
             }
         }
@@ -431,7 +426,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
             pt += c * ( 1.0 - exp( dumpingCoef * ( tStep->giveTargetTime() - Tau ) ) ) / dumpingCoef / Tau;
         }
 
-        loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
+        loadVector.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
         for ( k = 1; k <= neq; k++ ) {
             loadVector.at(k) = pt * loadRefVector.at(k) - internalForces.at(k);
         }
@@ -529,7 +524,7 @@ void NlDEIDynamic :: updateYourself(TimeStep *stepN)
 void
 NlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *stepN)
 {
-    answer.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
+    answer.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     answer.zero();
 
     //
@@ -552,7 +547,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
 {
     Domain *domain = this->giveDomain(1);
     int nelem = domain->giveNumberOfElements();
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
     int i, j, jj, n;
     double maxOmi, maxOmEl;
     FloatMatrix charMtrx, charMtrx2;
@@ -862,7 +857,7 @@ NlDEIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
         VM_Total, VM_Velocity, VM_Acceleration
     };
 
-    iDof->printMultipleOutputAt(stream, atTime, dofchar, EID_MomentumBalance, dofmodes, 3);
+    iDof->printMultipleOutputAt(stream, atTime, dofchar, dofmodes, 3);
 }
 
 void

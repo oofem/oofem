@@ -1843,9 +1843,9 @@ void Shell7Base :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
     if ( type == IST_DirectorField ) {
         answer.resize(3);
         answer = this->giveInitialNodeDirector(node);
-        answer.at(1) += this->giveNode(node)->giveDofWithID(W_u)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-        answer.at(2) += this->giveNode(node)->giveDofWithID(W_v)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-        answer.at(3) += this->giveNode(node)->giveDofWithID(W_w)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+        answer.at(1) += this->giveNode(node)->giveDofWithID(W_u)->giveUnknown(VM_Total, tStep);
+        answer.at(2) += this->giveNode(node)->giveDofWithID(W_v)->giveUnknown(VM_Total, tStep);
+        answer.at(3) += this->giveNode(node)->giveDofWithID(W_w)->giveUnknown(VM_Total, tStep);
         answer.times( this->giveCrossSection()->give(CS_Thickness) );
     } else {
         answer.resize(0);
@@ -2023,7 +2023,7 @@ Shell7Base :: computeVectorOf(const IntArray &dofIdArray, ValueModeType u, TimeS
                 Dof *d = dMan->giveDofWithID( dofIdArray.at(j) );
                 /// @todo: will fail if any other dof then gamma is excluded from enrichment 
                 /// since I only add "j". Instead I should skip certain dof numbers when incrementing
-                answer.at(k+j) = d->giveUnknown(EID_MomentumBalance, VM_Total, stepN); ///@todo: EID_MomentumBalance is just a dummy argument in this case and feels redundant
+                answer.at(k+j) = d->giveUnknown(VM_Total, stepN);
             }
         }
         k += 7;
@@ -2045,12 +2045,12 @@ Shell7Base :: temp_computeBoundaryVectorOf(IntArray &dofIdArray, int boundary, V
     answer.zero();
     int k = 0;
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
-        DofManager *dMan = this->giveDofManager(bNodes.at(i));        
+        DofManager *dMan = this->giveDofManager(bNodes.at(i));
         for (int j = 1; j <= dofIdArray.giveSize(); j++ ) {
             Dof *d = dMan->giveDof(j);
             k++;
             if ( dMan->hasDofID( (DofIDItem) dofIdArray.at(j) ) ) {
-                answer.at(k) = d->giveUnknown(EID_MomentumBalance, VM_Total, stepN); 
+                answer.at(k) = d->giveUnknown(VM_Total, stepN); 
             }
         }
     }

@@ -95,15 +95,15 @@ IMLSolver :: initializeFrom(InputRecord *ir)
     int val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_IMLSolver_lstype, "stype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_IMLSolver_lstype, "stype");
     solverType = ( IMLSolverType ) val;
 
     tol = 1.e-5;
-    IR_GIVE_OPTIONAL_FIELD(ir, tol, IFT_IMLSolver_lstol, "lstol");
+    IR_GIVE_OPTIONAL_FIELD(ir, tol, _IFT_IMLSolver_lstol, "lstol");
     maxite = 200;
-    IR_GIVE_OPTIONAL_FIELD(ir, maxite, IFT_IMLSolver_lsiter, "lsiter");
+    IR_GIVE_OPTIONAL_FIELD(ir, maxite, _IFT_IMLSolver_lsiter, "lsiter");
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_IMLSolver_lsprecond, "lsprecond");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_IMLSolver_lsprecond, "lsprecond");
     precondType = ( IMLPrecondType ) val;
 
     // create preconditioner

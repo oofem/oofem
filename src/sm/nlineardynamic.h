@@ -146,7 +146,7 @@ public:
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn, Domain *d);
     virtual void updateAttributes(MetaStep *mStep);
 
-    virtual double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual TimeStep *giveNextStep();
@@ -164,8 +164,7 @@ public:
     virtual fMode giveFormulation() { return nonLinFormulation; }
     virtual int useNonlocalStiffnessOption() { return this->nonlocalStiffnessFlag; }
     /// For load balancing purposes we store all values with same EquationID; so hash is computed from mode value only
-    virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN)
-    { return ( int ) mode; }
+    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN) { return ( int ) mode; }
     void timesMtrx(FloatArray &answer, FloatArray &vec, CharType type, Domain *domain, TimeStep *tStep);
 
 #ifdef __OOFEG

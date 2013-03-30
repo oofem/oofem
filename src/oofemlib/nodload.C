@@ -42,7 +42,7 @@ NodalLoad :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     int value = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_BoundaryLoad_cstype, "cstype");
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_NodalLoad_cstype);
     coordSystemType = ( BL_CoordSystType ) value;
 
     return Load :: initializeFrom(ir);

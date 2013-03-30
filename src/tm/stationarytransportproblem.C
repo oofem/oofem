@@ -90,11 +90,11 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
 
     EngngModel :: initializeFrom(ir);
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
     /* The following done in updateAttributes
@@ -104,7 +104,7 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
     // read field export flag
     IntArray exportFields;
     exportFields.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, exportFields, IFT_StationaryTransportProblem_exportfields, "exportfields");
+    IR_GIVE_OPTIONAL_FIELD(ir, exportFields, _IFT_StationaryTransportProblem_exportfields);
     if ( exportFields.giveSize() ) {
         IntArray mask(1);
         FieldManager *fm = this->giveContext()->giveFieldManager();
@@ -130,23 +130,15 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
 
 
 
-double StationaryTransportProblem :: giveUnknownComponent(EquationID chc, ValueModeType mode,
-                                                          TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displacement, velocity of equation eq
-// This function translates this request to numerical method language
+double StationaryTransportProblem :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
+#if DEBUG
     int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
-
-    if ( chc == EID_ConservationEquation ) { // heat and mass concetration vector
-        return UnknownsField->giveUnknownValue(dof, mode, tStep);
-    } else {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-    }
-
-    return 0.;
+#endif
+    return UnknownsField->giveUnknownValue(dof, mode, tStep);
 }
 
 
@@ -187,7 +179,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
         // allocate space for solution vector
         FloatArray *solutionVector = UnknownsField->giveSolutionVector(tStep);
-        solutionVector->resize( this->giveNumberOfEquations(EID_ConservationEquation) );
+        solutionVector->resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
         solutionVector->zero();
 
         conductivityMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
@@ -210,7 +202,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     //
     // assembling the element part of load vector
     //
-    rhsVector.resize( this->giveNumberOfEquations(EID_ConservationEquation) );
+    rhsVector.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     rhsVector.zero();
 
     this->assembleVectorFromElements( rhsVector, tStep, EID_ConservationEquation, ElementInternalSourceVector, VM_Total,
@@ -402,7 +394,7 @@ StationaryTransportProblem :: updateDomainLinks()
 void
 StationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
-    iDof->printSingleOutputAt(stream, atTime, 'f', EID_ConservationEquation, VM_Total);
+    iDof->printSingleOutputAt(stream, atTime, 'f', VM_Total);
 }
 
 void

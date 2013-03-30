@@ -133,7 +133,7 @@ public:
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
 
-    virtual double giveUnknownComponent(EquationID eid, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
     virtual double giveUnknownComponent(UnknownType ut, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
     virtual void giveElementCharacteristicVector(FloatArray &answer, int num, CharType type, ValueModeType mode, TimeStep *tStep, Domain *domain);
     virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType type, TimeStep *tStep, Domain *domain);
@@ -158,15 +158,7 @@ public:
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
-    virtual int giveNumberOfEquations(EquationID);
-    virtual int giveNumberOfPrescribedEquations(EquationID);
-    virtual int giveNumberOfDomainEquations(int, EquationID);
-    virtual int giveNumberOfPrescribedDomainEquations(int, EquationID);
-
     virtual int requiresUnknownsDictionaryUpdate() { return renumberFlag; }
-
-    virtual int giveNewEquationNumber(int domain, DofIDItem);
-    virtual int giveNewPrescribedEquationNumber(int domain, DofIDItem);
 
     virtual int forceEquationNumbering(int id);
     virtual int forceEquationNumbering() { return EngngModel :: forceEquationNumbering(); }
@@ -175,7 +167,7 @@ public:
     virtual double giveVariableScale(VarScaleType varId);
 
     virtual void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep);
-    virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN);
+    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN);
 
     virtual MaterialInterface *giveMaterialInterface(int n) { return materialInterface; }
 

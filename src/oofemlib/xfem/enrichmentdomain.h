@@ -43,6 +43,12 @@
 #include "geometry.h"
 
 namespace oofem {
+
+///@name Input fields for Enrichment domains
+//@{
+#define _IFT_DofManList_list "list"
+//@}
+
 /**
  * Abstract representation of enrichment domain - the geometry description of the particular 
  * enrichment item. Includes BasicGeometry as one type of description, list of enriched dofmanagers etc.

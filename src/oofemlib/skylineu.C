@@ -260,7 +260,7 @@ SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut
     IntArray loc;
     int n, i, first, ii, nonlocal;
     Domain *domain = eModel->giveDomain(di);
-    int neq = eModel->giveNumberOfDomainEquations(di, ut);
+    int neq = eModel->giveNumberOfDomainEquations(di, s);
     int nelem = domain->giveNumberOfElements();
     Element *elem;
     //nonlocal = aDomain -> giveAlgorithm() -> useNonlocalStiffness();

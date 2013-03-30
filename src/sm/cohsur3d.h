@@ -42,6 +42,7 @@
 #define _IFT_CohSur3d_kx "kx"
 #define _IFT_CohSur3d_ky "ky"
 #define _IFT_CohSur3d_kz "kz"
+#define _IFT_CohSur3d_area "area"
 //@}
 
 namespace oofem {

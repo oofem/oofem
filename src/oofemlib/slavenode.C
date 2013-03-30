@@ -45,8 +45,8 @@ IRResultType SlaveNode :: initializeFrom(InputRecord *ir)
 
     Node :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, masterDofManagers, IFT_SlaveNode_masterDofManagers, "masterdofman");
-    IR_GIVE_OPTIONAL_FIELD(ir, masterWeights, IFT_SlaveNode_weights, "weights");
+    IR_GIVE_FIELD(ir, masterDofManagers, _IFT_SlaveNode_masterDofManagers);
+    IR_GIVE_OPTIONAL_FIELD(ir, masterWeights, _IFT_SlaveNode_weights);
 
     if ( masterWeights.giveSize() == 0 ) {
         masterWeights.resize(masterDofManagers.giveSize());

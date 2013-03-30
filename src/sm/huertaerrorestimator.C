@@ -57,6 +57,8 @@
 #include "contextioerr.h"
 #include "timer.h"
 #include "oofem_limits.h"
+#include "calmls.h"
+#include "nrsolver.h"
 
 #include <vector>
 #include <string>
@@ -567,7 +569,7 @@ HuertaErrorEstimator :: initializeFrom(InputRecord *ir)
 
     ErrorEstimator :: initializeFrom(ir);
     n = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, n, IFT_HuertaErrorEstimator_normtype, "normtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, n, _IFT_HuertaErrorEstimator_normtype);
     if ( n == 0 ) {
         this->normType = L2Norm;
     } else {
@@ -575,14 +577,14 @@ HuertaErrorEstimator :: initializeFrom(InputRecord *ir)
     }
 
     level = this->refineLevel;
-    IR_GIVE_OPTIONAL_FIELD(ir, level, IFT_HuertaErrorEstimator_refinelevel, "refinelevel");
+    IR_GIVE_OPTIONAL_FIELD(ir, level, _IFT_HuertaErrorEstimator_refinelevel);
     if ( level >= 0 ) {
         this->refineLevel = level;
     }
 
-    IR_GIVE_FIELD(ir, this->requiredError, IFT_HuertaErrorEstimator_requirederror, "requirederror");
+    IR_GIVE_FIELD(ir, this->requiredError, _IFT_HuertaErrorEstimator_requirederror);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, maxSkipSteps, IFT_HuertaErrorEstimator_skipsteps, "skipsteps");
+    IR_GIVE_OPTIONAL_FIELD(ir, maxSkipSteps, _IFT_HuertaErrorEstimator_skipsteps);
     if ( maxSkipSteps < 0 ) {
         maxSkipSteps = 0;
     }
@@ -591,12 +593,12 @@ HuertaErrorEstimator :: initializeFrom(InputRecord *ir)
         maxSkipSteps = 5;
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, initialSkipSteps, IFT_HuertaErrorEstimator_initialskipsteps, "initialskipsteps");
+    IR_GIVE_OPTIONAL_FIELD(ir, initialSkipSteps, _IFT_HuertaErrorEstimator_initialskipsteps);
     if ( initialSkipSteps < 0 ) {
         initialSkipSteps = 0;
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, wErrorFlag, IFT_HuertaErrorEstimator_werror, "werror");
+    IR_GIVE_OPTIONAL_FIELD(ir, wErrorFlag, _IFT_HuertaErrorEstimator_werror);
     if ( wErrorFlag != 0 ) {
         wError = true;
     }
@@ -605,11 +607,11 @@ HuertaErrorEstimator :: initializeFrom(InputRecord *ir)
         masterRun = false;
 
         perMat = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, perMat, IFT_HuertaErrorEstimator_permat, "permat");
+        IR_GIVE_OPTIONAL_FIELD(ir, perMat, _IFT_HuertaErrorEstimator_permat);
 
         impMat = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, impMat, IFT_HuertaErrorEstimator_impmat, "impmat");
-        IR_GIVE_OPTIONAL_FIELD(ir, impPos, IFT_HuertaErrorEstimator_imppos, "imppos");
+        IR_GIVE_OPTIONAL_FIELD(ir, impMat, _IFT_HuertaErrorEstimator_impmat);
+        IR_GIVE_OPTIONAL_FIELD(ir, impPos, _IFT_HuertaErrorEstimator_imppos);
 
         if ( impMat != 0 && perMat == 0 ) {
             _error("initializeFrom: Missing perfect material specification");
@@ -617,7 +619,7 @@ HuertaErrorEstimator :: initializeFrom(InputRecord *ir)
 
 #ifdef EXACT_ERROR
         n = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, n, IFT_HuertaErrorEstimator_exact, "exact"); 
+        IR_GIVE_OPTIONAL_FIELD(ir, n, _IFT_HuertaErrorEstimator_exact); 
         if ( n > 0 ) {
             exactFlag = true;
             if ( n != 1 ) {
@@ -1002,22 +1004,22 @@ HuertaRemeshingCriteria :: initializeFrom(InputRecord *ir)
     double coeff;
     int noRemeshFlag = 0, wErrorFlag = 0;
 
-    IR_GIVE_FIELD(ir, this->requiredError, IFT_HuertaRemeshingCriteria_requirederror, "requirederror");
-    IR_GIVE_FIELD(ir, this->minElemSize, IFT_HuertaRemeshingCriteria_minelemsize, "minelemsize");
+    IR_GIVE_FIELD(ir, this->requiredError, _IFT_HuertaRemeshingCriteria_requirederror);
+    IR_GIVE_FIELD(ir, this->minElemSize, _IFT_HuertaRemeshingCriteria_minelemsize);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, noRemeshFlag, IFT_HuertaRemeshingCriteria_noremesh, "noremesh");
+    IR_GIVE_OPTIONAL_FIELD(ir, noRemeshFlag, _IFT_HuertaRemeshingCriteria_noremesh);
     if ( noRemeshFlag != 0 ) {
         this->noRemesh = true;
     }
 
 
-    IR_GIVE_OPTIONAL_FIELD(ir, wErrorFlag, IFT_HuertaRemeshingCriteria_werror, "werror");
+    IR_GIVE_OPTIONAL_FIELD(ir, wErrorFlag, _IFT_HuertaRemeshingCriteria_werror);
     if ( wErrorFlag != 0 ) {
         this->wError = true;
     }
 
     coeff = this->refineCoeff;
-    IR_GIVE_OPTIONAL_FIELD(ir, coeff, IFT_HuertaRemeshingCriteria_refinecoeff, "refinecoeff");
+    IR_GIVE_OPTIONAL_FIELD(ir, coeff, _IFT_HuertaRemeshingCriteria_refinecoeff);
     if ( coeff > 0.0 && coeff <= 1.0 ) {
         this->refineCoeff = coeff;
     }
@@ -1358,11 +1360,11 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
 
                     refinedReader.seek(nd1 + 6);
                     InputRecord *ir = refinedReader.giveInputRecord(DataReader :: IR_dofmanRec, nd1);
-                    IR_GIVE_FIELD(ir, coordinates1, IFT_HuertaErrorEstimatorInterface_coords, "coords");
+                    IR_GIVE_FIELD(ir, coordinates1, _IFT_HuertaErrorEstimatorInterface_coords);
 
                     refinedReader.seek(nd2 + 6);
                     ir = refinedReader.giveInputRecord(DataReader :: IR_dofmanRec, nd2);
-                    IR_GIVE_FIELD(ir, coordinates2, IFT_HuertaErrorEstimatorInterface_coords, "coords");
+                    IR_GIVE_FIELD(ir, coordinates2, _IFT_HuertaErrorEstimatorInterface_coords);
 
                     material = impMat;
                     for ( i = 1; i <= impPos.giveSize(); i++ ) {
@@ -3123,16 +3125,15 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     patchError.resize(size);
 
     // map coarse solution
-    uCoarse.resize( refinedProblem->giveNumberOfDomainEquations(1, EID_MomentumBalance) );
+    uCoarse.resize( refinedProblem->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     uCoarse.zero();
-    mapper.mapAndUpdate(uCoarse, VM_Total, EID_MomentumBalance, domain, refinedDomain, tStep);
+    mapper.mapAndUpdate(uCoarse, VM_Total, domain, refinedDomain, tStep);
 
     // get coarse solution and element and patch error (including BC !!!)
     pos = 1;
     for ( inode = 1; inode <= localNodeId; inode++ ) {
         node = refinedDomain->giveNode(inode);
-        node->giveUnknownVector(nodeSolution, dofIdArray,
-                                EID_MomentumBalance, VM_Total, refinedTStep);
+        node->giveUnknownVector(nodeSolution, dofIdArray, VM_Total, refinedTStep);
         for ( idof = 1; idof <= dofs; idof++, pos++ ) {
             nodeDof = node->giveDof(idof);
             if ( nodeDof->hasBc(refinedTStep) == 0 ) {
@@ -3689,9 +3690,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
 
     // store fine solution in primaryUnknownError
     for ( inode = 1; inode <= localNodeId; inode++ ) {
-        refinedDomain->giveNode(inode)->giveUnknownVector(nodeSolution, dofIdArray,
-                                                          EID_MomentumBalance, VM_Total,
-                                                          refinedTStep);
+        refinedDomain->giveNode(inode)->giveUnknownVector(nodeSolution, dofIdArray, VM_Total, refinedTStep);
         pos = globalNodeIdArray.at(inode);
         for ( idof = 1; idof <= dofs; idof++ ) {
             primaryUnknownError.at( ( pos - 1 ) * dofs + idof ) = nodeSolution.at(idof);
@@ -3915,16 +3914,15 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     errorSolution.resize(size);
 
     // map coarse solution
-    uCoarse.resize( refinedProblem->giveNumberOfDomainEquations(1, EID_MomentumBalance) );
+    uCoarse.resize( refinedProblem->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
     uCoarse.zero();
-    mapper.mapAndUpdate(uCoarse, VM_Total, EID_MomentumBalance, domain, refinedDomain, tStep);
+    mapper.mapAndUpdate(uCoarse, VM_Total, domain, refinedDomain, tStep);
 
     // get exact and coarse solution (including BC !!!)
     pos = 1;
     for ( inode = 1; inode <= localNodeId; inode++ ) {
         node = refinedDomain->giveNode(inode);
-        node->giveUnknownVector(nodeSolution, dofIdArray,
-                                EID_MomentumBalance, VM_Total, refinedTStep);
+        node->giveUnknownVector(nodeSolution, dofIdArray, VM_Total, refinedTStep);
         for ( idof = 1; idof <= dofs; idof++, pos++ ) {
             fineSolution.at(pos) = nodeSolution.at(idof);
             nodeDof = node->giveDof(idof);
@@ -4158,39 +4156,39 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
         nmstep = tStep->giveMetaStepNumber();
         ir = problem->giveMetaStep(nmstep)->giveAttributesRecord();
 
-        IR_GIVE_OPTIONAL_FIELD(ir, stiffMode, IFT_NonLinearStatic_stiffmode, "stiffmode"); //macro
-        IR_GIVE_OPTIONAL_FIELD(ir, controlMode, IFT_NonLinearStatic_controlmode, "controlmode"); //macro
+        IR_GIVE_OPTIONAL_FIELD(ir, stiffMode, _IFT_NonLinearStatic_stiffmode);
+        IR_GIVE_OPTIONAL_FIELD(ir, controlMode, _IFT_NonLinearStatic_controlmode);
 
         switch ( controlMode ) {
         case 0:
-            IR_GIVE_OPTIONAL_FIELD(ir, maxIter, IFT_CylindricalALM_maxiter, "maxiter");
-            IR_GIVE_OPTIONAL_FIELD(ir, reqIter, IFT_CylindricalALM_reqiterations, "reqiterations");
-            IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, IFT_CylindricalALM_minsteplength, "minsteplength");
-            IR_GIVE_OPTIONAL_FIELD(ir, manrmsteps, IFT_CylindricalALM_manrmsteps, "manrmsteps");
-            IR_GIVE_FIELD(ir, stepLength, IFT_CylindricalALM_steplength, "steplength");
+            IR_GIVE_OPTIONAL_FIELD(ir, maxIter, _IFT_CylindricalALM_maxiter);
+            IR_GIVE_OPTIONAL_FIELD(ir, reqIter, _IFT_CylindricalALM_reqiterations);
+            IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, _IFT_CylindricalALM_minsteplength);
+            IR_GIVE_OPTIONAL_FIELD(ir, manrmsteps, _IFT_CylindricalALM_manrmsteps);
+            IR_GIVE_FIELD(ir, stepLength, _IFT_CylindricalALM_steplength);
 
             initialStepLength = stepLength;
-            IR_GIVE_OPTIONAL_FIELD(ir, initialStepLength, IFT_CylindricalALM_initialsteplength, "initialsteplength");
+            IR_GIVE_OPTIONAL_FIELD(ir, initialStepLength, _IFT_CylindricalALM_initialsteplength);
 
-            IR_GIVE_OPTIONAL_FIELD(ir, psi, IFT_CylindricalALM_psi, "psi");
-            IR_GIVE_OPTIONAL_FIELD(ir, hpcMode, IFT_CylindricalALM_hpcmode, "hpcmode");
+            IR_GIVE_OPTIONAL_FIELD(ir, psi, _IFT_CylindricalALM_psi);
+            IR_GIVE_OPTIONAL_FIELD(ir, hpcMode, _IFT_CylindricalALM_hpcmode);
 
-            IR_GIVE_OPTIONAL_FIELD(ir, hpc, IFT_CylindricalALM_hpc, "hpc");
-            IR_GIVE_OPTIONAL_FIELD(ir, hpcw, IFT_CylindricalALM_hpcw, "hpcw");
-            IR_GIVE_FIELD(ir, rtolv, IFT_CylindricalALM_rtolv, "rtolv"); //macro
+            IR_GIVE_OPTIONAL_FIELD(ir, hpc, _IFT_CylindricalALM_hpc);
+            IR_GIVE_OPTIONAL_FIELD(ir, hpcw, _IFT_CylindricalALM_hpcw);
+            IR_GIVE_FIELD(ir, rtolv, _IFT_CylindricalALM_rtolv); 
 
             hpcSize = hpc.giveSize();
             hpcwSize = hpcw.giveSize();
             break;
         case 1:
-            IR_GIVE_OPTIONAL_FIELD(ir, maxIter, IFT_NRSolver_maxiter, "maxiter");
-            IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, IFT_NRSolver_minsteplength, "minsteplength");
-            IR_GIVE_OPTIONAL_FIELD(ir, manrmsteps, IFT_NRSolver_manrmsteps, "manrmsteps");
+            IR_GIVE_OPTIONAL_FIELD(ir, maxIter, _IFT_NRSolver_maxiter);
+            IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, _IFT_NRSolver_minsteplength);
+            IR_GIVE_OPTIONAL_FIELD(ir, manrmsteps, _IFT_NRSolver_manrmsteps);
 
-            IR_GIVE_OPTIONAL_FIELD(ir, ddm, IFT_NRSolver_ddm, "ddm");
-            IR_GIVE_OPTIONAL_FIELD(ir, ddv, IFT_NRSolver_ddv, "ddv");
-            IR_GIVE_OPTIONAL_FIELD(ir, ddltf, IFT_NRSolver_ddltf, "ddltf");
-            IR_GIVE_FIELD(ir, rtolv, IFT_NRSolver_rtolv, "rtolv"); //macro
+            IR_GIVE_OPTIONAL_FIELD(ir, ddm, _IFT_NRSolver_ddm);
+            IR_GIVE_OPTIONAL_FIELD(ir, ddv, _IFT_NRSolver_ddv);
+            IR_GIVE_OPTIONAL_FIELD(ir, ddltf, _IFT_NRSolver_ddltf);
+            IR_GIVE_FIELD(ir, rtolv, _IFT_NRSolver_rtolv);
 
             ddmSize = ddm.giveSize();
             ddvSize = ddv.giveSize();

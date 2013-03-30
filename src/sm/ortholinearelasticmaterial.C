@@ -57,44 +57,44 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 
     this->LinearElasticMaterial :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_ex, "ex");
+    IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_ex);
     propertyDictionary->add(Ex, value);
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_ey, "ey");
+    IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_ey);
     propertyDictionary->add(Ey, value);
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_ez, "ez");
+    IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_ez);
     propertyDictionary->add(Ez, value);
 
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_nyyz, "nyyz");
+    IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_nyyz);
     propertyDictionary->add(NYyz, value);
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_nyxz, "nyxz");
+    IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_nyxz);
     propertyDictionary->add(NYxz, value);
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_nyxy, "nyxy");
+    IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_nyxy);
     propertyDictionary->add(NYxy, value);
 
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_gyz, "gyz");
+    IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_gyz);
     propertyDictionary->add(Gyz, value);
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_gxz, "gxz");
+    IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_gxz);
     propertyDictionary->add(Gxz, value);
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_gxy, "gxy");
+    IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_gxy);
     propertyDictionary->add(Gxy, value);
 
 
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_talphax, "talphax");
+    IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_talphax);
     propertyDictionary->add(tAlphax, value);
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_talphay, "talphay");
+    IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_talphay);
     propertyDictionary->add(tAlphay, value);
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_talphaz, "talphaz");
+    IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_talphaz);
     propertyDictionary->add(tAlphaz, value);
 
     // check for suspicious parameters
@@ -116,7 +116,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 
     // try to read lcs section
     triplets.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, triplets, IFT_OrthotropicLinearElasticMaterial_lcs, "lcs");
+    IR_GIVE_OPTIONAL_FIELD(ir, triplets, _IFT_OrthotropicLinearElasticMaterial_lcs);
 
     size = triplets.giveSize();
     if ( !( ( size == 0 ) || ( size == 6 ) ) ) {
@@ -158,7 +158,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     // try to read ElementCS section
     if ( cs_type == unknownCS ) {
         triplets.resize(0);
-        IR_GIVE_OPTIONAL_FIELD(ir, triplets, IFT_OrthotropicLinearElasticMaterial_scs, "scs"); // cs for shells.
+        IR_GIVE_OPTIONAL_FIELD(ir, triplets, _IFT_OrthotropicLinearElasticMaterial_scs); // cs for shells.
         // first three numbers are direction of normal n - see orthoelasticmaterial.h for description
         // shellCS  - coordinate system of principal axes is specified in shell  coordinate system
         //            this is defined as follows: principal z-axis is perpendicular to mid-section

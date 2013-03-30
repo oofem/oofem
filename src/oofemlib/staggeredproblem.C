@@ -126,30 +126,30 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
 
-    if ( ir->hasField(IFT_StaggeredProblem_deltat, "deltat") ) {
+    if ( ir->hasField(_IFT_StaggeredProblem_deltat) ) {
         EngngModel :: initializeFrom(ir);
-        IR_GIVE_FIELD(ir, deltaT, IFT_StaggeredProblem_deltat, "deltat");
+        IR_GIVE_FIELD(ir, deltaT, _IFT_StaggeredProblem_deltat);
         dtTimeFunction = 0;
-    } else if ( ir->hasField(IFT_StaggeredProblem_prescribedtimes, "prescribedtimes") ) {
+    } else if ( ir->hasField(_IFT_StaggeredProblem_prescribedtimes) ) {
         EngngModel :: initializeFrom(ir);
-        IR_GIVE_FIELD(ir, discreteTimes, IFT_StaggeredProblem_prescribedtimes, "prescribedtimes");
+        IR_GIVE_FIELD(ir, discreteTimes, _IFT_StaggeredProblem_prescribedtimes);
         dtTimeFunction = 0;
     } else {
-        IR_GIVE_FIELD(ir, timeDefinedByProb, IFT_StaggeredProblem_timeDefinedByProb, "timedefinedbyprob");
+        IR_GIVE_FIELD(ir, timeDefinedByProb, _IFT_StaggeredProblem_timeDefinedByProb);
     }
 
     if ( dtTimeFunction < 1 ) {
         ndomains = 0;
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, dtTimeFunction, IFT_StaggeredProblem_dtf, "dtf");
-    IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, IFT_StaggeredProblem_stepmultiplier, "stepmultiplier");
+    IR_GIVE_OPTIONAL_FIELD(ir, dtTimeFunction, _IFT_StaggeredProblem_dtf);
+    IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, _IFT_StaggeredProblem_stepmultiplier);
     if ( stepMultiplier < 0 ) {
         _error("stepMultiplier must be > 0")
     }
 
-    IR_GIVE_FIELD(ir, inputStreamNames [ 0 ], IFT_StaggeredProblem_prob1, "prob1");
-    IR_GIVE_FIELD(ir, inputStreamNames [ 1 ], IFT_StaggeredProblem_prob2, "prob2");
+    IR_GIVE_FIELD(ir, inputStreamNames [ 0 ], _IFT_StaggeredProblem_prob1);
+    IR_GIVE_FIELD(ir, inputStreamNames [ 1 ], _IFT_StaggeredProblem_prob2);
 
     renumberFlag = true; // The staggered problem itself should always try to check if the sub-problems needs renumbering.
 
@@ -173,15 +173,15 @@ StaggeredProblem :: updateAttributes(MetaStep *mStep)
     }
 
     if ( !timeDefinedByProb ) {
-        if ( ir->hasField(IFT_StaggeredProblem_deltat, "deltat") ) {
-            IR_GIVE_FIELD(ir, deltaT, IFT_StaggeredProblem_deltat, "deltat");
-            IR_GIVE_OPTIONAL_FIELD(ir, dtTimeFunction, IFT_StaggeredProblem_dtf, "dtf");
-            IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, IFT_StaggeredProblem_stepmultiplier, "stepmultiplier");
+        if ( ir->hasField(_IFT_StaggeredProblem_deltat) ) {
+            IR_GIVE_FIELD(ir, deltaT, _IFT_StaggeredProblem_deltat);
+            IR_GIVE_OPTIONAL_FIELD(ir, dtTimeFunction, _IFT_StaggeredProblem_dtf);
+            IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, _IFT_StaggeredProblem_stepmultiplier);
             if ( stepMultiplier < 0 ) {
                 _error("stepMultiplier must be > 0")
             }
-        } else if ( ir->hasField(IFT_StaggeredProblem_prescribedtimes, "prescribedtimes") ) {
-            IR_GIVE_FIELD(ir, discreteTimes, IFT_StaggeredProblem_prescribedtimes, "prescribedtimes");
+        } else if ( ir->hasField(_IFT_StaggeredProblem_prescribedtimes) ) {
+            IR_GIVE_FIELD(ir, discreteTimes, _IFT_StaggeredProblem_prescribedtimes);
         }
     }
 }

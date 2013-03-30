@@ -102,8 +102,8 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
     }
 
     int _val = 0;
-    IR_GIVE_OPTIONAL_FIELD( ( mStep->giveAttributesRecord() ), _val, IFT_NonLinearStatic_controlmode, "controlmode" );
-    IR_GIVE_OPTIONAL_FIELD( ( mStep->giveAttributesRecord() ), _val, IFT_NonLinearStatic_controlmode, "controllmode" ); // for backward compatibility
+    IR_GIVE_OPTIONAL_FIELD( ( mStep->giveAttributesRecord() ), _val, _IFT_NonLinearStatic_controlmode);
+    IR_GIVE_OPTIONAL_FIELD( ( mStep->giveAttributesRecord() ), _val, "controllmode" ); ///@todo If there is ever a major version change, remove this (for backward compatibility)
     NonLinearStatic_controlType mode = ( NonLinearStatic_controlType ) _val;
 
     if ( mode == nls_indirectControl ) {
@@ -161,36 +161,36 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
      * }
      */
     int _val = nls_indirectControl;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_controlmode, "controlmode");
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_controlmode, "controllmode"); // for backward compatibility
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_NonLinearStatic_controlmode);
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, "controllmode"); /// @todo If there is ever a major version change, remove this (for backward compatibility)
     this->controlMode = ( NonLinearStatic_controlType ) _val;
 
     _val = IG_None;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_EngngModel_initialGuess, "initialguess");
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_EngngModel_initialGuess);
     this->initialGuessType = ( InitialGuess ) _val;
 
     deltaT = 1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_NonLinearStatic_deltat, "deltat");
+    IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_NonLinearStatic_deltat);
     if ( deltaT < 0. ) {
         _error("updateAttributes: deltaT < 0");
     }
 
     _val = nls_tangentStiffness;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_stiffmode, "stiffmode");
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_NonLinearStatic_stiffmode);
     this->stiffMode = ( NonLinearStatic_stiffnessMode ) _val;
 
     _val = SparseNonLinearSystemNM :: rlm_total;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_refloadmode, "refloadmode");
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_NonLinearStatic_refloadmode);
     this->refLoadInputMode = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
 
-    if ( ir->hasField(IFT_NonLinearStatic_keepll, "keepll") ) {
+    if ( ir->hasField(_IFT_NonLinearStatic_keepll) ) {
         mstepCumulateLoadLevelFlag = true;
     } else {
         mstepCumulateLoadLevelFlag = false;
     }
 
     // called just to mart filed as recognized, used later
-    ir->hasField(IFT_NonLinearStatic_donotfixload, "donotfixload");
+    ir->hasField(_IFT_NonLinearStatic_donotfixload);
 }
 
 
@@ -202,7 +202,7 @@ NonLinearStatic :: initializeFrom(InputRecord *ir)
 
     LinearStatic :: initializeFrom(ir);
     nonlocalStiffnessFlag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, IFT_NonLinearStatic_nonlocstiff, "nonlocstiff");
+    IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, _IFT_NonLinearStatic_nonlocstiff);
 
 #ifdef __PARALLEL_MODE
     //if (ir->hasField ("nodecutmode")) commMode = ProblemCommunicator::ProblemCommMode__NODE_CUT;
@@ -215,7 +215,7 @@ NonLinearStatic :: initializeFrom(InputRecord *ir)
                                                this->giveNumberOfProcesses(),
                                                this->commMode);
 
-        if ( ir->hasField(IFT_NonLinearStatic_nonlocalext, "nonlocalext") ) {
+        if ( ir->hasField(_IFT_NonLinearStatic_nonlocalext) ) {
             nonlocalExt = 1;
             nonlocCommunicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
                                                          this->giveNumberOfProcesses(),
@@ -228,15 +228,16 @@ NonLinearStatic :: initializeFrom(InputRecord *ir)
 }
 
 
-double NonLinearStatic :: giveUnknownComponent(EquationID chc, ValueModeType mode,
-                                               TimeStep *tStep, Domain *d, Dof *dof)
+double NonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
+#if DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
+#endif
 
 
     if ( tStep != this->giveCurrentStep() ) {
@@ -244,30 +245,25 @@ double NonLinearStatic :: giveUnknownComponent(EquationID chc, ValueModeType mod
         return 0.;
     }
 
-    if ( chc == EID_MomentumBalance ) {
-        switch ( mode ) {
-        case VM_Incremental:
-            // return incrementOfDisplacement -> at(eq);
-            // return nMethod-> giveUnknownComponent(IncrementOfSolution, eq);
-            if ( incrementOfDisplacement.isNotEmpty() ) {
-                return incrementOfDisplacement.at(eq);
-            } else {
-                return 0.;
-            }
-
-        case VM_Total:
-            if ( totalDisplacement.isNotEmpty() ) {
-                return totalDisplacement.at(eq);
-            } else {
-                return 0.;
-            }
-
-        default:
-            _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
+    switch ( mode ) {
+    case VM_Incremental:
+        // return incrementOfDisplacement -> at(eq);
+        // return nMethod-> giveUnknownComponent(IncrementOfSolution, eq);
+        if ( incrementOfDisplacement.isNotEmpty() ) {
+            return incrementOfDisplacement.at(eq);
+        } else {
+            return 0.;
         }
-    } else {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-        return 0.;
+
+    case VM_Total:
+        if ( totalDisplacement.isNotEmpty() ) {
+            return totalDisplacement.at(eq);
+        } else {
+            return 0.;
+        }
+
+    default:
+        _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
     }
 
     return 0.0;
@@ -345,7 +341,7 @@ void NonLinearStatic :: solveYourself()
     if (this->isParallel()) {
  #ifdef __VERBOSE_PARALLEL
         // force equation numbering before setting up comm maps
-        int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+        int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
         OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
 
@@ -387,7 +383,7 @@ NonLinearStatic :: updateLoadVectors(TimeStep *stepN)
     if ( controlMode == nls_indirectControl ) {
         //if ((stepN->giveNumber() == mstep->giveLastStepNumber()) && ir->hasField("fixload")) {
         if ( isLastMetaStep ) {
-            if ( !mstep->giveAttributesRecord()->hasField(IFT_NonLinearStatic_donotfixload, "donotfixload") ) {
+            if ( !mstep->giveAttributesRecord()->hasField(_IFT_NonLinearStatic_donotfixload) ) {
                 OOFEM_LOG_INFO("Fixed load level\n");
 
                 //update initialLoadVector
@@ -432,7 +428,7 @@ NonLinearStatic :: updateLoadVectors(TimeStep *stepN)
 
 
     // if (isLastMetaStep) {
-    if ( isLastMetaStep && !mstep->giveAttributesRecord()->hasField(IFT_NonLinearStatic_donotfixload, "donotfixload") ) {
+    if ( isLastMetaStep && !mstep->giveAttributesRecord()->hasField(_IFT_NonLinearStatic_donotfixload) ) {
 #ifdef VERBOSE
         OOFEM_LOG_INFO("Reseting load level\n");
 #endif
@@ -460,7 +456,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         //
         // first step  create space for stiffness Matrix
         //
-        int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+        int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
         internalForces.resize(neq);
         internalForces.zero();
 
@@ -506,7 +502,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     }
 
     if ( tStep->giveNumber() == 1 ) {
-        int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+        int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
         totalDisplacement.resize(neq);
         totalDisplacement.zero();
         incrementOfDisplacement.resize(neq);
@@ -891,9 +887,9 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
                                                            SparseNonLinearSystemNM :: referenceLoadInputModeType _refMode,
                                                            Domain *sourceDomain, EquationID ut, TimeStep *tStep)
 {
-    _incrementalLoadVector.resize( sourceDomain->giveEngngModel()->giveNumberOfEquations(EID_MomentumBalance) );
+    _incrementalLoadVector.resize( sourceDomain->giveEngngModel()->giveNumberOfDomainEquations(sourceDomain->giveNumber(), EModelDefaultEquationNumbering()) );
     _incrementalLoadVector.zero();
-    _incrementalLoadVectorOfPrescribed.resize( sourceDomain->giveEngngModel()->giveNumberOfPrescribedEquations(EID_MomentumBalance) );
+    _incrementalLoadVectorOfPrescribed.resize( sourceDomain->giveEngngModel()->giveNumberOfDomainEquations(sourceDomain->giveNumber(), EModelDefaultPrescribedEquationNumbering()) );
     _incrementalLoadVectorOfPrescribed.zero();
 
     if ( _refMode == SparseNonLinearSystemNM :: rlm_incremental ) {
@@ -1011,23 +1007,23 @@ NonLinearStatic :: packMigratingData(TimeStep *atTime)
             if ( _dof->isPrimaryDof() ) {
                 if ( ( _eq = _dof->__giveEquationNumber() ) ) {
                     // pack values in solution vectors
-                    _dof->updateUnknownsDictionary( atTime, EID_MomentumBalance, VM_Total, totalDisplacement.at(_eq) );
+                    _dof->updateUnknownsDictionary( atTime, VM_Total, totalDisplacement.at(_eq) );
                     if ( initialLoadVectorEmpty ) {
-                        _dof->updateUnknownsDictionary(atTime, EID_MomentumBalance, VM_RhsInitial, 0.0);
+                        _dof->updateUnknownsDictionary(atTime, VM_RhsInitial, 0.0);
                     } else {
-                        _dof->updateUnknownsDictionary( atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVector.at(_eq) );
+                        _dof->updateUnknownsDictionary( atTime, VM_RhsInitial, initialLoadVector.at(_eq) );
                     }
 
-                    _dof->updateUnknownsDictionary( atTime, EID_MomentumBalance, VM_RhsIncremental, incrementalLoadVector.at(_eq) );
+                    _dof->updateUnknownsDictionary( atTime, VM_RhsIncremental, incrementalLoadVector.at(_eq) );
                 } else if ( ( _eq = _dof->__givePrescribedEquationNumber() ) ) {
                     // pack values in prescribed solution vectors
                     if ( initialLoadVectorOfPrescribedEmpty ) {
-                        _dof->updateUnknownsDictionary(atTime, EID_MomentumBalance, VM_RhsInitial, 0.0);
+                        _dof->updateUnknownsDictionary(atTime, VM_RhsInitial, 0.0);
                     } else {
-                        _dof->updateUnknownsDictionary( atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq) );
+                        _dof->updateUnknownsDictionary( atTime, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq) );
                     }
 
-                    _dof->updateUnknownsDictionary( atTime, EID_MomentumBalance, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq) );
+                    _dof->updateUnknownsDictionary( atTime, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq) );
                 }
             } // end primary dof
 
@@ -1048,13 +1044,13 @@ NonLinearStatic :: unpackMigratingData(TimeStep *atTime)
     Dof *_dof;
 
     // resize target arrays
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
     totalDisplacement.resize(neq);
     incrementOfDisplacement.resize(neq);
     incrementalLoadVector.resize(neq);
     initialLoadVector.resize(neq);
-    initialLoadVectorOfPrescribed.resize( giveNumberOfPrescribedEquations(EID_MomentumBalance) );
-    incrementalLoadVectorOfPrescribed.resize( giveNumberOfPrescribedEquations(EID_MomentumBalance) );
+    initialLoadVectorOfPrescribed.resize( giveNumberOfDomainEquations(1, EModelDefaultPrescribedEquationNumbering()) );
+    incrementalLoadVectorOfPrescribed.resize( giveNumberOfDomainEquations(1, EModelDefaultPrescribedEquationNumbering()) );
 
     for ( idofman = 1; idofman <= ndofman; idofman++ ) {
         _dm = domain->giveDofManager(idofman);
@@ -1064,9 +1060,9 @@ NonLinearStatic :: unpackMigratingData(TimeStep *atTime)
             if ( _dof->isPrimaryDof() ) {
                 if ( ( _eq = _dof->__giveEquationNumber() ) ) {
                     // pack values in solution vectors
-                    _dof->giveUnknownsDictionaryValue( atTime, EID_MomentumBalance, VM_Total, totalDisplacement.at(_eq) );
-                    _dof->giveUnknownsDictionaryValue( atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVector.at(_eq) );
-                    _dof->giveUnknownsDictionaryValue( atTime, EID_MomentumBalance, VM_RhsIncremental, incrementalLoadVector.at(_eq) );
+                    _dof->giveUnknownsDictionaryValue( atTime, VM_Total, totalDisplacement.at(_eq) );
+                    _dof->giveUnknownsDictionaryValue( atTime, VM_RhsInitial, initialLoadVector.at(_eq) );
+                    _dof->giveUnknownsDictionaryValue( atTime, VM_RhsIncremental, incrementalLoadVector.at(_eq) );
 
  #if 0
                     // debug print
@@ -1079,8 +1075,8 @@ NonLinearStatic :: unpackMigratingData(TimeStep *atTime)
  #endif
                 } else if ( ( _eq = _dof->__givePrescribedEquationNumber() ) ) {
                     // pack values in prescribed solution vectors
-                    _dof->giveUnknownsDictionaryValue( atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq) );
-                    _dof->giveUnknownsDictionaryValue( atTime, EID_MomentumBalance, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq) );
+                    _dof->giveUnknownsDictionaryValue( atTime, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq) );
+                    _dof->giveUnknownsDictionaryValue( atTime, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq) );
 
  #if 0
                     // debug print

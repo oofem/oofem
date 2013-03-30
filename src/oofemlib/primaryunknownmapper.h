@@ -55,8 +55,6 @@ class IntArray;
  */
 class PrimaryUnknownMapper
 {
-protected:
-
 public:
     /// Constructor
     PrimaryUnknownMapper() { }
@@ -71,13 +69,12 @@ public:
      * new mesh dofmanagers.
      * @param answer Resulting array with primary unknowns.
      * @param mode Determines the mode of unknown.
-     * @param ut   Determines unknown type.
      * @param oldd Old mesh reference.
      * @param newd New mesh reference.
      * @param tStep Time step.
      * @return Nonzero if o.k.
      */
-    virtual int mapAndUpdate(FloatArray &answer, ValueModeType mode, EquationID ut,
+    virtual int mapAndUpdate(FloatArray &answer, ValueModeType mode,
                              Domain *oldd, Domain *newd,  TimeStep *tStep) = 0;
     /**
      * Evaluates the vector of primary unknowns, determined by domain, at given point.
@@ -85,7 +82,6 @@ public:
      * element containing given point.
      * @param answer Contains evaluated unknown vector.
      * @param dofMask Parameter containing dofIDs of mapped values.
-     * @param ut   Determines unknown type.
      * @param mode Determines the type of mode of unknown.
      * @param oldd Old mesh reference (mesh with unknown field).
      * @param coords Coordinates of point of interest.
@@ -93,7 +89,7 @@ public:
      * @param tStep Solution step.
      * @return Nonzero if o.k.
      */
-    virtual int evaluateAt(FloatArray &answer, IntArray &dofMask, EquationID ut, ValueModeType mode,
+    virtual int evaluateAt(FloatArray &answer, IntArray &dofMask, ValueModeType mode,
                            Domain *oldd, FloatArray &coords, IntArray &regList, TimeStep *tStep) = 0;
 protected:
     /// Prints error message and exits.

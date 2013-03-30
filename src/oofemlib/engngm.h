@@ -79,7 +79,6 @@
 #define _IFT_EngngModel_renumberFlag "renumber"
 #define _IFT_EngngModel_profileOpt "profileopt"
 #define _IFT_EngngModel_nmsteps "nmsteps"
-#define _IFT_EngngModel_nxfemman "nxfemman"
 #define _IFT_EngngModel_nonLinFormulation "nonlinform"
 #define _IFT_EngngModel_eetype "eetype"
 #define _IFT_EngngModel_parallelflag "parallelflag"
@@ -489,31 +488,10 @@ public:
     virtual int initializeAdaptive(int stepNumber) { return 0; }
 
     /**
-     * Returns total number of equations in active (current time step) time step.
-     * The UnknownType parameter allows to distinguish between several possible governing equations, that
-     * can be numbered separately.
-     * @todo This function is misleading, it will sum equations from all domains which isn't very useful 
-     * (it works because all problems calling this only has one domain).
-     */
-    virtual int giveNumberOfEquations(EquationID eid);
-    /**
-     * Returns total number of prescribed equations in active (current time step) time step.
-     * The UnknownType parameter allows to distinguish between several possible governing equations, that
-     * can be numbered separately.
-     */
-    virtual int giveNumberOfPrescribedEquations(EquationID eid);
-    /**
      * Returns number of equations for given domain in active (current time step) time step.
-     * The EquationID parameter allows to distinguish between several possible governing equations, that
-     * can be numbered separately.
+     * The numbering scheme determines which system the result is requested for.
      */
-    virtual int giveNumberOfDomainEquations(int di, EquationID eid);
-    /**
-     * Returns number of prescribed equations for given domain in active (current time step) time step.
-     * The UnknownType parameter allows to distinguish between several possible governing equations, that
-     * can be numbered separately.
-     */
-    virtual int giveNumberOfPrescribedDomainEquations(int di, EquationID eid);
+    virtual int giveNumberOfDomainEquations(int di, const UnknownNumberingScheme &num);
 
     // management components
     /**
@@ -527,7 +505,7 @@ public:
      * their associated unknowns.
      * @see Dof::giveUnknown
      */
-    virtual double giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
+    virtual double giveUnknownComponent(ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
     virtual double giveUnknownComponent(UnknownType, ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
 
 #ifdef __PARALLEL_MODE
@@ -848,7 +826,7 @@ public:
      * Usually the hash algorithm should produce index that depend on time step relatively to
      * actual one to avoid storage of complete history.
      */
-    virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN) { return 0; }
+    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN) { return 0; }
     /**
      * Returns UnknownNUmberingScheme related to given EquationID
      */

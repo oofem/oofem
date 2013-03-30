@@ -131,7 +131,7 @@ ExternalFieldGenerator :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, name, IFT_ExternalFieldGenerator_name, "name");
+    IR_GIVE_FIELD(ir, name, _IFT_ExternalFieldGenerator_name);
 
     std :: ifstream inputField( name.c_str() );
 

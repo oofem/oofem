@@ -58,10 +58,10 @@ IRResultType SurfaceTensionBoundaryCondition :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom";
     IRResultType result;
 
-    IR_GIVE_FIELD(ir, this->gamma, IFT_SurfaceTensionBoundaryCondition_gamma, "gamma");
+    IR_GIVE_FIELD(ir, this->gamma, _IFT_SurfaceTensionBoundaryCondition_gamma);
 
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_SurfaceTensionBoundaryCondition_useTangent, "usetangent");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_SurfaceTensionBoundaryCondition_useTangent);
     this->useTangent = val;
 
     return ActiveBoundaryCondition :: initializeFrom(ir);

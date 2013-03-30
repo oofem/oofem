@@ -147,12 +147,12 @@ SpringElement :: initializeFrom(InputRecord *ir)
     StructuralElement :: initializeFrom(ir);
 
     int _mode;
-    IR_GIVE_FIELD(ir, _mode, IFT_SpringElement_mode, "mode");
-    IR_GIVE_FIELD(ir, springConstant, IFT_SpringElement_springConstant, "k");
+    IR_GIVE_FIELD(ir, _mode, _IFT_SpringElement_mode);
+    IR_GIVE_FIELD(ir, springConstant, _IFT_SpringElement_springConstant);
 
     this->mode = (SpringElementType) _mode;
     if (mode != SE_1D_SPRING) {
-      IR_GIVE_OPTIONAL_FIELD(ir, this->dir, IFT_SpringElement_orientation, "orientation");
+      IR_GIVE_OPTIONAL_FIELD(ir, this->dir, _IFT_SpringElement_orientation);
       this->dir.normalize();
     }
     return IRRT_OK;

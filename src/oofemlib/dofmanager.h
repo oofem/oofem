@@ -61,7 +61,7 @@
 #define _IFT_DofManager_partitions "partitions"
 #define _IFT_DofManager_sharedflag "shared"
 #define _IFT_DofManager_remoteflag "remote"
-#define _IFT_DofManager_nullflag "nullflag"
+#define _IFT_DofManager_nullflag "null"
 //@}
 
 namespace oofem {
@@ -248,15 +248,13 @@ public:
      * (they describe physical meaning of dofs, see cltypes.h) is used to extract only
      * required values. If dof with requested physical meaning does not exist in receiver,
      * an error is generated and execution exits.
-     * @param type Physical meaning of  unknown.
      * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
      * @param stepN Time step when unknown requested. See documentation of particular EngngModel
      * class for valid stepN values (most implementation can return only values for current
      * and possibly for previous time step).
      * @see Dof::giveUnknown
      */
-    virtual void giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
-                                   EquationID type, ValueModeType mode, TimeStep *stepN);
+    virtual void giveUnknownVector(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN);
     /**
      * Assembles the vector of unknowns of given filed in global c.s for given dofs of receiver.
      * @param answer Result (in nodal cs.)
@@ -279,7 +277,7 @@ public:
      * @param mode Mode of unknowns.
      * @param tstepN Time step when unknown is requested.
      */
-    void giveCompleteUnknownVector(FloatArray &answer, EquationID type, ValueModeType mode, TimeStep *stepN);
+    void giveCompleteUnknownVector(FloatArray &answer, ValueModeType mode, TimeStep *stepN);
     /**
      * Constructs the requested vector by assembling e.g. [D_u, D_v, D_w] or [V_u, V_v, V_w].
      * If for example D_v or V_w doesn't exist, then zero value is inserted.
@@ -493,14 +491,14 @@ public:
     /**
      * Packs specific  DOF Manager's dofs unknowns into communication buffer.
      * @param buff Communication buffer to pack data.
-     * @param type Physical meaning of  unknown.
      * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
      * @param stepN Time step when unknown requested. See documentation of particular EngngModel
      * class for valid stepN values (most implementation can return only values for current
      * and possibly for previous time step).
      * @return Nonzero if successful
+     * @todo Remove this? Is this function ever used? It looks like leftovers that could be removed. / Mikael
      */
-    int packDOFsUnknowns(CommunicationBuffer &buff, EquationID type, ValueModeType mode, TimeStep *stepN);
+    int packDOFsUnknowns(CommunicationBuffer &buff, ValueModeType mode, TimeStep *stepN);
     /**
      * Returns partition list of receiver.
      * @return Partition array.

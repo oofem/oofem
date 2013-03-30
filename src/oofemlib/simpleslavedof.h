@@ -110,7 +110,7 @@ public:
      * Asks new equation number. Empty function (master is assumed to receive same message).
      */
     virtual int askNewEquationNumber(TimeStep *tStep) { return 1; }
-    virtual double giveUnknown(EquationID, ValueModeType, TimeStep *);
+    virtual double giveUnknown(ValueModeType, TimeStep *);
     virtual double giveUnknown(PrimaryField & field, ValueModeType, TimeStep * stepN);
     virtual bool hasBc(TimeStep *tStep);
     virtual bool hasIc();

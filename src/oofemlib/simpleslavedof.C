@@ -103,14 +103,9 @@ InitialCondition *SimpleSlaveDof :: giveIc()
 }
 
 
-double SimpleSlaveDof :: giveUnknown(EquationID type, ValueModeType mode, TimeStep *stepN)
-// The key method of class Dof. Returns the value of the unknown 'u'
-// (e.g., the displacement) of the receiver, at stepN. This value may,
-// or may not, be already available. It may depend on a boundary (if it
-// is not a predicted unknown) or initial condition. stepN is not the
-// current time step n, it is assumed to be the previous one (n-1).
+double SimpleSlaveDof :: giveUnknown(ValueModeType mode, TimeStep *stepN)
 {
-    return this->giveMasterDof()->giveUnknown(type, mode, stepN);
+    return this->giveMasterDof()->giveUnknown(mode, stepN);
 }
 
 double SimpleSlaveDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *stepN)

@@ -274,8 +274,8 @@ CohesiveInterfaceMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // elastic parameters
-    IR_GIVE_FIELD(ir, kn, IFT_IsoInterfaceDamageMaterial_kn, "kn");
-    IR_GIVE_FIELD(ir, ks, IFT_IsoInterfaceDamageMaterial_ks, "ks");
+    IR_GIVE_FIELD(ir, kn, _IFT_IsoInterfaceDamageMaterial_kn);
+    IR_GIVE_FIELD(ir, ks, _IFT_IsoInterfaceDamageMaterial_ks);
 
     // thermal coefficient
     tempDillatCoeff = 0.0;

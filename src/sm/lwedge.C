@@ -66,7 +66,7 @@ LWedge :: initializeFrom(InputRecord *ir)
 
     this->NLStructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 2;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
 
     if ( ( numberOfGaussPoints != 2 ) && ( numberOfGaussPoints != 9 ) ) {
         numberOfGaussPoints = 2;

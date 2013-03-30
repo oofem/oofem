@@ -287,22 +287,16 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         OOFEM_ERROR("PetscSparseMtrx :: buildInternalStructure - Not implemented");
     }
 #endif
-    // This should be based on the numberingscheme. Also, geqs seems redundant.
 
-    // This could simplify things.
-    int npeqs = eModel->giveNumberOfPrescribedEquations(ut);
-    int neqs = eModel->giveNumberOfEquations(ut);
-    nRows = r_s.isDefault() ? neqs : npeqs;
-    nColumns = c_s.isDefault() ? neqs : npeqs;
-
-    int totalEquations = eModel->giveNumberOfEquations(ut) + eModel->giveNumberOfPrescribedEquations(ut);
+    nRows = eModel->giveNumberOfDomainEquations(di, r_s);
+    nColumns = eModel->giveNumberOfDomainEquations(di, c_s);
 
     //determine nonzero structure of matrix
     int ii, jj;
     Element *elem;
     IntArray r_loc, c_loc;
-    std :: vector< std :: set< int > >rows(totalEquations);
-    std :: vector< std :: set< int > >rows_sym(totalEquations); // Only the symmetric part
+    std :: vector< std :: set< int > >rows(nRows);
+    std :: vector< std :: set< int > >rows_sym(nRows); // Only the symmetric part
 
     nelem = domain->giveNumberOfElements();
     for ( int n = 1; n <= nelem; n++ ) {
@@ -419,7 +413,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         //printf("%d, leqs = %d, geqs = %d\n", this->emodel->giveRank(), leqs, geqs);
 
  #ifdef __VERBOSE_PARALLEL
-        OOFEM_LOG_INFO( "[%d]PetscSparseMtrx:: buildInternalStructure: l_eqs = %d, g_eqs = %d, n_eqs = %d\n", rank, leqs, geqs, eModel->giveNumberOfEquations(ut) );
+        OOFEM_LOG_INFO( "[%d]PetscSparseMtrx:: buildInternalStructure: l_eqs = %d, g_eqs = %d, n_eqs = %d\n", rank, leqs, geqs, eModel->giveNumberOfDomainEquations(ut) );
  #endif
 
         // determine nonzero structure of a "local (maintained)" part of matrix, and the off-diagonal part
@@ -495,20 +489,20 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     } else {
 #endif
 
-    leqs = geqs = eModel->giveNumberOfEquations(ut);
-    int i, ii, j, jj, n;
-    Element *elem;
+    leqs = geqs = eModel->giveNumberOfDomainEquations(di, s);
+
     // allocation map
     std :: vector< std :: set< int > >rows(leqs);
     std :: vector< std :: set< int > >rows_sym(leqs);
 
     nelem = domain->giveNumberOfElements();
-    for ( n = 1; n <= nelem; n++ ) {
-        elem = domain->giveElement(n);
+    for ( int n = 1; n <= nelem; n++ ) {
+        Element *elem = domain->giveElement(n);
         elem->giveLocationArray(loc, ut, s);
-        for ( i = 1; i <= loc.giveSize(); i++ ) {
+        int ii, jj;
+        for ( int i = 1; i <= loc.giveSize(); i++ ) {
             if ( ( ii = loc.at(i) ) ) {
-                for ( j = 1; j <= loc.giveSize(); j++ ) {
+                for ( int j = 1; j <= loc.giveSize(); j++ ) {
                     jj = loc.at(j);
                     if ( jj ) {
                         rows [ ii - 1 ].insert(jj - 1);
@@ -531,6 +525,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
             for (std::size_t k = 0; k < r_locs.size(); k++) {
                 IntArray &krloc = r_locs[k];
                 IntArray &kcloc = c_locs[k];
+                int ii, jj;
                 for ( int i = 1; i <= krloc.giveSize(); i++ ) {
                     if ( ( ii = krloc.at(i) ) ) {
                         for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
@@ -550,7 +545,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 
     IntArray d_nnz(leqs);
     IntArray d_nnz_sym(leqs);
-    for ( i = 0; i < leqs; i++ ) {
+    for ( int i = 0; i < leqs; i++ ) {
         d_nnz(i) = rows [ i ].size();
         d_nnz_sym(i) = rows_sym [ i ].size();
     }

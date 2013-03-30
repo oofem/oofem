@@ -73,12 +73,12 @@ public:
     virtual bool isPrimaryDof();
     int giveNumberOfMasterDofs();
     virtual void giveMasterDofManArray(IntArray &answer);
-    virtual void giveUnknowns(FloatArray &masterUnknowns, EquationID type, ValueModeType mode, TimeStep *stepN);
+    virtual void giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, TimeStep *stepN);
     virtual void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *stepN);
     virtual void computeDofTransformation(FloatArray &primaryMasterContribs);
     virtual void giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme &s);
 
-    virtual double giveUnknown(EquationID type, ValueModeType mode, TimeStep *stepN);
+    virtual double giveUnknown(ValueModeType mode, TimeStep *stepN);
     virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *stepN);
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);

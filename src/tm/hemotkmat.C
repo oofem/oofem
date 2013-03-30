@@ -55,22 +55,22 @@ HeMoTKMaterial :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, a_0, IFT_HeMoTKMaterial_a_0, "a_0");
-    IR_GIVE_FIELD(ir, nn, IFT_HeMoTKMaterial_nn, "nn");
-    IR_GIVE_FIELD(ir, phi_c, IFT_HeMoTKMaterial_phi_c, "phi_c");
-    IR_GIVE_FIELD(ir, delta_wet, IFT_HeMoTKMaterial_delta_wet, "delta_wet");
+    IR_GIVE_FIELD(ir, a_0, _IFT_HeMoTKMaterial_a_0);
+    IR_GIVE_FIELD(ir, nn, _IFT_HeMoTKMaterial_nn);
+    IR_GIVE_FIELD(ir, phi_c, _IFT_HeMoTKMaterial_phi_c);
+    IR_GIVE_FIELD(ir, delta_wet, _IFT_HeMoTKMaterial_delta_wet);
 
-    IR_GIVE_FIELD(ir, w_h, IFT_HeMoTKMaterial_w_h, "w_h");
-    IR_GIVE_FIELD(ir, n, IFT_HeMoTKMaterial_n, "n");
-    IR_GIVE_FIELD(ir, a, IFT_HeMoTKMaterial_a, "a");
+    IR_GIVE_FIELD(ir, w_h, _IFT_HeMoTKMaterial_w_h);
+    IR_GIVE_FIELD(ir, n, _IFT_HeMoTKMaterial_n);
+    IR_GIVE_FIELD(ir, a, _IFT_HeMoTKMaterial_a);
 
-    IR_GIVE_FIELD(ir, latent, IFT_HeMoTKMaterial_latent, "latent");
-    IR_GIVE_FIELD(ir, c, IFT_HeMoTKMaterial_c, "c");
-    IR_GIVE_FIELD(ir, rho, IFT_HeMoTKMaterial_rho, "rho");
-    IR_GIVE_FIELD(ir, chi_eff, IFT_HeMoTKMaterial_chi_eff, "chi_eff");
+    IR_GIVE_FIELD(ir, latent, _IFT_HeMoTKMaterial_latent);
+    IR_GIVE_FIELD(ir, c, _IFT_HeMoTKMaterial_c);
+    IR_GIVE_FIELD(ir, rho, _IFT_HeMoTKMaterial_rho);
+    IR_GIVE_FIELD(ir, chi_eff, _IFT_HeMoTKMaterial_chi_eff);
 
-    IR_GIVE_FIELD(ir, por, IFT_HeMoTKMaterial_por, "por");
-    IR_GIVE_FIELD(ir, rho_gws, IFT_HeMoTKMaterial_rho_gws, "rho_gws");
+    IR_GIVE_FIELD(ir, por, _IFT_HeMoTKMaterial_por);
+    IR_GIVE_FIELD(ir, rho_gws, _IFT_HeMoTKMaterial_rho_gws);
 
     return Material :: initializeFrom(ir);
 }

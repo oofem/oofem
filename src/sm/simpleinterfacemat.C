@@ -404,10 +404,10 @@ SimpleInterfaceMaterial :: initializeFrom(InputRecord *ir)
     frictCoeff = 0.;
     stiffCoeff = 0.;
     normalClearance = 0.;
-    IR_GIVE_FIELD(ir, kn, IFT_SimpleInterfaceMaterial_kn, "kn");
-    IR_GIVE_OPTIONAL_FIELD(ir, frictCoeff, IFT_SimpleInterfaceMaterial_frictCoeff, "fc");
-    IR_GIVE_OPTIONAL_FIELD(ir, stiffCoeff, IFT_SimpleInterfaceMaterial_stiffCoeff, "stiffcoeff");
-    IR_GIVE_OPTIONAL_FIELD(ir, normalClearance, IFT_SimpleInterfaceMaterial_normalClearance, "normalclearance");
+    IR_GIVE_FIELD(ir, kn, _IFT_SimpleInterfaceMaterial_kn);
+    IR_GIVE_OPTIONAL_FIELD(ir, frictCoeff, _IFT_SimpleInterfaceMaterial_frictCoeff);
+    IR_GIVE_OPTIONAL_FIELD(ir, stiffCoeff, _IFT_SimpleInterfaceMaterial_stiffCoeff);
+    IR_GIVE_OPTIONAL_FIELD(ir, normalClearance, _IFT_SimpleInterfaceMaterial_normalClearance);
 
     return StructuralMaterial :: initializeFrom(ir);
 }

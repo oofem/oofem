@@ -98,11 +98,11 @@ FETISolver :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, ni, IFT_FETISolver_maxiter, "maxiter");
-    IR_GIVE_FIELD(ir, err, IFT_FETISolver_maxerr, "maxerr");
-    IR_GIVE_FIELD(ir, limit, IFT_FETISolver_limit, "limit");
+    IR_GIVE_FIELD(ir, ni, _IFT_FETISolver_maxiter);
+    IR_GIVE_FIELD(ir, err, _IFT_FETISolver_maxerr);
+    IR_GIVE_FIELD(ir, limit, _IFT_FETISolver_limit);
     energyNorm_comput_flag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, energyNorm_comput_flag, IFT_FETISolver_energynormflag, "energynormflag");
+    IR_GIVE_OPTIONAL_FIELD(ir, energyNorm_comput_flag, _IFT_FETISolver_energynormflag);
 
     if ( fabs(limit) < 1.e-20 ) {
         limit = 1.e-20;
@@ -1195,7 +1195,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
     if ( rank == 0 ) {
         // assemble l matrix containing rbm localized from partition contibutions
         if ( tnse ) {
-            l.resize(masterCommunicator->giveNumberOfEquations(), tnse);
+            l.resize(masterCommunicator->giveNumberOfDomainEquations(), tnse);
             l.zero();
         }
 
@@ -1264,13 +1264,13 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
 
     if ( rank == 0 ) {
         /*  vektor smeru  */
-        d.resize(masterCommunicator->giveNumberOfEquations() + 1);
+        d.resize(masterCommunicator->giveNumberOfDomainEquations() + 1);
         /*  pomocny vektor  */
-        p.resize( masterCommunicator->giveNumberOfEquations() );
+        p.resize( masterCommunicator->giveNumberOfDomainEquations() );
         /*  vektor gradientu  */
-        g.resize( masterCommunicator->giveNumberOfEquations() );
+        g.resize( masterCommunicator->giveNumberOfDomainEquations() );
         /*  vektor neznamych  */
-        w.resize( masterCommunicator->giveNumberOfEquations() );
+        w.resize( masterCommunicator->giveNumberOfDomainEquations() );
 
         /*  soucin (L^T.L)^{-1}.q  */
         if ( tnse ) {
@@ -1423,7 +1423,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
             /**************************************************************/
             /*  vypocet noveho gradientu g a nove aproximace neznamych x  */
             /**************************************************************/
-            for ( j = 1; j <= masterCommunicator->giveNumberOfEquations(); j++ ) {
+            for ( j = 1; j <= masterCommunicator->giveNumberOfDomainEquations(); j++ ) {
                 w.at(j) += alpha * d.at(j);
                 g.at(j) += alpha * p.at(j);
             }
@@ -1463,7 +1463,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
             /****************************/
             /*  vypocet noveho smeru d  */
             /****************************/
-            for ( j = 1; j <= masterCommunicator->giveNumberOfEquations(); j++ ) {
+            for ( j = 1; j <= masterCommunicator->giveNumberOfDomainEquations(); j++ ) {
                 d.at(j) = beta * d.at(j) - g.at(j);
             }
         }
@@ -1563,7 +1563,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
         OOFEM_LOG_INFO("End of iteration, reached norm %15e\n", nom);
 #ifdef __VERBOSE_PARALLEL
         OOFEM_LOG_DEBUG("\nVysledne Lagrangeovy multiplikatory\n");
-        for ( i = 1; i <= masterCommunicator->giveNumberOfEquations(); i++ ) {
+        for ( i = 1; i <= masterCommunicator->giveNumberOfDomainEquations(); i++ ) {
             OOFEM_LOG_DEBUG( "lambda %4d          %f\n", i, w.at(i) );
         }
 

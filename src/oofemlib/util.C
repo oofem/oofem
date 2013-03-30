@@ -57,9 +57,9 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
      * through the whole e-model instanciation
      */
     InputRecord *emodelir = dr->giveInputRecord(DataReader :: IR_emodelRec, 1)->GiveCopy();
-    result = emodelir->giveRecordKeywordField(problemName);
+    result = emodelir->giveRecordKeywordField(problemName); ///@todo Make this function robust, it can't be allowed to fail (the record keyword is not a normal field-id)
     if ( result != IRRT_OK ) {
-        IR_IOERR("", __proc, IFT_EngngModel_probname, "", emodelir, result);
+        IR_IOERR("", __proc, "", emodelir, result);
     }
 
     problem = CreateUsrDefEngngModelOfType(problemName.c_str(), 1, _master);

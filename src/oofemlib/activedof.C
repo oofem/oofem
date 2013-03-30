@@ -123,14 +123,14 @@ void ActiveDof :: giveMasterDofManArray(IntArray &answer)
 }
 
 
-void ActiveDof :: giveUnknowns(FloatArray &masterUnknowns, EquationID eid, ValueModeType mode, TimeStep *tStep)
+void ActiveDof :: giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, TimeStep *tStep)
 {
     FloatArray mstrUnknwns;
 
     masterUnknowns.resize( this->giveNumberOfPrimaryMasterDofs() );
     int countOfMasterDofs = this->giveNumberOfMasterDofs();
     for (int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
-        this->giveMasterDof(i)->giveUnknowns(mstrUnknwns, eid, mode, tStep);
+        this->giveMasterDof(i)->giveUnknowns(mstrUnknwns, mode, tStep);
         masterUnknowns.copySubVector(mstrUnknwns, k);
         k += mstrUnknwns.giveSize();
     }
@@ -170,12 +170,12 @@ void ActiveDof :: computeDofTransformation(FloatArray &primaryMasterContribs)
     }
 }
 
-double ActiveDof :: giveUnknown(EquationID eid, ValueModeType mode, TimeStep *tStep)
+double ActiveDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
 {
     if (this->hasBc(tStep)) {
         return this->giveBcValue(mode, tStep);
     }
-    return this->giveActiveBoundaryCondition()->giveUnknown(eid, mode, tStep, this);
+    return this->giveActiveBoundaryCondition()->giveUnknown(mode, tStep, this);
 }
 
 double ActiveDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep)

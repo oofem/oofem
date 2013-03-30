@@ -137,40 +137,40 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
 
 
     // Optionally change basic material properties
-    IR_GIVE_OPTIONAL_FIELD(ir, ae, IFT_HellmichMaterial_E, "e");
+    IR_GIVE_OPTIONAL_FIELD(ir, ae, _IFT_HellmichMaterial_E);
     printf("\nHellMat: Ultimate Young modulus E=%.4g.", ae);
 
-    if ( ir->hasField(IFT_HellmichMaterial_linearE, "lineare") ) {
+    if ( ir->hasField(_IFT_HellmichMaterial_linearE) ) {
         options = options | moLinearEModulus;
         printf("\nHellMat: Forcing linear relation E(ksi).");
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, ny, IFT_HellmichMaterial_nu, "n");
+    IR_GIVE_OPTIONAL_FIELD(ir, ny, _IFT_HellmichMaterial_nu);
     printf("\nHellMat: Poisson const nu=%.3f.", ny);
-    IR_GIVE_OPTIONAL_FIELD(ir, epscu, IFT_HellmichMaterial_epscu, "epscu"); // 0.0022
-    IR_GIVE_OPTIONAL_FIELD(ir, fc, IFT_HellmichMaterial_fc, "fc"); // 40.1e6  88e6
-    IR_GIVE_FIELD(ir, value, IFT_HellmichMaterial_tAlpha, "talpha");
+    IR_GIVE_OPTIONAL_FIELD(ir, epscu, _IFT_HellmichMaterial_epscu); // 0.0022
+    IR_GIVE_OPTIONAL_FIELD(ir, fc, _IFT_HellmichMaterial_fc); // 40.1e6  88e6
+    IR_GIVE_FIELD(ir, value, _IFT_HellmichMaterial_tAlpha);
     propertyDictionary->add(tAlpha, value);
 
     initialTemperature = -1;
-    IR_GIVE_OPTIONAL_FIELD(ir, initialTemperature, IFT_HellmichMaterial_isoT, "isot");
+    IR_GIVE_OPTIONAL_FIELD(ir, initialTemperature, _IFT_HellmichMaterial_isoT);
     if ( initialTemperature >= 0 ) {
         printf("\nHellMat: Isothermal analysis at %.2f K.", initialTemperature);
         options = options | moIsothermal;
         tTimeFunction = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, tTimeFunction, IFT_HellmichMaterial_Tltf, "tltf");
+        IR_GIVE_OPTIONAL_FIELD(ir, tTimeFunction, _IFT_HellmichMaterial_Tltf);
         if ( tTimeFunction ) {
             printf("\nHellMat: Time function number %d used as temperature history.", tTimeFunction);
         }
 
         hTimeFunction = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, tTimeFunction, IFT_HellmichMaterial_hltf, "hltf");
+        IR_GIVE_OPTIONAL_FIELD(ir, tTimeFunction, _IFT_HellmichMaterial_hltf);
         if ( tTimeFunction ) {
             printf("\nHellMat: Time function number %d used as moisture history.", tTimeFunction);
         }
     } else {
         options = options & ~moIsothermal;
-        IR_GIVE_OPTIONAL_FIELD(ir, initialTemperature, IFT_HellmichMaterial_iniT, "init");
+        IR_GIVE_OPTIONAL_FIELD(ir, initialTemperature, _IFT_HellmichMaterial_iniT);
     }
 
     materialGpUpdateFlag = 0; // needs init
@@ -180,7 +180,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
     if ( !( options & moIsothermal ) ) {
         value = -1;
         // for temperature field in Celsius degrees, hydration analysis requires absolute temperatures
-        IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HellmichMaterial_baseT, "baset");
+        IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_HellmichMaterial_baseT);
         if ( value >= 0 ) {
             temperatureFieldBase = value;
         } else {
@@ -193,7 +193,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
 
 
         flatTemperature = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, flatTemperature, IFT_HellmichMaterial_flatT, "flatt");
+        IR_GIVE_OPTIONAL_FIELD(ir, flatTemperature, _IFT_HellmichMaterial_flatT);
         if ( flatTemperature ) {
             if ( flatTemperature == -1 ) {
                 printf("\nHellMat: Temperature field flattened xz->xy");
@@ -203,7 +203,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
         }
 
         hemoMaterial = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, hemoMaterial, IFT_HellmichMaterial_hemomat, "hemomat");
+        IR_GIVE_OPTIONAL_FIELD(ir, hemoMaterial, _IFT_HellmichMaterial_hemomat);
         if ( hemoMaterial ) {
             printf("\nHellMat: Using material %d for sorption isotherms functions.", hemoMaterial);
         }
@@ -213,7 +213,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
     // !!! not very consistent with interface concept?
     // mix setting not available in input record
     value = -1.;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HellmichMaterial_hydration, "hydration");
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_HellmichMaterial_hydration);
     if ( value >= 0. ) {
         options = options | moHydration;
     } else {
@@ -228,7 +228,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
     pssIndex = -1;
     pssElement = 0;
     pssGaussPoint = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, pssIndex, IFT_HellmichMaterial_plotss, "plotss");
+    IR_GIVE_OPTIONAL_FIELD(ir, pssIndex, _IFT_HellmichMaterial_plotss);
     if ( pssIndex > -1 ) {
         options = options | moPlotStressStrain;
         printf("\nHellMat: Stress-strain plot for component %d.", pssIndex);
@@ -242,19 +242,19 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
     }
 
     if ( options & moPlotStressStrain ) {
-        if ( ir->hasField(IFT_HellmichMaterial_pssiter, "pssiter") ) {
+        if ( ir->hasField(_IFT_HellmichMaterial_pssiter) ) {
             options = options | moPlotStressStrainIter;
             printf("\nHellMat: Stress-Strain plot in each iteration.");
         } else {
             options = options & ~moPlotStressStrainIter;
         }
 
-        IR_GIVE_OPTIONAL_FIELD(ir, pssElement, IFT_HellmichMaterial_psselem,  "psselem");
+        IR_GIVE_OPTIONAL_FIELD(ir, pssElement, _IFT_HellmichMaterial_psselem);
         if ( pssElement ) {
             printf("\nHellMat: Stress-Strain plot for Element %d.", pssElement);
         }
 
-        IR_GIVE_OPTIONAL_FIELD(ir, pssGaussPoint, IFT_HellmichMaterial_pssgp, "pssgp");
+        IR_GIVE_OPTIONAL_FIELD(ir, pssGaussPoint, _IFT_HellmichMaterial_pssgp);
         if ( pssGaussPoint ) {
             printf("\nHellMat: Stress-Strain plot for GaussPoint %d.", pssGaussPoint);
         }
@@ -264,10 +264,10 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
     prestress = 0;
     prestressFrom = -1;
     prestressTo = -1;
-    IR_GIVE_OPTIONAL_FIELD(ir, prestress, IFT_HellmichMaterial_prestress, "prestress");
-    IR_GIVE_OPTIONAL_FIELD(ir, prestressFrom, IFT_HellmichMaterial_prestressFrom, "prestressfrom");
+    IR_GIVE_OPTIONAL_FIELD(ir, prestress, _IFT_HellmichMaterial_prestress);
+    IR_GIVE_OPTIONAL_FIELD(ir, prestressFrom, _IFT_HellmichMaterial_prestressFrom);
     prestressTo = prestressFrom;
-    IR_GIVE_OPTIONAL_FIELD(ir, prestressTo, IFT_HellmichMaterial_prestressTo, "prestressto");
+    IR_GIVE_OPTIONAL_FIELD(ir, prestressTo, _IFT_HellmichMaterial_prestressTo);
     if ( prestress ) {
         printf("\n Hellmat: prestress %.5e applied from %.2f to %.2f", prestress, prestressFrom, prestressTo);
     }
@@ -275,7 +275,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
     // Input time scale
     timeScale = 1.;
     value = -1.;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HellmichMaterial_timeScale, "timescale");
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_HellmichMaterial_timeScale);
     if ( value > 0. ) {
         timeScale = value;
         printf("\nHellMat: Time scale set to %.0f", timeScale);
@@ -286,8 +286,8 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
 
     // Select chemical shrinkage and moisture-dependent volume changes
     intvalue = -1;
-    IR_GIVE_OPTIONAL_FIELD(ir, intvalue, IFT_HellmichMaterial_shr, "shr");
-    if ( ( intvalue == 0 ) || ir->hasField(IFT_HellmichMaterial_noshr, "noshr") ) { // noshr set
+    IR_GIVE_OPTIONAL_FIELD(ir, intvalue, _IFT_HellmichMaterial_shr);
+    if ( ( intvalue == 0 ) || ir->hasField(_IFT_HellmichMaterial_noshr) ) { // noshr set
         options = options & ~moShrinkage;
         options = options & ~moHumidityStrain;
         options = options & ~moDryingShrinkage;
@@ -323,36 +323,36 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
         if ( !( options & moHydration ) ) {
             printf("\nHellMat: No chemical shrinkage without hydration.");
         } else { // optionally change autogenous shrinkage parameters (eshr = ashr + bshr * ksi; eshr <= 0 )
-            IR_GIVE_OPTIONAL_FIELD(ir, ashr, IFT_HellmichMaterial_ashr, "ashr"); //   5e-4;
+            IR_GIVE_OPTIONAL_FIELD(ir, ashr, _IFT_HellmichMaterial_ashr); //   5e-4;
             // Set bshr 0 to disable empiric hydration-dependent autogenous shrinkage
-            IR_GIVE_OPTIONAL_FIELD(ir, bshr, IFT_HellmichMaterial_bshr,  "bshr"); // -11e-4;
+            IR_GIVE_OPTIONAL_FIELD(ir, bshr, _IFT_HellmichMaterial_bshr); // -11e-4;
         }
     }
 
     // if humidity shrinkage is enabled, check hshr parameter Kappa
     if ( options & moHumidityStrain ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, kshr, IFT_HellmichMaterial_kshr, "kshr"); // 8e-4;
-        if ( ir->hasField(IFT_HellmichMaterial_kshr, "kshr") ) {
+        IR_GIVE_OPTIONAL_FIELD(ir, kshr, _IFT_HellmichMaterial_kshr); // 8e-4;
+        if ( ir->hasField(_IFT_HellmichMaterial_kshr) ) {
             printf("\nHellMat: Humidity volume change parameter Kappa set to %.3e", kshr);
         }
     }
 
     // if drying shrinkage is enabled, check parameter C
     if ( options & moDryingShrinkage ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, c, IFT_HellmichMaterial_dryingc, "dc"); // 1e-17;
-        if ( ir->hasField(IFT_HellmichMaterial_dryingc, "dc") ) {
+        IR_GIVE_OPTIONAL_FIELD(ir, c, _IFT_HellmichMaterial_dryingc); // 1e-17;
+        if ( ir->hasField(_IFT_HellmichMaterial_dryingc) ) {
             printf("\nHellMat: Drying shrinkage coefficient set to %.3e", c);
         }
     }
 
     // Switch off creep
-    if ( ir->hasField(IFT_HellmichMaterial_nocreep, "nocreep") ) {
+    if ( ir->hasField(_IFT_HellmichMaterial_nocreep) ) {
         options = options & ~moCreep;
         printf("\nHellMat: No creep.");
     }
 
     // Use parameters for the Skanska C60/75 mixture
-    if ( ir->hasField(IFT_HellmichMaterial_c60mix, "c60mix") ) {
+    if ( ir->hasField(_IFT_HellmichMaterial_c60mix) ) {
         printf("\nHellMat: Model parameters for Skanska C60/75 mixture.");
         setMixture(mtC60);
         modulusH = 1e6 / 9.5;
@@ -363,14 +363,14 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
 
     // optionally change material creep parameters
     if ( options & moCreep ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, modulusH, IFT_HellmichMaterial_modulusH, "modulush"); // 1e6/7  1e6/9,5
-        IR_GIVE_OPTIONAL_FIELD(ir, ur, IFT_HellmichMaterial_ur, "ur"); // 2700
-        IR_GIVE_OPTIONAL_FIELD(ir, jv, IFT_HellmichMaterial_jv, "jv"); // 24e-12 30e-12
-        IR_GIVE_OPTIONAL_FIELD(ir, tw, IFT_HellmichMaterial_tw, "tw"); // 28 days
+        IR_GIVE_OPTIONAL_FIELD(ir, modulusH, _IFT_HellmichMaterial_modulusH); // 1e6/7  1e6/9,5
+        IR_GIVE_OPTIONAL_FIELD(ir, ur, _IFT_HellmichMaterial_ur); // 2700
+        IR_GIVE_OPTIONAL_FIELD(ir, jv, _IFT_HellmichMaterial_jv); // 24e-12 30e-12
+        IR_GIVE_OPTIONAL_FIELD(ir, tw, _IFT_HellmichMaterial_tw); // 28 days
 
         // deviatoric creep options
         intvalue = -1;
-        IR_GIVE_OPTIONAL_FIELD(ir, intvalue, IFT_HellmichMaterial_devc, "devc");
+        IR_GIVE_OPTIONAL_FIELD(ir, intvalue, _IFT_HellmichMaterial_devc);
         if ( intvalue >= 0 ) { // devc set
             options = options & ~( moDeviatoricCreepE | moDeviatoricCreepF ); // init. turn off dev. creep
             intvalue = intvalue << 11; // 0/1/2/3 -> 0/2048/4096/6144
@@ -396,31 +396,31 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
 
     // === Plasticity ===
     // Switch off plasticity
-    if ( ir->hasField(IFT_HellmichMaterial_noplast, "noplast") ) {
+    if ( ir->hasField(_IFT_HellmichMaterial_noplast) ) {
         options = options & ~moPlasticity;
         printf("\nHellMat: No plasticity.");
     }
 
     if ( options & moPlasticity ) {
         // Switch off volumetric dependence of the yield surface (~ J2 plasticity)
-        if ( ir->hasField(IFT_HellmichMaterial_zeroalpha, "zeroalpha") ) {
+        if ( ir->hasField(_IFT_HellmichMaterial_zeroalpha) ) {
             alpha = 0;
             options = options | moHardening;
             printf("\nHellMat: J2 plasticity, no hardening.");
-        } else if ( ir->hasField(IFT_HellmichMaterial_nohardening, "nohardening") ) {
+        } else if ( ir->hasField(_IFT_HellmichMaterial_nohardening) ) {
             options = options & ~moHardening;
             printf("\nHellMat: no plastic hardening.");
         }
 
         // Use numeric derivative in local plastic iteration
-        if ( ( options & moPlasticity ) && ( ir->hasField(IFT_HellmichMaterial_approxnewton, "approxnewton") ) ) {
+        if ( ( options & moPlasticity ) && ( ir->hasField(_IFT_HellmichMaterial_approxnewton) ) ) {
             options = options | moApproxNewton;
             printf("\nHellMat: Approximate derivation used in local plastic iteration.");
         }
 
         // Compute plastic multiplier directly, not using the local Newton iteration
         // !!! not sure whether works correctly in 3D corner
-        if ( ( options & moPlasticity ) && ( ir->hasField(IFT_HellmichMaterial_computedl, "computedl") ) ) {
+        if ( ( options & moPlasticity ) && ( ir->hasField(_IFT_HellmichMaterial_computedl) ) ) {
             options = options | moComputedl;
             printf("\nHellMat: Direct computation of plastic multiplier dlambda1.");
         } else {
