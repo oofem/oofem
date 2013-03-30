@@ -123,7 +123,7 @@ void DofManager :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, Valu
 Dof *DofManager :: giveDof(int i) const
 // Returns the i-th degree of freedom of the receiver.
 {
-#if DEBUG
+#ifdef DEBUG
     if ( !dofArray ) {
         _error("giveDof: dof is not defined");
     }
@@ -138,7 +138,7 @@ Dof *DofManager :: giveDofWithID(int dofID) const
 {
     int indx = this->findDofWithDofId( ( DofIDItem ) dofID );
 
-#if DEBUG
+#ifdef DEBUG
     if ( !indx ) {
         _error("giveDofWithID: dof with given DofID does not exists");
     }
@@ -776,7 +776,7 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
 
     for ( int i = 1; i <= size; i++ ) {
         int pos = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) );
-#if DEBUG
+#ifdef DEBUG
         if ( pos == 0 ) {
             OOFEM_ERROR2("DofManager :: giveUnknownVector - Couldn't find dof with Dof ID %d", dofIDArry.at(i));
         }
@@ -802,7 +802,7 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
 
     for ( int i = 1; i <= size; i++ ) {
         int pos = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) );
-#if DEBUG
+#ifdef DEBUG
         if ( pos == 0 ) {
             OOFEM_ERROR2("DofManager :: giveUnknownVector - Couldn't find dof with Dof ID %d", dofIDArry.at(i));
         }

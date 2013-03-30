@@ -204,7 +204,7 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
 double NonLinearDynamic ::  giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
     int eq = dof->__giveEquationNumber();
-#if DEBUG
+#ifdef DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }

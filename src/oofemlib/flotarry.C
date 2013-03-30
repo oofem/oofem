@@ -895,7 +895,7 @@ FloatArray operator *( const FloatArray & x, const double & a )
 FloatArray operator + ( const FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
-#if DEBUG
+#ifdef DEBUG
     if ( N != y.giveSize() ) {
         OOFEM_ERROR("loatArray operator+ : incompatible vector lengths");
     }
@@ -912,7 +912,7 @@ FloatArray operator + ( const FloatArray & x, const FloatArray & y )
 FloatArray operator - ( const FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
-#if DEBUG
+#ifdef DEBUG
     if ( N != y.giveSize() ) {
         OOFEM_ERROR("FloatArray operator- : incompatible vector lengths");
     }
@@ -930,7 +930,7 @@ FloatArray operator - ( const FloatArray & x, const FloatArray & y )
 FloatArray &operator += ( FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
-#if DEBUG
+#ifdef DEBUG
     if ( N != y.giveSize() ) {
         OOFEM_ERROR("FloatArray& operator+= : incompatible vector lengths");
     }
@@ -947,7 +947,7 @@ FloatArray &operator += ( FloatArray & x, const FloatArray & y )
 FloatArray &operator -= ( FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
-#if DEBUG
+#ifdef DEBUG
     if ( N != y.giveSize() ) {
         OOFEM_ERROR("FloatArray& operator-= : incompatible vector lengths");
     }
@@ -964,7 +964,7 @@ FloatArray &operator -= ( FloatArray & x, const FloatArray & y )
 double dot(const FloatArray &x, const FloatArray &y)
 {
     //  Check for compatible dimensions:
-#if DEBUG
+#ifdef DEBUG
     if ( x.giveSize() != y.giveSize() ) {
         OOFEM_ERROR("dot : incompatible dimensions");
     }

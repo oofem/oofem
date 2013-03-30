@@ -315,7 +315,7 @@ bool IntArray :: containsOnlyZeroes() const
 
 int IntArray :: minimum() const
 {
-#if DEBUG
+#ifdef DEBUG
     if (size == 0) {
         OOFEM_ERROR("IntArray :: minimum - Empty array.");
     }
@@ -332,7 +332,7 @@ int IntArray :: minimum() const
 
 int IntArray :: maximum() const
 {
-#if DEBUG
+#ifdef DEBUG
     if (size == 0) {
         OOFEM_ERROR("IntArray :: maximum - Empty array.");
     }

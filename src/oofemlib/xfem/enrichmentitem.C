@@ -360,7 +360,7 @@ Delamination :: giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &
         zBottom =  0.;//this->giveDelaminationZCoord(dGroup-1);
         zTop    =  0.;//this->giveDelaminationZCoord(dGroup);
     }
-#if DEBUG
+#ifdef DEBUG
     if ( zBottom > zTop ) {
         OOFEM_ERROR2("giveDelaminationGroupZLimits: Bottom z-coord is larger than top z-coord in dGroup. (%i)", dGroup);
     }

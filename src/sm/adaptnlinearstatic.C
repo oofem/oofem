@@ -184,7 +184,7 @@ double AdaptiveNonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeS
 // This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
-#if DEBUG
+#ifdef DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }

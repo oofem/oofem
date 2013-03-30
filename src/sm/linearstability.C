@@ -116,7 +116,7 @@ double LinearStability :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
 // returns unknown quantity like displacement, eigen value.
 {
     int eq = dof->__giveEquationNumber();
-#if DEBUG
+#ifdef DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }

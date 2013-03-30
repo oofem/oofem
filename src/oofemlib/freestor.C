@@ -43,14 +43,14 @@ double *allocDouble(int n)
 // the free store is exhausted.
 {
     double *answer;
-#if DEBUG
+#ifdef DEBUG
     if ( !n ) {
         OOFEM_FATAL("allocDouble : cannot allocate 0 coefficients");
     }
 #endif
 
     answer = ( double * ) calloc( n, sizeof( double ) );
-#if DEBUG
+#ifdef DEBUG
     if ( !answer ) {
         OOFEM_FATAL2("allocDouble : free store exhausted (tried to allocate %d doubles)",n);
     }
@@ -65,7 +65,7 @@ int *allocInt(int n)
 // if the free store is exhausted.
 {
     int *answer;
-#if DEBUG
+#ifdef DEBUG
     if ( !n ) {
         OOFEM_FATAL("allocInt: cannot allocate 0 coefficients");
     }
@@ -73,7 +73,7 @@ int *allocInt(int n)
 
     answer = ( int * ) calloc( n, sizeof( int ) );
     //answer = ( int * ) malloc( n * sizeof( int ) );
-#if DEBUG
+#ifdef DEBUG
     if ( !answer ) {
         OOFEM_FATAL2("allocInt : free store exhausted (tried to allocate %d ints)",n);
     }

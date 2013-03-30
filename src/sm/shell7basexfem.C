@@ -831,7 +831,7 @@ Shell7BaseXFEM :: giveDelaminationGroupXiLimits(int &dGroup, double &xiTop, doub
             xiTop    = (*iter).second;
         }
 
-    #if DEBUG
+    #ifdef DEBUG
         if ( xiBottom > xiTop ) {
             OOFEM_ERROR2("giveDelaminationGroupZLimits: Bottom xi-coord is larger than top xi-coord in dGroup. (%i)", dGroup);
         }

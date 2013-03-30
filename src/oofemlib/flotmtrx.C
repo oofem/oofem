@@ -90,7 +90,7 @@ FloatMatrix :: FloatMatrix(int n, int m) :
 {
     ///@todo Should we really automatically zero matrices?
     values = (double*)calloc(allocatedSize, sizeof(double));
-#if DEBUG
+#ifdef DEBUG
     //for (int i = 0; i < allocatedSize; ++i) values[i] = NaN;
 #endif
 #ifdef DEBUG
@@ -213,7 +213,7 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
 {
     int ii, jj, size = src.giveNumberOfRows();
 
-#if DEBUG
+#ifdef DEBUG
     if ( size != loc.giveSize() ) {
         OOFEM_ERROR("FloatMatrix :: assemble : dimensions of 'src' and 'loc' mismatch");
     }
@@ -241,7 +241,7 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &rowind, con
     int nr = src.giveNumberOfRows();
     int nc = src.giveNumberOfColumns();
 
-#if DEBUG
+#ifdef DEBUG
     if ( nr != rowind.giveSize() ) {
         OOFEM_ERROR("FloatMatrix :: assemble : row dimensions of 'src' and 'rowind' mismatch");
     }
@@ -490,7 +490,7 @@ void FloatMatrix :: setSubMatrix(const FloatMatrix &src, int sr, int sc)
     sc--;
 
     int srcRows = src.giveNumberOfRows(), srcCols = src.giveNumberOfColumns();
-#if DEBUG
+#ifdef DEBUG
     int nr = sr + srcRows;
     int nc = sc + srcCols;
 
@@ -515,7 +515,7 @@ void FloatMatrix :: setTSubMatrix(const FloatMatrix &src, int sr, int sc)
     sc--;
 
     int srcRows = src.giveNumberOfRows(), srcCols = src.giveNumberOfColumns();
-#if DEBUG
+#ifdef DEBUG
     int nr = sr + srcCols;
     int nc = sc + srcRows;
 
@@ -1239,7 +1239,7 @@ void FloatMatrix :: resize(int rows, int columns, int allocChunk)
         allocatedSize = rows * columns + allocChunk; // REMEMBER NEW ALLOCATED SIZE
         ///@todo Should we set all values to zeros or not?
         values = (double*)calloc(allocatedSize, sizeof(double));
-#if DEBUG
+#ifdef DEBUG
         //for (int i = 0; i < allocatedSize; ++i) values[i] = NaN;
 #endif
     } else {
@@ -1266,7 +1266,7 @@ void FloatMatrix :: resizeWithData(int rows, int columns)
 
         allocatedSize = rows * columns; // REMEMBER NEW ALLOCATED SIZE
         values = (double*)calloc(allocatedSize, sizeof(double));
-#if DEBUG
+#ifdef DEBUG
         //for (int i = 0; i < allocatedSize; ++i) values[i] = NaN;
 #endif
     } else {
@@ -1301,7 +1301,7 @@ void FloatMatrix :: hardResize(int rows, int columns)
 
     allocatedSize = rows * columns; // REMEMBER NEW ALLOCATED SIZE
     values = (double*)calloc(allocatedSize, sizeof(double));
-#if DEBUG
+#ifdef DEBUG
     //for (int i = 0; i < allocatedSize; ++i) values[i] = NaN;
 #endif
 

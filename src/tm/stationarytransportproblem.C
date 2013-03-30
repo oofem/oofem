@@ -132,7 +132,7 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
 
 double StationaryTransportProblem :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
-#if DEBUG
+#ifdef DEBUG
     int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
