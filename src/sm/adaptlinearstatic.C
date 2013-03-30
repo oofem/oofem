@@ -113,7 +113,8 @@ AdaptiveLinearStatic :: initializeAdaptive(int stepNumber)
 }
 
 
-contextIOResultType AdaptiveLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, void *obj) {
+contextIOResultType AdaptiveLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+{
     contextIOResultType iores;
     if ( ( iores = LinearStatic :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -132,7 +133,7 @@ AdaptiveLinearStatic :: initializeFrom(InputRecord *ir)
     LinearStatic :: initializeFrom(ir);
 
     int meshPackageId = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, meshPackageId, IFT_AdaptiveLinearStatic_meshpackage, "meshpackage"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, meshPackageId, IFT_AdaptiveLinearStatic_meshpackage, "meshpackage");
 
     if ( meshPackageId == 1 ) {
         meshPackage = MPT_TARGE2;

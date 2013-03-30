@@ -55,7 +55,7 @@ MixedGradientPressureDirichlet :: MixedGradientPressureDirichlet(int n, Domain *
 {
     // The unknown volumetric strain
     voldman = new Node(1, d);
-    voldman->appendDof(new MasterDof(1, voldman, X_1));
+    voldman->appendDof(new MasterDof(1, voldman, (DofIDItem)d->giveNextFreeDofID()));
 
     int nsd = d->giveNumberOfSpatialDimensions();
     int components = (nsd+1)*nsd/2;
@@ -65,7 +65,7 @@ MixedGradientPressureDirichlet :: MixedGradientPressureDirichlet(int n, Domain *
         // Just putting in X_i id-items since they don't matter.
         // These don't actually need to be active, they are masterdofs with prescribed values, its
         // easier to just have them here rather than trying to make another Dirichlet boundary condition.
-        devdman->appendDof(new ActiveDof(i+1, devdman, this->giveNumber(), (DofIDItem)(X_1+i) ));
+        devdman->appendDof(new ActiveDof(i+1, devdman, this->giveNumber(), (DofIDItem)d->giveNextFreeDofID() ));
     }
 }
 
@@ -352,7 +352,7 @@ void MixedGradientPressureDirichlet :: computeTangents(
 double MixedGradientPressureDirichlet :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
 {
     if (this->isDevDof(dof)) {
-        return this->devGradient(dof->giveDofID() - X_1);
+        return this->devGradient(dof->giveNumber());
     }
     return this->giveUnknown(this->giveVolDof()->giveUnknown(field, mode, tStep), this->devGradient, mode, tStep, dof);
 }
@@ -361,7 +361,7 @@ double MixedGradientPressureDirichlet :: giveUnknown(PrimaryField &field, ValueM
 double MixedGradientPressureDirichlet :: giveUnknown(EquationID eid, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
 {
     if (this->isDevDof(dof)) {
-        return this->devGradient(dof->giveDofID() - X_1);
+        return this->devGradient(dof->giveNumber());
     }
     return this->giveUnknown(this->giveVolDof()->giveUnknown(eid, mode, tStep), this->devGradient, mode, tStep, dof);
 }
@@ -374,7 +374,7 @@ void MixedGradientPressureDirichlet :: setPrescribedDeviatoricGradientFromVoigt(
 
 
 double MixedGradientPressureDirichlet :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                    CharType type, ValueModeType mode, const UnknownNumberingScheme &s, Domain *domain)
+                    CharType type, ValueModeType mode, const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
     if (type != ExternalForcesVector)
         return 0.0;
@@ -385,10 +385,12 @@ double MixedGradientPressureDirichlet :: assembleVector(FloatArray &answer, Time
     if (eid != EID_MomentumBalance)
         return 0.0;
 
-    int vol_loc = this->giveVolDof()->giveEquationNumber(s);
+    Dof *vol = this->giveVolDof();
+    int vol_loc = vol->giveEquationNumber(s);
     if (vol_loc) {
         double rve_size = this->domainSize();
         answer.at(vol_loc) -= rve_size*pressure; // Note the negative sign (pressure as opposed to mean stress)
+        if ( eNorms ) eNorms->at(vol->giveDofID()) = rve_size*pressure*rve_size*pressure;
     }
     return 0.0;
 }
@@ -403,7 +405,7 @@ bool MixedGradientPressureDirichlet :: isPrimaryDof(ActiveDof *dof)
 double MixedGradientPressureDirichlet :: giveBcValue(ActiveDof *dof, ValueModeType mode, TimeStep *tStep)
 {
     if (this->isDevDof(dof)) {
-        return this->devGradient(dof->giveDofID() - X_1);
+        return this->devGradient(dof->giveNumber());
     }
     OOFEM_ERROR("MixedGradientPressureDirichlet :: giveBcValue - Has no prescribed value from bc.");
     return 0.0;
@@ -418,12 +420,7 @@ bool MixedGradientPressureDirichlet :: hasBc(ActiveDof *dof, TimeStep *tStep)
 
 bool MixedGradientPressureDirichlet :: isDevDof(ActiveDof *dof)
 {
-    for (int i = 1; i <= this->devdman->giveNumberOfDofs(); ++i) {
-        if (devdman->giveDof(i) == dof) {
-            return true;
-        }
-    }
-    return false;
+    return devdman == dof->giveDofManager();
 }
 
 

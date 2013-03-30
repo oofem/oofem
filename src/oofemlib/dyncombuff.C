@@ -357,9 +357,9 @@ DynamicCommunicationBuffer :: testCompletion()
 {
     if ( mode == DCB_send ) {
         return this->sendCompleted();
-    } else if ( mode == DCB_receive )  {
+    } else if ( mode == DCB_receive ) {
         return this->receiveCompleted();
-    } else                                                                     {
+    } else {
         return 0;
     }
 }

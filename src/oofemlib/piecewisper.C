@@ -43,7 +43,7 @@ double PeriodicPiecewiseLinFunction :: __at(double time)
 {
     double add, last;
 
-    if ( !numberOfPoints ) {
+    if ( !this->dates.giveSize() ) {
         _error("at: Undefined dates and values!");
     }
 
@@ -58,7 +58,7 @@ double PeriodicPiecewiseLinFunction :: __at(double time)
     }
 
     // periodicity
-    last = dates.at(numberOfPoints); // time of last date
+    last = dates.at(this->dates.giveSize()); // time of last date
     if ( ( period >= 0.0 ) && ( time > last ) ) {
         double d = ( time - last ) / period; // periods after last
         time = last + ( d - floor(d) - 1. ) * period;
@@ -75,7 +75,7 @@ double PeriodicPiecewiseLinFunction :: __derAt(double time)
 {
     double add, last;
 
-    if ( !numberOfPoints ) {
+    if ( !this->dates.giveSize() ) {
         _error("derAt: Undefined dates and values!");
     }
 
@@ -90,7 +90,7 @@ double PeriodicPiecewiseLinFunction :: __derAt(double time)
     }
 
     // periodicity
-    last = dates.at(numberOfPoints); // time of last date
+    last = dates.at(this->dates.giveSize()); // time of last date
     if ( ( period >= 0.0 ) && ( time > last ) ) {
         double d = ( time - last ) / period; // periods after last
         time = last + ( d - floor(d) - 1. ) * period;
@@ -108,9 +108,9 @@ PeriodicPiecewiseLinFunction :: initializeFrom(InputRecord *ir)
     PiecewiseLinFunction :: initializeFrom(ir);
 
     period = -1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, period, IFT_PeriodicPiecewiseLinFunction_period, "period"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, period, IFT_PeriodicPiecewiseLinFunction_period, "period");
     addTF = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, addTF, IFT_PeriodicPiecewiseLinFunction_addtf, "addtf"); // Macroo
+    IR_GIVE_OPTIONAL_FIELD(ir, addTF, IFT_PeriodicPiecewiseLinFunction_addtf, "addtf");
 
     return IRRT_OK;
 }

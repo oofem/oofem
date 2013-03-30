@@ -93,10 +93,10 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
 // strain increment, the only way, how to correctly update gp records
 //
 {
-    SimpleInterfaceMaterialStatus *status = ( SimpleInterfaceMaterialStatus * ) this->giveStatus(gp);
+    SimpleInterfaceMaterialStatus *status = static_cast< SimpleInterfaceMaterialStatus * >( this->giveStatus(gp) );
     this->initGpForNewStep(gp);
     FloatArray shearStrain(2), shearStress, strainVector;
-    StructuralElement *el = ( StructuralElement * ) gp->giveElement();
+    StructuralElement *el = static_cast< StructuralElement * >( gp->giveElement() );
     el->computeStrainVector(strainVector, gp, atTime);
     FloatArray tempShearStressShift = status->giveTempShearStressShift();
     const double normalStrain = strainVector.at(1);
@@ -175,9 +175,9 @@ SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveElement()->giveMaterialMode();
 
     FloatArray strainVector;
-    StructuralElement *el = ( StructuralElement * ) gp->giveElement();
+    StructuralElement *el = static_cast< StructuralElement * >( gp->giveElement() );
     double normalStrain;
-    
+
     el->computeStrainVector(strainVector, gp, atTime);
     normalStrain = strainVector.at(1);
     answer.zero();
@@ -421,7 +421,9 @@ SimpleInterfaceMaterial :: giveInputRecordString(std :: string &str, bool keywor
     StructuralMaterial :: giveInputRecordString(str, keyword);
 
     sprintf(buff, " kn %e", kn);
+    str += buff;
     sprintf(buff, " frictCoeff %e", frictCoeff);
+    str += buff;
     sprintf(buff, " stiffCoeff %e", stiffCoeff);
     str += buff;
 

@@ -217,8 +217,8 @@ IRResultType Line :: initializeFrom(InputRecord *ir)
 
     FloatArray *start = new FloatArray(2);
     FloatArray *end = new FloatArray(2);
-    IR_GIVE_FIELD(ir, * start, IFT_Line_start, "start"); // Macro
-    IR_GIVE_FIELD(ir, * end, IFT_Line_end, "end"); // Macro
+    IR_GIVE_FIELD(ir, * start, IFT_Line_start, "start");
+    IR_GIVE_FIELD(ir, * end, IFT_Line_end, "end");
     vertices->put(1, start);
     vertices->put(2, end);
     return IRRT_OK;
@@ -230,7 +230,7 @@ bool Line :: isPointInside(FloatArray *point)
     if ( vertices->at(1)->at(1) > vertices->at(2)->at(1) ) {
         maxX = vertices->at(1)->at(1);
         minX = vertices->at(2)->at(1);
-    } else   {
+    } else {
         minX = vertices->at(1)->at(1);
         maxX = vertices->at(2)->at(1);
     }
@@ -238,7 +238,7 @@ bool Line :: isPointInside(FloatArray *point)
     if ( vertices->at(1)->at(2) > vertices->at(2)->at(2) ) {
         maxY = vertices->at(1)->at(2);
         minY = vertices->at(2)->at(2);
-    } else   {
+    } else {
         minY = vertices->at(1)->at(2);
         maxY = vertices->at(2)->at(2);
     }
@@ -375,8 +375,8 @@ IRResultType Circle :: initializeFrom(InputRecord *ir)
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
     FloatArray *center = new FloatArray(2);
-    IR_GIVE_FIELD(ir, * center, IFT_Circle_center, "center"); // Macro
-    IR_GIVE_FIELD(ir, radius, IFT_Circle_radius, "radius"); // Macro
+    IR_GIVE_FIELD(ir, * center, IFT_Circle_center, "center");
+    IR_GIVE_FIELD(ir, radius, IFT_Circle_radius, "radius");
     vertices->put(1, center);
     return IRRT_OK;
 }
@@ -399,6 +399,33 @@ bool Circle :: intersects(Element *element)
         return true;
     }
 }
+
+
+
+bool 
+Circle :: isInside(FloatArray &point)
+{
+    double dist = this->giveVertex(1)->distance(point);
+    if ( dist < this->radius ) {
+        return true;
+    }
+    return false;
+}
+
+
+bool Circle :: isInside(Element *element)
+{   // condition should maybe be that all nodes should be inside
+    for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
+        FloatArray nodeCoord = *element->giveDofManager(i)->giveCoordinates();
+        if ( isInside(nodeCoord) ) {
+            return true;
+        }
+    }
+    return false;    
+}
+
+
+
 
 void Circle :: computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints)
 {
@@ -464,7 +491,7 @@ void Circle :: computeIntersectionPoints(Line *l, AList< FloatArray > *intersecP
         double fn;
         if ( i == 1 ) {
             fn = sqrt(D);
-        } else   {
+        } else {
             fn = ( -1 ) * sqrt(D);
         }
 
@@ -484,6 +511,14 @@ void Circle :: computeIntersectionPoints(Line *l, AList< FloatArray > *intersecP
         }
     }
 }
+
+int 
+Circle :: computeNumberOfIntersectionPoints(Element *element) { 
+    AList< FloatArray > intersecPoints;
+
+    this->computeIntersectionPoints(element, &intersecPoints);
+    return intersecPoints.giveSize();
+    };
 
 bool Circle :: isOutside(BasicGeometry *bg)
 {
@@ -507,4 +542,23 @@ void Circle :: printYourself()
     vertices->at(1)->printYourself();
     printf("\n");
 }
+
+
+
+IRResultType PointSwarm :: initializeFrom(InputRecord *ir)
+{
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result; // Required by IR_GIVE_FIELD macro
+    IntArray idList;
+    
+    IR_GIVE_FIELD(ir, idList, IFT_Identification, "nodeid"); // Macro
+    
+    for (int i=1; i<=idList.giveSize(); i++) {
+        this->idList.push_back( idList.at(i) );
+    }
+    return IRRT_OK;
+}
+
+
+
 } // end namespace oofem

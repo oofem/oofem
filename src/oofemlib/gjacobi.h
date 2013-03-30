@@ -37,7 +37,6 @@
 
 #include "nummet.h"
 #include "flotarry.h"
-
 #include "nmstatus.h"
 
 namespace oofem {

@@ -45,7 +45,7 @@ IRResultType
 HydratingHeMoMaterial :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                            // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
     int value;
     double dvalue;
 
@@ -55,7 +55,7 @@ HydratingHeMoMaterial :: initializeFrom(InputRecord *ir)
     HydrationModelInterface :: initializeFrom(ir);
 
     dvalue = -2.;
-    IR_GIVE_OPTIONAL_FIELD(ir, dvalue, IFT_HydratingHeMoMaterial_hydration, "hydration"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, dvalue, IFT_HydratingHeMoMaterial_hydration, "hydration");
     if ( dvalue >= 0. ) {
         hydration = 1;
     } else {
@@ -70,7 +70,7 @@ HydratingHeMoMaterial :: initializeFrom(InputRecord *ir)
     if ( hydration ) {
         // mixture type: 1 - mtLafarge, 2 - mtHuber, 3 - mtC60
         value = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HydratingHeMoMaterial_mix, "mix"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HydratingHeMoMaterial_mix, "mix");
         if ( !value ) {
             value = mtLafarge;
         }
@@ -151,7 +151,7 @@ HydratingHeMoMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint
 void
 HydratingHeMoMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime)
 {
-    TransportMaterialStatus *ms = ( TransportMaterialStatus * ) this->giveStatus(gp);
+    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     FloatArray aux;
     if ( ms ) {
         ms->letTempStateVectorBe(vec);
@@ -214,7 +214,7 @@ HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoi
         if ( !hydrationLHS ) {
             answer = 0;
         } else if ( hydrationModel ) {  //!!! better via HydrationModelInterface
-            FloatArray vec( ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveTempStateVector() );
+            FloatArray vec = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveTempStateVector();
 
             if ( vec.giveSize() < 2 ) {
                 vec.resize(2);

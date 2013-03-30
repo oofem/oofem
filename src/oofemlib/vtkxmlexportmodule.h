@@ -42,6 +42,7 @@
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 #include "internalstatevaluetype.h"
+//#include "elementgeometrytype.h"
 
 #ifdef __VTK_MODULE
  #include <vtkUnstructuredGrid.h>
@@ -50,6 +51,17 @@
 
 #include <string>
 #include <list>
+
+///@name Input fields for VTK XML export module
+//@{
+#define _IFT_VTKXMLExportModule_cellvars "cellvars"
+#define _IFT_VTKXMLExportModule_vars "vars"
+#define _IFT_VTKXMLExportModule_primvars "primvars"
+#define _IFT_VTKXMLExportModule_stype "stype"
+#define _IFT_VTKXMLExportModule_regionstoskip "regionstoskip"
+#define _IFT_VTKXMLExportModule_nvr "nvr"
+#define _IFT_VTKXMLExportModule_vrmap "vrmap"
+//@}
 
 namespace oofem {
 /**
@@ -84,6 +96,8 @@ protected:
     int nvr;
     /// Real->virtual region map.
     IntArray vrmap;
+    /// Scaling time in output, e.g. conversion from seconds to hours
+    double timeScale;
 
     /// Buffer for earlier time steps exported to *.pvd file.
     std::list< std::string > pvdBuffer;
@@ -99,7 +113,10 @@ public:
     virtual void initialize();
     virtual void terminate();
     virtual const char *giveClassName() const { return "VTKXMLExportModule"; }
-
+    /**
+     * Prints point data header.
+     */
+    void exportPointDataHeader(FILE *stream, TimeStep *tStep);
 protected:
     /// Gives the full form of given symmetrically stored tensors, missing components are filled with zeros.
     void makeFullForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType type, const IntArray &redIndx);
@@ -131,11 +148,10 @@ protected:
      * Returns the element cell geometry.
      */
     void giveElementCell(IntArray &answer, Element *elem, int cell);
+    //void giveElementCell(IntArray &answer, Element_Geometry_Type elemGT, int cell);
+     
 #ifndef __VTK_MODULE
-    /**
-     * Prints point data header.
-     */
-    void exportPointDataHeader(FILE *stream, TimeStep *tStep);
+
 #endif
     /**
      * Export internal variables by smoothing.
@@ -227,6 +243,32 @@ protected:
     void writeVTKCollection();
 };
 
+
+
+// New 
+class VTKElement 
+{
+public:
+    VTKElement(){};
+    int cellType;
+    std::vector<FloatArray> nodeCoords;
+    IntArray connectivity;
+    IntArray primVarsToExport;
+    std::vector< std::vector<FloatArray> > nodeVars;
+    std::vector<FloatArray> elVars;
+    int offset;
+};
+
+class VTKCompositeElement 
+{
+public:
+    VTKCompositeElement(){}; 
+    int numSubEl;
+    int numTotalNodes;
+    std::vector<VTKElement> elements;
+};
+
+
 /**
  * Elements with geometry defined as EGT_Composite are exported using individual pieces.
  * The VTKXMLExportModuleElementInterface serves for this purpose, defining abstract
@@ -238,7 +280,15 @@ class VTKXMLExportModuleElementInterface : public Interface
 public:
     VTKXMLExportModuleElementInterface() : Interface() {}
     virtual const char *giveClassName() const { return "VTKXMLExportModuleElementInterface"; }
-    virtual void _export(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep) = 0;
+    virtual void _export(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep) {};
+    virtual void exportCompositeElement(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep);
+    virtual void giveCompositeExportData(IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep ){};
+    void exportCellVarAs(InternalStateType type, std::vector<FloatArray> &cellVars, FILE *stream, TimeStep *tStep);
+    void exportNodalVarAs(InternalStateType type, int nodeVarNum, FILE *stream, TimeStep *tStep);
+    VTKCompositeElement compositeEl;
 };
+
+
+
 } // end namespace oofem
 #endif // vtkxmlexportmodule_h

@@ -37,6 +37,11 @@
 
 #include "trplanstrss.h"
 
+///@name Input fields for TrPlaneStrRot
+//@{
+#define _IFT_TrPlaneStrRot_niprot "niprot"
+//@}
+
 namespace oofem {
 /**
  * Class implements an triangular three-node  plane-

@@ -10,13 +10,13 @@ set (core_unsorted
     trianglemesherinterface.C
     geotoolbox.C geometry.C
     externalfieldgenerator.C
+    datastream.C
     rvematerial.C
     weakperiodicbc.C
     # Semi sorted:
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C
     eleminterpunknownmapper.C primaryunknownmapper.C materialmappingalgorithm.C
-    structuralms.C
     nonlocalmaterialext.C randommaterialext.C
     inputrecord.C oofemtxtinputrecord.C dynamicinputrecord.C
     dynamicdatareader.C buffereddatareader.C oofemtxtdatareader.C tokenizer.C parser.C
@@ -32,7 +32,6 @@ set (core_unsorted
     )
 
 #oofegutils
-#structeigenstrainload
 
 set (core_iml
     iml/dyncomprow.C iml/dyncompcol.C iml/symcompcol.C iml/compcol.C
@@ -60,7 +59,6 @@ set (core_dofs
 set (core_nm
     sparselinsystemnm.C
     nrsolver.C
-    nrsolver2.C
     linesearch.C
     spoolessolver.C
     calmls.C
@@ -84,7 +82,6 @@ set (core_ltf
     peak.C
     piecewis.C
     piecewisper.C
-    piecewisblock.C
     usrdeftimefunct.C
     )
 
@@ -92,7 +89,6 @@ set (core_cs
     crosssection.C
     emptycs.C
     simplecrosssection.C
-    structuralcrosssection.C
     )
 
 set (core_td
@@ -111,9 +107,6 @@ set (core_dofman
 
 set (core_material
     material.C
-    structuralmaterial.C
-    isolinearelasticmaterial.C
-    linearelasticmaterial.C
     )
 
 set (core_export
@@ -124,6 +117,7 @@ set (core_export
     vtkxmlexportmodule.C
     homexportmodule.C
     matlabexportmodule.C
+    gpexportmodule.C
     )
 
 set (core_iga
@@ -131,10 +125,6 @@ set (core_iga
     iga/feibspline.C
     iga/feinurbs.C
     iga/feitspline.C
-    iga/structuralelementevaluator.C
-    iga/planestresselementevaluator.C
-    iga/space3delementevaluator.C
-    iga/igaelements.C
     )
 
 set (core_arrays
@@ -150,13 +140,11 @@ set (core_arrays
 
 set (core_engng
     engngm.C
-    structengngmodel.C
+    staggeredproblem.C
     )
 
 set (core_element
     element.C
-    structuralelement.C
-    nlstructuralelement.C
     )
 
 set (core_fei
@@ -174,11 +162,13 @@ set (core_fei
     fei2dquadquad.C
     fei2dquadbiquad.C
     fei3dlinelin.C
-    fei3dtrlin.C
-	fei3dtrquad.C
+    fei3dtrquad.C
+    fei3dtetlin.C
     fei3dtetquad.C
     fei3dhexalin.C
     fei3dhexaquad.C
+    fei3dwedgelin.C 
+    fei3dwedgequad.C
     )
 
 set (core_xfem
@@ -189,6 +179,7 @@ set (core_xfem
     xfem/xfemmanager.C
     xfem/enrichmentitem.C
     xfem/patchintegrationrule.C
+    xfem/enrichmentdomain.C
     )
 
 set (core_parallel

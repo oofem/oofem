@@ -37,94 +37,91 @@
 
 #include "alist.h"
 #include "datareader.h"
-#include "dofiditem.h"
 #include "inputrecord.h"
 #include "classtype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
-#include "timestep.h"
+
+#include "enrichmentitem.h"
+///@name Input fields for XfemManager
+//@{
+#define _IFT_XfemManager_numberOfGeometryItems "numberofgeometryitems"  // -> numberOfEnrichmentDomains
+#define _IFT_XfemManager_numberOfEnrichmentItems "numberofenrichmentitems"
+#define _IFT_XfemManager_numberOfEnrichmentFunctions "numberofenrichmentfunctions"
+#define _IFT_XfemManager_name "xfemmanagername" ///< @todo Should this exist? / Mikael - No /JB
+//@}
 
 namespace oofem {
-class EngngModel;
 class Domain;
-class BasicGeometry;
 class EnrichmentItem;
-class EnrichmentFunction;
+//class EnrichmentFunction;
 class IntArray;
 class Element;
 class DataStream;
 
 /**
- * This class manages the xfem part as well as takes over some functions which would appear
- * in the Domain and Node class.
+ * This class manages the xfem part
  *
  * @author Ruzena Chamrova
+ * @author Jim Brouzoulis
  */
 class XfemManager
 {
 protected:
-    /// Associated Engineering Model.
-    EngngModel *emodel;
-    /// Index of the associated domain.
-    int domainIndex;
+    Domain *domain;
     /// Enrichment item list.
     AList< EnrichmentItem > *enrichmentItemList;
-    /// Geometry list.
-    AList< BasicGeometry > *geometryList;
-    /// Enrichment function list.
-    AList< EnrichmentFunction > *enrichmentFunctionList;
-    /// Map giving for a node a position of its fictitious node.
-    AList< IntArray > *fictPosition;
+
     /// Index of next available dofId from pool.
-    int dofIdPos;
     int numberOfEnrichmentItems;
-    int numberOfEnrichmentFunctions;
-    int numberOfGeometryItems;
+
+    
 
 public:
-    enum XfemType {
+    enum XfemType { // not in use right now
         SPLIT = 1, TIP = 4, STANDARD = 0
     };
     /// Constructor.
-    XfemManager(EngngModel *emodel, int index);
+    XfemManager(Domain *domain);
     /// Destructor.
     ~XfemManager();
-    /**
-     * Gets interacted enrichment items for a particular element, the enrichment items
-     * are referenced by a number from the domain
-     */
-    void getInteractedEI(IntArray &answer, Element *elem);
-    /// Checks whether an element is interacted.
-    bool isInteracted(Element *elem);
-    /// Checks whether a node is interacted.
-    bool isEnriched(int nodeNumber);
+    
+  
+    // Returns the active enrichment items for a particular element, the enrichment items
+    // are referenced by a number from the domain
+    void giveActiveEIsFor(IntArray &answer, const Element *elem);
+    
+    bool isElementEnriched(const Element *elem);
+
     /// Accessor.
     EnrichmentItem *giveEnrichmentItem(int n);
-    /// Accessor.
-    BasicGeometry *giveGeometry(int n);
-    /// Accessor.
-    EnrichmentFunction *giveEnrichmentFunction(int n);
     int giveNumberOfEnrichmentItems() { return enrichmentItemList->giveSize(); }
-    /// Computes for each node position of its fictitious node.
-    int computeFictPosition();
+    
+    void createEnrichedDofs();
+    void addEnrichedDofsTo( DofManager *dMan, IntArray &dofIdArray );
+
     /// Computes the type of node enrichment, returns zero if the node is not enriched.
-    XfemType computeNodeEnrichmentType(int nodeNumber);
+    // Old method: should instead return an array if there are several active /JB
+    XfemType computeNodeEnrichmentType(int nodeNumber); 
+
     /// Initializes receiver according to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
-    /// Instantiates the Xfem components.
+
     int instanciateYourself(DataReader *dr);
     const char *giveClassName() const { return "XfemManager"; }
     const char *giveInputRecordName() const { return "XfemManager"; }
+    
     /// Wrapper for updating the integration rule.
     void updateIntegrationRule();
-    /// Gives Domain.
-    Domain *giveDomain();
-    /// Accessor.
-    IntArray *giveFictPosition(int nodeNumber) { return fictPosition->at(nodeNumber); }
-    /// Geometry update; calls individual enrichment item updateGeometry method.
-    void updateGeometry(TimeStep *tStep);
+
+    //Domain *giveDomain() { return emodel->giveDomain(domainIndex); }
+    Domain *giveDomain() { return this->domain; }
+
+
     /// Clear the receiver
     void clear();
+
+
     /**
      * Stores the state of receiver to output stream.
      * @param stream Context stream.
@@ -133,7 +130,8 @@ public:
      * @return contextIOResultType.
      * @exception ContextIOERR If error encountered.
      */
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+   
+    //contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /**
      * Restores the state of receiver from output stream.
      * @param stream Context file.
@@ -142,11 +140,8 @@ public:
      * @return contextIOResultType.
      * @exception ContextIOERR exception if error encountered.
      */
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    //contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-protected:
-    /// Changes dofIdPos to next index.
-    DofIDItem allocateNewDofID();
 };
 } // end namespace oofem
 #endif // xfemmanager_h

@@ -54,6 +54,7 @@
  #include "m4.h"
  #include "idm1.h"
  #include "idmnl1.h"
+ #include "idmgrad1.h"
  #include "mazarsmodel.h"
  #include "mazarsmodelnl.h"
  #include "druckerPragerPlasticitySM.h"
@@ -78,12 +79,15 @@
  #include "trabboneembed.h"
  #include "trabbonenlembed.h"
  #include "trabbonenl3d.h"
+ #include "trabbonegrad3d.h"
  #include "concretedpm.h"
  #include "concretedpm2.h"
  #include "cohint.h"
  #include "latticedamage2d.h"
  #include "simpleinterfacemat.h"
  #include "dustmat.h"
+ #include "lsmastermat.h"
+ #include "lsmastermatgrad.h"
 // #include "abaqususermaterial.h"
 #endif // __SM_MODULE
 
@@ -91,6 +95,7 @@
  #include "isoheatmat.h"
  #include "isolinmoisturemat.h"
  #include "bazantnajjarmat.h"
+ #include "nlisomoisturemat.h"
  #include "hemotkmat.h"
  #include "hydratingisoheatmat.h"
  #include "hydratinghemomat.h"
@@ -134,6 +139,7 @@ REGISTER_CLASS(RCSDMaterial, "rcsd", RCSDMaterialClass)
 REGISTER_CLASS(M4Material, "microplane_m4", M4MaterialClass)
 REGISTER_CLASS(IsotropicDamageMaterial1, "idm1", IsotropicDamageMaterial1Class)
 REGISTER_CLASS(IDNLMaterial, "idmnl1", IDNLMaterialClass)
+REGISTER_CLASS(IDGMaterial, "idmgrad1", IDGMaterialClass)
 REGISTER_CLASS(MazarsNLMaterial, "mazarsmodelnl", MazarsNLMaterialClass)
 REGISTER_CLASS(MazarsMaterial, "mazarsmodel", MazarsMaterialClass)
 REGISTER_CLASS(DruckerPragerPlasticitySM, "druckerprager", DruckerPragerPlasticitySMClass)
@@ -168,12 +174,14 @@ REGISTER_CLASS(SimpleInterfaceMaterial, "simpleintermat", SimpleInterfaceMateria
 REGISTER_CLASS(ConcreteDPM2, "con2dpm", ConcreteDPM2Class)
 REGISTER_CLASS(LatticeDamage2d, "latticedamage2d", LatticeDamage2dClass)
 REGISTER_CLASS(DustMaterial, "dustmat", DustMaterialClass)
+REGISTER_CLASS(LsMasterMat, "lsmastermat", LsMasterMatClass)
 //REGISTER_CLASS(AbaqusUserMaterial, "abaqususermaterial", AbaqusUserMaterialClass)
 #endif //__SM_MODULE
 #ifdef __TM_MODULE
 REGISTER_CLASS(IsotropicHeatTransferMaterial, "isoheat", IsotropicHeatTransferMaterialClass)
 REGISTER_CLASS(IsotropicLinMoistureTransferMaterial, "isolinmoisturemat", IsotropicLinMoistureTransferMaterialClass)
 REGISTER_CLASS(BazantNajjarMoistureTransferMaterial, "bazantnajjarmoisturemat", BazantNajjarMoistureTransferMaterialClass)
+REGISTER_CLASS(NlIsoMoistureMaterial, "nlisomoisturemat", NlIsoMoistureMaterialClass)
 REGISTER_CLASS(HeMoTKMaterial, "hemotk", HeMoTKMaterialClass)
 REGISTER_CLASS(HydratingConcreteMat, "hydratingconcretemat", HydratingConcreteMatClass)
 REGISTER_CLASS(AnisotropicMassTransferMaterial, "anisomass", AnisotropicMassTransferMaterialClass)

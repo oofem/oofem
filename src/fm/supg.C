@@ -81,13 +81,13 @@ SUPG :: initializeFrom(InputRecord *ir)
 
     EngngModel :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, rtolv, IFT_SUPG_rtolv, "rtolv"); // Macro
+    IR_GIVE_FIELD(ir, rtolv, IFT_SUPG_rtolv, "rtolv");
     atolv = 1.e-15;
-    IR_GIVE_OPTIONAL_FIELD(ir, atolv, IFT_SUPG_atolv, "atolv"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, atolv, IFT_SUPG_atolv, "atolv");
 
 
     int __val = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, __val, IFT_SUPG_stopmaxiter, "stopmaxiter"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, __val, IFT_SUPG_stopmaxiter, "stopmaxiter");
     if ( __val ) {
         stopmaxiter = true;
     } else {
@@ -95,17 +95,17 @@ SUPG :: initializeFrom(InputRecord *ir)
     }
 
     maxiter = 200;
-    IR_GIVE_OPTIONAL_FIELD(ir, maxiter, IFT_SUPG_maxiter, "maxiter"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, maxiter, IFT_SUPG_maxiter, "maxiter");
 
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_SUPG_lstype, "lstype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_SUPG_smtype, "smtype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
     sparseMtrxType = ( SparseMtrxType ) val;
 
-    IR_GIVE_FIELD(ir, deltaT, IFT_SUPG_deltat, "deltat"); // Macro
+    IR_GIVE_FIELD(ir, deltaT, IFT_SUPG_deltat, "deltat");
     deltaTLTF = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, deltaTLTF, IFT_SUPG_deltatltf, "deltatltf");
 
@@ -118,9 +118,9 @@ SUPG :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_SUPG_scaleflag, "scaleflag");
     equationScalingFlag = val;
     if ( equationScalingFlag ) {
-        IR_GIVE_FIELD(ir, lscale, IFT_SUPG_lscale, "lscale"); // Macro
-        IR_GIVE_FIELD(ir, uscale, IFT_SUPG_uscale, "uscale"); // Macro
-        IR_GIVE_FIELD(ir, dscale, IFT_SUPG_dscale, "dscale"); // Macro
+        IR_GIVE_FIELD(ir, lscale, IFT_SUPG_lscale, "lscale");
+        IR_GIVE_FIELD(ir, uscale, IFT_SUPG_uscale, "uscale");
+        IR_GIVE_FIELD(ir, dscale, IFT_SUPG_dscale, "dscale");
         double vref = 1.0; // reference viscosity
         Re = dscale * uscale * lscale / vref;
     } else {
@@ -270,7 +270,7 @@ SUPG :: giveNextStep()
 
     // check for critical time step
     for ( i = 1; i <= nelem; i++ ) {
-        dt = min( dt, ( ( SUPGElement * ) domain->giveElement(i) )->computeCriticalTimeStep(previousStep) );
+        dt = min( dt, static_cast< SUPGElement * >( domain->giveElement(i) )->computeCriticalTimeStep(previousStep) );
     }
 
     if ( materialInterface ) {
@@ -883,7 +883,7 @@ SUPG :: checkConsistency()
 {
     // check internal consistency
     // if success returns nonzero
-    int i, nelem;
+    int nelem;
     Element *ePtr;
     SUPGElement *sePtr;
     GeneralBoundaryCondition *bcPtr;
@@ -893,7 +893,7 @@ SUPG :: checkConsistency()
     nelem = domain->giveNumberOfElements();
     // check for proper element type
 
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         ePtr = domain->giveElement(i);
         sePtr = dynamic_cast< SUPGElement * >(ePtr);
         if ( sePtr == NULL ) {
@@ -908,7 +908,7 @@ SUPG :: checkConsistency()
     // scale boundary and initial conditions
     if ( equationScalingFlag ) {
         int nbc = domain->giveNumberOfBoundaryConditions();
-        for ( i = 1; i <= nbc; i++ ) {
+        for ( int i = 1; i <= nbc; i++ ) {
             bcPtr = domain->giveBc(i);
             if ( bcPtr->giveBCValType() == VelocityBVT ) {
                 bcPtr->scale(1. / uscale);
@@ -922,7 +922,7 @@ SUPG :: checkConsistency()
         }
 
         int nic = domain->giveNumberOfInitialConditions();
-        for ( i = 1; i <= nic; i++ ) {
+        for ( int i = 1; i <= nic; i++ ) {
             icPtr = domain->giveIc(i);
             if ( icPtr->giveICValType() == VelocityBVT ) {
                 icPtr->scale(VM_Total, 1. / uscale);
@@ -1025,7 +1025,7 @@ SUPG :: applyIC(TimeStep *stepWhenIcApply)
     }
 
     for ( j = 1; j <= nelem; j++ ) {
-        element = ( SUPGElement * ) domain->giveElement(j);
+        element = static_cast< SUPGElement * >( domain->giveElement(j) );
         element->updateInternalState(stepWhenIcApply);
         element->updateYourself(stepWhenIcApply);
     }
@@ -1060,7 +1060,8 @@ SUPG :: giveNewPrescribedEquationNumber(int domain, DofIDItem id)
 }
 
 int
-SUPG :: giveNumberOfEquations(EquationID id) {
+SUPG :: giveNumberOfEquations(EquationID id)
+{
     //
     // returns number of equations of current problem
     // this method is implemented here, because some method may add some
@@ -1081,7 +1082,8 @@ SUPG :: giveNumberOfEquations(EquationID id) {
 }
 
 int
-SUPG :: giveNumberOfPrescribedEquations(EquationID id) {
+SUPG :: giveNumberOfPrescribedEquations(EquationID id)
+{
     //
     // returns number of equations of current problem
     // this method is implemented here, because some method may add some
@@ -1102,7 +1104,8 @@ SUPG :: giveNumberOfPrescribedEquations(EquationID id) {
 }
 
 int
-SUPG :: giveNumberOfDomainEquations(int d, EquationID id) {
+SUPG :: giveNumberOfDomainEquations(int d, EquationID id)
+{
     //
     // returns number of equations of current problem
     // this method is implemented here, because some method may add some
@@ -1123,7 +1126,8 @@ SUPG :: giveNumberOfDomainEquations(int d, EquationID id) {
 }
 
 int
-SUPG :: giveNumberOfPrescribedDomainEquations(int d, EquationID id) {
+SUPG :: giveNumberOfPrescribedDomainEquations(int d, EquationID id)
+{
     //
     // returns number of equations of current problem
     // this method is implemented here, because some method may add some
@@ -1171,12 +1175,11 @@ void
 SUPG :: evaluateElementStabilizationCoeffs(TimeStep *atTime)
 {
     Domain *domain = this->giveDomain(1);
-    int i, nelem = domain->giveNumberOfElements();
+    int nelem = domain->giveNumberOfElements();
     SUPGElement *ePtr;
 
-    //printf ("#");
-    for ( i = 1; i <= nelem; i++ ) {
-        ePtr = ( SUPGElement * ) domain->giveElement(i);
+    for ( int i = 1; i <= nelem; i++ ) {
+        ePtr = static_cast< SUPGElement * >( domain->giveElement(i) );
         ePtr->updateStabilizationCoeffs(atTime);
     }
 }
@@ -1185,14 +1188,14 @@ void
 SUPG :: updateElementsForNewInterfacePosition(TimeStep *atTime)
 {
     Domain *domain = this->giveDomain(1);
-    int i, nelem = domain->giveNumberOfElements();
+    int nelem = domain->giveNumberOfElements();
     SUPGElement *ePtr;
 
     OOFEM_LOG_DEBUG("SUPG :: updateElements - updating elements for interface position");
 
 
-    for ( i = 1; i <= nelem; i++ ) {
-        ePtr = ( SUPGElement * ) domain->giveElement(i);
+    for ( int i = 1; i <= nelem; i++ ) {
+        ePtr = static_cast< SUPGElement * >( domain->giveElement(i) );
         ePtr->updateElementForNewInterfacePosition(atTime);
     }
 }

@@ -72,6 +72,34 @@
  #include "mmaleastsquareprojection.h"
 #endif
 
+///@name Input fields for IsotropicDamageMaterial1
+//@{
+#define _IFT_IsotropicDamageMaterial1_e0 "e0"
+#define _IFT_IsotropicDamageMaterial1_ef "ef"
+#define _IFT_IsotropicDamageMaterial1_wf "wf"
+#define _IFT_IsotropicDamageMaterial1_equivstraintype "equivstraintype"
+#define _IFT_IsotropicDamageMaterial1_damageLaw "damlaw"
+#define _IFT_IsotropicDamageMaterial1_k "k"
+#define _IFT_IsotropicDamageMaterial1_md "md"
+#define _IFT_IsotropicDamageMaterial1_ecsm "ecsm"
+#define _IFT_IsotropicDamageMaterial1_At "at"
+#define _IFT_IsotropicDamageMaterial1_Bt "bt"
+#define _IFT_IsotropicDamageMaterial1_ft "ft"
+#define _IFT_IsotropicDamageMaterial1_w1wf "w1wf"
+#define _IFT_IsotropicDamageMaterial1_e1ef "e1ef"
+#define _IFT_IsotropicDamageMaterial1_s1ft "s1ft"
+#define _IFT_IsotropicDamageMaterial1_s1 "s1"
+#define _IFT_IsotropicDamageMaterial1_w1 "w1"
+#define _IFT_IsotropicDamageMaterial1_e1 "e1"
+#define _IFT_IsotropicDamageMaterial1_ek "ek"
+#define _IFT_IsotropicDamageMaterial1_gf "gf"
+#define _IFT_IsotropicDamageMaterial1_gft "gft"
+#define _IFT_IsotropicDamageMaterial1_ep "ep"
+#define _IFT_IsotropicDamageMaterial1_e2 "e2"
+#define _IFT_IsotropicDamageMaterial1_nd "nd"
+#define _IFT_IsotropicDamageMaterial1_checkSnapBack "checksnapback"
+//@}
+
 namespace oofem {
 #define IDM1_ITERATION_LIMIT 1.e-9
 
@@ -205,6 +233,8 @@ public:
 
     bool isCrackBandApproachUsed() { return ( this->softType == ST_Exponential_Cohesive_Crack || this->softType == ST_Linear_Cohesive_Crack || this->gf != 0. ); }
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+
+    virtual void computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime);
     virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp);
     /**
      * computes the value of damage parameter omega,
@@ -238,6 +268,27 @@ public:
      * @param kappa Equivalent strain measure.
      * @param gp Integration point.
      */
+    /**
+     * Returns the value of derivative of damage function
+     * wrt damage-driving variable kappa corresponding
+     * to a given value of the  kappa, depending on
+     * the type of selected damage law.
+     * @param kappa Equivalent strain measure.
+     * @param gp Integration point.
+     */
+    double damageFunctionPrime(double kappa, GaussPoint *gp);
+    /**
+     * Returns the value of compliance parameter
+     * corresponding to a given value
+     * of the damage-driving variable kappa,
+     * depending on the type of selected damage law,
+     * using a simple dependence (no adjustment for element size).
+     * The compliance parameter gamma is defined as
+     * gamma = omega/(1-omega)
+     * where omega is the damage.
+     * @param kappa Equivalent strain measure.
+     * @param gp Integration point.
+     */
     double complianceFunction(double kappa, GaussPoint *gp);
 
     virtual Interface *giveInterface(InterfaceType it);
@@ -250,6 +301,8 @@ public:
     virtual MaterialStatus *giveStatus(GaussPoint *gp) const;
 
     virtual double give(int aProperty, GaussPoint *gp);
+
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
 protected:
     /**

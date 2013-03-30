@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -35,14 +35,12 @@
 #ifndef Tr2Shell7_h
 #define Tr2Shell7_h
 
-
 #include "eleminterpmapperinterface.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "layeredcrosssection.h"
-
 #include "nlstructuralelement.h"
 #include "shell7base.h"
-
+//#include "vtkxmlexportmodule.h"
 namespace oofem {
 class FEI3dTrQuad;
 class BoundaryLoad;
@@ -81,7 +79,7 @@ protected:
         return true;
     }
 
-    virtual IntArray giveOrdering(SolutionField fieldType) const;
+    virtual const IntArray &giveOrdering(SolutionField fieldType) const;
 
     //specific
     void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
@@ -109,7 +107,8 @@ public:
     virtual int giveNumberOfEdgeDofManagers() { return 3;  }
     virtual const char *giveClassName()                const { return "Tr2Shell7"; }
     virtual classType giveClassID()                    const { return Tr2Shell7Class; }
-    virtual Element_Geometry_Type giveGeometryType()   const { return EGT_triangle_2; }
+    //virtual Element_Geometry_Type giveGeometryType()   const { return EGT_triangle_2; }
+    virtual Element_Geometry_Type giveGeometryType()   const { return EGT_Composite; }
     virtual integrationDomain  giveIntegrationDomain() const { return _Triangle; }     // write new wedge-like type 'layeredWedge'
 };
 } // end namespace oofem

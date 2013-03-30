@@ -97,7 +97,7 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
 #  endif
 
     DofManager :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, coordinates, IFT_Node_coords, "coords"); // Macro
+    IR_GIVE_FIELD(ir, coordinates, IFT_Node_coords, "coords");
 
     //
     // scaling of coordinates if necessary
@@ -110,7 +110,7 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
 
     // Read if available local coordinate system in this node
     triplets.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, triplets, IFT_Node_lcs, "lcs"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, triplets, IFT_Node_lcs, "lcs");
     size = triplets.giveSize();
     if ( !( ( size == 0 ) || ( size == 6 ) ) ) {
         _warning2( "initializeFrom: lcs in node %d is not properly defined, will be ignored", this->giveNumber() );
@@ -219,15 +219,15 @@ void
 Node :: updateYourself(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
-    int ic;
+    DofManager :: updateYourself(tStep);
 
     fMode mode = domain->giveEngngModel()->giveFormulation();
 
     double dt = tStep->giveTimeIncrement();
 
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        if ( mode == AL ) { // updated Lagrange
-            ic = domain->giveCorrespondingCoordinateIndex(i);
+    if ( mode == AL ) { // updated Lagrange
+        for ( int i = 1; i <= numberOfDofs; i++ ) {
+            int ic = domain->giveCorrespondingCoordinateIndex(i);
             if ( ic != 0 ) {
                 Dof *d = this->giveDof(i);
                 DofIDItem id = d->giveDofID();
@@ -325,14 +325,14 @@ Node :: checkConsistency()
      * Current implementation checks (when receiver has slave dofs) if receiver has the same
      * coordinate system as master dofManager of slave dof.
      */
-    int result = 1;
+    int result;
     int ndofs = this->giveNumberOfDofs();
     int nslaves = 0;
 
-    result = result && DofManager :: checkConsistency();
+    result = DofManager :: checkConsistency();
 
     for ( int i = 1; i <= ndofs; i++ ) {
-        if ( this->giveDof(i)->giveClassID() == SimpleSlaveDofClass ) {
+        if ( dynamic_cast< SimpleSlaveDof * >( this->giveDof(i) ) ) {
             nslaves++;
         }
     }
@@ -342,16 +342,16 @@ Node :: checkConsistency()
     }
 
     IntArray masterDofManagers(nslaves);
-    int numberOfMDM = 0; // counter of diferent master dofManagers
-    int j, master, alreadyFound = 0;
-    Dof *idof;
+    int numberOfMDM = 0; // counter of different master dofManagers
+    int master, alreadyFound = 0;
     Node *masterNode;
 
     for ( int i = 1; i <= ndofs; i++ ) {
-        if ( ( idof = this->giveDof(i) )->giveClassID() == SimpleSlaveDofClass ) {
+        SimpleSlaveDof *sdof = dynamic_cast< SimpleSlaveDof * >( this->giveDof(i) );
+        if ( sdof ) {
             alreadyFound  = 0;
-            master = ( ( SimpleSlaveDof * ) idof )->giveMasterDofManagerNum();
-            for ( j = 1; j <= numberOfMDM; j++ ) {
+            master = sdof->giveMasterDofManagerNum();
+            for ( int j = 1; j <= numberOfMDM; j++ ) {
                 if ( masterDofManagers.at(j) == master ) {
                     alreadyFound = 1;
                     break;
@@ -679,9 +679,8 @@ Node :: drawYourself(oofegGraphicContext &gc)
 
         bool ordinary = true;
 
-        int idof;
-        for ( idof = 1; idof <= this->giveNumberOfDofs(); idof++ ) {
-            if ( this->giveDof(1)->giveClassID() == SimpleSlaveDofClass ) {
+        for ( int idof = 1; idof <= this->giveNumberOfDofs(); idof++ ) {
+            if ( this->giveDof(idof)->isPrimaryDof() ) {
                 ordinary = false;
                 break;
             }
@@ -817,7 +816,7 @@ Node :: drawYourself(oofegGraphicContext &gc)
             pp [ 0 ].x = ( FPNum ) this->giveCoordinate(1);
             pp [ 0 ].y = ( FPNum ) this->giveCoordinate(2);
             pp [ 0 ].z = ( FPNum ) this->giveCoordinate(3);
-            pp [ 1 ].x = pp [ 1 ].x = pp [ 1 ].x = 0.0;
+            pp [ 1 ].x = pp [ 1 ].y = pp [ 1 ].z = 0.0;
 
             FloatArray load;
             FloatMatrix t;

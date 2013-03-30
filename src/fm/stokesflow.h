@@ -41,6 +41,11 @@
 #include "linsystsolvertype.h"
 #include "flotmtrx.h"
 
+///@name Input fields for Stokes' Flow
+//@{
+#define _IFT_StokesFlow_deltat "deltat"
+//@}
+
 namespace oofem {
 class SparseNonLinearSystemNM;
 class MeshQualityErrorEstimator;
@@ -66,7 +71,7 @@ protected:
     /// Linear solver type.
     LinSystSolverType solverType;
     /// Element norm for nonlinear analysis (squared)
-    double eNorm;
+    FloatArray eNorm;
 
     /// Used for determining if a new mesh must be created.
     MeshQualityErrorEstimator *meshqualityee;
@@ -121,7 +126,7 @@ public:
     virtual int checkConsistency();
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
     virtual void doStepOutput(TimeStep *tStep);
-    virtual void updateInternalState(TimeStep *tStep);
+    void updateInternalState(TimeStep *tStep);
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
     virtual TimeStep *giveNextStep();

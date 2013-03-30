@@ -71,7 +71,7 @@ void SkyLineMtx :: GrowSkyline(int i, int j, long *column_ns)
         if ( column_ns [ i ] < l ) {
             column_ns [ i ] = l;
         }
-    } else   {
+    } else {
         int l = j - i;
         if ( column_ns [ j ] < l ) {
             column_ns [ j ] = l;

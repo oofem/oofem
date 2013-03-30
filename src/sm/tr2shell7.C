@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -43,7 +43,7 @@
 #include "gausspnt.h"
 #include "fei3dtrquad.h"
 #include "boundaryload.h"
-
+#include "vtkxmlexportmodule.h"
 
 namespace oofem {
 FEI3dTrQuad Tr2Shell7 :: interpolation;
@@ -63,29 +63,28 @@ Tr2Shell7 :: Tr2Shell7(int n, Domain *aDomain) : Shell7Base(n, aDomain)
     this->numberOfDofMans = 6;
 }
 
-IntArray
-Tr2Shell7 :: giveOrdering(SolutionField fieldType) const {
+const IntArray &
+Tr2Shell7 :: giveOrdering(SolutionField fieldType) const
+{
     if ( fieldType == Midplane ) {
         return this->ordering_phibar;
-    } else if ( fieldType == Director  ) {
+    } else if ( fieldType == Director ) {
         return this->ordering_m;
-    } else if ( fieldType == InhomStrain  ) {
+    } else if ( fieldType == InhomStrain ) {
         return this->ordering_gam;
-    } else if ( fieldType == All  ) {
+    } else if ( fieldType == All ) {
         return this->ordering_all;
-    } else if ( fieldType == AllInv  ) {
+    } else if ( fieldType == AllInv ) {
         return this->ordering_gr;
-    } else if ( fieldType == EdgeInv  ) {
+    } else /*if ( fieldType == EdgeInv )*/ {
         return this->ordering_gr_edge;
-    } else {
-        _error("giveOrdering: unknown fieldType");
-        return -1;
     }
 }
 
 
 void
-Tr2Shell7 :: giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords) {
+Tr2Shell7 :: giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords)
+{
     nodeLocalXiCoords.setValues(6, 1., 0., 0., .5, 0., .5);      // corner nodes then midnodes, uncertain of node numbering
     nodeLocalEtaCoords.setValues(6, 0., 1., 0., .5, .5, 0.);
 }
@@ -95,26 +94,24 @@ FEInterpolation *Tr2Shell7 :: giveInterpolation() { return & interpolation; }
 
 
 
-
-
 void
 Tr2Shell7 :: computeGaussPoints()
 {
     if ( !integrationRulesArray ) {
         int nPointsTri = 6;                     // points in the plane
         int nPointsEdge = 2;
-        integrationRulesArray = new IntegrationRule * [ 3 ];
+        specialIntegrationRulesArray = new IntegrationRule * [ 3 ];
 
         // Midplane and thickness
 
         // Midplane only (Mass matrix integrated analytically through the thickness)
-        integrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
-        integrationRulesArray [ 1 ]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat);
+        specialIntegrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
+        specialIntegrationRulesArray [ 1 ]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat);
 
 
         // Edge
-        integrationRulesArray [ 2 ] = new GaussIntegrationRule(1, this);
-        integrationRulesArray [ 2 ]->SetUpPointsOnLine(nPointsEdge, _3dMat);
+        specialIntegrationRulesArray [ 2 ] = new GaussIntegrationRule(1, this);
+        specialIntegrationRulesArray [ 2 ]->SetUpPointsOnLine(nPointsEdge, _3dMat);
 
 
         // Layered cross section
@@ -124,15 +121,17 @@ Tr2Shell7 :: computeGaussPoints()
         }
 
         int numberOfLayers = layeredCS->giveNumberOfLayers();
-        layerIntegrationRulesArray = new IntegrationRule * [ numberOfLayers ];
-
+        integrationRulesArray = new IntegrationRule * [ numberOfLayers ];
+        this->numberOfIntegrationRules = numberOfLayers;
+        this->numberOfGaussPoints = numberOfLayers*nPointsTri*layeredCS->giveNumIntegrationPointsInLayer();
         // may need to extend this to handle Newton-Cotes integration in the thickness direction
         for ( int i = 1; i <= numberOfLayers; i++ ) {
-            layerIntegrationRulesArray [ i - 1 ] = new GaussIntegrationRule(1, this);
-            layerIntegrationRulesArray [ i - 1 ]->SetUpPointsOnWedge(nPointsTri, layeredCS->giveNumIntegrationPointsInLayer(), _3dMat);
+            integrationRulesArray [ i - 1 ] = new GaussIntegrationRule(1, this);
+            integrationRulesArray [ i - 1 ]->SetUpPointsOnWedge(nPointsTri, layeredCS->giveNumIntegrationPointsInLayer(), _3dMat);
         }
 
-        layeredCS->mapLayerGpCoordsToShellCoords(layeredCS, layerIntegrationRulesArray);
+        layeredCS->mapLayerGpCoordsToShellCoords(layeredCS, integrationRulesArray);
+        //layeredCS->printYourself();
     }
 }
 
@@ -162,8 +161,6 @@ Tr2Shell7 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 }
 
 
-
-
 void
 Tr2Shell7 :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 {
@@ -174,24 +171,32 @@ Tr2Shell7 :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 }
 
 
-
-
 // Integration
 
 double
-Tr2Shell7 :: computeVolumeAround(GaussPoint *gp) {
+Tr2Shell7 :: computeVolumeAround(GaussPoint *gp)
+{
     FloatArray G1, G2, G3, temp;
+    FloatMatrix Gcov;
     double detJ;
-    this->evalInitialCovarBaseVectorsAt(gp, G1, G2, G3);
+    this->evalInitialCovarBaseVectorsAt(gp, Gcov);
+    G1.beColumnOf(Gcov,1);
+    G2.beColumnOf(Gcov,2);
+    G3.beColumnOf(Gcov,3);
     temp.beVectorProductOf(G1, G2);
     detJ = temp.dotProduct(G3) * 0.5 * this->giveCrossSection()->give(CS_Thickness);
     return detJ * gp->giveWeight();
 }
 
 double
-Tr2Shell7 :: computeAreaAround(GaussPoint *gp) {
+Tr2Shell7 :: computeAreaAround(GaussPoint *gp)
+{
     FloatArray G1, G2, G3, temp;
-    this->evalInitialCovarBaseVectorsAt(gp, G1, G2, G3);
+    FloatMatrix Gcov;
+    this->evalInitialCovarBaseVectorsAt(gp, Gcov);
+    G1.beColumnOf(Gcov,1);
+    G2.beColumnOf(Gcov,2);
+    G3.beColumnOf(Gcov,3);
     temp.beVectorProductOf(G1, G2);
     double detJ = temp.computeNorm();
     return detJ * gp->giveWeight() * 0.5;
@@ -199,22 +204,28 @@ Tr2Shell7 :: computeAreaAround(GaussPoint *gp) {
 
 
 
-
 double
-Tr2Shell7 :: computeVolumeAroundLayer(GaussPoint *gp, int layer) {
-    FloatArray G1, G2, G3, temp;
+Tr2Shell7 :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
+{
+    //FloatArray G1, G2, G3, temp;
     double detJ;
-    this->evalInitialCovarBaseVectorsAt(gp, G1, G2, G3);
+    FloatMatrix Gcov;
+    this->evalInitialCovarBaseVectorsAt(gp, Gcov);
+    /*
+    G1.beColumnOf(Gcov,1);
+    G2.beColumnOf(Gcov,2);
+    G3.beColumnOf(Gcov,3);
     temp.beVectorProductOf(G1, G2);
-    LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection() );
-    detJ = temp.dotProduct(G3) * 0.5 * layeredCS->giveLayerThickness(layer);
+    //detJ = temp.dotProduct(G3) * 0.5 * this->layeredCS->giveLayerThickness(layer);
+    */
+    detJ = Gcov.giveDeterminant() * 0.5 * this->layeredCS->giveLayerThickness(layer);
     return detJ * gp->giveWeight();
 }
 
 
-
 void
-Tr2Shell7 :: compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matrix2, FloatMatrix &answer) {
+Tr2Shell7 :: compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matrix2, FloatMatrix &answer)
+{
     int ndofs = 42;
     answer.resize(ndofs, ndofs);
     for ( int i = 1; i <= ndofs; i++ ) {
@@ -224,15 +235,19 @@ Tr2Shell7 :: compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matr
                 double relDiff =  diff / matrix1.at(i, j);
                 if ( abs(relDiff) < 1.0e-4 ) {
                     answer.at(i, j) = 0.0;
-                } else if ( abs(diff) < 1.0e3 )     {
+                } else if ( abs(diff) < 1.0e3 ) {
                     answer.at(i, j) = 0.0;
-                } else  {
+                } else {
                     answer.at(i, j) = relDiff;
                 }
-            } else  {
+            } else{
                 answer.at(i, j) = -1.0;
             }
         }
     }
 }
+
+
+
+
 } // end namespace oofem

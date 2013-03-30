@@ -70,16 +70,16 @@ J2MPlasticMaterial :: initializeFrom(InputRecord *ir)
     MPlasticMaterial :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, value, IFT_J2MPlasticMaterial_ry, "ry"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_J2MPlasticMaterial_ry, "ry");
     k = value / sqrt(3.0);
 
     //  E = readDouble (initString,"e");
     // nu = readDouble (initString,"nu");
     kinematicModuli = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, kinematicModuli, IFT_J2MPlasticMaterial_khm, "khm"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, kinematicModuli, IFT_J2MPlasticMaterial_khm, "khm");
 
     isotropicModuli = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, isotropicModuli, IFT_J2MPlasticMaterial_ihm, "ihm"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, isotropicModuli, IFT_J2MPlasticMaterial_ihm, "ihm");
 
     if ( fabs(kinematicModuli) > 1.e-12 ) {
         kinematicHardeningFlag = 1;
@@ -90,7 +90,7 @@ J2MPlasticMaterial :: initializeFrom(InputRecord *ir)
     }
 
     int rma = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, rma, IFT_J2MPlasticMaterial_rma, "rma"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, rma, IFT_J2MPlasticMaterial_rma, "rma");
     if ( rma == 0 ) {
         this->rmType = mpm_ClosestPoint;
     } else {
@@ -266,10 +266,10 @@ J2MPlasticMaterial :: computeStressSpaceHardeningVarsReducedGradient(FloatArray 
 {
     /* computes stress space hardening gradient in reduced stress-strain space */
 
-    int i = 0, kcount = 0, size = this->giveSizeOfReducedHardeningVarsVector(gp);
+    int kcount = 0, size = this->giveSizeOfReducedHardeningVarsVector(gp);
     //double f,ax,ay,az,sx,sy,sz;
     FloatArray fullKinematicGradient, reducedKinematicGrad;
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
                                            ( gp->giveElement()->giveCrossSection() );
 
     if ( !hasHardening() ) {
@@ -281,14 +281,14 @@ J2MPlasticMaterial :: computeStressSpaceHardeningVarsReducedGradient(FloatArray 
 
     /* kinematic hardening variables first */
     if ( this->kinematicHardeningFlag ) {
-        this->computeStressGradientVector(fullKinematicGradient, ftype, i, gp, stressVector, stressSpaceHardeningVars);
+        this->computeStressGradientVector(fullKinematicGradient, ftype, isurf, gp, stressVector, stressSpaceHardeningVars);
         crossSection->giveReducedCharacteristicVector(reducedKinematicGrad, gp, fullKinematicGradient);
 
         kcount = reducedKinematicGrad.giveSize();
     }
 
     if ( this->kinematicHardeningFlag ) {
-        for ( i = 1; i <= kcount; i++ ) {
+        for ( int i = 1; i <= kcount; i++ ) {
             answer.at(i) = reducedKinematicGrad.at(i);
         }
     }
@@ -297,8 +297,6 @@ J2MPlasticMaterial :: computeStressSpaceHardeningVarsReducedGradient(FloatArray 
         answer.at(size) = sqrt(1. / 3.);
     }
 }
-
-
 
 
 int
@@ -505,7 +503,5 @@ J2MPlasticMaterial :: giveIsotropicHardeningVar(const FloatArray &stressSpaceHar
     } else {
         return stressSpaceHardeningVars.at(1);
     }
-
-    return 0.;
 }
 } // end namespace oofem

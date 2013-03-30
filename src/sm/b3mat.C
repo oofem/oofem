@@ -52,7 +52,7 @@ B3Material :: initializeFrom(InputRecord *ir)
     // units must be in Mpa, m, MN.
     //
     //
-    double fc, c, wc, ac, alpha1 = 0.0, alpha2 = 0.0;
+    double fc = 0.0, c = 0.0, wc = 0.0, ac = 0.0, alpha1 = 0.0, alpha2 = 0.0;
     MaxwellChainMaterial :: initializeFrom(ir);
 
     int mode = 0;
@@ -61,7 +61,7 @@ B3Material :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, fc, IFT_B3Material_fc, "fc"); // 28-day standard cylinder compression strength in MPa
         IR_GIVE_FIELD(ir, c, IFT_B3Material_cc, "cc"); // cement content of concrete  in kg m^-3.
         IR_GIVE_FIELD(ir, wc, IFT_B3Material_wc, "w/c"); // ratio (by weight) of water to cementitious material
-        IR_GIVE_FIELD(ir, ac, IFT_B3Material_ac, "a/c"); // ratio (by weight) of agregate to cement
+        IR_GIVE_FIELD(ir, ac, IFT_B3Material_ac, "a/c"); // ratio (by weight) of aggregate to cement
         IR_GIVE_FIELD(ir, t0, IFT_B3Material_t0, "t0"); // age when drying begins (in days)
     } else { // read raw Basic creep parameters
         IR_GIVE_FIELD(ir, q1, IFT_B3Material_q1, "q1");
@@ -82,9 +82,9 @@ B3Material :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, rprime, IFT_B3Material_rprime, "rprime");
         IR_GIVE_FIELD(ir, at, IFT_B3Material_at, "at");
         // read sorption isotherm data
-        IR_GIVE_FIELD(ir, w_h, IFT_B3Material_wh, "w_h"); // Macro
-        IR_GIVE_FIELD(ir, n, IFT_B3Material_ncoeff, "ncoeff"); // Macro
-        IR_GIVE_FIELD(ir, a, IFT_B3Material_a, "a"); // Macro
+        IR_GIVE_FIELD(ir, w_h, IFT_B3Material_wh, "w_h");
+        IR_GIVE_FIELD(ir, n, IFT_B3Material_ncoeff, "ncoeff");
+        IR_GIVE_FIELD(ir, a, IFT_B3Material_a, "a");
     } else if ( this->shMode == B3_AverageShrinkage ) {
         if ( mode == 0 ) { // default mode
             IR_GIVE_FIELD(ir, alpha1, IFT_B3Material_alpha1, "alpha1"); // shrinkage parameter
@@ -109,7 +109,7 @@ B3Material :: initializeFrom(InputRecord *ir)
         }
     }
 
-    IR_GIVE_FIELD(ir, talpha, IFT_B3Material_talpha, "talpha"); // Macro
+    IR_GIVE_FIELD(ir, talpha, IFT_B3Material_talpha, "talpha");
 
 
     w = wc * c;
@@ -342,7 +342,7 @@ B3Material :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, MatRe
         return;
     }
 
-    ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
+    static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
     giveReducedCharacteristicVector(answer, gp, fullAnswer);
 }
 
@@ -357,8 +357,8 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, MatResponseForm f
     //  at      - coeff relating stress-induced thermal strain and shrinkage
     double sv, sn, et0, et, wrate = 0.0, trate = 0.0, h1;
     double time = relMatAge + atTime->giveTargetTime() / timeFactor;
-    int i, err, tflag = 0, wflag = 0;
-    MaxwellChainMaterialStatus *status = ( MaxwellChainMaterialStatus * ) this->giveStatus(gp);
+    int err, tflag = 0, wflag = 0;
+    MaxwellChainMaterialStatus *status = static_cast< MaxwellChainMaterialStatus * >( this->giveStatus(gp) );
     int size = 6;
     FloatArray fullAnswer;
     MaterialMode mmode = gp->giveMaterialMode();
@@ -419,7 +419,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, MatResponseForm f
     giveFullCharacteristicVector(fullStressVector, gp, stressVector);
     // commpute volumetric stress
     sv = 0.0;
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         sv += stressVector.at(i);
     }
 
@@ -443,7 +443,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, MatResponseForm f
             return;
         }
 
-        ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
+        static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
         giveReducedCharacteristicVector(answer, gp, fullAnswer);
         return;
     } else { // total values required
@@ -464,7 +464,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, MatResponseForm f
             return;
         }
 
-        ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
+        static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
         giveReducedCharacteristicVector(answer, gp, fullAnswer);
         return;
     }

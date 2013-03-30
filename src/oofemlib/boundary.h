@@ -40,6 +40,11 @@
 #include "valuemodetype.h"
 #include "classtype.h"
 
+///@name Input fields for Dirichlet boundary condition
+//@{
+#define _IFT_BoundaryCondition_PrescribedValue "d"
+//@}
+
 namespace oofem {
 class TimeStep;
 class Dof;

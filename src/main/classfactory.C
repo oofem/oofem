@@ -186,8 +186,8 @@ case id:                                    \
     return answer;
 }
 
-  Dof *ClassFactory :: createDof(classType type, int num, DofManager* dman)
-  {
+Dof *ClassFactory :: createDof(dofType type, int num, DofManager* dman)
+{
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, id)  \
 case id:                            \
@@ -203,10 +203,10 @@ case id:                            \
     }
 
     return answer;
-  }
+}
 
-  SparseLinearSystemNM *ClassFactory :: createSparseLinSolver(LinSystSolverType type, int num, Domain *d, EngngModel *m)
-  {
+SparseLinearSystemNM *ClassFactory :: createSparseLinSolver(LinSystSolverType type, int num, Domain *d, EngngModel *m)
+{
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, id)  \
 case id:                            \
@@ -222,10 +222,10 @@ case id:                            \
     }
 
     return answer;
-  }
+}
 
-  ErrorEstimator * ClassFactory :: createErrorEstimator(ErrorEstimatorType type, int num, Domain *d)
-  {
+ErrorEstimator * ClassFactory :: createErrorEstimator(ErrorEstimatorType type, int num, Domain *d)
+{
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, id)  \
 case id:                            \
@@ -241,17 +241,17 @@ case id:                            \
     }
 
     return answer;
-  }
+}
 
-  InitialCondition * ClassFactory::createInitialCondition(classType type, int num, Domain *d)
-  {
+InitialCondition * ClassFactory::createInitialCondition(classType type, int num, Domain *d)
+{
     if (type == InitialConditionClass) {
-      return new InitialCondition(num, d);
+        return new InitialCondition(num, d);
     } else {
-      OOFEM_ERROR("ClassFactory::createInitialCondition: Unknown type\n");
-      return NULL;
+        OOFEM_ERROR("ClassFactory::createInitialCondition: Unknown type\n");
+        return NULL;
     }
-  }
+}
 
 
 } // End namespace oofem

@@ -36,7 +36,6 @@
 #define ltrspace_h
 
 #include "nlstructuralelement.h"
-#include "fei3dtrlin.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
@@ -48,6 +47,8 @@
 #include "huertaerrorestimator.h"
 
 namespace oofem {
+
+class FEI3dTetLin;
 
 /**
  * This class implements a linear tetrahedral four-node finite element for stress analysis.
@@ -61,14 +62,14 @@ class LTRSpace : public NLStructuralElement, public ZZNodalRecoveryModelInterfac
     public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
 {
 protected:
-    static FEI3dTrLin interpolation;
+    static FEI3dTetLin interpolation;
     int numberOfGaussPoints;
 
 public:
     LTRSpace(int n, Domain *d);
     virtual ~LTRSpace() { }
 
-    virtual FEInterpolation *giveInterpolation() { return &interpolation; }
+    virtual FEInterpolation *giveInterpolation();
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
@@ -90,7 +91,7 @@ public:
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_tetra_1; }
 
     virtual integrationDomain giveIntegrationDomain() { return _Tetrahedra; }
-    virtual MaterialMode giveMaterialMode() { return _3dMat; }
+    virtual MaterialMode giveMaterialMode();
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
@@ -171,6 +172,7 @@ protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i);
+    virtual void computeBFmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
 
     /**
@@ -188,7 +190,7 @@ protected:
      * @name Surface load support
      */
     //@{
-    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *);
+    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *);
     virtual void giveSurfaceDofMapping(IntArray &answer, int) const;
     virtual IntegrationRule *GetSurfaceIntegrationRule(int);
     virtual double computeSurfaceVolumeAround(GaussPoint *, int);

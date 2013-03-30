@@ -70,11 +70,11 @@ Interface *
 RerShell :: giveInterface(InterfaceType interface)
 {
     if ( interface == LayeredCrossSectionInterfaceType ) {
-        return ( LayeredCrossSectionInterface * ) this;
+        return static_cast< LayeredCrossSectionInterface * >( this );
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return ( NodalAveragingRecoveryModelInterface * ) this;
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     }
 
     return NULL;
@@ -279,12 +279,11 @@ RerShell :: initializeFrom(InputRecord *ir)
 
     this->StructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_RerShell_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
     if ( numberOfGaussPoints != 1 ) {
         numberOfGaussPoints = 1;
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 
@@ -379,12 +378,10 @@ RerShell :: computeGtoLRotationMatrix()
 // e3'    : e1' x help
 // e2'    : e3' x e1'
 {
-    int i;
-
     if ( GtoLRotationMatrix == NULL ) {
         FloatArray e1(3), e2, e3, help(3);
 
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             e1.at(i) = ( this->giveNode(2)->giveCoordinate(i) - this->giveNode(1)->giveCoordinate(i) );
             help.at(i) = ( this->giveNode(3)->giveCoordinate(i) - this->giveNode(1)->giveCoordinate(i) );
         }
@@ -405,7 +402,7 @@ RerShell :: computeGtoLRotationMatrix()
 
         GtoLRotationMatrix = new FloatMatrix(3, 3);
 
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             GtoLRotationMatrix->at(1, i) = e1.at(i);
             GtoLRotationMatrix->at(2, i) = e2.at(i);
             GtoLRotationMatrix->at(3, i) = e3.at(i);
@@ -475,10 +472,9 @@ RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     midplZ = z1 * answer.at(1) + z2 *answer.at(2) + z3 *answer.at(3);
 
     //check that the z is within the element
-    StructuralCrossSection *cs;
+    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );;
     double elthick;
 
-    cs = ( StructuralCrossSection * ) this->giveCrossSection();
     elthick = cs->give(CS_Thickness);
 
     if ( elthick / 2.0 + midplZ - fabs( inputCoords_ElCS.at(3) ) < -POINT_TOL ) {
@@ -514,7 +510,6 @@ RerShell :: computeGtoLRotationMatrix(FloatMatrix &answer)
 // e2'    : e3' x e1'
 {
     double val;
-    int i, j;
 
     // test if pereviously computed
     if ( GtoLRotationMatrix == NULL ) {
@@ -525,8 +520,8 @@ RerShell :: computeGtoLRotationMatrix(FloatMatrix &answer)
     answer.resize(18, 18);
     answer.zero();
 
-    for ( i = 1; i <= 3; i++ ) {
-        for ( j = 1; j <= 3; j++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             val = GtoLRotationMatrix->at(i, j);
             answer.at(i, j)     = val;
             answer.at(i + 3, j + 3) = val;
@@ -654,13 +649,12 @@ void
 RerShell :: printOutputAt(FILE *file, TimeStep *stepN)
 // Performs end-of-step operations.
 {
-    int i;
     GaussPoint *gp;
     FloatMatrix globTensorMembrane, globTensorPlate;
 
     fprintf(file, "element %d :\n", number);
 
-    for ( i = 1; i <= numberOfGaussPoints; i++ ) {
+    for ( int i = 1; i <= numberOfGaussPoints; i++ ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(i - 1);
         if ( !domain->giveEngngModel()->isIncremental() ) {
             // delete this -> ComputeStrainVector(gp,stepN) ;

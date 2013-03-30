@@ -44,6 +44,14 @@
  #include "processcomm.h"
  #include "feticommunicator.h"
  #include "engngm.h"
+ 
+ ///@name Input fields for FETISolver
+//@{
+#define _IFT_FETISolver_maxiter "maxiter"
+#define _IFT_FETISolver_maxerr "maxerr"
+#define _IFT_FETISolver_limit "limit"
+#define _IFT_FETISolver_energynormflag "energynormflag"
+//@}
 
 namespace oofem {
 class Domain;

@@ -62,11 +62,11 @@ Interface *
 Truss3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return ( DirectErrorIndicatorRCInterface * ) this;
+        return static_cast< DirectErrorIndicatorRCInterface * >( this );
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return ( NodalAveragingRecoveryModelInterface * ) this;
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     }
 
     //OOFEM_LOG_INFO("Interface on Truss3d element not supported");
@@ -241,7 +241,6 @@ Truss3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
     FloatArray lx, ly(3), lz(3), help(3);
     double length = this->computeLength();
     Node *nodeA, *nodeB;
-    int i;
 
     // if (referenceNode == 0)
     // _error ("instanciateFrom: wrong reference node specified");
@@ -256,7 +255,7 @@ Truss3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
     lx.times(1.0/length);
 
     int minIndx = 1;
-    for ( i = 2; i <= 3; i++ ) {
+    for ( int i = 2; i <= 3; i++ ) {
         if ( lx.at(i) < fabs( lx.at(minIndx) ) ) {
             minIndx = i;
         }
@@ -270,7 +269,7 @@ Truss3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
     ly.beVectorProductOf(lz, lx);
     ly.normalize();
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(1, i) = lx.at(i);
         answer.at(2, i) = ly.at(i);
         answer.at(3, i) = lz.at(i);
@@ -283,9 +282,7 @@ Truss3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 IRResultType
 Truss3d :: initializeFrom(InputRecord *ir)
 {
-    this->NLStructuralElement :: initializeFrom(ir);
-    this->computeGaussPoints();
-    return IRRT_OK;
+    return NLStructuralElement :: initializeFrom(ir);
 }
 
 
@@ -299,20 +296,6 @@ Truss3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 void
 Truss3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
-    /*
-     *
-     * computes interpolation matrix for element edge.
-     * we assemble locally this matrix for only nonzero
-     * shape functions.
-     * (for example only two nonzero shape functions for 2 dofs are
-     * necessary for linear plane stress triangle edge).
-     * These nonzero shape functions are then mapped to
-     * global element functions.
-     *
-     * Using mapping technique will allow to assemble shape functions
-     * without regarding particular side
-     */
-
     this->computeNmatrixAt(gp, answer);
 }
 

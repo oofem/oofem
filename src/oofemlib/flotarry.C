@@ -310,34 +310,20 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b, int 
 
 void FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx)
 //
-// returns subVector from receiver
-// subVector size will be indx max val size
-// and on i-th position of subVector will be this->at(indx->at(i))
+// Returns a subVector of the receiver constructed from an index array.
+// this->at(i) = src.at(indx->at(i))
 //
 {
-    int i, ii, n, isize;
-
-    n = indx.giveSize();
-
-#ifdef DEBUG
-    if ( src.size != n ) {
-        OOFEM_ERROR("FloatArray :: beSubArrayOf - size mismatch");
+#ifdef DEBUG  
+    if ( indx.maximum() > src.giveSize() || indx.minimum() < 1 ) {
+        OOFEM_ERROR("FloatArray :: beSubArrayOf - index points outside of source");
     }
-
 #endif
 
-    for ( isize = 0, i = 0; i < n; i++ ) {
-        if ( indx(i) > isize ) {
-            isize = indx(i);
-        }
-    }
-
-    this->resize(isize);
-    for ( i = 0; i < n; i++ ) {
-        ii = indx(i);
-        if ( ii > 0 ) {
-            this->values [ ii-1 ] = src.values [ i ];
-        }
+    int n = indx.giveSize();
+    this->resize(n);
+    for ( int i = 1; i <= n; i++ ) {
+        this->at(i) = src.at( indx.at(i) ) ;
     }
 }
 
@@ -439,7 +425,7 @@ void FloatArray :: assemble(const FloatArray &fe, const IntArray &loc)
 // Assembles the array fe (typically, the load vector of a finite
 // element) to the receiver, using loc as location array.
 {
-    int ii, n = fe.giveSize();
+    int n = fe.giveSize();
 #  ifdef DEBUG
     if ( n != loc.giveSize() ) {
         OOFEM_ERROR3("FloatArray::assemble : dimensions of 'fe' (%d) and 'loc' (%d) mismatch",fe.giveSize(), loc.giveSize());
@@ -1015,39 +1001,70 @@ double norm(const FloatArray &x)
 
 void FloatArray :: beFullVectorForm(const FloatMatrix &aMatrix)
 {
-	// Revrites the matrix on vector form, order: 11, 22, 33, 23, 13, 12, 32, 31, 21
+    // Revrites the matrix on vector form, order: 11, 22, 33, 23, 13, 12, 32, 31, 21
 #  ifdef DEBUG
-	if (  aMatrix.giveNumberOfColumns() || aMatrix.giveNumberOfColumns() !=3) {
+    if (  aMatrix.giveNumberOfColumns() || aMatrix.giveNumberOfColumns() !=3) {
         OOFEM_ERROR("FloatArray :: beFullVectorForm : matrix dimension is not 3x3");
     }
 
 #  endif
-	
-	this->resize(9);
-	this->at(1) = aMatrix.at(1,1);	this->at(2) = aMatrix.at(2,2);	this->at(3) = aMatrix.at(3,3);
-	this->at(4) = aMatrix.at(2,3);	this->at(5) = aMatrix.at(1,3);	this->at(6) = aMatrix.at(1,2);
-	this->at(7) = aMatrix.at(3,2);	this->at(8) = aMatrix.at(3,1);	this->at(9) = aMatrix.at(2,1);
-    
+    this->resize(9);
+    this->at(1) = aMatrix.at(1,1); this->at(2) = aMatrix.at(2,2); this->at(3) = aMatrix.at(3,3);
+    this->at(4) = aMatrix.at(2,3); this->at(5) = aMatrix.at(1,3); this->at(6) = aMatrix.at(1,2);
+    this->at(7) = aMatrix.at(3,2); this->at(8) = aMatrix.at(3,1); this->at(9) = aMatrix.at(2,1);
 }
 
-void FloatArray :: beReducedVectorForm(const FloatMatrix &aMatrix)
+void FloatArray :: beReducedVectorFormOfStress(const FloatMatrix &aMatrix)
 {
-	// Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
+    // Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
 #  ifdef DEBUG
-	if (  aMatrix.giveNumberOfColumns() !=3 || aMatrix.giveNumberOfColumns() !=3) {
+    if (  aMatrix.giveNumberOfColumns() !=3 || aMatrix.giveNumberOfColumns() !=3) {
         OOFEM_ERROR("FloatArray :: beReducedVectorForm : matrix dimension is not 3x3");
     }
 
 #  endif
-	
-	this->resize(6);
-	this->at(1) = aMatrix.at(1,1);	this->at(2) = aMatrix.at(2,2);	this->at(3) = aMatrix.at(3,3);
-	this->at(4) = 0.5*( aMatrix.at(2,3) + aMatrix.at(3,2) );
-	this->at(5) = 0.5*( aMatrix.at(1,3) + aMatrix.at(3,1) );
-	this->at(6) = 0.5*( aMatrix.at(1,2) + aMatrix.at(2,1) );
     
+    this->resize(6);
+    this->at(1) = aMatrix.at(1,1); this->at(2) = aMatrix.at(2,2); this->at(3) = aMatrix.at(3,3);
+    this->at(4) = 0.5*( aMatrix.at(2,3) + aMatrix.at(3,2) );
+    this->at(5) = 0.5*( aMatrix.at(1,3) + aMatrix.at(3,1) );
+    this->at(6) = 0.5*( aMatrix.at(1,2) + aMatrix.at(2,1) );
 }
 
+
+void FloatArray :: beReducedVectorFormOfStrain(const FloatMatrix &aMatrix)
+{
+    // Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
+#  ifdef DEBUG
+    if (  aMatrix.giveNumberOfColumns() !=3 || aMatrix.giveNumberOfColumns() !=3) {
+        OOFEM_ERROR("FloatArray :: beReducedVectorForm : matrix dimension is not 3x3");
+    }
+
+#  endif
+    
+    this->resize(6);
+    this->at(1) = aMatrix.at(1,1); this->at(2) = aMatrix.at(2,2); this->at(3) = aMatrix.at(3,3);
+    this->at(4) = ( aMatrix.at(2,3) + aMatrix.at(3,2) ); // Shear strains multiplied with a factor of 2
+    this->at(5) = ( aMatrix.at(1,3) + aMatrix.at(3,1) );
+    this->at(6) = ( aMatrix.at(1,2) + aMatrix.at(2,1) );
+}
+
+
+void FloatArray :: beColumnOf(const FloatMatrix &mat, int col)
+{
+#  ifdef DEBUG
+    if (  col > mat.giveNumberOfColumns() ) {
+        OOFEM_ERROR3("FloatArray :: beColumnOf: column index (%d) exceeds number of columns in input matrix (%d)", col, mat.giveNumberOfColumns() );
+    }
+#  endif
+
+    int nRows = mat.giveNumberOfRows();
+    this->resize(nRows);
+    for ( int i = 1; i <= nRows; i++ ) {
+        this->at(i) = mat.at(i,col);
+    }
+
+}
 
 
 } // end namespace oofem

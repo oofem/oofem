@@ -37,6 +37,12 @@
 
 #include "node.h"
 
+///@name Input fields for HangingNode
+//@{
+#define _IFT_HangingNode_masterElement "masterelement"
+#define _IFT_HangingNode_masterRegion "masterregion"
+//@}
+
 namespace oofem {
 
 /**
@@ -63,8 +69,8 @@ protected:
     /// Region of the master element (used for automatic detection).
     int masterRegion;
 #ifdef __OOFEG
-    /// Flag whether consistency check already completed.
-    bool consistencyChecked;
+    /// Flag whether node is fully initialized already.
+    bool initialized;
 #endif
 
 public:
@@ -78,6 +84,7 @@ public:
     virtual ~HangingNode(void) { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void postInitialize();
     virtual int checkConsistency();
     virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); }
 

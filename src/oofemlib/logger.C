@@ -102,13 +102,13 @@ static inline void print_stacktrace(FILE *out = stderr, unsigned int max_frames 
                 funcname = ret; // use possibly realloc()-ed string
                 fprintf(out, "  %s : %s+%s\n",
                         symbollist [ i ], funcname, begin_offset);
-            } else   {
+            } else {
                 // demangling failed. Output function name as a C function with
                 // no arguments.
                 fprintf(out, "  %s : %s()+%s\n",
                         symbollist [ i ], begin_name, begin_offset);
             }
-        } else   {
+        } else {
             // couldn't parse the line? print the whole line.
             fprintf(out, "  %s\n", symbollist [ i ]);
         }

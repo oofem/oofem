@@ -36,7 +36,6 @@
 #define engngm_h
 
 #include "inputrecord.h"
-
 #include "alist.h"
 #include "intarray.h"
 #include "fieldmanager.h"
@@ -54,7 +53,6 @@
 #include "contextoutputmode.h"
 #include "contextfilemode.h"
 #include "contextioresulttype.h"
-#include "xfemmanager.h"
 #include "unknownnumberingscheme.h"
 
 #ifdef __PARALLEL_MODE
@@ -74,6 +72,24 @@
 
 #include <string>
 
+///@name Input fields for general Engineering models.
+//@{
+#define _IFT_EngngModel_nsteps "nsteps"
+#define _IFT_EngngModel_contextoutputstep "contextoutputstep"
+#define _IFT_EngngModel_renumberFlag "renumber"
+#define _IFT_EngngModel_profileOpt "profileopt"
+#define _IFT_EngngModel_nmsteps "nmsteps"
+#define _IFT_EngngModel_nxfemman "nxfemman"
+#define _IFT_EngngModel_nonLinFormulation "nonlinform"
+#define _IFT_EngngModel_eetype "eetype"
+#define _IFT_EngngModel_parallelflag "parallelflag"
+#define _IFT_EngngModel_loadBalancingFlag "lbflag"
+#define _IFT_EngngModel_forceloadBalancingFlag "forcelb1"
+#define _IFT_EngngModel_initialGuess "initialGuess"
+
+#define _IFT_EngngModel_lstype "lstype"
+#define _IFT_EngngModel_smtype "smtype"
+//@}
 
 namespace oofem {
 
@@ -88,7 +104,6 @@ class MetaStep;
 class MaterialInterface;
 class SparseMtrx;
 class NumericalMethod;
-class XfemManager;
 class InitModuleManager;
 class ExportModuleManager;
 class FloatMatrix;
@@ -96,6 +111,8 @@ class FloatArray;
 
 #ifdef __PARALLEL_MODE
 class ProblemCommunicator;
+class ProcessCommunicatorBuff;
+class CommunicatorBuff;
 #endif
 
 
@@ -201,9 +218,9 @@ protected:
     /// Number of prescribed equations per domain.
     IntArray domainPrescribedNeqs;
     /// Renumbering flag (renumbers equations after each step, necessary if Dirichlet BCs change).
-    int renumberFlag;
+    bool renumberFlag;
     /// Profile optimized numbering flag (using Sloan's algorithm).
-    int profileOpt;
+    bool profileOpt;
     /// Equation numbering completed flag.
     int equationNumberingCompleted;
     /// Number of meta steps.
@@ -256,10 +273,6 @@ protected:
     EngngModelTimer timer;
     /// Flag indicating that the receiver runs in parallel.
     int parallelFlag;
-    /// List of Xfemmanagers.
-    AList< XfemManager > *xfemManagerList;
-    /// Number of Xfemmanagers.
-    int nxfemman;
     /// Type of non linear formulation (total or updated formulation).
     enum fMode nonLinFormulation;
     /// Error estimator. Useful for adaptivity, or simply printing errors output.
@@ -287,6 +300,35 @@ protected:
     bool force_load_rebalance_in_first_step;
     //@}
 
+    /// Common Communicator buffer.
+    CommunicatorBuff *commBuff;
+    /// Communicator.
+    ProblemCommunicator *communicator;
+
+    /// Flag indicating if nonlocal extension active, which will cause data to be sent between shared elements before computing the internal forces.
+    int nonlocalExt;
+    /// NonLocal Communicator. Necessary when nonlocal constitutive models are used.
+    ProblemCommunicator *nonlocCommunicator;
+    /// Message tags
+    enum { InternalForcesExchangeTag, MassExchangeTag, LoadExchangeTag, ReactionExchangeTag, RemoteElementExchangeTag };
+    /**
+     * Packing function for vector values of DofManagers. Packs vector values of shared/remote DofManagers
+     * into send communication buffer of given process communicator.
+     * @param processComm Task communicator.
+     * @param src Source vector.
+     * @param prescribedEquations True if src uses prescribed equations numbering.
+     * @return Nonzero if successful.
+     */
+    int packDofManagers(FloatArray *src, ProcessCommunicator &processComm, bool prescribedEquations);
+    /**
+     * Unpacking function for vector values of DofManagers . Unpacks vector of shared/remote DofManagers
+     * from  receive communication buffer of given process communicator.
+     * @param processComm Task communicator.
+     * @param dest Destination vector.
+     * @param prescribedEquations True if src uses prescribed equations numbering.
+     * @return Nonzero if successful.
+     */
+    int unpackDofManagers(FloatArray *dest, ProcessCommunicator &processComm, bool prescribedEquations);
 #endif // __PARALLEL_MODE
 
 #ifdef __PETSC_MODULE
@@ -322,10 +364,6 @@ public:
     virtual ErrorEstimator *giveDomainErrorEstimator(int n) { return defaultErrEstimator; }
     /** Returns material interface representation for given domain */
     virtual MaterialInterface *giveMaterialInterface(int n) { return NULL; }
-    /** Returns XfemManager at a particular position */
-    XfemManager *giveXfemManager(int n);
-    /** Return true if XfemManager at a particular position is available */
-    bool hasXfemManager(int n);
     void setNumberOfEquations(int id, int neq) {
         numberOfEquations = neq;
         domainNeqs.at(id) = neq;
@@ -454,6 +492,8 @@ public:
      * Returns total number of equations in active (current time step) time step.
      * The UnknownType parameter allows to distinguish between several possible governing equations, that
      * can be numbered separately.
+     * @todo This function is misleading, it will sum equations from all domains which isn't very useful 
+     * (it works because all problems calling this only has one domain).
      */
     virtual int giveNumberOfEquations(EquationID eid);
     /**
@@ -474,8 +514,6 @@ public:
      * can be numbered separately.
      */
     virtual int giveNumberOfPrescribedDomainEquations(int di, EquationID eid);
-    //virtual IntArray* GiveBanWidthVector ();
-
 
     // management components
     /**
@@ -494,15 +532,89 @@ public:
 
 #ifdef __PARALLEL_MODE
     /**
-     * Updates unknown. Unknown at give time step is characterized by its type and mode
-     * and by its equation number. This function is used by Dofs, when they are requested for
-     * their update of associated unknowns. Declared only in __PARALLEL_MODE
-     * @see Dof::giveUnknown method
+     * Exchanges necessary remote DofManagers data.
+     * @param answer Array with collected values.
+     * @param ExchangeTag Exchange tag used by communicator.
+     * @return Nonzero if successful.
      */
-    virtual void updateUnknownComponent(EquationID, ValueModeType, TimeStep *, int,
-                                        double, EngngModel_UpdateMode) { return; }
+    int updateSharedDofManagers(FloatArray &answer, int ExchangeTag);
+    /**
+     * Exchanges necessary remote prescribed DofManagers data.
+     * @param answer Array with collected values.
+     * @param ExchangeTag Exchange tag used by communicator.
+     * @return Nonzero if successful.
+     */
+    int updateSharedPrescribedDofManagers(FloatArray &answer, int ExchangeTag);
+    /**
+     * Exchanges necessary remote element data with remote partitions. The receiver's nonlocalExt flag must be set.
+     * Uses receiver nonlocCommunicator to perform the task using packRemoteElementData and unpackRemoteElementData
+     * receiver's services.
+     * @param ExchangeTag Exchange tag used by communicator.
+     * @return Nonzero if successful.
+     */
+    int exchangeRemoteElementData(int ExchangeTag);
+    /**
+     * Packs data of local element to be received by their remote counterpart on remote partitions.
+     * Remote elements are introduced when nonlocal constitutive models are used, in order to
+     * allow local averaging procedure (remote elements, which are involved in averaging on local partition are
+     * mirrored on this local partition) instead of implementing inefficient fine-grain communication.
+     * Remote element data are exchanged only if necessary and once for all of them.
+     * Current implementation calls packUnknowns service for all elements listed in
+     * given process communicator send map.
+     * @param processComm Corresponding process communicator.
+     * @return Nonzero if successful.
+     */
+    int packRemoteElementData(ProcessCommunicator &processComm);
+    /**
+     * Unpacks data for remote elements (which are mirrors of remote partition's local elements).
+     * Remote elements are introduced when nonlocal constitutive models are used, in order to
+     * allow local averaging procedure (remote elements, which are involved in averaging on local partition are
+     * mirrored on this local partition) instead of implementing inefficient fine-grain communication.
+     * Remote element data are exchanged only if necessary and once for all of them.
+     * Current implementation calls unpackAndUpdateUnknowns service for all elements listed in
+     * given process communicator receive map.
+     * @param processComm Corresponding process communicator.
+     * @return Nonzero if successful.
+     */
+    int unpackRemoteElementData(ProcessCommunicator &processComm);
+    /**
+     * Packing function for vector values of DofManagers. Packs vector values of shared/remote DofManagers
+     * into send communication buffer of given process communicator.
+     * @param processComm Task communicator.
+     * @param src Source vector.
+     * @return Nonzero if successful.
+     */
+    int packDofManagers(FloatArray *src, ProcessCommunicator &processComm);
+    /**
+     * Packing function for vector values of DofManagers. Packs vector values of shared/remote prescribed DofManagers
+     * into send communication buffer of given process communicator.
+     * @param processComm Task communicator.
+     * @param src Source vector.
+     * @return Nonzero if successful.
+     */
+    int packPrescribedDofManagers(FloatArray *src, ProcessCommunicator &processComm);
+    /**
+     * Unpacking function for vector values of DofManagers . Unpacks vector of shared/remote DofManagers
+     * from  receive communication buffer of given process communicator.
+     * @param processComm Task communicator.
+     * @param dest Destination vector.
+     * @return Nonzero if successful.
+     */
+    int unpackDofManagers(FloatArray *dest, ProcessCommunicator &processComm);
+    /**
+     * Unpacking function for vector values of DofManagers . Unpacks vector of shared/remote prescribed DofManagers
+     * from  receive communication buffer of given process communicator.
+     * @param processComm Task communicator.
+     * @param dest Destination vector.
+     * @return Nonzero if successful.
+     */
+    int unpackPrescribedDofManagers(FloatArray *dest, ProcessCommunicator &processComm);
 
-    virtual ProblemCommunicator *giveProblemCommunicator(EngngModelCommType t) { return NULL; }
+    void initializeCommMaps(bool forceInit = false);
+    
+    ProblemCommunicator *giveProblemCommunicator(EngngModelCommType t) {
+        if ( t == PC_default ) { return communicator; } else if ( t == PC_nonlocal ) { return nonlocCommunicator; } else { return NULL; }
+    }
 #endif
     /**
      * Initializes whole problem according to its description stored in inputStream.
@@ -831,11 +943,12 @@ public:
      * @param type Characteristic components of type type are requested.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
+     * @param eNorms If non-NULL, squared norms of each internal force will be added to this, split up into dof IDs.
      * @return Sum of element/node norm (squared) of assembled vector.
      */
     double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                           CharType type, ValueModeType mode,
-                          const UnknownNumberingScheme &s, Domain *domain);
+                          const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
     /**
      * Assembles characteristic vector of required type from dofManagers into given vector.
      * @param answer Assembled vector.
@@ -849,7 +962,7 @@ public:
      */
     double assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                          CharType type, ValueModeType mode,
-                                         const UnknownNumberingScheme &s, Domain *domain);
+                                         const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
     /**
      * Assembles characteristic vector of required type from elements into given vector.
      * @param answer Assembled vector.
@@ -864,7 +977,7 @@ public:
      */
     double assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                       CharType type, ValueModeType mode,
-                                      const UnknownNumberingScheme &s, Domain *domain);
+                                      const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
     /**
      * Assembles characteristic vector of required type from active boundary conditions.
@@ -880,7 +993,7 @@ public:
      */
     double assembleVectorFromActiveBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                       CharType type, ValueModeType mode,
-                                      const UnknownNumberingScheme &s, Domain *domain);
+                                      const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
     /**
      * Assembles the extrapolated internal forces vector,

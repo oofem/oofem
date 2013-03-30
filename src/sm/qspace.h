@@ -35,7 +35,7 @@
 #ifndef qspace_h
 #define qspace_h
 
-#include "structuralelement.h"
+#include "nlstructuralelement.h"
 #include "fei3dhexaquad.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
@@ -55,7 +55,7 @@ namespace oofem {
  *
  * @author Ladislav Svoboda
  */
-class QSpace : public StructuralElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
+class QSpace : public NLStructuralElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 {
 protected:
     int numberOfGaussPoints;
@@ -96,7 +96,7 @@ public:
     virtual int computeNumberOfDofs(EquationID ut) { return 60; }
 
     virtual integrationDomain giveIntegrationDomain() { return _Cube; }
-    virtual MaterialMode giveMaterialMode() { return _3dMat; }
+    virtual MaterialMode giveMaterialMode();
 
 protected:
     virtual void computeGaussPoints();
@@ -113,7 +113,7 @@ protected:
      */
     //@{
     virtual IntegrationRule *GetSurfaceIntegrationRule(int);
-    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
     virtual void giveSurfaceDofMapping(IntArray &answer, int) const;
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int);
     virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int);

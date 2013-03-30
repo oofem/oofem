@@ -200,11 +200,9 @@ TrianglePatch :: drawWD(oofegGraphicContext &gc, FloatArray &vd)
     p [ 2 ].y = ( FPNum ) vertices->at(3)->at(2);
     p [ 2 ].z = 0.;
 
-    if ( vd.giveSize() == 3 ) {
-        s [ 0 ] = vd.at(1);
-        s [ 1 ] = vd.at(2);
-        s [ 2 ] = vd.at(3);
-    }
+    s [ 0 ] = vd.giveSize() >= 1 ? 0. : vd.at(1);
+    s [ 1 ] = vd.giveSize() >= 2 ? 0. : vd.at(2);
+    s [ 2 ] = vd.giveSize() >= 3 ? 0. : vd.at(3);
 
     go =  CreateTriangleWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ]);
     EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);

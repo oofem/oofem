@@ -46,6 +46,12 @@
  #include "conTable.h"
 #endif
 
+///@name Input fields for TrabBoneNL3D
+//@{
+#define _IFT_TrabBoneNL3D_r "r"
+#define _IFT_TrabBoneNL3D_m "m"
+//@}
+
 namespace oofem {
 
 /**

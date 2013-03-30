@@ -157,7 +157,7 @@ Quad1PlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPo
      */
 
     FloatArray n;
-    this->interp.edgeEvalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     answer.resize(2, 4);
     answer.at(1, 1) = n.at(1);
     answer.at(1, 3) = n.at(2);
@@ -286,7 +286,7 @@ Quad1PlaneStrain :: initializeFrom(InputRecord *ir)
 
     this->StructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 4;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Quad1PlaneStrain_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
     if ( !( ( numberOfGaussPoints == 4 ) ||
            ( numberOfGaussPoints == 9 ) ||
@@ -294,7 +294,6 @@ Quad1PlaneStrain :: initializeFrom(InputRecord *ir)
         numberOfGaussPoints = 4;
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 
@@ -321,19 +320,19 @@ Interface *
 Quad1PlaneStrain :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return ( SpatialLocalizerInterface * ) this;
+        return static_cast< SpatialLocalizerInterface * >( this );
     } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return ( DirectErrorIndicatorRCInterface * ) this;
+        return static_cast< DirectErrorIndicatorRCInterface * >( this );
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return ( EIPrimaryUnknownMapperInterface * ) this;
+        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
-        return ( HuertaErrorEstimatorInterface * ) this;
+        return static_cast< HuertaErrorEstimatorInterface * >( this );
     } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return ( HuertaRemeshingCriteriaInterface * ) this;
+        return static_cast< HuertaRemeshingCriteriaInterface * >( this );
     }
 
     return NULL;

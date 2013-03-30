@@ -37,6 +37,12 @@
 
 #include "structengngmodel.h"
 
+///@name Input fields for DEIDynamic
+//@{
+#define _IFT_DEIDynamic_dumpcoef "dumpcoef"
+#define _IFT_DEIDynamic_deltat "deltat"
+//@}
+
 namespace oofem {
 
 /**
@@ -80,7 +86,6 @@ public:
 
     virtual void solveYourselfAt(TimeStep *tStep);
 
-    virtual void updateYourself(TimeStep *tStep);
     virtual double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual TimeStep *giveNextStep();

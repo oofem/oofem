@@ -45,7 +45,7 @@
 
 namespace oofem {
 
-class FEI3dTrLin;
+class FEI3dTetLin;
 
 /**
  * Tetrahedral element for Stokes flow using Bubble basis function for stabilization.
@@ -64,7 +64,7 @@ protected:
     /// Number of gauss points. Same for pressure and velocity.
     int numberOfGaussPoints;
     /// Interpolation for pressure
-    static FEI3dTrLin interp;
+    static FEI3dTetLin interp;
     /// Ordering of dofs in element. Used to assemble the element stiffness
     static IntArray ordering;
     /// Ordering of dofs on edges. Used to assemble edge loads

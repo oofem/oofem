@@ -65,7 +65,6 @@ Tr21Stokes :: Tr21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
         this->numberOfGaussPoints = 3;
     else 
         this->numberOfGaussPoints = 4;
-    this->computeGaussPoints();
 }
 
 Tr21Stokes :: ~Tr21Stokes()
@@ -108,8 +107,8 @@ void Tr21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answe
     // are held by each node. Since this element holds velocities (both in x and y direction),
     // in six nodes and pressure in three nodes the answer depends on which node is requested.
 
-    if ( ( inode == 1 ) || ( inode == 2 ) || ( inode == 3 ) ) {
-        if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
+    if ( inode <= 3 ) {
+        if ( ut == EID_MomentumBalance ) {
             answer.setValues(2, V_u, V_v);
         } else if ( ut == EID_ConservationEquation ) {
             answer.setValues(1, P_f);
@@ -118,8 +117,8 @@ void Tr21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answe
         } else {
             _error("giveDofManDofIDMask: Unknown equation id encountered");
         }
-    } else if ( ( inode == 4 ) || ( inode == 5 ) || ( inode == 6 ) ) {
-        if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
+    } else {
+        if ( ut == EID_MomentumBalance ) {
             answer.setValues(2, V_u, V_v);
         } else if ( ut == EID_ConservationEquation ) {
             answer.resize(0);
@@ -164,7 +163,7 @@ void Tr21Stokes :: giveCharacteristicMatrix(FloatMatrix &answer,
 void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    FluidDynamicMaterial *mat = ( FluidDynamicMaterial * ) this->domain->giveMaterial(this->material);
+    FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     FloatArray a_pressure, a_velocity, devStress, epsp, BTs, Nh, dNv(12);
     double r_vol, pressure;
     FloatMatrix dN, B(3, 12);
@@ -284,7 +283,7 @@ void Tr21Stokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int 
     answer.zero();
 
     if ( load->giveType() == TransmissionBC ) { // Neumann boundary conditions (traction)
-        BoundaryLoad *boundaryLoad = ( BoundaryLoad * ) load;
+        BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >( load );
 
         int numberOfEdgeIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 1. ) / 2. ) * 2;
 
@@ -300,13 +299,13 @@ void Tr21Stokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int 
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            this->interpolation_quad.edgeEvalN(N, * lcoords, FEIElementGeometryWrapper(this));
+            this->interpolation_quad.edgeEvalN(N, iEdge, * lcoords, FEIElementGeometryWrapper(this));
             double detJ = fabs(this->interpolation_quad.edgeGiveTransformationJacobian(iEdge, * lcoords, FEIElementGeometryWrapper(this)));
             double dS = gp->giveWeight() * detJ;
 
             if ( boundaryLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) { // Edge load in xi-eta system
                 boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
-            } else   { // Edge load in x-y system
+            } else { // Edge load in x-y system
                 FloatArray gcoords;
                 this->interpolation_quad.edgeLocal2global(gcoords, iEdge, * lcoords, FEIElementGeometryWrapper(this));
                 boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
@@ -320,7 +319,7 @@ void Tr21Stokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int 
         }
 
         answer.assemble(f, this->edge_ordering [ iEdge - 1 ]);
-    } else   {
+    } else {
         OOFEM_ERROR("Tr21Stokes :: computeEdgeBCSubVectorAt - Strange boundary condition type");
     }
 }
@@ -328,7 +327,7 @@ void Tr21Stokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int 
 void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     // Note: Working with the components; [K, G+Dp; G^T+Dv^T, C] . [v,p]
-    FluidDynamicMaterial *mat = ( FluidDynamicMaterial * ) this->domain->giveMaterial(this->material);
+    FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     GaussPoint *gp;
     FloatMatrix B(3, 12), EdB, K, G, Dp, DvT, C, Ed, dN;
@@ -492,7 +491,7 @@ void Tr21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
         answer.resize(1);
         if ( node == 1 || node == 2 || node == 3 ) {
             answer.at(1) = this->giveNode(node)->giveDofWithID(P_f)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
-        } else   {
+        } else {
             double a, b;
             if ( node == 4 ) {
                 a = this->giveNode(1)->giveDofWithID(P_f)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
@@ -507,7 +506,7 @@ void Tr21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
 
             answer.at(1) = ( a + b ) / 2;
         }
-    } else   {
+    } else {
         answer.resize(0);
     }
 }

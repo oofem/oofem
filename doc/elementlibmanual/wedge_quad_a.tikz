@@ -1,0 +1,41 @@
+\begin{tikzpicture}[scale=4,>=stealth,x={(1cm,0cm)}, y={ (0.4cm,-0.3cm) }, z={(0.0cm,0.8cm)}]
+ \tikzstyle{elemnode} = [draw=black,thick,fill=white,circle,inner sep=1]
+ \tikzstyle{background} = [densely dashed]
+
+  \coordinate (n1) at (0,0,0);
+  \coordinate (n2) at (0,1,0);
+  \coordinate (n3) at (1,0,0);
+  \coordinate (n4) at (0,0,1);
+  \coordinate (n5) at (0,1,1);
+  \coordinate (n6) at (1,0,1);
+
+  % Can't use rectangle in 3d
+  \draw[thick,background] (n1) -- (n3) coordinate[midway] (e3);
+  \draw[thick] (n2) -- (n1) coordinate[midway] (e1);
+  \draw[thick] (n2) -- (n3) coordinate[midway] (e2);
+  \draw[thick] (n5) -- (n4) coordinate[midway] (e4);
+  \draw[thick] (n5) -- (n6) coordinate[midway] (e5);
+  \draw[thick] (n4) -- (n6) coordinate[midway] (e6);
+  \draw[thick] (n1) -- (n4) coordinate[midway] (e7);
+  \draw[thick] (n2) -- (n5) coordinate[midway] (e8);
+  \draw[thick] (n3) -- (n6) coordinate[midway] (e9);
+
+  % Nodes
+  \node[elemnode] at (n1) {}; \node[below left ] at (n1) {1};
+  \node[elemnode] at (n2) {}; \node[below      ] at (n2) {2};
+  \node[elemnode] at (n3) {}; \node[below right] at (n3) {3};
+  \node[elemnode] at (n4) {}; \node[      left ] at (n4) {4};
+  \node[elemnode] at (n5) {}; \node[below left ] at (n5) {5};
+  \node[elemnode] at (n6) {}; \node[      right] at (n6) {6};
+
+  \node[elemnode] at (e1) {}; \node[below left ] at (e1) {7};
+  \node[elemnode] at (e2) {}; \node[below right] at (e2) {8};
+  \node[elemnode] at (e3) {}; \node[below      ] at (e3) {9};
+  \node[elemnode] at (e4) {}; \node[below left ] at (e4) {10};
+  \node[elemnode] at (e5) {}; \node[below right] at (e5) {11};
+  \node[elemnode] at (e6) {}; \node[above      ] at (e6) {12};
+  \node[elemnode] at (e7) {}; \node[      left ] at (e7) {13};
+  \node[elemnode] at (e8) {}; \node[above left ] at (e8) {14};
+  \node[elemnode] at (e9) {}; \node[      right] at (e9) {15};
+
+\end{tikzpicture}

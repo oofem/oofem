@@ -40,6 +40,16 @@
 #include "flotmtrx.h"
 #include "interface.h"
 
+///@name Input fields for LayeredCrossSection
+//@{
+#define _IFT_LayeredCrossSection_nlayers "nlayers"
+#define _IFT_LayeredCrossSection_layermaterials "layermaterials"
+#define _IFT_LayeredCrossSection_thicks "thicks"
+#define _IFT_LayeredCrossSection_widths "widths"
+#define _IFT_LayeredCrossSection_midsurf "midsurf"
+#define _IFT_LayeredCrossSection_nintegrationpoints "nintegrationpoints"
+//@}
+
 namespace oofem {
 class StructuralMaterial;
 
@@ -78,7 +88,9 @@ protected:
     FloatArray layerMidZ;   ///< z-coord of the mid plane for each layer
     int numberOfLayers;
     int numberOfIntegrationPoints; ///< num integration points per layer
-    double midSurfaceZcoordFromBottom, totalThick;
+    double midSurfaceZcoordFromBottom;
+    double midSurfaceXiCoordFromBottom;
+    double totalThick;
     double area;
 
 public:
@@ -132,23 +144,42 @@ public:
 
     virtual double give(CrossSectionProperty a);
     int giveNumberOfLayers();
+
     /// Returns the total thickness of all layers.
     double computeIntegralThick();
     void setupLayerMidPlanes();
 
-    int giveLayerMaterial(int layer) { return this->layerMaterials.at(layer); }
-    double giveLayerMidZ(int layer) { return this->layerMidZ.at(layer); }
-    double giveLayerThickness(int layer) { return this->layerThicks.at(layer); }
-    int giveNumIntegrationPointsInLayer() { return this->numberOfIntegrationPoints; }
+    int giveLayerMaterial(int layer) { 
+        return this->layerMaterials.at(layer); 
+    }
+    double giveLayerMidZ(int layer) { 
+        // Gives the z-coord measured from the geometric midplane of the (total) cross section.
+        return this->layerMidZ.at(layer); 
+    }
+    double giveLayerThickness(int layer) { 
+        return this->layerThicks.at(layer); 
+    }
+    int giveNumIntegrationPointsInLayer() { 
+        return this->numberOfIntegrationPoints; 
+    }
+    double giveMidSurfaceZcoordFromBottom() {
+        return this->midSurfaceZcoordFromBottom;
+    }
+    double giveMidSurfaceXiCoordFromBottom() {
+        return this->midSurfaceXiCoordFromBottom;
+    }
 
     // identification and auxiliary functions
-    virtual const char *giveClassName() const { return "LayeredCrossSection"; }
-    virtual classType giveClassID() const { return LayeredCrossSectionClass; }
+    virtual const char *giveClassName() const { 
+        return "LayeredCrossSection"; 
+    }
+    virtual classType giveClassID() const { 
+        return LayeredCrossSectionClass; 
+    }
     virtual void printYourself();
 
     MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode);
     GaussPoint *giveSlaveGaussPoint(GaussPoint *gp, int slaveIndex);
-    GaussPoint *giveSlaveGaussPointNew(GaussPoint *gp, int slaveIndex);
 
     virtual contextIOResultType saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
@@ -234,7 +265,7 @@ public:
      * @param tStep Time step.
      */
     virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
-                                            GaussPoint *slaveGp, TimeStep *tStep) = 0;
+        GaussPoint *slaveGp, TimeStep *tStep) {} ;
 };
 } // end namespace oofem
 #endif // layeredcrosssection_h

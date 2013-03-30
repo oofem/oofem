@@ -117,7 +117,7 @@ void LineSurfaceTension :: giveDofManDofIDMask(int inode, EquationID ut, IntArra
 
 void LineSurfaceTension :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep)
 {
-    if( mtrx == ExternalForcesVector )  {
+    if( mtrx == ExternalForcesVector ) {
         this->computeLoadVector(answer, mode, tStep);
     } else if ( mtrx == InternalForcesVector ){
         answer.resize(0);
@@ -128,7 +128,7 @@ void LineSurfaceTension :: giveCharacteristicVector(FloatArray &answer, CharType
 
 void LineSurfaceTension :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep)
 {
-    if ( mtrx == StiffnessMatrix )  {
+    if ( mtrx == StiffnessMatrix ) {
         this->computeTangent(answer, tStep);
     } else {
         OOFEM_ERROR2("giveCharacteristicMatrix: Unknown CharType (%s)",__CharTypeToString(mtrx));

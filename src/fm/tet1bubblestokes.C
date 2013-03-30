@@ -43,12 +43,12 @@
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "fluiddynamicmaterial.h"
-#include "fei3dtrlin.h"
+#include "fei3dtetlin.h"
 #include "masterdof.h"
 
 namespace oofem {
 
-FEI3dTrLin Tet1BubbleStokes :: interp;
+FEI3dTetLin Tet1BubbleStokes :: interp;
 // Set up ordering vectors (for assembling)
 IntArray Tet1BubbleStokes :: ordering(19);
 IntArray Tet1BubbleStokes :: edge_ordering [ 6 ] = { IntArray(6), IntArray(6), IntArray(6), IntArray(6), IntArray(6), IntArray(6) };
@@ -59,7 +59,6 @@ Tet1BubbleStokes :: Tet1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDom
 {
     this->numberOfDofMans = 4;
     this->numberOfGaussPoints = 24;
-    this->computeGaussPoints();
     
     this->bubble = new ElementDofManager(1, aDomain, this);
     this->bubble->appendDof(new MasterDof(1, this->bubble, V_u));
@@ -102,7 +101,7 @@ int Tet1BubbleStokes :: computeNumberOfDofs(EquationID ut)
 
 void Tet1BubbleStokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
+    if ( ut == EID_MomentumBalance ) {
         answer.setValues(3, V_u, V_v, V_w);
     } else if ( ut == EID_ConservationEquation ) {
         answer.setValues(1, P_f);
@@ -119,7 +118,7 @@ void Tet1BubbleStokes :: giveInternalDofManDofIDMask(int i, EquationID eid, IntA
         answer.setValues(3, V_u, V_v, V_w);
     } else {
         answer.resize(0);
-    }    
+    }
 }
 
 double Tet1BubbleStokes :: computeVolumeAround(GaussPoint *gp)
@@ -155,7 +154,7 @@ void Tet1BubbleStokes :: giveCharacteristicMatrix(FloatMatrix &answer,
 void Tet1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    FluidDynamicMaterial *mat = ( FluidDynamicMaterial * ) this->domain->giveMaterial(this->material);
+    FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     FloatArray a_pressure, a_velocity, devStress, epsp, BTs, N, dNv(15);
     double r_vol, pressure;
     FloatMatrix dN, B(6, 15);
@@ -290,7 +289,7 @@ void Tet1BubbleStokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load
     answer.zero();
 
     if ( load->giveType() == TransmissionBC ) { // Neumann boundary conditions (traction)
-        BoundaryLoad *boundaryLoad = ( BoundaryLoad * ) load;
+        BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >( load );
 
         int numberOfEdgeIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 2. ) / 2. );
 
@@ -306,13 +305,13 @@ void Tet1BubbleStokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            this->interp.edgeEvalN(N, * lcoords, FEIElementGeometryWrapper(this));
+            this->interp.edgeEvalN(N, iEdge, * lcoords, FEIElementGeometryWrapper(this));
             double detJ = fabs(this->interp.edgeGiveTransformationJacobian(iEdge, * lcoords, FEIElementGeometryWrapper(this)));
             double dS = gp->giveWeight() * detJ;
 
             if ( boundaryLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) { // Edge load in xi-eta system
                 boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
-            } else   { // Edge load in x-y system
+            } else { // Edge load in x-y system
                 FloatArray gcoords;
                 this->interp.edgeLocal2global(gcoords, iEdge, * lcoords, FEIElementGeometryWrapper(this));
                 boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
@@ -327,7 +326,7 @@ void Tet1BubbleStokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load
         }
 
         answer.assemble(f, this->edge_ordering [ iEdge - 1 ]);
-    } else   {
+    } else {
         OOFEM_ERROR("Tet1BubbleStokes :: computeEdgeBCSubVectorAt - Strange boundary condition type");
     }
 }
@@ -339,7 +338,7 @@ void Tet1BubbleStokes :: computeSurfBCSubVectorAt(FloatArray &answer, Load *load
     answer.zero();
 
     if ( load->giveType() == TransmissionBC ) { // Neumann boundary conditions (traction)
-        BoundaryLoad *boundaryLoad = ( BoundaryLoad * ) load;
+        BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >( load );
 
         int numberOfIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 2. ) / 2. );
 
@@ -355,13 +354,13 @@ void Tet1BubbleStokes :: computeSurfBCSubVectorAt(FloatArray &answer, Load *load
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            this->interp.surfaceEvalN(N, * lcoords, FEIElementGeometryWrapper(this));
+            this->interp.surfaceEvalN(N, iSurf, * lcoords, FEIElementGeometryWrapper(this));
             double detJ = fabs(this->interp.surfaceGiveTransformationJacobian(iSurf, * lcoords, FEIElementGeometryWrapper(this)));
             double dA = gp->giveWeight() * detJ;
 
             if ( boundaryLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) { // Edge load in xi-eta system
                 boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
-            } else   { // Edge load in x-y system
+            } else { // Edge load in x-y system
                 FloatArray gcoords;
                 this->interp.edgeLocal2global(gcoords, iSurf, * lcoords, FEIElementGeometryWrapper(this));
                 boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
@@ -378,7 +377,7 @@ void Tet1BubbleStokes :: computeSurfBCSubVectorAt(FloatArray &answer, Load *load
         }
 
         answer.assemble(f, this->surf_ordering [ iSurf - 1 ]);
-    } else   {
+    } else {
         OOFEM_ERROR("Tet1BubbleStokes :: computeSurfBCSubVectorAt - Strange boundary condition type");
     }
 }
@@ -386,7 +385,7 @@ void Tet1BubbleStokes :: computeSurfBCSubVectorAt(FloatArray &answer, Load *load
 void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     // Note: Working with the components; [K, G+Dp; G^T+Dv^T, C] . [v,p]
-    FluidDynamicMaterial *mat = ( FluidDynamicMaterial * ) this->domain->giveMaterial(this->material);
+    FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     GaussPoint *gp;
     FloatMatrix B(6, 15), EdB, K(15,15), G, Dp, DvT, C, Ed, dN;

@@ -41,6 +41,7 @@
 #include "isolinearelasticmaterial.h"
 #include "mmaclosestiptransfer.h"
 #include "nonlocalmaterialext.h"
+#include "microplane.h"
 #include "contextioerr.h"
 
 namespace oofem {
@@ -69,7 +70,7 @@ MMAClosestIPTransfer MDM :: mapper2;
 MaterialStatus *
 MDM :: CreateStatus(GaussPoint *gp) const
 {
-    if ( gp->giveClassID() == MicroplaneClass ) {
+    if ( dynamic_cast< Microplane* >( gp ) ) {
         return NULL;
     } else {
         return new MDMStatus(1, this->nsd, this->numberOfMicroplanes, MicroplaneMaterial :: giveDomain(), gp);
@@ -97,8 +98,8 @@ MDM :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint
     FloatArray reducedStrain, strainPDC, stressPDC, stress;
     FloatArray tempDamageTensorEigenVals;
     FloatMatrix tempDamageTensor, tempDamageTensorEigenVec;
-    MDMStatus *status = ( MDMStatus * ) this->giveStatus(gp);
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
+    MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp, totalStrain,
                                                 atTime, VM_Total);
@@ -170,7 +171,7 @@ MDM :: computeDamageTensor(FloatMatrix &damageTensor, const FloatArray &totalStr
     // local or nonlocal
     if ( nonlocal ) {
         FloatMatrix nonlocalContribution, nonlocalDamageTensor(nsd, nsd);
-        MDMStatus *nonlocStatus, *status = ( MDMStatus * ) this->giveStatus(gp);
+        MDMStatus *nonlocStatus, *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
 
         this->buildNonlocalPointTable(gp);
         this->updateDomainBeforeNonlocAverage(atTime);
@@ -180,20 +181,20 @@ MDM :: computeDamageTensor(FloatMatrix &damageTensor, const FloatArray &totalStr
         std::list< localIntegrationRecord > :: iterator pos;
 
         for ( pos = list->begin(); pos != list->end(); ++pos ) {
-            nonlocStatus = ( MDMStatus * ) this->giveStatus( ( * pos ).nearGp );
+            nonlocStatus = static_cast< MDMStatus * >( this->giveStatus( pos->nearGp ) );
             nonlocStatus->giveLocalDamageTensorForAverage(nonlocalContribution);
 
             if ( ndc == 3 ) {
-                nonlocalDamageTensor.at(1, 1) += nonlocalContribution.at(1, 1) * ( * pos ).weight;
-                nonlocalDamageTensor.at(2, 2) += nonlocalContribution.at(2, 2) * ( * pos ).weight;
-                nonlocalDamageTensor.at(1, 2) += nonlocalContribution.at(1, 2) * ( * pos ).weight;
+                nonlocalDamageTensor.at(1, 1) += nonlocalContribution.at(1, 1) * pos->weight;
+                nonlocalDamageTensor.at(2, 2) += nonlocalContribution.at(2, 2) * pos->weight;
+                nonlocalDamageTensor.at(1, 2) += nonlocalContribution.at(1, 2) * pos->weight;
             } else {
-                nonlocalDamageTensor.at(1, 1) += nonlocalContribution.at(1, 1) * ( * pos ).weight;
-                nonlocalDamageTensor.at(2, 2) += nonlocalContribution.at(2, 2) * ( * pos ).weight;
-                nonlocalDamageTensor.at(3, 3) += nonlocalContribution.at(3, 3) * ( * pos ).weight;
-                nonlocalDamageTensor.at(1, 2) += nonlocalContribution.at(1, 2) * ( * pos ).weight;
-                nonlocalDamageTensor.at(1, 3) += nonlocalContribution.at(1, 3) * ( * pos ).weight;
-                nonlocalDamageTensor.at(2, 3) += nonlocalContribution.at(2, 3) * ( * pos ).weight;
+                nonlocalDamageTensor.at(1, 1) += nonlocalContribution.at(1, 1) * pos->weight;
+                nonlocalDamageTensor.at(2, 2) += nonlocalContribution.at(2, 2) * pos->weight;
+                nonlocalDamageTensor.at(3, 3) += nonlocalContribution.at(3, 3) * pos->weight;
+                nonlocalDamageTensor.at(1, 2) += nonlocalContribution.at(1, 2) * pos->weight;
+                nonlocalDamageTensor.at(1, 3) += nonlocalContribution.at(1, 3) * pos->weight;
+                nonlocalDamageTensor.at(2, 3) += nonlocalContribution.at(2, 3) * pos->weight;
             }
         }
 
@@ -219,7 +220,7 @@ MDM :: computeLocalDamageTensor(FloatMatrix &damageTensor, const FloatArray &tot
     double PsiOld, Psi;
     FloatArray damageVector(6);
     Microplane *mPlane;
-    MDMStatus *status = ( MDMStatus * ) this->giveStatus(gp);
+    MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
     ;
 
     // Loop over microplanes.
@@ -286,14 +287,13 @@ MDM :: computeLocalDamageTensor(FloatMatrix &damageTensor, const FloatArray &tot
 double
 MDM :: computeDamageOnPlane(GaussPoint *gp, Microplane *mplane, const FloatArray &strain)
 {
-    int i;
     double en, em, el, Ep, Efp, ParEpp;
     double Enorm = 0.0, sv = 0.0, answer = 0.0;
     double fmicroplane;
     IntArray mask;
-    FloatArray fullStrain, prevStress = ( ( StructuralMaterialStatus * ) this->giveStatus(gp))->giveStressVector();
+    FloatArray fullStrain, prevStress = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) )->giveStressVector();
     this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) ( gp->giveElement()->giveCrossSection() );
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     crossSection->giveFullCharacteristicVector(fullStrain, gp, strain);
     en = this->computeNormalStrainComponent(mplane, fullStrain);
@@ -306,7 +306,7 @@ MDM :: computeDamageOnPlane(GaussPoint *gp, Microplane *mplane, const FloatArray
 
     // compute trace of stressTensor
     if ( prevStress.isNotEmpty() ) {
-        for ( i = 1; i <= nsd; i++ ) {
+        for ( int i = 1; i <= nsd; i++ ) {
             if ( mask.at(i) ) {
                 sv += prevStress.at( mask.at(i) );
             }
@@ -386,7 +386,7 @@ MDM :: transformStrainToPDC(FloatArray &answer, FloatArray &strain,
     FloatArray fullStrain;
 
     if ( mdmMode == mdm_3d ) {
-        ( ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection() )
+        ( static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() ) )
         ->giveFullCharacteristicVector(fullStrain, gp, strain);
 
         answer.resize(6);
@@ -519,7 +519,7 @@ MDM :: transformStressFromPDC(FloatArray &answer, const FloatArray &stressPDC, c
                            + Nt(1, 2) * ( Nt(2, 1) * S(6)  + Nt(2, 2) * S(2)  + Nt(2, 3) * S(4) )
                            + Nt(1, 3) * ( Nt(2, 1) * S(5)  + Nt(2, 2) * S(4)  + Nt(2, 3) * S(3) );
 
-        ( ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection() )
+        ( static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() ) )
         ->giveReducedCharacteristicVector(answer, gp, fullAnswer);
     } else if ( mdmMode == mdm_2d ) {
         answer.resize(3);
@@ -543,7 +543,7 @@ MDM :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
                                    TimeStep *atTime)
 {
     FloatMatrix de;
-    MDMStatus *status = ( MDMStatus * ) this->giveStatus(gp);
+    MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
 
     this->giveLinearElasticMaterial()->giveCharacteristicMatrix(de, ReducedForm, TangentStiffness, gp, atTime);
     //answer = de;
@@ -563,7 +563,9 @@ MDM :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
     } else {
         IntArray mask;
         this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
-        answer.beSubMatrixOfSizeOf(de, mask, 6);
+        answer.resize(6,6);
+        answer.zero();
+        answer.assemble(de,mask,mask);
     }
 }
 
@@ -573,7 +575,7 @@ MDM :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
 void
 MDM :: applyDamageToStiffness(FloatMatrix &d, GaussPoint *gp)
 {
-    MDMStatus *status = ( MDMStatus * ) this->giveStatus(gp);
+    MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
 
     if ( mdmMode == mdm_3d ) {
         double psi1 = 0.0, psi2 = 0.0, psi3 = 0.0;
@@ -692,7 +694,7 @@ MDM :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatRe
 int
 MDM :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    MDMStatus *status = ( MDMStatus * ) this->giveStatus(aGaussPoint);
+    MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(aGaussPoint) );
 
     if ( type == IST_DamageTensor ) {
         // DamageTensor = I-Phi*Phi \approx I - Phi^{-1}*Phi*^{-1}
@@ -810,8 +812,7 @@ MDM :: giveIPValueType(InternalStateType type)
 int
 MDM :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
-    if ( ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ||
-        ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ) {
+    if ( ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ) {
         answer.resize(6);
         if ( this->ndc == 3 ) {
             answer.at(1) = 1;
@@ -849,8 +850,7 @@ MDM :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, Material
 int
 MDM :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
-    if ( ( type == IST_DamageTensor ) || ( type == IST_DamageTensor ) ||
-        ( type == IST_DamageTensor ) || ( type == IST_DamageTensor ) ) {
+    if ( type == IST_DamageTensor ) {
         return ndc;
     } else if ( ( type == IST_PrincipalDamageTensor ) || ( type == IST_PrincipalDamageTempTensor ) ) {
         return nsd;
@@ -883,34 +883,34 @@ MDM :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, this->tempDillatCoeff, IFT_MDM_talpha, "talpha"); // Macro
-    IR_GIVE_FIELD(ir, this->ParMd, IFT_MDM_parmd, "parmd"); // Macro
-    IR_GIVE_FIELD(ir, this->nonlocal, IFT_MDM_nonloc, "nonloc"); // Macro
+    IR_GIVE_FIELD(ir, this->tempDillatCoeff, IFT_MDM_talpha, "talpha");
+    IR_GIVE_FIELD(ir, this->ParMd, IFT_MDM_parmd, "parmd");
+    IR_GIVE_FIELD(ir, this->nonlocal, IFT_MDM_nonloc, "nonloc");
 
     if ( this->nonlocal ) {
-        IR_GIVE_FIELD(ir, R, IFT_MDM_r, "r"); // Macro
+        IR_GIVE_FIELD(ir, R, IFT_MDM_r, "r");
         if ( R < 0.0 ) {
             R = 0.0;
         }
 
         if ( ( ir->hasField(IFT_MDM_efp, "efp") ) && ( ir->hasField(IFT_MDM_ep, "ep") ) ) {
             // read raw_params if available
-            IR_GIVE_FIELD(ir, this->mdm_Efp, IFT_MDM_efp, "efp"); // Macro
-            IR_GIVE_FIELD(ir, this->mdm_Ep, IFT_MDM_ep, "ep"); // Macro
+            IR_GIVE_FIELD(ir, this->mdm_Efp, IFT_MDM_efp, "efp");
+            IR_GIVE_FIELD(ir, this->mdm_Ep, IFT_MDM_ep, "ep");
         } else if ( ( ir->hasField(IFT_MDM_gf, "gf") ) && ( ir->hasField(IFT_MDM_ft, "ft") ) ) {
-            IR_GIVE_FIELD(ir, this->Gf, IFT_MDM_gf, "gf"); // Macro
-            IR_GIVE_FIELD(ir, this->Ft, IFT_MDM_ft, "ft"); // Macro
+            IR_GIVE_FIELD(ir, this->Gf, IFT_MDM_gf, "gf");
+            IR_GIVE_FIELD(ir, this->Ft, IFT_MDM_ft, "ft");
         } else {
             _error("instanciateFrom: unknown set of parameters");
         }
     } else { // local case
         if ( ( ir->hasField(IFT_MDM_efp, "efp") ) && ( ir->hasField(IFT_MDM_ep, "ep") ) ) {
             // read raw_params if available
-            IR_GIVE_FIELD(ir, this->mdm_Efp, IFT_MDM_efp, "efp"); // Macro
-            IR_GIVE_FIELD(ir, this->mdm_Ep, IFT_MDM_ep, "ep"); // Macro
+            IR_GIVE_FIELD(ir, this->mdm_Efp, IFT_MDM_efp, "efp");
+            IR_GIVE_FIELD(ir, this->mdm_Ep, IFT_MDM_ep, "ep");
         } else if ( ( ir->hasField(IFT_MDM_gf, "gf") ) && ( ir->hasField(IFT_MDM_ep, "ep") ) ) {
-            IR_GIVE_FIELD(ir, this->Gf, IFT_MDM_gf, "gf"); // Macro
-            IR_GIVE_FIELD(ir, this->mdm_Ep, IFT_MDM_ep, "ep"); // Macro
+            IR_GIVE_FIELD(ir, this->Gf, IFT_MDM_gf, "gf");
+            IR_GIVE_FIELD(ir, this->mdm_Ep, IFT_MDM_ep, "ep");
         } else {
             _error("instanciateFrom: unknown set of parameters");
         }
@@ -918,10 +918,10 @@ MDM :: initializeFrom(InputRecord *ir)
 
     // read formulation
     int _val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_MDM_formulation, "formulation"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_MDM_formulation, "formulation");
     this->formulation = ( MDMFormulatrionType ) _val;
 
-    IR_GIVE_FIELD(ir, _val, IFT_MDM_mode, "mode"); // Macro
+    IR_GIVE_FIELD(ir, _val, IFT_MDM_mode, "mode");
     this->mdmMode     = ( MDMModeType ) _val;
 
     if ( this->mdmMode == mdm_3d ) {
@@ -935,7 +935,7 @@ MDM :: initializeFrom(InputRecord *ir)
 
 #ifdef MDM_MAPPING_DEBUG
     _val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_MDM_mapper, "mapper"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_MDM_mapper, "mapper");
     this->mapperType = ( MDMMapperType ) _val;
     OOFEM_LOG_INFO("MDM: using optional mapper %d\n", mapperType);
 #endif
@@ -1124,7 +1124,7 @@ MDM :: giveRawMDMParameters(double &Efp, double &Ep, const FloatArray &reducedSt
         Ep = this->mdm_Ep   = f / EModulus;
         return;
     } else { // local model
-        StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
+        StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
         FloatArray strainVector, principalStrain;
         FloatMatrix dirs;
         double h;
@@ -1275,7 +1275,7 @@ MDM :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp,
      * corresponding status variable.
      * This service is declared at StructuralNonlocalMaterial level.
      */
-    MDMStatus *status = ( MDMStatus * ) this->giveStatus(gp);
+    MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
     FloatMatrix tempDamageTensor;
 
     this->computeLocalDamageTensor(tempDamageTensor, strainVector, gp, atTime);
@@ -1305,7 +1305,7 @@ MDM :: MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tStep)
     int result = 0;
     FloatArray intVal, strainIncr(3);
     IntArray toMap(1);
-    MDMStatus *status = ( MDMStatus * ) this->giveStatus(gp);
+    MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
 
     toMap.at(1) = ( int ) IST_MicroplaneDamageValues;
 
@@ -1381,7 +1381,7 @@ MDM :: MMI_update(GaussPoint *gp,  TimeStep *tStep, FloatArray *estrain)
 {
     int result = 1;
     FloatArray intVal, strain;
-    MDMStatus *status = ( MDMStatus * ) this->giveStatus(gp);
+    MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
 
     // now update all internal vars accordingly
     strain = status->giveStrainVector();
@@ -1410,9 +1410,9 @@ Interface *
 MDM :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return ( StructuralNonlocalMaterialExtensionInterface * ) this;
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
     } else if ( type == MaterialModelMapperInterfaceType ) {
-        return ( MaterialModelMapperInterface * ) this;
+        return static_cast< MaterialModelMapperInterface * >( this );
     } else {
         return NULL;
     }
@@ -1423,7 +1423,7 @@ MDM :: giveInterface(InterfaceType type)
 int
 MDM :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
 {
-    MDMStatus *status = ( MDMStatus * ) this->giveStatus(ip);
+    MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(ip) );
 
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(stepN);
@@ -1435,7 +1435,7 @@ int
 MDM :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
 {
     int result;
-    MDMStatus *status = ( MDMStatus * ) this->giveStatus(ip);
+    MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(ip) );
     FloatMatrix _LocalDamageTensorForAverage;
 
     result = _LocalDamageTensorForAverage.unpackFromCommBuffer(buff);
@@ -1468,12 +1468,12 @@ MDM :: predictRelativeComputationalCost(GaussPoint *gp)
 
     if ( nsd == 2 ) {
         cost = 1.5;
-    } else if ( nsd == 3 )  {
+    } else if ( nsd == 3 ) {
         cost = 1.8;
     }
 
     if ( nonlocal ) {
-        MDMStatus *status = ( MDMStatus * ) this->giveStatus(gp);
+        MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
         int size = status->giveIntegrationDomainList()->size();
         // just a guess (size/10) found optimal
         // cost *= (1.0 + (size/10)*0.5);
@@ -1484,21 +1484,6 @@ MDM :: predictRelativeComputationalCost(GaussPoint *gp)
 }
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

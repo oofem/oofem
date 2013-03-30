@@ -67,27 +67,27 @@ Interface *
 TrPlaneStress2d :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return ( NodalAveragingRecoveryModelInterface * ) this;
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return ( SpatialLocalizerInterface * ) this;
+        return static_cast< SpatialLocalizerInterface * >( this );
     } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return ( DirectErrorIndicatorRCInterface * ) this;
+        return static_cast< DirectErrorIndicatorRCInterface * >( this );
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return ( EIPrimaryUnknownMapperInterface * ) this;
+        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
-        return ( ZZErrorEstimatorInterface * ) this;
+        return static_cast< ZZErrorEstimatorInterface * >(this );
     } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return ( ZZRemeshingCriteriaInterface * ) this;
+        return static_cast< ZZRemeshingCriteriaInterface * >( this );
     } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
-        return ( MMAShapeFunctProjectionInterface * ) this;
+        return static_cast< MMAShapeFunctProjectionInterface * >( this );
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
-        return ( HuertaErrorEstimatorInterface * ) this;
+        return static_cast< HuertaErrorEstimatorInterface * >( this );
     } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return ( HuertaRemeshingCriteriaInterface * ) this;
+        return static_cast< HuertaRemeshingCriteriaInterface * >( this );
     }
 
     return NULL;
@@ -306,7 +306,7 @@ void
 TrPlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     FloatArray n;
-    this->interp.edgeEvalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.edgeEvalN( n, 1, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     answer.resize(2, 4);
     answer.at(1, 1) = answer.at(2, 2) = n.at(1);
     answer.at(1, 3) = answer.at(2, 4) = n.at(2);
@@ -424,14 +424,11 @@ TrPlaneStress2d :: initializeFrom(InputRecord *ir)
 
     this->NLStructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_TrPlaneStress2d_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
     if ( numberOfGaussPoints != 1 ) {
         numberOfGaussPoints = 1;
     }
-
-    // set - up Gaussian integration points
-    this->computeGaussPoints();
 
     return IRRT_OK;
 }
@@ -475,10 +472,9 @@ TrPlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCr
         // (standard or modified - no difference for constant-strain element)
 
         // nodal coordinates and coordinates of the element center
-        int i;
         FloatArray x(3), y(3);
         double cx = 0., cy = 0.;
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             x.at(i) = giveNode(i)->giveCoordinate(1);
             y.at(i) = giveNode(i)->giveCoordinate(2);
             cx += x.at(i);
@@ -490,7 +486,7 @@ TrPlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCr
 
         // nodal values of function phi (0 or 1)
         FloatArray phi(3);
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             if ( ( ( x.at(i) - cx ) * normalToCrackPlane.at(1) + ( y.at(i) - cy ) * normalToCrackPlane.at(2) ) > 0. ) {
                 phi.at(i) = 1.;
             } else {
@@ -511,14 +507,14 @@ TrPlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCr
         // gradient of function phi
         FloatArray gradPhi(2);
         gradPhi.zero();
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             gradPhi.at(1) += phi.at(i) * dnx.at(i, 1);
             gradPhi.at(2) += phi.at(i) * dnx.at(i, 2);
         }
 
         // scalar product of the gradient with crack normal
         double dPhidN = 0.;
-        for ( i = 1; i <= 2; i++ ) {
+        for ( int i = 1; i <= 2; i++ ) {
             dPhidN += gradPhi.at(i) * normalToCrackPlane.at(i);
         }
 
@@ -800,10 +796,9 @@ void TrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
 void
 TrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
 {
-    int i;
     WCRec l [ 2 ];
     GraphicObj *tr;
-    StructuralMaterial *mat = ( StructuralMaterial * ) this->giveMaterial();
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
     GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
@@ -819,7 +814,7 @@ TrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
         double ax, ay, bx, by, norm, xc, yc, length;
         FloatArray crackDir;
 
-        for ( i = 1; i <= numberOfGaussPoints; i++ ) {
+        for ( int i = 1; i <= numberOfGaussPoints; i++ ) {
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(i - 1);
             if ( mat->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
@@ -1107,7 +1102,8 @@ TrPlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 
 
 int
-TrPlaneStress2d :: SpatialLocalizerI_containsPoint(const FloatArray &coords) {
+TrPlaneStress2d :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
+{
     FloatArray lcoords;
     return this->computeLocalCoordinates(lcoords, coords);
 }
@@ -1140,7 +1136,8 @@ TrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Floa
 
 
 double
-TrPlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize() {
+TrPlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
+{
     return sqrt(this->giveArea() * 2.0);
 }
 
@@ -1183,7 +1180,7 @@ TrPlaneStress2d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArr
                                                                         coordType ct, nodalValContainerType &list,
                                                                         InternalStateType type, TimeStep *tStep)
 {
-    int i, n;
+    int n;
     double l1, l2, l3;
     FloatArray lcoords;
     if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
@@ -1198,7 +1195,7 @@ TrPlaneStress2d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArr
     n = list.at(1)->giveSize();
     answer.resize(n);
 
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= n; i++ ) {
         answer.at(i) = l1 * list.at(1)->at(i) + l2 *list.at(2)->at(i) + l3 *list.at(3)->at(i);
     }
 }

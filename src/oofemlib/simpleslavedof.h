@@ -37,7 +37,6 @@
 
 #include "dof.h"
 #include "compiler.h"
-#include "dictionr.h"
 #include "error.h"
 
 namespace oofem {
@@ -92,6 +91,7 @@ public:
     /// Destructor.
     virtual ~SimpleSlaveDof() { }
 
+    virtual dofType giveDofType() { return DT_simpleSlave; }
     virtual const char *giveClassName() const { return "SimpleSlaveDof"; }
     virtual classType giveClassID() const { return SimpleSlaveDofClass; }
     /**

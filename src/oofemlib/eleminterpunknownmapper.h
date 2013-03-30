@@ -43,7 +43,6 @@ class Domain;
 class Element;
 class TimeStep;
 
-
 /**
  * The class implementing the primary unknown mapper using element interpolation functions.
  * The basic task is to map the primary unknowns from one (old) mesh to the new one.
@@ -52,8 +51,6 @@ class TimeStep;
  */
 class EIPrimaryUnknownMapper : public PrimaryUnknownMapper
 {
-protected:
-
 public:
     /// Constructor
     EIPrimaryUnknownMapper();

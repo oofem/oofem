@@ -42,7 +42,7 @@ IRResultType
 HydratingIsoHeatMaterial :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                            // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
     int value;
     double dvalue;
 
@@ -52,7 +52,7 @@ HydratingIsoHeatMaterial :: initializeFrom(InputRecord *ir)
     HydrationModelInterface :: initializeFrom(ir);
 
     dvalue = -2.;
-    IR_GIVE_OPTIONAL_FIELD(ir, dvalue, IFT_HydratingIsoHeatMaterial_hydration, "hydration"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, dvalue, IFT_HydratingIsoHeatMaterial_hydration, "hydration");
     if ( dvalue >= 0. ) {
         hydration = 1;
     } else {
@@ -62,7 +62,7 @@ HydratingIsoHeatMaterial :: initializeFrom(InputRecord *ir)
     if ( hydration ) {
         // mixture type: 1 - mtLafarge, 2 - mtHuber, 3 - mtC60
         value = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HydratingIsoHeatMaterial_mix, "mix"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HydratingIsoHeatMaterial_mix, "mix");
         if ( !value ) {
             value = mtLafarge;
         }
@@ -140,7 +140,7 @@ HydratingIsoHeatMaterial :: computeInternalSourceVector(FloatArray &val, GaussPo
 void
 HydratingIsoHeatMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime)
 {
-    TransportMaterialStatus *ms = ( TransportMaterialStatus * ) this->giveStatus(gp);
+    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     FloatArray aux;
     if ( ms ) {
         ms->letTempStateVectorBe(vec);
@@ -192,7 +192,7 @@ HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, Gauss
     } else if ( !hydrationLHS ) {
         answer = 0;
     } else if ( hydrationModel ) { //!!! better via HydrationModelInterface
-        vec = ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveTempStateVector();
+        vec = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveTempStateVector();
         if ( vec.giveSize() < 2 ) {
             vec.resize(2);
             vec.at(2) = 1.; // saturated if undefined
@@ -314,7 +314,7 @@ Interface *
 HydratingTransportMaterialStatus :: giveInterface(InterfaceType type)
 {
     if ( type == HydrationModelStatusInterfaceType ) {
-        return ( HydrationModelStatusInterface * ) this;
+        return static_cast< HydrationModelStatusInterface * >( this );
     } else {
         return NULL;
     }

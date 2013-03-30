@@ -64,14 +64,12 @@ Element :: Element(int n, Domain *aDomain) :
     numberOfDofMans    = 0;
     numberOfIntegrationRules = 0;
     activityLtf = 0;
-    locationArray      = NULL;
     integrationRulesArray  = NULL;
 }
 
 
 Element :: ~Element()
 {
-    delete locationArray;
     if ( integrationRulesArray ) {
         for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
             delete integrationRulesArray [ i ];
@@ -197,28 +195,28 @@ Element :: computeVectorOfPrescribed(EquationID ut, ValueModeType mode, TimeStep
 // (e.g., the prescribed displacement) of the dofs of the receiver's
 // nodes. Puts 0 at each free dof.
 {
-    int i, j, k, size, nDofs;
+    int k, nDofs;
     IntArray dofIDMask, dofMask;
     FloatMatrix G2L;
     FloatArray vec;
 
-    answer.resize( size = this->computeNumberOfGlobalDofs(ut) );
+    answer.resize( this->computeNumberOfGlobalDofs(ut) );
 
     k = 0;
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
         this->giveDofManDofIDMask(i, ut, dofIDMask);
         this->giveDofManager(i)->givePrescribedUnknownVector(vec, dofIDMask, mode, stepN);
         nDofs = vec.giveSize();
-        for ( j = 1; j <= nDofs; j++ ) {
+        for ( int j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
         }
     }
 
-    for ( i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
+    for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
         this->giveInternalDofManDofIDMask(i, ut, dofIDMask);
         this->giveInternalDofManager(i)->givePrescribedUnknownVector(vec, dofIDMask, mode, stepN);
         nDofs = vec.giveSize();
-        for ( j = 1; j <= nDofs; j++ ) {
+        for ( int j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
         }
     }
@@ -239,25 +237,21 @@ Element :: computeNumberOfGlobalDofs(EquationID eid)
 int
 Element :: computeNumberOfPrimaryMasterDofs(EquationID ut)
 {
-    if ( this->locationArray ) {
-        return this->locationArray->giveSize();
-    } else {
-        int i, answer = 0;
-        IntArray nodeDofIDMask, dofMask;
+    int i, answer = 0;
+    IntArray nodeDofIDMask, dofMask;
 
-        for ( i = 1; i <= numberOfDofMans; i++ ) {
-            this->giveDofManDofIDMask(i, ut, nodeDofIDMask);
-            this->giveDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
-            answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
-        }
-
-        for ( i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
-            this->giveInternalDofManDofIDMask(i, ut, nodeDofIDMask);
-            this->giveInternalDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
-            answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
-        }
-        return answer;
+    for ( i = 1; i <= numberOfDofMans; i++ ) {
+        this->giveDofManDofIDMask(i, ut, nodeDofIDMask);
+        this->giveDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
+        answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
     }
+
+    for ( i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
+        this->giveInternalDofManDofIDMask(i, ut, nodeDofIDMask);
+        this->giveInternalDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
+        answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
+    }
+    return answer;
 }
 
 
@@ -370,67 +364,56 @@ Element :: giveBoundaryLoadArray()
 
 
 void
-Element :: giveLocationArray(IntArray &locationArray, EquationID eid, const UnknownNumberingScheme &s) const
+Element :: giveLocationArray(IntArray &locationArray, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIdArray) const
 // Returns the location array of the receiver. This array is obtained by
 // simply appending the location array of every node of the receiver.
 {
-    if ( s.isDefault() && this->locationArray ) {
-        locationArray = * this->locationArray;
-        return;
-    } else {
-        IntArray dofIDMask;
-        IntArray nodalArray;
-        locationArray.resize(0);
-        for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
-            this->giveDofManDofIDMask(i, eid, dofIDMask);
-            this->giveDofManager(i)->giveLocationArray(dofIDMask, nodalArray, s);
-            locationArray.followedBy(nodalArray);
+    IntArray dofIDMask, masterDofIDs;
+    IntArray nodalArray;
+    locationArray.resize(0);
+    if (dofIdArray) dofIdArray->resize(0);
+    for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
+        this->giveDofManDofIDMask(i, eid, dofIDMask);
+        this->giveDofManager(i)->giveLocationArray(dofIDMask, nodalArray, s);
+        locationArray.followedBy(nodalArray);
+        if (dofIdArray) {
+            this->giveDofManager(i)->giveMasterDofIDArray(dofIDMask, masterDofIDs);
+            dofIdArray->followedBy(masterDofIDs);
         }
-        for ( int i = 1; i <= this->giveNumberOfInternalDofManagers(); i++ ) {
-            this->giveInternalDofManDofIDMask(i, eid, dofIDMask);
-            this->giveInternalDofManager(i)->giveLocationArray(dofIDMask, nodalArray, s);
-            locationArray.followedBy(nodalArray);
+    }
+    for ( int i = 1; i <= this->giveNumberOfInternalDofManagers(); i++ ) {
+        this->giveInternalDofManDofIDMask(i, eid, dofIDMask);
+        this->giveInternalDofManager(i)->giveLocationArray(dofIDMask, nodalArray, s);
+        locationArray.followedBy(nodalArray);
+        if (dofIdArray) {
+            this->giveDofManager(i)->giveMasterDofIDArray(dofIDMask, masterDofIDs);
+            dofIdArray->followedBy(masterDofIDs);
         }
     }
 }
 
 
 void
-Element :: giveBoundaryLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s)
+Element :: giveBoundaryLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIdArray)
 // Returns the location array of the receiver. This array is obtained by
 // simply appending the location array of every node on the boundary of the receiver. Consistent numbering with the interpolator.
 {
     IntArray bNodes;
-    IntArray dofIDMask;
+    IntArray dofIDMask, masterDofIDs;
     IntArray nodalArray;
 
     this->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
     locationArray.resize(0);
+    if (dofIdArray) dofIdArray->resize(0);
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
         this->giveDofManDofIDMask(bNodes.at(i), eid, dofIDMask);
         this->giveDofManager(bNodes.at(i))->giveLocationArray(dofIDMask, nodalArray, s);
         locationArray.followedBy(nodalArray);
+        if (dofIdArray) {
+            this->giveDofManager(bNodes.at(i))->giveMasterDofIDArray(dofIDMask, masterDofIDs);
+            dofIdArray->followedBy(masterDofIDs);
+        }
     }
-}
-
-
-void
-Element :: invalidateLocationArray()
-{
-    // invalidates current location array in receiver
-    // next call of giveLocationArray() will assemble
-    // new location array
-    // used mainly for model supporting dynamic changes of
-    // static system
-
-
-    // force assembling
-    // of new location array
-    if ( locationArray ) {
-        delete locationArray;
-    }
-
-    locationArray = NULL;
 }
 
 
@@ -580,29 +563,26 @@ Element :: initializeFrom(InputRecord *ir)
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Instanciating element ",number);
 #  endif
-    IR_GIVE_FIELD(ir, material, IFT_Element_mat, "mat"); // Macro
+    IR_GIVE_FIELD(ir, material, IFT_Element_mat, _IFT_Element_mat);
 
-    IR_GIVE_FIELD(ir, crossSection, IFT_Element_crosssect, "crosssect"); // Macro
+    IR_GIVE_FIELD(ir, crossSection, IFT_Element_crosssect, _IFT_Element_crosssect);
 
-    IR_GIVE_FIELD(ir, dofManArray, IFT_Element_nodes, "nodes"); // Macro
-
-    //sideArray.resize(0);
-    //IR_GIVE_OPTIONAL_FIELD (ir, sideArray, IFT_Element_sides, "sides"); // Macro
+    IR_GIVE_FIELD(ir, dofManArray, IFT_Element_nodes, _IFT_Element_nodes);
 
     bodyLoadArray.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, bodyLoadArray, IFT_Element_bodyload, "bodyloads"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, bodyLoadArray, IFT_Element_bodyload, _IFT_Element_bodyload);
 
     boundaryLoadArray.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, boundaryLoadArray, IFT_Element_boundaryload, "boundaryloads"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, boundaryLoadArray, IFT_Element_boundaryload, _IFT_Element_boundaryload);
 
     elemLocalCS.resize(0, 0);
 
-    if ( ir->hasField(IFT_Element_lcs, "lcs") ) { //local coordinate system
+    if ( ir->hasField(IFT_Element_lcs, _IFT_Element_lcs) ) { //local coordinate system
         double n1 = 0.0, n2 = 0.0;
         int j;
         FloatArray triplets;
         triplets.resize(0);
-        IR_GIVE_OPTIONAL_FIELD(ir, triplets, IFT_Element_lcs, "lcs");
+        IR_GIVE_OPTIONAL_FIELD(ir, triplets, IFT_Element_lcs, _IFT_Element_lcs);
         elemLocalCS.resize(3, 3);
         for ( j = 1; j <= 3; j++ ) {
             elemLocalCS.at(j, 1) = triplets.at(j);
@@ -627,17 +607,16 @@ Element :: initializeFrom(InputRecord *ir)
 
 #ifdef __PARALLEL_MODE
     partitions.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, partitions, IFT_Element_partitions, "partitions"); // Macro
-    // if (hasString (initString, "shared")) parallel_mode = Element_shared;
-    if ( ir->hasField(IFT_Element_remote, "remote") ) {
+    IR_GIVE_OPTIONAL_FIELD(ir, partitions, IFT_Element_partitions, _IFT_Element_partitions);
+    if ( ir->hasField(IFT_Element_remote, _IFT_Element_remote) ) {
         parallel_mode = Element_remote;
     } else {
         parallel_mode = Element_local;
     }
 
 #endif
-    
-    IR_GIVE_OPTIONAL_FIELD(ir, activityLtf, IFT_Element_activityltf, "activityltf"); // Macro
+
+    IR_GIVE_OPTIONAL_FIELD(ir, activityLtf, IFT_Element_activityltf, _IFT_Element_activityltf);
 
     return IRRT_OK;
 }
@@ -687,19 +666,12 @@ Element :: isActivated(TimeStep *tStep)
     }
 }
 
-
-
 void
 Element :: initForNewStep()
 // initializes receiver to new time step or can be used
 // if current time step must be restarted
-//
-// call material->initGpForNewStep() for all GPs.
-//
 {
-    int i;
-
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         integrationRulesArray [ i ]->initForNewStep();
     }
 }
@@ -712,7 +684,7 @@ contextIOResultType Element :: saveContext(DataStream *stream, ContextMode mode,
 //
 {
     contextIOResultType iores;
-    int i, _val;
+    int _val;
 
     if ( ( iores = FEMComponent :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -736,7 +708,7 @@ contextIOResultType Element :: saveContext(DataStream *stream, ContextMode mode,
             // send global numbers instead of local ones
             int s = dofManArray.giveSize();
             IntArray globDN(s);
-            for ( i = 1; i <= s; i++ ) {
+            for ( int i = 1; i <= s; i++ ) {
                 globDN.at(i) = this->giveDofManager(i)->giveGlobalNumber();
             }
 
@@ -767,7 +739,7 @@ contextIOResultType Element :: saveContext(DataStream *stream, ContextMode mode,
             THROW_CIOERR(CIO_IOERR);
         }
 
-        for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+        for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
             _val = integrationRulesArray [ i ]->giveClassID();
             if ( !stream->write(& _val, 1) ) {
                 THROW_CIOERR(CIO_IOERR);
@@ -792,7 +764,7 @@ contextIOResultType Element :: saveContext(DataStream *stream, ContextMode mode,
 #endif
     }
 
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         if ( ( iores = integrationRulesArray [ i ]->saveContext(stream, mode, obj) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -809,7 +781,7 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
 //
 {
     contextIOResultType iores;
-    int i, _nrules;
+    int _nrules;
 
     if ( ( iores = FEMComponent :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -846,7 +818,7 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
 
         // restore integration rules
         IntArray dtypes(_nrules);
-        for ( i = 1; i <= _nrules; i++ ) {
+        for ( int i = 1; i <= _nrules; i++ ) {
             if ( !stream->read(& dtypes.at(i), 1) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
@@ -855,7 +827,7 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
         if ( _nrules != numberOfIntegrationRules ) {
             // delete old int rule array
             if ( integrationRulesArray ) {
-                for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+                for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
                     delete integrationRulesArray [ i ];
                 }
 
@@ -864,13 +836,13 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
 
             // AND ALLOCATE NEW ONE
             integrationRulesArray = new IntegrationRule * [ _nrules ];
-            for ( i = 0; i < _nrules; i++ ) {
+            for ( int i = 0; i < _nrules; i++ ) {
                 integrationRulesArray [ i ] = CreateUsrDefIRuleOfType( ( classType ) dtypes(i), i + 1, this );
             }
 
             numberOfIntegrationRules = _nrules;
         } else {
-            for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+            for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
                 if ( integrationRulesArray [ i ]->giveClassID() != dtypes(i) ) {
                     delete integrationRulesArray [ i ];
                     integrationRulesArray [ i ] = CreateUsrDefIRuleOfType( ( classType ) dtypes(i), i + 1, this );
@@ -897,7 +869,7 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
     }
 
 
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         if ( ( iores = integrationRulesArray [ i ]->restoreContext(stream, mode, this) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -912,12 +884,11 @@ Element :: computeVolumeAreaOrLength()
 // the element computes its volume, area or length
 // (depending on the spatial dimension of that element)
 {
-    int i;
     GaussPoint *gp;
     double answer = 0.;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     if ( iRule ) {
-        for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
             answer += this->computeVolumeAround(gp);
         }
@@ -1185,6 +1156,8 @@ Element :: giveSpatialDimension(void) const
     case EGT_tetra_2:
     case EGT_hexa_1:
     case EGT_hexa_2:
+    case EGT_wedge_1:
+    case EGT_wedge_2:
         return 3;
 
     case EGT_Composite:
@@ -1220,6 +1193,10 @@ Element :: giveNumberOfBoundarySides(void) const
     case EGT_tetra_2:
         return 4;
 
+    case EGT_wedge_1:
+    case EGT_wedge_2:
+        return 5;
+
     case EGT_hexa_1:
     case EGT_hexa_2:
         return 6;
@@ -1238,18 +1215,18 @@ Element :: giveNumberOfBoundarySides(void) const
 int
 Element :: adaptiveMap(Domain *oldd, TimeStep *tStep)
 {
-    int i, j, result = 1;
+    int result = 1;
     IntegrationRule *iRule;
-    MaterialModelMapperInterface *interface = ( MaterialModelMapperInterface * )
-                                              this->giveMaterial()->giveInterface(MaterialModelMapperInterfaceType);
+    MaterialModelMapperInterface *interface = static_cast< MaterialModelMapperInterface * >
+                                              ( this->giveMaterial()->giveInterface(MaterialModelMapperInterfaceType) );
 
     if ( !interface ) {
         return 0;
     }
 
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
             result &= interface->MMI_map(iRule->getIntegrationPoint(j), oldd, tStep);
         }
     }
@@ -1261,18 +1238,18 @@ Element :: adaptiveMap(Domain *oldd, TimeStep *tStep)
 int
 Element :: adaptiveFinish(TimeStep *tStep)
 {
-    int i, j, result = 1;
+    int result = 1;
     IntegrationRule *iRule;
-    MaterialModelMapperInterface *interface = ( MaterialModelMapperInterface * )
-                                              this->giveMaterial()->giveInterface(MaterialModelMapperInterfaceType);
+    MaterialModelMapperInterface *interface = static_cast< MaterialModelMapperInterface * >
+                                              ( this->giveMaterial()->giveInterface(MaterialModelMapperInterfaceType) );
 
     if ( !interface ) {
         return 0;
     }
 
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
             result &= interface->MMI_finish(tStep);
         }
     }
@@ -1284,8 +1261,7 @@ Element :: adaptiveFinish(TimeStep *tStep)
 void
 Element :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
-    int i;
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
         dofManArray.at(i) = f(dofManArray.at(i), ERS_DofManager);
     }
 }
@@ -1295,12 +1271,12 @@ Element :: updateLocalNumbering(EntityRenumberingFunctor &f)
 int
 Element :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN)
 {
-    int i, j, result = 1;
+    int result = 1;
     IntegrationRule *iRule;
 
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
             result &= this->giveCrossSection()->packUnknowns( buff, stepN, iRule->getIntegrationPoint(j) );
         }
     }
@@ -1312,12 +1288,12 @@ Element :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN)
 int
 Element :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN)
 {
-    int i, j, result = 1;
+    int result = 1;
     IntegrationRule *iRule;
 
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
             result &= this->giveCrossSection()->unpackAndUpdateUnknowns( buff, stepN, iRule->getIntegrationPoint(j) );
         }
     }
@@ -1329,12 +1305,12 @@ Element :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN)
 int
 Element :: estimatePackSize(CommunicationBuffer &buff)
 {
-    int i, j, result = 0;
+    int result = 0;
     IntegrationRule *iRule;
 
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
             result += this->giveCrossSection()->estimatePackSize( buff, iRule->getIntegrationPoint(j) );
         }
     }
@@ -1346,11 +1322,11 @@ Element :: estimatePackSize(CommunicationBuffer &buff)
 double
 Element :: predictRelativeComputationalCost()
 {
-    int j, nip;
+    int nip;
     double wgt = 0;
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     nip = iRule->getNumberOfIntegrationPoints();
-    for ( j = 0; j < nip; j++ ) {
+    for ( int j = 0; j < nip; j++ ) {
         wgt += this->giveCrossSection()->predictRelativeComputationalCost( iRule->getIntegrationPoint(j) );
     }
 

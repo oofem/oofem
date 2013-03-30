@@ -58,18 +58,18 @@ IRResultType
 NLTransientTransportProblem :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     NonStationaryTransportProblem :: initializeFrom(ir);
     int val = 30;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NLTransientTransportProblem_nsmax, "nsmax"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NLTransientTransportProblem_nsmax, "nsmax");
     nsmax = val;
 
-    IR_GIVE_FIELD(ir, rtol, IFT_NLTransientTransportProblem_rtol, "rtol"); // Macro
+    IR_GIVE_FIELD(ir, rtol, IFT_NLTransientTransportProblem_rtol, "rtol");
 
     NR_Mode = nrsolverModifiedNRM;
     MANRMSteps = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, MANRMSteps, IFT_NLTransientTransportProblem_manrmsteps, "manrmsteps"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, MANRMSteps, IFT_NLTransientTransportProblem_manrmsteps, "manrmsteps");
     if ( MANRMSteps > 0 ) {
         NR_Mode = nrsolverAccelNRM;
     } else {
@@ -80,8 +80,8 @@ NLTransientTransportProblem :: initializeFrom(InputRecord *ir)
 }
 
 
-
-void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
+void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
+{
     // creates system of governing eq's and solves them at given time step
     // first assemble problem at current time step
 
@@ -265,7 +265,6 @@ double NLTransientTransportProblem ::  giveUnknownComponent(EquationID type, Val
 void
 NLTransientTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 {
-    int j;
     Domain *domain = this->giveDomain(1);
 
     NonStationaryTransportProblem :: applyIC(stepWhenIcApply);
@@ -274,8 +273,8 @@ NLTransientTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
     int nelem = domain->giveNumberOfElements();
     TransportElement *element;
 
-    for ( j = 1; j <= nelem; j++ ) {
-        element = ( TransportElement * ) domain->giveElement(j);
+    for ( int j = 1; j <= nelem; j++ ) {
+        element = static_cast< TransportElement * >( domain->giveElement(j) );
         element->updateInternalState(stepWhenIcApply);
         element->updateYourself(stepWhenIcApply);
     }
@@ -284,7 +283,7 @@ NLTransientTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 void
 NLTransientTransportProblem :: createPreviousSolutionInDofUnknownsDictionary(TimeStep *tStep) {
     //Copy the last known temperature to be a previous solution
-    int i, nnodes, inode, nDofs;
+    int nnodes, nDofs;
     double val;
     Domain *domain;
     Dof *iDof;
@@ -294,10 +293,10 @@ NLTransientTransportProblem :: createPreviousSolutionInDofUnknownsDictionary(Tim
         domain = this->giveDomain(idomain);
         nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( inode = 1; inode <= nnodes; inode++ ) {
+            for ( int inode = 1; inode <= nnodes; inode++ ) {
                 node = domain->giveDofManager(inode);
                 nDofs = node->giveNumberOfDofs();
-                for ( i = 1; i <= nDofs; i++ ) {
+                for ( int i = 1; i <= nDofs; i++ ) {
                     iDof = node->giveDof(i);
                     val = iDof->giveUnknown(EID_ConservationEquation, VM_Total, tStep); //get number on hash=0(current)
                     iDof->updateUnknownsDictionary(tStep->givePreviousStep(), EID_MomentumBalance, VM_Total, val);

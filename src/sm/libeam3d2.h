@@ -38,6 +38,11 @@
 #include "nlstructuralelement.h"
 #include "fiberedcs.h"
 
+///@name Input fields for LIBeam3d2
+//@{
+#define _IFT_LIBeam3d2_refnode "refnode"
+//@}
+
 namespace oofem {
 /**
  * This class implements a 3-dimensional Linear Isoparametric

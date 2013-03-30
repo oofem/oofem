@@ -43,6 +43,12 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
+///@name Input fields for PrescribedTensor
+//@{
+#define _IFT_PrescribedGradient_centercoords "ccoord"
+#define _IFT_PrescribedGradient_gradient "gradient"
+//@}
+
 namespace oofem {
 /**
  * Prescribes @f$ v_i = d_{ij}(x_j-\bar{x}_j) @f$ or @f$ s = d_{1j}(x_j - \bar{x}_j) @f$

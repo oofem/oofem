@@ -76,6 +76,7 @@ class MesherInterface;
 class EnrichmentItem;
 class EnrichmentFunction;
 class BasicGeometry;
+class EnrichmentDomain;
 class Patch;
 class NodalRecoveryModel;
 class LoadBalancerMonitor;
@@ -293,7 +294,7 @@ DofManager *CreateUsrDefDofManagerOfType(classType type, int num, Domain *d);
  * @param d    Dofmanager to which new dof belongs.
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
-Dof *CreateUsrDefDofOfType(classType type, int num, DofManager *d);
+Dof *CreateUsrDefDofOfType(dofType type, int num, DofManager *d);
 /**
  * Creates new instance of user defined boundary condition  corresponding to given id.
  * @param type Id determining the type of new instance.
@@ -349,7 +350,7 @@ EnrichmentFunction *CreateUsrDefEnrichmentFunction(classType type, int num, Doma
  */
 BasicGeometry *CreateUsrDefGeometry(const char *name);
 BasicGeometry *CreateUsrDefGeometry(classType type);
- 
+EnrichmentDomain *CreateUsrDefEnrichmentDomain(const char *name);
 /**
  * Creates new instance of patch.
  * @param ptype Id determining the type of new instance.

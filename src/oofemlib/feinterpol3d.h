@@ -57,22 +57,25 @@ public:
     
     virtual void boundaryGiveNodes(IntArray &answer, int boundary)
     { this->computeLocalSurfaceMapping(answer, boundary); }
-    virtual void boundaryEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { this->surfaceEvalN(answer, lcoords, cellgeo); }
+    virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { this->surfaceEvalN(answer, boundary, lcoords, cellgeo); }
     virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { return this->surfaceEvalNormal(answer, boundary, lcoords, cellgeo); }
     virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { return this->surfaceGiveTransformationJacobian(boundary, lcoords, cellgeo); }
+    virtual void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { return this->surfaceLocal2global(answer, boundary, lcoords, cellgeo); }
 
     /**@name Edge interpolation services */
     //@{
     /**
      * Evaluates the array of edge interpolation functions (shape functions) at given point.
      * @param answer Contains resulting array of evaluated interpolation functions.
+     * @param iedge Edge number.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
      */
-    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    virtual void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
      * Evaluates the matrix of derivatives of edge interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -119,12 +122,12 @@ public:
 
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) = 0;
     void computeEdgeMapping(IntArray &edgeNodes, IntArray &elemNodes, int iedge) {
-        int i, size;
+        int size;
         IntArray ln;
         this->computeLocalEdgeMapping(ln, iedge);
         size = ln.giveSize();
         edgeNodes.resize(size);
-        for ( i = 1; i <= size; i++ ) { edgeNodes.at(i) = elemNodes.at( ln.at(i) ); }
+        for ( int i = 1; i <= size; i++ ) { edgeNodes.at(i) = elemNodes.at( ln.at(i) ); }
     }
     //@}
 
@@ -133,10 +136,11 @@ public:
     /**
      * Evaluates the array of edge interpolation functions (shape functions) at given point.
      * @param answer Contains resulting array of evaluated interpolation functions.
+     * @param isurf Surface number.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
      */
-    virtual void surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    virtual void surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
      * Evaluates the matrix of derivatives of edge interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined).

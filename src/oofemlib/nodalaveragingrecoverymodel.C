@@ -121,8 +121,8 @@ NodalAveragingRecoveryModel :: recoverValues(InternalStateType type, TimeStep *t
             }
 
             // If an element doesn't implement the interface, it is ignored.
-            if ( ( interface = ( NodalAveragingRecoveryModelInterface * )
-                               element->giveInterface(NodalAveragingRecoveryModelInterfaceType) ) == NULL ) {
+            if ( ( interface = static_cast< NodalAveragingRecoveryModelInterface * >
+                               ( element->giveInterface(NodalAveragingRecoveryModelInterfaceType) ) ) == NULL ) {
                 //abort();
                 continue;
             }
@@ -201,8 +201,8 @@ NodalAveragingRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regi
 
 #endif
 
-        if ( ( interface =  ( NodalAveragingRecoveryModelInterface * ) element->
-                           giveInterface(NodalAveragingRecoveryModelInterfaceType) ) == NULL ) {
+        if ( ( interface =  static_cast< NodalAveragingRecoveryModelInterface * >( element->
+                           giveInterface(NodalAveragingRecoveryModelInterfaceType) ) ) == NULL ) {
             // If an element doesn't implement the interface, it is ignored.
 
             //regionsSkipped = 1;

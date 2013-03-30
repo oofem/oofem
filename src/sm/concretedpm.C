@@ -272,7 +272,7 @@ ConcreteDPMStatus :: restoreContext(DataStream *stream, ContextMode mode, void *
 }
 
 int
-ConcreteDPMStatus :: setIPValue(const FloatArray value, InternalStateType type)
+ConcreteDPMStatus :: setIPValue(const FloatArray &value, InternalStateType type)
 {
     if ( type == IST_DamageScalar ) {
         damage = value.at(1);
@@ -314,7 +314,7 @@ ConcreteDPMStatus :: setIPValue(const FloatArray value, InternalStateType type)
 void
 ConcreteDPMStatus :: restoreConsistency()
 {
-    ConcreteDPM *mat = ( ConcreteDPM * ) gp->giveElement()->giveMaterial();
+    ConcreteDPM *mat = static_cast< ConcreteDPM * >( gp->giveElement()->giveMaterial() );
 
     // compute kappaD from damage
     kappaD = mat->computeInverseDamage(damage, gp);
@@ -393,8 +393,8 @@ ConcreteDPM :: initializeFrom(InputRecord *ir)
 
     // damage parameters - only exponential softening
     // [in ef variable the wf (crack opening) is stored]
-    if ( ir->hasField(IFT_ConcreteDPM_ef, "wf") ) {
-        IR_GIVE_FIELD(ir, ef, IFT_ConcreteDPM_ef, "wf");
+    if ( ir->hasField(IFT_ConcreteDPM_wf, "wf") ) {
+        IR_GIVE_FIELD(ir, ef, IFT_ConcreteDPM_wf, "wf");
         // fracture energy
     } else {
         double Gf;
@@ -475,7 +475,7 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
     // Initialize temp variables for this gauss point
     status->initTempStatus();
 
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     // subtract stress-independent part of strain
     // (due to temperature changes, shrinkage, etc.)
@@ -777,7 +777,7 @@ void
 ConcreteDPM :: performPlasticityReturn(GaussPoint *gp,
                                        StrainVector &strain)
 {
-    ConcreteDPMStatus *status = ( ConcreteDPMStatus * ) this->giveStatus(gp);
+    ConcreteDPMStatus *status = static_cast< ConcreteDPMStatus * >( this->giveStatus(gp) );
     if ( matMode == _Unknown ) {
         matMode = gp->giveMaterialMode();
     }
@@ -887,12 +887,12 @@ ConcreteDPM :: performRegularReturn(StressVector &effectiveStress,
                                     GaussPoint *gp)
 {
     //Define status
-    ConcreteDPMStatus *status = ( ConcreteDPMStatus * ) this->giveStatus(gp);
+    ConcreteDPMStatus *status = static_cast< ConcreteDPMStatus * >( this->giveStatus(gp) );
     //Variables
     deltaLambda = 0.;
     double deltaLambdaIncrement = 0.;
-    double yieldValue = 1.;
-    double residualNorm = 1.;
+    double yieldValue;
+    double residualNorm;
     double rhoTest = 0.;
     double deltaLambdaIncrementNew = 0.;
     double tempKappaPTest = 0.;
@@ -942,7 +942,7 @@ ConcreteDPM :: performRegularReturn(StressVector &effectiveStress,
     yieldValue = computeYieldValue(sig, rho, thetaTrial, tempKappaP);
     residualNorm = fabs(yieldValue);
 
-    while ( ( residualNorm ) > yieldTol ) {
+    while ( residualNorm > yieldTol ) {
         if ( ++iterationCount == newtonIter ) {
             _error("Closest point projection did not converge.\n");
         }
@@ -1088,7 +1088,7 @@ ConcreteDPM :: performVertexReturn(StressVector &effectiveStress,
                                    double apexStress,
                                    GaussPoint *gp)
 {
-    ConcreteDPMStatus *status = ( ConcreteDPMStatus * ) this->giveStatus(gp);
+    ConcreteDPMStatus *status = static_cast< ConcreteDPMStatus * >( this->giveStatus(gp) );
     StressVector deviatoricStressTrial(matMode);
     double sigTrial;
     StressVector stressTemp(matMode);

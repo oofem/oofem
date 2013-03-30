@@ -44,6 +44,7 @@
 #include "equationid.h"
 #include "valuemodetype.h"
 #include "dofiditem.h"
+#include "doftype.h"
 #include "contextioresulttype.h"
 
 namespace oofem {
@@ -118,6 +119,8 @@ public:
     /// Destructor.
     virtual ~Dof() { }
 
+    /// Returns the type of the receiver.
+    virtual dofType giveDofType() = 0;
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "Dof"; }
     /// Returns classType id of receiver.
@@ -172,15 +175,20 @@ public:
      * numbering strategy.
      *
      * For slave dofs (dependent on other primary dofs) the array of master equation numbers is returned.
-     * @param masterEqNumbers Equation numbers of master DOFs for receiver.
-     * @param s Numbering scheme used enumeration of equations.
+     * @param[out] masterEqNumbers Equation numbers of master DOFs for receiver.
+     * @param[in] s Numbering scheme used enumeration of equations.
      */
     virtual void giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme &s);
+    /**
+     * As giveEquationNumbers but for dof IDs.
+     * @param[out] masterDofIDs Dof IDs of master DOFs for receiver.
+     */
+    virtual void giveDofIDs(IntArray &masterDofIDs);
 
     /**
      * Returns prescribed equation number of receiver. If Dof has inactive BC,
      * returned prescribed equation number is zero.
-     * If Dof has active BC, then the corresponding  prescribed equation number is returned.
+     * If Dof has active BC, then the corresponding prescribed equation number is returned.
      * is zero. After initializing Dof by calling constructor, Dof has no prescribed equation
      * number assigned. When firstly invoked, this function asks EngngModel object
      * for next equation or prescribed equation number (this will increase also total number of equation
@@ -293,7 +301,7 @@ public:
      * Returns DofID value of receiver, which determines type of
      * of unknown connected to receiver (e.g., u-displacement, v-displacement, ...).
      */
-    DofIDItem giveDofID()  { return dofID; }
+    DofIDItem giveDofID() { return dofID; }
     /**
      * Returns char representation of DofID value of receiver, which determines physical meaning
      * of unknown connected to receiver. Useful only for printing. More conveniently,

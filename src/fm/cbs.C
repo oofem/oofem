@@ -78,30 +78,30 @@ CBS :: initializeFrom(InputRecord *ir)
 
     EngngModel :: initializeFrom(ir);
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_CBS_lstype, "lstype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_CBS_smtype, "smtype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
-    IR_GIVE_FIELD(ir, deltaT, IFT_CBS_deltat, "deltat"); // Macro
+    IR_GIVE_FIELD(ir, deltaT, IFT_CBS_deltat, _IFT_CBS_deltat);
     minDeltaT = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, minDeltaT, IFT_CBS_mindeltat, "mindeltat"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, minDeltaT, IFT_CBS_mindeltat, _IFT_CBS_mindeltat);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, consistentMassFlag, IFT_CBS_cmflag, "cmflag");
+    IR_GIVE_OPTIONAL_FIELD(ir, consistentMassFlag, IFT_CBS_cmflag, _IFT_CBS_cmflag);
 
     theta [ 0 ] = theta [ 1 ] = 1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, theta [ 0 ], IFT_CBS_theta1, "theta1");
-    IR_GIVE_OPTIONAL_FIELD(ir, theta [ 1 ], IFT_CBS_theta2, "theta2");
+    IR_GIVE_OPTIONAL_FIELD(ir, theta [ 0 ], IFT_CBS_theta1, _IFT_CBS_theta1);
+    IR_GIVE_OPTIONAL_FIELD(ir, theta [ 1 ], IFT_CBS_theta2, _IFT_CBS_theta2);
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_CBS_scaleflag, "scaleflag");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_CBS_scaleflag, _IFT_CBS_scaleflag);
     equationScalingFlag = val;
     if ( equationScalingFlag ) {
-        IR_GIVE_FIELD(ir, lscale, IFT_CBS_lscale, "lscale"); // Macro
-        IR_GIVE_FIELD(ir, uscale, IFT_CBS_uscale, "uscale"); // Macro
-        IR_GIVE_FIELD(ir, dscale, IFT_CBS_dscale, "dscale"); // Macro
+        IR_GIVE_FIELD(ir, lscale, IFT_CBS_lscale, _IFT_CBS_lscale);
+        IR_GIVE_FIELD(ir, uscale, IFT_CBS_uscale, _IFT_CBS_uscale);
+        IR_GIVE_FIELD(ir, dscale, IFT_CBS_dscale, _IFT_CBS_dscale);
         double vref = 1.0; // reference viscosity
         Re = dscale * uscale * lscale / vref;
     } else {
@@ -111,7 +111,7 @@ CBS :: initializeFrom(InputRecord *ir)
 
     //<RESTRICTED_SECTION>
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_CBS_miflag, "miflag");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_CBS_miflag, _IFT_CBS_miflag);
     if ( val ) {
         this->materialInterface = new LEPlic( 1, this->giveDomain(1) );
         // export velocity field
@@ -219,7 +219,7 @@ TimeStep *
 CBS :: giveNextStep()
 {
     int istep = this->giveNumberOfFirstStep();
-    int i, nelem;
+    int nelem;
     double totalTime = 0;
     double dt = deltaT;
     StateCounterType counter = 1;
@@ -240,8 +240,8 @@ CBS :: giveNextStep()
     Domain *domain = this->giveDomain(1);
     nelem = domain->giveNumberOfElements();
     // check for critical time step
-    for ( i = 1; i <= nelem; i++ ) {
-        dt = min( dt, ( ( CBSElement * ) domain->giveElement(i) )->computeCriticalTimeStep(previousStep) );
+    for ( int i = 1; i <= nelem; i++ ) {
+        dt = min( dt, static_cast< CBSElement * >( domain->giveElement(i) )->computeCriticalTimeStep(previousStep) );
     }
 
     dt *= 0.6;
@@ -263,9 +263,8 @@ CBS :: giveNextStep()
 void
 CBS :: solveYourselfAt(TimeStep *tStep)
 {
-    int i;
-    int momneq =  this->giveNumberOfEquations(EID_MomentumBalance);
-    int presneq =  this->giveNumberOfEquations(EID_ConservationEquation);
+    int momneq = this->giveNumberOfEquations(EID_MomentumBalance);
+    int presneq = this->giveNumberOfEquations(EID_ConservationEquation);
     int presneq_prescribed = this->giveNumberOfPrescribedEquations(EID_ConservationEquation);
     double deltaT = tStep->giveTimeIncrement();
 
@@ -363,7 +362,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
                                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
         nMethod->solve(mss, & rhs, & deltaAuxVelocity);
     } else {
-        for ( i = 1; i <= momneq; i++ ) {
+        for ( int i = 1; i <= momneq; i++ ) {
             deltaAuxVelocity.at(i) = deltaT * rhs.at(i) / mm.at(i);
         }
     }
@@ -374,7 +373,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     this->assembleVectorFromElements( prescribedTractionPressure, tStep, EID_ConservationEquation,
                                       DensityPrescribedTractionPressure, VM_Total,
                                       EModelDefaultPrescribedEquationNumbering(), this->giveDomain(1) );
-    for ( i = 1; i <= presneq_prescribed; i++ ) {
+    for ( int i = 1; i <= presneq_prescribed; i++ ) {
         prescribedTractionPressure.at(i) /= nodalPrescribedTractionPressureConnectivity.at(i);
     }
 
@@ -402,7 +401,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
         velocityVector->add(deltaAuxVelocity);
         velocityVector->add(*prevVelocityVector);
     } else {
-        for ( i = 1; i <= momneq; i++ ) {
+        for ( int i = 1; i <= momneq; i++ ) {
             velocityVector->at(i) = prevVelocityVector->at(i) + deltaAuxVelocity.at(i) + deltaT *rhs.at(i) / mm.at(i);
         }
     }
@@ -657,7 +656,7 @@ CBS :: applyIC(TimeStep *stepWhenIcApply)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Applying initial conditions\n");
 #endif
-    int nDofs, j, k, jj;
+    int nDofs, jj;
     int nman  = domain->giveNumberOfDofManagers();
     DofManager *node;
     Dof *iDof;
@@ -674,11 +673,11 @@ CBS :: applyIC(TimeStep *stepWhenIcApply)
     pressureVector->zero();
 
 
-    for ( j = 1; j <= nman; j++ ) {
+    for ( int j = 1; j <= nman; j++ ) {
         node = domain->giveDofManager(j);
         nDofs = node->giveNumberOfDofs();
 
-        for ( k = 1; k <= nDofs; k++ ) {
+        for ( int k = 1; k <= nDofs; k++ ) {
             // ask for initial values obtained from
             // bc (boundary conditions) and ic (initial conditions)
             iDof  =  node->giveDof(k);
@@ -703,8 +702,8 @@ CBS :: applyIC(TimeStep *stepWhenIcApply)
     int nelem = domain->giveNumberOfElements();
     CBSElement *element;
 
-    for ( j = 1; j <= nelem; j++ ) {
-        element = ( CBSElement * ) domain->giveElement(j);
+    for ( int j = 1; j <= nelem; j++ ) {
+        element = static_cast< CBSElement * >( domain->giveElement(j) );
         element->updateInternalState(stepWhenIcApply);
         element->updateYourself(stepWhenIcApply);
     }

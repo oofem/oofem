@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: drawmode.h
-//
-
 #ifndef drawmode_h
 #define drawmode_h
 

@@ -84,7 +84,7 @@ IDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
      */
     FloatArray SDstrainVector, fullSDStrainVector;
     double equivStrain;
-    IDNLMaterialStatus *nlstatus = ( IDNLMaterialStatus * ) this->giveStatus(gp);
+    IDNLMaterialStatus *nlstatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
@@ -120,13 +120,13 @@ IDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
 void
 IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
 {
-    IDNLMaterialStatus *nonlocStatus, *status = ( IDNLMaterialStatus * ) this->giveStatus(gp);
+    IDNLMaterialStatus *nonlocStatus, *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
     std::list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp);
     std::list< localIntegrationRecord > :: iterator pos, postarget;
 
     // find the current Gauss point (target) in the list of it neighbors
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        if ( ( * pos ).nearGp == gp ) {
+        if ( pos->nearGp == gp ) {
             postarget = pos;
         }
     }
@@ -143,10 +143,10 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     double distance = 0.; // distance modified by damage
     xprev = xtarget;
     for ( pos = postarget; pos != list->end(); ++pos ) {
-        nearElem = ( ( * pos ).nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( ( * pos ).nearGp )->giveCoordinates() ) );
+        nearElem = ( pos->nearGp )->giveElement();
+        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveCoordinates() ) );
         x = coords.at(1);
-        nonlocStatus = ( IDNLMaterialStatus * ) this->giveStatus( ( * pos ).nearGp );
+        nonlocStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus( pos->nearGp ) );
         damage = nonlocStatus->giveTempDamage();
         if ( damage == 0. ) {
             damage = nonlocStatus->giveDamage();
@@ -156,8 +156,8 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
             distance += ( x - xprev ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
         }
 
-        w = computeWeightFunction(distance) * nearElem->computeVolumeAround( ( * pos ).nearGp );
-        ( * pos ).weight = w;
+        w = computeWeightFunction(distance) * nearElem->computeVolumeAround( pos->nearGp );
+        pos->weight = w;
         wsum += w;
         xprev = x;
         damageprev = damage;
@@ -166,10 +166,10 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     // process the list from the target to the beginning
     distance = 0.;
     for ( pos = postarget; pos != list->begin(); --pos ) {
-        nearElem = ( ( * pos ).nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( ( * pos ).nearGp )->giveCoordinates() ) );
+        nearElem = ( pos->nearGp )->giveElement();
+        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveCoordinates() ) );
         x = coords.at(1);
-        nonlocStatus = ( IDNLMaterialStatus * ) this->giveStatus( ( * pos ).nearGp );
+        nonlocStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus( pos->nearGp ) );
         damage = nonlocStatus->giveTempDamage();
         if ( damage == 0. ) {
             damage = nonlocStatus->giveDamage();
@@ -177,8 +177,8 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
 
         if ( pos != postarget ) {
             distance += ( xprev - x ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
-            w = computeWeightFunction(distance) * nearElem->computeVolumeAround( ( * pos ).nearGp );
-            ( * pos ).weight = w;
+            w = computeWeightFunction(distance) * nearElem->computeVolumeAround( pos->nearGp );
+            pos->weight = w;
             wsum += w;
         }
 
@@ -189,18 +189,18 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     // the beginning must be treated separately
     pos = list->begin();
     if ( pos != postarget ) {
-        nearElem = ( ( * pos ).nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( ( * pos ).nearGp )->giveCoordinates() ) );
+        nearElem = ( pos->nearGp )->giveElement();
+        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveCoordinates() ) );
         x = coords.at(1);
-        nonlocStatus = ( IDNLMaterialStatus * ) this->giveStatus( ( * pos ).nearGp );
+        nonlocStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus( pos->nearGp ) );
         damage = nonlocStatus->giveTempDamage();
         if ( damage == 0. ) {
             damage = nonlocStatus->giveDamage();
         }
 
         distance += ( xprev - x ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
-        w = computeWeightFunction(distance) * nearElem->computeVolumeAround( ( * pos ).nearGp );
-        ( * pos ).weight = w;
+        w = computeWeightFunction(distance) * nearElem->computeVolumeAround( pos->nearGp );
+        pos->weight = w;
         wsum += w;
     }
 
@@ -227,7 +227,7 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
      * nearElem->computeGlobalCoordinates (coords, *(((*pos).nearGp)->giveCoordinates()));
      * x = coords.at(1);
      * w = ((*pos).weight/wsum)/(nearElem->computeVolumeAround((*pos).nearGp));
-     * nonlocStatus = ( IDNLMaterialStatus * ) this->giveStatus((*pos).nearGp);
+     * nonlocStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus((*pos).nearGp) );
      * damage = nonlocStatus->giveDamage();
      * printf("%g %g %g\n",x,w,damage);
      * }
@@ -264,7 +264,7 @@ IDNLMaterial :: computeDistanceModifier(double damage)
 void
 IDNLMaterial :: computeAngleAndSigmaRatio(double &angle, double &ratio, GaussPoint *gp, double &flag)
 {
-    IDNLMaterialStatus *status = ( IDNLMaterialStatus * ) this->giveStatus(gp);
+    IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
     MaterialMode matMode;
     matMode = gp->giveMaterialMode();
     if ( ( matMode == _3dMat ) || ( matMode == _1dMat ) ) { //Check if the stress-based approach can be applied
@@ -295,16 +295,16 @@ IDNLMaterial :: computeAngleAndSigmaRatio(double &angle, double &ratio, GaussPoi
     //compute angle of the first eigenvector
     if ( princDir.at(1, 1) == 0. ) { //Check if angle = 90 degrees
         angle = 3.141592 / 2;
-    } else  {
+    } else {
         angle = atan( princDir.at(2, 1) / princDir.at(1, 1) );
     }
 
     if ( principalStress.at(2) < 0. && principalStress.at(1) < 0. ) { //Check limit case both eigenvalues negative
         angle = 0.; //Set angle equal to 0
         ratio = 1.; //Set ratio equal to 1
-    } else if ( principalStress.at(2) < 0. )      { //Check if only one eigenvalue is positive
+    } else if ( principalStress.at(2) < 0. ) { //Check if only one eigenvalue is positive
         ratio = 0.; //Set ratio equal to 0
-    } else  {
+    } else {
         ratio = principalStress.at(2) / principalStress.at(1); //compute ratio
     }
 }
@@ -344,7 +344,7 @@ void
 IDNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
 {
     double nonlocalContribution, nonlocalEquivalentStrain = 0.0;
-    IDNLMaterialStatus *nonlocStatus, *status = ( IDNLMaterialStatus * ) this->giveStatus(gp);
+    IDNLMaterialStatus *nonlocStatus, *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
 
     this->buildNonlocalPointTable(gp);
     this->updateDomainBeforeNonlocAverage(atTime);
@@ -367,16 +367,17 @@ IDNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain,
         computeAngleAndSigmaRatio(eigenVectorAngle, sigmaRatio, gp, flag);
     }
 
-    //Loop over all Gauss Points which are in gp's integration domain
+    //Loop over all Gauss points which are in gp's integration domain
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        nonlocStatus = ( IDNLMaterialStatus * ) this->giveStatus( ( * pos ).nearGp );
+        GaussPoint *neargp = pos->nearGp;
+        nonlocStatus = static_cast< IDNLMaterialStatus * >( neargp->giveMaterialStatus( neargp->giveMaterial()->giveNumber() ) );
         nonlocalContribution = nonlocStatus->giveLocalEquivalentStrainForAverage();
         if ( this->nlvar == NLVT_StressBased && flag == 1 ) { //Check if Stress Based Averaging is requested and calculate nonlocal contribution
-            double stressBasedWeight = computeStressBasedWeight(eigenVectorAngle, sigmaRatio, gp, ( * pos ).nearGp, ( * pos ).weight); //Compute New Weight
+            double stressBasedWeight = computeStressBasedWeight(eigenVectorAngle, sigmaRatio, gp, neargp, pos->weight); //Compute new weight
             updatedIntegrationVolume +=  stressBasedWeight;
             nonlocalContribution *= stressBasedWeight;
-        } else  {
-            nonlocalContribution *= ( * pos ).weight;
+        } else {
+            nonlocalContribution *= pos->weight;
         }
 
         nonlocalEquivalentStrain += nonlocalContribution;
@@ -421,11 +422,11 @@ Interface *
 IDNLMaterial :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return ( StructuralNonlocalMaterialExtensionInterface * ) this;
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
     } else if ( type == NonlocalMaterialStiffnessInterfaceType ) {
-        return ( NonlocalMaterialStiffnessInterface * ) this;
+        return static_cast< NonlocalMaterialStiffnessInterface * >( this );
     } else if ( type == MaterialModelMapperInterfaceType ) {
-        return ( MaterialModelMapperInterface * ) this;
+        return static_cast< MaterialModelMapperInterface * >( this );
     } else {
         return NULL;
     }
@@ -452,11 +453,11 @@ IDNLMaterial :: initializeFrom(InputRecord *ir)
     }
 
     if ( averType == 2 || averType == 3 ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, exponent, IFT_IDNLMaterial_averagingtype, "exp");
+        IR_GIVE_OPTIONAL_FIELD(ir, exponent, IFT_IDNLMaterial_exp, "exp");
     }
 
     if ( averType >= 2 && averType <= 5 ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, Rf, IFT_IDNLMaterial_averagingtype, "rf");
+        IR_GIVE_OPTIONAL_FIELD(ir, Rf, IFT_IDNLMaterial_rf, "rf");
     }
 
     return IRRT_OK;
@@ -530,7 +531,7 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
                                                                      GaussPoint *gp, TimeStep *atTime)
 {
     double coeff;
-    IDNLMaterialStatus *status = ( IDNLMaterialStatus * ) this->giveStatus(gp);
+    IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
     std::list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
     std::list< localIntegrationRecord > :: iterator pos;
     IDNLMaterial *rmat;
@@ -544,10 +545,10 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
     }
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        rmat = ( IDNLMaterial * ) ( ( * pos ).nearGp )->giveMaterial();
-        if ( rmat->giveClassID() == this->giveClassID() ) {
-            rmat->giveRemoteNonlocalStiffnessContribution( ( * pos ).nearGp, rloc, s, rcontrib, atTime );
-            coeff = gp->giveElement()->computeVolumeAround(gp) * ( * pos ).weight / status->giveIntegrationScale();
+        rmat = dynamic_cast< IDNLMaterial * > ( pos->nearGp->giveMaterial() );
+        if ( rmat ) {
+            rmat->giveRemoteNonlocalStiffnessContribution( pos->nearGp, rloc, s, rcontrib, atTime );
+            coeff = gp->giveElement()->computeVolumeAround(gp) * pos->weight / status->giveIntegrationScale();
             //   printf ("\nelement %d:", gp->giveElement()->giveNumber());
             //   lcontrib.printYourself();
             //   rcontrib.printYourself();
@@ -564,10 +565,10 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
              *   if ((r != 0) && (c!=0)) dest.at(r,c) -= (double) (lcontrib.at(i)*rcontrib.at(j)*coeff);
              *  }
              */
-            int i, j, dim1 = loc.giveSize(), dim2 = rloc.giveSize();
+            int dim1 = loc.giveSize(), dim2 = rloc.giveSize();
             contrib.resize(dim1, dim2);
-            for ( i = 1; i <= dim1; i++ ) {
-                for ( j = 1; j <= dim2; j++ ) {
+            for ( int i = 1; i <= dim1; i++ ) {
+                for ( int j = 1; j <= dim2; j++ ) {
                     contrib.at(i, j) = -1.0 * lcontrib.at(i) * rcontrib.at(j) * coeff;
                 }
             }
@@ -580,7 +581,7 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
 std::list< localIntegrationRecord > *
 IDNLMaterial :: NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp)
 {
-    IDNLMaterialStatus *status = ( IDNLMaterialStatus * ) this->giveStatus(gp);
+    IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
     this->buildNonlocalPointTable(gp);
     return status->giveIntegrationDomainList();
 }
@@ -593,7 +594,7 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(Gauss
     IntArray loc, rloc;
     FloatArray strain;
     double f, equivStrain;
-    IDNLMaterialStatus *status = ( IDNLMaterialStatus * ) this->giveStatus(gp);
+    IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
     IDNLMaterial *rmat;
 
     const double e0 = this->give(e0_ID, gp);
@@ -618,23 +619,25 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(Gauss
 
     gp->giveElement()->giveLocationArray( loc, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
-    int n, m, i, j;
+    int n, m;
     std::list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
     std::list< localIntegrationRecord > :: iterator pos;
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        rmat = ( IDNLMaterial * ) ( ( * pos ).nearGp )->giveMaterial();
-        if ( rmat->giveClassID() == this->giveClassID() ) {
-            ( ( * pos ).nearGp )->giveElement()->giveLocationArray( rloc, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+        rmat = dynamic_cast< IDNLMaterial *>( pos->nearGp->giveMaterial() );
+        if ( rmat ) {
+            ( pos->nearGp )->giveElement()->giveLocationArray( rloc, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+        } else {
+            continue;
         }
 
         n = loc.giveSize();
         m = rloc.giveSize();
-        for ( i = 1; i <= n; i++ ) {
+        for ( int i = 1; i <= n; i++ ) {
             if ( loc.at(i) == 0 ) {
                 continue;
             }
 
-            for ( j = 1; j <= m; j++ ) {
+            for ( int j = 1; j <= m; j++ ) {
                 if ( rloc.at(j) == 0 ) {
                     continue;
                 }
@@ -678,10 +681,10 @@ int
 IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &loc, const UnknownNumberingScheme &s,
                                                        FloatArray &lcontrib, TimeStep *atTime)
 {
-    int nrows, nsize, i, j;
+    int nrows, nsize;
     double sum, f, equivStrain;
-    IDNLMaterialStatus *status = ( IDNLMaterialStatus * ) this->giveStatus(gp);
-    StructuralElement *elem = ( StructuralElement * ) ( gp->giveElement() );
+    IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
+    StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
     FloatMatrix b, de;
     FloatArray stress, strain;
 
@@ -736,9 +739,9 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
         nrows = b.giveNumberOfColumns();
         nsize = stress.giveSize();
         lcontrib.resize(nrows);
-        for ( i = 1; i <= nrows; i++ ) {
+        for ( int i = 1; i <= nrows; i++ ) {
             sum = 0.0;
-            for ( j = 1; j <= nsize; j++ ) {
+            for ( int j = 1; j <= nsize; j++ ) {
                 sum += b.at(j, i) * stress.at(j);
             }
 
@@ -757,11 +760,11 @@ void
 IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &rloc, const UnknownNumberingScheme &s,
                                                         FloatArray &rcontrib, TimeStep *atTime)
 {
-    int ncols, nsize, i, j;
+    int ncols, nsize;
     double coeff = 0.0, sum;
-    IDNLMaterialStatus *status = ( IDNLMaterialStatus * ) this->giveStatus(gp);
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
-    StructuralElement *elem = ( StructuralElement * ) ( gp->giveElement() );
+    IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
+    StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
     FloatMatrix b, de, den, princDir(3, 3), t;
     FloatArray stress, fullStress, strain, principalStress, help, nu;
 
@@ -816,7 +819,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
         }
 
         sum = 0.0;
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             if ( principalStress.at(i) > 0.0 ) {
                 sum += principalStress.at(i) * principalStress.at(i);
             }
@@ -837,7 +840,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
         //  if (gp->giveMaterialMode() != _1dMat) this->giveStressVectorTranformationMtrx (t, princDir,1);
 
         // extract positive part
-        for ( i = 1; i <= principalStress.giveSize(); i++ ) {
+        for ( int i = 1; i <= principalStress.giveSize(); i++ ) {
             principalStress.at(i) = max(principalStress.at(i), 0.0);
         }
 
@@ -871,7 +874,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
          */
         FloatArray fullPrincStress(6);
         fullPrincStress.zero();
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             fullPrincStress.at(i) = principalStress.at(i);
         }
 
@@ -898,9 +901,9 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     ncols = b.giveNumberOfColumns();
     nsize = nu.giveSize();
     rcontrib.resize(ncols);
-    for ( i = 1; i <= ncols; i++ ) {
+    for ( int i = 1; i <= ncols; i++ ) {
         sum = 0.0;
-        for ( j = 1; j <= nsize; j++ ) {
+        for ( int j = 1; j <= nsize; j++ ) {
             sum += nu.at(j) * b.at(j, i);
         }
 
@@ -1024,7 +1027,7 @@ Interface *
 IDNLMaterialStatus :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialStatusExtensionInterfaceType ) {
-        return ( StructuralNonlocalMaterialStatusExtensionInterface * ) this;
+        return static_cast< StructuralNonlocalMaterialStatusExtensionInterface * >( this );
     } else {
         return IsotropicDamageMaterial1Status :: giveInterface(type);
     }
@@ -1036,7 +1039,7 @@ IDNLMaterialStatus :: giveInterface(InterfaceType type)
 int
 IDNLMaterial :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
 {
-    IDNLMaterialStatus *status = ( IDNLMaterialStatus * ) this->giveStatus(ip);
+    IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(ip) );
 
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(stepN);
@@ -1048,7 +1051,7 @@ int
 IDNLMaterial :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
 {
     int result;
-    IDNLMaterialStatus *status = ( IDNLMaterialStatus * ) this->giveStatus(ip);
+    IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(ip) );
     double localEquivalentStrainForAverage;
 
     result = buff.unpackDouble(localEquivalentStrainForAverage);
@@ -1082,7 +1085,7 @@ IDNLMaterial :: predictRelativeComputationalCost(GaussPoint *gp)
         cost = 1.5;
     }
 
-    IDNLMaterialStatus *status = ( IDNLMaterialStatus * ) this->giveStatus(gp);
+    IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
     int size = status->giveIntegrationDomainList()->size();
     // just a guess (size/10) found optimal
     // cost *= (1.0 + (size/10)*0.5);

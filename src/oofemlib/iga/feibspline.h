@@ -38,6 +38,17 @@
 #include "feinterpol.h"
 #include "flotarry.h"
 
+///@name Input fields for BSplineInterpolation
+//@{
+#define _IFT_BSplineInterpolation_degree "degree"
+#define _IFT_BSplineInterpolation_knotVectorU "knotvectoru"
+#define _IFT_BSplineInterpolation_knotVectorV "knotvectorv"
+#define _IFT_BSplineInterpolation_knotVectorW "knotvectorw"
+#define _IFT_BSplineInterpolation_knotMultiplicityU "knotmultiplicityu"
+#define _IFT_BSplineInterpolation_knotMultiplicityV "knotmultiplicityv"
+#define _IFT_BSplineInterpolation_knotMultiplicityW "knotmultiplicityw"
+//@}
+
 namespace oofem {
 
 class FloatMatrix;
@@ -77,12 +88,15 @@ public:
     
     virtual void boundaryGiveNodes(IntArray &answer, int boundary)
     { OOFEM_ERROR("BSplineInterpolation :: boundaryGiveNodes - Not implemented"); }
-    virtual void boundaryEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("BSplineInterpolation :: boundaryEvalN - Not implemented"); }
     virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("BSplineInterpolation :: boundaryEvalNormal - Not implemented"); return 0.; }
     virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("BSplineInterpolation :: boundaryGiveTransformationJacobian - Not implemented"); return 0.;}
+    virtual void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("BSplineInterpolation :: boundaryLocal2Global - Not implemented"); }
+
     
     virtual int giveNumberOfKnotSpans(int dim) { return numberOfKnotSpans [ dim - 1 ]; }
     virtual int giveNumberOfControlPoints(int dim) { return numberOfControlPoints [ dim - 1 ]; }

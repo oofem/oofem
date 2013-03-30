@@ -114,7 +114,7 @@ CylindricalALM ::  ~CylindricalALM()
 NM_Status
 CylindricalALM :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
                         FloatArray *X, FloatArray *dX, FloatArray *F,
-                        double &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
+                        const FloatArray &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
                         int &nite, TimeStep *tNow)
 {
     FloatArray rhs, deltaXt, deltaX_, dXm1, XInitial;
@@ -496,7 +496,7 @@ bool
 CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, const FloatArray &F,
                                    const FloatArray &X, const FloatArray &ddX,
                                    double Lambda, double RR0, double RR, double drProduct,
-                                   double internalForcesEBENorm, int nite, bool &errorOutOfRange)
+                                   const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange)
 {
     /*
      * typedef std::set<DofID> __DofIDSet;
@@ -704,8 +704,8 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
         // we compute a relative error norm
         if ( ( RR0 + RR * Lambda * Lambda ) > calm_SMALL_ERROR_NUM ) {
             forceErr = sqrt( forceErr / ( RR0 + RR * Lambda * Lambda ) );
-        } else if ( internalForcesEBENorm > calm_SMALL_ERROR_NUM ) {
-            forceErr = sqrt(forceErr / internalForcesEBENorm);
+        } else if ( internalForcesEBENorm.at(1) > calm_SMALL_ERROR_NUM ) {
+            forceErr = sqrt(forceErr / internalForcesEBENorm.at(1));
         } else {
             forceErr = sqrt(forceErr);
         }
@@ -751,7 +751,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     int hpcMode;
     IRResultType val;
 
-    IR_GIVE_OPTIONAL_FIELD(ir, Psi, IFT_CylindricalALM_psi, "psi"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, Psi, IFT_CylindricalALM_psi, "psi");
     if ( Psi < 0. ) {
         Psi = oldPsi;
     }
@@ -760,17 +760,17 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     // TangenStiffnessTreshold = readDouble (initString,"tstiffnesstreshold");
     // if (TangenStiffnessTreshold < 0.01) TangenStiffnessTreshold  = oldTangenStiffnessTreshold;
     nsmax = 30;
-    IR_GIVE_OPTIONAL_FIELD(ir, nsmax, IFT_CylindricalALM_maxiter, "maxiter"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, nsmax, IFT_CylindricalALM_maxiter, "maxiter");
     if ( nsmax < 30 ) {
         nsmax = 30;
     }
 
     minStepLength = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, IFT_CylindricalALM_minsteplength, "minsteplength"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, IFT_CylindricalALM_minsteplength, "minsteplength");
 
-    IR_GIVE_FIELD(ir, maxStepLength, IFT_CylindricalALM_steplength, "steplength"); // Macro
+    IR_GIVE_FIELD(ir, maxStepLength, IFT_CylindricalALM_steplength, "steplength");
     initialStepLength = maxStepLength;
-    IR_GIVE_OPTIONAL_FIELD(ir, initialStepLength, IFT_CylindricalALM_initialsteplength, "initialsteplength"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, initialStepLength, IFT_CylindricalALM_initialsteplength, "initialsteplength");
 
     //if (deltaL <= 0.0)  deltaL=maxStepLength;
     // This method (instanciate) is called not only at the beginning but also
@@ -782,13 +782,13 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
 
     // using this, one can enforce deltaL from the input file after restart
     forcedInitialStepLength = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, forcedInitialStepLength, IFT_CylindricalALM_forcedinitialsteplength, "forcedinitialsteplength"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, forcedInitialStepLength, IFT_CylindricalALM_forcedinitialsteplength, "forcedinitialsteplength");
     if ( forcedInitialStepLength > 0. ) {
         deltaL = forcedInitialStepLength;
     }
 
     numberOfRequiredIterations = 3;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfRequiredIterations, IFT_CylindricalALM_reqiterations, "reqiterations"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfRequiredIterations, IFT_CylindricalALM_reqiterations, "reqiterations");
     if ( numberOfRequiredIterations < 3 ) {
         numberOfRequiredIterations = 3;
     }
@@ -797,7 +797,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         numberOfRequiredIterations = 1000;
     }
 
-    val = IR_GIVE_OPTIONAL_FIELD(ir, minIterations, IFT_CylindricalALM_miniterations, "miniter"); // Macro
+    val = IR_GIVE_OPTIONAL_FIELD(ir, minIterations, IFT_CylindricalALM_miniterations, "miniter");
     if ( val == IRRT_OK ) {
         if ( minIterations > 3 && minIterations < 1000 ) {
             numberOfRequiredIterations = minIterations;
@@ -810,7 +810,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
 
     // read if MANRM method is used
     calm_MANRMSteps = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, calm_MANRMSteps, IFT_CylindricalALM_manrmsteps, "manrmsteps"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, calm_MANRMSteps, IFT_CylindricalALM_manrmsteps, "manrmsteps");
     if ( calm_MANRMSteps > 0 ) {
         calm_NR_Mode = calm_NR_OldMode = calm_accelNRM;
     } else {
@@ -819,13 +819,13 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
 
     // read if HPC is requsted
     hpcMode = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, hpcMode, IFT_CylindricalALM_hpcmode, "hpcmode"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, hpcMode, IFT_CylindricalALM_hpcmode, "hpcmode");
 
     calm_HPCDmanDofSrcArray.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, calm_HPCDmanDofSrcArray, IFT_CylindricalALM_hpc, "hpc"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, calm_HPCDmanDofSrcArray, IFT_CylindricalALM_hpc, "hpc");
 
     calm_HPCDmanWeightSrcArray.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, calm_HPCDmanWeightSrcArray, IFT_CylindricalALM_hpcw, "hpcw"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, calm_HPCDmanWeightSrcArray, IFT_CylindricalALM_hpcw, "hpcw");
     // in calm_HPCIndirectDofMask are stored pairs with following meaning:
     // inode idof
     // example HPC 4 1 2 6 1
@@ -867,15 +867,15 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     }
 
     int _value = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _value, IFT_CylindricalALM_lstype, "lstype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _value, IFT_CylindricalALM_lstype, "lstype");
     solverType = ( LinSystSolverType ) _value;
 
     this->giveLinearSolver()->initializeFrom(ir);
 
     this->lsFlag = 0; // linesearch default is off
-    IR_GIVE_OPTIONAL_FIELD(ir, lsFlag, IFT_CylindricalALM_linesearch, "linesearch"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, lsFlag, IFT_CylindricalALM_linesearch, "linesearch");
 
-    IR_GIVE_OPTIONAL_FIELD(ir, ls_tolerance, IFT_CylindricalALM_lsearchtol, "lsearchtol"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, ls_tolerance, IFT_CylindricalALM_lsearchtol, "lsearchtol");
     if ( ls_tolerance < 0.6 ) {
         ls_tolerance = 0.6;
     }
@@ -884,7 +884,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         ls_tolerance = 0.95;
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, amplifFactor, IFT_CylindricalALM_lsearchamp, "lsearchamp"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, amplifFactor, IFT_CylindricalALM_lsearchamp, "lsearchamp");
     if ( amplifFactor < 1.0 ) {
         amplifFactor = 1.0;
     }
@@ -893,7 +893,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         amplifFactor = 10.0;
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, maxEta, IFT_CylindricalALM_lsearchmaxeta, "lsearchmaxeta"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, maxEta, IFT_CylindricalALM_lsearchmaxeta, "lsearchmaxeta");
     if ( maxEta < 1.5 ) {
         maxEta = 1.5;
     }
@@ -904,7 +904,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
 
     /* initialize optional dof groups for convergence criteria evaluation */
     this->nccdg = 0; // default, no dof cc group, all norms evaluated for all dofs
-    IR_GIVE_OPTIONAL_FIELD(ir, nccdg, IFT_CylindricalALM_nccdg, "nccdg"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, nccdg, IFT_CylindricalALM_nccdg, "nccdg");
 
     if ( nccdg >= 1 ) {
         int _i, _j;
@@ -917,7 +917,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         for ( _i = 0; _i < nccdg; _i++ ) {
             sprintf(name, "ccdg%d", _i + 1);
             // read dof group as int array under ccdg# keyword
-            IR_GIVE_FIELD(ir, _val, IFT_CylindricalALM_ccdg, name); // Macro
+            IR_GIVE_FIELD(ir, _val, IFT_CylindricalALM_ccdg, name);
             // convert aray into set
             for ( _j = 1; _j <= _val.giveSize(); _j++ ) {
                 ccDofGroups.at(_i).insert( (DofIDItem)_val.at(_j) );
@@ -926,11 +926,11 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
 
         // read relative error tolerances of the solver fo each cc
         // if common rtolv provided, set to this tolerace both rtolf and rtold
-        IR_GIVE_OPTIONAL_FIELD(ir, rtolf, IFT_CylindricalALM_rtolv, "rtolv"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, rtolf, IFT_CylindricalALM_rtolv, "rtolv");
         rtold = rtolf;
         // read optional force and displacement tolerances
-        IR_GIVE_OPTIONAL_FIELD(ir, rtolf, IFT_CylindricalALM_rtolf, "rtolf"); // Macro
-        IR_GIVE_OPTIONAL_FIELD(ir, rtold, IFT_CylindricalALM_rtold, "rtold"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, rtolf, IFT_CylindricalALM_rtolf, "rtolf");
+        IR_GIVE_OPTIONAL_FIELD(ir, rtold, IFT_CylindricalALM_rtold, "rtold");
 
         if ( ( rtolf.giveSize() != nccdg ) || ( rtold.giveSize() != nccdg ) ) {
             _error2("Incompatible size of rtolf or rtold params, expected size %d (nccdg)", nccdg);
@@ -942,11 +942,11 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         rtold.resize(1);
         // read relative error tolerances of the solver
         // if common rtolv provided, set to this tolerace both rtolf and rtold
-        IR_GIVE_OPTIONAL_FIELD(ir, _rtol, IFT_CylindricalALM_rtolf, "rtolv"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, _rtol, IFT_CylindricalALM_rtolf, "rtolv");
         rtolf.at(1) = rtold.at(1) = _rtol;
-        IR_GIVE_OPTIONAL_FIELD(ir, _rtol, IFT_CylindricalALM_rtolf, "rtolf"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, _rtol, IFT_CylindricalALM_rtolf, "rtolf");
         rtolf.at(1) = _rtol;
-        IR_GIVE_OPTIONAL_FIELD(ir, _rtol, IFT_CylindricalALM_rtold, "rtold"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, _rtol, IFT_CylindricalALM_rtold, "rtold");
         rtold.at(1) = _rtol;
     }
 

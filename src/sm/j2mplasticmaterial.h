@@ -37,6 +37,14 @@
 
 #include "mplasticmaterial.h"
 
+///@name Input fields for J2MPlasticMaterial
+//@{
+#define _IFT_J2MPlasticMaterial_ry "ry"
+#define _IFT_J2MPlasticMaterial_khm "khm"
+#define _IFT_J2MPlasticMaterial_ihm "ihm"
+#define _IFT_J2MPlasticMaterial_rma "rma"
+//@}
+
 namespace oofem {
 class Domain;
 

@@ -90,11 +90,11 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
 
     EngngModel :: initializeFrom(ir);
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_StationaryTransportProblem_lstype, "lstype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_StationaryTransportProblem_smtype, "smtype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
     sparseMtrxType = ( SparseMtrxType ) val;
 
     /* The following done in updateAttributes
@@ -104,7 +104,7 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
     // read field export flag
     IntArray exportFields;
     exportFields.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, exportFields, IFT_StationaryTransportProblem_exportfields, "exportfields");  // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, exportFields, IFT_StationaryTransportProblem_exportfields, "exportfields");
     if ( exportFields.giveSize() ) {
         IntArray mask(1);
         FieldManager *fm = this->giveContext()->giveFieldManager();
@@ -121,7 +121,7 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
         }
     }
 
-    if( UnknownsField == NULL ){ //can exist from nonstationary transport problem
+    if( UnknownsField == NULL ){ // can exist from nonstationary transport problem
         UnknownsField = new PrimaryField(this, 1, FT_TransportProblemUnknowns, EID_ConservationEquation, 0);
     }
 

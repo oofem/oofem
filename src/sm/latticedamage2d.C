@@ -70,51 +70,51 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
     RandomMaterialExtensionInterface :: initializeFrom(ir);
 
     double value = 0.;
-    IR_GIVE_FIELD(ir, value, IFT_IsotropicLinearElasticMaterial_talpha, "talpha"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_IsotropicLinearElasticMaterial_talpha, "talpha");
     propertyDictionary->add(tAlpha, value);
 
-    IR_GIVE_FIELD(ir, eNormal, IFT_LatticeDamage2d_eNormal, "e"); // Macro
+    IR_GIVE_FIELD(ir, eNormal, IFT_LatticeDamage2d_eNormal, "e");
 
     //factor which relates the shear stiffness to the normal stiffness. Default is 1
     alphaOne = 1.;
-    IR_GIVE_OPTIONAL_FIELD(ir, alphaOne, IFT_LatticeDamage2d_alphaOne, "a1"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, alphaOne, IFT_LatticeDamage2d_alphaOne, "a1");
     eShear = alphaOne * eNormal;
 
     //Parameter which is used for the definition of the moment.
     alphaTwo = 1.;
-    IR_GIVE_OPTIONAL_FIELD(ir, alphaTwo, IFT_LatticeDamage2d_alphaTwo, "a2"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, alphaTwo, IFT_LatticeDamage2d_alphaTwo, "a2");
 
     eTorsion = alphaTwo * eNormal / 12.;
 
     softeningType = 0;
-    IR_GIVE_FIELD(ir, softeningType, IFT_LatticeDamage2d_softeningType, "stype"); // Macro
+    IR_GIVE_FIELD(ir, softeningType, IFT_LatticeDamage2d_softeningType, "stype");
 
     if ( softeningType == 1 || softeningType == 3 ) { //linear or exponential softening
-        IR_GIVE_FIELD(ir, wf, IFT_LatticeDamage2d_wf, "wf"); // Macro
+        IR_GIVE_FIELD(ir, wf, IFT_LatticeDamage2d_wf, "wf");
     } else if ( softeningType == 2 ) {      //bilinear softening
-        IR_GIVE_FIELD(ir, wf, IFT_LatticeDamage2d_wf, "wf"); // Macro
+        IR_GIVE_FIELD(ir, wf, IFT_LatticeDamage2d_wf, "wf");
         wfOne = 0.15 * wf;
-        IR_GIVE_OPTIONAL_FIELD(ir, wfOne, IFT_LatticeDamage2d_wfOne, "wf1"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, wfOne, IFT_LatticeDamage2d_wfOne, "wf1");
         e0OneMean = 0.3 * e0Mean;
-        IR_GIVE_OPTIONAL_FIELD(ir, e0OneMean, IFT_LatticeDamage2d_e0OneMean, "e01"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, e0OneMean, IFT_LatticeDamage2d_e0OneMean, "e01");
     } else {
         _error("Unknown softening type");
     }
 
     localRandomType = 0; //Default: No local random field
-    IR_GIVE_OPTIONAL_FIELD(ir, localRandomType, IFT_LatticeDamage2d_localrandomtype, "randomtype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, localRandomType, IFT_LatticeDamage2d_localrandomtype, "randomtype");
     if ( localRandomType == 1 ) { //Gaussian random generator
         coefficientOfVariation = 0.;
-        IR_GIVE_FIELD(ir, coefficientOfVariation, IFT_LatticeDamage2d_coefficientOfVariation, "cov"); // Macro
+        IR_GIVE_FIELD(ir, coefficientOfVariation, IFT_LatticeDamage2d_coefficientOfVariation, "cov");
     }
 
     int equivType = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, equivType, IFT_LatticeDamage2d_equivType, "equivtype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, equivType, IFT_LatticeDamage2d_equivType, "equivtype");
     e0Mean = 0;
-    IR_GIVE_FIELD(ir, e0Mean, IFT_LatticeDamage2d_e0Mean, "e0"); // Macro
+    IR_GIVE_FIELD(ir, e0Mean, IFT_LatticeDamage2d_e0Mean, "e0");
 
-    IR_GIVE_FIELD(ir, coh, IFT_LatticeDamage2d_coh, "coh"); // Macro
-    IR_GIVE_FIELD(ir, ec, IFT_LatticeDamage2d_ec, "ec"); // Macro
+    IR_GIVE_FIELD(ir, coh, IFT_LatticeDamage2d_coh, "coh");
+    IR_GIVE_FIELD(ir, ec, IFT_LatticeDamage2d_ec, "ec");
 
     return IRRT_OK;
 }
@@ -127,12 +127,10 @@ LatticeDamage2d :: computeEquivalentStrain(double &tempEquivStrain, const FloatA
         return;
     }
 
-    //LatticeDamage2dStatus *status = ( LatticeDamage2dStatus * ) this->giveStatus(gp);
+    //LatticeDamage2dStatus *status = static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) );
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
 
-    double paramA = 0.;
-    double paramB = 0.;
-    double paramC = 0.;
+    double paramA, paramB, paramC;
 
     paramA = 0.5 * ( e0 + ec * e0 );
     paramB = ( coh * e0 ) / sqrt( 1. - pow( ( ec * e0 - e0 ) / ( e0 + ec * e0 ), 2. ) );
@@ -145,7 +143,7 @@ LatticeDamage2d :: computeEquivalentStrain(double &tempEquivStrain, const FloatA
 void
 LatticeDamage2d :: computeDamageParam(double &omega, double tempKappa, const FloatArray &strain, GaussPoint *gp)
 {
-    LatticeDamage2dStatus *status = ( LatticeDamage2dStatus * ) this->giveStatus(gp);
+    LatticeDamage2dStatus *status = static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) );
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
     omega = 0.0;
 
@@ -232,34 +230,34 @@ LatticeDamage2d :: computeDamageParam(double &omega, double tempKappa, const Flo
 void
 LatticeDamage2d :: initDamaged(double kappa, FloatArray &strainVector, GaussPoint *gp)
 {
-    int i, indx = 1;
+    int indx = 1;
     double le;
     FloatArray principalStrains, crackPlaneNormal(3), fullstrain;
     FloatMatrix principalDir(3, 3);
-    LatticeDamage2dStatus *status = ( LatticeDamage2dStatus * ) this->giveStatus(gp);
+    LatticeDamage2dStatus *status = static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) );
 
     //get the random variable from the status
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
 
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     crossSection->giveFullCharacteristicVector(fullstrain, gp, strainVector);
 
     if ( ( kappa > e0 ) && ( status->giveDamage() == 0. ) ) {
         this->computePrincipalValDir(principalStrains, principalDir, fullstrain, principal_strain);
         // finfd index of max positive principal strain
-        for ( i = 2; i <= 3; i++ ) {
+        for ( int i = 2; i <= 3; i++ ) {
             if ( principalStrains.at(i) > principalStrains.at(indx) ) {
                 indx = i;
             }
         }
 
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             crackPlaneNormal.at(i) = principalDir.at(i, indx);
         }
 
         le = gp->giveElement()->giveCharacteristicLenght(gp, crackPlaneNormal);
-        // remember le in cooresponding status
+        // remember le in corresponding status
         status->setLe(le);
     }
 }
@@ -275,15 +273,13 @@ LatticeDamage2d :: CreateStatus(GaussPoint *gp) const
 MaterialStatus *
 LatticeDamage2d :: giveStatus(GaussPoint *gp) const
 {
-    MaterialStatus *status;
-
-    status = ( MaterialStatus * ) gp->giveMaterialStatus( this->giveClassID() );
+    MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus( this->giveNumber() ) );
     if ( status == NULL ) {
         // create a new one
         status = this->CreateStatus(gp);
 
         if ( status != NULL ) {
-            gp->setMaterialStatus( status, this->giveClassID() );
+            gp->setMaterialStatus( status, this->giveNumber() );
             this->_generateStatusVariables(gp);
         }
     }
@@ -305,7 +301,7 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
 // strain increment, the only way, how to correctly update gp records
 //
 {
-    LatticeDamage2dStatus *status = ( LatticeDamage2dStatus * ) this->giveStatus(gp);
+    LatticeDamage2dStatus *status = static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) );
 
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
     status->setE0(e0);
@@ -552,7 +548,7 @@ LatticeDamage2d :: giveSecantStiffnessMatrix(FloatMatrix &answer,
                                              GaussPoint *gp,
                                              TimeStep *atTime)
 {
-    LatticeDamage2dStatus *status = ( LatticeDamage2dStatus * ) this->giveStatus(gp);
+    LatticeDamage2dStatus *status = static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) );
 
     double omega = status->giveTempDamage();
 
@@ -661,7 +657,7 @@ LatticeDamage2d :: giveIPValue(FloatArray &answer,
                                InternalStateType type,
                                TimeStep *atTime)
 {
-    LatticeDamage2dStatus *status = ( LatticeDamage2dStatus * ) this->giveStatus(gp);
+    LatticeDamage2dStatus *status = static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) );
     if ( type == IST_CrackStatuses ) {
         answer.resize(1);
         answer.at(1) = status->giveCrackFlag();
@@ -791,7 +787,7 @@ Interface *
 LatticeDamage2dStatus :: giveInterface(InterfaceType type)
 {
     if ( type == RandomMaterialStatusExtensionInterfaceType ) {
-        return ( RandomMaterialStatusExtensionInterface * ) this;
+        return static_cast< RandomMaterialStatusExtensionInterface * >( this );
     } else {
         return NULL;
     }

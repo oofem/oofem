@@ -44,11 +44,11 @@ DoublePowerLawMaterial :: initializeFrom(InputRecord *ir)
 
     MaxwellChainMaterial :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, E28, IFT_DoublePowerLawMaterial_e28, "e28"); // Macro
-    IR_GIVE_FIELD(ir, fi1, IFT_DoublePowerLawMaterial_fi1, "fi1"); // Macro
-    IR_GIVE_FIELD(ir, m, IFT_DoublePowerLawMaterial_m, "m"); // Macro
-    IR_GIVE_FIELD(ir, n, IFT_DoublePowerLawMaterial_n, "n"); // Macro
-    IR_GIVE_FIELD(ir, alpha, IFT_DoublePowerLawMaterial_alpha, "alpha"); // Macro
+    IR_GIVE_FIELD(ir, E28, IFT_DoublePowerLawMaterial_e28, "e28");
+    IR_GIVE_FIELD(ir, fi1, IFT_DoublePowerLawMaterial_fi1, "fi1");
+    IR_GIVE_FIELD(ir, m, IFT_DoublePowerLawMaterial_m, "m");
+    IR_GIVE_FIELD(ir, n, IFT_DoublePowerLawMaterial_n, "n");
+    IR_GIVE_FIELD(ir, alpha, IFT_DoublePowerLawMaterial_alpha, "alpha");
 
     return IRRT_OK;
 }

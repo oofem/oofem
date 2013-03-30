@@ -1,23 +1,27 @@
-SHELL = /bin/sh
+SHELL = /bin/bash
 BACKUP_FILES = *.tex *.fig *.eps makefile
 RCP = scp
 
-html: ps
+html: pdf
 	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
-	latex2html -local_icons -dir html -mkdir elementlibmanual
+	for i in elementlibmanual-figure*.pdf; do convert -density 300 $$i `echo $$i | sed -e 's/\.pdf/\.png/g'`; done
+#mkdir html
+	mkdir -p html
+	htlatex elementlibmanual.tex "elementlibmanual.cfg,html,index=2,3,next" "" "-dhtml/" 
+	rm elementlibmanual-figure*
+	rm *.html
 
-ps:
-	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
-	rm -f *.toc *.lot *.aux
-	latex \\nonstopmode\\input elementlibmanual
-	latex \\nonstopmode\\input elementlibmanual
-	dvips -o 	elementlibmanual.ps elementlibmanual
+#latex2html -local_icons -dir html -mkdir elementlibmanual
+
+ps: pdf
+	pdftops elementlibmanual.pdf
+
 
 pdf:
 	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
 	rm -f *.toc *.lot *.aux
-	pdflatex elementlibmanual
-	pdflatex elementlibmanual
+	pdflatex -shell-escape elementlibmanual
+	pdflatex -shell-escape elementlibmanual
 
 
 www-install: html pdf

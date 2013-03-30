@@ -49,16 +49,22 @@ namespace oofem {
  */
 class DataReader
 {
+protected:
+    /// Output file name (first line in OOFEM input files).
+    std::string outputFileName;
+    /// Description line (second line in OOFEM input files).
+    std::string description;
+
 public:
     /// Determines the type of input record.
     enum InputRecordType {
-        IR_outFileRec, IR_jobRec, IR_domainRec, IR_outManRec, IR_domainCompRec, IR_geometryRec, IR_gbpmRec,
+        IR_domainRec, IR_outManRec, IR_domainCompRec, IR_geometryRec, IR_gbpmRec,
         IR_emodelRec, IR_mstepRec, IR_expModuleRec, IR_dofmanRec, IR_elemRec,
         IR_crosssectRec, IR_matRec, IR_nlocBarRec, IR_bcRec, IR_icRec, IR_ltfRec,
         IR_nRandomFieldGenRec, IR_xfemManRec, IR_enrichFuncRec, IR_geoRec, IR_enrichItemRec
     };
 
-    DataReader() : lineNumber(0) { }
+    DataReader() { }
     virtual ~DataReader() { }
 
     /**
@@ -70,26 +76,19 @@ public:
     virtual InputRecord *giveInputRecord(InputRecordType irType, int recordId) = 0;
 
     /**
-     * Reads the whole line
-     */
-    virtual std::string giveLine() { return ""; }
-    
-    /// Return a line number, which is helpful for tracking errors.
-    virtual int giveLineNumber() { return lineNumber; };
-    
-    /**
      * Allows to detach all data connections.
      */
     virtual void finish() = 0;
+
+    /// Gives the output file name
+    std::string giveOutputFileName() { return this->outputFileName; }
+    /// Gives the problem description
+    std::string giveDescription() { return this->description; }
 
     /// Prints the name (shortened) of data source.
     virtual const char *giveDataSourceName() const = 0;
     /// Prints the error message.
     void report_error(const char *_class, const char *proc, const char *kwd, IRResultType result, const char *file, int line);
-    
-protected:
-    /// Keep track of read line from stream. Used for error repors.
-    int lineNumber;
 };
 } // end namespace oofem
 #endif // datareader_h

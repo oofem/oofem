@@ -256,7 +256,7 @@ LineSearchNM :: initializeFrom(InputRecord *ir)
      * amplifFactor = 2.5;
      * maxEta = 4.0;
      */
-    IR_GIVE_OPTIONAL_FIELD(ir, ls_tolerance, IFT_LineSearchNM_lsearchtol, "lsearchtol"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, ls_tolerance, IFT_LineSearchNM_lsearchtol, "lsearchtol");
     if ( ls_tolerance < 0.6 ) {
         ls_tolerance = 0.6;
     }
@@ -265,7 +265,7 @@ LineSearchNM :: initializeFrom(InputRecord *ir)
         ls_tolerance = 0.95;
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, amplifFactor, IFT_LineSearchNM_lsearchamp, "lsearchamp"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, amplifFactor, IFT_LineSearchNM_lsearchamp, "lsearchamp");
     if ( amplifFactor < 1.0 ) {
         amplifFactor = 1.0;
     }
@@ -274,7 +274,7 @@ LineSearchNM :: initializeFrom(InputRecord *ir)
         amplifFactor = 10.0;
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, maxEta, IFT_LineSearchNM_lsearchmaxeta, "lsearchmaxeta"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, maxEta, IFT_LineSearchNM_lsearchmaxeta, "lsearchmaxeta");
     if ( maxEta < 1.5 ) {
         maxEta = 1.5;
     }

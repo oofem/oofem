@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -39,8 +39,7 @@
 
 namespace oofem {
 /**
- * Class representing implementation of quadratic  interpolation class.
- * @author 
+ * Second order triangular interpolation in 3D space (6 nodes).
  * @todo This class is entirely unchecked.
  */
 class FEI3dTrQuad : public FEInterpolation3d
@@ -49,8 +48,7 @@ public:
     FEI3dTrQuad() : FEInterpolation3d(2) { }
 
     // Bulk
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    
+    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);    
     virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
@@ -63,17 +61,8 @@ public:
     virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo); 
     void surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords);
     
-
-
-    /**
-     * Returns a characteristic length of the geometry, typically a diagonal or edge length.
-     * @param cellgeo Underlying cell geometry.
-     * @return Square root of area.
-     */
-    virtual double giveCharacteristicLength(const FEICellGeometry &cellgeo) const;
-
     // Edge
-    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
             void edgeEvaldNdxi(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeEvaldNdx(FloatMatrix &answer, int iedge,
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo);
@@ -84,7 +73,7 @@ public:
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
 
     // Surface
-    virtual void surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void surfaceEvaldNdx(FloatMatrix &answer, int isurf,
                    const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double surfaceEvalNormal(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

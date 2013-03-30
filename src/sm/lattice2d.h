@@ -37,6 +37,13 @@
 
 #include "latticestructuralelement.h"
 
+///@name Input fields for Lattice2d
+//@{
+#define _IFT_Lattice2d_thick "thick"
+#define _IFT_Lattice2d_width "width"
+#define _IFT_Lattice2d_gpcoords "gpcoords"
+//@}
+
 namespace oofem {
 /**
  * This class implements a 2-dimensional lattice element
@@ -95,6 +102,9 @@ public:
     virtual void drawRawGeometry(oofegGraphicContext &);
     virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
     virtual void drawSpecial(oofegGraphicContext &gc);
+    void drawRawCrossSections(oofegGraphicContext &gc);
+    void giveCrossSectionCoordinates(FloatArray &coords);
+    void drawDeformedCrossSections(oofegGraphicContext &, UnknownType);
 #endif
 
 protected:

@@ -296,29 +296,14 @@ public:
      * @param topCol Index of top column of sub-matrix.
      * @param bottomCol index of bottom column of sub-matrix.
      */
-    void beSubMatrixOf(const FloatMatrix &src, int topRow,
-                       int bottomRow, int topCol, int bottomCol);
+    void beSubMatrixOf(const FloatMatrix &src, int topRow, int bottomRow, int topCol, int bottomCol);
     /**
-     * Assigns to the receiver the sub matrix of another matrix.
-     * Works only for square matrices. Should produce bigger matrix than source matrix.
-     * @param src Source matrix.
-     * @param indx Receiver (i.e. sub-matrix) will resize to square matrix of size given by
-     * maximum value found in indx parameter. On its position (indx->at(i), indx->at(j)) the
-     * value of src->at(i,j) will be stored. If one of indx->at(i), indx->at(j) indexes is
-     * less or equal to zero, then on this position zero will be stored.
+     * Modifies receiver to be a sub-matrix of another matrix.
+     * @param src Matrix from which sub-matrix is taken
+     * @param indxRow Array of the row indices to be extracted
+     * @param indxCol Array of the column indices to be extracted
      */
-    void beSubMatrixOf(const FloatMatrix &src, const IntArray &indx);
-    /**
-     * Assigns to the receiver the sub matrix of another matrix.
-     * Works only for square matrices. Should produce bigger matrix than source matrix.
-     * @param src Source matrix.
-     * @param indx Describes sub-matrix extraction. On receiver  position
-     * (indx->at(i), indx->at(j)) the
-     * value of src->at(i,j) will be stored. If one of indx->at(i), indx->at(j) indexes is
-     * less or equal to zero, then on this position zero will be stored.
-     * @param size Receiver becomes square (size, size) matrix.
-     */
-    void beSubMatrixOfSizeOf(const FloatMatrix &src, const IntArray &indx, int size);
+    void beSubMatrixOf(const FloatMatrix &src, const IntArray &indxRow, const IntArray &indxCol);
     /**
      * Adds given vector to receiver starting at given position.
      * @param src Source matrix.
@@ -489,15 +474,15 @@ public:
      * Exposes the internal values of the matrix. Should typically not be used outside of matrix classes.
      * @return Pointer to the values of the matrix.
      */
-    double *givePointer()  const { return values; }
+    double *givePointer() const { return values; }
 
     /**
      * Reciever will be a 3x3 matrix formed from a vector with either 9 or 6 components.
-	 * Order of matrix components in vector: 11, 22, 33, 23, 13, 12, 32, 31, 21 
-	 * If size(aArray) = 6, a symmetric matrix will be created.
-	 * @param aArray Array to transform.
+     * Order of matrix components in vector: 11, 22, 33, 23, 13, 12, 32, 31, 21 
+     * If size(aArray) = 6, a symmetric matrix will be created.
+     * @param aArray Array to transform.
      */
-    void beMatrixForm(const FloatArray &aArray);
+    void beMatrixFormOfStress(const FloatArray &aArray);
 
     // Overloaded methods:
     contextIOResultType storeYourself(DataStream *stream, ContextMode mode);

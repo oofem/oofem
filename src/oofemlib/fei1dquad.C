@@ -89,14 +89,11 @@ FEI1dQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FE
     c = x3 - coords.at(1);
 
     answer.resize(1);
-    if(fabs(a)<10.e-6)
-    {
+    if( fabs(a) < 1.e-6 ) {
         double ksi = ( 2.0 * coords.at(1) - ( x1 + x2 ) ) / ( x2 - x1 );
         answer.at(1) = clamp(ksi, -1., 1.);
         return fabs(ksi) <= 1.0;
-    }
-    else
-    {
+    } else {
         double ksi1 = (-b+sqrt(b*b-4.*a*c))/(2.*a);
         double ksi2 = (-b-sqrt(b*b-4.*a*c))/(2.*a);
 

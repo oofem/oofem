@@ -166,8 +166,8 @@ Quad1Mindlin :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Quad1Mindlin_nip, "nip"); // Macro
-    this->computeGaussPoints();
+    this->numberOfGaussPoints = 4;
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
     return this->NLStructuralElement :: initializeFrom(ir);
 }
 
@@ -237,13 +237,13 @@ int
 Quad1Mindlin :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 {
     if ( type == IST_ShellForceMomentumTensor ) {
-        answer = ( ( StructuralMaterialStatus * ) this->giveMaterial()->giveStatus(gp) )->giveStressVector();
+        answer = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStressVector();
         return 1;
     } else if ( type == IST_ShellStrainCurvatureTensor ) {
-        answer = ( ( StructuralMaterialStatus * ) this->giveMaterial()->giveStatus(gp) )->giveStrainVector();
+        answer = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStrainVector();
         return 1;
     } else {
-      return NLStructuralElement::giveIPValue(answer, gp, type, atTime);
+        return NLStructuralElement::giveIPValue(answer, gp, type, atTime);
     }
 }
 
@@ -282,7 +282,7 @@ Quad1Mindlin :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint 
     IntArray edgeNodes;
     FloatArray n;
 
-    this->interp_lin.edgeEvalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     this->interp_lin.computeLocalEdgeMapping(edgeNodes, iedge);
 
     answer.beNMatrixOf(n, 3);

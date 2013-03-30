@@ -151,9 +151,7 @@ InterfaceElem2dQuad :: computeVolumeAround(GaussPoint *aGaussPoint)
 IRResultType
 InterfaceElem2dQuad :: initializeFrom(InputRecord *ir)
 {
-    this->StructuralElement :: initializeFrom(ir);
-    this->computeGaussPoints();
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 
@@ -167,7 +165,6 @@ InterfaceElem2dQuad :: giveDofManDofIDMask(int inode, EquationID, IntArray &answ
 bool
 InterfaceElem2dQuad :: computeGtoLRotationMatrix(FloatMatrix &answer)
 {
-    int i;
     FloatArray grad(2);
 
     //double ksi = gp -> giveCoordinate(1) ;
@@ -182,7 +179,7 @@ InterfaceElem2dQuad :: computeGtoLRotationMatrix(FloatMatrix &answer)
     grad.normalize();
 
     answer.resize(12, 12);
-    for ( i = 0; i < 6; i++ ) {
+    for ( int i = 0; i < 6; i++ ) {
         answer.at(i * 2 + 1, i * 2 + 1) = grad.at(1);
         answer.at(i * 2 + 1, i * 2 + 2) = grad.at(2);
         answer.at(i * 2 + 2, i * 2 + 1) = -grad.at(2);

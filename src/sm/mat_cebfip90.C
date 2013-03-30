@@ -92,7 +92,7 @@ CebFipSlip90Material :: giveRealStressVector(FloatArray &answer, MatResponseForm
 // strain increment, the only way, how to correctly update gp records
 //
 {
-    CebFipSlip90MaterialStatus *status = ( CebFipSlip90MaterialStatus * ) this->giveStatus(gp);
+    CebFipSlip90MaterialStatus *status = static_cast< CebFipSlip90MaterialStatus * >( this->giveStatus(gp) );
     FloatArray reducedTotalStrainVector;
     double f, slip, tempKappa;
 
@@ -265,7 +265,7 @@ CebFipSlip90Material :: give1dInterfaceMaterialStiffnessMatrix(FloatMatrix &answ
                                                                GaussPoint *gp, TimeStep *atTime)
 {
     double kappa;
-    CebFipSlip90MaterialStatus *status = ( CebFipSlip90MaterialStatus * ) this->giveStatus(gp);
+    CebFipSlip90MaterialStatus *status = static_cast< CebFipSlip90MaterialStatus * >( this->giveStatus(gp) );
     answer.resize(1, 1);
 
     if ( ( rMode == ElasticStiffness ) || ( rMode == SecantStiffness ) ) {
@@ -333,12 +333,12 @@ CebFipSlip90Material :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, tmax, IFT_CebFipSlip90Material_tmax, "tmax"); // Macro
-    IR_GIVE_FIELD(ir, tres, IFT_CebFipSlip90Material_tres, "tres"); // Macro
+    IR_GIVE_FIELD(ir, tmax, IFT_CebFipSlip90Material_tmax, "tmax");
+    IR_GIVE_FIELD(ir, tres, IFT_CebFipSlip90Material_tres, "tres");
 
-    IR_GIVE_FIELD(ir, s1, IFT_CebFipSlip90Material_s1, "s1"); // Macro
-    IR_GIVE_FIELD(ir, s2, IFT_CebFipSlip90Material_s2, "s2"); // Macro
-    IR_GIVE_FIELD(ir, s3, IFT_CebFipSlip90Material_s3, "s3"); // Macro
+    IR_GIVE_FIELD(ir, s1, IFT_CebFipSlip90Material_s1, "s1");
+    IR_GIVE_FIELD(ir, s2, IFT_CebFipSlip90Material_s2, "s2");
+    IR_GIVE_FIELD(ir, s3, IFT_CebFipSlip90Material_s3, "s3");
 
     alpha = 0.4;
     return StructuralMaterial :: initializeFrom(ir);

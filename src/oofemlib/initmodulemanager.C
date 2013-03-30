@@ -50,7 +50,7 @@ InitModuleManager :: initializeFrom(InputRecord *ir)
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
     this->numberOfModules = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfModules, IFT_InitModuleManager_nmodules, "ninitmodules"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfModules, IFT_ModuleManager_nmodules, "ninitmodules");
     return IRRT_OK;
 }
 
@@ -63,7 +63,7 @@ void
 InitModuleManager :: doInit()
 {
     for ( int i = 1; i <= numberOfModules; i++ ) {
-        ( ( InitModule * ) this->giveModule(i) )->doInit();
+        this->giveModule(i)->doInit();
     }
 }
 } // end namespace oofem

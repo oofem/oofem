@@ -47,6 +47,25 @@
   #include "range.h"
  #endif
 
+ ///@name Input fields for LoadBalancer
+//@{
+#define _IFT_LoadBalancer_wtp "wtp"
+#define _IFT_LoadBalancerMonitor_nodeWeightMode "nodeweightmode"
+#define _IFT_LoadBalancerMonitor_initialnodeweights "nw"
+//@}
+
+///@name Input fields for WallClockLoadBalancerMonitor
+//@{
+#define _IFT_WallClockLoadBalancerMonitor_relwct "relwct"
+#define _IFT_WallClockLoadBalancerMonitor_abswct "abswct"
+#define _IFT_WallClockLoadBalancerMonitor_minwct "minwct"
+#define _IFT_WallClockLoadBalancerMonitor_lbstep "lbstep"
+#define _IFT_WallClockLoadBalancerMonitor_perturbedsteps "lbperturbedsteps"
+#define _IFT_WallClockLoadBalancerMonitor_perturbfactor "lbperturbfactor"
+#define _IFT_WallClockLoadBalancerMonitor_recoveredsteps "lbrecoveredsteps"
+#define _IFT_WallClockLoadBalancerMonitor_processingweights "lbprocessingweights"
+//@}
+
 namespace oofem {
 
 class Domain;
@@ -197,7 +216,7 @@ public:
     /// Returns reference to its domain.
     Domain *giveDomain() { return domain; }
     /// sets associated Domain
-    virtual void         setDomain(Domain *d) { this->domain = d; }
+    virtual void setDomain(Domain *d) { this->domain = d; }
     /// Returns class name of the receiver.
     const char *giveClassName() const { return "LoadBalancer"; }
 

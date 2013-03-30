@@ -68,7 +68,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
     this->numberOfDofMans = dofManArray.giveSize();
     this->giveInterpolation()->initializeFrom(ir); // read geometry
 
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_IGAElement_NIP, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
     // generate individual IntegrationElements; one for each nonzero knot span
     nsd = this->giveNsd();
@@ -179,7 +179,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
     this->knotSpanParallelMode.resize(numberOfKnotSpans);
     // set Element_local as default
     for ( int i = 1; i <= numberOfKnotSpans; i++) knotSpanParallelMode.at(i) = Element_local;
-    IR_GIVE_OPTIONAL_FIELD(ir, knotSpanParallelMode, IFT_IGAElement_KnotSpanParallelMode, "knotspanparmode"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, knotSpanParallelMode, IFT_IGAElement_KnotSpanParallelMode, "knotspanparmode");
 #endif
 
 
@@ -212,7 +212,7 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
-    TSplineInterpolation *interpol = ( TSplineInterpolation * ) this->giveInterpolation();
+    TSplineInterpolation *interpol = static_cast< TSplineInterpolation * >( this->giveInterpolation() );
 
     int indx = 0, ui, vi, i, nsd, numberOfGaussPoints = 1;
     double du, dv;
@@ -227,7 +227,7 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
     interpol->setNumberOfControlPoints(this->numberOfDofMans);
     this->giveInterpolation()->initializeFrom(ir); // read geometry
 
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_IGAElement_NIP, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
     // generate individual IntegrationElements; one for each nonzero knot span
     nsd = giveNsd();
@@ -360,7 +360,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc)
             }
         }                 // end loop over knot spans (irules)
 
-    } else if ( nsd == 2 )      {
+    } else if ( nsd == 2 ) {
         FloatArray c [ 4 ], cg [ 4 ];
         double du, dv;
 
@@ -465,7 +465,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc)
             }
         }                 // end loop over knot spans (irules)
 
-    } else if ( nsd == 3 )      {
+    } else if ( nsd == 3 ) {
         FloatArray c [ 8 ], cg [ 8 ];
         double du, dv, dt;
 
@@ -1001,7 +1001,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc)
             }
         }                 // end loop over knot spans (irules)
 
-    } else   {
+    } else {
         OOFEM_ERROR2("drawRawGeometry: not implemented for nsd = %d", nsd);
     }
 }
@@ -1098,7 +1098,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
             }
         }                 // end loop over knot spans (irules)
 
-    } else if ( nsd == 2 )      {
+    } else if ( nsd == 2 ) {
         FloatArray c [ 4 ], cg [ 4 ];
         double du, dv;
 
@@ -1157,7 +1157,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
             }
         }                 // end loop over knot spans (irules)
 
-    } else if ( nsd == 3 )      {
+    } else if ( nsd == 3 ) {
         FloatArray c [ 8 ], cg [ 8 ];
         double du, dv, dt;
 
@@ -1235,7 +1235,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
             }
         }                 // end loop over knot spans (irules)
 
-    } else   {
+    } else {
         OOFEM_ERROR2("drawDeformedGeometry: not implemented for nsd = %d", nsd);
     }
 }

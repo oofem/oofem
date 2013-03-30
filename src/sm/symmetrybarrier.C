@@ -126,8 +126,8 @@ SymmetryBarrier :: initializeFrom(InputRecord *ir)
     FloatArray normals;
     int j;
 
-    IR_GIVE_FIELD(ir, origin, IFT_SymmetryBarrier_origin, "origin"); // Macro
-    IR_GIVE_FIELD(ir, normals, IFT_SymmetryBarrier_normals, "normals"); // Macro
+    IR_GIVE_FIELD(ir, origin, IFT_SymmetryBarrier_origin, "origin");
+    IR_GIVE_FIELD(ir, normals, IFT_SymmetryBarrier_normals, "normals");
 
 
     lcs.resize(3, 3);
@@ -163,7 +163,7 @@ SymmetryBarrier :: initializeFrom(InputRecord *ir)
         lcs.at(3, 3) = lcs.at(1, 1) * lcs.at(2, 2) - lcs.at(1, 2) * lcs.at(2, 1);
     }
 
-    IR_GIVE_FIELD(ir, mask, IFT_SymmetryBarrier_activemask, "activemask"); // Macro
+    IR_GIVE_FIELD(ir, mask, IFT_SymmetryBarrier_activemask, "activemask");
     if ( mask.giveSize() != 3 ) {
         _error("instanciateFrom: activemask size should be 3");
     }

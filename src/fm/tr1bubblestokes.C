@@ -58,7 +58,6 @@ Tr1BubbleStokes :: Tr1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomai
 {
     this->numberOfDofMans = 3;
     this->numberOfGaussPoints = 7;
-    this->computeGaussPoints();
     
     this->bubble = new ElementDofManager(1, aDomain, this);
     this->bubble->appendDof(new MasterDof(1, this->bubble, V_u));
@@ -100,7 +99,7 @@ int Tr1BubbleStokes :: computeNumberOfDofs(EquationID ut)
 
 void Tr1BubbleStokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
+    if ( ut == EID_MomentumBalance ) {
         answer.setValues(2, V_u, V_v);
     } else if ( ut == EID_ConservationEquation ) {
         answer.setValues(1, P_f);
@@ -117,7 +116,7 @@ void Tr1BubbleStokes :: giveInternalDofManDofIDMask(int i, EquationID eid, IntAr
         answer.setValues(2, V_u, V_v);
     } else {
         answer.resize(0);
-    }    
+    }
 }
 
 double Tr1BubbleStokes :: computeVolumeAround(GaussPoint *gp)
@@ -152,7 +151,7 @@ void Tr1BubbleStokes :: giveCharacteristicMatrix(FloatMatrix &answer,
 void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    FluidDynamicMaterial *mat = ( FluidDynamicMaterial * ) this->domain->giveMaterial(this->material);
+    FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     FloatArray a_pressure, a_velocity, devStress, epsp, BTs, N, dNv(8);
     double r_vol, pressure;
     FloatMatrix dN, B(3, 8);
@@ -276,7 +275,7 @@ void Tr1BubbleStokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load,
     answer.zero();
 
     if ( load->giveType() == TransmissionBC ) { // Neumann boundary conditions (traction)
-        BoundaryLoad *boundaryLoad = ( BoundaryLoad * ) load;
+        BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >( load );
 
         int numberOfEdgeIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 2. ) / 2. );
 
@@ -292,13 +291,13 @@ void Tr1BubbleStokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load,
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            this->interp.edgeEvalN(N, * lcoords, FEIElementGeometryWrapper(this));
+            this->interp.edgeEvalN(N, iEdge, * lcoords, FEIElementGeometryWrapper(this));
             double detJ = fabs(this->interp.edgeGiveTransformationJacobian(iEdge, * lcoords, FEIElementGeometryWrapper(this)));
             double dS = gp->giveWeight() * detJ;
 
             if ( boundaryLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) { // Edge load in xi-eta system
                 boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
-            } else   { // Edge load in x-y system
+            } else { // Edge load in x-y system
                 FloatArray gcoords;
                 this->interp.edgeLocal2global(gcoords, iEdge, * lcoords, FEIElementGeometryWrapper(this));
                 boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
@@ -312,7 +311,7 @@ void Tr1BubbleStokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load,
         }
 
         answer.assemble(f, this->edge_ordering [ iEdge - 1 ]);
-    } else   {
+    } else {
         OOFEM_ERROR("Tr1BubbleStokes :: computeEdgeBCSubVectorAt - Strange boundary condition type");
     }
 }
@@ -320,7 +319,7 @@ void Tr1BubbleStokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load,
 void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     // Note: Working with the components; [K, G+Dp; G^T+Dv^T, C] . [v,p]
-    FluidDynamicMaterial *mat = ( FluidDynamicMaterial * ) this->domain->giveMaterial(this->material);
+    FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     GaussPoint *gp;
     FloatMatrix B(3, 8), EdB, K(8,8), G, Dp, DvT, C, Ed, dN;

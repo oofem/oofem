@@ -282,7 +282,6 @@ LIBeam3dNL2 :: computeXMtrx(FloatMatrix &answer, TimeStep *tStep)
 void
 LIBeam3dNL2 :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    int i, j;
     Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
@@ -295,15 +294,15 @@ LIBeam3dNL2 :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int
     this->computeRotMtrxFromQuaternion(tempTc, this->tempQ);
 
     if ( useUpdatedGpRecord == 1 ) {
-        TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )
+        TotalStressVector = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )
                             ->giveStressVector();
     } else {
         this->computeStressVector(TotalStressVector, gp, tStep);
     }
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         s1 = s2 = 0.0;
-        for ( j = 1; j <= 3; j++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             s1 += tempTc.at(i, j) * TotalStressVector.at(j);
             s2 += tempTc.at(i, j) * TotalStressVector.at(j + 3);
         }
@@ -445,7 +444,7 @@ LIBeam3dNL2 :: initializeFrom(InputRecord *ir)
     // first call parent
     NLStructuralElement :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, referenceNode, IFT_LIBeam3dNL2_refnode, "refnode"); // Macro
+    IR_GIVE_FIELD(ir, referenceNode, IFT_LIBeam3dNL2_refnode, "refnode");
     if ( referenceNode == 0 ) {
         _error("instanciateFrom: wrong reference node specified");
     }
@@ -460,13 +459,13 @@ LIBeam3dNL2 :: initializeFrom(InputRecord *ir)
      * }
      */
 
+    ///@todo Move this to postInitialize?
     // compute initial triad at centre - requires nodal coordinates
     FloatMatrix lcs, tc;
     this->giveLocalCoordinateSystem(lcs);
     tc.beTranspositionOf(lcs);
 
     this->computeQuaternionFromRotMtrx(q, tc);
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 
@@ -877,7 +876,7 @@ LIBeam3dNL2 :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
     }
 
     // ask for previous kappa
-    PrevEpsilon = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveStrainVector();
+    PrevEpsilon = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStrainVector();
     if ( PrevEpsilon.giveSize() ) {
         answer.at(1) += PrevEpsilon.at(4);
         answer.at(2) += PrevEpsilon.at(5);

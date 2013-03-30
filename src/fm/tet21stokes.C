@@ -45,12 +45,12 @@
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "fluiddynamicmaterial.h"
-#include "fei3dtrlin.h"
+#include "fei3dtetlin.h"
 #include "fei3dtetquad.h"
 
 namespace oofem {
 // Set up interpolation coordinates
-FEI3dTrLin Tet21Stokes :: interpolation_lin;
+FEI3dTetLin Tet21Stokes :: interpolation_lin;
 FEI3dTetQuad Tet21Stokes :: interpolation_quad;
 // Set up ordering vectors (for assembling)
 IntArray Tet21Stokes :: momentum_ordering(30);
@@ -64,7 +64,6 @@ Tet21Stokes :: Tet21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 {
     this->numberOfDofMans = 10;
     this->numberOfGaussPoints = 4;
-    this->computeGaussPoints();
 }
 
 Tet21Stokes :: ~Tet21Stokes()
@@ -108,7 +107,7 @@ void Tet21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answ
     // in six nodes and pressure in three nodes the answer depends on which node is requested.
 
     if ( inode <= 4 ) {
-        if ( ut == EID_MomentumBalance || ut == EID_AuxMomentumBalance ) {
+        if ( ut == EID_MomentumBalance ) {
             answer.setValues(3, V_u, V_v, V_w);
         } else if ( ut == EID_ConservationEquation ) {
             answer.setValues(1, P_f);
@@ -117,8 +116,8 @@ void Tet21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answ
         } else {
             OOFEM_ERROR("Tet21Stokes :: giveDofManDofIDMask: Unknown equation id encountered");
         }
-    } else if ( inode <= 10 ) {
-        if ( ut == EID_MomentumBalance || ut == EID_AuxMomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
+    } else {
+        if ( ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
             answer.setValues(3, V_u, V_v, V_w);
         } else if ( ut == EID_ConservationEquation ) {
             answer.resize(0);
@@ -126,7 +125,6 @@ void Tet21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answ
             OOFEM_ERROR("Tet21Stokes :: giveDofManDofIDMask: Unknown equation id encountered");
         }
     }
-    answer.resize(0);
 }
 
 void Tet21Stokes :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
@@ -156,7 +154,7 @@ void Tet21Stokes :: giveCharacteristicMatrix(FloatMatrix &answer,
 void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    FluidDynamicMaterial *mat = ( FluidDynamicMaterial * ) this->domain->giveMaterial(this->material);
+    FluidDynamicMaterial *mat = static_cast<FluidDynamicMaterial * >( this->giveMaterial() );
     FloatArray a_pressure, a_velocity, devStress, epsp, BTs, Nh, dN_V(30);
     FloatMatrix dN, B(4, 60);
     double r_vol, pressure;
@@ -269,7 +267,7 @@ void Tet21Stokes :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load, 
     answer.zero();
 
     if ( load->giveType() == TransmissionBC ) { // Neumann boundary conditions (traction)
-        BoundaryLoad *boundaryLoad = ( BoundaryLoad * ) load;
+        BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >( load );
 
         int numberOfSurfaceIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 1. ) / 2. ) * 2; ///@todo Check this.
 
@@ -284,12 +282,12 @@ void Tet21Stokes :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load, 
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            this->interpolation_quad.surfaceEvalN(N, * lcoords, FEIElementGeometryWrapper(this));
+            this->interpolation_quad.surfaceEvalN(N, iSurf, * lcoords, FEIElementGeometryWrapper(this));
             double dA = gp->giveWeight() * this->interpolation_quad.surfaceGiveTransformationJacobian(iSurf, * lcoords, FEIElementGeometryWrapper(this));
 
             if ( boundaryLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) { // load in xi-eta system
                 boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
-            } else   { // Edge load in x-y system
+            } else { // Edge load in x-y system
                 FloatArray gcoords;
                 this->interpolation_quad.surfaceLocal2global(gcoords, iSurf, * lcoords, FEIElementGeometryWrapper(this));
                 boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
@@ -311,7 +309,7 @@ void Tet21Stokes :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load, 
 
 void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
-    FluidDynamicMaterial *mat = ( FluidDynamicMaterial * ) this->domain->giveMaterial(this->material);
+    FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     GaussPoint *gp;
     FloatMatrix B(6, 60), EdB, K, G, Dp, DvT, C, Ed, dN;
@@ -496,7 +494,7 @@ void Tet21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answe
 
             answer.at(1) = ( a + b ) / 2;
         }
-    } else   {
+    } else {
         answer.resize(0);
     }
 }

@@ -14,7 +14,6 @@ set (tm_emodel
     stationarytransportproblem.C
     nonstationarytransportproblem.C
     nltransienttransportproblem.C
-    staggeredproblem.C
     darcyflow.C
     )
 
@@ -42,6 +41,7 @@ set (tm_material
     isomoisturemat.C
     isolinmoisturemat.C
     bazantnajjarmat.C
+    nlisomoisturemat.C
     hydratingconcretemat.C
     nonlinearmassmat.C
     anisomassmat.C

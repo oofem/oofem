@@ -47,6 +47,23 @@
 #include "contextioresulttype.h"
 #include "unknowntype.h"
 
+///@name Input fields for DofManager
+//@{
+#define _IFT_DofManager_ndofs "ndofs"
+#define _IFT_DofManager_dofidmask "dofidmask"
+#define _IFT_DofManager_load "load"
+#define _IFT_DofManager_bc "bc"
+#define _IFT_DofManager_ic "ic"
+#define _IFT_DofManager_mastermask "mastermask"
+#define _IFT_DofManager_doftypemask "doftype"
+#define _IFT_DofManager_boundaryflag "boundary"
+#define _IFT_DofManager_globnum "globnum"
+#define _IFT_DofManager_partitions "partitions"
+#define _IFT_DofManager_sharedflag "shared"
+#define _IFT_DofManager_remoteflag "remote"
+#define _IFT_DofManager_nullflag "nullflag"
+//@}
+
 namespace oofem {
 
 class DataStream;
@@ -183,8 +200,17 @@ public:
      * @param s Determines the equation numbering scheme.
      * @see Element::giveDofManDofIDMask.
      */
-    virtual void giveLocationArray(const IntArray &dofIDArry, IntArray &locationArray,
-                                           const UnknownNumberingScheme &s) const;
+    void giveLocationArray(const IntArray &dofIDArry, IntArray &locationArray,
+                           const UnknownNumberingScheme &s) const;
+    /**
+     * Returns master dof ID array of receiver.
+     * @param dofIDArry Array containing dof mask. This mask containing DofIDItem values
+     * (they describe physical meaning of dofs, see cltypes.h) is used to extract only
+     * required values. If dof with requested physical meaning does not exist in receiver,
+     * an error is generated and execution exits.
+     * @param masterDofIDs Master dof ID array.
+     */
+    void giveMasterDofIDArray(const IntArray &dofIDArry, IntArray &masterDofIDs) const;
     /**
      * Returns full location array of receiver containing equation numbers of all dofs
      * of receiver. Their order is specific to every DofManager. Mainly used at EngngModel level
@@ -192,7 +218,13 @@ public:
      * @param locationArray Complete location array of receiver.
      * @param s Determines the equation numbering scheme.
      */
-    virtual void giveCompleteLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s) const;
+    void giveCompleteLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s) const;
+    /**
+     * Returns the full dof ID array of receiver. 
+     * Mainly used at EngngModel level to assemble internal norms fronm DofManager contribution (typically load vector).
+     * @param dofIDaArray Complete dof ID array of receiver.
+     */
+    void giveCompleteMasterDofIDArray(IntArray &dofIDArray) const;
     /**
      * Returns DOFs numbers of receiver with required physical meaning.
      * @param dofIDArray Array containing DofIDItem-type values (this is enumeration
@@ -234,13 +266,20 @@ public:
      * an error is generated and execution exits.
      * @param field Primary field.
      * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
-     * @param stepN Time step when unknown requested. See documentation of particular EngngModel
-     * class for valid StepN values (most implementation can return only values for current
+     * @param stepN Time step when unknown is requested. See documentation of particular EngngModel
+     * class for valid stepN values (most implementation can return only values for current
      * and possibly for previous time step).
      * @see Dof::giveUnknown
      */
     virtual void giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
                                    PrimaryField &field, ValueModeType mode, TimeStep *stepN);
+    /**
+     * Assembles the complete unknown vector in node. Does not transform and local->global coordinate systems.
+     * @param answer Complete vector of all dof values in receiver.
+     * @param mode Mode of unknowns.
+     * @param tstepN Time step when unknown is requested.
+     */
+    void giveCompleteUnknownVector(FloatArray &answer, EquationID type, ValueModeType mode, TimeStep *stepN);
     /**
      * Constructs the requested vector by assembling e.g. [D_u, D_v, D_w] or [V_u, V_v, V_w].
      * If for example D_v or V_w doesn't exist, then zero value is inserted.
@@ -355,7 +394,7 @@ public:
      * Updates receiver after equilibrium in time step has been reached.
      * @param tStep Active time step.
      */
-    void updateYourself(TimeStep *tStep);
+    virtual void updateYourself(TimeStep *tStep);
 
     // Miscellaneous
     /// @return True if dofmanager is on boundary.
@@ -387,12 +426,9 @@ public:
     /// Returns true if dof of given type is allowed to be associated to receiver
     virtual bool isDofTypeCompatible(dofType type) const { return false; }
     /**
-     * Checks internal data consistency in node.
-     * Current implementation checks (when receiver has slave dofs) if receiver has the same
-     * coordinate system as master dofManager of slave dof.
-     * @return Nonzero if receiver check is o.k.
+     * Performs post-initialization such like checking if there are any slave dofs etc.
      */
-    virtual int checkConsistency();
+    virtual void postInitialize();
     /**
      * Local renumbering support. For some tasks (parallel load balancing, for example) it is necessary to
      * renumber the entities. The various FEM components (such as nodes or elements) typically contain
@@ -488,12 +524,13 @@ public:
     bool isShared() { if ( parallel_mode == DofManager_shared ) { return true; } else { return false; } }
 #endif
 
+    IntArray *giveCompleteGlobalDofIDArray() const; // JB - made it public
+
 protected:
     virtual IRResultType resolveDofIDArray(InputRecord *ir, IntArray &dofIDArry);
 
     /// Computes transformation matrix between DOFs in nodal c.s. and master DOFs.
     void computeSlaveDofTransformation(FloatMatrix &answer, const IntArray *dofMask);
-    IntArray *giveCompleteGlobalDofIDArray() const;
 };
 } // end namespace oofem
 #endif // dofmanager_h

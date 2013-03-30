@@ -34,7 +34,8 @@
 
 #ifndef qtrplstrgrad_h
 #define qtrplstrgrad_h
-#include "structuralelement.h"
+
+#include "nlstructuralelement.h"
 #include "gaussintegrationrule.h"
 #include "graddpelement.h"
 #include "qtrplstr.h"
@@ -70,6 +71,8 @@ protected:
     virtual void computeGaussPoints();
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual StructuralElement *giveStructuralElement() { return this; }
+    virtual NLStructuralElement *giveNLStructuralElement() { return this; }
+    
 };
 } // end namespace oofem
 #endif // qtrplstrgrad_h

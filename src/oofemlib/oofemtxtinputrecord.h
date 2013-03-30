@@ -60,6 +60,8 @@ protected:
     /// Record representation.
     std::string record;
 
+    int lineNumber;
+
 public:
     /// Constructor. Creates an empty input record.
     OOFEMTXTInputRecord();
@@ -85,19 +87,23 @@ public:
 public:
     virtual IRResultType giveRecordKeywordField(std::string &answer, int &value);
     virtual IRResultType giveRecordKeywordField(std::string &answer);
-    virtual IRResultType giveField(int &answer, InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveField(double &answer, InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveField(std::string &answer, InputFieldType fieldI, const char *idString);
-    virtual IRResultType giveField(FloatArray &answer, InputFieldType fieldI, const char *idString);
-    virtual IRResultType giveField(IntArray &answer, InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveField(FloatMatrix &answer, InputFieldType fieldI, const char *idString);
-    virtual IRResultType giveField(std::vector< std::string > &answer, InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveField(Dictionary &answer, InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveField(std::list< Range > &answer, InputFieldType fieldID, const char *idString);
+    virtual IRResultType giveField(int &answer, InputFieldType id);
+    virtual IRResultType giveField(double &answer, InputFieldType id);
+    virtual IRResultType giveField(bool &answer, InputFieldType id);
+    virtual IRResultType giveField(std::string &answer, InputFieldType id);
+    virtual IRResultType giveField(FloatArray &answer, InputFieldType id);
+    virtual IRResultType giveField(IntArray &answer, InputFieldType id);
+    virtual IRResultType giveField(FloatMatrix &answer, InputFieldType id);
+    virtual IRResultType giveField(std::vector< std::string > &answer, InputFieldType id);
+    virtual IRResultType giveField(Dictionary &answer, InputFieldType id);
+    virtual IRResultType giveField(std::list< Range > &answer, InputFieldType id);
 
-    virtual IRResultType giveField(double &answer, int tokenNumber);
-    virtual bool hasField(InputFieldType fieldID, const char *idString);
+    virtual bool hasField(InputFieldType id);
     virtual void printYourself();
+
+    virtual void report_error(const char *_class, const char *proc, InputFieldType id,
+                              IRResultType result, const char *file, int line);
+    void setLineNumber(int lineNumber) { this->lineNumber = lineNumber; }
 
 protected:
     int giveKeywordIndx(const char *kwd);

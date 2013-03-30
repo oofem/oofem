@@ -53,9 +53,9 @@
 #ifdef __USE_MPI
 // if MPI used, include headers
  #include <mpi.h>
+ #define PROCESSOR_NAME_LENGTH MPI_MAX_PROCESSOR_NAME
+#else
+ #define PROCESSOR_NAME_LENGTH 1024
 #endif
 
-namespace oofem {
-#define PROCESSOR_NAME_LENGTH 60
-} // end namespace oofem
 #endif // parallel_h

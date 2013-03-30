@@ -37,6 +37,12 @@
 
 #include "loadtime.h"
 
+///@name Input fields for PeakFunction
+//@{
+#define _IFT_PeakFunction_t "t"
+#define _IFT_PeakFunction_ft "f(t)"
+//@}
+
 namespace oofem {
 /**
  * This class implements a function that is 0 everywhere, except in a single

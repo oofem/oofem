@@ -42,13 +42,18 @@
 
 #include "femcmpnn.h"
 #include "compiler.h"
-
 #include "interface.h"
 #include "remeshingcrit.h"
 #include "classtype.h"
 #include "errorestimatortype.h"
 #include "intarray.h"
 #include "internalstatetype.h"
+
+///@name Input fields for ErrorEstimator
+//@{
+#define _IFT_ErrorEstimator_regionskipmap "regionskipmap"
+#define _IFT_ErrorEstimator_IStype "istype"
+//@}
 
 namespace oofem {
 class Domain;

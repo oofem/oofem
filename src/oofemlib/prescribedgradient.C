@@ -136,9 +136,9 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
     domainType d = domain->giveDomainType();
     if ( d == _2dIncompressibleFlow || d == _3dIncompressibleFlow ) {
         dofType.setValues(3, V_u, V_v, V_w);
-    } else if ( d == _3dMode || d == _2dPlaneStressMode || d == _PlaneStrainMode || d == _2dTrussMode )     {
+    } else if ( d == _3dMode || d == _2dPlaneStressMode || d == _PlaneStrainMode || d == _2dTrussMode ) {
         dofType.setValues(3, D_u, D_v, D_w);
-    } else   {
+    } else {
         OOFEM_ERROR("PrescribedGradient :: updateCoefficientMatrix - Unsupported domain type to construct C matrix");
     }
 
@@ -170,7 +170,7 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
                 C.at(k2, 2) = coords->at(2) - ybar;
                 C.at(k2, 3) = coords->at(1) - xbar;
             }
-        } else   { // nsd == 3
+        } else { // nsd == 3
             OOFEM_ERROR("PrescribedGradient :: updateCoefficientMatrix - 3D Not tested yet!");
             Dof *d3 = n->giveDofWithID(dofType(2));
             int k3 = d3->__givePrescribedEquationNumber();
@@ -305,8 +305,8 @@ IRResultType PrescribedGradient :: initializeFrom(InputRecord *ir)
 
     GeneralBoundaryCondition :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, this->gradient, IFT_PrescribedTensor_gradient, "gradient");
-    IRResultType rt = IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, IFT_PrescribedTensor_centercoords, "ccoord")
+    IR_GIVE_FIELD(ir, this->gradient, IFT_PrescribedGradient_gradient, "gradient");
+    IRResultType rt = IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, IFT_PrescribedGradient_centercoords, "ccoord")
     if ( rt != IRRT_OK ) {
         this->centerCoord.resize( this->gradient.giveNumberOfColumns() );
         this->centerCoord.zero();

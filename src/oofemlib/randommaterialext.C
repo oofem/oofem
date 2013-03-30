@@ -66,8 +66,8 @@ RandomMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
 
     randVariables.resize(0);
     randomVariableGenerators.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, randVariables, IFT_RandomMaterialExt_randVariables, "randvars"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, randomVariableGenerators, IFT_RandomMaterialExt_randGen, "randgen"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, randVariables, IFT_RandomMaterialExt_randVariables, "randvars");
+    IR_GIVE_OPTIONAL_FIELD(ir, randomVariableGenerators, IFT_RandomMaterialExt_randGen, "randgen");
 
     if ( randVariables.giveSize() != randomVariableGenerators.giveSize() ) {
         OOFEM_ERROR("RandomMaterialExtensionInterface::_initializeFrom: Incompatible size of randvars and randdist attrs");
@@ -81,20 +81,20 @@ bool
 RandomMaterialExtensionInterface :: give(int key, GaussPoint *gp, double &value)
 {
     MaterialStatus *status = gp->giveMaterial()->giveStatus(gp);
-    RandomMaterialStatusExtensionInterface *interface = ( RandomMaterialStatusExtensionInterface * )
-                                                        status->giveInterface(RandomMaterialStatusExtensionInterfaceType);
+    RandomMaterialStatusExtensionInterface *interface = static_cast< RandomMaterialStatusExtensionInterface * >
+                                                        ( status->giveInterface(RandomMaterialStatusExtensionInterfaceType) );
     return interface->_giveProperty(key, value);
 }
 
 void
 RandomMaterialExtensionInterface :: _generateStatusVariables(GaussPoint *gp) const
 {
-    int i, size = randVariables.giveSize();
+    int size = randVariables.giveSize();
     double value;
-    RandomMaterialStatusExtensionInterface *status = ( RandomMaterialStatusExtensionInterface * )
-                                                     gp->giveMaterial()->giveStatus(gp)->giveInterface(RandomMaterialStatusExtensionInterfaceType);
+    RandomMaterialStatusExtensionInterface *status = static_cast< RandomMaterialStatusExtensionInterface * >
+                                                     ( gp->giveMaterial()->giveStatus(gp)->giveInterface(RandomMaterialStatusExtensionInterfaceType) );
 
-    for ( i = 1; i <= size; i++ ) {
+    for ( int i = 1; i <= size; i++ ) {
         gp->giveElement()->giveDomain()->
         giveRandomFieldGenerator( randomVariableGenerators.at(i) )->generateRandomValueAt(value, gp);
         status->_setProperty(randVariables.at(i), value);

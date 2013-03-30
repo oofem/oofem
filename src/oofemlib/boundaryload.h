@@ -40,6 +40,14 @@
 #include "valuemodetype.h"
 #include "dictionr.h"
 
+///@name Input fields for BoundaryLoad
+//@{
+#define _IFT_BoundaryLoad_ndofs "ndofs"
+#define _IFT_BoundaryLoad_loadtype "loadtype"
+#define _IFT_BoundaryLoad_cstype "cstype"
+#define _IFT_BoundaryLoad_properties "properties"
+//@}
+
 namespace oofem {
 class TimeStep;
 
@@ -107,6 +115,7 @@ public:
     enum BL_CoordSystType {
         BL_GlobalMode, ///< Global mode i.e. load is specified in global c.s.
         BL_LocalMode, ///< Local entity (edge or surface) coordinate system.
+        BL_UpdatedGlobalMode, ///< Load is specified in global c.s. and follows the deformation (only supported on el. level)
     };
 
     /**

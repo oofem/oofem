@@ -38,10 +38,16 @@
 #include "fluiddynamicmaterial.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-
 #include "matconst.h"
-#include "structuralelement.h"
 #include "matstatus.h"
+
+///@name Input fields for BinghamFluidMaterial
+//@{
+#define _IFT_BinghamFluidMaterial_mu0 "mu0"
+#define _IFT_BinghamFluidMaterial_tau0 "tau0"
+#define _IFT_BinghamFluidMaterial_muinf "muinf"
+#define _IFT_BinghamFluidMaterial_stressGrowthRate "stressgrowthrate"
+//@}
 
 namespace oofem {
 class GaussPoint;
@@ -115,7 +121,7 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    BinghamFluidMaterial2(int n, Domain *d) : FluidDynamicMaterial(n, d) { mu_inf = 1.e6; stressGrowthRate=BINGHAM_DEFAULT_STRESS_GROWTH_RATE;}
+    BinghamFluidMaterial2(int n, Domain *d);
     /// Destructor.
     virtual ~BinghamFluidMaterial2() { }
 

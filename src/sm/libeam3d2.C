@@ -185,8 +185,6 @@ LIBeam3d2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, 
 bool
 LIBeam3d2 :: computeGtoLRotationMatrix(FloatMatrix &answer)
 {
-    int i, j;
-
     answer.resize(12, 12);
     answer.zero();
 
@@ -194,8 +192,8 @@ LIBeam3d2 :: computeGtoLRotationMatrix(FloatMatrix &answer)
         FloatMatrix lcs;
 
         this->giveLocalCoordinateSystem(lcs);
-        for ( i = 1; i <= 3; i++ ) {
-            for ( j = 1; j <= 3; j++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
+            for ( int j = 1; j <= 3; j++ ) {
                 answer.at(i, j) = lcs.at(i, j);
                 answer.at(i + 3, j + 3) = lcs.at(i, j);
                 answer.at(i + 6, j + 6) = lcs.at(i, j);
@@ -205,8 +203,8 @@ LIBeam3d2 :: computeGtoLRotationMatrix(FloatMatrix &answer)
     } else {
         this->updateTempTriad( domain->giveEngngModel()->giveCurrentStep() );
 
-        for ( i = 1; i <= 3; i++ ) {
-            for ( j = 1; j <= 3; j++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
+            for ( int j = 1; j <= 3; j++ ) {
                 answer.at(i, j) = tempTc.at(j, i);
                 answer.at(i + 3, j + 3) = tempTc.at(j, i);
                 answer.at(i + 6, j + 6) = tempTc.at(j, i);
@@ -290,7 +288,7 @@ LIBeam3d2 :: initializeFrom(InputRecord *ir)
     // first call parent
     NLStructuralElement :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, referenceNode, IFT_LIBeam3d2_refnode, "refnode"); // Macro
+    IR_GIVE_FIELD(ir, referenceNode, IFT_LIBeam3d2_refnode, "refnode");
     if ( referenceNode == 0 ) {
         _error("instanciateFrom: wrong reference node specified");
     }
@@ -306,8 +304,6 @@ LIBeam3d2 :: initializeFrom(InputRecord *ir)
     FloatMatrix lcs;
     this->giveLocalCoordinateSystem(lcs);
     this->tc.beTranspositionOf(lcs);
-
-    this->computeGaussPoints();
 
     return IRRT_OK;
 }
@@ -341,15 +337,13 @@ LIBeam3d2 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      * provides dof mapping of local edge dofs (only nonzero are taken into account)
      * to global element dofs
      */
-    int i;
-
     if ( iEdge != 1 ) {
         _error("giveEdgeDofMapping: wrong edge number");
     }
 
 
     answer.resize(12);
-    for ( i = 1; i <= 12; i++ ) {
+    for ( int i = 1; i <= 12; i++ ) {
         answer.at(i) = i;
     }
 }
@@ -379,14 +373,13 @@ LIBeam3d2 :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
     // f(elemLocal) = T * f (global)
 
     FloatMatrix lcs;
-    int i, j;
 
     answer.resize(6, 6);
     answer.zero();
 
     this->giveLocalCoordinateSystem(lcs);
-    for ( i = 1; i <= 3; i++ ) {
-        for ( j = 1; j <= 3; j++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             answer.at(i, j) = lcs.at(i, j);
             answer.at(3 + i, 3 + j) = lcs.at(i, j);
         }
@@ -429,7 +422,6 @@ LIBeam3d2 :: giveLocalCoordinateSystem(FloatMatrix &answer)
     FloatArray lx(3), ly(3), lz(3), help(3);
     double length = this->giveLength();
     Node *nodeA, *nodeB, *refNode;
-    int i;
 
     answer.resize(3, 3);
     answer.zero();
@@ -437,7 +429,7 @@ LIBeam3d2 :: giveLocalCoordinateSystem(FloatMatrix &answer)
     nodeB  = this->giveNode(2);
     refNode = this->giveDomain()->giveNode(this->referenceNode);
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         lx.at(i) = ( nodeB->giveCoordinate(i) - nodeA->giveCoordinate(i) ) / length;
         help.at(i) = ( refNode->giveCoordinate(i) - nodeA->giveCoordinate(i) );
     }
@@ -447,7 +439,7 @@ LIBeam3d2 :: giveLocalCoordinateSystem(FloatMatrix &answer)
     ly.beVectorProductOf(lz, lx);
     ly.normalize();
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(1, i) = lx.at(i);
         answer.at(2, i) = ly.at(i);
         answer.at(3, i) = lz.at(i);
@@ -549,7 +541,7 @@ LIBeam3d2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
 
     if ( this->nlGeometry ) {
         // add increment to previous total value
-        PrevEpsilon = ( ( StructuralMaterialStatus * ) this->giveMaterial()->giveStatus(gp) )->giveStrainVector();
+        PrevEpsilon = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStrainVector();
         if ( PrevEpsilon.giveSize() ) {
             answer.add(PrevEpsilon);
         }
@@ -669,7 +661,7 @@ Interface *
 LIBeam3d2 :: giveInterface(InterfaceType interface)
 {
     if ( interface == FiberedCrossSectionInterfaceType ) {
-        return ( FiberedCrossSectionInterface * ) this;
+        return static_cast< FiberedCrossSectionInterface * >( this );
     }
 
     return NULL;

@@ -54,28 +54,25 @@ HeMoTKMaterial :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
-    // double value ;
 
-    this->Material :: initializeFrom(ir);
+    IR_GIVE_FIELD(ir, a_0, IFT_HeMoTKMaterial_a_0, "a_0");
+    IR_GIVE_FIELD(ir, nn, IFT_HeMoTKMaterial_nn, "nn");
+    IR_GIVE_FIELD(ir, phi_c, IFT_HeMoTKMaterial_phi_c, "phi_c");
+    IR_GIVE_FIELD(ir, delta_wet, IFT_HeMoTKMaterial_delta_wet, "delta_wet");
 
-    IR_GIVE_FIELD(ir, a_0, IFT_HeMoTKMaterial_a_0, "a_0"); // Macro
-    IR_GIVE_FIELD(ir, nn, IFT_HeMoTKMaterial_nn, "nn"); // Macro
-    IR_GIVE_FIELD(ir, phi_c, IFT_HeMoTKMaterial_phi_c, "phi_c"); // Macro
-    IR_GIVE_FIELD(ir, delta_wet, IFT_HeMoTKMaterial_delta_wet, "delta_wet"); // Macro
+    IR_GIVE_FIELD(ir, w_h, IFT_HeMoTKMaterial_w_h, "w_h");
+    IR_GIVE_FIELD(ir, n, IFT_HeMoTKMaterial_n, "n");
+    IR_GIVE_FIELD(ir, a, IFT_HeMoTKMaterial_a, "a");
 
-    IR_GIVE_FIELD(ir, w_h, IFT_HeMoTKMaterial_w_h, "w_h"); // Macro
-    IR_GIVE_FIELD(ir, n, IFT_HeMoTKMaterial_n, "n"); // Macro
-    IR_GIVE_FIELD(ir, a, IFT_HeMoTKMaterial_a, "a"); // Macro
+    IR_GIVE_FIELD(ir, latent, IFT_HeMoTKMaterial_latent, "latent");
+    IR_GIVE_FIELD(ir, c, IFT_HeMoTKMaterial_c, "c");
+    IR_GIVE_FIELD(ir, rho, IFT_HeMoTKMaterial_rho, "rho");
+    IR_GIVE_FIELD(ir, chi_eff, IFT_HeMoTKMaterial_chi_eff, "chi_eff");
 
-    IR_GIVE_FIELD(ir, latent, IFT_HeMoTKMaterial_latent, "latent"); // Macro
-    IR_GIVE_FIELD(ir, c, IFT_HeMoTKMaterial_c, "c"); // Macro
-    IR_GIVE_FIELD(ir, rho, IFT_HeMoTKMaterial_rho, "rho"); // Macro
-    IR_GIVE_FIELD(ir, chi_eff, IFT_HeMoTKMaterial_chi_eff, "chi_eff"); // Macro
+    IR_GIVE_FIELD(ir, por, IFT_HeMoTKMaterial_por, "por");
+    IR_GIVE_FIELD(ir, rho_gws, IFT_HeMoTKMaterial_rho_gws, "rho_gws");
 
-    IR_GIVE_FIELD(ir, por, IFT_HeMoTKMaterial_por, "por"); // Macro
-    IR_GIVE_FIELD(ir, rho_gws, IFT_HeMoTKMaterial_rho_gws, "rho_gws"); // Macro
-
-    return IRRT_OK;
+    return Material :: initializeFrom(ir);
 }
 
 
@@ -145,7 +142,7 @@ HeMoTKMaterial :: matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
 //  25.9.2001
 {
     double k = 0.0, w = 0.0, t = 0.0;
-    TransportMaterialStatus *status = ( TransportMaterialStatus * ) this->giveStatus(gp);
+    TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     FloatArray s;
 
 
@@ -184,7 +181,7 @@ HeMoTKMaterial :: matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
 //  25.9.2001
 {
     double k = 0.0, w = 0.0, t = 0.0;
-    TransportMaterialStatus *status = ( TransportMaterialStatus * ) this->giveStatus(gp);
+    TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     FloatArray s;
 
 
@@ -226,7 +223,7 @@ HeMoTKMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
 //  25.9.2001
 {
     double k = 0.0, w = 0.0, t = 0.0;
-    TransportMaterialStatus *status = ( TransportMaterialStatus * ) this->giveStatus(gp);
+    TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     FloatArray s;
 
 
@@ -272,7 +269,7 @@ double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *
     } else if ( mode == Capacity_wh ) {
         return 0.0;
     } else if ( mode == Capacity_hw ) {
-        TransportMaterialStatus *status = ( TransportMaterialStatus * ) this->giveStatus(gp);
+        TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
         FloatArray s;
         double w, t;
 
@@ -285,7 +282,7 @@ double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *
         t = s.at(1);
         return get_b(w, t) * get_latent(w, t);
     } else if ( mode == Capacity_hh ) {
-        TransportMaterialStatus *status = ( TransportMaterialStatus * ) this->giveStatus(gp);
+        TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
         FloatArray s;
         double w, t;
 
@@ -308,12 +305,13 @@ double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *
 double
 HeMoTKMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
 {
-    FloatArray tempState = ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveTempStateVector();
+    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
+    const FloatArray &tempState = ms->giveTempStateVector();
     if ( tempState.giveSize() < 2 ) {
         _error("giveHumidity: undefined moisture status!");
     }
 
-    FloatArray state = ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveStateVector();
+    FloatArray state = ms->giveStateVector();
 
     if ( mode == VM_Total ) {
         return inverse_sorption_isotherm( tempState.at(2) );

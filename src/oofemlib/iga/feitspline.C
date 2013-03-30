@@ -70,18 +70,18 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
 
     IntArray localIndexKnotVector_tmp;
     int *indexKnotVec, indexKnotVal;
-    int i, j, n, pos, p;
+    int pos, p;
 
     const char *IFT_localIndexKnotVectorString [ 3 ] = {
         "localindexknotvectoru", "localindexknotvectorv", "localindexknotvectorw"
     };
-    InputFieldType IFT_localIndexKnotVectorType [ 3 ] = {
+    _InputFieldType IFT_localIndexKnotVectorType [ 3 ] = {
         IFT_TSplineInterpolation_localIndexKnotVectorU,
         IFT_TSplineInterpolation_localIndexKnotVectorV,
         IFT_TSplineInterpolation_localIndexKnotVectorW
     };
     int max_deg = 0;
-    for ( i = 0; i < nsd; i++ ) {
+    for ( int i = 0; i < nsd; i++ ) {
         if ( degree [ i ] > max_deg ) {
             max_deg = degree [ i ];
         }
@@ -90,29 +90,29 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
     openLocalKnotVector = new double [ 3 * max_deg + 2 ];
 
     localIndexKnotVector = new int ** [ totalNumberOfControlPoints ];
-    for ( i = 0; i < totalNumberOfControlPoints; i++ ) {
+    for ( int i = 0; i < totalNumberOfControlPoints; i++ ) {
         localIndexKnotVector [ i ] = new int * [ nsd ];
     }
 
-    for ( n = 0; n < nsd; n++ ) {
+    for ( int n = 0; n < nsd; n++ ) {
         localIndexKnotVector_tmp.resize(0);
-        IR_GIVE_FIELD(ir, localIndexKnotVector_tmp, IFT_localIndexKnotVectorType [ n ], IFT_localIndexKnotVectorString [ n ]); // Macro
+        IR_GIVE_FIELD(ir, localIndexKnotVector_tmp, IFT_localIndexKnotVectorType [ n ], IFT_localIndexKnotVectorString [ n ]);
         if ( localIndexKnotVector_tmp.giveSize() != totalNumberOfControlPoints * ( degree [ n ] + 2 ) ) {
             OOFEM_ERROR2("BSplineInterpolation::initializeFrom - invalid size of knot vector %s", IFT_localIndexKnotVectorString [ n ]);
         }
 
         pos = 0;
-        for ( i = 0; i < totalNumberOfControlPoints; i++ ) {
+        for ( int i = 0; i < totalNumberOfControlPoints; i++ ) {
             indexKnotVec = localIndexKnotVector [ i ] [ n ] = new int [ degree [ n ] + 2 ];
 
             p = 0;
-            for ( j = 0; j < degree [ n ] + 2; j++ ) {
+            for ( int j = 0; j < degree [ n ] + 2; j++ ) {
                 indexKnotVec [ p++ ] = localIndexKnotVector_tmp(pos++);
             }
 
             // check for monotonicity of local index knot vector with multiplicity
             indexKnotVal = indexKnotVec [ 0 ];
-            for ( j = 1; j < degree [ n ] + 2; j++ ) {
+            for ( int j = 1; j < degree [ n ] + 2; j++ ) {
                 if ( indexKnotVal > indexKnotVec [ j ] ) {
                     OOFEM_ERROR3("TSplineInterpolation::initializeFrom - local index knot vector %s of control point %d is not monotonic",
                                  IFT_localIndexKnotVectorString [ n ], i + 1);

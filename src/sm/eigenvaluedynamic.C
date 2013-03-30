@@ -70,7 +70,7 @@ EigenValueDynamic :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     //EngngModel::instanciateFrom (ir);
 
-    IR_GIVE_FIELD(ir, numberOfRequiredEigenValues, IFT_EigenValueDynamic_nroot, "nroot"); // Macro
+    IR_GIVE_FIELD(ir, numberOfRequiredEigenValues, IFT_EigenValueDynamic_nroot, "nroot");
 
     // numberOfSteps set artificially to numberOfRequiredEigenValues
     // in order to allow
@@ -78,7 +78,7 @@ EigenValueDynamic :: initializeFrom(InputRecord *ir)
     // numberOfSteps = numberOfRequiredEigenValues;
     numberOfSteps = 1;
 
-    IR_GIVE_FIELD(ir, rtolv, IFT_EigenValueDynamic_rtolv, "rtolv"); // Macro
+    IR_GIVE_FIELD(ir, rtolv, IFT_EigenValueDynamic_rtolv, "rtolv");
     if ( rtolv < 1.e-12 ) {
         rtolv =  1.e-12;
     }
@@ -88,11 +88,11 @@ EigenValueDynamic :: initializeFrom(InputRecord *ir)
     }
 
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EigenValueDynamic_stype, "stype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EigenValueDynamic_stype, "stype");
     solverType = ( GenEigvalSolverType ) val;
 
     val = 0; //Default Skyline
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EigenValueDynamic_smtype, "smtype");  // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
     sparseMtrxType = ( SparseMtrxType ) val;
 
     return IRRT_OK;
@@ -297,7 +297,7 @@ contextIOResultType EigenValueDynamic :: saveContext(DataStream *stream, Context
 {
     int closeFlag = 0;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
@@ -340,7 +340,7 @@ contextIOResultType EigenValueDynamic :: restoreContext(DataStream *stream, Cont
     int activeVector = this->resolveCorrespondingEigenStepNumber(obj);
     int istep = 1, iversion = 0;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
 
     if ( restoreFlag == 0 ) { // not restored before
         if ( stream == NULL ) {

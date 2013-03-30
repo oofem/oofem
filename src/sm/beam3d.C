@@ -421,14 +421,14 @@ Beam3d :: initializeFrom(InputRecord *ir)
     // first call parent
     StructuralElement :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, referenceNode, IFT_Beam3d_refnode, "refnode"); // Macro
+    IR_GIVE_FIELD(ir, referenceNode, IFT_Beam3d_refnode, "refnode");
     if ( referenceNode == 0 ) {
         _error("instanciateFrom: wrong reference node specified");
     }
 
     if ( ir->hasField(IFT_Beam3d_dofstocondense, "dofstocondense") ) {
         IntArray val;
-        IR_GIVE_FIELD(ir, val, IFT_Beam3d_dofstocondense, "dofstocondense"); // Macro
+        IR_GIVE_FIELD(ir, val, IFT_Beam3d_dofstocondense, "dofstocondense");
         if ( val.giveSize() >= 12 ) {
             _error("instanciateFrom: wrong input data for condensed dofs");
         }
@@ -438,7 +438,6 @@ Beam3d :: initializeFrom(InputRecord *ir)
         dofsToCondense = NULL;
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 
@@ -501,8 +500,8 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
         answer.resize(12);
         answer.zero();
 
-        switch ( edgeLoad->giveClassID() ) {
-        case ConstantEdgeLoadClass:
+        switch ( edgeLoad->giveApproxOrder() ) {
+        case 0:
 
             //edgeLoad->computeComponentArrayAt(components, tStep, mode);
             if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
@@ -544,8 +543,8 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
             answer.at(11) = ( 1. ) * fz * l * l / 12. + fmy * l * kappay / ( 1. + 2. * kappay );
             answer.at(12) = ( -1. ) * fy * l * l / 12. + fmz * l * kappaz / ( 1. + 2. * kappaz );
             break;
-        case LinearEdgeLoadClass:
 
+        case 1:
             /*
              * coords.at(1) = -1.;
              * edgeLoad->computeValueAt(components, tStep, coords, mode);
@@ -628,6 +627,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
             answer.at(12) = ( -1. ) * fy * l * l / 12. - dfy * l * l * ( 5. * kappaz + 3. ) / ( 60. * ( 1. + 2. * kappaz ) ) +
                             fmz * l * kappaz / ( 1. + 2. * kappaz ) + dfmz * l * ( 8. * kappaz + 1. ) / ( 12. * ( 1. + 2. * kappaz ) );
             break;
+
         default:
             _error("computeEdgeLoadVectorAt: unsupported load type");
         }
@@ -915,7 +915,7 @@ Interface *
 Beam3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == FiberedCrossSectionInterfaceType ) {
-        return ( FiberedCrossSectionInterface * ) this;
+        return static_cast< FiberedCrossSectionInterface * >( this );
     }
 
     return NULL;

@@ -62,6 +62,11 @@
  #include "q4axisymm.h"
  #include "l4axisymm.h"
  #include "ltrspace.h"
+ #include "qtrspace.h"
+ #include "qtrspacegrad.h"
+ #include "lwedge.h"
+ #include "qwedge.h"
+ #include "qwedgegrad.h"
  #include "beam2d.h"
  #include "beam3d.h"
  #include "libeam2dnl.h"
@@ -77,8 +82,11 @@
 // #include "tr_dirshell.h"
  #include "shell7base.h"
  #include "tr2shell7.h"
+ #include "shell7basexfem.h"
+ #include "tr2shell7xfem.h" 
  #include "rershell.h"
  #include "quad1mindlin.h"
+ #include "quad1mindlinshell3d.h"
  #include "interfaceelem2dquad.h"
  #include "interfaceelement1d.h"
  #include "interfaceelem3dtrlin.h"
@@ -89,6 +97,7 @@
  #include "springelement.h"
  #include "particle.h"
  #include "lattice2d.h"
+ #include "htselement.h"
 
 // iga elements
  #include "igaelements.h"
@@ -148,15 +157,22 @@ REGISTER_CLASS(LSpace, "lspace", LSpaceClass)
 REGISTER_CLASS(QSpaceGrad, "qspacegrad", QSpaceGradClass)
 REGISTER_CLASS(QSpace, "qspace", QSpaceClass)
 REGISTER_CLASS(Quad1Mindlin, "quad1mindlin", Quad1MindlinClass)
+REGISTER_CLASS(Quad1MindlinShell3D, "quad1mindlinshell3d", Quad1MindlinShell3DClass)
 REGISTER_CLASS(CCTPlate3d, "cctplate3d", CCTPlate3dClass)
 REGISTER_CLASS(CCTPlate, "cctplate", CCTPlateClass)
 //REGISTER_CLASS(LTRSpaceWithEmbeddedCrack, "ltrspaceec", )
 REGISTER_CLASS(LTRSpace, "ltrspace", LTRSpaceClass)
+REGISTER_CLASS(QTRSpace, "qtrspace", QTRSpaceClass)
+REGISTER_CLASS(QTRSpaceGrad, "qtrspacegrad", QTRSpaceGradClass)
+REGISTER_CLASS(LWedge, "lwedge", LWedgeClass)
+REGISTER_CLASS(QWedge, "qwedge", QWedgeClass)
+REGISTER_CLASS(QWedgeGrad, "qwedgegrad", QWedgeGradClass)
 REGISTER_CLASS(Truss2d, "truss2d", Truss2dClass)
 REGISTER_CLASS(RerShell, "rershell", RerShellClass)
 //REGISTER_CLASS(TrDirShell, "trdirshell", TrDirShellClass)
 //REGISTER_CLASS(Shell7Base, "shell7base", Shell7BaseClass)
 REGISTER_CLASS(Tr2Shell7, "tr2shell7", Tr2Shell7Class)
+REGISTER_CLASS(Tr2Shell7XFEM, "tr2shell7xfem", Tr2Shell7XFEMClass)
 REGISTER_CLASS(Beam2d, "beam2d", Beam2dClass)
 REGISTER_CLASS(Beam3d, "beam3d", Beam3dClass)
 REGISTER_CLASS(LIBeam2dNL, "libeam2dNL", LIBeam2dNLClass)
@@ -182,6 +198,7 @@ REGISTER_CLASS(NURBSPlaneStressElement, "nurbsplanestresselement", NURBSPlaneStr
 REGISTER_CLASS(TSplinePlaneStressElement, "tsplineplanestresselement", TSplinePlaneStressElementClass)
 REGISTER_CLASS(NURBSSpace3dElement, "nurbs3delement", NURBSSpace3dElementClass)
 REGISTER_CLASS(Lattice2d, "lattice2d", Lattice2dClass)
+REGISTER_CLASS(HTSelement, "htselement", HTSelementClass)
 #endif
 
 #ifdef __FM_MODULE

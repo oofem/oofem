@@ -23,6 +23,8 @@ targets/
 *.blg
 
 
+*.swp
+.*.kate-swp
 *.backup
 *kdev*
 makefile

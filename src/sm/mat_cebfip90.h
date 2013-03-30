@@ -40,6 +40,15 @@
 #include "structuralmaterial.h"
 #include "structuralms.h"
 
+///@name Input fields for CebFipSlip90Material
+//@{
+#define _IFT_CebFipSlip90Material_tmax "tmax"
+#define _IFT_CebFipSlip90Material_tres "tres"
+#define _IFT_CebFipSlip90Material_s1 "s1"
+#define _IFT_CebFipSlip90Material_s2 "s2"
+#define _IFT_CebFipSlip90Material_s3 "s3"
+//@}
+
 namespace oofem {
 // material contant's keys for give()
 class GaussPoint;

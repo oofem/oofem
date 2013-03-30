@@ -84,7 +84,7 @@ IsotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 // computes full constitutive matrix for case of gp stress-strain state.
 //
 {
-    IsotropicDamageMaterialStatus *status = ( IsotropicDamageMaterialStatus * ) this->giveStatus(gp);
+    IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     double om;
     if ( mode == ElasticStiffness ) {
         om = 0.0;
@@ -108,7 +108,7 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
 // strain increment, the only way, how to correctly update gp records
 //
 {
-    IsotropicDamageMaterialStatus *status = ( IsotropicDamageMaterialStatus * ) this->giveStatus(gp);
+    IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     //StructuralCrossSection *crossSection = (StructuralCrossSection*) gp -> giveElement()->giveCrossSection();
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
     FloatArray strainVector, reducedTotalStrainVector;
@@ -181,24 +181,47 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
 void IsotropicDamageMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode,
                                                          GaussPoint *gp, TimeStep *atTime)
 {
-    IsotropicDamageMaterialStatus *status = ( IsotropicDamageMaterialStatus * ) this->giveStatus(gp);
-    double om;
+    IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
+    double tempDamage;
     if ( mode == ElasticStiffness ) {
-        om = 0.0;
+        tempDamage = 0.0;
     } else {
-        om = status->giveTempDamage();
-        om = min(om, maxOmega);
+        tempDamage = status->giveTempDamage();
+        tempDamage = min(tempDamage, maxOmega);
     }
 
     this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
-    answer.times(1.0 - om);
+    answer.times(1.0 - tempDamage);
+    if ( mode == TangentStiffness ) {
+        double damage = status->giveDamage();
+        if ( tempDamage > damage ) {
+            double tempKappa;
+            FloatArray stress, strain, eta;
+            FloatMatrix correctionTerm;
+            stress = status->giveTempStressVector();
+            strain = status->giveTempStrainVector();
+            tempKappa = status->giveTempKappa();
+            // effective stress
+            stress.times( 1. / ( 1 - tempDamage ) );
+            //compute derivative of eqstrain wrt strain
+            this->computeEta(eta, strain, gp, atTime);
+            //compute derivative of damage function
+            double damagePrime = damageFunctionPrime(tempKappa, gp);
+            // dyadic product of eff stress and eta
+            correctionTerm.beDyadicProductOf(stress, eta);
+            // times minus derivative of damage function
+            correctionTerm.times(-damagePrime);
+            // add to secant stiffness
+            answer.add(correctionTerm);
+        }
+    }
 }
 
 
 void IsotropicDamageMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode,
                                                          GaussPoint *gp, TimeStep *atTime)
 {
-    IsotropicDamageMaterialStatus *status = ( IsotropicDamageMaterialStatus * ) this->giveStatus(gp);
+    IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     double om;
     if ( mode == ElasticStiffness ) {
         om = 0.0;
@@ -215,7 +238,7 @@ void IsotropicDamageMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, Ma
 void IsotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode,
                                                       GaussPoint *gp, TimeStep *atTime)
 {
-    IsotropicDamageMaterialStatus *status = ( IsotropicDamageMaterialStatus * ) this->giveStatus(gp);
+    IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     double om;
     if ( mode == ElasticStiffness ) {
         om = 0.0;
@@ -235,7 +258,7 @@ void IsotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatRe
 int
 IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    IsotropicDamageMaterialStatus *status = ( IsotropicDamageMaterialStatus * ) this->giveStatus(aGaussPoint);
+    IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(aGaussPoint) );
     if ( ( type == IST_DamageTensor ) || ( type == IST_PrincipalDamageTensor ) ) {
         answer.resize(1);
         answer.at(1) = status->giveDamage();
@@ -291,7 +314,7 @@ IsotropicDamageMaterial :: giveIPValueType(InternalStateType type)
         return ISVT_TENSOR_S3;
     } else if ( type == IST_MaxEquivalentStrainLevel || type == IST_CharacteristicLength || type == IST_CrackDirs ) {
         return ISVT_SCALAR;
-    } else if ( type == IST_CrackVector ){
+    } else if ( type == IST_CrackVector ) {
         return ISVT_VECTOR;
 
 #ifdef keep_track_of_dissipated_energy
@@ -351,6 +374,7 @@ IsotropicDamageMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *a
 #ifdef keep_track_of_dissipated_energy
     } else if ( ( type == IST_StressWorkDensity ) || ( type == IST_DissWorkDensity ) || ( type == IST_FreeEnergyDensity ) ) {
         return 1;
+
 #endif
     } else {
         return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
@@ -383,11 +407,11 @@ IsotropicDamageMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     //Set limit on the maximum isotropic damage parameter if needed
-    IR_GIVE_OPTIONAL_FIELD(ir, maxOmega, IFT_IsotropicDamageMaterial_maxOmega, "maxomega"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, maxOmega, IFT_IsotropicDamageMaterial_maxOmega, "maxomega");
     maxOmega = min(maxOmega, 0.999999);
     maxOmega = max(maxOmega, 0.0);
 
-    IR_GIVE_FIELD(ir, tempDillatCoeff, IFT_IsotropicDamageMaterial_talpha, "talpha"); // Macro
+    IR_GIVE_FIELD(ir, tempDillatCoeff, IFT_IsotropicDamageMaterial_talpha, "talpha");
     return StructuralMaterial :: initializeFrom(ir);
 }
 
@@ -430,8 +454,10 @@ IsotropicDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
-    if ( this->damage > 0.0 ) {
-        fprintf(file, "kappa %f, damage %f crackVector %f %f %f", this->kappa, this->damage, this->crackVector.at(1), this->crackVector.at(2), this->crackVector.at(3) );
+    if ( this->kappa > 0 && this->damage <= 0 ) {
+        fprintf(file, "kappa %f", this->kappa);
+    } else if ( this->damage > 0.0 ) {
+        fprintf( file, "kappa %f, damage %f crackVector %f %f %f", this->kappa, this->damage, this->crackVector.at(1), this->crackVector.at(2), this->crackVector.at(3) );
 
 #ifdef keep_track_of_dissipated_energy
         fprintf(file, ", dissW %f, freeE %f, stressW %f ", this->dissWork, ( this->stressWork ) - ( this->dissWork ), this->stressWork);

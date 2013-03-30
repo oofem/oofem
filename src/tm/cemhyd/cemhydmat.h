@@ -52,6 +52,18 @@ using namespace tinyxml2;
  #include "../isoheatmat.h"
 #endif
 
+///@name Input fields for CemhydMat
+//@{
+#define _IFT_CemhydMat_conductivitytype "conductivitytype"
+#define _IFT_CemhydMat_capacitytype "capacitytype"
+#define _IFT_CemhydMat_densitytype "densitytype"
+#define _IFT_CemhydMat_eachgp "eachgp"
+#define _IFT_CemhydMat_nowarnings "nowarnings"
+#define _IFT_CemhydMat_scaling "scaling"
+#define _IFT_CemhydMat_reinforcementDegree "reinforcementdegree"
+#define _IFT_CemhydMat_inputFileName "inputfilename"
+//@}
+
 namespace oofem {
 
 typedef struct FCOMPLEX {
@@ -115,7 +127,7 @@ public:
     /// Store temperatures multiplied with volume around GPs - need before temperature averaging.
     virtual void storeWeightTemperatureProductVolume(Element *element, TimeStep *tStep);
     /// Perform averaging on a master CemhydMatStatus.
-    virtual void averageTemperature(void);
+    virtual void averageTemperature();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     /// Use different methods to evaluate material parameters

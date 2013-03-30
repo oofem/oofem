@@ -68,6 +68,8 @@ public:
     SlaveDof(int n, DofManager *aNode, DofIDItem id = Undef);
     /// Destructor.
     virtual ~SlaveDof(void) { }
+    
+    virtual dofType giveDofType() { return DT_slave; }
 
     void initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const IntArray *mstrDofID, const FloatArray &mstrContribution);
     virtual int giveNumberOfPrimaryMasterDofs();
@@ -76,6 +78,7 @@ public:
     virtual void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *stepN);
     virtual void computeDofTransformation(FloatArray &primaryMasterContribs);
     virtual void giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme &s);
+    virtual void giveDofIDs(IntArray &masterDofIDs);
 
     /**
      * Returns the value of the unknown associated with the receiver at given time step.

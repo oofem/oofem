@@ -1,5 +1,14 @@
 set (sm_element
-    lspace.C lspacebb.C qspace.C ltrspace.C
+    structuralelementevaluator.C
+    space3delementevaluator.C
+    planestresselementevaluator.C
+    igaelements.C
+    structuralelement.C
+    nlstructuralelement.C
+    lspace.C lspacebb.C qspace.C qspacegrad.C
+    ltrspace.C qtrspace.C qtrspacegrad.C
+    lwedge.C qwedge.C qwedgegrad.C
+    htselement.C
     truss1d.C truss2d.C truss3d.C
     trplanstrss.C trplanestrain.C trplanrot.C
     libeam2d.C libeam2dnl.C
@@ -15,6 +24,7 @@ set (sm_element
     cohsur3d.C
     cct3d.C
     quad1mindlin.C
+    quad1mindlinshell3d.C
     trplanrot3d.C
     lumpedmasselement.C
     springelement.C
@@ -22,16 +32,20 @@ set (sm_element
     qplanestressgrad.C
     latticestructuralelement.C
     lattice2d.C
-	shell7base.C
-	tr2shell7.C
+    shell7base.C
+    tr2shell7.C
+    shell7basexfem.C
+    tr2shell7xfem.C
     )
 
 set (sm_crosssection
+    structuralcrosssection.C
     layeredcrosssection.C
     fiberedcs.C
     )
 
 set (sm_emodel
+    structengngmodel.C
     linearstatic.C
     nlinearstatic.C
     nlineardynamic.C
@@ -43,17 +57,21 @@ set (sm_emodel
     diidynamic.C
     nldeidynamic.C
     incrementallinearstatic.C
+    staticfracture.C
     )
 
 set (sm_loads
     tf1.C
     usrdeftempfield.C
     rotatingboundary.C
-	constantpressureload.C
+    constantpressureload.C
     )
 
 set (sm_material
     abaqususermaterial.C
+    structuralmaterial.C
+    linearelasticmaterial.C
+    isolinearelasticmaterial.C
     ortholinearelasticmaterial.C
     concrete2.C concrete3.C concretedpm.C concretedpm2.C
     cebfip78.C
@@ -62,7 +80,7 @@ set (sm_material
     b3solidmat.C
     rcsd.C rcsde.C rcsdnl.C
     m4.C
-    idm1.C idmnl1.C
+    idm1.C idmnl1.C idmgrad1.C
     mazarsmodel.C mazarsmodelnl.C
     druckerPragerPlasticitySM.C
     druckerpragercutmat.C
@@ -88,6 +106,7 @@ set (sm_material
     latticematstatus.C
     latticedamage2d.C
     dustmat.C
+    lsmastermat.C lsmastermatgrad.C
     )
 
 set (sm_error
@@ -101,7 +120,6 @@ set (sm_error
 set (sm_export
     dmexportmodule.C
     poiexportmodule.C
-    gpexportmodule.C
     )
 
 set (sm_barrier
@@ -117,6 +135,7 @@ set (sm_mesher
     )
 
 set (sm_status
+    structuralms.C
     rheoChM.C maxwellChM.C kelvinChM.C
     rcm2.C
     isodamagemodel.C

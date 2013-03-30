@@ -64,7 +64,7 @@ NewtonianFluidMaterial :: initializeFrom(InputRecord *ir)
     // we use rather object's member data than to store data into slow
     // key-val dictionary with lot of memory allocations
 
-    IR_GIVE_FIELD(ir, viscosity, IFT_NewtonianFluidMaterial_mu, "mu"); // Macro
+    IR_GIVE_FIELD(ir, viscosity, IFT_NewtonianFluidMaterial_mu, "mu");
 
     return IRRT_OK;
 }
@@ -105,7 +105,7 @@ NewtonianFluidMaterial :: give(int aProperty, GaussPoint *gp)
 // 'E') of the receiver.
 //
 {
-       if ( aProperty == Viscosity ) {
+    if ( aProperty == Viscosity ) {
         return viscosity;
     } else if ( aProperty == YieldStress ) {
         return 0.0;
@@ -166,7 +166,7 @@ NewtonianFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gaus
         _error("computeDeviatoricStressVector: unsuported material mode");
     }
 
-    ( ( FluidDynamicMaterialStatus * ) this->giveStatus(gp) )->letTempDeviatoricStressVectorBe(answer);
+    static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) )->letTempDeviatoricStressVectorBe(answer);
 }
 
 void

@@ -58,19 +58,17 @@ IRResultType SlaveNode :: initializeFrom(InputRecord *ir)
 }
 
 
-int SlaveNode :: checkConsistency()
+void SlaveNode :: postInitialize()
 {
-    bool result = true;
-
-    result = result && Node :: checkConsistency();
+    Node :: postInitialize();
 
     // initialize slave dofs (inside check of consistency of receiver and master dof)
     for ( int i = 1; i <= numberOfDofs; ++i ) {
-        if ( dofArray[i-1]->giveClassID() == SlaveDofClass ) {
-            ((SlaveDof*)dofArray[i-1])->initialize(masterDofManagers.giveSize(), masterDofManagers, NULL, masterWeights);
+        SlaveDof *sdof = dynamic_cast< SlaveDof* >( dofArray[i-1] );
+        if ( sdof ) {
+            sdof->initialize(masterDofManagers.giveSize(), masterDofManagers, NULL, masterWeights);
         }
     }
-    return result;
 }
 
 

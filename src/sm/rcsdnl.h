@@ -42,6 +42,16 @@
 #include "rcsde.h"
 #include "structuralnonlocalmaterialext.h"
 
+///@name Input fields for RCSDNLMaterial
+//@{
+#define _IFT_RCSDNLMaterial_ft "ft"
+#define _IFT_RCSDNLMaterial_sdtransitioncoeff "sdtransitioncoeff"
+#define _IFT_RCSDNLMaterial_sdtransitioncoeff2 "sdtransitioncoeff2"
+#define _IFT_RCSDNLMaterial_r "r"
+#define _IFT_RCSDNLMaterial_ef "ef"
+#define _IFT_RCSDNLMaterial_gf "gf"
+//@}
+
 namespace oofem {
 
 /**

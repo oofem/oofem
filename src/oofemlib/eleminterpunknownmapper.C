@@ -96,7 +96,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode, E
             //
             newd->giveNode(inode)->giveLocationArray( dofMask, locationArray, EModelDefaultEquationNumbering() );
             if ( newd->giveNode(inode)->hasAnySlaveDofs() ) {
-                for ( int ii = 1; ii <= dofMask.giveSize(); ii++ ) {
+                for ( int ii = 1; ii <= dofMask.giveSize(); ii++ ) { ///@todo How should be deal with slave dofs and such? dofMask.size() != locationArray.size() will happen
                     // exclude slaves; they are determined from masters
                     if ( newd->giveNode(inode)->giveDof(ii)->isPrimaryDof() ) {
                         answer.at( locationArray.at(ii) ) += unknownValues.at(ii);
@@ -170,7 +170,7 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Equa
     }
 #endif
 
-    interface = ( EIPrimaryUnknownMapperInterface * ) ( oelem->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
+    interface = static_cast< EIPrimaryUnknownMapperInterface * >( oelem->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
     if ( interface ) {
         interface->EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(dofMask);
 #if 1

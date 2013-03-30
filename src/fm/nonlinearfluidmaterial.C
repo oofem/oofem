@@ -32,7 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "math.h"
 #include "fluiddynamicmaterial.h"
 #include "nonlinearfluidmaterial.h"
 #include "domain.h"
@@ -40,9 +39,9 @@
 #include "gausspnt.h"
 #include "engngm.h"
 #include "contextioerr.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
+#include "mathfem.h"
+
+#include <cstdlib>
 
 namespace oofem {
 int
@@ -64,9 +63,9 @@ NonlinearFluidMaterial :: initializeFrom(InputRecord *ir)
 
     this->FluidDynamicMaterial :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, viscosity, IFT_NewtonianFluidMaterial_mu, "mu"); // Macro
-    IR_GIVE_FIELD(ir, alpha, IFT_NonlinearFluidMaterial_alpha, "alpha"); // Macro
-    IR_GIVE_FIELD(ir, c, IFT_NonlinearFluidMaterial_C, "c"); // Macro
+    IR_GIVE_FIELD(ir, viscosity, IFT_NonlinearFluidMaterial_mu, "mu");
+    IR_GIVE_FIELD(ir, alpha, IFT_NonlinearFluidMaterial_alpha, "alpha");
+    IR_GIVE_FIELD(ir, c, IFT_NonlinearFluidMaterial_C, "c");
 
     return IRRT_OK;
 }
@@ -114,7 +113,7 @@ NonlinearFluidMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 double
 NonlinearFluidMaterial :: give(int aProperty, GaussPoint *gp)
 {
-    if ( ( aProperty == Viscosity ) ) {
+    if ( aProperty == Viscosity ) {
         return viscosity;
     } else {
         return FluidDynamicMaterial :: give(aProperty, gp);
@@ -132,7 +131,7 @@ NonlinearFluidMaterial :: CreateStatus(GaussPoint *gp) const
 void
 NonlinearFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
 {
-    NonlinearFluidMaterialStatus *status = ( ( NonlinearFluidMaterialStatus * ) this->giveStatus(gp) );
+    NonlinearFluidMaterialStatus *status = static_cast< NonlinearFluidMaterialStatus * >( this->giveStatus(gp) );
 
     status->letTempDeviatoricStrainVectorBe(eps);
 
@@ -146,7 +145,7 @@ NonlinearFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gaus
     answer.at(3) *= 0.5;
     answer.times( 2.0 * viscosity * ( 1.0 + c * pow(normeps, alpha) ) );
 
-    ( ( FluidDynamicMaterialStatus * ) this->giveStatus(gp) )->letTempDeviatoricStressVectorBe(answer);
+    status->letTempDeviatoricStressVectorBe(answer);
 }
 
 void
@@ -158,7 +157,7 @@ NonlinearFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, Mat
 
     FloatMatrix op, t2;
 
-    NonlinearFluidMaterialStatus *status = ( ( NonlinearFluidMaterialStatus * ) this->giveStatus(gp) );
+    NonlinearFluidMaterialStatus *status = static_cast< NonlinearFluidMaterialStatus * >( this->giveStatus(gp) );
     eps = status->giveTempDeviatoricStrainVector();
 
     eps.at(3) *= 0.5;

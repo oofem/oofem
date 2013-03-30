@@ -49,9 +49,10 @@ public:
     virtual int giveNsd() { return 1; }
 
     virtual void boundaryGiveNodes(IntArray &answer, int boundary) { OOFEM_ERROR("FEInterpolation1d :: boundaryGiveNodes - Not implemented"); }
-    virtual void boundaryEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { answer.resize(1); answer.at(1) = 1.0; }
+    virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { answer.resize(1); answer.at(1) = 1.0; }
     virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { OOFEM_ERROR("FEInterpolation1d :: boundaryGiveNodes - Not implemented"); return 1.; }
     virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { return 1.0; }
+    virtual void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { answer = *cellgeo.giveVertexCoordinates(boundary); }
     /**
      * Computes the exact length.
      * @param cellgeo Cell geometry for the element.

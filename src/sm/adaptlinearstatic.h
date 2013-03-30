@@ -38,6 +38,11 @@
 #include "linearstatic.h"
 #include "meshpackagetype.h"
 
+///@name Input fields for AdaptiveLinearStatic
+//@{
+#define _IFT_AdaptiveLinearStatic_meshpackage "meshpackage"
+//@}
+
 namespace oofem {
 
 /**

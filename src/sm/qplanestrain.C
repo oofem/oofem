@@ -44,7 +44,7 @@ namespace oofem {
 FEI2dQuadQuad QPlaneStrain :: interpolation(1, 2);
 
 QPlaneStrain :: QPlaneStrain(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface()
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface()
     // Constructor.
 {
     numberOfDofMans  = 8;
@@ -55,7 +55,7 @@ Interface *
 QPlaneStrain :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     }
 
     return NULL;
@@ -111,7 +111,7 @@ QPlaneStrain :: initializeFrom(InputRecord *ir)
 
     this->Element :: initializeFrom(ir);
     numberOfGaussPoints = 4;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_QPlaneStrain_nip, "nip");
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
            ( numberOfGaussPoints == 4 ) ||
@@ -120,7 +120,6 @@ QPlaneStrain :: initializeFrom(InputRecord *ir)
         numberOfGaussPoints = 4;
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 

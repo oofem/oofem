@@ -41,12 +41,11 @@ NodalLoad :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    result = Load :: initializeFrom(ir);
     int value = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_BoundaryLoad_cstype, "cstype");
     coordSystemType = ( BL_CoordSystType ) value;
 
-    return IRRT_OK;
+    return Load :: initializeFrom(ir);
 }
 
 

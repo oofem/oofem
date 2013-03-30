@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -70,7 +70,7 @@ public:
      * Sets a new load vector.
      * @param newValue New load.
      */
-    void updateLoad(const FloatArray newValue) { componentArray = newValue; };
+    void updateLoad(const FloatArray &newValue) { componentArray = newValue; };
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual bcGeomType giveBCGeoType() const { return SurfaceLoadBGT; }

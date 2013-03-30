@@ -126,7 +126,7 @@ SpringElement :: computeSpringInternalForce(TimeStep *stepN)
 int
 SpringElement :: computeNumberOfGlobalDofs(EquationID eid)
 {
-    if ((this->mode == SE_1D_SPRING) || (this->mode == SE_2D_TORSIONALSPRING_XZ))  {
+    if ((this->mode == SE_1D_SPRING) || (this->mode == SE_2D_TORSIONALSPRING_XZ)) {
         return 2;
     } else if (this->mode == SE_2D_SPRING_XY) {
         return 4;
@@ -147,12 +147,12 @@ SpringElement :: initializeFrom(InputRecord *ir)
     StructuralElement :: initializeFrom(ir);
 
     int _mode;
-    IR_GIVE_FIELD(ir, _mode, IFT_SpringElement_mode, "mode"); // Macro
-    IR_GIVE_FIELD(ir, springConstant, IFT_SpringElement_springConstant, "k"); // Macro
+    IR_GIVE_FIELD(ir, _mode, IFT_SpringElement_mode, "mode");
+    IR_GIVE_FIELD(ir, springConstant, IFT_SpringElement_springConstant, "k");
 
     this->mode = (SpringElementType) _mode;
     if (mode != SE_1D_SPRING) {
-      IR_GIVE_OPTIONAL_FIELD(ir, this->dir, IFT_SpringElement_orientation, "orientation"); // Macro
+      IR_GIVE_OPTIONAL_FIELD(ir, this->dir, IFT_SpringElement_orientation, "orientation");
       this->dir.normalize();
     }
     return IRRT_OK;

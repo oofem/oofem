@@ -140,7 +140,7 @@ PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray& coords,
         return 1;
     }
 
-    EIPrimaryFieldInterface *interface = ( EIPrimaryFieldInterface * ) ( bgelem->giveInterface(EIPrimaryFieldInterfaceType) );
+    EIPrimaryFieldInterface *interface = static_cast< EIPrimaryFieldInterface * >( bgelem->giveInterface(EIPrimaryFieldInterfaceType) );
     if ( interface ) {
         if (dofId) {
             return interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, *dofId, mode, atTime);

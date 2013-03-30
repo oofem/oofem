@@ -44,7 +44,7 @@
 
 namespace oofem {
 
-class FEI3dTrLin;
+class FEI3dTetLin;
 class FEI3dTetQuad;
 
 /**
@@ -61,7 +61,7 @@ protected:
     /// Number of gauss points. Same for pressure and velocity.
     int numberOfGaussPoints;
     /// Interpolation for pressure
-    static FEI3dTrLin interpolation_lin;
+    static FEI3dTetLin interpolation_lin;
     /// Interpolation for geometry and velocity
     static FEI3dTetQuad interpolation_quad;
     /// Ordering of momentum balance dofs in element. Used to assemble the element stiffness

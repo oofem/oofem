@@ -41,6 +41,12 @@
 #include "dictionr.h"
 #include "valuemodetype.h"
 
+///@name Input fields for Load
+//@{
+#define _IFT_Load_components "components"
+#define _IFT_Load_dofexcludemask "dofexcludemask"
+//@}
+
 namespace oofem {
 /**
  * Load is base abstract class for all loads.

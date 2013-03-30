@@ -41,6 +41,16 @@
 #include "activebc.h"
 #include "inputrecord.h"
 
+///@name Input fields for WeakPeriodicBoundaryCondition
+//@{
+#define _IFT_WeakPeriodicBoundaryCondition_order "order"
+#define _IFT_WeakPeriodicBoundaryCondition_descritizationType "descritizationtype"
+#define _IFT_WeakPeriodicBoundaryCondition_dofid "dofid"
+#define _IFT_WeakPeriodicBoundaryCondition_ngp "ngp"
+#define _IFT_WeakPeriodicBoundaryCondition_elementSidesPositive "elementsidespositive"
+#define _IFT_WeakPeriodicBoundaryCondition_elementSidesNegative "elementsidesnegative"
+//@}
+
 namespace oofem {
 enum basisType { monomial=0, trigonometric=1, legendre=2 };
 /**
@@ -84,43 +94,35 @@ private:
     double computeBaseFunctionValue(int baseID, double coordinate);
 
     Node *gammaDman;
-    IntArray DofIDList;
 
-    double factorial(double n) {
-    	if (n==0) {
-    		return 1.0;
-    	} else {
-    		return n*factorial(n-1);
-    	};
-    };
+    double factorial(int n);
 
-    double binomial(double n , double k) {
-    	double f=1.0;
-    	for (double i=1.0; i<=k; i=i+1.0) {
-    		f=f*(n-(k-i))/i;
-    	}
-    	return f;//factorial(n)/(factorial(k)*factorial(n-k));
-    };
+    double binomial(double n , int k);
 
 public:
     WeakPeriodicbc(int n, Domain *d);
-    ~WeakPeriodicbc() { };
+    virtual ~WeakPeriodicbc() { };
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     basisType giveBasisType() {return useBasisType; };
 
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, 
+                          const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, 
+                          Domain *domain);
 
     virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                   CharType type, ValueModeType mode,
-                                  const UnknownNumberingScheme &s, Domain *domain);
+                                  const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorm = NULL);
 
     virtual int giveNumberOfInternalDofManagers();
 
     virtual DofManager *giveInternalDofManager(int i);
 
-    void addElementSide(int elem, int side);
+    virtual void addElementSide(int elem, int side);
+
+protected:
+    void computeElementTangent(FloatMatrix &answer, Element *e, int boundary);
 };
 }
 #endif /* WEAKPERIODICBC_H_ */

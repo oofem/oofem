@@ -39,6 +39,14 @@
 #include "gausspnt.h"
 #include "dictionr.h"
 
+///@name Input fields for PointLoad
+//@{
+#define _IFT_PointLoad_ndofs "ndofs"
+#define _IFT_PointLoad_coords "coords"
+#define _IFT_PointLoad_loadtype "loadtype"
+#define _IFT_PointLoad_cstype "cstype"
+//@}
+
 namespace oofem {
 class TimeStep;
 

@@ -48,6 +48,16 @@ namespace oofem {
 #define BINGHAM_ALT 1
 #define BINGHAM_MIN_SHEAR_RATE     1.e-10
 
+BinghamFluidMaterial2 :: BinghamFluidMaterial2(int n, Domain *d) : FluidDynamicMaterial(n, d),
+    mu_0(0.),
+    tau_0(0.),
+    tau_c(0.),
+    mu_inf(1.e6),
+    stressGrowthRate(BINGHAM_DEFAULT_STRESS_GROWTH_RATE)
+{
+}
+
+
 int
 BinghamFluidMaterial2 :: hasMaterialModeCapability(MaterialMode mode)
 //
@@ -57,7 +67,6 @@ BinghamFluidMaterial2 :: hasMaterialModeCapability(MaterialMode mode)
     if ( ( mode == _2dFlow ) || ( mode == _3dFlow ) ) {
         return 1;
     } 
-      
 
     return 0;
 }
@@ -72,11 +81,10 @@ BinghamFluidMaterial2 :: initializeFrom(InputRecord *ir)
     this->FluidDynamicMaterial :: initializeFrom(ir);
     // we use rather object's member data than to store data into slow
     // key-val dictionary with lot of memory allocations
-
-    IR_GIVE_FIELD(ir, mu_0, IFT_BinghamFluidMaterial_mu0, "mu0"); // Macro
-    IR_GIVE_FIELD(ir, tau_0, IFT_BinghamFluidMaterial_tau0, "tau0"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, mu_inf, IFT_BinghamFluidMaterial_muinf, "muinf"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, stressGrowthRate, IFT_BinghamFluidMaterial_stressGrowthRate, "stressgrowthrate"); // Macro
+    IR_GIVE_FIELD(ir, mu_0, IFT_BinghamFluidMaterial_mu0, _IFT_BinghamFluidMaterial_mu0);
+    IR_GIVE_FIELD(ir, tau_0, IFT_BinghamFluidMaterial_tau0, _IFT_BinghamFluidMaterial_tau0);
+    IR_GIVE_OPTIONAL_FIELD(ir, mu_inf, IFT_BinghamFluidMaterial_muinf, _IFT_BinghamFluidMaterial_muinf);
+    IR_GIVE_OPTIONAL_FIELD(ir, stressGrowthRate, IFT_BinghamFluidMaterial_stressGrowthRate, _IFT_BinghamFluidMaterial_stressGrowthRate);
     tau_c = tau_0 * mu_inf / ( mu_inf - mu_0 );
     //tau_c = tau_0;
     return IRRT_OK;
@@ -180,7 +188,7 @@ BinghamFluidMaterial2 :: computeDeviatoricStressVector(FloatArray &answer, Gauss
 {
     int size = eps.giveSize();
     answer.resize(size);
-    BinghamFluidMaterial2Status *status = ( ( BinghamFluidMaterial2Status * ) this->giveStatus(gp) );
+    BinghamFluidMaterial2Status *status = static_cast< BinghamFluidMaterial2Status * >( this->giveStatus(gp) );
     MaterialMode mmode = gp->giveMaterialMode();
     FloatArray epsd;
     double gamma, tau, _nu;
@@ -219,7 +227,7 @@ void
 BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp,
                                                        TimeStep *atTime)
 {
-    BinghamFluidMaterial2Status *status = ( ( BinghamFluidMaterial2Status * ) this->giveStatus(gp) );
+    BinghamFluidMaterial2Status *status = static_cast< BinghamFluidMaterial2Status * >( this->giveStatus(gp) );
     MaterialMode mmode = gp->giveMaterialMode();
     const FloatArray &epsd = status->giveTempDeviatoricStrainVector(); //status->giveTempDeviatoricStrainVector();
     double tau = status->giveTempDevStressMagnitude();
@@ -233,7 +241,7 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
         answer.resize(3, 3);
         answer.zero();
 
-        double dgde1, dgde2, dgde3, dgde4;
+        double dgde1, dgde2, dgde3;
         double dmudg, mu;
 
         if ( 0 ) {
@@ -255,7 +263,7 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
         } else { // tangent stiffness
 
             if ( gamma < BINGHAM_MIN_SHEAR_RATE ) {
-                dmudg = dgde1 = dgde2 = dgde3 = dgde4 = 0.0;
+                dmudg = dgde1 = dgde2 = dgde3 = 0.0;
                 mu = computeActualViscosity(tau_0, gamma);
             } else {
                 dmudg = ( -1.0 ) * tau_0 * ( 1.0 - exp(-this->stressGrowthRate * gamma) ) / gamma2 +
@@ -550,13 +558,6 @@ BinghamFluidMaterial2 :: computeDeviatoricStress(FloatArray &answer, const Float
 
 
 
-
-
-
-
-
-
-
 BinghamFluidMaterial2Status :: BinghamFluidMaterial2Status(int n, Domain *d, GaussPoint *g) :
     FluidDynamicMaterialStatus(n, d, g)
 {
@@ -587,17 +588,13 @@ void
 BinghamFluidMaterial2Status :: printOutputAt(FILE *File, TimeStep *tNow)
 // Prints the strains and stresses on the data file.
 {
-    int i, n;
-
     fprintf(File, " strains ");
-    n = deviatoricStrainVector.giveSize();
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= deviatoricStrainVector.giveSize(); i++ ) {
         fprintf( File, " % .4e", deviatoricStrainVector.at(i) );
     }
 
     fprintf(File, "\n deviatoric stresses");
-    n = deviatoricStressVector.giveSize();
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= deviatoricStressVector.giveSize(); i++ ) {
         fprintf( File, " % .4e", deviatoricStressVector.at(i) );
     }
 
@@ -702,11 +699,10 @@ BinghamFluidMaterial2Status :: restoreContext(DataStream *stream, ContextMode mo
 /*void
 BinghamFluidMaterial2 :: __debug(GaussPoint *gp, TimeStep *atTime)
 {
-    
-  BinghamFluidMaterial2Status *status = ( ( BinghamFluidMaterial2Status * ) this->giveStatus(gp) );
-const FloatArray &epsd = status->giveTempDeviatoricStrainVector();
-const FloatArray &sigd = status->giveTempDeviatoricStrainVector() 
-    for ( i = 1; i <= nincr; i++ ) {
+    BinghamFluidMaterial2Status *status = static_cast< BinghamFluidMaterial2Status * >( this->giveStatus(gp) );
+    const FloatArray &epsd = status->giveTempDeviatoricStrainVector();
+    const FloatArray &sigd = status->giveTempDeviatoricStrainVector() 
+    for ( int i = 1; i <= nincr; i++ ) {
         eps.add(eps_i);
         computeDeviatoricStressVector(tau, gp, eps, atTime);
         giveDeviatoricStiffnessMatrix(d, TangentStiffness, gp, atTime);

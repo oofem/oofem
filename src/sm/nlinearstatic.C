@@ -41,7 +41,6 @@
 #include "verbose.h"
 #include "sparsenonlinsystemnm.h"
 #include "nrsolver.h"
-#include "nrsolver2.h"
 #include "calmls.h"
 #include "outputmanager.h"
 #include "datastream.h"
@@ -62,7 +61,6 @@ NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i,
     //
     prevStepLength = 0.;
     currentStepLength = 0.;
-    internalForcesEBENorm = 0.0;
     loadLevel = cumulatedLoadLevel = 0.;
     mstepCumulateLoadLevelFlag = 0;
     numMetStatus = NM_None;
@@ -104,49 +102,35 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
     }
 
     int _val = 0;
-    IR_GIVE_OPTIONAL_FIELD( ( mStep->giveAttributesRecord() ), _val, IFT_NonLinearStatic_controlmode, "controlmode" ); // Macro
+    IR_GIVE_OPTIONAL_FIELD( ( mStep->giveAttributesRecord() ), _val, IFT_NonLinearStatic_controlmode, "controlmode" );
     IR_GIVE_OPTIONAL_FIELD( ( mStep->giveAttributesRecord() ), _val, IFT_NonLinearStatic_controlmode, "controllmode" ); // for backward compatibility
     NonLinearStatic_controlType mode = ( NonLinearStatic_controlType ) _val;
 
-    SparseNonLinearSystemNM *nm = NULL;
     if ( mode == nls_indirectControl ) {
         if ( nMethod ) {
-            if ( nMethod->giveClassID() == CylindricalALMSolverClass ) {
+            if ( dynamic_cast< CylindricalALM * >( nMethod ) ) {
                 return nMethod;
             } else {
                 delete nMethod;
             }
         }
 
-        nm = ( SparseNonLinearSystemNM * ) new CylindricalALM(1, this->giveDomain(1), this, EID_MomentumBalance);
-        nMethod = nm;
+        this->nMethod = new CylindricalALM(1, this->giveDomain(1), this, EID_MomentumBalance);
     } else if ( mode == nls_directControl ) {
         if ( nMethod ) {
-            if ( nMethod->giveClassID() == NRSolverClass ) {
+            if ( dynamic_cast< NRSolver * >( nMethod ) ) {
                 return nMethod;
             } else {
                 delete nMethod;
             }
         }
 
-        nm = ( SparseNonLinearSystemNM * ) new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance);
-        nMethod = nm;
-    } else if ( mode == nls_directControl2 ) {
-        if ( nMethod ) {
-            if ( nMethod->giveClassID() == NRSolverClass ) {
-                return nMethod;
-            } else {
-                delete nMethod;
-            }
-        }
-
-        nm = ( SparseNonLinearSystemNM * ) new NRSolver2(1, this->giveDomain(1), this, EID_MomentumBalance);
-        nMethod = nm;
+        this->nMethod = new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance);
     } else {
         _error("giveNumericalMethod: unsupported controlMode");
     }
 
-    return nm;
+    return this->nMethod;
 }
 
 
@@ -177,7 +161,7 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
      * }
      */
     int _val = nls_indirectControl;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_controlmode, "controlmode"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_controlmode, "controlmode");
     IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_controlmode, "controllmode"); // for backward compatibility
     this->controlMode = ( NonLinearStatic_controlType ) _val;
 
@@ -186,17 +170,17 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
     this->initialGuessType = ( InitialGuess ) _val;
 
     deltaT = 1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_NonLinearStatic_deltat, "deltat"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_NonLinearStatic_deltat, "deltat");
     if ( deltaT < 0. ) {
         _error("updateAttributes: deltaT < 0");
     }
 
     _val = nls_tangentStiffness;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_stiffmode, "stiffmode"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_stiffmode, "stiffmode");
     this->stiffMode = ( NonLinearStatic_stiffnessMode ) _val;
 
     _val = SparseNonLinearSystemNM :: rlm_total;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_refloadmode, "refloadmode"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_refloadmode, "refloadmode");
     this->refLoadInputMode = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
 
     if ( ir->hasField(IFT_NonLinearStatic_keepll, "keepll") ) {
@@ -218,7 +202,7 @@ NonLinearStatic :: initializeFrom(InputRecord *ir)
 
     LinearStatic :: initializeFrom(ir);
     nonlocalStiffnessFlag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, IFT_NonLinearStatic_nonlocstiff, "nonlocstiff"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, IFT_NonLinearStatic_nonlocstiff, "nonlocstiff");
 
 #ifdef __PARALLEL_MODE
     //if (ir->hasField ("nodecutmode")) commMode = ProblemCommunicator::ProblemCommMode__NODE_CUT;
@@ -312,8 +296,6 @@ double NonLinearStatic :: giveUnknownComponent(UnknownType chc, ValueModeType mo
         _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
         return 0.;
     }
-
-    return 0.0;
 }
 
 
@@ -510,7 +492,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
      }
 #endif
 
-    if ( loadInitFlag || ( controlMode == nls_directControl ) || ( controlMode == nls_directControl2 ) ) {
+    if ( loadInitFlag || controlMode == nls_directControl ) {
 #ifdef VERBOSE
         OOFEM_LOG_DEBUG("Assembling reference load\n");
 #endif
@@ -566,6 +548,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         incrementOfDisplacement.zero();
     }
 
+    //totalDisplacement.printYourself();
     if ( initialLoadVector.isNotEmpty() ) {
         numMetStatus = nMethod->solve(stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
                                       & totalDisplacement, & incrementOfDisplacement, & internalForces,
@@ -579,19 +562,6 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     ///@todo Use temporary variables. updateYourself() should set the final values, while proceedStep should be callable multiple times for each step (if necessary). / Mikael
     OOFEM_LOG_RELEVANT("Equilibrium reached at load level = %f in %d iterations\n", cumulatedLoadLevel + loadLevel, currentIterations);
     prevStepLength =  currentStepLength;
-}
-
-
-void
-NonLinearStatic :: updateYourself(TimeStep *stepN)
-{
-    //
-    // The following line is potentially serious performance leak.
-    // The numerical method may compute their internal forces - thus causing
-    // internal state to be updated, while checking equilibrium.
-    // update internal state only if necessary
-    this->updateInternalState(stepN);
-    StructuralEngngModel :: updateYourself(stepN);
 }
 
 
@@ -643,7 +613,7 @@ NonLinearStatic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain 
         OOFEM_LOG_DEBUG("Updating internal forces\n");
 #endif
         // update internalForces and internalForcesEBENorm concurrently
-        this->giveInternalForces(internalForces, true, 1, tStep);
+        this->giveInternalForces(internalForces, true, d->giveNumber(), tStep);
         break;
     case NonLinearRhs_Incremental:
 #ifdef VERBOSE
@@ -685,7 +655,7 @@ NonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     int closeFlag = 0;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
@@ -753,7 +723,7 @@ NonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, void *ob
     int closeFlag = 0;
     int istep, iversion;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
 
     this->resolveCorrespondingStepNumber(istep, iversion, obj);
     if ( stream == NULL ) {
@@ -854,9 +824,9 @@ NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, 
 
     if ( ( nonlocalStiffnessFlag ) && ( type == TangentStiffnessMatrix ) ) {
         // add nonlocal contribution
-        int ielem, nelem = domain->giveNumberOfElements();
-        for ( ielem = 1; ielem <= nelem; ielem++ ) {
-            ( ( StructuralElement * ) ( domain->giveElement(ielem) ) )->addNonlocalStiffnessContributions(* answer, s, tStep);
+        int nelem = domain->giveNumberOfElements();
+        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+            static_cast< StructuralElement * >( domain->giveElement(ielem) )->addNonlocalStiffnessContributions(* answer, s, tStep);
         }
 
         // print storage statistics

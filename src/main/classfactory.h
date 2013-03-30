@@ -338,7 +338,7 @@ public:
      * @param dman Dof manager assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    Dof *createDof(classType type, int num, DofManager *dman);
+    Dof *createDof(dofType type, int num, DofManager *dman);
     /**
      * Creates new instance of SparseLinearSystemNM corresponding
      * to given type.

@@ -99,14 +99,13 @@ Brick1_ht :: initializeFrom(InputRecord *ir)
 
     this->TransportElement :: initializeFrom(ir);
     numberOfGaussPoints = 8;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Brick1_ht_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
     if ( !( ( numberOfGaussPoints == 8 ) ||
            ( numberOfGaussPoints == 27 ) ) ) {
         numberOfGaussPoints = 8;
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 
@@ -159,13 +158,13 @@ Interface *
 Brick1_ht :: giveInterface(InterfaceType interface)
 {
     if ( interface == SpatialLocalizerInterfaceType ) {
-        return ( SpatialLocalizerInterface * ) this;
+        return static_cast< SpatialLocalizerInterface * >( this );
     } else if ( interface == EIPrimaryFieldInterfaceType ) {
-        return ( EIPrimaryFieldInterface * ) this;
+        return static_cast< EIPrimaryFieldInterface * >( this );
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     }
 
     return NULL;
@@ -187,10 +186,8 @@ Brick1_ht :: SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 void
 Brick1_ht :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
-    int i;
-
     pap.resize(numberOfDofMans);
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
         pap.at(i) = this->giveNode(i)->giveNumber();
     }
 }
@@ -198,10 +195,10 @@ Brick1_ht :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 void
 Brick1_ht :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
 {
-    int i, found = 0;
+    int found = 0;
     answer.resize(1);
 
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
         if ( this->giveNode(i)->giveNumber() == pap ) {
             found = 1;
         }
@@ -249,7 +246,6 @@ Brick1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray
 #ifdef __OOFEG
 void Brick1_ht :: drawRawGeometry(oofegGraphicContext &gc)
 {
-    int i;
     WCRec p [ 8 ];
     GraphicObj *go;
 
@@ -263,7 +259,7 @@ void Brick1_ht :: drawRawGeometry(oofegGraphicContext &gc)
     EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     EASValsSetFillStyle(FILL_SOLID);
-    for ( i = 0; i < 8; i++ ) {
+    for ( int i = 0; i < 8; i++ ) {
         p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
         p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
         p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
@@ -278,7 +274,7 @@ void Brick1_ht :: drawRawGeometry(oofegGraphicContext &gc)
 
 void Brick1_ht :: drawScalar(oofegGraphicContext &context)
 {
-    int i, indx, result = 0;
+    int indx, result = 0;
     WCRec p [ 8 ];
     GraphicObj *tr;
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
@@ -291,7 +287,7 @@ void Brick1_ht :: drawScalar(oofegGraphicContext &context)
     }
 
     if ( context.giveIntVarMode() == ISM_recovered ) {
-        for ( i = 1; i <= 8; i++ ) {
+        for ( int i = 1; i <= 8; i++ ) {
             result += this->giveInternalStateAtNode(v [ i - 1 ], context.giveIntVarType(), context.giveIntVarMode(), i, tStep);
         }
 
@@ -307,7 +303,7 @@ void Brick1_ht :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    for ( i = 1; i <= 8; i++ ) {
+    for ( int i = 1; i <= 8; i++ ) {
         s [ i - 1 ] = v [ i - 1 ].at(indx);
     }
 
@@ -315,7 +311,7 @@ void Brick1_ht :: drawScalar(oofegGraphicContext &context)
     EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
     if ( context.getScalarAlgo() == SA_ISO_SURF ) {
-        for ( i = 0; i < 8; i++ ) {
+        for ( int i = 0; i < 8; i++ ) {
             p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
             p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
             p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);

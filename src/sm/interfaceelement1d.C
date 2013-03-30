@@ -267,14 +267,13 @@ InterfaceElem1d :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     this->StructuralElement :: initializeFrom(ir);
-    IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, IFT_Beam3d_refnode, "refnode"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, normal, IFT_Node_coords, "normal");
+    IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, IFT_InterfaceElem1d_refnode, "refnode");
+    IR_GIVE_OPTIONAL_FIELD(ir, normal, IFT_InterfaceElem1d_normal, "normal");
     if ( referenceNode == 0 && normal.at(1) == 0 && normal.at(2) == 0 && normal.at(1) == 0 && normal.at(3) == 0 ) {
         _error("instanciateFrom: wrong reference node or normal specified");
     }
 
-    this->computeGaussPoints();
-    this->computeLocalSlipDir(normal);
+    this->computeLocalSlipDir(normal); ///@todo Move into postInitialize ?
     return IRRT_OK;
 }
 
@@ -332,7 +331,7 @@ InterfaceElem1d :: computeLocalSlipDir(FloatArray &normal)
         normal.at(1) = domain->giveNode(this->referenceNode)->giveCoordinate(1) - this->giveNode(1)->giveCoordinate(1);
         normal.at(2) = domain->giveNode(this->referenceNode)->giveCoordinate(2) - this->giveNode(1)->giveCoordinate(2);
         normal.at(3) = domain->giveNode(this->referenceNode)->giveCoordinate(3) - this->giveNode(1)->giveCoordinate(3);
-    } else   {
+    } else {
         if ( normal.at(1) == 0 && normal.at(2) == 0 && normal.at(3) == 0 ) {
             _error("computeLocalSlipDir: normal is not defined (referenceNode=0,normal=(0,0,0))");
         }

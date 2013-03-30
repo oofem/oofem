@@ -41,6 +41,37 @@
 
 #include "kelvinChSolM.h"
 
+///@name Input fields for MPSMaterial
+//@{
+#define _IFT_MPSMaterial_talpha "talpha"
+#define _IFT_MPSMaterial_mode "mode"
+#define _IFT_MPSMaterial_coupledanalysistype "coupledanalysistype"
+#define _IFT_MPSMaterial_fc "fc"
+#define _IFT_MPSMaterial_cc "cc"
+#define _IFT_MPSMaterial_wc "w/c"
+#define _IFT_MPSMaterial_ac "a/c"
+#define _IFT_MPSMaterial_q1 "q1"
+#define _IFT_MPSMaterial_q2 "q2"
+#define _IFT_MPSMaterial_q3 "q3"
+#define _IFT_MPSMaterial_q4 "q4"
+#define _IFT_MPSMaterial_lambda0 "lambda0"
+#define _IFT_MPSMaterial_t0 "t0"
+#define _IFT_MPSMaterial_ksh "ksh"
+#define _IFT_MPSMaterial_wh "w_h"
+#define _IFT_MPSMaterial_ncoeff "ncoeff"
+#define _IFT_MPSMaterial_a "a"
+#define _IFT_MPSMaterial_qetor "qetor"
+#define _IFT_MPSMaterial_qrtor "qrtor"
+#define _IFT_MPSMaterial_qstor "qstor"
+#define _IFT_MPSMaterial_alphae "alphae"
+#define _IFT_MPSMaterial_alphar "alphar"
+#define _IFT_MPSMaterial_alphas "alphas"
+#define _IFT_MPSMaterial_mus "mus"
+#define _IFT_MPSMaterial_kappat "kappat"
+#define _IFT_MPSMaterial_ct "ct"
+#define _IFT_MPSMaterial_stiffnessfactor "stiffnessfactor"
+//@}
+
 namespace oofem {
 
 /**

@@ -45,8 +45,8 @@ IsotropicLinMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
 
     IsotropicMoistureTransferMaterial :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, permeability, IFT_IsotropicLinMoistureTransferMaterial_perm, "perm"); // Macro// moisture permeability
-    IR_GIVE_FIELD(ir, moistureCapacity, IFT_IsotropicLinMoistureTransferMaterial_capa, "capa"); // Macro// moisture capacity
+    IR_GIVE_FIELD(ir, permeability, IFT_IsotropicLinMoistureTransferMaterial_perm, "perm");
+    IR_GIVE_FIELD(ir, moistureCapacity, IFT_IsotropicLinMoistureTransferMaterial_capa, "capa");
 
     return IRRT_OK;
 }

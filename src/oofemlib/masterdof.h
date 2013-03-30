@@ -121,6 +121,7 @@ public:
     /// Destructor.
     virtual ~MasterDof()   { delete unknowns; }
 
+    virtual dofType giveDofType() { return DT_master; }
     virtual const char *giveClassName() const { return "MasterDof"; }
     virtual classType giveClassID() const { return MasterDofClass; }
 
@@ -157,11 +158,6 @@ public:
     virtual void setUnknowns(Dictionary *unknowns) { this->unknowns = unknowns; }
     virtual Dictionary *giveUnknowns() { return this->unknowns; }
     virtual int giveEqn() { return equationNumber; }
-
-#ifdef __PARALLEL_MODE
-    virtual int packUnknowns(CommunicationBuffer &buff, EquationID type, ValueModeType mode, TimeStep *stepN);
-    virtual int unpackAndUpdateUnknown(CommunicationBuffer &buff, EquationID type, ValueModeType mode, TimeStep *stepN);
-#endif
 
 protected:
     BoundaryCondition *giveBc();

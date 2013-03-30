@@ -41,7 +41,6 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
-
 namespace oofem {
 /**
  * Abstract representation of Geometry
@@ -63,7 +62,7 @@ public:
     /// Checks whether an element is interacted, Element reference will be later replaced by Geometry.
     virtual bool intersects(Element *element) { return false; }
     /// Gives number of intersection points of Geometry entity with an element, Element reference will be later replaced by Geometry.
-    virtual int computeNumberOfIntersectionPoints(Element *element) { return 0; }
+    virtual int computeNumberOfIntersectionPoints(const Element *element) { return 0; }
     /// Gives intersection points between this Geometry and Element.
     virtual void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints) { }
     /// Accessor.
@@ -86,6 +85,8 @@ public:
     /// Returns number of Geometry vertices.
     int giveNrVertices() { return this->vertices->giveSize(); }
     virtual bool isOutside(BasicGeometry *bg) { return false; }
+    virtual bool isInside(Element *el) { return false; }
+    virtual bool isInside(FloatArray &point) { return false; }
     virtual void printYourself() { }
     /**
      * Stores the state of receiver to output stream.
@@ -163,9 +164,36 @@ public:
     virtual bool intersects(Element *element);
     virtual void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints);
     virtual void computeIntersectionPoints(Line *l, AList< FloatArray > *intersecPoints);
+    virtual int computeNumberOfIntersectionPoints(Element *element);
     virtual bool isOutside(BasicGeometry *bg);
+    virtual bool isInside(Element *element);
+    virtual bool isInside(FloatArray &point);
     virtual void printYourself();
 };
+
+
+class PointSwarm : public BasicGeometry
+{
+protected:
+    std::list< int > idList;
+public:
+    PointSwarm() : BasicGeometry() { }
+    virtual ~PointSwarm() { }
+    PointSwarm(std::list<int> pointsID);
+
+    /// Computes the normal distance to the surface not to the center.
+   // virtual double computeDistanceTo(FloatArray *point);
+   virtual IRResultType initializeFrom(InputRecord *ir);
+   // virtual const char *giveClassName() const { return "Circle"; }
+   // virtual bool intersects(Element *element);
+   // virtual void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints);
+   // virtual void computeIntersectionPoints(Line *l, AList< FloatArray > *intersecPoints);
+   // virtual bool isOutside(BasicGeometry *bg);
+   // virtual bool isInside(Element *element);
+   // virtual bool isInside(FloatArray &point);
+    
+};
+
 } // end namespace oofem
 #endif  // geometry_h
 

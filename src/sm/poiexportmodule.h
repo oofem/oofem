@@ -43,6 +43,14 @@
 
 #include <list>
 
+///@name Input fields for Point-of-Interest export module
+//@{
+#define _IFT_POIExportModule_vars "vars"
+#define _IFT_POIExportModule_primvars "primvars"
+#define _IFT_POIExportModule_mtype "mtype"
+#define _IFT_POIExportModule_poifilename "poifilename"
+//@}
+
 namespace oofem {
 /**
  * Represents POI (Point Of Interest) export module.

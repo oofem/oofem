@@ -94,11 +94,11 @@ NlDEIDynamic :: initializeFrom(InputRecord *ir)
 
     StructuralEngngModel :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, dumpingCoef, IFT_NlDEIDynamic_dumpcoef, "dumpcoef"); // C = dumpingCoef * M // Macro
-    IR_GIVE_FIELD(ir, deltaT, IFT_NlDEIDynamic_deltat, "deltat"); // Macro
+    IR_GIVE_FIELD(ir, dumpingCoef, IFT_NlDEIDynamic_dumpcoef, "dumpcoef"); // C = dumpingCoef * M
+    IR_GIVE_FIELD(ir, deltaT, IFT_NlDEIDynamic_deltat, "deltat");
 
     drFlag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, drFlag, IFT_NlDEIDynamic_drflag, "drflag"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, drFlag, IFT_NlDEIDynamic_drflag, "drflag");
     if ( drFlag ) {
         IR_GIVE_FIELD(ir, Tau, IFT_NlDEIDynamic_tau, "tau");
         IR_GIVE_FIELD(ir, pyEstimate, IFT_NlDEIDynamic_py, "py");
@@ -129,9 +129,6 @@ NlDEIDynamic :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
-
-
-
 
 
 double NlDEIDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
@@ -510,7 +507,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
         prevIncrOfDisplacement = previousIncrementOfDisplacementVector.at(i);
         incrOfDisplacement = loadVector.at(i) /
                              ( massMatrix.at(i) * ( 1. / ( deltaT * deltaT ) + dumpingCoef / ( 2. * deltaT ) ) );
-        
+
         accelerationVector.at(i) = ( incrOfDisplacement - prevIncrOfDisplacement ) / ( deltaT * deltaT );
         velocityVector.at(i)     = ( incrOfDisplacement + prevIncrOfDisplacement ) / ( 2. * deltaT );
         previousIncrementOfDisplacementVector.at(i) = incrOfDisplacement;
@@ -754,12 +751,11 @@ NlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff
 #endif
 
 
-
 contextIOResultType NlDEIDynamic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     int closeFlag = 0;
-    FILE *file;
+    FILE *file = NULL;
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
@@ -805,13 +801,12 @@ contextIOResultType NlDEIDynamic :: saveContext(DataStream *stream, ContextMode 
 }
 
 
-
 contextIOResultType NlDEIDynamic :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     int closeFlag = 0;
     int istep, iversion;
-    FILE *file;
+    FILE *file = NULL;
 
     this->resolveCorrespondingStepNumber(istep, iversion, obj);
 
@@ -857,7 +852,6 @@ contextIOResultType NlDEIDynamic :: restoreContext(DataStream *stream, ContextMo
 
     return CIO_OK;
 }
-
 
 
 void

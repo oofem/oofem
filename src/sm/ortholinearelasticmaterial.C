@@ -57,44 +57,44 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 
     this->LinearElasticMaterial :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_ex, "ex"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_ex, "ex");
     propertyDictionary->add(Ex, value);
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_ey, "ey"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_ey, "ey");
     propertyDictionary->add(Ey, value);
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_ez, "ez"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_ez, "ez");
     propertyDictionary->add(Ez, value);
 
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_nyyz, "nyyz"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_nyyz, "nyyz");
     propertyDictionary->add(NYyz, value);
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_nyxz, "nyxz"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_nyxz, "nyxz");
     propertyDictionary->add(NYxz, value);
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_nyxy, "nyxy"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_nyxy, "nyxy");
     propertyDictionary->add(NYxy, value);
 
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_gyz, "gyz"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_gyz, "gyz");
     propertyDictionary->add(Gyz, value);
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_gxz, "gxz"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_gxz, "gxz");
     propertyDictionary->add(Gxz, value);
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_gxy, "gxy"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_gxy, "gxy");
     propertyDictionary->add(Gxy, value);
 
 
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_talphax, "talphax"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_talphax, "talphax");
     propertyDictionary->add(tAlphax, value);
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_talphay, "talphay"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_talphay, "talphay");
     propertyDictionary->add(tAlphay, value);
 
-    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_talphaz, "talphaz"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_talphaz, "talphaz");
     propertyDictionary->add(tAlphaz, value);
 
     // check for suspicious parameters
@@ -116,7 +116,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 
     // try to read lcs section
     triplets.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, triplets, IFT_OrthotropicLinearElasticMaterial_lcs, "lcs"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, triplets, IFT_OrthotropicLinearElasticMaterial_lcs, "lcs");
 
     size = triplets.giveSize();
     if ( !( ( size == 0 ) || ( size == 6 ) ) ) {
@@ -297,7 +297,7 @@ OrthotropicLinearElasticMaterial :: giveTensorRotationMatrix(FloatMatrix &answer
 {
     int elementCsFlag;
     FloatMatrix elementCs;
-    StructuralElement *element = ( StructuralElement * ) gp->giveElement();
+    StructuralElement *element = static_cast< StructuralElement * >( gp->giveElement() );
 
     if ( gp->giveMaterialMode() == _1dMat ) { //do not rotate 1D materials on trusses and beams
         answer.resize(3, 3);

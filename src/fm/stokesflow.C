@@ -79,11 +79,11 @@ IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
     int val;
 
     val = ( int ) SMT_PetscMtrx;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_StokesFlow_smtype, "smtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
     this->sparseMtrxType = ( SparseMtrxType ) val;
 
     val = ( int ) ST_Petsc;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_SUPG_lstype, "lstype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
     this->solverType = ( LinSystSolverType ) val;
 
     this->deltaT = 1.0;
@@ -115,8 +115,8 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
         }
         if (this->ts == TS_NeedsRemeshing || meshdeformation > this->maxdef) {
             this->giveDomain(1)->giveTopology()->replaceFEMesh();
-            OOFEM_LOG_INFO("StokesFlow :: updateYourself - New mesh created (%d elements).\n",this->giveDomain(1)->giveNumberOfElements());
-            meshdeformation = this->meshqualityee->giveValue(globalErrorEEV, tStep);
+            OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - New mesh created (%d elements).\n",this->giveDomain(1)->giveNumberOfElements());
+            /*meshdeformation =*/ this->meshqualityee->giveValue(globalErrorEEV, tStep);
             this->giveExportModuleManager()->initialize();
         }
     }
@@ -167,9 +167,9 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
                                             solutionVector,
                                             & ( this->incrementOfSolution ),
                                             & ( this->internalForces ),
-                                            eNorm,
+                                            this->eNorm,
                                             loadLevel, // Only relevant for incrementalBCLoadVector?
-                                            SparseNonLinearSystemNM :: rlm_total, // Why this naming scheme? Should be RLM_Total, and ReferenceLoadInputModeType
+                                            SparseNonLinearSystemNM :: rlm_total,
                                             currentIterations,
                                             tStep);
 #else
@@ -190,25 +190,25 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     Domain* d = this->giveDomain(1);
     int i, nelem = d->giveNumberOfElements();
     for ( i = 1; i <= nelem; ++i ) {
-        ((FMElement*)d->giveElement(i))->updateStabilizationCoeffs(tStep);
+        static_cast< FMElement* >( d->giveElement(i) )->updateStabilizationCoeffs(tStep);
     }
 }
 
 void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 {
     // update element stabilization
-    int i, nelem = d->giveNumberOfElements();
-    for ( i = 1; i <= nelem; ++i ) {
-        ((FMElement*)d->giveElement(i))->updateStabilizationCoeffs(tStep);
+    int nelem = d->giveNumberOfElements();
+    for ( int i = 1; i <= nelem; ++i ) {
+        static_cast< FMElement* >( d->giveElement(i) )->updateStabilizationCoeffs(tStep);
     }
 
-    if (cmpn == InternalRhs) {
+    if ( cmpn == InternalRhs ) {
         this->internalForces.zero();
-        this->eNorm = this->assembleVector( this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
-                              EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assembleVector( this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
+                              EModelDefaultEquationNumbering(), this->giveDomain(1), &this->eNorm );
         return;
 
-    } else if (cmpn == NonLinearLhs) {
+    } else if ( cmpn == NonLinearLhs ) {
         this->stiffnessMatrix->zero();
         this->assemble(this->stiffnessMatrix, tStep, EID_MomentumBalance_ConservationEquation, StiffnessMatrix,
                 EModelDefaultEquationNumbering(), d);
@@ -274,13 +274,13 @@ void StokesFlow :: initPetscContexts()
 
 int StokesFlow :: checkConsistency()
 {
-    int i, nelem;
+    int nelem;
     FMElement *sePtr;
     Domain *domain = this->giveDomain(1);
     nelem = domain->giveNumberOfElements();
 
     // check for proper element type
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         sePtr = dynamic_cast< FMElement * >( domain->giveElement(i) );
         if ( sePtr == NULL ) {
             OOFEM_WARNING2("Element %d has no FMElement base", i);
@@ -333,9 +333,6 @@ NumericalMethod *StokesFlow :: giveNumericalMethod(MetaStep *mStep)
     }
 
     this->nMethod = new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance_ConservationEquation);
-    if ( !nMethod ) {
-        OOFEM_ERROR("giveNumericalMethod: numerical method creation failed");
-    }
     return this->nMethod;
 }
 

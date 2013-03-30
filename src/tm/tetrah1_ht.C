@@ -40,6 +40,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "structuralms.h"
+#include "fei3dtetlin.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -48,7 +49,7 @@
 #endif
 
 namespace oofem {
-FEI3dTrLin Tetrah1_ht :: interpolation;
+FEI3dTetLin Tetrah1_ht :: interpolation;
 
 Tetrah1_ht :: Tetrah1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM)
 {
@@ -63,6 +64,13 @@ Tetrah1_hmt :: Tetrah1_hmt(int n, Domain *aDomain) : Tetrah1_ht(n, aDomain)
 
 Tetrah1_ht :: ~Tetrah1_ht()
 { }
+
+
+FEInterpolation *
+Tetrah1_ht :: giveInterpolation()
+{
+    return &interpolation;
+}
 
 
 void
@@ -94,14 +102,13 @@ Tetrah1_ht :: initializeFrom(InputRecord *ir)
 
     this->TransportElement :: initializeFrom(ir);
     numberOfGaussPoints = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Tetrah1_ht_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
            ( numberOfGaussPoints == 4 ) ) ) {
         numberOfGaussPoints = 1;
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 
@@ -154,11 +161,11 @@ Interface *
 Tetrah1_ht :: giveInterface(InterfaceType interface)
 {
     if ( interface == SpatialLocalizerInterfaceType ) {
-        return ( SpatialLocalizerInterface * ) this;
+        return static_cast< SpatialLocalizerInterface * >( this );
     } else if ( interface == EIPrimaryFieldInterfaceType ) {
-        return ( EIPrimaryFieldInterface * ) this;
+        return static_cast< EIPrimaryFieldInterface * >( this );
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     }
 
     return NULL;

@@ -37,6 +37,15 @@
 
 #include "maxwellChM.h"
 
+///@name Input fields for DoublePowerLawMaterial
+//@{
+#define _IFT_DoublePowerLawMaterial_e28 "e28"
+#define _IFT_DoublePowerLawMaterial_fi1 "fi1"
+#define _IFT_DoublePowerLawMaterial_m "m"
+#define _IFT_DoublePowerLawMaterial_n "n"
+#define _IFT_DoublePowerLawMaterial_alpha "alpha"
+//@}
+
 namespace oofem {
 /**
  * This class implements a rheologic double power law material model.

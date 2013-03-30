@@ -44,6 +44,7 @@ namespace oofem {
     ENUM_ITEM(_3dMat) \
     ENUM_ITEM(_3dMat_F)  /* 3d deformation gradient */ \
     ENUM_ITEM(_3dMatGrad)  /* 3d model with gradient of internal variable */ \
+    ENUM_ITEM(_3dMatGrad_F)  /* 3d deformation gradient with gradient of internal variable */ \
     ENUM_ITEM(_1dMatGrad)  /* 1d model with gradient of internal variable */ \
     ENUM_ITEM(_PlaneStressGrad)  /* plane stress with gradient of internal variable */ \
     ENUM_ITEM(_PlaneStrainGrad)  /* plane strain with gradient of internal variable */ \
@@ -54,12 +55,12 @@ namespace oofem {
     ENUM_ITEM(_2dBeam) \
     ENUM_ITEM(_3dBeam) \
     ENUM_ITEM(_3dShell) \
-    ENUM_ITEM(_3dRotContinuum) /* axisymmetry */ \
+    ENUM_ITEM(_3dRotContinuum) /* Axisymmetry, use _3dMat if possible */ \
   \
     ENUM_ITEM(_2dPlateLayer) \
     ENUM_ITEM(_2dBeamLayer) \
     ENUM_ITEM(_3dShellLayer) \
-    ENUM_ITEM(_PlaneStressRot) \
+    ENUM_ITEM(_PlaneStressRot) /* Plane stress with rotation around z */\
   \
     ENUM_ITEM(_1dFiber) \
     ENUM_ITEM(_3dMicroplane) \
@@ -71,8 +72,8 @@ namespace oofem {
     ENUM_ITEM(_1dHeMo) /* 1d heat and mass (one component) transfer */ \
     ENUM_ITEM(_2dHeat) /* 2d heat */ \
     ENUM_ITEM(_2dHeMo) /* 2d heat and mass (one component) transfer */ \
-    ENUM_ITEM(_3dHeat) \
-    ENUM_ITEM(_3dHeMo) \
+    ENUM_ITEM(_3dHeat) /* 3d heat */ \
+    ENUM_ITEM(_3dHeMo) /* 3d heat and mass (one component) transfer */ \
   \
     ENUM_ITEM(_2dFlow) \
     ENUM_ITEM(_2dAxiFlow) \

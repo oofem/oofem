@@ -34,6 +34,7 @@
 
 #ifndef qspacegrad_h
 #define qspacegrad_h
+
 #include "qspace.h"
 #include "fei3dhexalin.h"
 #include "graddpelement.h"
@@ -73,6 +74,8 @@ protected:
     virtual void computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual StructuralElement* giveStructuralElement() { return this; }
+    virtual NLStructuralElement* giveNLStructuralElement() { return this; }
+    
 };
 
 }

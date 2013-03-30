@@ -156,13 +156,10 @@ FloatMatrix :: ~FloatMatrix()
 FloatMatrix & FloatMatrix :: operator = ( const FloatMatrix & src )
 {
     // assignment: cleanup and copy
-    double *P1, *P2;
     this->resize(src.nRows, src.nColumns);
 
-    P1 = values;
-    P2 = src.values;
     for ( int i = 0; i < nRows * nColumns; i++ ) {
-        P1 [ i ] = P2 [ i ];
+        values [ i ] = src.values [ i ];
     }
 
     return * this;
@@ -203,7 +200,7 @@ double FloatMatrix :: operator() (int i, int j) const
 void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
 {
     int ii, jj, size = src.giveNumberOfRows();
-    size = src.giveNumberOfRows();
+
 #if DEBUG
     if ( size != loc.giveSize() ) {
         OOFEM_ERROR("FloatMatrix :: assemble : dimensions of 'src' and 'loc' mismatch");
@@ -523,39 +520,6 @@ void FloatMatrix :: setTSubMatrix(const FloatMatrix &src, int sr, int sc)
 }
 
 
-void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src,
-                             int topRow, int bottomRow, int topCol, int bottomCol)
-/*
- * modifies receiver to be  submatrix of the src matrix
- * size of receiver  submatrix is determined from
- * input parameters
- */
-{
-#ifdef DEBUG
-    if ( ( topRow < 1 ) || ( bottomRow < 1 ) || ( topCol < 1 ) || ( bottomCol < 1 ) ) {
-        OOFEM_ERROR("FloatMatrix::beSubMatrixOf : subindexes size mismatch");
-    }
-
-    if ( ( src.nRows < bottomRow ) || ( src.nColumns < bottomCol ) || ( ( bottomRow - topRow ) > src.nRows ) ||
-        ( ( bottomCol - topCol ) > src.nColumns ) ) {
-        OOFEM_ERROR("FloatMatrix::beSubMatrixOf : subindexes size mismatch");
-    }
-#endif
-
-
-    int topRm1, topCm1;
-    topRm1 = topRow - 1;
-    topCm1 = topCol - 1;
-
-    // allocate return value
-    this->resize(bottomRow - topRm1, bottomCol - topCm1);
-    for ( int i = topRow; i <= bottomRow; i++ ) {
-        for ( int j = topCol; j <= bottomCol; j++ ) {
-            this->at(i - topRm1, j - topCm1) = src.at(i, j);
-        }
-    }
-}
-
 
 void FloatMatrix :: addSubVectorRow(const FloatArray &src, int sr, int sc)
 {
@@ -836,7 +800,7 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         for ( int i = nRows; i > 1; i-- ) {
             piv = tmp.at(i, i);
             for ( int j = i - 1; j > 0; j-- ) {
-                linkomb = tmp.at(j, i) / tmp.at(i, i);
+                linkomb = tmp.at(j, i) / piv;
                 for ( int k = i; k > 0; k-- ) {
                     tmp.at(j, k) -= tmp.at(i, k) * linkomb;
                 }
@@ -859,45 +823,35 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
 }
 
 
-void
-FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, const IntArray &indx)
+void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src,
+                             int topRow, int bottomRow, int topCol, int bottomCol)
 /*
- * modifies receiver to be  (sub)matrix of the src.
- * (sub)matrix has size of max value in indx
- * and on its position (indx->at(i),indx->at(j)) are values from src at (i, j).
- * if indx->at(i) or indx->at(j) are <= 0 then at position i,j is zero.
- *
- * Warning:
- * This method should produce also bigger matrix than src
- * Works only for square matrices.
+ * modifies receiver to be  submatrix of the src matrix
+ * size of receiver  submatrix is determined from
+ * input parameters
  */
 {
-    int size, n, ii, jj;
-
-    if ( ( n = indx.giveSize() ) == 0 ) {
-        this->resize(0, 0);
-        return;
+#ifdef DEBUG
+    if ( ( topRow < 1 ) || ( bottomRow < 1 ) || ( topCol < 1 ) || ( bottomCol < 1 ) ) {
+        OOFEM_ERROR("FloatMatrix::beSubMatrixOf : subindexes size mismatch");
     }
 
-#  ifdef DEBUG
-    if ( !src.isSquare() ) {
-        OOFEM_ERROR("FloatMatrix::beSubMatrixOf : cannot construct required submatrix");
+    if ( ( src.nRows < bottomRow ) || ( src.nColumns < bottomCol ) || ( ( bottomRow - topRow ) > src.nRows ) ||
+        ( ( bottomCol - topCol ) > src.nColumns ) ) {
+        OOFEM_ERROR("FloatMatrix::beSubMatrixOf : subindexes size mismatch");
     }
-# endif
+#endif
+    
+    
+    int topRm1, topCm1;
+    topRm1 = topRow - 1;
+    topCm1 = topCol - 1;
 
-    if ( n != src.nRows ) {
-        OOFEM_ERROR("FloatMatrix::beSubMatrixOf : giveSubMatrix size mismatch");
-    }
-
-    size = indx.maximum();
-
-    this->resize(size, size);
-
-    for ( int i = 1; i <= n; i++ ) {
-        for ( int j = 1; j <= n; j++ ) {
-            if ( ( ( ii = indx.at(i) ) != 0 ) && ( ( jj = indx.at(j) ) != 0 ) ) {
-                this->at(ii, jj) = src.at(i, j);
-            }
+    // allocate return value
+    this->resize(bottomRow - topRm1, bottomCol - topCm1);
+    for ( int i = topRow; i <= bottomRow; i++ ) {
+        for ( int j = topCol; j <= bottomCol; j++ ) {
+            this->at(i - topRm1, j - topCm1) = src.at(i, j);
         }
     }
 }
@@ -905,48 +859,30 @@ FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, const IntArray &indx)
 
 
 void
-FloatMatrix :: beSubMatrixOfSizeOf(const FloatMatrix &src, const IntArray &indx, int size)
+FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, const IntArray &indxRow, const IntArray &indxCol)
 /*
- * modifies receiver to be  (sub)matrix of the src matrix.
- * (sub)matrix has size size
- * and on its position (indx->at(i),indx->at(j)) are values from src at (i, j).
- * if indx->at(i) or indx->at(j) are <= 0 then at position i,j is zero.
- *
- * Warning:
- * This method should produce also bigger matrix than src
- * Works only for square matrices.
+ * Modifies receiver to be a sub-matrix of the src matrix.
+ * sub-matrix has size(indxRow) x size(indxCol) with values given as
+ * this(i,j) = src( indxRow(i), indxCol(j) )
  */
 {
-    int n, ii, jj;
-
-    if ( ( n = indx.giveSize() ) == 0 ) {
-        this->resize(0, 0);
-        return;
-    }
-
 #  ifdef DEBUG
-    if ( !src.isSquare() ) {
-        OOFEM_ERROR("FloatMatrix::beSubMatrixOfSizeOf : cannot construct submatrix");
-    }
-
-    if ( n != src.nRows ) {
-        OOFEM_ERROR("FloatMatrix::beSubMatrixOfSizeOf : giveSubMatrix size mismatch");
-    }
-
-    if ( indx.maximum() > size ) {
-        OOFEM_ERROR("FloatMatrix::beSubMatrixOfSizeOf : index in mask exceed size");
+    if ( indxRow.maximum() > src.giveNumberOfRows()  ||  indxCol.maximum() > src.giveNumberOfColumns()  ||
+         indxRow.minimum() < 1  ||  indxCol.minimum() < 1 ) {
+        OOFEM_ERROR("FloatMatrix::beSubMatrixOf : index exceeds source dimensions");
     }
 # endif
 
-    this->resize(size, size);
-
-    for ( int i = 1; i <= n; i++ ) {
-        for ( int j = 1; j <= n; j++ ) {
-            if ( ( ( ii = indx.at(i) ) != 0 ) && ( ( jj = indx.at(j) ) != 0 ) ) {
-                this->at(ii, jj) = src.at(i, j);
-            }
+    int szRow = indxRow.giveSize();
+    int szCol = indxCol.giveSize();
+    this->resize(szRow, szCol);
+    
+    for ( int i = 1; i <= szRow; i++ ) {
+        for ( int j = 1; j <= szCol; j++ ) {
+            this->at(i,j) = src.at( indxRow.at(i), indxCol.at(j) );
         }
     }
+
 }
 
 void FloatMatrix :: add(const FloatMatrix &aMatrix)
@@ -1577,25 +1513,25 @@ double FloatMatrix :: computeReciprocalCondition(char p) const
     return 1.0/(inv.computeNorm(p)*anorm);
 }
 
-void FloatMatrix ::beMatrixForm(const FloatArray &aArray)
+void FloatMatrix ::beMatrixFormOfStress(const FloatArray &aArray)
 {
-	// Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
+    // Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
 #  ifdef DEBUG
-	if ( aArray.giveSize() !=6 && aArray.giveSize() !=9 ) {
+    if ( aArray.giveSize() !=6 && aArray.giveSize() !=9 ) {
         OOFEM_ERROR("FloatArray :: beMatrixForm : matrix dimension is not 3x3");
     }
 #  endif
-	this->resize(3,3);
-	if( aArray.giveSize() == 9 ){
-		this->at(1,1) = aArray.at(1); this->at(2,2) = aArray.at(2); this->at(3,3) = aArray.at(3);
-		this->at(2,3) = aArray.at(4); this->at(1,3) = aArray.at(5);	this->at(1,2) = aArray.at(6);
-		this->at(3,2) = aArray.at(7); this->at(3,1) = aArray.at(8);	this->at(2,1) = aArray.at(9);
-	}
-	else if( aArray.giveSize() == 6 ){
-		this->at(1,1) = aArray.at(1); this->at(2,2) = aArray.at(2); this->at(3,3) = aArray.at(3);
-		this->at(2,3) = aArray.at(4); this->at(1,3) = aArray.at(5);	this->at(1,2) = aArray.at(6);
-		this->at(3,2) = aArray.at(4); this->at(3,1) = aArray.at(5);	this->at(2,1) = aArray.at(6);
-	}
+    this->resize(3,3);
+    if ( aArray.giveSize() == 9 ) {
+        this->at(1,1) = aArray.at(1); this->at(2,2) = aArray.at(2); this->at(3,3) = aArray.at(3);
+        this->at(2,3) = aArray.at(4); this->at(1,3) = aArray.at(5); this->at(1,2) = aArray.at(6);
+        this->at(3,2) = aArray.at(7); this->at(3,1) = aArray.at(8); this->at(2,1) = aArray.at(9);
+    }
+    else if ( aArray.giveSize() == 6 ) {
+        this->at(1,1) = aArray.at(1); this->at(2,2) = aArray.at(2); this->at(3,3) = aArray.at(3);
+        this->at(2,3) = aArray.at(4); this->at(1,3) = aArray.at(5); this->at(1,2) = aArray.at(6);
+        this->at(3,2) = aArray.at(4); this->at(3,1) = aArray.at(5); this->at(2,1) = aArray.at(6);
+    }
 }
 
 #if 0
@@ -1733,13 +1669,11 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
     if ( !isSquare() ) {
         OOFEM_ERROR("FloatMatrix::jaco_: Not square matrix");
     }
-	
     // check for symmetry
-	double equalityTol = 1.0e-6;
     for ( i = 1; i <= neq; i++ ) {
         for ( j = i + 1; j <= neq; j++ ) {
             //if ( this->at(i, j) != this->at(j, i) ) {
-			if ( abs( this->at(i, j) - this->at(j, i) ) > equalityTol ) {
+            if ( fabs( this->at(i, j) - this->at(j, i) ) > 1.0e-6 ) {
                 OOFEM_ERROR("FloatMatrix::jaco_: Not Symmetric matrix");
             }
         }

@@ -50,7 +50,7 @@
 #endif
 
 namespace oofem {
-FEI3dTrLin Tet1_3D_SUPG :: interpolation;
+FEI3dTetLin Tet1_3D_SUPG :: interpolation;
 
 Tet1_3D_SUPG :: Tet1_3D_SUPG(int n, Domain *aDomain) :
     SUPGElement2(n, aDomain)
@@ -101,7 +101,7 @@ Tet1_3D_SUPG :: computeNumberOfDofs(EquationID ut)
 void
 Tet1_3D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
+    if ( ut == EID_MomentumBalance ) {
         answer.setValues(3, V_u, V_v, V_w);
     } else if ( ut == EID_ConservationEquation ) {
         answer.setValues(1, P_f);
@@ -124,11 +124,7 @@ Tet1_3D_SUPG :: initializeFrom(InputRecord *ir)
 {
     //const char*__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                  // Required by IR_GIVE_FIELD macro
-
-    this->SUPGElement2 :: initializeFrom(ir);
-
-    this->computeGaussPoints();
-    return IRRT_OK;
+    return SUPGElement2 :: initializeFrom(ir);
 }
 
 void
@@ -151,7 +147,7 @@ Interface *
 Tet1_3D_SUPG :: giveInterface(InterfaceType interface)
 {
     if ( interface == LevelSetPCSElementInterfaceType ) {
-        return ( LevelSetPCSElementInterface * ) this;
+        return static_cast< LevelSetPCSElementInterface * >( this );
     }
 
     return NULL;
@@ -161,14 +157,13 @@ Tet1_3D_SUPG :: giveInterface(InterfaceType interface)
 void
 Tet1_3D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    int i;
     FloatArray n(4);
     this->interpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(3, 12);
     answer.zero();
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, 3 * i - 2)  = n.at(i);
         answer.at(2, 3 * i - 1)  = n.at(i);
         answer.at(3, 3 * i - 0)  = n.at(i);
@@ -178,7 +173,6 @@ Tet1_3D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
 void
 Tet1_3D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
 {
-    int i;
     FloatMatrix n, dn(4, 3);
     FloatArray u, un;
     interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
@@ -189,7 +183,7 @@ Tet1_3D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Time
 
     answer.resize(3, 12);
     answer.zero();
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, 3 * i - 2) = u.at(1) * dn.at(i, 1) + u.at(2) * dn.at(i, 2) + u.at(3) * dn.at(i, 3);
         answer.at(2, 3 * i - 1) = u.at(1) * dn.at(i, 1) + u.at(2) * dn.at(i, 2) + u.at(3) * dn.at(i, 3);
         answer.at(3, 3 * i - 0) = u.at(1) * dn.at(i, 1) + u.at(2) * dn.at(i, 2) + u.at(3) * dn.at(i, 3);
@@ -221,7 +215,6 @@ Tet1_3D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep
 
     answer.beProductOf(um, dn);
 }
-
 
 
 void
@@ -302,7 +295,7 @@ Tet1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     double h_ugn, sum = 0.0, vnorm, t_sugn1, t_sugn2, t_sugn3, u_1, u_2, u_3, z, Re_ugn;
     double dscale, uscale, lscale, tscale, dt;
     //bool zeroFlag = false;
-    int i, k, im1;
+    int im1;
     FloatArray u, divu;
     FloatMatrix du;
 
@@ -326,7 +319,7 @@ Tet1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     nu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, atTime->givePreviousStep());
     nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
 
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeDivUMatrix(du, gp);
         divu.beProductOf(du, u);
@@ -343,7 +336,7 @@ Tet1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
      */
     vnorm = 0.;
     int nsd = this->giveNumberOfSpatialDimensions();
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
         im1 = i - 1;
         u_1 = u.at( ( im1 ) * nsd + 1 );
         u_2 = u.at( ( im1 ) * nsd + 2 );
@@ -459,9 +452,8 @@ Tet1_3D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
     determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
                                                                        FEIElementGeometryWrapper(this)) );
 
-
-    weight      = aGaussPoint->giveWeight();
-    volume      = determinant * weight;
+    weight = aGaussPoint->giveWeight();
+    volume = determinant * weight;
 
     return volume;
 }
@@ -470,7 +462,6 @@ Tet1_3D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
 double
 Tet1_3D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
 {
-    int i, k;
     double answer = 0.0, norm, dV, vol = 0.0;
     FloatMatrix n(3, 4), dn(4, 3);
     FloatArray fi(4), u, un, gfi;
@@ -478,12 +469,12 @@ Tet1_3D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
     }
 
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
         interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));

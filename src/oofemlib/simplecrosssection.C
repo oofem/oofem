@@ -227,47 +227,47 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
 
     double thick = 0.0;
     if ( ir->hasField(IFT_SimpleCrossSection_thick, "thick")) {
-        IR_GIVE_OPTIONAL_FIELD(ir, thick, IFT_SimpleCrossSection_thick, "thick"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, thick, IFT_SimpleCrossSection_thick, "thick");
         propertyDictionary->add(CS_Thickness, thick);
     }
 
     double width = 0.0;
     if ( ir->hasField(IFT_SimpleCrossSection_width, "width")) {
-        IR_GIVE_OPTIONAL_FIELD(ir, width, IFT_SimpleCrossSection_width, "width"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, width, IFT_SimpleCrossSection_width, "width");
         propertyDictionary->add(CS_Width, width);
     }
 
     double area = 0.0;
     if ( ir->hasField(IFT_SimpleCrossSection_area, "area") ) {
-        IR_GIVE_FIELD(ir, area, IFT_SimpleCrossSection_area, "area"); // Macro
+        IR_GIVE_FIELD(ir, area, IFT_SimpleCrossSection_area, "area");
     } else {
         area = thick*width;
     }
     propertyDictionary->add(CS_Area, area);
 
     value = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_iy, "iy"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_iy, "iy");
     propertyDictionary->add(CS_InertiaMomentY, value);
 
     value = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_iz, "iz"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_iz, "iz");
     propertyDictionary->add(CS_InertiaMomentZ, value);
 
     value = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_ik, "ik"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_ik, "ik");
     propertyDictionary->add(CS_TorsionMomentX, value);
 
     double beamshearcoeff=0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, beamshearcoeff, IFT_SimpleCrossSection_shearcoeff, "beamshearcoeff"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, beamshearcoeff, IFT_SimpleCrossSection_shearcoeff, "beamshearcoeff");
     propertyDictionary->add(CS_BeamShearCoeff, beamshearcoeff);
 
     value = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_shearareay, "shearareay"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_shearareay, "shearareay");
     if (value == 0.0) value=beamshearcoeff * area;
     propertyDictionary->add(CS_SHEAR_AREA_Y, value);
 
     value = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_shearareaz, "shearareaz"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_shearareaz, "shearareaz");
     if (value == 0.0) value=beamshearcoeff * area;
     propertyDictionary->add(CS_SHEAR_AREA_Z, value);
 
@@ -296,7 +296,7 @@ SimpleCrossSection :: give(CrossSectionProperty aProperty)
 {
     double value = 0.0;
 
-    if ( propertyDictionary->includes(aProperty) )   {
+    if ( propertyDictionary->includes(aProperty) ) {
         value = propertyDictionary->at(aProperty);
     } else {
         OOFEM_ERROR3("Simple cross-section Number %d has undefined property ID %d", this->giveNumber(), aProperty);
@@ -315,7 +315,7 @@ SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
 // takes into account form of load vector assumed by engngModel (Incremental or Total Load form).
 //
 {
-    StructuralMaterial *mat = ( StructuralMaterial * ) gp->giveElement()->giveMaterial();
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
     ///@todo  Deprecated or not? If so, remove it! / Mikael
 #if 0
     MaterialMode matmode = gp-> giveMaterialMode ();

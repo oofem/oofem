@@ -84,7 +84,7 @@ MazarsMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, nu, IFT_IsotropicLinearElasticMaterial_n, "n");
 
     ver = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, ver, IFT_MazarsMaterial_version, "version"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, ver, IFT_MazarsMaterial_version, "version");
     if ( ver == 1 ) {
         this->modelVersion = maz_modTension;
     } else if ( ver == 0 ) {
@@ -124,10 +124,9 @@ MazarsMaterial :: initializeFrom(InputRecord *ir)
 void
 MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
 {
-    int i;
     double posNorm = 0.0;
     FloatArray principalStrains, strainb;
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     if ( strain.isEmpty() ) {
         kappa = 0.;
@@ -146,7 +145,7 @@ MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strai
 
     if ( ndim == 1 ) {
         principalStrains.resize(3);
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             principalStrains.at(i) = strainb.at(i);
         }
     } else {
@@ -164,7 +163,7 @@ MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strai
      * }
      * // end simple check
      */
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         if ( principalStrains.at(i) > 0.0 ) {
             posNorm += principalStrains.at(i) * principalStrains.at(i);
         }
@@ -227,7 +226,7 @@ MazarsMaterial :: giveNormalBlockOfElasticCompliance(FloatMatrix &answer, GaussP
 void
 MazarsMaterial :: computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp)
 {
-    int i; // positive_flag = 0, negat_count = 0;
+    // positive_flag = 0, negat_count = 0;
     FloatMatrix de, ce;
     FloatArray sigp, epsti, epsi;
     double gt, gc, alpha_t, alpha_c, alpha, eqStrain2;
@@ -255,7 +254,7 @@ MazarsMaterial :: computeDamageParam(double &omega, double kappa, const FloatArr
     // compute principal stresses
     sigp.beProductOf(de, epsi);
     // take positive part
-    for ( i = 1; i <= ndim; i++ ) {
+    for ( int i = 1; i <= ndim; i++ ) {
         if ( sigp.at(i) < 0. ) {
             sigp.at(i) = 0.;
         }
@@ -320,7 +319,7 @@ MazarsMaterial :: computeDamageParam(double &omega, double kappa, const FloatArr
     // evaluation of factors alpha_t and alpha_c
     alpha = 0.0;
     eqStrain2 = 0.0;
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         if ( epsi.at(i) > 0.0 ) {
             eqStrain2 += epsi.at(i) * epsi.at(i);
             alpha += epsti.at(i) * epsi.at(i);
@@ -340,13 +339,13 @@ MazarsMaterial :: computeDamageParam(double &omega, double kappa, const FloatArr
     if ( this->beta == 1. ) {
         alpha_t = alpha;
         alpha_c = 1. - alpha;
-    } else if ( alpha <= 0. )   {
+    } else if ( alpha <= 0. ) {
         alpha_t = 0.;
         alpha_c = 1.;
     } else if ( alpha < 1. ) {
         alpha_t = pow(alpha, this->beta);
         alpha_c = pow( ( 1. - alpha ), this->beta );
-    } else   {
+    } else {
         alpha_t = 1.;
         alpha_c = 0.;
     }
@@ -374,7 +373,7 @@ double MazarsMaterial :: computeGt(double kappa, GaussPoint *gp)
     // tension objectivity (material law dependent on element size)
     int nite = 0;
     double aux, hCurrt, kappaRefT, dgt, R;
-    MazarsMaterialStatus *status = ( MazarsMaterialStatus * ) this->giveStatus(gp);
+    MazarsMaterialStatus *status = static_cast< MazarsMaterialStatus * >( this->giveStatus(gp) );
     hCurrt = status->giveLe();
     kappaRefT = kappa;
     do {
@@ -417,13 +416,13 @@ double MazarsMaterial :: computeGc(double kappa, GaussPoint *gp)
     // compression objectivity (material law dependent on element size)
     int nite = 0;
     double aux, hCurrc, kappaRefC, dgc, R;
-    MazarsMaterialStatus *status = ( MazarsMaterialStatus * ) this->giveStatus(gp);
+    MazarsMaterialStatus *status = static_cast< MazarsMaterialStatus * >( this->giveStatus(gp) );
     hCurrc = status->giveLec();
     kappaRefC = kappa;
     do {
-        gc   = 1.0 - ( 1.0 - this->Ac ) * this->e0 / kappaRefC - this->Ac *exp( -this->Bc * ( kappaRefC - this->e0 ) );
+        gc = 1.0 - ( 1.0 - this->Ac ) * this->e0 / kappaRefC - this->Ac *exp( -this->Bc * ( kappaRefC - this->e0 ) );
         aux = 1 + gc * ( hRefc / hCurrc - 1.0 );
-        R   = kappaRefC * aux - kappa;
+        R = kappaRefC * aux - kappa;
         if ( fabs(R) <= _MAZARS_MODEL_ITER_TOL ) {
             return gc * ( hRefc * kappaRefC ) / ( hCurrc * kappa );
         }
@@ -440,11 +439,11 @@ double MazarsMaterial :: computeGc(double kappa, GaussPoint *gp)
 void
 MazarsMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp)
 {
-    int i, indmin = 1, indmax = 1;
+    int indmin = 1, indmax = 1;
     double le;
     FloatArray principalStrains, crackPlaneNormal(3), fullstrain;
     FloatMatrix principalDir(3, 3);
-    MazarsMaterialStatus *status = ( MazarsMaterialStatus * ) this->giveStatus(gp);
+    MazarsMaterialStatus *status = static_cast< MazarsMaterialStatus * >( this->giveStatus(gp) );
     //StructuralCrossSection *crossSection = (StructuralCrossSection*) gp -> giveElement()->giveCrossSection();
 
     // crossSection->giveFullCharacteristicVector(fullstrain, gp, totalStrainVector);
@@ -478,7 +477,7 @@ MazarsMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, Gauss
             }
         } else {
             // find index of max and min positive principal strains
-            for ( i = 2; i <= 3; i++ ) {
+            for ( int i = 2; i <= 3; i++ ) {
                 if ( principalStrains.at(i) > principalStrains.at(indmax) ) {
                     indmax = i;
                 }
@@ -489,7 +488,7 @@ MazarsMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, Gauss
             }
         }
 
-        for ( i = 1; i <= principalStrains.giveSize(); i++ ) {
+        for ( int i = 1; i <= principalStrains.giveSize(); i++ ) {
             crackPlaneNormal.at(i) = principalDir.at(i, indmax);
         }
 
@@ -497,7 +496,7 @@ MazarsMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, Gauss
         // remember le in cooresponding status for tension
         status->setLe(le);
 
-        for ( i = 1; i <= principalStrains.giveSize(); i++ ) {
+        for ( int i = 1; i <= principalStrains.giveSize(); i++ ) {
             crackPlaneNormal.at(i) = principalDir.at(i, indmin);
         }
 

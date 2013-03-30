@@ -46,6 +46,7 @@
 #include "flotmtrx.h"
 
 namespace oofem {
+
 void XfemElementInterface :: XfemElementInterface_partitionElement(AList< Triangle > *answer, AList< FloatArray > *together)
 {
     Delaunay dl;
@@ -54,10 +55,11 @@ void XfemElementInterface :: XfemElementInterface_partitionElement(AList< Triang
 
 void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 {
-    XfemManager *xf = this->element->giveDomain()->giveEngngModel()->giveXfemManager(1);
-    if ( xf->isInteracted(element) ) {
-        IntArray interactedEI;
-        xf->getInteractedEI(interactedEI, element);
+    // This will only work for one active ei
+    XfemManager *xMan = this->element->giveDomain()->giveXfemManager(1);
+    if ( xMan->isElementEnriched(element) ) { // unneccessary but extra check
+        IntArray activeEI;
+        xMan->giveActiveEIsFor(activeEI, element); 
         AList< Triangle >triangles;
         AList< Triangle >triangles2;
         // all the points coming into triangulation
@@ -74,15 +76,28 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
         }
 
         AList< IntegrationRule >irlist;
+        //EnrichmentItem *ei = xMan->giveEnrichmentItem( activeEI.at(1) );
+        //EnrichmentDomain *ed = ei->giveEnrichmentDomain(1);
+        
         for ( int i = 1; i <= triangles.giveSize(); i++ ) {
+            /*
             int mat = 0;
-            if ( xf->giveEnrichmentItem( interactedEI.at(1) )->giveGeometry()->isOutside( triangles.at(i) ) ) {
+            if ( Inclusion *iei = dynamic_cast< Inclusion * > (ei) ) { 
+                if ( EDBGCircle *edc = dynamic_cast< EDBGCircle *> (ed) ) {
+                    FloatArray circleCenter;
+                    triangles.at(i)->computeCenterOfCircumCircle(circleCenter);
+                    if ( edc->bg->isInside(circleCenter) ){
+                        mat = iei->giveMaterial()->giveNumber();
+                    }
+                }
+            } else {
                 mat = 1;
-            } else   {
-                mat = 2;
             }
+            
 
             Patch *patch = new TrianglePatch(element, mat);
+            */
+            Patch *patch = new TrianglePatch(element);
             for ( int j = 1; j <= triangles.at(i)->giveVertices()->giveSize(); j++ ) {
                 FloatArray *nCopy = new FloatArray( *triangles.at( i )->giveVertex(j) );
                 patch->setVertex(nCopy);
@@ -90,7 +105,7 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 
             PatchIntegrationRule *pir = new PatchIntegrationRule(i, element, patch);
             int pointNr = 3;
-            MaterialMode matMode = element->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0)->giveMaterialMode();
+            MaterialMode matMode = element->giveMaterialMode();
             pir->setUpIntegrationPoints(_Triangle, pointNr, matMode);
             irlist.put(i, pir);
         }
@@ -101,13 +116,13 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 
 void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(AList< FloatArray > *answer1, AList< FloatArray > *answer2)
 {
-    XfemManager *xf = this->element->giveDomain()->giveEngngModel()->giveXfemManager(1);
+    XfemManager *xMan = this->element->giveDomain()->giveXfemManager(1);
     IntArray interactedEI;
-    xf->getInteractedEI(interactedEI, element); //give the EI's for the el
+    xMan->giveActiveEIsFor(interactedEI, element); //give the EI's for the el
     // in intersecPoints the points of Element with interaction to EnrichmentItem will be stored
     AList< FloatArray >intersecPoints;
     for ( int i = 1; i <= interactedEI.giveSize(); i++ ) { // for the active enrichment items
-        xf->giveEnrichmentItem( interactedEI.at(i) )->computeIntersectionPoints(& intersecPoints, element);
+        xMan->giveEnrichmentItem( interactedEI.at(i) )->giveEnrichmentDomain(1)->computeIntersectionPoints(& intersecPoints, element);
     }
 
     // here the intersection points are copied in order to be put into two groups

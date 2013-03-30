@@ -64,7 +64,6 @@ NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEng
     numMetStatus              = NM_None;
 
     ndomains                = 1;
-    internalForcesEBENorm   = 0;
     internalVarUpdateStamp  = 0;
     initFlag = commInitFlag = 1;
 
@@ -99,21 +98,13 @@ NumericalMethod *NonLinearDynamic :: giveNumericalMethod(MetaStep *mStep)
         _error("giveNumericalMethod: undefined meta step");
     }
 
-    SparseNonLinearSystemNM *nm = NULL;
-
-    if ( nMethod ) {
-        if ( nMethod->giveClassID() == NRSolverClass ) {
-            nMethod->reinitialize();
-            return nMethod;
-        } else {
-            delete nMethod;
-        }
+    if ( this->nMethod ) {
+        nMethod->reinitialize();
+        return nMethod;
     }
 
-    nm = ( SparseNonLinearSystemNM * ) new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance);
-    nMethod = nm;
-
-    return nm;
+    this->nMethod = new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance);
+    return this->nMethod;
 }
 
 
@@ -153,11 +144,11 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
 
     StructuralEngngModel :: initializeFrom(ir);
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NonLinearDynamic_lstype, "lstype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NonLinearDynamic_smtype, "smtype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
     sparseMtrxType = ( SparseMtrxType ) val;
 
     nonlocalStiffnessFlag = 0;
@@ -332,7 +323,8 @@ NonLinearDynamic :: solveYourselfAt(TimeStep *tStep) {
 }
 
 void
-NonLinearDynamic :: terminate(TimeStep *tStep) {
+NonLinearDynamic :: terminate(TimeStep *tStep)
+{
     this->doStepOutput(tStep);
     this->printReactionForces(tStep, 1);
     fflush(this->giveOutputStream());
@@ -403,7 +395,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
             }
         }
 
-        this->giveInternalForces(internalForces, true, 1, tStep);
+        this->giveInternalForces(internalForces, true, di, tStep);
     }
 
     if ( initFlag ) {
@@ -620,11 +612,6 @@ void NonLinearDynamic :: updateYourself(TimeStep *stepN)
         previousInternalForces.at(i)          = internalForces.at(i);
     }
 
-    // The following line is potentially serious performance leak.
-    // The numerical method may compute their internal forces - thus causing
-    // internal state to be updated, while checking equilibrium.
-    // update internal state only if necessary
-    this->updateInternalState(stepN);
     StructuralEngngModel :: updateYourself(stepN);
 }
 
@@ -749,7 +736,7 @@ contextIOResultType NonLinearDynamic :: saveContext(DataStream *stream, ContextM
 {
     int closeFlag = 0;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
@@ -809,7 +796,7 @@ contextIOResultType NonLinearDynamic :: restoreContext(DataStream *stream, Conte
     int closeFlag = 0;
     int istep, iversion;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
 
     this->resolveCorrespondingStepNumber(istep, iversion, obj);
     if ( stream == NULL ) {
@@ -902,9 +889,9 @@ NonLinearDynamic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
 
     if ( ( nonlocalStiffnessFlag ) && ( type == TangentStiffnessMatrix ) ) {
         // Add nonlocal contribution.
-        int ielem, nelem = domain->giveNumberOfElements();
-        for ( ielem = 1; ielem <= nelem; ielem++ ) {
-            ( ( NLStructuralElement * ) ( domain->giveElement(ielem) ) )->addNonlocalStiffnessContributions(* answer, s, tStep);
+        int nelem = domain->giveNumberOfElements();
+        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+            static_cast< NLStructuralElement * >( domain->giveElement(ielem) )->addNonlocalStiffnessContributions(* answer, s, tStep);
         }
 
         // Print storage statistics.
@@ -923,7 +910,6 @@ NonLinearDynamic :: showSparseMtrxStructure(int type, oofegGraphicContext &conte
 {
     Domain *domain = this->giveDomain(1);
     CharType ctype;
-    int i;
 
     if ( type != 1 ) {
         return;
@@ -932,11 +918,11 @@ NonLinearDynamic :: showSparseMtrxStructure(int type, oofegGraphicContext &conte
     ctype = TangentStiffnessMatrix;
 
     int nelems = domain->giveNumberOfElements();
-    for ( i = 1; i <= nelems; i++ ) {
+    for ( int i = 1; i <= nelems; i++ ) {
         domain->giveElement(i)->showSparseMtrxStructure(ctype, context, atTime);
     }
 
-    for ( i = 1; i <= nelems; i++ ) {
+    for ( int i = 1; i <= nelems; i++ ) {
         domain->giveElement(i)->showExtendedSparseMtrxStructure(ctype, context, atTime);
     }
 }
@@ -990,7 +976,7 @@ NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type
 {
     int nelem = domain->giveNumberOfElements();
     //int neq = this->giveNumberOfEquations(EID_MomentumBalance);
-    int i, j, k, jj, kk, n;
+    int jj, kk, n;
     FloatMatrix charMtrx;
     IntArray loc;
     Element *element;
@@ -998,7 +984,7 @@ NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type
 
     answer.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
     answer.zero();
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
 #ifdef __PARALLEL_MODE
         // Skip remote elements (these are used as mirrors of remote elements on other domains
@@ -1025,10 +1011,10 @@ NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type
 
         n = loc.giveSize();
 
-        for ( j = 1; j <= n; j++ ) {
+        for ( int j = 1; j <= n; j++ ) {
             jj = loc.at(j);
             if ( jj ) {
-                for ( k = 1; k <= n; k++ ) {
+                for ( int k = 1; k <= n; k++ ) {
                     kk = loc.at(k);
                     if ( kk ) {
                         answer.at(jj) += charMtrx.at(j, k) * vec.at(kk);
@@ -1098,39 +1084,7 @@ NonLinearDynamic :: initializeCommMaps(bool forceInit)
     }
 }
 
-#endif
 
-int
-NonLinearDynamic :: checkConsistency()
-{
-    // check internal consistency
-    // if success returns nonzero
-    int i, nelem;
-    Element *ePtr;
-    NLStructuralElement *sePtr;
-    StructuralElementEvaluator *see;
-    Domain *domain = this->giveDomain(1);
-
-    nelem = domain->giveNumberOfElements();
-    // check for proper element type
-
-    for ( i = 1; i <= nelem; i++ ) {
-        ePtr = domain->giveElement(i);
-        sePtr = dynamic_cast< NLStructuralElement * >( ePtr );
-        see   = dynamic_cast< StructuralElementEvaluator * >( ePtr );
-
-        if ( ( sePtr == NULL ) && ( see == NULL ) ) {
-            _warning2("checkConsistency: element %d has no Structural support", i);
-            return 0;
-        }
-    }
-
-    EngngModel :: checkConsistency();
-
-    return 1;
-}
-
-#ifdef __PARALLEL_MODE
 LoadBalancer *
 NonLinearDynamic :: giveLoadBalancer()
 {
@@ -1145,6 +1099,8 @@ NonLinearDynamic :: giveLoadBalancer()
         return NULL;
     }
 }
+
+
 LoadBalancerMonitor *
 NonLinearDynamic :: giveLoadBalancerMonitor()
 {
@@ -1159,6 +1115,7 @@ NonLinearDynamic :: giveLoadBalancerMonitor()
         return NULL;
     }
 }
+
 
 void
 NonLinearDynamic :: packMigratingData(TimeStep *atTime)

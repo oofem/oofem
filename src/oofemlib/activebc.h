@@ -44,6 +44,13 @@
 
 #include <vector>
 
+///@name Input fields for active boundary condition
+//@{
+#define _IFT_ActiveBoundaryCondition_elements "elements"
+#define _IFT_ActiveBoundaryCondition_elementSides "elementsides"
+#define _IFT_ActiveBoundaryCondition_dofManagers "dofmanagers"
+//@}
+
 namespace oofem {
 class SparseMtrx;
 class UnknownNumberingScheme;
@@ -139,7 +146,7 @@ public:
      */
     virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                   CharType type, ValueModeType mode,
-                                  const UnknownNumberingScheme &s, Domain *domain) { return 0.0; };
+                                  const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL) { return 0.0; };
 
     /**
      * Gives a list of location arrays that will be assembled.

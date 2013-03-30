@@ -1,10 +1,10 @@
 xfem01.out
 Xfem test of circular inclusion in a structured plane stress square grid
-LinearStatic nsteps 1 nxfemman 1 
+LinearStatic nsteps 1  
 #vtk tstep_all domain_all primvars 1 1 vars 4 1 2 4 5 stype 1 0
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
-ndofman 441 nelem 400 ncrosssect 1 nmat 2 nbc 2 nic 0 nltf 1
+ndofman 441 nelem 400 ncrosssect 1 nmat 2 nbc 2 nic 0 nltf 1 nxfemman 1
 Node 1 coords 2 0.0 0.0 bc 2 0 1 
 Node 2 coords 2 3.0 0.0 bc 2 0 1 
 Node 3 coords 2 6.0 0.0 bc 2 0 1 
@@ -852,11 +852,14 @@ IsoLE 2 tAlpha 1.2e-05 d 1 E 0.1 n 0.3
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.01
 ConstantFunction 1 f(t) 1.0
-XfemManager 1 numberofenrichmentfunctions 1 numberofenrichmentitems 1 numberofgeometryitems 1
+#XfemManager 1 numberofenrichmentfunctions 1 numberofenrichmentitems 1 numberofgeometryitems 1
+XfemManager 1 numberofenrichmentitems 1 
+#RampFunction 1
+#Inclusion 1 geometryitem 1 enrichmentfunction 1 material 2
+Inclusion 1 enrichmentdomains 1 1 material 2
 RampFunction 1
 Circle 1 center 2 30.0 30.0 radius 12.5
-Inclusion 1 geometryitem 1 enrichmentfunction 1 material 2
-#%BEGIN_CHECK% tolerance 1.e-8
+#%BEGIN_CHECK% tolerance 1.e-3
 ##NODE tStep 1 number 304 dof 1 unknown d value -3.78917387e-03
 #NODE tStep 1 number 304 dof 2 unknown d value  9.53932214e-03
 ##NODE tStep 1 number 306 dof 1 unknown d value -4.43097051e-03

@@ -43,6 +43,7 @@
  #include "linearstatic.h"
  #include "adaptnlinearstatic.h"
  #include "adaptlinearstatic.h"
+ #include "staticfracture.h"
 #endif //__SM_MODULE
 
 #ifdef __TM_MODULE
@@ -72,6 +73,7 @@ REGISTER_CLASS(IncrementalLinearStatic, "incrlinearstatic", IncrementalLinearSta
 REGISTER_CLASS(LinearStability, "linearstability", LinearStabilityClass)
 REGISTER_CLASS(AdaptiveNonLinearStatic, "adaptnlinearstatic", AdaptiveNonLinearStaticClass)
 REGISTER_CLASS(AdaptiveLinearStatic, "adaptlinearstatic", AdaptiveLinearStaticClass)
+REGISTER_CLASS(StaticFracture, "staticfracture", StaticFractureClass)
 #endif //__SM_MODULE
 
 #ifdef __TM_MODULE

@@ -95,15 +95,15 @@ IMLSolver :: initializeFrom(InputRecord *ir)
     int val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_IMLSolver_lstype, "stype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_IMLSolver_lstype, "stype");
     solverType = ( IMLSolverType ) val;
 
     tol = 1.e-5;
-    IR_GIVE_OPTIONAL_FIELD(ir, tol, IFT_IMLSolver_lstol, "lstol"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, tol, IFT_IMLSolver_lstol, "lstol");
     maxite = 200;
-    IR_GIVE_OPTIONAL_FIELD(ir, maxite, IFT_IMLSolver_lsiter, "lsiter"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, maxite, IFT_IMLSolver_lsiter, "lsiter");
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_IMLSolver_lsprecond, "lsprecond"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_IMLSolver_lsprecond, "lsprecond");
     precondType = ( IMLPrecondType ) val;
 
     // create preconditioner
@@ -125,7 +125,7 @@ IMLSolver :: initializeFrom(InputRecord *ir)
     M->initializeFrom(ir);
 
     /*
-     * IR_GIVE_OPTIONAL_FIELD (ir, precondAttributesRecord, "precondattributes"); // Macro
+     * IR_GIVE_OPTIONAL_FIELD (ir, precondAttributesRecord, "precondattributes");
      */
     return IRRT_OK;
 }

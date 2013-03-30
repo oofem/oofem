@@ -86,13 +86,13 @@ AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
 
     NonLinearStatic :: initializeFrom(ir);
     int meshPackageId = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, meshPackageId, IFT_AdaptiveNonLinearStatic_meshpackage, "meshpackage"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, meshPackageId, IFT_AdaptiveNonLinearStatic_meshpackage, "meshpackage");
     meshPackage = ( MeshPackageType ) meshPackageId;
 
     equilibrateMappedConfigurationFlag =  0;
-    IR_GIVE_OPTIONAL_FIELD(ir, equilibrateMappedConfigurationFlag, IFT_AdaptiveNonLinearStatic_equilmc, "equilmc"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, equilibrateMappedConfigurationFlag, IFT_AdaptiveNonLinearStatic_equilmc, "equilmc");
     _val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_AdaptiveNonLinearStatic_preMappingLoadBalancingFlag, "premaplbflag"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_AdaptiveNonLinearStatic_preMappingLoadBalancingFlag, "premaplbflag");
     preMappingLoadBalancingFlag = _val;
 
     return IRRT_OK;
@@ -236,8 +236,8 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
     double mc1, mc2, mc3;
     timer.startTimer();
 
-    if ( sourceProblem->giveClassID() != AdaptiveNonLinearStaticClass ) {
-        _error("sory");
+    if ( dynamic_cast< AdaptiveNonLinearStatic* >( sourceProblem ) ) {
+        _error("AdaptiveNonLinearStatic :: initializeAdaptiveFrom - source problem must also be AdaptiveNonlinearStatic.");
     }
 
     this->currentStep = new TimeStep( * ( sourceProblem->giveCurrentStep() ) );
@@ -313,7 +313,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
     // assemble new initial load for new discretization
     this->assembleInitialLoadVector( initialLoadVector, initialLoadVectorOfPrescribed,
-                                    ( AdaptiveNonLinearStatic * ) sourceProblem, 1, this->giveCurrentStep() );
+                                    static_cast< AdaptiveNonLinearStatic * >( sourceProblem ), 1, this->giveCurrentStep() );
     // assemble new total load for new discretization
     // this->assembleCurrentTotalLoadVector (totalLoadVector, totalLoadVectorOfPrescribed, this->giveCurrentStep());
     // set bcloadVector to zero (no increment within same step)
@@ -746,7 +746,7 @@ contextIOResultType
 AdaptiveNonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj) {
     int closeFlag = 0;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
@@ -780,7 +780,7 @@ AdaptiveNonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, 
     int closeFlag = 0;
     int istep, iversion;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
 
     this->resolveCorrespondingStepNumber(istep, iversion, obj);
     if ( stream == NULL ) {
@@ -826,7 +826,6 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
     IRResultType result;                           // Required by IR_GIVE_FIELD macro
 
     int mstepNum = atTime->giveMetaStepNumber();
-    int imstep;
     int hasfixed, mode;
     InputRecord *ir;
     MetaStep *iMStep;
@@ -843,7 +842,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
     _incrementalLoadVector.zero();
     _incrementalLoadVectorOfPrescribed.zero();
 
-    for ( imstep = 1; imstep < mstepNum; imstep++ ) {
+    for ( int imstep = 1; imstep < mstepNum; imstep++ ) {
         iMStep = this->giveMetaStep(imstep);
         ir = iMStep->giveAttributesRecord();
         //hasfixed = ir->hasField("fixload");
@@ -860,7 +859,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
             // But there is NO WAY HOW TO TEST IF THIS HAPPEN
 
             mode = 0;
-            IR_GIVE_OPTIONAL_FIELD(ir, mode, IFT_AdaptiveNonLinearStatic_controlmode, "controlmode"); // Macro
+            IR_GIVE_OPTIONAL_FIELD(ir, mode, IFT_AdaptiveNonLinearStatic_controlmode, "controlmode");
 
             // check if displacement control takes place
             if ( ir->hasField(IFT_AdaptiveNonLinearStatic_ddm, "ddm") ) {
@@ -871,12 +870,13 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
             int laststep  = iMStep->giveLastStepNumber();
 
             int _val = 0;
-            IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_AdaptiveNonLinearStatic_refloadmode, "refloadmode"); // Macro
+            IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_AdaptiveNonLinearStatic_refloadmode, "refloadmode");
             rlm = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
 
             if ( mode == ( int ) nls_directControl ) { // and only load control
                 for ( int istep = firststep; istep <= laststep; istep++ ) {
                     // bad practise here
+                    ///@todo Likely memory leak here with new TimeStep; Check.
                     TimeStep *old = new TimeStep(istep, this, imstep, istep - 1.0, deltaT, 0);
                     this->assembleIncrementalReferenceLoadVectors(_incrementalLoadVector, _incrementalLoadVectorOfPrescribed,
                                                                   rlm, this->giveDomain(domainIndx), EID_MomentumBalance, old);
@@ -906,18 +906,17 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
     iMStep = this->giveMetaStep(mstepNum);
     ir = iMStep->giveAttributesRecord();
     mode = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, mode, IFT_AdaptiveNonLinearStatic_controlmode, "controlmode"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, mode, IFT_AdaptiveNonLinearStatic_controlmode, "controlmode");
     int firststep = iMStep->giveFirstStepNumber();
     int laststep  = atTime->giveNumber();
     int _val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_AdaptiveNonLinearStatic_refloadmode, "refloadmode"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_AdaptiveNonLinearStatic_refloadmode, "refloadmode");
     rlm = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
 
     if ( mode == ( int ) nls_directControl ) { // and only load control
-        iMStep = this->giveMetaStep(imstep);
         for ( int istep = firststep; istep <= laststep; istep++ ) {
             // bad practise here
-            TimeStep *old = new TimeStep(istep, this, imstep, istep - 1.0, deltaT, 0);
+            TimeStep *old = new TimeStep(istep, this, mstepNum, istep - 1.0, deltaT, 0);
             this->assembleIncrementalReferenceLoadVectors(_incrementalLoadVector, _incrementalLoadVectorOfPrescribed,
                                                           rlm, this->giveDomain(domainIndx), EID_MomentumBalance, old);
 
@@ -957,13 +956,13 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
  * ir = mStep->giveAttributesRecord();
  *
  * mode = 0;
- * IR_GIVE_OPTIONAL_FIELD (ir, mode, IFT_AdaptiveNonLinearStatic_controlmode, "controlmode"); // Macro
+ * IR_GIVE_OPTIONAL_FIELD (ir, mode, IFT_AdaptiveNonLinearStatic_controlmode, "controlmode");
  *
  * // check if displacement control takes place
  * if (ir->hasField(IFT_AdaptiveNonLinearStatic_ddm, "ddm"))
  * _error ("assembleCurrentTotalLoadVector: fixload recovery not supported for direct displacement control");
  * int _val = 0;
- * IR_GIVE_OPTIONAL_FIELD (ir, _val, IFT_AdaptiveNonLinearStatic_refloadmode, "refloadmode"); // Macro
+ * IR_GIVE_OPTIONAL_FIELD (ir, _val, IFT_AdaptiveNonLinearStatic_refloadmode, "refloadmode");
  *
  * int firststep = mStep->giveFirstStepNumber();
  * int laststep  = atTime->giveNumber()-1;

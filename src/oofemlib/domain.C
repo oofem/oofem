@@ -62,6 +62,11 @@
 #include "errorestimator.h"
 #include "compiler.h"
 
+ // For automatic dof creation, (should try to do without this) (move that stuff into DofManager class)
+#include "activebc.h"
+#include "activedof.h"
+#include "masterdof.h"
+
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
  #include "processcomm.h"
@@ -72,6 +77,8 @@
 
 #include <cstdarg>
 #include <cstring>
+#include <vector>
+#include <set>
 
 namespace oofem {
 Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
@@ -81,16 +88,16 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
     this->number = n;
     this->serialNumber = serNum;
 
-    elementList           = new AList< Element >(0);
-    dofManagerList        = new AList< DofManager >(0);
-    materialList          = new AList< Material >(0);
-    bcList                = new AList< GeneralBoundaryCondition >(0);
-    icList                = new AList< InitialCondition >(0);
-    loadTimeFunctionList  = new AList< LoadTimeFunction >(0);
-    crossSectionList      = new AList< CrossSection >(0);
-    nonlocalBarierList    = new AList< NonlocalBarrier >(0);
+    elementList              = new AList< Element >(0);
+    dofManagerList           = new AList< DofManager >(0);
+    materialList             = new AList< Material >(0);
+    bcList                   = new AList< GeneralBoundaryCondition >(0);
+    icList                   = new AList< InitialCondition >(0);
+    loadTimeFunctionList     = new AList< LoadTimeFunction >(0);
+    crossSectionList         = new AList< CrossSection >(0);
+    nonlocalBarierList       = new AList< NonlocalBarrier >(0);
     randomFieldGeneratorList = new AList< RandomFieldGenerator >(0);
-    xfemManager           = NULL;
+    xfemManagerList          = new AList< XfemManager >(0);
 
     dType                 = _unknownMode;
 
@@ -101,6 +108,8 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
     topology              = NULL;
 
     nonlocalUpdateStateCounter = 0;
+
+    freeDofID = MaxDofID;
 
 #ifdef __PARALLEL_MODE
     dmanMapInitialized = elementMapInitialized = false;
@@ -121,7 +130,7 @@ Domain :: ~Domain()
     delete crossSectionList;
     delete nonlocalBarierList;
     delete randomFieldGeneratorList;
-    delete xfemManager;
+    delete xfemManagerList;
     delete connectivityTable;
     delete spatialLocalizer;
     delete outputManager;
@@ -154,10 +163,7 @@ Domain :: clear()
     crossSectionList->clear();
     nonlocalBarierList->clear();
     randomFieldGeneratorList->clear();
-
-    if ( xfemManager ) {
-        xfemManager->clear();
-    }
+    xfemManagerList->clear();
 
     if ( connectivityTable ) {
         connectivityTable->reset();
@@ -187,17 +193,17 @@ Domain :: clear()
 #endif
 }
 
+
 Element *
 Domain :: giveElement(int n)
 // Returns the n-th element. Generates error if it is not defined yet.
 {
-    if ( elementList->includes(n) ) {
-        return elementList->at(n);
-    } else {
+#ifdef DEBUG
+    if ( !elementList->includes(n) ) {
         _error2("giveElement: undefined element (%d)", n);
     }
-
-    return NULL;
+#endif
+    return elementList->at(n);
 }
 
 
@@ -226,13 +232,12 @@ GeneralBoundaryCondition *
 Domain :: giveBc(int n)
 // Returns the n-th bc. Generates the error if not defined.
 {
-    if ( bcList->includes(n) ) {
-        return bcList->at(n);
-    } else {
+#ifdef DEBUG
+    if ( !bcList->includes(n) ) {
         _error2("giveBc: undefined bc (%d)", n);
     }
-
-    return NULL;
+#endif
+    return bcList->at(n);
 }
 
 
@@ -240,13 +245,13 @@ InitialCondition *
 Domain :: giveIc(int n)
 // Returns the n-th ic. Generates the error if not defined.
 {
-    if ( icList->includes(n) ) {
-        return icList->at(n);
-    } else {
+#ifdef DEBUG
+    if ( !icList->includes(n) ) {
         _error2("giveIc: undefined ic (%d)", n);
     }
+#endif
 
-    return NULL;
+    return icList->at(n);
 }
 
 
@@ -255,15 +260,13 @@ Domain :: giveLoadTimeFunction(int n)
 // Returns the n-th load-time function. Creates this fuction if it does
 // not exist yet.
 {
-    if ( loadTimeFunctionList->includes(n) ) {
-        return loadTimeFunctionList->at(n);
-    } else {
+#ifdef DEBUG
+    if ( !loadTimeFunctionList->includes(n) ) {
         _error2("giveLoadTimeFunction: undefined load-time function (%d)", n);
-        //      ltf = (LoadTimeFunction*) LoadTimeFunction(n,this).typed() ;
-        //      loadTimeFunctionList -> put(n,ltf) ;}
     }
+#endif
 
-    return NULL;
+    return loadTimeFunctionList->at(n);
 }
 
 
@@ -272,15 +275,13 @@ Domain :: giveMaterial(int n)
 // Returns the n-th material. Creates this material if it does not exist
 // yet.
 {
-    if ( materialList->includes(n) ) {
-        return materialList->at(n);
-    } else {
+#ifdef DEBUG
+    if ( !materialList->includes(n) ) {
         _error2("giveMaterial: undefined material (%d)", n);
-        //      mat = new Material(n,this) ;
-        //      materialList  -> put(n,mat) ;}
     }
+#endif
 
-    return NULL;
+    return materialList->at(n);
 }
 
 
@@ -313,18 +314,23 @@ ElementSide *
 Domain :: giveSide(int n)
 // Returns the n-th element side.
 {
-    DofManager *side = NULL;
+#ifdef DEBUG
+    ElementSide *side = NULL;
 
-    if ( dofManagerList->includes(n) ) {
-        side = dofManagerList->at(n);
-        if ( side->giveClassID() != ElementSideClass ) {
-            _error2("giveSide: incompatible type of dofManager %d, can not convert", n);
-        }
-    } else {
+    if ( !dofManagerList->includes(n) ) {
         _error2("giveSide: undefined dofManager (%d)", n);
     }
 
-    return ( ElementSide * ) side;
+    side = dynamic_cast< ElementSide* >( dofManagerList->at(n) );
+    if ( !side ) {
+        _error2("giveSide: incompatible type of dofManager %d, can not convert", n);
+    }
+    return side;
+    
+#else
+    return static_cast< ElementSide* >( dofManagerList->at(n) );
+    
+#endif
 }
 
 
@@ -332,15 +338,12 @@ DofManager *
 Domain :: giveDofManager(int n)
 // Returns the n-th node. Creates this node if it does not exist yet.
 {
-    if ( dofManagerList->includes(n) ) {
-        return dofManagerList->at(n);
-    } else {
+#ifdef DEBUG
+    if ( !dofManagerList->includes(n) ) {
         _error2("giveDofManager: undefined dofManager (%d)", n);
-        //      node = new Node(n,this) ;
-        //      nodeList  -> put(n,node) ;}
     }
-
-    return NULL;
+#endif
+    return dofManagerList->at(n);
 }
 
 
@@ -349,13 +352,12 @@ Domain :: giveCrossSection(int n)
 // Returns the n-th cross section.
 // yet.
 {
-    if ( crossSectionList->includes(n) ) {
-        return crossSectionList->at(n);
-    } else {
+#ifdef DEBUG
+    if ( !crossSectionList->includes(n) ) {
         _error2("giveCrossSection: undefined cross section (%d)", n);
     }
-
-    return NULL;
+#endif
+    return crossSectionList->at(n);
 }
 
 
@@ -363,13 +365,12 @@ NonlocalBarrier *
 Domain :: giveNonlocalBarrier(int n)
 // Returns the n-th NonlocalBarrier.
 {
-    if ( nonlocalBarierList->includes(n) ) {
-        return nonlocalBarierList->at(n);
-    } else {
+#ifdef DEBUG
+    if ( !nonlocalBarierList->includes(n) ) {
         _error2("giveNonlocalBarrier: undefined barrier (%d)", n);
     }
-
-    return NULL;
+#endif
+    return nonlocalBarierList->at(n);
 }
 
 
@@ -377,13 +378,13 @@ RandomFieldGenerator *
 Domain :: giveRandomFieldGenerator(int n)
 // Returns the n-th RandomFieldGenerator.
 {
-    if ( randomFieldGeneratorList->includes(n) ) {
-        return randomFieldGeneratorList->at(n);
-    } else {
+#ifdef DEBUG
+    if ( !randomFieldGeneratorList->includes(n) ) {
         _error2("giveRandomFieldGenerator: undefined generator (%d)", n);
     }
+#endif
 
-    return NULL;
+    return randomFieldGeneratorList->at(n);
 }
 
 
@@ -392,13 +393,13 @@ Domain :: giveEngngModel()
 // Returns the time integration algorithm. Creates it if it does not
 // exist yet.
 {
-    if ( engineeringModel ) {
-        return engineeringModel;
-    } else {
+#ifdef DEBUG
+    if ( !engineeringModel ) {
         _error("giveEngngModel: Not defined");
     }
+#endif
 
-    return NULL;
+    return engineeringModel;
 }
 
 void Domain :: resizeDofManagers(int _newSize) { dofManagerList->growTo(_newSize); }
@@ -427,12 +428,12 @@ int
 Domain :: instanciateYourself(DataReader *dr)
 // Creates all objects mentioned in the data file.
 {
-    const char *__keyword, *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                            // Required by IR_GIVE_FIELD macro
 
-    int i, num;
+    int num;
     std :: string name, topologytype;
-    int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg;
+    int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg, nxfemman=0;
     DofManager *node;
     Element *elem;
     Material *mat;
@@ -442,7 +443,7 @@ Domain :: instanciateYourself(DataReader *dr)
     CrossSection *crossSection;
     NonlocalBarrier *barrier;
     RandomFieldGenerator *rfg;
-
+    //XfemManager *xMan;
     // mapping from label to local numbers for dofmans and elements
     std :: map< int, int >dofManLabelMap, elemLabelMap;
 
@@ -450,11 +451,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read type of Domain to be solved
     InputRecord *ir = dr->giveInputRecord(DataReader :: IR_domainRec, 1);
-    __keyword = "domain";
-    result = ir->giveField(name, IFT_Domain_type, __keyword);
-    if ( result != IRRT_OK ) {
-        IR_IOERR(giveClassName(), __proc, IFT_Domain_type, __keyword, ir, result);
-    }
+    IR_GIVE_FIELD(ir, name, IFT_Domain_type, "domain");
 
     ir->finish();
 
@@ -473,28 +470,28 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read domain description
     ir = dr->giveInputRecord(DataReader :: IR_domainCompRec, 1);
-    IR_GIVE_FIELD(ir, nnode, IFT_Domain_ndofman, "ndofman"); // Macro
-    IR_GIVE_FIELD(ir, nelem, IFT_Domain_nelem, "nelem"); // Macro
-    IR_GIVE_FIELD(ir, ncrossSections, IFT_Domain_ncrosssect, "ncrosssect"); // Macro
-    IR_GIVE_FIELD(ir, nmat, IFT_Domain_nmat, "nmat"); // Macro
-    IR_GIVE_FIELD(ir, nload, IFT_Domain_nbc, "nbc"); // Macro
-    IR_GIVE_FIELD(ir, nic, IFT_Domain_nic, "nic"); // Macro
-    IR_GIVE_FIELD(ir, nloadtimefunc, IFT_Domain_nloadtimefunct, "nltf"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, topologytype, IFT_Domain_topology, "topology"); // Macro
+    IR_GIVE_FIELD(ir, nnode, IFT_Domain_ndofman, "ndofman");
+    IR_GIVE_FIELD(ir, nelem, IFT_Domain_nelem, "nelem");
+    IR_GIVE_FIELD(ir, ncrossSections, IFT_Domain_ncrosssect, "ncrosssect");
+    IR_GIVE_FIELD(ir, nmat, IFT_Domain_nmat, "nmat");
+    IR_GIVE_FIELD(ir, nload, IFT_Domain_nbc, "nbc");
+    IR_GIVE_FIELD(ir, nic, IFT_Domain_nic, "nic");
+    IR_GIVE_FIELD(ir, nloadtimefunc, IFT_Domain_nloadtimefunct, "nltf");
+    IR_GIVE_OPTIONAL_FIELD(ir, nxfemman, IFT_Domain_nxfemman, "nxfemman");
+    IR_GIVE_OPTIONAL_FIELD(ir, topologytype, IFT_Domain_topology, "topology");
 
     // read optional number of nonlocalBarriers
     nbarrier = 0;
-    __keyword = "nbarrier";
-    result = ir->giveOptionalField(nbarrier,  IFT_Domain_nbarrier, __keyword);
+    IR_GIVE_OPTIONAL_FIELD(ir, nbarrier,  IFT_Domain_nbarrier, "nbarrier");
     // read optional number of RandomFieldGenerator
     nrfg = 0;
-    result = ir->giveOptionalField(nrfg,  IFT_Domain_nrfg, "nrandgen");
+    IR_GIVE_OPTIONAL_FIELD(ir, nrfg, IFT_Domain_nrandgen, "nrandgen");
 
 
 
     // read nodes
     dofManagerList->growTo(nnode);
-    for ( i = 0; i < nnode; i++ ) {
+    for ( int i = 0; i < nnode; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_dofmanRec, i + 1);
         // read type of dofManager
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -516,7 +513,6 @@ Domain :: instanciateYourself(DataReader *dr)
         node->setGlobalNumber(num);    // set label
         dofManagerList->put(i + 1, node);
 
-        //dofManagerList->put(i+1,node) ;
         ir->finish();
     }
 
@@ -526,7 +522,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read elements
     elementList->growTo(nelem);
-    for ( i = 0; i < nelem; i++ ) {
+    for ( int i = 0; i < nelem; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_elemRec, i + 1);
         // read type of element
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -557,7 +553,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read cross sections
     crossSectionList->growTo(ncrossSections);
-    for ( i = 0; i < ncrossSections; i++ ) {
+    for ( int i = 0; i < ncrossSections; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_crosssectRec, i + 1);
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
@@ -588,7 +584,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read materials
     materialList->growTo(nmat);
-    for ( i = 0; i < nmat; i++ ) {
+    for ( int i = 0; i < nmat; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_matRec, i + 1);
         // read type of material
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -621,7 +617,7 @@ Domain :: instanciateYourself(DataReader *dr)
     if ( nbarrier ) {
         // read barriers
         nonlocalBarierList->growTo(nbarrier);
-        for ( i = 0; i < nbarrier; i++ ) {
+        for ( int i = 0; i < nbarrier; i++ ) {
             ir = dr->giveInputRecord(DataReader :: IR_nlocBarRec, i + 1);
             // read type of load
             IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -652,7 +648,7 @@ Domain :: instanciateYourself(DataReader *dr)
     if ( nrfg ) {
         // read random field generators
         randomFieldGeneratorList->growTo(nrfg);
-        for ( i = 0; i < nrfg; i++ ) {
+        for ( int i = 0; i < nrfg; i++ ) {
             ir = dr->giveInputRecord(DataReader :: IR_nRandomFieldGenRec, i + 1);
             // read type of load
             IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -683,7 +679,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read boundary conditions
     bcList->growTo(nload);
-    for ( i = 0; i < nload; i++ ) {
+    for ( int i = 0; i < nload; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_bcRec, i + 1);
         // read type of load
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -715,7 +711,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read initial conditions
     icList->growTo(nic);
-    for ( i = 0; i < nic; i++ ) {
+    for ( int i = 0; i < nic; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_icRec, i + 1);
         // read type of load
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -748,7 +744,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read load time functions
     loadTimeFunctionList->growTo(nloadtimefunc);
-    for ( i = 0; i < nloadtimefunc; i++ ) {
+    for ( int i = 0; i < nloadtimefunc; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_ltfRec, i + 1);
         // read type of ltf
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
@@ -778,13 +774,30 @@ Domain :: instanciateYourself(DataReader *dr)
 #  endif
 
 
+// instantiate xfemmanager
+    XfemManager *xMan;
+    xfemManagerList->growTo(nxfemman);
+    for ( int i = 1; i <= nxfemman; i++ ) {
+        //xMan =  new XfemManager(this->giveEngngModel(), i);
+        xMan =  new XfemManager(this);
+        ir = dr->giveInputRecord(DataReader :: IR_xfemManRec, 1);
+        // XfemManager has to be put into xfemManagerList before xm->initializeFrom, otherwise Enrichmentitem cannot access XfemManager
+        // or we have to make a reference from EnrichmentItem also
+        xfemManagerList->put(i, xMan);
+        xMan->initializeFrom(ir);
+        xMan->instanciateYourself(dr);
+    }
+
+
+
+
     // change internal component references from labels to assigned local numbers
     MapBasedEntityRenumberingFunctor labelToLocNumFunctor(dofManLabelMap, elemLabelMap);
-    for ( i = 1; i <= nnode; i++ ) {
+    for ( int i = 1; i <= nnode; i++ ) {
         this->giveDofManager(i)->updateLocalNumbering(labelToLocNumFunctor);
     }
 
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         this->giveElement(i)->updateLocalNumbering(labelToLocNumFunctor);
     }
 
@@ -801,12 +814,32 @@ Domain :: instanciateYourself(DataReader *dr)
     return 1;
 }
 
+XfemManager *
+Domain :: giveXfemManager(int i)
+{
+    if ( xfemManagerList->includes(i) ) {
+        return this->xfemManagerList->at(i);
+    } else {
+        _error2("giveXfemManager: undefined xfem manager (%d)", i);
+        return NULL; // return NULL to prevent compiler warnings
+    }
+}
+
+bool
+Domain :: hasXfemManager(int i)
+{
+    return xfemManagerList->includes(i);
+}
+
+
 void
 Domain :: postInitialize()
 {
+    for ( int i = 1; i <= this->dofManagerList->giveSize(); i++ ) {
+        this->dofManagerList->at(i)->postInitialize();
+    }
     for ( int i = 1; i <= this->elementList->giveSize(); i++ ) {
-        Element *e = this->elementList->at(i);
-        e->postInitialize();
+        this->elementList->at(i)->postInitialize();
     }
 }
 
@@ -880,8 +913,8 @@ Domain :: giveDefaultNodeDofIDArry()
         defaultNodeDofIDArry.setValues(3, V_u, V_v, P_f);
     }  else if ( dType == _3dIncompressibleFlow ) {
         defaultNodeDofIDArry.setValues(4, V_u, V_v, V_w, P_f);
-	}  else if ( dType == _3dDirShellMode ) {
-        defaultNodeDofIDArry.setValues(7, D_u, D_v, D_w, w_u, w_v, w_w, gam);
+    }  else if ( dType == _3dDirShellMode ) {
+        defaultNodeDofIDArry.setValues(7, D_u, D_v, D_w, W_u, W_v, W_w, Gamma);
     } else {
         _error2( "giveDefaultNodeDofIDArry : unknown domainType (%s)", __domainTypeToString(dType) );
     }
@@ -946,9 +979,9 @@ Domain :: resolveDomainDofsDefaults(const char *typeName)
         dType = _2dIncompressibleFlow;
     } else if ( !strncasecmp(typeName, "3dincompflow", 12) ) {
         dType = _3dIncompressibleFlow;
-	} else if  ( !strncasecmp(typeName, "3ddirshell", 10) ) {
+    } else if  ( !strncasecmp(typeName, "3ddirshell", 10) ) {
         dType = _3dDirShellMode;
-	} else if  ( !strncasecmp(typeName, "3d", 2) ) {
+    } else if  ( !strncasecmp(typeName, "3d", 2) ) {
         dType = _3dMode;
     } else {
         _error2("resolveDomainDofsDefaults : unknown domainType (%s)", typeName);
@@ -1182,6 +1215,60 @@ Domain ::  giveCorrespondingCoordinateIndex(int idof)
 }
 
 
+void Domain :: createDofs(const IntArray &nodeBCs, EquationID eid)
+{
+    IntArray dofids;
+
+    // Scan all required nodal dofs.
+    std::vector< std::set<int> > node_dofs( this->giveNumberOfDofManagers() );
+
+    for (int i = 1; i <= this->giveNumberOfElements(); ++i) {
+        // Scan for all dofs needed.
+        Element *element = this->giveElement(i);
+        for (int j = 1; j <= element->giveNumberOfNodes(); ++j) {
+            element->giveDofManDofIDMask(j, eid, dofids);
+            for (int k = 1; k <= dofids.giveSize(); k++) {
+                node_dofs[element->giveNode(j)->giveNumber()-1].insert(dofids.at(k));
+            }
+        }
+    }
+
+    int dnumber = 0;
+    for (int i = 1; i <= this->giveNumberOfDofManagers(); ++i) {
+        DofManager *dman = this->giveDofManager(i);
+        int bcid = nodeBCs.at(i);
+        int c = 0;
+        ///@todo How do we reconcile this with none-node dofmanagers, like hangingnode etc. ?  We should pass the information to the dof manager and let it deal with it.
+        dman->setNumberOfDofs(node_dofs[i-1].size());
+        if (bcid > 0) {
+            GeneralBoundaryCondition *bc = this->giveBc(bcid);
+            const IntArray &defaultDofs = bc->giveDefaultDofs();
+            for (std::set<int>::iterator it = node_dofs[i-1].begin(); it != node_dofs[i-1].end(); ++it) {
+                DofIDItem id = (DofIDItem)*it;
+                Dof *dof;
+                if ( defaultDofs.contains(id) ) {
+                    ActiveBoundaryCondition *active_bc = dynamic_cast<ActiveBoundaryCondition*>(bc);
+                    if (active_bc && active_bc->requiresActiveDofs()) {
+                        dof = new ActiveDof(++dnumber, dman, bcid, id);
+                    } else {
+                        dof = new MasterDof(++dnumber, dman, bcid, 0, id);
+                    }
+                } else {
+                    dof = new MasterDof(++dnumber, dman, id);
+                }
+                dman->setDof(++c, dof);
+            }
+        } else {
+            for (std::set<int>::iterator it = node_dofs[i-1].begin(); it != node_dofs[i-1].end(); ++it) {
+                Dof *dof = new MasterDof(++dnumber, dman, (DofIDItem)*it);
+                dman->setDof(++c, dof);
+            }
+        }
+        dman->checkConsistency();
+    }
+}
+
+
 int
 Domain :: checkConsistency()
 // this function transverse tree of all objects and invokes
@@ -1191,22 +1278,22 @@ Domain :: checkConsistency()
 // are having required support
 //
 {
-    int i, result = 1;
+    int result = 1;
     int nnode, nelem, nmat;
 
     nnode = this->giveNumberOfDofManagers();
     nelem = this->giveNumberOfElements();
     nmat  = this->giveNumberOfMaterialModels();
 
-    for ( i = 1; i <= nnode; i++ ) {
+    for ( int i = 1; i <= nnode; i++ ) {
         result &= this->giveDofManager(i)->checkConsistency();
     }
 
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         result &= this->giveElement(i)->checkConsistency();
     }
 
-    for ( i = 1; i <= nmat; i++ ) {
+    for ( int i = 1; i <= nmat; i++ ) {
         result &= this->giveMaterial(i)->checkConsistency();
     }
 
@@ -1233,32 +1320,52 @@ double Domain :: giveVolume()
     return volume;
 }
 
+int
+Domain :: giveNextFreeDofID(int increment)
+{
+#ifdef __PARALLEL_MODE
+    if ( this->engineeringModel->isParallel() ) {
+        OOFEM_ERROR("Additional dof id's not implemented/tested for parallel problems");
+    }
+#endif
+    int freeID = this->freeDofID; 
+    this->freeDofID += increment;
+    return freeID;
+}
+
+void
+Domain :: resetFreeDofID()
+{
+    this->freeDofID = MaxDofID;
+}
+
 ErrorEstimator *
-Domain :: giveErrorEstimator() {
+Domain :: giveErrorEstimator()
+{
     return engineeringModel->giveDomainErrorEstimator(this->number);
 }
 
 
 
-#define SAVE_COMPONENTS(size, type, giveMethod)   \
-    {                                             \
+#define SAVE_COMPONENTS(size, type, giveMethod)    \
+    {                                               \
         type *obj;                                  \
         for ( i = 1; i <= size; i++ ) {             \
             obj = giveMethod(i);                    \
             if ( ( mode & CM_Definition ) ) {       \
-                ct =  ( int ) obj->giveClassID();     \
+                ct =  ( int ) obj->giveClassID();   \
                 if ( !stream->write(& ct, 1) ) {    \
                     THROW_CIOERR(CIO_IOERR);        \
                 }                                   \
             }                                       \
             if ( ( iores = obj->saveContext(stream, mode) ) != CIO_OK ) { \
-                      THROW_CIOERR(iores);                \
-                  }                                       \
-                  }                                           \
-                  }
+                THROW_CIOERR(iores);                \
+            }                                       \
+        }                                           \
+    }
 
 #define RESTORE_COMPONENTS(size, type, resizeMethod, creator, giveMethod, setMethod) \
-    {                                         \
+    {                                           \
         type *obj;                              \
         if ( mode & CM_Definition ) {           \
             resizeMethod(size);                 \
@@ -1274,13 +1381,13 @@ Domain :: giveErrorEstimator() {
                 obj = giveMethod(i);            \
             }                                   \
             if ( ( iores = obj->restoreContext(stream, mode) ) != CIO_OK ) { \
-                      THROW_CIOERR(iores);            \
-                  }                                   \
-                  if ( mode & CM_Definition ) {       \
-                      setMethod(i, obj);              \
-                  }                                   \
-                  }                                       \
-                  }
+                THROW_CIOERR(iores);            \
+            }                                   \
+            if ( mode & CM_Definition ) {       \
+                setMethod(i, obj);              \
+            }                                   \
+        }                                       \
+    }
 
 #define DOMAIN_NCOMP 9
 
@@ -1355,7 +1462,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     int i, serNum;
-    bool domainUpdated = false;
+    bool domainUpdated;
     ErrorEstimator *ee;
     int ct;
     classType compId;
@@ -1792,11 +1899,7 @@ Domain :: elementGlobal2Local(int _globnum)
 }
 
 
-void
-Domain :: setXfemManager(XfemManager *xfemManager)
-{
-    this->xfemManager = xfemManager;
-}
+
 
 
 

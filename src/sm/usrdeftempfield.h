@@ -39,6 +39,14 @@
 #include "domain.h"
 #include "parser.h"
 
+///@name Input fields for UserDefinedTemperatureField
+//@{
+#define _IFT_UserDefinedTemperatureField_size "size"
+#define _IFT_UserDefinedTemperatureField_t1 "t1(txyz)"
+#define _IFT_UserDefinedTemperatureField_t2 "t2(txyz)"
+#define _IFT_UserDefinedTemperatureField_t3 "t3(txyz)"
+//@}
+
 namespace oofem {
 
 /**

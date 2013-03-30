@@ -39,7 +39,8 @@
 
 namespace oofem {
 void
-BoundaryLoad :: computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)  {
+BoundaryLoad :: computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
+{
     // returns component array for elements which use direct formulae
     Load :: computeComponentArrayAt(answer, tStep, mode);
 }
@@ -95,23 +96,20 @@ BoundaryLoad :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     result = Load :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        IR_IOERR(giveClassName(), __proc, IFT_Unknown, "", ir, result);
-    }
 
-    IR_GIVE_FIELD(ir, nDofs, IFT_BoundaryLoad_ndofs, "ndofs"); // Macro
+    IR_GIVE_FIELD(ir, nDofs, IFT_BoundaryLoad_ndofs, "ndofs");
 
     int value = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_BoundaryLoad_loadtype, "loadtype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_BoundaryLoad_loadtype, "loadtype");
     lType = ( bcType ) value;
 
     value = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_BoundaryLoad_cstype, "cstype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_BoundaryLoad_cstype, "cstype");
     coordSystemType = ( BL_CoordSystType ) value;
 
-    IR_GIVE_OPTIONAL_FIELD(ir, propertyDictionary, IFT_BoundaryLoad_properties, "properties"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, propertyDictionary, IFT_BoundaryLoad_properties, "properties");
 
-    return IRRT_OK;
+    return result;
 }
 
 

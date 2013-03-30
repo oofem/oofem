@@ -68,7 +68,7 @@ HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRe
     FloatMatrix C(3, 3);
     FloatMatrix invC(3, 3);
 
-    HyperElasticMaterialStatus *status = ( HyperElasticMaterialStatus * ) this->giveStatus(gp);
+    HyperElasticMaterialStatus *status = static_cast< HyperElasticMaterialStatus * >( this->giveStatus(gp) );
 
     C.at(1, 1) = 1. + 2. * status->giveTempStrainVector().at(1);
     C.at(2, 2) = 1. + 2. * status->giveTempStrainVector().at(2);
@@ -127,7 +127,7 @@ HyperElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm
     FloatMatrix invC(3, 3);
     FloatArray strainVector;
 
-    HyperElasticMaterialStatus *status = ( HyperElasticMaterialStatus * ) this->giveStatus(gp);
+    HyperElasticMaterialStatus *status = static_cast< HyperElasticMaterialStatus * >( this->giveStatus(gp) );
     this->giveStressDependentPartOfStrainVector(strainVector, gp,
                                                 totalStrain,
                                                 atTime, VM_Total);
@@ -177,7 +177,7 @@ HyperElasticMaterial :: initializeFrom(InputRecord *ir)
 
     // Read material properties here
 
-    IR_GIVE_FIELD(ir, K, IFT_HyperElasticMaterial_k, "k"); // Macro
+    IR_GIVE_FIELD(ir, K, IFT_HyperElasticMaterial_k, "k");
     IR_GIVE_FIELD(ir, G, IFT_HyperElasticMaterial_g, "g");
 
     return IRRT_OK;

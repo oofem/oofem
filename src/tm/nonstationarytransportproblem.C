@@ -45,10 +45,11 @@
 #include "usrdefsub.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "loadtime.h"
 
 #ifdef __CEMHYD_MODULE
  #include "cemhydmat.h"
-#endif //__CEMHYD_MODULE
+#endif
 
 namespace oofem {
 NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : StationaryTransportProblem(i, _master)
@@ -87,25 +88,25 @@ IRResultType
 NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     EngngModel :: initializeFrom(ir);
 
     if ( ir->hasField(IFT_NonStationaryTransportProblem_initt, "initt") ) {
-        IR_GIVE_FIELD(ir, initT, IFT_NonStationaryTransportProblem_initt, "initt"); // Macro
+        IR_GIVE_FIELD(ir, initT, IFT_NonStationaryTransportProblem_initt, "initt");
     }
 
     if ( ir->hasField(IFT_NonStationaryTransportProblem_deltat, "deltat") ) {
-        IR_GIVE_FIELD(ir, deltaT, IFT_NonStationaryTransportProblem_deltat, "deltat"); // Macro
-    } else if ( ir->hasField(IFT_NonStationaryTransportProblem_deltat, "deltatfunction") ) {
-        IR_GIVE_FIELD(ir, dtTimeFunction, IFT_NonStationaryTransportProblem_dtf, "deltatfunction"); // Macro
+        IR_GIVE_FIELD(ir, deltaT, IFT_NonStationaryTransportProblem_deltat, "deltat");
+    } else if ( ir->hasField(IFT_NonStationaryTransportProblem_deltatfunction, "deltatfunction") ) {
+        IR_GIVE_FIELD(ir, dtTimeFunction, IFT_NonStationaryTransportProblem_deltatfunction, "deltatfunction");
     } else if ( ir->hasField(IFT_NonStationaryTransportProblem_prescribedtimes, "prescribedtimes") ) {
-        IR_GIVE_FIELD(ir, discreteTimes, IFT_NonStationaryTransportProblem_prescribedtimes, "prescribedtimes"); // Macro
+        IR_GIVE_FIELD(ir, discreteTimes, IFT_NonStationaryTransportProblem_prescribedtimes, "prescribedtimes");
     } else {
         OOFEM_ERROR("Time step not defined");
     }
 
-    IR_GIVE_FIELD(ir, alpha, IFT_NonStationaryTransportProblem_alpha, "alpha"); // Macro
+    IR_GIVE_FIELD(ir, alpha, IFT_NonStationaryTransportProblem_alpha, "alpha");
     /* The following done in updateAttributes
      * if (this->giveNumericalMethod (giveCurrentStep())) nMethod -> instanciateFrom (ir);
      */
@@ -355,16 +356,42 @@ NonStationaryTransportProblem :: updateYourself(TimeStep *stepN)
 {
     this->updateInternalState(stepN);
     EngngModel :: updateYourself(stepN);
+
+    ///@todo Find a cleaner way to do these cemhyd hacks
+#ifdef __CEMHYD_MODULE
+    for ( int idomain = 1; idomain <= ndomains; idomain++ ) {
+        Domain *d = this->giveDomain(idomain);
+        for ( int i = 1; i <= d->giveNumberOfElements(); ++i ) {
+            TransportElement *elem = static_cast< TransportElement * >( d->giveElement(i) );
+            //store temperature and associated volume on each GP before performing averaging
+            CemhydMat *cem = dynamic_cast< CemhydMat * >( elem->giveMaterial() );
+            if ( cem ) {
+                cem->clearWeightTemperatureProductVolume(elem);
+                cem->storeWeightTemperatureProductVolume(elem, stepN);
+            }
+        }
+        //perform averaging on each material instance
+        for ( int i = 1; i <= d->giveNumberOfMaterialModels(); i++ ) {
+            CemhydMat *cem = dynamic_cast< CemhydMat * >( d->giveMaterial(i) );
+            if ( cem ) {
+                cem->averageTemperature();
+            }
+        }
+    }
+#ifdef VERBOSE
+    VERBOSE_PRINT0("Updated Materials ",0)
+#endif
+#endif
 }
 
 
 void
 NonStationaryTransportProblem :: updateInternalState(TimeStep *stepN)
 {
-    int j, idomain, nelem;
+    int nelem;
     Domain *domain;
 
-    for ( idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
+    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
         domain = this->giveDomain(idomain);
 
         if ( requiresUnknownsDictionaryUpdate() ) {
@@ -376,7 +403,7 @@ NonStationaryTransportProblem :: updateInternalState(TimeStep *stepN)
 
         if ( internalVarUpdateStamp != stepN->giveSolutionStateCounter() ) {
             nelem = domain->giveNumberOfElements();
-            for ( j = 1; j <= nelem; j++ ) {
+            for ( int j = 1; j <= nelem; j++ ) {
                 domain->giveElement(j)->updateInternalState(stepN);
             }
 
@@ -473,7 +500,7 @@ NonStationaryTransportProblem :: checkConsistency()
 {
     // check internal consistency
     // if success returns nonzero
-    int i, nelem;
+    int nelem;
     Element *ePtr;
     TransportElement *sePtr;
     Domain *domain = this->giveDomain(1);
@@ -481,7 +508,7 @@ NonStationaryTransportProblem :: checkConsistency()
     nelem = domain->giveNumberOfElements();
     // check for proper element type
 
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         ePtr = domain->giveElement(i);
         sePtr = dynamic_cast< TransportElement * >(ePtr);
         if ( sePtr == NULL ) {
@@ -504,7 +531,8 @@ NonStationaryTransportProblem :: updateDomainLinks()
 }
 
 int
-NonStationaryTransportProblem :: giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN) {
+NonStationaryTransportProblem :: giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN)
+{
     if ( mode == VM_Total ) { //Nodal temperature
         return 0;
     } else if ( mode == VM_RhsTotal ) { //Nodal Rhs
@@ -567,7 +595,6 @@ void
 NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, EquationID ut,
                                                               const UnknownNumberingScheme &s, TimeStep *tStep)
 {
-    int i;
     IntArray loc;
     FloatMatrix charMtrx, bcMtrx;
     FloatArray unknownVec, contrib;
@@ -576,7 +603,7 @@ NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer
     Domain *domain = this->giveDomain(1);
     int nelem = domain->giveNumberOfElements();
 
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
 #ifdef __PARALLEL_MODE
         // skip remote elements (these are used as mirrors of remote elements on other domains
@@ -621,24 +648,22 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Applying initial conditions\n");
 #endif
-    int nDofs, j, k, jj;
+    int nDofs, jj;
     int nman  = domain->giveNumberOfDofManagers();
-    DofManager *node;
-    Dof *iDof;
 
     UnknownsField->advanceSolution(stepWhenIcApply);
     solutionVector = UnknownsField->giveSolutionVector(stepWhenIcApply);
     solutionVector->resize(neq);
     solutionVector->zero();
 
-    for ( j = 1; j <= nman; j++ ) {
-        node = domain->giveDofManager(j);
+    for ( int j = 1; j <= nman; j++ ) {
+        DofManager *node = domain->giveDofManager(j);
         nDofs = node->giveNumberOfDofs();
 
-        for ( k = 1; k <= nDofs; k++ ) {
+        for ( int k = 1; k <= nDofs; k++ ) {
             // ask for initial values obtained from
             // bc (boundary conditions) and ic (initial conditions)
-            iDof  =  node->giveDof(k);
+            Dof *iDof = node->giveDof(k);
             if ( !iDof->isPrimaryDof() ) {
                 continue;
             }
@@ -658,7 +683,7 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 
     //project initial temperature to integration points
 
-    //     for ( j = 1; j <= nelem; j++ ) {
+    //     for ( int j = 1; j <= nelem; j++ ) {
     //         domain->giveElement(j)->updateInternalState(stepWhenIcApply);
     //     }
 
@@ -667,16 +692,14 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 
     // Not relevant in linear case, but needed for CemhydMat for temperature averaging before solving balance equations
     // Update element state according to given ic
-    TransportElement *element;
-    CemhydMat *cem;
-    for ( j = 1; j <= nelem; j++ ) {
-        element = ( TransportElement * ) domain->giveElement(j);
+    for ( int j = 1; j <= nelem; j++ ) {
+        TransportElement *element = static_cast< TransportElement * >( domain->giveElement(j) );
+        CemhydMat *cem = dynamic_cast< CemhydMat * >( element->giveMaterial() );
         //assign status to each integration point on each element
-        if ( element->giveMaterial()->giveClassID() == CemhydMatClass ) {
+        if ( cem ) {
             element->giveMaterial()->initMaterial(element); //create microstructures and statuses on specific GPs
             element->updateInternalState(stepWhenIcApply);   //store temporary unequilibrated temperature
             element->updateYourself(stepWhenIcApply);   //store equilibrated temperature
-            cem = ( CemhydMat * ) element->giveMaterial();
             cem->clearWeightTemperatureProductVolume(element);
             cem->storeWeightTemperatureProductVolume(element, stepWhenIcApply);
         }
@@ -684,9 +707,9 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 
     //perform averaging on each material instance of CemhydMatClass
     int nmat = domain->giveNumberOfMaterialModels();
-    for ( j = 1; j <= nmat; j++ ) {
-        if ( domain->giveMaterial(j)->giveClassID() == CemhydMatClass ) {
-            cem = ( CemhydMat * ) domain->giveMaterial(j);
+    for ( int j = 1; j <= nmat; j++ ) {
+        CemhydMat *cem = dynamic_cast< CemhydMat * >( domain->giveMaterial(j) );
+        if ( cem ) {
             cem->averageTemperature();
         }
     }
@@ -700,7 +723,6 @@ NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer
                                                               ValueModeType mode, CharType lhsType,
                                                               const UnknownNumberingScheme &ns, Domain *d)
 {
-    int ielem;
     IntArray loc;
     Element *element;
     FloatArray rp, charVec;
@@ -708,7 +730,7 @@ NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer
 
     int nelem = d->giveNumberOfElements();
 
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         element = d->giveElement(ielem);
 
         element->computeVectorOfPrescribed(EID_ConservationEquation, mode, tStep, rp);
@@ -725,15 +747,15 @@ NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer
             answer.assemble(charVec, loc);
         }
     } // end element loop
-
 }
 
+#if __CEMHYD_MODULE
 // needed for CemhydMat
 void
 NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
 {
+    ///@todo Verify this, the function is completely unused.
     Domain *domain = this->giveDomain(1);
-    int ielem, i;
     int nelem = domain->giveNumberOfElements();
     TransportElement *element;
     IntegrationRule *iRule;
@@ -741,12 +763,12 @@ NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
     FloatArray vecTemperature;
     TransportMaterial *mat;
 
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        element = ( TransportElement * ) domain->giveElement(ielem);
-        mat = ( TransportMaterial * ) element->giveMaterial();
-        if ( mat->giveClassID() == CemhydMatClass ) {
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+        element = static_cast< TransportElement * >( domain->giveElement(ielem) );
+        mat = static_cast< CemhydMat * >( element->giveMaterial() );
+        if ( mat ) {
             iRule = element->giveDefaultIntegrationRulePtr();
-            for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+            for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
                 gp  = iRule->getIntegrationPoint(i);
                 element->giveIPValue(vecTemperature, gp, IST_Temperature, tStep);
                 //mat->IP_volume += dV;
@@ -755,11 +777,13 @@ NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
         }
     }
 
-    for ( i = 1; i <= domain->giveNumberOfMaterialModels(); i++ ) {
-        mat = ( TransportMaterial * ) domain->giveMaterial(i);
-        if ( mat->giveClassID() == CemhydMatClass ) {
+    for ( int i = 1; i <= domain->giveNumberOfMaterialModels(); i++ ) {
+        mat = static_cast< CemhydMat * >( domain->giveMaterial(i) );
+        if ( mat ) {
             //mat->average_temp /= mat->IP_volume;
         }
     }
 }
+#endif
+
 } // end namespace oofem

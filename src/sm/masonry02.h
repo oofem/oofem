@@ -37,9 +37,32 @@
 
 #include "mplasticmaterial2.h"
 
+///@name Input fields for Masonry02
+//@{
+#define _IFT_Masonry02_ft0 "ft0"
+#define _IFT_Masonry02_gfi "gfi"
+#define _IFT_Masonry02_gfii "gfii"
+#define _IFT_Masonry02_kn "kn"
+#define _IFT_Masonry02_ks "ks"
+#define _IFT_Masonry02_c0 "c0"
+#define _IFT_Masonry02_tanfi0 "tanfi0"
+#define _IFT_Masonry02_tanfir "tanfir"
+#define _IFT_Masonry02_tanpsi "tanpsi"
+#define _IFT_Masonry02_cnn "cnn"
+#define _IFT_Masonry02_css "css"
+#define _IFT_Masonry02_cn "cn"
+#define _IFT_Masonry02_si "si"
+#define _IFT_Masonry02_sp "sp"
+#define _IFT_Masonry02_sm "sm"
+#define _IFT_Masonry02_sr "sr"
+#define _IFT_Masonry02_kp "kp"
+#define _IFT_Masonry02_km "km"
+#define _IFT_Masonry02_kr "kr"
+#define _IFT_Masonry02_cplane "cplane"
+//@}
+
 namespace oofem {
 class Domain;
-
 
 /**
  * This class implements an interface masonry model based on

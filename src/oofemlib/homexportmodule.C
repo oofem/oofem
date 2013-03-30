@@ -37,6 +37,7 @@
 #include "structuralelement.h"
 #include "materialinterface.h"
 #include "gausspnt.h"
+#include "truss3d.h"
 
 #include <vector>
 
@@ -59,12 +60,12 @@ HOMExportModule :: initializeFrom(InputRecord *ir)
     IRResultType val;
     this->scale = 1.;
     ExportModule :: initializeFrom(ir);
-    val = IR_GIVE_OPTIONAL_FIELD(ir, this->scale, IFT_HOMExportModule_scale, "scale"); // Macro
+    val = IR_GIVE_OPTIONAL_FIELD(ir, this->scale, IFT_HOMExportModule_scale, "scale");
     if ( val == IRRT_NOTFOUND ) {
         this->scale = 1.;
     }
 
-    val = IR_GIVE_OPTIONAL_FIELD(ir, this->matnum, IFT_HOMExportModule_matnum, "matnum"); // Macro
+    val = IR_GIVE_OPTIONAL_FIELD(ir, this->matnum, IFT_HOMExportModule_matnum, "matnum");
     return IRRT_OK;
 }
 
@@ -130,7 +131,7 @@ HOMExportModule :: doOutput(TimeStep *tStep)
                 iRule = elem->giveDefaultIntegrationRulePtr();
                 for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
                     gp  = iRule->getIntegrationPoint(i);
-                    structElem = ( StructuralElement * ) gp->giveElement();
+                    structElem = static_cast< StructuralElement * >( gp->giveElement() );
                     structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Incremental);
                     //gp->giveCoordinate(1);
                     dV  = elem->computeVolumeAround(gp);
@@ -143,7 +144,7 @@ HOMExportModule :: doOutput(TimeStep *tStep)
                     elem->giveIntVarCompFullIndx(Mask, IST_StrainTensor);
 
                     //truss element has strains and stresses in the first array so transform them to global coordinates
-                    if ( elem->giveClassID() == Truss3dClass ) {
+                    if ( dynamic_cast< Truss3d * >( elem ) ) {
                         elem->giveLocalCoordinateSystem(baseGCS);
                         //this->giveStressVectorTranformationMtrx(transfMatrix,baseGCS,1);//from structuralMaterial
                         //baseGCS.printYourself();

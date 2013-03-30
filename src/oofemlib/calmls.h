@@ -44,6 +44,33 @@
 #include "intarray.h"
 #include "dofiditem.h"
 
+///@name Input fields for CylindricalALM
+//@{
+#define _IFT_CylindricalALM_psi "psi"
+#define _IFT_CylindricalALM_maxiter "maxiter"
+#define _IFT_CylindricalALM_minsteplength "minsteplength"
+#define _IFT_CylindricalALM_steplength "steplength"
+#define _IFT_CylindricalALM_initialsteplength "initialsteplength"
+#define _IFT_CylindricalALM_forcedinitialsteplength "forcedinitialsteplength"
+#define _IFT_CylindricalALM_reqiterations "reqiterations"
+#define _IFT_CylindricalALM_miniterations "miniter"
+#define _IFT_CylindricalALM_manrmsteps "manrmsteps"
+#define _IFT_CylindricalALM_hpcmode "hpcmode"
+#define _IFT_CylindricalALM_hpc "hpc"
+#define _IFT_CylindricalALM_hpcw "hpcw"
+#define _IFT_CylindricalALM_lstype "lstype"
+#define _IFT_CylindricalALM_linesearch "linesearch"
+#define _IFT_CylindricalALM_lsearchtol "lsearchtol"
+#define _IFT_CylindricalALM_lsearchamp "lsearchamp"
+#define _IFT_CylindricalALM_lsearchmaxeta "lsearchmaxeta"
+#define _IFT_CylindricalALM_nccdg "nccdg"
+#define _IFT_CylindricalALM_ccdg "ccdg"
+#define _IFT_CylindricalALM_rtolv "rtolv"
+#define _IFT_CylindricalALM_rtolf "rtolf"
+#define _IFT_CylindricalALM_rtold "rtold"
+//@}
+
+
 namespace oofem {
 class Domain;
 class EngngModel;
@@ -190,7 +217,7 @@ public:
     // Overloaded methods:
     virtual NM_Status solve(SparseMtrx *K, FloatArray *R, FloatArray *R0,
                             FloatArray *X, FloatArray *dX, FloatArray *F,
-                            double &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
+                            const FloatArray &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
     virtual double giveCurrentStepLength() { return deltaL; }
     virtual void setStepLength(double s) { deltaL = s; }
@@ -231,7 +258,7 @@ protected:
     bool checkConvergence(const FloatArray &R, const FloatArray *R0, const FloatArray &F,
                           const FloatArray &X, const FloatArray &ddX,
                           double Lambda, double RR0, double RR, double drProduct,
-                          double internalForcesEBENorm, int nite, bool &errorOutOfRange);
+                          const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange);
 
     /// Perform line search optimization of step length
     void do_lineSearch(FloatArray &X, const FloatArray &XInitial, const FloatArray &deltaX_, const FloatArray &deltaXt,

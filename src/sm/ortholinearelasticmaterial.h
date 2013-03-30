@@ -39,9 +39,26 @@
 #include "dictionr.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-
 #include "matconst.h"
 #include "element.h"
+
+///@name Input fields for OrthotropicLinearElasticMaterial
+//@{
+#define _IFT_OrthotropicLinearElasticMaterial_ex "ex"
+#define _IFT_OrthotropicLinearElasticMaterial_ey "ey"
+#define _IFT_OrthotropicLinearElasticMaterial_ez "ez"
+#define _IFT_OrthotropicLinearElasticMaterial_nyyz "nyyz"
+#define _IFT_OrthotropicLinearElasticMaterial_nyxz "nyxz"
+#define _IFT_OrthotropicLinearElasticMaterial_nyxy "nyxy"
+#define _IFT_OrthotropicLinearElasticMaterial_gyz "gyz"
+#define _IFT_OrthotropicLinearElasticMaterial_gxz "gxz"
+#define _IFT_OrthotropicLinearElasticMaterial_gxy "gxy"
+#define _IFT_OrthotropicLinearElasticMaterial_talphax "talphax"
+#define _IFT_OrthotropicLinearElasticMaterial_talphay "talphay"
+#define _IFT_OrthotropicLinearElasticMaterial_talphaz "talphaz"
+#define _IFT_OrthotropicLinearElasticMaterial_lcs "lcs"
+#define _IFT_OrthotropicLinearElasticMaterial_scs "scs"
+//@}
 
 namespace oofem {
 class GaussPoint;

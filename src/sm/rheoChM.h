@@ -44,6 +44,15 @@
 #include "structuralelement.h"
 #include "structuralms.h"
 
+///@name Input fields for RheoChainMaterial
+//@{
+#define _IFT_RheoChainMaterial_n "n"
+#define _IFT_RheoChainMaterial_relmatage "relmatage"
+#define _IFT_RheoChainMaterial_begoftimeofinterest "begoftimeofinterest"
+#define _IFT_RheoChainMaterial_endoftimeofinterest "endoftimeofinterest"
+#define _IFT_RheoChainMaterial_timefactor "timefactor"
+//@}
+
 namespace oofem {
 #define MNC_NPOINTS 30
 #define TIME_DIFF   1.e-10

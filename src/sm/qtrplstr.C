@@ -40,6 +40,7 @@
 #include "intarray.h"
 #include "crosssection.h"
 #include "gaussintegrationrule.h"
+#include "mathfem.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -51,7 +52,7 @@ namespace oofem {
 FEI2dTrQuad QTrPlaneStress2d :: interpolation(1, 2);
 
 QTrPlaneStress2d :: QTrPlaneStress2d(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain), SpatialLocalizerInterface(),
+    NLStructuralElement(n, aDomain), SpatialLocalizerInterface(),
     DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface()
 {
     numberOfDofMans  = 6;
@@ -71,13 +72,13 @@ QTrPlaneStress2d :: giveInterface(InterfaceType interface)
      *    return ( ZZNodalRecoveryModelInterface * ) this;
      */
     if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return ( SpatialLocalizerInterface * ) this;
+        return static_cast< SpatialLocalizerInterface * >( this );
     } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return ( DirectErrorIndicatorRCInterface * ) this;
+        return static_cast< DirectErrorIndicatorRCInterface * >( this );
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return ( EIPrimaryUnknownMapperInterface * ) this;
+        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
     }
 
     return NULL;
@@ -188,7 +189,7 @@ QTrPlaneStress2d :: initializeFrom(InputRecord *ir)
 
     this->StructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 4;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_QTrPlaneStress2d_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
            ( numberOfGaussPoints == 3 ) ||
@@ -199,7 +200,6 @@ QTrPlaneStress2d :: initializeFrom(InputRecord *ir)
         numberOfGaussPoints = 4;
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 
@@ -209,7 +209,6 @@ QTrPlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answe
 // Returns the [3x12] strain-displacement matrix {B} of the receiver, eva-
 // luated at aGaussPoint.
 {
-    int i;
     FloatMatrix dnx;
 
     this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
@@ -217,7 +216,7 @@ QTrPlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answe
     answer.resize(3, 12);
     answer.zero();
 
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         answer.at(1, 2 * i - 1) = dnx.at(i, 1);
         answer.at(2, 2 * i - 0) = dnx.at(i, 2);
 
@@ -686,7 +685,7 @@ QTrPlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPo
      */
 
     FloatArray n(3);
-    this->interpolation.edgeEvalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 6);
     answer.zero();

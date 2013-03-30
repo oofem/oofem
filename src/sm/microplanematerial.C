@@ -71,7 +71,7 @@ MicroplaneMaterial :: giveMicroplane(int i, GaussPoint *masterGp)
         slave = masterGp->gaussPointArray [ i ];
     }
 
-    return ( Microplane * ) slave;
+    return static_cast< Microplane * >( slave );
 }
 
 
@@ -93,7 +93,7 @@ MicroplaneMaterial :: giveMicroplaneStatus(GaussPoint *gp)
 {
     IntegrationPointStatus *status;
 
-    status = gp->giveMaterialStatus(this->giveClassID());
+    status = gp->giveMaterialStatus( this->giveNumber() );
     if ( status == NULL ) {
         // create a new one
         status = this->CreateMicroplaneStatus(gp);
@@ -101,7 +101,7 @@ MicroplaneMaterial :: giveMicroplaneStatus(GaussPoint *gp)
         // don't include it. specific instance
         // does not have status.
         if ( status != NULL ) {
-            gp->setMaterialStatus(status, this->giveClassID());
+            gp->setMaterialStatus(status, this->giveNumber());
         }
     }
 
@@ -309,7 +309,7 @@ MicroplaneMaterial :: initializeFrom(InputRecord *ir)
 
     StructuralMaterial :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, numberOfMicroplanes, IFT_MicroplaneMaterial_nmp, "nmp"); // Macro
+    IR_GIVE_FIELD(ir, numberOfMicroplanes, IFT_MicroplaneMaterial_nmp, "nmp");
     this->initializeData(numberOfMicroplanes);
     return IRRT_OK;
 }
@@ -504,7 +504,7 @@ MicroplaneMaterial :: initializeData(int numberOfMicroplanes)
          *    m.at(2) = 1.0;
          *    m.at(3) = 0.0;
          *  }
-         * } else  {
+         * } else {
          *  aux = sqrt (n.at(1)*n.at(1) + n.at(3)*n.at(3));
          *  if(fabs(aux) > 1.0e-8){
          *    m.at(1) = n.at(3)/aux;

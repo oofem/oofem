@@ -49,12 +49,7 @@ InputRecord *
 BufferedDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
 {
     std::string line;
-    if ( typeId == IR_outFileRec ) {
-        this->giveRawLineFromInput(line);
-    } else {
-        this->giveLineFromInput(line);
-    }
-
+    this->giveLineFromInput(line);
     ir.setRecordString(line);
     return & ir;
 }

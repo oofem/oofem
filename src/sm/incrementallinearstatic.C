@@ -86,7 +86,6 @@ IRResultType IncrementalLinearStatic :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom";
     IRResultType result;
 
-    //StructuralEngngModel::initializeFrom (ir);
     IR_GIVE_OPTIONAL_FIELD(ir, discreteTimes, IFT_IncrementalLinearStatic_prescribedtimes, "prescribedtimes");
     if ( discreteTimes.giveSize() > 0 ) {
         numberOfSteps = discreteTimes.giveSize();
@@ -102,13 +101,14 @@ IRResultType IncrementalLinearStatic :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, IFT_IncrementalLinearStatic_endoftimeofinterest, "endoftimeofinterest");
 
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_IncrementalLinearStatic_lstype, "lstype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_IncrementalLinearStatic_smtype, "smtype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
     sparseMtrxType = ( SparseMtrxType ) val;
 
+    //StructuralEngngModel::initializeFrom (ir);
     return IRRT_OK;
 }
 
@@ -247,15 +247,6 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 }
 
 
-void IncrementalLinearStatic :: updateYourself(TimeStep *stepN)
-{
-    // updates internal state to reached one
-    this->updateInternalState(stepN);
-    StructuralEngngModel :: updateYourself(stepN);
-}
-
-
-
 double IncrementalLinearStatic :: giveUnknownComponent(EquationID type, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
     if ( type != EID_MomentumBalance ) { // heat and mass concetration vector
@@ -293,8 +284,8 @@ void IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, T
     double val;
     for ( int i = 1; i <= ndofs; i++ ) {
         iDof = inode->giveDof(i);
-	// skip slave DOFs (only master (primary) DOFs have to be updated).
-	if (!iDof->isPrimaryDof()) continue;
+        // skip slave DOFs (only master (primary) DOFs have to be updated).
+        if (!iDof->isPrimaryDof()) continue;
         val = iDof->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
         if ( !iDof->hasBc(tStep) ) {
             val += this->incrementOfDisplacementVector.at( iDof->__giveEquationNumber() );
@@ -324,7 +315,7 @@ contextIOResultType IncrementalLinearStatic :: saveContext(DataStream *stream, C
 {
     int closeFlag = 0;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
@@ -354,7 +345,7 @@ contextIOResultType IncrementalLinearStatic :: restoreContext(DataStream *stream
 {
     int closeFlag = 0, istep, iversion;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
     this->resolveCorrespondingStepNumber(istep, iversion, obj);
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {

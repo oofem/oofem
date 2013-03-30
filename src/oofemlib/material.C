@@ -115,11 +115,11 @@ Material :: initializeFrom(InputRecord *ir)
     // VERBOSE_PRINT1 ("Instanciating material ",this->giveNumber())
 #  endif
 
-    IR_GIVE_FIELD(ir, value, IFT_Material_density, "d"); // Macro
+    IR_GIVE_FIELD(ir, value, IFT_Material_density, "d");
     propertyDictionary->add('d', value);
 
     this->castingTime = -1.e10;
-    IR_GIVE_OPTIONAL_FIELD(ir, castingTime, IFT_Material_castingtime, "castingtime"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, castingTime, IFT_Material_castingtime, "castingtime");
 
     return IRRT_OK;
 }
@@ -149,18 +149,21 @@ Material :: hasMaterialModeCapability(MaterialMode mode)
 }
 
 int
-Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime) {
+Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+{
     answer.resize(0);
     return 0;
 }
 
 int
-Material :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint) {
+Material :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
+{
     return 0;
 }
 
 int
-Material :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode) {
+Material :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
+{
     answer.resize(0);
     return 0;
 }
@@ -183,11 +186,11 @@ contextIOResultType
 Material :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
 //
 // saves full material status (saves state variables, that completely describe
-// current state) stored in gp->matstatusDict with key =  (int)this->giveClassID()
+// current state) stored in gp->matstatusDict with key = this->giveNumber()
 // storing of corresponding context if it is defined for current material in
 // gp status dictionary should be performed here by overloading this function.
 // (such code should invoke also corresponding function for yield conditions,
-//  submaterials and so on)
+// submaterials and so on)
 //
 
 //
@@ -214,7 +217,7 @@ contextIOResultType
 Material :: restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
 //
 // restores full material status (saves state variables, that completely describe
-// current state) stored in gp->matstatusDict with key =  (int)this->giveClassID()
+// current state) stored in gp->matstatusDict with key = this->giveNumber()
 // restoring of corresponding context if it is defined for current material in
 // gp status dictionary should be performed here by overloading this function.
 // (such code should invoke also corresponding function for yield conditions,
@@ -247,8 +250,7 @@ Material :: giveStatus(GaussPoint *gp) const
  * returns material status in gp corresponding to specific material class
  */
 {
-    MaterialStatus *status;
-    status = (MaterialStatus*) gp->giveMaterialStatus(this->giveClassID());
+    MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus( this->giveNumber() ) );
     if ( status == NULL ) {
         // create a new one
         status = this->CreateStatus(gp);
@@ -257,7 +259,7 @@ Material :: giveStatus(GaussPoint *gp) const
         // dont include it. specific instance
         // does not have status.
         if ( status != NULL ) {
-            gp->setMaterialStatus(status,this->giveClassID());
+            gp->setMaterialStatus(status, this->giveNumber());
         }
     }
 
@@ -294,7 +296,8 @@ Material :: initGpForNewStep(GaussPoint *gp)
 }
 
 int
-Material :: initMaterial(Element *element) {
+Material :: initMaterial(Element *element)
+{
     return 0;
 }
 

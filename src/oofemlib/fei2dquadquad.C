@@ -103,12 +103,20 @@ FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIC
 void
 FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FloatMatrix jacobianMatrix, inv, dn;
-
-    this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
-    inv.beInverseOf(jacobianMatrix);
+    FloatMatrix jacobianMatrix(2, 2), inv, dn;
 
     this->giveDerivatives(dn, lcoords);
+    for ( int i = 1; i <= dn.giveNumberOfRows(); i++ ) {
+        double x = cellgeo.giveVertexCoordinates(i)->at(xind);
+        double y = cellgeo.giveVertexCoordinates(i)->at(yind);
+
+        jacobianMatrix.at(1, 1) += dn.at(i,1) * x;
+        jacobianMatrix.at(1, 2) += dn.at(i,1) * y;
+        jacobianMatrix.at(2, 1) += dn.at(i,2) * x;
+        jacobianMatrix.at(2, 2) += dn.at(i,2) * y;
+    }
+    inv.beInverseOf(jacobianMatrix);
+
     answer.beProductTOf(dn, inv);
 }
 
@@ -201,7 +209,7 @@ FEI2dQuadQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEI
 
 
 void
-FEI2dQuadQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dQuadQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     /*
      *   1-------3-------2
@@ -234,7 +242,7 @@ FEI2dQuadQuad :: edgeLocal2global(FloatArray &answer, int iedge,
     IntArray edgeNodes;
     FloatArray n;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
-    this->edgeEvalN(n, lcoords, cellgeo);
+    this->edgeEvalN(n, iedge, lcoords, cellgeo);
 
     answer.resize(2);
     answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(xind) +
@@ -302,7 +310,6 @@ double FEI2dQuadQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const Floa
 void
 FEI2dQuadQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 // Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
-// Computes it if it does not exist yet.
 {
     double x, y;
     FloatMatrix dn;

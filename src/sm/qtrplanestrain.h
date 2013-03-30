@@ -35,15 +35,13 @@
 #ifndef qtrplanestrain_h
 #define qtrplanestrain_h
 
-#include "structuralelement.h"
+#include "nlstructuralelement.h"
 #include "fei2dtrquad.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
-
 #include "directerrorindicatorrc.h"
 #include "eleminterpmapperinterface.h"
-
 #include "mathfem.h"
 
 namespace oofem {
@@ -51,7 +49,7 @@ namespace oofem {
  * This class implements an triangular three-node  plane-
  * stress elasticity finite element. Each node has 2 degrees of freedom.
  */
-class QTrPlaneStrain : public StructuralElement, public SpatialLocalizerInterface,
+class QTrPlaneStrain : public NLStructuralElement, public SpatialLocalizerInterface,
     public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface,
     public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface
 {

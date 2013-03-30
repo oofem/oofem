@@ -90,7 +90,7 @@ KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, MatRespons
     double v;
     FloatArray *sigmaVMu = NULL, reducedAnswer, help;
     FloatMatrix C;
-    KelvinChainSolidMaterialStatus *status = ( KelvinChainSolidMaterialStatus * ) this->giveStatus(gp);
+    KelvinChainSolidMaterialStatus *status = static_cast< KelvinChainSolidMaterialStatus * >( this->giveStatus(gp) );
 
     if ( mode == VM_Incremental ) {
         for ( mu = 1; mu <= nUnits; mu++ ) {
@@ -119,7 +119,7 @@ KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, MatRespons
         }
 
         // expand the strain to full form if requested
-        ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
+        static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
         giveFullCharacteristicVector(answer, gp, reducedAnswer);
     } else {
         /* error - total mode not implemented yet */
@@ -179,7 +179,7 @@ KelvinChainSolidMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
 
     FloatArray help, *SigmaVMu, deltaEps0, deltaSigma;
     FloatMatrix D;
-    KelvinChainSolidMaterialStatus *status = ( KelvinChainSolidMaterialStatus * ) this->giveStatus(gp);
+    KelvinChainSolidMaterialStatus *status = static_cast< KelvinChainSolidMaterialStatus * >( this->giveStatus(gp) );
 
     help = status->giveTempStrainVector(); // gives updated strain vector (at the end of time-step)
     help.subtract( status->giveStrainVector() ); // strain increment in current time-step

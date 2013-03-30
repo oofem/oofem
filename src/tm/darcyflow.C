@@ -11,10 +11,10 @@
 #include "timestep.h"
 #include "usrdefsub.h"
 #include "sparselinsystemnm.h"
-#include "math.h"
-#include "nrsolver.h"
-#include "nrsolver2.h"
+#include "mathfem.h"
 #include "tr1darcy.h"
+#include "sparsemtrx.h"
+#include "nrsolver.h"
 
 #include <iostream>
 #include <fstream>
@@ -44,11 +44,11 @@ IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
     EngngModel :: initializeFrom(ir);
 
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_DARCYFLOW_lstype, "lstype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_DARCYFLOW_smtype, "smtype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
     sparseMtrxType = ( SparseMtrxType ) val;
 
     // Create solution space for EID_ConservationEquation
@@ -111,7 +111,7 @@ void DarcyFlow :: solveYourselfAt (TimeStep *tStep)
     this->internalForces.resize(neq);
 
     this->giveNumericalMethod(this->giveCurrentMetaStep());
-    double loadLevel, ebenorm;
+    double loadLevel;
     int currentIterations;
     this->updateComponent( tStep, InternalRhs, this->giveDomain(1) );
     this->updateComponent( tStep, NonLinearLhs, this->giveDomain(1) );
@@ -123,7 +123,7 @@ void DarcyFlow :: solveYourselfAt (TimeStep *tStep)
                                             solutionVector,
                                             & ( this->incrementOfSolution ),
                                             & ( this->internalForces ),
-                                            ebenorm,
+                                            this->ebeNorm,
                                             loadLevel, // Only relevant for incrementalBCLoadVector?
                                             SparseNonLinearSystemNM :: rlm_total, // Why this naming scheme? Should be RLM_Total, and ReferenceLoadInputModeType
                                             currentIterations,
@@ -140,59 +140,47 @@ void DarcyFlow :: solveYourselfAt (TimeStep *tStep)
     DumpMatricesToFile( &LHS_backup, &rhs, NULL);
 #endif
 
-#if DUMPMATRICES
-    lhs->toFloatMatrix( LHS_backup);
-    DumpMatricesToFile( &LHS_backup, &rhs, NULL);
-#endif
-
     this->updateYourself(tStep);
 
 }
 
 void DarcyFlow :: DumpMatricesToFile(FloatMatrix *LHS, FloatArray *RHS, FloatArray *SolutionVector)
 {
-        int i, j;
-        FloatMatrix K;
+    FloatMatrix K;
 
-        FILE *rhsFile = fopen("RHS.txt", "w");
-        // rhs.printYourself();
+    FILE *rhsFile = fopen("RHS.txt", "w");
+    // rhs.printYourself();
 
-        for (i=1;i<=RHS->giveSize();i++)
-            fprintf(rhsFile, "%0.15e\n", RHS->at(i));
-        fclose(rhsFile);
+    for ( int i = 1; i <= RHS->giveSize(); i++ )
+        fprintf(rhsFile, "%0.15e\n", RHS->at(i));
+    fclose(rhsFile);
 
-        FILE *lhsFile = fopen("LHS.txt", "w");
+    FILE *lhsFile = fopen("LHS.txt", "w");
 
-        for (i=1;i<=this->giveNumberOfEquations(EID_ConservationEquation);i++) {
-            for (j=1;j<=this->giveNumberOfEquations(EID_ConservationEquation);j++) {
-                fprintf(lhsFile, "%0.15e\t", LHS->at(i,j));
-            }
-            fprintf(lhsFile, "\n");
+    for ( int i = 1; i <= this->giveNumberOfEquations(EID_ConservationEquation); i++ ) {
+        for ( int j = 1; j <= this->giveNumberOfEquations(EID_ConservationEquation); j++ ) {
+            fprintf(lhsFile, "%0.15e\t", LHS->at(i,j));
         }
+        fprintf(lhsFile, "\n");
+    }
 
-        fclose(lhsFile);
+    fclose(lhsFile);
 
-        if (SolutionVector==NULL) {
-            return;
-        }
+    if (SolutionVector==NULL) {
+        return;
+    }
 
-        FILE *SolutionFile = fopen("SolutionVector.txt", "w");
-        for (i=1;i<=SolutionVector->giveSize();i++)
-            fprintf(SolutionFile, "%0.15e\n", SolutionVector->at(i));
-        fclose(SolutionFile);
+    FILE *SolutionFile = fopen("SolutionVector.txt", "w");
+    for ( int i = 1; i <= SolutionVector->giveSize(); i++ )
+        fprintf(SolutionFile, "%0.15e\n", SolutionVector->at(i));
+    fclose(SolutionFile);
 
 }
 void DarcyFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
 
     DofIDItem type = iDof->giveDofID();
-    if ( type == V_u ) {
-        iDof->printSingleOutputAt(stream, atTime, 'u', EID_MomentumBalance, VM_Total, 1);
-    } else if ( type == V_v ) {
-        iDof->printSingleOutputAt(stream, atTime, 'v', EID_MomentumBalance, VM_Total, 1);
-    } else if ( type == V_w ) {
-        iDof->printSingleOutputAt(stream, atTime, 'w', EID_MomentumBalance, VM_Total, 1);
-    } else if ( type == P_f )    {
+    if ( type == P_f ) {
         iDof->printSingleOutputAt(stream, atTime, 'p', EID_ConservationEquation, VM_Total, 1);
     } else {
         _error("printDofOutputAt: unsupported dof type");
@@ -213,7 +201,7 @@ double DarcyFlow :: giveUnknownComponent(EquationID chc, ValueModeType mode, Tim
      * Return value of argument dof
      */
 
-    if ( ( chc==EID_ConservationEquation) || ( chc==EID_MomentumBalance) ) {
+    if ( chc == EID_ConservationEquation ) {
         return PressureField->giveUnknownValue(dof, mode, tStep);
     } else {
         _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
@@ -226,8 +214,8 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
     switch (cmpn) {
     case InternalRhs:
         this->internalForces.zero();
-        this->assembleVectorFromElements(this->internalForces, tStep, EID_ConservationEquation,  InternalForcesVector, VM_Total,
-                EModelDefaultEquationNumbering(), d);
+        this->assembleVector(this->internalForces, tStep, EID_ConservationEquation,  InternalForcesVector, VM_Total,
+                EModelDefaultEquationNumbering(), d, &this->ebeNorm );
         break;
 
     case NonLinearLhs:
@@ -290,9 +278,6 @@ int DarcyFlow :: forceEquationNumbering(int id)  // Is this really needed???!?
 
     // invalidate element local copies of location arrays
     nelem = domain->giveNumberOfElements();
-    for ( i = 1; i <= nelem; i++ ) {
-        domain->giveElement(i)->invalidateLocationArray();
-    }
 
     return domainNeqs.at(id);
 #endif

@@ -78,7 +78,7 @@ QTrPlaneStressGrad :: initializeFrom(InputRecord *ir)
     IRResultType result;               // Required by IR_GIVE_FIELD macro
     this->StructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 4;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_QTrPlaneStress2d_nip, "nip");
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
            ( numberOfGaussPoints == 4 ) ||
@@ -87,7 +87,6 @@ QTrPlaneStressGrad :: initializeFrom(InputRecord *ir)
         numberOfGaussPoints = 4;
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 
@@ -108,14 +107,13 @@ QTrPlaneStressGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
-    int i;
     FloatArray n(3);
 
     answer.resize(1, 3);
     answer.zero();
     this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(1, i) = n.at(i);
     }
 }
@@ -123,7 +121,6 @@ QTrPlaneStressGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix
 void
 QTrPlaneStressGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 {
-    int i;
     FloatMatrix dnx;
 
     this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
@@ -131,7 +128,7 @@ QTrPlaneStressGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix
     answer.resize(2, 3);
     answer.zero();
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(1, i) = dnx.at(i, 1);
         answer.at(2, i) = dnx.at(i, 2);
     }

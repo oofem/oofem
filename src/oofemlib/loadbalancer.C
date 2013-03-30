@@ -66,7 +66,7 @@ LoadBalancer :: initializeFrom(InputRecord *ir)
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
     IntArray wtp;
-    IR_GIVE_OPTIONAL_FIELD(ir, wtp, IFT_LoadBalancer_wtp, "wtp"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, wtp, IFT_LoadBalancer_wtp, "wtp");
 
     this->initializeWtp(wtp);
 
@@ -668,7 +668,7 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
 
             OOFEM_LOG_RELEVANT("[%d] LoadBalancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, recovering load\n", myrank, 100 * relWallClockImbalance, absWallClockImbalance);
             return LBD_RECOVER;
-        } else   {
+        } else {
             OOFEM_LOG_RELEVANT("[%d] LoadBalancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, continuing\n", myrank, 100 * relWallClockImbalance, absWallClockImbalance);
             return LBD_CONTINUE;
         }
@@ -701,13 +701,13 @@ LoadBalancerMonitor :: initializeFrom(InputRecord *ir)
         nodeWeights(i) = 1.0 / nproc;
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, nodeWeightMode, IFT_LoadBalancerMonitor_nodeWeightMode, "nodeweightmode"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, nodeWeightMode, IFT_LoadBalancerMonitor_nodeWeightMode, "nodeweightmode");
     if ( nodeWeightMode == 0 ) { // default, dynamic weights
         staticNodeWeightFlag = false;
     } else if ( nodeWeightMode == 1 ) { // equal weights for all nodes
         staticNodeWeightFlag = true;
     } else if ( nodeWeightMode == 2 ) { // user defined static weights
-        IR_GIVE_OPTIONAL_FIELD(ir, nodeWeights, IFT_LoadBalancerMonitor_initialnodeweights, "nw"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, nodeWeights, IFT_LoadBalancerMonitor_initialnodeweights, "nw");
         if ( nodeWeights.giveSize() != nproc ) {
             OOFEM_ERROR("nodeWeights size not equal to number of processors");
         }
@@ -731,21 +731,21 @@ WallClockLoadBalancerMonitor :: initializeFrom(InputRecord *ir)
 
 
 
-    IR_GIVE_OPTIONAL_FIELD(ir, relWallClockImbalanceTreshold, IFT_WallClockLoadBalancerMonitor_relwct, "relwct"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, absWallClockImbalanceTreshold, IFT_WallClockLoadBalancerMonitor_abswct, "abswct"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, minAbsWallClockImbalanceTreshold, IFT_WallClockLoadBalancerMonitor_minwct, "minwct"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, lbstep, IFT_WallClockLoadBalancerMonitor_lbstep, "lbstep"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, relWallClockImbalanceTreshold, IFT_WallClockLoadBalancerMonitor_relwct, "relwct");
+    IR_GIVE_OPTIONAL_FIELD(ir, absWallClockImbalanceTreshold, IFT_WallClockLoadBalancerMonitor_abswct, "abswct");
+    IR_GIVE_OPTIONAL_FIELD(ir, minAbsWallClockImbalanceTreshold, IFT_WallClockLoadBalancerMonitor_minwct, "minwct");
+    IR_GIVE_OPTIONAL_FIELD(ir, lbstep, IFT_WallClockLoadBalancerMonitor_lbstep, "lbstep");
 
 #ifdef __LB_DEBUG
     perturbedSteps.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, perturbedSteps, IFT_WallClockLoadBalancerMonitor_perturbedsteps, "lbperturbedsteps"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, perturbedSteps, IFT_WallClockLoadBalancerMonitor_perturbedsteps, "lbperturbedsteps");
     perturbFactor = 1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, perturbFactor, IFT_WallClockLoadBalancerMonitor_perturbfactor, "lbperturbfactor"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, perturbFactor, IFT_WallClockLoadBalancerMonitor_perturbfactor, "lbperturbfactor");
 
     recoveredSteps.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, recoveredSteps, IFT_WallClockLoadBalancerMonitor_recoveredsteps, "lbrecoveredsteps"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, recoveredSteps, IFT_WallClockLoadBalancerMonitor_recoveredsteps, "lbrecoveredsteps");
     processingWeights.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, processingWeights, IFT_WallClockLoadBalancerMonitor_processingweights, "lbprocessingweights"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, processingWeights, IFT_WallClockLoadBalancerMonitor_processingweights, "lbprocessingweights");
     if ( recoveredSteps.giveSize() != processingWeights.giveSize() ) {
         OOFEM_ERROR("WallClockLoadBalancerMonitor::initializeFrom - mismatch size of lbrecoveredsteps and lbprocessingweights");
     }

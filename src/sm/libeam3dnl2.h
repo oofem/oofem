@@ -38,6 +38,11 @@
 #include "nlstructuralelement.h"
 #include "gausspnt.h"
 
+///@name Input fields for LIBeam3dNL2
+//@{
+#define _IFT_LIBeam3dNL2_refnode "refnode"
+//@}
+
 namespace oofem {
 /**
  * This class implements a 3-dimensional Linear Isoparametric

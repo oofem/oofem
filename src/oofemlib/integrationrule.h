@@ -238,54 +238,62 @@ public:
      * Sets up receiver's  integration points on unit line integration domain.
      * Default implementation does not sets up any integration points and returns 0.
      * Must be overloaded by derived classes.
-     * @returns Number of integration points.
+     * @return Number of integration points.
      */
     virtual int SetUpPointsOnLine(int, MaterialMode mode) { return 0; }
     /**
      * Sets up receiver's  integration points on triangular (area coords) integration domain.
      * Default implementation does not sets up any integration points and returns 0.
      * Must be overloaded by derived classes.
-     * @returns Number of integration points.
+     * @return Number of integration points.
      */
     virtual int SetUpPointsOnTriangle(int, MaterialMode mode) { return 0; }
     /**
      * Sets up receiver's  integration points on unit square integration domain.
      * Default implementation does not sets up any integration points and returns 0.
      * Must be overloaded by derived classes.
-     * @returns Number of integration points.
+     * @return Number of integration points.
      */
     virtual int SetUpPointsOnSquare(int, MaterialMode mode) { return 0; }
     /**
      * Sets up receiver's  integration points on unit cube integration domain.
      * Default implementation does not sets up any integration points and returns 0.
      * Must be overloaded by derived classes.
-     * @returns Number of integration points.
+     * @return Number of integration points.
      */
     virtual int SetUpPointsOnCube(int, MaterialMode mode) { return 0; }
     /**
      * Sets up receiver's  integration points on tetrahedra (volume coords) integration domain.
      * Default implementation does not sets up any integration points and returns 0.
      * Must be overloaded by derived classes.
-     * @returns Number of integration points.
+     * @return Number of integration points.
      */
     virtual int SetUpPointsOnTetrahedra(int, MaterialMode mode) { return 0; }
     /**
      * Sets up receiver's  integration points on wedge (volume coords) integration domain.
      * Default implementation does not sets up any integration points and returns 0.
      * Must be overloaded by derived classes.
-     * @returns Number of integration points.
+     * @return Number of integration points.
      */
     virtual int SetUpPointsOnWedge(int, MaterialMode mode) { return 0; }
 
     /**
      * Sets up integration points on 2D embedded line inside 2D volume (the list of local coordinates
      * should be provided).
+     * @param nPoints Number of points along line.
      */
     virtual int SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mode,
                                             const FloatArray **coords) { return 0; }
 
-public:
-    virtual int SetUpPointsOnWedge(int, int, MaterialMode mode) { return 0; }
+    /**
+     * Sets up receiver's integration points on a wedge integration domain.
+     * Default implementation does not sets up any integration points and returns 0.
+     * Must be overloaded by derived classes.
+     * @param nPointsTri Number of points over the triangle cross-section.
+     * @param nPointsDepth Number of points over the depth.
+     * @return Number of integration points.
+     */
+    virtual int SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, MaterialMode mode) { return 0; }
 };
 } // end namespace oofem
 #endif // integrationrule_h

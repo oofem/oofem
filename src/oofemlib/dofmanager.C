@@ -221,11 +221,6 @@ bool DofManager :: hasDofID(DofIDItem id)
 
 
 void DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locationArray, const UnknownNumberingScheme &s) const
-// Returns the location array of the receiver. Creates this array if it
-// does not exist yet. The location array contains the equation number of
-// every requested degree of freedom of the receiver.
-// In dofIDArray are stored DofID's of requsted DOFs in receiver.
-// The DofID's are determining the physical meaning of particular DOFs
 {
     if ( !hasSlaveDofs ) {
         int size, indx;
@@ -240,11 +235,13 @@ void DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locati
 
             locationArray.at(i) = s.giveDofEquationNumber( this->giveDof(indx) );
         }
+
     } else {
         IntArray dofArray, mstrEqNmbrs;
+        int masterDofs = giveNumberOfPrimaryMasterDofs(dofArray);
 
         this->giveDofArray(dofIDArry, dofArray);
-        locationArray.resize( giveNumberOfPrimaryMasterDofs(dofArray) );
+        locationArray.resize( masterDofs );
 
         for ( int k = 1, i = 1; i <= dofArray.giveSize(); i++ ) {
             this->giveDof(dofArray.at(i))->giveEquationNumbers(mstrEqNmbrs, s);
@@ -255,9 +252,27 @@ void DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locati
 }
 
 
+void DofManager :: giveMasterDofIDArray(const IntArray &dofIDArry, IntArray &masterDofIDs) const
+{
+    if ( !hasSlaveDofs ) {
+        masterDofIDs = dofIDArry;
+    } else {
+        IntArray dofArray, temp;
+        int masterDofs = giveNumberOfPrimaryMasterDofs(dofArray);
+
+        this->giveDofArray(dofIDArry, dofArray);
+        masterDofIDs.resize( masterDofs );
+
+        for ( int k = 1, i = 1; i <= numberOfDofs; i++ ) {
+            this->giveDof(i)->giveDofIDs(temp);
+            masterDofIDs.copySubVector(temp, k);
+            k += temp.giveSize();
+        }
+    }
+}
+
+
 void DofManager :: giveCompleteLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s) const
-// Returns the complete location array of the receiver.
-// including all available dofs
 {
     if ( !hasSlaveDofs ) {
         // prevents some size problem when connecting different elements with
@@ -267,9 +282,40 @@ void DofManager :: giveCompleteLocationArray(IntArray &locationArray, const Unkn
             locationArray.at(i) = s.giveDofEquationNumber( this->giveDof(i) );
         }
     } else {
-        IntArray *dofids = giveCompleteGlobalDofIDArray();
-        giveLocationArray(*dofids, locationArray, s);
-        delete dofids;
+        IntArray temp;
+        int nMasterDofs = 0;
+        for ( int i = 1; i <= numberOfDofs; i++ ) {
+            nMasterDofs += this->giveDof(i)->giveNumberOfPrimaryMasterDofs();
+        }
+        locationArray.resize(nMasterDofs);
+        for ( int k = 1, i = 1; i <= numberOfDofs; i++ ) {
+            this->giveDof(i)->giveEquationNumbers(temp, s);
+            locationArray.copySubVector(temp, k);
+            k += temp.giveSize();
+        }
+    }
+}
+
+
+void DofManager :: giveCompleteMasterDofIDArray(IntArray &dofIDArray) const
+{
+    if ( !hasSlaveDofs ) {
+        dofIDArray.resize(numberOfDofs);
+        for ( int i = 1; i <= numberOfDofs; i++ ) {
+            dofIDArray.at(i) = this->giveDof(i)->giveDofID();
+        }
+    } else {
+        IntArray temp;
+        int nMasterDofs = 0;
+        for ( int i = 1; i <= numberOfDofs; i++ ) {
+            nMasterDofs += this->giveDof(i)->giveNumberOfPrimaryMasterDofs();
+        }
+        dofIDArray.resize(nMasterDofs);
+        for ( int k = 1, i = 1; i <= numberOfDofs; i++ ) {
+            this->giveDof(i)->giveDofIDs(temp);
+            dofIDArray.copySubVector(temp, k);
+            k += temp.giveSize();
+        }
     }
 }
 
@@ -365,15 +411,11 @@ int DofManager :: giveNumberOfPrimaryMasterDofs(IntArray &dofArray) const
 
 IRResultType DofManager ::  resolveDofIDArray(InputRecord *ir, IntArray &dofIDArry)
 {
-    const char *__keyword, *__proc = "resolveDofIDArray";
+    const char *__proc = "resolveDofIDArray";
     IRResultType result;
 
     numberOfDofs = -1;
-    __keyword = "ndofs";
-    result = ir->giveOptionalField(numberOfDofs, IFT_DofManager_ndofs, __keyword);
-    if ( result != IRRT_OK ) {
-        IR_IOERR(giveClassName(), __proc, IFT_DofManager_ndofs, __keyword, ir, result);
-    }
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfDofs, IFT_DofManager_ndofs, "ndofs");
 
     // returns nonzero if succes
     if ( numberOfDofs == -1 ) {
@@ -383,11 +425,7 @@ IRResultType DofManager ::  resolveDofIDArray(InputRecord *ir, IntArray &dofIDAr
         // if ndofs is prescribed, read the physical meaning of particular dofs
         // for detailed values of DofMask array see cltypes.h file
         // for exaple 1 is for D_u (displacemet in u dir), 2 for D_v, 3 for D_w, ...
-        __keyword = "dofidmask";
-        result = ir->giveField(dofIDArry, IFT_DofManager_dofidmask, __keyword);
-        if ( result != IRRT_OK ) {
-            IR_IOERR(giveClassName(), __proc, IFT_DofManager_dofidmask, __keyword, ir, result);
-        }
+        IR_GIVE_FIELD(ir, dofIDArry, IFT_DofManager_dofidmask, "dofidmask");
 
         if ( dofIDArry.giveSize() != numberOfDofs ) {
             _error("resolveDofIDArray : DofIDMask size mismatch");
@@ -407,25 +445,23 @@ DofManager :: initializeFrom(InputRecord *ir)
     IntArray bc, ic, masterMask, dofTypeMask;
 
     loadArray.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, loadArray, IFT_DofManager_load, "load"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, loadArray, IFT_DofManager_load, "load");
 
-    if ( this->resolveDofIDArray(ir, dofIDArry) != IRRT_OK ) {
-        IR_IOERR(giveClassName(), __proc,  IFT_Unknown, "", ir, result);
-    }
+    this->resolveDofIDArray(ir, dofIDArry);
 
     // numberOfDofs = domain->giveNumberOfDofs () ;
     bc.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, bc, IFT_DofManager_bc, "bc"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, bc, IFT_DofManager_bc, "bc");
 
     ic.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, ic, IFT_DofManager_ic, "ic"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, ic, IFT_DofManager_ic, "ic");
     // reads master mask - in this array are numbers of master dofManagers
     // to which are connected dofs in receiver.
     // if master mask index is zero then dof is created as master (i.e., having own equation number)
     // othervise slave dof connected to master DofManager is created.
     // by default if masterMask is not specifyed, all dofs are created as masters.
     dofTypeMask.resize(0); // termitovo
-    IR_GIVE_OPTIONAL_FIELD(ir, dofTypeMask, IFT_DofManager_doftypemask, "doftype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, dofTypeMask, IFT_DofManager_doftypemask, "doftype");
 
     // read boundary flag
     if ( ir->hasField(IFT_DofManager_boundaryflag, "boundary") ) {
@@ -435,7 +471,7 @@ DofManager :: initializeFrom(InputRecord *ir)
 
 #ifdef __PARALLEL_MODE
     partitions.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, partitions, IFT_DofManager_partitions, "partitions"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, partitions, IFT_DofManager_partitions, "partitions");
 
     if ( ir->hasField(IFT_DofManager_sharedflag, "shared") ) {
         parallel_mode = DofManager_shared;
@@ -505,7 +541,7 @@ DofManager :: initializeFrom(InputRecord *ir)
                 dofArray [ j ] = new ActiveDof( j + 1, this, dofBc, ( DofIDItem ) dofIDArry.at(j + 1) );
             } else if ( dtype == DT_simpleSlave ) { // Simple slave dof
                 if ( masterMask.giveSize() == 0 ) {
-                    IR_GIVE_FIELD(ir, masterMask, IFT_DofManager_mastermask, "mastermask"); // Macro
+                    IR_GIVE_FIELD(ir, masterMask, IFT_DofManager_mastermask, "mastermask");
                     if ( masterMask.giveSize() != numberOfDofs ) {
                         _error("initializeFrom: mastermask size mismatch");
                     }
@@ -583,7 +619,7 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
 
     // store dof types
     for ( int i = 1; i <= numberOfDofs; i++ ) {
-        _val =  this->giveDof(i)->giveClassID();
+        _val = this->giveDof(i)->giveDofType();
         if ( !stream->write(& _val, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
@@ -662,7 +698,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
     if ( samedofs ) {
         // if size match, check types
         for ( int i = 1; i <= _numberOfDofs; i++ ) {
-            if ( this->giveDof(i)->giveClassID() != dtypes.at(i) ) {
+            if ( this->giveDof(i)->giveDofType() != dtypes.at(i) ) {
                 samedofs = false;
                 break;
             }
@@ -683,7 +719,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
         // allocate new ones
         dofArray = new Dof * [ _numberOfDofs ];
         for ( int i = 0; i < _numberOfDofs; i++ ) {
-            dofArray [ i ] = CreateUsrDefDofOfType( ( classType ) dtypes(i), i + 1, this );
+            dofArray [ i ] = CreateUsrDefDofOfType( ( dofType ) dtypes(i), i + 1, this );
         }
 
         numberOfDofs = _numberOfDofs;
@@ -779,6 +815,16 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
     FloatMatrix L2G;
     if (this->computeL2GTransformation(L2G, dofIDArry)) {
         answer.rotatedWith(L2G, 'n');
+    }
+}
+
+
+void DofManager :: giveCompleteUnknownVector(FloatArray &answer,
+                                EquationID type, ValueModeType mode, TimeStep *stepN)
+{
+    answer.resize( this->numberOfDofs );
+    for ( int i = 1; i <= this->numberOfDofs; i++ ) {
+        answer.at(i) = this->giveDof(i)->giveUnknown(type, mode, stepN);
     }
 }
 
@@ -882,10 +928,7 @@ bool DofManager :: giveMasterDofMans(IntArray &masters)
 }
 
 
-int DofManager :: checkConsistency()
-// Checks internal data consistency in node.
-// Current implementation checks (when receiver has simple slave dofs) if receiver
-// has the same coordinate system as master dofManager of slave dof.
+void DofManager :: postInitialize()
 {
     hasSlaveDofs = false;
     for ( int i = 1; i <= numberOfDofs; i++ ) {
@@ -894,8 +937,6 @@ int DofManager :: checkConsistency()
             continue;
         }
     }
-
-    return 1;
 }
 
 
@@ -965,18 +1006,6 @@ bool DofManager :: computeM2LTransformation(FloatMatrix &answer, const IntArray 
 bool DofManager :: requiresTransformation()
 {
     return this->hasAnySlaveDofs();
-}
-
-
-IntArray *DofManager :: giveCompleteGlobalDofIDArray() const
-{
-    IntArray *answer = new IntArray(numberOfDofs);
-
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        answer->at(i) = ( int ) this->giveDof(i)->giveDofID();
-    }
-
-    return answer;
 }
 
 

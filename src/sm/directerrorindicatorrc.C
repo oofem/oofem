@@ -83,7 +83,7 @@ DirectErrorIndicatorRC :: giveDofManDensity(int num)
 double
 DirectErrorIndicatorRC :: giveLocalDofManDensity(int num)
 {
-    int isize, i;
+    int isize;
     double currDensity = 0.0;
     const IntArray *con;
     Domain *d = this->giveDomain();
@@ -93,10 +93,10 @@ DirectErrorIndicatorRC :: giveLocalDofManDensity(int num)
     con = ct->giveDofManConnectivityArray(num);
     isize = con->giveSize();
 
-    for ( i = 1; i <= isize; i++ ) {
+    for ( int i = 1; i <= isize; i++ ) {
         // ask for indicator variable value and determine current mesh density
-        interface = ( DirectErrorIndicatorRCInterface * )
-                    d->giveElement( con->at(i) )->giveInterface(DirectErrorIndicatorRCInterfaceType);
+        interface = static_cast< DirectErrorIndicatorRCInterface * >
+                    ( d->giveElement( con->at(i) )->giveInterface(DirectErrorIndicatorRCInterfaceType) );
         if ( !interface ) {
             OOFEM_WARNING2( "DirectErrorIndicatorRC::giveRequiredDofManDensity: elem %d does not support DirectErrorIndicatorRCInterface", con->at(i) );
         }
@@ -132,7 +132,7 @@ DirectErrorIndicatorRC :: giveDofManIndicator(int num, TimeStep *tStep)
 double
 DirectErrorIndicatorRC :: giveLocalDofManIndicator(int inode, TimeStep *tStep)
 {
-    int isize, i;
+    int isize;
     const IntArray *con;
     Domain *d = this->giveDomain();
     ConnectivityTable *ct = d->giveConnectivityTable();
@@ -142,10 +142,10 @@ DirectErrorIndicatorRC :: giveLocalDofManIndicator(int inode, TimeStep *tStep)
     con = ct->giveDofManConnectivityArray(inode);
     isize = con->giveSize();
 
-    for ( i = 1; i <= isize; i++ ) {
+    for ( int i = 1; i <= isize; i++ ) {
         // ask for indicator variable value and determine current mesh density
-        interface = ( DirectErrorIndicatorRCInterface * )
-                    d->giveElement( con->at(i) )->giveInterface(DirectErrorIndicatorRCInterfaceType);
+        interface = static_cast< DirectErrorIndicatorRCInterface * >
+                    ( d->giveElement( con->at(i) )->giveInterface(DirectErrorIndicatorRCInterfaceType) );
         if ( !interface ) {
             OOFEM_WARNING2( "DirectErrorIndicatorRC::giveRequiredDofManDensity: element %d does not support DirectErrorIndicatorRCInterface", con->at(i) );
         }
@@ -245,14 +245,14 @@ DirectErrorIndicatorRC :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, minIndicatorLimit, IFT_DirectErrorIndicatorRC_minlim, "minlim"); // Macro
-    IR_GIVE_FIELD(ir, maxIndicatorLimit, IFT_DirectErrorIndicatorRC_maxlim, "maxlim"); // Macro
-    IR_GIVE_FIELD(ir, minIndicatorDensity, IFT_DirectErrorIndicatorRC_mindens, "mindens"); // Macro
-    IR_GIVE_FIELD(ir, maxIndicatorDensity, IFT_DirectErrorIndicatorRC_maxdens, "maxdens"); // Macro
-    IR_GIVE_FIELD(ir, zeroIndicatorDensity, IFT_DirectErrorIndicatorRC_defdens, "defdens"); // Macro
+    IR_GIVE_FIELD(ir, minIndicatorLimit, IFT_DirectErrorIndicatorRC_minlim, "minlim");
+    IR_GIVE_FIELD(ir, maxIndicatorLimit, IFT_DirectErrorIndicatorRC_maxlim, "maxlim");
+    IR_GIVE_FIELD(ir, minIndicatorDensity, IFT_DirectErrorIndicatorRC_mindens, "mindens");
+    IR_GIVE_FIELD(ir, maxIndicatorDensity, IFT_DirectErrorIndicatorRC_maxdens, "maxdens");
+    IR_GIVE_FIELD(ir, zeroIndicatorDensity, IFT_DirectErrorIndicatorRC_defdens, "defdens");
 
     remeshingDensityRatioToggle = 0.80;
-    IR_GIVE_OPTIONAL_FIELD(ir, remeshingDensityRatioToggle, IFT_DirectErrorIndicatorRC_remeshingdensityratio, "remeshingdensityratio"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, remeshingDensityRatioToggle, IFT_DirectErrorIndicatorRC_remeshingdensityratio, "remeshingdensityratio");
 
 #ifdef __PARALLEL_MODE
     EngngModel *emodel = domain->giveEngngModel();

@@ -127,7 +127,7 @@ FEI2dTrConst :: giveTransformationJacobian(const FloatArray &lcoords, const FEIC
 
 
 void
-FEI2dTrConst :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dTrConst :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     answer.resize(1);
     answer.at(1) = 1.;

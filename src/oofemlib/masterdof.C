@@ -68,7 +68,7 @@ BoundaryCondition *MasterDof :: giveBc()
     if ( bc ) {
         GeneralBoundaryCondition *bcptr = dofManager->giveDomain()->giveBc(bc);
         if ( bcptr->giveType() == DirichletBT ) {
-            return ( BoundaryCondition * ) bcptr;
+            return static_cast< BoundaryCondition * >( bcptr );
         }
     }
 
@@ -107,8 +107,7 @@ int MasterDof :: askNewEquationNumber(TimeStep *tStep)
 // subjected to a boundary condition, else it is n+1, where n is the
 // equation number of the most recently numbered degree of freedom.
 {
-    EngngModel *model;
-    model = ( EngngModel * ) ( dofManager->giveDomain()->giveEngngModel() );
+    EngngModel *model = dofManager->giveDomain()->giveEngngModel();
 
 #ifdef __PARALLEL_MODE
     if ( dofManager->giveParallelMode() == DofManager_null ) {
@@ -443,40 +442,4 @@ contextIOResultType MasterDof :: restoreContext(DataStream *stream, ContextMode 
     return CIO_OK;
 }
 
-
-#ifdef __PARALLEL_MODE
-int
-MasterDof :: packUnknowns(CommunicationBuffer &buff, EquationID type, ValueModeType mode, TimeStep *stepN)
-{
-    return buff.packDouble( this->giveUnknown(type, mode, stepN) );
-}
-
-int
-MasterDof :: unpackAndUpdateUnknown(CommunicationBuffer &buff, EquationID type,
-                                    ValueModeType mode, TimeStep *stepN)
-{
-    EngngModel :: EngngModel_UpdateMode __umode = EngngModel :: EngngModel_Unknown_Mode;
-    double value;
-    int result = 0;
-    // if dof belonging to shared or remote DofManager, engng model unknowns are updated
-    // to accommodate remote contribution or "prescribed" remote values.
-    // The unknown dictionary is not updated, it is engng model job to update
-    // all unknowns dictionaries.
-
-    if ( dofManager->giveParallelMode() == DofManager_shared ) {
-        __umode = EngngModel :: EngngModel_SUMM_Mode;
-    } else if ( dofManager->giveParallelMode() == DofManager_remote ) {
-        __umode = EngngModel :: EngngModel_SET_Mode;
-    } else {
-        _error("unpackAndUpdateUnknown: unknown dofManager ParallelMode");
-    }
-
-    result = buff.unpackDouble(value);
-    dofManager->giveDomain()->giveEngngModel()->
-    updateUnknownComponent(type, mode, stepN, this->__giveEquationNumber(),
-                           value, __umode);
-    return result;
-}
-
-#endif
 } // end namespace oofem

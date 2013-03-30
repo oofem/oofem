@@ -41,6 +41,7 @@
 #include "flotarry.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "fei3dtetlin.h"
 
 #ifdef __OOFEG
  #include "engngm.h"
@@ -52,7 +53,7 @@
 #endif
 
 namespace oofem {
-FEI3dTrLin LTRSpace :: interpolation;
+FEI3dTetLin LTRSpace :: interpolation;
 
 LTRSpace :: LTRSpace(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
@@ -70,45 +71,52 @@ Interface *
 LTRSpace :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return ( NodalAveragingRecoveryModelInterface * ) this;
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return ( SpatialLocalizerInterface * ) this;
+        return static_cast< SpatialLocalizerInterface * >( this );
     } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return ( DirectErrorIndicatorRCInterface * ) this;
+        return static_cast< DirectErrorIndicatorRCInterface * >( this );
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return ( EIPrimaryUnknownMapperInterface * ) this;
+        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
-        return ( ZZErrorEstimatorInterface * ) this;
+        return static_cast< ZZErrorEstimatorInterface * >( this );
     } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return ( ZZRemeshingCriteriaInterface * ) this;
+        return static_cast< ZZRemeshingCriteriaInterface * >( this );
     } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
-        return ( MMAShapeFunctProjectionInterface * ) this;
+        return static_cast< MMAShapeFunctProjectionInterface * >( this );
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
-        return ( HuertaErrorEstimatorInterface * ) this;
+        return static_cast< HuertaErrorEstimatorInterface * >( this );
     } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return ( HuertaRemeshingCriteriaInterface * ) this;
+        return static_cast< HuertaRemeshingCriteriaInterface * >( this );
     }
 
     return NULL;
 }
+
+
+FEInterpolation *
+LTRSpace:: giveInterpolation()
+{
+    return &interpolation;
+}
+
 
 void
 LTRSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
 // Returns the [6x12] strain-displacement matrix {B} of the receiver, eva-
 // luated at aGaussPoint.
 {
-    int i;
     FloatMatrix dn(4, 3);
     interpolation.evaldNdx( dn, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 12);
     answer.zero();
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, 3 * i - 2) = dn.at(i, 1);
         answer.at(2, 3 * i - 1) = dn.at(i, 2);
         answer.at(3, 3 * i - 0) = dn.at(i, 3);
@@ -132,7 +140,6 @@ LTRSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
-    int i;
     FloatArray n(4);
 
     this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
@@ -140,7 +147,7 @@ LTRSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.resize(3, 12);
     answer.zero();
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, 3 * i - 2)  = n.at(i);
         answer.at(2, 3 * i - 1)  = n.at(i);
         answer.at(3, 3 * i - 0)  = n.at(i);
@@ -153,7 +160,6 @@ LTRSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int
 // Returns the [12x12] nonlinear part of the strain-displacement matrix {B} of the receiver,
 // evaluated at aGaussPoint
 {
-    int j, k, l;
     FloatMatrix dnx;
 
     interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
@@ -162,36 +168,59 @@ LTRSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int
     answer.zero();
 
     if ( i <= 3 ) {
-        for ( k = 0; k < 4; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 12; j += 3 ) {
+        for ( int k = 0; k < 4; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 12; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, i) * dnx.at( ( j - 1 ) / 3 + 1, i );
                 }
             }
         }
     } else if ( i == 4 ) {
-        for ( k = 0; k < 4; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 12; j += 3 ) {
+        for ( int k = 0; k < 4; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 12; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 2 );
                 }
             }
         }
     } else if ( i == 5 ) {
-        for ( k = 0; k < 4; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 12; j += 3 ) {
+        for ( int k = 0; k < 4; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 12; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
                 }
             }
         }
     } else if ( i == 6 ) {
-        for ( k = 0; k < 4; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 12; j += 3 ) {
+        for ( int k = 0; k < 4; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 12; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 2 ) + dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
                 }
             }
+        }
+    }
+}
+
+
+void
+LTRSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+// Returns the [9x12] defgrad-displacement matrix {BF} of the receiver,
+// evaluated at aGaussPoint.
+// BF matrix  -  9 rows : du/dx, dv/dx, dw/dx, du/dy, dv/dy, dw/dy, du/dz, dv/dz, dw/dz
+{
+    FloatMatrix dnx;
+
+    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+
+    answer.resize(9, 12);
+    answer.zero();
+
+    for ( int i = 1; i <= 3; i++ ) { // 3 spatial dimensions
+        for ( int j = 1; j <= 4; j++ ) { // 8 nodes
+            answer.at(3 * i - 2, 3 * j - 2) =
+                answer.at(3 * i - 1, 3 * j - 1) =
+                answer.at(3 * i, 3 * j) = dnx.at(j, i);     // derivative of Nj wrt Xi
         }
     }
 }
@@ -202,8 +231,8 @@ double LTRSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
     double determinant, weight, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
-    weight      = aGaussPoint->giveWeight();
-    volume      = determinant * weight;
+    weight = aGaussPoint->giveWeight();
+    volume = determinant * weight;
     return volume;
 }
 
@@ -215,13 +244,20 @@ LTRSpace :: initializeFrom(InputRecord *ir)
 
     this->NLStructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 1;
-
-    // set up Gaussian integration points
-    this->computeGaussPoints();
-
     return IRRT_OK;
 }
 
+
+
+MaterialMode
+LTRSpace :: giveMaterialMode()
+{
+    if ( nlGeometry > 1 ) {
+        return _3dMat_F;
+    } else {
+        return _3dMat;
+    }
+}
 
 void LTRSpace :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
@@ -230,7 +266,7 @@ void LTRSpace :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, numberOfGaussPoints, _3dMat);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, numberOfGaussPoints, this->giveMaterialMode());
     }
 }
 
@@ -333,10 +369,10 @@ LTRSpace :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 void
 LTRSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
 {
-    int i, found = 0;
+    int found = 0;
     answer.resize(1);
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         if ( this->giveNode(i)->giveNumber() == pap ) {
             found = 1;
         }
@@ -574,7 +610,7 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc)
     int i, j, k;
     WCRec q [ 4 ];
     GraphicObj *tr;
-    StructuralMaterial *mat = ( StructuralMaterial * ) this->giveMaterial();
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
@@ -811,7 +847,7 @@ LTRSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGa
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 6);
     answer.zero();
@@ -912,10 +948,10 @@ LTRSpace :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 }
 
 void
-LTRSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *sgp)
+LTRSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
     FloatArray n(3);
-    interpolation.surfaceEvalN( n, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interpolation.surfaceEvalN( n, iSurf, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 9);
     answer.zero();

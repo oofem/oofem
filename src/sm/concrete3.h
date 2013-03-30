@@ -38,6 +38,11 @@
 #include "rcm2.h"
 #include "isolinearelasticmaterial.h"
 
+///@name Input fields for Concrete3
+//@{
+#define _IFT_Concrete3_exp_soft "exp_soft"
+//@}
+
 namespace oofem {
 /**
  * This class implements a Concrete3 material in a finite element problem.

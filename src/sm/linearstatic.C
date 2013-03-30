@@ -46,6 +46,7 @@
 
 #ifdef __PARALLEL_MODE
  #include "fetisolver.h"
+ #include "sparsemtrx.h"
 #endif
 
 namespace oofem {
@@ -105,11 +106,11 @@ LinearStatic :: initializeFrom(InputRecord *ir)
 
     StructuralEngngModel :: initializeFrom(ir);
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_LinearStatic_lstype, "lstype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_lstype, "lstype");
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_LinearStatic_smtype, "smtype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EngngModel_smtype, "smtype");
     sparseMtrxType = ( SparseMtrxType ) val;
 
 #ifdef __PARALLEL_MODE
@@ -285,12 +286,6 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     tStep->incrementStateCounter();            // update solution state counter
 }
 
-void LinearStatic :: updateYourself(TimeStep *stepN)
-{
-    this->updateInternalState(stepN);
-    StructuralEngngModel :: updateYourself(stepN);
-}
-
 
 contextIOResultType LinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 //
@@ -299,7 +294,7 @@ contextIOResultType LinearStatic :: saveContext(DataStream *stream, ContextMode 
 {
     contextIOResultType iores;
     int closeFlag = 0;
-    FILE *file;
+    FILE *file = NULL;
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
@@ -337,7 +332,7 @@ contextIOResultType LinearStatic :: restoreContext(DataStream *stream, ContextMo
     contextIOResultType iores;
     int closeFlag = 0;
     int istep, iversion;
-    FILE *file;
+    FILE *file = NULL;
 
     this->resolveCorrespondingStepNumber(istep, iversion, obj);
 
@@ -378,37 +373,6 @@ LinearStatic :: terminate(TimeStep *tStep)
 }
 
 
-int
-LinearStatic :: checkConsistency()
-{
-    // check internal consistency
-    // if success returns nonzero
-    int i, nelem;
-    Element *ePtr;
-    StructuralElement *sePtr;
-    StructuralElementEvaluator *see;
-    Domain *domain = this->giveDomain(1);
-
-    nelem = domain->giveNumberOfElements();
-    // check for proper element type
-
-    for ( i = 1; i <= nelem; i++ ) {
-        ePtr = domain->giveElement(i);
-        sePtr = dynamic_cast< StructuralElement * >(ePtr);
-        see   = dynamic_cast< StructuralElementEvaluator * >(ePtr);
-
-        if ( ( sePtr == NULL ) && ( see == NULL ) ) {
-            _warning2("checkConsistency: element %d has no Structural support", i);
-            return 0;
-        }
-    }
-
-    EngngModel :: checkConsistency();
-
-    return 1;
-}
-
-
 void
 LinearStatic :: updateDomainLinks()
 {
@@ -430,22 +394,22 @@ int
 LinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
 {
     int mapSize = commMap.giveSize();
-    int i, j, ndofs, count = 0, pcount = 0;
+    int ndofs, count = 0, pcount = 0;
     IntArray locationArray;
     Domain *domain = this->giveDomain(1);
     DofManager *dman;
     Dof *jdof;
 
     if ( packUnpackType == ProblemCommMode__ELEMENT_CUT ) {
-        for ( i = 1; i <= mapSize; i++ ) {
+        for ( int i = 1; i <= mapSize; i++ ) {
             count += domain->giveDofManager( commMap.at(i) )->giveNumberOfDofs();
         }
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * count );
     } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
-        for ( i = 1; i <= mapSize; i++ ) {
+        for ( int i = 1; i <= mapSize; i++ ) {
             ndofs = ( dman = domain->giveDofManager( commMap.at(i) ) )->giveNumberOfDofs();
-            for ( j = 1; j <= ndofs; j++ ) {
+            for ( int j = 1; j <= ndofs; j++ ) {
                 jdof = dman->giveDof(j);
                 if ( jdof->isPrimaryDof() && ( jdof->__giveEquationNumber() ) ) {
                     count++;
@@ -461,7 +425,7 @@ LinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * pcount );
     } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
-        for ( i = 1; i <= mapSize; i++ ) {
+        for ( int i = 1; i <= mapSize; i++ ) {
             count += domain->giveElement( commMap.at(i) )->estimatePackSize(buff);
         }
 

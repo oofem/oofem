@@ -15,6 +15,7 @@
 #include "oofemtxtinputrecord.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "structuralelement.h"
 
 namespace oofem {
 #ifdef __TM_MODULE
@@ -74,7 +75,7 @@ HellmichMaterial :: createMaterialGp()
         _error("Could not create the material-level gp.");
     }
 
-    ( ( HellmichMaterialStatus * ) giveStatus(materialGp) )->setInitialTemperature(initialTemperature); // set material temperature in K
+    static_cast< HellmichMaterialStatus * >( giveStatus(materialGp) )->setInitialTemperature(initialTemperature); // set material temperature in K
  #ifdef VERBOSE_HELLMAT
     // output to check if it worked
     printf("\n Hellmat::createMaterialGp:");
@@ -136,7 +137,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
 
 
     // Optionally change basic material properties
-    IR_GIVE_OPTIONAL_FIELD(ir, ae, IFT_HellmichMaterial_E, "e"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, ae, IFT_HellmichMaterial_E, "e");
     printf("\nHellMat: Ultimate Young modulus E=%.4g.", ae);
 
     if ( ir->hasField(IFT_HellmichMaterial_linearE, "lineare") ) {
@@ -144,32 +145,32 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
         printf("\nHellMat: Forcing linear relation E(ksi).");
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, ny, IFT_HellmichMaterial_nu, "n"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, ny, IFT_HellmichMaterial_nu, "n");
     printf("\nHellMat: Poisson const nu=%.3f.", ny);
-    IR_GIVE_OPTIONAL_FIELD(ir, epscu, IFT_HellmichMaterial_epscu, "epscu"); // Macro // 0.0022
-    IR_GIVE_OPTIONAL_FIELD(ir, fc, IFT_HellmichMaterial_fc, "fc");    // Macro // 40.1e6  88e6
-    IR_GIVE_FIELD(ir, value, IFT_HellmichMaterial_tAlpha, "talpha"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, epscu, IFT_HellmichMaterial_epscu, "epscu"); // 0.0022
+    IR_GIVE_OPTIONAL_FIELD(ir, fc, IFT_HellmichMaterial_fc, "fc"); // 40.1e6  88e6
+    IR_GIVE_FIELD(ir, value, IFT_HellmichMaterial_tAlpha, "talpha");
     propertyDictionary->add(tAlpha, value);
 
     initialTemperature = -1;
-    IR_GIVE_OPTIONAL_FIELD(ir, initialTemperature, IFT_HellmichMaterial_isoT, "isot"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, initialTemperature, IFT_HellmichMaterial_isoT, "isot");
     if ( initialTemperature >= 0 ) {
         printf("\nHellMat: Isothermal analysis at %.2f K.", initialTemperature);
         options = options | moIsothermal;
         tTimeFunction = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, tTimeFunction, IFT_HellmichMaterial_Tltf, "tltf"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, tTimeFunction, IFT_HellmichMaterial_Tltf, "tltf");
         if ( tTimeFunction ) {
             printf("\nHellMat: Time function number %d used as temperature history.", tTimeFunction);
         }
 
         hTimeFunction = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, tTimeFunction, IFT_HellmichMaterial_hltf, "hltf"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, tTimeFunction, IFT_HellmichMaterial_hltf, "hltf");
         if ( tTimeFunction ) {
             printf("\nHellMat: Time function number %d used as moisture history.", tTimeFunction);
         }
     } else {
         options = options & ~moIsothermal;
-        IR_GIVE_OPTIONAL_FIELD(ir, initialTemperature, IFT_HellmichMaterial_iniT, "init"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, initialTemperature, IFT_HellmichMaterial_iniT, "init");
     }
 
     materialGpUpdateFlag = 0; // needs init
@@ -179,7 +180,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
     if ( !( options & moIsothermal ) ) {
         value = -1;
         // for temperature field in Celsius degrees, hydration analysis requires absolute temperatures
-        IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HellmichMaterial_baseT, "baset"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HellmichMaterial_baseT, "baset");
         if ( value >= 0 ) {
             temperatureFieldBase = value;
         } else {
@@ -192,7 +193,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
 
 
         flatTemperature = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, flatTemperature, IFT_HellmichMaterial_flatT, "flatt"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, flatTemperature, IFT_HellmichMaterial_flatT, "flatt");
         if ( flatTemperature ) {
             if ( flatTemperature == -1 ) {
                 printf("\nHellMat: Temperature field flattened xz->xy");
@@ -202,7 +203,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
         }
 
         hemoMaterial = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, hemoMaterial, IFT_HellmichMaterial_hemomat, "hemomat"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, hemoMaterial, IFT_HellmichMaterial_hemomat, "hemomat");
         if ( hemoMaterial ) {
             printf("\nHellMat: Using material %d for sorption isotherms functions.", hemoMaterial);
         }
@@ -212,7 +213,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
     // !!! not very consistent with interface concept?
     // mix setting not available in input record
     value = -1.;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HellmichMaterial_hydration, "hydration"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HellmichMaterial_hydration, "hydration");
     if ( value >= 0. ) {
         options = options | moHydration;
     } else {
@@ -227,7 +228,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
     pssIndex = -1;
     pssElement = 0;
     pssGaussPoint = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, pssIndex, IFT_HellmichMaterial_plotss, "plotss"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, pssIndex, IFT_HellmichMaterial_plotss, "plotss");
     if ( pssIndex > -1 ) {
         options = options | moPlotStressStrain;
         printf("\nHellMat: Stress-strain plot for component %d.", pssIndex);
@@ -248,12 +249,12 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
             options = options & ~moPlotStressStrainIter;
         }
 
-        IR_GIVE_OPTIONAL_FIELD(ir, pssElement, IFT_HellmichMaterial_psselem,  "psselem"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, pssElement, IFT_HellmichMaterial_psselem,  "psselem");
         if ( pssElement ) {
             printf("\nHellMat: Stress-Strain plot for Element %d.", pssElement);
         }
 
-        IR_GIVE_OPTIONAL_FIELD(ir, pssGaussPoint, IFT_HellmichMaterial_pssgp, "pssgp"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, pssGaussPoint, IFT_HellmichMaterial_pssgp, "pssgp");
         if ( pssGaussPoint ) {
             printf("\nHellMat: Stress-Strain plot for GaussPoint %d.", pssGaussPoint);
         }
@@ -263,10 +264,10 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
     prestress = 0;
     prestressFrom = -1;
     prestressTo = -1;
-    IR_GIVE_OPTIONAL_FIELD(ir, prestress, IFT_HellmichMaterial_prestress, "prestress"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, prestressFrom, IFT_HellmichMaterial_prestressFrom, "prestressfrom"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, prestress, IFT_HellmichMaterial_prestress, "prestress");
+    IR_GIVE_OPTIONAL_FIELD(ir, prestressFrom, IFT_HellmichMaterial_prestressFrom, "prestressfrom");
     prestressTo = prestressFrom;
-    IR_GIVE_OPTIONAL_FIELD(ir, prestressTo, IFT_HellmichMaterial_prestressTo, "prestressto"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, prestressTo, IFT_HellmichMaterial_prestressTo, "prestressto");
     if ( prestress ) {
         printf("\n Hellmat: prestress %.5e applied from %.2f to %.2f", prestress, prestressFrom, prestressTo);
     }
@@ -274,7 +275,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
     // Input time scale
     timeScale = 1.;
     value = -1.;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HellmichMaterial_timeScale, "timescale"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HellmichMaterial_timeScale, "timescale");
     if ( value > 0. ) {
         timeScale = value;
         printf("\nHellMat: Time scale set to %.0f", timeScale);
@@ -285,7 +286,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
 
     // Select chemical shrinkage and moisture-dependent volume changes
     intvalue = -1;
-    IR_GIVE_OPTIONAL_FIELD(ir, intvalue, IFT_HellmichMaterial_shr, "shr"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, intvalue, IFT_HellmichMaterial_shr, "shr");
     if ( ( intvalue == 0 ) || ir->hasField(IFT_HellmichMaterial_noshr, "noshr") ) { // noshr set
         options = options & ~moShrinkage;
         options = options & ~moHumidityStrain;
@@ -322,15 +323,15 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
         if ( !( options & moHydration ) ) {
             printf("\nHellMat: No chemical shrinkage without hydration.");
         } else { // optionally change autogenous shrinkage parameters (eshr = ashr + bshr * ksi; eshr <= 0 )
-            IR_GIVE_OPTIONAL_FIELD(ir, ashr, IFT_HellmichMaterial_ashr, "ashr"); // Macro //   5e-4;
+            IR_GIVE_OPTIONAL_FIELD(ir, ashr, IFT_HellmichMaterial_ashr, "ashr"); //   5e-4;
             // Set bshr 0 to disable empiric hydration-dependent autogenous shrinkage
-            IR_GIVE_OPTIONAL_FIELD(ir, bshr, IFT_HellmichMaterial_bshr,  "bshr"); // Macro // -11e-4;
+            IR_GIVE_OPTIONAL_FIELD(ir, bshr, IFT_HellmichMaterial_bshr,  "bshr"); // -11e-4;
         }
     }
 
     // if humidity shrinkage is enabled, check hshr parameter Kappa
     if ( options & moHumidityStrain ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, kshr, IFT_HellmichMaterial_kshr, "kshr"); // Macro // 8e-4;
+        IR_GIVE_OPTIONAL_FIELD(ir, kshr, IFT_HellmichMaterial_kshr, "kshr"); // 8e-4;
         if ( ir->hasField(IFT_HellmichMaterial_kshr, "kshr") ) {
             printf("\nHellMat: Humidity volume change parameter Kappa set to %.3e", kshr);
         }
@@ -338,7 +339,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
 
     // if drying shrinkage is enabled, check parameter C
     if ( options & moDryingShrinkage ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, c, IFT_HellmichMaterial_dryingc, "dc"); // Macro // 1e-17;
+        IR_GIVE_OPTIONAL_FIELD(ir, c, IFT_HellmichMaterial_dryingc, "dc"); // 1e-17;
         if ( ir->hasField(IFT_HellmichMaterial_dryingc, "dc") ) {
             printf("\nHellMat: Drying shrinkage coefficient set to %.3e", c);
         }
@@ -362,14 +363,14 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
 
     // optionally change material creep parameters
     if ( options & moCreep ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, modulusH, IFT_HellmichMaterial_modulusH, "modulush"); // Macro // 1e6/7  1e6/9,5
-        IR_GIVE_OPTIONAL_FIELD(ir, ur, IFT_HellmichMaterial_ur, "ur"); // Macro // 2700
-        IR_GIVE_OPTIONAL_FIELD(ir, jv, IFT_HellmichMaterial_jv, "jv"); // Macro // 24e-12 30e-12
-        IR_GIVE_OPTIONAL_FIELD(ir, tw, IFT_HellmichMaterial_tw, "tw"); // Macro // 28 days
+        IR_GIVE_OPTIONAL_FIELD(ir, modulusH, IFT_HellmichMaterial_modulusH, "modulush"); // 1e6/7  1e6/9,5
+        IR_GIVE_OPTIONAL_FIELD(ir, ur, IFT_HellmichMaterial_ur, "ur"); // 2700
+        IR_GIVE_OPTIONAL_FIELD(ir, jv, IFT_HellmichMaterial_jv, "jv"); // 24e-12 30e-12
+        IR_GIVE_OPTIONAL_FIELD(ir, tw, IFT_HellmichMaterial_tw, "tw"); // 28 days
 
         // deviatoric creep options
         intvalue = -1;
-        IR_GIVE_OPTIONAL_FIELD(ir, intvalue, IFT_HellmichMaterial_devc, "devc"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, intvalue, IFT_HellmichMaterial_devc, "devc");
         if ( intvalue >= 0 ) { // devc set
             options = options & ~( moDeviatoricCreepE | moDeviatoricCreepF ); // init. turn off dev. creep
             intvalue = intvalue << 11; // 0/1/2/3 -> 0/2048/4096/6144
@@ -655,7 +656,7 @@ double HellmichMaterial :: computeViscousSlipIncrement(GaussPoint *gp, TimeStep 
     double expterm, ba, ca;
     double base, gamman, dt, dT, T, dh, h;
     dt = giveTimeIncrement(atTime);
-    HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     // might also get directly from status - should be called only for materialGp from initAuxStatus in isothermal case
     T = giveTemperature(gp);
     dT = giveTemperatureChange(gp, VM_Incremental);
@@ -686,7 +687,7 @@ double HellmichMaterial :: computeViscosity(GaussPoint *gp, TimeStep *atTime)
 {
     double base, gamma, T;
     T = giveTemperature(gp);
-    HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     base = status->giveGamma0();
     gamma = status->giveTempViscousSlip();
     // c'=1e-6 - unit constant for Pa
@@ -928,7 +929,7 @@ void HellmichMaterial :: stressReturn(FloatArray &stress, FloatArray &trialStres
     ActiveSurface as;
     int i;
 
-    status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
 
     inv = invariantI1(trialStress);
     snorm = deviatorNorm(trialStress);
@@ -1016,7 +1017,7 @@ void HellmichMaterial :: give1dMaterialStiffnessMatrix(FloatMatrix &answer,
     }
 
     Ev = agingE(ksi) / giveKvCoeff(gp, atTime);
-    status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
 
     as = status->giveActiveSurface();
     if ( ( as == asNone ) || ( rMode == ElasticStiffness ) ) { // elastic
@@ -1077,7 +1078,7 @@ void HellmichMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     }
 
     giveKvCoeffs(gp, atTime, kv, gv, VM_Total); // obtain visc coefficients for volumetric(kv) and deviatoric(gv) stress
-    status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     as = status->giveActiveSurface();
 
     Gv = agingG(ksi) / gv; // deviatoric visc coeff included in base value of G
@@ -1374,7 +1375,7 @@ void HellmichMaterial :: plotReturn(FILE *outputStream, GaussPoint *gp, TimeStep
 
  #endif
 
-    status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     status->giveTrialStressVector(trialStress);
     stress = status->giveTempStressVector();
     ksi = giveHydrationDegree(gp, atTime, VM_Total);
@@ -1419,7 +1420,7 @@ void HellmichMaterial :: plotStressStrain(FILE *outputStream, GaussPoint *gp, Ti
     }
 
     ksi = giveHydrationDegree(gp, atTime, VM_Total);
-    status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     if ( status->giveTempStressVector().giveSize() ) {
         stress = status->giveTempStressVector() (idx);
     } else {
@@ -1475,7 +1476,7 @@ void HellmichMaterial :: plotStressPath(FILE *outputStream, GaussPoint *gp, Time
     FloatArray stress(6);
     double ksi;
 
-    status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
 
     if ( id == -1 ) { // print header
         ksi = giveHydrationDegree(gp, atTime, VM_Total);
@@ -1557,7 +1558,7 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *atTime)
     }
 
     // === Check if aux status is uninitialized ===  works for both gp and material-level status
-    HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     if ( status->giveUpdateFlag() ) {
         return;
     } else {
@@ -1736,7 +1737,7 @@ double HellmichMaterial :: giveTemperature(GaussPoint *gp)
         gp = giveMaterialGp();
     }
 
-    return ( ( HellmichMaterialStatus * ) giveStatus(gp) )->giveTempTemperature();
+    return ( static_cast< HellmichMaterialStatus * >( giveStatus(gp) ) )->giveTempTemperature();
 }
 
 double HellmichMaterial :: giveTemperatureChange(GaussPoint *gp, ValueModeType mode)
@@ -1745,7 +1746,7 @@ double HellmichMaterial :: giveTemperatureChange(GaussPoint *gp, ValueModeType m
         gp = giveMaterialGp();
     }
 
-    HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     if ( mode == VM_Total ) {
         return ( status->giveTempTemperature() - status->giveInitialTemperature() );
     } else if ( mode == VM_Incremental ) {
@@ -1761,7 +1762,7 @@ double HellmichMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
         gp = giveMaterialGp();
     }
 
-    HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     if ( mode == VM_Total ) {
         return status->giveTempHumidity();
     } else if ( mode == VM_Incremental ) {
@@ -1783,7 +1784,7 @@ double HellmichMaterial :: giveViscousSlip(GaussPoint *gp)
         gp = giveMaterialGp();
     }
 
-    return ( ( HellmichMaterialStatus * ) giveStatus(gp) )->giveViscousSlip();
+    return ( static_cast< HellmichMaterialStatus * >( giveStatus(gp) ) )->giveViscousSlip();
 }
 
 double HellmichMaterial :: giveGamma0(GaussPoint *gp)
@@ -1795,7 +1796,7 @@ double HellmichMaterial :: giveGamma0(GaussPoint *gp)
         gp = giveMaterialGp();
     }
 
-    return ( ( HellmichMaterialStatus * ) giveStatus(gp) )->giveGamma0();
+    return ( static_cast< HellmichMaterialStatus * >( giveStatus(gp) ) )->giveGamma0();
 }
 
 // === Creep ===
@@ -1807,7 +1808,7 @@ double HellmichMaterial :: givePrestress(GaussPoint *gp)
             gp = giveMaterialGp();
         }
 
-        HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
+        HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
         double g0;
         g0 = status->giveGamma0();
         if ( g0 <= 0 ) {
@@ -1828,7 +1829,7 @@ double HellmichMaterial :: giveViscosity(GaussPoint *gp)
         gp = giveMaterialGp();
     }
 
-    HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     if ( status->giveGamma0() <= 0. ) {
         return ( 0. );                     // gamma0 not set yet
     } else {
@@ -1880,7 +1881,7 @@ void HellmichMaterial :: giveKvCoeffs(GaussPoint *gp, TimeStep *atTime, double &
             ev = 1. / ( 1. + twTime(ksi) / dt ) * agingE(ksi) * jv;
 
             // compute flow creep coefficient fv
-            if ( ( ( HellmichMaterialStatus * ) giveStatus(gp) )->giveGamma0() > 0 ) {
+            if ( ( static_cast< HellmichMaterialStatus * >( giveStatus(gp) ) )->giveGamma0() > 0 ) {
                 fv = dt * agingE(ksi) * giveViscosity(gp);
             } else {
                 fv = 0.;
@@ -2125,7 +2126,7 @@ void HellmichMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFo
     dt = giveTimeIncrement(atTime);
     if ( ( options & moCreep ) && ( dt > 0 ) ) {
         // reduced stress vector
-        HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
+        HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
         stress = status->giveStressVector();
         // compute creep coefficients
         giveKvCoeffs(gp, atTime, ev, fv, VM_Incremental);
@@ -2185,11 +2186,11 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
 {
     FloatArray auxStrain, strainIncrement, elasticStrain;
     FloatArray auxStress, trialStressVector, fullStressVector(6), redStressVector;
-    HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
     ValueModeType mode = VM_Incremental;
     MaterialMode mmode = gp->giveMaterialMode();
-    double E, dt;
+    double E=-1.0, dt;
     // clear temporary status variables - maybe unnecessary
     initTempStatus(gp);
     // if needed, update auxiliary status values in gp and material
@@ -2308,6 +2309,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
         // auxiliary variables for 2D
         // !! CORNER !!
         _error("2D Plane stress plasticity not implemented!");
+#if 0
         double sigx, sigy, tau, tc, rc, fca, dl, fDP, Itrial, snorm;
         FloatArray depsp(3);
         ActiveSurface as;
@@ -2377,6 +2379,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
         fullStressVector(0) = redStressVector(0);
         fullStressVector(1) = redStressVector(1);
         fullStressVector(5) = redStressVector(2);
+#endif
     }
     // ====== 2D Konec ======
     else {
@@ -2611,7 +2614,7 @@ HellmichMaterial :: initGpForNewStep(GaussPoint *gp)
     // call parent method - calls initTempStatus(gp)
     StructuralMaterial :: initGpForNewStep(gp);
     // Force initialization of auxiliary status
-    ( ( HellmichMaterialStatus * ) giveStatus(gp) )->setUpdateFlag(0);
+    ( static_cast< HellmichMaterialStatus * >( giveStatus(gp) ) )->setUpdateFlag(0);
     initAuxStatus(gp, atTime);
 }
 
@@ -2665,7 +2668,7 @@ HellmichMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 
  #ifdef VERBOSE_TANGENT
     if ( options & moPlotStressStrainIter ) {
-        HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
+        HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
         if ( mMode == _1dMat ) {
             printf( "Time: %.2f, sig: %.10e, Eep: %.10e\n", giveTime(atTime),
                    ( status->giveTempStressVector().giveSize() ) ? ( status->giveTempStressVector() )(0) : 0, answer(0, 0) );

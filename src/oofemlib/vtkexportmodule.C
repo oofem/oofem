@@ -87,16 +87,16 @@ VTKExportModule :: initializeFrom(InputRecord *ir)
     int val;
 
     ExportModule :: initializeFrom(ir);
-    IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, IFT_VTKExportModule_cellvars, "cellvars"); // Macro - see internalstatetype.h
-    IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, IFT_VTKExportModule_vars, "vars"); // Macro - see internalstatetype.h
-    IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, IFT_VTKExportModule_primvars, "primvars");  // Macro - see unknowntype.h
+    IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, IFT_VTKExportModule_cellvars, "cellvars");
+    IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, IFT_VTKExportModule_vars, "vars");
+    IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, IFT_VTKExportModule_primvars, "primvars");
 
     val = NodalRecoveryModel::NRM_ZienkiewiczZhu;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_VTKExportModule_stype, "stype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_VTKExportModule_stype, "stype");
     stype = ( NodalRecoveryModel::NodalRecoveryModelType ) val;
 
     regionsToSkip.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, regionsToSkip, IFT_VTKExportModule_regionstoskip, "regionstoskip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, regionsToSkip, IFT_VTKExportModule_regionstoskip, "regionstoskip");
 
     return IRRT_OK;
 }
@@ -402,6 +402,10 @@ VTKExportModule :: giveCellType(Element *elem)
         vtkCellType = 12;
     } else if ( elemGT == EGT_hexa_2 ) {
         vtkCellType = 25;
+    }  else if ( elemGT == EGT_wedge_1 ) {
+        vtkCellType = 13;
+    } else if ( elemGT == EGT_wedge_2 ) {
+        vtkCellType = 26;
     } else {
         OOFEM_ERROR("VTKExportModule: unsupported element gemetry type");
     }
@@ -463,7 +467,7 @@ VTKExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
         ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
-        ( elemGT == EGT_hexa_1 ) ) {
+        ( elemGT == EGT_hexa_1 ) || (elemGT == EGT_wedge_1)) {
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( i = 1; i <= nelemNodes; i++ ) {
@@ -478,7 +482,13 @@ VTKExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
         for ( i = 1; i <= nelemNodes; i++ ) {
             answer.at(i) = elem->giveNode(HexaQuadNodeMapping [ i - 1 ])->giveNumber();
         }
-    } else {
+    } else if ( elemGT == EGT_wedge_2 ) {int WedgeQuadNodeMapping [] = { 4, 6, 5, 1, 3, 2, 12, 11, 10, 9, 8, 7, 13, 15,14 };
+        nelemNodes = elem->giveNumberOfNodes();
+        answer.resize(nelemNodes);
+        for ( i = 1; i <= nelemNodes; i++ ) {
+            answer.at(i) = elem->giveNode(WedgeQuadNodeMapping [ i - 1 ])->giveNumber() ;
+        }
+    }else {
         OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
     }
 }
@@ -494,7 +504,8 @@ VTKExportModule :: giveNumberOfElementCells(Element *elem)
         ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
-        ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) ) {
+        ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) ||
+        ( elemGT == EGT_wedge_1 )||( elemGT == EGT_wedge_2 )) {
         return 1;
     } else {
         OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
@@ -634,7 +645,7 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                 break;
 #if 0 // Hardly even worth the effort...
             case ISVT_TENSOR_G:
-                for (int indx = 1; indx < 9; ++indx)  {
+                for (int indx = 1; indx < 9; ++indx) {
                     fprintf(stream, "SCALARS %s_%d double 1\n", __InternalStateTypeToString(valID), indx);
 
                     for ( ielem = 1; ielem <= nelem; ielem++ ) {

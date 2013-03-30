@@ -68,29 +68,27 @@ Concrete2 :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    // double value ;
-
     this->Material :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, E, IFT_Concrete2_e, "e"); // Macro
-    IR_GIVE_FIELD(ir, n, IFT_Concrete2_n, "n"); // Macro
-    IR_GIVE_FIELD(ir, SCCC, IFT_Concrete2_sccc, "sccc"); // Macro
-    IR_GIVE_FIELD(ir, SCCT, IFT_Concrete2_scct, "scct"); // Macro
-    IR_GIVE_FIELD(ir, EPP, IFT_Concrete2_epp, "epp"); // Macro
-    IR_GIVE_FIELD(ir, EPU, IFT_Concrete2_epu, "epu"); // Macro
-    IR_GIVE_FIELD(ir, EOPP, IFT_Concrete2_eopp, "eopp"); // Macro
-    IR_GIVE_FIELD(ir, EOPU, IFT_Concrete2_eopu, "eopu"); // Macro
-    IR_GIVE_FIELD(ir, SHEARTOL, IFT_Concrete2_sheartol, "sheartol"); // Macro
-    IR_GIVE_FIELD(ir, IS_PLASTIC_FLOW, IFT_Concrete2_is_plastic_flow, "is_plastic_flow"); // Macro
-    IR_GIVE_FIELD(ir, IFAD, IFT_Concrete2_ifad, "ifad"); // Macro
+    IR_GIVE_FIELD(ir, E, IFT_Concrete2_e, "e");
+    IR_GIVE_FIELD(ir, n, IFT_Concrete2_n, "n");
+    IR_GIVE_FIELD(ir, SCCC, IFT_Concrete2_sccc, "sccc");
+    IR_GIVE_FIELD(ir, SCCT, IFT_Concrete2_scct, "scct");
+    IR_GIVE_FIELD(ir, EPP, IFT_Concrete2_epp, "epp");
+    IR_GIVE_FIELD(ir, EPU, IFT_Concrete2_epu, "epu");
+    IR_GIVE_FIELD(ir, EOPP, IFT_Concrete2_eopp, "eopp");
+    IR_GIVE_FIELD(ir, EOPU, IFT_Concrete2_eopu, "eopu");
+    IR_GIVE_FIELD(ir, SHEARTOL, IFT_Concrete2_sheartol, "sheartol");
+    IR_GIVE_FIELD(ir, IS_PLASTIC_FLOW, IFT_Concrete2_is_plastic_flow, "is_plastic_flow");
+    IR_GIVE_FIELD(ir, IFAD, IFT_Concrete2_ifad, "ifad");
 
     // stirrups constants
-    IR_GIVE_FIELD(ir, stirrE, IFT_Concrete2_stirr_e, "stirr_e"); // Macro
-    IR_GIVE_FIELD(ir, stirrFt, IFT_Concrete2_stirr_ft, "stirr_ft"); // Macro
-    IR_GIVE_FIELD(ir, stirrA, IFT_Concrete2_stirr_a, "stirr_a"); // Macro
-    IR_GIVE_FIELD(ir, stirrTOL, IFT_Concrete2_stirr_tol, "stirr_tol"); // Macro
-    IR_GIVE_FIELD(ir, stirrEREF, IFT_Concrete2_stirr_eref, "stirr_eref"); // Macro
-    IR_GIVE_FIELD(ir, stirrLAMBDA, IFT_Concrete2_stirr_lambda, "stirr_lambda"); // Macro
+    IR_GIVE_FIELD(ir, stirrE, IFT_Concrete2_stirr_e, "stirr_e");
+    IR_GIVE_FIELD(ir, stirrFt, IFT_Concrete2_stirr_ft, "stirr_ft");
+    IR_GIVE_FIELD(ir, stirrA, IFT_Concrete2_stirr_a, "stirr_a");
+    IR_GIVE_FIELD(ir, stirrTOL, IFT_Concrete2_stirr_tol, "stirr_tol");
+    IR_GIVE_FIELD(ir, stirrEREF, IFT_Concrete2_stirr_eref, "stirr_eref");
+    IR_GIVE_FIELD(ir, stirrLAMBDA, IFT_Concrete2_stirr_lambda, "stirr_lambda");
 
     this->linearElasticMaterial->initializeFrom(ir);
     return IRRT_OK;
@@ -167,8 +165,6 @@ Concrete2 :: give(int aProperty, GaussPoint *gp)
             // error ("give: property not defined");
         }
     }
-
-    return 0.;
 }
 
 
@@ -250,12 +246,12 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
 // Note: formulated in Full stress strain space
 {
     double us, SCC, SCT, psi2, comp, tol = 0.0, crit = 0.0, nez = 0.0, effstold = 0.0, dezold = 0.0, effst = 0.0, dez = 0.0;
-    double epsult = 0.0, ep1, ep2, ep3, relus, G, ez;
+    double epsult = 0.0, ep1 = -1.0, ep2 = -1.0, ep3 = -1.0, relus, G, ez;
     int ifsh, i, ifplas, ifupd;
     FloatArray plasticStrainVector, plasticStrainIncrementVector;
 
-    Concrete2MaterialStatus *status = ( Concrete2MaterialStatus * ) this->giveStatus(gp);
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
+    Concrete2MaterialStatus *status = static_cast< Concrete2MaterialStatus * >( this->giveStatus(gp) );
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
     FloatArray currentStress, currentStrain, currentEffStrain(6), pVal, * ep, * pStress,
     * strainIncr, plasticStrain, help, reducedStrain, helpR;
     FloatMatrix pDir;
@@ -1097,7 +1093,7 @@ Concrete2 :: strsoft(GaussPoint *gp, double epsult, FloatArray *ep, double &ep1,
 //    - components of plastic strain associated with epp in gp->plasticStrainVector.
 //
 {
-    Concrete2MaterialStatus *status = ( Concrete2MaterialStatus * ) this->giveStatus(gp);
+    Concrete2MaterialStatus *status = static_cast< Concrete2MaterialStatus * >( this->giveStatus(gp) );
     double eop, eopr, dep, d, eep, eepr;
     //
     // strain softening
@@ -1254,7 +1250,7 @@ Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray *strainIncrement)
 //     PLASTIC STRAIN INCREMENT
 //
 {
-    Concrete2MaterialStatus *status = ( Concrete2MaterialStatus * ) this->giveStatus(gp);
+    Concrete2MaterialStatus *status = static_cast< Concrete2MaterialStatus * >( this->giveStatus(gp) );
 
     double dep, srf, dez, ovs, s, dt;
     if ( strainIncrement == NULL ) {
@@ -1446,13 +1442,13 @@ Concrete2MaterialStatus :: initTempStatus()
     tempSEZ  = SEZ;
 
     if ( plasticStrainVector.giveSize() == 0 ) {
-        plasticStrainVector.resize( ( ( StructuralMaterial * ) gp->giveMaterial() )->
+        plasticStrainVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
                                    giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
         plasticStrainVector.zero();
     }
 
     if ( plasticStrainIncrementVector.giveSize() == 0 ) {
-        plasticStrainIncrementVector.resize( ( ( StructuralMaterial * ) gp->giveMaterial() )->
+        plasticStrainIncrementVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
                                             giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
         plasticStrainIncrementVector.zero();
     } else {

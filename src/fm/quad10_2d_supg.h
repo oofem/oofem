@@ -149,8 +149,6 @@ public:
     virtual int giveNumberOfInternalDofManagers() const { return 1; }
     virtual DofManager *giveInternalDofManager(int i) const;
 
-    virtual void giveLocationArray(IntArray &locationArray, EquationID, const UnknownNumberingScheme &s) const;
-
 protected:
     virtual void giveLocalVelocityDofMap (IntArray &map);
     virtual void giveLocalPressureDofMap (IntArray &map);

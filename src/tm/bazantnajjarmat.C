@@ -46,13 +46,13 @@ BazantNajjarMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
 
     IsotropicMoistureTransferMaterial :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, C1, IFT_BazantNajjarMoistureTransferMaterial_c1, "c1"); // Macro
-    IR_GIVE_FIELD(ir, n, IFT_BazantNajjarMoistureTransferMaterial_n, "n"); // Macro
-    IR_GIVE_FIELD(ir, alpha0, IFT_BazantNajjarMoistureTransferMaterial_alpha0, "alpha0"); // Macro
-    IR_GIVE_FIELD(ir, hC, IFT_BazantNajjarMoistureTransferMaterial_hc, "hc"); // Macro
+    IR_GIVE_FIELD(ir, C1, IFT_BazantNajjarMoistureTransferMaterial_c1, "c1");
+    IR_GIVE_FIELD(ir, n, IFT_BazantNajjarMoistureTransferMaterial_n, "n");
+    IR_GIVE_FIELD(ir, alpha0, IFT_BazantNajjarMoistureTransferMaterial_alpha0, "alpha0");
+    IR_GIVE_FIELD(ir, hC, IFT_BazantNajjarMoistureTransferMaterial_hc, "hc");
 
     this->moistureCapacity = 1.;
-    IR_GIVE_OPTIONAL_FIELD(ir, moistureCapacity, IFT_BazantNajjarMoistureTransferMaterial_capa, "capa"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, moistureCapacity, IFT_BazantNajjarMoistureTransferMaterial_capa, "capa");
 
 
     return IRRT_OK;
@@ -78,7 +78,7 @@ BazantNajjarMoistureTransferMaterial :: givePermeability(GaussPoint *gp, TimeSte
 double
 BazantNajjarMoistureTransferMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
 {
-    FloatArray tempState = ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveTempStateVector();
+    FloatArray tempState = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveTempStateVector();
     if ( ( tempState.at(1) > 1.0 ) || ( tempState.at(1) < 0.0 ) ) {
         OOFEM_ERROR2( "BazantNajjarMoistureTransferMaterial :: giveHumidity : Relative humidity %.3f is out of range", tempState.at(1) );
         return 0.;

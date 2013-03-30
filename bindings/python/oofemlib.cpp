@@ -1285,7 +1285,7 @@ object engngModel(bp::tuple args, bp::dict kw)
         engngm->instanciateDefaultMetaStep(&ir);
     }
     string outFile;
-    if ( ir.hasField(IFT_EngngModel_nmsteps, "outfile") ) {
+    if ( ir.hasField(IFT_EngngModel_outfile, "outfile") ) {
        ir.giveField(outFile, IFT_EngngModel_outfile, "outfile");
     } else {
        outFile = "oofem.out.XXXXXX";

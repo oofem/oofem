@@ -73,15 +73,14 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
 // strain increment, the only way, how to correctly update gp records
 //
 {
-    int i;
     FloatMatrix Ds0;
     double equivStrain;
     FloatArray princStress, crackStrain, reducedAnswer;
     FloatArray reducedStrainVector, strainVector, principalStrain;
     FloatArray reducedSpaceStressVector;
     FloatMatrix tempCrackDirs;
-    RCSDMaterialStatus *status = ( RCSDMaterialStatus * ) this->giveStatus(gp);
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
+    RCSDMaterialStatus *status = static_cast< RCSDMaterialStatus * >( this->giveStatus(gp) );
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
@@ -91,7 +90,6 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
     // therefore it is necessary to subtract always the total eigen strain value
     this->giveStressDependentPartOfStrainVector(reducedStrainVector, gp, totalStrain,
                                                 atTime, VM_Total);
-    //
 
     crossSection->giveFullCharacteristicVector(strainVector, gp, reducedStrainVector);
 
@@ -123,7 +121,7 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
         // test if transition to scalar damage mode take place
         double minSofteningPrincStress = this->Ft, dCoeff, CurrFt, E, ep, ef, damage;
         int ipos = 0;
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             if ( status->giveTempCrackStatus(i) == pscm_SOFTENING ) {
                 if ( princStress.at(i) < minSofteningPrincStress ) {
                     minSofteningPrincStress = princStress.at(i);
@@ -158,7 +156,7 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
     } else {
         // scalar damage mode
         double ep, ef, E, dCoeff;
-        double damage = 1.0;
+        double damage;
         //int ipos;
 
         E = linearElasticMaterial->give(Ex, gp);
@@ -197,7 +195,7 @@ RCSDMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
 // for gp stress strain mode
 //
 {
-    RCSDMaterialStatus *status = ( RCSDMaterialStatus * ) this->giveStatus(gp);
+    RCSDMaterialStatus *status = static_cast< RCSDMaterialStatus * >( this->giveStatus(gp) );
 
     if ( status->giveTempMode() == RCSDMaterialStatus :: rcMode ) {
         // rotating crack mode
@@ -224,7 +222,9 @@ RCSDMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
                 answer = reducedAnswer;
             } else {
                 this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
-                answer.beSubMatrixOf(reducedAnswer, mask);
+                answer.resize(mask.maximum(), mask.maximum());
+                answer.zero();
+                answer.assemble(reducedAnswer, mask, mask);
             }
         } else if ( rMode == ElasticStiffness ) {
             this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
@@ -254,15 +254,14 @@ RCSDMaterial :: computeCurrEquivStrain(GaussPoint *gp, const FloatArray &reduced
     FloatArray effStress, princEffStress, fullEffStress;
     FloatMatrix De;
     double answer = 0.0;
-    int i;
 
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
     linearElasticMaterial->giveCharacteristicMatrix(De, ReducedForm, TangentStiffness, gp, atTime);
     effStress.beProductOf(De, reducedTotalStrainVector);
     crossSection->giveFullCharacteristicVector(fullEffStress, gp, effStress);
 
     this->computePrincipalValues(princEffStress, fullEffStress, principal_stress);
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer = max( answer, macbra( princEffStress.at(i) ) );
     }
 
@@ -276,7 +275,7 @@ RCSDMaterial :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, SDTransitionCoeff, IFT_RCSDMaterial_sdtransitioncoeff, "sdtransitioncoeff"); // Macro
+    IR_GIVE_FIELD(ir, SDTransitionCoeff, IFT_RCSDMaterial_sdtransitioncoeff, "sdtransitioncoeff");
 
     return RCM2Material :: initializeFrom(ir);
 }
@@ -328,9 +327,7 @@ RCSDMaterial :: computeStrength(GaussPoint *gp, double charLength)
     Gf = this->give(pscm_Gf, gp);
     Ft = this->give(pscm_Ft, gp);
 
-    if ( this->checkSizeLimit(gp, charLength) ) {
-        ;
-    } else {
+    if ( !this->checkSizeLimit(gp, charLength) ) {
         // we reduce Ft and there is no softening but sudden drop
         Ft = sqrt(2. * Ee * Gf / charLength);
         //
@@ -348,7 +345,7 @@ RCSDMaterial :: giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i)
 // computes MinCrackStrainsForFullyOpenCrack for given gp and i-th crack
 //
 {
-    RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) this->giveStatus(gp);
+    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
     double Le, Gf, Ft;
 
     Le = status->giveCharLength(i);
@@ -396,7 +393,7 @@ RCSDMaterial :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
 {
     //double Ee, Gf;
     double Cf, Ft, Le, minEffStrainForFullyOpenCrack;
-    RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) this->giveStatus(gp);
+    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
 
     //
     // now we have to set proper reduced strength and softening modulus Et
@@ -456,7 +453,7 @@ RCSDMaterial :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int
 //
 {
     double Cf, Ft, Le, answer, minEffStrainForFullyOpenCrack;
-    RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) this->giveStatus(gp);
+    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
     minEffStrainForFullyOpenCrack = this->giveMinCrackStrainsForFullyOpenCrack(gp, i);
 
     Cf = this->giveCrackingModulus(TangentStiffness, gp, crackStrain, i); // < 0

@@ -44,14 +44,14 @@ namespace oofem {
 
 IRResultType RVEMaterial :: initializeFrom(InputRecord *ir)
 {
-	printf("rvematerial initializing...\n");
+    printf("rvematerial initializing...\n");
 
     const char *__proc = "initializeFrom";
     IRResultType result;
 
     // Read filename and instanciate RVE problem
 
-    IR_GIVE_FIELD(ir, this->rveFilename, IFT_MicroMaterialFileName, "file");
+    IR_GIVE_FIELD(ir, this->rveFilename, IFT_MicroMaterial_fileName, "file");
 
     OOFEM_LOG_INFO("************************** Instanciating microproblem from file %s\n", rveFilename.c_str());
     OOFEMTXTDataReader drMicro(rveFilename.c_str());

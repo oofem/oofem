@@ -40,6 +40,14 @@
 #include "flotmtrx.h"
 #include "enrichmentfunction.h"
 #include "layeredcrosssection.h"
+#include "enrichmentdomain.h"
+#include "dofiditem.h"
+///@name Input fields for EnrichmentItem
+//@{
+#define _IFT_EnrichmentItem_geometryItemNr "geometryitemnr"
+#define _IFT_EnrichmentItem_enrichmentFunctionNr "enrichmentfunctionnr"
+#define _IFT_EnrichmentItem_materialNr "material"
+//@}
 
 namespace oofem {
 class BasicGeometry;
@@ -60,73 +68,62 @@ class EnrichmentItem : public FEMComponent
 public:
     /// Constructor.
     EnrichmentItem(int n, XfemManager *xm, Domain *aDomain);
-
+    virtual ~EnrichmentItem();
     virtual IRResultType initializeFrom(InputRecord *ir);
     int instanciateYourself(DataReader *dr);
     virtual const char *giveClassName() const { return "EnrichmentItem"; }
+    IntArray *giveEnrichesDofsWithIdArray() { return this->enrichesDofsWithIdArray; }
+    int giveNumberOfEnrDofs();
 
-    /// Accessor. should there be support for several geom. objects describing one EI, probably yes. Ex. inclusion given as union of several geom.s?
+    // Enrichment domains
     BasicGeometry *giveGeometry(int i);
     BasicGeometry *giveGeometry();
-
-    // Spatial search queries
-    
-    /// Computes intersection points with Element. - based on the geometry of the enrichment
-    void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element);
-    
-    /// Computes number intersection points with Element.
-    int computeNumberOfIntersectionPoints(Element *element);
-    
-    /// Checks whether a Geometry is inside or outside. - what if the geometry is not closed? like a set of segments
-    bool isOutside(BasicGeometry *bg);
-    
-    /// Accessor.
-    //EnrichmentFunction *giveEnrichmentFunction(){}; // but there may be several functions?
-    EnrichmentFunction *giveEnrichmentFunction(int n);
-
-    /// Gives number of dofs.
-    //int giveNumberOfDofs() { return this->giveEnrichmentFunction()->giveNumberOfDofs(); }
-    int giveNumberOfDofs() { return 1; } // should loop over all EF and ask them - what should be meant. active dofs? total or enriched?
-
-    /// Sets DofId Array of an Enrichment Item.
-    void setDofIdArray(IntArray &dofId) { this->dofsId = dofId; }
-    /// Accessor.
-    IntArray *getDofIdArray() { return & dofsId; }
-
-
-    bool isDofManEnriched(int nodeNumber);
-    bool isDofManEnrichedByEnrichmentDomain(int dofManNumber, int edNumber);
-    bool isElementEnriched(Element *element); 
-    bool isElementEnrichedByEnrichmentDomain(Element *element, int edNumber); 
-
-    /// Updates receiver geometry to the state reached at given time step.
-    /// Geometry update; calls individual enrichment item updateGeometry method.
-    virtual void updateGeometry(TimeStep *tStep) {}
+    EnrichmentDomain *giveEnrichmentDomain(int i) { return this->enrichmentDomainList->at(i); };
     int giveNumberOfEnrichmentDomains() { return this->numberOfEnrichmentDomains; };      
+   
+    
+    // Enrichment functions
+    EnrichmentFunction *giveEnrichmentFunction(int n);
+    int giveNumberOfEnrichmentfunctions() { return this->numberOfEnrichmentFunctions; }
+
+    // Spatial query
+    bool isDofManEnriched(DofManager *dMan);
+    bool isDofManEnrichedByEnrichmentDomain(DofManager *dMan, int edNumber);
+    bool isElementEnriched(const Element *element); 
+    bool isElementEnrichedByEnrichmentDomain(const Element *element, int edNumber); 
+
+    // Should update receiver geometry to the state reached at given time step.
+    virtual void updateGeometry(TimeStep *tStep) {};
+
+    int giveStartOfDofIdPool() { return this->startOfDofIdPool; };
+    void computeDofManDofIdArray(IntArray &DofIdArray, DofManager *dMan, int enrichmentDomainNumber); // list of id's a particular dof manager supports
+    void giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber); // list of id's for the enrichment dofs
+
+
 
 protected:
     /// Link to associated Xfem manager.
-    XfemManager *xmanager;
-    /// Geometry associated with EnrichmentItem.
-    int geometry;
-    IntArray enrichmentDomainNumbers;
-    /// EnrichmentFunction associated with the EnrichmentItem. - should be a list of functions
-    int enrichmentFunction;
-    /// Additional dofIds from Enrichment. - depends on problem type and spatial dimension
-    IntArray dofsId;
+    XfemManager *xMan;
+    int startOfDofIdPool; // points to the first available dofId number associated with the ei 
 
-    // New -JB
-    /// Geometry list.
-    AList< BasicGeometry > *enrichementDomainList;
+    /// Geometry associated with EnrichmentItem.
+    IntArray enrichmentDomainNumbers;
+    IntArray *enrichesDofsWithIdArray;
+
+    /// EnrichmentFunction associated with the EnrichmentItem. - should generally be a list of functions
+    int enrichmentFunction;
+
+    /// Geometry object
+    AList< EnrichmentDomain > *enrichmentDomainList;
+    int numberOfEnrichmentDomains;
+
     /// Enrichment function list.
     AList< EnrichmentFunction > *enrichmentFunctionList;
     int numberOfEnrichmentFunctions;
-    //int numberOfGeometryItems;
-    int numberOfEnrichmentDomains;
 
 };
 
-/** Concrete representation of EnrichmentItem. */
+/** Sub classes to EnrichmentItem. */
 class CrackTip : public EnrichmentItem // only for 2D. Only the tip element belong to this
 {
 public:
@@ -145,9 +142,8 @@ class Inclusion : public EnrichmentItem
 {
 protected:
     Material *mat;
-
 public:
-    Inclusion(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain) { }
+    Inclusion(int n, XfemManager *xm, Domain *aDomain);
     virtual const char *giveClassName() const { return "Inclusion"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Material *giveMaterial() { return mat; }
@@ -155,22 +151,16 @@ public:
 
 
 
-// DELAMINATION
-
+/** Concrete representation of Delamination. */
 class Delamination : public EnrichmentItem 
 {
 public:
-    Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain){}
+    Delamination(int n, XfemManager *xm, Domain *aDomain);
     virtual const char *giveClassName() const { return "Delamination"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    //FloatArray delaminationZCoords;
-        //delaminationXiCoords;
 
-
-    FloatArray enrichmentDomainXiCoords; // must they be ordered?
+    FloatArray enrichmentDomainXiCoords; 
     std::list<std::pair<int, double> > delaminationXiCoordList;
-
-    
     double giveDelaminationZCoord(int n, Element *element); 
 
     int giveDelaminationGroupAt(double z);
@@ -181,50 +171,7 @@ public:
     double giveDelaminationGroupThickness(int dGroup, Element *e);
 
     void giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &zBottom, Element *e);
-
-
-};
-
-
-class GeometryDofManSwarm 
-{
-public:
-    GeometryDofManSwarm();
-    virtual const char *giveClassName() const { return "GeometryDofManSwarmClass"; }
-   
-
-
-};
-
-
-
-
-
-class MultipleDelamination : public EnrichmentItem  
-{
-public:
-    MultipleDelamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain){}
-    virtual const char *giveClassName() const { return "MultipleDelamination"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    
-    AList< EnrichmentItem > *delaminationList;
-    //AList< BasicGeometry > *enrichementDomainList;
-
-    int numberOfDelaminations;
-    int giveNumberOfDelaminations() { return numberOfDelaminations; };
-    
-    FloatArray delaminationZCoords; // must they be ordered?
-    double giveDelaminationZCoord(int n) { return delaminationZCoords.at(n); }; 
-
-    int giveDelaminationGroupAt(double z);
-    FloatArray delaminationGroupMidZ(int dGroup);
-    double giveDelaminationGroupMidZ(int dGroup, Element *e);
-    
-    FloatArray delaimnationGroupThickness;
-    double giveDelaminationGroupThickness(int dGroup, Element *e);
-
-    void giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &zBottom, Element *e);
-
+    double heaviside(double xi, double xi0);
 
 };
 

@@ -1,0 +1,38 @@
+planestress.oofem.out
+1D PETSc test
+linearstatic nsteps 1 lstype 3 smtype 7
+domain 2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+1 1 2 0 1 
+SimpleCS 1 thick 1.0
+IsoLE  1 d 1.0 E 300.e3 n 0.2 talpha 0.0
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0 
+ConstantEdgeLoad 2 loadTimeFunction 1 components 2 1.0 0.0 ndofs 2 loadtype 3
+ConstantFunction 1 f(t) 1.0
+
+vertex 1 
+nodeprop bc 2 1 1
+
+vertex 4 7
+curve 7 8
+nodeprop bc 2 1 0
+
+curve 3 4
+bload 2
+
+patch all
+elemprop crossSect 1 mat 1
+triatype TrPlanestress2D
+quadtype Planestress2D
+
+patch 1
+partition 1
+
+patch 2
+partition 2
+
+patch 3
+partition 3
+
+patch 4
+partition 4

@@ -47,11 +47,10 @@
 #endif
 
 namespace oofem {
-
 FEI1dQuad QTruss1d :: interpolation(1);
 
-QTruss1d :: QTruss1d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
-// Constructor.
+QTruss1d :: QTruss1d(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
+    // Constructor.
 {
     numberOfDofMans = 3;
 }
@@ -63,9 +62,8 @@ QTruss1d :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     this->StructuralElement :: initializeFrom(ir);
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_QTruss1d_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 
@@ -75,15 +73,22 @@ QTruss1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
     answer.setValues(1, D_u);
 }
 
+int
+QTruss1d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
+{
+    this->interpolation.local2global( answer, lcoords, FEIElementGeometryWrapper(this) );
+    return 1;
+}
+
 
 double
 QTruss1d :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double detJ = fabs( this->interpolation.giveTransformationJacobian(* gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
+    double detJ = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
     double weight  = gp->giveWeight();
-    return  detJ * weight * this->giveCrossSection()->give(CS_Area);
+    return detJ * weight * this->giveCrossSection()->give(CS_Area);
 }
 
 
@@ -104,13 +109,13 @@ QTruss1d :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // luated at gp.
 {
     FloatArray n;
-    answer.resize(1,3);
+    answer.resize(1, 3);
     answer.zero();
 
-    this->interpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-    answer.at(1,1) = n.at(1);
-    answer.at(1,2) = n.at(2);
-    answer.at(1,3) = n.at(3);
+    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    answer.at(1, 1) = n.at(1);
+    answer.at(1, 2) = n.at(2);
+    answer.at(1, 3) = n.at(3);
 }
 
 
@@ -121,10 +126,9 @@ QTruss1d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
 // Returns the linear part of the B matrix
 //
 {
-    answer.resize(1,3);
+    answer.resize(1, 3);
     answer.zero();
 
-    this->interpolation.evaldNdx(answer, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evaldNdx( answer, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 }
-
 } // end namespace oofem

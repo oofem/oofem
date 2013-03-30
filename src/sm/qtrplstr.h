@@ -35,23 +35,20 @@
 #ifndef qtrplstr_h
 #define qtrplstr_h
 
-#include "structuralelement.h"
+#include "nlstructuralelement.h"
 #include "fei2dtrquad.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
-
 #include "directerrorindicatorrc.h"
 #include "eleminterpmapperinterface.h"
-
-#include "mathfem.h"
 
 namespace oofem {
 /**
  * This class implements a quadratic triangular 6-node plane-
  * stress elasticity finite element. Each node has 2 degrees of freedom.
  */
-class QTrPlaneStress2d : public StructuralElement, public SpatialLocalizerInterface,
+class QTrPlaneStress2d : public NLStructuralElement, public SpatialLocalizerInterface,
     public SPRNodalRecoveryModelInterface,
     public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface
 {

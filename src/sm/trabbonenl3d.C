@@ -31,7 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 #include "trabbonenl3d.h"
 #include "structuralelement.h"
 #include "gausspnt.h"
@@ -51,6 +50,7 @@
  #include "conTable.h"
 #endif
 
+
 namespace oofem {
 
 TrabBoneNL3D :: TrabBoneNL3D(int n, Domain *d) : TrabBone3D(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
@@ -68,7 +68,7 @@ TrabBoneNL3D :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
 {
     FloatArray SDstrainVector, fullSDStrainVector;
     double cumPlastStrain;
-    TrabBoneNL3DStatus *nlStatus = ( TrabBoneNL3DStatus * ) this->giveStatus(gp);
+    TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
@@ -78,7 +78,7 @@ TrabBoneNL3D :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
 
     StrainVector strain( strainVector, gp->giveMaterialMode() );
 
-    this->performPlasticityReturn(gp, strain);
+    this->performPlasticityReturn(gp, strain,atTime, gp->giveMaterialMode() );
     this->computeLocalCumPlastStrain(cumPlastStrain, strain, gp, atTime);
     nlStatus->setLocalCumPlastStrainForAverage(cumPlastStrain);
 }
@@ -89,7 +89,7 @@ TrabBoneNL3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseForm form, MatResponseMode mode, GaussPoint *gp,
                                               TimeStep *atTime)
 {
-    TrabBoneNL3DStatus *nlStatus = ( TrabBoneNL3DStatus * ) this->giveStatus(gp);
+    TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
 
     double tempDam, beta, nlKappa;
     FloatArray tempEffectiveStress, tempTensor2, prodTensor, plasFlowDirec;
@@ -100,14 +100,14 @@ TrabBoneNL3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         elasticity.beInverseOf(compliance);
 
         answer = elasticity;
-    } else if ( mode == SecantStiffness )     {
+    } else if ( mode == SecantStiffness ) {
         this->constructAnisoComplTensor(compliance);
         elasticity.beInverseOf(compliance);
         tempDam = nlStatus->giveTempDam();
 
         answer = elasticity;
         answer.times(1.0 - tempDam);
-    } else if ( mode == TangentStiffness )     {
+    } else if ( mode == TangentStiffness ) {
         double kappa = nlStatus->giveKappa();
         double tempKappa = nlStatus->giveTempKappa();
         double dKappa = tempKappa - kappa;
@@ -130,7 +130,7 @@ TrabBoneNL3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
             if ( tempDam - dam > 0 ) {
                 thirdTerm.beDyadicProductOf(tempEffectiveStress, prodTensor);
                 thirdTerm.times(-expDam * critDam * exp(-expDam * nlKappa) * ( 1.0 - mParam ) / beta);
-            } else   {
+            } else {
                 thirdTerm.resize(6, 6);
             }
 
@@ -145,7 +145,7 @@ TrabBoneNL3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
             tangentMatrix.add(thirdTerm);
 
             answer = tangentMatrix;
-        } else   {
+        } else {
             // Import of state variables
             tempDam = nlStatus->giveTempDam();
             // Construction of the tangent stiffness
@@ -163,7 +163,7 @@ TrabBoneNL3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 void
 TrabBoneNL3D :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s, GaussPoint *gp, TimeStep *atTime)
 {
-    TrabBoneNL3DStatus *nlStatus = ( TrabBoneNL3DStatus * ) this->giveStatus(gp);
+    TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
     std::list< localIntegrationRecord > *list = nlStatus->giveIntegrationDomainList();
     std::list< localIntegrationRecord > :: iterator pos;
     TrabBoneNL3D *rmat;
@@ -179,10 +179,10 @@ TrabBoneNL3D :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
     }
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        rmat = ( TrabBoneNL3D * ) ( ( * pos ).nearGp )->giveMaterial();
-        if ( rmat->giveClassID() == this->giveClassID() ) {
-            rmat->giveRemoteNonlocalStiffnessContribution( ( * pos ).nearGp, rloc, s, rcontrib, atTime );
-            coeff = gp->giveElement()->computeVolumeAround(gp) * ( * pos ).weight / nlStatus->giveIntegrationScale();
+        rmat = dynamic_cast< TrabBoneNL3D * >( pos->nearGp->giveMaterial() );
+        if ( rmat ) {
+            rmat->giveRemoteNonlocalStiffnessContribution( pos->nearGp, rloc, s, rcontrib, atTime );
+            coeff = gp->giveElement()->computeVolumeAround(gp) * pos->weight / nlStatus->giveIntegrationScale();
 
             int i, j, dim1 = loc.giveSize(), dim2 = rloc.giveSize();
             contrib.resize(dim1, dim2);
@@ -197,22 +197,20 @@ TrabBoneNL3D :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
     }
 }
 
-
-std::list< localIntegrationRecord > *
+  std::list< localIntegrationRecord > *
 TrabBoneNL3D :: NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp)
 {
-    TrabBoneNL3DStatus *nlStatus = ( TrabBoneNL3DStatus * ) this->giveStatus(gp);
+    TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
     this->buildNonlocalPointTable(gp);
     return nlStatus->giveIntegrationDomainList();
 }
-
 
 int
 TrabBoneNL3D :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &loc, const UnknownNumberingScheme &s,
                                                        FloatArray &lcontrib, TimeStep *atTime)
 {
-    TrabBoneNL3DStatus *nlStatus = ( TrabBoneNL3DStatus * ) this->giveStatus(gp);
-    StructuralElement *elem = ( StructuralElement * ) ( gp->giveElement() );
+    TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
+    StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
 
     int nrows, nsize, i, j;
     double sum, nlKappa, dDamFunc, dam, tempDam;
@@ -249,16 +247,14 @@ TrabBoneNL3D :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
         return 0;
     }
 
-    return 0;
 }
-
 
 void
 TrabBoneNL3D :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &rloc, const UnknownNumberingScheme &s,
                                                         FloatArray &rcontrib, TimeStep *atTime)
 {
-    TrabBoneNL3DStatus *nlStatus = ( TrabBoneNL3DStatus * ) this->giveStatus(gp);
-    StructuralElement *elem = ( StructuralElement * ) ( gp->giveElement() );
+    TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
+    StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
 
     int ncols, nsize, i, j;
     double sum, beta;
@@ -285,7 +281,7 @@ TrabBoneNL3D :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
         beta = nlStatus->giveBeta();
 
         prodTensor.beTProductOf(SSaTensor, plasFlowDirec);
-        remoteNu.beScaled( 1.0 / beta, prodTensor);
+        remoteNu = 1 / beta * prodTensor;
         nsize = remoteNu.giveSize();
 
         for ( i = 1; i <= ncols; i++ ) {
@@ -296,7 +292,7 @@ TrabBoneNL3D :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
 
             rcontrib.at(i) = sum;
         }
-    } else   {
+    } else {
         for ( i = 1; i <= ncols; i++ ) {
             rcontrib.at(i) = 0.;
         }
@@ -308,20 +304,19 @@ void
 TrabBoneNL3D :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                      const FloatArray &totalStrain, TimeStep *atTime)
 {
-    TrabBoneNL3DStatus *nlStatus = ( TrabBoneNL3DStatus * ) this->giveStatus(gp);
+    TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
     this->initGpForNewStep(gp);
 
-    int i;
     double tempDam;
     FloatArray effStress, totalStress, densStress;
 
-    performPlasticityReturn(gp, totalStrain);
+    performPlasticityReturn(gp, totalStrain,atTime, gp->giveMaterialMode());
     tempDam = computeDamage(gp, atTime);
     effStress = * nlStatus->giveTempEffectiveStress();
 
-    totalStress.beScaled( 1.0 - tempDam, effStress);
+    totalStress = ( 1 - tempDam ) * effStress;
 
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         if ( sqrt( totalStress.at(i) * totalStress.at(i) ) < pow(10.0, -8.0) ) {
             totalStress.at(i) = 0.;
         }
@@ -329,10 +324,9 @@ TrabBoneNL3D :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
 
     computePlasStrainEnerDensity(gp, totalStrain, totalStress);
 
-    if ( JCrit != 0. ) {
+    if ( densCrit != 0. ) {
         computeDensificationStress(densStress, gp, totalStrain, atTime);
-    } else   {
-        densStress.resize(6);
+        answer.add(densStress);
     }
 
     answer = totalStress;
@@ -346,7 +340,7 @@ void
 TrabBoneNL3D :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *atTime)
 {
     double nonlocalContribution, nonlocalCumPlastStrain = 0.0;
-    TrabBoneNL3DStatus *nonlocStatus, *nlStatus = ( TrabBoneNL3DStatus * ) this->giveStatus(gp);
+    TrabBoneNL3DStatus *nonlocStatus, *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
 
     this->buildNonlocalPointTable(gp);
     this->updateDomainBeforeNonlocAverage(atTime);
@@ -355,11 +349,9 @@ TrabBoneNL3D :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *a
     std::list< localIntegrationRecord > :: iterator pos;
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        //coeff = gp->giveElement()->computeVolumeAround(gp) * ( * pos ).weight / nlStatus->giveIntegrationScale();
-
-        nonlocStatus = ( TrabBoneNL3DStatus * ) this->giveStatus( ( * pos ).nearGp );
+        nonlocStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus( pos->nearGp ) );
         nonlocalContribution = nonlocStatus->giveLocalCumPlastStrainForAverage();
-        nonlocalContribution *= ( * pos ).weight;
+        nonlocalContribution *= pos->weight;
         nonlocalCumPlastStrain += nonlocalContribution;
     }
 
@@ -374,12 +366,10 @@ Interface *
 TrabBoneNL3D :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return ( StructuralNonlocalMaterialExtensionInterface * ) this;
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
     } else if ( type == NonlocalMaterialStiffnessInterfaceType ) {
-        return ( NonlocalMaterialStiffnessInterface * ) this;
-    }
-    //
-    else {
+        return static_cast< NonlocalMaterialStiffnessInterface * >( this );
+    } else {
         return NULL;
     }
 }
@@ -394,13 +384,13 @@ TrabBoneNL3D :: initializeFrom(InputRecord *ir)
     TrabBone3D :: initializeFrom(ir);
     StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, R, IFT_TrabBoneNL3D_r, "r"); // Macro
+    IR_GIVE_FIELD(ir, R, IFT_TrabBoneNL3D_r, "r");
     if ( R < 0.0 ) {
         R = 0.0;
     }
 
     mParam = 2.;
-    IR_GIVE_OPTIONAL_FIELD(ir, mParam, IFT_TrabBoneNL3D_m, "m"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, mParam, IFT_TrabBoneNL3D_m, "m");
 
     return IRRT_OK;
 }
@@ -433,6 +423,10 @@ TrabBoneNL3D :: computeWeightFunction(const FloatArray &src, const FloatArray &c
     return 0.0;
 }
 
+
+/////////////////////////////////////////////////////////////////
+/////////TRABECULAR BONE NONLOCAL MATERIAL STATUS////////////////
+/////////////////////////////////////////////////////////////////
 
 TrabBoneNL3DStatus :: TrabBoneNL3DStatus(int n, Domain *d, GaussPoint *g) :
     TrabBone3DStatus(n, d, g), StructuralNonlocalMaterialStatusExtensionInterface()
@@ -497,7 +491,7 @@ TrabBoneNL3D :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPo
 {
     abort();
  #if 0
-    IDNLMaterialStatus *nlStatus = ( IDNLMaterialStatus * ) this->giveStatus(ip);
+    IDNLMaterialStatus *nlStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(ip) );
 
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(stepN);
@@ -507,14 +501,13 @@ TrabBoneNL3D :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPo
  #endif
 }
 
-
 int
 TrabBoneNL3D :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
 {
     abort();
  #if 0
     int result;
-    IDNLMaterialStatus *nlStatus = ( IDNLMaterialStatus * ) this->giveStatus(ip);
+    IDNLMaterialStatus *nlStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(ip) );
     double localEquivalentStrainForAverage;
 
     result = buff.unpackDouble(localEquivalentStrainForAverage);
@@ -523,7 +516,6 @@ TrabBoneNL3D :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *ste
 
  #endif
 }
-
 
 int
 TrabBoneNL3D :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
@@ -538,4 +530,7 @@ TrabBoneNL3D :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
 }
 #endif
 
+//
+// END: PARALLEL MODE OPTION
+/////////////////////////////////////////////////////////////////
 } // end namespace oofem

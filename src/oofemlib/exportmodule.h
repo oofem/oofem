@@ -40,6 +40,15 @@
 
 #include <list>
 
+///@name Input fields for export module
+//@{
+#define _IFT_ExportModule_tstepall "tstep_all"
+#define _IFT_ExportModule_tstepstep "tstep_step"
+#define _IFT_ExportModule_tstepsout "tstep_out"
+#define _IFT_ExportModule_domainall "domain_all"
+#define _IFT_ExportModule_domainmask "domain_mask"
+//@}
+
 namespace oofem {
 class EngngModel;
 class TimeStep;

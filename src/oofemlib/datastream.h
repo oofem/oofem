@@ -35,13 +35,13 @@
 #ifndef datastream_h
 #define datastream_h
 
-#include "combuff.h"
-#include "processcomm.h"
-
 #include <sstream>
 #include <cstdio>
 
 namespace oofem {
+
+class CommunicationBuffer;
+class ProcessCommunicatorBuff;
 
 /**
  * The purpose of DataStream abstract class is to allow to store/restore context to different streams,
@@ -63,15 +63,19 @@ public:
      */
     //@{
     /// Reads count integer values into array pointed by data.
-    virtual int read(int *data, const unsigned int count) = 0;
+    virtual int read(int *data, unsigned int count) = 0;
     /// Reads count unsigned long values into array pointed by data.
-    virtual int read(unsigned long *data, const unsigned int count) = 0;
+    virtual int read(unsigned long *data, unsigned int count) = 0;
     /// Reads count long values into array pointed by data.
-    virtual int read(long *data, const unsigned int count) = 0;
+    virtual int read(long *data, unsigned int count) = 0;
     /// Reads count double values into array pointed by data.
-    virtual int read(double *data, const unsigned int count) = 0;
+    virtual int read(double *data, unsigned int count) = 0;
     /// Reads count char values into array pointed by data.
-    virtual int read(char *data, const unsigned int count) = 0;
+    virtual int read(char *data, unsigned int count) = 0;
+    /// Reads count bool values into array pointed by data.
+    virtual int read(bool *data, unsigned int count) = 0;
+    /// Reads a string (stored as an int for the length followed by char*).
+    int read(std::string &data);
     //@}
 
     /**
@@ -81,58 +85,22 @@ public:
      */
     //@{
     /// Writes count integer values from array pointed by data.
-    virtual int write(const int *data, const unsigned int count) = 0;
+    virtual int write(const int *data, unsigned int count) = 0;
     /// Writes count unsigned long values from array pointed by data.
-    virtual int write(const unsigned long *data, const unsigned int count) = 0;
+    virtual int write(const unsigned long *data, unsigned int count) = 0;
     /// Writes count long values from array pointed by data.
-    virtual int write(const long *data, const unsigned int count) = 0;
+    virtual int write(const long *data, unsigned int count) = 0;
     /// Writes count double values from array pointed by data.
-    virtual int write(const double *data, const unsigned int count) = 0;
+    virtual int write(const double *data, unsigned int count) = 0;
     /// Writes count char values from array pointed by data.
-    virtual int write(const char *data, const unsigned int count) = 0;
+    virtual int write(const char *data, unsigned int count) = 0;
+    /// Writes count bool values from array pointed by data.
+    virtual int write(const bool *data, unsigned int count) = 0;
+    /// Reads a string (stored as an int for the length followed by char*).
+    int write(const std::string &data);
     //@}
 };
 
-/**
- * Implementation of StringDataStream representing DataStream interface to stringstream i/o.
- * This class creates a DataStream shell around c stream i/o routines. This class will
- * not provide any methods for opening/closing stream. This is the responsibility of user.
- * @see DataStream class.
- */
-class StringDataStream : public DataStream
-{
-private:
-    /// FILE pointer of associated stream
-    std::stringstream *stream;
-
-public:
-    /// Constructor, takes associated stream pointer as parameter
-    StringDataStream(std::stringstream *s) { stream = s; }
-    /// Destructor (will not close stream!)
-    virtual ~StringDataStream() { }
-
-    virtual int read(int *data, const unsigned int count)
-    { if ( stream->read(reinterpret_cast<char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
-    virtual int read(unsigned long *data, const unsigned int count)
-    { if ( stream->read(reinterpret_cast<char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
-    virtual int read(long *data, const unsigned int count)
-    { if ( stream->read(reinterpret_cast<char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
-    virtual int read(double *data, const unsigned int count)
-    { if ( stream->read(reinterpret_cast<char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
-    virtual int read(char *data, const unsigned int count)
-    { if ( stream->read(reinterpret_cast<char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
-
-    virtual int write(const int *data, const unsigned int count)
-    { if ( stream->write(reinterpret_cast<const char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
-    virtual int write(const unsigned long *data, const unsigned int count)
-    { if ( stream->write(reinterpret_cast<const char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
-    virtual int write(const long *data, const unsigned int count)
-    { if ( stream->write(reinterpret_cast<const char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
-    virtual int write(const double *data, const unsigned int count)
-    { if ( stream->write(reinterpret_cast<const char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
-    virtual int write(const char *data, const unsigned int count)
-    { if ( stream->write(reinterpret_cast<const char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
-};
 
 /**
  * Implementation of FileDataStream representing DataStream interface to file i/o.
@@ -151,27 +119,19 @@ public:
     /// Destructor (will not close stream!)
     virtual ~FileDataStream() { }
 
-    virtual int read(int *data, const unsigned int count)
-    { if ( fread(data, sizeof( int ), count, stream) == count ) { return 1; } else { return 0; } }
-    virtual int read(unsigned long *data, const unsigned int count)
-    { if ( fread(data, sizeof( unsigned long ), count, stream) == count ) { return 1; } else { return 0; } }
-    virtual int read(long *data, const unsigned int count)
-    { if ( fread(data, sizeof( long ), count, stream) == count ) { return 1; } else { return 0; } }
-    virtual int read(double *data, const unsigned int count)
-    { if ( fread(data, sizeof( double ), count, stream) == count ) { return 1; } else { return 0; } }
-    virtual int read(char *data, const unsigned int count)
-    { if ( fread(data, sizeof( char ), count, stream) == count ) { return 1; } else { return 0; } }
+    virtual int read ( int *data, unsigned int count );
+    virtual int read ( unsigned long *data, unsigned int count );
+    virtual int read ( long *data, unsigned int count );
+    virtual int read ( double *data, unsigned int count );
+    virtual int read ( char *data, unsigned int count );
+    virtual int read ( bool *data, unsigned int count );
 
-    virtual int write(const int *data, const unsigned int count)
-    { if ( fwrite(data, sizeof( int ), count, stream) == count ) { return 1; } else { return 0; } }
-    virtual int write(const unsigned long *data, const unsigned int count)
-    { if ( fwrite(data, sizeof( unsigned long ), count, stream) == count ) { return 1; } else { return 0; } }
-    virtual int write(const long *data, const unsigned int count)
-    { if ( fwrite(data, sizeof( long ), count, stream) == count ) { return 1; } else { return 0; } }
-    virtual int write(const double *data, const unsigned int count)
-    { if ( fwrite(data, sizeof( double ), count, stream) == count ) { return 1; } else { return 0; } }
-    virtual int write(const char *data, const unsigned int count)
-    { if ( fwrite(data, sizeof( char ), count, stream) == count ) { return 1; } else { return 0; } }
+    virtual int write ( const int *data, unsigned int count );
+    virtual int write ( const unsigned long *data, unsigned int count );
+    virtual int write ( const long *data, unsigned int count );
+    virtual int write ( const double *data, unsigned int count );
+    virtual int write ( const char *data, unsigned int count );
+    virtual int write ( const bool *data, unsigned int count );
 };
 
 #ifdef __PARALLEL_MODE
@@ -181,7 +141,6 @@ public:
  * This class creates a DataStream shell around communication buffer routines.
  * @see DataStream class.
  */
-
 class ComBuffDataStream : public DataStream
 {
 private:
@@ -194,17 +153,19 @@ public:
     /// Destructor
     virtual ~ComBuffDataStream() { }
 
-    virtual int read(int *data, const unsigned int count) { return buff->unpackArray(data, count); }
-    virtual int read(unsigned long *data, const unsigned int count) { return buff->unpackArray(data, count); }
-    virtual int read(long *data, const unsigned int count) { return buff->unpackArray(data, count); }
-    virtual int read(double *data, const unsigned int count) { return buff->unpackArray(data, count); }
-    virtual int read(char *data, const unsigned int count) { return buff->unpackArray(data, count); }
+    virtual int read(int *data, unsigned int count);
+    virtual int read(unsigned long *data, unsigned int count);
+    virtual int read(long *data, unsigned int count);
+    virtual int read(double *data, unsigned int count);
+    virtual int read(char *data, unsigned int count);
+    virtual int read(bool *data, unsigned int count);
 
-    virtual int write(const int *data, const unsigned int count) { return buff->packArray(data, count); }
-    virtual int write(const unsigned long *data, const unsigned int count) { return buff->packArray(data, count); }
-    virtual int write(const long *data, const unsigned int count) { return buff->packArray(data, count); }
-    virtual int write(const double *data, const unsigned int count) { return buff->packArray(data, count); }
-    virtual int write(const char *data, const unsigned int count) { return buff->packArray(data, count); }
+    virtual int write(const int *data, unsigned int count);
+    virtual int write(const unsigned long *data, unsigned int count);
+    virtual int write(const long *data, unsigned int count);
+    virtual int write(const double *data, unsigned int count);
+    virtual int write(const char *data, unsigned int count);
+    virtual int write(const bool *data, unsigned int count);
 };
 
 
@@ -218,23 +179,26 @@ class ProcessCommDataStream : public DataStream
 private:
     /// Associated process communicator buffer
     ProcessCommunicatorBuff *pc;
+
 public:
     /// Constructor
     ProcessCommDataStream(ProcessCommunicatorBuff *b) { pc = b; }
     /// Destructor
     virtual ~ProcessCommDataStream() { }
 
-    virtual int read(int *data, const unsigned int count) { return pc->unpackArray(data, count); }
-    virtual int read(unsigned long *data, const unsigned int count) { return pc->unpackArray(data, count); }
-    virtual int read(long *data, const unsigned int count) { return pc->unpackArray(data, count); }
-    virtual int read(double *data, const unsigned int count) { return pc->unpackArray(data, count); }
-    virtual int read(char *data, const unsigned int count) { return pc->unpackArray(data, count); }
+    virtual int read(int *data, unsigned int count);
+    virtual int read(unsigned long *data, unsigned int count);
+    virtual int read(long *data, unsigned int count);
+    virtual int read(double *data, unsigned int count);
+    virtual int read(char *data, unsigned int count);
+    virtual int read(bool *data, unsigned int count);
 
-    virtual int write(const int *data, const unsigned int count) { return pc->packArray(data, count); }
-    virtual int write(const unsigned long *data, const unsigned int count) { return pc->packArray(data, count); }
-    virtual int write(const long *data, const unsigned int count) { return pc->packArray(data, count); }
-    virtual int write(const double *data, const unsigned int count) { return pc->packArray(data, count); }
-    virtual int write(const char *data, const unsigned int count) { return pc->packArray(data, count); }
+    virtual int write(const int *data, unsigned int count);
+    virtual int write(const unsigned long *data, unsigned int count);
+    virtual int write(const long *data, unsigned int count);
+    virtual int write(const double *data, unsigned int count);
+    virtual int write(const char *data, unsigned int count);
+    virtual int write(const bool *data, unsigned int count);
 };
 
 #endif

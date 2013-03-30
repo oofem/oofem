@@ -79,38 +79,6 @@ public:
     /// reset receiver to an initial state (will force table update, when needed next time)
     void reset();
 
-#ifdef __OOFEG
-    /*
-     * Creates connectivity table.
-     * Alocates space for dofManagersConnectivity and dofManagersValues attributes.
-     * Availbale only in oofeg.
-     */
-    // void               allocateConnectivityTable ();
-    /*
-     * Builds the dofManagersConnectivity and dofManagersValues attributes.
-     * Availbale only in oofeg.
-     */
-    // void               instanciateYourself(oofegGraphicContext& gc);
-    // Resets dofManagersConnectivity and dofManagersValues attributes (Availbale only in oofeg).
-
-    // void               resetYourself ();
-    // Returns Number Of Elements sharing the given DofManager  (Availbale only in oofeg).
-    // int                giveNumberOfElementsInDofMngr (int i);
-
-    // Returns Value assigned to particular DofManager using dofManagersValues attribute (Availbale only in oofeg).
-    // double             giveDofMngrValue (oofegGraphicContext& gc, int i);
-    // Returns min and max values for values stored in dofManagersValues (Availbale only in oofeg).
-    // void               giveMinMaxVal (oofegGraphicContext& gc, double*, double*);
-#endif
-
-    /*
-     * void               instanciateReactionForceTable (TimeStep*);
-     * int                giveNumRestrDofMngrs() {return numRestrManagers;}
-     * int                giveRestrDofManager (int i) {return restrDofManager[i];}
-     * int                giveNumOfSharedElements (int inode);
-     * int                giveSharedElement (int inode, int ielem);
-     */
-
     /**
      * Builds connectivity table. This table contains for each dofManager the list of
      * elements sharing it.
@@ -134,9 +102,6 @@ public:
      * @param nodeList List of nodes, which neighborhood is searched.
      */
     void giveNodeNeighbourList(IntArray &answer, IntArray &nodeList);
-
-    /// Prints receiver contents on output.
-    void printYourself();
 };
 } // end namespace oofem
 #endif // conTable_h

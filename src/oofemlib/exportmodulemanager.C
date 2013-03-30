@@ -51,7 +51,7 @@ ExportModuleManager :: initializeFrom(InputRecord *ir)
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
     this->numberOfModules = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfModules, IFT_ExportModuleManager_nmodules, "nmodules"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfModules, IFT_ModuleManager_nmodules, "nmodules");
     return IRRT_OK;
 }
 
@@ -64,7 +64,7 @@ void
 ExportModuleManager :: doOutput(TimeStep *tStep)
 {
     for ( int i = 1; i <= numberOfModules; i++ ) {
-        ( ( ExportModule * ) this->giveModule(i) )->doOutput(tStep);
+        this->giveModule(i)->doOutput(tStep);
     }
 }
 
@@ -72,7 +72,7 @@ void
 ExportModuleManager :: initialize()
 {
     for ( int i = 1; i <= numberOfModules; i++ ) {
-        ( ( ExportModule * ) this->giveModule(i) )->initialize();
+        this->giveModule(i)->initialize();
     }
 }
 
@@ -81,7 +81,7 @@ void
 ExportModuleManager :: terminate()
 {
     for ( int i = 1; i <= numberOfModules; i++ ) {
-        ( ( ExportModule * ) this->giveModule(i) )->terminate();
+        this->giveModule(i)->terminate();
     }
 }
 } // end namespace oofem

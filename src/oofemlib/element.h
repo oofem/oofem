@@ -62,6 +62,20 @@
 
 #include <cstdio>
 
+///@name Input fields for general element.
+//@{
+#define _IFT_Element_mat "mat"
+#define _IFT_Element_crosssect "crosssect"
+#define _IFT_Element_nodes "nodes"
+#define _IFT_Element_bodyload "bodyloads"
+#define _IFT_Element_boundaryload "boundaryloads"
+#define _IFT_Element_lcs "lcs"
+#define _IFT_Element_partitions "partitions"
+#define _IFT_Element_remote "remote"
+#define _IFT_Element_activityltf "activityltf"
+#define _IFT_Element_nip "nip"
+//@}
+
 namespace oofem {
 class TimeStep;
 class Node;
@@ -158,8 +172,6 @@ protected:
      * use temporarily created integration rule.
      */
     IntegrationRule **integrationRulesArray;
-    /// Array of code numbers of element.
-    IntArray *locationArray;
 
     /// Transformation material matrix, used in orthotropic and anisotropic materials, global->local transformation
     FloatMatrix elemLocalCS;
@@ -201,23 +213,12 @@ public:
      * can be numbered separately. The default implementation assumes that location array will be assembled only for
      * one UnknownType value, and this array is cached on element level.
      */
-    virtual void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s) const;
+    virtual void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s, IntArray * dofIds = NULL) const;
     /**
      * Returns the location array for the boundary of the element.
      * The boundary is the corner nodes for 1D elements, the edges for a 2D element and the surfaces for a 3D element.
      */
-    void giveBoundaryLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s);
-    /**
-     * Invalidates location array in receiver. Each element stores its copy of location array(s), in order
-     * to avoid time consuming assembly of code numbers every time when requested. Some engineering models
-     * may support dynamic changes of static system (generally of boundary conditions during analysis),
-     * then these models use this function to invalidate location array after finishing time step,
-     * to enforce elements to update they code numbers, which may change. Changes of static system will lead
-     * to different number of equations, which requires special attention (for example internal structure
-     * of sparse matrices  must be reinitialized and characteristic vectors and matrices has to be
-     * newly assembled).
-     */
-    void invalidateLocationArray();
+    void giveBoundaryLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
     /**
      * @return Number of DOFs in element.
      */
@@ -565,7 +566,7 @@ public:
     int giveRegionNumber();
 
     /// Performs post initialization steps.
-    void postInitialize();
+    virtual void postInitialize();
 
     /**
      * Updates element state after equilibrium in time step has been reached.

@@ -42,7 +42,6 @@
 #include "qtruss1d.h"
 
 namespace oofem {
-
 /**
  * This class implements a three-node gradient truss bar element for one-dimensional
  * analysis.
@@ -65,7 +64,7 @@ public:
     virtual integrationDomain  giveIntegrationDomain() { return _Line; }
     virtual MaterialMode giveMaterialMode() { return _1dMatGrad; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-
+    virtual int computeNumberOfDofs(EquationID ut) { return 5; }
     int getNprimNodes() { return 3; }
     int getNprimVars() { return 1; }
     int getNsecNodes() { return 2; }
@@ -79,7 +78,8 @@ protected:
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual void computeGaussPoints();
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
-    virtual StructuralElement* giveStructuralElement(){return this;}
+    virtual StructuralElement *giveStructuralElement() { return this; }
+    virtual NLStructuralElement *giveNLStructuralElement() { return this; }
 };
 } // end namespace oofem
 #endif // truss1d_h

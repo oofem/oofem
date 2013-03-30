@@ -161,7 +161,7 @@ KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm
     int mu;
     double beta;
     FloatArray *gamma, reducedAnswer, help;
-    KelvinChainMaterialStatus *status = ( KelvinChainMaterialStatus * ) this->giveStatus(gp);
+    KelvinChainMaterialStatus *status = static_cast< KelvinChainMaterialStatus * >( this->giveStatus(gp) );
 
     // !!! chartime exponents are assumed to be equal to 1 !!!
 
@@ -188,7 +188,7 @@ KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm
         }
 
         // expand the strain to full form if requested
-        ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
+        static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
         giveFullCharacteristicVector(answer, gp, reducedAnswer);
     } else {
         /* error - total mode not implemented yet */
@@ -211,7 +211,7 @@ KelvinChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
     double tauMu;
 
     FloatArray help, *muthHiddenVarsVector, deltaEps0, help1;
-    KelvinChainMaterialStatus *status = ( KelvinChainMaterialStatus * ) this->giveStatus(gp);
+    KelvinChainMaterialStatus *status = static_cast< KelvinChainMaterialStatus * >( this->giveStatus(gp) );
 
     help = status->giveTempStrainVector(); // gives updated strain vector (at the end of time-step)
     help.subtract( status->giveStrainVector() ); // strain increment in current time-step
@@ -236,10 +236,10 @@ KelvinChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
         if ( deltaT / tauMu < 1.e-5 ) {
             betaMu = exp(-( deltaT ) / tauMu);
             lambdaMu = 1 - 0.5 * ( deltaT / tauMu ) + 1 / 6 * ( pow(deltaT / tauMu, 2) ) - 1 / 24 * ( pow(deltaT / tauMu, 3) );
-        } else if ( deltaT / tauMu > 30 )       {
+        } else if ( deltaT / tauMu > 30 ) {
             betaMu = 0;
             lambdaMu = tauMu / deltaT;
-        } else   {
+        } else {
             betaMu = exp(-( deltaT ) / tauMu);
             lambdaMu = ( 1.0 - betaMu ) * tauMu / deltaT;
         }

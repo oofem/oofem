@@ -111,7 +111,6 @@ double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
     default:
         return 0.0;
     }
-    return 0.0;
 }
 
 IRResultType
@@ -124,10 +123,10 @@ RotatingBoundary :: initializeFrom(InputRecord *ir)
 
     GeneralBoundaryCondition :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, axis, IFT_RotatingBoundary_axis, "axis"); // Macro
+    IR_GIVE_FIELD(ir, axis, IFT_RotatingBoundary_axis, "axis");
     axis.normalize();
 
-    IR_GIVE_OPTIONAL_FIELD(ir, center, IFT_RotatingBoundary_center, "center"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, center, IFT_RotatingBoundary_center, "center");
 
     return IRRT_OK;
 }
@@ -135,12 +134,6 @@ RotatingBoundary :: initializeFrom(InputRecord *ir)
 int
 RotatingBoundary :: giveInputRecordString(std :: string &str, bool keyword)
 {
-    char buff [ 1024 ];
-
-    GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
-
-    str += buff;
-
-    return 1;
+    return GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
 }
 } // end namespace oofem

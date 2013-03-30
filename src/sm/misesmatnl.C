@@ -74,7 +74,7 @@ void
 MisesMatNl :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                    const FloatArray &totalStrain, TimeStep *atTime)
 {
-    MisesMatNlStatus *nlStatus = ( MisesMatNlStatus * ) this->giveStatus(gp);
+    MisesMatNlStatus *nlStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
     this->initGpForNewStep(gp);
 
     double tempDam;
@@ -98,7 +98,7 @@ MisesMatNl :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, M
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
     double E = lmat->give('E', gp);
     double nlKappa;
-    MisesMatNlStatus *status = ( MisesMatNlStatus * ) this->giveStatus(gp);
+    MisesMatNlStatus *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
     double kappa = status->giveCumulativePlasticStrain();
     double tempKappa = status->giveTempCumulativePlasticStrain();
     double tempDamage = status->giveTempDamage();
@@ -135,7 +135,7 @@ MisesMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoi
      */
 
     double cumPlasticStrain;
-    MisesMatNlStatus *nlstatus = ( MisesMatNlStatus * ) this->giveStatus(gp);
+    MisesMatNlStatus *nlstatus = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
@@ -155,13 +155,13 @@ MisesMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoi
 void
 MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
 {
-    MisesMatNlStatus *nonlocStatus, *status = ( MisesMatNlStatus * ) this->giveStatus(gp);
+    MisesMatNlStatus *nonlocStatus, *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
     std::list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp);
     std::list< localIntegrationRecord > :: iterator pos, postarget;
 
     // find the current Gauss point (target) in the list of it neighbors
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        if ( ( * pos ).nearGp == gp ) {
+        if ( pos->nearGp == gp ) {
             postarget = pos;
         }
     }
@@ -178,17 +178,17 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     double distance = 0.; // distance modified by damage
     xprev = xtarget;
     for ( pos = postarget; pos != list->end(); ++pos ) {
-        nearElem = ( ( * pos ).nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( ( * pos ).nearGp )->giveCoordinates() ) );
+        nearElem = ( pos->nearGp )->giveElement();
+        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveCoordinates() ) );
         x = coords.at(1);
-        nonlocStatus = ( MisesMatNlStatus * ) this->giveStatus( ( * pos ).nearGp );
+        nonlocStatus = static_cast< MisesMatNlStatus * >( this->giveStatus( pos->nearGp ) );
         damage = nonlocStatus->giveTempDamage();
         if ( pos != postarget ) {
             distance += ( x - xprev ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
         }
 
-        w = computeWeightFunction(distance) * nearElem->computeVolumeAround( ( * pos ).nearGp );
-        ( * pos ).weight = w;
+        w = computeWeightFunction(distance) * nearElem->computeVolumeAround( pos->nearGp );
+        pos->weight = w;
         wsum += w;
         xprev = x;
         damageprev = damage;
@@ -197,15 +197,15 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     // process the list from the target to the beginning
     distance = 0.;
     for ( pos = postarget; pos != list->begin(); --pos ) {
-        nearElem = ( ( * pos ).nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( ( * pos ).nearGp )->giveCoordinates() ) );
+        nearElem = ( pos->nearGp )->giveElement();
+        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveCoordinates() ) );
         x = coords.at(1);
-        nonlocStatus = ( MisesMatNlStatus * ) this->giveStatus( ( * pos ).nearGp );
+        nonlocStatus = static_cast< MisesMatNlStatus * >( this->giveStatus( pos->nearGp ) );
         damage = nonlocStatus->giveTempDamage();
         if ( pos != postarget ) {
             distance += ( xprev - x ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
-            w = computeWeightFunction(distance) * nearElem->computeVolumeAround( ( * pos ).nearGp );
-            ( * pos ).weight = w;
+            w = computeWeightFunction(distance) * nearElem->computeVolumeAround( pos->nearGp );
+            pos->weight = w;
             wsum += w;
         }
 
@@ -216,14 +216,14 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     // the beginning must be treated separately
     pos = list->begin();
     if ( pos != postarget ) {
-        nearElem = ( ( * pos ).nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( ( * pos ).nearGp )->giveCoordinates() ) );
+        nearElem = ( pos->nearGp )->giveElement();
+        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveCoordinates() ) );
         x = coords.at(1);
-        nonlocStatus = ( MisesMatNlStatus * ) this->giveStatus( ( * pos ).nearGp );
+        nonlocStatus = static_cast< MisesMatNlStatus * >( this->giveStatus( pos->nearGp ) );
         damage = nonlocStatus->giveTempDamage();
         distance += ( xprev - x ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
-        w = computeWeightFunction(distance) * nearElem->computeVolumeAround( ( * pos ).nearGp );
-        ( * pos ).weight = w;
+        w = computeWeightFunction(distance) * nearElem->computeVolumeAround( pos->nearGp );
+        pos->weight = w;
         wsum += w;
     }
 
@@ -254,7 +254,7 @@ void
 MisesMatNl :: computeCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *atTime)
 {
     double nonlocalContribution, nonlocalCumPlasticStrain = 0.0;
-    MisesMatNlStatus *nonlocStatus, *status = ( MisesMatNlStatus * ) this->giveStatus(gp);
+    MisesMatNlStatus *nonlocStatus, *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
 
     this->buildNonlocalPointTable(gp);
     this->updateDomainBeforeNonlocAverage(atTime);
@@ -264,10 +264,10 @@ MisesMatNl :: computeCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *a
     std::list< localIntegrationRecord > :: iterator pos;
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        nonlocStatus = ( MisesMatNlStatus * ) this->giveStatus( ( * pos ).nearGp );
+        nonlocStatus = static_cast< MisesMatNlStatus * >( this->giveStatus( pos->nearGp ) );
         nonlocalContribution = nonlocStatus->giveLocalCumPlasticStrainForAverage();
         if ( nonlocalContribution > 0 ) {
-            nonlocalContribution *= ( * pos ).weight;
+            nonlocalContribution *= pos->weight;
         }
 
         nonlocalCumPlasticStrain += nonlocalContribution;
@@ -291,9 +291,9 @@ Interface *
 MisesMatNl :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return ( StructuralNonlocalMaterialExtensionInterface * ) this;
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
     } else if ( type == NonlocalMaterialStiffnessInterfaceType ) {
-        return ( NonlocalMaterialStiffnessInterface * ) this;
+        return static_cast< NonlocalMaterialStiffnessInterface * >( this );
     } else {
         return NULL;
     }
@@ -320,11 +320,11 @@ MisesMatNl :: initializeFrom(InputRecord *ir)
     }
 
     if ( averType == 2 || averType == 3 ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, exponent, IFT_MisesMatNl_averagingtype, "exp");
+        IR_GIVE_OPTIONAL_FIELD(ir, exponent, IFT_MisesMatNl_exp, "exp");
     }
 
     if ( averType >= 2 && averType <= 5 ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, Rf, IFT_MisesMatNl_averagingtype, "rf");
+        IR_GIVE_OPTIONAL_FIELD(ir, Rf, IFT_MisesMatNl_rf, "rf");
     }
 
     return IRRT_OK;
@@ -348,7 +348,7 @@ MisesMatNl :: giveInputRecordString(std :: string &str, bool keyword)
 double
 MisesMatNl :: computeDamage(GaussPoint *gp, TimeStep *atTime)
 {
-    MisesMatNlStatus *nlStatus = ( MisesMatNlStatus * ) this->giveStatus(gp);
+    MisesMatNlStatus *nlStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
     double nlKappa;
     this->computeCumPlasticStrain(nlKappa, gp, atTime);
     double dam, tempDam;
@@ -367,7 +367,7 @@ MisesMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &d
                                                                    GaussPoint *gp, TimeStep *atTime)
 {
     double coeff;
-    MisesMatNlStatus *status = ( MisesMatNlStatus * ) this->giveStatus(gp);
+    MisesMatNlStatus *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
     std::list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
     std::list< localIntegrationRecord > :: iterator pos;
     MisesMatNl *rmat;
@@ -381,10 +381,10 @@ MisesMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &d
     }
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        rmat = ( MisesMatNl * )( ( * pos ).nearGp )->giveMaterial();
-        if ( rmat->giveClassID() == this->giveClassID() ) {
-            rmat->giveRemoteNonlocalStiffnessContribution( ( * pos ).nearGp, rloc, s, rcontrib, atTime );
-            coeff = gp->giveElement()->computeVolumeAround(gp) * ( * pos ).weight / status->giveIntegrationScale();
+        rmat = dynamic_cast< MisesMatNl * >( pos->nearGp->giveMaterial() );
+        if ( rmat ) {
+            rmat->giveRemoteNonlocalStiffnessContribution( pos->nearGp, rloc, s, rcontrib, atTime );
+            coeff = gp->giveElement()->computeVolumeAround(gp) * pos->weight / status->giveIntegrationScale();
 
             int i, j, dim1 = loc.giveSize(), dim2 = rloc.giveSize();
             contrib.resize(dim1, dim2);
@@ -403,7 +403,7 @@ MisesMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &d
 std::list< localIntegrationRecord > *
 MisesMatNl :: NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp)
 {
-    MisesMatNlStatus *status = ( MisesMatNlStatus * ) this->giveStatus(gp);
+    MisesMatNlStatus *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
     this->buildNonlocalPointTable(gp);
     return status->giveIntegrationDomainList();
 }
@@ -415,8 +415,8 @@ MisesMatNl :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &l
 {
     int nrows, nsize, i, j;
     double sum, nlKappa, damage, tempDamage, dDamF;
-    MisesMatNlStatus *status = ( MisesMatNlStatus * ) this->giveStatus(gp);
-    StructuralElement *elem = ( StructuralElement * )( gp->giveElement() );
+    MisesMatNlStatus *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
+    StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
     FloatMatrix b;
     FloatArray stress;
 
@@ -452,8 +452,8 @@ MisesMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &
 {
     int ncols, nsize, i, j;
     double sum, kappa, tempKappa;
-    MisesMatNlStatus *status = ( MisesMatNlStatus * ) this->giveStatus(gp);
-    StructuralElement *elem = ( StructuralElement * )( gp->giveElement() );
+    MisesMatNlStatus *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
+    StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
     FloatMatrix b;
     FloatArray stress;
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
@@ -573,7 +573,7 @@ Interface *
 MisesMatNlStatus :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialStatusExtensionInterfaceType ) {
-        return ( StructuralNonlocalMaterialStatusExtensionInterface * ) this;
+        return static_cast< StructuralNonlocalMaterialStatusExtensionInterface * >( this );
     } else {
         return MisesMatStatus :: giveInterface(type);
     }
@@ -584,7 +584,7 @@ MisesMatNlStatus :: giveInterface(InterfaceType type)
 int
 MisesMatNl :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
 {
-    MisesMatNlStatus *nlStatus = ( MisesMatNlStatus * ) this->giveStatus(ip);
+    MisesMatNlStatus *nlStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(ip) );
 
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(stepN);
@@ -597,7 +597,7 @@ int
 MisesMatNl :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
 {
     int result;
-    MisesMatNlStatus *nlStatus = ( MisesMatNlStatus * ) this->giveStatus(ip);
+    MisesMatNlStatus *nlStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(ip) );
     double localCumPlasticStrainForAverage;
 
     result = buff.unpackDouble(localCumPlasticStrainForAverage);

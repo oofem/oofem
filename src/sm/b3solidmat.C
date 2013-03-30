@@ -54,7 +54,7 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
     // units must be in MPa, m???, MN.
     //
 
-    double fc, c, wc, ac, alpha1 = 1.0, alpha2 = 1.0;
+    double fc = -1.0, c = -1.0, wc = -1.0, ac = -1.0, alpha1 = 1.0, alpha2 = 1.0;
     double initHum; //MPS shrinkage parameter - initial value of humidity (range 0.2-0.98)
     double finalHum; //MPS shrinkage parameter - final value of humidity (range 0.2-0.98)
 
@@ -168,7 +168,7 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
         }
     }
 
-    IR_GIVE_FIELD(ir, talpha, IFT_B3Material_talpha, "talpha"); // Macro
+    IR_GIVE_FIELD(ir, talpha, IFT_B3Material_talpha, "talpha");
 
     // evaluate the total water content [kg/m^3]
     w = wc * c;
@@ -577,7 +577,7 @@ B3SolidMaterial :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, 
         return;
     }
 
-    ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
+    static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
     giveReducedCharacteristicVector(answer, gp, fullAnswer);
 }
 
@@ -612,7 +612,7 @@ B3SolidMaterial :: computePointShrinkageStrainVectorMPS(FloatArray &answer, MatR
         return;
     }
 
-    ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
+    static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
     giveReducedCharacteristicVector(answer, gp, fullAnswer);
 }
 
@@ -669,7 +669,7 @@ B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm for
     double v, eta;
     FloatArray help, reducedAnswer, sigma;
     FloatMatrix C;
-    KelvinChainMaterialStatus *status = ( KelvinChainMaterialStatus * ) this->giveStatus(gp);
+    KelvinChainMaterialStatus *status = static_cast< KelvinChainMaterialStatus * >( this->giveStatus(gp) );
 
     // !!! chartime exponents are assumed to be equal to 1 !!!
     if ( mode == VM_Incremental ) {
@@ -695,7 +695,7 @@ B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm for
         }
 
         // expand the strain to full form if requested
-        ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
+        static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
         giveFullCharacteristicVector(answer, gp, reducedAnswer);
     } else {
         /* error - total mode not implemented yet */
@@ -717,7 +717,7 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, MatResponseF
     double sv, sn, et0, et, wrate = 0.0, trate = 0.0, h1;
     double time = relMatAge + atTime->giveTargetTime() / timeFactor;
     int i, err, tflag = 0, wflag = 0;
-    KelvinChainMaterialStatus *status = ( KelvinChainMaterialStatus * ) this->giveStatus(gp);
+    KelvinChainMaterialStatus *status = static_cast< KelvinChainMaterialStatus * >( this->giveStatus(gp) );
     int size = 6;
     FloatArray fullAnswer;
     MaterialMode mmode = gp->giveMaterialMode();
@@ -730,8 +730,6 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, MatResponseF
 
     fullAnswer.resize(size);
     fullAnswer.zero();
-
-
 
     /* ask for humidity and temperature from external sources, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
@@ -770,7 +768,7 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, MatResponseF
     }
 
     if ( status->giveStressVector().giveSize() ) {
-        stressVector      = status->giveStressVector();
+        stressVector = status->giveStressVector();
     } else {
         stressVector.resize( this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
         stressVector.zero();
@@ -799,7 +797,7 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, MatResponseF
             return;
         }
 
-        ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
+        static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
         giveReducedCharacteristicVector(answer, gp, fullAnswer);
         return;
     } else { // total values required
@@ -820,7 +818,7 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, MatResponseF
             return;
         }
 
-        ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
+        static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
         giveReducedCharacteristicVector(answer, gp, fullAnswer);
         return;
     }
@@ -880,7 +878,7 @@ B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *atTime, int o
      *      // if the time step is the first one, ask for an initial microprestress
      *      S = this->giveInitMicroPrestress();
      * } else {
-     *      B3SolidMaterialStatus *status = ( B3SolidMaterialStatus * ) this->giveStatus(gp);
+     *      B3SolidMaterialStatus *status = static_cast< B3SolidMaterialStatus * >( this->giveStatus(gp) );
      *      S = status->giveMPS();
      * }
      *
@@ -917,13 +915,11 @@ B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *atTime, int o
         // if the time step is the first one, ask for an initial microprestress
         S = this->giveInitMicroPrestress();
     } else {
-        B3SolidMaterialStatus *status =
-            ( B3SolidMaterialStatus * ) this->giveStatus(gp);
+        B3SolidMaterialStatus *status = static_cast< B3SolidMaterialStatus * >( this->giveStatus(gp) );
         S = status->giveMPS();
     }
 
-    humOld = this->giveHumidity(gp, atTime) - this->giveHumidityIncrement(gp,
-                                                                          atTime);
+    humOld = this->giveHumidity(gp, atTime) - this->giveHumidityIncrement(gp, atTime);
     if ( option == 1 ) {  // hum in the end of the time step
         humNew = this->giveHumidity(gp, atTime);
     } else if ( option == 0 ) {  // hum in the middle of the time step
@@ -1036,8 +1032,7 @@ B3SolidMaterial :: CreateStatus(GaussPoint *gp) const
 void
 B3SolidMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
 {
-    B3SolidMaterialStatus *status = ( B3SolidMaterialStatus * ) this->giveStatus(
-        gp);
+    B3SolidMaterialStatus *status = static_cast< B3SolidMaterialStatus * >( this->giveStatus(gp) );
     if ( this->MicroPrestress == 1 ) {
         status->setMPS( this->computeMicroPrestress(gp, tNow, 1) );
     }

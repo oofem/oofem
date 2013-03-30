@@ -97,7 +97,7 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm fo
     FloatArray stressIncrement, stressVector, strainIncrement, reducedStrain, eigenStrain;
     FloatMatrix Binv;
     double Emodulus;
-    RheoChainMaterialStatus *status = ( RheoChainMaterialStatus * ) this->giveStatus(gp);
+    RheoChainMaterialStatus *status = static_cast< RheoChainMaterialStatus * >( this->giveStatus(gp) );
 
     // initialize the temporary material status and the Gauss point
     this->initTempStatus(gp);
@@ -150,7 +150,7 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm fo
     }
 
     // expand the stress to full form if needed
-    ( ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection() )
+    static_cast< StructuralCrossSection * >( gp->giveCrossSection() )
     ->giveFullCharacteristicVector(answer, gp, stressVector);
 }
 
@@ -161,7 +161,7 @@ RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
                                                        const FloatArray &atTimes,
                                                        double t0, double tr)
 {
-    int i, k, size, nsteps, si;
+    int size, nsteps, si;
     double taui, tauk, Jtrt0, totalDeltaSigma;
     double sig0;
     double sum;
@@ -178,8 +178,9 @@ RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
     si = 2;
 
     totalDeltaSigma = 0.;
-    for ( k = si; k <= nsteps; k++ ) {
-        for ( sum = 0., i = si; i <= k - 1; i++ ) {
+    for ( int k = si; k <= nsteps; k++ ) {
+        sum = 0.;
+        for ( int i = si; i <= k - 1; i++ ) {
             if ( i == 1 ) {
                 // ??? it seems that tr plays no role because si=2 and the case
                 // i=1 or k=1 can never occur
@@ -260,7 +261,7 @@ RheoChainMaterial :: giveUnitStiffnessMatrix(FloatMatrix &answer,
      * at the crosssection level).
      */
 
-    ( ( StructuralCrossSection * ) gp->giveCrossSection() )
+    static_cast< StructuralCrossSection * >( gp->giveCrossSection() )
     ->giveCharMaterialStiffnessMatrixOf(answer,
                                         form, TangentStiffness, gp,
                                         this->giveLinearElasticMaterial(),
@@ -278,7 +279,7 @@ RheoChainMaterial :: giveUnitComplianceMatrix(FloatMatrix &answer,
  * and a unit value of Young's modulus.
  */
 {
-    ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
+    static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
     giveCharMaterialComplianceMatrixOf(answer, form, TangentStiffness, gp,
                                        this->giveLinearElasticMaterial(),
                                        tStep);
@@ -406,7 +407,7 @@ RheoChainMaterial :: computeCharTimes()
      */
 # define a 10.
 
-    int size, nsteps, i;
+    int size, nsteps;
     double endTime, Taun1, Tau1, help;
 
     endTime = this->giveEndOfTimeOfInterest() + relMatAge;
@@ -434,7 +435,7 @@ RheoChainMaterial :: computeCharTimes()
     charTimes.at(1) = Tau1;
     charTimes.at(size) = 1.0e10;
     help = ( log(Taun1) - log(Tau1) ) / ( double ) nsteps;
-    for ( i = 1; i <= nsteps; i++ ) {
+    for ( int i = 1; i <= nsteps; i++ ) {
         charTimes.at(i + 1) = exp(log(Tau1) + help * i);
     }
 }
@@ -570,12 +571,12 @@ RheoChainMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     StructuralMaterial :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, nu, IFT_RheoChainMaterial_n, "n"); // Macro
-    IR_GIVE_FIELD(ir, relMatAge, IFT_RheoChainMaterial_relmatage, "relmatage"); // Macro
+    IR_GIVE_FIELD(ir, nu, IFT_RheoChainMaterial_n, "n");
+    IR_GIVE_FIELD(ir, relMatAge, IFT_RheoChainMaterial_relmatage, "relmatage");
     this->begOfTimeOfInterest = -1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, begOfTimeOfInterest, IFT_RheoChainMaterial_begoftimeofinterest, "begoftimeofinterest"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, begOfTimeOfInterest, IFT_RheoChainMaterial_begoftimeofinterest, "begoftimeofinterest");
     this->endOfTimeOfInterest = -1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, IFT_RheoChainMaterial_endoftimeofinterest, "endoftimeofinterest"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, IFT_RheoChainMaterial_endoftimeofinterest, "endoftimeofinterest");
     IR_GIVE_FIELD(ir, timeFactor, IFT_RheoChainMaterial_timefactor, "timefactor"); // solution time/timeFactor should give time in days
 
     this->computeCharTimes(); // sets up nUnits variable
@@ -711,17 +712,16 @@ RheoChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     // printing of hidden variables
     // useful only for debugging
-    int i, j;
     FloatArray helpVec;
 
     StructuralMaterialStatus :: printOutputAt(file, tStep);
 
     fprintf(file, "{hidden variables: ");
-    for ( i = 0; i < nUnits; i++ ) {
-        ( ( StructuralCrossSection * )
-         gp->giveCrossSection() )->giveFullCharacteristicVector( helpVec, gp, * ( hiddenVars [ i ] ) );
+    for ( int i = 0; i < nUnits; i++ ) {
+        static_cast< StructuralCrossSection * >( gp->giveCrossSection() )
+            ->giveFullCharacteristicVector( helpVec, gp, * ( hiddenVars [ i ] ) );
         fprintf(file, "{ ");
-        for ( j = 1; j <= helpVec.giveSize(); j++ ) {
+        for ( int j = 1; j <= helpVec.giveSize(); j++ ) {
             fprintf( file, "%f ", helpVec.at(j) );
         }
 
@@ -730,7 +730,7 @@ RheoChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
     if ( shrinkageStrain.isNotEmpty() ) {
         fprintf(file, "shrinkageStrain: {");
-        for ( j = 1; j <= shrinkageStrain.giveSize(); j++ ) {
+        for ( int j = 1; j <= shrinkageStrain.giveSize(); j++ ) {
             fprintf( file, "%f ", shrinkageStrain.at(j) );
         }
 
@@ -759,7 +759,6 @@ RheoChainMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, voi
 // saves full information stored in this Status
 //
 {
-    int i;
     contextIOResultType iores;
 
     if ( stream == NULL ) {
@@ -771,7 +770,7 @@ RheoChainMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, voi
     }
 
     // write raw data
-    for ( i = 0; i < nUnits; i++ ) {
+    for ( int i = 0; i < nUnits; i++ ) {
         if ( hiddenVars [ i ] == NULL ) {
             hiddenVars [ i ] = new FloatArray(0);
         }
@@ -795,7 +794,6 @@ RheoChainMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, 
 // restore the state variables from a stream
 //
 {
-    int i;
     contextIOResultType iores;
 
     if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
@@ -803,7 +801,7 @@ RheoChainMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, 
     }
 
     // read raw data
-    for ( i = 0; i < nUnits; i++ ) {
+    for ( int i = 0; i < nUnits; i++ ) {
         if ( hiddenVars [ i ] == NULL ) {
             hiddenVars [ i ] = new FloatArray(0);
         }

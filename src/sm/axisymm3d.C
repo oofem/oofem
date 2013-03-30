@@ -70,13 +70,13 @@ Interface *
 Axisymm3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return ( NodalAveragingRecoveryModelInterface * ) this;
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return ( SpatialLocalizerInterface * ) this;
+        return static_cast< SpatialLocalizerInterface * >( this );
     }
 
     return NULL;
@@ -88,14 +88,13 @@ Axisymm3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
 // evaluated at aGaussPoint.
 {
-    int i;
     FloatArray n(3);
 
     answer.resize(2, 6);
     answer.zero();
     this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(1, 2 * i - 1) = n.at(i);
         answer.at(2, 2 * i - 0) = n.at(i);
     }
@@ -239,11 +238,11 @@ Axisymm3d :: initializeFrom(InputRecord *ir)
 
     this->StructuralElement :: initializeFrom(ir);
 
-    numberOfGaussPoints      = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Axisymm3d_nip, "nip"); // Macro
+    numberOfGaussPoints = 1;
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Element_nip, "nip");
 
-    numberOfFiAndShGaussPoints    = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, IFT_Axisymm3d_nipfish, "nipfish"); // Macro
+    numberOfFiAndShGaussPoints = 1;
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, IFT_Axisymm3d_nipfish, "nipfish");
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
            ( numberOfGaussPoints == 4 ) ||
@@ -257,8 +256,6 @@ Axisymm3d :: initializeFrom(InputRecord *ir)
         numberOfFiAndShGaussPoints = 1;
     }
 
-    this->computeGaussPoints();
-
     return IRRT_OK;
 }
 
@@ -269,7 +266,6 @@ Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
 // the receiver, at time step stepN. The nature of these strains depends
 // on the element's type.
 {
-    int i;
     FloatMatrix b, A;
     FloatArray u, Epsilon, help;
     fMode mode = domain->giveEngngModel()->giveFormulation();
@@ -306,7 +302,7 @@ Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
         answer.at(6) = Epsilon.at(4);
 
         if ( nlGeometry ) {
-            for ( i = 1; i <= 6; i++ ) {
+            for ( int i = 1; i <= 6; i++ ) {
                 // nonlin part of strain vector
                 this->computeNLBMatrixAt(A, gp, i);
                 if ( A.isNotEmpty() ) {
@@ -453,7 +449,7 @@ Axisymm3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aG
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 4);
     answer.zero();

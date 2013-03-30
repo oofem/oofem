@@ -39,6 +39,7 @@
 #include "intarray.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
+#include "fluiddynamicmaterial.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -58,11 +59,16 @@ SUPGElement :: ~SUPGElement()
 IRResultType
 SUPGElement :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    //IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     FMElement :: initializeFrom(ir);
-    this->computeGaussPoints();
+
+    IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, IFT_SUPGElement_bsides, _IFT_SUPGElement_bsides);
+    if ( !boundarySides.isEmpty() ) {
+        IR_GIVE_FIELD(ir, boundaryCodes, IFT_SUPGElement_bcodes, _IFT_SUPGElement_bcodes);
+    }
+
     return IRRT_OK;
 }
 
@@ -216,7 +222,7 @@ SUPGElement :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeS
     // compute deviatoric strain
     this->computeDeviatoricStrain(eps, gp, tStep);
     // call material to compute stress
-    ( ( FluidDynamicMaterial * ) this->giveMaterial() )->computeDeviatoricStressVector(answer, gp, eps, tStep);
+    static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->computeDeviatoricStressVector(answer, gp, eps, tStep);
 }
 
 
@@ -225,7 +231,6 @@ void
 SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 {
     bcType boundarytype;
-    int i, n, side;
     int nLoads = 0;
     int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
     Load *load;
@@ -238,17 +243,17 @@ SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
     answer.resize(undofs, undofs);
     answer.zero();
 
-    nLoads    = this->giveBoundaryLoadArray()->giveSize() / 2;
+    nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
     if ( nLoads ) {
-        for ( i = 1; i <= nLoads; i++ ) {
-            n     = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
-            side    = boundaryLoadArray.at(i * 2);
-            load  = dynamic_cast< Load * >( domain->giveLoad(n) );
+        for ( int i = 1; i <= nLoads; i++ ) {
+            int n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+            int side = boundaryLoadArray.at(i * 2);
+            load = domain->giveLoad(n);
             boundarytype = load->giveType();
             if ( boundarytype == SlipWithFriction ) {
-                this->computeSlipWithFrictionBCTerm_MB(helpMatrix, ( Load * ) load, side, atTime);
+                this->computeSlipWithFrictionBCTerm_MB(helpMatrix, load, side, atTime);
             } else if ( boundarytype == PenetrationWithResistance ) {
-                this->computePenetrationWithResistanceBCTerm_MB(helpMatrix, ( Load * ) load, side, atTime);
+                this->computePenetrationWithResistanceBCTerm_MB(helpMatrix, load, side, atTime);
             } else {
                 helpMatrix.resize(undofs, undofs);
                 helpMatrix.zero();
@@ -258,15 +263,15 @@ SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
             answer.add(helpMatrix);
         }
     }
-    nLoads    = this->giveBodyLoadArray()->giveSize();
+    nLoads = this->giveBodyLoadArray()->giveSize();
 
     if ( nLoads ) { 
         bcGeomType ltype;
-        for ( i = 1; i <= nLoads; i++ ) {
+        for ( int i = 1; i <= nLoads; i++ ) {
             load  = domain->giveLoad( bodyLoadArray.at(i) );
             ltype = load->giveBCGeoType();
             if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
-                this->computeHomogenizedReinforceTerm_MB(helpMatrix, ( Load * ) load, atTime);
+                this->computeHomogenizedReinforceTerm_MB(helpMatrix, load, atTime);
             }
         }
     }
@@ -276,7 +281,6 @@ void
 SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 {
     bcType boundarytype;
-    int i, n, side;
     int nLoads = 0;
     int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
     int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
@@ -290,13 +294,13 @@ SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime
     answer.resize(undofs, pndofs);
     answer.zero();
 
-    nLoads    = this->giveBoundaryLoadArray()->giveSize() / 2;
+    nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
 
     if ( nLoads ) {
-        for ( i = 1; i <= nLoads; i++ ) {
-            n     = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
-            side    = boundaryLoadArray.at(i * 2);
-            load  = dynamic_cast< Load * >( domain->giveLoad(n) );
+        for ( int i = 1; i <= nLoads; i++ ) {
+            int n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+            int side = boundaryLoadArray.at(i * 2);
+            load = domain->giveLoad(n);
             boundarytype = load->giveType();
             if ( boundarytype == OutFlowBC ) {
                 this->computeOutFlowBCTerm_MB(helpMatrix, side, atTime);
@@ -322,7 +326,7 @@ SUPGElement :: computeBCLhsPressureTerm_MC(FloatMatrix &answer, TimeStep *atTime
     //bcType loadtype;
     FloatMatrix helpMatrix;
 
-    nLoads    = this->giveBodyLoadArray()->giveSize();
+    nLoads = this->giveBodyLoadArray()->giveSize();
     answer.resize(pndofs, undofs);
     answer.zero();
     helpMatrix.resize(pndofs, undofs);
@@ -333,10 +337,10 @@ SUPGElement :: computeBCLhsPressureTerm_MC(FloatMatrix &answer, TimeStep *atTime
             load  = domain->giveLoad( bodyLoadArray.at(i) );
             ltype = load->giveBCGeoType();
             if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
-                this->computeHomogenizedReinforceTerm_MC(helpMatrix, ( Load * ) load, atTime);
+                this->computeHomogenizedReinforceTerm_MC(helpMatrix, load, atTime);
             }
             answer.add(helpMatrix);
-        }   
+        }
     }
 }
 
@@ -376,14 +380,13 @@ SUPGElement :: checkConsistency()
 void
 SUPGElement :: updateInternalState(TimeStep *stepN)
 {
-    int i, j;
     IntegrationRule *iRule;
     FloatArray stress;
 
     // force updating strains & stresses
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
             computeDeviatoricStress(stress, iRule->getIntegrationPoint(j), stepN);
         }
     }
@@ -393,15 +396,13 @@ void
 SUPGElement :: printOutputAt(FILE *file, TimeStep *stepN)
 // Performs end-of-step operations.
 {
-    int i;
-
 #ifdef __PARALLEL_MODE
     fprintf( file, "element %d [%8d] :\n", this->giveNumber(), this->giveGlobalNumber() );
 #else
     fprintf(file, "element %d :\n", number);
 #endif
 
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         integrationRulesArray [ i ]->printOutputAt(file, stepN);
     }
 }

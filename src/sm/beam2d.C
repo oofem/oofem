@@ -76,7 +76,7 @@ Interface *
 Beam2d :: giveInterface(InterfaceType interface)
 {
     if ( interface == LayeredCrossSectionInterfaceType ) {
-        return ( LayeredCrossSectionInterface * ) this;
+        return static_cast< LayeredCrossSectionInterface * >( this );
     }
 
     return NULL;
@@ -382,7 +382,7 @@ Beam2d :: initializeFrom(InputRecord *ir)
 
     if ( ir->hasField(IFT_Beam2d_dofstocondense, "dofstocondense") ) {
         IntArray val;
-        IR_GIVE_FIELD(ir, val, IFT_Beam2d_dofstocondense, "dofstocondense"); // Macro
+        IR_GIVE_FIELD(ir, val, IFT_Beam2d_dofstocondense, "dofstocondense");
         if ( val.giveSize() >= 6 ) {
             _error("instanciateFrom: wrong input data for condensed dofs");
         }
@@ -392,7 +392,6 @@ Beam2d :: initializeFrom(InputRecord *ir)
         dofsToCondense = NULL;
     }
 
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 
@@ -473,8 +472,9 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
         sine = sin( this->givePitch() );
         cosine = cos(pitch);
 
-        switch ( edgeLoad->giveClassID() ) {
-        case ConstantEdgeLoadClass:
+
+        switch ( edgeLoad->giveApproxOrder() ) {
+        case 0:
             coords.resize(1);
             if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
                 coords.at(1) = 0.0;
@@ -501,8 +501,8 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
             answer.at(5) = fz * l / 2. - fm / ( 1. + 2. * kappa );
             answer.at(6) = fz * l * l / 12. + fm * l * kappa / ( 1. + 2. * kappa );
             break;
-        case LinearEdgeLoadClass:
 
+        case 1:
             components.resize(6);
 
             if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
@@ -561,6 +561,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
             answer.at(6) = fz * l * l / 12. + dfz * l * l * ( 5. * kappa + 3. ) / ( 60. * ( 1. + 2. * kappa ) ) +
                            fm * l * kappa / ( 1. + 2. * kappa ) + dfm * l * ( 8. * kappa + 1. ) / ( 12. * ( 1. + 2. * kappa ) );
             break;
+
         default:
             _error("computeEdgeLoadVectorAt: unsupported load type");
         }
