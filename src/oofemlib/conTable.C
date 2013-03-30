@@ -36,7 +36,6 @@
 #include <cstdlib>
 #include <set>
 
-#include "freestor.h"
 #include "domain.h"
 #include "element.h"
 #include "dofmanager.h"
@@ -52,11 +51,6 @@ ConnectivityTable :: ~ConnectivityTable()
 void
 ConnectivityTable :: reset()
 {
-    if ( dofManagersConnectivity ) {
-        freeInt(dofManagersConnectivity);
-    }
-
-    dofManagersConnectivity = NULL;
     nodalConnectivityFlag = 0;
 }
 

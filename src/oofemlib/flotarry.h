@@ -93,11 +93,15 @@ protected:
 
 public:
     /**
+     * Constructor for empty array.
+     */
+    FloatArray();
+    /**
      * Constructor. Array is not zeroed.
      * @see FloatArray::zero
      * @param size Size of array.
      */
-    FloatArray(int size = 0);
+    FloatArray(int size);
     /**
      * Copy constructor. Creates the array from another array.
      * @param x Array to copy.
@@ -172,6 +176,11 @@ public:
      * @param allocChunk Additional space to allocate.
      */
     void resize(int s, int allocChunk = 0);
+    /**
+     * Resizes receiver, but doesn't initialize any entries.
+     * @param s New size.
+     */
+    void simpleResize(int s);
     /**
      * Resizes the size of the receiver to requested bounds. Memory allocation always happens, more preferably use
      * resize() function instead.

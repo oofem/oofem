@@ -56,9 +56,6 @@ private:
     /// Pointer to domain to which receiver belongs to.
     Domain *domain;
 
-    /// Array of connectivities for dofmanagers.
-    int *dofManagersConnectivity;
-
     /// Nodal connectivity table for domain.
     AList< IntArray >nodalConnectivity;
     /// Flag indicating assembled connectivity table for domain.
@@ -68,12 +65,7 @@ public:
     /**
      * Constructor. Creates new Connectivity table belonging to given domain.
      */
-    ConnectivityTable(Domain *d) : nodalConnectivity(0)
-    {
-        domain = d;
-        dofManagersConnectivity = NULL;
-        nodalConnectivityFlag = 0;
-    }
+    ConnectivityTable(Domain *d) : domain(d), nodalConnectivity(0), nodalConnectivityFlag(0) { }
     /// Destructor
     ~ConnectivityTable();
     /// reset receiver to an initial state (will force table update, when needed next time)

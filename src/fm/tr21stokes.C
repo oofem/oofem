@@ -655,7 +655,7 @@ void Tr21Stokes :: giveElementFMatrix(FloatMatrix &answer)
         temp.at(i*2, 2)=N2.at(i);
     }
 
-    answer.resize(17,2);
+    answer.resize(15,2);
     answer.zero();
     answer.assemble(temp, this->ordering, col);
 

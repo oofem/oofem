@@ -41,7 +41,6 @@
 #ifndef flotmtrx_h
 #define flotmtrx_h
 
-#include "matrix.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
@@ -81,13 +80,17 @@ class CommunicationBuffer;
  *   If further request for growing then is necessary memory reallocation.
  *   This process is controlled in resize member function.
  */
-class FloatMatrix : public Matrix
+class FloatMatrix
 {
 protected:
-    /// Values of matrix stored column wise.
-    double *values;
+    /// Number of rows.
+    int nRows;
+    /// Number of columns.
+    int nColumns;
     /// Allocated size for values.
     int allocatedSize;
+    /// Values of matrix stored column wise.
+    double *values;
 
 public:
     /**
@@ -110,9 +113,25 @@ public:
     /// Copy constructor.
     FloatMatrix(const FloatMatrix &);
     /// Destructor.
-    virtual ~FloatMatrix();
+    ~FloatMatrix();
     /// Assignment operator, adjusts size of the receiver if necessary.
     FloatMatrix & operator=(const FloatMatrix &);
+
+    /**
+     * Checks size of receiver towards requested bounds.
+     * Current implementation will call exit(1), if positions are outside bounds.
+     * @param i Required number of rows.
+     * @param j Required number of columns.
+     */
+    void checkBounds(int i, int j) const;
+    /// Returns number of rows of receiver.
+    inline int giveNumberOfRows() const { return nRows; }
+    /// Returns number of columns of receiver.
+    inline int giveNumberOfColumns() const { return nColumns; }
+    /// Returns nonzero if receiver is square matrix.
+    inline bool isSquare() const { return nRows == nColumns; }
+    /// Tests for empty matrix.
+    inline bool isNotEmpty() const { return nRows > 0 && nColumns > 0; }
 
     /**
      * Coefficient access function. Returns value of coefficient at given

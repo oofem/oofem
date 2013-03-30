@@ -62,8 +62,4 @@ void Matrix :: checkBounds(int i, int j) const
     }
 }
 
-void Matrix :: printYourself() const
-{
-    OOFEM_LOG_INFO("Matrix :: printYourself - Not implemented");
-}
 } // end namespace oofem

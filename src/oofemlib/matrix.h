@@ -82,8 +82,6 @@ public:
     bool isSquare() const { return nRows == nColumns; }
     /// Tests for empty matrix.
     bool isNotEmpty() const { return nRows > 0 && nColumns > 0; }
-    /// Prints receiver on stdout. Useful mainly for debugging.
-    virtual void printYourself() const;
 };
 } // end namespace oofem
 #endif // matrix_h

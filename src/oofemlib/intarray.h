@@ -79,7 +79,9 @@ private:
 
 public:
     /// Constructor for zero sized array
-    IntArray(int = 0);
+    IntArray();
+    /// Constructor for sized array
+    IntArray(int n);
     /// Copy constructor. Creates the array from another array.
     IntArray(const IntArray &);
     /// Destructor.
@@ -170,7 +172,7 @@ public:
      * @param allocChunk If reallocation needed, an additional space for allocChunk values will be allocated
      * to prevent excessive reallocation.
      */
-    void followedBy(const int b, int allocChunk = 0);
+    void followedBy(int b, int allocChunk = 0);
     /// @return Size of receiver.
     int giveSize() const { return size; }
     /**

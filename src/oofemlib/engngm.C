@@ -1082,7 +1082,7 @@ double EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep 
     IntArray loc, dofids;
     FloatArray charVec;
     FloatMatrix R;
-    IntArray dofIDarry(0);
+    IntArray dofIDarry;
     DofManager *node;
     double norm = 0.0;
     int nnode = domain->giveNumberOfDofManagers();

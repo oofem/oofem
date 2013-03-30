@@ -44,7 +44,9 @@
 #include "error.h"
 #include "datastream.h"
 #include "classtype.h"
-#include "freestor.h"
+
+#include <cstdlib>
+#include <cstring>
 
 #ifdef BOOST_PYTHON
 #include <boost/python.hpp>
@@ -81,18 +83,29 @@ extern void dgetrs_(const char *trans, const int *n, const int *nrhs, double *a,
 #endif
 
 namespace oofem {
-    
-FloatMatrix :: FloatMatrix(int n, int m) : Matrix(n, m)
+
+FloatMatrix :: FloatMatrix(int n, int m) :
+    nRows(n), nColumns(m),
+    allocatedSize(n * m)
 {
-    allocatedSize = n * m;
-    values = allocDouble(n * m);
+    ///@todo Should we really automatically zero matrices?
+    values = (double*)calloc(allocatedSize, sizeof(double));
+#if DEBUG
+    //for (int i = 0; i < allocatedSize; ++i) values[i] = NaN;
+#endif
+#ifdef DEBUG
+    if ( !values ) {
+        OOFEM_FATAL2("FloatArray :: FloatArray - Failed in allocating %d doubles", n);
+    }
+#endif
 }
 
 
-FloatMatrix :: FloatMatrix() : Matrix(0, 0)
+FloatMatrix :: FloatMatrix() : 
+    nRows(0), nColumns(0),
+    allocatedSize(0),
+    values(NULL)
 {
-    allocatedSize = 0;
-    values = NULL;
 }
 
 
@@ -111,46 +124,47 @@ FloatMatrix :: FloatMatrix(const FloatArray *vector, bool transpose)
     }
 
     allocatedSize = nRows * nColumns;
-    values = allocDouble(allocatedSize);
-
-    if ( transpose ) {
-        for ( int i = 1; i <= nColumns; i++ ) {
-            this->at(1, i) = vector->at(i);
-        }
-    } else {
-        for ( int i = 1; i <= nRows; i++ ) {
-            this->at(i, 1) = vector->at(i);
-        }
-    }
+    values = (double*)malloc(allocatedSize * sizeof(double));
+    memcpy(values, vector->givePointer(), allocatedSize * sizeof(double) );
 }
 
 
-FloatMatrix :: FloatMatrix(const FloatMatrix &src) : Matrix(src.nRows, src.nColumns)
+FloatMatrix :: FloatMatrix(const FloatMatrix &src) : 
+    nRows(src.nRows), nColumns(src.nColumns)
 {
-    // copy constructor
-    double *P1, *P2;
-
-    //this->nRows = src.nRows;
-    //this->nColumns = src.nColumns;
-
     allocatedSize = nRows * nColumns;
-    values = allocDouble(allocatedSize);
-
-    P1 = values;
-    P2 = src.values;
-    for ( int i = 0; i < nRows * nColumns; i++ ) {
-        P1 [ i ] = P2 [ i ];
-    }
+    values = (double*)malloc(allocatedSize * sizeof(double));
+    memcpy(values, src.values, allocatedSize * sizeof(double) );
 }
 
 
 FloatMatrix :: ~FloatMatrix()
 {
     if ( values ) {
-        freeDouble(values);
+        free(values);
     }
 }
 
+
+void FloatMatrix :: checkBounds(int i, int j) const
+// Checks that the receiver includes a position (i,j).
+{
+    if ( i <= 0 ) {
+        OOFEM_ERROR2("FloatMatrix::checkBounds : matrix error on rows : %d < 0", i);
+    }
+
+    if ( j <= 0 ) {
+        OOFEM_ERROR2("FloatMatrix::checkBounds : matrix error on columns : %d < 0", j);
+    }
+
+    if ( i > nRows ) {
+        OOFEM_ERROR3("FloatMatrix::checkBounds : matrix error on rows : %d > %d", i, nRows);
+    }
+
+    if ( j > nColumns ) {
+        OOFEM_ERROR3("FloatMatrix::checkBounds : matrix error on columns : %d > %d", j, nColumns);
+    }
+}
 
 
 FloatMatrix & FloatMatrix :: operator = ( const FloatMatrix & src )
@@ -158,9 +172,7 @@ FloatMatrix & FloatMatrix :: operator = ( const FloatMatrix & src )
     // assignment: cleanup and copy
     this->resize(src.nRows, src.nColumns);
 
-    for ( int i = 0; i < nRows * nColumns; i++ ) {
-        values [ i ] = src.values [ i ];
-    }
+    memcpy(values, src.values, nRows * nColumns * sizeof(double));
 
     return * this;
 }
@@ -365,8 +377,8 @@ void FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &
     int n1 = vec1.giveSize();
     int n2 = vec2.giveSize();
     this->resize(n1, n2);
-    for ( int i = 1; i <= n1; i++ ) {
-        for ( int j = 1; j <= n2; j++ ) {
+    for ( int j = 1; j <= n2; j++ ) {
+        for ( int i = 1; i <= n1; i++ ) {
             this->at(i, j) = vec1.at(i) * vec2.at(j);
         }
     }
@@ -493,6 +505,7 @@ void FloatMatrix :: setSubMatrix(const FloatMatrix &src, int sr, int sc)
             (*this)(sr + i, sc + j) = src(i, j);
         }
     }
+    //memcpy( &(*this)(sr + 0, sc + j), &src(0,j), srcRows * sizeof(int));
 }
 
 
@@ -573,8 +586,7 @@ void FloatMatrix :: setColumn(const FloatArray &src, int c)
 
     double *P = this->values + (c-1)*nr;
     double *srcP = src.givePointer();
-    for (int j = 0; j < nr; ++j )
-        *P++ = *srcP++;
+    memcpy(P, srcP, nr * sizeof(double));
 }
 
 
@@ -590,8 +602,7 @@ void FloatMatrix :: copyColumn(FloatArray &dest, int c) const
     dest.resize(nr);
     double *P = this->values + (c-1)*nr;
     double *destP = dest.givePointer();
-    for (int j = 0; j < nr; ++j )
-        *destP++ = *P++;
+    memcpy(destP, P, nr * sizeof(double));
 }
 
 
@@ -1168,34 +1179,18 @@ void FloatMatrix :: initFromVector(const FloatArray &vector, bool transposed)
 //
 {
     if ( transposed ) {
-        resize( 1, vector.giveSize() );
+        this->resize( 1, vector.giveSize() );
     } else {
-        resize(vector.giveSize(), 1); // row vector- default
+        this->resize(vector.giveSize(), 1); // row vector- default
     }
 
-    if ( transposed ) {
-        for ( int i = 1; i <= nColumns; i++ ) {
-            this->at(1, i) = vector.at(i);
-        }
-    } else {
-        for ( int i = 1; i <= nRows; i++ ) {
-            this->at(i, 1) = vector.at(i);
-        }
-    }
+    memcpy(this->values, vector.givePointer(), this->nRows * this->nColumns * sizeof(double));
 }
 
 
 void FloatMatrix :: zero() const
 {
-    // zeroing the receiver - fast implementation
-    double *P1;
-    int i;
-
-    P1 = this->values;
-    i  = nRows * nColumns;
-    while ( i-- ) {
-        * P1++ = 0.;
-    }
+    memset(this->values, 0, nRows * nColumns * sizeof(double) );
 }
 
 
@@ -1234,7 +1229,7 @@ void FloatMatrix :: resize(int rows, int columns, int allocChunk)
     if ( rows * columns > allocatedSize ) {
         // memory realocation necessary
         if ( values ) {
-            freeDouble(values);
+            free(values);
         }
 
         if ( allocChunk < 0 ) {
@@ -1242,7 +1237,11 @@ void FloatMatrix :: resize(int rows, int columns, int allocChunk)
         }
 
         allocatedSize = rows * columns + allocChunk; // REMEMBER NEW ALLOCATED SIZE
-        values = allocDouble(allocatedSize);
+        ///@todo Should we set all values to zeros or not?
+        values = (double*)calloc(allocatedSize, sizeof(double));
+#if DEBUG
+        //for (int i = 0; i < allocatedSize; ++i) values[i] = NaN;
+#endif
     } else {
         // reuse previously allocated space
     }
@@ -1262,11 +1261,14 @@ void FloatMatrix :: resizeWithData(int rows, int columns)
     if ( rows * columns > allocatedSize ) {
         // memory realocation necessary
         if ( values ) {
-            freeDouble(values);
+            free(values);
         }
 
         allocatedSize = rows * columns; // REMEMBER NEW ALLOCATED SIZE
-        values = allocDouble(allocatedSize);
+        values = (double*)calloc(allocatedSize, sizeof(double));
+#if DEBUG
+        //for (int i = 0; i < allocatedSize; ++i) values[i] = NaN;
+#endif
     } else {
         // reuse previously allocated space
     }
@@ -1294,11 +1296,14 @@ void FloatMatrix :: hardResize(int rows, int columns)
 {
     // memory realocation necessary
     if ( values ) {
-        freeDouble(values);
+        free(values);
     }
 
     allocatedSize = rows * columns; // REMEMBER NEW ALLOCATED SIZE
-    values = allocDouble(allocatedSize);
+    values = (double*)calloc(allocatedSize, sizeof(double));
+#if DEBUG
+    //for (int i = 0; i < allocatedSize; ++i) values[i] = NaN;
+#endif
 
     this->nRows = rows;
     this->nColumns = columns;
@@ -1429,10 +1434,9 @@ void FloatMatrix :: negated()
 
 double FloatMatrix :: computeFrobeniusNorm() const
 {
-    int i, j;
     double answer = 0.0;
-    for ( i = 1; i <= nRows; i++ ) {
-        for ( j = 1; j <= nColumns; j++ ) {
+    for ( int i = 1; i <= nRows; i++ ) {
+        for ( int j = 1; j <= nColumns; j++ ) {
             answer += this->at(i, j) * this->at(i, j);
         }
     }
@@ -1619,12 +1623,12 @@ contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream, ContextMo
     }
 
     if ( values != NULL ) {
-        freeDouble(values);
+        free(values);
     }
 
     if ( nRows * nColumns ) {
-        values = allocDouble(nRows * nColumns);
         allocatedSize = nRows * nColumns;
+        values = (double*)malloc(allocatedSize * sizeof(double));
     } else {
         values = NULL;
         allocatedSize = 0;
