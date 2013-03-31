@@ -46,6 +46,7 @@ namespace oofem {
 DynamicInputRecord :: DynamicInputRecord() : InputRecord(),
     recordKeyword(),
     recordNumber(0),
+    emptyRecord(),
     intRecord(),
     doubleRecord(),
     boolRecord(),
@@ -62,6 +63,7 @@ DynamicInputRecord :: DynamicInputRecord() : InputRecord(),
 DynamicInputRecord :: DynamicInputRecord(const DynamicInputRecord &src) :
     recordKeyword(src.recordKeyword),
     recordNumber(src.recordNumber),
+    emptyRecord(src.emptyRecord),
     intRecord(src.intRecord),
     doubleRecord(src.doubleRecord),
     boolRecord(src.boolRecord),
@@ -83,6 +85,7 @@ DynamicInputRecord & DynamicInputRecord :: operator=(const DynamicInputRecord &s
 {
     this->recordKeyword = src.recordKeyword;
     this->recordNumber = src.recordNumber;
+    this->emptyRecord = src.emptyRecord;
     this->intRecord = src.intRecord;
     this->doubleRecord = src.doubleRecord;
     this->boolRecord = src.boolRecord;
@@ -207,7 +210,8 @@ IRResultType DynamicInputRecord :: giveField(std::list< Range > &answer, InputFi
 
 bool DynamicInputRecord :: hasField(InputFieldType id)
 {
-    return this->intRecord.find(id) != this->intRecord.end() ||
+    return this->emptyRecord.find(id) != this->emptyRecord.end() ||
+           this->intRecord.find(id) != this->intRecord.end() ||
            this->doubleRecord.find(id) != this->doubleRecord.end() ||
            this->boolRecord.find(id) != this->boolRecord.end() ||
            this->floatArrayRecord.find(id) != this->floatArrayRecord.end() ||
@@ -281,6 +285,11 @@ void DynamicInputRecord :: setField(const std::list< Range > &item, InputFieldTy
     this->rangeRecord[id] = item;
 }
 
+void DynamicInputRecord :: setField(InputFieldType id)
+{
+    this->emptyRecord.insert(id);
+}
+
 void
 DynamicInputRecord :: report_error(const char *_class, const char *proc, InputFieldType id,
                                     IRResultType result, const char *file, int line)
@@ -302,6 +311,12 @@ std::string DynamicInputRecord::giveRecordAsString() const
     // Though, technically, some things *could* be numbered arbitrarily (even negative), this is never actually done in practice.
     if ( this->recordNumber > 0 ) rec << " " << this->recordNumber;
 
+    // Empty fields
+    for ( std::set< std::string >::const_iterator it = emptyRecord.begin(); it != emptyRecord.end(); ++it ) {
+        rec << " " << *it;
+    }
+
+    // Standard fields;
     forRecord(int, intRecord);
     forRecord(double, doubleRecord);
     forRecord(bool, boolRecord);
