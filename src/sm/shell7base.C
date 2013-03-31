@@ -46,13 +46,13 @@
 #include "constantpressureload.h"
 #include "constantsurfaceload.h"
 #include "vtkxmlexportmodule.h"
-
+#include "fracturemanager.h"
 
 namespace oofem {
 FEI3dWedgeQuad Shell7Base :: interpolationForExport;
 
 Shell7Base :: Shell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomain),  LayeredCrossSectionInterface(), 
-    VTKXMLExportModuleElementInterface(), ZZNodalRecoveryModelInterface(){}
+    VTKXMLExportModuleElementInterface(), ZZNodalRecoveryModelInterface(), FailureModuleElementInterface(){}
 
 IRResultType Shell7Base :: initializeFrom(InputRecord *ir)
 {
@@ -92,6 +92,9 @@ Interface *Shell7Base :: giveInterface(InterfaceType it)
     case ZZNodalRecoveryModelInterfaceType:
         return static_cast< ZZNodalRecoveryModelInterface * >( this );
 
+    case FailureModuleElementInterfaceType:
+        return static_cast< FailureModuleElementInterface * >( this );
+
     default:
         return StructuralElement :: giveInterface(it);
     }
@@ -125,7 +128,7 @@ Shell7Base :: giveGlobalZcoord(GaussPoint *gp)
     return gp->giveCoordinate(3) * this->giveCrossSection()->give(CS_Thickness) * 0.5;
 }
 
-double
+double // @todo move to layered crosssection
 Shell7Base :: giveGlobalZcoordInLayer(double xi, int layer)
 {
     // Mid position + part of the layer thickness
@@ -401,9 +404,9 @@ Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
 }
 
 void
-Shell7Base :: computeLambdaMatrices(FloatMatrix lambda [ 3 ], FloatArray &genEps, double zeta)
+Shell7Base :: computeLambdaGMatrices(FloatMatrix lambda [ 3 ], FloatArray &genEps, double zeta)
 {
-
+    // computes the lambda^g matrices associated with the variation and linearization of the base vectors g.
     FloatArray m(3), dm1(3), dm2(3), temp1;
     double dgam1, dgam2, gam;
     this->giveGeneralizedStrainComponents(genEps, temp1, temp1, dm1, dm2, m, dgam1, dgam2, gam);
@@ -446,6 +449,26 @@ Shell7Base :: computeLambdaMatrices(FloatMatrix lambda [ 3 ], FloatArray &genEps
     lambda[ 2 ].setColumn(zm,18);
 }
 
+void
+Shell7Base :: computeLambdaNMatrix(FloatMatrix lambda, FloatArray &genEps, double zeta)
+{
+    // computes the lambda^n matrix associated with the variation and linearization of the position vector x.
+    FloatArray m(3);
+    m.setValues( 3, genEps.at(13), genEps.at(14), genEps.at(15) );
+    double gam = genEps.at(18);
+
+    // thickness coefficients
+    double a = zeta + 0.5 * gam * zeta * zeta;
+    double b = 0.5 * zeta * zeta;
+    
+    // lambda =  ( I, a*I, b*m )
+    lambda.resize(3,7);
+    lambda.zero();
+    lambda.at(1,1) = lambda.at(2,2) = lambda.at(3,3) = 1.0;
+    lambda.at(1,4) = lambda.at(2,5) = lambda.at(3,6) = a;
+    lambda.setColumn(b*m,7); 
+
+}
 
 
 void
@@ -483,8 +506,8 @@ Shell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solV
             Shell7Base :: computeLinearizedStiffness(gp, mat, tStep, S1g, S2g, S3g, A, genEps);
 
             double zeta = this->giveGlobalZcoord(gp);
-            this->computeLambdaMatrices(lambdaI, genEpsI, zeta);
-            this->computeLambdaMatrices(lambdaJ, genEpsJ, zeta);
+            this->computeLambdaGMatrices(lambdaI, genEpsI, zeta);
+            this->computeLambdaGMatrices(lambdaJ, genEpsJ, zeta);
 
             this->computeBmatrixAt(gp, B, 0, 0);
             // L = sum_{i,j} (lambdaI_i)^T * A^ij * lambdaJ_j
@@ -1017,7 +1040,7 @@ GaussPoint *gp, Material *mat, TimeStep *tStep, FloatArray &genEps, FloatArray &
     this->transInitialCartesianToInitialContravar(gp, cartStressVector, contravarStressVector);
     this->computeStressResultantsAt(gp, contravarStressVector, S1g, S2g, S3g, genEps);
 
-    this->computeLambdaMatrices(lambda, genEpsD, zeta);    
+    this->computeLambdaGMatrices(lambda, genEpsD, zeta);    
 
     // f = lambda_1^T * S1g + lambda_2^T * S2g + lambda_3^T * S3g
     FloatArray sectionalForces(18), temp;
@@ -1242,7 +1265,8 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
 
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of data
 
-    FloatMatrix M11(18, 18), M12(18, 18), M13(18, 6), M22(18, 18), M23(18, 6), M33(6, 6);
+    FloatMatrix M11(18, 18), M12(18, 18), M13(18, 6), M22(18, 18), M23(18, 6), M33(6, 6), M(42,42);
+    M.zero();
     M11.zero();
     M12.zero();
     M13.zero();
@@ -1253,7 +1277,7 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
-
+#if 0
         for ( int j = 1; j <= iRuleL->getNumberOfIntegrationPoints(); j++ ) {
             GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
 
@@ -1268,7 +1292,7 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
              *
              *         3    3    1
              *         3 [a*I  b*I   c*m      [A  B  C
-             * mass =   3       d*I   e*m    =     D  E
+             * mass =  3       d*I   e*m    =     D  E
              *         1  sym       f*m.m]     sym   F]
              */
 
@@ -1346,7 +1370,31 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
         answer.assemble(M31, ordering_gam,    ordering_phibar);
         answer.assemble(M32, ordering_gam,    ordering_m);
         answer.symmetrized();
+#else
+        for ( int j = 1; j <= iRuleL->getNumberOfIntegrationPoints(); j++ ) {
+            GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
 
+            FloatMatrix lambda, B, N, temp;
+            FloatArray genEps;
+            this->computeBmatrixAt(gp, B);
+            genEps.beProductOf(B, solVec);    
+            double zeta = giveGlobalZcoord(gp);
+            this->computeLambdaNMatrix(lambda, genEps, zeta);
+            
+            // could also create lambda*N and then plusProdSymm - probably faster
+            mass.beTProductOf(lambda,lambda);
+            this->computeNmatrixAt(gp, N);
+            temp.beProductOf(mass,N);
+        
+            double dV = this->computeVolumeAroundLayer(gp, layer);
+            double rho = mat->give('d', gp);
+            M.plusProductSymmUpper(N, temp, rho*dV);
+        }
+        M.symmetrized();
+        const IntArray &ordering_all = this->giveOrdering(All);
+        answer.zero();
+        answer.assemble(M, ordering_all, ordering_all);
+#endif
  #if 0
 
         FloatArray sums(6);
@@ -1529,11 +1577,6 @@ void
 Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &answer, const int iSurf, FloatArray genEps, BoundaryLoad *surfLoad, TimeStep *tStep)
 {
     // Computes pressure loading. Acts normal to the current (deformed) surface.
-
-    FloatArray g1, g2, g3, m, load, traction;
-    double gam;
-    answer.resize(7);
-    answer.zero();
     double zeta = 1.e30;
     if ( iSurf == 1 ) {
         zeta = this->giveCrossSection()->give(CS_Thickness) * ( -0.5 );  // bottom surface -> iSurf = 1
@@ -1545,24 +1588,32 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &answer, const i
         _error("computePressureForceAt: incompatible load surface must be 1, 2 or 3");
     }
 
-    m.setValues( 3,  genEps.at(13),  genEps.at(14),  genEps.at(15) );
-    gam =  genEps.at(18);
-
+    FloatArray load, traction;
     if ( dynamic_cast< ConstantPressureLoad * >( surfLoad ) ) {
         FloatMatrix gcov; 
-        this->evalCovarBaseVectorsAt(gp, gcov, genEps);         // m=g3
+        FloatArray g1, g2;
+        this->evalCovarBaseVectorsAt(gp, gcov, genEps); 
         g1.beColumnOf(gcov,1);
         g2.beColumnOf(gcov,2);
-        surfLoad->computeValueAt(load, tStep, * ( gp->giveCoordinates() ), VM_Total);        // pressure components
-        traction.beVectorProductOf(g1, g2);        // normal vector (unnormalized)
+        surfLoad->computeValueAt(load, tStep, * ( gp->giveCoordinates() ), VM_Total);        // pressure component
+        traction.beVectorProductOf(g1, g2);        // normal vector (should not be normalized due to integraton in reference config.)
         traction.times( -load.at(1) );
     } else if ( dynamic_cast< ConstantSurfaceLoad * >( surfLoad ) ) {
         surfLoad->computeValueAt(traction, tStep, * ( gp->giveCoordinates() ), VM_Total);        // traction vector
     } else {
         _error("computePressureForceAt: incompatible load type");
     }
-
-
+    
+    answer.resize(7);
+    answer.zero();
+#if 1 
+    FloatMatrix lambda;
+    this->computeLambdaNMatrix(lambda, genEps, zeta);
+    answer.beTProductOf(lambda,traction);
+#else
+    FloatArray m;
+    m.setValues( 3,  genEps.at(13),  genEps.at(14),  genEps.at(15) );
+    double gam =  genEps.at(18);
     double fac1 = zeta + 0.5 * zeta * zeta * gam;
     double fac2 = 0.5 * zeta * zeta;
     /*  Force
@@ -1577,6 +1628,7 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &answer, const i
     answer.at(5) = fac1 * traction.at(2);
     answer.at(6) = fac1 * traction.at(3);
     answer.at(7) = fac2 * m.dotProduct(traction);
+#endif
 }
 
 
@@ -2727,4 +2779,62 @@ Shell7Base :: giveVoigtIndex(int ind1, int ind2)
         return -1;
     }
 };
+
+
+
+void 
+Shell7Base :: computeInterLaminarStressesAt(int interfaceNum, TimeStep *tStep, std::vector < FloatArray > &interLamStresses)
+{
+    
+    LayeredIntegrationRule *irLower = static_cast< LayeredIntegrationRule * >(this->giveIntegrationRule(interfaceNum-1)); // index from 0
+    LayeredIntegrationRule *irUpper = static_cast< LayeredIntegrationRule * >(this->giveIntegrationRule(interfaceNum));
+    IntegrationPoint *ip;
+
+    // compute stresses
+    int numInterfaceIP = irLower->upperInterfacePoints.giveSize();
+    interLamStresses.resize(numInterfaceIP);
+    FloatArray vSLower, vSUpper;
+    // compute mean interface stress for a gp-pair
+    for ( int i = 1; i <= numInterfaceIP; i++ ) {
+        ip = irUpper->getIntegrationPoint( irUpper->lowerInterfacePoints.at(i) );
+        this->giveIPValue(vSUpper, ip, IST_CauchyStressTensor, tStep);
+        ip = irLower->getIntegrationPoint( irLower->upperInterfacePoints.at(i) );
+        this->giveIPValue(vSLower, ip, IST_CauchyStressTensor, tStep);
+
+        interLamStresses.at(i-1).resize( vSUpper.giveSize() );
+        interLamStresses.at(i-1) = 0.5 * ( vSUpper + vSLower );
+    }
+
+}
+
+
+void
+Shell7Base :: evaluateFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep) 
+{
+    // Stress ordering (1, 5, 9, 6, 3, 2) = (xx, yy, zz, yz, xz, xy)
+    int numInterfaces = this->layeredCS->giveNumberOfLayers() - 1;
+    
+    switch ( fc->giveType() ) {
+    
+    case FC_MaxShearStress:
+        fc->quantities.resize(numInterfaces); // will overwrite this every time
+        for (int i = 1; i <= numInterfaces; i++ ) {
+            std::vector < FloatArray > interLamStresses;
+            this->computeInterLaminarStressesAt(i, tStep, interLamStresses); // all 6 components
+            int numEvalPoints = interLamStresses.size();
+            fc->quantities[i-1].resize(numEvalPoints); // most often = numIP
+            
+            for ( int j = 1; j <= numEvalPoints; j++) {
+                FloatArray &values = fc->quantities[i-1][j-1]; //     // one resulting shear stress
+                FloatArray &vS = interLamStresses[j-1];
+                values.resize(1);
+                values.at(1) = sqrt( vS.at(4)*vS.at(4) + vS.at(5)*vS.at(5) );
+
+            }
+        }
+
+    };
+}
+
+
 } // end namespace oofem

@@ -606,8 +606,8 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &
                 Shell7Base :: computeLinearizedStiffness(gp, mat, tStep, S1g, S2g, S3g, A, genEps);
 
 
-                this->computeLambdaMatrices(lambdaI, genEpsI, zeta);
-                this->computeLambdaMatrices(lambdaJ, genEpsJ, zeta);
+                this->computeLambdaGMatrices(lambdaI, genEpsI, zeta);
+                this->computeLambdaGMatrices(lambdaJ, genEpsJ, zeta);
 
                 this->computeBmatrixAt(gp, B, 0, 0);
                 // L = sum_{i,j} (lambdaI_i)^T * A^ij * lambdaJ_j

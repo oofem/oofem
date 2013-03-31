@@ -33,7 +33,7 @@
  */
 
 #include "staticfracture.h"
-
+#include "fracturemanager.h"
 // Should be moved to future FractureManager class later
 //#include "gausspnt.h"
 #include <vector>
@@ -65,20 +65,20 @@ StaticFracture :: solveYourselfAt(TimeStep *tStep)
         this->setTotalDisplacementFromUnknownsInDictionary(EID_MomentumBalance, VM_Total, tStep);
     }
     
+    // Instanciate fracture manager
+    if ( tStep->isTheFirstStep() ) {
+    
+        this->fMan =  new FractureManager( this->giveDomain(1) );
+        this->fMan->failureCriterias = new AList< FailureCriteria >(1);
+        FailureCriteria *fc = new FailureCriteria(FC_MaxShearStress);
+        fc->thresholds.resize(1);
+        fc->thresholds.at(1) = 0.0009;
+        this->fMan->failureCriterias->put(1, fc);
+    }
+
+
     crackGrowthFlag = false;
     NonLinearStatic :: solveYourselfAt(tStep);
-
-    /* 1) Compute fracture mechanics quantities
-          What should be included
-          - Element wise evaluation for cohesive zones
-          - Evaluation of crack tip quantities: K, J, G
-       2) Evaluate propagation model based on quantities above
-       3) Update crack(s) according to propagation model
-
-       Or should one turn it around. Set propagation model and then the model tries to evaluated what it needs.
-
-       Need some class to keep track of the active propagation models and such
-    */
 
 }
 
@@ -87,6 +87,9 @@ StaticFracture :: updateYourself(TimeStep *stepN)
 {
     
     NonLinearStatic :: updateYourself(stepN);
+
+    this->fMan->evaluateFailureCriterias(stepN);
+
 
     this->evaluatePropagationLaw(stepN); 
 
@@ -192,7 +195,7 @@ StaticFracture :: updateLoadVectors(TimeStep *stepN)
 #if 1
 
 double 
-StaticFracture ::  giveUnknownComponent(EquationID type, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
+StaticFracture ::  giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
     // Returns the unknown quantity corresponding to the dof
     if ( this->requiresUnknownsDictionaryUpdate() ) {

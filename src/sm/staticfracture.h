@@ -37,7 +37,7 @@
 #include "nlinearstatic.h"
 #include "metastep.h"
 #include "xfemmanager.h"
-
+#include "fracturemanager.h"
 namespace oofem {
 /**
  * This class implements a nonlinear static fracture problem.
@@ -56,7 +56,7 @@ protected:
     virtual void updateYourself(TimeStep *stepN);
 
 
-    virtual double giveUnknownComponent(EquationID chc, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
     
     // for updating structure
     void setTotalDisplacementFromUnknownsInDictionary(EquationID type, ValueModeType mode, TimeStep *tStep);
@@ -68,6 +68,10 @@ protected:
     void computeInterLaminarStressesAt(int layer, Element *el, TimeStep *tStep, std::vector < FloatArray > &interLamStresses);
     void evaluateFractureCriterion(std::vector < FloatArray > &interLamStresses, bool &propagateFlag);
     bool crackGrowthFlag;
+
+    // Fracture manager stuff
+    FractureManager *fMan;
+
 public:
     StaticFracture(int i, EngngModel *_master = NULL);
     virtual ~StaticFracture(){};

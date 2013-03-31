@@ -1187,6 +1187,7 @@ LayeredCrossSection :: mapLayerGpCoordsToShellCoords(IntegrationRule **&layerInt
     |    -------- -1               -------- -1
 */
 {
+    double scaleFactor = 0.999; // Will be numerically unstable with xfem if the endpints lie at +-1
     double totalThickness = this->computeIntegralThick();
     int number = 1;
     for( int layer = 1; layer <= numberOfLayers; layer++ ) {
@@ -1199,7 +1200,7 @@ LayeredCrossSection :: mapLayerGpCoordsToShellCoords(IntegrationRule **&layerInt
             double zMid_i = this->giveLayerMidZ(layer); // global z-coord
             double xiMid_i = 1.0 - 2.0*(totalThickness - this->midSurfaceZcoordFromBottom - zMid_i)/totalThickness; // local z-coord
             double deltaxi = gp->coordinates->at(3)*this->giveLayerThickness(layer)/totalThickness; // distance from layer mid
-            double xinew = xiMid_i + deltaxi;
+            double xinew = xiMid_i + deltaxi * scaleFactor;
             iRule->getIntegrationPoint(j-1)->coordinates->at(3) = xinew;
             iRule->getIntegrationPoint(j-1)->number = number;   // fix gp ordering
             number++;
@@ -1235,6 +1236,7 @@ LayeredIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsThicknes
     FloatArray coords_xi1, coords_xi2, coords_xi, weights_tri, weights_thickness;
     GaussIntegrationRule   :: giveTriCoordsAndWeights(nPointsTri, coords_xi1, coords_xi2, weights_tri );
     LobattoIntegrationRule :: giveLineCoordsAndWeights(nPointsThickness, coords_xi, weights_thickness );
+    //GaussIntegrationRule :: giveLineCoordsAndWeights(nPointsThickness, coords_xi, weights_thickness );
 
     // Assumes that the integration rules of the layers are the same such that the ordering of the ip's are also 
     // the same =>  upperInterfacePoints.at(i) of one layer is paired with lowerInterfacePoints.at(i) of the next.

@@ -42,6 +42,7 @@
 #include "vtkxmlexportmodule.h"
 #include "zznodalrecoverymodel.h"
 #include "fei3dwedgequad.h"
+#include "fracturemanager.h"
 #include <vector>
 
 namespace oofem {
@@ -55,7 +56,7 @@ class BoundaryLoad;
  * @date 2012-11-01
  */
 class Shell7Base : public NLStructuralElement, public NodalAveragingRecoveryModelInterface, public LayeredCrossSectionInterface, 
-    public VTKXMLExportModuleElementInterface, public ZZNodalRecoveryModelInterface
+    public VTKXMLExportModuleElementInterface, public ZZNodalRecoveryModelInterface, public FailureModuleElementInterface
 {
 public:
     Shell7Base(int n, Domain *d); // constructor
@@ -165,7 +166,8 @@ protected:
     void computeLinearizedStiffness(GaussPoint * gp,  Material * mat, TimeStep * tStep,
                                     FloatArray & S1g, FloatArray & S2g, FloatArray & S3g, FloatMatrix A [ 3 ] [ 3 ], FloatArray & solVec);
     void computePressureTangentMatrix(FloatMatrix &answer, Load *load, const int iSurf, TimeStep *tStep);
-    void computeLambdaMatrices(FloatMatrix lambda [ 3 ], FloatArray &solVec, double zeta);
+    void computeLambdaGMatrices(FloatMatrix lambda [ 3 ], FloatArray &genEps, double zeta);
+    void computeLambdaNMatrix(FloatMatrix lambda, FloatArray &genEps, double zeta);
 
     // Internal forces
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
@@ -249,6 +251,9 @@ protected:
     FloatArray convV6ToV9Stress(const FloatArray &V6);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    void computeInterLaminarStressesAt(int interfaceNum, TimeStep *tStep, std::vector < FloatArray > &interLamStresses);
+    virtual void evaluateFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep);
+
 };
 } // end namespace oofem
 #endif

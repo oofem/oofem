@@ -247,6 +247,8 @@ enum classType {
     DarcyFlowClass,
     StaticFractureClass,
 
+    FractureManagerClass,
+
     NumericalMethodClass,
     SparseLinearSystemNMClass,
     SparseNonLinearSystemNMClass,

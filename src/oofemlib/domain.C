@@ -779,7 +779,6 @@ Domain :: instanciateYourself(DataReader *dr)
     XfemManager *xMan;
     xfemManagerList->growTo(nxfemman);
     for ( int i = 1; i <= nxfemman; i++ ) {
-        //xMan =  new XfemManager(this->giveEngngModel(), i);
         xMan =  new XfemManager(this);
         ir = dr->giveInputRecord(DataReader :: IR_xfemManRec, 1);
         // XfemManager has to be put into xfemManagerList before xm->initializeFrom, otherwise Enrichmentitem cannot access XfemManager

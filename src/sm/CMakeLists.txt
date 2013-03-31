@@ -176,6 +176,10 @@ set (sm_obsolete
     rankinepm.C
     )
 
+set (sm_fracture
+    fracturemanager.C
+    )
+
 set (sm
     ${sm_element}
     ${sm_crosssection}
@@ -191,6 +195,7 @@ set (sm
     ${sm_unsorted}
     ${sm_parallel}
     ${sm_obsolete}
+    ${sm_fracture}
     ${sm_new}
     )
 
