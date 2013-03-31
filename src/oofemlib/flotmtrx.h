@@ -44,6 +44,8 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
+#include <iosfwd>
+
 #ifdef BOOST_PYTHON
 namespace boost { namespace python { namespace api {
 class object;
@@ -506,6 +508,8 @@ public:
     // Overloaded methods:
     contextIOResultType storeYourself(DataStream *stream, ContextMode mode);
     contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
+
+    friend std::ostream& operator<< (std::ostream &out, const FloatMatrix &r);
 
 #ifdef __PARALLEL_MODE
     int packToCommBuffer(CommunicationBuffer &buff) const;

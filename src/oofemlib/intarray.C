@@ -635,4 +635,14 @@ int IntArray :: givePackSize(CommunicationBuffer &buff)
     return buff.givePackSize(MPI_INT, 1) + buff.givePackSize(MPI_INT, this->size);
 }
 #endif
+
+std::ostream& operator<< (std::ostream &out, const IntArray &x)
+{
+    out << x.size;
+    for ( int i = 0; i < x.size; ++i ) {
+        out << " " << x(i);
+    }
+    return out;
+}
+
 } // end namespace oofem

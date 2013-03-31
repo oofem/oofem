@@ -49,6 +49,7 @@
 #include <cstdarg>
 #include <cstdlib>
 #include <cstring>
+#include <ostream>
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
@@ -1016,6 +1017,15 @@ void FloatArray :: beReducedVectorForm(const FloatMatrix &aMatrix)
     this->at(4) = 0.5*( aMatrix.at(2,3) + aMatrix.at(3,2) );
     this->at(5) = 0.5*( aMatrix.at(1,3) + aMatrix.at(3,1) );
     this->at(6) = 0.5*( aMatrix.at(1,2) + aMatrix.at(2,1) );
+}
+
+std::ostream& operator<< (std::ostream &out, const FloatArray &x)
+{
+    out << x.size;
+    for ( int i = 0; i < x.size; ++i ) {
+        out << " " << x(i);
+    }
+    return out;
 }
 
 } // end namespace oofem

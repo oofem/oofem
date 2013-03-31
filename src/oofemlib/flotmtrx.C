@@ -47,6 +47,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <ostream>
 
 #ifdef BOOST_PYTHON
 #include <boost/python.hpp>
@@ -1866,5 +1867,19 @@ FloatMatrix :: __getitem__ (boost::python::api::object t)
     return this->at(boost::python::extract<int>(t[0])+1, boost::python::extract<int>(t[1])+1 );
 }
 #endif
+
+std::ostream& operator<< (std::ostream &out, const FloatMatrix &x)
+{
+    out << x.nRows << " " << x.nColumns << " {";
+    for ( int i = 0; i < x.nRows; ++i ) {
+        for ( int j = 0; j < x.nColumns; ++j ) {
+            out << " " << x(i,j);
+        }
+        out << ";";
+    }
+    out << "}";
+    return out;
+}
+
 
 } // end namespace oofem

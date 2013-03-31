@@ -38,7 +38,6 @@
 #include "domain.h"
 #include "engngm.h"
 #include "intarray.h"
-#include "range.h"
 
 #include <list>
 
@@ -57,6 +56,9 @@
 //@}
 
 namespace oofem {
+
+class Range;
+
 /**
  * Represents output manager. It controls and manages the time step output.
  * Allows to filter output to certain time steps, dof managers and elements.
@@ -153,12 +155,7 @@ public:
      * Receiver becomes shallow copy of the argument. Shallow here means that only
      * tstep_all_out_flag, tstep_step_out, dofman_all_out_flag, and element_all_out_flag are copied.
      */
-    void beCopyOf(OutputManager *om) {
-        this->tstep_all_out_flag = om->tstep_all_out_flag;
-        this->tstep_step_out = om->tstep_step_out;
-        this->dofman_all_out_flag = om->dofman_all_out_flag;
-        this->element_all_out_flag = om->element_all_out_flag;
-    }
+    void beCopyOf(OutputManager *om);
 };
 } // end namespace oofem
 #endif // outputmanager_h

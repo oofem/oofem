@@ -39,6 +39,8 @@
 #include "dictionr.h"
 #include "range.h"
 
+#include <sstream>
+
 namespace oofem {
 
 DynamicInputRecord :: DynamicInputRecord() : InputRecord(),
@@ -284,6 +286,51 @@ DynamicInputRecord :: report_error(const char *_class, const char *proc, InputFi
                                     IRResultType result, const char *file, int line)
 {
     __OOFEM_ERROR5(file, line, "Input error: \"%s\", field keyword \"%s\"\n%s::%s", strerror(result), id, _class, proc);
+}
+
+// Helpful macro since we have so many separate records
+#define forRecord(type, name) \
+    for ( std::map< std::string, type >::const_iterator it = name.begin(); it != name.end(); ++it ) { \
+        rec << " " << it->first << " " << it->second; \
+    }
+
+std::string DynamicInputRecord::giveRecordAsString() const
+{
+    std::ostringstream rec;
+    rec << this->recordKeyword;
+    // Some records aren't numbered, here we assume that if no number is set (default 0) then it's not printed.
+    // Though, technically, some things *could* be numbered arbitrarily (even negative), this is never actually done in practice.
+    if ( this->recordNumber > 0 ) rec << " " << this->recordNumber;
+
+    forRecord(int, intRecord);
+    forRecord(double, doubleRecord);
+    forRecord(bool, boolRecord);
+    forRecord(std::string, stringRecord);
+    forRecord(FloatArray, floatArrayRecord);
+    forRecord(IntArray, intArrayRecord);
+    forRecord(FloatMatrix, matrixRecord);
+    forRecord(Dictionary, dictionaryRecord);
+
+    // Have to write special code for std::vector and std::list
+    for ( std::map< std::string, std::vector< std::string > >::const_iterator it = stringListRecord.begin(); it != stringListRecord.end(); ++it ) {
+        rec << " " << it->first;
+        std::vector< std::string > list = it->second;
+        rec << " " << list.size();
+        for ( std::vector< std::string >::const_iterator it2 = list.begin(); it2 != list.end(); ++it2 ) {
+            rec << " " << *it2;
+        }
+    }
+
+    for ( std::map< std::string, std::list< Range > >::const_iterator it = rangeRecord.begin(); it != rangeRecord.end(); ++it ) {
+        rec << " " << it->first;
+        std::list< Range > list = it->second;
+        rec << " " << list.size();
+        for ( std::list< Range >::const_iterator it2 = list.begin(); it2 != list.end(); ++it2 ) {
+            rec << " " << *it2;
+        }
+    }
+
+    return rec.str();
 }
 
 };

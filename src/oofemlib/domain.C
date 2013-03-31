@@ -60,6 +60,7 @@
 #include "topologydescription.h"
 #include "randomfieldgenerator.h"
 #include "errorestimator.h"
+#include "range.h"
 #include "compiler.h"
 
  // For automatic dof creation, (should try to do without this) (move that stuff into DofManager class)

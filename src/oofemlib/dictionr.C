@@ -39,6 +39,7 @@
 #include "contextmode.h"
 
 #include <cstdlib>
+#include <ostream>
 
 namespace oofem {
 Dictionary :: ~Dictionary()
@@ -251,4 +252,24 @@ contextIOResultType Dictionary :: restoreContext(DataStream *stream, ContextMode
 
     return CIO_OK;
 }
+
+
+std::ostream& operator<< (std::ostream &out, const Dictionary &r)
+{
+    int count = 0;
+    Pair *next = r.first;
+    while ( next ) {
+        count ++;
+        next = next->giveNext();
+    }
+
+    out << count;
+    next = r.first;
+    while ( next ) {
+        out << " " << next->giveKey() << " " << next->giveValue();
+        next = next->giveNext();
+    }
+    return out;
+}
+
 } // end namespace oofem

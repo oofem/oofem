@@ -45,6 +45,8 @@
 #include "contextmode.h"
 #include "iml/iml.h"
 
+#include <iosfwd>
+
 namespace oofem {
 class IntArray;
 class FloatMatrix;
@@ -400,8 +402,6 @@ public:
      */
     void beReducedVectorForm(const FloatMatrix &aMatrix);
 
-
-
 #ifdef __PARALLEL_MODE
     int packToCommBuffer(CommunicationBuffer &buff) const;
     int unpackFromCommBuffer(CommunicationBuffer &buff);
@@ -410,6 +410,8 @@ public:
 
     contextIOResultType storeYourself(DataStream *stream, ContextMode mode);
     contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
+
+    friend std::ostream& operator<< (std::ostream &out, const FloatArray &x);
 
 #ifdef IML_COMPAT
     /// Assignment of scalar to all components of receiver

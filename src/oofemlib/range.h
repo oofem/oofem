@@ -35,7 +35,11 @@
 #ifndef range_h
 #define range_h
 
+//#include <iosfwd>
+#include <ostream>
+
 namespace oofem {
+
 /**
  * Class Range is an abstraction for interval of integer numbers. It is described using its start and end values of interval
  * it represents. The interval is defined to represent all values between start and end values, including start and end values.
@@ -66,6 +70,10 @@ public:
 
     /// Tests if number is in range.
     bool test(int i) { return ( i >= startIndx ) && ( i <= endIndx ); }
+
+    friend std::ostream& operator<< (std::ostream &out, const Range &r) { 
+        return out << r.startIndx << " " << r.endIndx;
+    }
 };
 } // end namespace oofem
 #endif // range_h

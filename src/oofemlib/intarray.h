@@ -44,6 +44,8 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
+#include <iosfwd>
+
 namespace oofem {
 class DataStream;
 #ifdef __PARALLEL_MODE
@@ -311,6 +313,8 @@ public:
      * @see FEMComponent
      */
     contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
+
+    friend std::ostream& operator<< (std::ostream &out, const IntArray &x);
 
 #ifdef __PARALLEL_MODE
     /**@name Methods for packing/unpacking to/from communication buffer */

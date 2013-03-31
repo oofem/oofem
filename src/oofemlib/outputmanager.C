@@ -37,6 +37,7 @@
 #include "engngm.h"
 #include "element.h"
 #include "dofmanager.h"
+#include "range.h"
 
 namespace oofem {
 OutputManager :: OutputManager(Domain *d) : dofman_out(), dofman_except(), element_out(), element_except()
@@ -82,7 +83,7 @@ OutputManager :: initializeFrom(InputRecord *ir)
 void
 OutputManager :: doDofManOutput(FILE *file, TimeStep *tStep)
 {
-    int i, ndofman = domain->giveNumberOfDofManagers();
+    int ndofman = domain->giveNumberOfDofManagers();
 
     if ( !testTimeStepOutput(tStep) ) {
         return;
@@ -91,7 +92,7 @@ OutputManager :: doDofManOutput(FILE *file, TimeStep *tStep)
     fprintf(file, "\n\nDofManager output:\n------------------\n");
 
     if ( dofman_all_out_flag   && dofman_except.empty() ) {
-        for ( i = 1; i <= ndofman; i++ ) {
+        for ( int i = 1; i <= ndofman; i++ ) {
 #ifdef __PARALLEL_MODE
             // test for null dof in parallel mode
             if ( domain->giveDofManager(i)->giveParallelMode() == DofManager_null ) {
@@ -102,7 +103,7 @@ OutputManager :: doDofManOutput(FILE *file, TimeStep *tStep)
             domain->giveDofManager(i)->printOutputAt(file, tStep);
         }
     } else {
-        for ( i = 1; i <= ndofman; i++ ) {
+        for ( int i = 1; i <= ndofman; i++ ) {
             if ( _testDofManOutput(i) ) {
                 domain->giveDofManager(i)->printOutputAt(file, tStep);
             }
@@ -115,7 +116,7 @@ OutputManager :: doDofManOutput(FILE *file, TimeStep *tStep)
 void
 OutputManager :: doElementOutput(FILE *file, TimeStep *tStep)
 {
-    int i, nelem = domain->giveNumberOfElements();
+    int nelem = domain->giveNumberOfElements();
     if ( !testTimeStepOutput(tStep) ) {
         return;
     }
@@ -123,7 +124,7 @@ OutputManager :: doElementOutput(FILE *file, TimeStep *tStep)
     fprintf(file, "\n\nElement output:\n---------------\n");
 
     if ( element_all_out_flag   && element_except.empty() ) {
-        for ( i = 1; i <= nelem; i++ ) {
+        for ( int i = 1; i <= nelem; i++ ) {
 #ifdef __PARALLEL_MODE
             // test for remote element in parallel mode
             if ( domain->giveElement(i)->giveParallelMode() == Element_remote ) {
@@ -135,7 +136,7 @@ OutputManager :: doElementOutput(FILE *file, TimeStep *tStep)
             domain->giveElement(i)->printOutputAt(file, tStep);
         }
     } else {
-        for ( i = 1; i <= nelem; i++ ) {
+        for ( int i = 1; i <= nelem; i++ ) {
             if ( _testElementOutput(i) ) {
                 domain->giveElement(i)->printOutputAt(file, tStep);
             }
@@ -293,4 +294,14 @@ OutputManager :: testElementOutput(int num, TimeStep *tStep)
 
     return 0;
 }
+
+void
+OutputManager :: beCopyOf(OutputManager *om)
+{
+    this->tstep_all_out_flag = om->tstep_all_out_flag;
+    this->tstep_step_out = om->tstep_step_out;
+    this->dofman_all_out_flag = om->dofman_all_out_flag;
+    this->element_all_out_flag = om->element_all_out_flag;
+}
+
 } // end namespace oofem

@@ -108,6 +108,9 @@ public:
 
     virtual void report_error(const char *_class, const char *proc, InputFieldType id,
                               IRResultType result, const char *file, int line);
+
+    /// Returns record as string.
+    std::string giveRecordAsString() const;
 };
 } // end namespace oofem
 #endif // dynamicinputrecord_h
