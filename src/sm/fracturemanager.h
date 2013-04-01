@@ -89,15 +89,23 @@ private:
     
 
     FailureCriteriaType type; 
+    bool failedFlag;
 public:
-    // list of all the quantities for each layer - quantities[layer][ip].arrayOfValues
-    std::vector < std::vector < FloatArray > > quantities;
-    FloatArray thresholds;
     FailureCriteria(FailureCriteriaType type){ this->type = type; };
     ~FailureCriteria(){}; // must destroy object correctly
 
+
+    // list of all the quantities for each layer - quantities[layer][ip].arrayOfValues
+    std::vector < std::vector < FloatArray > > quantities;
+    FloatArray thresholds;
+
+
     FailureCriteriaType giveType() { return this->type; }
     bool evaluateFailureCriteria();
+    bool evaluateFCQuantities() { return false; };
+
+    bool hasFailed() { return failedFlag; }
+
 /*
 class LocalFailureCriteria : public FalureCriteria
 {
@@ -136,16 +144,14 @@ public:
     AList < FailureCriteria > *failureCriterias; // All failure criterias to evaluate
     AList < PropagationLaw  > *propagationLaws;
     
-
-    
-
+    bool needsUpdate;
     //createCrack(){}; //Should be able to create a new crack based on failure criterias?
     //removeCrack(int number){};
     
     void evaluateFailureCriterias(TimeStep *tStep); //Loop through all elements and evaluate criteria (if supported)
-    virtual void evaluateFailureCriteria(FailureCriteria *fc, FailureCriteriaType type, Element *el, TimeStep *tStep);
+    virtual void evaluateFailureCriteria(FailureCriteria *fc, Element *el, TimeStep *tStep);
     
-    
+    void update(TimeStep *tStep);
     
     //evaluatePropagationLaws(){};
     /// Constructor.

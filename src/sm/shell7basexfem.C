@@ -353,6 +353,18 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
                 FloatArray tempRed;
                 tempRed.beSubArrayOf(temp, activeDofs);
                 answer.assemble(tempRed, ordering);
+
+                // Cohesive zone model
+                FloatArray fCZ;
+                this->computeCohesiveForces( fCZ, tStep, solVec, solVecD, useUpdatedGpRecord, dei, j);
+                tempRed.beSubArrayOf(fCZ, activeDofs);
+                answer.assemble(tempRed, ordering);
+                /*
+                // test
+                this->computeOrderingArray(ordering, activeDofs, 0, All);
+                fCZ.negated();
+                answer.assemble(fCZ, ordering);
+                */
             }
         }
     }
@@ -436,6 +448,71 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
 }
 
 
+
+void
+Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, int useUpdatedGpRecord, 
+                     Delamination *dei, int enrichmentDomainNumber)
+{
+    //Computes the cohesive nodal forces for a given interface
+    FloatArray Fp;
+    answer.resize(42); // replace with fnc call
+    answer.zero();
+
+    FloatMatrix N, B;  
+
+    IntegrationRule *iRuleL = specialIntegrationRulesArray [ 0 ];
+    Material *mat = dei->giveMaterial(); // CZ-material
+
+    for ( int i = 1; i <= iRuleL->getNumberOfIntegrationPoints(); i++ ) {
+        IntegrationPoint *ip = iRuleL->getIntegrationPoint(i - 1);
+
+        this->computeBmatrixAt(ip, B);
+        Shell7Base :: computeNmatrixAt(ip, N);
+        
+        // Compute material jump
+        FloatArray genEps, genEpsD;
+        genEpsD.beProductOf(B, solVecD);        
+        genEps.beProductOf(B, solVec);        
+        double zeta = giveGlobalZcoord(ip); // fix z-coord 
+        zeta = 0.0;
+        FloatMatrix lambda;
+        this->computeLambdaNMatrix(lambda, genEpsD, zeta);
+        
+        FloatArray xd, unknowns;
+        unknowns.beProductOf(N, solVecD);
+        xd.beProductOf(lambda,unknowns); // spatial jump
+        FloatMatrix F, Finv;
+        this->computeFAt(ip, F, genEps); // (xi=0) ip must have a valid x-coord
+        Finv.beInverseOf(F);
+        FloatArray J;
+        J.beProductOf(Finv,xd); // material (reference system)
+
+        //J.setValues(3, xd.at(3), xd.at(1), xd.at(2) );
+        // compute cohesive traction based on J
+        FloatArray cTraction, tTemp; 
+        FloatMatrix K(3,3);
+        K.zero();
+        K.at(3,3) = 100.0; // traction in normal dir only
+        cTraction.beProductOf(K,J);
+        // interfacematerial assumes J(1) = normal dir and J(2), J(3) are shear
+        //static_cast < StructuralMaterial * > (mat)->giveRealStressVector(tTemp, ReducedForm, ip, J, tStep);
+
+        FloatArray fp;
+        //cTraction.setValues(3, tTemp.at(2), tTemp.at(3), tTemp.at(1) );
+        fp.beTProductOf(lambda, cTraction);
+        cTraction.printYourself();
+        Fp.beTProductOf(N, fp);
+        
+        double dA = this->computeAreaAround(ip);
+        Fp.times(dA);
+        answer.subtract(Fp); 
+        
+    }
+
+    
+
+}
+
 void
 Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
@@ -482,10 +559,6 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
                         FloatMatrix tempRed;
                         tempRed.beSubMatrixOf(temp, activeDofsJ, activeDofsK);
                         answer.assemble(tempRed, orderingJ, orderingK);
-                        //orderingJ.printYourself();
-                        //orderingK.printYourself();
-                        //printf("Kdd \n");
-                        //tempRed.printYourself();
                     }
                 }
                 
@@ -613,6 +686,7 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &
                 // L = sum_{i,j} (lambdaI_i)^T * A^ij * lambdaJ_j
                 // Naive implementation - should be optimized 
                 // note: L will only be symmetric if lambdaI = lambdaJ
+                // but if gamma is not enriched then they should all be the same, or?
                 FloatMatrix temp;
                 L.zero();
                 for ( int j = 0; j < 3; j++ ) {
@@ -839,7 +913,7 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
 
         return;
     } else {
-        _error("Shell7Base :: computeEdgeLoadVectorAt: load type not supported");
+        _error("Shell7BaseXFEM :: computeEdgeLoadVectorAt: load type not supported");
         return;
     }
 }

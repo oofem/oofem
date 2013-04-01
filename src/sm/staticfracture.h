@@ -77,6 +77,7 @@ public:
     virtual ~StaticFracture(){};
     virtual int requiresUnknownsDictionaryUpdate() { return crackGrowthFlag; }
     virtual bool requiresEquationRenumbering(TimeStep *) { return crackGrowthFlag; }
+    void setCrackGrowthFlag(bool flag) { crackGrowthFlag = flag; }
 };
 
 } // end namespace oofem

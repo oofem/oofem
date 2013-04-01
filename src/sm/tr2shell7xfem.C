@@ -101,7 +101,10 @@ Tr2Shell7XFEM :: computeGaussPoints()
         int nPointsEdge = 2;   // edge integration
         specialIntegrationRulesArray = new IntegrationRule * [ 3 ];
 
-        // Midplane and thickness
+        // Cohessive zone // @todo only temporary solution
+        specialIntegrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
+        specialIntegrationRulesArray [ 0 ]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
+
 
         // Midplane (Mass matrix integrated analytically through the thickness)
         specialIntegrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);

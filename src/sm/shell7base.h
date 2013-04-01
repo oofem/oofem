@@ -167,7 +167,7 @@ protected:
                                     FloatArray & S1g, FloatArray & S2g, FloatArray & S3g, FloatMatrix A [ 3 ] [ 3 ], FloatArray & solVec);
     void computePressureTangentMatrix(FloatMatrix &answer, Load *load, const int iSurf, TimeStep *tStep);
     void computeLambdaGMatrices(FloatMatrix lambda [ 3 ], FloatArray &genEps, double zeta);
-    void computeLambdaNMatrix(FloatMatrix lambda, FloatArray &genEps, double zeta);
+    void computeLambdaNMatrix(FloatMatrix &lambda, FloatArray &genEps, double zeta);
 
     // Internal forces
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);

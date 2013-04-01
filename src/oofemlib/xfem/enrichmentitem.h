@@ -51,6 +51,7 @@
 #define _IFT_EnrichmentItem_function "enrichmentfunction"
 
 #define _IFT_Delamination_xiCoords "delaminationxicoords"
+#define _IFT_Delamination_CohesiveZoneMaterial "czmaterial"
 //@}
 
 namespace oofem {
@@ -158,6 +159,8 @@ public:
 /** Concrete representation of Delamination. */
 class Delamination : public EnrichmentItem 
 {
+protected:
+    Material *mat;  // Material for cohesive zone model
 public:
     Delamination(int n, XfemManager *xm, Domain *aDomain);
     virtual const char *giveClassName() const { return "Delamination"; }
@@ -176,7 +179,7 @@ public:
 
     void giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &zBottom, Element *e);
     double heaviside(double xi, double xi0);
-
+    virtual Material *giveMaterial() { return mat; }
 };
 
 

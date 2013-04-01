@@ -276,7 +276,11 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
         OOFEM_ERROR3( "EnrichmentItem :: initializeFrom: size of enrichmentDomainXiCoords (%i) differs from numberOfEnrichmentDomains (%i)", 
                        this->enrichmentDomainXiCoords.giveSize(), this->numberOfEnrichmentDomains );
     }
-
+    int material = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, material, _IFT_Delamination_CohesiveZoneMaterial);
+    if ( material > 0 ) {
+        this->mat = this->giveDomain()->giveMaterial(material);
+    }
     //write an instanciate method
 
     return IRRT_OK;

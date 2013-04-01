@@ -100,6 +100,8 @@ protected:
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
     void discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, int useUpdatedGpRecord,  
           EnrichmentItem *ei, int enrichmentDomainNumber);
+    void computeCohesiveForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, int useUpdatedGpRecord,  
+          Delamination *dei, int enrichmentDomainNumber);
 
     void computeOrderingArray(IntArray &orderingArray, IntArray &activeDofsArray, int enrichmentDomainNumber, SolutionField field);
     //void edgeComputeOrderingArray( IntArray &orderingArray, IntArray &activeDofsArray, int iEdge, int enrichmentDomainNumber, SolutionField field);

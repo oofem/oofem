@@ -450,7 +450,7 @@ Shell7Base :: computeLambdaGMatrices(FloatMatrix lambda [ 3 ], FloatArray &genEp
 }
 
 void
-Shell7Base :: computeLambdaNMatrix(FloatMatrix lambda, FloatArray &genEps, double zeta)
+Shell7Base :: computeLambdaNMatrix(FloatMatrix &lambda, FloatArray &genEps, double zeta)
 {
     // computes the lambda^n matrix associated with the variation and linearization of the position vector x.
     FloatArray m(3);
@@ -2429,7 +2429,8 @@ Shell7Base :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
-    int ndofs = this->giveNumberOfDofs();
+    //int ndofs = this->giveNumberOfDofs();
+    int ndofs = Shell7Base :: giveNumberOfDofs();
     int ndofs_xm  = this->giveNumberOfFieldDofs(Midplane);
     answer.resize(7, ndofs);
     answer.zero();
@@ -2825,8 +2826,8 @@ Shell7Base :: evaluateFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *t
             fc->quantities[i-1].resize(numEvalPoints); // most often = numIP
             
             for ( int j = 1; j <= numEvalPoints; j++) {
-                FloatArray &values = fc->quantities[i-1][j-1]; //     // one resulting shear stress
-                FloatArray &vS = interLamStresses[j-1];
+                FloatArray &values = fc->quantities[i-1][j-1]; // one resulting shear stress
+                FloatArray &vS = interLamStresses[j-1];        // Stress in eval point
                 values.resize(1);
                 values.at(1) = sqrt( vS.at(4)*vS.at(4) + vS.at(5)*vS.at(5) );
 

@@ -49,6 +49,7 @@
 #include "contextioerr.h"
 
 #include "layeredcrosssection.h"
+#include "xfemmanager.h"
 namespace oofem {
 FractureManager :: FractureManager(Domain *domain)
 {
@@ -114,16 +115,23 @@ void
 FractureManager :: evaluateFailureCriterias(TimeStep *tStep)
 {
     // For element wise evaluation of failure criteria
+    this->needsUpdate = false;
     Domain *domain;
     domain = this->giveDomain();   
     Element *el;
     FailureCriteria *fc;
     FailureCriteriaType type = FC_MaxShearStress;
     for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
+        printf( "\n -------------------------------\n");
         el = domain->giveElement(i);
         for ( int j = 1; j <= this->failureCriterias->giveSize(); j++ ) {
             fc = this->failureCriterias->at(j);
-            this->evaluateFailureCriteria(fc, type, el, tStep);
+            this->evaluateFailureCriteria(fc, el, tStep);
+
+            if( fc->hasFailed() ) {
+                printf( "Element %d fails \n", el->giveNumber() );
+                this->needsUpdate = true;
+            }
         }
 
     }
@@ -160,57 +168,90 @@ FractureManager :: evaluateFailureCriterias(TimeStep *tStep)
 
 
 void 
-FractureManager :: evaluateFailureCriteria(FailureCriteria *fc, FailureCriteriaType type, Element *el, TimeStep *tStep) 
+FractureManager :: evaluateFailureCriteria(FailureCriteria *fc, Element *el, TimeStep *tStep) 
 {
     // If we have a layered cross section it needs special treatment
-    if ( dynamic_cast< LayeredCrossSection *>( el->giveCrossSection() ) ) {
+    // or only check CS when a special quantity is asked for, e.g interlam eval.
+
+    if ( ! fc->evaluateFCQuantities() ) { // cannot evaluate on its own, ask element for implementation
         FailureModuleElementInterface *fmInterface =
             dynamic_cast< FailureModuleElementInterface * >( el->giveInterface(FailureModuleElementInterfaceType) );
         if ( fmInterface ) { // if element supports the failure interface
-            std::vector < FloatArray > quantities;
             fmInterface->evaluateFailureCriteriaQuantities(fc, tStep); // computeQuantities
         }
     }
+    //if ( dynamic_cast< LayeredCrossSection *>( el->giveCrossSection() ) ) {
+      
 
 
     // Compare quantity with threshold
-    printf( "\n -------------------------------\n");
     fc->evaluateFailureCriteria();
-    /*
-    for ( int i = 1; i <= fc->quantities.size(); i++ ) {
-        for ( int j = 1; j <= fc->quantities[i-1].size(); j++ ) {
-            FloatArray &values = fc->quantities[i-1][j-1];
-            for ( int k = 1; k <= values.giveSize(); k++ ) {
-                // assumeds that there is only one value to compare against which is generally 
-                // not true, e.g. tension/compression thresholds
-                if ( values.at(k) >= fc->thresholds.at(k) ) {
-                    printf( "Eval. point %d in interface %d in element %d fails (%e >= %e) \n", 
-                        j, i, el->giveNumber(), values.at(k), fc->thresholds.at(k) );
-                }
-            }
-        }
-    }
-    */
 
     // Store which layers, interfaces that has failed and send it back 
+
+
 }
 
+
+void
+FractureManager :: update(TimeStep *tStep)
+{
+    Domain *domain;
+    domain = this->giveDomain();   
+    Element *el;
+    FailureCriteria *fc;
+    XfemManager *xMan; 
+    xMan = domain->giveXfemManager(1);
+
+    for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
+        el = domain->giveElement(i);
+
+        for ( int j = 1; j <= this->failureCriterias->giveSize(); j++ ) {
+            fc = this->failureCriterias->at(j);
+            if( fc->hasFailed() ) {
+                // need to check which layer and create a new crack
+            }
+
+            EnrichmentItem *ei;
+            for ( int k = 1; k <= xMan->giveNumberOfEnrichmentItems(); k++ ) {    
+                ei = xMan->giveEnrichmentItem(k);
+
+                if ( Delamination *dei = dynamic_cast< Delamination * > (ei) )  {
+                    for ( int m = 1; m <= ei->giveNumberOfEnrichmentDomains(); m++ ) {   
+                    }
+                }
+            }
+
+
+
+
+
+
+        }
+
+    }
+}
+
+
+//---------------------------------------------------
 
 bool 
 FailureCriteria :: evaluateFailureCriteria() 
 {
+    this->failedFlag = false;
     // Compare quantity with threshold
     // should save bool for all values
-    printf( "\n -------------------------------\n");
+
     for ( int i = 1; i <= this->quantities.size(); i++ ) {
         for ( int j = 1; j <= this->quantities[i-1].size(); j++ ) {
             FloatArray &values = this->quantities[i-1][j-1];
             for ( int k = 1; k <= values.giveSize(); k++ ) {
-                // assumeds that there is only one value to compare against which is generally 
+                // assumes there is only one value to compare against which is generally 
                 // not true, e.g. tension/compression thresholds
                 if ( values.at(k) >= this->thresholds.at(k) ) {
-                    printf( "Eval. point %d in interface %d fails (%e >= %e) \n", 
-                        j, i, values.at(k), this->thresholds.at(k) );
+                    //printf( "Eval. point %d in interface %d fails (%e >= %e) \n", 
+                    //    j, i, values.at(k), this->thresholds.at(k) );
+                    this->failedFlag = true;
                     return true;
                 }
             }

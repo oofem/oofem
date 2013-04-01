@@ -88,10 +88,18 @@ StaticFracture :: updateYourself(TimeStep *stepN)
     
     NonLinearStatic :: updateYourself(stepN);
 
+    // new - not working
     this->fMan->evaluateFailureCriterias(stepN);
+    if ( this->fMan->needsUpdate ) {
+        this->setCrackGrowthFlag( this->fMan->needsUpdate );
+        // update geometries
+        this->fMan->update(stepN);
+    }
 
-
+    // old - working
     this->evaluatePropagationLaw(stepN); 
+
+
 
     // Update the UnknownsDictionary if needed
     if ( this->requiresUnknownsDictionaryUpdate() ) {
