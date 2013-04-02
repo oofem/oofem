@@ -62,6 +62,7 @@ class DataStream;
 class Domain;
 class Interface;
 class TimeStep;
+class DynamicInputRecord;
 
 /**
  * The top abstract class of all classes constituting the finite element mesh.
@@ -137,18 +138,23 @@ public:
      * @param ir Input record to initialize from.
      * @return IRResultType
      */
-    virtual IRResultType initializeFrom(InputRecord *ir) {return IRRT_NOTFOUND; };
+    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_NOTFOUND; };
     /**
     * The same function as above, but allows to read more lines since a pointer 
     * to the DataReader is provided.
     */
-    virtual IRResultType initializeFrom(InputRecord *ir, DataReader *dr) {return IRRT_NOTFOUND; };
+    virtual IRResultType initializeFrom(InputRecord *ir, DataReader *dr) { return IRRT_NOTFOUND; };
     /**
      * Setups the input record string of receiver.
      * @param str String to be filled by input record.
      * @param keyword Determines if record keyword should be printed.
      */
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    /**
+     * Setups the input record string of receiver.
+     * @param input Dynamic input record to be filled by receiver.
+     */
+    virtual void giveInputRecord(DynamicInputRecord &input);
     /**
      * Stores receiver state to output stream.
      * Writes the FEMComponent class-id in order to allow test whether correct data are then restored.

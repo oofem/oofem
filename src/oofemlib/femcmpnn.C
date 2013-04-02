@@ -43,6 +43,7 @@
 #include "datastream.h"
 #include "oofem_limits.h"
 #include "contextioerr.h"
+#include "dynamicinputrecord.h"
 
 #include <cstdarg>
 
@@ -89,6 +90,12 @@ FEMComponent :: giveInputRecordString(std :: string &str, bool keyword)
     }
 
     return 1;
+}
+
+void
+FEMComponent :: giveInputRecord(DynamicInputRecord &input)
+{
+    input.setRecordKeywordField(this->giveInputRecordName(), this->giveNumber());
 }
 
 
