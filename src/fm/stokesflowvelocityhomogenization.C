@@ -261,8 +261,8 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
 
     FloatMatrix H;
 
-//    SparseLinearSystemNM *linMethod = CreateUsrDefSparseLinSolver(ST_Petsc, 1, this->giveDomain(1), this);
-    SparseLinearSystemNM *linMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+//    SparseLinearSystemNM *linMethod = CreateUsrDefSparseLinSolver(ST_Petsc, this->giveDomain(1), this);
+    SparseLinearSystemNM *linMethod = CreateUsrDefSparseLinSolver(solverType, this->giveDomain(1), this);
 
     H.resize( F.giveNumberOfRows(), F.giveNumberOfColumns() );
     H.zero();

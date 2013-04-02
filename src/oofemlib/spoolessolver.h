@@ -81,7 +81,7 @@ public:
      * @param d Domain which solver belongs to.
      * @param m Engineering model which solver belongs to.
      */
-    SpoolesSolver(int i, Domain *d, EngngModel *m);
+    SpoolesSolver(Domain *d, EngngModel *m);
 
     ///Destructor
     virtual ~SpoolesSolver();
@@ -91,12 +91,11 @@ public:
      */
     virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
 
-    /// Initializes receiver from given record. Empty implementation.
+    /// Initializes receiver from given record.
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     // identification
     virtual const char *giveClassName() const { return "SpoolesSolver"; }
-    virtual classType giveClassID() const { return SpoolesSolverClass; }
     virtual LinSystSolverType giveLinSystSolverType() const { return ST_Spooles; }
 };
 } // end namespace oofem

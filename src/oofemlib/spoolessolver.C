@@ -36,9 +36,9 @@
  #include "spoolessolver.h"
 
 namespace oofem {
-SpoolesSolver :: SpoolesSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
+SpoolesSolver :: SpoolesSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
 {
-    _error("SpoolesSolver: can't create, SPOOLES support not compiled");
+    OOFEM_ERROR("SpoolesSolver: can't create, SPOOLES support not compiled");
 }
 
 SpoolesSolver :: ~SpoolesSolver() { }
@@ -62,7 +62,7 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_
  #include "spoolesinterface.h"
 
 namespace oofem {
-SpoolesSolver :: SpoolesSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
+SpoolesSolver :: SpoolesSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
 {
     Lhs = NULL;
     msglvl = 0;
@@ -123,9 +123,9 @@ SpoolesSolver :: initializeFrom(InputRecord *ir)
     std::string msgFileName;
 
     val = -3;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_SpoolesSolver_msglvl, "msglvl");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_SpoolesSolver_msglvl);
     msglvl = val;
-    IR_GIVE_OPTIONAL_FIELD(ir, msgFileName, _IFT_SpoolesSolver_msgfile, "msgfile");
+    IR_GIVE_OPTIONAL_FIELD(ir, msgFileName, _IFT_SpoolesSolver_msgfile);
     if ( !msgFileName.empty() ) {
         msgFile = fopen(msgFileName.c_str(), "w");
         msgFileCloseFlag = 1;

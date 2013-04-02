@@ -35,11 +35,15 @@
 #ifndef nummet_h
 #define nummet_h
 
-#include "femcmpnn.h"
-#include "alist.h"
+#include "inputrecord.h"
+#include "classtype.h"
+#include "contextioresulttype.h"
+#include "contextmode.h"
 
 namespace oofem {
 class EngngModel;
+class Domain;
+class DataStream;
 
 /**
  * This base class is an abstraction for numerical algorithm.
@@ -73,25 +77,28 @@ class EngngModel;
  * instance may also represent interface to an existing procedure
  * written in C or Fortran.
  */
-class NumericalMethod : public FEMComponent
+class NumericalMethod
 {
 protected:
+    /// Pointer to domain
+    Domain *domain;
     /// Pointer to engineering model.
     EngngModel *engngModel;
 
 public:
     /**
      * Constructor.
-     * @param i Index of method.
      * @param d Domain which the receiver belongs to.
      * @param m Engineering model which the receiver belongs to.
      */
-    NumericalMethod(int i, Domain *d, EngngModel *m) : FEMComponent(i, d), engngModel(m) { }
+    NumericalMethod(Domain *d, EngngModel *m) : domain(d), engngModel(m) { }
     /// Destructor
     virtual ~NumericalMethod() { }
 
     /// @return Engineering model receiver is connected to.
     EngngModel *giveEngngModel() { return engngModel; }
+    
+    virtual IRResultType initializeFrom(InputRecord *ir)  { return IRRT_OK; }
 
     /**
      * Reinitializes the receiver. This is used, when topology of problem has changed
@@ -103,10 +110,13 @@ public:
      * This method clears receiver cached data dependent on topology, when it changes.
      */
     virtual void reinitialize() { }
+    
+    virtual void setDomain(Domain *d) { domain = d; }
 
-    // Overloaded from FEMComponent:
     virtual const char *giveClassName() const { return "NumericalMethod"; }
-    virtual classType giveClassID() const { return NumericalMethodClass; }
+    
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
 };
 } // end namespace oofem
 #endif // nummet_h

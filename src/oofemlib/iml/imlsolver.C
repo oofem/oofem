@@ -35,9 +35,9 @@
  #include "imlsolver.h"
 
 namespace oofem {
-IMLSolver :: IMLSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
+IMLSolver :: IMLSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
 {
-    _error("IMLSolver: can't create, IML support not compiled");
+    OOFEM_ERROR("IMLSolver: can't create, IML support not compiled");
 }
 
 IMLSolver :: ~IMLSolver() { }
@@ -70,7 +70,7 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSu
  #endif
 
 namespace oofem {
-IMLSolver :: IMLSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
+IMLSolver :: IMLSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
 {
     Lhs = NULL;
     M = NULL;

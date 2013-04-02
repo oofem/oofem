@@ -103,7 +103,7 @@ NumericalMethod *NonLinearDynamic :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
 
-    this->nMethod = new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance);
+    this->nMethod = new NRSolver(this->giveDomain(1), this, EID_MomentumBalance);
     return this->nMethod;
 }
 

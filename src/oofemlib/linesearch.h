@@ -51,6 +51,7 @@ namespace oofem {
 class EngngModel;
 class SparseMtrx;
 class FloatArray;
+class TimeStep;
 
 /**
  * This base class is an abstraction/implementation for numerical method solving
@@ -70,13 +71,7 @@ public:
 
 public:
     /// Constructor
-    LineSearchNM(int i, Domain *d, EngngModel *m);
-    /// Destructor
-    virtual ~LineSearchNM();
-
-    // identification
-    virtual const char *giveClassName() const { return "LineSearchNM"; }
-    virtual classType giveClassID() const { return NumericalMethodClass; }
+    LineSearchNM(Domain *d, EngngModel *m);
 
     /**
      * Solves the line search optimization problem in the form of @f$ g(r)=0; r_{new}=r_{old}+\eta\delta r; 0 < \eta < 1 @f$,
@@ -96,10 +91,8 @@ public:
     virtual NM_Status solve(FloatArray *r, FloatArray *dr, FloatArray *F, FloatArray *R, FloatArray *R0,
                             IntArray &eqnmask, double lambda, double &etaValue, LS_status &status, TimeStep *tStep);
 
-    // Management  components
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
+    virtual const char *giveClassName() const { return "LineSearchNM"; }
 
 protected:
     void search(int istep, FloatArray &prod, FloatArray &eta, double amp, double maxeta, double mineta, int &status);

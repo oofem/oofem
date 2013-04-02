@@ -211,7 +211,7 @@ protected:
 #endif
 
 public:
-    CylindricalALM(int i, Domain *d, EngngModel *m, EquationID ut);
+    CylindricalALM(Domain *d, EngngModel *m, EquationID ut);
     virtual ~CylindricalALM();
 
     // Overloaded methods:
@@ -237,7 +237,6 @@ public:
         }
     }
     virtual const char *giveClassName() const { return "CylindricalALM"; }
-    virtual classType giveClassID() const { return CylindricalALMSolverClass; }
 
     virtual SparseLinearSystemNM *giveLinearSolver();
 

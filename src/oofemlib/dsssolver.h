@@ -54,12 +54,11 @@ class DSSSolver : public SparseLinearSystemNM
 public:
     /**
      * Constructor.
-     * Creates new instance of LDLTFactorization, with number i, belonging to domain d and Engngmodel m.
-     * @param i Solver number.
+     * Creates new instance of DSS solver belonging to domain d and Engngmodel m.
      * @param d Domain which solver belongs to.
      * @param m Engineering model which solver belongs to.
      */
-    DSSSolver(int i, Domain *d, EngngModel *m);
+    DSSSolver(Domain *d, EngngModel *m);
     /// Destructor.
     virtual ~DSSSolver();
 
@@ -73,11 +72,8 @@ public:
      * @return NM_Status value.
      */
     virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
-    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    // identification
     virtual const char *giveClassName() const { return "LDLTFactorization"; }
-    virtual classType giveClassID() const { return LDLTFactorizationClass; }
     virtual LinSystSolverType giveLinSystSolverType() const { return ST_DSS; }
 };
 } // end namespace oofem

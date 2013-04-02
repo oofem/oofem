@@ -62,12 +62,8 @@ private:
     int solved;
 
 public:
-    GJacobi(int i, Domain *d, EngngModel *m);
+    GJacobi(Domain *d, EngngModel *m);
     virtual ~GJacobi();
-
-    void solveYourselfAt(TimeStep *tStep);
-    void updateYourself();
-    void updateYourselfExceptLhs();
 
     /**
      * Solves the given sparse generalized eigenvalue system of equations @f$ K\cdot x = w^2 M\cdot x @f$.
@@ -79,9 +75,7 @@ public:
      */
     virtual NM_Status solve(FloatMatrix *K, FloatMatrix *M, FloatArray *w, FloatMatrix *x);
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "GeneralizedJacobiSolver"; }
-    virtual classType giveClassID() const { return GeneralizedJacobiSolverClass; }
 };
 } // end namespace oofem
 #endif // gjacobi_h

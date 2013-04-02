@@ -52,8 +52,8 @@ namespace oofem {
 #define CALM_DEFAULT_NRM_TICKS 2
 #define CALM_MAX_REL_ERROR_BOUND 1.e10
 
-CylindricalALM :: CylindricalALM(int i, Domain *d, EngngModel *m, EquationID ut) :
-    SparseNonLinearSystemNM(i, d, m, ut), calm_HPCWeights(), calm_HPCIndirectDofMask(), calm_HPCDmanDofSrcArray(), ccDofGroups()
+CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m, EquationID ut) :
+    SparseNonLinearSystemNM(d, m, ut), calm_HPCWeights(), calm_HPCIndirectDofMask(), calm_HPCDmanDofSrcArray(), ccDofGroups()
 {
     //
     // constructor
@@ -845,7 +845,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         }
 
         if ( ( calm_HPCDmanDofSrcArray.giveSize() % 2 ) != 0 ) {
-            _error("HPC Map size must be even number, it contains pairs <node, nodeDof>");
+            OOFEM_ERROR("CALMSLS :: HPC Map size must be even number, it contains pairs <node, nodeDof>");
         }
 
         nsize = calm_HPCDmanDofSrcArray.giveSize() / 2;
@@ -856,21 +856,19 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
                 calm_HPCWeights.at(i) = 1.0;
             }
         } else if ( nsize != calm_HPCWeights.giveSize() ) {
-            _error("HPC map size and weight array size mismatch");
+            OOFEM_ERROR("CALMSLS :: HPC map size and weight array size mismatch");
         }
 
         calm_hpc_init = 1;
     } else {
         if ( hpcMode ) {
-            _error("HPC Map must be specified");
+            OOFEM_ERROR("CALMSLS :: HPC Map must be specified");
         }
     }
 
     int _value = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _value, _IFT_CylindricalALM_lstype);
     solverType = ( LinSystSolverType ) _value;
-
-    this->giveLinearSolver()->initializeFrom(ir);
 
     this->lsFlag = 0; // linesearch default is off
     IR_GIVE_OPTIONAL_FIELD(ir, lsFlag, _IFT_CylindricalALM_linesearch);
@@ -933,7 +931,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, rtold, _IFT_CylindricalALM_rtold);
 
         if ( ( rtolf.giveSize() != nccdg ) || ( rtold.giveSize() != nccdg ) ) {
-            _error2("Incompatible size of rtolf or rtold params, expected size %d (nccdg)", nccdg);
+            OOFEM_ERROR2("CALMLS :: Incompatible size of rtolf or rtold params, expected size %d (nccdg)", nccdg);
         }
     } else {
         nccdg = 0;
@@ -1063,9 +1061,9 @@ CylindricalALM :: giveLinearSolver()
         }
     }
 
-    linSolver = CreateUsrDefSparseLinSolver(solverType, 1, domain, engngModel);
+    linSolver = CreateUsrDefSparseLinSolver(solverType, domain, engngModel);
     if ( linSolver == NULL ) {
-        _error("giveLinearSolver: linear solver creation failed");
+        OOFEM_ERROR("CALMSLS :: giveLinearSolver: linear solver creation failed");
     }
 
     return linSolver;
@@ -1164,7 +1162,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
         // solution of quadratic eqn.
         double discr = a2 * a2 - 4.0 * a1 * a3;
         if ( discr < 0.0 ) {
-            _error("computeDeltaLambda: discriminant is negative, solution failed");
+            OOFEM_ERROR("CALMSLS :: computeDeltaLambda: discriminant is negative, solution failed");
         }
 
         discr = sqrt(discr);
@@ -1234,7 +1232,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
         denom = colv(1);
 #endif
         if ( fabs(denom) < calm_SMALL_NUM ) {
-            _error("\ncalm: zero denominator in linearized control");
+            OOFEM_ERROR("CALMSLS :: \ncalm: zero denominator in linearized control");
         }
 
         deltaLambda = ( deltaL - nom ) / denom;

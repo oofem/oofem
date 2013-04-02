@@ -258,9 +258,9 @@ Dof *CreateUsrDefDofOfType(dofType type, int number, DofManager *dman)
 }
 
 // ================ SparseLinearSystemNM CLASS FACTORY==================
-SparseLinearSystemNM *CreateUsrDefSparseLinSolver(LinSystSolverType st, int i, Domain *d, EngngModel *m)
+SparseLinearSystemNM *CreateUsrDefSparseLinSolver(LinSystSolverType st, Domain *d, EngngModel *m)
 {
-    return classFactory.createSparseLinSolver(st,i,d,m);
+    return classFactory.createSparseLinSolver(st,d,m);
 }
 
 // ================ ErrorEstimator CLASS FACTORY==================
@@ -308,14 +308,14 @@ TopologyDescription *CreateUsrDefTopologyOfType(const char *aClass, Domain *doma
     return ( topologyNameList.count(aClass) == 1 ) ? topologyNameList [ aClass ](domain) : NULL;
 }
 
-SparseGeneralEigenValueSystemNM *CreateUsrDefGeneralizedEigenValueSolver(GenEigvalSolverType st, int i, Domain *d, EngngModel *m)
+SparseGeneralEigenValueSystemNM *CreateUsrDefGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *d, EngngModel *m)
 {
     if ( st == GES_SubspaceIt ) {
-        return new SubspaceIteration(i, d, m);
+        return new SubspaceIteration(d, m);
     } else if ( st == GES_InverseIt ) {
-        return new InverseIteration(i, d, m);
+        return new InverseIteration(d, m);
     } else if ( st == GES_SLEPc ) {
-        return new SLEPcSolver(i, d, m);
+        return new SLEPcSolver(d, m);
     } else {
         OOFEM_ERROR("CreateUsrDefGeneralizedEigenValueSolver: Unknown solver type\n");
         return NULL;
@@ -323,17 +323,17 @@ SparseGeneralEigenValueSystemNM *CreateUsrDefGeneralizedEigenValueSolver(GenEigv
 }
 
 
-template< typename T > SparseNonLinearSystemNM *nonlinCreator(int n, Domain *d, EngngModel *m, EquationID eid) { return ( new T(n, d, m, eid) ); }
-std :: map < std :: string, SparseNonLinearSystemNM * ( * )(int, Domain *, EngngModel *, EquationID), CaseComp > nonlinList;
+template< typename T > SparseNonLinearSystemNM *nonlinCreator(Domain *d, EngngModel *m, EquationID eid) { return ( new T(d, m, eid) ); }
+std :: map < std :: string, SparseNonLinearSystemNM * ( * )(Domain *, EngngModel *, EquationID), CaseComp > nonlinList;
 
-SparseNonLinearSystemNM *CreateUsrDefNonLinearSolver(const char *aClass, int number, Domain *d, EngngModel *emodel, EquationID eid)
+SparseNonLinearSystemNM *CreateUsrDefNonLinearSolver(const char *aClass, Domain *d, EngngModel *emodel, EquationID eid)
 {
     if ( nonlinList.empty() ) {
         nonlinList [ "nrsolver" ]   = nonlinCreator< NRSolver >;
         nonlinList [ "calm" ]       = nonlinCreator< CylindricalALM >;
     }
 
-    return ( nonlinList.count(aClass) == 1 ) ? nonlinList [ aClass ](number, d, emodel, eid) : NULL;
+    return ( nonlinList.count(aClass) == 1 ) ? nonlinList [ aClass ](d, emodel, eid) : NULL;
 }
 
 template< typename T > ExportModule *exportCreator(int n, EngngModel *e) { return ( new T(n, e) ); }

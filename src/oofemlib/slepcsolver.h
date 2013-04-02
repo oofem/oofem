@@ -62,15 +62,11 @@ private:
 #endif
 
 public:
-    SLEPcSolver(int i, Domain *d, EngngModel *m);
+    SLEPcSolver(Domain *d, EngngModel *m);
     virtual ~SLEPcSolver();
 
     virtual NM_Status solve(SparseMtrx *a, SparseMtrx *b, FloatArray *v, FloatMatrix *x, double rtol, int nroot);
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
-    // Identification
     virtual const char *giveClassName() const { return "SLEPcSolver"; }
-    virtual classType giveClassID() const { return SlepcSolverClass; }
 };
 } // end namespace oofem
 #endif // slepcsolver_h

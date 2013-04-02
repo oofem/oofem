@@ -101,7 +101,7 @@ private:
     /// Flag indicating computation of energy norm.
     int energyNorm_comput_flag;
 public:
-    FETISolver(int i, Domain *d, EngngModel *m);
+    FETISolver(Domain *d, EngngModel *m);
     virtual ~FETISolver();
 
     /**
@@ -123,7 +123,6 @@ public:
 
     // identification
     virtual const char *giveClassName() const { return "FETISolver"; }
-    virtual classType giveClassID() const { return NumericalMethodClass; }
     virtual LinSystSolverType giveLinSystSolverType() const { return ST_Feti; }
 
     void projection(FloatArray &v, FloatMatrix &l, FloatMatrix &l1);

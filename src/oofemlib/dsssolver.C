@@ -34,14 +34,12 @@
 
 #include "dsssolver.h"
 
-#ifdef __DSS_MODULE
-
- #include "dss.h"
- #include "timer.h"
+#include "dss.h"
+#include "timer.h"
 
 namespace oofem {
-DSSSolver :: DSSSolver(int i, Domain *d, EngngModel *m) :
-    SparseLinearSystemNM(i, d, m) { }
+DSSSolver :: DSSSolver(Domain *d, EngngModel *m) :
+    SparseLinearSystemNM(d, m) { }
 
 DSSSolver :: ~DSSSolver() { }
 
@@ -70,30 +68,4 @@ DSSSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     return NM_Success;
 }
 
-IRResultType
-DSSSolver :: initializeFrom(InputRecord *ir)
-//
-//
-//
-{
-    return IRRT_OK;
-}
 } // end namespace oofem
-
-#else // __DSS_MODULE
-
-namespace oofem {
-DSSSolver :: DSSSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
-{
-    _error("DSSSolver: can't create, DSS support not compiled");
-}
-
-DSSSolver :: ~DSSSolver() { }
-
-IRResultType
-DSSSolver :: initializeFrom(InputRecord *ir) { return IRRT_OK; }
-
-NM_Status
-DSSSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSuccess; }
-} // end namespace oofem
-#endif

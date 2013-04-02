@@ -72,7 +72,7 @@ NumericalMethod *IncrementalLinearStatic :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
 
-    nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+    nMethod = CreateUsrDefSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }

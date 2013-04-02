@@ -81,7 +81,7 @@ NumericalMethod *NlDEIDynamic :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
 
-    nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+    nMethod = CreateUsrDefSparseLinSolver(solverType, this->giveDomain(1), this);
 
     return nMethod;
 }

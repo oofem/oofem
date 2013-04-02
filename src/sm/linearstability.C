@@ -57,7 +57,7 @@ NumericalMethod *LinearStability :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
 
-    nMethod = CreateUsrDefGeneralizedEigenValueSolver(solverType, 1, this->giveDomain(1), this);
+    nMethod = CreateUsrDefGeneralizedEigenValueSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod:  solver creation failed");
     }
@@ -71,7 +71,7 @@ SparseLinearSystemNM *LinearStability :: giveNumericalMethodForLinStaticProblem(
         return nMethodLS;
     }
 
-    nMethodLS = CreateUsrDefSparseLinSolver(ST_Direct, 1, this->giveDomain(1), this); ///@todo Support other solvers
+    nMethodLS = CreateUsrDefSparseLinSolver(ST_Direct, this->giveDomain(1), this); ///@todo Support other solvers
     if ( nMethodLS == NULL ) {
         _error("giveNumericalMethodForLinStaticProblem:  solver creation failed");
     }

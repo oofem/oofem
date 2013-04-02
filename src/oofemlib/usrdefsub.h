@@ -178,30 +178,27 @@ SparseMtrx *CreateUsrDefSparseMtrx(SparseMtrxType type);
 /**
  * Creates new Instance of Linear Sparse Solver of given type.
  * @param st Solver type.
- * @param i Component number.
  * @param d Domain.
  * @param m Engineering model.
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
-SparseLinearSystemNM *CreateUsrDefSparseLinSolver(LinSystSolverType st, int i, Domain *d, EngngModel *m);
+SparseLinearSystemNM *CreateUsrDefSparseLinSolver(LinSystSolverType st, Domain *d, EngngModel *m);
 /**
  * Creates new instance of Generalized Eigenvalue Solver of given type.
  * @param st Solver type.
- * @param i Component number.
  * @param d Domain.
  * @param m Engineering model.
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
-SparseGeneralEigenValueSystemNM *CreateUsrDefGeneralizedEigenValueSolver(GenEigvalSolverType st, int i, Domain *d, EngngModel *m);
+SparseGeneralEigenValueSystemNM *CreateUsrDefGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *d, EngngModel *m);
 /**
  * Creates new instance of a nonlinear solver of given name.
  * @param name Keyword string determining the type of new instance.
- * @param i Component number.
  * @param d Domain.
  * @param m Engineering model.
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
-SparseNonLinearSystemNM *CreateUsrDefNonlinearSolver(const char *name, int i, Domain *d, EngngModel *m);
+SparseNonLinearSystemNM *CreateUsrDefNonlinearSolver(const char *name, Domain *d, EngngModel *m);
 /**
  * Creates new instance of Error Estimator of given type.
  * @param type Determines Error Estimator type.

@@ -61,7 +61,7 @@ private:
 
 public:
     /// Constructor - creates new instance of LDLTFactorization, with number i, belonging to domain d and Engngmodel m.
-    LDLTFactorization(int i, Domain *d, EngngModel *m);
+    LDLTFactorization(Domain *d, EngngModel *m);
     /// Destructor
     virtual ~LDLTFactorization();
 
@@ -76,11 +76,7 @@ public:
      */
     virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
-    // identification
     virtual const char *giveClassName() const { return "LDLTFactorization"; }
-    virtual classType giveClassID() const { return LDLTFactorizationClass; }
     virtual LinSystSolverType giveLinSystSolverType() const { return ST_Direct; }
 };
 } // end namespace oofem

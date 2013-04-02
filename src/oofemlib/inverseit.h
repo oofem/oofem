@@ -93,16 +93,11 @@ private:
     int solved;
 
 public:
-
-    InverseIteration(int i, Domain *d, EngngModel *m);
+    InverseIteration(Domain *d, EngngModel *m);
     virtual ~InverseIteration();
 
     virtual NM_Status solve(SparseMtrx *A, SparseMtrx *B, FloatArray *x, FloatMatrix *v, double rtol, int nroot);
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
-    // identification
     virtual const char *giveClassName() const { return "InverseIteration"; }
-    virtual classType giveClassID() const { return InverseIterationSolverClass; }
 };
 } // end namespace oofem
 #endif // inverseit_h

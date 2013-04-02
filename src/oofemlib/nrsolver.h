@@ -142,7 +142,7 @@ private:
     FloatArray rtold;
 
 public:
-    NRSolver(int i, Domain *d, EngngModel *m, EquationID ut);
+    NRSolver(Domain *d, EngngModel *m, EquationID ut);
     virtual ~NRSolver();
 
     // Overloaded methods:
@@ -151,11 +151,10 @@ public:
                             const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
     virtual void printState(FILE *outputStream);
+
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual const char *giveClassName() const { return "NRSolver"; }
-    virtual classType giveClassID() const { return NRSolverClass; }
+
     virtual void setDomain(Domain *d) {
         this->domain = d;
         if ( linSolver ) {

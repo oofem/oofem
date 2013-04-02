@@ -115,7 +115,7 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
             }
         }
 
-        this->nMethod = new CylindricalALM(1, this->giveDomain(1), this, EID_MomentumBalance);
+        this->nMethod = new CylindricalALM(this->giveDomain(1), this, EID_MomentumBalance);
     } else if ( mode == nls_directControl ) {
         if ( nMethod ) {
             if ( dynamic_cast< NRSolver * >( nMethod ) ) {
@@ -125,7 +125,7 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
             }
         }
 
-        this->nMethod = new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance);
+        this->nMethod = new NRSolver(this->giveDomain(1), this, EID_MomentumBalance);
     } else {
         _error("giveNumericalMethod: unsupported controlMode");
     }

@@ -574,7 +574,7 @@ void MixedGradientPressureNeumann :: computeTangents(
     // Fetch some information from the engineering model
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
-    SparseLinearSystemNM *solver = CreateUsrDefSparseLinSolver(ST_Petsc, 1, this->domain, this->domain->giveEngngModel());// = rve->giveLinearSolver();
+    SparseLinearSystemNM *solver = CreateUsrDefSparseLinSolver(ST_Petsc, this->domain, this->domain->giveEngngModel());// = rve->giveLinearSolver();
     SparseMtrx *Kff;
     SparseMtrxType stype = SMT_PetscMtrx;// = rve->giveSparseMatrixType();
     EModelDefaultEquationNumbering fnum;

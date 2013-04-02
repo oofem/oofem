@@ -49,6 +49,7 @@ namespace oofem {
 class EngngModel;
 class SparseMtrx;
 class FloatArray;
+class TimeStep;
 
 /**
  * This base class is an abstraction for all numerical methods solving sparse
@@ -82,7 +83,7 @@ protected:
 
 public:
     /// Constructor
-    SparseNonLinearSystemNM(int i, Domain *d, EngngModel *m, EquationID ut) : NumericalMethod(i, d, m) { this->ut = ut; }
+    SparseNonLinearSystemNM(Domain *d, EngngModel *m, EquationID ut) : NumericalMethod(d, m) { this->ut = ut; }
     /// Destructor
     virtual ~SparseNonLinearSystemNM() { }
 
@@ -133,9 +134,7 @@ public:
      */
     virtual SparseLinearSystemNM *giveLinearSolver() { return NULL; }
 
-    // Overloaded methods:
     virtual const char *giveClassName() const { return "SparseNonLinearSystemNM"; }
-    virtual classType giveClassID() const { return SparseNonLinearSystemNMClass; }
 };
 } // end namespace oofem
 #endif // sparsenonlinsystemnm_h

@@ -65,7 +65,7 @@ NumericalMethod *SUPG :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
 
-    nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+    nMethod = CreateUsrDefSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }
@@ -921,7 +921,8 @@ void
 SUPG :: updateDomainLinks()
 {
     EngngModel :: updateDomainLinks();
-    this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
+    this->giveNumericalMethod( this->giveCurrentMetaStep() )->reinitialize( );
+    //this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
 }
 
 void

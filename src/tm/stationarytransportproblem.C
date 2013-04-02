@@ -74,7 +74,7 @@ NumericalMethod *StationaryTransportProblem :: giveNumericalMethod(MetaStep *mSt
         return nMethod;
     }
 
-    nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+    nMethod = CreateUsrDefSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }

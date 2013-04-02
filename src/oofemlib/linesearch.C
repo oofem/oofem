@@ -39,8 +39,8 @@
 #include "nmstatus.h"
 
 namespace oofem {
-LineSearchNM :: LineSearchNM(int i, Domain *d, EngngModel *m) :
-    NumericalMethod(i, d, m)
+LineSearchNM :: LineSearchNM(Domain *d, EngngModel *m) :
+    NumericalMethod(d, m)
 {
     max_iter = 10;
     ls_tolerance = 0.80;
@@ -48,8 +48,6 @@ LineSearchNM :: LineSearchNM(int i, Domain *d, EngngModel *m) :
     maxEta = 4.0;
     minEta = 0.2;
 }
-
-LineSearchNM :: ~LineSearchNM() { }
 
 NM_Status
 LineSearchNM :: solve(FloatArray *r, FloatArray *dr, FloatArray *F, FloatArray *R, FloatArray *R0,

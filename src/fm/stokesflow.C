@@ -327,7 +327,7 @@ NumericalMethod *StokesFlow :: giveNumericalMethod(MetaStep *mStep)
         return this->nMethod;
     }
 
-    this->nMethod = new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance_ConservationEquation);
+    this->nMethod = new NRSolver(this->giveDomain(1), this, EID_MomentumBalance_ConservationEquation);
     return this->nMethod;
 }
 

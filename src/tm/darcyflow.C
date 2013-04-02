@@ -285,7 +285,7 @@ NumericalMethod *DarcyFlow :: giveNumericalMethod(MetaStep *mStep)
         return this->nMethod;
     }
 
-    this->nMethod = new NRSolver(1, this->giveDomain(1), this, EID_ConservationEquation);
+    this->nMethod = new NRSolver(this->giveDomain(1), this, EID_ConservationEquation);
     if ( !nMethod ) {
         OOFEM_ERROR("giveNumericalMethod: numerical method creation failed");
     }

@@ -58,13 +58,11 @@ class SparseGeneralEigenValueSystemNM : public NumericalMethod
 {
 public:
     /// Constructor.
-    SparseGeneralEigenValueSystemNM(int i, Domain *d, EngngModel *m) : NumericalMethod(i, d, m) { };
+    SparseGeneralEigenValueSystemNM(Domain *d, EngngModel *m) : NumericalMethod(d, m) { };
     /// Destructor.
     virtual ~SparseGeneralEigenValueSystemNM() { };
 
-    // identification
     virtual const char *giveClassName() const { return "SparseGeneralEigenValueSystemNM"; }
-    virtual classType giveClassID() const { return SparseGeneralEigenValueSystemNMClass; }
 
     /**
      * Solves the given sparse generalized eigen value system of equations @f$ Av = x^2 Bv @f$.

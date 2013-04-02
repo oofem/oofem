@@ -85,10 +85,10 @@ NumericalMethod *LinearStatic :: giveNumericalMethod(MetaStep *mStep)
 
     if ( isParallel() ) {
         if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
-            nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+            nMethod = CreateUsrDefSparseLinSolver(solverType, this->giveDomain(1), this);
         }
     } else {
-        nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+        nMethod = CreateUsrDefSparseLinSolver(solverType, this->giveDomain(1), this);
     }
 
     if ( nMethod == NULL ) {

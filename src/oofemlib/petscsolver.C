@@ -44,18 +44,7 @@
  #include <petscksp.h>
 
 namespace oofem {
-PetscSolver :: PetscSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m) { }
-
-
-PetscSolver :: ~PetscSolver() { }
-
-
-IRResultType PetscSolver :: initializeFrom(InputRecord *ir)
-{
-    // const char *__keyword, *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    // IRResultType result;                               // Required by IR_GIVE_FIELD macro
-    return IRRT_OK;
-}
+PetscSolver :: PetscSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m) { }
 
 
 NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
@@ -64,25 +53,25 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 
     // first check whether Lhs is defined
     if ( !A ) {
-        _error("solve: unknown Lhs");
+        OOFEM_ERROR("PETScSolver :: solve: unknown Lhs");
     }
 
     // and whether Rhs
     if ( !b ) {
-        _error("solve: unknown Rhs");
+        OOFEM_ERROR("PETScSolver :: solve: unknown Rhs");
     }
 
     // and whether previous Solution exist
     if ( !x ) {
-        _error("solve: unknown solution array");
+        OOFEM_ERROR("PETScSolver :: solve: unknown solution array");
     }
 
     if ( x->giveSize() != ( neqs = b->giveSize() ) ) {
-        _error("solve: size mismatch");
+        OOFEM_ERROR("PETScSolver :: solve: size mismatch");
     }
 
     if ( A->giveType() != SMT_PetscMtrx ) {
-        _error("solve: PetscSparseMtrx Expected");
+        OOFEM_ERROR("PETScSolver :: solve: PetscSparseMtrx Expected");
     }
 
     PetscSparseMtrx *Lhs = ( PetscSparseMtrx * ) A;
@@ -120,7 +109,7 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
     PetscErrorCode err;
     KSPConvergedReason reason;
     if ( Lhs->giveType() != SMT_PetscMtrx ) {
-        _error("petsc_solve: PetscSparseMtrx Expected");
+        OOFEM_ERROR("PETScSolver :: petsc_solve: PetscSparseMtrx Expected");
     }
 
     Timer timer;
@@ -202,10 +191,10 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
 NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
 {
     if ( !A ) {
-        _error("solve: Unknown Lhs");
+        OOFEM_ERROR("PETScSolver :: solve: Unknown Lhs");
     }
     if ( A->giveType() != SMT_PetscMtrx ) {
-        _error("solve: PetscSparseMtrx Expected");
+        OOFEM_ERROR("PETScSolver :: solve: PetscSparseMtrx Expected");
     }
 
     PetscSparseMtrx *Lhs = ( PetscSparseMtrx * ) A;
@@ -242,17 +231,14 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
 }
 #endif
 
-
-void PetscSolver :: reinitialize() {}
-
 } // end namespace oofem
 #endif //ifdef __PETSC_MODULE
 
 #ifndef __PETSC_MODULE
 namespace oofem {
-PetscSolver :: PetscSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
+PetscSolver :: PetscSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
 {
-    _error("PetscSolver: can't create, PETSc support not compiled");
+    OOFEM_ERROR("PETScSolver :: PetscSolver: can't create, PETSc support not compiled");
 }
 
 PetscSolver :: ~PetscSolver() { }

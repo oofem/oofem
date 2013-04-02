@@ -39,8 +39,8 @@
 #include "nmstatus.h"
 
 namespace oofem {
-GJacobi :: GJacobi(int i, Domain *d, EngngModel *m) :
-    NumericalMethod(i, d, m)
+GJacobi :: GJacobi(Domain *d, EngngModel *m) :
+    NumericalMethod(d, m)
 {
     //
     // constructor
@@ -78,17 +78,17 @@ GJacobi :: solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *
 
     // first check whether Amatrix is defined
     if ( !a ) {
-        _error("solveYourselfAt: unknown A matrix");
+        OOFEM_ERROR("GJacobi :: solveYourselfAt: unknown A matrix");
     }
 
     // and whether Bmatrix
     if ( !b ) {
-        _error("solveYourselfAt: unknown Bmatrx");
+        OOFEM_ERROR("GJacobi :: solveYourselfAt: unknown Bmatrx");
     }
 
     if ( ( a->giveNumberOfRows() != b->giveNumberOfRows() ) ||
         ( !a->isSquare() ) || ( !b->isSquare() ) ) {
-        _error("solveYourselfAt: A matrix, B mtrix -> size mismatch");
+        OOFEM_ERROR("GJacobi :: solveYourselfAt: A matrix, B mtrix -> size mismatch");
     }
 
     int n = a->giveNumberOfRows();
@@ -96,19 +96,19 @@ GJacobi :: solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *
     // Check output  arrays
     //
     if ( !eigv ) {
-        _error("solveYourselfAt: unknown eigv array");
+        OOFEM_ERROR("GJacobi :: solveYourselfAt: unknown eigv array");
     }
 
     if ( !x ) {
-        _error("solveYourselfAt: unknown x    mtrx ");
+        OOFEM_ERROR("GJacobi :: solveYourselfAt: unknown x    mtrx ");
     }
 
     if ( eigv->giveSize() != n ) {
-        _error("solveYourselfAt: eigv size mismatch");
+        OOFEM_ERROR("GJacobi :: solveYourselfAt: eigv size mismatch");
     }
 
     if ( ( !x->isSquare() ) || ( x->giveNumberOfRows() != n ) ) {
-        _error("solveYourselfAt: x size mismatch");
+        OOFEM_ERROR("GJacobi :: solveYourselfAt: x size mismatch");
     }
 
     //
@@ -172,7 +172,7 @@ GJacobi :: solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *
                 if ( fabs(check) < GJacobi_ZERO_CHECK_TOL ) {
                     check = fabs(check);
                 } else if ( check < 0.0 ) {
-                    _error("solveYourselfAt: Matrices are not positive definite");
+                    OOFEM_ERROR("GJacobi :: solveYourselfAt: Matrices are not positive definite");
                 }
 
                 sqch = sqrt(check);
@@ -344,9 +344,4 @@ label280:
     return NM_Success;
 }
 
-IRResultType
-GJacobi :: initializeFrom(InputRecord *ir)
-{
-    return IRRT_OK;
-}
 } // end namespace oofem

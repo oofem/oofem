@@ -60,8 +60,8 @@ namespace oofem {
 #define NRSOLVER_DEFAULT_NRM_TICKS 10
 
 
-NRSolver :: NRSolver(int i, Domain *d, EngngModel *m, EquationID ut) :
-    SparseNonLinearSystemNM(i, d, m, ut), prescribedDofs(), prescribedDofsValues()
+NRSolver :: NRSolver(Domain *d, EngngModel *m, EquationID ut) :
+    SparseNonLinearSystemNM(d, m, ut), prescribedDofs(), prescribedDofsValues()
 {
     //
     // constructor
@@ -119,7 +119,7 @@ NRSolver :: initializeFrom(InputRecord *ir)
     nsmax = 1e8;
     IR_GIVE_OPTIONAL_FIELD(ir, nsmax, _IFT_NRSolver_maxiter);
     if ( nsmax < 0 ) {
-        _error("initializeFrom: nsmax < 0");
+        OOFEM_ERROR("NRSolver :: initializeFrom: nsmax < 0");
     }
 
     minIterations = 0;
@@ -140,7 +140,6 @@ NRSolver :: initializeFrom(InputRecord *ir)
     int _val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_NRSolver_lstype);
     solverType = ( LinSystSolverType ) _val;
-    this->giveLinearSolver()->initializeFrom(ir);
 
     // read relative error tolerances of the solver
     // if rtolv provided set to this tolerance both rtolf and rtold
@@ -161,7 +160,7 @@ NRSolver :: initializeFrom(InputRecord *ir)
 
     numberOfPrescribedDofs = prescribedDofs.giveSize() / 2;
     if ( numberOfPrescribedDofs != prescribedDofsValues.giveSize() ) {
-        _error("instanciateFrom direct displacement mask size mismatch");
+        OOFEM_ERROR("NRSolver :: instanciateFrom direct displacement mask size mismatch");
     }
 
     if ( numberOfPrescribedDofs ) {
@@ -178,20 +177,6 @@ NRSolver :: initializeFrom(InputRecord *ir)
     }
 
     return IRRT_OK;
-}
-
-
-contextIOResultType
-NRSolver :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-{
-    return CIO_OK;
-}
-
-
-contextIOResultType
-NRSolver :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
-{
-    return CIO_OK;
 }
 
 
@@ -361,9 +346,9 @@ NRSolver :: giveLinearSolver()
         }
     }
 
-    linSolver = CreateUsrDefSparseLinSolver(solverType, 1, domain, engngModel);
+    linSolver = CreateUsrDefSparseLinSolver(solverType, domain, engngModel);
     if ( linSolver == NULL ) {
-        _error("giveLinearSolver: linear solver creation failed");
+        OOFEM_ERROR("NRSolver :: giveLinearSolver: linear solver creation failed");
     }
 
     return linSolver;
@@ -374,7 +359,7 @@ LineSearchNM *
 NRSolver :: giveLineSearchSolver()
 {
     if ( linesearchSolver == NULL ) {
-        linesearchSolver = new LineSearchNM(1, this->giveDomain(), engngModel);
+        linesearchSolver = new LineSearchNM(domain, engngModel);
     }
 
     return linesearchSolver;
@@ -432,7 +417,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
     if ( solverType == ST_Petsc ) {
         PetscScalar diagVal = 1.0;
         if ( k->giveType() != SMT_PetscMtrx ) {
-            _error("applyConstraintsToStiffness: PetscSparseMtrx Expected");
+            OOFEM_ERROR("NRSolver :: applyConstraintsToStiffness: PetscSparseMtrx Expected");
         }
 
         PetscSparseMtrx *lhs = ( PetscSparseMtrx * ) k;
@@ -476,7 +461,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
  #ifdef __PETSC_MODULE
     if ( solverType == ST_Petsc ) {
         if ( k->giveType() != SMT_PetscMtrx ) {
-            _error("applyConstraintsToStiffness: PetscSparseMtrx Expected");
+            OOFEM_ERROR("NRSolver :: applyConstraintsToStiffness: PetscSparseMtrx Expected");
         }
 
         PetscSparseMtrx *lhs = ( PetscSparseMtrx * ) k;
@@ -559,7 +544,7 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
  #ifdef __PETSC_MODULE
         if ( solverType == ST_Petsc ) {
             if ( k->giveType() != SMT_PetscMtrx ) {
-                _error("applyConstraintsToStiffness: PetscSparseMtrx Expected");
+                OOFEM_ERROR("NRSolver :: applyConstraintsToStiffness: PetscSparseMtrx Expected");
             }
 
             PetscSparseMtrx *lhs = ( PetscSparseMtrx * ) k;

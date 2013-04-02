@@ -55,7 +55,7 @@ NumericalMethod *EigenValueDynamic :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
 
-    nMethod = CreateUsrDefGeneralizedEigenValueSolver(solverType, 1, this->giveDomain(1), this);
+    nMethod = CreateUsrDefGeneralizedEigenValueSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod:  solver creation failed");
     }

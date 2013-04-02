@@ -205,12 +205,12 @@ case id:                            \
     return answer;
 }
 
-SparseLinearSystemNM *ClassFactory :: createSparseLinSolver(LinSystSolverType type, int num, Domain *d, EngngModel *m)
+SparseLinearSystemNM *ClassFactory :: createSparseLinSolver(LinSystSolverType type, Domain *d, EngngModel *m)
 {
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, id)  \
 case id:                            \
-  answer = new _class(num, d, m);   \
+  answer = new _class(d, m);   \
     break;
 
     SparseLinearSystemNM *answer = NULL;
