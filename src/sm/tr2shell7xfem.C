@@ -114,29 +114,6 @@ Tr2Shell7XFEM :: computeGaussPoints()
         // Edge
         specialIntegrationRulesArray [ 2 ] = new GaussIntegrationRule(1, this);
         specialIntegrationRulesArray [ 2 ]->SetUpPointsOnLine(nPointsEdge, _3dMat);
-
-        /*
-        // Layered cross section
-        LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >(Tr2Shell7XFEM::giveCrossSection());
-        if( layeredCS == NULL ){
-            OOFEM_ERROR("Tr2Shell7XFEM only supports layered cross section");
-        }
-        int numberOfLayers = layeredCS->giveNumberOfLayers();
-        integrationRulesArray = new IntegrationRule * [ numberOfLayers ];
-        this->numberOfIntegrationRules = numberOfLayers;
-        this->numberOfGaussPoints = numberOfLayers*nPointsTri*layeredCS->giveNumIntegrationPointsInLayer();
-
-        
-        // may need to extend this to handle Newton-Cotes integration in the thickness direction
-        for( int i = 1; i <= numberOfLayers; i++ ){
-            integrationRulesArray[ i-1 ]= new GaussIntegrationRule(1, this);
-            integrationRulesArray[ i-1 ]->SetUpPointsOnWedge(nPointsTri, layeredCS->giveNumIntegrationPointsInLayer(), _3dMat); 
-
-        }
-
-        layeredCS->mapLayerGpCoordsToShellCoords(integrationRulesArray);
-        //layeredCS->printYourself();
-        */
         
         // Layered cross section for bulk integration
         //@todo - must use a cast here since check consistency has not been called yet

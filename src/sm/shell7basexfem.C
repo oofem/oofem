@@ -359,12 +359,8 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
                 this->computeCohesiveForces( fCZ, tStep, solVec, solVecD, useUpdatedGpRecord, dei, j);
                 tempRed.beSubArrayOf(fCZ, activeDofs);
                 answer.assemble(tempRed, ordering);
-                /*
-                // test
-                this->computeOrderingArray(ordering, activeDofs, 0, All);
-                fCZ.negated();
-                answer.assemble(fCZ, ordering);
-                */
+                //tempRed.printYourself();
+ 
             }
         }
     }
@@ -454,64 +450,165 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
                      Delamination *dei, int enrichmentDomainNumber)
 {
     //Computes the cohesive nodal forces for a given interface
-    FloatArray Fp;
-    answer.resize(42); // replace with fnc call
-    answer.zero();
+    FloatArray answerTemp;
+    answerTemp.resize(42); // replace with fnc call
+    answerTemp.zero();
 
     FloatMatrix N, B;  
 
     IntegrationRule *iRuleL = specialIntegrationRulesArray [ 0 ];
-    Material *mat = dei->giveMaterial(); // CZ-material
+    //Material *mat = dei->giveMaterial(); // CZ-material
+    StructuralMaterial *mat = static_cast < StructuralMaterial * > (dei->giveMaterial());
+   
+    for ( int i = 1; i <= iRuleL->getNumberOfIntegrationPoints(); i++ ) {
+        IntegrationPoint *ip = iRuleL->getIntegrationPoint(i - 1);
+
+        this->computeBmatrixAt(ip, B);
+        this->computeNmatrixAt(ip, N);
+
+        // Lambda matrix
+        FloatArray genEpsD;
+        genEpsD.beProductOf(B, solVecD);        
+        //double zeta = giveGlobalZcoord(ip); // fix z-coord 
+        double zeta = 0.0;
+        FloatMatrix lambda;
+        this->computeLambdaNMatrix(lambda, genEpsD, zeta);
+        
+        //Compute material jump
+        FloatArray xd, unknowns;
+        unknowns.beProductOf(N, solVecD);
+        xd.beProductOf(lambda,unknowns); // spatial jump
+        //xd.printYourself();
+        //FloatMatrix F, Finv;
+        //FloatArray genEps;
+        //this->computeFAt(ip, F, genEps); // (xi=0) ip must have a valid x-coord
+        //Finv.beInverseOf(F);
+        
+        //J.beProductOf(Finv,xd); // material (reference system)
+        
+        
+        // compute cohesive traction based on J
+        FloatArray cTraction, tTemp; 
+        FloatMatrix K(3,3);
+        K.zero();
+        K.at(3,3) = 50000.0; // traction in normal dir only
+        cTraction.beProductOf(K,xd);
+        // interfacematerial assumes J(1) = normal dir and J(2), J(3) are shear
+        //mat->giveRealStressVector(tTemp, ReducedForm, ip, J, tStep);
+
+        FloatMatrix lambdaN;
+        lambdaN.beProductOf(lambda,N);
+        FloatArray Fp;
+        Fp.beTProductOf(lambdaN, cTraction);
+
+        double dA = this->computeAreaAround(ip);
+        answerTemp.add(dA,Fp);         
+    }
+
+    answer.resize(42, 42);
+    answer.zero();
+    const IntArray &ordering = this->giveOrdering(All);
+    answer.assemble(answerTemp, ordering);
+
+}
+
+
+void
+Shell7BaseXFEM :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
+{
+    //Computes the cohesive nodal forces for a given interface
+    FloatArray solVec;
+    this->giveUpdatedSolutionVector(solVec, tStep);
+    FloatMatrix temp;
+    int ndofs = this->giveNumberOfDofs();
+    answer.resize(ndofs, ndofs);
+    answer.zero();
+
+    // Disccontinuous part
+    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
+        Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
+
+        for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
+            if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
+                IntArray eiDofIdArray;
+                FloatArray solVecD;
+                dei->giveEIDofIdArray(eiDofIdArray, j);
+                this->giveSolutionVector(solVecD, eiDofIdArray, tStep);  
+
+                this->computeCohesiveTangentAt(temp, tStep, solVec, solVecD, dei);
+                // Assemble part correpsonding to active dofs
+                IntArray orderingJ, activeDofsJ;
+                computeOrderingArray(orderingJ, activeDofsJ, j, All);
+                FloatMatrix tempRed;
+                tempRed.beSubMatrixOf(temp, activeDofsJ, activeDofsJ);
+                answer.assemble(tempRed, orderingJ, orderingJ);
+                //tempRed.printYourself();
+                    
+            }
+        }
+    }
+}
+
+
+
+void
+Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, Delamination *dei)
+{
+    //Computes the cohesive tangent for a given interface
+    FloatMatrix answerTemp;
+    answerTemp.resize(42,42); // replace with fnc call
+    answerTemp.zero();
+
+    FloatMatrix N, B;  
+
+    IntegrationRule *iRuleL = specialIntegrationRulesArray [ 0 ];
+    //Material *mat = dei->giveMaterial(); // CZ-material
 
     for ( int i = 1; i <= iRuleL->getNumberOfIntegrationPoints(); i++ ) {
         IntegrationPoint *ip = iRuleL->getIntegrationPoint(i - 1);
 
         this->computeBmatrixAt(ip, B);
-        Shell7Base :: computeNmatrixAt(ip, N);
+        this->computeNmatrixAt(ip, N);
         
         // Compute material jump
-        FloatArray genEps, genEpsD;
+        FloatArray genEpsD;
         genEpsD.beProductOf(B, solVecD);        
-        genEps.beProductOf(B, solVec);        
-        double zeta = giveGlobalZcoord(ip); // fix z-coord 
-        zeta = 0.0;
+        //genEps.beProductOf(B, solVec);        
+        //double zeta = giveGlobalZcoord(ip); // fix z-coord 
+        double zeta = 0.0;
         FloatMatrix lambda;
         this->computeLambdaNMatrix(lambda, genEpsD, zeta);
         
         FloatArray xd, unknowns;
         unknowns.beProductOf(N, solVecD);
-        xd.beProductOf(lambda,unknowns); // spatial jump
-        FloatMatrix F, Finv;
-        this->computeFAt(ip, F, genEps); // (xi=0) ip must have a valid x-coord
-        Finv.beInverseOf(F);
-        FloatArray J;
-        J.beProductOf(Finv,xd); // material (reference system)
+        //FloatMatrix F, Finv;
+        //FloatArray genEps,
+        //this->computeFAt(ip, F, genEps); // (xi=0) ip must have a valid x-coord
+        //Finv.beInverseOf(F);
 
-        //J.setValues(3, xd.at(3), xd.at(1), xd.at(2) );
-        // compute cohesive traction based on J
-        FloatArray cTraction, tTemp; 
         FloatMatrix K(3,3);
         K.zero();
-        K.at(3,3) = 100.0; // traction in normal dir only
-        cTraction.beProductOf(K,J);
-        // interfacematerial assumes J(1) = normal dir and J(2), J(3) are shear
-        //static_cast < StructuralMaterial * > (mat)->giveRealStressVector(tTemp, ReducedForm, ip, J, tStep);
+        K.at(3,3) = 50000.0; // traction in normal dir only
 
-        FloatArray fp;
-        //cTraction.setValues(3, tTemp.at(2), tTemp.at(3), tTemp.at(1) );
-        fp.beTProductOf(lambda, cTraction);
-        cTraction.printYourself();
-        Fp.beTProductOf(N, fp);
-        
+        FloatMatrix lambdaN, KF, temp, tangent;
+        lambdaN.beProductOf(lambda,N);
+        //KF.beProductOf(K,Finv);
+        temp.beProductOf(K,lambdaN);
+        //temp.beProductOf(KF,lambdaN);
+        tangent.beTProductOf(lambdaN, temp);
+                
         double dA = this->computeAreaAround(ip);
-        Fp.times(dA);
-        answer.subtract(Fp); 
-        
+        answerTemp.add(dA,tangent); 
     }
 
-    
-
+    answer.resize(42, 42);
+    answer.zero();
+    const IntArray &ordering = this->giveOrdering(All);
+    answer.assemble(answerTemp, ordering, ordering);
 }
+
+
+
 
 void
 Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
@@ -629,6 +726,12 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
 
     }
     //answer.symmetrized();
+
+
+    // Cohesive zone model
+    FloatMatrix tangentCZ;
+    this->computeCohesiveTangent(tangentCZ, tStep);
+    answer.add(tangentCZ);
 }
 
 
