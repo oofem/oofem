@@ -55,6 +55,8 @@ public:
      * @param m Engineering model which solver belongs to.
      */
     PetscSolver(Domain *d, EngngModel *m);
+    
+    virtual ~PetscSolver();
 
     virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
 

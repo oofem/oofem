@@ -40,12 +40,14 @@
  #include "flotarry.h"
  #include "verbose.h"
  #include "timer.h"
+ #include "error.h"
 
  #include <petscksp.h>
 
 namespace oofem {
 PetscSolver :: PetscSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m) { }
 
+PetscSolver :: ~PetscSolver() { }
 
 NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 {
@@ -235,6 +237,9 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
 #endif //ifdef __PETSC_MODULE
 
 #ifndef __PETSC_MODULE
+
+#include "error.h"
+
 namespace oofem {
 PetscSolver :: PetscSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
 {
@@ -243,14 +248,8 @@ PetscSolver :: PetscSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m
 
 PetscSolver :: ~PetscSolver() { }
 
-IRResultType
-PetscSolver :: initializeFrom(InputRecord *ir) { return IRRT_OK; }
-
 NM_Status
 PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSuccess; }
 
-void
-PetscSolver :: reinitialize()
-{ }
 } // end namespace oofem
 #endif
