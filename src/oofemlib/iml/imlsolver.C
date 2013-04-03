@@ -118,7 +118,7 @@ IMLSolver :: initializeFrom(InputRecord *ir)
     } else if ( precondType == IML_ICPrec ) {
         M = new CompCol_ICPreconditioner();
     } else {
-        _error("setSparseMtrxAsComponent: unknown preconditioner type");
+        OOFEM_ERROR("IMLSolver::setSparseMtrxAsComponent: unknown preconditioner type");
     }
 
     // initialize precond attributes
@@ -138,21 +138,21 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 
     // first check whether Lhs is defined
     if ( !A ) {
-        _error("solveYourselfAt: unknown Lhs");
+        OOFEM_ERROR("IMLSolver :: solve: unknown Lhs");
     }
 
     // and whether Rhs
     if ( !b ) {
-        _error("solveYourselfAt: unknown Rhs");
+        OOFEM_ERROR("IMLSolver :: solve: unknown Rhs");
     }
 
     // and whether previous Solution exist
     if ( !x ) {
-        _error("solveYourselfAt: unknown solution array");
+        OOFEM_ERROR("IMLSolver :: solve: unknown solution array");
     }
 
     if ( x->giveSize() != b->giveSize() ) {
-        _error("solveYourselfAt: size mismatch");
+        OOFEM_ERROR("IMLSolver :: solve: size mismatch");
     }
 
 
@@ -162,7 +162,7 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
             M->init(* A);
         }
     } else {
-        _error("setSparseMtrxAsComponent: preconditioner creation error");
+        OOFEM_ERROR("IMLSolver :: solve: preconditioner creation error");
     }
 
     Lhs = A;
@@ -186,7 +186,7 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
         result = GMRES(* Lhs, * x, * b, * M, H, restart, mi, t);
         OOFEM_LOG_INFO("GMRES(%s): flag=%d, nite %d, achieved tol. %g\n", M->giveClassName(), result, mi, t);
     } else {
-        _error("solveYourselfAt: unknown lsover type");
+        OOFEM_ERROR("IMLSolver :: solve: unknown lsover type");
     }
 
  #ifdef TIME_REPORT
