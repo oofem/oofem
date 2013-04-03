@@ -62,8 +62,6 @@ enum FieldType {
 #undef ENUM_ITEM_WITH_VALUE
 #undef enumitem_h
 
-FieldType __StringToFieldType(std::string _value);
-
 class TimeStep;
 class FloatArray;
 
