@@ -76,6 +76,9 @@ TR_SHELL01 :: initializeFrom(InputRecord *ir)
     plate->initializeFrom(ir);
     membrane->initializeFrom(ir);
 
+    plate->computeGaussPoints();
+    membrane->computeGaussPoints();
+
     // check the compatibility of irules of plate and membrane
     if (plate->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints() != membrane->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints()) {
       OOFEM_ERROR ("TR_SHELL01: incompatible integration rules detected");

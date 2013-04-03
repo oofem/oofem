@@ -166,6 +166,7 @@ enum classType {
     Q4AxisymmClass,
     L4AxisymmClass,
     RerShellClass,
+    TR_SHELL01Class,
     PPdeElementClass,
     LTrElementPPDEClass,
     Beam2dClass,

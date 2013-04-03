@@ -85,6 +85,7 @@
  #include "shell7basexfem.h"
  #include "tr2shell7xfem.h" 
  #include "rershell.h"
+ #include "tr_shell01.h"
  #include "quad1mindlin.h"
  #include "quad1mindlinshell3d.h"
  #include "interfaceelem2dquad.h"
@@ -169,6 +170,7 @@ REGISTER_CLASS(QWedge, "qwedge", QWedgeClass)
 REGISTER_CLASS(QWedgeGrad, "qwedgegrad", QWedgeGradClass)
 REGISTER_CLASS(Truss2d, "truss2d", Truss2dClass)
 REGISTER_CLASS(RerShell, "rershell", RerShellClass)
+REGISTER_CLASS(TR_SHELL01, "tr_shell01", TR_SHELL01Class)
 //REGISTER_CLASS(TrDirShell, "trdirshell", TrDirShellClass)
 //REGISTER_CLASS(Shell7Base, "shell7base", Shell7BaseClass)
 REGISTER_CLASS(Tr2Shell7, "tr2shell7", Tr2Shell7Class)

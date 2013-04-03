@@ -15,7 +15,7 @@ set (sm_element
     libeam3d.C libeam3dnl.C libeam3dnl2.C libeam3d2.C
     beam2d.C beam3d.C
     interfaceelement1d.C interfaceelem2dquad.C interfaceelem3dtrlin.C
-    quad1planestrain.C rershell.C qplanstrss.C qtrplstr.C q4axisymm.C
+    quad1planestrain.C rershell.C tr_shell01.C qplanstrss.C qtrplstr.C q4axisymm.C
     planstrss.C
     planstrssxfem.C
     axisymm3d.C l4axisymm.C
