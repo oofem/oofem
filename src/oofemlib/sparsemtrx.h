@@ -164,8 +164,6 @@ public:
      * using one (or more) loop over local code numbers of elements.
      * This method must be called before any operation, like assembly, zeroing,
      * or multiplication.
-     * The EquationID parameter allows to distinguish between several possible governing equations, that
-     * can be numbered separately.
      * @param eModel Pointer to corresponding engineering model.
      * @param di Domain index specify which domain to use.
      * @param s Determines unknown numbering scheme.

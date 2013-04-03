@@ -452,7 +452,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     this->domainList->put(2, dNew);
 
 #ifdef __PETSC_MODULE
-    PetscContext *pcNew = new PetscContext(this, EID_MomentumBalance);
+    PetscContext *pcNew = new PetscContext(this);
 
     this->petscContextList->put(2, pcNew);
 #endif

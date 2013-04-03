@@ -211,7 +211,7 @@ protected:
 #endif
 
 public:
-    CylindricalALM(Domain *d, EngngModel *m, EquationID ut);
+    CylindricalALM(Domain *d, EngngModel *m);
     virtual ~CylindricalALM();
 
     // Overloaded methods:

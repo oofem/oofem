@@ -39,7 +39,7 @@
 namespace oofem {
 //#define PetscContext_debug_print
 
-PetscContext :: PetscContext(EngngModel *e, EquationID ut, bool naturalVectors)
+PetscContext :: PetscContext(EngngModel *e, bool naturalVectors)
 #ifdef __PARALLEL_MODE
     : n2g(), n2l()
 #endif
@@ -52,7 +52,6 @@ PetscContext :: PetscContext(EngngModel *e, EquationID ut, bool naturalVectors)
         comm = PETSC_COMM_SELF;
     this->naturalVectors = naturalVectors;
     this->emodel = e;
-    this->ut = ut;
     n2gvecscat = NULL;
 }
 
@@ -67,13 +66,15 @@ void
 PetscContext :: init(int di)
 {
     this->di = di;
+    ///@todo Should we even do this here? The user of the requested PetscContext will just set this manually instead.
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
-        n2g.init(emodel, ut, di);
-        n2l.init(emodel, ut, di);
+        ///@todo This shouldn't be hardcoded to just the default numbering schemes. In fact, this shouldn't even have "prescribed" and "free", just use the given numbering.
+        n2g.init(emodel, di, EModelDefaultEquationNumbering());
+        n2l.init(emodel, di, EModelDefaultEquationNumbering());
 
-        n2g_prescribed.init(emodel, ut, di, ApplicationOrdering :: et_prescribed);
-        n2l_prescribed.init(emodel, ut, di, ApplicationOrdering :: et_prescribed);
+        n2g_prescribed.init(emodel, di, EModelDefaultPrescribedEquationNumbering());
+        n2l_prescribed.init(emodel, di, EModelDefaultPrescribedEquationNumbering());
 
  #ifdef  PetscContext_debug_print
         fprintf( stderr, "[%d] Petsccontext::init leq:%d, neq:%d, geq:%d\n", emodel->giveRank(), giveNumberOfLocalEqs(), giveNumberOfNaturalEqs(), giveNumberOfGlobalEqs() );

@@ -1046,7 +1046,7 @@ double EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, Equatio
 #ifdef __PARALLEL_MODE
     if ( this->isParallel() ) {
 #ifdef __PETSC_MODULE
-        norm = this->givePetscContext(domain->giveNumber(), eid)->accumulate(norm);
+        norm = this->givePetscContext(domain->giveNumber())->accumulate(norm);
 #else
         double localNorm = norm;
         MPI_Allreduce(& localNorm, & norm, 1, MPI_DOUBLE, MPI_SUM, comm);
@@ -1054,7 +1054,7 @@ double EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, Equatio
         if ( eNorms ) {
             FloatArray localENorms = *eNorms;
 #ifdef __PETSC_MODULE
-            this->givePetscContext(domain->giveNumber(), eid)->accumulate(localENorms, *eNorms);
+            this->givePetscContext(domain->giveNumber())->accumulate(localENorms, *eNorms);
 #else
             MPI_Allreduce(localENorms.givePointer(), eNorms.givePointer(), eNorms.giveSize(), MPI_DOUBLE, MPI_SUM, comm);
 #endif
@@ -1687,7 +1687,7 @@ EngngModel :: setDomain(int i, Domain *ptr)
 
 #ifdef __PETSC_MODULE
 PetscContext *
-EngngModel :: givePetscContext(int i, EquationID eid)
+EngngModel :: givePetscContext(int i)
 {
     if ( ( i > 0 ) && ( i <= this->ndomains ) ) {
         if  ( i > petscContextList->giveSize() ) {

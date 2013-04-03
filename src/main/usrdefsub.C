@@ -192,9 +192,9 @@ RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(classType type, int numbe
     return classFactory.createRandomFieldGenerator(type,number,domain);
 }
 
-SparseNonLinearSystemNM *CreateUsrDefNonLinearSolver(const char *aClass, Domain *d, EngngModel *emodel, EquationID eid)
+SparseNonLinearSystemNM *CreateUsrDefNonLinearSolver(const char *aClass, Domain *d, EngngModel *emodel)
 {
-    return classFactory.createNonLinearSolver(aClass,d,emodel,eid);
+    return classFactory.createNonLinearSolver(aClass,d,emodel);
 }
 
 InitModule *CreateUsrDefInitModuleOfType(const char *aClass, int number, EngngModel *emodel)

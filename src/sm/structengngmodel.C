@@ -283,7 +283,7 @@ StructuralEngngModel :: initPetscContexts()
 
     petscContextList->growTo(ndomains);
     for ( int i = 0; i < this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this, EID_MomentumBalance);
+        petscContext =  new PetscContext(this);
         petscContextList->put(i + 1, petscContext);
     }
 }

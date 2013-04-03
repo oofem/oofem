@@ -63,7 +63,6 @@
 
 #ifdef __PETSC_MODULE
  #include "petsccontext.h"
- #include "petscordering.h"
 #endif
 
 #ifdef __OOFEG
@@ -865,7 +864,7 @@ public:
      * Returns the PETSc context corresponding to given domain (n) and unknown type
      * Default implementation returns i-th context from petscContextList.
      */
-    virtual PetscContext *givePetscContext(int n, EquationID eid);
+    virtual PetscContext *givePetscContext(int n);
     /**
      * Creates PETSc contexts. Must be implemented by derived classes since the governing equation type is required
      * for context creation.

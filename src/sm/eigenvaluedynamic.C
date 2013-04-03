@@ -420,7 +420,7 @@ EigenValueDynamic :: initPetscContexts()
     int i;
     petscContextList->growTo(ndomains);
     for ( i = 0; i < this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this, EID_MomentumBalance);
+        petscContext =  new PetscContext(this);
         petscContextList->put(i + 1, petscContext);
     }
 }

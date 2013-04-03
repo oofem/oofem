@@ -1391,7 +1391,7 @@ SUPG :: initPetscContexts()
     PetscContext *petscContext;
     petscContextList->growTo(ndomains);
     for ( int i = 1; i <= this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this, EID_MomentumBalance_ConservationEquation);
+        petscContext =  new PetscContext(this);
         petscContextList->put(i, petscContext);
     }
 }

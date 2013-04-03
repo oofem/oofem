@@ -82,7 +82,7 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     Vec globSolVec;
 
     // "Parallel" context automatically uses sequential alternative if the engineering problem is sequential.
-    PetscContext *context = engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() );
+    PetscContext *context = engngModel->givePetscContext( Lhs->giveDomainIndex() );
 
     /*
      * scatter and gather rhs to global representation
@@ -121,7 +121,7 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
      *  Create the linear solver and set various options
      *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
     if ( !Lhs->kspInit ) {
-        MPI_Comm comm = engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() )->giveComm();
+        MPI_Comm comm = engngModel->givePetscContext( Lhs->giveDomainIndex() )->giveComm();
         KSPCreate(comm, & Lhs->ksp);
         Lhs->kspInit = true;
     }

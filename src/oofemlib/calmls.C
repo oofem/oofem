@@ -52,8 +52,8 @@ namespace oofem {
 #define CALM_DEFAULT_NRM_TICKS 2
 #define CALM_MAX_REL_ERROR_BOUND 1.e10
 
-CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m, EquationID ut) :
-    SparseNonLinearSystemNM(d, m, ut), calm_HPCWeights(), calm_HPCIndirectDofMask(), calm_HPCDmanDofSrcArray(), ccDofGroups()
+CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m) :
+    SparseNonLinearSystemNM(d, m), calm_HPCWeights(), calm_HPCIndirectDofMask(), calm_HPCDmanDofSrcArray(), ccDofGroups()
 {
     //
     // constructor
@@ -95,7 +95,7 @@ CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m, EquationID ut) :
 
 #ifdef __PARALLEL_MODE
 #ifdef __PETSC_MODULE
-    parallel_context = engngModel->givePetscContext(d->giveNumber(), ut);
+    parallel_context = engngModel->givePetscContext(d->giveNumber());
 #endif
 #endif
 

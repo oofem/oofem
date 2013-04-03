@@ -35,11 +35,10 @@
 #ifndef appordering_h
 #define appordering_h
 
-#include "equationid.h"
-
 namespace oofem {
 class EngngModel;
 class IntArray;
+class UnknownNumberingScheme;
 
 /**
  * Base class for ordering of equation for parallelization.
@@ -48,19 +47,16 @@ class IntArray;
 class ApplicationOrdering
 {
 public:
-    enum EquationType { et_standard, et_prescribed };
-
     ApplicationOrdering() { }
     virtual ~ApplicationOrdering() { }
 
     /**
      * Initiates the receiver.
      * @param em Engineering model to determine general information about the problem.
-     * @param ut Equation to solve.
      * @param di Domain index.
      * @param et Equation type.
      */
-    virtual void init(EngngModel *em, EquationID ut, int di, EquationType et = et_standard) = 0;
+    virtual void init(EngngModel *em, int di, const UnknownNumberingScheme &u) = 0;
 
     /**
      * Returns number of local eqs; ie. those that belong to receiver processor;

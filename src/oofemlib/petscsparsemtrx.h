@@ -53,7 +53,6 @@ protected:
     int leqs;
     int geqs;
     int di;
-    EquationID ut;
     EngngModel *emodel;
 
     /// Linear solver context.
@@ -108,7 +107,6 @@ public:
     Mat *giveMtrx() { return & this->mtrx; }
     bool giveSymmetryFlag() const { return symmFlag; }
     int setOption(MatOption op, PetscBool flag) { return MatSetOption(this->mtrx, op, flag); }
-    EquationID giveEquationID() const { return ut; }
     int giveLeqs() { return leqs; }
     int giveDomainIndex() const { return di; }
 

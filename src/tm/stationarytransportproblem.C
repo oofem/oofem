@@ -457,7 +457,7 @@ StationaryTransportProblem :: initPetscContexts()
 
     petscContextList->growTo(ndomains);
     for ( i = 0; i < this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this, EID_ConservationEquation);
+        petscContext =  new PetscContext(this);
         petscContextList->put(i + 1, petscContext);
     }
 }

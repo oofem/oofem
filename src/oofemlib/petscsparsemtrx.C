@@ -57,7 +57,6 @@ PetscSparseMtrx :: GiveCopy() const
         answer->leqs     = this->leqs;
         answer->geqs     = this->geqs;
         answer->di       = this->di;
-        answer->ut       = this->ut;
         answer->emodel   = this->emodel;
         answer->kspInit  = false;
         answer->newValues= this->newValues;
@@ -83,7 +82,7 @@ PetscSparseMtrx :: times(const FloatArray &x, FloatArray &answer) const
         Vec globY;
 
         // "Parallel" context automatically uses sequential alternative if the engineering problem is sequential.
-        PetscContext *context = emodel->givePetscContext( this->giveDomainIndex(), this->giveEquationID() );
+        PetscContext *context = emodel->givePetscContext( this->giveDomainIndex() );
 
         /*
          * scatter and gather x to global representation
@@ -278,7 +277,6 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
       this->kspInit  = false; // force ksp to be initialized
     }
 
-    this->ut = ut;
     this->emodel = eModel;
     this->di = di;
 
@@ -388,7 +386,6 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
       this->kspInit  = false; // force ksp to be initialized
     }
 
-    this->ut = ut;
     this->emodel = eModel;
     this->di = di;
 
@@ -397,11 +394,11 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     if ( eModel->isParallel() ) {
         PetscNatural2GlobalOrdering *n2g;
         PetscNatural2LocalOrdering *n2l;
-        n2g = eModel->givePetscContext(di, ut)->giveN2Gmap();
-        n2l = eModel->givePetscContext(di, ut)->giveN2Lmap();
+        n2g = eModel->givePetscContext(di)->giveN2Gmap();
+        n2l = eModel->givePetscContext(di)->giveN2Lmap();
 
-        n2l->init(eModel, ut, di);
-        n2g->init(eModel, ut, di);
+        n2l->init(eModel, di, s);
+        n2g->init(eModel, di, s);
 
  #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT("PetscSparseMtrx:: buildInternalStructure", "", eModel-giveRank());
@@ -417,8 +414,6 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
  #endif
 
         // determine nonzero structure of a "local (maintained)" part of matrix, and the off-diagonal part
-        int i, ii, j, jj, n;
-        Element *elem;
         // allocation map
         std :: vector< std :: set< int > >d_rows(leqs);  // diagonal sub-matrix allocation
         std :: vector< std :: set< int > >o_rows(leqs);  // off-diagonal allocation
@@ -429,16 +424,17 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         //for (n=1; n<=n2l.giveN2Lmap()->giveSize(); n++) fprintf (stderr, "%d ", n2l.giveN2Lmap()->at(n));
 
         nelem = domain->giveNumberOfElements();
-        for ( n = 1; n <= nelem; n++ ) {
+        for ( int n = 1; n <= nelem; n++ ) {
             //fprintf (stderr, "(elem %d) ", n);
-            elem = domain->giveElement(n);
+            Element *elem = domain->giveElement(n);
             elem->giveLocationArray(loc, ut, s);
             n2l->map2New(lloc, loc, 0); // translate natural->local numbering (remark, 1-based indexing)
             n2g->map2New(gloc, loc, 0); // translate natural->global numbering (remark, 0-based indexing)
             // See the petsc manual for details on how this allocation is constructed.
-            for ( i = 1; i <= lloc.giveSize(); i++ ) {
+            int ii, jj;
+            for ( int i = 1; i <= lloc.giveSize(); i++ ) {
                 if ( ( ii = lloc.at(i) ) ) {
-                    for ( j = 1; j <= lloc.giveSize(); j++ ) {
+                    for ( int j = 1; j <= lloc.giveSize(); j++ ) {
                         if ( ( jj = gloc.at(j) ) >= 0 ) { // if negative, then it is prescribed
                             if ( lloc.at(j) ) { // if true, then its the local part (the diagonal block matrix)
                                 d_rows [ ii - 1 ].insert(jj);
@@ -461,7 +457,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
             }
         }
 
-        for ( i = 0; i < leqs; i++ ) {
+        for ( int i = 0; i < leqs; i++ ) {
             d_nnz(i) = d_rows [ i ].size();
             o_nnz(i) = o_rows [ i ].size();
         }
@@ -583,7 +579,7 @@ PetscSparseMtrx :: assemble(const IntArray &loc, const FloatMatrix &mat)
     if ( emodel->isParallel() ) {
         // translate local code numbers to global ones
         IntArray gloc(ndofe);
-        emodel->givePetscContext(this->di, ut)->giveN2Gmap()->map2New(gloc, loc, 0);
+        emodel->givePetscContext(this->di)->giveN2Gmap()->map2New(gloc, loc, 0);
 
         //fprintf (stderr, "[?] gloc=");
         //for (int i=1; i<=ndofe; i++) fprintf (stderr, "%d ", gloc.at(i));
@@ -616,20 +612,20 @@ PetscSparseMtrx :: assemble(const IntArray &rloc, const IntArray &cloc, const Fl
     if ( emodel->isParallel() ) {
         // translate eq numbers
         IntArray grloc( rloc.giveSize() ), gcloc( cloc.giveSize() );
-        emodel->givePetscContext(this->di, ut)->giveN2Gmap()->map2New(grloc, rloc, 0);
-        emodel->givePetscContext(this->di, ut)->giveN2Gmap()->map2New(gcloc, cloc, 0);
+        emodel->givePetscContext(this->di)->giveN2Gmap()->map2New(grloc, rloc, 0);
+        emodel->givePetscContext(this->di)->giveN2Gmap()->map2New(gcloc, cloc, 0);
 
         MatSetValues(this->mtrx, grloc.giveSize(), grloc.givePointer(),
                      gcloc.giveSize(), gcloc.givePointer(), mat.givePointer(), ADD_VALUES);
     } else {
 #endif
-    int i, rsize = rloc.giveSize(), csize = cloc.giveSize();
+    int rsize = rloc.giveSize(), csize = cloc.giveSize();
     IntArray grloc(rsize), gcloc(csize);
-    for ( i = 1; i <= rsize; i++ ) {
+    for ( int i = 1; i <= rsize; i++ ) {
         grloc.at(i) = rloc.at(i) - 1;
     }
 
-    for ( i = 1; i <= csize; i++ ) {
+    for ( int i = 1; i <= csize; i++ ) {
         gcloc.at(i) = cloc.at(i) - 1;
     }
 

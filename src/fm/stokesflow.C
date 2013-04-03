@@ -260,7 +260,7 @@ void StokesFlow :: initPetscContexts()
     PetscContext *petscContext;
     petscContextList->growTo(ndomains);
     for ( int i = 1; i <= this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this, EID_MomentumBalance_ConservationEquation);
+        petscContext =  new PetscContext(this);
         petscContextList->put(i, petscContext);
     }
 }
@@ -327,7 +327,7 @@ NumericalMethod *StokesFlow :: giveNumericalMethod(MetaStep *mStep)
         return this->nMethod;
     }
 
-    this->nMethod = new NRSolver(this->giveDomain(1), this, EID_MomentumBalance_ConservationEquation);
+    this->nMethod = new NRSolver(this->giveDomain(1), this);
     return this->nMethod;
 }
 

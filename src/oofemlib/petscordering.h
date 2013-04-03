@@ -74,7 +74,7 @@ public:
     PetscNatural2GlobalOrdering();
     virtual ~PetscNatural2GlobalOrdering() { }
 
-    void init(EngngModel *, EquationID ut, int di, EquationType et = et_standard);
+    virtual void init(EngngModel *, int di, const UnknownNumberingScheme &n);
 
     virtual int giveNewEq(int leq);
     virtual int giveOldEq(int eq);
@@ -102,7 +102,7 @@ public:
     PetscNatural2LocalOrdering();
     virtual ~PetscNatural2LocalOrdering() { }
 
-    void init(EngngModel *, EquationID ut, int di, EquationType et = et_standard);
+    virtual void init(EngngModel *, int di, const UnknownNumberingScheme &n);
 
     virtual int giveNewEq(int leq);
     virtual int giveOldEq(int eq);

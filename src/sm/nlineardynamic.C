@@ -103,7 +103,7 @@ NumericalMethod *NonLinearDynamic :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
 
-    this->nMethod = new NRSolver(this->giveDomain(1), this, EID_MomentumBalance);
+    this->nMethod = new NRSolver(this->giveDomain(1), this);
     return this->nMethod;
 }
 
@@ -867,7 +867,7 @@ NonLinearDynamic :: initPetscContexts()
 {
     petscContextList->growTo(ndomains);
     for ( int i = 1; i <= this->ndomains; i++ ) {
-        petscContextList->put( i, new PetscContext(this, EID_MomentumBalance, false) ); // false == using local vectors.
+        petscContextList->put( i, new PetscContext(this, false) ); // false == using local vectors.
     }
 }
 #endif

@@ -45,7 +45,6 @@
 #include "geneigvalsolvertype.h"
 #include "materialmappingalgorithmtype.h"
 #include "meshpackagetype.h"
-#include "equationid.h"
 
 #include <map>
 #include <string>
@@ -100,7 +99,7 @@ template< typename T > LoadTimeFunction *ltfCreator(int n, Domain *d) { return n
 template< typename T > NonlocalBarrier *nlbCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > RandomFieldGenerator *rfgCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > ExportModule *exportCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
-template< typename T > SparseNonLinearSystemNM *nonlinCreator(Domain *d, EngngModel *m, EquationID eid) { return ( new T(d, m, eid) ); }
+template< typename T > SparseNonLinearSystemNM *nonlinCreator(Domain *d, EngngModel *m) { return ( new T(d, m) ); }
 template< typename T > InitModule *initCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
 template< typename T > TopologyDescription *topologyCreator(Domain *d) { return new T(d); }
 
@@ -168,7 +167,7 @@ protected:
     /// Associative container containing export module creators.
     std :: map < std :: string, ExportModule * ( * )(int, EngngModel *), CaseComp > exportList;
     /// Associative container containing nonlinear solver creators.
-    std :: map < std :: string, SparseNonLinearSystemNM * ( * )(Domain *, EngngModel *, EquationID), CaseComp > nonlinList;
+    std :: map < std :: string, SparseNonLinearSystemNM * ( * )(Domain *, EngngModel *), CaseComp > nonlinList;
     /// Associative container containing init module creators.
     std :: map < std :: string, InitModule * ( * )(int, EngngModel *), CaseComp > initList;
     /// Associative container containing topology description creators.
@@ -360,7 +359,7 @@ public:
      * @param eid Equation ID of sys of equations.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    SparseNonLinearSystemNM* createNonLinearSolver(const char *name, Domain *d, EngngModel *emodel, EquationID eid);
+    SparseNonLinearSystemNM* createNonLinearSolver(const char *name, Domain *d, EngngModel *emodel);
     /**
      * Creates new instance of init module corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.

@@ -285,7 +285,7 @@ NumericalMethod *DarcyFlow :: giveNumericalMethod(MetaStep *mStep)
         return this->nMethod;
     }
 
-    this->nMethod = new NRSolver(this->giveDomain(1), this, EID_ConservationEquation);
+    this->nMethod = new NRSolver(this->giveDomain(1), this);
     if ( !nMethod ) {
         OOFEM_ERROR("giveNumericalMethod: numerical method creation failed");
     }
@@ -318,7 +318,7 @@ void DarcyFlow :: initPetscContexts()
     PetscContext *petscContext;
     petscContextList->growTo(ndomains);
     for ( int i = 1; i <= this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this, EID_ConservationEquation);
+        petscContext =  new PetscContext(this);
         petscContextList->put(i, petscContext);
     }
 }

@@ -75,15 +75,12 @@ public:
     };
 
 protected:
-    /// Equation to solve for.
-    EquationID ut;
-
     /// Load level
     double deltaL;
 
 public:
     /// Constructor
-    SparseNonLinearSystemNM(Domain *d, EngngModel *m, EquationID ut) : NumericalMethod(d, m) { this->ut = ut; }
+    SparseNonLinearSystemNM(Domain *d, EngngModel *m) : NumericalMethod(d, m) { }
     /// Destructor
     virtual ~SparseNonLinearSystemNM() { }
 

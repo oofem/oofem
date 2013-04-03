@@ -419,9 +419,9 @@ ExportModule* ClassFactory::createExportModule(const char *name, int number, Eng
     return ( exportList.count(name) == 1 ) ? exportList [ name ](number, emodel) : NULL;
 }
 
-SparseNonLinearSystemNM* ClassFactory::createNonLinearSolver(const char *name, Domain *d, EngngModel *emodel, EquationID eid)
+SparseNonLinearSystemNM* ClassFactory::createNonLinearSolver(const char *name, Domain *d, EngngModel *emodel)
 {
-    return ( nonlinList.count(name) == 1 ) ? nonlinList [ name ](d, emodel, eid) : NULL;
+    return ( nonlinList.count(name) == 1 ) ? nonlinList [ name ](d, emodel) : NULL;
 }
 
 InitModule* ClassFactory::createInitModule(const char *name, int number, EngngModel *emodel)

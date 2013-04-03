@@ -115,7 +115,7 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
             }
         }
 
-        this->nMethod = new CylindricalALM(this->giveDomain(1), this, EID_MomentumBalance);
+        this->nMethod = new CylindricalALM(this->giveDomain(1), this);
     } else if ( mode == nls_directControl ) {
         if ( nMethod ) {
             if ( dynamic_cast< NRSolver * >( nMethod ) ) {
@@ -125,7 +125,7 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
             }
         }
 
-        this->nMethod = new NRSolver(this->giveDomain(1), this, EID_MomentumBalance);
+        this->nMethod = new NRSolver(this->giveDomain(1), this);
     } else {
         _error("giveNumericalMethod: unsupported controlMode");
     }
@@ -800,7 +800,7 @@ NonLinearStatic :: initPetscContexts()
 {
     petscContextList->growTo(ndomains);
     for ( int i = 1; i <= this->ndomains; i++ ) {
-        petscContextList->put(i, new PetscContext(this, EID_MomentumBalance, false)); // false == using local vectors.
+        petscContextList->put(i, new PetscContext(this, false)); // false == using local vectors.
     }
 }
 #endif

@@ -35,6 +35,7 @@
 #ifdef __PARALLEL_MODE
 
 #include "engngm.h"
+#include "unknownnumberingscheme.h"
 #include "petscordering.h"
 #include "combuff.h"
 #include "mathfem.h"
@@ -74,7 +75,7 @@ PetscNatural2GlobalOrdering :: PetscNatural2GlobalOrdering() : PetscOrdering_Bas
 
 
 void
-PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, EquationType et)
+PetscNatural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberingScheme &n)
 {
     Domain *d = emodel->giveDomain(di);
     int ndofs, ndofman = d->giveNumberOfDofManagers();
@@ -82,8 +83,6 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
     DofManager *dman;
     // determine number of local eqs + number of those shared DOFs which are numbered by receiver
     // shared dofman is numbered on partition with lovest rank number
-    EModelDefaultEquationNumbering dn;
-    EModelDefaultPrescribedEquationNumbering dpn;
 
 #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT("PetscNatural2GlobalOrdering :: init", "initializing N2G ordering", myrank);
@@ -121,14 +120,8 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
             ndofs = dman->giveNumberOfDofs();
             for ( int j = 1; j <= ndofs; j++ ) {
                 if ( dman->giveDof(j)->isPrimaryDof() ) {
-                    if ( et == et_standard ) {
-                        if ( dman->giveDof(j)->giveEquationNumber(dn) ) {
-                            l_neqs++;
-                        }
-                    } else {
-                        if ( dman->giveDof(j)->giveEquationNumber(dpn) ) {
-                            l_neqs++;
-                        }
+                    if ( dman->giveDof(j)->giveEquationNumber(n) ) {
+                        l_neqs++;
                     }
                 }
             }
@@ -151,11 +144,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
     }
 
     // send numbered shared ones
-    if ( et == et_standard ) {
-        locGlobMap.resize( emodel->giveNumberOfDomainEquations(di, dn) );
-    } else {
-        locGlobMap.resize( emodel->giveNumberOfDomainEquations(di, dpn) );
-    }
+    locGlobMap.resize( emodel->giveNumberOfDomainEquations(di, n) );
 
     // determine shared dofs
     int psize, nproc = emodel->giveNumberOfProcesses();
@@ -218,12 +207,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
                 ndofs = dman->giveNumberOfDofs();
                 for ( int j = 1; j <= ndofs; j++ ) {
                     if ( dman->giveDof(j)->isPrimaryDof() ) {
-                        int eq;
-                        if ( et == et_standard ) {
-                            eq = dman->giveDof(j)->giveEquationNumber(dn);
-                        } else {
-                            eq = dman->giveDof(j)->giveEquationNumber(dpn);
-                        }
+                        int eq = dman->giveDof(j)->giveEquationNumber(n);
 
                         if ( eq ) {
                             locGlobMap.at(eq) = globeq++;
@@ -237,12 +221,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
             ndofs = dman->giveNumberOfDofs();
             for ( int j = 1; j <= ndofs; j++ ) {
                 if ( dman->giveDof(j)->isPrimaryDof() ) {
-                    int eq;
-                    if ( et == et_standard ) {
-                        eq = dman->giveDof(j)->giveEquationNumber(dn);
-                    } else {
-                        eq = dman->giveDof(j)->giveEquationNumber(dpn);
-                    }
+                    int eq = dman->giveDof(j)->giveEquationNumber(n);
 
                     if ( eq ) {
                         locGlobMap.at(eq) = globeq++;
@@ -297,12 +276,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
                     ndofs = dman->giveNumberOfDofs();
                     for ( int k = 1; k <= ndofs; k++ ) {
                         if ( dman->giveDof(k)->isPrimaryDof() ) {
-                            int eq;
-                            if ( et == et_standard ) {
-                                eq = dman->giveDof(k)->giveEquationNumber(dn);
-                            } else {
-                                eq = dman->giveDof(k)->giveEquationNumber(dpn);
-                            }
+                            int eq = dman->giveDof(k)->giveEquationNumber(n);
 
                             if ( eq ) {
                                 buffs [ p ]->packInt( locGlobMap.at(eq) );
@@ -403,12 +377,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
                         ndofs = dman->giveNumberOfDofs();
                         for ( int j = 1; j <= ndofs; j++ ) {
                             if ( dman->giveDof(j)->isPrimaryDof() ) {
-                                int eq;
-                                if ( et == et_standard ) {
-                                    eq = dman->giveDof(j)->giveEquationNumber(dn);
-                                } else {
-                                    eq = dman->giveDof(j)->giveEquationNumber(dpn);
-                                }
+                                int eq = dman->giveDof(j)->giveEquationNumber(n);
 
                                 if ( eq ) {
                                     int val;
@@ -465,12 +434,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
 
 
     // build reverse map
-    int lneq;
-    if ( et == et_standard ) {
-        lneq = emodel->giveNumberOfDomainEquations(di, dn);
-    } else {
-        lneq = emodel->giveNumberOfDomainEquations(di, dpn);
-    }
+    int lneq = emodel->giveNumberOfDomainEquations(di, n);
 
     globLocMap.clear();
     for ( int i = 1; i <= lneq; i++ ) {
@@ -544,24 +508,17 @@ PetscNatural2GlobalOrdering :: map2Old(IntArray &answer, const IntArray &src, in
 PetscNatural2LocalOrdering :: PetscNatural2LocalOrdering() : PetscOrdering_Base(), n2l() { }
 
 void
-PetscNatural2LocalOrdering :: init(EngngModel *emodel, EquationID ut, int di,  EquationType et)
+PetscNatural2LocalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberingScheme &n)
 {
     Domain *d = emodel->giveDomain(di);
     int n_eq = 0, ndofs, ndofman = d->giveNumberOfDofManagers(), loc_eq = 1;
     bool lFlag;
     DofManager *dman;
-    EModelDefaultEquationNumbering dn;
-    EModelDefaultPrescribedEquationNumbering dpn;
-
 
     // determine number of local eqs + number of those shared DOFs which are numbered by receiver
     // shared dofman is numbered on partition with lovest rank number
 
-    if ( et == et_standard ) {
-        n2l.resize( emodel->giveNumberOfDomainEquations(di, dn) );
-    } else {
-        n2l.resize( emodel->giveNumberOfDomainEquations(di, dpn) );
-    }
+    n2l.resize( emodel->giveNumberOfDomainEquations(di, n) );
 
     for ( int i = 1; i <= ndofman; i++ ) {
         dman = d->giveDofManager(i);
@@ -569,11 +526,7 @@ PetscNatural2LocalOrdering :: init(EngngModel *emodel, EquationID ut, int di,  E
         ndofs = dman->giveNumberOfDofs();
         for ( int j = 1; j <= ndofs; j++ ) {
             if ( dman->giveDof(j)->isPrimaryDof() ) {
-                if ( et == et_standard ) {
-                    n_eq = dman->giveDof(j)->giveEquationNumber(dn);
-                } else {
-                    n_eq = dman->giveDof(j)->giveEquationNumber(dpn);
-                }
+                n_eq = dman->giveDof(j)->giveEquationNumber(n);
 
                 if ( n_eq == 0 ) {
                     continue;
