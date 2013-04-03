@@ -40,8 +40,8 @@
  #include "timer.h"
 
 namespace oofem {
-DSSSolver :: DSSSolver(int i, Domain *d, EngngModel *m) :
-    SparseLinearSystemNM(i, d, m) { }
+DSSSolver :: DSSSolver(Domain *d, EngngModel *m) :
+    SparseLinearSystemNM(d, m) { }
 
 DSSSolver :: ~DSSSolver() { }
 
@@ -69,6 +69,7 @@ DSSSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 
     return NM_Success;
 }
+} // end namespace oofem
 
 #else // __DSS_MODULE
 
