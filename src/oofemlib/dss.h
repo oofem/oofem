@@ -106,6 +106,25 @@ public:
     SparseMtrxType giveType() const { return SMT_SymCompCol; }
     bool isAsymmetric() const { return false; }
 };
+
+class DSSMatrixLDL : public DSSMatrix
+{
+public:
+    DSSMatrixLDL() : DSSMatrix(sym_LDL) {}
+};
+
+class DSSMatrixLL : public DSSMatrix
+{
+public:
+    DSSMatrixLL() : DSSMatrix(sym_LL) {}
+};
+
+class DSSMatrixLU : public DSSMatrix
+{
+public:
+    DSSMatrixLU() : DSSMatrix(unsym_LU) {}
+};
+
 } // end namespace oofem
 #endif // ifdef __DSS_MODULE
 #endif // dss_h

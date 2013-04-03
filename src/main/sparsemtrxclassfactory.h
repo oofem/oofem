@@ -61,8 +61,8 @@ REGISTER_CLASS(SpoolesSparseMtrx, SMT_SpoolesMtrx)
 REGISTER_CLASS(PetscSparseMtrx, SMT_PetscMtrx)
 #endif
 #ifdef __DSS_MODULE
-REGISTER_CLASS_1(DSSMatrix, SMT_DSS_sym_LDL, DSSMatrix :: sym_LDL)
-REGISTER_CLASS_1(DSSMatrix, SMT_DSS_sym_LL, DSSMatrix :: sym_LL)
-REGISTER_CLASS_1(DSSMatrix, SMT_DSS_unsym_LU, DSSMatrix :: unsym_LU)
+REGISTER_CLASS(DSSMatrixLDL, SMT_DSS_sym_LDL)
+REGISTER_CLASS(DSSMatrixLL, SMT_DSS_sym_LL)
+REGISTER_CLASS(DSSMatrixLU, SMT_DSS_unsym_LU)
 #endif
 
