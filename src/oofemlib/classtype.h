@@ -338,6 +338,7 @@ enum classType {
     ConcreteDPM2Class,
     LatticeDamage2dClass,
     IsoInterfaceDamageMaterialClass,
+    BilinearCZMaterialClass,
     CebFipSlip90MaterialClass,
     DustMaterialClass,
     RVEMaterialClass,

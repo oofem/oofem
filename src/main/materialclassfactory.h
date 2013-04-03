@@ -63,6 +63,7 @@
  #include "rankinepm.h"
  #include "masonry02.h"
  #include "isointerfacedamage01.h"
+ #include "bilinearczmaterial.h"
  #include "j2mat.h"
  #include "mat_cebfip90.h"
  #include "hellmat.h"
@@ -148,6 +149,7 @@ REGISTER_CLASS(J2MPlasticMaterial, "j2mmat", J2MPlasticMaterialClass)
 REGISTER_CLASS(RankinePlasticMaterial, "rankine", RankinePlasticMaterialClass)
 REGISTER_CLASS(Masonry02, "masonry02", Masonry02Class)
 REGISTER_CLASS(IsoInterfaceDamageMaterial, "isointrfdm01", IsoInterfaceDamageMaterialClass)
+REGISTER_CLASS(BilinearCZMaterial, "bilinearczmat", BilinearCZMaterialClass)
 REGISTER_CLASS(J2Mat, "j22mat", J2MatClass)
 REGISTER_CLASS(CebFipSlip90Material, "cebfipslip90", CebFipSlip90MaterialClass)
 REGISTER_CLASS(HellmichMaterial, "hellmat", HellmichMaterialClass)
