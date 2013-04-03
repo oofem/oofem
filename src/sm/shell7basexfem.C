@@ -37,7 +37,7 @@
 #include "enrichmentitem.h"
 #include "xfemmanager.h"
 #include "constantpressureload.h"
-
+#include "simpleinterfacemat.h"
 namespace oofem {
 IntArray Shell7BaseXFEM :: dofId_Midplane(3);
 IntArray Shell7BaseXFEM :: dofId_Director(3);
@@ -359,7 +359,6 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
                 this->computeCohesiveForces( fCZ, tStep, solVec, solVecD, useUpdatedGpRecord, dei, j);
                 tempRed.beSubArrayOf(fCZ, activeDofs);
                 answer.assemble(tempRed, ordering);
-                //tempRed.printYourself();
  
             }
         }
@@ -456,8 +455,7 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
 
     FloatMatrix N, B;  
 
-    IntegrationRule *iRuleL = specialIntegrationRulesArray [ 0 ];
-    //Material *mat = dei->giveMaterial(); // CZ-material
+    IntegrationRule *iRuleL = czIntegrationRulesArray [ dei->giveNumber() - 1 ];
     StructuralMaterial *mat = static_cast < StructuralMaterial * > (dei->giveMaterial());
    
     for ( int i = 1; i <= iRuleL->getNumberOfIntegrationPoints(); i++ ) {
@@ -488,13 +486,10 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         
         
         // compute cohesive traction based on J
-        FloatArray cTraction, tTemp; 
-        FloatMatrix K(3,3);
-        K.zero();
-        K.at(3,3) = 50000.0; // traction in normal dir only
-        cTraction.beProductOf(K,xd);
+        FloatArray cTraction;  
+        mat->giveRealStressVector(cTraction, FullForm, ip, xd, tStep);
         // interfacematerial assumes J(1) = normal dir and J(2), J(3) are shear
-        //mat->giveRealStressVector(tTemp, ReducedForm, ip, J, tStep);
+        
 
         FloatMatrix lambdaN;
         lambdaN.beProductOf(lambda,N);
@@ -511,6 +506,7 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
     answer.assemble(answerTemp, ordering);
 
 }
+
 
 
 void
@@ -542,7 +538,6 @@ Shell7BaseXFEM :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
                 FloatMatrix tempRed;
                 tempRed.beSubMatrixOf(temp, activeDofsJ, activeDofsJ);
                 answer.assemble(tempRed, orderingJ, orderingJ);
-                //tempRed.printYourself();
                     
             }
         }
@@ -561,8 +556,8 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
 
     FloatMatrix N, B;  
 
-    IntegrationRule *iRuleL = specialIntegrationRulesArray [ 0 ];
-    //Material *mat = dei->giveMaterial(); // CZ-material
+    IntegrationRule *iRuleL = czIntegrationRulesArray [ dei->giveNumber() - 1 ];
+     StructuralMaterial *mat = static_cast < StructuralMaterial * > (dei->giveMaterial()); // CZ-material
 
     for ( int i = 1; i <= iRuleL->getNumberOfIntegrationPoints(); i++ ) {
         IntegrationPoint *ip = iRuleL->getIntegrationPoint(i - 1);
@@ -586,9 +581,13 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
         //this->computeFAt(ip, F, genEps); // (xi=0) ip must have a valid x-coord
         //Finv.beInverseOf(F);
 
-        FloatMatrix K(3,3);
-        K.zero();
-        K.at(3,3) = 50000.0; // traction in normal dir only
+        FloatMatrix K(3,3), KTemp;
+
+        mat->giveCharacteristicMatrix(K, FullForm, TangentStiffness, ip, tStep);
+        
+        //IntArray ordering;
+        //ordering.setValues(3,  3, 1, 2);
+        //K.assemble(KTemp, ordering, ordering);     
 
         FloatMatrix lambdaN, KF, temp, tangent;
         lambdaN.beProductOf(lambda,N);

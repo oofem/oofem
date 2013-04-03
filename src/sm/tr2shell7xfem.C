@@ -105,6 +105,21 @@ Tr2Shell7XFEM :: computeGaussPoints()
         specialIntegrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
         specialIntegrationRulesArray [ 0 ]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
 
+        // need to check if interface has failed but need to update the integration rule later
+        XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { 
+            Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) ); 
+            if (dei) {
+                int numberOfDealam = dei->giveNumberOfEnrichmentDomains();
+                czIntegrationRulesArray = new IntegrationRule * [ numberOfDealam ];
+                for ( int i = 0; i < numberOfDealam; i++ ) {
+                    czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
+                    czIntegrationRulesArray [ i ]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat);
+                }
+            }
+        }
+        
+
 
         // Midplane (Mass matrix integrated analytically through the thickness)
         specialIntegrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);

@@ -90,7 +90,7 @@ protected:
     static bool sortFunc(std::pair<int, double> a, std::pair<int, double> b) {
         return a.second < b.second;
     }
-    
+    IntegrationRule **czIntegrationRulesArray;
 
     virtual void evalCovarBaseVectorsAt(GaussPoint *gp, FloatMatrix &gcon, FloatArray &solVec);
     void discGiveInitialSolutionVector(FloatArray &answer, IntArray &eiDofIdArray);
@@ -121,6 +121,7 @@ protected:
 
     // VTK
     virtual void vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
+
 
 public:
     // constructor
