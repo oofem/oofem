@@ -38,8 +38,8 @@
 #include "material.h"
 #include "matstatus.h"
 
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 
 namespace oofem {

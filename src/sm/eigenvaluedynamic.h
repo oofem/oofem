@@ -38,8 +38,8 @@
 #include "engngm.h"
 #include "sparsegeneigenvalsystemnm.h"
 #include "sparsemtrx.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "geneigvalsolvertype.h"
 
 ///@name Input fields for EigenValueDynamic

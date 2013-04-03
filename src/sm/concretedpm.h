@@ -37,8 +37,8 @@
 
 #include "structuralmaterial.h"
 #include "gausspnt.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "cltypes.h"
 #include "structuralms.h"
 #include "strainvector.h"

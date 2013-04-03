@@ -32,56 +32,42 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef piecewisper_h
-#define piecewisper_h
+#ifndef constantfunction_h
+#define constantfunction_h
 
-#include "flotarry.h"
-#include "piecewis.h"
-
-///@name Input fields for PeriodicPiecewiseLinFunction
-//@{
-#define _IFT_PeriodicPiecewiseLinFunction_period "period"
-#define _IFT_PeriodicPiecewiseLinFunction_addtf "addtf"
-//@}
+#include "loadtimefunction.h"
 
 namespace oofem {
+
 /**
- * This class implements an enhanced piecewise linear function with periodicity.
- * and possibility to add another arbitrary time function.
- *
- * The function is defined by 'numberOfPoints' points. 'dates' and 'values'
- * store respectively the abscissas (t) and the values (f(t)) of the points
- * The values are repeated after 'period'. 'AddTF' parameter specifies number
- * of function to add.
+ * Class implementing time function that is constant in time; @f$ f(t) = C @f$.
  */
-class PeriodicPiecewiseLinFunction : public PiecewiseLinFunction
+class ConstantFunction : public LoadTimeFunction
 {
 private:
-    /// If nonzero, the value of time function specified by addTF is added to computed value.
-    int addTF;
-    /**
-     * If less than zero no periodicity, if >=0 date time is computed as
-     * given time%period.
-     * If points span more than period, span of LAST period is repeated
-     */
-    double period;
+    /// Value of receiver.
+    double value;
 
 public:
-    PeriodicPiecewiseLinFunction(int i, Domain *d) : PiecewiseLinFunction(i, d)
-    {
-        period = -1.0;
-        addTF = 0;
-    }
-    virtual ~PeriodicPiecewiseLinFunction() { }
+    /**
+     * Constructor. Creates constant load time function with given number, belonging to given domain.
+     * @param i Load time function number.
+     * @param d Domain to which new object will belongs.
+     */
+    ConstantFunction(int i, Domain *d) : LoadTimeFunction(i, d) { value = 0; }
+    /// Destructor.
+    virtual ~ConstantFunction() { }
+
+    /// @return Value of receiver.
+    double giveValue() { return value; }
+
+    virtual double __at(double t) { return this->giveValue(); }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
-    virtual classType giveClassID() const { return PeriodicPiecewiseClass; }
-    virtual const char *giveClassName() const { return "PeriodicPiecewiseClass"; }
-    virtual const char *giveInputRecordName() const { return "PeriodicPiecewiseLinFunction"; }
 
-    virtual double __at(double);
-    virtual double __derAt(double);
+    virtual classType giveClassID() const { return ConstantFunctionClass; }
+    virtual const char *giveClassName() const { return "ConstantFunction"; }
 };
 } // end namespace oofem
-#endif // piecewisper_h
+#endif // constantfunction_h

@@ -33,7 +33,7 @@
  */
 
 #include "bazantnajjarmat.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "gausspnt.h"
 #include "mathfem.h"
 

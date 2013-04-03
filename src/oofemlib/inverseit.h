@@ -41,7 +41,7 @@
 #define inverseit_h
 
 #include "sparsegeneigenvalsystemnm.h"
-#include "flotarry.h"
+#include "floatarray.h"
 
 namespace oofem {
 class Domain;

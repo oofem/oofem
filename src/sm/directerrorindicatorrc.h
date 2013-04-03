@@ -37,7 +37,7 @@
 
 #include "interface.h"
 #include "remeshingcrit.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "statecountertype.h"
 
 ///@name Input fields for DirectErrorIndicatorRC

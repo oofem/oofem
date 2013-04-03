@@ -45,7 +45,7 @@
 #include "usrdefsub.h"
 #include "datastream.h"
 #include "contextioerr.h"
-#include "loadtime.h"
+#include "loadtimefunction.h"
 
 #ifdef __CEMHYD_MODULE
  #include "cemhydmat.h"

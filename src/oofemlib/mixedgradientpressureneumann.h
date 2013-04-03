@@ -36,13 +36,13 @@
 #define mixedgradientpressurecneumann_h
 
 #include "mixedgradientpressurebc.h"
-#include "boundary.h"
+#include "boundarycondition.h"
 #include "dof.h"
 #include "bctype.h"
 #include "valuemodetype.h"
 #include "classtype.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 #include <list>
 

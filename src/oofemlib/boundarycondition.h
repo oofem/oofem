@@ -35,7 +35,7 @@
 #ifndef boudary_h
 #define boudary_h
 
-#include "generalbc.h"
+#include "generalboundarycondition.h"
 #include "bctype.h"
 #include "valuemodetype.h"
 #include "classtype.h"

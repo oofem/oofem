@@ -35,7 +35,7 @@
 #include "combinedzzsiee.h"
 #include "domain.h"
 #include "element.h"
-#include "conTable.h"
+#include "connectivitytable.h"
 #include "mathfem.h"
 
 namespace oofem {

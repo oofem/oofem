@@ -35,7 +35,7 @@
 #ifndef tractionpressurebc_h
 #define tractionpressurebc_h
 
-#include "boundary.h"
+#include "boundarycondition.h"
 
 namespace oofem {
 /**

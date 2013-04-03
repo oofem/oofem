@@ -36,7 +36,7 @@
 #include "node.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "intarray.h"
 
 #ifdef __OOFEG

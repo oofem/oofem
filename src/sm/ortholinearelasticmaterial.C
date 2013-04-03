@@ -37,7 +37,7 @@
 #include "structuralelement.h"
 #include "material.h"
 #include "structuralms.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "gausspnt.h"
 #include "mathfem.h"
 

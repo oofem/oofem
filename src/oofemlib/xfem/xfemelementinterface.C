@@ -42,8 +42,8 @@
 #include "patchintegrationrule.h"
 #include "delaunay.h"
 #include "xfemmanager.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 namespace oofem {
 

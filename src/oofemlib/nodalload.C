@@ -32,43 +32,32 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef peak_h
-#define peak_h
-
-#include "loadtime.h"
-
-///@name Input fields for PeakFunction
-//@{
-#define _IFT_PeakFunction_t "t"
-#define _IFT_PeakFunction_ft "f(t)"
-//@}
+#include "nodalload.h"
 
 namespace oofem {
-/**
- * This class implements a function that is 0 everywhere, except in a single
- * point.
- */
-class PeakFunction : public LoadTimeFunction
+IRResultType
+NodalLoad :: initializeFrom(InputRecord *ir)
 {
-private:
-    /// Specific time when function is nonzero.
-    double t;
-    /// Value of function at nonzero time.
-    double value;
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-public:
-    PeakFunction(int i, Domain *d) : LoadTimeFunction(i, d)
-    {
-        t = 0.0;
-        value = 0.0;
-    }
-    virtual ~PeakFunction() { }
+    int value = 1;
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_NodalLoad_cstype);
+    coordSystemType = ( BL_CoordSystType ) value;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual classType giveClassID() const { return PeakFunctionClass; }
-    virtual const char *giveClassName() const { return "PeakFunction"; }
+    return Load :: initializeFrom(ir);
+}
 
-    virtual double  __at(double);
-};
+
+int
+NodalLoad :: giveInputRecordString(std :: string &str, bool keyword)
+{
+    char buff [ 1024 ];
+
+    Load :: giveInputRecordString(str, keyword);
+    sprintf(buff, " cstype %d", ( int ) this->coordSystemType);
+    str += buff;
+
+    return 1;
+}
 } // end namespace oofem
-#endif // peak_h

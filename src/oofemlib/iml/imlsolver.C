@@ -56,7 +56,7 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSu
  #include <iml/gmres.h>
  #include "imlsolver.h"
  #include "sparsemtrx.h"
- #include "flotarry.h"
+ #include "floatarray.h"
  #include "diagpre.h"
  #include "voidprecond.h"
  #include "compcol.h"

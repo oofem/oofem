@@ -36,7 +36,7 @@
 #include "domain.h"
 #include "node.h"
 #include "intarray.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "mathfem.h"
 
 namespace oofem {

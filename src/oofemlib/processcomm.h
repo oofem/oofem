@@ -40,8 +40,8 @@
  #include "combuff.h"
  #include "commbufftype.h"
  #include "communicatormode.h"
- #include "flotmtrx.h"
- #include "flotarry.h"
+ #include "floatmatrix.h"
+ #include "floatarray.h"
  #include "intarray.h"
  #include "error.h"
 

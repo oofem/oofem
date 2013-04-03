@@ -35,7 +35,7 @@
 #ifndef rveengngmodel_h
 #define rveengngmodel_h
 
-#include "flotarry.h"
+#include "floatarray.h"
 #include "timestep.h"
 
 namespace oofem {

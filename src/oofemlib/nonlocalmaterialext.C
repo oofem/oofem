@@ -33,7 +33,7 @@
  */
 
 #include "gausspnt.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "element.h"
 #include "timestep.h"
 #include "integrationrule.h"

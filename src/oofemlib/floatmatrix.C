@@ -37,8 +37,8 @@
  * PhD Thesis, EPFL, Lausanne, 1992.
  */
 
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
 #include "error.h"

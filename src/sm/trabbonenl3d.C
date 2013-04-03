@@ -34,8 +34,8 @@
 #include "trabbonenl3d.h"
 #include "structuralelement.h"
 #include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "mathfem.h"
 #include "sparsemtrx.h"
 #include "nonlocalmaterialext.h"
@@ -47,7 +47,7 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 #endif
 
 

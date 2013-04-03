@@ -34,7 +34,7 @@
 
 #include "twofluidmaterial.h"
 #include "domain.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "gausspnt.h"
 #include "engngm.h"
 #include "materialinterface.h"

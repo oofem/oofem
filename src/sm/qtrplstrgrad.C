@@ -35,8 +35,8 @@
 #include "qtrplstrgrad.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 
 #ifdef __OOFEG

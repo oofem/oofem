@@ -38,7 +38,7 @@
  * PhD Thesis, EPFL, Lausanne, 1992.
  */
 
-#include "loadtime.h"
+#include "loadtimefunction.h"
 #include "timestep.h"
 
 namespace oofem {

@@ -31,7 +31,7 @@
 #ifndef icprecond_h
 #define icprecond_h
 
-#include "flotarry.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "symcompcol.h"
 #include "precond.h"

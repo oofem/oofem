@@ -35,8 +35,8 @@
 #ifndef heavisideltf_h
 #define heavisideltf_h
 
-#include "flotarry.h"
-#include "loadtime.h"
+#include "floatarray.h"
+#include "loadtimefunction.h"
 
 ///@name Input fields for HeavisideLTF
 //@{

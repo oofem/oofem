@@ -32,54 +32,56 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef rotatingboundary_h
-#define rotatingboundary_h
+#ifndef periodicpiecewiselinfunction_h
+#define periodicpiecewiselinfunction_h
 
-#include "boundarycondition.h"
 #include "floatarray.h"
-#include "floatmatrix.h"
+#include "piecewiselinfunction.h"
 
-///@name Input fields for RotatingBoundary
+///@name Input fields for PeriodicPiecewiseLinFunction
 //@{
-#define _IFT_RotatingBoundary_axis "axis"
-#define _IFT_RotatingBoundary_center "center"
-#define _IFT_RotatingBoundary_frequency "frequency" ///< @todo Unused ( But it makes sense that you'd have this, can you check it Andreas? ) / Mikael
+#define _IFT_PeriodicPiecewiseLinFunction_period "period"
+#define _IFT_PeriodicPiecewiseLinFunction_addtf "addtf"
 //@}
 
 namespace oofem {
 /**
- * Class implementing rotating boundary surface.
- * This boundary condition is usually attribute of one or more degrees of freedom (DOF).
+ * This class implements an enhanced piecewise linear function with periodicity.
+ * and possibility to add another arbitrary time function.
  *
- * @author Andreas Feymark
+ * The function is defined by 'numberOfPoints' points. 'dates' and 'values'
+ * store respectively the abscissas (t) and the values (f(t)) of the points
+ * The values are repeated after 'period'. 'AddTF' parameter specifies number
+ * of function to add.
  */
-class RotatingBoundary : public BoundaryCondition
+class PeriodicPiecewiseLinFunction : public PiecewiseLinFunction
 {
-protected:
-    /// Rotation matrix.
-    FloatMatrix R;
-
-    /// Axis and center of rotation.
-    FloatArray axis, center;
+private:
+    /// If nonzero, the value of time function specified by addTF is added to computed value.
+    int addTF;
+    /**
+     * If less than zero no periodicity, if >=0 date time is computed as
+     * given time%period.
+     * If points span more than period, span of LAST period is repeated
+     */
+    double period;
 
 public:
-    /**
-     * Constructor. Creates boundary condition with given number, belonging to given domain.
-     * @param i Boundary condition number.
-     * @param d Domain to which new object will belongs.
-     */
-    RotatingBoundary(int i, Domain *d) : BoundaryCondition(i, d) { }
-    /// Destructor.
-    virtual ~RotatingBoundary() { }
-
-    virtual double give(Dof *dof, ValueModeType mode, TimeStep *tStep);
+    PeriodicPiecewiseLinFunction(int i, Domain *d) : PiecewiseLinFunction(i, d)
+    {
+        period = -1.0;
+        addTF = 0;
+    }
+    virtual ~PeriodicPiecewiseLinFunction() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
-    virtual void scale(double s) { }
-    const char *giveClassName() const { return "RotatingBoundary"; }
-    classType giveClassID() const { return RotatingBoundaryClass; }
-    
+    virtual classType giveClassID() const { return PeriodicPiecewiseClass; }
+    virtual const char *giveClassName() const { return "PeriodicPiecewiseClass"; }
+    virtual const char *giveInputRecordName() const { return "PeriodicPiecewiseLinFunction"; }
+
+    virtual double __at(double);
+    virtual double __derAt(double);
 };
 } // end namespace oofem
-#endif // rotatingboundary_h
+#endif // periodicpiecewiselinfunction_h

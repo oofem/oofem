@@ -33,7 +33,7 @@
  */
 
 #include "externalfieldgenerator.h"
-#include "flotarry.h"
+#include "floatarray.h"
 
 #include <iostream>
 #include <fstream>

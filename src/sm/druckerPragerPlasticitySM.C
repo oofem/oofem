@@ -34,8 +34,8 @@
 
 #include "druckerPragerPlasticitySM.h"
 
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "structuralms.h"
 #include "gausspnt.h"
 #include "intarray.h"

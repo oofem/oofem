@@ -37,7 +37,7 @@
 
 #include "sparsegeneigenvalsystemnm.h"
 #include "sparsemtrx.h"
-#include "flotarry.h"
+#include "floatarray.h"
 
 #ifdef __SLEPC_MODULE
  #include <slepceps.h>

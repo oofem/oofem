@@ -36,7 +36,7 @@
 #define gjacobi_h
 
 #include "nummet.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "nmstatus.h"
 
 namespace oofem {

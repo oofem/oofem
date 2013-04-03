@@ -43,7 +43,7 @@
 
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
-#include "flotarry.h"
+#include "floatarray.h"
 
 namespace oofem {
 class Domain;

@@ -36,8 +36,8 @@
 #define element_h
 
 #include "femcmpnn.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 
 #include "alist.h"
 #include "intarray.h"

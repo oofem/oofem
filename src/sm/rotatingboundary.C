@@ -36,7 +36,7 @@
 #include "engngm.h"
 #include "dofmanager.h"
 #include "mathfem.h"
-#include "loadtime.h"
+#include "loadtimefunction.h"
 
 namespace oofem {
 double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)

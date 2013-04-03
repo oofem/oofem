@@ -35,7 +35,7 @@
 #include "calmls.h"
 #include "verbose.h"
 #include "timestep.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "datastream.h"
 #include "mathfem.h"
 #include "element.h"

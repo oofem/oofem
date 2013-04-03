@@ -39,7 +39,7 @@
 #include "domain.h"
 #include "spatiallocalizer.h"
 #include "integrationrule.h"
-#include "conTable.h"
+#include "connectivitytable.h"
 
 namespace oofem {
 MMALeastSquareProjection :: MMALeastSquareProjection() : MaterialMappingAlgorithm()

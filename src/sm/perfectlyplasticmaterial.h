@@ -37,8 +37,8 @@
 
 #include "structuralmaterial.h"
 #include "linearelasticmaterial.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 #include "structuralms.h"
 

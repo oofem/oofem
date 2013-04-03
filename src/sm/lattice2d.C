@@ -39,9 +39,9 @@
 #include "gausspnt.h"
 #include "latticematstatus.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "intarray.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "mathfem.h"
 #include "latticestructuralelement.h"
 

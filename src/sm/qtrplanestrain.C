@@ -35,15 +35,15 @@
 #include "qtrplanestrain.h"
 #include "node.h"
 #include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "crosssection.h"
 #include "gaussintegrationrule.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
  #include "oofegutils.h"
  #include "rcm2.h"
 #endif

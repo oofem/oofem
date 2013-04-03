@@ -35,7 +35,7 @@
 #ifndef usrdeftimefunct_h
 #define usrdeftimefunct_h
 
-#include "loadtime.h"
+#include "loadtimefunction.h"
 
 ///@name Input fields for UserDefinedLoadTimeFunction
 //@{

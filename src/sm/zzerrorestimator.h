@@ -38,7 +38,7 @@
 #include "errorestimator.h"
 #include "interface.h"
 #include "internalstatetype.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "statecountertype.h"
 
 ///@name Input fields for ZZErrorEstimator

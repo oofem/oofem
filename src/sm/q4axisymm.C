@@ -36,8 +36,8 @@
 #include "node.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "domain.h"
 #include "engngm.h"
@@ -45,7 +45,7 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 //#include "rcm2.h"
 //#include "oofegutils.h"
 #endif

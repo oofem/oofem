@@ -43,7 +43,7 @@
 
 #include "dofmanager.h"
 #include "domain.h"
-#include "flotarry.h"
+#include "floatarray.h"
 
 ///@name Input fields for Node
 //@{

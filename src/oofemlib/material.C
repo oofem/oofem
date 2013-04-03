@@ -35,7 +35,7 @@
 #include "material.h"
 #include "verbose.h"
 #include "gausspnt.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "mathfem.h"
 #include "contextioerr.h"
 

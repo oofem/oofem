@@ -33,7 +33,7 @@
  */
 
 #include "spatiallocalizer.h"
-#include "conTable.h"
+#include "connectivitytable.h"
 #include "element.h"
 #include "node.h"
 #include "mathfem.h"

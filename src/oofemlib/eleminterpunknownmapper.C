@@ -40,7 +40,7 @@
 #include "spatiallocalizer.h"
 #include "node.h"
 #include "dof.h"
-#include "conTable.h"
+#include "connectivitytable.h"
 
 namespace oofem {
 EIPrimaryUnknownMapper :: EIPrimaryUnknownMapper() : PrimaryUnknownMapper()

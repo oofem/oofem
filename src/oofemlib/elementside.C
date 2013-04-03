@@ -34,7 +34,7 @@
 
 #include "elementside.h"
 #include "dof.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "intarray.h"
 #include "verbose.h"
 

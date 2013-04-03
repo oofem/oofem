@@ -35,8 +35,8 @@
 #include "strainvector.h"
 #include "stressvector.h"
 #include "mathfem.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "error.h"
 
 namespace oofem {

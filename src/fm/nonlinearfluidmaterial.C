@@ -35,7 +35,7 @@
 #include "fluiddynamicmaterial.h"
 #include "nonlinearfluidmaterial.h"
 #include "domain.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "gausspnt.h"
 #include "engngm.h"
 #include "contextioerr.h"

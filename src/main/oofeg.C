@@ -44,7 +44,7 @@
 #include "oofeggraphiccontext.h"
 
 
-#include "conTable.h"
+#include "connectivitytable.h"
 #include "mathfem.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"

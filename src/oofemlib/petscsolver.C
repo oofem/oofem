@@ -37,7 +37,7 @@
 #ifdef __PETSC_MODULE
  #include "petscsparsemtrx.h"
  #include "engngm.h"
- #include "flotarry.h"
+ #include "floatarray.h"
  #include "verbose.h"
  #include "timer.h"
  #include "error.h"

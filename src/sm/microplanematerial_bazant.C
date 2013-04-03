@@ -34,7 +34,7 @@
 
 #include "microplanematerial_bazant.h"
 #include "microplane.h"
-#include "flotarry.h"
+#include "floatarray.h"
 
 namespace oofem {
 MicroplaneMaterial_Bazant :: MicroplaneMaterial_Bazant(int n, Domain *d) : MicroplaneMaterial(n, d)

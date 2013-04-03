@@ -32,32 +32,53 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "peak.h"
-#include "mathfem.h"
+#include "boundarycondition.h"
+#include "timestep.h"
+#include "loadtimefunction.h"
+#include "verbose.h"
 
 namespace oofem {
-double PeakFunction :: __at(double time)
-// Returns the value of the receiver at time 'time'.
+double BoundaryCondition :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
+// Returns the value at stepN of the prescribed value of the kinematic
+// unknown 'u'. Returns 0 if 'u' has no prescribed value.
 {
-    double precision = 1e-6;
+    double factor;
 
-    if ( fabs(t - time) < precision ) {
-        return value;
-    } else {
-        return 0.;
-    }
+    factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
+    return prescribedValue * factor;
 }
 
+
 IRResultType
-PeakFunction :: initializeFrom(InputRecord *ir)
+BoundaryCondition :: initializeFrom(InputRecord *ir)
+// Sets up the dictionary where the receiver stores the conditions it
+// imposes.
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    LoadTimeFunction :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, t, _IFT_PeakFunction_t);
-    IR_GIVE_FIELD(ir, value, _IFT_PeakFunction_ft);
+    GeneralBoundaryCondition :: initializeFrom(ir);
+
+    if ( ir->hasField(_IFT_BoundaryCondition_PrescribedValue) ) {
+        IR_GIVE_FIELD(ir, prescribedValue, _IFT_BoundaryCondition_PrescribedValue);
+    } else {
+        IR_GIVE_FIELD(ir, prescribedValue, _IFT_BoundaryCondition_PrescribedValue_d);
+    }
 
     return IRRT_OK;
+}
+
+
+
+int
+BoundaryCondition :: giveInputRecordString(std :: string &str, bool keyword)
+{
+    char buff [ 1024 ];
+
+    GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
+    sprintf(buff, " prescribedvalue %e", this->prescribedValue);
+    str += buff;
+
+    return 1;
 }
 } // end namespace oofem

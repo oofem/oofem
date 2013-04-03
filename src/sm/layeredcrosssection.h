@@ -36,8 +36,8 @@
 #define layeredcrosssection_h
 
 #include "structuralcrosssection.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "interface.h"
 
 ///@name Input fields for LayeredCrossSection

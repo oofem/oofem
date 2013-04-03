@@ -37,8 +37,8 @@
 
 #include "nonlocalbarrier.h"
 #include "domain.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 ///@name Input fields for SymmetryBarrier
 //@{

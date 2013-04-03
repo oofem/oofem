@@ -33,7 +33,7 @@
  */
 
 #include "rowcol.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
 #include "freestor.h"

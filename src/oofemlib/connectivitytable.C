@@ -39,7 +39,7 @@
 #include "domain.h"
 #include "element.h"
 #include "dofmanager.h"
-#include "conTable.h"
+#include "connectivitytable.h"
 
 namespace oofem {
 ConnectivityTable :: ~ConnectivityTable()

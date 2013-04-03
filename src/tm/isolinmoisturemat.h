@@ -36,8 +36,8 @@
 #define isolinmoisturemat_h
 
 #include "isomoisturemat.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 ///@name Input fields for IsotropicLinMoistureTransferMaterial
 //@{

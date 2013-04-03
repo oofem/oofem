@@ -32,7 +32,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "flotarry.h"
+#include "floatarray.h"
 #include "gausspnt.h"
 #include "integrationrule.h"
 #include "patch.h"

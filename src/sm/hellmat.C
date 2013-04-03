@@ -7,7 +7,7 @@
 
 #include "gausspnt.h"
 #include "timestep.h"
-#include "loadtime.h"
+#include "loadtimefunction.h"
 #include "isolinearelasticmaterial.h"
 #include "structuralcrosssection.h"
 #include "hellmat.h"

@@ -34,8 +34,8 @@
 
 #include "trabbonenlembed.h"
 #include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "nonlocalmaterialext.h"
 
 #ifdef __OOFEG

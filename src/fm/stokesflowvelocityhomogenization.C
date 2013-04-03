@@ -35,7 +35,7 @@
 #include "stokesflowvelocityhomogenization.h"
 #include "primaryfield.h"
 
-#include "deadwght.h"
+#include "deadweight.h"
 #include "tr21stokes.h"
 
 namespace oofem

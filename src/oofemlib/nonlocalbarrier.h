@@ -38,7 +38,7 @@
 #include "femcmpnn.h"
 #include "domain.h"
 
-#include "flotarry.h"
+#include "floatarray.h"
 #include "nonlocalmaterialext.h"
 
 namespace oofem {

@@ -34,7 +34,7 @@
 
 #include "skylineu.h"
 #include "rowcol.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "intarray.h"
 #include "domain.h"
 #include "engngm.h"

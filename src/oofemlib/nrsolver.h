@@ -42,7 +42,7 @@
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
 #include "sparsemtrx.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "linesearch.h"
 
 #ifdef __PETSC_MODULE

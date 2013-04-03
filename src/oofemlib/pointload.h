@@ -37,7 +37,7 @@
 
 #include "load.h"
 #include "gausspnt.h"
-#include "dictionr.h"
+#include "dictionary.h"
 
 ///@name Input fields for PointLoad
 //@{

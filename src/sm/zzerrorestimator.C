@@ -37,8 +37,8 @@
 #include "dofmanager.h"
 #include "element.h"
 #include "gausspnt.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "mathfem.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
@@ -46,7 +46,7 @@
 #include "structuralmaterial.h"
 #include "structuralms.h"
 #include "integrationrule.h"
-#include "conTable.h"
+#include "connectivitytable.h"
 
 #include <vector>
 

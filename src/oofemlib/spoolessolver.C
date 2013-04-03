@@ -54,7 +54,7 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_
 
  #include "spoolessolver.h"
  #include "spoolessparsemtrx.h"
- #include "flotarry.h"
+ #include "floatarray.h"
  #include "verbose.h"
  #include "timer.h"
 

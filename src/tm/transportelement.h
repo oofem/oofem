@@ -36,7 +36,7 @@
 #define transportelement_h
 
 #include "element.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 
 #include "primaryfield.h"
 #include "matresponsemode.h"

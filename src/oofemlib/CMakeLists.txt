@@ -1,9 +1,9 @@
 # Much to organize
 set (core_unsorted
     femcmpnn.C domain.C timestep.C metastep.C gausspnt.C
-    cltypes.C timer.C dictionr.C freestor.C
-    conTable.C compiler.C error.C mathfem.C logger.C util.C
-    initmodulemanager.C initmodule.C initial.C
+    cltypes.C timer.C dictionary.C freestor.C
+    connectivitytable.C compiler.C error.C mathfem.C logger.C util.C
+    initmodulemanager.C initmodule.C initialcondition.C
     homogenize.C
     localgaussianrandomgenerator.C
     nonlocalbarrier.C
@@ -76,13 +76,13 @@ set (core_fields
     )
 
 set (core_ltf
-    loadtime.C
-    constant.C
+    loadtimefunction.C
+    constantfunction.C
     heavisideltf.C
-    peak.C
-    piecewis.C
-    piecewisper.C
-    usrdeftimefunct.C
+    peakfunction.C
+    piecewiselinfunction.C
+    periodicpiecewiselinfunction.C
+    userdefinedloadtimefunction.C
     )
 
 set (core_cs
@@ -129,12 +129,12 @@ set (core_iga
 
 set (core_arrays
     intarray.C
-    flotarry.C
+    floatarray.C
     stressstrainbasevector.C
     stressvector.C
     strainvector.C
     matrix.C
-    flotmtrx.C
+    floatmatrix.C
     petscsparsemtrx.C
     )
 
@@ -197,8 +197,8 @@ set (core_parallel
     )
 
 set (core_bc
-    generalbc.C
-    boundary.C
+    generalboundarycondition.C
+    boundarycondition.C
     prescribedgradient.C
     mixedgradientpressurebc.C
     mixedgradientpressuredirichlet.C
@@ -209,7 +209,7 @@ set (core_bc
     linearedgeload.C
     constantedgeload.C
     constantsurfaceload.C
-    nodload.C
+    nodalload.C
     reinforcement.C
     surfacetensionbc.C
     )

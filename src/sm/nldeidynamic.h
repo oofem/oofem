@@ -37,8 +37,8 @@
 
 #include "structengngmodel.h"
 
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 #include "sparselinsystemnm.h"
 #include "sparsemtrxtype.h"

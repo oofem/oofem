@@ -36,7 +36,7 @@
 #include "gausspnt.h"
 #include "element.h"
 #include "structuralmaterial.h"
-#include "flotarry.h"
+#include "floatarray.h"
 
 namespace oofem {
 void

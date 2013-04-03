@@ -37,8 +37,8 @@
 
 #include "femcmpnn.h"
 #include "domain.h"
-#include "flotarry.h"
-#include "dictionr.h"
+#include "floatarray.h"
+#include "dictionary.h"
 #include "classtype.h"
 #include "bcvaltype.h"
 #include "bcgeomtype.h"

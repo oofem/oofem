@@ -39,9 +39,9 @@
 // includes for ddc - not very clean (NumMethod knows what is "node" and "dof")
 #include "node.h"
 #include "element.h"
-#include "generalbc.h"
+#include "generalboundarycondition.h"
 #include "dof.h"
-#include "loadtime.h"
+#include "loadtimefunction.h"
 #include "linesearch.h"
 #include "usrdefsub.h"
 #ifdef __PETSC_MODULE

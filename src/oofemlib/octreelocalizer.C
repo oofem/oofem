@@ -39,7 +39,7 @@
 #include "gausspnt.h"
 #include "dofmanager.h"
 #include "node.h"
-#include "conTable.h"
+#include "connectivitytable.h"
 #include "alist.h"
 #include "mathfem.h"
 #include "timer.h"

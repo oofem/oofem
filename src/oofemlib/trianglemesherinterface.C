@@ -33,7 +33,7 @@
  */
 
 #include "trianglemesherinterface.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
 

@@ -39,7 +39,7 @@
 #include "sparsemtrxtype.h"
 #include "topologydescription.h"
 #include "linsystsolvertype.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 
 ///@name Input fields for Stokes' Flow
 //@{

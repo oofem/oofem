@@ -70,7 +70,7 @@
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #include "compcol.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "engngm.h"
 #include "domain.h"
 #include "element.h"

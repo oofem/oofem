@@ -36,7 +36,7 @@
 #ifndef ilucomprowprecond_h
 #define ilucomprowprecond_h
 
-#include "flotarry.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "dyncomprow.h"
 #include "precond.h"

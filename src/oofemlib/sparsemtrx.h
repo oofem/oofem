@@ -36,8 +36,8 @@
 #define sparsemtrx_h
 
 #include "matrix.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "intarray.h"
 #include "equationid.h"
 #include "error.h"

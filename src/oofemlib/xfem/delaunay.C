@@ -33,7 +33,7 @@
  */
 
 #include "delaunay.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "alist.h"
 #include "geometry.h"

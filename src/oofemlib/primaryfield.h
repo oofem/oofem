@@ -37,7 +37,7 @@
 
 #include "field.h"
 #include "interface.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "equationid.h"
 #include "unknownnumberingscheme.h"
 #include "valuemodetype.h"

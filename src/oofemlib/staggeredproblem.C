@@ -35,7 +35,7 @@
 #include "staggeredproblem.h"
 #include "engngm.h"
 #include "timestep.h"
-#include "loadtime.h"
+#include "loadtimefunction.h"
 #include "metastep.h"
 #include "exportmodulemanager.h"
 #include "mathfem.h"

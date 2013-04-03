@@ -36,14 +36,14 @@
 #include "node.h"
 #include "particle.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "intarray.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "mathfem.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
  #include "oofegutils.h"
  #include "engngm.h"
 #endif

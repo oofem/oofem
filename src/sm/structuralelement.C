@@ -48,8 +48,8 @@
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
 #include "intarray.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "structuralnonlocalmaterialext.h"
 #include "nonlocmatstiffinterface.h"
 #include "mathfem.h"
@@ -57,7 +57,7 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 #endif
 
 

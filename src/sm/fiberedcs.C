@@ -38,7 +38,7 @@
 #include "material.h"
 #include "structuralmaterial.h"
 #include "structuralms.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "verbose.h"
 #include "contextioerr.h"
 

@@ -32,10 +32,10 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "generalbc.h"
+#include "generalboundarycondition.h"
 #include "valuemodetype.h"
 #include "bcvaltype.h"
-#include "loadtime.h"
+#include "loadtimefunction.h"
 #include "reinforcement.h"
 
 namespace oofem {

@@ -33,7 +33,7 @@
  */
 
 #include "linearedgeload.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "mathfem.h"
 
 namespace oofem {

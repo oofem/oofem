@@ -34,8 +34,8 @@
 
 #include "lspacebb.h"
 #include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 
 #ifdef __OOFEG
  #include "engngm.h"

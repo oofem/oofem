@@ -33,8 +33,8 @@
  */
 
 #include "inverseit.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "sparsemtrx.h"
 #include "mathfem.h"
 

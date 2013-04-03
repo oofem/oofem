@@ -33,8 +33,8 @@
  */
 
 #include "sparselinsystemnm.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "sparsemtrx.h"
 
 namespace oofem {

@@ -32,30 +32,33 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "nodload.h"
+#include "constantfunction.h"
 
 namespace oofem {
+
 IRResultType
-NodalLoad :: initializeFrom(InputRecord *ir)
+ConstantFunction :: initializeFrom(InputRecord *ir)
 {
+    //
+    // instanciates receiver according to input record
+    //
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    int value = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_NodalLoad_cstype);
-    coordSystemType = ( BL_CoordSystType ) value;
+    LoadTimeFunction :: initializeFrom(ir);
+    IR_GIVE_FIELD(ir, value, _IFT_LoadTimeFunction_ft);
 
-    return Load :: initializeFrom(ir);
+    return IRRT_OK;
 }
 
 
 int
-NodalLoad :: giveInputRecordString(std :: string &str, bool keyword)
+ConstantFunction :: giveInputRecordString(std :: string &str, bool keyword)
 {
     char buff [ 1024 ];
 
-    Load :: giveInputRecordString(str, keyword);
-    sprintf(buff, " cstype %d", ( int ) this->coordSystemType);
+    LoadTimeFunction :: giveInputRecordString(str, keyword);
+    sprintf(buff, " f(t) %e", this->value);
     str += buff;
 
     return 1;

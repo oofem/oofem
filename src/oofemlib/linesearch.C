@@ -34,7 +34,7 @@
 
 #include "linesearch.h"
 #include "timestep.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "mathfem.h"
 #include "nmstatus.h"
 

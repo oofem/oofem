@@ -38,7 +38,7 @@
 #include "node.h"
 #include "element.h"
 #include "datastream.h"
-#include "conTable.h"
+#include "connectivitytable.h"
 #include "spatiallocalizer.h"
 #include "geotoolbox.h"
 #include "fastmarchingmethod.h"

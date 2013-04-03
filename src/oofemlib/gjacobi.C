@@ -35,7 +35,7 @@
 
 #include "gjacobi.h"
 #include "mathfem.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "nmstatus.h"
 
 namespace oofem {

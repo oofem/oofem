@@ -40,7 +40,7 @@
 #include "refinedelement.h"
 #include "refinedmesh.h"
 #include "alist.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "statecountertype.h"
 
 ///@name Input fields for HuertaErrorEstimator

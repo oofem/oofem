@@ -35,7 +35,7 @@
 #ifndef feinterpol2d_h
 #define feinterpol2d_h
 
-#include "flotarry.h"
+#include "floatarray.h"
 
 #include "feinterpol.h"
 

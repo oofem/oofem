@@ -33,7 +33,7 @@
  */
 
 #include "crosssection.h"
-#include "dictionr.h"
+#include "dictionary.h"
 #include "gausspnt.h"
 #include "material.h"
 #include "contextioerr.h"

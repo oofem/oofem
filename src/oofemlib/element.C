@@ -37,8 +37,8 @@
 #include "integrationrule.h"
 #include "errorestimator.h"
 #include "intarray.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "primaryfield.h"
 #include "verbose.h"
 #include "entityrenumberingscheme.h"
@@ -52,7 +52,7 @@
 #include "feinterpol1d.h"
 #include "feinterpol2d.h"
 #include "feinterpol3d.h"
-#include "loadtime.h"
+#include "loadtimefunction.h"
 
 #include <cstdio>
 

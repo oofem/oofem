@@ -36,7 +36,7 @@
 #define tr1_2d_supg2_h
 
 #include "tr1_2d_supg.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"

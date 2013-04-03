@@ -47,7 +47,7 @@
 #include "engngm.h"
 #include "xfemmanager.h"
 #include "load.h"
-#include "loadtime.h"
+#include "loadtimefunction.h"
 #include "material.h"
 #include "gaussintegrationrule.h"
 

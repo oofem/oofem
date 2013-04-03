@@ -32,42 +32,46 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef constant_h
-#define constant_h
+#ifndef piecewiselinfunction_h
+#define piecewiselinfunction_h
 
-#include "loadtime.h"
+#include "floatarray.h"
+#include "loadtimefunction.h"
+
+///@name Input fields for PiecewiseLinFunction
+//@{
+#define _IFT_PiecewiseLinFunction_npoints "npoints"
+#define _IFT_PiecewiseLinFunction_t "t"
+#define _IFT_PiecewiseLinFunction_ft "f(t)"
+#define _IFT_PiecewiseLinFunction_dataFile "datafile"
+//@}
 
 namespace oofem {
 
 /**
- * Class implementing time function that is constant in time; @f$ f(t) = C @f$.
+ * This class implements a piecewise linear function.
+ * The function is defined by 'numberOfPoints' points. 'dates' and 'values'
+ * store respectively the abscissas (t) and the values (f(t)) of the points
  */
-class ConstantFunction : public LoadTimeFunction
+class PiecewiseLinFunction : public LoadTimeFunction
 {
-private:
-    /// Value of receiver.
-    double value;
+protected:
+    FloatArray dates;
+    FloatArray values;
 
 public:
-    /**
-     * Constructor. Creates constant load time function with given number, belonging to given domain.
-     * @param i Load time function number.
-     * @param d Domain to which new object will belongs.
-     */
-    ConstantFunction(int i, Domain *d) : LoadTimeFunction(i, d) { value = 0; }
-    /// Destructor.
-    virtual ~ConstantFunction() { }
-
-    /// @return Value of receiver.
-    double giveValue() { return value; }
-
-    virtual double __at(double t) { return this->giveValue(); }
+    PiecewiseLinFunction(int i, Domain *d);
+    virtual ~PiecewiseLinFunction() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual classType giveClassID() const { return PiecewiceClass; }
+    virtual const char *giveClassName() const { return "PiecewiceClass"; }
+    virtual const char *giveInputRecordName() const { return "PiecewiseLinFunction"; }
 
-    virtual classType giveClassID() const { return ConstantFunctionClass; }
-    virtual const char *giveClassName() const { return "ConstantFunction"; }
+    virtual double __at(double);
+    virtual double __derAt(double);
+    virtual double __accelAt(double) { return 0.; }
 };
 } // end namespace oofem
-#endif // constant_h
+#endif // piecewiselinfunction_h

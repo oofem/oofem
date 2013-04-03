@@ -33,8 +33,8 @@
  */
 
 #include "inputrecord.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "mathfem.h"
 #include "iga.h"
 #include "feitspline.h"

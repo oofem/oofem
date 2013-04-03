@@ -32,8 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef deadwght_h
-#define deadwght_h
+#ifndef deadweight_h
+#define deadweight_h
 
 #include "bodyload.h"
 #include "bcgeomtype.h"
@@ -73,10 +73,4 @@ public:
     virtual const char *giveInputRecordName() const { return "DeadWeight"; }
 };
 } // end namespace oofem
-#endif // deadwght_h
-
-
-
-
-
-
+#endif // deadweight_h

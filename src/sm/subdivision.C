@@ -42,12 +42,12 @@
 #include "masterdof.h"
 #include "simpleslavedof.h"
 #include "nonlocalbarrier.h"
-#include "initial.h"
+#include "initialcondition.h"
 #include "usrdefsub.h"
 #include "oofemtxtinputrecord.h"
 #include "outputmanager.h"
 #include "crosssection.h"
-#include "loadtime.h"
+#include "loadtimefunction.h"
 #include "timer.h"
 
 #include <queue>

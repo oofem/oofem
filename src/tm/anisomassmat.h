@@ -36,9 +36,9 @@
 #define anisomassmat_h
 
 #include "transportmaterial.h"
-#include "dictionr.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "dictionary.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 ///@name Input fields for AnisotropicMassTransferMaterial
 //@{

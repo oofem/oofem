@@ -34,8 +34,8 @@
 #ifndef druckerpragerplasticitysm_h
 #define druckerpragerplasticitysm_h
 
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 #include "structuralms.h"
 #include "strainvector.h"

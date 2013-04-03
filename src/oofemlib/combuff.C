@@ -41,8 +41,8 @@
 #include "compiler.h"
 #include "combuff.h"
 #include "intarray.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "error.h"
 
 namespace oofem {

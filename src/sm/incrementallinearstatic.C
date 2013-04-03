@@ -36,7 +36,7 @@
 #include "timestep.h"
 #include "dof.h"
 #include "sparsemtrx.h"
-#include "dictionr.h"
+#include "dictionary.h"
 #include "verbose.h"
 #include "usrdefsub.h"
 #include "datastream.h"

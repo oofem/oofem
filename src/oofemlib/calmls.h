@@ -40,7 +40,7 @@
 
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "dofiditem.h"
 

@@ -34,7 +34,7 @@
 
 #include "trabbonenl.h"
 #include "gausspnt.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "mathfem.h"
 #include "nonlocalmaterialext.h"
 

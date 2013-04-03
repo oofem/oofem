@@ -58,7 +58,7 @@
 #include "sparselinearsystemsolverclassfactory.h"
 #include "errorestimatorclassfactory.h"
 
-#include "initial.h"
+#include "initialcondition.h"
 
 namespace oofem {
 

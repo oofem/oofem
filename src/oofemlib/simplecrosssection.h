@@ -37,8 +37,8 @@
 
 #include "structuralcrosssection.h"
 #include "structuralmaterial.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 ///@name Input fields for SimpleCrossSection
 //@{

@@ -33,8 +33,8 @@
  */
 
 #include "fei2dquadbiquad.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 
 namespace oofem {
 

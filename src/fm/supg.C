@@ -38,7 +38,7 @@
 #include "element.h"
 #include "dofmanager.h"
 #include "dof.h"
-#include "initial.h"
+#include "initialcondition.h"
 #include "maskedprimaryfield.h"
 #include "verbose.h"
 #include "supgelement.h"
@@ -48,7 +48,7 @@
 #include "leplic.h"
 #include "levelsetpcs.h"
 #include "datastream.h"
-#include "loadtime.h"
+#include "loadtimefunction.h"
 #include "contextioerr.h"
 #ifdef TIME_REPORT
  #include "timer.h"

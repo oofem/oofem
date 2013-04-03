@@ -39,7 +39,7 @@
 #ifdef __OOFEG
  #include "node.h"
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 #endif
 
 

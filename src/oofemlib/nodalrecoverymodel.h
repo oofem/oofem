@@ -37,7 +37,7 @@
 
 #include "tdictionary.h"
 #include "intarray.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "alist.h"
 #include "interface.h"
 #include "internalstatetype.h"

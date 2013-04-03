@@ -36,7 +36,7 @@
 #define enrichmentdomain_h
 
 #include "domain.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "node.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"

@@ -36,7 +36,7 @@
 #define freeminterface_h
 
 #include "mesherinterface.h"
-#include "flotarry.h"
+#include "floatarray.h"
 
 namespace oofem {
 class TimeStep;

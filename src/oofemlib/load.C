@@ -35,7 +35,7 @@
 #include "load.h"
 #include "verbose.h"
 #include "timestep.h"
-#include "loadtime.h"
+#include "loadtimefunction.h"
 
 namespace oofem {
 Load :: Load(int i, Domain *aDomain) :

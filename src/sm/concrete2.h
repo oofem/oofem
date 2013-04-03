@@ -36,11 +36,11 @@
 #define concrete2_h
 
 #include "femcmpnn.h"
-#include "dictionr.h"
+#include "dictionary.h"
 #include "material.h"
 #include "deformationtheorymaterial.h"
 #include "isolinearelasticmaterial.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "structuralms.h"
 
 ///@name Input fields for Concrete2

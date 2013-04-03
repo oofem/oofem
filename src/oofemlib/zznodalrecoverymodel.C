@@ -40,6 +40,7 @@
 #include "integrationrule.h"
 #include "feinterpol.h"
 #include "mathfem.h"
+#include "feinterpol.h"
 #include "error.h"
 #include <sstream>
 #include <set>

@@ -37,7 +37,7 @@
 #define masterdof_h
 
 #include "dof.h"
-#include "dictionr.h"
+#include "dictionary.h"
 #include "dofmanager.h"
 
 #ifdef __PARALLEL_MODE

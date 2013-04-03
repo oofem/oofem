@@ -9,8 +9,8 @@
 #define hellmat_h
 
 // oofem includes
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "structuralms.h"
 #include "structuralmaterial.h"
 #include "isolinearelasticmaterial.h"

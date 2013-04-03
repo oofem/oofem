@@ -36,8 +36,8 @@
 #define structuralmaterial_h
 
 #include "material.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "matconst.h"
 #include "matstatus.h"
 #include "stressstrainprincmode.h"

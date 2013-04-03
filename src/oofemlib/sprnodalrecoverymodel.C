@@ -36,7 +36,7 @@
 #include "timestep.h"
 #include "element.h"
 #include "node.h"
-#include "conTable.h"
+#include "connectivitytable.h"
 #include "integrationrule.h"
 #include "gausspnt.h"
 

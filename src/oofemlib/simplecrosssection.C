@@ -35,7 +35,7 @@
 #include "simplecrosssection.h"
 #include "gausspnt.h"
 #include "structuralmaterial.h"
-#include "flotarry.h"
+#include "floatarray.h"
 
 namespace oofem {
 void

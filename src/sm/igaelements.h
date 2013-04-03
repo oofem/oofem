@@ -41,8 +41,8 @@
 #include "feibspline.h"
 #include "feinurbs.h"
 #include "feitspline.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "matresponsemode.h"
 #include "mathfem.h"
 

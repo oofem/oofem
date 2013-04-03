@@ -37,7 +37,7 @@
 #include "timestep.h"
 #include "geotoolbox.h"
 #include "node.h"
-#include "conTable.h"
+#include "connectivitytable.h"
 #include "datastream.h"
 #include "spatiallocalizer.h"
 #include "contextioerr.h"

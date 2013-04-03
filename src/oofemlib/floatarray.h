@@ -38,8 +38,8 @@
  * PhD Thesis, EPFL, Lausanne, 1992.
  */
 
-#ifndef flotarry_h
-#define flotarry_h
+#ifndef floatarray_h
+#define floatarray_h
 
 #include "contextioresulttype.h"
 #include "contextmode.h"
@@ -440,4 +440,4 @@ double norm(const FloatArray &x);
 double dot(const FloatArray &x, const FloatArray &y);
 #endif
 } // end namespace oofem
-#endif // flotarry_h
+#endif // floatarray_h

@@ -36,7 +36,7 @@
 #define fastmarchingmethod_h
 
 #include "classtype.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "mathfem.h"
 
 #include <vector>

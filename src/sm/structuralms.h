@@ -36,7 +36,7 @@
 #define structuralms_h
 
 #include "matstatus.h"
-#include "flotarry.h"
+#include "floatarray.h"
 
 namespace oofem {
 

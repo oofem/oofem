@@ -39,7 +39,7 @@
 #include "timer.h"
 #include "mathfem.h"
 #include "timestep.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "usrdefsub.h"
 #include "element.h"
 

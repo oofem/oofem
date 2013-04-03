@@ -34,7 +34,7 @@
 
 #include "hangingnode.h"
 #include "slavedof.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "element.h"
 #include "feinterpol.h"

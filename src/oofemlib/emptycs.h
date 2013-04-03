@@ -38,8 +38,8 @@
 #include "crosssection.h"
 #include "material.h"
 #include "gausspnt.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 namespace oofem {
 /**

@@ -35,6 +35,6 @@
 #include "structeigenstrainload.h"
 #include "element.h"
 #include "timestep.h"
-#include "loadtime.h"
+#include "loadtimefunction.h"
 #include "material.h"
-#include "flotarry.h"
+#include "floatarray.h"

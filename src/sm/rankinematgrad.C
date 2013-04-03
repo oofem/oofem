@@ -35,8 +35,8 @@
 #include "rankinematgrad.h"
 #include "stressvector.h"
 #include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "error.h"
 
 namespace oofem {

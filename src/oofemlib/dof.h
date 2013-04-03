@@ -37,7 +37,7 @@
 
 #include <cstdio>
 
-#include "flotarry.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "classtype.h"
 #include "unknowntype.h"

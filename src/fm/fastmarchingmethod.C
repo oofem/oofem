@@ -37,7 +37,7 @@
 #include "mathfem.h"
 #include "node.h"
 #include "element.h"
-#include "conTable.h"
+#include "connectivitytable.h"
 
 #include <cstdlib>
 

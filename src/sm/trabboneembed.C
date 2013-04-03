@@ -33,8 +33,8 @@
  */
 
 #include "trabboneembed.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "mathfem.h"
 #include "contextioerr.h"
 

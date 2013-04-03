@@ -32,53 +32,71 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "boundary.h"
-#include "timestep.h"
-#include "loadtime.h"
-#include "verbose.h"
+#include "initialcondition.h"
+#include "cltypes.h"
 
 namespace oofem {
-double BoundaryCondition :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
-// Returns the value at stepN of the prescribed value of the kinematic
-// unknown 'u'. Returns 0 if 'u' has no prescribed value.
-{
-    double factor;
 
-    factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
-    return prescribedValue * factor;
+double InitialCondition :: give(ValueModeType type)
+// Returns the prescribed value of the kinematic unknown 'u'.
+{
+    char u;
+    u =  cltypesGiveUnknownTypeModeKey(type);
+    if ( this->hasConditionOn(u) ) {
+        return initialValueDictionary.at(u);
+    } else {
+        return 0.;
+    }
+}
+
+
+int InitialCondition :: hasConditionOn(int u)
+// Returns True if the receiver submits the unknown 'u' to an initial
+// condition, else returns False.
+{
+    return  ( initialValueDictionary.includes(u) );
+}
+
+
+int InitialCondition :: hasConditionOn(ValueModeType type)
+// Returns True if the receiver submits the unknown 'u' to an initial
+// condition, else returns False.
+{
+    char u = cltypesGiveUnknownTypeModeKey(type);
+    return  ( initialValueDictionary.includes(u) );
+}
+
+void InitialCondition :: printYourself()
+// Prints the receiver on screen.
+{
+    printf("Initial condition %d\ninitial values :\n", number);
+    initialValueDictionary.printYourself();
 }
 
 
 IRResultType
-BoundaryCondition :: initializeFrom(InputRecord *ir)
+InitialCondition :: initializeFrom(InputRecord *ir)
 // Sets up the dictionary where the receiver stores the conditions it
 // imposes.
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    GeneralBoundaryCondition :: initializeFrom(ir);
+    IR_GIVE_FIELD(ir, initialValueDictionary, _IFT_InitialCondition_conditions);
 
-    if ( ir->hasField(_IFT_BoundaryCondition_PrescribedValue) ) {
-        IR_GIVE_FIELD(ir, prescribedValue, _IFT_BoundaryCondition_PrescribedValue);
-    } else {
-        IR_GIVE_FIELD(ir, prescribedValue, _IFT_BoundaryCondition_PrescribedValue_d);
-    }
+    int val = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_GeneralBoundaryCondition_valType);
+    valType = ( bcValType ) val;
 
     return IRRT_OK;
 }
 
 
-
-int
-BoundaryCondition :: giveInputRecordString(std :: string &str, bool keyword)
+void
+InitialCondition :: scale(ValueModeType type, double s)
 {
-    char buff [ 1024 ];
-
-    GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
-    sprintf(buff, " prescribedvalue %e", this->prescribedValue);
-    str += buff;
-
-    return 1;
+    if ( this->hasConditionOn(type) ) {
+        initialValueDictionary.at(type) *= s;
+    }
 }
 } // end namespace oofem

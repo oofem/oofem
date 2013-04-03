@@ -32,7 +32,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "dictionr.h"
+#include "dictionary.h"
 #include "logger.h"
 #include "datastream.h"
 #include "contextioerr.h"

@@ -36,8 +36,8 @@
 #define rvestokesflow_h
 
 #include "rvematerial.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "transportmaterial.h"
 
 namespace oofem {

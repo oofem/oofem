@@ -37,8 +37,8 @@
 
 #include "structuralmaterial.h"
 #include "structuralms.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 ///@name Input fields for AbaqusUserMaterial
 //@{

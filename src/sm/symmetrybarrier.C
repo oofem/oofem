@@ -34,7 +34,7 @@
 
 #include "symmetrybarrier.h"
 #include "intarray.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "mathfem.h"
 
 namespace oofem {

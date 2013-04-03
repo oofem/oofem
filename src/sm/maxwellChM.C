@@ -34,8 +34,8 @@
 
 #include "mathfem.h"
 #include "maxwellChM.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "gausspnt.h"
 #include "structuralcrosssection.h"
 #include "timestep.h"

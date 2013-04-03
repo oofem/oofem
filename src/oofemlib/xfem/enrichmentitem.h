@@ -37,7 +37,7 @@
 
 #include "femcmpnn.h"
 #include "domain.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "enrichmentfunction.h"
 #include "layeredcrosssection.h"
 #include "enrichmentdomain.h"

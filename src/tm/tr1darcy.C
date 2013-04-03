@@ -40,7 +40,7 @@
 #include "gaussintegrationrule.h"
 #include "gausspnt.h"
 #include "bcgeomtype.h"
-#include "generalbc.h"
+#include "generalboundarycondition.h"
 #include "load.h"
 #include "boundaryload.h"
 #include "mathfem.h"

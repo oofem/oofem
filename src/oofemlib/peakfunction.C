@@ -32,35 +32,32 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "constant.h"
+#include "peakfunction.h"
+#include "mathfem.h"
 
 namespace oofem {
-
-IRResultType
-ConstantFunction :: initializeFrom(InputRecord *ir)
+double PeakFunction :: __at(double time)
+// Returns the value of the receiver at time 'time'.
 {
-    //
-    // instanciates receiver according to input record
-    //
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    double precision = 1e-6;
 
-    LoadTimeFunction :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, value, _IFT_LoadTimeFunction_ft);
-
-    return IRRT_OK;
+    if ( fabs(t - time) < precision ) {
+        return value;
+    } else {
+        return 0.;
+    }
 }
 
-
-int
-ConstantFunction :: giveInputRecordString(std :: string &str, bool keyword)
+IRResultType
+PeakFunction :: initializeFrom(InputRecord *ir)
 {
-    char buff [ 1024 ];
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    LoadTimeFunction :: giveInputRecordString(str, keyword);
-    sprintf(buff, " f(t) %e", this->value);
-    str += buff;
+    LoadTimeFunction :: initializeFrom(ir);
+    IR_GIVE_FIELD(ir, t, _IFT_PeakFunction_t);
+    IR_GIVE_FIELD(ir, value, _IFT_PeakFunction_ft);
 
-    return 1;
+    return IRRT_OK;
 }
 } // end namespace oofem

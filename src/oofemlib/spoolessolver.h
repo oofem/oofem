@@ -36,7 +36,7 @@
 
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "spoolesinterface.h"
 
 ///@name Input fields for SpoolesSolver

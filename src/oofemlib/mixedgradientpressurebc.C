@@ -33,7 +33,7 @@
  */
 
 #include "mixedgradientpressurebc.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "engngm.h"
 #ifdef __FM_MODULE
 #include "../fm/line2boundaryelement.h"

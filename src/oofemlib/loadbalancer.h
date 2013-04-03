@@ -38,7 +38,7 @@
  #include "inputrecord.h"
  #include "interface.h"
  #include "alist.h"
- #include "flotarry.h"
+ #include "floatarray.h"
  #include "intarray.h"
 
 #define __LB_DEBUG

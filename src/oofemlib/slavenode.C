@@ -34,7 +34,7 @@
 
 #include "slavenode.h"
 #include "slavedof.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "intarray.h"
 
 namespace oofem {

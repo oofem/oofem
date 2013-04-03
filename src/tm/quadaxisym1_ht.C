@@ -35,12 +35,12 @@
 #include "quadaxisym1_ht.h"
 #include "node.h"
 #include "gausspnt.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "mathfem.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 #endif
 
 namespace oofem {

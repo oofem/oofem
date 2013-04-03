@@ -33,7 +33,7 @@
  */
 
 #include "isomoisturemat.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "gausspnt.h"
 
 namespace oofem {

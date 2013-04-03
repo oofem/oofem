@@ -33,9 +33,9 @@
  */
 
 #include "springelement.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "intarray.h"
-#include "flotarry.h"
+#include "floatarray.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

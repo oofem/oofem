@@ -32,46 +32,43 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef piecewis_h
-#define piecewis_h
+#ifndef peakfunction_h
+#define peakfunction_h
 
-#include "flotarry.h"
-#include "loadtime.h"
+#include "loadtimefunction.h"
 
-///@name Input fields for PiecewiseLinFunction
+///@name Input fields for PeakFunction
 //@{
-#define _IFT_PiecewiseLinFunction_npoints "npoints"
-#define _IFT_PiecewiseLinFunction_t "t"
-#define _IFT_PiecewiseLinFunction_ft "f(t)"
-#define _IFT_PiecewiseLinFunction_dataFile "datafile"
+#define _IFT_PeakFunction_t "t"
+#define _IFT_PeakFunction_ft "f(t)"
 //@}
 
 namespace oofem {
-
 /**
- * This class implements a piecewise linear function.
- * The function is defined by 'numberOfPoints' points. 'dates' and 'values'
- * store respectively the abscissas (t) and the values (f(t)) of the points
+ * This class implements a function that is 0 everywhere, except in a single
+ * point.
  */
-class PiecewiseLinFunction : public LoadTimeFunction
+class PeakFunction : public LoadTimeFunction
 {
-protected:
-    FloatArray dates;
-    FloatArray values;
+private:
+    /// Specific time when function is nonzero.
+    double t;
+    /// Value of function at nonzero time.
+    double value;
 
 public:
-    PiecewiseLinFunction(int i, Domain *d);
-    virtual ~PiecewiseLinFunction() { }
+    PeakFunction(int i, Domain *d) : LoadTimeFunction(i, d)
+    {
+        t = 0.0;
+        value = 0.0;
+    }
+    virtual ~PeakFunction() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
-    virtual classType giveClassID() const { return PiecewiceClass; }
-    virtual const char *giveClassName() const { return "PiecewiceClass"; }
-    virtual const char *giveInputRecordName() const { return "PiecewiseLinFunction"; }
+    virtual classType giveClassID() const { return PeakFunctionClass; }
+    virtual const char *giveClassName() const { return "PeakFunction"; }
 
-    virtual double __at(double);
-    virtual double __derAt(double);
-    virtual double __accelAt(double) { return 0.; }
+    virtual double  __at(double);
 };
 } // end namespace oofem
-#endif // piecewis_h
+#endif // peakfunction_h

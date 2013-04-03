@@ -39,9 +39,9 @@
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
 #include "structuralms.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "intarray.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "timestep.h"
 #include "contextioerr.h"
 #include "mathfem.h"
@@ -50,7 +50,7 @@
  #include "engngm.h"
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
  #include "util.h"
 #endif
 

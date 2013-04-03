@@ -32,7 +32,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "piecewis.h"
+#include "piecewiselinfunction.h"
 #include "mathfem.h"
 
 #include <fstream>

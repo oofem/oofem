@@ -37,7 +37,7 @@
 #include "simplecrosssection.h"
 #include "material.h"
 #include "structuralms.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "gausspnt.h"
 
 namespace oofem {

@@ -39,7 +39,7 @@
 #include "engngm.h"
 #include "element.h"
 #include "dofmanager.h"
-#include "conTable.h"
+#include "connectivitytable.h"
 #include "error.h"
 #include "parallel.h"
 #include "processcomm.h"

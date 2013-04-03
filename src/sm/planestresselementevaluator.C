@@ -33,8 +33,8 @@
  */
 
 #include "planestresselementevaluator.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "domain.h"
 #include "node.h"
 #include "element.h"

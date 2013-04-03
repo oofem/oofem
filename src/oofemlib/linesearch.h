@@ -38,7 +38,7 @@
 
 #include "nummet.h"
 #include "nmstatus.h"
-#include "flotarry.h"
+#include "floatarray.h"
 
 ///@name Input fields for LineSearchNM
 //@{

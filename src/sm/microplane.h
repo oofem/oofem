@@ -37,7 +37,7 @@
 
 #include "gausspnt.h"
 #include "microplanematerial.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "element.h"
 #include "matstatus.h"
 

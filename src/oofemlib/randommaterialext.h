@@ -36,7 +36,7 @@
 #define randommaterialext_h
 
 #include "matstatus.h"
-#include "dictionr.h"
+#include "dictionary.h"
 #include "interface.h"
 
 ///@name Input fields for RandomMaterialExt

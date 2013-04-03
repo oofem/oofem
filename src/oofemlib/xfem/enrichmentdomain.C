@@ -37,7 +37,7 @@
 #include "enrichmentdomain.h"
 #include "element.h"
 #include "dofmanager.h"
-#include "conTable.h"
+#include "connectivitytable.h"
 #include <algorithm>
 
 namespace oofem {

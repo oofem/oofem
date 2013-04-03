@@ -34,8 +34,8 @@
 
 #include "rcm2.h"
 #include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "structuralcrosssection.h"
 #include "contextioerr.h"
 #include "mathfem.h"

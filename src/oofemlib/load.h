@@ -35,10 +35,10 @@
 #ifndef load_h
 #define load_h
 
-#include "generalbc.h"
+#include "generalboundarycondition.h"
 #include "domain.h"
-#include "flotarry.h"
-#include "dictionr.h"
+#include "floatarray.h"
+#include "dictionary.h"
 #include "valuemodetype.h"
 
 ///@name Input fields for Load

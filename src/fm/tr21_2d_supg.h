@@ -37,8 +37,8 @@
 
 #include "supgelement2.h"
 #include "intarray.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "fei2dtrquad.h"
 #include "fei2dtrlin.h"
 

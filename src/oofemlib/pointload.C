@@ -33,8 +33,8 @@
  */
 
 #include "pointload.h"
-#include "loadtime.h"
-#include "flotarry.h"
+#include "loadtimefunction.h"
+#include "floatarray.h"
 
 namespace oofem {
 void

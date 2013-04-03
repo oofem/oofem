@@ -34,8 +34,8 @@
 
 #include "m4.h"
 #include "microplane.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "mathfem.h"
 
 namespace oofem {

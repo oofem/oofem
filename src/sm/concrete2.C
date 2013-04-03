@@ -35,7 +35,7 @@
 #include "concrete2.h"
 #include "material.h"
 #include "domain.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "gausspnt.h"
 #include "mathfem.h"
 #include "engngm.h"

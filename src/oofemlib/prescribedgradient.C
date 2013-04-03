@@ -37,9 +37,9 @@
 #include "dofmanager.h"
 #include "dof.h"
 #include "valuemodetype.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
-#include "loadtime.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
+#include "loadtimefunction.h"
 #include "engngm.h"
 #include "node.h"
 #include "usrdefsub.h" // For sparse matrix creation.

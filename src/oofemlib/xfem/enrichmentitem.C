@@ -33,12 +33,12 @@
  */
 
 #include "xfemmanager.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "enrichmentitem.h"
 #include "element.h"
 #include "enrichmentfunction.h"
 #include "cltypes.h"
-#include "conTable.h"
+#include "connectivitytable.h"
 #include "oofem_limits.h"
 #include "usrdefsub.h"
 

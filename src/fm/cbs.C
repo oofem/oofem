@@ -38,7 +38,7 @@
 #include "element.h"
 #include "dofmanager.h"
 #include "dof.h"
-#include "initial.h"
+#include "initialcondition.h"
 #include "maskedprimaryfield.h"
 
 #include "verbose.h"

@@ -41,7 +41,7 @@
 
 #ifdef __SLEPC_MODULE
  #include "engngm.h"
- #include "flotarry.h"
+ #include "floatarray.h"
  #include "verbose.h"
 
  #ifdef TIME_REPORT

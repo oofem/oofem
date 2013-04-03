@@ -39,8 +39,8 @@
 
  #include "sparselinsystemnm.h"
  #include "sparsemtrx.h"
- #include "flotarry.h"
- #include "flotmtrx.h"
+ #include "floatarray.h"
+ #include "floatmatrix.h"
  #include "processcomm.h"
  #include "feticommunicator.h"
  #include "engngm.h"

@@ -34,8 +34,8 @@
 
 #include "eigenvaluedynamic.h"
 #include "timestep.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "exportmodulemanager.h"
 #include "verbose.h"
 #include "usrdefsub.h"

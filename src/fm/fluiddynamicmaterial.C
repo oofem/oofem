@@ -34,7 +34,7 @@
 
 #include "fluiddynamicmaterial.h"
 #include "gausspnt.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "contextioerr.h"
 
 namespace oofem {

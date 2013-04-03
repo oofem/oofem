@@ -32,8 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef nodload_h
-#define nodload_h
+#ifndef nodalload_h
+#define nodalload_h
 
 #include "load.h"
 #include "bcgeomtype.h"
@@ -106,4 +106,4 @@ public:
     classType giveClassID() const { return NodalLoadClass; }
 };
 } // end namespace oofem
-#endif // nodload_h
+#endif // nodalload_h

@@ -35,8 +35,8 @@
 #ifndef initial_h
 #define initial_h
 
-#include "generalbc.h"
-#include "dictionr.h"
+#include "generalboundarycondition.h"
+#include "dictionary.h"
 
 #include "classtype.h"
 #include "bcvaltype.h"

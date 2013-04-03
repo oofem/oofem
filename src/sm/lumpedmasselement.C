@@ -34,8 +34,8 @@
 
 #include "lumpedmasselement.h"
 #include "dofmanager.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 
 #ifdef __OOFEG

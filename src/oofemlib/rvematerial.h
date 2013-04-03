@@ -39,8 +39,8 @@
 #include <cstdlib>
 
 #include "material.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "oofem_limits.h"
 
 ///@name Input fields for RVEMaterial

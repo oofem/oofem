@@ -36,7 +36,7 @@
 #define nlisomoisturemat_h
 
 #include "isomoisturemat.h"
-#include "flotarry.h"
+#include "floatarray.h"
 
 ///@name Input fields for NlIsoMoistureMaterial
 //@{

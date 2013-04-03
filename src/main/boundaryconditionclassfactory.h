@@ -32,9 +32,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "generalbc.h"
-#include "deadwght.h"
-#include "nodload.h"
+#include "generalboundarycondition.h"
+#include "deadweight.h"
+#include "nodalload.h"
 #include "linearedgeload.h"
 #include "constantedgeload.h"
 #include "constantsurfaceload.h"

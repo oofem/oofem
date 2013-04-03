@@ -34,8 +34,8 @@
 
 #include "druckerpragercutmat.h"
 #include "isolinearelasticmaterial.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "gausspnt.h"
 #include "stressvector.h"
 #include "strainvector.h"

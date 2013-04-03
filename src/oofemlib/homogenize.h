@@ -35,8 +35,8 @@
 #ifndef homogenize_h
 #define homogenize_h
 
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "error.h"
 
 namespace oofem {
