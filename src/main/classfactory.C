@@ -168,94 +168,54 @@ ClassFactory :: ClassFactory() {
 #define REGISTER_CLASS(_class, name, id) \
     rfgIdList [ id ] = rfgCreator< _class >;
 #include "randomfieldgeneratorclassfactory.h"
+
+#undef REGISTER_CLASS
+#define REGISTER_CLASS(_class, id) \
+    sparseMtrxList [ id ] = sparseMtrxCreator< _class >;
+#include "sparsemtrxclassfactory.h"
+
+#undef REGISTER_CLASS
+#define REGISTER_CLASS(_class, id) \
+    dofList [ id ] = dofCreator< _class >;
+#include "dofclassfactory.h"
+
+#undef REGISTER_CLASS
+#define REGISTER_CLASS(_class, id) \
+    errEstList [ id ] = errEstCreator< _class >;
+#include "errorestimatorclassfactory.h"
+
+#undef REGISTER_CLASS
+#define REGISTER_CLASS(_class, id) \
+    sparseLinSolList [ id ] = sparseLinSolCreator< _class >;
+#include "sparselinearsystemsolverclassfactory.h"
 }
 
 SparseMtrx *ClassFactory :: createSparseMtrx(SparseMtrxType type)
 {
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, id)  \
-case id:                            \
-    answer = new _class();          \
-    break;
-#undef  REGISTER_CLASS_1
-#define REGISTER_CLASS_1(_class, id, type)  \
-case id:                                    \
-    answer = new _class(type);              \
-    break;
-    SparseMtrx *answer = NULL;
-    switch ( type ) {
-#include "sparsemtrxclassfactory.h"
-    default:
-        OOFEM_ERROR("ClassFactory::createSparseMtrx: Unknown mtrx type\n");
-        answer = NULL;
-    }
-
-    return answer;
+    return ( sparseMtrxList.count ( type ) == 1 ) ? sparseMtrxList [ type ] () : NULL;
 }
 
 Dof *ClassFactory :: createDof(dofType type, int num, DofManager* dman)
 {
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, id)  \
-case id:                            \
-  answer = new _class(num, dman);   \
-    break;
-
-    Dof *answer = NULL;
-    switch ( type ) {
-#include "dofclassfactory.h"
-    default:
-        OOFEM_ERROR("ClassFactory::createDof: Unknown DOF type\n");
-        answer = NULL;
-    }
-
-    return answer;
+    return ( dofList.count ( type ) == 1 ) ? dofList [ type ] (num, dman) : NULL;
 }
 
 SparseLinearSystemNM *ClassFactory :: createSparseLinSolver(LinSystSolverType type, Domain *d, EngngModel *m)
 {
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, id)  \
-case id:                            \
-  answer = new _class(d, m);   \
-    break;
-
-    SparseLinearSystemNM *answer = NULL;
-    switch ( type ) {
-#include "sparselinearsystemsolverclassfactory.h"
-    default:
-        OOFEM_ERROR("ClassFactory::createSparseLinSolver: Unknown type\n");
-        answer = NULL;
-    }
-
-    return answer;
+    return ( sparseLinSolList.count ( type ) == 1 ) ? sparseLinSolList [ type ] (d, m) : NULL;
 }
 
 ErrorEstimator * ClassFactory :: createErrorEstimator(ErrorEstimatorType type, int num, Domain *d)
 {
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, id)  \
-case id:                            \
-  answer = new _class(num, d);      \
-    break;
-
-    ErrorEstimator *answer = NULL;
-    switch ( type ) {
-#include "errorestimatorclassfactory.h"
-    default:
-        OOFEM_ERROR("ClassFactory::createErrorEstimator: Unknown type\n");
-        answer = NULL;
-    }
-
-    return answer;
+    return ( errEstList.count ( type ) == 1 ) ? errEstList [ type ] (num, d) : NULL;
 }
 
 InitialCondition * ClassFactory::createInitialCondition(classType type, int num, Domain *d)
 {
+    ///@todo Is this even relevant to have here in the class factory? There is only one type available / Mikael
     if (type == InitialConditionClass) {
         return new InitialCondition(num, d);
     } else {
-        OOFEM_ERROR("ClassFactory::createInitialCondition: Unknown type\n");
         return NULL;
     }
 }

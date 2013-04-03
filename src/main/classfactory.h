@@ -74,8 +74,11 @@ template< typename T > EngngModel *engngCreator(int n, EngngModel *m) { return (
 template< typename T > LoadTimeFunction *ltfCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > NonlocalBarrier *nlbCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > RandomFieldGenerator *rfgCreator(int n, Domain *d) { return new T(n, d); }
-//template < typename T > SparseMatrix* sparseMtrxCreator() { return new T(); }
-//template < typename T > SparseMatrix* sparseMtrxCreator(DSSMatrix::dssType t) { return new T(t); }
+
+template< typename T > SparseMtrx* sparseMtrxCreator() { return new T(); }
+template< typename T > SparseLinearSystemNM* sparseLinSolCreator(Domain *d, EngngModel *m) { return new T(d, m); }
+template< typename T > Dof* dofCreator(int n, DofManager *dman) { return new T(n, dman); }
+template< typename T > ErrorEstimator* errEstCreator(int n, Domain *d) { return new T(n, d); }
 
 /**
  * Class Factory allows to register terminal oofem classes, based on their membership
@@ -127,6 +130,16 @@ protected:
     std :: map < std :: string, RandomFieldGenerator * ( * )(int, Domain *), CaseComp > rfgNameList;
     /// Associative container containing random field generator creators with class id as key.
     std :: map < classType, RandomFieldGenerator * ( * )(int, Domain *) > rfgIdList;
+
+    // Internal structures (accessed by hard-coded enum values)
+    /// Associative container containing sparse matrix creators
+    std :: map < SparseMtrxType, SparseMtrx * ( * )() > sparseMtrxList;
+    /// Associative container containing sparse matrix creators
+    std :: map < dofType, Dof * ( * )(int, DofManager *) > dofList;
+    /// Associative container containing sparse matrix creators
+    std :: map < ErrorEstimatorType, ErrorEstimator * ( * )(int, Domain *) > errEstList;
+    /// Associative container containing sparse matrix creators
+    std :: map < LinSystSolverType, SparseLinearSystemNM * ( * )(Domain *, EngngModel *) > sparseLinSolList;
 
 public:
     /// Constructor, registers all classes
