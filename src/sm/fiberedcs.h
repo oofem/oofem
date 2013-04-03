@@ -136,7 +136,7 @@ public:
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode, Material *mat);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 
-    virtual void giveFiberMaterialStiffnessMatrix(FloatMatrix &fiberMatrix, MatResponseForm FullForm,
+    virtual void giveFiberMaterialStiffnessMatrix(FloatMatrix &fiberMatrix, MatResponseForm form,
                                                   MatResponseMode rMode, GaussPoint *layerGp,
                                                   TimeStep *tStep);
 

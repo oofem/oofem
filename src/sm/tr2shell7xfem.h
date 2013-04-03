@@ -59,7 +59,7 @@ class BoundaryLoad;
 class Tr2Shell7XFEM : public Shell7BaseXFEM
 {
 protected:
-    int numberOfGaussPoints;	
+    int numberOfGaussPoints;
     static FEI3dTrQuad interpolation;
     static bool __initialized;
     static IntArray ordering_phibar;
@@ -95,7 +95,7 @@ protected:
     virtual void computeGaussPoints();
     virtual void giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords);
 
-    //only used for debuging 
+    //only used for debugging 
     void compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matrix2, FloatMatrix &answer);
 
     virtual FEInterpolation *giveInterpolation();

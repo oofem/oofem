@@ -218,31 +218,12 @@ StressStrainBaseVector :: giveReducedSize(MaterialMode mode)
 void
 StressStrainBaseVector :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
                                                MaterialMode mmode) const
-//
-// this function returns mask of reduced(if form == ReducedForm)
-// or Full(if form==FullForm) stressStrain vector in full or
-// reduced StressStrainVector
-// acording to stressStrain mode of given gp.
-//
-//
-// mask has size of reduced or full StressStrain Vector and  i-th component
-// is index to full or reduced StressStrainVector where corresponding
-// stressStrain resides.
-//
-// Reduced form is sub-vector (of stress or strain components),
-// where components corresponding to imposed zero stress (plane stress,...)
-// are not included. On the other hand, if zero strain component is imposed
-// (Plane strain, ..) this condition must be taken into account in geometrical
-// relations, and corresponding component is included in reduced vector.
-//
 {
-    int i;
-
     if ( form == ReducedForm ) {
         switch ( mmode ) {
         case _3dMat:
             answer.resize(6);
-            for ( i = 1; i <= 6; i++ ) {
+            for ( int i = 1; i <= 6; i++ ) {
                 answer.at(i) = i;
             }
 
@@ -275,7 +256,7 @@ StressStrainBaseVector :: giveStressStrainMask(IntArray &answer, MatResponseForm
         case _3dMat:
             answer.resize(6);
             answer.zero();
-            for ( i = 1; i <= 6; i++ ) {
+            for ( int i = 1; i <= 6; i++ ) {
                 answer.at(i) = i;
             }
 
@@ -309,8 +290,6 @@ StressStrainBaseVector :: giveStressStrainMask(IntArray &answer, MatResponseForm
     } else {
         OOFEM_ERROR("giveStressStrainMask : unknown form mode");
     }
-
-    return;
 }
 
 void

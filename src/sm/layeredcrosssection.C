@@ -918,25 +918,25 @@ LayeredCrossSection :: mapLayerGpCoordsToShellCoords(LayeredCrossSection *layere
         -------- -1               -------- -1
 */
 {
-	double totalThickness = this->computeIntegralThick();
+    double totalThickness = this->computeIntegralThick();
     int number = 1;
-	for( int layer = 1; layer <= numberOfLayers; layer++ ) {
-		IntegrationRule *iRule = layerIntegrationRulesArray [layer-1]; 
-		
-		for( int j = 1; j <= iRule->getNumberOfIntegrationPoints(); j++ ) {
-			GaussPoint *gp = iRule->getIntegrationPoint(j-1);
+    for( int layer = 1; layer <= numberOfLayers; layer++ ) {
+        IntegrationRule *iRule = layerIntegrationRulesArray [layer-1]; 
 
-			// Map local layer cs to local shell cs
-			double zMid_i = layeredCS->giveLayerMidZ(layer);
+        for( int j = 1; j <= iRule->getNumberOfIntegrationPoints(); j++ ) {
+            GaussPoint *gp = iRule->getIntegrationPoint(j-1);
+
+            // Map local layer cs to local shell cs
+            double zMid_i = layeredCS->giveLayerMidZ(layer);
             double xiMid_i = 1.0 - 2.0*(totalThickness - this->midSurfaceZcoordFromBottom - zMid_i)/totalThickness; 
-			double xi = xiMid_i; 
-			double xi2 = gp->coordinates->at(3)*layeredCS->giveLayerThickness(layer)/totalThickness;
-			double xinew = xi+xi2;
-			iRule->getIntegrationPoint(j-1)->coordinates->at(3) = xinew;
+            double xi = xiMid_i; 
+            double xi2 = gp->coordinates->at(3)*layeredCS->giveLayerThickness(layer)/totalThickness;
+            double xinew = xi+xi2;
+            iRule->getIntegrationPoint(j-1)->coordinates->at(3) = xinew;
             iRule->getIntegrationPoint(j-1)->number = number;
             number++;
-			}
-		}
+        }
+    }
 
 }
 
@@ -1042,7 +1042,7 @@ LayeredCrossSection :: restoreIPContext(DataStream *stream, ContextMode mode, Ga
 MaterialMode
 LayeredCrossSection :: giveCorrespondingSlaveMaterialMode(MaterialMode masterMode)
 //
-// returns cooresponding slave material mode to master mode
+// returns corresponding slave material mode to master mode
 //
 {
     if ( masterMode == _2dPlate ) {
@@ -1079,7 +1079,6 @@ LayeredCrossSection :: giveIntegrated3dShellStress(FloatArray &answer, GaussPoin
     FloatArray layerStress, reducedLayerStress;
     GaussPoint *layerGp;
     double layerThick, layerWidth, layerZCoord, top, bottom, layerZeta;
-    int i;
 
     answer.resize(8);
     // perform integration over layers
@@ -1087,7 +1086,7 @@ LayeredCrossSection :: giveIntegrated3dShellStress(FloatArray &answer, GaussPoin
     bottom = -midSurfaceZcoordFromBottom;
     top    = totalThick - midSurfaceZcoordFromBottom;
 
-    for ( i = 1; i <= numberOfLayers; i++ ) {
+    for ( int i = 1; i <= numberOfLayers; i++ ) {
         layerGp = giveSlaveGaussPoint(masterGp, i - 1);
         layerMat = domain->giveMaterial( layerMaterials.at(i) );
         layerStatus = static_cast< StructuralMaterialStatus * >( layerMat->giveStatus(layerGp) );
@@ -1129,14 +1128,14 @@ LayeredCrossSection :: give(CrossSectionProperty aProperty)
 {
     if ( aProperty == CS_Thickness ) {
         return this->computeIntegralThick();
-    } else if ( aProperty == CS_TopZCoord )   {
+    } else if ( aProperty == CS_TopZCoord ) {
         this->computeIntegralThick();
         return totalThick - midSurfaceZcoordFromBottom;
-    } else if ( aProperty == CS_BottomZCoord )   {
+    } else if ( aProperty == CS_BottomZCoord ) {
         return -midSurfaceZcoordFromBottom;
-    } else if ( aProperty == CS_Area )   {
+    } else if ( aProperty == CS_Area ) {
         return this->giveArea();
-    } else if ( aProperty == CS_NumLayers )   {
+    } else if ( aProperty == CS_NumLayers ) {
         return this->numberOfLayers;
     }
 

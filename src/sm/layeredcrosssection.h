@@ -135,7 +135,7 @@ public:
 
     virtual void giveStressStrainMask(IntArray &answer, MatResponseForm form,
                                       MaterialMode mmode, StructuralMaterial *mat) const;
-    virtual void giveLayerMaterialStiffnessMatrix(FloatMatrix &layerMatrix, MatResponseForm FullForm,
+    virtual void giveLayerMaterialStiffnessMatrix(FloatMatrix &layerMatrix, MatResponseForm form,
                                                   MatResponseMode rMode, GaussPoint *layerGp,
                                                   TimeStep *tStep);
 

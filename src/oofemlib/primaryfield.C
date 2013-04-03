@@ -155,7 +155,8 @@ PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray& coords,
     }
 }
 
-int PrimaryField :: evaluateAt(FloatArray &answer, FloatArray &coords,
+int
+PrimaryField :: evaluateAt(FloatArray &answer, FloatArray &coords,
                     ValueModeType mode, TimeStep *atTime)
 {
     return this->__evaluateAt(answer, coords, mode, atTime, NULL);
