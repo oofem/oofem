@@ -35,7 +35,6 @@
 #ifndef sparsemtrx_h
 #define sparsemtrx_h
 
-#include "matrix.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "intarray.h"
@@ -48,6 +47,7 @@
 namespace oofem {
 class EngngModel;
 class TimeStep;
+
 /**
  * Base class for all matrices stored in sparse format. Basically sparse matrix
  * contains contribution of local element matrices. Localization of local element
@@ -58,12 +58,17 @@ class TimeStep;
  * - Multiplication by array
  * - Possible factorization and back substitution.
  */
-class SparseMtrx : public Matrix
+class SparseMtrx
 {
 public:
     typedef long SparseMtrxVersionType;
 
 protected:
+    /// Number of rows.
+    int nRows;
+    /// Number of columns.
+    int nColumns;
+
     /**
      * Allows to track if receiver changes.
      * Any change on receiver should increment this variable.
@@ -80,12 +85,40 @@ public:
      * Constructor, creates (n,m) sparse matrix. Due to sparsity character of matrix,
      * not all coefficient are physically stored (in general, zero members are omitted).
      */
-    SparseMtrx(int n, int m) : Matrix(n, m), version(0) { }
+    SparseMtrx(int n, int m) : nRows(n), nColumns(m), version(0) { }
     /// Constructor
-    SparseMtrx() : Matrix(), version(0) { }
+    SparseMtrx() : nRows(0), nColumns(0), version(0) { }
+    /// Destructor
+    virtual ~SparseMtrx() { }
 
     /// Return receiver version.
     SparseMtrxVersionType giveVersion() { return this->version; }
+
+    /**
+     * Checks size of receiver towards requested bounds.
+     * Current implementation will call exit(1), if positions are outside bounds.
+     * @param i Required number of rows.
+     * @param j Required number of columns.
+     */
+    void checkBounds(int i, int j) const {
+        if ( i <= 0 ) {
+            OOFEM_ERROR2("Matrix::checkBounds : matrix error on rows : %d <= 0", i);
+        } else if ( j <= 0 ) {
+            OOFEM_ERROR2("Matrix::checkBounds : matrix error on columns : %d <= 0", j);
+        } else if ( i > nRows ) {
+            OOFEM_ERROR3("Matrix::checkBounds : matrix error on rows : %d => %d", i, nRows);
+        } else if ( j > nColumns ) {
+            OOFEM_ERROR3("Matrix::checkBounds : matrix error on columns : %d => %d", j, nColumns);
+        }
+    }
+    /// Returns number of rows of receiver.
+    int giveNumberOfRows() const { return nRows; }
+    /// Returns number of columns of receiver.
+    int giveNumberOfColumns() const { return nColumns; }
+    /// Returns nonzero if receiver is square matrix.
+    bool isSquare() const { return nRows == nColumns; }
+    /// Tests for empty matrix.
+    bool isNotEmpty() const { return nRows > 0 && nColumns > 0; }
 
     /**
      * Returns a <em>newly allocated</em> copy of receiver. Programmer must take

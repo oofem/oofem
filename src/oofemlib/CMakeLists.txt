@@ -133,7 +133,6 @@ set (core_arrays
     stressstrainbasevector.C
     stressvector.C
     strainvector.C
-    matrix.C
     floatmatrix.C
     petscsparsemtrx.C
     )
