@@ -34,96 +34,6 @@
 
 #include "usrdefsub.h"
 #include "classfactory.h"
-#include "compiler.h" // to supply missing strncasecmp on some platforms
-
-#include <cstring>
-#ifdef HAVE_STRINGS_H
- #include <strings.h>
-#endif
-
-// __OOFEMLIB_MODULE
-#include "node.h"
-#include "element.h"
-#include "engngm.h"
-#include "xfemmanager.h"
-#include "load.h"
-#include "loadtimefunction.h"
-#include "material.h"
-#include "gaussintegrationrule.h"
-
-#include "subspaceit.h"
-#include "inverseit.h"
-#include "slepcsolver.h"
-
-// Nonlinear solvers
-#include "nrsolver.h"
-#include "calmls.h"
-
-// export modules
-#include "vtkexportmodule.h"
-#include "vtkxmlexportmodule.h"
-#include "matlabexportmodule.h"
-
-// nodal recovery models
-#include "zznodalrecoverymodel.h"
-#include "nodalaveragingrecoverymodel.h"
-#include "sprnodalrecoverymodel.h"
-
-#if 0 // Soon
- #include "particletopologydescription.h" // Soon
-#endif
-// end __OOFEMLIB_MODULE
-
-
-#ifdef __SM_MODULE
-
-// export modules
- #include "poiexportmodule.h"
- #include "homexportmodule.h"
- #include "dmexportmodule.h"
- #include "gpexportmodule.h"
-
-// init modules
- #include "gpinitmodule.h"
-
-// mesher interfaces
- #include "t3dinterface.h"
- #include "targe2interface.h"
- #include "freeminterface.h"
- #include "subdivision.h"
-
- #include "dss.h"
-
- #include "mmaclosestiptransfer.h"
- #include "mmaleastsquareprojection.h"
- #include "mmashapefunctprojection.h"
-#endif //__SM_MODULE
-
-
-
-#ifdef __TM_MODULE
-#endif //__TM_MODULE
-
-
-#ifdef __FM_MODULE
-#endif // __FM_Module
-
-// GENERAL
-#include "masterdof.h"
-#include "slavedof.h"
-#include "simpleslavedof.h"
-#include "activedof.h"
-
-// XFEM
-#include "enrichmentfunction.h"
-#include "enrichmentitem.h"
-
-#ifdef __PARALLEL_MODE
- #include "loadbalancer.h"
- #include "parmetisloadbalancer.h"
-#endif
-
-#include <string>
 
 /* ======================== Note =============================================
  * The system of new class registration has been changed to more flexible one.
@@ -147,16 +57,6 @@
  */
 
 namespace oofem {
-// Comparison operator for strings. Just strcasecmp here?
-struct CaseComp
-{
-    int operator() (std :: string a, std :: string b) const { return strncasecmp( a.c_str(), b.c_str(), b.length() ) < 0; }
-};
-struct CaseCompId
-{
-    int operator() (classType a, classType b) const { return ( ( ( int ) a ) < ( ( int ) b ) ); }
-};
-
 
 // ================ELEMENT CLASS FACTORY==================
 
@@ -292,283 +192,85 @@ RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(classType type, int numbe
     return classFactory.createRandomFieldGenerator(type,number,domain);
 }
 
-
-//------------------OLD Style CreateUsrDef Functions-------------------------------------------
-
-// ================ Topology CLASS FACTORY==================
-// Template to wrap constructors into functions
-template< typename T > TopologyDescription *topologyCreator(Domain *d) { return new T(d); }
-std :: map < std :: string, TopologyDescription * ( * )(Domain *), CaseComp > topologyNameList;
-
-TopologyDescription *CreateUsrDefTopologyOfType(const char *aClass, Domain *domain)
-{
-#if 0
-    if ( topologyNameList.empty() ) { topologyNameList["particletopology"] = topologyCreator< ParticleTopologyDescription >; }
-#endif
-
-    return ( topologyNameList.count(aClass) == 1 ) ? topologyNameList [ aClass ](domain) : NULL;
-}
-
-SparseGeneralEigenValueSystemNM *CreateUsrDefGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *d, EngngModel *m)
-{
-    if ( st == GES_SubspaceIt ) {
-        return new SubspaceIteration(d, m);
-    } else if ( st == GES_InverseIt ) {
-        return new InverseIteration(d, m);
-    } else if ( st == GES_SLEPc ) {
-        return new SLEPcSolver(d, m);
-    } else {
-        OOFEM_ERROR("CreateUsrDefGeneralizedEigenValueSolver: Unknown solver type\n");
-        return NULL;
-    }
-}
-
-
-template< typename T > SparseNonLinearSystemNM *nonlinCreator(Domain *d, EngngModel *m, EquationID eid) { return ( new T(d, m, eid) ); }
-std :: map < std :: string, SparseNonLinearSystemNM * ( * )(Domain *, EngngModel *, EquationID), CaseComp > nonlinList;
-
 SparseNonLinearSystemNM *CreateUsrDefNonLinearSolver(const char *aClass, Domain *d, EngngModel *emodel, EquationID eid)
 {
-    if ( nonlinList.empty() ) {
-        nonlinList [ "nrsolver" ]   = nonlinCreator< NRSolver >;
-        nonlinList [ "calm" ]       = nonlinCreator< CylindricalALM >;
-    }
-
-    return ( nonlinList.count(aClass) == 1 ) ? nonlinList [ aClass ](d, emodel, eid) : NULL;
+    return classFactory.createUsrDefNonLinearSolver(aClass,d,emodel,eid);
 }
-
-template< typename T > ExportModule *exportCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
-std :: map < std :: string, ExportModule * ( * )(int, EngngModel *), CaseComp > exportList;
-
-ExportModule *CreateUsrDefExportModuleOfType(const char *aClass, int number, EngngModel *emodel)
-{
-    if ( exportList.empty() ) {
-        exportList [ "vtkxml" ]    = exportCreator< VTKXMLExportModule >;
-        exportList [ "vtk" ]       = exportCreator< VTKExportModule >;
-        exportList [ "matlab" ]    = exportCreator< MatlabExportModule >;
-#ifdef __SM_MODULE
-        exportList [ "poi" ]       = exportCreator< POIExportModule >;
-        exportList [ "hom" ]       = exportCreator< HOMExportModule >;
-        exportList [ "dm" ]        = exportCreator< DofManExportModule >;
-        exportList [ "gp" ]        = exportCreator< GPExportModule >;
-#endif //__SM_MODULE
-    }
-
-    return ( exportList.count(aClass) == 1 ) ? exportList [ aClass ](number, emodel) : NULL;
-}
-
-
-template< typename T > InitModule *initCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
-std :: map < std :: string, InitModule * ( * )(int, EngngModel *), CaseComp > initList;
 
 InitModule *CreateUsrDefInitModuleOfType(const char *aClass, int number, EngngModel *emodel)
 {
-    if ( initList.empty() ) {
-#ifdef __SM_MODULE
-        initList [ "gpinitmodule" ] = initCreator< GPInitModule >;
-#endif //__SM_MODULE
-    }
-
-    return ( initList.count(aClass) == 1 ) ? initList [ aClass ](number, emodel) : NULL;
+    return classFactory.createUsrDefInitModule(aClass, number, emodel);
 }
 
-
-IntegrationRule *CreateUsrDefIRuleOfType(classType type, int number, Element *e)
+ExportModule *CreateUsrDefExportModuleOfType(const char *aClass, int number, EngngModel *emodel)
 {
-    IntegrationRule *answer = NULL;
-    if ( type == GaussIntegrationRuleClass ) {
-        answer = new GaussIntegrationRule(number, e);
-    }
-
-    if ( answer == NULL ) {
-        OOFEM_ERROR2("CreateUsrDefIRuleOfType: Unknown integration rule type [%d]", type);
-    }
-
-    return answer;
+    return classFactory.createUsrDefExportModule(aClass,number,emodel);
 }
 
-
-
-
-MaterialMappingAlgorithm *CreateUsrDefMaterialMappingAlgorithm(MaterialMappingAlgorithmType type)
+TopologyDescription *CreateUsrDefTopologyOfType(const char *aClass, Domain *domain)
 {
-    MaterialMappingAlgorithm *answer = NULL;
-
-#ifdef __SM_MODULE
-    if ( type == MMA_ClosestPoint ) {
-        answer = new MMAClosestIPTransfer();
-    } else if ( type == MMA_LeastSquareProjection ) {
-        answer = new MMALeastSquareProjection();
-    } else if ( type == MMA_ShapeFunctionProjection ) {
-        answer = new MMAShapeFunctProjection();
-    }
-
-#endif
-    if ( answer == NULL ) {
-        OOFEM_ERROR2("CreateUsrDefMaterialMappingAlgorithm: Unknown mma type [%d]", type);
-    }
-
-    return answer;
-}
-
-MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain *d)
-{
-    MesherInterface *answer = NULL;
-#ifdef __SM_MODULE
-    if ( type == MPT_T3D ) {
-        answer = new T3DInterface(d);
-    } else if ( type == MPT_TARGE2 ) {
-        answer = new Targe2Interface(d);
-    } else if ( type == MPT_FREEM ) {
-        answer = new FreemInterface(d);
-    } else if ( type == MPT_SUBDIVISION ) {
-        answer = new Subdivision(d);
-    }
-
-#endif
-    if ( answer == NULL ) {
-        OOFEM_ERROR2("CreateUsrDefMesherInterface: Unknown MI type [%d]", type);
-    }
-
-    return answer;
-}
-
-
-template< typename T > EnrichmentItem *enrichItemCreator(int n, XfemManager *x, Domain *d) { return new T(n, x, d); }
-std :: map < std :: string, EnrichmentItem * ( * )(int, XfemManager *, Domain *), CaseComp > enrichItemList;
-
-EnrichmentItem *CreateUsrDefEnrichmentItem(const char *aClass, int number, XfemManager *xm, Domain *domain)
-{
-    if ( enrichItemList.empty() ) {
-        enrichItemList [ "cracktip" ]      = enrichItemCreator< CrackTip >;
-        enrichItemList [ "crackinterior" ] = enrichItemCreator< CrackInterior >;
-        enrichItemList [ "inclusion" ]     = enrichItemCreator< Inclusion >;
-        enrichItemList [ "delamination" ]  = enrichItemCreator< Delamination >;
-        enrichItemList [ "multipledelamination" ]  = enrichItemCreator< Delamination >;
-    }
-
-    return ( enrichItemList.count(aClass) == 1 ) ? enrichItemList [ aClass ](number, xm, domain) : NULL;
-}
-
-EnrichmentItem *CreateUsrDefEnrichmentItem(classType type, int number, XfemManager *xm, Domain *domain)
-{
-    OOFEM_ERROR("CreateUsrDefEnrichmentItem: Unknown type\n");
-    return NULL;
-}
-
-
-template< typename T > EnrichmentFunction *enrichFuncCreator(int n, Domain *d) { return new T(n, d); }
-std :: map < std :: string, EnrichmentFunction * ( * )(int, Domain *), CaseComp > enrichFuncList;
-
-EnrichmentFunction *CreateUsrDefEnrichmentFunction(const char *aClass, int number, Domain *domain)
-{
-    if ( enrichFuncList.empty() ) {
-        enrichFuncList [ "discontinuousfunction" ] = enrichFuncCreator< DiscontinuousFunction >;
-        enrichFuncList [ "branchfunction" ] = enrichFuncCreator< BranchFunction >;
-        enrichFuncList [ "rampfunction" ] = enrichFuncCreator< RampFunction >;
-    }
-
-    return ( enrichFuncList.count(aClass) == 1 ) ? enrichFuncList [ aClass ](number, domain) : NULL;
-}
-
-EnrichmentFunction *CreateUsrDefEnrichmentFunction(classType type, int number, Domain *domain)
-{
-  OOFEM_ERROR("CreateUsrDefEnrichmentFunction: Unknown type\n");
-  return NULL;
-}
-
-template< typename T > BasicGeometry *geometryCreator() { return new T(); }
-std :: map < std :: string, BasicGeometry * ( * )(), CaseComp > geometryList;
-
-BasicGeometry *CreateUsrDefGeometry(const char *aClass)
-{
-    if ( geometryList.empty() ) {
-        geometryList [ "line" ] = geometryCreator< Line >;
-        geometryList [ "circle" ] = geometryCreator< Circle >;
-        geometryList [ "pointswarm" ] = geometryCreator< PointSwarm >; // just temporary
-    }
-
-    return ( geometryList.count(aClass) == 1 ) ? geometryList [ aClass ]() : NULL;
-}
-
-
-template< typename T > EnrichmentDomain *enrichmentDomainCreator() { return new T(); }
-std :: map < std :: string, EnrichmentDomain * ( * )(), CaseComp > enrichmentDomainList;
-
-EnrichmentDomain *CreateUsrDefEnrichmentDomain(const char *aClass)
-{
-    if ( enrichmentDomainList.size() == 0 ) {
-        enrichmentDomainList [ "dofmanlist" ]  = enrichmentDomainCreator< DofManList >;
-        enrichmentDomainList [ "wholedomain" ] = enrichmentDomainCreator< WholeDomain >;
-        enrichmentDomainList [ "circle" ]      = enrichmentDomainCreator< EDBGCircle >;
-        //enrichmentDomainList [ "line" ]        = enrichmentDomainCreator< BasicGeometryDomain<Line> >;
-    }
-    return ( enrichmentDomainList.count(aClass) == 1 ) ? enrichmentDomainList [ aClass ]() : NULL;
-}
-
-BasicGeometry *CreateUsrDefGeometry(classType type)
-{
-    OOFEM_ERROR("CreateUsrDefGeometry: Unknown type\n");
-    return NULL;
+    return classFactory.createUsrDefTopology(aClass, domain);
 }
 
 Patch *CreateUsrDefPatch(Patch :: PatchType ptype, Element *e)
 {
-    Patch *answer = NULL;
-    if ( ptype == Patch :: PT_TrianglePatch ) {
-        answer = new TrianglePatch(e);
-    } else {
-        OOFEM_ERROR2("CreateUsrDefPatch: Unknown PatchType [%d]", ptype);
-    }
-
-    return answer;
+    return classFactory.createUsrDefPatch(ptype, e);
 }
 
-NodalRecoveryModel *
-CreateUsrDefNodalRecoveryModel(NodalRecoveryModel :: NodalRecoveryModelType type, Domain *d)
+NodalRecoveryModel *CreateUsrDefNodalRecoveryModel(NodalRecoveryModel :: NodalRecoveryModelType type, Domain *d)
 {
-    NodalRecoveryModel *answer = NULL;
-    if ( type == NodalRecoveryModel :: NRM_NodalAveraging ) {
-        answer = new NodalAveragingRecoveryModel(d);
-    } else if ( type == NodalRecoveryModel :: NRM_ZienkiewiczZhu ) {
-        answer = new ZZNodalRecoveryModel(d);
-    } else if ( type == NodalRecoveryModel :: NRM_SPR ) {
-        answer = new SPRNodalRecoveryModel(d);
-    } else {
-        OOFEM_ERROR2("CreateUsrDefNodalRecoveryModel: unsupported NodalRecoveryModelType [%d]", type);
-    }
-
-    return answer;
+    return classFactory.createUsrDefNodalRecoveryModel(type, d);
 }
 
+EnrichmentItem *CreateUsrDefEnrichmentItem(const char *aClass, int number, XfemManager *xm, Domain *domain)
+{
+    return classFactory.createUsrDefEnrichmentItem(aClass, number, xm, domain);
+}
+
+EnrichmentFunction *CreateUsrDefEnrichmentFunction(const char *aClass, int number, Domain *domain)
+{
+    return classFactory.createUsrDefEnrichmentFunction(aClass, number, domain);
+}
+
+EnrichmentDomain *CreateUsrDefEnrichmentDomain(const char *aClass)
+{
+    return classFactory.createUsrDefEnrichmentDomain(aClass);
+}
+
+BasicGeometry *CreateUsrDefGeometry(const char *aClass)
+{
+    return classFactory.createUsrDefGeometry(aClass);
+}
+
+SparseGeneralEigenValueSystemNM *CreateUsrDefGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *d, EngngModel *m)
+{
+    return classFactory.createUsrDefGeneralizedEigenValueSolver(st, d, m);
+}
+
+IntegrationRule *CreateUsrDefIRuleOfType(classType type, int number, Element *e)
+{
+    return classFactory.createUsrDefIRule(type, number, e);
+}
+
+MaterialMappingAlgorithm *CreateUsrDefMaterialMappingAlgorithm(MaterialMappingAlgorithmType type)
+{
+    return classFactory.createUsrDefMaterialMappingAlgorithm(type);
+}
+
+MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain *d)
+{
+    return classFactory.createUsrDefMesherInterface(type, d);
+}
 
 #ifdef __PARALLEL_MODE
 LoadBalancerMonitor *CreateUsrDefLoadBalancerMonitorOfType(classType type, EngngModel *e)
 {
-    LoadBalancerMonitor *answer = NULL;
-    if ( type == WallClockLoadBalancerMonitorClass ) {
-        answer = new WallClockLoadBalancerMonitor(e);
-    }
-
-    if ( answer == NULL ) {
-        OOFEM_ERROR2("CreateUsrDefLoadBalancerMonitorOfType: Unknown type [%d]", type);
-    }
-
-    return answer;
+    return classFactory.createUsrDefLoadBalancerMonitor(type, e);
 }
 
 LoadBalancer *CreateUsrDefLoadBalancerOfType(classType type, Domain *d)
 {
-    LoadBalancer *answer = NULL;
-    if ( type == ParmetisLoadBalancerClass ) {
-        answer = new ParmetisLoadBalancer(d);
-    }
-
-    if ( answer == NULL ) {
-        OOFEM_ERROR2("CreateUsrDefLoadBalancerOfType: Unknown type [%d]", type);
-    }
-
-    return answer;
+    return classFactory.createUsrDefLoadBalancer(type, d);
 }
 #endif
 } // end namespace oofem

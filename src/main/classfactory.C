@@ -51,9 +51,52 @@
 #include "nonlocalbarrierclassfactory.h"
 #include "randomfieldgeneratorclassfactory.h"
 
+// No class factory files for these;
+#include "subspaceit.h"
+#include "inverseit.h"
+#include "slepcsolver.h"
+
+#include "vtkexportmodule.h"
+#include "vtkxmlexportmodule.h"
+#include "matlabexportmodule.h"
+#include "gpexportmodule.h"
+#ifdef __SM_MODULE
+ #include "poiexportmodule.h"
+ #include "homexportmodule.h"
+ #include "dmexportmodule.h"
+ 
+ // mesher interfaces
+ #include "t3dinterface.h"
+ #include "targe2interface.h"
+ #include "freeminterface.h"
+ #include "subdivision.h"
+
+ #include "mmaclosestiptransfer.h"
+ #include "mmaleastsquareprojection.h"
+ #include "mmashapefunctprojection.h"
+#endif
+
+// or these
+#include "masterdof.h"
+#include "slavedof.h"
+#include "simpleslavedof.h"
+#include "activedof.h"
+#include "nrsolver.h"
+#include "calmls.h"
+#ifdef __SM_MODULE
+ #include "gpinitmodule.h"
+#endif
+#if 0 // Soon
+#include "particletopologydescription.h"
+#endif
+
+#ifdef __PARALLEL_MODE
+ #include "loadbalancer.h"
+ #include "parmetisloadbalancer.h"
+#endif
+
 #undef  REGISTER_CLASS
 #define REGISTER_CLASS(_class, id)
-#define REGISTER_CLASS_1(_class, id, type)
 #include "sparsemtrxclassfactory.h"
 #include "dofclassfactory.h"
 #include "sparselinearsystemsolverclassfactory.h"
@@ -188,6 +231,48 @@ ClassFactory :: ClassFactory() {
 #define REGISTER_CLASS(_class, id) \
     sparseLinSolList [ id ] = sparseLinSolCreator< _class >;
 #include "sparselinearsystemsolverclassfactory.h"
+
+    // No separate files for export modules (yet)
+    exportList [ "vtkxml" ]    = exportCreator< VTKXMLExportModule >;
+    exportList [ "vtk" ]       = exportCreator< VTKExportModule >;
+    exportList [ "matlab" ]    = exportCreator< MatlabExportModule >;
+    exportList [ "gp" ]        = exportCreator< GPExportModule >;
+#ifdef __SM_MODULE
+    exportList [ "poi" ]       = exportCreator< POIExportModule >;
+    exportList [ "dm" ]        = exportCreator< DofManExportModule >;
+    exportList [ "hom" ]       = exportCreator< HOMExportModule >;
+#endif //__SM_MODULE
+
+    nonlinList [ "nrsolver" ]   = nonlinCreator< NRSolver >;
+    nonlinList [ "calm" ]       = nonlinCreator< CylindricalALM >;
+
+#ifdef __SM_MODULE
+    initList [ "gpinitmodule" ] = initCreator< GPInitModule >;
+#endif //__SM_MODULE
+
+#if 0
+    topologyList["particletopology"] = topologyCreator< ParticleTopologyDescription >;
+#endif
+
+    // No separate files for xfem (yet)
+    enrichItemList [ "cracktip" ]      = enrichItemCreator< CrackTip >;
+    enrichItemList [ "crackinterior" ] = enrichItemCreator< CrackInterior >;
+    enrichItemList [ "inclusion" ]     = enrichItemCreator< Inclusion >;
+    enrichItemList [ "delamination" ]  = enrichItemCreator< Delamination >;
+    enrichItemList [ "multipledelamination" ]  = enrichItemCreator< Delamination >;
+
+    enrichFuncList [ "discontinuousfunction" ] = enrichFuncCreator< DiscontinuousFunction >;
+    enrichFuncList [ "branchfunction" ] = enrichFuncCreator< BranchFunction >;
+    enrichFuncList [ "rampfunction" ] = enrichFuncCreator< RampFunction >;
+
+    enrichmentDomainList [ "dofmanlist" ]  = enrichmentDomainCreator< DofManList >;
+    enrichmentDomainList [ "wholedomain" ] = enrichmentDomainCreator< WholeDomain >;
+    enrichmentDomainList [ "circle" ]      = enrichmentDomainCreator< EDBGCircle >;
+    //enrichmentDomainList [ "line" ]        = enrichmentDomainCreator< BasicGeometryDomain<Line> >;
+
+    geometryList [ "line" ] = geometryCreator< Line >;
+    geometryList [ "circle" ] = geometryCreator< Circle >;
+    geometryList [ "pointswarm" ] = geometryCreator< PointSwarm >; // just temporary
 }
 
 SparseMtrx *ClassFactory :: createSparseMtrx(SparseMtrxType type)
@@ -212,17 +297,36 @@ ErrorEstimator * ClassFactory :: createErrorEstimator(ErrorEstimatorType type, i
 
 InitialCondition * ClassFactory::createInitialCondition(classType type, int num, Domain *d)
 {
-    ///@todo Is this even relevant to have here in the class factory? There is only one type available / Mikael
     if (type == InitialConditionClass) {
         return new InitialCondition(num, d);
-    } else {
-        return NULL;
     }
+    return NULL;
 }
 
-Element* ClassFactory::createElement ( const char* aClass, int number, Domain* domain )
+Patch * ClassFactory::createUsrDefPatch(Patch :: PatchType type, Element *e)
 {
-    return ( elemNameList.count ( aClass ) == 1 ) ? elemNameList [ aClass ] ( number, domain ) : NULL;
+    if ( type == Patch :: PT_TrianglePatch ) {
+        return new TrianglePatch(e);
+    }
+    return NULL;
+}
+
+NodalRecoveryModel * ClassFactory::createUsrDefNodalRecoveryModel(NodalRecoveryModel :: NodalRecoveryModelType type, Domain *d)
+{
+    if ( type == NodalRecoveryModel :: NRM_NodalAveraging ) {
+        return new NodalAveragingRecoveryModel(d);
+    } else if ( type == NodalRecoveryModel :: NRM_ZienkiewiczZhu ) {
+        return new ZZNodalRecoveryModel(d);
+    } else if ( type == NodalRecoveryModel :: NRM_SPR ) {
+        return new SPRNodalRecoveryModel(d);
+    }
+    return NULL;
+}
+
+
+Element* ClassFactory::createElement ( const char* name, int number, Domain* domain )
+{
+    return ( elemNameList.count ( name ) == 1 ) ? elemNameList [ name ] ( number, domain ) : NULL;
 }
 
 Element* ClassFactory::createElement ( classType type, int number, Domain* domain )
@@ -230,9 +334,9 @@ Element* ClassFactory::createElement ( classType type, int number, Domain* domai
     return ( elemIdList.count ( type ) == 1 ) ? elemIdList [ type ] ( number, domain ) : NULL;
 }
 
-DofManager* ClassFactory::createDofManager ( const char* aClass, int number, Domain* domain )
+DofManager* ClassFactory::createDofManager ( const char* name, int number, Domain* domain )
 {
-    return ( dofmanNameList.count ( aClass ) == 1 ) ? dofmanNameList [ aClass ] ( number, domain ) : NULL;
+    return ( dofmanNameList.count ( name ) == 1 ) ? dofmanNameList [ name ] ( number, domain ) : NULL;
 }
 
 DofManager* ClassFactory::createDofManager ( classType type, int number, Domain* domain )
@@ -240,9 +344,9 @@ DofManager* ClassFactory::createDofManager ( classType type, int number, Domain*
     return ( dofmanIdList.count ( type ) == 1 ) ? dofmanIdList [ type ] ( number, domain ) : NULL;
 }
 
-GeneralBoundaryCondition* ClassFactory::createBoundaryCondition ( const char* aClass, int number, Domain* domain )
+GeneralBoundaryCondition* ClassFactory::createBoundaryCondition ( const char* name, int number, Domain* domain )
 {
-    return ( bcNameList.count ( aClass ) == 1 ) ? bcNameList [ aClass ] ( number, domain ) : NULL;
+    return ( bcNameList.count ( name ) == 1 ) ? bcNameList [ name ] ( number, domain ) : NULL;
 }
 
 GeneralBoundaryCondition* ClassFactory::createBoundaryCondition ( classType type, int number, Domain* domain )
@@ -250,9 +354,9 @@ GeneralBoundaryCondition* ClassFactory::createBoundaryCondition ( classType type
     return ( bcIdList.count ( type ) == 1 ) ? bcIdList [ type ] ( number, domain ) : NULL;
 }
 
-CrossSection* ClassFactory::createCrossSection ( const char* aClass, int number, Domain* domain )
+CrossSection* ClassFactory::createCrossSection ( const char* name, int number, Domain* domain )
 {
-    return ( csNameList.count ( aClass ) == 1 ) ? csNameList [ aClass ] ( number, domain ) : NULL;
+    return ( csNameList.count ( name ) == 1 ) ? csNameList [ name ] ( number, domain ) : NULL;
 }
 
 CrossSection* ClassFactory::createCrossSection ( classType type, int number, Domain* domain )
@@ -260,9 +364,9 @@ CrossSection* ClassFactory::createCrossSection ( classType type, int number, Dom
     return ( csIdList.count ( type ) == 1 ) ? csIdList [ type ] ( number, domain ) : NULL;
 }
 
-Material* ClassFactory::createMaterial ( const char* aClass, int number, Domain* domain )
+Material* ClassFactory::createMaterial ( const char* name, int number, Domain* domain )
 {
-    return ( matNameList.count ( aClass ) == 1 ) ? matNameList [ aClass ] ( number, domain ) : NULL;
+    return ( matNameList.count ( name ) == 1 ) ? matNameList [ name ] ( number, domain ) : NULL;
 }
 
 Material* ClassFactory::createMaterial ( classType type, int number, Domain* domain )
@@ -270,9 +374,9 @@ Material* ClassFactory::createMaterial ( classType type, int number, Domain* dom
     return ( matIdList.count ( type ) == 1 ) ? matIdList [ type ] ( number, domain ) : NULL;
 }
 
-EngngModel* ClassFactory::createEngngModel ( const char* aClass, int number, EngngModel* master )
+EngngModel* ClassFactory::createEngngModel ( const char* name, int number, EngngModel* master )
 {
-    return ( engngNameList.count ( aClass ) == 1 ) ? engngNameList [ aClass ] ( number, master ) : NULL;
+    return ( engngNameList.count ( name ) == 1 ) ? engngNameList [ name ] ( number, master ) : NULL;
 }
 
 EngngModel* ClassFactory::createEngngModel ( classType type, int number, EngngModel* master )
@@ -280,9 +384,9 @@ EngngModel* ClassFactory::createEngngModel ( classType type, int number, EngngMo
     return ( engngIdList.count ( type ) == 1 ) ? engngIdList [ type ] ( number, master ) : NULL;
 }
 
-LoadTimeFunction* ClassFactory::createLoadTimeFunction ( const char* aClass, int number, Domain* domain )
+LoadTimeFunction* ClassFactory::createLoadTimeFunction ( const char* name, int number, Domain* domain )
 {
-    return ( ltfNameList.count ( aClass ) == 1 ) ? ltfNameList [ aClass ] ( number, domain ) : NULL;
+    return ( ltfNameList.count ( name ) == 1 ) ? ltfNameList [ name ] ( number, domain ) : NULL;
 }
 
 LoadTimeFunction* ClassFactory::createLoadTimeFunction ( classType type, int number, Domain* domain )
@@ -290,9 +394,9 @@ LoadTimeFunction* ClassFactory::createLoadTimeFunction ( classType type, int num
     return ( ltfIdList.count ( type ) == 1 ) ? ltfIdList [ type ] ( number, domain ) : NULL;
 }
 
-NonlocalBarrier* ClassFactory::createNonlocalBarrier ( const char* aClass, int number, Domain* domain )
+NonlocalBarrier* ClassFactory::createNonlocalBarrier ( const char* name, int number, Domain* domain )
 {
-    return ( nlbNameList.count ( aClass ) == 1 ) ? nlbNameList [ aClass ] ( number, domain ) : NULL;
+    return ( nlbNameList.count ( name ) == 1 ) ? nlbNameList [ name ] ( number, domain ) : NULL;
 }
 
 NonlocalBarrier* ClassFactory::createNonlocalBarrier ( classType type, int number, Domain* domain )
@@ -300,9 +404,9 @@ NonlocalBarrier* ClassFactory::createNonlocalBarrier ( classType type, int numbe
     return ( nlbIdList.count ( type ) == 1 ) ? nlbIdList [ type ] ( number, domain ) : NULL;
 }
 
-RandomFieldGenerator* ClassFactory::createRandomFieldGenerator ( const char* aClass, int number, Domain* domain )
+RandomFieldGenerator* ClassFactory::createRandomFieldGenerator ( const char* name, int number, Domain* domain )
 {
-    return ( rfgNameList.count ( aClass ) == 1 ) ? rfgNameList [ aClass ] ( number, domain ) : NULL;
+    return ( rfgNameList.count ( name ) == 1 ) ? rfgNameList [ name ] ( number, domain ) : NULL;
 }
 
 RandomFieldGenerator* ClassFactory::createRandomFieldGenerator ( classType type, int number, Domain* domain )
@@ -310,4 +414,115 @@ RandomFieldGenerator* ClassFactory::createRandomFieldGenerator ( classType type,
     return ( rfgIdList.count ( type ) == 1 ) ? rfgIdList [ type ] ( number, domain ) : NULL;
 }
 
+ExportModule* ClassFactory::createUsrDefExportModule(const char *name, int number, EngngModel *emodel)
+{
+    return ( exportList.count(name) == 1 ) ? exportList [ name ](number, emodel) : NULL;
+}
+
+SparseNonLinearSystemNM* ClassFactory::createUsrDefNonLinearSolver(const char *name, Domain *d, EngngModel *emodel, EquationID eid)
+{
+    return ( nonlinList.count(name) == 1 ) ? nonlinList [ name ](d, emodel, eid) : NULL;
+}
+
+InitModule* ClassFactory::createUsrDefInitModule(const char *name, int number, EngngModel *emodel)
+{
+    return ( initList.count(name) == 1 ) ? initList [ name ](number, emodel) : NULL;
+}
+
+TopologyDescription* ClassFactory::createUsrDefTopology(const char *name, Domain *domain)
+{
+    return ( topologyList.count(name) == 1 ) ? topologyList [ name ](domain) : NULL;
+}
+
+
+// XFEM:
+EnrichmentItem* ClassFactory::createUsrDefEnrichmentItem(const char *name, int number, XfemManager *xm, Domain *domain)
+{
+    return ( enrichItemList.count(name) == 1 ) ? enrichItemList [ name ](number, xm, domain) : NULL;
+}
+
+EnrichmentFunction* ClassFactory::createUsrDefEnrichmentFunction(const char *name, int number, Domain *domain)
+{
+    return ( enrichFuncList.count(name) == 1 ) ? enrichFuncList [ name ](number, domain) : NULL;
+}
+
+EnrichmentDomain* ClassFactory::createUsrDefEnrichmentDomain(const char *name)
+{
+    return ( enrichmentDomainList.count(name) == 1 ) ? enrichmentDomainList [ name ]() : NULL;
+}
+
+BasicGeometry* ClassFactory::createUsrDefGeometry(const char *name)
+{
+    return ( geometryList.count(name) == 1 ) ? geometryList [ name ]() : NULL;
+}
+
+
+SparseGeneralEigenValueSystemNM* ClassFactory::createUsrDefGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *d, EngngModel *m)
+{
+    if ( st == GES_SubspaceIt ) {
+        return new SubspaceIteration(d, m);
+    } else if ( st == GES_InverseIt ) {
+        return new InverseIteration(d, m);
+    } else if ( st == GES_SLEPc ) {
+        return new SLEPcSolver(d, m);
+    }
+    return NULL;
+}
+
+IntegrationRule* ClassFactory::createUsrDefIRule(classType type, int number, Element *e)
+{
+    if ( type == GaussIntegrationRuleClass ) {
+        return new GaussIntegrationRule(number, e);
+    }
+    return NULL;
+}
+
+MaterialMappingAlgorithm* ClassFactory::createUsrDefMaterialMappingAlgorithm(MaterialMappingAlgorithmType type)
+{
+#ifdef __SM_MODULE
+    if ( type == MMA_ClosestPoint ) {
+        return new MMAClosestIPTransfer();
+    } else if ( type == MMA_LeastSquareProjection ) {
+        return new MMALeastSquareProjection();
+    } else if ( type == MMA_ShapeFunctionProjection ) {
+        return new MMAShapeFunctProjection();
+    }
+#endif
+    return NULL;
+}
+
+MesherInterface* ClassFactory::createUsrDefMesherInterface(MeshPackageType type, Domain *d)
+{
+#ifdef __SM_MODULE
+    if ( type == MPT_T3D ) {
+        return new T3DInterface(d);
+    } else if ( type == MPT_TARGE2 ) {
+        return new Targe2Interface(d);
+    } else if ( type == MPT_FREEM ) {
+        return new FreemInterface(d);
+    } else if ( type == MPT_SUBDIVISION ) {
+        return new Subdivision(d);
+    }
+#endif
+    return NULL;
+}
+
+
+#ifdef __PARALLEL_MODE
+LoadBalancerMonitor* ClassFactory::createUsrDefLoadBalancerMonitor(classType type, EngngModel *e)
+{
+    if ( type == WallClockLoadBalancerMonitorClass ) {
+        return new WallClockLoadBalancerMonitor(e);
+    }
+    return NULL;
+}
+
+LoadBalancer* ClassFactory::createUsrDefLoadBalancer(classType type, Domain *d)
+{
+    if ( type == ParmetisLoadBalancerClass ) {
+        return new ParmetisLoadBalancer(d);
+    }
+    return NULL;
+}
+#endif
 } // End namespace oofem

@@ -40,6 +40,12 @@
 #include "errorestimatortype.h"
 #include "doftype.h"
 #include "linsystsolvertype.h"
+#include "patch.h" // for PatchType
+#include "nodalrecoverymodel.h" // for NodalRecoveryModelType
+#include "geneigvalsolvertype.h"
+#include "materialmappingalgorithmtype.h"
+#include "meshpackagetype.h"
+#include "equationid.h"
 
 #include <map>
 #include <string>
@@ -57,12 +63,31 @@ class Material;
 class LoadTimeFunction;
 class NonlocalBarrier;
 class RandomFieldGenerator;
+class ExportModule;
+class SparseNonLinearSystemNM;
+class InitModule;
+class TopologyDescription;
 
 class Dof;
 class SparseMtrx;
 class SparseLinearSystemNM;
 class ErrorEstimator;
 class InitialCondition;
+class Patch;
+class NodalRecoveryModel;
+class SparseGeneralEigenValueSystemNM;
+class IntegrationRule;
+class MaterialMappingAlgorithm;
+class MesherInterface;
+
+class LoadBalancerMonitor;
+class LoadBalancer;
+
+class XfemManager;
+class EnrichmentItem;
+class EnrichmentFunction;
+class EnrichmentDomain;
+class BasicGeometry;
 
 // Templates to wrap constructors into functions
 template< typename T > Element *elemCreator(int n, Domain *d) { return new T(n, d); }
@@ -74,11 +99,21 @@ template< typename T > EngngModel *engngCreator(int n, EngngModel *m) { return (
 template< typename T > LoadTimeFunction *ltfCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > NonlocalBarrier *nlbCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > RandomFieldGenerator *rfgCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T > ExportModule *exportCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
+template< typename T > SparseNonLinearSystemNM *nonlinCreator(Domain *d, EngngModel *m, EquationID eid) { return ( new T(d, m, eid) ); }
+template< typename T > InitModule *initCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
+template< typename T > TopologyDescription *topologyCreator(Domain *d) { return new T(d); }
 
 template< typename T > SparseMtrx* sparseMtrxCreator() { return new T(); }
 template< typename T > SparseLinearSystemNM* sparseLinSolCreator(Domain *d, EngngModel *m) { return new T(d, m); }
 template< typename T > Dof* dofCreator(int n, DofManager *dman) { return new T(n, dman); }
 template< typename T > ErrorEstimator* errEstCreator(int n, Domain *d) { return new T(n, d); }
+
+// XFEM stuff
+template< typename T > EnrichmentItem *enrichItemCreator(int n, XfemManager *x, Domain *d) { return new T(n, x, d); }
+template< typename T > EnrichmentFunction *enrichFuncCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T > BasicGeometry *geometryCreator() { return new T(); }
+template< typename T > EnrichmentDomain *enrichmentDomainCreator() { return new T(); }
 
 /**
  * Class Factory allows to register terminal oofem classes, based on their membership
@@ -130,16 +165,33 @@ protected:
     std :: map < std :: string, RandomFieldGenerator * ( * )(int, Domain *), CaseComp > rfgNameList;
     /// Associative container containing random field generator creators with class id as key.
     std :: map < classType, RandomFieldGenerator * ( * )(int, Domain *) > rfgIdList;
-
+    /// Associative container containing export module creators.
+    std :: map < std :: string, ExportModule * ( * )(int, EngngModel *), CaseComp > exportList;
+    /// Associative container containing nonlinear solver creators.
+    std :: map < std :: string, SparseNonLinearSystemNM * ( * )(Domain *, EngngModel *, EquationID), CaseComp > nonlinList;
+    /// Associative container containing init module creators.
+    std :: map < std :: string, InitModule * ( * )(int, EngngModel *), CaseComp > initList;
+    /// Associative container containing topology description creators.
+    std :: map < std :: string, TopologyDescription * ( * )(Domain *), CaseComp > topologyList;
     // Internal structures (accessed by hard-coded enum values)
-    /// Associative container containing sparse matrix creators
+    /// Associative container containing sparse matrix creators.
     std :: map < SparseMtrxType, SparseMtrx * ( * )() > sparseMtrxList;
-    /// Associative container containing sparse matrix creators
+    /// Associative container containing dof creators.
     std :: map < dofType, Dof * ( * )(int, DofManager *) > dofList;
-    /// Associative container containing sparse matrix creators
+    /// Associative container containing error estimator creators.
     std :: map < ErrorEstimatorType, ErrorEstimator * ( * )(int, Domain *) > errEstList;
-    /// Associative container containing sparse matrix creators
+    /// Associative container containing sparse linear solver creators
     std :: map < LinSystSolverType, SparseLinearSystemNM * ( * )(Domain *, EngngModel *) > sparseLinSolList;
+
+    // XFEM:
+    /// Associative container containing enrichment item creators
+    std :: map < std :: string, EnrichmentItem * ( * )(int, XfemManager *, Domain *), CaseComp > enrichItemList;
+    /// Associative container containing enrichment function creators
+    std :: map < std :: string, EnrichmentFunction * ( * )(int, Domain *), CaseComp > enrichFuncList;
+    /// Associative container containing geometry creators
+    std :: map < std :: string, BasicGeometry * ( * )(), CaseComp > geometryList;
+    /// Associative container containing enrichment-domain creators
+    std :: map < std :: string, EnrichmentDomain * ( * )(), CaseComp > enrichmentDomainList;
 
 public:
     /// Constructor, registers all classes
@@ -152,7 +204,7 @@ public:
      * @param d    Domain assigned to new element.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    Element *createElement(const char *aClass, int number, Domain *domain);
+    Element *createElement(const char *name, int num, Domain *domain);
     /**
      * Creates new instance of element corresponding to given element id.
      * @param type ClassId determining the type of new instance.
@@ -160,7 +212,7 @@ public:
      * @param d    Domain assigned to new element.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    Element *createElement(classType type, int number, Domain *domain);
+    Element *createElement(classType type, int num, Domain *domain);
     /**
      * Creates new instance of Dof manager corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -168,7 +220,7 @@ public:
      * @param d    Domain assigned to new instance.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    DofManager *createDofManager(const char *aClass, int number, Domain *domain);
+    DofManager *createDofManager(const char *name, int num, Domain *domain);
     /**
      * Creates new instance of dof manager corresponding to given id.
      * @param type ClassId determining the type of new instance.
@@ -176,7 +228,7 @@ public:
      * @param d    Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    DofManager *createDofManager(classType type, int number, Domain *domain);
+    DofManager *createDofManager(classType type, int num, Domain *domain);
     /**
      * Creates new instance of boundary condition corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -184,7 +236,7 @@ public:
      * @param d    Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    GeneralBoundaryCondition *createBoundaryCondition(const char *aClass, int number, Domain *domain);
+    GeneralBoundaryCondition *createBoundaryCondition(const char *name, int num, Domain *domain);
     /**
      * Creates new instance of boundary condition corresponding to given id.
      * @param type ClassId determining the type of new instance.
@@ -192,7 +244,7 @@ public:
      * @param d    Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    GeneralBoundaryCondition *createBoundaryCondition(classType type, int number, Domain *domain);
+    GeneralBoundaryCondition *createBoundaryCondition(classType type, int num, Domain *domain);
     /**
      * Creates new instance of cross section corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -200,7 +252,7 @@ public:
      * @param d    Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    CrossSection *createCrossSection(const char *aClass, int number, Domain *domain);
+    CrossSection *createCrossSection(const char *name, int num, Domain *domain);
     /**
      * Creates new instance of cross section corresponding to given id.
      * @param type ClassId determining the type of new instance.
@@ -208,7 +260,7 @@ public:
      * @param d    Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    CrossSection *createCrossSection(classType type, int number, Domain *domain);
+    CrossSection *createCrossSection(classType type, int num, Domain *domain);
     /**
      * Creates new instance of material corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -216,7 +268,7 @@ public:
      * @param d    Domain assigned to new material.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    Material *createMaterial(const char *aClass, int number, Domain *domain);
+    Material *createMaterial(const char *name, int num, Domain *domain);
     /**
      * Creates new instance of material corresponding to given keyword.
      * @param type ClassId determining the type of new instance.
@@ -224,15 +276,15 @@ public:
      * @param d    Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    Material *createMaterial(classType type, int number, Domain *domain);
+    Material *createMaterial(classType type, int num, Domain *domain);
     /**
      * Creates new instance of engng model corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param num  Engng model number.
-     * @param d    Domain assigned to new object.
+     * @param master Master engineering model (used for multiscale modeling).
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    EngngModel *createEngngModel(const char *aClass, int number, EngngModel *master);
+    EngngModel *createEngngModel(const char *name, int num, EngngModel *master);
     /**
      * Creates new instance of engng model corresponding to given id.
      * @param type ClassId determining the type of new instance.
@@ -240,7 +292,7 @@ public:
      * @param d    Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    EngngModel *createEngngModel(classType type, int number, EngngModel *master);
+    EngngModel *createEngngModel(classType type, int num, EngngModel *master);
     /**
      * Creates new instance of load time function corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -248,7 +300,7 @@ public:
      * @param d    Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    LoadTimeFunction *createLoadTimeFunction(const char *aClass, int number, Domain *domain);
+    LoadTimeFunction *createLoadTimeFunction(const char *name, int num, Domain *domain);
     /**
      * Creates new instance of load time function corresponding to given id.
      * @param type ClassId determining the type of new instance.
@@ -257,7 +309,7 @@ public:
      * @param d    Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    LoadTimeFunction *createLoadTimeFunction(classType type, int number, Domain *domain);
+    LoadTimeFunction *createLoadTimeFunction(classType type, int num, Domain *domain);
     /**
      * Creates new instance of nonlocal barrier corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -265,7 +317,7 @@ public:
      * @param d    Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    NonlocalBarrier *createNonlocalBarrier(const char *aClass, int number, Domain *domain);
+    NonlocalBarrier *createNonlocalBarrier(const char *name, int num, Domain *domain);
     /**
      * Creates new instance of nonlocal barrier corresponding to given id.
      * @param type ClassId determining the type of new instance.
@@ -274,7 +326,7 @@ public:
      * @param d    Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    NonlocalBarrier *createNonlocalBarrier(classType type, int number, Domain *domain);
+    NonlocalBarrier *createNonlocalBarrier(classType type, int num, Domain *domain);
     /**
      * Creates new instance of random field generator corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -282,7 +334,7 @@ public:
      * @param d    Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    RandomFieldGenerator *createRandomFieldGenerator(const char *aClass, int number, Domain *domain);
+    RandomFieldGenerator *createRandomFieldGenerator(const char *name, int num, Domain *domain);
     /**
      * Creates new instance of random field generator corresponding to given id.
      * @param type ClassId determining the type of new instance.
@@ -291,9 +343,42 @@ public:
      * @param d    Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    RandomFieldGenerator *createRandomFieldGenerator(classType type, int number, Domain *domain);
+    RandomFieldGenerator *createRandomFieldGenerator(classType type, int num, Domain *domain);
     /**
-     * Creates new instance of sparse mtrx corresponding to given keyword.
+     * Creates new instance of export module corresponding to given keyword.
+     * @param name Keyword string determining the type of new instance.
+     * @param num  Export module number.
+     * @param emodel Engineering model that object belongs to.
+     * @return Newly allocated object of requested type, null if keyword not supported.
+     */
+    ExportModule *createUsrDefExportModule(const char *name, int num, EngngModel *emodel);
+    /**
+     * Creates new instance of nonlinear solver corresponding to given keyword.
+     * @param name Keyword string determining the type of new instance.
+     * @param d    Domain assigned to new object.
+     * @param emodel Engineering model that object belongs to.
+     * @param eid Equation ID of sys of equations.
+     * @return Newly allocated object of requested type, null if keyword not supported.
+     */
+    SparseNonLinearSystemNM* createUsrDefNonLinearSolver(const char *name, Domain *d, EngngModel *emodel, EquationID eid);
+    /**
+     * Creates new instance of init module corresponding to given keyword.
+     * @param name Keyword string determining the type of new instance.
+     * @param num  Init module number.
+     * @param emodel Engineering model that object belongs to.
+     * @return Newly allocated object of requested type, null if keyword not supported.
+     */
+    InitModule* createUsrDefInitModule(const char *name, int number, EngngModel *emodel);
+    /**
+     * Creates new instance of topology description corresponding to given keyword.
+     * @param name Keyword string determining the type of new instance.
+     * @param d    Domain assigned to new object.
+     * @return Newly allocated object of requested type, null if keyword not supported.
+     */
+    TopologyDescription* createUsrDefTopology(const char *name, Domain *d);
+
+    /**
+     * Creates new instance of sparse matrix corresponding to given keyword.
      * @param type SparseMtrxType id determining the type of new instance.
      * @param num  object's number.
      * @param d    Domain assigned to new object.
@@ -321,7 +406,7 @@ public:
      * Creates new instance of ErrorEstimator corresponding
      * to given type.
      * @param type ErrorEstimatorType id determining the type of new instance.
-     * @param number  object's number.
+     * @param num  object's number.
      * @param d Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
@@ -330,12 +415,41 @@ public:
      * Creates new instance of Initial Condition corresponding
      * to given type.
      * @param type classType id determining the type of new instance.
-     * @param number  object's number.
+     * @param num  object's number.
      * @param d Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    InitialCondition *createInitialCondition(classType type, int num, Domain *d) ;
+    InitialCondition *createInitialCondition(classType type, int num, Domain *d);
+    /**
+     * Creates new instance of patch corresponding to given type.
+     * @param type ID determining the type of new instance.
+     * @param e Element assigned to new object.
+     * @return Newly allocated object of requested type, null if keyword not supported.
+     */
+    Patch *createUsrDefPatch(Patch :: PatchType type, Element *e);
+    /**
+     * Creates new instance of nodal recovery model corresponding to given type.
+     * @param type ID determining the type of new instance.
+     * @param d Domain assigned to new object.
+     * @return Newly allocated object of requested type, null if keyword not supported.
+     */
+    NodalRecoveryModel *createUsrDefNodalRecoveryModel(NodalRecoveryModel :: NodalRecoveryModelType type, Domain *d);
 
+    // XFEM:
+    EnrichmentItem *createUsrDefEnrichmentItem(const char *name, int num, XfemManager *xm, Domain *domain);
+    EnrichmentFunction *createUsrDefEnrichmentFunction(const char *name, int num, Domain *domain);
+    EnrichmentDomain *createUsrDefEnrichmentDomain(const char *name);
+    BasicGeometry *createUsrDefGeometry(const char *name);
+
+    SparseGeneralEigenValueSystemNM *createUsrDefGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *d, EngngModel *m);
+    IntegrationRule *createUsrDefIRule(classType type, int number, Element *e);
+    MaterialMappingAlgorithm *createUsrDefMaterialMappingAlgorithm(MaterialMappingAlgorithmType type);
+    MesherInterface *createUsrDefMesherInterface(MeshPackageType type, Domain *d);
+
+#ifdef __PARALLEL_MODE
+    LoadBalancerMonitor* createUsrDefLoadBalancerMonitor(classType type, EngngModel *e);
+    LoadBalancer* createUsrDefLoadBalancer(classType type, Domain *d);
+#endif
 };
 
 extern ClassFactory classFactory;
