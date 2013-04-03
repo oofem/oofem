@@ -96,6 +96,7 @@
 
  #include "mmaclosestiptransfer.h"
  #include "mmaleastsquareprojection.h"
+ #include "mmashapefunctprojection.h"
 #endif //__SM_MODULE
 
 
