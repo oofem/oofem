@@ -34,9 +34,11 @@
 
 #include "simplecrosssection.h"
 #include "emptycs.h"
-#include "../sm/layeredcrosssection.h"
-#include "../sm/fiberedcs.h"
 
+#ifdef __SM_MODULE
+ #include "layeredcrosssection.h"
+ #include "fiberedcs.h"
+#endif
 
 
 REGISTER_CLASS(SimpleCrossSection, "simplecs", SimpleCrossSectionClass)
