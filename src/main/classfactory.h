@@ -351,7 +351,7 @@ public:
      * @param emodel Engineering model that object belongs to.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    ExportModule *createUsrDefExportModule(const char *name, int num, EngngModel *emodel);
+    ExportModule *createExportModule(const char *name, int num, EngngModel *emodel);
     /**
      * Creates new instance of nonlinear solver corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -360,7 +360,7 @@ public:
      * @param eid Equation ID of sys of equations.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    SparseNonLinearSystemNM* createUsrDefNonLinearSolver(const char *name, Domain *d, EngngModel *emodel, EquationID eid);
+    SparseNonLinearSystemNM* createNonLinearSolver(const char *name, Domain *d, EngngModel *emodel, EquationID eid);
     /**
      * Creates new instance of init module corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -368,14 +368,14 @@ public:
      * @param emodel Engineering model that object belongs to.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    InitModule* createUsrDefInitModule(const char *name, int number, EngngModel *emodel);
+    InitModule* createInitModule(const char *name, int number, EngngModel *emodel);
     /**
      * Creates new instance of topology description corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param d    Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    TopologyDescription* createUsrDefTopology(const char *name, Domain *d);
+    TopologyDescription* createTopology(const char *name, Domain *d);
 
     /**
      * Creates new instance of sparse matrix corresponding to given keyword.
@@ -426,29 +426,29 @@ public:
      * @param e Element assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    Patch *createUsrDefPatch(Patch :: PatchType type, Element *e);
+    Patch *createPatch(Patch :: PatchType type, Element *e);
     /**
      * Creates new instance of nodal recovery model corresponding to given type.
      * @param type ID determining the type of new instance.
      * @param d Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    NodalRecoveryModel *createUsrDefNodalRecoveryModel(NodalRecoveryModel :: NodalRecoveryModelType type, Domain *d);
+    NodalRecoveryModel *createNodalRecoveryModel(NodalRecoveryModel :: NodalRecoveryModelType type, Domain *d);
 
     // XFEM:
-    EnrichmentItem *createUsrDefEnrichmentItem(const char *name, int num, XfemManager *xm, Domain *domain);
-    EnrichmentFunction *createUsrDefEnrichmentFunction(const char *name, int num, Domain *domain);
-    EnrichmentDomain *createUsrDefEnrichmentDomain(const char *name);
-    BasicGeometry *createUsrDefGeometry(const char *name);
+    EnrichmentItem *createEnrichmentItem(const char *name, int num, XfemManager *xm, Domain *domain);
+    EnrichmentFunction *createEnrichmentFunction(const char *name, int num, Domain *domain);
+    EnrichmentDomain *createEnrichmentDomain(const char *name);
+    BasicGeometry *createGeometry(const char *name);
 
-    SparseGeneralEigenValueSystemNM *createUsrDefGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *d, EngngModel *m);
-    IntegrationRule *createUsrDefIRule(classType type, int number, Element *e);
-    MaterialMappingAlgorithm *createUsrDefMaterialMappingAlgorithm(MaterialMappingAlgorithmType type);
-    MesherInterface *createUsrDefMesherInterface(MeshPackageType type, Domain *d);
+    SparseGeneralEigenValueSystemNM *createGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *d, EngngModel *m);
+    IntegrationRule *createIRule(classType type, int number, Element *e);
+    MaterialMappingAlgorithm *createMaterialMappingAlgorithm(MaterialMappingAlgorithmType type);
+    MesherInterface *createMesherInterface(MeshPackageType type, Domain *d);
 
 #ifdef __PARALLEL_MODE
-    LoadBalancerMonitor* createUsrDefLoadBalancerMonitor(classType type, EngngModel *e);
-    LoadBalancer* createUsrDefLoadBalancer(classType type, Domain *d);
+    LoadBalancerMonitor* createLoadBalancerMonitor(classType type, EngngModel *e);
+    LoadBalancer* createLoadBalancer(classType type, Domain *d);
 #endif
 };
 

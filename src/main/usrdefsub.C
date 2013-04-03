@@ -194,83 +194,83 @@ RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(classType type, int numbe
 
 SparseNonLinearSystemNM *CreateUsrDefNonLinearSolver(const char *aClass, Domain *d, EngngModel *emodel, EquationID eid)
 {
-    return classFactory.createUsrDefNonLinearSolver(aClass,d,emodel,eid);
+    return classFactory.createNonLinearSolver(aClass,d,emodel,eid);
 }
 
 InitModule *CreateUsrDefInitModuleOfType(const char *aClass, int number, EngngModel *emodel)
 {
-    return classFactory.createUsrDefInitModule(aClass, number, emodel);
+    return classFactory.createInitModule(aClass, number, emodel);
 }
 
 ExportModule *CreateUsrDefExportModuleOfType(const char *aClass, int number, EngngModel *emodel)
 {
-    return classFactory.createUsrDefExportModule(aClass,number,emodel);
+    return classFactory.createExportModule(aClass,number,emodel);
 }
 
 TopologyDescription *CreateUsrDefTopologyOfType(const char *aClass, Domain *domain)
 {
-    return classFactory.createUsrDefTopology(aClass, domain);
+    return classFactory.createTopology(aClass, domain);
 }
 
 Patch *CreateUsrDefPatch(Patch :: PatchType ptype, Element *e)
 {
-    return classFactory.createUsrDefPatch(ptype, e);
+    return classFactory.createPatch(ptype, e);
 }
 
 NodalRecoveryModel *CreateUsrDefNodalRecoveryModel(NodalRecoveryModel :: NodalRecoveryModelType type, Domain *d)
 {
-    return classFactory.createUsrDefNodalRecoveryModel(type, d);
+    return classFactory.createNodalRecoveryModel(type, d);
 }
 
 EnrichmentItem *CreateUsrDefEnrichmentItem(const char *aClass, int number, XfemManager *xm, Domain *domain)
 {
-    return classFactory.createUsrDefEnrichmentItem(aClass, number, xm, domain);
+    return classFactory.createEnrichmentItem(aClass, number, xm, domain);
 }
 
 EnrichmentFunction *CreateUsrDefEnrichmentFunction(const char *aClass, int number, Domain *domain)
 {
-    return classFactory.createUsrDefEnrichmentFunction(aClass, number, domain);
+    return classFactory.createEnrichmentFunction(aClass, number, domain);
 }
 
 EnrichmentDomain *CreateUsrDefEnrichmentDomain(const char *aClass)
 {
-    return classFactory.createUsrDefEnrichmentDomain(aClass);
+    return classFactory.createEnrichmentDomain(aClass);
 }
 
 BasicGeometry *CreateUsrDefGeometry(const char *aClass)
 {
-    return classFactory.createUsrDefGeometry(aClass);
+    return classFactory.createGeometry(aClass);
 }
 
 SparseGeneralEigenValueSystemNM *CreateUsrDefGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *d, EngngModel *m)
 {
-    return classFactory.createUsrDefGeneralizedEigenValueSolver(st, d, m);
+    return classFactory.createGeneralizedEigenValueSolver(st, d, m);
 }
 
 IntegrationRule *CreateUsrDefIRuleOfType(classType type, int number, Element *e)
 {
-    return classFactory.createUsrDefIRule(type, number, e);
+    return classFactory.createIRule(type, number, e);
 }
 
 MaterialMappingAlgorithm *CreateUsrDefMaterialMappingAlgorithm(MaterialMappingAlgorithmType type)
 {
-    return classFactory.createUsrDefMaterialMappingAlgorithm(type);
+    return classFactory.createMaterialMappingAlgorithm(type);
 }
 
 MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain *d)
 {
-    return classFactory.createUsrDefMesherInterface(type, d);
+    return classFactory.createMesherInterface(type, d);
 }
 
 #ifdef __PARALLEL_MODE
 LoadBalancerMonitor *CreateUsrDefLoadBalancerMonitorOfType(classType type, EngngModel *e)
 {
-    return classFactory.createUsrDefLoadBalancerMonitor(type, e);
+    return classFactory.createLoadBalancerMonitor(type, e);
 }
 
 LoadBalancer *CreateUsrDefLoadBalancerOfType(classType type, Domain *d)
 {
-    return classFactory.createUsrDefLoadBalancer(type, d);
+    return classFactory.createLoadBalancer(type, d);
 }
 #endif
 } // end namespace oofem

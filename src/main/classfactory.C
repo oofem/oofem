@@ -303,7 +303,7 @@ InitialCondition * ClassFactory::createInitialCondition(classType type, int num,
     return NULL;
 }
 
-Patch * ClassFactory::createUsrDefPatch(Patch :: PatchType type, Element *e)
+Patch * ClassFactory::createPatch(Patch :: PatchType type, Element *e)
 {
     if ( type == Patch :: PT_TrianglePatch ) {
         return new TrianglePatch(e);
@@ -311,7 +311,7 @@ Patch * ClassFactory::createUsrDefPatch(Patch :: PatchType type, Element *e)
     return NULL;
 }
 
-NodalRecoveryModel * ClassFactory::createUsrDefNodalRecoveryModel(NodalRecoveryModel :: NodalRecoveryModelType type, Domain *d)
+NodalRecoveryModel * ClassFactory::createNodalRecoveryModel(NodalRecoveryModel :: NodalRecoveryModelType type, Domain *d)
 {
     if ( type == NodalRecoveryModel :: NRM_NodalAveraging ) {
         return new NodalAveragingRecoveryModel(d);
@@ -414,50 +414,50 @@ RandomFieldGenerator* ClassFactory::createRandomFieldGenerator ( classType type,
     return ( rfgIdList.count ( type ) == 1 ) ? rfgIdList [ type ] ( number, domain ) : NULL;
 }
 
-ExportModule* ClassFactory::createUsrDefExportModule(const char *name, int number, EngngModel *emodel)
+ExportModule* ClassFactory::createExportModule(const char *name, int number, EngngModel *emodel)
 {
     return ( exportList.count(name) == 1 ) ? exportList [ name ](number, emodel) : NULL;
 }
 
-SparseNonLinearSystemNM* ClassFactory::createUsrDefNonLinearSolver(const char *name, Domain *d, EngngModel *emodel, EquationID eid)
+SparseNonLinearSystemNM* ClassFactory::createNonLinearSolver(const char *name, Domain *d, EngngModel *emodel, EquationID eid)
 {
     return ( nonlinList.count(name) == 1 ) ? nonlinList [ name ](d, emodel, eid) : NULL;
 }
 
-InitModule* ClassFactory::createUsrDefInitModule(const char *name, int number, EngngModel *emodel)
+InitModule* ClassFactory::createInitModule(const char *name, int number, EngngModel *emodel)
 {
     return ( initList.count(name) == 1 ) ? initList [ name ](number, emodel) : NULL;
 }
 
-TopologyDescription* ClassFactory::createUsrDefTopology(const char *name, Domain *domain)
+TopologyDescription* ClassFactory::createTopology(const char *name, Domain *domain)
 {
     return ( topologyList.count(name) == 1 ) ? topologyList [ name ](domain) : NULL;
 }
 
 
 // XFEM:
-EnrichmentItem* ClassFactory::createUsrDefEnrichmentItem(const char *name, int number, XfemManager *xm, Domain *domain)
+EnrichmentItem* ClassFactory::createEnrichmentItem(const char *name, int number, XfemManager *xm, Domain *domain)
 {
     return ( enrichItemList.count(name) == 1 ) ? enrichItemList [ name ](number, xm, domain) : NULL;
 }
 
-EnrichmentFunction* ClassFactory::createUsrDefEnrichmentFunction(const char *name, int number, Domain *domain)
+EnrichmentFunction* ClassFactory::createEnrichmentFunction(const char *name, int number, Domain *domain)
 {
     return ( enrichFuncList.count(name) == 1 ) ? enrichFuncList [ name ](number, domain) : NULL;
 }
 
-EnrichmentDomain* ClassFactory::createUsrDefEnrichmentDomain(const char *name)
+EnrichmentDomain* ClassFactory::createEnrichmentDomain(const char *name)
 {
     return ( enrichmentDomainList.count(name) == 1 ) ? enrichmentDomainList [ name ]() : NULL;
 }
 
-BasicGeometry* ClassFactory::createUsrDefGeometry(const char *name)
+BasicGeometry* ClassFactory::createGeometry(const char *name)
 {
     return ( geometryList.count(name) == 1 ) ? geometryList [ name ]() : NULL;
 }
 
 
-SparseGeneralEigenValueSystemNM* ClassFactory::createUsrDefGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *d, EngngModel *m)
+SparseGeneralEigenValueSystemNM* ClassFactory::createGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *d, EngngModel *m)
 {
     if ( st == GES_SubspaceIt ) {
         return new SubspaceIteration(d, m);
@@ -469,7 +469,7 @@ SparseGeneralEigenValueSystemNM* ClassFactory::createUsrDefGeneralizedEigenValue
     return NULL;
 }
 
-IntegrationRule* ClassFactory::createUsrDefIRule(classType type, int number, Element *e)
+IntegrationRule* ClassFactory::createIRule(classType type, int number, Element *e)
 {
     if ( type == GaussIntegrationRuleClass ) {
         return new GaussIntegrationRule(number, e);
@@ -477,7 +477,7 @@ IntegrationRule* ClassFactory::createUsrDefIRule(classType type, int number, Ele
     return NULL;
 }
 
-MaterialMappingAlgorithm* ClassFactory::createUsrDefMaterialMappingAlgorithm(MaterialMappingAlgorithmType type)
+MaterialMappingAlgorithm* ClassFactory::createMaterialMappingAlgorithm(MaterialMappingAlgorithmType type)
 {
 #ifdef __SM_MODULE
     if ( type == MMA_ClosestPoint ) {
@@ -491,7 +491,7 @@ MaterialMappingAlgorithm* ClassFactory::createUsrDefMaterialMappingAlgorithm(Mat
     return NULL;
 }
 
-MesherInterface* ClassFactory::createUsrDefMesherInterface(MeshPackageType type, Domain *d)
+MesherInterface* ClassFactory::createMesherInterface(MeshPackageType type, Domain *d)
 {
 #ifdef __SM_MODULE
     if ( type == MPT_T3D ) {
@@ -509,7 +509,7 @@ MesherInterface* ClassFactory::createUsrDefMesherInterface(MeshPackageType type,
 
 
 #ifdef __PARALLEL_MODE
-LoadBalancerMonitor* ClassFactory::createUsrDefLoadBalancerMonitor(classType type, EngngModel *e)
+LoadBalancerMonitor* ClassFactory::createLoadBalancerMonitor(classType type, EngngModel *e)
 {
     if ( type == WallClockLoadBalancerMonitorClass ) {
         return new WallClockLoadBalancerMonitor(e);
@@ -517,7 +517,7 @@ LoadBalancerMonitor* ClassFactory::createUsrDefLoadBalancerMonitor(classType typ
     return NULL;
 }
 
-LoadBalancer* ClassFactory::createUsrDefLoadBalancer(classType type, Domain *d)
+LoadBalancer* ClassFactory::createLoadBalancer(classType type, Domain *d)
 {
     if ( type == ParmetisLoadBalancerClass ) {
         return new ParmetisLoadBalancer(d);
