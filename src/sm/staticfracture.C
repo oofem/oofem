@@ -89,12 +89,14 @@ StaticFracture :: updateYourself(TimeStep *stepN)
     NonLinearStatic :: updateYourself(stepN);
 
     // new - not working
+    /*
     this->fMan->evaluateFailureCriterias(stepN);
     if ( this->fMan->needsUpdate ) {
         this->setCrackGrowthFlag( this->fMan->needsUpdate );
         // update geometries
         this->fMan->update(stepN);
     }
+    */
 
     // old - working
     this->evaluatePropagationLaw(stepN); 
@@ -355,8 +357,8 @@ StaticFracture :: evaluatePropagationLawForDelamination(Element *el, EnrichmentD
 
     if ( propagateFlag ) {
         crackGrowthFlag = true;
-        printf( "\n -------------------------------\n");
-        printf( "Crack growth in element %d \n", el->giveNumber() );
+        //printf( "\n -------------------------------\n");
+        //printf( "Crack growth in element %d \n", el->giveNumber() );
         
 
         
@@ -455,7 +457,8 @@ StaticFracture :: evaluateFractureCriterion(std::vector < FloatArray > &interLam
     propagateFlag = false;
     for (int  i = 1; i <= interLamStresses.size(); i++ ) {
 
-        if ( interLamStresses[i-1].at(3) > 0.0009 ) {
+        //if ( interLamStresses[i-1].at(3) > 0.000 ) {
+        if ( 1 ) {
             propagateFlag = true;
             
             return;

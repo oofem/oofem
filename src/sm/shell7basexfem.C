@@ -355,11 +355,13 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
                 answer.assemble(tempRed, ordering);
 
                 // Cohesive zone model
+              if ( this->giveNumber() != 24 && this->giveNumber() != 31 && this->giveNumber() != 36 &&
+                     this->giveNumber() != 37 && this->giveNumber() != 35 && this->giveNumber() != 34 ) {
                 FloatArray fCZ;
                 this->computeCohesiveForces( fCZ, tStep, solVec, solVecD, useUpdatedGpRecord, dei, j);
                 tempRed.beSubArrayOf(fCZ, activeDofs);
                 answer.assemble(tempRed, ordering);
- 
+                }
             }
         }
     }
@@ -531,6 +533,8 @@ Shell7BaseXFEM :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
                 dei->giveEIDofIdArray(eiDofIdArray, j);
                 this->giveSolutionVector(solVecD, eiDofIdArray, tStep);  
 
+              if ( this->giveNumber() != 24 && this->giveNumber() != 31 && this->giveNumber() != 36 &&
+                     this->giveNumber() != 37 && this->giveNumber() != 35 && this->giveNumber() != 34 ) {
                 this->computeCohesiveTangentAt(temp, tStep, solVec, solVecD, dei);
                 // Assemble part correpsonding to active dofs
                 IntArray orderingJ, activeDofsJ;
@@ -538,7 +542,7 @@ Shell7BaseXFEM :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
                 FloatMatrix tempRed;
                 tempRed.beSubMatrixOf(temp, activeDofsJ, activeDofsJ);
                 answer.assemble(tempRed, orderingJ, orderingJ);
-                    
+                }    
             }
         }
     }

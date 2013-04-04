@@ -160,17 +160,17 @@ BilinearCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer
             answer.at(1,1) = this->ks0;
             answer.at(2,2) = this->ks0;
             answer.at(3,3) = this->kn0;
-            printf("Linear branch...\n");
+            //printf("Linear branch...\n");
         } else if ( gn <= this->gnmax  ) { // softening branch
             answer.at(1,1) = this->ks0; // no degradation in shear
             answer.at(2,2) = this->ks0;
             answer.at(3,3) = this->kn1;
-            printf("Softening branch...\n");
+            //printf("Softening branch...\n");
         } else {
             answer.at(1,1) = this->ks0; 
             answer.at(2,2) = this->ks0;
             answer.at(3,3) = 0.0; // failed
-            printf("Failed...\n");
+            //printf("Failed...\n");
         }
     
     }  else {

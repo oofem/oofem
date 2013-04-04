@@ -68,18 +68,6 @@ protected:
      * @param id Domain number.
      */
     void printReactionForces(TimeStep *tStep, int id);
-    /**
-     * Builds the reaction force table. For each prescribed equation number it will find
-     * corresponding node and dof number. The entries in the restrDofMans, restrDofs, and eqn
-     * arrays are sorted with increasing dofman number and with increasing dof number as
-     * a second minor criterion.
-     * @param restrDofMans Contains numbers of restrained Dofmanagers, with size equal to total number of prescribed equations.
-     * @param restrDofs Contains numbers of restrained Dofs, with size equal to total number of prescribed equations.
-     * @param eqn Contains the corresponding restrained equation numbers.
-     * @param tStep Time step.
-     * @param di Domain number.
-     */
-    void buildReactionTable(IntArray &restrDofMans, IntArray &restrDofs, IntArray &eqn, TimeStep *tStep, int di);
 
     /**
      * Computes the contribution external loading to reaction forces in given domain. Default implementations adds the
@@ -132,6 +120,20 @@ public:
      * @param di Domain number.
      */
     void computeReaction(FloatArray &answer, TimeStep *tStep, int di);
+
+    /**
+     * Builds the reaction force table. For each prescribed equation number it will find
+     * corresponding node and dof number. The entries in the restrDofMans, restrDofs, and eqn
+     * arrays are sorted with increasing dofman number and with increasing dof number as
+     * a second minor criterion.
+     * @param restrDofMans Contains numbers of restrained Dofmanagers, with size equal to total number of prescribed equations.
+     * @param restrDofs Contains numbers of restrained Dofs, with size equal to total number of prescribed equations.
+     * @param eqn Contains the corresponding restrained equation numbers.
+     * @param tStep Time step.
+     * @param di Domain number.
+     */
+    void buildReactionTable(IntArray &restrDofMans, IntArray &restrDofs, IntArray &eqn, TimeStep *tStep, int di);
+
 
 #ifdef __PETSC_MODULE
     /**

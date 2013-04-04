@@ -39,6 +39,11 @@
 #include "domain.h"
 #include "engngm.h"
 
+///@name Input fields for BilinearCZMaterial
+//@{
+#define _IFT_DofManExportModule_dmlist "dmlist"
+//@}
+
 namespace oofem {
 /**
  * Represents DofManager export module.
@@ -50,6 +55,7 @@ namespace oofem {
 class DofManExportModule : public ExportModule
 {
 protected:
+    IntArray dofManList;
 
 public:
     /// Constructor
