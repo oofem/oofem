@@ -257,7 +257,6 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
             }
         }
     
-
         for (int j = 1; j <= dofManDofIdMask.giveSize(); j++ ) {
             int pos = dMan->findDofWithDofId( (DofIDItem) dofManDofIdMask.at(j) );
             activeDofPos++;
@@ -481,7 +480,8 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
 
     IntegrationRule *iRuleL = czIntegrationRulesArray [ dei->giveNumber() - 1 ];
     StructuralMaterial *mat = static_cast < StructuralMaterial * > (this->czMat);
-   
+    FloatMatrix lambdaN;
+    FloatArray Fp;
     for ( int i = 1; i <= iRuleL->getNumberOfIntegrationPoints(); i++ ) {
         IntegrationPoint *ip = iRuleL->getIntegrationPoint(i - 1);
 
@@ -500,24 +500,15 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         FloatArray xd, unknowns;
         unknowns.beProductOf(N, solVecD);
         xd.beProductOf(lambda,unknowns); // spatial jump
-        //xd.printYourself();
-        //FloatMatrix F, Finv;
-        //FloatArray genEps;
-        //this->computeFAt(ip, F, genEps); // (xi=0) ip must have a valid x-coord
-        //Finv.beInverseOf(F); 
-        //J.beProductOf(Finv,xd); // material (reference system)
-       
+
         // compute cohesive traction based on J
         FloatArray cTraction;  
         mat->giveRealStressVector(cTraction, FullForm, ip, xd, tStep);
-
-        FloatMatrix lambdaN;
+        
         lambdaN.beProductOf(lambda,N);
-        FloatArray Fp;
         Fp.beTProductOf(lambdaN, cTraction);
-
         double dA = this->computeAreaAround(ip);
-        answerTemp.add(dA,Fp);         
+        answerTemp.add(dA,Fp);
     }
 
     answer.resize(42, 42);

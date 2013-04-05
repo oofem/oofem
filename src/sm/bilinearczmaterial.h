@@ -42,6 +42,7 @@
 //@{
 #define _IFT_BilinearCZMaterial_kn "kn"
 #define _IFT_BilinearCZMaterial_ks "ks"
+#define _IFT_BilinearCZMaterial_knc "knc"
 #define _IFT_BilinearCZMaterial_g1c "g1c"
 #define _IFT_BilinearCZMaterial_sigfn "sigfn"
 #define _IFT_BilinearCZMaterial_sigfs "sigfs"
@@ -105,6 +106,7 @@ protected:
     /// Material parameters
     double kn0;
     double ks0;
+    double knc;   // stiffness in compression  
     double GIc;
     double sigfn;
     double sigfs;

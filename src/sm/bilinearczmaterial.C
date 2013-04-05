@@ -88,6 +88,7 @@ BilinearCZMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm f
     answer.resize( jumpVector.giveSize() );
     answer.zero();
     //@todo for now only study normal stress
+    // no degradation in shear
     // jumpVector = [shear 1 shear 2 normal]
     double gn  = jumpVector.at(3);
     double gs1 = jumpVector.at(1);
@@ -96,13 +97,13 @@ BilinearCZMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm f
     if ( gn <= 0.0 ) { // compresssion
         answer.at(1) = this->ks0 * gs1;
         answer.at(2) = this->ks0 * gs2;
-        answer.at(3) = this->kn0 * gn;
+        answer.at(3) = this->knc * gn;
     } else if ( gn <= this->gn0 ) { // first linear part
         answer.at(1) = this->ks0 * gs1;
         answer.at(2) = this->ks0 * gs2;
         answer.at(3) = this->kn0 * gn;
     } else if ( gn <= this->gnmax  ) {  // softening branch
-        answer.at(1) = this->ks0 * gs1; // no degradation in shear
+        answer.at(1) = this->ks0 * gs1; 
         answer.at(2) = this->ks0 * gs2;
         answer.at(3) = this->sigfn + this->kn1 * (gn - this->gn0 );
     } else {
@@ -111,7 +112,7 @@ BilinearCZMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm f
         answer.at(3) = 0.0; // failed
     }
 
-
+    //answer.printYourself();
     // update gp
     status->letTempStrainVectorBe(jumpVector);
     status->letTempStressVectorBe(answer);
@@ -163,7 +164,7 @@ BilinearCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer
         if ( gn <= 0.0 ) { // compresssion
             answer.at(1,1) = this->ks0;
             answer.at(2,2) = this->ks0;
-            answer.at(3,3) = this->kn0;
+            answer.at(3,3) = this->knc;
         } else if ( gn <= this->gn0 ) { // first linear part
             answer.at(1,1) = this->ks0;
             answer.at(2,2) = this->ks0;
@@ -465,12 +466,14 @@ const double tolerance = 1.0e-12; // small number
 IRResultType
 BilinearCZMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
+    IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, kn0, _IFT_BilinearCZMaterial_kn);
+    this->knc = kn0;                        // Defaults to the same stiffness in compression and tension
+    IR_GIVE_OPTIONAL_FIELD(ir, this->knc, _IFT_BilinearCZMaterial_knc);
     
-    ks0 = 0.0; // Defaults to no shear stiffness
+    this->ks0 = 0.0;                        // Defaults to no shear stiffness
     IR_GIVE_OPTIONAL_FIELD(ir, ks0, _IFT_BilinearCZMaterial_ks);
 
     IR_GIVE_FIELD(ir, GIc, _IFT_BilinearCZMaterial_g1c);
@@ -478,26 +481,29 @@ BilinearCZMaterial :: initializeFrom(InputRecord *ir)
     this->sigfn = 1.0e50; // defaults to infinite strength @todo but then it will not be bilinear only linear
     this->sigfs = 1.0e50;
     IR_GIVE_OPTIONAL_FIELD(ir, sigfn, _IFT_BilinearCZMaterial_sigfn);
-    //IR_GIVE_OPTIONAL_FIELD(ir, sigfs, _IFT_BilinearCZMaterial_sigfs);
 
-    this->gn0 = sigfn / (kn0 + tolerance);         // normal jump at damage initiation 
-    this->gs0 = sigfs / (ks0 + tolerance);         // shear jump at damage initiation
-    this->gnmax = 2.0 * GIc / sigfn; // @todo defaults to zero - will this cause problems?
-    this->kn1 = - this->sigfn / ( this->gnmax - this->gn0 );   // slope during softening part in normal dir
+    this->gn0 = sigfn / (kn0 + tolerance);                   // normal jump at damage initiation 
+    this->gs0 = sigfs / (ks0 + tolerance);                   // shear jump at damage initiation
+    this->gnmax = 2.0 * GIc / sigfn;                         // @todo defaults to zero - will this cause problems?
+    this->kn1 = - this->sigfn / ( this->gnmax - this->gn0 ); // slope during softening part in normal dir
     double kn0min = 0.5*sigfn*sigfn/GIc;
-    this->checkConsistency(); // check consistency of the material paramters
+    this->checkConsistency();                                // check validity of the material paramters
     return IRRT_OK;
 }
 
 int
 BilinearCZMaterial :: checkConsistency()
 {
-    if ( this->kn0 < tolerance ) {
-        OOFEM_ERROR3("BilinearCZMaterial :: initializeFrom - stiffness kn0 is below tolerance (%e) < (%e)", this->kn0, tolerance );
+    double kn0min = 0.5*this->sigfn*this->sigfn/this->GIc;
+    if ( this->kn0 < 0.0 ) {
+        OOFEM_ERROR2("BilinearCZMaterial :: initializeFrom - stiffness kn0 is negative (%.2e)", this->kn0);
     } else if ( this->ks0 < 0.0 ) {
-        OOFEM_ERROR2("BilinearCZMaterial :: initializeFrom - stiffness ks0 is negative (%e)", this->ks0);
+        OOFEM_ERROR2("BilinearCZMaterial :: initializeFrom - stiffness ks0 is negative (%.2e)", this->ks0);
     } else if ( this->GIc < 0.0 ) {
-        OOFEM_ERROR2("BilinearCZMaterial :: initializeFrom - GIc is negative (%e)", this->GIc);
+        OOFEM_ERROR2("BilinearCZMaterial :: initializeFrom - GIc is negative (%.2e)", this->GIc);
+    } else if ( this->kn0 < kn0min  ) { // => gn0 > gnmax
+        //OOFEM_ERROR3("BilinearCZMaterial :: initializeFrom - kn0 (%.2e) is below minimum stiffness (%.2e), => gn0 > gnmax, which is unphysical" ,
+        //    this->kn0, kn0min);
     }
     return 1;
 }
