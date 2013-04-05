@@ -44,6 +44,13 @@
 #include "shell7base.h"
 #include "xfemelementinterface.h"
 #include "enrichmentitem.h"
+
+///@name Input fields for el
+//@{
+#define _IFT_Shell7BaseXFEM_CohesiveZoneMaterial "czmaterial"
+//@}
+
+
 namespace oofem {
 
 class FEI3dTrQuad;
@@ -60,7 +67,8 @@ class BoundaryLoad;
 class Shell7BaseXFEM : public Shell7Base, public XfemElementInterface
 {
 protected:
-
+    Material *czMat; // cohesive zone material
+    int czMatNum;
     virtual double giveGlobalZcoord(GaussPoint *gp);
     std::list< std::pair<int, double> > delaminationXiCoordList;
     void setupDelaminationXiCoordList();
@@ -137,6 +145,7 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     void discGiveDofManDofIDMask(int inode,  int enrichmentdomainNumber, IntArray &answer) const;
     virtual int giveNumberOfDofs();
+    bool hasCohesiveZone();
 };
 
 

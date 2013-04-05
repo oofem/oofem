@@ -1235,8 +1235,8 @@ LayeredIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsThicknes
     // uses Gauss integration in the plane and Lobatto in the thickness
     FloatArray coords_xi1, coords_xi2, coords_xi, weights_tri, weights_thickness;
     GaussIntegrationRule   :: giveTriCoordsAndWeights(nPointsTri, coords_xi1, coords_xi2, weights_tri );
-    LobattoIntegrationRule :: giveLineCoordsAndWeights(nPointsThickness, coords_xi, weights_thickness );
-    //GaussIntegrationRule :: giveLineCoordsAndWeights(nPointsThickness, coords_xi, weights_thickness );
+    //LobattoIntegrationRule :: giveLineCoordsAndWeights(nPointsThickness, coords_xi, weights_thickness );
+    GaussIntegrationRule :: giveLineCoordsAndWeights(nPointsThickness, coords_xi, weights_thickness );
 
     // Assumes that the integration rules of the layers are the same such that the ordering of the ip's are also 
     // the same =>  upperInterfacePoints.at(i) of one layer is paired with lowerInterfacePoints.at(i) of the next.

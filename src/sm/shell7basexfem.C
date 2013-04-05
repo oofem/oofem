@@ -46,7 +46,7 @@ bool Shell7BaseXFEM :: __initializedFieldDofId = Shell7BaseXFEM :: initDofId();
 
 Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain), XfemElementInterface(this) 
 {
-
+    czMat = NULL;
 }
 
 int 
@@ -54,16 +54,39 @@ Shell7BaseXFEM :: checkConsistency()
 {
     Shell7Base :: checkConsistency();
     this->xMan =  this->giveDomain()->giveXfemManager(1);
+
+    if ( this->czMatNum > 0 ) {
+        this->czMat = this->giveDomain()->giveMaterial(this->czMatNum);
+    }
+
     return 1;
 }
 
 
 IRResultType Shell7BaseXFEM :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    
+    int material = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, material, _IFT_Shell7BaseXFEM_CohesiveZoneMaterial);
+    if ( material > 0 ) {
+        this->czMatNum = material;
+        //this->czMat = this->giveDomain()->giveMaterial(material);
+    }
     Shell7Base :: initializeFrom(ir);
     return IRRT_OK; 
 }
 
+bool 
+Shell7BaseXFEM :: hasCohesiveZone()
+{
+    if ( this->czMat !=NULL ) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 Interface
 *Shell7BaseXFEM :: giveInterface(InterfaceType it)
@@ -355,12 +378,11 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
                 answer.assemble(tempRed, ordering);
 
                 // Cohesive zone model
-              if ( this->giveNumber() != 24 && this->giveNumber() != 31 && this->giveNumber() != 36 &&
-                     this->giveNumber() != 37 && this->giveNumber() != 35 && this->giveNumber() != 34 ) {
-                FloatArray fCZ;
-                this->computeCohesiveForces( fCZ, tStep, solVec, solVecD, useUpdatedGpRecord, dei, j);
-                tempRed.beSubArrayOf(fCZ, activeDofs);
-                answer.assemble(tempRed, ordering);
+                if ( this->hasCohesiveZone() ) {
+                    FloatArray fCZ;
+                    this->computeCohesiveForces( fCZ, tStep, solVec, solVecD, useUpdatedGpRecord, dei, j);
+                    tempRed.beSubArrayOf(fCZ, activeDofs);
+                    answer.assemble(tempRed, ordering);
                 }
             }
         }
@@ -458,7 +480,7 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
     FloatMatrix N, B;  
 
     IntegrationRule *iRuleL = czIntegrationRulesArray [ dei->giveNumber() - 1 ];
-    StructuralMaterial *mat = static_cast < StructuralMaterial * > (dei->giveMaterial());
+    StructuralMaterial *mat = static_cast < StructuralMaterial * > (this->czMat);
    
     for ( int i = 1; i <= iRuleL->getNumberOfIntegrationPoints(); i++ ) {
         IntegrationPoint *ip = iRuleL->getIntegrationPoint(i - 1);
@@ -482,16 +504,12 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         //FloatMatrix F, Finv;
         //FloatArray genEps;
         //this->computeFAt(ip, F, genEps); // (xi=0) ip must have a valid x-coord
-        //Finv.beInverseOf(F);
-        
+        //Finv.beInverseOf(F); 
         //J.beProductOf(Finv,xd); // material (reference system)
-        
-        
+       
         // compute cohesive traction based on J
         FloatArray cTraction;  
         mat->giveRealStressVector(cTraction, FullForm, ip, xd, tStep);
-        // interfacematerial assumes J(1) = normal dir and J(2), J(3) are shear
-        
 
         FloatMatrix lambdaN;
         lambdaN.beProductOf(lambda,N);
@@ -533,16 +551,17 @@ Shell7BaseXFEM :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
                 dei->giveEIDofIdArray(eiDofIdArray, j);
                 this->giveSolutionVector(solVecD, eiDofIdArray, tStep);  
 
-              if ( this->giveNumber() != 24 && this->giveNumber() != 31 && this->giveNumber() != 36 &&
-                     this->giveNumber() != 37 && this->giveNumber() != 35 && this->giveNumber() != 34 ) {
-                this->computeCohesiveTangentAt(temp, tStep, solVec, solVecD, dei);
-                // Assemble part correpsonding to active dofs
-                IntArray orderingJ, activeDofsJ;
-                computeOrderingArray(orderingJ, activeDofsJ, j, All);
-                FloatMatrix tempRed;
-                tempRed.beSubMatrixOf(temp, activeDofsJ, activeDofsJ);
-                answer.assemble(tempRed, orderingJ, orderingJ);
-                }    
+                if ( this->hasCohesiveZone() ) {
+                    this->computeCohesiveTangentAt(temp, tStep, solVec, solVecD, dei);
+                    // Assemble part correpsonding to active dofs
+                    IntArray orderingJ, activeDofsJ;
+                    computeOrderingArray(orderingJ, activeDofsJ, j, All);
+                    FloatMatrix tempRed;
+                    tempRed.beSubMatrixOf(temp, activeDofsJ, activeDofsJ);
+                    answer.assemble(tempRed, orderingJ, orderingJ);
+                } else {
+                    int elnum =this->giveNumber();
+                }
             }
         }
     }
@@ -561,7 +580,7 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
     FloatMatrix N, B;  
 
     IntegrationRule *iRuleL = czIntegrationRulesArray [ dei->giveNumber() - 1 ];
-     StructuralMaterial *mat = static_cast < StructuralMaterial * > (dei->giveMaterial()); // CZ-material
+    StructuralMaterial *mat = static_cast < StructuralMaterial * > (this->czMat); // CZ-material
 
     for ( int i = 1; i <= iRuleL->getNumberOfIntegrationPoints(); i++ ) {
         IntegrationPoint *ip = iRuleL->getIntegrationPoint(i - 1);

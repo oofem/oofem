@@ -93,14 +93,18 @@ BilinearCZMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm f
     double gs1 = jumpVector.at(1);
     double gs2 = jumpVector.at(2);
 
-    if ( gn <= this->gn0 ) { // first linear part
+    if ( gn <= 0.0 ) { // compresssion
+        answer.at(1) = this->ks0 * gs1;
+        answer.at(2) = this->ks0 * gs2;
+        answer.at(3) = this->kn0 * gn;
+    } else if ( gn <= this->gn0 ) { // first linear part
         answer.at(1) = this->ks0 * gs1;
         answer.at(2) = this->ks0 * gs2;
         answer.at(3) = this->kn0 * gn;
     } else if ( gn <= this->gnmax  ) {  // softening branch
         answer.at(1) = this->ks0 * gs1; // no degradation in shear
         answer.at(2) = this->ks0 * gs2;
-        answer.at(3) = this->sigfn - this->kn1 * (gn - this->gn0 );
+        answer.at(3) = this->sigfn + this->kn1 * (gn - this->gn0 );
     } else {
         answer.at(1) = this->ks0 * gs1; 
         answer.at(2) = this->ks0 * gs2;
@@ -156,7 +160,11 @@ BilinearCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer
         
         answer.resize(3, 3);
         answer.zero();
-        if ( gn <= this->gn0 ) { // first linear part
+        if ( gn <= 0.0 ) { // compresssion
+            answer.at(1,1) = this->ks0;
+            answer.at(2,2) = this->ks0;
+            answer.at(3,3) = this->kn0;
+        } else if ( gn <= this->gn0 ) { // first linear part
             answer.at(1,1) = this->ks0;
             answer.at(2,2) = this->ks0;
             answer.at(3,3) = this->kn0;
@@ -462,7 +470,7 @@ BilinearCZMaterial :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, kn0, _IFT_BilinearCZMaterial_kn);
     
-    ks0 = 0.0; // Default to no shear stiffness
+    ks0 = 0.0; // Defaults to no shear stiffness
     IR_GIVE_OPTIONAL_FIELD(ir, ks0, _IFT_BilinearCZMaterial_ks);
 
     IR_GIVE_FIELD(ir, GIc, _IFT_BilinearCZMaterial_g1c);
@@ -473,10 +481,10 @@ BilinearCZMaterial :: initializeFrom(InputRecord *ir)
     //IR_GIVE_OPTIONAL_FIELD(ir, sigfs, _IFT_BilinearCZMaterial_sigfs);
 
     this->gn0 = sigfn / (kn0 + tolerance);         // normal jump at damage initiation 
-    this->gs0 = sigfn / (ks0 + tolerance);         // shear jump at damage initiation
+    this->gs0 = sigfs / (ks0 + tolerance);         // shear jump at damage initiation
     this->gnmax = 2.0 * GIc / sigfn; // @todo defaults to zero - will this cause problems?
-    this->kn1 = this->sigfn / ( this->gnmax - this->gn0 );   // slope during softening part in normal dir
-
+    this->kn1 = - this->sigfn / ( this->gnmax - this->gn0 );   // slope during softening part in normal dir
+    double kn0min = 0.5*sigfn*sigfn/GIc;
     this->checkConsistency(); // check consistency of the material paramters
     return IRRT_OK;
 }
