@@ -33,6 +33,7 @@
  */
 
 #include "tr1_2d_supg_axi.h"
+#include "fluidmodel.h"
 #include "node.h"
 #include "material.h"
 #include "gausspnt.h"
@@ -221,7 +222,7 @@ TR1_2D_SUPG_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
     answer.resize(6);
     answer.zero();
     FloatArray u, eps, stress;
-    double Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, atTime, domain, NULL);
+    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     FloatMatrix _b(4, 6);
@@ -269,7 +270,7 @@ TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRes
     answer.resize(6, 6);
     answer.zero();
     FloatMatrix _db, _d, _b(4, 6);
-    double Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, atTime, domain, NULL);
+    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     double dV;
     GaussPoint *gp;
@@ -488,7 +489,7 @@ void TR1_2D_SUPG_AXI :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *at
     answer.zero();
 
 #if 1
-    double Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, atTime, domain, NULL);
+    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
     double dV, _r, rho;
     GaussPoint *gp;
     FloatArray eps, stress, u(6);
@@ -521,7 +522,7 @@ void TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, T
     answer.zero();
 
 #if 1
-    double Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, atTime, domain, NULL);
+    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     double dV, _r, rho;
     GaussPoint *gp;

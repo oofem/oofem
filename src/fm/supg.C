@@ -171,7 +171,7 @@ SUPG :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof
         } else {
             OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
         }
-        } else {
+    } else {
 
         int eq = dof->__giveEquationNumber();
         if ( eq == 0 ) {
@@ -198,22 +198,13 @@ SUPG :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof
 
 
 double
-SUPG :: giveUnknownComponent(UnknownType chc, ValueModeType mode,
-                             TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displaacement, velocity of equation eq
-// This function translates this request to numerical method language
+SUPG :: giveReynoldsNumber()
 {
-    if ( chc == ReynoldsNumber ) {
-        if ( equationScalingFlag ) {
-            return this->Re;
-        } else {
-            return 1.0;
-        }
+    if ( equationScalingFlag ) {
+        return this->Re;
     } else {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
+        return 1.0;
     }
-
-    return 0;
 }
 
 
@@ -389,9 +380,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     // assemble rhs (residual)
     //
     rhs.zero();
-    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, BCRhsTerm_MB, VM_Total,
-                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, BCRhsTerm_MC, VM_Total,
+    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
     // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
     this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total,
@@ -481,11 +470,11 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             this->updateDofUnknownsDictionary_corrector(tStep);
         } else {
 
-        //update
-        this->updateSolutionVectors(*solutionVector, accelerationVector, incrementalSolutionVector, tStep);
-        avn = accelerationVector.computeSquaredNorm();
-        aivn = incrementalSolutionVector.computeSquaredNorm();
-    }   // end update
+            //update
+            this->updateSolutionVectors(*solutionVector, accelerationVector, incrementalSolutionVector, tStep);
+            avn = accelerationVector.computeSquaredNorm();
+            aivn = incrementalSolutionVector.computeSquaredNorm();
+        }   // end update
 
 #if 0
  #ifdef SUPG_IMPLICIT_INTERFACE
@@ -524,11 +513,9 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         // assemble rhs (residual)
         //
         rhs.zero();
-        this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, BCRhsTerm_MB, VM_Total,
+        this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
                                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, BCRhsTerm_MC, VM_Total,
-                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
+        // algorithmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
         this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total,
                                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
         this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total,
@@ -575,9 +562,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             // assemble rhs (residual)
             //
             rhs.zero();
-            this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, BCRhsTerm_MB, VM_Total,
-                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, BCRhsTerm_MC, VM_Total,
+            this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
                                              EModelDefaultEquationNumbering(), this->giveDomain(1) );
             // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
             this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total,

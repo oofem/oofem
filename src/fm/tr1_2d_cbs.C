@@ -33,6 +33,7 @@
  */
 
 #include "tr1_2d_cbs.h"
+#include "cbs.h"
 #include "node.h"
 #include "material.h"
 #include "gausspnt.h"
@@ -284,7 +285,7 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
     FloatArray stress;
     int nLoads;
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
-    double Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, tStep, domain, NULL);
+    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
     double coeff, rho = mat->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     bcGeomType ltype;
@@ -394,7 +395,7 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
     // computes velocity terms on RHS for density equation
     double velu = 0.0, velv = 0.0; // dudx=0.0, dvdy=0.0;
     //double rho = this->giveMaterial()->give('d');
-    double theta1 = domain->giveEngngModel()->giveUnknownComponent(Theta_1, VM_Unknown, tStep, domain, NULL);
+    double theta1 = static_cast< CBS * >(domain->giveEngngModel())->giveTheta1();
     double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
     FloatArray u(6), ustar(6);
 
@@ -402,9 +403,11 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
     answer.zero();
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    ///@todo Check the following again:
     // Should we really want to add this term?
     // This will produce velocities that differs from their actual Dirichlet b.c.s;
     // The patch05.in test has a Dirichlet V_v = 1.0 on node 2, but this will produce the value V_v 1.5 for that dof.
+    // It also requires knowing theta1, which we could otherwise do without.
     // It is added for now to mirror the old code below.
     this->computeVectorOfPrescribed(EID_MomentumBalance, VM_Incremental, tStep, ustar);
     u.add(theta1, ustar);
@@ -479,7 +482,7 @@ TR1_2D_CBS :: computePrescribedTractionPressure(FloatArray &answer, TimeStep *tS
      * this pressure is enforced as dirichlet bc in density/pressure equation
      */
     FloatArray stress;
-    double Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, tStep, domain, NULL);
+    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     stress = static_cast< FluidDynamicMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveDeviatoricStressVector();
     stress.times(1. / Re);
@@ -577,7 +580,7 @@ TR1_2D_CBS :: computeDensityRhsPressureTerms(FloatArray &answer, TimeStep *tStep
 {
     // computes pressure terms on RHS for density equation
     FloatArray p(3);
-    double theta1 = domain->giveEngngModel()->giveUnknownComponent(Theta_1, VM_Unknown, tStep, domain, NULL);
+    double theta1 = static_cast< CBS * >(domain->giveEngngModel())->giveTheta1();
 
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep->givePreviousStep(), p);
     answer.resize(9);
@@ -769,7 +772,7 @@ TR1_2D_CBS :: computeCriticalTimeStep(TimeStep *tStep)
 {
     FloatArray u;
     double dt1, dt2, dt;
-    double Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, tStep, domain, NULL);
+    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 

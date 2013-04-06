@@ -35,7 +35,7 @@
 #ifndef stokesflow_h
 #define stokesflow_h
 
-#include "engngm.h"
+#include "fluidmodel.h"
 #include "sparsemtrxtype.h"
 #include "topologydescription.h"
 #include "linsystsolvertype.h"
@@ -57,7 +57,7 @@ class MeshQualityErrorEstimator;
  * @author Carl Sandström
  * @author Mikael Öhman
  */
-class StokesFlow : public EngngModel
+class StokesFlow : public FluidModel
 {
 protected:
     /// Time increment read from input record.
@@ -106,7 +106,8 @@ public:
     virtual void updateYourself(TimeStep *tStep);
 
     virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *domain, Dof *dof);
-    virtual double giveUnknownComponent(UnknownType ut, ValueModeType mode, TimeStep *tStep, Domain *domain, Dof *dof);
+
+    virtual double giveReynoldsNumber();
 
     virtual int forceEquationNumbering(int id);
 
@@ -137,5 +138,3 @@ public:
 } // end namespace oofem
 
 #endif // stokesflow_h
-
-

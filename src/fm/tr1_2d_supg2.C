@@ -33,6 +33,7 @@
  */
 
 #include "tr1_2d_supg2.h"
+#include "fluidmodel.h"
 #include "node.h"
 #include "material.h"
 #include "gausspnt.h"
@@ -476,7 +477,7 @@ TR1_2D_SUPG2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
     answer.resize(6);
     answer.zero();
     FloatArray u, un, eps(3), stress;
-    double dV, Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, atTime, domain, NULL);
+    double dV, Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
     //double dudx,dudy,dvdx,dvdy;
     GaussPoint *gp;
 
@@ -547,7 +548,7 @@ TR1_2D_SUPG2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
     FloatMatrix _db, _d, _b(3, 6), _bs(3, 6);
     //FloatArray un;
     GaussPoint *gp;
-    double Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, atTime, domain, NULL);
+    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
 
     _b.at(1, 1) = b [ 0 ];
     _b.at(1, 2) = 0.;
@@ -1307,7 +1308,7 @@ TR1_2D_SUPG2 :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, Time
  * {
  * FloatArray u;
  * double dt1, dt2, dt;
- * double Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, tStep, domain, NULL);
+ * double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
  *
  * this -> computeVectorOf(EID_MomentumBalance,VM_Total,tStep, u) ;
  *

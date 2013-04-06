@@ -270,31 +270,6 @@ double NonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
 }
 
 
-double NonLinearStatic :: giveUnknownComponent(UnknownType chc, ValueModeType mode,
-                                               TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displacement, velocity of equation eq
-// This function translates this request to numerical method language
-{
-    int eq = dof->__giveEquationNumber();
-    if ( eq == 0 ) {
-        _error("giveUnknownComponent: invalid equation number");
-    }
-
-
-    if ( tStep != this->giveCurrentStep() ) {
-        _error("giveUnknownComponent: unknown time step encountered");
-        return 0.;
-    }
-
-    if ( chc == TotalLoadLevel ) {
-        return loadLevel;
-    } else {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-        return 0.;
-    }
-}
-
-
 TimeStep *NonLinearStatic :: giveNextStep()
 {
     int istep = giveNumberOfFirstStep();

@@ -134,7 +134,7 @@ public:
     virtual void updateYourself(TimeStep *tStep);
 
     virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
-    virtual double giveUnknownComponent(UnknownType ut, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual double giveReynoldsNumber();
     virtual void giveElementCharacteristicVector(FloatArray &answer, int num, CharType type, ValueModeType mode, TimeStep *tStep, Domain *domain);
     virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType type, TimeStep *tStep, Domain *domain);
 

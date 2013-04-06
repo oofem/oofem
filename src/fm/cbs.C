@@ -91,9 +91,9 @@ CBS :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, consistentMassFlag, _IFT_CBS_cmflag);
 
-    theta [ 0 ] = theta [ 1 ] = 1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, theta [ 0 ], _IFT_CBS_theta1);
-    IR_GIVE_OPTIONAL_FIELD(ir, theta [ 1 ], _IFT_CBS_theta2);
+    theta1 = theta2 = 1.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, theta1, _IFT_CBS_theta1);
+    IR_GIVE_OPTIONAL_FIELD(ir, theta2, _IFT_CBS_theta2);
 
     val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_CBS_scaleflag);
@@ -147,21 +147,26 @@ CBS :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof 
 
 
 double
+CBS :: giveReynoldsNumber()
+{
+    if ( equationScalingFlag ) {
+        return this->Re;
+    } else {
+        return 1.0;
+    }
+}
+
+
+double CBS :: giveTheta1() { return this->theta1; }
+
+double CBS :: giveTheta2() { return this->theta2; }
+
+double
 CBS :: giveUnknownComponent(UnknownType chc, ValueModeType mode,
                             TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity
 {
-    if ( chc == ReynoldsNumber ) {
-        if ( equationScalingFlag ) {
-            return this->Re;
-        } else {
-            return 1.0;
-        }
-    } else if ( chc == Theta_1 ) {
-        return this->theta [ 0 ];
-    } else if ( chc == Theta_2 ) {
-        return this->theta [ 1 ];
-    } else if ( chc == PrescribedTractionPressure ) {
+    if ( chc == PrescribedTractionPressure ) {
         if ( mode == VM_Total ) {
             int eq = dof->__givePrescribedEquationNumber();
             if ( eq ) {
@@ -266,7 +271,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
 
         this->assemble( lhs, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, PressureLhs,
                         pnum, this->giveDomain(1) );
-        lhs->times(deltaT * theta [ 0 ] * theta [ 1 ]);
+        lhs->times(deltaT * theta1 * theta2);
 
         if ( consistentMassFlag ) {
             mss = CreateUsrDefSparseMtrx(sparseMtrxType);
@@ -298,7 +303,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
         lhs->zero();
         this->assemble( lhs, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, PressureLhs,
                         pnum, this->giveDomain(1) );
-        lhs->times(deltaT * theta [ 0 ] * theta [ 1 ]);
+        lhs->times(deltaT * theta1 * theta2);
 
         if ( consistentMassFlag ) {
             mss->zero();
@@ -361,7 +366,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
 
     // DensityRhsVelocityTerms needs this: Current velocity without correction;
     *velocityVector = *prevVelocityVector;
-    velocityVector->add(this->theta [ 0 ], deltaAuxVelocity);
+    velocityVector->add(this->theta1, deltaAuxVelocity);
 
     // Depends on old V + deltaAuxV * theta1:
     this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, DensityRhsVelocityTerms, VM_Total,
@@ -371,7 +376,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
                                       pnum, this->giveDomain(1) );
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
     nMethod->solve(lhs, & rhs, pressureVector);
-    pressureVector->times(this->theta [ 1 ]);
+    pressureVector->times(this->theta2);
     pressureVector->add(*prevPressureVector);
 
     /* STEP 3 - velocity correction step */

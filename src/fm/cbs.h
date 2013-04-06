@@ -35,7 +35,7 @@
 #ifndef cbs_h
 #define cbs_h
 
-#include "engngm.h"
+#include "fluidmodel.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "primaryfield.h"
@@ -114,7 +114,7 @@ public:
 /**
  * This class represents CBS algorithm for solving incompressible Navier-Stokes equations
  */
-class CBS : public EngngModel
+class CBS : public FluidModel
 {
 protected:
     /// Numerical method used to solve the problem.
@@ -140,7 +140,7 @@ protected:
     /// Time step and its minimal value.
     double deltaT, minDeltaT;
     /// Integration constants.
-    double theta [ 2 ];
+    double theta1, theta2;
 
     int initFlag;
     /// Consistent mass flag.
@@ -166,7 +166,7 @@ protected:
     MaterialInterface *materialInterface;
     //</RESTRICTED_SECTION>
 public:
-    CBS(int i, EngngModel *_master = NULL) : EngngModel(i, _master),
+    CBS(int i, EngngModel *_master = NULL) : FluidModel(i, _master),
             PressureField(this, 1, FT_Pressure, EID_ConservationEquation, 1),
             VelocityField(this, 1, FT_Velocity, EID_MomentumBalance, 1),
             vnum(false), vnumPrescribed(true), pnum(false), pnumPrescribed(true) {
@@ -193,6 +193,10 @@ public:
 
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     virtual double giveUnknownComponent(UnknownType ut, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual double giveReynoldsNumber();
+    double giveTheta1();
+    double giveTheta2();
+
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 

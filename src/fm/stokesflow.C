@@ -47,7 +47,7 @@
 #include "primaryfield.h"
 
 namespace oofem {
-StokesFlow :: StokesFlow(int i, EngngModel *_master) : EngngModel(i, _master)
+StokesFlow :: StokesFlow(int i, EngngModel *_master) : FluidModel(i, _master)
 {
     this->nMethod = NULL;
     this->ndomains = 1;
@@ -245,13 +245,11 @@ double StokesFlow :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, D
     return velocityPressureField->giveUnknownValue(dof, mode, tStep);
 }
 
-double StokesFlow::giveUnknownComponent(UnknownType ut, ValueModeType vmt, TimeStep *atTime, Domain *d, Dof *dof)
+
+double StokesFlow :: giveReynoldsNumber()
 {
-    if (ut==ReynoldsNumber)
-        return 1.0;
-    else
-        return 0.0;
-} // bp
+    return 1.0;
+}
 
 
 #ifdef __PETSC_MODULE

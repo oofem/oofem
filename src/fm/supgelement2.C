@@ -39,6 +39,7 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
+#include "fluidmodel.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -475,7 +476,7 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
     FloatArray u, eps, stress, bs, dDB_u;
     FloatMatrix b, un_gu, dDB;
     GaussPoint *gp;
-    double coeff, sum, dV, Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, atTime, domain, NULL);
+    double coeff, sum, dV, Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
     int isd, nsd;
 
     answer.resize(undofs);
@@ -522,7 +523,7 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
     answer.resize(undofs, undofs);
     answer.zero();
     FloatMatrix _db, _d, _b, dDB, un_gu;
-    double dV, Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, atTime, domain, NULL);
+    double dV, Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
     GaussPoint *gp;
     FloatArray dDB_u;
 
@@ -538,8 +539,7 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
         this->computeUDotGradUMatrix( un_gu, gp, atTime->givePreviousStep() );
         /* standard term */
         _db.beProductOf(_d, _b);
-        answer.plusProductUnsym(_b, _db, dV); //answer.plusProduct (_b,_db,area);
-        answer.times(1. / Re);
+        answer.plusProductUnsym(_b, _db, dV / Re); //answer.plusProduct (_b,_db,area);
 
         /* SUPG term */
 
