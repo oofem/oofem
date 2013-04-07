@@ -83,7 +83,7 @@
 #define _IFT_EngngModel_parallelflag "parallelflag"
 #define _IFT_EngngModel_loadBalancingFlag "lbflag"
 #define _IFT_EngngModel_forceloadBalancingFlag "forcelb1"
-#define _IFT_EngngModel_initialGuess "initialGuess"
+#define _IFT_EngngModel_initialGuess "initialguess"
 
 #define _IFT_EngngModel_lstype "lstype"
 #define _IFT_EngngModel_smtype "smtype"
@@ -505,7 +505,6 @@ public:
      * @see Dof::giveUnknown
      */
     virtual double giveUnknownComponent(ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
-    virtual double giveUnknownComponent(UnknownType, ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
 
 #ifdef __PARALLEL_MODE
     /**

@@ -102,17 +102,10 @@ LSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
         answer.at(1, 3 * i - 2) = dnx.at(i, 1);
         answer.at(2, 3 * i - 1) = dnx.at(i, 2);
         answer.at(3, 3 * i - 0) = dnx.at(i, 3);
-    }
 
-    for ( int i = 1; i <= 8; i++ ) {
-        answer.at(4, 3 * i - 1) = dnx.at(i, 3);
-        answer.at(4, 3 * i - 0) = dnx.at(i, 2);
-
-        answer.at(5, 3 * i - 2) = dnx.at(i, 3);
-        answer.at(5, 3 * i - 0) = dnx.at(i, 1);
-
-        answer.at(6, 3 * i - 2) = dnx.at(i, 2);
-        answer.at(6, 3 * i - 1) = dnx.at(i, 1);
+        answer.at(5, 3 * i - 2) = answer.at(4, 3 * i - 1) = dnx.at(i, 3);
+        answer.at(6, 3 * i - 2) = answer.at(4, 3 * i - 0) = dnx.at(i, 2);
+        answer.at(6, 3 * i - 1) = answer.at(5, 3 * i - 0) = dnx.at(i, 1);
     }
 }
 
