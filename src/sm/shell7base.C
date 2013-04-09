@@ -187,8 +187,10 @@ Shell7Base :: edgeEvalInitialCovarBaseVectorsAt(GaussPoint *gp, const int iedge,
     G1.resize(3);
     G1.zero();
     for ( int i = 1; i <= edgeNodes.giveSize(); i++ ) {
-        FloatArray &xbar = * this->giveNode(i)->giveCoordinates();
-        M = this->giveInitialNodeDirector(i);
+        //FloatArray &xbar = * this->giveNode(i)->giveCoordinates();
+        //M = this->giveInitialNodeDirector(i);
+        FloatArray &xbar = * this->giveNode(edgeNodes.at(i))->giveCoordinates();
+        M = this->giveInitialNodeDirector(edgeNodes.at(i));
         FloatArray nodeCoords = (xbar + zeta*M);
         G1 += dNdxi.at(i) * nodeCoords; 
     }
