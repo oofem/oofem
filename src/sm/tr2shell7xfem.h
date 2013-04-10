@@ -95,9 +95,6 @@ protected:
     virtual void computeGaussPoints();
     virtual void giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords);
 
-    //only used for debuging 
-    void compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matrix2, FloatMatrix &answer);
-
     virtual FEInterpolation *giveInterpolation();
 
     // VTK

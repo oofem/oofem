@@ -94,7 +94,7 @@ Interface
     } else if ( it == XfemElementInterfaceType ) {
         return ( XfemElementInterface * ) this;
     } else {
-        return Shell7Base :: giveInterface(it);
+        return Shell7Base :: giveInterface(it); //@todo remove
     }
 }
 
@@ -102,7 +102,9 @@ Interface
 double 
 Shell7BaseXFEM :: giveGlobalZcoord(GaussPoint *gp) 
 {
+    return Shell7Base ::giveGlobalZcoord(gp);
 
+    /*
     this->setupDelaminationXiCoordList();
     this->setupGPDelaminationGroupList();
 
@@ -113,7 +115,7 @@ Shell7BaseXFEM :: giveGlobalZcoord(GaussPoint *gp)
     LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * > (this->element->giveCrossSection());
     //return (xiRef - xiMid)*layeredCS->computeIntegralThick()*0.5; // new xi-coord measured from dGroup c.s. 
     return (xiRef )*layeredCS->computeIntegralThick()*0.5; // new xi-coord measured from dGroup c.s. 
-    
+    */
 }
 
 
@@ -279,67 +281,6 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
     }
 }
 
-#if 0
-void 
-Shell7BaseXFEM :: edgeComputeOrderingArray( IntArray &orderingArray, IntArray &activeDofsArray, int iEdge, int enrichmentDomainNumber, SolutionField field)
-{
-    // Routine to extract vector given an array of dofid items
-    // If a certain dofId does not exist a zero is used as value
-
-    //const IntArray &ordering_cont = this->giveOrdering(field);
-    
-    IntArray ordering_cont; 
-    this->giveEdgeDofMapping(ordering_cont, iEdge);
-    ordering_cont.printYourself();
-    const IntArray &fieldDofId    = this->giveFieldDofId(field);
-
-    IntArray ordering_temp, activeDofsArrayTemp;
-    ordering_temp.resize(ordering_cont.giveSize());
-    activeDofsArrayTemp.resize(ordering_cont.giveSize());
-
-    //new
-    IntArray edgeNodes;
-    this->fei->computeLocalEdgeMapping(edgeNodes, iEdge);
-
-    int activeDofPos = 0, activeDofIndex = 0, orderingDofIndex = 0;
-    //for ( int i = 1; i <= numberOfDofMans; i++ ) {
-    for ( int i = 1; i <= edgeNodes.giveSize(); i++ ) {
-        DofManager *dMan = this->giveDofManager(edgeNodes.at(i));
-        IntArray dofManDofIdMask, dofManDofIdMaskAll; 
-
-        if ( enrichmentDomainNumber == 0 ) { // return mask corresponding to the regular id's
-           Shell7Base ::giveDofManDofIDMask(i, EID_MomentumBalance, dofManDofIdMask);
-        } else {
-            EnrichmentItem *ei = this->xMan->giveEnrichmentItem(1); ///@todo: *ei should be input
-            if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,enrichmentDomainNumber) ) {
-                ei->giveEIDofIdArray(dofManDofIdMask, enrichmentDomainNumber);
-            }
-        }
-    
-
-        for (int j = 1; j <= dofManDofIdMask.giveSize(); j++ ) {
-            int pos = dMan->findDofWithDofId( (DofIDItem) dofManDofIdMask.at(j) );
-            activeDofPos++;
-            ordering_temp      .at(activeDofPos) = orderingDofIndex + pos;
-            activeDofsArrayTemp.at(activeDofPos) = activeDofIndex   + j;
-        }
-        this->giveDofManDofIDMask(i, EID_MomentumBalance, dofManDofIdMaskAll);
-        orderingDofIndex += dofManDofIdMaskAll.giveSize();
-        activeDofIndex   += fieldDofId.giveSize();
-
-    }
-    
-    // Reduce arrays to actual size 
-    ///@todo will not work if there are several ei
-    int numActiveDofs = activeDofPos;
-    orderingArray.resize(numActiveDofs), activeDofsArray.resize(numActiveDofs);
-    
-    for ( int i = 1; i <= numActiveDofs; i++ ) {
-        orderingArray.at(i) = ordering_temp.at(i); 
-        activeDofsArray.at(i) = activeDofsArrayTemp.at(i);
-    }
-}
-#endif
 
 void
 Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
@@ -503,7 +444,6 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         // compute cohesive traction based on J
         FloatArray cTraction;  
         mat->giveRealStressVector(cTraction, FullForm, ip, xd, tStep);
-        //cTraction.printYourself();
         lambdaN.beProductOf(lambda,N);
         Fp.beTProductOf(lambdaN, cTraction);
         double dA = this->computeAreaAround(ip);
@@ -626,111 +566,72 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
 
 
     // Disccontinuous part
+    FloatMatrix tempRed;FloatMatrix tempRedT;
+    IntArray orderingJ, orderingK, activeDofsJ, activeDofsK;IntArray eiDofIdArray;
+    FloatArray solVecJ;FloatArray solVecK;
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
         Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
 
     #if 1
         for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
             if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
-                IntArray eiDofIdArray;
-                FloatArray solVecJ;
                 dei->giveEIDofIdArray(eiDofIdArray, j);
                 this->giveSolutionVector(solVecJ, eiDofIdArray, tStep);  
 
                 for ( int k = 1; k <= dei->giveNumberOfEnrichmentDomains(); k++ ) {
                     if ( dei->isElementEnrichedByEnrichmentDomain(this, k) ) {
-                        FloatArray solVecK;
                         dei->giveEIDofIdArray(eiDofIdArray, k);
                         this->giveSolutionVector(solVecK, eiDofIdArray, tStep);  
                         discComputeBulkTangentMatrix(temp, solVec, solVecJ, solVecK, rMode, tStep, dei, j, k);
 
-
                         // Assemble part correpsonding to active dofs
-                        IntArray orderingJ, orderingK, activeDofsJ, activeDofsK;
                         computeOrderingArray(orderingJ, activeDofsJ, j, All);
-                        computeOrderingArray(orderingK, activeDofsK, k, All);
-                        FloatMatrix tempRed;
+                        computeOrderingArray(orderingK, activeDofsK, k, All);                
                         tempRed.beSubMatrixOf(temp, activeDofsJ, activeDofsK);
                         answer.assemble(tempRed, orderingJ, orderingK);
                     }
                 }
-                
-
             }
         }
 
 
-        // First column
-
+        // First column and row
         for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
             if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
-                IntArray eiDofIdArray;
-                FloatArray solVecJ;
                 dei->giveEIDofIdArray(eiDofIdArray, j);
                 this->giveSolutionVector(solVecJ, eiDofIdArray, tStep);  
                 discComputeBulkTangentMatrix(temp, solVec, solVecJ, solVec, rMode, tStep, dei, j, 0);
 
-
                 // Assemble part correpsonding to active dofs
-                IntArray orderingJ, activeDofsJ;
                 computeOrderingArray(orderingJ, activeDofsJ, j, All);
 
                 // First column K_{di,c}
-                FloatMatrix tempRed;
                 tempRed.beSubMatrixOf(temp, activeDofsJ, activeDofs);
                 answer.assemble(tempRed, orderingJ, ordering);
 
                 // First row  K_{c,di} = K_{di,c}^T
-                FloatMatrix tempRedT;
                 tempRedT.beTranspositionOf(tempRed);
-                answer.assemble(tempRedT, ordering, orderingJ);
-                
-
-                //FloatMatrix test;
-                //test.beSubMatrixOf(tempRed,1,7,15,21);
-                //printf("Kdc \n");
-                //test.printYourself();
-                
-                
-            }
-            
+                answer.assemble(tempRedT, ordering, orderingJ);       
+            } 
         }
 
-         // First row
-        #if 0
-        for ( int k = 1; k <= dei->giveNumberOfEnrichmentDomains(); k++ ) {
-            if ( dei->isElementEnrichedByEnrichmentDomain(this, k) ) {
-                IntArray eiDofIdArray;
-                FloatArray solVecK;
-                dei->giveEIDofIdArray(eiDofIdArray, k);
-                this->giveSolutionVector(solVecK, eiDofIdArray, tStep);  
-                discComputeBulkTangentMatrix(temp, solVec, solVec, solVecK, rMode, tStep, dei, 0, k);
-
-
-                // Assemble part correpsonding to active dofs
-                IntArray orderingK, activeDofsK;
-                computeOrderingArray(orderingK, activeDofsK, k, All);
-                
-                FloatMatrix tempRed;
-                tempRed.beSubMatrixOf(temp, activeDofs, activeDofsK);
-                answer.assemble(tempRed, ordering, orderingK);
-            }
-        }
-        #endif
 
     #endif
+        for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
+            if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
+                // Cohesive zone model
+                if( this->hasCohesiveZone() ) {
+                    FloatMatrix tangentCZ;
+                    this->computeCohesiveTangent(tangentCZ, tStep);
+                    answer.add(tangentCZ);
+                }
+            }
+        }
+
 
     }
-    //answer.symmetrized();
 
 
-    // Cohesive zone model
-    if( this->hasCohesiveZone() ) {
-        FloatMatrix tangentCZ;
-        this->computeCohesiveTangent(tangentCZ, tStep);
-        answer.add(tangentCZ);
-        //printf("mupp el %i",this->giveNumber());
-    }
 }
 
 
@@ -987,11 +888,14 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
         answer.assemble(fT, ordering);        
 
         
-        //@todo add check to see if size components = 8
+        //@todo assumes no variation i xi1-dir
         FloatArray componentsTemp, coordsTemp(1);
-        coordsTemp.at(1) = 0.0;
+        coordsTemp.at(1) = 0.0; // 
         edgeLoad->computeValueAt(componentsTemp, tStep, coordsTemp, VM_Total);
-        double xi = componentsTemp.at(8); // use the 8th component to store the-xi coord where the load acts
+        double xi = 0.0; // defaults to geometric midplane
+        if ( componentsTemp.giveSize() == 8 ) {
+            xi = componentsTemp.at(8);   // use the 8th component to store the-xi coord where the load acts
+        }
 
         // Disccontinuous part
         FloatArray temp;

@@ -185,6 +185,8 @@ Tr2Shell7XFEM :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 double 
 Tr2Shell7XFEM :: computeVolumeAround(GaussPoint *gp)
 {
+    return 0.0;
+    /*
     FloatArray G1, G2, G3, temp;
     double detJ;
     FloatMatrix Gcov;
@@ -195,17 +197,17 @@ Tr2Shell7XFEM :: computeVolumeAround(GaussPoint *gp)
     temp.beVectorProductOf(G1, G2);
     detJ = temp.dotProduct(G3)*0.5*this->giveCrossSection()->give(CS_Thickness); 
     return detJ * gp->giveWeight();
+    */
 }
 
 double 
 Tr2Shell7XFEM :: computeAreaAround(GaussPoint *gp)
 {
-    FloatArray G1, G2, G3, temp;
+    FloatArray G1, G2, temp;
     FloatMatrix Gcov;
     this->evalInitialCovarBaseVectorsAt(gp, Gcov);
     G1.beColumnOf(Gcov,1);
     G2.beColumnOf(Gcov,2);
-    G3.beColumnOf(Gcov,3);
     temp.beVectorProductOf(G1, G2);
     double detJ = temp.computeNorm();
     return detJ * gp->giveWeight()*0.5 ;
@@ -215,48 +217,12 @@ Tr2Shell7XFEM :: computeAreaAround(GaussPoint *gp)
 double 
 Tr2Shell7XFEM :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
 {
-    FloatArray G1, G2, G3, temp;
     double detJ;
     FloatMatrix Gcov;
     this->evalInitialCovarBaseVectorsAt(gp, Gcov);
-    G1.beColumnOf(Gcov,1);
-    G2.beColumnOf(Gcov,2);
-    G3.beColumnOf(Gcov,3);
-    temp.beVectorProductOf(G1, G2);
-    LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >(this->giveCrossSection());
-    detJ = temp.dotProduct(G3)*0.5*layeredCS->giveLayerThickness(layer);
+    detJ = Gcov.giveDeterminant() * 0.5 * this->layeredCS->giveLayerThickness(layer);
     return detJ * gp->giveWeight();
 }
-
-
-
-void 
-Tr2Shell7XFEM :: compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matrix2, FloatMatrix &answer)
-{
-    int ndofs = 42;
-    answer.resize(ndofs,ndofs);
-    for( int i = 1; i <= ndofs; i++ ){
-        for( int j = 1; j <= 18; j++ ){
-
-            if( abs(matrix1.at(i,j)) > 1.0e-12 ) {
-                double diff = ( matrix1.at(i,j)-matrix2.at(i,j) );
-                double relDiff =  diff / matrix1.at(i,j);
-                if ( abs(relDiff)<1.0e-4) {
-                    answer.at(i,j) = 0.0;
-                } else if( abs(diff)<1.0e3 ) {
-                    answer.at(i,j) = 0.0;
-                } else {
-                    answer.at(i,j) = relDiff;
-                }
-            }else{
-                answer.at(i,j) = -1.0;
-            }
-
-        }
-    }
-
-}
-
 
 
 
