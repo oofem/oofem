@@ -44,6 +44,7 @@
 #include "fei3dtrquad.h"
 #include "boundaryload.h"
 
+#include "tr2shell7.h"
 
 namespace oofem {
 FEI3dTrQuad Tr2Shell7XFEM :: interpolation;
@@ -225,7 +226,6 @@ Tr2Shell7XFEM :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
     LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >(this->giveCrossSection());
     detJ = temp.dotProduct(G3)*0.5*layeredCS->giveLayerThickness(layer);
     return detJ * gp->giveWeight();
-
 }
 
 

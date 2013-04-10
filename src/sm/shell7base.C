@@ -125,7 +125,7 @@ Shell7Base :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
 double
 Shell7Base :: giveGlobalZcoord(GaussPoint *gp)
 {
-    return gp->giveCoordinate(3) * this->giveCrossSection()->give(CS_Thickness) * 0.5;
+    return gp->giveCoordinate(3) * this->layeredCS->give(CS_Thickness) * 0.5;
 }
 
 double // @todo move to layered crosssection
@@ -384,7 +384,7 @@ Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     
     // first 'solVec' corresponds to the point where the tangent i evaluated and solVecLeft, solVecRight
     // corresponds to the solution used for evaluation of the lambda matrices
-    // this->new_computeBulkTangentMatrix(answer, solVecPoint, solVecLeft, solVecRight, rMode, tStep);
+    // new_computeBulkTangentMatrix(answer, solVecPoint, solVecLeft, solVecRight, rMode, tStep);
     this->new_computeBulkTangentMatrix(answer, solVec, solVec, solVec, rMode, tStep);
 
     // Add contribution due to pressure load
@@ -437,9 +437,9 @@ Shell7Base :: computeLambdaGMatrices(FloatMatrix lambda [ 3 ], FloatArray &genEp
     lambda[ 1 ].setSubMatrix(bdg2eye,1,13);
 
     FloatArray bm(3), bdm1(3), bdm2(3);
-    bm = m; bm.times(b);
-    bdm1 = dm1; bdm1.times(b);
-    bdm2 = dm2; bdm2.times(b);
+    bm   = b*m; 
+    bdm1 = b*dm1; 
+    bdm2 = b*dm2; 
     lambda[ 0 ].setColumn(bm,16);   lambda[ 0 ].setColumn(bdm1,18);
     lambda[ 1 ].setColumn(bm,17);   lambda[ 1 ].setColumn(bdm2,18);
 
@@ -447,7 +447,7 @@ Shell7Base :: computeLambdaGMatrices(FloatMatrix lambda [ 3 ], FloatArray &genEp
     lambda[ 2 ].resize(3,18);   lambda[ 2 ].zero();
     lambda[ 2 ].at(1,13) = lambda[ 2 ].at(2,14) = lambda[ 2 ].at(3,15) = c;
     FloatArray zm(3);
-    zm = m; zm.times(zeta);
+    zm = zeta*m; 
     lambda[ 2 ].setColumn(zm,18);
 }
 
@@ -1709,19 +1709,6 @@ Shell7Base :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
 #if 1
 
 double
-Shell7Base :: computeAreaAround(GaussPoint *gp)
-{
-    FloatArray G1, G2, temp;
-    FloatMatrix Gcov;
-    this->evalInitialCovarBaseVectorsAt(gp, Gcov);
-    G1.beColumnOf(Gcov,1);
-    G2.beColumnOf(Gcov,2);
-    temp.beVectorProductOf(G1, G2);
-    double detJ = temp.computeNorm();
-    return detJ * gp->giveWeight() * 0.5;
-}
-
-double
 Shell7Base :: edgeComputeLengthAround(GaussPoint *gp, const int iedge)
 {
     FloatArray G1, G3;
@@ -1732,15 +1719,6 @@ Shell7Base :: edgeComputeLengthAround(GaussPoint *gp, const int iedge)
 }
 
 
-double
-Shell7Base :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
-{
-    double detJ;
-    FloatMatrix Gcov;
-    this->evalInitialCovarBaseVectorsAt(gp, Gcov);
-    detJ = Gcov.giveDeterminant() * 0.5 * this->layeredCS->giveLayerThickness(layer);
-    return detJ * gp->giveWeight();
-}
 #endif
 
 
@@ -1753,7 +1731,6 @@ Shell7Base :: transInitialCartesianToInitialContravar(GaussPoint *gp, const Floa
 {
     // Transform stress in cart system to curvilinear sytem
     // Uses Bond transformation matrix. No need to go from matrix to Voigt form and back.
-    FloatArray Gcon1, Gcon2, Gcon3;
     FloatMatrix Gcon; 
     this->evalInitialContravarBaseVectorsAt(gp, Gcon);
     FloatMatrix GE, M;
@@ -1768,7 +1745,6 @@ Shell7Base :: transInitialCartesianToInitialContravar(GaussPoint *gp, const Floa
 {
     // Transform stifness tensor in cart system to curvilinear sytem
     // Uses Bond transformation matrix. No need to go from matrix to Voigt form and back.
-    FloatArray Gcon1, Gcon2, Gcon3;
     FloatMatrix Gcon; 
     this->evalInitialContravarBaseVectorsAt(gp, Gcon);
     FloatMatrix GE, M, temp;
@@ -2186,14 +2162,14 @@ void
 Shell7Base :: giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &dphidxi1, FloatArray &dphidxi2, FloatArray &dmdxi1,
                                               FloatArray &dmdxi2, FloatArray &m, double &dgamdxi1, double &dgamdxi2, double &gam) {
     // generealized strain vector  [dxdxi, dmdxi, m, dgamdxi, gam]^T
-    dphidxi1.setValues( 3, genEps.at(1), genEps.at(2), genEps.at(3) );
-    dphidxi2.setValues( 3, genEps.at(4), genEps.at(5), genEps.at(6) );
-    dmdxi1.setValues( 3, genEps.at(7), genEps.at(8), genEps.at(9) );
-    dmdxi2.setValues( 3, genEps.at(10), genEps.at(11), genEps.at(12) );
-    m.setValues( 3, genEps.at(13), genEps.at(14), genEps.at(15) );
+    dphidxi1.setValues( 3, genEps.at(1), genEps.at(2), genEps.at(3)    );
+    dphidxi2.setValues( 3, genEps.at(4), genEps.at(5), genEps.at(6)    );
+      dmdxi1.setValues( 3, genEps.at(7), genEps.at(8), genEps.at(9)    );
+      dmdxi2.setValues( 3, genEps.at(10), genEps.at(11), genEps.at(12) );
+           m.setValues( 3, genEps.at(13), genEps.at(14), genEps.at(15) );
     dgamdxi1 = genEps.at(16);
     dgamdxi2 = genEps.at(17);
-    gam = genEps.at(18);
+         gam = genEps.at(18);
 }
 
 

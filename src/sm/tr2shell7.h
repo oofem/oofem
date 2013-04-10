@@ -86,7 +86,7 @@ protected:
     void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
     void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
 
-    virtual double computeVolumeAround(GaussPoint *gp);
+    //virtual double computeVolumeAround(GaussPoint *gp);
     virtual double computeVolumeAroundLayer(GaussPoint *mastergp, int layer);
     virtual double computeAreaAround(GaussPoint *gp);
 
@@ -111,6 +111,9 @@ public:
     //virtual Element_Geometry_Type giveGeometryType()   const { return EGT_triangle_2; }
     virtual Element_Geometry_Type giveGeometryType()   const { return EGT_Composite; }
     virtual integrationDomain  giveIntegrationDomain() const { return _Triangle; }     // write new wedge-like type 'layeredWedge'
+
+    //friend class Tr2Shell7XFEM;
+
 };
 } // end namespace oofem
 #endif

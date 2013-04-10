@@ -70,10 +70,8 @@ IRResultType Shell7BaseXFEM :: initializeFrom(InputRecord *ir)
     
     int material = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, material, _IFT_Shell7BaseXFEM_CohesiveZoneMaterial);
-    if ( material > 0 ) {
-        this->czMatNum = material;
-        //this->czMat = this->giveDomain()->giveMaterial(material);
-    }
+    this->czMatNum = material;
+
     Shell7Base :: initializeFrom(ir);
     return IRRT_OK; 
 }
@@ -113,7 +111,8 @@ Shell7BaseXFEM :: giveGlobalZcoord(GaussPoint *gp)
     double xiMid = this->giveDelaminationGroupMidXi(dGroup);
     
     LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * > (this->element->giveCrossSection());
-    return (xiRef - xiMid)*layeredCS->computeIntegralThick()*0.5; // new xi-coord measured from dGroup c.s. 
+    //return (xiRef - xiMid)*layeredCS->computeIntegralThick()*0.5; // new xi-coord measured from dGroup c.s. 
+    return (xiRef )*layeredCS->computeIntegralThick()*0.5; // new xi-coord measured from dGroup c.s. 
     
 }
 
@@ -504,13 +503,12 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         // compute cohesive traction based on J
         FloatArray cTraction;  
         mat->giveRealStressVector(cTraction, FullForm, ip, xd, tStep);
-        
+        //cTraction.printYourself();
         lambdaN.beProductOf(lambda,N);
         Fp.beTProductOf(lambdaN, cTraction);
         double dA = this->computeAreaAround(ip);
         answerTemp.add(dA,Fp);
     }
-
     answer.resize(42, 42);
     answer.zero();
     const IntArray &ordering = this->giveOrdering(All);
@@ -542,17 +540,14 @@ Shell7BaseXFEM :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
                 dei->giveEIDofIdArray(eiDofIdArray, j);
                 this->giveSolutionVector(solVecD, eiDofIdArray, tStep);  
 
-                if ( this->hasCohesiveZone() ) {
-                    this->computeCohesiveTangentAt(temp, tStep, solVec, solVecD, dei);
-                    // Assemble part correpsonding to active dofs
-                    IntArray orderingJ, activeDofsJ;
-                    computeOrderingArray(orderingJ, activeDofsJ, j, All);
-                    FloatMatrix tempRed;
-                    tempRed.beSubMatrixOf(temp, activeDofsJ, activeDofsJ);
-                    answer.assemble(tempRed, orderingJ, orderingJ);
-                } else {
-                    int elnum =this->giveNumber();
-                }
+                this->computeCohesiveTangentAt(temp, tStep, solVec, solVecD, dei);
+                // Assemble part correpsonding to active dofs
+                IntArray orderingJ, activeDofsJ;
+                computeOrderingArray(orderingJ, activeDofsJ, j, All);
+                FloatMatrix tempRed;
+                tempRed.beSubMatrixOf(temp, activeDofsJ, activeDofsJ);
+                answer.assemble(tempRed, orderingJ, orderingJ);
+
             }
         }
     }
@@ -582,7 +577,6 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
         // Compute material jump
         FloatArray genEpsD;
         genEpsD.beProductOf(B, solVecD);        
-        //genEps.beProductOf(B, solVec);        
         //double zeta = giveGlobalZcoord(ip); // fix z-coord 
         double zeta = 0.0;
         FloatMatrix lambda;
@@ -590,24 +584,13 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
         
         FloatArray xd, unknowns;
         unknowns.beProductOf(N, solVecD);
-        //FloatMatrix F, Finv;
-        //FloatArray genEps,
-        //this->computeFAt(ip, F, genEps); // (xi=0) ip must have a valid x-coord
-        //Finv.beInverseOf(F);
-
         FloatMatrix K(3,3), KTemp;
 
         mat->giveCharacteristicMatrix(K, FullForm, TangentStiffness, ip, tStep);
         
-        //IntArray ordering;
-        //ordering.setValues(3,  3, 1, 2);
-        //K.assemble(KTemp, ordering, ordering);     
-
         FloatMatrix lambdaN, KF, temp, tangent;
         lambdaN.beProductOf(lambda,N);
-        //KF.beProductOf(K,Finv);
         temp.beProductOf(K,lambdaN);
-        //temp.beProductOf(KF,lambdaN);
         tangent.beTProductOf(lambdaN, temp);
                 
         double dA = this->computeAreaAround(ip);
@@ -742,9 +725,12 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
 
 
     // Cohesive zone model
-    FloatMatrix tangentCZ;
-    this->computeCohesiveTangent(tangentCZ, tStep);
-    answer.add(tangentCZ);
+    if( this->hasCohesiveZone() ) {
+        FloatMatrix tangentCZ;
+        this->computeCohesiveTangent(tangentCZ, tStep);
+        answer.add(tangentCZ);
+        //printf("mupp el %i",this->giveNumber());
+    }
 }
 
 

@@ -106,10 +106,12 @@ BilinearCZMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm f
         answer.at(1) = this->ks0 * gs1; 
         answer.at(2) = this->ks0 * gs2;
         answer.at(3) = this->sigfn + this->kn1 * (gn - this->gn0 );
+        printf("Softening branch...\n");
     } else {
         answer.at(1) = this->ks0 * gs1; 
         answer.at(2) = this->ks0 * gs2;
         answer.at(3) = 0.0; // failed
+        printf("Failed...\n");
     }
 
     //answer.printYourself();

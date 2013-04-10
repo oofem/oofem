@@ -1187,7 +1187,7 @@ LayeredCrossSection :: mapLayerGpCoordsToShellCoords(IntegrationRule **&layerInt
     |    -------- -1               -------- -1
 */
 {
-    double scaleFactor = 0.999; // Will be numerically unstable with xfem if the endpints lie at +-1
+    double scaleFactor = 0.999; // Will be numerically unstable with xfem if the endpoints lie at +-1
     double totalThickness = this->computeIntegralThick();
     int number = 1;
     for( int layer = 1; layer <= numberOfLayers; layer++ ) {
