@@ -103,8 +103,8 @@ Tr2Shell7XFEM :: computeGaussPoints()
         specialIntegrationRulesArray = new IntegrationRule * [ 3 ];
 
         // Cohessive zone // @todo only temporary solution
-        specialIntegrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
-        specialIntegrationRulesArray [ 0 ]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
+        //specialIntegrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
+        //specialIntegrationRulesArray [ 0 ]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
 
         // need to check if interface has failed but need to update the integration rule later
         XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
@@ -181,24 +181,6 @@ Tr2Shell7XFEM :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 
 
 // Integration
-
-double 
-Tr2Shell7XFEM :: computeVolumeAround(GaussPoint *gp)
-{
-    return 0.0;
-    /*
-    FloatArray G1, G2, G3, temp;
-    double detJ;
-    FloatMatrix Gcov;
-    this->evalInitialCovarBaseVectorsAt(gp, Gcov);
-    G1.beColumnOf(Gcov,1);
-    G2.beColumnOf(Gcov,2);
-    G3.beColumnOf(Gcov,3);
-    temp.beVectorProductOf(G1, G2);
-    detJ = temp.dotProduct(G3)*0.5*this->giveCrossSection()->give(CS_Thickness); 
-    return detJ * gp->giveWeight();
-    */
-}
 
 double 
 Tr2Shell7XFEM :: computeAreaAround(GaussPoint *gp)

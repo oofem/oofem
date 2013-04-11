@@ -408,7 +408,8 @@ Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
 void
 Shell7Base :: computeLambdaGMatrices(FloatMatrix lambda [ 3 ], FloatArray &genEps, double zeta)
 {
-    // computes the lambda^g matrices associated with the variation and linearization of the base vectors g.
+    // computes the lambda^g matrices associated with the variation and linearization of the base vectors g_i.
+    // @todo optimize method
     FloatArray m(3), dm1(3), dm2(3), temp1;
     double dgam1, dgam2, gam;
     this->giveGeneralizedStrainComponents(genEps, temp1, temp1, dm1, dm2, m, dgam1, dgam2, gam);
@@ -416,7 +417,7 @@ Shell7Base :: computeLambdaGMatrices(FloatMatrix lambda [ 3 ], FloatArray &genEp
     // thickness coefficients
     double a = zeta + 0.5 * gam * zeta * zeta;
     double b = 0.5 * zeta * zeta;
-    double c = 1. + gam * zeta;
+    double c = 1.0 + gam * zeta;
 
     // lambda1 =  ( I,   0,  a*I,   0 ,  b*dgam1*I,  b*m,   0 ,  b*dm1 )
     // lambda2 =  ( 0,   I,   0 ,  a*I,  b*dgam2*I,   0 ,  b*m,  b*dm2 )
@@ -479,9 +480,7 @@ Shell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solV
     FloatMatrix A [ 3 ] [ 3 ], lambdaI [ 3 ], lambdaJ [ 3 ];
     FloatMatrix L(18,18);
     FloatMatrix B11, B22, B32, B43, B53, B;
-    FloatArray S1g(3), S2g(3), S3g(3);
     FloatMatrix K(42,42), tempAnswer(42,42);
-    K.zero();
     tempAnswer.zero();
 
     int ndofs = Shell7Base :: giveNumberOfDofs();
@@ -489,6 +488,8 @@ Shell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solV
     answer.zero();
 
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     
+    FloatMatrix temp, Ktemp;
+    FloatArray genEpsI, genEpsJ, genEps;
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
@@ -497,25 +498,23 @@ Shell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solV
         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
 
-
             this->computeBmatricesAt(gp, B11, B22, B32, B43, B53);
-            FloatArray genEpsI, genEpsJ, genEps;
+            this->computeBmatrixAt(gp, B, 0, 0);
             this->computeGeneralizedStrainVector(genEpsI, solVecI, B11, B22, B32, B43, B53);
             this->computeGeneralizedStrainVector(genEpsJ, solVecJ, B11, B22, B32, B43, B53);
             this->computeGeneralizedStrainVector(genEps , solVec , B11, B22, B32, B43, B53);
 
             // Material stiffness
-            Shell7Base :: computeLinearizedStiffness(gp, mat, tStep, S1g, S2g, S3g, A, genEps);
+            Shell7Base :: computeLinearizedStiffness(gp, mat, tStep, A, genEps);
 
             double zeta = this->giveGlobalZcoord(gp);
+            //printf("zeta %e\n",zeta);
             this->computeLambdaGMatrices(lambdaI, genEpsI, zeta);
             this->computeLambdaGMatrices(lambdaJ, genEpsJ, zeta);
 
-            this->computeBmatrixAt(gp, B, 0, 0);
             // L = sum_{i,j} (lambdaI_i)^T * A^ij * lambdaJ_j
-            // Naive implementation - should be optimized 
+            // @todo Naive implementation - should be optimized 
             // note: L will only be symmetric if lambdaI = lambdaJ
-            FloatMatrix temp;
             L.zero();
             for ( int j = 0; j < 3; j++ ) {
                 for ( int k = 0; k < 3; k++ ) {
@@ -523,14 +522,18 @@ Shell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solV
                     L.add(temp);
                 }
             }
-     
-            FloatMatrix Ktemp, K;
-            Ktemp.beProductOf(L, B);
+            
+            this->computeTripleProduct(K, B, L, B);
             double dV = this->computeVolumeAroundLayer(gp, layer);
-            K.beTProductOf(B,Ktemp);
             tempAnswer.add(dV, K);
+
+
         }
     }
+            FloatMatrix test(6,6);
+            test.beSubMatrixOf(K,19,24,19,24);
+            //test.printYourself();    
+
 
     const IntArray &ordering = this->giveOrdering(All);
     answer.assemble(tempAnswer, ordering, ordering);
@@ -540,7 +543,7 @@ Shell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solV
 
 void
 Shell7Base :: computeLinearizedStiffness(GaussPoint *gp, Material *mat, TimeStep *tStep,
-                                         FloatArray &S1g, FloatArray &S2g, FloatArray &S3g, FloatMatrix A [ 3 ] [ 3 ], FloatArray &genEps) 
+                                         FloatMatrix A [ 3 ] [ 3 ], FloatArray &genEps) 
 {
     FloatArray cartStressVector, contravarStressVector;
     FloatMatrix D, Dcart, S;
@@ -1492,6 +1495,7 @@ void
 Shell7Base :: computeTripleProduct(FloatMatrix &answer, const FloatMatrix &a, const FloatMatrix &b, const FloatMatrix &c)
 {
     // Computes the product a^T*b*c
+    // @todo room for optimization + add scalar product for integration
     FloatMatrix temp;
     temp.beTProductOf(a, b);
     answer.beProductOf(temp, c);

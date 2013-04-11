@@ -102,20 +102,19 @@ Interface
 double 
 Shell7BaseXFEM :: giveGlobalZcoord(GaussPoint *gp) 
 {
-    return Shell7Base ::giveGlobalZcoord(gp);
+    //return Shell7Base ::giveGlobalZcoord(gp);
 
-    /*
+    
     this->setupDelaminationXiCoordList();
-    this->setupGPDelaminationGroupList();
+    //this->setupGPDelaminationGroupList();
 
     double xiRef = gp->giveCoordinate(3);
     int dGroup   = this->giveDelaminationGroupAt( xiRef );
     double xiMid = this->giveDelaminationGroupMidXi(dGroup);
     
-    LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * > (this->element->giveCrossSection());
     //return (xiRef - xiMid)*layeredCS->computeIntegralThick()*0.5; // new xi-coord measured from dGroup c.s. 
-    return (xiRef )*layeredCS->computeIntegralThick()*0.5; // new xi-coord measured from dGroup c.s. 
-    */
+    return (xiRef+0. )*this->layeredCS->computeIntegralThick()*0.5; // new xi-coord measured from dGroup c.s. 
+    
 }
 
 
@@ -142,7 +141,7 @@ Shell7BaseXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer
 }
 
 
-void
+void // @todo why do I have 2 similar methods?
 Shell7BaseXFEM :: discGiveDofManDofIDMask(int inode,  int enrichmentdomainNumber, IntArray &answer) const
 {
     // Returns the id mask corresponding to a given enrichment domain 
@@ -642,7 +641,6 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &
     FloatMatrix A [ 3 ] [ 3 ], lambdaI [ 3 ], lambdaJ [ 3 ];
     FloatMatrix L(18,18);
     FloatMatrix B11, B22, B32, B43, B53, B;
-    FloatArray S1g(3), S2g(3), S3g(3);
     FloatMatrix K(42,42), tempAnswer(42,42);
     K.zero(); tempAnswer.zero();
     double xi0I = 0.0; 
@@ -661,6 +659,8 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &
 
 
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     
+    FloatArray genEpsI, genEpsJ, genEps;
+    FloatMatrix temp, Ktemp;
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
@@ -668,29 +668,26 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &
 
         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
-            double zeta = giveGlobalZcoord(gp);
-
+            
             if ( gp->giveCoordinate(3) > xi0I  &&   gp->giveCoordinate(3) > xi0J  ) { // Should be enriched ///@todo not general!
 
                 this->computeBmatricesAt(gp, B11, B22, B32, B43, B53);
-                FloatArray genEpsI, genEpsJ, genEps;
+                this->computeBmatrixAt(gp, B, 0, 0);
                 this->computeGeneralizedStrainVector(genEpsI, solVecI, B11, B22, B32, B43, B53);
                 this->computeGeneralizedStrainVector(genEpsJ, solVecJ, B11, B22, B32, B43, B53);
                 this->computeGeneralizedStrainVector(genEps , solVec , B11, B22, B32, B43, B53);
 
                 // Material stiffness
-                Shell7Base :: computeLinearizedStiffness(gp, mat, tStep, S1g, S2g, S3g, A, genEps);
+                Shell7Base :: computeLinearizedStiffness(gp, mat, tStep, A, genEps);
 
-
+                double zeta = giveGlobalZcoord(gp);
                 this->computeLambdaGMatrices(lambdaI, genEpsI, zeta);
                 this->computeLambdaGMatrices(lambdaJ, genEpsJ, zeta);
 
-                this->computeBmatrixAt(gp, B, 0, 0);
                 // L = sum_{i,j} (lambdaI_i)^T * A^ij * lambdaJ_j
                 // Naive implementation - should be optimized 
                 // note: L will only be symmetric if lambdaI = lambdaJ
                 // but if gamma is not enriched then they should all be the same, or?
-                FloatMatrix temp;
                 L.zero();
                 for ( int j = 0; j < 3; j++ ) {
                     for ( int k = 0; k < 3; k++ ) {
@@ -698,11 +695,9 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &
                         L.add(temp);
                     }
                 }
-     
-                FloatMatrix Ktemp, K;
-                Ktemp.beProductOf(L, B);
+                
+                this->computeTripleProduct(K, B, L, B);
                 double dV = this->computeVolumeAroundLayer(gp, layer);
-                K.beTProductOf(B,Ktemp);
                 tempAnswer.add(dV, K);
             }
         }
@@ -714,7 +709,6 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &
     answer.zero();
     const IntArray &ordering = this->giveOrdering(All);
     answer.assemble(tempAnswer, ordering, ordering);
-
 }
 
 
@@ -1052,8 +1046,8 @@ Shell7BaseXFEM :: giveDelaminationGroupMidXi(int dGroup)
 void
 Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep)
 {
-    double zeta = localCoords.at(3)*this->layeredCS->giveLayerThickness(layer)*0.5 + this->layeredCS->giveLayerMidZ(layer);
-
+    //double zeta = localCoords.at(3)*this->layeredCS->giveLayerThickness(layer)*0.5 + this->layeredCS->giveLayerMidZ(layer);
+    double zeta = this->giveGlobalZcoordInLayer(localCoords.at(3), layer); //@todo should probably be giveGlobalZetaCoord
     // Continuous part
     FloatArray solVec;
     this->giveUpdatedSolutionVector(solVec, tStep);

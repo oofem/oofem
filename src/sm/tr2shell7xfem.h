@@ -88,7 +88,7 @@ protected:
     void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
     void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
 
-    virtual double computeVolumeAround(GaussPoint *gp);
+    //virtual double computeVolumeAround(GaussPoint *gp);
     virtual double computeVolumeAroundLayer(GaussPoint *mastergp, int layer);
     virtual double computeAreaAround(GaussPoint *gp);
 
