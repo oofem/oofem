@@ -1265,8 +1265,6 @@ LayeredIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsThicknes
         }
         
     }
-    //this->lowerInterfacePoints.printYourself();
-    //this->upperInterfacePoints.printYourself();
     return numberOfIntegrationPoints;
 }
 

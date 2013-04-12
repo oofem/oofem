@@ -458,7 +458,7 @@ StaticFracture :: evaluateFractureCriterion(std::vector < FloatArray > &interLam
     for (int  i = 1; i <= interLamStresses.size(); i++ ) {
 
         //if ( interLamStresses[i-1].at(3) > 0.000 ) {
-        if ( 1 ) {
+        if ( 0 ) {
             propagateFlag = true;
             
             return;

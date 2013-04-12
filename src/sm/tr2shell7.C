@@ -123,7 +123,6 @@ Tr2Shell7 :: computeGaussPoints()
         this->numberOfIntegrationRules = layeredCS->giveNumberOfLayers();
         this->numberOfGaussPoints = layeredCS->giveNumberOfLayers()*nPointsTri*layeredCS->giveNumIntegrationPointsInLayer();
         layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
-        //layeredCS->printYourself();
 
     }
 }
