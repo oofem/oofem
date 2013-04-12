@@ -192,10 +192,10 @@ public:
     virtual void updateYourself(TimeStep *tStep);
 
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    virtual double giveUnknownComponent(UnknownType ut, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     virtual double giveReynoldsNumber();
     double giveTheta1();
     double giveTheta2();
+    double giveTractionPressure(Dof *dof);
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);

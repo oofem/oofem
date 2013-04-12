@@ -33,21 +33,18 @@
  */
 
 #include "tractionpressurebc.h"
-#include "engngm.h"
+#include "cbs.h"
 
 namespace oofem {
 double TractionPressureBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 // Returns the value at stepN of the prescribed value of the kinematic
 // unknown 'u'. Returns 0 if 'u' has no prescribed value.
 {
-    double value = this->domain->giveEngngModel()->giveUnknownComponent(PrescribedTractionPressure, VM_Total, stepN, domain, dof);
-    return value;
+    return static_cast< CBS * >(this->domain->giveEngngModel())->giveTractionPressure(dof);
 }
 
 IRResultType
 TractionPressureBC :: initializeFrom(InputRecord *ir)
-// Sets up the dictionary where the receiver stores the conditions it
-// imposes.
 {
     return GeneralBoundaryCondition :: initializeFrom(ir);
 }
