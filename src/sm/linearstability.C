@@ -138,48 +138,6 @@ double LinearStability :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
     return 0.;
 }
 
-double LinearStability ::  giveUnknownComponent(UnknownType chc, ValueModeType mode,
-                                                TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displaacement, eigen value.
-// This function translates this request to numerical method language
-{
-    int eq = dof->__giveEquationNumber();
-    if ( eq == 0 ) {
-        _error("giveUnknownComponent: invalid equation number");
-    }
-
-    int activeVector = ( int ) tStep->giveTargetTime();
-    if ( chc == EigenValue ) {
-        return eigVal.at(eq);
-    } else if ( chc == DisplacementVector ) {
-        switch ( mode ) {
-        case VM_Total: // EigenVector
-            if ( activeVector ) {
-                return eigVec.at(eq, activeVector);
-            }
-
-            return displacementVector.at(eq);
-
-        default:
-            _error("giveUnknownComponent: Unknown is of undefined type for this problem");
-        }
-    } else if ( chc == EigenVector ) {
-        switch ( mode ) {
-        case VM_Total: // EigenVector
-            return eigVec.at(eq, activeVector);
-
-        default:
-            _error("giveUnknownComponent: Unknown is of undefined type for this problem");
-        }
-    } else {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-        return 0.;
-    }
-
-    return 0.;
-}
-
-
 TimeStep *LinearStability :: giveNextStep()
 {
     int istep = giveNumberOfFirstStep();

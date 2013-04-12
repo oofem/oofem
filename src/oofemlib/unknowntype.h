@@ -40,16 +40,13 @@
 namespace oofem {
 
 #define UnknownType_DEF \
-    ENUM_ITEM_WITH_VALUE(UnknownType_Unknown, 0) \
     ENUM_ITEM_WITH_VALUE(DisplacementVector, 1) \
     ENUM_ITEM_WITH_VALUE(GeneralizedDisplacementVector, 2) \
-    ENUM_ITEM_WITH_VALUE(FluxVector, 3) \
+    ENUM_ITEM_WITH_VALUE(FluxVector, 3)                    \
     ENUM_ITEM_WITH_VALUE(VelocityVector, 4)                     \
     ENUM_ITEM_WITH_VALUE(PressureVector, 5)                     \
-    ENUM_ITEM_WITH_VALUE(Temperature, 6)                  \
-    ENUM_ITEM_WITH_VALUE(EigenValue, 7)                         \
+    ENUM_ITEM_WITH_VALUE(Temperature, 6)                        \
     ENUM_ITEM_WITH_VALUE(EigenVector, 8)                        \
-    ENUM_ITEM_WITH_VALUE(PrescribedTractionPressure, 13) /* CBS prescribed pressure due to applied traction)*/ \
     ENUM_ITEM_WITH_VALUE(DirectorField, 15) /* Vector field */
 /**
  * Type representing particular unknown (its physical meaning).

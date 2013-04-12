@@ -122,35 +122,6 @@ double EigenValueDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *t
 }
 
 
-double EigenValueDynamic ::  giveUnknownComponent(UnknownType chc, ValueModeType mode,
-                                                  TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displacement, eigenvalue.
-// This function translates this request to numerical method language
-{
-    int eq = dof->__giveEquationNumber();
-    if ( eq == 0 ) {
-        _error("giveUnknownComponent: invalid equation number");
-    }
-
-    if ( chc == EigenValue ) {
-        return eigVal.at(eq);
-    } else if ( !( chc == EigenVector ) ) {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-        return 0.;
-    }
-
-    switch ( mode ) {
-    case VM_Total:  // EigenVector
-        return eigVec.at( eq, ( int ) tStep->giveTargetTime() );
-
-    default:
-        _error("giveUnknownComponent: Unknown is of undefined type for this problem");
-    }
-
-    return 0.;
-}
-
-
 TimeStep *EigenValueDynamic :: giveNextStep()
 {
     int istep = giveNumberOfFirstStep();
