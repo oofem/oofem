@@ -45,7 +45,7 @@
 #include "dofmanager.h"
 #include "cltypes.h"
 #include "xfemelementinterface.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "masterdof.h"
 #include "datareader.h"
 #include "datastream.h"
@@ -144,7 +144,7 @@ XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
 
 void 
 XfemManager :: createEnrichedDofs()
-{   
+{
     // Creates new dofs due to enrichment and appends them to the dof managers
     ///@todo: need to add check if dof already exists in the dofmanager
     int nrDofMan = this->giveDomain()->giveNumberOfDofManagers();
@@ -158,11 +158,11 @@ XfemManager :: createEnrichedDofs()
                 if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,k) ) {
                     ei->computeDofManDofIdArray(dofIdArray, dMan, k);
                     int nDofs = dMan->giveNumberOfDofs();
-                    for ( int m = 1; m<= dofIdArray.giveSize(); m++ ) {                      
+                    for ( int m = 1; m<= dofIdArray.giveSize(); m++ ) {
                         dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );   
                     }
                 }
-            }        
+            }
         }
     }
 
@@ -195,7 +195,7 @@ int XfemManager :: instanciateYourself(DataReader *dr)
             IR_IOERR(giveClassName(), __proc, "", mir, result);
         }
 
-        EnrichmentItem *ei = CreateUsrDefEnrichmentItem( name.c_str(), i, this, this->giveDomain() );
+        EnrichmentItem *ei = classFactory.createEnrichmentItem( name.c_str(), i, this, this->giveDomain() );
         if ( ei == NULL ) {
             OOFEM_ERROR2( "XfemManager::instanciateYourself: unknown enrichment item (%s)", name.c_str() );
         }

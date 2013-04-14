@@ -47,7 +47,6 @@
 #define _IFT_XfemManager_numberOfGeometryItems "numberofgeometryitems"  // -> numberOfEnrichmentDomains
 #define _IFT_XfemManager_numberOfEnrichmentItems "numberofenrichmentitems"
 #define _IFT_XfemManager_numberOfEnrichmentFunctions "numberofenrichmentfunctions"
-#define _IFT_XfemManager_name "xfemmanagername" ///< @todo Should this exist? / Mikael - No /JB
 //@}
 
 namespace oofem {

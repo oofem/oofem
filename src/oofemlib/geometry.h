@@ -45,11 +45,16 @@ namespace oofem {
 
 ///@name Input fields for geometries
 //@{
+#define _IFT_Circle_Name "circle"
 #define _IFT_Circle_radius "radius"
 #define _IFT_Circle_center "center"
-#define _IFT_PointSwarm_nodeID "nodeid"
+
+#define _IFT_Line_Name "line"
 #define _IFT_Line_start "start"
 #define _IFT_Line_end "end"
+
+#define _IFT_PointSwarm_Name "pointswarm" // just temporary
+#define _IFT_PointSwarm_nodeID "nodeid"
 //@}
 
 /**

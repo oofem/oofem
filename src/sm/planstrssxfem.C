@@ -35,6 +35,9 @@
 #include "planstrssxfem.h"
 #include "structuralmaterial.h"
 #include "xfemelementinterface.h"
+#include "enrichmentfunction.h"
+#include "enrichmentitem.h"
+#include "enrichmentdomain.h"
 #include "structuralcrosssection.h"
 #include "vtkxmlexportmodule.h"
 #ifdef __OOFEG
@@ -99,8 +102,8 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     int counter = 8;
     for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
         EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-        EnrichmentDomain *ed = ei->giveEnrichmentDomain(1);        
-        // Enrichment function and its gradient evaluated at the gauss point     
+        EnrichmentDomain *ed = ei->giveEnrichmentDomain(1);
+        // Enrichment function and its gradient evaluated at the gauss point
         EnrichmentFunction *ef = ei->giveEnrichmentFunction(1);
         double efgp = ef->evaluateFunctionAt(gp, ed);
         FloatArray efgpD;
@@ -234,7 +237,7 @@ PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer
 void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
-    ///@todo: only works fo circles
+    ///@todo: only works for circles
     EDBGCircle *edc = static_cast< EDBGCircle * > ( xMan->giveEnrichmentItem(1)->giveEnrichmentDomain(1) );
     
     FloatArray coords;

@@ -46,6 +46,7 @@
 
 ///@name Input fields for CylindricalALM
 //@{
+#define _IFT_CylindricalALM_Name "calm"
 #define _IFT_CylindricalALM_psi "psi"
 #define _IFT_CylindricalALM_maxiter "maxiter"
 #define _IFT_CylindricalALM_minsteplength "minsteplength"

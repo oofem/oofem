@@ -38,10 +38,14 @@
 #include "materialinterface.h"
 #include "gausspnt.h"
 #include "truss3d.h"
+#include "classfactory.h"
 
 #include <vector>
 
 namespace oofem {
+
+//REGISTER_ExportModule( HOMExportModule )
+
 //inherit LinearElasticMaterial for accessing stress/strain transformation functions
 HOMExportModule :: HOMExportModule(int n, EngngModel *e) : ExportModule(n, e), LinearElasticMaterial(0, NULL)
 {

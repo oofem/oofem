@@ -45,6 +45,7 @@
 #include "gausspnt.h"
 #include "weakperiodicbc.h"
 #include "timestep.h"
+#include "classfactory.h"
 
 #ifdef __FM_MODULE
 #include "tr21stokes.h"
@@ -52,6 +53,9 @@
 #endif
 
 namespace oofem {
+
+//REGISTER_ExportModule( MatlabExportModule )
+
 MatlabExportModule :: MatlabExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
 {}
 

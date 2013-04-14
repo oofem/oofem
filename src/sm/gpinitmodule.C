@@ -41,10 +41,14 @@
 #include "floatarray.h"
 #include "domain.h"
 #include "engngm.h"
+#include "classfactory.h"
 
 #include <cassert>
 
 namespace oofem {
+
+//REGISTER_InitModule( GPInitModule )
+
 GPInitModule :: GPInitModule(int n, EngngModel *e) : InitModule(n, e)
 {}
 

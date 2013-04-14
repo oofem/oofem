@@ -43,7 +43,8 @@
 #include "dof.h"
 #include "loadtimefunction.h"
 #include "linesearch.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
+
 #ifdef __PETSC_MODULE
  #include "petscsolver.h"
  #include "petscsparsemtrx.h"
@@ -59,6 +60,7 @@ namespace oofem {
 #define NRSOLVER_RESET_STEP_REDUCE 0.25
 #define NRSOLVER_DEFAULT_NRM_TICKS 10
 
+//REGISTER_SparseNonLinearSystemNM( NRSolver )
 
 NRSolver :: NRSolver(Domain *d, EngngModel *m) :
     SparseNonLinearSystemNM(d, m), prescribedDofs(), prescribedDofsValues()
@@ -346,7 +348,7 @@ NRSolver :: giveLinearSolver()
         }
     }
 
-    linSolver = CreateUsrDefSparseLinSolver(solverType, domain, engngModel);
+    linSolver = classFactory.createSparseLinSolver(solverType, domain, engngModel);
     if ( linSolver == NULL ) {
         OOFEM_ERROR("NRSolver :: giveLinearSolver: linear solver creation failed");
     }

@@ -36,8 +36,17 @@
 #include "gausspnt.h"
 #include "mathfem.h"
 #include "feinterpol.h"
+#include "enrichmentdomain.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+//REGISTER_EnrichmentFunction( DiscontinuousFunction )
+//REGISTER_EnrichmentFunction( BranchFunction )
+//REGISTER_EnrichmentFunction( RampFunction )
+
+bool EnrichmentFunction :: __dummy = EnrichmentFunction :: init();
+
 IRResultType EnrichmentFunction :: initializeFrom(InputRecord *ir)
 {
     return IRRT_OK;

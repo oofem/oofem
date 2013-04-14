@@ -42,7 +42,7 @@
 #include "mathfem.h"
 #include "cltypes.h"
 #include "material.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 
 #include <string>
 #include <sstream>
@@ -62,6 +62,9 @@
 #endif
 
 namespace oofem {
+
+//REGISTER_ExportModule( VTKXMLExportModule )
+
 VTKXMLExportModule :: VTKXMLExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
 {
     primVarSmoother = NULL;
@@ -937,7 +940,7 @@ VTKXMLExportModule :: giveSmoother()
     Domain *d = emodel->giveDomain(1);
 
     if ( this->smoother == NULL ) {
-      this->smoother = CreateUsrDefNodalRecoveryModel(this->stype, d);
+      this->smoother = classFactory.createNodalRecoveryModel(this->stype, d);
       this->smoother->setRecoveryMode (nvr, vrmap);
     }
     return this->smoother;
@@ -950,7 +953,7 @@ VTKXMLExportModule :: givePrimVarSmoother()
     Domain *d = emodel->giveDomain(1);
 
     if ( this->primVarSmoother == NULL ) {
-        this->primVarSmoother = CreateUsrDefNodalRecoveryModel(NodalRecoveryModel::NRM_NodalAveraging, d);
+        this->primVarSmoother = classFactory.createNodalRecoveryModel(NodalRecoveryModel::NRM_NodalAveraging, d);
         this->primVarSmoother->setRecoveryMode (nvr, vrmap);
     }
     return this->primVarSmoother;

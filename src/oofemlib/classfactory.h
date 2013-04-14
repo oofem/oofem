@@ -111,14 +111,38 @@ template< typename T > ErrorEstimator* errEstCreator(int n, Domain *d) { return 
 // XFEM stuff
 template< typename T > EnrichmentItem *enrichItemCreator(int n, XfemManager *x, Domain *d) { return new T(n, x, d); }
 template< typename T > EnrichmentFunction *enrichFuncCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > BasicGeometry *geometryCreator() { return new T(); }
 template< typename T > EnrichmentDomain *enrichmentDomainCreator() { return new T(); }
+template< typename T > BasicGeometry *geometryCreator() { return new T(); }
+
+///@name Macros for registering new components. Unique dummy variables must be created as a result (design flaw in C++).
+//@{
+#define REGISTER_Element(class) static bool __dummy_##class = GiveClassFactory().registerElement(_IFT_##class##_Name, elemCreator< class >);
+#define REGISTER_DofManager(class) static bool __dummy_##class = GiveClassFactory().registerDofManager(_IFT_##class##_Name, dofmanCreator< class >);
+#define REGISTER_BoundaryCondition(class) static bool __dummy_##class = GiveClassFactory().registerBoundaryCondition(_IFT_##class##_Name, bcCreator< class >);
+#define REGISTER_CrossSection(class) static bool __dummy_##class = GiveClassFactory().registerCrossSection(_IFT_##class##_Name, csCreator< class >);
+#define REGISTER_Material(class) static bool __dummy_##class = GiveClassFactory().registerMaterial(_IFT_##class##_Name, matCreator< class >);
+#define REGISTER_EngngModel(class) static bool __dummy_##class = GiveClassFactory().registerEngngModel(_IFT_##class##_Name, engngCreator< class >);
+#define REGISTER_LoadTimeFunction(class) static bool __dummy_##class = GiveClassFactory().registerLoadTimeFunction(_IFT_##class##_Name, ltfCreator< class >);
+#define REGISTER_NonlocalBarrier(class) static bool __dummy_##class = GiveClassFactory().registerNonlocalBarrier(_IFT_##class##_Name, nlbCreator< class >);
+#define REGISTER_RandomFieldGenerator(class) static bool __dummy_##class = GiveClassFactory().registerRandomFieldGenerator(_IFT_##class##_Name, rfgCreator< class >);
+#define REGISTER_ExportModule(class) static bool __dummy_##class = GiveClassFactory().registerExportModule(_IFT_##class##_Name, exportCreator< class >);
+#define REGISTER_SparseNonLinearSystemNM(class) static bool __dummy_##class = GiveClassFactory().registerSparseNonLinearSystemNM(_IFT_##class##_Name, nonlinCreator< class >);
+#define REGISTER_InitModule(class) static bool __dummy_##class = GiveClassFactory().registerInitModule(_IFT_##class##_Name, initCreator< class >);
+#define REGISTER_TopologyDescription(class) static bool __dummy_##class = GiveClassFactory().registerTopologyDescription(_IFT_##class##_Name, topologyCreator< class >);
+
+#define REGISTER_EnrichmentItem(class) static bool __dummy_##class = GiveClassFactory().registerEnrichmentItem(_IFT_##class##_Name, enrichItemCreator< class >);
+#define REGISTER_EnrichmentFunction(class) static bool __dummy_##class = GiveClassFactory().registerEnrichmentFunction(_IFT_##class##_Name, enrichFuncCreator< class >);
+#define REGISTER_EnrichmentDomain(class) static bool __dummy_##class = GiveClassFactory().registerEnrichmentDomain(_IFT_##class##_Name, enrichmentDomainCreator< class >);
+#define REGISTER_Geometry(class) static bool __dummy_##class = GiveClassFactory().registerGeometry(_IFT_##class##_Name, geometryCreator< class >);
+//@}
 
 /**
  * Class Factory allows to register terminal oofem classes, based on their membership
  * (classes representing elements, dof managers, material models, etc)
  * and create them on demand according to their name or id.
  * Global instance of ClassFactory named classFactory is created on startup.
+ * 
+ * @note To register new elements on startup, you must call GiveClassFactory to ensure that the global class factory is created first. This is ensured if you use the corresponding macro.
  */
 class ClassFactory
 {
@@ -129,39 +153,39 @@ class ClassFactory
 
 protected:
     /// Associative container containing element creators with element name as key.
-    std :: map < std :: string, Element * ( * )(int, Domain *), CaseComp > elemNameList;
+    std :: map < std :: string, Element * ( * )(int, Domain *), CaseComp > elemList;
     /// Associative container containing element creators with element id as key.
     std :: map < classType, Element * ( * )(int, Domain *) > elemIdList;
     /// Associative container containing dofmanager creators with dofmanager  name as key.
-    std :: map < std :: string, DofManager * ( * )(int, Domain *), CaseComp > dofmanNameList;
+    std :: map < std :: string, DofManager * ( * )(int, Domain *), CaseComp > dofmanList;
     /// Associative container containing dofmanager creators with dofmanager id as key.
     std :: map < classType, DofManager * ( * )(int, Domain *) > dofmanIdList;
     /// Associative container containing boundary condition creators with bc  name as key.
-    std :: map < std :: string, GeneralBoundaryCondition * ( * )(int, Domain *), CaseComp > bcNameList;
+    std :: map < std :: string, GeneralBoundaryCondition * ( * )(int, Domain *), CaseComp > bcList;
     /// Associative container containing boundary condition creators with bc id as key.
     std :: map < classType, GeneralBoundaryCondition * ( * )(int, Domain *) > bcIdList;
     /// Associative container containing cross section creators with cross section name as key.
-    std :: map < std :: string, CrossSection * ( * )(int, Domain *), CaseComp > csNameList;
+    std :: map < std :: string, CrossSection * ( * )(int, Domain *), CaseComp > csList;
     /// Associative container containing cross section creators with cross section id as key.
     std :: map < classType, CrossSection * ( * )(int, Domain *) > csIdList;
     /// Associative container containing material creators with material name as key.
-    std :: map < std :: string, Material * ( * )(int, Domain *), CaseComp > matNameList;
+    std :: map < std :: string, Material * ( * )(int, Domain *), CaseComp > matList;
     /// Associative container containing material creators with material id as key.
     std :: map < classType, Material * ( * )(int, Domain *) > matIdList;
     /// Associative container containing engng model creators with engng model name as key.
-    std :: map < std :: string, EngngModel * ( * )(int, EngngModel *), CaseComp > engngNameList;
+    std :: map < std :: string, EngngModel * ( * )(int, EngngModel *), CaseComp > engngList;
     /// Associative container containing engng model creators with engng model id as key.
     std :: map < classType, EngngModel * ( * )(int, EngngModel *) > engngIdList;
     /// Associative container containing load time function creators with ltf name as key.
-    std :: map < std :: string, LoadTimeFunction * ( * )(int, Domain *), CaseComp > ltfNameList;
+    std :: map < std :: string, LoadTimeFunction * ( * )(int, Domain *), CaseComp > ltfList;
     /// Associative container containing load time function creators with ltf id as key.
     std :: map < classType, LoadTimeFunction * ( * )(int, Domain *) > ltfIdList;
     /// Associative container containing nonlocal barriers creators with barrier name as key.
-    std :: map < std :: string, NonlocalBarrier * ( * )(int, Domain *), CaseComp > nlbNameList;
+    std :: map < std :: string, NonlocalBarrier * ( * )(int, Domain *), CaseComp > nlbList;
     /// Associative container containing nonlocal barriers creators with barrier id as key.
     std :: map < classType, NonlocalBarrier * ( * )(int, Domain *) > nlbIdList;
     /// Associative container containing random field generator creators with names as key.
-    std :: map < std :: string, RandomFieldGenerator * ( * )(int, Domain *), CaseComp > rfgNameList;
+    std :: map < std :: string, RandomFieldGenerator * ( * )(int, Domain *), CaseComp > rfgList;
     /// Associative container containing random field generator creators with class id as key.
     std :: map < classType, RandomFieldGenerator * ( * )(int, Domain *) > rfgIdList;
     /// Associative container containing export module creators.
@@ -205,6 +229,11 @@ public:
      */
     Element *createElement(const char *name, int num, Domain *domain);
     /**
+     * Registers a new element in the class factory.
+     * @param name Keyword string.
+     */
+    bool registerElement(const char *name, Element * ( *creator )(int, Domain *));
+    /**
      * Creates new instance of element corresponding to given element id.
      * @param type ClassId determining the type of new instance.
      * @param num  Element number.
@@ -220,6 +249,11 @@ public:
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
     DofManager *createDofManager(const char *name, int num, Domain *domain);
+    /**
+     * Registers a new dof manager in the class factory.
+     * @param name Keyword string.
+     */
+    bool registerDofManager(const char *name, DofManager * ( *creator )(int, Domain *));
     /**
      * Creates new instance of dof manager corresponding to given id.
      * @param type ClassId determining the type of new instance.
@@ -237,6 +271,11 @@ public:
      */
     GeneralBoundaryCondition *createBoundaryCondition(const char *name, int num, Domain *domain);
     /**
+     * Registers a new boundary condition in the class factory.
+     * @param name Keyword string.
+     */
+    bool registerBoundaryCondition(const char *name, GeneralBoundaryCondition * ( *creator )(int, Domain *));
+    /**
      * Creates new instance of boundary condition corresponding to given id.
      * @param type ClassId determining the type of new instance.
      * @param num  object's number.
@@ -252,6 +291,11 @@ public:
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
     CrossSection *createCrossSection(const char *name, int num, Domain *domain);
+    /**
+     * Registers a new cross section in the class factory.
+     * @param name Keyword string.
+     */
+    bool registerCrossSection(const char *name, CrossSection * ( *creator )(int, Domain *));
     /**
      * Creates new instance of cross section corresponding to given id.
      * @param type ClassId determining the type of new instance.
@@ -269,6 +313,11 @@ public:
      */
     Material *createMaterial(const char *name, int num, Domain *domain);
     /**
+     * Registers a new material in the class factory.
+     * @param name Keyword string.
+     */
+    bool registerMaterial(const char *name, Material * ( *creator )(int, Domain *));
+    /**
      * Creates new instance of material corresponding to given keyword.
      * @param type ClassId determining the type of new instance.
      * @param num  object's number.
@@ -285,6 +334,11 @@ public:
      */
     EngngModel *createEngngModel(const char *name, int num, EngngModel *master);
     /**
+     * Registers a new engineering model in the class factory.
+     * @param name Keyword string.
+     */
+    bool registerEngngModel(const char *name, EngngModel * ( *creator )(int, EngngModel *));
+    /**
      * Creates new instance of engng model corresponding to given id.
      * @param type ClassId determining the type of new instance.
      * @param num  object's number.
@@ -300,6 +354,11 @@ public:
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
     LoadTimeFunction *createLoadTimeFunction(const char *name, int num, Domain *domain);
+    /**
+     * Registers a new load time function in the class factory.
+     * @param name Keyword string.
+     */
+    bool registerLoadTimeFunction(const char *name, LoadTimeFunction * ( *creator )(int, Domain *));
     /**
      * Creates new instance of load time function corresponding to given id.
      * @param type ClassId determining the type of new instance.
@@ -318,6 +377,11 @@ public:
      */
     NonlocalBarrier *createNonlocalBarrier(const char *name, int num, Domain *domain);
     /**
+     * Registers a new nonlocal barrier in the class factory.
+     * @param name Keyword string.
+     */
+    bool registerNonlocalBarrier(const char *name, NonlocalBarrier * ( *creator )(int, Domain *));
+    /**
      * Creates new instance of nonlocal barrier corresponding to given id.
      * @param type ClassId determining the type of new instance.
      * @param name Keyword string determining the type of new instance.
@@ -334,6 +398,11 @@ public:
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
     RandomFieldGenerator *createRandomFieldGenerator(const char *name, int num, Domain *domain);
+    /**
+     * Registers a new random field generator in the class factory.
+     * @param name Keyword string.
+     */
+    bool registerRandomFieldGenerator(const char *name, RandomFieldGenerator * ( *creator )(int, Domain *));
     /**
      * Creates new instance of random field generator corresponding to given id.
      * @param type ClassId determining the type of new instance.
@@ -352,6 +421,11 @@ public:
      */
     ExportModule *createExportModule(const char *name, int num, EngngModel *emodel);
     /**
+     * Registers a new export module in the class factory.
+     * @param name Keyword string.
+     */
+    bool registerExportModule(const char *name, ExportModule * ( *creator )(int, EngngModel *));
+    /**
      * Creates new instance of nonlinear solver corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param d    Domain assigned to new object.
@@ -361,6 +435,11 @@ public:
      */
     SparseNonLinearSystemNM* createNonLinearSolver(const char *name, Domain *d, EngngModel *emodel);
     /**
+     * Registers a new nonlinear solver in the class factory.
+     * @param name Keyword string.
+     */
+    bool registerSparseNonLinearSystemNM(const char *name, SparseNonLinearSystemNM * ( *creator )(Domain *, EngngModel *));
+    /**
      * Creates new instance of init module corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param num  Init module number.
@@ -369,12 +448,22 @@ public:
      */
     InitModule* createInitModule(const char *name, int number, EngngModel *emodel);
     /**
+     * Registers a new init module in the class factory.
+     * @param name Keyword string.
+     */
+    bool registerInitModule(const char *name, InitModule * ( *creator )(int, EngngModel *));
+    /**
      * Creates new instance of topology description corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param d    Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
     TopologyDescription* createTopology(const char *name, Domain *d);
+    /**
+     * Registers a new topology description in the class factory.
+     * @param name Keyword string.
+     */
+    bool registerTopologyDescription(const char *name, TopologyDescription * ( *creator )(Domain *));
 
     /**
      * Creates new instance of sparse matrix corresponding to given keyword.
@@ -436,9 +525,16 @@ public:
 
     // XFEM:
     EnrichmentItem *createEnrichmentItem(const char *name, int num, XfemManager *xm, Domain *domain);
+    bool registerEnrichmentItem(const char *name, EnrichmentItem * ( *creator )(int, XfemManager *, Domain *));
+
     EnrichmentFunction *createEnrichmentFunction(const char *name, int num, Domain *domain);
+    bool registerEnrichmentFunction(const char *name, EnrichmentFunction * ( *creator )(int, Domain *));
+
     EnrichmentDomain *createEnrichmentDomain(const char *name);
+    bool registerEnrichmentDomain(const char *name, EnrichmentDomain * ( *creator )());
+
     BasicGeometry *createGeometry(const char *name);
+    bool registerGeometry(const char *name, BasicGeometry * ( *creator )());
 
     SparseGeneralEigenValueSystemNM *createGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *d, EngngModel *m);
     IntegrationRule *createIRule(classType type, int number, Element *e);
@@ -452,5 +548,11 @@ public:
 };
 
 extern ClassFactory classFactory;
+
+/**
+ * This function must be used by all code run at link time to ensure that the classFactory is constructed first.
+ */
+ClassFactory &GiveClassFactory();
+
 } // end namespace oofem
 #endif // clasfactort_h

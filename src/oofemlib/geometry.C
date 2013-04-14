@@ -37,8 +37,14 @@
 #include "geometry.h"
 #include "element.h"
 #include "dofmanager.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+//REGISTER_Geometry(Line)
+//REGISTER_Geometry(Circle)
+//REGISTER_Geometry(PointSwarm)
+
 BasicGeometry :: BasicGeometry()
 {
     this->vertices = new AList< FloatArray >(0);
@@ -198,7 +204,6 @@ void Line :: computeTransformationMatrix(FloatMatrix &answer)
 
 void Line :: transformIntoPolar(FloatArray *point, FloatArray &answer)
 {
-    OOFEM_ERROR("WTF");
     FloatArray xp;
     FloatMatrix Qt;
     FloatArray help;
@@ -513,12 +518,13 @@ void Circle :: computeIntersectionPoints(Line *l, AList< FloatArray > *intersecP
 }
 
 int 
-Circle :: computeNumberOfIntersectionPoints(Element *element) { 
+Circle :: computeNumberOfIntersectionPoints(Element *element)
+{ 
     AList< FloatArray > intersecPoints;
 
     this->computeIntersectionPoints(element, &intersecPoints);
     return intersecPoints.giveSize();
-    };
+}
 
 bool Circle :: isOutside(BasicGeometry *bg)
 {

@@ -39,11 +39,10 @@
 #include "engngm.h"
 #include "freestor.h"
 #include "compiler.h"
+#include "oofemcfg.h"
 
 #include "oofemtxtdatareader.h"
 #include "util.h"
-#include "oofemcfg.h"
-#include "usrdefsub.h"
 #include "error.h"
 #include "logger.h"
 #include "contextioerr.h"

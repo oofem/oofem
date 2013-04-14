@@ -35,19 +35,18 @@
 #ifndef Shell7BaseXFEM_h
 #define Shell7BaseXFEM_h
 
-
 //#include "eleminterpmapperinterface.h"
 //#include "nodalaveragingrecoverymodel.h"
 //#include "layeredcrosssection.h"
-
 //#include "nlstructuralelement.h"
 #include "shell7base.h"
 #include "xfemelementinterface.h"
-#include "enrichmentitem.h"
+
 namespace oofem {
 
 class FEI3dTrQuad;
 class BoundaryLoad;
+class EnrichmentItem;
 
 /**
  * This class represent a 7 parameter shell element. 

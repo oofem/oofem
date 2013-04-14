@@ -39,6 +39,8 @@
 #include "domain.h"
 #include "engngm.h"
 
+#define _IFT_DofManExportModule_Name "dm"
+
 namespace oofem {
 /**
  * Represents DofManager export module.

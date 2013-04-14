@@ -47,6 +47,10 @@ namespace oofem {
 ///@name Input fields for Enrichment domains
 //@{
 #define _IFT_DofManList_list "list"
+#define _IFT_DofManList_Name "dofmanlist"
+#define _IFT_WholeDomain_Name "wholedomain"
+#define _IFT_EDBGCircle_Name "circle"
+//#define _IFT_BasicGeometryDomain<Line>_Name "line" // Odd one out, how should we treat these?
 //@}
 
 /**

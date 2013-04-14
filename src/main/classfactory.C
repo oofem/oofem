@@ -56,6 +56,10 @@
 #include "inverseit.h"
 #include "slepcsolver.h"
 
+#include "enrichmentdomain.h"
+#include "enrichmentfunction.h"
+#include "enrichmentitem.h"
+
 #include "vtkexportmodule.h"
 #include "vtkxmlexportmodule.h"
 #include "matlabexportmodule.h"
@@ -107,18 +111,20 @@ namespace oofem {
 
 ClassFactory classFactory;
 
+ClassFactory &GiveClassFactory() { return classFactory; }
 
-int ClassFactory::CaseComp::operator()(const std::string &a, const std::string &b) const
+int ClassFactory :: CaseComp::operator()(const std::string &a, const std::string &b) const
 {
     return strncasecmp ( a.c_str(), b.c_str(), ( int ) b.length() ) < 0;
 }
 
 
-ClassFactory :: ClassFactory() {
+ClassFactory :: ClassFactory()
+{
     // register elements
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, name, id) \
-    elemNameList [ name ]  = elemCreator< _class >;
+    elemList [ name ]  = elemCreator< _class >;
 #include "elementclassfactory.h"
 
 #undef REGISTER_CLASS
@@ -129,7 +135,7 @@ ClassFactory :: ClassFactory() {
     // register dof managers
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, name, id) \
-    dofmanNameList [ name ]  = dofmanCreator< _class >;
+    dofmanList [ name ]  = dofmanCreator< _class >;
 #include "dofmanclassfactory.h"
 
 #undef REGISTER_CLASS
@@ -140,7 +146,7 @@ ClassFactory :: ClassFactory() {
     // register boundary conditions
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, name, id) \
-    bcNameList [ name ]  = bcCreator< _class >;
+    bcList [ name ]  = bcCreator< _class >;
 #include "boundaryconditionclassfactory.h"
 
 #undef REGISTER_CLASS
@@ -151,7 +157,7 @@ ClassFactory :: ClassFactory() {
     // register cross sections
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, name, id) \
-    csNameList [ name ]  = csCreator< _class >;
+    csList [ name ]  = csCreator< _class >;
 #include "crosssectionclassfactory.h"
 
 #undef REGISTER_CLASS
@@ -162,7 +168,7 @@ ClassFactory :: ClassFactory() {
     // register materials
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, name, id) \
-    matNameList [ name ]  = matCreator< _class >;
+    matList [ name ]  = matCreator< _class >;
 #include "materialclassfactory.h"
 
 #undef REGISTER_CLASS
@@ -173,7 +179,7 @@ ClassFactory :: ClassFactory() {
     // register engng models
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, name, id) \
-    engngNameList [ name ]  = engngCreator< _class >;
+    engngList [ name ]  = engngCreator< _class >;
 #include "engngmodelclassfactory.h"
 
 #undef REGISTER_CLASS
@@ -184,7 +190,7 @@ ClassFactory :: ClassFactory() {
     // register load time functions
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, name, id) \
-    ltfNameList [ name ]  = ltfCreator< _class >;
+    ltfList [ name ]  = ltfCreator< _class >;
 #include "ltfclassfactory.h"
 
 #undef REGISTER_CLASS
@@ -194,7 +200,7 @@ ClassFactory :: ClassFactory() {
     // register nonlocal barriers
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, name, id) \
-    nlbNameList [ name ]  = nlbCreator< _class >;
+    nlbList [ name ]  = nlbCreator< _class >;
 #include "nonlocalbarrierclassfactory.h"
 
 #undef REGISTER_CLASS
@@ -204,7 +210,7 @@ ClassFactory :: ClassFactory() {
     // register random field generators
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, name, id) \
-    rfgNameList [ name ]  = rfgCreator< _class >;
+    rfgList [ name ]  = rfgCreator< _class >;
 #include "randomfieldgeneratorclassfactory.h"
 
 #undef REGISTER_CLASS
@@ -295,7 +301,7 @@ ErrorEstimator * ClassFactory :: createErrorEstimator(ErrorEstimatorType type, i
     return ( errEstList.count ( type ) == 1 ) ? errEstList [ type ] (num, d) : NULL;
 }
 
-InitialCondition * ClassFactory::createInitialCondition(classType type, int num, Domain *d)
+InitialCondition * ClassFactory :: createInitialCondition(classType type, int num, Domain *d)
 {
     if (type == InitialConditionClass) {
         return new InitialCondition(num, d);
@@ -303,7 +309,7 @@ InitialCondition * ClassFactory::createInitialCondition(classType type, int num,
     return NULL;
 }
 
-Patch * ClassFactory::createPatch(Patch :: PatchType type, Element *e)
+Patch * ClassFactory :: createPatch(Patch :: PatchType type, Element *e)
 {
     if ( type == Patch :: PT_TrianglePatch ) {
         return new TrianglePatch(e);
@@ -311,7 +317,7 @@ Patch * ClassFactory::createPatch(Patch :: PatchType type, Element *e)
     return NULL;
 }
 
-NodalRecoveryModel * ClassFactory::createNodalRecoveryModel(NodalRecoveryModel :: NodalRecoveryModelType type, Domain *d)
+NodalRecoveryModel * ClassFactory :: createNodalRecoveryModel(NodalRecoveryModel :: NodalRecoveryModelType type, Domain *d)
 {
     if ( type == NodalRecoveryModel :: NRM_NodalAveraging ) {
         return new NodalAveragingRecoveryModel(d);
@@ -324,140 +330,258 @@ NodalRecoveryModel * ClassFactory::createNodalRecoveryModel(NodalRecoveryModel :
 }
 
 
-Element* ClassFactory::createElement ( const char* name, int number, Domain* domain )
+Element* ClassFactory :: createElement( const char* name, int number, Domain* domain )
 {
-    return ( elemNameList.count ( name ) == 1 ) ? elemNameList [ name ] ( number, domain ) : NULL;
+    return ( elemList.count ( name ) == 1 ) ? elemList [ name ] ( number, domain ) : NULL;
 }
 
-Element* ClassFactory::createElement ( classType type, int number, Domain* domain )
+bool ClassFactory :: registerElement(const char *name, Element * ( *creator )(int, Domain *))
+{
+    printf("Register %s\n", name);
+    elemList[name] = creator;
+    return true;
+}
+
+Element* ClassFactory :: createElement( classType type, int number, Domain* domain )
 {
     return ( elemIdList.count ( type ) == 1 ) ? elemIdList [ type ] ( number, domain ) : NULL;
 }
 
-DofManager* ClassFactory::createDofManager ( const char* name, int number, Domain* domain )
+DofManager* ClassFactory :: createDofManager( const char* name, int number, Domain* domain )
 {
-    return ( dofmanNameList.count ( name ) == 1 ) ? dofmanNameList [ name ] ( number, domain ) : NULL;
+    return ( dofmanList.count ( name ) == 1 ) ? dofmanList [ name ] ( number, domain ) : NULL;
 }
 
-DofManager* ClassFactory::createDofManager ( classType type, int number, Domain* domain )
+bool ClassFactory :: registerDofManager(const char *name, DofManager * ( *creator )(int, Domain *))
+{
+    printf("Register %s\n", name);
+    dofmanList[name] = creator;
+    return true;
+}
+
+DofManager* ClassFactory :: createDofManager( classType type, int number, Domain* domain )
 {
     return ( dofmanIdList.count ( type ) == 1 ) ? dofmanIdList [ type ] ( number, domain ) : NULL;
 }
 
-GeneralBoundaryCondition* ClassFactory::createBoundaryCondition ( const char* name, int number, Domain* domain )
+GeneralBoundaryCondition* ClassFactory :: createBoundaryCondition( const char* name, int number, Domain* domain )
 {
-    return ( bcNameList.count ( name ) == 1 ) ? bcNameList [ name ] ( number, domain ) : NULL;
+    return ( bcList.count ( name ) == 1 ) ? bcList [ name ] ( number, domain ) : NULL;
 }
 
-GeneralBoundaryCondition* ClassFactory::createBoundaryCondition ( classType type, int number, Domain* domain )
+bool ClassFactory :: registerBoundaryCondition(const char *name, GeneralBoundaryCondition * ( *creator )(int, Domain *))
+{
+    printf("Register %s\n", name);
+    bcList[name] = creator;
+    return true;
+}
+
+GeneralBoundaryCondition* ClassFactory :: createBoundaryCondition( classType type, int number, Domain* domain )
 {
     return ( bcIdList.count ( type ) == 1 ) ? bcIdList [ type ] ( number, domain ) : NULL;
 }
 
-CrossSection* ClassFactory::createCrossSection ( const char* name, int number, Domain* domain )
+CrossSection* ClassFactory :: createCrossSection( const char* name, int number, Domain* domain )
 {
-    return ( csNameList.count ( name ) == 1 ) ? csNameList [ name ] ( number, domain ) : NULL;
+    return ( csList.count ( name ) == 1 ) ? csList [ name ] ( number, domain ) : NULL;
 }
 
-CrossSection* ClassFactory::createCrossSection ( classType type, int number, Domain* domain )
+bool ClassFactory :: registerCrossSection(const char *name, CrossSection * ( *creator )(int, Domain *))
+{
+    printf("Register %s\n", name);
+    csList[name] = creator;
+    return true;
+}
+
+CrossSection* ClassFactory :: createCrossSection( classType type, int number, Domain* domain )
 {
     return ( csIdList.count ( type ) == 1 ) ? csIdList [ type ] ( number, domain ) : NULL;
 }
 
-Material* ClassFactory::createMaterial ( const char* name, int number, Domain* domain )
+Material* ClassFactory :: createMaterial( const char* name, int number, Domain* domain )
 {
-    return ( matNameList.count ( name ) == 1 ) ? matNameList [ name ] ( number, domain ) : NULL;
+    return ( matList.count ( name ) == 1 ) ? matList [ name ] ( number, domain ) : NULL;
 }
 
-Material* ClassFactory::createMaterial ( classType type, int number, Domain* domain )
+bool ClassFactory :: registerMaterial(const char *name, Material * ( *creator )(int, Domain *))
+{
+    printf("Register %s\n", name);
+    matList[name] = creator;
+    return true;
+}
+
+Material* ClassFactory :: createMaterial( classType type, int number, Domain* domain )
 {
     return ( matIdList.count ( type ) == 1 ) ? matIdList [ type ] ( number, domain ) : NULL;
 }
 
-EngngModel* ClassFactory::createEngngModel ( const char* name, int number, EngngModel* master )
+EngngModel* ClassFactory :: createEngngModel( const char* name, int number, EngngModel* master )
 {
-    return ( engngNameList.count ( name ) == 1 ) ? engngNameList [ name ] ( number, master ) : NULL;
+    return ( engngList.count ( name ) == 1 ) ? engngList [ name ] ( number, master ) : NULL;
 }
 
-EngngModel* ClassFactory::createEngngModel ( classType type, int number, EngngModel* master )
+bool ClassFactory :: registerEngngModel(const char *name, EngngModel * ( *creator )(int, EngngModel *))
+{
+    printf("Register %s\n", name);
+    engngList[name] = creator;
+    return true;
+}
+
+EngngModel* ClassFactory :: createEngngModel( classType type, int number, EngngModel* master )
 {
     return ( engngIdList.count ( type ) == 1 ) ? engngIdList [ type ] ( number, master ) : NULL;
 }
 
-LoadTimeFunction* ClassFactory::createLoadTimeFunction ( const char* name, int number, Domain* domain )
+LoadTimeFunction* ClassFactory :: createLoadTimeFunction( const char* name, int number, Domain* domain )
 {
-    return ( ltfNameList.count ( name ) == 1 ) ? ltfNameList [ name ] ( number, domain ) : NULL;
+    return ( ltfList.count ( name ) == 1 ) ? ltfList [ name ] ( number, domain ) : NULL;
 }
 
-LoadTimeFunction* ClassFactory::createLoadTimeFunction ( classType type, int number, Domain* domain )
+bool ClassFactory :: registerLoadTimeFunction(const char *name, LoadTimeFunction * ( *creator )(int, Domain *))
+{
+    printf("Register %s\n", name);
+    ltfList[name] = creator;
+    return true;
+}
+
+LoadTimeFunction* ClassFactory :: createLoadTimeFunction( classType type, int number, Domain* domain )
 {
     return ( ltfIdList.count ( type ) == 1 ) ? ltfIdList [ type ] ( number, domain ) : NULL;
 }
 
-NonlocalBarrier* ClassFactory::createNonlocalBarrier ( const char* name, int number, Domain* domain )
+NonlocalBarrier* ClassFactory :: createNonlocalBarrier( const char* name, int number, Domain* domain )
 {
-    return ( nlbNameList.count ( name ) == 1 ) ? nlbNameList [ name ] ( number, domain ) : NULL;
+    return ( nlbList.count ( name ) == 1 ) ? nlbList [ name ] ( number, domain ) : NULL;
 }
 
-NonlocalBarrier* ClassFactory::createNonlocalBarrier ( classType type, int number, Domain* domain )
+bool ClassFactory :: registerNonlocalBarrier(const char *name, NonlocalBarrier * ( *creator )(int, Domain *))
+{
+    printf("Register %s\n", name);
+    nlbList[name] = creator;
+    return true;
+}
+
+NonlocalBarrier* ClassFactory :: createNonlocalBarrier( classType type, int number, Domain* domain )
 {
     return ( nlbIdList.count ( type ) == 1 ) ? nlbIdList [ type ] ( number, domain ) : NULL;
 }
 
-RandomFieldGenerator* ClassFactory::createRandomFieldGenerator ( const char* name, int number, Domain* domain )
+RandomFieldGenerator* ClassFactory :: createRandomFieldGenerator( const char* name, int number, Domain* domain )
 {
-    return ( rfgNameList.count ( name ) == 1 ) ? rfgNameList [ name ] ( number, domain ) : NULL;
+    return ( rfgList.count ( name ) == 1 ) ? rfgList [ name ] ( number, domain ) : NULL;
 }
 
-RandomFieldGenerator* ClassFactory::createRandomFieldGenerator ( classType type, int number, Domain* domain )
+bool ClassFactory :: registerRandomFieldGenerator(const char *name, RandomFieldGenerator * ( *creator )(int, Domain *))
+{
+    printf("Register %s\n", name);
+    rfgList[name] = creator;
+    return true;
+}
+
+RandomFieldGenerator* ClassFactory :: createRandomFieldGenerator( classType type, int number, Domain* domain )
 {
     return ( rfgIdList.count ( type ) == 1 ) ? rfgIdList [ type ] ( number, domain ) : NULL;
 }
 
-ExportModule* ClassFactory::createExportModule(const char *name, int number, EngngModel *emodel)
+ExportModule* ClassFactory :: createExportModule(const char *name, int number, EngngModel *emodel)
 {
     return ( exportList.count(name) == 1 ) ? exportList [ name ](number, emodel) : NULL;
 }
 
-SparseNonLinearSystemNM* ClassFactory::createNonLinearSolver(const char *name, Domain *d, EngngModel *emodel)
+bool ClassFactory :: registerExportModule(const char *name, ExportModule * ( *creator )(int, EngngModel *))
+{
+    printf("Register %s\n", name);
+    exportList[name] = creator;
+    return true;
+}
+
+SparseNonLinearSystemNM* ClassFactory :: createNonLinearSolver(const char *name, Domain *d, EngngModel *emodel)
 {
     return ( nonlinList.count(name) == 1 ) ? nonlinList [ name ](d, emodel) : NULL;
 }
 
-InitModule* ClassFactory::createInitModule(const char *name, int number, EngngModel *emodel)
+bool ClassFactory :: registerSparseNonLinearSystemNM(const char *name, SparseNonLinearSystemNM * ( *creator )(Domain *, EngngModel *))
+{
+    printf("Register %s\n", name);
+    nonlinList[name] = creator;
+    return true;
+}
+
+InitModule* ClassFactory :: createInitModule(const char *name, int number, EngngModel *emodel)
 {
     return ( initList.count(name) == 1 ) ? initList [ name ](number, emodel) : NULL;
 }
 
-TopologyDescription* ClassFactory::createTopology(const char *name, Domain *domain)
+bool ClassFactory :: registerInitModule(const char *name, InitModule * ( *creator )(int, EngngModel *))
+{
+    printf("Register %s\n", name);
+    initList[name] = creator;
+    return true;
+}
+
+TopologyDescription* ClassFactory :: createTopology(const char *name, Domain *domain)
 {
     return ( topologyList.count(name) == 1 ) ? topologyList [ name ](domain) : NULL;
 }
 
+bool ClassFactory :: registerTopologyDescription(const char *name, TopologyDescription * ( *creator )(Domain *))
+{
+    printf("Register %s\n", name);
+    topologyList[name] = creator;
+    return true;
+}
+
 
 // XFEM:
-EnrichmentItem* ClassFactory::createEnrichmentItem(const char *name, int number, XfemManager *xm, Domain *domain)
+EnrichmentItem* ClassFactory :: createEnrichmentItem(const char *name, int number, XfemManager *xm, Domain *domain)
 {
     return ( enrichItemList.count(name) == 1 ) ? enrichItemList [ name ](number, xm, domain) : NULL;
 }
 
-EnrichmentFunction* ClassFactory::createEnrichmentFunction(const char *name, int number, Domain *domain)
+bool ClassFactory :: registerEnrichmentItem(const char *name, EnrichmentItem * ( *creator )(int, XfemManager *, Domain *))
+{
+    printf("Register %s\n", name);
+    enrichItemList[name] = creator;
+    return true;
+}
+
+EnrichmentFunction* ClassFactory :: createEnrichmentFunction(const char *name, int number, Domain *domain)
 {
     return ( enrichFuncList.count(name) == 1 ) ? enrichFuncList [ name ](number, domain) : NULL;
 }
 
-EnrichmentDomain* ClassFactory::createEnrichmentDomain(const char *name)
+bool ClassFactory :: registerEnrichmentFunction(const char *name, EnrichmentFunction * ( *creator )(int, Domain *))
+{
+    printf("Register %s\n", name);
+    enrichFuncList[name] = creator;
+    return true;
+}
+
+EnrichmentDomain* ClassFactory :: createEnrichmentDomain(const char *name)
 {
     return ( enrichmentDomainList.count(name) == 1 ) ? enrichmentDomainList [ name ]() : NULL;
 }
 
-BasicGeometry* ClassFactory::createGeometry(const char *name)
+bool ClassFactory :: registerEnrichmentDomain(const char *name, EnrichmentDomain * ( *creator )())
+{
+    printf("Register %s\n", name);
+    enrichmentDomainList[name] = creator;
+    return true;
+}
+
+BasicGeometry* ClassFactory :: createGeometry(const char *name)
 {
     return ( geometryList.count(name) == 1 ) ? geometryList [ name ]() : NULL;
 }
 
+bool ClassFactory :: registerGeometry(const char *name, BasicGeometry * ( *creator )())
+{
+    printf("Register %s\n", name);
+    geometryList[name] = creator;
+    return true;
+}
 
-SparseGeneralEigenValueSystemNM* ClassFactory::createGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *d, EngngModel *m)
+SparseGeneralEigenValueSystemNM* ClassFactory :: createGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *d, EngngModel *m)
 {
     if ( st == GES_SubspaceIt ) {
         return new SubspaceIteration(d, m);
@@ -469,7 +593,7 @@ SparseGeneralEigenValueSystemNM* ClassFactory::createGeneralizedEigenValueSolver
     return NULL;
 }
 
-IntegrationRule* ClassFactory::createIRule(classType type, int number, Element *e)
+IntegrationRule* ClassFactory :: createIRule(classType type, int number, Element *e)
 {
     if ( type == GaussIntegrationRuleClass ) {
         return new GaussIntegrationRule(number, e);
@@ -477,7 +601,7 @@ IntegrationRule* ClassFactory::createIRule(classType type, int number, Element *
     return NULL;
 }
 
-MaterialMappingAlgorithm* ClassFactory::createMaterialMappingAlgorithm(MaterialMappingAlgorithmType type)
+MaterialMappingAlgorithm* ClassFactory :: createMaterialMappingAlgorithm(MaterialMappingAlgorithmType type)
 {
 #ifdef __SM_MODULE
     if ( type == MMA_ClosestPoint ) {
@@ -491,7 +615,7 @@ MaterialMappingAlgorithm* ClassFactory::createMaterialMappingAlgorithm(MaterialM
     return NULL;
 }
 
-MesherInterface* ClassFactory::createMesherInterface(MeshPackageType type, Domain *d)
+MesherInterface* ClassFactory :: createMesherInterface(MeshPackageType type, Domain *d)
 {
 #ifdef __SM_MODULE
     if ( type == MPT_T3D ) {
@@ -509,7 +633,7 @@ MesherInterface* ClassFactory::createMesherInterface(MeshPackageType type, Domai
 
 
 #ifdef __PARALLEL_MODE
-LoadBalancerMonitor* ClassFactory::createLoadBalancerMonitor(classType type, EngngModel *e)
+LoadBalancerMonitor* ClassFactory :: createLoadBalancerMonitor(classType type, EngngModel *e)
 {
     if ( type == WallClockLoadBalancerMonitorClass ) {
         return new WallClockLoadBalancerMonitor(e);
@@ -517,7 +641,7 @@ LoadBalancerMonitor* ClassFactory::createLoadBalancerMonitor(classType type, Eng
     return NULL;
 }
 
-LoadBalancer* ClassFactory::createLoadBalancer(classType type, Domain *d)
+LoadBalancer* ClassFactory :: createLoadBalancer(classType type, Domain *d)
 {
     if ( type == ParmetisLoadBalancerClass ) {
         return new ParmetisLoadBalancer(d);

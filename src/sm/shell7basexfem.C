@@ -36,6 +36,7 @@
 #include "shell7base.h"
 #include "enrichmentitem.h"
 #include "xfemmanager.h"
+#include "dofmanager.h"
 #include "constantpressureload.h"
 
 namespace oofem {

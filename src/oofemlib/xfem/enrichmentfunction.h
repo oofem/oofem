@@ -36,10 +36,15 @@
 #define enrichmentfunction_h
 
 #include "intarray.h"
-#include "enrichmentdomain.h"
+#include "classfactory.h"
+
+#define _IFT_DiscontinuousFunction_Name "discontinuousfunction"
+#define _IFT_BranchFunction_Name "branchfunction"
+#define _IFT_RampFunction_Name "rampfunction"
 
 namespace oofem {
 class EnrichmentItem;
+class EnrichmentDomain;
 class BasicGeometry;
 class GaussPoint;
 
@@ -54,12 +59,15 @@ class GaussPoint;
 class EnrichmentFunction : public FEMComponent
 {
 public:
+    static bool __dummy;
+    static bool init() { printf("does it work????????????????\n"); return true; }
+public:
     /**
      * Constructor.
      * @param n Number associated with receiver.
      * @param aDomain Reference to domain.
      */
-    EnrichmentFunction(int n, Domain *aDomain) : FEMComponent(n, aDomain) { }
+    EnrichmentFunction(int n, Domain *aDomain) : FEMComponent(n + __dummy, aDomain) { }
     /// Destructor
     virtual ~EnrichmentFunction() { };
     /// Evaluates a function at a particular point

@@ -38,20 +38,25 @@
 #include "interface.h"
 #include "alist.h"
 #include "xfemmanager.h"
-#include "enrichmentdomain.h"
-#include "enrichmentitem.h"
+
 namespace oofem {
 class FloatArray;
 class FloatMatrix;
 class Triangle;
 class Element;
 class GaussPoint;
+class Element;
+class XfemManager;
 
 /**
  * Provides Xfem interface for an element.
  */
 class XfemElementInterface : public Interface
 {
+protected:
+    Element *element;
+    XfemManager *xMan;
+
 public:
     /// Constructor.
     XfemElementInterface(Element *e) : Interface() { this->element = e; }
@@ -63,9 +68,6 @@ public:
     void XfemElementInterface_updateIntegrationRule();
     /// Helpful routine to put the nodes for triangulation together, should be in protected members probably.
     void XfemElementInterface_prepareNodesForDelaunay(AList< FloatArray > *answer1, AList< FloatArray > *answer2);
-protected:
-    Element *element;
-    XfemManager *xMan;
 };
 } // end namespace oofem
 #endif // xfemelementinterface_h

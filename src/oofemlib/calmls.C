@@ -39,10 +39,10 @@
 #include "datastream.h"
 #include "mathfem.h"
 #include "element.h"
+#include "classfactory.h"
 // includes for HPC - not very clean (NumMethod knows what is "node" and "dof")
 #include "node.h"
 #include "dof.h"
-#include "usrdefsub.h"
 #include "contextioerr.h"
 
 namespace oofem {
@@ -51,6 +51,8 @@ namespace oofem {
 #define CALM_TANGENT_STIFF_TRESHOLD 0.1
 #define CALM_DEFAULT_NRM_TICKS 2
 #define CALM_MAX_REL_ERROR_BOUND 1.e10
+
+//REGISTER_SparseNonLinearSystemNM( CylindricalALM )
 
 CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m) :
     SparseNonLinearSystemNM(d, m), calm_HPCWeights(), calm_HPCIndirectDofMask(), calm_HPCDmanDofSrcArray(), ccDofGroups()
@@ -1061,7 +1063,7 @@ CylindricalALM :: giveLinearSolver()
         }
     }
 
-    linSolver = CreateUsrDefSparseLinSolver(solverType, domain, engngModel);
+    linSolver = classFactory.createSparseLinSolver(solverType, domain, engngModel);
     if ( linSolver == NULL ) {
         OOFEM_ERROR("CALMSLS :: giveLinearSolver: linear solver creation failed");
     }

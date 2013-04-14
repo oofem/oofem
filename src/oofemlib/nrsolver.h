@@ -51,6 +51,7 @@
 
 ///@name Input fields for NRSolver
 //@{
+#define _IFT_NRSolver_Name "nrsolver"
 #define _IFT_NRSolver_maxiter "maxiter"
 #define _IFT_NRSolver_miniterations "miniter"
 #define _IFT_NRSolver_minsteplength "minsteplength"

@@ -37,8 +37,12 @@
 #include "engngm.h"
 #include "dofmanager.h"
 #include "dof.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+//REGISTER_ExportModule( DofManExportModule )
+
 DofManExportModule :: DofManExportModule(int n, EngngModel *e) : ExportModule(n, e)
 {}
 
