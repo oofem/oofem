@@ -96,18 +96,16 @@ void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, d
     bc->computeFields(stress_dev, r_vol, EID_MomentumBalance_ConservationEquation, tStep);
     ms->letTempDeviatoricStressVectorBe(stress_dev);
 
-    // Stores temporary tangents
-    // Take the solver that the RVE-problem used for linear systems (even in non-linear materials, tangent problem is still linear)
-    bc->computeTangents(ms->giveDeviatoricTangent(),
-                        ms->giveDeviatoricPressureTangent(),
-                        ms->giveVolumetricDeviatoricTangent(),
-                        ms->giveVolumetricPressureTangent(),
-                        EID_MomentumBalance_ConservationEquation, tStep);
+    ms->markOldTangents(); // Mark this so that tangents are reevaluated if they are needed.
+    // One could also just compute them here, but you don't actually need them if the problem has converged, so this method saves on that iteration.
+    // Computing the tangents are often *more* expensive than computeFields, so this is well worth the time it saves
+    // All the tangents are computed in one go, because they are almost always all needed, and doing so saves time.
 }
 
 void FE2FluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     FE2FluidMaterialStatus *ms = static_cast<FE2FluidMaterialStatus*> (this->giveStatus(gp));
+    ms->computeTangents(tStep);
     if ( mode == TangentStiffness ) {
         answer = ms->giveDeviatoricTangent();
 #ifdef DEBUG_TANGENT
@@ -151,6 +149,7 @@ void FE2FluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
 void FE2FluidMaterial :: giveDeviatoricPressureStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     FE2FluidMaterialStatus *ms = static_cast<FE2FluidMaterialStatus*> (this->giveStatus(gp));
+    ms->computeTangents(tStep);
     if ( mode == TangentStiffness ) {
         answer = ms->giveDeviatoricPressureTangent();
 #ifdef DEBUG_TANGENT
@@ -180,6 +179,7 @@ void FE2FluidMaterial :: giveDeviatoricPressureStiffness(FloatArray &answer, Mat
 void FE2FluidMaterial :: giveVolumetricDeviatoricStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     FE2FluidMaterialStatus *ms = static_cast<FE2FluidMaterialStatus*> (this->giveStatus(gp));
+    ms->computeTangents(tStep);
     if ( mode == TangentStiffness ) {
         answer = ms->giveVolumetricDeviatoricTangent();
 #ifdef DEBUG_TANGENT
@@ -220,6 +220,7 @@ void FE2FluidMaterial :: giveVolumetricDeviatoricStiffness(FloatArray &answer, M
 void FE2FluidMaterial :: giveVolumetricPressureStiffness(double &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     FE2FluidMaterialStatus *ms = static_cast<FE2FluidMaterialStatus*> (this->giveStatus(gp));
+    ms->computeTangents(tStep);
     if ( mode == TangentStiffness ) {
         answer = ms->giveVolumetricPressureTangent();
 #ifdef DEBUG_TANGENT
@@ -314,6 +315,7 @@ FE2FluidMaterialStatus :: FE2FluidMaterialStatus(int n, Domain *d, GaussPoint *g
     //this->strainVector.zero();
     //this->tempStrainVector = this->strainVector;
     this->voffraction = 0.0;
+    this->oldTangents = true;
 
     if (!this->createRVE(n, gp, inputfile)) {
         OOFEM_ERROR("FE2FluidMaterialStatus :: Constructor - Couldn't create RVE");
@@ -412,6 +414,20 @@ contextIOResultType FE2FluidMaterialStatus :: restoreContext(DataStream *stream,
         THROW_CIOERR(iores);
     }
     return CIO_OK;
+}
+
+void FE2FluidMaterialStatus :: markOldTangents() { this->oldTangents = true; }
+
+void FE2FluidMaterialStatus :: computeTangents(TimeStep *tStep)
+{
+    if ( this->oldTangents ) {
+        bc->computeTangents(this->giveDeviatoricTangent(),
+                    this->giveDeviatoricPressureTangent(),
+                    this->giveVolumetricDeviatoricTangent(),
+                    this->giveVolumetricPressureTangent(),
+                    EID_MomentumBalance_ConservationEquation, tStep);
+    }
+    this->oldTangents = false;
 }
 
 } // end namespace oofem
