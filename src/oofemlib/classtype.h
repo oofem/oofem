@@ -246,6 +246,7 @@ enum classType {
     SUPGClass,
     StokesFlowClass,
     DarcyFlowClass,
+    FluidMaterialEvaluatorClass,
 
     NumericalMethodClass,
     SparseLinearSystemNMClass,

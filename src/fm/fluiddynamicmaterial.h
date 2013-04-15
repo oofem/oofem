@@ -58,8 +58,10 @@ namespace oofem {
 class FluidDynamicMaterialStatus : public MaterialStatus
 {
 protected:
-    /// Equilibrated state vector in reduced form.
+    /// Stress vector in reduced form.
     FloatArray deviatoricStressVector;
+    /// Strain vector in reduced form.
+    FloatArray deviatoricStrainRateVector;
 
 public:
     /// Constructor - creates new TransportMaterialStatus with number n, belonging to domain d and integration point g.
@@ -78,10 +80,12 @@ public:
      * Gives the deviatoric stress.
      */
     const FloatArray &giveDeviatoricStressVector() { return deviatoricStressVector; }
+    const FloatArray &giveDeviatoricStrainRateVector() { return deviatoricStrainRateVector; }
     /**
      * Sets the deviatoric stress.
      */
     void letTempDeviatoricStressVectorBe(const FloatArray &v) { deviatoricStressVector = v; }
+    void letTempDeviatoricStrainRateVectorBe(const FloatArray &v) { deviatoricStrainRateVector = v; }
 
     virtual const char *giveClassName() const { return "FluidDynamicMaterialStatus"; }
     virtual classType giveClassID() const { return FluidDynamicMaterialStatusClass; }

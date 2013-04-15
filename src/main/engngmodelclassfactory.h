@@ -58,6 +58,7 @@
  #include "stokesflow.h"
  #include "stokesflowvelocityhomogenization.h"
  #include "supg.h"
+ #include "fluidmaterialevaluator.h"
 #endif // __FM_Module
 
 #ifdef __SM_MODULE
@@ -87,5 +88,6 @@ REGISTER_CLASS(CBS, "cbs", CBSClass)
 REGISTER_CLASS(SUPG, "supg", SUPGClass)
 REGISTER_CLASS(StokesFlow, "stokesflow", StokesFlowClass)
 REGISTER_CLASS(StokesFlowVelocityHomogenization, "stokesflowvelocityhomogenization", StokesFlowVelocityHomogenizationClass)
+REGISTER_CLASS(FluidMaterialEvaluator, "fluidmaterialevaluator", FluidMaterialEvaluatorClass)
 #endif //__FM_MODULE
 

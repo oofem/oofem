@@ -25,6 +25,7 @@ set (fm_element
     linesurfacetension.C
     line2surfacetension.C
     line2boundaryelement.C
+    fluidmaterialevaluator.C
     )
 
 set (fm_material
