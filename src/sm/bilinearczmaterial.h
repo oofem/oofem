@@ -46,9 +46,6 @@
 #define _IFT_BilinearCZMaterial_g1c "g1c"
 #define _IFT_BilinearCZMaterial_sigfn "sigfn"
 #define _IFT_BilinearCZMaterial_sigfs "sigfs"
-//#define _IFT_IsoInterfaceDamageMaterial_gf "gf"
-//#define _IFT_IsoInterfaceDamageMaterial_maxOmega "maxomega"
-//#define _IFT_IsoInterfaceDamageMaterial_talpha "talpha"
 //@}
 
 namespace oofem {
@@ -60,8 +57,6 @@ namespace oofem {
 class BilinearCZMaterialStatus : public StructuralMaterialStatus
 {
 protected:
-    /// Scalar measure of the largest equivalent displacement ever reached in material.
-    //double kappa;
 
 public:
     /// Constructor
@@ -70,11 +65,6 @@ public:
     virtual ~BilinearCZMaterialStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
-
-    /// Returns the last equilibrated scalar measure of the largest strain level.
-    //double giveKappa() { return kappa; }
-    
-    //void setTempDamage(double newDamage) { tempDamage = newDamage; }
 
     // definition
     virtual const char *giveClassName() const { return "BilinearCZMaterialStatus"; }
@@ -153,7 +143,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new BilinearCZMaterialStatus(1, domain, gp); }
-
+    void printYourself();
 protected:
    
 };

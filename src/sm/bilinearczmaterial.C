@@ -491,6 +491,7 @@ BilinearCZMaterial :: initializeFrom(InputRecord *ir)
     this->kn1 = - this->sigfn / ( this->gnmax - this->gn0 ); // slope during softening part in normal dir
     double kn0min = 0.5*sigfn*sigfn/GIc;
     this->checkConsistency();                                // check validity of the material paramters
+    this->printYourself();
     return IRRT_OK;
 }
 
@@ -505,13 +506,33 @@ BilinearCZMaterial :: checkConsistency()
     } else if ( this->GIc < 0.0 ) {
         OOFEM_ERROR2("BilinearCZMaterial :: initializeFrom - GIc is negative (%.2e)", this->GIc);
     } else if ( this->kn0 < kn0min  ) { // => gn0 > gnmax
-        //OOFEM_ERROR3("BilinearCZMaterial :: initializeFrom - kn0 (%.2e) is below minimum stiffness (%.2e), => gn0 > gnmax, which is unphysical" ,
-        //    this->kn0, kn0min);
+        OOFEM_ERROR3("BilinearCZMaterial :: initializeFrom - kn0 (%.2e) is below minimum stiffness (%.2e), => gn0 > gnmax, which is unphysical" ,
+            this->kn0, kn0min);
     }
     return 1;
 }
 
+void
+BilinearCZMaterial :: printYourself()
+{
+    printf("Paramters for BilinearCZMaterial: \n");
 
+    printf("-Strength paramters \n");
+    printf("  sigfn = %e \n", this->sigfn);
+    printf("  GIc   = %e \n", this->GIc);
+    //printf("\n");
+
+    printf("-Stiffness parameters \n");
+    printf("  kn0   = %e \n", this->kn0);
+    printf("  kn1   = %e \n", this->kn1);
+    printf("  knc   = %e \n", this->knc);
+    //printf("\n");
+
+    printf("-jump limits \n");
+    printf("  gn0   = %e \n", this->gn0);
+    printf("  gnmax = %e \n", this->gnmax);
+    
+}
 
 BilinearCZMaterialStatus :: BilinearCZMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
 {
