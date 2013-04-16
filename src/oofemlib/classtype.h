@@ -339,6 +339,7 @@ enum classType {
     LatticeDamage2dClass,
     IsoInterfaceDamageMaterialClass,
     BilinearCZMaterialClass,
+    ExpCZMaterialClass,
     CebFipSlip90MaterialClass,
     DustMaterialClass,
     RVEMaterialClass,

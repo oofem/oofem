@@ -108,6 +108,7 @@ set (sm_material
     dustmat.C
     lsmastermat.C lsmastermatgrad.C
     bilinearczmaterial.C
+    expczmaterial.C
     )
 
 set (sm_error
