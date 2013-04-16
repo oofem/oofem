@@ -331,8 +331,13 @@ IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPoints,
         return  ( numberOfIntegrationPoints = this->SetUpPointsOnTetrahedra(nPoints, matMode) );
 
     case _Wedge:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOnWedge(nPoints, matMode) );
-
+        // Limited wrapper for now;
+        if ( nPoints == 2 ) {
+            numberOfIntegrationPoints = this->SetUpPointsOnWedge(1, 2, matMode);
+        } else {
+            numberOfIntegrationPoints = this->SetUpPointsOnWedge(3, 3, matMode);
+        }
+        return numberOfIntegrationPoints;
     default:
         OOFEM_ERROR("IntegrationRule::setUpIntegrationPoints - unknown mode");
     }

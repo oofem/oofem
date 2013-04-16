@@ -270,14 +270,6 @@ public:
      */
     virtual int SetUpPointsOnTetrahedra(int, MaterialMode mode) { return 0; }
     /**
-     * Sets up receiver's  integration points on wedge (volume coords) integration domain.
-     * Default implementation does not sets up any integration points and returns 0.
-     * Must be overloaded by derived classes.
-     * @return Number of integration points.
-     */
-    virtual int SetUpPointsOnWedge(int, MaterialMode mode) { return 0; }
-
-    /**
      * Sets up integration points on 2D embedded line inside 2D volume (the list of local coordinates
      * should be provided).
      * @param nPoints Number of points along line.
