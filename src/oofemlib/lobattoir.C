@@ -32,14 +32,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 #include "lobattoir.h"
 #include "gausspnt.h"
 #include "floatarray.h"
 #include "mathfem.h"
 
 namespace oofem {
-// initialize class member
 
 LobattoIntegrationRule :: LobattoIntegrationRule(int n, Element *e,
                                                  int startIndx, int endIndx, bool dynamic) :
@@ -51,23 +49,19 @@ LobattoIntegrationRule :: ~LobattoIntegrationRule()
 
 
 int
-LobattoIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode, GaussPoint ***arry)
-// creates array of nPoints Lobatto Integration Points
-// ( don't confuse with GaussPoint - elem is only the container where to
-//   store coordinates and weights)
+LobattoIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode)
 {
-    int i;
     double weight;
     FloatArray *coord, *c, *w;
 
     switch ( nPoints ) {
     case 1:
 
-        * arry = new GaussPoint * [ nPoints ];
+        gaussPointArray = new GaussPoint * [ nPoints ];
         coord = new FloatArray(1);
         coord->at(1) = 0.0;
         weight = 2.0;
-        ( * arry ) [ 0 ] = new GaussPoint(this, 1, coord, weight, mode);
+        gaussPointArray [ 0 ] = new GaussPoint(this, 1, coord, weight, mode);
         break;
 
     case 2:
@@ -81,13 +75,13 @@ LobattoIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode, Gaus
         w->at(1) = 1.0;
         w->at(2) = 1.0;
 
-        * arry = new GaussPoint * [ nPoints ];
+        gaussPointArray = new GaussPoint * [ nPoints ];
 
-        for ( i = 0; i < 2; i++ ) {
+        for ( int i = 0; i < 2; i++ ) {
             coord = new FloatArray(1);
             coord->at(1) = c->at(i + 1);
             weight = w->at(i + 1);
-            ( * arry ) [ i ] = new GaussPoint(this, i + 1, coord, weight, mode);
+            gaussPointArray [ i ] = new GaussPoint(this, i + 1, coord, weight, mode);
         }
 
         delete c;
@@ -107,13 +101,13 @@ LobattoIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode, Gaus
         w->at(2) =  1.333333333333333;
         w->at(3) =  0.333333333333333;
 
-        * arry = new GaussPoint * [ nPoints ];
+        gaussPointArray = new GaussPoint * [ nPoints ];
 
-        for ( i = 0; i < 3; i++ ) {
+        for ( int i = 0; i < 3; i++ ) {
             coord  = new FloatArray(1);
             coord->at(1) = c->at(i + 1);
             weight = w->at(i + 1);
-            ( * arry ) [ i ] = new GaussPoint(this, i + 1, coord, weight, mode);
+            gaussPointArray [ i ] = new GaussPoint(this, i + 1, coord, weight, mode);
         }
 
         delete c;
@@ -135,13 +129,13 @@ LobattoIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode, Gaus
         w->at(3) =  0.833333333333333;
         w->at(4) =  0.166666666666667;
 
-        * arry = new GaussPoint * [ nPoints ];
+        gaussPointArray = new GaussPoint * [ nPoints ];
 
-        for ( i = 0; i < 4; i++ ) {
+        for ( int i = 0; i < 4; i++ ) {
             coord  = new FloatArray(1);
             coord->at(1) = c->at(i + 1);
             weight = w->at(i + 1);
-            ( * arry ) [ i ] = new GaussPoint(this, i + 1, coord, weight, mode);
+            gaussPointArray [ i ] = new GaussPoint(this, i + 1, coord, weight, mode);
         }
 
         delete c;
@@ -166,13 +160,13 @@ LobattoIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode, Gaus
         w->at(5) =  0.1;
 
 
-        * arry = new GaussPoint * [ nPoints ];
+        gaussPointArray = new GaussPoint * [ nPoints ];
 
-        for ( i = 0; i < 5; i++ ) {
+        for ( int i = 0; i < 5; i++ ) {
             coord  = new FloatArray(1);
             coord->at(1) = c->at(i + 1);
             weight = w->at(i + 1);
-            ( * arry ) [ i ] = new GaussPoint(this, i + 1, coord, weight, mode);
+            gaussPointArray [ i ] = new GaussPoint(this, i + 1, coord, weight, mode);
         }
 
         delete c;
@@ -198,13 +192,13 @@ LobattoIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode, Gaus
         w->at(5) =  0.378474956297847;
         w->at(6) =  0.066666666666667;
 
-        * arry = new GaussPoint * [ nPoints ];
+        gaussPointArray = new GaussPoint * [ nPoints ];
 
-        for ( i = 0; i < 6; i++ ) {
+        for ( int i = 0; i < 6; i++ ) {
             coord  = new FloatArray(1);
             coord->at(1) = c->at(i + 1);
             weight = w->at(i + 1);
-            ( * arry ) [ i ] = new GaussPoint(this, i + 1, coord, weight, mode);
+            gaussPointArray [ i ] = new GaussPoint(this, i + 1, coord, weight, mode);
         }
 
         delete c;
@@ -219,30 +213,21 @@ LobattoIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode, Gaus
 }
 
 int
-LobattoIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode, GaussPoint ***arry)
-// creates array of nPoints Gauss Integration Points
-// ( don't confuse with GaussPoint - elem is only the container where to
-//   store corrdinates and weights)
+LobattoIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 {
     OOFEM_ERROR2("SetUpPointsOnTriangle: unsupported number of IPs (%d)", nPoints);
     return nPoints;
 }
 
 int
-LobattoIntegrationRule :: SetUpPointsOnSquare(int nPoints, MaterialMode mode, GaussPoint ***arry)
-// creates array of nPoints Gauss Integration Points
-// ( don't confuse with GaussPoint - elem is only the container where to
-//   store corrdinates and weights)
+LobattoIntegrationRule :: SetUpPointsOnSquare(int nPoints, MaterialMode mode)
 {
     OOFEM_ERROR2("SetUpPointsOnSquare: unsupported number of IPs (%d)", nPoints);
     return nPoints;
 }
 
 int
-LobattoIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode, GaussPoint ***arry)
-// creates array of nPoints Gauss Integration Points
-// ( don't confuse with GaussPoint - elem is only the container where to
-//   store corrdinates and weights)
+LobattoIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode)
 {
     OOFEM_ERROR2("SetUpPointsOnCube: unsupported number of IPs (%d)", nPoints);
     return nPoints;
@@ -250,10 +235,7 @@ LobattoIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode, Gaus
 
 
 int
-LobattoIntegrationRule :: SetUpPointsOnTetrahedra(int nPoints, MaterialMode mode, GaussPoint ***arry)
-// creates array of nPoints Gauss Integration Points
-// ( don't confuse with GaussPoint - elem is only the container where to
-//   store corrdinates and weights)
+LobattoIntegrationRule :: SetUpPointsOnTetrahedra(int nPoints, MaterialMode mode)
 {
     OOFEM_ERROR2("SetUpPointsOnTetrahedra: unsupported number of IPs (%d)", nPoints);
     return nPoints;
@@ -264,9 +246,6 @@ LobattoIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain
                                                                int approxOrder)
 {
     int requiredNIP;
-    if ( approxOrder < 0 ) {
-        return 0;
-    }
 
     switch ( dType ) {
     case _Line:

@@ -64,11 +64,11 @@ public:
 
     virtual int getRequiredNumberOfIntegrationPoints(integrationDomain dType, int approxOrder);
 
-    virtual int SetUpPointsOnLine(int, MaterialMode mode, GaussPoint ***gp);
-    virtual int SetUpPointsOnTriangle(int, MaterialMode mode, GaussPoint ***gp);
-    virtual int SetUpPointsOnSquare(int, MaterialMode mode, GaussPoint ***gp);
-    virtual int SetUpPointsOnCube(int, MaterialMode mode, GaussPoint ***gp);
-    virtual int SetUpPointsOnTetrahedra(int, MaterialMode mode, GaussPoint ***gp);
+    virtual int SetUpPointsOnLine(int, MaterialMode mode);
+    virtual int SetUpPointsOnTriangle(int, MaterialMode mode);
+    virtual int SetUpPointsOnSquare(int, MaterialMode mode);
+    virtual int SetUpPointsOnCube(int, MaterialMode mode);
+    virtual int SetUpPointsOnTetrahedra(int, MaterialMode mode);
 };
 } // end namespace oofem
 #endif // lobattoir_h

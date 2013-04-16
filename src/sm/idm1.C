@@ -379,6 +379,9 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
             dim = 3;
             StrainVector fullStrain(strain, _3dMat);
             fullStrain.computePrincipalValDir(principalStrains, N);
+        } else {
+            dim = 0;
+            OOFEM_ERROR("IsotropicDamageMaterial1 :: computeEta - Unknown material mode.");
         }
 
         FloatArray n(dim);
@@ -434,10 +437,13 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
             fullStress.computePrincipalValDir(principalStress, N);
             principalStress.resize(3);
             dim = 2;
-        } else if ( gp->giveMaterialMode() == _3dMat || gp->giveMaterialMode() == _3dMatGrad )     {
+        } else if ( gp->giveMaterialMode() == _3dMat || gp->giveMaterialMode() == _3dMatGrad ) {
             StressVector fullStress(stress, _3dMat);
             fullStress.computePrincipalValDir(principalStress, N);
             dim = 3;
+        } else {
+            dim = 0;
+            OOFEM_ERROR("IsotropicDamageMaterial1 :: computeEta - Unknown material mode.");
         }
 
         FloatArray n(dim);

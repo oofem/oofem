@@ -103,7 +103,7 @@ public:
     virtual ~EDBGCircle() { }
     virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir);  };
     virtual bool isDofManagerEnriched(DofManager *dMan);
-    virtual bool isElementEnriched(const Element *element);
+    virtual bool isElementEnriched(Element *element);
     virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element) { bg->computeIntersectionPoints(element, intersectionPoints); }
     virtual int computeNumberOfIntersectionPoints(Element *element) { return static_cast<Circle *>(bg)->computeNumberOfIntersectionPoints(element); };
 };

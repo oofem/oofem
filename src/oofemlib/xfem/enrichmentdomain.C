@@ -127,7 +127,7 @@ EDBGCircle :: isDofManagerEnriched(DofManager *dMan)
 
 
 bool
-EDBGCircle :: isElementEnriched(const Element *element) 
+EDBGCircle :: isElementEnriched(Element *element) 
 {
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
         if ( this->isDofManagerEnriched( element->giveDofManager(i) ) ) {

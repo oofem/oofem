@@ -77,7 +77,7 @@ public:
     /// Checks whether an element is interacted, Element reference will be later replaced by Geometry.
     virtual bool intersects(Element *element) { return false; }
     /// Gives number of intersection points of Geometry entity with an element, Element reference will be later replaced by Geometry.
-    virtual int computeNumberOfIntersectionPoints(const Element *element) { return 0; }
+    virtual int computeNumberOfIntersectionPoints(Element *element) { return 0; }
     /// Gives intersection points between this Geometry and Element.
     virtual void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints) { }
     /// Accessor.

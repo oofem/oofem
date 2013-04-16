@@ -737,10 +737,9 @@ IDGMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, Ga
 
 
 MaterialStatus *
-IDGMaterial :: CreateStatus(GaussPoint *gp)
+IDGMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    IDGMaterialStatus *answer = new IDGMaterialStatus(1, IDGMaterial :: domain, gp);
-    return answer;
+    return new IDGMaterialStatus(1, IDGMaterial :: domain, gp);
 }
 
 

@@ -53,11 +53,7 @@ TrabBone3D :: TrabBone3D(int n, Domain *d) : StructuralMaterial(n, d)
 int
 TrabBone3D :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( ( mode == _3dMat ) ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _3dMat;
 }
 
 void TrabBone3D :: computePlasStrainEnerDensity(GaussPoint *gp, const FloatArray &totalStrain, const FloatArray &totalStress)
