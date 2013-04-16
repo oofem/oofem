@@ -895,6 +895,7 @@ void
 Shell7Base :: computeCauchyStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     // Compute Cauchy stress from 2nd Piola stress
+    // @todo rewrite so the input is F and have a corresponding method for shell7basexfem
     FloatArray solVec;
     this->giveUpdatedSolutionVector(solVec, tStep); 
     FloatMatrix B11, B22, B32, B43, B53;
