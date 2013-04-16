@@ -33,7 +33,7 @@
  */
 
 #include "engngm.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "util.h"
 #include "inputrecord.h"
 #include "datareader.h"
@@ -62,7 +62,7 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
         IR_IOERR("", __proc, "", emodelir, result);
     }
 
-    problem = CreateUsrDefEngngModelOfType(problemName.c_str(), 1, _master);
+    problem = classFactory.createEngngModel(problemName.c_str(), 1, _master);
     if (!problem) {
         OOFEM_ERROR("EngngModel::InstanciateProblem - Failed to construct engineering model.\n");
     }

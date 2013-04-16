@@ -34,7 +34,7 @@
 
 #include "initmodulemanager.h"
 #include "modulemanager.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 
 namespace oofem {
 InitModuleManager :: InitModuleManager(EngngModel *emodel) : ModuleManager< InitModule >(emodel)
@@ -54,9 +54,9 @@ InitModuleManager :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-InitModule *InitModuleManager :: CreateModuleOfType(const char *name, int n, EngngModel *emodel)
+InitModule *InitModuleManager :: CreateModule(const char *name, int n, EngngModel *emodel)
 {
-    return CreateUsrDefInitModuleOfType(name, n, emodel);
+    return classFactory.createInitModule(name, n, emodel);
 }
 
 void

@@ -43,7 +43,7 @@
 #include "simpleslavedof.h"
 #include "nonlocalbarrier.h"
 #include "initialcondition.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "oofemtxtinputrecord.h"
 #include "outputmanager.h"
 #include "crosssection.h"
@@ -3574,7 +3574,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
         if ( parent ) {
             parentNodePtr = domain->giveNode(parent);
             // inherit all data from parent (bc, ic, load, etc.)
-            node = CreateUsrDefDofManagerOfType(parentNodePtr->giveClassName(), inode, * dNew);
+            node = classFactory.createDofManager(parentNodePtr->giveClassName(), inode, * dNew);
             ndofs = parentNodePtr->giveNumberOfDofs();
             node->setNumberOfDofs(ndofs);
             node->setLoadArray( * parentNodePtr->giveLoadArray() );
@@ -3602,7 +3602,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
 #endif
         } else {
             // newly created node (irregular)
-            node = CreateUsrDefDofManagerOfType(NodeClass, inode, * dNew);
+            node = classFactory.createDofManager(NodeClass, inode, * dNew);
             //create new node with default DOFs
             ndofs = dofIDArrayPtr.giveSize();
             node->setNumberOfDofs(ndofs);
@@ -3815,7 +3815,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
 #endif
         if ( parent ) {
             parentElementPtr = domain->giveElement(parent);
-            elem = CreateUsrDefElementOfType(parentElementPtr->giveClassName(), eNum, * dNew);
+            elem = classFactory.createElement(parentElementPtr->giveClassName(), eNum, * dNew);
             ( * dNew )->setElement(eNum, elem);
             elem->setDofManagers( * mesh->giveElement(ielem)->giveNodes() );
             elem->setMaterial( parentElementPtr->giveMaterial()->giveNumber() );
@@ -3843,7 +3843,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
         irPtr->setRecordString( irString );
         IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
-        crossSection = CreateUsrDefCrossSectionOfType(name.c_str(), i, * dNew);
+        crossSection = classFactory.createCrossSection(name.c_str(), i, * dNew);
         crossSection->initializeFrom(irPtr);
         ( * dNew )->setCrossSection(i, crossSection);
     }
@@ -3856,7 +3856,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
         irPtr->setRecordString( irString );
         IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
-        mat = CreateUsrDefMaterialOfType(name.c_str(), i, * dNew);
+        mat = classFactory.createMaterial(name.c_str(), i, * dNew);
         mat->initializeFrom(irPtr);
         ( * dNew )->setMaterial(i, mat);
     }
@@ -3869,7 +3869,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
         irPtr->setRecordString( irString );
         IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
-        barrier = CreateUsrDefNonlocalBarrierOfType(name.c_str(), i, * dNew);
+        barrier = classFactory.createNonlocalBarrier(name.c_str(), i, * dNew);
         barrier->initializeFrom(irPtr);
         ( * dNew )->setNonlocalBarrier(i, barrier);
     }
@@ -3882,7 +3882,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
         irPtr->setRecordString( irString );
         IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
-        bc = CreateUsrDefBoundaryConditionOfType(name.c_str(), i, * dNew);
+        bc = classFactory.createBoundaryCondition(name.c_str(), i, * dNew);
         bc->initializeFrom(irPtr);
         ( * dNew )->setBoundaryCondition(i, bc);
     }
@@ -3908,7 +3908,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
         irPtr->setRecordString( irString );
         IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
-        ltf = CreateUsrDefLoadTimeFunctionOfType(name.c_str(), i, * dNew);
+        ltf = classFactory.createLoadTimeFunction(name.c_str(), i, * dNew);
         ltf->initializeFrom(irPtr);
         ( * dNew )->setLoadTimeFunction(i, ltf);
     }
@@ -5292,7 +5292,7 @@ Subdivision :: unpackRemoteElements(Domain *d, ProcessCommunicator &pc)
         if ( ( dofman = dtm->giveDofManager(_globnum) ) == NULL ) {
             // data not available -> create a new one
             _newentry = true;
-            dofman = CreateUsrDefDofManagerOfType(_etype, 0, d);
+            dofman = classFactory.createDofManager(_etype, 0, d);
         }
 
         dofman->setGlobalNumber(_globnum);
@@ -5319,7 +5319,7 @@ Subdivision :: unpackRemoteElements(Domain *d, ProcessCommunicator &pc)
         }
 
         _etype = ( classType ) _type;
-        elem = CreateUsrDefElementOfType(_etype, 0, d);
+        elem = classFactory.createElement(_etype, 0, d);
         elem->restoreContext(& pcDataStream, CM_Definition | CM_DefinitionGlobal);
         elem->setParallelMode(Element_remote);
         elem->setPartitionList(elemPartitions);

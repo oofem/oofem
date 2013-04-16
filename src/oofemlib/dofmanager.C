@@ -42,7 +42,7 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "intarray.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "mathfem.h"
@@ -719,7 +719,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
         // allocate new ones
         dofArray = new Dof * [ _numberOfDofs ];
         for ( int i = 0; i < _numberOfDofs; i++ ) {
-            dofArray [ i ] = CreateUsrDefDofOfType( ( dofType ) dtypes(i), i + 1, this );
+            dofArray [ i ] = classFactory.createDof( ( dofType ) dtypes(i), i + 1, this );
         }
 
         numberOfDofs = _numberOfDofs;

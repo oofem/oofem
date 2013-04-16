@@ -42,7 +42,7 @@
 #include "verbose.h"
 #include "structuralelement.h"
 #include "structuralelementevaluator.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 
 namespace oofem {
 DIIDynamic :: DIIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
@@ -90,7 +90,7 @@ NumericalMethod *DIIDynamic :: giveNumericalMethod(MetaStep *mStep)
             return nMethod;
         }
 
-        nMethod = CreateUsrDefSparseLinSolver(solverType, this->giveDomain(1), this);
+        nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     }
 
     if ( nMethod == NULL ) {
@@ -105,7 +105,7 @@ NumericalMethod *DIIDynamic :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
 
-    nMethod = CreateUsrDefSparseLinSolver(solverType, this->giveDomain(1), this);
+    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }
@@ -291,7 +291,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
 #ifdef VERBOSE
         OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
-        stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( stiffnessMatrix == NULL ) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }

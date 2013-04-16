@@ -9,7 +9,7 @@
 #include "element.h"
 #include "inputrecord.h"
 #include "timestep.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "sparselinsystemnm.h"
 #include "mathfem.h"
 #include "tr1darcy.h"
@@ -96,7 +96,7 @@ void DarcyFlow :: solveYourselfAt (TimeStep *tStep)
 
     // Create "stiffness matrix"
     if ( !this->stiffnessMatrix ) {
-        this->stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        this->stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         this->stiffnessMatrix->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
     }
 

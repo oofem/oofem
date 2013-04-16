@@ -39,7 +39,7 @@
 #include "dof.h"
 #include "verbose.h"
 #include "transportelement.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "mathfem.h"
 
 namespace oofem {
@@ -99,7 +99,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
             delete conductivityMatrix;
         }
 
-        conductivityMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( conductivityMatrix == NULL ) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }

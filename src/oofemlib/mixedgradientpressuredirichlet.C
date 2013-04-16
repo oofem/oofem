@@ -44,7 +44,7 @@
 #include "node.h"
 #include "activedof.h"
 #include "masterdof.h"
-#include "usrdefsub.h" // For sparse matrix creation.
+#include "classfactory.h" // For sparse matrix creation.
 #include "sparsemtrxtype.h"
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
@@ -247,17 +247,17 @@ void MixedGradientPressureDirichlet :: computeTangents(
     // Fetch some information from the engineering model
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
-    SparseLinearSystemNM *solver = CreateUsrDefSparseLinSolver(ST_Petsc, this->domain, this->domain->giveEngngModel());// = rve->giveLinearSolver();
+    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver(ST_Petsc, this->domain, this->domain->giveEngngModel());// = rve->giveLinearSolver();
     SparseMtrx *Kff, *Kfp, *Kpf, *Kpp;
     SparseMtrxType stype = SMT_PetscMtrx;// = rve->giveSparseMatrixType();
     EModelDefaultEquationNumbering fnum;
     EModelDefaultPrescribedEquationNumbering pnum;
 
     // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
-    Kff = CreateUsrDefSparseMtrx(stype);
-    Kfp = CreateUsrDefSparseMtrx(stype);
-    Kpf = CreateUsrDefSparseMtrx(stype);
-    Kpp = CreateUsrDefSparseMtrx(stype);
+    Kff = classFactory.createSparseMtrx(stype);
+    Kfp = classFactory.createSparseMtrx(stype);
+    Kpf = classFactory.createSparseMtrx(stype);
+    Kpp = classFactory.createSparseMtrx(stype);
     if ( !Kff ) {
         OOFEM_ERROR2("MixedGradientPressureDirichlet :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
     }

@@ -40,7 +40,7 @@
 #include "rveengngmodel.h"
 #include "engngm.h"
 #include "sparselinsystemnm.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 
 namespace oofem
 {

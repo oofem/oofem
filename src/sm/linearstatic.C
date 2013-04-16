@@ -40,7 +40,7 @@
 #include "verbose.h"
 #include "structuralelement.h"
 #include "structuralelementevaluator.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"
 
@@ -85,10 +85,10 @@ NumericalMethod *LinearStatic :: giveNumericalMethod(MetaStep *mStep)
 
     if ( isParallel() ) {
         if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
-            nMethod = CreateUsrDefSparseLinSolver(solverType, this->giveDomain(1), this);
+            nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
         }
     } else {
-        nMethod = CreateUsrDefSparseLinSolver(solverType, this->giveDomain(1), this);
+        nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     }
 
     if ( nMethod == NULL ) {
@@ -222,7 +222,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
         //
         // first step  assemble stiffness Matrix
         //
-        stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( stiffnessMatrix == NULL ) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }

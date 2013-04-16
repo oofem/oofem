@@ -49,7 +49,7 @@ using namespace std;
 #include "structuralelementevaluator.h"
 #include "outputmanager.h"
 #include "datastream.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "timer.h"
 #include "contextioerr.h"
 #include "sparsemtrx.h"
@@ -398,8 +398,8 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         // First assemble problem at current time step.
         // Option to take into account initial conditions.
         if ( !effectiveStiffnessMatrix ) {
-            effectiveStiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
-            massMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+            effectiveStiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
+            massMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         }
 
         if ( effectiveStiffnessMatrix == NULL || massMatrix == NULL ) {
@@ -1089,7 +1089,7 @@ NonLinearDynamic :: giveLoadBalancer()
     }
 
     if ( loadBalancingFlag ) {
-        lb = CreateUsrDefLoadBalancerOfType( ParmetisLoadBalancerClass, this->giveDomain(1) );
+        lb = classFactory.createLoadBalancer( ParmetisLoadBalancerClass, this->giveDomain(1) );
         return lb;
     } else {
         return NULL;
@@ -1105,7 +1105,7 @@ NonLinearDynamic :: giveLoadBalancerMonitor()
     }
 
     if ( loadBalancingFlag ) {
-        lbm = CreateUsrDefLoadBalancerMonitorOfType(WallClockLoadBalancerMonitorClass, this);
+        lbm = classFactory.createLoadBalancerMonitor(WallClockLoadBalancerMonitorClass, this);
         return lbm;
     } else {
         return NULL;

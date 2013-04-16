@@ -42,7 +42,7 @@
 #include "maskedprimaryfield.h"
 #include "verbose.h"
 #include "transportelement.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "loadtimefunction.h"
@@ -76,7 +76,7 @@ NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *
         return nMethod;
     }
 
-    nMethod = CreateUsrDefSparseLinSolver(solverType, this->giveDomain(1), this);
+    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }
@@ -277,7 +277,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
             delete conductivityMatrix;
         }
 
-        conductivityMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( conductivityMatrix == NULL ) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }

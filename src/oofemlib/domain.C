@@ -54,7 +54,7 @@
 #include "datareader.h"
 #include "nodalrecoverymodel.h"
 #include "nonlocalbarrier.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "logger.h"
 #include "xfemmanager.h"
 #include "topologydescription.h"
@@ -499,7 +499,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
         // assign component number according to record order
         // component number (as given in input record) becomes label
-        if ( ( node = CreateUsrDefDofManagerOfType(name.c_str(), i + 1, this) ) == NULL ) {
+        if ( ( node = classFactory.createDofManager(name.c_str(), i + 1, this) ) == NULL ) {
             OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create node of type: %s\n", name.c_str() );
         }
 
@@ -528,7 +528,7 @@ Domain :: instanciateYourself(DataReader *dr)
         // read type of element
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-        if ( ( elem = CreateUsrDefElementOfType(name.c_str(), i + 1, this) ) == NULL ) {
+        if ( ( elem = classFactory.createElement(name.c_str(), i + 1, this) ) == NULL ) {
             OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create element: %s", name.c_str() );
         }
 
@@ -558,7 +558,7 @@ Domain :: instanciateYourself(DataReader *dr)
         ir = dr->giveInputRecord(DataReader :: IR_crosssectRec, i + 1);
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-        if ( ( crossSection = CreateUsrDefCrossSectionOfType(name.c_str(), num, this) ) == NULL ) {
+        if ( ( crossSection = classFactory.createCrossSection(name.c_str(), num, this) ) == NULL ) {
             OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create crosssection: %s", name.c_str() );
         }
 
@@ -590,7 +590,7 @@ Domain :: instanciateYourself(DataReader *dr)
         // read type of material
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-        if ( ( mat = CreateUsrDefMaterialOfType(name.c_str(), num, this) ) == NULL ) {
+        if ( ( mat = classFactory.createMaterial(name.c_str(), num, this) ) == NULL ) {
             OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create material: %s", name.c_str() );
         }
 
@@ -623,7 +623,7 @@ Domain :: instanciateYourself(DataReader *dr)
             // read type of load
             IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-            barrier = CreateUsrDefNonlocalBarrierOfType(name.c_str(), num, this);
+            barrier = classFactory.createNonlocalBarrier(name.c_str(), num, this);
             barrier->initializeFrom(ir);
 
             // check number
@@ -654,7 +654,7 @@ Domain :: instanciateYourself(DataReader *dr)
             // read type of load
             IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-            rfg = CreateUsrDefRandomFieldGenerator(name.c_str(), num, this);
+            rfg = classFactory.createRandomFieldGenerator(name.c_str(), num, this);
             rfg->initializeFrom(ir);
 
             // check number
@@ -685,7 +685,7 @@ Domain :: instanciateYourself(DataReader *dr)
         // read type of load
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-        if ( ( load = CreateUsrDefBoundaryConditionOfType(name.c_str(), num, this) ) == NULL ) {
+        if ( ( load = classFactory.createBoundaryCondition(name.c_str(), num, this) ) == NULL ) {
             OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create boundary condition: %s", name.c_str() );
         }
 
@@ -749,7 +749,7 @@ Domain :: instanciateYourself(DataReader *dr)
         ir = dr->giveInputRecord(DataReader :: IR_ltfRec, i + 1);
         // read type of ltf
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
-        if ( ( ltf = CreateUsrDefLoadTimeFunctionOfType(name.c_str(), num, this) ) == NULL ) {
+        if ( ( ltf = classFactory.createLoadTimeFunction(name.c_str(), num, this) ) == NULL ) {
             OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create time function: %s", name.c_str() );
         }
 
@@ -805,7 +805,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     this->topology = NULL;
     if ( topologytype.length() > 0 ) {
-        this->topology = CreateUsrDefTopologyOfType(topologytype.c_str(), this);
+        this->topology = classFactory.createTopology(topologytype.c_str(), this);
         if ( !this->topology ) {
             OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create topology of type '%s'", topologytype.c_str() );
         }
@@ -1535,17 +1535,17 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         nrfg = this->giveNumberOfRandomFieldGenerators();
     }
 
-    RESTORE_COMPONENTS(nnodes, DofManager, this->resizeDofManagers, CreateUsrDefDofManagerOfType, this->giveDofManager, this->setDofManager);
-    RESTORE_COMPONENTS(nelem, Element, this->resizeElements, CreateUsrDefElementOfType, this->giveElement, this->setElement);
-    RESTORE_COMPONENTS(nbc, GeneralBoundaryCondition, this->resizeBoundaryConditions, CreateUsrDefBoundaryConditionOfType, this->giveBc, this->setBoundaryCondition);
+    RESTORE_COMPONENTS(nnodes, DofManager, this->resizeDofManagers, classFactory.createDofManager, this->giveDofManager, this->setDofManager);
+    RESTORE_COMPONENTS(nelem, Element, this->resizeElements, classFactory.createElement, this->giveElement, this->setElement);
+    RESTORE_COMPONENTS(nbc, GeneralBoundaryCondition, this->resizeBoundaryConditions, classFactory.createBoundaryCondition, this->giveBc, this->setBoundaryCondition);
 
     if ( ( mode & CM_Definition ) ) {
-        RESTORE_COMPONENTS(nmat, Material, this->resizeMaterials, CreateUsrDefMaterialOfType, this->giveMaterial, this->setMaterial);
-        RESTORE_COMPONENTS(ncs, CrossSection, this->resizeCrossSectionModels, CreateUsrDefCrossSectionOfType, this->giveCrossSection, this->setCrossSection);
-        RESTORE_COMPONENTS(nic, InitialCondition, this->resizeInitialConditions, CreateUsrDefInitialConditionOfType, this->giveIc, setInitialCondition);
-        RESTORE_COMPONENTS(nltf, LoadTimeFunction, resizeLoadTimeFunctions, CreateUsrDefLoadTimeFunctionOfType, giveLoadTimeFunction, setLoadTimeFunction);
-        RESTORE_COMPONENTS(nnlb, NonlocalBarrier, resizeNonlocalBarriers, CreateUsrDefNonlocalBarrierOfType, giveNonlocalBarrier, setNonlocalBarrier);
-        RESTORE_COMPONENTS(nrfg, RandomFieldGenerator, resizeRandomFieldGenerators, CreateUsrDefRandomFieldGenerator, giveRandomFieldGenerator, setRandomFieldGenerator);
+        RESTORE_COMPONENTS(nmat, Material, this->resizeMaterials, classFactory.createMaterial, this->giveMaterial, this->setMaterial);
+        RESTORE_COMPONENTS(ncs, CrossSection, this->resizeCrossSectionModels, classFactory.createCrossSection, this->giveCrossSection, this->setCrossSection);
+        RESTORE_COMPONENTS(nic, InitialCondition, this->resizeInitialConditions, classFactory.createInitialCondition, this->giveIc, setInitialCondition);
+        RESTORE_COMPONENTS(nltf, LoadTimeFunction, resizeLoadTimeFunctions, classFactory.createLoadTimeFunction, giveLoadTimeFunction, setLoadTimeFunction);
+        RESTORE_COMPONENTS(nnlb, NonlocalBarrier, resizeNonlocalBarriers, classFactory.createNonlocalBarrier, giveNonlocalBarrier, setNonlocalBarrier);
+        RESTORE_COMPONENTS(nrfg, RandomFieldGenerator, resizeRandomFieldGenerators, classFactory.createRandomFieldGenerator, giveRandomFieldGenerator, setRandomFieldGenerator);
     }
 
     // restore error estimator data

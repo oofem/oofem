@@ -425,7 +425,6 @@ if (USE_SHARED_LIB)
     add_library (liboofem
         SHARED
         # These doesn't really belong in main;
-        ${oofem_SOURCE_DIR}/src/main/usrdefsub.C
         ${oofem_SOURCE_DIR}/src/main/classfactory.C
         ${oofempy}
         ${LIBS} 
@@ -443,7 +442,6 @@ if (USE_STATIC_LIB)
         add_library (liboofem_static
             STATIC
             # These doesn't really belong in main;
-            ${oofem_SOURCE_DIR}/src/main/usrdefsub.C
             ${oofem_SOURCE_DIR}/src/main/classfactory.C
             ${oofempy}
             )
@@ -452,7 +450,6 @@ if (USE_STATIC_LIB)
         add_library (liboofem_static
             STATIC
             # These doesn't really belong in main;
-            ${oofem_SOURCE_DIR}/src/main/usrdefsub.C
             ${oofem_SOURCE_DIR}/src/main/classfactory.C
             ${oofempy}
             ${LIBS} 
@@ -560,6 +557,7 @@ include (CTest)
 set (oofem_TEST_DIR "${oofem_SOURCE_DIR}/tests/")
 set (oofem_cmd  $<TARGET_FILE:oofem>)
 set (test_cmd  ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/testhelper.py")
+set (extractor_cmd "${oofem_SOURCE_DIR}/tools/extractor.py")
 
 # Helper script (perhaps one could do without this one)
 # Some input files requier other files, so I didn't feel that there were any option to just running them in the main tree.
@@ -578,38 +576,24 @@ if subprocess.call(command):
 else:
     for f in files:
         python=\"${PYTHON_EXECUTABLE}\"
-        extractor = \"${oofem_SOURCE_DIR}/tools/extractor.py\"
+        extractor = \"${extractor_cmd}\"
         print('Executing: ', [python, extractor, '-f', f, '-c'])
         if subprocess.call([python, extractor, '-f', f, '-c']):
             exit(2)
 exit(0)
 ")
 
-# TODO: Not working yet (ctest might be too limited for this approach)
-file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/memcheckhelper.py
-"import subprocess,sys,glob
-if len(sys.argv) == 1:
-    exit(subprocess.call('valgrind'))
-command = ['valgrind','--tool=memcheck']
-if sys.argv[4] == 'p':
-    files = glob.glob(sys.argv[3]+'.[0-9]*')
-    command.extend(['mpirun','-np',str(len(files)),sys.argv[2],'-p','-f',sys.argv[3],'-l','2'])
-else:
-    files = [sys.argv[3]]
-    command.extend([sys.argv[2],'-f',sys.argv[3],'-l','2'])
-command.extend(sys.argv[5:])
-print('Executing: ', command)
-exit(subprocess.call(command))
-")
-
 if (USE_PARALLEL)
     set (par_dir ${oofem_TEST_DIR}/partests)
     file (GLOB parallel_tests RELATIVE "${par_dir}" "${par_dir}/*/")
     foreach (case ${parallel_tests})
+        add_test (NAME "partest_${case}" WORKING_DIRECTORY ${par_dir}/${case} COMMAND ${test_cmd} ${oofem_cmd} ${case}.oofem.in "p")
         #file (GLOB files "${par_dir}/${case}/${case}.oofem.in.*")
         #list (LENGTH files num_files)
-        #add_test (NAME "partest_${case}" WORKING_DIRECTORY ${par_dir}/${case} COMMAND ${test_cmd} "mpirun" "-np" ${num_files} ${oofem_cmd} "-p" "-f" "${case}.oofem.in" "-l" "2")
-        add_test (NAME "partest_${case}" WORKING_DIRECTORY ${par_dir}/${case} COMMAND ${test_cmd} ${oofem_cmd} ${case}.oofem.in "p")
+        #add_test (NAME "partest_${case}" WORKING_DIRECTORY ${par_dir}/${case} COMMAND "mpirun" "-np" ${num_files} ${oofem_cmd} "-p" "-f" "${case}.oofem.in" "-l" "2")
+        #add_test (NAME "parextr_${case}" WORKING_DIRECTORY ${par_dir}/${case} COMMAND ${PYTHON_EXECUTABLE} ${extractor_cmd} "-p" "-f" "${case}.oofem.in" "-c")
+        #set_tests_properties ("parextr_${case}" PROPERTIES DEPENDS "partest_${case}")
+        #list (APPEND CTEST_CUSTOM_MEMCHECK_IGNORE "parextr_${case}")
     endforeach (case)
 endif ()
 # Sequential test cases
@@ -618,8 +602,12 @@ file (GLOB fm_tests RELATIVE "${oofem_TEST_DIR}/fm" "${oofem_TEST_DIR}/fm/*.in")
 file (GLOB tm_tests RELATIVE "${oofem_TEST_DIR}/tm" "${oofem_TEST_DIR}/tm/*.in")
 file (GLOB tmsm_tests RELATIVE "${oofem_TEST_DIR}/tmsm" "${oofem_TEST_DIR}/tmsm/*.in")
 foreach (case ${sm_tests})
-    #add_test (NAME "partest_${case}" WORKING_DIRECTORY ${par_dir}/${case} COMMAND ${test_cmd} ${oofem_cmd} "-p" "-f" "${case}.oofem.in" "-l" "2")
     add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
+    # Separate commands so that we can use valgrind and gcov versions
+    #add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm COMMAND ${oofem_cmd} "-f" ${case} "-l" "2")
+    #add_test (NAME "extr_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm COMMAND ${PYTHON_EXECUTABLE} ${extractor_cmd} "-f" ${case} "-c")
+    #set_tests_properties ("extr_${case}" PROPERTIES DEPENDS "test_${case}")
+    #list (APPEND CTEST_CUSTOM_MEMCHECK_IGNORE "extr_${case}")
 endforeach (case)
 foreach (case ${fm_tests})
     add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/fm COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")

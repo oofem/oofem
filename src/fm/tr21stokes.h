@@ -76,7 +76,6 @@ protected:
     static bool __initialized;
     /// Defines the ordering of the dofs in the local stiffness matrix.
     static bool initOrdering() {
-        printf("Tr21stokes sure is initialized!\n");
         ordering.setValues(15,  1, 2, 4, 5, 7, 8, 10, 11, 12, 13, 14, 15, 3, 6, 9);
         edge_ordering [ 0 ].setValues(6,  1, 2, 4, 5, 10, 11);
         edge_ordering [ 1 ].setValues(6,  4, 5, 7, 8, 12, 13);

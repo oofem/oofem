@@ -42,7 +42,7 @@
 #include "floatmatrix.h"
 #include "verbose.h"
 #include "floatarray.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "datastream.h"
 #include "exportmodulemanager.h"
 
@@ -57,7 +57,7 @@ NumericalMethod *LinearStability :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
 
-    nMethod = CreateUsrDefGeneralizedEigenValueSolver(solverType, this->giveDomain(1), this);
+    nMethod = classFactory.createGeneralizedEigenValueSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod:  solver creation failed");
     }
@@ -71,7 +71,7 @@ SparseLinearSystemNM *LinearStability :: giveNumericalMethodForLinStaticProblem(
         return nMethodLS;
     }
 
-    nMethodLS = CreateUsrDefSparseLinSolver(ST_Direct, this->giveDomain(1), this); ///@todo Support other solvers
+    nMethodLS = classFactory.createSparseLinSolver(ST_Direct, this->giveDomain(1), this); ///@todo Support other solvers
     if ( nMethodLS == NULL ) {
         _error("giveNumericalMethodForLinStaticProblem:  solver creation failed");
     }
@@ -184,7 +184,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
         //
         // first step - solve linear static problem
         //
-        stiffnessMatrix = CreateUsrDefSparseMtrx(SMT_Skyline); ///@todo Don't hardcode skyline matrix only
+        stiffnessMatrix = classFactory.createSparseMtrx(SMT_Skyline); ///@todo Don't hardcode skyline matrix only
         stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
         //

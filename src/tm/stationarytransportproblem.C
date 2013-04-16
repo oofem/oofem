@@ -39,7 +39,7 @@
 #include "maskedprimaryfield.h"
 #include "verbose.h"
 #include "transportelement.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"
 
@@ -74,7 +74,7 @@ NumericalMethod *StationaryTransportProblem :: giveNumericalMethod(MetaStep *mSt
         return nMethod;
     }
 
-    nMethod = CreateUsrDefSparseLinSolver(solverType, this->giveDomain(1), this);
+    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }
@@ -182,7 +182,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         solutionVector->resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
         solutionVector->zero();
 
-        conductivityMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( conductivityMatrix == NULL ) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }

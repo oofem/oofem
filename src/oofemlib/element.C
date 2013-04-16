@@ -43,7 +43,7 @@
 #include "verbose.h"
 #include "entityrenumberingscheme.h"
 #include "error.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "datastream.h"
 #include "materialmapperinterface.h"
 #include "contextioerr.h"
@@ -868,7 +868,7 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
             // AND ALLOCATE NEW ONE
             integrationRulesArray = new IntegrationRule * [ _nrules ];
             for ( int i = 0; i < _nrules; i++ ) {
-                integrationRulesArray [ i ] = CreateUsrDefIRuleOfType( ( classType ) dtypes(i), i + 1, this );
+                integrationRulesArray [ i ] = classFactory.createIRule( ( classType ) dtypes(i), i + 1, this );
             }
 
             numberOfIntegrationRules = _nrules;
@@ -876,7 +876,7 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
             for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
                 if ( integrationRulesArray [ i ]->giveClassID() != dtypes(i) ) {
                     delete integrationRulesArray [ i ];
-                    integrationRulesArray [ i ] = CreateUsrDefIRuleOfType( ( classType ) dtypes(i), i + 1, this );
+                    integrationRulesArray [ i ] = classFactory.createIRule( ( classType ) dtypes(i), i + 1, this );
                 }
             }
         }

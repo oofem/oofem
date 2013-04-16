@@ -43,7 +43,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "sparsemtrx.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
@@ -81,7 +81,7 @@ NumericalMethod *NlDEIDynamic :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
 
-    nMethod = CreateUsrDefSparseLinSolver(solverType, this->giveDomain(1), this);
+    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
 
     return nMethod;
 }

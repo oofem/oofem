@@ -43,7 +43,7 @@
 
 #include "verbose.h"
 #include "cbselement.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "mathfem.h"
 #include "datastream.h"
 //<RESTRICTED_SECTION>
@@ -62,7 +62,7 @@ NumericalMethod *CBS :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
 
-    nMethod = CreateUsrDefSparseLinSolver(solverType, this->giveDomain(1), this);
+    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }
@@ -247,7 +247,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
                                           pnumPrescribed, this->giveDomain(1) );
 
 
-        lhs = CreateUsrDefSparseMtrx(sparseMtrxType);
+        lhs = classFactory.createSparseMtrx(sparseMtrxType);
         if ( lhs == NULL ) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }
@@ -259,7 +259,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
         lhs->times(deltaT * theta1 * theta2);
 
         if ( consistentMassFlag ) {
-            mss = CreateUsrDefSparseMtrx(sparseMtrxType);
+            mss = classFactory.createSparseMtrx(sparseMtrxType);
             if ( mss == NULL ) {
                 _error("solveYourselfAt: sparse matrix creation failed");
             }

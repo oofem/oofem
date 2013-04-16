@@ -38,7 +38,7 @@
 #include "sparsemtrx.h"
 #include "dictionary.h"
 #include "verbose.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"
 
@@ -72,7 +72,7 @@ NumericalMethod *IncrementalLinearStatic :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
 
-    nMethod = CreateUsrDefSparseLinSolver(solverType, this->giveDomain(1), this);
+    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }
@@ -226,7 +226,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
         delete stiffnessMatrix;
     }
 
-    stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+    stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
     if ( stiffnessMatrix == NULL ) {
         _error("solveYourselfAt: sparse matrix creation failed");
     }

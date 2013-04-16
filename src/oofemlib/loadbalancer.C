@@ -40,7 +40,7 @@
 #include "mathfem.h"
 #include "timestep.h"
 #include "floatarray.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "element.h"
 
 #include "parallel.h"
@@ -310,11 +310,11 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
              * if ( ( dofman = dtm->giveDofManager(_globnum) ) == NULL ) {
              *  // data not available -> create a new one
              *  _newentry = true;
-             *  dofman = CreateUsrDefDofManagerOfType(_etype, 0, d);
+             *  dofman = classFactory.createDofManager(_etype, 0, d);
              * }
              */
             _newentry = true;
-            dofman = CreateUsrDefDofManagerOfType(_etype, 0, d);
+            dofman = classFactory.createDofManager(_etype, 0, d);
 
             dofman->setGlobalNumber(_globnum);
             // unpack dofman state (this is the local dofman, not available on remote)
@@ -340,11 +340,11 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
              * if ( ( dofman = dtm->giveDofManager(_globnum) ) == NULL ) {
              *  // data not available -> mode should be SharedUpdate
              *  _newentry = true;
-             *  dofman = CreateUsrDefDofManagerOfType(_etype, 0, d);
+             *  dofman = classFactory.createDofManager(_etype, 0, d);
              * }
              */
             _newentry = true;
-            dofman = CreateUsrDefDofManagerOfType(_etype, 0, d);
+            dofman = classFactory.createDofManager(_etype, 0, d);
 
 
             dofman->setGlobalNumber(_globnum);
@@ -385,7 +385,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
         }
 
         _etype = ( classType ) _type;
-        elem = CreateUsrDefElementOfType(_etype, 0, d);
+        elem = classFactory.createElement(_etype, 0, d);
         elem->restoreContext(& pcDataStream, CM_Definition | CM_State);
         elem->initForNewStep();
         dtm->addTransaction(DomainTransactionManager :: DTT_ADD, DomainTransactionManager :: DCT_Element, elem->giveGlobalNumber(), elem);

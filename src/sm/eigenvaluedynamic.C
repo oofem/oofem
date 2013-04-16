@@ -38,7 +38,7 @@
 #include "floatarray.h"
 #include "exportmodulemanager.h"
 #include "verbose.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "datastream.h"
 #include "geneigvalsolvertype.h"
 #include "contextioerr.h"
@@ -55,7 +55,7 @@ NumericalMethod *EigenValueDynamic :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
 
-    nMethod = CreateUsrDefGeneralizedEigenValueSolver(solverType, this->giveDomain(1), this);
+    nMethod = classFactory.createGeneralizedEigenValueSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod:  solver creation failed");
     }
@@ -157,10 +157,10 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
         // first step  assemble stiffness Matrix
         //
 
-        stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
-        massMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        massMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         massMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
         this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,

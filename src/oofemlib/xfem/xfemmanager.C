@@ -334,7 +334,7 @@ contextIOResultType XfemManager:: restoreContext(DataStream *stream, ContextMode
                     THROW_CIOERR(CIO_IOERR);
                 }
                 compId = ( classType ) ct;
-                obj = CreateUsrDefEnrichmentItem(compId, i, this, this->giveDomain());
+                obj = classFactory.createEnrichmentItem(compId, i, this, this->giveDomain());
             } else {
                 obj = this->giveEnrichmentItem(i);
             }
@@ -359,7 +359,7 @@ contextIOResultType XfemManager:: restoreContext(DataStream *stream, ContextMode
                     THROW_CIOERR(CIO_IOERR);
                 }
                 compId = ( classType ) ct;
-                obj = CreateUsrDefEnrichmentFunction(compId, i, this->giveDomain());
+                obj = classFactory.createEnrichmentFunction(compId, i, this->giveDomain());
             } else {
                 obj = this->giveEnrichmentFunction(i);
             }
@@ -384,7 +384,7 @@ contextIOResultType XfemManager:: restoreContext(DataStream *stream, ContextMode
                     THROW_CIOERR(CIO_IOERR);
                 }
                 compId = ( classType ) ct;
-                obj = CreateUsrDefGeometry(compId);
+                obj = classFactory.createGeometry(compId);
             } else {
                 obj = this->giveGeometry(i);
             }

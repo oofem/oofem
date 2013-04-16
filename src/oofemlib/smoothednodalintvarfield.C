@@ -34,7 +34,7 @@
 
 #include "smoothednodalintvarfield.h"
 #include "spatiallocalizer.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "element.h"
 
 namespace oofem {
@@ -42,7 +42,7 @@ SmoothedNodalInternalVariableField :: SmoothedNodalInternalVariableField(Interna
 {
     this->istType = ist;
     this->stype = st;
-    this->smoother = CreateUsrDefNodalRecoveryModel(this->stype, d);
+    this->smoother = classFactory.createNodalRecoveryModel(this->stype, d);
     // setup smoother (whole domain recovery)
     this->smoother->setRecoveryMode(0, IntArray());
     this->domain = d;

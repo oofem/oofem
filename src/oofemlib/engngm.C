@@ -58,7 +58,7 @@
 #include "outputmanager.h"
 #include "exportmodulemanager.h"
 #include "initmodulemanager.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "oofem_limits.h"
 
 #ifdef __PARALLEL_MODE
@@ -407,7 +407,7 @@ EngngModel :: initializeFrom(InputRecord *ir)
     int eeTypeId = -1;
     IR_GIVE_OPTIONAL_FIELD(ir, eeTypeId, _IFT_EngngModel_eetype);
     if ( eeTypeId >= 0 ) {
-        this->defaultErrEstimator = CreateUsrDefErrorEstimator( ( ErrorEstimatorType ) eeTypeId, 1, this->giveDomain(1) );
+        this->defaultErrEstimator = classFactory.createErrorEstimator( ( ErrorEstimatorType ) eeTypeId, 1, this->giveDomain(1) );
         this->defaultErrEstimator->initializeFrom(ir);
     }
 

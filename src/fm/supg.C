@@ -42,7 +42,7 @@
 #include "maskedprimaryfield.h"
 #include "verbose.h"
 #include "supgelement.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "mathfem.h"
 #include "dofdistributedprimaryfield.h"
 #include "leplic.h"
@@ -65,7 +65,7 @@ NumericalMethod *SUPG :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
 
-    nMethod = CreateUsrDefSparseLinSolver(solverType, this->giveDomain(1), this);
+    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }
@@ -312,7 +312,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
         incrementalSolutionVector.resize(neq);
 
-        lhs = CreateUsrDefSparseMtrx(sparseMtrxType);
+        lhs = classFactory.createSparseMtrx(sparseMtrxType);
         if ( lhs == NULL ) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }

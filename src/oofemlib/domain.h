@@ -314,7 +314,7 @@ public:
      * Reads receiver description from input stream and creates corresponding components accordingly.
      * It scans input file, each line is assumed to be single record describing type and parameters for
      * specific entity in domain. The record line is converted to lower case letters.
-     * Corresponding component is created using CreateUsrDef* function of
+     * Corresponding component is created using classFactory.create* function of
      * corresponding base class, sending component name (extracted from corresponding record)
      * as parameter. After new object is created, its initializeFrom member function is
      * called with its record as parameter.

@@ -44,7 +44,7 @@
 #include "calmls.h"
 #include "outputmanager.h"
 #include "datastream.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "timer.h"
 #include "contextioerr.h"
 #include "sparsemtrx.h"
@@ -436,7 +436,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         internalForces.zero();
 
         if ( !stiffnessMatrix ) {
-            stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+            stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         }
 
         if ( stiffnessMatrix == NULL ) {
@@ -939,7 +939,7 @@ NonLinearStatic :: giveLoadBalancer()
     }
 
     if ( loadBalancingFlag ) {
-        lb = CreateUsrDefLoadBalancerOfType( ParmetisLoadBalancerClass, this->giveDomain(1) );
+        lb = classFactory.createLoadBalancer( ParmetisLoadBalancerClass, this->giveDomain(1) );
         return lb;
     } else {
         return NULL;
@@ -955,7 +955,7 @@ NonLinearStatic :: giveLoadBalancerMonitor()
     }
 
     if ( loadBalancingFlag ) {
-        lbm = CreateUsrDefLoadBalancerMonitorOfType(WallClockLoadBalancerMonitorClass, this);
+        lbm = classFactory.createLoadBalancerMonitor(WallClockLoadBalancerMonitorClass, this);
         return lbm;
     } else {
         return NULL;

@@ -41,7 +41,7 @@
 #include "communicator.h"
 #include "datastream.h"
 #include "domaintransactionmanager.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 
 #include <set>
 
@@ -450,7 +450,7 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
     // unpack dofman data
     while ( _type != NonlocalMaterialWTP_END_DATA ) {
         _etype = ( classType ) _type;
-        dofman = CreateUsrDefDofManagerOfType(_etype, 0, d);
+        dofman = classFactory.createDofManager(_etype, 0, d);
         dofman->restoreContext(& pcDataStream, CM_Definition | CM_State | CM_UnknownDictState);
         dofman->setParallelMode(DofManager_null);
         if ( d->dofmanGlobal2Local( dofman->giveGlobalNumber() ) ) {
@@ -479,7 +479,7 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
         }
 
         _etype = ( classType ) _type;
-        elem = CreateUsrDefElementOfType(_etype, 0, d);
+        elem = classFactory.createElement(_etype, 0, d);
         elem->restoreContext(& pcDataStream, CM_Definition | CM_State);
         elem->setParallelMode(Element_remote);
         elem->setPartitionList(_partitions);

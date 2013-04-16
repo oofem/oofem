@@ -36,7 +36,7 @@
 #include "fmelement.h"
 #include "inputrecord.h"
 #include "timestep.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "domain.h"
 #include "nrsolver.h"
 #include "sparsenonlinsystemnm.h"
@@ -136,7 +136,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 
     // Create "stiffness matrix"
     if ( !this->stiffnessMatrix ) {
-        this->stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        this->stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( !this->stiffnessMatrix ) {
             OOFEM_ERROR2("StokesFlow :: solveYourselfAt - Couldn't create requested sparse matrix of type %d", sparseMtrxType);
         }

@@ -48,7 +48,7 @@
 #include "dof.h"
 #include "eleminterpunknownmapper.h"
 #include "errorestimator.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "oofem_terminate.h"
@@ -129,7 +129,7 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep) {
         //
     } else if ( ( strategy == RemeshingFromCurrentState_RS ) || ( strategy == RemeshingFromPreviousState_RS ) ) {
         // do remeshing
-        MesherInterface *mesher = CreateUsrDefMesherInterface( meshPackage, this->giveDomain(1) );
+        MesherInterface *mesher = classFactory.createMesherInterface( meshPackage, this->giveDomain(1) );
 
         Domain *newDomain;
         MesherInterface :: returnCode result = mesher->createMesh(this->giveCurrentStep(), 1,
@@ -336,7 +336,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
 
         if ( initFlag ) {
-            stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+            stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
             if ( stiffnessMatrix == NULL ) {
                 _error("proceedStep: sparse matrix creation failed");
             }
@@ -670,7 +670,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
 
         if ( initFlag ) {
             if ( !stiffnessMatrix ) {
-                stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+                stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
                 if ( stiffnessMatrix == NULL ) {
                     _error("proceedStep: sparse matrix creation failed");
                 }
@@ -1016,7 +1016,7 @@ AdaptiveNonLinearStatic :: giveLoadBalancer()
     }
 
     if ( loadBalancingFlag || preMappingLoadBalancingFlag ) {
-        lb = CreateUsrDefLoadBalancerOfType( ParmetisLoadBalancerClass, this->giveDomain(1) );
+        lb = classFactory.createLoadBalancer( ParmetisLoadBalancerClass, this->giveDomain(1) );
         return lb;
     } else {
         return NULL;
@@ -1030,7 +1030,7 @@ AdaptiveNonLinearStatic :: giveLoadBalancerMonitor()
     }
 
     if ( loadBalancingFlag || preMappingLoadBalancingFlag ) {
-        lbm = CreateUsrDefLoadBalancerMonitorOfType(WallClockLoadBalancerMonitorClass, this);
+        lbm = classFactory.createLoadBalancerMonitor(WallClockLoadBalancerMonitorClass, this);
         return lbm;
     } else {
         return NULL;
