@@ -42,6 +42,7 @@
 #include "dofdistributedprimaryfield.h"
 #include "transportmaterial.h"
 #include "stationarytransportproblem.h"
+#include "linsystsolvertype.h"
 
 ///@name Input fields for NonStationaryTransportProblem
 //@{
@@ -67,6 +68,9 @@ protected:
      * (like those for computing real internal forces or updating the internal state).
      */
     StateCounterType internalVarUpdateStamp;
+    
+    LinSystSolverType solverType; ///@todo Remove this and use nonlinear methods.
+    SparseLinearSystemNM *nMethod; ///@todo Remove this and use nonlinear methods.
 
     /// Right hand side vector from boundary conditions.
     FloatArray bcRhs;

@@ -67,6 +67,9 @@ public:
 
     virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
 
+    virtual void computeInternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+    virtual void computeExternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+
     /** Computes the capacity matrix of the receiver */
     virtual void computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep);
     /** Computes the conductivity matrix of the receiver */

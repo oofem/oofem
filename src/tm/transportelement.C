@@ -138,9 +138,13 @@ TransportElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx,
 // returns characteristics vector of receiver according to requested type
 //
 {
-    if ( mtrx == ElementBCTransportVector ) {
+    if ( mtrx == InternalForcesVector ) {
+        this->computeInternalForcesVectorAt(answer, tStep, mode);
+    } else if ( mtrx == ExternalForcesVector ) {
+        this->computeExternalForcesVectorAt(answer, tStep, mode);
+    } else if ( mtrx == ElementBCTransportVector ) { ///@todo Remove this, only external and internal.
         this->computeBCVectorAt(answer, tStep, mode);
-    } else if ( mtrx == ElementInternalSourceVector ) {
+    } else if ( mtrx == ElementInternalSourceVector ) { ///@todo Remove this, only external and internal.
         this->computeInternalSourceRhsVectorAt(answer, tStep, mode);
     } else {
         _error2( "giveCharacteristicVector: Unknown Type of characteristic mtrx (%s)",
@@ -525,6 +529,26 @@ TransportElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
     static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicMatrix(answer, FullForm, rMode, gp, tStep);
 }
 
+void
+TransportElement :: computeInternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
+{
+    FloatArray unknowns;
+    FloatMatrix s;
+    MatResponseMode rmode;
+    this->computeVectorOf(EID_ConservationEquation, mode, tStep, unknowns);
+    ///@todo Integrate and compute as a nonlinear problem instead of doing this tangent.
+    this->computeConductivityMatrix(s, Conductivity, tStep);
+    answer.beProductOf(s, unknowns);
+}
+
+void
+TransportElement :: computeExternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
+{
+    FloatArray tmp;
+    this->computeInternalSourceRhsVectorAt(answer, tStep, mode);
+    this->computeBCVectorAt(tmp, tStep, mode);
+    answer.add(tmp);
+}
 
 void
 TransportElement :: computeBCVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)

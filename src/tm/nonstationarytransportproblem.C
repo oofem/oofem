@@ -46,6 +46,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "loadtimefunction.h"
+#include "sparsenonlinsystemnm.h"
 
 #ifdef __CEMHYD_MODULE
  #include "cemhydmat.h"
@@ -557,11 +558,10 @@ NonStationaryTransportProblem :: giveElementCharacteristicMatrix(FloatMatrix &an
         element->giveCharacteristicMatrix(charMtrx2, CapacityMatrix, tStep);
 
         if ( lumpedCapacityStab ) {
-            int i, j, size = charMtrx2.giveNumberOfRows();
-            double s;
-            for ( i = 1; i <= size; i++ ) {
-                s = 0.0;
-                for ( j = 1; j <= size; j++ ) {
+            int size = charMtrx2.giveNumberOfRows();
+            for ( int i = 1; i <= size; i++ ) {
+                double s = 0.0;
+                for ( int j = 1; j <= size; j++ ) {
                     s += charMtrx2.at(i, j);
                     charMtrx2.at(i, j) = 0.0;
                 }
@@ -643,7 +643,7 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Applying initial conditions\n");
 #endif
-    int nDofs, jj;
+    int nDofs;
     int nman  = domain->giveNumberOfDofManagers();
 
     UnknownsField->advanceSolution(stepWhenIcApply);
@@ -663,7 +663,7 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
                 continue;
             }
 
-            jj = iDof->__giveEquationNumber();
+            int jj = iDof->__giveEquationNumber();
             if ( jj ) {
                 val = iDof->giveUnknown(VM_Total, stepWhenIcApply);
                 solutionVector->at(jj) = val;
