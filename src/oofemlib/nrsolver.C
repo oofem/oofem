@@ -783,12 +783,13 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                 dispErr = sqrt( dg_dispErr.at(dg) );
             }
 
-            if ( forceErr > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ||
-                 dispErr  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
+            if ( ( rtolf.at(1) > 0.0 && forceErr > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ||
+                 ( rtold.at(1) > 0.0 && dispErr  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ) {
                 errorOutOfRange = true;
             }
 
-            if ( forceErr > rtolf.at(1) || dispErr > rtold.at(1) ) {
+            if ( ( rtolf.at(1) > 0.0 && forceErr > rtolf.at(1) ) || 
+                 ( rtold.at(1) > 0.0 && dispErr > rtold.at(1) ) ) {
                 answer = false;
             }
 
@@ -823,8 +824,8 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             dispErr = sqrt( dXdX );
         }
 
-        if ( ( fabs(forceErr) > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ||
-            ( fabs(dispErr)  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ) {
+        if ( ( rtolf.at(1) > 0.0 && fabs(forceErr) > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ||
+             ( rtold.at(1) > 0.0 && fabs(dispErr)  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ) {
             errorOutOfRange = true;
         }
 
@@ -840,7 +841,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         if ( rtolf.at(1) > 0.0 ) OOFEM_LOG_INFO(" %-15e", forceErr);
         if ( rtold.at(1) > 0.0 ) OOFEM_LOG_INFO(" %-15e", dispErr);
         OOFEM_LOG_INFO("\n");
-    } // end default case (all dofs conributing)
+    } // end default case (all dofs contributing)
 
     return answer;
 }
