@@ -51,6 +51,7 @@
 #include "equationid.h"
 
 #include <cstring>
+#include <string>
 
 namespace oofem {
 
@@ -248,7 +249,12 @@ const char *__MatResponseModeToString(MatResponseMode _value) {
     TO_STRING_BODY(MatResponseMode_DEF)
 }
 
-const char *__DofIDItemToString(DofIDItem _value) {
+std::string __DofIDItemToString(DofIDItem _value) {
+    if ( _value >= MaxDofID ) {
+        char tmp[1024];
+        sprintf(tmp, "X_%d", _value - MaxDofID + 1);
+        return tmp;
+    }
     TO_STRING_BODY(DofIDItem_DEF)
 }
 

@@ -425,8 +425,6 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
     // Note: implementation rely on D_u, D_v and D_w (R_u, R_v, R_w) order in cltypes.h
     // file. Do not change their order and do not insert any values between these values.
     //
-
-    int i, j;
     DofIDItem id, id2;
 
     if ( localCoordinateSystem == NULL ) {
@@ -439,13 +437,13 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
             answer.resize(numberOfDofs, numberOfDofs);
             answer.zero();
 
-            for ( i = 1; i <= numberOfDofs; i++ ) {
+            for ( int i = 1; i <= numberOfDofs; i++ ) {
                 // test for vector quantities
                 switch ( id = giveDof(i)->giveDofID() ) {
                 case D_u:
                 case D_v:
                 case D_w:
-                    for ( j = 1; j <= numberOfDofs; j++ ) {
+                    for ( int j = 1; j <= numberOfDofs; j++ ) {
                         id2 = giveDof(j)->giveDofID();
                         if ( ( id2 == D_u ) || ( id2 == D_v ) || ( id2 == D_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( D_u ) + 1,
@@ -458,7 +456,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case V_u:
                 case V_v:
                 case V_w:
-                    for ( j = 1; j <= numberOfDofs; j++ ) {
+                    for ( int j = 1; j <= numberOfDofs; j++ ) {
                         id2 = giveDof(j)->giveDofID();
                         if ( ( id2 == V_u ) || ( id2 == V_v ) || ( id2 == V_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( V_u ) + 1,
@@ -471,7 +469,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case R_u:
                 case R_v:
                 case R_w:
-                    for ( j = 1; j <= numberOfDofs; j++ ) {
+                    for ( int j = 1; j <= numberOfDofs; j++ ) {
                         id2 = giveDof(j)->giveDofID();
                         if ( ( id2 == R_u ) || ( id2 == R_v ) || ( id2 == R_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( R_u ) + 1,
@@ -488,7 +486,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                     break;
 
                 default:
-                    _error2( "computeGNTransformation: unknown dofID (%s)", __DofIDItemToString(id) );
+                    _error2( "computeGNTransformation: unknown dofID (%s)", __DofIDItemToString(id).c_str() );
                 }
             }
         } else { // end if (dofIDArry.isEmpty())
@@ -497,13 +495,13 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
             answer.resize(size, size);
             answer.zero();
 
-            for ( i = 1; i <= size; i++ ) {
+            for ( int i = 1; i <= size; i++ ) {
                 // test for vector quantities
                 switch ( id = ( DofIDItem ) dofIDArry.at(i) ) {
                 case D_u:
                 case D_v:
                 case D_w:
-                    for ( j = 1; j <= size; j++ ) {
+                    for ( int j = 1; j <= size; j++ ) {
                         id2 = ( DofIDItem ) dofIDArry.at(j);
                         if ( ( id2 == D_u ) || ( id2 == D_v ) || ( id2 == D_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( D_u ) + 1, ( int ) ( id2 ) - ( int ) ( D_u ) + 1 );
@@ -515,7 +513,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case V_u:
                 case V_v:
                 case V_w:
-                    for ( j = 1; j <= size; j++ ) {
+                    for ( int j = 1; j <= size; j++ ) {
                         id2 = ( DofIDItem ) dofIDArry.at(j);
                         if ( ( id2 == V_u ) || ( id2 == V_v ) || ( id2 == V_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( V_u ) + 1, ( int ) ( id2 ) - ( int ) ( V_u ) + 1 );
@@ -527,7 +525,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case R_u:
                 case R_v:
                 case R_w:
-                    for ( j = 1; j <= size; j++ ) {
+                    for ( int j = 1; j <= size; j++ ) {
                         id2 = ( DofIDItem ) dofIDArry.at(j);
                         if ( ( id2 == R_u ) || ( id2 == R_v ) || ( id2 == R_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( R_u ) + 1, ( int ) ( id2 ) - ( int ) ( R_u ) + 1 );
@@ -543,7 +541,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                     break;
 
                 default:
-                    _error2( "computeGNTransformation: unknown dofID (%s)", __DofIDItemToString(id) );
+                    _error2( "computeGNTransformation: unknown dofID (%s)", __DofIDItemToString(id).c_str() );
                 }
             }
         } // end map is provided -> assemble for requested dofs

@@ -793,7 +793,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                 answer = false;
             }
 
-            OOFEM_LOG_INFO( "  %s:", __DofIDItemToString((DofIDItem)dg) );
+            OOFEM_LOG_INFO( "  %s:", __DofIDItemToString((DofIDItem)dg).c_str() );
             if ( rtolf.at(1) > 0.0 ) OOFEM_LOG_INFO( " %.3e", forceErr );
             if ( rtold.at(1) > 0.0 ) OOFEM_LOG_INFO( " %.3e", dispErr );
         }
