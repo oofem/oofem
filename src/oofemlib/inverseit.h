@@ -84,11 +84,7 @@ class EngngModel;
 class InverseIteration : public SparseGeneralEigenValueSystemNM
 {
 private:
-    FloatMatrix *a;
-    FloatMatrix *b;
-    FloatArray *eigv;    // only pointer to caller data, not ownership
-    FloatMatrix *x;      // only pointer to caller data, not ownership
-    int n, nc, nsmax, nitem;
+    int n, nc, nitem;
     double rtol;
     int solved;
 

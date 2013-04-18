@@ -34,6 +34,7 @@
 
 #ifndef htselement_h
 #define htselement_h
+
 #include "structuralelement.h"
 #include "gaussintegrationrule.h"
 

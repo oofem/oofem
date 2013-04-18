@@ -53,10 +53,6 @@ class EngngModel;
 class GJacobi : public NumericalMethod
 {
 private:
-    FloatMatrix *a;
-    FloatMatrix *b;
-    FloatArray *eigv; // only pointer to caller data, not ownership
-    FloatMatrix *x;   // only pointer to caller data, not ownership
     int n, nsmax;
     double rtol;
     int solved;

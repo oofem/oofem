@@ -297,7 +297,7 @@ FEI3dTrQuad :: surfaceEvalBaseVectorsAt(FloatArray &G1, FloatArray &G2, const Fl
 }
 
 double
-FEI3dTrQuad :: surfaceEvalNormal(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTrQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatArray G1, G2; // local curvilinear base vectors
     this->surfaceEvalBaseVectorsAt(G1, G2, lcoords, cellgeo);

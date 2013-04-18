@@ -90,10 +90,7 @@ class EngngModel;
 class SubspaceIteration : public SparseGeneralEigenValueSystemNM
 {
 private:
-    FloatMatrix *ar;
-    FloatMatrix *br;
-    FloatMatrix *vec;
-    int n, nc, nsmax, nitem;
+    int n, nc, nitem;
     int solved;
 
 public:

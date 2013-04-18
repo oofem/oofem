@@ -42,14 +42,6 @@ namespace oofem {
 GJacobi :: GJacobi(Domain *d, EngngModel *m) :
     NumericalMethod(d, m)
 {
-    //
-    // constructor
-    //
-    //a      = NULL ;
-    //b      = NULL ;
-    //eigv   = NULL ;  // only pointer to caller data, not ownership
-    //x      = NULL ;  // only pointer to caller data, not ownership
-
     nsmax  = 15;     // default maximum number of sweeps allowed
     rtol   = 10.E-12; // convergence tolerance
     n = 0;

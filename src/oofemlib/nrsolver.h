@@ -92,7 +92,7 @@ class NRSolver : public SparseNonLinearSystemNM
 private:
     enum nrsolver_ModeType { nrsolverModifiedNRM, nrsolverFullNRM, nrsolverAccelNRM };
 
-    int nite, nsmax, minIterations;
+    int nsmax, minIterations;
     double minStepLength;
     int solved;
     nrsolver_ModeType NR_Mode, NR_OldMode;
