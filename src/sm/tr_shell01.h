@@ -58,6 +58,12 @@ protected:
     CCTPlate3d *plate;
     /// Pointer to membrane (plane stress) element.
     TrPlaneStrRot3d *membrane;
+    /**
+     * Element integraton rule (plate and membrane parts have their own integration rules)
+     * this one used to integrate element error and perhaps can be (re)used for other putrposes.
+     * Created on demand.
+     */
+    IntegrationRule *compositeIR;
 
 public:
     /// Constructor
@@ -66,6 +72,7 @@ public:
     virtual ~TR_SHELL01() {
         delete plate;
         delete membrane;
+	if (this->compositeIR) delete this->compositeIR;
     }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 18; }
@@ -116,6 +123,8 @@ public:
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
     // ZZErrorEstimatorInterface
     virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
+    virtual IntegrationRule *ZZErrorEstimatorI_giveIntegrationRule();
+    virtual void ZZErrorEstimatorI_computeLocalStress(FloatArray& answer, FloatArray& sig);
     virtual void ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(FloatArray &answer, GaussPoint *gp,
                                                                            InternalStateType type)
     { ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(answer, gp, type); }

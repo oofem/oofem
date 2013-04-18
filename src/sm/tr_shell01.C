@@ -35,6 +35,7 @@
 #include "tr_shell01.h"
 #include "fei2dtrlin.h"
 #include "contextioerr.h"
+#include "gaussintegrationrule.h"
 
 #ifdef __OOFEG
  #include "node.h"
@@ -48,6 +49,7 @@ TR_SHELL01 :: TR_SHELL01(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 {
     plate    = new CCTPlate3d(-1, aDomain);
     membrane = new TrPlaneStrRot3d(-1, aDomain);
+    compositeIR = NULL;
 
     numberOfDofMans = 3;
 }
@@ -181,18 +183,19 @@ TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 {
     if ( type == IST_ShellForceMomentumTensor ) {
         FloatArray aux;
-        // gp is from plate part (the plate irule is used as default rule for this master element)
         GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
+	GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
         
-        plate->giveIPValue(answer, gp, IST_ShellForceMomentumTensor, atTime);
+        plate->giveIPValue(answer, plateGP, IST_ShellForceMomentumTensor, atTime);
         membrane->giveIPValue(aux, membraneGP, IST_ShellForceMomentumTensor, atTime);
         answer.add(aux);
         return 1;
     } else if ( type == IST_ShellStrainCurvatureTensor ) {
         FloatArray aux;
         GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
+	GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
 
-        plate->giveIPValue(answer, gp, IST_ShellStrainCurvatureTensor, atTime);
+        plate->giveIPValue(answer, plateGP, IST_ShellStrainCurvatureTensor, atTime);
         membrane->giveIPValue(aux, membraneGP, IST_ShellStrainCurvatureTensor, atTime);
         answer.add(aux);
 
@@ -361,9 +364,76 @@ TR_SHELL01 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     return iores;
 }
 
+IntegrationRule* 
+TR_SHELL01 :: ZZErrorEstimatorI_giveIntegrationRule()
+{
+  if (this->compositeIR) {
+    return this->compositeIR;
+  } else {
+    this->compositeIR = new GaussIntegrationRule(1, this, 1, 12);
+    this->compositeIR->setUpIntegrationPoints(_Triangle, plate->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints(), _3dShell);
+    return this->compositeIR;
+  }
+}
+
+void 
+TR_SHELL01 :: ZZErrorEstimatorI_computeLocalStress(FloatArray& answer, FloatArray& sig)  
+{
+  // sig is global ShellForceMomentumTensor
+  FloatMatrix globTensor(3,3);
+  const FloatMatrix* GtoLRotationMatrix = plate->computeGtoLRotationMatrix();
+  FloatMatrix LtoGRotationMatrix ;
+
+  answer.resize(8); // reduced, local form
+  LtoGRotationMatrix.beTranspositionOf(*GtoLRotationMatrix);
+
+  // Forces
+  globTensor.at(1, 1) = sig.at(1) ; //sxForce
+  globTensor.at(1, 2) = sig.at(6) ; //qxyForce
+  globTensor.at(1, 3) = sig.at(5) ; //qxzForce
+
+  globTensor.at(2, 1) = sig.at(6) ; //qxyForce
+  globTensor.at(2, 2) = sig.at(2) ; //syForce
+  globTensor.at(2, 3) = sig.at(4) ; //syzForce
+
+  globTensor.at(3, 1) = sig.at(5) ; //qxzForce
+  globTensor.at(3, 2) = sig.at(4) ; //syzForce
+  globTensor.at(3, 3) = sig.at(3) ; //szForce
+
+  globTensor.rotatedWith(LtoGRotationMatrix);
+  // Forces: now globTensoris transformed into local c.s
+
+  // answer should be in reduced, local  form 
+  answer.at(1) = globTensor.at(1, 1); //sxForce
+  answer.at(2) = globTensor.at(2, 2); //syForce
+  answer.at(3) = globTensor.at(1, 2); //qxyForce
+  answer.at(7) = globTensor.at(2, 3); //syzForce
+  answer.at(8) = globTensor.at(1, 3); //qxzForce
 
 
+  // Moments:
+  globTensor.at(1, 1) = sig.at(7) ; //mxForce
+  globTensor.at(1, 2) = sig.at(12); //mxyForce
+  globTensor.at(1, 3) = sig.at(11); //mxzForce
 
+  globTensor.at(2, 1) = sig.at(12); //mxyForce
+  globTensor.at(2, 2) = sig.at(8) ; //myForce
+  globTensor.at(2, 3) = sig.at(10); //myzForce
+
+  globTensor.at(3, 1) = sig.at(11); //mxzForce
+  globTensor.at(3, 2) = sig.at(10); //myzForce
+  globTensor.at(3, 3) = sig.at(9) ; //mzForce
+
+  globTensor.rotatedWith (LtoGRotationMatrix); 
+  // now globTensoris transformed into local c.s
+ 
+  answer.at(4)  = globTensor.at(1, 1); //mxForce
+  answer.at(5)  = globTensor.at(2, 2); //myForce
+  answer.at(6) = globTensor.at(1, 2); //mxyForce
+
+}
+
+    
 
 //
 // io routines

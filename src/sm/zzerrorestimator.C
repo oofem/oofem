@@ -244,9 +244,9 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
 {
     int size, nDofMans;
     Element *elem = this->ZZErrorEstimatorI_giveElement();
-    IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
+    IntegrationRule *iRule = this->ZZErrorEstimatorI_giveIntegrationRule();
     const FloatArray *recoveredStress;
-    FloatArray sig, diff, n;
+    FloatArray sig, lsig, diff, ldiff, n;
     FloatMatrix nodalRecoveredStreses;
     GaussPoint *gp;
     double dV;
@@ -262,6 +262,10 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
             nodalRecoveredStreses.at(i, j) = recoveredStress->at(j);
         }
     }
+    /* Note: The recovered stresses should be in global coordinate system. This is important for shells, for example, to make
+       sure that forces and moments in the same directions are averaged. For elements where local and global coordina systems
+       are the same this does not matter.
+    */
 
     eNorm = sNorm = 0.0;
     diff.resize(size);
@@ -281,7 +285,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
             }
 
             elem->giveIPValue(sig, gp, type, tStep);
-
+	    /* the internal stress difference is in global coordinate system */
             diff.subtract(sig);
 
             eNorm += diff.computeSquaredNorm() * dV;
@@ -305,13 +309,16 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
                 }
             }
 
-            elem->giveIPValue(sig, gp, type, tStep);
+            elem->giveIPValue(sig, gp, type, tStep); 
             diff.subtract(sig);
-
-            help.beProductOf(DInv, diff);
-            eNorm += diff.dotProduct(help) * dV;
-            help.beProductOf(DInv, sig);
-            sNorm += sig.dotProduct(help)   * dV;
+	    /* the internal stress difference is in global coordinate system */
+	    /* needs to be transformed into local system to compute associated energy */
+	    this->ZZErrorEstimatorI_computeLocalStress(ldiff, diff);
+            help.beProductOf(DInv, ldiff);
+            eNorm += ldiff.dotProduct(help) * dV;
+	    this->ZZErrorEstimatorI_computeLocalStress(lsig, sig);
+            help.beProductOf(DInv, lsig);
+            sNorm += lsig.dotProduct(help) * dV;
         }
     } else {
         OOFEM_ERROR("ZZErrorEstimatorInterface::ZZErrorEstimatorI_computeElementContributions unsupported norm type");

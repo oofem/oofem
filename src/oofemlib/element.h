@@ -666,7 +666,7 @@ public:
      * @return Pointer to default integration rule.
      * @see giveDefaultIntegrationRule
      */
-    IntegrationRule *giveDefaultIntegrationRulePtr() {
+    virtual IntegrationRule *giveDefaultIntegrationRulePtr() {
         if ( this->giveNumberOfIntegrationRules() == 0 ) {
             return NULL;
         } else {
