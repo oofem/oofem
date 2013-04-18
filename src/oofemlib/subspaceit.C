@@ -50,10 +50,7 @@ SubspaceIteration ::  SubspaceIteration(Domain *d, EngngModel *m) :
     //
     //a      = NULL ;
     //b      = NULL ;
-    //ar     = NULL ;
-    //br     = NULL ;
     //_eigv  = NULL ;   // not ownership
-    //vec    = NULL ;
     //_r     = NULL ;   // not ownership
 
     //nroot  = 0 ;
@@ -65,14 +62,8 @@ SubspaceIteration ::  SubspaceIteration(Domain *d, EngngModel *m) :
 }
 
 
-SubspaceIteration :: ~SubspaceIteration() {
-    //
-    // destructor
-    //
-
-    //  delete ar ;
-    //  delete br ;
-    //  delete vec;
+SubspaceIteration :: ~SubspaceIteration()
+{
 }
 
 NM_Status

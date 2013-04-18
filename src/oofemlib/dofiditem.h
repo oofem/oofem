@@ -37,6 +37,8 @@
 
 #include "enumitem.h"
 
+#include <string>
+
 namespace oofem {
 
 #define DofIDItem_DEF \
@@ -81,7 +83,7 @@ enum DofIDItem {
 #undef ENUM_ITEM_WITH_VALUE
 #undef enumitem_h
 
-const char *__DofIDItemToString(DofIDItem _value);
+std::string __DofIDItemToString(DofIDItem _value);
 
 } // end namespace oofem
 #endif // dofiditem_h

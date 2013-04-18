@@ -50,7 +50,7 @@ namespace oofem {
  *
  * @author Ladislav Svoboda
  */
-  class TR_SHELL01 : public StructuralElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, 
+class TR_SHELL01 : public StructuralElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, 
     public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface
 {
 protected:
@@ -74,6 +74,8 @@ public:
         delete membrane;
 	if (this->compositeIR) delete this->compositeIR;
     }
+
+    virtual FEInterpolation *giveInterpolation() { return plate->giveInterpolation(); }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
@@ -113,7 +115,6 @@ public:
 
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type);
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);
@@ -123,11 +124,9 @@ public:
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
     // ZZErrorEstimatorInterface
     virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
+
     virtual IntegrationRule *ZZErrorEstimatorI_giveIntegrationRule();
     virtual void ZZErrorEstimatorI_computeLocalStress(FloatArray& answer, FloatArray& sig);
-    virtual void ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(FloatArray &answer, GaussPoint *gp,
-                                                                           InternalStateType type)
-    { ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(answer, gp, type); }
 
     // ZZRemeshingCriteriaInterface
     virtual double ZZRemeshingCriteriaI_giveCharacteristicSize();

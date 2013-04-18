@@ -147,8 +147,11 @@ NRSolver :: initializeFrom(InputRecord *ir)
     // if rtolv provided set to this tolerance both rtolf and rtold
     rtolf.resize(1);
     rtolf.at(1) = 1.e-3; // Default value.
+    rtold.resize(1);
+    rtold = 0.0; // Default off (0.0 or negative values mean that residual is ignored)
     IR_GIVE_OPTIONAL_FIELD(ir, rtolf.at(1), _IFT_NRSolver_rtolv);
-    rtold = rtolf;
+    IR_GIVE_OPTIONAL_FIELD(ir, rtold.at(1), _IFT_NRSolver_rtolv);
+
     // read optional force and displacement tolerances
     IR_GIVE_OPTIONAL_FIELD(ir, rtolf.at(1), _IFT_NRSolver_rtolf);
     IR_GIVE_OPTIONAL_FIELD(ir, rtold.at(1), _IFT_NRSolver_rtold);
@@ -206,8 +209,10 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 #endif
 
     if ( engngModel->giveProblemScale() == macroScale ) {
-        OOFEM_LOG_INFO("NRSolver:     Iteration       ForceError      DisplError                    \n");
-        OOFEM_LOG_INFO("----------------------------------------------------------------------------\n");
+        OOFEM_LOG_INFO("NRSolver: Iteration");
+        if ( rtolf.at(1) > 0.0 ) OOFEM_LOG_INFO(" ForceError");
+        if ( rtold.at(1) > 0.0 ) OOFEM_LOG_INFO(" DisplError");
+        OOFEM_LOG_INFO("\n----------------------------------------------------------------------------\n");
     }
 
     l = 1.0;
@@ -778,16 +783,19 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                 dispErr = sqrt( dg_dispErr.at(dg) );
             }
 
-            if ( forceErr > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ||
-                 dispErr  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
+            if ( ( rtolf.at(1) > 0.0 && forceErr > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ||
+                 ( rtold.at(1) > 0.0 && dispErr  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ) {
                 errorOutOfRange = true;
             }
 
-            if ( forceErr > rtolf.at(1) || dispErr > rtold.at(1) ) {
+            if ( ( rtolf.at(1) > 0.0 && forceErr > rtolf.at(1) ) || 
+                 ( rtold.at(1) > 0.0 && dispErr > rtold.at(1) ) ) {
                 answer = false;
             }
 
-            OOFEM_LOG_INFO( "  %s: %.3e %.3e", __DofIDItemToString((DofIDItem)dg), forceErr, dispErr );
+            OOFEM_LOG_INFO( "  %s:", __DofIDItemToString((DofIDItem)dg).c_str() );
+            if ( rtolf.at(1) > 0.0 ) OOFEM_LOG_INFO( " %.3e", forceErr );
+            if ( rtold.at(1) > 0.0 ) OOFEM_LOG_INFO( " %.3e", dispErr );
         }
         OOFEM_LOG_INFO("\n");
     } else { // No dof grouping
@@ -816,20 +824,24 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             dispErr = sqrt( dXdX );
         }
 
-        if ( ( fabs(forceErr) > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ||
-            ( fabs(dispErr)  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ) {
+        if ( ( rtolf.at(1) > 0.0 && fabs(forceErr) > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ||
+             ( rtold.at(1) > 0.0 && fabs(dispErr)  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ) {
             errorOutOfRange = true;
         }
 
-        if ( ( fabs(forceErr) > rtolf.at(1) ) || ( fabs(dispErr) > rtold.at(1) ) ) {
+        if ( ( rtolf.at(1) > 0.0 && fabs(forceErr) > rtolf.at(1) ) || 
+             ( rtold.at(1) > 0.0 && fabs(dispErr)  > rtold.at(1) ) ) {
             answer = false;
         }
         if ( engngModel->giveProblemScale() == macroScale ) {
-            OOFEM_LOG_INFO("NRSolver:     %-15d %-15e %-15e\n", nite, forceErr, dispErr);
+            OOFEM_LOG_INFO("NRSolver:     %-15d", nite);
         } else {
-            OOFEM_LOG_INFO("  NRSolver:     %-15d %-15e %-15e\n", nite, forceErr, dispErr);
+            OOFEM_LOG_INFO("  NRSolver:     %-15d", nite);
         }
-    } // end default case (all dofs conributing)
+        if ( rtolf.at(1) > 0.0 ) OOFEM_LOG_INFO(" %-15e", forceErr);
+        if ( rtold.at(1) > 0.0 ) OOFEM_LOG_INFO(" %-15e", dispErr);
+        OOFEM_LOG_INFO("\n");
+    } // end default case (all dofs contributing)
 
     return answer;
 }

@@ -268,23 +268,6 @@ LWedge :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
     return this->giveIPValueSize(type, gp);
 }
 
-void
-LWedge :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
-{
-    FloatArray n;
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        answer.resize(1, 6);
-    } else {
-        return;
-    }
-
-    for ( int i = 1; i <= 6; i++ ) {
-        answer.at(1, i)  = n.at(i);
-    }
-}
-
 int
 LWedge :: SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {

@@ -42,7 +42,8 @@ namespace oofem {
 #define DETAILED_REPORT
 
 InverseIteration ::  InverseIteration(Domain *d, EngngModel *m) :
-    SparseGeneralEigenValueSystemNM(d, m) {
+    SparseGeneralEigenValueSystemNM(d, m)
+{
     nc     = 0;
     rtol   = 10.E-6;  // convergence tolerance
     n = 0;

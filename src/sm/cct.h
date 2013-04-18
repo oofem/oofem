@@ -125,7 +125,6 @@ public:
 
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type);
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);
@@ -142,9 +141,6 @@ public:
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
     // ZZErrorEstimatorInterface
     virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
-    virtual void ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(FloatArray &answer, GaussPoint *gp,
-                                                                           InternalStateType type)
-    { ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(answer, gp, type); }
 
     // ZZRemeshingCriteriaInterface
     virtual double ZZRemeshingCriteriaI_giveCharacteristicSize();

@@ -42,6 +42,7 @@
 #include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "nrsolver.h"
 
 namespace oofem {
 
@@ -55,30 +56,18 @@ StationaryTransportProblem :: StationaryTransportProblem(int i, EngngModel *_mas
 
 StationaryTransportProblem :: ~StationaryTransportProblem()
 {
-    delete  conductivityMatrix;
-    if ( nMethod ) {
-        delete nMethod;
-    }
-    if ( UnknownsField ) {
-        delete UnknownsField;
-    }
-
+    delete conductivityMatrix;
+    delete nMethod;
+    delete UnknownsField;
 }
 
 NumericalMethod *StationaryTransportProblem :: giveNumericalMethod(MetaStep *mStep)
-// only one has reason for LinearStatic
-//     - SolutionOfLinearEquations
-
 {
     if ( nMethod ) {
         return nMethod;
     }
 
-    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
-    if ( nMethod == NULL ) {
-        _error("giveNumericalMethod: linear solver creation failed");
-    }
-
+    nMethod = new NRSolver(this->giveDomain(1), this);
     return nMethod;
 }
 
@@ -89,17 +78,13 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     EngngModel :: initializeFrom(ir);
-    int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
-    solverType = ( LinSystSolverType ) val;
 
-    val = 0;
+    int val = SMT_Skyline;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
-    sparseMtrxType = ( SparseMtrxType ) val;
+    this->sparseMtrxType = ( SparseMtrxType ) val;
 
-    /* The following done in updateAttributes
-     * if (this->giveNumericalMethod (giveCurrentStep())) nMethod -> instanciateFrom (ir);
-     */
+    ///@todo Combine this option with structural problems, where it is possible to keep the secant tangent elastic tangent (or generally, the initial tangent) etc. One option should fit all common needs here.
+    this->keepTangent = ir->hasField(_IFT_StationaryTransportProblem_keepTangent);
 
     // read field export flag
     IntArray exportFields;
@@ -133,8 +118,7 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
 double StationaryTransportProblem :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
 #ifdef DEBUG
-    int eq = dof->__giveEquationNumber();
-    if ( eq == 0 ) {
+    if ( dof->__giveEquationNumber() == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
 #endif
@@ -148,12 +132,10 @@ TimeStep *StationaryTransportProblem :: giveNextStep()
     //int mstep = 1;
     StateCounterType counter = 1;
 
-    if (previousStep != NULL){
-        delete previousStep;
-    }
+    delete previousStep;
 
     if ( currentStep != NULL ) {
-        istep =  currentStep->giveNumber() + 1;
+        istep = currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
     }
 
@@ -171,15 +153,12 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     //
     // first assemble problem at current time step
     UnknownsField->advanceSolution(tStep);
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 
     if ( tStep->giveNumber() == 1 ) {
-#ifdef VERBOSE
-        OOFEM_LOG_INFO("Assembling conductivity matrix\n");
-#endif
-
         // allocate space for solution vector
         FloatArray *solutionVector = UnknownsField->giveSolutionVector(tStep);
-        solutionVector->resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
+        solutionVector->resize( neq );
         solutionVector->zero();
 
         conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
@@ -188,49 +167,47 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         }
 
         conductivityMatrix->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
+        if ( this->keepTangent ) {
+            this->conductivityMatrix->zero();
+            this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, ConductivityMatrix,
+                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, LHSBCMatrix,
+                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        }
 
-        this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, ConductivityMatrix,
-                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, LHSBCMatrix,
-                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 
+    internalForces.resize(neq);
+    
 #ifdef VERBOSE
-    OOFEM_LOG_INFO("Assembling rhs\n");
+    OOFEM_LOG_INFO("Assembling external forces\n");
 #endif
+    FloatArray externalForces(neq);
+    this->assembleVector( externalForces, tStep, EID_ConservationEquation, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
-    //
-    // assembling the element part of load vector
-    //
-    rhsVector.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
-    rhsVector.zero();
-
-    this->assembleVectorFromElements( rhsVector, tStep, EID_ConservationEquation, ElementInternalSourceVector, VM_Total,
-                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( rhsVector, tStep, EID_ConservationEquation, ElementBCTransportVector, VM_Total,
-                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleDirichletBcRhsVector( rhsVector, tStep, EID_ConservationEquation, VM_Total, ConductivityMatrix,
-                                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    //
-    // assembling the nodal part of load vector
-    //
-    this->assembleVectorFromDofManagers( rhsVector, tStep, EID_ConservationEquation, ExternalForcesVector, VM_Total,
-                                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
-
-    //
-    // set-up numerical model
-    //
+    // set-up numerical method
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
-
-    //
-    // call numerical model to solve arised problem
-    //
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
 
-    //nMethod -> solveYourselfAt(tStep);
-    nMethod->solve( conductivityMatrix, & rhsVector, UnknownsField->giveSolutionVector(tStep) );
+    FloatArray incrementOfSolution;
+    double loadLevel;
+    int currentIterations;
+    this->updateComponent( tStep, InternalRhs, this->giveDomain(1) );
+    this->nMethod->solve(this->conductivityMatrix,
+                         & externalForces,
+                         NULL,
+                         UnknownsField->giveSolutionVector(tStep),
+                         & incrementOfSolution,
+                         & this->internalForces,
+                         this->eNorm,
+                         loadLevel, // Only relevant for incrementalBCLoadVector
+                         SparseNonLinearSystemNM :: rlm_total,
+                         currentIterations,
+                         tStep);
+
+    //nMethod->solve( conductivityMatrix, & rhsVector, UnknownsField->giveSolutionVector(tStep) );
     // update solution state counter
     tStep->incrementStateCounter();
 }
@@ -242,34 +219,29 @@ StationaryTransportProblem :: updateYourself(TimeStep *stepN)
     EngngModel :: updateYourself(stepN);
 }
 
-/*
 void
 StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 {
-    // update element stabilization
-    int i, nelem = d->giveNumberOfElements();
-    for ( i = 1; i <= nelem; ++i ) {
-        ((FMElement*)d->giveElement(i))->updateStabilizationCoeffs(tStep);
-    }
-
-    if (cmpn == InternalRhs) {
+    if ( cmpn == InternalRhs ) {
         this->internalForces.zero();
-        this->eNorm = this->assembleVector( this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
-                              EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assembleVector( this->internalForces, tStep, EID_ConservationEquation, InternalForcesVector, VM_Total,
+                              EModelDefaultEquationNumbering(), this->giveDomain(1), & this->eNorm );
         return;
-
-    } else if (cmpn == NonLinearLhs) {
-        this->conductivityMatrix->zero();
-        ///@todo StiffnessMatrix should be renamed TangentMatrix
-        this->assemble(this->conductivityMatrix, tStep, EID_MomentumBalance_ConservationEquation, StiffnessMatrix,
-                EModelDefaultEquationNumbering(), d);
+    } else if ( cmpn == NonLinearLhs ) {
+        if ( !this->keepTangent ) {
+            // Optimization for linear problems, we can keep the old matrix (which could save its factorization)
+            this->conductivityMatrix->zero();
+            ///@todo We should use some problem-neutral names instead of "ConductivityMatrix" (and something nicer for LHSBCMatrix)
+            this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, ConductivityMatrix,
+                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, LHSBCMatrix,
+                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        }
         return;
-
     } else {
-        OOFEM_ERROR("StokesFlow::updateComponent - Unknown component");
+        OOFEM_ERROR("StationaryTransportProblem::updateComponent - Unknown component");
     }
 }
-*/
 
 contextIOResultType
 StationaryTransportProblem :: saveContext(DataStream *stream, ContextMode mode, void *obj)
@@ -358,28 +330,19 @@ StationaryTransportProblem :: restoreContext(DataStream *stream, ContextMode mod
 int
 StationaryTransportProblem :: checkConsistency()
 {
-    // check internal consistency
-    // if success returns nonzero
-    int i, nelem;
-    Element *ePtr;
-    TransportElement *sePtr;
     Domain *domain = this->giveDomain(1);
 
-    nelem = domain->giveNumberOfElements();
     // check for proper element type
-
-    for ( i = 1; i <= nelem; i++ ) {
-        ePtr = domain->giveElement(i);
-        sePtr = dynamic_cast< TransportElement * >(ePtr);
-        if ( sePtr == NULL ) {
+    int nelem = domain->giveNumberOfElements();
+    for ( int i = 1; i <= nelem; i++ ) {
+        Element *ePtr = domain->giveElement(i);
+        if ( !dynamic_cast< TransportElement * >(ePtr) ) {
             _warning2("Element %d has no TransportElement base", i);
             return 0;
         }
     }
 
-    EngngModel :: checkConsistency();
-
-    return 1;
+    return EngngModel :: checkConsistency();
 }
 
 
@@ -397,68 +360,29 @@ StationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep
     iDof->printSingleOutputAt(stream, atTime, 'f', VM_Total);
 }
 
-void
-StationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, EquationID ut,
-                                                           ValueModeType mode, CharType lhsType,
-                                                           const UnknownNumberingScheme &ns, Domain *d)
-{
-    int ielem;
-    IntArray loc;
-    Element *element;
-    FloatArray rp, charVec;
-    FloatMatrix s;
-
-    int nelem = d->giveNumberOfElements();
-
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        element = d->giveElement(ielem);
-
-        element->computeVectorOfPrescribed(EID_ConservationEquation, mode, tStep, rp);
-        if ( rp.containsOnlyZeroes() ) {
-            continue;
-        } else {
-            this->giveElementCharacteristicMatrix(s, ielem, lhsType, tStep, d);
-            charVec.beProductOf(s, rp);
-            charVec.negated();
-
-            element->giveLocationArray(loc, ut, ns);
-            answer.assemble(charVec, loc);
-        }
-    }
-
-    // end element loop
-}
-
 
 void
 StationaryTransportProblem :: updateInternalState(TimeStep *stepN)
 {
-    int j, idomain, nelem;
-    Domain *domain;
-
-    for ( idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        domain = this->giveDomain(idomain);
-        nelem = domain->giveNumberOfElements();
-        for ( j = 1; j <= nelem; j++ ) {
+    ///@todo Remove this, unnecessary with solving as a nonlinear problem (left for now, since nonstationary problems might still need it)
+    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
+        Domain *domain = this->giveDomain(idomain);
+        int nelem = domain->giveNumberOfElements();
+        for ( int j = 1; j <= nelem; j++ ) {
             domain->giveElement(j)->updateInternalState(stepN);
         }
     }
 }
 
 
-
 #ifdef __PETSC_MODULE
 void
 StationaryTransportProblem :: initPetscContexts()
 {
-    int i;
-    PetscContext *petscContext;
-
-
     petscContextList->growTo(ndomains);
-    for ( i = 0; i < this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this);
-        petscContextList->put(i + 1, petscContext);
+    for ( int i = 1; i <= this->ndomains; i++ ) {
+        PetscContext *petscContext =  new PetscContext(this);
+        petscContextList->put(i, petscContext);
     }
 }
 #endif

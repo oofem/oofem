@@ -55,10 +55,8 @@ namespace oofem {
 FEI3dTetQuad QTRSpace :: interpolation;
 
 QTRSpace :: QTRSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
-    // Constructor.
 {
     numberOfDofMans = 10;
-   
 }
 
 
@@ -77,6 +75,13 @@ QTRSpace :: initializeFrom(InputRecord *ir)
     }
 
     return IRRT_OK;
+}
+
+
+FEInterpolation*
+QTRSpace :: giveInterpolation()
+{
+    return &interpolation;
 }
 
 
@@ -99,11 +104,9 @@ double
 QTRSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
-  double determinant = fabs ((this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this))));
-  
-  double weight = aGaussPoint->giveWeight();
-  
-  return ( determinant * weight);
+    double determinant = fabs ((this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this))));
+    double weight = aGaussPoint->giveWeight();
+    return ( determinant * weight);
 }
 
 
@@ -155,7 +158,6 @@ QTRSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int
 // evaluated at aGaussPoint
 
 {
-    int j, k, l;
     FloatMatrix dnx;
 
     // compute the derivatives of shape functions
@@ -167,33 +169,33 @@ QTRSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int
     // put the products of derivatives of shape functions into the "nonlinear B matrix",
     // depending on parameter i, which is the number of the strain component
     if ( i <= 3 ) {
-        for ( k = 0; k < 10; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 30; j += 3 ) {
+        for ( int k = 0; k < 10; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 30; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, i) * dnx.at( ( j - 1 ) / 3 + 1, i );
                 }
             }
         }
-    } else if ( i == 4 )        {
-        for ( k = 0; k < 10; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 30; j += 3 ) {
+    } else if ( i == 4 ) {
+        for ( int k = 0; k < 10; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 30; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 2 );
                 }
             }
         }
-    } else if ( i == 5 )        {
-        for ( k = 0; k < 10; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 30; j += 3 ) {
+    } else if ( i == 5 ) {
+        for ( int k = 0; k < 10; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 30; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
                 }
             }
         }
-    } else if ( i == 6 )        {
-        for ( k = 0; k < 10; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 30; j += 3 ) {
+    } else if ( i == 6 ) {
+        for ( int k = 0; k < 10; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 30; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 2 ) + dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
                 }
             }
@@ -277,23 +279,6 @@ QTRSpace :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
     return this->giveIPValueSize(type, gp);
 }
 
-void
-QTRSpace :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
-{
-    FloatArray n;
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        answer.resize(1, 10);
-    } else {
-        return;
-    }
-
-    for ( int i = 1; i <= 10; i++ ) {
-        answer.at(1, i)  = n.at(i);
-    }
-}
-
 int
 QTRSpace :: SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
@@ -364,4 +349,5 @@ QTRSpace :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int si
 {
     answer.resize(0);
 }
+
 } // end namespace oofem

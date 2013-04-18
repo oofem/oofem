@@ -137,9 +137,6 @@ public:
 
     /// Returns reference to corresponding element
     virtual Element *ZZErrorEstimatorI_giveElement() = 0;
-    /// Computes the interpolation matrix used for recovered values
-    virtual void ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(FloatArray &answer, GaussPoint *gp,
-                                                                           InternalStateType type) = 0;
     /**
      * Computes the element contributions to global norms.
      * @param eNorm Element contribution to error norm.
