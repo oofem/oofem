@@ -90,7 +90,7 @@
 #ifdef __SM_MODULE
  #include "gpinitmodule.h"
 #endif
-#if 0 // Soon
+#if 1 // Soon
 #include "particletopologydescription.h"
 #endif
 
@@ -256,7 +256,7 @@ ClassFactory :: ClassFactory()
     initList [ "gpinitmodule" ] = initCreator< GPInitModule >;
 #endif //__SM_MODULE
 
-#if 0
+#if 1
     topologyList["particletopology"] = topologyCreator< ParticleTopologyDescription >;
 #endif
 
