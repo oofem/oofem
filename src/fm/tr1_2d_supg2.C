@@ -1949,30 +1949,6 @@ TR1_2D_SUPG2 :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 
 
 void
-TR1_2D_SUPG2 :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type)
-{
-    // evaluates N matrix (interpolation estimated stress matrix)
-    // according to Zienkiewicz & Zhu paper
-    // N(nsigma, nsigma*nnodes)
-    // Definition : sigmaVector = N * nodalSigmaVector
-    double l1, l2, l3;
-
-    l1 = aGaussPoint->giveCoordinate(1);
-    l2 = aGaussPoint->giveCoordinate(2);
-    l3 = 1.0 - l1 - l2;
-
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        answer.resize(1, 3);
-    } else {
-        return;
-    }
-
-    answer.at(1) = l1;
-    answer.at(2) = l2;
-    answer.at(3) = l3;
-}
-
-void
 TR1_2D_SUPG2 :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                            InternalStateType type, TimeStep *tStep)
 {

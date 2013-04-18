@@ -35,8 +35,6 @@
 #ifndef zznodalrecoverymodel_h
 #define zznodalrecoverymodel_h
 
-#include "compiler.h"
-
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 
@@ -129,12 +127,6 @@ public:
      * Returns the corresponding element to interface.
      */
     virtual Element *ZZNodalRecoveryMI_giveElement() = 0;
-    /**
-     * Evaluates N matrix (interpolation estimated value matrix).
-     * Default implementation requires element to provide valid interpolation via giveInterpolation method.
-     */
-    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *aGaussPoint,
-                                                                     InternalStateType type);
     //@}
 };
 } // end namespace oofem

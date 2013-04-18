@@ -318,21 +318,6 @@ LTRSpace :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 
 
 void
-LTRSpace :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type)
-{
-    // evaluates N matrix (interpolation estimated stress matrix)
-    // according to Zienkiewicz & Zhu paper
-    // N(nsigma, nsigma*nnodes)
-    // Definition : sigmaVector = N * nodalSigmaVector
-
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        this->interpolation.evalN( answer, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    } else {
-        return;
-    }
-}
-
-void
 LTRSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                        InternalStateType type, TimeStep *tStep)
 {

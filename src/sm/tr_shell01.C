@@ -240,24 +240,6 @@ TR_SHELL01 :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 }
 
 
-void
-TR_SHELL01 :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *gp, InternalStateType type)
-// evaluates N matrix (interpolation estimated stress matrix)
-// according to Zienkiewicz & Zhu paper
-// N(nsigma, nsigma*nnodes)
-// Definition : sigmaVector = N * nodalSigmaVector
-{
-    FloatArray n;
-    FEI2dTrLin interp_lin(1, 2);
-    interp_lin.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(3);
-    answer.zero();
-    answer.at(1) = n.at(1);
-    answer.at(2) = n.at(2);
-    answer.at(3) = n.at(3);
-}
-
 double 
 TR_SHELL01::ZZRemeshingCriteriaI_giveCharacteristicSize() 
 {

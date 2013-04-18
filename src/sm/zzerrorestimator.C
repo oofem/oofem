@@ -46,6 +46,7 @@
 #include "structuralmaterial.h"
 #include "structuralms.h"
 #include "integrationrule.h"
+#include "feinterpol.h"
 #include "connectivitytable.h"
 
 #include <vector>
@@ -244,12 +245,11 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
 {
     int size, nDofMans;
     Element *elem = this->ZZErrorEstimatorI_giveElement();
+    FEInterpolation *interpol = elem->giveInterpolation();
     IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
     const FloatArray *recoveredStress;
     FloatArray sig, diff, n;
     FloatMatrix nodalRecoveredStreses;
-    GaussPoint *gp;
-    double dV;
 
     nDofMans = elem->giveNumberOfDofManagers();
     size = elem->giveIPValueSize(type, iRule->getIntegrationPoint(0));
@@ -265,20 +265,15 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
 
     eNorm = sNorm = 0.0;
     diff.resize(size);
-    diff.zero();
 
     // compute  the e-norm and s-norm
     if ( norm == ZZErrorEstimator :: L2Norm ) {
         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-            gp  = iRule->getIntegrationPoint(i);
-            dV  = elem->computeVolumeAround(gp);
-            diff.zero();
-            this->ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(n, gp, type);
-            for ( int j = 1; j <= size; j++ ) {
-                for ( int k = 1; k <= nDofMans; k++ ) {
-                    diff.at(j) += n.at(k) * nodalRecoveredStreses.at(k, j);
-                }
-            }
+            GaussPoint *gp = iRule->getIntegrationPoint(i);
+            double dV = elem->computeVolumeAround(gp);
+            interpol->evalN( n, *gp->giveCoordinates(), FEIElementGeometryWrapper(elem));
+
+            diff.beTProductOf(nodalRecoveredStreses, n);
 
             elem->giveIPValue(sig, gp, type, tStep);
 
@@ -292,18 +287,13 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
         FloatMatrix DInv;
 
         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-            gp  = iRule->getIntegrationPoint(i);
-            dV  = elem->computeVolumeAround(gp);
-            diff.zero();
-            this->ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(n, gp, type);
+            GaussPoint *gp = iRule->getIntegrationPoint(i);
+            double dV = elem->computeVolumeAround(gp);
+            interpol->evalN( n, *gp->giveCoordinates(), FEIElementGeometryWrapper(elem));
             static_cast< StructuralMaterial * >( elem->giveMaterial() )
-            ->giveCharacteristicComplianceMatrix(DInv, ReducedForm, TangentStiffness,
-                                                 gp, tStep);
-            for ( int j = 1; j <= size; j++ ) {
-                for ( int k = 1; k <= nDofMans; k++ ) {
-                    diff.at(j) += n.at(k) * nodalRecoveredStreses.at(k, j);
-                }
-            }
+            ->giveCharacteristicComplianceMatrix(DInv, ReducedForm, TangentStiffness, gp, tStep);
+
+            diff.beTProductOf(nodalRecoveredStreses, n);
 
             elem->giveIPValue(sig, gp, type, tStep);
             diff.subtract(sig);

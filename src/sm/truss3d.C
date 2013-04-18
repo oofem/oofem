@@ -84,16 +84,6 @@ Truss3d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 
 
 void
-Truss3d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *gp, InternalStateType type)
-{
-    if ( !this->giveIPValueSize(type, gp) ) {
-        return;
-    }
-    this->interp.evalN(answer, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-}
-
-
-void
 Truss3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
     int size = NodalAveragingRecoveryMI_giveDofManRecordSize(type);
