@@ -60,7 +60,7 @@ class EnrichmentFunction : public FEMComponent
 {
 public:
     static bool __dummy;
-    static bool init() { printf("does it work????????????????\n"); return true; }
+    static bool init() { return true; }
 public:
     /**
      * Constructor.
