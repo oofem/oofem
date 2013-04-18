@@ -59,15 +59,12 @@ class GaussPoint;
 class EnrichmentFunction : public FEMComponent
 {
 public:
-    static bool __dummy;
-    static bool init() { return true; }
-public:
     /**
      * Constructor.
      * @param n Number associated with receiver.
      * @param aDomain Reference to domain.
      */
-    EnrichmentFunction(int n, Domain *aDomain) : FEMComponent(n + __dummy, aDomain) { }
+    EnrichmentFunction(int n, Domain *aDomain) : FEMComponent(n, aDomain) { }
     /// Destructor
     virtual ~EnrichmentFunction() { };
     /// Evaluates a function at a particular point
