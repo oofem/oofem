@@ -1562,7 +1562,7 @@ Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const 
     FloatMatrix N, B;
     FloatArray Fp, fp, genEps;
 
-    answer.resize( this->giveNumberOfDofs() );
+    answer.resize( Shell7Base :: giveNumberOfDofs() );
     answer.zero();
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
@@ -1605,6 +1605,8 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &answer, const i
         surfLoad->computeValueAt(load, tStep, * ( gp->giveCoordinates() ), VM_Total);        // pressure component
         traction.beVectorProductOf(g1, g2);        // normal vector (should not be normalized due to integraton in reference config.)
         traction.times( -load.at(1) );
+        load.printYourself();
+        traction.printYourself();
     } else if ( dynamic_cast< ConstantSurfaceLoad * >( surfLoad ) ) {
         surfLoad->computeValueAt(traction, tStep, * ( gp->giveCoordinates() ), VM_Total);        // traction vector
     } else {
@@ -1617,6 +1619,7 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &answer, const i
     FloatMatrix lambda;
     this->computeLambdaNMatrix(lambda, genEps, zeta);
     answer.beTProductOf(lambda,traction);
+   
 #else
     FloatArray m;
     m.setValues( 3,  genEps.at(13),  genEps.at(14),  genEps.at(15) );

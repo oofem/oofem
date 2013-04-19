@@ -84,7 +84,7 @@
 #define _IFT_EngngModel_parallelflag "parallelflag"
 #define _IFT_EngngModel_loadBalancingFlag "lbflag"
 #define _IFT_EngngModel_forceloadBalancingFlag "forcelb1"
-#define _IFT_EngngModel_initialGuess "initialGuess"
+#define _IFT_EngngModel_initialGuess "initialguess"
 
 #define _IFT_EngngModel_lstype "lstype"
 #define _IFT_EngngModel_smtype "smtype"

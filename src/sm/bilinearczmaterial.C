@@ -107,12 +107,12 @@ BilinearCZMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm f
         answer.at(1) = this->ks0 * gs1; 
         answer.at(2) = this->ks0 * gs2;
         answer.at(3) = this->sigfn + this->kn1 * (gn - this->gn0 );
-        printf("Softening branch...\n");
+        //printf("Softening branch...\n");
     } else {
         answer.at(1) = this->ks0 * gs1; 
         answer.at(2) = this->ks0 * gs2;
         answer.at(3) = 0.0; // failed
-        printf("Failed...\n");
+        //printf("Failed...\n");
     }
 
     //answer.printYourself();
@@ -176,7 +176,7 @@ BilinearCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer
         } else if ( gn <= this->gnmax  ) { // softening branch
             answer.at(1,1) = this->ks0; // no degradation in shear
             answer.at(2,2) = this->ks0;
-            answer.at(3,3) = this->kn1;
+            answer.at(3,3) = this->kn1*0.0;
             //printf("Softening branch...\n");
         } else {
             answer.at(1,1) = this->ks0; 
@@ -506,8 +506,8 @@ BilinearCZMaterial :: checkConsistency()
     } else if ( this->GIc < 0.0 ) {
         OOFEM_ERROR2("BilinearCZMaterial :: initializeFrom - GIc is negative (%.2e)", this->GIc);
     } else if ( this->kn0 < kn0min  ) { // => gn0 > gnmax
-        OOFEM_ERROR3("BilinearCZMaterial :: initializeFrom - kn0 (%.2e) is below minimum stiffness (%.2e), => gn0 > gnmax, which is unphysical" ,
-            this->kn0, kn0min);
+     //   OOFEM_ERROR3("BilinearCZMaterial :: initializeFrom - kn0 (%.2e) is below minimum stiffness (%.2e), => gn0 > gnmax, which is unphysical" ,
+     //       this->kn0, kn0min);
     }
     return 1;
 }

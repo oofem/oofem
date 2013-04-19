@@ -123,6 +123,8 @@ protected:
 
     // Loads
     virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode);
+    virtual void computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
+                                         int iSurf, TimeStep *tStep, ValueModeType mode);
 
     // Mass matrices
     void computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep); 

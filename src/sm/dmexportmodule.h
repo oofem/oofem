@@ -39,7 +39,7 @@
 #include "domain.h"
 #include "engngm.h"
 
-///@name Input fields for BilinearCZMaterial
+///@name Input fields
 //@{
 #define _IFT_DofManExportModule_dmlist "dmlist"
 //@}

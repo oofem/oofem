@@ -116,6 +116,7 @@ Tr2Shell7XFEM :: computeGaussPoints()
                 for ( int i = 0; i < numberOfDealam; i++ ) {
                     czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
                     czIntegrationRulesArray [ i ]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat);
+                    //czIntegrationRulesArray [ i ]->SetUpPointsOnWedge(3, 1, _3dMat);
                 }
             }
         }

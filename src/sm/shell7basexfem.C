@@ -578,7 +578,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
 
                         // cohesive zone
                         if( this->hasCohesiveZone() ) {
-                            this->computeCohesiveTangentAt(temp, tStep, solVec, solVecK, dei, j); // should be 2 inputs K,J
+                            this->computeCohesiveTangentAt(temp, tStep, solVec, solVecK, dei, k); // should be 2 inputs K,J
                             // Assemble part correpsonding to active dofs
                             tempRed.beSubMatrixOf(temp, activeDofsJ, activeDofsK);
                             answer.assemble(tempRed, orderingJ, orderingK);
@@ -915,7 +915,67 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
 }
 
 
+// Surface
+void
+Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
+                                         int iSurf, TimeStep *tStep, ValueModeType mode)
+{
+    BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >( load );
+    if ( surfLoad ) {
+        
+        answer.resize( this->giveNumberOfDofs() );
+        answer.zero();
 
+        // Continuous part
+        FloatArray solVec, force;
+        this->giveUpdatedSolutionVector(solVec, tStep);
+        this->computePressureForce(force, solVec, iSurf, surfLoad, tStep);
+
+        IntArray activeDofs, ordering, eiDofIdArray;
+        this->computeOrderingArray(ordering, activeDofs, 0, All);
+        answer.assemble(force, ordering);     
+
+        //IntArray mask;
+        //this->giveSurfaceDofMapping(mask, 1);         // same dofs regardless of iSurf
+
+        /*
+        // Disccontinuous part
+        FloatArray componentsTemp, coordsTemp(1), solVecD;
+        coordsTemp.at(1) = 0.0; // 
+        surfLoad->computeValueAt(componentsTemp, tStep, coordsTemp, VM_Total);
+        double xi = 0.0; // defaults to geometric midplane
+        if ( componentsTemp.giveSize() == 2 ) {
+            xi = componentsTemp.at(2);   // use the 8th component to store the-xi coord where the load acts
+        }
+        
+        FloatArray temp;
+        for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
+            Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
+
+            for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
+                if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
+                    double xi0 = dei->enrichmentDomainXiCoords.at(j);
+                    if ( xi > xi0 ) {
+                        dei->giveEIDofIdArray(eiDofIdArray, j);
+                        this->giveSolutionVector(solVecD, eiDofIdArray, tStep);  
+                        
+                        this->computePressureForce(temp, solVecD, iSurf, surfLoad, tStep);
+                        // Assemble
+                        this->computeOrderingArray(ordering, activeDofs,  j, All);
+                        FloatArray tempRed;
+                        tempRed.beSubArrayOf(temp, activeDofs);
+                        answer.assemble(tempRed, ordering);
+                    }
+                }
+            }
+        }
+        */
+        return;
+    } else {
+        _error("Shell7Base :: computeSurfaceLoadVectorAt: load type not supported");
+        return;
+    }
+}
 
 
 
