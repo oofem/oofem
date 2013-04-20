@@ -32,44 +32,33 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef fei2dquadbiquad_h
-#define fei2dquadbiquad_h
+#ifndef fei3dhexatriquad_h
+#define fei3dhexatriquad_h
 
-#include "fei2dquadquad.h"
+#include "fei3dhexaquad.h"
 
 namespace oofem {
 /**
- * Class representing a 2d quadrilateral with bi-quadratic interpolation based on isoparametric coordinates.
- * Local Node Numbering
- *       ^ eta
- *       |
- * (4)--(7)--(3)
- *  |         |
- *  |         |
- * (8)  (9)  (6)-->ksi
- *  |         |
- *  |         |
- * (1)--(5)--(2)
- * Everything regarding edges can be directly inherited by FEI2dQuadQuad.
- * @note Untested.
+ * Class representing implementation of tri-quadratic hexahedra interpolation class.
  * @author Mikael Öhman
  */
-class FEI2dQuadBiQuad : public FEI2dQuadQuad
+class FEI3dHexaTriQuad : public FEI3dHexaQuad
 {
 public:
-    FEI2dQuadBiQuad(int ind1, int ind2) : FEI2dQuadQuad(ind1,ind2) { }
+    FEI3dHexaTriQuad() : FEI3dHexaQuad() { }
 
     // Bulk
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+
+    // Surface
+    virtual void surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    //virtual void surfaceEvaldNdx(FloatMatrix&answer, int isurf, const FloatArray& lcoords, const FEICellGeometry& cellgeo);
+    virtual void computeLocalSurfaceMapping(IntArray &nodes, int iSurf);
 
 protected:
-    virtual void giveDerivatives(FloatMatrix &answer, const FloatArray &lcoords);
+    virtual void giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords);
 };
 } // end namespace oofem
-#endif // fei2dquadbiquad_h
-
-
-
-
-
-
+#endif

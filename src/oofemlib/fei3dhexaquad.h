@@ -32,8 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-// Recasted by Ladislav Svoboda
-
 #ifndef fei3dhexaquad_h
 #define fei3dhexaquad_h
 
@@ -65,6 +63,9 @@ namespace oofem {
  *   |/   L ksi        |/                    |/                |/
  *   +--------+--------+                     +-----------------+
  *  8         15        7
+ * 
+ * @author Ladislav Svoboda
+ * @author Mikael Öhman
  */
 class FEI3dHexaQuad : public FEInterpolation3d
 {
@@ -97,13 +98,11 @@ public:
     virtual void surfaceLocal2global(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void computeLocalSurfaceMapping(IntArray &nodes, int iSurf);
-    void computeGlobalSurfaceMapping(IntArray &edgeNodes, IntArray &elemNodes, int iedge);
 
     virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
 protected:
-    double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
-    void giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords);
+    virtual void giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords);
 };
 } // end namespace oofem
 #endif

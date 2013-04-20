@@ -25,7 +25,7 @@
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU General Public License for more dvils.
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
@@ -41,58 +41,62 @@ namespace oofem {
 void
 FEI2dQuadBiQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double ksi, eta, n9;
-
+    double u, v;
     answer.resize(9);
 
-    ksi = lcoords.at(1);
-    eta = lcoords.at(2);
+    u = lcoords.at(1);
+    v = lcoords.at(2);
 
-    n9 = ( 1. - ksi * ksi ) * ( 1. - eta * eta );
+    double a[] = {0.5*(u-1.0)*u, 0.5*(u+1.0)*u, 1.0-u*u};
+    double b[] = {0.5*(v-1.0)*v, 0.5*(v+1.0)*v, 1.0-v*v};
 
-    answer.at(1) = ( 1. + ksi ) * ( 1. + eta ) * 0.25 * ( ksi + eta - 1. ) - 0.25*n9;
-    answer.at(2) = ( 1. - ksi ) * ( 1. + eta ) * 0.25 * ( -ksi + eta - 1. ) - 0.25*n9;
-    answer.at(3) = ( 1. - ksi ) * ( 1. - eta ) * 0.25 * ( -ksi - eta - 1. ) - 0.25*n9;
-    answer.at(4) = ( 1. + ksi ) * ( 1. - eta ) * 0.25 * ( ksi - eta - 1. ) - 0.25*n9;
-    answer.at(5) = 0.5 * ( 1. - ksi * ksi ) * ( 1. + eta ) - 0.5*n9;
-    answer.at(6) = 0.5 * ( 1. - ksi ) * ( 1. - eta * eta ) - 0.5*n9;
-    answer.at(7) = 0.5 * ( 1. - ksi * ksi ) * ( 1. - eta ) - 0.5*n9;
-    answer.at(8) = 0.5 * ( 1. + ksi ) * ( 1. - eta * eta ) - 0.5*n9;
-    answer.at(9) = n9;
+    answer.at(1) = a[0] * b[0];
+    answer.at(5) = a[1] * b[0];
+    answer.at(2) = a[2] * b[0];
+
+    answer.at(8) = a[0] * b[1];
+    answer.at(9) = a[1] * b[1];
+    answer.at(6) = a[2] * b[1];
+
+    answer.at(4) = a[0] * b[2];
+    answer.at(7) = a[1] * b[2];
+    answer.at(3) = a[2] * b[2];
 }
 
 
 void
-FEI2dQuadBiQuad :: giveDerivatives(FloatMatrix &dn, const FloatArray &lc)
+FEI2dQuadBiQuad :: giveDerivatives(FloatMatrix &dN, const FloatArray &lc)
 {
-    double ksi, eta, dn9dxi, dn9deta;
-    ksi = lc.at(1);
-    eta = lc.at(2);
-    dn.resize(9, 2);
-    
-    // dn/dxi
-    dn9dxi = 2.0 * ksi * ( 1. - eta * eta );
-    dn.at(1,1) =  0.25 * ( 1. + eta ) * ( 2.0 * ksi + eta ) - 0.25 * dn9dxi;
-    dn.at(2,1) = -0.25 * ( 1. + eta ) * ( -2.0 * ksi + eta ) - 0.25 * dn9dxi;
-    dn.at(3,1) = -0.25 * ( 1. - eta ) * ( -2.0 * ksi - eta ) - 0.25 * dn9dxi;
-    dn.at(4,1) =  0.25 * ( 1. - eta ) * ( 2.0 * ksi - eta ) - 0.25 * dn9dxi;
-    dn.at(5,1) = -ksi * ( 1. + eta ) - 0.5 * dn9dxi;
-    dn.at(6,1) = -0.5 * ( 1. - eta * eta ) - 0.5 * dn9dxi;
-    dn.at(7,1) = -ksi * ( 1. - eta ) - 0.5 * dn9dxi;
-    dn.at(8,1) =  0.5 * ( 1. - eta * eta ) - 0.5 * dn9dxi;
-    dn.at(9,1) =  dn9dxi;
+    IntArray snodes;
 
-    // dn/deta
-    dn9deta = ( 1. - ksi * ksi ) * 2.0 * eta;
-    dn.at(1,2) =  0.25 * ( 1. + ksi ) * ( 2.0 * eta + ksi ) - 0.25 * dn9deta;
-    dn.at(2,2) =  0.25 * ( 1. - ksi ) * ( 2.0 * eta - ksi ) - 0.25 * dn9deta;
-    dn.at(3,2) = -0.25 * ( 1. - ksi ) * ( -2.0 * eta - ksi ) - 0.25 * dn9deta;
-    dn.at(4,2) = -0.25 * ( 1. + ksi ) * ( -2.0 * eta + ksi ) - 0.25 * dn9deta;
-    dn.at(5,2) =  0.5 * ( 1. - ksi * ksi ) - 0.5 * dn9deta;
-    dn.at(6,2) = -eta * ( 1. - ksi ) - 0.5 * dn9deta;
-    dn.at(7,2) = -0.5 * ( 1. - ksi * ksi ) - 0.5 * dn9deta;
-    dn.at(8,2) = -eta * ( 1. + ksi ) - 0.5 * dn9deta;
-    dn.at(9,2) =  dn9deta;
+    double u = lc.at(1);
+    double v = lc.at(2);
+
+    double a[] = {0.5*(u-1.0)*u, 0.5*(u+1.0)*u, 1.0-u*u};
+    double b[] = {0.5*(v-1.0)*v, 0.5*(v+1.0)*v, 1.0-v*v};
+
+    double da[] = {u - 0.5, u + 0.5, -2.0 * u};
+    double db[] = {v - 0.5, v + 0.5, -2.0 * v};
+
+    dN.at(1,1) = da[0] * b[0];
+    dN.at(5,1) = da[1] * b[0];
+    dN.at(2,1) = da[2] * b[0];
+    dN.at(8,1) = da[0] * b[1];
+    dN.at(9,1) = da[1] * b[1];
+    dN.at(6,1) = da[2] * b[1];
+    dN.at(4,1) = da[0] * b[2];
+    dN.at(7,1) = da[1] * b[2];
+    dN.at(3,1) = da[2] * b[2];
+
+    dN.at(1,2) = a[0] * db[0];
+    dN.at(5,2) = a[1] * db[0];
+    dN.at(2,2) = a[2] * db[0];
+    dN.at(8,2) = a[0] * db[1];
+    dN.at(9,2) = a[1] * db[1];
+    dN.at(6,2) = a[2] * db[1];
+    dN.at(4,2) = a[0] * db[2];
+    dN.at(7,2) = a[1] * db[2];
+    dN.at(3,2) = a[2] * db[2];
 }
 
 } // end namespace oofem

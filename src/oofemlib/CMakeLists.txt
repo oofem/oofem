@@ -166,6 +166,7 @@ set (core_fei
     fei3dtetquad.C
     fei3dhexalin.C
     fei3dhexaquad.C
+    fei3dhexatriquad.C
     fei3dwedgelin.C 
     fei3dwedgequad.C
     )

@@ -116,9 +116,7 @@ FEI1dQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FE
 double
 FEI1dQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-
     double x1, x2, x3, J, ksi;
-
 
     x1 = cellgeo.giveVertexCoordinates(1)->at(cindx);
     x2 = cellgeo.giveVertexCoordinates(2)->at(cindx);
