@@ -34,15 +34,15 @@
 
 #ifdef __PARALLEL_MODE
 
+#include "petscordering.h"
 #include "engngm.h"
 #include "unknownnumberingscheme.h"
-#include "petscordering.h"
 #include "combuff.h"
 #include "mathfem.h"
 
 namespace oofem {
 bool
-PetscOrdering_Base :: isLocal(DofManager *dman)
+ParallelOrdering :: isLocal(DofManager *dman)
 {
     int myrank = dman->giveDomain()->giveEngngModel()->giveRank();
     if ( dman->giveParallelMode() == DofManager_local ) {
@@ -59,7 +59,7 @@ PetscOrdering_Base :: isLocal(DofManager *dman)
 }
 
 bool
-PetscOrdering_Base :: isShared(DofManager *dman)
+ParallelOrdering :: isShared(DofManager *dman)
 {
     if ( dman->giveParallelMode() == DofManager_shared ) {
         return true;
@@ -68,7 +68,7 @@ PetscOrdering_Base :: isShared(DofManager *dman)
     }
 }
 
-PetscNatural2GlobalOrdering :: PetscNatural2GlobalOrdering() : PetscOrdering_Base(), locGlobMap(), globLocMap()
+PetscNatural2GlobalOrdering :: PetscNatural2GlobalOrdering() : ParallelOrdering(), locGlobMap(), globLocMap()
 {
     l_neqs = g_neqs = 0;
 }
@@ -505,7 +505,7 @@ PetscNatural2GlobalOrdering :: map2Old(IntArray &answer, const IntArray &src, in
 
 
 
-PetscNatural2LocalOrdering :: PetscNatural2LocalOrdering() : PetscOrdering_Base(), n2l() { }
+PetscNatural2LocalOrdering :: PetscNatural2LocalOrdering() : ParallelOrdering(), n2l() { }
 
 void
 PetscNatural2LocalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberingScheme &n)
