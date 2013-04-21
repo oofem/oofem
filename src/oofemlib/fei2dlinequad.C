@@ -225,4 +225,24 @@ double FEI2dLineQuad :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeom
     return 0.0;
 }
 
+double FEI2dLineQuad::evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
+{
+    const FloatArray *node;
+    double x1, x2, x3, y1, y2, y3;
+
+    node = cellgeo.giveVertexCoordinates(1);
+    x1 = node->at ( xind );
+    y1 = node->at ( yind );
+
+    node = cellgeo.giveVertexCoordinates(2);
+    x2 = node->at ( xind );
+    y2 = node->at ( yind );
+
+    node = cellgeo.giveVertexCoordinates(3);
+    x3 = node->at ( xind );
+    y3 = node->at ( yind );
+
+    return ( x1 * y2 - x2 * y1 + 4 * ( x3 * ( y1 - y2 ) + y3 * ( x2 - x1 ) ) ) / 3.0;
+}
+
 } // end namespace oofem

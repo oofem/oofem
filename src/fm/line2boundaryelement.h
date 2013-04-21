@@ -82,7 +82,6 @@ public:
     /**
      * Computes the integral @f$ \int_S n \cdot x \mathrm{d}s @f$.
      * The normal is defined as left in the direction parameterization.
-     * @todo{Move actual computations to FEI class}
      * @return Evaluated integral.
      */
     virtual double computeNXIntegral() const;

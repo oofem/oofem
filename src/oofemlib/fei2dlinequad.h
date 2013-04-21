@@ -73,6 +73,13 @@ public:
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
+    /**
+     * Computes the integral @f$ \int_S n \cdot x \mathrm{d}s @f$.
+     * The normal is defined as left in the direction parameterization.
+     * @return Evaluated integral.
+     */
+    virtual double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo);
+
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
     void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
