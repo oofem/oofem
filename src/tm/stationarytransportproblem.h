@@ -81,6 +81,9 @@ public:
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
+    void assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, EquationID ut,
+                                                           ValueModeType mode, CharType lhsType,
+                                                           const UnknownNumberingScheme &ns, Domain *d);
     virtual void updateDomainLinks();
 
     virtual TimeStep *giveNextStep();

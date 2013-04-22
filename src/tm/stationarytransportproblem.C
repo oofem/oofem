@@ -183,6 +183,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO("Assembling external forces\n");
 #endif
     FloatArray externalForces(neq);
+    externalForces.zero();
     this->assembleVector( externalForces, tStep, EID_ConservationEquation, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     // set-up numerical method
@@ -194,7 +195,6 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     FloatArray incrementOfSolution;
     double loadLevel;
     int currentIterations;
-    this->updateComponent( tStep, InternalRhs, this->giveDomain(1) );
     this->nMethod->solve(this->conductivityMatrix,
                          & externalForces,
                          NULL,
@@ -208,8 +208,6 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
                          tStep);
 
     //nMethod->solve( conductivityMatrix, & rhsVector, UnknownsField->giveSolutionVector(tStep) );
-    // update solution state counter
-    tStep->incrementStateCounter();
 }
 
 void
@@ -358,6 +356,38 @@ void
 StationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
     iDof->printSingleOutputAt(stream, atTime, 'f', VM_Total);
+}
+
+void
+StationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, EquationID ut,
+                                                           ValueModeType mode, CharType lhsType,
+                                                           const UnknownNumberingScheme &ns, Domain *d)
+{
+    int ielem;
+    IntArray loc;
+    Element *element;
+    FloatArray rp, charVec;
+    FloatMatrix s;
+
+    int nelem = d->giveNumberOfElements();
+
+    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+        element = d->giveElement(ielem);
+
+        element->computeVectorOfPrescribed(EID_ConservationEquation, mode, tStep, rp);
+        if ( rp.containsOnlyZeroes() ) {
+            continue;
+        } else {
+            this->giveElementCharacteristicMatrix(s, ielem, lhsType, tStep, d);
+            charVec.beProductOf(s, rp);
+            charVec.negated();
+
+            element->giveLocationArray(loc, ut, ns);
+            answer.assemble(charVec, loc);
+        }
+    }
+
+    // end element loop
 }
 
 

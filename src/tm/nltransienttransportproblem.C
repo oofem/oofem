@@ -238,6 +238,8 @@ double NLTransientTransportProblem :: giveUnknownComponent(ValueModeType mode, T
     }
 
     if ( ( t >= previousStep->giveTargetTime() ) && ( t <= currentStep->giveTargetTime() ) ) {
+        ///@todo Shouldn't it be enough to just run this?
+        //UnknownsField->giveUnknownValue(dof, mode, currentStep);
         double rtdt = UnknownsField->giveUnknownValue(dof, VM_Total, currentStep);
         double rt   = UnknownsField->giveUnknownValue(dof, VM_Total, previousStep);
         double psi = ( t - previousStep->giveTargetTime() ) / currentStep->giveTimeIncrement();
