@@ -252,4 +252,23 @@ double FEI2dTrLin :: giveArea(const FEICellGeometry &cellgeo) const
 
     return 0.5 * ( x1*(y2-y3) + x2*(-y1+y3) + x3*(y1-y2) ); ///@todo Absolute value or not?
 }
+
+double FEI2dTrLin :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
+{
+    IntArray eNodes;
+    const FloatArray *node;
+    double x1, x2, y1, y2;
+
+    this->computeLocalEdgeMapping(eNodes, iEdge);
+
+    node = cellgeo.giveVertexCoordinates(eNodes.at(1));
+    x1 = node->at ( xind );
+    y1 = node->at ( yind );
+
+    node = cellgeo.giveVertexCoordinates(eNodes.at(2));
+    x2 = node->at ( xind );
+    y2 = node->at ( yind );
+
+    return -( x2 * y1 - x1 * y2 );
+}
 } // end namespace oofem

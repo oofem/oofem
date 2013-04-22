@@ -296,13 +296,13 @@ double FEI2dQuadQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const Floa
 
     normal.resize(2);
 
-    normal.at(1) =-dN1dxi*cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(yind) +
-                  -dN2dxi*cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(yind) +
-                  -dN3dxi*cellgeo.giveVertexCoordinates(edgeNodes.at(3))->at(yind);
+    normal.at(1) = dN1dxi*cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(yind) +
+                   dN2dxi*cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(yind) +
+                   dN3dxi*cellgeo.giveVertexCoordinates(edgeNodes.at(3))->at(yind);
 
-    normal.at(2) = dN1dxi*cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(xind) +
-                   dN2dxi*cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(xind) +
-                   dN3dxi*cellgeo.giveVertexCoordinates(edgeNodes.at(3))->at(xind);
+    normal.at(2) =-dN1dxi*cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(xind) +
+                  -dN2dxi*cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(xind) +
+                  -dN3dxi*cellgeo.giveVertexCoordinates(edgeNodes.at(3))->at(xind);
 
     return normal.normalize();
 }
@@ -357,6 +357,30 @@ FEI2dQuadQuad :: giveDerivatives(FloatMatrix &dn, const FloatArray &lc)
     dn.at(6,2) = -eta * ( 1. - ksi );
     dn.at(7,2) = -0.5 * ( 1. - ksi * ksi );
     dn.at(8,2) = -eta * ( 1. + ksi );
+}
+
+
+double FEI2dQuadQuad :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
+{
+    IntArray eNodes;
+    const FloatArray *node;
+    double x1, x2, x3, y1, y2, y3;
+
+    this->computeLocalEdgeMapping(eNodes, iEdge);
+
+    node = cellgeo.giveVertexCoordinates(eNodes.at(1));
+    x1 = node->at ( xind );
+    y1 = node->at ( yind );
+
+    node = cellgeo.giveVertexCoordinates(eNodes.at(2));
+    x2 = node->at ( xind );
+    y2 = node->at ( yind );
+
+    node = cellgeo.giveVertexCoordinates(eNodes.at(3));
+    x3 = node->at ( xind );
+    y3 = node->at ( yind );
+
+    return - ( x1 * y2 - x2 * y1 + 4 * ( x3 * ( y1 - y2 ) + y3 * ( x2 - x1 ) ) ) / 3.0;
 }
 
 } // end namespace oofem

@@ -225,7 +225,7 @@ double FEI2dLineQuad :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeom
     return 0.0;
 }
 
-double FEI2dLineQuad::evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
+double FEI2dLineQuad :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
 {
     const FloatArray *node;
     double x1, x2, x3, y1, y2, y3;

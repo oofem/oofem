@@ -644,10 +644,10 @@ QPlaneStress2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge,
 
     this->interpolation.edgeEvalNormal( normal, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
-    answer.at(1, 1) = ( -1.0 ) * normal.at(2);
-    answer.at(1, 2) = ( -1.0 ) * normal.at(1);
-    answer.at(2, 1) = normal.at(1);
-    answer.at(2, 2) = ( -1.0 ) * normal.at(2);
+    answer.at(1, 1) = normal.at(2);
+    answer.at(1, 2) = normal.at(1);
+    answer.at(2, 1) = -normal.at(1);
+    answer.at(2, 2) = normal.at(2);
 
     return 1;
 }

@@ -412,4 +412,27 @@ double FEI2dTrQuad :: giveArea(const FEICellGeometry &cellgeo) const
             x1*(-y2 + y3 + 4*y4 - 4*y6) + x3*(-y1 + y2 - 4*y5 + 4*y6))/6;
 }
 
+double FEI2dTrQuad :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
+{
+    IntArray eNodes;
+    const FloatArray *node;
+    double x1, x2, x3, y1, y2, y3;
+
+    this->computeLocalEdgeMapping(eNodes, iEdge);
+
+    node = cellgeo.giveVertexCoordinates(eNodes.at(1));
+    x1 = node->at ( xind );
+    y1 = node->at ( yind );
+
+    node = cellgeo.giveVertexCoordinates(eNodes.at(2));
+    x2 = node->at ( xind );
+    y2 = node->at ( yind );
+
+    node = cellgeo.giveVertexCoordinates(eNodes.at(3));
+    x3 = node->at ( xind );
+    y3 = node->at ( yind );
+
+    return - ( x1 * y2 - x2 * y1 + 4 * ( x3 * ( y1 - y2 ) + y3 * ( x2 - x1 ) ) ) / 3.0;
+}
+
 } // end namespace oofem

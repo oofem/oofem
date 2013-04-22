@@ -385,4 +385,23 @@ FEI2dQuadLin :: giveDerivatives(FloatMatrix &dn, const FloatArray &lc)
     dn.at(4, 2) = -0.25 * ( 1. + ksi );
 }
 
+double FEI2dQuadLin :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
+{
+    IntArray eNodes;
+    const FloatArray *node;
+    double x1, x2, y1, y2;
+
+    this->computeLocalEdgeMapping(eNodes, iEdge);
+
+    node = cellgeo.giveVertexCoordinates(eNodes.at(1));
+    x1 = node->at ( xind );
+    y1 = node->at ( yind );
+
+    node = cellgeo.giveVertexCoordinates(eNodes.at(2));
+    x2 = node->at ( xind );
+    y2 = node->at ( yind );
+
+    return -( x2 * y1 - x1 * y2 );
+}
+
 } // end namespace oofem
