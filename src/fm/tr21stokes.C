@@ -52,10 +52,8 @@ namespace oofem {
 FEI2dTrLin Tr21Stokes :: interpolation_lin(1, 2);
 FEI2dTrQuad Tr21Stokes :: interpolation_quad(1, 2);
 // Set up ordering vectors (for assembling)
-IntArray Tr21Stokes :: ordering(15);
-IntArray Tr21Stokes :: edge_ordering [ 3 ] = {
-    IntArray(6), IntArray(6), IntArray(6)
-};
+IntArray Tr21Stokes :: ordering;
+IntArray Tr21Stokes :: edge_ordering [ 3 ] = { IntArray(), IntArray(), IntArray() };
 bool Tr21Stokes :: __initialized = Tr21Stokes :: initOrdering();
 
 Tr21Stokes :: Tr21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
@@ -186,7 +184,7 @@ void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tSt
         this->interpolation_lin.evalN(Nh, * lcoords, FEIElementGeometryWrapper(this));
         double dA = detJ * gp->giveWeight();
 
-        for ( int j = 0, k = 0; j < 6; j++, k += 2 ) {
+        for ( int j = 0, k = 0; j < dN.giveNumberOfRows(); j++, k += 2 ) {
             dNv(k)     = B(0, k)     = B(2, k + 1) = dN(j, 0);
             dNv(k + 1) = B(1, k + 1) = B(2, k)     = dN(j, 1);
         }
@@ -214,19 +212,16 @@ void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tSt
 
 void Tr21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
 {
-    int load_number, load_id;
-    Load *load;
-    bcGeomType ltype;
     FloatArray vec;
 
+    answer.resize(0);
+
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
-    answer.resize(15);
-    answer.zero();
     for ( int i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition
-        load_number = this->boundaryLoadArray.at(2 * i - 1);
-        load_id = this->boundaryLoadArray.at(2 * i);
-        load = this->domain->giveLoad(load_number);
-        ltype = load->giveBCGeoType();
+        int load_number = this->boundaryLoadArray.at(2 * i - 1);
+        int load_id = this->boundaryLoadArray.at(2 * i);
+        Load *load = this->domain->giveLoad(load_number);
+        bcGeomType ltype = load->giveBCGeoType();
 
         if ( ltype == EdgeLoadBGT ) {
             this->computeEdgeBCSubVectorAt(vec, load, load_id, tStep);
@@ -236,8 +231,8 @@ void Tr21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
 
     nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
-        load  = domain->giveLoad( bodyLoadArray.at(i) );
-        ltype = load->giveBCGeoType();
+        Load *load  = domain->giveLoad( bodyLoadArray.at(i) );
+        bcGeomType ltype = load->giveBCGeoType();
         if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
             this->computeBodyLoadVectorAt(vec, load, tStep);
             answer.add(vec);
@@ -249,20 +244,18 @@ void Tr21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
 void Tr21Stokes :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep)
 {
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    GaussPoint *gp;
-    FloatArray N, gVector, *lcoords, temparray(15);
-    double dA, detJ, rho;
+    FloatArray N, gVector, temparray(15);
 
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
         for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
-            gp = iRule->getIntegrationPoint(k);
-            lcoords = gp->giveCoordinates();
+            GaussPoint *gp = iRule->getIntegrationPoint(k);
+            FloatArray *lcoords = gp->giveCoordinates();
 
-            rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, tStep);
-            detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
-            dA = detJ * gp->giveWeight();
+            double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, tStep);
+            double detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
+            double dA = detJ * gp->giveWeight();
 
             this->interpolation_quad.evalN(N, * lcoords, FEIElementGeometryWrapper(this));
             for ( int j = 0; j < 6; j++ ) {
@@ -329,17 +322,16 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
     // Note: Working with the components; [K, G+Dp; G^T+Dv^T, C] . [v,p]
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    GaussPoint *gp;
     FloatMatrix B(3, 12), EdB, K, G, Dp, DvT, C, Ed, dN;
-    FloatArray *lcoords, dN_V(12), Nlin, Ep, Cd, tmpA, tmpB;
+    FloatArray dN_V(12), Nlin, Ep, Cd, tmpA, tmpB;
     double Cp;
 
     G.zero();
 
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         // Compute Gauss point and determinant at current element
-        gp = iRule->getIntegrationPoint(i);
-        lcoords = gp->giveCoordinates();
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
+        FloatArray *lcoords = gp->giveCoordinates();
 
         double detJ = fabs(this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)));
         double dA = detJ * gp->giveWeight();

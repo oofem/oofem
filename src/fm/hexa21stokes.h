@@ -32,8 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef tet21stokes_h
-#define tet21stokes_h
+#ifndef hexa21stokes_h
+#define hexa21stokes_h
 
 #include "fmelement.h"
 #include "domain.h"
@@ -44,15 +44,15 @@
 
 namespace oofem {
 
-class FEI3dTetLin;
-class FEI3dTetQuad;
+class FEI3dHexaLin;
+class FEI3dHexaTriQuad;
 
 /**
- * Tetrahedral Taylor-Hood element for Stokes flow.
- * Quadratic interpolation of geometry and velocity, and linear interpolation of pressures.
+ * Hexahedral Taylor-Hood element for Stokes flow.
+ *(Tri)Quadratic interpolation of geometry and velocity, and linear interpolation of pressures.
  * @author Mikael Öhman
  */
-class Tet21Stokes : public FMElement,
+class Hexa21Stokes : public FMElement,
     public NodalAveragingRecoveryModelInterface,
     public SpatialLocalizerInterface,
     public EIPrimaryUnknownMapperInterface
@@ -61,62 +61,103 @@ protected:
     /// Number of gauss points. Same for pressure and velocity.
     int numberOfGaussPoints;
     /// Interpolation for pressure
-    static FEI3dTetLin interpolation_lin;
+    static FEI3dHexaLin interpolation_lin;
     /// Interpolation for geometry and velocity
-    static FEI3dTetQuad interpolation_quad;
+    static FEI3dHexaTriQuad interpolation_quad;
     /// Ordering of momentum balance dofs in element. Used to assemble the element stiffness
     static IntArray momentum_ordering;
     /// Ordering of conservation dofs in element. Used to assemble the element stiffness
     static IntArray conservation_ordering;
     /// Ordering of dofs on surfaces. Used to assemble edge loads (only momentum balance)
-    static IntArray surf_ordering [ 4 ];
+    static IntArray surf_ordering [ 6 ];
 
     /// Dummy variable
     static bool __initialized;
 
     /// Defines the ordering of the dofs in the local stiffness matrix.
     static bool initOrdering() {
-        for (int i = 0, j = 1; i < 10; ++i) {
+        return true;
+    /*
+        for (int i = 0, j = 1; i < 27; ++i) {
             momentum_ordering(i*3+0) = j++;
             momentum_ordering(i*3+1) = j++;
             momentum_ordering(i*3+2) = j++;
-            if ( i <= 4 ) j++;
+            if ( i <= 8 ) j++;
         }
-        conservation_ordering.setValues(4, 4, 8, 12, 16);
+        conservation_ordering.setValues(8, 4, 8, 12, 16);
 
-        surf_ordering [ 0 ].setValues(18, 1,  2,  3,  // node 1
-                                          9, 10, 11,  // node 3
-                                          5,  6,  7,  // node 2
-                                         23, 24, 25,  // node 7
-                                         20, 21, 22,  // node 6
-                                         17, 18, 19); // node 5
+        surf_ordering [ 0 ].setValues(27,
+                                     5,   6,   7, // node 2
+                                     1,   2,   3, // node 1
+                                    13,  14,  15, // node 4
+                                     9,  10,  11, // node 3
+                                    33,  34,  35, // node 9
+                                    42,  43,  44, // node 12
+                                    39,  40,  41, // node 11
+                                    36,  37,  38, // node 10
+                                    69,  70,  71);// node 21
 
-        surf_ordering [ 1 ].setValues(18, 1,  2,  3,  // node 1
-                                          5,  6,  7,  // node 2
-                                         13, 14, 15,  // node 4
-                                         17, 18, 19,  // node 5
-                                         29, 30, 31,  // node 9
-                                         26, 27, 28); // node 8
+        surf_ordering [ 1 ].setValues(27,
+                                    17,  18,  19, // node 5
+                                    21,  22,  23, // node 6
+                                    25,  26,  27, // node 7
+                                    29,  30,  31, // node 8
+                                    45,  46,  47, // node 13
+                                    48,  49,  50, // node 14
+                                    51,  52,  53, // node 15
+                                    54,  55,  56, // node 16
+                                    72,  73,  74);// node 22
 
-        surf_ordering [ 2 ].setValues(18, 5,  6,  7,  // node 2
-                                          9, 10, 11,  // node 3
-                                         13, 14, 15,  // node 4
-                                         20, 21, 22,  // node 6
-                                         32, 33, 34,  // node 10
-                                         29, 30, 31); // node 9
+        surf_ordering [ 2 ].setValues(27,
+                                     1,   2,   3, // node 1
+                                    17,  18,  19, // node 5
+                                    21,  22,  23, // node 6
+                                     5,   6,   7, // node 2
+                                    57,  58,  59, // node 17
+                                    45,  46,  47, // node 13
+                                    60,  61,  62, // node 18
+                                    33,  34,  35, // node 9
+                                    75,  76,  77);// node 23
 
-        surf_ordering [ 2 ].setValues(18, 1,  2,  3,  // node 1
-                                         13, 14, 15,  // node 4
-                                          9, 10, 11,  // node 3
-                                         26, 27, 28,  // node 8
-                                         32, 33, 34,  // node 10
-                                         23, 24, 25); // node 7
+        surf_ordering [ 3 ].setValues(27,
+                                     5,   6,   7, // node 2
+                                     9,  10,  11, // node 3
+                                    25,  26,  27, // node 7
+                                    21,  22,  23, // node 6
+                                    36,  37,  38, // node 10
+                                    63,  64,  65, // node 19
+                                    48,  49,  50, // node 14
+                                    60,  61,  62, // node 18
+                                    78,  79,  80);// node 24
+
+        surf_ordering [ 4 ].setValues(27,
+                                     9,  10,  11, // node 3
+                                    13,  14,  15, // node 4
+                                    29,  30,  31, // node 8
+                                    25,  26,  27, // node 7
+                                    39,  40,  41, // node 11
+                                    66,  67,  68, // node 20
+                                    51,  52,  53, // node 15
+                                    63,  64,  65, // node 19
+                                    81,  82,  83);// node 25
+
+        surf_ordering [ 5 ].setValues(27,
+                                    13,  14,  15, // node 4
+                                     1,   2,   3, // node 1
+                                    17,  18,  19, // node 5
+                                    29,  30,  31, // node 8
+                                    42,  43,  44, // node 12
+                                    57,  58,  59, // node 17
+                                    54,  55,  56, // node 16
+                                    66,  67,  68, // node 20
+                                    84,  85,  86);// node 26
         return true;
+        */
     }
 
 public:
-    Tet21Stokes(int n, Domain *d);
-    virtual ~Tet21Stokes();
+    Hexa21Stokes(int n, Domain *d);
+    virtual ~Hexa21Stokes();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
@@ -130,9 +171,9 @@ public:
     virtual void computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load, int iSurf, TimeStep *tStep);
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep);
 
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_tetra_2; }
-    virtual const char *giveClassName() const { return "Tet21Stokes"; }
-    virtual classType giveClassID() const { return Tet21StokesElementClass; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_27; }
+    virtual const char *giveClassName() const { return "Hexa21Stokes"; }
+    virtual classType giveClassID() const { return Hexa21StokesElementClass; }
     virtual MaterialMode giveMaterialMode() { return _3dFlow; }
 
     virtual int computeNumberOfDofs(EquationID ut);
@@ -140,13 +181,6 @@ public:
     virtual FEInterpolation *giveInterpolation();
     virtual FEInterpolation *giveInterpolation(DofIDItem id);
 
-    /**
-     * Gives the dof ID mask for the element.
-     * This element (Taylor-Hood) has V_u, V_v, P_f in node corner and V_u, V_v in edge nodes.
-     * @param inode Node to check.
-     * @param ut Equation ID to check.
-     * @param answer List of dof IDs.
-     */
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
     virtual void updateYourself(TimeStep *tStep);
@@ -171,4 +205,4 @@ public:
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type);
 };
 } // end namespace oofem
-#endif // tet21stokes_h
+#endif // hexa21stokes_h
