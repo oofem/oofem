@@ -151,6 +151,7 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFor
     if ( mode == VM_Incremental ) {
         this->giveUnitComplianceMatrix(B, ReducedForm, gp, atTime);
         reducedAnswer.resize( B.giveNumberOfRows() );
+        reducedAnswer.zero();
 
         for ( mu = 1; mu <= nUnits; mu++ ) {
             deltaYmu = atTime->giveTimeIncrement() / timeFactor / this->giveCharTime(mu);

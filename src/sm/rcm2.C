@@ -153,8 +153,8 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
                                  principal_strain);
 
     this->giveRealPrincipalStressVector3d(princStress, gp, principalStrain, tempCrackDirs, atTime);
+    princStress.resizeWithValues(6);
 
-    princStress.resize(6);
     status->giveTempCrackDirs(tempCrackDirs);
     this->transformStressVectorTo(answer, tempCrackDirs, princStress, 1);
 

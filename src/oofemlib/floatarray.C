@@ -67,7 +67,6 @@ FloatArray :: FloatArray(int n) :
 {
     if ( size ) {
         values = (double*)calloc(size, sizeof(double)); // calloc actually *does* zero everything, and some code seems to rely on this.
-        // We could actually just fill it with NaN when DEBUG is on, and leave it with garbage whenever it is not.
 #ifdef DEBUG
         if ( !values ) {
             OOFEM_FATAL2("FloatArray :: FloatArray - Failed in allocating %d doubles", n);
@@ -109,7 +108,7 @@ FloatArray &
 FloatArray :: operator = ( const FloatArray & src )
 {
     if ( this != & src ) { // beware of s=s;
-        this->simpleResize(src.size);
+        this->resize(src.size);
         memcpy(this->values, src.values, size * sizeof(double));
     }
 
@@ -142,7 +141,7 @@ FloatArray :: setValues(int n, ...)
 {
     va_list vl;
     va_start(vl,n);
-    this->simpleResize(n);
+    this->resize(n);
     for (int i = 0; i < n; i++ ) {
         this->values [ i ] = va_arg(vl, double);
     }
@@ -153,7 +152,7 @@ FloatArray :: setValues(int n, ...)
 void
 FloatArray :: beScaled(double s, const FloatArray &b)
 {
-    this->simpleResize(b.size);
+    this->resize(b.size);
     for ( int i = 0; i < this->size; ++i ) {
         this->values [ i ] = s * b.values [ i ];
     }
@@ -222,7 +221,7 @@ void FloatArray :: subtract(const FloatArray &src)
     }
 
     if ( !size ) {
-        this->simpleResize(src.size);
+        this->resize(src.size);
         for ( int i = 0; i < this->size; ++i ) {
             this->values [ i ] = -src.values [ i ];
         }
@@ -254,7 +253,7 @@ void FloatArray :: beMaxOf(const FloatArray &a, const FloatArray &b)
 
 #  endif
 
-    this->simpleResize(n);
+    this->resize(n);
     for ( int i = 0; i < n; i++ ) {
         this->values [ i ] = max( a(i), b(i) );
     }
@@ -272,7 +271,7 @@ void FloatArray :: beMinOf(const FloatArray &a, const FloatArray &b)
 
 #  endif
 
-    this->simpleResize(n);
+    this->resize(n);
     for ( int i = 0; i < n; i++ ) {
         this->values [ i ] = min( a(i), b(i) );
     }
@@ -287,7 +286,7 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b)
     }
 
 #endif
-    this->simpleResize(a.size);
+    this->resize(a.size);
     for ( int i = 0; i < this->size; ++i ) {
         this->values [ i ] = a.values [ i ] - b.values [ i ];
     }
@@ -301,7 +300,7 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b, int 
     }
 
 #endif
-    this->simpleResize(n);
+    this->resize(n);
     for ( int i = 0; i < n; ++i ) {
         this->values [ i ] = a.values [ i ] - b.values [ i ];
     }
@@ -321,7 +320,7 @@ void FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx)
 #endif
 
     int n = indx.giveSize();
-    this->simpleResize(n);
+    this->resize(n);
     for ( int i = 1; i <= n; i++ ) {
         this->at(i) = src.at( indx.at(i) ) ;
     }
@@ -353,7 +352,7 @@ void FloatArray :: beVectorProductOf(const FloatArray &v1, const FloatArray &v2)
     }
 #  endif
 
-    this->simpleResize(3);
+    this->resize(3);
 
     this->at(1) = v1.at(2) * v2.at(3) - v1.at(3) * v2.at(2);
     this->at(2) = v1.at(3) * v2.at(1) - v1.at(1) * v2.at(3);
@@ -495,7 +494,7 @@ void FloatArray :: checkSizeTowards(const IntArray &loc)
 }
 
 
-void FloatArray :: resize(int n, int allocChunk)
+void FloatArray :: resizeWithValues(int n, int allocChunk)
 {
 #ifdef DEBUG
     if ( allocChunk < 0 ) {
@@ -514,7 +513,7 @@ void FloatArray :: resize(int n, int allocChunk)
     double *newValues = (double*)malloc(allocatedSize * sizeof(double));
 #ifdef DEBUG
     if ( !newValues ) {
-        OOFEM_FATAL2("FloatArray :: resize - Failed in allocating %d doubles", n + allocChunk);
+        OOFEM_FATAL2("FloatArray :: resizeWithValues - Failed in allocating %d doubles", n + allocChunk);
     }
 #endif
     memcpy(newValues, values, size * sizeof(double) );
@@ -525,20 +524,32 @@ void FloatArray :: resize(int n, int allocChunk)
     size = n;
 }
 
-void FloatArray :: simpleResize(int n)
+void FloatArray :: resize(int n)
 {
+    // This will be changed, either to calloc or malloc without copying the old data.
+    // For now it is left as the old default implementation until code using these classes are properly adjusted.
+#if 1
+    this->resizeWithValues(n);
+#else
+    ///@todo Decide on if we should zero it unconditionally (memset is pretty cheap anyway), or just leave it, and leave calling zero() to the caller.
     size = n;
     if ( n <= allocatedSize ) {
+        //memset(this->values, 0, this->size * sizeof(double) );
         return;
     }
     allocatedSize = n;
 
     if ( values ) free(values);
     values = (double*)malloc(allocatedSize * sizeof(double));
+    //values = (double*)calloc(allocatedSize, sizeof(double));
 #ifdef DEBUG
     if ( !values ) {
-        OOFEM_FATAL2("FloatArray :: simpleResize - Failed in allocating %d doubles", n);
+        OOFEM_FATAL2("FloatArray :: simple - Failed in allocating %d doubles", n);
     }
+    //for ( int i = 0; i < n; ++i ) {
+    //    values[ i ] = -1e12;
+    //}
+#endif
 #endif
 }
 
@@ -552,7 +563,6 @@ void FloatArray :: hardResize(int n)
     if ( !newValues ) {
         OOFEM_FATAL2("FloatArray :: hardResize - Failed in allocating %d doubles", n);
     }
-
 #endif
     memcpy(newValues, values, size * sizeof(double) );
     memset(&newValues[size], 0, (allocatedSize - size) * sizeof(double) );
@@ -561,7 +571,6 @@ void FloatArray :: hardResize(int n)
     values = newValues;
     size = n;
 }
-
 
 
 bool FloatArray :: containsOnlyZeroes() const
@@ -596,7 +605,7 @@ void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anA
 #  endif
 
     nColumns = aMatrix.giveNumberOfColumns();
-    this->simpleResize( nRows = aMatrix.giveNumberOfRows() );
+    this->resize( nRows = aMatrix.giveNumberOfRows() );
     for ( int i = 1; i <= nRows; i++ ) {
         sum = 0.;
         for ( int j = 1; j <= nColumns; j++ ) {
@@ -621,7 +630,7 @@ void FloatArray :: beTProductOf(const FloatMatrix &aMatrix, const FloatArray &an
 #  endif
 
     nColumns = aMatrix.giveNumberOfRows();
-    this->simpleResize( nRows = aMatrix.giveNumberOfColumns() );
+    this->resize( nRows = aMatrix.giveNumberOfColumns() );
     for ( int i = 1; i <= nRows; i++ ) {
         double sum = 0.;
         for ( int j = 1; j <= nColumns; j++ ) {
@@ -746,7 +755,7 @@ void FloatArray :: copySubVector(const FloatArray &src, int si)
     si--;
 
     int reqSize = si + src.size;
-    this->simpleResize(reqSize);
+    this->resize(reqSize);
  
     memcpy(values + si, src.values, src.size * sizeof(double));
 }
@@ -828,7 +837,7 @@ int FloatArray :: unpackFromCommBuffer(CommunicationBuffer &buff)
     // unpack size
     result &= buff.unpackInt(newSize);
     // resize yourself
-    this->simpleResize(newSize);
+    this->resize(newSize);
     result &= buff.unpackArray(this->values, newSize);
 
     return result;
@@ -996,7 +1005,7 @@ void FloatArray :: beFullVectorForm(const FloatMatrix &aMatrix)
     }
 
 #  endif
-    this->simpleResize(9);
+    this->resize(9);
     this->at(1) = aMatrix.at(1,1); this->at(2) = aMatrix.at(2,2); this->at(3) = aMatrix.at(3,3);
     this->at(4) = aMatrix.at(2,3); this->at(5) = aMatrix.at(1,3); this->at(6) = aMatrix.at(1,2);
     this->at(7) = aMatrix.at(3,2); this->at(8) = aMatrix.at(3,1); this->at(9) = aMatrix.at(2,1);
@@ -1012,7 +1021,7 @@ void FloatArray :: beReducedVectorForm(const FloatMatrix &aMatrix)
 
 #  endif
     
-    this->simpleResize(6);
+    this->resize(6);
     this->at(1) = aMatrix.at(1,1); this->at(2) = aMatrix.at(2,2); this->at(3) = aMatrix.at(3,3);
     this->at(4) = 0.5*( aMatrix.at(2,3) + aMatrix.at(3,2) );
     this->at(5) = 0.5*( aMatrix.at(1,3) + aMatrix.at(3,1) );

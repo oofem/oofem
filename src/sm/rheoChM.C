@@ -121,6 +121,7 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm fo
         stressVector = status->giveStressVector();
     } else {
         stressVector.resize( strainIncrement.giveSize() );
+        stressVector.zero();
     }
 
     // evaluate the incremental modulus

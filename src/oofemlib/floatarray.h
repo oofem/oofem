@@ -177,12 +177,12 @@ public:
      * @param s New size.
      * @param allocChunk Additional space to allocate.
      */
-    void resize(int s, int allocChunk = 0);
+    void resizeWithValues(int s, int allocChunk = 0);
     /**
-     * Resizes receiver, but doesn't initialize any entries.
+     * Resizes receiver towards requested size.
      * @param s New size.
      */
-    void simpleResize(int s);
+    void resize(int s);
     /**
      * Resizes the size of the receiver to requested bounds. Memory allocation always happens, more preferably use
      * resize() function instead.

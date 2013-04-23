@@ -278,6 +278,7 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
     elem->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     answer.resize(ndofs);
+    answer.zero();
     FloatArray *m = & answer;
     if ( elem->giveInterpolation()->hasSubPatchFormulation() ) {
         m = & temp;

@@ -362,10 +362,6 @@ NonLinearStatic :: updateLoadVectors(TimeStep *stepN)
                 OOFEM_LOG_INFO("Fixed load level\n");
 
                 //update initialLoadVector
-                if ( initialLoadVector.isEmpty() ) {
-                    initialLoadVector.resize( incrementalLoadVector.giveSize() );
-                }
-
                 incrementalLoadVector.times(loadLevel);
                 initialLoadVector.add(incrementalLoadVector);
 
@@ -383,10 +379,6 @@ NonLinearStatic :: updateLoadVectors(TimeStep *stepN)
     } else { // direct control
         //update initialLoadVector after each step of direct control
         //(here the loading is not proportional)
-        if ( initialLoadVector.isEmpty() ) {
-            initialLoadVector.resize( incrementalLoadVector.giveSize() );
-        }
-
         OOFEM_LOG_DEBUG("Fixed load level\n");
 
         incrementalLoadVector.times(loadLevel);

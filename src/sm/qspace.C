@@ -46,10 +46,8 @@ namespace oofem {
 FEI3dHexaQuad QSpace :: interpolation;
 
 QSpace :: QSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
-    // Constructor.
 {
     numberOfDofMans = 20;
-    //nn = numberOfDofMans; // number of nodes
     //nnsurf = 8;           // number of nodes on surface
     //ndofsn = 3;           // number of DOFs on node
 }
@@ -327,22 +325,22 @@ QSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPo
      * _error ("computeLoadLSToLRotationMatrix: surface local coordinate system not supported");
      * return 1;
      */
-    int i, j;
     FloatArray gc(3);
     FloatArray h1(3), h2(3), nn(3), n(3);
     IntArray snodes(4);
 
     answer.resize(3, 3);
+    answer.zero();
 
     this->interpolation.computeSurfaceMapping(snodes, dofManArray, iSurf);
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         gc.add( * domain->giveNode( snodes.at(i) )->giveCoordinates() );
     }
 
     gc.times(1. / 4.);
     // determine "average normal"
-    for ( i = 1; i <= 4; i++ ) {
-        j = ( i ) % 4 + 1;
+    for ( int i = 1; i <= 4; i++ ) {
+        int j = ( i ) % 4 + 1;
         h1.beDifferenceOf(* domain->giveNode( snodes.at(i) )->giveCoordinates(), gc);
         h2.beDifferenceOf(* domain->giveNode( snodes.at(j) )->giveCoordinates(), gc);
         n.beVectorProductOf(h1, h2);
@@ -356,11 +354,10 @@ QSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPo
     nn.times(1. / 4.);
     if ( nn.computeSquaredNorm() < 1.e-6 ) {
         answer.zero();
-        return 1;
     }
 
     nn.normalize();
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(i, 3) = nn.at(i);
     }
 
@@ -378,7 +375,7 @@ QSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPo
     h1.at(3) = answer.at(3, 1) = 0.0;
     // local y axis perpendicular to local x,z axes
     h2.beVectorProductOf(nn, h1);
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(i, 2) = h2.at(i);
     }
 

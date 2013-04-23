@@ -407,7 +407,7 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
                         masterDofIDs.followedBy(nodalArray);
 
                         double value = thisElement->giveDofManager( bNodes.at(i) )->giveDof(j)->giveUnknown(mode, tStep);
-                        a.resize( sideLocation.giveSize() );
+                        a.resizeWithValues( sideLocation.giveSize() );
                         a.at( sideLocation.giveSize() ) = value;
                         dofCountOnBoundary++;
                         break;

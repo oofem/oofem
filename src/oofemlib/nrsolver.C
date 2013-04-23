@@ -234,6 +234,7 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 #endif
 
     ddX.resize(neq);
+    ddX.zero();
 
     // Fetch the matrix before evaluating internal forces.
     // This is intentional, since its a simple way to drastically increase convergence for nonlinear problems.

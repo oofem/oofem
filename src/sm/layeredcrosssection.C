@@ -1081,6 +1081,7 @@ LayeredCrossSection :: giveIntegrated3dShellStress(FloatArray &answer, GaussPoin
     double layerThick, layerWidth, layerZCoord, top, bottom, layerZeta;
 
     answer.resize(8);
+    answer.zero();
     // perform integration over layers
     this->computeIntegralThick(); // ensure that total thick has been conputed
     bottom = -midSurfaceZcoordFromBottom;
