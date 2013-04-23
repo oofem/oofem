@@ -35,7 +35,7 @@
 #include "xfemelementinterface.h"
 #include "enrichmentitem.h"
 #include "engngm.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "materialmode.h"
 #include "fei2dquadlin.h"
 #include "patch.h"

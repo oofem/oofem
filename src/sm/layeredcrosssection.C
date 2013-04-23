@@ -34,7 +34,7 @@
 
 #include "layeredcrosssection.h"
 #include "structuralelement.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "material.h"
 #include "structuralmaterial.h"
 #include "structuralms.h"

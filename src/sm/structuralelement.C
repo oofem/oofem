@@ -45,7 +45,7 @@
 #include "pointload.h"
 #include "structtemperatureload.h"
 #include "structeigenstrainload.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "intarray.h"
 #include "floatarray.h"

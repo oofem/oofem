@@ -44,7 +44,7 @@
 #include "node.h"
 #include "masterdof.h"
 #include "sparsemtrx.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "mathfem.h"
 #include "fei2dtrlin.h"

@@ -41,7 +41,7 @@
 #include "classfactory.h"
 #include "contextioerr.h"
 #include "datastream.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 
 namespace oofem {
 PatchIntegrationRule :: PatchIntegrationRule(int n, Element *e, Patch *patch) : GaussIntegrationRule(n, e)

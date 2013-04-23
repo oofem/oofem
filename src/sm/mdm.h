@@ -49,7 +49,7 @@
 
 #include "microplanematerial.h"
 #include "structuralnonlocalmaterialext.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "matconst.h"
 #include "structuralms.h"
 #include "materialmapperinterface.h"

@@ -58,7 +58,7 @@
 #ifdef __TM_MODULE //OOFEM transport module
  #include "domain.h"
  #include "floatmatrix.h"
- #include "gausspnt.h"
+ #include "gausspoint.h"
 #endif
 
 namespace oofem {

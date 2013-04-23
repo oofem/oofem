@@ -34,7 +34,7 @@
 
 #include "microplanematerial.h"
 #include "microplane.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "floatarray.h"
 #include "contextioerr.h"
 #include "mathfem.h"

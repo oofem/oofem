@@ -33,7 +33,7 @@
  */
 
 #include "hydratingisoheatmat.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "timestep.h"
 #include "contextioerr.h"
 

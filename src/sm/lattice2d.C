@@ -36,7 +36,7 @@
 #include "lattice2d.h"
 #include "node.h"
 #include "material.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "latticematstatus.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"

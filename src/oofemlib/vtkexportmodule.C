@@ -49,7 +49,7 @@
 
 #include "vtkexportmodule.h"
 #include "timestep.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "engngm.h"
 #include "node.h"
 #include "materialinterface.h"

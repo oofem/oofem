@@ -38,7 +38,7 @@
 #include "element.h"
 #include "material.h"
 #include "integrationrule.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 
 namespace oofem {
 MMAContainingElementProjection :: MMAContainingElementProjection() : MaterialMappingAlgorithm()

@@ -36,7 +36,7 @@
 #include "stokesflow.h"
 #include "oofemtxtdatareader.h"
 #include "domain.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "engngm.h"
 #include "contextioerr.h"
 #include "util.h"

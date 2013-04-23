@@ -33,7 +33,7 @@
  */
 
 #include "materialmappingalgorithm.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "element.h"
 
 namespace oofem {

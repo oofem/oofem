@@ -33,7 +33,7 @@
  */
 
 #include "enrichmentfunction.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "mathfem.h"
 #include "feinterpol.h"
 #include "enrichmentdomain.h"

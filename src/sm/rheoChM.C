@@ -38,7 +38,7 @@
 #include "isolinearelasticmaterial.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "structuralcrosssection.h"
 #include "contextioerr.h"
 

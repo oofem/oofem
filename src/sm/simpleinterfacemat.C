@@ -35,7 +35,7 @@
 #include "simpleinterfacemat.h"
 #include "structuralelement.h"
 #include "interfaceelement1d.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "mathfem.h"

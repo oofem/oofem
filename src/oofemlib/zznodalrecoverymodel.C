@@ -36,7 +36,7 @@
 #include "timestep.h"
 #include "element.h"
 #include "dofmanager.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "integrationrule.h"
 #include "feinterpol.h"
 #include "mathfem.h"

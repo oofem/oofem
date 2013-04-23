@@ -33,7 +33,7 @@
  */
 
 #include "trabbonenlembed.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "nonlocalmaterialext.h"

@@ -34,7 +34,7 @@
 
 #include "qtruss1dgrad.h"
 #include "fei1dlin.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"

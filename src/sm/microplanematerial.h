@@ -36,7 +36,7 @@
 #define microplanematerial_h
 
 #include "structuralmaterial.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "matconst.h"
 
 ///@name Input fields for MicroplaneMaterial

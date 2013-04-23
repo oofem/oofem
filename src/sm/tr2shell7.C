@@ -40,7 +40,7 @@
 #include "domain.h"
 #include "equationid.h"
 #include "gaussintegrationrule.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "fei3dtrquad.h"
 #include "boundaryload.h"
 #include "vtkxmlexportmodule.h"

@@ -44,7 +44,7 @@
 #include "element.h"
 #include "integrationrule.h"
 #include "gaussintegrationrule.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "masterdof.h"
 #include "classfactory.h" // For sparse matrix creation.
 #include "sparsemtrxtype.h"

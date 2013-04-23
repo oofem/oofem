@@ -38,7 +38,7 @@
 #include "verbose.h"
 #include "structuralms.h"
 #include "structuralelement.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "mathfem.h"

@@ -33,7 +33,7 @@
  */
 
 #include "hydratingconcretemat.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "timestep.h"
 #include "mathfem.h"
 

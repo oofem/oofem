@@ -36,7 +36,7 @@
 #define localrandomgenerator_h
 
 #include "randomfieldgenerator.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 
 ///@name Input fields for LocalGaussianRandomGenerator
 //@{

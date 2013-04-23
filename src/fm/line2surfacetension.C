@@ -35,7 +35,7 @@
 #include "line2surfacetension.h"
 #include "node.h"
 #include "gaussintegrationrule.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "material.h"
 #include "fei2dlinequad.h"
 

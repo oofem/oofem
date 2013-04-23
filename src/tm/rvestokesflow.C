@@ -39,7 +39,7 @@
 #include "engngm.h"
 #include "nummet.h"
 #include "contextioerr.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "mathfem.h"
 
 #include <cstdio>

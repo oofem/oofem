@@ -16,19 +16,19 @@ namespace bp = boost::python;
 * O O F E M L I B   M O D U L E
 *
 *****************************************************/
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "flotarray.h"
+#include "flotmatrix.h"
 #include "intarray.h"
 #include "engngm.h"
 #include "domain.h"
 #include "sparsemtrx.h"
 #include "load.h"
-#include "initial.h"
-#include "loadtime.h"
+#include "initialcondition.h"
+#include "loadtimefunction.h"
 #include "material.h"
 #include "crosssection.h"
 #include "node.h"
-#include "conTable.h"
+#include "connectivitytable.h"
 #include "spatiallocalizer.h"
 #include "errorestimator.h"
 #include "nodalrecoverymodel.h"
@@ -44,10 +44,10 @@ namespace bp = boost::python;
 #include "dofmanvalfield.h"
 #include "dofmantransftype.h"
 #include "fieldmanager.h"
-#include "generalbc.h"
-#include "boundary.h"
+#include "generalboundarycondition.h"
+#include "boundarycondition.h"
 #include "integrationrule.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "internalstatetype.h"
 #include "matresponsemode.h"
 #include "matresponseform.h"
@@ -57,7 +57,6 @@ namespace bp = boost::python;
 #include "exportmodulemanager.h"
 #include "outputmanager.h"
 #include "classfactory.h"
-#include "usrdefsub.h"
 
 
 namespace oofem {
@@ -1509,7 +1508,7 @@ object exportModule(bp::tuple args, bp::dict kw)
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     EngngModel *engngm = len(args)>2? extract<EngngModel*>(args[2])() : NULL;
-    ExportModule *module = CreateUsrDefExportModuleOfType(aClass.c_str(),number,engngm);
+    ExportModule *module = classFactory.createExportModule(aClass.c_str(),number,engngm);
     if (module==NULL) { LOG_ERROR(oofem_errLogger,"exportModule: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     module->initializeFrom(&ir);

@@ -33,7 +33,7 @@
  */
 
 #include "rcsdnl.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "structuralcrosssection.h"

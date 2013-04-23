@@ -36,7 +36,7 @@
 #define externalfieldgenerator_h
 
 #include "randomfieldgenerator.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 
 #define NAME_MAX_LENGTH 200
 

@@ -33,7 +33,7 @@
  */
 
 #include "simplecrosssection.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "structuralmaterial.h"
 #include "floatarray.h"
 

@@ -36,7 +36,7 @@
 #include "nonlocalmatwtp.h"
 #include "nonlocalmaterialext.h"
 #include "element.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "material.h"
 #include "communicator.h"
 #include "datastream.h"

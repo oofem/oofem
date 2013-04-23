@@ -33,7 +33,7 @@
  */
 
 #include "gpexportmodule.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "material.h"
 #include "element.h"
 #include "integrationrule.h"

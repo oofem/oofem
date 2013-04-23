@@ -37,7 +37,7 @@
 #include "transportmaterial.h"
 #include "load.h"
 #include "boundaryload.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "intarray.h"
 #include "floatarray.h"

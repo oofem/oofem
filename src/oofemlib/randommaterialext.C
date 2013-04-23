@@ -32,7 +32,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "inputrecord.h"
 #include "domain.h"
 #include "material.h"

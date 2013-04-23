@@ -34,7 +34,7 @@
 
 #include "rankinematnl.h"
 #include "structuralelement.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "sparsemtrx.h"

@@ -34,7 +34,7 @@
 
 #include "qbrick1_ht.h"
 #include "node.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"

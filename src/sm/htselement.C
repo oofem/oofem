@@ -34,7 +34,7 @@
 //last edit: 07/02/2013 by Jan Novak
 
 #include "htselement.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"

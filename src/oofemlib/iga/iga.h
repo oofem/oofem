@@ -41,7 +41,7 @@
 #include "domain.h"
 #include "node.h"
 #include "element.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "mathfem.h"
 #include "feinterpol.h"

@@ -33,7 +33,7 @@
  */
 
 #include "lspacebb.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 
