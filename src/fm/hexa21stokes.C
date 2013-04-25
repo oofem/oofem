@@ -154,7 +154,7 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FluidDynamicMaterial *mat = static_cast<FluidDynamicMaterial * >( this->giveMaterial() );
     FloatArray a_pressure, a_velocity, devStress, epsp, BTs, Nh, dN_V(81);
-    FloatMatrix dN, B(4, 81);
+    FloatMatrix dN, B(6, 81);
     double r_vol, pressure;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
