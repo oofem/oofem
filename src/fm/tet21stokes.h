@@ -80,7 +80,7 @@ protected:
             momentum_ordering(i*3+0) = j++;
             momentum_ordering(i*3+1) = j++;
             momentum_ordering(i*3+2) = j++;
-            if ( i <= 4 ) j++;
+            if ( i <= 3 ) j++;
         }
         conservation_ordering.setValues(4, 4, 8, 12, 16);
 

@@ -74,7 +74,7 @@ FEI3dTetQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
         coords.at(i,3) = c->at(3);
     }
     jacobianMatrix.beProductOf(dNdxi, coords);
-    jacobianMatrix.solveForRhs(answer, dNdxi);
+    jacobianMatrix.solveForRhs(dNdxi, answer);
 }
 
 void
@@ -225,8 +225,8 @@ FEI3dTetQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
     for (int i = 1; i <= 10; ++i) {
         const FloatArray *c = cellgeo.giveVertexCoordinates(i);
         coords.at(i,1) = c->at(1);
-        coords.at(i,1) = c->at(2);
-        coords.at(i,1) = c->at(3);
+        coords.at(i,2) = c->at(2);
+        coords.at(i,3) = c->at(3);
     }
     jacobianMatrix.beProductOf(dNdxi, coords);
 }

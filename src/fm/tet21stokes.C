@@ -81,7 +81,7 @@ void Tet21Stokes :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, this->numberOfGaussPoints, _2dFlow);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, this->numberOfGaussPoints, _3dFlow);
     }
 }
 
@@ -156,7 +156,7 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FluidDynamicMaterial *mat = static_cast<FluidDynamicMaterial * >( this->giveMaterial() );
     FloatArray a_pressure, a_velocity, devStress, epsp, BTs, Nh, dN_V(30);
-    FloatMatrix dN, B(4, 30);
+    FloatMatrix dN, B(6, 30);
     double r_vol, pressure;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
@@ -256,6 +256,7 @@ void Tet21Stokes :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, Time
     answer.resize(34);
     answer.zero();
     answer.assemble( temparray, this->momentum_ordering );
+
 }
 
 void Tet21Stokes :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load, int iSurf, TimeStep *tStep)
@@ -325,10 +326,12 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
         this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
         this->interpolation_lin.evalN(Nlin, * lcoords, FEIElementGeometryWrapper(this));
 
-        for ( int j = 0, k = 0; j < dN.giveNumberOfRows(); j++, k+=3 ) {
-            dN_V(k + 0) = B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(j, 0);
-            dN_V(k + 1) = B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(j, 1);
-            dN_V(k + 2) = B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(j, 2);
+//        dN.printYourself();
+
+        for ( int j = 0, k = 0; j < dN.giveNumberOfColumns(); j++, k+=3 ) {
+            dN_V(k + 0) = B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(0, j);
+            dN_V(k + 1) = B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(1, j);
+            dN_V(k + 2) = B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(2, j);
         }
 
         // Computing the internal forces should have been done first.
@@ -337,6 +340,8 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
         mat->giveVolumetricDeviatoricStiffness(Cd, TangentStiffness, gp, tStep); // deps_vol/deps_dev
         mat->giveVolumetricPressureStiffness(Cp, TangentStiffness, gp, tStep); // deps_vol/dp
 
+//        Ed.printYourself();
+//        B.printYourself();
         EdB.beProductOf(Ed,B);
         K.plusProductSymmUpper(B, EdB, dV);
         G.plusDyadUnsym(dN_V, Nlin, -dV);
@@ -362,6 +367,10 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.assemble(GDp, this->momentum_ordering, this->conservation_ordering);
     answer.assemble(GTDvT, this->conservation_ordering, this->momentum_ordering);
     answer.assemble(C, this->conservation_ordering, this->conservation_ordering);
+//    K.printYourself();
+//    GDp.printYourself();
+//    GTDvT.printYourself();
+//    C.printYourself();
 }
 
 FEInterpolation *Tet21Stokes :: giveInterpolation()
