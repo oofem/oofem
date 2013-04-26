@@ -42,6 +42,7 @@
 #include "load.h"
 #include "initialcondition.h"
 #include "loadtimefunction.h"
+#include "set.h"
 #include "engngm.h"
 #include "oofem_limits.h"
 #include "entityrenumberingscheme.h"
@@ -97,6 +98,7 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
     loadTimeFunctionList     = new AList< LoadTimeFunction >(0);
     crossSectionList         = new AList< CrossSection >(0);
     nonlocalBarierList       = new AList< NonlocalBarrier >(0);
+    setList                  = new AList< Set >(0);
     randomFieldGeneratorList = new AList< RandomFieldGenerator >(0);
     xfemManagerList          = new AList< XfemManager >(0);
 
@@ -130,6 +132,7 @@ Domain :: ~Domain()
     delete loadTimeFunctionList;
     delete crossSectionList;
     delete nonlocalBarierList;
+    delete setList;
     delete randomFieldGeneratorList;
     delete xfemManagerList;
     delete connectivityTable;
@@ -163,6 +166,7 @@ Domain :: clear()
     loadTimeFunctionList->clear();
     crossSectionList->clear();
     nonlocalBarierList->clear();
+    setList->clear();
     randomFieldGeneratorList->clear();
     xfemManagerList->clear();
 
@@ -389,6 +393,19 @@ Domain :: giveRandomFieldGenerator(int n)
 }
 
 
+Set *
+Domain :: giveSet(int n)
+{
+#ifdef DEBUG
+    if ( !setList->includes(n) ) {
+        _error2("giveSet: undefined set (%d)", n);
+    }
+#endif
+
+    return setList->at(n);
+}
+
+
 EngngModel *
 Domain :: giveEngngModel()
 // Returns the time integration algorithm. Creates it if it does not
@@ -412,6 +429,7 @@ void Domain :: resizeBoundaryConditions(int _newSize) { bcList->growTo(_newSize)
 void Domain :: resizeInitialConditions(int _newSize) { icList->growTo(_newSize); }
 void Domain :: resizeLoadTimeFunctions(int _newSize) { loadTimeFunctionList->growTo(_newSize); }
 void Domain :: resizeRandomFieldGenerators(int _newSize) { randomFieldGeneratorList->growTo(_newSize); }
+void Domain :: resizeSets(int _newSize) { setList->growTo(_newSize); }
 
 void Domain :: setDofManager(int i, DofManager *obj) { dofManagerList->put(i, obj); }
 void Domain :: setElement(int i, Element *obj) { elementList->put(i, obj); }
@@ -422,6 +440,7 @@ void Domain :: setBoundaryCondition(int i, GeneralBoundaryCondition *obj) { bcLi
 void Domain :: setInitialCondition(int i, InitialCondition *obj) { icList->put(i, obj); }
 void Domain :: setLoadTimeFunction(int i, LoadTimeFunction *obj) { loadTimeFunctionList->put(i, obj); }
 void Domain :: setRandomFieldGenerator(int i, RandomFieldGenerator *obj) { randomFieldGeneratorList->put(i, obj); }
+void Domain :: setSet(int i, Set *obj) { setList->put(i, obj); }
 
 void Domain :: clearBoundaryConditions() { bcList->clear(true); };
 
@@ -434,15 +453,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     int num;
     std :: string name, topologytype;
-    int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg, nxfemman=0;
-    DofManager *node;
-    Element *elem;
-    Material *mat;
-    GeneralBoundaryCondition *load;
-    InitialCondition *ic;
-    LoadTimeFunction *ltf;
-    CrossSection *crossSection;
-    NonlocalBarrier *barrier;
+    int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg, nset=0, nxfemman=0;
     RandomFieldGenerator *rfg;
     //XfemManager *xMan;
     // mapping from label to local numbers for dofmans and elements
@@ -478,6 +489,7 @@ Domain :: instanciateYourself(DataReader *dr)
     IR_GIVE_FIELD(ir, nload, _IFT_Domain_nbc);
     IR_GIVE_FIELD(ir, nic, _IFT_Domain_nic);
     IR_GIVE_FIELD(ir, nloadtimefunc, _IFT_Domain_nloadtimefunct);
+    IR_GIVE_OPTIONAL_FIELD(ir, nset, _IFT_Domain_nset);
     IR_GIVE_OPTIONAL_FIELD(ir, nxfemman, _IFT_Domain_nxfemman);
     IR_GIVE_OPTIONAL_FIELD(ir, topologytype, _IFT_Domain_topology);
 
@@ -492,27 +504,28 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read nodes
     dofManagerList->growTo(nnode);
-    for ( int i = 0; i < nnode; i++ ) {
-        ir = dr->giveInputRecord(DataReader :: IR_dofmanRec, i + 1);
+    for ( int i = 1; i <= nnode; i++ ) {
+        DofManager *node;
+        ir = dr->giveInputRecord(DataReader :: IR_dofmanRec, i);
         // read type of dofManager
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
         // assign component number according to record order
         // component number (as given in input record) becomes label
-        if ( ( node = classFactory.createDofManager(name.c_str(), i + 1, this) ) == NULL ) {
+        if ( ( node = classFactory.createDofManager(name.c_str(), i, this) ) == NULL ) {
             OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create node of type: %s\n", name.c_str() );
         }
 
         node->initializeFrom(ir);
         if ( dofManLabelMap.find(num) == dofManLabelMap.end() ) {
             // label does not exist yet
-            dofManLabelMap [ num ] = i + 1;
+            dofManLabelMap [ num ] = i;
         } else {
             _error2("instanciateYourself: Dofmanager entry already exist (label=%d)", num);
         }
 
         node->setGlobalNumber(num);    // set label
-        dofManagerList->put(i + 1, node);
+        dofManagerList->put(i, node);
 
         ir->finish();
     }
@@ -523,12 +536,13 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read elements
     elementList->growTo(nelem);
-    for ( int i = 0; i < nelem; i++ ) {
-        ir = dr->giveInputRecord(DataReader :: IR_elemRec, i + 1);
+    for ( int i = 1; i <= nelem; i++ ) {
+        Element *elem;
+        ir = dr->giveInputRecord(DataReader :: IR_elemRec, i);
         // read type of element
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-        if ( ( elem = classFactory.createElement(name.c_str(), i + 1, this) ) == NULL ) {
+        if ( ( elem = classFactory.createElement(name.c_str(), i, this) ) == NULL ) {
             OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create element: %s", name.c_str() );
         }
 
@@ -536,15 +550,14 @@ Domain :: instanciateYourself(DataReader *dr)
 
         if ( elemLabelMap.find(num) == elemLabelMap.end() ) {
             // label does not exist yet
-            elemLabelMap [ num ] = i + 1;
+            elemLabelMap [ num ] = i;
         } else {
             _error2("instanciateYourself: Element entry already exist (label=%d)", num);
         }
 
         elem->setGlobalNumber(num);
-        elementList->put(i + 1, elem);
+        elementList->put(i, elem);
 
-        //elementList->put(i+1,elem) ;
         ir->finish();
     }
 
@@ -554,8 +567,9 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read cross sections
     crossSectionList->growTo(ncrossSections);
-    for ( int i = 0; i < ncrossSections; i++ ) {
-        ir = dr->giveInputRecord(DataReader :: IR_crosssectRec, i + 1);
+    for ( int i = 1; i <= ncrossSections; i++ ) {
+        CrossSection *crossSection;
+        ir = dr->giveInputRecord(DataReader :: IR_crosssectRec, i);
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
         if ( ( crossSection = classFactory.createCrossSection(name.c_str(), num, this) ) == NULL ) {
@@ -575,7 +589,6 @@ Domain :: instanciateYourself(DataReader *dr)
             _error2("instanciateYourself: crossSection entry already exist (num=%d)", num);
         }
 
-        //crossSectionList->put(i+1,crossSection) ;
         ir->finish();
     }
 
@@ -585,8 +598,9 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read materials
     materialList->growTo(nmat);
-    for ( int i = 0; i < nmat; i++ ) {
-        ir = dr->giveInputRecord(DataReader :: IR_matRec, i + 1);
+    for ( int i = 1; i <= nmat; i++ ) {
+        Material *mat;
+        ir = dr->giveInputRecord(DataReader :: IR_matRec, i);
         // read type of material
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
@@ -607,7 +621,6 @@ Domain :: instanciateYourself(DataReader *dr)
             _error2("instanciateYourself: material entry already exist (num=%d)", num);
         }
 
-        //materialList->put(i+1,mat) ;
         ir->finish();
     }
 
@@ -615,73 +628,77 @@ Domain :: instanciateYourself(DataReader *dr)
     VERBOSE_PRINT0("Instanciated materials ", nmat)
 #  endif
 
+    // read barriers
+    nonlocalBarierList->growTo(nbarrier);
+    for ( int i = 1; i <= nbarrier; i++ ) {
+        NonlocalBarrier *barrier;
+        ir = dr->giveInputRecord(DataReader :: IR_nlocBarRec, i);
+        // read type of load
+        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
+
+        if ( ( barrier = classFactory.createNonlocalBarrier(name.c_str(), num, this) ) == NULL ) {
+            OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create barrier: %s", name.c_str() );
+        }
+
+        barrier->initializeFrom(ir);
+
+        // check number
+        if ( ( num < 1 ) || ( num > nbarrier ) ) {
+            _error2("instanciateYourself: Invalid barrier number (num=%d)", num);
+        }
+
+        if ( !nonlocalBarierList->includes(num) ) {
+            nonlocalBarierList->put(num, barrier);
+        } else {
+            _error2("instanciateYourself: barrier entry already exist (num=%d)", num);
+        }
+
+        ir->finish();
+    }
+
+#  ifdef VERBOSE
     if ( nbarrier ) {
-        // read barriers
-        nonlocalBarierList->growTo(nbarrier);
-        for ( int i = 0; i < nbarrier; i++ ) {
-            ir = dr->giveInputRecord(DataReader :: IR_nlocBarRec, i + 1);
-            // read type of load
-            IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
-
-            barrier = classFactory.createNonlocalBarrier(name.c_str(), num, this);
-            barrier->initializeFrom(ir);
-
-            // check number
-            if ( ( num < 1 ) || ( num > nbarrier ) ) {
-                _error2("instanciateYourself: Invalid barrier number (num=%d)", num);
-            }
-
-            if ( !nonlocalBarierList->includes(num) ) {
-                nonlocalBarierList->put(num, barrier);
-            } else {
-                _error2("instanciateYourself: barrier entry already exist (num=%d)", num);
-            }
-
-            //nonlocalBarierList->put(i+1,barrier) ;
-            ir->finish();
-        }
-
-#  ifdef VERBOSE
         VERBOSE_PRINT0("Instanciated barriers ", nbarrier);
-#  endif
     }
+#  endif
 
-    if ( nrfg ) {
-        // read random field generators
-        randomFieldGeneratorList->growTo(nrfg);
-        for ( int i = 0; i < nrfg; i++ ) {
-            ir = dr->giveInputRecord(DataReader :: IR_nRandomFieldGenRec, i + 1);
-            // read type of load
-            IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
+    // read random field generators
+    randomFieldGeneratorList->growTo(nrfg);
+    for ( int i = 1; i <= nrfg; i++ ) {
+        ir = dr->giveInputRecord(DataReader :: IR_nRandomFieldGenRec, i);
+        // read type of load
+        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-            rfg = classFactory.createRandomFieldGenerator(name.c_str(), num, this);
-            rfg->initializeFrom(ir);
+        rfg = classFactory.createRandomFieldGenerator(name.c_str(), num, this);
+        rfg->initializeFrom(ir);
 
-            // check number
-            if ( ( num < 1 ) || ( num > nrfg ) ) {
-                _error2("instanciateYourself: Invalid generator number (num=%d)", num);
-            }
-
-            if ( !randomFieldGeneratorList->includes(num) ) {
-                randomFieldGeneratorList->put(num, rfg);
-            } else {
-                _error2("instanciateYourself: generator entry already exist (num=%d)", num);
-            }
-
-            ir->finish();
+        // check number
+        if ( ( num < 1 ) || ( num > nrfg ) ) {
+            _error2("instanciateYourself: Invalid generator number (num=%d)", num);
         }
 
-#  ifdef VERBOSE
-        VERBOSE_PRINT0("Instanciated random generators ", nbarrier);
-#  endif
+        if ( !randomFieldGeneratorList->includes(num) ) {
+            randomFieldGeneratorList->put(num, rfg);
+        } else {
+            _error2("instanciateYourself: generator entry already exist (num=%d)", num);
+        }
+
+        ir->finish();
     }
+
+#  ifdef VERBOSE
+    if ( nrfg ) {
+        VERBOSE_PRINT0("Instanciated random generators ", nbarrier);
+    }
+#  endif
 
 
 
     // read boundary conditions
     bcList->growTo(nload);
-    for ( int i = 0; i < nload; i++ ) {
-        ir = dr->giveInputRecord(DataReader :: IR_bcRec, i + 1);
+    for ( int i = 1; i <= nload; i++ ) {
+        GeneralBoundaryCondition *load;
+        ir = dr->giveInputRecord(DataReader :: IR_bcRec, i);
         // read type of load
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
@@ -702,7 +719,6 @@ Domain :: instanciateYourself(DataReader *dr)
             _error2("instanciateYourself: boundary condition entry already exist (num=%d)", num);
         }
 
-        //loadList->put(i+1,load) ;
         ir->finish();
     }
 
@@ -712,17 +728,17 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read initial conditions
     icList->growTo(nic);
-    for ( int i = 0; i < nic; i++ ) {
-        ir = dr->giveInputRecord(DataReader :: IR_icRec, i + 1);
+    for ( int i = 1; i <= nic; i++ ) {
+        InitialCondition *ic;
+        ir = dr->giveInputRecord(DataReader :: IR_icRec, i);
         // read type of load
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-        ic = new InitialCondition(num, this);
-        if ( ic ) {
-            ic->initializeFrom(ir);
-        } else {
+        if ( ( ic = new InitialCondition(num, this) ) == NULL ){
             _error2("instanciateYourself: Creation of IC no. %d failed", num);
         }
+
+        ic->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > nic ) ) {
@@ -745,8 +761,9 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read load time functions
     loadTimeFunctionList->growTo(nloadtimefunc);
-    for ( int i = 0; i < nloadtimefunc; i++ ) {
-        ir = dr->giveInputRecord(DataReader :: IR_ltfRec, i + 1);
+    for ( int i = 1; i <= nloadtimefunc; i++ ) {
+        LoadTimeFunction *ltf;
+        ir = dr->giveInputRecord(DataReader :: IR_ltfRec, i);
         // read type of ltf
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
         if ( ( ltf = classFactory.createLoadTimeFunction(name.c_str(), num, this) ) == NULL ) {
@@ -766,22 +783,51 @@ Domain :: instanciateYourself(DataReader *dr)
             _error2("instanciateYourself: LoadTimeFunction entry already exist (num=%d)", num);
         }
 
-        //loadTimeFunctionList->put(i+1,ltf) ;
         ir->finish();
     }
-
+    
 #  ifdef VERBOSE
     VERBOSE_PRINT0("Instanciated load-time fncts ", nloadtimefunc)
 #  endif
+    
+    // read load time functions
+    setList->growTo(nset);
+    for ( int i = 1; i < nset; i++ ) {
+        ir = dr->giveInputRecord(DataReader :: IR_setRec, i);
+        // read type of ltf
+        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
+        // Only one set for now (i don't see any need to ever introduce any other version)
+        Set *set = new Set(num, this);
+        /*if ( ( set = classFactory.createSet(name.c_str(), num, this) ) == NULL ) {
+            OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create set: %s", name.c_str() );
+        }*/
 
+        set->initializeFrom(ir);
+
+        // check number
+        if ( ( num < 1 ) || ( num > nset ) ) {
+            _error2("instanciateYourself: Invalid set number (num=%d)", num);
+        }
+
+        if ( !setList->includes(num) ) {
+            setList->put(num, set);
+        } else {
+            _error2("instanciateYourself: Set entry already exist (num=%d)", num);
+        }
+
+        ir->finish();
+    }
+    
+#  ifdef VERBOSE
+    if ( nset ) VERBOSE_PRINT0("Instanciated sets ", nset)
+#  endif
 
 // instantiate xfemmanager
     ///@todo Do we actually need multiple xfemmanagers per domain? This made sense when they were stored in EngngModel, but not now.
-    XfemManager *xMan;
     xfemManagerList->growTo(nxfemman);
     for ( int i = 1; i <= nxfemman; i++ ) {
         //xMan =  new XfemManager(this->giveEngngModel(), i);
-        xMan =  new XfemManager(this);
+        XfemManager *xMan = new XfemManager(this);
         ir = dr->giveInputRecord(DataReader :: IR_xfemManRec, 1);
         // XfemManager has to be put into xfemManagerList before xm->initializeFrom, otherwise Enrichmentitem cannot access XfemManager
         // or we have to make a reference from EnrichmentItem also
@@ -1505,6 +1551,8 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         loadTimeFunctionList->clear();
         nonlocalBarierList->clear();
         randomFieldGeneratorList->clear();
+        setList->clear();
+        xfemManagerList->clear();
         //this->clear();
 
 

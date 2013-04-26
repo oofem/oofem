@@ -61,6 +61,7 @@
 #define _IFT_Domain_nbc "nbc"
 #define _IFT_Domain_nic "nic"
 #define _IFT_Domain_nloadtimefunct "nltf"
+#define _IFT_Domain_nset "nset"
 #define _IFT_Domain_nbarrier "nbarrier"
 #define _IFT_Domain_nrandgen "nrandgen"
 #define _IFT_Domain_topology "topology"
@@ -90,6 +91,7 @@ class RandomFieldGenerator;
 class XfemManager;
 class TopologyDescription;
 class DataReader;
+class Set;
 
 #ifdef __PARALLEL_MODE
 class ProcessCommunicator;
@@ -126,6 +128,8 @@ private:
     AList< InitialCondition > *icList;
     /// Load time function list.
     AList< LoadTimeFunction > *loadTimeFunctionList;
+    /// Set list.
+    AList< Set > *setList;
     /// Nonlocal barrier list.
     AList< NonlocalBarrier > *nonlocalBarierList;
     /// List of Random generators.
@@ -288,6 +292,12 @@ public:
      * @param n Pointer to n-th object is returned.
      */
     RandomFieldGenerator *giveRandomFieldGenerator(int n);
+    /**
+     * Service for accessing particular domain set.
+     * Generates error if no such set is defined.
+     * @param n Pointer to n-th object is returned.
+     */
+    Set *giveSet(int n);
 
     /**
      * Service for accessing particular domain node.
@@ -385,6 +395,8 @@ public:
     void resizeLoadTimeFunctions(int _newSize);
     /// Resizes the internal data structure to accommodate space for _newSize random field generators.
     void resizeRandomFieldGenerators(int _newSize);
+    /// Resizes the internal data structure to accommodate space for _newSize sets.
+    void resizeSets(int _newSize);
 
     /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setDofManager(int i, DofManager *obj);
@@ -404,6 +416,8 @@ public:
     void setLoadTimeFunction(int i, LoadTimeFunction *obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setRandomFieldGenerator(int i, RandomFieldGenerator *obj);
+    /// Sets i-th component. The component will be further managed and maintained by domain object.
+    void setSet(int i, Set *obj);
     
     /// Temporary function, sets xfemManager.
     void setXfemManager(XfemManager *xfemManager);

@@ -11,6 +11,7 @@ set (core_unsorted
     geotoolbox.C geometry.C
     externalfieldgenerator.C
     datastream.C
+    set.C
     rvematerial.C
     weakperiodicbc.C
     # Semi sorted:
