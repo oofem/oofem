@@ -83,6 +83,7 @@ public:
     virtual double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
                                                      const FEICellGeometry &cellgeo);
     virtual void computeLocalSurfaceMapping(IntArray &edgeNodes, int iedge);
+    virtual double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo);
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);

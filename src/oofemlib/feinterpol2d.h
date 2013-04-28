@@ -125,14 +125,6 @@ public:
         FloatArray normal;
         return this->edgeEvalNormal(normal, iedge, lcoords, cellgeo);
     }
-    /**
-     * Computes the integral @f$ \int_S n \cdot x \mathrm{d}s @f$.
-     * @return Evaluated integral.
-     */
-    virtual double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) {
-        OOFEM_ERROR("FEInterpolation2d :: evalNXIntegral - Not implemented");
-        return 0.;
-    }
     //@}
 };
 } // end namespace oofem

@@ -473,6 +473,54 @@ FEI3dTetQuad :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
     surfNodes.at(4) = dNode;
     surfNodes.at(5) = eNode;
     surfNodes.at(6) = fNode;
+}
+
+double FEI3dTetQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
+{
+    IntArray fNodes;
+    this->computeLocalSurfaceMapping(fNodes, iEdge);
+
+    const FloatArray &c1 = *cellgeo.giveVertexCoordinates(fNodes.at(1));
+    const FloatArray &c2 = *cellgeo.giveVertexCoordinates(fNodes.at(2));
+    const FloatArray &c3 = *cellgeo.giveVertexCoordinates(fNodes.at(3));
+    const FloatArray &c4 = *cellgeo.giveVertexCoordinates(fNodes.at(4));
+    const FloatArray &c5 = *cellgeo.giveVertexCoordinates(fNodes.at(5));
+    const FloatArray &c6 = *cellgeo.giveVertexCoordinates(fNodes.at(6));
+
+    // Expression derived in Mathematica:
+    return (
+        c1(2)*(c2(1)*(                     -  2*c3(0) -  3*c4(0) +  5*c5(0) +  5*c6(0)) + 
+               c3(1)*(             2*c2(0)            -  5*c4(0) -  5*c5(0) +  3*c6(0)) + 
+               c4(1)*(             3*c2(0) +  5*c3(0)            -  4*c5(0) - 24*c6(0)) + 
+               c5(1)*(          -  5*c2(0) +  5*c3(0) +  4*c4(0)            -  4*c6(0)) + 
+               c6(1)*(          -  5*c2(0) -  3*c3(0) + 24*c4(0) +  4*c5(0)           )) + 
+        c2(2)*(c1(1)*(                        2*c3(0) +  3*c4(0) -  5*c5(0) -  5*c6(0)) + 
+               c3(1)*( -2*c1(0)                       +  5*c4(0) -  3*c5(0) +  5*c6(0)) + 
+               c4(1)*( -3*c1(0)            -  5*c3(0)            + 24*c5(0) +  4*c6(0)) + 
+               c5(1)*(  5*c1(0)            +  3*c3(0) - 24*c4(0)            -  4*c6(0)) + 
+               c6(1)*(  5*c1(0)            -  5*c3(0) -  4*c4(0) +  4*c5(0)           )) + 
+        c3(2)*(c1(1)*(          -  2*c2(0)            +  5*c4(0) +  5*c5(0) -  3*c6(0)) + 
+               c2(1)*(  2*c1(0)                       -  5*c4(0) +  3*c5(0) -  5*c6(0)) + 
+               c4(1)*( -5*c1(0) +  5*c2(0)                       -  4*c5(0) +  4*c6(0)) + 
+               c5(1)*( -5*c1(0) -  3*c2(0)            +  4*c4(0)            + 24*c6(0)) + 
+               c6(1)*(  3*c1(0) +  5*c2(0)            -  4*c4(0) - 24*c5(0)           )) + 
+        c4(2)*(c1(1)*(          -  3*c2(0) -  5*c3(0)            +  4*c5(0) + 24*c6(0)) + 
+               c2(1)*(  3*c1(0)            +  5*c3(0)            - 24*c5(0) -  4*c6(0)) + 
+               c3(1)*(  5*c1(0) -  5*c2(0)                       +  4*c5(0) -  4*c6(0)) + 
+               c5(1)*( -4*c1(0) + 24*c2(0) -  4*c3(0)                       - 16*c6(0)) + 
+               c6(1)*(-24*c1(0) +  4*c2(0) +  4*c3(0)            + 16*c5(0)           )) + 
+        c5(2)*(c1(1)*(             5*c2(0) -  5*c3(0) -  4*c4(0)            +  4*c6(0)) + 
+               c2(1)*( -5*c1(0)            -  3*c3(0) + 24*c4(0)            +  4*c6(0)) + 
+               c3(1)*(  5*c1(0) +  3*c2(0)            -  4*c4(0)            - 24*c6(0)) + 
+               c4(1)*(  4*c1(0) - 24*c2(0) +  4*c3(0)                       + 16*c6(0)) + 
+               c6(1)*( -4*c1(0) -  4*c2(0) + 24*c3(0) - 16*c4(0)                      )) + 
+        c6(2)*(c1(1)*(             5*c2(0) +  3*c3(0) - 24*c4(0) -  4*c5(0)           ) + 
+               c2(1)*( -5*c1(0)            +  5*c3(0) +  4*c4(0) -  4*c5(0)           ) + 
+               c3(1)*( -3*c1(0) -  5*c2(0)            +  4*c4(0) + 24*c5(0)           ) + 
+               c4(1)*( 24*c1(0) -  4*c2(0) -  4*c3(0)            - 16*c5(0)           ) + 
+               c5(1)*(  4*c1(0) +  4*c2(0) - 24*c3(0) + 16*c4(0)                      ))
+        ) / 30.;
 
 }
+
 } // end namespace oofem
