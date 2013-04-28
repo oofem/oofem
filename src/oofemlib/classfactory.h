@@ -453,6 +453,14 @@ public:
      */
     bool registerInitModule(const char *name, InitModule * ( *creator )(int, EngngModel *));
     /**
+     * Creates new instance of Initial Condition corresponding to given type.
+     * @param name Keyword string determining the type of new instance.
+     * @param num  object's number.
+     * @param d Domain assigned to new object.
+     * @return Newly allocated object of requested type, null if keyword not supported.
+     */
+    InitialCondition *createInitialCondition(const char *name, int num, Domain *d);
+    /**
      * Creates new instance of topology description corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param d    Domain assigned to new object.

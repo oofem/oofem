@@ -301,6 +301,15 @@ ErrorEstimator * ClassFactory :: createErrorEstimator(ErrorEstimatorType type, i
     return ( errEstList.count ( type ) == 1 ) ? errEstList [ type ] (num, d) : NULL;
 }
 
+InitialCondition * ClassFactory :: createInitialCondition(const char *name, int num, Domain *d)
+{
+    CaseComp c;
+    if ( c(name, "initialcondition") ) {
+        return new InitialCondition(num, d);
+    }
+    return NULL;
+}
+
 InitialCondition * ClassFactory :: createInitialCondition(classType type, int num, Domain *d)
 {
     if (type == InitialConditionClass) {
