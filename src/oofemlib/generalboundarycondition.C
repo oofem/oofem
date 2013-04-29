@@ -45,6 +45,7 @@ GeneralBoundaryCondition :: GeneralBoundaryCondition(int n, Domain *d) : FEMComp
 {
     loadTimeFunction = 0;
     isImposedTimeFunction = 0;
+    set = 0;
 }
 
 
@@ -75,10 +76,15 @@ GeneralBoundaryCondition :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_GeneralBoundaryCondition_valType);
     valType = ( bcValType ) val;
 
+    defaultDofs.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, defaultDofs, _IFT_GeneralBoundaryCondition_defaultDofs);
 
+    isImposedTimeFunction = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, isImposedTimeFunction, _IFT_GeneralBoundaryCondition_IsImposedTimeFunct);
-    
+
+    set = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, set, _IFT_GeneralBoundaryCondition_set);
+
     return IRRT_OK;
 }
 

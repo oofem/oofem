@@ -50,6 +50,7 @@
 #define _IFT_GeneralBoundaryCondition_valType "valtype"
 #define _IFT_GeneralBoundaryCondition_defaultDofs "defaultdofs"
 #define _IFT_GeneralBoundaryCondition_IsImposedTimeFunct "isimposedtimefunction"
+#define _IFT_GeneralBoundaryCondition_set "set"
 //@}
 
 namespace oofem {
@@ -85,10 +86,13 @@ protected:
     bcValType valType;
     /// Default dofs (for remeshing/adaptivity).
     IntArray defaultDofs;
-    /** Zero by default - the BC is than always imposed. Otherwise the number of associated
+    /** 
+     * Zero by default - the BC is than always imposed. Otherwise the number of associated
     * load time function. If the load time function returns aero value, the BC is inactive.
     */
     int isImposedTimeFunction;
+    /// Set number for boundary condition to be applied to.
+    int set;
 
 public:
     /**
@@ -99,6 +103,8 @@ public:
     GeneralBoundaryCondition(int n, Domain *d);
     /// Destructor.
     virtual ~GeneralBoundaryCondition() { }
+
+    int giveSetNumber() { return set; }
 
     /// Gives the number of internal dof managers.
     virtual int giveNumberOfInternalDofManagers() { return 0; }
