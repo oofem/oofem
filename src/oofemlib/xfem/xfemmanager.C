@@ -229,8 +229,7 @@ void XfemManager :: updateIntegrationRule()
     for ( i = 1; i <= size; i++ ) {             \
         obj = giveMethod(i);                    \
         if ( ( mode & CM_Definition ) ) {       \
-            ct =  (int) obj->giveClassID();     \
-            if ( !stream->write(& ct, 1) ) {    \
+            if ( !stream->write(obj->giveInputRecordName()) ) { \
                 THROW_CIOERR(CIO_IOERR);        \
             }                                   \
         }                                       \
@@ -248,11 +247,11 @@ void XfemManager :: updateIntegrationRule()
     }                                       \
     for ( i = 1; i <= size; i++ ) {         \
         if ( mode & CM_Definition ) {       \
-            if ( !stream->read(& ct, 1) ) { \
+            std::string name;               \
+            if ( !stream->read(name) ) {    \
                 THROW_CIOERR(CIO_IOERR);    \
             }                               \
-            compId = ( classType ) ct;      \
-            obj = creator(compId, 0, this); \
+            obj = creator(name.c_str(), 0, this); \
         } else {                            \
             obj = giveMethod(i);            \
         }                                   \
@@ -270,7 +269,7 @@ void XfemManager :: updateIntegrationRule()
 contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
-    int i,ct;
+    int i;
 
     if (mode & CM_Definition) {
         int _state[XFEMMAN_STATE_SIZE];
@@ -307,8 +306,7 @@ contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode m
 contextIOResultType XfemManager:: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
-    int i, ct;
-    classType compId;
+    int i;
 
     if (mode & CM_Definition) {
         int _state[XFEMMAN_STATE_SIZE];

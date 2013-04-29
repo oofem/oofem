@@ -42,6 +42,7 @@
 #include "linsystsolvertype.h"
 #include "patch.h" // for PatchType
 #include "nodalrecoverymodel.h" // for NodalRecoveryModelType
+#include "integrationrule.h" // for IntegrationRuleType
 #include "geneigvalsolvertype.h"
 #include "materialmappingalgorithmtype.h"
 #include "meshpackagetype.h"
@@ -545,7 +546,7 @@ public:
     bool registerGeometry(const char *name, BasicGeometry * ( *creator )());
 
     SparseGeneralEigenValueSystemNM *createGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *d, EngngModel *m);
-    IntegrationRule *createIRule(classType type, int number, Element *e);
+    IntegrationRule *createIRule(IntegrationRuleType type, int number, Element *e);
     MaterialMappingAlgorithm *createMaterialMappingAlgorithm(MaterialMappingAlgorithmType type);
     MesherInterface *createMesherInterface(MeshPackageType type, Domain *d);
 

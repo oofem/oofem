@@ -52,6 +52,9 @@
 #include "randomfieldgeneratorclassfactory.h"
 
 // No class factory files for these;
+#include "gaussintegrationrule.h"
+#include "lobattoir.h"
+
 #include "subspaceit.h"
 #include "inverseit.h"
 #include "slepcsolver.h"
@@ -602,10 +605,12 @@ SparseGeneralEigenValueSystemNM* ClassFactory :: createGeneralizedEigenValueSolv
     return NULL;
 }
 
-IntegrationRule* ClassFactory :: createIRule(classType type, int number, Element *e)
+IntegrationRule* ClassFactory :: createIRule(IntegrationRuleType type, int number, Element *e)
 {
-    if ( type == GaussIntegrationRuleClass ) {
+    if ( type == IRT_Gauss ) {
         return new GaussIntegrationRule(number, e);
+    } else if ( type == IRT_Lobatto ) {
+        return new LobattoIntegrationRule(number, e);
     }
     return NULL;
 }

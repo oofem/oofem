@@ -765,7 +765,7 @@ contextIOResultType Element :: saveContext(DataStream *stream, ContextMode mode,
         }
 
         for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-            _val = integrationRulesArray [ i ]->giveClassID();
+            _val = integrationRulesArray [ i ]->giveIntegrationRuleType();
             if ( !stream->write(& _val, 1) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
@@ -862,15 +862,15 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
             // AND ALLOCATE NEW ONE
             integrationRulesArray = new IntegrationRule * [ _nrules ];
             for ( int i = 0; i < _nrules; i++ ) {
-                integrationRulesArray [ i ] = classFactory.createIRule( ( classType ) dtypes(i), i + 1, this );
+                integrationRulesArray [ i ] = classFactory.createIRule( ( IntegrationRuleType ) dtypes(i), i + 1, this );
             }
 
             numberOfIntegrationRules = _nrules;
         } else {
             for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-                if ( integrationRulesArray [ i ]->giveClassID() != dtypes(i) ) {
+                if ( integrationRulesArray [ i ]->giveIntegrationRuleType() != dtypes(i) ) {
                     delete integrationRulesArray [ i ];
-                    integrationRulesArray [ i ] = classFactory.createIRule( ( classType ) dtypes(i), i + 1, this );
+                    integrationRulesArray [ i ] = classFactory.createIRule( ( IntegrationRuleType ) dtypes(i), i + 1, this );
                 }
             }
         }

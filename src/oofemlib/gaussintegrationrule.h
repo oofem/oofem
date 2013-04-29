@@ -71,6 +71,7 @@ public:
 
     virtual classType giveClassID() const { return GaussIntegrationRuleClass; }
     virtual const char *giveClassName() const { return "GaussIntegrationRule"; }
+    virtual IntegrationRuleType giveIntegrationRuleType() const { return IRT_Gauss; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
     virtual int getRequiredNumberOfIntegrationPoints(integrationDomain dType, int approxOrder);

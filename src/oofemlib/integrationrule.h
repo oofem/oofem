@@ -50,6 +50,13 @@ class GaussPoint;
 class Element;
 class DataStream;
 
+///@todo Breaks modularity, reconsider this;
+enum IntegrationRuleType {
+    IRT_None = 0,
+    IRT_Gauss = 1,
+    IRT_Lobatto = 2
+};
+
 /**
  * Abstract base class representing integration rule. The integration rule is
  * a collection of integration points used to  numerically integrate some formula.
@@ -231,6 +238,7 @@ public:
 
     virtual classType giveClassID() const { return IntegrationRuleClass; }
     virtual const char *giveClassName() const { return "IntegrationRule"; }
+    virtual IntegrationRuleType giveIntegrationRuleType() const { return IRT_None; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
 
