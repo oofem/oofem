@@ -43,6 +43,8 @@ LobattoIntegrationRule :: LobattoIntegrationRule(int n, Element *e,
                                                  int startIndx, int endIndx, bool dynamic) :
     IntegrationRule(n, e, startIndx, endIndx, dynamic) { }
 
+LobattoIntegrationRule :: LobattoIntegrationRule(int n, Element *e) :
+    IntegrationRule(n, e) { }
 
 LobattoIntegrationRule :: ~LobattoIntegrationRule()
 { }

@@ -69,6 +69,9 @@ public:
     virtual const char *giveClassName() const { return "PiecewiceClass"; }
     virtual const char *giveInputRecordName() const { return "PiecewiseLinFunction"; }
 
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+
     virtual double __at(double);
     virtual double __derAt(double);
     virtual double __accelAt(double) { return 0.; }

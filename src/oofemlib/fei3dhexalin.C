@@ -500,4 +500,22 @@ FEI3dHexaLin :: giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords)
     dN.at(8, 3) = -0.125 * ( 1. + u ) * ( 1. - v );
 }
 
+double
+FEI3dHexaLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
+{
+    IntArray fNodes;
+    this->computeLocalSurfaceMapping(fNodes, iEdge);
+
+    const FloatArray &c1 = *cellgeo.giveVertexCoordinates(fNodes.at(1));
+    const FloatArray &c2 = *cellgeo.giveVertexCoordinates(fNodes.at(2));
+    const FloatArray &c3 = *cellgeo.giveVertexCoordinates(fNodes.at(3));
+    const FloatArray &c4 = *cellgeo.giveVertexCoordinates(fNodes.at(4));
+
+    return (
+        c4(2)*(c1(1)*(-c2(0) - c3(0)) + c2(1)*( c1(0) - c3(0)) + c3(1)*( c1(0) + c2(0))                         ) +
+        c3(2)*(c1(1)*(-c2(0) + c4(0)) + c2(1)*( c1(0) + c4(0)) +                          c4(1)*(-c1(0) - c2(0))) +
+        c2(2)*(c1(1)*( c3(0) + c4(0)) +                          c3(1)*(-c1(0) - c4(0)) + c4(1)*(-c1(0) + c3(0))) +
+        c1(2)*(                         c2(1)*(-c3(0) - c4(0)) + c3(1)*( c2(0) - c4(0)) + c4(1)*( c2(0) + c3(0))) )*0.24;
+}
+
 } // end namespace oofem

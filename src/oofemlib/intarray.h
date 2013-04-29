@@ -203,6 +203,11 @@ public:
      */
     int maximum() const;
     /**
+     * Finds all indices where the input array is nonzero
+     * @param logical Array of logical values (0 = false, nonzero = true) to have index extracted.
+     */
+    void findNonzeros(const IntArray &logical);
+    /**
      * Checks if sorted receiver contains a given value.
      * @return True if receiver contains given value.
      */

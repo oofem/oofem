@@ -484,14 +484,12 @@ DofManager *
 Element :: giveDofManager(int i) const
 // Returns the i-th node of the receiver.
 {
-    int n;
 #ifdef DEBUG
     if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
         OOFEM_ERROR2("giveNode: Node %i is not defined", i);
     }
 #endif
-    n = dofManArray.at(i);
-    return domain->giveDofManager(n);
+    return domain->giveDofManager(dofManArray.at(i));
 }
 
 
@@ -499,14 +497,12 @@ Node *
 Element :: giveNode(int i) const
 // Returns the i-th node of the receiver.
 {
-    int n;
 #ifdef DEBUG
     if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
         _error("giveNode: Node is not defined");
     }
 #endif
-    n = dofManArray.at(i);
-    return domain->giveNode(n);
+    return domain->giveNode(dofManArray.at(i));
 }
 
 
@@ -514,14 +510,12 @@ ElementSide *
 Element :: giveSide(int i) const
 // Returns the i-th side of the receiver.
 {
-    int n;
 #ifdef DEBUG
     if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
         _error("giveNode: Side is not defined");
     }
 #endif
-    n = dofManArray.at(i);
-    return domain->giveSide(n);
+    return domain->giveSide(dofManArray.at(i));
 }
 
 
@@ -771,7 +765,7 @@ contextIOResultType Element :: saveContext(DataStream *stream, ContextMode mode,
         }
 
         for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-            _val = integrationRulesArray [ i ]->giveClassID();
+            _val = integrationRulesArray [ i ]->giveIntegrationRuleType();
             if ( !stream->write(& _val, 1) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
@@ -868,15 +862,15 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
             // AND ALLOCATE NEW ONE
             integrationRulesArray = new IntegrationRule * [ _nrules ];
             for ( int i = 0; i < _nrules; i++ ) {
-                integrationRulesArray [ i ] = classFactory.createIRule( ( classType ) dtypes(i), i + 1, this );
+                integrationRulesArray [ i ] = classFactory.createIRule( ( IntegrationRuleType ) dtypes(i), i + 1, this );
             }
 
             numberOfIntegrationRules = _nrules;
         } else {
             for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-                if ( integrationRulesArray [ i ]->giveClassID() != dtypes(i) ) {
+                if ( integrationRulesArray [ i ]->giveIntegrationRuleType() != dtypes(i) ) {
                     delete integrationRulesArray [ i ];
-                    integrationRulesArray [ i ] = classFactory.createIRule( ( classType ) dtypes(i), i + 1, this );
+                    integrationRulesArray [ i ] = classFactory.createIRule( ( IntegrationRuleType ) dtypes(i), i + 1, this );
                 }
             }
         }
@@ -1169,6 +1163,7 @@ Element :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 int
 Element :: giveSpatialDimension(void) const
 {
+    ///@todo Just ask the interpolator instead?
     switch ( this->giveGeometryType() ) {
     case EGT_point:
         return 0;
@@ -1187,6 +1182,7 @@ Element :: giveSpatialDimension(void) const
     case EGT_tetra_2:
     case EGT_hexa_1:
     case EGT_hexa_2:
+    case EGT_hexa_27:
     case EGT_wedge_1:
     case EGT_wedge_2:
         return 3;
@@ -1204,6 +1200,7 @@ Element :: giveSpatialDimension(void) const
 int
 Element :: giveNumberOfBoundarySides(void) const
 {
+    ///@todo Just ask the interpolator instead?
     switch ( this->giveGeometryType() ) {
     case EGT_point:
         return 0;
@@ -1230,6 +1227,7 @@ Element :: giveNumberOfBoundarySides(void) const
 
     case EGT_hexa_1:
     case EGT_hexa_2:
+    case EGT_hexa_27:
         return 6;
 
     case EGT_Composite:

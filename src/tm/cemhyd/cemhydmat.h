@@ -40,6 +40,7 @@
 
 #include "mathfem.h"
 #include <cstdio>
+#include <string>
 #include <cstring>
 #include <tinyxml2.h>
 

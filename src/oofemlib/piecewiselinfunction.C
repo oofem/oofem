@@ -189,4 +189,28 @@ PiecewiseLinFunction :: giveInputRecordString(std :: string &str, bool keyword)
     return 1;
 }
 
+
+contextIOResultType
+PiecewiseLinFunction :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+{
+    if ( mode & CM_Definition ) {
+        dates.storeYourself(stream, mode);
+        values.storeYourself(stream, mode);
+    }
+
+    return CIO_OK;
+}
+
+
+contextIOResultType
+PiecewiseLinFunction :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+{
+    if ( mode & CM_Definition ) {
+        dates.restoreYourself(stream, mode);
+        values.restoreYourself(stream, mode);
+    }
+
+    return CIO_OK;
+}
+
 } // end namespace oofem

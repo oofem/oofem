@@ -55,6 +55,7 @@ public:
     virtual double surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     //virtual void surfaceEvaldNdx(FloatMatrix&answer, int isurf, const FloatArray& lcoords, const FEICellGeometry& cellgeo);
     virtual void computeLocalSurfaceMapping(IntArray &nodes, int iSurf);
+    virtual double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo);
 
 protected:
     virtual void giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords);

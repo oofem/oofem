@@ -52,6 +52,9 @@
 #include "randomfieldgeneratorclassfactory.h"
 
 // No class factory files for these;
+#include "gaussintegrationrule.h"
+#include "lobattoir.h"
+
 #include "subspaceit.h"
 #include "inverseit.h"
 #include "slepcsolver.h"
@@ -299,6 +302,15 @@ SparseLinearSystemNM *ClassFactory :: createSparseLinSolver(LinSystSolverType ty
 ErrorEstimator * ClassFactory :: createErrorEstimator(ErrorEstimatorType type, int num, Domain *d)
 {
     return ( errEstList.count ( type ) == 1 ) ? errEstList [ type ] (num, d) : NULL;
+}
+
+InitialCondition * ClassFactory :: createInitialCondition(const char *name, int num, Domain *d)
+{
+    CaseComp c;
+    if ( c(name, "initialcondition") ) {
+        return new InitialCondition(num, d);
+    }
+    return NULL;
 }
 
 InitialCondition * ClassFactory :: createInitialCondition(classType type, int num, Domain *d)
@@ -593,10 +605,12 @@ SparseGeneralEigenValueSystemNM* ClassFactory :: createGeneralizedEigenValueSolv
     return NULL;
 }
 
-IntegrationRule* ClassFactory :: createIRule(classType type, int number, Element *e)
+IntegrationRule* ClassFactory :: createIRule(IntegrationRuleType type, int number, Element *e)
 {
-    if ( type == GaussIntegrationRuleClass ) {
+    if ( type == IRT_Gauss ) {
         return new GaussIntegrationRule(number, e);
+    } else if ( type == IRT_Lobatto ) {
+        return new LobattoIntegrationRule(number, e);
     }
     return NULL;
 }
