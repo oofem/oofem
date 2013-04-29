@@ -156,6 +156,9 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual classType giveClassID() const { return GeneralBoundaryConditionClass; }
     virtual const char *giveClassName() const { return "GeneralBoundaryCondition"; }
+
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 } // end namespace oofem
 #endif // generalbc_h

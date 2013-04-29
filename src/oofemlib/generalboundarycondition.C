@@ -37,6 +37,8 @@
 #include "bcvaltype.h"
 #include "loadtimefunction.h"
 #include "reinforcement.h"
+#include "datastream.h"
+#include "contextioerr.h"
 
 namespace oofem {
 GeneralBoundaryCondition :: GeneralBoundaryCondition(int n, Domain *d) : FEMComponent(n, d)
@@ -110,4 +112,30 @@ GeneralBoundaryCondition :: giveInputRecordString(std :: string &str, bool keywo
 
     return 1;
 }
+
+contextIOResultType
+GeneralBoundaryCondition :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+{
+    if ( mode & CM_Definition ) {
+        if ( !stream->write(& loadTimeFunction, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+    }
+
+    return CIO_OK;
+}
+
+
+contextIOResultType
+GeneralBoundaryCondition :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+{
+    if ( mode & CM_Definition ) {
+        if ( !stream->read(& loadTimeFunction, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+    }
+
+    return CIO_OK;
+}
+
 } // end namespace oofem
