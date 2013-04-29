@@ -105,9 +105,6 @@ protected:
     /// DOF-manager containing the unknown deviatoric stress.
     Node *sigmaDev;
 
-    /// Element boundaries to integrate over. Boundary number 0 indicates that the element is a boundary element itself.
-    std::list< std::pair<int,int> > boundaries;
-
 public:
     /**
      * Creates boundary condition with given number, belonging to given domain.
@@ -138,15 +135,9 @@ public:
      * The input record contains two fields;
      * - devGradient \#columns { d_11 d_22 ... d_21 ... } (required)
      * - pressure p (required)
-     * - elementSides List of element numbers and sides (interleaved) to apply boundary condition to.
-     * - elements List of boundary elements to apply boundary condition to.
      * The gradient should be in Voigt notation (only the deviatoric part will be used)
      */
     virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual void addElementSide(int elem, int side);
-    virtual void addElement(int elem);
-    void clearElements();
 
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
