@@ -68,7 +68,7 @@ IRResultType SurfaceTensionBoundaryCondition :: initializeFrom(InputRecord *ir)
 }
 
 void SurfaceTensionBoundaryCondition :: giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
-                                const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain)
+                                const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if (eid == EID_MomentumBalance_ConservationEquation) {
         eid = EID_MomentumBalance;
@@ -90,7 +90,7 @@ void SurfaceTensionBoundaryCondition :: giveLocationArrays(std::vector<IntArray>
 }
 
 void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain)
+                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if (eid == EID_MomentumBalance_ConservationEquation) {
         eid = EID_MomentumBalance;
@@ -115,7 +115,7 @@ void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *t
 
 double SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                 CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
+                                const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
     if (type != InternalForcesVector) {
         return 0.0;

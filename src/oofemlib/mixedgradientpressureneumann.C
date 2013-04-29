@@ -227,9 +227,8 @@ void MixedGradientPressureNeumann :: setPrescribedDeviatoricGradientFromVoigt(co
 }
 
 
-///@todo Should be really send domain here?
 void MixedGradientPressureNeumann :: giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
-    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain)
+    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if (eid == EID_MomentumBalance_ConservationEquation)
         eid = EID_MomentumBalance;
@@ -418,7 +417,7 @@ void MixedGradientPressureNeumann :: integrateDevTangent(FloatMatrix &answer, El
 
 
 double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                    CharType type, ValueModeType mode, const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
+                    CharType type, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
     // Boundary condition only acts on the momentumbalance part.
     if (eid == EID_MomentumBalance_ConservationEquation)
@@ -506,7 +505,7 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
 
 
 void MixedGradientPressureNeumann :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
-    CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain)
+    CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if (eid == EID_MomentumBalance_ConservationEquation)
         eid = EID_MomentumBalance;

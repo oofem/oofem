@@ -151,13 +151,13 @@ public:
 
     virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                   CharType type, ValueModeType mode,
-                                  const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorm = NULL);
+                                  const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
     
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
+                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
     
     virtual void giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
-                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
+                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual const char *giveClassName() const { return "MixedGradientPressureNeumann"; }
     virtual classType giveClassID() const { return MixedGradientPressureNeumannClass; }

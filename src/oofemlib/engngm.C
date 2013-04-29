@@ -888,7 +888,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
     for ( int i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
-            bc->assemble(answer, tStep, eid, type, s, s, domain);
+            bc->assemble(answer, tStep, eid, type, s, s);
         }
     }
 
@@ -1019,7 +1019,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
     for ( int i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
-            bc->assemble(answer, tStep, eid, type, rs, cs, domain);
+            bc->assemble(answer, tStep, eid, type, rs, cs);
         }
     }
 
@@ -1140,7 +1140,7 @@ double EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, E
         Load *load;
 
         if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >( bc ) ) ) {
-            norm += abc->assembleVector(answer, tStep, eid, type, mode, s, domain, eNorms);
+            norm += abc->assembleVector(answer, tStep, eid, type, mode, s, eNorms);
         } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >( bc ) ) ) {
 #if 0
             ///@todo Work in progress: Introduce the general element load assemble interfaces necessary
