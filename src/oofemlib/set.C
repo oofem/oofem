@@ -149,6 +149,14 @@ const IntArray& Set :: giveNodeList()
     return this->totalNodes;
 }
 
+void Set :: setElementList(const IntArray& newElements) { this->elements = newElements; }
+
+void Set :: setBoundaryList(const IntArray& newBoundaries) { this->elementBoundaries = newBoundaries; }
+
+void Set :: setEdgeList(const IntArray& newEdges) { this->elementEdges = newEdges; }
+
+void Set :: setNodeList(const IntArray& newNodes) { this->nodes = newNodes; }
+
 void Set :: clear()
 {
     this->elementEdges.resize(0);

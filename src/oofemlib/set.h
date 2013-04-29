@@ -32,7 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 #ifndef set_h
 #define set_h
 
@@ -101,6 +100,23 @@ public:
      * @return List of node numbers.
      */
     const IntArray &giveNodeList();
+    
+    /**
+     * Sets list of elements within set. 
+     */
+    void setElementList(const IntArray &newElements);
+    /**
+     * Sets list of element boundaries within set.
+     */
+    void setBoundaryList(const IntArray &newBoundaries);
+    /**
+     * Sets list of element edges within set (must be edges of 3D elements).
+     */
+    void setEdgeList(const IntArray &newEdges);
+    /**
+     * Sets list of nodes within set.
+     */
+    void setNodeList(const IntArray &newNodes);
 
     /**
      * Clears the entire set.
