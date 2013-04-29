@@ -42,6 +42,8 @@
 #include "timestep.h"
 #include "metastep.h"
 #include "element.h"
+#include "set.h"
+#include "load.h"
 #include "oofemcfg.h"
 #include "timer.h"
 #include "dofmanager.h"
@@ -1040,7 +1042,7 @@ double EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, Equatio
 
     norm += this->assembleVectorFromDofManagers(answer, tStep, eid, type, mode, s, domain, eNorms);
     norm += this->assembleVectorFromElements(answer, tStep, eid, type, mode, s, domain, eNorms);
-    norm += this->assembleVectorFromActiveBC(answer, tStep, eid, type, mode, s, domain, eNorms);
+    norm += this->assembleVectorFromBC(answer, tStep, eid, type, mode, s, domain, eNorms);
 
     // Collect over mpi;
 #ifdef __PARALLEL_MODE
@@ -1124,7 +1126,7 @@ double EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep 
 }
 
 
-double EngngModel :: assembleVectorFromActiveBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
+double EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                                 CharType type, ValueModeType mode,
                                                 const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
@@ -1133,9 +1135,124 @@ double EngngModel :: assembleVectorFromActiveBC(FloatArray &answer, TimeStep *tS
 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     for ( int i = 1; i <= nbc; ++i ) {
-        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
-        if ( bc != NULL ) {
-            norm += bc->assembleVector(answer, tStep, eid, type, mode, s, domain, eNorms);
+        GeneralBoundaryCondition *bc = domain->giveBc(i);
+        ActiveBoundaryCondition *abc;
+        Load *load;
+
+        if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >( bc ) ) ) {
+            norm += abc->assembleVector(answer, tStep, eid, type, mode, s, domain, eNorms);
+        } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >( bc ) ) ) {
+#if 0
+            ///@todo Work in progress: Introduce the general element load assemble interfaces necessary
+            IntArray dofids, loc, dofIDarry;
+            FloatArray charVec;
+            FloatMatrix R;
+
+            // If there is a set connected to the load, then assemble that:
+            Set *set = domain->giveSet(bc->giveSetNumber());
+
+            // Bulk load:
+            const IntArray &elements = set->giveElementList();
+            for (int ielem = 1; ielem <= elements.giveSize(); ++ielem) {
+                Element *element = domain->giveElement(elements.at(ielem));
+                element->computeLoadVector(charVec, type, mode, load, tStep);
+                element->giveLocationArray(loc, eid, s, &dofids);
+
+                if ( charVec.isNotEmpty() ) {
+                    if ( element->giveRotationMatrix(R, eid) ) {
+                        charVec.rotatedWith(R, 't');
+                    }
+
+                    answer.assemble(charVec, loc);
+            
+                    if ( eNorms ) {
+                        for ( int i = 1; i <= dofids.giveSize(); ++i ) {
+                            eNorms->at(dofids.at(i)) += charVec.at(i) * charVec.at(i);
+                        }
+                    }
+                    norm += charVec.computeSquaredNorm();
+                }
+            }
+
+            // Boundary load:
+            const IntArray &boundaries = set->giveBoundaryList();
+            for (int ibnd = 1; ibnd <= boundaries.giveSize()/2; ++ibnd) {
+                Element *element = domain->giveElement(boundaries.at(ibnd*2-1));
+                int boundary = ibnd*2;
+                element->computeBoundaryLoadVector(charVec, boundary, type, mode, load, tStep);
+                element->giveBoundaryLocationArray(loc, boundary, eid, s, &dofids);
+                answer.assemble(charVec, loc);
+
+                if ( charVec.isNotEmpty() ) {
+                    ///@todo Work out rotations at boundaries:
+                    if ( element->giveRotationMatrix(R, eid) ) {
+                        OOFEM_ERROR("EngngModel :: assembleVectorFromBC : Edge-load assembling with rotation not supported yet");
+                    //    charVec.rotatedWith(R, 't');
+                    }
+
+                    answer.assemble(charVec, loc);
+            
+                    if ( eNorms ) {
+                        for ( int i = 1; i <= dofids.giveSize(); ++i ) {
+                            eNorms->at(dofids.at(i)) += charVec.at(i) * charVec.at(i);
+                        }
+                    }
+                    norm += charVec.computeSquaredNorm();
+                }
+            }
+
+            // Edge load:
+            const IntArray &edges = set->giveEdgeList();
+            for (int iedge = 1; iedge <= edges.giveSize()/2; ++iedge) {
+                Element *element = domain->giveElement(edges.at(iedge*2-1));
+                int edge = iedge*2;
+                element->computeEdgeLoadVector(charVec, edge, type, mode, load, tStep);
+                element->giveEdgeLocationArray(loc, edge, eid, s, &dofids);
+                answer.assemble(charVec, loc);
+                
+                if ( charVec.isNotEmpty() ) {
+                    if ( element->giveRotationMatrix(R, eid) ) {
+                        OOFEM_ERROR("EngngModel :: assembleVectorFromBC : Edge-load assembling with rotation not supported yet");
+                    //    charVec.rotatedWith(R, 't');
+                    }
+
+                    answer.assemble(charVec, loc);
+            
+                    if ( eNorms ) {
+                        for ( int i = 1; i <= dofids.giveSize(); ++i ) {
+                            eNorms->at(dofids.at(i)) += charVec.at(i) * charVec.at(i);
+                        }
+                    }
+                    norm += charVec.computeSquaredNorm();
+                }
+            }
+
+            // Nodal load:
+            const IntArray &nodes = set->giveNodeList();
+            for (int idman = 1; idman <= nodes.giveSize(); ++idman) {
+                DofManager *node = domain->giveDofManager(nodes.at(idman));
+                node->computeLoadVector(charVec, type, mode, load, tStep);
+                node->giveCompleteLocationArray(loc, s);
+                answer.assemble(charVec, loc);
+                
+                if ( charVec.isNotEmpty() ) {
+                    node->giveCompleteLocationArray(loc, s);
+                    if ( node->computeM2LTransformation(R, dofIDarry) ) {
+                        charVec.rotatedWith(R, 't');
+                    }
+
+                    answer.assemble(charVec, loc);
+                    
+                    if ( eNorms ) {
+                        node->giveCompleteMasterDofIDArray(dofids);
+                        for ( int i = 1; i <= dofids.giveSize(); ++i ) {
+                            eNorms->at(dofids.at(i)) += charVec.at(i) * charVec.at(i);
+                        }
+                    }
+                    norm += charVec.computeSquaredNorm();
+                }
+            }
+#endif
         }
     }
 

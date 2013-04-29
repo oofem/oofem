@@ -956,7 +956,7 @@ public:
                                       const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
     /**
-     * Assembles characteristic vector of required type from active boundary conditions.
+     * Assembles characteristic vector of required type from boundary conditions.
      * @param answer Assembled vector.
      * @param tStep Time step, when answer is assembled.
      * @param eid Determines type of equation and corresponding element code numbers.
@@ -967,9 +967,9 @@ public:
      * @param domain Domain to assemble from.
      * @return Sum of element norm (squared) of assembled vector.
      */
-    double assembleVectorFromActiveBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                      CharType type, ValueModeType mode,
-                                      const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
+    double assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                                CharType type, ValueModeType mode,
+                                const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
     /**
      * Assembles the extrapolated internal forces vector,
