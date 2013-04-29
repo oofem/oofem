@@ -1394,15 +1394,13 @@ Domain :: giveErrorEstimator()
 }
 
 
-
 #define SAVE_COMPONENTS(size, type, giveMethod)    \
     {                                               \
         type *obj;                                  \
         for ( i = 1; i <= size; i++ ) {             \
             obj = giveMethod(i);                    \
             if ( ( mode & CM_Definition ) ) {       \
-                ct =  ( int ) obj->giveClassID();   \
-                if ( !stream->write(& ct, 1) ) {    \
+                if ( !stream->write(obj->giveInputRecordName()) ) { \
                     THROW_CIOERR(CIO_IOERR);        \
                 }                                   \
             }                                       \
@@ -1420,11 +1418,11 @@ Domain :: giveErrorEstimator()
         }                                       \
         for ( i = 1; i <= size; i++ ) {         \
             if ( mode & CM_Definition ) {       \
-                if ( !stream->read(& ct, 1) ) { \
+                std::string name;               \
+                if ( !stream->read(name) ) {    \
                     THROW_CIOERR(CIO_IOERR);    \
                 }                               \
-                compId = ( classType ) ct;      \
-                obj = creator(compId, 0, this); \
+                obj = creator(name.c_str(), 0, this); \
             } else {                            \
                 obj = giveMethod(i);            \
             }                                   \
@@ -1445,7 +1443,6 @@ Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     contextIOResultType iores;
     int i, serNum;
     ErrorEstimator *ee;
-    int ct;
 
     // save domain serial number
     serNum = this->giveSerialNumber();
@@ -1469,6 +1466,14 @@ Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         if ( !stream->write(ncomp, DOMAIN_NCOMP) ) {
             THROW_CIOERR(CIO_IOERR);
         }
+
+        // Have to store materials (and possible other things first) before restoring integration points and such).
+        SAVE_COMPONENTS(this->giveNumberOfMaterialModels(), Material, this->giveMaterial);
+        SAVE_COMPONENTS(this->giveNumberOfCrossSectionModels(), CrossSection, this->giveCrossSection);
+        SAVE_COMPONENTS(this->giveNumberOfInitialConditions(), InitialCondition, this->giveIc);
+        SAVE_COMPONENTS(this->giveNumberOfLoadTimeFunctions(), LoadTimeFunction, this->giveLoadTimeFunction);
+        SAVE_COMPONENTS(this->giveNumberOfNonlocalBarriers(), NonlocalBarrier, this->giveNonlocalBarrier);
+        SAVE_COMPONENTS(this->giveNumberOfRandomFieldGenerators(), RandomFieldGenerator, this->giveRandomFieldGenerator);
     }
 
     // save dof managers
@@ -1477,21 +1482,6 @@ Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     SAVE_COMPONENTS(this->giveNumberOfElements(), Element, this->giveElement);
     // boundary conditions
     SAVE_COMPONENTS(this->giveNumberOfBoundaryConditions(), GeneralBoundaryCondition, this->giveBc);
-
-    if ( ( mode & CM_Definition ) ) {
-        // store material models
-        SAVE_COMPONENTS(this->giveNumberOfMaterialModels(), Material, this->giveMaterial);
-        // store cross sections
-        SAVE_COMPONENTS(this->giveNumberOfCrossSectionModels(), CrossSection, this->giveCrossSection);
-        // store initial conditions
-        SAVE_COMPONENTS(this->giveNumberOfInitialConditions(), InitialCondition, this->giveIc);
-        // store load time functions
-        SAVE_COMPONENTS(this->giveNumberOfLoadTimeFunctions(), LoadTimeFunction, this->giveLoadTimeFunction);
-        // store nonlocal barriers
-        SAVE_COMPONENTS(this->giveNumberOfNonlocalBarriers(), NonlocalBarrier, this->giveNonlocalBarrier);
-        // store random field generators
-        SAVE_COMPONENTS(this->giveNumberOfRandomFieldGenerators(), RandomFieldGenerator, this->giveRandomFieldGenerator);
-    } // end if ( ( mode & CM_Definition ) ) {
 
     // store error estimator data
     ee = this->giveErrorEstimator();
@@ -1512,8 +1502,6 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     int i, serNum;
     bool domainUpdated;
     ErrorEstimator *ee;
-    int ct;
-    classType compId;
     long ncomp [ DOMAIN_NCOMP ];
 
     int nnodes, nelem, nmat, ncs, nbc, nic, nltf, nnlb, nrfg;
@@ -1555,6 +1543,12 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         xfemManagerList->clear();
         //this->clear();
 
+        RESTORE_COMPONENTS(nmat, Material, this->resizeMaterials, classFactory.createMaterial, this->giveMaterial, this->setMaterial);
+        RESTORE_COMPONENTS(ncs, CrossSection, this->resizeCrossSectionModels, classFactory.createCrossSection, this->giveCrossSection, this->setCrossSection);
+        RESTORE_COMPONENTS(nic, InitialCondition, this->resizeInitialConditions, classFactory.createInitialCondition, this->giveIc, setInitialCondition);
+        RESTORE_COMPONENTS(nltf, LoadTimeFunction, resizeLoadTimeFunctions, classFactory.createLoadTimeFunction, giveLoadTimeFunction, setLoadTimeFunction);
+        RESTORE_COMPONENTS(nnlb, NonlocalBarrier, resizeNonlocalBarriers, classFactory.createNonlocalBarrier, giveNonlocalBarrier, setNonlocalBarrier);
+        RESTORE_COMPONENTS(nrfg, RandomFieldGenerator, resizeRandomFieldGenerators, classFactory.createRandomFieldGenerator, giveRandomFieldGenerator, setRandomFieldGenerator);
 
         domainUpdated = true;
     } else {
@@ -1587,22 +1581,12 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     RESTORE_COMPONENTS(nelem, Element, this->resizeElements, classFactory.createElement, this->giveElement, this->setElement);
     RESTORE_COMPONENTS(nbc, GeneralBoundaryCondition, this->resizeBoundaryConditions, classFactory.createBoundaryCondition, this->giveBc, this->setBoundaryCondition);
 
-    if ( ( mode & CM_Definition ) ) {
-        RESTORE_COMPONENTS(nmat, Material, this->resizeMaterials, classFactory.createMaterial, this->giveMaterial, this->setMaterial);
-        RESTORE_COMPONENTS(ncs, CrossSection, this->resizeCrossSectionModels, classFactory.createCrossSection, this->giveCrossSection, this->setCrossSection);
-        RESTORE_COMPONENTS(nic, InitialCondition, this->resizeInitialConditions, classFactory.createInitialCondition, this->giveIc, setInitialCondition);
-        RESTORE_COMPONENTS(nltf, LoadTimeFunction, resizeLoadTimeFunctions, classFactory.createLoadTimeFunction, giveLoadTimeFunction, setLoadTimeFunction);
-        RESTORE_COMPONENTS(nnlb, NonlocalBarrier, resizeNonlocalBarriers, classFactory.createNonlocalBarrier, giveNonlocalBarrier, setNonlocalBarrier);
-        RESTORE_COMPONENTS(nrfg, RandomFieldGenerator, resizeRandomFieldGenerators, classFactory.createRandomFieldGenerator, giveRandomFieldGenerator, setRandomFieldGenerator);
-    }
-
     // restore error estimator data
     ee = this->giveErrorEstimator();
-    if ( domainUpdated ) {
-        ee->setDomain(this);
-    }
-
     if ( ee ) {
+        if ( domainUpdated ) {
+            ee->setDomain(this);
+        }
         if ( ( iores = ee->restoreContext(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
