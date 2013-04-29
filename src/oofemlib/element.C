@@ -426,14 +426,43 @@ Element :: giveLocationArray(IntArray &locationArray, EquationID eid, const Unkn
 
 void
 Element :: giveBoundaryLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIdArray)
-// Returns the location array of the receiver. This array is obtained by
-// simply appending the location array of every node on the boundary of the receiver. Consistent numbering with the interpolator.
 {
     IntArray bNodes;
     IntArray dofIDMask, masterDofIDs;
     IntArray nodalArray;
 
     this->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+    locationArray.resize(0);
+    if (dofIdArray) dofIdArray->resize(0);
+    for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
+        this->giveDofManDofIDMask(bNodes.at(i), eid, dofIDMask);
+        this->giveDofManager(bNodes.at(i))->giveLocationArray(dofIDMask, nodalArray, s);
+        locationArray.followedBy(nodalArray);
+        if (dofIdArray) {
+            this->giveDofManager(bNodes.at(i))->giveMasterDofIDArray(dofIDMask, masterDofIDs);
+            dofIdArray->followedBy(masterDofIDs);
+        }
+    }
+}
+
+
+void
+Element :: giveEdgeLocationArray(IntArray &locationArray, int edge, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIdArray)
+{
+    IntArray bNodes;
+    IntArray dofIDMask, masterDofIDs;
+    IntArray nodalArray;
+
+    FEInterpolation3d *interp;
+#if DEBUG
+    if ( !( interp = dynamic_cast< FEInterpolation3d* >( this->giveInterpolation() ) ) ) {
+        OOFEM_ERROR("Element :: giveEdgeLocationArray - No 3D-interpolator found");
+    }
+#else
+    interp = static_cast< FEInterpolation3d* >( this->giveInterpolation() );
+#endif
+    
+    interp->computeLocalEdgeMapping(bNodes, edge);
     locationArray.resize(0);
     if (dofIdArray) dofIdArray->resize(0);
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
