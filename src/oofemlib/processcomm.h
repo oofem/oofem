@@ -125,6 +125,15 @@ public:
      */
     int packFloatMatrix(const FloatMatrix &mtrx) { return mtrx.packToCommBuffer(* send_buff); }
     /**
+     * Packs given string into buffer.
+     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
+     * @return Nonzero if successful.
+     */
+    int packString(const std::string &str) {
+        this->packInt(str.size());
+        return this->packArray(str.data(), str.size());
+    }
+    /**
      *  Unpacks single integer value from buffer.
      *  @return Nonzero if successful.
      */
@@ -162,6 +171,22 @@ public:
      * @return Nonzero if successful.
      */
     int unpackFloatMatrix(FloatMatrix &mtrx) { return mtrx.unpackFromCommBuffer(* recv_buff); }
+    /**
+     * Unpacks given string value from buffer.
+     * @return Nonzero if successful.
+     */
+    int unpackString(std::string &str) {
+        int status;
+        int n;
+        char *tmpstr;
+        status = this->unpackInt( n );
+        tmpstr = new char[n + 1];
+        status = status && this->unpackArray(tmpstr, n);
+        tmpstr[n] = '\0';
+        str = tmpstr;
+        delete [] tmpstr;
+        return status;
+    }
     //@}
 
 

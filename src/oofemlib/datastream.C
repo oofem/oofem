@@ -50,7 +50,7 @@ int DataStream::read ( std::string& data )
     str[n] = '\0';
     data = str;
     delete [] str;
-    return n;
+    return 1;
 }
 
 int DataStream::write ( const std::string& data )
