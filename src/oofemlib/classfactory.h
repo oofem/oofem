@@ -155,40 +155,22 @@ class ClassFactory
 protected:
     /// Associative container containing element creators with element name as key.
     std :: map < std :: string, Element * ( * )(int, Domain *), CaseComp > elemList;
-    /// Associative container containing element creators with element id as key.
-    std :: map < classType, Element * ( * )(int, Domain *) > elemIdList;
     /// Associative container containing dofmanager creators with dofmanager  name as key.
     std :: map < std :: string, DofManager * ( * )(int, Domain *), CaseComp > dofmanList;
-    /// Associative container containing dofmanager creators with dofmanager id as key.
-    std :: map < classType, DofManager * ( * )(int, Domain *) > dofmanIdList;
     /// Associative container containing boundary condition creators with bc  name as key.
     std :: map < std :: string, GeneralBoundaryCondition * ( * )(int, Domain *), CaseComp > bcList;
-    /// Associative container containing boundary condition creators with bc id as key.
-    std :: map < classType, GeneralBoundaryCondition * ( * )(int, Domain *) > bcIdList;
     /// Associative container containing cross section creators with cross section name as key.
     std :: map < std :: string, CrossSection * ( * )(int, Domain *), CaseComp > csList;
-    /// Associative container containing cross section creators with cross section id as key.
-    std :: map < classType, CrossSection * ( * )(int, Domain *) > csIdList;
     /// Associative container containing material creators with material name as key.
     std :: map < std :: string, Material * ( * )(int, Domain *), CaseComp > matList;
-    /// Associative container containing material creators with material id as key.
-    std :: map < classType, Material * ( * )(int, Domain *) > matIdList;
     /// Associative container containing engng model creators with engng model name as key.
     std :: map < std :: string, EngngModel * ( * )(int, EngngModel *), CaseComp > engngList;
-    /// Associative container containing engng model creators with engng model id as key.
-    std :: map < classType, EngngModel * ( * )(int, EngngModel *) > engngIdList;
     /// Associative container containing load time function creators with ltf name as key.
     std :: map < std :: string, LoadTimeFunction * ( * )(int, Domain *), CaseComp > ltfList;
-    /// Associative container containing load time function creators with ltf id as key.
-    std :: map < classType, LoadTimeFunction * ( * )(int, Domain *) > ltfIdList;
     /// Associative container containing nonlocal barriers creators with barrier name as key.
     std :: map < std :: string, NonlocalBarrier * ( * )(int, Domain *), CaseComp > nlbList;
-    /// Associative container containing nonlocal barriers creators with barrier id as key.
-    std :: map < classType, NonlocalBarrier * ( * )(int, Domain *) > nlbIdList;
     /// Associative container containing random field generator creators with names as key.
     std :: map < std :: string, RandomFieldGenerator * ( * )(int, Domain *), CaseComp > rfgList;
-    /// Associative container containing random field generator creators with class id as key.
-    std :: map < classType, RandomFieldGenerator * ( * )(int, Domain *) > rfgIdList;
     /// Associative container containing export module creators.
     std :: map < std :: string, ExportModule * ( * )(int, EngngModel *), CaseComp > exportList;
     /// Associative container containing nonlinear solver creators.
@@ -235,14 +217,6 @@ public:
      */
     bool registerElement(const char *name, Element * ( *creator )(int, Domain *));
     /**
-     * Creates new instance of element corresponding to given element id.
-     * @param type ClassId determining the type of new instance.
-     * @param num  Element number.
-     * @param d    Domain assigned to new element.
-     * @return Newly allocated object of requested type, null if keyword not supported.
-     */
-    Element *createElement(classType type, int num, Domain *domain);
-    /**
      * Creates new instance of Dof manager corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param num  dofmanager number.
@@ -255,14 +229,6 @@ public:
      * @param name Keyword string.
      */
     bool registerDofManager(const char *name, DofManager * ( *creator )(int, Domain *));
-    /**
-     * Creates new instance of dof manager corresponding to given id.
-     * @param type ClassId determining the type of new instance.
-     * @param num  object's number.
-     * @param d    Domain assigned to new object.
-     * @return Newly allocated object of requested type, null if keyword not supported.
-     */
-    DofManager *createDofManager(classType type, int num, Domain *domain);
     /**
      * Creates new instance of boundary condition corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -277,14 +243,6 @@ public:
      */
     bool registerBoundaryCondition(const char *name, GeneralBoundaryCondition * ( *creator )(int, Domain *));
     /**
-     * Creates new instance of boundary condition corresponding to given id.
-     * @param type ClassId determining the type of new instance.
-     * @param num  object's number.
-     * @param d    Domain assigned to new object.
-     * @return Newly allocated object of requested type, null if keyword not supported.
-     */
-    GeneralBoundaryCondition *createBoundaryCondition(classType type, int num, Domain *domain);
-    /**
      * Creates new instance of cross section corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param num  object's number.
@@ -297,14 +255,6 @@ public:
      * @param name Keyword string.
      */
     bool registerCrossSection(const char *name, CrossSection * ( *creator )(int, Domain *));
-    /**
-     * Creates new instance of cross section corresponding to given id.
-     * @param type ClassId determining the type of new instance.
-     * @param num  object's number.
-     * @param d    Domain assigned to new object.
-     * @return Newly allocated object of requested type, null if keyword not supported.
-     */
-    CrossSection *createCrossSection(classType type, int num, Domain *domain);
     /**
      * Creates new instance of material corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -319,14 +269,6 @@ public:
      */
     bool registerMaterial(const char *name, Material * ( *creator )(int, Domain *));
     /**
-     * Creates new instance of material corresponding to given keyword.
-     * @param type ClassId determining the type of new instance.
-     * @param num  object's number.
-     * @param d    Domain assigned to new object.
-     * @return Newly allocated object of requested type, null if keyword not supported.
-     */
-    Material *createMaterial(classType type, int num, Domain *domain);
-    /**
      * Creates new instance of engng model corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param num  Engng model number.
@@ -339,14 +281,6 @@ public:
      * @param name Keyword string.
      */
     bool registerEngngModel(const char *name, EngngModel * ( *creator )(int, EngngModel *));
-    /**
-     * Creates new instance of engng model corresponding to given id.
-     * @param type ClassId determining the type of new instance.
-     * @param num  object's number.
-     * @param d    Domain assigned to new object.
-     * @return Newly allocated object of requested type, null if keyword not supported.
-     */
-    EngngModel *createEngngModel(classType type, int num, EngngModel *master);
     /**
      * Creates new instance of load time function corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -361,15 +295,6 @@ public:
      */
     bool registerLoadTimeFunction(const char *name, LoadTimeFunction * ( *creator )(int, Domain *));
     /**
-     * Creates new instance of load time function corresponding to given id.
-     * @param type ClassId determining the type of new instance.
-     * @param name Keyword string determining the type of new instance.
-     * @param num  object's number.
-     * @param d    Domain assigned to new object.
-     * @return Newly allocated object of requested type, null if keyword not supported.
-     */
-    LoadTimeFunction *createLoadTimeFunction(classType type, int num, Domain *domain);
-    /**
      * Creates new instance of nonlocal barrier corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param num  object's number.
@@ -383,15 +308,6 @@ public:
      */
     bool registerNonlocalBarrier(const char *name, NonlocalBarrier * ( *creator )(int, Domain *));
     /**
-     * Creates new instance of nonlocal barrier corresponding to given id.
-     * @param type ClassId determining the type of new instance.
-     * @param name Keyword string determining the type of new instance.
-     * @param num  object's number.
-     * @param d    Domain assigned to new object.
-     * @return Newly allocated object of requested type, null if keyword not supported.
-     */
-    NonlocalBarrier *createNonlocalBarrier(classType type, int num, Domain *domain);
-    /**
      * Creates new instance of random field generator corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param num  object's number.
@@ -404,15 +320,6 @@ public:
      * @param name Keyword string.
      */
     bool registerRandomFieldGenerator(const char *name, RandomFieldGenerator * ( *creator )(int, Domain *));
-    /**
-     * Creates new instance of random field generator corresponding to given id.
-     * @param type ClassId determining the type of new instance.
-     * @param name Keyword string determining the type of new instance.
-     * @param num  object's number.
-     * @param d    Domain assigned to new object.
-     * @return Newly allocated object of requested type, null if keyword not supported.
-     */
-    RandomFieldGenerator *createRandomFieldGenerator(classType type, int num, Domain *domain);
     /**
      * Creates new instance of export module corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -484,7 +391,7 @@ public:
     SparseMtrx *createSparseMtrx(SparseMtrxType type);
     /**
      * Creates new instance of DOF corresponding to given keyword.
-     * @param type classType id determining the type of new instance.
+     * @param type ID determining the type of new instance.
      * @param num  object's number.
      * @param dman Dof manager assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
@@ -508,15 +415,6 @@ public:
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
     ErrorEstimator *createErrorEstimator(ErrorEstimatorType type, int num, Domain *d);
-    /**
-     * Creates new instance of Initial Condition corresponding
-     * to given type.
-     * @param type classType id determining the type of new instance.
-     * @param num  object's number.
-     * @param d Domain assigned to new object.
-     * @return Newly allocated object of requested type, null if keyword not supported.
-     */
-    InitialCondition *createInitialCondition(classType type, int num, Domain *d);
     /**
      * Creates new instance of patch corresponding to given type.
      * @param type ID determining the type of new instance.
