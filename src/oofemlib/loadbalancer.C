@@ -194,10 +194,6 @@ LoadBalancer :: packMigratingData(Domain *d, ProcessCommunicator &pc)
 {
     int myrank = d->giveEngngModel()->giveRank();
     int iproc = pc.giveRank();
-    int idofman, ndofman;
-    classType dtype;
-    DofManager *dofman;
-    LoadBalancer :: DofManMode dmode;
 
     //  **************************************************
     //  Pack migrating data to remote partition
@@ -212,18 +208,16 @@ LoadBalancer :: packMigratingData(Domain *d, ProcessCommunicator &pc)
     ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
     ProcessCommDataStream pcDataStream(pcbuff);
     // loop over dofManagers
-    ndofman = d->giveNumberOfDofManagers();
-    for ( idofman = 1; idofman <= ndofman; idofman++ ) {
-        dofman = d->giveDofManager(idofman);
-        dmode = this->giveDofManState(idofman);
-        dtype = dofman->giveClassID();
+    int ndofman = d->giveNumberOfDofManagers();
+    for ( int idofman = 1; idofman <= ndofman; idofman++ ) {
+        DofManager *dofman = d->giveDofManager(idofman);
         // sync data to remote partition
         // if dofman already present on remote partition then there is no need to sync
         //if ((this->giveDofManPartitions(idofman)->findFirstIndexOf(iproc))) {
         if ( ( this->giveDofManPartitions(idofman)->findFirstIndexOf(iproc) ) &&
             ( !dofman->givePartitionList()->findFirstIndexOf(iproc) ) ) {
-            pcbuff->packInt(dtype);
-            pcbuff->packInt(dmode);
+            pcbuff->packString( dofman->giveInputRecordName() );
+            pcbuff->packInt( this->giveDofManState(idofman) );
             pcbuff->packInt( dofman->giveGlobalNumber() );
 
             // pack dofman state (this is the local dofman, not available on remote)
@@ -237,27 +231,25 @@ LoadBalancer :: packMigratingData(Domain *d, ProcessCommunicator &pc)
     }
 
     // pack end-of-dofman-section record
-    pcbuff->packInt(LOADBALANCER_END_DATA);
+    pcbuff->packString("");
 
-    int ielem, nelem = d->giveNumberOfElements(), nsend = 0;
+    int nelem = d->giveNumberOfElements(), nsend = 0;
 
-    Element *elem;
-
-    for ( ielem = 1; ielem <= nelem; ielem++ ) { // begin loop over elements
-        elem = d->giveElement(ielem);
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) { // begin loop over elements
+        Element *elem = d->giveElement(ielem);
         if ( ( elem->giveParallelMode() == Element_local ) &&
             ( this->giveElementPartition(ielem) == iproc ) ) {
-            // pack local element (node numbers shuld be global ones!!!)
+            // pack local element (node numbers should be global ones!!!)
             // pack type
-            pcbuff->packInt( elem->giveClassID() );
-            // nodal numbers shuld be packed as global !!
+            pcbuff->packString( elem->giveInputRecordName() );
+            // nodal numbers should be packed as global !!
             elem->saveContext(& pcDataStream, CM_Definition | CM_DefinitionGlobal | CM_State);
             nsend++;
         }
     } // end loop over elements
 
     // pack end-of-element-record
-    pcbuff->packInt(LOADBALANCER_END_DATA);
+    pcbuff->packString("");
 
     OOFEM_LOG_RELEVANT("[%d] LoadBalancer:: sending %d migrating elements to %d\n", myrank, nsend, iproc);
 
@@ -276,9 +268,9 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
     // int nproc=this->giveEngngModel()->giveNumberOfProcesses();
     int myrank = d->giveEngngModel()->giveRank();
     int iproc = pc.giveRank();
-    int _mode, _globnum, _type;
+    int _mode, _globnum;
     bool _newentry;
-    classType _etype;
+    std::string _type;
     IntArray _partitions, local_partitions;
     //LoadBalancer::DofManMode dmode;
     DofManager *dofman;
@@ -296,10 +288,12 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
     ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
     ProcessCommDataStream pcDataStream(pcbuff);
 
-    pcbuff->unpackInt(_type);
     // unpack dofman data
-    while ( _type != LOADBALANCER_END_DATA ) {
-        _etype = ( classType ) _type;
+    do {
+        pcbuff->unpackString(_type);
+        if ( _type.size() == 0 ) { // Empty string marks end of data
+            break;
+        }
         pcbuff->unpackInt(_mode);
         switch ( _mode ) {
         case LoadBalancer :: DM_Remote:
@@ -314,7 +308,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
              * }
              */
             _newentry = true;
-            dofman = classFactory.createDofManager(_etype, 0, d);
+            dofman = classFactory.createDofManager(_type.c_str(), 0, d);
 
             dofman->setGlobalNumber(_globnum);
             // unpack dofman state (this is the local dofman, not available on remote)
@@ -344,7 +338,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
              * }
              */
             _newentry = true;
-            dofman = classFactory.createDofManager(_etype, 0, d);
+            dofman = classFactory.createDofManager(_type.c_str(), 0, d);
 
 
             dofman->setGlobalNumber(_globnum);
@@ -366,26 +360,20 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
             break;
 
         default:
-            OOFEM_ERROR2("LoadBalancer::unpackMigratingData: unexpected dof manager type (%d)", _type);
+            OOFEM_ERROR2("LoadBalancer::unpackMigratingData: unexpected dof manager mode (%d)", _mode);
         }
-
-        // get next type record
-        pcbuff->unpackInt(_type);
-    }
-
-    ; // while (_type != LOADBALANCER_END_DATA);
+    } while ( 1 );
 
     // unpack element data
     Element *elem;
     int nrecv = 0;
     do {
-        pcbuff->unpackInt(_type);
-        if ( _type == LOADBALANCER_END_DATA ) {
+        pcbuff->unpackString(_type);
+        if ( _type.size() == 0 ) {
             break;
         }
 
-        _etype = ( classType ) _type;
-        elem = classFactory.createElement(_etype, 0, d);
+        elem = classFactory.createElement(_type.c_str(), 0, d);
         elem->restoreContext(& pcDataStream, CM_Definition | CM_State);
         elem->initForNewStep();
         dtm->addTransaction(DomainTransactionManager :: DTT_ADD, DomainTransactionManager :: DCT_Element, elem->giveGlobalNumber(), elem);
