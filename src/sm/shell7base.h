@@ -73,10 +73,6 @@ public:
     virtual int giveNumberOfDofs();
     virtual int giveNumberOfEdgeDofs() = 0;
     virtual int giveNumberOfEdgeDofManagers() = 0;
-    virtual Element_Geometry_Type giveGeometryType() const = 0;
-    virtual FEInterpolation *giveInterpolation() = 0;
-    virtual integrationDomain  giveIntegrationDomain() const = 0;
-
 
 protected:
     virtual Interface *giveInterface(InterfaceType it);

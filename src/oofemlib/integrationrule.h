@@ -196,7 +196,7 @@ public:
     /** Returns receiver number */
     int giveNumber() { return this->number; }
     /** Returns the domain for the receiver */
-    integrationDomain giveIntegrationDomain() { return this->intdomain; }
+    integrationDomain giveIntegrationDomain() const { return this->intdomain; }
     /**
      * Abstract service.
      * Returns required number of integration points to exactly integrate

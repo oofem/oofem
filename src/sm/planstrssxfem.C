@@ -159,11 +159,11 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
 }
 
 
-void PlaneStress2dXfem :: computeNmatrixAt(FloatArray &lcoords, FloatMatrix &answer)
+void PlaneStress2dXfem :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
 
     FloatArray Nc;
-    interpolation.evalN( Nc, lcoords, FEIElementGeometryWrapper(this) );
+    interpolation.evalN( Nc, *gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     // assemble xfem part of strain-displacement matrix
     XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
     FloatArray Nd;
@@ -177,7 +177,7 @@ void PlaneStress2dXfem :: computeNmatrixAt(FloatArray &lcoords, FloatMatrix &ans
 
         // Enrichment function and its gradient evaluated at the gauss point     
         EnrichmentFunction *ef = ei->giveEnrichmentFunction(1);
-        this->computeGlobalCoordinates(coords,lcoords);
+        this->computeGlobalCoordinates(coords, *gp->giveCoordinates());
         double efgp = ef->evaluateFunctionAt(&coords, ed);
 
         // adds up the number of the dofs from an enrichment item

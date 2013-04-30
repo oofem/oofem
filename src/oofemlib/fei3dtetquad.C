@@ -66,7 +66,7 @@ FEI3dTetQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
     FloatMatrix jacobianMatrix;
     FloatMatrix dNdxi;
     FloatMatrix coords(10,3);
-    this->evaldNdxi(dNdxi, lcoords);
+    this->evaldNdxi(dNdxi, lcoords, cellgeo);
     for (int i = 1; i <= 10; ++i) {
         const FloatArray *c = cellgeo.giveVertexCoordinates(i);
         coords.at(i,1) = c->at(1);
@@ -78,7 +78,7 @@ FEI3dTetQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
 }
 
 void
-FEI3dTetQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords)
+FEI3dTetQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double x1 = lcoords(0);
     double x2 = lcoords(1);
@@ -219,7 +219,7 @@ FEI3dTetQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
 {
     FloatMatrix dNdxi;
     FloatMatrix coords;
-    this->evaldNdxi(dNdxi, lcoords);
+    this->evaldNdxi(dNdxi, lcoords, cellgeo);
     jacobianMatrix.resize(3,3);
     coords.resize(10,3);
     for (int i = 1; i <= 10; ++i) {
