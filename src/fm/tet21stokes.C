@@ -173,12 +173,11 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
         this->interpolation_lin.evalN(Nh, * lcoords, FEIElementGeometryWrapper(this));
         double dV = detJ * gp->giveWeight();
 
-        for ( int j = 0, k = 0; j < dN.giveNumberOfRows(); j++, k+=3 ) {
-            dN_V(k + 0) = B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(j, 0);
-            dN_V(k + 1) = B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(j, 1);
-            dN_V(k + 2) = B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(j, 2);
+        for ( int j = 0, k = 0; j < dN.giveNumberOfColumns(); j++, k+=3 ) {
+            dN_V(k + 0) = B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(0, j);
+            dN_V(k + 1) = B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(1, j);
+            dN_V(k + 2) = B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(2, j);
         }
-
         epsp.beProductOf(B, a_velocity);
         pressure = Nh.dotProduct(a_pressure);
         mat->computeDeviatoricStressVector(devStress, r_vol, gp, epsp, pressure, tStep);
