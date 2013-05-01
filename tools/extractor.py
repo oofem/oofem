@@ -16,7 +16,7 @@ rt_loadlevel= 9994
 global rectime, recnumber, recdofnum, recvalue
 global firstTimeStepFlag, debug
 global tolerance
-
+global error_on_missing_record
 # TODO:
 # - add reading of userrec from file
 # - add support for extractor/checker mode (or split into separate scripts)
@@ -44,6 +44,8 @@ recursion_level=0
 #default mode 'e' - Extractor
 #mode 'c' - Checker, can be turned on on command line with '-c' option
 mode='e'
+#flag, can be changed by "-p" option
+error_on_missing_record = True
 
 
 class Context:
@@ -483,6 +485,8 @@ def match_beamrec (context):
 
 
 def check_results (context, tolerance):
+    global error_on_missing_record
+
     success = 1
     if ( context.parentfilename):
         header= "Checker.py: "+(os.path.basename(context.parentfilename)+'->'+os.path.basename(context.infilename)).ljust(55)[:55]
@@ -495,10 +499,14 @@ def check_results (context, tolerance):
             if (rec[1] > 0): success = 0
             continue
         elif (context.recVal[irec] == '--'):
-            if (success): print header # print header before reporting error for the first time
-            print "\tError when checking rule ",irec,": not found"
-            success = 0
-            continue
+            if error_on_missing_record:
+                if (success): print header # print header before reporting error for the first time
+                print "\tError when checking rule ",irec,": not found"
+                success = 0
+                continue
+            else:
+                print "\tWarning when checking rule ",irec,": not found"
+                continue
 
         try:
             err = (float(rec[-1])-float(context.recVal[irec]))
@@ -545,7 +553,7 @@ The syntax of extractor input file is following:
 ------BEGIN---------
 oofem_output_file_name
 ....
-#%BEGIN_CHECK% [tolerance #]
+#%BEGIN_CHECK% [tolerance #] [error_when_missing #]
 #DOFMAN    {tStep #} number # dof # type [dtfva] {value #}
 #ELEMENT   {tStep #} number # [irule #] gp # keyword # component # {value #}
 #REACTION  {tStep #} number # dof # {value #}
@@ -558,6 +566,11 @@ Other lines not matching the syntax are ignored.
 The records in {} are required only when in checker mode,
 records in <> are available only in extractor mode.
 the records in [] are optional.
+
+The error_when_missing flag allows to change the behaviour, 
+when some records were not found. When set to 0, the check will
+pass even if records not found (warning always reported), when
+set to 1 (default), error is always generated on missing record.
 
 The type value is a single character determining the type of dof
 value, where 'd' stands for displavement, 'v' for velocity,
@@ -580,7 +593,7 @@ patch100.out
 
 def process_file (infilename, parentfilename):
     #parentfilename name of master file name, none otherwise
-    global userrec, mode, tolerance, recursion_level
+    global userrec, mode, tolerance, recursion_level, error_on_missing_record
     context = Context();
 
     result = 0
@@ -609,6 +622,12 @@ def process_file (infilename, parentfilename):
                 if match:
                     tolerance = match.group(1)
                     if debug: print "Tolerance = ", tolerance
+                match=re.search("error_when_missing\s+(\d+)", line)
+                if match:
+                    val = int(match.group(1))
+                    if (val == 0):
+                        error_on_missing_record=False
+                    print "error_on_missing_record ", error_on_missing_record
                 break
 
     if begin==0:
@@ -681,7 +700,7 @@ def main():
 
     try:
         # options expecting value followed by ':', see also Unix getopt
-        opts, args = getopt.getopt (sys.argv[1:],'cf:')
+        opts, args = getopt.getopt (sys.argv[1:],'cpf:')
     except getopt.GetoptError, err:
         print str(err)
         usage()
@@ -696,6 +715,8 @@ def main():
             infileflag = True
         elif o == "-c":
             mode = 'c'
+        elif o == "-p":
+            error_on_missing_record = False
         else:
             usage()
             assert False, "unhandled option"
