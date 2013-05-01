@@ -38,8 +38,8 @@
  * PhD Thesis, EPFL, Lausanne, 1992.
  */
 
-#ifndef gausspnt_h
-#define gausspnt_h
+#ifndef gausspoint_h
+#define gausspoint_h
 
 #include "integrationrule.h"
 #include "integrationpointstatus.h"
@@ -243,9 +243,4 @@ public:
 
 typedef GaussPoint IntegrationPoint;
 } // end namespace oofem
-#endif // gausspnt_h
-
-
-
-
-
+#endif // gausspoint_h

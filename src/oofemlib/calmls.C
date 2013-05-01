@@ -161,7 +161,9 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 
     XInitial = * X;
     ddX.resize(neq);
+    ddX.zero();
     deltaXt.resize(neq);
+    deltaXt.zero();
 
     status = NM_None;
     this->giveLinearSolver();

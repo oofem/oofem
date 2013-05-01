@@ -84,6 +84,7 @@ public:
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo);
 
 protected:
     virtual void giveDerivatives(FloatMatrix &dn, const FloatArray &lc);

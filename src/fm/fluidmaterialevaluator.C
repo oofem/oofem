@@ -36,7 +36,7 @@
 #include "inputrecord.h"
 #include "timestep.h"
 #include "domain.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "fluiddynamicmaterial.h"
 #include "loadtimefunction.h"
 

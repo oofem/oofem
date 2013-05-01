@@ -26,7 +26,7 @@
  */
 
 #include "hydram.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "datastream.h"
 #include "mathfem.h"
 #include "contextioerr.h"

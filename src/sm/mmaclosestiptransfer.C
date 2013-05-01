@@ -36,7 +36,7 @@
 #include "spatiallocalizer.h"
 #include "domain.h"
 #include "material.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 
 namespace oofem {
 

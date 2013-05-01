@@ -38,7 +38,7 @@
 #include "domain.h"
 #include "equationid.h"
 #include "gaussintegrationrule.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "bcgeomtype.h"
 #include "generalboundarycondition.h"
 #include "load.h"
@@ -81,7 +81,7 @@ void Tet21Stokes :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, this->numberOfGaussPoints, _2dFlow);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, this->numberOfGaussPoints, _3dFlow);
     }
 }
 
@@ -156,13 +156,12 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FluidDynamicMaterial *mat = static_cast<FluidDynamicMaterial * >( this->giveMaterial() );
     FloatArray a_pressure, a_velocity, devStress, epsp, BTs, Nh, dN_V(30);
-    FloatMatrix dN, B(4, 60);
+    FloatMatrix dN, B(6, 30);
     double r_vol, pressure;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
-    FloatArray momentum(30), conservation(4);
-    momentum.zero();
-    conservation.zero();
+    FloatArray momentum, conservation;
+
     B.zero();
     GaussPoint *gp;
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
@@ -174,12 +173,11 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
         this->interpolation_lin.evalN(Nh, * lcoords, FEIElementGeometryWrapper(this));
         double dV = detJ * gp->giveWeight();
 
-        for ( int j = 0, k = 0; j < 10; j++, k+=3 ) {
-            dN_V(k + 0) = B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(j, 0);
-            dN_V(k + 1) = B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(j, 1);
-            dN_V(k + 2) = B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(j, 2);
+        for ( int j = 0, k = 0; j < dN.giveNumberOfColumns(); j++, k+=3 ) {
+            dN_V(k + 0) = B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(0, j);
+            dN_V(k + 1) = B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(1, j);
+            dN_V(k + 2) = B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(2, j);
         }
-
         epsp.beProductOf(B, a_velocity);
         pressure = Nh.dotProduct(a_pressure);
         mat->computeDeviatoricStressVector(devStress, r_vol, gp, epsp, pressure, tStep);
@@ -204,8 +202,8 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
     FloatArray vec;
 
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
-    answer.resize(15);
-    answer.zero();
+    answer.resize(0);
+
     for ( int i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition
         load_number = this->boundaryLoadArray.at(2 * i - 1);
         load_id = this->boundaryLoadArray.at(2 * i);
@@ -232,20 +230,18 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
 void Tet21Stokes :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep)
 {
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    GaussPoint *gp;
-    FloatArray N, gVector, *lcoords, temparray(30);
-    double dA, detJ, rho;
+    FloatArray N, gVector, temparray(30);
 
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
         for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
-            gp = iRule->getIntegrationPoint(k);
-            lcoords = gp->giveCoordinates();
+            GaussPoint *gp = iRule->getIntegrationPoint(k);
+            FloatArray *lcoords = gp->giveCoordinates();
 
-            rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, tStep);
-            detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
-            dA = detJ * gp->giveWeight();
+            double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, tStep);
+            double detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
+            double dA = detJ * gp->giveWeight();
 
             this->interpolation_quad.evalN(N, * lcoords, FEIElementGeometryWrapper(this));
             for ( int j = 0; j < N.giveSize(); j++ ) {
@@ -259,6 +255,7 @@ void Tet21Stokes :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, Time
     answer.resize(34);
     answer.zero();
     answer.assemble( temparray, this->momentum_ordering );
+
 }
 
 void Tet21Stokes :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load, int iSurf, TimeStep *tStep)
@@ -311,17 +308,16 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    GaussPoint *gp;
-    FloatMatrix B(6, 60), EdB, K, G, Dp, DvT, C, Ed, dN;
-    FloatArray *lcoords, dN_V(30), Nlin, Ep, Cd, tmpA, tmpB;
+    FloatMatrix B(6, 30), EdB, K, G, Dp, DvT, C, Ed, dN;
+    FloatArray dN_V(30), Nlin, Ep, Cd, tmpA, tmpB;
     double Cp;
 
     B.zero();
 
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         // Compute Gauss point and determinant at current element
-        gp = iRule->getIntegrationPoint(i);
-        lcoords = gp->giveCoordinates();
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
+        FloatArray *lcoords = gp->giveCoordinates();
 
         double detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
         double dV = detJ * gp->giveWeight();
@@ -329,10 +325,12 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
         this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
         this->interpolation_lin.evalN(Nlin, * lcoords, FEIElementGeometryWrapper(this));
 
-        for ( int j = 0, k = 0; j < 10; j++, k+=3 ) {
-            dN_V(k + 0) = B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(j, 0);
-            dN_V(k + 1) = B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(j, 1);
-            dN_V(k + 2) = B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(j, 2);
+//        dN.printYourself();
+
+        for ( int j = 0, k = 0; j < dN.giveNumberOfColumns(); j++, k+=3 ) {
+            dN_V(k + 0) = B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(0, j);
+            dN_V(k + 1) = B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(1, j);
+            dN_V(k + 2) = B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(2, j);
         }
 
         // Computing the internal forces should have been done first.
@@ -341,6 +339,8 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
         mat->giveVolumetricDeviatoricStiffness(Cd, TangentStiffness, gp, tStep); // deps_vol/deps_dev
         mat->giveVolumetricPressureStiffness(Cp, TangentStiffness, gp, tStep); // deps_vol/dp
 
+//        Ed.printYourself();
+//        B.printYourself();
         EdB.beProductOf(Ed,B);
         K.plusProductSymmUpper(B, EdB, dV);
         G.plusDyadUnsym(dN_V, Nlin, -dV);
@@ -366,6 +366,10 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.assemble(GDp, this->momentum_ordering, this->conservation_ordering);
     answer.assemble(GTDvT, this->conservation_ordering, this->momentum_ordering);
     answer.assemble(C, this->conservation_ordering, this->conservation_ordering);
+//    K.printYourself();
+//    GDp.printYourself();
+//    GTDvT.printYourself();
+//    C.printYourself();
 }
 
 FEInterpolation *Tet21Stokes :: giveInterpolation()
@@ -445,7 +449,7 @@ double Tet21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const F
 {
     FloatArray center;
     FloatArray lcoords;
-    lcoords.setValues(4, 0.3333333, 0.3333333, 0.3333333, 0.3333333);
+    lcoords.setValues(3, 0.3333333, 0.3333333, 0.3333333);
     this->computeGlobalCoordinates(center, lcoords);
     return center.distance(coords);
 }
@@ -471,28 +475,11 @@ void Tet21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answe
         if ( node <= 4 ) {
             answer.at(1) = this->giveNode(node)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
         } else {
-            double a, b;
-            if ( node == 5 ) {
-                a = this->giveNode(1)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
-                b = this->giveNode(2)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
-            } else if ( node == 6 ) {
-                a = this->giveNode(2)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
-                b = this->giveNode(3)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
-            } else if ( node == 7 ) {
-                a = this->giveNode(3)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
-                b = this->giveNode(1)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
-            } else if ( node == 8 ) {
-                a = this->giveNode(1)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
-                b = this->giveNode(4)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
-            } else if ( node == 9 ) {
-                a = this->giveNode(2)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
-                b = this->giveNode(4)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
-            } else /*if ( node == 10 )*/ {
-                a = this->giveNode(3)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
-                b = this->giveNode(4)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
-            }
-
-            answer.at(1) = ( a + b ) / 2;
+            IntArray eNodes;
+            this->interpolation_quad.computeLocalEdgeMapping(eNodes, node - 4);
+            answer.at(1) = 0.5 * (
+                this->giveNode(eNodes.at(1))->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) +
+                this->giveNode(eNodes.at(2))->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) );
         }
     } else {
         answer.resize(0);

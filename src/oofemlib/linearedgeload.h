@@ -36,7 +36,7 @@
 #define linearedgeload_h
 
 #include "boundaryload.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "floatarray.h"
 
 ///@name Input fields for LinearEdgeLoad

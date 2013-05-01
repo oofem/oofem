@@ -34,7 +34,7 @@
 
 #include "crosssection.h"
 #include "dictionary.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "material.h"
 #include "contextioerr.h"
 

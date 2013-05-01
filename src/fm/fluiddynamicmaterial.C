@@ -33,7 +33,7 @@
  */
 
 #include "fluiddynamicmaterial.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "floatarray.h"
 #include "contextioerr.h"
 

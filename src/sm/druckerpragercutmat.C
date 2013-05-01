@@ -36,7 +36,7 @@
 #include "isolinearelasticmaterial.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "stressvector.h"
 #include "strainvector.h"
 #include "mathfem.h"

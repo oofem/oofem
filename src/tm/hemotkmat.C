@@ -34,7 +34,7 @@
 
 #include "hemotkmat.h"
 #include "floatmatrix.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "mathfem.h"
 
 namespace oofem {

@@ -37,7 +37,7 @@
 
 #include "crosssection.h"
 #include "material.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 

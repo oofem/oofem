@@ -33,7 +33,7 @@
  */
 
 #include "lobattoir.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "floatarray.h"
 #include "mathfem.h"
 
@@ -43,6 +43,8 @@ LobattoIntegrationRule :: LobattoIntegrationRule(int n, Element *e,
                                                  int startIndx, int endIndx, bool dynamic) :
     IntegrationRule(n, e, startIndx, endIndx, dynamic) { }
 
+LobattoIntegrationRule :: LobattoIntegrationRule(int n, Element *e) :
+    IntegrationRule(n, e) { }
 
 LobattoIntegrationRule :: ~LobattoIntegrationRule()
 { }

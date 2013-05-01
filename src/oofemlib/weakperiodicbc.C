@@ -44,7 +44,7 @@
 #include "node.h"
 #include "masterdof.h"
 #include "sparsemtrx.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "mathfem.h"
 #include "fei2dtrlin.h"
@@ -244,7 +244,7 @@ void WeakPeriodicbc :: computeElementTangent(FloatMatrix &B, Element *e, int bou
     }
 }
 
-void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain)
+void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if ( type != StiffnessMatrix ) {
         return;
@@ -341,7 +341,7 @@ double WeakPeriodicbc :: computeBaseFunctionValue(int baseID, double coordinate)
 
 double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                         CharType type, ValueModeType mode,
-                                        const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
+                                        const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
     if ( type != InternalForcesVector ) {
         return 0.0;
@@ -407,7 +407,7 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
                         masterDofIDs.followedBy(nodalArray);
 
                         double value = thisElement->giveDofManager( bNodes.at(i) )->giveDof(j)->giveUnknown(mode, tStep);
-                        a.resize( sideLocation.giveSize() );
+                        a.resizeWithValues( sideLocation.giveSize() );
                         a.at( sideLocation.giveSize() ) = value;
                         dofCountOnBoundary++;
                         break;

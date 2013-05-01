@@ -41,10 +41,12 @@ namespace oofem {
 /**
  * Class representing a 2d quadrilateral with bi-quadratic interpolation based on isoparametric coordinates.
  * Local Node Numbering
+ *       ^ eta
+ *       |
  * (4)--(7)--(3)
  *  |         |
  *  |         |
- * (8)  (9)  (6)
+ * (8)  (9)  (6)-->ksi
  *  |         |
  *  |         |
  * (1)--(5)--(2)

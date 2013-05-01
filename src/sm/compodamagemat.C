@@ -35,7 +35,7 @@
 #include "compodamagemat.h"
 #include "structuralelement.h"
 #include "material.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "structuralmaterial.h"
 #include "structuralms.h"
 #include "mathfem.h"

@@ -34,7 +34,7 @@
 
 #include "vtkxmlexportmodule.h"
 #include "element.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "timestep.h"
 #include "engngm.h"
 #include "node.h"

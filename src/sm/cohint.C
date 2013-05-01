@@ -33,7 +33,7 @@
  */
 
 #include "cohint.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "contextioerr.h"

@@ -37,7 +37,7 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "structuralms.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "intarray.h"
 #include "structuralmaterial.h"
 #include "isolinearelasticmaterial.h"

@@ -52,6 +52,9 @@
 #include "randomfieldgeneratorclassfactory.h"
 
 // No class factory files for these;
+#include "gaussintegrationrule.h"
+#include "lobattoir.h"
+
 #include "subspaceit.h"
 #include "inverseit.h"
 #include "slepcsolver.h"
@@ -127,20 +130,10 @@ ClassFactory :: ClassFactory()
     elemList [ name ]  = elemCreator< _class >;
 #include "elementclassfactory.h"
 
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, name, id) \
-    elemIdList [ id ] = elemCreator< _class >;
-#include "elementclassfactory.h"
-
     // register dof managers
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, name, id) \
     dofmanList [ name ]  = dofmanCreator< _class >;
-#include "dofmanclassfactory.h"
-
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, name, id) \
-    dofmanIdList [ id ] = dofmanCreator< _class >;
 #include "dofmanclassfactory.h"
 
     // register boundary conditions
@@ -149,20 +142,10 @@ ClassFactory :: ClassFactory()
     bcList [ name ]  = bcCreator< _class >;
 #include "boundaryconditionclassfactory.h"
 
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, name, id) \
-    bcIdList [ id ] = bcCreator< _class >;
-#include "boundaryconditionclassfactory.h"
-
     // register cross sections
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, name, id) \
     csList [ name ]  = csCreator< _class >;
-#include "crosssectionclassfactory.h"
-
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, name, id) \
-    csIdList [ id ] = csCreator< _class >;
 #include "crosssectionclassfactory.h"
 
     // register materials
@@ -171,20 +154,10 @@ ClassFactory :: ClassFactory()
     matList [ name ]  = matCreator< _class >;
 #include "materialclassfactory.h"
 
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, name, id) \
-    matIdList [ id ] = matCreator< _class >;
-#include "materialclassfactory.h"
-
     // register engng models
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, name, id) \
     engngList [ name ]  = engngCreator< _class >;
-#include "engngmodelclassfactory.h"
-
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, name, id) \
-    engngIdList [ id ] = engngCreator< _class >;
 #include "engngmodelclassfactory.h"
 
     // register load time functions
@@ -193,29 +166,16 @@ ClassFactory :: ClassFactory()
     ltfList [ name ]  = ltfCreator< _class >;
 #include "ltfclassfactory.h"
 
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, name, id) \
-    ltfIdList [ id ] = ltfCreator< _class >;
-#include "ltfclassfactory.h"
     // register nonlocal barriers
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, name, id) \
     nlbList [ name ]  = nlbCreator< _class >;
 #include "nonlocalbarrierclassfactory.h"
 
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, name, id) \
-    nlbIdList [ id ] = nlbCreator< _class >;
-#include "nonlocalbarrierclassfactory.h"
     // register random field generators
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, name, id) \
     rfgList [ name ]  = rfgCreator< _class >;
-#include "randomfieldgeneratorclassfactory.h"
-
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, name, id) \
-    rfgIdList [ id ] = rfgCreator< _class >;
 #include "randomfieldgeneratorclassfactory.h"
 
 #undef REGISTER_CLASS
@@ -301,9 +261,10 @@ ErrorEstimator * ClassFactory :: createErrorEstimator(ErrorEstimatorType type, i
     return ( errEstList.count ( type ) == 1 ) ? errEstList [ type ] (num, d) : NULL;
 }
 
-InitialCondition * ClassFactory :: createInitialCondition(classType type, int num, Domain *d)
+InitialCondition * ClassFactory :: createInitialCondition(const char *name, int num, Domain *d)
 {
-    if (type == InitialConditionClass) {
+    CaseComp c;
+    if ( c(name, "initialcondition") ) {
         return new InitialCondition(num, d);
     }
     return NULL;
@@ -342,11 +303,6 @@ bool ClassFactory :: registerElement(const char *name, Element * ( *creator )(in
     return true;
 }
 
-Element* ClassFactory :: createElement( classType type, int number, Domain* domain )
-{
-    return ( elemIdList.count ( type ) == 1 ) ? elemIdList [ type ] ( number, domain ) : NULL;
-}
-
 DofManager* ClassFactory :: createDofManager( const char* name, int number, Domain* domain )
 {
     return ( dofmanList.count ( name ) == 1 ) ? dofmanList [ name ] ( number, domain ) : NULL;
@@ -357,11 +313,6 @@ bool ClassFactory :: registerDofManager(const char *name, DofManager * ( *creato
     printf("Register %s\n", name);
     dofmanList[name] = creator;
     return true;
-}
-
-DofManager* ClassFactory :: createDofManager( classType type, int number, Domain* domain )
-{
-    return ( dofmanIdList.count ( type ) == 1 ) ? dofmanIdList [ type ] ( number, domain ) : NULL;
 }
 
 GeneralBoundaryCondition* ClassFactory :: createBoundaryCondition( const char* name, int number, Domain* domain )
@@ -376,11 +327,6 @@ bool ClassFactory :: registerBoundaryCondition(const char *name, GeneralBoundary
     return true;
 }
 
-GeneralBoundaryCondition* ClassFactory :: createBoundaryCondition( classType type, int number, Domain* domain )
-{
-    return ( bcIdList.count ( type ) == 1 ) ? bcIdList [ type ] ( number, domain ) : NULL;
-}
-
 CrossSection* ClassFactory :: createCrossSection( const char* name, int number, Domain* domain )
 {
     return ( csList.count ( name ) == 1 ) ? csList [ name ] ( number, domain ) : NULL;
@@ -391,11 +337,6 @@ bool ClassFactory :: registerCrossSection(const char *name, CrossSection * ( *cr
     printf("Register %s\n", name);
     csList[name] = creator;
     return true;
-}
-
-CrossSection* ClassFactory :: createCrossSection( classType type, int number, Domain* domain )
-{
-    return ( csIdList.count ( type ) == 1 ) ? csIdList [ type ] ( number, domain ) : NULL;
 }
 
 Material* ClassFactory :: createMaterial( const char* name, int number, Domain* domain )
@@ -410,11 +351,6 @@ bool ClassFactory :: registerMaterial(const char *name, Material * ( *creator )(
     return true;
 }
 
-Material* ClassFactory :: createMaterial( classType type, int number, Domain* domain )
-{
-    return ( matIdList.count ( type ) == 1 ) ? matIdList [ type ] ( number, domain ) : NULL;
-}
-
 EngngModel* ClassFactory :: createEngngModel( const char* name, int number, EngngModel* master )
 {
     return ( engngList.count ( name ) == 1 ) ? engngList [ name ] ( number, master ) : NULL;
@@ -425,11 +361,6 @@ bool ClassFactory :: registerEngngModel(const char *name, EngngModel * ( *creato
     printf("Register %s\n", name);
     engngList[name] = creator;
     return true;
-}
-
-EngngModel* ClassFactory :: createEngngModel( classType type, int number, EngngModel* master )
-{
-    return ( engngIdList.count ( type ) == 1 ) ? engngIdList [ type ] ( number, master ) : NULL;
 }
 
 LoadTimeFunction* ClassFactory :: createLoadTimeFunction( const char* name, int number, Domain* domain )
@@ -444,11 +375,6 @@ bool ClassFactory :: registerLoadTimeFunction(const char *name, LoadTimeFunction
     return true;
 }
 
-LoadTimeFunction* ClassFactory :: createLoadTimeFunction( classType type, int number, Domain* domain )
-{
-    return ( ltfIdList.count ( type ) == 1 ) ? ltfIdList [ type ] ( number, domain ) : NULL;
-}
-
 NonlocalBarrier* ClassFactory :: createNonlocalBarrier( const char* name, int number, Domain* domain )
 {
     return ( nlbList.count ( name ) == 1 ) ? nlbList [ name ] ( number, domain ) : NULL;
@@ -461,11 +387,6 @@ bool ClassFactory :: registerNonlocalBarrier(const char *name, NonlocalBarrier *
     return true;
 }
 
-NonlocalBarrier* ClassFactory :: createNonlocalBarrier( classType type, int number, Domain* domain )
-{
-    return ( nlbIdList.count ( type ) == 1 ) ? nlbIdList [ type ] ( number, domain ) : NULL;
-}
-
 RandomFieldGenerator* ClassFactory :: createRandomFieldGenerator( const char* name, int number, Domain* domain )
 {
     return ( rfgList.count ( name ) == 1 ) ? rfgList [ name ] ( number, domain ) : NULL;
@@ -476,11 +397,6 @@ bool ClassFactory :: registerRandomFieldGenerator(const char *name, RandomFieldG
     printf("Register %s\n", name);
     rfgList[name] = creator;
     return true;
-}
-
-RandomFieldGenerator* ClassFactory :: createRandomFieldGenerator( classType type, int number, Domain* domain )
-{
-    return ( rfgIdList.count ( type ) == 1 ) ? rfgIdList [ type ] ( number, domain ) : NULL;
 }
 
 ExportModule* ClassFactory :: createExportModule(const char *name, int number, EngngModel *emodel)
@@ -593,10 +509,12 @@ SparseGeneralEigenValueSystemNM* ClassFactory :: createGeneralizedEigenValueSolv
     return NULL;
 }
 
-IntegrationRule* ClassFactory :: createIRule(classType type, int number, Element *e)
+IntegrationRule* ClassFactory :: createIRule(IntegrationRuleType type, int number, Element *e)
 {
-    if ( type == GaussIntegrationRuleClass ) {
+    if ( type == IRT_Gauss ) {
         return new GaussIntegrationRule(number, e);
+    } else if ( type == IRT_Lobatto ) {
+        return new LobattoIntegrationRule(number, e);
     }
     return NULL;
 }

@@ -38,7 +38,7 @@
 #include "domain.h"
 #include "node.h"
 #include "element.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "matresponsemode.h"
 #include "crosssection.h"

@@ -38,7 +38,7 @@
 #include "node.h"
 #include "connectivitytable.h"
 #include "integrationrule.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 
 #include <list>
 

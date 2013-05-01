@@ -38,7 +38,7 @@
 #include "material.h"
 #include "structuralms.h"
 #include "floatmatrix.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 
 namespace oofem {
 IsotropicLinearElasticMaterial :: IsotropicLinearElasticMaterial(int n, Domain *d,

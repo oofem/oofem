@@ -36,7 +36,7 @@
 #include "timestep.h"
 #include "structuralelement.h"
 #include "materialinterface.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "truss3d.h"
 #include "classfactory.h"
 

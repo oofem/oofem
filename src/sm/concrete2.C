@@ -36,7 +36,7 @@
 #include "material.h"
 #include "domain.h"
 #include "floatmatrix.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "mathfem.h"
 #include "engngm.h"
 #include "timestep.h"

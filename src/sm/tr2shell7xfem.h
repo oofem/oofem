@@ -103,10 +103,10 @@ protected:
     // VTK
     void vtkGiveFictiousNodeCoords(FloatArray nodeCoords[15], int layer);
     void vtkGiveUpdatedFictiousNodeCoords(FloatArray nodeCoords[15], int layer, TimeStep *tStep);
-    
+
 public:
-    Tr2Shell7XFEM(int n, Domain *d);	// constructor
-    virtual ~Tr2Shell7XFEM() { }		// destructor -> declaring as virtual will make each subclass call their respective destr.
+    Tr2Shell7XFEM(int n, Domain *d);
+    virtual ~Tr2Shell7XFEM() { }     // destructor -> declaring as virtual will make each subclass call their respective destr.
     // definition & identification
     //virtual int giveNumberOfDofs()           { return 42; }
     //virtual int giveNumberOfDofs()           { return 42+14; }///@todo temporary! remove!
@@ -114,15 +114,12 @@ public:
     virtual int giveNumberOfEdgeDofs()       { return 21; }
     //virtual int giveNumberOfEdgeDofs()       { return 35; } ///@todo temporary! remove!
     virtual int giveNumberOfEdgeDofManagers(){ return 3;  }
-    virtual const char *giveClassName()                const { return "Tr2Shell7XFEM"; }
-    virtual classType giveClassID()                    const { return Tr2Shell7XFEMClass; }
-    //virtual Element_Geometry_Type giveGeometryType()   const { return EGT_triangle_2; }
-    virtual Element_Geometry_Type giveGeometryType()   const { return EGT_Composite; }
-    virtual integrationDomain  giveIntegrationDomain() const { return _Triangle; } // write new wedge-like type 'layeredWedge'
-
-
+    virtual const char *giveClassName() const { return "Tr2Shell7XFEM"; }
+    virtual classType giveClassID() const { return Tr2Shell7XFEMClass; }
+    //virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_Composite; }
+    virtual integrationDomain giveIntegrationDomain() { return _Triangle; } // write new wedge-like type 'layeredWedge'
 };
-
 
 
 } // end namespace oofem

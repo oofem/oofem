@@ -79,14 +79,14 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
+                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                   CharType type, ValueModeType mode,
-                                  const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
+                                  const UnknownNumberingScheme &s, FloatArray *eNorms = NULL);
 
     virtual void giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
-                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
+                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual classType giveClassID() const { return SurfaceTensionBoundaryConditionClass; }
     virtual const char *giveClassName() const { return "SurfaceTensionBoundaryCondition"; }

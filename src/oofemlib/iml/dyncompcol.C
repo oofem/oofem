@@ -948,7 +948,7 @@ DynCompCol :: insertRowInColumn(int col, int row)
 
     if ( oldsize == 0 ) {
         rowind_ [ col ]->resize(1, DynCompCol_CHUNK);
-        columns_ [ col ]->resize(1, DynCompCol_CHUNK);
+        columns_ [ col ]->resizeWithValues(1, DynCompCol_CHUNK);
         columns_ [ col ]->at(1) = 0.0;
         rowind_ [ col ]->at(1) = row;
         return 1;
@@ -981,7 +981,7 @@ DynCompCol :: insertRowInColumn(int col, int row)
 
     // insert row at middle+1 position
     rowind_ [ col ]->resize(oldsize + 1, DynCompCol_CHUNK);
-    columns_ [ col ]->resize(oldsize + 1, DynCompCol_CHUNK);
+    columns_ [ col ]->resizeWithValues(oldsize + 1, DynCompCol_CHUNK);
 
     for ( i = oldsize; i >= right; i-- ) {
         rowind_ [ col ]->at(i + 1) = rowind_ [ col ]->at(i);

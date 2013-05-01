@@ -36,7 +36,7 @@
 #include "maxwellChM.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "structuralcrosssection.h"
 #include "timestep.h"
 #include "contextioerr.h"
@@ -151,6 +151,7 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFor
     if ( mode == VM_Incremental ) {
         this->giveUnitComplianceMatrix(B, ReducedForm, gp, atTime);
         reducedAnswer.resize( B.giveNumberOfRows() );
+        reducedAnswer.zero();
 
         for ( mu = 1; mu <= nUnits; mu++ ) {
             deltaYmu = atTime->giveTimeIncrement() / timeFactor / this->giveCharTime(mu);

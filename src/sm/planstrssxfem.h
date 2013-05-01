@@ -58,7 +58,7 @@ public:
     virtual classType giveClassID() const { return PlaneStress2dXfemClass; }
     virtual int computeNumberOfDofs(EquationID ut);
     virtual void computeGaussPoints();
-    virtual void computeNmatrixAt(FloatArray &lcoords, FloatMatrix &answer);
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                           int lowerIndx = 1, int upperIndx = ALL_STRAINS);
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray & answer) const;

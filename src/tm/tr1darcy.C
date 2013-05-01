@@ -38,7 +38,7 @@
 #include "domain.h"
 #include "equationid.h"
 #include "gaussintegrationrule.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "bcgeomtype.h"
 #include "generalboundarycondition.h"
 #include "load.h"

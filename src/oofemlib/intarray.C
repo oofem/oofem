@@ -347,6 +347,21 @@ int IntArray :: maximum() const
 }
 
 
+void IntArray::findNonzeros(const IntArray &logical)
+{
+    int newsize = 0;
+    for (int i = 1; i <= logical.size; ++i) {
+        if ( logical.at(i) ) ++newsize;
+    }
+    this->resize(newsize);
+    
+    int pos = 1;
+    for (int i = 1; i <= logical.size; ++i) {
+        if ( logical.at(i) ) this->at(pos++) = i;
+    }
+}
+
+
 void IntArray :: printYourself() const
 // Prints the receiver on screen.
 {

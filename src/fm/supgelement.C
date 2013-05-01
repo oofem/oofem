@@ -35,7 +35,7 @@
 #include "supgelement.h"
 #include "domain.h"
 #include "load.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "intarray.h"
 #include "floatarray.h"
 #include "floatmatrix.h"

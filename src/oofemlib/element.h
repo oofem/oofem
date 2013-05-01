@@ -213,12 +213,17 @@ public:
      * can be numbered separately. The default implementation assumes that location array will be assembled only for
      * one UnknownType value, and this array is cached on element level.
      */
-    virtual void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s, IntArray * dofIds = NULL) const;
+    void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s, IntArray * dofIds = NULL) const;
     /**
      * Returns the location array for the boundary of the element.
      * The boundary is the corner nodes for 1D elements, the edges for a 2D element and the surfaces for a 3D element.
      */
     void giveBoundaryLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
+    /**
+     * Returns the location array for the edge of the element.
+     * The element must be in 3D. For 2D edges, use Element::giveBoundaryLocationArray.
+     */
+    void giveEdgeLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
     /**
      * @return Number of DOFs in element.
      */

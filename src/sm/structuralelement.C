@@ -45,7 +45,7 @@
 #include "pointload.h"
 #include "structtemperatureload.h"
 #include "structeigenstrainload.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "intarray.h"
 #include "floatarray.h"
@@ -924,7 +924,7 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
             // localize irule contribution into element matrix
             if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule, EID_MomentumBalance) ) {
                 answer.assemble(* m, irlocnum);
-                m->resize(0, 0);
+                m->resize(0);
             }
         }
     }

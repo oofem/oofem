@@ -40,7 +40,7 @@
 #include "domain.h"
 #include "equationid.h"
 #include "gaussintegrationrule.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "feinterpol3d.h"
 #include "boundaryload.h"
 #include "constantpressureload.h"

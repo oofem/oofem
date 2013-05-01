@@ -34,7 +34,7 @@
 
 #include "masonry02.h"
 #include "isolinearelasticmaterial.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"

@@ -121,6 +121,7 @@
  #include "tr1_2d_cbs.h"
  #include "tr21stokes.h"
  #include "tet21stokes.h"
+ #include "hexa21stokes.h"
  #include "tr1bubblestokes.h"
  #include "tet1bubblestokes.h"
  #include "linesurfacetension.h"
@@ -214,6 +215,7 @@ REGISTER_CLASS(TR21_2D_SUPG, "tr21supg", TR21_2D_SUPGClass)
 REGISTER_CLASS(Quad10_2D_SUPG, "quad1supg", Quad10_2D_SUPGClass)
 REGISTER_CLASS(Tr21Stokes, "tr21stokes", Tr21StokesElementClass)
 REGISTER_CLASS(Tet21Stokes, "tet21stokes", Tet21StokesElementClass)
+REGISTER_CLASS(Hexa21Stokes, "hexa21stokes", Hexa21StokesElementClass)
 REGISTER_CLASS(Tr1BubbleStokes, "tr1bubblestokes", Tr1BubbleStokesElementClass)
 REGISTER_CLASS(Tet1BubbleStokes, "tet1bubblestokes", Tet1BubbleStokesElementClass)
 REGISTER_CLASS(Line2BoundaryElement, "line2boundary", Line2BoundaryElementClass)

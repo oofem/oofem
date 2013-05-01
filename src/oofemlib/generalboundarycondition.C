@@ -37,12 +37,15 @@
 #include "bcvaltype.h"
 #include "loadtimefunction.h"
 #include "reinforcement.h"
+#include "datastream.h"
+#include "contextioerr.h"
 
 namespace oofem {
 GeneralBoundaryCondition :: GeneralBoundaryCondition(int n, Domain *d) : FEMComponent(n, d)
 {
     loadTimeFunction = 0;
     isImposedTimeFunction = 0;
+    set = 0;
 }
 
 
@@ -73,10 +76,15 @@ GeneralBoundaryCondition :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_GeneralBoundaryCondition_valType);
     valType = ( bcValType ) val;
 
+    defaultDofs.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, defaultDofs, _IFT_GeneralBoundaryCondition_defaultDofs);
 
+    isImposedTimeFunction = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, isImposedTimeFunction, _IFT_GeneralBoundaryCondition_IsImposedTimeFunct);
-    
+
+    set = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, set, _IFT_GeneralBoundaryCondition_set);
+
     return IRRT_OK;
 }
 
@@ -110,4 +118,30 @@ GeneralBoundaryCondition :: giveInputRecordString(std :: string &str, bool keywo
 
     return 1;
 }
+
+contextIOResultType
+GeneralBoundaryCondition :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+{
+    if ( mode & CM_Definition ) {
+        if ( !stream->write(& loadTimeFunction, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+    }
+
+    return CIO_OK;
+}
+
+
+contextIOResultType
+GeneralBoundaryCondition :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+{
+    if ( mode & CM_Definition ) {
+        if ( !stream->read(& loadTimeFunction, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+    }
+
+    return CIO_OK;
+}
+
 } // end namespace oofem

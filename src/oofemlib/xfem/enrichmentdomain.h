@@ -72,7 +72,7 @@ public:
     // Default is to loop through the dofman and check if any of them are enriched
     virtual bool isElementEnriched(Element *element); 
 
-    // Spatial search metohds
+    // Spatial search methods
     virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element){};
     virtual int computeNumberOfIntersectionPoints(Element *element){return 0;};
 };
@@ -80,7 +80,7 @@ public:
 
 /**
  * Base class for EnrichmentDomains that derive from BasicGeometry
- * ///@todo: Add additional basic geometry descriptions like polygon
+ * @todo: Add additional basic geometry descriptions like polygon
  */
 class EnrichmentDomain_BG : public EnrichmentDomain
 {

@@ -37,7 +37,7 @@
 #include "transportmaterial.h"
 #include "load.h"
 #include "boundaryload.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "intarray.h"
 #include "floatarray.h"
@@ -62,18 +62,6 @@ TransportElement :: TransportElement(int n, Domain *aDomain, ElementMode em) :
 
 TransportElement :: ~TransportElement()
 { }
-
-
-IRResultType
-TransportElement :: initializeFrom(InputRecord *ir)
-{
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
-    result = Element :: initializeFrom(ir);
-
-    return result;
-}
 
 
 void
@@ -340,19 +328,17 @@ TransportElement :: giveApproxOrder(int unknownIndx)
 void
 TransportElement :: computeCapacitySubMatrix(FloatMatrix &answer, MatResponseMode rmode, int iri, TimeStep *tStep)
 {
-    double dV, c;
     FloatArray n;
-    GaussPoint *gp;
     IntegrationRule *iRule = integrationRulesArray [ iri ];
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
     answer.beEmptyMtrx();
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
         this->computeNAt( n, * gp->giveCoordinates() );
         // ask for capacity coefficient. In basic units [J/K/m3]
-        c = mat->giveCharacteristicValue(rmode, gp, tStep);
-        dV = this->computeVolumeAround(gp);
+        double c = mat->giveCharacteristicValue(rmode, gp, tStep);
+        double dV = this->computeVolumeAround(gp);
         answer.plusDyadSymmUpper(n, n, dV * c);
     }
 
@@ -391,28 +377,22 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
     // // load vector is then transformed to coordinate system in each node.
     // // (should be global coordinate system, but there may be defined
     // //  different coordinate system in each node)
-    int k, nLoads;
-    double dV;
-    bcGeomType ltype;
-    Load *load;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
-    GaussPoint *gp;
-
 
     FloatArray val, helpLoadVector, globalIPcoords, n;
     answer.resize(0);
 
-    nLoads = this->giveBodyLoadArray()->giveSize();
+    int nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
-        k = bodyLoadArray.at(i);
-        load = domain->giveLoad(k);
-        ltype = load->giveBCGeoType();
+        int k = bodyLoadArray.at(i);
+        Load *load = domain->giveLoad(k);
+        bcGeomType ltype = load->giveBCGeoType();
         if ( ltype == BodyLoadBGT ) {
             for ( int igp = 0; igp < iRule->getNumberOfIntegrationPoints(); igp++ ) {
-                gp  = iRule->getIntegrationPoint(igp);
+                GaussPoint *gp = iRule->getIntegrationPoint(igp);
                 this->computeNAt( n, * gp->giveCoordinates() );
-                dV  = this->computeVolumeAround(gp);
+                double dV = this->computeVolumeAround(gp);
                 this->computeGlobalCoordinates( globalIPcoords, * gp->giveCoordinates() );
                 load->computeValueAt(val, tStep, globalIPcoords, mode);
 
@@ -426,9 +406,9 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
     // add internal source produced by material (if any)
     if ( mat->hasInternalSource() ) {
         for ( int igp = 0; igp < iRule->getNumberOfIntegrationPoints(); igp++ ) {
-            gp  = iRule->getIntegrationPoint(igp);
+            GaussPoint *gp = iRule->getIntegrationPoint(igp);
             this->computeNAt( n, * gp->giveCoordinates() );
-            dV  = this->computeVolumeAround(gp);
+            double dV = this->computeVolumeAround(gp);
             mat->computeInternalSourceVector(val, gp, tStep, mode);
 
             helpLoadVector.add(val.at(indx) * dV, n);
@@ -501,19 +481,17 @@ TransportElement :: computeIntSourceLHSSubMatrix(FloatMatrix &answer, MatRespons
 // IntSource_ww - HeMo water content source
 // hw, wh is not used now
 {
-    double dV, c;
     FloatArray n;
-    GaussPoint *gp;
     IntegrationRule *iRule = integrationRulesArray [ iri ];
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
     answer.beEmptyMtrx();
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
         this->computeNAt( n, * gp->giveCoordinates() );
         // ask for coefficient from material
-        c = mat->giveCharacteristicValue(rmode, gp, tStep);
-        dV = this->computeVolumeAround(gp);
+        double c = mat->giveCharacteristicValue(rmode, gp, tStep);
+        double dV = this->computeVolumeAround(gp);
         answer.plusDyadSymmUpper(n, n, dV * c);
     }
 
@@ -534,11 +512,19 @@ TransportElement :: computeInternalForcesVectorAt(FloatArray &answer, TimeStep *
 {
     FloatArray unknowns;
     FloatMatrix s;
-    MatResponseMode rmode;
     this->computeVectorOf(EID_ConservationEquation, mode, tStep, unknowns);
     ///@todo Integrate and compute as a nonlinear problem instead of doing this tangent.
     this->computeConductivityMatrix(s, Conductivity, tStep);
     answer.beProductOf(s, unknowns);
+
+    ///@todo Convective b.c.s should be treated as a active boundary condition instead (same for every bc that has contributions to the residual and/or tangent).
+    FloatMatrix bc_tangent;
+    this->computeBCMtrxAt(bc_tangent, tStep, VM_Total);
+    if ( bc_tangent.isNotEmpty() ) {
+        FloatArray tmp;
+        tmp.beProductOf(bc_tangent, unknowns);
+        answer.add(tmp);
+    }
 }
 
 void
@@ -570,6 +556,7 @@ TransportElement :: computeBCVectorAt(FloatArray &answer, TimeStep *tStep, Value
     }
 }
 
+
 void
 TransportElement :: computeBCMtrxAt(FloatMatrix &answer, TimeStep *tStep, ValueModeType mode)
 {
@@ -597,9 +584,6 @@ TransportElement :: computeBCMtrxAt(FloatMatrix &answer, TimeStep *tStep, ValueM
 void
 TransportElement :: computeBCSubVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode, int indx)
 {
-    int n, id;
-    Load *load;
-    bcGeomType ltype;
     FloatArray vec;
 
     answer.resize( this->giveNumberOfDofManagers() );
@@ -608,10 +592,10 @@ TransportElement :: computeBCSubVectorAt(FloatArray &answer, TimeStep *tStep, Va
     // loop over boundary load array
     int nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
     for ( int i = 1; i <= nLoads; i++ ) {
-        n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
-        id = boundaryLoadArray.at(i * 2);
-        load = domain->giveLoad(n);
-        ltype = load->giveBCGeoType();
+        int n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+        int id = boundaryLoadArray.at(i * 2);
+        Load *load = domain->giveLoad(n);
+        bcGeomType ltype = load->giveBCGeoType();
         if ( ltype == EdgeLoadBGT ) {
             this->computeEdgeBCSubVectorAt(vec, load, id, tStep, mode, indx);
         } else if ( ltype == SurfaceLoadBGT ) {
@@ -622,16 +606,12 @@ TransportElement :: computeBCSubVectorAt(FloatArray &answer, TimeStep *tStep, Va
 
         answer.add(vec);
     }
-
-    // end loop over applied bc
 }
 
 void
 TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge,
                                              TimeStep *tStep, ValueModeType mode, int indx)
 {
-    int approxOrder, numberOfEdgeIPs;
-
     answer.resize( this->giveNumberOfDofManagers() );
     answer.zero();
 
@@ -642,12 +622,11 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
         }
 
 
-        approxOrder = edgeLoad->giveApproxOrder() + this->giveApproxOrder(indx);
-        numberOfEdgeIPs = ( int ) ceil( ( approxOrder + 1. ) / 2. );
+        int approxOrder = edgeLoad->giveApproxOrder() + this->giveApproxOrder(indx);
+        int numberOfEdgeIPs = ( int ) ceil( ( approxOrder + 1. ) / 2. );
         GaussIntegrationRule iRule(1, this, 1, 1);
         iRule.setUpIntegrationPoints(_Line, numberOfEdgeIPs, _Unknown);
-        GaussPoint *gp;
-        FloatArray reducedAnswer, val, ntf, n;
+        FloatArray reducedAnswer, val, n;
         IntArray mask;
         double dV, coeff = 1.0;
 
@@ -658,7 +637,7 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
         }
 
         for ( int i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
-            gp  = iRule.getIntegrationPoint(i);
+            GaussPoint *gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
             this->computeEgdeNAt(n, iEdge, * lcoords);
             dV = this->computeEdgeVolumeAround(gp, iEdge);
@@ -685,17 +664,12 @@ void
 TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
                                                 int iSurf, TimeStep *tStep, ValueModeType mode, int indx)
 {
-    int approxOrder;
-    double dV, coeff = 1.0;
-
     if ( !this->testElementExtension(Element_SurfaceLoadSupport) ) {
         _error("computeSurfaceBCSubVectorAt : no surface load support");
     }
 
     BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >( load );
     if ( surfLoad ) {
-        IntegrationRule *iRule;
-        GaussPoint *gp;
         FloatArray reducedAnswer, val, globalIPcoords, n;
         IntArray mask;
 
@@ -706,19 +680,20 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
             return;
         }
 
+        double coeff;
         if ( load->giveType() == TransmissionBC ) {
             coeff = -1.0;
         } else {
             coeff = surfLoad->giveProperty('a');
         }
 
-        approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder(indx);
+        int approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder(indx);
 
-        iRule = this->GetSurfaceIntegrationRule(approxOrder);
+        IntegrationRule *iRule = this->GetSurfaceIntegrationRule(approxOrder);
         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-            gp = iRule->getIntegrationPoint(i);
+            GaussPoint *gp = iRule->getIntegrationPoint(i);
             this->computeSurfaceNAt( n, iSurf, * gp->giveCoordinates() );
-            dV = this->computeSurfaceVolumeAround(gp, iSurf);
+            double dV = this->computeSurfaceVolumeAround(gp, iSurf);
 
             if ( surfLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
                 surfLoad->computeValueAt(val, tStep, * gp->giveCoordinates(), mode);
@@ -745,10 +720,7 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
 void
 TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, ValueModeType mode, int indx)
 {
-    int k, id, defined = 0;
-    GeneralBoundaryCondition *load;
-    double dV;
-    bcGeomType ltype;
+    int defined = 0;
 
     answer.resize( this->giveNumberOfDofManagers(), this->giveNumberOfDofManagers() );
     answer.zero();
@@ -756,11 +728,11 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
     // loop over boundary load array
     int nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
     for ( int i = 1; i <= nLoads; i++ ) {
-        k = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
-        id = boundaryLoadArray.at(i * 2);
-        load = domain->giveLoad(k);
+        int k = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+        int id = boundaryLoadArray.at(i * 2);
+        GeneralBoundaryCondition *load = domain->giveLoad(k);
         if ( load->giveType() == ConvectionBC ) {
-            ltype = load->giveBCGeoType();
+            bcGeomType ltype = load->giveBCGeoType();
             if ( ltype == EdgeLoadBGT ) {
                 BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >( load );
                 if ( edgeLoad->isDofExcluded(indx) || !edgeLoad->isImposed(tStep) ) {
@@ -772,15 +744,14 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 int numberOfEdgeIPs = ( int ) ceil( ( approxOrder + 1. ) / 2. );
                 GaussIntegrationRule iRule(1, this, 1, 1);
                 iRule.setUpIntegrationPoints(_Line, numberOfEdgeIPs, _Unknown);
-                GaussPoint *gp;
                 FloatArray val, n;
                 IntArray mask;
                 FloatMatrix subAnswer;
 
                 for ( int igp = 0; igp < iRule.getNumberOfIntegrationPoints(); igp++ ) {
-                    gp = iRule.getIntegrationPoint(igp);
+                    GaussPoint *gp = iRule.getIntegrationPoint(igp);
                     this->computeEgdeNAt( n, id, * gp->giveCoordinates() );
-                    dV = this->computeEdgeVolumeAround(gp, id);
+                    double dV = this->computeEdgeVolumeAround(gp, id);
                     subAnswer.plusDyadSymmUpper( n, n, dV * edgeLoad->giveProperty('a') );
                 }
 
@@ -788,8 +759,6 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 this->giveEdgeDofMapping(mask, id);
                 answer.assemble(subAnswer, mask);
             } else if ( ltype == SurfaceLoadBGT ) {
-                IntegrationRule *iRule;
-                GaussPoint *gp;
                 FloatArray val, n;
                 IntArray mask;
                 FloatMatrix subAnswer;
@@ -801,12 +770,12 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
 
                 defined = 1;
                 int approxOrder = 2 * this->giveApproxOrder(indx);
-                iRule = this->GetSurfaceIntegrationRule(approxOrder);
+                IntegrationRule *iRule = this->GetSurfaceIntegrationRule(approxOrder);
 
                 for ( int igp = 0; igp < iRule->getNumberOfIntegrationPoints(); igp++ ) {
-                    gp  = iRule->getIntegrationPoint(igp);
+                    GaussPoint *gp = iRule->getIntegrationPoint(igp);
                     this->computeSurfaceNAt( n, id, * gp->giveCoordinates() );
-                    dV  = this->computeSurfaceVolumeAround(gp, id);
+                    double dV = this->computeSurfaceVolumeAround(gp, id);
                     subAnswer.plusDyadSymmUpper( n, n, dV * surfLoad->giveProperty('a') );
                 }
 
@@ -832,13 +801,12 @@ void
 TransportElement :: assembleLocalContribution(FloatMatrix &answer, FloatMatrix &src,
                                               int ndofs, int rdof, int cdof)
 {
-    int ti, tj;
     int nnodes = this->giveNumberOfDofManagers();
 
     for ( int i = 1; i <= nnodes; i++ ) {
-        ti = ( i - 1 ) * ndofs + rdof;
+        int ti = ( i - 1 ) * ndofs + rdof;
         for ( int j = 1; j <= nnodes; j++ ) {
-            tj = ( j - 1 ) * ndofs + cdof;
+            int tj = ( j - 1 ) * ndofs + cdof;
             answer.at(ti, tj) += src.at(i, j);
         }
     }
@@ -849,11 +817,10 @@ void
 TransportElement :: assembleLocalContribution(FloatArray &answer, FloatArray &src,
                                               int ndofs, int rdof)
 {
-    int ti;
     int nnodes = this->giveNumberOfDofManagers();
 
     for ( int i = 1; i <= nnodes; i++ ) {
-        ti = ( i - 1 ) * ndofs + rdof;
+        int ti = ( i - 1 ) * ndofs + rdof;
         answer.at(ti) += src.at(i);
     }
 }
@@ -912,19 +879,17 @@ void
 TransportElement :: updateInternalState(TimeStep *tStep)
 // Updates the receiver at the end of a solution step
 {
-    IntegrationRule *iRule;
     FloatArray stateVector, r;
     FloatArray gradient, flux;
     FloatMatrix n, B;
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
-    GaussPoint *gp;
 
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, r);
     // force updating ip values
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
+        IntegrationRule *iRule = integrationRulesArray [ i ];
         for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
-            gp = iRule->getIntegrationPoint(j);
+            GaussPoint *gp = iRule->getIntegrationPoint(j);
 
             ///@todo Why is the state vector the unknown solution at the gauss point? / Mikael
             this->computeNmatrixAt( n, * gp->giveCoordinates() );

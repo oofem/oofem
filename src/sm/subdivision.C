@@ -3574,7 +3574,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
         if ( parent ) {
             parentNodePtr = domain->giveNode(parent);
             // inherit all data from parent (bc, ic, load, etc.)
-            node = classFactory.createDofManager(parentNodePtr->giveClassName(), inode, * dNew);
+            node = classFactory.createDofManager(parentNodePtr->giveInputRecordName(), inode, * dNew);
             ndofs = parentNodePtr->giveNumberOfDofs();
             node->setNumberOfDofs(ndofs);
             node->setLoadArray( * parentNodePtr->giveLoadArray() );
@@ -3602,7 +3602,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
 #endif
         } else {
             // newly created node (irregular)
-            node = classFactory.createDofManager(NodeClass, inode, * dNew);
+            node = new Node(inode, * dNew);
             //create new node with default DOFs
             ndofs = dofIDArrayPtr.giveSize();
             node->setNumberOfDofs(ndofs);
@@ -4877,8 +4877,6 @@ Subdivision :: unpackSharedIrregulars(Subdivision *s, ProcessCommunicator &pc)
         pcbuff->unpackInt(_type);
     }
 
-    ; // while (_type != LOADBALANCER_END_DATA);
-
     return 1;
 }
 
@@ -5166,7 +5164,6 @@ Subdivision :: packRemoteElements(RS_packRemoteElemsStruct *s, ProcessCommunicat
     int i, inode;
     int nn, in;
     int myrank = this->giveRank();
-    classType dtype;
     DofManager *inodePtr;
     Element *elemPtr, *relemPtr;
     std :: queue< int >elemCandidates;
@@ -5234,29 +5231,28 @@ Subdivision :: packRemoteElements(RS_packRemoteElemsStruct *s, ProcessCommunicat
     // send nodes that define remote_elements gometry
     for ( si = nodesToSend.begin(); si != nodesToSend.end(); si++ ) {
         inodePtr = d->giveDofManager(* si);
-        dtype = inodePtr->giveClassID();
 
-        pcbuff->packInt(dtype);
+        pcbuff->packString( inodePtr->giveInputRecordName() );
         pcbuff->packInt( inodePtr->giveGlobalNumber() );
         inodePtr->saveContext(& pcDataStream, CM_Definition);
     }
 
     // pack end-of-element-record
-    pcbuff->packInt(SUBDIVISION_END_DATA);
+    pcbuff->packString("");
 
     // send elements
     for ( si = remoteElements.begin(); si != remoteElements.end(); si++ ) {
         elemPtr = d->giveElement(* si);
         // pack local element (node numbers shuld be global ones!!!)
         // pack type
-        pcbuff->packInt( elemPtr->giveClassID() );
+        pcbuff->packString( elemPtr->giveInputRecordName() );
         // nodal numbers shuld be packed as global !!
         elemPtr->saveContext(& pcDataStream, CM_Definition | CM_DefinitionGlobal);
         //OOFEM_LOG_INFO ("[%d] Sending Remote elem %d[%d] to rank %d\n", myrank,*si, elemPtr->giveGlobalNumber(), rproc );
     }
 
     // pack end-of-element-record
-    pcbuff->packInt(SUBDIVISION_END_DATA);
+    pcbuff->packString("");
 
     return 1;
 }
@@ -5267,10 +5263,8 @@ Subdivision :: unpackRemoteElements(Domain *d, ProcessCommunicator &pc)
 {
     int myrank = d->giveEngngModel()->giveRank();
     int iproc = pc.giveRank();
-    int _globnum, _type;
-    bool _newentry;
-    classType _etype;
-    DofManager *dofman;
+    int _globnum;
+    std::string _type;
     DomainTransactionManager *dtm = d->giveTransactionManager();
 
     if ( iproc == myrank ) {
@@ -5281,18 +5275,22 @@ Subdivision :: unpackRemoteElements(Domain *d, ProcessCommunicator &pc)
     ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
     ProcessCommDataStream pcDataStream(pcbuff);
 
-    pcbuff->unpackInt(_type);
     // unpack dofman data
-    while ( _type != SUBDIVISION_END_DATA ) {
-        _etype = ( classType ) _type;
+    do {
+        pcbuff->unpackString(_type);
+        if ( _type.size() == 0 ) {
+            break;
+        }
+
         // receiving new local dofManager
         pcbuff->unpackInt(_globnum);
 
-        _newentry = false;
+        DofManager *dofman;
+        bool _newentry = false;
         if ( ( dofman = dtm->giveDofManager(_globnum) ) == NULL ) {
             // data not available -> create a new one
             _newentry = true;
-            dofman = classFactory.createDofManager(_etype, 0, d);
+            dofman = classFactory.createDofManager(_type.c_str(), 0, d);
         }
 
         dofman->setGlobalNumber(_globnum);
@@ -5303,23 +5301,19 @@ Subdivision :: unpackRemoteElements(Domain *d, ProcessCommunicator &pc)
         if ( _newentry ) {
             dtm->addTransaction(DomainTransactionManager :: DTT_ADD, DomainTransactionManager :: DCT_DofManager, _globnum, dofman);
         }
+    } while ( 1 );
 
-        pcbuff->unpackInt(_type);
-    }
-
-    Element *elem;
     IntArray elemPartitions(1);
     elemPartitions.at(1) = iproc;
     int nrecv = 0;
 
     do {
-        pcbuff->unpackInt(_type);
-        if ( _type == SUBDIVISION_END_DATA ) {
+        pcbuff->unpackString(_type);
+        if ( _type.size() == 0 ) {
             break;
         }
 
-        _etype = ( classType ) _type;
-        elem = classFactory.createElement(_etype, 0, d);
+        Element *elem = classFactory.createElement(_type.c_str(), 0, d);
         elem->restoreContext(& pcDataStream, CM_Definition | CM_DefinitionGlobal);
         elem->setParallelMode(Element_remote);
         elem->setPartitionList(elemPartitions);

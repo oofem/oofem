@@ -51,6 +51,7 @@ namespace oofem {
     ENUM_ITEM(EGT_tetra_2)  /* tetrahedron with 10 nodes */   \
     ENUM_ITEM(EGT_hexa_1)   /* hexahedron with 8 nodes */   \
     ENUM_ITEM(EGT_hexa_2)   /* hexahedron with 20 nodes */   \
+    ENUM_ITEM(EGT_hexa_27)   /* hexahedron with 27 nodes */   \
     ENUM_ITEM(EGT_wedge_1)  /* wedge with 6 nodes */ \
     ENUM_ITEM(EGT_wedge_2)  /* wedge with 15 nodes */\
     ENUM_ITEM(EGT_Composite) /* Composite geometry, vtk export supported by individual elements */ \
@@ -74,6 +75,7 @@ namespace oofem {
  * EGT_tetra_2 - tetrahedron with 10 nodes
  * EGT_hexa_1  - hexahedron with 8 nodes
  * EGT_hexa_2  - hexahedron with 20 nodes
+ * EGT_hexa_27  - hexahedron with 27 nodes
  */
 enum Element_Geometry_Type {
     Element_Geometry_Type_DEF

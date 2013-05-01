@@ -34,7 +34,7 @@
 
 #include "b3solidmat.h"
 #include "mathfem.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "structuralcrosssection.h"
 #include "timestep.h"
 #include "contextioerr.h"

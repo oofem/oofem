@@ -1,6 +1,6 @@
 # Much to organize
 set (core_unsorted
-    femcmpnn.C domain.C timestep.C metastep.C gausspnt.C
+    femcmpnn.C domain.C timestep.C metastep.C gausspoint.C
     cltypes.C timer.C dictionary.C freestor.C
     connectivitytable.C compiler.C error.C mathfem.C logger.C util.C
     initmodulemanager.C initmodule.C initialcondition.C
@@ -11,6 +11,7 @@ set (core_unsorted
     geotoolbox.C geometry.C
     externalfieldgenerator.C
     datastream.C
+    set.C
     rvematerial.C
     weakperiodicbc.C
     # Semi sorted:
@@ -166,6 +167,7 @@ set (core_fei
     fei3dtetquad.C
     fei3dhexalin.C
     fei3dhexaquad.C
+    fei3dhexatriquad.C
     fei3dwedgelin.C 
     fei3dwedgequad.C
     )

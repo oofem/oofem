@@ -374,7 +374,7 @@ void MixedGradientPressureDirichlet :: setPrescribedDeviatoricGradientFromVoigt(
 
 
 double MixedGradientPressureDirichlet :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                    CharType type, ValueModeType mode, const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
+                    CharType type, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
     if (type != ExternalForcesVector)
         return 0.0;

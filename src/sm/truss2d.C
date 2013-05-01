@@ -36,7 +36,7 @@
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
@@ -185,6 +185,7 @@ Truss2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoord
     n2  = ( 1. + ksi ) * 0.5;
 
     answer.resize(3);
+    answer.zero();
     answer.at(c1) = n1 * this->giveNode(1)->giveCoordinate(c1) + n2 *this->giveNode(2)->giveCoordinate(c1);
     answer.at(c2) = n1 * this->giveNode(1)->giveCoordinate(c2) + n2 *this->giveNode(2)->giveCoordinate(c2);
 

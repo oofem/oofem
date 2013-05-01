@@ -34,7 +34,7 @@
 
 #include "qtrplanestraingrad.h"
 #include "node.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "intarray.h"

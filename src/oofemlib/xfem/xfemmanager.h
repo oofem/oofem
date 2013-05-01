@@ -81,18 +81,18 @@ public:
     XfemManager(Domain *domain);
     /// Destructor.
     ~XfemManager();
-    
-  
+
+
     // Returns the active enrichment items for a particular element, the enrichment items
     // are referenced by a number from the domain
     void giveActiveEIsFor(IntArray &answer, const Element *elem);
-    
+
     bool isElementEnriched(const Element *elem);
 
     /// Accessor.
     EnrichmentItem *giveEnrichmentItem(int n);
     int giveNumberOfEnrichmentItems() { return enrichmentItemList->giveSize(); }
-    
+
     void createEnrichedDofs();
 
     /// Computes the type of node enrichment, returns zero if the node is not enriched.
@@ -112,10 +112,8 @@ public:
     //Domain *giveDomain() { return emodel->giveDomain(domainIndex); }
     Domain *giveDomain() { return this->domain; }
 
-
     /// Clear the receiver
     void clear();
-
 
     /**
      * Stores the state of receiver to output stream.
@@ -125,8 +123,7 @@ public:
      * @return contextIOResultType.
      * @exception ContextIOERR If error encountered.
      */
-   
-    //contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /**
      * Restores the state of receiver from output stream.
      * @param stream Context file.
@@ -135,8 +132,7 @@ public:
      * @return contextIOResultType.
      * @exception ContextIOERR exception if error encountered.
      */
-    //contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-
+    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 } // end namespace oofem
 #endif // xfemmanager_h

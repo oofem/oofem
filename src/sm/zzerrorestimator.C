@@ -36,7 +36,7 @@
 #include "domain.h"
 #include "dofmanager.h"
 #include "element.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "mathfem.h"

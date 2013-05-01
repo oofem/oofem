@@ -34,7 +34,7 @@
 
 #include "qplanstrss.h"
 #include "crosssection.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
@@ -495,7 +495,7 @@ void QPlaneStress2d :: drawScalar(oofegGraphicContext &context)
 int
 QPlaneStress2d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) || ( type == IST_DamageTensor ) ) {
+    if ( type == IST_DamageTensor ) {
         return 3;
     }
 
@@ -644,10 +644,10 @@ QPlaneStress2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge,
 
     this->interpolation.edgeEvalNormal( normal, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
-    answer.at(1, 1) = ( -1.0 ) * normal.at(2);
-    answer.at(1, 2) = ( -1.0 ) * normal.at(1);
-    answer.at(2, 1) = normal.at(1);
-    answer.at(2, 2) = ( -1.0 ) * normal.at(2);
+    answer.at(1, 1) = normal.at(2);
+    answer.at(1, 2) = normal.at(1);
+    answer.at(2, 1) = -normal.at(1);
+    answer.at(2, 2) = normal.at(2);
 
     return 1;
 }

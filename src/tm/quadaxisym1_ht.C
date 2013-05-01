@@ -34,7 +34,7 @@
 
 #include "quadaxisym1_ht.h"
 #include "node.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "floatmatrix.h"
 #include "mathfem.h"
 

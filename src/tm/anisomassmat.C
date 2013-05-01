@@ -35,7 +35,7 @@
 #include "anisomassmat.h"
 #include "domain.h"
 #include "floatmatrix.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 
 #include <cstdlib>
 

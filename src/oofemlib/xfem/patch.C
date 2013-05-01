@@ -33,7 +33,7 @@
  */
 
 #include "floatarray.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "integrationrule.h"
 #include "patch.h"
 #include "gaussintegrationrule.h"

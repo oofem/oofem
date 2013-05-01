@@ -55,6 +55,8 @@ public:
     virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
+    virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo);
+
     /**
      * Returns a characteristic length of the geometry, typically a diagonal or edge length.
      * @param cellgeo Underlying cell geometry.
@@ -83,6 +85,7 @@ public:
     virtual double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
                                                      const FEICellGeometry &cellgeo);
     virtual void computeLocalSurfaceMapping(IntArray &edgeNodes, int iedge);
+    virtual double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo);
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
@@ -90,7 +93,6 @@ protected:
     double computeVolume(const FEICellGeometry &cellgeo);
 
     virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords);
 };
 } // end namespace oofem
 #endif // fei3dtetquad_h

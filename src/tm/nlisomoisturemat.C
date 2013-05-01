@@ -33,7 +33,7 @@
  */
 
 #include "nlisomoisturemat.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "mathfem.h"
 
 namespace oofem {

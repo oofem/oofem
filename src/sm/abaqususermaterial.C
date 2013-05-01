@@ -33,7 +33,7 @@
  */
 
 #include "abaqususermaterial.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 
 #ifdef _WIN32 //_MSC_VER and __MINGW32__ included
  #include <Windows.h>

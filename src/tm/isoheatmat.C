@@ -34,7 +34,7 @@
 
 #include "isoheatmat.h"
 #include "floatmatrix.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 
 namespace oofem {
 IRResultType

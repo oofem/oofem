@@ -36,7 +36,7 @@
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "structuralms.h"
 #include "floatmatrix.h"

@@ -36,7 +36,7 @@
 #define ConcreteDPM_h
 
 #include "structuralmaterial.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "cltypes.h"

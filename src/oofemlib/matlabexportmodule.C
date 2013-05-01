@@ -42,7 +42,7 @@
 #include "engngm.h"
 #include "node.h"
 #include "mathfem.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "weakperiodicbc.h"
 #include "timestep.h"
 #include "classfactory.h"

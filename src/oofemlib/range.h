@@ -67,6 +67,11 @@ public:
         startIndx = 0;
         endIndx = -1;
     }
+    
+    /// Returns the start index (inclusive).
+    int giveStart() { return startIndx; }
+    /// Returns the end index (inclusive).
+    int giveEnd() { return endIndx; }
 
     /// Tests if number is in range.
     bool test(int i) { return ( i >= startIndx ) && ( i <= endIndx ); }
