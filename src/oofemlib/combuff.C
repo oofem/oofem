@@ -38,7 +38,6 @@
 #include <cstdlib>
 #include <cstring> // for memmove
 
-#include "compiler.h"
 #include "combuff.h"
 #include "intarray.h"
 #include "floatarray.h"

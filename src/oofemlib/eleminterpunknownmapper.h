@@ -36,7 +36,6 @@
 #define eleminterpunknownmapper_h
 
 #include "primaryunknownmapper.h"
-#include "compiler.h"
 
 namespace oofem {
 class Domain;

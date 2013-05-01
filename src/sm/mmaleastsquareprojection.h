@@ -38,7 +38,6 @@
 #include "alist.h"
 #include "materialmappingalgorithm.h"
 #include "interface.h"
-#include "compiler.h"
 
 #include <list>
 

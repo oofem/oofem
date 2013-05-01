@@ -61,7 +61,6 @@ FETISolver :: ~FETISolver()
 }
 
 
-
 int
 FETISolver :: estimateMaxPackSize(IntArray &map, CommunicationBuffer &buff, int &packUnpackType)
 {

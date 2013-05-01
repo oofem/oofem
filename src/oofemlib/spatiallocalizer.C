@@ -82,22 +82,22 @@ SpatialLocalizerInterface :: SpatialLocalizerI_BBoxContainsPoint(const FloatArra
     Element *element = this->SpatialLocalizerI_giveElement();
     FloatArray *coordinates;
     double coordMin [ 3 ], coordMax [ 3 ], val;
-    int i, j, size;
+    int size;
 
     coordinates = element->giveNode(1)->giveCoordinates();
     size = coordinates->giveSize();
-    for ( j = 1; j <= size; j++ ) {
+    for ( int j = 1; j <= size; j++ ) {
         val = coordinates->at(j);
         coordMin [ j - 1 ] = coordMax [ j - 1 ] = val;
     }
 
-    for ( i = 2; i <= element->giveNumberOfNodes(); i++ ) {
+    for ( int i = 2; i <= element->giveNumberOfNodes(); i++ ) {
         coordinates = element->giveNode(i)->giveCoordinates();
         if ( coordinates->giveSize() != size ) {
             OOFEM_ERROR("SpatialLocalizerInterface::SpatialLocalizerI_BBoxContainsPoint: coordinates size mismatch");
         }
 
-        for ( j = 1; j <= size; j++ ) {
+        for ( int j = 1; j <= size; j++ ) {
             val = coordinates->at(j);
             if ( val < coordMin [ j - 1 ] ) {
                 coordMin [ j - 1 ] = val;
@@ -118,7 +118,7 @@ SpatialLocalizerInterface :: SpatialLocalizerI_BBoxContainsPoint(const FloatArra
      * }
      */
     size = min( size, coords.giveSize() );
-    for ( j = 1; j <= size; j++ ) {
+    for ( int j = 1; j <= size; j++ ) {
         if ( coords.at(j) < coordMin [ j - 1 ] - POINT_TOL ) {
             return 0;
         }
@@ -140,7 +140,6 @@ SpatialLocalizer :: giveAllElementsWithNodesWithinBox(elementContainerType &elem
     nodeContainerType nodesWithinBox;
     nodeContainerType :: iterator it;
     const IntArray *dofmanConnectivity;
-    int i;
 
     elemSet.clear();
 
@@ -150,7 +149,7 @@ SpatialLocalizer :: giveAllElementsWithNodesWithinBox(elementContainerType &elem
 
     for ( it = nodesWithinBox.begin(); it != nodesWithinBox.end(); ++it ) {
         dofmanConnectivity = ct->giveDofManConnectivityArray(* it);
-        for ( i = 1; i <= dofmanConnectivity->giveSize(); i++ ) {
+        for ( int i = 1; i <= dofmanConnectivity->giveSize(); i++ ) {
             elemSet.insert( dofmanConnectivity->at(i) );
         }
     }

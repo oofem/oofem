@@ -41,7 +41,6 @@
 #define errorestimator_h
 
 #include "femcmpnn.h"
-#include "compiler.h"
 #include "interface.h"
 #include "remeshingcrit.h"
 #include "errorestimatortype.h"

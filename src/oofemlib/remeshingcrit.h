@@ -36,7 +36,6 @@
 #define remeshingcrit_h
 
 #include "femcmpnn.h"
-#include "compiler.h"
 #include "interface.h"
 
 #ifdef __PARALLEL_MODE

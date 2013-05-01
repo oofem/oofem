@@ -35,7 +35,6 @@
 #ifndef dictionr_h
 #define dictionr_h
 
-#include "compiler.h"
 #include "pair.h"
 #include "error.h"
 #include "contextioresulttype.h"

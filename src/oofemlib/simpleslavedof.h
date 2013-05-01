@@ -36,7 +36,6 @@
 #define simpleslavedof_h
 
 #include "dof.h"
-#include "compiler.h"
 #include "error.h"
 
 namespace oofem {

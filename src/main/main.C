@@ -38,7 +38,6 @@
 
 #include "engngm.h"
 #include "freestor.h"
-#include "compiler.h"
 #include "oofemcfg.h"
 
 #include "oofemtxtdatareader.h"

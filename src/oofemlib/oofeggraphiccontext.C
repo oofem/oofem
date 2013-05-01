@@ -33,7 +33,6 @@
  */
 
 #ifdef __OOFEG
-#include "compiler.h"
 #include "oofeggraphiccontext.h"
 #include "engngm.h"
 #include "element.h"

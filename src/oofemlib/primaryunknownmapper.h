@@ -35,7 +35,6 @@
 #ifndef primaryunknownmapper_h
 #define primaryunknownmapper_h
 
-#include "compiler.h"
 #include "interface.h"
 #include "equationid.h"
 #include "valuemodetype.h"

@@ -40,7 +40,7 @@
 #define mathfem_h
 
 #include "error.h"
-#include "compiler.h"
+#include "oofemcfg.h"
 
 #include <cmath>
 #include <cfloat> // For _isnan

@@ -35,8 +35,6 @@
 #ifndef mmacontainingelementprojection_h
 #define mmacontainingelementprojection_h
 
-#include "compiler.h"
-
 #include "materialmappingalgorithm.h"
 
 namespace oofem {

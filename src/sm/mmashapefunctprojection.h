@@ -39,7 +39,6 @@
 #include "materialmappingalgorithm.h"
 #include "nodalrecoverymodel.h"
 #include "interface.h"
-#include "compiler.h"
 
 namespace oofem {
 class Domain;

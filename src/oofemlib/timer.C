@@ -33,7 +33,7 @@
  */
 
 #include "timer.h"
-#include "compiler.h"
+
 #include <cstdio>
 
 #ifndef _WIN32 //_MSC_VER and __MINGW32__ included

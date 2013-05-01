@@ -35,8 +35,6 @@
 #ifndef mmaclosestiptransfer_h
 #define mmaclosestiptransfer_h
 
-#include "compiler.h"
-
 #include "materialmappingalgorithm.h"
 
 namespace oofem {
