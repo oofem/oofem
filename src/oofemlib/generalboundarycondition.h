@@ -39,7 +39,6 @@
 #include "domain.h"
 #include "floatarray.h"
 #include "dictionary.h"
-#include "classtype.h"
 #include "bcvaltype.h"
 #include "bcgeomtype.h"
 #include "bctype.h"

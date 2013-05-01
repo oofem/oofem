@@ -36,7 +36,6 @@
 #define sparsegeneigenvalsystemnm_h
 
 #include "nummet.h"
-#include "classtype.h"
 #include "nmstatus.h"
 
 namespace oofem {

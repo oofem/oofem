@@ -37,7 +37,6 @@
 
 #include "load.h"
 
-#include "classtype.h"
 #include "bcgeomtype.h"
 
 namespace oofem {

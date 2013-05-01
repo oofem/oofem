@@ -35,7 +35,6 @@
 #ifndef fastmarchingmethod_h
 #define fastmarchingmethod_h
 
-#include "classtype.h"
 #include "floatarray.h"
 #include "mathfem.h"
 
@@ -117,7 +116,6 @@ public:
 
     // identification
     const char *giveClassName() const { return "FastMarchingMethod"; }
-    classType giveClassID() const { return FastMarchingMethodClass; }
 
 protected:
     /// Initialize receiver.

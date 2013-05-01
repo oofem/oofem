@@ -39,7 +39,6 @@
 #include "dof.h"
 #include "bctype.h"
 #include "valuemodetype.h"
-#include "classtype.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 

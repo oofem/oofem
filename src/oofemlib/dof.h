@@ -39,7 +39,6 @@
 
 #include "floatarray.h"
 #include "intarray.h"
-#include "classtype.h"
 #include "unknowntype.h"
 #include "equationid.h"
 #include "valuemodetype.h"
@@ -123,8 +122,6 @@ public:
     virtual dofType giveDofType() = 0;
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "Dof"; }
-    /// Returns classType id of receiver.
-    virtual classType giveClassID() const { return DofClass; }
 
     /// @return Receiver number.
     int giveNumber() const { return number; }

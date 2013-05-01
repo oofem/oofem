@@ -40,7 +40,6 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 #include "inputrecord.h"
-#include "classtype.h"
 
 #include <cstdio>
 
@@ -236,7 +235,6 @@ public:
     /// Returns receiver sub patch indices (if apply).
     virtual const IntArray *giveKnotSpan() { return NULL; }
 
-    virtual classType giveClassID() const { return IntegrationRuleClass; }
     virtual const char *giveClassName() const { return "IntegrationRule"; }
     virtual IntegrationRuleType giveIntegrationRuleType() const { return IRT_None; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }

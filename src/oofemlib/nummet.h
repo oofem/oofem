@@ -36,7 +36,6 @@
 #define nummet_h
 
 #include "inputrecord.h"
-#include "classtype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 

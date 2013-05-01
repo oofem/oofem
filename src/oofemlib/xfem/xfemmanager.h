@@ -38,7 +38,6 @@
 #include "alist.h"
 #include "datareader.h"
 #include "inputrecord.h"
-#include "classtype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 

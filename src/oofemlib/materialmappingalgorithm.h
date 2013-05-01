@@ -38,7 +38,6 @@
 #include "interface.h"
 #include "intarray.h"
 #include "inputrecord.h"
-#include "classtype.h"
 #include "internalstatetype.h"
 
 namespace oofem {

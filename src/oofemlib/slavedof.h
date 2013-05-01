@@ -142,7 +142,6 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual const char *giveClassName() const { return "SlaveDof"; }
-    virtual classType giveClassID() const { return SlaveDofClass; }
 
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 

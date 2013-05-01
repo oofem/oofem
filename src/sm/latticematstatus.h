@@ -36,7 +36,6 @@
 #define latticematstatus_h
 
 #include "structuralms.h"
-#include "classtype.h"
 
 namespace oofem {
 

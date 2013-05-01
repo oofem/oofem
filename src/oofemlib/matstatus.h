@@ -36,7 +36,6 @@
 #define matstatus_h
 
 #include "integrationpointstatus.h"
-#include "classtype.h"
 
 namespace oofem {
 

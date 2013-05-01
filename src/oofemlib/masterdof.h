@@ -123,7 +123,6 @@ public:
 
     virtual dofType giveDofType() { return DT_master; }
     virtual const char *giveClassName() const { return "MasterDof"; }
-    virtual classType giveClassID() const { return MasterDofClass; }
 
     virtual int __giveEquationNumber() const ;
 

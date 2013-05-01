@@ -38,7 +38,6 @@
 #include "generalboundarycondition.h"
 #include "bctype.h"
 #include "valuemodetype.h"
-#include "classtype.h"
 
 ///@name Input fields for Dirichlet boundary condition
 //@{

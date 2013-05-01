@@ -41,7 +41,6 @@
 #include "intarray.h"
 #include "error.h"
 #include "datastream.h"
-#include "classtype.h"
 
 #include <cstdarg>
 #include <cstdlib>

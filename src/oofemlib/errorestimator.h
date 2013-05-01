@@ -44,7 +44,6 @@
 #include "compiler.h"
 #include "interface.h"
 #include "remeshingcrit.h"
-#include "classtype.h"
 #include "errorestimatortype.h"
 #include "intarray.h"
 #include "internalstatetype.h"

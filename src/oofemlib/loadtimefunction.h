@@ -42,7 +42,6 @@
 
 #include "femcmpnn.h"
 #include "domain.h"
-#include "classtype.h"
 #include "valuemodetype.h"
 
 ///@name Input fields for LoadTimeFunction

@@ -133,7 +133,7 @@ private:
     LineSearchNM *linesearchSolver;
 
 #ifdef __PETSC_MODULE
-    IS prescribedEgsIS;
+    //IS prescribedEgsIS;
     bool prescribedEgsIS_defined;
 #endif
 

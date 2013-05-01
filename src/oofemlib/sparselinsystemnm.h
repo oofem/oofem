@@ -36,7 +36,6 @@
 #define sparselinsystemnm_h
 
 #include "nummet.h"
-#include "classtype.h"
 #include "nmstatus.h"
 #include "linsystsolvertype.h"
 

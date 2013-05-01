@@ -37,9 +37,7 @@
 
 #include "femcmpnn.h"
 #include "compiler.h"
-
 #include "interface.h"
-#include "classtype.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"

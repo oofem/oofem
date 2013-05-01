@@ -36,7 +36,6 @@
 #define meshqualityerrorestimator_h
 
 #include "errorestimator.h"
-#include "classtype.h"
 #include "errorestimatortype.h"
 
 namespace oofem {

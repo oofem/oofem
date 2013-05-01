@@ -59,7 +59,6 @@ public:
     /// Destructor
     virtual ~LobattoIntegrationRule();
 
-    virtual classType giveClassID() const { return LobattoIntegrationRuleClass; }
     virtual const char *giveClassName() const { return "LobattoIntegrationRule"; }
     virtual IntegrationRuleType giveIntegrationRuleType() const { return IRT_Lobatto; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }

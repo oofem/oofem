@@ -43,7 +43,6 @@
 #include "intarray.h"
 #include "error.h"
 #include "integrationrule.h"
-#include "classtype.h"
 #include "chartype.h"
 #include "elementgeometrytype.h"
 #include "equationid.h"

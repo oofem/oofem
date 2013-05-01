@@ -37,8 +37,6 @@
 
 #include "generalboundarycondition.h"
 #include "dictionary.h"
-
-#include "classtype.h"
 #include "bcvaltype.h"
 #include "valuemodetype.h"
 

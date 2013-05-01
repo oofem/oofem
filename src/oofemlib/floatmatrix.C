@@ -43,7 +43,6 @@
 #include "mathfem.h"
 #include "error.h"
 #include "datastream.h"
-#include "classtype.h"
 
 #include <cstdlib>
 #include <cstring>

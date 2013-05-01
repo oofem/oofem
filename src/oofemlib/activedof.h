@@ -86,7 +86,6 @@ public:
 
     virtual dofType giveDofType() { return DT_active; }
     virtual const char *giveClassName() const { return "ActiveDof"; }
-    virtual classType giveClassID() const { return ActiveDofClass; }
 
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
