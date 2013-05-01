@@ -1423,6 +1423,9 @@ Domain :: giveErrorEstimator()
                     THROW_CIOERR(CIO_IOERR);    \
                 }                               \
                 obj = creator(name.c_str(), 0, this); \
+                if ( !obj ) {                   \
+                    THROW_CIOERR(CIO_BADVERSION); \
+                }                               \
             } else {                            \
                 obj = giveMethod(i);            \
             }                                   \
