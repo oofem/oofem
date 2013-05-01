@@ -627,7 +627,6 @@ def process_file (infilename, parentfilename):
                     val = int(match.group(1))
                     if (val == 0):
                         error_on_missing_record=False
-                    print "error_on_missing_record ", error_on_missing_record
                 break
 
     if begin==0:
@@ -695,7 +694,7 @@ def process_file (infilename, parentfilename):
 # main function
 #########################################################
 def main():
-    global userrec, recval, mode, tolerance
+    global userrec, recval, mode, tolerance, error_on_missing_record
     infilename = ""
 
     try:
