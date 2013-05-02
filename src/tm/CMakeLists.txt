@@ -28,6 +28,7 @@ set (tm_element
     tetrah1_ht.C
     tr1darcy.C
     latticetransportelement.C
+    lattice2d_mt.C
     )
 
 set (tm_status
