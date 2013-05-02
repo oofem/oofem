@@ -239,6 +239,11 @@ ClassFactory :: ClassFactory()
     geometryList [ "line" ] = geometryCreator< Line >;
     geometryList [ "circle" ] = geometryCreator< Circle >;
     geometryList [ "pointswarm" ] = geometryCreator< PointSwarm >; // just temporary
+
+#ifdef __PARALLEL_MODE
+    loadBalancerList [ "parmetis" ] = loadBalancerCreator< ParmetisLoadBalancer >;
+    loadMonitorList [ "wallclock" ] = loadMonitorCreator< WallClockLoadBalancerMonitor >;
+#endif
 }
 
 SparseMtrx *ClassFactory :: createSparseMtrx(SparseMtrxType type)
@@ -551,20 +556,14 @@ MesherInterface* ClassFactory :: createMesherInterface(MeshPackageType type, Dom
 
 
 #ifdef __PARALLEL_MODE
-LoadBalancerMonitor* ClassFactory :: createLoadBalancerMonitor(classType type, EngngModel *e)
+LoadBalancerMonitor* ClassFactory :: createLoadBalancerMonitor(const char *name, EngngModel *e)
 {
-    if ( type == WallClockLoadBalancerMonitorClass ) {
-        return new WallClockLoadBalancerMonitor(e);
-    }
-    return NULL;
+    return ( loadMonitorList.count(name) == 1 ) ? loadMonitorList [ name ] (e) : NULL;
 }
 
-LoadBalancer* ClassFactory :: createLoadBalancer(classType type, Domain *d)
+LoadBalancer* ClassFactory :: createLoadBalancer(const char *name, Domain *d)
 {
-    if ( type == ParmetisLoadBalancerClass ) {
-        return new ParmetisLoadBalancer(d);
-    }
-    return NULL;
+    return ( loadBalancerList.count(name) == 1 ) ? loadBalancerList [ name ] (d) : NULL;
 }
 #endif
 } // End namespace oofem

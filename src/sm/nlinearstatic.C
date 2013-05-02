@@ -931,7 +931,8 @@ NonLinearStatic :: giveLoadBalancer()
     }
 
     if ( loadBalancingFlag ) {
-        lb = classFactory.createLoadBalancer( ParmetisLoadBalancerClass, this->giveDomain(1) );
+        ///@todo Make the name possibly optional (but currently, there is just one choice, "parmetis")
+        lb = classFactory.createLoadBalancer( _IFT_ParmetisLoadBalancer_Name, this->giveDomain(1) );
         return lb;
     } else {
         return NULL;
@@ -947,7 +948,7 @@ NonLinearStatic :: giveLoadBalancerMonitor()
     }
 
     if ( loadBalancingFlag ) {
-        lbm = classFactory.createLoadBalancerMonitor(WallClockLoadBalancerMonitorClass, this);
+        lbm = classFactory.createLoadBalancerMonitor( _IFT_WallClockLoadBalancerMonitor_Name, this);
         return lbm;
     } else {
         return NULL;

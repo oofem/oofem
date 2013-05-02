@@ -1596,7 +1596,7 @@ VTKXMLExportModuleElementInterface :: exportCellVarAs(InternalStateType type, st
 {
 
     int ncomponents = cellVars.at(0).giveSize();
-#if __VTK_MODULE
+#ifdef __VTK_MODULE
     vtkSmartPointer<vtkDoubleArray> cellVarsArray = vtkSmartPointer<vtkDoubleArray>::New();
     cellVarsArray->SetName(__InternalStateTypeToString(type));
     

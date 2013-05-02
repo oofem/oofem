@@ -52,10 +52,13 @@
 #define _IFT_LoadBalancer_wtp "wtp"
 #define _IFT_LoadBalancerMonitor_nodeWeightMode "nodeweightmode"
 #define _IFT_LoadBalancerMonitor_initialnodeweights "nw"
+
+#define _IFT_ParmetisLoadBalancer_Name "parmetis"
 //@}
 
 ///@name Input fields for WallClockLoadBalancerMonitor
 //@{
+#define _IFT_WallClockLoadBalancerMonitor_Name "wallclock"
 #define _IFT_WallClockLoadBalancerMonitor_relwct "relwct"
 #define _IFT_WallClockLoadBalancerMonitor_abswct "abswct"
 #define _IFT_WallClockLoadBalancerMonitor_minwct "minwct"

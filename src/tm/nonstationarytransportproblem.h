@@ -149,7 +149,7 @@ public:
      */
     double giveDiscreteTime(int n);
 
-#if __CEMHYD_MODULE
+#ifdef __CEMHYD_MODULE
     void averageOverElements(TimeStep *tStep);
 #endif
 

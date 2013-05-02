@@ -35,7 +35,6 @@
 #ifndef classfactory_h
 #define classfactory_h
 
-#include "classtype.h"
 #include "sparsemtrxtype.h"
 #include "errorestimatortype.h"
 #include "doftype.h"
@@ -46,6 +45,7 @@
 #include "geneigvalsolvertype.h"
 #include "materialmappingalgorithmtype.h"
 #include "meshpackagetype.h"
+#include "load.h"
 
 #include <map>
 #include <string>
@@ -109,6 +109,9 @@ template< typename T > SparseLinearSystemNM* sparseLinSolCreator(Domain *d, Engn
 template< typename T > Dof* dofCreator(int n, DofManager *dman) { return new T(n, dman); }
 template< typename T > ErrorEstimator* errEstCreator(int n, Domain *d) { return new T(n, d); }
 
+template< typename T > LoadBalancer* loadBalancerCreator(Domain *d) { return new T(d); }
+template< typename T > LoadBalancerMonitor* loadMonitorCreator(EngngModel *e) { return new T(e); }
+
 // XFEM stuff
 template< typename T > EnrichmentItem *enrichItemCreator(int n, XfemManager *x, Domain *d) { return new T(n, x, d); }
 template< typename T > EnrichmentFunction *enrichFuncCreator(int n, Domain *d) { return new T(n, d); }
@@ -130,6 +133,8 @@ template< typename T > BasicGeometry *geometryCreator() { return new T(); }
 #define REGISTER_SparseNonLinearSystemNM(class) static bool __dummy_##class = GiveClassFactory().registerSparseNonLinearSystemNM(_IFT_##class##_Name, nonlinCreator< class >);
 #define REGISTER_InitModule(class) static bool __dummy_##class = GiveClassFactory().registerInitModule(_IFT_##class##_Name, initCreator< class >);
 #define REGISTER_TopologyDescription(class) static bool __dummy_##class = GiveClassFactory().registerTopologyDescription(_IFT_##class##_Name, topologyCreator< class >);
+#define REGISTER_LoadMonitor(class) static bool __dummy_##class = GiveClassFactory().registerLoadMonitor(_IFT_##class##_Name, loadMonitorCreator< class >);
+#define REGISTER_LoadBalancer(class) static bool __dummy_##class = GiveClassFactory().registerLoadBalancer(_IFT_##class##_Name, loadBalancerCreator< class >);
 
 #define REGISTER_EnrichmentItem(class) static bool __dummy_##class = GiveClassFactory().registerEnrichmentItem(_IFT_##class##_Name, enrichItemCreator< class >);
 #define REGISTER_EnrichmentFunction(class) static bool __dummy_##class = GiveClassFactory().registerEnrichmentFunction(_IFT_##class##_Name, enrichFuncCreator< class >);
@@ -179,6 +184,12 @@ protected:
     std :: map < std :: string, InitModule * ( * )(int, EngngModel *), CaseComp > initList;
     /// Associative container containing topology description creators.
     std :: map < std :: string, TopologyDescription * ( * )(Domain *), CaseComp > topologyList;
+        /// Associative container containing load balancer creators.
+#ifdef __PARALLEL_MODE
+    std :: map < std :: string, LoadBalancer * ( * )(Domain *), CaseComp > loadBalancerList;
+        /// Associative container containing load balancer monitor creators.
+    std :: map < std :: string, LoadBalancerMonitor * ( * )(EngngModel *), CaseComp > loadMonitorList;
+#endif
     // Internal structures (accessed by hard-coded enum values)
     /// Associative container containing sparse matrix creators.
     std :: map < SparseMtrxType, SparseMtrx * ( * )() > sparseMtrxList;
@@ -449,8 +460,8 @@ public:
     MesherInterface *createMesherInterface(MeshPackageType type, Domain *d);
 
 #ifdef __PARALLEL_MODE
-    LoadBalancerMonitor* createLoadBalancerMonitor(classType type, EngngModel *e);
-    LoadBalancer* createLoadBalancer(classType type, Domain *d);
+    LoadBalancerMonitor* createLoadBalancerMonitor(const char *name, EngngModel *e);
+    LoadBalancer* createLoadBalancer(const char *name, Domain *d);
 #endif
 };
 

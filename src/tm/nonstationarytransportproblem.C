@@ -744,7 +744,7 @@ NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer
     } // end element loop
 }
 
-#if __CEMHYD_MODULE
+#ifdef __CEMHYD_MODULE
 // needed for CemhydMat
 void
 NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)

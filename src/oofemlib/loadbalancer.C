@@ -74,13 +74,14 @@ LoadBalancer :: initializeFrom(InputRecord *ir)
 }
 
 void
-LoadBalancer :: initializeWtp(IntArray &wtp) {
-    int i, size = wtp.giveSize();
+LoadBalancer :: initializeWtp(IntArray &wtp)
+{
+    int size = wtp.giveSize();
     WorkTransferPlugin *plugin = NULL;
 
     if ( size ) {
         wtpList.growTo(size);
-        for ( i = 1; i <= size; i++ ) {
+        for ( int i = 1; i <= size; i++ ) {
             if ( wtp.at(i) == 1 ) {
                 plugin = new NonlocalMaterialWTP(this);
             } else {
@@ -97,14 +98,13 @@ void
 LoadBalancer :: migrateLoad(Domain *d)
 {
     // domain->migrateLoad(this);
-    int i;
     int nproc = d->giveEngngModel()->giveNumberOfProcesses();
     int myrank = d->giveEngngModel()->giveRank();
 
     OOFEM_LOG_RELEVANT("[%d] LoadBalancer: migrateLoad: migrating load\n", myrank);
 
     // initialize work transfer plugins before any transfer
-    for ( i = 1; i <= wtpList.giveSize(); i++ ) {
+    for ( int i = 1; i <= wtpList.giveSize(); i++ ) {
         wtpList.at(i)->init(d);
     }
 
@@ -132,14 +132,14 @@ LoadBalancer :: migrateLoad(Domain *d)
 
 #if LoadBalancer_debug_print
     // debug print
-    int j, nnodes = d->giveNumberOfDofManagers(), nelems = d->giveNumberOfElements();
+    int nnodes = d->giveNumberOfDofManagers(), nelems = d->giveNumberOfElements();
     fprintf(stderr, "\n[%d] Nodal Table\n", myrank);
-    for ( i = 1; i <= nnodes; i++ ) {
+    for ( int i = 1; i <= nnodes; i++ ) {
         if ( d->giveDofManager(i)->giveParallelMode() == DofManager_local ) {
             fprintf( stderr, "[%d]: %5d[%d] local\n", myrank, i, d->giveDofManager(i)->giveGlobalNumber() );
         } else if ( d->giveDofManager(i)->giveParallelMode() == DofManager_shared ) {
             fprintf( stderr, "[%d]: %5d[%d] shared ", myrank, i, d->giveDofManager(i)->giveGlobalNumber() );
-            for ( j = 1; j <= d->giveDofManager(i)->givePartitionList()->giveSize(); j++ ) {
+            for ( int j = 1; j <= d->giveDofManager(i)->givePartitionList()->giveSize(); j++ ) {
                 fprintf( stderr, "%d ", d->giveDofManager(i)->givePartitionList()->at(j) );
             }
 
@@ -148,9 +148,9 @@ LoadBalancer :: migrateLoad(Domain *d)
     }
 
     fprintf(stderr, "\n[%d] Element Table\n", myrank);
-    for ( i = 1; i <= nelems; i++ ) {
+    for ( int i = 1; i <= nelems; i++ ) {
         fprintf(stderr, "%5d {", i);
-        for ( j = 1; j <= d->giveElement(i)->giveNumberOfDofManagers(); j++ ) {
+        for ( int j = 1; j <= d->giveElement(i)->giveNumberOfDofManagers(); j++ ) {
             fprintf( stderr, "%d ", d->giveElement(i)->giveDofManager(j)->giveNumber() );
         }
 
@@ -160,12 +160,12 @@ LoadBalancer :: migrateLoad(Domain *d)
 #endif
 
     // migrate work transfer plugin data
-    for ( i = 1; i <= wtpList.giveSize(); i++ ) {
+    for ( int i = 1; i <= wtpList.giveSize(); i++ ) {
         wtpList.at(i)->migrate();
     }
 
     // update work transfer plugin data
-    for ( i = 1; i <= wtpList.giveSize(); i++ ) {
+    for ( int i = 1; i <= wtpList.giveSize(); i++ ) {
         wtpList.at(i)->update();
     }
 
@@ -174,13 +174,13 @@ LoadBalancer :: migrateLoad(Domain *d)
     int nnode = domain->giveNumberOfDofManagers();
     int lnode = 0, lelem = 0;
 
-    for ( i = 1; i <= nnode; i++ ) {
+    for ( int i = 1; i <= nnode; i++ ) {
         if ( domain->giveDofManager(i)->giveParallelMode() == DofManager_local ) {
             lnode++;
         }
     }
 
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         if ( domain->giveElement(i)->giveParallelMode() == Element_local ) {
             lelem++;
         }
@@ -394,7 +394,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
 void
 LoadBalancer :: deleteRemoteDofManagers(Domain *d)
 {
-    int i, ndofman =  d->giveNumberOfDofManagers();
+    int ndofman = d->giveNumberOfDofManagers();
     //LoadBalancer* lb = this->giveLoadBalancer();
     LoadBalancer :: DofManMode dmode;
     DofManager *dman;
@@ -402,7 +402,7 @@ LoadBalancer :: deleteRemoteDofManagers(Domain *d)
     DomainTransactionManager *dtm = d->giveTransactionManager();
     // loop over local nodes
 
-    for ( i = 1; i <= ndofman; i++ ) {
+    for ( int i = 1; i <= ndofman; i++ ) {
         dmode = this->giveDofManState(i);
         if ( ( dmode == LoadBalancer :: DM_Remote ) ) {
             // positive candidate found
@@ -443,7 +443,7 @@ LoadBalancer :: deleteRemoteDofManagers(Domain *d)
 void
 LoadBalancer :: deleteRemoteElements(Domain *d)
 {
-    int i, nelem =  d->giveNumberOfElements();
+    int nelem =  d->giveNumberOfElements();
     int myrank = d->giveEngngModel()->giveRank();
     //LoadBalancer* lb = this->giveLoadBalancer();
     DomainTransactionManager *dtm = d->giveTransactionManager();
@@ -451,7 +451,7 @@ LoadBalancer :: deleteRemoteElements(Domain *d)
 
     // loop over local nodes
 
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         if ( this->giveElementPartition(i) != myrank ) {
             // positive candidate found
             // this->deleteElement (i);  // delete and set entry to NULL
@@ -473,18 +473,17 @@ LoadBalancer :: printStatistics() const
     int nelem, nnode;
     int lelem = 0, lnode = 0;
     int myrank = emodel->giveRank();
-    int i;
 
     nelem = domain->giveNumberOfElements();
     nnode = domain->giveNumberOfDofManagers();
 
-    for ( i = 1; i <= nnode; i++ ) {
+    for ( int i = 1; i <= nnode; i++ ) {
         if ( domain->giveDofManager(i)->giveParallelMode() == DofManager_local ) {
             lnode++;
         }
     }
 
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         if ( domain->giveElement(i)->giveParallelMode() == Element_local ) {
             lelem++;
         }
@@ -502,10 +501,10 @@ LoadBalancer :: printStatistics() const
 LoadBalancerMonitor :: LoadBalancerDecisionType
 WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
 {
-    int i, nproc = emodel->giveNumberOfProcesses();
+    int nproc = emodel->giveNumberOfProcesses();
     int myrank = emodel->giveRank();
     Domain *d = emodel->giveLoadBalancer()->giveDomain();
-    int ie, nelem;
+    int nelem;
     double *node_solutiontimes = new double [ nproc ];
     double *node_relcomppowers = new double [ nproc ];
     double *node_equivelements = new double [ nproc ];
@@ -552,7 +551,7 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
     MPI_Allgather(& mySolutionTime, 1, MPI_DOUBLE, node_solutiontimes, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 
     OOFEM_LOG_RELEVANT("\nLoadBalancer:: individual processor times [sec]: (");
-    for ( i = 0; i < nproc; i++ ) {
+    for ( int i = 0; i < nproc; i++ ) {
         OOFEM_LOG_RELEVANT(" %.3f", node_solutiontimes [ i ]);
     }
 
@@ -560,7 +559,7 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
 
     // detect imbalance
     min_st = max_st = node_solutiontimes [ 0 ];
-    for ( i = 0; i < nproc; i++ ) {
+    for ( int i = 0; i < nproc; i++ ) {
         min_st = min(min_st, node_solutiontimes [ i ]);
         max_st = max(max_st, node_solutiontimes [ i ]);
     }
@@ -577,7 +576,7 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
     // compute number or equivalent elements (equavalent element has computational weight equal to 1.0)
     nelem = d->giveNumberOfElements();
     neqelems = 0.0;
-    for ( ie = 1; ie <= nelem; ie++ ) {
+    for ( int ie = 1; ie <= nelem; ie++ ) {
         if ( d->giveElement(ie)->giveParallelMode() == Element_remote ) {
             continue;
         }
@@ -591,24 +590,24 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
 
     if ( !this->staticNodeWeightFlag ) {
         // compute relative computational powers (solution_time/number_of_equivalent_elements)
-        for ( i = 0; i < nproc; i++ ) {
+        for ( int i = 0; i < nproc; i++ ) {
             node_relcomppowers [ i ] = node_equivelements [ i ] / node_solutiontimes [ i ];
         }
 
         // normalize computational powers
         sum_relcomppowers = 0.0;
-        for ( i = 0; i < nproc; i++ ) {
+        for ( int i = 0; i < nproc; i++ ) {
             sum_relcomppowers += node_relcomppowers [ i ];
         }
 
-        for ( i = 0; i < nproc; i++ ) {
+        for ( int i = 0; i < nproc; i++ ) {
             nodeWeights(i) = node_relcomppowers [ i ] / sum_relcomppowers;
         }
     }
 
     // log equivalent elements on nodes
     OOFEM_LOG_RELEVANT("[%d] LoadBalancer:  node equivalent elements: ", myrank);
-    for ( i = 0; i < nproc; i++ ) {
+    for ( int i = 0; i < nproc; i++ ) {
         OOFEM_LOG_RELEVANT("%6d ", ( int ) node_equivelements [ i ]);
     }
 
@@ -616,7 +615,7 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
 
     // log processor weights
     OOFEM_LOG_RELEVANT("[%d] LoadBalancer: updated proc weights: ", myrank);
-    for ( i = 0; i < nproc; i++ ) {
+    for ( int i = 0; i < nproc; i++ ) {
 #ifdef __LB_DEBUG
         OOFEM_LOG_RELEVANT( "%22.15e ", nodeWeights(i) );
 #else
@@ -643,7 +642,7 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
 
             // exchange processing weights
             MPI_Allgather(& procWeight, 1, MPI_DOUBLE, procWeights, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-            for ( i = 0; i < nproc; i++ ) {
+            for ( int i = 0; i < nproc; i++ ) {
                 nodeWeights(i) = procWeights [ i ];
                 sumWeight += procWeights [ i ];
             }
@@ -681,11 +680,11 @@ LoadBalancerMonitor :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
-    int i, nproc = emodel->giveNumberOfProcesses();
+    int nproc = emodel->giveNumberOfProcesses();
     int nodeWeightMode = 0;
 
     nodeWeights.resize(nproc);
-    for ( i = 0; i < nproc; i++ ) {
+    for ( int i = 0; i < nproc; i++ ) {
         nodeWeights(i) = 1.0 / nproc;
     }
 
