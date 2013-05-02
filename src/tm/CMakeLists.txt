@@ -32,6 +32,7 @@ set (tm_element
 
 set (tm_status
     transportmaterial.C
+    latticetransmat.C
     )
 
 set (tm_material
