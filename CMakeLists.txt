@@ -376,7 +376,6 @@ check_include_files ("unistd.h" HAVE_UNISTD_H)
 check_include_files ("execinfo.h" HAVE_EXECINFO_H)
 check_symbol_exists ("strncasecmp" "strings.h" HAVE_STRNCASECMP)
 check_symbol_exists ("access" "unistd.h" HAVE_ACCESS)
-check_cxx_symbol_exists ("nearest" "cmath" HAVE_NEAREST) # In what header? I don't have it.
 check_cxx_symbol_exists ("cbrt" "cmath" HAVE_CBRT)
 check_cxx_symbol_exists ("isnan" "cmath" HAVE_ISNAN)
 check_cxx_symbol_exists ("M_PI" "cmath" HAVE_M_PI)

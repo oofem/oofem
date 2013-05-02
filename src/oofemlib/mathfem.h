@@ -105,11 +105,6 @@ inline bool isnan(double x) { return std::isnan(x); }
 #endif
 #endif
 
-#ifndef HAVE_NEAREST
-/// Returns the nearest integer
-inline int nearest(double x) { return (int)floor( x + 0.5 ); }
-#endif
-
 #ifndef HAVE_CBRT
 /// Returns the cubic root of x.
 inline double cbrt(double x) { return sgn(x)*pow(fabs(x),1.0/3.0); }

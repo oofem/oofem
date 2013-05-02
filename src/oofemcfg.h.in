@@ -45,9 +45,6 @@ ____________________________________________________\n"
 /* Define if strncasecmp is defined */
 #cmakedefine HAVE_STRNCASECMP 1
 
-/* Define if nearest is defined */
-#cmakedefine HAVE_NEAREST 1
-
 /* Define if cbrt is defined */
 #cmakedefine HAVE_CBRT 1
 
