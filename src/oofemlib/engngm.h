@@ -87,6 +87,8 @@
 
 #define _IFT_EngngModel_lstype "lstype"
 #define _IFT_EngngModel_smtype "smtype"
+
+#define _IFT_EngngModel_coupling "coupling"
 //@}
 
 namespace oofem {
@@ -263,6 +265,9 @@ protected:
     // initial value of processor time used by program
     // clock_t startClock;
 
+    /// List of slave models to which this model is coupled    
+    IntArray coupledModels;
+
     /// Master e-model; if defined receiver is in maintained (slave) mode.
     EngngModel *master;
     /// Context.
@@ -358,6 +363,13 @@ public:
     void setDomain (int i, Domain *ptr);
     /// Returns number of domains in problem.
     int giveNumberOfDomains() { return ndomains; }
+
+    /// Returns list of model number that this model is coupled with. Used for staggered approach.
+    void giveCoupledModels(IntArray& answer) { answer = coupledModels;}
+
+    ///Returns the master engnmodel
+    EngngModel* giveMasterEngngModel(){return this->master;}
+
     /** Service for accessing ErrorEstimator corresponding to particular domain */
     virtual ErrorEstimator *giveDomainErrorEstimator(int n) { return defaultErrEstimator; }
     /** Returns material interface representation for given domain */
