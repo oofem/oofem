@@ -35,13 +35,16 @@
 #include "tf1.h"
 #include "timestep.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_BoundaryCondition( TF1 );
+
 void
 TF1 :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArray &coords, ValueModeType mode)
 // Returns the value of the receiver at time and given position respecting the mode.
 {
-    int i;
     FloatArray cd(3);
     double t, k, c, h, result;
     answer.resize(1);
@@ -52,7 +55,7 @@ TF1 :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArray &coords, V
 
 
     t = stepN->giveTargetTime();
-    for ( i = 1; i <= coords.giveSize(); i++ ) {
+    for ( int i = 1; i <= coords.giveSize(); i++ ) {
         cd.at(i) = coords.at(i);
     }
 

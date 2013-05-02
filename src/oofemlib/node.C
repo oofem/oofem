@@ -51,6 +51,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -59,6 +60,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_DofManager( Node );
+
 Node :: Node(int n, Domain *aDomain) :
     DofManager(n, aDomain), coordinates()
 {

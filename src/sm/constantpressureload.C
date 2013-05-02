@@ -36,8 +36,12 @@
 #include "loadtimefunction.h"
 #include "floatarray.h"
 #include "timestep.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_BoundaryCondition( ConstantPressureLoad );
+
 IRResultType
 ConstantPressureLoad :: initializeFrom(InputRecord *ir)
 {

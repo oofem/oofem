@@ -41,6 +41,7 @@
 
 ///@name Input fields for Reinforcement
 //@{
+#define _IFT_Reinforcement_Name "Reinforcement"
 #define _IFT_Reinforcement_porosity "porosity"
 #define _IFT_Reinforcement_permeability "permeability"
 #define _IFT_Reinforcement_shapeFactor "shapefactor"

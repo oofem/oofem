@@ -35,8 +35,12 @@
 #include "linearedgeload.h"
 #include "floatarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_BoundaryCondition( LinearEdgeLoad );
+
 IRResultType
 LinearEdgeLoad :: initializeFrom(InputRecord *ir)
 {

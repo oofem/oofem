@@ -63,7 +63,9 @@ set (sm_loads
     tf1.C
     usrdeftempfield.C
     rotatingboundary.C
-	constantpressureload.C
+    constantpressureload.C
+    structtemperatureload.C
+    structeigenstrainload.C
     )
 
 set (sm_material

@@ -55,6 +55,8 @@
 
 namespace oofem {
 
+REGISTER_BoundaryCondition( MixedGradientPressureNeumann );
+
 MixedGradientPressureNeumann :: MixedGradientPressureNeumann(int n, Domain *d) : MixedGradientPressureBC(n,d)
 {
     int nsd = d->giveNumberOfSpatialDimensions();

@@ -41,6 +41,7 @@
 #include "feinterpol.h"
 #include "feinterpol2d.h"
 #include "feinterpol3d.h"
+#include "classfactory.h"
 #include "sparsemtrx.h"
 
 #include "integrationdomain.h"
@@ -52,6 +53,8 @@
 #include <list>
 
 namespace oofem {
+
+REGISTER_BoundaryCondition( SurfaceTensionBoundaryCondition );
 
 IRResultType SurfaceTensionBoundaryCondition :: initializeFrom(InputRecord *ir)
 {

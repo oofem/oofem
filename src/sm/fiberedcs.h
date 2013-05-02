@@ -46,6 +46,7 @@
 
 ///@name Input fields for FiberedCrossSection
 //@{
+#define _IFT_FiberedCrossSection_Name "fiberedcs"
 #define _IFT_FiberedCrossSection_nfibers "nfibers"
 #define _IFT_FiberedCrossSection_fibermaterials "fibermaterials"
 #define _IFT_FiberedCrossSection_thicks "thicks"

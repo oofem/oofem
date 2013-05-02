@@ -40,6 +40,7 @@
 
 ///@name Input fields for PeriodicPiecewiseLinFunction
 //@{
+#define _IFT_PeriodicPiecewiseLinFunction_Name "periodicpiecewiselinfunction"
 #define _IFT_PeriodicPiecewiseLinFunction_period "period"
 #define _IFT_PeriodicPiecewiseLinFunction_addtf "addtf"
 //@}

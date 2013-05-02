@@ -40,6 +40,7 @@
 
 ///@name Input fields for LocalGaussianRandomGenerator
 //@{
+#define _IFT_LocalGaussianRandomGenerator_Name "localgaussrandomgenerator"
 #define _IFT_LocalGaussianRandomGenerator_mean "mean"
 #define _IFT_LocalGaussianRandomGenerator_variance "variance"
 #define _IFT_LocalGaussianRandomGenerator_seed "seed"

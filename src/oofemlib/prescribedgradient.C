@@ -42,7 +42,7 @@
 #include "loadtimefunction.h"
 #include "engngm.h"
 #include "node.h"
-#include "classfactory.h" // For sparse matrix creation.
+#include "classfactory.h"
 #ifdef __FM_MODULE
 #include "../fm/line2boundaryelement.h"
 #endif
@@ -51,6 +51,9 @@
 #include "sparselinsystemnm.h"
 
 namespace oofem {
+
+REGISTER_BoundaryCondition( PrescribedGradient );
+
 double PrescribedGradient :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
     DofIDItem id = dof->giveDofID();

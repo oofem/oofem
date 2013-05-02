@@ -35,8 +35,12 @@
 #include "pointload.h"
 #include "loadtimefunction.h"
 #include "floatarray.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_BoundaryCondition( PointLoad );
+
 void
 PointLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
 {

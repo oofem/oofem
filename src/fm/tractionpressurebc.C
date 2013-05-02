@@ -34,8 +34,12 @@
 
 #include "tractionpressurebc.h"
 #include "cbs.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_BoundaryCondition( TractionPressureBC );
+
 double TractionPressureBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 // Returns the value at stepN of the prescribed value of the kinematic
 // unknown 'u'. Returns 0 if 'u' has no prescribed value.

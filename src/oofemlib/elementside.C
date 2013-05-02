@@ -37,8 +37,12 @@
 #include "floatmatrix.h"
 #include "intarray.h"
 #include "verbose.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_DofManager( ElementSide );
+
 ElementSide :: ElementSide(int n, Domain *aDomain) :
     DofManager(n, aDomain)
 { }
@@ -81,6 +85,7 @@ void ElementSide :: printYourself()
 void ElementSide :: computeTransformation(FloatMatrix &answer, const IntArray *map)
 {
     //
+    
     // computes transformation of receiver from global cs to nodal (user-defined) cs.
     // Note: implementation rely on D_u, D_v and D_w (R_u, R_v, R_w) order in cltypes.h
     // file. Do not change their order and do not insert any values between these values.

@@ -41,6 +41,8 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 
+#define _IFT_EmptyCS_Name "emptycs"
+
 namespace oofem {
 /**
  * Empty cross section model, passes all requests to material driver.

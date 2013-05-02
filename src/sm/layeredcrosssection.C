@@ -40,9 +40,12 @@
 #include "structuralms.h"
 #include "floatarray.h"
 #include "contextioerr.h"
-
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_CrossSection( LayeredCrossSection );
+
 void
 LayeredCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm form,
                                          GaussPoint *gp,

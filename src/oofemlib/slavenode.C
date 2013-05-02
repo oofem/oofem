@@ -36,8 +36,12 @@
 #include "slavedof.h"
 #include "floatarray.h"
 #include "intarray.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_DofManager( SlaveNode );
+
 IRResultType SlaveNode :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro

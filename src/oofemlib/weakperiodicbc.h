@@ -43,6 +43,7 @@
 
 ///@name Input fields for WeakPeriodicBoundaryCondition
 //@{
+#define _IFT_WeakPeriodicBoundaryCondition_Name "weakperiodicbc"
 #define _IFT_WeakPeriodicBoundaryCondition_order "order"
 #define _IFT_WeakPeriodicBoundaryCondition_descritizationType "descritizationtype"
 #define _IFT_WeakPeriodicBoundaryCondition_dofid "dofid"
@@ -58,7 +59,7 @@ enum basisType { monomial=0, trigonometric=1, legendre=2 };
  *
  * @author Carl Sandström
  */
-class WeakPeriodicbc : public ActiveBoundaryCondition
+class WeakPeriodicBoundaryCondition : public ActiveBoundaryCondition
 {
 private:
 
@@ -100,8 +101,8 @@ private:
     double binomial(double n , int k);
 
 public:
-    WeakPeriodicbc(int n, Domain *d);
-    virtual ~WeakPeriodicbc() { };
+    WeakPeriodicBoundaryCondition(int n, Domain *d);
+    virtual ~WeakPeriodicBoundaryCondition() { };
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

@@ -42,6 +42,7 @@
 
 ///@name Input fields for LayeredCrossSection
 //@{
+#define _IFT_LayeredCrossSection_Name "layeredcs"
 #define _IFT_LayeredCrossSection_nlayers "nlayers"
 #define _IFT_LayeredCrossSection_layermaterials "layermaterials"
 #define _IFT_LayeredCrossSection_thicks "thicks"

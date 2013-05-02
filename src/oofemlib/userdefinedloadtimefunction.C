@@ -34,9 +34,14 @@
 
 #include "userdefinedloadtimefunction.h"
 #include "parser.h"
+#include "classfactory.h"
+
 #include <sstream>
 
 namespace oofem {
+
+REGISTER_LoadTimeFunction( UserDefinedLoadTimeFunction );
+
 UserDefinedLoadTimeFunction :: UserDefinedLoadTimeFunction(int n, Domain *d) : LoadTimeFunction(n, d) { }
 
 IRResultType

@@ -49,16 +49,20 @@
 #include "mathfem.h"
 #include "fei2dtrlin.h"
 #include "fei2dtrquad.h"
+#include "classfactory.h"
 
 namespace oofem {
-WeakPeriodicbc :: WeakPeriodicbc(int n, Domain *d) : ActiveBoundaryCondition(n, d)
+
+REGISTER_BoundaryCondition( WeakPeriodicBoundaryCondition );
+
+WeakPeriodicBoundaryCondition :: WeakPeriodicBoundaryCondition(int n, Domain *d) : ActiveBoundaryCondition(n, d)
 {
     useBasisType = trigonometric;
     doUpdateSminmax = true;
 }
 
 IRResultType
-WeakPeriodicbc :: initializeFrom(InputRecord *ir)
+WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom";
     IRResultType result;
@@ -104,7 +108,7 @@ WeakPeriodicbc :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-void WeakPeriodicbc :: giveEdgeNormal(FloatArray &answer, int element, int side)
+void WeakPeriodicBoundaryCondition :: giveEdgeNormal(FloatArray &answer, int element, int side)
 {
     FloatArray Tangent;
 
@@ -134,7 +138,7 @@ void WeakPeriodicbc :: giveEdgeNormal(FloatArray &answer, int element, int side)
     answer.at(2) = -Tangent.at(1);
 }
 
-void WeakPeriodicbc :: updateDirection()
+void WeakPeriodicBoundaryCondition :: updateDirection()
 {
     // Check orientation for s
     FloatArray normal;
@@ -147,7 +151,7 @@ void WeakPeriodicbc :: updateDirection()
     }
 }
 
-void WeakPeriodicbc :: updateSminmax()
+void WeakPeriodicBoundaryCondition :: updateSminmax()
 {
     if ( doUpdateSminmax ) {
         updateDirection();
@@ -166,7 +170,7 @@ void WeakPeriodicbc :: updateSminmax()
     }
 }
 
-void WeakPeriodicbc :: addElementSide(int newElement, int newSide)
+void WeakPeriodicBoundaryCondition :: addElementSide(int newElement, int newSide)
 {
     //printf ("Add element %u, side %u\n", newElement, newSide);
 
@@ -200,7 +204,7 @@ void WeakPeriodicbc :: addElementSide(int newElement, int newSide)
     side [ addToList ].push_back(newSide);
 }
 
-void WeakPeriodicbc :: computeElementTangent(FloatMatrix &B, Element *e, int boundary)
+void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Element *e, int boundary)
 {
     FloatArray gcoords;
     IntArray bnodes;
@@ -244,7 +248,7 @@ void WeakPeriodicbc :: computeElementTangent(FloatMatrix &B, Element *e, int bou
     }
 }
 
-void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if ( type != StiffnessMatrix ) {
         return;
@@ -315,7 +319,7 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
     }
 }
 
-double WeakPeriodicbc :: computeBaseFunctionValue(int baseID, double coordinate)
+double WeakPeriodicBoundaryCondition :: computeBaseFunctionValue(int baseID, double coordinate)
 {
     double fVal=0.0;
     double sideLength = smax - smin;
@@ -339,7 +343,7 @@ double WeakPeriodicbc :: computeBaseFunctionValue(int baseID, double coordinate)
     return fVal;
 }
 
-double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+double WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                         CharType type, ValueModeType mode,
                                         const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
@@ -446,12 +450,12 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
     return norm;
 }
 
-int WeakPeriodicbc :: giveNumberOfInternalDofManagers()
+int WeakPeriodicBoundaryCondition :: giveNumberOfInternalDofManagers()
 {
     return 1;
 }
 
-DofManager *WeakPeriodicbc :: giveInternalDofManager(int i)
+DofManager *WeakPeriodicBoundaryCondition :: giveInternalDofManager(int i)
 {
     if ( i == 1 ) {
         return gammaDman;
@@ -460,7 +464,7 @@ DofManager *WeakPeriodicbc :: giveInternalDofManager(int i)
     }
 }
 
-double WeakPeriodicbc::factorial(int n)
+double WeakPeriodicBoundaryCondition::factorial(int n)
 {
     int x = 1.0;
     for ( int i = 1; i <= n; i++ ) {
@@ -469,7 +473,7 @@ double WeakPeriodicbc::factorial(int n)
     return x;
 }
 
-double WeakPeriodicbc::binomial(double n, int k)
+double WeakPeriodicBoundaryCondition::binomial(double n, int k)
 {
     double f = 1.0;
     for ( int i = 1; i <= k; i++ ) {

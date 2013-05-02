@@ -34,6 +34,7 @@
 
 #include "piecewiselinfunction.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #include <fstream>
 #include <ios>
@@ -42,7 +43,9 @@
 namespace oofem {
 #define PiecewiseLinFunction_PRECISION 1.e-12
 
-PiecewiseLinFunction::PiecewiseLinFunction ( int i, Domain* d ) : LoadTimeFunction ( i, d ), dates(), values()
+REGISTER_LoadTimeFunction( PiecewiseLinFunction );
+
+PiecewiseLinFunction :: PiecewiseLinFunction ( int i, Domain* d ) : LoadTimeFunction ( i, d ), dates(), values()
 {
 }
 

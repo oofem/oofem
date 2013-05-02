@@ -43,6 +43,8 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 
+#define _IFT_MixedGradientPressureDirichlet_Name "mixedgradientpressuredirichlet"
+
 namespace oofem {
 class MasterDof;
 class Node;

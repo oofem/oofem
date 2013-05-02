@@ -39,6 +39,7 @@
 
 ///@name Input fields for Particle
 //@{
+#define _IFT_Particle_Name "particle"
 #define _IFT_Particle_rad "rad"
 //@}
 

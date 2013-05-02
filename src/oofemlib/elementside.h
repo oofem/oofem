@@ -32,11 +32,13 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef elementside_666_h
-#define elementside_666_h
+#ifndef elementside_h
+#define elementside_h
 
 #include "dofmanager.h"
 #include "domain.h"
+
+#define _IFT_ElementSide_Name "elementside"
 
 namespace oofem {
 class Dof;

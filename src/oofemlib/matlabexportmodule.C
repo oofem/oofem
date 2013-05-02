@@ -268,7 +268,7 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
     unsigned int wpbccount = 1;
 
     for ( int i = 1; i <= domain->giveNumberOfBoundaryConditions(); i++ ) {
-        WeakPeriodicbc *wpbc = dynamic_cast< WeakPeriodicbc * >( domain->giveBc(i) );
+        WeakPeriodicBoundaryCondition *wpbc = dynamic_cast< WeakPeriodicBoundaryCondition * >( domain->giveBc(i) );
         if ( wpbc ) {
             for ( int j = 1; j <= wpbc->giveNumberOfInternalDofManagers(); j++ ) {
                 fprintf( FID, "\tspecials.weakperiodic{%u}.descType=%u;\n", wpbccount, wpbc->giveBasisType() );

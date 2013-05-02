@@ -211,6 +211,7 @@ set (core_bc
     constantedgeload.C
     constantsurfaceload.C
     nodalload.C
+    deadweight.C
     reinforcement.C
     surfacetensionbc.C
     )

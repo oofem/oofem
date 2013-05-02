@@ -47,6 +47,7 @@
 
 ///@name Input fields for Node
 //@{
+#define _IFT_Node_Name "node"
 #define _IFT_Node_coords "coords"
 #define _IFT_Node_lcs "lcs"
 //@}

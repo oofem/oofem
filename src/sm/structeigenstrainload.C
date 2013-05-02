@@ -33,8 +33,15 @@
  */
 
 #include "structeigenstrainload.h"
-#include "element.h"
-#include "timestep.h"
-#include "loadtimefunction.h"
-#include "material.h"
-#include "floatarray.h"
+#include "classfactory.h"
+
+namespace oofem {
+
+REGISTER_BoundaryCondition( StructuralEigenstrainLoad );
+
+void StructuralEigenstrainLoad :: computeValueAt(FloatArray& answer, TimeStep* tStep, FloatArray& coords, ValueModeType mode)
+{
+    this->computeComponentArrayAt(answer, tStep, mode);
+}
+
+}

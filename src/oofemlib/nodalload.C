@@ -33,8 +33,12 @@
  */
 
 #include "nodalload.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_BoundaryCondition( NodalLoad );
+
 IRResultType
 NodalLoad :: initializeFrom(InputRecord *ir)
 {

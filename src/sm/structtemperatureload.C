@@ -32,18 +32,16 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "classtype.h"
-#include "constantfunction.h"
-#include "peakfunction.h"
-#include "piecewiselinfunction.h"
-#include "periodicpiecewiselinfunction.h"
-#include "heavisideltf.h"
-#include "userdefinedloadtimefunction.h"
+#include "structtemperatureload.h"
+#include "classfactory.h"
 
-REGISTER_CLASS(ConstantFunction, "constantfunction", ConstantFunctionClass)
-REGISTER_CLASS(PeakFunction, "peakfunction", PeakFunctionClass)
-REGISTER_CLASS(PiecewiseLinFunction, "piecewiselinfunction", PiecewiseLinFunctionClass)
-REGISTER_CLASS(PeriodicPiecewiseLinFunction, "periodicpiecewiselinfunction", PeriodicPiecewiseLinFunctionClass)
-REGISTER_CLASS(HeavisideLTF, "heavisideltf", HeavisideLTFClass)
-REGISTER_CLASS(UserDefinedLoadTimeFunction, "usrdefltf", UserDefinedLoadTimeFunctionClass)
+namespace oofem {
 
+REGISTER_BoundaryCondition( StructuralTemperatureLoad );
+
+void StructuralTemperatureLoad :: computeValueAt(FloatArray& answer, TimeStep* tStep, FloatArray& coords, ValueModeType mode)
+{
+    this->computeComponentArrayAt(answer, tStep, mode);
+}
+
+}

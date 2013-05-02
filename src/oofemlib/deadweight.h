@@ -39,6 +39,8 @@
 #include "bcgeomtype.h"
 #include "valuemodetype.h"
 
+#define _IFT_DeadWeight_Name "deadweight"
+
 namespace oofem {
 /**
  * This class implements a gravity-like load, or internal source (heat etc.) for transport problems.
@@ -60,17 +62,16 @@ public:
      * @param coords Global coordinates, which are used to evaluate components values.
      * @param mode Determines response mode-
      */
-    virtual void computeValueAt(FloatArray &answer, TimeStep *atTime, FloatArray &coords, ValueModeType mode)
-    { computeComponentArrayAt(answer, atTime, mode); }
+    virtual void computeValueAt(FloatArray &answer, TimeStep *atTime, FloatArray &coords, ValueModeType mode);
 
     virtual bcValType giveBCValType() const { return ForceLoadBVT; }
     virtual bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
 
-    void setDeadWeighComponents(FloatArray &newComponents) { this->componentArray.at(1)=newComponents.at(1); this->componentArray.at(2)=newComponents.at(2); }
+    void setDeadWeighComponents(const FloatArray &newComponents);
 
     virtual classType giveClassID() const { return DeadWeightClass; }
     virtual const char *giveClassName() const { return "DeadWeight"; }
-    virtual const char *giveInputRecordName() const { return "DeadWeight"; }
+    virtual const char *giveInputRecordName() const { return _IFT_DeadWeight_Name; }
 };
 } // end namespace oofem
 #endif // deadweight_h

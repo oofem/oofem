@@ -41,6 +41,7 @@
 
 ///@name Input fields for Dirichlet boundary condition
 //@{
+#define _IFT_BoundaryCondition_Name "boundarycondition"
 #define _IFT_BoundaryCondition_PrescribedValue "prescribedvalue"
 #define _IFT_BoundaryCondition_PrescribedValue_d "d" ///< Alternative input field
 //@}

@@ -39,8 +39,12 @@
 #include "element.h"
 #include "feinterpol.h"
 #include "spatiallocalizer.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_DofManager( HangingNode );
+
 HangingNode :: HangingNode(int n, Domain *aDomain) : Node(n, aDomain)
 {
 #ifdef __OOFEG

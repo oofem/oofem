@@ -44,12 +44,14 @@
 #include "node.h"
 #include "activedof.h"
 #include "masterdof.h"
-#include "classfactory.h" // For sparse matrix creation.
+#include "classfactory.h"
 #include "sparsemtrxtype.h"
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
 
 namespace oofem {
+
+REGISTER_BoundaryCondition( MixedGradientPressureDirichlet );
 
 MixedGradientPressureDirichlet :: MixedGradientPressureDirichlet(int n, Domain *d) : MixedGradientPressureBC(n,d)
 {

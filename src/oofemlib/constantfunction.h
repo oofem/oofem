@@ -37,6 +37,8 @@
 
 #include "loadtimefunction.h"
 
+#define _IFT_ConstantFunction_Name "constantfunction"
+
 namespace oofem {
 
 /**

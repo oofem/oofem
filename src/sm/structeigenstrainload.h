@@ -37,6 +37,8 @@
 
 #include "load.h"
 
+#define _IFT_StructuralEigenstrainLoad_Name "structeigenstrainload"
+
 namespace oofem {
 class Element;
 class TimeStep;
@@ -60,8 +62,7 @@ public:
      * @param coords Integration point global coordinates, which are used to evaluate components values.
      * @param mode Determines response mode.
      */
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
-    { this->computeComponentArrayAt(answer, tStep, mode); }
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
 
     virtual classType giveClassID() const { return StructuralEigenstrainLoadClass; }
     virtual const char *giveClassName() const { return "StructuralEigenstrainLoad"; }

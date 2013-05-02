@@ -39,6 +39,7 @@
 
 ///@name Input fields for PeakFunction
 //@{
+#define _IFT_PeakFunction_Name "peakfunction"
 #define _IFT_PeakFunction_t "t"
 #define _IFT_PeakFunction_ft "f(t)"
 //@}

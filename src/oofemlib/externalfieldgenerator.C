@@ -34,11 +34,15 @@
 
 #include "externalfieldgenerator.h"
 #include "floatarray.h"
+#include "classfactory.h"
 
 #include <iostream>
 #include <fstream>
 
 namespace oofem {
+    
+REGISTER_RandomFieldGenerator( ExternalFieldGenerator );
+
 ExternalFieldGenerator :: ExternalFieldGenerator(int num, Domain *d) : RandomFieldGenerator(num, d)
 {
 }

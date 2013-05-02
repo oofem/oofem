@@ -37,6 +37,8 @@
 
 #include "boundarycondition.h"
 
+#define _IFT_TractionPressureBC_Name "prescribedtractionpressurebc"
+
 namespace oofem {
 /**
  * Class implementing prescribed pressure bc due to prescribed tractions (Dirichlet boundary condition on DOF).

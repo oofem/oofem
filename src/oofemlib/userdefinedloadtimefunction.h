@@ -39,6 +39,7 @@
 
 ///@name Input fields for UserDefinedLoadTimeFunction
 //@{
+#define _IFT_UserDefinedLoadTimeFunction_Name "usrdefltf"
 #define _IFT_UserDefinedLoadTimeFunction_ft "f(t)"
 #define _IFT_UserDefinedLoadTimeFunction_dfdt "dfdt(t)"
 #define _IFT_UserDefinedLoadTimeFunction_d2fdt2 "d2fdt2(t)"

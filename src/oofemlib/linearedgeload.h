@@ -41,6 +41,7 @@
 
 ///@name Input fields for LinearEdgeLoad
 //@{
+#define _IFT_LinearEdgeLoad_Name "linearedgeload"
 #define _IFT_LinearEdgeLoad_formulation "formulation"
 #define _IFT_LinearEdgeLoad_startcoord "sc"
 #define _IFT_LinearEdgeLoad_endcoord "ec"

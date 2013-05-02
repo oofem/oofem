@@ -36,8 +36,12 @@
 #include "slavedof.h"
 #include "floatarray.h"
 #include "intarray.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_DofManager( RigidArmNode );
+
 RigidArmNode :: RigidArmNode(int n, Domain *aDomain) : Node(n, aDomain)
 { }
 

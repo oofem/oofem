@@ -40,7 +40,6 @@
 #endif
 
 namespace oofem {
-
 double MixedGradientPressureBC :: domainSize()
 {
     ///@todo This code is very general, and necessary for all multiscale simulations with pores, so it should be moved into Domain eventually

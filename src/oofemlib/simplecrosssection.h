@@ -42,6 +42,7 @@
 
 ///@name Input fields for SimpleCrossSection
 //@{
+#define _IFT_SimpleCrossSection_Name "simplecs"
 #define _IFT_SimpleCrossSection_thick "thick"
 #define _IFT_SimpleCrossSection_width "width"
 #define _IFT_SimpleCrossSection_area "area"

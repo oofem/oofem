@@ -41,10 +41,13 @@
 #include "verbose.h"
 #include "classfactory.h"
 #include "timestep.h"
+#include "classfactory.h"
 
 #include <cstdlib>
 
 namespace oofem {
+
+REGISTER_BoundaryCondition( Reinforcement );
 
 IRResultType
 Reinforcement :: initializeFrom(InputRecord *ir)

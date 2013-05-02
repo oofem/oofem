@@ -37,6 +37,8 @@
 
 #include "boundaryload.h"
 
+#define _IFT_ConstantSurfaceLoad_Name "constantsurfaceload"
+
 namespace oofem {
 
 /**

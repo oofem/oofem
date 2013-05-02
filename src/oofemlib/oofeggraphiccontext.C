@@ -151,7 +151,7 @@ oofegGraphicContext :: GR_giveColorFromUserColorTable(EPixel *table, int tableSi
         relVal = 0.;
     }
 
-    int indx = ( int ) nearest(relVal * tableSize);
+    int indx = ( int ) floor(relVal * tableSize + 0.5);
     return table [ indx - 1 ];
 }
 

@@ -33,8 +33,11 @@
  */
 
 #include "constantfunction.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_LoadTimeFunction( ConstantFunction );
 
 IRResultType
 ConstantFunction :: initializeFrom(InputRecord *ir)

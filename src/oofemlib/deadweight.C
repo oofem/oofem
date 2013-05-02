@@ -32,13 +32,25 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "doftype.h"
-#include "masterdof.h"
-#include "simpleslavedof.h"
-#include "slavedof.h"
-#include "activedof.h"
+#include "deadweight.h"
+#include "timestep.h"
+#include "loadtimefunction.h"
+#include "classfactory.h"
 
-REGISTER_CLASS(MasterDof, DT_master)
-REGISTER_CLASS(SimpleSlaveDof, DT_simpleSlave)
-REGISTER_CLASS(SlaveDof, DT_slave)
-REGISTER_CLASS(ActiveDof, DT_active)
+namespace oofem {
+
+REGISTER_BoundaryCondition( DeadWeight );
+
+void DeadWeight :: computeValueAt(FloatArray& answer, TimeStep* atTime, FloatArray& coords, ValueModeType mode)
+{
+    computeComponentArrayAt(answer, atTime, mode);
+}
+
+void DeadWeight :: setDeadWeighComponents(const FloatArray& newComponents)
+{
+    this->componentArray.at(1) = newComponents.at(1);
+    this->componentArray.at(2) = newComponents.at(2);
+}
+
+
+} // end namespace oofem

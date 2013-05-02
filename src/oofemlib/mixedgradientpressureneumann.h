@@ -45,6 +45,8 @@
 
 #include <list>
 
+#define _IFT_MixedGradientPressureNeumann_Name   "mixedgradientpressureneumann"
+
 namespace oofem {
 class MasterDof;
 class Node;

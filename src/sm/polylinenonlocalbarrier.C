@@ -38,8 +38,12 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_NonlocalBarrier( PolylineNonlocalBarrier )
+
 PolylineNonlocalBarrier :: PolylineNonlocalBarrier(int n, Domain *aDomain) :
     NonlocalBarrier(n, aDomain), vertexNodes()
     // Constructor. Creates an element with number n, belonging to aDomain.

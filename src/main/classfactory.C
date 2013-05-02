@@ -42,16 +42,14 @@
 
 #define REGISTER_CLASS(_class, name, id)
 #include "elementclassfactory.h"
-#include "dofmanclassfactory.h"
-#include "boundaryconditionclassfactory.h"
-#include "crosssectionclassfactory.h"
 #include "materialclassfactory.h"
 #include "engngmodelclassfactory.h"
-#include "ltfclassfactory.h"
-#include "nonlocalbarrierclassfactory.h"
-#include "randomfieldgeneratorclassfactory.h"
 
-// No class factory files for these;
+#include "masterdof.h"
+#include "slavedof.h"
+#include "simpleslavedof.h"
+#include "activedof.h"
+
 #include "gaussintegrationrule.h"
 #include "lobattoir.h"
 
@@ -72,12 +70,6 @@
 #include "mmashapefunctprojection.h"
 #include "mmacontainingelementprojection.h" ///@todo This doesn't seem to be included? It is broken?
 
-// or these
-#include "masterdof.h"
-#include "slavedof.h"
-#include "simpleslavedof.h"
-#include "activedof.h"
-
 #ifdef __PARALLEL_MODE
  #include "loadbalancer.h"
  #include "parmetisloadbalancer.h"
@@ -86,7 +78,6 @@
 #undef  REGISTER_CLASS
 #define REGISTER_CLASS(_class, id)
 #include "sparsemtrxclassfactory.h"
-#include "dofclassfactory.h"
 #include "sparselinearsystemsolverclassfactory.h"
 #include "errorestimatorclassfactory.h"
 
@@ -115,24 +106,6 @@ ClassFactory :: ClassFactory()
     elemList [ name ]  = elemCreator< _class >;
 #include "elementclassfactory.h"
 
-    // register dof managers
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, name, id) \
-    dofmanList [ name ]  = dofmanCreator< _class >;
-#include "dofmanclassfactory.h"
-
-    // register boundary conditions
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, name, id) \
-    bcList [ name ]  = bcCreator< _class >;
-#include "boundaryconditionclassfactory.h"
-
-    // register cross sections
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, name, id) \
-    csList [ name ]  = csCreator< _class >;
-#include "crosssectionclassfactory.h"
-
     // register materials
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, name, id) \
@@ -145,33 +118,10 @@ ClassFactory :: ClassFactory()
     engngList [ name ]  = engngCreator< _class >;
 #include "engngmodelclassfactory.h"
 
-    // register load time functions
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, name, id) \
-    ltfList [ name ]  = ltfCreator< _class >;
-#include "ltfclassfactory.h"
-
-    // register nonlocal barriers
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, name, id) \
-    nlbList [ name ]  = nlbCreator< _class >;
-#include "nonlocalbarrierclassfactory.h"
-
-    // register random field generators
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, name, id) \
-    rfgList [ name ]  = rfgCreator< _class >;
-#include "randomfieldgeneratorclassfactory.h"
-
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, id) \
     sparseMtrxList [ id ] = sparseMtrxCreator< _class >;
 #include "sparsemtrxclassfactory.h"
-
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, id) \
-    dofList [ id ] = dofCreator< _class >;
-#include "dofclassfactory.h"
 
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, id) \
@@ -182,6 +132,12 @@ ClassFactory :: ClassFactory()
 #define REGISTER_CLASS(_class, id) \
     sparseLinSolList [ id ] = sparseLinSolCreator< _class >;
 #include "sparselinearsystemsolverclassfactory.h"
+
+    // Fixed list for DOF types. No new components can register for these since these are part of the internal structure in OOFEM.
+    dofList [ DT_master ] = dofCreator< MasterDof >;
+    dofList [ DT_simpleSlave ] = dofCreator< SimpleSlaveDof >;
+    dofList [ DT_slave ] = dofCreator< SlaveDof >;
+    dofList [ DT_active ] = dofCreator< ActiveDof >;
 
 #ifdef __PARALLEL_MODE
     loadBalancerList [ "parmetis" ] = loadBalancerCreator< ParmetisLoadBalancer >;
