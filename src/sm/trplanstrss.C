@@ -426,9 +426,10 @@ TrPlaneStress2d :: initializeFrom(InputRecord *ir)
     numberOfGaussPoints = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
 
-    if ( numberOfGaussPoints != 1 ) {
-        numberOfGaussPoints = 1;
-    }
+    /*  if ( numberOfGaussPoints != 1 ) {
+           numberOfGaussPoints = 1;
+	}
+    */
 
     return IRRT_OK;
 }

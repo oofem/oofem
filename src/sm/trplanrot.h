@@ -88,6 +88,9 @@ public:
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
+
+    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+
 };
 } // end namespace oofem
 #endif //  trplanrot_h
