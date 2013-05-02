@@ -27,6 +27,7 @@ set (tm_element
     qbrick1_ht.C
     tetrah1_ht.C
     tr1darcy.C
+    latticetransportelement.C
     )
 
 set (tm_status
