@@ -39,7 +39,6 @@
 #include "element.h"
 #include "connectivitytable.h"
 #include "mathfem.h"
-#include "planstrss.h"
 
 #include <list>
 
@@ -58,7 +57,6 @@ FreemInterface :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum
 int
 FreemInterface :: createInput(Domain *d, TimeStep *stepN)
 {
-    int i;
     int nnodes = d->giveNumberOfDofManagers(), nelem = d->giveNumberOfElements();
     double density;
     FILE *outputStrem;
@@ -72,7 +70,7 @@ FreemInterface :: createInput(Domain *d, TimeStep *stepN)
     /* mesh densities smoothing */
     // query nodal absolute densities
     FloatArray nodalDensities(nnodes);
-    for ( i = 1; i <= nnodes; i++ ) {
+    for ( int i = 1; i <= nnodes; i++ ) {
         nodalDensities.at(i) = d->giveErrorEstimator()->giveRemeshingCrit()->giveRequiredDofManDensity(i, stepN);
     }
 
@@ -80,7 +78,7 @@ FreemInterface :: createInput(Domain *d, TimeStep *stepN)
     /* end of smoothing */
 
     // loop over nodes
-    for ( i = 1; i <= nnodes; i++ ) {
+    for ( int i = 1; i <= nnodes; i++ ) {
         //density = d->giveErrorEstimator ()->giveRemeshingCrit()->giveRequiredDofManDensity (i, stepN, 1);
         //density = d->giveErrorEstimator ()->giveRemeshingCrit()->giveDofManDensity (i) / nodalDensities.at(i);
         density = nodalDensities.at(i);
@@ -88,10 +86,10 @@ FreemInterface :: createInput(Domain *d, TimeStep *stepN)
         fprintf(outputStrem, "backgroungMeshNode %d x %e y %e density %e\n", i, inode->giveCoordinate(1), inode->giveCoordinate(2), density);
     }
 
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         ielem = d->giveElement(i);
-        if ( dynamic_cast< PlaneStress2d * >( ielem ) ) {
-            OOFEM_ERROR("FreemInterface::createInput : unsupported element type (not PlaneStress2d)");
+        if ( ielem->giveGeometryType() != EGT_quad_1 ) {
+            OOFEM_ERROR("FreemInterface::createInput : unsupported element type (not a bilinear quad)");
         }
 
         fprintf( outputStrem, "backgroundMeshElem %d  nodes 4 %d %d %d %d\n", i,

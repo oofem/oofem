@@ -215,6 +215,20 @@ set (core_bc
     surfacetensionbc.C
     )
 
+set (core_mapping
+    mmaclosestiptransfer.C
+    mmashapefunctprojection.C
+    mmaleastsquareprojection.C
+    mmacontainingelementprojection.C
+    )
+
+set (core_mesher
+    t3dinterface.C
+    targe2interface.C
+    freeminterface.C
+    subdivision.C
+    )
+
 set (core
     ${core_iml} # TODO: Make this optional
     ${core_unsorted}
@@ -237,6 +251,8 @@ set (core
     ${core_parallel}
     ${core_bc}
     ${core_iga}
+    ${core_mesher}
+    ${core_mapping}
     )
 
 add_library (core

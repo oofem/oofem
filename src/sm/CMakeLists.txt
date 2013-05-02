@@ -126,13 +126,6 @@ set (sm_barrier
     symmetrybarrier.C
     )
 
-set (sm_mesher
-    t3dinterface.C
-    targe2interface.C
-    freeminterface.C
-    subdivision.C
-    )
-
 set (sm_status
     structuralms.C
     rheoChM.C maxwellChM.C kelvinChM.C
@@ -150,13 +143,6 @@ set (sm_unsorted
     refinedmesh.C
     microplane.C
     gpinitmodule.C
-    )
-
-set (sm_mapping
-    mmaclosestiptransfer.C
-    mmashapefunctprojection.C
-    mmaleastsquareprojection.C
-    mmacontainingelementprojection.C
     )
 
 set (sm_parallel
@@ -185,8 +171,6 @@ set (sm
     ${sm_export}
     ${sm_barrier}
     ${sm_error}
-    ${sm_mesher}
-    ${sm_mapping}
     ${sm_unsorted}
     ${sm_parallel}
     ${sm_obsolete}

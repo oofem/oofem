@@ -61,17 +61,16 @@
 #include "inverseit.h"
 #include "slepcsolver.h"
 
-#ifdef __SM_MODULE
- // mesher interfaces
- #include "t3dinterface.h"
- #include "targe2interface.h"
- #include "freeminterface.h"
- #include "subdivision.h"
+// mesher interfaces
+#include "t3dinterface.h"
+#include "targe2interface.h"
+#include "subdivision.h"
+#include "freeminterface.h"
 
- #include "mmaclosestiptransfer.h"
- #include "mmaleastsquareprojection.h"
- #include "mmashapefunctprojection.h"
-#endif
+#include "mmaclosestiptransfer.h"
+#include "mmaleastsquareprojection.h"
+#include "mmashapefunctprojection.h"
+#include "mmacontainingelementprojection.h" ///@todo This doesn't seem to be included? It is broken?
 
 // or these
 #include "masterdof.h"
@@ -101,7 +100,7 @@ ClassFactory &GiveClassFactory()
 
 ClassFactory &classFactory = GiveClassFactory();
 
-int ClassFactory :: CaseComp::operator()(const std::string &a, const std::string &b) const
+int ClassFactory :: CaseComp :: operator()(const std::string &a, const std::string &b) const
 {
     return strncasecmp ( a.c_str(), b.c_str(), ( int ) b.length() ) < 0;
 }

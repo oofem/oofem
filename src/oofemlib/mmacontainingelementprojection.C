@@ -53,7 +53,6 @@ MMAContainingElementProjection :: __init(Domain *dold, IntArray &type, FloatArra
     GaussPoint *jGp;
     FloatArray jGpCoords;
     double distance, minDist = 1.e6;
-    int j;
     IntegrationRule *iRule;
     Element *srcElem;
 
@@ -61,7 +60,7 @@ MMAContainingElementProjection :: __init(Domain *dold, IntArray &type, FloatArra
         iRule = srcElem->giveDefaultIntegrationRulePtr();
 
         this->source = NULL;
-        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
             jGp = iRule->getIntegrationPoint(j);
             if ( srcElem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
                 distance = coords.distance(jGpCoords);

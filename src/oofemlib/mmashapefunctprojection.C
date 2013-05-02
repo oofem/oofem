@@ -56,7 +56,7 @@ void
 MMAShapeFunctProjection :: __init(Domain *dold, IntArray &varTypes, FloatArray &coords, int region, TimeStep *tStep)
 //(Domain* dold, IntArray& varTypes, GaussPoint* gp, TimeStep* tStep)
 {
-    int ivar, nvar = varTypes.giveSize();
+    int nvar = varTypes.giveSize();
     // check time stemp
     if ( stateCounter == tStep->giveSolutionStateCounter() ) {
         return;
@@ -67,13 +67,13 @@ MMAShapeFunctProjection :: __init(Domain *dold, IntArray &varTypes, FloatArray &
     if ( this->smootherList.giveSize() != nvar ) {
         this->smootherList.clear();
         this->smootherList.growTo(nvar);
-        for ( ivar = 1; ivar <= nvar; ivar++ ) {
+        for ( int ivar = 1; ivar <= nvar; ivar++ ) {
             this->smootherList.put( ivar, new NodalAveragingRecoveryModel(dold) );
         }
     }
 
     this->intVarTypes = varTypes;
-    for ( ivar = 1; ivar <= nvar; ivar++ ) {
+    for ( int ivar = 1; ivar <= nvar; ivar++ ) {
         this->smootherList.at(ivar)->recoverValues( ( InternalStateType ) varTypes.at(ivar), tStep );
     }
 
@@ -94,7 +94,7 @@ int
 MMAShapeFunctProjection :: mapVariable(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     Element *elem = gp->giveElement();
-    int inode, nnodes = elem->giveNumberOfDofManagers();
+    int nnodes = elem->giveNumberOfDofManagers();
     MMAShapeFunctProjectionInterface :: nodalValContainerType container(nnodes);
     MMAShapeFunctProjectionInterface *interface;
     const FloatArray *nvec;
@@ -106,7 +106,7 @@ MMAShapeFunctProjection :: mapVariable(FloatArray &answer, GaussPoint *gp, Inter
 
     int indx = this->intVarTypes.findFirstIndexOf( ( int ) type );
     if ( indx ) {
-        for ( inode = 1; inode <= nnodes; inode++ ) {
+        for ( int inode = 1; inode <= nnodes; inode++ ) {
             container.put(inode, new FloatArray);
             this->smootherList.at(indx)->giveNodalVector( nvec, elem->giveDofManager(inode)->giveNumber(),
                                                          elem->giveRegionNumber() );
@@ -133,7 +133,7 @@ MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
         OOFEM_ERROR("MMAShapeFunctProjection::__mapVariable: no suitable source found");
     }
 
-    int inode, nnodes = elem->giveNumberOfDofManagers();
+    int nnodes = elem->giveNumberOfDofManagers();
     MMAShapeFunctProjectionInterface :: nodalValContainerType container(nnodes);
     MMAShapeFunctProjectionInterface *interface;
     const FloatArray *nvec;
@@ -145,7 +145,7 @@ MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
 
     int indx = this->intVarTypes.findFirstIndexOf( ( int ) type );
     if ( indx ) {
-        for ( inode = 1; inode <= nnodes; inode++ ) {
+        for ( int inode = 1; inode <= nnodes; inode++ ) {
             container.put(inode, new FloatArray);
             this->smootherList.at(indx)->giveNodalVector( nvec, elem->giveDofManager(inode)->giveNumber(),
                                                          elem->giveRegionNumber() );

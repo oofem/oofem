@@ -58,7 +58,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     Element *sourceElement;
     SpatialLocalizer *sl = dold->giveSpatialLocalizer();
     IntegrationRule *iRule;
-    int j, nip;
+    int nip;
 
 
     IntArray patchList;
@@ -90,7 +90,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     if ( this->stateFilter ) {
         iRule = sourceElement->giveDefaultIntegrationRulePtr();
         nip = iRule->getNumberOfIntegrationPoints();
-        for ( j = 0; j < nip; j++ ) {
+        for ( int j = 0; j < nip; j++ ) {
             sourceElement->giveIPValue(dam, iRule->getIntegrationPoint(j), IST_PrincipalDamageTensor, tStep);
             if ( dam.computeNorm() > 1.e-3 ) {
                 state = 1; // damaged
@@ -105,7 +105,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     patchList.at(1) = sourceElement->giveNumber();
     int minNumberOfPoints = this->giveNumberOfUnknownPolynomialCoefficients(this->patchType);
     int actualNumberOfPoints = sourceElement->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
-    int i, nite = 0;
+    int nite = 0;
     int elemFlag;
     // check if number of IP in patchList is sufficient
     // some recursion control would be appropriate
@@ -115,7 +115,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
         // count number of available points
         patchList.resize(0);
         actualNumberOfPoints = 0;
-        for ( i = 1; i <= neighborList.giveSize(); i++ ) {
+        for ( int i = 1; i <= neighborList.giveSize(); i++ ) {
             if ( this->stateFilter ) {
                 element = patchDomain->giveElement( neighborList.at(i) );
                 // exclude elements in different regions
@@ -126,7 +126,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
                 iRule = element->giveDefaultIntegrationRulePtr();
                 nip = iRule->getNumberOfIntegrationPoints();
                 elemFlag = 0;
-                for ( j = 0; j < nip; j++ ) {
+                for ( int j = 0; j < nip; j++ ) {
                     element->giveIPValue(dam, iRule->getIntegrationPoint(j), IST_PrincipalDamageTensor, tStep);
                     if ( state && ( dam.computeNorm() > 1.e-3 ) ) {
                         actualNumberOfPoints++;
@@ -182,7 +182,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
         element = patchDomain->giveElement( patchList.at(ielem) );
         iRule = element->giveDefaultIntegrationRulePtr();
         nip = iRule->getNumberOfIntegrationPoints();
-        for ( i = 0; i < nip; i++ ) {
+        for ( int i = 0; i < nip; i++ ) {
             srcgp  = iRule->getIntegrationPoint(i);
             if ( element->computeGlobalCoordinates( srcgpcoords, * ( srcgp->giveCoordinates() ) ) ) {
                 element->giveIPValue(dam, srcgp, IST_PrincipalDamageTensor, tStep);
@@ -217,7 +217,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     double swap, minDist;
     int minDistIndx = 0;
     // loop over all points
-    for ( i = 1; i <= minNumberOfPoints; i++ ) {
+    for ( int i = 1; i <= minNumberOfPoints; i++ ) {
         minDist = dist.at(i);
         minDistIndx = i;
         // search for point with i-th smallest distance
@@ -253,7 +253,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
         element = patchDomain->giveElement( patchList.at(ielem) );
         iRule = element->giveDefaultIntegrationRulePtr();
         nip = iRule->getNumberOfIntegrationPoints();
-        for ( i = 0; i < nip; i++ ) {
+        for ( int i = 0; i < nip; i++ ) {
             patchGPList.push_front( iRule->getIntegrationPoint(i) );
         }
     }
@@ -273,7 +273,7 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
 {
     //int nelem, ielem,
     int neq = this->giveNumberOfUnknownPolynomialCoefficients(this->patchType);
-    int i, j, k, nval = ( * patchGPList.begin() )->giveElement()->giveIPValueSize( type, * patchGPList.begin() );
+    int nval = ( * patchGPList.begin() )->giveElement()->giveIPValueSize( type, * patchGPList.begin() );
     FloatArray ipVal, coords, P;
     FloatMatrix a, rhs, x;
     Element *element;
@@ -305,12 +305,12 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
                 coords.subtract(targetCoords);
                 // compute ip contribution
                 this->computePolynomialTerms(P, coords, patchType);
-                for ( j = 1; j <= neq; j++ ) {
-                    for ( k = 1; k <= nval; k++ ) {
+                for ( int j = 1; j <= neq; j++ ) {
+                    for ( int k = 1; k <= nval; k++ ) {
                         rhs.at(j, k) += P.at(j) * ipVal.at(k);
                     }
 
-                    for ( k = 1; k <= neq; k++ ) {
+                    for ( int k = 1; k <= neq; k++ ) {
                         a.at(j, k) += P.at(j) * P.at(k);
                     }
                 }
@@ -344,8 +344,8 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
 
         answer.resize(nval);
         answer.zero();
-        for ( i = 1; i <= nval; i++ ) {
-            for ( j = 1; j <= neq; j++ ) {
+        for ( int i = 1; i <= nval; i++ ) {
+            for ( int j = 1; j <= neq; j++ ) {
                 answer.at(i) += P.at(j) * x.at(j, i);
             }
         }
