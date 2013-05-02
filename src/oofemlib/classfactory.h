@@ -465,10 +465,11 @@ public:
 #endif
 };
 
-extern ClassFactory classFactory;
+extern ClassFactory &classFactory;
 
 /**
- * This function must be used by all code run at link time to ensure that the classFactory is constructed first.
+ * This function must be used by all code that run at link time to ensure that the classFactory is constructed first.
+ * See "static initialization order fiasco" for explanation.
  */
 ClassFactory &GiveClassFactory();
 

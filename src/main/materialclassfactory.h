@@ -175,7 +175,6 @@ REGISTER_CLASS(ConcreteDPM2, "con2dpm", ConcreteDPM2Class)
 REGISTER_CLASS(LatticeDamage2d, "latticedamage2d", LatticeDamage2dClass)
 REGISTER_CLASS(DustMaterial, "dustmat", DustMaterialClass)
 REGISTER_CLASS(LsMasterMat, "lsmastermat", LsMasterMatClass)
-//REGISTER_CLASS(AbaqusUserMaterial, "abaqususermaterial", AbaqusUserMaterialClass)
 #endif //__SM_MODULE
 #ifdef __TM_MODULE
 REGISTER_CLASS(IsotropicHeatTransferMaterial, "isoheat", IsotropicHeatTransferMaterialClass)

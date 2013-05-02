@@ -93,7 +93,7 @@ set (core_cs
     )
 
 set (core_td
-    #particletopologydescription.C
+    particletopologydescription.C
     )
 
 set (core_dofman

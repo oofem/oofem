@@ -45,10 +45,10 @@
 
 namespace oofem {
 
-//REGISTER_EnrichmentDomain( DofManList )
-//REGISTER_EnrichmentDomain( WholeDomain )
-//REGISTER_EnrichmentDomain( EDBGCircle )
-////REGISTER_EnrichmentDomain( BasicGeometryDomain<Line> )
+REGISTER_EnrichmentDomain( DofManList )
+REGISTER_EnrichmentDomain( WholeDomain )
+REGISTER_EnrichmentDomain( EDBGCircle )
+//REGISTER_EnrichmentDomain( BasicGeometryDomain<Line> )
 
 // General 
 

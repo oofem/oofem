@@ -63,7 +63,7 @@
 
 namespace oofem {
 
-//REGISTER_ExportModule( VTKExportModule )
+REGISTER_ExportModule( VTKExportModule )
 
 VTKExportModule :: VTKExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
 {

@@ -60,7 +60,7 @@ namespace oofem {
 #define NRSOLVER_RESET_STEP_REDUCE 0.25
 #define NRSOLVER_DEFAULT_NRM_TICKS 10
 
-//REGISTER_SparseNonLinearSystemNM( NRSolver )
+REGISTER_SparseNonLinearSystemNM( NRSolver )
 
 NRSolver :: NRSolver(Domain *d, EngngModel *m) :
     SparseNonLinearSystemNM(d, m), prescribedDofs(), prescribedDofsValues()

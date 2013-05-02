@@ -45,10 +45,10 @@
 
 namespace oofem {
 
-//REGISTER_EnrichmentItem( CrackTip )
-//REGISTER_EnrichmentItem( CrackInterior )
-//REGISTER_EnrichmentItem( Inclusion )
-//REGISTER_EnrichmentItem( Delamination )
+REGISTER_EnrichmentItem( CrackTip )
+REGISTER_EnrichmentItem( CrackInterior )
+REGISTER_EnrichmentItem( Inclusion )
+REGISTER_EnrichmentItem( Delamination )
 
 EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FEMComponent(n, aDomain)
 {

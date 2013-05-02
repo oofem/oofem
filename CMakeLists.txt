@@ -54,8 +54,11 @@ set (PARMETIS_DIR CACHE PATH "Manual ParMetis directory")
 option (USE_OOFEG "Enable OOFEG" OFF)
 option (USE_PYTHON_BINDINGS "Enable Python bidings" OFF)
 if (${CMAKE_VERSION} VERSION_GREATER "2.8.7") # Compability with older version of cmake
-    option (USE_SHARED_LIB "Build shared library" OFF)
-    option (USE_STATIC_LIB "Build static library" OFF)
+    if (WIN32) # Shared libraries aren't working on windows.
+        option (USE_SHARED_LIB "Build shared library" OFF)
+    else ()
+        option (USE_SHARED_LIB "Build shared library" ON)
+    endif ()
 endif ()
 # Parallel stuff
 option (USE_PARALLEL "Enable parallel support" OFF)
@@ -350,7 +353,6 @@ if (USE_PYTHON_BINDINGS)
     find_package(Boost COMPONENTS "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}" REQUIRED)
     include_directories (${PYTHON_INCLUDE_DIRS})
     include_directories (${Boost_INCLUDE_DIRS})
-    include_directories (${oofem_SOURCE_DIR}/src/main) # classfactory should probably be in oofemlib instead.
     set (EXT_LIBS ${EXT_LIBS} ${PYTHON_LIBRARIES} ${Boost_LIBRARIES})
     set (MODULE_LIST ${MODULE_LIST} "Python")
     add_definitions(-DBOOST_PYTHON)
@@ -395,8 +397,11 @@ configure_file (
 #######################################################################
 # Subtargets
 if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
-    set (LIB_TYPE STATIC)
+    # This won't work on windows, but windows users should have newer version than 2.8.7)
+    set (LIB_TYPE SHARED)
 else ()
+    # Classfactory doesn't belong in main;
+    list (APPEND LIBS ${oofem_SOURCE_DIR}/src/main/classfactory.C)
     set (LIB_TYPE OBJECT)
 endif ()
 add_subdirectory ("${oofem_SOURCE_DIR}/src/oofemlib")
@@ -424,62 +429,40 @@ endif ()
 if (USE_SHARED_LIB)
     add_library (liboofem
         SHARED
-        # These doesn't really belong in main;
-        ${oofem_SOURCE_DIR}/src/main/classfactory.C
         ${oofempy}
         ${LIBS} 
         )
     target_link_libraries (liboofem ${EXT_LIBS})
     set_target_properties (liboofem PROPERTIES OUTPUT_NAME oofem)
     install (TARGETS liboofem DESTINATION lib)
-else ()
-    set (USE_STATIC_LIB ON)
 endif ()
 
-# Optional static lib (only compiled and installed if explicitly called):
-if (USE_STATIC_LIB)
-    if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
-        add_library (liboofem_static
-            STATIC
-            # These doesn't really belong in main;
-            ${oofem_SOURCE_DIR}/src/main/classfactory.C
-            ${oofempy}
-            )
-        target_link_libraries (liboofem_static ${LIBS} ${LIBS} ${EXT_LIBS})
-    else ()
-        add_library (liboofem_static
-            STATIC
-            # These doesn't really belong in main;
-            ${oofem_SOURCE_DIR}/src/main/classfactory.C
-            ${oofempy}
-            ${LIBS} 
-            )
-        target_link_libraries (liboofem_static ${EXT_LIBS})
-    endif ()
-    set_target_properties (liboofem_static PROPERTIES OUTPUT_NAME oofem)
-    install (TARGETS liboofem_static DESTINATION lib)
-endif ()
-
-# OOFEM target;
-add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
+# OOFEM target
 if (USE_SHARED_LIB) # Prefer dynamic lib if available.
+    add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
     target_link_libraries (oofem liboofem)
+elseif (${CMAKE_VERSION} VERSION_LESS "2.8.8") # Hackish backwards compatibility 
+    add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C
+                    ${oofem_SOURCE_DIR}/src/main/classfactory.C)
+    target_link_libraries (oofem ${LIBS} ${LIBS} ${LIBS} ${EXT_LIBS}) # Cyclic dependencies.
 else ()
-    if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
-        target_link_libraries (oofem ${LIBS} liboofem_static ${LIBS} ${LIBS}) # Cyclic dependencies.
-    else ()
-        target_link_libraries (oofem liboofem_static)
-    endif ()
+    add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C ${LIBS})
+    target_link_libraries (oofem ${EXT_LIBS})
 endif ()
 install (TARGETS oofem DESTINATION bin)
 
 if (USE_OOFEG)
     #  OOFEG target:
-    add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C)
     if (USE_SHARED_LIB)
+        add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C)
         target_link_libraries (oofeg liboofem)
+    elseif (${CMAKE_VERSION} VERSION_LESS "2.8.8") # Hackish backwards compatibility
+        add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C
+                    ${oofem_SOURCE_DIR}/src/main/classfactory.C)
+        target_link_libraries (oofeg ${LIBS})
     else ()
-        target_link_libraries (oofeg liboofem_static liboofem_static)
+        add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C ${LIBS})
+        target_link_libraries (oofem ${EXT_LIBS})
     endif ()
     install(TARGETS oofeg DESTINATION bin)
 endif ()

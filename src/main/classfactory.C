@@ -55,23 +55,13 @@
 #include "gaussintegrationrule.h"
 #include "lobattoir.h"
 
+#include "initialcondition.h"
+
 #include "subspaceit.h"
 #include "inverseit.h"
 #include "slepcsolver.h"
 
-#include "enrichmentdomain.h"
-#include "enrichmentfunction.h"
-#include "enrichmentitem.h"
-
-#include "vtkexportmodule.h"
-#include "vtkxmlexportmodule.h"
-#include "matlabexportmodule.h"
-#include "gpexportmodule.h"
 #ifdef __SM_MODULE
- #include "poiexportmodule.h"
- #include "homexportmodule.h"
- #include "dmexportmodule.h"
- 
  // mesher interfaces
  #include "t3dinterface.h"
  #include "targe2interface.h"
@@ -88,14 +78,6 @@
 #include "slavedof.h"
 #include "simpleslavedof.h"
 #include "activedof.h"
-#include "nrsolver.h"
-#include "calmls.h"
-#ifdef __SM_MODULE
- #include "gpinitmodule.h"
-#endif
-#if 0 // Soon
-#include "particletopologydescription.h"
-#endif
 
 #ifdef __PARALLEL_MODE
  #include "loadbalancer.h"
@@ -108,13 +90,16 @@
 #include "dofclassfactory.h"
 #include "sparselinearsystemsolverclassfactory.h"
 #include "errorestimatorclassfactory.h"
-#include "initialcondition.h"
 
 namespace oofem {
 
-ClassFactory classFactory;
+ClassFactory &GiveClassFactory()
+{
+    static ClassFactory ans;
+    return ans;
+}
 
-ClassFactory &GiveClassFactory() { return classFactory; }
+ClassFactory &classFactory = GiveClassFactory();
 
 int ClassFactory :: CaseComp::operator()(const std::string &a, const std::string &b) const
 {
@@ -124,6 +109,7 @@ int ClassFactory :: CaseComp::operator()(const std::string &a, const std::string
 
 ClassFactory :: ClassFactory()
 {
+    printf("Classfactory created!\n");
     // register elements
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, name, id) \
@@ -197,48 +183,6 @@ ClassFactory :: ClassFactory()
 #define REGISTER_CLASS(_class, id) \
     sparseLinSolList [ id ] = sparseLinSolCreator< _class >;
 #include "sparselinearsystemsolverclassfactory.h"
-
-    // No separate files for export modules (yet)
-    exportList [ "vtkxml" ]    = exportCreator< VTKXMLExportModule >;
-    exportList [ "vtk" ]       = exportCreator< VTKExportModule >;
-    exportList [ "matlab" ]    = exportCreator< MatlabExportModule >;
-    exportList [ "gp" ]        = exportCreator< GPExportModule >;
-#ifdef __SM_MODULE
-    exportList [ "poi" ]       = exportCreator< POIExportModule >;
-    exportList [ "dm" ]        = exportCreator< DofManExportModule >;
-    exportList [ "hom" ]       = exportCreator< HOMExportModule >;
-#endif //__SM_MODULE
-
-    nonlinList [ "nrsolver" ]   = nonlinCreator< NRSolver >;
-    nonlinList [ "calm" ]       = nonlinCreator< CylindricalALM >;
-
-#ifdef __SM_MODULE
-    initList [ "gpinitmodule" ] = initCreator< GPInitModule >;
-#endif //__SM_MODULE
-
-#if 0
-    topologyList["particletopology"] = topologyCreator< ParticleTopologyDescription >;
-#endif
-
-    // No separate files for xfem (yet)
-    enrichItemList [ "cracktip" ]      = enrichItemCreator< CrackTip >;
-    enrichItemList [ "crackinterior" ] = enrichItemCreator< CrackInterior >;
-    enrichItemList [ "inclusion" ]     = enrichItemCreator< Inclusion >;
-    enrichItemList [ "delamination" ]  = enrichItemCreator< Delamination >;
-    enrichItemList [ "multipledelamination" ]  = enrichItemCreator< Delamination >;
-
-    enrichFuncList [ "discontinuousfunction" ] = enrichFuncCreator< DiscontinuousFunction >;
-    enrichFuncList [ "branchfunction" ] = enrichFuncCreator< BranchFunction >;
-    enrichFuncList [ "rampfunction" ] = enrichFuncCreator< RampFunction >;
-
-    enrichmentDomainList [ "dofmanlist" ]  = enrichmentDomainCreator< DofManList >;
-    enrichmentDomainList [ "wholedomain" ] = enrichmentDomainCreator< WholeDomain >;
-    enrichmentDomainList [ "circle" ]      = enrichmentDomainCreator< EDBGCircle >;
-    //enrichmentDomainList [ "line" ]        = enrichmentDomainCreator< BasicGeometryDomain<Line> >;
-
-    geometryList [ "line" ] = geometryCreator< Line >;
-    geometryList [ "circle" ] = geometryCreator< Circle >;
-    geometryList [ "pointswarm" ] = geometryCreator< PointSwarm >; // just temporary
 
 #ifdef __PARALLEL_MODE
     loadBalancerList [ "parmetis" ] = loadBalancerCreator< ParmetisLoadBalancer >;

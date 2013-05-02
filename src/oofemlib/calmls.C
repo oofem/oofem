@@ -52,7 +52,7 @@ namespace oofem {
 #define CALM_DEFAULT_NRM_TICKS 2
 #define CALM_MAX_REL_ERROR_BOUND 1.e10
 
-//REGISTER_SparseNonLinearSystemNM( CylindricalALM )
+REGISTER_SparseNonLinearSystemNM( CylindricalALM )
 
 CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m) :
     SparseNonLinearSystemNM(d, m), calm_HPCWeights(), calm_HPCIndirectDofMask(), calm_HPCDmanDofSrcArray(), ccDofGroups()

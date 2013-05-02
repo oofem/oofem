@@ -54,7 +54,7 @@
 
 namespace oofem {
 
-//REGISTER_ExportModule( MatlabExportModule )
+REGISTER_ExportModule( MatlabExportModule )
 
 MatlabExportModule :: MatlabExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
 {}

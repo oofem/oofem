@@ -41,9 +41,9 @@
 
 namespace oofem {
 
-//REGISTER_EnrichmentFunction( DiscontinuousFunction )
-//REGISTER_EnrichmentFunction( BranchFunction )
-//REGISTER_EnrichmentFunction( RampFunction )
+REGISTER_EnrichmentFunction( DiscontinuousFunction )
+REGISTER_EnrichmentFunction( BranchFunction )
+REGISTER_EnrichmentFunction( RampFunction )
 
 IRResultType EnrichmentFunction :: initializeFrom(InputRecord *ir)
 {

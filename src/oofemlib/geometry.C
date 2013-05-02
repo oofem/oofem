@@ -41,9 +41,9 @@
 
 namespace oofem {
 
-//REGISTER_Geometry(Line)
-//REGISTER_Geometry(Circle)
-//REGISTER_Geometry(PointSwarm)
+REGISTER_Geometry(Line)
+REGISTER_Geometry(Circle)
+REGISTER_Geometry(PointSwarm)
 
 BasicGeometry :: BasicGeometry()
 {

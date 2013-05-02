@@ -43,7 +43,7 @@
 
 namespace oofem {
 
-//REGISTER_ExportModule( GPExportModule )
+REGISTER_ExportModule( GPExportModule )
 
 GPExportModule :: GPExportModule(int n, EngngModel *e) : ExportModule(n, e)
 {

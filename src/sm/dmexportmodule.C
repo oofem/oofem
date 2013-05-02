@@ -41,7 +41,7 @@
 
 namespace oofem {
 
-//REGISTER_ExportModule( DofManExportModule )
+REGISTER_ExportModule( DofManExportModule )
 
 DofManExportModule :: DofManExportModule(int n, EngngModel *e) : ExportModule(n, e)
 {}

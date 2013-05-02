@@ -51,7 +51,7 @@
 
 namespace oofem {
 
-//REGISTER_ExportModule( POIExportModule )
+REGISTER_ExportModule( POIExportModule )
 
 POIExportModule :: POIExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport(), POIList()
 {
