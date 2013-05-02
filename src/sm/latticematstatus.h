@@ -62,6 +62,9 @@ public:
 
     virtual void updateYourself(TimeStep *) { }
     
+    /// Gives the last equilibrated normal stress
+    virtual double giveNormalStress(){return 0;}
+
     virtual const char *giveClassName() const { return "LatticeMaterialStatus"; }
 
     virtual classType giveClassID() const { return LatticeMaterialStatusClass; }

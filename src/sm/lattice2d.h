@@ -42,6 +42,8 @@
 #define _IFT_Lattice2d_thick "thick"
 #define _IFT_Lattice2d_width "width"
 #define _IFT_Lattice2d_gpcoords "gpcoords"
+#define _IFT_Lattice2d_couplingflag "couplingflag"
+#define _IFT_Lattice2d_couplingnumber "couplingnumber"
 //@}
 
 namespace oofem {
@@ -56,7 +58,8 @@ protected:
 
     double width, thickness;
     FloatArray gpCoords;
-
+    int couplingFlag, couplingNumber;
+    
 public:
     Lattice2d(int n, Domain *d);
     virtual ~Lattice2d();
@@ -79,6 +82,8 @@ public:
 
     virtual double giveLength();
 
+    virtual double giveNormalStress();
+
     virtual double giveArea() { return this->width * this->thickness; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 6; }
@@ -90,12 +95,17 @@ public:
     virtual double giveCrackWidth();
     virtual double giveDissipation();
     virtual double giveDeltaDissipation();
+
+    virtual int giveCouplingFlag(){return couplingFlag;}
+    
+    virtual int giveCouplingNumber(){return couplingNumber;}
     //
     // definition & identification
     //
     virtual const char *giveClassName() const { return "Lattice2d"; }
     virtual classType giveClassID() const { return Lattice2dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
 
 #ifdef __OOFEG
     void drawYourself(oofegGraphicContext &context);
@@ -117,6 +127,7 @@ protected:
     double givePitch();
     virtual void computeGaussPoints();
     virtual integrationDomain giveIntegrationDomain() { return _Line; }
+    virtual void  giveGpCoordinates(FloatArray &coords);
 };
 } // end namespace oofem
 #endif

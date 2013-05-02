@@ -175,13 +175,10 @@ Lattice2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
 
     answer.at(3, 1) = 0.;
     answer.at(3, 2) = 0.;
-    answer.at(3, 3) = -pow(this->width, 2.) / ( sqrt(12.) * l );
-    //  answer.at(3,3) = -this->width;
+    answer.at(3, 3) = -this->width/sqrt(12.);
     answer.at(3, 4) = 0.;
     answer.at(3, 5) = 0.;
-
-    answer.at(3, 6) = pow(this->width, 2.) / ( sqrt(12.) * l );
-    //  answer.at(3,6) = this->width;
+    answer.at(3, 6) = this->width/sqrt(12.);
 
     answer.times(1. / l);
 }
@@ -292,6 +289,24 @@ double Lattice2d :: givePitch()
     return pitch;
 }
 
+double
+Lattice2d :: giveNormalStress()
+{
+  LatticeMaterialStatus* status;
+
+  GaussPoint* gp;
+  IntegrationRule* iRule = integrationRulesArray[giveDefaultIntegrationRule()];
+  gp = iRule->getIntegrationPoint(0);
+  Material *mat = this->giveMaterial();
+
+  status = (LatticeMaterialStatus*) mat->giveStatus(gp);
+  double normalStress =0;
+  normalStress = status->giveNormalStress();
+  
+  return normalStress;
+
+}
+
 
 int
 Lattice2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
@@ -331,6 +346,13 @@ Lattice2d :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, gpCoords, _IFT_Lattice2d_gpcoords);
 
+    couplingFlag=0;
+    IR_GIVE_OPTIONAL_FIELD (ir, couplingFlag, _IFT_Lattice2d_couplingflag);
+    
+    if(couplingFlag == 1){
+      IR_GIVE_OPTIONAL_FIELD (ir, couplingNumber, _IFT_Lattice2d_couplingnumber);
+    }
+    
     return IRRT_OK;
 }
 
@@ -345,6 +367,16 @@ Lattice2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoo
     return 1;
 }
 
+
+void
+Lattice2d :: giveGpCoordinates(FloatArray &answer)
+{
+    answer.resize(3);
+    answer.at(1) = this->gpCoords.at(1);
+    answer.at(2) = this->gpCoords.at(2);
+
+    return;
+}
 
 #ifdef __OOFEG
 
