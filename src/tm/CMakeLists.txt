@@ -31,6 +31,10 @@ set (tm_element
     lattice2d_mt.C
     )
 
+set (tm_boundary
+    gravitypressure.C
+    )
+
 set (tm_status
     transportmaterial.C
     latticetransmat.C
@@ -59,6 +63,7 @@ set (tm
     ${tm_new}
     ${tm_cemhyd}
     ${tm_hydram}
+    ${tm_boundary}
     )
 
 add_library (tm

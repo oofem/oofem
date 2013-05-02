@@ -74,6 +74,7 @@ enum classType {
     TractionPressureBCClass,
     TransmissionBCClass,
     ConvectionBCClass,
+    GravityPressureClass,
 
     LoadTimeFunctionClass,
     ConstantFunctionClass,

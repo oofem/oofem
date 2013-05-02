@@ -1,0 +1,88 @@
+/*
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2013   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#ifndef gravpress_h
+#define gravpress_h
+
+#include "bodyload.h"
+#include "bcgeomtype.h"
+#include "valuemodetype.h"
+
+/**
+ * This class implements a gravity-like pressure for transport models.
+ * The inheritted attribute 'componentArray' contains the components of an
+ * loading prescribed per unit volume.
+ */
+
+///@name Input fields for GravityPressure
+//@{
+#define _IFT_GravityPressure_normal "normal"
+#define _IFT_GravityPressure_zerolevel "zerolevel"
+//@}
+
+namespace oofem {
+class GravityPressure : public BodyLoad
+{
+    /*
+     * This class implements a gravity-like load.
+     * DESCRIPTION
+     * The attribute 'componentArray' contains the components of an acceleration
+     * 'a', expected (but not required) to be downwards vertical.
+     * TASK
+     * returning the body force  rho*a  acting on a given element.
+     */
+protected:
+
+    double zeroLevel;
+    FloatArray normalVector;
+
+public:
+    /// Constructor
+    GravityPressure(int i, Domain *d) : BodyLoad(i, d) { }         // constructor
+    /**
+     * Returns receiver load type.
+     * @return StructuralLoadLT;
+     */
+    bcGeomType    giveBCGeoType() const { return GravityPressureBGT; }
+    void         computeValueAt(FloatArray &answer, TimeStep *atTime, FloatArray &coords, ValueModeType mode);
+
+    /// Initializes receiver acording to object description stored in input record.
+    IRResultType initializeFrom(InputRecord *ir);
+
+    /// Returns input record name of the receiver.
+    const char *giveInputRecordName() const { return "GravityPressure"; }
+};
+} // end namespace oofem
+
+#endif // gravpress_h

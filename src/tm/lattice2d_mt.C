@@ -340,38 +340,38 @@ Lattice2d_mt :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *a
         load  = ( Load * ) domain->giveLoad(n);
         ltype = load->giveBCGeoType();
 
-        // if ( ltype == GravityPressureBGT ) {
-        //     //Compute change of coordinates
-        //     nodeA   = this->giveNode(1);
-        //     nodeB   = this->giveNode(2);
-        //     deltaX.at(1) = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
-        //     deltaX.at(2) = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
-        //     deltaX.at(3) = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
+        if ( ltype == GravityPressureBGT ) {
+            //Compute change of coordinates
+            nodeA   = this->giveNode(1);
+            nodeB   = this->giveNode(2);
+            deltaX.at(1) = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
+            deltaX.at(2) = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
+            deltaX.at(3) = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
 
-        //     //Compute the local coordinate system
-        //     gp  = iRule->getIntegrationPoint(0);
+            //Compute the local coordinate system
+            gp  = iRule->getIntegrationPoint(0);
 
-        //     gravityHelp.at(1) = 1.;
-        //     gravityHelp.at(2) = -1.;
+            gravityHelp.at(1) = 1.;
+            gravityHelp.at(2) = -1.;
 
-        //     dV  = this->computeVolumeAround(gp);
-        //     load->computeValueAt(val, atTime, deltaX, mode);
+            dV  = this->computeVolumeAround(gp);
+            load->computeValueAt(val, atTime, deltaX, mode);
 
-        //     k = ( static_cast< TransportMaterial * >( this->giveMaterial() ) )->giveCharacteristicValue(Conductivity_hh, gp, atTime);
+            k = ( static_cast< TransportMaterial * >( this->giveMaterial() ) )->giveCharacteristicValue(Conductivity_hh, gp, atTime);
 
-        //     double helpFactor = val.at(1) * k * dV;
+            double helpFactor = val.at(1) * k * dV;
 
-        //     helpFactor /= pow(this->giveLength(), 2.);
-        //     gravityHelp.times(helpFactor);
+            helpFactor /= pow(this->giveLength(), 2.);
+            gravityHelp.times(helpFactor);
 
-        //     if ( helpLoadVector.isEmpty() ) {
-        //         helpLoadVector.resize( gravityHelp.giveSize() );
-        //     }
+            if ( helpLoadVector.isEmpty() ) {
+                helpLoadVector.resize( gravityHelp.giveSize() );
+            }
 
-        //     for ( j = 1; j <= gravityHelp.giveSize(); j++ ) {
-        //         helpLoadVector.at(j) += gravityHelp.at(j);
-        //     }
-        // }
+            for ( j = 1; j <= gravityHelp.giveSize(); j++ ) {
+                helpLoadVector.at(j) += gravityHelp.at(j);
+            }
+        }
 
         answer.add(helpLoadVector);
     }
