@@ -40,6 +40,8 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "mathfem.h"
+#include "latticestructuralelement.h"
+#include "latticetransportelement.h"
 #include "isolinearelasticmaterial.h"
 
 namespace oofem {
@@ -76,6 +78,10 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, eNormal, _IFT_LatticeDamage2d_eNormal);
 
+    cAlpha = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, cAlpha, _IFT_LatticeDamage2d_calpha);
+
+
     //factor which relates the shear stiffness to the normal stiffness. Default is 1
     alphaOne = 1.;
     IR_GIVE_OPTIONAL_FIELD(ir, alphaOne, _IFT_LatticeDamage2d_alphaOne);
@@ -85,7 +91,7 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
     alphaTwo = 1.;
     IR_GIVE_OPTIONAL_FIELD(ir, alphaTwo, _IFT_LatticeDamage2d_alphaTwo);
 
-    eTorsion = alphaTwo * eNormal / 12.;
+    eTorsion = alphaTwo * eNormal;
 
     softeningType = 0;
     IR_GIVE_FIELD(ir, softeningType, _IFT_LatticeDamage2d_softeningType);
@@ -116,6 +122,9 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, coh, _IFT_LatticeDamage2d_coh);
     IR_GIVE_FIELD(ir, ec, _IFT_LatticeDamage2d_ec);
+
+    this->biotCoefficient = 1;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->biotCoefficient, _IFT_LatticeDamage2d_bio);
 
     return IRRT_OK;
 }
@@ -229,6 +238,52 @@ LatticeDamage2d :: computeDamageParam(double &omega, double tempKappa, const Flo
 
 
 void
+LatticeDamage2d :: computeStressIndependentStrainVector(FloatArray &answer,
+                                                        GaussPoint *gp,
+                                                        TimeStep *stepN,
+                                                        ValueModeType mode)
+{
+    FloatArray et;
+    LatticeStructuralElement *lselem = static_cast< LatticeStructuralElement * >( gp->giveElement() );
+
+    answer.resize(3);
+    answer.zero();
+
+    if ( stepN->giveIntrinsicTime() < this->castingTime ) {
+        return;
+    }
+
+    if ( lselem ) {
+        lselem->computeResultingIPTemperatureAt(et, stepN, gp, mode);
+    }
+
+    if ( et.giveSize() == 0 ) {
+        answer.resize(0);
+        return;
+    }
+
+    if ( et.giveSize() < 1 ) {
+        _error("computeStressIndependentStrainVector - Bad format of TemperatureLoad");
+        exit(1);
+    }
+
+    double deltaTemperature = 0.;
+    if ( mode == VM_Total ) {
+        // compute temperature difference
+        deltaTemperature = et.at(1) - this->referenceTemperature;
+        answer.at(1) = this->give(tAlpha, gp) * deltaTemperature;
+    } else {
+        answer.at(1) = this->give(tAlpha, gp) * et.at(1);
+    }
+
+    double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
+
+    answer.at(1) += this->cAlpha * et.at(1) / length;
+    return;
+}
+
+
+void
 LatticeDamage2d :: initDamaged(double kappa, FloatArray &strainVector, GaussPoint *gp)
 {
     int indx = 1;
@@ -307,7 +362,7 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
     status->setE0(e0);
 
-    FloatArray strainVector, reducedStrain, reducedStrainOld;
+    FloatArray strainVector, reducedStrain;
 
     double f, equivStrain, tempKappa, omega = 0.;
 
@@ -355,10 +410,62 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
     answer.at(2) = ( 1. - omega ) * eShear * reducedStrain.at(2);
     answer.at(3) = ( 1. - omega ) * eTorsion * reducedStrain.at(3);
 
-    //Compute dissipation for post-processing reasons
+    //Add the water pressure to the normal component of the stress
+    IntArray coupledModels;
+    double waterPressure = 0.;
+    if ( domain->giveEngngModel()->giveMasterEngngModel() ) {
+        domain->giveEngngModel()->giveMasterEngngModel()->giveCoupledModels(coupledModels);
+        int couplingFlag = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveCouplingFlag();
 
-    FloatArray crackPlaneNormal(3); //Dummy floatArray so that I can use giveCharacteristiclenght. This needs to be improved
-    double length = gp->giveElement()->giveCharacteristicLenght(gp, crackPlaneNormal);
+        if ( couplingFlag == 1 && coupledModels.at(2) != 0 && !atTime->isTheFirstStep() ) {
+            int couplingNumber;
+            couplingNumber = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveCouplingNumber();
+            LatticeTransportElement *coupledElement;
+            coupledElement  = static_cast< LatticeTransportElement * >( domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem( coupledModels.at(2) )->giveDomain(1)->giveElement(couplingNumber) );
+            waterPressure = coupledElement->givePressure();
+        }
+    }
+
+    answer.at(1) = answer.at(1) + biotCoefficient * waterPressure;
+
+    //Compute dissipation
+    double tempDissipation = status->giveDissipation();
+    double tempDeltaDissipation = 0.;
+    computeDeltaDissipation(omega, reducedStrain, gp, atTime);
+    tempDissipation += tempDeltaDissipation;
+
+    //Compute crack width
+    double le = status->giveLe();
+    double crackWidth = omega * sqrt( pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) + pow(reducedStrain.at(3), 2.) ) * le;
+
+    //Set all temp values
+    status->setTempDissipation(tempDissipation);
+    status->setTempDeltaDissipation(tempDeltaDissipation);
+
+    status->setTempEquivalentStrain(equivStrain);
+    status->letTempStrainVectorBe(totalStrain);
+    status->letTempReducedStrainBe(reducedStrain);
+    status->letTempStressVectorBe(answer);
+    status->setTempKappa(tempKappa);
+    status->setTempDamage(omega);
+
+    status->setTempNormalStress( answer.at(1) );
+    status->setTempCrackWidth(crackWidth);
+    return;
+}
+
+double
+LatticeDamage2d :: computeDeltaDissipation(double omega,
+                                           FloatArray &reducedStrain,
+                                           GaussPoint *gp,
+                                           TimeStep *atTime)
+{
+    LatticeDamage2dStatus *status = static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) );
+    double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
+    const double e0 = this->give(e0_ID, gp) * this->e0Mean;
+
+    FloatArray reducedStrainOld;
+
     reducedStrainOld = status->giveReducedStrain();
     double omegaOld = status->giveDamage();
     double deltaOmega;
@@ -368,12 +475,9 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
     crackOpeningOld.times(length);
     FloatArray stressOld( status->giveStressVector() );
     FloatArray intermediateStrain(3);
-    double tempDissipation = status->giveDissipation();
+
     double tempDeltaDissipation = 0.;
     double deltaTempDeltaDissipation = 0.;
-
-    //Need to do this only if f is greater than zero. Otherwise dissipation is zero.
-    //Loop over 100 steps to get the excact dissipation
 
     double intermediateOmega = 0;
     FloatArray oldIntermediateStrain(3);
@@ -407,7 +511,7 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
     }
 
     double oldKappa = status->giveKappa();
-
+    double f, equivStrain;
     if ( deltaOmega > 0 ) {
         for ( int k = 0; k < intervals; k++ ) {
             intermediateStrain(0) = reducedStrainOld(0) + ( k + 1 ) / intervals * ( reducedStrain(0) - reducedStrainOld(0) );
@@ -436,27 +540,11 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
         tempDeltaDissipation = 0.;
     }
 
-    tempDissipation += tempDeltaDissipation;
-
-    if ( tempDissipation >= 2. * referenceGf ) {
-        tempDissipation = 2. * referenceGf;
+    if ( tempDeltaDissipation >= 2. * referenceGf ) {
+        tempDeltaDissipation = 2. * referenceGf;
     }
 
-    //Set all the temp values
-    status->setTempDissipation(tempDissipation);
-    status->setTempDeltaDissipation(tempDeltaDissipation);
-
-    status->setTempEquivalentStrain(equivStrain);
-    status->letTempStrainVectorBe(totalStrain);
-    status->letTempReducedStrainBe(reducedStrain);
-    status->letTempStressVectorBe(answer);
-    status->setTempKappa(tempKappa);
-    status->setTempDamage(omega);
-
-    double le = status->giveLe();
-    double crackWidth = omega * sqrt( pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) + pow(reducedStrain.at(3), 2.) ) * le;
-
-    status->setTempCrackWidth(crackWidth);
+    return tempDeltaDissipation;
 }
 
 void
@@ -632,7 +720,7 @@ LatticeDamage2d :: give(int aProperty, GaussPoint *gp)
     } else if ( aProperty == ef_ID ) {
         return 1.;
     } else {
-        return LatticeDamage2d :: give(aProperty, gp);
+        return StructuralMaterial :: give(aProperty, gp);
     }
 }
 
@@ -727,6 +815,7 @@ LatticeDamage2dStatus :: LatticeDamage2dStatus(int n, Domain *d, GaussPoint *g) 
     le = 0.0;
     crack_flag = temp_crack_flag = 0;
     crackWidth = tempCrackWidth = 0;
+    normalStress = tempNormalStress = 0;
     e0 = 0.;
     damage = tempDamage = 0.;
     equivStrain = tempEquivStrain = 0.;
@@ -751,6 +840,7 @@ LatticeDamage2dStatus :: initTempStatus()
     this->tempDeltaDissipation = this->deltaDissipation;
     this->temp_crack_flag = this->crack_flag;
     this->tempCrackWidth = this->crackWidth;
+    this->tempNormalStress = this->normalStress;
 }
 
 void
@@ -764,7 +854,7 @@ LatticeDamage2dStatus :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf( file, "% .4e ", reducedStrain.at(k) );
     }
 
-    fprintf(file, "kappa %f, equivStrain %f, damage %f, dissipation %f, deltaDissipation %f, e0 %f, crack_flag %d ", this->kappa, this->equivStrain, this->damage, this->dissipation, this->deltaDissipation, this->e0, this->crack_flag);
+    fprintf(file, "kappa %f, equivStrain %f, damage %f, dissipation %f, deltaDissipation %f, e0 %f, crack_flag %d, crackWidth % .8e ", this->kappa, this->equivStrain, this->damage, this->dissipation, this->deltaDissipation, this->e0, this->crack_flag, this->crackWidth);
     fprintf(file, "}\n");
 }
 
@@ -782,18 +872,24 @@ LatticeDamage2dStatus :: updateYourself(TimeStep *atTime)
     this->deltaDissipation = this->tempDeltaDissipation;
     this->crack_flag = this->temp_crack_flag;
     this->crackWidth = this->tempCrackWidth;
+    this->normalStress = this->tempNormalStress;
 }
 
 Interface *
 LatticeDamage2dStatus :: giveInterface(InterfaceType type)
 {
     if ( type == RandomMaterialStatusExtensionInterfaceType ) {
-        return static_cast< RandomMaterialStatusExtensionInterface * >( this );
+        return static_cast< RandomMaterialStatusExtensionInterface * >(this);
     } else {
         return NULL;
     }
 }
 
+void
+LatticeDamage2dStatus :: setTempNormalStress(double val)
+{
+    tempNormalStress = val;
+}
 
 contextIOResultType
 LatticeDamage2dStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)

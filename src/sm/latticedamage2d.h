@@ -59,6 +59,8 @@
 #define _IFT_LatticeDamage2d_e0OneMean "e01"
 #define _IFT_LatticeDamage2d_coh "coh"
 #define _IFT_LatticeDamage2d_ec "ec"
+#define _IFT_LatticeDamage2d_calpha "calpha"
+#define _IFT_LatticeDamage2d_bio "bio"
 //@}
 
 namespace oofem {
@@ -99,7 +101,7 @@ protected:
     /// Random material parameter stored in status, since each gp has a different value.
     double e0;
 
-    /** 
+    /**
      * The crack_flag indicates if the gp is cracked:
      * crack_flag = 0 gp is uncracked
      * crack_flag = 1 gp is cracked and damage grows
@@ -115,6 +117,13 @@ protected:
 
     /// Non-equilibrated crack width.
     double tempCrackWidth;
+
+    /// equilibrated normal stress
+    double normalStress;
+
+    /// nonequilibrated normal stress
+    double tempNormalStress;
+
 
     /// Reduced strain.
     FloatArray reducedStrain;
@@ -200,6 +209,12 @@ public:
     /// Gives the last equilibrated crack width
     double giveCrackWidth() { return this->crackWidth; }
 
+    virtual double giveNormalStress() { return this->normalStress; }
+
+    /// Sets the temp normalStress
+    void setTempNormalStress(double val);
+
+
     // definition
     virtual const char *giveClassName() const { return "LatticeDamage2dStatus"; }
     virtual classType giveClassID() const { return LatticeDamage2dStatusClass; }
@@ -242,6 +257,9 @@ protected:
     /// Mean effective strain at sigma1
     double e0OneMean;
 
+    ///coefficient used for modelling eigendisplacements
+    double cAlpha;
+
     /**
      * Parameter which determines the typ of the softeningFunction
      * 1 = linear softening
@@ -258,6 +276,9 @@ protected:
 
     /// Parameter setting ratio of shear and tensile strength
     double coh;
+
+    /// Parameter controlling the amount of fluid pressure added to the mechanical stress (Biot's coefficient)
+    double biotCoefficient;
 
     /// Coefficient variation of the Gaussian distribution
     double coefficientOfVariation;
@@ -308,6 +329,12 @@ public:
     void giveTangentStiffnessMatrix(FloatMatrix &answer,
                                     GaussPoint *gp,
                                     TimeStep *atTime);
+
+
+    virtual void computeStressIndependentStrainVector(FloatArray &answer,
+                                                      GaussPoint *gp,
+                                                      TimeStep *stepN,
+                                                      ValueModeType mode);
 
     /**
      * Computes the secant stiffness.
@@ -360,6 +387,10 @@ public:
 
     /** Reimplemented from RandomMaterialInterface */
     virtual void giveRandomParameters(FloatArray &param);
+
+
+    ///Compute increment of dissipation for post-processing reasons
+    double computeDeltaDissipation(double omega, FloatArray &reducedStrain, GaussPoint *gp, TimeStep *atTime);
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp,  TimeStep *tStep);
 

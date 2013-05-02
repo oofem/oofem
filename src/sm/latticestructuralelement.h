@@ -100,7 +100,7 @@ public:
      * Usually computes interpolation function, which is not needed for the lattice elements.
      * However, structural element requires implementation.
      */
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer){return ;}
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) { return; }
 
 
     /**
@@ -109,6 +109,29 @@ public:
      * @return increment of dissipation
      */
     virtual double giveDeltaDissipation() { return 0; }
+
+    /**
+     * Returns the coupling flag.
+     * @return couplingFlag
+     */
+    virtual int giveCouplingFlag() { return 0; }
+
+    /**
+     * Returns the coupling number.
+     * @return couplingNumber
+     */
+    virtual int giveCouplingNumber() { return 0; }
+
+    /**
+     * Returns the normal stress.
+     * @return normalStress
+     */
+    virtual double giveNormalStress() { return 0; }
+
+    /**
+     * Gives the GP coordinates
+     */
+    virtual void  giveGpCoordinates(FloatArray &coords) { return; }
 };
 } // end namespace oofem
 #endif
