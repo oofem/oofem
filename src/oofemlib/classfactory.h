@@ -137,7 +137,7 @@ template< typename T > BasicGeometry *geometryCreator() { return new T(); }
 
 // These should be converted to use strings.
 #define REGISTER_SparseMtrx(class, type) static bool __dummy_##class = GiveClassFactory().registerSparseMatrix(type, sparseMtrxCreator< class >);
-#define REGISTER_SparseLinearSystemSolver(class, type) static bool __dummy_##class = GiveClassFactory().registerSparseLinearSystemSolver(type, sparseLinSolCreator< class >);
+#define REGISTER_SparseLinSolver(class, type) static bool __dummy_##class = GiveClassFactory().registerSparseLinSolver(type, sparseLinSolCreator< class >);
 #define REGISTER_ErrorEstimator(class, type) static bool __dummy_##class = GiveClassFactory().registerErrorEstimator(type, errEstCreator< class >);
 
 #define REGISTER_EnrichmentItem(class) static bool __dummy_##class = GiveClassFactory().registerEnrichmentItem(_IFT_##class##_Name, enrichItemCreator< class >);
@@ -408,7 +408,7 @@ public:
      * Registers a sparse matrix type.
      * @param type SparseMtrxType id determining the type of new instance.
      */
-    bool createSparseMtrx(SparseMtrxType type, SparseMtrx * ( * )() );
+    bool registerSparseMtrx(SparseMtrxType type, SparseMtrx * ( * )() );
     /**
      * Creates new instance of DOF corresponding to given keyword.
      * @param type ID determining the type of new instance.
@@ -430,7 +430,7 @@ public:
      * Registers a sparse linear system solver.
      * @param type LinSystSolverType id determining the type of new instance.
      */
-    bool createSparseMtrx(LinSystSolverType type, SparseLinearSystemNM * ( * )(Domain*, EngngModel*) );
+    bool registerSparseLinSolver(LinSystSolverType type, SparseLinearSystemNM * ( * )(Domain*, EngngModel*) );
     /**
      * Creates new instance of ErrorEstimator corresponding
      * to given type.
@@ -444,7 +444,7 @@ public:
      * Registers a new  error estimator.
      * @param type ErrorEstimatorType id determining the type of new instance.
      */
-    bool createSparseMtrx(ErrorEstimatorType type, ErrorEstimator * ( * )(int, Domain*) );
+    bool registerErrorEstimator(ErrorEstimatorType type, ErrorEstimator * ( * )(int, Domain*) );
     /**
      * Creates new instance of patch corresponding to given type.
      * @param type ID determining the type of new instance.

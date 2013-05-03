@@ -136,7 +136,7 @@ SparseMtrx *ClassFactory :: createSparseMtrx(SparseMtrxType name)
     return ( sparseMtrxList.count ( name ) == 1 ) ? sparseMtrxList [ name ] () : NULL;
 }
 
-bool ClassFactory :: createSparseMtrx(SparseMtrxType name, SparseMtrx * ( *creator )() )
+bool ClassFactory :: registerSparseMtrx(SparseMtrxType name, SparseMtrx * ( *creator )() )
 {
     printf("Register %d\n", name);
     sparseMtrxList[name] = creator;
@@ -153,7 +153,7 @@ SparseLinearSystemNM *ClassFactory :: createSparseLinSolver(LinSystSolverType na
     return ( sparseLinSolList.count ( name ) == 1 ) ? sparseLinSolList [ name ] (d, m) : NULL;
 }
 
-bool ClassFactory :: createSparseMtrx(LinSystSolverType name, SparseLinearSystemNM * ( *creator )(Domain*, EngngModel*) )
+bool ClassFactory :: registerSparseLinSolver(LinSystSolverType name, SparseLinearSystemNM * ( *creator )(Domain*, EngngModel*) )
 {
     printf("Register %d\n", name);
     sparseLinSolList[name] = creator;
@@ -165,7 +165,7 @@ ErrorEstimator * ClassFactory :: createErrorEstimator(ErrorEstimatorType name, i
     return ( errEstList.count ( name ) == 1 ) ? errEstList [ name ] (num, d) : NULL;
 }
 
-bool ClassFactory :: createSparseMtrx(ErrorEstimatorType name, ErrorEstimator * ( *creator )(int, Domain*) )
+bool ClassFactory :: registerErrorEstimator(ErrorEstimatorType name, ErrorEstimator * ( *creator )(int, Domain*) )
 {
     printf("Register %d\n", name);
     errEstList[name] = creator;
