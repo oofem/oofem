@@ -8,7 +8,7 @@
  \setmainfont[Ligatures=TeX]{Latin Modern Roman}
  \fontspec[SmallCapsFeatures={Letters=SmallCaps}]{Latin Modern Roman}
  \usepackage{unicode-math}
- \setmathfont[math-style=ISO]{lmmath-regular.otf}
+ \setmathfont[math-style=ISO]{latinmodernmath-regular.otf}
  %\setmathfont[math-style=ISO]{xits-math.otf}
 \else
  \usepackage[utf8]{inputenc}
@@ -1345,6 +1345,29 @@ Standard 10 node tetrahedral element for stokes flow, with quadratic geometry, v
 \elementDescription{Features}{-}
 \elementDescription{Status}{Untested}
 \end{elementsummary}
+
+\subsubsection{Hexa21Stokes element}
+Standard 27 node hexahedral element for stokes flow, with quadratic geometry, velocity and linear pressure. The element features are summarized in Table~\ref{Hexa21Stokessummary}.
+
+\begin{figure}[htb]
+ \centering
+ \begin{makeimage}
+  \raisebox{-0.5\height}{\input{hexa_triquad_a.tikz}}
+  \raisebox{-0.5\height}{\input{hexa_quad_b.tikz}}
+ \end{makeimage}
+ \caption{Hexa21Stokes element. Node numbering and face numbering.}
+ \label{Tr1CBSfig}
+\end{figure}
+
+\begin{elementsummary}{Hexa21Stokes}{Standard 10 node tetrahedral element for stokes flow, with quadratic geometry, velocity and linear pressure}{-}{Hexa21Stokes element summary}{Hexa21Stokessummary}
+%\elementParam{\param{NIP}: allows to change the default number of integration point used, possible values are 8, 27 (default) and 64.}
+\elementDescription{Unknowns}{Unknown pressure (P\_f) in nodes 1--8, and unknown velocity (V\_u, V\_v, V\_w) in all nodes.}
+\elementDescription{Approximation}{Quadratic approximation of geometry and velocity, linear pressure approximation.}
+\elementDescription{Integration}{}
+\elementDescription{Features}{-}
+\elementDescription{Status}{Untested}
+\end{elementsummary}
+
 
 \subsubsection{Tr1BubbleStokes element}
 So called ``Mini'' element in 2D. A 3 node triangular element for stokes flow, with linear geometry and pressure. Velocity is enriched by a bubble function.
