@@ -446,7 +446,7 @@ if (USE_SHARED_LIB) # Prefer dynamic lib if available.
 elseif (${CMAKE_VERSION} VERSION_LESS "2.8.8") # Hackish backwards compatibility 
     add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C
                     ${oofem_SOURCE_DIR}/src/main/classfactory.C)
-    target_link_libraries (oofem ${LIBS} ${LIBS} ${LIBS} ${EXT_LIBS}) # Cyclic dependencies.
+    target_link_libraries (oofem ${LIBS} ${EXT_LIBS})
 else ()
     add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C ${LIBS})
     target_link_libraries (oofem ${EXT_LIBS})
@@ -461,10 +461,10 @@ if (USE_OOFEG)
     elseif (${CMAKE_VERSION} VERSION_LESS "2.8.8") # Hackish backwards compatibility
         add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C
                     ${oofem_SOURCE_DIR}/src/main/classfactory.C)
-        target_link_libraries (oofeg ${LIBS})
+        target_link_libraries (oofeg ${LIBS} ${EXT_LIBS})
     else ()
         add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C ${LIBS})
-        target_link_libraries (oofem ${EXT_LIBS})
+        target_link_libraries (oofeg ${EXT_LIBS})
     endif ()
     install(TARGETS oofeg DESTINATION bin)
 endif ()
