@@ -131,24 +131,45 @@ ClassFactory :: ClassFactory()
 #endif
 }
 
-SparseMtrx *ClassFactory :: createSparseMtrx(SparseMtrxType type)
+SparseMtrx *ClassFactory :: createSparseMtrx(SparseMtrxType name)
 {
-    return ( sparseMtrxList.count ( type ) == 1 ) ? sparseMtrxList [ type ] () : NULL;
+    return ( sparseMtrxList.count ( name ) == 1 ) ? sparseMtrxList [ name ] () : NULL;
 }
 
-Dof *ClassFactory :: createDof(dofType type, int num, DofManager* dman)
+bool ClassFactory :: createSparseMtrx(SparseMtrxType name, SparseMtrx * ( *creator )() )
 {
-    return ( dofList.count ( type ) == 1 ) ? dofList [ type ] (num, dman) : NULL;
+    printf("Register %d\n", name);
+    sparseMtrxList[name] = creator;
+    return true;
 }
 
-SparseLinearSystemNM *ClassFactory :: createSparseLinSolver(LinSystSolverType type, Domain *d, EngngModel *m)
+Dof *ClassFactory :: createDof(dofType name, int num, DofManager* dman)
 {
-    return ( sparseLinSolList.count ( type ) == 1 ) ? sparseLinSolList [ type ] (d, m) : NULL;
+    return ( dofList.count ( name ) == 1 ) ? dofList [ name ] (num, dman) : NULL;
 }
 
-ErrorEstimator * ClassFactory :: createErrorEstimator(ErrorEstimatorType type, int num, Domain *d)
+SparseLinearSystemNM *ClassFactory :: createSparseLinSolver(LinSystSolverType name, Domain *d, EngngModel *m)
 {
-    return ( errEstList.count ( type ) == 1 ) ? errEstList [ type ] (num, d) : NULL;
+    return ( sparseLinSolList.count ( name ) == 1 ) ? sparseLinSolList [ name ] (d, m) : NULL;
+}
+
+bool ClassFactory :: createSparseMtrx(LinSystSolverType name, SparseLinearSystemNM * ( *creator )(Domain*, EngngModel*) )
+{
+    printf("Register %d\n", name);
+    sparseLinSolList[name] = creator;
+    return true;
+}
+
+ErrorEstimator * ClassFactory :: createErrorEstimator(ErrorEstimatorType name, int num, Domain *d)
+{
+    return ( errEstList.count ( name ) == 1 ) ? errEstList [ name ] (num, d) : NULL;
+}
+
+bool ClassFactory :: createSparseMtrx(ErrorEstimatorType name, ErrorEstimator * ( *creator )(int, Domain*) )
+{
+    printf("Register %d\n", name);
+    errEstList[name] = creator;
+    return true;
 }
 
 InitialCondition * ClassFactory :: createInitialCondition(const char *name, int num, Domain *d)

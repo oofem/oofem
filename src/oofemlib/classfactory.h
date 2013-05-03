@@ -45,7 +45,6 @@
 #include "geneigvalsolvertype.h"
 #include "materialmappingalgorithmtype.h"
 #include "meshpackagetype.h"
-#include "load.h"
 
 #include <map>
 #include <string>
@@ -104,9 +103,9 @@ template< typename T > SparseNonLinearSystemNM *nonlinCreator(Domain *d, EngngMo
 template< typename T > InitModule *initCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
 template< typename T > TopologyDescription *topologyCreator(Domain *d) { return new T(d); }
 
+template< typename T > Dof* dofCreator(int n, DofManager *dman) { return new T(n, dman); }
 template< typename T > SparseMtrx* sparseMtrxCreator() { return new T(); }
 template< typename T > SparseLinearSystemNM* sparseLinSolCreator(Domain *d, EngngModel *m) { return new T(d, m); }
-template< typename T > Dof* dofCreator(int n, DofManager *dman) { return new T(n, dman); }
 template< typename T > ErrorEstimator* errEstCreator(int n, Domain *d) { return new T(n, d); }
 
 template< typename T > LoadBalancer* loadBalancerCreator(Domain *d) { return new T(d); }
@@ -135,6 +134,11 @@ template< typename T > BasicGeometry *geometryCreator() { return new T(); }
 #define REGISTER_TopologyDescription(class) static bool __dummy_##class = GiveClassFactory().registerTopologyDescription(_IFT_##class##_Name, topologyCreator< class >);
 #define REGISTER_LoadMonitor(class) static bool __dummy_##class = GiveClassFactory().registerLoadMonitor(_IFT_##class##_Name, loadMonitorCreator< class >);
 #define REGISTER_LoadBalancer(class) static bool __dummy_##class = GiveClassFactory().registerLoadBalancer(_IFT_##class##_Name, loadBalancerCreator< class >);
+
+// These should be converted to use strings.
+#define REGISTER_SparseMtrx(class, type) static bool __dummy_##class = GiveClassFactory().registerSparseMatrix(type, sparseMtrxCreator< class >);
+#define REGISTER_SparseLinearSystemSolver(class, type) static bool __dummy_##class = GiveClassFactory().registerSparseLinearSystemSolver(type, sparseLinSolCreator< class >);
+#define REGISTER_ErrorEstimator(class, type) static bool __dummy_##class = GiveClassFactory().registerErrorEstimator(type, errEstCreator< class >);
 
 #define REGISTER_EnrichmentItem(class) static bool __dummy_##class = GiveClassFactory().registerEnrichmentItem(_IFT_##class##_Name, enrichItemCreator< class >);
 #define REGISTER_EnrichmentFunction(class) static bool __dummy_##class = GiveClassFactory().registerEnrichmentFunction(_IFT_##class##_Name, enrichFuncCreator< class >);
@@ -401,6 +405,11 @@ public:
      */
     SparseMtrx *createSparseMtrx(SparseMtrxType type);
     /**
+     * Registers a sparse matrix type.
+     * @param type SparseMtrxType id determining the type of new instance.
+     */
+    bool createSparseMtrx(SparseMtrxType type, SparseMtrx * ( * )() );
+    /**
      * Creates new instance of DOF corresponding to given keyword.
      * @param type ID determining the type of new instance.
      * @param num  object's number.
@@ -418,6 +427,11 @@ public:
      */
     SparseLinearSystemNM *createSparseLinSolver(LinSystSolverType st, Domain *d, EngngModel *m);
     /**
+     * Registers a sparse linear system solver.
+     * @param type LinSystSolverType id determining the type of new instance.
+     */
+    bool createSparseMtrx(LinSystSolverType type, SparseLinearSystemNM * ( * )(Domain*, EngngModel*) );
+    /**
      * Creates new instance of ErrorEstimator corresponding
      * to given type.
      * @param type ErrorEstimatorType id determining the type of new instance.
@@ -426,6 +440,11 @@ public:
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
     ErrorEstimator *createErrorEstimator(ErrorEstimatorType type, int num, Domain *d);
+    /**
+     * Registers a new  error estimator.
+     * @param type ErrorEstimatorType id determining the type of new instance.
+     */
+    bool createSparseMtrx(ErrorEstimatorType type, ErrorEstimator * ( * )(int, Domain*) );
     /**
      * Creates new instance of patch corresponding to given type.
      * @param type ID determining the type of new instance.
