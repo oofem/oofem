@@ -46,6 +46,7 @@
 
 ///@name Input fields for NonStationaryTransportProblem
 //@{
+#define _IFT_NonStationaryTransportProblem_Name "nonstationaryproblem"
 #define _IFT_NonStationaryTransportProblem_initt "initt"
 #define _IFT_NonStationaryTransportProblem_deltat "deltat"
 #define _IFT_NonStationaryTransportProblem_deltatfunction "deltatfunction"

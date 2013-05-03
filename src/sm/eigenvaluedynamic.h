@@ -44,6 +44,7 @@
 
 ///@name Input fields for EigenValueDynamic
 //@{
+#define _IFT_EigenValueDynamic_Name "eigenvaluedynamic"
 #define _IFT_EigenValueDynamic_nroot "nroot"
 #define _IFT_EigenValueDynamic_rtolv "rtolv"
 #define _IFT_EigenValueDynamic_stype "stype"

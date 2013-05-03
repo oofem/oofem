@@ -40,7 +40,6 @@
 #include "dof.h"
 #include "initialcondition.h"
 #include "maskedprimaryfield.h"
-
 #include "verbose.h"
 #include "cbselement.h"
 #include "classfactory.h"
@@ -55,6 +54,8 @@
 #include "contextioerr.h"
 
 namespace oofem {
+
+REGISTER_EngngModel( CBS );
 
 NumericalMethod *CBS :: giveNumericalMethod(MetaStep *mStep)
 {

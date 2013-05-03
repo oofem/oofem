@@ -59,6 +59,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_EngngModel( AdaptiveNonLinearStatic );
+
 AdaptiveNonLinearStatic :: AdaptiveNonLinearStatic(int i, EngngModel *_master) : NonLinearStatic(i, _master),
     d2_totalDisplacement(), d2_incrementOfDisplacement(), timeStepLoadLevels()
 {

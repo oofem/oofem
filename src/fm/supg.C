@@ -58,6 +58,7 @@ namespace oofem {
 /* define if implicit interface update required */
 //#define SUPG_IMPLICIT_INTERFACE
 
+REGISTER_EngngModel( SUPG );
 
 NumericalMethod *SUPG :: giveNumericalMethod(MetaStep *mStep)
 {

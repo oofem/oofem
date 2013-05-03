@@ -39,9 +39,12 @@
 #include "dof.h"
 #include "verbose.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
 #define ZERO_MASS  1.E-10   // unit dependent !!!!
+
+REGISTER_EngngModel( DEIDynamic );
 
 DEIDynamic :: ~DEIDynamic() { }
 

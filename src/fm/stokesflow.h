@@ -43,6 +43,7 @@
 
 ///@name Input fields for Stokes' Flow
 //@{
+#define _IFT_StokesFlow_Name "stokesflow"
 #define _IFT_StokesFlow_deltat "deltat"
 //@}
 

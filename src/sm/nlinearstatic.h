@@ -40,6 +40,7 @@
 
 ///@name Input fields for NonLinearStatic
 //@{
+#define _IFT_NonLinearStatic_Name "nonlinearstatic"
 #define _IFT_NonLinearStatic_controlmode "controlmode"
 #define _IFT_NonLinearStatic_deltat "deltat"
 #define _IFT_NonLinearStatic_stiffmode "stiffmode"

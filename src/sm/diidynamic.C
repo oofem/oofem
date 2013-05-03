@@ -45,6 +45,9 @@
 #include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_EngngModel( DIIDynamic );
+
 DIIDynamic :: DIIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
     loadVector(), previousLoadVector(), rhs(), displacementVector(), velocityVector(), accelerationVector(),
                                                        previousDisplacementVector(), previousVelocityVector(), previousAccelerationVector(), previousIncrementOfDisplacement(), help()

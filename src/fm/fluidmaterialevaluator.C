@@ -39,10 +39,14 @@
 #include "gausspoint.h"
 #include "fluiddynamicmaterial.h"
 #include "loadtimefunction.h"
+#include "classfactory.h"
 
 #include <fstream>
 
 namespace oofem {
+
+REGISTER_EngngModel( FluidMaterialEvaluator );
+
 FluidMaterialEvaluator :: FluidMaterialEvaluator(int i, EngngModel *_master) : EngngModel(i, _master)
 {
     this->ndomains = 1;

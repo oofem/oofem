@@ -46,6 +46,7 @@
 
 ///@name Input fields for LinearStability
 //@{
+#define _IFT_LinearStability_Name "linearstability"
 #define _IFT_LinearStability_nroot "nroot"
 #define _IFT_LinearStability_rtolv "rtolv"
 #define _IFT_LinearStability_stype "stype"

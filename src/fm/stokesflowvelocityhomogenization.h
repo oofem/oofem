@@ -42,6 +42,8 @@
 #include "sparselinsystemnm.h"
 #include "classfactory.h"
 
+#define _IFT_StokesFlowVelocityHomogenization_Name "stokesflowvelocityhomogenization"
+
 namespace oofem
 {
 /**

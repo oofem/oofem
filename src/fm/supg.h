@@ -43,6 +43,7 @@
 
 ///@name Input fields for SUPG
 //@{
+#define _IFT_SUPG_Name "supg"
 #define _IFT_SUPG_deltat "deltat"
 #define _IFT_SUPG_deltatltf "deltatltf"
 #define _IFT_SUPG_cmflag "cmflag"

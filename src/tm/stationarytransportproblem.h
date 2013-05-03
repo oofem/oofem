@@ -42,6 +42,7 @@
 
 ///@name Input fields for StationaryTransportProblem
 //@{
+#define _IFT_StationaryTransportProblem_Name "stationaryproblem"
 #define _IFT_StationaryTransportProblem_exportfields "exportfields"
 #define _IFT_StationaryTransportProblem_keepTangent "keeptangent"
 //@}

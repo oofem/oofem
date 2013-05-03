@@ -52,6 +52,8 @@
 namespace oofem {
 #define ZERO_REL_MASS  1.E-6
 
+REGISTER_EngngModel( NlDEIDynamic );
+
 NlDEIDynamic ::  NlDEIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master), massMatrix(), loadVector(),
     previousIncrementOfDisplacementVector(), displacementVector(),
     velocityVector(), accelerationVector(), internalForces()

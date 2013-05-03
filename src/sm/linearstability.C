@@ -51,6 +51,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_EngngModel( LinearStability );
+
 NumericalMethod *LinearStability :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( nMethod ) {

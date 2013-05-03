@@ -40,6 +40,9 @@
 #include "contextioerr.h"
 
 namespace oofem {
+
+REGISTER_EngngModel( AdaptiveLinearStatic );
+
 void
 AdaptiveLinearStatic::updateYourself(TimeStep *stepN)
 {

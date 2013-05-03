@@ -47,6 +47,9 @@
 #include "primaryfield.h"
 
 namespace oofem {
+
+REGISTER_EngngModel( StokesFlow );
+
 StokesFlow :: StokesFlow(int i, EngngModel *_master) : FluidModel(i, _master)
 {
     this->nMethod = NULL;

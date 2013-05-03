@@ -43,7 +43,6 @@
 #define REGISTER_CLASS(_class, name, id)
 #include "elementclassfactory.h"
 #include "materialclassfactory.h"
-#include "engngmodelclassfactory.h"
 
 #include "masterdof.h"
 #include "slavedof.h"
@@ -111,12 +110,6 @@ ClassFactory :: ClassFactory()
 #define REGISTER_CLASS(_class, name, id) \
     matList [ name ]  = matCreator< _class >;
 #include "materialclassfactory.h"
-
-    // register engng models
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, name, id) \
-    engngList [ name ]  = engngCreator< _class >;
-#include "engngmodelclassfactory.h"
 
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, id) \

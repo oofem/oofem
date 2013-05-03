@@ -41,6 +41,7 @@
 
 ///@name Input fields for StaggeredProblem
 //@{
+#define _IFT_StaggeredProblem_Name "staggeredproblem"
 #define _IFT_StaggeredProblem_deltat "deltat"
 #define _IFT_StaggeredProblem_dtf "dtf"
 #define _IFT_StaggeredProblem_timeDefinedByProb "timedefinedbyprob"

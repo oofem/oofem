@@ -42,12 +42,15 @@
 #include "datastream.h"
 #include "geneigvalsolvertype.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
+
+REGISTER_EngngModel( EigenValueDynamic );
 
 NumericalMethod *EigenValueDynamic :: giveNumericalMethod(MetaStep *mStep)
 {

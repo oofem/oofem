@@ -43,6 +43,9 @@
 #include "contextioerr.h"
 
 namespace oofem {
+
+REGISTER_EngngModel( IncrementalLinearStatic );
+
 IncrementalLinearStatic :: IncrementalLinearStatic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
     loadVector(), internalLoadVector(), incrementOfDisplacementVector(), discreteTimes()
 {

@@ -52,6 +52,7 @@
 
 ///@name Input fields for NlDEIDynamic
 //@{
+#define _IFT_NlDEIDynamic_Name "nldeidynamic"
 #define _IFT_NlDEIDynamic_dumpcoef "dumpcoef"
 #define _IFT_NlDEIDynamic_deltat "deltat"
 #define _IFT_NlDEIDynamic_drflag "drflag"

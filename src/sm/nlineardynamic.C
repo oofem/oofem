@@ -56,6 +56,9 @@ using namespace std;
 #include "errorestimator.h"
 
 namespace oofem {
+
+REGISTER_EngngModel( NonLinearDynamic );
+
 NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
     totalDisplacement(), incrementOfDisplacement(), internalForces(), forcesVector(), initialLoadVector(),
     incrementalLoadVector(), initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed()

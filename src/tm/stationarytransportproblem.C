@@ -46,6 +46,8 @@
 
 namespace oofem {
 
+REGISTER_EngngModel( StationaryTransportProblem );
+
 StationaryTransportProblem :: StationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master)
 {
     UnknownsField = NULL;

@@ -39,6 +39,8 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrxtype.h"
 
+#define _IFT_LinearStatic_Name "linearstatic"
+
 namespace oofem {
 
 class SparseMtrx;

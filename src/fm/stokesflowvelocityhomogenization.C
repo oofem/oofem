@@ -34,12 +34,14 @@
 #include "stokesflow.h"
 #include "stokesflowvelocityhomogenization.h"
 #include "primaryfield.h"
-
+#include "classfactory.h"
 #include "deadweight.h"
 #include "tr21stokes.h"
 
-namespace oofem
-{
+namespace oofem {
+
+REGISTER_EngngModel( StokesFlowVelocityHomogenization );
+
 StokesFlowVelocityHomogenization :: StokesFlowVelocityHomogenization(int i, EngngModel *_master) : StokesFlow(i, _master)
 {
     areaOfDomain = -1.;

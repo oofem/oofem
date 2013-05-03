@@ -53,6 +53,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_EngngModel( NonStationaryTransportProblem );
+
 NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : StationaryTransportProblem(i, _master)
 {
     ndomains = 1;

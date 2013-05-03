@@ -41,6 +41,7 @@
 
 ///@name Input fields for material evaluator
 //@{
+#define _IFT_FluidMaterialEvaluator_Name "fluidmaterialevaluator"
 #define _IFT_FluidMaterialEvaluator_deltat "deltat"
 #define _IFT_FluidMaterialEvaluator_numberOfTimeSteps "nsteps"
 #define _IFT_FluidMaterialEvaluator_nDimensions "ndim" ///< Number of dimensions (2 or 3)

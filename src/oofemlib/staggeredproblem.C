@@ -42,6 +42,7 @@
 #include "oofemtxtdatareader.h"
 #include "util.h"
 #include "verbose.h"
+#include "classfactory.h"
 
 #include <stdlib.h>
 
@@ -50,6 +51,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_EngngModel( StaggeredProblem );
+
 StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i, _master)
 {
     ndomains = 1; // domain is needed to store the time step ltf

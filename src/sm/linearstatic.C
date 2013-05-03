@@ -43,6 +43,7 @@
 #include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 #ifdef __PARALLEL_MODE
  #include "fetisolver.h"
@@ -50,6 +51,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_EngngModel( LinearStatic );
+
 LinearStatic :: LinearStatic(int i, EngngModel *_master) : StructuralEngngModel(i, _master), loadVector(), displacementVector()
 {
     stiffnessMatrix = NULL;

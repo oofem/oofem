@@ -22,6 +22,8 @@
 
 namespace oofem {
 
+REGISTER_EngngModel( DarcyFlow );
+
 DarcyFlow :: DarcyFlow(int i, EngngModel *_master) : EngngModel (i, _master)
 {
     this->nMethod = NULL;

@@ -20,6 +20,8 @@
 #include "processcomm.h"
 #endif
 
+#define _IFT_DarcyFlow_Name "darcyflow"
+
 namespace oofem {
 
 /**

@@ -52,6 +52,9 @@
 #include "mathfem.h"
 
 namespace oofem {
+
+REGISTER_EngngModel( NonLinearStatic );
+
 NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i, _master),
     totalDisplacement(), incrementOfDisplacement(), internalForces(), initialLoadVector(), incrementalLoadVector(),
     initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed()
