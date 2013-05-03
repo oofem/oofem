@@ -43,6 +43,7 @@
 
 ///@name Input fields for TwoFluidMaterial
 //@{
+#define _IFT_TwoFluidMaterial_Name "twofluidmat"
 #define _IFT_TwoFluidMaterial_mat "mat"
 //@}
 

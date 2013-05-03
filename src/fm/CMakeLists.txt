@@ -33,6 +33,7 @@ set (fm_material
     newtonianfluid.C
     fe2fluidmaterial.C
     nonlinearfluidmaterial.C
+    surfacetensionmaterial.C
     )
 
 set (fm_loads

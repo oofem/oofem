@@ -47,6 +47,7 @@
 
 ///@name Input fields for TrabBoneNL
 //@{
+#define _IFT_TrabBoneNL_Name "trabbonenl"
 #define _IFT_TrabBoneNL_r "r"
 #define _IFT_TrabBoneNL_m "m"
 //@}

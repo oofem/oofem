@@ -43,8 +43,12 @@
 #include "mathfem.h"
 #include "strainvector.h"
 #include "stressvector.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( IsotropicDamageMaterial1 );
+
 #ifdef IDM_USE_MMAClosestIPTransfer
 MMAClosestIPTransfer IsotropicDamageMaterial1 :: mapper;
 #endif

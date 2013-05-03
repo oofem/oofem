@@ -40,9 +40,12 @@
 #include "floatmatrix.h"
 #include "gausspoint.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
 #define ZERO_LENGTH 1.e-6
+
+REGISTER_Material( OrthotropicLinearElasticMaterial );
 
 IRResultType
 OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)

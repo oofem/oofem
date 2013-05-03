@@ -39,6 +39,7 @@
 
 ///@name Input fields for HeMoTKMaterial
 //@{
+#define _IFT_HeMoTKMaterial_Name "hemotk"
 #define _IFT_HeMoTKMaterial_a_0 "a_0"
 #define _IFT_HeMoTKMaterial_nn "nn"
 #define _IFT_HeMoTKMaterial_phi_c "phi_c"

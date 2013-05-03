@@ -55,6 +55,7 @@ using namespace tinyxml2;
 
 ///@name Input fields for CemhydMat
 //@{
+#define _IFT_CemhydMat_Name "cemhydmat"
 #define _IFT_CemhydMat_conductivitytype "conductivitytype"
 #define _IFT_CemhydMat_capacitytype "capacitytype"
 #define _IFT_CemhydMat_densitytype "densitytype"

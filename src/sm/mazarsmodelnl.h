@@ -40,6 +40,7 @@
 
 ///@name Input fields for MazarsNLMaterial
 //@{
+#define _IFT_MazarsNLMaterial_Name "mazarsmodelnl"
 #define _IFT_MazarsNLMaterial_r "r"
 //@}
 

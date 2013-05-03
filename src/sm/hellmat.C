@@ -16,13 +16,17 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "structuralelement.h"
+#include "classfactory.h"
 
 namespace oofem {
 #ifdef __TM_MODULE
 
+REGISTER_Material( HellmichMaterial );
+
 // --------- class AgingIsoLEMaterial implementation---------
 AgingIsoLEMaterial :: AgingIsoLEMaterial(int n, Domain *d, double E, double nu) : IsotropicLinearElasticMaterial(n, d, E, nu) { }
-void AgingIsoLEMaterial :: setE(double newE) {
+void AgingIsoLEMaterial :: setE(double newE)
+{
     E = newE;
     G = 0.5 * E / ( 1. + nu );
 }

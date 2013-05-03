@@ -43,8 +43,12 @@
 #include "latticestructuralelement.h"
 #include "latticetransportelement.h"
 #include "isolinearelasticmaterial.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( LatticeDamage2d );
+
 LatticeDamage2d :: LatticeDamage2d(int n, Domain *d) : StructuralMaterial(n, d), RandomMaterialExtensionInterface()
 {}
 

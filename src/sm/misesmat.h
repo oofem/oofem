@@ -44,6 +44,7 @@
 
 ///@name Input fields for MisesMat
 //@{
+#define _IFT_MisesMat_Name "misesmat"
 #define _IFT_MisesMat_sig0 "sig0"
 #define _IFT_MisesMat_h "h"
 #define _IFT_MisesMat_omega_crit "omega_crit"

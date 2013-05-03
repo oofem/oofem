@@ -38,11 +38,14 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
-
 #include "structuralcrosssection.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( J2plasticMaterial );
+
 J2plasticMaterial :: J2plasticMaterial(int n, Domain *d) : PlasticMaterial(n, d)
 {
     //

@@ -38,9 +38,13 @@
 #include "gausspoint.h"
 #include "engngm.h"
 #include "materialinterface.h"
+#include "classfactory.h"
 //#include "leplic.h"
 
 namespace oofem {
+
+REGISTER_Material( TwoFluidMaterial );
+
 int
 TwoFluidMaterial :: checkConsistency()
 {

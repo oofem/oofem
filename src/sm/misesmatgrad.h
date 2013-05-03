@@ -46,6 +46,7 @@
 
 ///@name Input fields for MisesMatGrad
 //@{
+#define _IFT_MisesMatGrad_Name "misesmatgrad"
 #define _IFT_MisesMatGrad_r "r"
 #define _IFT_MisesMatGrad_m "m"
 //@}

@@ -36,8 +36,12 @@
 #include "gausspoint.h"
 #include "timestep.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( HydratingIsoHeatMaterial );
+
 IRResultType
 HydratingIsoHeatMaterial :: initializeFrom(InputRecord *ir)
 {

@@ -47,6 +47,7 @@
 
 ///@name Input fields for ConcreteDPM
 //@{
+#define _IFT_ConcreteDPM_Name "concretedpm"
 #define _IFT_ConcreteDPM_fc "fc"
 #define _IFT_ConcreteDPM_ft "ft"
 #define _IFT_ConcreteDPM_ecc "ecc"

@@ -35,17 +35,16 @@
 #include "concrete3.h"
 #include "gausspoint.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( Concrete3 );
+
 Concrete3 :: Concrete3(int n, Domain *d) : RCM2Material(n, d)
-    //
-    // constructor
-    //
 {
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
 }
-
-
 
 
 MaterialStatus *

@@ -40,6 +40,8 @@
 #include "floatmatrix.h"
 #include "transportmaterial.h"
 
+#define _IFT_RVEStokesFlow_Name "rvestokesflow"
+
 namespace oofem {
 /**
  * Material status class for the RVEStokesFlow class.

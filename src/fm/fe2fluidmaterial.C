@@ -40,6 +40,7 @@
 #include "engngm.h"
 #include "contextioerr.h"
 #include "util.h"
+#include "classfactory.h"
 
 // Used for computing
 #include "line2boundaryelement.h"
@@ -50,6 +51,8 @@
 #define DEBUG_ERR (1e-6)
 
 namespace oofem {
+
+REGISTER_Material( FE2FluidMaterial );
 
 int FE2FluidMaterial :: n = 1;
 

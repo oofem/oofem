@@ -37,10 +37,12 @@
 
 #include "idm1.h"
 
+#define _IFT_IDGMaterial_Name "idmgrad1"
+
 namespace oofem {
 
 /**
- * Gradient-enhancedl Isotropic Damage model for concrete in tension,
+ * Gradient-enhanced Isotropic Damage model for concrete in tension,
  */
 class IDGMaterial : public IsotropicDamageMaterial1
 {

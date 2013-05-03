@@ -108,6 +108,7 @@ set (core_dofman
 
 set (core_material
     material.C
+    dummymaterial.C
     )
 
 set (core_export

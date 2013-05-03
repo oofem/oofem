@@ -39,6 +39,7 @@
 
 ///@name Input fields for J2MPlasticMaterial
 //@{
+#define _IFT_J2MPlasticMaterial_Name "j2mmat"
 #define _IFT_J2MPlasticMaterial_ry "ry"
 #define _IFT_J2MPlasticMaterial_khm "khm"
 #define _IFT_J2MPlasticMaterial_ihm "ihm"

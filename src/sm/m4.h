@@ -40,6 +40,7 @@
 
 ///@name Input fields for M4Material
 //@{
+#define _IFT_M4Material_Name "microplane_m4"
 #define _IFT_M4Material_c3 "c3"
 #define _IFT_M4Material_c4 "c4"
 #define _IFT_M4Material_c20 "c20"

@@ -47,6 +47,7 @@
 
 ///@name Input fields for TrabBoneNLEmbed
 //@{
+#define _IFT_TrabBoneNLEmbed_Name "trabbonenlembed"
 #define _IFT_TrabBoneNLEmbed_r "r"
 #define _IFT_TrabBoneNLEmbed_m "m"
 //@}

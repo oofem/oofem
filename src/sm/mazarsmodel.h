@@ -41,6 +41,7 @@
 
 ///@name Input fields for MazarsMaterial
 //@{
+#define _IFT_MazarsMaterial_Name "mazarsmodel"
 #define _IFT_MazarsMaterial_version "version"
 #define _IFT_MazarsMaterial_e0 "e0"
 #define _IFT_MazarsMaterial_ac "ac"

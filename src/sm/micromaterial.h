@@ -52,6 +52,7 @@
 
 ///@name Input fields for MicroMaterial
 //@{
+#define _IFT_MicroMaterial_Name "micromat"
 #define _IFT_MicroMaterial_fileName "file"
 //@}
 

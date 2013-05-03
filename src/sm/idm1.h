@@ -74,6 +74,7 @@
 
 ///@name Input fields for IsotropicDamageMaterial1
 //@{
+#define _IFT_IsotropicDamageMaterial1_Name "idm1"
 #define _IFT_IsotropicDamageMaterial1_e0 "e0"
 #define _IFT_IsotropicDamageMaterial1_ef "ef"
 #define _IFT_IsotropicDamageMaterial1_wf "wf"

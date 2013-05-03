@@ -38,8 +38,11 @@
 #include "structuralmaterial.h"
 #include "contextioerr.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( TrabBoneMaterial );
 
 TrabBoneMaterial :: TrabBoneMaterial(int n, Domain *d) : StructuralMaterial(n, d)
 {}

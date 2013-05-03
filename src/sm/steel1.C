@@ -35,8 +35,12 @@
 #include "steel1.h"
 #include "isolinearelasticmaterial.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( Steel1 );
+
 Steel1 :: Steel1(int n, Domain *d) : PerfectlyPlasticMaterial(n, d)
     // constructor
 {

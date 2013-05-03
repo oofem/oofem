@@ -39,8 +39,12 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( Masonry02 );
+
 Masonry02 :: Masonry02(int n, Domain *d) : MPlasticMaterial2(n, d)
 {
     //

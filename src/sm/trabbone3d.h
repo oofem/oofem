@@ -46,6 +46,7 @@
 
 ///@name Input fields for TrabBone3D
 //@{
+#define _IFT_TrabBone3D_Name "trabbone3d"
 #define _IFT_TrabBone3D_eps0 "eps0"
 #define _IFT_TrabBone3D_nu0 "nu0"
 #define _IFT_TrabBone3D_mu0 "mu0"

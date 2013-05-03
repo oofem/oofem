@@ -37,11 +37,14 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 namespace oofem {
 //---------------------------------------------------------------------------------------------------
 // c l a s s   CohesiveInterfaceMaterial
 //---------------------------------------------------------------------------------------------------
+
+REGISTER_Material( CohesiveInterfaceMaterial );
 
 CohesiveInterfaceMaterial :: CohesiveInterfaceMaterial(int n, Domain *d) : StructuralMaterial(n, d)
 //

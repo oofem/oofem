@@ -39,6 +39,7 @@
 
 ///@name Input fields for J2Mat
 //@{
+#define _IFT_J2Mat_Name "j22mat"
 #define _IFT_J2Mat_ry "ry"
 #define _IFT_J2Mat_khm "khm"
 #define _IFT_J2Mat_ihm "ihm"

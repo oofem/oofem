@@ -40,6 +40,7 @@
 #include "classfactory.h"
 #include "oofemtxtdatareader.h"
 #include "util.h"
+#include "classfactory.h"
 
 namespace oofem {
 //valgrind --leak-check=full --show-reachable=no -v --log-file=valgr.txt ./oofem -f Macrolspace_1.in
@@ -57,6 +58,7 @@ namespace oofem {
 //     A.beProductOf(B, displacementVector);
 //     A.printYourself();
 
+REGISTER_Material( MicroMaterial );
 
 // constructor
 //strainVector, tempStrainVector, stressVector, tempStressVector are defined on StructuralMaterialStatus

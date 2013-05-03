@@ -36,10 +36,14 @@
 #include "domain.h"
 #include "floatmatrix.h"
 #include "gausspoint.h"
+#include "classfactory.h"
 
 #include <cstdlib>
 
 namespace oofem {
+
+REGISTER_Material( AnisotropicMassTransferMaterial );
+
 AnisotropicMassTransferMaterialStatus :: AnisotropicMassTransferMaterialStatus(int n, Domain *d, GaussPoint *g) : TransportMaterialStatus(n, d, g)
 {
 }

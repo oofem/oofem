@@ -38,8 +38,12 @@
 #include "floatmatrix.h"
 #include "gausspoint.h"
 #include "engngm.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( NewtonianFluidMaterial );
+
 int
 NewtonianFluidMaterial :: hasMaterialModeCapability(MaterialMode mode)
 //

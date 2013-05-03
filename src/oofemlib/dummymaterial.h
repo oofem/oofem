@@ -37,6 +37,8 @@
 
 #include "material.h"
 
+#define _IFT_DummyMaterial_Name "dummymat"
+
 namespace oofem {
 class GaussPoint;
 class Domain;
@@ -54,8 +56,7 @@ public:
 
     virtual const char *giveClassName() const { return "DummyMaterial"; }
     virtual classType giveClassID() const { return DummyMaterialClass; }
-    virtual IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
-
+    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 };
 } // end namespace oofem
 #endif // material_h

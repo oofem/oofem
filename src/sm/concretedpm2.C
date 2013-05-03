@@ -45,8 +45,12 @@
 #include "isolinearelasticmaterial.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( ConcreteDPM2 );
+
 ConcreteDPM2Status :: ConcreteDPM2Status(int n, Domain *d, GaussPoint *gp) :
     StructuralMaterialStatus(n, d, gp),
     plasticStrain( gp->giveMaterialMode() ),

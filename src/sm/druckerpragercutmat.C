@@ -42,8 +42,12 @@
 #include "mathfem.h"
 #include "contextioerr.h"
 #include "datastream.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( DruckerPragerCutMat );
+
 // constructor
 DruckerPragerCutMat :: DruckerPragerCutMat(int n, Domain *d) : MPlasticMaterial2(n, d)
 {

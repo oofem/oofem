@@ -43,8 +43,12 @@
 #include "mathfem.h"
 #include "contextioerr.h"
 #include "datastream.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( MisesMat );
+
 // constructor
 MisesMat :: MisesMat(int n, Domain *d) : StructuralMaterial(n, d)
 {

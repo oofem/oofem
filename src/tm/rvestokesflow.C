@@ -41,12 +41,15 @@
 #include "contextioerr.h"
 #include "gausspoint.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #include <cstdio>
 #include <cstring>
 #include <sstream>
 
 namespace oofem {
+
+REGISTER_Material( RVEStokesFlow );
 
 RVEStokesFlowMaterialStatus :: RVEStokesFlowMaterialStatus(int n, Domain *d, GaussPoint *g) :
     TransportMaterialStatus(n, d, g)

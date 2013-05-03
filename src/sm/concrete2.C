@@ -43,21 +43,19 @@
 #include "structuralcrosssection.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( Concrete2 );
+
 Concrete2 :: Concrete2(int n, Domain *d) : DeformationTheoryMaterial(n, d)
-    //
-    // constructor
-    //
 {
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
 }
 
 
 Concrete2 :: ~Concrete2()
-//
-// destructor
-//
 {
     delete linearElasticMaterial;
 }

@@ -41,6 +41,7 @@
 
 ///@name Input fields for IsotropicLinMoistureTransferMaterial
 //@{
+#define _IFT_IsotropicLinMoistureTransferMaterial_Name "isolinmoisturemat"
 #define _IFT_IsotropicLinMoistureTransferMaterial_perm "perm" ///< Moisture permeability
 #define _IFT_IsotropicLinMoistureTransferMaterial_capa "capa" ///< Moisture capacity
 //@}

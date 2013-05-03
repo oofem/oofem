@@ -40,12 +40,13 @@
 #include "mathfem.h"
 #include "nonlocalmaterialext.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( RCSDNLMaterial );
+
 RCSDNLMaterial :: RCSDNLMaterial(int n, Domain *d) : RCSDEMaterial(n, d), StructuralNonlocalMaterialExtensionInterface(d)
-    //
-    // constructor
-    //
 {
     //linearElasticMaterial = new IsotropicLinearElasticMaterial (n,d);
     SDTransitionCoeff2 = 0.;
@@ -54,9 +55,6 @@ RCSDNLMaterial :: RCSDNLMaterial(int n, Domain *d) : RCSDEMaterial(n, d), Struct
 
 
 RCSDNLMaterial :: ~RCSDNLMaterial()
-//
-// destructor
-//
 {
     //delete linearElasticMaterial;
 }

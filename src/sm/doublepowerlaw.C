@@ -34,8 +34,12 @@
 
 #include "doublepowerlaw.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( DoublePowerLawMaterial );
+
 IRResultType
 DoublePowerLawMaterial :: initializeFrom(InputRecord *ir)
 {

@@ -40,6 +40,7 @@
 
 ///@name Input fields for HydratingHeMoMaterial
 //@{
+#define _IFT_HydratingHeMoMaterial_Name "hhemotk"
 #define _IFT_HydratingHeMoMaterial_hydration "hydration"
 #define _IFT_HydratingHeMoMaterial_mix "mix"
 #define _IFT_HydratingHeMoMaterial_noHeat "noheat"

@@ -42,6 +42,7 @@
 
 ///@name Input fields for CebFipSlip90Material
 //@{
+#define _IFT_CebFipSlip90Material_Name "cebfipslip90"
 #define _IFT_CebFipSlip90Material_tmax "tmax"
 #define _IFT_CebFipSlip90Material_tres "tres"
 #define _IFT_CebFipSlip90Material_s1 "s1"

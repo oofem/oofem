@@ -32,39 +32,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "isolinmoisturemat.h"
-#include "floatmatrix.h"
-#include "gausspoint.h"
+#include "dummymaterial.h"
 #include "classfactory.h"
 
 namespace oofem {
 
-REGISTER_Material( IsotropicLinMoistureTransferMaterial );
+REGISTER_Material( DummyMaterial );
 
-IRResultType
-IsotropicLinMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
-{
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    IsotropicMoistureTransferMaterial :: initializeFrom(ir);
-
-    IR_GIVE_FIELD(ir, permeability, _IFT_IsotropicLinMoistureTransferMaterial_perm);
-    IR_GIVE_FIELD(ir, moistureCapacity, _IFT_IsotropicLinMoistureTransferMaterial_capa);
-
-    return IRRT_OK;
-}
-
-
-double
-IsotropicLinMoistureTransferMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *atTime)
-{
-    return this->moistureCapacity;
-}
-
-double
-IsotropicLinMoistureTransferMaterial :: givePermeability(GaussPoint *gp, TimeStep *atTime)
-{
-    return this->permeability;
-}
 } // end namespace oofem
+

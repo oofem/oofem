@@ -43,6 +43,7 @@
 
 ///@name Input fields for NewtonianFluidMaterial
 //@{
+#define _IFT_NewtonianFluidMaterial_Name "newtonianfluid"
 #define _IFT_NewtonianFluidMaterial_mu "mu"
 //@}
 

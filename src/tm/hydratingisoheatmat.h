@@ -40,6 +40,7 @@
 
 ///@name Input fields for HydratingIsoHeatMaterial
 //@{
+#define _IFT_HydratingIsoHeatMaterial_Name "hisoheat"
 #define _IFT_HydratingIsoHeatMaterial_hydration "hydration"
 #define _IFT_HydratingIsoHeatMaterial_mix "mix"
 #define _IFT_HydratingIsoHeatMaterial_noHeat "noheat"

@@ -35,12 +35,13 @@
 #include "hyperelasticmaterial.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( HyperElasticMaterial );
+
 HyperElasticMaterial :: HyperElasticMaterial(int n, Domain *d) : StructuralMaterial(n, d)
-//
-// constructor
-//
 {}
 
 

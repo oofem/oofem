@@ -37,6 +37,7 @@
 #include "floatarray.h"
 #include "mathfem.h"
 #include "nonlocalmaterialext.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -47,6 +48,7 @@ namespace oofem {
 ////////////TRABECULAR BONE NONLOCAL MATERIAL////////////////////
 /////////////////////////////////////////////////////////////////
 
+REGISTER_Material( TrabBoneNL );
 
 /////////////////////////////////////////////////////////////////
 // BEGIN: CONSTRUCTOR

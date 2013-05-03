@@ -44,8 +44,14 @@
 #include "structuralmaterial.h"
 #include "isolinearelasticmaterial.h"
 #include "structuralcrosssection.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( ConcreteDPM );
+///@todo Eventually remove this old input string (replacing the name in input files is easy anyway).
+static bool __dummy_ConcreteDPM_alt = GiveClassFactory().registerMaterial("concreteidp" , matCreator< ConcreteDPM >); 
+
 ConcreteDPMStatus :: ConcreteDPMStatus(int n, Domain *d, GaussPoint *gp) :
     StructuralMaterialStatus(n, d, gp),
     plasticStrain( gp->giveMaterialMode() ),

@@ -41,6 +41,7 @@
 
 ///@name Input fields for IsotropicHeatTransferMaterial
 //@{
+#define _IFT_IsotropicHeatTransferMaterial_Name "isoheat"
 #define _IFT_IsotropicHeatTransferMaterial_k "k" ///< Conductivity
 #define _IFT_IsotropicHeatTransferMaterial_c "c" ///< Specific heat
 //@}

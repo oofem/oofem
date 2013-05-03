@@ -41,6 +41,7 @@
 #include "sparsemtrx.h"
 #include "nonlocalmaterialext.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
@@ -51,6 +52,8 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Material( MisesMatNl );
 
 MisesMatNl :: MisesMatNl(int n, Domain *d) : MisesMat(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
 //

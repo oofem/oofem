@@ -44,6 +44,7 @@
 
 ///@name Input fields for LsMasterMat
 //@{
+#define _IFT_LsMasterMat_Name "lsmastermat"
 #define _IFT_LsMasterMat_m "m"
 #define _IFT_LsMasterMat_slaveMat "slavemat"
 //@}

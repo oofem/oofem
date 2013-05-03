@@ -39,6 +39,7 @@
 #include "mathfem.h"
 #include "sparsemtrx.h"
 #include "nonlocalmaterialext.h"
+#include "classfactory.h"
 
 #ifdef __PARALLEL_MODE
  #include "idmnl1.h"
@@ -52,6 +53,8 @@
 
 
 namespace oofem {
+
+REGISTER_Material( TrabBoneNL3D );
 
 TrabBoneNL3D :: TrabBoneNL3D(int n, Domain *d) : TrabBone3D(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
 {

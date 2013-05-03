@@ -50,6 +50,7 @@
 
 ///@name Input fields for RankineMat
 //@{
+#define _IFT_RankineMat_Name "rankmat"
 #define _IFT_RankineMat_sig0 "sig0"
 #define _IFT_RankineMat_h "h"
 #define _IFT_RankineMat_a "a"

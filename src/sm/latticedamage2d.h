@@ -46,6 +46,7 @@
 
 ///@name Input fields for LatticeDamage2d
 //@{
+#define _IFT_LatticeDamage2d_Name "latticedamage2d"
 #define _IFT_LatticeDamage2d_eNormal "e"
 #define _IFT_LatticeDamage2d_alphaOne "a1"
 #define _IFT_LatticeDamage2d_alphaTwo "a2"

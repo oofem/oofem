@@ -39,6 +39,7 @@
 
 ///@name Input fields for B3Material
 //@{
+#define _IFT_B3Material_Name "b3mat"
 #define _IFT_B3Material_mode "mode"
 #define _IFT_B3Material_emodulimode "emodulimode"
 #define _IFT_B3Material_shmode "shmode"

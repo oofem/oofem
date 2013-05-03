@@ -39,6 +39,7 @@
 
 ///@name Input fields for DoublePowerLawMaterial
 //@{
+#define _IFT_DoublePowerLawMaterial_Name "doublepowerlaw"
 #define _IFT_DoublePowerLawMaterial_e28 "e28"
 #define _IFT_DoublePowerLawMaterial_fi1 "fi1"
 #define _IFT_DoublePowerLawMaterial_m "m"

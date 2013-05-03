@@ -41,10 +41,13 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "isolinearelasticmaterial.h"
+#include "classfactory.h"
 
 namespace oofem {
 #define _MAZARS_MODEL_ITER_TOL 1.e-15
 #define _MAZARS_MODEL_MAX_ITER 400.
+
+REGISTER_Material( MazarsMaterial );
 
 MazarsMaterial :: MazarsMaterial(int n, Domain *d) : IsotropicDamageMaterial1(n, d)
     //

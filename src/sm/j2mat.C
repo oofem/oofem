@@ -39,8 +39,12 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( J2Mat );
+
 J2Mat :: J2Mat(int n, Domain *d) : MPlasticMaterial2(n, d)
 {
     //

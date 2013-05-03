@@ -74,6 +74,7 @@
 
 ///@name Input fields for MDM
 //@{
+#define _IFT_MDM_Name "mdm"
 #define _IFT_MDM_talpha "talpha"
 #define _IFT_MDM_parmd "parmd"
 #define _IFT_MDM_nonloc "nonloc"

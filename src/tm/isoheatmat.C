@@ -35,8 +35,12 @@
 #include "isoheatmat.h"
 #include "floatmatrix.h"
 #include "gausspoint.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( IsotropicHeatTransferMaterial );
+
 IRResultType
 IsotropicHeatTransferMaterial :: initializeFrom(InputRecord *ir)
 {

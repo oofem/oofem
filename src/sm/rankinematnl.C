@@ -41,6 +41,7 @@
 #include "error.h"
 #include "nonlocalmaterialext.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
@@ -51,6 +52,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Material( RankineMatNl );
+
 RankineMatNl :: RankineMatNl(int n, Domain *d) : RankineMat(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
 //
 // constructor

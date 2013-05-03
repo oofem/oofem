@@ -36,9 +36,13 @@
 #include "isolinearelasticmaterial.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "classfactory.h"
 
 namespace oofem {
-RankinePlasticMaterial ::        RankinePlasticMaterial(int n, Domain *d) : MPlasticMaterial(n, d)
+
+REGISTER_Material( RankinePlasticMaterial );
+
+RankinePlasticMaterial :: RankinePlasticMaterial(int n, Domain *d) : MPlasticMaterial(n, d)
 {
     //
     // constructor

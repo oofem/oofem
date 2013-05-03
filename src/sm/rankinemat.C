@@ -43,8 +43,12 @@
 #include "mathfem.h"
 #include "contextioerr.h"
 #include "datastream.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( RankineMat );
+
 // constructor
 RankineMat :: RankineMat(int n, Domain *d) : StructuralMaterial(n, d)
 {

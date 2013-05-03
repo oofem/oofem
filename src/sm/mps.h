@@ -43,6 +43,7 @@
 
 ///@name Input fields for MPSMaterial
 //@{
+#define _IFT_MPSMaterial_Name "mps"
 #define _IFT_MPSMaterial_talpha "talpha"
 #define _IFT_MPSMaterial_mode "mode"
 #define _IFT_MPSMaterial_coupledanalysistype "coupledanalysistype"

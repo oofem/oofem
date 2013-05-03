@@ -23,6 +23,7 @@
 
 ///@name Input fields for HellmichMaterial
 //@{
+#define _IFT_HellmichMaterial_Name "hellmat"
 #define _IFT_HellmichMaterial_E "e"
 #define _IFT_HellmichMaterial_nu "n"
 #define _IFT_HellmichMaterial_linearE "lineare"

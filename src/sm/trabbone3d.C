@@ -42,9 +42,12 @@
 #include "contextioerr.h"
 #include "intarray.h"
 #include "datastream.h"
+#include "classfactory.h"
 
 
 namespace oofem {
+
+REGISTER_Material( TrabBone3D );
 
 TrabBone3D :: TrabBone3D(int n, Domain *d) : StructuralMaterial(n, d)
 {}

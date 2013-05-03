@@ -39,9 +39,13 @@
 #include "timestep.h"
 #include "contextioerr.h"
 #include "datastream.h"
+#include "classfactory.h"
 #include "b3mat.h" // For the input record keywords.
 
 namespace oofem {
+
+REGISTER_Material( B3SolidMaterial );
+
 IRResultType
 B3SolidMaterial :: initializeFrom(InputRecord *ir)
 {

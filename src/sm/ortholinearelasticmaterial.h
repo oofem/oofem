@@ -44,6 +44,7 @@
 
 ///@name Input fields for OrthotropicLinearElasticMaterial
 //@{
+#define _IFT_OrthotropicLinearElasticMaterial_Name "orthole"
 #define _IFT_OrthotropicLinearElasticMaterial_ex "ex"
 #define _IFT_OrthotropicLinearElasticMaterial_ey "ey"
 #define _IFT_OrthotropicLinearElasticMaterial_ez "ez"

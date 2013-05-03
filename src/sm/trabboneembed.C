@@ -37,8 +37,11 @@
 #include "floatarray.h"
 #include "mathfem.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( TrabBoneEmbed );
 
 TrabBoneEmbed :: TrabBoneEmbed(int n, Domain *d) : StructuralMaterial(n, d)
 {}

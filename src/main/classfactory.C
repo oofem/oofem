@@ -42,7 +42,6 @@
 
 #define REGISTER_CLASS(_class, name, id)
 #include "elementclassfactory.h"
-#include "materialclassfactory.h"
 
 #include "masterdof.h"
 #include "slavedof.h"
@@ -104,12 +103,6 @@ ClassFactory :: ClassFactory()
 #define REGISTER_CLASS(_class, name, id) \
     elemList [ name ]  = elemCreator< _class >;
 #include "elementclassfactory.h"
-
-    // register materials
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, name, id) \
-    matList [ name ]  = matCreator< _class >;
-#include "materialclassfactory.h"
 
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, id) \

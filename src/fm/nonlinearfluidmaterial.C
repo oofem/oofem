@@ -40,10 +40,14 @@
 #include "engngm.h"
 #include "contextioerr.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #include <cstdlib>
 
 namespace oofem {
+
+REGISTER_Material( NonlinearFluidMaterial );
+
 int
 NonlinearFluidMaterial :: hasMaterialModeCapability(MaterialMode mode)
 {

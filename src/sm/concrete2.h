@@ -45,6 +45,7 @@
 
 ///@name Input fields for Concrete2
 //@{
+#define _IFT_Concrete2_Name "concrete2"
 #define _IFT_Concrete2_e "e"
 #define _IFT_Concrete2_n "n"
 #define _IFT_Concrete2_sccc "sccc"

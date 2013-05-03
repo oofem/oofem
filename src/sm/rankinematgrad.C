@@ -38,12 +38,15 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "error.h"
+#include "classfactory.h"
 
 namespace oofem {
 /////////////////////////////////////////////////
 // gradient regularization of Rankine plasticity
 // coupled with isotropic damage
 /////////////////////////////////////////////////
+
+REGISTER_Material( RankineMatGrad );
 
 // constructor
 RankineMatGrad :: RankineMatGrad(int n, Domain *d) : RankineMat(n, d)

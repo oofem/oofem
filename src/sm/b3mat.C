@@ -37,8 +37,12 @@
 #include "gausspoint.h"
 #include "structuralcrosssection.h"
 #include "timestep.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( B3Material );
+
 IRResultType
 B3Material :: initializeFrom(InputRecord *ir)
 {

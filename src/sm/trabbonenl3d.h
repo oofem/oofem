@@ -48,6 +48,7 @@
 
 ///@name Input fields for TrabBoneNL3D
 //@{
+#define _IFT_TrabBoneNL3D_Name "trabbonenl3d"
 #define _IFT_TrabBoneNL3D_r "r"
 #define _IFT_TrabBoneNL3D_m "m"
 //@}

@@ -44,6 +44,7 @@
 
 ///@name Input fields for DustMaterial
 //@{
+#define _IFT_DustMaterial_Name "dustmat"
 #define _IFT_DustMaterial_alpha "alpha"
 #define _IFT_DustMaterial_beta "beta"
 #define _IFT_DustMaterial_lambda "lambda"

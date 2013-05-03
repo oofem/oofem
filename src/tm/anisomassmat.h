@@ -42,6 +42,7 @@
 
 ///@name Input fields for AnisotropicMassTransferMaterial
 //@{
+#define _IFT_AnisotropicMassTransferMaterial_Name "anisomass"
 #define _IFT_AnisotropicMassTransferMaterial_c "c"
 //@}
 

@@ -37,6 +37,7 @@
 #include "floatarray.h"
 #include "nonlocalmaterialext.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
@@ -44,6 +45,9 @@
 
 
 namespace oofem {
+
+REGISTER_Material( MazarsNLMaterial );
+
 MazarsNLMaterial :: MazarsNLMaterial(int n, Domain *d) : MazarsMaterial(n, d), StructuralNonlocalMaterialExtensionInterface(d)
     //
     // constructor

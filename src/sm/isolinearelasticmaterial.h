@@ -42,6 +42,7 @@
 
 ///@name Input fields for IsotropicLinearElasticMaterial
 //@{
+#define _IFT_IsotropicLinearElasticMaterial_Name "isole"
 #define _IFT_IsotropicLinearElasticMaterial_e "e"
 #define _IFT_IsotropicLinearElasticMaterial_n "n"
 #define _IFT_IsotropicLinearElasticMaterial_talpha "talpha"

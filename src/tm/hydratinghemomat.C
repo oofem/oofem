@@ -37,9 +37,12 @@
 #include "gausspoint.h"
 #include "timestep.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 namespace oofem {
 #define PRECAST_CAPACITY_COEFF 1e-2 // coefficient for obtaining capacity before cast of the material : 1e-4, tried 1e-2 for jete (no convergency with 1e-4)
+
+REGISTER_Material( HydratingHeMoMaterial );
 
 IRResultType
 HydratingHeMoMaterial :: initializeFrom(InputRecord *ir)

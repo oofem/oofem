@@ -37,8 +37,12 @@
 #include "floatmatrix.h"
 #include "gausspoint.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( NonlinearMassTransferMaterial );
+
 IRResultType
 NonlinearMassTransferMaterial :: initializeFrom(InputRecord *ir)
 {

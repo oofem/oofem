@@ -39,8 +39,12 @@
 #include "mathfem.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( CebFipSlip90Material );
+
 CebFipSlip90Material :: CebFipSlip90Material(int n, Domain *d) : StructuralMaterial(n, d)
 //
 // constructor

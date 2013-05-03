@@ -41,9 +41,11 @@
 #include "floatmatrix.h"
 #include "matconst.h"
 #include "matstatus.h"
+#include "classfactory.h"
 
 ///@name Input fields for SurfaceTensionMaterial
 //@{
+#define _IFT_SurfaceTensionMaterial_Name "surfacetension"
 #define _IFT_SurfaceTensionMaterial_isotropic "g"
 //@}
 
@@ -82,18 +84,11 @@ public:
      * Initializes the material.
      * - g Isotropic surface tension (gamma) (optional, default 0.0)
      */
-    virtual IRResultType initializeFrom(InputRecord *ir)
-    {
-        const char *__proc = "initializeFrom";
-        IRResultType result;
-        double value = 0.0;
-        IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SurfaceTensionMaterial_isotropic);
-        this->propertyDictionary->add('g', value);
-        return result;
-    }
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual const char *giveClassName() const { return "SurfaceTensionMaterial"; }
     virtual classType giveClassID() const { return SurfaceTensionMaterialClass; }
 };
+
 } // end namespace oofem
 #endif // surfacetensionmaterial_h
