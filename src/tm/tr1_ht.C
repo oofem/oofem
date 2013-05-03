@@ -41,8 +41,13 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
+
 
 namespace oofem {
+
+REGISTER_Element( Tr1_ht );
+REGISTER_Element( Tr1_hmt );
 
 FEI2dTrLin Tr1_ht :: interp(1, 2);
 

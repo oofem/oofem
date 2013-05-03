@@ -51,6 +51,7 @@
 #include "fei2dtrlin.h"
 #include "fei2dquadlin.h"
 #include "geotoolbox.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -60,6 +61,7 @@
 namespace oofem {
 #define TRSUPG_ZERO_VOF 1.e-8
 
+REGISTER_Element( TR1_2D_SUPG2_AXI );
 
 //#define TR1_2D_SUPG2_AXI_DEBUG
 

@@ -45,12 +45,16 @@
 #include "mathfem.h"
 #include "engngm.h"
 #include "timestep.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( Tet1_3D_SUPG );
+
 FEI3dTetLin Tet1_3D_SUPG :: interpolation;
 
 Tet1_3D_SUPG :: Tet1_3D_SUPG(int n, Domain *aDomain) :

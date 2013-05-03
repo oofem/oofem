@@ -42,6 +42,7 @@
 
 ///@name Input fields for Beam2d
 //@{
+#define _IFT_Beam2d_Name "beam2d"
 #define _IFT_Beam2d_dofstocondense "dofstocondense"
 //@}
 

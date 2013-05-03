@@ -44,6 +44,7 @@
 
 ///@name Input fields for Axisymm3d
 //@{
+#define _IFT_Axisymm3d_Name "axisymm3d"
 #define _IFT_Axisymm3d_nipfish "nipfish"
 //@}
 

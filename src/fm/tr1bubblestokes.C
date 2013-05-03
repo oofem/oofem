@@ -45,8 +45,12 @@
 #include "fluiddynamicmaterial.h"
 #include "fei2dtrlin.h"
 #include "masterdof.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( Tr1BubbleStokes );
+
 // Set up interpolation coordinates
 FEI2dTrLin Tr1BubbleStokes :: interp(1, 2);
 // Set up ordering vectors (for assembling)

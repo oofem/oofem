@@ -38,6 +38,8 @@
 #include "cct.h"
 #include "layeredcrosssection.h"
 
+#define _IFT_RerShell_Name "rershell"
+
 namespace oofem {
 #ifndef __CHARTENSOR // termitovo
  #define __CHARTENSOR

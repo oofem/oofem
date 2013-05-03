@@ -46,6 +46,7 @@
 #include "load.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -53,6 +54,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( RerShell );
+
 RerShell :: RerShell(int n, Domain *aDomain) :
     CCTPlate(n, aDomain)
 {

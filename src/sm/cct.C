@@ -45,12 +45,16 @@
 #include "load.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( CCTPlate );
+
 FEI2dTrLin CCTPlate :: interp_lin(1, 2);
 //FEI2dTrRot CCTPlate :: interp_rot(1, 2);
 

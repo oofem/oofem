@@ -47,6 +47,7 @@
 #include "load.h"
 #include "boundaryload.h"
 #include "fluiddynamicmaterial.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -54,6 +55,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( TR1_2D_SUPG_AXI );
+
 TR1_2D_SUPG_AXI :: TR1_2D_SUPG_AXI(int n, Domain *aDomain) : TR1_2D_SUPG(n, aDomain)
     // Constructor.
 { }

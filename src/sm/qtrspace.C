@@ -47,10 +47,13 @@
 #include "mathfem.h"
 #include "structuralcrosssection.h"
 #include "fei3dtetquad.h"
+#include "classfactory.h"
 
 #include <cstdio>
 
 namespace oofem {
+
+REGISTER_Element( QTRSpace );
  
 FEI3dTetQuad QTRSpace :: interpolation;
 

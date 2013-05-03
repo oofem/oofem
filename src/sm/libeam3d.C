@@ -42,8 +42,12 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( LIBeam3d );
+
 LIBeam3d :: LIBeam3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
     // Constructor.
 {

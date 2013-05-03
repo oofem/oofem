@@ -44,6 +44,8 @@
 #include "fei2dtrlin.h"
 #include "zzerrorestimator.h"
 
+#define _IFT_CCTPlate_Name "cctplate"
+
 namespace oofem {
 
 /**

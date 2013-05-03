@@ -46,10 +46,14 @@
 #include "structuralms.h"
 #include "mathfem.h"
 #include "structuralcrosssection.h"
+#include "classfactory.h"
 
 #include <cstdio>
 
 namespace oofem {
+
+REGISTER_Element( QWedge );
+
 FEI3dWedgeQuad QWedge :: interpolation;
 
 QWedge :: QWedge(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)

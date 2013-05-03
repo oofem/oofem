@@ -36,12 +36,15 @@
 #include "floatmatrix.h"
 #include "intarray.h"
 #include "floatarray.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( SpringElement );
 
 SpringElement :: SpringElement(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 {

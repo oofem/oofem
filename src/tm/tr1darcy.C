@@ -48,8 +48,12 @@
 #include "matresponseform.h"
 #include "matresponsemode.h"
 #include "fei2dtrlin.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( Tr1Darcy );
+
 FEI2dTrLin Tr1Darcy :: interpolation_lin(1, 2);
 
 Tr1Darcy :: Tr1Darcy(int n, Domain *aDomain) : TransportElement(n, aDomain)

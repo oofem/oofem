@@ -37,6 +37,8 @@
 
 #include "cct.h"
 
+#define _IFT_CCTPlate3d_Name "cctplate3d"
+
 namespace oofem {
 #ifndef __CHARTENSOR
  #define __CHARTENSOR

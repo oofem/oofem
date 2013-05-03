@@ -47,8 +47,12 @@
 #include "fluiddynamicmaterial.h"
 #include "fei3dtetlin.h"
 #include "fei3dtetquad.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( Tet21Stokes );
+
 // Set up interpolation coordinates
 FEI3dTetLin Tet21Stokes :: interpolation_lin;
 FEI3dTetQuad Tet21Stokes :: interpolation_quad;

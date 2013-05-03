@@ -37,6 +37,7 @@
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -44,6 +45,11 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( QuadAxisym1_ht );
+REGISTER_Element( QuadAxisym1_hmt );
+REGISTER_Element( QuadAxisym1_mt );
+
 QuadAxisym1_ht :: QuadAxisym1_ht(int n, Domain *aDomain) : Quad1_ht(n, aDomain)
 { }
 

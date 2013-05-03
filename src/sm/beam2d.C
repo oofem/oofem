@@ -44,12 +44,16 @@
 #include "engngm.h"
 #include "boundaryload.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( Beam2d );
+
 // Set up interpolation coordinates
 FEI2dLineLin Beam2d :: interp_geom(1, 3);
 FEI2dLineHermite Beam2d :: interp_beam(1, 3);

@@ -47,6 +47,8 @@
 #include "huertaerrorestimator.h"
 #include "fei1dlin.h"
 
+#define _IFT_Truss1d_Name "truss1d"
+
 namespace oofem {
 /**
  * This class implements a two-node truss bar element for one-dimensional

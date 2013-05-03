@@ -39,6 +39,7 @@
 
 ///@name Input fields for 2D truss element
 //@{
+#define _IFT_Truss2d_Name "truss2d"
 #define _IFT_Truss2d_cs "cs"
 //@}
 

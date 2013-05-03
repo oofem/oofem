@@ -39,9 +39,10 @@
 #include "eleminterpmapperinterface.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "layeredcrosssection.h"
-
 #include "nlstructuralelement.h"
 #include "shell7basexfem.h"
+
+#define _IFT_Tr2Shell7XFEM_Name "tr2shell7xfem"
 
 namespace oofem {
 

@@ -40,6 +40,7 @@
 
 ///@name Input fields for Beam3d
 //@{
+#define _IFT_Beam3d_Name "beam3d"
 #define _IFT_Beam3d_dofstocondense "dofstocondense"
 #define _IFT_Beam3d_refnode "refnode"
 //@}

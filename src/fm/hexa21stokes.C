@@ -47,8 +47,12 @@
 #include "fluiddynamicmaterial.h"
 #include "fei3dhexalin.h"
 #include "fei3dhexatriquad.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( Hexa21Stokes );
+
 // Set up interpolation coordinates
 FEI3dHexaLin Hexa21Stokes :: interpolation_lin;
 FEI3dHexaTriQuad Hexa21Stokes :: interpolation_quad;

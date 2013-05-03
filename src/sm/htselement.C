@@ -42,9 +42,12 @@
 #include "node.h"
 #include "mathfem.h"
 #include "boundaryload.h"
+#include "classfactory.h"
 
 namespace oofem {
-  
+
+REGISTER_Element( HTSelement );
+
 HTSelement :: HTSelement(int n, Domain *aDomain) : StructuralElement(n, aDomain)
     // Constructor.
 {

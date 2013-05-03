@@ -37,6 +37,8 @@
 
 #include "lspace.h"
 
+#define _IFT_LSpaceBB_Name "lspacebb"
+
 namespace oofem {
 /**
  * Three dimensional brick with linear approximation, suitable for incompressible settings

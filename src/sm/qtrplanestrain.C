@@ -40,6 +40,7 @@
 #include "intarray.h"
 #include "crosssection.h"
 #include "gaussintegrationrule.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -48,7 +49,11 @@
  #include "rcm2.h"
 #endif
 
+
 namespace oofem {
+
+REGISTER_Element( QTrPlaneStrain );
+
 FEI2dTrQuad QTrPlaneStrain :: interpolation(1, 2);
 
 QTrPlaneStrain :: QTrPlaneStrain(int n, Domain *aDomain) :

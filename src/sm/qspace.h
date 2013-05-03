@@ -43,6 +43,8 @@
 #include "huertaerrorestimator.h"
 #include "sprnodalrecoverymodel.h"
 
+#define _IFT_QSpace_Name "qspace"
+
 namespace oofem {
 /**
  * This class implements an Quadratic 3d  20 - node element. Each node has 3 degrees of freedom.

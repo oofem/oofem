@@ -39,6 +39,8 @@
 #include "layeredcrosssection.h"
 #include "fei2dlinelin.h"
 
+#define _IFT_LIBeam2d_Name "libeam2d"
+
 namespace oofem {
 /**
  * A 2-dimensional Linear Isoparametric

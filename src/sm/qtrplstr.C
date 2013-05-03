@@ -41,6 +41,7 @@
 #include "crosssection.h"
 #include "gaussintegrationrule.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -49,6 +50,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( QTrPlaneStress2d );
+
 FEI2dTrQuad QTrPlaneStress2d :: interpolation(1, 2);
 
 QTrPlaneStress2d :: QTrPlaneStress2d(int n, Domain *aDomain) :

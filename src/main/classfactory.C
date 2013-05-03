@@ -40,9 +40,6 @@
 #endif
 #include "compiler.h"
 
-#define REGISTER_CLASS(_class, name, id)
-#include "elementclassfactory.h"
-
 #include "masterdof.h"
 #include "slavedof.h"
 #include "simpleslavedof.h"
@@ -56,6 +53,10 @@
 #include "subspaceit.h"
 #include "inverseit.h"
 #include "slepcsolver.h"
+
+#include "nodalaveragingrecoverymodel.h"
+#include "zznodalrecoverymodel.h"
+#include "sprnodalrecoverymodel.h"
 
 // mesher interfaces
 #include "t3dinterface.h"
@@ -92,11 +93,6 @@ int ClassFactory :: CaseComp :: operator()(const std::string &a, const std::stri
 ClassFactory :: ClassFactory()
 {
     printf("Classfactory created!\n");
-    // register elements
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, name, id) \
-    elemList [ name ]  = elemCreator< _class >;
-#include "elementclassfactory.h"
 
     // Fixed list for DOF types. No new components can register for these since these are part of the internal structure in OOFEM.
     dofList [ DT_master ] = dofCreator< MasterDof >;

@@ -37,6 +37,7 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -44,6 +45,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( LumpedMassElement );
+
 LumpedMassElement :: LumpedMassElement(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 // Constructor.
 {

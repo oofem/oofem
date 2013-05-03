@@ -38,8 +38,12 @@
 #include "material.h"
 #include "mathfem.h"
 #include "fei2dlinelin.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( LineSurfaceTension );
+
 FEI2dLineLin LineSurfaceTension :: interp(1, 2);
 
 LineSurfaceTension :: LineSurfaceTension(int n, Domain *aDomain) : FMElement (n, aDomain)

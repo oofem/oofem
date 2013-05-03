@@ -45,10 +45,13 @@
 #include "structuralms.h"
 #include "mathfem.h"
 #include "structuralcrosssection.h"
+#include "classfactory.h"
 
 #include <cstdio>
 
 namespace oofem {
+
+REGISTER_Element( QWedgeGrad );
 
 FEI3dWedgeLin QWedgeGrad :: interpolation;
 

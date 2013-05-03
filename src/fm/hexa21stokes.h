@@ -37,10 +37,11 @@
 
 #include "fmelement.h"
 #include "domain.h"
-
 #include "nodalaveragingrecoverymodel.h"
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
+
+#define _IFT_Hexa21Stokes_Name "hexa21stokes"
 
 namespace oofem {
 

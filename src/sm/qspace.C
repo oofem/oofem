@@ -41,8 +41,12 @@
 #include "intarray.h"
 #include "domain.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( QSpace );
+
 FEI3dHexaQuad QSpace :: interpolation;
 
 QSpace :: QSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)

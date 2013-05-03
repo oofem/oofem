@@ -48,6 +48,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( MacroLSpace );
+
 //derived from linear brick element
 MacroLSpace :: MacroLSpace(int n, Domain *aDomain) : LSpace(n, aDomain)
 {

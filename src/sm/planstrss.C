@@ -44,6 +44,7 @@
 #include "mathfem.h"
 #include "structuralms.h"
 #include "strainvector.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -53,6 +54,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( PlaneStress2d );
+
 FEI2dQuadLin PlaneStress2d :: interpolation(1, 2);
 
 PlaneStress2d :: PlaneStress2d(int n, Domain *aDomain) :

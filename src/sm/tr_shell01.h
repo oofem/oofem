@@ -41,6 +41,8 @@
 #include "cct3d.h"
 #include "trplanrot3d.h"
 
+#define _IFT_TR_SHELL01_Name "tr_shell01"
+
 namespace oofem {
 
 /**

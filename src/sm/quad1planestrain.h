@@ -44,6 +44,8 @@
 #include "huertaerrorestimator.h"
 #include "fei2dquadlin.h"
 
+#define _IFT_Quad1PlaneStrain_Name "quad1planestrain"
+
 namespace oofem {
 /// Comment or uncomment the following line to force full or reduced integration
 ///@todo Removed for now.

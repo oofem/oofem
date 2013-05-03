@@ -44,6 +44,7 @@
 #include "floatarray.h"
 #include "mathfem.h"
 #include "latticestructuralelement.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -51,6 +52,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( Lattice2d );
+
 Lattice2d :: Lattice2d(int n, Domain *aDomain) : LatticeStructuralElement(n, aDomain)
     // Constructor.
 {

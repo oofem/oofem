@@ -43,6 +43,8 @@
 #include "nodalaveragingrecoverymodel.h"
 #include "fei3dlinelin.h"
 
+#define _IFT_Truss3d_Name "truss3d"
+
 namespace oofem {
 
 /**

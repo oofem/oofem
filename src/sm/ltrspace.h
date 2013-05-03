@@ -46,6 +46,8 @@
 #include "mmashapefunctprojection.h"
 #include "huertaerrorestimator.h"
 
+#define _IFT_LTRSpace_Name "ltrspace"
+
 namespace oofem {
 
 class FEI3dTetLin;

@@ -37,11 +37,12 @@
 
 #include "fmelement.h"
 #include "domain.h"
-
 #include "zznodalrecoverymodel.h"
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
 #include "elementinternaldofman.h"
+
+#define _IFT_Tr1BubbleStokes_Name "tr1bubblestokes"
 
 namespace oofem {
 

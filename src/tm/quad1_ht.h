@@ -40,6 +40,10 @@
 #include "zznodalrecoverymodel.h"
 #include "fei2dquadlin.h"
 
+#define _IFT_Quad1_ht_Name "quad1ht"
+#define _IFT_Quad1_hmt_Name "quad1hmt"
+#define _IFT_Quad1_mt_Name "quad1mt"
+
 namespace oofem {
 /**
  * Quadratic (2d) element with linear approximation for heat transfer.

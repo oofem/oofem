@@ -39,6 +39,7 @@
 
 ///@name Input fields for Lattice2d
 //@{
+#define _IFT_Lattice2d_Name "lattice2d"
 #define _IFT_Lattice2d_thick "thick"
 #define _IFT_Lattice2d_width "width"
 #define _IFT_Lattice2d_gpcoords "gpcoords"

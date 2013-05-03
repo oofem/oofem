@@ -47,6 +47,8 @@
 #include "huertaerrorestimator.h"
 #include "fei2dtrlin.h"
 
+#define _IFT_TrPlaneStrain_Name "trplanestrain"
+
 namespace oofem {
 
 /**

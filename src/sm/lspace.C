@@ -41,6 +41,7 @@
 #include "intarray.h"
 #include "domain.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "engngm.h"
@@ -50,6 +51,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( LSpace );
+
 FEI3dHexaLin LSpace :: interpolation;
 
 LSpace :: LSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(),

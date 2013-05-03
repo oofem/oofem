@@ -48,8 +48,12 @@
 #include "engngm.h"
 #include "load.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( TrPlaneStrRot );
+
 TrPlaneStrRot :: TrPlaneStrRot(int n, Domain *aDomain) :
     TrPlaneStress2d(n, aDomain)
 {

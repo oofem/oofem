@@ -37,6 +37,8 @@
 
 #include "tr1_2d_supg.h"
 
+#define _IFT_TR1_2D_SUPG_AXI_Name "tr1supgaxi"
+
 namespace oofem {
 /**
  * Class representing 2d linear axisymmetric triangular element

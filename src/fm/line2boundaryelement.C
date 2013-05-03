@@ -36,8 +36,12 @@
 #include "node.h"
 #include "fei2dlinequad.h"
 #include "gaussintegrationrule.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( Line2BoundaryElement );
+
 FEI2dLineQuad Line2BoundaryElement :: fei(1, 2);
 
 Line2BoundaryElement :: Line2BoundaryElement(int n, Domain *aDomain) : FMElement(n, aDomain)

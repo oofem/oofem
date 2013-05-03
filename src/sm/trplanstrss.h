@@ -47,6 +47,8 @@
 #include "mmashapefunctprojection.h"
 #include "huertaerrorestimator.h"
 
+#define _IFT_TrPlaneStress2d_Name "trplanestress2d"
+
 namespace oofem {
 /**
  * This class implements an triangular three-node plane-stress

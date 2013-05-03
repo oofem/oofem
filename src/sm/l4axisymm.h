@@ -41,6 +41,8 @@
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
 
+#define _IFT_L4Axisymm_Name "l4axisymm"
+
 namespace oofem {
 
 /**

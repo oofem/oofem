@@ -41,6 +41,7 @@
 #include "mathfem.h"
 #include "structuralms.h"
 #include "fei3dtetlin.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -49,6 +50,10 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( Tetrah1_ht );
+REGISTER_Element( Tetrah1_hmt );
+
 FEI3dTetLin Tetrah1_ht :: interpolation;
 
 Tetrah1_ht :: Tetrah1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM)

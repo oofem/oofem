@@ -44,12 +44,16 @@
 #include "floatarray.h"
 #include "mathfem.h"
 #include "timestep.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( LIBeam3dNL );
+
 LIBeam3dNL :: LIBeam3dNL(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), tc(3, 3), tempTc(3, 3) //, kappa (3)
 {
     numberOfDofMans    = 2;

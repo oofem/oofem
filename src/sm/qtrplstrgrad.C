@@ -38,12 +38,16 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( QTrPlaneStressGrad );
+
 FEI2dQuadLin QTrPlaneStressGrad :: interpolation(1, 2);
 
 QTrPlaneStressGrad :: QTrPlaneStressGrad(int n, Domain *aDomain) : QTrPlaneStress2d(n, aDomain), GradDpElement()

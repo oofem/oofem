@@ -39,6 +39,7 @@
 
 ///@name Input fields for TrPlaneStrRot
 //@{
+#define _IFT_TrPlaneStrRot_Name "trplanestrrot"
 #define _IFT_TrPlaneStrRot_niprot "niprot"
 //@}
 

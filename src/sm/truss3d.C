@@ -42,12 +42,15 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( Truss3d );
 
 FEI3dLineLin Truss3d :: interp;
 

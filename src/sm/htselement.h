@@ -38,6 +38,8 @@
 #include "structuralelement.h"
 #include "gaussintegrationrule.h"
 
+#define _IFT_HTSelement_Name "htselement"
+
 namespace oofem {
 class HTSelement : public StructuralElement
 {

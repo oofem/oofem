@@ -36,6 +36,7 @@
 #include "fei2dtrlin.h"
 #include "contextioerr.h"
 #include "gaussintegrationrule.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "node.h"
@@ -45,6 +46,9 @@
 
 
 namespace oofem {
+
+REGISTER_Element( TR_SHELL01 );
+
 TR_SHELL01 :: TR_SHELL01(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 {
     plate    = new CCTPlate3d(-1, aDomain);

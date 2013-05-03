@@ -42,6 +42,7 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "engngm.h"
@@ -49,6 +50,8 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( Truss2d );
 
 Truss2d :: Truss2d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain)

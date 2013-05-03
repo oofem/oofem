@@ -43,6 +43,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "fei1dlin.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "engngm.h"
@@ -50,6 +51,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( Truss1d );
+
 FEI1dLin Truss1d :: interp(1); // Initiates the static interpolator
 
 

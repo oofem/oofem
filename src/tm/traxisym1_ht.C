@@ -36,6 +36,7 @@
 #include "gausspoint.h"
 #include "floatarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -43,6 +44,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( TrAxisym1_ht );
+
 TrAxisym1_ht :: TrAxisym1_ht(int n, Domain *aDomain) : Tr1_ht(n, aDomain)
 // Constructor.
 { }

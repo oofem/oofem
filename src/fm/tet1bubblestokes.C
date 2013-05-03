@@ -45,8 +45,11 @@
 #include "fluiddynamicmaterial.h"
 #include "fei3dtetlin.h"
 #include "masterdof.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( Tet1BubbleStokes );
 
 FEI3dTetLin Tet1BubbleStokes :: interp;
 // Set up ordering vectors (for assembling)

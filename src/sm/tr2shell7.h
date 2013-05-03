@@ -42,6 +42,8 @@
 #include "shell7base.h"
 //#include "vtkxmlexportmodule.h"
 
+#define _IFT_Tr2Shell7_Name "tr2shell7"
+
 namespace oofem {
 class FEI3dTrQuad;
 class BoundaryLoad;

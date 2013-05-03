@@ -42,6 +42,7 @@
 #include "domain.h"
 #include "engngm.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -50,6 +51,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( L4Axisymm );
+
 FEI2dQuadLin L4Axisymm :: interpolation(1, 2);
 
 L4Axisymm :: L4Axisymm(int n, Domain *aDomain) :

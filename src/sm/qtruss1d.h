@@ -39,6 +39,8 @@
 #include "nlstructuralelement.h"
 #include "gaussintegrationrule.h"
 
+#define _IFT_QTruss1d_Name "qtruss1d"
+
 namespace oofem {
 /**
  * This class implements a three-node truss bar element for one-dimensional

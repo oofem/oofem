@@ -41,12 +41,13 @@
 #include "floatmatrix.h"
 #include "fei2dtrquad.h"
 #include "fei2dtrlin.h"
-
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "leplic.h"
 #include "levelsetpcs.h"
+
+#define _IFT_TR21_2D_SUPG_Name "tr21supg"
 
 namespace oofem {
 /**

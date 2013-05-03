@@ -37,11 +37,12 @@
 
 #include "fmelement.h"
 #include "domain.h"
-
 #include "nodalaveragingrecoverymodel.h"
 #include "zznodalrecoverymodel.h"
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
+
+#define _IFT_Tr21Stokes_Name "tr21stokes"
 
 namespace oofem {
 

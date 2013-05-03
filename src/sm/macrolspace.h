@@ -43,6 +43,7 @@
 
 ///@name Input fields for MacroLspace
 //@{
+#define _IFT_MacroLSpace_Name "macrolspace"
 #define _IFT_MacroLspace_microMasterNodes "micromasternodes"
 #define _IFT_MacroLspace_microBoundaryNodes "microboundarynodes"
 #define _IFT_MacroLspace_stiffMatrxFileName "stiffmatrxfilename"

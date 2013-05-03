@@ -38,8 +38,11 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( QSpaceGrad );
 
 FEI3dHexaLin QSpaceGrad :: interpolation;
 

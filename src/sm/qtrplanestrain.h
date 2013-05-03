@@ -44,6 +44,8 @@
 #include "eleminterpmapperinterface.h"
 #include "mathfem.h"
 
+#define _IFT_QTrPlaneStrain_Name "qtrplanestrain"
+
 namespace oofem {
 /**
  * This class implements an triangular three-node  plane-

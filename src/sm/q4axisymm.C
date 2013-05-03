@@ -42,6 +42,7 @@
 #include "domain.h"
 #include "engngm.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -51,6 +52,8 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( Q4Axisymm );
 
 FEI2dQuadQuad Q4Axisymm :: interp(1, 2);
 

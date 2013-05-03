@@ -46,8 +46,12 @@
 #include "fluiddynamicmaterial.h"
 #include "fei2dtrlin.h"
 #include "fei2dtrquad.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( Tr21Stokes );
+
 // Set up interpolation coordinates
 FEI2dTrLin Tr21Stokes :: interpolation_lin(1, 2);
 FEI2dTrQuad Tr21Stokes :: interpolation_quad(1, 2);

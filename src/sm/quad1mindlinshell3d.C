@@ -46,8 +46,11 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "fei2dquadlin.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( Quad1MindlinShell3D );
 
 FEI2dQuadLin Quad1MindlinShell3D :: interp(1,2);
 IntArray Quad1MindlinShell3D :: shellOrdering(20);

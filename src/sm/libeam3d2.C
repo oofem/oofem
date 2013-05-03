@@ -45,6 +45,7 @@
 #include "timestep.h"
 #include "contextioerr.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "engngm.h"
@@ -55,6 +56,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( LIBeam3d2 );
+
 LIBeam3d2 :: LIBeam3d2(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), tc(), tempTc()
 {
     numberOfDofMans     = 2;

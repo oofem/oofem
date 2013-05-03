@@ -42,6 +42,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "fei3dtetlin.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "engngm.h"
@@ -53,6 +54,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( LTRSpace );
+
 FEI3dTetLin LTRSpace :: interpolation;
 
 LTRSpace :: LTRSpace(int n, Domain *aDomain) :

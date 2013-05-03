@@ -52,6 +52,7 @@
 #include "materialinterface.h"
 #include "contextioerr.h"
 #include "reinforcement.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -60,6 +61,8 @@
 
 namespace oofem {
 #define TRSUPG_ZERO_VOF 1.e-8
+
+REGISTER_Element( TR1_2D_SUPG );
 
 FEI2dTrLin TR1_2D_SUPG :: interp(1,2);
 

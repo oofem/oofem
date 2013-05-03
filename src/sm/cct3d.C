@@ -37,8 +37,12 @@
 #include "load.h"
 #include "structuralms.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( CCTPlate3d );
+
 CCTPlate3d :: CCTPlate3d(int n, Domain *aDomain) : CCTPlate(n, aDomain)
 {
     GtoLRotationMatrix = NULL;

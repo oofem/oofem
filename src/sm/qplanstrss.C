@@ -41,8 +41,12 @@
 #include "intarray.h"
 #include "engngm.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( QPlaneStress2d );
+
 FEI2dQuadQuad QPlaneStress2d :: interpolation(1, 2);
 
 QPlaneStress2d :: QPlaneStress2d(int n, Domain *aDomain) :

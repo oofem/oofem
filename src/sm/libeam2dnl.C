@@ -43,12 +43,16 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( LIBeam2dNL );
+
 LIBeam2dNL :: LIBeam2dNL(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), LayeredCrossSectionInterface()
 {
     numberOfDofMans     = 2;

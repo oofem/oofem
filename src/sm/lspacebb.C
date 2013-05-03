@@ -36,6 +36,7 @@
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "engngm.h"
@@ -44,6 +45,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( LSpaceBB );
+
 LSpaceBB :: LSpaceBB(int n, Domain *aDomain) : LSpace(n, aDomain)
 { }
 

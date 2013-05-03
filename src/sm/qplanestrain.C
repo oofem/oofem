@@ -39,8 +39,12 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( QPlaneStrain );
+
 FEI2dQuadQuad QPlaneStrain :: interpolation(1, 2);
 
 QPlaneStrain :: QPlaneStrain(int n, Domain *aDomain) :

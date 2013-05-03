@@ -45,8 +45,11 @@
 #include "load.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( Quad1Mindlin );
 
 FEI2dQuadLin Quad1Mindlin :: interp_lin(1, 2);
 

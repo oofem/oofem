@@ -39,6 +39,8 @@
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
 
+#define _IFT_Line2BoundaryElement_Name "line2boundary"
+
 namespace oofem {
 class FEI2dLineQuad;
 

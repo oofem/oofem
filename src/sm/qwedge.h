@@ -43,6 +43,8 @@
 #include "huertaerrorestimator.h"
 #include "sprnodalrecoverymodel.h"
 
+#define _IFT_QWedge_Name "qwedge"
+
 namespace oofem {
 
 /**

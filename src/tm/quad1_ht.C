@@ -40,6 +40,7 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -48,6 +49,11 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( Quad1_ht );
+REGISTER_Element( Quad1_hmt );
+REGISTER_Element( Quad1_mt );
+
 FEI2dQuadLin Quad1_ht :: interpolation(1, 2);
 
 Quad1_ht :: Quad1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM)

@@ -37,10 +37,11 @@
 
 #include "fmelement.h"
 #include "domain.h"
-
 #include "nodalaveragingrecoverymodel.h"
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
+
+#define _IFT_Tet21Stokes_Name "tet21stokes"
 
 namespace oofem {
 

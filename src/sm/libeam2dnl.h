@@ -38,6 +38,8 @@
 #include "nlstructuralelement.h"
 #include "layeredcrosssection.h"
 
+#define _IFT_LIBeam2dNL_Name "libeam2dNL"
+
 namespace oofem {
 /**
  * This class implements a 2-dimensional Linear Isoparametric

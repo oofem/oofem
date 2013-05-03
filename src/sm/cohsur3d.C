@@ -40,6 +40,7 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -49,6 +50,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( CohesiveSurface3d );
+
 CohesiveSurface3d :: CohesiveSurface3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
     // Constructor.
 {

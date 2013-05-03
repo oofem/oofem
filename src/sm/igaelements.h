@@ -46,7 +46,13 @@
 #include "matresponsemode.h"
 #include "mathfem.h"
 
+#define _IFT_BsplinePlaneStressElement_Name "bsplineplanestresselement"
+#define _IFT_NURBSPlaneStressElement_Name "nurbsplanestresselement"
+#define _IFT_TSplinePlaneStressElement_Name "tsplineplanestresselement"
+#define _IFT_NURBSSpace3dElement_Name "nurbs3delement"
+
 namespace oofem {
+
 class BsplinePlaneStressElement : public IGAElement, public PlaneStressStructuralElementEvaluator
 {
 protected:

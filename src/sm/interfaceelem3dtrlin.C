@@ -42,6 +42,7 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -50,6 +51,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( InterfaceElement3dTrLin );
+
 FEI2dTrLin InterfaceElement3dTrLin :: interpolation(1, 2);
 
 InterfaceElement3dTrLin :: InterfaceElement3dTrLin(int n, Domain *aDomain) :

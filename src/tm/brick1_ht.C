@@ -41,6 +41,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "load.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -49,6 +50,11 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( Brick1_ht );
+REGISTER_Element( Brick1_hmt );
+REGISTER_Element( Brick1_mt );
+
 FEI3dHexaLin Brick1_ht :: interpolation;
 
 Brick1_ht :: Brick1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(), ZZNodalRecoveryModelInterface(), SPRNodalRecoveryModelInterface()

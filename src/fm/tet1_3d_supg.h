@@ -36,9 +36,10 @@
 #define tet1_3d_supg_h
 
 #include "supgelement2.h"
-
 #include "levelsetpcs.h"
 #include "fei3dtetlin.h"
+
+#define _IFT_Tet1_3D_SUPG_Name "tet1supg"
 
 namespace oofem {
 

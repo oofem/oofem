@@ -41,6 +41,7 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -48,6 +49,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( TrPlaneStrain );
+
 FEI2dTrLin TrPlaneStrain :: interp(1, 2);
 
 TrPlaneStrain :: TrPlaneStrain(int n, Domain *aDomain) :

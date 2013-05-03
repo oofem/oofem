@@ -40,6 +40,7 @@
 
 ///@name Input fields for Q4Axisymm
 //@{
+#define _IFT_Q4Axisymm_Name "q4axisymm"
 #define _IFT_Q4Axisymm_nipfish "nipfish"
 //@}
 

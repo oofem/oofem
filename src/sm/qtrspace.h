@@ -42,6 +42,8 @@
 #include "huertaerrorestimator.h"
 #include "sprnodalrecoverymodel.h"
 
+#define _IFT_QTRSpace_Name "qtrspace"
+
 namespace oofem {
 
 class FEI3dTetQuad;

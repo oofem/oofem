@@ -45,6 +45,7 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "iga.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -52,6 +53,12 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( BsplinePlaneStressElement );
+REGISTER_Element( NURBSPlaneStressElement );
+REGISTER_Element( TSplinePlaneStressElement );
+REGISTER_Element( NURBSSpace3dElement );
+
 
 BsplinePlaneStressElement :: BsplinePlaneStressElement(int n, Domain *aDomain) : IGAElement(n, aDomain), PlaneStressStructuralElementEvaluator(), interpolation(2) { }
 

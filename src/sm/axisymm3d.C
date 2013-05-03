@@ -42,13 +42,18 @@
 #include "domain.h"
 #include "engngm.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "connectivitytable.h"
 #endif
 
+
 namespace oofem {
+
+REGISTER_Element( Axisymm3d );
+
 FEI2dTrLin Axisymm3d :: interpolation(1, 2);
 
 Axisymm3d :: Axisymm3d(int n, Domain *aDomain) :

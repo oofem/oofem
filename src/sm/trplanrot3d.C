@@ -39,8 +39,12 @@
 #include "load.h"
 #include "structuralms.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( TrPlaneStrRot3d );
+
 TrPlaneStrRot3d :: TrPlaneStrRot3d(int n, Domain *aDomain) : TrPlaneStrRot(n, aDomain)
 {
     GtoLRotationMatrix = NULL;

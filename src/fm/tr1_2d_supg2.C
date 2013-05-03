@@ -52,6 +52,7 @@
 #include "fei2dquadlin.h"
 #include "geotoolbox.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -61,6 +62,7 @@
 namespace oofem {
 #define TRSUPG_ZERO_VOF 1.e-8
 
+REGISTER_Element( TR1_2D_SUPG2 );
 
 //#define TR1_2D_SUPG2_DEBUG
 

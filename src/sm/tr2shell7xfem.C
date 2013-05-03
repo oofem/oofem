@@ -43,9 +43,13 @@
 #include "gausspoint.h"
 #include "fei3dtrquad.h"
 #include "boundaryload.h"
+#include "classfactory.h"
 
 
 namespace oofem {
+
+REGISTER_Element( Tr2Shell7XFEM );
+
 FEI3dTrQuad Tr2Shell7XFEM :: interpolation;
 
 IntArray Tr2Shell7XFEM :: ordering_phibar(18);

@@ -39,12 +39,15 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( QTruss1dGrad );
 
 FEI1dLin QTruss1dGrad :: interpolation(1);
 

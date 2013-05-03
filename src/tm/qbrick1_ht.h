@@ -43,6 +43,9 @@
 #include "eleminterpmapperinterface.h"
 #include "fei3dhexaquad.h"
 
+#define _IFT_QBrick1_ht_Name "qbrick1ht"
+#define _IFT_QBrick1_hmt_Name "qbrick1hmt"
+
 namespace oofem {
 /**
  * Brick (3d) elements with quadratic approximation for heat and mass transfer. Each node has 1 (heat) or 2 (heat+moisture) degrees of freedom.

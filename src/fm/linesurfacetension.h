@@ -40,6 +40,8 @@
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
 
+#define _IFT_LineSurfaceTension_Name "linesurfacetension"
+
 namespace oofem {
 class FEI2dLineLin;
 

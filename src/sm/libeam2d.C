@@ -42,8 +42,12 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( LIBeam2d );
+
 // Set up interpolation coordinates
 FEI2dLineLin LIBeam2d :: interpolation(1, 3);
 

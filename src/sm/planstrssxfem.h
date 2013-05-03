@@ -38,7 +38,11 @@
 #include "planstrss.h"
 #include "xfemelementinterface.h"
 #include "vtkxmlexportmodule.h"
+
+#define _IFT_PlaneStress2dXfem_Name "planestress2dxfem"
+
 namespace oofem {
+
 /**
  * Temporary class for testing
  * in the usual case instead of PlaneStress2dXfem
