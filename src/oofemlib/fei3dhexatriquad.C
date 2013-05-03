@@ -51,43 +51,42 @@ FEI3dHexaTriQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const F
 
     answer.resize(27);
 
-    answer.at( 1) = a[0] * b[0] * c[0];
-    answer.at( 5) = a[1] * b[0] * c[0];
-    answer.at(17) = a[2] * b[0] * c[0];
+    answer.at( 5) = a[0] * b[0] * c[0];
+    answer.at( 8) = a[1] * b[0] * c[0];
+    answer.at(16) = a[2] * b[0] * c[0];
 
-    answer.at( 2) = a[0] * b[1] * c[0];
-    answer.at( 6) = a[1] * b[1] * c[0];
-    answer.at(18) = a[2] * b[1] * c[0];
+    answer.at( 6) = a[0] * b[1] * c[0];
+    answer.at( 7) = a[1] * b[1] * c[0];
+    answer.at(14) = a[2] * b[1] * c[0];
 
-    answer.at( 9) = a[0] * b[2] * c[0];
-    answer.at(13) = a[1] * b[2] * c[0];
-    answer.at(23) = a[2] * b[2] * c[0];
+    answer.at(13) = a[0] * b[2] * c[0];
+    answer.at(15) = a[1] * b[2] * c[0];
+    answer.at(22) = a[2] * b[2] * c[0];
 
-    answer.at( 4) = a[0] * b[0] * c[1];
-    answer.at( 8) = a[1] * b[0] * c[1];
-    answer.at(20) = a[2] * b[0] * c[1];
+    answer.at( 1) = a[0] * b[0] * c[1];
+    answer.at( 4) = a[1] * b[0] * c[1];
+    answer.at(12) = a[2] * b[0] * c[1];
 
-    answer.at( 3) = a[0] * b[1] * c[1];
-    answer.at( 7) = a[1] * b[1] * c[1];
-    answer.at(19) = a[2] * b[1] * c[1];
+    answer.at( 2) = a[0] * b[1] * c[1];
+    answer.at( 3) = a[1] * b[1] * c[1];
+    answer.at(10) = a[2] * b[1] * c[1];
 
-    answer.at(11) = a[0] * b[2] * c[1];
-    answer.at(15) = a[1] * b[2] * c[1];
-    answer.at(25) = a[2] * b[2] * c[1];
+    answer.at( 9) = a[0] * b[2] * c[1];
+    answer.at(11) = a[1] * b[2] * c[1];
+    answer.at(21) = a[2] * b[2] * c[1];
 
-    answer.at(12) = a[0] * b[0] * c[2];
-    answer.at(16) = a[1] * b[0] * c[2];
+    answer.at(17) = a[0] * b[0] * c[2];
+    answer.at(20) = a[1] * b[0] * c[2];
     answer.at(26) = a[2] * b[0] * c[2];
 
-    answer.at(10) = a[0] * b[1] * c[2];
-    answer.at(14) = a[1] * b[1] * c[2];
+    answer.at(18) = a[0] * b[1] * c[2];
+    answer.at(19) = a[1] * b[1] * c[2];
     answer.at(24) = a[2] * b[1] * c[2];
 
-    answer.at(21) = a[0] * b[2] * c[2];
-    answer.at(22) = a[1] * b[2] * c[2];
+    answer.at(23) = a[0] * b[2] * c[2];
+    answer.at(25) = a[1] * b[2] * c[2];
     answer.at(27) = a[2] * b[2] * c[2];
 }
-
 
 
 void
@@ -206,118 +205,119 @@ FEI3dHexaTriQuad :: giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoor
 
     dN.resize(27, 3);
 
-    dN.at( 1, 1) = da[0] * b[0] * c[0];
-    dN.at( 5, 1) = da[1] * b[0] * c[0];
-    dN.at(17, 1) = da[2] * b[0] * c[0];
+    dN.at( 5, 1) = da[0] * b[0] * c[0];
+    dN.at( 8, 1) = da[1] * b[0] * c[0];
+    dN.at(16, 1) = da[2] * b[0] * c[0];
 
-    dN.at( 2, 1) = da[0] * b[1] * c[0];
-    dN.at( 6, 1) = da[1] * b[1] * c[0];
-    dN.at(18, 1) = da[2] * b[1] * c[0];
+    dN.at( 6, 1) = da[0] * b[1] * c[0];
+    dN.at( 7, 1) = da[1] * b[1] * c[0];
+    dN.at(14, 1) = da[2] * b[1] * c[0];
 
-    dN.at( 9, 1) = da[0] * b[2] * c[0];
-    dN.at(13, 1) = da[1] * b[2] * c[0];
-    dN.at(23, 1) = da[2] * b[2] * c[0];
+    dN.at(13, 1) = da[0] * b[2] * c[0];
+    dN.at(15, 1) = da[1] * b[2] * c[0];
+    dN.at(22, 1) = da[2] * b[2] * c[0];
 
-    dN.at( 4, 1) = da[0] * b[0] * c[1];
-    dN.at( 8, 1) = da[1] * b[0] * c[1];
-    dN.at(20, 1) = da[2] * b[0] * c[1];
+    dN.at( 1, 1) = da[0] * b[0] * c[1];
+    dN.at( 4, 1) = da[1] * b[0] * c[1];
+    dN.at(12, 1) = da[2] * b[0] * c[1];
 
-    dN.at( 3, 1) = da[0] * b[1] * c[1];
-    dN.at( 7, 1) = da[1] * b[1] * c[1];
-    dN.at(19, 1) = da[2] * b[1] * c[1];
+    dN.at( 2, 1) = da[0] * b[1] * c[1];
+    dN.at( 3, 1) = da[1] * b[1] * c[1];
+    dN.at(10, 1) = da[2] * b[1] * c[1];
 
-    dN.at(11, 1) = da[0] * b[2] * c[1];
-    dN.at(15, 1) = da[1] * b[2] * c[1];
-    dN.at(25, 1) = da[2] * b[2] * c[1];
+    dN.at( 9, 1) = da[0] * b[2] * c[1];
+    dN.at(11, 1) = da[1] * b[2] * c[1];
+    dN.at(21, 1) = da[2] * b[2] * c[1];
 
-    dN.at(12, 1) = da[0] * b[0] * c[2];
-    dN.at(16, 1) = da[1] * b[0] * c[2];
+    dN.at(17, 1) = da[0] * b[0] * c[2];
+    dN.at(20, 1) = da[1] * b[0] * c[2];
     dN.at(26, 1) = da[2] * b[0] * c[2];
 
-    dN.at(10, 1) = da[0] * b[1] * c[2];
-    dN.at(14, 1) = da[1] * b[1] * c[2];
+    dN.at(18, 1) = da[0] * b[1] * c[2];
+    dN.at(19, 1) = da[1] * b[1] * c[2];
     dN.at(24, 1) = da[2] * b[1] * c[2];
 
-    dN.at(21, 1) = da[0] * b[2] * c[2];
-    dN.at(22, 1) = da[1] * b[2] * c[2];
+    dN.at(23, 1) = da[0] * b[2] * c[2];
+    dN.at(25, 1) = da[1] * b[2] * c[2];
     dN.at(27, 1) = da[2] * b[2] * c[2];
 
     //
 
-    dN.at( 1, 2) = a[0] * db[0] * c[0];
-    dN.at( 5, 2) = a[1] * db[0] * c[0];
-    dN.at(17, 2) = a[2] * db[0] * c[0];
+    dN.at( 5, 2) = a[0] * db[0] * c[0];
+    dN.at( 8, 2) = a[1] * db[0] * c[0];
+    dN.at(16, 2) = a[2] * db[0] * c[0];
 
-    dN.at( 2, 2) = a[0] * db[1] * c[0];
-    dN.at( 6, 2) = a[1] * db[1] * c[0];
-    dN.at(18, 2) = a[2] * db[1] * c[0];
+    dN.at( 6, 2) = a[0] * db[1] * c[0];
+    dN.at( 7, 2) = a[1] * db[1] * c[0];
+    dN.at(14, 2) = a[2] * db[1] * c[0];
 
-    dN.at( 9, 2) = a[0] * db[2] * c[0];
-    dN.at(13, 2) = a[1] * db[2] * c[0];
-    dN.at(23, 2) = a[2] * db[2] * c[0];
+    dN.at(13, 2) = a[0] * db[2] * c[0];
+    dN.at(15, 2) = a[1] * db[2] * c[0];
+    dN.at(22, 2) = a[2] * db[2] * c[0];
 
-    dN.at( 4, 2) = a[0] * db[0] * c[1];
-    dN.at( 8, 2) = a[1] * db[0] * c[1];
-    dN.at(20, 2) = a[2] * db[0] * c[1];
+    dN.at( 1, 2) = a[0] * db[0] * c[1];
+    dN.at( 4, 2) = a[1] * db[0] * c[1];
+    dN.at(12, 2) = a[2] * db[0] * c[1];
 
-    dN.at( 3, 2) = a[0] * db[1] * c[1];
-    dN.at( 7, 2) = a[1] * db[1] * c[1];
-    dN.at(19, 2) = a[2] * db[1] * c[1];
+    dN.at( 2, 2) = a[0] * db[1] * c[1];
+    dN.at( 3, 2) = a[1] * db[1] * c[1];
+    dN.at(10, 2) = a[2] * db[1] * c[1];
 
-    dN.at(11, 2) = a[0] * db[2] * c[1];
-    dN.at(15, 2) = a[1] * db[2] * c[1];
-    dN.at(25, 2) = a[2] * db[2] * c[1];
+    dN.at( 9, 2) = a[0] * db[2] * c[1];
+    dN.at(11, 2) = a[1] * db[2] * c[1];
+    dN.at(21, 2) = a[2] * db[2] * c[1];
 
-    dN.at(12, 2) = a[0] * db[0] * c[2];
-    dN.at(16, 2) = a[1] * db[0] * c[2];
+    dN.at(17, 2) = a[0] * db[0] * c[2];
+    dN.at(20, 2) = a[1] * db[0] * c[2];
     dN.at(26, 2) = a[2] * db[0] * c[2];
 
-    dN.at(10, 2) = a[0] * db[1] * c[2];
-    dN.at(14, 2) = a[1] * db[1] * c[2];
+    dN.at(18, 2) = a[0] * db[1] * c[2];
+    dN.at(19, 2) = a[1] * db[1] * c[2];
     dN.at(24, 2) = a[2] * db[1] * c[2];
 
-    dN.at(21, 2) = a[0] * db[2] * c[2];
-    dN.at(22, 2) = a[1] * db[2] * c[2];
+    dN.at(23, 2) = a[0] * db[2] * c[2];
+    dN.at(25, 2) = a[1] * db[2] * c[2];
     dN.at(27, 2) = a[2] * db[2] * c[2];
 
     //
 
-    dN.at( 1, 3) = a[0] * b[0] * dc[0];
-    dN.at( 5, 3) = a[1] * b[0] * dc[0];
-    dN.at(17, 3) = a[2] * b[0] * dc[0];
+    dN.at( 5, 3) = a[0] * b[0] * dc[0];
+    dN.at( 8, 3) = a[1] * b[0] * dc[0];
+    dN.at(16, 3) = a[2] * b[0] * dc[0];
 
-    dN.at( 2, 3) = a[0] * b[1] * dc[0];
-    dN.at( 6, 3) = a[1] * b[1] * dc[0];
-    dN.at(18, 3) = a[2] * b[1] * dc[0];
+    dN.at( 6, 3) = a[0] * b[1] * dc[0];
+    dN.at( 7, 3) = a[1] * b[1] * dc[0];
+    dN.at(14, 3) = a[2] * b[1] * dc[0];
 
-    dN.at( 9, 3) = a[0] * b[2] * dc[0];
-    dN.at(13, 3) = a[1] * b[2] * dc[0];
-    dN.at(23, 3) = a[2] * b[2] * dc[0];
+    dN.at(13, 3) = a[0] * b[2] * dc[0];
+    dN.at(15, 3) = a[1] * b[2] * dc[0];
+    dN.at(22, 3) = a[2] * b[2] * dc[0];
 
-    dN.at( 4, 3) = a[0] * b[0] * dc[1];
-    dN.at( 8, 3) = a[1] * b[0] * dc[1];
-    dN.at(20, 3) = a[2] * b[0] * dc[1];
+    dN.at( 1, 3) = a[0] * b[0] * dc[1];
+    dN.at( 4, 3) = a[1] * b[0] * dc[1];
+    dN.at(12, 3) = a[2] * b[0] * dc[1];
 
-    dN.at( 3, 3) = a[0] * b[1] * dc[1];
-    dN.at( 7, 3) = a[1] * b[1] * dc[1];
-    dN.at(19, 3) = a[2] * b[1] * dc[1];
+    dN.at( 2, 3) = a[0] * b[1] * dc[1];
+    dN.at( 3, 3) = a[1] * b[1] * dc[1];
+    dN.at(10, 3) = a[2] * b[1] * dc[1];
 
-    dN.at(11, 3) = a[0] * b[2] * dc[1];
-    dN.at(15, 3) = a[1] * b[2] * dc[1];
-    dN.at(25, 3) = a[2] * b[2] * dc[1];
+    dN.at( 9, 3) = a[0] * b[2] * dc[1];
+    dN.at(11, 3) = a[1] * b[2] * dc[1];
+    dN.at(21, 3) = a[2] * b[2] * dc[1];
 
-    dN.at(12, 3) = a[0] * b[0] * dc[2];
-    dN.at(16, 3) = a[1] * b[0] * dc[2];
+    dN.at(17, 3) = a[0] * b[0] * dc[2];
+    dN.at(20, 3) = a[1] * b[0] * dc[2];
     dN.at(26, 3) = a[2] * b[0] * dc[2];
 
-    dN.at(10, 3) = a[0] * b[1] * dc[2];
-    dN.at(14, 3) = a[1] * b[1] * dc[2];
+    dN.at(18, 3) = a[0] * b[1] * dc[2];
+    dN.at(19, 3) = a[1] * b[1] * dc[2];
     dN.at(24, 3) = a[2] * b[1] * dc[2];
 
-    dN.at(21, 3) = a[0] * b[2] * dc[2];
-    dN.at(22, 3) = a[1] * b[2] * dc[2];
+    dN.at(23, 3) = a[0] * b[2] * dc[2];
+    dN.at(25, 3) = a[1] * b[2] * dc[2];
     dN.at(27, 3) = a[2] * b[2] * dc[2];
 }
+
 
 double
 FEI3dHexaTriQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
