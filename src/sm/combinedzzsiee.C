@@ -37,12 +37,17 @@
 #include "element.h"
 #include "connectivitytable.h"
 #include "mathfem.h"
+#include "errorestimatortype.h"
+#include "classfactory.h"
 
 namespace oofem {
 #define CZZSI_ZERO_INDICATOR_TOL 1.e-3
 
+REGISTER_ErrorEstimator(CombinedZZSIErrorEstimator, EET_CZZSI);
+
 void
-CombinedZZSIErrorEstimator :: setDomain(Domain *d) {
+CombinedZZSIErrorEstimator :: setDomain(Domain *d)
+{
     FEMComponent :: setDomain(d);
     zzee.setDomain(d);
     siee.setDomain(d);

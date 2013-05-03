@@ -59,12 +59,17 @@
 #include "oofem_limits.h"
 #include "calmls.h"
 #include "nrsolver.h"
+#include "errorestimatortype.h"
+#include "classfactory.h"
 
 #include <vector>
 #include <string>
 
 
 namespace oofem {
+
+REGISTER_ErrorEstimator(HuertaErrorEstimator, EET_HEE);
+
 //#define STIFFNESS_TYPE       TangentStiffnessMatrix
 #define STIFFNESS_TYPE       ElasticStiffnessMatrix
 //#define STIFFNESS_TYPE       SecantStiffnessMatrix

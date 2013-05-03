@@ -34,8 +34,12 @@
 
 #ifndef __SPOOLES_MODULE
  #include "spoolessolver.h"
+ #include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_SparseLinSolver(SpoolesSolver, ST_Spooles)
+
 SpoolesSolver :: SpoolesSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
 {
     OOFEM_ERROR("SpoolesSolver: can't create, SPOOLES support not compiled");

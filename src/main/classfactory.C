@@ -73,12 +73,6 @@
  #include "parmetisloadbalancer.h"
 #endif
 
-#undef  REGISTER_CLASS
-#define REGISTER_CLASS(_class, id)
-#include "sparsemtrxclassfactory.h"
-#include "sparselinearsystemsolverclassfactory.h"
-#include "errorestimatorclassfactory.h"
-
 namespace oofem {
 
 ClassFactory &GiveClassFactory()
@@ -103,21 +97,6 @@ ClassFactory :: ClassFactory()
 #define REGISTER_CLASS(_class, name, id) \
     elemList [ name ]  = elemCreator< _class >;
 #include "elementclassfactory.h"
-
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, id) \
-    sparseMtrxList [ id ] = sparseMtrxCreator< _class >;
-#include "sparsemtrxclassfactory.h"
-
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, id) \
-    errEstList [ id ] = errEstCreator< _class >;
-#include "errorestimatorclassfactory.h"
-
-#undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, id) \
-    sparseLinSolList [ id ] = sparseLinSolCreator< _class >;
-#include "sparselinearsystemsolverclassfactory.h"
 
     // Fixed list for DOF types. No new components can register for these since these are part of the internal structure in OOFEM.
     dofList [ DT_master ] = dofCreator< MasterDof >;

@@ -33,8 +33,12 @@
  */
 #ifndef __IML_MODULE
  #include "imlsolver.h"
+ #include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_SparseLinSolver(IMLSolver, ST_IML)
+
 IMLSolver :: IMLSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
 {
     OOFEM_ERROR("IMLSolver: can't create, IML support not compiled");

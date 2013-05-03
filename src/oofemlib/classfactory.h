@@ -136,7 +136,7 @@ template< typename T > BasicGeometry *geometryCreator() { return new T(); }
 #define REGISTER_LoadBalancer(class) static bool __dummy_##class = GiveClassFactory().registerLoadBalancer(_IFT_##class##_Name, loadBalancerCreator< class >);
 
 // These should be converted to use strings.
-#define REGISTER_SparseMtrx(class, type) static bool __dummy_##class = GiveClassFactory().registerSparseMatrix(type, sparseMtrxCreator< class >);
+#define REGISTER_SparseMtrx(class, type) static bool __dummy_##class = GiveClassFactory().registerSparseMtrx(type, sparseMtrxCreator< class >);
 #define REGISTER_SparseLinSolver(class, type) static bool __dummy_##class = GiveClassFactory().registerSparseLinSolver(type, sparseLinSolCreator< class >);
 #define REGISTER_ErrorEstimator(class, type) static bool __dummy_##class = GiveClassFactory().registerErrorEstimator(type, errEstCreator< class >);
 

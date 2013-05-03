@@ -41,11 +41,18 @@
  #include "domain.h"
  #include "element.h"
  #include "dofmanager.h"
+ #include "sparsemtrxtype.h"
+ #include "classfactory.h"
  #include "DSSolver.h"
 
  #include <set>
 
 namespace oofem {
+
+REGISTER_SparseMtrx( DSSMatrixLDL, SMT_DSS_sym_LDL);
+REGISTER_SparseMtrx( DSSMatrixLL, SMT_DSS_sym_LL);
+REGISTER_SparseMtrx( DSSMatrixLU, SMT_DSS_unsym_LU);
+
 DSSMatrix :: DSSMatrix(dssType _t) : SparseMtrx()
 {
     eDSSolverType _st = eDSSFactorizationLDLT;

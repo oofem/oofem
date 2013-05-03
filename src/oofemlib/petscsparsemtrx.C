@@ -38,6 +38,8 @@
 #include "engngm.h"
 #include "activebc.h"
 #include "element.h"
+#include "sparsemtrxtype.h"
+#include "classfactory.h"
 
 #include <set>
 #include <vector>
@@ -45,6 +47,9 @@
 #include <petscvec.h>
 
 namespace oofem {
+
+REGISTER_SparseMtrx( PetscSparseMtrx, SMT_PetscMtrx);
+
 SparseMtrx *
 PetscSparseMtrx :: GiveCopy() const
 {

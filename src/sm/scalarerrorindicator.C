@@ -37,8 +37,13 @@
 #include "element.h"
 #include "integrationrule.h"
 #include "mathfem.h"
+#include "errorestimatortype.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_ErrorEstimator(ScalarErrorIndicator, EET_SEI);
+
 int
 ScalarErrorIndicator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
 {

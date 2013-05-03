@@ -40,6 +40,8 @@
 #include "element.h"
 #include "mathfem.h"
 #include "verbose.h"
+#include "sparsemtrxtype.h"
+#include "classfactory.h"
 
 #include <climits>
 #include <cstdlib>
@@ -49,6 +51,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_SparseMtrx( Skyline, SMT_Skyline);
+
 Skyline :: Skyline(int n) : SparseMtrx(n, n)
 {
     // constructor

@@ -42,12 +42,17 @@
 #include "mathfem.h"
 #include "verbose.h"
 #include "element.h"
+#include "sparsemtrxtype.h"
+#include "classfactory.h"
 
 #ifdef TIME_REPORT
  #include "timer.h"
 #endif
 
 namespace oofem {
+
+REGISTER_SparseMtrx( DynCompRow, SMT_DynCompRow);
+
 DynCompRow :: DynCompRow(void) : SparseMtrx(), base_(0)
 {
     rows_ = NULL;

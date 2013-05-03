@@ -33,8 +33,12 @@
  */
 
 #include "ldltfact.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_SparseLinSolver(LDLTFactorization, ST_Direct)
+    
 LDLTFactorization :: LDLTFactorization(Domain *d, EngngModel *m) :
     SparseLinearSystemNM(d, m)
 {

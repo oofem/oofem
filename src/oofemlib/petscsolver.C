@@ -41,10 +41,14 @@
  #include "verbose.h"
  #include "timer.h"
  #include "error.h"
+ #include "classfactory.h"
 
  #include <petscksp.h>
 
 namespace oofem {
+
+REGISTER_SparseLinSolver(PetscSolver, ST_Petsc);
+
 PetscSolver :: PetscSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m) { }
 
 PetscSolver :: ~PetscSolver() { }

@@ -74,10 +74,15 @@
 #include "engngm.h"
 #include "domain.h"
 #include "element.h"
+#include "sparsemtrxtype.h"
+#include "classfactory.h"
 
 #include <set>
 
 namespace oofem {
+
+REGISTER_SparseMtrx( CompCol, SMT_CompCol);
+
 CompCol :: CompCol(void) : SparseMtrx(), val_(0), rowind_(0), colptr_(0), base_(0), nz_(0)
 {
     dim_ [ 0 ] = 0;

@@ -74,10 +74,15 @@
 #include "engngm.h"
 #include "domain.h"
 #include "element.h"
+#include "sparsemtrxtype.h"
+#include "classfactory.h"
 
 #include <set>
 
 namespace oofem {
+
+REGISTER_SparseMtrx( SymCompCol, SMT_SymCompCol);
+
 SymCompCol :: SymCompCol(void) : CompCol()
 { }
 

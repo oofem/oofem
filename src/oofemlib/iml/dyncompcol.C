@@ -40,8 +40,13 @@
 #include "domain.h"
 #include "mathfem.h"
 #include "element.h"
+#include "sparsemtrxtype.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_SparseMtrx( DynCompCol, SMT_DynCompCol);
+
 DynCompCol :: DynCompCol(void) : SparseMtrx(), base_(0)
 {
 #ifndef DynCompCol_USE_STL_SETS

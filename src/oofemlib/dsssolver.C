@@ -33,6 +33,7 @@
  */
 
 #include "dsssolver.h"
+#include "classfactory.h"
 
 #ifdef __DSS_MODULE
 
@@ -40,6 +41,9 @@
  #include "timer.h"
 
 namespace oofem {
+
+REGISTER_SparseLinSolver(DSSSolver, ST_DSS);
+
 DSSSolver :: DSSSolver(Domain *d, EngngModel *m) :
     SparseLinearSystemNM(d, m) { }
 

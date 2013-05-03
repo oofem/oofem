@@ -42,12 +42,17 @@
 #include "mathfem.h"
 #include "verbose.h"
 #include "error.h"
+#include "sparsemtrxtype.h"
+#include "classfactory.h"
 
 #ifdef TIME_REPORT
  #include "timer.h"
 #endif
 
 namespace oofem {
+
+REGISTER_SparseMtrx( SkylineUnsym, SMT_SkylineU);
+
 SkylineUnsym :: SkylineUnsym(int n) : SparseMtrx(n, n)
     // Constructor. Creates an empty skyline unsymmetric.
 

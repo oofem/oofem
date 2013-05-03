@@ -37,8 +37,13 @@
 #include "spoolessparsemtrx.h"
 #include "engngm.h"
 #include "spoolesinterface.h"
+#include "sparsemtrxtype.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_SparseMtrx( SpoolesSparseMtrx, SMT_SpoolesMtrx);
+
 SparseMtrx *
 SpoolesSparseMtrx :: GiveCopy() const
 {

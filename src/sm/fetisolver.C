@@ -42,8 +42,12 @@
 #include "dofmanager.h"
 #include "engngm.h"
 #include "feticommunicator.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_SparseLinSolver(FETISolver, ST_Feti);
+
 FETISolver :: FETISolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m), pcbuff(CBT_static), processCommunicator(& pcbuff, 0)
 {
     err    = 1.e-6;

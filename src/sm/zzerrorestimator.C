@@ -48,10 +48,15 @@
 #include "integrationrule.h"
 #include "feinterpol.h"
 #include "connectivitytable.h"
+#include "errorestimatortype.h"
+#include "classfactory.h"
 
 #include <vector>
 
 namespace oofem {
+
+REGISTER_ErrorEstimator(ZZErrorEstimator, EET_ZZEE);
+
 #ifdef EXPERIMENT
 FloatArray sNorms;
 #endif
