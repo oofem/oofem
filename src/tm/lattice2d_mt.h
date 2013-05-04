@@ -40,6 +40,7 @@
 
 ///@name Input fields for Lattice2d_mt
 //@{
+#define _IFT_Lattice2d_mt_Name "latticemt2d"
 #define _IFT_Lattice2DMT_dim "dim"
 #define _IFT_Lattice2DMT_thick "thick"
 #define _IFT_Lattice2DMT_width "width"

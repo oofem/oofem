@@ -39,11 +39,15 @@
 #include "math.h"
 #include "nlinearstatic.h"
 #include "latticestructuralelement.h"
+#include "classfactory.h"
 
 #ifndef __MAKEDEPEND
  #include <stdlib.h>
 #endif
 namespace oofem {
+
+REGISTER_Material( LatticeTransportMaterial );
+
 IRResultType
 LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
 {

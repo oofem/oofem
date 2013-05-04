@@ -43,6 +43,7 @@
 
 ///@name Input fields for Lattice2d_mt
 //@{
+#define _IFT_LatticeTransportMaterial_Name "latticetransmat"
 #define _IFT_LatticeTransportMaterial_vis "vis"
 #define _IFT_LatticeTransportMaterial_k "k"
 #define _IFT_LatticeTransportMaterial_thetas "thetas"
