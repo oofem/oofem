@@ -54,6 +54,8 @@ namespace oofem {
 class Domain;
 class Element;
 class TimeStep;
+class ProblemCommunicator;
+class ProcessCommunicator;
 
 /**
  * The corresponding element interface to DirectErrorIndicatorRC class.

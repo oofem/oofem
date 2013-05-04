@@ -191,8 +191,8 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 
     // update element stabilization
     Domain* d = this->giveDomain(1);
-    int i, nelem = d->giveNumberOfElements();
-    for ( i = 1; i <= nelem; ++i ) {
+    int nelem = d->giveNumberOfElements();
+    for ( int i = 1; i <= nelem; ++i ) {
         static_cast< FMElement* >( d->giveElement(i) )->updateStabilizationCoeffs(tStep);
     }
 }

@@ -46,6 +46,7 @@
 #include <set>
 
 #ifdef __PARALLEL_MODE
+ #include "problemcomm.h"
  #include "communicator.h"
 #endif
 

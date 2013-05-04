@@ -39,6 +39,7 @@
 #include "element.h"
 #include "connectivitytable.h"
 #include "mathfem.h"
+#include "remeshingcrit.h"
 
 #include <list>
 

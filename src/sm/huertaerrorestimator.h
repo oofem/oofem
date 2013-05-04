@@ -42,6 +42,7 @@
 #include "alist.h"
 #include "floatarray.h"
 #include "statecountertype.h"
+#include "remeshingcrit.h"
 
 ///@name Input fields for HuertaErrorEstimator
 //@{

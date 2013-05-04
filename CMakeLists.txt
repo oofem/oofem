@@ -399,7 +399,6 @@ if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
     # This won't work on windows, but windows users should have newer version than 2.8.7)
     set (LIB_TYPE SHARED)
 else ()
-    # Classfactory doesn't belong in main;
     set (LIB_TYPE OBJECT)
 endif ()
 add_subdirectory ("${oofem_SOURCE_DIR}/src/oofemlib")

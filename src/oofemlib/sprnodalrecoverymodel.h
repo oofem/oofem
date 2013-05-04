@@ -41,6 +41,7 @@
 namespace oofem {
 class GaussPoint;
 class SPRNodalRecoveryModelInterface;
+class ProcessCommunicator;
 
 enum SPRPatchType {
     SPRPatchType_2dxy,

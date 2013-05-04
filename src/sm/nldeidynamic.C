@@ -47,6 +47,7 @@
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
+ #include "processcomm.h"
 #endif
 
 namespace oofem {

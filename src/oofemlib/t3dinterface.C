@@ -38,6 +38,7 @@
 #include "node.h"
 #include "element.h"
 #include "engngm.h"
+#include "remeshingcrit.h"
 
 namespace oofem {
 MesherInterface :: returnCode

@@ -96,7 +96,7 @@ public:
     CemhydMat(int n, Domain *d);
     /// Destructor
     virtual ~CemhydMat();
-    /// Returns input record name of the receiver.
+    /// Returns input record name of the receiver. 
     virtual const char *giveClassName() const { return "CemhydMat"; }
     virtual classType giveClassID() const { return CemhydMatClass; }
 
@@ -174,9 +174,7 @@ public:
     virtual classType giveClassID() const { return CemhydMatStatusClass; }
     virtual void updateYourself(TimeStep *atTime);
     virtual void printOutputAt(FILE *file, TimeStep *atTime);
-#endif
-
-#ifdef CEMPY
+#elif CEMPY
 class CemhydMatStatus
 {
 public:
@@ -474,8 +472,7 @@ void QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int pos
 void QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, const char *key, double &val);
 void QueryStringAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, char *chars);
 int countKey;     //counter for many keys in the XML element
-#endif
-#ifdef CMLFILE
+#elif CMLFILE
 cmlfile *F;
 #endif
 double ran1(int *idum);

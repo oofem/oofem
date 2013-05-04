@@ -33,14 +33,30 @@
  */
 
 #include "errorestimator.h"
+#include "remeshingcrit.h"
 
 namespace oofem {
+
+ErrorEstimator :: ErrorEstimator ( int n, Domain* d ) : FEMComponent ( n, d )
+{
+    rc = NULL;
+    skippedNelems = 0;
+    regionSkipMap.resize ( 0 );
+}
+
+ErrorEstimator :: ~ErrorEstimator()
+{
+    delete rc;
+}
+
 void
 ErrorEstimator :: setDomain(Domain *d)
 {
     FEMComponent :: setDomain(d);
     this->giveRemeshingCrit()->setDomain(d);
 }
+
+
 
 IRResultType
 ErrorEstimator :: initializeFrom(InputRecord *ir)
@@ -57,4 +73,19 @@ ErrorEstimator :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
+
+void ErrorEstimator :: reinitialize()
+{
+    this->rc->reinitialize();
+}
+
+bool ErrorEstimator :: skipRegion ( int reg )
+{
+    if ( reg <= regionSkipMap.giveSize() ) {
+        return regionSkipMap.at ( reg ) > 0;
+    } else {
+        return false;
+    }
+}
+
 } // end namespace oofem

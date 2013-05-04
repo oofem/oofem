@@ -37,6 +37,12 @@
 #include "element.h"
 #include "dofmanager.h"
 
+#ifdef __PARALLEL_MODE
+ #include "problemcomm.h"
+ #include "processcomm.h"
+ #include "communicator.h"
+#endif
+
 namespace oofem {
 NodalAveragingRecoveryModel :: NodalAveragingRecoveryModel(Domain *d) : NodalRecoveryModel(d)
 { }

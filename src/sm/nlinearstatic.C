@@ -51,6 +51,11 @@
 #include "errorestimator.h"
 #include "mathfem.h"
 
+#ifdef __PARALLEL_MODE
+ #include "problemcomm.h"
+ #include "communicator.h"
+#endif
+
 namespace oofem {
 
 REGISTER_EngngModel( NonLinearStatic );
@@ -811,7 +816,6 @@ NonLinearStatic :: showSparseMtrxStructure(int type, oofegGraphicContext &contex
 {
     Domain *domain = this->giveDomain(1);
     CharType ctype;
-    int i;
 
     if ( type != 1 ) {
         return;
@@ -826,11 +830,11 @@ NonLinearStatic :: showSparseMtrxStructure(int type, oofegGraphicContext &contex
     }
 
     int nelems = domain->giveNumberOfElements();
-    for ( i = 1; i <= nelems; i++ ) {
+    for ( int i = 1; i <= nelems; i++ ) {
         domain->giveElement(i)->showSparseMtrxStructure(ctype, context, atTime);
     }
 
-    for ( i = 1; i <= nelems; i++ ) {
+    for ( int i = 1; i <= nelems; i++ ) {
         domain->giveElement(i)->showExtendedSparseMtrxStructure(ctype, context, atTime);
     }
 }

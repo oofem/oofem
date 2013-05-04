@@ -49,6 +49,7 @@
 #include "crosssection.h"
 #include "loadtimefunction.h"
 #include "timer.h"
+#include "remeshingcrit.h"
 
 #include <queue>
 #include <set>
@@ -60,6 +61,7 @@
 
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
+ #include "problemcomm.h"
  #include "communicator.h"
  #include "datastream.h"
  #include "domaintransactionmanager.h"

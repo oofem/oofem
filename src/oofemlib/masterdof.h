@@ -40,10 +40,6 @@
 #include "dictionary.h"
 #include "dofmanager.h"
 
-#ifdef __PARALLEL_MODE
- #include "combuff.h"
-#endif
-
 #include <cstdio>
 
 namespace oofem {

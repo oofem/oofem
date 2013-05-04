@@ -16,6 +16,11 @@
 #include "sparsemtrx.h"
 #include "nrsolver.h"
 
+#ifdef __PARALLEL_MODE
+ #include "problemcomm.h"
+ #include "processcomm.h"
+#endif
+
 #include <iostream>
 #include <fstream>
 #include <cstdio>

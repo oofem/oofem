@@ -44,12 +44,6 @@ PetscContext :: PetscContext(EngngModel *e, bool naturalVectors)
     : n2g(), n2l()
 #endif
 {
-#ifdef __PARALLEL_MODE
-    if ( e->isParallel() )
-        comm = PETSC_COMM_WORLD;
-    else
-#endif
-        comm = PETSC_COMM_SELF;
     this->naturalVectors = naturalVectors;
     this->emodel = e;
     n2gvecscat = NULL;
@@ -72,9 +66,6 @@ PetscContext :: init(int di)
         ///@todo This shouldn't be hardcoded to just the default numbering schemes. In fact, this shouldn't even have "prescribed" and "free", just use the given numbering.
         n2g.init(emodel, di, EModelDefaultEquationNumbering());
         n2l.init(emodel, di, EModelDefaultEquationNumbering());
-
-        n2g_prescribed.init(emodel, di, EModelDefaultPrescribedEquationNumbering());
-        n2l_prescribed.init(emodel, di, EModelDefaultPrescribedEquationNumbering());
 
  #ifdef  PetscContext_debug_print
         fprintf( stderr, "[%d] Petsccontext::init leq:%d, neq:%d, geq:%d\n", emodel->giveRank(), giveNumberOfLocalEqs(), giveNumberOfNaturalEqs(), giveNumberOfGlobalEqs() );
@@ -149,8 +140,8 @@ PetscContext :: scatterG2N(Vec src, Vec dest, InsertMode mode)
         if ( n2gvecscat == NULL ) {
             //
             IS naturalIS, globalIS;
-            ISCreateGeneral(comm, neqs, this->giveN2Gmap()->giveN2Gmap()->givePointer(), PETSC_USE_POINTER, & globalIS);
-            ISCreateStride(comm, neqs, 0, 1, & naturalIS);
+            ISCreateGeneral(this->emodel->giveParallelComm(), neqs, this->giveN2Gmap()->giveN2Gmap()->givePointer(), PETSC_USE_POINTER, & globalIS);
+            ISCreateStride(this->emodel->giveParallelComm(), neqs, 0, 1, & naturalIS);
             VecScatterCreate(dest, naturalIS, src, globalIS, & n2gvecscat);
             ISDestroy( & naturalIS );
             ISDestroy( & globalIS );
@@ -214,8 +205,8 @@ PetscContext :: scatterN2G(Vec src, Vec dest, InsertMode mode)
         if ( n2gvecscat == NULL ) {
             //
             IS naturalIS, globalIS;
-            ISCreateGeneral(comm, neqs, this->giveN2Gmap()->giveN2Gmap()->givePointer(), PETSC_USE_POINTER, & globalIS);
-            ISCreateStride(comm, neqs, 0, 1, & naturalIS);
+            ISCreateGeneral(this->emodel->giveParallelComm(), neqs, this->giveN2Gmap()->giveN2Gmap()->givePointer(), PETSC_USE_POINTER, & globalIS);
+            ISCreateStride(this->emodel->giveParallelComm(), neqs, 0, 1, & naturalIS);
             VecScatterCreate(src, naturalIS, dest, globalIS, & n2gvecscat);
             ISDestroy( & naturalIS );
             ISDestroy( & globalIS );
@@ -266,7 +257,6 @@ int
 PetscContext :: scatterL2G(const FloatArray *src, Vec dest, InsertMode mode)
 {
     PetscScalar *ptr;
-    int i;
 
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
@@ -275,7 +265,7 @@ PetscContext :: scatterL2G(const FloatArray *src, Vec dest, InsertMode mode)
 
         Natural2LocalOrdering *n2l = this->giveN2Lmap();
         Natural2GlobalOrdering *n2g = this->giveN2Gmap();
-        for ( i = 0; i < size; i++ ) {
+        for ( int i = 0; i < size; i++ ) {
             if ( n2l->giveNewEq(i + 1) ) {
                 eqg = n2g->giveNewEq(i + 1);
                 VecSetValues(dest, 1, & eqg, ptr + i, ADD_VALUES);
@@ -290,7 +280,7 @@ PetscContext :: scatterL2G(const FloatArray *src, Vec dest, InsertMode mode)
 
     int size = src->giveSize();
     ptr = src->givePointer();
-    for ( i = 0; i < size; i++ ) {
+    for ( int i = 0; i < size; i++ ) {
         //VecSetValues(dest, 1, & i, ptr + i, mode);
         VecSetValue(dest, i, ptr[i], mode);
     }
@@ -341,7 +331,7 @@ PetscContext :: localNorm(const FloatArray &src)
                 norm2 += src(i)*src(i);
             }
         }
-        MPI_Allreduce(&norm2, &norm2_tot, 1, MPI_DOUBLE, MPI_SUM, comm);
+        MPI_Allreduce(&norm2, &norm2_tot, 1, MPI_DOUBLE, MPI_SUM, this->emodel->giveParallelComm());
         return sqrt(norm2_tot);
     }
 #endif
@@ -362,7 +352,7 @@ PetscContext :: localDotProduct(const FloatArray &a, const FloatArray &b)
                 val += a(i)*b(i);
             }
         }
-        MPI_Allreduce(&val, &val_tot, 1, MPI_DOUBLE, MPI_SUM, comm);
+        MPI_Allreduce(&val, &val_tot, 1, MPI_DOUBLE, MPI_SUM, this->emodel->giveParallelComm());
         return val_tot;
     }
 #endif
@@ -423,7 +413,7 @@ PetscContext :: accumulate(double local)
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
         double global;
-        MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_SUM, comm);
+        MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_SUM, this->emodel->giveParallelComm());
         return global;
     }
 #endif
@@ -439,7 +429,7 @@ PetscContext :: accumulate(const FloatArray &local, FloatArray &global)
     if ( emodel->isParallel() ) {
         int size = local.giveSize();
         global.resize(size);
-        MPI_Allreduce(local.givePointer(), global.givePointer(), size, MPI_DOUBLE, MPI_SUM, comm);
+        MPI_Allreduce(local.givePointer(), global.givePointer(), size, MPI_DOUBLE, MPI_SUM, this->emodel->giveParallelComm());
     }
     else {
 #endif
@@ -455,7 +445,7 @@ PetscContext :: createVecGlobal(Vec *answer)
 {
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
-        VecCreate(comm, answer);
+        VecCreate(this->emodel->giveParallelComm(), answer);
         VecSetSizes( * answer, giveNumberOfLocalEqs(), giveNumberOfGlobalEqs() );
         VecSetFromOptions(* answer);
     } else {

@@ -41,6 +41,7 @@
 namespace oofem {
 class GaussPoint;
 class ZZNodalRecoveryModelInterface;
+class ProcessCommunicator;
 
 /**
  * The nodal recovery model based on paper of Zienkiewicz and Zhu "A Simple Estimator and Adaptive

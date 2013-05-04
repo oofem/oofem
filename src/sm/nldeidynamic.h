@@ -36,17 +36,10 @@
 #define nldeidynamic_h
 
 #include "structengngmodel.h"
-
 #include "floatarray.h"
 #include "floatmatrix.h"
-
 #include "sparselinsystemnm.h"
 #include "sparsemtrxtype.h"
-
-#ifdef __PARALLEL_MODE
- #include "problemcomm.h"
- #include "processcomm.h"
-#endif
 
 #define LOCAL_ZERO_MASS_REPLACEMENT 1
 

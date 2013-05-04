@@ -131,6 +131,9 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     communicator = NULL;
     nonlocCommunicator = NULL;
     commBuff = NULL;
+#ifdef __USE_MPI
+    comm = MPI_COMM_SELF;
+#endif
 #endif
 
 #ifdef __PETSC_MODULE
@@ -1039,7 +1042,15 @@ double EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, Equatio
 {
     double norm = 0.0;
     if ( eNorms ) {
-        eNorms->resize( domain->giveMaxDofID() ); ///@todo What if different cores have different sizes?
+        int maxdofids = domain->giveMaxDofID();
+#ifdef __PARALLEL_MODE
+        if ( this->isParallel() ) {
+            int val;
+            MPI_Allreduce(& maxdofids, & val, 1, MPI_INT, MPI_SUM, this->comm);
+            maxdofids = val;
+        }
+#endif
+        eNorms->resize( maxdofids );
         eNorms->zero();
     }
 
@@ -1047,22 +1058,15 @@ double EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, Equatio
     norm += this->assembleVectorFromElements(answer, tStep, eid, type, mode, s, domain, eNorms);
     norm += this->assembleVectorFromBC(answer, tStep, eid, type, mode, s, domain, eNorms);
 
-    // Collect over mpi;
 #ifdef __PARALLEL_MODE
     if ( this->isParallel() ) {
-#ifdef __PETSC_MODULE
-        norm = this->givePetscContext(domain->giveNumber())->accumulate(norm);
-#else
+        //norm = this->givePetscContext(domain->giveNumber())->accumulate(norm);
         double localNorm = norm;
-        MPI_Allreduce(& localNorm, & norm, 1, MPI_DOUBLE, MPI_SUM, comm);
-#endif
+        MPI_Allreduce(& localNorm, & norm, 1, MPI_DOUBLE, MPI_SUM, this->comm);
         if ( eNorms ) {
             FloatArray localENorms = *eNorms;
-#ifdef __PETSC_MODULE
-            this->givePetscContext(domain->giveNumber())->accumulate(localENorms, *eNorms);
-#else
-            MPI_Allreduce(localENorms.givePointer(), eNorms.givePointer(), eNorms.giveSize(), MPI_DOUBLE, MPI_SUM, comm);
-#endif
+            //this->givePetscContext(domain->giveNumber())->accumulate(localENorms, *eNorms);
+            MPI_Allreduce(localENorms.givePointer(), eNorms->givePointer(), eNorms->giveSize(), MPI_DOUBLE, MPI_SUM, this->comm);
         }
     }
 #endif
@@ -1938,8 +1942,9 @@ EngngModel :: initParallel()
  #ifdef __USE_MPI
     int len;
     MPI_Get_processor_name(processor_name, & len);
-    MPI_Comm_rank(MPI_COMM_WORLD, & this->rank);
-    MPI_Comm_size(MPI_COMM_WORLD, & numProcs);
+    this->comm = MPI_COMM_WORLD;
+    MPI_Comm_rank(this->comm, & this->rank);
+    MPI_Comm_size(this->comm, & numProcs);
  #endif
  #ifdef __VERBOSE_PARALLEL
     OOFEM_LOG_RELEVANT("[%d/%d] Running on %s\n", rank, numProcs, processor_name);

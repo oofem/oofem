@@ -125,7 +125,7 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
      *  Create the linear solver and set various options
      *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
     if ( !Lhs->kspInit ) {
-        MPI_Comm comm = engngModel->givePetscContext( Lhs->giveDomainIndex() )->giveComm();
+        MPI_Comm comm = engngModel->giveParallelComm();
         KSPCreate(comm, & Lhs->ksp);
         Lhs->kspInit = true;
     }

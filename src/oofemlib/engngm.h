@@ -291,7 +291,10 @@ protected:
     char processor_name [ PROCESSOR_NAME_LENGTH ];
     /// Communicator mode. Determines current strategy used.
     ProblemCommunicatorMode commMode;
-
+#ifdef __USE_MPI
+    /// Communication object for this engineering model.
+    MPI_Comm comm;
+#endif
 
     /**@name Load balancing attributes */
     //@{
@@ -520,6 +523,8 @@ public:
     virtual double giveUnknownComponent(ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
 
 #ifdef __PARALLEL_MODE
+    /// Returns the communication object of reciever.
+    MPI_Comm giveParallelComm() { return this->comm; }
     /**
      * Exchanges necessary remote DofManagers data.
      * @param answer Array with collected values.

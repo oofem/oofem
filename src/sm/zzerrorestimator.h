@@ -42,6 +42,7 @@
 #include "statecountertype.h"
 #include "element.h"
 #include "integrationrule.h"
+#include "remeshingcrit.h"
 
 ///@name Input fields for ZZErrorEstimator
 //@{

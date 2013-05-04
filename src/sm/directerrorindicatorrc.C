@@ -40,6 +40,10 @@
 #include "mathfem.h"
 #include "timestep.h"
 
+#ifdef __PARALLEL_MODE
+ #include "problemcomm.h"
+#endif
+
 namespace oofem {
 DirectErrorIndicatorRC :: DirectErrorIndicatorRC(int n, ErrorEstimator *e) : RemeshingCriteria(n, e)
 {

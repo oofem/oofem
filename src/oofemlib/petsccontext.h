@@ -66,15 +66,9 @@ protected:
     /// True if vectors are assumed to be natural distribution.
     bool naturalVectors;
 
-    /// Communicator used for parallel objects.
-    MPI_Comm comm;
-
 #ifdef __PARALLEL_MODE
     Natural2GlobalOrdering n2g;
     Natural2LocalOrdering n2l;
-
-    Natural2GlobalOrdering n2g_prescribed;
-    Natural2LocalOrdering n2l_prescribed;
  #endif
 
 public:
@@ -93,12 +87,6 @@ public:
      * @param di Domain index.
      */
     void init(int di);
-
-    /**
-     * Gives the communicator for parallel (if active).
-     * @return Parallel communicator object (typically PETSC_COMM_WORLD). Gives the self communicator if engineering problem isn't parallel.
-     */
-    MPI_Comm giveComm() { return comm; };
 
     int giveNumberOfLocalEqs();
     int giveNumberOfGlobalEqs();
@@ -173,10 +161,6 @@ public:
  #ifdef __PARALLEL_MODE
     Natural2GlobalOrdering *giveN2Gmap() { return & n2g; }
     Natural2LocalOrdering *giveN2Lmap() { return & n2l; }
-
-    Natural2GlobalOrdering *giveN2GPrescribedmap() { return & n2g_prescribed; }
-    Natural2LocalOrdering *giveN2LPrescribedmap() { return & n2l_prescribed; }
-
  #endif
 };
 } // end namespace oofem

@@ -38,15 +38,13 @@
 #include "femcmpnn.h"
 #include "interface.h"
 
-#ifdef __PARALLEL_MODE
- #include "problemcomm.h"
-#endif
-
 namespace oofem {
 class Domain;
 class Element;
 class TimeStep;
 class ErrorEstimator;
+class CommunicatorBuff;
+class ProblemCommunicator;
 
 /// Type representing the remeshing strategy
 enum RemeshingStrategy { NoRemeshing_RS, RemeshingFromCurrentState_RS, RemeshingFromPreviousState_RS };

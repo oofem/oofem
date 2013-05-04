@@ -40,6 +40,11 @@
 #include "integrationrule.h"
 #include "gausspoint.h"
 
+#ifdef __PARALLEL_MODE
+ #include "processcomm.h"
+ #include "problemcomm.h"
+#endif
+
 #include <list>
 
 namespace oofem {
