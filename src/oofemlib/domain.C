@@ -990,6 +990,8 @@ Domain :: giveDefaultNodeDofIDArry()
         defaultNodeDofIDArry.setValues(4, V_u, V_v, V_w, P_f);
     }  else if ( dType == _3dDirShellMode ) {
         defaultNodeDofIDArry.setValues(7, D_u, D_v, D_w, W_u, W_v, W_w, Gamma);
+    }  else if ( dType == _2dLatticeMassTransportMode) {
+        defaultNodeDofIDArry.setValues(1, P_f);
     } else {
         _error2( "giveDefaultNodeDofIDArry : unknown domainType (%s)", __domainTypeToString(dType) );
     }
@@ -1056,6 +1058,8 @@ Domain :: resolveDomainDofsDefaults(const char *typeName)
         dType = _3dIncompressibleFlow;
     } else if  ( !strncasecmp(typeName, "3ddirshell", 10) ) {
         dType = _3dDirShellMode;
+    } else if  ( !strncasecmp(typeName, "2dmasslatticetransport", 22) ) {
+      dType = _2dLatticeMassTransportMode;
     } else if  ( !strncasecmp(typeName, "3d", 2) ) {
         dType = _3dMode;
     } else {
