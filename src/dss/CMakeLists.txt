@@ -19,4 +19,6 @@ set (dss
 add_library (dss
     ${LIB_TYPE}
     ${dss}
+    dssmatrix.C
+    dsssolver.C
     )

@@ -43,7 +43,6 @@
 
 #include "contextioresulttype.h"
 #include "contextmode.h"
-#include "iml/iml.h"
 
 #include <iosfwd>
 
@@ -413,10 +412,11 @@ public:
 
     friend std::ostream& operator<< (std::ostream &out, const FloatArray &x);
 
-#ifdef IML_COMPAT
+    ///@name IML compatibility
+    //@{
     /// Assignment of scalar to all components of receiver
     FloatArray &operator=(const double &);
-#endif
+    //@}
 
 #ifdef BOOST_PYTHON
     void __setitem__(int i, double val) { this->at(i+1) = val; }
@@ -426,7 +426,8 @@ public:
 };
 
 
-#ifdef IML_COMPAT
+///@name IML compatibility
+//@{
 /// Vector multiplication by scalar
 FloatArray &operator*=(FloatArray &x, const double &a);
 FloatArray operator*(const double &a, const FloatArray &x);
@@ -438,6 +439,6 @@ FloatArray &operator-=(FloatArray &x, const FloatArray &y);
 
 double norm(const FloatArray &x);
 double dot(const FloatArray &x, const FloatArray &y);
-#endif
+//@}
 } // end namespace oofem
 #endif // floatarray_h

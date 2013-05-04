@@ -73,17 +73,10 @@ public:
      */
     virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
 
-    virtual const char *giveClassName() const { return "LDLTFactorization"; }
+    virtual const char *giveClassName() const { return "DSSSolver"; }
     virtual LinSystSolverType giveLinSystSolverType() const { return ST_DSS; }
 };
 } // end namespace oofem
+
 #endif // dsssolver_h
-
-
-
-
-
-
-
-
 

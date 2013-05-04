@@ -35,8 +35,6 @@
 #ifndef dss_h
 #define dss_h
 
-#ifdef __DSS_MODULE
-
 #include "sparsemtrx.h"
 #include "intarray.h"
 
@@ -126,6 +124,6 @@ public:
 };
 
 } // end namespace oofem
-#endif // ifdef __DSS_MODULE
+
 #endif // dss_h
 

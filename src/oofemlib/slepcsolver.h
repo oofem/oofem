@@ -39,9 +39,7 @@
 #include "sparsemtrx.h"
 #include "floatarray.h"
 
-#ifdef __SLEPC_MODULE
- #include <slepceps.h>
-#endif
+#include <slepceps.h>
 
 namespace oofem {
 class Domain;
@@ -52,14 +50,12 @@ class PetscSparseMtrx;
 class SLEPcSolver : public SparseGeneralEigenValueSystemNM
 {
 private:
-#ifdef __SLEPC_MODULE
     PetscSparseMtrx *A;
     PetscSparseMtrx *B;
     /// Eigenvalue solver context.
     EPS eps;
     /// Flag if context initialized.
     bool epsInit;
-#endif
 
 public:
     SLEPcSolver(Domain *d, EngngModel *m);

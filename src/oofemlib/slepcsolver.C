@@ -34,19 +34,15 @@
 
 #include "slepcsolver.h"
 
-#ifdef __PETSC_MODULE
- #define TIME_REPORT
- #include "petscsparsemtrx.h"
+#define TIME_REPORT
+#include "petscsparsemtrx.h"
+#include "engngm.h"
+#include "floatarray.h"
+#include "verbose.h"
+
+#ifdef TIME_REPORT
+ #include "timer.h"
 #endif
-
-#ifdef __SLEPC_MODULE
- #include "engngm.h"
- #include "floatarray.h"
- #include "verbose.h"
-
- #ifdef TIME_REPORT
-  #include "timer.h"
- #endif
 
 namespace oofem {
 SLEPcSolver :: SLEPcSolver(Domain *d, EngngModel *m) : SparseGeneralEigenValueSystemNM(d, m)
@@ -244,21 +240,4 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
     return NM_Success;
 }
 } // end namespace oofem
-#endif //ifdef __SLEPC_MODULE
 
-#ifndef __SLEPC_MODULE
-namespace oofem {
-SLEPcSolver :: SLEPcSolver(Domain *d, EngngModel *m) : SparseGeneralEigenValueSystemNM(d, m)
-{
-    OOFEM_ERROR("SLEPcSolver: can't create, SLEPc support not compiled");
-}
-
-SLEPcSolver :: ~SLEPcSolver() {}
-
-NM_Status
-SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatrix *_r, double rtol, int nroot)
-{
-    return NM_NoSuccess;
-}
-} // end namespace oofem
-#endif

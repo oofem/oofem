@@ -1210,7 +1210,7 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
     oPM = this -> computeDamageParamPrime(kappaMax);
 
     pR = (s+oPM/(1-oM))/(1-oM)/s;
-    pR = pR;
+    //pR = pR;
     //hardFactor = 0.75;
     //    pR = -citatel/jmenovatel;
     yR = exp(expPlasHard*kappaMax)/(1-oM)-pR*(exp(expPlasHard*kappaMax)-1);

@@ -16,8 +16,8 @@ namespace bp = boost::python;
 * O O F E M L I B   M O D U L E
 *
 *****************************************************/
-#include "flotarray.h"
-#include "flotmatrix.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "intarray.h"
 #include "engngm.h"
 #include "domain.h"
@@ -581,24 +581,21 @@ class PyDofManager : public DofManager, public wrapper<DofManager>
 public:
     PyDofManager (int n, Domain *d) : DofManager (n,d) {}
 
-    void giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
-                EquationID type, ValueModeType mode, TimeStep *stepN) {
+    void giveUnknownVector(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN) {
         if ( override f = this->get_override("giveUnknownVector") ) {
-        f (answer, dofMask, type, mode, stepN); return;}
-        DofManager::giveUnknownVector(answer, dofMask, type, mode, stepN);
+        f (answer, dofMask, mode, stepN); return;}
+        DofManager::giveUnknownVector(answer, dofMask, mode, stepN);
     }
     bool computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry) {
         if (override f = this->get_override("computeL2GTransformation")) { return f(answer, dofIDArry); }
         return DofManager::computeL2GTransformation(answer, dofIDArry);
     }
 
-    void default_giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
-                    EquationID type, ValueModeType mode, TimeStep *stepN)
-    { return this->DofManager::giveUnknownVector(answer, dofMask, type, mode, stepN); }
+    void default_giveUnknownVector(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN)
+    { return this->DofManager::giveUnknownVector(answer, dofMask, mode, stepN); }
 };
 
-void (DofManager::*giveUnknownVector_1)(FloatArray &answer, const IntArray &dofMask,
-                    EquationID type, ValueModeType mode, TimeStep *stepN) = &DofManager::giveUnknownVector;
+void (DofManager::*giveUnknownVector_1)(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN) = &DofManager::giveUnknownVector;
 
 void pyclass_DofManager()
 {
@@ -667,7 +664,6 @@ void pyclass_Element()
         .def("giveLabel", &Element::giveLabel)
         .add_property("label",&Element::giveLabel)
         .def("giveLocationArray", &PyElement::giveLocationArray)
-        .def("invalidateLocationArray", &PyElement::invalidateLocationArray)
         .def("giveNumberOfDofManagers", &PyElement::giveNumberOfDofManagers)
         .add_property("numberOfDofManagers", &PyElement::giveNumberOfDofManagers)
         .def("computeNumberOfDofs", &PyElement::computeNumberOfDofs)
@@ -1044,7 +1040,6 @@ void pyenum_EquationID()
 {
     enum_<EquationID>("EquationID")
         .value("EID_MomentumBalance", EID_MomentumBalance)
-        .value("EID_AuxMomentumBalance", EID_AuxMomentumBalance)
         .value("EID_ConservationEquation", EID_ConservationEquation)
         .value("EID_MomentumBalance_ConservationEquation", EID_MomentumBalance_ConservationEquation)
         ;
@@ -1278,14 +1273,15 @@ object engngModel(bp::tuple args, bp::dict kw)
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     engngm->initializeFrom(&ir);
     // instanciateYourself
-    if ( ir.hasField(IFT_EngngModel_nmsteps, "nmsteps") ) {
+    if ( ir.hasField(_IFT_EngngModel_nmsteps) ) {
         LOG_ERROR(oofem_errLogger,"engngModel: simulation with metasteps is not (yet) supported in Python");
     } else {
         engngm->instanciateDefaultMetaStep(&ir);
     }
+    ///@todo Output filename isn't stored like this (and has never been!)!?
     string outFile;
-    if ( ir.hasField(IFT_EngngModel_outfile, "outfile") ) {
-       ir.giveField(outFile, IFT_EngngModel_outfile, "outfile");
+    if ( ir.hasField("outfile") ) {
+       ir.giveField(outFile, "outfile");
     } else {
        outFile = "oofem.out.XXXXXX";
     }

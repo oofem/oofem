@@ -32,20 +32,18 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifdef __DSS_MODULE
+#include "dssmatrix.h"
+#include "error.h"
+#include "floatarray.h"
+#include "engngm.h"
+#include "domain.h"
+#include "element.h"
+#include "dofmanager.h"
+#include "sparsemtrxtype.h"
+#include "classfactory.h"
+#include "DSSolver.h"
 
- #include "dss.h"
- #include "error.h"
- #include "floatarray.h"
- #include "engngm.h"
- #include "domain.h"
- #include "element.h"
- #include "dofmanager.h"
- #include "sparsemtrxtype.h"
- #include "classfactory.h"
- #include "DSSolver.h"
-
- #include <set>
+#include <set>
 
 namespace oofem {
 
@@ -377,4 +375,3 @@ double &DSSMatrix :: operator() (int i, int j)
 }
 } // end namespace oofem
 
-#endif // ifdef __DSS_MODULE

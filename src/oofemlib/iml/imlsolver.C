@@ -31,49 +31,31 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-#ifndef __IML_MODULE
- #include "imlsolver.h"
- #include "classfactory.h"
+
+#include <iml/cg.h>
+#include <iml/gmres.h>
+
+#include "imlsolver.h"
+#include "sparsemtrx.h"
+#include "floatarray.h"
+#include "diagpre.h"
+#include "voidprecond.h"
+#include "compcol.h"
+#include "iluprecond.h"
+#include "icprecond.h"
+#include "verbose.h"
+#include "ilucomprowprecond.h"
+#include "linsystsolvertype.h"
+#include "classfactory.h"
+
+#ifdef TIME_REPORT
+ #include "timer.h"
+#endif
 
 namespace oofem {
 
 REGISTER_SparseLinSolver(IMLSolver, ST_IML)
 
-IMLSolver :: IMLSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
-{
-    OOFEM_ERROR("IMLSolver: can't create, IML support not compiled");
-}
-
-IMLSolver :: ~IMLSolver() { }
-
-IRResultType
-IMLSolver :: initializeFrom(InputRecord *ir) { return IRRT_OK; }
-
-NM_Status
-IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSuccess; }
-} // end namespace oofem
-#endif
-
-#ifdef __IML_MODULE
-
- #include <iml/cg.h>
- #include <iml/gmres.h>
- #include "imlsolver.h"
- #include "sparsemtrx.h"
- #include "floatarray.h"
- #include "diagpre.h"
- #include "voidprecond.h"
- #include "compcol.h"
- #include "iluprecond.h"
- #include "icprecond.h"
- #include "verbose.h"
- #include "ilucomprowprecond.h"
-
- #ifdef TIME_REPORT
-  #include "timer.h"
- #endif
-
-namespace oofem {
 IMLSolver :: IMLSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
 {
     Lhs = NULL;
@@ -203,4 +185,3 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     return NM_Success;
 }
 } // end namespace oofem
-#endif //ifdef __IML_MODULE

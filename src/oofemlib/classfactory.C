@@ -52,7 +52,9 @@
 
 #include "subspaceit.h"
 #include "inverseit.h"
-#include "slepcsolver.h"
+#ifdef __SLEPC_MODULE
+ #include "slepcsolver.h"
+#endif
 
 #include "nodalaveragingrecoverymodel.h"
 #include "zznodalrecoverymodel.h"
@@ -389,9 +391,12 @@ SparseGeneralEigenValueSystemNM* ClassFactory :: createGeneralizedEigenValueSolv
         return new SubspaceIteration(d, m);
     } else if ( st == GES_InverseIt ) {
         return new InverseIteration(d, m);
-    } else if ( st == GES_SLEPc ) {
+    } 
+#ifdef __SLEPC_MODULE
+    else if ( st == GES_SLEPc ) {
         return new SLEPcSolver(d, m);
     }
+#endif
     return NULL;
 }
 
@@ -407,7 +412,6 @@ IntegrationRule* ClassFactory :: createIRule(IntegrationRuleType type, int numbe
 
 MaterialMappingAlgorithm* ClassFactory :: createMaterialMappingAlgorithm(MaterialMappingAlgorithmType type)
 {
-#ifdef __SM_MODULE
     if ( type == MMA_ClosestPoint ) {
         return new MMAClosestIPTransfer();
     } else if ( type == MMA_LeastSquareProjection ) {
@@ -415,13 +419,11 @@ MaterialMappingAlgorithm* ClassFactory :: createMaterialMappingAlgorithm(Materia
     } else if ( type == MMA_ShapeFunctionProjection ) {
         return new MMAShapeFunctProjection();
     }
-#endif
     return NULL;
 }
 
 MesherInterface* ClassFactory :: createMesherInterface(MeshPackageType type, Domain *d)
 {
-#ifdef __SM_MODULE
     if ( type == MPT_T3D ) {
         return new T3DInterface(d);
     } else if ( type == MPT_TARGE2 ) {
@@ -431,7 +433,6 @@ MesherInterface* ClassFactory :: createMesherInterface(MeshPackageType type, Dom
     } else if ( type == MPT_SUBDIVISION ) {
         return new Subdivision(d);
     }
-#endif
     return NULL;
 }
 

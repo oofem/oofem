@@ -391,9 +391,8 @@ EigenValueDynamic :: initPetscContexts()
 {
     PetscContext *petscContext;
 
-    int i;
     petscContextList->growTo(ndomains);
-    for ( i = 0; i < this->ndomains; i++ ) {
+    for ( int i = 0; i < this->ndomains; i++ ) {
         petscContext =  new PetscContext(this);
         petscContextList->put(i + 1, petscContext);
     }

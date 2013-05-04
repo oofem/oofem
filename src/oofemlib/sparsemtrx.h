@@ -42,7 +42,6 @@
 #include "error.h"
 #include "sparsemtrxtype.h"
 #include "unknownnumberingscheme.h"
-#include "iml/iml.h"
 
 namespace oofem {
 class EngngModel;
@@ -252,7 +251,8 @@ public:
     /// Returns true if asymmetric
     virtual bool isAsymmetric() const = 0;
 
-#ifdef IML_COMPAT
+    ///@name IML compatibility
+    //@{
     /// IML compatibility, @f$ A \cdot x@f$
     FloatArray operator*(const FloatArray &x) const
     {
@@ -267,7 +267,7 @@ public:
         this->timesT(x, answer);
         return answer;
     }
-#endif
+    //@}
 };
 } // end namespace oofem
 #endif // sparsemtrx_h

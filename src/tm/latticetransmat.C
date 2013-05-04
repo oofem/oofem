@@ -104,7 +104,7 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
 double
 LatticeTransportMaterial :: give(int aProperty, GaussPoint *gp)
 {
-    if ( ( aProperty == 'k' ) ) {
+    if ( aProperty == 'k' ) {
         return permeability;
     } else if ( ( aProperty == HeatCapaCoeff ) || ( aProperty == 'c' ) ) {
         return ( this->give('d', gp) );

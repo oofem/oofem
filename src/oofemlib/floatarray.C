@@ -849,7 +849,7 @@ int FloatArray :: givePackSize(CommunicationBuffer &buff) const
 
 #endif
 
-#ifdef IML_COMPAT
+// IML compat
 
 FloatArray &FloatArray :: operator = ( const double & val )
 {
@@ -993,7 +993,7 @@ double norm(const FloatArray &x)
     return sqrt(temp);
 }
 
-#endif
+// End of IML compat
 
 void FloatArray :: beFullVectorForm(const FloatMatrix &aMatrix)
 {

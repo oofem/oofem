@@ -32,40 +32,17 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef __SPOOLES_MODULE
- #include "spoolessolver.h"
- #include "classfactory.h"
+#include "spoolessolver.h"
+#include "spoolessparsemtrx.h"
+#include "floatarray.h"
+#include "verbose.h"
+#include "timer.h"
+#include "classfactory.h"
 
 namespace oofem {
 
-REGISTER_SparseLinSolver(SpoolesSolver, ST_Spooles)
+REGISTER_SparseLinSolver( SpoolesSolver, ST_Spooles );
 
-SpoolesSolver :: SpoolesSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
-{
-    OOFEM_ERROR("SpoolesSolver: can't create, SPOOLES support not compiled");
-}
-
-SpoolesSolver :: ~SpoolesSolver() { }
-
-IRResultType
-SpoolesSolver :: initializeFrom(InputRecord *ir) { return IRRT_OK; }
-
-NM_Status
-SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSuccess; }
-} // end namespace oofem
-
-#else
-
- #include "spoolessolver.h"
- #include "spoolessparsemtrx.h"
- #include "floatarray.h"
- #include "verbose.h"
- #include "timer.h"
-
-// Spooles includes
- #include "spoolesinterface.h"
-
-namespace oofem {
 SpoolesSolver :: SpoolesSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
 {
     Lhs = NULL;
@@ -428,4 +405,3 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 }
 
 } // end namespace oofem
-#endif //ifdef __SPOOLES_MODULE

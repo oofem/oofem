@@ -1,5 +1,6 @@
 # Much to organize
 set (core_unsorted
+    classfactory.C
     femcmpnn.C domain.C timestep.C metastep.C gausspoint.C
     cltypes.C timer.C dictionary.C
     connectivitytable.C compiler.C error.C mathfem.C logger.C util.C
@@ -25,20 +26,29 @@ set (core_unsorted
     integrationrule.C gaussintegrationrule.C lobattoir.C
     smoothednodalintvarfield.C dofmanvalfield.C
     # Deprecated?
-    spoolessparsemtrx.C
     rowcol.C skyline.C skylineu.C
     ldltfact.C
-    dss.C dsssolver.C
     inverseit.C subspaceit.C gjacobi.C
     )
 
 #oofegutils
 
-set (core_iml
-    iml/dyncomprow.C iml/dyncompcol.C iml/symcompcol.C iml/compcol.C
-    iml/precond.C iml/voidprecond.C iml/icprecond.C iml/iluprecond.C iml/ilucomprowprecond.C iml/diagpre.C
-    iml/imlsolver.C
-    )
+if (USE_SPOOLES)
+    list (APPEND core_unsorted spoolessparsemtrx.C spoolessolver.C)
+endif ()
+
+if (USE_IML)
+    list (APPEND core_unsorted
+        iml/dyncomprow.C iml/dyncompcol.C iml/symcompcol.C iml/compcol.C
+        iml/precond.C iml/voidprecond.C iml/icprecond.C iml/iluprecond.C iml/ilucomprowprecond.C iml/diagpre.C
+        iml/imlsolver.C
+        )
+endif ()
+
+if (USE_SLEPC)
+    list (APPEND core_unsorted slepcsolver.C)
+endif ()
+
 
 set (core_oofeg oofeggraphiccontext.C)
 
@@ -61,9 +71,7 @@ set (core_nm
     sparselinsystemnm.C
     nrsolver.C
     linesearch.C
-    spoolessolver.C
     calmls.C
-    slepcsolver.C
     petscsolver.C
     )
 
@@ -101,7 +109,7 @@ set (core_dofman
     node.C
     slavenode.C
     hangingnode.C
-    rigidarmnode.C
+     rigidarmnode.C
     elementinternaldofman.C
     elementside.C
     )
@@ -232,7 +240,6 @@ set (core_mesher
     )
 
 set (core
-    ${core_iml} # TODO: Make this optional
     ${core_unsorted}
     ${core_oofeg}
     ${core_nodalrecovery}

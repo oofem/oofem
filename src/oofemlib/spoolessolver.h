@@ -37,7 +37,12 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "floatarray.h"
-#include "spoolesinterface.h"
+extern "C" {
+ #include <spooles/misc.h>
+ #include <spooles/FrontMtx.h>
+ #include <spooles/SymbFac.h>
+};
+
 
 ///@name Input fields for SpoolesSolver
 //@{
@@ -57,7 +62,6 @@ class FloatMatrix;
 class SpoolesSolver : public SparseLinearSystemNM
 {
 private:
-#ifdef __SPOOLES_MODULE
     /// Last mapped LHS matrix
     SparseMtrx *Lhs;
     /// Last mapped matrix version
@@ -72,7 +76,6 @@ private:
     IVL *adjIVL, *symbfacIVL;
     SubMtxManager *mtxmanager;
     Graph *graph;
-#endif
 
 public:
     /**

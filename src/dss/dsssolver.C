@@ -32,11 +32,44 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef iml_h
-#define iml_h
+#include "dsssolver.h"
+#include "classfactory.h"
+
+#include "dssmatrix.h"
+#include "timer.h"
 
 namespace oofem {
-/// Turns on IML++ compilation support.
-#define IML_COMPAT
+
+REGISTER_SparseLinSolver(DSSSolver, ST_DSS);
+
+DSSSolver :: DSSSolver(Domain *d, EngngModel *m) :
+    SparseLinearSystemNM(d, m) { }
+
+DSSSolver :: ~DSSSolver() { }
+
+NM_Status
+DSSSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
+{
+ #ifdef TIME_REPORT
+    Timer timer;
+    timer.startTimer();
+ #endif
+
+
+    DSSMatrix *_mtrx = dynamic_cast< DSSMatrix * >(A);
+    if ( _mtrx ) {
+        _mtrx->factorized();
+        _mtrx->solve(b, x);
+    } else {
+        OOFEM_ERROR("DSSSolver::solve : incompatible sparse mtrx format");
+    }
+
+ #ifdef TIME_REPORT
+    timer.stopTimer();
+    OOFEM_LOG_INFO( "DSSSolver info: user time consumed by solution: %.2fs\n", timer.getUtime() );
+ #endif
+
+    return NM_Success;
+}
 } // end namespace oofem
-#endif // iml_h
+
