@@ -41,7 +41,7 @@
   #include <petscvec.h>
  #endif
 
- #include "petscordering.h"
+ #include "parallelordering.h"
  #include "equationid.h"
 
 namespace oofem {
@@ -70,11 +70,11 @@ protected:
     MPI_Comm comm;
 
 #ifdef __PARALLEL_MODE
-    PetscNatural2GlobalOrdering n2g;
-    PetscNatural2LocalOrdering n2l;
+    Natural2GlobalOrdering n2g;
+    Natural2LocalOrdering n2l;
 
-    PetscNatural2GlobalOrdering n2g_prescribed;
-    PetscNatural2LocalOrdering n2l_prescribed;
+    Natural2GlobalOrdering n2g_prescribed;
+    Natural2LocalOrdering n2l_prescribed;
  #endif
 
 public:
@@ -171,11 +171,11 @@ public:
     void createVecGlobal(Vec *answer);
 
  #ifdef __PARALLEL_MODE
-    PetscNatural2GlobalOrdering *giveN2Gmap() { return & n2g; }
-    PetscNatural2LocalOrdering *giveN2Lmap() { return & n2l; }
+    Natural2GlobalOrdering *giveN2Gmap() { return & n2g; }
+    Natural2LocalOrdering *giveN2Lmap() { return & n2l; }
 
-    PetscNatural2GlobalOrdering *giveN2GPrescribedmap() { return & n2g_prescribed; }
-    PetscNatural2LocalOrdering *giveN2LPrescribedmap() { return & n2l_prescribed; }
+    Natural2GlobalOrdering *giveN2GPrescribedmap() { return & n2g_prescribed; }
+    Natural2LocalOrdering *giveN2LPrescribedmap() { return & n2l_prescribed; }
 
  #endif
 };

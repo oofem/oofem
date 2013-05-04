@@ -198,7 +198,7 @@ set (core_parallel
     problemcomm.C
     combuff.C
     domaintransactionmanager.C
-    petscordering.C
+    parallelordering.C
     petsccontext.C
     dyncombuff.C
     loadbalancer.C

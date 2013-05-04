@@ -100,7 +100,7 @@ public:
  * Ordering from oofem natural ordering (includes all local and shared eqs)
  * to global ordering.
  */
-class PetscNatural2GlobalOrdering : public ParallelOrdering
+class Natural2GlobalOrdering : public ParallelOrdering
 {
 protected:
     /// Old to new mapping; uses 0-based global eq ordering; 1-based local ordering.
@@ -112,8 +112,8 @@ protected:
     int l_neqs, g_neqs;
 
 public:
-    PetscNatural2GlobalOrdering();
-    virtual ~PetscNatural2GlobalOrdering() { }
+    Natural2GlobalOrdering();
+    virtual ~Natural2GlobalOrdering() { }
 
     virtual void init(EngngModel *, int di, const UnknownNumberingScheme &n);
 
@@ -133,15 +133,15 @@ public:
  * Ordering from oofem natural ordering (includes all local and shared eqs)
  * to local ordering, where only locally maintained eqs are considered.
  */
-class PetscNatural2LocalOrdering : public ParallelOrdering
+class Natural2LocalOrdering : public ParallelOrdering
 {
 protected:
     /// Natural to local
     IntArray n2l;
 
 public:
-    PetscNatural2LocalOrdering();
-    virtual ~PetscNatural2LocalOrdering() { }
+    Natural2LocalOrdering();
+    virtual ~Natural2LocalOrdering() { }
 
     virtual void init(EngngModel *, int di, const UnknownNumberingScheme &n);
 

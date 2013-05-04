@@ -433,7 +433,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
         if ( !prescribedEgsIS_defined ) {
             IntArray eqs;
   #ifdef __PARALLEL_MODE
-            PetscNatural2GlobalOrdering *n2lpm = engngModel->givePetscContext(1)->giveN2Gmap();
+            Natural2GlobalOrdering *n2lpm = engngModel->givePetscContext(1)->giveN2Gmap();
             int s = prescribedEqs.giveSize();
             eqs.resize(s);
             for ( int i = 1; i <= s; i++ ) {
@@ -527,7 +527,7 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
  #ifdef __PETSC_MODULE
         if ( solverType == ST_Petsc ) {
   #ifdef __PARALLEL_MODE
-            //PetscNatural2LocalOrdering* n2lpm = engngModel->givePetscContext(1)->giveN2Lmap();
+            //Natural2LocalOrdering* n2lpm = engngModel->givePetscContext(1)->giveN2Lmap();
             //IntArray* map = n2lpm->giveN2Lmap();
             for ( i = 1; i <= prescribedEqs.giveSize(); i++ ) {
                 eq = prescribedEqs.at(i);
@@ -620,7 +620,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
  #ifdef __PARALLEL_MODE
   #ifdef __PETSC_MODULE
     PetscContext *parallel_context = engngModel->givePetscContext(this->domain->giveNumber());
-    PetscNatural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
+    Natural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
   #endif
  #endif
 

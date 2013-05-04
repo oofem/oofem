@@ -68,14 +68,14 @@ ParallelOrdering :: isShared(DofManager *dman)
     }
 }
 
-PetscNatural2GlobalOrdering :: PetscNatural2GlobalOrdering() : ParallelOrdering(), locGlobMap(), globLocMap()
+Natural2GlobalOrdering :: Natural2GlobalOrdering() : ParallelOrdering(), locGlobMap(), globLocMap()
 {
     l_neqs = g_neqs = 0;
 }
 
 
 void
-PetscNatural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberingScheme &n)
+Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberingScheme &n)
 {
     Domain *d = emodel->giveDomain(di);
     int ndofs, ndofman = d->giveNumberOfDofManagers();
@@ -85,7 +85,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNum
     // shared dofman is numbered on partition with lovest rank number
 
 #ifdef __VERBOSE_PARALLEL
-    VERBOSEPARALLEL_PRINT("PetscNatural2GlobalOrdering :: init", "initializing N2G ordering", myrank);
+    VERBOSEPARALLEL_PRINT("Natural2GlobalOrdering :: init", "initializing N2G ordering", myrank);
 #endif
 
     l_neqs = 0;
@@ -369,7 +369,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNum
                         if ( globloc.find(shdm) != globloc.end() ) {
                             ldm = globloc [ shdm ];
                         } else {
-                            OOFEM_ERROR3("[%d] PetscNatural2GlobalOrdering :: init: invalid shared dofman received, globnum %d\n", myrank, shdm);
+                            OOFEM_ERROR3("[%d] Natural2GlobalOrdering :: init: invalid shared dofman received, globnum %d\n", myrank, shdm);
                             ldm = 0;
                         }
 
@@ -452,19 +452,19 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNum
 
     MPI_Barrier(MPI_COMM_WORLD);
 #ifdef __VERBOSE_PARALLEL
-    VERBOSEPARALLEL_PRINT("PetscNatural2GlobalOrdering :: init", "done", myrank);
+    VERBOSEPARALLEL_PRINT("Natural2GlobalOrdering :: init", "done", myrank);
 #endif
 }
 
 
 int
-PetscNatural2GlobalOrdering :: giveNewEq(int leq)
+Natural2GlobalOrdering :: giveNewEq(int leq)
 {
     return locGlobMap.at(leq);
 }
 
 int
-PetscNatural2GlobalOrdering :: giveOldEq(int eq)
+Natural2GlobalOrdering :: giveOldEq(int eq)
 {
     std :: map< int, int > :: iterator i = globLocMap.find(eq);
     if ( i != globLocMap.end() ) {
@@ -475,7 +475,7 @@ PetscNatural2GlobalOrdering :: giveOldEq(int eq)
 }
 
 void
-PetscNatural2GlobalOrdering :: map2New(IntArray &answer, const IntArray &src, int baseOffset)
+Natural2GlobalOrdering :: map2New(IntArray &answer, const IntArray &src, int baseOffset)
 {
     int indx, n = src.giveSize();
     answer.resize(n);
@@ -492,7 +492,7 @@ PetscNatural2GlobalOrdering :: map2New(IntArray &answer, const IntArray &src, in
 
 
 void
-PetscNatural2GlobalOrdering :: map2Old(IntArray &answer, const IntArray &src, int baseOffset)
+Natural2GlobalOrdering :: map2Old(IntArray &answer, const IntArray &src, int baseOffset)
 {
     int n = src.giveSize();
     int offset = baseOffset - 1;
@@ -505,10 +505,10 @@ PetscNatural2GlobalOrdering :: map2Old(IntArray &answer, const IntArray &src, in
 
 
 
-PetscNatural2LocalOrdering :: PetscNatural2LocalOrdering() : ParallelOrdering(), n2l() { }
+Natural2LocalOrdering :: Natural2LocalOrdering() : ParallelOrdering(), n2l() { }
 
 void
-PetscNatural2LocalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberingScheme &n)
+Natural2LocalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberingScheme &n)
 {
     Domain *d = emodel->giveDomain(di);
     int n_eq = 0, ndofs, ndofman = d->giveNumberOfDofManagers(), loc_eq = 1;
@@ -543,13 +543,13 @@ PetscNatural2LocalOrdering :: init(EngngModel *emodel, int di, const UnknownNumb
 }
 
 int
-PetscNatural2LocalOrdering :: giveNewEq(int leq)
+Natural2LocalOrdering :: giveNewEq(int leq)
 {
     return n2l.at(leq);
 }
 
 int
-PetscNatural2LocalOrdering :: giveOldEq(int eq)
+Natural2LocalOrdering :: giveOldEq(int eq)
 {
     // not really efficient
     // it is assumed that queries in oposite directuion take only place
@@ -558,7 +558,7 @@ PetscNatural2LocalOrdering :: giveOldEq(int eq)
 }
 
 void
-PetscNatural2LocalOrdering :: map2New(IntArray &answer, const IntArray &src, int baseOffset)
+Natural2LocalOrdering :: map2New(IntArray &answer, const IntArray &src, int baseOffset)
 {
     int indx, n = src.giveSize();
     answer.resize(n);
@@ -572,7 +572,7 @@ PetscNatural2LocalOrdering :: map2New(IntArray &answer, const IntArray &src, int
 }
 
 void
-PetscNatural2LocalOrdering :: map2Old(IntArray &answer, const IntArray &src, int baseOffset)
+Natural2LocalOrdering :: map2Old(IntArray &answer, const IntArray &src, int baseOffset)
 {
     int n = src.giveSize();
     answer.resize(n);

@@ -273,8 +273,8 @@ PetscContext :: scatterL2G(const FloatArray *src, Vec dest, InsertMode mode)
         int eqg, size = src->giveSize();
         ptr = src->givePointer();
 
-        PetscNatural2LocalOrdering *n2l = this->giveN2Lmap();
-        PetscNatural2GlobalOrdering *n2g = this->giveN2Gmap();
+        Natural2LocalOrdering *n2l = this->giveN2Lmap();
+        Natural2GlobalOrdering *n2g = this->giveN2Gmap();
         for ( i = 0; i < size; i++ ) {
             if ( n2l->giveNewEq(i + 1) ) {
                 eqg = n2g->giveNewEq(i + 1);
@@ -335,7 +335,7 @@ PetscContext :: localNorm(const FloatArray &src)
     if ( emodel->isParallel() ) {
         double norm2 = 0.0, norm2_tot;
         int size = src.giveSize();
-        PetscNatural2LocalOrdering *n2l = this->giveN2Lmap();
+        Natural2LocalOrdering *n2l = this->giveN2Lmap();
         for ( int i = 0; i < size; i++ ) {
             if ( n2l->giveNewEq(i + 1) ) {
                 norm2 += src(i)*src(i);
@@ -356,7 +356,7 @@ PetscContext :: localDotProduct(const FloatArray &a, const FloatArray &b)
     if ( emodel->isParallel() ) {
         double val = 0.0, val_tot = 0.0;
         int size = a.giveSize();
-        PetscNatural2LocalOrdering *n2l = this->giveN2Lmap();
+        Natural2LocalOrdering *n2l = this->giveN2Lmap();
         for ( int i = 0; i < size; i++ ) {
             if ( n2l->giveNewEq(i + 1) ) {
                 val += a(i)*b(i);

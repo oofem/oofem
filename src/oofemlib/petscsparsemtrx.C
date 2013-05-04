@@ -397,8 +397,8 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 
 #ifdef __PARALLEL_MODE
     if ( eModel->isParallel() ) {
-        PetscNatural2GlobalOrdering *n2g;
-        PetscNatural2LocalOrdering *n2l;
+        Natural2GlobalOrdering *n2g;
+        Natural2LocalOrdering *n2l;
         n2g = eModel->givePetscContext(di)->giveN2Gmap();
         n2l = eModel->givePetscContext(di)->giveN2Lmap();
 
