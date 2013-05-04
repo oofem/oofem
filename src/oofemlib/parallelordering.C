@@ -34,7 +34,7 @@
 
 #ifdef __PARALLEL_MODE
 
-#include "petscordering.h"
+#include "parallelordering.h"
 #include "engngm.h"
 #include "unknownnumberingscheme.h"
 #include "combuff.h"

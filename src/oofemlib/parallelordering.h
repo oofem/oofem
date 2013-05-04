@@ -32,8 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef petscordering_h
-#define petscordering_h
+#ifndef parallelordering_h
+#define parallelordering_h
 
 #ifdef __PARALLEL_MODE
 
@@ -155,4 +155,4 @@ public:
 };
 } // end namespace oofem
 #endif
-#endif // petscordering_h
+#endif // parallelordering_h

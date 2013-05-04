@@ -93,6 +93,7 @@
 
 namespace oofem {
 
+template < class T > class AList;
 class Domain;
 class TimeStep;
 class Dof;

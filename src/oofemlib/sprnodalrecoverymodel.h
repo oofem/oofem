@@ -35,7 +35,6 @@
 #ifndef sprnodalrecoverymodel_h
 #define sprnodalrecoverymodel_h
 
-#include "compiler.h"
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 

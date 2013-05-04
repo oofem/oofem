@@ -48,7 +48,7 @@
 #ifdef __PETSC_MODULE
  #include "petscsolver.h"
  #include "petscsparsemtrx.h"
- #include "petscordering.h"
+ #include "parallelordering.h"
 #endif
 
 #include <cstdio>
