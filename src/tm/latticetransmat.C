@@ -39,6 +39,7 @@
 #include "math.h"
 #include "nlinearstatic.h"
 #include "latticestructuralelement.h"
+#include "staggeredproblem.h"
 #include "classfactory.h"
 
 #ifndef __MAKEDEPEND
@@ -160,7 +161,7 @@ LatticeTransportMaterial :: computeConductivity(FloatArray &stateVector,
 
     IntArray coupledModels;
     if ( domain->giveEngngModel()->giveMasterEngngModel() ) {
-        domain->giveEngngModel()->giveMasterEngngModel()->giveCoupledModels(coupledModels);
+        (static_cast< StaggeredProblem *>(domain->giveEngngModel()->giveMasterEngngModel()))->giveCoupledModels(coupledModels);
         int couplingFlag = ( static_cast< LatticeTransportElement * >( gp->giveElement() ) )->giveCouplingFlag();
 
         if ( couplingFlag == 1 && coupledModels.at(1) != 0 && !stepN->isTheFirstStep() ) {

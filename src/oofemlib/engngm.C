@@ -416,9 +416,6 @@ EngngModel :: initializeFrom(InputRecord *ir)
         this->defaultErrEstimator->initializeFrom(ir);
     }
 
-    coupledModels.resize(3);
-    IR_GIVE_OPTIONAL_FIELD(ir, this->coupledModels, _IFT_EngngModel_coupling);
-
 #ifdef __PARALLEL_MODE
     IR_GIVE_OPTIONAL_FIELD(ir, parallelFlag, _IFT_EngngModel_parallelflag);
     // fprintf (stderr, "Parallel mode is %d\n", parallelFlag);

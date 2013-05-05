@@ -55,7 +55,6 @@
 #define _IFT_LatticeDamage2d_wfOne "wf1"
 #define _IFT_LatticeDamage2d_localrandomtype "randomtype"
 #define _IFT_LatticeDamage2d_coefficientOfVariation "cov"
-#define _IFT_LatticeDamage2d_equivType "equivtype"
 #define _IFT_LatticeDamage2d_e0Mean "e0"
 #define _IFT_LatticeDamage2d_e0OneMean "e01"
 #define _IFT_LatticeDamage2d_coh "coh"

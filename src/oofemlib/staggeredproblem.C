@@ -157,6 +157,9 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
 
     renumberFlag = true; // The staggered problem itself should always try to check if the sub-problems needs renumbering.
 
+    coupledModels.resize(3);
+    IR_GIVE_OPTIONAL_FIELD(ir, this->coupledModels, _IFT_EngngModel_coupling);
+
     return IRRT_OK;
 }
 

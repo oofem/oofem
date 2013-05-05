@@ -43,6 +43,7 @@
 #include "latticestructuralelement.h"
 #include "latticetransportelement.h"
 #include "isolinearelasticmaterial.h"
+#include "staggeredproblem.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -119,8 +120,6 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, coefficientOfVariation, _IFT_LatticeDamage2d_coefficientOfVariation);
     }
 
-    int equivType = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, equivType, _IFT_LatticeDamage2d_equivType);
     e0Mean = 0;
     IR_GIVE_FIELD(ir, e0Mean, _IFT_LatticeDamage2d_e0Mean);
 
@@ -417,8 +416,9 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
     //Add the water pressure to the normal component of the stress
     IntArray coupledModels;
     double waterPressure = 0.;
-    if ( domain->giveEngngModel()->giveMasterEngngModel() ) {
-        domain->giveEngngModel()->giveMasterEngngModel()->giveCoupledModels(coupledModels);
+
+    if (domain->giveEngngModel()->giveMasterEngngModel() ) {
+      (static_cast< StaggeredProblem *>(domain->giveEngngModel()->giveMasterEngngModel()))->giveCoupledModels(coupledModels);
         int couplingFlag = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveCouplingFlag();
 
         if ( couplingFlag == 1 && coupledModels.at(2) != 0 && !atTime->isTheFirstStep() ) {

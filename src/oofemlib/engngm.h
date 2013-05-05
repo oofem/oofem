@@ -266,11 +266,9 @@ protected:
     // initial value of processor time used by program
     // clock_t startClock;
 
-    /// List of slave models to which this model is coupled    
-    IntArray coupledModels;
-
     /// Master e-model; if defined receiver is in maintained (slave) mode.
     EngngModel *master;
+
     /// Context.
     EngngModelContext *context;
     /// E-model timer.
@@ -367,12 +365,6 @@ public:
     void setDomain (int i, Domain *ptr);
     /// Returns number of domains in problem.
     int giveNumberOfDomains() { return ndomains; }
-
-    /// Returns list of model number that this model is coupled with. Used for staggered approach.
-    void giveCoupledModels(IntArray& answer) { answer = coupledModels;}
-
-    ///Returns the master engnmodel
-    EngngModel* giveMasterEngngModel(){return this->master;}
 
     /** Service for accessing ErrorEstimator corresponding to particular domain */
     virtual ErrorEstimator *giveDomainErrorEstimator(int n) { return defaultErrEstimator; }
@@ -521,6 +513,9 @@ public:
      * @see Dof::giveUnknown
      */
     virtual double giveUnknownComponent(ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
+
+    ///Returns the master engnmodel
+    EngngModel* giveMasterEngngModel(){return this->master;}
 
 #ifdef __PARALLEL_MODE
     /// Returns the communication object of reciever.
