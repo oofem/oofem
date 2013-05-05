@@ -911,10 +911,10 @@ ProblemCommunicator :: setUpCommunicationMaps(EngngModel *pm, bool excludeSelfCo
 int
 ProblemCommunicator :: setProcessCommunicatorToSendArry(ProcessCommunicator *processComm, IntArray &map)
 {
-    if ( ( this->mode == ProblemCommMode__NODE_CUT ) ) {
+    if ( this->mode == ProblemCommMode__NODE_CUT ) {
         sortCommMap(map, & ProblemCommunicator :: DofManCmp);
-    } else if ( ( this->mode == ProblemCommMode__REMOTE_ELEMENT_MODE ) ||
-               ( this->mode == ProblemCommMode__ELEMENT_CUT ) ) {
+    } else if ( this->mode == ProblemCommMode__REMOTE_ELEMENT_MODE ||
+               this->mode == ProblemCommMode__ELEMENT_CUT ) {
         sortCommMap(map, & ProblemCommunicator :: ElemCmp);
     } else {
         _error("setDomainCommunicatorToSendArry: unknown mode");
@@ -927,10 +927,10 @@ ProblemCommunicator :: setProcessCommunicatorToSendArry(ProcessCommunicator *pro
 int
 ProblemCommunicator :: setProcessCommunicatorToRecvArry(ProcessCommunicator *processComm, IntArray &map)
 {
-    if ( ( this->mode == ProblemCommMode__NODE_CUT ) ) {
+    if ( this->mode == ProblemCommMode__NODE_CUT ) {
         sortCommMap(map, & ProblemCommunicator :: DofManCmp);
-    } else if ( ( this->mode == ProblemCommMode__REMOTE_ELEMENT_MODE ) ||
-               ( this->mode == ProblemCommMode__ELEMENT_CUT ) ) {
+    } else if ( this->mode == ProblemCommMode__REMOTE_ELEMENT_MODE ||
+               this->mode == ProblemCommMode__ELEMENT_CUT ) {
         sortCommMap(map, & ProblemCommunicator :: ElemCmp);
     } else {
         _error("setDomainCommunicatorToRecvArry: unknown mode");

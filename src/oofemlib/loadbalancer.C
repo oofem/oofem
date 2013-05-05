@@ -404,13 +404,13 @@ LoadBalancer :: deleteRemoteDofManagers(Domain *d)
 
     for ( int i = 1; i <= ndofman; i++ ) {
         dmode = this->giveDofManState(i);
-        if ( ( dmode == LoadBalancer :: DM_Remote ) ) {
+        if ( dmode == LoadBalancer :: DM_Remote ) {
             // positive candidate found
             dtm->addTransaction(DomainTransactionManager :: DTT_Remove, DomainTransactionManager :: DCT_DofManager, d->giveDofManager(i)->giveGlobalNumber(), NULL);
             // dmanMap.erase (d->giveDofManager (i)->giveGlobalNumber());
             //dman = dofManagerList->unlink (i);
             //delete dman;
-        } else if ( ( dmode == LoadBalancer :: DM_NULL ) ) {
+        } else if ( dmode == LoadBalancer :: DM_NULL ) {
             // positive candidate found; we delete all null dof managers
             // they will be created by nonlocalmatwtp if necessary.
             // potentially, they can be reused, but this will make the code too complex
