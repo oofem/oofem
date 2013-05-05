@@ -94,8 +94,6 @@ int ClassFactory :: CaseComp :: operator()(const std::string &a, const std::stri
 
 ClassFactory :: ClassFactory()
 {
-    printf("Classfactory created!\n");
-
     // Fixed list for DOF types. No new components can register for these since these are part of the internal structure in OOFEM.
     dofList [ DT_master ] = dofCreator< MasterDof >;
     dofList [ DT_simpleSlave ] = dofCreator< SimpleSlaveDof >;
@@ -115,7 +113,6 @@ SparseMtrx *ClassFactory :: createSparseMtrx(SparseMtrxType name)
 
 bool ClassFactory :: registerSparseMtrx(SparseMtrxType name, SparseMtrx * ( *creator )() )
 {
-    printf("Register %d\n", name);
     sparseMtrxList[name] = creator;
     return true;
 }
@@ -132,7 +129,6 @@ SparseLinearSystemNM *ClassFactory :: createSparseLinSolver(LinSystSolverType na
 
 bool ClassFactory :: registerSparseLinSolver(LinSystSolverType name, SparseLinearSystemNM * ( *creator )(Domain*, EngngModel*) )
 {
-    printf("Register %d\n", name);
     sparseLinSolList[name] = creator;
     return true;
 }
@@ -144,7 +140,6 @@ ErrorEstimator * ClassFactory :: createErrorEstimator(ErrorEstimatorType name, i
 
 bool ClassFactory :: registerErrorEstimator(ErrorEstimatorType name, ErrorEstimator * ( *creator )(int, Domain*) )
 {
-    printf("Register %d\n", name);
     errEstList[name] = creator;
     return true;
 }
@@ -186,7 +181,6 @@ Element* ClassFactory :: createElement( const char* name, int number, Domain* do
 
 bool ClassFactory :: registerElement(const char *name, Element * ( *creator )(int, Domain *))
 {
-    printf("Register %s\n", name);
     elemList[name] = creator;
     return true;
 }
@@ -198,7 +192,6 @@ DofManager* ClassFactory :: createDofManager( const char* name, int number, Doma
 
 bool ClassFactory :: registerDofManager(const char *name, DofManager * ( *creator )(int, Domain *))
 {
-    printf("Register %s\n", name);
     dofmanList[name] = creator;
     return true;
 }
@@ -210,7 +203,6 @@ GeneralBoundaryCondition* ClassFactory :: createBoundaryCondition( const char* n
 
 bool ClassFactory :: registerBoundaryCondition(const char *name, GeneralBoundaryCondition * ( *creator )(int, Domain *))
 {
-    printf("Register %s\n", name);
     bcList[name] = creator;
     return true;
 }
@@ -222,7 +214,6 @@ CrossSection* ClassFactory :: createCrossSection( const char* name, int number, 
 
 bool ClassFactory :: registerCrossSection(const char *name, CrossSection * ( *creator )(int, Domain *))
 {
-    printf("Register %s\n", name);
     csList[name] = creator;
     return true;
 }
@@ -234,7 +225,6 @@ Material* ClassFactory :: createMaterial( const char* name, int number, Domain* 
 
 bool ClassFactory :: registerMaterial(const char *name, Material * ( *creator )(int, Domain *))
 {
-    printf("Register %s\n", name);
     matList[name] = creator;
     return true;
 }
@@ -246,7 +236,6 @@ EngngModel* ClassFactory :: createEngngModel( const char* name, int number, Engn
 
 bool ClassFactory :: registerEngngModel(const char *name, EngngModel * ( *creator )(int, EngngModel *))
 {
-    printf("Register %s\n", name);
     engngList[name] = creator;
     return true;
 }
@@ -258,7 +247,6 @@ LoadTimeFunction* ClassFactory :: createLoadTimeFunction( const char* name, int 
 
 bool ClassFactory :: registerLoadTimeFunction(const char *name, LoadTimeFunction * ( *creator )(int, Domain *))
 {
-    printf("Register %s\n", name);
     ltfList[name] = creator;
     return true;
 }
@@ -270,7 +258,6 @@ NonlocalBarrier* ClassFactory :: createNonlocalBarrier( const char* name, int nu
 
 bool ClassFactory :: registerNonlocalBarrier(const char *name, NonlocalBarrier * ( *creator )(int, Domain *))
 {
-    printf("Register %s\n", name);
     nlbList[name] = creator;
     return true;
 }
@@ -282,7 +269,6 @@ RandomFieldGenerator* ClassFactory :: createRandomFieldGenerator( const char* na
 
 bool ClassFactory :: registerRandomFieldGenerator(const char *name, RandomFieldGenerator * ( *creator )(int, Domain *))
 {
-    printf("Register %s\n", name);
     rfgList[name] = creator;
     return true;
 }
@@ -294,7 +280,6 @@ ExportModule* ClassFactory :: createExportModule(const char *name, int number, E
 
 bool ClassFactory :: registerExportModule(const char *name, ExportModule * ( *creator )(int, EngngModel *))
 {
-    printf("Register %s\n", name);
     exportList[name] = creator;
     return true;
 }
@@ -306,7 +291,6 @@ SparseNonLinearSystemNM* ClassFactory :: createNonLinearSolver(const char *name,
 
 bool ClassFactory :: registerSparseNonLinearSystemNM(const char *name, SparseNonLinearSystemNM * ( *creator )(Domain *, EngngModel *))
 {
-    printf("Register %s\n", name);
     nonlinList[name] = creator;
     return true;
 }
@@ -318,7 +302,6 @@ InitModule* ClassFactory :: createInitModule(const char *name, int number, Engng
 
 bool ClassFactory :: registerInitModule(const char *name, InitModule * ( *creator )(int, EngngModel *))
 {
-    printf("Register %s\n", name);
     initList[name] = creator;
     return true;
 }
@@ -330,7 +313,6 @@ TopologyDescription* ClassFactory :: createTopology(const char *name, Domain *do
 
 bool ClassFactory :: registerTopologyDescription(const char *name, TopologyDescription * ( *creator )(Domain *))
 {
-    printf("Register %s\n", name);
     topologyList[name] = creator;
     return true;
 }
@@ -344,7 +326,6 @@ EnrichmentItem* ClassFactory :: createEnrichmentItem(const char *name, int numbe
 
 bool ClassFactory :: registerEnrichmentItem(const char *name, EnrichmentItem * ( *creator )(int, XfemManager *, Domain *))
 {
-    printf("Register %s\n", name);
     enrichItemList[name] = creator;
     return true;
 }
@@ -356,7 +337,6 @@ EnrichmentFunction* ClassFactory :: createEnrichmentFunction(const char *name, i
 
 bool ClassFactory :: registerEnrichmentFunction(const char *name, EnrichmentFunction * ( *creator )(int, Domain *))
 {
-    printf("Register %s\n", name);
     enrichFuncList[name] = creator;
     return true;
 }
@@ -368,7 +348,6 @@ EnrichmentDomain* ClassFactory :: createEnrichmentDomain(const char *name)
 
 bool ClassFactory :: registerEnrichmentDomain(const char *name, EnrichmentDomain * ( *creator )())
 {
-    printf("Register %s\n", name);
     enrichmentDomainList[name] = creator;
     return true;
 }
@@ -380,7 +359,6 @@ BasicGeometry* ClassFactory :: createGeometry(const char *name)
 
 bool ClassFactory :: registerGeometry(const char *name, BasicGeometry * ( *creator )())
 {
-    printf("Register %s\n", name);
     geometryList[name] = creator;
     return true;
 }
