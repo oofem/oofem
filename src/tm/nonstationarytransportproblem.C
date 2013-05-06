@@ -65,6 +65,8 @@ NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel
     dtTimeFunction = 0;
     internalVarUpdateStamp = 0;
     changingProblemSize = false;
+    linSolver = NULL;
+    solverType = ST_Direct;
 }
 
 NonStationaryTransportProblem :: ~NonStationaryTransportProblem()
@@ -76,16 +78,16 @@ NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *
 //     - SolutionOfLinearEquations
 
 {
-    if ( nMethod ) {
-        return nMethod;
+    if ( linSolver ) {
+        return linSolver;
     }
 
-    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
-    if ( nMethod == NULL ) {
+    linSolver = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+    if ( linSolver == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }
 
-    return nMethod;
+    return linSolver;
 }
 
 IRResultType
@@ -129,6 +131,11 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
 
     //read other input data from StationaryTransportProblem
     StationaryTransportProblem :: initializeFrom(ir);
+
+    int val = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
+    solverType = ( LinSystSolverType ) val;
+
 
     return IRRT_OK;
 }
@@ -345,7 +352,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
     UnknownsField->giveSolutionVector(tStep)->resize(neq);
-    nMethod->solve( conductivityMatrix, & rhs, UnknownsField->giveSolutionVector(tStep) );
+    linSolver->solve( conductivityMatrix, & rhs, UnknownsField->giveSolutionVector(tStep) );
     // update solution state counter
     tStep->incrementStateCounter();
 }

@@ -71,7 +71,7 @@ protected:
     StateCounterType internalVarUpdateStamp;
     
     LinSystSolverType solverType; ///@todo Remove this and use nonlinear methods.
-    SparseLinearSystemNM *nMethod; ///@todo Remove this and use nonlinear methods.
+    SparseLinearSystemNM *linSolver; ///@todo Remove this and use nonlinear methods.
 
     /// Right hand side vector from boundary conditions.
     FloatArray bcRhs;

@@ -62,6 +62,7 @@ LinearStatic :: LinearStatic(int i, EngngModel *_master) : StructuralEngngModel(
     ndomains = 1;
     nMethod = NULL;
     initFlag = 1;
+    solverType = ST_Direct;
 
 #ifdef __PARALLEL_MODE
     commMode = ProblemCommMode__NODE_CUT;
