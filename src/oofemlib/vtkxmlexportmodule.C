@@ -203,6 +203,8 @@ VTKXMLExportModule :: giveCellType(Element *elem)
         vtkCellType = 12;
     } else if ( elemGT == EGT_hexa_2 ) {
         vtkCellType = 25;
+    } else if ( elemGT == EGT_hexa_27 ) {
+        vtkCellType = 29;
     } else if ( elemGT == EGT_wedge_1 ) {
         vtkCellType = 13;
     } else if ( elemGT == EGT_wedge_2 ) {
@@ -248,6 +250,8 @@ VTKXMLExportModule :: giveNumberOfNodesPerCell(int cellType)
 
         case 25:
             return 20;
+        case 29:
+            return 27;
 
         default:
             OOFEM_ERROR("VTKXMLExportModule: unsupported cell type ID");
@@ -269,11 +273,21 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
         ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
-        ( elemGT == EGT_hexa_1 ) || (elemGT == EGT_wedge_1) ) {
+        ( elemGT == EGT_hexa_1 ) ||
+        (elemGT == EGT_wedge_1) ) {
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( int i = 1; i <= nelemNodes; i++ ) {
             answer.at(i) = elem->giveNode(i)->giveNumber() ;
+        }
+    } else if ( elemGT == EGT_hexa_27 ) {
+        int HexaQuadNodeMapping [] = {
+            5, 8, 7, 6, 1, 4, 3, 2, 16, 15, 14, 13, 12, 11, 10, 9, 17, 20, 19, 18, 23, 25, 26, 24, 22, 21, 27
+        };
+        nelemNodes = elem->giveNumberOfNodes();
+        answer.resize(nelemNodes);
+        for ( int i = 1; i <= nelemNodes; i++ ) {
+            answer.at(i) = elem->giveNode(HexaQuadNodeMapping [ i - 1 ])->giveNumber() ;
         }
     } else if ( elemGT == EGT_hexa_2 ) {
         int HexaQuadNodeMapping [] = {
@@ -284,7 +298,8 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
         for ( int i = 1; i <= nelemNodes; i++ ) {
             answer.at(i) = elem->giveNode(HexaQuadNodeMapping [ i - 1 ])->giveNumber() ;
         }
-    } else if ( elemGT == EGT_wedge_2 ) {int WedgeQuadNodeMapping [] = { 4, 6, 5, 1, 3, 2, 12, 11, 10, 9, 8, 7, 13, 15,14 };
+    } else if ( elemGT == EGT_wedge_2 ) {
+        int WedgeQuadNodeMapping [] = { 4, 6, 5, 1, 3, 2, 12, 11, 10, 9, 8, 7, 13, 15,14 };
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( int i = 1; i <= nelemNodes; i++ ) {
@@ -314,7 +329,7 @@ VTKXMLExportModule :: giveNumberOfElementCells(Element *elem)
         ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
-        ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) ||
+        ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) || ( elemGT == EGT_hexa_27 ) ||
         ( elemGT == EGT_wedge_1 ) || ( elemGT == EGT_wedge_2 ) ) {
         return 1;
     } else {

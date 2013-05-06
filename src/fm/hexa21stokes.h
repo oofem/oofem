@@ -77,15 +77,13 @@ protected:
 
     /// Defines the ordering of the dofs in the local stiffness matrix.
     static bool initOrdering() {
-        return true;
-    /*
         for (int i = 0, j = 1; i < 27; ++i) {
             momentum_ordering(i*3+0) = j++;
             momentum_ordering(i*3+1) = j++;
             momentum_ordering(i*3+2) = j++;
-            if ( i <= 8 ) j++;
+            if ( i < 8 ) j++;
         }
-        conservation_ordering.setValues(8, 4, 8, 12, 16);
+        conservation_ordering.setValues(8, 4, 8, 12, 16, 20, 24, 28, 32);
 
         surf_ordering [ 0 ].setValues(27,
                                      5,   6,   7, // node 2
@@ -153,7 +151,6 @@ protected:
                                     66,  67,  68, // node 20
                                     84,  85,  86);// node 26
         return true;
-        */
     }
 
 public:

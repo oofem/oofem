@@ -64,7 +64,7 @@ bool Hexa21Stokes :: __initialized = Hexa21Stokes :: initOrdering();
 
 Hexa21Stokes :: Hexa21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 {
-    this->numberOfDofMans = 10;
+    this->numberOfDofMans = 27;
     this->numberOfGaussPoints = 27;
 }
 
@@ -83,7 +83,7 @@ void Hexa21Stokes :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, this->numberOfGaussPoints, _2dFlow);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, this->numberOfGaussPoints, _3dFlow);
     }
 }
 
@@ -171,6 +171,12 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
         FloatArray *lcoords = gp->giveCoordinates();
 
         double detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
+#if 1
+        FloatMatrix jac;
+        this->interpolation_quad.giveJacobianMatrixAt(jac, * lcoords, FEIElementGeometryWrapper(this));
+        printf("J = \n");
+        jac.printYourself();
+#endif
         this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
         this->interpolation_lin.evalN(Nh, * lcoords, FEIElementGeometryWrapper(this));
         double dV = detJ * gp->giveWeight();
@@ -359,7 +365,7 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
     GDp = G;
     GDp.add(Dp);
 
-    answer.resize(34, 34);
+    answer.resize(89, 89);
     answer.zero();
     answer.assemble(K, this->momentum_ordering);
     answer.assemble(GDp, this->momentum_ordering, this->conservation_ordering);
@@ -471,7 +477,7 @@ void Hexa21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answ
         answer.resize(1);
         if ( node <= 8 ) { // Corner nodes
             answer.at(1) = this->giveNode(node)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
-        } else if ( node <= 12 ) { // Edge nodes
+        } else if ( node <= 20 ) { // Edge nodes
             // Edges are numbered consistently with edge nodes, so node number - 8 = edge number
             IntArray eNodes;
             this->interpolation_quad.computeLocalEdgeMapping(eNodes, node - 8);
@@ -481,7 +487,7 @@ void Hexa21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answ
         } else if ( node <= 26 ) { // Face nodes
             // Faces are numbered consistently with edge nodes, so node number - 12 = face number
             IntArray fNodes;
-            this->interpolation_quad.computeLocalSurfaceMapping(fNodes, node - 12);
+            this->interpolation_quad.computeLocalSurfaceMapping(fNodes, node - 20);
             answer.at(1) = 0.25 * (
                 this->giveNode(fNodes.at(1))->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) +
                 this->giveNode(fNodes.at(2))->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) + 
