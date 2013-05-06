@@ -47,7 +47,7 @@ FEI3dHexaTriQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const F
 
     double a[] = {0.5*(u-1.0)*u, 0.5*(u+1.0)*u, 1.0-u*u};
     double b[] = {0.5*(v-1.0)*v, 0.5*(v+1.0)*v, 1.0-v*v};
-    double c[] = {0.5*(w-1.0)*v, 0.5*(w+1.0)*w, 1.0-w*w};
+    double c[] = {0.5*(w-1.0)*w, 0.5*(w+1.0)*w, 1.0-w*w};
 
     answer.resize(27);
 
@@ -197,7 +197,7 @@ FEI3dHexaTriQuad :: giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoor
     // Helpers expressions;
     double a[] = {0.5*(u-1.0)*u, 0.5*(u+1.0)*u, 1.0-u*u};
     double b[] = {0.5*(v-1.0)*v, 0.5*(v+1.0)*v, 1.0-v*v};
-    double c[] = {0.5*(w-1.0)*v, 0.5*(w+1.0)*w, 1.0-w*w};
+    double c[] = {0.5*(w-1.0)*w, 0.5*(w+1.0)*w, 1.0-w*w};
 
     double da[] = {-0.5 + u, 0.5 + u, -2.0 * u};
     double db[] = {-0.5 + v, 0.5 + v, -2.0 * v};
