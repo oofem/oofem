@@ -45,6 +45,7 @@
 #include "errorestimatortype.h"
 #include "intarray.h"
 #include "internalstatetype.h"
+#include "remeshingcrit.h"
 
 ///@name Input fields for ErrorEstimator
 //@{

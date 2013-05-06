@@ -519,7 +519,17 @@ TR_SHELL01  :: drawScalar(oofegGraphicContext &context)
         result += this->giveInternalStateAtNode(v2, context.giveIntVarType(), context.giveIntVarMode(), 2, tStep);
         result += this->giveInternalStateAtNode(v3, context.giveIntVarType(), context.giveIntVarMode(), 3, tStep);
     } else if ( context.giveIntVarMode() == ISM_local ) {
-        return;
+      int nip = plate->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
+      FloatArray a, v(12);
+      v.zero();
+      for (int _i=1; _i<= nip; _i++) {
+	this->giveIPValue(a, plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(_i-1), IST_ShellForceMomentumTensor, tStep);
+	v += a;
+      }
+      v.times(1./nip);
+      v1 = v;
+      v2 =v;
+      v3 =v;
     }
 
     result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
