@@ -197,7 +197,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
         // compute norm of residuals from balance equations
         solutionErr = rhs.computeNorm();
 
-        nMethod->solve(conductivityMatrix, & rhs, & solutionVectorIncrement);
+        linSolver->solve(conductivityMatrix, & rhs, & solutionVectorIncrement);
         solutionVector->add(solutionVectorIncrement);
         this->updateInternalState(& TauStep); //insert to hash=0(current), if changes in equation numbering
         // compute error in the solutionvector increment
