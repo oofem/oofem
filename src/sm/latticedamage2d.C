@@ -41,10 +41,12 @@
 #include "contextioerr.h"
 #include "mathfem.h"
 #include "latticestructuralelement.h"
-#include "latticetransportelement.h"
 #include "isolinearelasticmaterial.h"
 #include "staggeredproblem.h"
 #include "classfactory.h"
+#ifdef __TM_MODULE
+#include "latticetransportelement.h"
+#endif
 
 namespace oofem {
 
@@ -417,6 +419,7 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
     IntArray coupledModels;
     double waterPressure = 0.;
 
+#ifdef __TM_MODULE
     if (domain->giveEngngModel()->giveMasterEngngModel() ) {
       (static_cast< StaggeredProblem *>(domain->giveEngngModel()->giveMasterEngngModel()))->giveCoupledModels(coupledModels);
         int couplingFlag = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveCouplingFlag();
@@ -429,6 +432,7 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
             waterPressure = coupledElement->givePressure();
         }
     }
+#endif
 
     answer.at(1) = answer.at(1) + biotCoefficient * waterPressure;
 
