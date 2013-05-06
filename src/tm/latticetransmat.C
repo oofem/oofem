@@ -37,14 +37,12 @@
 #include "gausspoint.h"
 #include "latticetransportelement.h"
 #include "math.h"
-#include "nlinearstatic.h"
-#include "latticestructuralelement.h"
 #include "staggeredproblem.h"
 #include "classfactory.h"
-
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
+#ifdef __SM_MODULE
+#include "latticestructuralelement.h"
 #endif
+
 namespace oofem {
 
 REGISTER_Material( LatticeTransportMaterial );
@@ -159,6 +157,7 @@ LatticeTransportMaterial :: computeConductivity(FloatArray &stateVector,
 
     double crackWidth = 0.;
 
+#ifdef __SM_MODULE
     IntArray coupledModels;
     if ( domain->giveEngngModel()->giveMasterEngngModel() ) {
         (static_cast< StaggeredProblem *>(domain->giveEngngModel()->giveMasterEngngModel()))->giveCoupledModels(coupledModels);
@@ -171,7 +170,10 @@ LatticeTransportMaterial :: computeConductivity(FloatArray &stateVector,
             coupledElement  = static_cast< LatticeStructuralElement * >( domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem( coupledModels.at(1) )->giveDomain(1)->giveElement(couplingNumber) );
             crackWidth = coupledElement->giveCrackWidth();
         }
-    } else {
+    } 
+#endif
+
+    if (!domain->giveEngngModel()->giveMasterEngngModel() ) {
         crackWidth = ( static_cast< LatticeTransportElement * >( gp->giveElement() ) )->giveCrackWidth();
     }
 
