@@ -165,20 +165,13 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
     FloatArray momentum, conservation;
 
     B.zero();
-    GaussPoint *gp;
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
-        FloatArray *lcoords = gp->giveCoordinates();
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
+        const FloatArray &lcoords = * gp->giveCoordinates();
 
-        double detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
-#if 1
-        FloatMatrix jac;
-        this->interpolation_quad.giveJacobianMatrixAt(jac, * lcoords, FEIElementGeometryWrapper(this));
-        printf("J = \n");
-        jac.printYourself();
-#endif
-        this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
-        this->interpolation_lin.evalN(Nh, * lcoords, FEIElementGeometryWrapper(this));
+        double detJ = fabs( this->interpolation_quad.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this)) );
+        this->interpolation_quad.evaldNdx(dN, lcoords, FEIElementGeometryWrapper(this));
+        this->interpolation_lin.evalN(Nh, lcoords, FEIElementGeometryWrapper(this));
         double dV = detJ * gp->giveWeight();
 
         for ( int j = 0, k = 0; j < dN.giveNumberOfRows(); j++, k+=3 ) {
@@ -186,6 +179,8 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
             dN_V(k + 1) = B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(j, 1);
             dN_V(k + 2) = B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(j, 2);
         }
+        dN.printYourself();
+        B.printYourself();
 
         epsp.beProductOf(B, a_velocity);
         pressure = Nh.dotProduct(a_pressure);
@@ -205,21 +200,17 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
 
 void Hexa21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
 {
-    int load_number, load_id;
-    Load *load;
-    bcGeomType ltype;
     FloatArray vec;
 
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
     answer.resize(0);
 
     for ( int i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition
-        load_number = this->boundaryLoadArray.at(2 * i - 1);
-        load_id = this->boundaryLoadArray.at(2 * i);
-        load = this->domain->giveLoad(load_number);
-        ltype = load->giveBCGeoType();
+        int load_number = this->boundaryLoadArray.at(2 * i - 1);
+        int load_id = this->boundaryLoadArray.at(2 * i);
+        Load *load = this->domain->giveLoad(load_number);
 
-        if ( ltype == SurfaceLoadBGT ) {
+        if ( load->giveBCGeoType() == SurfaceLoadBGT ) {
             this->computeSurfaceBCSubVectorAt(vec, load, load_id, tStep);
             answer.add(vec);
         }
@@ -227,9 +218,8 @@ void Hexa21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
 
     nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
-        load  = domain->giveLoad( bodyLoadArray.at(i) );
-        ltype = load->giveBCGeoType();
-        if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
+        Load *load = domain->giveLoad( bodyLoadArray.at(i) );
+        if ( load->giveBCGeoType() == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
             this->computeBodyLoadVectorAt(vec, load, tStep);
             answer.add(vec);
         }
@@ -316,23 +306,22 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
 {
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    GaussPoint *gp;
     FloatMatrix B(6, 81), EdB, K, G, Dp, DvT, C, Ed, dN;
-    FloatArray *lcoords, dN_V(81), Nlin, Ep, Cd, tmpA, tmpB;
+    FloatArray dN_V(81), Nlin, Ep, Cd, tmpA, tmpB;
     double Cp;
 
     B.zero();
 
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         // Compute Gauss point and determinant at current element
-        gp = iRule->getIntegrationPoint(i);
-        lcoords = gp->giveCoordinates();
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
+        const FloatArray &lcoords = *gp->giveCoordinates();
 
-        double detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
+        double detJ = fabs( this->interpolation_quad.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this)) );
         double dV = detJ * gp->giveWeight();
 
-        this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
-        this->interpolation_lin.evalN(Nlin, * lcoords, FEIElementGeometryWrapper(this));
+        this->interpolation_quad.evaldNdx(dN, lcoords, FEIElementGeometryWrapper(this));
+        this->interpolation_lin.evalN(Nlin, lcoords, FEIElementGeometryWrapper(this));
 
         for ( int j = 0, k = 0; j < dN.giveNumberOfRows(); j++, k+=3 ) {
             dN_V(k + 0) = B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(j, 0);
