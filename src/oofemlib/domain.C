@@ -792,7 +792,7 @@ Domain :: instanciateYourself(DataReader *dr)
     
     // read load time functions
     setList->growTo(nset);
-    for ( int i = 1; i < nset; i++ ) {
+    for ( int i = 1; i <= nset; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_setRec, i);
         // read type of ltf
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
