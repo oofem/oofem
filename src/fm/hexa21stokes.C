@@ -179,8 +179,6 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
             dN_V(k + 1) = B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(j, 1);
             dN_V(k + 2) = B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(j, 2);
         }
-        dN.printYourself();
-        B.printYourself();
 
         epsp.beProductOf(B, a_velocity);
         pressure = Nh.dotProduct(a_pressure);

@@ -278,8 +278,10 @@ IntegrationRule *MixedGradientPressureNeumann :: CreateIntegrationRule(Element *
     int npoints;
     integrationDomain id;
     if (nsd == 3) {
-        npoints = 4; ///@todo I don't know how to determine this for surfaces
-        id = _Triangle; ///@todo We need to obtain this from the element itself.
+        ///@todo I don't know how to determine this for surfaces, We need to obtain this from the element itself.
+        npoints = 4;
+        //id = _Triangle;
+        id = _Square;
     } else if (nsd == 2) {
         npoints = (order + 1 + 1)/2; // extra +1 for rounding up; npoints gives exact integration for order = npoints*2 - 1
         id = _Line;
