@@ -821,7 +821,7 @@ EngngModel :: printOutputAt(FILE *File, TimeStep *stepN)
     }
 
     fprintf(File, "\n==============================================================");
-    fprintf( File, "\nOutput for time % .8e ", stepN->giveTargetTime() * this->giveVariableScale(VST_Time) );
+    fprintf(File, "\nOutput for time % .8e ", stepN->giveTargetTime() * this->giveVariableScale(VST_Time) );
     fprintf(File, "\n==============================================================\n");
     for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
         domain = this->giveDomain(idomain);
@@ -836,7 +836,7 @@ void EngngModel :: printYourself()
 {
     printf( "\nEngineeringModel: instance %s\n", this->giveClassName() );
     printf( "number of steps: %d\n", this->giveNumberOfSteps() );
-    printf("number of eq's : %d\n", numberOfEquations);
+    printf( "number of eq's : %d\n", numberOfEquations );
 }
 
 void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,

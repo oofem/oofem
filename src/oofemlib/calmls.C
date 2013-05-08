@@ -705,11 +705,12 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
         dXX = X.computeSquaredNorm();
 
 #endif
+        double eNorm = internalForcesEBENorm.sum();
         // we compute a relative error norm
         if ( ( RR0 + RR * Lambda * Lambda ) > calm_SMALL_ERROR_NUM ) {
             forceErr = sqrt( forceErr / ( RR0 + RR * Lambda * Lambda ) );
-        } else if ( internalForcesEBENorm.at(1) > calm_SMALL_ERROR_NUM ) {
-            forceErr = sqrt(forceErr / internalForcesEBENorm.at(1));
+        } else if ( eNorm > calm_SMALL_ERROR_NUM ) {
+            forceErr = sqrt(forceErr / eNorm );
         } else {
             forceErr = sqrt(forceErr);
         }
