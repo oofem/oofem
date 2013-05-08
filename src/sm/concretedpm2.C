@@ -1197,7 +1197,7 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
             subIncrementFlag = 0;
             convergedStrain = oldStrain;
             tempStrain = strain;
-            deltaStrain.beDifferenceOf(oldStrain, strain);
+            deltaStrain.beDifferenceOf(strain, oldStrain);
             //To get into the loop
             returnResult = RR_NotConverged;
             while ( returnResult == RR_NotConverged || subIncrementFlag == 1 ) {
@@ -1228,7 +1228,7 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
                     subIncrementFlag = 0;
                     returnResult = RR_NotConverged;
                     convergedStrain = tempStrain;
-                    deltaStrain.beDifferenceOf(convergedStrain, strain);
+                    deltaStrain.beDifferenceOf(strain, convergedStrain);
                     tempStrain = strain;
                 } else {
                     status->letTempKappaPBe(tempKappaP);
