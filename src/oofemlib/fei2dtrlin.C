@@ -176,8 +176,8 @@ double FEI2dTrLin :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatAr
     IntArray edgeNodes;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
     normal.resize(2);
-    normal.at(1) = cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(xind) - cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(xind);
-    normal.at(2) = -(cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(yind) - cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(yind));
+    normal.at(1) = cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(yind) - cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(yind);
+    normal.at(2) = -(cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(xind) - cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(xind));
     return normal.normalize()*0.5;
 }
 
