@@ -107,9 +107,9 @@ POIExportModule :: readPOIFile(const std::string &poiFileName)
 
 
 void
-POIExportModule :: doOutput(TimeStep *tStep)
+POIExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
-    if ( !testTimeStepOutput(tStep) ) {
+    if ( !(testTimeStepOutput(tStep) || forcedOutput) ) {
         return;
     }
 

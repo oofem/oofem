@@ -93,12 +93,20 @@ public:
     /**
      * Writes the output. Abstract service.
      * @param tStep time step.
+     * @param bool if true, no testTimeStepOutput should be done
      */
-    virtual void doOutput(TimeStep *tStep) = 0;
+    virtual void doOutput(TimeStep *tStep, bool forcedOutput=false) = 0;
+    /**
+     * Writes the output. Abstract service.
+     * @param tStep time step.
+     * @param bool if true, no testTimeStepOutput should be done
+     */
+    void doForcedOutput(TimeStep *tStep) { doOutput(tStep,true); }
     /**
      * Initializes receiver.
      * The init file messages should be printed.
      */
+
     virtual void initialize() { }
     /**
      * Terminates the receiver.

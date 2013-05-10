@@ -118,7 +118,7 @@ MatlabExportModule :: computeArea()
 
 
 void
-MatlabExportModule :: doOutput(TimeStep *tStep)
+MatlabExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
 	FILE *FID;
 	FID = giveOutputStream(tStep);

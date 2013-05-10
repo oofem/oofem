@@ -70,7 +70,7 @@ GPExportModule :: initializeFrom(InputRecord *ir)
 
 
 void
-GPExportModule :: doOutput(TimeStep *tStep)
+GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
     if ( !testTimeStepOutput(tStep) ) {
         return;

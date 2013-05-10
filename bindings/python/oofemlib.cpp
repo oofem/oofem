@@ -424,22 +424,25 @@ void pyclass_ExportModuleManager()
 /*****************************************************
 * ExportModule
 *****************************************************/
+//BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(exportmodule_overloads_dooutput, resize, 1, 2);
 class PyExportModule : public ExportModule, public wrapper<ExportModule>
 {
 public:
     PyExportModule(int i, EngngModel * e) : ExportModule(i, e) {}
 
-    void doOutput(TimeStep *tStep) {
+    void doOutput(TimeStep *tStep, bool forcedOutput=false) {
         this->get_override("doOutput")();
     }
 
-    void default_doOutput(TimeStep *tStep) {this->ExportModule::doOutput(tStep);}
+    void default_doOutput(TimeStep *tStep, bool forcedOutput=false) {this->ExportModule::doOutput(tStep,forcedOutput);}
 };
 
 void pyclass_ExportModule()
 {
     class_<PyExportModule, boost::noncopyable>("ExportModule", no_init)
-        .def("doOutput", pure_virtual(&ExportModule::doOutput))
+        .def("doOutput", pure_virtual(&ExportModule::doOutput), (bp::arg("tStep"), bp::arg("forcedOutput")=false ) )
+        .def("doForcedOutput", &ExportModule::doForcedOutput)
+        //.def("doOutput", pure_virtual(&ExportModule::doOutput), exportmodule_overloads_dooutput() )
         ;
 }
 
@@ -1195,10 +1198,6 @@ void pyenum_domainType()
 /*****************************************************
 * Auxiliary functions
 *****************************************************/
-#if 0
-// construct auxiliary global object (for eval and exec functions) only once
-bp::dict temp_global(import("__main__").attr("__dict__"));
-#endif
 
 /*
 make oofem input line from **kw arguments. This function is used by "constructor" methods

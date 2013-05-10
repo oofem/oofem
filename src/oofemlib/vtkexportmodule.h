@@ -94,7 +94,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void doOutput(TimeStep *tStep);
+    virtual void doOutput(TimeStep *tStep, bool forcedOutput=false);
     virtual void initialize();
     virtual void terminate();
     virtual const char *giveClassName() const { return "VTKExportModule"; }
