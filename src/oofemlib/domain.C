@@ -223,6 +223,7 @@ Domain :: giveGlobalElement(int n)
 
 #ifdef DEBUG
 	_error2("giveGlobalElement: undefined element id (%d)", n);
+	return NULL;
 #endif
 }
 
