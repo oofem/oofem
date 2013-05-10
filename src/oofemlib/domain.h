@@ -240,6 +240,12 @@ public:
      */
     Element *giveElement(int n);
     /**
+     * Service for accessing particular domain fe element.
+     * Generates error if no such element is defined.
+     * @param n Pointer to the element with id n
+     */
+    Element *giveGlobalElement(int n);
+    /**
      * Returns engineering model to which receiver is associated.
      */
     EngngModel *giveEngngModel();

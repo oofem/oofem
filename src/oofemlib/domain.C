@@ -211,6 +211,20 @@ Domain :: giveElement(int n)
     return elementList->at(n);
 }
 
+Element *
+Domain :: giveGlobalElement(int n)
+// Returns the global element with id n. Generates error if it is not defined yet.
+{
+	for (int i=1; i<=elementList->giveSize(); i++) {
+		if (elementList->at(i)->giveGlobalNumber()==n) {
+			return elementList->at(i);
+		}
+	}
+
+#ifdef DEBUG
+	_error2("giveGlobalElement: undefined element id (%d)", n);
+#endif
+}
 
 Load *
 Domain :: giveLoad(int n)
