@@ -248,12 +248,12 @@ void MixedGradientPressureNeumann :: giveLocationArrays(std::vector<IntArray> &r
     Set *set = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = set->giveBoundaryList();
 
-    rows.resize(boundaries.giveSize()/2);
-    cols.resize(boundaries.giveSize()/2);
+    rows.resize(boundaries.giveSize());
+    cols.resize(boundaries.giveSize());
     int i = 0;
     for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
-        Element *e = this->giveDomain()->giveElement( pos*2-1 );
-        int boundary = pos*2;
+        Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
+        int boundary = boundaries.at(pos*2);
 
         e->giveBoundaryLocationArray(loc_r, boundary, eid, r_s);
         e->giveBoundaryLocationArray(loc_c, boundary, eid, c_s);
@@ -278,8 +278,10 @@ IntegrationRule *MixedGradientPressureNeumann :: CreateIntegrationRule(Element *
     int npoints;
     integrationDomain id;
     if (nsd == 3) {
-        npoints = 4; ///@todo I don't know how to determine this for surfaces
-        id = _Triangle; ///@todo We need to obtain this from the element itself.
+        ///@todo I don't know how to determine this for surfaces, We need to obtain this from the element itself.
+        npoints = 4;
+        //id = _Triangle;
+        id = _Square;
     } else if (nsd == 2) {
         npoints = (order + 1 + 1)/2; // extra +1 for rounding up; npoints gives exact integration for order = npoints*2 - 1
         id = _Line;
@@ -447,8 +449,8 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
         // The second contribution is on the momentumbalance equation; - int delta_v . n dA * p
         FloatArray fe;
         for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
-            Element *e = this->giveDomain()->giveElement( pos*2-1 );
-            int boundary = pos*2;
+            Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
+            int boundary = boundaries.at(pos*2);
             
             e->giveBoundaryLocationArray(loc, boundary, eid, s, &masterDofIDs);
             this->integrateVolTangent(fe, e, boundary);
@@ -476,8 +478,8 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
         //           int v (x) n dA : E_i delta_s_i
         norm = 0.;
         for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
-            Element *e = this->giveDomain()->giveElement( pos*2-1 );
-            int boundary = pos*2;
+            Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
+            int boundary = boundaries.at(pos*2);
             
             // Fetch the element information;
             e->giveBoundaryLocationArray(loc, boundary, eid, s, &masterDofIDs);
@@ -526,8 +528,8 @@ void MixedGradientPressureNeumann :: assemble(SparseMtrx *answer, TimeStep *tSte
         this->sigmaDev->giveCompleteLocationArray(sigma_loc_c, c_s);
         
         for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
-            Element *e = this->giveDomain()->giveElement( pos*2-1 );
-            int boundary = pos*2;
+            Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
+            int boundary = boundaries.at(pos*2);
             
             // Fetch the element information;
             e->giveBoundaryLocationArray(loc_r, boundary, eid, r_s);
@@ -567,8 +569,8 @@ void MixedGradientPressureNeumann :: computeFields(FloatArray &sigmaDev, double 
     FloatArray unknowns, fe;
     vol = 0.;
     for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
-        Element *e = this->giveDomain()->giveElement( pos*2-1 );
-        int boundary = pos*2;
+        Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
+        int boundary = boundaries.at(pos*2);
         
         e->computeVectorOf(eid, VM_Total, tStep, unknowns);
         this->integrateVolTangent(fe, e, boundary);
@@ -628,8 +630,8 @@ void MixedGradientPressureNeumann :: computeTangents(
     FloatArray fe;
     IntArray loc;
     for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
-        Element *e = this->giveDomain()->giveElement( pos*2-1 );
-        int boundary = pos*2;
+        Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
+        int boundary = boundaries.at(pos*2);
 
         e->giveBoundaryLocationArray(loc, boundary, eid, fnum);
         this->integrateVolTangent(fe, e, boundary);
@@ -656,8 +658,8 @@ void MixedGradientPressureNeumann :: computeTangents(
     FloatArray e_d(ndev); e_d.zero();
     double e_p = 0.0;
     for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
-        Element *e = this->giveDomain()->giveElement( pos*2-1 );
-        int boundary = pos*2;
+        Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
+        int boundary = boundaries.at(pos*2);
     
         this->integrateVolTangent(fe, e, boundary);
         e->giveBoundaryLocationArray(loc, boundary, eid, fnum);

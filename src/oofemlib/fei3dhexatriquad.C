@@ -320,10 +320,10 @@ FEI3dHexaTriQuad :: giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoor
 
 
 double
-FEI3dHexaTriQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
+FEI3dHexaTriQuad :: evalNXIntegral(int iSurf, const FEICellGeometry &cellgeo)
 {
     IntArray fNodes;
-    this->computeLocalSurfaceMapping(fNodes, iEdge);
+    this->computeLocalSurfaceMapping(fNodes, iSurf);
 
     const FloatArray &c1 = *cellgeo.giveVertexCoordinates(fNodes.at(1));
     const FloatArray &c2 = *cellgeo.giveVertexCoordinates(fNodes.at(2));

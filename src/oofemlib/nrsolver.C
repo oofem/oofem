@@ -761,46 +761,69 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
 #endif
  #endif
         OOFEM_LOG_INFO("NRSolver: %-5d", nite);
+        bool zeroNorm = false;
         // loop over dof groups and check convergence individually
         for ( int dg = 1; dg <= nccdg; dg++ ) {
+            bool zeroFNorm = false, zeroDNorm = false;
             // Skips the ones which aren't used in this problem (the residual will be zero for these anyway, but it is annoying to print them all)
             if ( !idsInUse.at(dg) ) {
                 continue;
             }
-            //  compute a relative error norm
-            if ( ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
-                forceErr = sqrt( dg_forceErr.at(dg) / ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) );
-            } else {
-                 // If both external forces and internal ebe norms are zero, then the residual must be zero.
-                forceErr = sqrt( dg_forceErr.at(dg) );
-            }
-
-            //
-            // compute displacement error
-            //
-            if ( dg_totalDisp.at(dg) >  nrsolver_ERROR_NORM_SMALL_NUM ) {
-                dispErr = sqrt( dg_dispErr.at(dg) / dg_totalDisp.at(dg) );
-            } else {
-                dispErr = sqrt( dg_dispErr.at(dg) );
-            }
-
-            if ( ( rtolf.at(1) > 0.0 && forceErr > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ||
-                 ( rtold.at(1) > 0.0 && dispErr  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ) {
-                errorOutOfRange = true;
-            }
-
-            if ( ( rtolf.at(1) > 0.0 && forceErr > rtolf.at(1) ) || 
-                 ( rtold.at(1) > 0.0 && dispErr > rtold.at(1) ) ) {
-                answer = false;
-            }
-
+            
             OOFEM_LOG_INFO( "  %s:", __DofIDItemToString((DofIDItem)dg).c_str() );
-            if ( rtolf.at(1) > 0.0 ) OOFEM_LOG_INFO( " %.3e", forceErr );
-            if ( rtold.at(1) > 0.0 ) OOFEM_LOG_INFO( " %.3e", dispErr );
+
+            if ( rtolf.at(1) > 0.0 ) {
+                //  compute a relative error norm
+                if ( ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
+                    forceErr = sqrt( dg_forceErr.at(dg) / ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) );
+                } else {
+                    // If both external forces and internal ebe norms are zero, then the residual must be zero.
+                    zeroNorm = true; // Warning about this afterwards.
+                    zeroFNorm = true;
+                    forceErr = sqrt( dg_forceErr.at(dg) );
+                }
+
+                if ( forceErr > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
+                    errorOutOfRange = true;
+                }
+                if ( forceErr > rtolf.at(1) ) {
+                    answer = false;
+                }
+                OOFEM_LOG_INFO( zeroFNorm ? " *%.3e" : "  %.3e", forceErr );
+            }
+
+            if ( rtold.at(1) > 0.0 ) {
+                // compute displacement error
+                if ( dg_totalDisp.at(dg) >  nrsolver_ERROR_NORM_SMALL_NUM ) {
+                    dispErr = sqrt( dg_dispErr.at(dg) / dg_totalDisp.at(dg) );
+                } else {
+                    ///@todo This is almost always the case for displacement error. nrsolveR_ERROR_NORM_SMALL_NUM is no good.
+                    //zeroNorm = true; // Warning about this afterwards.
+                    //zeroDNorm = true;
+                    dispErr = sqrt( dg_dispErr.at(dg) );
+                }
+                if ( dispErr  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
+                    errorOutOfRange = true;
+                }
+                if ( dispErr > rtold.at(1) ) {
+                    answer = false;
+                }
+                OOFEM_LOG_INFO( zeroDNorm ? " *%.3e" : "  %.3e", dispErr );
+            }
         }
         OOFEM_LOG_INFO("\n");
+        if ( zeroNorm ) {
+            OOFEM_WARNING("NRSolver :: checkConvergence - Had to resort to absolute error measure (marked by *)");
+        }
     } else { // No dof grouping
         double dXX, dXdX;
+        
+        if ( engngModel->giveProblemScale() == macroScale ) {
+            OOFEM_LOG_INFO("NRSolver:     %-15d", nite);
+        } else {
+            OOFEM_LOG_INFO("  NRSolver:     %-15d", nite);
+        }
+
  #ifdef __PARALLEL_MODE
         forceErr = parallel_context->norm(rhs); forceErr *= forceErr;
         dXX = parallel_context->localNorm(X); dXX *= dXX; // Note: Solutions are always total global values (natural distribution makes little sense for the solution)
@@ -810,37 +833,39 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         dXX = X.computeSquaredNorm();
         dXdX = ddX.computeSquaredNorm();
  #endif
-        // we compute a relative error norm
-        if ( ( RRT + internalForcesEBENorm.at(1) ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
-            forceErr = sqrt( forceErr / ( RRT + internalForcesEBENorm.at(1) ) );
-        } else {
-            forceErr = sqrt( forceErr ); // absolute norm as last resort
+        if ( rtolf.at(1) > 0.0 ) {
+            // we compute a relative error norm
+            if ( ( RRT + internalForcesEBENorm.at(1) ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
+                forceErr = sqrt( forceErr / ( RRT + internalForcesEBENorm.at(1) ) );
+            } else {
+                forceErr = sqrt( forceErr ); // absolute norm as last resort
+            }
+            if ( fabs(forceErr) > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
+                errorOutOfRange = true;
+            }
+            if ( fabs(forceErr) > rtolf.at(1) ) {
+                answer = false;
+            }
+            OOFEM_LOG_INFO(" %-15e", forceErr);
         }
 
-        // compute displacement error
-        // err is relative displacement change
-        if ( dXX > nrsolver_ERROR_NORM_SMALL_NUM ) {
-            dispErr = sqrt( dXdX / dXX );
-        } else {
-            dispErr = sqrt( dXdX );
+        if ( rtold.at(1) > 0.0 ) {
+            // compute displacement error
+            // err is relative displacement change
+            if ( dXX > nrsolver_ERROR_NORM_SMALL_NUM ) {
+                dispErr = sqrt( dXdX / dXX );
+            } else {
+                dispErr = sqrt( dXdX );
+            }
+            if ( fabs(dispErr)  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
+                errorOutOfRange = true;
+            }
+            if ( fabs(dispErr)  > rtold.at(1) ) {
+                answer = false;
+            }
+            OOFEM_LOG_INFO(" %-15e", dispErr);
         }
 
-        if ( ( rtolf.at(1) > 0.0 && fabs(forceErr) > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ||
-             ( rtold.at(1) > 0.0 && fabs(dispErr)  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ) {
-            errorOutOfRange = true;
-        }
-
-        if ( ( rtolf.at(1) > 0.0 && fabs(forceErr) > rtolf.at(1) ) || 
-             ( rtold.at(1) > 0.0 && fabs(dispErr)  > rtold.at(1) ) ) {
-            answer = false;
-        }
-        if ( engngModel->giveProblemScale() == macroScale ) {
-            OOFEM_LOG_INFO("NRSolver:     %-15d", nite);
-        } else {
-            OOFEM_LOG_INFO("  NRSolver:     %-15d", nite);
-        }
-        if ( rtolf.at(1) > 0.0 ) OOFEM_LOG_INFO(" %-15e", forceErr);
-        if ( rtold.at(1) > 0.0 ) OOFEM_LOG_INFO(" %-15e", dispErr);
         OOFEM_LOG_INFO("\n");
     } // end default case (all dofs contributing)
 

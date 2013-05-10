@@ -110,32 +110,15 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
 
 void WeakPeriodicBoundaryCondition :: giveEdgeNormal(FloatArray &answer, int element, int side)
 {
-    FloatArray Tangent;
 
-    answer.resize(2);
-    Tangent.resize(2);
+	FloatArray xi;
+	xi.resize(1);
+	xi(0)=0.5;
+    Element *thisElement = this->domain->giveElement( element );
+    FEInterpolation *interpolation = thisElement->giveInterpolation( (DofIDItem)dofid );
 
-    Element *thisElement;
-    thisElement = this->domain->giveElement(element);
+    interpolation->boundaryEvalNormal(answer, side, xi, FEIElementGeometryWrapper(thisElement));
 
-    if ( side == 1 ) {
-        Tangent.at(1) = thisElement->giveNode(2)->giveCoordinate(1) - thisElement->giveNode(1)->giveCoordinate(1);              // x
-        Tangent.at(2) = thisElement->giveNode(2)->giveCoordinate(2) - thisElement->giveNode(1)->giveCoordinate(2);              // y
-    } else if ( side == 2 ) {
-        Tangent.at(1) = thisElement->giveNode(3)->giveCoordinate(1) - thisElement->giveNode(2)->giveCoordinate(1);              // x
-        Tangent.at(2) = thisElement->giveNode(3)->giveCoordinate(2) - thisElement->giveNode(2)->giveCoordinate(2);              // y
-    } else if ( side == 3 ) {
-        Tangent.at(1) = thisElement->giveNode(1)->giveCoordinate(1) - thisElement->giveNode(3)->giveCoordinate(1);              // x
-        Tangent.at(2) = thisElement->giveNode(1)->giveCoordinate(2) - thisElement->giveNode(3)->giveCoordinate(2);              // y
-    }
-
-    // Normalize
-    double l = sqrt( Tangent.at(1) * Tangent.at(1) + Tangent.at(2) * Tangent.at(2) );
-    Tangent.at(1) = Tangent.at(1) / ( l );
-    Tangent.at(2) = Tangent.at(2) / ( l );
-
-    answer.at(1) = Tangent.at(2);
-    answer.at(2) = -Tangent.at(1);
 }
 
 void WeakPeriodicBoundaryCondition :: updateDirection()
@@ -266,7 +249,9 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
 
     // Assemble each side
     for ( int thisSide = 0; thisSide <= 1; thisSide++ ) {
+
         giveEdgeNormal( normal, element [ thisSide ].at(0), side [ thisSide ].at(0) );
+
         if ( ( normal.at(1) + normal.at(2) ) <= 0.0001 ) {     // This is a south or west edge
             normalSign = -1;
         } else {

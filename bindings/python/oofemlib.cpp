@@ -71,7 +71,7 @@ namespace oofem {
 /*****************************************************
 * FloatArray
 *****************************************************/
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(flotarry_overloads_resize, resize, 1, 2)
+//BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(flotarry_overloads_resize, resize, 1, 2)
 void (FloatArray::*floatarray_add_1)(const FloatArray&) = &FloatArray::add;
 void (FloatArray::*floatarray_add_2)(double, const FloatArray&) = &FloatArray::add;
 void (FloatArray::*floatarray_add_3)(double) = &FloatArray::add;
@@ -85,7 +85,7 @@ void pyclass_FloatArray()
     class_<FloatArray, boost::noncopyable>("FloatArray")
         .def(init< optional<int> >())
         .def(init< FloatArray& >())
-        .def("resize", &FloatArray::resize, flotarry_overloads_resize("Checks size of receiver towards requested bounds. If dimension mismatch, size is adjusted accordingly"))
+        .def("resize", &FloatArray::resize, "Checks size of receiver towards requested bounds. If dimension mismatch, size is adjusted accordingly")
         .def("containsOnlyZeroes", &FloatArray::containsOnlyZeroes, "Returns nonzero if all coefficients of the receiver are 0, else returns zero")
         .def("giveSize", &FloatArray::giveSize, "Returns the size of receiver")
         .def("isNotEmpty", &FloatArray::isNotEmpty, "Returns true if receiver is not empty")
@@ -1192,9 +1192,10 @@ void pyenum_domainType()
 /*****************************************************
 * Auxiliary functions
 *****************************************************/
-
-// constuct auxiliary global object (for eval and exec functions) only once
+#if 0
+// construct auxiliary global object (for eval and exec functions) only once
 bp::dict temp_global(import("__main__").attr("__dict__"));
+#endif
 
 /*
 make oofem input line from **kw arguments. This function is used by "constructor" methods
@@ -1203,7 +1204,8 @@ e.g. in function:
 */
 OOFEMTXTInputRecord makeOOFEMTXTInputRecordFrom(bp::dict &kw)
 {
-    temp_global["kw"] = kw;
+    bp::dict temp(import("__main__").attr("__dict__"));
+    temp["kw"] = kw;
     str command =
         "ret = ''\n"
         "for key,val in kw.iteritems():\n" // iterate over key,val pairs
@@ -1221,9 +1223,9 @@ OOFEMTXTInputRecord makeOOFEMTXTInputRecordFrom(bp::dict &kw)
         "ret = ret.lower()\n" // finally make it lower case
         "print ret\n"
         ;
-    exec(command,temp_global,temp_global);
+    exec(command,temp,temp);
     // extract string from globals["ret"], convert it to char* and return OOFEMTXTInputRecord from it
-    return OOFEMTXTInputRecord( ( extract<string>(temp_global["ret"])() ).c_str() );
+    return OOFEMTXTInputRecord( ( extract<string>(temp["ret"])() ).c_str() );
 }
 
 OOFEMTXTInputRecord makeOutputManagerOOFEMTXTInputRecordFrom(bp::dict &kw)
@@ -1251,8 +1253,6 @@ void makeDictKeysLowerCase(bp::dict &kw)
         kw[extract<str>(keys[i])().lower()] = vals[i];
     }
 }
-
-
 
 /*
 The process is almost same for all classes, therefore only Element part is documented line by line
