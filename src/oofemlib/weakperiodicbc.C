@@ -97,6 +97,25 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
         element [ 1 ].push_back( temp.at(2 * i + 2) );
     }
 
+    // Check that elements are added
+    if (element[0].size()==0) {
+    	OOFEM_ERROR("No elements on positive side\n");
+    }
+    if (element[1].size()==0) {
+    	OOFEM_ERROR("No elements on negative side\n");
+    }
+
+    // Determine which is the positive and which is the negative side
+    FloatArray normal;
+    giveEdgeNormal( normal, element [ 0 ].at(0), side [ 0 ].at(0) );
+    if ((normal.at(1)+normal.at(2)) > - 0.000001) {
+    	sideSign [ 0 ] = 1;
+    	sideSign [ 1 ] = -1;
+    } else {
+    	sideSign [ 0 ] = -1;
+    	sideSign [ 1 ] = 1;
+    }
+
     // Create dofs for coefficients
     bcID = this->giveNumber();
     gammaDman = new Node(0, this->domain);
@@ -250,13 +269,7 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
     // Assemble each side
     for ( int thisSide = 0; thisSide <= 1; thisSide++ ) {
 
-        giveEdgeNormal( normal, element [ thisSide ].at(0), side [ thisSide ].at(0) );
-
-        if ( ( normal.at(1) + normal.at(2) ) <= 0.0001 ) {     // This is a south or west edge
-            normalSign = -1;
-        } else {
-            normalSign = 1;
-        }
+    	normalSign = sideSign[thisSide];
 
         for ( size_t ielement = 0; ielement < element [ thisSide ].size(); ielement++ ) {       // Loop over each element on this edge
             Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
@@ -360,12 +373,14 @@ double WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeS
 
     // Assemble each side
     for ( int thisSide = 0; thisSide <= 1; thisSide++ ) {
-        giveEdgeNormal( normal, element [ thisSide ].at(0), side [ thisSide ].at(0) );
-        if ( ( normal.at(1) + normal.at(2) ) <= 0.0001 ) {         // This is a south or west edge
-            normalSign = -1;
-        } else {
-            normalSign = 1;
-        }
+//        giveEdgeNormal( normal, element [ thisSide ].at(0), side [ thisSide ].at(0) );
+//        if ( ( normal.at(1) + normal.at(2) ) <= 0.0001 ) {         // This is a south or west edge
+//            normalSign = -1;
+//        } else {
+//            normalSign = 1;
+//        }
+
+        normalSign = sideSign[thisSide];
 
         for ( size_t ielement = 0; ielement < element [ thisSide ].size(); ielement++ ) {           // Loop over each element on this edge
 
