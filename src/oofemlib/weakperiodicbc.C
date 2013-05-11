@@ -57,431 +57,451 @@ REGISTER_BoundaryCondition( WeakPeriodicBoundaryCondition );
 
 WeakPeriodicBoundaryCondition :: WeakPeriodicBoundaryCondition(int n, Domain *d) : ActiveBoundaryCondition(n, d)
 {
-    useBasisType = trigonometric;
-    doUpdateSminmax = true;
+	useBasisType = trigonometric;
+	doUpdateSminmax = true;
 }
 
 IRResultType
 WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
-    IRResultType result;
+	const char *__proc = "initializeFrom";
+	IRResultType result;
 
-    ActiveBoundaryCondition :: initializeFrom(ir); ///@todo Carl, remove this line and use elementsidespositive/negative instead.
+	ActiveBoundaryCondition :: initializeFrom(ir); ///@todo Carl, remove this line and use elementsidespositive/negative instead.
 
-    orderOfPolygon = 2;
-    IR_GIVE_OPTIONAL_FIELD(ir, orderOfPolygon, _IFT_WeakPeriodicBoundaryCondition_order);
+	orderOfPolygon = 2;
+	IR_GIVE_OPTIONAL_FIELD(ir, orderOfPolygon, _IFT_WeakPeriodicBoundaryCondition_order);
 
-    int t = ( int ) trigonometric;
-    IR_GIVE_OPTIONAL_FIELD(ir, t, _IFT_WeakPeriodicBoundaryCondition_descritizationType);
-    useBasisType = ( basisType ) t;  // Fourierseries by default
+	int t = ( int ) trigonometric;
+	IR_GIVE_OPTIONAL_FIELD(ir, t, _IFT_WeakPeriodicBoundaryCondition_descritizationType);
+	useBasisType = ( basisType ) t;  // Fourierseries by default
 
-    dofid = P_f;    // Pressure as default
-    IR_GIVE_OPTIONAL_FIELD(ir, dofid, _IFT_WeakPeriodicBoundaryCondition_dofid);
+	dofid = P_f;    // Pressure as default
+	IR_GIVE_OPTIONAL_FIELD(ir, dofid, _IFT_WeakPeriodicBoundaryCondition_dofid);
 
-    ngp = -1;    // Pressure as default
-    IR_GIVE_OPTIONAL_FIELD(ir, ngp, _IFT_WeakPeriodicBoundaryCondition_ngp);
+	ngp = -1;    // Pressure as default
+	IR_GIVE_OPTIONAL_FIELD(ir, ngp, _IFT_WeakPeriodicBoundaryCondition_ngp);
 
-    IntArray temp;
-    IR_GIVE_OPTIONAL_FIELD(ir, temp, _IFT_WeakPeriodicBoundaryCondition_elementSidesPositive);
-    for ( int i = 0; i < temp.giveSize() / 2; i++ ) {
-        //printf("Add positive edge, element %u, side %u\n", temp.at(2*i+2), temp.at(2*i+1));
-        side [ 0 ].push_back( temp.at(2 * i + 1) );
-        element [ 0 ].push_back( temp.at(2 * i + 2) );
-    }
+	IntArray temp;
+	IR_GIVE_OPTIONAL_FIELD(ir, temp, _IFT_WeakPeriodicBoundaryCondition_elementSidesPositive);
+	for ( int i = 0; i < temp.giveSize() / 2; i++ ) {
+		//printf("Add positive edge, element %u, side %u\n", temp.at(2*i+2), temp.at(2*i+1));
+		side [ 0 ].push_back( temp.at(2 * i + 1) );
+		element [ 0 ].push_back( temp.at(2 * i + 2) );
+	}
 
-    IR_GIVE_OPTIONAL_FIELD(ir, temp, _IFT_WeakPeriodicBoundaryCondition_elementSidesNegative);
-    for ( int i = 0; i < temp.giveSize() / 2; i++ ) {
-        //printf("Add negative edge, element %u, side %u\n", temp.at(2*i+2), temp.at(2*i+1));
-        side [ 1 ].push_back( temp.at(2 * i + 1) );
-        element [ 1 ].push_back( temp.at(2 * i + 2) );
-    }
+	IR_GIVE_OPTIONAL_FIELD(ir, temp, _IFT_WeakPeriodicBoundaryCondition_elementSidesNegative);
+	for ( int i = 0; i < temp.giveSize() / 2; i++ ) {
+		//printf("Add negative edge, element %u, side %u\n", temp.at(2*i+2), temp.at(2*i+1));
+		side [ 1 ].push_back( temp.at(2 * i + 1) );
+		element [ 1 ].push_back( temp.at(2 * i + 2) );
+	}
 
-    // Create dofs for coefficients
-    bcID = this->giveNumber();
-    gammaDman = new Node(0, this->domain);
+	// Check that elements are added
+	if (element[0].size()==0) {
+		OOFEM_ERROR("No elements on positive side\n");
+	}
+	if (element[1].size()==0) {
+		OOFEM_ERROR("No elements on negative side\n");
+	}
 
-    for ( int i = 0; i <= orderOfPolygon; i++ ) {
-        gammaDman->appendDof( new MasterDof( i, gammaDman, (DofIDItem)this->domain->giveNextFreeDofID() ) );
-    }
+	// Determine which is the positive and which is the negative side
+	FloatArray normal;
+	giveEdgeNormal( normal, element [ 0 ].at(0), side [ 0 ].at(0) );
+	if ((normal.at(1)+normal.at(2)) > - 0.000001) {
+		sideSign [ 0 ] = 1;
+		sideSign [ 1 ] = -1;
+	} else {
+		sideSign [ 0 ] = -1;
+		sideSign [ 1 ] = 1;
+	}
 
-    return IRRT_OK;
+	for (size_t i=0; i< element[0].size(); i++) {
+		giveEdgeNormal( normal, element [ 0 ].at(i), side [ 0 ].at(i) );
+		normal.printYourself();
+	}
+
+	for (size_t i=0; i< element[1].size(); i++) {
+		giveEdgeNormal( normal, element [ 1 ].at(i), side [ 1 ].at(i) );
+		normal.printYourself();
+	}
+
+	// Create dofs for coefficients
+	bcID = this->giveNumber();
+	gammaDman = new Node(0, this->domain);
+
+	for ( int i = 0; i <= orderOfPolygon; i++ ) {
+		gammaDman->appendDof( new MasterDof( i, gammaDman, (DofIDItem)this->domain->giveNextFreeDofID() ) );
+	}
+
+	return IRRT_OK;
 }
 
 void WeakPeriodicBoundaryCondition :: giveEdgeNormal(FloatArray &answer, int element, int side)
 {
-    FloatArray Tangent;
 
-    answer.resize(2);
-    Tangent.resize(2);
+	FloatArray xi;
 
-    Element *thisElement;
-    thisElement = this->domain->giveElement(element);
+	if (this->domain->giveNumberOfSpatialDimensions()==3) {
+		xi.resize(2);
+		xi(0)=0.25;
+		xi(1)=0.25;
+	} else {
+		xi.resize(1);
+		xi(0)=0.5;
+	}
 
-    if ( side == 1 ) {
-        Tangent.at(1) = thisElement->giveNode(2)->giveCoordinate(1) - thisElement->giveNode(1)->giveCoordinate(1);              // x
-        Tangent.at(2) = thisElement->giveNode(2)->giveCoordinate(2) - thisElement->giveNode(1)->giveCoordinate(2);              // y
-    } else if ( side == 2 ) {
-        Tangent.at(1) = thisElement->giveNode(3)->giveCoordinate(1) - thisElement->giveNode(2)->giveCoordinate(1);              // x
-        Tangent.at(2) = thisElement->giveNode(3)->giveCoordinate(2) - thisElement->giveNode(2)->giveCoordinate(2);              // y
-    } else if ( side == 3 ) {
-        Tangent.at(1) = thisElement->giveNode(1)->giveCoordinate(1) - thisElement->giveNode(3)->giveCoordinate(1);              // x
-        Tangent.at(2) = thisElement->giveNode(1)->giveCoordinate(2) - thisElement->giveNode(3)->giveCoordinate(2);              // y
-    }
+	Element *thisElement = this->domain->giveGlobalElement( element );
+	FEInterpolation *interpolation = thisElement->giveInterpolation( (DofIDItem)dofid );
 
-    // Normalize
-    double l = sqrt( Tangent.at(1) * Tangent.at(1) + Tangent.at(2) * Tangent.at(2) );
-    Tangent.at(1) = Tangent.at(1) / ( l );
-    Tangent.at(2) = Tangent.at(2) / ( l );
+	interpolation->boundaryEvalNormal(answer, side, xi, FEIElementGeometryWrapper(thisElement));
 
-    answer.at(1) = Tangent.at(2);
-    answer.at(2) = -Tangent.at(1);
 }
 
 void WeakPeriodicBoundaryCondition :: updateDirection()
 {
-    // Check orientation for s
-    FloatArray normal;
+	// Check orientation for s
+	FloatArray normal;
 
-    giveEdgeNormal( normal, element [ 0 ].at(0), side [ 0 ].at(0) );
-    if ( abs(abs( normal.at(1) ) - 1) < 0.0001 ) {              // Normal point in x direction, thus set direction to y
-        direction = 2;
-    } else {
-        direction = 1;
-    }
+	giveEdgeNormal( normal, element [ 0 ].at(0), side [ 0 ].at(0) );
+
+//	giveEdgeNormal( normal, element [ 0 ].at(0), 1 );
+//	normal.printYourself();
+//	giveEdgeNormal( normal, element [ 0 ].at(0), 2 );
+//	normal.printYourself();
+//	giveEdgeNormal( normal, element [ 0 ].at(0), 3 );
+//	normal.printYourself();
+//	giveEdgeNormal( normal, element [ 0 ].at(0), 4 );
+//	normal.printYourself();
+	if ( abs(abs( normal.at(1) ) - 1) < 0.0001 ) {              // Normal point in x direction, thus set direction to y
+		direction = 2;
+	} else {
+		direction = 1;
+	}
 }
 
 void WeakPeriodicBoundaryCondition :: updateSminmax()
 {
-    if ( doUpdateSminmax ) {
-        updateDirection();
+	if ( doUpdateSminmax ) {
+		updateDirection();
 
-        smin = this->domain->giveDofManager(1)->giveCoordinate(direction);
-        smax = this->domain->giveDofManager(1)->giveCoordinate(direction);
+		smin = this->domain->giveDofManager(1)->giveCoordinate(direction);
+		smax = this->domain->giveDofManager(1)->giveCoordinate(direction);
 
-        for ( int i = 1; i <= this->domain->giveNumberOfDofManagers(); i++ ) {
-            double sValue = this->domain->giveDofManager(i)->giveCoordinate(direction);
-            smin = std :: min(smin, sValue);
-            smax = std :: max(smax, sValue);
-        }
+		for ( int i = 1; i <= this->domain->giveNumberOfDofManagers(); i++ ) {
+			double sValue = this->domain->giveDofManager(i)->giveCoordinate(direction);
+			smin = std :: min(smin, sValue);
+			smax = std :: max(smax, sValue);
+		}
 
-        //printf("smin=%f\tsmax=%f\n", smin, smax);
-        doUpdateSminmax = false;
-    }
+		//printf("smin=%f\tsmax=%f\n", smin, smax);
+		doUpdateSminmax = false;
+	}
 }
 
 void WeakPeriodicBoundaryCondition :: addElementSide(int newElement, int newSide)
 {
-    //printf ("Add element %u, side %u\n", newElement, newSide);
+	//printf ("Add element %u, side %u\n", newElement, newSide);
 
-    FloatArray normalNew, normal0;
-    int addToList = 0;
+	FloatArray normalNew, normal0;
+	int addToList = 0;
 
-    if ( element [ 0 ].size() > 0 ) {
-        // If there are elements in the list, compare normals in order to determine which list to store them in
-        giveEdgeNormal(normalNew, newElement, newSide);
-        //normalNew.printYourself();
-        giveEdgeNormal( normal0, element [ 0 ].at(0), side [ 0 ].at(0) );
-        double d = sqrt( pow(normalNew.at(1) - normal0.at(1), 2) + pow(normalNew.at(2) - normal0.at(2), 2) );
-        if ( abs(d) < 0.001 ) {
-            addToList = 0;
-        } else {
-            addToList = 1;
-        }
-    } else {
-        // Otherwise, check the normal in order to decide upon which direction the parameter runs (x or y)
-        giveEdgeNormal(normalNew, newElement, newSide);
-        //normalNew.printYourself();
-        if ( abs(abs( normalNew.at(1) ) - 1) < 0.0001 ) {               // Normal point in x direction, thus set direction to y
-            direction = 2;
-        } else {
-            direction = 1;
-        }
-    }
+	if ( element [ 0 ].size() > 0 ) {
+		// If there are elements in the list, compare normals in order to determine which list to store them in
+		giveEdgeNormal(normalNew, newElement, newSide);
+		//normalNew.printYourself();
+		giveEdgeNormal( normal0, element [ 0 ].at(0), side [ 0 ].at(0) );
+		double d = sqrt( pow(normalNew.at(1) - normal0.at(1), 2) + pow(normalNew.at(2) - normal0.at(2), 2) );
+		if ( abs(d) < 0.001 ) {
+			addToList = 0;
+		} else {
+			addToList = 1;
+		}
+	} else {
+		// Otherwise, check the normal in order to decide upon which direction the parameter runs (x or y)
+		giveEdgeNormal(normalNew, newElement, newSide);
+		//normalNew.printYourself();
+		if ( abs(abs( normalNew.at(1) ) - 1) < 0.0001 ) {               // Normal point in x direction, thus set direction to y
+			direction = 2;
+		} else {
+			direction = 1;
+		}
+	}
 
-    //printf(" to list %u\n", addToList);
-    element [ addToList ].push_back(newElement);
-    side [ addToList ].push_back(newSide);
+	//printf(" to list %u\n", addToList);
+	element [ addToList ].push_back(newElement);
+	side [ addToList ].push_back(newSide);
 }
 
 void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Element *e, int boundary)
 {
-    FloatArray gcoords;
-    IntArray bnodes;
-    FEInterpolation *geoInterpolation = e->giveInterpolation();
-    FEInterpolation *interpolation = e->giveInterpolation( (DofIDItem)dofid );
+	FloatArray gcoords;
+	IntArray bnodes;
+	FEInterpolation *geoInterpolation = e->giveInterpolation();
+	FEInterpolation *interpolation = e->giveInterpolation( (DofIDItem)dofid );
 
-    interpolation->boundaryGiveNodes(bnodes, boundary);
+	interpolation->boundaryGiveNodes(bnodes, boundary);
 
-    B.resize(bnodes.giveSize(), orderOfPolygon + 1);
-    B.zero();
-    ///@todo Add this to all interpolators, should return _Point, _Line, _Triangle, ... etc.
-    //integrationDomain sideGeom = geoInterpolation->boundaryGiveGeometry(boundary);
-    integrationDomain sideGeom = _Line;
-    GaussIntegrationRule iRule(1, e);
-    if ( ngp == -1 ) {
-        ngp = iRule.getRequiredNumberOfIntegrationPoints(sideGeom, 2 + orderOfPolygon);
-    }
-    iRule.setUpIntegrationPoints(sideGeom, ngp, _Unknown);
+	B.resize(bnodes.giveSize(), orderOfPolygon + 1);
+	B.zero();
+	///@todo Add this to all interpolators, should return _Point, _Line, _Triangle, ... etc.
+	//integrationDomain sideGeom = geoInterpolation->boundaryGiveGeometry(boundary);
+	integrationDomain sideGeom = _Line;
+	GaussIntegrationRule iRule(1, e);
+	if ( ngp == -1 ) {
+		ngp = iRule.getRequiredNumberOfIntegrationPoints(sideGeom, 2 + orderOfPolygon);
+	}
+	iRule.setUpIntegrationPoints(sideGeom, ngp, _Unknown);
 
-    for ( int i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule.getIntegrationPoint(i);
-        FloatArray *lcoords = gp->giveCoordinates();
+	for ( int i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
+		GaussPoint *gp = iRule.getIntegrationPoint(i);
+		FloatArray *lcoords = gp->giveCoordinates();
 
-        FloatArray N;
+		FloatArray N;
 
-        // Find the value of parameter s which is the vert/horiz distance to 0
-        geoInterpolation->boundaryLocal2Global( gcoords, boundary, * lcoords, FEIElementGeometryWrapper(e) );
-        // Compute base function values
-        interpolation->boundaryEvalN( N, boundary, * lcoords, FEIElementGeometryWrapper(e) );
-        // Compute Jacobian
-        double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( boundary, * lcoords, FEIElementGeometryWrapper(e) ) );
-        double s = gcoords.at(direction);
+		// Find the value of parameter s which is the vert/horiz distance to 0
+		geoInterpolation->boundaryLocal2Global( gcoords, boundary, * lcoords, FEIElementGeometryWrapper(e) );
+		// Compute base function values
+		interpolation->boundaryEvalN( N, boundary, * lcoords, FEIElementGeometryWrapper(e) );
+		// Compute Jacobian
+		double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( boundary, * lcoords, FEIElementGeometryWrapper(e) ) );
+		double s = gcoords.at(direction);
 
-        for ( int j = 0; j < B.giveNumberOfColumns(); j++ ) {
-            double fVal = computeBaseFunctionValue(j, s);
-            //printf("fVal=%f @ %f\n", fVal, s);
-            for ( int k = 0; k < B.giveNumberOfRows(); k++ ) {
-                B(k, j) += + N(k) * fVal * detJ * gp->giveWeight();
-            }
-        }
-    }
+		for ( int j = 0; j < B.giveNumberOfColumns(); j++ ) {
+			double fVal = computeBaseFunctionValue(j, s);
+			//printf("fVal=%f @ %f\n", fVal, s);
+			for ( int k = 0; k < B.giveNumberOfRows(); k++ ) {
+				B(k, j) += + N(k) * fVal * detJ * gp->giveWeight();
+			}
+		}
+	}
 }
 
 void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    if ( type != StiffnessMatrix ) {
-        return;
-    }
+	if ( type != StiffnessMatrix ) {
+		return;
+	}
 
-    IntArray c_loc, r_loc;
-    gammaDman->giveCompleteLocationArray( r_loc, r_s );
-    gammaDman->giveCompleteLocationArray( c_loc, c_s );
+	IntArray c_loc, r_loc;
+	gammaDman->giveCompleteLocationArray( r_loc, r_s );
+	gammaDman->giveCompleteLocationArray( c_loc, c_s );
 
-    FloatMatrix B, BT;
-    FloatArray gcoords, normal;
-    int normalSign, dofCountOnBoundary;
+	FloatMatrix B, BT;
+	FloatArray gcoords, normal;
+	int normalSign, dofCountOnBoundary;
 
-    updateSminmax();
+	updateSminmax();
 
-    // Assemble each side
-    for ( int thisSide = 0; thisSide <= 1; thisSide++ ) {
-        giveEdgeNormal( normal, element [ thisSide ].at(0), side [ thisSide ].at(0) );
-        if ( ( normal.at(1) + normal.at(2) ) <= 0.0001 ) {     // This is a south or west edge
-            normalSign = -1;
-        } else {
-            normalSign = 1;
-        }
+	// Assemble each side
+	for ( int thisSide = 0; thisSide <= 1; thisSide++ ) {
 
-        for ( size_t ielement = 0; ielement < element [ thisSide ].size(); ielement++ ) {       // Loop over each element on this edge
-            Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
+		normalSign = sideSign[thisSide];
 
-            // Find dofs for this element side
-            IntArray r_sideLoc, c_sideLoc;
+		for ( size_t ielement = 0; ielement < element [ thisSide ].size(); ielement++ ) {       // Loop over each element on this edge
+			Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
 
-            ///@todo See todo on assembleVector
-            //thisElement->giveBoundaryLocationArray(r_sideLoc, side [ thisSide ].at(ielement), dofids, eid, r_s);
-            //thisElement->giveBoundaryLocationArray(c_sideLoc, side [ thisSide ].at(ielement), dofids, eid, c_s);
+			// Find dofs for this element side
+			IntArray r_sideLoc, c_sideLoc;
 
-            // Find dofs for this element which should be periodic
-            IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray;
-            periodicDofIDMask.resize(1);
-            periodicDofIDMask.at(1) = dofid;
+			///@todo See todo on assembleVector
+			//thisElement->giveBoundaryLocationArray(r_sideLoc, side [ thisSide ].at(ielement), dofids, eid, r_s);
+			//thisElement->giveBoundaryLocationArray(c_sideLoc, side [ thisSide ].at(ielement), dofids, eid, c_s);
 
-            FEInterpolation *interpolation = thisElement->giveInterpolation( (DofIDItem)dofid );
-            interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
-            r_sideLoc.resize(0);
-            c_sideLoc.resize(0);
-            dofCountOnBoundary = 0;
-            for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
-                thisElement->giveDofManDofIDMask(bNodes.at(i), EID_MomentumBalance_ConservationEquation, nodeDofIDMask);
+			// Find dofs for this element which should be periodic
+			IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray;
+			periodicDofIDMask.resize(1);
+			periodicDofIDMask.at(1) = dofid;
 
-                for ( int j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
-                    if ( nodeDofIDMask.at(j) == dofid ) {
-                        thisElement->giveDofManager( bNodes.at(i) )->giveLocationArray(periodicDofIDMask, nodalArray, r_s);
-                        r_sideLoc.followedBy(nodalArray);
-                        thisElement->giveDofManager( bNodes.at(i) )->giveLocationArray(periodicDofIDMask, nodalArray, c_s);
-                        c_sideLoc.followedBy(nodalArray);
-                        dofCountOnBoundary++;
-                        break;
-                    }
-                }
-            }
+			FEInterpolation *interpolation = thisElement->giveInterpolation( (DofIDItem)dofid );
+			interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
+			r_sideLoc.resize(0);
+			c_sideLoc.resize(0);
+			dofCountOnBoundary = 0;
+			for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
+				thisElement->giveDofManDofIDMask(bNodes.at(i), EID_MomentumBalance_ConservationEquation, nodeDofIDMask);
 
-            this->computeElementTangent(B, thisElement, side [ thisSide ].at(ielement));
-            B.times( normalSign );
+				for ( int j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
+					if ( nodeDofIDMask.at(j) == dofid ) {
+						thisElement->giveDofManager( bNodes.at(i) )->giveLocationArray(periodicDofIDMask, nodalArray, r_s);
+						r_sideLoc.followedBy(nodalArray);
+						thisElement->giveDofManager( bNodes.at(i) )->giveLocationArray(periodicDofIDMask, nodalArray, c_s);
+						c_sideLoc.followedBy(nodalArray);
+						dofCountOnBoundary++;
+						break;
+					}
+				}
+			}
 
-            BT.beTranspositionOf(B);
+			this->computeElementTangent(B, thisElement, side [ thisSide ].at(ielement));
+			B.times( normalSign );
 
-            answer->assemble(r_sideLoc, c_loc, B);
-            answer->assemble(r_loc, c_sideLoc, BT);
-        }
-    }
+			BT.beTranspositionOf(B);
+
+			answer->assemble(r_sideLoc, c_loc, B);
+			answer->assemble(r_loc, c_sideLoc, BT);
+		}
+	}
 }
 
 double WeakPeriodicBoundaryCondition :: computeBaseFunctionValue(int baseID, double coordinate)
 {
-    double fVal=0.0;
-    double sideLength = smax - smin;
+	double fVal=0.0;
+	double sideLength = smax - smin;
 
-    if ( useBasisType == monomial ) {
-        fVal = pow(coordinate, baseID);
-    } else if ( useBasisType == trigonometric ) {
-        if ( baseID % 2 == 0 ) {   // Even
-            fVal = cos( ( ( double ) baseID ) / 2. * ( coordinate * 2. * M_PI / sideLength ) );
-        } else {
-            fVal = sin( ( ( double ) baseID + 1 ) / 2. * ( coordinate * 2. * M_PI / sideLength ) );
-        }
-    } else if ( useBasisType == legendre ) {
-        double n = (double) baseID;
-        coordinate = 2.0*coordinate-1.0;
-        for ( int k = 0.; k <= baseID; k++ ) {
-            fVal = fVal + binomial(n,k) * binomial(-n-1.0, k) * pow((1.0-coordinate)/2.0, (double)k);
-        }
-    }
+	if ( useBasisType == monomial ) {
+		fVal = pow(coordinate, baseID);
+	} else if ( useBasisType == trigonometric ) {
+		if ( baseID % 2 == 0 ) {   // Even
+			fVal = cos( ( ( double ) baseID ) / 2. * ( coordinate * 2. * M_PI / sideLength ) );
+		} else {
+			fVal = sin( ( ( double ) baseID + 1 ) / 2. * ( coordinate * 2. * M_PI / sideLength ) );
+		}
+	} else if ( useBasisType == legendre ) {
+		double n = (double) baseID;
+		coordinate = 2.0*coordinate-1.0;
+		for ( int k = 0.; k <= baseID; k++ ) {
+			fVal = fVal + binomial(n,k) * binomial(-n-1.0, k) * pow((1.0-coordinate)/2.0, (double)k);
+		}
+	}
 
-    return fVal;
+	return fVal;
 }
 
 double WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                        CharType type, ValueModeType mode,
-                                        const UnknownNumberingScheme &s, FloatArray *eNorms)
+		CharType type, ValueModeType mode,
+		const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
-    if ( type != InternalForcesVector ) {
-        return 0.0;
-    }
+	if ( type != InternalForcesVector ) {
+		return 0.0;
+	}
 
-    //printf("*** assembleVector\n");
-    double norm = 0.0;
+	double norm = 0.0;
 
-    // Fetch unknowns of this boundary condition
-    IntArray gammaLoc, gammaDofIDs;
-    FloatArray gamma;
-    gammaDman->giveCompleteUnknownVector( gamma, mode, tStep);
-    gammaDman->giveCompleteLocationArray( gammaLoc, s );
-    gammaDman->giveCompleteMasterDofIDArray( gammaDofIDs );
+	// Fetch unknowns of this boundary condition
+	IntArray gammaLoc, gammaDofIDs;
+	FloatArray gamma;
+	gammaDman->giveCompleteUnknownVector( gamma, mode, tStep);
+	gammaDman->giveCompleteLocationArray( gammaLoc, s );
+	gammaDman->giveCompleteMasterDofIDArray( gammaDofIDs );
 
-    // Values from solution
-    FloatArray a;
-    // Find dofs for this element side
-    IntArray sideLocation, masterDofIDs;
+	// Values from solution
+	FloatArray a;
+	// Find dofs for this element side
+	IntArray sideLocation, masterDofIDs;
 
-    FloatMatrix B;
+	FloatMatrix B;
 
-    FloatArray gcoords, normal;
-    int normalSign, dofCountOnBoundary;
+	FloatArray gcoords, normal;
+	int normalSign, dofCountOnBoundary;
 
-    updateSminmax();
+	updateSminmax();
 
-    // Assemble each side
-    for ( int thisSide = 0; thisSide <= 1; thisSide++ ) {
-        giveEdgeNormal( normal, element [ thisSide ].at(0), side [ thisSide ].at(0) );
-        if ( ( normal.at(1) + normal.at(2) ) <= 0.0001 ) {         // This is a south or west edge
-            normalSign = -1;
-        } else {
-            normalSign = 1;
-        }
+	// Assemble each side
+	for ( int thisSide = 0; thisSide <= 1; thisSide++ ) {
 
-        for ( size_t ielement = 0; ielement < element [ thisSide ].size(); ielement++ ) {           // Loop over each element on this edge
+		normalSign = sideSign[thisSide];
 
-            Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
+		for ( size_t ielement = 0; ielement < element [ thisSide ].size(); ielement++ ) {           // Loop over each element on this edge
 
-            ///@todo Support explicitly asking specifying dofids instead of equation ids (Jim needed this feature as well, and it makes sense to have it)
-            //thisElement->giveBoundaryLocationArray(sideLocation, side [ thisSide ].at(ielement), &dofids, eid, s, &masterDofIDs);
+			Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
 
-            // Find dofs for this element which should be periodic
-            IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray;
-            periodicDofIDMask.resize(1);
-            periodicDofIDMask.at(1) = dofid;
+			///@todo Support explicitly asking specifying dofids instead of equation ids (Jim needed this feature as well, and it makes sense to have it)
+			//thisElement->giveBoundaryLocationArray(sideLocation, side [ thisSide ].at(ielement), &dofids, eid, s, &masterDofIDs);
 
-            FEInterpolation *interpolation = thisElement->giveInterpolation( (DofIDItem)dofid );
-            interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
-            sideLocation.resize(0);
-            masterDofIDs.resize(0);
-            a.resize(0);
-            dofCountOnBoundary = 0;
-            for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
-                thisElement->giveDofManDofIDMask(bNodes.at(i), EID_MomentumBalance_ConservationEquation, nodeDofIDMask);
+			// Find dofs for this element which should be periodic
+			IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray;
+			periodicDofIDMask.resize(1);
+			periodicDofIDMask.at(1) = dofid;
 
-                for ( int j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
-                    if ( nodeDofIDMask.at(j) == dofid ) {
-                        thisElement->giveDofManager( bNodes.at(i) )->giveLocationArray(periodicDofIDMask, nodalArray, s);
-                        sideLocation.followedBy(nodalArray);
-                        thisElement->giveDofManager( bNodes.at(i) )->giveMasterDofIDArray(periodicDofIDMask, nodalArray);
-                        masterDofIDs.followedBy(nodalArray);
+			FEInterpolation *interpolation = thisElement->giveInterpolation( (DofIDItem)dofid );
+			interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
+			sideLocation.resize(0);
+			masterDofIDs.resize(0);
+			a.resize(0);
+			dofCountOnBoundary = 0;
+			for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
+				thisElement->giveDofManDofIDMask(bNodes.at(i), EID_MomentumBalance_ConservationEquation, nodeDofIDMask);
 
-                        double value = thisElement->giveDofManager( bNodes.at(i) )->giveDof(j)->giveUnknown(mode, tStep);
-                        a.resizeWithValues( sideLocation.giveSize() );
-                        a.at( sideLocation.giveSize() ) = value;
-                        dofCountOnBoundary++;
-                        break;
-                    }
-                }
-            }
+				for ( int j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
+					if ( nodeDofIDMask.at(j) == dofid ) {
+						thisElement->giveDofManager( bNodes.at(i) )->giveLocationArray(periodicDofIDMask, nodalArray, s);
+						sideLocation.followedBy(nodalArray);
+						thisElement->giveDofManager( bNodes.at(i) )->giveMasterDofIDArray(periodicDofIDMask, nodalArray);
+						masterDofIDs.followedBy(nodalArray);
+
+						double value = thisElement->giveDofManager( bNodes.at(i) )->giveDof(j)->giveUnknown(mode, tStep);
+						a.resizeWithValues( sideLocation.giveSize() );
+						a.at( sideLocation.giveSize() ) = value;
+						dofCountOnBoundary++;
+						break;
+					}
+				}
+			}
 
 
-            this->computeElementTangent(B, thisElement, side [ thisSide ].at(ielement));
-            B.times( normalSign );
+			this->computeElementTangent(B, thisElement, side [ thisSide ].at(ielement));
+			B.times( normalSign );
 
-            FloatArray myProd, myProdGamma;
-            myProd.beTProductOf(B, a);
-            myProdGamma.beProductOf(B, gamma);
+			FloatArray myProd, myProdGamma;
+			myProd.beTProductOf(B, a);
+			myProdGamma.beProductOf(B, gamma);
 
-            norm += myProd.computeSquaredNorm();
-            norm += myProdGamma.computeSquaredNorm();
-            if ( eNorms ) {
-                for ( int i = 1; i <= gammaLoc.giveSize(); ++i ) {
-                    if ( gammaLoc.at(i) ) 
-                        eNorms->at(gammaDofIDs.at(i)) += myProd.at(i) * myProd.at(i);
-                }
-                for ( int i = 1; i <= sideLocation.giveSize(); ++i ) {
-                    if ( sideLocation.at(i) ) 
-                        eNorms->at(masterDofIDs.at(i)) += myProdGamma.at(i) * myProdGamma.at(i);
-                }
-            }
+			norm += myProd.computeSquaredNorm();
+			norm += myProdGamma.computeSquaredNorm();
+			if ( eNorms ) {
+				for ( int i = 1; i <= gammaLoc.giveSize(); ++i ) {
+					if ( gammaLoc.at(i) )
+						eNorms->at(gammaDofIDs.at(i)) += myProd.at(i) * myProd.at(i);
+				}
+				for ( int i = 1; i <= sideLocation.giveSize(); ++i ) {
+					if ( sideLocation.at(i) )
+						eNorms->at(masterDofIDs.at(i)) += myProdGamma.at(i) * myProdGamma.at(i);
+				}
+			}
 
-            answer.assemble(myProd, gammaLoc);
-            answer.assemble(myProdGamma, sideLocation);
-        }
-    }
+			answer.assemble(myProd, gammaLoc);
+			answer.assemble(myProdGamma, sideLocation);
+		}
+	}
 
-//    answer.printYourself();
+	//    answer.printYourself();
 
-    return norm;
+	return norm;
 }
 
 int WeakPeriodicBoundaryCondition :: giveNumberOfInternalDofManagers()
 {
-    return 1;
+	return 1;
 }
 
 DofManager *WeakPeriodicBoundaryCondition :: giveInternalDofManager(int i)
 {
-    if ( i == 1 ) {
-        return gammaDman;
-    } else {
-        return NULL;
-    }
+	if ( i == 1 ) {
+		return gammaDman;
+	} else {
+		return NULL;
+	}
 }
 
 double WeakPeriodicBoundaryCondition::factorial(int n)
 {
-    int x = 1.0;
-    for ( int i = 1; i <= n; i++ ) {
-        x = x * i;
-    }
-    return x;
+	int x = 1.0;
+	for ( int i = 1; i <= n; i++ ) {
+		x = x * i;
+	}
+	return x;
 }
 
 double WeakPeriodicBoundaryCondition::binomial(double n, int k)
 {
-    double f = 1.0;
-    for ( int i = 1; i <= k; i++ ) {
-        f = f * ( n - ( k - i ) ) / i;
-    }
-    return f;
+	double f = 1.0;
+	for ( int i = 1; i <= k; i++ ) {
+		f = f * ( n - ( k - i ) ) / i;
+	}
+	return f;
 }
 
-    
+
 }
 

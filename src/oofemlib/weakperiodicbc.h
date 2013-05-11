@@ -86,6 +86,9 @@ private:
     /** side[] keeps track of which side of the triangle is located along the boundary. element[] keeps track of what element is located along the boundary */
     std :: vector< int >side [ 2 ], element [ 2 ];
 
+    /** Keeps track of which coordinate(s) are changing on the surface/edge */
+    std :: vector< double> directions;
+
     void giveEdgeNormal(FloatArray &answer, int element, int side);
 
     void updateSminmax();

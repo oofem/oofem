@@ -433,7 +433,7 @@ void
 FEI3dTetQuad :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
 {
     int aNode = 0, bNode = 0, cNode = 0, dNode = 0, eNode = 0, fNode = 0;
-    surfNodes.resize(3);
+    surfNodes.resize(6);
 
     if ( isurf == 1 ) {
         aNode = 1;
