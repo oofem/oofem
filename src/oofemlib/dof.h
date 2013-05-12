@@ -288,6 +288,10 @@ public:
      */
     DofIDItem giveDofID() { return dofID; }
     /**
+     * Sets the ID of receiver.
+     */
+    void setDofID(DofIDItem id) { this->dofID = id; }
+    /**
      * Returns char representation of DofID value of receiver, which determines physical meaning
      * of unknown connected to receiver. Useful only for printing. More conveniently,
      * one should use giveDofID function.
@@ -400,7 +404,9 @@ public:
     /// Restores the receiver state previously written in stream.
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /// Overwrites the boundary condition id (0-inactive BC), intended for specific purposes such as coupling of bc's in multiscale simulations
-    virtual void setBcId(int bcId) {};
+    virtual void setBcId(int bcId) {}
+    /// Overwrites the initial condition id (0-inactive IC)
+    virtual void setIcId(int icId) {}
 
     /**
      * Sets a specific equation number to receiver.
