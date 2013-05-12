@@ -699,8 +699,8 @@ EngngModel :: updateAttributes(MetaStep *mStep)
     MetaStep *mStep1 = this->giveMetaStep( mStep->giveNumber() );//this line ensures correct input file in staggered problem
     InputRecord *ir = mStep1->giveAttributesRecord();
 
-    if ( this->giveNumericalMethod(mStep) ) {
-        this->giveNumericalMethod(mStep)->initializeFrom(ir);
+    if ( this->giveNumericalMethod(mStep1) ) {
+        this->giveNumericalMethod(mStep1)->initializeFrom(ir);
     }
 
 #ifdef __PARALLEL_MODE
