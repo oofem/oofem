@@ -110,6 +110,7 @@ public:
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer)
     { _error("cct3d :: giveLocalCoordinateSystem: calling of this function id not allowed");
