@@ -398,6 +398,11 @@ public:
      */
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const { answer.resize(0); }
     /**
+     * Calls giveDofManDofIDMask with the default equation id for the type of problem.
+     * @todo Can have a pure virtual method because of the hacks in HellmichMaterial :: createMaterialGp()
+     */
+    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { }
+    /**
      * Returns internal  dofmanager dof mask for node. This mask defines the dofs which are used by element
      * in node. Mask influences the code number ordering for particular node. Code numbers are
      * ordered according to node order and dofs belonging to particular node are ordered
