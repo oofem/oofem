@@ -715,7 +715,7 @@ int MixedGradientPressureNeumann :: giveInputRecordString(std :: string &str, bo
 
     GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
 
-    sprintf( buff, " devgradient %d ", this->devGradient.giveSize() );
+    sprintf( buff, " pressrue %e devgradient %d ", this->pressure, this->devGradient.giveSize() );
     for ( int i = 1; i <= this->devGradient.giveSize(); i++ ) {
         sprintf( buff, " %e", this->devGradient.at(i) );
         str += buff;
