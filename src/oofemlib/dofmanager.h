@@ -46,6 +46,7 @@
 #include "dofiditem.h"
 #include "contextioresulttype.h"
 #include "unknowntype.h"
+#include "chartype.h"
 
 ///@name Input fields for DofManager
 //@{
@@ -94,7 +95,7 @@ enum dofManagerParallelMode {
 
 #endif
 
-class NodalLoad;
+class Load;
 class TimeStep;
 class FloatArray;
 class IntArray;
@@ -377,6 +378,15 @@ public:
      * @param mode Determines response mode.
      */
     virtual void computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
+    /**
+     * Computes the load vector for given load.
+     * @param answer Load vector for given load.
+     * @param load Given load.
+     * @param type Characteristic type of the vector.
+     * @param stepN Time step when answer is computed.
+     * @param mode Determines response mode.
+     */
+    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *stepN, ValueModeType mode);
     /**
      * Returns the array containing applied loadings of the receiver
      * @return Array with indices to the applied loads.

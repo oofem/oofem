@@ -105,8 +105,6 @@ void DofManager :: setLoadArray(IntArray &la)
 void DofManager :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
 // Computes the vector of the nodal loads of the receiver.
 {
-    int n, nLoads;
-    Load *loadN;
     FloatArray contribution;
 
     if ( this->giveLoadArray()->isEmpty() ) {
@@ -114,18 +112,23 @@ void DofManager :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, Valu
         return;
     } else {
         answer.resize(0);
-        nLoads = loadArray.giveSize();     // the node may be subjected
+        int nLoads = loadArray.giveSize();     // the node may be subjected
         for ( int i = 1; i <= nLoads; i++ ) {   // to more than one load
-            n            = loadArray.at(i);
-            loadN        = domain->giveLoad(n);
-            if ( loadN->giveBCGeoType() != NodalLoadBGT ) {
-                _error("computeLoadVectorAt: incompatible load type applied");
-            }
-
-            loadN->computeComponentArrayAt(contribution, stepN, mode); // can be NULL
+            int n = loadArray.at(i);
+            Load *loadN = domain->giveLoad(n);
+            computeLoadVector(contribution, loadN, ExternalForcesVector, stepN, mode);
             answer.add(contribution);
         }
     }
+}
+
+
+void DofManager :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *stepN, ValueModeType mode)
+{
+    if ( load->giveBCGeoType() != NodalLoadBGT ) {
+        _error("computeLoadVector: incompatible load type applied");
+    }
+    load->computeComponentArrayAt(answer, stepN, mode);
 }
 
 
