@@ -170,6 +170,8 @@ TR_SHELL01 :: giveInterface(InterfaceType interface)
         return static_cast< ZZErrorEstimatorInterface * >( this );
     } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
         return static_cast< ZZRemeshingCriteriaInterface * >( this );
+    } else if ( interface == SpatialLocalizerInterfaceType ) {
+      return static_cast< SpatialLocalizerInterface * >( this );
     }
 
 
@@ -419,7 +421,60 @@ TR_SHELL01 :: ZZErrorEstimatorI_computeLocalStress(FloatArray& answer, FloatArra
 
 }
 
+int 
+TR_SHELL01 :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
+{
+    FloatArray lcoords;
+    return plate->computeLocalCoordinates(lcoords, coords);
+}
+
+double
+TR_SHELL01 :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
+{
+  FloatArray c(3); 
+  c.zero();
+  // evaluate element center
+  for (int i=1; i<=3; i++) {
+    c.add(*plate->giveNode(i)->giveCoordinates());
+  }
+  c.times(1./3.);
+  return c.distance(coords);
+}
+
+void
+TR_SHELL01 :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1)
+{
+
+  FloatArray lt3(3), gt3(3); // global vector in the element thickness direction of lenght thickeness/2
+  const FloatMatrix* GtoLRotationMatrix = plate->computeGtoLRotationMatrix();
+
+  // setup vector in the element local cs. perpendicular to element plane of thickness/2 length
+  lt3.at(1) = 0.0;
+  lt3.at(2) = 0.0;
+  lt3.at(3) = 1.0; //this->giveCrossSection()->give(CS_Thickness)/2.0; // HUHU
+  // transform it to globa cs
+  gt3.beTProductOf (*GtoLRotationMatrix, lt3);
+  
+  // use gt3 to construct element bounding box respecting true element volume
+  
+  FloatArray *coordinates, _c(3);
+
+  for ( int i = 1; i <= this->giveNumberOfNodes(); ++i ) {
+    coordinates = this->giveNode(i)->giveCoordinates();
     
+    _c = *coordinates; _c.add(gt3);
+    if (i == 1) {
+      bb0 = bb1 = _c;
+    } else {
+      bb0.beMinOf(bb0, _c);
+      bb1.beMaxOf(bb1, _c);
+    }
+
+    _c = *coordinates; _c.subtract(gt3);
+    bb0.beMinOf(bb0, _c);
+    bb1.beMaxOf(bb1, _c);
+  }
+}
 
 //
 // io routines
