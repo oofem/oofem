@@ -65,8 +65,9 @@
 #include "compiler.h"
 
  // For automatic dof creation, (should try to do without this) (move that stuff into DofManager class)
+#include "boundarycondition.h"
 #include "activebc.h"
-#include "activedof.h"
+#include "simpleslavedof.h"
 #include "masterdof.h"
 
 #ifdef __PARALLEL_MODE
@@ -418,6 +419,23 @@ Domain :: giveSet(int n)
 #endif
 
     return setList->at(n);
+}
+
+XfemManager *
+Domain :: giveXfemManager(int i)
+{
+#ifdef DEBUG
+    if ( !xfemManagerList->includes(i) ) {
+        _error2("giveXfemManager: undefined xfem manager (%d)", i);
+    }
+#endif
+    return this->xfemManagerList->at(i);
+}
+
+bool
+Domain :: hasXfemManager(int i)
+{
+    return xfemManagerList->includes(i);
 }
 
 
@@ -850,8 +868,22 @@ Domain :: instanciateYourself(DataReader *dr)
         xMan->initializeFrom(ir);
         xMan->instanciateYourself(dr);
     }
+#  ifdef VERBOSE
+    if ( nxfemman ) VERBOSE_PRINT0("Instanciated xfem ", nxfemman);
+#  endif
 
+    this->topology = NULL;
+    if ( topologytype.length() > 0 ) {
+        this->topology = classFactory.createTopology(topologytype.c_str(), this);
+        if ( !this->topology ) {
+            OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create topology of type '%s'", topologytype.c_str() );
+        }
 
+        return this->topology->instanciateYourself(dr);
+    }
+#  ifdef VERBOSE
+    if ( topologytype.length() > 0 ) VERBOSE_PRINT0("Instanciated topologies ", topologytype.length());
+#  endif
 
 
     // change internal component references from labels to assigned local numbers
@@ -864,40 +896,20 @@ Domain :: instanciateYourself(DataReader *dr)
         this->giveElement(i)->updateLocalNumbering(labelToLocNumFunctor);
     }
 
-    this->topology = NULL;
-    if ( topologytype.length() > 0 ) {
-        this->topology = classFactory.createTopology(topologytype.c_str(), this);
-        if ( !this->topology ) {
-            OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create topology of type '%s'", topologytype.c_str() );
-        }
-
-        return this->topology->instanciateYourself(dr);
+    for ( int i = 1; i <= nset; i++ ) {
+        this->giveSet(i)->updateLocalNumbering(labelToLocNumFunctor);
     }
 
     return 1;
-}
-
-XfemManager *
-Domain :: giveXfemManager(int i)
-{
-    if ( xfemManagerList->includes(i) ) {
-        return this->xfemManagerList->at(i);
-    } else {
-        _error2("giveXfemManager: undefined xfem manager (%d)", i);
-        return NULL; // return NULL to prevent compiler warnings
-    }
-}
-
-bool
-Domain :: hasXfemManager(int i)
-{
-    return xfemManagerList->includes(i);
 }
 
 
 void
 Domain :: postInitialize()
 {
+    // Dofs must be created before dof managers due their post-initialization:
+    this->createDofs();
+
     for ( int i = 1; i <= this->dofManagerList->giveSize(); i++ ) {
         this->dofManagerList->at(i)->postInitialize();
     }
@@ -1278,57 +1290,146 @@ Domain ::  giveCorrespondingCoordinateIndex(int idof)
 }
 
 
-void Domain :: createDofs(const IntArray &nodeBCs, EquationID eid)
+void Domain :: createDofs()
 {
     IntArray dofids;
 
-    // Scan all required nodal dofs.
-    std::vector< std::set<int> > node_dofs( this->giveNumberOfDofManagers() );
-
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////// Step 1. Scan all required nodal dofs.
+    std::vector< std::set< int > > node_dofs( this->giveNumberOfDofManagers() );
     for (int i = 1; i <= this->giveNumberOfElements(); ++i) {
-        // Scan for all dofs needed.
+        // Scan for all dofs needed by element.
         Element *element = this->giveElement(i);
         for (int j = 1; j <= element->giveNumberOfNodes(); ++j) {
-            element->giveDofManDofIDMask(j, eid, dofids);
+            element->giveDefaultDofManDofIDMask(j, dofids);
             for (int k = 1; k <= dofids.giveSize(); k++) {
                 node_dofs[element->giveNode(j)->giveNumber()-1].insert(dofids.at(k));
             }
         }
     }
-
-    int dnumber = 0;
     for (int i = 1; i <= this->giveNumberOfDofManagers(); ++i) {
+        // Nodes can also contain their own list of dofs (typical usecase: RigidArmNode )
         DofManager *dman = this->giveDofManager(i);
-        int bcid = nodeBCs.at(i);
-        int c = 0;
-        ///@todo How do we reconcile this with none-node dofmanagers, like hangingnode etc. ?  We should pass the information to the dof manager and let it deal with it.
-        dman->setNumberOfDofs(node_dofs[i-1].size());
-        if (bcid > 0) {
-            GeneralBoundaryCondition *bc = this->giveBc(bcid);
-            const IntArray &defaultDofs = bc->giveDefaultDofs();
-            for (std::set<int>::iterator it = node_dofs[i-1].begin(); it != node_dofs[i-1].end(); ++it) {
-                DofIDItem id = (DofIDItem)*it;
-                Dof *dof;
-                if ( defaultDofs.contains(id) ) {
-                    ActiveBoundaryCondition *active_bc = dynamic_cast<ActiveBoundaryCondition*>(bc);
-                    if (active_bc && active_bc->requiresActiveDofs()) {
-                        dof = new ActiveDof(++dnumber, dman, bcid, id);
-                    } else {
-                        dof = new MasterDof(++dnumber, dman, bcid, 0, id);
-                    }
-                } else {
-                    dof = new MasterDof(++dnumber, dman, id);
-                }
-                dman->setDof(++c, dof);
-            }
-        } else {
-            for (std::set<int>::iterator it = node_dofs[i-1].begin(); it != node_dofs[i-1].end(); ++it) {
-                Dof *dof = new MasterDof(++dnumber, dman, (DofIDItem)*it);
-                dman->setDof(++c, dof);
+        const IntArray *dofids = dman->giveForcedDofIDs();
+        if ( dofids ) {
+            for (int k = 1; k <= dofids->giveSize(); ++k) {
+                node_dofs[i-1].insert(dofids->at(k));
             }
         }
-        dman->checkConsistency();
     }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // Step 2. Scan all Dirichlet b.c.s (or active dofs). For every node we store a map from the dofid to it's b.c. number.
+    // This loop won't check for slave dofs or so, and will give a bc id for every single relevant dof.
+    // This must be a separate step since we store the inverse mapping (bc->dof instead of dof->bc) so we want to loop over all b.c.s to invert this.
+    std::vector< std::map< int, int > > dof_bc( this->giveNumberOfDofManagers() );
+    for (int i = 1; i <= this->giveNumberOfBoundaryConditions(); ++i) {
+        GeneralBoundaryCondition *gbc = this->giveBc(i);
+        if ( gbc->giveSetNumber() > 0 ) { ///@todo This will eventually not be optional.
+            // Loop over nodes in set and store the bc number in each dof.
+            Set *set = this->giveSet( gbc->giveSetNumber() );
+            ActiveBoundaryCondition *active_bc = dynamic_cast< ActiveBoundaryCondition* >(gbc);
+            BoundaryCondition *bc = dynamic_cast< BoundaryCondition* >(gbc);
+            if ( bc || ( active_bc && active_bc->requiresActiveDofs() ) ) {
+                const IntArray &appliedDofs = gbc->giveDefaultDofs();
+                const IntArray &nodes = set->giveNodeList();
+                for (int inode = 1; inode <= nodes.giveSize(); ++inode) {
+                    for (int idof = 1; idof <= appliedDofs.giveSize(); ++idof) {
+                        dof_bc[nodes.at(inode)-1][appliedDofs.at(idof)] = i;
+                    }
+                }
+            }
+        }
+    }
+    // Step 2b. This step asks nodes for their bc-vector, which is the old approach to dirichlet b.c.s (i.e. this is for backwards compatibility)
+    ///@todo Remove this input method whenever we decide on deprecating the old approach.
+    for (int i = 1; i <= this->giveNumberOfDofManagers(); ++i) {
+        DofManager *dman = this->giveDofManager(i);
+        const std::map< int, int > *dmanBcs = dman->giveBcMap();
+        if ( dmanBcs ) dof_bc[i-1].insert(dmanBcs->begin(), dmanBcs->end()); // This will ignore duplicated dofiditems. 
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // Step 3. Same for initial conditions as for boundary conditions in step 2.
+    std::vector< std::map< int, int > > dof_ic( this->giveNumberOfDofManagers() );
+    for (int i = 1; i <= this->giveNumberOfInitialConditions(); ++i) {
+        InitialCondition *ic = this->giveIc(i);
+        if ( ic->giveSetNumber() > 0 ) { ///@todo This will eventually not be optional.
+            // Loop over nodes in set and store the bc number in each dof.
+            Set *set = this->giveSet( ic->giveSetNumber() );
+            const IntArray &appliedDofs = ic->giveDofIDs();
+            const IntArray &nodes = set->giveNodeList();
+            for (int inode = 1; inode <= nodes.giveSize(); ++inode) {
+                for (int idof = 1; idof <= appliedDofs.giveSize(); ++idof) {
+                    dof_ic[nodes.at(inode)-1][appliedDofs.at(idof)] = i;
+                }
+            }
+        }
+    }
+    // Step 3b. This step asks nodes for their bc-vector, which is the old approach to dirichlet b.c.s (i.e. this is for backwards compatibility)
+    ///@todo Remove this input method whenever we decide on deprecating the old approach.
+    for (int i = 1; i <= this->giveNumberOfDofManagers(); ++i) {
+        DofManager *dman = this->giveDofManager(i);
+        const std::map< int, int > *dmanIcs = dman->giveIcMap();
+        if ( dmanIcs ) dof_ic[i-1].insert(dmanIcs->begin(), dmanIcs->end()); // This will ignore duplicated dofiditems. 
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // Step 3. Create the dofs. This involves obtaining the correct
+    for (int i = 1; i <= this->giveNumberOfDofManagers(); ++i) {
+        DofManager *dman = this->giveDofManager(i);
+        int c = 0;
+        //printf("Dofs in node %d (of %d) = %d\n", i, this->giveNumberOfDofManagers(), node_dofs[i-1].size());
+        dman->setNumberOfDofs(node_dofs[i-1].size());
+        for (std::set<int>::iterator it = node_dofs[i-1].begin(); it != node_dofs[i-1].end(); ++it) {
+            DofIDItem id = (DofIDItem)*it;
+            // Find bc and ic if there are any, otherwise zero.
+            int bcid = dof_bc[i-1].find(id) != dof_bc[i-1].end() ? dof_bc[i-1][id] : 0;
+            int icid = dof_ic[i-1].find(id) != dof_ic[i-1].end() ? dof_ic[i-1][id] : 0;
+
+            // Determine the doftype:
+            dofType dtype = DT_master;
+            const std::map< int, int > *dmanTypes = dman->giveDofTypeMap();
+            if ( dmanTypes ) {
+                std::map< int, int >::const_iterator it = dmanTypes->find(id);
+                if ( it != dmanTypes->end() ) {
+                    dtype = (dofType)it->second;
+                }
+            }
+            // Check if active dofs are needed:
+            if ( bcid > 0 ) {
+                // What should take precedence here if there is a slave node?
+                // Right now the active b.c. overrides anything set prior, if necessary.
+                // This seems like the most suitable choice, but it could possibly be changed.
+                ActiveBoundaryCondition *active_bc = dynamic_cast< ActiveBoundaryCondition* >(this->giveBc(bcid));
+                if ( active_bc && active_bc->requiresActiveDofs() ) {
+                    dtype = DT_active;
+                }
+            }
+
+            if ( !dman->isDofTypeCompatible(dtype) ) {
+                OOFEM_ERROR3("Domain :: createDofs: incompatible dof type (%d) in node %d", dtype, i);
+            }
+
+            // Finally create the new DOF:
+            //printf("Creating: node %d, id = %d, dofType = %d, bc = %d, ic = %d\n", i, id, dtype, bcid, icid);
+            Dof *dof = classFactory.createDof(dtype, ++c, dman);
+            dof->setDofID(id);
+            dof->setBcId(bcid); // Note: slave dofs and such will simple ignore this.
+            dof->setIcId(icid);
+            // Slave dofs obtain their weights post-initialization, simple slave dofs must have their master node specified.
+            if ( dtype == DT_simpleSlave ) {
+                ((SimpleSlaveDof*)dof)->setMasterDofManagerNum( (*dman->giveMasterMap())[id] );
+            }
+            dman->setDof(c, dof);
+        }
+    }
+
+    // XFEM managers create additional dofs themselves:
+    for ( int i = 1; i <= this->xfemManagerList->giveSize(); i++ ) {
+        xfemManagerList->at(i)->createEnrichedDofs();
+    }
+
 }
 
 

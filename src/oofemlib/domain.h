@@ -348,11 +348,8 @@ public:
      * Automatically detects necessary nodal dofs and creates them accordingly.
      * Scans every element after its requested dof's and picks the union of all those dof types.
      * Intenal DOF managers are not affected, as those are created by the corresponding element/bc.
-     * @todo Nodal BCs currently have a very limited implementation. Should be replaced in favor of some more flexible node-sets/element-sets etc.
-     * @param nodeBCs The boundary conditions for each node
-     * @param eid Equation ID for dofs.
      */
-    void createDofs(const IntArray &nodeBCs, EquationID eid);
+    void createDofs();
     //int giveNumberOfNodes () {return nodeList->giveSize();}
     //int giveNumberOfSides () {return elementSideList->giveSize();}
     /// Returns number of dof managers in domain.

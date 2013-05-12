@@ -148,6 +148,17 @@ protected:
     IntArray partitions;
 #endif
 
+    /// List of additional dof ids to include.
+    IntArray * dofidmask;
+    /// Map from DofIDItem to dofType.
+    std::map< int, int > *dofTypemap;
+    /// Map from DofIDItem to master node.
+    std::map< int, int > *dofMastermap;
+    /// Map from DofIDItem to bc (to be removed).
+    std::map< int, int > *dofBCmap;
+    /// Map from DofIDItem to ic (to be removed).
+    std::map< int, int > *dofICmap;
+
 public:
     /**
      * Constructor. Creates DofManager with given number belonging to domain aDomain.
@@ -385,6 +396,38 @@ public:
     virtual double giveCoordinate(int i) { return 0.0; }
     /// @return Pointer to node coordinate array.
     virtual FloatArray *giveCoordinates() { return NULL; }
+    //@}
+
+    /**@name Functions necessary for dof creation. All optional. */
+    //@{
+    /** 
+     * Returns list of specific dofs that should be included in node.
+     * @return NULL if no additional dofs are necessary, otherwise a list of DofIDItem's.
+     */
+    const IntArray *giveForcedDofIDs() { return dofidmask; }
+    /**
+     * Returns map from DofIDItem to dofType.
+     * @return NULL if no specific dofTypes are required, otherwise a map. 
+     */
+    std::map< int, int > *giveDofTypeMap()  { return dofTypemap; }
+    /**
+     * Returns map from DofIDItem to dofType.
+     * @return NULL if no specific BCs are required, otherwise a map. 
+     * @deprecated This method of applying dirichlet b.c.s is soon to be deprecated.
+     */
+    std::map< int, int > *giveMasterMap()  { return dofMastermap; }
+    /**
+     * Returns map from DofIDItem to dofType.
+     * @return NULL if no specific BCs are required, otherwise a map. 
+     * @deprecated This method of applying dirichlet b.c.s is soon to be deprecated.
+     */
+    std::map< int, int > *giveBcMap()  { return dofBCmap; }
+    /**
+     * Returns map from DofIDItem to initial condition.
+     * @return NULL if no specific ICs are required, otherwise a map. 
+     * @deprecated This method of applying i.c.s is soon to be deprecated.
+     */
+    std::map< int, int > *giveIcMap() { return dofICmap; }
     //@}
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
