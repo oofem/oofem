@@ -85,8 +85,14 @@ InitialCondition :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, initialValueDictionary, _IFT_InitialCondition_conditions);
 
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_GeneralBoundaryCondition_valType);
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_InitialCondition_valType);
     valType = ( bcValType ) val;
+
+    ///@todo Make these both not optional (and remove the old approach). Not done right now because it breaks backwards compatibility with input files.
+    this->set = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->set, _IFT_InitialCondition_set);
+    this->dofIDs.resize(0);
+    IR_GIVE_OPTIONAL_FIELD(ir, this->dofIDs, _IFT_InitialCondition_dofs);
 
     return IRRT_OK;
 }

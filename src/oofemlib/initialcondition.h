@@ -43,9 +43,15 @@
 ///@name Input fields for initial condition
 //@{
 #define _IFT_InitialCondition_conditions "conditions"
+#define _IFT_InitialCondition_valType "valtype"
+#define _IFT_InitialCondition_set "set"
+#define _IFT_InitialCondition_dofs "dofs"
 //@}
 
 namespace oofem {
+
+class IntArray;
+
 /**
  * Class implementing general initial condition. Initial condition is usually attribute of
  * one or more degrees of freedom (DOFs).
@@ -76,6 +82,10 @@ private:
     Dictionary initialValueDictionary;
     /// Physical meaning of bc value.
     bcValType valType;
+    /// Set number
+    int set;
+    /// List of dof ids that IC is applied to
+    IntArray dofIDs;
 
 public:
     /**
@@ -121,6 +131,16 @@ public:
      * @param s Scaling factor.
      */
     virtual void scale(ValueModeType type, double s);
+
+    /**
+     * Gives the set number which initial condition is applied to.
+     */
+    int giveSetNumber() { return set; }
+
+    /**
+     * Gives the set number which initial condition is applied to.
+     */
+    const IntArray &giveDofIDs() { return dofIDs; }
 
     // Overloaded methods:
     virtual IRResultType initializeFrom(InputRecord *ir);
