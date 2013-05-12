@@ -119,24 +119,22 @@ const IntArray& Set :: giveNodeList()
 
         IntArray bNodes;
         for (int ibnd = 1; ibnd <= this->elementBoundaries.giveSize()/2; ++ibnd) {
-            ///@todo Check order of interleaved data;
-            Element *e = this->domain->giveElement(ibnd*2-1);
-            int boundary = ibnd*2;
+            Element *e = this->domain->giveElement( this->elementBoundaries.at(ibnd*2-1) );
+            int boundary = this->elementBoundaries.at(ibnd*2);
             FEInterpolation *fei = e->giveInterpolation();
             fei->boundaryGiveNodes(bNodes, boundary);
-            for (int inode = 1; inode <= e->giveNumberOfNodes(); ++inode) {
+            for (int inode = 1; inode <= bNodes.giveSize(); ++inode) {
                 afflictedNodes.at(e->giveNode(bNodes.at(inode))->giveNumber()) = 1;
             }
         }
 
         IntArray eNodes;
         for (int iedge = 1; iedge <= this->elementEdges.giveSize()/2; ++iedge) {
-            ///@todo Check order of interleaved data;
-            Element *e = this->domain->giveElement(iedge*2-1);
-            int edge = iedge*2;
+            Element *e = this->domain->giveElement( this->elementEdges.at(iedge*2-1) );
+            int edge = this->elementEdges.at(iedge*2);
             FEInterpolation3d *fei = static_cast< FEInterpolation3d* >( e->giveInterpolation() );
             fei->computeLocalEdgeMapping(eNodes, edge);
-            for (int inode = 1; inode <= e->giveNumberOfNodes(); ++inode) {
+            for (int inode = 1; inode <= eNodes.giveSize(); ++inode) {
                 afflictedNodes.at(e->giveNode(eNodes.at(inode))->giveNumber()) = 1;
             }
         }

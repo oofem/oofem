@@ -35,20 +35,16 @@
 #include "mixedgradientpressurebc.h"
 #include "floatarray.h"
 #include "engngm.h"
+#include "element.h"
 #include "feinterpol.h"
 #include "set.h"
-#ifdef __FM_MODULE
-#include "../fm/line2boundaryelement.h"
-#endif
 
 namespace oofem {
 double MixedGradientPressureBC :: domainSize()
 {
-    ///@todo This code is very general, and necessary for all multiscale simulations with pores, so it should be moved into Domain eventually
     int nsd = this->domain->giveNumberOfSpatialDimensions();
     double domain_size = 0.0;
     // This requires the boundary to be consistent and ordered correctly.
-#if 1
     Set *set = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = set->giveBoundaryList();
 
@@ -59,24 +55,6 @@ double MixedGradientPressureBC :: domainSize()
         domain_size += fei->evalNXIntegral( boundary, FEIElementGeometryWrapper(e) );
     }
     return domain_size/nsd;
-#else
- #ifdef __FM_MODULE
-    for (int i = 1; i <= this->domain->giveNumberOfElements(); ++i) {
-        //BoundaryElement *e = dynamic_cast< BoundaryElement* >(d->giveElement(i));
-        ///@todo Support more than 2D
-        Element *e = dynamic_cast< Line2BoundaryElement* >(this->domain->giveElement(i));
-        if (e) {
-            domain_size += e->computeNXIntegral();
-        }
-    }
- #endif
-    if  (domain_size == 0.0) { // No boundary elements? Assume full density;
-        return this->domain->giveArea(); ///@todo Support more than 2D
-    } else {
-        return domain_size/nsd;
-    }
-#endif
-
 }
 
 
