@@ -122,6 +122,7 @@ public:
      * Clears the entire set.
      */
     void clear();
+    virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
     /**
      * Renumbering of nodes (could change due to load balancing).
      */

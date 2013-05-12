@@ -166,6 +166,12 @@ void Set :: clear()
     this->totalNodes.resize(0);
 }
 
+void Set :: updateLocalNumbering(EntityRenumberingFunctor& f)
+{
+    this->updateLocalNodeNumbering(f);
+    this->updateLocalElementNumbering(f);
+}
+
 void Set :: updateLocalNodeNumbering(EntityRenumberingFunctor& f)
 {
     for (int i = 1; i <= nodes.giveSize(); i++ ) {
