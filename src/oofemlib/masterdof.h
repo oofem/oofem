@@ -149,6 +149,7 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual void setBcId(int bcId) { this->bc = bcId; }
+    virtual void setIcId(int icId) { this->ic = icId; }
     virtual void setEquationNumber(int equationNumber) { this->equationNumber = equationNumber; }
     virtual void setUnknowns(Dictionary *unknowns) { this->unknowns = unknowns; }
     virtual Dictionary *giveUnknowns() { return this->unknowns; }

@@ -56,6 +56,10 @@ DofManager :: DofManager(int n, Domain *aDomain) :
     dofArray      = NULL;
     isBoundaryFlag = false;
     hasSlaveDofs  = false;
+    dofidmask = NULL;
+    dofTypemap = NULL;
+    dofBCmap = NULL;
+    dofICmap = NULL;
 #ifdef __PARALLEL_MODE
     partitions.resize(0);
     parallel_mode = DofManager_local;
@@ -75,6 +79,11 @@ DofManager :: ~DofManager()
 
         delete[] dofArray;
     }
+
+    delete dofidmask;
+    delete dofTypemap;
+    delete dofBCmap;
+    delete dofICmap;
 }
 
 
@@ -96,8 +105,6 @@ void DofManager :: setLoadArray(IntArray &la)
 void DofManager :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
 // Computes the vector of the nodal loads of the receiver.
 {
-    int n, nLoads;
-    Load *loadN;
     FloatArray contribution;
 
     if ( this->giveLoadArray()->isEmpty() ) {
@@ -105,18 +112,23 @@ void DofManager :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, Valu
         return;
     } else {
         answer.resize(0);
-        nLoads = loadArray.giveSize();     // the node may be subjected
+        int nLoads = loadArray.giveSize();     // the node may be subjected
         for ( int i = 1; i <= nLoads; i++ ) {   // to more than one load
-            n            = loadArray.at(i);
-            loadN        = domain->giveLoad(n);
-            if ( loadN->giveBCGeoType() != NodalLoadBGT ) {
-                _error("computeLoadVectorAt: incompatible load type applied");
-            }
-
-            loadN->computeComponentArrayAt(contribution, stepN, mode); // can be NULL
+            int n = loadArray.at(i);
+            Load *loadN = domain->giveLoad(n);
+            computeLoadVector(contribution, loadN, ExternalForcesVector, stepN, mode);
             answer.add(contribution);
         }
     }
+}
+
+
+void DofManager :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *stepN, ValueModeType mode)
+{
+    if ( load->giveBCGeoType() != NodalLoadBGT ) {
+        _error("computeLoadVector: incompatible load type applied");
+    }
+    load->computeComponentArrayAt(answer, stepN, mode);
 }
 
 
@@ -421,6 +433,9 @@ IRResultType DofManager ::  resolveDofIDArray(InputRecord *ir, IntArray &dofIDAr
     if ( numberOfDofs == -1 ) {
         dofIDArry = domain->giveDefaultNodeDofIDArry();
         numberOfDofs = dofIDArry.giveSize();
+        delete this->dofidmask;
+        //this->dofidmask = NULL;
+        this->dofidmask = new IntArray(dofIDArry); ///@todo To be removed eventually.
     } else {
         // if ndofs is prescribed, read the physical meaning of particular dofs
         // for detailed values of DofMask array see cltypes.h file
@@ -430,6 +445,9 @@ IRResultType DofManager ::  resolveDofIDArray(InputRecord *ir, IntArray &dofIDAr
         if ( dofIDArry.giveSize() != numberOfDofs ) {
             _error("resolveDofIDArray : DofIDMask size mismatch");
         }
+
+        delete this->dofidmask;
+        this->dofidmask = new IntArray(dofIDArry);
     }
 
     return IRRT_OK;
@@ -447,14 +465,29 @@ DofManager :: initializeFrom(InputRecord *ir)
     loadArray.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, loadArray, _IFT_DofManager_load);
 
+#if 1
+    ///@todo This method is unnecessary, we should just check if user has supplied a dofidmask field or not and just drop "numberOfDofs")
     this->resolveDofIDArray(ir, dofIDArry);
+#else
+    if ( ir->hasField(_IFT_DofManager_dofidmask) ) {
+        IR_GIVE_FIELD(ir, dofIDArry, _IFT_DofManager_dofidmask);
+        delete this->dofidmask;
+        this->dofidmask = new IntArray(dofIDArry);
+    } else {
+        dofIDArry = domain->giveDefaultNodeDofIDArry();
+        delete this->dofidmask;
+        //this->dofidmask = NULL;
+        this->dofidmask = new IntArray(dofIDArry); ///@todo To be removed eventually.
+    }
+    numberOfDofs = dofIDArry.giveSize();
+#endif
 
-    // numberOfDofs = domain->giveNumberOfDofs () ;
     bc.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, bc, _IFT_DofManager_bc);
 
     ic.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, ic, _IFT_DofManager_ic);
+
     // reads master mask - in this array are numbers of master dofManagers
     // to which are connected dofs in receiver.
     // if master mask index is zero then dof is created as master (i.e., having own equation number)
@@ -488,18 +521,23 @@ DofManager :: initializeFrom(InputRecord *ir)
 #endif
 
 
+    int dofIc = 0, dofBc = 0;
 
-    int hasIc, hasBc, dofIc = 0, dofBc = 0, hasTypeinfo = 0;
-    dofType dtype;
-
-    hasIc = !( ic.giveSize() == 0 );
-    hasBc = !( bc.giveSize() == 0 );
-    hasTypeinfo = !( dofTypeMask.giveSize() == 0 );
+    bool hasIc = !( ic.giveSize() == 0 );
+    bool hasBc = !( bc.giveSize() == 0 );
+    bool hasTypeinfo = !( dofTypeMask.giveSize() == 0 );
 
     // check sizes
     if ( hasBc ) {
         if ( bc.giveSize() != this->giveNumberOfDofs() ) {
             _error3( "initializeFrom: bc size mismatch. Size is %d and need %d", bc.giveSize(), this->giveNumberOfDofs() );
+        }
+        delete this->dofBCmap;
+        this->dofBCmap = new std::map< int, int >();
+        for (int i = 1; i <= bc.giveSize(); ++i) {
+            if ( bc.at(i) > 0 ) {
+                (*this->dofBCmap)[dofIDArry.at(i)] = bc.at(i);
+            }
         }
     }
 
@@ -507,16 +545,45 @@ DofManager :: initializeFrom(InputRecord *ir)
         if ( ic.giveSize() != this->giveNumberOfDofs() ) {
             _error3( "initializeFrom: ic size mismatch. Size is %d and need %d", ic.giveSize(), this->giveNumberOfDofs() );
         }
+        delete this->dofICmap;
+        this->dofICmap = new std::map< int, int >();
+        for (int i = 1; i <= ic.giveSize(); ++i) {
+            if ( ic.at(i) > 0 ) {
+                (*this->dofICmap)[dofIDArry.at(i)] = ic.at(i);
+            }
+        }
     }
 
     if ( hasTypeinfo ) {
         if ( dofTypeMask.giveSize() != this->giveNumberOfDofs() ) {
             _error3( "initializeFrom: dofTypeMask size mismatch. Size is %d and need %d", dofTypeMask.giveSize(), this->giveNumberOfDofs() );
         }
+        delete this->dofTypemap;
+        this->dofTypemap = new std::map< int, int >();
+        for (int i = 1; i <= dofTypeMask.giveSize(); ++i) {
+            if ( dofTypeMask.at(i) != DT_master ) {
+                (*this->dofTypemap)[dofIDArry.at(i)] = dofTypeMask.at(i);
+            }
+        }
+        // For simple slave dofs:
+        if ( dofTypeMask.contains(DT_simpleSlave) ) {
+            IR_GIVE_FIELD(ir, masterMask, _IFT_DofManager_mastermask);
+            if ( masterMask.giveSize() != numberOfDofs ) {
+                _error("initializeFrom: mastermask size mismatch");
+            }
+            delete this->dofMastermap;
+            this->dofMastermap = new std::map< int, int >();
+            for (int i = 1; i <= masterMask.giveSize(); ++i) {
+                if ( masterMask.at(i) > 0 ) {
+                    (*this->dofMastermap)[dofIDArry.at(i)] = masterMask.at(i);
+                }
+            }
+        }
     }
 
     dofArray = new Dof * [ this->giveNumberOfDofs() ];
     for ( int j = 0; j < numberOfDofs; j++ ) {
+        dofType dtype;
         if ( hasTypeinfo ) {
             dtype = ( dofType ) dofTypeMask.at(j + 1);
         } else {
@@ -524,29 +591,18 @@ DofManager :: initializeFrom(InputRecord *ir)
         }
 
         if ( this->isDofTypeCompatible(dtype) ) {
+            if ( hasIc ) {
+                dofIc = ic.at(j + 1);
+            }
+            if ( hasBc ) {
+                dofBc = bc.at(j + 1);
+            }
+
             if ( dtype == DT_master ) {
-                if ( hasIc ) {
-                    dofIc = ic.at(j + 1);
-                }
-
-                if ( hasBc ) {
-                    dofBc = bc.at(j + 1);
-                }
-
                 dofArray [ j ] = new MasterDof( j + 1, this, dofBc, dofIc, ( DofIDItem ) dofIDArry.at(j + 1) );
             } else if ( dtype == DT_active ) {
-                if ( hasBc ) {
-                    dofBc = bc.at(j + 1);
-                }
                 dofArray [ j ] = new ActiveDof( j + 1, this, dofBc, ( DofIDItem ) dofIDArry.at(j + 1) );
             } else if ( dtype == DT_simpleSlave ) { // Simple slave dof
-                if ( masterMask.giveSize() == 0 ) {
-                    IR_GIVE_FIELD(ir, masterMask, _IFT_DofManager_mastermask);
-                    if ( masterMask.giveSize() != numberOfDofs ) {
-                        _error("initializeFrom: mastermask size mismatch");
-                    }
-                }
-
                 dofArray [ j ] = new SimpleSlaveDof( j + 1, this, masterMask.at(j + 1), ( DofIDItem ) dofIDArry.at(j + 1) );
             } else if ( dtype == DT_slave ) { // Slave dof
                 dofArray [ j ] = new SlaveDof( j + 1, this, ( DofIDItem ) dofIDArry.at(j + 1) );

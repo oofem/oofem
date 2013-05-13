@@ -64,6 +64,9 @@ public:
      */
     virtual void updateStabilizationCoeffs(TimeStep *tStep) { }
 
+    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const
+    { this->giveDofManDofIDMask(inode, EID_MomentumBalance_ConservationEquation, answer); }
+
     virtual const char *giveClassName() const { return "FMElement"; }
     virtual classType giveClassID() const { return FMElementClass; }
 };

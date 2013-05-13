@@ -40,6 +40,7 @@
 #include "zzerrorestimator.h"
 #include "cct3d.h"
 #include "trplanrot3d.h"
+#include "spatiallocalizer.h"
 
 #define _IFT_TR_SHELL01_Name "tr_shell01"
 
@@ -52,8 +53,7 @@ namespace oofem {
  *
  * @author Ladislav Svoboda
  */
-class TR_SHELL01 : public StructuralElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, 
-    public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface
+class TR_SHELL01 : public StructuralElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface, public SpatialLocalizerInterface
 {
 protected:
     /// Pointer to plate element.
@@ -134,6 +134,16 @@ public:
     virtual double ZZRemeshingCriteriaI_giveCharacteristicSize();
     virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
 
+    // SpatialLocalizerI
+    virtual Element *SpatialLocalizerI_giveElement() { return this; }
+    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
+    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
+    virtual void SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1);
+
+
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) {
+      return this->plate->computeGlobalCoordinates (answer, lcoords);
+    }
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS)

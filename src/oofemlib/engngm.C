@@ -696,10 +696,11 @@ EngngModel :: initMetaStepAttributes(MetaStep *mStep)
 void
 EngngModel :: updateAttributes(MetaStep *mStep)
 {
-    InputRecord *ir = mStep->giveAttributesRecord();
+    MetaStep *mStep1 = this->giveMetaStep( mStep->giveNumber() );//this line ensures correct input file in staggered problem
+    InputRecord *ir = mStep1->giveAttributesRecord();
 
-    if ( this->giveNumericalMethod(mStep) ) {
-        this->giveNumericalMethod(mStep)->initializeFrom(ir);
+    if ( this->giveNumericalMethod(mStep1) ) {
+        this->giveNumericalMethod(mStep1)->initializeFrom(ir);
     }
 
 #ifdef __PARALLEL_MODE
@@ -1120,9 +1121,7 @@ double EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep 
             
             if ( eNorms ) {
                 node->giveCompleteMasterDofIDArray(dofids);
-                for ( int i = 1; i <= dofids.giveSize(); ++i ) {
-                    eNorms->at(dofids.at(i)) += charVec.at(i) * charVec.at(i);
-                }
+                eNorms->assembleSquared(charVec, dofids);
             }
             norm += charVec.computeSquaredNorm();
         }
@@ -1149,8 +1148,6 @@ double EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, E
         if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >( bc ) ) ) {
             norm += abc->assembleVector(answer, tStep, eid, type, mode, s, eNorms);
         } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >( bc ) ) ) {
-#if 0
-            ///@todo Work in progress: Introduce the general element load assemble interfaces necessary
             IntArray dofids, loc, dofIDarry;
             FloatArray charVec;
             FloatMatrix R;
@@ -1158,6 +1155,8 @@ double EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, E
             // If there is a set connected to the load, then assemble that:
             Set *set = domain->giveSet(bc->giveSetNumber());
 
+            ///@todo Work in progress: Introduce the general element load assemble interfaces necessary
+#if 0
             // Bulk load:
             const IntArray &elements = set->giveElementList();
             for (int ielem = 1; ielem <= elements.giveSize(); ++ielem) {
@@ -1171,12 +1170,8 @@ double EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, E
                     }
 
                     answer.assemble(charVec, loc);
-            
-                    if ( eNorms ) {
-                        for ( int i = 1; i <= dofids.giveSize(); ++i ) {
-                            eNorms->at(dofids.at(i)) += charVec.at(i) * charVec.at(i);
-                        }
-                    }
+
+                    if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
                     norm += charVec.computeSquaredNorm();
                 }
             }
@@ -1198,12 +1193,8 @@ double EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, E
                     }
 
                     answer.assemble(charVec, loc);
-            
-                    if ( eNorms ) {
-                        for ( int i = 1; i <= dofids.giveSize(); ++i ) {
-                            eNorms->at(dofids.at(i)) += charVec.at(i) * charVec.at(i);
-                        }
-                    }
+
+                    if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
                     norm += charVec.computeSquaredNorm();
                 }
             }
@@ -1216,7 +1207,7 @@ double EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, E
                 element->computeEdgeLoadVector(charVec, edge, type, mode, load, tStep);
                 element->giveEdgeLocationArray(loc, edge, eid, s, &dofids);
                 answer.assemble(charVec, loc);
-                
+
                 if ( charVec.isNotEmpty() ) {
                     if ( element->giveRotationMatrix(R, eid) ) {
                         OOFEM_ERROR("EngngModel :: assembleVectorFromBC : Edge-load assembling with rotation not supported yet");
@@ -1224,24 +1215,20 @@ double EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, E
                     }
 
                     answer.assemble(charVec, loc);
-            
-                    if ( eNorms ) {
-                        for ( int i = 1; i <= dofids.giveSize(); ++i ) {
-                            eNorms->at(dofids.at(i)) += charVec.at(i) * charVec.at(i);
-                        }
-                    }
+
+                    if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
                     norm += charVec.computeSquaredNorm();
                 }
             }
-
+#endif
             // Nodal load:
             const IntArray &nodes = set->giveNodeList();
             for (int idman = 1; idman <= nodes.giveSize(); ++idman) {
                 DofManager *node = domain->giveDofManager(nodes.at(idman));
-                node->computeLoadVector(charVec, type, mode, load, tStep);
+                node->computeLoadVector(charVec, load, type, tStep, mode);
                 node->giveCompleteLocationArray(loc, s);
                 answer.assemble(charVec, loc);
-                
+
                 if ( charVec.isNotEmpty() ) {
                     node->giveCompleteLocationArray(loc, s);
                     if ( node->computeM2LTransformation(R, dofIDarry) ) {
@@ -1249,17 +1236,11 @@ double EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, E
                     }
 
                     answer.assemble(charVec, loc);
-                    
-                    if ( eNorms ) {
-                        node->giveCompleteMasterDofIDArray(dofids);
-                        for ( int i = 1; i <= dofids.giveSize(); ++i ) {
-                            eNorms->at(dofids.at(i)) += charVec.at(i) * charVec.at(i);
-                        }
-                    }
+
+                    if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
                     norm += charVec.computeSquaredNorm();
                 }
             }
-#endif
         }
     }
 
@@ -1312,11 +1293,7 @@ double EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tS
 
             answer.assemble(charVec, loc);
             
-            if ( eNorms ) {
-                for ( int i = 1; i <= dofids.giveSize(); ++i ) {
-                    eNorms->at(dofids.at(i)) += charVec.at(i) * charVec.at(i);
-                }
-            }
+            if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
             norm += charVec.computeSquaredNorm();
         }
     }

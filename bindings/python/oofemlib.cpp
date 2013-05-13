@@ -625,19 +625,22 @@ class PyElement : public Element, public wrapper<Element>
 public:
     PyElement (int n, Domain *d) : Element (n,d) {}
 
-    void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
         this->get_override("giveCharacteristicMatrix")();
     }
 
-    void  giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) {
+    virtual void  giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) {
         this->get_override("giveCharacteristicVector")();
     }
 
-    double giveCharacteristicValue(CharType, TimeStep *) {
+    virtual double giveCharacteristicValue(CharType, TimeStep *) {
         return this->get_override("giveCharacteristicValue")();
     }
 
-    void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const {
+    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const {
+        this->get_override("giveDefaultDofManDofIDMask")();
+    }
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const {
         this->get_override("giveDofManDofIDMask")();
     }
 };

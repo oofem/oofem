@@ -318,6 +318,12 @@ public:
      */
     void assemble(const FloatArray &fe, const IntArray &loc);
     /**
+     * Assembles the array fe with each component squared.
+     * @param fe Array to be assembled (with each component squared)
+     * @param loc Location array.
+     */
+    void assembleSquared(const FloatArray &fe, const IntArray &loc);
+    /**
      * Copy the given vector as sub-vector to receiver. The sub-vector values will be set to receivers
      * values starting at at positions (si,...,si+src.size). The size of receiver will be
      * adjusted, if necessary.

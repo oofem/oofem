@@ -103,6 +103,9 @@ public:
     /// Destructor.
     virtual ~GeneralBoundaryCondition() { }
 
+    /**
+     * Gives the set number which boundary condition is applied to.
+     */
     int giveSetNumber() { return set; }
 
     /// Gives the number of internal dof managers.

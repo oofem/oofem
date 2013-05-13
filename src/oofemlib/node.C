@@ -158,40 +158,29 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
 }
 
 void
-Node :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-// Computes the vector of the nodal loads of the receiver.
+Node :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *stepN, ValueModeType mode)
 {
-    if ( this->giveLoadArray()->isEmpty() ) {
+    if ( type != ExternalForcesVector ) {
         answer.resize(0);
         return;
-    } else {
-        int n, nLoads;
-        NodalLoad *loadN;
-        FloatArray contribution;
+    }
+
+    NodalLoad *loadN = dynamic_cast< NodalLoad * >( load );
+    if ( !loadN ) {
+        _error("computeLoadVectorAt: incompatible load");
+    }
+
+    if ( loadN->giveBCGeoType() != NodalLoadBGT ) {
+        _error("computeLoadVectorAt: incompatible load type applied");
+    }
+
+    loadN->computeComponentArrayAt(answer, stepN, mode); // can be NULL
+    // Transform from Global to Local c.s.
+    if ( loadN->giveCoordSystMode() == NodalLoad :: BL_GlobalMode ) {
         IntArray dofIDarry(0);
         FloatMatrix L2G;
-
-        answer.resize(0);
-        nLoads = loadArray.giveSize();       // the node may be subjected
-        for ( int i = 1; i <= nLoads; i++ ) {     // to more than one load
-            n     = loadArray.at(i);
-            loadN = dynamic_cast< NodalLoad * >( domain->giveLoad(n) );
-            if ( !loadN ) {
-                _error("computeLoadVectorAt: incompatible load");
-            }
-
-            if ( loadN->giveBCGeoType() != NodalLoadBGT ) {
-                _error("computeLoadVectorAt: incompatible load type applied");
-            }
-
-            loadN->computeComponentArrayAt(contribution, stepN, mode); // can be NULL
-            // Transform from Global to Local c.s.
-            if ( loadN->giveCoordSystMode() == NodalLoad :: BL_GlobalMode ) {
-                if ( this->computeL2GTransformation(L2G, dofIDarry) ) {
-                    contribution.rotatedWith(L2G, 't');
-                }
-            }
-            answer.add(contribution);
+        if ( this->computeL2GTransformation(L2G, dofIDarry) ) {
+            answer.rotatedWith(L2G, 't');
         }
     }
 }

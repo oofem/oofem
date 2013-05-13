@@ -94,6 +94,7 @@ public:
     virtual int askNewEquationNumber(TimeStep *tStep);
     virtual bool hasBc(TimeStep *tStep);
     virtual int giveBcId();
+    virtual void setBcId(int bcId);
     virtual double giveBcValue(ValueModeType mode, TimeStep *tStep);
 
     virtual bool hasIc(TimeStep *tStep);

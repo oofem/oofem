@@ -203,7 +203,6 @@ int XfemManager :: instanciateYourself(DataReader *dr)
         ei->initializeFrom(mir);
         ei->instanciateYourself(dr);
         this->enrichmentItemList->put(i, ei);
-        this->createEnrichedDofs();
     }
     return 1;
 }

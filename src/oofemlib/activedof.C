@@ -231,6 +231,12 @@ int ActiveDof :: giveBcId()
     return this->bc;
 }
 
+void ActiveDof :: setBcId( int bcId )
+{
+    bc = bcId;
+    activeBC = NULL;
+}
+
 double ActiveDof :: giveBcValue(ValueModeType mode, TimeStep *tStep)
 {
     return this->giveActiveBoundaryCondition()->giveBcValue(this, mode, tStep);
@@ -265,5 +271,6 @@ void ActiveDof :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
     // No numbering is stored.
 }
+
 
 } // end namespace oofem

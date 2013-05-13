@@ -181,7 +181,7 @@ double MixedGradientPressureDirichlet :: giveUnknown(double vol, const FloatArra
     FloatArray *coords = dof->giveDofManager()->giveCoordinates();
 
     if ( coords == NULL || coords->giveSize() != this->centerCoord.giveSize() ) {
-        OOFEM_ERROR("MixedGradientPressureDirichlet :: give - Size of coordinate system different from center coordinate in b.c.");
+        OOFEM_ERROR2("MixedGradientPressureDirichlet :: give - Size of coordinate system different from center coordinate (%d) in b.c.", this->centerCoord.giveSize());
     }
 
     FloatArray dx;
@@ -189,30 +189,30 @@ double MixedGradientPressureDirichlet :: giveUnknown(double vol, const FloatArra
 
     int nsd = dx.giveSize(); // Number of spatial dimensions
 
-    double dev11, dev22, dev33 = 0., gam12, gam23 = 0., gam13 = 0.;
+    double dev11, dev22, dev33 = 0., dev12, dev23 = 0., dev13 = 0.;
     if (nsd == 2) {
         dev11 = dev.at(1);
         dev22 = dev.at(2);
-        gam12 = dev.at(3);
+        dev12 = dev.at(3)*0.5;
     } else /*if (nsd == 3)*/ {
         dev11 = dev.at(1);
         dev22 = dev.at(2);
         dev33 = dev.at(3);
-        gam23 = dev.at(4);
-        gam13 = dev.at(5);
-        gam12 = dev.at(6);
+        dev23 = dev.at(4)*0.5;
+        dev13 = dev.at(5)*0.5;
+        dev12 = dev.at(6)*0.5;
     }
 
     double val;
     if ( id == D_u || id == V_u ) {
         val = dx.at(1)/3.0*vol;
-        if (nsd == 2) val += dx.at(1)*dev11 + dx.at(2)/2.0*gam12;
-        if (nsd == 3) val += dx.at(3)/2.0*gam13;
+        if (nsd >= 2) val += dx.at(1)*dev11 + dx.at(2)*dev12;
+        if (nsd == 3) val += dx.at(3)*dev13;
     } else if ( id == D_v || id == V_v ) {
-        val = dx.at(2)/3.0*vol + dx.at(1)/2.0*gam12 + dx.at(2)*dev22;
-        if (nsd == 3) val += dx.at(3)/2.0*gam23;
+        val = dx.at(2)/3.0*vol + dx.at(1)*dev12 + dx.at(2)*dev22;
+        if (nsd == 3) val += dx.at(3)*dev23;
     } else /*if ( id == D_w || id == V_w )*/ { // 3D only:
-        val = dx.at(3)/3.0*vol + dx.at(1)/2.0*gam13 + dx.at(2)/2.0*gam23 + dx.at(3)*dev33;
+        val = dx.at(3)/3.0*vol + dx.at(1)*dev13 + dx.at(2)*dev23 + dx.at(3)*dev33;
     }
     return val;
 }
@@ -433,11 +433,9 @@ IRResultType MixedGradientPressureDirichlet :: initializeFrom(InputRecord *ir)
 
     MixedGradientPressureBC :: initializeFrom(ir);
 
-    IRResultType rt = IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, _IFT_MixedGradientPressure_centerCoords)
-    if ( rt != IRRT_OK ) {
-        this->centerCoord.resize( domain->giveNumberOfSpatialDimensions() );
-        this->centerCoord.zero();
-    }
+    this->centerCoord.resize( domain->giveNumberOfSpatialDimensions() );
+    this->centerCoord.zero();
+    IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, _IFT_MixedGradientPressure_centerCoords)
 
     return IRRT_OK;
 }

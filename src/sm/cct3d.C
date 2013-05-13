@@ -55,6 +55,7 @@ CCTPlate3d :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
 // transformed into local coordinate system of the
 // receiver
 {
+    FloatArray offset;
     // test the parametr
     if ( global.giveSize() != 3 ) {
         _error("giveLocalCoordinate : cannot transform coordinates - size mismatch");
@@ -66,7 +67,9 @@ CCTPlate3d :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
         this->computeGtoLRotationMatrix();
     }
 
-    answer.beProductOf(* GtoLRotationMatrix, global);
+    offset = global;
+    offset.subtract(*this->giveNode(1)->giveCoordinates());
+    answer.beProductOf(* GtoLRotationMatrix, offset);
 }
 
 
@@ -112,9 +115,33 @@ CCTPlate3d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
 {
     // rotate the input point Coordinate System into the element CS
     FloatArray inputCoords_ElCS;
+    FloatArray lc[3], llc;
+    const FloatArray *lcptr[3] = {lc, lc+1, lc+2};
     this->giveLocalCoordinates( inputCoords_ElCS, const_cast< FloatArray & >(coords) );
+    for (int _i=0; _i<3; _i++) {
+      this->giveLocalCoordinates( lc[_i], *this->giveNode(_i+1)->giveCoordinates());
+    }
+    FEIVertexListGeometryWrapper wr(3, lcptr);
+    FEI2dTrLin _interp(1,2);
+    bool inplane = _interp.global2local(llc, inputCoords_ElCS, wr);
+    // now check if the thid local coordinate is within the thickness of element
+    bool outofplane = (abs(inputCoords_ElCS.at(3)) <= this->giveCrossSection()->give(CS_Thickness)/2.); 
+    return inplane && outofplane;
+}
 
-    return CCTPlate :: computeLocalCoordinates(answer, inputCoords_ElCS);
+
+int 
+CCTPlate3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
+{
+  double l1 = lcoords.at(1);
+  double l2 = lcoords.at(2);
+  double l3 = 1.-l2-l1;
+
+  answer.resize(3);
+  for (int _i=1; _i<=3; _i++) {
+    answer.at(_i) = l1*this->giveNode(1)->giveCoordinate(_i) + l2*this->giveNode(2)->giveCoordinate(_i)+l3*this->giveNode(3)->giveCoordinate(_i);
+  }
+  return true;
 }
 
 
