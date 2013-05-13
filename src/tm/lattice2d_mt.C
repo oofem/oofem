@@ -46,7 +46,6 @@
 #include "domain.h"
 #include "mathfem.h"
 #include "engngm.h"
-#include "structuralms.h"
 #include "load.h"
 #include "classfactory.h"
 
