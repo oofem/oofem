@@ -88,7 +88,6 @@
 #define _IFT_EngngModel_lstype "lstype"
 #define _IFT_EngngModel_smtype "smtype"
 
-#define _IFT_EngngModel_coupling "coupling"
 //@}
 
 namespace oofem {
