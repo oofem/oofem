@@ -35,7 +35,7 @@
 #ifndef stationarytransportproblem_h
 #define stationarytransportproblem_h
 
-#include "structengngmodel.h"
+#include "engngm.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "primaryfield.h"
