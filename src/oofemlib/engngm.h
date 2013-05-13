@@ -948,9 +948,9 @@ public:
      * @param domain Domain to assemble from.
      * @return Sum of element norm (squared) of assembled vector.
      */
-    double assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                         CharType type, ValueModeType mode,
-                                         const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
+    void assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                                       CharType type, ValueModeType mode,
+                                       const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
     /**
      * Assembles characteristic vector of required type from elements into given vector.
      * @param answer Assembled vector.
@@ -963,9 +963,9 @@ public:
      * @param domain Domain to assemble from.
      * @return Sum of element norm (squared) of assembled vector.
      */
-    double assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                      CharType type, ValueModeType mode,
-                                      const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
+    void assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                                    CharType type, ValueModeType mode,
+                                    const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
     /**
      * Assembles characteristic vector of required type from boundary conditions.
@@ -977,11 +977,10 @@ public:
      * from elements and assembled using prescribed eqn numbers.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
-     * @return Sum of element norm (squared) of assembled vector.
      */
-    double assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
+    void assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                              CharType type, ValueModeType mode,
+                              const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
     /**
      * Assembles the extrapolated internal forces vector,

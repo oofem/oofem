@@ -122,7 +122,7 @@ public:
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, 
                           const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
-    virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                   CharType type, ValueModeType mode,
                                   const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
 

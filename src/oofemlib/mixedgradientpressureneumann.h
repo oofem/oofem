@@ -150,7 +150,7 @@ public:
     virtual void setPrescribedPressure(double p) { pressure = p; }
     virtual void setPrescribedDeviatoricGradientFromVoigt(const FloatArray &ddev);
 
-    virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                   CharType type, ValueModeType mode,
                                   const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
     

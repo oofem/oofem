@@ -420,7 +420,7 @@ void MixedGradientPressureNeumann :: integrateDevTangent(FloatMatrix &answer, El
 }
 
 
-double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                     CharType type, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
     // Boundary condition only acts on the momentumbalance part.
@@ -428,12 +428,11 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
         eid = EID_MomentumBalance;
 
     if (eid != EID_MomentumBalance)
-        return 0.0;
+        return;
 
     Set *set = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = set->giveBoundaryList();
 
-    double norm;
     IntArray loc, sigma_loc;  // For the velocities and stress respectively
     IntArray masterDofIDs, sigmaMasterDofIDs;
     this->sigmaDev->giveCompleteLocationArray(sigma_loc, s);
@@ -444,7 +443,6 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
         FloatArray devLoad;
         devLoad.beScaled(-rve_size, this->devGradient);
         answer.assemble(devLoad, sigma_loc);
-        norm = devLoad.computeSquaredNorm();
 
         // The second contribution is on the momentumbalance equation; - int delta_v . n dA * p
         FloatArray fe;
@@ -462,9 +460,8 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
                 }
             }
         }
-        return norm;
         
-    } else if (type == InternalForcesVector) {
+    } else if ( type == InternalForcesVector ) {
         FloatMatrix Ke;
         FloatArray fe_v, fe_s;
         FloatArray s_dev, e_v;
@@ -476,7 +473,6 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
 
         // Assemble: int delta_v (x) n dA : E_i s_i
         //           int v (x) n dA : E_i delta_s_i
-        norm = 0.;
         for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
             Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
             int boundary = boundaries.at(pos*2);
@@ -492,7 +488,6 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
             
             answer.assemble(fe_s, loc); // Contributions to delta_v equations
             answer.assemble(fe_v, sigma_loc); // Contribution to delta_s_i equations
-            norm += fe_v.computeNorm() + fe_s.computeNorm(); ///@todo This is awful. Different units, therefore the split up use below;
             if ( eNorms ) {
                 for ( int i = 1; i <= loc.giveSize(); ++i ) {
                     if ( loc.at(i) ) eNorms->at(masterDofIDs.at(i)) += fe_s.at(i) * fe_s.at(i);
@@ -502,9 +497,7 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
                 }
             }
         }
-        return norm;
     }
-    return 0.;
 }
 
 

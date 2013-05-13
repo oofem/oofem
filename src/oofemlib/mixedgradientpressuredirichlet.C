@@ -375,17 +375,14 @@ void MixedGradientPressureDirichlet :: setPrescribedDeviatoricGradientFromVoigt(
 }
 
 
-double MixedGradientPressureDirichlet :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+void MixedGradientPressureDirichlet :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                     CharType type, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
     if (type != ExternalForcesVector)
-        return 0.0;
+        return;
 
-    if (eid == EID_MomentumBalance_ConservationEquation)
-        eid = EID_MomentumBalance;
-
-    if (eid != EID_MomentumBalance)
-        return 0.0;
+    if (eid != EID_MomentumBalance_ConservationEquation && eid != EID_MomentumBalance)
+        return;
 
     Dof *vol = this->giveVolDof();
     int vol_loc = vol->giveEquationNumber(s);
@@ -394,7 +391,6 @@ double MixedGradientPressureDirichlet :: assembleVector(FloatArray &answer, Time
         answer.at(vol_loc) -= rve_size*pressure; // Note the negative sign (pressure as opposed to mean stress)
         if ( eNorms ) eNorms->at(vol->giveDofID()) = rve_size*pressure*rve_size*pressure;
     }
-    return 0.0;
 }
 
 

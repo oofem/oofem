@@ -116,23 +116,22 @@ void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *t
     }
 }
 
-double SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+void SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                 CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
     if (type != InternalForcesVector) {
-        return 0.0;
+        return;
     }
     if (eid == EID_MomentumBalance_ConservationEquation) {
         eid = EID_MomentumBalance;
     }
     if (eid != EID_MomentumBalance || mode != VM_Total) {
-        return 0.0;
+        return;
     }
 
     FloatArray fe;
     IntArray loc, dofids, masterdofids;
-    double norm = 0.0;
 
     for (std :: list< std::pair<int, int> > :: const_iterator it = sides.begin(); it != sides.end(); ++it ) {
         Element *e = this->giveDomain()->giveElement(it->first);
@@ -140,14 +139,12 @@ double SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, Tim
         e->giveBoundaryLocationArray(loc, side, eid, s, &masterdofids);
         this->computeLoadVectorFromElement(fe, e, side, tStep);
         answer.assemble(fe, loc);
-        norm += fe.computeSquaredNorm();
         if ( eNorms ) {
             for ( int i = 1; i <= loc.giveSize(); ++i ) {
                 if ( loc.at(i) > 0 ) eNorms->at(masterdofids.at(1)) += fe.at(i) * fe.at(i);
             }
         }
     }
-    return norm;
 }
 
 void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &answer, Element *e, int side, TimeStep *tStep)
