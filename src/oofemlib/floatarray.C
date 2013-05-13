@@ -172,9 +172,12 @@ void FloatArray :: add(const FloatArray &b)
         return;
     }
 
+#  ifdef DEBUG
     if ( size != b.size ) {
         OOFEM_ERROR3("FloatArray :: add :  dimension mismatch in a[%d]->add(b[%d])\n", size, b.size);
     }
+
+#  endif
 
     for ( int i = 0; i < this->size; i++ ) {
         this->values [ i ] += b.values [ i ];

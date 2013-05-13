@@ -67,7 +67,7 @@ protected:
     /// Interpolation for pressure
     static FEI3dTetLin interp;
     /// Ordering of dofs in element. Used to assemble the element stiffness
-    static IntArray ordering;
+    static IntArray momentum_ordering, conservation_ordering;
     /// Ordering of dofs on edges. Used to assemble edge loads
     static IntArray edge_ordering [ 6 ];
     /// Ordering of dofs on surfaces. Used to assemble surface loads
@@ -76,7 +76,8 @@ protected:
     static bool __initialized;
     /// Convenient vectors for the ordering of the dofs in the local stiffness matrix.
     static bool initOrdering() {
-        ordering.setValues(19,  1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19, 4, 8, 12, 16);
+        momentum_ordering.setValues(15,  1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19);
+        conservation_ordering.setValues(4, 4, 8, 12, 16);
         // Note; Still possibilities or errors here, check again if results look strange
         edge_ordering [ 0 ].setValues(6,  1,  2,  3,  5,  6,  7);
         edge_ordering [ 1 ].setValues(6,  5,  6,  7,  9, 10, 11);
@@ -111,11 +112,12 @@ public:
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
 
     void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
-    void computeLoadVector(FloatArray &answer, TimeStep *tStep);
     void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep);
-    void computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep);
-    void computeSurfBCSubVectorAt(FloatArray &answer, Load *load, int iSurf, TimeStep *tStep);
-    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep);
+
+    void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep);
+    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryLoadVector(FloatArray &answer, Load *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeEdgeLoadVector(FloatArray &answer, Load *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep);
 
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_tetra_1; }
     virtual const char *giveClassName() const { return "Tet1BubbleStokes"; }

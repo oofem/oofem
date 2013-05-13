@@ -134,7 +134,7 @@ void Hexa21Stokes :: giveCharacteristicVector(FloatArray &answer, CharType mtrx,
 {
     // Compute characteristic vector for this element. I.e the load vector(s)
     if ( mtrx == ExternalForcesVector ) {
-        this->computeLoadVector(answer, tStep);
+        this->computeExternalForcesVector(answer, tStep);
     } else if ( mtrx == InternalForcesVector ) {
         this->computeInternalForcesVector(answer, tStep);
     } else {
@@ -196,7 +196,7 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
     answer.assemble(conservation, this->conservation_ordering);
 }
 
-void Hexa21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
+void Hexa21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     FloatArray vec;
 
@@ -209,7 +209,7 @@ void Hexa21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
         Load *load = this->domain->giveLoad(load_number);
 
         if ( load->giveBCGeoType() == SurfaceLoadBGT ) {
-            this->computeSurfaceBCSubVectorAt(vec, load, load_id, tStep);
+            this->computeBoundaryLoadVector(vec, load, load_id, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         }
     }
@@ -218,14 +218,19 @@ void Hexa21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
     for ( int i = 1; i <= nLoads; i++ ) {
         Load *load = domain->giveLoad( bodyLoadArray.at(i) );
         if ( load->giveBCGeoType() == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
-            this->computeBodyLoadVectorAt(vec, load, tStep);
+            this->computeLoadVector(vec, load, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         }
     }
 }
 
-void Hexa21Stokes :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep)
+void Hexa21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
+    if ( type != ExternalForcesVector ) {
+        answer.resize(0);
+        return;
+    }
+
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatArray N, gVector, temparray(81);
 
@@ -254,10 +259,12 @@ void Hexa21Stokes :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, Tim
     answer.assemble( temparray, this->momentum_ordering );
 }
 
-void Hexa21Stokes :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load, int iSurf, TimeStep *tStep)
+void Hexa21Stokes :: computeBoundaryLoadVector(FloatArray &answer, Load *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep)
 {
-    answer.resize(89);
-    answer.zero();
+    if ( type != ExternalForcesVector ) {
+        answer.resize(0);
+        return;
+    }
 
     if ( load->giveType() == TransmissionBC ) { // Neumann boundary conditions (traction)
         BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >( load );
@@ -294,6 +301,8 @@ void Hexa21Stokes :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
             }
         }
 
+        answer.resize(89);
+        answer.zero();
         answer.assemble(f, this->surf_ordering [ iSurf - 1 ]);
     } else {
         OOFEM_ERROR("Hexa21Stokes :: Strange boundary condition type");
@@ -357,7 +366,7 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
     answer.assemble(K, this->momentum_ordering);
     answer.assemble(GDp, this->momentum_ordering, this->conservation_ordering);
     answer.assemble(GTDvT, this->conservation_ordering, this->momentum_ordering);
-    answer.assemble(C, this->conservation_ordering, this->conservation_ordering);
+    answer.assemble(C, this->conservation_ordering);
 }
 
 FEInterpolation *Hexa21Stokes :: giveInterpolation()
