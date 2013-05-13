@@ -40,6 +40,7 @@
 
 #include "activebc.h"
 #include "inputrecord.h"
+#include "gaussintegrationrule.h"
 
 ///@name Input fields for WeakPeriodicBoundaryCondition
 //@{
@@ -67,11 +68,15 @@ private:
     int bcID;
     int orderOfPolygon;
 
+    /** Direction of normal. 1 if normal in x, 2 if y and 3 if z. */
     int direction;
+
+    /** Keeps info on which coordinates varies over the surface. Depends on number of spatial dimensions and normal direction */
+    IntArray surfaceIndexes;
 
     int normalDirection;
 
-    double smax, smin;
+    FloatArray smax, smin;
     bool doUpdateSminmax;
     /** Number of Gausspoints used when integrating along the element edges */
     int ngp;
@@ -88,6 +93,9 @@ private:
 
     /** Keeps track of which coordinate(s) are changing on the surface/edge */
     std :: vector< double> directions;
+
+    /** Type of surface/edge */
+    integrationDomain sideGeom;
 
     void giveEdgeNormal(FloatArray &answer, int element, int side);
 

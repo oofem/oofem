@@ -116,15 +116,15 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
 		sideSign [ 1 ] = 1;
 	}
 
-	for (size_t i=0; i< element[0].size(); i++) {
-		giveEdgeNormal( normal, element [ 0 ].at(i), side [ 0 ].at(i) );
-		normal.printYourself();
-	}
-
-	for (size_t i=0; i< element[1].size(); i++) {
-		giveEdgeNormal( normal, element [ 1 ].at(i), side [ 1 ].at(i) );
-		normal.printYourself();
-	}
+	//	for (size_t i=0; i< element[0].size(); i++) {
+	//		giveEdgeNormal( normal, element [ 0 ].at(i), side [ 0 ].at(i) );
+	//		normal.printYourself();
+	//	}
+	//
+	//	for (size_t i=0; i< element[1].size(); i++) {
+	//		giveEdgeNormal( normal, element [ 1 ].at(i), side [ 1 ].at(i) );
+	//		normal.printYourself();
+	//	}
 
 	// Create dofs for coefficients
 	bcID = this->giveNumber();
@@ -165,18 +165,53 @@ void WeakPeriodicBoundaryCondition :: updateDirection()
 
 	giveEdgeNormal( normal, element [ 0 ].at(0), side [ 0 ].at(0) );
 
-//	giveEdgeNormal( normal, element [ 0 ].at(0), 1 );
-//	normal.printYourself();
-//	giveEdgeNormal( normal, element [ 0 ].at(0), 2 );
-//	normal.printYourself();
-//	giveEdgeNormal( normal, element [ 0 ].at(0), 3 );
-//	normal.printYourself();
-//	giveEdgeNormal( normal, element [ 0 ].at(0), 4 );
-//	normal.printYourself();
-	if ( abs(abs( normal.at(1) ) - 1) < 0.0001 ) {              // Normal point in x direction, thus set direction to y
-		direction = 2;
+	//	giveEdgeNormal( normal, element [ 0 ].at(0), 1 );
+	//	normal.printYourself();
+	//	giveEdgeNormal( normal, element [ 0 ].at(0), 2 );
+	//	normal.printYourself();
+	//	giveEdgeNormal( normal, element [ 0 ].at(0), 3 );
+	//	normal.printYourself();
+	//	giveEdgeNormal( normal, element [ 0 ].at(0), 4 );
+	//	normal.printYourself();
+	if (this->domain->giveNumberOfSpatialDimensions()==2) {
+		surfaceIndexes.resize(1);
+		smin.resize(1);
+		smax.resize(1);
+		sideGeom = _Line;
 	} else {
+		surfaceIndexes.resize(2);
+		smin.resize(2);
+		smax.resize(2);
+		sideGeom = _Triangle;
+	}
+
+	if ( abs(normal.at(1))>0.99999 ) {              // Normal points in X direction
 		direction = 1;
+		if (this->domain->giveNumberOfSpatialDimensions()==2) {
+			surfaceIndexes.at(1)=2;
+		} else {
+			surfaceIndexes.at(1)=2;
+			surfaceIndexes.at(2)=3;
+		}
+
+	} else if ( abs(normal.at(2))>0.99999) {         // Normal points in Y direction
+		direction = 2;
+		if (this->domain->giveNumberOfSpatialDimensions()==2) {
+			surfaceIndexes.at(1)=1;
+		} else {
+			surfaceIndexes.at(1)=2;
+			surfaceIndexes.at(2)=3;
+		}
+	} else if ( abs(normal.at(3))>0.99999) {         // Normal points in Z direction
+		direction = 3;
+		if (this->domain->giveNumberOfSpatialDimensions()==2) {
+			_error1("3 dimensioal normal in a 2 dimensional problem.\n");
+		} else {
+			surfaceIndexes.at(1)=2;
+			surfaceIndexes.at(2)=3;
+		}
+	} else {
+		_error1("Only surfaces with normal in x, y or z direction supported.\n");
 	}
 }
 
@@ -185,16 +220,18 @@ void WeakPeriodicBoundaryCondition :: updateSminmax()
 	if ( doUpdateSminmax ) {
 		updateDirection();
 
-		smin = this->domain->giveDofManager(1)->giveCoordinate(direction);
-		smax = this->domain->giveDofManager(1)->giveCoordinate(direction);
+		for (int i=1; i<=surfaceIndexes.giveSize(); i++) {
+			smin.at(i) = this->domain->giveDofManager(1)->giveCoordinate(surfaceIndexes.at(i));
+			smax.at(i) = this->domain->giveDofManager(1)->giveCoordinate(surfaceIndexes.at(i));
 
-		for ( int i = 1; i <= this->domain->giveNumberOfDofManagers(); i++ ) {
-			double sValue = this->domain->giveDofManager(i)->giveCoordinate(direction);
-			smin = std :: min(smin, sValue);
-			smax = std :: max(smax, sValue);
+			for ( int j = 1; j <= this->domain->giveNumberOfDofManagers(); j++ ) {
+				double sValue = this->domain->giveDofManager(j)->giveCoordinate(surfaceIndexes.at(i));
+				smin.at(i) = std :: min(smin.at(i), sValue);
+				smax.at(i) = std :: max(smax.at(i), sValue);
+			}
+
+			//printf("smin=%f\tsmax=%f\n", smin, smax);
 		}
-
-		//printf("smin=%f\tsmax=%f\n", smin, smax);
 		doUpdateSminmax = false;
 	}
 }
@@ -202,6 +239,7 @@ void WeakPeriodicBoundaryCondition :: updateSminmax()
 void WeakPeriodicBoundaryCondition :: addElementSide(int newElement, int newSide)
 {
 	//printf ("Add element %u, side %u\n", newElement, newSide);
+//	_error1("Not supported");
 
 	FloatArray normalNew, normal0;
 	int addToList = 0;
@@ -246,7 +284,7 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
 	B.zero();
 	///@todo Add this to all interpolators, should return _Point, _Line, _Triangle, ... etc.
 	//integrationDomain sideGeom = geoInterpolation->boundaryGiveGeometry(boundary);
-	integrationDomain sideGeom = _Line;
+
 	GaussIntegrationRule iRule(1, e);
 	if ( ngp == -1 ) {
 		ngp = iRule.getRequiredNumberOfIntegrationPoints(sideGeom, 2 + orderOfPolygon);
@@ -265,7 +303,7 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
 		interpolation->boundaryEvalN( N, boundary, * lcoords, FEIElementGeometryWrapper(e) );
 		// Compute Jacobian
 		double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( boundary, * lcoords, FEIElementGeometryWrapper(e) ) );
-		double s = gcoords.at(direction);
+		double s = gcoords.at(surfaceIndexes.at(1));
 
 		for ( int j = 0; j < B.giveNumberOfColumns(); j++ ) {
 			double fVal = computeBaseFunctionValue(j, s);
@@ -299,7 +337,7 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
 		normalSign = sideSign[thisSide];
 
 		for ( size_t ielement = 0; ielement < element [ thisSide ].size(); ielement++ ) {       // Loop over each element on this edge
-			Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
+			Element *thisElement = this->domain->giveGlobalElement( element [ thisSide ].at(ielement) );
 
 			// Find dofs for this element side
 			IntArray r_sideLoc, c_sideLoc;
@@ -347,15 +385,21 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
 double WeakPeriodicBoundaryCondition :: computeBaseFunctionValue(int baseID, double coordinate)
 {
 	double fVal=0.0;
-	double sideLength = smax - smin;
+	FloatArray sideLength;
+
+	// compute side lengths
+	sideLength.resize(smax.giveSize());
+	for (int i=1; i<=smax.giveSize(); i++) {
+		sideLength.at(i) = smax.at(i) - smin.at(i);
+	}
 
 	if ( useBasisType == monomial ) {
 		fVal = pow(coordinate, baseID);
 	} else if ( useBasisType == trigonometric ) {
-		if ( baseID % 2 == 0 ) {   // Even
-			fVal = cos( ( ( double ) baseID ) / 2. * ( coordinate * 2. * M_PI / sideLength ) );
+		if ( baseID % 2 == 0 ) {   // Even (does not yet work in 3D)
+			fVal = cos( ( ( double ) baseID ) / 2. * ( coordinate * 2. * M_PI / sideLength.at(1) ) );
 		} else {
-			fVal = sin( ( ( double ) baseID + 1 ) / 2. * ( coordinate * 2. * M_PI / sideLength ) );
+			fVal = sin( ( ( double ) baseID + 1 ) / 2. * ( coordinate * 2. * M_PI / sideLength.at(1) ) );
 		}
 	} else if ( useBasisType == legendre ) {
 		double n = (double) baseID;
@@ -404,7 +448,7 @@ double WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeS
 
 		for ( size_t ielement = 0; ielement < element [ thisSide ].size(); ielement++ ) {           // Loop over each element on this edge
 
-			Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
+			Element *thisElement = this->domain->giveGlobalElement( element [ thisSide ].at(ielement) );
 
 			///@todo Support explicitly asking specifying dofids instead of equation ids (Jim needed this feature as well, and it makes sense to have it)
 			//thisElement->giveBoundaryLocationArray(sideLocation, side [ thisSide ].at(ielement), &dofids, eid, s, &masterDofIDs);
