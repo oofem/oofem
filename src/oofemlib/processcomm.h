@@ -46,6 +46,7 @@
  #include "error.h"
 
  #include <mpi.h>
+ #include <string>
 
 namespace oofem {
 /**
