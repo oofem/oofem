@@ -77,6 +77,7 @@ public:
     virtual void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *stepN);
     virtual void computeDofTransformation(FloatArray &primaryMasterContribs);
     virtual void giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme &s);
+    virtual void giveDofIDs(IntArray &masterDofIDs);
 
     virtual double giveUnknown(ValueModeType mode, TimeStep *stepN);
     virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *stepN);
