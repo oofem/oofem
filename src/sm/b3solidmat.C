@@ -738,7 +738,7 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, MatResponseF
 
     /* ask for humidity and temperature from external sources, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-    Field *tf;
+    FM_FieldPtr tf;
     FloatArray gcoords, et2, ei2, stressVector, fullStressVector;
 
     if ( ( tf = fm->giveField(FT_Temperature) ) ) {
@@ -966,7 +966,7 @@ B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *atTime) //computes hum
 
     /* ask for humidity from external sources, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-    Field *tf;
+    FM_FieldPtr tf;
     FloatArray gcoords, et2;
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
@@ -997,7 +997,7 @@ B3SolidMaterial :: giveHumidityIncrement(GaussPoint *gp, TimeStep *atTime) //com
 
     /* ask for humidity from external sources, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-    Field *tf;
+    FM_FieldPtr tf;
     FloatArray gcoords, et2, ei2;
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {

@@ -2448,7 +2448,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
     } else if ( type == IST_Temperature ) {
         /* add external source, if provided, such as staggered analysis */
         FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-        Field *tf;
+	FM_FieldPtr tf;
         int err;
         if ( ( tf = fm->giveField(FT_Temperature) ) ) {
             // temperature field registered
@@ -2598,7 +2598,8 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
     /* add external source, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-    Field *tf;
+    FM_FieldPtr tf;
+
     if ( ( tf = fm->giveField(FT_Temperature) ) ) {
         // temperature field registered
         FloatArray gcoords, et2;

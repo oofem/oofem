@@ -208,7 +208,8 @@ LEPlic :: doLagrangianPhase(TimeStep *atTime)
         }
 
         // compute interpolated velocity field at x2 [ v(tn+1, x(tn)+0.5*dt*v(tn,x(tn))) = v(tn+1, x2) ]
-        Field *vfield;
+
+	FM_FieldPtr vfield;
         vfield = emodel->giveContext()->giveFieldManager()->giveField(FT_Velocity);
         if ( vfield == NULL ) {
             _error("doLagrangianPhase: Velocity field not available");

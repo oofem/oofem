@@ -144,8 +144,14 @@ SUPG :: initializeFrom(InputRecord *ir)
         FieldManager *fm = this->giveContext()->giveFieldManager();
         IntArray mask;
         mask.setValues(3, V_u, V_v, V_w);
+
+#ifdef  FIELDMANAGER_USE_SHARED_PTR
+	std::tr1::shared_ptr<Field> _velocityField (new MaskedPrimaryField (FT_Velocity, this->VelocityPressureField, mask));
+	fm->registerField(_velocityField, FT_Velocity);
+#else
         MaskedPrimaryField* _velocityField = new MaskedPrimaryField (FT_Velocity, this->VelocityPressureField, mask);
         fm->registerField(_velocityField, FT_Velocity, true);
+#endif
 
         //fsflag = 0;
         //IR_GIVE_OPTIONAL_FIELD (ir, fsflag, _IFT_SUPG_fsflag, "fsflag");
