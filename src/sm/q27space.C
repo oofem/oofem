@@ -32,7 +32,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "qspace.h"
+#include "q27space.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -42,21 +42,27 @@
 #include "domain.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "fei3dhexatriquad.h"
 
 namespace oofem {
 
-REGISTER_Element( QSpace );
+REGISTER_Element( Q27Space );
 
-FEI3dHexaQuad QSpace :: interpolation;
+FEI3dHexaTriQuad Q27Space :: interpolation;
 
-QSpace :: QSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
+FEInterpolation* Q27Space :: giveInterpolation()
 {
-    numberOfDofMans = 20;
+    return &interpolation;
+}
+
+Q27Space :: Q27Space(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
+{
+    numberOfDofMans = 27;
 }
 
 
 IRResultType
-QSpace :: initializeFrom(InputRecord *ir)
+Q27Space :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
@@ -65,22 +71,18 @@ QSpace :: initializeFrom(InputRecord *ir)
     numberOfGaussPoints = 27;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
 
-    if ( ( numberOfGaussPoints != 8 ) && ( numberOfGaussPoints != 14 ) && ( numberOfGaussPoints != 27 ) && ( numberOfGaussPoints != 64 ) ) {
-        numberOfGaussPoints = 27;
-    }
-
     return IRRT_OK;
 }
 
 
 void
-QSpace :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+Q27Space :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     answer.setValues(3, D_u, D_v, D_w);
 }
 
 MaterialMode
-QSpace :: giveMaterialMode()
+Q27Space :: giveMaterialMode()
 {
     if ( this->nlGeometry > 1 )
         return _3dMat_F;
@@ -90,7 +92,7 @@ QSpace :: giveMaterialMode()
 
 
 double
-QSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
+Q27Space :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this)) );
@@ -101,7 +103,7 @@ QSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 
 double
-QSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+Q27Space :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
 {
     double factor = pow( ( double ) this->numberOfGaussPoints, 1. / 3. );
     return this->giveLenghtInDir(normalToCrackPlane) / factor;
@@ -109,7 +111,7 @@ QSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCra
 
 
 void
-QSpace :: computeGaussPoints()
+Q27Space :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
     if ( !integrationRulesArray ) {
@@ -122,7 +124,7 @@ QSpace :: computeGaussPoints()
 
 
 void
-QSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+Q27Space :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
@@ -134,7 +136,7 @@ QSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 
 
 void
-QSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+Q27Space :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
 // Returns the [6x60] strain-displacement matrix {B} of the receiver, eva-
 // luated at aGaussPoint.
 // B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
@@ -143,10 +145,10 @@ QSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 
     this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
-    answer.resize(6, 60);
+    answer.resize(6, 81);
     answer.zero();
 
-    for ( int i = 1; i <= 20; i++ ) {
+    for ( int i = 1; i <= dnx.giveNumberOfRows(); i++ ) {
         answer.at(1, 3 * i - 2) = dnx.at(i, 1);
         answer.at(2, 3 * i - 1) = dnx.at(i, 2);
         answer.at(3, 3 * i - 0) = dnx.at(i, 3);
@@ -163,41 +165,42 @@ QSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 }
 
 void
-QSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i) 
+Q27Space :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i) 
 // Returns the [60x60] nonlinear part of strain-displacement matrix {B} of the receiver,
 // evaluated at aGaussPoint
 
 {
+ 
     FloatMatrix dnx;
 
     // compute the derivatives of shape functions
     this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
-    answer.resize(60, 60);
+    answer.resize(81, 81);
     answer.zero();
 
     // put the products of derivatives of shape functions into the "nonlinear B matrix",
     // depending on parameter i, which is the number of the strain component
     if ( i <= 3 ) {
-        for ( int k = 0; k < 20; k++ ) {
+        for ( int k = 0; k < 27; k++ ) {
             for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 60; j += 3 ) {
+                for ( int j = 1; j <= 81; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, i) * dnx.at( ( j - 1 ) / 3 + 1, i );
                 }
             }
         }
     } else if ( i == 4 )        {
-        for ( int k = 0; k < 20; k++ ) {
+        for ( int k = 0; k < 27; k++ ) {
             for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 60; j += 3 ) {
+                for ( int j = 1; j <= 81; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 2 );
                 }
             }
         }
     } else if ( i == 5 )        {
-        for ( int k = 0; k < 20; k++ ) {
+        for ( int k = 0; k < 27; k++ ) {
             for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 60; j += 3 ) {
+                for ( int j = 1; j <= 81; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
                 }
             }
@@ -205,7 +208,7 @@ QSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i
     } else if ( i == 6 )        {
         for ( int k = 0; k < 20; k++ ) {
             for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 60; j += 3 ) {
+                for ( int j = 1; j <= 81; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 2 ) + dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
                 }
             }
@@ -216,17 +219,17 @@ QSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i
 }
 
 void
-QSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer) 
+Q27Space :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer) 
 {
     FloatMatrix dnx;
     
     this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
-    answer.resize(9, 60);
+    answer.resize(9, 81);
     answer.zero();
 
     for ( int i = 1; i <= 3; i++ ) { // 3 spatial dimensions
-        for ( int j = 1; j <= 20; j++ ) { // 8 nodes
+        for ( int j = 1; j <= 27; j++ ) {
             answer.at(3 * i - 2, 3 * j - 2) =
                 answer.at(3 * i - 1, 3 * j - 1) =
                 answer.at(3 * i, 3 * j) = dnx.at(j, i); // derivative of Nj wrt Xi
@@ -239,7 +242,7 @@ QSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // ******************************
 
 IntegrationRule *
-QSpace :: GetSurfaceIntegrationRule(int approxOrder)
+Q27Space :: GetSurfaceIntegrationRule(int approxOrder)
 {
     IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
     int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Square, approxOrder);
@@ -248,7 +251,7 @@ QSpace :: GetSurfaceIntegrationRule(int approxOrder)
 }
 
 void
-QSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
+Q27Space :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
     FloatArray n;
     interpolation.surfaceEvalN(n, iSurf, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this));
@@ -256,24 +259,23 @@ QSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sg
 }
 
 void
-QSpace :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
+Q27Space :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 {
     IntArray nodes;
-    const int ndofsn = 3;
 
     interpolation.computeLocalSurfaceMapping(nodes, iSurf);
 
-    answer.resize(24);
+    answer.resize(27);
 
-    for ( int i = 1; i <= 8; i++ ) {
-        answer.at(i * ndofsn - 2) = nodes.at(i) * ndofsn - 2;
-        answer.at(i * ndofsn - 1) = nodes.at(i) * ndofsn - 1;
-        answer.at(i * ndofsn) = nodes.at(i) * ndofsn;
+    for ( int i = 1; i <= 9; i++ ) {
+        answer.at(i * 3 - 2) = nodes.at(i) * 3 - 2;
+        answer.at(i * 3 - 1) = nodes.at(i) * 3 - 1;
+        answer.at(i * 3 - 0) = nodes.at(i) * 3 - 0;
     }
 }
 
 double
-QSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
+Q27Space :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double determinant, weight, volume;
     determinant = fabs( interpolation.surfaceGiveTransformationJacobian(iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
@@ -285,13 +287,13 @@ QSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 }
 
 void
-QSpace :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf)
+Q27Space :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf)
 {
     interpolation.surfaceLocal2global(answer, iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 int
-QSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp)
+Q27Space :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp)
 {
     // returns transformation matrix from
     // surface local coordinate system
@@ -367,7 +369,7 @@ QSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPo
 }
 
 Interface *
-QSpace :: giveInterface(InterfaceType interface)
+Q27Space :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
         return static_cast< ZZNodalRecoveryModelInterface * >( this );
@@ -382,7 +384,7 @@ QSpace :: giveInterface(InterfaceType interface)
 }
 
 int
-QSpace :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
+Q27Space :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
     if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) || ( type == IST_DamageTensor ) ) {
         return 6;
@@ -393,27 +395,27 @@ QSpace :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 }
 
 int
-QSpace :: SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
+Q27Space :: SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
     return ZZNodalRecoveryMI_giveDofManRecordSize(type);
 }
 
 void
-QSpace :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
+Q27Space :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
-    pap.resize(20);
-    for ( int i = 1; i <= 20; i++ ) {
+    pap.resize(27);
+    for ( int i = 1; i <= 27; i++ ) {
         pap.at(i) = this->giveNode(i)->giveNumber();
     }
 }
 
 void
-QSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
+Q27Space :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
 {
     int found = 0;
     answer.resize(1);
 
-    for ( int i = 1; i <= 20; i++ ) {
+    for ( int i = 1; i <= 27; i++ ) {
         if ( this->giveNode(i)->giveNumber() == pap ) {
             found = 1;
         }
@@ -427,21 +429,21 @@ QSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int 
 }
 
 int
-QSpace :: SPRNodalRecoveryMI_giveNumberOfIP()
+Q27Space :: SPRNodalRecoveryMI_giveNumberOfIP()
 {
     return numberOfGaussPoints;
 }
 
 
 SPRPatchType
-QSpace :: SPRNodalRecoveryMI_givePatchType()
+Q27Space :: SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_3dBiQuadratic;
 }
 
 
 void
-QSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
+Q27Space :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
     int size = NodalAveragingRecoveryMI_giveDofManRecordSize(type);
     answer.resize(size);
@@ -450,8 +452,9 @@ QSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
 }
 
 void
-QSpace :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
+Q27Space :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
 {
     answer.resize(0);
 }
+
 } // end namespace oofem

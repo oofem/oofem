@@ -5,7 +5,9 @@ set (sm_element
     igaelements.C
     structuralelement.C
     nlstructuralelement.C
-    lspace.C lspacebb.C qspace.C qspacegrad.C
+    lspace.C lspacebb.C
+    qspace.C qspacegrad.C
+    q27space.C
     ltrspace.C qtrspace.C qtrspacegrad.C
     lwedge.C qwedge.C qwedgegrad.C
     htselement.C
