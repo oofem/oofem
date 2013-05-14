@@ -93,16 +93,9 @@ Axisymm3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
 // evaluated at aGaussPoint.
 {
-    FloatArray n(3);
-
-    answer.resize(2, 6);
-    answer.zero();
+    FloatArray n;
     this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    for ( int i = 1; i <= 3; i++ ) {
-        answer.at(1, 2 * i - 1) = n.at(i);
-        answer.at(2, 2 * i - 0) = n.at(i);
-    }
+    answer.beNMatrixOf(n, 2);
 }
 
 
@@ -111,7 +104,6 @@ Axisymm3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
 // Returns the [6x6] strain-displacement matrix {B} of the receiver, eva-
 // luated at aGaussPoint.
 {
-    int i;
     double x, r;
     int size, ind = 1;
     FloatMatrix dnx;
@@ -152,7 +144,7 @@ Axisymm3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
         this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
         r = 0.;
-        for ( i = 1; i <= numberOfDofMans; i++ ) {
+        for ( int i = 1; i <= numberOfDofMans; i++ ) {
             x  = this->giveNode(i)->giveCoordinate(1);
             r += x * n.at(i);
         }
@@ -344,8 +336,7 @@ Axisymm3d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalTo
     // is perpendicular to to x--y plane) - crack caused by hoop strain.
     if ( fabs( normalToCrackPlane.at(3) ) > NONZERO_COORD_TOL ) {
         double r = 0.;
-        int i;
-        for ( i = 1; i <= numberOfDofMans; i++ ) {
+        for ( int i = 1; i <= numberOfDofMans; i++ ) {
             r += this->giveNode(i)->giveCoordinate(1);
         }
 

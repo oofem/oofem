@@ -139,19 +139,11 @@ Domain :: ~Domain()
     delete connectivityTable;
     delete spatialLocalizer;
     delete outputManager;
-    if ( smoother ) {
-        delete smoother;
-    }
-
-    if ( topology ) {
-        delete topology;
-    }
+    delete smoother;
+    delete topology;
 
 #ifdef __PARALLEL_MODE
-    if ( transactionManager ) {
-        delete transactionManager;
-    }
-
+    delete transactionManager;
 #endif
 }
 
@@ -175,27 +167,20 @@ Domain :: clear()
         connectivityTable->reset();
     }
 
-    if ( spatialLocalizer ) {
-        delete spatialLocalizer;
-        spatialLocalizer = NULL;
-    }
+    delete spatialLocalizer;
+    spatialLocalizer = NULL;
 
     if ( smoother ) {
         smoother->clear();
     }
 
     // bp: how to clear/reset topology data?
-    if ( topology ) {
-        delete topology;
-        topology = NULL;
-    }
+    delete topology;
+    topology = NULL;
 
 #ifdef __PARALLEL_MODE
-    if ( transactionManager ) {
-        delete transactionManager;
-        transactionManager = NULL;
-    }
-
+    delete transactionManager;
+    transactionManager = NULL;
 #endif
 }
 
@@ -216,15 +201,15 @@ Element *
 Domain :: giveGlobalElement(int n)
 // Returns the global element with id n. Generates error if it is not defined yet.
 {
-	for (int i=1; i<=elementList->giveSize(); i++) {
-		if (elementList->at(i)->giveGlobalNumber()==n) {
-			return elementList->at(i);
-		}
-	}
+    for (int i = 1; i <= elementList->giveSize(); i++ ) {
+        if ( elementList->at(i)->giveGlobalNumber() == n ) {
+            return elementList->at(i);
+        }
+    }
 
 #ifdef DEBUG
-	_error2("giveGlobalElement: undefined element id (%d)", n);
-	return NULL;
+    _error2("giveGlobalElement: undefined element id (%d)", n);
+    return NULL;
 #endif
 }
 
@@ -232,20 +217,20 @@ Load *
 Domain :: giveLoad(int n)
 // Returns the n-th load. Generates the error if not defined.
 {
-    Load *answer;
-
-    if ( bcList->includes(n) ) {
-        answer = dynamic_cast< Load * >( bcList->at(n) );
-        if ( answer ) {
-            return answer;
-        } else {
-            _error2("giveLoad: cannot cast boundary condition %d to Load class", n);
-        }
-    } else {
+#ifdef DEBUG
+    if ( !bcList->includes(n) ) {
         _error2("giveLoad: undefined load (%d)", n);
     }
-
-    return NULL;
+    Load *answer = dynamic_cast< Load * >( bcList->at(n) );
+    if ( answer ) {
+        return answer;
+    } else {
+        _error2("giveLoad: cannot cast boundary condition %d to Load class", n);
+        return NULL;
+    }
+#else
+    return static_cast< Load * >( bcList->at(n) );
+#endif
 }
 
 
@@ -311,13 +296,11 @@ Domain :: giveNode(int n)
 // Returns the n-th node if it exists.
 {
 #ifdef DEBUG
-    Node *node = NULL;
-
     if ( !dofManagerList->includes(n) ) {
         _error2("giveNode: undefined dofManager (%d)", n);
     }
 
-    node = dynamic_cast< Node * >( dofManagerList->at(n) );
+    Node *node = dynamic_cast< Node * >( dofManagerList->at(n) );
     if ( node == NULL ) {
         _error2("giveNode: incompatible type of dofManager %d, can not convert", n);
     }
@@ -336,13 +319,11 @@ Domain :: giveSide(int n)
 // Returns the n-th element side.
 {
 #ifdef DEBUG
-    ElementSide *side = NULL;
-
     if ( !dofManagerList->includes(n) ) {
         _error2("giveSide: undefined dofManager (%d)", n);
     }
 
-    side = dynamic_cast< ElementSide* >( dofManagerList->at(n) );
+    ElementSide *side = dynamic_cast< ElementSide* >( dofManagerList->at(n) );
     if ( !side ) {
         _error2("giveSide: incompatible type of dofManager %d, can not convert", n);
     }
@@ -1124,7 +1105,7 @@ Domain :: giveSmoother()
 void
 Domain :: setSmoother(NodalRecoveryModel *smoother, bool destroyOld)
 {
-    if ( destroyOld && this->smoother ) {
+    if ( destroyOld ) {
         delete this->smoother;
     }
 
@@ -1135,7 +1116,7 @@ Domain :: setSmoother(NodalRecoveryModel *smoother, bool destroyOld)
 void
 Domain :: setTopology(TopologyDescription *topo, bool destroyOld)
 {
-    if ( destroyOld && this->topology ) {
+    if ( destroyOld ) {
         delete this->topology;
     }
 
@@ -1516,9 +1497,8 @@ Domain :: giveErrorEstimator()
 
 #define SAVE_COMPONENTS(size, type, giveMethod)    \
     {                                               \
-        type *obj;                                  \
-        for ( i = 1; i <= size; i++ ) {             \
-            obj = giveMethod(i);                    \
+        for ( int i = 1; i <= size; i++ ) {         \
+            type *obj = giveMethod(i);              \
             if ( ( mode & CM_Definition ) ) {       \
                 if ( !stream->write(obj->giveInputRecordName()) ) { \
                     THROW_CIOERR(CIO_IOERR);        \
@@ -1532,11 +1512,11 @@ Domain :: giveErrorEstimator()
 
 #define RESTORE_COMPONENTS(size, type, resizeMethod, creator, giveMethod, setMethod) \
     {                                           \
-        type *obj;                              \
         if ( mode & CM_Definition ) {           \
             resizeMethod(size);                 \
         }                                       \
-        for ( i = 1; i <= size; i++ ) {         \
+        for ( int i = 1; i <= size; i++ ) {     \
+            type *obj;                          \
             if ( mode & CM_Definition ) {       \
                 std::string name;               \
                 if ( !stream->read(name) ) {    \
@@ -1564,7 +1544,7 @@ contextIOResultType
 Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
-    int i, serNum;
+    int serNum;
     ErrorEstimator *ee;
 
     // save domain serial number
@@ -1622,7 +1602,7 @@ contextIOResultType
 Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
-    int i, serNum;
+    int serNum;
     bool domainUpdated;
     ErrorEstimator *ee;
     long ncomp [ DOMAIN_NCOMP ];
@@ -2054,9 +2034,6 @@ Domain :: elementGlobal2Local(int _globnum)
         return 0;
     }
 }
-
-
-
 
 
 
