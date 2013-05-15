@@ -1,0 +1,127 @@
+lb03.out.1
+Three point bending test with nonlocal material (coarse mesh, only for testing purposes)
+NonLinearStatic nsteps 2 stepLength 10.e-3 rtolv 1.e-4 refloadmode 0 lstype 3 smtype 7 lbflag 1 hpcmode 1 hpc 4 45 2 46 2 reqIterations 30 maxiter 60 nonlocalext forcelb1 1 wtp 1 1
+domain 2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+ndofman 50 nelem 35 ncrosssect  1 nmat 1 nbc 3 nic 0 nltf 1
+#
+node 1 coords 3  0.0   0.0   0.0  bc 2 1 1   null 
+node 2 coords 3  0.1   0.0   0.0  bc 2 0 0   null 
+node 3 coords 3  0.2   0.0   0.0  bc 2 0 0   null 
+node 4 coords 3  0.3   0.0   0.0  bc 2 0 0   null 
+node 5 coords 3  0.4   0.0   0.0  bc 2 0 0   null 
+node 6 coords 3  0.5   0.0   0.0  bc 2 0 0   null 
+node 7 coords 3  0.6   0.0   0.0  bc 2 0 0   null 
+node 8 coords 3  0.7   0.0   0.0  bc 2 0 0   null 
+node 9 coords 3  0.8   0.0   0.0  bc 2 0 0   null 
+node 10 coords 3  0.9   0.0   0.0  bc 2 0 1  null 
+#
+node 11 coords 3  0.0   0.1   0.0  bc 2 0 0   Shared partitions 1 0
+node 12 coords 3  0.1   0.1   0.0  bc 2 0 0   Shared partitions 1 0
+node 13 coords 3  0.2   0.1   0.0  bc 2 0 0   Shared partitions 1 0
+node 14 coords 3  0.3   0.1   0.0  bc 2 0 0   Shared partitions 1 0
+node 15 coords 3  0.4   0.1   0.0  bc 2 0 0   Shared partitions 1 0
+node 16 coords 3  0.5   0.1   0.0  bc 2 0 0   Shared partitions 1 0
+node 17 coords 3  0.6   0.1   0.0  bc 2 0 0   Shared partitions 1 0
+node 18 coords 3  0.7   0.1   0.0  bc 2 0 0   Shared partitions 1 0
+node 19 coords 3  0.8   0.1   0.0  bc 2 0 0   Shared partitions 1 0
+node 20 coords 3  0.9   0.1   0.0  bc 2 0 0   Shared partitions 1 0
+#
+node 21 coords 3  0.0   0.2   0.0  bc 2 0 0 
+node 22 coords 3  0.1   0.2   0.0  bc 2 0 0  
+node 23 coords 3  0.2   0.2   0.0  bc 2 0 0  
+node 24 coords 3  0.3   0.2   0.0  bc 2 0 0  
+node 25 coords 3  0.4   0.2   0.0  bc 2 0 0  
+node 26 coords 3  0.5   0.2   0.0  bc 2 0 0 
+node 27 coords 3  0.6   0.2   0.0  bc 2 0 0 
+node 28 coords 3  0.7   0.2   0.0  bc 2 0 0 
+node 29 coords 3  0.8   0.2   0.0  bc 2 0 0 
+node 30 coords 3  0.9   0.2   0.0  bc 2 0 0 
+#
+node 31 coords 3  0.0   0.3   0.0  bc 2 0 0   Shared partitions 1 2
+node 32 coords 3  0.1   0.3   0.0  bc 2 0 0   Shared partitions 1 2
+node 33 coords 3  0.2   0.3   0.0  bc 2 0 0   Shared partitions 1 2
+node 34 coords 3  0.3   0.3   0.0  bc 2 0 0   Shared partitions 1 2
+node 35 coords 3  0.4   0.3   0.0  bc 2 0 0   Shared partitions 1 2
+node 36 coords 3  0.5   0.3   0.0  bc 2 0 0   Shared partitions 1 2
+node 37 coords 3  0.6   0.3   0.0  bc 2 0 0   Shared partitions 1 2
+node 38 coords 3  0.7   0.3   0.0  bc 2 0 0   Shared partitions 1 2
+node 39 coords 3  0.8   0.3   0.0  bc 2 0 0   Shared partitions 1 2
+node 40 coords 3  0.9   0.3   0.0  bc 2 0 0   Shared partitions 1 2
+#
+node 41 coords 3  0.0   0.4   0.0  bc 2 0 0   null 
+node 42 coords 3  0.1   0.4   0.0  bc 2 0 0   null 
+node 43 coords 3  0.2   0.4   0.0  bc 2 0 0   null 
+node 44 coords 3  0.3   0.4   0.0  bc 2 0 0   null 
+node 45 coords 3  0.4   0.4   0.0  bc 2 0 0   null 
+node 46 coords 3  0.5   0.4   0.0  bc 2 0 0   null 
+node 47 coords 3  0.6   0.4   0.0  bc 2 0 0   null 
+node 48 coords 3  0.7   0.4   0.0  bc 2 0 0   null 
+node 49 coords 3  0.8   0.4   0.0  bc 2 0 0   null 
+node 50 coords 3  0.9   0.4   0.0  bc 2 0 0   null 
+#
+PlaneStress2d 1 nodes 4 1 2 12 11  crossSect 1 mat 1     remote partitions 1 0
+PlaneStress2d 2 nodes 4 2 3 13 12  crossSect 1 mat 1     remote partitions 1 0
+PlaneStress2d 3 nodes 4 3 4 14 13  crossSect 1 mat 1     remote partitions 1 0
+PlaneStress2d 4 nodes 4 4 5 15 14  crossSect 1 mat 1     remote partitions 1 0
+PlaneStress2d 5 nodes 4 6 7 17 16  crossSect 1 mat 1     remote partitions 1 0
+PlaneStress2d 6 nodes 4 7 8 18 17  crossSect 1 mat 1     remote partitions 1 0
+PlaneStress2d 7 nodes 4 8 9 19 18  crossSect 1 mat 1     remote partitions 1 0
+PlaneStress2d 8 nodes 4 9 10 20 19  crossSect 1 mat 1    remote partitions 1 0
+#
+PlaneStress2d 9  nodes 4 11 12 22 21  crossSect 1 mat 1  
+PlaneStress2d 10 nodes 4 12 13 23 22  crossSect 1 mat 1  
+PlaneStress2d 11 nodes 4 13 14 24 23  crossSect 1 mat 1  
+PlaneStress2d 12 nodes 4 14 15 25 24  crossSect 1 mat 1  
+PlaneStress2d 13 nodes 4 15 16 26 25  crossSect 1 mat 1  
+PlaneStress2d 14 nodes 4 16 17 27 26  crossSect 1 mat 1  
+PlaneStress2d 15 nodes 4 17 18 28 27  crossSect 1 mat 1  
+PlaneStress2d 16 nodes 4 18 19 29 28  crossSect 1 mat 1  
+PlaneStress2d 17 nodes 4 19 20 30 29  crossSect 1 mat 1  
+#
+PlaneStress2d 18 nodes 4 21 22 32 31  crossSect 1 mat 1  
+PlaneStress2d 19 nodes 4 22 23 33 32  crossSect 1 mat 1  
+PlaneStress2d 20 nodes 4 23 24 34 33  crossSect 1 mat 1  
+PlaneStress2d 21 nodes 4 24 25 35 34  crossSect 1 mat 1  
+PlaneStress2d 22 nodes 4 25 26 36 35  crossSect 1 mat 1  
+PlaneStress2d 23 nodes 4 26 27 37 36  crossSect 1 mat 1  
+PlaneStress2d 24 nodes 4 27 28 38 37  crossSect 1 mat 1  
+PlaneStress2d 25 nodes 4 28 29 39 38  crossSect 1 mat 1  
+PlaneStress2d 26 nodes 4 29 30 40 39  crossSect 1 mat 1  
+#
+PlaneStress2d 27 nodes 4 31 32 42 41  crossSect 1 mat 1  boundaryLoads 2 3 3   remote partitions 1 2
+PlaneStress2d 28 nodes 4 32 33 43 42  crossSect 1 mat 1  boundaryLoads 2 3 3   remote partitions 1 2
+PlaneStress2d 29 nodes 4 33 34 44 43  crossSect 1 mat 1  boundaryLoads 2 3 3   remote partitions 1 2
+PlaneStress2d 30 nodes 4 34 35 45 44  crossSect 1 mat 1  boundaryLoads 2 3 3   remote partitions 1 2
+PlaneStress2d 31 nodes 4 35 36 46 45  crossSect 1 mat 1  boundaryLoads 2 3 3   remote partitions 1 2
+PlaneStress2d 32 nodes 4 36 37 47 46  crossSect 1 mat 1  boundaryLoads 2 3 3   remote partitions 1 2
+PlaneStress2d 33 nodes 4 37 38 48 47  crossSect 1 mat 1  boundaryLoads 2 3 3   remote partitions 1 2
+PlaneStress2d 34 nodes 4 38 39 49 48  crossSect 1 mat 1  boundaryLoads 2 3 3   remote partitions 1 2
+PlaneStress2d 35 nodes 4 39 40 50 49  crossSect 1 mat 1  boundaryLoads 2 3 3   remote partitions 1 2
+#
+SimpleCS 1 thick 0.15 width 1.0
+#IsoLE 1 d 0. E 15.0 n 0.25 tAlpha 0.000012
+idmnl1 1 d 1.0  E 30.e3  n 0.18  e0 0.00011666666667 ef 0.0059953333333 R 0.1 equivstraintype 1 talpha 0.0
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
+NodalLoad 2 loadTimeFunction 1 Components 2 -2.5 0.0
+ConstantEdgeLoad 3 ndofs 2 loadType 2 Components 2 0 -1.0 loadTimeFunction 1
+ConstantFunction 1 f(t) 1.0
+#
+#%BEGIN_CHECK% tolerance 1.e-4 error_when_missing 0
+## check reactions 
+#REACTION tStep 1 number 1 dof 2 value 6.3635e-02
+#REACTION tStep 1 number 10 dof 2 value 6.3635e-02
+## check nodes
+#NODE tStep 1 number 41 dof 1 unknown d value 1.35314724e-04
+#NODE tStep 1 number 41 dof 2 unknown d value -6.62280919e-05
+#NODE tStep 1 number 45 dof 1 unknown d value 1.03512570e-04
+#NODE tStep 1 number 45 dof 2 unknown d value -1.68241216e-04
+#NODE tStep 1 number 50 dof 1 unknown d value 5.19741733e-05
+#NODE tStep 1 number 50 dof 2 unknown d value -6.62280919e-05
+## check elements
+#ELEMENT tStep 1 number 5 gp 3 keyword "strains" component 1  value 7.6643e-05
+#ELEMENT tStep 1 number 5 gp 3 keyword "strains" component 2  value 2.5445e-05 
+#ELEMENT tStep 1 number 5 gp 3 keyword "stresses" component 1  value 2.4368e+00
+#ELEMENT tStep 1 number 5 gp 3 keyword "stresses" component 2  value 1.1773e+00
+#ELEMENT tStep 1 number 5 gp 3 keyword "damage" component 1  value 0.032358
+#%END_CHECK%
