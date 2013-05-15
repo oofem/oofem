@@ -33,14 +33,18 @@
  */
 
 #include "isointerfacedamage01.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "mathfem.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( IsoInterfaceDamageMaterial );
+
 IsoInterfaceDamageMaterial :: IsoInterfaceDamageMaterial(int n, Domain *d) : StructuralMaterial(n, d)
 //
 // constructor

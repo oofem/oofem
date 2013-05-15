@@ -33,8 +33,12 @@
  */
 
 #include "heavisideltf.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_LoadTimeFunction( HeavisideLTF );
+
 double
 HeavisideLTF :: __at(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be

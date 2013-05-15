@@ -37,10 +37,11 @@
 
 #include "nonlocalbarrier.h"
 #include "domain.h"
-#include "flotarry.h"
+#include "floatarray.h"
 
 ///@name Input fields for PolylineNonlocalBarrier
 //@{
+#define _IFT_PolylineNonlocalBarrier_Name "polylinebarrier"
 #define _IFT_PolylineNonlocalBarrier_vertexnodes "vertexnodes"
 #define _IFT_PolylineNonlocalBarrier_xcoordindx "xcoordindx"
 #define _IFT_PolylineNonlocalBarrier_ycoordindx "ycoordindx"

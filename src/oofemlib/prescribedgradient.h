@@ -35,16 +35,16 @@
 #ifndef prescribedgradient_h
 #define prescribedgradient_h
 
-#include "boundary.h"
+#include "boundarycondition.h"
 #include "dof.h"
 #include "bctype.h"
 #include "valuemodetype.h"
-#include "classtype.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 ///@name Input fields for PrescribedTensor
 //@{
+#define _IFT_PrescribedGradient_Name "prescribedgradient"
 #define _IFT_PrescribedGradient_centercoords "ccoord"
 #define _IFT_PrescribedGradient_gradient "gradient"
 //@}

@@ -39,6 +39,7 @@
 
 ///@name Input fields for MatlabExportModule
 //@{
+#define _IFT_MatlabExportModule_Name "matlab"
 #define _IFT_MatlabExportModule_mesh "mesh"
 #define _IFT_MatlabExportModule_data "data"
 #define _IFT_MatlabExportModule_area "area"

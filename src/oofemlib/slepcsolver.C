@@ -34,22 +34,18 @@
 
 #include "slepcsolver.h"
 
-#ifdef __PETSC_MODULE
- #define TIME_REPORT
- #include "petscsparsemtrx.h"
+#define TIME_REPORT
+#include "petscsparsemtrx.h"
+#include "engngm.h"
+#include "floatarray.h"
+#include "verbose.h"
+
+#ifdef TIME_REPORT
+ #include "timer.h"
 #endif
 
-#ifdef __SLEPC_MODULE
- #include "engngm.h"
- #include "flotarry.h"
- #include "verbose.h"
-
- #ifdef TIME_REPORT
-  #include "timer.h"
- #endif
-
 namespace oofem {
-SLEPcSolver :: SLEPcSolver(int i, Domain *d, EngngModel *m) : SparseGeneralEigenValueSystemNM(i, d, m)
+SLEPcSolver :: SLEPcSolver(Domain *d, EngngModel *m) : SparseGeneralEigenValueSystemNM(d, m)
 {
     A = B = NULL;
     epsInit = false;
@@ -75,39 +71,39 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
 
     // first check whether Lhs is defined
     if ( ( !a ) || ( !b ) ) {
-        _error("SLEPcSolver :: solveYourselfAt : matrices are not defined\n");
+        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt : matrices are not defined\n");
     }
 
     if ( a->giveNumberOfRows() != a->giveNumberOfColumns() ||
         b->giveNumberOfRows() != b->giveNumberOfRows() ||
         a->giveNumberOfColumns() != b->giveNumberOfColumns() ) {
-        _error("SLEPcSolver :: solveYourselfAt : matrices size mismatch\n");
+        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt : matrices size mismatch\n");
     }
 
     if ( a->giveType() != SMT_PetscMtrx || b->giveType() != SMT_PetscMtrx ) {
-        _error("SLEPcSolver :: solveYourselfAt: PetscSparseMtrx Expected");
+        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: PetscSparseMtrx Expected");
     }
 
     A = ( PetscSparseMtrx * ) a;
     B = ( PetscSparseMtrx * ) b;
-    size = engngModel->givePetscContext( A->giveDomainIndex(), A->giveEquationID() )->giveNumberOfNaturalEqs(); // A->giveLeqs();
+    size = engngModel->givePetscContext( A->giveDomainIndex() )->giveNumberOfNaturalEqs(); // A->giveLeqs();
 
     // check array for storing eigenvalues
     if ( _eigv == NULL ) {
-        _error("SLEPcSolver :: solveYourselfAt: unknown eigenvalue array");
+        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: unknown eigenvalue array");
     }
 
     if ( _eigv->giveSize() != nroot ) {
-        _error("SLEPcSolver :: solveYourselfAt: eigv size mismatch");
+        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: eigv size mismatch");
     }
 
     // check matrix for storing resulted eigen vectors at the end
     if ( _r == NULL ) {
-        _error("SLEPcSolver :: solveYourselfAt: unknown eigen vectors mtrx");
+        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: unknown eigen vectors mtrx");
     }
 
     if ( ( _r->giveNumberOfRows() != size ) || ( _r->giveNumberOfColumns() != nroot ) ) {
-        _error("SLEPcSolver :: solveYourselfAt: _r size mismatch");
+        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: _r size mismatch");
     }
 
 
@@ -204,7 +200,7 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
 
             //Store the eigenvector
  #ifdef __PARALLEL_MODE
-            engngModel->givePetscContext( A->giveDomainIndex(), A->giveEquationID() )->scatterG2N(Vr, Vr2, INSERT_VALUES);
+            engngModel->givePetscContext( A->giveDomainIndex() )->scatterG2N(Vr, Vr2, INSERT_VALUES);
             ierr = VecGetArray(Vr2, & array);
             CHKERRQ(ierr);
             for ( int j = 0; j < size; j++ ) {
@@ -233,7 +229,7 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
         CHKERRQ(ierr);
  #endif
     } else {
-        _error("SLEPcSolver :: solveYourselfAt: No converged eigenpairs\n");
+        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: No converged eigenpairs\n");
     }
 
  #ifdef TIME_REPORT
@@ -244,29 +240,4 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
     return NM_Success;
 }
 } // end namespace oofem
-#endif //ifdef __SLEPC_MODULE
 
-#ifndef __SLEPC_MODULE
-namespace oofem {
-SLEPcSolver :: SLEPcSolver(int i, Domain *d, EngngModel *m) : SparseGeneralEigenValueSystemNM(i, d, m)
-{
-    _error("SLEPcSolver: can't create, SLEPc support not compiled");
-}
-
-SLEPcSolver :: ~SLEPcSolver() {}
-
-NM_Status
-SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatrix *_r, double rtol, int nroot)
-{
-    return NM_NoSuccess;
-}
-} // end namespace oofem
-#endif
-
-namespace oofem {
-IRResultType
-SLEPcSolver :: initializeFrom(InputRecord *ir)
-{
-    return IRRT_OK;
-}
-} // end namespace oofem

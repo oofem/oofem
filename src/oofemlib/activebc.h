@@ -35,7 +35,7 @@
 #ifndef activebc_h
 #define activebc_h
 
-#include "generalbc.h"
+#include "generalboundarycondition.h"
 #include "intarray.h"
 #include "equationid.h"
 #include "chartype.h"
@@ -131,7 +131,7 @@ public:
      * @param domain Domain to assemble from.
      */
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain) {};
+                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) {}
 
     /**
      * Assembles B.C. contributions to specified vector.
@@ -141,12 +141,11 @@ public:
      * @param type Type of matrix to assemble.
      * @param mode Mode of value.
      * @param s Numbering scheme.
-     * @param domain Domain to assemble from.
      * @return Equivalent of the sum of the element norm (squared) of assembled vector.
      */
-    virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                   CharType type, ValueModeType mode,
-                                  const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL) { return 0.0; };
+                                  const UnknownNumberingScheme &s, FloatArray *eNorms = NULL) {}
 
     /**
      * Gives a list of location arrays that will be assembled.
@@ -157,10 +156,9 @@ public:
      * @param type Type of matrix to assemble.
      * @param r_s Row numbering scheme.
      * @param c_s Column numbering scheme.
-     * @param domain Domain to assemble from.
      */
     virtual void giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
-                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain) {};
+                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) {}
 
 
     /// @name Functions related to boundary conditions which have to deal with special DOFs.

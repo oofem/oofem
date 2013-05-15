@@ -36,23 +36,27 @@
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "domain.h"
 #include "engngm.h"
 #include "load.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( RerShell );
+
 RerShell :: RerShell(int n, Domain *aDomain) :
     CCTPlate(n, aDomain)
 {
@@ -703,32 +707,6 @@ RerShell :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
     }
 
     return 0;
-}
-
-
-void
-RerShell :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type)
-{
-    // evaluates N matrix (interpolation estimated stress matrix)
-    // according to Zienkiewicz & Zhu paper
-    // N(nsigma, nsigma*nnodes)
-    // Definition : sigmaVector = N * nodalSigmaVector
-    double l1, l2, l3;
-
-    l1 = aGaussPoint->giveCoordinate(1);
-    l2 = aGaussPoint->giveCoordinate(2);
-    l3 = 1.0 - l1 - l2;
-
-    if ( type == IST_ShellForceMomentumTensor ) {
-        answer.resize(3);
-    } else {
-        return;
-    }
-
-    answer.zero();
-    answer.at(1) = l1;
-    answer.at(2) = l2;
-    answer.at(3) = l3;
 }
 
 

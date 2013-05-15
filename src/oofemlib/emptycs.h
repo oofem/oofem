@@ -37,9 +37,11 @@
 
 #include "crosssection.h"
 #include "material.h"
-#include "gausspnt.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "gausspoint.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
+
+#define _IFT_EmptyCS_Name "emptycs"
 
 namespace oofem {
 /**

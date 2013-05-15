@@ -49,13 +49,16 @@ using namespace std;
 #include "structuralelementevaluator.h"
 #include "outputmanager.h"
 #include "datastream.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "timer.h"
 #include "contextioerr.h"
 #include "sparsemtrx.h"
 #include "errorestimator.h"
 
 namespace oofem {
+
+REGISTER_EngngModel( NonLinearDynamic );
+
 NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
     totalDisplacement(), incrementOfDisplacement(), internalForces(), forcesVector(), initialLoadVector(),
     incrementalLoadVector(), initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed()
@@ -103,7 +106,7 @@ NumericalMethod *NonLinearDynamic :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
 
-    this->nMethod = new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance);
+    this->nMethod = new NRSolver(this->giveDomain(1), this);
     return this->nMethod;
 }
 
@@ -204,7 +207,7 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
 double NonLinearDynamic ::  giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
     int eq = dof->__giveEquationNumber();
-#if DEBUG
+#ifdef DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -398,8 +401,8 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         // First assemble problem at current time step.
         // Option to take into account initial conditions.
         if ( !effectiveStiffnessMatrix ) {
-            effectiveStiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
-            massMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+            effectiveStiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
+            massMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         }
 
         if ( effectiveStiffnessMatrix == NULL || massMatrix == NULL ) {
@@ -867,7 +870,7 @@ NonLinearDynamic :: initPetscContexts()
 {
     petscContextList->growTo(ndomains);
     for ( int i = 1; i <= this->ndomains; i++ ) {
-        petscContextList->put( i, new PetscContext(this, EID_MomentumBalance, false) ); // false == using local vectors.
+        petscContextList->put( i, new PetscContext(this, false) ); // false == using local vectors.
     }
 }
 #endif
@@ -1089,7 +1092,7 @@ NonLinearDynamic :: giveLoadBalancer()
     }
 
     if ( loadBalancingFlag ) {
-        lb = CreateUsrDefLoadBalancerOfType( ParmetisLoadBalancerClass, this->giveDomain(1) );
+        lb = classFactory.createLoadBalancer( _IFT_ParmetisLoadBalancer_Name, this->giveDomain(1) );
         return lb;
     } else {
         return NULL;
@@ -1105,7 +1108,7 @@ NonLinearDynamic :: giveLoadBalancerMonitor()
     }
 
     if ( loadBalancingFlag ) {
-        lbm = CreateUsrDefLoadBalancerMonitorOfType(WallClockLoadBalancerMonitorClass, this);
+        lbm = classFactory.createLoadBalancerMonitor( _IFT_WallClockLoadBalancerMonitor_Name, this);
         return lbm;
     } else {
         return NULL;

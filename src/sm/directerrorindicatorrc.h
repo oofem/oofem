@@ -37,7 +37,7 @@
 
 #include "interface.h"
 #include "remeshingcrit.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "statecountertype.h"
 
 ///@name Input fields for DirectErrorIndicatorRC
@@ -54,6 +54,8 @@ namespace oofem {
 class Domain;
 class Element;
 class TimeStep;
+class ProblemCommunicator;
+class ProcessCommunicator;
 
 /**
  * The corresponding element interface to DirectErrorIndicatorRC class.

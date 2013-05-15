@@ -32,8 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "iga.h"
 #include "feibspline.h"
 

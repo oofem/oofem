@@ -38,7 +38,7 @@
 #include "supgelement.h"
 #include "femcmpnn.h"
 #include "domain.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 
 #include "primaryfield.h"
 #include "fluiddynamicmaterial.h"

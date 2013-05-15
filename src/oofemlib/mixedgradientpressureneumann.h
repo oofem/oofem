@@ -36,15 +36,16 @@
 #define mixedgradientpressurecneumann_h
 
 #include "mixedgradientpressurebc.h"
-#include "boundary.h"
+#include "boundarycondition.h"
 #include "dof.h"
 #include "bctype.h"
 #include "valuemodetype.h"
-#include "classtype.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 #include <list>
+
+#define _IFT_MixedGradientPressureNeumann_Name   "mixedgradientpressureneumann"
 
 namespace oofem {
 class MasterDof;
@@ -105,9 +106,6 @@ protected:
     /// DOF-manager containing the unknown deviatoric stress.
     Node *sigmaDev;
 
-    /// Element boundaries to integrate over. Boundary number 0 indicates that the element is a boundary element itself.
-    std::list< std::pair<int,int> > boundaries;
-
 public:
     /**
      * Creates boundary condition with given number, belonging to given domain.
@@ -138,15 +136,9 @@ public:
      * The input record contains two fields;
      * - devGradient \#columns { d_11 d_22 ... d_21 ... } (required)
      * - pressure p (required)
-     * - elementSides List of element numbers and sides (interleaved) to apply boundary condition to.
-     * - elements List of boundary elements to apply boundary condition to.
      * The gradient should be in Voigt notation (only the deviatoric part will be used)
      */
     virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual void addElementSide(int elem, int side);
-    virtual void addElement(int elem);
-    void clearElements();
 
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
@@ -158,15 +150,15 @@ public:
     virtual void setPrescribedPressure(double p) { pressure = p; }
     virtual void setPrescribedDeviatoricGradientFromVoigt(const FloatArray &ddev);
 
-    virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                   CharType type, ValueModeType mode,
-                                  const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorm = NULL);
+                                  const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
     
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
+                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
     
     virtual void giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
-                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
+                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual const char *giveClassName() const { return "MixedGradientPressureNeumann"; }
     virtual classType giveClassID() const { return MixedGradientPressureNeumannClass; }

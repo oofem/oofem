@@ -33,8 +33,8 @@
  */
 
 #include "crosssection.h"
-#include "dictionr.h"
-#include "gausspnt.h"
+#include "dictionary.h"
+#include "gausspoint.h"
 #include "material.h"
 #include "contextioerr.h"
 

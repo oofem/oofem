@@ -41,12 +41,18 @@
 #include "feibspline.h"
 #include "feinurbs.h"
 #include "feitspline.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "matresponsemode.h"
 #include "mathfem.h"
 
+#define _IFT_BsplinePlaneStressElement_Name "bsplineplanestresselement"
+#define _IFT_NURBSPlaneStressElement_Name "nurbsplanestresselement"
+#define _IFT_TSplinePlaneStressElement_Name "tsplineplanestresselement"
+#define _IFT_NURBSSpace3dElement_Name "nurbs3delement"
+
 namespace oofem {
+
 class BsplinePlaneStressElement : public IGAElement, public PlaneStressStructuralElementEvaluator
 {
 protected:
@@ -54,22 +60,24 @@ protected:
 
 public:
     BsplinePlaneStressElement(int n, Domain *aDomain);
-    IRResultType initializeFrom(InputRecord *ir);
 
-    void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
+    virtual IRResultType initializeFrom(InputRecord *ir);
+
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
         PlaneStressStructuralElementEvaluator :: giveCharacteristicMatrix(answer, mtrx, tStep);
     }
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *t) {
         PlaneStressStructuralElementEvaluator :: giveCharacteristicVector(answer, type, mode, t);
     }
 
-    FEInterpolation *giveInterpolation() { return & this->interpolation; }
+    virtual FEInterpolation *giveInterpolation() { return & this->interpolation; }
     virtual Element *giveElement() { return this; }
-    void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
+    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
+    virtual void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
         PlaneStressStructuralElementEvaluator :: giveDofManDofIDMask(inode, u, answer);
     }
     virtual int computeNumberOfDofs(EquationID ut) { return numberOfDofMans * 2; }
-    void updateInternalState(TimeStep *stepN) { PlaneStressStructuralElementEvaluator :: updateInternalState(stepN); }
+    virtual void updateInternalState(TimeStep *stepN) { PlaneStressStructuralElementEvaluator :: updateInternalState(stepN); }
     // definition & identification
     virtual const char *giveClassName() const { return "BsplinePlaneStressElement"; }
     virtual classType giveClassID() const { return BsplinePlaneStressElementClass; }
@@ -96,22 +104,24 @@ protected:
 
 public:
     NURBSPlaneStressElement(int n, Domain *aDomain);
-    IRResultType initializeFrom(InputRecord *ir);
 
-    void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
+    virtual IRResultType initializeFrom(InputRecord *ir);
+
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
         PlaneStressStructuralElementEvaluator :: giveCharacteristicMatrix(answer, mtrx, tStep);
     }
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *t) {
         PlaneStressStructuralElementEvaluator :: giveCharacteristicVector(answer, type, mode, t);
     }
 
-    FEInterpolation *giveInterpolation() { return & this->interpolation; }
+    virtual FEInterpolation *giveInterpolation() { return & this->interpolation; }
     virtual Element *giveElement() { return this; }
-    void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
+    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
+    virtual void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
         PlaneStressStructuralElementEvaluator :: giveDofManDofIDMask(inode, u, answer);
     }
     virtual int computeNumberOfDofs(EquationID ut) { return numberOfDofMans * 2; }
-    void updateInternalState(TimeStep *stepN) { PlaneStressStructuralElementEvaluator :: updateInternalState(stepN); }
+    virtual void updateInternalState(TimeStep *stepN) { PlaneStressStructuralElementEvaluator :: updateInternalState(stepN); }
     // definition & identification
     virtual const char *giveClassName() const { return "NURBSPlaneStressElement"; }
     virtual classType giveClassID() const { return NURBSPlaneStressElementClass; }
@@ -139,26 +149,28 @@ protected:
 
 public:
     TSplinePlaneStressElement(int n, Domain *aDomain);
-    IRResultType initializeFrom(InputRecord *ir) {
+
+    virtual IRResultType initializeFrom(InputRecord *ir) {
         IGATSplineElement :: initializeFrom(ir);
         //PlaneStressStructuralElementEvaluator::initializeFrom(ir);
         return IRRT_OK;
     }
 
-    void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
         PlaneStressStructuralElementEvaluator :: giveCharacteristicMatrix(answer, mtrx, tStep);
     }
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *t) {
         PlaneStressStructuralElementEvaluator :: giveCharacteristicVector(answer, type, mode, t);
     }
 
-    FEInterpolation *giveInterpolation() { return & this->interpolation; }
+    virtual FEInterpolation *giveInterpolation() { return & this->interpolation; }
     virtual Element *giveElement() { return this; }
-    void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
+    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
+    virtual void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
         PlaneStressStructuralElementEvaluator :: giveDofManDofIDMask(inode, u, answer);
     }
     virtual int computeNumberOfDofs(EquationID ut) { return numberOfDofMans * 2; }
-    void updateInternalState(TimeStep *stepN) { PlaneStressStructuralElementEvaluator :: updateInternalState(stepN); }
+    virtual void updateInternalState(TimeStep *stepN) { PlaneStressStructuralElementEvaluator :: updateInternalState(stepN); }
     // definition & identification
     virtual const char *giveClassName() const { return "TSplinePlaneStressElement"; }
     virtual classType giveClassID() const { return TSplinePlaneStressElementClass; }
@@ -179,22 +191,25 @@ protected:
 
 public:
     NURBSSpace3dElement(int n, Domain *aDomain);
-    IRResultType initializeFrom(InputRecord *ir);
 
-    void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
+    virtual IRResultType initializeFrom(InputRecord *ir);
+
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
         Space3dStructuralElementEvaluator :: giveCharacteristicMatrix(answer, mtrx, tStep);
     }
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *t) {
         Space3dStructuralElementEvaluator :: giveCharacteristicVector(answer, type, mode, t);
     }
 
-    FEInterpolation *giveInterpolation() { return & this->interpolation; }
+    virtual FEInterpolation *giveInterpolation() { return & this->interpolation; }
     virtual Element *giveElement() { return this; }
-    void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
+
+    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
+    virtual void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
         Space3dStructuralElementEvaluator :: giveDofManDofIDMask(inode, u, answer);
     }
     virtual int computeNumberOfDofs(EquationID ut) { return numberOfDofMans * 3; }
-    void updateInternalState(TimeStep *stepN) { Space3dStructuralElementEvaluator :: updateInternalState(stepN); }
+    virtual void updateInternalState(TimeStep *stepN) { Space3dStructuralElementEvaluator :: updateInternalState(stepN); }
     // definition & identification
     virtual const char *giveClassName() const { return "NURBSSpace3dElement"; }
     virtual classType giveClassID() const { return NURBSSpace3dElementClass; }

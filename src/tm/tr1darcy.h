@@ -41,6 +41,8 @@
 #include "nodalaveragingrecoverymodel.h"
 #include "transportmaterial.h"
 
+#define _IFT_Tr1Darcy_Name "tr1darcy"
+
 namespace oofem {
 /**
  * Element class for the DarcyFlow engineering model. Linear description of seepage

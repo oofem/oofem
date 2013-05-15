@@ -36,11 +36,12 @@
 #define isoheatmat_h
 
 #include "transportmaterial.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 ///@name Input fields for IsotropicHeatTransferMaterial
 //@{
+#define _IFT_IsotropicHeatTransferMaterial_Name "isoheat"
 #define _IFT_IsotropicHeatTransferMaterial_k "k" ///< Conductivity
 #define _IFT_IsotropicHeatTransferMaterial_c "c" ///< Specific heat
 //@}

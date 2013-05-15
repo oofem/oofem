@@ -35,8 +35,8 @@
 #ifndef trabboneembed_h
 
 #include "structuralmaterial.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "cltypes.h"
 #include "matconst.h"
 #include "matstatus.h"
@@ -46,6 +46,7 @@
 
 ///@name Input fields for TrabBoneEmbed
 //@{
+#define _IFT_TrabBoneEmbed_Name "trabboneembed"
 #define _IFT_TrabBoneEmbed_eps0 "eps0"
 #define _IFT_TrabBoneEmbed_nu0 "nu0"
 //@}

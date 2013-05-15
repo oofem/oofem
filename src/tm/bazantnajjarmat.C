@@ -33,11 +33,15 @@
  */
 
 #include "bazantnajjarmat.h"
-#include "flotmtrx.h"
-#include "gausspnt.h"
+#include "floatmatrix.h"
+#include "gausspoint.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( BazantNajjarMoistureTransferMaterial );
+
 IRResultType
 BazantNajjarMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
 {

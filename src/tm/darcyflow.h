@@ -15,12 +15,12 @@
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
 
-#ifdef __PARALLEL_MODE
-#include "problemcomm.h"
-#include "processcomm.h"
-#endif
+#define _IFT_DarcyFlow_Name "darcyflow"
 
 namespace oofem {
+
+class CommunicatorBuff;
+class ProblemCommunicator;
 
 /**
  * Class describing an extended Darcy flow. A Darcy flow is a linear relation between the seepage velocity and the pressure gradient. By 'extended',

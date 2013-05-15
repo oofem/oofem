@@ -36,7 +36,7 @@
 #define feinterpol1d_h
 
 #include "feinterpol.h"
-#include "flotarry.h"
+#include "floatarray.h"
 
 namespace oofem {
 /**

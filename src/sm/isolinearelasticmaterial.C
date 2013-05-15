@@ -37,10 +37,14 @@
 #include "simplecrosssection.h"
 #include "material.h"
 #include "structuralms.h"
-#include "flotmtrx.h"
-#include "gausspnt.h"
+#include "floatmatrix.h"
+#include "gausspoint.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( IsotropicLinearElasticMaterial );
+
 IsotropicLinearElasticMaterial :: IsotropicLinearElasticMaterial(int n, Domain *d,
                                                                  double _E, double _nu) :
     LinearElasticMaterial(n, d)

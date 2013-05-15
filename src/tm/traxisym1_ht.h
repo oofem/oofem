@@ -37,6 +37,8 @@
 
 #include "tr1_ht.h"
 
+#define _IFT_TrAxisym1_ht_Name "traxisym1ht"
+
 namespace oofem {
 /**
  * Triangular axisymmetric element with linear approximation for moisture/heat transfer.

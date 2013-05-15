@@ -39,13 +39,14 @@
 #include "structuralcrosssection.h"
 #include "structuralmaterial.h"
 #include "element.h"
-#include "dictionr.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "dictionary.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "interface.h"
 
 ///@name Input fields for FiberedCrossSection
 //@{
+#define _IFT_FiberedCrossSection_Name "fiberedcs"
 #define _IFT_FiberedCrossSection_nfibers "nfibers"
 #define _IFT_FiberedCrossSection_fibermaterials "fibermaterials"
 #define _IFT_FiberedCrossSection_thicks "thicks"
@@ -136,7 +137,7 @@ public:
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode, Material *mat);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 
-    virtual void giveFiberMaterialStiffnessMatrix(FloatMatrix &fiberMatrix, MatResponseForm FullForm,
+    virtual void giveFiberMaterialStiffnessMatrix(FloatMatrix &fiberMatrix, MatResponseForm form,
                                                   MatResponseMode rMode, GaussPoint *layerGp,
                                                   TimeStep *tStep);
 

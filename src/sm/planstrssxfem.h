@@ -38,7 +38,11 @@
 #include "planstrss.h"
 #include "xfemelementinterface.h"
 #include "vtkxmlexportmodule.h"
+
+#define _IFT_PlaneStress2dXfem_Name "planestress2dxfem"
+
 namespace oofem {
+
 /**
  * Temporary class for testing
  * in the usual case instead of PlaneStress2dXfem
@@ -58,7 +62,7 @@ public:
     virtual classType giveClassID() const { return PlaneStress2dXfemClass; }
     virtual int computeNumberOfDofs(EquationID ut);
     virtual void computeGaussPoints();
-    virtual void computeNmatrixAt(FloatArray &lcoords, FloatMatrix &answer);
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                           int lowerIndx = 1, int upperIndx = ALL_STRAINS);
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray & answer) const;

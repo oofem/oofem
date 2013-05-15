@@ -40,6 +40,7 @@
 
 ///@name Input fields for Concrete3
 //@{
+#define _IFT_Concrete3_Name "concrete3"
 #define _IFT_Concrete3_exp_soft "exp_soft"
 //@}
 

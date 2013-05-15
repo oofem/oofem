@@ -196,7 +196,6 @@ class DSSolver : public ISolver
     MathTracer *eMT;
 
     SparseMatrixF sm;
-    SparseGridMtx *act_matrix;     // points to matrix or matrixPD
     SparseGridMtx *matrix;
     SparseGridMtxPD *matrixPD;
     char str [ 512 ];

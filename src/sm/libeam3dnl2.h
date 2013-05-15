@@ -36,10 +36,11 @@
 #define libeam3dnl2_h
 
 #include "nlstructuralelement.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 
 ///@name Input fields for LIBeam3dNL2
 //@{
+#define _IFT_LIBeam3dNL2_Name "libeam3dnl2"
 #define _IFT_LIBeam3dNL2_refnode "refnode"
 //@}
 

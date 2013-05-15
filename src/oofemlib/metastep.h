@@ -35,7 +35,6 @@
 #ifndef metastep_h
 #define metastep_h
 
-#include "classtype.h"
 #include "inputrecord.h"
 
 ///@name Input fields for meta step
@@ -110,8 +109,6 @@ public:
     int giveLastStepNumber() { return ( sindex + numberOfSteps - 1 ); }
     /// Returns class name of receiver.
     const char *giveClassName() const { return "MetaStep"; }
-    /// Returns class ID of receiver.
-    classType giveClassID() const { return MetaStepClass; }
 };
 } // end namespace oofem
 #endif // metastep_h

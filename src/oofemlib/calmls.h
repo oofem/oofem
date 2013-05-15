@@ -40,12 +40,13 @@
 
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "dofiditem.h"
 
 ///@name Input fields for CylindricalALM
 //@{
+#define _IFT_CylindricalALM_Name "calm"
 #define _IFT_CylindricalALM_psi "psi"
 #define _IFT_CylindricalALM_maxiter "maxiter"
 #define _IFT_CylindricalALM_minsteplength "minsteplength"
@@ -211,7 +212,7 @@ protected:
 #endif
 
 public:
-    CylindricalALM(int i, Domain *d, EngngModel *m, EquationID ut);
+    CylindricalALM(Domain *d, EngngModel *m);
     virtual ~CylindricalALM();
 
     // Overloaded methods:
@@ -237,7 +238,6 @@ public:
         }
     }
     virtual const char *giveClassName() const { return "CylindricalALM"; }
-    virtual classType giveClassID() const { return CylindricalALMSolverClass; }
 
     virtual SparseLinearSystemNM *giveLinearSolver();
 

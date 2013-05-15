@@ -34,14 +34,18 @@
 
 #include "b3solidmat.h"
 #include "mathfem.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "structuralcrosssection.h"
 #include "timestep.h"
 #include "contextioerr.h"
 #include "datastream.h"
+#include "classfactory.h"
 #include "b3mat.h" // For the input record keywords.
 
 namespace oofem {
+
+REGISTER_Material( B3SolidMaterial );
+
 IRResultType
 B3SolidMaterial :: initializeFrom(InputRecord *ir)
 {
@@ -734,7 +738,7 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, MatResponseF
 
     /* ask for humidity and temperature from external sources, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-    Field *tf;
+    FM_FieldPtr tf;
     FloatArray gcoords, et2, ei2, stressVector, fullStressVector;
 
     if ( ( tf = fm->giveField(FT_Temperature) ) ) {
@@ -962,7 +966,7 @@ B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *atTime) //computes hum
 
     /* ask for humidity from external sources, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-    Field *tf;
+    FM_FieldPtr tf;
     FloatArray gcoords, et2;
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
@@ -993,7 +997,7 @@ B3SolidMaterial :: giveHumidityIncrement(GaussPoint *gp, TimeStep *atTime) //com
 
     /* ask for humidity from external sources, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-    Field *tf;
+    FM_FieldPtr tf;
     FloatArray gcoords, et2, ei2;
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {

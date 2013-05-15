@@ -37,22 +37,25 @@
 #include "dofmanager.h"
 #include "dof.h"
 #include "valuemodetype.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "engngm.h"
 #include "node.h"
 #include "element.h"
 #include "integrationrule.h"
 #include "gaussintegrationrule.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "masterdof.h"
-#include "usrdefsub.h" // For sparse matrix creation.
+#include "classfactory.h" // For sparse matrix creation.
 #include "sparsemtrxtype.h"
 #include "mathfem.h"
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
+#include "set.h"
 
 namespace oofem {
+
+REGISTER_BoundaryCondition( MixedGradientPressureNeumann );
 
 MixedGradientPressureNeumann :: MixedGradientPressureNeumann(int n, Domain *d) : MixedGradientPressureBC(n,d)
 {
@@ -227,7 +230,7 @@ void MixedGradientPressureNeumann :: setPrescribedDeviatoricGradientFromVoigt(co
 
 
 void MixedGradientPressureNeumann :: giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
-    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain)
+    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if (eid == EID_MomentumBalance_ConservationEquation)
         eid = EID_MomentumBalance;
@@ -242,12 +245,15 @@ void MixedGradientPressureNeumann :: giveLocationArrays(std::vector<IntArray> &r
     this->sigmaDev->giveCompleteLocationArray(sigma_loc_r, r_s);
     this->sigmaDev->giveCompleteLocationArray(sigma_loc_c, c_s);
 
-    rows.resize(this->boundaries.size()*2);
-    cols.resize(this->boundaries.size()*2);
+    Set *set = this->giveDomain()->giveSet(this->set);
+    const IntArray &boundaries = set->giveBoundaryList();
+
+    rows.resize(boundaries.giveSize());
+    cols.resize(boundaries.giveSize());
     int i = 0;
-    for (std::list< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
-        Element *e = this->giveDomain()->giveElement( (*pos).first );
-        int boundary = (*pos).second;
+    for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
+        Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
+        int boundary = boundaries.at(pos*2);
 
         e->giveBoundaryLocationArray(loc_r, boundary, eid, r_s);
         e->giveBoundaryLocationArray(loc_c, boundary, eid, c_s);
@@ -272,8 +278,10 @@ IntegrationRule *MixedGradientPressureNeumann :: CreateIntegrationRule(Element *
     int npoints;
     integrationDomain id;
     if (nsd == 3) {
-        npoints = 4; ///@todo I don't know how to determine this for surfaces
-        id = _Triangle; ///@todo We need to obtain this from the element itself.
+        ///@todo I don't know how to determine this for surfaces, We need to obtain this from the element itself.
+        npoints = 4;
+        //id = _Triangle;
+        id = _Square;
     } else if (nsd == 2) {
         npoints = (order + 1 + 1)/2; // extra +1 for rounding up; npoints gives exact integration for order = npoints*2 - 1
         id = _Line;
@@ -412,17 +420,19 @@ void MixedGradientPressureNeumann :: integrateDevTangent(FloatMatrix &answer, El
 }
 
 
-double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                    CharType type, ValueModeType mode, const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
+void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                    CharType type, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
     // Boundary condition only acts on the momentumbalance part.
     if (eid == EID_MomentumBalance_ConservationEquation)
         eid = EID_MomentumBalance;
 
     if (eid != EID_MomentumBalance)
-        return 0.0;
+        return;
 
-    double norm;
+    Set *set = this->giveDomain()->giveSet(this->set);
+    const IntArray &boundaries = set->giveBoundaryList();
+
     IntArray loc, sigma_loc;  // For the velocities and stress respectively
     IntArray masterDofIDs, sigmaMasterDofIDs;
     this->sigmaDev->giveCompleteLocationArray(sigma_loc, s);
@@ -433,13 +443,12 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
         FloatArray devLoad;
         devLoad.beScaled(-rve_size, this->devGradient);
         answer.assemble(devLoad, sigma_loc);
-        norm = devLoad.computeSquaredNorm();
 
         // The second contribution is on the momentumbalance equation; - int delta_v . n dA * p
         FloatArray fe;
-        for (std::list< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
-            Element *e = this->giveDomain()->giveElement( (*pos).first );
-            int boundary = (*pos).second;
+        for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
+            Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
+            int boundary = boundaries.at(pos*2);
             
             e->giveBoundaryLocationArray(loc, boundary, eid, s, &masterDofIDs);
             this->integrateVolTangent(fe, e, boundary);
@@ -451,9 +460,8 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
                 }
             }
         }
-        return norm;
         
-    } else if (type == InternalForcesVector) {
+    } else if ( type == InternalForcesVector ) {
         FloatMatrix Ke;
         FloatArray fe_v, fe_s;
         FloatArray s_dev, e_v;
@@ -465,10 +473,9 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
 
         // Assemble: int delta_v (x) n dA : E_i s_i
         //           int v (x) n dA : E_i delta_s_i
-        norm = 0.;
-        for (std::list< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
-            Element *e = this->giveDomain()->giveElement( (*pos).first );
-            int boundary = (*pos).second;
+        for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
+            Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
+            int boundary = boundaries.at(pos*2);
             
             // Fetch the element information;
             e->giveBoundaryLocationArray(loc, boundary, eid, s, &masterDofIDs);
@@ -481,7 +488,6 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
             
             answer.assemble(fe_s, loc); // Contributions to delta_v equations
             answer.assemble(fe_v, sigma_loc); // Contribution to delta_s_i equations
-            norm += fe_v.computeNorm() + fe_s.computeNorm(); ///@todo This is awful. Different units, therefore the split up use below;
             if ( eNorms ) {
                 for ( int i = 1; i <= loc.giveSize(); ++i ) {
                     if ( loc.at(i) ) eNorms->at(masterDofIDs.at(i)) += fe_s.at(i) * fe_s.at(i);
@@ -491,14 +497,12 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
                 }
             }
         }
-        return norm;
     }
-    return 0.;
 }
 
 
 void MixedGradientPressureNeumann :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
-    CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain)
+    CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if (eid == EID_MomentumBalance_ConservationEquation)
         eid = EID_MomentumBalance;
@@ -509,14 +513,16 @@ void MixedGradientPressureNeumann :: assemble(SparseMtrx *answer, TimeStep *tSte
     if (type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == StiffnessMatrix || type == ElasticStiffnessMatrix) {
         FloatMatrix Ke, KeT;
         IntArray loc_r, loc_c, sigma_loc_r, sigma_loc_c;
+        Set *set = this->giveDomain()->giveSet(this->set);
+        const IntArray &boundaries = set->giveBoundaryList();
 
         // Fetch the columns/rows for the stress contributions;
         this->sigmaDev->giveCompleteLocationArray(sigma_loc_r, r_s);
         this->sigmaDev->giveCompleteLocationArray(sigma_loc_c, c_s);
         
-        for (std::list< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
-            Element *e = this->giveDomain()->giveElement( (*pos).first );
-            int boundary = (*pos).second;
+        for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
+            Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
+            int boundary = boundaries.at(pos*2);
             
             // Fetch the element information;
             e->giveBoundaryLocationArray(loc_r, boundary, eid, r_s);
@@ -535,7 +541,9 @@ void MixedGradientPressureNeumann :: computeFields(FloatArray &sigmaDev, double 
 {
     int nsd = this->giveDomain()->giveNumberOfSpatialDimensions();
     FloatArray sigmaDevBase;
-    IntArray dofMask(0);
+    Set *set = this->giveDomain()->giveSet(this->set);
+    const IntArray &boundaries = set->giveBoundaryList();
+
     // Fetch the current values of the stress in deviatoric base;
     sigmaDevBase.resize(this->sigmaDev->giveNumberOfDofs());
     for ( int i = 1; i <= this->sigmaDev->giveNumberOfDofs(); i++ ) {
@@ -553,9 +561,9 @@ void MixedGradientPressureNeumann :: computeFields(FloatArray &sigmaDev, double 
     // Postprocessing; vol = int v . n dA
     FloatArray unknowns, fe;
     vol = 0.;
-    for (std::list< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
-        Element *e = this->giveDomain()->giveElement( (*pos).first );
-        int boundary = (*pos).second;
+    for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
+        Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
+        int boundary = boundaries.at(pos*2);
         
         e->computeVectorOf(eid, VM_Total, tStep, unknowns);
         this->integrateVolTangent(fe, e, boundary);
@@ -574,14 +582,16 @@ void MixedGradientPressureNeumann :: computeTangents(
     // Fetch some information from the engineering model
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
-    SparseLinearSystemNM *solver = CreateUsrDefSparseLinSolver(ST_Petsc, 1, this->domain, this->domain->giveEngngModel());// = rve->giveLinearSolver();
+    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver(ST_Petsc, this->domain, this->domain->giveEngngModel());// = rve->giveLinearSolver();
     SparseMtrx *Kff;
     SparseMtrxType stype = SMT_PetscMtrx;// = rve->giveSparseMatrixType();
     EModelDefaultEquationNumbering fnum;
+    Set *set = this->giveDomain()->giveSet(this->set);
+    const IntArray &boundaries = set->giveBoundaryList();
     double rve_size = this->domainSize();
     
     // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
-    Kff = CreateUsrDefSparseMtrx(stype);
+    Kff = classFactory.createSparseMtrx(stype);
     if ( !Kff ) {
         OOFEM_ERROR2("MixedGradientPressureNeumann :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
     }
@@ -612,9 +622,9 @@ void MixedGradientPressureNeumann :: computeTangents(
     p_pert.zero();
     FloatArray fe;
     IntArray loc;
-    for (std::list< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
-        Element *e = this->giveDomain()->giveElement( (*pos).first );
-        int boundary = (*pos).second;
+    for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
+        Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
+        int boundary = boundaries.at(pos*2);
 
         e->giveBoundaryLocationArray(loc, boundary, eid, fnum);
         this->integrateVolTangent(fe, e, boundary);
@@ -640,9 +650,9 @@ void MixedGradientPressureNeumann :: computeTangents(
     // Post-process the volumetric rate of deformations in the sensitivity fields;
     FloatArray e_d(ndev); e_d.zero();
     double e_p = 0.0;
-    for (std::list< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
-        Element *e = this->giveDomain()->giveElement( (*pos).first );
-        int boundary = (*pos).second;
+    for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
+        Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
+        int boundary = boundaries.at(pos*2);
     
         this->integrateVolTangent(fe, e, boundary);
         e->giveBoundaryLocationArray(loc, boundary, eid, fnum);
@@ -698,31 +708,13 @@ int MixedGradientPressureNeumann :: giveInputRecordString(std :: string &str, bo
 
     GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
 
-    sprintf( buff, " devgradient %d ", this->devGradient.giveSize() );
+    sprintf( buff, " pressrue %e devgradient %d ", this->pressure, this->devGradient.giveSize() );
     for ( int i = 1; i <= this->devGradient.giveSize(); i++ ) {
         sprintf( buff, " %e", this->devGradient.at(i) );
         str += buff;
     }
 
     return 1;
-}
-
-
-void MixedGradientPressureNeumann :: addElementSide(int elem, int side)
-{
-    this->boundaries.push_back(std::pair<int,int>(elem,side));
-}
-
-
-void MixedGradientPressureNeumann :: addElement(int elem)
-{
-    this->addElementSide(elem, 0);
-}
-
-
-void MixedGradientPressureNeumann :: clearElements()
-{
-    this->boundaries.clear();
 }
 
 

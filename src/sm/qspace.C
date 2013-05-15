@@ -34,24 +34,24 @@
 
 #include "qspace.h"
 #include "node.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "domain.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( QSpace );
+
 FEI3dHexaQuad QSpace :: interpolation;
 
 QSpace :: QSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
-    // Constructor.
 {
     numberOfDofMans = 20;
-    //nn = numberOfDofMans; // number of nodes
-    //nnsurf = 8;           // number of nodes on surface
-    //ndofsn = 3;           // number of DOFs on node
 }
 
 
@@ -82,7 +82,7 @@ QSpace :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 MaterialMode
 QSpace :: giveMaterialMode()
 {
-    if(this->nlGeometry > 1)
+    if ( this->nlGeometry > 1 )
         return _3dMat_F;
     else
         return _3dMat;
@@ -126,18 +126,9 @@ QSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
-    FloatArray n(20);
-
-    answer.resize(3, 60);
-    answer.zero();
-
+    FloatArray n;
     this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    for ( int i = 1; i <= 20; i++ ) {
-        answer.at(1, 3 * i - 2) = n.at(i);
-        answer.at(2, 3 * i - 1) = n.at(i);
-        answer.at(3, 3 * i - 0) = n.at(i);
-    }
+    answer.beNMatrixOf(n, 3);
 }
 
 
@@ -177,7 +168,6 @@ QSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i
 // evaluated at aGaussPoint
 
 {
- 
     FloatMatrix dnx;
 
     // compute the derivatives of shape functions
@@ -260,17 +250,9 @@ QSpace :: GetSurfaceIntegrationRule(int approxOrder)
 void
 QSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-    FloatArray n(8);
+    FloatArray n;
     interpolation.surfaceEvalN(n, iSurf, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    answer.resize(3, 24);
-    answer.zero();
-
-    for ( int i = 0; i < 8; i++ ) { // loop over surfaces
-        for ( int j = 0; j < 3; j++ ) { // loop over DOFs
-            answer(j, j + i * 3) = n(i);
-        }
-    }
+    answer.beNMatrixOf(n, 3);
 }
 
 void
@@ -327,22 +309,22 @@ QSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPo
      * _error ("computeLoadLSToLRotationMatrix: surface local coordinate system not supported");
      * return 1;
      */
-    int i, j;
     FloatArray gc(3);
     FloatArray h1(3), h2(3), nn(3), n(3);
     IntArray snodes(4);
 
     answer.resize(3, 3);
+    answer.zero();
 
     this->interpolation.computeSurfaceMapping(snodes, dofManArray, iSurf);
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         gc.add( * domain->giveNode( snodes.at(i) )->giveCoordinates() );
     }
 
     gc.times(1. / 4.);
     // determine "average normal"
-    for ( i = 1; i <= 4; i++ ) {
-        j = ( i ) % 4 + 1;
+    for ( int i = 1; i <= 4; i++ ) {
+        int j = ( i ) % 4 + 1;
         h1.beDifferenceOf(* domain->giveNode( snodes.at(i) )->giveCoordinates(), gc);
         h2.beDifferenceOf(* domain->giveNode( snodes.at(j) )->giveCoordinates(), gc);
         n.beVectorProductOf(h1, h2);
@@ -356,11 +338,10 @@ QSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPo
     nn.times(1. / 4.);
     if ( nn.computeSquaredNorm() < 1.e-6 ) {
         answer.zero();
-        return 1;
     }
 
     nn.normalize();
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(i, 3) = nn.at(i);
     }
 
@@ -378,7 +359,7 @@ QSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPo
     h1.at(3) = answer.at(3, 1) = 0.0;
     // local y axis perpendicular to local x,z axes
     h2.beVectorProductOf(nn, h1);
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(i, 2) = h2.at(i);
     }
 

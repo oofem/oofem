@@ -35,14 +35,13 @@
 #ifndef zznodalrecoverymodel_h
 #define zznodalrecoverymodel_h
 
-#include "compiler.h"
-
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 
 namespace oofem {
 class GaussPoint;
 class ZZNodalRecoveryModelInterface;
+class ProcessCommunicator;
 
 /**
  * The nodal recovery model based on paper of Zienkiewicz and Zhu "A Simple Estimator and Adaptive
@@ -129,12 +128,6 @@ public:
      * Returns the corresponding element to interface.
      */
     virtual Element *ZZNodalRecoveryMI_giveElement() = 0;
-    /**
-     * Evaluates N matrix (interpolation estimated value matrix).
-     * Default implementation requires element to provide valid interpolation via giveInterpolation method.
-     */
-    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *aGaussPoint,
-                                                                     InternalStateType type);
     //@}
 };
 } // end namespace oofem

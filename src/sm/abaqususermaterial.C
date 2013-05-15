@@ -33,7 +33,8 @@
  */
 
 #include "abaqususermaterial.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
+#include "classfactory.h"
 
 #ifdef _WIN32 //_MSC_VER and __MINGW32__ included
  #include <Windows.h>
@@ -44,6 +45,9 @@
 #include <cstring>
 
 namespace oofem {
+
+REGISTER_Material( AbaqusUserMaterial );
+
 int AbaqusUserMaterial :: n = 1;
 
 AbaqusUserMaterial :: ~AbaqusUserMaterial()

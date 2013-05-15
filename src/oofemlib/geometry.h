@@ -36,7 +36,7 @@
 #define geometry_h
 
 #include "domain.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "node.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
@@ -45,11 +45,16 @@ namespace oofem {
 
 ///@name Input fields for geometries
 //@{
+#define _IFT_Circle_Name "circle"
 #define _IFT_Circle_radius "radius"
 #define _IFT_Circle_center "center"
-#define _IFT_PointSwarm_nodeID "nodeid"
+
+#define _IFT_Line_Name "line"
 #define _IFT_Line_start "start"
 #define _IFT_Line_end "end"
+
+#define _IFT_PointSwarm_Name "pointswarm" // just temporary
+#define _IFT_PointSwarm_nodeID "nodeid"
 //@}
 
 /**
@@ -72,7 +77,7 @@ public:
     /// Checks whether an element is interacted, Element reference will be later replaced by Geometry.
     virtual bool intersects(Element *element) { return false; }
     /// Gives number of intersection points of Geometry entity with an element, Element reference will be later replaced by Geometry.
-    virtual int computeNumberOfIntersectionPoints(const Element *element) { return 0; }
+    virtual int computeNumberOfIntersectionPoints(Element *element) { return 0; }
     /// Gives intersection points between this Geometry and Element.
     virtual void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints) { }
     /// Accessor.

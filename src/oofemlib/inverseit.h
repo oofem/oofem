@@ -41,7 +41,7 @@
 #define inverseit_h
 
 #include "sparsegeneigenvalsystemnm.h"
-#include "flotarry.h"
+#include "floatarray.h"
 
 namespace oofem {
 class Domain;
@@ -84,25 +84,16 @@ class EngngModel;
 class InverseIteration : public SparseGeneralEigenValueSystemNM
 {
 private:
-    FloatMatrix *a;
-    FloatMatrix *b;
-    FloatArray *eigv;    // only pointer to caller data, not ownership
-    FloatMatrix *x;      // only pointer to caller data, not ownership
-    int n, nc, nsmax, nitem;
+    int n, nc, nitem;
     double rtol;
     int solved;
 
 public:
-
-    InverseIteration(int i, Domain *d, EngngModel *m);
+    InverseIteration(Domain *d, EngngModel *m);
     virtual ~InverseIteration();
 
     virtual NM_Status solve(SparseMtrx *A, SparseMtrx *B, FloatArray *x, FloatMatrix *v, double rtol, int nroot);
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
-    // identification
     virtual const char *giveClassName() const { return "InverseIteration"; }
-    virtual classType giveClassID() const { return InverseIterationSolverClass; }
 };
 } // end namespace oofem
 #endif // inverseit_h

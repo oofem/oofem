@@ -36,18 +36,21 @@
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( Truss3d );
 
 FEI3dLineLin Truss3d :: interp;
 
@@ -80,16 +83,6 @@ Truss3d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
-}
-
-
-void
-Truss3d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *gp, InternalStateType type)
-{
-    if ( !this->giveIPValueSize(type, gp) ) {
-        return;
-    }
-    this->interp.evalN(answer, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 

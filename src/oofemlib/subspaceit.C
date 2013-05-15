@@ -36,23 +36,21 @@
 
 #include "subspaceit.h"
 #include "engngm.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "mathfem.h"
 #include "gjacobi.h"
 
 namespace oofem {
-SubspaceIteration ::  SubspaceIteration(int i, Domain *d, EngngModel *m) :
-    SparseGeneralEigenValueSystemNM(i, d, m) {
+SubspaceIteration ::  SubspaceIteration(Domain *d, EngngModel *m) :
+    SparseGeneralEigenValueSystemNM(d, m)
+{
     //
     // constructor
     //
     //a      = NULL ;
     //b      = NULL ;
-    //ar     = NULL ;
-    //br     = NULL ;
     //_eigv  = NULL ;   // not ownership
-    //vec    = NULL ;
     //_r     = NULL ;   // not ownership
 
     //nroot  = 0 ;
@@ -64,14 +62,8 @@ SubspaceIteration ::  SubspaceIteration(int i, Domain *d, EngngModel *m) :
 }
 
 
-SubspaceIteration :: ~SubspaceIteration() {
-    //
-    // destructor
-    //
-
-    //  delete ar ;
-    //  delete br ;
-    //  delete vec;
+SubspaceIteration :: ~SubspaceIteration()
+{
 }
 
 NM_Status
@@ -90,23 +82,23 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
     double rt, art, brt, eigvt, dif;
     FloatMatrix ar, br, vec;
 
-    GJacobi mtd(number + 1, domain, engngModel);
+    GJacobi mtd(domain, engngModel);
     outStream = domain->giveEngngModel()->giveOutputStream();
     nc = min(2 * nroot, nroot + 8);
     //
     // check matrix size
     //
     if ( ( !a ) || ( !b ) ) {
-        _error("SubspaceIteration :: solveYourselfAt : matrices are not defined\n");
+        OOFEM_ERROR("SubspaceIteration :: solveYourselfAt : matrices are not defined\n");
     }
 
     if ( a->giveNumberOfColumns() != b->giveNumberOfColumns() ) {
-        _error("SubspaceIteration :: solveYourselfAt : matrices size mismatch\n");
+        OOFEM_ERROR("SubspaceIteration :: solveYourselfAt : matrices size mismatch\n");
     }
 
     // check matrix for factorization support
     if ( !a->canBeFactorized() ) {
-        _error("SubspaceIteration :: a matrix not support factorization");
+        OOFEM_ERROR("SubspaceIteration :: a matrix not support factorization");
     }
 
     //
@@ -139,20 +131,20 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
     vec.zero();                   // eigen vectors of reduced problem
     // check matrix for storing resulted eigen vectors at the end
     if ( _r == NULL ) {
-        _error("solveYourselfAt: unknown eigen vectors mtrx");
+        OOFEM_ERROR("SubspaceIteration :: solveYourselfAt: unknown eigen vectors mtrx");
     }
 
     if ( ( _r->giveNumberOfRows() != nn ) || ( _r->giveNumberOfColumns() != nroot ) ) {
-        _error("solveYourselfAt: _r size mismatch");
+        OOFEM_ERROR("SubspaceIteration :: solveYourselfAt: _r size mismatch");
     }
 
     // check array for storing eigenvalues
     if ( _eigv == NULL ) {
-        _error("solveYourselfAt: unknown eigenvalue array");
+        OOFEM_ERROR("SubspaceIteration :: solveYourselfAt: unknown eigenvalue array");
     }
 
     if ( _eigv->giveSize() != nroot ) {
-        _error("solveYourselfAt: eigv size mismatch");
+        OOFEM_ERROR("SubspaceIteration :: solveYourselfAt: eigv size mismatch");
     }
 
     //
@@ -469,12 +461,4 @@ label400:
     return NM_Success;
 }
 
-IRResultType
-SubspaceIteration :: initializeFrom(InputRecord *ir)
-//
-//
-//
-{
-    return IRRT_OK;
-}
 } // end namespace oofem

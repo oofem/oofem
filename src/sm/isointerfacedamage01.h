@@ -40,6 +40,7 @@
 
 ///@name Input fields for IsoInterfaceDamageMaterial
 //@{
+#define _IFT_IsoInterfaceDamageMaterial_Name "isointrfdm01"
 #define _IFT_IsoInterfaceDamageMaterial_kn "kn"
 #define _IFT_IsoInterfaceDamageMaterial_ks "ks"
 #define _IFT_IsoInterfaceDamageMaterial_ft "ft"

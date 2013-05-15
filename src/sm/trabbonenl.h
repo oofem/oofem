@@ -42,11 +42,12 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 #endif
 
 ///@name Input fields for TrabBoneNL
 //@{
+#define _IFT_TrabBoneNL_Name "trabbonenl"
 #define _IFT_TrabBoneNL_r "r"
 #define _IFT_TrabBoneNL_m "m"
 //@}

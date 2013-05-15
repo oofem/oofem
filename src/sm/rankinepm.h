@@ -39,6 +39,7 @@
 
 ///@name Input fields for RankinePlasticMaterial
 //@{
+#define _IFT_RankinePlasticMaterial_Name "rankine"
 #define _IFT_RankinePlasticMaterial_ry "ry"
 //@}
 

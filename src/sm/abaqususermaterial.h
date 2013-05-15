@@ -37,11 +37,12 @@
 
 #include "structuralmaterial.h"
 #include "structuralms.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 ///@name Input fields for AbaqusUserMaterial
 //@{
+#define _IFT_AbaqusUserMaterial_Name "abaqususermaterial"
 #define _IFT_AbaqusUserMaterial_numState "numstate"
 #define _IFT_AbaqusUserMaterial_properties "properties"
 #define _IFT_AbaqusUserMaterial_userMaterial "umat"

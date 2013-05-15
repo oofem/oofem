@@ -37,8 +37,13 @@
 #include "element.h"
 #include "integrationrule.h"
 #include "mathfem.h"
+#include "errorestimatortype.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_ErrorEstimator(ScalarErrorIndicator, EET_SEI);
+
 int
 ScalarErrorIndicator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
 {
@@ -58,7 +63,7 @@ ScalarErrorIndicator :: giveElementError(EE_ErrorType type, Element *elem, TimeS
 {
     FloatArray val;
     IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
-    int i, result = 1, nip = iRule->getNumberOfIntegrationPoints();
+    int result = 1, nip = iRule->getNumberOfIntegrationPoints();
     double sval, maxVal = 0.0;
 
     if ( type != indicatorET ) {
@@ -69,7 +74,7 @@ ScalarErrorIndicator :: giveElementError(EE_ErrorType type, Element *elem, TimeS
         return 0.0;
     }
 
-    for ( i = 0; i < nip; i++ ) {
+    for ( int i = 0; i < nip; i++ ) {
         result = elem->giveIPValue(val, iRule->getIntegrationPoint(i), varType, tStep);
         if ( result ) {
             sval = val.computeNorm();

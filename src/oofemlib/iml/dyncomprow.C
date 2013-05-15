@@ -36,18 +36,23 @@
 // inspired by SL++
 
 #include "dyncomprow.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "engngm.h"
 #include "domain.h"
 #include "mathfem.h"
 #include "verbose.h"
 #include "element.h"
+#include "sparsemtrxtype.h"
+#include "classfactory.h"
 
 #ifdef TIME_REPORT
  #include "timer.h"
 #endif
 
 namespace oofem {
+
+REGISTER_SparseMtrx( DynCompRow, SMT_DynCompRow);
+
 DynCompRow :: DynCompRow(void) : SparseMtrx(), base_(0)
 {
     rows_ = NULL;
@@ -658,7 +663,7 @@ DynCompRow :: insertColInRow(int row, int col)
 
     if ( oldsize == 0 ) {
         colind_ [ row ]->resize(1, DynCompRow_CHUNK);
-        rows_ [ row ]->resize(1, DynCompRow_CHUNK);
+        rows_ [ row ]->resizeWithValues(1, DynCompRow_CHUNK);
         rows_ [ row ]->at(1) = 0.0;
         colind_ [ row ]->at(1) = col;
         return 1;
@@ -691,7 +696,7 @@ DynCompRow :: insertColInRow(int row, int col)
 
     // insert col at middle+1 position
     colind_ [ row ]->resize(oldsize + 1, DynCompRow_CHUNK);
-    rows_ [ row ]->resize(oldsize + 1, DynCompRow_CHUNK);
+    rows_ [ row ]->resizeWithValues(oldsize + 1, DynCompRow_CHUNK);
 
     for ( i = oldsize; i >= right; i-- ) {
         colind_ [ row ]->at(i + 1) = colind_ [ row ]->at(i);
@@ -802,7 +807,7 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
 
         inorm = sqrt(inorm);
 
-        w.resize(rows_ [ i ]->giveSize(), ILU_ROW_CHUNK);
+        w.resizeWithValues(rows_ [ i ]->giveSize(), ILU_ROW_CHUNK);
         iw.resize(rows_ [ i ]->giveSize(), ILU_ROW_CHUNK);
         for ( kk = 1; kk <= rows_ [ i ]->giveSize(); kk++ ) {
             irw( colind_ [ i ]->at(kk) ) = kk;
@@ -834,7 +839,7 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
 #ifndef ILU_0
                             // insert new entry
                             int newsize = w.giveSize() + 1;
-                            w.resize(newsize, ILU_ROW_CHUNK);
+                            w.resizeWithValues(newsize, ILU_ROW_CHUNK);
                             iw.resize(newsize, ILU_ROW_CHUNK);
 
                             iw.at(newsize) = jcol;

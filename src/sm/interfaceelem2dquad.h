@@ -37,6 +37,8 @@
 
 #include "structuralelement.h"
 
+#define _IFT_InterfaceElem2dQuad_Name "interface2dquad"
+
 namespace oofem {
 
 /**

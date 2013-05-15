@@ -44,6 +44,8 @@
 #include "eleminterpmapperinterface.h"
 #include "huertaerrorestimator.h"
 
+#define _IFT_LSpace_Name "lspace"
+
 namespace oofem {
 /**
  * This class implements a Linear 3d 8-node finite element for stress analysis.

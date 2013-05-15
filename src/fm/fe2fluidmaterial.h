@@ -41,6 +41,7 @@
 
 ///@name Input fields for FE^2 fluid material
 //@{
+#define _IFT_FE2FluidMaterial_Name "fe2fluidmaterial"
 #define _IFT_FE2FluidMaterial_fileName "inputfile"
 //@}
 
@@ -67,6 +68,8 @@ protected:
 
     double voffraction;
 
+    bool oldTangents;
+
 public:
     /**
      * Creates new material status.
@@ -81,6 +84,9 @@ public:
 
     StokesFlow *giveRVE() { return this->rve; }
     MixedGradientPressureBC *giveBC() { return this->bc; }
+
+    void markOldTangents();
+    void computeTangents(TimeStep *tStep);
 
     double giveVOFFraction() { return this->voffraction; }
 

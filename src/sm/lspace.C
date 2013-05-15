@@ -34,13 +34,14 @@
 
 #include "lspace.h"
 #include "node.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "domain.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "engngm.h"
@@ -50,6 +51,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( LSpace );
+
 FEI3dHexaLin LSpace :: interpolation;
 
 LSpace :: LSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(),
@@ -102,17 +106,10 @@ LSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
         answer.at(1, 3 * i - 2) = dnx.at(i, 1);
         answer.at(2, 3 * i - 1) = dnx.at(i, 2);
         answer.at(3, 3 * i - 0) = dnx.at(i, 3);
-    }
 
-    for ( int i = 1; i <= 8; i++ ) {
-        answer.at(4, 3 * i - 1) = dnx.at(i, 3);
-        answer.at(4, 3 * i - 0) = dnx.at(i, 2);
-
-        answer.at(5, 3 * i - 2) = dnx.at(i, 3);
-        answer.at(5, 3 * i - 0) = dnx.at(i, 1);
-
-        answer.at(6, 3 * i - 2) = dnx.at(i, 2);
-        answer.at(6, 3 * i - 1) = dnx.at(i, 1);
+        answer.at(5, 3 * i - 2) = answer.at(4, 3 * i - 1) = dnx.at(i, 3);
+        answer.at(6, 3 * i - 2) = answer.at(4, 3 * i - 0) = dnx.at(i, 2);
+        answer.at(6, 3 * i - 1) = answer.at(5, 3 * i - 0) = dnx.at(i, 1);
     }
 }
 

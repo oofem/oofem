@@ -33,8 +33,8 @@
  */
 
 #include "fluiddynamicmaterial.h"
-#include "gausspnt.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatarray.h"
 #include "contextioerr.h"
 
 namespace oofem {
@@ -88,10 +88,8 @@ void
 FluidDynamicMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 // Prints the strains and stresses on the data file.
 {
-    int n;
-
     fprintf(File, "\n deviatoric stresses");
-    n = deviatoricStressVector.giveSize();
+    int n = deviatoricStressVector.giveSize();
     for ( int i = 1; i <= n; i++ ) {
         fprintf( File, " % .4e", deviatoricStressVector.at(i) );
     }
@@ -203,15 +201,15 @@ FluidDynamicMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, 
 // current state)
 {
     contextIOResultType iores;
-    if ( stream == NULL ) {
-        _error("saveContex : can't write into NULL stream");
-    }
-
     if ( ( iores = MaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     if ( ( iores = deviatoricStressVector.storeYourself(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+    
+    if ( ( iores = deviatoricStrainRateVector.storeYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -227,15 +225,15 @@ FluidDynamicMaterialStatus :: restoreContext(DataStream *stream, ContextMode mod
 //
 {
     contextIOResultType iores;
-    if ( stream == NULL ) {
-        _error("saveContex : can't write into NULL stream");
-    }
-
     if ( ( iores = MaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     if ( ( iores = deviatoricStressVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = deviatoricStrainRateVector.restoreYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

@@ -35,7 +35,7 @@
 #ifndef precond_h
 #define precond_h
 
-#include "flotarry.h"
+#include "floatarray.h"
 #include "sparsemtrx.h"
 #include "inputrecord.h"
 

@@ -33,8 +33,8 @@
  */
 
 #include "isomoisturemat.h"
-#include "flotmtrx.h"
-#include "gausspnt.h"
+#include "floatmatrix.h"
+#include "gausspoint.h"
 
 namespace oofem {
 IRResultType

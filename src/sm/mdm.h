@@ -49,7 +49,7 @@
 
 #include "microplanematerial.h"
 #include "structuralnonlocalmaterialext.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "matconst.h"
 #include "structuralms.h"
 #include "materialmapperinterface.h"
@@ -74,6 +74,7 @@
 
 ///@name Input fields for MDM
 //@{
+#define _IFT_MDM_Name "mdm"
 #define _IFT_MDM_talpha "talpha"
 #define _IFT_MDM_parmd "parmd"
 #define _IFT_MDM_nonloc "nonloc"

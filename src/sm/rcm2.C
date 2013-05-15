@@ -33,9 +33,9 @@
  */
 
 #include "rcm2.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "structuralcrosssection.h"
 #include "contextioerr.h"
 #include "mathfem.h"
@@ -153,8 +153,8 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
                                  principal_strain);
 
     this->giveRealPrincipalStressVector3d(princStress, gp, principalStrain, tempCrackDirs, atTime);
+    princStress.resizeWithValues(6);
 
-    princStress.resize(6);
     status->giveTempCrackDirs(tempCrackDirs);
     this->transformStressVectorTo(answer, tempCrackDirs, princStress, 1);
 

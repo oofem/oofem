@@ -37,13 +37,13 @@
 #include "integrationrule.h"
 #include "errorestimator.h"
 #include "intarray.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "primaryfield.h"
 #include "verbose.h"
 #include "entityrenumberingscheme.h"
 #include "error.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "datastream.h"
 #include "materialmapperinterface.h"
 #include "contextioerr.h"
@@ -52,7 +52,7 @@
 #include "feinterpol1d.h"
 #include "feinterpol2d.h"
 #include "feinterpol3d.h"
-#include "loadtime.h"
+#include "loadtimefunction.h"
 
 #include <cstdio>
 
@@ -426,14 +426,43 @@ Element :: giveLocationArray(IntArray &locationArray, EquationID eid, const Unkn
 
 void
 Element :: giveBoundaryLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIdArray)
-// Returns the location array of the receiver. This array is obtained by
-// simply appending the location array of every node on the boundary of the receiver. Consistent numbering with the interpolator.
 {
     IntArray bNodes;
     IntArray dofIDMask, masterDofIDs;
     IntArray nodalArray;
 
     this->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+    locationArray.resize(0);
+    if (dofIdArray) dofIdArray->resize(0);
+    for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
+        this->giveDofManDofIDMask(bNodes.at(i), eid, dofIDMask);
+        this->giveDofManager(bNodes.at(i))->giveLocationArray(dofIDMask, nodalArray, s);
+        locationArray.followedBy(nodalArray);
+        if (dofIdArray) {
+            this->giveDofManager(bNodes.at(i))->giveMasterDofIDArray(dofIDMask, masterDofIDs);
+            dofIdArray->followedBy(masterDofIDs);
+        }
+    }
+}
+
+
+void
+Element :: giveEdgeLocationArray(IntArray &locationArray, int edge, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIdArray)
+{
+    IntArray bNodes;
+    IntArray dofIDMask, masterDofIDs;
+    IntArray nodalArray;
+
+    FEInterpolation3d *interp;
+#if DEBUG
+    if ( !( interp = dynamic_cast< FEInterpolation3d* >( this->giveInterpolation() ) ) ) {
+        OOFEM_ERROR("Element :: giveEdgeLocationArray - No 3D-interpolator found");
+    }
+#else
+    interp = static_cast< FEInterpolation3d* >( this->giveInterpolation() );
+#endif
+    
+    interp->computeLocalEdgeMapping(bNodes, edge);
     locationArray.resize(0);
     if (dofIdArray) dofIdArray->resize(0);
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
@@ -484,14 +513,12 @@ DofManager *
 Element :: giveDofManager(int i) const
 // Returns the i-th node of the receiver.
 {
-    int n;
 #ifdef DEBUG
     if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
         OOFEM_ERROR2("giveNode: Node %i is not defined", i);
     }
 #endif
-    n = dofManArray.at(i);
-    return domain->giveDofManager(n);
+    return domain->giveDofManager(dofManArray.at(i));
 }
 
 
@@ -499,14 +526,12 @@ Node *
 Element :: giveNode(int i) const
 // Returns the i-th node of the receiver.
 {
-    int n;
 #ifdef DEBUG
     if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
         _error("giveNode: Node is not defined");
     }
 #endif
-    n = dofManArray.at(i);
-    return domain->giveNode(n);
+    return domain->giveNode(dofManArray.at(i));
 }
 
 
@@ -514,14 +539,12 @@ ElementSide *
 Element :: giveSide(int i) const
 // Returns the i-th side of the receiver.
 {
-    int n;
 #ifdef DEBUG
     if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
         _error("giveNode: Side is not defined");
     }
 #endif
-    n = dofManArray.at(i);
-    return domain->giveSide(n);
+    return domain->giveSide(dofManArray.at(i));
 }
 
 
@@ -571,6 +594,27 @@ Element :: giveCharacteristicVector(FloatArray &answer, CharType type, ValueMode
 //
 {
     _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
+}
+
+
+void
+Element :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+{
+    _error("computeLoadVector: Unknown load type.");
+}
+
+
+void
+Element :: computeBoundaryLoadVector(FloatArray &answer, Load *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
+{
+    _error("computeBoundaryLoadVector: Unknown load type.");
+}
+
+
+void
+Element :: computeEdgeLoadVector(FloatArray &answer, Load *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
+{
+    _error("computeEdgeLoadVector: Unknown load type.");
 }
 
 
@@ -771,7 +815,7 @@ contextIOResultType Element :: saveContext(DataStream *stream, ContextMode mode,
         }
 
         for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-            _val = integrationRulesArray [ i ]->giveClassID();
+            _val = integrationRulesArray [ i ]->giveIntegrationRuleType();
             if ( !stream->write(& _val, 1) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
@@ -868,15 +912,15 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
             // AND ALLOCATE NEW ONE
             integrationRulesArray = new IntegrationRule * [ _nrules ];
             for ( int i = 0; i < _nrules; i++ ) {
-                integrationRulesArray [ i ] = CreateUsrDefIRuleOfType( ( classType ) dtypes(i), i + 1, this );
+                integrationRulesArray [ i ] = classFactory.createIRule( ( IntegrationRuleType ) dtypes(i), i + 1, this );
             }
 
             numberOfIntegrationRules = _nrules;
         } else {
             for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-                if ( integrationRulesArray [ i ]->giveClassID() != dtypes(i) ) {
+                if ( integrationRulesArray [ i ]->giveIntegrationRuleType() != dtypes(i) ) {
                     delete integrationRulesArray [ i ];
-                    integrationRulesArray [ i ] = CreateUsrDefIRuleOfType( ( classType ) dtypes(i), i + 1, this );
+                    integrationRulesArray [ i ] = classFactory.createIRule( ( IntegrationRuleType ) dtypes(i), i + 1, this );
                 }
             }
         }
@@ -1169,6 +1213,7 @@ Element :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 int
 Element :: giveSpatialDimension(void) const
 {
+    ///@todo Just ask the interpolator instead?
     switch ( this->giveGeometryType() ) {
     case EGT_point:
         return 0;
@@ -1187,6 +1232,7 @@ Element :: giveSpatialDimension(void) const
     case EGT_tetra_2:
     case EGT_hexa_1:
     case EGT_hexa_2:
+    case EGT_hexa_27:
     case EGT_wedge_1:
     case EGT_wedge_2:
         return 3;
@@ -1204,6 +1250,7 @@ Element :: giveSpatialDimension(void) const
 int
 Element :: giveNumberOfBoundarySides(void) const
 {
+    ///@todo Just ask the interpolator instead?
     switch ( this->giveGeometryType() ) {
     case EGT_point:
         return 0;
@@ -1230,6 +1277,7 @@ Element :: giveNumberOfBoundarySides(void) const
 
     case EGT_hexa_1:
     case EGT_hexa_2:
+    case EGT_hexa_27:
         return 6;
 
     case EGT_Composite:

@@ -33,11 +33,15 @@
  */
 
 #include "hemotkmat.h"
-#include "flotmtrx.h"
-#include "gausspnt.h"
+#include "floatmatrix.h"
+#include "gausspoint.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( HeMoTKMaterial );
+
 int
 HeMoTKMaterial :: hasMaterialModeCapability(MaterialMode mode)
 {

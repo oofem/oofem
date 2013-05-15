@@ -33,16 +33,20 @@
  */
 
 #include "traxisym1_ht.h"
-#include "gausspnt.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( TrAxisym1_ht );
+
 TrAxisym1_ht :: TrAxisym1_ht(int n, Domain *aDomain) : Tr1_ht(n, aDomain)
 // Constructor.
 { }

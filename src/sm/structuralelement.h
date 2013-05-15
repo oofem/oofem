@@ -38,8 +38,8 @@
 #include "element.h"
 #include "femcmpnn.h"
 #include "domain.h"
-#include "flotmtrx.h"
-#include "loadtime.h"
+#include "floatmatrix.h"
+#include "loadtimefunction.h"
 #include "matresponseform.h"
 #include "matresponsemode.h"
 #include "valuemodetype.h"
@@ -110,6 +110,7 @@ public:
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
+    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
     /**
      * Computes mass matrix of receiver. Default implementation returns consistent mass matrix and uses
      * numerical integration. Returns result of this->computeConsistentMassMatrix service, transformed into

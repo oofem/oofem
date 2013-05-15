@@ -34,14 +34,19 @@
 
 #include "usrdeftempfield.h"
 #include "timestep.h"
+#include "classfactory.h"
+
 #include <sstream>
 
 namespace oofem {
+
+REGISTER_BoundaryCondition( UserDefinedTemperatureField );
+
 void
 UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArray &coords, ValueModeType mode)
 // Returns the value of the receiver at time and given position respecting the mode.
 {
-    int i, err;
+    int err;
     double result;
 
     if ( ( mode != VM_Incremental ) && ( mode != VM_Total ) ) {
@@ -50,7 +55,7 @@ UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *step
 
     answer.resize(this->size);
     std::ostringstream buff;
-    for ( i = 1; i <= size; i++ ) {
+    for ( int i = 1; i <= size; i++ ) {
         buff << "x=" << coords.at(1) << ";y=" << coords.at(2) << ";z=" << coords.at(3) <<
             ";t=" << stepN->giveTargetTime() << ";" <<ftExpression[i-1];
         result = myParser.eval(buff.str().c_str(), err);

@@ -43,14 +43,17 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "sparsemtrx.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
+ #include "processcomm.h"
 #endif
 
 namespace oofem {
 #define ZERO_REL_MASS  1.E-6
+
+REGISTER_EngngModel( NlDEIDynamic );
 
 NlDEIDynamic ::  NlDEIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master), massMatrix(), loadVector(),
     previousIncrementOfDisplacementVector(), displacementVector(),
@@ -81,7 +84,7 @@ NumericalMethod *NlDEIDynamic :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
 
-    nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
 
     return nMethod;
 }
@@ -136,7 +139,7 @@ double NlDEIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep,
 // This function translates this request to numerical method language.
 {
     int eq = dof->__giveEquationNumber();
-#if DEBUG
+#ifdef DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }

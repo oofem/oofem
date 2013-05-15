@@ -34,16 +34,22 @@
 
 #include "quadaxisym1_ht.h"
 #include "node.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( QuadAxisym1_ht );
+REGISTER_Element( QuadAxisym1_hmt );
+REGISTER_Element( QuadAxisym1_mt );
+
 QuadAxisym1_ht :: QuadAxisym1_ht(int n, Domain *aDomain) : Quad1_ht(n, aDomain)
 { }
 

@@ -37,10 +37,10 @@
 #include "fei2dquadconst.h"
 #include "dofmanager.h"
 #include "material.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "domain.h"
 #include "mathfem.h"
@@ -48,12 +48,16 @@
 #include "timestep.h"
 #include "materialinterface.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( Quad10_2D_SUPG );
+
 FEI2dQuadLin Quad10_2D_SUPG :: velocityInterpolation(1, 2);
 FEI2dQuadConst Quad10_2D_SUPG :: pressureInterpolation(1, 2);
 

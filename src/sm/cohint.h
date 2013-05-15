@@ -45,6 +45,7 @@ namespace oofem {
 
 ///@name Input fields for RankineMat
 //@{
+#define _IFT_CohesiveInterfaceMaterial_Name "cohint"
 #define _IFT_IsoInterfaceDamageMaterial_kn "kn"
 #define _IFT_IsoInterfaceDamageMaterial_ks "ks"
 //@}

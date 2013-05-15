@@ -39,6 +39,7 @@
 
 ///@name Input fields for lumped mass element
 //@{
+#define _IFT_LumpedMassElement_Name "lumpedmass"
 #define _IFT_LumpedMassElement_components "components"
 //@}
 

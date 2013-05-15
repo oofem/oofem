@@ -35,18 +35,23 @@
 #include "binghamfluid2.h"
 #include "fluiddynamicmaterial.h"
 #include "domain.h"
-#include "flotmtrx.h"
-#include "gausspnt.h"
+#include "floatmatrix.h"
+#include "gausspoint.h"
 #include "engngm.h"
 #include "mathfem.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 #include <cstdlib>
 
 namespace oofem {
 #define BINGHAM_ALT 1
 #define BINGHAM_MIN_SHEAR_RATE     1.e-10
+
+REGISTER_Material( BinghamFluidMaterial2 );
+///@todo Remove the alternative ID. Just stick to "binghamfluid".
+static bool __dummy_BinghamFluidMaterial2_alt = GiveClassFactory().registerMaterial("binghamfluid2" , matCreator< BinghamFluidMaterial2 >); 
 
 BinghamFluidMaterial2 :: BinghamFluidMaterial2(int n, Domain *d) : FluidDynamicMaterial(n, d),
     mu_0(0.),
@@ -81,10 +86,10 @@ BinghamFluidMaterial2 :: initializeFrom(InputRecord *ir)
     this->FluidDynamicMaterial :: initializeFrom(ir);
     // we use rather object's member data than to store data into slow
     // key-val dictionary with lot of memory allocations
-    IR_GIVE_FIELD(ir, mu_0, _IFT_BinghamFluidMaterial_mu0);
-    IR_GIVE_FIELD(ir, tau_0, _IFT_BinghamFluidMaterial_tau0);
-    IR_GIVE_OPTIONAL_FIELD(ir, mu_inf, _IFT_BinghamFluidMaterial_muinf);
-    IR_GIVE_OPTIONAL_FIELD(ir, stressGrowthRate, _IFT_BinghamFluidMaterial_stressGrowthRate);
+    IR_GIVE_FIELD(ir, mu_0, _IFT_BinghamFluidMaterial2_mu0);
+    IR_GIVE_FIELD(ir, tau_0, _IFT_BinghamFluidMaterial2_tau0);
+    IR_GIVE_OPTIONAL_FIELD(ir, mu_inf, _IFT_BinghamFluidMaterial2_muinf);
+    IR_GIVE_OPTIONAL_FIELD(ir, stressGrowthRate, _IFT_BinghamFluidMaterial2_stressGrowthRate);
     tau_c = tau_0 * mu_inf / ( mu_inf - mu_0 );
     //tau_c = tau_0;
     return IRRT_OK;

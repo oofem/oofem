@@ -38,8 +38,11 @@
 #include "errorestimator.h"
 #include "interface.h"
 #include "internalstatetype.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "statecountertype.h"
+#include "element.h"
+#include "integrationrule.h"
+#include "remeshingcrit.h"
 
 ///@name Input fields for ZZErrorEstimator
 //@{
@@ -135,9 +138,6 @@ public:
 
     /// Returns reference to corresponding element
     virtual Element *ZZErrorEstimatorI_giveElement() = 0;
-    /// Computes the interpolation matrix used for recovered values
-    virtual void ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(FloatArray &answer, GaussPoint *gp,
-                                                                           InternalStateType type) = 0;
     /**
      * Computes the element contributions to global norms.
      * @param eNorm Element contribution to error norm.
@@ -148,6 +148,22 @@ public:
      */
     virtual void ZZErrorEstimatorI_computeElementContributions(double &eNorm, double &sNorm, ZZErrorEstimator :: NormType norm,
                                                                InternalStateType type, TimeStep *tStep);
+    /**
+     * Returns element integration rule used to evaluate error.
+     * Default implementation returns element default rule. 
+     */
+    virtual IntegrationRule *ZZErrorEstimatorI_giveIntegrationRule() {
+      return this->ZZErrorEstimatorI_giveElement()->giveDefaultIntegrationRulePtr();
+    }
+    
+    /** 
+     * Returns stress vector in global c.s. transformed into element local c.s.
+     * Default is no transformation (global and element local c.s. coincide.
+     */
+    virtual void ZZErrorEstimatorI_computeLocalStress(FloatArray& answer, FloatArray& sig) {
+      answer = sig;
+    }
+
 };
 
 

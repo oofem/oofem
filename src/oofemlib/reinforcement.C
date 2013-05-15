@@ -34,17 +34,20 @@
 
 #include "load.h"
 #include "reinforcement.h"
-#include "nodload.h"
-#include "boundary.h"
-#include "initial.h"
+#include "nodalload.h"
+#include "boundarycondition.h"
+#include "initialcondition.h"
 //#include "temperatureload.h"
 #include "verbose.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "timestep.h"
+#include "classfactory.h"
 
 #include <cstdlib>
 
 namespace oofem {
+
+REGISTER_BoundaryCondition( Reinforcement );
 
 IRResultType
 Reinforcement :: initializeFrom(InputRecord *ir)

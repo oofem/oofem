@@ -38,13 +38,17 @@
 #include "element.h"
 #include "integrationrule.h"
 #include "material.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "domain.h"
 #include "engngm.h"
+#include "classfactory.h"
 
 #include <cassert>
 
 namespace oofem {
+
+REGISTER_InitModule( GPInitModule )
+
 GPInitModule :: GPInitModule(int n, EngngModel *e) : InitModule(n, e)
 {}
 

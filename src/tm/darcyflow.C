@@ -9,18 +9,25 @@
 #include "element.h"
 #include "inputrecord.h"
 #include "timestep.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "sparselinsystemnm.h"
 #include "mathfem.h"
 #include "tr1darcy.h"
 #include "sparsemtrx.h"
 #include "nrsolver.h"
 
+#ifdef __PARALLEL_MODE
+ #include "problemcomm.h"
+ #include "processcomm.h"
+#endif
+
 #include <iostream>
 #include <fstream>
 #include <cstdio>
 
 namespace oofem {
+
+REGISTER_EngngModel( DarcyFlow );
 
 DarcyFlow :: DarcyFlow(int i, EngngModel *_master) : EngngModel (i, _master)
 {
@@ -96,7 +103,7 @@ void DarcyFlow :: solveYourselfAt (TimeStep *tStep)
 
     // Create "stiffness matrix"
     if ( !this->stiffnessMatrix ) {
-        this->stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        this->stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         this->stiffnessMatrix->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
     }
 
@@ -285,7 +292,7 @@ NumericalMethod *DarcyFlow :: giveNumericalMethod(MetaStep *mStep)
         return this->nMethod;
     }
 
-    this->nMethod = new NRSolver(1, this->giveDomain(1), this, EID_ConservationEquation);
+    this->nMethod = new NRSolver(this->giveDomain(1), this);
     if ( !nMethod ) {
         OOFEM_ERROR("giveNumericalMethod: numerical method creation failed");
     }
@@ -318,7 +325,7 @@ void DarcyFlow :: initPetscContexts()
     PetscContext *petscContext;
     petscContextList->growTo(ndomains);
     for ( int i = 1; i <= this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this, EID_ConservationEquation);
+        petscContext =  new PetscContext(this);
         petscContextList->put(i, petscContext);
     }
 }

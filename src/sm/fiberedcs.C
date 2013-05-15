@@ -34,15 +34,19 @@
 
 #include "fiberedcs.h"
 #include "structuralelement.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "material.h"
 #include "structuralmaterial.h"
 #include "structuralms.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "verbose.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_CrossSection( FiberedCrossSection );
+
 void
 FiberedCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm form,
                                          GaussPoint *gp,

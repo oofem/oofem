@@ -38,18 +38,20 @@
 #include "dofmanager.h"
 #include "dof.h"
 #include "valuemodetype.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "engngm.h"
 #include "node.h"
 #include "activedof.h"
 #include "masterdof.h"
-#include "usrdefsub.h" // For sparse matrix creation.
+#include "classfactory.h"
 #include "sparsemtrxtype.h"
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
 
 namespace oofem {
+
+REGISTER_BoundaryCondition( MixedGradientPressureDirichlet );
 
 MixedGradientPressureDirichlet :: MixedGradientPressureDirichlet(int n, Domain *d) : MixedGradientPressureBC(n,d)
 {
@@ -179,7 +181,7 @@ double MixedGradientPressureDirichlet :: giveUnknown(double vol, const FloatArra
     FloatArray *coords = dof->giveDofManager()->giveCoordinates();
 
     if ( coords == NULL || coords->giveSize() != this->centerCoord.giveSize() ) {
-        OOFEM_ERROR("MixedGradientPressureDirichlet :: give - Size of coordinate system different from center coordinate in b.c.");
+        OOFEM_ERROR2("MixedGradientPressureDirichlet :: give - Size of coordinate system different from center coordinate (%d) in b.c.", this->centerCoord.giveSize());
     }
 
     FloatArray dx;
@@ -187,30 +189,30 @@ double MixedGradientPressureDirichlet :: giveUnknown(double vol, const FloatArra
 
     int nsd = dx.giveSize(); // Number of spatial dimensions
 
-    double dev11, dev22, dev33 = 0., gam12, gam23 = 0., gam13 = 0.;
+    double dev11, dev22, dev33 = 0., dev12, dev23 = 0., dev13 = 0.;
     if (nsd == 2) {
         dev11 = dev.at(1);
         dev22 = dev.at(2);
-        gam12 = dev.at(3);
+        dev12 = dev.at(3)*0.5;
     } else /*if (nsd == 3)*/ {
         dev11 = dev.at(1);
         dev22 = dev.at(2);
         dev33 = dev.at(3);
-        gam23 = dev.at(4);
-        gam13 = dev.at(5);
-        gam12 = dev.at(6);
+        dev23 = dev.at(4)*0.5;
+        dev13 = dev.at(5)*0.5;
+        dev12 = dev.at(6)*0.5;
     }
 
     double val;
     if ( id == D_u || id == V_u ) {
         val = dx.at(1)/3.0*vol;
-        if (nsd == 2) val += dx.at(1)*dev11 + dx.at(2)/2.0*gam12;
-        if (nsd == 3) val += dx.at(3)/2.0*gam13;
+        if (nsd >= 2) val += dx.at(1)*dev11 + dx.at(2)*dev12;
+        if (nsd == 3) val += dx.at(3)*dev13;
     } else if ( id == D_v || id == V_v ) {
-        val = dx.at(2)/3.0*vol + dx.at(1)/2.0*gam12 + dx.at(2)*dev22;
-        if (nsd == 3) val += dx.at(3)/2.0*gam23;
+        val = dx.at(2)/3.0*vol + dx.at(1)*dev12 + dx.at(2)*dev22;
+        if (nsd == 3) val += dx.at(3)*dev23;
     } else /*if ( id == D_w || id == V_w )*/ { // 3D only:
-        val = dx.at(3)/3.0*vol + dx.at(1)/2.0*gam13 + dx.at(2)/2.0*gam23 + dx.at(3)*dev33;
+        val = dx.at(3)/3.0*vol + dx.at(1)*dev13 + dx.at(2)*dev23 + dx.at(3)*dev33;
     }
     return val;
 }
@@ -247,17 +249,17 @@ void MixedGradientPressureDirichlet :: computeTangents(
     // Fetch some information from the engineering model
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
-    SparseLinearSystemNM *solver = CreateUsrDefSparseLinSolver(ST_Petsc, 1, this->domain, this->domain->giveEngngModel());// = rve->giveLinearSolver();
+    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver(ST_Petsc, this->domain, this->domain->giveEngngModel());// = rve->giveLinearSolver();
     SparseMtrx *Kff, *Kfp, *Kpf, *Kpp;
     SparseMtrxType stype = SMT_PetscMtrx;// = rve->giveSparseMatrixType();
     EModelDefaultEquationNumbering fnum;
     EModelDefaultPrescribedEquationNumbering pnum;
 
     // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
-    Kff = CreateUsrDefSparseMtrx(stype);
-    Kfp = CreateUsrDefSparseMtrx(stype);
-    Kpf = CreateUsrDefSparseMtrx(stype);
-    Kpp = CreateUsrDefSparseMtrx(stype);
+    Kff = classFactory.createSparseMtrx(stype);
+    Kfp = classFactory.createSparseMtrx(stype);
+    Kpf = classFactory.createSparseMtrx(stype);
+    Kpp = classFactory.createSparseMtrx(stype);
     if ( !Kff ) {
         OOFEM_ERROR2("MixedGradientPressureDirichlet :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
     }
@@ -373,17 +375,14 @@ void MixedGradientPressureDirichlet :: setPrescribedDeviatoricGradientFromVoigt(
 }
 
 
-double MixedGradientPressureDirichlet :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                    CharType type, ValueModeType mode, const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
+void MixedGradientPressureDirichlet :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                    CharType type, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
     if (type != ExternalForcesVector)
-        return 0.0;
+        return;
 
-    if (eid == EID_MomentumBalance_ConservationEquation)
-        eid = EID_MomentumBalance;
-
-    if (eid != EID_MomentumBalance)
-        return 0.0;
+    if (eid != EID_MomentumBalance_ConservationEquation && eid != EID_MomentumBalance)
+        return;
 
     Dof *vol = this->giveVolDof();
     int vol_loc = vol->giveEquationNumber(s);
@@ -392,7 +391,6 @@ double MixedGradientPressureDirichlet :: assembleVector(FloatArray &answer, Time
         answer.at(vol_loc) -= rve_size*pressure; // Note the negative sign (pressure as opposed to mean stress)
         if ( eNorms ) eNorms->at(vol->giveDofID()) = rve_size*pressure*rve_size*pressure;
     }
-    return 0.0;
 }
 
 
@@ -431,11 +429,9 @@ IRResultType MixedGradientPressureDirichlet :: initializeFrom(InputRecord *ir)
 
     MixedGradientPressureBC :: initializeFrom(ir);
 
-    IRResultType rt = IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, _IFT_MixedGradientPressure_centerCoords)
-    if ( rt != IRRT_OK ) {
-        this->centerCoord.resize( domain->giveNumberOfSpatialDimensions() );
-        this->centerCoord.zero();
-    }
+    this->centerCoord.resize( domain->giveNumberOfSpatialDimensions() );
+    this->centerCoord.zero();
+    IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, _IFT_MixedGradientPressure_centerCoords)
 
     return IRRT_OK;
 }

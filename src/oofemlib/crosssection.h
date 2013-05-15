@@ -36,11 +36,10 @@
 #define crosssection_h
 
 #include "femcmpnn.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "materialmode.h"
 #include "matresponsemode.h"
 #include "material.h"
-#include "classtype.h"
 #include "internalstatetype.h"
 #include "internalstatevaluetype.h"
 #include "crosssectextension.h"

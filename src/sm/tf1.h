@@ -38,6 +38,8 @@
 #include "structtemperatureload.h"
 #include "domain.h"
 
+#define _IFT_TF1_Name "tf1"
+
 namespace oofem {
 /**
  * Class representing user defined temperature field.

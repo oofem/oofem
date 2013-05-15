@@ -44,6 +44,7 @@ class InputRecord;
 
 /**
  * Class representing the implementation of a dynamic data reader for in-code use.
+ * Despite its name, it can also write OOFEM text-input files.
  *
  * @see DynamicInputRecord It is the intended complement for in-code generation of FE-problem intialization.
  * @author Mikael Öhman
@@ -84,8 +85,7 @@ public:
     virtual const char *giveDataSourceName() const { return ""; }
 
     /**
-     * Writes all containing OOFEMTXTInputRecords to file. 
-     * Will give error if any of the records aren't of the type OOFEMTXTInputRecord.
+     * Writes all input records to file. 
      * @param fileName Name of file to dump data to.
      */
     void writeToFile(const char *fileName);

@@ -1,0 +1,38 @@
+con2dpm2.out
+#
+Con2DPM Tension in plane strain
+NonLinearStatic nmsteps 1 nsteps 1 
+nsteps 1 rtolv 1.e-4 reqIterations 4000 stiffMode 2 maxiter 4000 controllmode 0 stepLength 2.e-5 minsteplength 2.e-5 Psi 0. hpcmode 2 hpc 2 2 1 hpcw 1 1. donotfixload
+#
+domain 3d
+#
+OutputManager tstep_all dofman_all element_all
+#
+#
+ndofman 4 nelem 1 ncrosssect 1 nmat 1 nbc 2 nltf 2 nic 0
+node 1 coords 3 0. 0. 0. bc 3 1 1 1
+node 2 coords 3 1. 0. 0. bc 3 0 1 1 load 1 2
+node 3 coords 3 0. 1. 0. bc 3 1 0 1
+node 4 coords 3 0. 0. 1. bc 3 1 1 1
+#
+ltrspace 1 nodes 4 1 2 3 4 mat 1 crossSect 1
+#
+SimpleCS 1
+#
+#isole 1 d 0 E 10.e9 n 0.15 talpha 0.
+con2dpm 1 d 0 E 30.e9 n 0.15 talpha 0. wf 9.3755e-4 fc 3.e6 ft 1.e6 hp 0.01 yieldtol 1.e-5 asoft 5. bsoft 1. stype 1 helem 0.1 kinit 0.3
+#
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.
+NodalLoad 2 loadTimeFunction 1 Components 3 1.e6 0. 0.
+#
+ConstantFunction 1 f(t) 1. 
+PiecewiselinFunction 2 nPoints 2 t 2 0. 2. f(t) 2 0. 1.  
+#%BEGIN_CHECK%
+#ELEMENT tStep 0 number 1 gp 1 record 0 keyword "strains" component 1 value 2e-05
+#ELEMENT tStep 0 number 1 gp 1 record 0 keyword "strains" component 2 value -3.4434e-06
+#ELEMENT tStep 0 number 1 gp 1 record 0 keyword "strains" component 3 value 0
+#ELEMENT tStep 0 number 1 gp 1 record 1 keyword "stresses" component 1 value 589620
+#ELEMENT tStep 0 number 1 gp 1 record 1 keyword "stresses" component 2 value -0.45933
+#ELEMENT tStep 0 number 1 gp 1 record 1 keyword "stresses" component 3 value 86604
+#TIME
+#%END_CHECK%

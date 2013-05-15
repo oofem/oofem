@@ -35,11 +35,15 @@
 #include "line2surfacetension.h"
 #include "node.h"
 #include "gaussintegrationrule.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "material.h"
 #include "fei2dlinequad.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( Line2SurfaceTension );
+
 FEI2dLineQuad Line2SurfaceTension :: fei(1, 2);
 
 Line2SurfaceTension :: Line2SurfaceTension(int n, Domain *aDomain) : LineSurfaceTension(n, aDomain)

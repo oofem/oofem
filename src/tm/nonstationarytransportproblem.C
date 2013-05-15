@@ -42,16 +42,20 @@
 #include "maskedprimaryfield.h"
 #include "verbose.h"
 #include "transportelement.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"
-#include "loadtime.h"
+#include "loadtimefunction.h"
+#include "sparsenonlinsystemnm.h"
 
 #ifdef __CEMHYD_MODULE
  #include "cemhydmat.h"
 #endif
 
 namespace oofem {
+
+REGISTER_EngngModel( NonStationaryTransportProblem );
+
 NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : StationaryTransportProblem(i, _master)
 {
     ndomains = 1;
@@ -61,6 +65,8 @@ NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel
     dtTimeFunction = 0;
     internalVarUpdateStamp = 0;
     changingProblemSize = false;
+    linSolver = NULL;
+    solverType = ST_Direct;
 }
 
 NonStationaryTransportProblem :: ~NonStationaryTransportProblem()
@@ -72,16 +78,16 @@ NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *
 //     - SolutionOfLinearEquations
 
 {
-    if ( nMethod ) {
-        return nMethod;
+    if ( linSolver ) {
+        return linSolver;
     }
 
-    nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
-    if ( nMethod == NULL ) {
+    linSolver = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+    if ( linSolver == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }
 
-    return nMethod;
+    return linSolver;
 }
 
 IRResultType
@@ -125,6 +131,11 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
 
     //read other input data from StationaryTransportProblem
     StationaryTransportProblem :: initializeFrom(ir);
+
+    int val = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
+    solverType = ( LinSystSolverType ) val;
+
 
     return IRRT_OK;
 }
@@ -277,7 +288,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
             delete conductivityMatrix;
         }
 
-        conductivityMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( conductivityMatrix == NULL ) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }
@@ -341,7 +352,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
     UnknownsField->giveSolutionVector(tStep)->resize(neq);
-    nMethod->solve( conductivityMatrix, & rhs, UnknownsField->giveSolutionVector(tStep) );
+    linSolver->solve( conductivityMatrix, & rhs, UnknownsField->giveSolutionVector(tStep) );
     // update solution state counter
     tStep->incrementStateCounter();
 }
@@ -557,11 +568,10 @@ NonStationaryTransportProblem :: giveElementCharacteristicMatrix(FloatMatrix &an
         element->giveCharacteristicMatrix(charMtrx2, CapacityMatrix, tStep);
 
         if ( lumpedCapacityStab ) {
-            int i, j, size = charMtrx2.giveNumberOfRows();
-            double s;
-            for ( i = 1; i <= size; i++ ) {
-                s = 0.0;
-                for ( j = 1; j <= size; j++ ) {
+            int size = charMtrx2.giveNumberOfRows();
+            for ( int i = 1; i <= size; i++ ) {
+                double s = 0.0;
+                for ( int j = 1; j <= size; j++ ) {
                     s += charMtrx2.at(i, j);
                     charMtrx2.at(i, j) = 0.0;
                 }
@@ -643,7 +653,7 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Applying initial conditions\n");
 #endif
-    int nDofs, jj;
+    int nDofs;
     int nman  = domain->giveNumberOfDofManagers();
 
     UnknownsField->advanceSolution(stepWhenIcApply);
@@ -663,7 +673,7 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
                 continue;
             }
 
-            jj = iDof->__giveEquationNumber();
+            int jj = iDof->__giveEquationNumber();
             if ( jj ) {
                 val = iDof->giveUnknown(VM_Total, stepWhenIcApply);
                 solutionVector->at(jj) = val;
@@ -744,7 +754,7 @@ NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer
     } // end element loop
 }
 
-#if __CEMHYD_MODULE
+#ifdef __CEMHYD_MODULE
 // needed for CemhydMat
 void
 NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)

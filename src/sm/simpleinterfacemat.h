@@ -46,6 +46,7 @@
 
 ///@name Input fields for SimpleInterfaceMaterial
 //@{
+#define _IFT_SimpleInterfaceMaterial_Name "simpleintermat"
 #define _IFT_SimpleInterfaceMaterial_kn "kn"
 #define _IFT_SimpleInterfaceMaterial_knt "knt"
 #define _IFT_SimpleInterfaceMaterial_frictCoeff "fc"

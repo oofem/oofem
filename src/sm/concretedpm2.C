@@ -33,10 +33,10 @@
  */
 
 #include "concretedpm2.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "structuralms.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "intarray.h"
 #include "datastream.h"
 #include "contextioerr.h"
@@ -45,8 +45,12 @@
 #include "isolinearelasticmaterial.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( ConcreteDPM2 );
+
 ConcreteDPM2Status :: ConcreteDPM2Status(int n, Domain *d, GaussPoint *gp) :
     StructuralMaterialStatus(n, d, gp),
     plasticStrain( gp->giveMaterialMode() ),
@@ -1193,7 +1197,7 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
             subIncrementFlag = 0;
             convergedStrain = oldStrain;
             tempStrain = strain;
-            deltaStrain.beDifferenceOf(oldStrain, strain);
+            deltaStrain.beDifferenceOf(strain, oldStrain);
             //To get into the loop
             returnResult = RR_NotConverged;
             while ( returnResult == RR_NotConverged || subIncrementFlag == 1 ) {
@@ -1224,7 +1228,7 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
                     subIncrementFlag = 0;
                     returnResult = RR_NotConverged;
                     convergedStrain = tempStrain;
-                    deltaStrain.beDifferenceOf(convergedStrain, strain);
+                    deltaStrain.beDifferenceOf(strain, convergedStrain);
                     tempStrain = strain;
                 } else {
                     status->letTempKappaPBe(tempKappaP);

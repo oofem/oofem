@@ -36,14 +36,18 @@
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "intarray.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( LIBeam2d );
+
 // Set up interpolation coordinates
 FEI2dLineLin LIBeam2d :: interpolation(1, 3);
 

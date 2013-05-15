@@ -34,13 +34,17 @@
 
 #include "twofluidmaterial.h"
 #include "domain.h"
-#include "flotmtrx.h"
-#include "gausspnt.h"
+#include "floatmatrix.h"
+#include "gausspoint.h"
 #include "engngm.h"
 #include "materialinterface.h"
+#include "classfactory.h"
 //#include "leplic.h"
 
 namespace oofem {
+
+REGISTER_Material( TwoFluidMaterial );
+
 int
 TwoFluidMaterial :: checkConsistency()
 {

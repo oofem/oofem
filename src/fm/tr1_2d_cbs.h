@@ -38,7 +38,7 @@
 #include "cbselement.h"
 #include "femcmpnn.h"
 #include "domain.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "fei2dtrlin.h"
 #include "primaryfield.h"
 #include "spatiallocalizer.h"
@@ -51,6 +51,7 @@
 
 ///@name Input fields for TR12DCBS
 //@{
+#define _IFT_TR1_2D_CBS_Name "tr1cbs"
 #define _IFT_Tr1CBS_vof "vof"
 #define _IFT_Tr1CBS_pvof "pvof"
 //@}

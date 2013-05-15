@@ -42,7 +42,7 @@
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
 #include "sparsemtrx.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "linesearch.h"
 
 #ifdef __PETSC_MODULE
@@ -51,6 +51,7 @@
 
 ///@name Input fields for NRSolver
 //@{
+#define _IFT_NRSolver_Name "nrsolver"
 #define _IFT_NRSolver_maxiter "maxiter"
 #define _IFT_NRSolver_miniterations "miniter"
 #define _IFT_NRSolver_minsteplength "minsteplength"
@@ -91,7 +92,7 @@ class NRSolver : public SparseNonLinearSystemNM
 private:
     enum nrsolver_ModeType { nrsolverModifiedNRM, nrsolverFullNRM, nrsolverAccelNRM };
 
-    int nite, nsmax, minIterations;
+    int nsmax, minIterations;
     double minStepLength;
     int solved;
     nrsolver_ModeType NR_Mode, NR_OldMode;
@@ -142,7 +143,7 @@ private:
     FloatArray rtold;
 
 public:
-    NRSolver(int i, Domain *d, EngngModel *m, EquationID ut);
+    NRSolver(Domain *d, EngngModel *m);
     virtual ~NRSolver();
 
     // Overloaded methods:
@@ -151,11 +152,10 @@ public:
                             const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
     virtual void printState(FILE *outputStream);
+
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual const char *giveClassName() const { return "NRSolver"; }
-    virtual classType giveClassID() const { return NRSolverClass; }
+
     virtual void setDomain(Domain *d) {
         this->domain = d;
         if ( linSolver ) {

@@ -33,14 +33,14 @@
  */
 
 #include "intvarfield.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 
 namespace oofem {
 InternalVariableField :: InternalVariableField(InternalStateType ist, FieldType ft, MaterialMappingAlgorithmType mma_type, Domain *d) :
     Field(ft)
 {
     this->type = ist;
-    this->mma = CreateUsrDefMaterialMappingAlgorithm(mma_type);
+    this->mma = classFactory.createMaterialMappingAlgorithm(mma_type);
     this->domain = d;
 }
 

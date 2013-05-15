@@ -36,12 +36,12 @@
 #include "nonlocalmatwtp.h"
 #include "nonlocalmaterialext.h"
 #include "element.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "material.h"
 #include "communicator.h"
 #include "datastream.h"
 #include "domaintransactionmanager.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 
 #include <set>
 
@@ -372,8 +372,6 @@ int NonlocalMaterialWTP :: packRemoteElements(Domain *d, ProcessCommunicator &pc
     int i, ie, nnodes, inode;
     DofManager *node, *dofman;
     Element *elem;
-    classType dtype;
-
 
     if ( iproc == myrank ) {
         return 1;                // skip local partition
@@ -405,24 +403,23 @@ int NonlocalMaterialWTP :: packRemoteElements(Domain *d, ProcessCommunicator &pc
     std :: set< int > :: const_iterator nit;
     for ( nit = nodesToSend.begin(); nit != nodesToSend.end(); ++nit ) {
         inode = d->dofmanGlobal2Local(* nit);
-        dofman  = d->giveDofManager(inode);
-        dtype = dofman->giveClassID();
-        pcbuff->packInt(dtype);
+        dofman = d->giveDofManager(inode);
+        pcbuff->packString(dofman->giveInputRecordName());
         dofman->saveContext(& pcDataStream, CM_Definition | CM_State | CM_UnknownDictState);
     }
 
-    pcbuff->packInt(NonlocalMaterialWTP_END_DATA);
+    pcbuff->packString("");
 
     for ( it = toSendList [ iproc ].begin(); it != toSendList [ iproc ].end(); ++it ) {
         ie = * it; //ie = d->elementGlobal2Local(*it);
         elem = d->giveElement(ie);
         // pack local element (node numbers shuld be global ones!!!)
         // pack type
-        pcbuff->packInt( elem->giveClassID() );
+        pcbuff->packString( elem->giveInputRecordName() );
         elem->saveContext(& pcDataStream, CM_Definition | CM_DefinitionGlobal | CM_State);
     }
 
-    pcbuff->packInt(NonlocalMaterialWTP_END_DATA);
+    pcbuff->packString("");
 
 
     return 1;
@@ -432,8 +429,7 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
 {
     int myrank = d->giveEngngModel()->giveRank();
     int iproc = pc.giveRank();
-    int _type;
-    classType _etype;
+    std::string _type;
     DofManager *dofman;
     IntArray _partitions;
 
@@ -445,12 +441,13 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
     ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
     ProcessCommDataStream pcDataStream(pcbuff);
 
-    // unpack null dofmans
-    pcbuff->unpackInt(_type);
     // unpack dofman data
-    while ( _type != NonlocalMaterialWTP_END_DATA ) {
-        _etype = ( classType ) _type;
-        dofman = CreateUsrDefDofManagerOfType(_etype, 0, d);
+    do {
+        pcbuff->unpackString(_type);
+        if ( _type.size() == 0 ) {
+            break;
+        }
+        dofman = classFactory.createDofManager(_type.c_str(), 0, d);
         dofman->restoreContext(& pcDataStream, CM_Definition | CM_State | CM_UnknownDictState);
         dofman->setParallelMode(DofManager_null);
         if ( d->dofmanGlobal2Local( dofman->giveGlobalNumber() ) ) {
@@ -462,10 +459,7 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
                                                         dofman->giveGlobalNumber(),
                                                         dofman);
         }
-
-        // get next type record
-        pcbuff->unpackInt(_type);
-    }
+    } while ( 1 );
 
 
     // unpack element data
@@ -473,13 +467,12 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
     _partitions.resize(1);
     _partitions.at(1) = iproc;
     do {
-        pcbuff->unpackInt(_type);
-        if ( _type == NonlocalMaterialWTP_END_DATA ) {
+        pcbuff->unpackString(_type);
+        if ( _type.size() == 0 ) {
             break;
         }
 
-        _etype = ( classType ) _type;
-        elem = CreateUsrDefElementOfType(_etype, 0, d);
+        elem = classFactory.createElement(_type.c_str(), 0, d);
         elem->restoreContext(& pcDataStream, CM_Definition | CM_State);
         elem->setParallelMode(Element_remote);
         elem->setPartitionList(_partitions);

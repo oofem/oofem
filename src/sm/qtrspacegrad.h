@@ -43,6 +43,8 @@
 #include "huertaerrorestimator.h"
 #include "sprnodalrecoverymodel.h"
 
+#define _IFT_QTRSpaceGrad_Name "qtrspacegrad"
+
 namespace oofem {
 
 class FEI3dTetLin;

@@ -40,6 +40,8 @@
 #include "zznodalrecoverymodel.h"
 #include "mathfem.h"
 
+#define _IFT_QPlaneStrain_Name "qplanestrain"
+
 namespace oofem {
 /**
  * This class implements an Quadratic isoparametric eight-node quadrilateral plane-

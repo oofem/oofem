@@ -36,7 +36,6 @@
 #define integrationpointstatus_h
 
 #include "femcmpnn.h"
-#include "classtype.h"
 
 namespace oofem {
 

@@ -34,10 +34,10 @@
 
 #include "dustmat.h"
 
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "structuralms.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "intarray.h"
 #include "structuralmaterial.h"
 #include "isolinearelasticmaterial.h"
@@ -45,8 +45,12 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( DustMaterial );
+
 DustMaterialStatus :: DustMaterialStatus(int n, Domain *d, GaussPoint *gp) :
     StructuralMaterialStatus(n, d, gp),
     plasticStrain( gp->giveMaterialMode() ),

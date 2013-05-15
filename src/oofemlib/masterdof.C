@@ -36,10 +36,10 @@
 #include "dofmanager.h"
 #include "domain.h"
 #include "timestep.h"
-#include "boundary.h"
-#include "initial.h"
+#include "boundarycondition.h"
+#include "initialcondition.h"
 #include "primaryfield.h"
-#include "dictionr.h"
+#include "dictionary.h"
 #include "datastream.h"
 #include "contextioerr.h"
 

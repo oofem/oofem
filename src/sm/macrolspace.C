@@ -36,7 +36,7 @@
 #include "micromaterial.h"
 #include "lspace.h"
 #include "domain.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "dynamicinputrecord.h"
 
 #ifdef __OOFEG
@@ -44,10 +44,13 @@
  #include "metastep.h"
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( MacroLSpace );
+
 //derived from linear brick element
 MacroLSpace :: MacroLSpace(int n, Domain *aDomain) : LSpace(n, aDomain)
 {
@@ -188,7 +191,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
 
     ir_ltf.setRecordKeywordField("constantfunction", 1);
     ir_ltf.setField(1.0, _IFT_LoadTimeFunction_ft);
-    if ( ( LoadTimeFunct = CreateUsrDefLoadTimeFunctionOfType("constantfunction", 1, microDomain) ) == NULL ) {
+    if ( ( LoadTimeFunct = classFactory.createLoadTimeFunction("constantfunction", 1, microDomain) ) == NULL ) {
         OOFEM_ERROR("MacroLSpace :: changeMicroBoundaryConditions - Couldn't create constant time function");
     }
     LoadTimeFunct->initializeFrom(&ir_ltf);
@@ -215,7 +218,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
                 ir_bc.setRecordKeywordField("boundarycondition", counter);
                 ir_bc.setField(1, _IFT_GeneralBoundaryCondition_LoadTimeFunct);
                 ir_bc.setField(displ, _IFT_BoundaryCondition_PrescribedValue);
-                if ( ( GeneralBoundaryCond = CreateUsrDefBoundaryConditionOfType("boundarycondition", counter, microDomain) ) == NULL ) {
+                if ( ( GeneralBoundaryCond = classFactory.createBoundaryCondition("boundarycondition", counter, microDomain) ) == NULL ) {
                     OOFEM_ERROR("MacroLSpace :: changeMicroBoundaryConditions - Couldn't create boundary condition.");
                 }
                 GeneralBoundaryCond->initializeFrom(&ir_bc);

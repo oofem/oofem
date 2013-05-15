@@ -33,18 +33,19 @@
  */
 
 #include "igaelements.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "domain.h"
 #include "node.h"
 #include "element.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "matresponsemode.h"
 #include "crosssection.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "iga.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -52,6 +53,12 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( BsplinePlaneStressElement );
+REGISTER_Element( NURBSPlaneStressElement );
+REGISTER_Element( TSplinePlaneStressElement );
+REGISTER_Element( NURBSSpace3dElement );
+
 
 BsplinePlaneStressElement :: BsplinePlaneStressElement(int n, Domain *aDomain) : IGAElement(n, aDomain), PlaneStressStructuralElementEvaluator(), interpolation(2) { }
 
@@ -222,7 +229,7 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
                         s [ k ] = val.at(indx);
                     }
 
-                    if ( ( std::isnan(s [ 0 ]) ) || ( std::isnan(s [ 1 ]) ) || ( std::isnan(s [ 2 ]) ) || ( std::isnan(s [ 3 ]) ) ) {
+                    if ( ( isnan(s [ 0 ]) ) || ( isnan(s [ 1 ]) ) || ( isnan(s [ 2 ]) ) || ( isnan(s [ 3 ]) ) ) {
                         continue;
                     }
 
@@ -413,7 +420,7 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context)
 
                     }
 
-                    if ( ( std::isnan(s [ 0 ]) ) || ( std::isnan(s [ 1 ]) ) || ( std::isnan(s [ 2 ]) ) || ( std::isnan(s [ 3 ]) ) ) {
+                    if ( ( isnan(s [ 0 ]) ) || ( isnan(s [ 1 ]) ) || ( isnan(s [ 2 ]) ) || ( isnan(s [ 3 ]) ) ) {
                     continue;
                     }
 
@@ -542,7 +549,7 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
                         s [ k ] = val.at(indx);
                     }
 
-                    if ( ( std::isnan(s [ 0 ]) ) || ( std::isnan(s [ 1 ]) ) || ( std::isnan(s [ 2 ]) ) || ( std::isnan(s [ 3 ]) ) ) {
+                    if ( ( isnan(s [ 0 ]) ) || ( isnan(s [ 1 ]) ) || ( isnan(s [ 2 ]) ) || ( isnan(s [ 3 ]) ) ) {
                         continue;
                     }
 
@@ -799,11 +806,11 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context)
 #endif
                         }
 
-                        if ( ( std::isnan(s [ 0 ]) ) || ( std::isnan(s [ 1 ]) ) || ( std::isnan(s [ 2 ]) ) || ( std::isnan(s [ 3 ]) ) ) {
+                        if ( ( isnan(s [ 0 ]) ) || ( isnan(s [ 1 ]) ) || ( isnan(s [ 2 ]) ) || ( isnan(s [ 3 ]) ) ) {
                         continue;
                         }
 
-                        if ( ( std::isnan(s [ 4 ]) ) || ( std::isnan(s [ 5 ]) ) || ( std::isnan(s [ 6 ]) ) || ( std::isnan(s [ 7 ]) ) ) {
+                        if ( ( isnan(s [ 4 ]) ) || ( isnan(s [ 5 ]) ) || ( isnan(s [ 6 ]) ) || ( isnan(s [ 7 ]) ) ) {
                         continue;
                         }
 

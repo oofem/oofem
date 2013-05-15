@@ -36,14 +36,13 @@
 #define element_h
 
 #include "femcmpnn.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 
 #include "alist.h"
 #include "intarray.h"
 #include "error.h"
 #include "integrationrule.h"
-#include "classtype.h"
 #include "chartype.h"
 #include "elementgeometrytype.h"
 #include "equationid.h"
@@ -86,6 +85,7 @@ class IntArray;
 class CrossSection;
 class ElementSide;
 class FEInterpolation;
+class Load;
 
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;
@@ -213,12 +213,17 @@ public:
      * can be numbered separately. The default implementation assumes that location array will be assembled only for
      * one UnknownType value, and this array is cached on element level.
      */
-    virtual void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s, IntArray * dofIds = NULL) const;
+    void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s, IntArray * dofIds = NULL) const;
     /**
      * Returns the location array for the boundary of the element.
      * The boundary is the corner nodes for 1D elements, the edges for a 2D element and the surfaces for a 3D element.
      */
     void giveBoundaryLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
+    /**
+     * Returns the location array for the edge of the element.
+     * The element must be in 3D. For 2D edges, use Element::giveBoundaryLocationArray.
+     */
+    void giveEdgeLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
     /**
      * @return Number of DOFs in element.
      */
@@ -272,6 +277,41 @@ public:
      * @return Requested value.
      */
     virtual double giveCharacteristicValue(CharType type, TimeStep *tStep);
+    //@}
+
+    /**
+     * @name General methods for computing the contribution from loads
+     */
+    //@{
+    /**
+     * Computes the contribution of the given load.
+     * @param answer Requested contribution of load.
+     * @param load   Load to compute contribution from.
+     * @param type   Type of the contribution.
+     * @param mode   Determines mode of answer.
+     * @param tStep  Time step when answer is computed.
+     */
+    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
+    /**
+     * Computes the contribution of the given load at the given boundary.
+     * @param answer Requested contribution of load.
+     * @param load Load to compute contribution from.
+     * @param boundary Boundary number.
+     * @param type Type of the contribution.
+     * @param mode Determines mode of answer.
+     * @param tStep Time step when answer is computed.
+     */
+    virtual void computeBoundaryLoadVector(FloatArray &answer, Load *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
+    /**
+     * Computes the contribution of the given load at the given edge.
+     * @param answer Requested contribution of load.
+     * @param load Load to compute contribution from.
+     * @param boundary Edge number.
+     * @param type Type of the contribution.
+     * @param mode Determines mode of answer.
+     * @param tStep Time step when answer is computed.
+     */
+    virtual void computeEdgeLoadVector(FloatArray &answer, Load *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep);
     //@}
 
     //virtual MaterialMode giveMaterialMode() {return _Unknown;}
@@ -393,6 +433,11 @@ public:
      * @param answer Mask for node.
      */
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const { answer.resize(0); }
+    /**
+     * Calls giveDofManDofIDMask with the default equation id for the type of problem.
+     * @todo Can have a pure virtual method because of the hacks in HellmichMaterial :: createMaterialGp()
+     */
+    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { }
     /**
      * Returns internal  dofmanager dof mask for node. This mask defines the dofs which are used by element
      * in node. Mask influences the code number ordering for particular node. Code numbers are
@@ -666,7 +711,7 @@ public:
      * @return Pointer to default integration rule.
      * @see giveDefaultIntegrationRule
      */
-    IntegrationRule *giveDefaultIntegrationRulePtr() {
+    virtual IntegrationRule *giveDefaultIntegrationRulePtr() {
         if ( this->giveNumberOfIntegrationRules() == 0 ) {
             return NULL;
         } else {

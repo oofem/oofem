@@ -35,11 +35,15 @@
 #include "newtonianfluid.h"
 #include "fluiddynamicmaterial.h"
 #include "domain.h"
-#include "flotmtrx.h"
-#include "gausspnt.h"
+#include "floatmatrix.h"
+#include "gausspoint.h"
 #include "engngm.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( NewtonianFluidMaterial );
+
 int
 NewtonianFluidMaterial :: hasMaterialModeCapability(MaterialMode mode)
 //

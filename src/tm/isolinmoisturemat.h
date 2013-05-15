@@ -36,11 +36,12 @@
 #define isolinmoisturemat_h
 
 #include "isomoisturemat.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 ///@name Input fields for IsotropicLinMoistureTransferMaterial
 //@{
+#define _IFT_IsotropicLinMoistureTransferMaterial_Name "isolinmoisturemat"
 #define _IFT_IsotropicLinMoistureTransferMaterial_perm "perm" ///< Moisture permeability
 #define _IFT_IsotropicLinMoistureTransferMaterial_capa "capa" ///< Moisture capacity
 //@}

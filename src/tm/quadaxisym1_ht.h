@@ -37,6 +37,10 @@
 
 #include "quad1_ht.h"
 
+#define _IFT_QuadAxisym1_ht_Name "quadaxisym1ht"
+#define _IFT_QuadAxisym1_hmt_Name "quadaxisym1hmt"
+#define _IFT_QuadAxisym1_mt_Name "quadaxisym1mt"
+
 namespace oofem {
 /**
  * Quadratic axisymmetric element with linear approximation for heat transfer.

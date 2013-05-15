@@ -36,7 +36,9 @@
 #define dynamicinputrecord_h
 
 #include "inputrecord.h"
+
 #include <map>
+#include <set>
 
 namespace oofem {
 
@@ -53,7 +55,7 @@ protected:
     int recordNumber;
 
     // Record representation.
-    //std::map<std::string, void*> record;
+    std::set<std::string> emptyRecord; ///< Fields without values
     std::map<std::string, int>  intRecord;
     std::map<std::string, double> doubleRecord;
     std::map<std::string, bool>  boolRecord;
@@ -90,7 +92,7 @@ public:
     virtual IRResultType giveField(std::vector< std::string > &answer, InputFieldType id);
     virtual IRResultType giveField(Dictionary &answer, InputFieldType id);
     virtual IRResultType giveField(std::list< Range > &answer, InputFieldType id);
-    
+
     virtual bool hasField(InputFieldType id);
     virtual void printYourself();
     // Setters, unique for the dynamic input record
@@ -105,9 +107,14 @@ public:
     virtual void setField(const std::vector< std::string > &item, InputFieldType id);
     virtual void setField(const Dictionary &item, InputFieldType id);
     virtual void setField(const std::list< Range > &item, InputFieldType id);
+    /// Sets an empty field with given id.
+    virtual void setField(InputFieldType id);
 
     virtual void report_error(const char *_class, const char *proc, InputFieldType id,
                               IRResultType result, const char *file, int line);
+
+    /// Returns record as string.
+    std::string giveRecordAsString() const;
 };
 } // end namespace oofem
 #endif // dynamicinputrecord_h

@@ -36,7 +36,7 @@
 #include "fmelement.h"
 #include "inputrecord.h"
 #include "timestep.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "domain.h"
 #include "nrsolver.h"
 #include "sparsenonlinsystemnm.h"
@@ -47,7 +47,10 @@
 #include "primaryfield.h"
 
 namespace oofem {
-StokesFlow :: StokesFlow(int i, EngngModel *_master) : EngngModel(i, _master)
+
+REGISTER_EngngModel( StokesFlow );
+
+StokesFlow :: StokesFlow(int i, EngngModel *_master) : FluidModel(i, _master)
 {
     this->nMethod = NULL;
     this->ndomains = 1;
@@ -136,7 +139,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 
     // Create "stiffness matrix"
     if ( !this->stiffnessMatrix ) {
-        this->stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        this->stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( !this->stiffnessMatrix ) {
             OOFEM_ERROR2("StokesFlow :: solveYourselfAt - Couldn't create requested sparse matrix of type %d", sparseMtrxType);
         }
@@ -188,8 +191,8 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 
     // update element stabilization
     Domain* d = this->giveDomain(1);
-    int i, nelem = d->giveNumberOfElements();
-    for ( i = 1; i <= nelem; ++i ) {
+    int nelem = d->giveNumberOfElements();
+    for ( int i = 1; i <= nelem; ++i ) {
         static_cast< FMElement* >( d->giveElement(i) )->updateStabilizationCoeffs(tStep);
     }
 }
@@ -245,13 +248,11 @@ double StokesFlow :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, D
     return velocityPressureField->giveUnknownValue(dof, mode, tStep);
 }
 
-double StokesFlow::giveUnknownComponent(UnknownType ut, ValueModeType vmt, TimeStep *atTime, Domain *d, Dof *dof)
+
+double StokesFlow :: giveReynoldsNumber()
 {
-    if (ut==ReynoldsNumber)
-        return 1.0;
-    else
-        return 0.0;
-} // bp
+    return 1.0;
+}
 
 
 #ifdef __PETSC_MODULE
@@ -260,7 +261,7 @@ void StokesFlow :: initPetscContexts()
     PetscContext *petscContext;
     petscContextList->growTo(ndomains);
     for ( int i = 1; i <= this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this, EID_MomentumBalance_ConservationEquation);
+        petscContext =  new PetscContext(this);
         petscContextList->put(i, petscContext);
     }
 }
@@ -327,7 +328,7 @@ NumericalMethod *StokesFlow :: giveNumericalMethod(MetaStep *mStep)
         return this->nMethod;
     }
 
-    this->nMethod = new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance_ConservationEquation);
+    this->nMethod = new NRSolver(this->giveDomain(1), this);
     return this->nMethod;
 }
 

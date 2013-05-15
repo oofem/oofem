@@ -40,6 +40,7 @@
 
 ///@name Input fields for NonLinearStatic
 //@{
+#define _IFT_NonLinearStatic_Name "nonlinearstatic"
 #define _IFT_NonLinearStatic_controlmode "controlmode"
 #define _IFT_NonLinearStatic_deltat "deltat"
 #define _IFT_NonLinearStatic_stiffmode "stiffmode"
@@ -143,7 +144,6 @@ public:
     virtual void updateAttributes(MetaStep *mStep);
 
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    virtual double giveUnknownComponent(UnknownType ut, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual TimeStep *giveNextStep();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);

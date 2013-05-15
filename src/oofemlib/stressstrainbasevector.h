@@ -35,7 +35,7 @@
 #ifndef stressstrainbasevector_h
 #define stressstrainbasevector_h
 
-#include "flotarry.h"
+#include "floatarray.h"
 #include "materialmode.h"
 #include "matresponseform.h"
 

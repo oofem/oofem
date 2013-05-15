@@ -39,6 +39,7 @@
 
 ///@name Input fields for SlaveNode
 //@{
+#define _IFT_SlaveNode_Name "slavenode"
 #define _IFT_SlaveNode_masterDofManagers "masterdofman"
 #define _IFT_SlaveNode_weights "weights"
 //@}

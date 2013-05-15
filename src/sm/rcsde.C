@@ -33,18 +33,22 @@
  */
 
 #include "rcsde.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "isolinearelasticmaterial.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 #include <cstring>
 
 namespace oofem {
+
+REGISTER_Material( RCSDEMaterial );
+
 RCSDEMaterial :: RCSDEMaterial(int n, Domain *d) : RCM2Material(n, d)
 //
 // constructor

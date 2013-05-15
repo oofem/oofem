@@ -41,6 +41,7 @@
 
 ///@name Input fields for IDNLMaterial
 //@{
+#define _IFT_IDNLMaterial_Name "idmnl1"
 #define _IFT_IDNLMaterial_r "r"
 #define _IFT_IDNLMaterial_averagingtype "averagingtype"
 #define _IFT_IDNLMaterial_exp "exp"

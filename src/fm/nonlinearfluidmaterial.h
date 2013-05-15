@@ -36,13 +36,14 @@
 #define nonlinearfluidmaterial_h
 
 #include "fluiddynamicmaterial.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "matconst.h"
 #include "matstatus.h"
 
 ///@name Input fields for NonlinearFluidMaterial
 //@{
+#define _IFT_NonlinearFluidMaterial_Name "nonlinearfluid"
 #define _IFT_NonlinearFluidMaterial_mu "mu"
 #define _IFT_NonlinearFluidMaterial_alpha "alpha"
 #define _IFT_NonlinearFluidMaterial_C "c"

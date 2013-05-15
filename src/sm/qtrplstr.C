@@ -34,13 +34,14 @@
 
 #include "qtrplstr.h"
 #include "node.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "crosssection.h"
 #include "gaussintegrationrule.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -49,6 +50,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( QTrPlaneStress2d );
+
 FEI2dTrQuad QTrPlaneStress2d :: interpolation(1, 2);
 
 QTrPlaneStress2d :: QTrPlaneStress2d(int n, Domain *aDomain) :
@@ -643,13 +647,14 @@ QTrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeTy
 {
     FloatArray lcoords, u, nn;
     FloatMatrix n(2, 12);
-    int i, result;
+    int result;
 
     result = this->computeLocalCoordinates(lcoords, coords);
 
     this->interpolation.evalN( nn, lcoords, FEIElementGeometryWrapper(this) );
 
-    for ( i = 1; i <= 6; i++ ) {
+    n.zero();
+    for ( int i = 1; i <= 6; i++ ) {
         n.at(1, 2 * i - 1) = nn.at(i);
         n.at(2, 2 * i - 0) = nn.at(i);
     }
@@ -706,13 +711,11 @@ QTrPlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      * provides dof mapping of local edge dofs (only nonzero are taken into account)
      * to global element dofs
      */
-
-    int i;
     IntArray eNodes(3);
     this->interpolation.computeLocalEdgeMapping(eNodes,  iEdge);
 
     answer.resize(6);
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(i * 2 - 1) = eNodes.at(i) * 2 - 1;
         answer.at(i * 2) = eNodes.at(i) * 2;
     }
@@ -749,10 +752,10 @@ QTrPlaneStress2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdg
 
     this->interpolation.edgeEvalNormal( normal, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
-    answer.at(1, 1) = ( -1.0 ) * normal.at(2);
-    answer.at(1, 2) = ( -1.0 ) * normal.at(1);
-    answer.at(2, 1) = normal.at(1);
-    answer.at(2, 2) = ( -1.0 ) * normal.at(2);
+    answer.at(1, 1) = normal.at(2);
+    answer.at(1, 2) = normal.at(1);
+    answer.at(2, 1) = -normal.at(1);
+    answer.at(2, 2) = normal.at(2);
 
     return 1;
 }

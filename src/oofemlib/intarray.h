@@ -44,6 +44,8 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
+#include <iosfwd>
+
 namespace oofem {
 class DataStream;
 #ifdef __PARALLEL_MODE
@@ -79,7 +81,9 @@ private:
 
 public:
     /// Constructor for zero sized array
-    IntArray(int = 0);
+    IntArray();
+    /// Constructor for sized array
+    IntArray(int n);
     /// Copy constructor. Creates the array from another array.
     IntArray(const IntArray &);
     /// Destructor.
@@ -170,7 +174,7 @@ public:
      * @param allocChunk If reallocation needed, an additional space for allocChunk values will be allocated
      * to prevent excessive reallocation.
      */
-    void followedBy(const int b, int allocChunk = 0);
+    void followedBy(int b, int allocChunk = 0);
     /// @return Size of receiver.
     int giveSize() const { return size; }
     /**
@@ -198,6 +202,11 @@ public:
      * @return Maximum of array or prints error is array is empty.
      */
     int maximum() const;
+    /**
+     * Finds all indices where the input array is nonzero
+     * @param logical Array of logical values (0 = false, nonzero = true) to have index extracted.
+     */
+    void findNonzeros(const IntArray &logical);
     /**
      * Checks if sorted receiver contains a given value.
      * @return True if receiver contains given value.
@@ -309,6 +318,8 @@ public:
      * @see FEMComponent
      */
     contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
+
+    friend std::ostream& operator<< (std::ostream &out, const IntArray &x);
 
 #ifdef __PARALLEL_MODE
     /**@name Methods for packing/unpacking to/from communication buffer */

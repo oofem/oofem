@@ -36,7 +36,6 @@
 #define sparselinsystemnm_h
 
 #include "nummet.h"
-#include "classtype.h"
 #include "nmstatus.h"
 #include "linsystsolvertype.h"
 
@@ -59,12 +58,11 @@ class SparseLinearSystemNM : public NumericalMethod
 {
 public:
     /// Constructor.
-    SparseLinearSystemNM(int i, Domain *d, EngngModel *m);
+    SparseLinearSystemNM(Domain *d, EngngModel *m);
     /// Destructor.
     virtual ~SparseLinearSystemNM();
 
     virtual const char *giveClassName() const { return "SparseLinearSystemNM"; }
-    virtual classType giveClassID() const { return SparseLinearSystemNMClass; }
 
     /**
      * @return LinSystSolverType value, corresponding to receiver.

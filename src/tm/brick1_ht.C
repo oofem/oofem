@@ -34,21 +34,27 @@
 
 #include "brick1_ht.h"
 #include "node.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
 #include "load.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( Brick1_ht );
+REGISTER_Element( Brick1_hmt );
+REGISTER_Element( Brick1_mt );
+
 FEI3dHexaLin Brick1_ht :: interpolation;
 
 Brick1_ht :: Brick1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(), ZZNodalRecoveryModelInterface(), SPRNodalRecoveryModelInterface()

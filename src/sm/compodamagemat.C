@@ -35,13 +35,17 @@
 #include "compodamagemat.h"
 #include "structuralelement.h"
 #include "material.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "structuralmaterial.h"
 #include "structuralms.h"
 #include "mathfem.h"
+#include "classfactory.h"
 #include "contextioerr.h"
 
 namespace oofem {
+
+REGISTER_Material( CompoDamageMat );
+
 CompoDamageMat :: CompoDamageMat(int n, Domain *d) : StructuralMaterial(n, d)
 {
     // Constructor

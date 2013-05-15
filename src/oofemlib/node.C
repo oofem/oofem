@@ -42,15 +42,16 @@
 #include "dof.h"
 #include "slavedof.h"
 #include "simpleslavedof.h"
-#include "nodload.h"
+#include "nodalload.h"
 #include "timestep.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "intarray.h"
 #include "verbose.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -59,6 +60,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_DofManager( Node );
+
 Node :: Node(int n, Domain *aDomain) :
     DofManager(n, aDomain), coordinates()
 {
@@ -91,7 +95,6 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     int size;
-    FloatArray triplets;
 
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Instanciating node ",number)
@@ -110,14 +113,14 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
 
 
     // Read if available local coordinate system in this node
-    triplets.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, triplets, _IFT_Node_lcs);
-    size = triplets.giveSize();
-    if ( !( ( size == 0 ) || ( size == 6 ) ) ) {
-        _warning2( "initializeFrom: lcs in node %d is not properly defined, will be ignored", this->giveNumber() );
-    }
+    if ( ir->hasField(_IFT_Node_lcs) ) {
+        FloatArray triplets;
+        IR_GIVE_FIELD(ir, triplets, _IFT_Node_lcs);
+        size = triplets.giveSize();
+        if ( size != 6 ) {
+            _warning2( "initializeFrom: lcs in node %d is not properly defined, will be ignored", this->giveNumber() );
+        }
 
-    if ( size == 6 ) {
         double n1 = 0.0, n2 = 0.0;
         localCoordinateSystem = new FloatMatrix(3, 3);
 
@@ -155,40 +158,29 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
 }
 
 void
-Node :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-// Computes the vector of the nodal loads of the receiver.
+Node :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *stepN, ValueModeType mode)
 {
-    int n, nLoads;
-    NodalLoad *loadN;
-    FloatArray contribution;
-    IntArray dofIDarry(0);
-    FloatMatrix L2G;
-
-    if ( this->giveLoadArray()->isEmpty() ) {
+    if ( type != ExternalForcesVector ) {
         answer.resize(0);
         return;
-    } else {
-        answer.resize(0);
-        nLoads = loadArray.giveSize();       // the node may be subjected
-        for ( int i = 1; i <= nLoads; i++ ) {     // to more than one load
-            n     = loadArray.at(i);
-            loadN = dynamic_cast< NodalLoad * >( domain->giveLoad(n) );
-            if ( !loadN ) {
-                _error("computeLoadVectorAt: incompatible load");
-            }
+    }
 
-            if ( loadN->giveBCGeoType() != NodalLoadBGT ) {
-                _error("computeLoadVectorAt: incompatible load type applied");
-            }
+    NodalLoad *loadN = dynamic_cast< NodalLoad * >( load );
+    if ( !loadN ) {
+        _error("computeLoadVectorAt: incompatible load");
+    }
 
-            loadN->computeComponentArrayAt(contribution, stepN, mode); // can be NULL
-            // Transform from Global to Local c.s.
-            if ( loadN->giveCoordSystMode() == NodalLoad :: BL_GlobalMode ) {
-                if ( this->computeL2GTransformation(L2G, dofIDarry) ) {
-                    contribution.rotatedWith(L2G, 't');
-                }
-            }
-            answer.add(contribution);
+    if ( loadN->giveBCGeoType() != NodalLoadBGT ) {
+        _error("computeLoadVectorAt: incompatible load type applied");
+    }
+
+    loadN->computeComponentArrayAt(answer, stepN, mode); // can be NULL
+    // Transform from Global to Local c.s.
+    if ( loadN->giveCoordSystMode() == NodalLoad :: BL_GlobalMode ) {
+        IntArray dofIDarry(0);
+        FloatMatrix L2G;
+        if ( this->computeL2GTransformation(L2G, dofIDarry) ) {
+            answer.rotatedWith(L2G, 't');
         }
     }
 }
@@ -426,8 +418,6 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
     // Note: implementation rely on D_u, D_v and D_w (R_u, R_v, R_w) order in cltypes.h
     // file. Do not change their order and do not insert any values between these values.
     //
-
-    int i, j;
     DofIDItem id, id2;
 
     if ( localCoordinateSystem == NULL ) {
@@ -440,13 +430,13 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
             answer.resize(numberOfDofs, numberOfDofs);
             answer.zero();
 
-            for ( i = 1; i <= numberOfDofs; i++ ) {
+            for ( int i = 1; i <= numberOfDofs; i++ ) {
                 // test for vector quantities
                 switch ( id = giveDof(i)->giveDofID() ) {
                 case D_u:
                 case D_v:
                 case D_w:
-                    for ( j = 1; j <= numberOfDofs; j++ ) {
+                    for ( int j = 1; j <= numberOfDofs; j++ ) {
                         id2 = giveDof(j)->giveDofID();
                         if ( ( id2 == D_u ) || ( id2 == D_v ) || ( id2 == D_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( D_u ) + 1,
@@ -459,7 +449,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case V_u:
                 case V_v:
                 case V_w:
-                    for ( j = 1; j <= numberOfDofs; j++ ) {
+                    for ( int j = 1; j <= numberOfDofs; j++ ) {
                         id2 = giveDof(j)->giveDofID();
                         if ( ( id2 == V_u ) || ( id2 == V_v ) || ( id2 == V_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( V_u ) + 1,
@@ -472,7 +462,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case R_u:
                 case R_v:
                 case R_w:
-                    for ( j = 1; j <= numberOfDofs; j++ ) {
+                    for ( int j = 1; j <= numberOfDofs; j++ ) {
                         id2 = giveDof(j)->giveDofID();
                         if ( ( id2 == R_u ) || ( id2 == R_v ) || ( id2 == R_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( R_u ) + 1,
@@ -489,7 +479,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                     break;
 
                 default:
-                    _error2( "computeGNTransformation: unknown dofID (%s)", __DofIDItemToString(id) );
+                    _error2( "computeGNTransformation: unknown dofID (%s)", __DofIDItemToString(id).c_str() );
                 }
             }
         } else { // end if (dofIDArry.isEmpty())
@@ -498,13 +488,13 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
             answer.resize(size, size);
             answer.zero();
 
-            for ( i = 1; i <= size; i++ ) {
+            for ( int i = 1; i <= size; i++ ) {
                 // test for vector quantities
                 switch ( id = ( DofIDItem ) dofIDArry.at(i) ) {
                 case D_u:
                 case D_v:
                 case D_w:
-                    for ( j = 1; j <= size; j++ ) {
+                    for ( int j = 1; j <= size; j++ ) {
                         id2 = ( DofIDItem ) dofIDArry.at(j);
                         if ( ( id2 == D_u ) || ( id2 == D_v ) || ( id2 == D_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( D_u ) + 1, ( int ) ( id2 ) - ( int ) ( D_u ) + 1 );
@@ -516,7 +506,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case V_u:
                 case V_v:
                 case V_w:
-                    for ( j = 1; j <= size; j++ ) {
+                    for ( int j = 1; j <= size; j++ ) {
                         id2 = ( DofIDItem ) dofIDArry.at(j);
                         if ( ( id2 == V_u ) || ( id2 == V_v ) || ( id2 == V_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( V_u ) + 1, ( int ) ( id2 ) - ( int ) ( V_u ) + 1 );
@@ -528,7 +518,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case R_u:
                 case R_v:
                 case R_w:
-                    for ( j = 1; j <= size; j++ ) {
+                    for ( int j = 1; j <= size; j++ ) {
                         id2 = ( DofIDItem ) dofIDArry.at(j);
                         if ( ( id2 == R_u ) || ( id2 == R_v ) || ( id2 == R_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( R_u ) + 1, ( int ) ( id2 ) - ( int ) ( R_u ) + 1 );
@@ -544,7 +534,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                     break;
 
                 default:
-                    _error2( "computeGNTransformation: unknown dofID (%s)", __DofIDItemToString(id) );
+                    _error2( "computeGNTransformation: unknown dofID (%s)", __DofIDItemToString(id).c_str() );
                 }
             }
         } // end map is provided -> assemble for requested dofs

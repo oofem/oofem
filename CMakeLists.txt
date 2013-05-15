@@ -22,7 +22,7 @@ endif ()
 if (MSVC)
     add_definitions (-D_USE_MATH_DEFINES)
     set (CMAKE_REQUIRED_DEFINITIONS "-D_USE_MATH_DEFINES")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -wd4100 -wd4996 -wd4706 -wd4512")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -wd4786 -wd4100 -wd4996 -wd4706 -wd4512")
 else ()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
 endif ()
@@ -54,8 +54,11 @@ set (PARMETIS_DIR CACHE PATH "Manual ParMetis directory")
 option (USE_OOFEG "Enable OOFEG" OFF)
 option (USE_PYTHON_BINDINGS "Enable Python bidings" OFF)
 if (${CMAKE_VERSION} VERSION_GREATER "2.8.7") # Compability with older version of cmake
-    option (USE_SHARED_LIB "Build shared library" OFF)
-    option (USE_STATIC_LIB "Build static library" OFF)
+    if (WIN32) # Shared libraries aren't working on windows.
+        option (USE_SHARED_LIB "Build shared library" OFF)
+    else ()
+        option (USE_SHARED_LIB "Build shared library" ON)
+    endif ()
 endif ()
 # Parallel stuff
 option (USE_PARALLEL "Enable parallel support" OFF)
@@ -151,7 +154,6 @@ endif ()
 
 if (USE_DSS)
     include_directories ("${oofem_SOURCE_DIR}/src/dss")
-    add_definitions (-D__DSS_MODULE)
     if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
         set (LIBS ${LIBS} dss)
     else ()
@@ -225,6 +227,9 @@ if (USE_PARMETIS)
         find_library (PARMETIS_LIB parmetis PATH "${PARMETIS_DIR}")
         find_library (METIS_LIB metis PATH "${PARMETIS_DIR}")
         include_directories ("${PARMETIS_DIR}")
+    else ()
+        find_library (PARMETIS_LIB parmetis)
+        find_library (METIS_LIB metis)
     endif ()
     if (${PARMETIS_LIB} STREQUAL "PARMETIS_LIB-NOTFOUND")
         message (FATAL_ERROR "Parmetis library not found")
@@ -324,7 +329,6 @@ if (USE_IML)
     if ((NOT HAVE_IML_CG_H) OR (NOT HAVE_IML_GMRES_H))
         message (FATAL_ERROR "Necessary IML++ headers not found")
     endif ()
-    add_definitions (-D__IML_MODULE)
     set (MODULE_LIST ${MODULE_LIST} "IML++")
 endif ()
 
@@ -338,7 +342,6 @@ if (USE_SPOOLES)
     if (${SPOOLES_LIB} STREQUAL "SPOOLES_LIB-NOTFOUND")
         message (FATAL_ERROR "SPOOLES not found")
     endif ()
-    add_definitions (-D__SPOOLES_MODULE)
     set (EXT_LIBS ${EXT_LIBS} ${SPOOLES_LIB})
     set (MODULE_LIST ${MODULE_LIST} "SPOOLES")
 endif ()
@@ -350,7 +353,6 @@ if (USE_PYTHON_BINDINGS)
     find_package(Boost COMPONENTS "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}" REQUIRED)
     include_directories (${PYTHON_INCLUDE_DIRS})
     include_directories (${Boost_INCLUDE_DIRS})
-    include_directories (${oofem_SOURCE_DIR}/src/main) # classfactory should probably be in oofemlib instead.
     set (EXT_LIBS ${EXT_LIBS} ${PYTHON_LIBRARIES} ${Boost_LIBRARIES})
     set (MODULE_LIST ${MODULE_LIST} "Python")
     add_definitions(-DBOOST_PYTHON)
@@ -374,7 +376,6 @@ check_include_files ("unistd.h" HAVE_UNISTD_H)
 check_include_files ("execinfo.h" HAVE_EXECINFO_H)
 check_symbol_exists ("strncasecmp" "strings.h" HAVE_STRNCASECMP)
 check_symbol_exists ("access" "unistd.h" HAVE_ACCESS)
-check_cxx_symbol_exists ("nearest" "cmath" HAVE_NEAREST) # In what header? I don't have it.
 check_cxx_symbol_exists ("cbrt" "cmath" HAVE_CBRT)
 check_cxx_symbol_exists ("isnan" "cmath" HAVE_ISNAN)
 check_cxx_symbol_exists ("M_PI" "cmath" HAVE_M_PI)
@@ -395,7 +396,8 @@ configure_file (
 #######################################################################
 # Subtargets
 if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
-    set (LIB_TYPE STATIC)
+    # This won't work on windows, but windows users should have newer version than 2.8.7)
+    set (LIB_TYPE SHARED)
 else ()
     set (LIB_TYPE OBJECT)
 endif ()
@@ -424,65 +426,38 @@ endif ()
 if (USE_SHARED_LIB)
     add_library (liboofem
         SHARED
-        # These doesn't really belong in main;
-        ${oofem_SOURCE_DIR}/src/main/usrdefsub.C
-        ${oofem_SOURCE_DIR}/src/main/classfactory.C
         ${oofempy}
         ${LIBS} 
         )
     target_link_libraries (liboofem ${EXT_LIBS})
     set_target_properties (liboofem PROPERTIES OUTPUT_NAME oofem)
     install (TARGETS liboofem DESTINATION lib)
-else ()
-    set (USE_STATIC_LIB ON)
 endif ()
 
-# Optional static lib (only compiled and installed if explicitly called):
-if (USE_STATIC_LIB)
-    if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
-        add_library (liboofem_static
-            STATIC
-            # These doesn't really belong in main;
-            ${oofem_SOURCE_DIR}/src/main/usrdefsub.C
-            ${oofem_SOURCE_DIR}/src/main/classfactory.C
-            ${oofempy}
-            )
-        target_link_libraries (liboofem_static ${LIBS} ${LIBS} ${EXT_LIBS})
-    else ()
-        add_library (liboofem_static
-            STATIC
-            # These doesn't really belong in main;
-            ${oofem_SOURCE_DIR}/src/main/usrdefsub.C
-            ${oofem_SOURCE_DIR}/src/main/classfactory.C
-            ${oofempy}
-            ${LIBS} 
-            )
-        target_link_libraries (liboofem_static ${EXT_LIBS})
-    endif ()
-    set_target_properties (liboofem_static PROPERTIES OUTPUT_NAME oofem)
-    install (TARGETS liboofem_static DESTINATION lib)
-endif ()
-
-# OOFEM target;
-add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
+# OOFEM target
 if (USE_SHARED_LIB) # Prefer dynamic lib if available.
+    add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
     target_link_libraries (oofem liboofem)
+elseif (${CMAKE_VERSION} VERSION_LESS "2.8.8") # Hackish backwards compatibility 
+    add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
+    target_link_libraries (oofem ${LIBS} ${EXT_LIBS})
 else ()
-    if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
-        target_link_libraries (oofem ${LIBS} liboofem_static ${LIBS} ${LIBS}) # Cyclic dependencies.
-    else ()
-        target_link_libraries (oofem liboofem_static)
-    endif ()
+    add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C ${LIBS})
+    target_link_libraries (oofem ${EXT_LIBS})
 endif ()
 install (TARGETS oofem DESTINATION bin)
 
 if (USE_OOFEG)
     #  OOFEG target:
-    add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C)
     if (USE_SHARED_LIB)
+        add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C)
         target_link_libraries (oofeg liboofem)
+    elseif (${CMAKE_VERSION} VERSION_LESS "2.8.8") # Hackish backwards compatibility
+        add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C)
+        target_link_libraries (oofeg ${LIBS} ${EXT_LIBS})
     else ()
-        target_link_libraries (oofeg liboofem_static liboofem_static)
+        add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C ${LIBS})
+        target_link_libraries (oofeg ${EXT_LIBS})
     endif ()
     install(TARGETS oofeg DESTINATION bin)
 endif ()
@@ -560,6 +535,7 @@ include (CTest)
 set (oofem_TEST_DIR "${oofem_SOURCE_DIR}/tests/")
 set (oofem_cmd  $<TARGET_FILE:oofem>)
 set (test_cmd  ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/testhelper.py")
+set (extractor_cmd "${oofem_SOURCE_DIR}/tools/extractor.py")
 
 # Helper script (perhaps one could do without this one)
 # Some input files requier other files, so I didn't feel that there were any option to just running them in the main tree.
@@ -578,38 +554,24 @@ if subprocess.call(command):
 else:
     for f in files:
         python=\"${PYTHON_EXECUTABLE}\"
-        extractor = \"${oofem_SOURCE_DIR}/tools/extractor.py\"
+        extractor = \"${extractor_cmd}\"
         print('Executing: ', [python, extractor, '-f', f, '-c'])
         if subprocess.call([python, extractor, '-f', f, '-c']):
             exit(2)
 exit(0)
 ")
 
-# TODO: Not working yet (ctest might be too limited for this approach)
-file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/memcheckhelper.py
-"import subprocess,sys,glob
-if len(sys.argv) == 1:
-    exit(subprocess.call('valgrind'))
-command = ['valgrind','--tool=memcheck']
-if sys.argv[4] == 'p':
-    files = glob.glob(sys.argv[3]+'.[0-9]*')
-    command.extend(['mpirun','-np',str(len(files)),sys.argv[2],'-p','-f',sys.argv[3],'-l','2'])
-else:
-    files = [sys.argv[3]]
-    command.extend([sys.argv[2],'-f',sys.argv[3],'-l','2'])
-command.extend(sys.argv[5:])
-print('Executing: ', command)
-exit(subprocess.call(command))
-")
-
 if (USE_PARALLEL)
     set (par_dir ${oofem_TEST_DIR}/partests)
     file (GLOB parallel_tests RELATIVE "${par_dir}" "${par_dir}/*/")
     foreach (case ${parallel_tests})
+        add_test (NAME "partest_${case}" WORKING_DIRECTORY ${par_dir}/${case} COMMAND ${test_cmd} ${oofem_cmd} ${case}.oofem.in "p")
         #file (GLOB files "${par_dir}/${case}/${case}.oofem.in.*")
         #list (LENGTH files num_files)
-        #add_test (NAME "partest_${case}" WORKING_DIRECTORY ${par_dir}/${case} COMMAND ${test_cmd} "mpirun" "-np" ${num_files} ${oofem_cmd} "-p" "-f" "${case}.oofem.in" "-l" "2")
-        add_test (NAME "partest_${case}" WORKING_DIRECTORY ${par_dir}/${case} COMMAND ${test_cmd} ${oofem_cmd} ${case}.oofem.in "p")
+        #add_test (NAME "partest_${case}" WORKING_DIRECTORY ${par_dir}/${case} COMMAND "mpirun" "-np" ${num_files} ${oofem_cmd} "-p" "-f" "${case}.oofem.in" "-l" "2")
+        #add_test (NAME "parextr_${case}" WORKING_DIRECTORY ${par_dir}/${case} COMMAND ${PYTHON_EXECUTABLE} ${extractor_cmd} "-p" "-f" "${case}.oofem.in" "-c")
+        #set_tests_properties ("parextr_${case}" PROPERTIES DEPENDS "partest_${case}")
+        #list (APPEND CTEST_CUSTOM_MEMCHECK_IGNORE "parextr_${case}")
     endforeach (case)
 endif ()
 # Sequential test cases
@@ -618,8 +580,12 @@ file (GLOB fm_tests RELATIVE "${oofem_TEST_DIR}/fm" "${oofem_TEST_DIR}/fm/*.in")
 file (GLOB tm_tests RELATIVE "${oofem_TEST_DIR}/tm" "${oofem_TEST_DIR}/tm/*.in")
 file (GLOB tmsm_tests RELATIVE "${oofem_TEST_DIR}/tmsm" "${oofem_TEST_DIR}/tmsm/*.in")
 foreach (case ${sm_tests})
-    #add_test (NAME "partest_${case}" WORKING_DIRECTORY ${par_dir}/${case} COMMAND ${test_cmd} ${oofem_cmd} "-p" "-f" "${case}.oofem.in" "-l" "2")
     add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
+    # Separate commands so that we can use valgrind and gcov versions
+    #add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm COMMAND ${oofem_cmd} "-f" ${case} "-l" "2")
+    #add_test (NAME "extr_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm COMMAND ${PYTHON_EXECUTABLE} ${extractor_cmd} "-f" ${case} "-c")
+    #set_tests_properties ("extr_${case}" PROPERTIES DEPENDS "test_${case}")
+    #list (APPEND CTEST_CUSTOM_MEMCHECK_IGNORE "extr_${case}")
 endforeach (case)
 foreach (case ${fm_tests})
     add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/fm COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")

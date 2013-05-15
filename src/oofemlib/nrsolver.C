@@ -39,15 +39,16 @@
 // includes for ddc - not very clean (NumMethod knows what is "node" and "dof")
 #include "node.h"
 #include "element.h"
-#include "generalbc.h"
+#include "generalboundarycondition.h"
 #include "dof.h"
-#include "loadtime.h"
+#include "loadtimefunction.h"
 #include "linesearch.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
+
 #ifdef __PETSC_MODULE
  #include "petscsolver.h"
  #include "petscsparsemtrx.h"
- #include "petscordering.h"
+ #include "parallelordering.h"
 #endif
 
 #include <cstdio>
@@ -59,9 +60,10 @@ namespace oofem {
 #define NRSOLVER_RESET_STEP_REDUCE 0.25
 #define NRSOLVER_DEFAULT_NRM_TICKS 10
 
+REGISTER_SparseNonLinearSystemNM( NRSolver )
 
-NRSolver :: NRSolver(int i, Domain *d, EngngModel *m, EquationID ut) :
-    SparseNonLinearSystemNM(i, d, m, ut), prescribedDofs(), prescribedDofsValues()
+NRSolver :: NRSolver(Domain *d, EngngModel *m) :
+    SparseNonLinearSystemNM(d, m), prescribedDofs(), prescribedDofsValues()
 {
     //
     // constructor
@@ -119,7 +121,7 @@ NRSolver :: initializeFrom(InputRecord *ir)
     nsmax = 1e8;
     IR_GIVE_OPTIONAL_FIELD(ir, nsmax, _IFT_NRSolver_maxiter);
     if ( nsmax < 0 ) {
-        _error("initializeFrom: nsmax < 0");
+        OOFEM_ERROR("NRSolver :: initializeFrom: nsmax < 0");
     }
 
     minIterations = 0;
@@ -140,15 +142,16 @@ NRSolver :: initializeFrom(InputRecord *ir)
     int _val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_NRSolver_lstype);
     solverType = ( LinSystSolverType ) _val;
-    this->giveLinearSolver()->initializeFrom(ir);
 
     // read relative error tolerances of the solver
     // if rtolv provided set to this tolerance both rtolf and rtold
     rtolf.resize(1);
     rtolf.at(1) = 1.e-3; // Default value.
+    rtold.resize(1);
+    rtold = 0.0; // Default off (0.0 or negative values mean that residual is ignored)
     IR_GIVE_OPTIONAL_FIELD(ir, rtolf.at(1), _IFT_NRSolver_rtolv);
-    //OOFEM_WARNING("CHECK!");
-    rtold = rtolf;
+    IR_GIVE_OPTIONAL_FIELD(ir, rtold.at(1), _IFT_NRSolver_rtolv);
+
     // read optional force and displacement tolerances
     IR_GIVE_OPTIONAL_FIELD(ir, rtolf.at(1), _IFT_NRSolver_rtolf);
     IR_GIVE_OPTIONAL_FIELD(ir, rtold.at(1), _IFT_NRSolver_rtold);
@@ -162,7 +165,7 @@ NRSolver :: initializeFrom(InputRecord *ir)
 
     numberOfPrescribedDofs = prescribedDofs.giveSize() / 2;
     if ( numberOfPrescribedDofs != prescribedDofsValues.giveSize() ) {
-        _error("instanciateFrom direct displacement mask size mismatch");
+        OOFEM_ERROR("NRSolver :: instanciateFrom direct displacement mask size mismatch");
     }
 
     if ( numberOfPrescribedDofs ) {
@@ -179,20 +182,6 @@ NRSolver :: initializeFrom(InputRecord *ir)
     }
 
     return IRRT_OK;
-}
-
-
-contextIOResultType
-NRSolver :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-{
-    return CIO_OK;
-}
-
-
-contextIOResultType
-NRSolver :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
-{
-    return CIO_OK;
 }
 
 
@@ -215,13 +204,15 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     bool converged, errorOutOfRangeFlag;
 #ifdef __PARALLEL_MODE
  #ifdef __PETSC_MODULE
-    PetscContext *parallel_context  = engngModel->givePetscContext(this->domain->giveNumber(), ut);
+    PetscContext *parallel_context  = engngModel->givePetscContext(this->domain->giveNumber());
  #endif
 #endif
 
     if ( engngModel->giveProblemScale() == macroScale ) {
-        OOFEM_LOG_INFO("NRSolver:     Iteration       ForceError      DisplError                    \n");
-        OOFEM_LOG_INFO("----------------------------------------------------------------------------\n");
+        OOFEM_LOG_INFO("NRSolver: Iteration");
+        if ( rtolf.at(1) > 0.0 ) OOFEM_LOG_INFO(" ForceError");
+        if ( rtold.at(1) > 0.0 ) OOFEM_LOG_INFO(" DisplError");
+        OOFEM_LOG_INFO("\n----------------------------------------------------------------------------\n");
     }
 
     l = 1.0;
@@ -243,6 +234,7 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 #endif
 
     ddX.resize(neq);
+    ddX.zero();
 
     // Fetch the matrix before evaluating internal forces.
     // This is intentional, since its a simple way to drastically increase convergence for nonlinear problems.
@@ -362,9 +354,9 @@ NRSolver :: giveLinearSolver()
         }
     }
 
-    linSolver = CreateUsrDefSparseLinSolver(solverType, 1, domain, engngModel);
+    linSolver = classFactory.createSparseLinSolver(solverType, domain, engngModel);
     if ( linSolver == NULL ) {
-        _error("giveLinearSolver: linear solver creation failed");
+        OOFEM_ERROR("NRSolver :: giveLinearSolver: linear solver creation failed");
     }
 
     return linSolver;
@@ -375,7 +367,7 @@ LineSearchNM *
 NRSolver :: giveLineSearchSolver()
 {
     if ( linesearchSolver == NULL ) {
-        linesearchSolver = new LineSearchNM(1, this->giveDomain(), engngModel);
+        linesearchSolver = new LineSearchNM(domain, engngModel);
     }
 
     return linesearchSolver;
@@ -387,7 +379,7 @@ NRSolver :: initPrescribedEqs()
 {
     EModelDefaultEquationNumbering dn;
  #if defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE )
-    PetscContext *parallel_context = engngModel->givePetscContext(this->domain->giveNumber(), ut);
+    PetscContext *parallel_context = engngModel->givePetscContext(this->domain->giveNumber());
  #endif
     int jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
     int inode, idof;
@@ -433,7 +425,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
     if ( solverType == ST_Petsc ) {
         PetscScalar diagVal = 1.0;
         if ( k->giveType() != SMT_PetscMtrx ) {
-            _error("applyConstraintsToStiffness: PetscSparseMtrx Expected");
+            OOFEM_ERROR("NRSolver :: applyConstraintsToStiffness: PetscSparseMtrx Expected");
         }
 
         PetscSparseMtrx *lhs = ( PetscSparseMtrx * ) k;
@@ -441,7 +433,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
         if ( !prescribedEgsIS_defined ) {
             IntArray eqs;
   #ifdef __PARALLEL_MODE
-            PetscNatural2GlobalOrdering *n2lpm = engngModel->givePetscContext(1)->giveN2Gmap();
+            Natural2GlobalOrdering *n2lpm = engngModel->givePetscContext(1)->giveN2Gmap();
             int s = prescribedEqs.giveSize();
             eqs.resize(s);
             for ( int i = 1; i <= s; i++ ) {
@@ -477,7 +469,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
  #ifdef __PETSC_MODULE
     if ( solverType == ST_Petsc ) {
         if ( k->giveType() != SMT_PetscMtrx ) {
-            _error("applyConstraintsToStiffness: PetscSparseMtrx Expected");
+            OOFEM_ERROR("NRSolver :: applyConstraintsToStiffness: PetscSparseMtrx Expected");
         }
 
         PetscSparseMtrx *lhs = ( PetscSparseMtrx * ) k;
@@ -486,7 +478,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
         PetscScalar *ptr;
         int eq;
 
-        PetscContext *parallel_context = engngModel->givePetscContext(this->domain->giveNumber(), ut);
+        PetscContext *parallel_context = engngModel->givePetscContext(this->domain->giveNumber());
         parallel_context->createVecGlobal(& diag);
         MatGetDiagonal(* lhs->giveMtrx(), diag);
         VecGetArray(diag, & ptr);
@@ -535,7 +527,7 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
  #ifdef __PETSC_MODULE
         if ( solverType == ST_Petsc ) {
   #ifdef __PARALLEL_MODE
-            //PetscNatural2LocalOrdering* n2lpm = engngModel->givePetscContext(1)->giveN2Lmap();
+            //Natural2LocalOrdering* n2lpm = engngModel->givePetscContext(1)->giveN2Lmap();
             //IntArray* map = n2lpm->giveN2Lmap();
             for ( i = 1; i <= prescribedEqs.giveSize(); i++ ) {
                 eq = prescribedEqs.at(i);
@@ -560,14 +552,14 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
  #ifdef __PETSC_MODULE
         if ( solverType == ST_Petsc ) {
             if ( k->giveType() != SMT_PetscMtrx ) {
-                _error("applyConstraintsToStiffness: PetscSparseMtrx Expected");
+                OOFEM_ERROR("NRSolver :: applyConstraintsToStiffness: PetscSparseMtrx Expected");
             }
 
             PetscSparseMtrx *lhs = ( PetscSparseMtrx * ) k;
 
             Vec diag;
             PetscScalar *ptr;
-            engngModel->givePetscContext(this->domain->giveNumber(), ut)->createVecGlobal(& diag);
+            engngModel->givePetscContext(this->domain->giveNumber())->createVecGlobal(& diag);
             MatGetDiagonal(* lhs->giveMtrx(), diag);
             VecGetArray(diag, & ptr);
 
@@ -627,8 +619,8 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
     EModelDefaultEquationNumbering dn;
  #ifdef __PARALLEL_MODE
   #ifdef __PETSC_MODULE
-    PetscContext *parallel_context = engngModel->givePetscContext(this->domain->giveNumber(), ut);
-    PetscNatural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
+    PetscContext *parallel_context = engngModel->givePetscContext(this->domain->giveNumber());
+    Natural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
   #endif
  #endif
 
@@ -769,43 +761,69 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
 #endif
  #endif
         OOFEM_LOG_INFO("NRSolver: %-5d", nite);
+        bool zeroNorm = false;
         // loop over dof groups and check convergence individually
         for ( int dg = 1; dg <= nccdg; dg++ ) {
+            bool zeroFNorm = false, zeroDNorm = false;
             // Skips the ones which aren't used in this problem (the residual will be zero for these anyway, but it is annoying to print them all)
             if ( !idsInUse.at(dg) ) {
                 continue;
             }
-            //  compute a relative error norm
-            if ( ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
-                forceErr = sqrt( dg_forceErr.at(dg) / ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) );
-            } else {
-                 // If both external forces and internal ebe norms are zero, then the residual must be zero.
-                forceErr = sqrt( dg_forceErr.at(dg) );
+            
+            OOFEM_LOG_INFO( "  %s:", __DofIDItemToString((DofIDItem)dg).c_str() );
+
+            if ( rtolf.at(1) > 0.0 ) {
+                //  compute a relative error norm
+                if ( ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
+                    forceErr = sqrt( dg_forceErr.at(dg) / ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) );
+                } else {
+                    // If both external forces and internal ebe norms are zero, then the residual must be zero.
+                    zeroNorm = true; // Warning about this afterwards.
+                    zeroFNorm = true;
+                    forceErr = sqrt( dg_forceErr.at(dg) );
+                }
+
+                if ( forceErr > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
+                    errorOutOfRange = true;
+                }
+                if ( forceErr > rtolf.at(1) ) {
+                    answer = false;
+                }
+                OOFEM_LOG_INFO( zeroFNorm ? " *%.3e" : "  %.3e", forceErr );
             }
 
-            //
-            // compute displacement error
-            //
-            if ( dg_totalDisp.at(dg) >  nrsolver_ERROR_NORM_SMALL_NUM ) {
-                dispErr = sqrt( dg_dispErr.at(dg) / dg_totalDisp.at(dg) );
-            } else {
-                dispErr = sqrt( dg_dispErr.at(dg) );
+            if ( rtold.at(1) > 0.0 ) {
+                // compute displacement error
+                if ( dg_totalDisp.at(dg) >  nrsolver_ERROR_NORM_SMALL_NUM ) {
+                    dispErr = sqrt( dg_dispErr.at(dg) / dg_totalDisp.at(dg) );
+                } else {
+                    ///@todo This is almost always the case for displacement error. nrsolveR_ERROR_NORM_SMALL_NUM is no good.
+                    //zeroNorm = true; // Warning about this afterwards.
+                    //zeroDNorm = true;
+                    dispErr = sqrt( dg_dispErr.at(dg) );
+                }
+                if ( dispErr  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
+                    errorOutOfRange = true;
+                }
+                if ( dispErr > rtold.at(1) ) {
+                    answer = false;
+                }
+                OOFEM_LOG_INFO( zeroDNorm ? " *%.3e" : "  %.3e", dispErr );
             }
-
-            if ( forceErr > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ||
-                 dispErr  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
-                errorOutOfRange = true;
-            }
-
-            if ( forceErr > rtolf.at(1) || dispErr > rtold.at(1) ) {
-                answer = false;
-            }
-
-            OOFEM_LOG_INFO( "  %s: %.3e %.3e", __DofIDItemToString((DofIDItem)dg), forceErr, dispErr );
         }
         OOFEM_LOG_INFO("\n");
+        if ( zeroNorm ) {
+            OOFEM_WARNING("NRSolver :: checkConvergence - Had to resort to absolute error measure (marked by *)");
+        }
     } else { // No dof grouping
         double dXX, dXdX;
+        
+        if ( engngModel->giveProblemScale() == macroScale ) {
+            OOFEM_LOG_INFO("NRSolver:     %-15d", nite);
+        } else {
+            OOFEM_LOG_INFO("  NRSolver:     %-15d", nite);
+        }
+
  #ifdef __PARALLEL_MODE
         forceErr = parallel_context->norm(rhs); forceErr *= forceErr;
         dXX = parallel_context->localNorm(X); dXX *= dXX; // Note: Solutions are always total global values (natural distribution makes little sense for the solution)
@@ -815,35 +833,41 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         dXX = X.computeSquaredNorm();
         dXdX = ddX.computeSquaredNorm();
  #endif
-        // we compute a relative error norm
-        if ( ( RRT + internalForcesEBENorm.at(1) ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
-            forceErr = sqrt( forceErr / ( RRT + internalForcesEBENorm.at(1) ) );
-        } else {
-            forceErr = sqrt( forceErr ); // absolute norm as last resort
+        if ( rtolf.at(1) > 0.0 ) {
+            // we compute a relative error norm
+            if ( ( RRT + internalForcesEBENorm.at(1) ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
+                forceErr = sqrt( forceErr / ( RRT + internalForcesEBENorm.at(1) ) );
+            } else {
+                forceErr = sqrt( forceErr ); // absolute norm as last resort
+            }
+            if ( fabs(forceErr) > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
+                errorOutOfRange = true;
+            }
+            if ( fabs(forceErr) > rtolf.at(1) ) {
+                answer = false;
+            }
+            OOFEM_LOG_INFO(" %-15e", forceErr);
         }
 
-        // compute displacement error
-        // err is relative displacement change
-        if ( dXX > nrsolver_ERROR_NORM_SMALL_NUM ) {
-            dispErr = sqrt( dXdX / dXX );
-        } else {
-            dispErr = sqrt( dXdX );
+        if ( rtold.at(1) > 0.0 ) {
+            // compute displacement error
+            // err is relative displacement change
+            if ( dXX > nrsolver_ERROR_NORM_SMALL_NUM ) {
+                dispErr = sqrt( dXdX / dXX );
+            } else {
+                dispErr = sqrt( dXdX );
+            }
+            if ( fabs(dispErr)  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
+                errorOutOfRange = true;
+            }
+            if ( fabs(dispErr)  > rtold.at(1) ) {
+                answer = false;
+            }
+            OOFEM_LOG_INFO(" %-15e", dispErr);
         }
 
-        if ( ( fabs(forceErr) > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ||
-            ( fabs(dispErr)  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ) {
-            errorOutOfRange = true;
-        }
-
-        if ( ( fabs(forceErr) > rtolf.at(1) ) || ( fabs(dispErr) > rtold.at(1) ) ) {
-            answer = false;
-        }
-        if ( engngModel->giveProblemScale() == macroScale ) {
-            OOFEM_LOG_INFO("NRSolver:     %-15d %-15e %-15e\n", nite, forceErr, dispErr);
-        } else {
-            OOFEM_LOG_INFO("  NRSolver:     %-15d %-15e %-15e\n", nite, forceErr, dispErr);
-        }
-    } // end default case (all dofs conributing)
+        OOFEM_LOG_INFO("\n");
+    } // end default case (all dofs contributing)
 
     return answer;
 }

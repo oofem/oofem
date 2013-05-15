@@ -38,6 +38,8 @@
 #include "nlstructuralelement.h"
 #include "fei2dquadlin.h"
 
+#define _IFT_Quad1Mindlin_Name "quad1mindlin"
+
 namespace oofem {
 
 /**

@@ -37,7 +37,6 @@
 #include <list>
 #include <algorithm>
 
-#include "compiler.h"
 #include "dyncombuff.h"
 #include "mathfem.h"
 #include "error.h"

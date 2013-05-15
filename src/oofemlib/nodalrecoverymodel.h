@@ -37,21 +37,19 @@
 
 #include "tdictionary.h"
 #include "intarray.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "alist.h"
 #include "interface.h"
 #include "internalstatetype.h"
 #include "statecountertype.h"
-
-#ifdef __PARALLEL_MODE
- #include "problemcomm.h"
-#endif
 
 namespace oofem {
 class Domain;
 class Element;
 class CrossSection;
 class TimeStep;
+class CommunicatorBuff;
+class ProblemCommunicator;
 /**
  * The base class for all recovery models, which perform nodal averaging or projection
  * processes for internal variables typically stored in integration points.

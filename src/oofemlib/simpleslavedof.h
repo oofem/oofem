@@ -36,7 +36,6 @@
 #define simpleslavedof_h
 
 #include "dof.h"
-#include "compiler.h"
 #include "error.h"
 
 namespace oofem {
@@ -93,7 +92,6 @@ public:
 
     virtual dofType giveDofType() { return DT_simpleSlave; }
     virtual const char *giveClassName() const { return "SimpleSlaveDof"; }
-    virtual classType giveClassID() const { return SimpleSlaveDofClass; }
     /**
      * Returns equation number corresponding to receiver.
      * Slave simply forwards this message to master.

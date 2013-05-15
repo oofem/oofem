@@ -34,13 +34,17 @@
 
 #include "masonry02.h"
 #include "isolinearelasticmaterial.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( Masonry02 );
+
 Masonry02 :: Masonry02(int n, Domain *d) : MPlasticMaterial2(n, d)
 {
     //

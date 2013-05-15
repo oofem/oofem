@@ -35,13 +35,17 @@
 #include "simpleinterfacemat.h"
 #include "structuralelement.h"
 #include "interfaceelement1d.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "mathfem.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( SimpleInterfaceMaterial );
+
 SimpleInterfaceMaterial :: SimpleInterfaceMaterial(int n, Domain *d) : StructuralMaterial(n, d)
 //
 // constructor

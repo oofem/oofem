@@ -36,9 +36,11 @@
 #define gaussintegrationrule_h
 
 #include "integrationrule.h"
-#include "element.h"
 
 namespace oofem {
+
+class Element;
+
 /**
  * Class representing Gaussian-quadrature integration rule.
  * The number of integration points and their coordinates and integration weights depends on
@@ -69,8 +71,8 @@ public:
     /// Destructor
     virtual ~GaussIntegrationRule();
 
-    virtual classType giveClassID() const { return GaussIntegrationRuleClass; }
     virtual const char *giveClassName() const { return "GaussIntegrationRule"; }
+    virtual IntegrationRuleType giveIntegrationRuleType() const { return IRT_Gauss; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
     virtual int getRequiredNumberOfIntegrationPoints(integrationDomain dType, int approxOrder);
@@ -82,7 +84,6 @@ public:
     virtual int SetUpPointsOnCube(int, MaterialMode);
     virtual int SetUpPointsOnTetrahedra(int, MaterialMode);
     virtual int SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, MaterialMode mode);
-    virtual int SetUpPointsOnWedge(int, MaterialMode, GaussPoint * * *);
     virtual int SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mode, const FloatArray **coords);
 
     void giveTetCoordsAndWeights(int nPoints, FloatArray &coords_xi1, FloatArray &coords_xi2, FloatArray &coords_xi3, FloatArray &weights);

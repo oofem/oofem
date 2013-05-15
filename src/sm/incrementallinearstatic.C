@@ -36,13 +36,16 @@
 #include "timestep.h"
 #include "dof.h"
 #include "sparsemtrx.h"
-#include "dictionr.h"
+#include "dictionary.h"
 #include "verbose.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"
 
 namespace oofem {
+
+REGISTER_EngngModel( IncrementalLinearStatic );
+
 IncrementalLinearStatic :: IncrementalLinearStatic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
     loadVector(), internalLoadVector(), incrementOfDisplacementVector(), discreteTimes()
 {
@@ -72,7 +75,7 @@ NumericalMethod *IncrementalLinearStatic :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
 
-    nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }
@@ -226,7 +229,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
         delete stiffnessMatrix;
     }
 
-    stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+    stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
     if ( stiffnessMatrix == NULL ) {
         _error("solveYourselfAt: sparse matrix creation failed");
     }

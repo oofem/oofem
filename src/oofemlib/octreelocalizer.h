@@ -36,7 +36,7 @@
 #define octreelocalizer_h
 
 #include "spatiallocalizer.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "alist.h"
 #include "intarray.h"
 

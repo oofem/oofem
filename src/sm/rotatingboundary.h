@@ -35,12 +35,13 @@
 #ifndef rotatingboundary_h
 #define rotatingboundary_h
 
-#include "boundary.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "boundarycondition.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 ///@name Input fields for RotatingBoundary
 //@{
+#define _IFT_RotatingBoundary_Name "rotatingboundary"
 #define _IFT_RotatingBoundary_axis "axis"
 #define _IFT_RotatingBoundary_center "center"
 #define _IFT_RotatingBoundary_frequency "frequency" ///< @todo Unused ( But it makes sense that you'd have this, can you check it Andreas? ) / Mikael

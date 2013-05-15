@@ -34,8 +34,8 @@
 
 #include "fei2dtrquad.h"
 #include "mathfem.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 
 namespace oofem {
 void
@@ -191,9 +191,10 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
     answer.resize(3);
     answer(0) = lcoords_guess(0);
     answer(1) = lcoords_guess(1);
+    answer(2) = 1.0 - lcoords_guess(0) - lcoords_guess(1);
 
     bool inside = true;
-    for ( int  i = 0; i < 2; i++ ) {
+    for ( int  i = 0; i < 3; i++ ) {
         if ( answer(i) < ( 0. - POINT_TOL ) ) {
             answer(i) = 0.;
             inside = false;
@@ -203,8 +204,6 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
         }
     }
 
-    answer(2) = 1.0 - lcoords_guess(0) - lcoords_guess(1);
-    
     return inside;
 }
 
@@ -411,6 +410,29 @@ double FEI2dTrQuad :: giveArea(const FEICellGeometry &cellgeo) const
 
     return (4*(-(x4*y1) + x6*y1 + x4*y2 - x5*y2 + x5*y3 - x6*y3) + x2*(y1 - y3 - 4*y4 + 4*y5) +
             x1*(-y2 + y3 + 4*y4 - 4*y6) + x3*(-y1 + y2 - 4*y5 + 4*y6))/6;
+}
+
+double FEI2dTrQuad :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
+{
+    IntArray eNodes;
+    const FloatArray *node;
+    double x1, x2, x3, y1, y2, y3;
+
+    this->computeLocalEdgeMapping(eNodes, iEdge);
+
+    node = cellgeo.giveVertexCoordinates(eNodes.at(1));
+    x1 = node->at ( xind );
+    y1 = node->at ( yind );
+
+    node = cellgeo.giveVertexCoordinates(eNodes.at(2));
+    x2 = node->at ( xind );
+    y2 = node->at ( yind );
+
+    node = cellgeo.giveVertexCoordinates(eNodes.at(3));
+    x3 = node->at ( xind );
+    y3 = node->at ( yind );
+
+    return - ( x1 * y2 - x2 * y1 + 4 * ( x3 * ( y1 - y2 ) + y3 * ( x2 - x1 ) ) ) / 3.0;
 }
 
 } // end namespace oofem

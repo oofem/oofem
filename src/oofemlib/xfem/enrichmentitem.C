@@ -33,23 +33,30 @@
  */
 
 #include "xfemmanager.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "enrichmentitem.h"
 #include "element.h"
 #include "enrichmentfunction.h"
+#include "enrichmentdomain.h"
 #include "cltypes.h"
-#include "conTable.h"
+#include "connectivitytable.h"
 #include "oofem_limits.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_EnrichmentItem( CrackTip )
+REGISTER_EnrichmentItem( CrackInterior )
+REGISTER_EnrichmentItem( Inclusion )
+REGISTER_EnrichmentItem( Delamination )
+
 EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FEMComponent(n, aDomain)
 {
     this->xMan = xMan;
     this->enrichmentFunctionList = new AList< EnrichmentFunction >(0);
     this->enrichmentDomainList = new AList< EnrichmentDomain >(0); 
-    this->numberOfEnrichmentFunctions = 1;    
-    this->numberOfEnrichmentDomains = 1;  
+    this->numberOfEnrichmentFunctions = 1;
+    this->numberOfEnrichmentDomains = 1;
     this->startOfDofIdPool = -1;
     this->enrichesDofsWithIdArray = new IntArray;
 }
@@ -156,7 +163,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
             IR_IOERR(giveClassName(), __proc, "", mir, result);
         }
         
-        EnrichmentFunction *ef = CreateUsrDefEnrichmentFunction( name.c_str(), i, this->xMan->giveDomain() );
+        EnrichmentFunction *ef = classFactory.createEnrichmentFunction( name.c_str(), i, this->xMan->giveDomain() );
         if ( ef == NULL ) {
             OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment function (%s)", name.c_str() );
         }
@@ -174,7 +181,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
             IR_IOERR(giveClassName(), __proc, "", mir, result);
         }
 
-        EnrichmentDomain *ed = CreateUsrDefEnrichmentDomain( name.c_str() ); 
+        EnrichmentDomain *ed = classFactory.createEnrichmentDomain( name.c_str() ); 
         if ( ed == NULL ) {
             OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment domain (%s)", name.c_str() );
         }
@@ -365,7 +372,7 @@ Delamination :: giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &
         zBottom =  0.;//this->giveDelaminationZCoord(dGroup-1);
         zTop    =  0.;//this->giveDelaminationZCoord(dGroup);
     }
-#if DEBUG
+#ifdef DEBUG
     if ( zBottom > zTop ) {
         OOFEM_ERROR2("giveDelaminationGroupZLimits: Bottom z-coord is larger than top z-coord in dGroup. (%i)", dGroup);
     }

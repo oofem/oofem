@@ -33,9 +33,9 @@
  */
 
 #include "idmgrad1.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "sparsemtrx.h"
@@ -47,12 +47,15 @@
 #include "contextioerr.h"
 #include "stressvector.h"
 #include "strainvector.h"
+#include "classfactory.h"
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Material( IDGMaterial );
 
 IDGMaterial :: IDGMaterial(int n, Domain *d):IsotropicDamageMaterial1(n,d) 
     //
@@ -121,35 +124,26 @@ IDGMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _1dMatGrad:
-      if ( form == PDGrad_uu ) {
-	give1dStressStiffMtrx(answer, form, rMode, gp, atTime);
-	break;
-      } else if ( form == PDGrad_ku ) {
-	give1dKappaMatrix(answer, form, rMode, gp, atTime);
-	break;
-      } else if ( form == PDGrad_uk ) {
-	give1dGprime(answer, form, rMode, gp, atTime);
-	break;
-      } else if ( form == PDGrad_kk ) {
-	giveInternalLength(answer, form, rMode, gp, atTime);
-	break;
-      }
+        if ( form == PDGrad_uu ) {
+            give1dStressStiffMtrx(answer, form, rMode, gp, atTime);
+        } else if ( form == PDGrad_ku ) {
+            give1dKappaMatrix(answer, form, rMode, gp, atTime);
+        } else if ( form == PDGrad_uk ) {
+            give1dGprime(answer, form, rMode, gp, atTime);
+        } else if ( form == PDGrad_kk ) {
+            giveInternalLength(answer, form, rMode, gp, atTime);
+        }
     case _PlaneStressGrad:
         if ( form == PDGrad_uu ) {
             givePlaneStressStiffMtrx(answer, form, rMode, gp, atTime);
-	    break;
         } else if ( form == PDGrad_ku ) {
             givePlaneStressKappaMatrix(answer, form, rMode, gp, atTime);
-	    break;
         } else if ( form == PDGrad_uk ) {
             givePlaneStressGprime(answer, form, rMode, gp, atTime);
-	    break;
         } else if ( form == PDGrad_kk ) {
             giveInternalLength(answer, form, rMode, gp, atTime);
-	    break;
         } else if ( form == PDGrad_LD ) {
             giveInternalLengthDerivative(answer, form, rMode, gp, atTime);
-	    break;
         }
         break;
 
@@ -192,25 +186,24 @@ IDGMaterial :: computeEta(FloatMatrix &answer, const FloatArray &strain, GaussPo
             principalStrains.at(3) = -nu * ( principalStrains.at(1) + principalStrains.at(2) ) / ( 1. - nu );
 
             for ( int i = 1; i <= 3; i++ ) {
-	      if ( i < 3 ) {
-		if ( principalStrains.at(i) > 0.0 ) {
-		  double e = principalStrains.at(i);
-		  for(int j = 1; j<3;j++)
-		    n.at(j) = N.at(i,j);
-		  m.beDyadicProductOf(n,n);
-		  m.times(e);
-		  Eta.add(m);
-		}
-	      }
-	      if ( principalStrains.at(i) > 0.0 ) 
-		posNorm += principalStrains.at(i) * principalStrains.at(i);	      
+                if ( i < 3 ) {
+                    if ( principalStrains.at(i) > 0.0 ) {
+                        double e = principalStrains.at(i);
+                        for(int j = 1; j<3;j++)
+                            n.at(j) = N.at(i,j);
+                        m.beDyadicProductOf(n,n);
+                        m.times(e);
+                        Eta.add(m);
+                    }
+                }
+                if ( principalStrains.at(i) > 0.0 ) 
+                    posNorm += principalStrains.at(i) * principalStrains.at(i);
             }
             double kappa = sqrt(posNorm);
             Eta.times(1./kappa);
             answer.at(1,1) = Eta.at(1,1);
             answer.at(1,2) = Eta.at(2,2);
             answer.at(1,3) = Eta.at(1,2);
-
         }
     } else {
         _error("computeEta: unknown EquivStrainType");
@@ -747,10 +740,9 @@ IDGMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, Ga
 
 
 MaterialStatus *
-IDGMaterial :: CreateStatus(GaussPoint *gp)
+IDGMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    IDGMaterialStatus *answer = new IDGMaterialStatus(1, IDGMaterial :: domain, gp);
-    return answer;
+    return new IDGMaterialStatus(1, IDGMaterial :: domain, gp);
 }
 
 

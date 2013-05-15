@@ -34,8 +34,8 @@
 
 #include "fei2dlinelin.h"
 #include "mathfem.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 
 namespace oofem {
 void FEI2dLineLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
@@ -122,6 +122,22 @@ double FEI2dLineLin :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeome
     x2_x1 = cellgeo.giveVertexCoordinates(2)->at(xind) - cellgeo.giveVertexCoordinates(1)->at(xind);
     y2_y1 = cellgeo.giveVertexCoordinates(2)->at(yind) - cellgeo.giveVertexCoordinates(1)->at(yind);
     return sqrt(x2_x1*x2_x1 + y2_y1*y2_y1);
+}
+
+double FEI2dLineLin :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
+{
+    const FloatArray *node;
+    double x1, x2, y1, y2;
+
+    node = cellgeo.giveVertexCoordinates(1);
+    x1 = node->at ( xind );
+    y1 = node->at ( yind );
+
+    node = cellgeo.giveVertexCoordinates(2);
+    x2 = node->at ( xind );
+    y2 = node->at ( yind );
+
+    return x2 * y1 - x1 * y2;
 }
 
 } // end namespace oofem

@@ -37,6 +37,8 @@
 
 #include "load.h"
 
+#define _IFT_StructuralTemperatureLoad_Name "structtemperatureload"
+
 namespace oofem {
 class Element;
 class TimeStep;
@@ -53,8 +55,7 @@ class StructuralTemperatureLoad : public Load
 public:
     StructuralTemperatureLoad(int n, Domain *d) : Load(n, d) { }
 
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
-    { this->computeComponentArrayAt(answer, tStep, mode); }
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
 
     virtual classType giveClassID() const { return StructuralTemperatureLoadClass; }
     virtual bcValType giveBCValType() const { return TemperatureBVT; }

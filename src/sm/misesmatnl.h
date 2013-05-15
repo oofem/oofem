@@ -41,11 +41,12 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 #endif
 
 ///@name Input fields for MisesMatNl
 //@{
+#define _IFT_MisesMatNl_Name "misesmatnl"
 #define _IFT_MisesMatNl_averagingtype "averagingtype"
 #define _IFT_MisesMatNl_exp "exp"
 #define _IFT_MisesMatNl_rf "rf"

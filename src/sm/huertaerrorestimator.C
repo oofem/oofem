@@ -37,14 +37,14 @@
 #include "node.h"
 #include "element.h"
 #include "load.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "mathfem.h"
-#include "loadtime.h"
+#include "loadtimefunction.h"
 #include "timestep.h"
 #include "metastep.h"
 #include "integrationrule.h"
-#include "conTable.h"
+#include "connectivitytable.h"
 #include "crosssection.h"
 #include "dof.h"
 #include "util.h"
@@ -59,12 +59,17 @@
 #include "oofem_limits.h"
 #include "calmls.h"
 #include "nrsolver.h"
+#include "errorestimatortype.h"
+#include "classfactory.h"
 
 #include <vector>
 #include <string>
 
 
 namespace oofem {
+
+REGISTER_ErrorEstimator(HuertaErrorEstimator, EET_HEE);
+
 //#define STIFFNESS_TYPE       TangentStiffnessMatrix
 #define STIFFNESS_TYPE       ElasticStiffnessMatrix
 //#define STIFFNESS_TYPE       SecantStiffnessMatrix

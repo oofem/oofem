@@ -35,7 +35,6 @@
 #ifndef scalarerrorindicator_h
 #define scalarerrorindicator_h
 
-#include "compiler.h"
 #include "errorestimator.h"
 #include "internalstatetype.h"
 

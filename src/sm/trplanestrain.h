@@ -47,6 +47,8 @@
 #include "huertaerrorestimator.h"
 #include "fei2dtrlin.h"
 
+#define _IFT_TrPlaneStrain_Name "trplanestrain"
+
 namespace oofem {
 
 /**
@@ -113,9 +115,6 @@ public:
 
     // ZZErrorEstimatorInterface
     virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
-    virtual void ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(FloatArray &answer, GaussPoint *gp,
-                                                                           InternalStateType type)
-    { ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(answer, gp, type); }
 
     // HuertaErrorEstimatorInterface
     virtual Element *HuertaErrorEstimatorI_giveElement() { return this; }

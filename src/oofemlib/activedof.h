@@ -77,6 +77,7 @@ public:
     virtual void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *stepN);
     virtual void computeDofTransformation(FloatArray &primaryMasterContribs);
     virtual void giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme &s);
+    virtual void giveDofIDs(IntArray &masterDofIDs);
 
     virtual double giveUnknown(ValueModeType mode, TimeStep *stepN);
     virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *stepN);
@@ -86,7 +87,6 @@ public:
 
     virtual dofType giveDofType() { return DT_active; }
     virtual const char *giveClassName() const { return "ActiveDof"; }
-    virtual classType giveClassID() const { return ActiveDofClass; }
 
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
@@ -95,6 +95,7 @@ public:
     virtual int askNewEquationNumber(TimeStep *tStep);
     virtual bool hasBc(TimeStep *tStep);
     virtual int giveBcId();
+    virtual void setBcId(int bcId);
     virtual double giveBcValue(ValueModeType mode, TimeStep *tStep);
 
     virtual bool hasIc(TimeStep *tStep);

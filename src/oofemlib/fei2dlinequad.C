@@ -34,8 +34,8 @@
 
 #include "fei2dlinequad.h"
 #include "mathfem.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 
 namespace oofem {
 void FEI2dLineQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
@@ -223,6 +223,26 @@ double FEI2dLineQuad :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeom
 {
     OOFEM_ERROR("FEI2DLineQuad :: edgeComputeLength - Not implemented");
     return 0.0;
+}
+
+double FEI2dLineQuad :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
+{
+    const FloatArray *node;
+    double x1, x2, x3, y1, y2, y3;
+
+    node = cellgeo.giveVertexCoordinates(1);
+    x1 = node->at ( xind );
+    y1 = node->at ( yind );
+
+    node = cellgeo.giveVertexCoordinates(2);
+    x2 = node->at ( xind );
+    y2 = node->at ( yind );
+
+    node = cellgeo.giveVertexCoordinates(3);
+    x3 = node->at ( xind );
+    y3 = node->at ( yind );
+
+    return ( x1 * y2 - x2 * y1 + 4 * ( x3 * ( y1 - y2 ) + y3 * ( x2 - x1 ) ) ) / 3.0;
 }
 
 } // end namespace oofem

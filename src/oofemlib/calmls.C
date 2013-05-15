@@ -35,14 +35,14 @@
 #include "calmls.h"
 #include "verbose.h"
 #include "timestep.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "datastream.h"
 #include "mathfem.h"
 #include "element.h"
+#include "classfactory.h"
 // includes for HPC - not very clean (NumMethod knows what is "node" and "dof")
 #include "node.h"
 #include "dof.h"
-#include "usrdefsub.h"
 #include "contextioerr.h"
 
 namespace oofem {
@@ -52,8 +52,10 @@ namespace oofem {
 #define CALM_DEFAULT_NRM_TICKS 2
 #define CALM_MAX_REL_ERROR_BOUND 1.e10
 
-CylindricalALM :: CylindricalALM(int i, Domain *d, EngngModel *m, EquationID ut) :
-    SparseNonLinearSystemNM(i, d, m, ut), calm_HPCWeights(), calm_HPCIndirectDofMask(), calm_HPCDmanDofSrcArray(), ccDofGroups()
+REGISTER_SparseNonLinearSystemNM( CylindricalALM )
+
+CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m) :
+    SparseNonLinearSystemNM(d, m), calm_HPCWeights(), calm_HPCIndirectDofMask(), calm_HPCDmanDofSrcArray(), ccDofGroups()
 {
     //
     // constructor
@@ -95,7 +97,7 @@ CylindricalALM :: CylindricalALM(int i, Domain *d, EngngModel *m, EquationID ut)
 
 #ifdef __PARALLEL_MODE
 #ifdef __PETSC_MODULE
-    parallel_context = engngModel->givePetscContext(d->giveNumber(), ut);
+    parallel_context = engngModel->givePetscContext(d->giveNumber());
 #endif
 #endif
 
@@ -159,7 +161,9 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 
     XInitial = * X;
     ddX.resize(neq);
+    ddX.zero();
     deltaXt.resize(neq);
+    deltaXt.zero();
 
     status = NM_None;
     this->giveLinearSolver();
@@ -515,7 +519,7 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
     EModelDefaultEquationNumbering dn;
 #ifdef __PARALLEL_MODE
  #ifdef __PETSC_MODULE
-    PetscNatural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
+    Natural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
  #endif
 #endif
 
@@ -701,11 +705,12 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
         dXX = X.computeSquaredNorm();
 
 #endif
+        double eNorm = internalForcesEBENorm.sum();
         // we compute a relative error norm
         if ( ( RR0 + RR * Lambda * Lambda ) > calm_SMALL_ERROR_NUM ) {
             forceErr = sqrt( forceErr / ( RR0 + RR * Lambda * Lambda ) );
-        } else if ( internalForcesEBENorm.at(1) > calm_SMALL_ERROR_NUM ) {
-            forceErr = sqrt(forceErr / internalForcesEBENorm.at(1));
+        } else if ( eNorm > calm_SMALL_ERROR_NUM ) {
+            forceErr = sqrt(forceErr / eNorm );
         } else {
             forceErr = sqrt(forceErr);
         }
@@ -845,7 +850,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         }
 
         if ( ( calm_HPCDmanDofSrcArray.giveSize() % 2 ) != 0 ) {
-            _error("HPC Map size must be even number, it contains pairs <node, nodeDof>");
+            OOFEM_ERROR("CALMSLS :: HPC Map size must be even number, it contains pairs <node, nodeDof>");
         }
 
         nsize = calm_HPCDmanDofSrcArray.giveSize() / 2;
@@ -856,21 +861,19 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
                 calm_HPCWeights.at(i) = 1.0;
             }
         } else if ( nsize != calm_HPCWeights.giveSize() ) {
-            _error("HPC map size and weight array size mismatch");
+            OOFEM_ERROR("CALMSLS :: HPC map size and weight array size mismatch");
         }
 
         calm_hpc_init = 1;
     } else {
         if ( hpcMode ) {
-            _error("HPC Map must be specified");
+            OOFEM_ERROR("CALMSLS :: HPC Map must be specified");
         }
     }
 
     int _value = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _value, _IFT_CylindricalALM_lstype);
     solverType = ( LinSystSolverType ) _value;
-
-    this->giveLinearSolver()->initializeFrom(ir);
 
     this->lsFlag = 0; // linesearch default is off
     IR_GIVE_OPTIONAL_FIELD(ir, lsFlag, _IFT_CylindricalALM_linesearch);
@@ -933,7 +936,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, rtold, _IFT_CylindricalALM_rtold);
 
         if ( ( rtolf.giveSize() != nccdg ) || ( rtold.giveSize() != nccdg ) ) {
-            _error2("Incompatible size of rtolf or rtold params, expected size %d (nccdg)", nccdg);
+            OOFEM_ERROR2("CALMLS :: Incompatible size of rtolf or rtold params, expected size %d (nccdg)", nccdg);
         }
     } else {
         nccdg = 0;
@@ -1063,9 +1066,9 @@ CylindricalALM :: giveLinearSolver()
         }
     }
 
-    linSolver = CreateUsrDefSparseLinSolver(solverType, 1, domain, engngModel);
+    linSolver = classFactory.createSparseLinSolver(solverType, domain, engngModel);
     if ( linSolver == NULL ) {
-        _error("giveLinearSolver: linear solver creation failed");
+        OOFEM_ERROR("CALMSLS :: giveLinearSolver: linear solver creation failed");
     }
 
     return linSolver;
@@ -1088,7 +1091,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
 
 #ifdef __PARALLEL_MODE
  #ifdef __PETSC_MODULE
-    //PetscNatural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
+    //Natural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
  #endif
 #endif
     //
@@ -1164,7 +1167,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
         // solution of quadratic eqn.
         double discr = a2 * a2 - 4.0 * a1 * a3;
         if ( discr < 0.0 ) {
-            _error("computeDeltaLambda: discriminant is negative, solution failed");
+            OOFEM_ERROR("CALMSLS :: computeDeltaLambda: discriminant is negative, solution failed");
         }
 
         discr = sqrt(discr);
@@ -1234,7 +1237,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
         denom = colv(1);
 #endif
         if ( fabs(denom) < calm_SMALL_NUM ) {
-            _error("\ncalm: zero denominator in linearized control");
+            OOFEM_ERROR("CALMSLS :: \ncalm: zero denominator in linearized control");
         }
 
         deltaLambda = ( deltaL - nom ) / denom;
@@ -1356,7 +1359,7 @@ CylindricalALM :: do_lineSearch(FloatArray &r, const FloatArray &rInitial, const
 
 #ifdef __PARALLEL_MODE
  #ifdef __PETSC_MODULE
-    //PetscNatural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
+    //Natural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
  #endif
     d6 = parallel_context->localDotProduct(deltaX_, F);
     d7 = parallel_context->localDotProduct(deltaXt, F);

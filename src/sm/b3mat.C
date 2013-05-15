@@ -34,11 +34,15 @@
 
 #include "b3mat.h"
 #include "mathfem.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "structuralcrosssection.h"
 #include "timestep.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( B3Material );
+
 IRResultType
 B3Material :: initializeFrom(InputRecord *ir)
 {
@@ -375,7 +379,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, MatResponseForm f
 
     /* ask for humidity and temperature from external sources, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-    Field *tf;
+    FM_FieldPtr tf;
     FloatArray gcoords, et2, ei2, stressVector, fullStressVector;
 
     if ( ( tf = fm->giveField(FT_Temperature) ) ) {

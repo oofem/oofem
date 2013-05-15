@@ -33,9 +33,9 @@
  */
 
 #include "idmnl1.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "structuralelement.h"
@@ -45,6 +45,7 @@
 #include "contextioerr.h"
 #include "stressvector.h"
 #include "strainvector.h"
+#include "classfactory.h"
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
@@ -52,10 +53,13 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Material( IDNLMaterial );
+
 IDNLMaterial :: IDNLMaterial(int n, Domain *d) : IsotropicDamageMaterial1(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
     //
     // constructor

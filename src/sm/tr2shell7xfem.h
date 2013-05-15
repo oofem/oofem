@@ -39,9 +39,10 @@
 #include "eleminterpmapperinterface.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "layeredcrosssection.h"
-
 #include "nlstructuralelement.h"
 #include "shell7basexfem.h"
+
+#define _IFT_Tr2Shell7XFEM_Name "tr2shell7xfem"
 
 namespace oofem {
 
@@ -59,7 +60,7 @@ class BoundaryLoad;
 class Tr2Shell7XFEM : public Shell7BaseXFEM
 {
 protected:
-    int numberOfGaussPoints;	
+    int numberOfGaussPoints;
     static FEI3dTrQuad interpolation;
     static bool __initialized;
     static IntArray ordering_phibar;
@@ -101,27 +102,24 @@ protected:
     void vtkGiveUpdatedFictiousNodeCoords(FloatArray nodeCoords[15], int layer, TimeStep *tStep);
 
 public:
-    Tr2Shell7XFEM(int n, Domain *d);	// constructor
-    virtual ~Tr2Shell7XFEM() { }		// destructor -> declaring as virtual will make each subclass call their respective destr.
+    Tr2Shell7XFEM(int n, Domain *d);
+    virtual ~Tr2Shell7XFEM() { }     // destructor -> declaring as virtual will make each subclass call their respective destr.
     // definition & identification
     //virtual int giveNumberOfDofs()           { return 42; }
     virtual int giveNumberOfEdgeDofs()       { return 21; }
     //virtual int giveNumberOfEdgeDofs()       { return 35; } ///@todo temporary! remove!
     virtual int giveNumberOfEdgeDofManagers(){ return 3;  }
-    virtual const char *giveClassName()                const { return "Tr2Shell7XFEM"; }
-    virtual classType giveClassID()                    const { return Tr2Shell7XFEMClass; }
-    //virtual Element_Geometry_Type giveGeometryType()   const { return EGT_triangle_2; }
-    virtual Element_Geometry_Type giveGeometryType()   const { return EGT_Composite; }
-    virtual integrationDomain  giveIntegrationDomain() const { return _Triangle; } // write new wedge-like type 'layeredWedge'
-
-
+    virtual const char *giveClassName() const { return "Tr2Shell7XFEM"; }
+    virtual classType giveClassID() const { return Tr2Shell7XFEMClass; }
+    //virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_Composite; }
+    virtual integrationDomain giveIntegrationDomain() { return _Triangle; } // write new wedge-like type 'layeredWedge'
     virtual void giveCompositeExportData( IntArray &primaryVarsToExport, IntArray &cellVarsToExport,
                  std::vector<FloatArray> &nodeCoords, std::vector<IntArray> &cellNodes, IntArray &cellTypes, 
                  std::vector<FloatArray> &primaryVars, std::vector<FloatArray> &cellVars, TimeStep *tStep ){};
 
     //virtual void giveCompositeExportData( IntArray &primaryVarsToExport, IntArray &cellVarsToExport, TimeStep *tStep );
 };
-
 
 
 } // end namespace oofem

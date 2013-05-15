@@ -41,6 +41,7 @@
 
 ///@name Input fields for StaggeredProblem
 //@{
+#define _IFT_StaggeredProblem_Name "staggeredproblem"
 #define _IFT_StaggeredProblem_deltat "deltat"
 #define _IFT_StaggeredProblem_dtf "dtf"
 #define _IFT_StaggeredProblem_timeDefinedByProb "timedefinedbyprob"
@@ -48,6 +49,7 @@
 #define _IFT_StaggeredProblem_prescribedtimes "prescribedtimes"
 #define _IFT_StaggeredProblem_prob1 "prob1"
 #define _IFT_StaggeredProblem_prob2 "prob2"
+#define _IFT_StaggeredProblem_coupling "coupling"
 //@}
 
 namespace oofem {
@@ -99,6 +101,9 @@ protected:
 
     /// Optional parameter which specify problems to define load time functions
     int timeDefinedByProb;
+
+    /// List of slave models to which this model is coupled    
+    IntArray coupledModels;
 
 public:
     /**
@@ -159,6 +164,9 @@ public:
      * Returns time for time step number n (array discreteTimes must be specified)
      */
     double giveDiscreteTime(int n);
+
+    /// Returns list of model number that this model is coupled with. Used for staggered approach.
+    void giveCoupledModels(IntArray& answer) { answer = coupledModels;}
 
 #ifdef __OOFEG
     void drawYourself(oofegGraphicContext &context);

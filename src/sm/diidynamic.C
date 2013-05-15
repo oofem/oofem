@@ -42,9 +42,12 @@
 #include "verbose.h"
 #include "structuralelement.h"
 #include "structuralelementevaluator.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_EngngModel( DIIDynamic );
+
 DIIDynamic :: DIIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
     loadVector(), previousLoadVector(), rhs(), displacementVector(), velocityVector(), accelerationVector(),
                                                        previousDisplacementVector(), previousVelocityVector(), previousAccelerationVector(), previousIncrementOfDisplacement(), help()
@@ -90,7 +93,7 @@ NumericalMethod *DIIDynamic :: giveNumericalMethod(MetaStep *mStep)
             return nMethod;
         }
 
-        nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+        nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     }
 
     if ( nMethod == NULL ) {
@@ -105,7 +108,7 @@ NumericalMethod *DIIDynamic :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
 
-    nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }
@@ -172,7 +175,7 @@ double DIIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, D
 // This function translates this request to numerical method language.
 {
     int eq = dof->__giveEquationNumber();
-#if DEBUG
+#ifdef DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -291,7 +294,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
 #ifdef VERBOSE
         OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
-        stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( stiffnessMatrix == NULL ) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }

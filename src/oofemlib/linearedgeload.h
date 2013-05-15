@@ -36,11 +36,12 @@
 #define linearedgeload_h
 
 #include "boundaryload.h"
-#include "gausspnt.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatarray.h"
 
 ///@name Input fields for LinearEdgeLoad
 //@{
+#define _IFT_LinearEdgeLoad_Name "linearedgeload"
 #define _IFT_LinearEdgeLoad_formulation "formulation"
 #define _IFT_LinearEdgeLoad_startcoord "sc"
 #define _IFT_LinearEdgeLoad_endcoord "ec"

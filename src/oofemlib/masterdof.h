@@ -37,12 +37,8 @@
 #define masterdof_h
 
 #include "dof.h"
-#include "dictionr.h"
+#include "dictionary.h"
 #include "dofmanager.h"
-
-#ifdef __PARALLEL_MODE
- #include "combuff.h"
-#endif
 
 #include <cstdio>
 
@@ -123,7 +119,6 @@ public:
 
     virtual dofType giveDofType() { return DT_master; }
     virtual const char *giveClassName() const { return "MasterDof"; }
-    virtual classType giveClassID() const { return MasterDofClass; }
 
     virtual int __giveEquationNumber() const ;
 
@@ -154,6 +149,7 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual void setBcId(int bcId) { this->bc = bcId; }
+    virtual void setIcId(int icId) { this->ic = icId; }
     virtual void setEquationNumber(int equationNumber) { this->equationNumber = equationNumber; }
     virtual void setUnknowns(Dictionary *unknowns) { this->unknowns = unknowns; }
     virtual Dictionary *giveUnknowns() { return this->unknowns; }

@@ -33,10 +33,14 @@
  */
 
 #include "isolinmoisturemat.h"
-#include "flotmtrx.h"
-#include "gausspnt.h"
+#include "floatmatrix.h"
+#include "gausspoint.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( IsotropicLinMoistureTransferMaterial );
+
 IRResultType
 IsotropicLinMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
 {

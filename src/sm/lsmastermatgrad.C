@@ -34,9 +34,9 @@
 
 #include "lsmastermatgrad.h"
 #include "isolinearelasticmaterial.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "stressvector.h"
 #include "strainvector.h"

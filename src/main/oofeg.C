@@ -38,13 +38,12 @@
 #include "oofemtxtdatareader.h"
 #include "engngm.h"
 #include "timestep.h"
-#include "freestor.h"
 #include "compiler.h"
 #include "error.h"
 #include "oofeggraphiccontext.h"
 
 
-#include "conTable.h"
+#include "connectivitytable.h"
 #include "mathfem.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"

@@ -33,11 +33,15 @@
  */
 
 #include "constantedgeload.h"
-#include "loadtime.h"
-#include "flotarry.h"
+#include "loadtimefunction.h"
+#include "floatarray.h"
 #include "timestep.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_BoundaryCondition( ConstantEdgeLoad );
+
 IRResultType
 ConstantEdgeLoad :: initializeFrom(InputRecord *ir)
 {

@@ -35,16 +35,17 @@
 #ifndef nonstationarytransportproblem_h
 #define nonstationarytransportproblem_h
 
-#include "structengngmodel.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "primaryfield.h"
 #include "dofdistributedprimaryfield.h"
 #include "transportmaterial.h"
 #include "stationarytransportproblem.h"
+#include "linsystsolvertype.h"
 
 ///@name Input fields for NonStationaryTransportProblem
 //@{
+#define _IFT_NonStationaryTransportProblem_Name "nonstationaryproblem"
 #define _IFT_NonStationaryTransportProblem_initt "initt"
 #define _IFT_NonStationaryTransportProblem_deltat "deltat"
 #define _IFT_NonStationaryTransportProblem_deltatfunction "deltatfunction"
@@ -67,6 +68,9 @@ protected:
      * (like those for computing real internal forces or updating the internal state).
      */
     StateCounterType internalVarUpdateStamp;
+    
+    LinSystSolverType solverType; ///@todo Remove this and use nonlinear methods.
+    SparseLinearSystemNM *linSolver; ///@todo Remove this and use nonlinear methods.
 
     /// Right hand side vector from boundary conditions.
     FloatArray bcRhs;
@@ -145,7 +149,7 @@ public:
      */
     double giveDiscreteTime(int n);
 
-#if __CEMHYD_MODULE
+#ifdef __CEMHYD_MODULE
     void averageOverElements(TimeStep *tStep);
 #endif
 

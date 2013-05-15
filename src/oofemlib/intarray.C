@@ -39,46 +39,50 @@
  */
 
 #include "intarray.h"
-#include "freestor.h"
 #include "error.h"
 #include "datastream.h"
-#include "classtype.h"
 
 #include <cstdarg>
+#include <cstdlib>
+#include <cstring>
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
 #endif
 
 namespace oofem {
-IntArray :: IntArray(int n)
+
+IntArray :: IntArray() :
+    size(0),
+    allocatedSize(0),
+    values(NULL)
+{
+}
+
+
+IntArray :: IntArray(int n) :
+    size(n),
+    allocatedSize(n)
 // Constructor : creates an array of size n (filled with garbage).
 {
-    allocatedSize = size = n;
-    if ( n ) {
-        values = allocInt(size);
+    if ( size ) {
+        values = (int*)calloc(size, sizeof(int));
     } else {
         values = NULL;
     }
 }
 
 
-IntArray :: IntArray(const IntArray &src)
+IntArray :: IntArray(const IntArray &src) :
+     size(src.size),
+     allocatedSize(src.size)
+// copy constructor
 {
-    // copy constructor
-    allocatedSize = size = src.size;
     if ( size ) {
-        values = allocInt(size);
+        values = (int*)malloc(size * sizeof(int));
+        memcpy(values, src.values, size * sizeof(int));
     } else {
         values = NULL;
-    }
-
-    int *p2        = src.values;
-    int *p3        = values;
-
-    int i = size;
-    while ( i-- ) {
-        * p3++ = * p2++;
     }
 }
 
@@ -86,7 +90,7 @@ IntArray :: IntArray(const IntArray &src)
 IntArray :: ~IntArray()
 {
     if ( values ) {
-        freeInt(values);
+        free(values);
     }
 }
 
@@ -95,21 +99,13 @@ IntArray &IntArray :: operator = ( const IntArray & src )
 {
     // assignment: cleanup and copy
     if ( values ) {
-        freeInt(values);
+        free(values);
     }
-
 
     allocatedSize = size = src.size;
     if ( size ) {
-        values = allocInt(size);
-
-        int *p2        = src.values;
-        int *p3        = values;
-
-        int i = size;
-        while ( i-- ) {
-            * p3++ = * p2++;
-        }
+        values = (int*)malloc(size * sizeof(int));
+        memcpy(values, src.values, size * sizeof(int));
     } else {
         values = NULL;
     }
@@ -120,12 +116,7 @@ IntArray &IntArray :: operator = ( const IntArray & src )
 
 void IntArray :: zero()
 {
-    int *p1 = values;
-
-    int i = size;
-    while ( i-- ) {
-        * p1++ = 0;
-    }
+    memset(values, 0, size * sizeof(int));
 }
 
 
@@ -187,70 +178,60 @@ void IntArray :: checkBounds(int i) const
 
 void IntArray :: resize(int n, int allocChunk)
 {
-    int *p1, *p2, *newValues, i;
+#ifdef DEBUG
+    if ( allocChunk < 0 ) {
+        OOFEM_FATAL2("FloatArray :: resize - allocChunk must be non-negative; %d", allocChunk);
+    }
+
+#endif
 
     if ( n <= allocatedSize ) {
         size = n;
         return;
     }
-
-    if ( allocChunk < 0 ) {
-        allocChunk = 0;
-    }
-
-    newValues = allocInt(n + allocChunk);
-
-    p1 = values;
-    p2 = newValues;
-    i  = size;
-    while ( i-- ) {
-        * p2++ = * p1++;
-    }
-
-    if ( values ) {
-        freeInt(values);
-    }
-
-    values = newValues;
     allocatedSize = n + allocChunk;
-    size   = n;
+
+    // For the typical small sizes we have, realloc doesn't seem to be worth it, better with just malloc.
+    int *newValues = (int*)malloc(allocatedSize * sizeof(int));
+#ifdef DEBUG
+    if ( !newValues ) {
+        OOFEM_FATAL2("FloatArray :: resize - Failed in allocating %d doubles", allocatedSize);
+    }
+#endif
+    memcpy(newValues, values, size * sizeof(int) );
+    memset(&newValues[size], 0, (allocatedSize - size) * sizeof(int) );
+
+    if ( values ) free(values);
+    values = newValues;
+    size = n;
 }
 
 
 void IntArray :: preallocate(int futureSize)
 {
-    int *p1, *p2, *newValues, i;
-
     if ( allocatedSize >= futureSize ) {
         return;
     }
-
-    newValues = allocInt(futureSize);
-
-    p1 = values;
-    p2 = newValues;
-    i  = size;
-    while ( i-- ) {
-        * p2++ = * p1++;
-    }
-
-    if ( values ) {
-        freeInt(values);
-    }
-
-    values = newValues;
     allocatedSize = futureSize;
+    
+    int *newValues = (int*)malloc(allocatedSize * sizeof(int));
+#ifdef DEBUG
+    if ( !newValues ) {
+        OOFEM_FATAL2("FloatArray :: preallocate - Failed in allocating %d doubles", allocatedSize);
+    }
+#endif
+    memcpy(newValues, values, size * sizeof(int) );
+    memset(&newValues[size], 0, (allocatedSize - size) * sizeof(int) );
+
+    if ( values ) free(values);
+    values = newValues;
 }
 
 
 void IntArray :: followedBy(const IntArray &b, int allocChunk)
 // Appends the array 'b' the receiver. Returns the receiver.
 {
-    register int i;
-    int newSize;
-    int *newValues, *p1, *p2, *p3;
-
-    newSize = size + b.size;
+    int newSize = size + b.size;
     if ( newSize == size ) {
         return;
     }
@@ -260,75 +241,44 @@ void IntArray :: followedBy(const IntArray &b, int allocChunk)
     }
 
     if ( newSize > allocatedSize ) {
-        newValues = allocInt(newSize + allocChunk);
+        int *newValues = (int*)malloc((newSize + allocChunk) * sizeof(int));
 
-        p1 = values;
-        p2 = b.values;
-        p3 = newValues;
+        memcpy(newValues, values, size * sizeof(int));
+        memcpy(newValues + size, b.values, b.size * sizeof(int));
+        ///@todo Do we zero or just leave the last part uninitialized?
+        memset(newValues + newSize, 0, allocChunk * sizeof(int));
 
-        i = size;
-        while ( i-- ) {
-            * p3++ = * p1++;
-        }
-
-        i = b.size;
-        while ( i-- ) {
-            * p3++ = * p2++;
-        }
-
-        if ( values ) {
-            freeInt(values);
-        }
-
+        if ( values ) free(values);
         values = newValues;
         allocatedSize = newSize + allocChunk;
         size = newSize;
     } else {
-        p1 = values + size;
-        p2 = b.values;
-
-        i = b.size;
-        while ( i-- ) {
-            * p1++ = * p2++;
-        }
-
+        memcpy(values + size, b.values, b.size * sizeof(int));
         size = newSize;
     }
 }
 
 
-void IntArray :: followedBy(const int b, int allocChunk)
+void IntArray :: followedBy(int b, int allocChunk)
 // Appends the array 'b' the receiver. Returns the receiver.
 {
-    register int i;
-    int newSize;
-    int *newValues, *p1, *p3;
-
-    newSize = size + 1;
+    int newSize = size + 1;
 
     if ( newSize > allocatedSize ) {
-        newValues = allocInt(newSize + allocChunk);
+        ///@todo use malloc + memcpy/memset.
+        int *newValues = (int*)calloc(newSize + allocChunk, sizeof(int));
 
-        p1        = values;
-        p3        = newValues;
+        memcpy(newValues, values, size * sizeof(int));
+        newValues[size] = b;
 
-        i = size;
-        while ( i-- ) {
-            * p3++ = * p1++;
-        }
-
-        * p3 = b;
-
-        if ( values ) {
-            freeInt(values);
-        }
+        if ( values ) free(values);
 
         values = newValues;
         allocatedSize = newSize + allocChunk;
-        size   = newSize;
+        size = newSize;
     } else {
         * ( values + size ) = b;
-        size   = newSize;
+        size = newSize;
     }
 }
 
@@ -364,7 +314,7 @@ bool IntArray :: containsOnlyZeroes() const
 
 int IntArray :: minimum() const
 {
-#if DEBUG
+#ifdef DEBUG
     if (size == 0) {
         OOFEM_ERROR("IntArray :: minimum - Empty array.");
     }
@@ -381,7 +331,7 @@ int IntArray :: minimum() const
 
 int IntArray :: maximum() const
 {
-#if DEBUG
+#ifdef DEBUG
     if (size == 0) {
         OOFEM_ERROR("IntArray :: maximum - Empty array.");
     }
@@ -393,6 +343,21 @@ int IntArray :: maximum() const
         }
     }
     return x;
+}
+
+
+void IntArray::findNonzeros(const IntArray &logical)
+{
+    int newsize = 0;
+    for (int i = 1; i <= logical.size; ++i) {
+        if ( logical.at(i) ) ++newsize;
+    }
+    this->resize(newsize);
+    
+    int pos = 1;
+    for (int i = 1; i <= logical.size; ++i) {
+        if ( logical.at(i) ) this->at(pos++) = i;
+    }
 }
 
 
@@ -445,11 +410,11 @@ contextIOResultType IntArray :: restoreYourself(DataStream *stream, ContextMode 
     }
 
     if ( values != NULL ) {
-        freeInt(values);
+        free(values);
     }
 
     if ( size ) {
-        values = allocInt(size);
+        values = (int*)malloc(size*sizeof(int));
         allocatedSize = size;
     } else {
         values = NULL;
@@ -470,8 +435,7 @@ int IntArray :: findFirstIndexOf(int value)   const
 {
     // finds index of value in receiver
     // if such value  does not exists, returns zero index
-    int i;
-    for ( i = 0; i < size; i++ ) {
+    for ( int i = 0; i < size; i++ ) {
         if ( values [ i ] == value ) {
             return i + 1;
         }
@@ -484,7 +448,7 @@ int IntArray :: findFirstIndexOf(int value)   const
 
 void IntArray :: addSubVector(const IntArray &src, int si)
 {
-    int i, reqSize, n = src.giveSize();
+    int reqSize, n = src.giveSize();
 
     si--;
     reqSize = si + n;
@@ -492,7 +456,7 @@ void IntArray :: addSubVector(const IntArray &src, int si)
         this->resize(reqSize);
     }
 
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= n; i++ ) {
         this->at(si + i) += src.at(i);
     }
 }
@@ -500,7 +464,7 @@ void IntArray :: addSubVector(const IntArray &src, int si)
 
 void IntArray :: copySubVector(const IntArray &src, int si)
 {
-    int i, reqSize, n = src.giveSize();
+    int reqSize, n = src.giveSize();
 
     si--;
     reqSize = si + n;
@@ -508,9 +472,8 @@ void IntArray :: copySubVector(const IntArray &src, int si)
         this->resize(reqSize);
     }
 
-    for ( i = 1; i <= n; i++ ) {
-        this->at(si + i) = src.at(i);
-    }
+
+    memcpy(values + si, src.values, n * sizeof(int));
 }
 
 
@@ -554,10 +517,10 @@ int IntArray :: insertSorted(int _val, int allocChunk)
     int *newValues = NULL, *p1, *p2;
 
     if ( newSize > allocatedSize ) { // realocate if needed
-        newValues = allocInt(newSize + allocChunk);
+        newValues = (int*)calloc(newSize + allocChunk, sizeof(int));
 
-        p1        = values;
-        p2        = newValues;
+        p1 = values;
+        p2 = newValues;
     } else {
         p1 = p2 = values;
     }
@@ -581,7 +544,7 @@ int IntArray :: insertSorted(int _val, int allocChunk)
 
         // dealocate original space
         if ( values ) {
-            freeInt(values);
+            free(values);
         }
 
         values = newValues;
@@ -617,9 +580,9 @@ void IntArray :: eraseSorted(int value)
 
 int IntArray :: findCommonValuesSorted(const IntArray &iarray, IntArray &common, int allocChunk) const
 {
-    int i = 0, j, val;
+    int i = 0, val;
 
-    for ( j = 1; j <= iarray.giveSize(); j++ ) {
+    for ( int j = 1; j <= iarray.giveSize(); j++ ) {
         val = iarray.at(j);
 
         while ( i < size ) {
@@ -686,4 +649,14 @@ int IntArray :: givePackSize(CommunicationBuffer &buff)
     return buff.givePackSize(MPI_INT, 1) + buff.givePackSize(MPI_INT, this->size);
 }
 #endif
+
+std::ostream& operator<< (std::ostream &out, const IntArray &x)
+{
+    out << x.size;
+    for ( int i = 0; i < x.size; ++i ) {
+        out << " " << x(i);
+    }
+    return out;
+}
+
 } // end namespace oofem

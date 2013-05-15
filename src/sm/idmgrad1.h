@@ -37,10 +37,12 @@
 
 #include "idm1.h"
 
+#define _IFT_IDGMaterial_Name "idmgrad1"
+
 namespace oofem {
 
 /**
- * Gradient-enhancedl Isotropic Damage model for concrete in tension,
+ * Gradient-enhanced Isotropic Damage model for concrete in tension,
  */
 class IDGMaterial : public IsotropicDamageMaterial1
 {
@@ -59,7 +61,7 @@ public:
     /// Destructor
     virtual ~IDGMaterial();
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp);
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "IDGMaterial"; }
     virtual classType giveClassID() const { return IDGMaterialClass; }
@@ -105,6 +107,5 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 
-  
 } // end namespace oofem
 #endif // idmgrad1_h

@@ -36,10 +36,13 @@
 #include "remeshingcrit.h"
 #include "mesherinterface.h"
 #include "errorestimator.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "contextioerr.h"
 
 namespace oofem {
+
+REGISTER_EngngModel( AdaptiveLinearStatic );
+
 void
 AdaptiveLinearStatic::updateYourself(TimeStep *stepN)
 {
@@ -55,7 +58,7 @@ AdaptiveLinearStatic::updateYourself(TimeStep *stepN)
         return;
     } else {
         // do remeshing
-        MesherInterface *mesher = CreateUsrDefMesherInterface( meshPackage, this->giveDomain(1) );
+        MesherInterface *mesher = classFactory.createMesherInterface( meshPackage, this->giveDomain(1) );
         Domain *newDomain;
 
         MesherInterface :: returnCode result =

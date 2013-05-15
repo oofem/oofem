@@ -32,13 +32,15 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifdef __SPOOLES_MODULE
-
 #include "spoolessparsemtrx.h"
 #include "engngm.h"
-#include "spoolesinterface.h"
+#include "sparsemtrxtype.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_SparseMtrx( SpoolesSparseMtrx, SMT_SpoolesMtrx);
+
 SparseMtrx *
 SpoolesSparseMtrx :: GiveCopy() const
 {
@@ -196,4 +198,3 @@ SpoolesSparseMtrx :: printYourself() const
 }
 
 } // end namespace oofem
-#endif //ifdef __SPOOLES_MODULE

@@ -34,14 +34,18 @@
 
 #include "misesmatgrad.h"
 #include "stressvector.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "mathfem.h"
 #include "error.h"
+#include "classfactory.h"
 
 
 namespace oofem {
+
+REGISTER_Material( MisesMatGrad );
+
 /////////////////////////////////////////////////////////////////
 //gradient regularization of Mises plasticity coupled with isotropic damage////////////////////
 /////////////////////////////////////////////////////////////////

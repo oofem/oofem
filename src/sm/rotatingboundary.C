@@ -36,9 +36,13 @@
 #include "engngm.h"
 #include "dofmanager.h"
 #include "mathfem.h"
-#include "loadtime.h"
+#include "loadtimefunction.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_BoundaryCondition( RotatingBoundary );
+
 double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 // Returns the value at stepN of the prescribed value of the kinematic
 // unknown 'u'. Returns 0 if 'u' has no prescribed value.

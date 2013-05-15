@@ -33,16 +33,17 @@
  */
 
 #include "inverseit.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "sparsemtrx.h"
 #include "mathfem.h"
 
 namespace oofem {
 #define DETAILED_REPORT
 
-InverseIteration ::  InverseIteration(int i, Domain *d, EngngModel *m) :
-    SparseGeneralEigenValueSystemNM(i, d, m) {
+InverseIteration ::  InverseIteration(Domain *d, EngngModel *m) :
+    SparseGeneralEigenValueSystemNM(d, m)
+{
     nc     = 0;
     rtol   = 10.E-6;  // convergence tolerance
     n = 0;
@@ -67,15 +68,15 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
     //
     nc = min(2 * nroot, nroot + 8);
     if ( ( !a ) || ( !b ) ) {
-        _error("SubspaceIteration :: solveYourselfAt : matrices are not defined\n");
+        OOFEM_ERROR("SubspaceIteration :: solveYourselfAt : matrices are not defined\n");
     }
 
     if ( a->giveNumberOfColumns() != b->giveNumberOfColumns() ) {
-        _error("SubspaceIteration :: solveYourselfAt : matrices size mismatch\n");
+        OOFEM_ERROR("SubspaceIteration :: solveYourselfAt : matrices size mismatch\n");
     }
 
     if ( !a->canBeFactorized() ) {
-        _error("SubspaceIteration :: a matrix not support factorization");
+        OOFEM_ERROR("SubspaceIteration :: a matrix not support factorization");
     }
 
     //
@@ -203,16 +204,6 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
 
 
     return NM_Success;
-
-    ;
 }
 
-IRResultType
-InverseIteration :: initializeFrom(InputRecord *ir)
-//
-//
-//
-{
-    return IRRT_OK;
-}
 } // end namespace oofem

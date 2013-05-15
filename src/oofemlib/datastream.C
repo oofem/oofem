@@ -46,11 +46,11 @@ int DataStream::read ( std::string& data )
     char *str;
     this->read ( &n, 1 );
     str = new char[n + 1];
-    n = this->read ( str, n );
+    this->read ( str, n );
     str[n] = '\0';
     data = str;
     delete [] str;
-    return n;
+    return 1;
 }
 
 int DataStream::write ( const std::string& data )

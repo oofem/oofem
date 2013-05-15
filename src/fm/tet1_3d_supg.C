@@ -33,23 +33,28 @@
  */
 
 #include "tet1_3d_supg.h"
+#include "fluidmodel.h"
 #include "node.h"
 #include "material.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "domain.h"
 #include "mathfem.h"
 #include "engngm.h"
 #include "timestep.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( Tet1_3D_SUPG );
+
 FEI3dTetLin Tet1_3D_SUPG :: interpolation;
 
 Tet1_3D_SUPG :: Tet1_3D_SUPG(int n, Domain *aDomain) :
@@ -395,7 +400,7 @@ double
 Tet1_3D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
 {
     FloatArray u;
-    double Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, tStep, domain, NULL);
+    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 

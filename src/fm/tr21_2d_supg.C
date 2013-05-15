@@ -35,22 +35,26 @@
 #include "tr21_2d_supg.h"
 #include "node.h"
 #include "material.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
 #include "fluiddynamicmaterial.h"
 #include "timestep.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( TR21_2D_SUPG );
+
 FEI2dTrQuad TR21_2D_SUPG :: velocityInterpolation(1, 2);
 FEI2dTrLin TR21_2D_SUPG :: pressureInterpolation(1, 2);
 

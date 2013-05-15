@@ -37,6 +37,8 @@
 
 #include "linesurfacetension.h"
 
+#define _IFT_Line2SurfaceTension_Name "line2surfacetension"
+
 namespace oofem {
 class FEI2dLineQuad;
 

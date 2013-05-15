@@ -34,9 +34,9 @@
 
 #include "oofemtxtinputrecord.h"
 #include "intarray.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
-#include "dictionr.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
+#include "dictionary.h"
 #include "range.h"
 
 #include <cstdlib>

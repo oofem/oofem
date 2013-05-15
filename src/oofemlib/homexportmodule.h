@@ -43,6 +43,7 @@
 
 ///@name Input fields for Homogenization export module
 //@{
+#define _IFT_HOMExportModule_Name "hom"
 #define _IFT_HOMExportModule_scale "scale"
 #define _IFT_HOMExportModule_matnum "matnum"
 //@}

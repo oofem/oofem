@@ -40,6 +40,7 @@
 
 ///@name Input fields for LIBeam3d2
 //@{
+#define _IFT_LIBeam3d2_Name "libeam3d2"
 #define _IFT_LIBeam3d2_refnode "refnode"
 //@}
 

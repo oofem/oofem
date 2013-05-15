@@ -37,6 +37,8 @@
 
 #include "trplanrot.h"
 
+#define _IFT_TrPlaneStrRot3d_Name "trplanestrrot3d"
+
 namespace oofem {
 
 #ifndef __CHARTENSOR

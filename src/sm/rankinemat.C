@@ -34,17 +34,21 @@
 
 #include "rankinemat.h"
 #include "isolinearelasticmaterial.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "stressvector.h"
 #include "strainvector.h"
 #include "mathfem.h"
 #include "contextioerr.h"
 #include "datastream.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( RankineMat );
+
 // constructor
 RankineMat :: RankineMat(int n, Domain *d) : StructuralMaterial(n, d)
 {

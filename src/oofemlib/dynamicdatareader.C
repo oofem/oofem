@@ -35,6 +35,7 @@
 #include "dynamicdatareader.h"
 #include "inputrecord.h"
 #include "oofemtxtinputrecord.h"
+#include "dynamicinputrecord.h"
 #include "error.h"
 
 #include <fstream>
@@ -84,18 +85,19 @@ DynamicDataReader :: finish()
 void
 DynamicDataReader :: writeToFile(const char *fileName)
 {
-    bool warning = false;
     std::ofstream fout(fileName);
 
     fout << this->outputFileName << '\n';
     fout << this->description << '\n';
     for (std::list<InputRecord*>::iterator it = this->recordList.begin(); it != this->recordList.end(); ++it) {
-        OOFEMTXTInputRecord *txt = dynamic_cast<OOFEMTXTInputRecord*>(*it);
-        if (txt) {
-            fout << (txt->giveRecordAsString()) << '\n';
-        } else if (warning) {
-            OOFEM_WARNING("DynamicDataReader :: writeToFile - At least one non-text input record found, can't be printed to file\n");
-            warning = true;
+        DynamicInputRecord *dyn;
+        OOFEMTXTInputRecord *txt;
+        if ( ( dyn = dynamic_cast<DynamicInputRecord*>(*it) ) ) {
+            fout << dyn->giveRecordAsString() << "\n";
+        } else if ( ( txt = dynamic_cast<OOFEMTXTInputRecord*>(*it) ) ) {
+            fout << txt->giveRecordAsString() << '\n';
+        } else {
+            OOFEM_ERROR("DynamicDataReader :: writeToFile - A non-text or dynamic input record found, can't be printed to file\n");
         }
     }
     fout.close();

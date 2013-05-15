@@ -36,12 +36,13 @@
 #define isolinearelasticmaterial_h
 
 #include "linearelasticmaterial.h"
-#include "dictionr.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "dictionary.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 ///@name Input fields for IsotropicLinearElasticMaterial
 //@{
+#define _IFT_IsotropicLinearElasticMaterial_Name "isole"
 #define _IFT_IsotropicLinearElasticMaterial_e "e"
 #define _IFT_IsotropicLinearElasticMaterial_n "n"
 #define _IFT_IsotropicLinearElasticMaterial_talpha "talpha"

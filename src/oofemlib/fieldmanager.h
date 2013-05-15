@@ -35,16 +35,37 @@
 #ifndef fieldmanager_h
 #define fieldmanager_h
 
+//#define FIELDMANAGER_USE_SHARED_PTR
+
 #include "field.h"
 
 #include <map>
+#ifdef FIELDMANAGER_USE_SHARED_PTR
+#include <tr1/memory>
+#endif
 
 namespace oofem {
+
+#ifdef FIELDMANAGER_USE_SHARED_PTR
+typedef std::tr1::shared_ptr<Field> FM_FieldPtr ;
+#else
+typedef Field* FM_FieldPtr ;
+#endif
 
 class FieldManager
 {
 protected:
 
+#ifdef FIELDMANAGER_USE_SHARED_PTR
+  /**
+   * Field container. Stores smart pointers to objects (not object themselves)
+   * to avoid copying elements and to preserve the use of polymorphic types.
+   * The use of shared_ptr is essential here, as some registered fields may be
+   * ovned (and maintained) by emodel, some may be cretead on demand and thus 
+   * managed only by field manager.
+   */
+  std :: map<FieldType, std::tr1::shared_ptr<Field> > externalFields;
+#else  
     /**
      * Internal datastructure to keep reference (pointer) to registered field and
      * flag, indicating, whether the field pointer is managed by field manager or not.
@@ -72,29 +93,40 @@ protected:
      * to avoid copying elements and to preserve the use of polymorphic types.
      */
     std :: map< FieldType, fieldRecord* >externalFields;
-
+#endif
 
 public:
     FieldManager(): externalFields() { }
     ~FieldManager();
 
+#ifdef FIELDMANAGER_USE_SHARED_PTR
+    /**
+     * Registers the given field (the receiver is not assumed to own given field).
+     * The field is registered under given key. Using this key, it can be later accessed.
+     */
+    void registerField(FM_FieldPtr eField, FieldType key);
+#else
     /**
      * Registers the given field (the receiver is not assumed to own given field).
      * The field is registered under given key. Using this key, it can be later accessed.
      * If managedFlag set to true, the receiver is assumed to own the field, so it is
      * responsible for its deallocation).
      */
-    void registerField(Field *eField, FieldType key, bool managedFlag = false);
-    /** Returns true if field is registered under key */
-    bool isFieldRegistered(FieldType key);
+    void registerField(FM_FieldPtr eField, FieldType key, bool managedFlag = false);
+#endif
+
     /**
      * Returns the previously registered field under given key; NULL otherwise
      */
-    Field *giveField(FieldType key);
+    FM_FieldPtr giveField(FieldType key);
+
+    /** Returns true if field is registered under key */
+    bool isFieldRegistered(FieldType key);
     /**
      * Unregisters (deletes) the field registered under given key.
      */
     void unregisterField(FieldType key);
+    
 };
 } // end namespace oofem
 #endif // fieldmanager_h

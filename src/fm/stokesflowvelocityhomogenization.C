@@ -34,12 +34,14 @@
 #include "stokesflow.h"
 #include "stokesflowvelocityhomogenization.h"
 #include "primaryfield.h"
-
-#include "deadwght.h"
+#include "classfactory.h"
+#include "deadweight.h"
 #include "tr21stokes.h"
 
-namespace oofem
-{
+namespace oofem {
+
+REGISTER_EngngModel( StokesFlowVelocityHomogenization );
+
 StokesFlowVelocityHomogenization :: StokesFlowVelocityHomogenization(int i, EngngModel *_master) : StokesFlow(i, _master)
 {
     areaOfDomain = -1.;
@@ -254,7 +256,6 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
         if ( Tr21Stokes * T = dynamic_cast< Tr21Stokes * >( this->giveDomain(1)->giveElement(i) ) ) {
             T->giveElementFMatrix(Fe);
             T->giveLocationArray( loc, EID_MomentumBalance_ConservationEquation, EModelDefaultEquationNumbering() );
-            Fe.resizeWithData(15, 2);
 
             F.assemble(Fe, loc, col);
         }
@@ -262,8 +263,8 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
 
     FloatMatrix H;
 
-//    SparseLinearSystemNM *linMethod = CreateUsrDefSparseLinSolver(ST_Petsc, 1, this->giveDomain(1), this);
-    SparseLinearSystemNM *linMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+//    SparseLinearSystemNM *linMethod = classFactory.createSparseLinSolver(ST_Petsc, this->giveDomain(1), this);
+    SparseLinearSystemNM *linMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
 
     H.resize( F.giveNumberOfRows(), F.giveNumberOfColumns() );
     H.zero();

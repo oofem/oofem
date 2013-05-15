@@ -44,6 +44,7 @@ enum bcGeomType {
     EdgeLoadBGT,    ///< Distributed edge load.
     SurfaceLoadBGT, ///< Distributed surface load.
     PointLoadBGT,   ///< Concentrated point load (placed anywhere).
+    GravityPressureBGT, ///<Pressure due to distributed body load.
 };
 } // end namespace oofem
 #endif // bcgeomtype_h

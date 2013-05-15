@@ -36,12 +36,13 @@
 #include "interfaceelem3dtrlin.h"
 #include "node.h"
 #include "crosssection.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -50,6 +51,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( InterfaceElement3dTrLin );
+
 FEI2dTrLin InterfaceElement3dTrLin :: interpolation(1, 2);
 
 InterfaceElement3dTrLin :: InterfaceElement3dTrLin(int n, Domain *aDomain) :

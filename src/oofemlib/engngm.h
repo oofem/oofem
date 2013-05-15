@@ -63,7 +63,6 @@
 
 #ifdef __PETSC_MODULE
  #include "petsccontext.h"
- #include "petscordering.h"
 #endif
 
 #ifdef __OOFEG
@@ -88,10 +87,12 @@
 
 #define _IFT_EngngModel_lstype "lstype"
 #define _IFT_EngngModel_smtype "smtype"
+
 //@}
 
 namespace oofem {
 
+template < class T > class AList;
 class Domain;
 class TimeStep;
 class Dof;
@@ -266,6 +267,7 @@ protected:
 
     /// Master e-model; if defined receiver is in maintained (slave) mode.
     EngngModel *master;
+
     /// Context.
     EngngModelContext *context;
     /// E-model timer.
@@ -286,7 +288,10 @@ protected:
     char processor_name [ PROCESSOR_NAME_LENGTH ];
     /// Communicator mode. Determines current strategy used.
     ProblemCommunicatorMode commMode;
-
+#ifdef __USE_MPI
+    /// Communication object for this engineering model.
+    MPI_Comm comm;
+#endif
 
     /**@name Load balancing attributes */
     //@{
@@ -359,6 +364,7 @@ public:
     void setDomain (int i, Domain *ptr);
     /// Returns number of domains in problem.
     int giveNumberOfDomains() { return ndomains; }
+
     /** Service for accessing ErrorEstimator corresponding to particular domain */
     virtual ErrorEstimator *giveDomainErrorEstimator(int n) { return defaultErrEstimator; }
     /** Returns material interface representation for given domain */
@@ -506,9 +512,13 @@ public:
      * @see Dof::giveUnknown
      */
     virtual double giveUnknownComponent(ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
-    virtual double giveUnknownComponent(UnknownType, ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
+
+    ///Returns the master engnmodel
+    EngngModel* giveMasterEngngModel(){return this->master;}
 
 #ifdef __PARALLEL_MODE
+    /// Returns the communication object of reciever.
+    MPI_Comm giveParallelComm() { return this->comm; }
     /**
      * Exchanges necessary remote DofManagers data.
      * @param answer Array with collected values.
@@ -865,7 +875,7 @@ public:
      * Returns the PETSc context corresponding to given domain (n) and unknown type
      * Default implementation returns i-th context from petscContextList.
      */
-    virtual PetscContext *givePetscContext(int n, EquationID eid);
+    virtual PetscContext *givePetscContext(int n);
     /**
      * Creates PETSc contexts. Must be implemented by derived classes since the governing equation type is required
      * for context creation.
@@ -938,9 +948,9 @@ public:
      * @param domain Domain to assemble from.
      * @return Sum of element norm (squared) of assembled vector.
      */
-    double assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                         CharType type, ValueModeType mode,
-                                         const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
+    void assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                                       CharType type, ValueModeType mode,
+                                       const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
     /**
      * Assembles characteristic vector of required type from elements into given vector.
      * @param answer Assembled vector.
@@ -953,12 +963,12 @@ public:
      * @param domain Domain to assemble from.
      * @return Sum of element norm (squared) of assembled vector.
      */
-    double assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                      CharType type, ValueModeType mode,
-                                      const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
+    void assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                                    CharType type, ValueModeType mode,
+                                    const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
     /**
-     * Assembles characteristic vector of required type from active boundary conditions.
+     * Assembles characteristic vector of required type from boundary conditions.
      * @param answer Assembled vector.
      * @param tStep Time step, when answer is assembled.
      * @param eid Determines type of equation and corresponding element code numbers.
@@ -967,11 +977,10 @@ public:
      * from elements and assembled using prescribed eqn numbers.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
-     * @return Sum of element norm (squared) of assembled vector.
      */
-    double assembleVectorFromActiveBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                      CharType type, ValueModeType mode,
-                                      const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
+    void assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                              CharType type, ValueModeType mode,
+                              const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
     /**
      * Assembles the extrapolated internal forces vector,

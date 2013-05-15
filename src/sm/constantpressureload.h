@@ -37,6 +37,8 @@
 
 #include "boundaryload.h"
 
+#define _IFT_ConstantPressureLoad_Name "constantpressureload"
+
 namespace oofem {
 /**
  * This class implements a boundary load (force, moment,...) that acts

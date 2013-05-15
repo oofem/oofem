@@ -33,12 +33,13 @@
  */
 #include "trabbonenl3d.h"
 #include "structuralelement.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "mathfem.h"
 #include "sparsemtrx.h"
 #include "nonlocalmaterialext.h"
+#include "classfactory.h"
 
 #ifdef __PARALLEL_MODE
  #include "idmnl1.h"
@@ -47,11 +48,13 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 #endif
 
 
 namespace oofem {
+
+REGISTER_Material( TrabBoneNL3D );
 
 TrabBoneNL3D :: TrabBoneNL3D(int n, Domain *d) : TrabBone3D(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
 {

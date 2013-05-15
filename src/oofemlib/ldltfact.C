@@ -33,10 +33,14 @@
  */
 
 #include "ldltfact.h"
+#include "classfactory.h"
 
 namespace oofem {
-LDLTFactorization :: LDLTFactorization(int i, Domain *d, EngngModel *m) :
-    SparseLinearSystemNM(i, d, m)
+
+REGISTER_SparseLinSolver(LDLTFactorization, ST_Direct)
+    
+LDLTFactorization :: LDLTFactorization(Domain *d, EngngModel *m) :
+    SparseLinearSystemNM(d, m)
 {
     //
     // constructor
@@ -57,26 +61,26 @@ LDLTFactorization :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 
     // first check whether Lhs is defined
     if ( !A ) {
-        _error("solveYourselfAt: unknown Lhs");
+        OOFEM_ERROR("LDLTFactorization :: solveYourselfAt: unknown Lhs");
     }
 
     // and whether Rhs
     if ( !b ) {
-        _error("solveYourselfAt: unknown Rhs");
+        OOFEM_ERROR("LDLTFactorization :: solveYourselfAt: unknown Rhs");
     }
 
     // and whether previous Solution exist
     if ( !x ) {
-        _error("solveYourselfAt: unknown solution array");
+        OOFEM_ERROR("LDLTFactorization :: solveYourselfAt: unknown solution array");
     }
 
     if ( ( size = x->giveSize() ) != b->giveSize() ) {
-        _error("solveYourselfAt: size mismatch");
+        OOFEM_ERROR("LDLTFactorization :: solveYourselfAt: size mismatch");
     }
 
     // check whether Lhs supports factorization
     if ( !A->canBeFactorized() ) {
-        _error("solveYourselfAt: Lhs not support factorization");
+        OOFEM_ERROR("LDLTFactorization :: solveYourselfAt: Lhs not support factorization");
     }
 
     for ( int i = 1; i <= size; i++ ) {
@@ -89,12 +93,4 @@ LDLTFactorization :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     return NM_Success;
 }
 
-IRResultType
-LDLTFactorization :: initializeFrom(InputRecord *ir)
-//
-//
-//
-{
-    return IRRT_OK;
-}
 } // end namespace oofem

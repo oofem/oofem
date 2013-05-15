@@ -36,25 +36,29 @@
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "structuralms.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "intarray.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "timestep.h"
 #include "contextioerr.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "engngm.h"
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
  #include "util.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( LIBeam3d2 );
+
 LIBeam3d2 :: LIBeam3d2(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), tc(), tempTc()
 {
     numberOfDofMans     = 2;

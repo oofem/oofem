@@ -41,7 +41,7 @@
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
-#include "flotarry.h"
+#include "floatarray.h"
 
 
 namespace oofem {

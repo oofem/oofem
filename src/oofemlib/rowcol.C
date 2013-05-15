@@ -33,11 +33,12 @@
  */
 
 #include "rowcol.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
-#include "freestor.h"
 #include "error.h"
+
+#include <cstdlib>
 
 namespace oofem {
 RowColumn :: RowColumn(int n, int st)
@@ -50,8 +51,11 @@ RowColumn :: RowColumn(int n, int st)
     diag   = 0.;
     size   = number - start;
     if ( size ) {
-        row    = allocDouble(size);
-        column = allocDouble(size);
+        row    = (double*)calloc(size, sizeof(double));
+        column = (double*)calloc(size, sizeof(double));
+        if ( !row || !column ) {
+            OOFEM_ERROR("RowColumn :: RowColumn - Failed to allocate memory");
+        }
     } else {
         row    = NULL;
         column = NULL;
@@ -62,13 +66,8 @@ RowColumn :: RowColumn(int n, int st)
 RowColumn :: ~RowColumn()
 // Destructor.
 {
-    int size;
-
-    size = number - start;
-    if ( size ) {
-        freeDouble(row);
-        freeDouble(column);
-    }
+    free(row);
+    free(column);
 }
 
 
@@ -183,8 +182,11 @@ RowColumn :: growTo(int newStart)
 #  endif
 
     newSize   = number - newStart;
-    newRow    = allocDouble(newSize);
-    newColumn = allocDouble(newSize);
+    newRow    = (double*)calloc(newSize, sizeof(double));
+    newColumn = (double*)calloc(newSize, sizeof(double));
+    if ( !newRow || !newColumn ) {
+        OOFEM_ERROR("RowColumn :: growTo - Failed to allocate memory");
+    }
     size      = number - start;
 
     if ( size ) {
@@ -195,7 +197,7 @@ RowColumn :: growTo(int newStart)
             * p2++ = * p1++;
         }
 
-        freeDouble(row);
+        free(row);
 
         p1  = column;
         p2  = newColumn + ( start - newStart );
@@ -204,7 +206,7 @@ RowColumn :: growTo(int newStart)
             * p2++ = * p1++;
         }
 
-        freeDouble(column);
+        free(column);
     }
 
     row    = newRow;
@@ -257,9 +259,11 @@ RowColumn :: GiveCopy()
     int size = number - start;
 
     if ( size ) {
-        newRow    = allocDouble(size);
-        newColumn = allocDouble(size);
-
+        newRow    = (double*)malloc(size * sizeof(double));
+        newColumn = (double*)malloc(size * sizeof(double));
+        if ( !newRow || !newColumn ) {
+            OOFEM_ERROR("RowColumn :: GiveCopy - Failed to allocate memory");
+        }
 
         p1  = row;
         p2  = newRow;

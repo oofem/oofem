@@ -49,7 +49,7 @@
 
 #include "vtkexportmodule.h"
 #include "timestep.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "engngm.h"
 #include "node.h"
 #include "materialinterface.h"
@@ -57,11 +57,14 @@
 #include "cltypes.h"
 #include "element.h"
 #include "material.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 
 #include <vector>
 
 namespace oofem {
+
+REGISTER_ExportModule( VTKExportModule )
+
 VTKExportModule :: VTKExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
 {
     //this->mode = rbrmode;
@@ -1084,7 +1087,7 @@ VTKExportModule :: giveSmoother()
     Domain *d = emodel->giveDomain(1);
 
     if ( this->smoother == NULL ) {
-        this->smoother = CreateUsrDefNodalRecoveryModel(this->stype, d);
+        this->smoother = classFactory.createNodalRecoveryModel(this->stype, d);
         IntArray vrmap;
 
         if (this->mode == wdmode) {

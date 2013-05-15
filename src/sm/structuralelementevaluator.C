@@ -33,12 +33,12 @@
  */
 
 #include "structuralelementevaluator.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "domain.h"
 #include "node.h"
 #include "element.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "matresponsemode.h"
 #include "crosssection.h"
@@ -278,6 +278,7 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
     elem->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     answer.resize(ndofs);
+    answer.zero();
     FloatArray *m = & answer;
     if ( elem->giveInterpolation()->hasSubPatchFormulation() ) {
         m = & temp;

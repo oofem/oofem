@@ -40,6 +40,8 @@
 #include "qplanstrss.h"
 #include "fei2dquadlin.h"
 
+#define _IFT_QPlaneStressGrad_Name "qplanestressgrad"
+
 namespace oofem {
 class QPlaneStressGrad : public QPlaneStress2d, public GradDpElement
 {

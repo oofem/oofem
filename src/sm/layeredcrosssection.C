@@ -34,16 +34,20 @@
 
 #include "layeredcrosssection.h"
 #include "structuralelement.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "material.h"
 #include "structuralmaterial.h"
 #include "structuralms.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "contextioerr.h"
 #include "gaussintegrationrule.h"
+#include "classfactory.h"
 #include "lobattoir.h"
 
 namespace oofem {
+
+REGISTER_CrossSection( LayeredCrossSection );
+
 void
 LayeredCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm form,
                                          GaussPoint *gp,
@@ -903,6 +907,8 @@ LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
 
 
 
+        }
+    }
 
 
 double
@@ -1005,7 +1011,7 @@ LayeredCrossSection :: restoreIPContext(DataStream *stream, ContextMode mode, Ga
 MaterialMode
 LayeredCrossSection :: giveCorrespondingSlaveMaterialMode(MaterialMode masterMode)
 //
-// returns cooresponding slave material mode to master mode
+// returns corresponding slave material mode to master mode
 //
 {
     if ( masterMode == _2dPlate ) {
@@ -1042,15 +1048,15 @@ LayeredCrossSection :: giveIntegrated3dShellStress(FloatArray &answer, GaussPoin
     FloatArray layerStress, reducedLayerStress;
     GaussPoint *layerGp;
     double layerThick, layerWidth, layerZCoord, top, bottom, layerZeta;
-    int i;
 
     answer.resize(8);
+    answer.zero();
     // perform integration over layers
     this->computeIntegralThick(); // ensure that total thick has been conputed
     bottom = -midSurfaceZcoordFromBottom;
     top    = totalThick - midSurfaceZcoordFromBottom;
 
-    for ( i = 1; i <= numberOfLayers; i++ ) {
+    for ( int i = 1; i <= numberOfLayers; i++ ) {
         layerGp = giveSlaveGaussPoint(masterGp, i - 1);
         layerMat = domain->giveMaterial( layerMaterials.at(i) );
         layerStatus = static_cast< StructuralMaterialStatus * >( layerMat->giveStatus(layerGp) );
@@ -1092,14 +1098,14 @@ LayeredCrossSection :: give(CrossSectionProperty aProperty)
 {
     if ( aProperty == CS_Thickness ) {
         return this->computeIntegralThick();
-    } else if ( aProperty == CS_TopZCoord )   {
+    } else if ( aProperty == CS_TopZCoord ) {
         this->computeIntegralThick();
         return totalThick - midSurfaceZcoordFromBottom;
-    } else if ( aProperty == CS_BottomZCoord )   {
+    } else if ( aProperty == CS_BottomZCoord ) {
         return -midSurfaceZcoordFromBottom;
-    } else if ( aProperty == CS_Area )   {
+    } else if ( aProperty == CS_Area ) {
         return this->giveArea();
-    } else if ( aProperty == CS_NumLayers )   {
+    } else if ( aProperty == CS_NumLayers ) {
         return this->numberOfLayers;
     }
 

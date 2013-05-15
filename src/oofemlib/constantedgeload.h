@@ -37,6 +37,8 @@
 
 #include "boundaryload.h"
 
+#define _IFT_ConstantEdgeLoad_Name "constantedgeload"
+
 namespace oofem {
 
 /**

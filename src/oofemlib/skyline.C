@@ -33,22 +33,27 @@
  */
 
 #include "skyline.h"
-#include "flotmtrx.h"
-#include "freestor.h"
+#include "floatmatrix.h"
 #include "intarray.h"
 #include "domain.h"
 #include "engngm.h"
 #include "element.h"
 #include "mathfem.h"
 #include "verbose.h"
+#include "sparsemtrxtype.h"
+#include "classfactory.h"
 
 #include <climits>
+#include <cstdlib>
 
 #ifdef TIME_REPORT
  #include "timer.h"
 #endif
 
 namespace oofem {
+
+REGISTER_SparseMtrx( Skyline, SMT_Skyline);
+
 Skyline :: Skyline(int n) : SparseMtrx(n, n)
 {
     // constructor
@@ -76,7 +81,7 @@ Skyline :: ~Skyline()
 {
     // Destructor.
     if ( this->giveNumberOfRows() ) {
-        freeDouble(mtrx);
+        free(mtrx);
         delete(adr);
     }
 }
@@ -374,10 +379,13 @@ int Skyline :: setInternalStructure(IntArray *a)
     int n = a->giveSize();
     nwk = adr->at(n); // check
     if ( mtrx ) {
-        freeDouble(mtrx);
+        free(mtrx);
     }
 
-    mtrx = allocDouble(nwk);
+    mtrx = ( double * ) calloc( nwk, sizeof( double ) );
+    if ( !mtrx ) {
+        OOFEM_ERROR2("Skyline :: setInternalStructure - Can't allocate: %d", nwk);
+    }
     nRows = nColumns = n - 1;
 
     // increment version
@@ -391,8 +399,8 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
     // maximal column height for assembled characteristics matrix
     //
 
-    int j, js, ieq, maxle;
-    int i, ac1;
+    int js, maxle;
+    int ac1;
     int neq;
     if ( s.isDefault() ) {
         neq = eModel->giveNumberOfDomainEquations(di, s);
@@ -413,26 +421,26 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
     IntArray *mht = new IntArray(neq);
     Domain *domain = eModel->giveDomain(di);
 
-    for ( j = 1; j <= neq; j++ ) {
+    for ( int j = 1; j <= neq; j++ ) {
         mht->at(j) = j; // initialize column height, maximum is line number (since it only stores upper triangular)
     }
 
     int nelem = domain->giveNumberOfElements();
 
     // loop over elements code numbers
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         domain->giveElement(i)->giveLocationArray(loc, ut, s);
         js = loc.giveSize();
         maxle = INT_MAX;
-        for ( j = 1; j <= js; j++ ) {
-            ieq = loc.at(j);
+        for ( int j = 1; j <= js; j++ ) {
+            int ieq = loc.at(j);
             if ( ieq != 0 ) {
                 maxle = min(maxle, ieq);
             }
         }
 
-        for ( j = 1; j <= js; j++ ) {
-            ieq = loc.at(j);
+        for ( int j = 1; j <= js; j++ ) {
+            int ieq = loc.at(j);
             if ( ieq != 0 ) {
                 mht->at(ieq) = min( maxle, mht->at(ieq) );
             }
@@ -456,7 +464,7 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
     adr = new IntArray(neq + 1);
 
     ac1 = 1;
-    for ( i = 1; i <= neq; i++ ) {
+    for ( int i = 1; i <= neq; i++ ) {
         adr->at(i) = ac1;
         ac1 += ( i - mht->at(i) + 1 );
     }
@@ -465,10 +473,13 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
     nRows = nColumns = neq;
     nwk  = ac1;
     if ( mtrx ) {
-        freeDouble(mtrx);
+        free(mtrx);
     }
 
-    mtrx = allocDouble(ac1);
+    mtrx = ( double * ) calloc( ac1, sizeof( double ) );
+    if ( !mtrx ) {
+        OOFEM_ERROR2("Skyline :: buildInternalStructure - Can't allocate: %d", ac1);
+    }
 
     delete mht;
 
@@ -644,10 +655,7 @@ void Skyline :: writeToFile(const char* fname) const
 void Skyline :: zero()
 {
     // Returns the receiver with all coefficients set to zero.
-
-    int j;
-
-    for ( j = 0; j < nwk; j++ ) {
+    for ( int j = 0; j < nwk; j++ ) {
         mtrx [ j ] = 0.0;
     }
 
@@ -671,7 +679,11 @@ SparseMtrx *Skyline :: GiveCopy() const
         adr1->at(i) = this->adr->at(i);
     }
 
-    mtrx1 = allocDouble(this->nwk);
+    mtrx1 = ( double * ) malloc( this->nwk * sizeof( double ) );
+    if ( !mtrx1 ) {
+        OOFEM_ERROR2("Skyline :: buildInternalStructure - Can't allocate: %d", this->nwk);
+    }
+
     for ( i = 0; i < this->nwk; i++ ) {
         mtrx1 [ i ] = this->mtrx [ i ];
     }

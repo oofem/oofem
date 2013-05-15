@@ -35,7 +35,9 @@
 #ifndef tractionpressurebc_h
 #define tractionpressurebc_h
 
-#include "boundary.h"
+#include "boundarycondition.h"
+
+#define _IFT_TractionPressureBC_Name "prescribedtractionpressurebc"
 
 namespace oofem {
 /**

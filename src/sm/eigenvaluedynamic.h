@@ -38,12 +38,13 @@
 #include "engngm.h"
 #include "sparsegeneigenvalsystemnm.h"
 #include "sparsemtrx.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "geneigvalsolvertype.h"
 
 ///@name Input fields for EigenValueDynamic
 //@{
+#define _IFT_EigenValueDynamic_Name "eigenvaluedynamic"
 #define _IFT_EigenValueDynamic_nroot "nroot"
 #define _IFT_EigenValueDynamic_rtolv "rtolv"
 #define _IFT_EigenValueDynamic_stype "stype"
@@ -97,7 +98,6 @@ public:
     virtual void updateYourself(TimeStep *tStep);
 
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    virtual double giveUnknownComponent(UnknownType ut, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);

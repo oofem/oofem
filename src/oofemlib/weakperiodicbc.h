@@ -40,9 +40,11 @@
 
 #include "activebc.h"
 #include "inputrecord.h"
+#include "gaussintegrationrule.h"
 
 ///@name Input fields for WeakPeriodicBoundaryCondition
 //@{
+#define _IFT_WeakPeriodicBoundaryCondition_Name "weakperiodicbc"
 #define _IFT_WeakPeriodicBoundaryCondition_order "order"
 #define _IFT_WeakPeriodicBoundaryCondition_descritizationType "descritizationtype"
 #define _IFT_WeakPeriodicBoundaryCondition_dofid "dofid"
@@ -58,7 +60,7 @@ enum basisType { monomial=0, trigonometric=1, legendre=2 };
  *
  * @author Carl Sandström
  */
-class WeakPeriodicbc : public ActiveBoundaryCondition
+class WeakPeriodicBoundaryCondition : public ActiveBoundaryCondition
 {
 private:
 
@@ -66,11 +68,15 @@ private:
     int bcID;
     int orderOfPolygon;
 
+    /** Direction of normal. 1 if normal in x, 2 if y and 3 if z. */
     int direction;
+
+    /** Keeps info on which coordinates varies over the surface. Depends on number of spatial dimensions and normal direction */
+    IntArray surfaceIndexes;
 
     int normalDirection;
 
-    double smax, smin;
+    FloatArray smax, smin;
     bool doUpdateSminmax;
     /** Number of Gausspoints used when integrating along the element edges */
     int ngp;
@@ -84,6 +90,12 @@ private:
 
     /** side[] keeps track of which side of the triangle is located along the boundary. element[] keeps track of what element is located along the boundary */
     std :: vector< int >side [ 2 ], element [ 2 ];
+
+    /** Keeps track of which coordinate(s) are changing on the surface/edge */
+    std :: vector< double> directions;
+
+    /** Type of surface/edge */
+    integrationDomain sideGeom;
 
     void giveEdgeNormal(FloatArray &answer, int element, int side);
 
@@ -100,20 +112,19 @@ private:
     double binomial(double n , int k);
 
 public:
-    WeakPeriodicbc(int n, Domain *d);
-    virtual ~WeakPeriodicbc() { };
+    WeakPeriodicBoundaryCondition(int n, Domain *d);
+    virtual ~WeakPeriodicBoundaryCondition() { };
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     basisType giveBasisType() {return useBasisType; };
 
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, 
-                          const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, 
-                          Domain *domain);
+                          const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
-    virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                   CharType type, ValueModeType mode,
-                                  const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorm = NULL);
+                                  const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
 
     virtual int giveNumberOfInternalDofManagers();
 

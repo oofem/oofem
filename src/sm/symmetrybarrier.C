@@ -34,10 +34,14 @@
 
 #include "symmetrybarrier.h"
 #include "intarray.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_NonlocalBarrier( SymmetryBarrier )
+
 SymmetryBarrier :: SymmetryBarrier(int n, Domain *aDomain) :
     NonlocalBarrier(n, aDomain), origin(), normals(), mask(), lcs(3, 3)
     // Constructor. Creates an element with number n, belonging to aDomain.

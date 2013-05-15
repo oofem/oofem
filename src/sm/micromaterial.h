@@ -37,21 +37,22 @@
 
 #include "structuralmaterial.h"
 #include "structuralms.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "timestep.h"
-#include "dictionr.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "dictionary.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "sparsemtrx.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "unknownnumberingscheme.h"
-#include "boundary.h"
+#include "boundarycondition.h"
 #include "macrolspace.h"
 #include "error.h"
 
 ///@name Input fields for MicroMaterial
 //@{
+#define _IFT_MicroMaterial_Name "micromat"
 #define _IFT_MicroMaterial_fileName "file"
 //@}
 

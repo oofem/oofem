@@ -39,6 +39,7 @@
 
 ///@name Input fields for RigidArmNode
 //@{
+#define _IFT_RigidArmNode_Name "rigidarmnode"
 #define _IFT_RigidArmNode_master "master"
 //@}
 

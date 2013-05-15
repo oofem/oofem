@@ -38,7 +38,7 @@
  #include "inputrecord.h"
  #include "interface.h"
  #include "alist.h"
- #include "flotarry.h"
+ #include "floatarray.h"
  #include "intarray.h"
 
 #define __LB_DEBUG
@@ -52,10 +52,13 @@
 #define _IFT_LoadBalancer_wtp "wtp"
 #define _IFT_LoadBalancerMonitor_nodeWeightMode "nodeweightmode"
 #define _IFT_LoadBalancerMonitor_initialnodeweights "nw"
+
+#define _IFT_ParmetisLoadBalancer_Name "parmetis"
 //@}
 
 ///@name Input fields for WallClockLoadBalancerMonitor
 //@{
+#define _IFT_WallClockLoadBalancerMonitor_Name "wallclock"
 #define _IFT_WallClockLoadBalancerMonitor_relwct "relwct"
 #define _IFT_WallClockLoadBalancerMonitor_abswct "abswct"
 #define _IFT_WallClockLoadBalancerMonitor_minwct "minwct"
@@ -74,11 +77,6 @@ class ProcessCommunicator;
 class TimeStep;
 
  #define MIGRATE_LOAD_TAG       9998
-/**
- * End-of-data marker, used to identify end of data stream received.
- * The value should not conflict with any classType value.
- */
- #define LOADBALANCER_END_DATA -1
 
 /**
  * Abstract base class representing general load balancer monitor. The task of the monitor is to

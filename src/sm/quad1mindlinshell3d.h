@@ -39,6 +39,7 @@
 
 ///@name Input fields for Quad1MindlinShell3D element
 //@{
+#define _IFT_Quad1MindlinShell3D_Name "quad1mindlinshell3d"
 #define _IFT_Quad1MindlinShell3D_alpha "alpha"
 //@}
 

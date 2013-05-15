@@ -43,12 +43,16 @@
 #include "util.h"
 #include "internalstatevaluetype.h"
 #include "element.h"
+#include "classfactory.h"
 
 #include <string>
 #include <fstream>
 #include <ios>
 
 namespace oofem {
+
+REGISTER_ExportModule( POIExportModule )
+
 POIExportModule :: POIExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport(), POIList()
 {
     mapper = NULL;

@@ -43,6 +43,7 @@
 
 ///@name Input fields for CompoDamageMat
 //@{
+#define _IFT_CompoDamageMat_Name "compdammat"
 #define _IFT_CompoDamageMat_exx "exx"
 #define _IFT_CompoDamageMat_eyyezz "eyyezz"
 #define _IFT_CompoDamageMat_nuxynuxz "nuxynuxz"

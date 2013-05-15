@@ -36,13 +36,14 @@
 #define quad10_2d_supg_h
 
 #include "supgelement2.h"
-
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "leplic.h"
 #include "levelsetpcs.h"
 #include "elementinternaldofman.h"
+
+#define _IFT_Quad10_2D_SUPG_Name "quad1supg"
 
 namespace oofem {
 

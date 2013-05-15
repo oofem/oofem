@@ -36,8 +36,8 @@
 #define structuralmaterial_h
 
 #include "material.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "matconst.h"
 #include "matstatus.h"
 #include "stressstrainprincmode.h"
@@ -261,11 +261,17 @@ public:
      * @return For unknown mode error is generated.
      */
     virtual void giveStressStrainMask(IntArray &answer, MatResponseForm form, MaterialMode mmode) const;
+    virtual void givePrincipalStressStrainMask(IntArray &answer, MatResponseForm form, MaterialMode mmode) const;
     /**
      * Returns the size of reduced stress/strain vector according to given mode.
      * @param mmode Material response mode.
      */
     virtual int giveSizeOfReducedStressStrainVector(MaterialMode mmode);
+    /**
+     * Returns the size of reduced principal stress/strain vector according to given mode.
+     * @param mmode Material response mode.
+     */
+    virtual int giveSizeOfReducedPrincipalStressStrainVector(MaterialMode mmode);
     /**
      * Method for subtracting from reduced space strain vector its stress-independent parts
      * (caused by temperature, shrinkage, creep and possibly by other phenomena).

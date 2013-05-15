@@ -39,6 +39,7 @@
 
 ///@name Input fields for DruckerPragerCutMat
 //@{
+#define _IFT_DruckerPragerCutMat_Name "druckerpragercutmat"
 #define _IFT_DruckerPragerCutMat_alpha "alpha" ///< Friction coefficient (DP model)
 #define _IFT_DruckerPragerCutMat_alphapsi "alphapsi" /// Dilatancy coefficient (DP model)
 #define _IFT_DruckerPragerCutMat_h "h" ///< Hardening modulus  (DP model)

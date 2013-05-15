@@ -36,7 +36,6 @@
 #define spatiallocalizer_h
 
 #include "femcmpnn.h"
-#include "compiler.h"
 #include "interface.h"
 #include "logger.h"
 

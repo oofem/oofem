@@ -37,7 +37,7 @@
 
 #include "valuemodetype.h"
 #include "interface.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "error.h"
 

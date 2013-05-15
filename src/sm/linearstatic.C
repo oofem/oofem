@@ -40,22 +40,29 @@
 #include "verbose.h"
 #include "structuralelement.h"
 #include "structuralelementevaluator.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 #ifdef __PARALLEL_MODE
  #include "fetisolver.h"
  #include "sparsemtrx.h"
+ #include "problemcomm.h"
+ #include "communicator.h"
 #endif
 
 namespace oofem {
+
+REGISTER_EngngModel( LinearStatic );
+
 LinearStatic :: LinearStatic(int i, EngngModel *_master) : StructuralEngngModel(i, _master), loadVector(), displacementVector()
 {
     stiffnessMatrix = NULL;
     ndomains = 1;
     nMethod = NULL;
     initFlag = 1;
+    solverType = ST_Direct;
 
 #ifdef __PARALLEL_MODE
     commMode = ProblemCommMode__NODE_CUT;
@@ -85,10 +92,10 @@ NumericalMethod *LinearStatic :: giveNumericalMethod(MetaStep *mStep)
 
     if ( isParallel() ) {
         if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
-            nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+            nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
         }
     } else {
-        nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+        nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     }
 
     if ( nMethod == NULL ) {
@@ -133,7 +140,7 @@ double LinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep,
 // This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
-#if DEBUG
+#ifdef DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -222,7 +229,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
         //
         // first step  assemble stiffness Matrix
         //
-        stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( stiffnessMatrix == NULL ) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }

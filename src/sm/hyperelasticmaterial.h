@@ -40,6 +40,7 @@
 
 ///@name Input fields for HyperElasticMaterial
 //@{
+#define _IFT_HyperElasticMaterial_Name "hyperelmat"
 #define _IFT_HyperElasticMaterial_k "k"
 #define _IFT_HyperElasticMaterial_g "g"
 //@}

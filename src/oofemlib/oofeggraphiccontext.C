@@ -33,11 +33,11 @@
  */
 
 #ifdef __OOFEG
-#include "compiler.h"
 #include "oofeggraphiccontext.h"
 #include "engngm.h"
 #include "element.h"
 #include "material.h"
+#include "range.h"
 #include "mathfem.h"
 #include "oofemtxtinputrecord.h"
 // for Range class definition outputmanager.h included
@@ -151,7 +151,7 @@ oofegGraphicContext :: GR_giveColorFromUserColorTable(EPixel *table, int tableSi
         relVal = 0.;
     }
 
-    int indx = ( int ) nearest(relVal * tableSize);
+    int indx = ( int ) floor(relVal * tableSize + 0.5);
     return table [ indx - 1 ];
 }
 

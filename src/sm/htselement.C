@@ -34,17 +34,20 @@
 //last edit: 07/02/2013 by Jan Novak
 
 #include "htselement.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "engngm.h"
 #include "node.h"
 #include "mathfem.h"
 #include "boundaryload.h"
+#include "classfactory.h"
 
 namespace oofem {
-  
+
+REGISTER_Element( HTSelement );
+
 HTSelement :: HTSelement(int n, Domain *aDomain) : StructuralElement(n, aDomain)
     // Constructor.
 {

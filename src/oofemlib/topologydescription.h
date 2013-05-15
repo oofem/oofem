@@ -37,7 +37,6 @@
 #define topologydescription_h
 
 #include "domain.h"
-#include "classtype.h"
 #include "error.h"
 
 namespace oofem {
@@ -110,10 +109,6 @@ public:
      * Gives the name of the class.
      */
     virtual const char *giveClassName() const { return "TopologyDescription"; }
-    /**
-     * Gives the class ID.
-     */
-    virtual classType giveClassID() const { return TopologyDescriptionClass; }
 };
 
 } // end namespace oofem

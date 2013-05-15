@@ -33,12 +33,12 @@
  */
 
 #include "sparselinsystemnm.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "sparsemtrx.h"
 
 namespace oofem {
-SparseLinearSystemNM :: SparseLinearSystemNM(int i, Domain *d, EngngModel *m) : NumericalMethod(i, d, m)
+SparseLinearSystemNM :: SparseLinearSystemNM(Domain *d, EngngModel *m) : NumericalMethod(d, m)
 { }
 
 SparseLinearSystemNM :: ~SparseLinearSystemNM()

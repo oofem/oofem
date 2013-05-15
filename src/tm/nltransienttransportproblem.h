@@ -41,6 +41,7 @@
 
 ///@name Input fields for NLTransientTransportProblem
 //@{
+#define _IFT_NLTransientTransportProblem_Name "nltransienttransportproblem"
 #define _IFT_NLTransientTransportProblem_nsmax "nsmax"
 #define _IFT_NLTransientTransportProblem_rtol "rtol"
 #define _IFT_NLTransientTransportProblem_manrmsteps "manrmsteps"

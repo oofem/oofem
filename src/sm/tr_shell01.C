@@ -35,19 +35,25 @@
 #include "tr_shell01.h"
 #include "fei2dtrlin.h"
 #include "contextioerr.h"
+#include "gaussintegrationrule.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "node.h"
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 #endif
 
 
 namespace oofem {
+
+REGISTER_Element( TR_SHELL01 );
+
 TR_SHELL01 :: TR_SHELL01(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 {
     plate    = new CCTPlate3d(-1, aDomain);
     membrane = new TrPlaneStrRot3d(-1, aDomain);
+    compositeIR = NULL;
 
     numberOfDofMans = 3;
 }
@@ -75,6 +81,9 @@ TR_SHELL01 :: initializeFrom(InputRecord *ir)
     //
     plate->initializeFrom(ir);
     membrane->initializeFrom(ir);
+
+    plate->computeGaussPoints();
+    membrane->computeGaussPoints();
 
     // check the compatibility of irules of plate and membrane
     if (plate->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints() != membrane->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints()) {
@@ -161,6 +170,8 @@ TR_SHELL01 :: giveInterface(InterfaceType interface)
         return static_cast< ZZErrorEstimatorInterface * >( this );
     } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
         return static_cast< ZZRemeshingCriteriaInterface * >( this );
+    } else if ( interface == SpatialLocalizerInterfaceType ) {
+      return static_cast< SpatialLocalizerInterface * >( this );
     }
 
 
@@ -178,18 +189,19 @@ TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 {
     if ( type == IST_ShellForceMomentumTensor ) {
         FloatArray aux;
-        // gp is from plate part (the plate irule is used as default rule for this master element)
         GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
+	GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
         
-        plate->giveIPValue(answer, gp, IST_ShellForceMomentumTensor, atTime);
+        plate->giveIPValue(answer, plateGP, IST_ShellForceMomentumTensor, atTime);
         membrane->giveIPValue(aux, membraneGP, IST_ShellForceMomentumTensor, atTime);
         answer.add(aux);
         return 1;
     } else if ( type == IST_ShellStrainCurvatureTensor ) {
         FloatArray aux;
         GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
+	GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
 
-        plate->giveIPValue(answer, gp, IST_ShellStrainCurvatureTensor, atTime);
+        plate->giveIPValue(answer, plateGP, IST_ShellStrainCurvatureTensor, atTime);
         membrane->giveIPValue(aux, membraneGP, IST_ShellStrainCurvatureTensor, atTime);
         answer.add(aux);
 
@@ -236,24 +248,6 @@ TR_SHELL01 :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
   return giveIPValueSize (type, this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0));
 }
 
-
-void
-TR_SHELL01 :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *gp, InternalStateType type)
-// evaluates N matrix (interpolation estimated stress matrix)
-// according to Zienkiewicz & Zhu paper
-// N(nsigma, nsigma*nnodes)
-// Definition : sigmaVector = N * nodalSigmaVector
-{
-    FloatArray n;
-    FEI2dTrLin interp_lin(1, 2);
-    interp_lin.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(3);
-    answer.zero();
-    answer.at(1) = n.at(1);
-    answer.at(2) = n.at(2);
-    answer.at(3) = n.at(3);
-}
 
 double 
 TR_SHELL01::ZZRemeshingCriteriaI_giveCharacteristicSize() 
@@ -358,9 +352,129 @@ TR_SHELL01 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     return iores;
 }
 
+IntegrationRule* 
+TR_SHELL01 :: ZZErrorEstimatorI_giveIntegrationRule()
+{
+  if (this->compositeIR) {
+    return this->compositeIR;
+  } else {
+    this->compositeIR = new GaussIntegrationRule(1, this, 1, 12);
+    this->compositeIR->setUpIntegrationPoints(_Triangle, plate->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints(), _3dShell);
+    return this->compositeIR;
+  }
+}
+
+void 
+TR_SHELL01 :: ZZErrorEstimatorI_computeLocalStress(FloatArray& answer, FloatArray& sig)  
+{
+  // sig is global ShellForceMomentumTensor
+  FloatMatrix globTensor(3,3);
+  const FloatMatrix* GtoLRotationMatrix = plate->computeGtoLRotationMatrix();
+  FloatMatrix LtoGRotationMatrix ;
+
+  answer.resize(8); // reduced, local form
+  LtoGRotationMatrix.beTranspositionOf(*GtoLRotationMatrix);
+
+  // Forces
+  globTensor.at(1, 1) = sig.at(1) ; //sxForce
+  globTensor.at(1, 2) = sig.at(6) ; //qxyForce
+  globTensor.at(1, 3) = sig.at(5) ; //qxzForce
+
+  globTensor.at(2, 1) = sig.at(6) ; //qxyForce
+  globTensor.at(2, 2) = sig.at(2) ; //syForce
+  globTensor.at(2, 3) = sig.at(4) ; //syzForce
+
+  globTensor.at(3, 1) = sig.at(5) ; //qxzForce
+  globTensor.at(3, 2) = sig.at(4) ; //syzForce
+  globTensor.at(3, 3) = sig.at(3) ; //szForce
+
+  globTensor.rotatedWith(LtoGRotationMatrix);
+  // Forces: now globTensoris transformed into local c.s
+
+  // answer should be in reduced, local  form 
+  answer.at(1) = globTensor.at(1, 1); //sxForce
+  answer.at(2) = globTensor.at(2, 2); //syForce
+  answer.at(3) = globTensor.at(1, 2); //qxyForce
+  answer.at(7) = globTensor.at(2, 3); //syzForce
+  answer.at(8) = globTensor.at(1, 3); //qxzForce
 
 
+  // Moments:
+  globTensor.at(1, 1) = sig.at(7) ; //mxForce
+  globTensor.at(1, 2) = sig.at(12); //mxyForce
+  globTensor.at(1, 3) = sig.at(11); //mxzForce
 
+  globTensor.at(2, 1) = sig.at(12); //mxyForce
+  globTensor.at(2, 2) = sig.at(8) ; //myForce
+  globTensor.at(2, 3) = sig.at(10); //myzForce
+
+  globTensor.at(3, 1) = sig.at(11); //mxzForce
+  globTensor.at(3, 2) = sig.at(10); //myzForce
+  globTensor.at(3, 3) = sig.at(9) ; //mzForce
+
+  globTensor.rotatedWith (LtoGRotationMatrix); 
+  // now globTensoris transformed into local c.s
+ 
+  answer.at(4)  = globTensor.at(1, 1); //mxForce
+  answer.at(5)  = globTensor.at(2, 2); //myForce
+  answer.at(6) = globTensor.at(1, 2); //mxyForce
+
+}
+
+int 
+TR_SHELL01 :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
+{
+    FloatArray lcoords;
+    return plate->computeLocalCoordinates(lcoords, coords);
+}
+
+double
+TR_SHELL01 :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
+{
+  FloatArray c(3); 
+  c.zero();
+  // evaluate element center
+  for (int i=1; i<=3; i++) {
+    c.add(*plate->giveNode(i)->giveCoordinates());
+  }
+  c.times(1./3.);
+  return c.distance(coords);
+}
+
+void
+TR_SHELL01 :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1)
+{
+
+  FloatArray lt3(3), gt3(3); // global vector in the element thickness direction of lenght thickeness/2
+  const FloatMatrix* GtoLRotationMatrix = plate->computeGtoLRotationMatrix();
+
+  // setup vector in the element local cs. perpendicular to element plane of thickness/2 length
+  lt3.at(1) = 0.0;
+  lt3.at(2) = 0.0;
+  lt3.at(3) = 1.0; //this->giveCrossSection()->give(CS_Thickness)/2.0; // HUHU
+  // transform it to globa cs
+  gt3.beTProductOf (*GtoLRotationMatrix, lt3);
+  
+  // use gt3 to construct element bounding box respecting true element volume
+  
+  FloatArray *coordinates, _c(3);
+
+  for ( int i = 1; i <= this->giveNumberOfNodes(); ++i ) {
+    coordinates = this->giveNode(i)->giveCoordinates();
+    
+    _c = *coordinates; _c.add(gt3);
+    if (i == 1) {
+      bb0 = bb1 = _c;
+    } else {
+      bb0.beMinOf(bb0, _c);
+      bb1.beMaxOf(bb1, _c);
+    }
+
+    _c = *coordinates; _c.subtract(gt3);
+    bb0.beMinOf(bb0, _c);
+    bb1.beMaxOf(bb1, _c);
+  }
+}
 
 //
 // io routines
@@ -460,7 +574,17 @@ TR_SHELL01  :: drawScalar(oofegGraphicContext &context)
         result += this->giveInternalStateAtNode(v2, context.giveIntVarType(), context.giveIntVarMode(), 2, tStep);
         result += this->giveInternalStateAtNode(v3, context.giveIntVarType(), context.giveIntVarMode(), 3, tStep);
     } else if ( context.giveIntVarMode() == ISM_local ) {
-        return;
+      int nip = plate->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
+      FloatArray a, v(12);
+      v.zero();
+      for (int _i=1; _i<= nip; _i++) {
+	this->giveIPValue(a, plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(_i-1), IST_ShellForceMomentumTensor, tStep);
+	v += a;
+      }
+      v.times(1./nip);
+      v1 = v;
+      v2 =v;
+      v3 =v;
     }
 
     result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );

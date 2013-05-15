@@ -33,8 +33,8 @@
  */
 
 #include "boundaryload.h"
-#include "loadtime.h"
-#include "flotarry.h"
+#include "loadtimefunction.h"
+#include "floatarray.h"
 #include "timestep.h"
 
 namespace oofem {

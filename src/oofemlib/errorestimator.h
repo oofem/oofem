@@ -41,13 +41,11 @@
 #define errorestimator_h
 
 #include "femcmpnn.h"
-#include "compiler.h"
 #include "interface.h"
-#include "remeshingcrit.h"
-#include "classtype.h"
 #include "errorestimatortype.h"
 #include "intarray.h"
 #include "internalstatetype.h"
+#include "remeshingcrit.h"
 
 ///@name Input fields for ErrorEstimator
 //@{
@@ -59,6 +57,7 @@ namespace oofem {
 class Domain;
 class Element;
 class TimeStep;
+class RemeshingCriteria;
 
 /** Type characterizing different type of errors. */
 enum EE_ValueType { globalNormEEV, globalErrorEEV, globalWeightedErrorEEV };
@@ -95,13 +94,9 @@ protected:
 
 public:
     /// Constructor
-    ErrorEstimator(int n, Domain *d) : FEMComponent(n, d) {
-        rc = NULL;
-        skippedNelems = 0;
-        regionSkipMap.resize(0);
-    }
+    ErrorEstimator(int n, Domain *d);
     /// Destructor
-    virtual ~ErrorEstimator() { if ( rc ) { delete rc; } }
+    virtual ~ErrorEstimator();
     /// Sets Domain; should also re-initialize attributes if necessary.
     void setDomain(Domain *d);
     /**
@@ -151,8 +146,8 @@ public:
      * @param reg Region to check.
      * @return True if region should be skipped.
      */
-    bool skipRegion(int reg) { if ( reg <= regionSkipMap.giveSize() ) { return regionSkipMap.at(reg) > 0; } else { return false; } }
-    virtual void reinitialize() { this->rc->reinitialize(); }
+    bool skipRegion(int reg);
+    virtual void reinitialize();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "ErrorEstimator"; }

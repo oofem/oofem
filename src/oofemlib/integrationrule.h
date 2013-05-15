@@ -40,7 +40,6 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 #include "inputrecord.h"
-#include "classtype.h"
 
 #include <cstdio>
 
@@ -49,6 +48,13 @@ class TimeStep;
 class GaussPoint;
 class Element;
 class DataStream;
+
+///@todo Breaks modularity, reconsider this;
+enum IntegrationRuleType {
+    IRT_None = 0,
+    IRT_Gauss = 1,
+    IRT_Lobatto = 2
+};
 
 /**
  * Abstract base class representing integration rule. The integration rule is
@@ -189,7 +195,7 @@ public:
     /** Returns receiver number */
     int giveNumber() { return this->number; }
     /** Returns the domain for the receiver */
-    integrationDomain giveIntegrationDomain() { return this->intdomain; }
+    integrationDomain giveIntegrationDomain() const { return this->intdomain; }
     /**
      * Abstract service.
      * Returns required number of integration points to exactly integrate
@@ -229,8 +235,8 @@ public:
     /// Returns receiver sub patch indices (if apply).
     virtual const IntArray *giveKnotSpan() { return NULL; }
 
-    virtual classType giveClassID() const { return IntegrationRuleClass; }
     virtual const char *giveClassName() const { return "IntegrationRule"; }
+    virtual IntegrationRuleType giveIntegrationRuleType() const { return IRT_None; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
 
@@ -269,14 +275,6 @@ public:
      * @return Number of integration points.
      */
     virtual int SetUpPointsOnTetrahedra(int, MaterialMode mode) { return 0; }
-    /**
-     * Sets up receiver's  integration points on wedge (volume coords) integration domain.
-     * Default implementation does not sets up any integration points and returns 0.
-     * Must be overloaded by derived classes.
-     * @return Number of integration points.
-     */
-    virtual int SetUpPointsOnWedge(int, MaterialMode mode) { return 0; }
-
     /**
      * Sets up integration points on 2D embedded line inside 2D volume (the list of local coordinates
      * should be provided).

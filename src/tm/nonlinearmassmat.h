@@ -40,6 +40,7 @@
 
 ///@name Input fields for NonlinearMassTransferMaterial
 //@{
+#define _IFT_NonlinearMassTransferMaterial_Name "nonlinmass"
 #define _IFT_NonlinearMassTransferMaterial_c "c"
 #define _IFT_NonlinearMassTransferMaterial_alpha "alpha"
 //@}

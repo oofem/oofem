@@ -48,7 +48,7 @@
 #include "dof.h"
 #include "eleminterpunknownmapper.h"
 #include "errorestimator.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "oofem_terminate.h"
@@ -59,6 +59,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_EngngModel( AdaptiveNonLinearStatic );
+
 AdaptiveNonLinearStatic :: AdaptiveNonLinearStatic(int i, EngngModel *_master) : NonLinearStatic(i, _master),
     d2_totalDisplacement(), d2_incrementOfDisplacement(), timeStepLoadLevels()
 {
@@ -129,7 +132,7 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep) {
         //
     } else if ( ( strategy == RemeshingFromCurrentState_RS ) || ( strategy == RemeshingFromPreviousState_RS ) ) {
         // do remeshing
-        MesherInterface *mesher = CreateUsrDefMesherInterface( meshPackage, this->giveDomain(1) );
+        MesherInterface *mesher = classFactory.createMesherInterface( meshPackage, this->giveDomain(1) );
 
         Domain *newDomain;
         MesherInterface :: returnCode result = mesher->createMesh(this->giveCurrentStep(), 1,
@@ -184,7 +187,7 @@ double AdaptiveNonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeS
 // This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
-#if DEBUG
+#ifdef DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -336,7 +339,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
 
         if ( initFlag ) {
-            stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+            stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
             if ( stiffnessMatrix == NULL ) {
                 _error("proceedStep: sparse matrix creation failed");
             }
@@ -452,7 +455,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     this->domainList->put(2, dNew);
 
 #ifdef __PETSC_MODULE
-    PetscContext *pcNew = new PetscContext(this, EID_MomentumBalance);
+    PetscContext *pcNew = new PetscContext(this);
 
     this->petscContextList->put(2, pcNew);
 #endif
@@ -670,7 +673,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
 
         if ( initFlag ) {
             if ( !stiffnessMatrix ) {
-                stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+                stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
                 if ( stiffnessMatrix == NULL ) {
                     _error("proceedStep: sparse matrix creation failed");
                 }
@@ -1016,7 +1019,7 @@ AdaptiveNonLinearStatic :: giveLoadBalancer()
     }
 
     if ( loadBalancingFlag || preMappingLoadBalancingFlag ) {
-        lb = CreateUsrDefLoadBalancerOfType( ParmetisLoadBalancerClass, this->giveDomain(1) );
+        lb = classFactory.createLoadBalancer( _IFT_ParmetisLoadBalancer_Name, this->giveDomain(1) );
         return lb;
     } else {
         return NULL;
@@ -1030,7 +1033,7 @@ AdaptiveNonLinearStatic :: giveLoadBalancerMonitor()
     }
 
     if ( loadBalancingFlag || preMappingLoadBalancingFlag ) {
-        lbm = CreateUsrDefLoadBalancerMonitorOfType(WallClockLoadBalancerMonitorClass, this);
+        lbm = classFactory.createLoadBalancerMonitor( _IFT_WallClockLoadBalancerMonitor_Name, this);
         return lbm;
     } else {
         return NULL;

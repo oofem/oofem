@@ -35,7 +35,7 @@
 #include "exportmodulemanager.h"
 #include "modulemanager.h"
 #include "exportmodule.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 
 namespace oofem {
 ExportModuleManager :: ExportModuleManager(EngngModel *emodel) : ModuleManager< ExportModule >(emodel)
@@ -55,9 +55,9 @@ ExportModuleManager :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-ExportModule *ExportModuleManager :: CreateModuleOfType(const char *name, int n, EngngModel *emodel)
+ExportModule *ExportModuleManager :: CreateModule(const char *name, int n, EngngModel *emodel)
 {
-    return CreateUsrDefExportModuleOfType(name, n, emodel);
+    return classFactory.createExportModule(name, n, emodel);
 }
 
 void

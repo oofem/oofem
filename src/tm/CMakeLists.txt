@@ -27,10 +27,17 @@ set (tm_element
     qbrick1_ht.C
     tetrah1_ht.C
     tr1darcy.C
+    latticetransportelement.C
+    lattice2d_mt.C
+    )
+
+set (tm_boundary
+    gravitypressure.C
     )
 
 set (tm_status
     transportmaterial.C
+    latticetransmat.C
     )
 
 set (tm_material
@@ -56,6 +63,7 @@ set (tm
     ${tm_new}
     ${tm_cemhyd}
     ${tm_hydram}
+    ${tm_boundary}
     )
 
 add_library (tm

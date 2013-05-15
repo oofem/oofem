@@ -38,10 +38,10 @@
 #include "integrationrule.h"
 #include "gaussintegrationrule.h"
 #include "geometry.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "contextioerr.h"
 #include "datastream.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 
 namespace oofem {
 PatchIntegrationRule :: PatchIntegrationRule(int n, Element *e, Patch *patch) : GaussIntegrationRule(n, e)
@@ -133,7 +133,7 @@ PatchIntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, voi
     }
 
     // create new patch
-    this->patch = CreateUsrDefPatch( ( Patch :: PatchType ) _ptype, this->giveElement() );
+    this->patch = classFactory.createPatch( ( Patch :: PatchType ) _ptype, this->giveElement() );
     this->patch->restoreContext(stream, mode, obj);
 
     return CIO_OK;

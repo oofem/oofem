@@ -9,8 +9,8 @@
 #define hellmat_h
 
 // oofem includes
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "structuralms.h"
 #include "structuralmaterial.h"
 #include "isolinearelasticmaterial.h"
@@ -23,6 +23,7 @@
 
 ///@name Input fields for HellmichMaterial
 //@{
+#define _IFT_HellmichMaterial_Name "hellmat"
 #define _IFT_HellmichMaterial_E "e"
 #define _IFT_HellmichMaterial_nu "n"
 #define _IFT_HellmichMaterial_linearE "lineare"

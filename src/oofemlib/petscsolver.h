@@ -51,13 +51,11 @@ class PetscSolver : public SparseLinearSystemNM
 public:
     /**
      * Constructor.
-     * @param i Solver number.
      * @param d Domain which solver belongs to.
      * @param m Engineering model which solver belongs to.
      */
-    PetscSolver(int i, Domain *d, EngngModel *m);
-
-    /// Destructor.
+    PetscSolver(Domain *d, EngngModel *m);
+    
     virtual ~PetscSolver();
 
     virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
@@ -72,14 +70,7 @@ public:
      */
     NM_Status petsc_solve(PetscSparseMtrx *A, Vec b, Vec x);
 #endif
-
-    /// Initializes receiver from given record. Empty implementation.
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void reinitialize();
-
-    // Identification
     virtual const char *giveClassName() const { return "PetscSolver"; }
-    virtual classType giveClassID() const { return PetscSolverClass; }
     virtual LinSystSolverType giveLinSystSolverType() const { return ST_Petsc; }
 };
 } // end namespace oofem

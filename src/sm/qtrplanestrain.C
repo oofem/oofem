@@ -34,21 +34,26 @@
 
 #include "qtrplanestrain.h"
 #include "node.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "crosssection.h"
 #include "gaussintegrationrule.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
  #include "oofegutils.h"
  #include "rcm2.h"
 #endif
 
+
 namespace oofem {
+
+REGISTER_Element( QTrPlaneStrain );
+
 FEI2dTrQuad QTrPlaneStrain :: interpolation(1, 2);
 
 QTrPlaneStrain :: QTrPlaneStrain(int n, Domain *aDomain) :

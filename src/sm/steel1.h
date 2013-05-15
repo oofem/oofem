@@ -40,6 +40,7 @@
 
 ///@name Input fields for Steel1
 //@{
+#define _IFT_Steel1_Name "steel1"
 #define _IFT_Steel1_ry "ry"
 //@}
 

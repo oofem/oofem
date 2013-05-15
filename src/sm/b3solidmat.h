@@ -37,6 +37,8 @@
 
 #include "kelvinChM.h"
 
+#define _IFT_B3SolidMaterial_Name "b3solidmat"
+
 namespace oofem {
 /**
  * This class implements associated Material Status to B3SolidMaterial.

@@ -36,9 +36,9 @@
 #define ConcreteDPM2_h
 
 #include "structuralmaterial.h"
-#include "gausspnt.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "gausspoint.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "cltypes.h"
 #include "structuralms.h"
 #include "strainvector.h"
@@ -49,6 +49,7 @@
 
 ///@name Input fields for ConcreteDPM2
 //@{
+#define _IFT_ConcreteDPM2_Name "con2dpm"
 #define _IFT_ConcreteDPM2_fc "fc"
 #define _IFT_ConcreteDPM2_fcZero "fczero"
 #define _IFT_ConcreteDPM2_ft "ft"

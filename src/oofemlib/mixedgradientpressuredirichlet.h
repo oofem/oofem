@@ -36,13 +36,14 @@
 #define mixedgradientpressuredirichlet_h
 
 #include "mixedgradientpressurebc.h"
-#include "boundary.h"
+#include "boundarycondition.h"
 #include "dof.h"
 #include "bctype.h"
 #include "valuemodetype.h"
-#include "classtype.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
+
+#define _IFT_MixedGradientPressureDirichlet_Name "mixedgradientpressuredirichlet"
 
 namespace oofem {
 class MasterDof;
@@ -138,9 +139,9 @@ public:
     /// Returns the center coordinate
     virtual FloatArray &giveCenterCoordinate() { return centerCoord; }
 
-    virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                  CharType type, ValueModeType mode,
-                                  const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
+    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                                CharType type, ValueModeType mode,
+                                const UnknownNumberingScheme &s, FloatArray *eNorms = NULL);
 
     virtual bool requiresActiveDofs() { return true; }
     virtual bool isPrimaryDof(ActiveDof *dof);

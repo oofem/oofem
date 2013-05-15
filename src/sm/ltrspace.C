@@ -35,13 +35,14 @@
 #include "ltrspace.h"
 #include "node.h"
 #include "material.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
 #include "fei3dtetlin.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "engngm.h"
@@ -53,6 +54,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( LTRSpace );
+
 FEI3dTetLin LTRSpace :: interpolation;
 
 LTRSpace :: LTRSpace(int n, Domain *aDomain) :
@@ -316,21 +320,6 @@ LTRSpace :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
     return this->giveIPValueSize(type, gp);
 }
 
-
-void
-LTRSpace :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type)
-{
-    // evaluates N matrix (interpolation estimated stress matrix)
-    // according to Zienkiewicz & Zhu paper
-    // N(nsigma, nsigma*nnodes)
-    // Definition : sigmaVector = N * nodalSigmaVector
-
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        this->interpolation.evalN( answer, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    } else {
-        return;
-    }
-}
 
 void
 LTRSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,

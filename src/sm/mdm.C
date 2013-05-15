@@ -33,9 +33,9 @@
  */
 
 #include "mdm.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "isolinearelasticmaterial.h"
@@ -43,8 +43,12 @@
 #include "nonlocalmaterialext.h"
 #include "microplane.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( MDM );
+
 #ifndef MDM_MAPPING_DEBUG
 
  #ifdef MDM_USE_MMAClosestIPTransfer

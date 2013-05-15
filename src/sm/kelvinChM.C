@@ -33,9 +33,9 @@
 
 #include "mathfem.h"
 #include "kelvinChM.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
-#include "gausspnt.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
+#include "gausspoint.h"
 #include "structuralcrosssection.h"
 #include "timestep.h"
 #include "contextioerr.h"

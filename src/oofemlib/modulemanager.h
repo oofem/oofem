@@ -77,7 +77,7 @@ public:
      * @param n Number associated with module.
      * @param emodel Engineering model which receiver belongs to.
      */
-    virtual M *CreateModuleOfType(const char *name, int n, EngngModel *emodel) = 0;
+    virtual M *CreateModule(const char *name, int n, EngngModel *emodel) = 0;
     /**
 
      * Reads receiver description from input stream and creates corresponding modules components accordingly.
@@ -108,7 +108,7 @@ public:
             }
 
             // read type of module
-            module = this->CreateModuleOfType(name.c_str(), i, emodel);
+            module = this->CreateModule(name.c_str(), i, emodel);
             if ( module == NULL ) {
                 OOFEM_ERROR2("InitModuleManager::instanciateYourself: unknown module (%s)", name.c_str());
             }

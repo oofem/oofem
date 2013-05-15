@@ -35,33 +35,39 @@
 #ifndef stationarytransportproblem_h
 #define stationarytransportproblem_h
 
-#include "structengngmodel.h"
+#include "engngm.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "primaryfield.h"
 
 ///@name Input fields for StationaryTransportProblem
 //@{
+#define _IFT_StationaryTransportProblem_Name "stationaryproblem"
 #define _IFT_StationaryTransportProblem_exportfields "exportfields"
+#define _IFT_StationaryTransportProblem_keepTangent "keeptangent"
 //@}
 
 namespace oofem {
+class SparseNonLinearSystemNM;
+
 /**
  * This class represents stationary transport problem.
  */
 class StationaryTransportProblem : public EngngModel
 {
 protected:
-    LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
     /// This field stores solution vector. For fixed size of problem, the PrimaryField is used, for growing/decreasing size, DofDistributedPrimaryField applies.
     PrimaryField *UnknownsField;
 
     SparseMtrx *conductivityMatrix;
-    FloatArray rhsVector;
+    FloatArray internalForces;
+    FloatArray eNorm;
 
     /// Numerical method used to solve the problem
-    SparseLinearSystemNM *nMethod;
+    SparseNonLinearSystemNM *nMethod;
+
+    bool keepTangent;
 
 public:
     /// Constructor.
@@ -71,10 +77,14 @@ public:
 
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
+    virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
     virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
+    void assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, EquationID ut,
+                                                           ValueModeType mode, CharType lhsType,
+                                                           const UnknownNumberingScheme &ns, Domain *d);
     virtual void updateDomainLinks();
 
     virtual TimeStep *giveNextStep();
@@ -96,20 +106,6 @@ public:
 #endif
 
 protected:
-    /**
-     * Assembles part of rhs due to Dirichlet boundary conditions.
-     * @param answer Global vector where the contribution will be added.
-     * @param tStep Solution step.
-     * @param eid Equation ID.
-     * @param mode CharTypeMode of result.
-     * @param lhsType Type of element matrix to be multiplied by vector of prescribed.
-     * The giveElementCharacteristicMatrix service is used to get/compute element matrix.
-     * @param s Numbering scheme for unknowns.
-     * @param d Domain.
-     */
-    void assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, EquationID eid, ValueModeType mode,
-                                      CharType lhsType, const UnknownNumberingScheme &s, Domain *d);
-
     /**
      * Updates IP values on elements
      * @param stepN Solution step.

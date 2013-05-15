@@ -33,12 +33,13 @@
  */
 
 #include "tr1_2d_supg2.h"
+#include "fluidmodel.h"
 #include "node.h"
 #include "material.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "domain.h"
 #include "mathfem.h"
@@ -51,15 +52,17 @@
 #include "fei2dquadlin.h"
 #include "geotoolbox.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 #endif
 
 namespace oofem {
 #define TRSUPG_ZERO_VOF 1.e-8
 
+REGISTER_Element( TR1_2D_SUPG2 );
 
 //#define TR1_2D_SUPG2_DEBUG
 
@@ -476,7 +479,7 @@ TR1_2D_SUPG2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
     answer.resize(6);
     answer.zero();
     FloatArray u, un, eps(3), stress;
-    double dV, Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, atTime, domain, NULL);
+    double dV, Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
     //double dudx,dudy,dvdx,dvdy;
     GaussPoint *gp;
 
@@ -547,7 +550,7 @@ TR1_2D_SUPG2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
     FloatMatrix _db, _d, _b(3, 6), _bs(3, 6);
     //FloatArray un;
     GaussPoint *gp;
-    double Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, atTime, domain, NULL);
+    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
 
     _b.at(1, 1) = b [ 0 ];
     _b.at(1, 2) = 0.;
@@ -1307,7 +1310,7 @@ TR1_2D_SUPG2 :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, Time
  * {
  * FloatArray u;
  * double dt1, dt2, dt;
- * double Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, tStep, domain, NULL);
+ * double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
  *
  * this -> computeVectorOf(EID_MomentumBalance,VM_Total,tStep, u) ;
  *
@@ -1946,30 +1949,6 @@ TR1_2D_SUPG2 :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
     return this->giveIPValueSize(type, gp);
 }
 
-
-void
-TR1_2D_SUPG2 :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type)
-{
-    // evaluates N matrix (interpolation estimated stress matrix)
-    // according to Zienkiewicz & Zhu paper
-    // N(nsigma, nsigma*nnodes)
-    // Definition : sigmaVector = N * nodalSigmaVector
-    double l1, l2, l3;
-
-    l1 = aGaussPoint->giveCoordinate(1);
-    l2 = aGaussPoint->giveCoordinate(2);
-    l3 = 1.0 - l1 - l2;
-
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        answer.resize(1, 3);
-    } else {
-        return;
-    }
-
-    answer.at(1) = l1;
-    answer.at(2) = l2;
-    answer.at(3) = l3;
-}
 
 void
 TR1_2D_SUPG2 :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,

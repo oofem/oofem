@@ -45,6 +45,8 @@
 #include "eleminterpmapperinterface.h"
 #include "huertaerrorestimator.h"
 
+#define _IFT_PlaneStress2d_Name "planestress2d"
+
 namespace oofem {
 /// Comment or uncomment the following line to force full or reduced integration
 #define PlaneStress2d_reducedShearIntegration

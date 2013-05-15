@@ -36,14 +36,15 @@
 #define tr1_2d_supg2_h
 
 #include "tr1_2d_supg.h"
-#include "flotmtrx.h"
-
+#include "floatmatrix.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "leplic.h"
 #include "gaussintegrationrule.h"
+
+#define _IFT_TR1_2D_SUPG2_Name "tr1supg2"
 
 namespace oofem {
 /**
@@ -148,8 +149,6 @@ public:
 
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *aGaussPoint,
-                                                             InternalStateType type);
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);

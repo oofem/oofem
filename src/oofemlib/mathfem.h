@@ -40,7 +40,7 @@
 #define mathfem_h
 
 #include "error.h"
-#include "compiler.h"
+#include "oofemcfg.h"
 
 #include <cmath>
 #include <cfloat> // For _isnan
@@ -99,12 +99,10 @@ double signum(double i);
 #ifdef _MSC_VER
 /// Returns true is x is NaN
 inline bool isnan(double x) { return _isnan(x) != 0; }
+#else
+// Last attempt to find a isnan function, rely on C++11
+inline bool isnan(double x) { return std::isnan(x); }
 #endif
-#endif
-
-#ifndef HAVE_NEAREST
-/// Returns the nearest integer
-inline int nearest(double x) { return (int)floor( x + 0.5 ); }
 #endif
 
 #ifndef HAVE_CBRT

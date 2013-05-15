@@ -34,8 +34,8 @@
 
 #include "fei3dtetlin.h"
 #include "mathfem.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 
 namespace oofem {
 void
@@ -423,4 +423,21 @@ FEI3dTetLin :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
     surfNodes.at(2) = ( bNode );
     surfNodes.at(3) = ( cNode );
 }
+
+double
+FEI3dTetLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
+{
+    IntArray fNodes;
+    this->computeLocalSurfaceMapping(fNodes, iEdge);
+
+    const FloatArray &c1 = *cellgeo.giveVertexCoordinates(fNodes.at(1));
+    const FloatArray &c2 = *cellgeo.giveVertexCoordinates(fNodes.at(2));
+    const FloatArray &c3 = *cellgeo.giveVertexCoordinates(fNodes.at(3));
+
+    return ( (c2.at(1)*c3.at(2) - c3.at(1)*c2.at(2))*c1.at(3) + 
+             (c3.at(1)*c1.at(2) - c1.at(1)*c3.at(2))*c2.at(3) + 
+             (c1.at(1)*c2.at(2) - c2.at(1)*c1.at(2))*c3.at(3) ) * 0.5;
+}
+
+
 } // end namespace oofem

@@ -35,8 +35,8 @@
 #ifndef trabbonematerial_h
 
 #include "structuralmaterial.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "cltypes.h"
 #include "matconst.h"
 #include "matstatus.h"
@@ -46,6 +46,7 @@
 
 ///@name Input fields for TrabBoneMaterial
 //@{
+#define _IFT_TrabBoneMaterial_Name "trabbone"
 #define _IFT_TrabBoneMaterial_E0 "e0"
 #define _IFT_TrabBoneMaterial_Eil "eil"
 #define _IFT_TrabBoneMaterial_Eie "eie"

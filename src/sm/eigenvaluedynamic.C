@@ -34,14 +34,15 @@
 
 #include "eigenvaluedynamic.h"
 #include "timestep.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "exportmodulemanager.h"
 #include "verbose.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "datastream.h"
 #include "geneigvalsolvertype.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -49,13 +50,15 @@
 
 namespace oofem {
 
+REGISTER_EngngModel( EigenValueDynamic );
+
 NumericalMethod *EigenValueDynamic :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( nMethod ) {
         return nMethod;
     }
 
-    nMethod = CreateUsrDefGeneralizedEigenValueSolver(solverType, 1, this->giveDomain(1), this);
+    nMethod = classFactory.createGeneralizedEigenValueSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod:  solver creation failed");
     }
@@ -104,40 +107,11 @@ double EigenValueDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *t
 // This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
-#if DEBUG
+#ifdef DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
 #endif
-
-    switch ( mode ) {
-    case VM_Total:  // EigenVector
-        return eigVec.at( eq, ( int ) tStep->giveTargetTime() );
-
-    default:
-        _error("giveUnknownComponent: Unknown is of undefined type for this problem");
-    }
-
-    return 0.;
-}
-
-
-double EigenValueDynamic ::  giveUnknownComponent(UnknownType chc, ValueModeType mode,
-                                                  TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displacement, eigenvalue.
-// This function translates this request to numerical method language
-{
-    int eq = dof->__giveEquationNumber();
-    if ( eq == 0 ) {
-        _error("giveUnknownComponent: invalid equation number");
-    }
-
-    if ( chc == EigenValue ) {
-        return eigVal.at(eq);
-    } else if ( !( chc == EigenVector ) ) {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-        return 0.;
-    }
 
     switch ( mode ) {
     case VM_Total:  // EigenVector
@@ -186,10 +160,10 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
         // first step  assemble stiffness Matrix
         //
 
-        stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
-        massMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        massMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         massMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
         this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
@@ -417,10 +391,9 @@ EigenValueDynamic :: initPetscContexts()
 {
     PetscContext *petscContext;
 
-    int i;
     petscContextList->growTo(ndomains);
-    for ( i = 0; i < this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this, EID_MomentumBalance);
+    for ( int i = 0; i < this->ndomains; i++ ) {
+        petscContext =  new PetscContext(this);
         petscContextList->put(i + 1, petscContext);
     }
 }

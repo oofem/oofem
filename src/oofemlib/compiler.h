@@ -42,7 +42,4 @@
 int strncasecmp(const char *s1, const char *s2, int count);
 #endif
 
-#ifdef _MSC_VER // If Microsoft C do not complain about names longer than 255
- #pragma warning( disable : 4786 )
-#endif
 #endif // compiler_h

@@ -32,8 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "gausspnt.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatarray.h"
 #include "element.h"
 #include "timestep.h"
 #include "integrationrule.h"

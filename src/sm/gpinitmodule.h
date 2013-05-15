@@ -37,6 +37,8 @@
 
 #include "initmodule.h"
 
+#define _IFT_GPInitModule_Name "gpinitmodule"
+
 namespace oofem {
 /**
  * Represents GP (Gauss point) initialization module.

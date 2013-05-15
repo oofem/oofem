@@ -34,13 +34,17 @@
 
 #include "j2mat.h"
 #include "isolinearelasticmaterial.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( J2Mat );
+
 J2Mat :: J2Mat(int n, Domain *d) : MPlasticMaterial2(n, d)
 {
     //

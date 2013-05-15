@@ -1,9 +1,10 @@
 # Much to organize
 set (core_unsorted
-    femcmpnn.C domain.C timestep.C metastep.C gausspnt.C
-    cltypes.C timer.C dictionr.C freestor.C
-    conTable.C compiler.C error.C mathfem.C logger.C util.C
-    initmodulemanager.C initmodule.C initial.C
+    classfactory.C
+    femcmpnn.C domain.C timestep.C metastep.C gausspoint.C
+    cltypes.C timer.C dictionary.C
+    connectivitytable.C compiler.C error.C mathfem.C logger.C util.C
+    initmodulemanager.C initmodule.C initialcondition.C
     homogenize.C
     localgaussianrandomgenerator.C
     nonlocalbarrier.C
@@ -11,6 +12,7 @@ set (core_unsorted
     geotoolbox.C geometry.C
     externalfieldgenerator.C
     datastream.C
+    set.C
     rvematerial.C
     weakperiodicbc.C
     # Semi sorted:
@@ -24,20 +26,29 @@ set (core_unsorted
     integrationrule.C gaussintegrationrule.C lobattoir.C
     smoothednodalintvarfield.C dofmanvalfield.C
     # Deprecated?
-    spoolessparsemtrx.C
     rowcol.C skyline.C skylineu.C
     ldltfact.C
-    dss.C dsssolver.C
     inverseit.C subspaceit.C gjacobi.C
     )
 
 #oofegutils
 
-set (core_iml
-    iml/dyncomprow.C iml/dyncompcol.C iml/symcompcol.C iml/compcol.C
-    iml/precond.C iml/voidprecond.C iml/icprecond.C iml/iluprecond.C iml/ilucomprowprecond.C iml/diagpre.C
-    iml/imlsolver.C
-    )
+if (USE_SPOOLES)
+    list (APPEND core_unsorted spoolessparsemtrx.C spoolessolver.C)
+endif ()
+
+if (USE_IML)
+    list (APPEND core_unsorted
+        iml/dyncomprow.C iml/dyncompcol.C iml/symcompcol.C iml/compcol.C
+        iml/precond.C iml/voidprecond.C iml/icprecond.C iml/iluprecond.C iml/ilucomprowprecond.C iml/diagpre.C
+        iml/imlsolver.C
+        )
+endif ()
+
+if (USE_SLEPC)
+    list (APPEND core_unsorted slepcsolver.C)
+endif ()
+
 
 set (core_oofeg oofeggraphiccontext.C)
 
@@ -60,9 +71,7 @@ set (core_nm
     sparselinsystemnm.C
     nrsolver.C
     linesearch.C
-    spoolessolver.C
     calmls.C
-    slepcsolver.C
     petscsolver.C
     )
 
@@ -76,13 +85,13 @@ set (core_fields
     )
 
 set (core_ltf
-    loadtime.C
-    constant.C
+    loadtimefunction.C
+    constantfunction.C
     heavisideltf.C
-    peak.C
-    piecewis.C
-    piecewisper.C
-    usrdeftimefunct.C
+    peakfunction.C
+    piecewiselinfunction.C
+    periodicpiecewiselinfunction.C
+    userdefinedloadtimefunction.C
     )
 
 set (core_cs
@@ -100,13 +109,14 @@ set (core_dofman
     node.C
     slavenode.C
     hangingnode.C
-    rigidarmnode.C
+     rigidarmnode.C
     elementinternaldofman.C
     elementside.C
     )
 
 set (core_material
     material.C
+    dummymaterial.C
     )
 
 set (core_export
@@ -129,12 +139,11 @@ set (core_iga
 
 set (core_arrays
     intarray.C
-    flotarry.C
+    floatarray.C
     stressstrainbasevector.C
     stressvector.C
     strainvector.C
-    matrix.C
-    flotmtrx.C
+    floatmatrix.C
     petscsparsemtrx.C
     )
 
@@ -167,6 +176,7 @@ set (core_fei
     fei3dtetquad.C
     fei3dhexalin.C
     fei3dhexaquad.C
+    fei3dhexatriquad.C
     fei3dwedgelin.C 
     fei3dwedgequad.C
     )
@@ -188,7 +198,7 @@ set (core_parallel
     problemcomm.C
     combuff.C
     domaintransactionmanager.C
-    petscordering.C
+    parallelordering.C
     petsccontext.C
     dyncombuff.C
     loadbalancer.C
@@ -197,8 +207,8 @@ set (core_parallel
     )
 
 set (core_bc
-    generalbc.C
-    boundary.C
+    generalboundarycondition.C
+    boundarycondition.C
     prescribedgradient.C
     mixedgradientpressurebc.C
     mixedgradientpressuredirichlet.C
@@ -209,13 +219,27 @@ set (core_bc
     linearedgeload.C
     constantedgeload.C
     constantsurfaceload.C
-    nodload.C
+    nodalload.C
+    deadweight.C
     reinforcement.C
     surfacetensionbc.C
     )
 
+set (core_mapping
+    mmaclosestiptransfer.C
+    mmashapefunctprojection.C
+    mmaleastsquareprojection.C
+    mmacontainingelementprojection.C
+    )
+
+set (core_mesher
+    t3dinterface.C
+    targe2interface.C
+    freeminterface.C
+    subdivision.C
+    )
+
 set (core
-    ${core_iml} # TODO: Make this optional
     ${core_unsorted}
     ${core_oofeg}
     ${core_nodalrecovery}
@@ -236,6 +260,8 @@ set (core
     ${core_parallel}
     ${core_bc}
     ${core_iga}
+    ${core_mesher}
+    ${core_mapping}
     )
 
 add_library (core

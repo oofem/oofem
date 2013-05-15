@@ -42,7 +42,7 @@
 
 #include "sparsegeneigenvalsystemnm.h"
 #include "sparsemtrx.h"
-#include "flotarry.h"
+#include "floatarray.h"
 
 namespace oofem {
 class Domain;
@@ -90,23 +90,15 @@ class EngngModel;
 class SubspaceIteration : public SparseGeneralEigenValueSystemNM
 {
 private:
-    FloatMatrix *ar;
-    FloatMatrix *br;
-    FloatMatrix *vec;
-    int n, nc, nsmax, nitem;
+    int n, nc, nitem;
     int solved;
 
 public:
-    SubspaceIteration(int i, Domain *d, EngngModel *m);
+    SubspaceIteration(Domain *d, EngngModel *m);
     virtual ~SubspaceIteration();
 
     virtual NM_Status solve(SparseMtrx *A, SparseMtrx *B, FloatArray *x, FloatMatrix *v, double rtol, int nroot);
-
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
-    // identification
     virtual const char *giveClassName() const { return "SubspaceIterationSolver"; }
-    virtual classType giveClassID() const { return SubspaceIterationSolverClass; }
 };
 } // end namespace oofem
 #endif // subspaceit_h

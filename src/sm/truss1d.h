@@ -47,6 +47,8 @@
 #include "huertaerrorestimator.h"
 #include "fei1dlin.h"
 
+#define _IFT_Truss1d_Name "truss1d"
+
 namespace oofem {
 /**
  * This class implements a two-node truss bar element for one-dimensional
@@ -102,8 +104,6 @@ public:
     //void ZZNodalRecoveryMI_computeNNMatrix (FloatArray& answer, InternalStateType type);
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *aGaussPoint,
-                                                             InternalStateType type);
 
     // NodalAveragingRecoveryMInterface
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
@@ -129,9 +129,6 @@ public:
 
     // ZZErrorEstimatorInterface
     virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
-    virtual void ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(FloatArray &answer, GaussPoint *gp,
-                                                                           InternalStateType type)
-    { ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(answer, gp, type); }
 
     // HuertaErrorEstimatorInterface
     virtual Element *HuertaErrorEstimatorI_giveElement() { return this; }

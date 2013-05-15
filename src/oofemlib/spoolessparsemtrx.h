@@ -35,10 +35,13 @@
 #ifndef spoolessparsemtrx_h
 #define spoolessparsemtrx_h
 
-#ifdef __SPOOLES_MODULE
-
  #include "sparsemtrx.h"
- #include "spoolesinterface.h"
+
+ extern "C" {
+  #include <spooles/misc.h>
+  #include <spooles/FrontMtx.h>
+  #include <spooles/SymbFac.h>
+ };
 
 namespace oofem {
 /**
@@ -95,4 +98,3 @@ public:
 };
 } // end namespace oofem
 #endif
-#endif // spoolessparsemtrx_h

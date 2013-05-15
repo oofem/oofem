@@ -38,9 +38,9 @@
 #include "structuralmaterial.h"
 #include "structuralms.h"
 #include "linearelasticmaterial.h"
-#include "dictionr.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "dictionary.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 // this turns on or off a bunch of internal variables
 // that allow tracking the distribution of dissipated energy
@@ -50,6 +50,7 @@
 
 ///@name Input fields for RankineMat
 //@{
+#define _IFT_RankineMat_Name "rankmat"
 #define _IFT_RankineMat_sig0 "sig0"
 #define _IFT_RankineMat_h "h"
 #define _IFT_RankineMat_a "a"

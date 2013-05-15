@@ -35,13 +35,14 @@
 #include "staggeredproblem.h"
 #include "engngm.h"
 #include "timestep.h"
-#include "loadtime.h"
+#include "loadtimefunction.h"
 #include "metastep.h"
 #include "exportmodulemanager.h"
 #include "mathfem.h"
 #include "oofemtxtdatareader.h"
 #include "util.h"
 #include "verbose.h"
+#include "classfactory.h"
 
 #include <stdlib.h>
 
@@ -50,6 +51,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_EngngModel( StaggeredProblem );
+
 StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i, _master)
 {
     ndomains = 1; // domain is needed to store the time step ltf
@@ -152,6 +156,9 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, inputStreamNames [ 1 ], _IFT_StaggeredProblem_prob2);
 
     renumberFlag = true; // The staggered problem itself should always try to check if the sub-problems needs renumbering.
+
+    coupledModels.resize(3);
+    IR_GIVE_OPTIONAL_FIELD(ir, this->coupledModels, _IFT_StaggeredProblem_coupling);
 
     return IRRT_OK;
 }

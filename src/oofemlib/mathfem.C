@@ -33,7 +33,7 @@
  */
 
 #include "mathfem.h"
-#include "flotarry.h"
+#include "floatarray.h"
 
 namespace oofem {
 // measure dependent constant

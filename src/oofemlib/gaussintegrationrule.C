@@ -33,8 +33,9 @@
  */
 
 #include "gaussintegrationrule.h"
-#include "gausspnt.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "element.h"
+#include "floatarray.h"
 #include "mathfem.h"
 
 namespace oofem {
@@ -212,114 +213,6 @@ GaussIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
 
     this->intdomain = _Wedge;
     return numberOfIntegrationPoints;
-}
-
-
-int
-GaussIntegrationRule :: SetUpPointsOnWedge(int nPoints,
-                                          MaterialMode mode, GaussPoint ***arry)
-{
-  double weight;
-  FloatArray *coord1;
-
-    switch ( nPoints ) {
-    case 2:
-
-        * arry = new GaussPoint * [ nPoints ];
-        coord1 = new FloatArray(3);
-        coord1->at(1) = 0.333333333333;
-        coord1->at(2) = 0.333333333333;
-        coord1->at(3) = -0.577350269189626;
-        weight = 0.5;
-        ( * arry ) [ 0 ] = new GaussPoint(this, 1, coord1, weight, mode);
-
-        coord1 = new FloatArray(3);
-        coord1->at(1) = 0.333333333333;
-        coord1->at(2) = 0.333333333333;
-        coord1->at(3) = 0.577350269189626;
-        weight = 0.5;
-        ( * arry ) [ 1 ] = new GaussPoint(this, 1, coord1, weight, mode);
-        break;
-
-    case 9:
-
-        * arry = new GaussPoint * [ nPoints ];
-        double w1,w2,w3;
-        w1 = 0.16666666666666666666;
-        w2 = 0.55555555555555555555;
-        w3 = 0.88888888888888888888;
-
-        coord1 = new FloatArray(3);
-        coord1 ->at(1) = 0.166666666666666;
-        coord1 ->at(2) = 0.166666666666666;
-        coord1 ->at(3) =  -0.7745996669241483;
-        weight  =  w1*w2;
-        ( * arry ) [ 0 ] = new GaussPoint(this, 1, coord1, weight, mode);
-
-        coord1 = new FloatArray(3);
-        coord1 ->at(1) = 0.166666666666666;
-        coord1 ->at(2) = 0.166666666666666;
-        coord1 ->at(3) = 0.;
-        weight  = w1*w3;
-        ( * arry ) [ 1 ] = new GaussPoint(this, 1, coord1, weight, mode);
-
-        coord1 = new FloatArray(3);
-        coord1 ->at(1) = 0.166666666666666;
-        coord1 ->at(2) = 0.166666666666666;
-        coord1 ->at(3) = 0.7745996669241483;
-        weight = w1*w2;
-        ( * arry ) [ 2 ] = new GaussPoint(this, 1, coord1, weight, mode);
-
-        coord1 = new FloatArray(3);
-        coord1 ->at(1) = 0.666666666666666;
-        coord1 ->at(2) = 0.166666666666666;
-        coord1 ->at(3) =  -0.7745996669241483;
-        weight = w1*w2;
-        ( * arry ) [ 3 ] = new GaussPoint(this, 1, coord1, weight, mode);
-
-        coord1 = new FloatArray(3);
-        coord1 ->at(1) = 0.666666666666666;
-        coord1 ->at(2) = 0.166666666666666;
-        coord1 ->at(3) = 0.;
-        weight = w1*w3;
-        ( * arry ) [ 4 ] = new GaussPoint(this, 1, coord1, weight, mode);
-
-        coord1 = new FloatArray(3);
-        coord1 ->at(1) = 0.666666666666666;
-        coord1 ->at(2) = 0.166666666666666;
-        coord1 ->at(3) = 0.7745996669241483;
-        weight = w1*w2;
-        ( * arry ) [ 5 ] = new GaussPoint(this, 1, coord1, weight, mode);
-
-        coord1 = new FloatArray(3);
-        coord1 ->at(1) = 0.166666666666666;
-        coord1 ->at(2) = 0.666666666666666;
-        coord1 ->at(3) =  -0.7745996669241483;
-        weight = w1*w2;
-        ( * arry ) [ 6 ] = new GaussPoint(this, 1, coord1, weight, mode);
-
-
-        coord1 = new FloatArray(3);
-        coord1 ->at(1) = 0.166666666666666;
-        coord1 ->at(2) = 0.666666666666666;
-        coord1 ->at(3) = 0.;
-        weight =  w1*w3;
-        ( * arry ) [ 7 ] = new GaussPoint(this, 1, coord1, weight, mode);
-
-        coord1 = new FloatArray(3);
-        coord1 ->at(1) = 0.166666666666666;
-        coord1 ->at(2) = 0.666666666666666;
-        coord1 ->at(3) = 0.7745996669241483;
-        weight = w1*w2;
-        ( * arry ) [ 8 ] = new GaussPoint(this, 1, coord1, weight, mode);
-            break;
-
-        delete coord1;
-    default:
-        OOFEM_ERROR2("SetUpPointsOnWedge: unsupported number of IPs (%d)", nPoints);
-    }
-
-    return nPoints;
 }
 
 

@@ -39,8 +39,8 @@
 #include "domain.h"
 #include "engngm.h"
 
-///@name Input fields
-//@{
+#define _IFT_DofManExportModule_Name "dm"
+
 #define _IFT_DofManExportModule_dmlist "dmlist"
 //@}
 

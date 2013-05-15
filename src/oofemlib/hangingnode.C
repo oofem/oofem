@@ -34,13 +34,17 @@
 
 #include "hangingnode.h"
 #include "slavedof.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "element.h"
 #include "feinterpol.h"
 #include "spatiallocalizer.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_DofManager( HangingNode );
+
 HangingNode :: HangingNode(int n, Domain *aDomain) : Node(n, aDomain)
 {
 #ifdef __OOFEG

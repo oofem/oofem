@@ -36,20 +36,24 @@
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "intarray.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "engngm.h"
 #include "boundaryload.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( Beam3d );
+
 Beam3d :: Beam3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 {
     numberOfDofMans = 2;

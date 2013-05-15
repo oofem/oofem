@@ -44,14 +44,22 @@
 #include "calmls.h"
 #include "outputmanager.h"
 #include "datastream.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "timer.h"
 #include "contextioerr.h"
 #include "sparsemtrx.h"
 #include "errorestimator.h"
 #include "mathfem.h"
 
+#ifdef __PARALLEL_MODE
+ #include "problemcomm.h"
+ #include "communicator.h"
+#endif
+
 namespace oofem {
+
+REGISTER_EngngModel( NonLinearStatic );
+
 NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i, _master),
     totalDisplacement(), incrementOfDisplacement(), internalForces(), initialLoadVector(), incrementalLoadVector(),
     initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed()
@@ -115,7 +123,7 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
             }
         }
 
-        this->nMethod = new CylindricalALM(1, this->giveDomain(1), this, EID_MomentumBalance);
+        this->nMethod = new CylindricalALM(this->giveDomain(1), this);
     } else if ( mode == nls_directControl ) {
         if ( nMethod ) {
             if ( dynamic_cast< NRSolver * >( nMethod ) ) {
@@ -125,7 +133,7 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
             }
         }
 
-        this->nMethod = new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance);
+        this->nMethod = new NRSolver(this->giveDomain(1), this);
     } else {
         _error("giveNumericalMethod: unsupported controlMode");
     }
@@ -233,7 +241,7 @@ double NonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
 // This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
-#if DEBUG
+#ifdef DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -267,31 +275,6 @@ double NonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
     }
 
     return 0.0;
-}
-
-
-double NonLinearStatic :: giveUnknownComponent(UnknownType chc, ValueModeType mode,
-                                               TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displacement, velocity of equation eq
-// This function translates this request to numerical method language
-{
-    int eq = dof->__giveEquationNumber();
-    if ( eq == 0 ) {
-        _error("giveUnknownComponent: invalid equation number");
-    }
-
-
-    if ( tStep != this->giveCurrentStep() ) {
-        _error("giveUnknownComponent: unknown time step encountered");
-        return 0.;
-    }
-
-    if ( chc == TotalLoadLevel ) {
-        return loadLevel;
-    } else {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-        return 0.;
-    }
 }
 
 
@@ -387,10 +370,6 @@ NonLinearStatic :: updateLoadVectors(TimeStep *stepN)
                 OOFEM_LOG_INFO("Fixed load level\n");
 
                 //update initialLoadVector
-                if ( initialLoadVector.isEmpty() ) {
-                    initialLoadVector.resize( incrementalLoadVector.giveSize() );
-                }
-
                 incrementalLoadVector.times(loadLevel);
                 initialLoadVector.add(incrementalLoadVector);
 
@@ -408,10 +387,6 @@ NonLinearStatic :: updateLoadVectors(TimeStep *stepN)
     } else { // direct control
         //update initialLoadVector after each step of direct control
         //(here the loading is not proportional)
-        if ( initialLoadVector.isEmpty() ) {
-            initialLoadVector.resize( incrementalLoadVector.giveSize() );
-        }
-
         OOFEM_LOG_DEBUG("Fixed load level\n");
 
         incrementalLoadVector.times(loadLevel);
@@ -461,7 +436,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         internalForces.zero();
 
         if ( !stiffnessMatrix ) {
-            stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+            stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         }
 
         if ( stiffnessMatrix == NULL ) {
@@ -801,7 +776,7 @@ NonLinearStatic :: initPetscContexts()
 {
     petscContextList->growTo(ndomains);
     for ( int i = 1; i <= this->ndomains; i++ ) {
-        petscContextList->put(i, new PetscContext(this, EID_MomentumBalance, false)); // false == using local vectors.
+        petscContextList->put(i, new PetscContext(this, false)); // false == using local vectors.
     }
 }
 #endif
@@ -842,7 +817,6 @@ NonLinearStatic :: showSparseMtrxStructure(int type, oofegGraphicContext &contex
 {
     Domain *domain = this->giveDomain(1);
     CharType ctype;
-    int i;
 
     if ( type != 1 ) {
         return;
@@ -857,11 +831,11 @@ NonLinearStatic :: showSparseMtrxStructure(int type, oofegGraphicContext &contex
     }
 
     int nelems = domain->giveNumberOfElements();
-    for ( i = 1; i <= nelems; i++ ) {
+    for ( int i = 1; i <= nelems; i++ ) {
         domain->giveElement(i)->showSparseMtrxStructure(ctype, context, atTime);
     }
 
-    for ( i = 1; i <= nelems; i++ ) {
+    for ( int i = 1; i <= nelems; i++ ) {
         domain->giveElement(i)->showExtendedSparseMtrxStructure(ctype, context, atTime);
     }
 }
@@ -965,7 +939,8 @@ NonLinearStatic :: giveLoadBalancer()
     }
 
     if ( loadBalancingFlag ) {
-        lb = CreateUsrDefLoadBalancerOfType( ParmetisLoadBalancerClass, this->giveDomain(1) );
+        ///@todo Make the name possibly optional (but currently, there is just one choice, "parmetis")
+        lb = classFactory.createLoadBalancer( _IFT_ParmetisLoadBalancer_Name, this->giveDomain(1) );
         return lb;
     } else {
         return NULL;
@@ -981,7 +956,7 @@ NonLinearStatic :: giveLoadBalancerMonitor()
     }
 
     if ( loadBalancingFlag ) {
-        lbm = CreateUsrDefLoadBalancerMonitorOfType(WallClockLoadBalancerMonitorClass, this);
+        lbm = classFactory.createLoadBalancerMonitor( _IFT_WallClockLoadBalancerMonitor_Name, this);
         return lbm;
     } else {
         return NULL;

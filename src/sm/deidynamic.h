@@ -39,6 +39,7 @@
 
 ///@name Input fields for DEIDynamic
 //@{
+#define _IFT_DEIDynamic_Name "deidynamic"
 #define _IFT_DEIDynamic_dumpcoef "dumpcoef"
 #define _IFT_DEIDynamic_deltat "deltat"
 //@}

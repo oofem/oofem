@@ -36,6 +36,7 @@
 #include "shell7base.h"
 #include "enrichmentitem.h"
 #include "xfemmanager.h"
+#include "dofmanager.h"
 #include "constantpressureload.h"
 #include "simpleinterfacemat.h"
 namespace oofem {
@@ -1079,7 +1080,7 @@ Shell7BaseXFEM :: giveDelaminationGroupXiLimits(int &dGroup, double &xiTop, doub
             xiTop    = (*iter).second;
         }
 
-    #if DEBUG
+    #ifdef DEBUG
         if ( xiBottom > xiTop ) {
             OOFEM_ERROR2("giveDelaminationGroupZLimits: Bottom xi-coord is larger than top xi-coord in dGroup. (%i)", dGroup);
         }

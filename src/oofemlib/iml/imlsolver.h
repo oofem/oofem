@@ -37,7 +37,7 @@
 
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "precond.h"
 
 ///@name Input fields for IMLSolver
@@ -88,7 +88,7 @@ private:
 
 public:
     /// Constructor. Creates new instance of LDLTFactorization, with number i, belonging to domain d and Engngmodel m.
-    IMLSolver(int i, Domain *d, EngngModel *m);
+    IMLSolver(Domain *d, EngngModel *m);
     /// Destructor
     virtual ~IMLSolver();
 
@@ -103,7 +103,6 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "IMLSolver"; }
-    virtual classType giveClassID() const { return IMLSolverClass; }
     virtual LinSystSolverType giveLinSystSolverType() const { return ST_IML; }
 };
 } // end namespace oofem

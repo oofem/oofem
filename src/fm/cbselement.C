@@ -36,8 +36,8 @@
 #include "node.h"
 #include "integrationrule.h"
 #include "intarray.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

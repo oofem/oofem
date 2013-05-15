@@ -42,6 +42,8 @@
 #include "shell7base.h"
 //#include "vtkxmlexportmodule.h"
 
+#define _IFT_Tr2Shell7_Name "tr2shell7"
+
 namespace oofem {
 class FEI3dTrQuad;
 class BoundaryLoad;
@@ -110,7 +112,7 @@ public:
     virtual classType giveClassID()                    const { return Tr2Shell7Class; }
     //virtual Element_Geometry_Type giveGeometryType()   const { return EGT_triangle_2; }
     virtual Element_Geometry_Type giveGeometryType()   const { return EGT_Composite; }
-    virtual integrationDomain  giveIntegrationDomain() const { return _Triangle; }     // write new wedge-like type 'layeredWedge'
+    virtual integrationDomain giveIntegrationDomain() { return _Triangle; }     // write new wedge-like type 'layeredWedge'
 
     //friend class Tr2Shell7XFEM;
 

@@ -33,11 +33,15 @@
  */
 
 #include "simplecrosssection.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "structuralmaterial.h"
-#include "flotarry.h"
+#include "floatarray.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_CrossSection( SimpleCrossSection );
+
 void
 SimpleCrossSection :: giveRealStresses(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                        const FloatArray &totalStrain, TimeStep *tStep)

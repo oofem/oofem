@@ -36,8 +36,8 @@
 #define feitspline_h
 
 #include "feibspline.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 /*
  * alternatively, it is possible to store for individual control points open local knot vector;

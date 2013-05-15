@@ -37,25 +37,32 @@
 
 #include "femcmpnn.h"
 #include "domain.h"
-#include "flotmtrx.h"
-#include "enrichmentfunction.h"
+#include "floatmatrix.h"
 #include "layeredcrosssection.h"
-#include "enrichmentdomain.h"
 #include "dofiditem.h"
 
 ///@name Input fields for XFEM
 //@{
+#define _IFT_CrackTip_Name "cracktip"
+#define _IFT_CrackInterior_Name "crackinterior"
+
+#define _IFT_Inclusion_Name "inclusion"
 #define _IFT_Inclusion_material "material"
 
 #define _IFT_EnrichmentItem_domains "enrichmentdomains"
 #define _IFT_EnrichmentItem_function "enrichmentfunction"
 
+#define _IFT_Delamination_Name "delamination"
 #define _IFT_Delamination_xiCoords "delaminationxicoords"
 #define _IFT_Delamination_CohesiveZoneMaterial "czmaterial"
+//#define _IFT_MultipleDelamination_Name "multipledelamination"
 //@}
 
 namespace oofem {
+template< class T > class AList;
 class BasicGeometry;
+class EnrichmentFunction;
+class EnrichmentDomain;
 
 /**
  * Abstract class representing entity, which is included in the FE model using one (or more)
@@ -83,10 +90,9 @@ public:
     // Enrichment domains
     BasicGeometry *giveGeometry(int i);
     BasicGeometry *giveGeometry();
-    EnrichmentDomain *giveEnrichmentDomain(int i) { return this->enrichmentDomainList->at(i); };
-    int giveNumberOfEnrichmentDomains() { return this->numberOfEnrichmentDomains; };      
-   
-    
+    EnrichmentDomain *giveEnrichmentDomain(int i) { return this->enrichmentDomainList->at(i); }
+    int giveNumberOfEnrichmentDomains() { return this->numberOfEnrichmentDomains; }
+
     // Enrichment functions
     EnrichmentFunction *giveEnrichmentFunction(int n);
     int giveNumberOfEnrichmentfunctions() { return this->numberOfEnrichmentFunctions; }
@@ -103,7 +109,6 @@ public:
     int giveStartOfDofIdPool() { return this->startOfDofIdPool; };
     void computeDofManDofIdArray(IntArray &DofIdArray, DofManager *dMan, int enrichmentDomainNumber); // list of id's a particular dof manager supports
     void giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber); // list of id's for the enrichment dofs
-
 
 
 protected:
@@ -155,7 +160,6 @@ public:
 };
 
 
-
 /** Concrete representation of Delamination. */
 class Delamination : public EnrichmentItem 
 {
@@ -182,11 +186,6 @@ public:
     virtual Material *giveMaterial() { return mat; }
 };
 
-
-
 } // end namespace oofem
-
-
-
 
 #endif  // enrichmentitem_h

@@ -33,9 +33,9 @@
  */
 
 #include "plasticmaterial.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "structuralcrosssection.h"
 #include "datastream.h"

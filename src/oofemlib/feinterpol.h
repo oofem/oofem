@@ -237,6 +237,16 @@ public:
      * @param cellgeo Underlying cell geometry.
      */
     virtual void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    /**
+     * Computes the integral @f$ \int_S n \cdot x \mathrm{d}s @f$.
+     * @param boundary Boundary number.
+     * @param cellgeo Underlying cell geometry.
+     * @return Evaluated integral.
+     */
+    virtual double evalNXIntegral(int boundary, const FEICellGeometry &cellgeo) {
+        OOFEM_ERROR("FEInterpolation :: evalNXIntegral - Not implemented");
+        return 0.;
+    }
     //@}
 
     /**@name Methods to support interpolation defined on patch by patch basis. */

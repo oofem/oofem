@@ -32,37 +32,18 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef __SPOOLES_MODULE
- #include "spoolessolver.h"
+#include "spoolessolver.h"
+#include "spoolessparsemtrx.h"
+#include "floatarray.h"
+#include "verbose.h"
+#include "timer.h"
+#include "classfactory.h"
 
 namespace oofem {
-SpoolesSolver :: SpoolesSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
-{
-    _error("SpoolesSolver: can't create, SPOOLES support not compiled");
-}
 
-SpoolesSolver :: ~SpoolesSolver() { }
+REGISTER_SparseLinSolver( SpoolesSolver, ST_Spooles );
 
-IRResultType
-SpoolesSolver :: initializeFrom(InputRecord *ir) { return IRRT_OK; }
-
-NM_Status
-SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSuccess; }
-} // end namespace oofem
-
-#else
-
- #include "spoolessolver.h"
- #include "spoolessparsemtrx.h"
- #include "flotarry.h"
- #include "verbose.h"
- #include "timer.h"
-
-// Spooles includes
- #include "spoolesinterface.h"
-
-namespace oofem {
-SpoolesSolver :: SpoolesSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
+SpoolesSolver :: SpoolesSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
 {
     Lhs = NULL;
     msglvl = 0;
@@ -123,9 +104,9 @@ SpoolesSolver :: initializeFrom(InputRecord *ir)
     std::string msgFileName;
 
     val = -3;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_SpoolesSolver_msglvl, "msglvl");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_SpoolesSolver_msglvl);
     msglvl = val;
-    IR_GIVE_OPTIONAL_FIELD(ir, msgFileName, _IFT_SpoolesSolver_msgfile, "msgfile");
+    IR_GIVE_OPTIONAL_FIELD(ir, msgFileName, _IFT_SpoolesSolver_msgfile);
     if ( !msgFileName.empty() ) {
         msgFile = fopen(msgFileName.c_str(), "w");
         msgFileCloseFlag = 1;
@@ -424,4 +405,3 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 }
 
 } // end namespace oofem
-#endif //ifdef __SPOOLES_MODULE

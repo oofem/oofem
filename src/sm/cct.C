@@ -37,20 +37,24 @@
 #include "material.h"
 #include "crosssection.h"
 #include "structuralms.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "load.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( CCTPlate );
+
 FEI2dTrLin CCTPlate :: interp_lin(1, 2);
 //FEI2dTrRot CCTPlate :: interp_rot(1, 2);
 
@@ -451,23 +455,6 @@ CCTPlate :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 }
 
 
-void
-CCTPlate :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *gp, InternalStateType type)
-// evaluates N matrix (interpolation estimated stress matrix)
-// according to Zienkiewicz & Zhu paper
-// N(nsigma, nsigma*nnodes)
-// Definition : sigmaVector = N * nodalSigmaVector
-{
-    FloatArray n;
-
-    this->interp_lin.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    answer.resize(3);
-    answer.zero();
-    answer.at(1) = n.at(1);
-    answer.at(2) = n.at(2);
-    answer.at(3) = n.at(3);
-}
-
 double 
 CCTPlate :: ZZRemeshingCriteriaI_giveCharacteristicSize() 
 {
@@ -678,10 +665,6 @@ CCTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 
     return 1;
 }
-
-
-
-
 
 
 //

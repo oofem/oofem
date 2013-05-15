@@ -61,6 +61,7 @@
 #define _IFT_Domain_nbc "nbc"
 #define _IFT_Domain_nic "nic"
 #define _IFT_Domain_nloadtimefunct "nltf"
+#define _IFT_Domain_nset "nset"
 #define _IFT_Domain_nbarrier "nbarrier"
 #define _IFT_Domain_nrandgen "nrandgen"
 #define _IFT_Domain_topology "topology"
@@ -90,6 +91,7 @@ class RandomFieldGenerator;
 class XfemManager;
 class TopologyDescription;
 class DataReader;
+class Set;
 
 #ifdef __PARALLEL_MODE
 class ProcessCommunicator;
@@ -126,6 +128,8 @@ private:
     AList< InitialCondition > *icList;
     /// Load time function list.
     AList< LoadTimeFunction > *loadTimeFunctionList;
+    /// Set list.
+    AList< Set > *setList;
     /// Nonlocal barrier list.
     AList< NonlocalBarrier > *nonlocalBarierList;
     /// List of Random generators.
@@ -236,6 +240,12 @@ public:
      */
     Element *giveElement(int n);
     /**
+     * Service for accessing particular domain fe element.
+     * Generates error if no such element is defined.
+     * @param n Pointer to the element with id n
+     */
+    Element *giveGlobalElement(int n);
+    /**
      * Returns engineering model to which receiver is associated.
      */
     EngngModel *giveEngngModel();
@@ -288,6 +298,12 @@ public:
      * @param n Pointer to n-th object is returned.
      */
     RandomFieldGenerator *giveRandomFieldGenerator(int n);
+    /**
+     * Service for accessing particular domain set.
+     * Generates error if no such set is defined.
+     * @param n Pointer to n-th object is returned.
+     */
+    Set *giveSet(int n);
 
     /**
      * Service for accessing particular domain node.
@@ -314,7 +330,7 @@ public:
      * Reads receiver description from input stream and creates corresponding components accordingly.
      * It scans input file, each line is assumed to be single record describing type and parameters for
      * specific entity in domain. The record line is converted to lower case letters.
-     * Corresponding component is created using CreateUsrDef* function of
+     * Corresponding component is created using classFactory.create* function of
      * corresponding base class, sending component name (extracted from corresponding record)
      * as parameter. After new object is created, its initializeFrom member function is
      * called with its record as parameter.
@@ -332,11 +348,8 @@ public:
      * Automatically detects necessary nodal dofs and creates them accordingly.
      * Scans every element after its requested dof's and picks the union of all those dof types.
      * Intenal DOF managers are not affected, as those are created by the corresponding element/bc.
-     * @todo Nodal BCs currently have a very limited implementation. Should be replaced in favor of some more flexible node-sets/element-sets etc.
-     * @param nodeBCs The boundary conditions for each node
-     * @param eid Equation ID for dofs.
      */
-    void createDofs(const IntArray &nodeBCs, EquationID eid);
+    void createDofs();
     //int giveNumberOfNodes () {return nodeList->giveSize();}
     //int giveNumberOfSides () {return elementSideList->giveSize();}
     /// Returns number of dof managers in domain.
@@ -385,6 +398,8 @@ public:
     void resizeLoadTimeFunctions(int _newSize);
     /// Resizes the internal data structure to accommodate space for _newSize random field generators.
     void resizeRandomFieldGenerators(int _newSize);
+    /// Resizes the internal data structure to accommodate space for _newSize sets.
+    void resizeSets(int _newSize);
 
     /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setDofManager(int i, DofManager *obj);
@@ -404,6 +419,8 @@ public:
     void setLoadTimeFunction(int i, LoadTimeFunction *obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setRandomFieldGenerator(int i, RandomFieldGenerator *obj);
+    /// Sets i-th component. The component will be further managed and maintained by domain object.
+    void setSet(int i, Set *obj);
     
     /// Temporary function, sets xfemManager.
     void setXfemManager(XfemManager *xfemManager);

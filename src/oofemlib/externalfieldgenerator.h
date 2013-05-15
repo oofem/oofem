@@ -36,12 +36,13 @@
 #define externalfieldgenerator_h
 
 #include "randomfieldgenerator.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 
 #define NAME_MAX_LENGTH 200
 
 ///@name Input fields for ExternalFieldGenerator
 //@{
+#define _IFT_ExternalFieldGenerator_Name "externalfieldgenerator"
 #define _IFT_ExternalFieldGenerator_name "name"
 //@}
 

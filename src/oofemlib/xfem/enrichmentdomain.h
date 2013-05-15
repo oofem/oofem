@@ -36,7 +36,7 @@
 #define enrichmentdomain_h
 
 #include "domain.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "node.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
@@ -47,6 +47,10 @@ namespace oofem {
 ///@name Input fields for Enrichment domains
 //@{
 #define _IFT_DofManList_list "list"
+#define _IFT_DofManList_Name "dofmanlist"
+#define _IFT_WholeDomain_Name "wholedomain"
+#define _IFT_EDBGCircle_Name "circle"
+//#define _IFT_BasicGeometryDomain<Line>_Name "line" // Odd one out, how should we treat these?
 //@}
 
 /**
@@ -72,7 +76,7 @@ public:
     // Update of description
     virtual void updateEnrichmentDomain();
 
-    // Spatial search metohds
+    // Spatial search methods
     virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element){};
     virtual int computeNumberOfIntersectionPoints(Element *element){return 0;};
 private:
@@ -82,7 +86,7 @@ private:
 
 /**
  * Base class for EnrichmentDomains that derive from BasicGeometry
- * ///@todo: Add additional basic geometry descriptions like polygon
+ * @todo: Add additional basic geometry descriptions like polygon
  */
 class EnrichmentDomain_BG : public EnrichmentDomain
 {
@@ -106,7 +110,7 @@ public:
     virtual ~EDBGCircle() { }
     virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir);  };
     virtual bool isDofManagerEnriched(DofManager *dMan);
-    virtual bool isElementEnriched(const Element *element);
+    virtual bool isElementEnriched(Element *element);
     virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element) { bg->computeIntersectionPoints(element, intersectionPoints); }
     virtual int computeNumberOfIntersectionPoints(Element *element) { return static_cast<Circle *>(bg)->computeNumberOfIntersectionPoints(element); };
 };

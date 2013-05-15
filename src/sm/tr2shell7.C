@@ -40,12 +40,16 @@
 #include "domain.h"
 #include "equationid.h"
 #include "gaussintegrationrule.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "fei3dtrquad.h"
 #include "boundaryload.h"
 #include "vtkxmlexportmodule.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( Tr2Shell7 );
+
 FEI3dTrQuad Tr2Shell7 :: interpolation;
 
 IntArray Tr2Shell7 :: ordering_phibar(18);

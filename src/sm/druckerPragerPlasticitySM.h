@@ -34,8 +34,8 @@
 #ifndef druckerpragerplasticitysm_h
 #define druckerpragerplasticitysm_h
 
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 #include "structuralms.h"
 #include "strainvector.h"
@@ -45,6 +45,7 @@
 
 ///@name Input fields for DruckerPragerPlasticitySM
 //@{
+#define _IFT_DruckerPragerPlasticitySM_Name "druckerprager"
 #define _IFT_DruckerPragerPlasticitySM_iys "iys" ///< Initial yield stress under pure shear
 #define _IFT_DruckerPragerPlasticitySM_alpha "alpha" ///< Friction coefficient
 #define _IFT_DruckerPragerPlasticitySM_alphapsi "alphapsi" ///< Dilatancy coefficient

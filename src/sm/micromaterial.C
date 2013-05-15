@@ -37,9 +37,10 @@
 #include "structuralms.h"
 #include "domain.h"
 #include "dofmanager.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "oofemtxtdatareader.h"
 #include "util.h"
+#include "classfactory.h"
 
 namespace oofem {
 //valgrind --leak-check=full --show-reachable=no -v --log-file=valgr.txt ./oofem -f Macrolspace_1.in
@@ -57,6 +58,7 @@ namespace oofem {
 //     A.beProductOf(B, displacementVector);
 //     A.printYourself();
 
+REGISTER_Material( MicroMaterial );
 
 // constructor
 //strainVector, tempStrainVector, stressVector, tempStressVector are defined on StructuralMaterialStatus
@@ -292,7 +294,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
         Kbi->zero();
         Kii1KbiT = new FloatMatrix(totalInternalDofs, totalBoundaryDofs);
         Kii1KbiT->zero();
-        Kii = CreateUsrDefSparseMtrx(sparseMtrxType);
+        Kii = classFactory.createSparseMtrx(sparseMtrxType);
         Kii->buildInternalStructure(microEngngModel, 1, EID_MomentumBalance, * this);
         Kii->zero();
         microEngngModel->assemble(Kii, tStep, EID_MomentumBalance, type, * this, microDomain);
@@ -304,7 +306,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     this->reqNumberOfDomainEquation = this->maxNumberOfDomainEquation;
     this->DofEquationNumbering = AllNodes;
 
-    stiffnessMatrixMicro = CreateUsrDefSparseMtrx(sparseMtrxType);
+    stiffnessMatrixMicro = classFactory.createSparseMtrx(sparseMtrxType);
     stiffnessMatrixMicro->zero();
     stiffnessMatrixMicro->buildInternalStructure(microEngngModel, 1, EID_MomentumBalance, * this);
     stiffnessMatrixMicro->zero();

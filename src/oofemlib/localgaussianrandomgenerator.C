@@ -34,10 +34,14 @@
 
 #include "localgaussianrandomgenerator.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #include <ctime>
 
 namespace oofem {
+
+REGISTER_RandomFieldGenerator( LocalGaussianRandomGenerator );
+
 LocalGaussianRandomGenerator :: LocalGaussianRandomGenerator(int num, Domain *d) : RandomFieldGenerator(num, d)
 {}
 

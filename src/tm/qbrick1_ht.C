@@ -34,16 +34,21 @@
 
 #include "qbrick1_ht.h"
 #include "node.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "domain.h"
 #include "mathfem.h"
 #include "load.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( QBrick1_ht );
+REGISTER_Element( QBrick1_hmt );
+
 FEI3dHexaQuad QBrick1_ht :: interpolation;
 
 QBrick1_ht :: QBrick1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(), ZZNodalRecoveryModelInterface(), SPRNodalRecoveryModelInterface()

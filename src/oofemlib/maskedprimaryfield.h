@@ -37,7 +37,7 @@
 
 #include "primaryfield.h"
 
-#include "flotarry.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "valuemodetype.h"
 #include "contextioresulttype.h"

@@ -55,11 +55,12 @@ public:
      * @param dynamic Flag indicating that receiver can change.
      */
     LobattoIntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic);
+    LobattoIntegrationRule(int n, Element *e);
     /// Destructor
     virtual ~LobattoIntegrationRule();
 
-    virtual classType giveClassID() const { return LobattoIntegrationRuleClass; }
     virtual const char *giveClassName() const { return "LobattoIntegrationRule"; }
+    virtual IntegrationRuleType giveIntegrationRuleType() const { return IRT_Lobatto; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
     virtual int getRequiredNumberOfIntegrationPoints(integrationDomain dType, int approxOrder);
@@ -72,11 +73,6 @@ public:
     static void giveLineCoordsAndWeights(int nPoints, FloatArray &coords_xi, FloatArray &weights);
 
 
-    virtual int SetUpPointsOnLine(int, MaterialMode mode, GaussPoint ***gp);
-    virtual int SetUpPointsOnTriangle(int, MaterialMode mode, GaussPoint ***gp);
-    virtual int SetUpPointsOnSquare(int, MaterialMode mode, GaussPoint ***gp);
-    virtual int SetUpPointsOnCube(int, MaterialMode mode, GaussPoint ***gp);
-    virtual int SetUpPointsOnTetrahedra(int, MaterialMode mode, GaussPoint ***gp);
 
 };
 } // end namespace oofem

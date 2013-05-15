@@ -36,12 +36,13 @@
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "engngm.h"
@@ -49,6 +50,8 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( Truss2d );
 
 Truss2d :: Truss2d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain)
@@ -185,6 +188,7 @@ Truss2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoord
     n2  = ( 1. + ksi ) * 0.5;
 
     answer.resize(3);
+    answer.zero();
     answer.at(c1) = n1 * this->giveNode(1)->giveCoordinate(c1) + n2 *this->giveNode(2)->giveCoordinate(c1);
     answer.at(c2) = n1 * this->giveNode(1)->giveCoordinate(c2) + n2 *this->giveNode(2)->giveCoordinate(c2);
 

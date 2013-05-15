@@ -41,6 +41,7 @@
 
 ///@name Input fields for IncrementalLinearStatic
 //@{
+#define _IFT_IncrementalLinearStatic_Name "incrlinearstatic"
 #define _IFT_IncrementalLinearStatic_endoftimeofinterest "endoftimeofinterest"
 #define _IFT_IncrementalLinearStatic_prescribedtimes "prescribedtimes"
 #define _IFT_IncrementalLinearStatic_deltat "deltat"

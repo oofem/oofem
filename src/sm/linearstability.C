@@ -39,10 +39,10 @@
 #include "timestep.h"
 #include "element.h"
 #include "contextioerr.h"
-#include "flotmtrx.h"
+#include "floatmatrix.h"
 #include "verbose.h"
-#include "flotarry.h"
-#include "usrdefsub.h"
+#include "floatarray.h"
+#include "classfactory.h"
 #include "datastream.h"
 #include "exportmodulemanager.h"
 
@@ -51,13 +51,16 @@
 #endif
 
 namespace oofem {
+
+REGISTER_EngngModel( LinearStability );
+
 NumericalMethod *LinearStability :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( nMethod ) {
         return nMethod;
     }
 
-    nMethod = CreateUsrDefGeneralizedEigenValueSolver(solverType, 1, this->giveDomain(1), this);
+    nMethod = classFactory.createGeneralizedEigenValueSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod:  solver creation failed");
     }
@@ -71,7 +74,7 @@ SparseLinearSystemNM *LinearStability :: giveNumericalMethodForLinStaticProblem(
         return nMethodLS;
     }
 
-    nMethodLS = CreateUsrDefSparseLinSolver(ST_Direct, 1, this->giveDomain(1), this); ///@todo Support other solvers
+    nMethodLS = classFactory.createSparseLinSolver(ST_Direct, this->giveDomain(1), this); ///@todo Support other solvers
     if ( nMethodLS == NULL ) {
         _error("giveNumericalMethodForLinStaticProblem:  solver creation failed");
     }
@@ -116,7 +119,7 @@ double LinearStability :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
 // returns unknown quantity like displacement, eigen value.
 {
     int eq = dof->__giveEquationNumber();
-#if DEBUG
+#ifdef DEBUG
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -137,48 +140,6 @@ double LinearStability :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
 
     return 0.;
 }
-
-double LinearStability ::  giveUnknownComponent(UnknownType chc, ValueModeType mode,
-                                                TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displaacement, eigen value.
-// This function translates this request to numerical method language
-{
-    int eq = dof->__giveEquationNumber();
-    if ( eq == 0 ) {
-        _error("giveUnknownComponent: invalid equation number");
-    }
-
-    int activeVector = ( int ) tStep->giveTargetTime();
-    if ( chc == EigenValue ) {
-        return eigVal.at(eq);
-    } else if ( chc == DisplacementVector ) {
-        switch ( mode ) {
-        case VM_Total: // EigenVector
-            if ( activeVector ) {
-                return eigVec.at(eq, activeVector);
-            }
-
-            return displacementVector.at(eq);
-
-        default:
-            _error("giveUnknownComponent: Unknown is of undefined type for this problem");
-        }
-    } else if ( chc == EigenVector ) {
-        switch ( mode ) {
-        case VM_Total: // EigenVector
-            return eigVec.at(eq, activeVector);
-
-        default:
-            _error("giveUnknownComponent: Unknown is of undefined type for this problem");
-        }
-    } else {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-        return 0.;
-    }
-
-    return 0.;
-}
-
 
 TimeStep *LinearStability :: giveNextStep()
 {
@@ -226,7 +187,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
         //
         // first step - solve linear static problem
         //
-        stiffnessMatrix = CreateUsrDefSparseMtrx(SMT_Skyline); ///@todo Don't hardcode skyline matrix only
+        stiffnessMatrix = classFactory.createSparseMtrx(SMT_Skyline); ///@todo Don't hardcode skyline matrix only
         stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
         //

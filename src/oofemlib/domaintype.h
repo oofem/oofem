@@ -56,6 +56,7 @@ namespace oofem {
     ENUM_ITEM(_2dIncompressibleFlow) /* 2d Incompressible flow, no energy eq */ \
     ENUM_ITEM(_3dIncompressibleFlow) /* 3d Incompressible flow, no energy eq */ \
     ENUM_ITEM(_2dLatticeMode)\
+    ENUM_ITEM(_2dLatticeMassTransportMode)\
     ENUM_ITEM(_3dDirShellMode) /* 7 parameter shell based on director fields */ \
 /**
  * Type representing type of domain.

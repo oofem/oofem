@@ -38,18 +38,22 @@
 #include "material.h"
 #include "structuralcrosssection.h"
 #include "structuralms.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "domain.h"
 #include "verbose.h"
 #include "engngm.h"
 #include "load.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( TrPlaneStrRot );
+
 TrPlaneStrRot :: TrPlaneStrRot(int n, Domain *aDomain) :
     TrPlaneStress2d(n, aDomain)
 {
@@ -657,4 +661,18 @@ TrPlaneStrRot :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Time
         answer.resize(0);          // nil resultant
     }
 }
+
+int
+TrPlaneStrRot :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
+{
+    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
+        return 4;
+    }
+
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    return this->giveIPValueSize(type, gp);
+}
+
+
+
 } // end namespace oofem

@@ -40,12 +40,13 @@
 #include "sparsegeneigenvalsystemnm.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "nummet.h"
 
 ///@name Input fields for LinearStability
 //@{
+#define _IFT_LinearStability_Name "linearstability"
 #define _IFT_LinearStability_nroot "nroot"
 #define _IFT_LinearStability_rtolv "rtolv"
 #define _IFT_LinearStability_stype "stype"
@@ -113,7 +114,6 @@ public:
     // When DisplacementVector is requested, then if time==0 linear elastic solution displacement are returned,
     // otherwise corresponding eigen vector is considered as displacement vector
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    virtual double giveUnknownComponent(UnknownType ut, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);

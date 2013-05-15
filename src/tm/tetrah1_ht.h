@@ -39,6 +39,9 @@
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 
+#define _IFT_Tetrah1_ht_Name "tetrah1ht"
+#define _IFT_Tetrah1_hmt_Name "tetrah1hmt"
+
 namespace oofem {
 
 class FEI3dTetLin;

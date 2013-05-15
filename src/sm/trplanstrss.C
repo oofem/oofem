@@ -35,12 +35,13 @@
 #include "trplanstrss.h"
 #include "node.h"
 #include "crosssection.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -49,6 +50,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( TrPlaneStress2d );
+
 FEI2dTrLin TrPlaneStress2d :: interp(1, 2);
 
 TrPlaneStress2d :: TrPlaneStress2d(int n, Domain *aDomain) :
@@ -426,9 +430,10 @@ TrPlaneStress2d :: initializeFrom(InputRecord *ir)
     numberOfGaussPoints = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
 
-    if ( numberOfGaussPoints != 1 ) {
-        numberOfGaussPoints = 1;
-    }
+    /*  if ( numberOfGaussPoints != 1 ) {
+           numberOfGaussPoints = 1;
+	}
+    */
 
     return IRRT_OK;
 }

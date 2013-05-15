@@ -39,6 +39,8 @@
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
 
+#define _IFT_Line2BoundaryElement_Name "line2boundary"
+
 namespace oofem {
 class FEI2dLineQuad;
 
@@ -82,7 +84,6 @@ public:
     /**
      * Computes the integral @f$ \int_S n \cdot x \mathrm{d}s @f$.
      * The normal is defined as left in the direction parameterization.
-     * @todo{Move actual computations to FEI class}
      * @return Evaluated integral.
      */
     virtual double computeNXIntegral() const;

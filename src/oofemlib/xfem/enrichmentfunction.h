@@ -36,10 +36,15 @@
 #define enrichmentfunction_h
 
 #include "intarray.h"
-#include "enrichmentdomain.h"
+#include "classfactory.h"
+
+#define _IFT_DiscontinuousFunction_Name "discontinuousfunction"
+#define _IFT_BranchFunction_Name "branchfunction"
+#define _IFT_RampFunction_Name "rampfunction"
 
 namespace oofem {
 class EnrichmentItem;
+class EnrichmentDomain;
 class BasicGeometry;
 class GaussPoint;
 

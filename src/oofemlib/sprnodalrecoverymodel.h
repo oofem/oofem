@@ -35,13 +35,13 @@
 #ifndef sprnodalrecoverymodel_h
 #define sprnodalrecoverymodel_h
 
-#include "compiler.h"
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 
 namespace oofem {
 class GaussPoint;
 class SPRNodalRecoveryModelInterface;
+class ProcessCommunicator;
 
 enum SPRPatchType {
     SPRPatchType_2dxy,

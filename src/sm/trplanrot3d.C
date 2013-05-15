@@ -39,8 +39,12 @@
 #include "load.h"
 #include "structuralms.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( TrPlaneStrRot3d );
+
 TrPlaneStrRot3d :: TrPlaneStrRot3d(int n, Domain *aDomain) : TrPlaneStrRot(n, aDomain)
 {
     GtoLRotationMatrix = NULL;
@@ -245,6 +249,8 @@ TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Inte
         answer.at(4) = globTensor.at(2, 3); //syzForce
         answer.at(5) = globTensor.at(1, 3); //qxzForce
         answer.at(6) = globTensor.at(1, 2); //qxyForce
+	// mutiply stresses by thickness to get forces
+	answer.times(this->giveCrossSection()->give(CS_Thickness));
 
         if ( type == IST_ShellForceMomentumTensor ) {
             cht = GlobalMomentumTensor;

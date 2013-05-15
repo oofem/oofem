@@ -54,6 +54,7 @@
 
 ///@name Input fields for VTK XML export module
 //@{
+#define _IFT_VTKXMLExportModule_Name "vtkxml"
 #define _IFT_VTKXMLExportModule_cellvars "cellvars"
 #define _IFT_VTKXMLExportModule_vars "vars"
 #define _IFT_VTKXMLExportModule_primvars "primvars"

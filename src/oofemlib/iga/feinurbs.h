@@ -36,8 +36,8 @@
 #define feinurbs_h
 
 #include "feibspline.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "mathfem.h"
 
 namespace oofem {

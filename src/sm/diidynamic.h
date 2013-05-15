@@ -42,6 +42,7 @@
 
 ///@name Input fields for DIIDynamic
 //@{
+#define _IFT_DIIDynamic_Name "diidynamic"
 #define _IFT_DIIDynamic_deltat "deltat"
 #define _IFT_DIIDynamic_ddtScheme "ddtscheme"
 #define _IFT_DIIDynamic_gamma "gamma"

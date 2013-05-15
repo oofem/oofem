@@ -34,8 +34,8 @@
 #ifndef dustmat_h
 #define dustmat_h
 
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "structuralms.h"
 #include "strainvector.h"
 #include "stressvector.h"
@@ -44,6 +44,7 @@
 
 ///@name Input fields for DustMaterial
 //@{
+#define _IFT_DustMaterial_Name "dustmat"
 #define _IFT_DustMaterial_alpha "alpha"
 #define _IFT_DustMaterial_beta "beta"
 #define _IFT_DustMaterial_lambda "lambda"

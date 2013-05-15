@@ -41,6 +41,8 @@
 #include "graddpelement.h"
 #include "qtruss1d.h"
 
+#define _IFT_QTruss1dGrad_Name "qtruss1dgrad"
+
 namespace oofem {
 /**
  * This class implements a three-node gradient truss bar element for one-dimensional

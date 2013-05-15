@@ -36,8 +36,8 @@
 #define isomoisturemat_h
 
 #include "transportmaterial.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 namespace oofem {
 /**

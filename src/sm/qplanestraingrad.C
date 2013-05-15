@@ -33,18 +33,22 @@
  */
 
 #include "qplanestraingrad.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "engngm.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
+
+REGISTER_Element( QPlaneStrainGrad );
+
 FEI2dQuadLin QPlaneStrainGrad :: interpolation(1, 2);
 
 QPlaneStrainGrad :: QPlaneStrainGrad(int n, Domain *aDomain) : QPlaneStrain(n, aDomain), GradDpElement()

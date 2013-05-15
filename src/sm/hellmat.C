@@ -5,9 +5,9 @@
 //  ?? standalone thermochemical analysis - temperature history as input / both ksi & T input ... thermochemo a few steps ahead - temperature interpolation for given time / coordinates
 // file hellmat.C
 
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "timestep.h"
-#include "loadtime.h"
+#include "loadtimefunction.h"
 #include "isolinearelasticmaterial.h"
 #include "structuralcrosssection.h"
 #include "hellmat.h"
@@ -16,13 +16,17 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "structuralelement.h"
+#include "classfactory.h"
 
 namespace oofem {
 #ifdef __TM_MODULE
 
+REGISTER_Material( HellmichMaterial );
+
 // --------- class AgingIsoLEMaterial implementation---------
 AgingIsoLEMaterial :: AgingIsoLEMaterial(int n, Domain *d, double E, double nu) : IsotropicLinearElasticMaterial(n, d, E, nu) { }
-void AgingIsoLEMaterial :: setE(double newE) {
+void AgingIsoLEMaterial :: setE(double newE)
+{
     E = newE;
     G = 0.5 * E / ( 1. + nu );
 }
@@ -1591,7 +1595,7 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *atTime)
         // Get temperature from transportProblem via Field Manager
         // Might also get hydration degree, so that it need not be computed twice
         FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-        Field *tf;
+	FM_FieldPtr tf;
         StructuralElement *elem;
         // == Temperature ==
         if ( ( tf = fm->giveField(FT_Temperature) ) ) {

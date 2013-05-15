@@ -41,11 +41,12 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 #endif
 
 ///@name Input fields for RankineMatGrad
 //@{
+#define _IFT_RankineMatGrad_Name "rankmatgrad"
 #define _IFT_RankineMatGrad_r "r"
 #define _IFT_RankineMatGrad_m "m"
 #define _IFT_RankineMatGrad_negligibleDamage "negligible_damage"

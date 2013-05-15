@@ -5,7 +5,9 @@ set (sm_element
     igaelements.C
     structuralelement.C
     nlstructuralelement.C
-    lspace.C lspacebb.C qspace.C qspacegrad.C
+    lspace.C lspacebb.C
+    qspace.C qspacegrad.C
+    q27space.C
     ltrspace.C qtrspace.C qtrspacegrad.C
     lwedge.C qwedge.C qwedgegrad.C
     htselement.C
@@ -15,7 +17,7 @@ set (sm_element
     libeam3d.C libeam3dnl.C libeam3dnl2.C libeam3d2.C
     beam2d.C beam3d.C
     interfaceelement1d.C interfaceelem2dquad.C interfaceelem3dtrlin.C
-    quad1planestrain.C rershell.C qplanstrss.C qtrplstr.C q4axisymm.C
+    quad1planestrain.C rershell.C tr_shell01.C qplanstrss.C qtrplstr.C q4axisymm.C
     planstrss.C
     planstrssxfem.C
     axisymm3d.C l4axisymm.C
@@ -32,8 +34,8 @@ set (sm_element
     qplanestressgrad.C
     latticestructuralelement.C
     lattice2d.C
-    shell7base.C
-    tr2shell7.C
+	shell7base.C
+	tr2shell7.C
     shell7basexfem.C
     tr2shell7xfem.C
     )
@@ -57,7 +59,6 @@ set (sm_emodel
     diidynamic.C
     nldeidynamic.C
     incrementallinearstatic.C
-    staticfracture.C
     )
 
 set (sm_loads
@@ -65,6 +66,8 @@ set (sm_loads
     usrdeftempfield.C
     rotatingboundary.C
     constantpressureload.C
+    structtemperatureload.C
+    structeigenstrainload.C
     )
 
 set (sm_material
@@ -107,8 +110,6 @@ set (sm_material
     latticedamage2d.C
     dustmat.C
     lsmastermat.C lsmastermatgrad.C
-    bilinearczmaterial.C
-    expczmaterial.C
     )
 
 set (sm_error
@@ -127,13 +128,6 @@ set (sm_export
 set (sm_barrier
     polylinenonlocalbarrier.C
     symmetrybarrier.C
-    )
-
-set (sm_mesher
-    t3dinterface.C
-    targe2interface.C
-    freeminterface.C
-    subdivision.C
     )
 
 set (sm_status
@@ -155,13 +149,6 @@ set (sm_unsorted
     gpinitmodule.C
     )
 
-set (sm_mapping
-    mmaclosestiptransfer.C
-    mmashapefunctprojection.C
-    mmaleastsquareprojection.C
-    mmacontainingelementprojection.C
-    )
-
 set (sm_parallel
     feticommunicator.C
     fetiboundarydofman.C
@@ -178,10 +165,6 @@ set (sm_obsolete
     rankinepm.C
     )
 
-set (sm_fracture
-    fracturemanager.C
-    )
-
 set (sm
     ${sm_element}
     ${sm_crosssection}
@@ -192,12 +175,9 @@ set (sm
     ${sm_export}
     ${sm_barrier}
     ${sm_error}
-    ${sm_mesher}
-    ${sm_mapping}
     ${sm_unsorted}
     ${sm_parallel}
     ${sm_obsolete}
-    ${sm_fracture}
     ${sm_new}
     )
 

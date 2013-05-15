@@ -43,6 +43,7 @@
 
 ///@name Input fields for RCSDEMaterial
 //@{
+#define _IFT_RCSDEMaterial_Name "rcsde"
 #define _IFT_RCSDEMaterial_sdtransitioncoeff "sdtransitioncoeff"
 //@}
 

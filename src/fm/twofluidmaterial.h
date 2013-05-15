@@ -36,13 +36,14 @@
 #define twofluidmaterial_h
 
 #include "fluiddynamicmaterial.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "matconst.h"
 #include "matstatus.h"
 
 ///@name Input fields for TwoFluidMaterial
 //@{
+#define _IFT_TwoFluidMaterial_Name "twofluidmat"
 #define _IFT_TwoFluidMaterial_mat "mat"
 //@}
 

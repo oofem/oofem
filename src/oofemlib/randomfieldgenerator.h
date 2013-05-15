@@ -35,8 +35,8 @@
 #ifndef randomfieldgenerator_h
 #define randomfieldgenerator_h
 
-#include "flotarry.h"
-#include "gausspnt.h"
+#include "floatarray.h"
+#include "gausspoint.h"
 
 namespace oofem {
 

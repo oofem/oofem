@@ -37,11 +37,12 @@
 
 #include "structuralcrosssection.h"
 #include "structuralmaterial.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 ///@name Input fields for SimpleCrossSection
 //@{
+#define _IFT_SimpleCrossSection_Name "simplecs"
 #define _IFT_SimpleCrossSection_thick "thick"
 #define _IFT_SimpleCrossSection_width "width"
 #define _IFT_SimpleCrossSection_area "area"

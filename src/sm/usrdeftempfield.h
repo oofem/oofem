@@ -41,6 +41,7 @@
 
 ///@name Input fields for UserDefinedTemperatureField
 //@{
+#define _IFT_UserDefinedTemperatureField_Name "usrdeftempfield"
 #define _IFT_UserDefinedTemperatureField_size "size"
 #define _IFT_UserDefinedTemperatureField_t1 "t1(txyz)"
 #define _IFT_UserDefinedTemperatureField_t2 "t2(txyz)"

@@ -36,9 +36,14 @@
 #include "timestep.h"
 #include "element.h"
 #include "node.h"
-#include "conTable.h"
+#include "connectivitytable.h"
 #include "integrationrule.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
+
+#ifdef __PARALLEL_MODE
+ #include "processcomm.h"
+ #include "problemcomm.h"
+#endif
 
 #include <list>
 

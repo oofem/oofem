@@ -37,7 +37,7 @@
 #include "domain.h"
 #include "equationid.h"
 #include "gaussintegrationrule.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "bcgeomtype.h"
 #include "load.h"
 #include "boundaryload.h"
@@ -45,12 +45,17 @@
 #include "fluiddynamicmaterial.h"
 #include "fei2dtrlin.h"
 #include "masterdof.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( Tr1BubbleStokes );
+
 // Set up interpolation coordinates
 FEI2dTrLin Tr1BubbleStokes :: interp(1, 2);
 // Set up ordering vectors (for assembling)
-IntArray Tr1BubbleStokes :: ordering(11);
+IntArray Tr1BubbleStokes :: momentum_ordering;
+IntArray Tr1BubbleStokes :: conservation_ordering;
 IntArray Tr1BubbleStokes :: edge_ordering [ 3 ] = { IntArray(4), IntArray(4), IntArray(4) };
 bool Tr1BubbleStokes :: __initialized = Tr1BubbleStokes :: initOrdering();
 
@@ -130,7 +135,7 @@ void Tr1BubbleStokes :: giveCharacteristicVector(FloatArray &answer, CharType mt
 {
     // Compute characteristic vector for this element. I.e the load vector(s)
     if ( mtrx == ExternalForcesVector ) {
-        this->computeLoadVector(answer, tStep);
+        this->computeExternalForcesVector(answer, tStep);
     } else if ( mtrx == InternalForcesVector ) {
         this->computeInternalForcesVector(answer, tStep);
     } else {
@@ -156,17 +161,16 @@ void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep
     double r_vol, pressure;
     FloatMatrix dN, B(3, 8);
     B.zero();
-    
+
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
 
     FloatArray momentum(8), conservation(3);
     momentum.zero();
     conservation.zero();
-    GaussPoint *gp;
 
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
         double detJ = fabs(this->interp.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)));
@@ -193,16 +197,13 @@ void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep
         conservation.add(r_vol*dA, N);
     }
 
-    FloatArray temp(11);
-    temp.zero();
-    temp.addSubVector(momentum, 1);
-    temp.addSubVector(conservation, 9);
     answer.resize(11);
     answer.zero();
-    answer.assemble(temp, this->ordering);
+    answer.assemble(momentum, this->momentum_ordering);
+    answer.assemble(conservation, this->conservation_ordering);
 }
 
-void Tr1BubbleStokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
+void Tr1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     int load_number, load_id;
     Load *load;
@@ -219,7 +220,7 @@ void Tr1BubbleStokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
         ltype = load->giveBCGeoType();
 
         if ( ltype == EdgeLoadBGT ) {
-            this->computeEdgeBCSubVectorAt(vec, load, load_id, tStep);
+            this->computeBoundaryLoadVector(vec, load, load_id, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         }
     }
@@ -229,30 +230,33 @@ void Tr1BubbleStokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
         load  = domain->giveLoad( bodyLoadArray.at(i) );
         ltype = load->giveBCGeoType();
         if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
-            this->computeBodyLoadVectorAt(vec, load, tStep);
+            this->computeLoadVector(vec, load, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         }
     }
 }
 
 
-void Tr1BubbleStokes :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep)
+void Tr1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
+    if ( type != ExternalForcesVector ) {
+        answer.resize(0);
+        return;
+    }
+
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    GaussPoint *gp;
-    FloatArray N, gVector, *lcoords, temparray(8);
-    double dA, detJ, rho;
+    FloatArray N, gVector, temparray(8);
 
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
         for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
-            gp = iRule->getIntegrationPoint(k);
-            lcoords = gp->giveCoordinates();
+            GaussPoint *gp = iRule->getIntegrationPoint(k);
+            FloatArray *lcoords = gp->giveCoordinates();
 
-            rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, tStep);
-            detJ = fabs( this->interp.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
-            dA = detJ * gp->giveWeight();
+            double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, tStep);
+            double detJ = fabs( this->interp.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
+            double dA = detJ * gp->giveWeight();
 
             this->interp.evalN(N, * lcoords, FEIElementGeometryWrapper(this));
             for ( int j = 0; j < 3; j++ ) {
@@ -266,13 +270,15 @@ void Tr1BubbleStokes :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, 
 
     answer.resize(11);
     answer.zero();
-    answer.assemble( temparray, this->ordering );
+    answer.assemble( temparray, this->momentum_ordering );
 }
 
-void Tr1BubbleStokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep)
+void Tr1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, Load *load, int iEdge, CharType type, ValueModeType mode, TimeStep *tStep)
 {
-    answer.resize(11);
-    answer.zero();
+    if ( type != ExternalForcesVector ) {
+        answer.resize(0);
+        return;
+    }
 
     if ( load->giveType() == TransmissionBC ) { // Neumann boundary conditions (traction)
         BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >( load );
@@ -280,7 +286,6 @@ void Tr1BubbleStokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load,
         int numberOfEdgeIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 2. ) / 2. );
 
         GaussIntegrationRule iRule(1, this, 1, 1);
-        GaussPoint *gp;
         FloatArray N, t, f(4);
         IntArray edge_mapping;
 
@@ -288,7 +293,7 @@ void Tr1BubbleStokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load,
         iRule.setUpIntegrationPoints(_Line, numberOfEdgeIPs, _Unknown);
 
         for ( int i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
-            gp = iRule.getIntegrationPoint(i);
+            GaussPoint *gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
             this->interp.edgeEvalN(N, iEdge, * lcoords, FEIElementGeometryWrapper(this));
@@ -310,6 +315,8 @@ void Tr1BubbleStokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load,
             }
         }
 
+        answer.resize(11);
+        answer.zero();
         answer.assemble(f, this->edge_ordering [ iEdge - 1 ]);
     } else {
         OOFEM_ERROR("Tr1BubbleStokes :: computeEdgeBCSubVectorAt - Strange boundary condition type");
@@ -321,9 +328,8 @@ void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     // Note: Working with the components; [K, G+Dp; G^T+Dv^T, C] . [v,p]
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    GaussPoint *gp;
     FloatMatrix B(3, 8), EdB, K(8,8), G, Dp, DvT, C, Ed, dN;
-    FloatArray *lcoords, dNv(8), N, Ep, Cd, tmpA, tmpB;
+    FloatArray dNv(8), N, Ep, Cd, tmpA, tmpB;
     double Cp;
 
     K.zero();
@@ -332,8 +338,8 @@ void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
 
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         // Compute Gauss point and determinant at current element
-        gp = iRule->getIntegrationPoint(i);
-        lcoords = gp->giveCoordinates();
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
+        FloatArray *lcoords = gp->giveCoordinates();
 
         double detJ = fabs(this->interp.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)));
         double dA = detJ * gp->giveWeight();
@@ -375,15 +381,12 @@ void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     GDp = G;
     GDp.add(Dp);
 
-    FloatMatrix temp(11, 11);
-    temp.setSubMatrix(K, 1, 1);
-    temp.setSubMatrix(GTDvT, 9, 1);
-    temp.setSubMatrix(GDp, 1, 9);
-    temp.setSubMatrix(C, 9, 9);
-
     answer.resize(11, 11);
     answer.zero();
-    answer.assemble(temp, this->ordering);
+    answer.assemble(K, this->momentum_ordering);
+    answer.assemble(GTDvT, this->conservation_ordering, this->momentum_ordering);
+    answer.assemble(GDp, this->momentum_ordering, this->conservation_ordering);
+    answer.assemble(C, this->conservation_ordering);
 }
 
 FEInterpolation *Tr1BubbleStokes :: giveInterpolation()

@@ -36,10 +36,10 @@
 #include "element.h"
 #include "domain.h"
 #include "integrationrule.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "dofmanager.h"
 #include "node.h"
-#include "conTable.h"
+#include "connectivitytable.h"
 #include "alist.h"
 #include "mathfem.h"
 #include "timer.h"
@@ -708,13 +708,14 @@ Element *
 OctreeSpatialLocalizer :: giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList)
 {
     Element *ielemptr, *answer = NULL;
-    double currDist, minDist = 1.1 * rootCell->giveWidth();
+    double currDist, minDist;
     elementContainerType :: iterator pos;
     elementContainerType *elementList;
     OctantRec *currCell;
 
     this->init();
     this->initElementIPDataStructure();
+    minDist = 1.1 * rootCell->giveWidth();
 
     // found terminal octant containing point
     currCell = this->findTerminalContaining(rootCell, coords);

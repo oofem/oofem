@@ -45,6 +45,7 @@
 
 ///@name Input fields for Point-of-Interest export module
 //@{
+#define _IFT_POIExportModule_Name "poi"
 #define _IFT_POIExportModule_vars "vars"
 #define _IFT_POIExportModule_primvars "primvars"
 #define _IFT_POIExportModule_mtype "mtype"

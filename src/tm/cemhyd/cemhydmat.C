@@ -54,11 +54,12 @@
 #include "cemhydmat.h"
 #include "homogenize.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __TM_MODULE //OOFEM transport module
  #include "domain.h"
- #include "flotmtrx.h"
- #include "gausspnt.h"
+ #include "floatmatrix.h"
+ #include "gausspoint.h"
 #endif
 
 namespace oofem {
@@ -83,14 +84,14 @@ namespace oofem {
  * Dynamical allocation of memory arrays (possible in input file)
  */
 
-#define OUTFILES //if defined, output files are generated
-#define IMAGEFILES //if defined, output percolated and unpercolated images in each cycle (directories perc/ and unperc/)
-#define PRINTF //if defined, printf results simultaneously on screen
+//#define OUTFILES //if defined, output files are generated
+//#define IMAGEFILES //if defined, output percolated and unpercolated images in each cycle (directories perc/ and unperc/)
+//#define PRINTF //if defined, printf results simultaneously on screen
 
 #ifdef __TM_MODULE //OOFEM transport module
- #undef OUTFILES
- #undef IMAGEFILES
- #undef PRINTF
+
+REGISTER_Material( CemhydMat );
+
 CemhydMat :: CemhydMat(int n, Domain *d) : IsotropicHeatTransferMaterial(n, d)
 {
     MasterCemhydMatStatus = NULL;

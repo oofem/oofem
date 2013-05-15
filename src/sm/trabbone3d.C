@@ -33,18 +33,21 @@
  */
 
 #include "trabbone3d.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "internalstatetype.h"
 #include "contextioerr.h"
 #include "intarray.h"
 #include "datastream.h"
+#include "classfactory.h"
 
 
 namespace oofem {
+
+REGISTER_Material( TrabBone3D );
 
 TrabBone3D :: TrabBone3D(int n, Domain *d) : StructuralMaterial(n, d)
 {}
@@ -53,11 +56,7 @@ TrabBone3D :: TrabBone3D(int n, Domain *d) : StructuralMaterial(n, d)
 int
 TrabBone3D :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( ( mode == _3dMat ) ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _3dMat;
 }
 
 void TrabBone3D :: computePlasStrainEnerDensity(GaussPoint *gp, const FloatArray &totalStrain, const FloatArray &totalStress)
@@ -1211,7 +1210,7 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
     oPM = this -> computeDamageParamPrime(kappaMax);
 
     pR = (s+oPM/(1-oM))/(1-oM)/s;
-    pR = pR;
+    //pR = pR;
     //hardFactor = 0.75;
     //    pR = -citatel/jmenovatel;
     yR = exp(expPlasHard*kappaMax)/(1-oM)-pR*(exp(expPlasHard*kappaMax)-1);

@@ -37,12 +37,15 @@
 #include "structuralelement.h"
 #include "material.h"
 #include "structuralms.h"
-#include "flotmtrx.h"
-#include "gausspnt.h"
+#include "floatmatrix.h"
+#include "gausspoint.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
 #define ZERO_LENGTH 1.e-6
+
+REGISTER_Material( OrthotropicLinearElasticMaterial );
 
 IRResultType
 OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)

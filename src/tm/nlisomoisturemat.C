@@ -33,10 +33,14 @@
  */
 
 #include "nlisomoisturemat.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( NlIsoMoistureMaterial );
+
 IRResultType
 NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
 {

@@ -37,11 +37,12 @@
 
 #include "fmelement.h"
 #include "domain.h"
-
 #include "zznodalrecoverymodel.h"
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
 #include "elementinternaldofman.h"
+
+#define _IFT_Tr1BubbleStokes_Name "tr1bubblestokes"
 
 namespace oofem {
 
@@ -66,14 +67,15 @@ protected:
     /// Interpolation for pressure
     static FEI2dTrLin interp;
     /// Ordering of dofs in element. Used to assemble the element stiffness
-    static IntArray ordering;
+    static IntArray momentum_ordering, conservation_ordering;
     /// Ordering of dofs on edges. Used to assemble edge loads
     static IntArray edge_ordering [ 3 ];
     /// Dummy variable
     static bool __initialized;
     /// Defines the ordering of the dofs in the local stiffness matrix.
     static bool initOrdering() {
-        ordering.setValues(11,  1, 2, 4, 5, 7, 8, 10, 11, 3, 6, 9);
+        momentum_ordering.setValues(8,  1, 2, 4, 5, 7, 8, 10, 11);
+        conservation_ordering.setValues(3,  3, 6, 9);
         edge_ordering [ 0 ].setValues(4,  1, 2, 4, 5);
         edge_ordering [ 1 ].setValues(4,  4, 5, 7, 8);
         edge_ordering [ 2 ].setValues(4,  7, 8, 1, 2);
@@ -92,17 +94,18 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual double computeVolumeAround(GaussPoint *gp);
-    
+
     virtual void computeGaussPoints();
-    
+
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
 
     void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
-    void computeLoadVector(FloatArray &answer, TimeStep *tStep);
     void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep);
-    void computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep);
-    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep);
+
+    void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep);
+    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryLoadVector(FloatArray &answer, Load *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
 
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
     virtual const char *giveClassName() const { return "Tr1BubbleStokes"; }
@@ -110,7 +113,7 @@ public:
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
     virtual int computeNumberOfDofs(EquationID ut);
-    
+
     virtual int giveNumberOfInternalDofManagers() const { return 1; }
     virtual DofManager *giveInternalDofManager(int i) const { return bubble; }
     virtual void giveInternalDofManDofIDMask(int i, EquationID eid, IntArray &answer) const;

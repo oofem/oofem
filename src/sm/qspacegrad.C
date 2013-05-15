@@ -33,13 +33,16 @@
  */
 
 #include "qspacegrad.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Element( QSpaceGrad );
 
 FEI3dHexaLin QSpaceGrad :: interpolation;
 

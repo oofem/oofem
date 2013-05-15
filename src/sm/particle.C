@@ -33,9 +33,13 @@
  */
 
 #include "particle.h"
+#include "classfactory.h"
 
 namespace oofem {
-// Constructor.
+
+REGISTER_DofManager( Particle );
+
+
 Particle :: Particle(int n, Domain *aDomain) : Node(n, aDomain)
 {}
 

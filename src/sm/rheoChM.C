@@ -36,9 +36,9 @@
 #include "rheoChM.h"
 #include "material.h"
 #include "isolinearelasticmaterial.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
-#include "gausspnt.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
+#include "gausspoint.h"
 #include "structuralcrosssection.h"
 #include "contextioerr.h"
 
@@ -121,6 +121,7 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm fo
         stressVector = status->giveStressVector();
     } else {
         stressVector.resize( strainIncrement.giveSize() );
+        stressVector.zero();
     }
 
     // evaluate the incremental modulus

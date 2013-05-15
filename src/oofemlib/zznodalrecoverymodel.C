@@ -36,15 +36,17 @@
 #include "timestep.h"
 #include "element.h"
 #include "dofmanager.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "integrationrule.h"
 #include "feinterpol.h"
 #include "mathfem.h"
+#include "feinterpol.h"
 #include "error.h"
 #include <sstream>
 #include <set>
 
 #ifdef __PARALLEL_MODE
+ #include "problemcomm.h"
  #include "communicator.h"
 #endif
 
@@ -187,9 +189,8 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
 
         if ( missingDofManContribution ) {
             std::ostringstream msg;
-            std::set<int>::const_iterator sit;
             int i = 0;
-            for (sit = unresolvedDofMans.begin(); sit != unresolvedDofMans.end(); ++sit) {
+            for ( std::set<int>::const_iterator sit = unresolvedDofMans.begin(); sit != unresolvedDofMans.end(); ++sit ) {
                 msg << *sit << ' ';
                 if (++i > 20) break;
             }
@@ -276,32 +277,26 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNValProduct(FloatMatri
 {  // evaluates N^T sigma over element volume
    // N(nsigma, nsigma*nnodes)
    // Definition : sigmaVector = N * nodalSigmaVector
-    int i, j, k, size;
-    double dV;
-    FloatArray stressVector, help, n;
+    FloatArray stressVector, n;
     Element *elem  = this->ZZNodalRecoveryMI_giveElement();
+    FEInterpolation *interpol = elem->giveInterpolation();
     IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
-    GaussPoint *gp;
 
-    size = ZZNodalRecoveryMI_giveDofManRecordSize(type);
+    int size = ZZNodalRecoveryMI_giveDofManRecordSize(type);
     answer.resize(elem->giveNumberOfDofManagers(), size);
 
     answer.zero();
-    for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
-        dV  = elem->computeVolumeAround(gp);
+    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
+        double dV = elem->computeVolumeAround(gp);
         //this-> computeStressVector(stressVector, gp, stepN);
         if ( !elem->giveIPValue(stressVector, gp, type, tStep) ) {
             stressVector.resize(size);
             stressVector.zero();
         }
 
-        this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(n, gp, type);
-        for ( j = 1; j <= elem->giveNumberOfDofManagers(); j++ ) {
-            for ( k = 1; k <= size; k++ ) {
-                answer.at(j, k) += n.at(j) * stressVector.at(k) * dV;
-            }
-        }
+        interpol->evalN( n, *gp->giveCoordinates(), FEIElementGeometryWrapper(elem));
+        answer.plusDyadUnsym(n, stressVector, dV);
 
         //  help.beTProductOf(n,stressVector);
         //  answer.add(help.times(dV));
@@ -316,23 +311,26 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
     // The size of N mtrx is (nstresses, nnodes*nstreses)
     // Definition : sigmaVector = N * nodalSigmaVector
     //
-    int size;
-    double sum, dV, volume = 0.0;
+    double volume = 0.0;
     FloatMatrix fullAnswer;
     FloatArray n;
     Element *elem  = this->ZZNodalRecoveryMI_giveElement();
+    FEInterpolation *interpol = elem->giveInterpolation();
     IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
-    GaussPoint *gp;
+    
+    if ( !interpol ) {
+        OOFEM_ERROR2( "ZZNodalRecoveryMI_computeNNMatrix: Element %d not providing interpolation", elem->giveNumber() );
+    }
 
-    size = elem->giveNumberOfDofManagers(); //ZZNodalRecoveryMI_giveDofManRecordSize (type);
+    int size = elem->giveNumberOfDofManagers(); //ZZNodalRecoveryMI_giveDofManRecordSize (type);
     fullAnswer.resize(size, size);
     fullAnswer.zero();
     double pok = 0.0;
 
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
-        dV  = elem->computeVolumeAround(gp);
-        this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(n, gp, type);
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
+        double dV = elem->computeVolumeAround(gp);
+        interpol->evalN( n, *gp->giveCoordinates(), FEIElementGeometryWrapper(elem));
         fullAnswer.plusDyadSymmUpper(n, n, dV);
         pok += ( n.at(1) * dV ); ///@todo What is this? Completely unused.
         volume += dV;
@@ -342,7 +340,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
     fullAnswer.symmetrized();
     answer.resize(size);
     for ( int i = 1; i <= size; i++ ) {
-        sum = 0.0;
+        double sum = 0.0;
         for ( int j = 1; j <= size; j++ ) {
             sum += fullAnswer.at(i, j);
         }
@@ -351,32 +349,6 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
     }
 }
 
-void
-ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *gp, InternalStateType type)
-{
-    // evaluates N matrix (interpolation estimated stress matrix)
-    // according to Zienkiewicz & Zhu paper
-    // N(nsigma, nsigma*nnodes)
-    // Definition : sigmaVector = N * nodalSigmaVector
-
-    Element *elem = ZZNodalRecoveryMI_giveElement();
-    FEInterpolation *interpol = elem->giveInterpolation();
-
-    // test if underlying element provides interpolation
-    if ( interpol ) {
-        if ( !elem->giveIPValueSize(type, gp) ) {
-            OOFEM_ERROR3("ZZNodalRecoveryMI_computeNNMatrix: Element %d not supporting type %d", elem->giveNumber(), type);
-            return;
-        }
-
-        interpol->evalN( answer, * gp->giveCoordinates(), FEIElementGeometryWrapper(elem) );
-    } else {
-        // ok default implementation can not work, as element is not providing valid interpolation
-        // to resolve this, one can overload this method for element implementing ZZNodalRecoveryModelInterface
-        // or element should provide interpolation.
-        OOFEM_ERROR2( "ZZNodalRecoveryMI_computeNNMatrix: Element %d not providing valid interpolation", elem->giveNumber() );
-    }
-}
 
 int
 ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
@@ -438,13 +410,13 @@ ZZNodalRecoveryModel :: exchangeDofManValues(int ireg, FloatArray &lhs, FloatMat
 int
 ZZNodalRecoveryModel :: packSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm)
 {
-    int result = 1, i, j, indx, nc, size;
+    int result = 1, indx, nc, size;
     ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
     IntArray const *toSendMap = processComm.giveToSendMap();
     nc = s->rhs->giveNumberOfColumns();
 
     size = toSendMap->giveSize();
-    for ( i = 1; i <= size; i++ ) {
+    for ( int i = 1; i <= size; i++ ) {
         // toSendMap contains all shared dofmans with remote partition
         // one has to check, if particular shared node value is available for given region
         indx = s->regionNodalNumbers->at( toSendMap->at(i) );
@@ -452,7 +424,7 @@ ZZNodalRecoveryModel :: packSharedDofManData(parallelStruct *s, ProcessCommunica
             // pack "1" to indicate that for given shared node this is a valid contribution
             result &= pcbuff->packInt(1);
             result &= pcbuff->packDouble( s->lhs->at(indx) );
-            for ( j = 1; j <= nc; j++ ) {
+            for ( int j = 1; j <= nc; j++ ) {
                 result &= pcbuff->packDouble( s->rhs->at(indx, j) );
             }
 
@@ -471,14 +443,14 @@ int
 ZZNodalRecoveryModel :: unpackSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm)
 {
     int result = 1;
-    int i, j, nc, indx, size, flag;
+    int nc, indx, size, flag;
     IntArray const *toRecvMap = processComm.giveToRecvMap();
     ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
     double value;
     nc = s->rhs->giveNumberOfColumns();
 
     size = toRecvMap->giveSize();
-    for ( i = 1; i <= size; i++ ) {
+    for ( int i = 1; i <= size; i++ ) {
         indx = s->regionNodalNumbers->at( toRecvMap->at(i) );
         // toRecvMap contains all shared dofmans with remote partition
         // one has to check, if particular shared node received contribution is available for given region
@@ -491,7 +463,7 @@ ZZNodalRecoveryModel :: unpackSharedDofManData(parallelStruct *s, ProcessCommuni
                 s->lhs->at(indx) += value;
             }
 
-            for ( j = 1; j <= nc; j++ ) {
+            for ( int j = 1; j <= nc; j++ ) {
                 result &= pcbuff->unpackDouble(value);
                 if ( indx ) {
                     s->rhs->at(indx, j) += value;

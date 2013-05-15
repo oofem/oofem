@@ -33,11 +33,15 @@
  */
 
 #include "hydratingconcretemat.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "timestep.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( HydratingConcreteMat );
+
 HydratingConcreteMat :: HydratingConcreteMat(int n, Domain *d) : IsotropicHeatTransferMaterial(n, d)
 {
     // constructor

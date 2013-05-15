@@ -42,9 +42,10 @@
 #include "engngm.h"
 #include "node.h"
 #include "mathfem.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "weakperiodicbc.h"
 #include "timestep.h"
+#include "classfactory.h"
 
 #ifdef __FM_MODULE
 #include "tr21stokes.h"
@@ -52,6 +53,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_ExportModule( MatlabExportModule )
+
 MatlabExportModule :: MatlabExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
 {}
 
@@ -264,7 +268,7 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
     unsigned int wpbccount = 1;
 
     for ( int i = 1; i <= domain->giveNumberOfBoundaryConditions(); i++ ) {
-        WeakPeriodicbc *wpbc = dynamic_cast< WeakPeriodicbc * >( domain->giveBc(i) );
+        WeakPeriodicBoundaryCondition *wpbc = dynamic_cast< WeakPeriodicBoundaryCondition * >( domain->giveBc(i) );
         if ( wpbc ) {
             for ( int j = 1; j <= wpbc->giveNumberOfInternalDofManagers(); j++ ) {
                 fprintf( FID, "\tspecials.weakperiodic{%u}.descType=%u;\n", wpbccount, wpbc->giveBasisType() );

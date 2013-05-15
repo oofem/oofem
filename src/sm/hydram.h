@@ -72,8 +72,8 @@
 #ifndef hydram_h
 #define hydram_h
 
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "timestep.h"
 #include "structuralms.h"
 #include "structuralmaterial.h"

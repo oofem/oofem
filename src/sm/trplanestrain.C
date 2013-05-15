@@ -35,12 +35,13 @@
 #include "trplanestrain.h"
 #include "node.h"
 #include "crosssection.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -48,6 +49,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( TrPlaneStrain );
+
 FEI2dTrLin TrPlaneStrain :: interp(1, 2);
 
 TrPlaneStrain :: TrPlaneStrain(int n, Domain *aDomain) :

@@ -37,26 +37,21 @@
 #ifdef __PETSC_MODULE
  #include "petscsparsemtrx.h"
  #include "engngm.h"
- #include "flotarry.h"
+ #include "floatarray.h"
  #include "verbose.h"
  #include "timer.h"
+ #include "error.h"
+ #include "classfactory.h"
 
  #include <petscksp.h>
 
 namespace oofem {
-PetscSolver :: PetscSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m) { }
 
+REGISTER_SparseLinSolver(PetscSolver, ST_Petsc);
+
+PetscSolver :: PetscSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m) { }
 
 PetscSolver :: ~PetscSolver() { }
-
-
-IRResultType PetscSolver :: initializeFrom(InputRecord *ir)
-{
-    // const char *__keyword, *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    // IRResultType result;                               // Required by IR_GIVE_FIELD macro
-    return IRRT_OK;
-}
-
 
 NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 {
@@ -64,25 +59,25 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 
     // first check whether Lhs is defined
     if ( !A ) {
-        _error("solve: unknown Lhs");
+        OOFEM_ERROR("PETScSolver :: solve: unknown Lhs");
     }
 
     // and whether Rhs
     if ( !b ) {
-        _error("solve: unknown Rhs");
+        OOFEM_ERROR("PETScSolver :: solve: unknown Rhs");
     }
 
     // and whether previous Solution exist
     if ( !x ) {
-        _error("solve: unknown solution array");
+        OOFEM_ERROR("PETScSolver :: solve: unknown solution array");
     }
 
     if ( x->giveSize() != ( neqs = b->giveSize() ) ) {
-        _error("solve: size mismatch");
+        OOFEM_ERROR("PETScSolver :: solve: size mismatch");
     }
 
     if ( A->giveType() != SMT_PetscMtrx ) {
-        _error("solve: PetscSparseMtrx Expected");
+        OOFEM_ERROR("PETScSolver :: solve: PetscSparseMtrx Expected");
     }
 
     PetscSparseMtrx *Lhs = ( PetscSparseMtrx * ) A;
@@ -91,7 +86,7 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     Vec globSolVec;
 
     // "Parallel" context automatically uses sequential alternative if the engineering problem is sequential.
-    PetscContext *context = engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() );
+    PetscContext *context = engngModel->givePetscContext( Lhs->giveDomainIndex() );
 
     /*
      * scatter and gather rhs to global representation
@@ -120,7 +115,7 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
     PetscErrorCode err;
     KSPConvergedReason reason;
     if ( Lhs->giveType() != SMT_PetscMtrx ) {
-        _error("petsc_solve: PetscSparseMtrx Expected");
+        OOFEM_ERROR("PETScSolver :: petsc_solve: PetscSparseMtrx Expected");
     }
 
     Timer timer;
@@ -130,7 +125,11 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
      *  Create the linear solver and set various options
      *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
     if ( !Lhs->kspInit ) {
-        MPI_Comm comm = engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() )->giveComm();
+#ifdef __PARALLEL_MODE
+        MPI_Comm comm = engngModel->giveParallelComm();
+#else
+        MPI_Comm comm = PETSC_COMM_SELF;
+#endif
         KSPCreate(comm, & Lhs->ksp);
         Lhs->kspInit = true;
     }
@@ -202,10 +201,10 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
 NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
 {
     if ( !A ) {
-        _error("solve: Unknown Lhs");
+        OOFEM_ERROR("PETScSolver :: solve: Unknown Lhs");
     }
     if ( A->giveType() != SMT_PetscMtrx ) {
-        _error("solve: PetscSparseMtrx Expected");
+        OOFEM_ERROR("PETScSolver :: solve: PetscSparseMtrx Expected");
     }
 
     PetscSparseMtrx *Lhs = ( PetscSparseMtrx * ) A;
@@ -242,29 +241,23 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
 }
 #endif
 
-
-void PetscSolver :: reinitialize() {}
-
 } // end namespace oofem
 #endif //ifdef __PETSC_MODULE
 
 #ifndef __PETSC_MODULE
+
+#include "error.h"
+
 namespace oofem {
-PetscSolver :: PetscSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
+PetscSolver :: PetscSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
 {
-    _error("PetscSolver: can't create, PETSc support not compiled");
+    OOFEM_ERROR("PETScSolver :: PetscSolver: can't create, PETSc support not compiled");
 }
 
 PetscSolver :: ~PetscSolver() { }
 
-IRResultType
-PetscSolver :: initializeFrom(InputRecord *ir) { return IRRT_OK; }
-
 NM_Status
 PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSuccess; }
 
-void
-PetscSolver :: reinitialize()
-{ }
 } // end namespace oofem
 #endif

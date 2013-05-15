@@ -33,8 +33,8 @@
  */
 
 #include "fei3dwedgequad.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "intarray.h"
 
 namespace oofem {

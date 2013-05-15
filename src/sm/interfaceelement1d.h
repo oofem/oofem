@@ -40,6 +40,7 @@
 
 ///@name Input fields for Material
 //@{
+#define _IFT_InterfaceElem1d_Name "interface1d"
 #define _IFT_InterfaceElem1d_refnode "refnode"
 #define _IFT_InterfaceElem1d_normal "normal"
 //@}

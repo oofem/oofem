@@ -31,7 +31,7 @@
 #ifndef iluprecond_h
 #define iluprecond_h
 
-#include "flotarry.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "compcol.h"
 #include "dyncompcol.h"

@@ -43,6 +43,8 @@
 #include "directerrorindicatorrc.h"
 #include "eleminterpmapperinterface.h"
 
+#define _IFT_QTrPlaneStress2d_Name "qtrplstr"
+
 namespace oofem {
 /**
  * This class implements a quadratic triangular 6-node plane-

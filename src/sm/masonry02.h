@@ -39,6 +39,7 @@
 
 ///@name Input fields for Masonry02
 //@{
+#define _IFT_Masonry02_Name "masonry02"
 #define _IFT_Masonry02_ft0 "ft0"
 #define _IFT_Masonry02_gfi "gfi"
 #define _IFT_Masonry02_gfii "gfii"

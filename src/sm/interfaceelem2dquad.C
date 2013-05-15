@@ -35,12 +35,13 @@
 #include "interfaceelem2dquad.h"
 #include "node.h"
 #include "crosssection.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -49,6 +50,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( InterfaceElem2dQuad );
+
 InterfaceElem2dQuad :: InterfaceElem2dQuad(int n, Domain *aDomain) :
     StructuralElement(n, aDomain)
 {

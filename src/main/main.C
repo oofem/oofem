@@ -37,13 +37,10 @@
 //
 
 #include "engngm.h"
-#include "freestor.h"
-#include "compiler.h"
+#include "oofemcfg.h"
 
 #include "oofemtxtdatareader.h"
 #include "util.h"
-#include "oofemcfg.h"
-#include "usrdefsub.h"
 #include "error.h"
 #include "logger.h"
 #include "contextioerr.h"
@@ -72,6 +69,12 @@
 #include "classfactory.h"
 
 using namespace oofem;
+
+void freeStoreError()
+// This function is called whenever operator "new" is unable to allocate memory.
+{
+    OOFEM_FATAL("freeStoreError : free store exhausted");
+}
 
 // debug
 void oofem_debug(EngngModel *emodel);

@@ -37,6 +37,11 @@
 #include "element.h"
 #include "dofmanager.h"
 
+#ifdef __PARALLEL_MODE
+ #include "problemcomm.h"
+#endif
+
+
 namespace oofem {
 NodalRecoveryModel :: NodalRecoveryModel(Domain *d) : nodalValList(0), virtualRegionMap(0)
 {

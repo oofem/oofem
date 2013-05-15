@@ -38,12 +38,13 @@
 #include "structuralmaterial.h"
 #include "structuralms.h"
 #include "linearelasticmaterial.h"
-#include "dictionr.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "dictionary.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 ///@name Input fields for LsMasterMat
 //@{
+#define _IFT_LsMasterMat_Name "lsmastermat"
 #define _IFT_LsMasterMat_m "m"
 #define _IFT_LsMasterMat_slaveMat "slavemat"
 //@}

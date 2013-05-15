@@ -31,46 +31,32 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-#ifndef __IML_MODULE
- #include "imlsolver.h"
 
-namespace oofem {
-IMLSolver :: IMLSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
-{
-    _error("IMLSolver: can't create, IML support not compiled");
-}
+#include <iml/cg.h>
+#include <iml/gmres.h>
 
-IMLSolver :: ~IMLSolver() { }
+#include "imlsolver.h"
+#include "sparsemtrx.h"
+#include "floatarray.h"
+#include "diagpre.h"
+#include "voidprecond.h"
+#include "compcol.h"
+#include "iluprecond.h"
+#include "icprecond.h"
+#include "verbose.h"
+#include "ilucomprowprecond.h"
+#include "linsystsolvertype.h"
+#include "classfactory.h"
 
-IRResultType
-IMLSolver :: initializeFrom(InputRecord *ir) { return IRRT_OK; }
-
-NM_Status
-IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSuccess; }
-} // end namespace oofem
+#ifdef TIME_REPORT
+ #include "timer.h"
 #endif
 
-#ifdef __IML_MODULE
-
- #include <iml/cg.h>
- #include <iml/gmres.h>
- #include "imlsolver.h"
- #include "sparsemtrx.h"
- #include "flotarry.h"
- #include "diagpre.h"
- #include "voidprecond.h"
- #include "compcol.h"
- #include "iluprecond.h"
- #include "icprecond.h"
- #include "verbose.h"
- #include "ilucomprowprecond.h"
-
- #ifdef TIME_REPORT
-  #include "timer.h"
- #endif
-
 namespace oofem {
-IMLSolver :: IMLSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
+
+REGISTER_SparseLinSolver(IMLSolver, ST_IML)
+
+IMLSolver :: IMLSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
 {
     Lhs = NULL;
     M = NULL;
@@ -95,15 +81,15 @@ IMLSolver :: initializeFrom(InputRecord *ir)
     int val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_IMLSolver_lstype, "stype");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_IMLSolver_lstype);
     solverType = ( IMLSolverType ) val;
 
     tol = 1.e-5;
-    IR_GIVE_OPTIONAL_FIELD(ir, tol, _IFT_IMLSolver_lstol, "lstol");
+    IR_GIVE_OPTIONAL_FIELD(ir, tol, _IFT_IMLSolver_lstol);
     maxite = 200;
-    IR_GIVE_OPTIONAL_FIELD(ir, maxite, _IFT_IMLSolver_lsiter, "lsiter");
+    IR_GIVE_OPTIONAL_FIELD(ir, maxite, _IFT_IMLSolver_lsiter);
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_IMLSolver_lsprecond, "lsprecond");
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_IMLSolver_lsprecond);
     precondType = ( IMLPrecondType ) val;
 
     // create preconditioner
@@ -118,7 +104,7 @@ IMLSolver :: initializeFrom(InputRecord *ir)
     } else if ( precondType == IML_ICPrec ) {
         M = new CompCol_ICPreconditioner();
     } else {
-        _error("setSparseMtrxAsComponent: unknown preconditioner type");
+        OOFEM_ERROR("IMLSolver::setSparseMtrxAsComponent: unknown preconditioner type");
     }
 
     // initialize precond attributes
@@ -138,21 +124,21 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 
     // first check whether Lhs is defined
     if ( !A ) {
-        _error("solveYourselfAt: unknown Lhs");
+        OOFEM_ERROR("IMLSolver :: solve: unknown Lhs");
     }
 
     // and whether Rhs
     if ( !b ) {
-        _error("solveYourselfAt: unknown Rhs");
+        OOFEM_ERROR("IMLSolver :: solve: unknown Rhs");
     }
 
     // and whether previous Solution exist
     if ( !x ) {
-        _error("solveYourselfAt: unknown solution array");
+        OOFEM_ERROR("IMLSolver :: solve: unknown solution array");
     }
 
     if ( x->giveSize() != b->giveSize() ) {
-        _error("solveYourselfAt: size mismatch");
+        OOFEM_ERROR("IMLSolver :: solve: size mismatch");
     }
 
 
@@ -162,7 +148,7 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
             M->init(* A);
         }
     } else {
-        _error("setSparseMtrxAsComponent: preconditioner creation error");
+        OOFEM_ERROR("IMLSolver :: solve: preconditioner creation error");
     }
 
     Lhs = A;
@@ -186,7 +172,7 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
         result = GMRES(* Lhs, * x, * b, * M, H, restart, mi, t);
         OOFEM_LOG_INFO("GMRES(%s): flag=%d, nite %d, achieved tol. %g\n", M->giveClassName(), result, mi, t);
     } else {
-        _error("solveYourselfAt: unknown lsover type");
+        OOFEM_ERROR("IMLSolver :: solve: unknown lsover type");
     }
 
  #ifdef TIME_REPORT
@@ -199,4 +185,3 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     return NM_Success;
 }
 } // end namespace oofem
-#endif //ifdef __IML_MODULE

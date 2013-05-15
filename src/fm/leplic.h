@@ -36,7 +36,7 @@
 #define leplic_h
 
 #include "materialinterface.h"
-#include "flotarry.h"
+#include "floatarray.h"
 #include "mathfem.h"
 #include "interface.h"
 

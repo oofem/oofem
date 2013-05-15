@@ -41,7 +41,7 @@
   #include <petscvec.h>
  #endif
 
- #include "petscordering.h"
+ #include "parallelordering.h"
  #include "equationid.h"
 
 namespace oofem {
@@ -61,21 +61,14 @@ class PetscContext
 protected:
     int di;
     EngngModel *emodel;
-    EquationID ut;
     VecScatter n2gvecscat;
     VecScatter l2gvecscat;
     /// True if vectors are assumed to be natural distribution.
     bool naturalVectors;
 
-    /// Communicator used for parallel objects.
-    MPI_Comm comm;
-
 #ifdef __PARALLEL_MODE
-    PetscNatural2GlobalOrdering n2g;
-    PetscNatural2LocalOrdering n2l;
-
-    PetscNatural2GlobalOrdering n2g_prescribed;
-    PetscNatural2LocalOrdering n2l_prescribed;
+    Natural2GlobalOrdering n2g;
+    Natural2LocalOrdering n2l;
  #endif
 
 public:
@@ -86,7 +79,7 @@ public:
      * @param naturalVectors Should be true if shared dofs only contain the local contributions.
      * Some engineering models manually scatter local vectors to their global value, in which case this would be false.
      */
-    PetscContext(EngngModel *e, EquationID eid, bool naturalVectors = true);
+    PetscContext(EngngModel *e, bool naturalVectors = true);
     ~PetscContext();
 
     /**
@@ -94,12 +87,6 @@ public:
      * @param di Domain index.
      */
     void init(int di);
-
-    /**
-     * Gives the communicator for parallel (if active).
-     * @return Parallel communicator object (typically PETSC_COMM_WORLD). Gives the self communicator if engineering problem isn't parallel.
-     */
-    MPI_Comm giveComm() { return comm; };
 
     int giveNumberOfLocalEqs();
     int giveNumberOfGlobalEqs();
@@ -172,12 +159,8 @@ public:
     void createVecGlobal(Vec *answer);
 
  #ifdef __PARALLEL_MODE
-    PetscNatural2GlobalOrdering *giveN2Gmap() { return & n2g; }
-    PetscNatural2LocalOrdering *giveN2Lmap() { return & n2l; }
-
-    PetscNatural2GlobalOrdering *giveN2GPrescribedmap() { return & n2g_prescribed; }
-    PetscNatural2LocalOrdering *giveN2LPrescribedmap() { return & n2l_prescribed; }
-
+    Natural2GlobalOrdering *giveN2Gmap() { return & n2g; }
+    Natural2LocalOrdering *giveN2Lmap() { return & n2l; }
  #endif
 };
 } // end namespace oofem

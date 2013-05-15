@@ -35,10 +35,10 @@
 #include "qtrspacegrad.h"
 #include "node.h"
 #include "material.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "domain.h"
 #include "cltypes.h"
@@ -46,10 +46,13 @@
 #include "mathfem.h"
 #include "structuralcrosssection.h"
 #include "fei3dtetlin.h"
+#include "classfactory.h"
 
 #include <cstdio>
 
 namespace oofem {
+
+REGISTER_Element( QTRSpaceGrad );
 
 FEI3dTetLin QTRSpaceGrad :: interpolation;
 

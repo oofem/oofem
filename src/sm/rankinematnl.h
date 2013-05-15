@@ -42,8 +42,10 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 #endif
+
+#define _IFT_RankineMatNl_Name "rankmatnl"
 
 namespace oofem {
 

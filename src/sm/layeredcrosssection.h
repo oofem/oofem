@@ -36,13 +36,14 @@
 #define layeredcrosssection_h
 
 #include "structuralcrosssection.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "interface.h"
 #include "gaussintegrationrule.h"
 
 ///@name Input fields for LayeredCrossSection
 //@{
+#define _IFT_LayeredCrossSection_Name "layeredcs"
 #define _IFT_LayeredCrossSection_nlayers "nlayers"
 #define _IFT_LayeredCrossSection_layermaterials "layermaterials"
 #define _IFT_LayeredCrossSection_thicks "thicks"
@@ -136,7 +137,7 @@ public:
 
     virtual void giveStressStrainMask(IntArray &answer, MatResponseForm form,
                                       MaterialMode mmode, StructuralMaterial *mat) const;
-    virtual void giveLayerMaterialStiffnessMatrix(FloatMatrix &layerMatrix, MatResponseForm FullForm,
+    virtual void giveLayerMaterialStiffnessMatrix(FloatMatrix &layerMatrix, MatResponseForm form,
                                                   MatResponseMode rMode, GaussPoint *layerGp,
                                                   TimeStep *tStep);
 

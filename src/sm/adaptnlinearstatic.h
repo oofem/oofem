@@ -42,6 +42,7 @@
 
 ///@name Input fields for AdaptiveNonLinearStatic
 //@{
+#define _IFT_AdaptiveNonLinearStatic_Name "adaptnlinearstatic"
 #define _IFT_AdaptiveNonLinearStatic_meshpackage "meshpackage"
 #define _IFT_AdaptiveNonLinearStatic_equilmc "equilmc"
 #define _IFT_AdaptiveNonLinearStatic_controlmode "controlmode"

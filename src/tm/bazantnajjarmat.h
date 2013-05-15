@@ -36,11 +36,12 @@
 #define bazantnajjarmat_h
 
 #include "isomoisturemat.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 ///@name Input fields for BazantNajjarMoistureTransferMaterial
 //@{
+#define _IFT_BazantNajjarMoistureTransferMaterial_Name "bazantnajjarmoisturemat"
 #define _IFT_BazantNajjarMoistureTransferMaterial_c1 "c1"
 #define _IFT_BazantNajjarMoistureTransferMaterial_n "n"
 #define _IFT_BazantNajjarMoistureTransferMaterial_alpha0 "alpha0"

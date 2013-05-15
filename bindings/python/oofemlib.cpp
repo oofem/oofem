@@ -16,19 +16,19 @@ namespace bp = boost::python;
 * O O F E M L I B   M O D U L E
 *
 *****************************************************/
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 #include "intarray.h"
 #include "engngm.h"
 #include "domain.h"
 #include "sparsemtrx.h"
 #include "load.h"
-#include "initial.h"
-#include "loadtime.h"
+#include "initialcondition.h"
+#include "loadtimefunction.h"
 #include "material.h"
 #include "crosssection.h"
 #include "node.h"
-#include "conTable.h"
+#include "connectivitytable.h"
 #include "spatiallocalizer.h"
 #include "errorestimator.h"
 #include "nodalrecoverymodel.h"
@@ -44,10 +44,10 @@ namespace bp = boost::python;
 #include "dofmanvalfield.h"
 #include "dofmantransftype.h"
 #include "fieldmanager.h"
-#include "generalbc.h"
-#include "boundary.h"
+#include "generalboundarycondition.h"
+#include "boundarycondition.h"
 #include "integrationrule.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "internalstatetype.h"
 #include "matresponsemode.h"
 #include "matresponseform.h"
@@ -57,7 +57,6 @@ namespace bp = boost::python;
 #include "exportmodulemanager.h"
 #include "outputmanager.h"
 #include "classfactory.h"
-#include "usrdefsub.h"
 
 
 namespace oofem {
@@ -72,7 +71,7 @@ namespace oofem {
 /*****************************************************
 * FloatArray
 *****************************************************/
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(flotarry_overloads_resize, resize, 1, 2)
+//BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(flotarry_overloads_resize, resize, 1, 2)
 void (FloatArray::*floatarray_add_1)(const FloatArray&) = &FloatArray::add;
 void (FloatArray::*floatarray_add_2)(double, const FloatArray&) = &FloatArray::add;
 void (FloatArray::*floatarray_add_3)(double) = &FloatArray::add;
@@ -86,7 +85,7 @@ void pyclass_FloatArray()
     class_<FloatArray, boost::noncopyable>("FloatArray")
         .def(init< optional<int> >())
         .def(init< FloatArray& >())
-        .def("resize", &FloatArray::resize, flotarry_overloads_resize("Checks size of receiver towards requested bounds. If dimension mismatch, size is adjusted accordingly"))
+        .def("resize", &FloatArray::resize, "Checks size of receiver towards requested bounds. If dimension mismatch, size is adjusted accordingly")
         .def("containsOnlyZeroes", &FloatArray::containsOnlyZeroes, "Returns nonzero if all coefficients of the receiver are 0, else returns zero")
         .def("giveSize", &FloatArray::giveSize, "Returns the size of receiver")
         .def("isNotEmpty", &FloatArray::isNotEmpty, "Returns true if receiver is not empty")
@@ -582,24 +581,21 @@ class PyDofManager : public DofManager, public wrapper<DofManager>
 public:
     PyDofManager (int n, Domain *d) : DofManager (n,d) {}
 
-    void giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
-                EquationID type, ValueModeType mode, TimeStep *stepN) {
+    void giveUnknownVector(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN) {
         if ( override f = this->get_override("giveUnknownVector") ) {
-        f (answer, dofMask, type, mode, stepN); return;}
-        DofManager::giveUnknownVector(answer, dofMask, type, mode, stepN);
+        f (answer, dofMask, mode, stepN); return;}
+        DofManager::giveUnknownVector(answer, dofMask, mode, stepN);
     }
     bool computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry) {
         if (override f = this->get_override("computeL2GTransformation")) { return f(answer, dofIDArry); }
         return DofManager::computeL2GTransformation(answer, dofIDArry);
     }
 
-    void default_giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
-                    EquationID type, ValueModeType mode, TimeStep *stepN)
-    { return this->DofManager::giveUnknownVector(answer, dofMask, type, mode, stepN); }
+    void default_giveUnknownVector(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN)
+    { return this->DofManager::giveUnknownVector(answer, dofMask, mode, stepN); }
 };
 
-void (DofManager::*giveUnknownVector_1)(FloatArray &answer, const IntArray &dofMask,
-                    EquationID type, ValueModeType mode, TimeStep *stepN) = &DofManager::giveUnknownVector;
+void (DofManager::*giveUnknownVector_1)(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN) = &DofManager::giveUnknownVector;
 
 void pyclass_DofManager()
 {
@@ -629,19 +625,22 @@ class PyElement : public Element, public wrapper<Element>
 public:
     PyElement (int n, Domain *d) : Element (n,d) {}
 
-    void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
         this->get_override("giveCharacteristicMatrix")();
     }
 
-    void  giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) {
+    virtual void  giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) {
         this->get_override("giveCharacteristicVector")();
     }
 
-    double giveCharacteristicValue(CharType, TimeStep *) {
+    virtual double giveCharacteristicValue(CharType, TimeStep *) {
         return this->get_override("giveCharacteristicValue")();
     }
 
-    void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const {
+    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const {
+        this->get_override("giveDefaultDofManDofIDMask")();
+    }
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const {
         this->get_override("giveDofManDofIDMask")();
     }
 };
@@ -668,7 +667,6 @@ void pyclass_Element()
         .def("giveLabel", &Element::giveLabel)
         .add_property("label",&Element::giveLabel)
         .def("giveLocationArray", &PyElement::giveLocationArray)
-        .def("invalidateLocationArray", &PyElement::invalidateLocationArray)
         .def("giveNumberOfDofManagers", &PyElement::giveNumberOfDofManagers)
         .add_property("numberOfDofManagers", &PyElement::giveNumberOfDofManagers)
         .def("computeNumberOfDofs", &PyElement::computeNumberOfDofs)
@@ -1045,7 +1043,6 @@ void pyenum_EquationID()
 {
     enum_<EquationID>("EquationID")
         .value("EID_MomentumBalance", EID_MomentumBalance)
-        .value("EID_AuxMomentumBalance", EID_AuxMomentumBalance)
         .value("EID_ConservationEquation", EID_ConservationEquation)
         .value("EID_MomentumBalance_ConservationEquation", EID_MomentumBalance_ConservationEquation)
         ;
@@ -1198,9 +1195,10 @@ void pyenum_domainType()
 /*****************************************************
 * Auxiliary functions
 *****************************************************/
-
-// constuct auxiliary global object (for eval and exec functions) only once
+#if 0
+// construct auxiliary global object (for eval and exec functions) only once
 bp::dict temp_global(import("__main__").attr("__dict__"));
+#endif
 
 /*
 make oofem input line from **kw arguments. This function is used by "constructor" methods
@@ -1209,7 +1207,8 @@ e.g. in function:
 */
 OOFEMTXTInputRecord makeOOFEMTXTInputRecordFrom(bp::dict &kw)
 {
-    temp_global["kw"] = kw;
+    bp::dict temp(import("__main__").attr("__dict__"));
+    temp["kw"] = kw;
     str command =
         "ret = ''\n"
         "for key,val in kw.iteritems():\n" // iterate over key,val pairs
@@ -1227,9 +1226,9 @@ OOFEMTXTInputRecord makeOOFEMTXTInputRecordFrom(bp::dict &kw)
         "ret = ret.lower()\n" // finally make it lower case
         "print ret\n"
         ;
-    exec(command,temp_global,temp_global);
+    exec(command,temp,temp);
     // extract string from globals["ret"], convert it to char* and return OOFEMTXTInputRecord from it
-    return OOFEMTXTInputRecord( ( extract<string>(temp_global["ret"])() ).c_str() );
+    return OOFEMTXTInputRecord( ( extract<string>(temp["ret"])() ).c_str() );
 }
 
 OOFEMTXTInputRecord makeOutputManagerOOFEMTXTInputRecordFrom(bp::dict &kw)
@@ -1258,8 +1257,6 @@ void makeDictKeysLowerCase(bp::dict &kw)
     }
 }
 
-
-
 /*
 The process is almost same for all classes, therefore only Element part is documented line by line
 */
@@ -1279,14 +1276,15 @@ object engngModel(bp::tuple args, bp::dict kw)
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     engngm->initializeFrom(&ir);
     // instanciateYourself
-    if ( ir.hasField(IFT_EngngModel_nmsteps, "nmsteps") ) {
+    if ( ir.hasField(_IFT_EngngModel_nmsteps) ) {
         LOG_ERROR(oofem_errLogger,"engngModel: simulation with metasteps is not (yet) supported in Python");
     } else {
         engngm->instanciateDefaultMetaStep(&ir);
     }
+    ///@todo Output filename isn't stored like this (and has never been!)!?
     string outFile;
-    if ( ir.hasField(IFT_EngngModel_outfile, "outfile") ) {
-       ir.giveField(outFile, IFT_EngngModel_outfile, "outfile");
+    if ( ir.hasField("outfile") ) {
+       ir.giveField(outFile, "outfile");
     } else {
        outFile = "oofem.out.XXXXXX";
     }
@@ -1509,7 +1507,7 @@ object exportModule(bp::tuple args, bp::dict kw)
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     EngngModel *engngm = len(args)>2? extract<EngngModel*>(args[2])() : NULL;
-    ExportModule *module = CreateUsrDefExportModuleOfType(aClass.c_str(),number,engngm);
+    ExportModule *module = classFactory.createExportModule(aClass.c_str(),number,engngm);
     if (module==NULL) { LOG_ERROR(oofem_errLogger,"exportModule: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     module->initializeFrom(&ir);

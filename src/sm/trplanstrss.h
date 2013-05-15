@@ -47,6 +47,8 @@
 #include "mmashapefunctprojection.h"
 #include "huertaerrorestimator.h"
 
+#define _IFT_TrPlaneStress2d_Name "trplanestress2d"
+
 namespace oofem {
 /**
  * This class implements an triangular three-node plane-stress
@@ -128,9 +130,6 @@ public:
 
     // ZZErrorEstimatorInterface
     virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
-    virtual void ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(FloatArray &answer, GaussPoint *gp,
-                                                                           InternalStateType type)
-    { ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(answer, gp, type); }
 
     // HuertaErrorEstimatorInterface
     virtual Element *HuertaErrorEstimatorI_giveElement() { return this; }

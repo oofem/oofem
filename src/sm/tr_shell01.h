@@ -40,6 +40,9 @@
 #include "zzerrorestimator.h"
 #include "cct3d.h"
 #include "trplanrot3d.h"
+#include "spatiallocalizer.h"
+
+#define _IFT_TR_SHELL01_Name "tr_shell01"
 
 namespace oofem {
 
@@ -50,14 +53,19 @@ namespace oofem {
  *
  * @author Ladislav Svoboda
  */
-  class TR_SHELL01 : public StructuralElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, 
-    public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface
+class TR_SHELL01 : public StructuralElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface, public SpatialLocalizerInterface
 {
 protected:
     /// Pointer to plate element.
     CCTPlate3d *plate;
     /// Pointer to membrane (plane stress) element.
     TrPlaneStrRot3d *membrane;
+    /**
+     * Element integraton rule (plate and membrane parts have their own integration rules)
+     * this one used to integrate element error and perhaps can be (re)used for other putrposes.
+     * Created on demand.
+     */
+    IntegrationRule *compositeIR;
 
 public:
     /// Constructor
@@ -66,7 +74,10 @@ public:
     virtual ~TR_SHELL01() {
         delete plate;
         delete membrane;
+	if (this->compositeIR) delete this->compositeIR;
     }
+
+    virtual FEInterpolation *giveInterpolation() { return plate->giveInterpolation(); }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
@@ -106,7 +117,6 @@ public:
 
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type);
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);
@@ -116,14 +126,24 @@ public:
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
     // ZZErrorEstimatorInterface
     virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
-    virtual void ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(FloatArray &answer, GaussPoint *gp,
-                                                                           InternalStateType type)
-    { ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(answer, gp, type); }
+
+    virtual IntegrationRule *ZZErrorEstimatorI_giveIntegrationRule();
+    virtual void ZZErrorEstimatorI_computeLocalStress(FloatArray& answer, FloatArray& sig);
 
     // ZZRemeshingCriteriaInterface
     virtual double ZZRemeshingCriteriaI_giveCharacteristicSize();
     virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
 
+    // SpatialLocalizerI
+    virtual Element *SpatialLocalizerI_giveElement() { return this; }
+    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
+    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
+    virtual void SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1);
+
+
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) {
+      return this->plate->computeGlobalCoordinates (answer, lcoords);
+    }
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS)
@@ -134,7 +154,7 @@ protected:
     /// @todo In time delete
 protected:
     virtual void computeGaussPoints()
-    { _error("TR_SHELL01 :: computeGaussPoints: calling of this function is not allowed"); }
+    { this->membrane->computeGaussPoints(); this->plate->computeGaussPoints(); }
     virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
     { _error("TR_SHELL01 :: computeStressVector: calling of this function is not allowed"); }
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)

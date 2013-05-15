@@ -40,8 +40,8 @@
 #include "crosssection.h"
 #include "integrationrule.h"
 #include "intarray.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
 
 namespace oofem {
 NLStructuralElement :: NLStructuralElement(int n, Domain *aDomain) :
@@ -300,7 +300,7 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
             // localize irule contribution into element matrix
             if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule, EID_MomentumBalance) ) {
                 answer.assemble(* m, irlocnum);
-                m->resize(0, 0);
+                m->resize(0);
             }
         }
     } // end loop over irules

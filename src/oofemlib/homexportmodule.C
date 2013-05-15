@@ -36,12 +36,16 @@
 #include "timestep.h"
 #include "structuralelement.h"
 #include "materialinterface.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "truss3d.h"
+#include "classfactory.h"
 
 #include <vector>
 
 namespace oofem {
+
+REGISTER_ExportModule( HOMExportModule )
+
 //inherit LinearElasticMaterial for accessing stress/strain transformation functions
 HOMExportModule :: HOMExportModule(int n, EngngModel *e) : ExportModule(n, e), LinearElasticMaterial(0, NULL)
 {
@@ -73,7 +77,6 @@ HOMExportModule :: initializeFrom(InputRecord *ir)
 void
 HOMExportModule :: doOutput(TimeStep *tStep)
 {
-    int i, j, index, ielem;
     Element *elem;
     if ( !testTimeStepOutput(tStep) ) {
         return;
@@ -93,11 +96,11 @@ HOMExportModule :: doOutput(TimeStep *tStep)
     domainType domType = d->giveDomainType();
 
     if ( domType == _HeatTransferMode || domType == _HeatMass1Mode ) {
-        for ( ielem = 1; ielem <= nelem; ielem++ ) {
+        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
             elem = d->giveElement(ielem);
             if ( this->matnum.giveSize() == 0 || this->matnum.contains( elem->giveMaterial()->giveNumber() ) ) {
                 iRule = elem->giveDefaultIntegrationRulePtr();
-                for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+                for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
                     gp  = iRule->getIntegrationPoint(i);
                     dV  = elem->computeVolumeAround(gp);
                     VolTot += dV;
@@ -125,11 +128,11 @@ HOMExportModule :: doOutput(TimeStep *tStep)
         SumStress.zero();
         SumEigStrain.zero();
 
-        for ( ielem = 1; ielem <= nelem; ielem++ ) {
+        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
             elem = d->giveElement(ielem);
             if ( this->matnum.giveSize() == 0 || this->matnum.contains( elem->giveMaterial()->giveNumber() ) ) {
                 iRule = elem->giveDefaultIntegrationRulePtr();
-                for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+                for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
                     gp  = iRule->getIntegrationPoint(i);
                     structElem = static_cast< StructuralElement * >( gp->giveElement() );
                     structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Incremental);
@@ -158,7 +161,7 @@ HOMExportModule :: doOutput(TimeStep *tStep)
                         tempFloatAr = VecEigStrain;
                         VecEigStrain = tempFloatAr;
 
-                        for ( j = 1; j <= 6; j++ ) {
+                        for ( int j = 1; j <= 6; j++ ) {
                             Mask.at(j) = j;
                         }
 
@@ -175,8 +178,8 @@ HOMExportModule :: doOutput(TimeStep *tStep)
                         sumDamage += damage.at(1)*dV;
                     }
                     
-                    for ( j = 0; j < 6; j++ ) {
-                        index = Mask(j); //indexes in Mask from 1
+                    for ( int j = 0; j < 6; j++ ) {
+                        int index = Mask(j); //indexes in Mask from 1
                         if ( index ) {
                             SumStrain(j) += VecStrain(index - 1);
                             if ( VecEigStrain.giveSize() ) {
@@ -203,17 +206,17 @@ HOMExportModule :: doOutput(TimeStep *tStep)
         //SumEigStrain.printYourself();
         //SumStress.printYourself();
         fprintf( this->stream, "%f   ", tStep->giveTargetTime() );
-        for ( j = 0; j < 6; j++ ) { //strain
+        for ( int j = 0; j < 6; j++ ) { //strain
             fprintf( this->stream, "%06.5e ", SumStrain(j) );
         }
 
         fprintf(this->stream, "    ");
-        for ( j = 0; j < 6; j++ ) { //stress
+        for ( int j = 0; j < 6; j++ ) { //stress
             fprintf( this->stream, "%06.5e ", SumStress(j) );
         }
 
         fprintf(this->stream, "    ");
-        for ( j = 0; j < 6; j++ ) { //eigenstrain
+        for ( int j = 0; j < 6; j++ ) { //eigenstrain
             fprintf( this->stream, "%06.5e ", SumEigStrain(j) );
         }
 

@@ -37,10 +37,14 @@
 #include "engngm.h"
 #include "dofmanager.h"
 #include "dof.h"
+#include "classfactory.h"
 
 #include "structengngmodel.h"// JB
 
 namespace oofem {
+
+REGISTER_ExportModule( DofManExportModule )
+
 DofManExportModule :: DofManExportModule(int n, EngngModel *e) : ExportModule(n, e)
 {
     this->dofManList.resize(0);

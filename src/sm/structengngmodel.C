@@ -58,11 +58,6 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
 // computes and prints reaction forces in all supported or restrained dofs
 //
 {
-    //
-    // Sum all equivalent forces for all connected elements
-    //
-    int numRestrDofs = 0;
-
     IntArray ielemDofMask;
     FloatArray reactions;
     IntArray dofManMap, dofMap, eqnMap;
@@ -85,13 +80,13 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
     //
     fprintf(outputStream, "\n\n\tR E A C T I O N S  O U T P U T:\n\t_______________________________\n\n\n");
 
-    numRestrDofs = this->giveNumberOfDomainEquations(di, EModelDefaultPrescribedEquationNumbering());
     // compute reaction forces
     this->computeReaction(reactions, tStep, di);
+
     //
     // loop over reactions and print them
     //
-    for ( int i = 1; i <= numRestrDofs; i++ ) {
+    for ( int i = 1; i <= dofManMap.giveSize(); i++ ) {
         if ( domain->giveOutputManager()->testDofManOutput(dofManMap.at(i), tStep) ) {
             fprintf( outputStream, "\tNode %8d iDof %2d reaction % .4e    [bc-id: %d]\n",
                     domain->giveDofManager( dofManMap.at(i) )->giveLabel(),
@@ -244,9 +239,7 @@ StructuralEngngModel :: buildReactionTable(IntArray &restrDofMans, IntArray &res
     Domain *domain = this->giveDomain(di);
     int numRestrDofs = this->giveNumberOfDomainEquations(di, EModelDefaultPrescribedEquationNumbering());
     int ndofMan = domain->giveNumberOfDofManagers();
-    int indofs, rindex, count = 0;
-    DofManager *inode;
-    Dof *jdof;
+    int rindex, count = 0;
 
     // initialize corresponding dofManagers and dofs for each restrained dof
     restrDofMans.resize(numRestrDofs);
@@ -254,10 +247,10 @@ StructuralEngngModel :: buildReactionTable(IntArray &restrDofMans, IntArray &res
     eqn.resize(numRestrDofs);
 
     for ( int i = 1; i <= ndofMan; i++ ) {
-        inode = domain->giveDofManager(i);
-        indofs = inode->giveNumberOfDofs();
+        DofManager *inode = domain->giveDofManager(i);
+        int indofs = inode->giveNumberOfDofs();
         for ( int j = 1; j <= indofs; j++ ) {
-            jdof = inode->giveDof(j);
+            Dof *jdof = inode->giveDof(j);
             if ( jdof->isPrimaryDof() && ( jdof->hasBc(tStep) ) ) { // skip slave dofs
                 rindex = jdof->__givePrescribedEquationNumber();
                 if ( rindex ) {
@@ -272,6 +265,10 @@ StructuralEngngModel :: buildReactionTable(IntArray &restrDofMans, IntArray &res
             }
         }
     }
+    // Trim to size.
+    restrDofMans.resize(count);
+    restrDofs.resize(count);
+    eqn.resize(count);
 }
 
 
@@ -283,7 +280,7 @@ StructuralEngngModel :: initPetscContexts()
 
     petscContextList->growTo(ndomains);
     for ( int i = 0; i < this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this, EID_MomentumBalance);
+        petscContext =  new PetscContext(this);
         petscContextList->put(i + 1, petscContext);
     }
 }

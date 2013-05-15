@@ -34,11 +34,15 @@
 
 #include "m4.h"
 #include "microplane.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( M4Material );
+
 M4Material :: M4Material(int n, Domain *d) :
     MicroplaneMaterial_Bazant(n, d)
 { }

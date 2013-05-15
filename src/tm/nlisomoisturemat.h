@@ -36,10 +36,11 @@
 #define nlisomoisturemat_h
 
 #include "isomoisturemat.h"
-#include "flotarry.h"
+#include "floatarray.h"
 
 ///@name Input fields for NlIsoMoistureMaterial
 //@{
+#define _IFT_NlIsoMoistureMaterial_Name "nlisomoisturemat"
 #define _IFT_NlIsoMoistureMaterial_isothermtype "isothermtype"
 #define _IFT_NlIsoMoistureMaterial_permeabilitytype "permeabilitytype"
 #define _IFT_NlIsoMoistureMaterial_rhodry "rhodry"

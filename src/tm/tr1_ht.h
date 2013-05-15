@@ -40,6 +40,10 @@
 #include "zznodalrecoverymodel.h"
 #include "fei2dtrlin.h"
 
+#define _IFT_Tr1_hmt_Name "tr1hmt"
+#define _IFT_Tr1_ht_Name "tr1ht"
+
+
 namespace oofem {
 /**
  * Triangle (2d) element with linear approximation for heat transfer.

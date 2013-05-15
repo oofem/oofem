@@ -39,7 +39,7 @@
 #include "node.h"
 #include "integrationrule.h"
 #include "feinterpol.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 
 namespace oofem {
 

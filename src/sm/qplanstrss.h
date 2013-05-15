@@ -40,6 +40,8 @@
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 
+#define _IFT_QPlaneStress2d_Name "qplanestress2d"
+
 namespace oofem {
 /**
  * This class implements an Quadratic isoparametric eight-node quadrilateral plane-

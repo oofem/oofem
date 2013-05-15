@@ -35,12 +35,12 @@
 #ifndef nodalaveragingrecoverymodel_h
 #define nodalaveragingrecoverymodel_h
 
-#include "compiler.h"
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 
 namespace oofem {
 class GaussPoint;
+class ProcessCommunicator;
 
 /**
  * The nodal recovery model based on nodal averaging. The recovery is based

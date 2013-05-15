@@ -35,29 +35,27 @@
 #include "concrete2.h"
 #include "material.h"
 #include "domain.h"
-#include "flotmtrx.h"
-#include "gausspnt.h"
+#include "floatmatrix.h"
+#include "gausspoint.h"
 #include "mathfem.h"
 #include "engngm.h"
 #include "timestep.h"
 #include "structuralcrosssection.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( Concrete2 );
+
 Concrete2 :: Concrete2(int n, Domain *d) : DeformationTheoryMaterial(n, d)
-    //
-    // constructor
-    //
 {
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
 }
 
 
 Concrete2 :: ~Concrete2()
-//
-// destructor
-//
 {
     delete linearElasticMaterial;
 }

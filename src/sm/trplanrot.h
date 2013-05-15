@@ -39,6 +39,7 @@
 
 ///@name Input fields for TrPlaneStrRot
 //@{
+#define _IFT_TrPlaneStrRot_Name "trplanestrrot"
 #define _IFT_TrPlaneStrRot_niprot "niprot"
 //@}
 
@@ -88,6 +89,9 @@ public:
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
+
+    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+
 };
 } // end namespace oofem
 #endif //  trplanrot_h

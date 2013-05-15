@@ -34,8 +34,8 @@
 
 #include "fei2dtrlin.h"
 #include "mathfem.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 
 namespace oofem {
 void
@@ -112,11 +112,11 @@ FEI2dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const F
 
     answer.at(1) = ( ( x2 * y3 - x3 * y2 ) + ( y2 - y3 ) * coords.at(xind) + ( x3 - x2 ) * coords.at(yind) ) / detJ;
     answer.at(2) = ( ( x3 * y1 - x1 * y3 ) + ( y3 - y1 ) * coords.at(xind) + ( x1 - x3 ) * coords.at(yind) ) / detJ;
-    //answer.at(3) = ( ( x1 * y2 - x2 * y1 ) + ( y1 - y2 ) * coords.at(xind) + ( x2 - x1 ) * coords.at(yind) ) / detJ;
+    answer.at(3) = 1. - answer.at(1) - answer.at(2);
 
     // check if point is inside
     bool inside = true;
-    for ( int i = 1; i <= 2; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         if ( answer.at(i) < ( 0. - POINT_TOL ) ) {
             answer.at(i) = 0.;
             inside = false;
@@ -126,8 +126,6 @@ FEI2dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const F
         }
     }
     
-    answer.at(3) = 1. - answer.at(1) - answer.at(2);
-
     return inside;
 }
 
@@ -178,8 +176,8 @@ double FEI2dTrLin :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatAr
     IntArray edgeNodes;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
     normal.resize(2);
-    normal.at(1) = cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(xind) - cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(xind);
-    normal.at(2) = -(cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(yind) - cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(yind));
+    normal.at(1) = cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(yind) - cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(yind);
+    normal.at(2) = -(cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(xind) - cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(xind));
     return normal.normalize()*0.5;
 }
 
@@ -253,5 +251,24 @@ double FEI2dTrLin :: giveArea(const FEICellGeometry &cellgeo) const
     y3 = p->at(2);
 
     return 0.5 * ( x1*(y2-y3) + x2*(-y1+y3) + x3*(y1-y2) ); ///@todo Absolute value or not?
+}
+
+double FEI2dTrLin :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
+{
+    IntArray eNodes;
+    const FloatArray *node;
+    double x1, x2, y1, y2;
+
+    this->computeLocalEdgeMapping(eNodes, iEdge);
+
+    node = cellgeo.giveVertexCoordinates(eNodes.at(1));
+    x1 = node->at ( xind );
+    y1 = node->at ( yind );
+
+    node = cellgeo.giveVertexCoordinates(eNodes.at(2));
+    x2 = node->at ( xind );
+    y2 = node->at ( yind );
+
+    return -( x2 * y1 - x1 * y2 );
 }
 } // end namespace oofem

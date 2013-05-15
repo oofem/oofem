@@ -39,10 +39,12 @@
 #include "dof.h"
 #include "verbose.h"
 #include "transportelement.h"
-#include "usrdefsub.h"
+#include "classfactory.h"
 #include "mathfem.h"
 
 namespace oofem {
+
+REGISTER_EngngModel( NLTransientTransportProblem );
 
 NLTransientTransportProblem :: NLTransientTransportProblem(int i, EngngModel *_master = NULL) : NonStationaryTransportProblem(i, _master)
 {
@@ -99,7 +101,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
             delete conductivityMatrix;
         }
 
-        conductivityMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( conductivityMatrix == NULL ) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }
@@ -195,7 +197,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
         // compute norm of residuals from balance equations
         solutionErr = rhs.computeNorm();
 
-        nMethod->solve(conductivityMatrix, & rhs, & solutionVectorIncrement);
+        linSolver->solve(conductivityMatrix, & rhs, & solutionVectorIncrement);
         solutionVector->add(solutionVectorIncrement);
         this->updateInternalState(& TauStep); //insert to hash=0(current), if changes in equation numbering
         // compute error in the solutionvector increment
@@ -238,6 +240,8 @@ double NLTransientTransportProblem :: giveUnknownComponent(ValueModeType mode, T
     }
 
     if ( ( t >= previousStep->giveTargetTime() ) && ( t <= currentStep->giveTargetTime() ) ) {
+        ///@todo Shouldn't it be enough to just run this?
+        //UnknownsField->giveUnknownValue(dof, mode, currentStep);
         double rtdt = UnknownsField->giveUnknownValue(dof, VM_Total, currentStep);
         double rt   = UnknownsField->giveUnknownValue(dof, VM_Total, previousStep);
         double psi = ( t - previousStep->giveTargetTime() ) / currentStep->giveTimeIncrement();

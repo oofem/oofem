@@ -40,6 +40,7 @@
 
 ///@name Input fields for AdaptiveLinearStatic
 //@{
+#define _IFT_AdaptiveLinearStatic_Name "adaptlinearstatic"
 #define _IFT_AdaptiveLinearStatic_meshpackage "meshpackage"
 //@}
 

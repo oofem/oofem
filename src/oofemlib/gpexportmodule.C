@@ -33,14 +33,18 @@
  */
 
 #include "gpexportmodule.h"
-#include "gausspnt.h"
+#include "gausspoint.h"
 #include "material.h"
 #include "element.h"
 #include "integrationrule.h"
 #include "timestep.h"
 #include "engngm.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_ExportModule( GPExportModule )
+
 GPExportModule :: GPExportModule(int n, EngngModel *e) : ExportModule(n, e)
 {
     ncoords = -1; // means: export as many coordinates as available

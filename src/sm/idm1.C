@@ -34,17 +34,21 @@
 
 #include "idm1.h"
 #include "isolinearelasticmaterial.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "structuralcrosssection.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "mathfem.h"
 #include "strainvector.h"
 #include "stressvector.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_Material( IsotropicDamageMaterial1 );
+
 #ifdef IDM_USE_MMAClosestIPTransfer
 MMAClosestIPTransfer IsotropicDamageMaterial1 :: mapper;
 #endif
@@ -379,6 +383,9 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
             dim = 3;
             StrainVector fullStrain(strain, _3dMat);
             fullStrain.computePrincipalValDir(principalStrains, N);
+        } else {
+            dim = 0;
+            OOFEM_ERROR("IsotropicDamageMaterial1 :: computeEta - Unknown material mode.");
         }
 
         FloatArray n(dim);
@@ -434,10 +441,13 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
             fullStress.computePrincipalValDir(principalStress, N);
             principalStress.resize(3);
             dim = 2;
-        } else if ( gp->giveMaterialMode() == _3dMat || gp->giveMaterialMode() == _3dMatGrad )     {
+        } else if ( gp->giveMaterialMode() == _3dMat || gp->giveMaterialMode() == _3dMatGrad ) {
             StressVector fullStress(stress, _3dMat);
             fullStress.computePrincipalValDir(principalStress, N);
             dim = 3;
+        } else {
+            dim = 0;
+            OOFEM_ERROR("IsotropicDamageMaterial1 :: computeEta - Unknown material mode.");
         }
 
         FloatArray n(dim);

@@ -35,15 +35,19 @@
 #include "fluiddynamicmaterial.h"
 #include "nonlinearfluidmaterial.h"
 #include "domain.h"
-#include "flotmtrx.h"
-#include "gausspnt.h"
+#include "floatmatrix.h"
+#include "gausspoint.h"
 #include "engngm.h"
 #include "contextioerr.h"
 #include "mathfem.h"
+#include "classfactory.h"
 
 #include <cstdlib>
 
 namespace oofem {
+
+REGISTER_Material( NonlinearFluidMaterial );
+
 int
 NonlinearFluidMaterial :: hasMaterialModeCapability(MaterialMode mode)
 {
