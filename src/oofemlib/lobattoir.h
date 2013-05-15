@@ -71,7 +71,7 @@ public:
     virtual int SetUpPointsOnSquare(int nPoints, MaterialMode mode);
     virtual int SetUpPointsOnCube(int nPoints, MaterialMode mode);
     static void giveLineCoordsAndWeights(int nPoints, FloatArray &coords_xi, FloatArray &weights);
-
+    virtual int SetUpPointsOnTriangle(int nPoints, MaterialMode mode);
 
 
 };
