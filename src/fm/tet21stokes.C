@@ -136,7 +136,7 @@ void Tet21Stokes :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, 
 {
     // Compute characteristic vector for this element. I.e the load vector(s)
     if ( mtrx == ExternalForcesVector ) {
-        this->computeLoadVector(answer, tStep);
+        this->computeExternalForcesVector(answer, tStep);
     } else if ( mtrx == InternalForcesVector ) {
         this->computeInternalForcesVector(answer, tStep);
     } else {
@@ -167,9 +167,8 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
     FloatArray momentum, conservation;
 
     B.zero();
-    GaussPoint *gp;
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
         double detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
@@ -198,7 +197,7 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
     answer.assemble(conservation, this->conservation_ordering);
 }
 
-void Tet21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
+void Tet21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     int load_number, load_id;
     Load *load;
@@ -215,7 +214,7 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
         ltype = load->giveBCGeoType();
 
         if ( ltype == SurfaceLoadBGT ) {
-            this->computeSurfaceBCSubVectorAt(vec, load, load_id, tStep);
+            this->computeBoundaryLoadVector(vec, load, load_id, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         }
     }
@@ -225,14 +224,19 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
         load  = domain->giveLoad( bodyLoadArray.at(i) );
         ltype = load->giveBCGeoType();
         if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
-            this->computeBodyLoadVectorAt(vec, load, tStep);
+            this->computeLoadVector(vec, load, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         }
     }
 }
 
-void Tet21Stokes :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep)
+void Tet21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
+    if ( type != ExternalForcesVector ) {
+        answer.resize(0);
+        return;
+    }
+
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatArray N, gVector, temparray(30);
 
@@ -262,8 +266,13 @@ void Tet21Stokes :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, Time
 
 }
 
-void Tet21Stokes :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load, int iSurf, TimeStep *tStep)
+void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, Load *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep)
 {
+    if ( type != ExternalForcesVector ) {
+        answer.resize(0);
+        return;
+    }
+
     answer.resize(34);
     answer.zero();
 
@@ -369,7 +378,7 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.assemble(K, this->momentum_ordering);
     answer.assemble(GDp, this->momentum_ordering, this->conservation_ordering);
     answer.assemble(GTDvT, this->conservation_ordering, this->momentum_ordering);
-    answer.assemble(C, this->conservation_ordering, this->conservation_ordering);
+    answer.assemble(C, this->conservation_ordering);
 //    K.printYourself();
 //    GDp.printYourself();
 //    GTDvT.printYourself();

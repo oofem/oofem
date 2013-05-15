@@ -85,6 +85,7 @@ class IntArray;
 class CrossSection;
 class ElementSide;
 class FEInterpolation;
+class Load;
 
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;
@@ -276,6 +277,41 @@ public:
      * @return Requested value.
      */
     virtual double giveCharacteristicValue(CharType type, TimeStep *tStep);
+    //@}
+
+    /**
+     * @name General methods for computing the contribution from loads
+     */
+    //@{
+    /**
+     * Computes the contribution of the given load.
+     * @param answer Requested contribution of load.
+     * @param load   Load to compute contribution from.
+     * @param type   Type of the contribution.
+     * @param mode   Determines mode of answer.
+     * @param tStep  Time step when answer is computed.
+     */
+    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
+    /**
+     * Computes the contribution of the given load at the given boundary.
+     * @param answer Requested contribution of load.
+     * @param load Load to compute contribution from.
+     * @param boundary Boundary number.
+     * @param type Type of the contribution.
+     * @param mode Determines mode of answer.
+     * @param tStep Time step when answer is computed.
+     */
+    virtual void computeBoundaryLoadVector(FloatArray &answer, Load *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
+    /**
+     * Computes the contribution of the given load at the given edge.
+     * @param answer Requested contribution of load.
+     * @param load Load to compute contribution from.
+     * @param boundary Edge number.
+     * @param type Type of the contribution.
+     * @param mode Determines mode of answer.
+     * @param tStep Time step when answer is computed.
+     */
+    virtual void computeEdgeLoadVector(FloatArray &answer, Load *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep);
     //@}
 
     //virtual MaterialMode giveMaterialMode() {return _Unknown;}

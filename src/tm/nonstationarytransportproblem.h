@@ -35,7 +35,6 @@
 #ifndef nonstationarytransportproblem_h
 #define nonstationarytransportproblem_h
 
-#include "structengngmodel.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "primaryfield.h"

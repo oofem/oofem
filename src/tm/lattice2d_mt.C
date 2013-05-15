@@ -46,12 +46,8 @@
 #include "domain.h"
 #include "mathfem.h"
 #include "engngm.h"
-#include "structuralms.h"
 #include "load.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdio.h>
-#endif
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -59,6 +55,9 @@
 #endif
 
 namespace oofem {
+
+REGISTER_Element( Lattice2d_mt );
+
 Lattice2d_mt :: Lattice2d_mt(int n, Domain *aDomain, ElementMode em) :
     LatticeTransportElement(n, aDomain, em)
     // Constructor.

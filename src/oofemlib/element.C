@@ -597,6 +597,27 @@ Element :: giveCharacteristicVector(FloatArray &answer, CharType type, ValueMode
 }
 
 
+void
+Element :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+{
+    _error("computeLoadVector: Unknown load type.");
+}
+
+
+void
+Element :: computeBoundaryLoadVector(FloatArray &answer, Load *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
+{
+    _error("computeBoundaryLoadVector: Unknown load type.");
+}
+
+
+void
+Element :: computeEdgeLoadVector(FloatArray &answer, Load *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
+{
+    _error("computeEdgeLoadVector: Unknown load type.");
+}
+
+
 double
 Element :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
 //

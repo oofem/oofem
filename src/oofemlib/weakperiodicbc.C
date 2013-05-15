@@ -431,15 +431,13 @@ double WeakPeriodicBoundaryCondition :: computeBaseFunctionValue(int baseID, dou
 	return fVal;
 }
 
-double WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
 		CharType type, ValueModeType mode,
 		const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
 	if ( type != InternalForcesVector ) {
-		return 0.0;
+		return;
 	}
-
-	double norm = 0.0;
 
 	// Fetch unknowns of this boundary condition
 	IntArray gammaLoc, gammaDofIDs;
@@ -510,8 +508,6 @@ double WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeS
 			myProd.beTProductOf(B, a);
 			myProdGamma.beProductOf(B, gamma);
 
-			norm += myProd.computeSquaredNorm();
-			norm += myProdGamma.computeSquaredNorm();
 			if ( eNorms ) {
 				for ( int i = 1; i <= gammaLoc.giveSize(); ++i ) {
 					if ( gammaLoc.at(i) )
@@ -527,10 +523,7 @@ double WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeS
 			answer.assemble(myProdGamma, sideLocation);
 		}
 	}
-
 	//    answer.printYourself();
-
-	return norm;
 }
 
 int WeakPeriodicBoundaryCondition :: giveNumberOfInternalDofManagers()

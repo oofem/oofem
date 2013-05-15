@@ -1595,7 +1595,7 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *atTime)
         // Get temperature from transportProblem via Field Manager
         // Might also get hydration degree, so that it need not be computed twice
         FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-        Field *tf;
+	FM_FieldPtr tf;
         StructuralElement *elem;
         // == Temperature ==
         if ( ( tf = fm->giveField(FT_Temperature) ) ) {

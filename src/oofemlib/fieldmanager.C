@@ -36,6 +36,50 @@
 
 namespace oofem {
 
+
+#ifdef FIELDMANAGER_USE_SHARED_PTR
+FieldManager :: ~FieldManager() 
+{}
+
+void
+FieldManager :: registerField(std::tr1::shared_ptr<Field> eField, FieldType key)
+{
+    this->externalFields [ key ] = eField;
+}
+
+bool
+FieldManager :: isFieldRegistered(FieldType key)
+{
+    return ( this->externalFields.find(key) != this->externalFields.end() );
+}
+
+std::tr1::shared_ptr<Field> 
+FieldManager :: giveField(FieldType key)
+{
+    std :: map< FieldType, std::tr1::shared_ptr<Field> > :: iterator i;
+    if ( ( i = this->externalFields.find(key) ) == this->externalFields.end() ) {
+      std::tr1::shared_ptr<Field> p; // std::tr1::shared_ptr<Field> p(nullptr);
+      return p;
+    }
+
+    return (i->second);
+}
+
+void
+FieldManager :: unregisterField(FieldType key)
+{
+    std :: map< FieldType, std::tr1::shared_ptr<Field> > :: iterator i;
+    i = this->externalFields.find(key);
+    if ( i == this->externalFields.end() ) {
+        return;
+    }
+
+    this->externalFields.erase(i);
+}
+
+
+#else //FIELDMANAGER_USE_SHARED_PTR
+
 FieldManager :: ~FieldManager() 
 {
     std :: map< FieldType, fieldRecord* > :: iterator i;
@@ -86,4 +130,8 @@ FieldManager :: unregisterField(FieldType key)
     delete (*i).second;
     this->externalFields.erase(i);
 }
+
+
+#endif //FIELDMANAGER_USE_SHARED_PTR
+
 } // end namespace oofem

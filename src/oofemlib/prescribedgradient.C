@@ -41,11 +41,10 @@
 #include "floatmatrix.h"
 #include "loadtimefunction.h"
 #include "engngm.h"
+#include "set.h"
 #include "node.h"
+#include "element.h"
 #include "classfactory.h"
-#ifdef __FM_MODULE
-#include "../fm/line2boundaryelement.h"
-#endif
 
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
@@ -59,7 +58,7 @@ double PrescribedGradient :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
     DofIDItem id = dof->giveDofID();
     FloatArray *coords = dof->giveDofManager()->giveCoordinates();
 
-    if ( coords == NULL || coords->giveSize() != this->centerCoord.giveSize() ) {
+    if ( coords->giveSize() != this->centerCoord.giveSize() ) {
         OOFEM_ERROR("PrescribedGradient :: give - Size of coordinate system different from center coordinate in b.c.");
     }
 
@@ -80,19 +79,11 @@ double PrescribedGradient :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
 
     case D_v:
     case V_v:
-        if ( u.giveSize() >= 2 ) {
-            return u.at(2);
-        } else {
-            OOFEM_ERROR("PrescribedGradient :: give - Prescribed tensor dimensions to small for D_v or V_v.");
-        }
+        return u.at(2);
 
     case D_w:
     case V_w:
-        if ( u.giveSize() >= 3 ) {
-            return u.at(3);
-        } else {
-            OOFEM_ERROR("PrescribedGradient :: give - Prescribed tensor dimensions to small for D_w or V_w.");
-        }
+        return u.at(3);
 
     default:
         return 0.0;
@@ -114,9 +105,9 @@ void PrescribedGradient :: setPrescribedGradientVoigt(const FloatArray &t)
         this->gradient.at(2, 2) = t.at(2);
         this->gradient.at(2, 2) = t.at(3);
         // In voigt form, assuming the use of gamma_12 instead of eps_12
-        this->gradient.at(1, 2) = this->gradient.at(2, 1) = t.at(6) / 2;
-        this->gradient.at(1, 3) = this->gradient.at(3, 1) = t.at(5) / 2;
-        this->gradient.at(2, 3) = this->gradient.at(3, 2) = t.at(4) / 2;
+        this->gradient.at(1, 2) = this->gradient.at(2, 1) = t.at(6) * 0.5;
+        this->gradient.at(1, 3) = this->gradient.at(3, 1) = t.at(5) * 0.5;
+        this->gradient.at(2, 3) = this->gradient.at(3, 2) = t.at(4) * 0.5;
     } else {
         OOFEM_ERROR("setPrescribedTensorVoigt: Tensor is in strange voigt format. Should be 3 or 6. Use setPrescribedTensor directly if needed.");
     }
@@ -200,25 +191,19 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
 
 double PrescribedGradient :: domainSize()
 {
-    ///@todo This code is very general, and necessary for all multiscale simulations with pores, so it should be moved into Domain eventually
     int nsd = this->domain->giveNumberOfSpatialDimensions();
     double domain_size = 0.0;
-#ifdef __FM_MODULE
     // This requires the boundary to be consistent and ordered correctly.
-    for (int i = 1; i <= this->domain->giveNumberOfElements(); ++i) {
-        //BoundaryElement *e = dynamic_cast< BoundaryElement* >(d->giveElement(i));
-        ///@todo Support more than 2D
-        Line2BoundaryElement *e = dynamic_cast< Line2BoundaryElement* >(this->domain->giveElement(i));
-        if (e) {
-            domain_size += e->computeNXIntegral();
-        }
+    Set *set = this->giveDomain()->giveSet(this->set);
+    const IntArray &boundaries = set->giveBoundaryList();
+
+    for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
+        Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
+        int boundary = boundaries.at(pos*2);
+        FEInterpolation *fei = e->giveInterpolation();
+        domain_size += fei->evalNXIntegral( boundary, FEIElementGeometryWrapper(e) );
     }
-#endif
-    if  (domain_size == 0.0) { // No boundary elements? Assume full density;
-        return this->domain->giveArea(); ///@todo Support more than 2D
-    } else {
-        return domain_size/nsd;
-    }
+    return domain_size/nsd;
 }
 
 
@@ -259,16 +244,15 @@ void PrescribedGradient :: computeTangent(FloatMatrix &tangent, EquationID eid, 
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
     SparseLinearSystemNM *solver = classFactory.createSparseLinSolver(ST_Petsc, this->domain, this->domain->giveEngngModel());// = rve->giveLinearSolver();
-    SparseMtrx *Kff, *Kfp, *Kpf, *Kpp;
     SparseMtrxType stype = SMT_PetscMtrx;// = rve->giveSparseMatrixType();
     EModelDefaultEquationNumbering fnum;
     EModelDefaultPrescribedEquationNumbering pnum;
 
     // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
-    Kff = classFactory.createSparseMtrx(stype);
-    Kfp = classFactory.createSparseMtrx(stype);
-    Kpf = classFactory.createSparseMtrx(stype);
-    Kpp = classFactory.createSparseMtrx(stype);
+    SparseMtrx *Kff = classFactory.createSparseMtrx(stype);
+    SparseMtrx *Kfp = classFactory.createSparseMtrx(stype);
+    SparseMtrx *Kpf = classFactory.createSparseMtrx(stype);
+    SparseMtrx *Kpp = classFactory.createSparseMtrx(stype);
     if ( !Kff ) {
         OOFEM_ERROR2("MixedGradientPressureBC :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
     }
@@ -309,11 +293,10 @@ IRResultType PrescribedGradient :: initializeFrom(InputRecord *ir)
     GeneralBoundaryCondition :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->gradient, _IFT_PrescribedGradient_gradient);
-    IRResultType rt = IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, _IFT_PrescribedGradient_centercoords)
-    if ( rt != IRRT_OK ) {
-        this->centerCoord.resize( this->gradient.giveNumberOfColumns() );
-        this->centerCoord.zero();
-    }
+    
+    this->centerCoord.resize( this->gradient.giveNumberOfColumns() );
+    this->centerCoord.zero();
+    IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, _IFT_PrescribedGradient_centercoords)
 
     return IRRT_OK;
 }

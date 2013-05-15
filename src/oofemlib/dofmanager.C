@@ -58,6 +58,7 @@ DofManager :: DofManager(int n, Domain *aDomain) :
     hasSlaveDofs  = false;
     dofidmask = NULL;
     dofTypemap = NULL;
+    dofMastermap = NULL;
     dofBCmap = NULL;
     dofICmap = NULL;
 #ifdef __PARALLEL_MODE
@@ -82,6 +83,7 @@ DofManager :: ~DofManager()
 
     delete dofidmask;
     delete dofTypemap;
+    delete dofMastermap;
     delete dofBCmap;
     delete dofICmap;
 }
@@ -433,8 +435,6 @@ IRResultType DofManager ::  resolveDofIDArray(InputRecord *ir, IntArray &dofIDAr
     if ( numberOfDofs == -1 ) {
         dofIDArry = domain->giveDefaultNodeDofIDArry();
         numberOfDofs = dofIDArry.giveSize();
-        delete this->dofidmask;
-        //this->dofidmask = NULL;
         this->dofidmask = new IntArray(dofIDArry); ///@todo To be removed eventually.
     } else {
         // if ndofs is prescribed, read the physical meaning of particular dofs
@@ -446,7 +446,6 @@ IRResultType DofManager ::  resolveDofIDArray(InputRecord *ir, IntArray &dofIDAr
             _error("resolveDofIDArray : DofIDMask size mismatch");
         }
 
-        delete this->dofidmask;
         this->dofidmask = new IntArray(dofIDArry);
     }
 
@@ -458,6 +457,12 @@ DofManager :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
+
+    delete dofidmask; dofidmask = NULL;
+    delete dofTypemap; dofTypemap = NULL;
+    delete dofMastermap; dofMastermap = NULL;
+    delete dofBCmap; dofBCmap = NULL;
+    delete dofICmap; dofICmap = NULL;
 
     IntArray dofIDArry;
     IntArray bc, ic, masterMask, dofTypeMask;
@@ -471,12 +476,9 @@ DofManager :: initializeFrom(InputRecord *ir)
 #else
     if ( ir->hasField(_IFT_DofManager_dofidmask) ) {
         IR_GIVE_FIELD(ir, dofIDArry, _IFT_DofManager_dofidmask);
-        delete this->dofidmask;
         this->dofidmask = new IntArray(dofIDArry);
     } else {
         dofIDArry = domain->giveDefaultNodeDofIDArry();
-        delete this->dofidmask;
-        //this->dofidmask = NULL;
         this->dofidmask = new IntArray(dofIDArry); ///@todo To be removed eventually.
     }
     numberOfDofs = dofIDArry.giveSize();
@@ -532,7 +534,6 @@ DofManager :: initializeFrom(InputRecord *ir)
         if ( bc.giveSize() != this->giveNumberOfDofs() ) {
             _error3( "initializeFrom: bc size mismatch. Size is %d and need %d", bc.giveSize(), this->giveNumberOfDofs() );
         }
-        delete this->dofBCmap;
         this->dofBCmap = new std::map< int, int >();
         for (int i = 1; i <= bc.giveSize(); ++i) {
             if ( bc.at(i) > 0 ) {
@@ -545,7 +546,6 @@ DofManager :: initializeFrom(InputRecord *ir)
         if ( ic.giveSize() != this->giveNumberOfDofs() ) {
             _error3( "initializeFrom: ic size mismatch. Size is %d and need %d", ic.giveSize(), this->giveNumberOfDofs() );
         }
-        delete this->dofICmap;
         this->dofICmap = new std::map< int, int >();
         for (int i = 1; i <= ic.giveSize(); ++i) {
             if ( ic.at(i) > 0 ) {
@@ -558,7 +558,6 @@ DofManager :: initializeFrom(InputRecord *ir)
         if ( dofTypeMask.giveSize() != this->giveNumberOfDofs() ) {
             _error3( "initializeFrom: dofTypeMask size mismatch. Size is %d and need %d", dofTypeMask.giveSize(), this->giveNumberOfDofs() );
         }
-        delete this->dofTypemap;
         this->dofTypemap = new std::map< int, int >();
         for (int i = 1; i <= dofTypeMask.giveSize(); ++i) {
             if ( dofTypeMask.at(i) != DT_master ) {
@@ -571,7 +570,6 @@ DofManager :: initializeFrom(InputRecord *ir)
             if ( masterMask.giveSize() != numberOfDofs ) {
                 _error("initializeFrom: mastermask size mismatch");
             }
-            delete this->dofMastermap;
             this->dofMastermap = new std::map< int, int >();
             for (int i = 1; i <= masterMask.giveSize(); ++i) {
                 if ( masterMask.at(i) > 0 ) {

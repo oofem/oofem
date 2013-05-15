@@ -39,7 +39,6 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
-#include "structuralms.h"
 #include "fei3dtetlin.h"
 #include "classfactory.h"
 

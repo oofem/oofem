@@ -163,11 +163,12 @@ public:
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
 
-    virtual void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
-    virtual void computeLoadVector(FloatArray &answer, TimeStep *tStep);
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load, int iSurf, TimeStep *tStep);
-    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep);
+    void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
+    void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep);
+
+    void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep);
+    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryLoadVector(FloatArray &answer, Load *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
 
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_27; }
     virtual const char *giveClassName() const { return "Hexa21Stokes"; }

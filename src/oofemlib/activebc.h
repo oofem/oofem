@@ -143,9 +143,9 @@ public:
      * @param s Numbering scheme.
      * @return Equivalent of the sum of the element norm (squared) of assembled vector.
      */
-    virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                   CharType type, ValueModeType mode,
-                                  const UnknownNumberingScheme &s, FloatArray *eNorms = NULL) { return 0.0; }
+                                  const UnknownNumberingScheme &s, FloatArray *eNorms = NULL) {}
 
     /**
      * Gives a list of location arrays that will be assembled.

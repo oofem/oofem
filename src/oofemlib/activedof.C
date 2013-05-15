@@ -103,6 +103,25 @@ void ActiveDof :: giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNu
     }
 }
 
+void ActiveDof :: giveDofIDs(IntArray &masterDofIDs)
+{
+    if (this->isPrimaryDof()) {
+        masterDofIDs.resize(1);
+        masterDofIDs.at(1) = this->giveDofID();
+        return;
+    }
+
+    IntArray mstrDofIDs;
+
+    masterDofIDs.resize( this->giveNumberOfPrimaryMasterDofs() );
+    int countOfMasterDofs = this->giveNumberOfMasterDofs();
+    for (int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
+        this->giveMasterDof(i)->giveDofIDs(mstrDofIDs);
+        masterDofIDs.copySubVector(mstrDofIDs, k);
+        k += mstrDofIDs.giveSize();
+    }
+}
+
 void ActiveDof :: giveMasterDofManArray(IntArray &answer)
 {
     if (this->isPrimaryDof()) {

@@ -70,14 +70,15 @@ protected:
     /// Interpolation for geometry and velocity
     static FEI2dTrQuad interpolation_quad;
     /// Ordering of dofs in element. Used to assemble the element stiffness
-    static IntArray ordering;
+    static IntArray momentum_ordering, conservation_ordering;
     /// Ordering of dofs on edges. Used to assemble edge loads
     static IntArray edge_ordering [ 3 ];
     /// Dummy variable
     static bool __initialized;
     /// Defines the ordering of the dofs in the local stiffness matrix.
     static bool initOrdering() {
-        ordering.setValues(15,  1, 2, 4, 5, 7, 8, 10, 11, 12, 13, 14, 15, 3, 6, 9);
+        momentum_ordering.setValues(12,  1, 2, 4, 5, 7, 8, 10, 11, 12, 13, 14, 15);
+        conservation_ordering.setValues(3,  3, 6, 9);
         edge_ordering [ 0 ].setValues(6,  1, 2, 4, 5, 10, 11);
         edge_ordering [ 1 ].setValues(6,  4, 5, 7, 8, 12, 13);
         edge_ordering [ 2 ].setValues(6,  7, 8, 1, 2, 14, 15);
@@ -99,15 +100,16 @@ public:
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual void computeGaussPoints();
-    
+
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
 
     void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
-    void computeLoadVector(FloatArray &answer, TimeStep *tStep);
     void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep);
-    void computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep);
-    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep);
+
+    void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep);
+    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryLoadVector(FloatArray &answer, Load *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
 
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     virtual const char *giveClassName() const { return "Tr21Stokes"; }
