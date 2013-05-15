@@ -532,7 +532,6 @@ Shell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solV
     }
             FloatMatrix test(6,6);
             test.beSubMatrixOf(K,19,24,19,24);
-            //test.printYourself();    
 
 
     const IntArray &ordering = this->giveOrdering(All);
@@ -1206,14 +1205,12 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     FloatMatrix A(18, 18), B(18, 18), C(18, 6), D(18, 18), E(18, 6), F(6, 6), eigVec, temp2;
 
     temp2.beSubMatrixOf(temp, 1, 18, 19, 36);
-    //   temp2.printYourself();
     A.beSubMatrixOf(temp, 1, 18, 1, 18);
     B.beSubMatrixOf(temp, 1, 18, 19, 36);
     C.beSubMatrixOf(temp, 1, 18, 37, 42);
     D.beSubMatrixOf(temp, 19, 36, 19, 36);
     E.beSubMatrixOf(temp, 19, 36, 37, 42);
     F.beSubMatrixOf(temp, 37, 42, 37, 42);
-    //    B.printYourself();
 
     FloatArray sums(6);
     sums.zero();
@@ -1227,7 +1224,6 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
     sums.at(6) += F.at(1, 1) + F.at(2, 2) + F.at(3, 3) + F.at(4, 4) + F.at(5, 5) + F.at(6, 6);
     printf("\n analytical \n");
-    sums.printYourself();
  #endif
 }
 
@@ -1354,7 +1350,6 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
             M33.add(0.25 * rho * dV, M33temp);
         }
 
-        //M33.printYourself();
         answer.resize(ndofs, ndofs);
         answer.zero();
 
@@ -1415,7 +1410,6 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
 
         sums.at(6) += M33.at(1, 1) + M33.at(2, 2) + M33.at(3, 3) + M33.at(4, 4) + M33.at(5, 5) + M33.at(6, 6);
         printf("\n numerical \n");
-        sums.printYourself();
 
 
 
@@ -1605,8 +1599,6 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &answer, const i
         surfLoad->computeValueAt(load, tStep, * ( gp->giveCoordinates() ), VM_Total);        // pressure component
         traction.beVectorProductOf(g1, g2);        // normal vector (should not be normalized due to integraton in reference config.)
         traction.times( -load.at(1) );
-        load.printYourself();
-        traction.printYourself();
     } else if ( dynamic_cast< ConstantSurfaceLoad * >( surfLoad ) ) {
         surfLoad->computeValueAt(traction, tStep, * ( gp->giveCoordinates() ), VM_Total);        // traction vector
     } else {

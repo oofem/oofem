@@ -55,7 +55,6 @@ Shell7BaseXFEM :: checkConsistency()
 {
     Shell7Base :: checkConsistency();
     this->xMan =  this->giveDomain()->giveXfemManager(1);
-
     if ( this->czMatNum > 0 ) {
         this->czMat = this->giveDomain()->giveMaterial(this->czMatNum);
     }
@@ -126,11 +125,13 @@ Shell7BaseXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer
 
     // Continuous part
     Shell7Base ::giveDofManDofIDMask(inode, ut, answer);
-
+    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
     // Discontinuous part
     DofManager *dMan = this->giveDofManager(inode);
-    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
-        EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
+    //for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
+    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
+        //EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
+        EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
         for ( int j = 1; j <= ei->giveNumberOfEnrichmentDomains(); j++ ) {
             if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,j) ) {
                 IntArray eiDofIdArray;
@@ -448,7 +449,7 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         answerTemp.add(dA,Fp);
     }
     int ndofs = Shell7Base ::giveNumberOfDofs();
-    answer.resize(ndofs, ndofs);
+    answer.resize(ndofs);
     answer.zero();
     const IntArray &ordering = this->giveOrdering(All);
     answer.assemble(answerTemp, ordering);
