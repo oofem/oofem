@@ -583,10 +583,6 @@ void Tr21Stokes :: giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep )
             if ((d->giveDofID()==V_u) || (d->giveDofID()==V_v)) {
                 k=k+1;
                 v.at(k,1)=d->giveUnknown(VM_Total, tStep);
-            /*} else if (d->giveDofID()==A_x) {
-                boundaryV.at(1,1)=d->giveUnknown(VM_Total, tStep);
-            } else if (d->giveDofID()==A_y) {
-                boundaryV.at(2,1)=d->giveUnknown(VM_Total, tStep);*/
             }
         }
     }
