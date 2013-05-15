@@ -33,14 +33,16 @@
  */
 
 #include "bilinearczmaterial.h"
-#include "gausspnt.h"
-#include "flotmtrx.h"
-#include "flotarry.h"
+#include "gausspoint.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
 #include "mathfem.h"
 #include "datastream.h"
 #include "contextioerr.h"
-
+#include "classfactory.h"
 namespace oofem {
+
+REGISTER_Material( BilinearCZMaterial );
 
 BilinearCZMaterial :: BilinearCZMaterial(int n, Domain *d) : StructuralMaterial(n, d)
 //
@@ -102,7 +104,6 @@ BilinearCZMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm f
         answer.at(1) = this->ks0 * gs1;
         answer.at(2) = this->ks0 * gs2;
         answer.at(3) = this->kn0 * gn;
-       // jumpVector.printYourself();
     } else if ( gn <= this->gnmax  ) {  // softening branch
         answer.at(1) = this->ks0 * gs1; 
         answer.at(2) = this->ks0 * gs2;
@@ -115,7 +116,6 @@ BilinearCZMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm f
         //printf("Failed...\n");
     }
 
-    //answer.printYourself();
     // update gp
     status->letTempStrainVectorBe(jumpVector);
     status->letTempStressVectorBe(answer);
@@ -156,7 +156,6 @@ BilinearCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer
     double gs1 = jumpVector.at(1);
     double gs2 = jumpVector.at(2);
 
-    //jumpVector.printYourself();
 
     //if ( ( rMode == ElasticStiffness ) || ( rMode == SecantStiffness ) || ( rMode == TangentStiffness ) ) {
     if ( rMode == TangentStiffness ) {
@@ -176,7 +175,7 @@ BilinearCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer
         } else if ( gn <= this->gnmax  ) { // softening branch
             answer.at(1,1) = this->ks0; // no degradation in shear
             answer.at(2,2) = this->ks0;
-            answer.at(3,3) = this->kn1*0.0;
+            answer.at(3,3) = this->kn1;
             //printf("Softening branch...\n");
         } else {
             answer.at(1,1) = this->ks0; 

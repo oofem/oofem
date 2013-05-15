@@ -34,11 +34,20 @@
 
 #include "staticfracture.h"
 #include "fracturemanager.h"
+
+#include "dofmanager.h"
+#include "enrichmentdomain.h"
+#include "classfactory.h"
+
+
 // Should be moved to future FractureManager class later
 //#include "gausspnt.h"
 #include <vector>
 
 namespace oofem {
+
+REGISTER_EngngModel( StaticFracture );
+
 StaticFracture :: StaticFracture(int i, EngngModel *_master) : NonLinearStatic(i, _master)
 {
     crackGrowthFlag = true; // if true, then the internal structure needs to be updated

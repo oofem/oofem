@@ -40,6 +40,7 @@
 
 ///@name Input fields for BilinearCZMaterial
 //@{
+#define _IFT_BilinearCZMaterial_Name "bilinearczmaterial"
 #define _IFT_BilinearCZMaterial_kn "kn"
 #define _IFT_BilinearCZMaterial_ks "ks"
 #define _IFT_BilinearCZMaterial_knc "knc"
@@ -49,10 +50,9 @@
 //@}
 
 namespace oofem {
-//class IntegrationPoint;
 
 /**
- * This class implements associated Material Status to IsoInterfaceDamageMaterial.
+ * This class implements associated Material Status for ...
  */
 class BilinearCZMaterialStatus : public StructuralMaterialStatus
 {

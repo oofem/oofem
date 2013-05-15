@@ -34,8 +34,8 @@ set (sm_element
     qplanestressgrad.C
     latticestructuralelement.C
     lattice2d.C
-	shell7base.C
-	tr2shell7.C
+    shell7base.C
+    tr2shell7.C
     shell7basexfem.C
     tr2shell7xfem.C
     )
@@ -59,6 +59,8 @@ set (sm_emodel
     diidynamic.C
     nldeidynamic.C
     incrementallinearstatic.C
+    staticfracture.C
+    fracturemanager.C
     )
 
 set (sm_loads
@@ -110,6 +112,7 @@ set (sm_material
     latticedamage2d.C
     dustmat.C
     lsmastermat.C lsmastermatgrad.C
+    bilinearczmaterial.C
     )
 
 set (sm_error

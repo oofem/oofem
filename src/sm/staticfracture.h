@@ -38,6 +38,9 @@
 #include "metastep.h"
 #include "xfemmanager.h"
 #include "fracturemanager.h"
+
+#define _IFT_StaticFracture_Name "staticfracture"
+
 namespace oofem {
 /**
  * This class implements a nonlinear static fracture problem.
