@@ -489,4 +489,69 @@ void Tet21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answe
         answer.resize(0);
     }
 }
+
+void Tet21Stokes :: giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep )
+{
+    /*
+    * Integrate velocity over element
+    */
+
+    IntegrationRule *iRule = integrationRulesArray [ 0 ];
+    FloatMatrix v, v_gamma, ThisAnswer, Nmatrix;
+    double detJ;
+    FloatArray *lcoords, N;
+    int i, j, k=0;
+    Dof *d;
+    GaussPoint *gp;
+
+    v.resize(30,1);
+    v.zero();
+
+    FloatArray test;
+
+    for (i=1; i<=this->giveNumberOfDofManagers(); i++) {
+
+        for (j=1; j<=this->giveDofManager(i)->giveNumberOfDofs(); j++) {
+            d = this->giveDofManager(i)->giveDof(j);
+
+            if ((d->giveDofID()==V_u) || (d->giveDofID()==V_v) || (d->giveDofID()==V_w) ) {
+                k=k+1;
+                v.at(k,1)=d->giveUnknown(VM_Total, tStep);
+            }
+        }
+//    	v.printYourself();
+
+    }
+
+    answer.resize(3,1);
+    answer.zero();
+
+    Nmatrix.resize(3,30);
+
+    for (i=0; i<iRule->getNumberOfIntegrationPoints(); i++) {
+
+        gp = iRule->getIntegrationPoint(i);
+
+        lcoords = gp->giveCoordinates();
+
+        this->interpolation_quad.evalN(N, *lcoords, FEIElementGeometryWrapper(this));
+        detJ = this->interpolation_quad.giveTransformationJacobian(*lcoords, FEIElementGeometryWrapper(this));
+
+        N.times(detJ*gp->giveWeight());
+
+        for (j=1; j<=6;j++) {
+            Nmatrix.at(1,j*3-2)=N.at(j);
+            Nmatrix.at(2,j*3-1)=N.at(j);
+            Nmatrix.at(3,j*3)=N.at(j);
+        }
+
+//        Nmatrix.printYourself();
+
+        ThisAnswer.beProductOf(Nmatrix,v);
+        answer.add(ThisAnswer);
+
+    }
+
+}
+
 } // end namespace oofem
