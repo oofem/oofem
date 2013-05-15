@@ -100,23 +100,19 @@ TR_SHELL01 :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueM
 // returns characteristics vector of receiver accordind to mtrx
 //
 {
+  IntArray loc(9);
   FloatArray aux;
-  FloatMatrix R;
 
-    plate->giveCharacteristicVector(answer, mtrx, mode, tStep);
-    if ( answer.isNotEmpty() ) {
-        if (plate->giveRotationMatrix(R, EID_MomentumBalance)) {
-            answer.rotatedWith(R, 't');
-        }
-    }
-    membrane->giveCharacteristicVector(aux, mtrx, mode, tStep);
-    if ( aux.isNotEmpty() ) {
-        if (membrane->giveRotationMatrix(R, EID_MomentumBalance)) {
-            aux.rotatedWith(R, 't');
-        }
-    }
+  answer.resize(18);
+  answer.zero();
 
-    answer.add(aux);
+  plate->giveCharacteristicVector(aux, mtrx, mode, tStep);
+  loc.setValues(9, 3,4,5, 9,10,11, 15,16,17);
+  answer.assemble(aux, loc);
+
+  membrane->giveCharacteristicVector(aux, mtrx, mode, tStep);
+  loc.setValues(9, 1,2,6, 7,8,12, 13,14,18);
+  answer.assemble(aux, loc);
 }
 
 void
@@ -125,21 +121,55 @@ TR_SHELL01 :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeS
 // returns characteristics matrix of receiver accordind to mtrx
 //
 {
-  FloatMatrix aux, R;
+  IntArray loc(9);
+  FloatMatrix aux;
 
-    plate->giveCharacteristicMatrix(answer, mtrx, tStep);
-    if (plate->giveRotationMatrix(R, EID_MomentumBalance)) {
-      answer.rotatedWith(R);
-    }
+  answer.resize(18,18);
+  answer.zero();
 
-    membrane->giveCharacteristicMatrix(aux, mtrx, tStep);
-    if (membrane->giveRotationMatrix(R, EID_MomentumBalance)) {
-     aux.rotatedWith(R);
-    }
+  plate->giveCharacteristicMatrix(aux, mtrx, tStep);
+  loc.setValues(9, 3,4,5, 9,10,11, 15,16,17);
+  answer.assemble(aux, loc);
 
-    answer.add(aux);
+  membrane->giveCharacteristicMatrix(aux, mtrx, tStep);
+  loc.setValues(9, 1,2,6, 7,8,12, 13,14,18);
+  answer.assemble(aux, loc);
+  
 }
 
+bool
+TR_SHELL01 :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
+{
+  IntArray loc(9);
+  FloatMatrix aux1, aux2;
+  int i,j, ncol;
+
+  bool t1 = plate->giveRotationMatrix(aux1, eid);
+  bool t2 =  membrane->giveRotationMatrix(aux2, eid);
+
+  if (t1 != t2) OOFEM_ERROR ("Transformation demand mismatch");
+  
+  if (t1) {
+    ncol = aux1.giveNumberOfColumns();
+    answer.resize(18,ncol);
+    
+    loc.setValues(9, 3,4,5, 9,10,11, 15,16,17);
+    for (i=1; i<=9; i++) { // row index
+      for (j=1; j<=ncol; j++) {
+	answer.at(loc.at(i),j)=aux1.at(i,j);
+      }
+    }
+
+    loc.setValues(9, 1,2,6, 7,8,12, 13,14,18);
+    for (i=1; i<=9; i++) { // row index
+      for (j=1; j<=ncol; j++) {
+	answer.at(loc.at(i),j)=aux2.at(i,j);
+      }
+    }
+  }
+
+  return t1;
+}
 
 void
 TR_SHELL01 :: updateInternalState(TimeStep *stepN)

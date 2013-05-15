@@ -91,6 +91,7 @@ public:
     virtual void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep);
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
     virtual double computeVolumeAround(GaussPoint *gp);
+    virtual bool giveRotationMatrix(FloatMatrix &answer, EquationID eid);
 
     virtual void updateYourself(TimeStep *tStep);
     virtual void updateInternalState(TimeStep *tStep);
