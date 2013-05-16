@@ -34,20 +34,31 @@
 
 #include "homexportmodule.h"
 #include "timestep.h"
-#include "structuralelement.h"
+#include "element.h"
+#include "femcmpnn.h"
 #include "materialinterface.h"
 #include "gausspoint.h"
-#include "truss3d.h"
 #include "classfactory.h"
 
-#include <vector>
+#ifdef __SM_MODULE
+    #include "structuralelement.h"
+    #include "structuralmaterial.h"
+    #include "truss3d.h"
+    #include "stressvector.h"
+    #include "strainvector.h"
+#endif
+
+#ifdef __TM_MODULE
+    #include "transportmaterial.h"
+#endif
+
 
 namespace oofem {
 
 REGISTER_ExportModule( HOMExportModule )
 
 //inherit LinearElasticMaterial for accessing stress/strain transformation functions
-HOMExportModule :: HOMExportModule(int n, EngngModel *e) : ExportModule(n, e), LinearElasticMaterial(0, NULL)
+HOMExportModule :: HOMExportModule(int n, EngngModel *e) : ExportModule(n, e)
 {
     this->matnum.resize(0);
 }
@@ -118,10 +129,11 @@ HOMExportModule :: doOutput(TimeStep *tStep)
         fprintf(this->stream, "%e  % e       ", tStep->giveTargetTime(), sumState);
         sumFlow.times(1. / VolTot * this->scale);
         fprintf( this->stream, "% e  % e  % e\n", sumFlow.at(1), sumFlow.at(2), sumFlow.at(3) );
-    } else {
+    } else {//structural analysis
+        #ifdef __SM_MODULE
         StructuralElement *structElem;
         //int nnodes = d->giveNumberOfDofManagers();
-        FloatArray VecStrain, VecStress, VecEigStrain, SumStrain(6), SumStress(6), SumEigStrain(6), tempFloatAr, damage;
+        FloatArray VecStrain, VecStress, VecEigStrain, tempStrain(6), tempStress(6), tempEigStrain(6), SumStrain(6), SumStress(6), SumEigStrain(6), tempFloatAr, damage;
         double sumDamage = 0.;
         //stress and strain vectors are always in global c.s.
         SumStrain.zero(); //xx, yy, zz, yz, zx, xy
@@ -129,6 +141,10 @@ HOMExportModule :: doOutput(TimeStep *tStep)
         SumEigStrain.zero();
 
         for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+            tempStrain.zero();
+            tempStress.zero();
+            tempEigStrain.zero();
+            
             elem = d->giveElement(ielem);
             if ( this->matnum.giveSize() == 0 || this->matnum.contains( elem->giveMaterial()->giveNumber() ) ) {
                 iRule = elem->giveDefaultIntegrationRulePtr();
@@ -136,11 +152,7 @@ HOMExportModule :: doOutput(TimeStep *tStep)
                     gp  = iRule->getIntegrationPoint(i);
                     structElem = static_cast< StructuralElement * >( gp->giveElement() );
                     structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Incremental);
-                    //gp->giveCoordinate(1);
                     dV  = elem->computeVolumeAround(gp);
-                    //OOFEM_LOG_INFO("Element %d GP %d Vol %f\n", elem->giveNumber(), gp->giveNumber(), dV);
-                    //fprintf(this->stream, "Element %d GP %d stress %f\n", elem->giveNumber(), gp->giveNumber(), 0.0);
-                    //((StructuralCrossSection*) gp->giveCrossSection())->giveFullCharacteristicVector(helpVec, gp, strainVector);
                     elem->giveIPValue(VecStrain, gp, IST_StrainTensor, tStep);
                     elem->giveIPValue(VecStress, gp, IST_StressTensor, tStep);
                     elem->giveIPValue(damage, gp, IST_DamageTensor, tStep);
@@ -148,26 +160,31 @@ HOMExportModule :: doOutput(TimeStep *tStep)
 
                     //truss element has strains and stresses in the first array so transform them to global coordinates
                     if ( dynamic_cast< Truss3d * >( elem ) ) {
+                        MaterialMode mmode = _3dMat;
+                        tempStress.at(1) = VecStress.at(1);
+                        tempStrain.at(1) = VecStrain.at(1);
+                        if (VecEigStrain.giveSize () ){
+                            tempEigStrain.at(1) = VecEigStrain.at(1);
+                        }
+                        StressVector stressVector1(tempStress, mmode);//convert from array
+                        StressVector stressVector2(mmode);
+                        StrainVector strainVector1(tempStrain, mmode);//convert from array
+                        StrainVector strainVector2(mmode);
+                        StrainVector strainEigVector1(tempEigStrain, mmode);//convert from array
+                        StrainVector strainEigVector2(mmode);
                         elem->giveLocalCoordinateSystem(baseGCS);
-                        //this->giveStressVectorTranformationMtrx(transfMatrix,baseGCS,1);//from structuralMaterial
-                        //baseGCS.printYourself();
-                        VecStress.resize(6);
-                        VecStrain.resize(6);
-                        VecEigStrain.resize(6);
-                        this->transformStressVectorTo(tempFloatAr, baseGCS, VecStress, 0);
-                        VecStress = tempFloatAr;
-                        this->transformStrainVectorTo(tempFloatAr, baseGCS, VecStrain, 0);
-                        VecStrain = tempFloatAr;
-                        tempFloatAr = VecEigStrain;
-                        VecEigStrain = tempFloatAr;
-
+                        
+                        stressVector1.transformTo(stressVector2, baseGCS, 0);
+                        strainVector1.transformTo(strainVector2, baseGCS, 0);
+                        strainEigVector1.transformTo(strainEigVector2, baseGCS, 0);
+                        
+                        stressVector2.convertToFullForm(VecStress);
+                        strainVector2.convertToFullForm(VecStrain);
+                        strainEigVector2.convertToFullForm(VecEigStrain);
+                        
                         for ( int j = 1; j <= 6; j++ ) {
                             Mask.at(j) = j;
                         }
-
-                        //VecStrain.printYourself();
-                        //VecEigStrain.printYourself();
-                        //VecStress.printYourself();
                     }
 
                     VolTot += dV;
@@ -223,6 +240,8 @@ HOMExportModule :: doOutput(TimeStep *tStep)
         fprintf(this->stream, "Vol %06.5e ", VolTot);
         fprintf(this->stream, "AvrDamage %06.5e ", sumDamage);
         fprintf(this->stream, "\n");
+    
+    #endif
     }
     fflush(this->stream);
 }
