@@ -74,12 +74,14 @@ private:
     /** Keeps info on which coordinates varies over the surface. Depends on number of spatial dimensions and normal direction */
     IntArray surfaceIndexes;
 
-    int normalDirection;
-
     FloatArray smax, smin;
     bool doUpdateSminmax;
+
     /** Number of Gausspoints used when integrating along the element edges */
     int ngp;
+
+    /** Number of degrees of freedom */
+    int ndof;
 
 
     /** ID of dofs on which weak periodicity is imposed */
@@ -111,6 +113,7 @@ private:
 
     double binomial(double n , int k);
 
+    void getExponents(int n, int &i, int &j);
 public:
     WeakPeriodicBoundaryCondition(int n, Domain *d);
     virtual ~WeakPeriodicBoundaryCondition() { };

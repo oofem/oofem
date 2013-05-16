@@ -35,6 +35,8 @@
 #ifndef matlabexportmodule_h_
 #define matlabexportmodule_h_
 
+#include <vector>
+
 #include "exportmodule.h"
 
 ///@name Input fields for MatlabExportModule
@@ -63,8 +65,11 @@ protected:
     std :: string functionname;
 
     FILE *giveOutputStream(TimeStep *);
-    double xmax, xmin, ymax, ymin;
-    double Area;
+    std :: vector <double> smax;
+    std :: vector <double> smin;
+
+    double Area, Volume;
+    int ndim;
 
     bool exportMesh;
     bool exportData;

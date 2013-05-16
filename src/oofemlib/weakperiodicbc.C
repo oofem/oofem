@@ -108,12 +108,21 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
 	// Determine which is the positive and which is the negative side
 	FloatArray normal;
 	giveEdgeNormal( normal, element [ 0 ].at(0), side [ 0 ].at(0) );
-	if ((normal.at(1)+normal.at(2)) > - 0.000001) {
+
+	if ((normal.at(1)+normal.at(2)) > - 0.000001) { // No support for 3D yet
 		sideSign [ 0 ] = 1;
 		sideSign [ 1 ] = -1;
 	} else {
 		sideSign [ 0 ] = -1;
 		sideSign [ 1 ] = 1;
+	}
+
+
+	if (this->domain->giveNumberOfSpatialDimensions()==2)
+		ndof=orderOfPolygon+1;
+	else if (this->domain->giveNumberOfSpatialDimensions()==3) {
+		ndof=1;
+		for (int i=1; i<=orderOfPolygon; i++) ndof=ndof + (i+1);
 	}
 
 	//	for (size_t i=0; i< element[0].size(); i++) {
@@ -130,7 +139,7 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
 	bcID = this->giveNumber();
 	gammaDman = new Node(0, this->domain);
 
-	for ( int i = 0; i <= orderOfPolygon; i++ ) {
+	for ( int i = 0; i < ndof; i++ ) {
 		gammaDman->appendDof( new MasterDof( i, gammaDman, (DofIDItem)this->domain->giveNextFreeDofID() ) );
 	}
 
@@ -239,7 +248,7 @@ void WeakPeriodicBoundaryCondition :: updateSminmax()
 void WeakPeriodicBoundaryCondition :: addElementSide(int newElement, int newSide)
 {
 	//printf ("Add element %u, side %u\n", newElement, newSide);
-//	_error1("Not supported");
+	//	_error1("Not supported");
 
 	FloatArray normalNew, normal0;
 	int addToList = 0;
@@ -280,14 +289,14 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
 
 	interpolation->boundaryGiveNodes(bnodes, boundary);
 
-	B.resize(bnodes.giveSize(), orderOfPolygon + 1);
+	B.resize(bnodes.giveSize(), ndof);
 	B.zero();
 	///@todo Add this to all interpolators, should return _Point, _Line, _Triangle, ... etc.
 	//integrationDomain sideGeom = geoInterpolation->boundaryGiveGeometry(boundary);
 
 	GaussIntegrationRule iRule(1, e);
 	if ( ngp == -1 ) {
-		ngp = iRule.getRequiredNumberOfIntegrationPoints(sideGeom, 2 + orderOfPolygon);
+		ngp = iRule.getRequiredNumberOfIntegrationPoints(sideGeom, 2 + ndof - 1);
 	}
 	iRule.setUpIntegrationPoints(sideGeom, ngp, _Unknown);
 
@@ -306,7 +315,17 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
 		double s = gcoords.at(surfaceIndexes.at(1));
 
 		for ( int j = 0; j < B.giveNumberOfColumns(); j++ ) {
-			double fVal = computeBaseFunctionValue(j, s);
+
+			double fVal;
+
+			if (this->domain->giveNumberOfSpatialDimensions()==2 )
+				fVal = computeBaseFunctionValue(j, s);
+			else {
+				int a, b;
+				getExponents(j+1, a, b);
+				fVal=pow(gcoords.at(surfaceIndexes.at(1)), a)*pow(gcoords.at(surfaceIndexes.at(2)), b);
+			}
+
 			//printf("fVal=%f @ %f\n", fVal, s);
 			for ( int k = 0; k < B.giveNumberOfRows(); k++ ) {
 				B(k, j) += + N(k) * fVal * detJ * gp->giveWeight();
@@ -539,6 +558,32 @@ double WeakPeriodicBoundaryCondition::binomial(double n, int k)
 	return f;
 }
 
+void  WeakPeriodicBoundaryCondition::getExponents(int term, int &i, int &j)
+{
+
+	bool doContinue=true;
+
+	// c is the number of the current term
+	int c=0;
+
+	// n is the order of the current polynomial (row in Pascals triangle)
+	int n=0;
+
+	while (doContinue) {
+		for (int t=0; t<=n; t++) {
+			c++;
+			if (c==term) {
+				i=n-t;
+				j=t;
+				doContinue=false;
+				break;
+			}
+		}
+		n++;
+	}
+
+
+}
 
 }
 
