@@ -646,110 +646,6 @@ SUPG :: updateInternalState(TimeStep *stepN)
 }
 
 
-int
-SUPG :: forceEquationNumbering(int id)
-{
-    // Necessary to number DOFs in special order to guarantee that Skyline matrix factorization to work.
-    Domain *domain = this->giveDomain(id);
-    TimeStep *currStep = this->giveCurrentStep();
-    IntArray loc;
-
-    this->domainNeqs.at(id) = 0;
-    this->domainPrescribedNeqs.at(id) = 0;
-
-    int nnodes = domain->giveNumberOfDofManagers();
-    int nelem  = domain->giveNumberOfElements();
-    int nbc    = domain->giveNumberOfBoundaryConditions();
-
-    // First velocity.
-    for ( int i = 1; i <= nnodes; i++ ) {
-        DofManager *dman = domain->giveDofManager(i);
-        int ndofs = dman->giveNumberOfDofs();
-        for ( int j = 1; j <= ndofs; j++ ) {
-            Dof *jDof = dman->giveDof(j);
-            DofIDItem type = jDof->giveDofID();
-            if ( (type == V_u) || (type == V_v) || (type == V_w) ) {
-                jDof->askNewEquationNumber(currStep);
-            }
-        }
-    }
-    for ( int i = 1; i <= nelem; ++i ) {
-        Element *elem = domain->giveElement(i);
-        int innodes = elem->giveNumberOfInternalDofManagers();
-        for ( int k = 1; k <= innodes; k++ ) {
-            DofManager *dman = elem->giveInternalDofManager(k);
-            int ndofs = dman->giveNumberOfDofs();
-            for ( int j = 1; j <= ndofs; j++ ) {
-                Dof *jDof = dman->giveDof(j);
-                DofIDItem type = jDof->giveDofID();
-                if ( (type == V_u) || (type == V_v) || (type == V_w) ) {
-                    jDof->askNewEquationNumber(currStep);
-                }
-            }
-        }
-    }
-    for ( int i = 1; i <= nbc; ++i ) {
-        GeneralBoundaryCondition *bc = domain->giveBc(i);
-        int innodes = bc->giveNumberOfInternalDofManagers();
-        for ( int k = 1; k <= innodes; k++ ) {
-            DofManager *dman = bc->giveInternalDofManager(k);
-            int ndofs = dman->giveNumberOfDofs();
-            for ( int j = 1; j <= ndofs; j++ ) {
-                Dof *jDof = dman->giveDof(j);
-                DofIDItem type = jDof->giveDofID();
-                if ( (type == V_u) || (type == V_v) || (type == V_w) ) {
-                    jDof->askNewEquationNumber(currStep);
-                }
-            }
-        }
-    }
-    // Then the rest
-    for ( int i = 1; i <= nnodes; i++ ) {
-        DofManager *dman = domain->giveDofManager(i);
-        int ndofs = dman->giveNumberOfDofs();
-        for ( int j = 1; j <= ndofs; j++ ) {
-            Dof *jDof = dman->giveDof(j);
-            DofIDItem type = jDof->giveDofID();
-            if ( !( (type == V_u) || (type == V_v) || (type == V_w) ) ) {
-                jDof->askNewEquationNumber(currStep);
-            }
-        }
-    }
-    for ( int i = 1; i <= nelem; ++i ) {
-        Element *elem = domain->giveElement(i);
-        int innodes = elem->giveNumberOfInternalDofManagers();
-        for ( int k = 1; k <= innodes; k++ ) {
-            DofManager *dman = elem->giveInternalDofManager(k);
-            int ndofs = dman->giveNumberOfDofs();
-            for ( int j = 1; j <= ndofs; j++ ) {
-                Dof *jDof = dman->giveDof(j);
-                DofIDItem type = jDof->giveDofID();
-                if ( !( type == V_u || type == V_v || type == V_w ) ) {
-                    jDof->askNewEquationNumber(currStep);
-                }
-            }
-        }
-    }
-    for ( int i = 1; i <= nbc; ++i ) {
-        GeneralBoundaryCondition *bc = domain->giveBc(i);
-        int innodes = bc->giveNumberOfInternalDofManagers();
-        for ( int k = 1; k <= innodes; k++ ) {
-            DofManager *dman = bc->giveInternalDofManager(k);
-            int ndofs = dman->giveNumberOfDofs();
-            for ( int j = 1; j <= ndofs; j++ ) {
-                Dof *jDof = dman->giveDof(j);
-                DofIDItem type = jDof->giveDofID();
-                if ( !( type == V_u || type == V_v || type == V_w ) ) {
-                    jDof->askNewEquationNumber(currStep);
-                }
-            }
-        }
-    }
-
-    return domainNeqs.at(id);
-}
-
-
 contextIOResultType
 SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 //
@@ -796,7 +692,6 @@ SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
     return CIO_OK;
 }
-
 
 
 contextIOResultType

@@ -35,7 +35,7 @@
 #ifndef supg_h
 #define supg_h
 
-#include "engngm.h"
+#include "fluidmodel.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "primaryfield.h"
@@ -65,7 +65,7 @@ namespace oofem {
  * This class represents transient incompressible flow problem. Solution is based on
  * algorithm with SUPG/PSPG stabilization.
  */
-class SUPG : public EngngModel
+class SUPG : public FluidModel
 {
 protected:
     /// Numerical method used to solve the problem
@@ -111,9 +111,9 @@ protected:
     // int fsflag;
 
 public:
-    /*  SUPG (int i, EngngModel* _master = NULL) : EngngModel (i,_master), VelocityPressureField(this,1,FBID_VelocityPressureField, EID_MomentumBalance_ConservationEquation, 1),accelerationVector()
+    /*  SUPG (int i, EngngModel* _master = NULL) : FluidModel (i,_master), VelocityPressureField(this,1,FBID_VelocityPressureField, EID_MomentumBalance_ConservationEquation, 1),accelerationVector()
      */
-    SUPG(int i, EngngModel *_master = NULL) : EngngModel(i, _master), accelerationVector() {
+    SUPG(int i, EngngModel *_master = NULL) : FluidModel(i, _master), accelerationVector() {
         initFlag = 1;
         lhs = NULL;
         ndomains = 1;
@@ -160,9 +160,6 @@ public:
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
     virtual int requiresUnknownsDictionaryUpdate() { return renumberFlag; }
-
-    virtual int forceEquationNumbering(int id);
-    virtual int forceEquationNumbering() { return EngngModel :: forceEquationNumbering(); }
 
     virtual bool giveEquationScalingFlag() { return equationScalingFlag; }
     virtual double giveVariableScale(VarScaleType varId);
