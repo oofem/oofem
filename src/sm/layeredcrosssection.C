@@ -907,8 +907,6 @@ LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
 
 
 
-        }
-    }
 
 
 double
