@@ -435,7 +435,6 @@ IRResultType DofManager ::  resolveDofIDArray(InputRecord *ir, IntArray &dofIDAr
     if ( numberOfDofs == -1 ) {
         dofIDArry = domain->giveDefaultNodeDofIDArry();
         numberOfDofs = dofIDArry.giveSize();
-        this->dofidmask = new IntArray(dofIDArry); ///@todo To be removed eventually.
     } else {
         // if ndofs is prescribed, read the physical meaning of particular dofs
         // for detailed values of DofMask array see cltypes.h file
@@ -479,7 +478,6 @@ DofManager :: initializeFrom(InputRecord *ir)
         this->dofidmask = new IntArray(dofIDArry);
     } else {
         dofIDArry = domain->giveDefaultNodeDofIDArry();
-        this->dofidmask = new IntArray(dofIDArry); ///@todo To be removed eventually.
     }
     numberOfDofs = dofIDArry.giveSize();
 #endif
@@ -528,6 +526,9 @@ DofManager :: initializeFrom(InputRecord *ir)
     bool hasIc = !( ic.giveSize() == 0 );
     bool hasBc = !( bc.giveSize() == 0 );
     bool hasTypeinfo = !( dofTypeMask.giveSize() == 0 );
+
+    ///@todo This should eventually be removed, still here to preserve backwards compatibility:
+    if ( ( hasIc || hasBc || hasTypeinfo ) && !this->dofidmask )  this->dofidmask = new IntArray(dofIDArry);
 
     // check sizes
     if ( hasBc ) {
