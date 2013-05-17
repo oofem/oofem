@@ -35,10 +35,6 @@
 #ifndef Shell7BaseXFEM_h
 #define Shell7BaseXFEM_h
 
-//#include "eleminterpmapperinterface.h"
-//#include "nodalaveragingrecoverymodel.h"
-//#include "layeredcrosssection.h"
-//#include "nlstructuralelement.h"
 #include "shell7base.h"
 #include "xfemelementinterface.h"
 
@@ -113,7 +109,7 @@ protected:
     void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, Delamination *dei, int enrichmentDomainNumber);
 
     void computeOrderingArray(IntArray &orderingArray, IntArray &activeDofsArray, int enrichmentDomainNumber, SolutionField field);
-    //void edgeComputeOrderingArray( IntArray &orderingArray, IntArray &activeDofsArray, int iEdge, int enrichmentDomainNumber, SolutionField field);
+    
 
     // Tangent matrices
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
@@ -133,13 +129,12 @@ protected:
 
 
 public:
-    // constructor
-    Shell7BaseXFEM(int n, Domain *d);   // : Shell7Base(n, d),  XfemElementInterface(this);
-    virtual ~Shell7BaseXFEM() {};		// destructor -> declaring as virtual will make each subclass call their respective destr.
+    Shell7BaseXFEM(int n, Domain *d);   
+    virtual ~Shell7BaseXFEM() {};		
     virtual int checkConsistency();
 
     virtual const char *giveClassName()  const { return "Shell7BaseXFEM"; }
-    virtual classType giveClassID()      const { return Shell7BaseXFEMClass; }
+    //virtual classType giveClassID()      const { return Shell7BaseXFEMClass; }
     virtual Interface *giveInterface(InterfaceType it);
     
     virtual IRResultType initializeFrom(InputRecord *ir);
