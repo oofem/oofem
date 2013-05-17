@@ -761,7 +761,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
 #endif
  #endif
         OOFEM_LOG_INFO("NRSolver: %-5d", nite);
-        bool zeroNorm = false;
+        //bool zeroNorm = false;
         // loop over dof groups and check convergence individually
         for ( int dg = 1; dg <= nccdg; dg++ ) {
             bool zeroFNorm = false, zeroDNorm = false;
@@ -778,7 +778,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                     forceErr = sqrt( dg_forceErr.at(dg) / ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) );
                 } else {
                     // If both external forces and internal ebe norms are zero, then the residual must be zero.
-                    zeroNorm = true; // Warning about this afterwards.
+                    //zeroNorm = true; // Warning about this afterwards.
                     zeroFNorm = true;
                     forceErr = sqrt( dg_forceErr.at(dg) );
                 }
@@ -812,9 +812,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             }
         }
         OOFEM_LOG_INFO("\n");
-        if ( zeroNorm ) {
-            OOFEM_WARNING("NRSolver :: checkConvergence - Had to resort to absolute error measure (marked by *)");
-        }
+        //if ( zeroNorm ) OOFEM_WARNING("NRSolver :: checkConvergence - Had to resort to absolute error measure (marked by *)");
     } else { // No dof grouping
         double dXX, dXdX;
         
