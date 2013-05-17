@@ -62,7 +62,7 @@ FluidModel :: forceEquationNumbering ( int id )
         for ( int j = 1; j <= ndofs; j++ ) {
             Dof *jDof = dman->giveDof ( j );
             DofIDItem type = jDof->giveDofID();
-            if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
+            if ( type == V_u || type == V_v || type == V_w ) {
                 jDof->askNewEquationNumber ( currStep );
             }
         }
@@ -76,7 +76,7 @@ FluidModel :: forceEquationNumbering ( int id )
             for ( int j = 1; j <= ndofs; j++ ) {
                 Dof *jDof = dman->giveDof ( j );
                 DofIDItem type = jDof->giveDofID();
-                if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
+                if ( type == V_u || type == V_v || type == V_w ) {
                     jDof->askNewEquationNumber ( currStep );
                 }
             }
@@ -91,7 +91,7 @@ FluidModel :: forceEquationNumbering ( int id )
             for ( int j = 1; j <= ndofs; j++ ) {
                 Dof *jDof = dman->giveDof ( j );
                 DofIDItem type = jDof->giveDofID();
-                if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
+                if ( type == V_u || type == V_v || type == V_w ) {
                     jDof->askNewEquationNumber ( currStep );
                 }
             }
@@ -104,7 +104,7 @@ FluidModel :: forceEquationNumbering ( int id )
         for ( int j = 1; j <= ndofs; j++ ) {
             Dof *jDof = dman->giveDof ( j );
             DofIDItem type = jDof->giveDofID();
-            if ( ! ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) ) {
+            if ( ! ( type == V_u || type == V_v || type == V_w ) ) {
                 jDof->askNewEquationNumber ( currStep );
             }
         }
