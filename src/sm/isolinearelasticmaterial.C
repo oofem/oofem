@@ -40,6 +40,7 @@
 #include "floatmatrix.h"
 #include "gausspoint.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 
@@ -138,6 +139,18 @@ IsotropicLinearElasticMaterial :: giveInputRecordString(std :: string &str, bool
     str += buff;
 
     return 1;
+}
+
+
+void
+IsotropicLinearElasticMaterial :: giveInputRecord(DynamicInputRecord &input)
+{
+    this->LinearElasticMaterial :: giveInputRecord(input);
+    StructuralMaterial :: giveInputRecord(input);
+
+    input.setField(this->E, _IFT_IsotropicLinearElasticMaterial_e);
+    input.setField(this->nu, _IFT_IsotropicLinearElasticMaterial_n);
+    input.setField(this->propertyDictionary->at(tAlpha), _IFT_IsotropicLinearElasticMaterial_talpha);
 }
 
 

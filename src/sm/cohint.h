@@ -135,6 +135,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new CohesiveInterfaceMaterialStatus(1, FEMComponent :: domain, gp); }
 

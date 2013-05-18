@@ -41,6 +41,7 @@
 #include "mathfem.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "dynamicinputrecord.h"
 #include "classfactory.h"
 
 #include <cstdlib>
@@ -88,7 +89,9 @@ BinghamFluidMaterial2 :: initializeFrom(InputRecord *ir)
     // key-val dictionary with lot of memory allocations
     IR_GIVE_FIELD(ir, mu_0, _IFT_BinghamFluidMaterial2_mu0);
     IR_GIVE_FIELD(ir, tau_0, _IFT_BinghamFluidMaterial2_tau0);
+    mu_inf = 1.e6;
     IR_GIVE_OPTIONAL_FIELD(ir, mu_inf, _IFT_BinghamFluidMaterial2_muinf);
+    stressGrowthRate = BINGHAM_DEFAULT_STRESS_GROWTH_RATE;
     IR_GIVE_OPTIONAL_FIELD(ir, stressGrowthRate, _IFT_BinghamFluidMaterial2_stressGrowthRate);
     tau_c = tau_0 * mu_inf / ( mu_inf - mu_0 );
     //tau_c = tau_0;
@@ -106,6 +109,16 @@ BinghamFluidMaterial2 :: giveInputRecordString(std :: string &str, bool keyword)
     str += buff;
 
     return 1;
+}
+
+void
+BinghamFluidMaterial2 :: giveInputRecord(DynamicInputRecord &input)
+{
+    FluidDynamicMaterial :: giveInputRecord(input);
+    input.setField(this->mu_0, _IFT_BinghamFluidMaterial2_mu0);
+    input.setField(this->tau_0, _IFT_BinghamFluidMaterial2_tau0);
+    input.setField(this->mu_inf, _IFT_BinghamFluidMaterial2_muinf);
+    input.setField(this->stressGrowthRate, _IFT_BinghamFluidMaterial2_stressGrowthRate);
 }
 
 

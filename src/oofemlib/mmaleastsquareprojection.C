@@ -40,6 +40,7 @@
 #include "spatiallocalizer.h"
 #include "integrationrule.h"
 #include "connectivitytable.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 MMALeastSquareProjection :: MMALeastSquareProjection() : MaterialMappingAlgorithm()
@@ -442,4 +443,16 @@ MMALeastSquareProjection :: giveInputRecordString(std :: string &str, bool keywo
 
     return 1;
 }
+
+void MMALeastSquareProjection :: giveInputRecord(DynamicInputRecord &input)
+{
+    if ( this->stateFilter ) {
+        input.setField(this->stateFilter, _IFT_MMALeastSquareProjection_statefilter);
+    }
+    if ( this->regionFilter ) {
+        input.setField(this->stateFilter, _IFT_MMALeastSquareProjection_regionfilter);
+    }
+}
+
+
 } // end namespace oofem

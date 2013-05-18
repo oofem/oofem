@@ -167,6 +167,7 @@ public:
      */
     IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     /**
      * Returns receiver load type. It distinguish particular boundary conditions according to
      * their "physical" meaning (like StructuralTemperatureLoadLT, StructuralLoadLT).

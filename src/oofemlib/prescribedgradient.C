@@ -45,6 +45,7 @@
 #include "node.h"
 #include "element.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
@@ -323,5 +324,14 @@ int PrescribedGradient :: giveInputRecordString(std :: string &str, bool keyword
 
     return 1;
 }
+
+void PrescribedGradient :: giveInputRecord(DynamicInputRecord &input)
+{
+    BoundaryCondition :: giveInputRecord(input);
+    input.setField(this->gradient, _IFT_PrescribedGradient_gradient);
+    input.setField(this->centerCoord, _IFT_PrescribedGradient_centercoords);
+}
+
+
 } // end namespace oofem
 

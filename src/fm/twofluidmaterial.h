@@ -57,7 +57,7 @@ class GaussPoint;
 class TwoFluidMaterial : public FluidDynamicMaterial
 {
 protected:
-    int slaveMaterial [ 2 ];
+    IntArray slaveMaterial;
 
 public:
     /**
@@ -85,6 +85,7 @@ public:
     virtual double give(int aProperty, GaussPoint *gp);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "TwoFluidMaterial"; }
     virtual classType giveClassID() const { return TwoFluidMaterialClass; }
@@ -92,7 +93,7 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:
-    FluidDynamicMaterial *giveMaterial(int i) const { return static_cast< FluidDynamicMaterial * >( domain->giveMaterial(slaveMaterial [ i ]) ); }
+    FluidDynamicMaterial *giveMaterial(int i) const { return static_cast< FluidDynamicMaterial * >( domain->giveMaterial(slaveMaterial( i )) ); }
     double giveTempVOF(GaussPoint *gp);
 };
 } // end namespace oofem

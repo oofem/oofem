@@ -40,8 +40,16 @@
 
 #include "loadtimefunction.h"
 #include "timestep.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
+
+LoadTimeFunction :: LoadTimeFunction ( int n, Domain* d ) :
+    FEMComponent( n, d ),
+    initialValue( 0.)
+{
+}
+
 double
 LoadTimeFunction :: evaluate(TimeStep *atTime, ValueModeType mode)
 {
@@ -77,16 +85,10 @@ LoadTimeFunction :: initializeFrom(InputRecord *ir)
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
 
-    IR_GIVE_OPTIONAL_FIELD(ir, initialValue, _IFT_LoadTimeFunction_initialvalue);
+    this->initialValue = 0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->initialValue, _IFT_LoadTimeFunction_initialvalue);
 
     return IRRT_OK;
-}
-
-
-IRResultType
-LoadTimeFunction :: initializeFrom(InputRecord *ir, DataReader *dr)
-{
-    return initializeFrom(ir);
 }
 
 
@@ -100,4 +102,13 @@ LoadTimeFunction :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
+
+void
+LoadTimeFunction :: giveInputRecord(DynamicInputRecord& input)
+{
+    FEMComponent :: giveInputRecord(input);
+    input.setField(this->initialValue, _IFT_LoadTimeFunction_initialvalue);
+}
+
+
 } // end namespace oofem

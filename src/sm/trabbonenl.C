@@ -38,6 +38,7 @@
 #include "mathfem.h"
 #include "nonlocalmaterialext.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -235,6 +236,16 @@ TrabBoneNL :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
+
+
+void
+TrabBoneNL :: giveInputRecord(DynamicInputRecord &input)
+{
+    TrabBoneMaterial :: giveInputRecord(input);
+    input.setField(this->R, _IFT_TrabBoneNL_r);
+    input.setField(this->mParam, _IFT_TrabBoneNL_m);
+}
+
 
 //
 // END: ????????????????

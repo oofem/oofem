@@ -148,12 +148,9 @@ public:
      * Derived classes should always overload, default implementation returns UnknownLoadGT value.
      */
     virtual bcGeomType giveBCGeoType() const { return UnknownBGT; }
-    /**
-     * Setups the input record string of receiver
-     * @param str String to be filled by input record
-     * @param keyword If true, then also print record keyword (default true).
-     */
+
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     /**
      * Scales the receiver according to given value. Typically used in nondimensional analysis to scale down BCs and ICs.
      * @param s Scale factor.

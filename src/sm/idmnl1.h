@@ -133,6 +133,8 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
+
     virtual Interface *giveInterface(InterfaceType it);
 
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);

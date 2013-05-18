@@ -84,6 +84,7 @@ public:
     virtual double give(int aProperty, GaussPoint *gp);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "NewtonianFluidMaterial"; }
     virtual classType giveClassID() const { return NewtonianFluidMaterialClass; }

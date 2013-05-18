@@ -38,6 +38,7 @@
 #include "floatarray.h"
 #include "contextioerr.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 //---------------------------------------------------------------------------------------------------
@@ -298,6 +299,17 @@ CohesiveInterfaceMaterial :: giveInputRecordString(std :: string &str, bool keyw
 
     return 1;
 }
+
+
+void
+CohesiveInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
+{
+    StructuralMaterial :: giveInputRecord(input);
+    //input.setField(this->tempDillatCoeff, _IFT_CohesiveInterfaceMaterial_temperatureDillationCoeff);
+    input.setField(this->kn, _IFT_IsoInterfaceDamageMaterial_kn);
+    input.setField(this->ks, _IFT_IsoInterfaceDamageMaterial_ks);
+}
+
 
 //---------------------------------------------------------------------------------------------------
 // c l a s s   CohesiveInterfaceMaterialStatus

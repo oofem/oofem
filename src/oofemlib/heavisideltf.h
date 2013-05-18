@@ -68,6 +68,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     virtual classType giveClassID() const { return HeavisideLTFClass; }
     virtual const char *giveClassName() const { return "HeavisideLTF"; }
 

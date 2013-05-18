@@ -37,6 +37,7 @@
 #include "structuralmaterial.h"
 #include "floatarray.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 
@@ -292,6 +293,21 @@ SimpleCrossSection :: giveInputRecordString(std :: string &str, bool keyword)
     str += buff;
 
     return 1;
+}
+
+
+void SimpleCrossSection::giveInputRecord(DynamicInputRecord &input)
+{
+    StructuralCrossSection :: giveInputRecord(input);
+    input.setField(this->give(CS_Thickness), _IFT_SimpleCrossSection_thick);
+    input.setField(this->give(CS_Width), _IFT_SimpleCrossSection_width);
+    input.setField(this->give(CS_Area), _IFT_SimpleCrossSection_area);
+    input.setField(this->give(CS_TorsionMomentX), _IFT_SimpleCrossSection_ik);
+    input.setField(this->give(CS_InertiaMomentY), _IFT_SimpleCrossSection_iy);
+    input.setField(this->give(CS_InertiaMomentZ), _IFT_SimpleCrossSection_iz);
+    input.setField(this->give(CS_SHEAR_AREA_Y), _IFT_SimpleCrossSection_shearareay);
+    input.setField(this->give(CS_SHEAR_AREA_Y), _IFT_SimpleCrossSection_shearareaz);
+    input.setField(this->give(CS_BeamShearCoeff), _IFT_SimpleCrossSection_shearcoeff);
 }
 
 

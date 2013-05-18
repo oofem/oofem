@@ -128,6 +128,13 @@ int CompoDamageMat :: giveInputRecordString(std :: string &str, bool keyword)
     return 1;
 }
 
+void CompoDamageMat :: giveInputRecord(DynamicInputRecord &input)
+{
+    StructuralMaterial :: giveInputRecord(input);
+    OOFEM_ERROR("CompoDamageMat :: giveInputRecord - Not implemented yet\n");
+}
+
+
 //called at the beginning of each time increment (not iteration), no influence of parameter
 void CompoDamageMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {

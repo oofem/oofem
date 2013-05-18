@@ -51,6 +51,7 @@ namespace oofem {
 class Domain;
 class Element;
 class TimeStep;
+class DynamicInputRecord;
 
 enum MMALeastSquareProjectionPatchType { MMALSPPatchType_1dq, MMALSPPatchType_2dq };
 /*
@@ -102,6 +103,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual const char *giveClassName() const { return "MMALeastSquareProjectionPatchType"; }
 

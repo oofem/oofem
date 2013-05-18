@@ -140,11 +140,6 @@ public:
      */
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_NOTFOUND; };
     /**
-    * The same function as above, but allows to read more lines since a pointer 
-    * to the DataReader is provided.
-    */
-    virtual IRResultType initializeFrom(InputRecord *ir, DataReader *dr) { return IRRT_NOTFOUND; };
-    /**
      * Setups the input record string of receiver.
      * @param str String to be filled by input record.
      * @param keyword Determines if record keyword should be printed.

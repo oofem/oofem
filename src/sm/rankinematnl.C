@@ -226,6 +226,15 @@ RankineMatNl :: giveInputRecordString(std :: string &str, bool keyword)
 }
 
 
+void
+RankineMatNl :: giveInputRecord(DynamicInputRecord &input)
+{
+    RankineMat :: giveInputRecord(input);
+    StructuralNonlocalMaterialExtensionInterface :: giveInputRecord(input);
+}
+
+
+
 double
 RankineMatNl :: computeDamage(GaussPoint *gp, TimeStep *atTime)
 {

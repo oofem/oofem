@@ -39,6 +39,7 @@
 #include "reinforcement.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 GeneralBoundaryCondition :: GeneralBoundaryCondition(int n, Domain *d) : FEMComponent(n, d)
@@ -117,6 +118,14 @@ GeneralBoundaryCondition :: giveInputRecordString(std :: string &str, bool keywo
     str += buff;
 
     return 1;
+}
+
+void
+GeneralBoundaryCondition :: giveInputRecord(DynamicInputRecord &input)
+{
+    FEMComponent :: giveInputRecord(input);
+    input.setField(this->loadTimeFunction, _IFT_GeneralBoundaryCondition_LoadTimeFunct);
+    input.setField(this->isImposedTimeFunction, _IFT_GeneralBoundaryCondition_IsImposedTimeFunct);
 }
 
 contextIOResultType

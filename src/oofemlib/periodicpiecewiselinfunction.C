@@ -35,6 +35,7 @@
 #include "periodicpiecewiselinfunction.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 
@@ -133,4 +134,12 @@ PeriodicPiecewiseLinFunction :: giveInputRecordString(std :: string &str, bool k
 
     return 1;
 }
+
+void PeriodicPiecewiseLinFunction :: giveInputRecord(DynamicInputRecord &input)
+{
+    PiecewiseLinFunction :: giveInputRecord(input);
+    input.setField(this->period, _IFT_PeriodicPiecewiseLinFunction_period);
+    input.setField(this->addTF, _IFT_PeriodicPiecewiseLinFunction_addtf);
+}
+
 } // end namespace oofem

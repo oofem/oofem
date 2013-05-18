@@ -35,6 +35,7 @@
 #include "piecewiselinfunction.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 #include <fstream>
 #include <ios>
@@ -191,6 +192,16 @@ PiecewiseLinFunction :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
+
+
+void PiecewiseLinFunction :: giveInputRecord(DynamicInputRecord &input)
+{
+    LoadTimeFunction :: giveInputRecord(input);
+    input.setField(this->dates.giveSize(), _IFT_PiecewiseLinFunction_npoints);
+    input.setField(this->dates, _IFT_PiecewiseLinFunction_t);
+    input.setField(this->values, _IFT_PiecewiseLinFunction_ft);
+}
+
 
 
 contextIOResultType

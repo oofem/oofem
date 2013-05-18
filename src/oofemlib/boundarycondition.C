@@ -36,6 +36,7 @@
 #include "timestep.h"
 #include "loadtimefunction.h"
 #include "verbose.h"
+#include "dynamicinputrecord.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -73,7 +74,6 @@ BoundaryCondition :: initializeFrom(InputRecord *ir)
 }
 
 
-
 int
 BoundaryCondition :: giveInputRecordString(std :: string &str, bool keyword)
 {
@@ -85,4 +85,12 @@ BoundaryCondition :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
+
+void
+BoundaryCondition :: giveInputRecord(DynamicInputRecord &input)
+{
+    GeneralBoundaryCondition :: giveInputRecord(input);
+    input.setField(this->prescribedValue, _IFT_BoundaryCondition_PrescribedValue);
+}
+
 } // end namespace oofem

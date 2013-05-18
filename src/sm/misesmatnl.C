@@ -42,6 +42,7 @@
 #include "nonlocalmaterialext.h"
 #include "contextioerr.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
@@ -345,6 +346,23 @@ MisesMatNl :: giveInputRecordString(std :: string &str, bool keyword)
     str += buff;
 
     return 1;
+}
+
+
+void
+MisesMatNl :: giveInputRecord(DynamicInputRecord &input)
+{
+    StructuralMaterial :: giveInputRecord(input);
+    StructuralNonlocalMaterialExtensionInterface :: giveInputRecord(input);
+
+    input.setField(averType, _IFT_MisesMatNl_averagingtype);
+
+    if ( averType == 2 || averType == 3 ) {
+        input.setField(exponent, _IFT_MisesMatNl_exp);
+    }
+    if ( averType >= 2 && averType <= 5 ) {
+        input.setField(Rf, _IFT_MisesMatNl_rf);
+    }
 }
 
 

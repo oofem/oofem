@@ -44,6 +44,7 @@
 #include "strainvector.h"
 #include "stressvector.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 
@@ -238,6 +239,23 @@ IsotropicDamageMaterial1 :: giveInputRecordString(std :: string &str, bool keywo
     str += buff;
 
     return 1;
+}
+
+
+void
+IsotropicDamageMaterial1 :: giveInputRecord(DynamicInputRecord &input)
+{
+    // Done first so that record name is overwritten afterwards by femcomponent:
+    linearElasticMaterial->giveInputRecord(input);
+    IsotropicDamageMaterial :: giveInputRecord(input);
+    ///@todo This is also necessary to implement before this will work:
+    //RandomMaterialExtensionInterface :: giveInputRecord(ir);
+
+    input.setField(this->e0, _IFT_IsotropicDamageMaterial1_e0);
+    input.setField(this->ef, _IFT_IsotropicDamageMaterial1_ef);
+    input.setField(this->equivStrainType, _IFT_IsotropicDamageMaterial1_equivstraintype);
+    ///@todo A lot missing here (in giveInputRecordString as well)
+    OOFEM_ERROR("IsotropicDamageMaterial1 :: giveInputRecord - Not implemented yet");
 }
 
 

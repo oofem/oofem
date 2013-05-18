@@ -96,8 +96,6 @@ public:
     /// Copies time step data to RVE.
     virtual void setTimeStep(TimeStep *tStep);
 
-    double computeSize();
-
     FloatMatrix &giveDeviatoricTangent() { return Ed; }
     FloatArray &giveDeviatoricPressureTangent() { return Ep; };
     FloatArray &giveVolumetricDeviatoricTangent() { return Cd; };
@@ -144,6 +142,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual int checkConsistency();
     virtual int hasMaterialModeCapability(MaterialMode mode);

@@ -44,6 +44,7 @@
 #include "mathfem.h"
 #include "engngm.h"
 #include "fieldmanager.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 int
@@ -2836,4 +2837,14 @@ StructuralMaterial :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
+
+
+void
+StructuralMaterial :: giveInputRecord(DynamicInputRecord &input)
+{
+    Material :: giveInputRecord(input);
+    input.setField(this->referenceTemperature, _IFT_StructuralMaterial_referencetemperature);
+}
+
+
 } // end namespace oofem

@@ -40,6 +40,7 @@
 #include "sparsemtrx.h"
 #include "nonlocalmaterialext.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 #ifdef __PARALLEL_MODE
  #include "idmnl1.h"
@@ -215,7 +216,7 @@ TrabBoneNL3D :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
     TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
     StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
 
-    int nrows, nsize, i, j;
+    int nrows, nsize;
     double sum, nlKappa, dDamFunc, dam, tempDam;
     FloatArray localNu;
     FloatMatrix b;
@@ -235,9 +236,9 @@ TrabBoneNL3D :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
         nrows = b.giveNumberOfColumns();
         nsize = localNu.giveSize();
         lcontrib.resize(nrows);
-        for ( i = 1; i <= nrows; i++ ) {
+        for ( int i = 1; i <= nrows; i++ ) {
             sum = 0.0;
-            for ( j = 1; j <= nsize; j++ ) {
+            for ( int j = 1; j <= nsize; j++ ) {
                 sum += b.at(j, i) * localNu.at(j);
             }
 
@@ -259,7 +260,7 @@ TrabBoneNL3D :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
     StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
 
-    int ncols, nsize, i, j;
+    int ncols, nsize;
     double sum, beta;
     FloatArray remoteNu, plasFlowDirec, prodTensor;
     FloatMatrix b, SSaTensor;
@@ -287,16 +288,16 @@ TrabBoneNL3D :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
         remoteNu = 1 / beta * prodTensor;
         nsize = remoteNu.giveSize();
 
-        for ( i = 1; i <= ncols; i++ ) {
+        for ( int i = 1; i <= ncols; i++ ) {
             sum = 0.0;
-            for ( j = 1; j <= nsize; j++ ) {
+            for ( int j = 1; j <= nsize; j++ ) {
                 sum += remoteNu.at(j) * b.at(j, i);
             }
 
             rcontrib.at(i) = sum;
         }
     } else {
-        for ( i = 1; i <= ncols; i++ ) {
+        for ( int i = 1; i <= ncols; i++ ) {
             rcontrib.at(i) = 0.;
         }
     }
@@ -411,6 +412,16 @@ TrabBoneNL3D :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
+
+
+void
+TrabBoneNL3D :: giveInputRecord(DynamicInputRecord& input)
+{
+    TrabBone3D :: giveInputRecord(input);
+    input.setField(this->R, _IFT_TrabBoneNL3D_r);
+    input.setField(this->mParam, _IFT_TrabBoneNL3D_m);
+}
+
 
 
 double

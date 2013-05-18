@@ -40,6 +40,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 
@@ -524,6 +525,22 @@ IsoInterfaceDamageMaterial :: giveInputRecordString(std :: string &str, bool key
 
     return 1;
 }
+
+void
+IsoInterfaceDamageMaterial :: giveInputRecord(DynamicInputRecord &input)
+{
+    StructuralMaterial :: giveInputRecord(input);
+
+    input.setField(this->kn, _IFT_IsoInterfaceDamageMaterial_kn);
+    input.setField(this->ks, _IFT_IsoInterfaceDamageMaterial_ks);
+
+    input.setField(this->ft, _IFT_IsoInterfaceDamageMaterial_ft);
+    input.setField(this->gf, _IFT_IsoInterfaceDamageMaterial_gf);
+
+    input.setField(this->maxOmega, _IFT_IsoInterfaceDamageMaterial_maxOmega);
+    input.setField(this->tempDillatCoeff, _IFT_IsoInterfaceDamageMaterial_talpha);
+}
+
 
 void
 IsoInterfaceDamageMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)

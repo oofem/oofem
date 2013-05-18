@@ -33,6 +33,7 @@
  */
 
 #include "constantfunction.h"
+#include "dynamicinputrecord.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -66,4 +67,12 @@ ConstantFunction :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
+
+void
+ConstantFunction :: giveInputRecord(DynamicInputRecord &input)
+{
+    LoadTimeFunction :: giveInputRecord(input);
+    input.setField(this->value, _IFT_LoadTimeFunction_ft);
+}
+
 } // end namespace oofem

@@ -40,6 +40,7 @@
 #include "engngm.h"
 #include "contextioerr.h"
 #include "mathfem.h"
+#include "dynamicinputrecord.h"
 #include "classfactory.h"
 
 #include <cstdlib>
@@ -85,6 +86,15 @@ NonlinearFluidMaterial :: giveInputRecordString(std :: string &str, bool keyword
     str += buff;
 
     return 1;
+}
+
+void
+NonlinearFluidMaterial :: giveInputRecord(DynamicInputRecord &input)
+{
+    FluidDynamicMaterial :: giveInputRecord(input);
+    input.setField(this->viscosity, _IFT_NonlinearFluidMaterial_mu);
+    input.setField(this->alpha, _IFT_NonlinearFluidMaterial_alpha);
+    input.setField(this->c, _IFT_NonlinearFluidMaterial_C);
 }
 
 

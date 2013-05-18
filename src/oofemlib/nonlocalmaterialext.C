@@ -573,12 +573,11 @@ int
 NonlocalMaterialExtensionInterface :: giveInputRecordString(std :: string &str, bool keyword)
 {
     char buff [ 1024 ];
-    int i;
 
     if ( regionMap.isEmpty() == 0 ) {
         sprintf( buff, " regionmap %d", regionMap.giveSize() );
         str += buff;
-        for ( i = 1; i <= regionMap.giveSize(); i++ ) {
+        for ( int i = 1; i <= regionMap.giveSize(); i++ ) {
             sprintf( buff, " %d", regionMap.at(i) );
             str += buff;
         }
@@ -586,6 +585,13 @@ NonlocalMaterialExtensionInterface :: giveInputRecordString(std :: string &str, 
 
     return 1;
 }
+
+
+void NonlocalMaterialExtensionInterface :: giveInputRecord(DynamicInputRecord &input)
+{
+    OOFEM_ERROR("NonlocalMaterialExtension :: giveInputRecord - Not implemented yet\n");
+}
+
 
 
 //int NonlocalMaterialExtension :: giveElementRegion (Element* element) {return element->giveCrossSection()->giveNumber();}

@@ -33,6 +33,7 @@
  */
 
 #include "heavisideltf.h"
+#include "dynamicinputrecord.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -81,4 +82,12 @@ HeavisideLTF :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
+
+void HeavisideLTF :: giveInputRecord(DynamicInputRecord& input)
+{
+    LoadTimeFunction :: giveInputRecord ( input );
+    input.setField(this->origin, _IFT_HeavisideLTF_origin);
+    input.setField(this->value, _IFT_HeavisideLTF_value);
+}
+
 } // end namespace oofem

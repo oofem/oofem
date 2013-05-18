@@ -46,6 +46,7 @@
 #include "stressvector.h"
 #include "strainvector.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
@@ -480,6 +481,24 @@ IDNLMaterial :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
+
+
+void
+IDNLMaterial :: giveInputRecord(DynamicInputRecord &input)
+{
+    IsotropicDamageMaterial1 :: giveInputRecord(input);
+    StructuralNonlocalMaterialExtensionInterface :: giveInputRecord(input);
+
+    input.setField(this->averType, _IFT_IDNLMaterial_averagingtype);
+
+    if ( averType == 2 || averType == 3 ) {
+        input.setField(this->exponent, _IFT_IDNLMaterial_exp);
+    }
+    if ( averType >= 2 && averType <= 5 ) {
+        input.setField(this->Rf, _IFT_IDNLMaterial_rf);
+    }
+}
+
 
 /*
  * // old implementation - now implemented in local model

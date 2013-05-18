@@ -257,6 +257,7 @@ public:
     virtual classType giveClassID() const { return MaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     virtual void printYourself();
 
     /**

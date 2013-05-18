@@ -784,7 +784,7 @@ Domain :: instanciateYourself(DataReader *dr)
             OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create time function: %s", name.c_str() );
         }
 
-        ltf->initializeFrom(ir, dr);
+        ltf->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > nloadtimefunc ) ) {

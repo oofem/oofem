@@ -41,6 +41,7 @@
 #include "mathfem.h"
 #include "contextioerr.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 
@@ -432,6 +433,17 @@ SimpleInterfaceMaterial :: giveInputRecordString(std :: string &str, bool keywor
     str += buff;
 
     return 1;
+}
+
+
+void
+SimpleInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
+{
+    StructuralMaterial :: giveInputRecord(input);
+    input.setField(this->kn, _IFT_SimpleInterfaceMaterial_kn);
+    input.setField(this->frictCoeff, _IFT_SimpleInterfaceMaterial_frictCoeff);
+    input.setField(this->stiffCoeff, _IFT_SimpleInterfaceMaterial_stiffCoeff);
+    input.setField(this->normalClearance, _IFT_SimpleInterfaceMaterial_normalClearance);
 }
 
 

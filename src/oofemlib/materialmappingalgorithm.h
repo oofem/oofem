@@ -46,6 +46,7 @@ class Element;
 class TimeStep;
 class FloatArray;
 class GaussPoint;
+class DynamicInputRecord;
 
 /**
  * The class representing the general material model mapping algorithm.
@@ -147,6 +148,7 @@ public:
      * @param keyword Print record keyword (default true).
      */
     virtual int giveInputRecordString(std :: string &str, bool keyword = true) { return 1; }
+    virtual void giveInputRecord(DynamicInputRecord &input) {}
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const  = 0;
 };

@@ -38,6 +38,7 @@
 #include "floatarray.h"
 #include "nonlocalmaterialext.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -180,6 +181,15 @@ TrabBoneNLEmbed :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
+
+void
+TrabBoneNLEmbed :: giveInputRecord(DynamicInputRecord &input)
+{
+    TrabBoneEmbed :: giveInputRecord(input);
+    input.setField(this->R, _IFT_TrabBoneNLEmbed_r);
+    input.setField(this->mParam, _IFT_TrabBoneNLEmbed_m);
+}
+
 
 double
 TrabBoneNLEmbed :: computeWeightFunction(const FloatArray &src, const FloatArray &coord)

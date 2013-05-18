@@ -38,6 +38,7 @@
 #include "gausspoint.h"
 #include "engngm.h"
 #include "materialinterface.h"
+#include "dynamicinputrecord.h"
 #include "classfactory.h"
 //#include "leplic.h"
 
@@ -65,15 +66,10 @@ TwoFluidMaterial :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IntArray mats(2);
-    IR_GIVE_FIELD(ir, mats, _IFT_TwoFluidMaterial_mat);
-    if ( mats.giveSize() != 2 ) {
+    IR_GIVE_FIELD(ir, this->slaveMaterial, _IFT_TwoFluidMaterial_mat);
+    if ( this->slaveMaterial.giveSize() != 2 ) {
         _error("initializeFrom: mat array should have two values\n");
     }
-
-    slaveMaterial [ 0 ] = mats.at(1);
-    slaveMaterial [ 1 ] = mats.at(2);
-
     return IRRT_OK;
 }
 
@@ -84,10 +80,17 @@ TwoFluidMaterial :: giveInputRecordString(std :: string &str, bool keyword)
     char buff [ 1024 ];
 
     FluidDynamicMaterial :: giveInputRecordString(str, keyword);
-    sprintf(buff, " mat 2 %d %d ", slaveMaterial [ 0 ], slaveMaterial [ 1 ]);
+    sprintf(buff, " mat 2 %d %d ", slaveMaterial( 0 ), slaveMaterial( 1 ));
     str += buff;
 
     return 1;
+}
+
+void
+TwoFluidMaterial :: giveInputRecord(DynamicInputRecord &input)
+{
+    FluidDynamicMaterial :: giveInputRecord(input);
+    input.setField(this->slaveMaterial, _IFT_TwoFluidMaterial_mat);
 }
 
 
