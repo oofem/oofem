@@ -149,8 +149,6 @@ public:
      */
     virtual bcGeomType giveBCGeoType() const { return UnknownBGT; }
 
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
-    virtual void giveInputRecord(DynamicInputRecord &input);
     /**
      * Scales the receiver according to given value. Typically used in nondimensional analysis to scale down BCs and ICs.
      * @param s Scale factor.
@@ -159,6 +157,8 @@ public:
 
     // Overloaded methods:
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
+
     virtual classType giveClassID() const { return GeneralBoundaryConditionClass; }
     virtual const char *giveClassName() const { return "GeneralBoundaryCondition"; }
 

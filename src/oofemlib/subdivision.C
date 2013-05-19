@@ -50,6 +50,7 @@
 #include "loadtimefunction.h"
 #include "timer.h"
 #include "remeshingcrit.h"
+#include "dynamicinputrecord.h"
 
 #include <queue>
 #include <set>
@@ -3393,12 +3394,10 @@ MesherInterface :: returnCode
 Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, Domain **dNew)
 {
     // import data from old domain
-    int i, j, parent, nnodes = domain->giveNumberOfDofManagers(), nelems = domain->giveNumberOfElements();
-    int inode, idof, ielem, ndofs, num;
+    int parent, nnodes = domain->giveNumberOfDofManagers(), nelems = domain->giveNumberOfElements();
     IntArray enodes;
     Subdivision :: RS_Node *_node;
     Subdivision :: RS_Element *_element;
-    IRResultType result;                          // Required by IR_GIVE_FIELD macro
     Timer timer;
 
     timer.startTimer();
@@ -3412,7 +3411,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     // import nodes
     // all nodes (including remote which are not needed) are imported to ensure consistency between
     // node number (in the mesh) and its parent number (in the domain) because the domain is used to import connectivities
-    for ( i = 1; i <= nnodes; i++ ) {
+    for ( int i = 1; i <= nnodes; i++ ) {
         _node = new Subdivision :: RS_Node( i, mesh, i, *( domain->giveNode(i)->giveCoordinates() ),
                                            domain->giveErrorEstimator()->giveRemeshingCrit()->giveRequiredDofManDensity(i, stepN),
                                            domain->giveNode ( i )->isBoundary() );
@@ -3427,10 +3426,10 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     // import elements
     // all elements (including remote which are not needed) are imported to ensure consistency between
     // element number (in the mesh) and its parent number (in the domain) because the domain is used to import connectivities
-    for ( i = 1; i <= nelems; i++ ) {
+    for ( int i = 1; i <= nelems; i++ ) {
         if ( domain->giveElement(i)->giveGeometryType() == EGT_triangle_1 ) {
             enodes.resize(3);
-            for ( j = 1; j <= 3; j++ ) {
+            for ( int j = 1; j <= 3; j++ ) {
                 enodes.at(j) = domain->giveElement(i)->giveDofManagerNumber(j);
             }
 
@@ -3438,7 +3437,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
             this->mesh->addElement(i, _element);
         } else if ( domain->giveElement(i)->giveGeometryType() == EGT_tetra_1 ) {
             enodes.resize(4);
-            for ( j = 1; j <= 4; j++ ) {
+            for ( int j = 1; j <= 4; j++ ) {
                 enodes.at(j) = domain->giveElement(i)->giveDofManagerNumber(j);
             }
 
@@ -3456,7 +3455,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     }
 
     // import connectivities for local elements only
-    for ( i = 1; i <= nelems; i++ ) {
+    for ( int i = 1; i <= nelems; i++ ) {
 #ifdef __PARALLEL_MODE
         if ( this->mesh->giveElement(i)->giveParallelMode() != Element_local ) {
             continue;
@@ -3470,7 +3469,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     // import connectivities for shared nodes only
     // build global shared node map (for top level only)
     this->mesh->initGlobalSharedNodeMap();
-    for ( i = 1; i <= nnodes; i++ ) {
+    for ( int i = 1; i <= nnodes; i++ ) {
         _node = this->mesh->giveNode(i);
         if ( _node->giveParallelMode() != DofManager_shared ) {
             continue;
@@ -3482,7 +3481,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
 
     // build array of shared edges (for top level only)
     // this can be done after connectivity is available for all shared nodes
-    for ( i = 1; i <= nnodes; i++ ) {
+    for ( int i = 1; i <= nnodes; i++ ) {
         _node = this->mesh->giveNode(i);
         if ( _node->giveParallelMode() != DofManager_shared ) {
             continue;
@@ -3492,7 +3491,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     }
 
     // initiate queue for shared edge exchange
-    for ( i = 1; i <= mesh->giveNumberOfEdges(); i++ ) {
+    for ( int i = 1; i <= mesh->giveNumberOfEdges(); i++ ) {
         if ( mesh->giveEdge(i)->givePartitions()->giveSize() ) {
             sharedEdgesQueue.push_back(i);
         }
@@ -3505,7 +3504,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
 #ifdef __OOFEG
  #ifdef DRAW_MESH_BEFORE_BISECTION
     nelems = mesh->giveNumberOfElements();
-    for ( i = 1; i <= nelems; i++ ) {
+    for ( int i = 1; i <= nelems; i++ ) {
   #ifdef __PARALLEL_MODE
         if ( this->mesh->giveElement(i)->giveParallelMode() != Element_local ) {
             continue;
@@ -3533,7 +3532,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
 #ifdef __OOFEG
  #ifdef DRAW_MESH_AFTER_BISECTION
     nelems = mesh->giveNumberOfElements();
-    for ( i = 1; i <= nelems; i++ ) {
+    for ( int i = 1; i <= nelems; i++ ) {
         if ( !mesh->giveElement(i)->isTerminal() ) {
             continue;
         }
@@ -3561,7 +3560,6 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     InitialCondition *ic;
     LoadTimeFunction *ltf;
     std::string name;
-    const char *__proc = "createMesh"; // Required by IR_GIVE_FIELD macro
 
     // create new mesh (missing param for new mesh!)
     nnodes = mesh->giveNumberOfNodes();
@@ -3571,17 +3569,17 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     // copy dof managers
     ( * dNew )->resizeDofManagers(nnodes);
     const IntArray dofIDArrayPtr = domain->giveDefaultNodeDofIDArry();
-    for ( inode = 1; inode <= nnodes; inode++ ) {
+    for ( int inode = 1; inode <= nnodes; inode++ ) {
         parent = mesh->giveNode(inode)->giveParent();
         if ( parent ) {
             parentNodePtr = domain->giveNode(parent);
             // inherit all data from parent (bc, ic, load, etc.)
             node = classFactory.createDofManager(parentNodePtr->giveInputRecordName(), inode, * dNew);
-            ndofs = parentNodePtr->giveNumberOfDofs();
+            int ndofs = parentNodePtr->giveNumberOfDofs();
             node->setNumberOfDofs(ndofs);
             node->setLoadArray( * parentNodePtr->giveLoadArray() );
             // create individual DOFs
-            for ( idof = 1; idof <= ndofs; idof++ ) {
+            for ( int idof = 1; idof <= ndofs; idof++ ) {
                 idofPtr = parentNodePtr->giveDof(idof);
                 if ( idofPtr->isPrimaryDof() ) {
                     dof = new MasterDof( idof, node, idofPtr->giveBcId(), idofPtr->giveIcId(), idofPtr->giveDofID() );
@@ -3606,11 +3604,11 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
             // newly created node (irregular)
             node = new Node(inode, * dNew);
             //create new node with default DOFs
-            ndofs = dofIDArrayPtr.giveSize();
+            int ndofs = dofIDArrayPtr.giveSize();
             node->setNumberOfDofs(ndofs);
 
             // create individual DOFs
-            for ( idof = 1; idof <= ndofs; idof++ ) {
+            for ( int idof = 1; idof <= ndofs; idof++ ) {
 #ifdef NM
                 dof = NULL;
                 FloatArray *coords = mesh->giveNode(inode)->giveCoordinates();
@@ -3782,7 +3780,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     // count number of local terminal elements first
     int nterminals = 0;
     nelems = mesh->giveNumberOfElements();
-    for ( ielem = 1; ielem <= nelems; ielem++ ) {
+    for ( int ielem = 1; ielem <= nelems; ielem++ ) {
 #ifdef __PARALLEL_MODE
         if ( mesh->giveElement(ielem)->giveParallelMode() != Element_local ) {
             continue;
@@ -3799,7 +3797,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
 #endif
     ( * dNew )->resizeElements(nterminals);
     int eNum = 0;
-    for ( ielem = 1; ielem <= nelems; ielem++ ) {
+    for ( int ielem = 1; ielem <= nelems; ielem++ ) {
 #ifdef __PARALLEL_MODE
         if ( mesh->giveElement(ielem)->giveParallelMode() != Element_local ) {
             continue;
@@ -3834,84 +3832,83 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
         }
     } // end loop over elements
 
-    OOFEMTXTInputRecord _ir, *irPtr = & _ir;
     std :: string irString;
     // create the rest of the model description (BCs, CrossSections, Materials, etc)
     // cross sections
     int ncrosssect = domain->giveNumberOfCrossSectionModels();
     ( * dNew )->resizeCrossSectionModels(ncrosssect);
-    for ( i = 1; i <= ncrosssect; i++ ) {
-        domain->giveCrossSection(i)->giveInputRecordString(irString);
-        irPtr->setRecordString( irString );
-        IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
+    for ( int i = 1; i <= ncrosssect; i++ ) {
+        DynamicInputRecord ir;
+        domain->giveCrossSection(i)->giveInputRecord(ir);
+        ir.giveRecordKeywordField(name);
 
         crossSection = classFactory.createCrossSection(name.c_str(), i, * dNew);
-        crossSection->initializeFrom(irPtr);
+        crossSection->initializeFrom(&ir);
         ( * dNew )->setCrossSection(i, crossSection);
     }
 
     // materials
     int nmat = domain->giveNumberOfMaterialModels();
     ( * dNew )->resizeMaterials(nmat);
-    for ( i = 1; i <= nmat; i++ ) {
-        domain->giveMaterial(i)->giveInputRecordString(irString);
-        irPtr->setRecordString( irString );
-        IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
+    for ( int i = 1; i <= nmat; i++ ) {
+        DynamicInputRecord ir;
+        domain->giveMaterial(i)->giveInputRecord(ir);
+        ir.giveRecordKeywordField(name);
 
         mat = classFactory.createMaterial(name.c_str(), i, * dNew);
-        mat->initializeFrom(irPtr);
+        mat->initializeFrom(&ir);
         ( * dNew )->setMaterial(i, mat);
     }
 
     // barriers
     int nbarriers = domain->giveNumberOfNonlocalBarriers();
     ( * dNew )->resizeNonlocalBarriers(nbarriers);
-    for ( i = 1; i <= nbarriers; i++ ) {
-        domain->giveNonlocalBarrier(i)->giveInputRecordString(irString);
-        irPtr->setRecordString( irString );
-        IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
+    for ( int i = 1; i <= nbarriers; i++ ) {
+        DynamicInputRecord ir;
+        domain->giveNonlocalBarrier(i)->giveInputRecord(ir);
+        ir.giveRecordKeywordField(name);
 
         barrier = classFactory.createNonlocalBarrier(name.c_str(), i, * dNew);
-        barrier->initializeFrom(irPtr);
+        barrier->initializeFrom(&ir);
         ( * dNew )->setNonlocalBarrier(i, barrier);
     }
 
     // boundary conditions
     int nbc = domain->giveNumberOfBoundaryConditions();
     ( * dNew )->resizeBoundaryConditions(nbc);
-    for ( i = 1; i <= nbc; i++ ) {
-        domain->giveBc(i)->giveInputRecordString(irString);
-        irPtr->setRecordString( irString );
-        IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
+    for ( int i = 1; i <= nbc; i++ ) {
+        DynamicInputRecord ir;
+        domain->giveBc(i)->giveInputRecord(ir);
+        ir.giveRecordKeywordField(name);
 
         bc = classFactory.createBoundaryCondition(name.c_str(), i, * dNew);
-        bc->initializeFrom(irPtr);
+        bc->initializeFrom(&ir);
         ( * dNew )->setBoundaryCondition(i, bc);
     }
 
     // initial conditions
     int nic = domain->giveNumberOfInitialConditions();
     ( * dNew )->resizeInitialConditions(nic);
-    for ( i = 1; i <= nic; i++ ) {
-        domain->giveIc(i)->giveInputRecordString(irString);
-        irPtr->setRecordString( irString );
-        IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
+    for ( int i = 1; i <= nic; i++ ) {
+        DynamicInputRecord ir;
+        domain->giveIc(i)->giveInputRecord(ir);
+        ir.giveRecordKeywordField(name);
 
         ic = new InitialCondition(i, *dNew);
-        ic->initializeFrom(irPtr);
+        ic->initializeFrom(&ir);
         ( * dNew )->setInitialCondition(i, ic);
     }
 
     // load time functions
     int nltf = domain->giveNumberOfLoadTimeFunctions();
     ( * dNew )->resizeLoadTimeFunctions(nltf);
-    for ( i = 1; i <= nltf; i++ ) {
-        domain->giveLoadTimeFunction(i)->giveInputRecordString(irString);
-        irPtr->setRecordString( irString );
-        IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
+    for ( int i = 1; i <= nltf; i++ ) {
+        DynamicInputRecord ir;
+        domain->giveLoadTimeFunction(i)->giveInputRecord(ir);
+        ir.giveRecordKeywordField(name);
 
         ltf = classFactory.createLoadTimeFunction(name.c_str(), i, * dNew);
-        ltf->initializeFrom(irPtr);
+        ltf->initializeFrom(&ir);
         ( * dNew )->setLoadTimeFunction(i, ltf);
     }
 
@@ -3941,10 +3938,9 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     // we need to assign global numbers to newly generated elements
     this->assignGlobalNumbersToElements(* dNew);
 
-    int im;
     bool nonloc = false;
     nmat = ( * dNew )->giveNumberOfMaterialModels();
-    for ( im = 1; im <= nmat; im++ ) {
+    for ( int im = 1; im <= nmat; im++ ) {
         if ( ( * dNew )->giveMaterial(im)->giveInterface(NonlocalMaterialExtensionInterfaceType) ) {
             nonloc = true;
         }
@@ -3959,14 +3955,16 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     // print some statistics
     nelems = ( * dNew )->giveNumberOfElements();
     int localVals [ 2 ], globalVals [ 2 ];
-    for ( localVals [ 0 ] = 0, ielem = 1; ielem <= nelems; ielem++ ) {
+    localVals [ 0 ] = 0;
+    for ( int ielem = 1; ielem <= nelems; ielem++ ) {
         if ( ( * dNew )->giveElement(ielem)->giveParallelMode() == Element_local ) {
             localVals [ 0 ]++;
         }
     }
 
     nnodes = ( * dNew )->giveNumberOfDofManagers();
-    for ( localVals [ 1 ] = 0, inode = 1; inode <= nnodes; inode++ ) {
+    localVals [ 1 ] = 0;
+    for ( int inode = 1; inode <= nnodes; inode++ ) {
         if ( ( * dNew )->giveDofManager(inode)->isLocal() ) {
             localVals [ 1 ]++;
         }

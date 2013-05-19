@@ -78,7 +78,6 @@ public:
 
     virtual int giveApproxOrder() { return 1; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual void giveInputRecord(DynamicInputRecord &input);
     virtual bcGeomType giveBCGeoType() const { return EdgeLoadBGT; }
     virtual BL_FormulationType giveFormulationType() { return formulation; }

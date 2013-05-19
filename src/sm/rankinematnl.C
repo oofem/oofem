@@ -212,20 +212,6 @@ RankineMatNl :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-RankineMatNl :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    RankineMat :: giveInputRecordString(str, keyword);
-    StructuralNonlocalMaterialExtensionInterface :: giveInputRecordString(str, false);
-    sprintf(buff, " r %e", this->cl);
-    str += buff;
-
-    return 1;
-}
-
-
 void
 RankineMatNl :: giveInputRecord(DynamicInputRecord &input)
 {

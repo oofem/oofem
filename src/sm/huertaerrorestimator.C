@@ -61,6 +61,8 @@
 #include "nrsolver.h"
 #include "errorestimatortype.h"
 #include "classfactory.h"
+#include "dynamicdatareader.h"
+#include "dynamicinputrecord.h"
 
 #include <vector>
 #include <string>
@@ -4431,23 +4433,28 @@ void
 HuertaErrorEstimator :: setupRefinedProblemEpilog1(int csects, int mats, int loads, int nlbarriers)
 {
     Domain *domain = this->domain;
-    std :: string str;
-    int i;
 
     /* copy csects, mats, loads */
 
-    for ( i = 1; i <= csects; i++ ) {
-        domain->giveCrossSection(i)->giveInputRecordString(str);
+    for ( int i = 1; i <= csects; i++ ) {
+        DynamicInputRecord ir;
+        domain->giveCrossSection(i)->giveInputRecord(ir);
+        ///@todo Use DynamicDataReader instead of storing strings.
+        std::string str = ir.giveRecordAsString();
         refinedReader.appendInputString(str);
     }
 
-    for ( i = 1; i <= mats; i++ ) {
-        domain->giveMaterial(i)->giveInputRecordString(str);
+    for ( int i = 1; i <= mats; i++ ) {
+        DynamicInputRecord ir;
+        domain->giveMaterial(i)->giveInputRecord(ir);
+        std::string str = ir.giveRecordAsString();
         refinedReader.appendInputString(str);
     }
 
-    for ( i = 1; i <= loads; i++ ) {
-        domain->giveLoad(i)->giveInputRecordString(str);
+    for ( int i = 1; i <= loads; i++ ) {
+        DynamicInputRecord ir;
+        domain->giveLoad(i)->giveInputRecord(ir);
+        std::string str = ir.giveRecordAsString();
         refinedReader.appendInputString(str);
     }
 }
@@ -4459,13 +4466,13 @@ HuertaErrorEstimator :: setupRefinedProblemEpilog2(int ltfuncs)
 {
     char line [ OOFEM_MAX_LINE_LENGTH + 1 ];
     Domain *domain = this->domain;
-    std :: string str;
-    int i;
 
     /* copy tfuncs */
 
-    for ( i = 1; i <= ltfuncs; i++ ) {
-        domain->giveLoadTimeFunction(i)->giveInputRecordString(str);
+    for ( int i = 1; i <= ltfuncs; i++ ) {
+        DynamicInputRecord ir;
+        domain->giveLoadTimeFunction(i)->giveInputRecord(ir);
+        std :: string str = ir.giveRecordAsString();
         refinedReader.appendInputString(str);
     }
 

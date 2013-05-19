@@ -74,18 +74,6 @@ BoundaryCondition :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-BoundaryCondition :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
-    sprintf(buff, " prescribedvalue %e", this->prescribedValue);
-    str += buff;
-
-    return 1;
-}
-
 void
 BoundaryCondition :: giveInputRecord(DynamicInputRecord &input)
 {

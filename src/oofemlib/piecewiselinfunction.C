@@ -168,32 +168,6 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-PiecewiseLinFunction :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    LoadTimeFunction :: giveInputRecordString(str, keyword);
-    sprintf(buff, " npoints %d", this->dates.giveSize());
-    str += buff;
-    sprintf( buff, " t %d", this->dates.giveSize() );
-    str += buff;
-    for ( int i = 1; i <= this->dates.giveSize(); i++ ) {
-        sprintf( buff, " %e", this->dates.at(i) );
-        str += buff;
-    }
-
-    sprintf( buff, " f(t) %d", this->values.giveSize() );
-    str += buff;
-    for ( int i = 1; i <= this->values.giveSize(); i++ ) {
-        sprintf( buff, " %e", this->values.at(i) );
-        str += buff;
-    }
-
-    return 1;
-}
-
-
 void PiecewiseLinFunction :: giveInputRecord(DynamicInputRecord &input)
 {
     LoadTimeFunction :: giveInputRecord(input);

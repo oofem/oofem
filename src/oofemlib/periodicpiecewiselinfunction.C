@@ -121,20 +121,6 @@ PeriodicPiecewiseLinFunction :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-PeriodicPiecewiseLinFunction :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    PiecewiseLinFunction :: giveInputRecordString(str, keyword);
-    sprintf(buff, " period %e", this->period);
-    str += buff;
-    sprintf(buff, " addTF %d", this->addTF);
-    str += buff;
-
-    return 1;
-}
-
 void PeriodicPiecewiseLinFunction :: giveInputRecord(DynamicInputRecord &input)
 {
     PiecewiseLinFunction :: giveInputRecord(input);

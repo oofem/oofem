@@ -417,19 +417,6 @@ IsotropicDamageMaterial :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-IsotropicDamageMaterial :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    StructuralMaterial :: giveInputRecordString(str, keyword);
-    sprintf(buff, " talpha %e", this->tempDillatCoeff);
-    str += buff;
-
-    return 1;
-}
-
-
 void
 IsotropicDamageMaterial :: giveInputRecord(DynamicInputRecord &input)
 {

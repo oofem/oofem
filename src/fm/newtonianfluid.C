@@ -75,18 +75,6 @@ NewtonianFluidMaterial :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-NewtonianFluidMaterial :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    FluidDynamicMaterial :: giveInputRecordString(str, keyword);
-    sprintf(buff, " mu %e ", this->viscosity);
-    str += buff;
-
-    return 1;
-}
-
 void
 NewtonianFluidMaterial :: giveInputRecord(DynamicInputRecord &input)
 {

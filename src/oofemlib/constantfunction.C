@@ -56,18 +56,6 @@ ConstantFunction :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-ConstantFunction :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    LoadTimeFunction :: giveInputRecordString(str, keyword);
-    sprintf(buff, " f(t) %e", this->value);
-    str += buff;
-
-    return 1;
-}
-
 void
 ConstantFunction :: giveInputRecord(DynamicInputRecord &input)
 {

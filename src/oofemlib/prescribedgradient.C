@@ -302,28 +302,6 @@ IRResultType PrescribedGradient :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-int PrescribedGradient :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
-
-    sprintf( buff, " gradient %d %d ", this->gradient.giveNumberOfRows(), this->gradient.giveNumberOfColumns() );
-    for ( int i = 1; i <= this->gradient.giveNumberOfColumns(); i++ ) {
-        for ( int j = 1; j <= this->gradient.giveNumberOfRows(); j++ ) {
-            sprintf( buff, " %e", this->gradient.at(i, j) );
-            str += buff;
-        }
-    }
-
-    sprintf( buff, " ccord %d", this->centerCoord.giveSize() );
-    for ( int i = 1; i <= this->centerCoord.giveSize(); i++ ) {
-        sprintf( buff, " %e", this->centerCoord.at(i) );
-        str += buff;
-    }
-
-    return 1;
-}
 
 void PrescribedGradient :: giveInputRecord(DynamicInputRecord &input)
 {

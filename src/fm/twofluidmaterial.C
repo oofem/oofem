@@ -74,18 +74,6 @@ TwoFluidMaterial :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-TwoFluidMaterial :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    FluidDynamicMaterial :: giveInputRecordString(str, keyword);
-    sprintf(buff, " mat 2 %d %d ", slaveMaterial( 0 ), slaveMaterial( 1 ));
-    str += buff;
-
-    return 1;
-}
-
 void
 TwoFluidMaterial :: giveInputRecord(DynamicInputRecord &input)
 {

@@ -122,7 +122,6 @@ public:
      * @param ir Record to read off.
      */
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
 protected:

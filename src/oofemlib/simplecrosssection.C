@@ -280,22 +280,6 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-SimpleCrossSection :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    CrossSection :: giveInputRecordString(str, keyword);
-    sprintf( buff, " thick %e width %e area %e iy %e iz %e ik %e beamshearcoeff %e",
-            this->give(CS_Thickness), this->give(CS_Width), this->give(CS_Area),
-            this->give(CS_InertiaMomentY), this->give(CS_InertiaMomentZ), this->give(CS_TorsionMomentX),
-            this->give(CS_BeamShearCoeff) );
-    str += buff;
-
-    return 1;
-}
-
-
 void SimpleCrossSection::giveInputRecord(DynamicInputRecord &input)
 {
     StructuralCrossSection :: giveInputRecord(input);

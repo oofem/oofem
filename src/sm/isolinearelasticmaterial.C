@@ -129,19 +129,6 @@ IsotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-IsotropicLinearElasticMaterial :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    LinearElasticMaterial :: giveInputRecordString(str, keyword);
-    sprintf( buff, " e %e n %e talpha %e", this->E, this->nu, propertyDictionary->at(tAlpha) );
-    str += buff;
-
-    return 1;
-}
-
-
 void
 IsotropicLinearElasticMaterial :: giveInputRecord(DynamicInputRecord &input)
 {

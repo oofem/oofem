@@ -438,27 +438,6 @@ IRResultType MixedGradientPressureDirichlet :: initializeFrom(InputRecord *ir)
 }
 
 
-int MixedGradientPressureDirichlet :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
-
-    sprintf( buff, " devgradient %d ", this->devGradient.giveSize() );
-    for ( int i = 1; i <= this->devGradient.giveSize(); i++ ) {
-        sprintf( buff, " %e", this->devGradient.at(i) );
-        str += buff;
-    }
-
-    sprintf( buff, " ccoord %d", this->centerCoord.giveSize() );
-    for ( int i = 1; i <= this->centerCoord.giveSize(); i++ ) {
-        sprintf( buff, " %e", this->centerCoord.at(i) );
-        str += buff;
-    }
-
-    return 1;
-}
-
 void MixedGradientPressureDirichlet :: giveInputRecord(DynamicInputRecord &input)
 {
     MixedGradientPressureBC :: giveInputRecord(input);

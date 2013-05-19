@@ -79,19 +79,6 @@ FEMComponent :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 }
 
 
-int
-FEMComponent :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buffer [ 512 ];
-
-    if ( keyword == true ) {
-        sprintf( buffer, "%s %d", this->giveInputRecordName(), this->giveNumber() );
-        str = buffer;
-    }
-
-    return 1;
-}
-
 void
 FEMComponent :: giveInputRecord(DynamicInputRecord &input)
 {

@@ -126,18 +126,6 @@ Material :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-Material :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    FEMComponent :: giveInputRecordString(str, keyword);
-    sprintf( buff, " d %e", propertyDictionary->at('d') );
-    str += buff;
-
-    return 1;
-}
-
 void
 Material :: giveInputRecord(DynamicInputRecord& input)
 {
@@ -145,7 +133,6 @@ Material :: giveInputRecord(DynamicInputRecord& input)
     input.setField(this->propertyDictionary->at('d'), _IFT_Material_density);
     input.setField(this->castingTime, _IFT_Material_castingtime);
 }
-
 
 
 int

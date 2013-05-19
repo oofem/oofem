@@ -76,18 +76,6 @@ NonlinearFluidMaterial :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-NonlinearFluidMaterial :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    FluidDynamicMaterial :: giveInputRecordString(str, keyword);
-    sprintf(buff, " mu %e ", this->viscosity);
-    str += buff;
-
-    return 1;
-}
-
 void
 NonlinearFluidMaterial :: giveInputRecord(DynamicInputRecord &input)
 {

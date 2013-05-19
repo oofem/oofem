@@ -92,17 +92,6 @@ LoadTimeFunction :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-LoadTimeFunction :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    sprintf(buff, " initialvalue %e", this->initialValue);
-    str += buff;
-
-    return 1;
-}
-
 void
 LoadTimeFunction :: giveInputRecord(DynamicInputRecord& input)
 {

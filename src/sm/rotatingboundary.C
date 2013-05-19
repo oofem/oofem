@@ -136,13 +136,6 @@ RotatingBoundary :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-int
-RotatingBoundary :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    return GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
-}
-
-
 void
 RotatingBoundary :: giveInputRecord(DynamicInputRecord &input)
 {

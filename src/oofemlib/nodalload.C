@@ -54,19 +54,6 @@ NodalLoad :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-NodalLoad :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    Load :: giveInputRecordString(str, keyword);
-    sprintf(buff, " cstype %d", ( int ) this->coordSystemType);
-    str += buff;
-
-    return 1;
-}
-
-
 void NodalLoad :: giveInputRecord(DynamicInputRecord &input)
 {
     Load :: giveInputRecord(input);

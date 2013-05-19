@@ -350,20 +350,6 @@ CebFipSlip90Material :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-CebFipSlip90Material :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    StructuralMaterial :: giveInputRecordString(str, keyword);
-
-    sprintf(buff, " tmax %e tres %e s1 %e s2 %e s3 %e", tmax, tres, s1, s2, s3);
-    str += buff;
-
-    return 1;
-}
-
-
 void
 CebFipSlip90Material :: giveInputRecord(DynamicInputRecord &input)
 {

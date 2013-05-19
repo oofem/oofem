@@ -106,8 +106,6 @@ public:
     virtual const char *giveInputRecordName() const { return "RankineMatNl"; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual Interface *giveInterface(InterfaceType);

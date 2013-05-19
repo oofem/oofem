@@ -335,20 +335,6 @@ MisesMatNl :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-MisesMatNl :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    MisesMat :: giveInputRecordString(str, keyword);
-    StructuralNonlocalMaterialExtensionInterface :: giveInputRecordString(str, false);
-    sprintf(buff, " r %e", this->cl);
-    str += buff;
-
-    return 1;
-}
-
-
 void
 MisesMatNl :: giveInputRecord(DynamicInputRecord &input)
 {

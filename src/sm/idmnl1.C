@@ -469,20 +469,6 @@ IDNLMaterial :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-IDNLMaterial :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    IsotropicDamageMaterial1 :: giveInputRecordString(str, keyword);
-    StructuralNonlocalMaterialExtensionInterface :: giveInputRecordString(str, false);
-    sprintf(buff, " r %e", this->cl);
-    str += buff;
-
-    return 1;
-}
-
-
 void
 IDNLMaterial :: giveInputRecord(DynamicInputRecord &input)
 {

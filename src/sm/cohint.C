@@ -287,20 +287,6 @@ CohesiveInterfaceMaterial :: initializeFrom(InputRecord *ir)
     return StructuralMaterial :: initializeFrom(ir);
 }
 
-int
-CohesiveInterfaceMaterial :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    StructuralMaterial :: giveInputRecordString(str, keyword);
-
-    sprintf(buff, " talpha %e kn %e ks %e", this->tempDillatCoeff, kn, ks);
-    str += buff;
-
-    return 1;
-}
-
-
 void
 CohesiveInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
 {

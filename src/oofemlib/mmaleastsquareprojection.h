@@ -101,8 +101,6 @@ public:
     virtual int __mapVariable(FloatArray &answer, FloatArray &coords, InternalStateType type, TimeStep *tStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual const char *giveClassName() const { return "MMALeastSquareProjectionPatchType"; }

@@ -141,12 +141,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_NOTFOUND; };
     /**
      * Setups the input record string of receiver.
-     * @param str String to be filled by input record.
-     * @param keyword Determines if record keyword should be printed.
-     */
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
-    /**
-     * Setups the input record string of receiver.
      * @param input Dynamic input record to be filled by receiver.
      */
     virtual void giveInputRecord(DynamicInputRecord &input);

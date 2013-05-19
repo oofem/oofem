@@ -2826,19 +2826,6 @@ StructuralMaterial :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-StructuralMaterial :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    Material :: giveInputRecordString(str, keyword);
-    sprintf(buff, " referencetemperature %e", this->referenceTemperature);
-    str += buff;
-
-    return 1;
-}
-
-
 void
 StructuralMaterial :: giveInputRecord(DynamicInputRecord &input)
 {

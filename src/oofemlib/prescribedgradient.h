@@ -91,6 +91,7 @@ public:
      * The size of the center coordinates must be equal to the size of the coordinates in the applied nodes.
      */
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     /**
      * Constructs a coefficient matrix for all prescribed unknowns.
@@ -115,9 +116,6 @@ public:
      * @param tStep Active time step.
      */
     void computeTangent(FloatMatrix &tangent, EquationID eid, TimeStep *tStep);
-
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
-    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual void scale(double s) { gradient.times(s); }
 

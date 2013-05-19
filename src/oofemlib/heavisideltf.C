@@ -71,17 +71,6 @@ HeavisideLTF :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-int
-HeavisideLTF :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    LoadTimeFunction :: giveInputRecordString(str, keyword);
-    sprintf(buff, " origin %e value %e", this->origin, this->value);
-    str += buff;
-
-    return 1;
-}
 
 void HeavisideLTF :: giveInputRecord(DynamicInputRecord& input)
 {

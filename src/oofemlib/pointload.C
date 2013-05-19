@@ -77,24 +77,6 @@ PointLoad :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-PointLoad :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    Load :: giveInputRecordString(str, keyword);
-    sprintf( buff, " ndofs %d loadtype %d cstype %d coords %d", this->nDofs, ( int ) this->lType,
-            ( int ) this->coordSystemType, coords.giveSize() );
-    str += buff;
-
-    for ( int i = 1; i <= this->coords.giveSize(); i++ ) {
-        sprintf( buff, " %e", this->coords.at(i) );
-        str += buff;
-    }
-
-    return 1;
-}
-
 void
 PointLoad :: giveInputRecord(DynamicInputRecord &input)
 {

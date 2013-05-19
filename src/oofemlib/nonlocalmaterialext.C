@@ -43,6 +43,7 @@
 #include "domain.h"
 #include "nonlocalbarrier.h"
 #include "mathfem.h"
+#include "dynamicinputrecord.h"
 
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
@@ -489,10 +490,12 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
         regionMap.zero();
     }
 
-    int _permanentNonlocTableFlag = this->permanentNonlocTableFlag;
-    IR_GIVE_OPTIONAL_FIELD(ir, _permanentNonlocTableFlag,
-                           _IFT_NonlocalMaterialExtensionInterface_permanentNonlocTableFlag);
-    this->permanentNonlocTableFlag = _permanentNonlocTableFlag;
+    if ( this->hasBoundedSupport() ) {
+        permanentNonlocTableFlag = true;
+    } else {
+        permanentNonlocTableFlag = false;
+    }
+    IR_GIVE_OPTIONAL_FIELD(ir, this->permanentNonlocTableFlag, _IFT_NonlocalMaterialExtensionInterface_permanentNonlocTableFlag);
 
     // read the characteristic length
     IR_GIVE_FIELD(ir, cl, _IFT_NonlocalMaterialExtensionInterface_r);
@@ -501,19 +504,9 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     }
 
     // read the type of weight function
-    int wft = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, wft, _IFT_NonlocalMaterialExtensionInterface_wft);
-    if ( wft == 2 ) {
-        weightFun = WFT_Gauss;
-    } else if ( wft == 3 ) {
-        weightFun = WFT_Green;
-    } else if ( wft == 4 ) {
-        weightFun = WFT_Uniform;
-    } else if ( wft == 5 ) {
-        weightFun = WFT_UniformOverElement;
-    } else {
-        weightFun = WFT_Bell; // default
-    }
+    int val = WFT_Bell;
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_NonlocalMaterialExtensionInterface_wft);
+    this->weightFun = (WeightFunctionType)val;
 
     // this is introduced for compatibility of input format with previous versions
     // ("averagingtype 1" in the input means that the weight function
@@ -533,24 +526,14 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, mm, _IFT_NonlocalMaterialExtensionInterface_m);
 
     // read the type of scaling
-    int st = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, st, _IFT_NonlocalMaterialExtensionInterface_scalingtype);
-    if ( st == 2 ) {
-        scaling = ST_Noscaling;
-    } else if ( st == 3 ) {
-        scaling = ST_Borino;
-    } else {
-        scaling = ST_Standard; // default
-    }
+    val = ST_Standard;
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_NonlocalMaterialExtensionInterface_scalingtype);
+    this->scaling = (ScalingType)val;
 
     // read the type of averaged variable
-    int av = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, av, _IFT_NonlocalMaterialExtensionInterface_averagedquantity);
-    if ( av == 2 ) {
-        averagedVar = AVT_Compliance;
-    } else {
-        averagedVar = AVT_EqStrain; // default
-    }
+    val = AVT_EqStrain;
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_NonlocalMaterialExtensionInterface_averagedquantity);
+    this->averagedVar = (AveragedVarType)val;
 
     //Read the nonlocal variation type (default is zero)
     cl0 = cl;
@@ -569,27 +552,24 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-NonlocalMaterialExtensionInterface :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    if ( regionMap.isEmpty() == 0 ) {
-        sprintf( buff, " regionmap %d", regionMap.giveSize() );
-        str += buff;
-        for ( int i = 1; i <= regionMap.giveSize(); i++ ) {
-            sprintf( buff, " %d", regionMap.at(i) );
-            str += buff;
-        }
-    }
-
-    return 1;
-}
-
-
 void NonlocalMaterialExtensionInterface :: giveInputRecord(DynamicInputRecord &input)
 {
-    OOFEM_ERROR("NonlocalMaterialExtension :: giveInputRecord - Not implemented yet\n");
+    if ( regionMap.giveSize() ) {
+        input.setField(this->regionMap, _IFT_NonlocalMaterialExtensionInterface_regionmap);
+    }
+    input.setField(this->permanentNonlocTableFlag, _IFT_NonlocalMaterialExtensionInterface_permanentNonlocTableFlag);
+    input.setField(this->cl, _IFT_NonlocalMaterialExtensionInterface_r);
+    input.setField(this->weightFun, _IFT_NonlocalMaterialExtensionInterface_wft);
+    input.setField(this->mm, _IFT_NonlocalMaterialExtensionInterface_m);
+    input.setField(this->scaling, _IFT_NonlocalMaterialExtensionInterface_scalingtype);
+    input.setField(this->averagedVar, _IFT_NonlocalMaterialExtensionInterface_averagedquantity);
+    input.setField(this->nlvar, _IFT_NonlocalMaterialExtensionInterface_nonlocalvariation);
+    if ( nlvar == NLVT_DistanceBased ) {
+        input.setField(this->beta, _IFT_NonlocalMaterialExtensionInterface_beta);
+        input.setField(this->zeta, _IFT_NonlocalMaterialExtensionInterface_zeta);
+    } else if ( nlvar == NLVT_StressBased ) {
+        input.setField(this->beta, _IFT_NonlocalMaterialExtensionInterface_beta);
+    }
 }
 
 

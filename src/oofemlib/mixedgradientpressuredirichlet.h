@@ -120,8 +120,6 @@ public:
      * The size of the center coordinates must be equal to the size of the coordinates in the applied nodes.
      */
     virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual void scale(double s) { devGradient.times(s); pressure *= s; }

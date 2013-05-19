@@ -235,7 +235,6 @@ public:
     virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp) = 0;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IsotropicDamageMaterialStatus(1, domain, gp); }

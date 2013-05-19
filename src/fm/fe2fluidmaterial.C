@@ -297,11 +297,6 @@ int FE2FluidMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
     }
 }
 
-int FE2FluidMaterial :: giveInputRecordString(std::string &str, bool keyword)
-{
-    return FluidDynamicMaterial :: giveInputRecordString(str, keyword);
-}
-
 void FE2FluidMaterial::giveInputRecord(DynamicInputRecord &input)
 {
     FluidDynamicMaterial :: giveInputRecord(input);

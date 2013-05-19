@@ -222,7 +222,6 @@ public:
     virtual classType giveClassID() const { return IsotropicDamageMaterial1Class; }
     virtual const char *giveInputRecordName() const { return "idm1"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual void giveInputRecord(DynamicInputRecord &input);
     /**
      * Computes invariants I1 and J2 of the strain tensor

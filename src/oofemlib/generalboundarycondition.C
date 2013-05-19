@@ -104,22 +104,6 @@ bool GeneralBoundaryCondition :: isImposed(TimeStep *tStep)
 }
 
 
-int
-GeneralBoundaryCondition :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    FEMComponent :: giveInputRecordString(str, keyword);
-    sprintf(buff, " loadtimefunction %d", this->loadTimeFunction);
-    str += buff;
-    
-    GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
-    sprintf(buff, " isimposedtimefunction %d ", this->isImposedTimeFunction);
-    str += buff;
-
-    return 1;
-}
-
 void
 GeneralBoundaryCondition :: giveInputRecord(DynamicInputRecord &input)
 {

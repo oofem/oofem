@@ -168,7 +168,6 @@ public:
     double computeBondForceStiffness(double kappa);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new CebFipSlip90MaterialStatus(1, domain, gp); }

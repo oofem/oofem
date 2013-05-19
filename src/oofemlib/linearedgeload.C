@@ -71,35 +71,6 @@ LinearEdgeLoad :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-LinearEdgeLoad :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    int i;
-    char buff [ 1024 ];
-
-    BoundaryLoad :: giveInputRecordString(str, keyword);
-    sprintf(buff, " formulation %d", ( int ) this->formulation);
-    str += buff;
-    if ( this->formulation == BL_GlobalFormulation ) {
-        sprintf( buff, " sc %d", this->startCoords.giveSize() );
-        str += buff;
-        for ( i = 1; i <= this->startCoords.giveSize(); i++ ) {
-            sprintf( buff, " %e", this->startCoords.at(i) );
-            str += buff;
-        }
-
-        sprintf( buff, " ec %d", this->endCoords.giveSize() );
-        str += buff;
-        for ( i = 1; i <= this->endCoords.giveSize(); i++ ) {
-            sprintf( buff, " %e", this->endCoords.at(i) );
-            str += buff;
-        }
-    }
-
-    return 1;
-}
-
-
 void LinearEdgeLoad :: giveInputRecord(DynamicInputRecord& input)
 {
     BoundaryLoad :: giveInputRecord ( input );

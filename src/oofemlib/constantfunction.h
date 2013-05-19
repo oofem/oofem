@@ -66,7 +66,6 @@ public:
     virtual double __at(double t) { return this->giveValue(); }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual classType giveClassID() const { return ConstantFunctionClass; }

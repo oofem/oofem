@@ -102,22 +102,6 @@ Load :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-Load :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
-    sprintf( buff, " components %d", this->componentArray.giveSize() );
-    str += buff;
-    for ( int i = 1; i <= this->componentArray.giveSize(); i++ ) {
-        sprintf( buff, " %e", this->componentArray.at(i) );
-        str += buff;
-    }
-
-    return 1;
-}
-
 void Load :: giveInputRecord ( DynamicInputRecord& input )
 {
     GeneralBoundaryCondition::giveInputRecord ( input );
@@ -126,7 +110,6 @@ void Load :: giveInputRecord ( DynamicInputRecord& input )
         input.setField( this->dofExcludeMask, _IFT_Load_dofexcludemask );
     }
 }
-
 
 
 int

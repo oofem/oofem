@@ -169,18 +169,6 @@ TrabBoneNLEmbed :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-int
-TrabBoneNLEmbed :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    TrabBoneEmbed :: giveInputRecordString(str, keyword);
-    StructuralNonlocalMaterialExtensionInterface :: giveInputRecordString(str, false);
-    sprintf(buff, " r %e", this->R);
-    str += buff;
-
-    return 1;
-}
 
 void
 TrabBoneNLEmbed :: giveInputRecord(DynamicInputRecord &input)

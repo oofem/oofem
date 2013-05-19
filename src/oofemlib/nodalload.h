@@ -102,7 +102,6 @@ public:
     BL_CoordSystType giveCoordSystMode() { return coordSystemType; }
 
     IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual void giveInputRecord(DynamicInputRecord &input);
     const char *giveClassName() const { return "NodalLoad"; }
     classType giveClassID() const { return NodalLoadClass; }

@@ -228,34 +228,77 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-IsotropicDamageMaterial1 :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    IsotropicDamageMaterial :: giveInputRecordString(str, keyword);
-    linearElasticMaterial->giveInputRecordString(str, false);
-    sprintf(buff, " e0 %e ef %e equivstraintype %d", this->e0, this->ef, ( int ) this->equivStrainType);
-    str += buff;
-
-    return 1;
-}
-
-
 void
 IsotropicDamageMaterial1 :: giveInputRecord(DynamicInputRecord &input)
 {
     // Done first so that record name is overwritten afterwards by femcomponent:
-    linearElasticMaterial->giveInputRecord(input);
+    this->linearElasticMaterial->giveInputRecord(input);
+    this->mapper.giveInputRecord(input);
     IsotropicDamageMaterial :: giveInputRecord(input);
-    ///@todo This is also necessary to implement before this will work:
-    //RandomMaterialExtensionInterface :: giveInputRecord(ir);
+    RandomMaterialExtensionInterface :: giveInputRecord(input);
 
     input.setField(this->e0, _IFT_IsotropicDamageMaterial1_e0);
     input.setField(this->ef, _IFT_IsotropicDamageMaterial1_ef);
     input.setField(this->equivStrainType, _IFT_IsotropicDamageMaterial1_equivstraintype);
-    ///@todo A lot missing here (in giveInputRecordString as well)
-    OOFEM_ERROR("IsotropicDamageMaterial1 :: giveInputRecord - Not implemented yet");
+
+    input.setField(this->checkSnapBack, _IFT_IsotropicDamageMaterial1_checkSnapBack);
+
+    input.setField(this->equivStrainType, _IFT_IsotropicDamageMaterial1_equivstraintype);
+    if ( this->equivStrainType == EST_Mises ) {
+        input.setField(this->k, _IFT_IsotropicDamageMaterial1_k);
+    }
+
+    input.setField(this->damageLaw, _IFT_IsotropicDamageMaterial1_damageLaw);
+    if ( this->damageLaw != 7 ) {
+        input.setField(this->e0, _IFT_IsotropicDamageMaterial1_e0);
+    }
+
+    switch ( damageLaw ) {
+    case 0:
+        if ( this->softType == ST_Exponential_Cohesive_Crack ) {
+            input.setField(this->wf, _IFT_IsotropicDamageMaterial1_wf);
+        } else if ( this->softType == ST_Exponential_Cohesive_Crack ) {
+            input.setField(this->gf, _IFT_IsotropicDamageMaterial1_gf);
+        } else {
+            input.setField(this->ef, _IFT_IsotropicDamageMaterial1_ef);
+        }
+
+        break;
+    case 1:     // linear softening law
+        if ( this->softType == ST_Linear_Cohesive_Crack ) {
+            input.setField(this->wf, _IFT_IsotropicDamageMaterial1_wf);
+        } else if ( this->softType == ST_Linear_Cohesive_Crack ) {
+            input.setField(this->gf, _IFT_IsotropicDamageMaterial1_gf);
+        } else {
+            input.setField(this->ef, _IFT_IsotropicDamageMaterial1_ef);
+        }
+
+        break;
+    case 2:     // bilinear softening
+        input.setField(this->gf, _IFT_IsotropicDamageMaterial1_gf);
+        input.setField(this->ek, _IFT_IsotropicDamageMaterial1_ek);
+        input.setField(this->gft, _IFT_IsotropicDamageMaterial1_gft);
+
+        break;
+    case 4:
+        input.setField(this->At, _IFT_IsotropicDamageMaterial1_At);
+        input.setField(this->Bt, _IFT_IsotropicDamageMaterial1_Bt);
+        break;
+    case 5:
+        input.setField(this->md, _IFT_IsotropicDamageMaterial1_md);
+        break;
+    case 7:
+        input.setField(this->e1, _IFT_IsotropicDamageMaterial1_e1);
+        input.setField(this->e2, _IFT_IsotropicDamageMaterial1_e2);
+        input.setField(this->nd, _IFT_IsotropicDamageMaterial1_nd);
+        break;
+    }
+
+    if ( softType == ST_Exponential_Cohesive_Crack || softType == ST_Linear_Cohesive_Crack || softType == ST_BiLinear_Cohesive_Crack ) {
+        input.setField(this->ecsMethod, _IFT_IsotropicDamageMaterial1_ecsm);
+    }
+
+
 }
 
 

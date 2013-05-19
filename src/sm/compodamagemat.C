@@ -122,12 +122,6 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-//used in debugging only ?
-int CompoDamageMat :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    return 1;
-}
-
 void CompoDamageMat :: giveInputRecord(DynamicInputRecord &input)
 {
     StructuralMaterial :: giveInputRecord(input);

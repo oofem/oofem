@@ -400,20 +400,6 @@ TrabBoneNL3D :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-TrabBoneNL3D :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    TrabBone3D :: giveInputRecordString(str, keyword);
-    StructuralNonlocalMaterialExtensionInterface :: giveInputRecordString(str, false);
-    sprintf(buff, " r %e", this->R);
-    str += buff;
-
-    return 1;
-}
-
-
 void
 TrabBoneNL3D :: giveInputRecord(DynamicInputRecord& input)
 {

@@ -201,7 +201,6 @@ public:
     virtual classType giveClassID() const { return StructuralMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual void giveInputRecord(DynamicInputRecord &input);
     /**
      * Auxiliary member function that computes principal values of stress/strain vector.

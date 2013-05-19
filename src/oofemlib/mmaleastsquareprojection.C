@@ -426,24 +426,6 @@ MMALeastSquareProjection :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-MMALeastSquareProjection :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    if ( this->stateFilter ) {
-        sprintf( buff, " mmalsp_statefilter %d", ( int ) ( this->stateFilter ) );
-        str += buff;
-    }
-
-    if ( this->regionFilter ) {
-        sprintf( buff, " mmalsp_regionfilter %d", ( int ) ( this->regionFilter ) );
-        str += buff;
-    }
-
-    return 1;
-}
-
 void MMALeastSquareProjection :: giveInputRecord(DynamicInputRecord &input)
 {
     if ( this->stateFilter ) {

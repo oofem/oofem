@@ -703,21 +703,6 @@ IRResultType MixedGradientPressureNeumann :: initializeFrom(InputRecord *ir)
 }
 
 
-int MixedGradientPressureNeumann :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
-
-    sprintf( buff, " pressure %e devgradient %d ", this->pressure, this->devGradient.giveSize() );
-    for ( int i = 1; i <= this->devGradient.giveSize(); i++ ) {
-        sprintf( buff, " %e", this->devGradient.at(i) );
-        str += buff;
-    }
-
-    return 1;
-}
-
 void MixedGradientPressureNeumann :: giveInputRecord(DynamicInputRecord &input)
 {
     MixedGradientPressureBC :: giveInputRecord(input);

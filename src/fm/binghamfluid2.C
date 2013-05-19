@@ -99,18 +99,6 @@ BinghamFluidMaterial2 :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-BinghamFluidMaterial2 :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    FluidDynamicMaterial :: giveInputRecordString(str, keyword);
-    sprintf(buff, " mu0 %e tau0 %e", this->mu_0, this->tau_0);
-    str += buff;
-
-    return 1;
-}
-
 void
 BinghamFluidMaterial2 :: giveInputRecord(DynamicInputRecord &input)
 {

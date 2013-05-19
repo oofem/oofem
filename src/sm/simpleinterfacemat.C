@@ -418,24 +418,6 @@ SimpleInterfaceMaterial :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-SimpleInterfaceMaterial :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    char buff [ 1024 ];
-
-    StructuralMaterial :: giveInputRecordString(str, keyword);
-
-    sprintf(buff, " kn %e", kn);
-    str += buff;
-    sprintf(buff, " frictCoeff %e", frictCoeff);
-    str += buff;
-    sprintf(buff, " stiffCoeff %e", stiffCoeff);
-    str += buff;
-
-    return 1;
-}
-
-
 void
 SimpleInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
 {

@@ -123,7 +123,6 @@ public:
     //virtual PL_FormulationType giveFormulationType () {return BL_EntityFormulation;}
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual bcType giveType() const { return lType; }
