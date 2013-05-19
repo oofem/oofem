@@ -1316,7 +1316,7 @@ void Domain :: createDofs()
             ActiveBoundaryCondition *active_bc = dynamic_cast< ActiveBoundaryCondition* >(gbc);
             BoundaryCondition *bc = dynamic_cast< BoundaryCondition* >(gbc);
             if ( bc || ( active_bc && active_bc->requiresActiveDofs() ) ) {
-                const IntArray &appliedDofs = gbc->giveDefaultDofs();
+                const IntArray &appliedDofs = gbc->giveDofIDs();
                 const IntArray &nodes = set->giveNodeList();
                 for (int inode = 1; inode <= nodes.giveSize(); ++inode) {
                     for (int idof = 1; idof <= appliedDofs.giveSize(); ++idof) {
@@ -1397,7 +1397,7 @@ void Domain :: createDofs()
             }
 
             // Finally create the new DOF:
-            //printf("Creating: node %d, id = %d, dofType = %d, bc = %d, ic = %d\n", i, id, dtype, bcid, icid);
+            printf("Creating: node %d, id = %d, dofType = %d, bc = %d, ic = %d\n", i, id, dtype, bcid, icid);
             Dof *dof = classFactory.createDof(dtype, ++c, dman);
             dof->setDofID(id);
             dof->setBcId(bcid); // Note: slave dofs and such will simple ignore this.

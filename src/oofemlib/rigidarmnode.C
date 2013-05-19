@@ -91,7 +91,7 @@ RigidArmNode :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, masterDofMngr, _IFT_RigidArmNode_master);
 
     IR_GIVE_FIELD(ir, masterMask, _IFT_DofManager_mastermask);
-    if ( masterMask.giveSize() != this->giveNumberOfDofs() ) {
+    if ( masterMask.giveSize() != this->dofidmask->giveSize() ) {
         _error("initializeFrom: mastermask size mismatch");
     }
 
