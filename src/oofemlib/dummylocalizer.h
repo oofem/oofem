@@ -70,7 +70,6 @@ public:
     virtual void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius);
 
     virtual const char *giveClassName() const { return "DummySpatialLocalizer"; }
-    virtual classType giveClassID() const { return DummySpatialLocalizerClass; }
 };
 } // end namespace oofem
 #endif // dummylocalizer_h

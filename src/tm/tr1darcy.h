@@ -77,6 +77,7 @@ public:
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 
     // From NodalAveragingRecoveryModelInterface
+    virtual const char *giveInputRecordName() const { return _IFT_Tr1Darcy_Name; }
     virtual const char *giveClassName() const { return "Tr1Darcy"; };
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);

@@ -42,6 +42,7 @@
 #include "feinterpol2d.h"
 #include "feinterpol3d.h"
 #include "classfactory.h"
+#include "set.h"
 #include "sparsemtrx.h"
 
 #include "integrationdomain.h"
@@ -63,9 +64,7 @@ IRResultType SurfaceTensionBoundaryCondition :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->gamma, _IFT_SurfaceTensionBoundaryCondition_gamma);
 
-    int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_SurfaceTensionBoundaryCondition_useTangent);
-    this->useTangent = val;
+    this->useTangent = ir->hasField(_IFT_SurfaceTensionBoundaryCondition_useTangent);
 
     return ActiveBoundaryCondition :: initializeFrom(ir);
 }
@@ -79,16 +78,18 @@ void SurfaceTensionBoundaryCondition :: giveLocationArrays(std::vector<IntArray>
     if (!this->useTangent || eid != EID_MomentumBalance || type != TangentStiffnessMatrix)
         return;
 
-    rows.resize(this->sides.size());
-    cols.resize(this->sides.size());
+    Set *set = this->giveDomain()->giveSet(this->set);
+    const IntArray &boundaries = set->giveBoundaryList();
 
-    int i = 0;
-    for (std :: list< std::pair<int, int> > :: const_iterator it = sides.begin(); it != sides.end(); ++it ) {
-        Element *e = this->giveDomain()->giveElement(it->first);
-        int side = it->second;
-        e->giveBoundaryLocationArray(rows[i], side, eid, r_s);
-        e->giveBoundaryLocationArray(cols[i], side, eid, c_s);
-        i++;
+    rows.resize(boundaries.giveSize()/2);
+    cols.resize(boundaries.giveSize()/2);
+
+    for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
+        Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
+        int boundary = boundaries.at(pos*2);
+
+        e->giveBoundaryLocationArray(rows[pos], boundary, eid, r_s);
+        e->giveBoundaryLocationArray(cols[pos], boundary, eid, c_s);
     }
 }
 
@@ -106,12 +107,16 @@ void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *t
     FloatMatrix Ke;
     IntArray r_loc, c_loc;
 
-    for (std :: list< std::pair<int, int> > :: const_iterator it = sides.begin(); it != sides.end(); ++it ) {
-        Element *e = this->giveDomain()->giveElement(it->first);
-        int side = it->second;
-        e->giveBoundaryLocationArray(r_loc, side, eid, r_s);
-        e->giveBoundaryLocationArray(c_loc, side, eid, c_s);
-        this->computeTangentFromElement(Ke, e, side, tStep);
+    Set *set = this->giveDomain()->giveSet(this->set);
+    const IntArray &boundaries = set->giveBoundaryList();
+
+    for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
+        Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
+        int boundary = boundaries.at(pos*2);
+
+        e->giveBoundaryLocationArray(r_loc, boundary, eid, r_s);
+        e->giveBoundaryLocationArray(c_loc, boundary, eid, c_s);
+        this->computeTangentFromElement(Ke, e, boundary, tStep);
         answer->assemble(r_loc, c_loc, Ke);
     }
 }
@@ -133,11 +138,15 @@ void SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, TimeS
     FloatArray fe;
     IntArray loc, dofids, masterdofids;
 
-    for (std :: list< std::pair<int, int> > :: const_iterator it = sides.begin(); it != sides.end(); ++it ) {
-        Element *e = this->giveDomain()->giveElement(it->first);
-        int side = it->second;
-        e->giveBoundaryLocationArray(loc, side, eid, s, &masterdofids);
-        this->computeLoadVectorFromElement(fe, e, side, tStep);
+    Set *set = this->giveDomain()->giveSet(this->set);
+    const IntArray &boundaries = set->giveBoundaryList();
+
+    for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
+        Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
+        int boundary = boundaries.at(pos*2);
+
+        e->giveBoundaryLocationArray(loc, boundary, eid, s, &masterdofids);
+        this->computeLoadVectorFromElement(fe, e, boundary, tStep);
         answer.assemble(fe, loc);
         if ( eNorms ) {
             for ( int i = 1; i <= loc.giveSize(); ++i ) {

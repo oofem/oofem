@@ -129,10 +129,11 @@ public:
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "IDNLMaterial"; }
     virtual classType giveClassID() const { return IDNLMaterialClass; }
-    virtual const char *giveInputRecordName() const { return "idmnl1"; }
+    virtual const char *giveInputRecordName() const { return _IFT_IDNLMaterial_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
+
     virtual Interface *giveInterface(InterfaceType it);
 
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);

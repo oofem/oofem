@@ -134,6 +134,7 @@ public:
 
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_tetra_2; }
     virtual const char *giveClassName() const { return "Tet21Stokes"; }
+    virtual const char *giveInputRecordName() const { return _IFT_Tet21Stokes_Name; }
     virtual classType giveClassID() const { return Tet21StokesElementClass; }
     virtual MaterialMode giveMaterialMode() { return _3dFlow; }
 

@@ -38,6 +38,7 @@
 #include "floatarray.h"
 #include "contextioerr.h"
 #include "mathfem.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 Microplane *
@@ -315,16 +316,11 @@ MicroplaneMaterial :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-MicroplaneMaterial :: giveInputRecordString(std :: string &str, bool keyword)
+void
+MicroplaneMaterial :: giveInputRecord(DynamicInputRecord &input)
 {
-    char buff [ 1024 ];
-
-    StructuralMaterial :: giveInputRecordString(str, keyword);
-    sprintf(buff, " nmp %d", this->numberOfMicroplanes);
-    str += buff;
-
-    return 1;
+    StructuralMaterial :: giveInputRecord(input);
+    input.setField(this->numberOfMicroplanes, _IFT_MicroplaneMaterial_nmp);
 }
 
 

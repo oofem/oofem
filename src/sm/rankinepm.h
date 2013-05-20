@@ -62,6 +62,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
+    virtual const char *giveInputRecordName() const { return _IFT_RankinePlasticMaterial_Name; }
     virtual const char *giveClassName() const { return "RankinePlasticMaterial"; }
     virtual classType giveClassID() const { return RankinePlasticMaterialClass; }
 

@@ -37,6 +37,7 @@
 #include "gausspoint.h"
 #include "floatarray.h"
 #include "mathfem.h"
+#include "dynamicinputrecord.h"
 #include "contextioerr.h"
 
 namespace oofem {
@@ -125,17 +126,12 @@ Material :: initializeFrom(InputRecord *ir)
 }
 
 
-
-int
-Material :: giveInputRecordString(std :: string &str, bool keyword)
+void
+Material :: giveInputRecord(DynamicInputRecord& input)
 {
-    char buff [ 1024 ];
-
-    FEMComponent :: giveInputRecordString(str, keyword);
-    sprintf( buff, " d %e", propertyDictionary->at('d') );
-    str += buff;
-
-    return 1;
+    FEMComponent :: giveInputRecord(input);
+    input.setField(this->propertyDictionary->at('d'), _IFT_Material_density);
+    input.setField(this->castingTime, _IFT_Material_castingtime);
 }
 
 

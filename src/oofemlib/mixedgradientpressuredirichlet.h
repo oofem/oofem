@@ -120,8 +120,7 @@ public:
      * The size of the center coordinates must be equal to the size of the coordinates in the applied nodes.
      */
     virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual void scale(double s) { devGradient.times(s); pressure *= s; }
 
@@ -161,6 +160,7 @@ public:
     virtual double giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
 
     virtual const char *giveClassName() const { return "MixedGradientPressureDirichlet"; }
+    virtual const char *giveInputRecordName() const { return _IFT_MixedGradientPressureDirichlet_Name; }
     virtual classType giveClassID() const { return MixedGradientPressureDirichletClass; }
 };
 } // end namespace oofem

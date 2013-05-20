@@ -103,11 +103,10 @@ public:
 
     virtual const char *giveClassName() const { return "TrabBoneNLEmbed"; }
     virtual classType giveClassID() const { return TrabBoneNLEmbedClass; }
-    virtual const char *giveInputRecordName() const { return "trabbonenlembed"; }
+    virtual const char *giveInputRecordName() const { return _IFT_TrabBoneNLEmbed_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual Interface *giveInterface(InterfaceType);
 

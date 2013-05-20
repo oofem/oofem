@@ -103,6 +103,7 @@ public:
     virtual int hasNonLinearBehaviour() { return 1; }
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
+    virtual const char *giveInputRecordName() const { return _IFT_MisesMat_Name; }
     virtual const char *giveClassName() const { return "MisesMat"; }
     virtual classType giveClassID() const { return MisesMatClass; }
 

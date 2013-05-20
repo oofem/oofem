@@ -111,6 +111,7 @@ public:
 
     virtual int hasNonLinearBehaviour() { return 1; }
     virtual int hasMaterialModeCapability(MaterialMode mode);
+    virtual const char *giveInputRecordName() const { return _IFT_SimpleInterfaceMaterial_Name; }
     virtual const char *giveClassName() const { return "SimpleInterfaceMaterial"; }
     virtual classType giveClassID() const { return SimpleInterfaceMaterialClass; }
 
@@ -147,7 +148,7 @@ public:
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new SimpleInterfaceMaterialStatus(1, domain, gp); }
 };

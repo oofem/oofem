@@ -54,6 +54,8 @@ IRResultType Set :: initializeFrom(InputRecord* ir)
     const char *__proc = "initializeFrom";
     IRResultType result;
 
+    FEMComponent :: initializeFrom(ir);
+
     IntArray inputNodes;
     std::list< Range > inputNodeRanges;
     IR_GIVE_OPTIONAL_FIELD(ir, inputNodes, _IFT_Set_nodes);
@@ -64,7 +66,7 @@ IRResultType Set :: initializeFrom(InputRecord* ir)
     std::list< Range > inputElementRanges;
     IR_GIVE_OPTIONAL_FIELD(ir, inputElements, _IFT_Set_elements);
     IR_GIVE_OPTIONAL_FIELD(ir, inputElementRanges, _IFT_Set_elementRanges);
-    this->computeIntArray(this->nodes, inputNodes, inputNodeRanges);
+    this->computeIntArray(this->elements, inputElements, inputElementRanges);
 
     this->elementBoundaries.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, this->elementBoundaries, _IFT_Set_elementBoundaries);
@@ -72,7 +74,7 @@ IRResultType Set :: initializeFrom(InputRecord* ir)
     this->elementEdges.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, this->elementEdges, _IFT_Set_elementEdges);
 
-    return FEMComponent :: initializeFrom(ir);
+    return IRRT_OK;
 }
 
 void Set :: computeIntArray(IntArray& answer, const IntArray& specified, std::list< Range > ranges)
@@ -94,7 +96,7 @@ void Set :: computeIntArray(IntArray& answer, const IntArray& specified, std::li
             afflictedNodes.at(i) = 1;
         }
     }
-
+    answer.findNonzeros(afflictedNodes);
 }
 
 
@@ -138,8 +140,8 @@ const IntArray& Set :: giveNodeList()
                 afflictedNodes.at(e->giveNode(eNodes.at(inode))->giveNumber()) = 1;
             }
         }
-        
-        for (int inode = 1; inode <= this->elementEdges.giveSize()/2; ++inode) {
+
+        for (int inode = 1; inode <= this->nodes.giveSize(); ++inode) {
             afflictedNodes.at( this->nodes.at(inode) ) = 1;
         }
         totalNodes.findNonzeros(afflictedNodes);

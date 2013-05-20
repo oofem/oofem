@@ -98,6 +98,7 @@ public:
     virtual void toFloatMatrix(FloatMatrix &answer) const;
     virtual void printStatistics() const;
     virtual void printYourself() const;
+    void printMatlab() const;
     virtual SparseMtrxType  giveType() const { return SMT_PetscMtrx; }
     virtual bool isAsymmetric() const { return !symmFlag; }
 

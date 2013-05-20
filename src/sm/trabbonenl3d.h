@@ -101,13 +101,12 @@ public:
 
     virtual const char *giveClassName() const { return "TrabBoneNL3D"; }
     virtual classType giveClassID() const { return TrabBoneNL3DClass; }
-    virtual const char *giveInputRecordName() const { return "trabbonenl3d"; }
+    virtual const char *giveInputRecordName() const { return _IFT_TrabBoneNL3D_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual Interface *giveInterface(InterfaceType it);
-
 
     virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
 

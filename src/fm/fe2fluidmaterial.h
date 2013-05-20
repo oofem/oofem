@@ -96,8 +96,6 @@ public:
     /// Copies time step data to RVE.
     virtual void setTimeStep(TimeStep *tStep);
 
-    double computeSize();
-
     FloatMatrix &giveDeviatoricTangent() { return Ed; }
     FloatArray &giveDeviatoricPressureTangent() { return Ep; };
     FloatArray &giveVolumetricDeviatoricTangent() { return Cd; };
@@ -143,7 +141,7 @@ public:
     virtual ~FE2FluidMaterial() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual int checkConsistency();
     virtual int hasMaterialModeCapability(MaterialMode mode);
@@ -163,6 +161,7 @@ public:
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
     virtual const char *giveClassName() const { return "FE2FluidMaterial"; }
+    virtual const char *giveInputRecordName() const { return _IFT_FE2FluidMaterial_Name; }
     virtual classType giveClassID() const { return FE2FluidMaterialClass; }
 };
 

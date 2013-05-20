@@ -6,7 +6,7 @@
 
 from numpy import *
 
-nelem = 13;
+nelem = 5;
 n = nelem*2 + 1;
 
 X, Y, Z = mgrid[0:nelem:n*1j, 0:nelem:n*1j, 0:nelem:n*1j ]
@@ -22,8 +22,6 @@ for ez in range(0,nelem):
     for ey in range(0,nelem):
         for ex in range(0,nelem):
             e = ex + ey*nelem + ez*nelem*nelem
-
-            emat[e] = 1;
 
             elem[e, 0] = nC[0+ex*2,0+ey*2,2+ez*2]
             elem[e, 1] = nC[0+ex*2,2+ey*2,2+ez*2]
@@ -59,6 +57,19 @@ for ez in range(0,nelem):
         
             elem[e,26] = nC[1+ex*2,1+ey*2,1+ez*2]
 
+            # Check if center coordinate is within some sphere:
+            ccoord = array([
+                    X[1+ex*2,1+ey*2,1+ez*2],
+                    Y[1+ex*2,1+ey*2,1+ez*2],
+                    Z[1+ex*2,1+ey*2,1+ez*2]
+                    ]) - nelem*0.5
+            dist = linalg.norm(ccoord)
+            if dist <= nelem*0.5:
+                emat[e] = 2
+            else:
+                emat[e] = 1
+
+
 
 # Write the input file
 fname = 'hexstokes';
@@ -66,34 +77,20 @@ f = open(fname+'.in','w')
 print(fname+'.out', file=f)
 print('Hex grid for incompressible stokes flow', file=f)
 print('StokesFlow nsteps 1 rtolf 1e-6 lstype 3 smtype 7 nonlinform 1 nmodules 1', file=f)
-print('VTKXML tstep_all domain_all primvars 2 4 5', file=f)
-print('Domain 2dIncompFlow', file=f)
+#print('Nonlinearstatic nsteps 1 rtolf 1e-6 lstype 3 smtype 7 controlmode 1 nmodules 1', file=f)
+print('VTKXML tstep_all domain_all primvars 2 4 5 cellvars 1 46', file=f)
+#print('VTKXML tstep_all domain_all primvars 1 1 cellvars 2 46 4', file=f)
+print('Domain 3dIncompFlow', file=f)
+#print('Domain 3d', file=f)
 print('OutputManager tstep_all dofman_all element_all', file=f)
-print('ndofman', n*n*n, 'nelem', nelem*nelem*nelem, 'ncrosssect 1 nmat 2 nbc 2 nic 0 nltf 1', file=f)
+print('ndofman', n*n*n, 'nelem', nelem*nelem*nelem, 'ncrosssect 1 nmat 2 nbc 4 nic 0 nltf 1 nset 4', file=f)
 
 # Nodes:
 for nz in range(0,n):
     for ny in range(0,n):
         for nx in range(0,n):
             node = nx + ny * n + nz * n * n + 1
-            no_p = mod(nx,2) or mod(ny,2) or mod(nz,2)
-            bc = zeros([4 - no_p]).astype(int)
-            if nz == 0:
-                #if nx == 0 and ny == 0:
-                bc[0] = 1
-                bc[1] = 1
-                bc[2] = 1
-            elif nz == n-1:
-                bc[0] = 1
-                bc[1] = 1
-                bc[2] = 2
-
-            if size(bc) == 3:
-                print('Node', node, 'coords 3', X[nx,ny,nz], Y[nx,ny,nz], Z[nx,ny,nz], 
-                    'ndofs 3 dofidmask 3 7 8 9    bc 3', bc[0],bc[1],bc[2],file=f)
-            else:
-                print('Node', node, 'coords 3', X[nx,ny,nz], Y[nx,ny,nz], Z[nx,ny,nz], 
-                    'ndofs 4 dofidmask 4 7 8 9 11 bc 4', bc[0],bc[1],bc[2],bc[3], file=f)
+            print('Node', node, 'coords 3', X[nx,ny,nz], Y[nx,ny,nz], Z[nx,ny,nz], file=f)
 
 
 # Elements:
@@ -102,15 +99,76 @@ for ez in range(0,nelem):
         for ex in range(0,nelem):
             e = ex + ey*nelem + ez*nelem*nelem
             q = elem[e];
-            print('Hexa21Stokes', e+1, 'mat', emat[e], 'crossSect 1 nodes',size(q),
+            elname = 'Hexa21Stokes'
+            #elname = 'Q27Space'
+            print(elname, e+1, 'mat', emat[e], 'crossSect 1 nodes',size(q),
                 q[0],q[1],q[2],q[3],q[4],q[5],q[6],q[7],q[8],q[9],q[10],q[11],q[12],q[13],q[14],q[15],q[16],
-                q[17],q[18],q[19],q[20],q[21],q[22],q[23],q[24],q[25],q[26], file=f)
+                q[17],q[18],q[19],q[20],q[21],q[22],q[23],q[24],q[25],q[26], 
+                file=f)
 
-print('EmptyCS 1', file=f)
+#print('EmptyCS 1', file=f)
+print('SimpleCS 1 thick 0.2', file=f)
 print('NewtonianFluid 1 d 1 mu 1', file=f)
 print('NewtonianFluid 2 d 1 mu 5', file=f)
-print('BoundaryCondition 1 d 0.0 loadTimeFunction 1 defaultDofs 3 7 8 9', file=f)
-print('BoundaryCondition 2 d 1.0 loadTimeFunction 1 defaultDofs 3 7 8 9', file=f)
+#print('IsoLE 1 d 1 E 1 n 0.45 talpha 0', file=f)
+#print('IsoLE 2 d 1 E 5 n 0.45 talpha 0', file=f)
+print('BoundaryCondition 1 d 0.0 loadTimeFunction 1 defaultDofs 6 1 2 3 7 8 9 set 3', file=f)
+print('BoundaryCondition 2 d 1.0 loadTimeFunction 1 defaultDofs 6 1 2 3 7 8 9 set 0', file=f)
+print('DeadWeight 3 loadTimeFunction 1 components 3 0 0 -1 set 0', file=f)
+print('MixedGradientPressureNeumann 4 loadTimeFunction 1 set 1 devgradient 6 0 0 0 1 1 1 pressure 0', file=f)
+#print('MixedGradientPressureDirichlet 4 loadTimeFunction 1 set 1 defaultdofs 6 1 2 3 7 8 9 devgradient 6 0 0 0 1 1 1 pressure 0', file=f)
+#print('PrescribedGradient 4 loadTimeFunction 1 set 1 defaultdofs 6 1 2 3 7 8 9 gradient 3 3 {0 0 1; 0 0 0; 1 0 0}', file=f)
 print('ConstantFunction 1 f(t) 1.0', file=f)
+print('Set 1 elementboundaries', 2*6*nelem*nelem, end=' ', file=f)
+
+ez = 0
+for ey in range(0,nelem):
+    for ex in range(0,nelem):
+        e = ex + ey*nelem + ez*nelem*nelem + 1
+        print(e, 2, end=' ', file=f)
+
+ez = nelem-1
+for ey in range(0,nelem):
+    for ex in range(0,nelem):
+        e = ex + ey*nelem + ez*nelem*nelem + 1
+        print(e, 1, end=' ', file=f)
+
+for ez in range(0,nelem):
+    ey = 0
+    for ex in range(0,nelem):
+        e = ex + ey*nelem + ez*nelem*nelem + 1
+        print(e, 6, end=' ', file=f)
+
+for ez in range(0,nelem):
+    ey = nelem-1
+    for ex in range(0,nelem):
+        e = ex + ey*nelem + ez*nelem*nelem + 1
+        print(e, 4, end=' ', file=f)
+
+for ez in range(0,nelem):
+    for ey in range(0,nelem):
+        ex = 0
+        e = ex + ey*nelem + ez*nelem*nelem + 1
+        print(e, 3, end=' ', file=f)
+
+for ez in range(0,nelem):
+    for ey in range(0,nelem):
+        ex = nelem-1
+        e = ex + ey*nelem + ez*nelem*nelem + 1
+        print(e, 5, end=' ', file=f)
+
+print('', file=f)
+
+print('Set 2 elementboundaries', 2*nelem*nelem, end=' ', file=f)
+ez = nelem-1
+for ey in range(0,nelem):
+    for ex in range(0,nelem):
+        e = ex + ey*nelem + ez*nelem*nelem + 1
+        print(e, 1, end=' ', file=f)
+print('', file=f)
+
+print('Set 3 nodes 1', nC[nelem][nelem][nelem], file=f)
+
+print('Set 4 elementRanges {(', 1, nelem*nelem*nelem,')}', file=f)
 
 f.close()

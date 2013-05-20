@@ -40,6 +40,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 
@@ -349,18 +350,18 @@ CebFipSlip90Material :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-CebFipSlip90Material :: giveInputRecordString(std :: string &str, bool keyword)
+void
+CebFipSlip90Material :: giveInputRecord(DynamicInputRecord &input)
 {
-    char buff [ 1024 ];
+    StructuralMaterial::giveInputRecord(input);
+    input.setField(this->tmax, _IFT_CebFipSlip90Material_tmax);
+    input.setField(this->tres, _IFT_CebFipSlip90Material_tres);
 
-    StructuralMaterial :: giveInputRecordString(str, keyword);
-
-    sprintf(buff, " tmax %e tres %e s1 %e s2 %e s3 %e", tmax, tres, s1, s2, s3);
-    str += buff;
-
-    return 1;
+    input.setField(this->s1, _IFT_CebFipSlip90Material_s1);
+    input.setField(this->s2, _IFT_CebFipSlip90Material_s2);
+    input.setField(this->s3, _IFT_CebFipSlip90Material_s3);
 }
+
 
 
 double

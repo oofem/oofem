@@ -36,6 +36,7 @@
 #include "loadtimefunction.h"
 #include "floatarray.h"
 #include "timestep.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 void
@@ -113,26 +114,14 @@ BoundaryLoad :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-BoundaryLoad :: giveInputRecordString(std :: string &str, bool keyword)
+void
+BoundaryLoad :: giveInputRecord(DynamicInputRecord &input)
 {
-    char buff [ 1024 ];
-
-
-    Load :: giveInputRecordString(str, keyword);
-    sprintf(buff, " ndofs %d loadtype %d cstype %d", this->nDofs, ( int ) this->lType, ( int ) this->coordSystemType);
-    str += buff;
-
-    if ( this->propertyDictionary.giveSize() != 0 ) {
-        std :: string helpStr;
-
-        sprintf( buff, " properties %d", this->propertyDictionary.giveSize() );
-        str += buff;
-        this->propertyDictionary.formatAsString(helpStr);
-        str += helpStr;
-    }
-
-    return 1;
+    Load :: giveInputRecord(input);
+    input.setField(this->nDofs, _IFT_BoundaryLoad_ndofs);
+    input.setField(this->lType, _IFT_BoundaryLoad_loadtype);
+    input.setField(this->coordSystemType, _IFT_BoundaryLoad_cstype);
+    input.setField(this->propertyDictionary, _IFT_BoundaryLoad_properties);
 }
 
 

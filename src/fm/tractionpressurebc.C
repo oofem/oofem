@@ -47,15 +47,4 @@ double TractionPressureBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
     return static_cast< CBS * >(this->domain->giveEngngModel())->giveTractionPressure(dof);
 }
 
-IRResultType
-TractionPressureBC :: initializeFrom(InputRecord *ir)
-{
-    return GeneralBoundaryCondition :: initializeFrom(ir);
-}
-
-int
-TractionPressureBC :: giveInputRecordString(std :: string &str, bool keyword)
-{
-    return 1;
-}
 } // end namespace oofem

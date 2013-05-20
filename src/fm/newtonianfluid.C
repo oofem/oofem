@@ -38,6 +38,7 @@
 #include "floatmatrix.h"
 #include "gausspoint.h"
 #include "engngm.h"
+#include "dynamicinputrecord.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -74,18 +75,12 @@ NewtonianFluidMaterial :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-NewtonianFluidMaterial :: giveInputRecordString(std :: string &str, bool keyword)
+void
+NewtonianFluidMaterial :: giveInputRecord(DynamicInputRecord &input)
 {
-    char buff [ 1024 ];
-
-    FluidDynamicMaterial :: giveInputRecordString(str, keyword);
-    sprintf(buff, " mu %e ", this->viscosity);
-    str += buff;
-
-    return 1;
+    FluidDynamicMaterial :: giveInputRecord(input);
+    input.setField(this->viscosity, _IFT_NewtonianFluidMaterial_mu);
 }
-
 
 double
 NewtonianFluidMaterial :: giveCharacteristicValue(MatResponseMode mode,

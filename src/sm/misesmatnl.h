@@ -109,11 +109,10 @@ public:
 
     virtual const char *giveClassName() const { return "MisesMatNl"; }
     virtual classType giveClassID() const { return MisesMatClass; }
-    virtual const char *giveInputRecordName() const { return "MisesMatNl"; }
+    virtual const char *giveInputRecordName() const { return _IFT_MisesMatNl_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual Interface *giveInterface(InterfaceType);
 

@@ -106,6 +106,7 @@ public:
 #endif
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_SpringElement_Name; }
     virtual const char *giveClassName() const { return "SpringElement"; }
     virtual classType giveClassID() const { return SpringElementClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);

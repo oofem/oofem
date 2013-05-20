@@ -87,6 +87,7 @@ public:
 
     virtual classType giveClassID() const { return UserDefinedLoadTimeFunctionClass; }
     virtual const char *giveClassName() const { return "UserDefinedLoadTimeFunction"; }
+    virtual const char *giveInputRecordName() const { return _IFT_UserDefinedLoadTimeFunction_Name; }
 };
 } // end namespace oofem
 #endif // usrdeftimefunct_h

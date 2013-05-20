@@ -108,6 +108,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
+    virtual const char *giveInputRecordName() const { return _IFT_Masonry02_Name; }
     virtual const char *giveClassName() const { return "Masonry02"; }
     virtual classType giveClassID() const { return Masonry02Class; }
 

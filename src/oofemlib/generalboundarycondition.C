@@ -39,6 +39,7 @@
 #include "reinforcement.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 GeneralBoundaryCondition :: GeneralBoundaryCondition(int n, Domain *d) : FEMComponent(n, d)
@@ -76,8 +77,8 @@ GeneralBoundaryCondition :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_GeneralBoundaryCondition_valType);
     valType = ( bcValType ) val;
 
-    defaultDofs.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, defaultDofs, _IFT_GeneralBoundaryCondition_defaultDofs);
+    dofs.resize(0);
+    IR_GIVE_OPTIONAL_FIELD(ir, dofs, _IFT_GeneralBoundaryCondition_dofs);
 
     isImposedTimeFunction = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, isImposedTimeFunction, _IFT_GeneralBoundaryCondition_IsImposedTimeFunct);
@@ -103,20 +104,12 @@ bool GeneralBoundaryCondition :: isImposed(TimeStep *tStep)
 }
 
 
-int
-GeneralBoundaryCondition :: giveInputRecordString(std :: string &str, bool keyword)
+void
+GeneralBoundaryCondition :: giveInputRecord(DynamicInputRecord &input)
 {
-    char buff [ 1024 ];
-
-    FEMComponent :: giveInputRecordString(str, keyword);
-    sprintf(buff, " loadtimefunction %d", this->loadTimeFunction);
-    str += buff;
-    
-    GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
-    sprintf(buff, " isimposedtimefunction %d ", this->isImposedTimeFunction);
-    str += buff;
-
-    return 1;
+    FEMComponent :: giveInputRecord(input);
+    input.setField(this->loadTimeFunction, _IFT_GeneralBoundaryCondition_LoadTimeFunct);
+    input.setField(this->isImposedTimeFunction, _IFT_GeneralBoundaryCondition_IsImposedTimeFunct);
 }
 
 contextIOResultType

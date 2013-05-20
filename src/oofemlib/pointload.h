@@ -123,12 +123,13 @@ public:
     //virtual PL_FormulationType giveFormulationType () {return BL_EntityFormulation;}
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual bcType giveType() const { return lType; }
     virtual bcGeomType giveBCGeoType() const { return PointLoadBGT; }
     virtual classType giveClassID() const { return PointLoadClass; }
     virtual const char *giveClassName() const { return "PointLoad"; }
+    virtual const char *giveInputRecordName() const { return _IFT_PointLoad_Name; }
 };
 } // end namespace oofem
 #endif // pointload_h

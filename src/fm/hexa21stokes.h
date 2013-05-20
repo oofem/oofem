@@ -172,6 +172,7 @@ public:
 
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_27; }
     virtual const char *giveClassName() const { return "Hexa21Stokes"; }
+    virtual const char *giveInputRecordName() const { return _IFT_Hexa21Stokes_Name; }
     virtual classType giveClassID() const { return Hexa21StokesElementClass; }
     virtual MaterialMode giveMaterialMode() { return _3dFlow; }
 

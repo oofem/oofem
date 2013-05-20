@@ -94,9 +94,6 @@ public:
      * @return the minimum value of the minimum distance from nonlocal boundary and maxPossibleDistance
      */
     virtual double calculateMinimumDistanceFromBoundary(const FloatArray &coords, double maxPossibleDistance) = 0;
-
-    virtual const char *giveClassName() const { return "NonlocalBarrier"; }
-    virtual classType giveClassID() const { return NonlocalBarrierClass; }
 };
 } // end namespace oofem
 #endif // nonlocalbarrier_h

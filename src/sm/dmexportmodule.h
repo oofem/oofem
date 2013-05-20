@@ -63,6 +63,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void doOutput(TimeStep *tStep);
     virtual const char *giveClassName() const { return "DofManExportModuleClass"; }
+    virtual const char *giveInputRecordName() const { return _IFT_DofManExportModule_Name; }
 
 protected:
     FILE *giveOutputStream(TimeStep *tStep);

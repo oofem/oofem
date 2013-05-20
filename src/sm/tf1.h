@@ -66,6 +66,7 @@ public:
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
 
     virtual classType giveClassID() const { return TF1Class; }
+    virtual const char *giveInputRecordName() const { return _IFT_TF1_Name; }
     virtual const char *giveClassName() const { return "TF1"; }
 
 };

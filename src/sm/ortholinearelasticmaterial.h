@@ -124,6 +124,7 @@ public:
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     // identification and auxiliary functions
+    virtual const char *giveInputRecordName() const { return _IFT_OrthotropicLinearElasticMaterial_Name; }
     virtual const char *giveClassName() const { return "OrthotropicLinearElasticMaterial"; }
     virtual classType giveClassID() const { return OrthotropicLinearElasticMaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);

@@ -199,8 +199,9 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "StructuralMaterial"; }
     virtual classType giveClassID() const { return StructuralMaterialClass; }
+
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     /**
      * Auxiliary member function that computes principal values of stress/strain vector.
      * @param answer Computed principal values.

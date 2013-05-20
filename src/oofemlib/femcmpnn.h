@@ -102,9 +102,9 @@ public:
      */
     virtual classType giveClassID() const { return FEMComponentClass; }
     /// @return Class name of the receiver.
-    virtual const char *giveClassName() const  = 0;
+    virtual const char *giveClassName() const = 0;
     /// @return Input record name of the receiver.
-    virtual const char *giveInputRecordName() const { return ( this->giveClassName() ); }
+    virtual const char *giveInputRecordName() const = 0;
     /// @return Domain which receiver belongs to.
     Domain *giveDomain() const { return domain; }
     /**
@@ -139,17 +139,6 @@ public:
      * @return IRResultType
      */
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_NOTFOUND; };
-    /**
-    * The same function as above, but allows to read more lines since a pointer 
-    * to the DataReader is provided.
-    */
-    virtual IRResultType initializeFrom(InputRecord *ir, DataReader *dr) { return IRRT_NOTFOUND; };
-    /**
-     * Setups the input record string of receiver.
-     * @param str String to be filled by input record.
-     * @param keyword Determines if record keyword should be printed.
-     */
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     /**
      * Setups the input record string of receiver.
      * @param input Dynamic input record to be filled by receiver.

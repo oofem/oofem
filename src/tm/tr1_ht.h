@@ -62,6 +62,7 @@ public:
     virtual double computeVolumeAround(GaussPoint *gp);
 
     // definition
+    virtual const char *giveInputRecordName() const { return _IFT_Tr1_ht_Name; }
     virtual const char *giveClassName() const { return "Tr1_htElement"; }
     virtual classType giveClassID() const { return Tr1_htClass; }
 
@@ -99,6 +100,8 @@ class Tr1_hmt: public Tr1_ht
 {
 public:
     Tr1_hmt(int n, Domain *d);
+
+    virtual const char *giveInputRecordName() const { return _IFT_Tr1_hmt_Name; }
     virtual const char *giveClassName() const { return "Tr1_hmt"; }
     virtual classType giveClassID() const { return Tr1_hmtClass; }
 };

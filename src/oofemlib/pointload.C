@@ -36,6 +36,7 @@
 #include "loadtimefunction.h"
 #include "floatarray.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 
@@ -76,21 +77,14 @@ PointLoad :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-PointLoad :: giveInputRecordString(std :: string &str, bool keyword)
+void
+PointLoad :: giveInputRecord(DynamicInputRecord &input)
 {
-    char buff [ 1024 ];
-
-    Load :: giveInputRecordString(str, keyword);
-    sprintf( buff, " ndofs %d loadtype %d cstype %d coords %d", this->nDofs, ( int ) this->lType,
-            ( int ) this->coordSystemType, coords.giveSize() );
-    str += buff;
-
-    for ( int i = 1; i <= this->coords.giveSize(); i++ ) {
-        sprintf( buff, " %e", this->coords.at(i) );
-        str += buff;
-    }
-
-    return 1;
+    Load :: giveInputRecord(input);
+    input.setField(this->nDofs, _IFT_PointLoad_ndofs);
+    input.setField(this->lType, _IFT_PointLoad_loadtype);
+    input.setField(this->coordSystemType, _IFT_PointLoad_cstype);
+    input.setField(this->coords, _IFT_PointLoad_coords);
 }
+
 } // end namespace oofem

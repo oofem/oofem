@@ -235,8 +235,6 @@ public:
 #endif
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual const char *giveClassName() const { return "CrossSection"; }
-    virtual classType giveClassID() const { return CrossSectionClass; }
 
     /**
      * Stores integration point state to output stream.

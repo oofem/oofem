@@ -56,6 +56,8 @@ public:
      */
     MaterialInterface(int n, Domain *d) : FEMComponent(n, d) { }
 
+    virtual const char *giveInputRecordName() const { return NULL; }
+
     /**
      *  Initializes receiver
      */

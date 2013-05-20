@@ -80,6 +80,7 @@ public:
 
     virtual classType giveClassID() const { return ConstantSurfaceLoadClass; }
     virtual const char *giveClassName() const { return "ConstantSurfaceLoad"; }
+    virtual const char *giveInputRecordName() const { return _IFT_ConstantSurfaceLoad_Name; }
 
 private:
     virtual void computeNArray(FloatArray &answer, FloatArray &coords) const { answer.resize(0); }

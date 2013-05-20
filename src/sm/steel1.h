@@ -57,6 +57,7 @@ public:
     virtual ~Steel1() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveInputRecordName() const { return _IFT_Steel1_Name; }
     virtual const char *giveClassName() const { return "Steel1MaterialClass"; }
     virtual classType giveClassID() const { return Steel1MaterialClass; }
     virtual void updateIfFailure(GaussPoint *gp, FloatArray *, FloatArray *) { }

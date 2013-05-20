@@ -322,11 +322,10 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir);
     /**
-     * Sets up the input record string of receiver.
-     * @param str String to be filled by input record.
-     * @param keyword Print record keyword (default true).
+     * Stores receiver in an input record
+     * @param input Input record to be filled in.
      */
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    void giveInputRecord(DynamicInputRecord &input);
     /*
      * Creates new copy of associated status and inserts it into given integration point.
      * @param gp Integration point where newly created status will be stored.

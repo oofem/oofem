@@ -96,6 +96,7 @@ public:
 
     // identification
     virtual const char *giveClassName() const { return "DEIDynamic"; }
+    virtual const char *giveInputRecordName() const { return _IFT_DEIDynamic_Name; }
     virtual classType giveClassID() const { return DEIDynamicClass; }
     virtual fMode giveFormulation() { return TL; }
     virtual int giveNumberOfFirstStep() { return 0; }

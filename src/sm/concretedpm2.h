@@ -680,6 +680,7 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mMode);
 
     virtual const char *giveClassName() const { return "ConcreteDPM2"; }
+    virtual const char *giveInputRecordName() const { return _IFT_ConcreteDPM2_Name; }
     virtual classType giveClassID() const { return ConcreteDPM2Class; }
 
     LinearElasticMaterial *giveLinearElasticMaterial()

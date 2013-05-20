@@ -100,6 +100,7 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode) { return ( mode == _3dInterface ); }
 
     virtual const char *giveClassName() const { return "CohesiveInterfaceMaterial"; }
+    virtual const char *giveInputRecordName() const { return _IFT_CohesiveInterfaceMaterial_Name; }
     virtual classType giveClassID() const { return CohesiveInterfaceMaterialClass; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
@@ -134,7 +135,7 @@ public:
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new CohesiveInterfaceMaterialStatus(1, FEMComponent :: domain, gp); }
 

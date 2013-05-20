@@ -120,9 +120,6 @@ public:
      * @param ddev Vector in Voigt format.
      */
     virtual void setPrescribedDeviatoricGradientFromVoigt(const FloatArray &ddev) = 0;
-
-    virtual const char *giveClassName() const { return "MixedGradientPressureBC"; }
-    virtual classType giveClassID() const { return MixedGradientPressureBCClass; }
 };
 } // end namespace oofem
 

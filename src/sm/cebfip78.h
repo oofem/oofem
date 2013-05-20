@@ -69,6 +69,7 @@ public:
     virtual ~CebFip78Material() { }
 
     virtual const char *giveClassName() const { return "CebFip78Material"; }
+    virtual const char *giveInputRecordName() const { return _IFT_CebFip78Material_Name; }
     virtual classType giveClassID() const { return CebFip78MaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 

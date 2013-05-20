@@ -113,6 +113,7 @@ public:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 
+    virtual const char *giveInputRecordName() const { return _IFT_AnisotropicMassTransferMaterial_Name; }
     virtual const char *giveClassName() const { return "AnisotropicMassTransferMaterial"; }
     virtual classType giveClassID() const { return AnisotropicMassTransferMaterialClass; }
 

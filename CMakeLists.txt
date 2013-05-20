@@ -543,7 +543,7 @@ file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/testhelper.py
 "import subprocess,sys,glob
 if sys.argv[3] == 'p':
     files = glob.glob(sys.argv[2]+'.[0-9]*')
-    command = ['mpirun','-np',str(len(files)),sys.argv[1],'-p','-f',sys.argv[2],'-l','2']
+    command = ['mpirun','-np',str(len(files)),sys.argv[1],'-p','-f',sys.argv[2],'-l','2','-ksp_type','cg']
 else:
     files = [sys.argv[2]]
     command = [sys.argv[1],'-f',sys.argv[2],'-l','2']

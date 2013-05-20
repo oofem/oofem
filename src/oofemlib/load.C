@@ -36,6 +36,7 @@
 #include "verbose.h"
 #include "timestep.h"
 #include "loadtimefunction.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 Load :: Load(int i, Domain *aDomain) :
@@ -101,20 +102,13 @@ Load :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-Load :: giveInputRecordString(std :: string &str, bool keyword)
+void Load :: giveInputRecord ( DynamicInputRecord& input )
 {
-    char buff [ 1024 ];
-
-    GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
-    sprintf( buff, " components %d", this->componentArray.giveSize() );
-    str += buff;
-    for ( int i = 1; i <= this->componentArray.giveSize(); i++ ) {
-        sprintf( buff, " %e", this->componentArray.at(i) );
-        str += buff;
+    GeneralBoundaryCondition::giveInputRecord ( input );
+    input.setField( this->componentArray, _IFT_Load_components );
+    if ( !this->dofExcludeMask.containsOnlyZeroes() ) {
+        input.setField( this->dofExcludeMask, _IFT_Load_dofexcludemask );
     }
-
-    return 1;
 }
 
 

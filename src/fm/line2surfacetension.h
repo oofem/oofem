@@ -92,6 +92,7 @@ public:
     virtual int computeNumberOfDofs(EquationID ut) { return 6; }
 
     virtual const char *giveClassName() const { return "Line2SurfaceTension"; }
+    virtual const char *giveInputRecordName() const { return _IFT_Line2SurfaceTension_Name; }
     virtual classType giveClassID() const { return Line2SurfaceTensionElementClass; }
 };
 }

@@ -82,7 +82,7 @@ public:
     virtual ~EnrichmentItem();
     virtual IRResultType initializeFrom(InputRecord *ir);
     int instanciateYourself(DataReader *dr);
-    virtual const char *giveClassName() const { return "EnrichmentItem"; }
+    virtual const char *giveClassName() const = 0;
     IntArray *giveEnrichesDofsWithIdArray() { return this->enrichesDofsWithIdArray; }
     int giveNumberOfEnrDofs();
 
@@ -137,6 +137,8 @@ class CrackTip : public EnrichmentItem // only for 2D. Only the tip element belo
 {
 public:
     CrackTip(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain) { }
+    virtual const char *giveClassName() const { return "CrackTip"; }
+    virtual const char *giveInputRecordName() const { return _IFT_CrackTip_Name; }
 };
 
 /** Concrete representation of EnrichmentItem. */
@@ -144,6 +146,8 @@ class CrackInterior : public EnrichmentItem // rest of the crack el. that does n
 {
 public:
     CrackInterior(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain) { }
+    virtual const char *giveClassName() const { return "CrackInterior"; }
+    virtual const char *giveInputRecordName() const { return _IFT_CrackInterior_Name; }
 };
 
 /** Concrete representation of EnrichmentItem. */
@@ -154,6 +158,7 @@ protected:
 public:
     Inclusion(int n, XfemManager *xm, Domain *aDomain);
     virtual const char *giveClassName() const { return "Inclusion"; }
+    virtual const char *giveInputRecordName() const { return _IFT_Inclusion_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Material *giveMaterial() { return mat; }
 };
@@ -165,6 +170,7 @@ class Delamination : public EnrichmentItem
 public:
     Delamination(int n, XfemManager *xm, Domain *aDomain);
     virtual const char *giveClassName() const { return "Delamination"; }
+    virtual const char *giveInputRecordName() const { return _IFT_Delamination_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     FloatArray enrichmentDomainXiCoords; 

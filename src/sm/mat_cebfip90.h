@@ -124,6 +124,7 @@ public:
     virtual int hasNonLinearBehaviour() { return 1; }
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
+    virtual const char *giveInputRecordName() const { return _IFT_CebFipSlip90Material_Name; }
     virtual const char *giveClassName() const { return "CebFipSlip90Material"; }
     virtual classType giveClassID() const { return CebFipSlip90MaterialClass; }
 
@@ -168,8 +169,7 @@ public:
     double computeBondForceStiffness(double kappa);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new CebFipSlip90MaterialStatus(1, domain, gp); }
 

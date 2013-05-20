@@ -59,14 +59,8 @@ public:
             OOFEM_ERROR("RandomFieldGenerator::generateRandomValue computeGlobalCoordinates failed");
         }
     }
-    /**
-     * Initializes the receiver.
-     * @see{FEMComponent::initializeFrom}
-     */
+
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
-    /// Returns class name of the receiver.
-    virtual const char *giveClassName() const { return "RandomFieldGenerator"; }
-    virtual classType giveClassID() const { return RandomFieldGeneratorClass; }
 };
 } // end namespace oofem
 #endif

@@ -85,6 +85,7 @@ public:
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_LIBeam3dNL2_Name; }
     virtual const char *giveClassName() const { return "LIBeam3dNL2"; }
     virtual classType giveClassID() const { return LIBeam3dNL2Class; }
     virtual IRResultType initializeFrom(InputRecord *ir);

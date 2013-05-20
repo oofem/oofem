@@ -52,6 +52,7 @@
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
 #include "set.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 
@@ -702,20 +703,15 @@ IRResultType MixedGradientPressureNeumann :: initializeFrom(InputRecord *ir)
 }
 
 
-int MixedGradientPressureNeumann :: giveInputRecordString(std :: string &str, bool keyword)
+void MixedGradientPressureNeumann :: giveInputRecord(DynamicInputRecord &input)
 {
-    char buff [ 1024 ];
-
-    GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
-
-    sprintf( buff, " pressrue %e devgradient %d ", this->pressure, this->devGradient.giveSize() );
-    for ( int i = 1; i <= this->devGradient.giveSize(); i++ ) {
-        sprintf( buff, " %e", this->devGradient.at(i) );
-        str += buff;
-    }
-
-    return 1;
+    MixedGradientPressureBC :: giveInputRecord(input);
+    input.setField(this->pressure, _IFT_MixedGradientPressure_pressure);
+    OOFEM_ERROR("MixedGradientPressureDirichlet :: giveInputRecord - Not supported yet\n");
+    //FloatArray devGradientVoigt;
+    //input.setField(devGradientVoigt, _IFT_MixedGradientPressure_devGradient);
 }
+
 
 
 void MixedGradientPressureNeumann :: scale(double s)

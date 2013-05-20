@@ -138,8 +138,6 @@ public:
      */
     virtual void restoreConsistency() {}
 
-    virtual const char *giveClassName() const { return "MaterialStatus"; }
-    virtual classType giveClassID() const { return MaterialStatusClass; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 };
 } // end namespace oofem

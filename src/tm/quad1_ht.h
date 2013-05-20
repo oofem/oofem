@@ -60,6 +60,7 @@ public:
 
     virtual double computeVolumeAround(GaussPoint *gp);
 
+    virtual const char *giveInputRecordName() const { return _IFT_Quad1_ht_Name; }
     virtual const char *giveClassName() const { return "Quad1_ht"; }
     virtual classType giveClassID() const { return Quad1_htClass; }
 
@@ -99,6 +100,8 @@ class Quad1_hmt : public Quad1_ht
 {
 public:
     Quad1_hmt(int n, Domain *d);
+
+    virtual const char *giveInputRecordName() const { return _IFT_Quad1_hmt_Name; }
     virtual const char *giveClassName() const { return "Quad1_hmt"; }
     virtual classType giveClassID() const { return Quad1_hmtClass; }
     virtual int computeNumberOfDofs(EquationID ut) { return 8; }
@@ -111,6 +114,8 @@ class Quad1_mt : public Quad1_ht
 {
 public:
     Quad1_mt(int n, Domain *d);
+
+    virtual const char *giveInputRecordName() const { return _IFT_Quad1_mt_Name; }
     virtual const char *giveClassName() const { return "Quad1_mt"; }
     virtual classType giveClassID() const { return Quad1_mtClass; }
     virtual int computeNumberOfDofs(EquationID ut) { return 4; }

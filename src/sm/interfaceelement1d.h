@@ -83,6 +83,7 @@ public:
 #endif
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_InterfaceElem1d_Name; }
     virtual const char *giveClassName() const { return "InterfaceElem1d"; }
     virtual classType giveClassID() const { return InterfaceElem1dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);

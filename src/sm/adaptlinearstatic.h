@@ -80,6 +80,7 @@ public:
 
     // identification
     virtual const char *giveClassName() const { return "AdaptiveLinearStatic"; }
+    virtual const char *giveInputRecordName() const { return _IFT_AdaptiveLinearStatic_Name; }
     virtual classType giveClassID() const { return AdaptiveLinearStaticClass; }
 };
 } // end namespace oofem

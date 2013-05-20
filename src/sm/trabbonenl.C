@@ -38,6 +38,7 @@
 #include "mathfem.h"
 #include "nonlocalmaterialext.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -223,18 +224,14 @@ TrabBoneNL :: initializeFrom(InputRecord *ir)
 // BEGIN: ??????????????
 //
 
-int
-TrabBoneNL :: giveInputRecordString(std :: string &str, bool keyword)
+void
+TrabBoneNL :: giveInputRecord(DynamicInputRecord &input)
 {
-    char buff [ 1024 ];
-
-    TrabBoneMaterial :: giveInputRecordString(str, keyword);
-    StructuralNonlocalMaterialExtensionInterface :: giveInputRecordString(str, false);
-    sprintf(buff, " r %e", this->R);
-    str += buff;
-
-    return 1;
+    TrabBoneMaterial :: giveInputRecord(input);
+    input.setField(this->R, _IFT_TrabBoneNL_r);
+    input.setField(this->mParam, _IFT_TrabBoneNL_m);
 }
+
 
 //
 // END: ????????????????

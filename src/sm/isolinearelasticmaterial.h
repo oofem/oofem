@@ -116,14 +116,14 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "IsotropicLinearElasticMaterial"; }
     virtual classType giveClassID() const { return IsotropicLinearElasticMaterialClass; }
-    virtual const char *giveInputRecordName() const { return "IsoLE"; }
+    virtual const char *giveInputRecordName() const { return _IFT_IsotropicLinearElasticMaterial_Name; }
     /**
      * Initializes receiver according to object description stored in input record.
      * The E modulus (keyword "E"), Poisson ratio ("nu") and coefficient of thermal dilatation
      * alpha ("talpha") are read. The parent class instanciateFrom method is called.
      */
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual double give(int aProperty, GaussPoint *gp);
 

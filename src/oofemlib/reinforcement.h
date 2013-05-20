@@ -83,7 +83,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
     classType giveClassID() const { return ReinforcementClass; }
     const char *giveClassName() const { return "Reinforcement"; }
-    const char *giveInputRecordName() const { return "Reinforcement"; }
+    const char *giveInputRecordName() const { return _IFT_Reinforcement_Name; }
 
     ///Accessor
     double givePorosity(){ return porosity; }

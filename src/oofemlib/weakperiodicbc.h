@@ -135,6 +135,9 @@ public:
 
     virtual void addElementSide(int elem, int side);
 
+    virtual const char *giveClassName() const { return "WeakPeriodicBoundaryCondition"; }
+    virtual const char *giveInputRecordName() const { return _IFT_WeakPeriodicBoundaryCondition_Name; }
+
 protected:
     void computeElementTangent(FloatMatrix &answer, Element *e, int boundary);
 };

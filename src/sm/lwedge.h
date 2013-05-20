@@ -95,6 +95,7 @@ public:
     //
     // definition & identification
     //
+    virtual const char *giveInputRecordName() const { return _IFT_LWedge_Name; }
     virtual const char *giveClassName() const { return "LWedge"; }
     virtual classType giveClassID() const { return LWedgeClass; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_wedge_1; }

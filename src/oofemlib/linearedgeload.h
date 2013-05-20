@@ -78,12 +78,13 @@ public:
 
     virtual int giveApproxOrder() { return 1; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     virtual bcGeomType giveBCGeoType() const { return EdgeLoadBGT; }
     virtual BL_FormulationType giveFormulationType() { return formulation; }
 
     virtual classType giveClassID() const { return LinearEdgeLoadClass; }
     virtual const char *giveClassName() const { return "LinearEdgeLoad"; }
+    virtual const char *giveInputRecordName() const { return _IFT_LinearEdgeLoad_Name; }
 
 protected:
     virtual void computeNArray(FloatArray &answer, FloatArray &coords) const;

@@ -80,6 +80,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int hasNonLinearBehaviour() { return 1; }
+    virtual const char *giveInputRecordName() const { return _IFT_LsMasterMat_Name; }
     virtual const char *giveClassName() const { return "LsMasterMat"; }
     virtual classType giveClassID() const { return LsMasterMatClass; }
 
