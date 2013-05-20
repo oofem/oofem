@@ -343,10 +343,14 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
         xi0 = dei->enrichmentDomainXiCoords.at(enrichmentDomainNumber);
     }
 
+    int ndofs = Shell7Base :: giveNumberOfDofs();
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of types
-    FloatArray f1(18), f2(18), f3(6);
-    f1.zero(); f2.zero(); f3.zero();
+    FloatArray f(ndofs);
+    FloatArray genEps, genEpsD;
+    FloatMatrix B;
+    FloatArray ftemp;
 
+    f.zero();
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
@@ -357,52 +361,28 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
 
             if ( gp->giveCoordinate(3) > xi0 ) { // Should be enriched ///@todo not general!
 
-                FloatMatrix B11, B22, B32, B43, B53;
-                this->computeBmatricesAt(gp, B11, B22, B32, B43, B53);
-                FloatArray genEps, genEpsD;
-                this->computeGeneralizedStrainVector(genEps,  solVec,  B11, B22, B32, B43, B53);
-                this->computeGeneralizedStrainVector(genEpsD, solVecD, B11, B22, B32, B43, B53);
+                this->computeBmatrixAt(gp, B);
+                this->computeGeneralizedStrainVectorNew(genEps,  solVec,  B);
+                this->computeGeneralizedStrainVectorNew(genEpsD, solVecD, B);
 
                 double zeta = giveGlobalZcoord(gp);
-                FloatArray N, M, T, Ms;
-                double Ts = 0.;
-                this->computeSectionalForcesAt(N, M, T, Ms, Ts, gp, mat, tStep, genEps, genEpsD, zeta);
+
+                FloatArray sectionalForces;
+                this->computeSectionalForcesAt(sectionalForces, gp, mat, tStep, genEps, genEpsD, zeta);
 
                 // Computation of nodal forces: f = B^t*[N M T Ms Ts]^t
-                FloatArray f1temp(18), f2temp(18), f3temp(6), temp;
-                // f1 = BT11*N
-                f1temp.beTProductOf(B11, N);
-
-                // f2 = BT22*M + BT32*T
-                f2temp.beTProductOf(B22, M);
-                temp.beTProductOf(B32, T);
-                f2temp.add(temp);
-
-                // f3 = BT43*Ms + BT53*Ts
-                f3temp.beTProductOf(B43, Ms);
-                for ( int i = 1; i <= 6; i++ ) {
-                    f3temp.at(i) += B53.at(1, i) * Ts;
-                }
-
+                ftemp.beTProductOf(B,sectionalForces);
                 double dV = this->computeVolumeAroundLayer(gp, layer);
-                f1.add(dV, f1temp);
-                f2.add(dV, f2temp);
-                f3.add(dV, f3temp);
+                f.add(dV, ftemp);
             
             }
 
         }
     }
 
-    const IntArray &ordering_phibar = this->giveOrdering(Midplane);
-    const IntArray &ordering_m      = this->giveOrdering(Director);
-    const IntArray &ordering_gam    = this->giveOrdering(InhomStrain);
-    
-    answer.resize( Shell7Base :: giveNumberOfDofs() );
-    answer.zero();
-    answer.assemble(f1, ordering_phibar);
-    answer.assemble(f2, ordering_m);
-    answer.assemble(f3, ordering_gam);
+    answer.resize(ndofs);  answer.zero();
+    const IntArray &ordering_all = this->giveOrdering(All);
+    answer.assemble(f, ordering_all);
 
 }
 
@@ -638,7 +618,7 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &
 {
     FloatMatrix A [ 3 ] [ 3 ], lambdaI [ 3 ], lambdaJ [ 3 ];
     FloatMatrix L(18,18);
-    FloatMatrix B11, B22, B32, B43, B53, B;
+    FloatMatrix B;
     FloatMatrix K(42,42), tempAnswer(42,42);
     K.zero(); tempAnswer.zero();
     double xi0I = 0.0; 
@@ -669,11 +649,11 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &
             
             if ( gp->giveCoordinate(3) > xi0I  &&   gp->giveCoordinate(3) > xi0J  ) { // Should be enriched ///@todo not general!
 
-                this->computeBmatricesAt(gp, B11, B22, B32, B43, B53);
                 this->computeBmatrixAt(gp, B, 0, 0);
-                this->computeGeneralizedStrainVector(genEpsI, solVecI, B11, B22, B32, B43, B53);
-                this->computeGeneralizedStrainVector(genEpsJ, solVecJ, B11, B22, B32, B43, B53);
-                this->computeGeneralizedStrainVector(genEps , solVec , B11, B22, B32, B43, B53);
+
+                this->computeGeneralizedStrainVectorNew(genEpsI, solVecI, B);
+                this->computeGeneralizedStrainVectorNew(genEpsJ, solVecJ, B);
+                this->computeGeneralizedStrainVectorNew(genEps , solVec , B);
 
                 // Material stiffness
                 Shell7Base :: computeLinearizedStiffness(gp, mat, tStep, A, genEps);

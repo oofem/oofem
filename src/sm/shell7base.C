@@ -840,7 +840,7 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
 void
 Shell7Base :: computeFAt(GaussPoint *gp, FloatMatrix &answer, FloatArray &genEps)
 {
-    // Compute deformation gradient as open product(g_i, G_i) = gcov*Gcon^T
+    // Compute deformation gradient as open product(g_i, G^i) = gcov*Gcon^T
     // Output is a 3x3 matrix
     FloatMatrix gcov, Gcon;
     this->evalCovarBaseVectorsAt(gp, gcov, genEps);
@@ -949,7 +949,7 @@ Shell7Base :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int 
 // Computes internal forces as a summation of: sectional forces + convective mass force
 {
     FloatArray solVec;
-    this->giveUpdatedSolutionVector(solVec, tStep); // da
+    this->giveUpdatedSolutionVector(solVec, tStep); // placement vector x
     answer.resize( this->giveNumberOfDofs() );
     answer.zero();
     this->computeSectionalForces(answer, tStep, solVec, useUpdatedGpRecord);
@@ -962,82 +962,60 @@ void
 Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, int useUpdatedGpRecord)
 //
 {
-    answer.resize( Shell7Base :: giveNumberOfDofs() );
-    answer.zero();
+    int ndofs = Shell7Base :: giveNumberOfDofs();
+
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of types
-    FloatArray f1(18), f2(18), f3(6);
-    f1.zero();
-    f2.zero();
-    f3.zero();
+    FloatArray f(ndofs), ftemp, sectionalForces;
+    FloatArray genEps, genEpsD, totalSolVec;
+    FloatMatrix B;
+
+    f.zero();
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
         for ( int j = 1; j <= iRuleL->getNumberOfIntegrationPoints(); j++ ) {
             GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
-            FloatMatrix B11, B22, B32, B43, B53;
-            this->computeBmatricesAt(gp, B11, B22, B32, B43, B53);
+            this->computeBmatrixAt(gp, B);
 
-            FloatArray genEpsD, totalSolVec;
-            this->computeGeneralizedStrainVector(genEpsD, solVec, B11, B22, B32, B43, B53);
-
+            this->computeGeneralizedStrainVectorNew(genEpsD, solVec, B);
             this->giveUpdatedSolutionVector(totalSolVec, tStep); 
-            FloatArray genEps;
-            this->computeGeneralizedStrainVector(genEps, totalSolVec, B11, B22, B32, B43, B53);
+            this->computeGeneralizedStrainVectorNew(genEps, totalSolVec, B);
 
             double zeta = giveGlobalZcoord(gp);
-            FloatArray N, M, T, Ms;
-            double Ts = 0.;
-            this->computeSectionalForcesAt(N, M, T, Ms, Ts, gp, mat, tStep, genEps, genEpsD, zeta);
+            this->computeSectionalForcesAt(sectionalForces, gp, mat, tStep, genEps, genEpsD, zeta);
 
             // Computation of sectional forces: f = B^t*[N M T Ms Ts]^t
-            FloatArray f1temp(18), f2temp(18), f3temp(6), temp;
-            // f1 = BT11*N
-            f1temp.beTProductOf(B11, N);
-
-            // f2 = BT22*M + BT32*T
-            f2temp.beTProductOf(B22, M);
-            temp.beTProductOf(B32, T);
-            f2temp.add(temp);
-
-            // f3 = BT43*Ms + BT53*Ts
-            f3temp.beTProductOf(B43, Ms);
-            for ( int i = 1; i <= 6; i++ ) {
-                f3temp.at(i) += B53.at(1, i) * Ts;
-            }
-
+            ftemp.beTProductOf(B,sectionalForces);
             double dV = this->computeVolumeAroundLayer(gp, layer);
-            f1.add(dV, f1temp);
-            f2.add(dV, f2temp);
-            f3.add(dV, f3temp);
+            f.add(dV, ftemp);
         }
     }
-    const IntArray &ordering_phibar = this->giveOrdering(Midplane);
-    const IntArray &ordering_m      = this->giveOrdering(Director);
-    const IntArray &ordering_gam    = this->giveOrdering(InhomStrain);
-    answer.assemble(f1, ordering_phibar);
-    answer.assemble(f2, ordering_m);
-    answer.assemble(f3, ordering_gam);
+
+    answer.resize( ndofs );
+    answer.zero();
+    const IntArray &ordering_all = this->giveOrdering(All);
+    answer.assemble(f, ordering_all);
 }
 
 
 void
-Shell7Base :: computeSectionalForcesAt(FloatArray &N, FloatArray  &M, FloatArray &T, FloatArray  &Ms, double &Ts, 
-GaussPoint *gp, Material *mat, TimeStep *tStep, FloatArray &genEps, FloatArray &genEpsD, double zeta)
+Shell7Base :: computeSectionalForcesAt(FloatArray &sectionalForces, IntegrationPoint *ip, Material *mat, TimeStep *tStep, FloatArray &genEpsC, FloatArray &genEpsD, double zeta)
 {
 
     FloatArray S1g(3), S2g(3), S3g(3);
     FloatArray cartStressVector, contravarStressVector;
     FloatMatrix lambda[3];
 
-    this->computeStressMatrix(cartStressVector, genEps, gp, mat, tStep);
-    this->transInitialCartesianToInitialContravar(gp, cartStressVector, contravarStressVector);
-    this->computeStressResultantsAt(gp, contravarStressVector, S1g, S2g, S3g, genEps);
+    this->computeStressMatrix(cartStressVector, genEpsC, ip, mat, tStep);
+    this->transInitialCartesianToInitialContravar(ip, cartStressVector, contravarStressVector);
+    this->computeStressResultantsAt(ip, contravarStressVector, S1g, S2g, S3g, genEpsC);
 
     this->computeLambdaGMatrices(lambda, genEpsD, zeta);    
 
     // f = lambda_1^T * S1g + lambda_2^T * S2g + lambda_3^T * S3g
-    FloatArray sectionalForces(18), temp;
+    sectionalForces.resize(18);
+    FloatArray temp;
     sectionalForces.zero();
     temp.beTProductOf(lambda [0], S1g);
     sectionalForces.add(temp);
@@ -1047,28 +1025,6 @@ GaussPoint *gp, Material *mat, TimeStep *tStep, FloatArray &genEps, FloatArray &
     sectionalForces.add(temp);
 
 
-    /* The following expressions are sectional forces (in the classic sense) if integrated over the thickness. However,
-     * now they are integrated over the volume to produce f_int.*/
-    N.resize(6);  // Membrane forces - N1, N2
-    M.resize(6);  // Moments - M1, M2
-    for ( int i = 1; i <=6; i++ ) {
-        N.at(i) = sectionalForces.at(i);
-        M.at(i) = sectionalForces.at(6+i);
-    }
-    
-    // Shear force - T
-    T.resize(3);
-    T.at(1) = sectionalForces.at(13);
-    T.at(2) = sectionalForces.at(14);
-    T.at(3) = sectionalForces.at(15);
-
-    // Higher order force - Ms
-    Ms.resize(2);
-    Ms.at(1) = sectionalForces.at(16);
-    Ms.at(2) = sectionalForces.at(17);
-    
-    // Ts
-    Ts = sectionalForces.at(18);
 
 }
 
@@ -1499,7 +1455,6 @@ Shell7Base :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge,
 {
     BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
     if ( edgeLoad ) {
-        FloatArray fT;
         this->computeTractionForce(answer, iEdge, edgeLoad, tStep);
         return;
     } else {
@@ -1521,7 +1476,7 @@ Shell7Base :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         this->computePressureForce(force, solVec, iSurf, surfLoad, tStep);
 
         IntArray mask;
-        this->giveSurfaceDofMapping(mask, 1);         // same dofs regardless of iSurf
+        this->giveSurfaceDofMapping(mask, 1);         // same dofs regardless of iSurf->1
         answer.resize( this->computeNumberOfDofs(EID_MomentumBalance) );
         answer.zero();
         answer.assemble(force, this->giveOrdering(All));
