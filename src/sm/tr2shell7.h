@@ -109,13 +109,14 @@ public:
     Tr2Shell7(int n, Domain *d);        // constructor
     virtual ~Tr2Shell7() { }            // destructor -> declaring as virtual will make each subclass call their respective destr.
     // definition & identification
-    virtual int giveNumberOfDofs()           { return 42; }
-    virtual int giveNumberOfEdgeDofs()       { return 21; }
+    virtual int giveNumberOfDofs() { return 42; }
+    virtual int giveNumberOfEdgeDofs() { return 21; }
     virtual int giveNumberOfEdgeDofManagers() { return 3;  }
-    virtual const char *giveClassName()                const { return "Tr2Shell7"; }
-    virtual classType giveClassID()                    const { return Tr2Shell7Class; }
-    //virtual Element_Geometry_Type giveGeometryType()   const { return EGT_triangle_2; }
-    virtual Element_Geometry_Type giveGeometryType()   const { return EGT_Composite; }
+    virtual const char *giveInputRecordName() const { return _IFT_Tr2Shell7_Name; }
+    virtual const char *giveClassName() const { return "Tr2Shell7"; }
+    virtual classType giveClassID() const { return Tr2Shell7Class; }
+    //virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_Composite; }
     virtual integrationDomain giveIntegrationDomain() { return _Triangle; }     // write new wedge-like type 'layeredWedge'
 };
 } // end namespace oofem

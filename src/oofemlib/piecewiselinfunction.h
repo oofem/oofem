@@ -67,8 +67,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
     virtual classType giveClassID() const { return PiecewiceClass; }
-    virtual const char *giveClassName() const { return "PiecewiceClass"; }
-    virtual const char *giveInputRecordName() const { return "PiecewiseLinFunction"; }
+    virtual const char *giveClassName() const { return "PiecewiceLinFunction"; }
+    virtual const char *giveInputRecordName() const { return _IFT_PiecewiseLinFunction_Name; }
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);

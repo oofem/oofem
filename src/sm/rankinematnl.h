@@ -103,7 +103,7 @@ public:
 
     virtual const char *giveClassName() const { return "RankineMatNl"; }
     virtual classType giveClassID() const { return RankineMatNlClass; }
-    virtual const char *giveInputRecordName() const { return "RankineMatNl"; }
+    virtual const char *giveInputRecordName() const { return _IFT_RankineMatNl_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);

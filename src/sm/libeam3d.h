@@ -83,6 +83,7 @@ public:
     virtual Interface *giveInterface(InterfaceType it);
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_LIBeam3d_Name; }
     virtual const char *giveClassName() const { return "LIBeam3d"; }
     virtual classType giveClassID() const { return LIBeam3dClass; }
 

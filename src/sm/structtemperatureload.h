@@ -60,6 +60,7 @@ public:
     virtual classType giveClassID() const { return StructuralTemperatureLoadClass; }
     virtual bcValType giveBCValType() const { return TemperatureBVT; }
     virtual bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
+    virtual const char *giveInputRecordName() const { return _IFT_StructuralTemperatureLoad_Name; }
     virtual const char *giveClassName() const { return "StructuralTemperatureLoad"; }
 };
 } // end namespace oofem

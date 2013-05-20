@@ -115,9 +115,6 @@ public:
     // Overloaded methods:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
-
-    virtual classType giveClassID() const { return LoadTimeFunctionClass; }
-    virtual const char *giveClassName() const { return "LoadTimeFunction"; }
 };
 } // end namespace oofem
 #endif // loadtime_h

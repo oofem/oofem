@@ -46,6 +46,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "mathfem.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 DofManager :: DofManager(int n, Domain *aDomain) :
@@ -614,6 +615,44 @@ DofManager :: initializeFrom(InputRecord *ir)
     }
 
     return IRRT_OK;
+}
+
+
+void DofManager :: giveInputRecord(DynamicInputRecord &input)
+{
+    FEMComponent :: giveInputRecord(input);
+    if ( this->dofidmask ) input.setField(*this->dofidmask, _IFT_DofManager_dofidmask);
+    if ( this->dofTypemap ) {
+        IntArray typeMask( this->dofidmask->giveSize() );
+        for ( int i = 1; i <= dofidmask->giveSize(); ++i )
+            typeMask.at(i) = (*this->dofTypemap)[dofidmask->at(i)];
+        input.setField(typeMask, _IFT_DofManager_doftypemask);
+    }
+    if ( this->dofMastermap ) {
+        IntArray masterMask( this->dofidmask->giveSize() );
+        for ( int i = 1; i <= dofidmask->giveSize(); ++i )
+            masterMask.at(i) = (*this->dofMastermap)[dofidmask->at(i)];
+        input.setField(masterMask, _IFT_DofManager_mastermask);
+    }
+
+    if ( isBoundaryFlag ) {
+        input.setField( _IFT_DofManager_boundaryflag );
+    }
+
+
+#ifdef __PARALLEL_MODE
+    if ( this->partitions.giveSize() > 0 ) {
+        input.setField(this->partitions, _IFT_DofManager_partitions);
+    }
+
+    if ( parallel_mode == DofManager_shared ) {
+        input.setField(_IFT_DofManager_sharedflag);
+    } else if ( parallel_mode == DofManager_remote ) {
+        input.setField(_IFT_DofManager_remoteflag);
+    } else if ( parallel_mode == DofManager_null ) {
+        input.setField(_IFT_DofManager_nullflag);
+    }
+#endif
 }
 
 

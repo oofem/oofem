@@ -70,36 +70,33 @@ public:
     ///Constructor
     LatticeTransportMaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor
-    ~LatticeTransportMaterialStatus() { }
+    virtual ~LatticeTransportMaterialStatus() { }
 
-    void   printOutputAt(FILE *, TimeStep *);
+    void printOutputAt(FILE *, TimeStep *);
 
-    ///Returns pressure
+    /// Returns pressure
     double givePressure() { return stateVector.at(1); }
 
-    ///Sets the mass
+    /// Sets the mass
     void setMass(double input) { this->mass = input; }
 
-    ///Returns mass
+    /// Returns mass
     double giveMass() { return this->mass; }
 
-    void updateYourself(TimeStep *tStep);
+    virtual void updateYourself(TimeStep *tStep);
 
-    void initTempStatus();
+    virtual void initTempStatus();
 
-    const char *giveClassName() const { return "LatticeTransportMaterialStatus"; }
-
-    classType giveClassID() const { return LatticeTransportMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "LatticeTransportMaterialStatus"; }
+    virtual classType giveClassID() const { return LatticeTransportMaterialStatusClass; }
 };
 
+/**
+ * This class implements a transport constitutive model for saturated and unsaturated porous materials for lattice elements.
+ */
 class LatticeTransportMaterial : public TransportMaterial
 {
-    /**
-     *   This class implements a transport constitutive model for saturated and unsaturated porous materials for lattice elements.
-     */
-
 protected:
-
     ///Viscosity of fluid
     double viscosity;
 
@@ -137,12 +134,11 @@ protected:
     double suctionAirEntry;
 
 public:
-
     LatticeTransportMaterial(int n, Domain *d) : TransportMaterial(n, d) {}
 
-    ~LatticeTransportMaterial() {}
+    virtual ~LatticeTransportMaterial() {}
 
-    void  giveCharacteristicMatrix(FloatMatrix &answer,
+    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
                                    MatResponseForm form,
                                    MatResponseMode mode,
                                    GaussPoint *gp,
@@ -177,16 +173,17 @@ public:
 
     double computeMass(FloatArray &stateVector, GaussPoint *gp);
 
-    const char *giveClassName() const { return "LatticeTransportMaterial"; }
-    classType giveClassID()         const { return LatticeTransportMaterialClass; }
+    virtual const char *giveInputRecordName() const { return _IFT_LatticeTransportMaterial_Name; }
+    virtual const char *giveClassName() const { return "LatticeTransportMaterial"; }
+    virtual classType giveClassID() const { return LatticeTransportMaterialClass; }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    double   give(int, GaussPoint *gp);
+    virtual double give(int, GaussPoint *gp);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    MaterialStatus *giveStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *giveStatus(GaussPoint *gp) const;
 };
 } // end namespace oofem
 #define latticetransmat_h

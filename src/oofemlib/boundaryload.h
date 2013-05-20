@@ -183,9 +183,6 @@ public:
      */
     virtual double giveProperty(int aProperty);
 
-    virtual classType giveClassID() const { return BoundaryLoadClass; }
-    virtual const char *giveClassName() const { return "BoundaryLoad"; }
-
 protected:
     /**
      * Abstract function, for computing approximation matrix of receiver at given  point.

@@ -116,7 +116,7 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "IsotropicLinearElasticMaterial"; }
     virtual classType giveClassID() const { return IsotropicLinearElasticMaterialClass; }
-    virtual const char *giveInputRecordName() const { return "IsoLE"; }
+    virtual const char *giveInputRecordName() const { return _IFT_IsotropicLinearElasticMaterial_Name; }
     /**
      * Initializes receiver according to object description stored in input record.
      * The E modulus (keyword "E"), Poisson ratio ("nu") and coefficient of thermal dilatation

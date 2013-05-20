@@ -119,6 +119,7 @@ public:
     virtual void initialize();
     virtual void terminate();
     virtual const char *giveClassName() const { return "VTKXMLExportModule"; }
+    virtual const char *giveInputRecordName() const { return _IFT_VTKXMLExportModule_Name; }
 #ifndef __VTK_MODULE
     /**
      * Prints point data header.

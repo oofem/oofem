@@ -114,6 +114,7 @@ public:
 
 
     virtual const char *giveClassName() const { return "Axisymm3d"; }
+    virtual const char *giveInputRecordName() const { return _IFT_Axisymm3d_Name; }
     virtual classType giveClassID() const { return Axisymm3dClass; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }

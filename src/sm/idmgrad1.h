@@ -65,7 +65,7 @@ public:
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "IDGMaterial"; }
     virtual classType giveClassID() const { return IDGMaterialClass; }
-    virtual const char *giveInputRecordName() const { return "idmgrad1"; }
+    virtual const char *giveInputRecordName() const { return _IFT_IDGMaterial_Name; }
     virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,const FloatArray &totalStrain,TimeStep *atTime);
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime);
     virtual IRResultType initializeFrom(InputRecord *ir);

@@ -124,6 +124,7 @@ public:
 
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 1; }
+    virtual const char *giveInputRecordName() const { return _IFT_RankineMat_Name; }
     virtual const char *giveClassName() const { return "RankineMat"; }
     virtual classType giveClassID() const { return RankineMatClass; }
 

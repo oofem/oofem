@@ -81,6 +81,7 @@
 
 ///@name Input fields for HydrationModel
 //@{
+#define _IFT_HydrationModel_Name "hydrationmodel" ///@todo Is this right? double check. And isn't REGISTER_Material() missing?
 #define _IFT_HydrationModel_hydration "hydration"
 #define _IFT_HydrationModel_c60mix "c60mix"
 #define _IFT_HydrationModel_timeScale "timescale"
@@ -265,6 +266,7 @@ public:
     /// Returns coefficients for LHS contribution from internal sources (dHeat/dT, dWaterSource/dw) for given temp state vector.
     virtual double giveCharacteristicValue(const FloatArray &vec, MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime);
     // --- identification and auxiliary functions ---
+    virtual const char *giveInputRecordName() const { return _IFT_HydrationModel_Name; }
     virtual const char *giveClassName() const { return "HydrationModel"; }
     virtual classType giveClassID() const { return ( classType ) HydrationModelClass; }
 

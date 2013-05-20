@@ -112,6 +112,7 @@ public:
                                            GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
 
     virtual const char *giveClassName() const { return "B3Material"; }
+    virtual const char *giveInputRecordName() const { return _IFT_B3Material_Name; }
     virtual classType giveClassID() const { return B3MaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 

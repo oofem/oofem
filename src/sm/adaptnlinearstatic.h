@@ -134,6 +134,7 @@ public:
     virtual void updateDomainLinks();
 
     virtual const char *giveClassName() const { return "AdaptiveNonLinearStatic"; }
+    virtual const char *giveInputRecordName() const { return _IFT_AdaptiveNonLinearStatic_Name; }
     virtual classType giveClassID() const { return AdaptiveNonLinearStaticClass; }
 
 #ifdef __PARALLEL_MODE

@@ -80,7 +80,6 @@ public:
     // Sets a particular EnrichmentItem active
     // void setActive(EnrichmentItem *er);
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual const char *giveClassName() const { return "EnrichmentFunction"; }
     /// Accessor.
     int giveNumberOfDofs() { return numberOfDofs; }
 
@@ -102,6 +101,9 @@ public:
     }
     double evaluateFunctionAt(FloatArray *point, EnrichmentDomain *ed);
     void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentDomain *ed);
+
+    virtual const char *giveClassName() const { return "DiscontinuousFunction"; }
+    virtual const char *giveInputRecordName() const { return _IFT_DiscontinuousFunction_Name; }
 };
 
 /** Class representing Branch EnrichmentFunction. */
@@ -114,6 +116,9 @@ public:
     }
     double evaluateFunctionAt(FloatArray *point, EnrichmentDomain *ed);
     void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentDomain *ed);
+
+    virtual const char *giveClassName() const { return "BranchFunction"; }
+    virtual const char *giveInputRecordName() const { return _IFT_BranchFunction_Name; }
 };
 
 /** Class representing bimaterial interface. */
@@ -128,6 +133,9 @@ public:
     void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentDomain *ed);
     double evaluateFunctionAt(GaussPoint *gp, EnrichmentDomain *ed);
     void evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentDomain *ed);
+
+    virtual const char *giveClassName() const { return "RampFunction"; }
+    virtual const char *giveInputRecordName() const { return _IFT_RampFunction_Name; }
 };
 } // end namespace oofem
 #endif  // enrichmentfunction_h

@@ -102,9 +102,9 @@ public:
      */
     virtual classType giveClassID() const { return FEMComponentClass; }
     /// @return Class name of the receiver.
-    virtual const char *giveClassName() const  = 0;
+    virtual const char *giveClassName() const = 0;
     /// @return Input record name of the receiver.
-    virtual const char *giveInputRecordName() const { return ( this->giveClassName() ); }
+    virtual const char *giveInputRecordName() const = 0;
     /// @return Domain which receiver belongs to.
     Domain *giveDomain() const { return domain; }
     /**

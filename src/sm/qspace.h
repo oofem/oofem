@@ -92,6 +92,7 @@ public:
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type) { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_QSpace_Name; }
     virtual const char *giveClassName() const { return "QSpace"; }
     virtual classType giveClassID() const { return QSpaceClass; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_2; }

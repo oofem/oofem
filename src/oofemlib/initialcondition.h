@@ -42,6 +42,7 @@
 
 ///@name Input fields for initial condition
 //@{
+#define _IFT_InitialCondition_Name "initialcondition"
 #define _IFT_InitialCondition_conditions "conditions"
 #define _IFT_InitialCondition_valType "valtype"
 #define _IFT_InitialCondition_set "set"
@@ -147,6 +148,7 @@ public:
     virtual void printYourself();
     virtual classType giveClassID() const { return InitialConditionClass; }
     virtual const char *giveClassName() const { return "InitialCondition"; }
+    virtual const char *giveInputRecordName() const { return _IFT_InitialCondition_Name; }
 };
 } // end namespace oofem
 #endif // initial_h

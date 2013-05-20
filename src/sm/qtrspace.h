@@ -97,6 +97,7 @@ public:
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_QTRSpace_Name; }
     virtual const char *giveClassName() const { return "QTRSpace"; }
     virtual classType giveClassID() const { return QTRSpaceClass; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_tetra_2; }

@@ -73,6 +73,7 @@ public:
     virtual Interface *giveInterface(InterfaceType it);
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_L4Axisymm_Name; }
     virtual const char *giveClassName() const { return "L4Axisymm"; }
     virtual classType giveClassID() const { return L4AxisymmClass; }
 

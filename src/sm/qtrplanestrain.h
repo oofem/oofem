@@ -83,6 +83,7 @@ public:
 #endif
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_QTrPlaneStrain_Name; }
     virtual const char *giveClassName() const { return "QTrPlaneStrain"; }
     virtual classType giveClassID() const { return QTrPlaneStrainClass; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }

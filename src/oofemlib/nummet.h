@@ -112,8 +112,6 @@ public:
     
     virtual void setDomain(Domain *d) { domain = d; }
 
-    virtual const char *giveClassName() const { return "NumericalMethod"; }
-    
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
 };

@@ -77,6 +77,7 @@ public:
     virtual void initialize();
     virtual void terminate();
     virtual const char *giveClassName() const { return "HOMExportModule"; }
+    virtual const char *giveInputRecordName() const { return _IFT_HOMExportModule_Name; }
 
 protected:
     /// Stream for file.

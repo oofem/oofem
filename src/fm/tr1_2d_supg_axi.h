@@ -89,6 +89,7 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "TR1_2D_SUPG_AXI"; }
+    virtual const char *giveInputRecordName() const { return _IFT_TR1_2D_SUPG_AXI_Name; }
     virtual classType giveClassID() const { return TR1_2D_SUPG_AXIClass; }
     virtual MaterialMode giveMaterialMode() { return _2dAxiFlow; }
 

@@ -76,6 +76,7 @@ public:
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_Quad1Mindlin_Name; }
     virtual const char *giveClassName() const { return "Quad1Mindlin"; }
     virtual classType giveClassID() const { return Quad1MindlinClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);

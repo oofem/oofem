@@ -103,6 +103,7 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "TR1_2D_CBS"; }
+    virtual const char *giveInputRecordName() const { return _IFT_TR1_2D_CBS_Name; }
     virtual classType giveClassID() const { return TR1_2D_CBSClass; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }

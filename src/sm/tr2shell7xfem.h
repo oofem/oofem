@@ -115,6 +115,7 @@ public:
     virtual int giveNumberOfEdgeDofs()       { return 21; }
     //virtual int giveNumberOfEdgeDofs()       { return 35; } ///@todo temporary! remove!
     virtual int giveNumberOfEdgeDofManagers(){ return 3;  }
+    virtual const char *giveInputRecordName() const { return _IFT_Tr2Shell7XFEM_Name; }
     virtual const char *giveClassName() const { return "Tr2Shell7XFEM"; }
     virtual classType giveClassID() const { return Tr2Shell7XFEMClass; }
     //virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }

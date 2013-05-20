@@ -36,8 +36,12 @@
 #include "load.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
+#include "classfactory.h"
 
 namespace oofem {
+
+REGISTER_BoundaryCondition( GravityPressure );
+
 IRResultType
 GravityPressure :: initializeFrom(InputRecord *ir)
 {

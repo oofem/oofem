@@ -71,6 +71,7 @@ public:
 
     // definition & identification
     virtual Interface *giveInterface(InterfaceType) { return NULL; }
+    virtual const char *giveInputRecordName() const { return _IFT_Q4Axisymm_Name; }
     virtual const char *giveClassName() const { return "Q4axisymm"; }
     virtual classType giveClassID() const { return Q4AxisymmClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);

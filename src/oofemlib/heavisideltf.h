@@ -70,6 +70,7 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
     virtual classType giveClassID() const { return HeavisideLTFClass; }
     virtual const char *giveClassName() const { return "HeavisideLTF"; }
+    virtual const char *giveInputRecordName() const { return _IFT_HeavisideLTF_Name; }
 
     virtual double __at(double);
 };

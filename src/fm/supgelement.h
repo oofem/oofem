@@ -201,10 +201,6 @@ public:
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual int checkConsistency();
 
-    // definition
-    virtual const char *giveClassName() const { return "SUPGElement"; }
-    virtual classType giveClassID() const { return SUPGElementClass; }
-
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);

@@ -64,6 +64,7 @@ public:
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual FEInterpolation *giveInterpolation() { return & interpolation; }
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_QBrick1_ht_Name; }
     virtual const char *giveClassName() const { return "QBrick1_ht"; }
     virtual classType giveClassID() const { return QBrick1_htClass; }
 
@@ -99,6 +100,7 @@ class QBrick1_hmt : public QBrick1_ht
 public:
     QBrick1_hmt(int n, Domain *d);
 
+    virtual const char *giveInputRecordName() const { return _IFT_QBrick1_hmt_Name; }
     virtual const char *giveClassName() const { return "QBrick1_hmt"; }
     virtual classType giveClassID() const { return QBrick1_hmtClass; }
 };

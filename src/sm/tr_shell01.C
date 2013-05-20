@@ -121,54 +121,53 @@ TR_SHELL01 :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeS
 // returns characteristics matrix of receiver accordind to mtrx
 //
 {
-  IntArray loc(9);
-  FloatMatrix aux;
+    IntArray loc(9);
+    FloatMatrix aux;
 
-  answer.resize(18,18);
-  answer.zero();
+    answer.resize(18,18);
+    answer.zero();
 
-  plate->giveCharacteristicMatrix(aux, mtrx, tStep);
-  loc.setValues(9, 3,4,5, 9,10,11, 15,16,17);
-  answer.assemble(aux, loc);
+    plate->giveCharacteristicMatrix(aux, mtrx, tStep);
+    loc.setValues(9, 3,4,5, 9,10,11, 15,16,17);
+    answer.assemble(aux, loc);
 
-  membrane->giveCharacteristicMatrix(aux, mtrx, tStep);
-  loc.setValues(9, 1,2,6, 7,8,12, 13,14,18);
-  answer.assemble(aux, loc);
-  
+    membrane->giveCharacteristicMatrix(aux, mtrx, tStep);
+    loc.setValues(9, 1,2,6, 7,8,12, 13,14,18);
+    answer.assemble(aux, loc);
 }
 
 bool
 TR_SHELL01 :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
 {
-  IntArray loc(9);
-  FloatMatrix aux1, aux2;
-  int i,j, ncol;
+    IntArray loc(9);
+    FloatMatrix aux1, aux2;
+    int i,j, ncol;
 
-  bool t1 = plate->giveRotationMatrix(aux1, eid);
-  bool t2 =  membrane->giveRotationMatrix(aux2, eid);
+    bool t1 = plate->giveRotationMatrix(aux1, eid);
+    bool t2 =  membrane->giveRotationMatrix(aux2, eid);
 
-  if (t1 != t2) OOFEM_ERROR ("Transformation demand mismatch");
-  
-  if (t1) {
-    ncol = aux1.giveNumberOfColumns();
-    answer.resize(18,ncol);
+    if (t1 != t2) OOFEM_ERROR ("Transformation demand mismatch");
     
-    loc.setValues(9, 3,4,5, 9,10,11, 15,16,17);
-    for (i=1; i<=9; i++) { // row index
-      for (j=1; j<=ncol; j++) {
-	answer.at(loc.at(i),j)=aux1.at(i,j);
-      }
+    if (t1) {
+        ncol = aux1.giveNumberOfColumns();
+        answer.resize(18,ncol);
+        
+        loc.setValues(9, 3,4,5, 9,10,11, 15,16,17);
+        for (i=1; i<=9; i++) { // row index
+            for (j=1; j<=ncol; j++) {
+                answer.at(loc.at(i),j)=aux1.at(i,j);
+            }
+        }
+
+        loc.setValues(9, 1,2,6, 7,8,12, 13,14,18);
+        for (i=1; i<=9; i++) { // row index
+            for (j=1; j<=ncol; j++) {
+                answer.at(loc.at(i),j)=aux2.at(i,j);
+            }
+        }
     }
 
-    loc.setValues(9, 1,2,6, 7,8,12, 13,14,18);
-    for (i=1; i<=9; i++) { // row index
-      for (j=1; j<=ncol; j++) {
-	answer.at(loc.at(i),j)=aux2.at(i,j);
-      }
-    }
-  }
-
-  return t1;
+    return t1;
 }
 
 void
@@ -220,7 +219,7 @@ TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
     if ( type == IST_ShellForceMomentumTensor ) {
         FloatArray aux;
         GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
-	GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
+        GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
         
         plate->giveIPValue(answer, plateGP, IST_ShellForceMomentumTensor, atTime);
         membrane->giveIPValue(aux, membraneGP, IST_ShellForceMomentumTensor, atTime);
@@ -229,7 +228,7 @@ TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
     } else if ( type == IST_ShellStrainCurvatureTensor ) {
         FloatArray aux;
         GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
-	GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
+        GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
 
         plate->giveIPValue(answer, plateGP, IST_ShellStrainCurvatureTensor, atTime);
         membrane->giveIPValue(aux, membraneGP, IST_ShellStrainCurvatureTensor, atTime);
@@ -258,13 +257,13 @@ TR_SHELL01 :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 int
 TR_SHELL01 :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
 {
-  if ( ( type == IST_ShellForceMomentumTensor || type == IST_ShellStrainCurvatureTensor ) ) {
-    answer.resize(12);
-    for (int i=1; i<=12; i++) answer.at(i)=i;
-    return 1;
-  } else {
-    return StructuralElement::giveIntVarCompFullIndx(answer, type);
-  }
+    if ( ( type == IST_ShellForceMomentumTensor || type == IST_ShellStrainCurvatureTensor ) ) {
+        answer.resize(12);
+        for (int i=1; i<=12; i++) answer.at(i) = i;
+        return 1;
+    } else {
+        return StructuralElement::giveIntVarCompFullIndx(answer, type);
+    }
 }
 
 
@@ -274,8 +273,7 @@ TR_SHELL01 :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
 int
 TR_SHELL01 :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-
-  return giveIPValueSize (type, this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0));
+    return giveIPValueSize (type, this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0));
 }
 
 
@@ -353,17 +351,17 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
 contextIOResultType
 TR_SHELL01 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
-  contextIOResultType iores;
-  if ( ( iores =  StructuralElement::saveContext (stream, mode, obj) ) != CIO_OK ) {
-    THROW_CIOERR(iores);
-  }
-  if ( ( iores =  this->plate->saveContext(stream, mode, obj) ) != CIO_OK ) { 
-    THROW_CIOERR(iores);
-  }
-    if ( ( iores = this->membrane->saveContext(stream, mode, obj) ) != CIO_OK ) {;
-    THROW_CIOERR(iores);
-  }
-  return iores;
+    contextIOResultType iores;
+    if ( ( iores =  StructuralElement::saveContext (stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+    if ( ( iores =  this->plate->saveContext(stream, mode, obj) ) != CIO_OK ) { 
+        THROW_CIOERR(iores);
+    }
+    if ( ( iores = this->membrane->saveContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+    return iores;
 }
 
 contextIOResultType
@@ -385,70 +383,69 @@ TR_SHELL01 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 IntegrationRule* 
 TR_SHELL01 :: ZZErrorEstimatorI_giveIntegrationRule()
 {
-  if (this->compositeIR) {
-    return this->compositeIR;
-  } else {
-    this->compositeIR = new GaussIntegrationRule(1, this, 1, 12);
-    this->compositeIR->setUpIntegrationPoints(_Triangle, plate->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints(), _3dShell);
-    return this->compositeIR;
-  }
+    if (this->compositeIR) {
+        return this->compositeIR;
+    } else {
+        this->compositeIR = new GaussIntegrationRule(1, this, 1, 12);
+        this->compositeIR->setUpIntegrationPoints(_Triangle, plate->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints(), _3dShell);
+        return this->compositeIR;
+    }
 }
 
 void 
 TR_SHELL01 :: ZZErrorEstimatorI_computeLocalStress(FloatArray& answer, FloatArray& sig)  
 {
-  // sig is global ShellForceMomentumTensor
-  FloatMatrix globTensor(3,3);
-  const FloatMatrix* GtoLRotationMatrix = plate->computeGtoLRotationMatrix();
-  FloatMatrix LtoGRotationMatrix ;
+    // sig is global ShellForceMomentumTensor
+    FloatMatrix globTensor(3,3);
+    const FloatMatrix* GtoLRotationMatrix = plate->computeGtoLRotationMatrix();
+    FloatMatrix LtoGRotationMatrix ;
 
-  answer.resize(8); // reduced, local form
-  LtoGRotationMatrix.beTranspositionOf(*GtoLRotationMatrix);
+    answer.resize(8); // reduced, local form
+    LtoGRotationMatrix.beTranspositionOf(*GtoLRotationMatrix);
 
-  // Forces
-  globTensor.at(1, 1) = sig.at(1) ; //sxForce
-  globTensor.at(1, 2) = sig.at(6) ; //qxyForce
-  globTensor.at(1, 3) = sig.at(5) ; //qxzForce
+    // Forces
+    globTensor.at(1, 1) = sig.at(1) ; //sxForce
+    globTensor.at(1, 2) = sig.at(6) ; //qxyForce
+    globTensor.at(1, 3) = sig.at(5) ; //qxzForce
 
-  globTensor.at(2, 1) = sig.at(6) ; //qxyForce
-  globTensor.at(2, 2) = sig.at(2) ; //syForce
-  globTensor.at(2, 3) = sig.at(4) ; //syzForce
+    globTensor.at(2, 1) = sig.at(6) ; //qxyForce
+    globTensor.at(2, 2) = sig.at(2) ; //syForce
+    globTensor.at(2, 3) = sig.at(4) ; //syzForce
 
-  globTensor.at(3, 1) = sig.at(5) ; //qxzForce
-  globTensor.at(3, 2) = sig.at(4) ; //syzForce
-  globTensor.at(3, 3) = sig.at(3) ; //szForce
+    globTensor.at(3, 1) = sig.at(5) ; //qxzForce
+    globTensor.at(3, 2) = sig.at(4) ; //syzForce
+    globTensor.at(3, 3) = sig.at(3) ; //szForce
 
-  globTensor.rotatedWith(LtoGRotationMatrix);
-  // Forces: now globTensoris transformed into local c.s
+    globTensor.rotatedWith(LtoGRotationMatrix);
+    // Forces: now globTensoris transformed into local c.s
 
-  // answer should be in reduced, local  form 
-  answer.at(1) = globTensor.at(1, 1); //sxForce
-  answer.at(2) = globTensor.at(2, 2); //syForce
-  answer.at(3) = globTensor.at(1, 2); //qxyForce
-  answer.at(7) = globTensor.at(2, 3); //syzForce
-  answer.at(8) = globTensor.at(1, 3); //qxzForce
+    // answer should be in reduced, local  form 
+    answer.at(1) = globTensor.at(1, 1); //sxForce
+    answer.at(2) = globTensor.at(2, 2); //syForce
+    answer.at(3) = globTensor.at(1, 2); //qxyForce
+    answer.at(7) = globTensor.at(2, 3); //syzForce
+    answer.at(8) = globTensor.at(1, 3); //qxzForce
 
 
-  // Moments:
-  globTensor.at(1, 1) = sig.at(7) ; //mxForce
-  globTensor.at(1, 2) = sig.at(12); //mxyForce
-  globTensor.at(1, 3) = sig.at(11); //mxzForce
+    // Moments:
+    globTensor.at(1, 1) = sig.at(7) ; //mxForce
+    globTensor.at(1, 2) = sig.at(12); //mxyForce
+    globTensor.at(1, 3) = sig.at(11); //mxzForce
 
-  globTensor.at(2, 1) = sig.at(12); //mxyForce
-  globTensor.at(2, 2) = sig.at(8) ; //myForce
-  globTensor.at(2, 3) = sig.at(10); //myzForce
+    globTensor.at(2, 1) = sig.at(12); //mxyForce
+    globTensor.at(2, 2) = sig.at(8) ; //myForce
+    globTensor.at(2, 3) = sig.at(10); //myzForce
 
-  globTensor.at(3, 1) = sig.at(11); //mxzForce
-  globTensor.at(3, 2) = sig.at(10); //myzForce
-  globTensor.at(3, 3) = sig.at(9) ; //mzForce
+    globTensor.at(3, 1) = sig.at(11); //mxzForce
+    globTensor.at(3, 2) = sig.at(10); //myzForce
+    globTensor.at(3, 3) = sig.at(9) ; //mzForce
 
-  globTensor.rotatedWith (LtoGRotationMatrix); 
-  // now globTensoris transformed into local c.s
- 
-  answer.at(4)  = globTensor.at(1, 1); //mxForce
-  answer.at(5)  = globTensor.at(2, 2); //myForce
-  answer.at(6) = globTensor.at(1, 2); //mxyForce
-
+    globTensor.rotatedWith (LtoGRotationMatrix); 
+    // now globTensoris transformed into local c.s
+    
+    answer.at(4)  = globTensor.at(1, 1); //mxForce
+    answer.at(5)  = globTensor.at(2, 2); //myForce
+    answer.at(6) = globTensor.at(1, 2); //mxyForce
 }
 
 int 
@@ -461,49 +458,49 @@ TR_SHELL01 :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
 double
 TR_SHELL01 :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
-  FloatArray c(3); 
-  c.zero();
-  // evaluate element center
-  for (int i=1; i<=3; i++) {
-    c.add(*plate->giveNode(i)->giveCoordinates());
-  }
-  c.times(1./3.);
-  return c.distance(coords);
+    FloatArray c(3); 
+    c.zero();
+    // evaluate element center
+    for (int i=1; i<=3; i++) {
+        c.add(*plate->giveNode(i)->giveCoordinates());
+    }
+    c.times(1./3.);
+    return c.distance(coords);
 }
 
 void
 TR_SHELL01 :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1)
 {
 
-  FloatArray lt3(3), gt3(3); // global vector in the element thickness direction of lenght thickeness/2
-  const FloatMatrix* GtoLRotationMatrix = plate->computeGtoLRotationMatrix();
+    FloatArray lt3(3), gt3(3); // global vector in the element thickness direction of lenght thickeness/2
+    const FloatMatrix* GtoLRotationMatrix = plate->computeGtoLRotationMatrix();
 
-  // setup vector in the element local cs. perpendicular to element plane of thickness/2 length
-  lt3.at(1) = 0.0;
-  lt3.at(2) = 0.0;
-  lt3.at(3) = 1.0; //this->giveCrossSection()->give(CS_Thickness)/2.0; // HUHU
-  // transform it to globa cs
-  gt3.beTProductOf (*GtoLRotationMatrix, lt3);
-  
-  // use gt3 to construct element bounding box respecting true element volume
-  
-  FloatArray *coordinates, _c(3);
-
-  for ( int i = 1; i <= this->giveNumberOfNodes(); ++i ) {
-    coordinates = this->giveNode(i)->giveCoordinates();
+    // setup vector in the element local cs. perpendicular to element plane of thickness/2 length
+    lt3.at(1) = 0.0;
+    lt3.at(2) = 0.0;
+    lt3.at(3) = 1.0; //this->giveCrossSection()->give(CS_Thickness)/2.0; // HUHU
+    // transform it to globa cs
+    gt3.beTProductOf (*GtoLRotationMatrix, lt3);
     
-    _c = *coordinates; _c.add(gt3);
-    if (i == 1) {
-      bb0 = bb1 = _c;
-    } else {
-      bb0.beMinOf(bb0, _c);
-      bb1.beMaxOf(bb1, _c);
-    }
+    // use gt3 to construct element bounding box respecting true element volume
+    
+    FloatArray *coordinates, _c(3);
 
-    _c = *coordinates; _c.subtract(gt3);
-    bb0.beMinOf(bb0, _c);
-    bb1.beMaxOf(bb1, _c);
-  }
+    for ( int i = 1; i <= this->giveNumberOfNodes(); ++i ) {
+        coordinates = this->giveNode(i)->giveCoordinates();
+        
+        _c = *coordinates; _c.add(gt3);
+        if (i == 1) {
+            bb0 = bb1 = _c;
+        } else {
+            bb0.beMinOf(bb0, _c);
+            bb1.beMaxOf(bb1, _c);
+        }
+
+        _c = *coordinates; _c.subtract(gt3);
+        bb0.beMinOf(bb0, _c);
+        bb1.beMaxOf(bb1, _c);
+    }
 }
 
 //
@@ -604,17 +601,17 @@ TR_SHELL01  :: drawScalar(oofegGraphicContext &context)
         result += this->giveInternalStateAtNode(v2, context.giveIntVarType(), context.giveIntVarMode(), 2, tStep);
         result += this->giveInternalStateAtNode(v3, context.giveIntVarType(), context.giveIntVarMode(), 3, tStep);
     } else if ( context.giveIntVarMode() == ISM_local ) {
-      int nip = plate->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
-      FloatArray a, v(12);
-      v.zero();
-      for (int _i=1; _i<= nip; _i++) {
-	this->giveIPValue(a, plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(_i-1), IST_ShellForceMomentumTensor, tStep);
-	v += a;
-      }
-      v.times(1./nip);
-      v1 = v;
-      v2 =v;
-      v3 =v;
+        int nip = plate->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
+        FloatArray a, v(12);
+        v.zero();
+        for (int _i=1; _i<= nip; _i++) {
+            this->giveIPValue(a, plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(_i-1), IST_ShellForceMomentumTensor, tStep);
+            v += a;
+        }
+        v.times(1./nip);
+        v1 = v;
+        v2 =v;
+        v3 =v;
     }
 
     result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );

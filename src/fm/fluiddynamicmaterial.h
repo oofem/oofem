@@ -183,9 +183,6 @@ public:
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-
-    virtual const char *giveClassName() const { return "FluidDynamicMaterial"; }
-    virtual classType giveClassID() const { return FluidDynamicMaterialClass; }
 };
 } // end namespace oofem
 #endif // fluiddynamicmaterial_h

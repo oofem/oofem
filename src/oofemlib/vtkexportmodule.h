@@ -98,6 +98,7 @@ public:
     virtual void initialize();
     virtual void terminate();
     virtual const char *giveClassName() const { return "VTKExportModule"; }
+    virtual const char *giveInputRecordName() const { return _IFT_VTKExportModule_Name; }
 
 protected:
     /// Returns the internal smoother.

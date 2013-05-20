@@ -87,6 +87,7 @@ public:
     { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_LTRSpace_Name; }
     virtual const char *giveClassName() const { return "LTRSpace"; }
     virtual classType giveClassID() const { return LTRSpaceClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);

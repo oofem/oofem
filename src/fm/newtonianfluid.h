@@ -86,6 +86,7 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "NewtonianFluidMaterial"; }
+    virtual const char *giveInputRecordName() const { return _IFT_NewtonianFluidMaterial_Name; }
     virtual classType giveClassID() const { return NewtonianFluidMaterialClass; }
     virtual int checkConsistency();
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;

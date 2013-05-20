@@ -124,6 +124,7 @@ public:
     virtual int hasNonLinearBehaviour() { return 1; }
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
+    virtual const char *giveInputRecordName() const { return _IFT_CebFipSlip90Material_Name; }
     virtual const char *giveClassName() const { return "CebFipSlip90Material"; }
     virtual classType giveClassID() const { return CebFipSlip90MaterialClass; }
 

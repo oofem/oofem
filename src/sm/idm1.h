@@ -220,7 +220,7 @@ public:
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "IsotropicDamageMaterial1"; }
     virtual classType giveClassID() const { return IsotropicDamageMaterial1Class; }
-    virtual const char *giveInputRecordName() const { return "idm1"; }
+    virtual const char *giveInputRecordName() const { return _IFT_IsotropicDamageMaterial1_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
     /**

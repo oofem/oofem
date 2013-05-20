@@ -84,6 +84,7 @@ public:
 
     virtual classType giveClassID() const { return LinearEdgeLoadClass; }
     virtual const char *giveClassName() const { return "LinearEdgeLoad"; }
+    virtual const char *giveInputRecordName() const { return _IFT_LinearEdgeLoad_Name; }
 
 protected:
     virtual void computeNArray(FloatArray &answer, FloatArray &coords) const;

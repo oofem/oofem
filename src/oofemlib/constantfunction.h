@@ -70,6 +70,7 @@ public:
 
     virtual classType giveClassID() const { return ConstantFunctionClass; }
     virtual const char *giveClassName() const { return "ConstantFunction"; }
+    virtual const char *giveInputRecordName() const { return _IFT_ConstantFunction_Name; }
 };
 } // end namespace oofem
 #endif // constantfunction_h

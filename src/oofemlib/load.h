@@ -116,9 +116,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    virtual classType giveClassID() const { return LoadClass; }
-    virtual const char *giveClassName() const { return "Load"; }
-
 protected:
     /**
      * @return Pointer to receiver component array, where component values of boundary condition are stored.

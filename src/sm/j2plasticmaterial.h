@@ -66,6 +66,7 @@ public:
     virtual ~J2plasticMaterial();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveInputRecordName() const { return _IFT_J2plasticMaterial_Name; }
     virtual const char *giveClassName() const { return "J2plasticMaterial"; }
     virtual classType giveClassID() const { return J2plasticMaterialClass; }
 

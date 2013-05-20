@@ -88,6 +88,7 @@ public:
 #endif
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_LumpedMassElement_Name; }
     virtual const char *giveClassName() const { return "LumpedMassElement"; }
     virtual classType giveClassID() const { return LumpedMassElementClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);

@@ -94,6 +94,7 @@ public:
 #endif
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_TrPlaneStress2d_Name; }
     virtual const char *giveClassName() const { return "TrPlaneStress2d"; }
     virtual classType giveClassID() const { return TrPlaneStress2dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);

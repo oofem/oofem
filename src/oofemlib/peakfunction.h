@@ -68,6 +68,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual classType giveClassID() const { return PeakFunctionClass; }
     virtual const char *giveClassName() const { return "PeakFunction"; }
+    virtual const char *giveInputRecordName() const { return _IFT_PeakFunction_Name; }
 
     virtual double  __at(double);
 };

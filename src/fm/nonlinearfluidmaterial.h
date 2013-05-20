@@ -127,6 +127,7 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
     virtual const char *giveClassName() const { return "NewtonianFluidMaterial"; }
+    virtual const char *giveInputRecordName() const { return _IFT_NonlinearFluidMaterial_Name; }
     virtual classType giveClassID() const { return NewtonianFluidMaterialClass; }
 
     virtual int checkConsistency();

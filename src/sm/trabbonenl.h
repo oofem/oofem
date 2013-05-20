@@ -98,7 +98,7 @@ public:
 
     virtual const char *giveClassName() const { return "TrabBoneNL"; }
     virtual classType   giveClassID()   const { return TrabBoneNLClass; }
-    virtual const char *giveInputRecordName() const { return "trabbonenl"; }
+    virtual const char *giveInputRecordName() const { return _IFT_TrabBoneNL_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);

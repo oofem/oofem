@@ -66,6 +66,7 @@ public:
     virtual void giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) const;
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_QWedgeGrad_Name; }
     virtual const char* giveClassName() const { return "QWedgeGrad"; }
     virtual classType giveClassID() const { return QWedgeClass; }
     virtual int computeNumberOfDofs(EquationID ut) {return 51;}

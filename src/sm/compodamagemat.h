@@ -144,7 +144,7 @@ public:
 
     virtual const char *giveClassName() const { return "CompositeDamageMaterial"; }
     virtual classType giveClassID() const { return CompoDamageMatClass; }
-    virtual const char *giveInputRecordName() const { return "compodamagemat"; }
+    virtual const char *giveInputRecordName() const { return _IFT_CompoDamageMat_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);

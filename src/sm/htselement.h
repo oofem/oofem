@@ -58,6 +58,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
+    virtual const char *giveInputRecordName() const { return _IFT_HTSelement_Name; }
     virtual const char *giveClassName() const { return "HTSelement"; }
     virtual classType giveClassID() const { return HTSelementClass; }
 

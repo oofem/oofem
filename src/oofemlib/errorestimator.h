@@ -150,8 +150,8 @@ public:
     virtual void reinitialize();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual const char *giveClassName() const { return "ErrorEstimator"; }
-    virtual classType giveClassID() const { return ErrorEstimatorClass; }
+
+    virtual const char *giveInputRecordName() const { return NULL; }
 };
 } // end namespace oofem
 #endif // errorestimator_h

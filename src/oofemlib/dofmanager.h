@@ -466,9 +466,8 @@ public:
      */
     virtual bool giveMasterDofMans(IntArray &masters);
 
-    virtual const char *giveClassName() const { return "DofManager"; }
-    virtual classType giveClassID() const { return DofManagerClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual void printYourself();
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);

@@ -249,6 +249,7 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mMode);
 
     virtual const char *giveClassName() const { return "DruckerPragerPlasticitySM"; }
+    virtual const char *giveInputRecordName() const { return _IFT_DruckerPragerPlasticitySM_Name; }
     virtual classType giveClassID() const { return DruckerPragerPlasticitySMClass; }
 
     virtual void giveRealStressVector(FloatArray &answer,

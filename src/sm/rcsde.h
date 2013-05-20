@@ -126,6 +126,7 @@ public:
     virtual ~RCSDEMaterial();
 
     // identification and auxiliary functions
+    virtual const char *giveInputRecordName() const { return _IFT_RCSDEMaterial_Name; }
     virtual const char *giveClassName() const { return "RCSDEMaterial"; }
     virtual classType giveClassID() const { return RCSDEMaterialClass; }
 

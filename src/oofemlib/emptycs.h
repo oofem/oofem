@@ -60,6 +60,7 @@ public:
     virtual ~EmptyCS();
 
     virtual const char *giveClassName() const { return "EmptyCS"; }
+    virtual const char *giveInputRecordName() const { return _IFT_EmptyCS_Name; }
     virtual classType giveClassID() const { return EmptyCrossSectionClass; }
 };
 } // end namespace oofem

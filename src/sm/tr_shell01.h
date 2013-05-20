@@ -74,7 +74,7 @@ public:
     virtual ~TR_SHELL01() {
         delete plate;
         delete membrane;
-	if (this->compositeIR) delete this->compositeIR;
+        if (this->compositeIR) delete this->compositeIR;
     }
 
     virtual FEInterpolation *giveInterpolation() { return plate->giveInterpolation(); }
@@ -84,6 +84,7 @@ public:
     { plate->giveDofManDofIDMask(inode, ut, answer); }
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_TR_SHELL01_Name; }
     virtual const char *giveClassName() const { return "TR_SHELL01"; }
     virtual classType giveClassID() const { return TR_SHELL01Class; }
     virtual IRResultType initializeFrom(InputRecord *ir);

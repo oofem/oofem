@@ -85,6 +85,7 @@ public:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 
+    virtual const char *giveInputRecordName() const { return _IFT_NonlinearMassTransferMaterial_Name; }
     virtual const char *giveClassName() const { return "NonlinearMassTransferMaterial"; };
     virtual classType giveClassID() const { return NonlinearMassTransferMaterialClass; };
 

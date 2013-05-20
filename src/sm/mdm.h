@@ -263,6 +263,7 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     // identification and auxiliary functions
+    virtual const char *giveInputRecordName() const { return _IFT_MDM_Name; }
     virtual const char *giveClassName() const { return "MDM"; }
     virtual classType giveClassID() const { return MDMClass; }
 

@@ -155,6 +155,7 @@ public:
 
     virtual void restoreConsistency();
     virtual const char *giveClassName() const { return "ConcreteDPMStatus"; }
+    virtual const char *giveInputRecordName() const { return _IFT_ConcreteDPM_Name; }
     virtual classType giveClassID() const { return ConcreteDPMStatusClass; }
 
     /**
@@ -472,6 +473,7 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mMode);
 
     virtual const char *giveClassName() const { return "ConcreteDPM"; }
+    virtual const char *giveInputRecordName() const { return _IFT_ConcreteDPM_Name; }
     virtual classType giveClassID() const { return ConcreteDPMClass; }
 
     virtual ConcreteDPMStatus *giveStatus(GaussPoint *gp) const

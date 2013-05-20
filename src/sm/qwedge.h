@@ -95,6 +95,7 @@ public:
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_QWedge_Name; }
     virtual const char *giveClassName() const { return "QWedge"; }
     virtual classType giveClassID() const { return QWedgeClass; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_wedge_2; }

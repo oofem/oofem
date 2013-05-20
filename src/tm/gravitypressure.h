@@ -47,21 +47,21 @@
 
 ///@name Input fields for GravityPressure
 //@{
+#define _IFT_GravityPressure_Name "gravitypressure"
 #define _IFT_GravityPressure_normal "normal"
 #define _IFT_GravityPressure_zerolevel "zerolevel"
 //@}
 
 namespace oofem {
+
+/**
+ * This class implements a gravity-like load.
+ * The attribute 'componentArray' contains the components of an acceleration
+ * 'a', expected (but not required) to be downwards vertical.
+ * Task: returning the body force  rho*a  acting on a given element.
+ */
 class GravityPressure : public BodyLoad
 {
-    /*
-     * This class implements a gravity-like load.
-     * DESCRIPTION
-     * The attribute 'componentArray' contains the components of an acceleration
-     * 'a', expected (but not required) to be downwards vertical.
-     * TASK
-     * returning the body force  rho*a  acting on a given element.
-     */
 protected:
 
     double zeroLevel;
@@ -69,19 +69,15 @@ protected:
 
 public:
     /// Constructor
-    GravityPressure(int i, Domain *d) : BodyLoad(i, d) { }         // constructor
-    /**
-     * Returns receiver load type.
-     * @return StructuralLoadLT;
-     */
-    bcGeomType    giveBCGeoType() const { return GravityPressureBGT; }
-    void         computeValueAt(FloatArray &answer, TimeStep *atTime, FloatArray &coords, ValueModeType mode);
+    GravityPressure(int i, Domain *d) : BodyLoad(i, d) { }
 
-    /// Initializes receiver acording to object description stored in input record.
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual bcGeomType giveBCGeoType() const { return GravityPressureBGT; }
+    virtual void computeValueAt(FloatArray &answer, TimeStep *atTime, FloatArray &coords, ValueModeType mode);
 
-    /// Returns input record name of the receiver.
-    const char *giveInputRecordName() const { return "GravityPressure"; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+
+    virtual const char *giveClassName() const { return "GravityPressure"; }
+    virtual const char *giveInputRecordName() const { return _IFT_GravityPressure_Name; }
 };
 } // end namespace oofem
 

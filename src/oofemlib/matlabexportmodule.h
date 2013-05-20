@@ -92,6 +92,7 @@ public:
     void doOutputSpecials(TimeStep *tStep,      FILE *FID);
 
     virtual const char *giveClassName() const { return "MatlabExportModule"; };
+    virtual const char *giveInputRecordName() const { return _IFT_MatlabExportModule_Name; }
 };
 } // end namespace oofem
 #endif // matlabexportmodule_h_

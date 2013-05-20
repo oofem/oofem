@@ -42,18 +42,18 @@
 namespace oofem {
 DofManValueField :: DofManValueField(FieldType ft, Domain *d) : Field(ft), dmanvallist()
 {
-    int i, ndofman = d->giveNumberOfDofManagers();
+    int ndofman = d->giveNumberOfDofManagers();
     this->domain = d;
     this->dmanvallist.growTo(ndofman);
-    for (i=1;i<=ndofman; i++) {
-      this->dmanvallist.put(i, new FloatArray);
+    for ( int i = 1 ; i <= ndofman; i++ ) {
+        this->dmanvallist.put(i, new FloatArray);
     }
 }
 
 int
 DofManValueField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime)
 {
-    int i, result = 0; // assume ok
+    int result = 0; // assume ok
     FloatArray lc, n;
 
     // request element containing target point
@@ -66,7 +66,7 @@ DofManValueField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueMode
                 // evaluate interpolation functions at target point
                 interp->evalN( n, lc, FEIElementGeometryWrapper(elem) );
                 // loop over element nodes
-                for (i=1; i<=n.giveSize(); i++) {
+                for ( int i = 1; i <= n.giveSize(); i++ ) {
                     // multiply nodal value by value of corresponding shape function and add this to answer
                     answer.add(n.at(i), *this->dmanvallist.at(elem->giveDofManagerNumber(i)));
                 }
@@ -83,14 +83,14 @@ DofManValueField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueMode
 }
 
 int
-DofManValueField::evaluateAt(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime)
+DofManValueField :: evaluateAt(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime)
 {
-    answer=*this->dmanvallist.at(dman->giveNumber());
+    answer =* this->dmanvallist.at(dman->giveNumber());
     return 1;
 }
 
 void
-DofManValueField::setDofManValue (int dofMan, const FloatArray &value)
+DofManValueField :: setDofManValue (int dofMan, const FloatArray &value)
 {
     (*this->dmanvallist.at(dofMan)) = value;
 }

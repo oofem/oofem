@@ -116,6 +116,7 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
     virtual void scale(double s) { prescribedValue *= s; }
     virtual const char *giveClassName() const { return "BoundaryCondition"; }
+    virtual const char *giveInputRecordName() const { return _IFT_BoundaryCondition_Name; }
     virtual classType giveClassID() const { return BoundaryConditionClass; }
 };
 } // end namespace oofem
