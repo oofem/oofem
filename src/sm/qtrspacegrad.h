@@ -67,6 +67,7 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray& answer) const;
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_QTRSpaceGrad_Name; }
     virtual const char* giveClassName() const { return "QTRSpaceGrad"; }
     virtual classType giveClassID() const { return QTRSpaceClass; }
     virtual int computeNumberOfDofs(EquationID ut) { return 34; }

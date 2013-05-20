@@ -97,6 +97,7 @@ public:
     /// Destructor
     virtual ~CemhydMat();
     /// Returns input record name of the receiver. 
+    virtual const char *giveInputRecordName() const { return _IFT_CemhydMat_Name; }
     virtual const char *giveClassName() const { return "CemhydMat"; }
     virtual classType giveClassID() const { return CemhydMatClass; }
 

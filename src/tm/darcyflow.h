@@ -77,7 +77,8 @@ public:
 
     virtual int forceEquationNumbering(int id);
 
-    virtual const char *giveClassName() const { return "DarcyFlowEngngModel"; }
+    virtual const char *giveInputRecordName() const { return _IFT_DarcyFlow_Name; }
+    virtual const char *giveClassName() const { return "DarcyFlow"; }
     virtual classType giveClassID() const { return DarcyFlowClass; }
 
 #ifdef __PARALLEL_MODE
