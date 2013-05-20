@@ -1028,7 +1028,6 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual const char *giveClassName() const { return "Element"; }
-    virtual classType giveClassID() const { return ElementClass; }
 
 protected:
     /**

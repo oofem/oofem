@@ -59,6 +59,7 @@ public:
     QTruss1dGrad(int n, Domain *d);
     virtual ~QTruss1dGrad() { }
 
+    virtual const char *giveInputRecordName() const { return _IFT_QTruss1dGrad_Name; }
     virtual const char *giveClassName() const { return "QTruss1dGrad"; }
     virtual classType giveClassID() const { return QTruss1dGradClass; }
 

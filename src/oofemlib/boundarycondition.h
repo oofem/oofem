@@ -113,9 +113,10 @@ public:
     // Overloaded methods:
     virtual bcType giveType() const { return DirichletBT; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     virtual void scale(double s) { prescribedValue *= s; }
     virtual const char *giveClassName() const { return "BoundaryCondition"; }
+    virtual const char *giveInputRecordName() const { return _IFT_BoundaryCondition_Name; }
     virtual classType giveClassID() const { return BoundaryConditionClass; }
 };
 } // end namespace oofem

@@ -1152,7 +1152,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
             my_(3) = _a3;
             parallel_context->accumulate(my_, col_);
             a1 = eta * eta * col_(0) + Psi * Psi * col_(1);
-            a2 = _RR * Psi * Psi * DeltaLambda0 * 2.0;
+            a2 = col_(1) * Psi * Psi * DeltaLambda0 * 2.0;
             a2 += 2.0 * col_(2);
             a3 = col_(3) - deltaL * deltaL + DeltaLambda0 * DeltaLambda0 * col_(1) * Psi * Psi;
 #else

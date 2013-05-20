@@ -46,6 +46,7 @@ class Element;
 class TimeStep;
 class FloatArray;
 class GaussPoint;
+class DynamicInputRecord;
 
 /**
  * The class representing the general material model mapping algorithm.
@@ -142,11 +143,10 @@ public:
      */
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     /**
-     * Setups the input record string of receiver.
-     * @param str String to be filled by input record.
-     * @param keyword Print record keyword (default true).
+     * Setups the input record of receiver.
+     * @param input Input record to be filled.
      */
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true) { return 1; }
+    virtual void giveInputRecord(DynamicInputRecord &input) {}
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const  = 0;
 };

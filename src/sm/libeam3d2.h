@@ -101,6 +101,7 @@ public:
     virtual Interface *giveInterface(InterfaceType it);
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_LIBeam3d2_Name; }
     virtual const char *giveClassName() const { return "LIBeam3d2"; }
     virtual classType giveClassID() const { return LIBeam3d2Class; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }

@@ -1,4 +1,5 @@
 set (fm_emodel
+    fluidmodel.C
     cbs.C
     supg.C
     stokesflow.C

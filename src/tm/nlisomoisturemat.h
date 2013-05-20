@@ -121,6 +121,7 @@ public:
     virtual double giveMoistureCapacity(GaussPoint *gp, TimeStep *atTime);
     virtual double givePermeability(GaussPoint *gp, TimeStep *atTime);
 
+    virtual const char *giveInputRecordName() const { return _IFT_NlIsoMoistureMaterial_Name; }
     virtual const char *giveClassName() const { return "NlIsoMoistureMaterial"; }
     virtual classType giveClassID() const { return NlIsoMoistureMaterialClass; }
 

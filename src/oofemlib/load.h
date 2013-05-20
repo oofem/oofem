@@ -114,9 +114,7 @@ public:
     int isDofExcluded(int index);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
-    virtual classType giveClassID() const { return LoadClass; }
-    virtual const char *giveClassName() const { return "Load"; }
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
 protected:
     /**

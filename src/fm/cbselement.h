@@ -103,10 +103,6 @@ public:
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual int checkConsistency();
 
-    // definition
-    virtual const char *giveClassName() const { return "CBSElement"; }
-    virtual classType giveClassID() const { return CBSElementClass; }
-
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
 
 #ifdef __OOFEG

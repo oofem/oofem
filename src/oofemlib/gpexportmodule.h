@@ -71,7 +71,8 @@ public:
     virtual void doOutput(TimeStep *tStep);
     virtual void initialize();
     virtual void terminate();
-    virtual const char *giveClassName() const { return "GPExportModuleClass"; }
+    virtual const char *giveClassName() const { return "GPExportModule"; }
+    virtual const char *giveInputRecordName() const { return _IFT_GPExportModule_Name; }
 
 protected:
     /// Returns the output stream for given solution step

@@ -64,6 +64,7 @@ public:
     virtual double computeVolumeAround(GaussPoint *gp);
 
     // definition
+    virtual const char *giveInputRecordName() const { return _IFT_Tetrah1_ht_Name; }
     virtual const char *giveClassName() const { return "Tetrah1_ht"; }
     virtual classType giveClassID() const { return Tetrah1_htClass; }
 
@@ -103,6 +104,7 @@ class Tetrah1_hmt : public Tetrah1_ht
 public:
     Tetrah1_hmt(int n, Domain *d);
 
+    virtual const char *giveInputRecordName() const { return _IFT_Tetrah1_hmt_Name; }
     virtual const char *giveClassName() const { return "Tetrah1_hmt"; }
     virtual classType giveClassID() const { return Tetrah1_hmtClass; }
 };

@@ -111,6 +111,7 @@ public:
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
     virtual const char *giveClassName() const { return "LineSurfaceTension"; }
+    virtual const char *giveInputRecordName() const { return _IFT_LineSurfaceTension_Name; }
     virtual classType giveClassID() const { return LineSurfaceTensionElementClass; }
 };
 

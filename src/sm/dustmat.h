@@ -458,6 +458,7 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mMode);
 
     virtual const char *giveClassName() const { return "DustMaterial"; }
+    virtual const char *giveInputRecordName() const { return _IFT_DustMaterial_Name; }
     virtual classType giveClassID() const { return DustMaterialClass; }
 
     virtual void giveRealStressVector(FloatArray &answer,

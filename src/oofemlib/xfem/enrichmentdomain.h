@@ -62,22 +62,21 @@ namespace oofem {
 class EnrichmentDomain 
 {
 public:
-    EnrichmentDomain(){};
-    virtual ~EnrichmentDomain(){};
-    virtual IRResultType initializeFrom(InputRecord *ir){ return IRRT_OK; }; 
-    virtual const char *giveClassName() const { return NULL; }
-    virtual classType giveClassID() const { return EnrichmentDomainClass; }
+    EnrichmentDomain() { }
+    virtual ~EnrichmentDomain() { }
+    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual const char *giveClassName() const = 0;
 
     virtual bool isDofManagerEnriched(DofManager *dMan) = 0;
     // Default is to loop through the dofman and check if any of them are enriched
-    virtual bool isElementEnriched(Element *element); 
+    virtual bool isElementEnriched(Element *element);
     int giveNumber() { return number; };
     void setNumber(int i) { this->number = i; };
     // Update of description
     virtual void updateEnrichmentDomain();
 
     // Spatial search methods
-    virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element){};
+    virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element) { }
     virtual int computeNumberOfIntersectionPoints(Element *element){return 0;};
 private:
     int number;
@@ -92,14 +91,15 @@ class EnrichmentDomain_BG : public EnrichmentDomain
 {
 public:
     BasicGeometry *bg;
-    EnrichmentDomain_BG(){}; 
+    EnrichmentDomain_BG() { }
     virtual ~EnrichmentDomain_BG() { }
-    virtual IRResultType initializeFrom(InputRecord *ir) { return this->bg->initializeFrom(ir); };
-    virtual bool isDofManagerEnriched(DofManager *dMan){ return false; };
+    virtual IRResultType initializeFrom(InputRecord *ir) { return this->bg->initializeFrom(ir); }
+    virtual bool isDofManagerEnriched(DofManager *dMan){ return false; }
 
     virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element) { bg->computeIntersectionPoints(element, intersectionPoints); }
-    virtual int computeNumberOfIntersectionPoints(Element *element) { return bg->computeNumberOfIntersectionPoints(element); };
+    virtual int computeNumberOfIntersectionPoints(Element *element) { return bg->computeNumberOfIntersectionPoints(element); }
 
+    virtual const char *giveClassName() const { return "EnrichmentDomain_BG"; }
 };
 
 
@@ -108,11 +108,13 @@ class EDBGCircle : public EnrichmentDomain_BG
 public:
     EDBGCircle(){ bg = new Circle; }; 
     virtual ~EDBGCircle() { }
-    virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir);  };
+    virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir); }
     virtual bool isDofManagerEnriched(DofManager *dMan);
     virtual bool isElementEnriched(Element *element);
     virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element) { bg->computeIntersectionPoints(element, intersectionPoints); }
-    virtual int computeNumberOfIntersectionPoints(Element *element) { return static_cast<Circle *>(bg)->computeNumberOfIntersectionPoints(element); };
+    virtual int computeNumberOfIntersectionPoints(Element *element) { return static_cast<Circle *>(bg)->computeNumberOfIntersectionPoints(element); }
+
+    virtual const char *giveClassName() const { return "EDBGCircle"; }
 };
 
 /**
@@ -124,15 +126,15 @@ class DofManList : public EnrichmentDomain
 protected:
     std::list< int > dofManList;
 public:
-    DofManList(){ }
-    virtual ~DofManList(){};
-    virtual IRResultType initializeFrom(InputRecord *ir) ;
+    DofManList() { }
+    virtual ~DofManList() { }
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual bool isDofManagerEnriched(DofManager *dMan);
     void addDofManagers(IntArray &dofManNumbers);
     virtual void updateEnrichmentDomain(IntArray &dofManNumbers);
+
+    virtual const char *giveClassName() const { return "DofManList"; }
 };
-
-
 
 /**
  * The whole computational domain is enriched which thus is a global enrichment
@@ -142,15 +144,15 @@ public:
 class WholeDomain : public EnrichmentDomain
 {
 public:
-    WholeDomain(){ }
-    virtual ~WholeDomain(){};
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; } ;
-    virtual bool isDofManagerEnriched(DofManager *dMan) { return true; };
-    virtual bool isElementEnriched(Element *element) { return true; };
+    WholeDomain() { }
+    virtual ~WholeDomain() { }
+    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual bool isDofManagerEnriched(DofManager *dMan) { return true; }
+    virtual bool isElementEnriched(Element *element) { return true; }
+
+    virtual const char *giveClassName() const { return "WholeDomain"; }
 };
 
 } // end namespace oofem
 #endif  
-
-
 

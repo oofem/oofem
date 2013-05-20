@@ -82,6 +82,7 @@ public:
 #endif
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_QTrPlaneStress2d_Name; }
     virtual const char *giveClassName() const { return "QTrPlaneStress2d"; }
     virtual classType giveClassID() const { return QTrPlaneStress2dClass; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }

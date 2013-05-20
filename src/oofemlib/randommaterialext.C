@@ -38,6 +38,7 @@
 #include "material.h"
 #include "randomfieldgenerator.h"
 #include "randommaterialext.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 bool
@@ -74,6 +75,14 @@ RandomMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     }
 
     return IRRT_OK;
+}
+
+
+void
+RandomMaterialExtensionInterface :: giveInputRecord(DynamicInputRecord &ir)
+{
+    ir.setField(this->randVariables, _IFT_RandomMaterialExt_randVariables);
+    ir.setField(this->randomVariableGenerators, _IFT_RandomMaterialExt_randGen);
 }
 
 

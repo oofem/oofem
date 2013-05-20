@@ -102,6 +102,7 @@ public:
      */
     double giveDistancePointLine(const FloatArray &coordsA, const FloatArray &coordsB, const FloatArray &coordsGP);
 
+    virtual const char *giveInputRecordName() const { return _IFT_PolylineNonlocalBarrier_Name; }
     virtual const char *giveClassName() const { return "PolylineNonlocalBarrier"; }
     virtual classType giveClassID() const { return PolylineNonlocalBarrierClass; }
 };

@@ -41,6 +41,7 @@
 #include "contextioerr.h"
 #include "util.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 // Used for computing
 #include "line2boundaryelement.h"
@@ -296,10 +297,12 @@ int FE2FluidMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
     }
 }
 
-int FE2FluidMaterial :: giveInputRecordString(std::string &str, bool keyword)
+void FE2FluidMaterial::giveInputRecord(DynamicInputRecord &input)
 {
-    return FluidDynamicMaterial :: giveInputRecordString(str, keyword);
+    FluidDynamicMaterial :: giveInputRecord(input);
+    input.setField(this->inputfile, _IFT_FE2FluidMaterial_fileName);
 }
+
 
 MaterialStatus * FE2FluidMaterial :: CreateStatus(GaussPoint *gp) const
 {
@@ -368,27 +371,10 @@ void FE2FluidMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     FluidDynamicMaterialStatus :: printOutputAt(file, tStep);
 }
 
-double FE2FluidMaterialStatus :: computeSize()
-{
-    Domain *d = this->rve->giveDomain(1);
-    int nsd = d->giveNumberOfSpatialDimensions();
-    double domain_size = 0.0;
-
-    // This requires the boundary to be consistent and ordered correctly.
-    for (int i = 1; i <= d->giveNumberOfElements(); ++i) {
-        //BoundaryElement *e = dynamic_cast< BoundaryElement* >(d->giveElement(i));
-        Line2BoundaryElement *e = dynamic_cast< Line2BoundaryElement* >(d->giveElement(i));
-        if (e) {
-            domain_size += e->computeNXIntegral();
-        }
-    }
-    return domain_size/nsd;
-}
-
 void FE2FluidMaterialStatus :: updateYourself(TimeStep *tStep)
 {
     double fluid_area = this->rve->giveDomain(1)->giveArea();
-    double total_area = this->computeSize();
+    double total_area = this->bc->domainSize();
     this->voffraction = fluid_area/total_area;
     FluidDynamicMaterialStatus::updateYourself(tStep);
 

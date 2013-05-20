@@ -172,12 +172,9 @@ public:
     }
 
     // identification and auxiliary functions
-    virtual const char *giveClassName() const { 
-        return "LayeredCrossSection"; 
-    }
-    virtual classType giveClassID() const { 
-        return LayeredCrossSectionClass; 
-    }
+    virtual const char *giveInputRecordName() const { return _IFT_LayeredCrossSection_Name; }
+    virtual const char *giveClassName() const { return "LayeredCrossSection"; }
+    virtual classType giveClassID() const { return LayeredCrossSectionClass; }
     virtual void printYourself();
 
     MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode);

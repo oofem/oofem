@@ -80,7 +80,7 @@ public:
      * @param n Load time function number.
      * @param d Domain to which new object will belongs.
      */
-    LoadTimeFunction(int n, Domain *d) : FEMComponent(n, d) { initialValue = 0.0; }
+    LoadTimeFunction(int n, Domain *d);
     /// Destructor
     virtual ~LoadTimeFunction() { }
 
@@ -114,12 +114,7 @@ public:
 
     // Overloaded methods:
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual IRResultType initializeFrom(InputRecord *ir, DataReader *dr);
-    
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
-
-    virtual classType giveClassID() const { return LoadTimeFunctionClass; }
-    virtual const char *giveClassName() const { return "LoadTimeFunction"; }
+    virtual void giveInputRecord(DynamicInputRecord &input);
 };
 } // end namespace oofem
 #endif // loadtime_h

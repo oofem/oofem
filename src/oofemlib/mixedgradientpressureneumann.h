@@ -139,8 +139,7 @@ public:
      * The gradient should be in Voigt notation (only the deviatoric part will be used)
      */
     virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual void scale(double s);
 
@@ -161,6 +160,7 @@ public:
                                     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual const char *giveClassName() const { return "MixedGradientPressureNeumann"; }
+    virtual const char *giveInputRecordName() const { return _IFT_MixedGradientPressureNeumann_Name; }
     virtual classType giveClassID() const { return MixedGradientPressureNeumannClass; }
     
 protected:

@@ -99,6 +99,7 @@ public:
 
     // definition & identification
     virtual const char *giveClassName() const { return "Beam3d"; }
+    virtual const char *giveInputRecordName() const { return _IFT_Beam3d_Name; }
     virtual classType giveClassID() const { return Beam3dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }

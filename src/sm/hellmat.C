@@ -65,7 +65,7 @@ HellmichMaterial :: createMaterialGp()
  * Sets gp number to 0 to let status services know it's the material-level gp.
  */
 {
-    Element *elem = new Element( 0, giveDomain() );
+    Element *elem = NULL;//new Element( 0, giveDomain() );
     IntegrationRule *ir = new IntegrationRule(0, elem);
     char eirstr [ 50 ];
     sprintf( eirstr, "mat %d crosssect 1 nodes 0", giveNumber() );

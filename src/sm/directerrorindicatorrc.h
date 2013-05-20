@@ -127,6 +127,9 @@ public:
 
     virtual void setDomain(Domain *d);
 
+    virtual const char *giveInputRecordName() const { return NULL; }
+    virtual const char *giveClassName() const { return "DirectErrorIndicatorRC"; }
+
 protected:
     double giveLocalDofManDensity(int num);
     /**

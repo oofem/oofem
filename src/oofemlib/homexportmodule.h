@@ -39,7 +39,7 @@
 #include "domain.h"
 #include "engngm.h"
 #include "intarray.h"
-#include "linearelasticmaterial.h"
+
 
 ///@name Input fields for Homogenization export module
 //@{
@@ -57,7 +57,7 @@ namespace oofem {
  *
  * @author Vit Smilauer
  */
-class HOMExportModule : public ExportModule, public LinearElasticMaterial
+class HOMExportModule : public ExportModule
 {
 protected:
     /// Scale of all homogenized values.
@@ -77,6 +77,7 @@ public:
     virtual void initialize();
     virtual void terminate();
     virtual const char *giveClassName() const { return "HOMExportModule"; }
+    virtual const char *giveInputRecordName() const { return _IFT_HOMExportModule_Name; }
 
 protected:
     /// Stream for file.

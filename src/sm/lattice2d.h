@@ -103,6 +103,7 @@ public:
     //
     // definition & identification
     //
+    virtual const char *giveInputRecordName() const { return _IFT_Lattice2d_Name; }
     virtual const char *giveClassName() const { return "Lattice2d"; }
     virtual classType giveClassID() const { return Lattice2dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);

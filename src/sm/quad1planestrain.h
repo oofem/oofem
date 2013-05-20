@@ -127,6 +127,7 @@ public:
 #endif
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_Quad1PlaneStrain_Name; }
     virtual const char *giveClassName() const { return "Quad1PlaneStrain"; }
     virtual classType giveClassID() const { return Quad1PlaneStrainClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);

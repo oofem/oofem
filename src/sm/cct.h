@@ -104,6 +104,7 @@ protected:
 public:
     // definition & identification
     virtual const char *giveClassName() const { return "CCTPlate"; }
+    virtual const char *giveInputRecordName() const { return _IFT_CCTPlate_Name; }
     virtual classType giveClassID() const { return CCTPlateClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }

@@ -98,7 +98,7 @@ public:
 
     virtual const char *giveClassName() const { return "RankineMatGrad"; }
     virtual classType giveClassID() const { return RankineMatGradClass; }
-    virtual const char *giveInputRecordName() const { return "RankineMatGrad"; }
+    virtual const char *giveInputRecordName() const { return _IFT_RankineMatGrad_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int hasMaterialModeCapability(MaterialMode mode);

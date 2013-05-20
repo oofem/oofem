@@ -155,6 +155,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "NRSolver"; }
+    virtual const char *giveInputRecordName() const { return _IFT_NRSolver_Name; }
 
     virtual void setDomain(Domain *d) {
         this->domain = d;

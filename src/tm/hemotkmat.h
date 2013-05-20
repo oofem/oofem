@@ -113,6 +113,7 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
     // identification
+    virtual const char *giveInputRecordName() const { return _IFT_HeMoTKMaterial_Name; }
     virtual const char *giveClassName() const { return "HeMoTKMaterial"; }
     virtual classType giveClassID() const { return HeMoTKMaterialClass; }
 

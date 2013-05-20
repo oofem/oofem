@@ -69,6 +69,7 @@ public:
     virtual int estimateError(EE_ErrorMode mode, TimeStep *tStep);
     virtual RemeshingCriteria *giveRemeshingCrit();
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveInputRecordName() const { return NULL; }
     virtual const char *giveClassName() const { return "CombinedZZSIErrorEstimator"; }
     virtual classType giveClassID() const { return CombinedZZSIErrorEstimatorClass; }
     virtual void setDomain(Domain *d);
@@ -104,6 +105,7 @@ public:
     virtual RemeshingStrategy giveRemeshingStrategy(TimeStep *tStep);
     virtual int estimateMeshDensities(TimeStep *tStep);
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveInputRecordName() const { return NULL; }
     virtual const char *giveClassName() const { return "CombinedZZSIRemeshingCriteria"; }
     virtual classType giveClassID() const { return CombinedZZSIRemeshingCriteriaClass; }
     virtual void setDomain(Domain *d);

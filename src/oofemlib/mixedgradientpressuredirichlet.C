@@ -48,6 +48,7 @@
 #include "sparsemtrxtype.h"
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 
@@ -437,25 +438,14 @@ IRResultType MixedGradientPressureDirichlet :: initializeFrom(InputRecord *ir)
 }
 
 
-int MixedGradientPressureDirichlet :: giveInputRecordString(std :: string &str, bool keyword)
+void MixedGradientPressureDirichlet :: giveInputRecord(DynamicInputRecord &input)
 {
-    char buff [ 1024 ];
-
-    GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
-
-    sprintf( buff, " devgradient %d ", this->devGradient.giveSize() );
-    for ( int i = 1; i <= this->devGradient.giveSize(); i++ ) {
-        sprintf( buff, " %e", this->devGradient.at(i) );
-        str += buff;
-    }
-
-    sprintf( buff, " ccoord %d", this->centerCoord.giveSize() );
-    for ( int i = 1; i <= this->centerCoord.giveSize(); i++ ) {
-        sprintf( buff, " %e", this->centerCoord.at(i) );
-        str += buff;
-    }
-
-    return 1;
+    MixedGradientPressureBC :: giveInputRecord(input);
+    input.setField( this->centerCoord, _IFT_MixedGradientPressure_centerCoords );
+    input.setField( this->devGradient, _IFT_MixedGradientPressure_devGradient );
+    input.setField( this->pressure, _IFT_MixedGradientPressure_pressure );
 }
+
+
 } // end namespace oofem
 

@@ -78,6 +78,7 @@ public:
     virtual double calculateMinimumDistanceFromBoundary(const FloatArray &coords, double maxPossibleDistance) { return maxPossibleDistance; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
+    virtual const char *giveInputRecordName() const { return _IFT_SymmetryBarrier_Name; }
     virtual const char *giveClassName() const { return "SymmetryBarrier"; }
     virtual classType giveClassID() const { return SymmetryBarrierClass; }
 };

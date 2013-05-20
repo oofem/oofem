@@ -62,6 +62,7 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_QPlaneStrain_Name; }
     virtual const char *giveClassName() const { return "QPlaneStrain"; }
     virtual classType giveClassID() const { return QPlaneStrainClass; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }

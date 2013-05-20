@@ -121,6 +121,7 @@ public:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 
     virtual const char *giveClassName() const { return "RVEStokesFlow"; }
+    virtual const char *giveInputRecordName() const { return _IFT_RVEStokesFlow_Name; }
     virtual classType giveClassID() const { return RVEStokesFlowClass; }
 };
 }

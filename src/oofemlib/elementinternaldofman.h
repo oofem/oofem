@@ -71,6 +71,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void printYourself();
     virtual const char *giveClassName() const { return "ElementDofManager"; }
+    virtual const char *giveInputRecordName() const { return ""; } // Note: Can't be created in input files.
     virtual classType giveClassID() const { return ElementDofManagerClass; }
 
     virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_simpleSlave ); }

@@ -44,6 +44,7 @@
 #include "microplane.h"
 #include "contextioerr.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 
@@ -225,7 +226,6 @@ MDM :: computeLocalDamageTensor(FloatMatrix &damageTensor, const FloatArray &tot
     FloatArray damageVector(6);
     Microplane *mPlane;
     MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
-    ;
 
     // Loop over microplanes.
     for ( int im = 0; im < numberOfMicroplanes; im++ ) {
@@ -964,74 +964,48 @@ MDM :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-MDM :: giveInputRecordString(std :: string &str, bool keyword)
+void MDM :: giveInputRecord(DynamicInputRecord &input)
 {
-    char buff [ 1024 ];
-
-    MicroplaneMaterial :: giveInputRecordString(str, keyword);
-    this->giveLinearElasticMaterial()->giveInputRecordString(str, false);
-    sprintf(buff, " talpha %e", this->tempDillatCoeff);
-    str += buff;
-    sprintf(buff, " parmd %e", this->ParMd);
-    str += buff;
-    sprintf(buff, " nonloc %d", this->nonlocal);
-    str += buff;
-    if ( this->nonlocal ) {
-        sprintf(buff, " r %e", this->R);
-        str += buff;
-
-        if ( this->mdm_Ep >= 0.0 && this->mdm_Efp >= 0.0 ) {
-            sprintf(buff, " efp %e", this->mdm_Efp);
-            str += buff;
-            sprintf(buff, " ep %e", this->mdm_Ep);
-            str += buff;
-        } else {
-            sprintf(buff, " gf %e", this->Gf);
-            str += buff;
-            sprintf(buff, " ft %e", this->Ft);
-            str += buff;
-        }
-    } else {             // local case
-        if ( this->mdm_Ep >= 0.0 && this->mdm_Efp >= 0.0 ) {
-            sprintf(buff, " efp %e", this->mdm_Efp);
-            str += buff;
-            sprintf(buff, " ep %e", this->mdm_Ep);
-            str += buff;
-        } else {
-            sprintf(buff, " gf %e", this->Gf);
-            str += buff;
-            if ( this->mdm_Ep >= 0.0 ) {
-                sprintf(buff, " ep %e", this->mdm_Ep);
-                str += buff;
-            }
-        }
-    }
-
-    if ( this->formulation ) {
-        sprintf( buff, " formulation %d", ( int ) ( this->formulation ) );
-        str += buff;
-    }
-
-    sprintf( buff, " mode %d", ( int ) ( this->mdmMode ) );
-    str += buff;
-
+    linearElasticMaterial->giveInputRecord(input);
+    MicroplaneMaterial :: giveInputRecord(input);
+    StructuralNonlocalMaterialExtensionInterface :: giveInputRecord(input);
 #ifdef MDM_MAPPING_DEBUG
-    sprintf( buff, " mapper %d", ( int ) ( this->mapperType ) );
-    str += buff;
-#endif
-
-    StructuralNonlocalMaterialExtensionInterface :: giveInputRecordString(str, false);
-
-#ifdef MDM_MAPPING_DEBUG
-    this->mapperSFT.giveInputRecordString(str, false);
-    this->mapperLST.giveInputRecordString(str, false);
+    mapperSFT.giveInputRecord(input);
+    mapperLST.giveInputRecord(input);
+    input.setField(this->mapperType, _IFT_MDM_mapper);
 #else
-    this->mapper.giveInputRecordString(str, false);
+    mapper.giveInputRecord(input);
 #endif
-    this->mapper2.giveInputRecordString(str, false);
+    mapper2.giveInputRecord(input);
 
-    return 1;
+    input.setField(this->tempDillatCoeff, _IFT_MDM_talpha);
+    input.setField(this->ParMd, _IFT_MDM_parmd);
+    input.setField(this->nonlocal, _IFT_MDM_nonloc);
+
+    if ( this->nonlocal ) {
+        input.setField(R, _IFT_MDM_r);
+
+        if ( this->mdm_Ep >= 0.0 && this->mdm_Efp >= 0.0 ) {
+            // read raw_params if available
+            input.setField(this->mdm_Efp, _IFT_MDM_efp);
+            input.setField(this->mdm_Ep, _IFT_MDM_ep);
+        } else {
+            input.setField(this->Gf, _IFT_MDM_gf);
+            input.setField(this->Ft, _IFT_MDM_ft);
+        }
+    } else { // local case
+        if ( this->mdm_Ep >= 0.0 && this->mdm_Efp >= 0.0 ) {
+            // read raw_params if available
+            input.setField(this->mdm_Efp, _IFT_MDM_efp);
+            input.setField(this->mdm_Ep, _IFT_MDM_ep);
+        } else {
+            input.setField(this->Gf, _IFT_MDM_gf);
+            input.setField(this->mdm_Ep, _IFT_MDM_ep);
+        }
+    }
+
+    input.setField(this->formulation, _IFT_MDM_formulation);
+    input.setField(this->mdmMode, _IFT_MDM_mode);
 }
 
 

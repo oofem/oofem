@@ -38,6 +38,7 @@
 #include "mathfem.h"
 #include "loadtimefunction.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 
@@ -135,9 +136,12 @@ RotatingBoundary :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-int
-RotatingBoundary :: giveInputRecordString(std :: string &str, bool keyword)
+void
+RotatingBoundary :: giveInputRecord(DynamicInputRecord &input)
 {
-    return GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
+    GeneralBoundaryCondition :: giveInputRecord(input);
+    input.setField(this->axis, _IFT_RotatingBoundary_axis);
+    input.setField(this->center, _IFT_RotatingBoundary_center);
 }
+
 } // end namespace oofem

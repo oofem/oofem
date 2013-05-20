@@ -102,6 +102,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
+    virtual const char *giveInputRecordName() const { return _IFT_MicroMaterial_Name; }
     virtual const char *giveClassName() const { return "MicroMaterial"; }
 
     virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *, const FloatArray &, TimeStep *);

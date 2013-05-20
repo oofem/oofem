@@ -85,7 +85,6 @@ public:
     void enableStdout();
 
     const char *giveClassName() const { return "RVEMaterial"; };
-    classType giveClassID() const { return RVEMaterialClass; };
 };
 
 }

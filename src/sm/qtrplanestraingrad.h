@@ -52,6 +52,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
+    //virtual const char *giveInputRecordName() const { return _IFT_QtrPlaneStrainGrad_Name; }
     virtual const char *giveClassName() const { return "QTrPlaneStrainGrad"; }
     virtual classType giveClassID() const { return QTrPlaneStrainGradClass; }
 

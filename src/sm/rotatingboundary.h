@@ -76,11 +76,11 @@ public:
     virtual double give(Dof *dof, ValueModeType mode, TimeStep *tStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
+
     virtual void scale(double s) { }
-    const char *giveClassName() const { return "RotatingBoundary"; }
-    classType giveClassID() const { return RotatingBoundaryClass; }
-    
+    virtual const char *giveClassName() const { return "RotatingBoundary"; }
+    virtual classType giveClassID() const { return RotatingBoundaryClass; }
 };
 } // end namespace oofem
 #endif // rotatingboundary_h

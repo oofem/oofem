@@ -37,6 +37,7 @@
 #include "structuralmaterial.h"
 #include "floatarray.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 
@@ -279,19 +280,18 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-SimpleCrossSection :: giveInputRecordString(std :: string &str, bool keyword)
+void SimpleCrossSection::giveInputRecord(DynamicInputRecord &input)
 {
-    char buff [ 1024 ];
-
-    CrossSection :: giveInputRecordString(str, keyword);
-    sprintf( buff, " thick %e width %e area %e iy %e iz %e ik %e beamshearcoeff %e",
-            this->give(CS_Thickness), this->give(CS_Width), this->give(CS_Area),
-            this->give(CS_InertiaMomentY), this->give(CS_InertiaMomentZ), this->give(CS_TorsionMomentX),
-            this->give(CS_BeamShearCoeff) );
-    str += buff;
-
-    return 1;
+    StructuralCrossSection :: giveInputRecord(input);
+    input.setField(this->give(CS_Thickness), _IFT_SimpleCrossSection_thick);
+    input.setField(this->give(CS_Width), _IFT_SimpleCrossSection_width);
+    input.setField(this->give(CS_Area), _IFT_SimpleCrossSection_area);
+    input.setField(this->give(CS_TorsionMomentX), _IFT_SimpleCrossSection_ik);
+    input.setField(this->give(CS_InertiaMomentY), _IFT_SimpleCrossSection_iy);
+    input.setField(this->give(CS_InertiaMomentZ), _IFT_SimpleCrossSection_iz);
+    input.setField(this->give(CS_SHEAR_AREA_Y), _IFT_SimpleCrossSection_shearareay);
+    input.setField(this->give(CS_SHEAR_AREA_Y), _IFT_SimpleCrossSection_shearareaz);
+    input.setField(this->give(CS_BeamShearCoeff), _IFT_SimpleCrossSection_shearcoeff);
 }
 
 

@@ -38,6 +38,7 @@
 #include "mathfem.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 IsotropicDamageMaterial :: IsotropicDamageMaterial(int n, Domain *d) : StructuralMaterial(n, d)
@@ -416,16 +417,12 @@ IsotropicDamageMaterial :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-IsotropicDamageMaterial :: giveInputRecordString(std :: string &str, bool keyword)
+void
+IsotropicDamageMaterial :: giveInputRecord(DynamicInputRecord &input)
 {
-    char buff [ 1024 ];
-
-    StructuralMaterial :: giveInputRecordString(str, keyword);
-    sprintf(buff, " talpha %e", this->tempDillatCoeff);
-    str += buff;
-
-    return 1;
+    StructuralMaterial :: giveInputRecord(input);
+    input.setField(this->maxOmega, _IFT_IsotropicDamageMaterial_maxOmega);
+    input.setField(this->tempDillatCoeff, _IFT_IsotropicDamageMaterial_talpha);
 }
 
 

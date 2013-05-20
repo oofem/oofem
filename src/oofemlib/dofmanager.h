@@ -466,9 +466,8 @@ public:
      */
     virtual bool giveMasterDofMans(IntArray &masters);
 
-    virtual const char *giveClassName() const { return "DofManager"; }
-    virtual classType giveClassID() const { return DofManagerClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual void printYourself();
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
@@ -578,8 +577,6 @@ public:
     IntArray *giveCompleteGlobalDofIDArray() const; // JB - made it public
 
 protected:
-    virtual IRResultType resolveDofIDArray(InputRecord *ir, IntArray &dofIDArry);
-
     /// Computes transformation matrix between DOFs in nodal c.s. and master DOFs.
     void computeSlaveDofTransformation(FloatMatrix &answer, const IntArray *dofMask);
 };

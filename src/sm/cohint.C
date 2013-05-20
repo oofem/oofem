@@ -38,6 +38,7 @@
 #include "floatarray.h"
 #include "contextioerr.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 //---------------------------------------------------------------------------------------------------
@@ -286,18 +287,15 @@ CohesiveInterfaceMaterial :: initializeFrom(InputRecord *ir)
     return StructuralMaterial :: initializeFrom(ir);
 }
 
-int
-CohesiveInterfaceMaterial :: giveInputRecordString(std :: string &str, bool keyword)
+void
+CohesiveInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
 {
-    char buff [ 1024 ];
-
-    StructuralMaterial :: giveInputRecordString(str, keyword);
-
-    sprintf(buff, " talpha %e kn %e ks %e", this->tempDillatCoeff, kn, ks);
-    str += buff;
-
-    return 1;
+    StructuralMaterial :: giveInputRecord(input);
+    //input.setField(this->tempDillatCoeff, _IFT_CohesiveInterfaceMaterial_temperatureDillationCoeff);
+    input.setField(this->kn, _IFT_IsoInterfaceDamageMaterial_kn);
+    input.setField(this->ks, _IFT_IsoInterfaceDamageMaterial_ks);
 }
+
 
 //---------------------------------------------------------------------------------------------------
 // c l a s s   CohesiveInterfaceMaterialStatus

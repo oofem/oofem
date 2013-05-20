@@ -58,6 +58,7 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
+    virtual const char *giveInputRecordName() const { return _IFT_PlaneStress2dXfem_Name; }
     virtual const char *giveClassName() const { return "PlaneStress2dXfem"; }
     virtual classType giveClassID() const { return PlaneStress2dXfemClass; }
     virtual int computeNumberOfDofs(EquationID ut);

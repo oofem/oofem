@@ -57,8 +57,6 @@ class ElementSide;
  */
 class SurfaceTensionBoundaryCondition : public ActiveBoundaryCondition
 {
-    std::list<std::pair<int,int> > sides; ///< Sides of bulk elements on which load is applied.
-
     double gamma; ///< Surface tension.
     bool useTangent; ///< Determines if tangent should be used.
 
@@ -70,12 +68,7 @@ public:
      */
     SurfaceTensionBoundaryCondition(int n, Domain *d) : ActiveBoundaryCondition(n, d) { }
     /// Destructor.
-    virtual ~SurfaceTensionBoundaryCondition() { sides.clear(); }
-
-    virtual void addElement(int elem) { OOFEM_ERROR("SurfaceTensionBoundaryCondition :: addElement - Only applies to boundaries") }
-    virtual void addElementSide(int elem, int side) { sides.push_back(std::make_pair(elem,side)); }
-
-    void clearElementSides() { sides.clear(); }
+    virtual ~SurfaceTensionBoundaryCondition() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
@@ -91,6 +84,7 @@ public:
 
     virtual classType giveClassID() const { return SurfaceTensionBoundaryConditionClass; }
     virtual const char *giveClassName() const { return "SurfaceTensionBoundaryCondition"; }
+    virtual const char *giveInputRecordName() const { return _IFT_SurfaceTensionBoundaryCondition_Name; }
 
 protected:
     /**

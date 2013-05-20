@@ -145,6 +145,7 @@ public:
 
     virtual int hasMaterialModeCapability(MaterialMode);
 
+    virtual const char *giveInputRecordName() const { return _IFT_TrabBoneMaterial_Name; }
     virtual const char *giveClassName() const { return "TrabBoneMaterial"; }
     virtual classType giveClassID() const { return TrabBoneMaterialClass; }
 

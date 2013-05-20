@@ -78,6 +78,7 @@ public:
     virtual FEInterpolation *giveInterpolation() { return &interpolation; }
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_LIBeam2d_Name; }
     virtual const char *giveClassName() const { return "LIBeam2d"; }
     virtual classType giveClassID() const { return LIBeam2dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);

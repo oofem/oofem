@@ -106,8 +106,8 @@ public:
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "SimpleCrossSection"; }
+    virtual const char *giveInputRecordName() const { return _IFT_SimpleCrossSection_Name; }
     virtual classType giveClassID() const { return SimpleCrossSectionClass; }
-    virtual const char *giveInputRecordName() const { return "SimpleCS"; }
 
     /**
      * Initializes receiver acording to object description stored in input record.
@@ -122,7 +122,7 @@ public:
      * @param ir Record to read off.
      */
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
 protected:
     virtual void giveMaterialStiffnessMatrixOf(FloatMatrix &answer,

@@ -34,6 +34,7 @@
 
 #include "nodalload.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 
@@ -53,15 +54,11 @@ NodalLoad :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-NodalLoad :: giveInputRecordString(std :: string &str, bool keyword)
+void NodalLoad :: giveInputRecord(DynamicInputRecord &input)
 {
-    char buff [ 1024 ];
-
-    Load :: giveInputRecordString(str, keyword);
-    sprintf(buff, " cstype %d", ( int ) this->coordSystemType);
-    str += buff;
-
-    return 1;
+    Load :: giveInputRecord(input);
+    input.setField(this->coordSystemType, _IFT_NodalLoad_cstype);
 }
+
+
 } // end namespace oofem

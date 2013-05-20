@@ -76,10 +76,10 @@ public:
     virtual ~PeriodicPiecewiseLinFunction() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     virtual classType giveClassID() const { return PeriodicPiecewiseClass; }
     virtual const char *giveClassName() const { return "PeriodicPiecewiseClass"; }
-    virtual const char *giveInputRecordName() const { return "PeriodicPiecewiseLinFunction"; }
+    virtual const char *giveInputRecordName() const { return _IFT_PeriodicPiecewiseLinFunction_Name; }
 
     virtual double __at(double);
     virtual double __derAt(double);

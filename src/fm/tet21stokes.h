@@ -134,6 +134,7 @@ public:
 
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_tetra_2; }
     virtual const char *giveClassName() const { return "Tet21Stokes"; }
+    virtual const char *giveInputRecordName() const { return _IFT_Tet21Stokes_Name; }
     virtual classType giveClassID() const { return Tet21StokesElementClass; }
     virtual MaterialMode giveMaterialMode() { return _3dFlow; }
 
@@ -171,6 +172,8 @@ public:
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type);
+
+    void giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep );
 };
 } // end namespace oofem
 #endif // tet21stokes_h

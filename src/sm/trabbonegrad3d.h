@@ -37,6 +37,8 @@
 
 #include "trabbone3d.h"
 
+#define _IFT_TrabBoneGrad3D_Name "trabbonegrad3d"
+
 namespace oofem {
 
 class LinearElasticMaterial;
@@ -84,7 +86,7 @@ public:
 
     virtual const char *giveClassName() const { return "TrabBoneGrad3D"; }
     virtual classType giveClassID() const { return TrabBoneGrad3DClass; }
-    virtual const char *giveInputRecordName() const { return "TrabBoneGrad3D"; }
+    virtual const char *giveInputRecordName() const { return _IFT_TrabBoneGrad3D_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int hasMaterialModeCapability(MaterialMode mode);

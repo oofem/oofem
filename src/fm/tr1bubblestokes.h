@@ -109,6 +109,7 @@ public:
 
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
     virtual const char *giveClassName() const { return "Tr1BubbleStokes"; }
+    virtual const char *giveInputRecordName() const { return _IFT_Tr1BubbleStokes_Name; }
     virtual classType giveClassID() const { return Tr1BubbleStokesElementClass; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 

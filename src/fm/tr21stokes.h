@@ -113,6 +113,7 @@ public:
 
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     virtual const char *giveClassName() const { return "Tr21Stokes"; }
+    virtual const char *giveInputRecordName() const { return _IFT_Tr21Stokes_Name; }
     virtual classType giveClassID() const { return Tr21StokesElementClass; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 

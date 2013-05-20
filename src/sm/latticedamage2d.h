@@ -293,8 +293,8 @@ public:
     /// Destructor
     virtual ~LatticeDamage2d();
 
+    virtual const char *giveInputRecordName() const { return _IFT_LatticeDamage2d_Name; }
     virtual const char *giveClassName() const { return "LatticeDamage2d"; }
-
     virtual classType giveClassID() const { return LatticeDamage2dClass; }
 
     virtual int giveStressStrainComponentIndOf(MatResponseForm, MaterialMode mmode, int);

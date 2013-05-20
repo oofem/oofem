@@ -89,6 +89,7 @@ public:
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
 
     virtual classType giveClassID() const { return UserDefinedTemperatureFieldClass; }
+    virtual const char *giveInputRecordName() const { return _IFT_UserDefinedTemperatureField_Name; }
     virtual const char *giveClassName() const { return "UserDefinedTemperatureField"; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

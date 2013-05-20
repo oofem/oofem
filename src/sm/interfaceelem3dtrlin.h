@@ -72,6 +72,7 @@ public:
 #endif
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_InterfaceElement3dTrLin_Name; }
     virtual const char *giveClassName() const { return "InterfaceElement3dTrLin"; }
     virtual classType giveClassID() const { return InterfaceElement3dTrLinClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);

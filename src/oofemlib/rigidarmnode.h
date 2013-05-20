@@ -105,6 +105,7 @@ public:
     void computeMasterContribution();
 
     virtual const char *giveClassName() const { return "RigidArmNode"; }
+    virtual const char *giveInputRecordName() const { return _IFT_RigidArmNode_Name; }
     virtual classType giveClassID() const { return RigidArmNodeClass; }
     virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); }
 };

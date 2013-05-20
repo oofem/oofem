@@ -71,6 +71,7 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "Quad1_2D_SUPG"; }
+    virtual const char *giveInputRecordName() const { return _IFT_Quad10_2D_SUPG_Name; }
     virtual classType giveClassID() const { return Quad10_2D_SUPGClass; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }

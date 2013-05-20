@@ -44,6 +44,7 @@
 #include "enrichmentitem.h"
 ///@name Input fields for XfemManager
 //@{
+#define _IFT_XfemManager_Name "xfemmanager"
 #define _IFT_XfemManager_numberOfGeometryItems "numberofgeometryitems"  // -> numberOfEnrichmentDomains
 #define _IFT_XfemManager_numberOfEnrichmentItems "numberofenrichmentitems"
 #define _IFT_XfemManager_numberOfEnrichmentFunctions "numberofenrichmentfunctions"
@@ -107,7 +108,7 @@ public:
 
     int instanciateYourself(DataReader *dr);
     const char *giveClassName() const { return "XfemManager"; }
-    const char *giveInputRecordName() const { return "XfemManager"; }
+    const char *giveInputRecordName() const { return _IFT_XfemManager_Name; }
     
     /// Wrapper for updating the integration rule.
     void updateIntegrationRule();

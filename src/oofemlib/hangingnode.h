@@ -90,6 +90,7 @@ public:
     virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); }
 
     virtual const char *giveClassName() const { return "HangingNode"; }
+    virtual const char *giveInputRecordName() const { return _IFT_HangingNode_Name; }
     virtual classType giveClassID() const { return HangingNodeClass; }
 };
 } // end namespace oofem

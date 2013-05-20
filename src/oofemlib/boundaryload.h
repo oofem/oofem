@@ -167,7 +167,7 @@ public:
      * its loadType into loadType attribute and coordinate system type into csType attribute.
      */
     IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     /**
      * Returns receiver load type. It distinguish particular boundary conditions according to
      * their "physical" meaning (like StructuralTemperatureLoadLT, StructuralLoadLT).
@@ -183,9 +183,6 @@ public:
      * @return property value
      */
     virtual double giveProperty(int aProperty);
-
-    virtual classType giveClassID() const { return BoundaryLoadClass; }
-    virtual const char *giveClassName() const { return "BoundaryLoad"; }
 
 protected:
     /**

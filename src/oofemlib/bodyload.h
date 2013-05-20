@@ -63,9 +63,6 @@ public:
      * @return BodyLoadBGT.
      */
     virtual bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
-
-    virtual const char *giveClassName() const { return "BodyLoad"; }
-    virtual classType giveClassID() const { return BodyLoadClass; }
 };
 } // end namespace oofem
 #endif // bodyload_h

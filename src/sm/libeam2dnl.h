@@ -74,6 +74,7 @@ public:
     virtual  double computeVolumeAround(GaussPoint *gp);
 
     // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_LIBeam2dNL_Name; }
     virtual const char *giveClassName() const { return "LIBeam2dNL"; }
     virtual classType giveClassID() const { return LIBeam2dNLClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);

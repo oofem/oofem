@@ -127,6 +127,7 @@ public:
     virtual ~RCSDMaterial();
 
     // identification and auxiliary functions
+    virtual const char *giveInputRecordName() const { return _IFT_RCSDMaterial_Name; }
     virtual const char *giveClassName() const { return "RCSDMaterial"; }
     virtual classType giveClassID() const { return RCSDMaterialClass; }
 

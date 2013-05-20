@@ -831,6 +831,7 @@ public:
 
     // === identification and auxiliary functions ===
 
+    virtual const char *giveInputRecordName() const { return _IFT_HellmichMaterial_Name; }
     virtual const char *giveClassName() const { return "HellmichMaterial"; }
     virtual classType giveClassID() const { return HellmichMaterialClass; }
 

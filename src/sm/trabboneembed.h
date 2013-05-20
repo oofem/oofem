@@ -123,6 +123,7 @@ public:
 
     virtual int hasMaterialModeCapability(MaterialMode);
 
+    virtual const char *giveInputRecordName() const { return _IFT_TrabBoneEmbed_Name; }
     virtual const char *giveClassName() const { return "TrabBoneEmbed"; }
     virtual classType giveClassID() const { return TrabBoneEmbedClass; }
 

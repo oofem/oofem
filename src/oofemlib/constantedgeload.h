@@ -72,6 +72,7 @@ public:
 
     virtual classType giveClassID() const { return ConstantEdgeLoadClass; }
     virtual const char *giveClassName() const { return "ConstantEdgeLoad"; }
+    virtual const char *giveInputRecordName() const { return _IFT_ConstantEdgeLoad_Name; }
 
 private:
     virtual void computeNArray(FloatArray &answer, FloatArray &coords) const { answer.resize(0); }

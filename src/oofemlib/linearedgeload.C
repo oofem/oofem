@@ -36,6 +36,7 @@
 #include "floatarray.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 
@@ -70,35 +71,15 @@ LinearEdgeLoad :: initializeFrom(InputRecord *ir)
 }
 
 
-int
-LinearEdgeLoad :: giveInputRecordString(std :: string &str, bool keyword)
+void LinearEdgeLoad :: giveInputRecord(DynamicInputRecord& input)
 {
-    int i;
-    char buff [ 1024 ];
-
-    BoundaryLoad :: giveInputRecordString(str, keyword);
-    sprintf(buff, " formulation %d", ( int ) this->formulation);
-    str += buff;
+    BoundaryLoad :: giveInputRecord ( input );
+    input.setField(this->formulation, _IFT_LinearEdgeLoad_formulation);
     if ( this->formulation == BL_GlobalFormulation ) {
-        sprintf( buff, " sc %d", this->startCoords.giveSize() );
-        str += buff;
-        for ( i = 1; i <= this->startCoords.giveSize(); i++ ) {
-            sprintf( buff, " %e", this->startCoords.at(i) );
-            str += buff;
-        }
-
-        sprintf( buff, " ec %d", this->endCoords.giveSize() );
-        str += buff;
-        for ( i = 1; i <= this->endCoords.giveSize(); i++ ) {
-            sprintf( buff, " %e", this->endCoords.at(i) );
-            str += buff;
-        }
+        input.setField(this->startCoords, _IFT_LinearEdgeLoad_startcoord);
+        input.setField(this->endCoords, _IFT_LinearEdgeLoad_endcoord);
     }
-
-    return 1;
 }
-
-
 
 
 void

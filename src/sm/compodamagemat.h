@@ -144,10 +144,10 @@ public:
 
     virtual const char *giveClassName() const { return "CompositeDamageMaterial"; }
     virtual classType giveClassID() const { return CompoDamageMatClass; }
-    virtual const char *giveInputRecordName() const { return "compodamagemat"; }
+    virtual const char *giveInputRecordName() const { return _IFT_CompoDamageMat_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new CompoDamageMatStatus(1, domain, gp); }
 

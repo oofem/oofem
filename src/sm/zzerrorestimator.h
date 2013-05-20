@@ -210,6 +210,7 @@ public:
     virtual int estimateMeshDensities(TimeStep *tStep);
     virtual IRResultType initializeFrom(InputRecord *ir);
 
+    virtual const char *giveInputRecordName() const { return NULL; }
     virtual const char *giveClassName() const { return "ZZErrorEstimator"; }
     virtual classType giveClassID() const { return ZZRemeshingCriteriaClass; }
 };

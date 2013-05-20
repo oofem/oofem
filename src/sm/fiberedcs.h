@@ -147,6 +147,7 @@ public:
     virtual double give(CrossSectionProperty a);
 
     // identification and auxiliary functions
+    virtual const char *giveInputRecordName() const { return _IFT_FiberedCrossSection_Name; }
     virtual const char *giveClassName() const { return "FiberedCrossSection"; }
     virtual classType giveClassID() const { return FiberedCrossSectionClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);

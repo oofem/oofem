@@ -238,6 +238,7 @@ public:
         }
     }
     virtual const char *giveClassName() const { return "CylindricalALM"; }
+    virtual const char *giveInputRecordName() const { return _IFT_CylindricalALM_Name; }
 
     virtual SparseLinearSystemNM *giveLinearSolver();
 

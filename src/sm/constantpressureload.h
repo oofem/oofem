@@ -79,6 +79,7 @@ public:
 
     virtual classType giveClassID() const { return ConstantPressureLoadClass; }
     virtual const char *giveClassName() const { return "ConstantPressureLoad"; }
+    virtual const char *giveInputRecordName() const { return _IFT_ConstantPressureLoad_Name; }
 
 private:
     virtual void computeNArray(FloatArray &answer, FloatArray &coords) const { answer.resize(0); }

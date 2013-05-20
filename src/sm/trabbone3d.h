@@ -156,7 +156,6 @@ public:
     void setNsubsteps(int n)  { nss = n; }
 
     void setDensG(double g) { densG = g; }
-    
 
     virtual const char *giveClassName() const { return "TrabBone3DStatus"; }
     virtual classType giveClassID() const { return TrabBone3DStatusClass; }
@@ -243,6 +242,7 @@ public:
 
     virtual int hasMaterialModeCapability(MaterialMode);
 
+    virtual const char *giveInputRecordName() const { return _IFT_TrabBone3D_Name; }
     virtual const char *giveClassName() const { return "TrabBone3D"; }
     virtual classType giveClassID() const { return TrabBone3DClass; }
 

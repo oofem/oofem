@@ -72,51 +72,51 @@ protected:
     int couplingFlag, couplingNumber;
 
 public:
-
     // constructor
     Lattice2d_mt(int, Domain *, ElementMode em = HeatTransferEM);
-    ~Lattice2d_mt();                       // destructor
+    virtual ~Lattice2d_mt();
 
     /** Computes the contribution to balance equation(s) due to internal sources */
-    virtual void          computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode);
-    double                computeVolumeAround(GaussPoint *);
+    virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode);
+    virtual double computeVolumeAround(GaussPoint *);
 
-    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
-    void computeConductivityMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    virtual void computeConductivityMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
 
-    void computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep);
 
-    const char *giveClassName() const { return "Lattice2d_mtElement"; }
-    classType                giveClassID() const { return Lattice2d_mtClass; }
+    virtual const char *giveInputRecordName() const { return _IFT_Lattice2d_mt_Name; }
+    virtual const char *giveClassName() const { return "Lattice2d_mtElement"; }
+    virtual classType giveClassID() const { return Lattice2d_mtClass; }
 
-    Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
 
-    virtual int            computeNumberOfDofs(EquationID ut) { return 2; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 2; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
-    IRResultType           initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    void updateInternalState(TimeStep *stepN);
+    virtual void updateInternalState(TimeStep *stepN);
 
 #ifdef __OOFEG
     //
     // Graphics output
     //
 
-    void drawYourself(oofegGraphicContext &gc);
+    virtual void drawYourself(oofegGraphicContext &gc);
 
-    void  drawRawGeometry(oofegGraphicContext &);
+    virtual void drawRawGeometry(oofegGraphicContext &);
 
-    void drawRawCrossSections(oofegGraphicContext &gc);
+    virtual void drawRawCrossSections(oofegGraphicContext &gc);
 
-    void  giveCrossSectionCoordinates(FloatArray &coords);
+    virtual void giveCrossSectionCoordinates(FloatArray &coords);
 
 #endif
 
 protected:
-    void                  computeGaussPoints();
+    virtual void computeGaussPoints();
 
     virtual void  computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *);
     virtual void  computeNmatrixAt(FloatMatrix &n, FloatArray *);
@@ -145,9 +145,9 @@ protected:
 
     virtual void  giveGpCoordinates(FloatArray &coords);
 
-    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) { return 0; }
+    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) { return 0; }
 
-    int giveApproxOrder(int unknownIndx) { return 1; }
+    virtual int giveApproxOrder(int unknownIndx) { return 1; }
 };
 } // end namespace oofem
 #endif
