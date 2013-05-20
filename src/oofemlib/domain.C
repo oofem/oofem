@@ -1146,7 +1146,7 @@ Domain :: giveSpatialLocalizer()
 {
     //  if (spatialLocalizer == NULL) spatialLocalizer = new DummySpatialLocalizer(1, this);
     if ( spatialLocalizer == NULL ) {
-        spatialLocalizer = new OctreeSpatialLocalizer(1, this);
+        spatialLocalizer = new OctreeSpatialLocalizer(this);
     }
 
     return spatialLocalizer;

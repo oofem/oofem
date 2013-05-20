@@ -56,7 +56,7 @@ protected:
 
 public:
     /// Constructor
-    DummySpatialLocalizer(int n, Domain *d) : SpatialLocalizer(n, d), region_elements(), initialized(false) { }
+    DummySpatialLocalizer(Domain *d) : SpatialLocalizer(d), region_elements(), initialized(false) { }
     /// Destructor
     virtual ~DummySpatialLocalizer() { }
 

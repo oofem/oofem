@@ -194,7 +194,7 @@ protected:
 
 public:
     /// Constructor
-    OctreeSpatialLocalizer(int n, Domain *d) : SpatialLocalizer(n, d), octreeMask(3) {
+    OctreeSpatialLocalizer(Domain *d) : SpatialLocalizer(d), octreeMask(3) {
         rootCell = NULL;
         elementIPListsInitialized = false;
         elementListsInitialized.resize(0);
@@ -223,7 +223,6 @@ public:
     virtual void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius);
 
     virtual const char *giveClassName() const { return "OctreeSpatialLocalizer"; }
-    virtual classType giveClassID() const { return OctreeSpatialLocalizerClass; }
 
 protected:
     /**
