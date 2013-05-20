@@ -174,14 +174,6 @@ void WeakPeriodicBoundaryCondition :: updateDirection()
 
 	giveEdgeNormal( normal, element [ 0 ].at(0), side [ 0 ].at(0) );
 
-	//	giveEdgeNormal( normal, element [ 0 ].at(0), 1 );
-	//	normal.printYourself();
-	//	giveEdgeNormal( normal, element [ 0 ].at(0), 2 );
-	//	normal.printYourself();
-	//	giveEdgeNormal( normal, element [ 0 ].at(0), 3 );
-	//	normal.printYourself();
-	//	giveEdgeNormal( normal, element [ 0 ].at(0), 4 );
-	//	normal.printYourself();
 	if (this->domain->giveNumberOfSpatialDimensions()==2) {
 		surfaceIndexes.resize(1);
 		smin.resize(1);
@@ -194,7 +186,7 @@ void WeakPeriodicBoundaryCondition :: updateDirection()
 		sideGeom = _Triangle;
 	}
 
-	if ( abs(normal.at(1))>0.99999 ) {              // Normal points in X direction
+	if ( fabs(normal.at(1))>0.99999 ) {              // Normal points in X direction
 		direction = 1;
 		if (this->domain->giveNumberOfSpatialDimensions()==2) {
 			surfaceIndexes.at(1)=2;
@@ -203,23 +195,24 @@ void WeakPeriodicBoundaryCondition :: updateDirection()
 			surfaceIndexes.at(2)=3;
 		}
 
-	} else if ( abs(normal.at(2))>0.99999) {         // Normal points in Y direction
+	} else if ( fabs(normal.at(2))>0.99999) {         // Normal points in Y direction
 		direction = 2;
 		if (this->domain->giveNumberOfSpatialDimensions()==2) {
 			surfaceIndexes.at(1)=1;
 		} else {
-			surfaceIndexes.at(1)=2;
+			surfaceIndexes.at(1)=1;
 			surfaceIndexes.at(2)=3;
 		}
-	} else if ( abs(normal.at(3))>0.99999) {         // Normal points in Z direction
+	} else if ( fabs(normal.at(3))>0.99 ) {         // Normal points in Z direction
 		direction = 3;
 		if (this->domain->giveNumberOfSpatialDimensions()==2) {
 			_error1("3 dimensioal normal in a 2 dimensional problem.\n");
 		} else {
-			surfaceIndexes.at(1)=2;
-			surfaceIndexes.at(2)=3;
+			surfaceIndexes.at(1)=1;
+			surfaceIndexes.at(2)=2;
 		}
 	} else {
+		normal.printYourself();
 		_error1("Only surfaces with normal in x, y or z direction supported.\n");
 	}
 }
@@ -239,7 +232,6 @@ void WeakPeriodicBoundaryCondition :: updateSminmax()
 				smax.at(i) = std :: max(smax.at(i), sValue);
 			}
 
-			//printf("smin=%f\tsmax=%f\n", smin, smax);
 		}
 		doUpdateSminmax = false;
 	}
@@ -296,7 +288,7 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
 
 	GaussIntegrationRule iRule(1, e);
 	if ( ngp == -1 ) {
-		ngp = iRule.getRequiredNumberOfIntegrationPoints(sideGeom, 2 + ndof - 1);
+		ngp = iRule.getRequiredNumberOfIntegrationPoints(sideGeom, 2 + orderOfPolygon);
 	}
 	iRule.setUpIntegrationPoints(sideGeom, ngp, _Unknown);
 
@@ -326,7 +318,6 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
 				fVal=pow(gcoords.at(surfaceIndexes.at(1)), a)*pow(gcoords.at(surfaceIndexes.at(2)), b);
 			}
 
-			//printf("fVal=%f @ %f\n", fVal, s);
 			for ( int k = 0; k < B.giveNumberOfRows(); k++ ) {
 				B(k, j) += + N(k) * fVal * detJ * gp->giveWeight();
 			}
@@ -523,7 +514,6 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
 			answer.assemble(myProdGamma, sideLocation);
 		}
 	}
-	//    answer.printYourself();
 }
 
 int WeakPeriodicBoundaryCondition :: giveNumberOfInternalDofManagers()
