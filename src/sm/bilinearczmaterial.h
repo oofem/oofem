@@ -51,6 +51,7 @@
 
 namespace oofem {
 
+
 /**
  * This class implements associated Material Status for ...
  */
@@ -121,7 +122,7 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "BilinearCZMaterial"; }
     virtual classType giveClassID() const { return BilinearCZMaterialClass; }
-
+    virtual const char *giveInputRecordName() const { return _IFT_BilinearCZMaterial_Name; }
     
 
     virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
