@@ -515,6 +515,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         n.zero();
         Eta.resize(dim, dim);
         Eta.zero();
+        index = 1;
         for ( int i = 1; i <= 3; i++ ) {
             if ( principalStress.at(i) > 0.0 ) {
                 if ( this->equivStrainType == EST_Rankine_Smooth ) {
@@ -528,7 +529,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
                     m.beDyadicProductOf(n, n);
                     m.times( principalStress.at(i) );
                     Eta.add(m);
-                } else if ( sum < principalStress.at(i) )  {
+                } else if ( sum < principalStress.at(i) ) {
                     sum = principalStress.at(i);
                     index = i;
                 }

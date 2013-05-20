@@ -1397,7 +1397,7 @@ void Domain :: createDofs()
             }
 
             // Finally create the new DOF:
-            printf("Creating: node %d, id = %d, dofType = %d, bc = %d, ic = %d\n", i, id, dtype, bcid, icid);
+            //printf("Creating: node %d, id = %d, dofType = %d, bc = %d, ic = %d\n", i, id, dtype, bcid, icid);
             Dof *dof = classFactory.createDof(dtype, ++c, dman);
             dof->setDofID(id);
             dof->setBcId(bcid); // Note: slave dofs and such will simple ignore this.
