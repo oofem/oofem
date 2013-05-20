@@ -577,8 +577,6 @@ public:
     IntArray *giveCompleteGlobalDofIDArray() const; // JB - made it public
 
 protected:
-    virtual IRResultType resolveDofIDArray(InputRecord *ir, IntArray &dofIDArry);
-
     /// Computes transformation matrix between DOFs in nodal c.s. and master DOFs.
     void computeSlaveDofTransformation(FloatMatrix &answer, const IntArray *dofMask);
 };

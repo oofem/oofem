@@ -47,7 +47,7 @@
 //@{
 #define _IFT_GeneralBoundaryCondition_LoadTimeFunct "loadtimefunction"
 #define _IFT_GeneralBoundaryCondition_valType "valtype"
-#define _IFT_GeneralBoundaryCondition_defaultDofs "defaultdofs"
+#define _IFT_GeneralBoundaryCondition_dofs "dofs"
 #define _IFT_GeneralBoundaryCondition_IsImposedTimeFunct "isimposedtimefunction"
 #define _IFT_GeneralBoundaryCondition_set "set"
 //@}
@@ -83,8 +83,8 @@ protected:
     int loadTimeFunction;
     /// Physical meaning of BC value.
     bcValType valType;
-    /// Default dofs (for remeshing/adaptivity).
-    IntArray defaultDofs;
+    /// Dofs that b.c. is applied to (relevant for Dirichlet type b.c.s).
+    IntArray dofs;
     /** 
      * Zero by default - the BC is than always imposed. Otherwise the number of associated
     * load time function. If the load time function returns aero value, the BC is inactive.
@@ -134,10 +134,10 @@ public:
     virtual bool isImposed(TimeStep *tStep);
 
     /**
-     * Array with default dofs which b.c. acts on.
+     * Array with default dofs which b.c. acts on (only Dirichlet type b.c.s are afflicted).
      * @return Array with dof IDs.
      */
-    virtual const IntArray& giveDefaultDofs() const { return defaultDofs; }
+    virtual const IntArray& giveDofIDs() const { return dofs; }
     /**
      * @return Type of boundary condition. It allows to distinguish BC according its
      * mathematical meaning, ie. like Dirichlet, Neumann, or Newton type.
