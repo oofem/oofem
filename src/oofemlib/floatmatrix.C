@@ -75,6 +75,10 @@ extern int dsyevx_(const char *jobz,  const char *range, const char *uplo, const
         int jobz_len, int range_len, int uplo_len);
 /// Solves system which has been LU-factorized.
 extern void dgetrs_(const char *trans, const int *n, const int *nrhs, double *a, const int *lda, int *ipiv, const double *b, const int *ldb, int *info );
+/// General matrix multiplication
+extern void dgemm_(const char *transa, const char *transb, const int *m, const int *n, const int *k, const double *alpha, 
+                   const double *a, const int *lda, const double *b, const int *ldb, const double *beta, double *c, const int *ldc,
+                   int a_len, int b_len, int c_len);
 }
 #endif
 
@@ -303,8 +307,14 @@ void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &b
         OOFEM_ERROR("FloatMatrix::beProductOf : error in product A*B : dimensions do not match");
     }
 #  endif
-
     this->resize(aMatrix.nRows, bMatrix.nColumns);
+#  ifdef __LAPACK_MODULE
+    double alpha = 1., beta = 0.;
+    dgemm_("n", "n", & this->nRows, & this->nColumns, & aMatrix.nColumns, 
+           & alpha, aMatrix.values, & aMatrix.nRows, bMatrix.values, & bMatrix.nRows, 
+           & beta, this->values, & this->nRows,
+           aMatrix.nColumns, bMatrix.nColumns, this->nColumns);
+#  else
     for ( int i = 1; i <= aMatrix.nRows; i++ ) {
         for ( int j = 1; j <= bMatrix.nColumns; j++ ) {
             double coeff = 0.;
@@ -315,25 +325,92 @@ void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &b
             this->at(i, j) = coeff;
         }
     }
+#  endif
+}
+
+
+void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
+// Receiver = aMatrix^T * bMatrix
+{
+#  ifdef DEBUG
+    if ( aMatrix.nRows != bMatrix.nRows ) {
+        OOFEM_ERROR("FloatMatrix::beTProductOf : error in product A*B : dimensions do not match");
+    }
+#  endif
+    this->resize(aMatrix.nColumns, bMatrix.nColumns);
+#  ifdef __LAPACK_MODULE
+    double alpha = 1., beta = 0.;
+    dgemm_("t", "n", & this->nRows, & this->nColumns, & aMatrix.nRows, 
+           & alpha, aMatrix.values, & aMatrix.nRows, bMatrix.values, & bMatrix.nRows, 
+           & beta, this->values, & this->nRows,
+           aMatrix.nColumns, bMatrix.nColumns, this->nColumns);
+#  else
+    for ( int i = 1; i <= aMatrix.nColumns; i++ ) {
+        for ( int j = 1; j <= bMatrix.nColumns; j++ ) {
+            double coeff = 0.;
+            for ( int k = 1; k <= aMatrix.nRows; k++ ) {
+                coeff += aMatrix.at(k, i) * bMatrix.at(k, j);
+            }
+
+            this->at(i, j) = coeff;
+        }
+    }
+#endif
+}
+
+
+void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
+// Receiver = aMatrix * bMatrix^T
+{
+#  ifdef DEBUG
+    if ( aMatrix.nColumns != bMatrix.nColumns ) {
+        OOFEM_ERROR("FloatMatrix::beProductTOf : error in product A*B : dimensions do not match");
+    }
+#  endif
+    this->resize(aMatrix.nRows, bMatrix.nRows);
+#  ifdef __LAPACK_MODULE
+    double alpha = 1., beta = 0.;
+    dgemm_("n", "t", & this->nRows, & this->nColumns, & aMatrix.nColumns, 
+           & alpha, aMatrix.values, & aMatrix.nRows, bMatrix.values, & bMatrix.nRows, 
+           & beta, this->values, & this->nRows,
+           aMatrix.nColumns, bMatrix.nColumns, this->nColumns);
+#  else
+    for ( int i = 1; i <= aMatrix.nRows; i++ ) {
+        for ( int j = 1; j <= bMatrix.nRows; j++ ) {
+            double coeff = 0.;
+            for ( int k = 1; k <= aMatrix.nColumns; k++ ) {
+                coeff += aMatrix.at(i, k) * bMatrix.at(j, k);
+            }
+
+            this->at(i, j) = coeff;
+        }
+    }
+#  endif
 }
 
 
 void FloatMatrix :: addProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
 // Receiver = aMatrix * bMatrix
 {
-    int p;
-    double coeff;
-
 #  ifdef DEBUG
     if ( aMatrix.nColumns != bMatrix.nRows ) {
         OOFEM_ERROR("FloatMatrix::addProductOf : error in product A*B : dimensions do not match");
     }
+    if ( aMatrix.nRows != this->nRows || bMatrix.nColumns != this->nColumns) {
+        OOFEM_ERROR("FloatMatrix::addTProductOf : error in product receiver : dimensions do not match");
+    }
 #  endif
 
-    p = bMatrix.nColumns;
+#  ifdef __LAPACK_MODULE
+    double alpha = 1., beta = 1.;
+    dgemm_("n", "n", & this->nRows, & this->nColumns, & aMatrix.nColumns, 
+           & alpha, aMatrix.values, & aMatrix.nRows, bMatrix.values, & bMatrix.nRows, 
+           & beta, this->values, & this->nRows,
+           aMatrix.nColumns, bMatrix.nColumns, this->nColumns);
+#  else
     for ( int i = 1; i <= aMatrix.nRows; i++ ) {
-        for ( int j = 1; j <= p; j++ ) {
-            coeff = 0.;
+        for ( int j = 1; j <= bMatrix.nColumns; j++ ) {
+            double coeff = 0.;
             for ( int k = 1; k <= aMatrix.nColumns; k++ ) {
                 coeff += aMatrix.at(i, k) * bMatrix.at(k, j);
             }
@@ -341,26 +418,31 @@ void FloatMatrix :: addProductOf(const FloatMatrix &aMatrix, const FloatMatrix &
             this->at(i, j) += coeff;
         }
     }
+#  endif
 }
-
 
 void FloatMatrix :: addTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
 // Receiver += aMatrix^T * bMatrix
 {
-    int p;
-    double coeff;
-
 #  ifdef DEBUG
     if ( aMatrix.nRows != bMatrix.nRows ) {
         OOFEM_ERROR("FloatMatrix::addTProductOf : error in product A*B : dimensions do not match");
     }
+    if ( aMatrix.nColumns != this->nColumns || bMatrix.nColumns != this->nRows) {
+        OOFEM_ERROR("FloatMatrix::addTProductOf : error in product receiver : dimensions do not match");
+    }
 #  endif
 
-    p = bMatrix.nColumns;
-    this->resize(aMatrix.nColumns, p);
+#  ifdef __LAPACK_MODULE
+    double alpha = 1., beta = 1.;
+    dgemm_("t", "n",  & this->nRows, & this->nColumns, & aMatrix.nRows, 
+           & alpha, aMatrix.values, & aMatrix.nRows, bMatrix.values, & bMatrix.nRows, 
+           & beta, this->values, & this->nRows,
+           aMatrix.nColumns, bMatrix.nColumns, this->nColumns);
+#  else
     for ( int i = 1; i <= aMatrix.nColumns; i++ ) {
-        for ( int j = 1; j <= p; j++ ) {
-            coeff = 0.;
+        for ( int j = 1; j <= bMatrix.nColumns; j++ ) {
+            double coeff = 0.;
             for ( int k = 1; k <= aMatrix.nRows; k++ ) {
                 coeff += aMatrix.at(k, i) * bMatrix.at(k, j);
             }
@@ -368,6 +450,7 @@ void FloatMatrix :: addTProductOf(const FloatMatrix &aMatrix, const FloatMatrix 
             this->at(i, j) += coeff;
         }
     }
+#  endif
 }
 
 
@@ -437,52 +520,6 @@ void FloatMatrix :: beLocalCoordSys(const FloatArray &normal)
         OOFEM_ERROR("FloatMatrix :: beLocalCoordinateTransformation - Normal needs 1 to 3 components.");
     }
 }
-
-void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
-// Receiver = aMatrix^T * bMatrix
-{
-#  ifdef DEBUG
-    if ( aMatrix.nRows != bMatrix.nRows ) {
-        OOFEM_ERROR("FloatMatrix::beTProductOf : error in product A*B : dimensions do not match");
-    }
-#  endif
-
-    this->resize(aMatrix.nColumns, bMatrix.nColumns);
-    for ( int i = 1; i <= aMatrix.nColumns; i++ ) {
-        for ( int j = 1; j <= bMatrix.nColumns; j++ ) {
-            double coeff = 0.;
-            for ( int k = 1; k <= aMatrix.nRows; k++ ) {
-                coeff += aMatrix.at(k, i) * bMatrix.at(k, j);
-            }
-
-            this->at(i, j) = coeff;
-        }
-    }
-}
-
-
-void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
-// Receiver = aMatrix * bMatrix^T
-{
-#  ifdef DEBUG
-    if ( aMatrix.nColumns != bMatrix.nColumns ) {
-        OOFEM_ERROR("FloatMatrix::beProductTOf : error in product A*B : dimensions do not match");
-    }
-#  endif
-
-    this->resize(aMatrix.nRows, bMatrix.nRows);
-    for ( int i = 1; i <= aMatrix.nRows; i++ ) {
-        for ( int j = 1; j <= bMatrix.nRows; j++ ) {
-            double coeff = 0.;
-            for ( int k = 1; k <= aMatrix.nColumns; k++ ) {
-                coeff += aMatrix.at(i, k) * bMatrix.at(j, k);
-            }
-
-            this->at(i, j) = coeff;
-        }
-    }
-}
-
 
 void FloatMatrix :: setSubMatrix(const FloatMatrix &src, int sr, int sc)
 {
