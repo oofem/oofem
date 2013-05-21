@@ -142,6 +142,7 @@ NRSolver :: initializeFrom(InputRecord *ir)
     int _val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_NRSolver_lstype);
     solverType = ( LinSystSolverType ) _val;
+    this->giveLinearSolver()->initializeFrom(ir); // make sure that linear solver is initialized from ir as well
 
     // read relative error tolerances of the solver
     // if rtolv provided set to this tolerance both rtolf and rtold
