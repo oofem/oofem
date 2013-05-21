@@ -520,7 +520,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
 #if 1
     this->computeStiffnessMatrixOpt(answer, rMode, tStep);
     FloatMatrix test(8,8);
-    test.beSubMatrixOf(answer,1,8,1,8);
+    //test.beSubMatrixOf(answer,1,8,1,8);
 //    test.printYourself();
 
 #else 
@@ -634,23 +634,12 @@ Shell7BaseXFEM :: computeStiffnessMatrixOpt(FloatMatrix &answer, MatResponseMode
     answer.resize(ndofs, ndofs);
     answer.zero();
     
-
-
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     
-    FloatArray genEpsC;
-    FloatMatrix temp, B, tempRed, tempRedT;
-    FloatMatrix A [ 3 ] [ 3 ], lambdaC [ 3 ], lambdaD [ 3 ];
-    FloatMatrix LCAC(18,18), LCAD(18,18), LDAD(18,18); 
-    FloatMatrix KCCtemp, KCDtemp, KDCtemp, KDDtemp;
-    FloatMatrix KCC(42,42), KCD(42,42), KDC(42,42), KDD(42,42);
-    KCC.zero(); KCD.zero(); KDC.zero(); KDD.zero();
+    FloatMatrix tempRed, tempRedT;
+    FloatMatrix KCC, KCD, KDC, KDD;
     IntArray orderingC, activeDofsC;
     IntArray orderingJ, orderingK, activeDofsJ, activeDofsK;
-
-    FloatArray solVecC;
-    this->giveUpdatedSolutionVector(solVecC, tStep);
     this->computeOrderingArray(orderingC, activeDofsC, 0, All);
-    const IntArray &ordering = this->giveOrdering(All);
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
@@ -658,48 +647,10 @@ Shell7BaseXFEM :: computeStiffnessMatrixOpt(FloatMatrix &answer, MatResponseMode
 
         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             IntegrationPoint *ip = iRule->getIntegrationPoint(i);
-            
-            /*
-            // continuous part
-            this->computeBmatrixAt(ip, B, 0, 0);
-            this->computeGeneralizedStrainVectorNew(genEpsC, solVecC , B);
-            Shell7Base :: computeLinearizedStiffness(ip, mat, tStep, A, genEpsC);
-            
-            double zeta = giveGlobalZcoord(ip);
-            this->computeLambdaGMatrices(lambdaC, genEpsC, zeta);
-            this->computeLambdaGMatricesDis(lambdaD, zeta);
-
-            LCAC.zero(); LCAD.zero(); LDAD.zero();
-            for ( int j = 0; j < 3; j++ ) {
-                for ( int k = 0; k < 3; k++ ) {
-                    this->computeTripleProduct(temp, lambdaC [ j ], A [ j ][ k ], lambdaC [ k ]);
-                    LCAC.add(temp); temp.zero();
-                    this->computeTripleProduct(temp, lambdaC [ j ], A [ j ][ k ], lambdaD [ k ]);
-                    LCAD.add(temp); temp.zero();
-                    this->computeTripleProduct(temp, lambdaD [ j ], A [ j ][ k ], lambdaD [ k ]);
-                    LDAD.add(temp); temp.zero();
-                }
-            }
-            
-            // should use symmetry here
-            this->computeTripleProduct(KCCtemp, B, LCAC, B);
-            this->computeTripleProduct(KCDtemp, B, LCAD, B);
-            this->computeTripleProduct(KDDtemp, B, LDAD, B);
-            double dV = this->computeVolumeAroundLayer(ip, layer);
-            KCCtemp.times(dV);
-            KCDtemp.times(dV);
-            KDDtemp.times(dV);
-            //KDCtemp.beTranspositionOf(KCDtemp);
-            
-            KCC.assemble(KCCtemp, ordering, ordering);
-            KCD.assemble(KCDtemp, ordering, ordering);
-            KDD.assemble(KDDtemp, ordering, ordering);
-            //KDC.beTranspositionOf(KCD);
-            */
             this->discComputeBulkTangentMatrixOpt(KCC, KCD, KDD, ip, mat, layer, tStep);
 
+            // Continuous part
             answer.assemble(KCC, orderingC, orderingC);
-
 
             // Discontinuous part
             for ( int m = 1; m <= this->xMan->giveNumberOfEnrichmentItems(); m++ ) { // Only one is supported at the moment
@@ -766,24 +717,63 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrixOpt(FloatMatrix &KCC, FloatMatrix 
     LCAC.zero(); LCAD.zero(); LDAD.zero();
     for ( int j = 0; j < 3; j++ ) {
         for ( int k = 0; k < 3; k++ ) {
-            this->computeTripleProduct(temp, lambdaC [ j ], A [ j ][ k ], lambdaC [ k ]);
-            LCAC.add(temp); temp.zero();
+
+            temp.beProductOf(A [ j ][ k ], lambdaC [ k ]);
+            LCAC.plusProductSymmUpper(lambdaC [ j ],temp,1.0);
+            temp.beProductOf(A [ j ][ k ], lambdaD [ k ]);
+            LDAD.plusProductSymmUpper(lambdaD [ j ],temp,1.0);
+
+            
+        }
+    }
+    //for ( int j = 0; j < 3; j++ ) {
+    //    temp.beProductOf(A [ j ][ j ], lambdaC [ j ]);
+    //    LCAC.plusProductSymmUpper(lambdaC [ j ],temp,1.0);
+    //    temp.beProductOf(A [ j ][ j ], lambdaD [ j ]);
+    //    LDAD.plusProductSymmUpper(lambdaD [ j ],temp,1.0);
+
+    //    for ( int k = 0, i = 0; k < 3, i>j; k++, i++ ) {
+
+    //        temp.beProductOf(A [ j ][ k ], lambdaC [ k ]);
+    //        LCAC.plusProductSymmUpper(lambdaC [ j ],temp,1.0);
+    //        LCAC.plusProductSymmUpper(temp,lambdaC [ j ],1.0);
+
+    //        temp.beProductOf(A [ j ][ k ], lambdaD [ k ]);
+    //        LDAD.plusProductSymmUpper(lambdaD [ j ],temp,1.0);
+    //        LDAD.plusProductSymmUpper(temp,lambdaD [ j ],1.0);
+
+
+    //    }
+    //}
+    LCAC.symmetrized();
+    LDAD.symmetrized();
+
+
+    for ( int j = 0; j < 3; j++ ) {
+        for ( int k = 0; k < 3; k++ ) {
             this->computeTripleProduct(temp, lambdaC [ j ], A [ j ][ k ], lambdaD [ k ]);
-            LCAD.add(temp); temp.zero();
-            this->computeTripleProduct(temp, lambdaD [ j ], A [ j ][ k ], lambdaD [ k ]);
-            LDAD.add(temp); temp.zero();
+            LCAD.add(temp); 
         }
     }
             
     // should use symmetry here
     FloatMatrix KCCtemp, KCDtemp, KDDtemp;
-    this->computeTripleProduct(KCCtemp, B, LCAC, B);
+    FloatMatrix LCACB, LDADB;
+    //this->computeTripleProduct(KCCtemp, B, LCAC, B);
+    //this->computeTripleProduct(KDDtemp, B, LDAD, B);
+    LCACB.beProductOf(LCAC,B);
+    LDADB.beProductOf(LDAD,B);
+    KCCtemp.plusProductSymmUpper(B,LCACB,dV);
+    KDDtemp.plusProductSymmUpper(B,LDADB,dV);
     this->computeTripleProduct(KCDtemp, B, LCAD, B);
-    this->computeTripleProduct(KDDtemp, B, LDAD, B);
+    
 
-    KCCtemp.times(dV);
+    //KCCtemp.times(dV);
+    //KDDtemp.times(dV);
+    KCCtemp.symmetrized();
+    KDDtemp.symmetrized();
     KCDtemp.times(dV);
-    KDDtemp.times(dV);
+    
     
     int ndofs = Shell7Base :: giveNumberOfDofs();
     KCC.resize(ndofs,ndofs); KCD.resize(ndofs,ndofs); KDD.resize(ndofs,ndofs); 
