@@ -142,7 +142,7 @@ Shell7BaseXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer
     }
 }
 
-
+#if 0
 void // @todo why do I have 2 similar methods?
 Shell7BaseXFEM :: discGiveDofManDofIDMask(int inode,  int enrichmentdomainNumber, IntArray &answer) const
 {
@@ -162,7 +162,7 @@ Shell7BaseXFEM :: discGiveDofManDofIDMask(int inode,  int enrichmentdomainNumber
         }
     }
 }
-
+#endif
 
 void
 Shell7BaseXFEM :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatMatrix &gcov, FloatArray &genEpsC)

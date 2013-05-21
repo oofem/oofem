@@ -1551,30 +1551,10 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &answer, const i
     
     answer.resize(7);
     answer.zero();
-#if 1 
     FloatMatrix lambda;
     this->computeLambdaNMatrix(lambda, genEps, zeta);
     answer.beTProductOf(lambda,traction);
-   
-#else
-    FloatArray m;
-    m.setValues( 3,  genEps.at(13),  genEps.at(14),  genEps.at(15) );
-    double gam =  genEps.at(18);
-    double fac1 = zeta + 0.5 * zeta * zeta * gam;
-    double fac2 = 0.5 * zeta * zeta;
-    /*  Force
-     * fp = [      n
-     *         f1*n
-     *    f2*dotprod(n,m)]
-     */
-    answer.at(1) = traction.at(1);
-    answer.at(2) = traction.at(2);
-    answer.at(3) = traction.at(3);
-    answer.at(4) = fac1 * traction.at(1);
-    answer.at(5) = fac1 * traction.at(2);
-    answer.at(6) = fac1 * traction.at(3);
-    answer.at(7) = fac2 * m.dotProduct(traction);
-#endif
+
 }
 
 
@@ -1669,7 +1649,9 @@ Shell7Base :: edgeComputeLengthAround(GaussPoint *gp, const int iedge)
 
 
 // Transformation of bases and transformation matrices
+
 # if 1
+// general function
 void
 Shell7Base :: transInitialCartesianToInitialContravar(GaussPoint *gp, const FloatArray &VoightMatrix, FloatArray &answer)
 {
@@ -1684,6 +1666,7 @@ Shell7Base :: transInitialCartesianToInitialContravar(GaussPoint *gp, const Floa
     answer.beProductOf(M, VoightMatrix);
 }
 
+// general function
 void
 Shell7Base :: transInitialCartesianToInitialContravar(GaussPoint *gp, const FloatMatrix &stiffness, FloatMatrix &answer)
 {
@@ -1698,6 +1681,7 @@ Shell7Base :: transInitialCartesianToInitialContravar(GaussPoint *gp, const Floa
     answer.beProductOf(M, temp);
 }
 
+// general function
 void
 Shell7Base :: giveCoordTransMatrix(FloatMatrix &answer, FloatArray &g1, FloatArray &g2, FloatArray &g3,
                                    FloatArray &G1, FloatArray &G2, FloatArray &G3)
@@ -1716,6 +1700,7 @@ Shell7Base :: giveCoordTransMatrix(FloatMatrix &answer, FloatArray &g1, FloatArr
     answer.at(3, 3) = g3.dotProduct(G3);
 }
 
+// general function
 void
 Shell7Base :: giveCoordTransMatrix(FloatMatrix &answer, FloatArray &g1, FloatArray &g2, FloatArray &g3)
 {
@@ -1734,6 +1719,7 @@ Shell7Base :: giveCoordTransMatrix(FloatMatrix &answer, FloatArray &g1, FloatArr
     answer.at(3, 3) = g3.at(3);
 }
 
+// general function
 void
 Shell7Base :: giveBondTransMatrix(FloatMatrix &answer, FloatMatrix &Q)
 {
@@ -2124,7 +2110,6 @@ Shell7Base :: computeGeneralizedStrainVector(FloatArray &answer, const FloatArra
     answer.resize(18);
     answer.zero();
     
-#if 1
     int ndofs_xm  = this->giveNumberOfFieldDofs(Midplane);
     int ndofs_gam = this->giveNumberOfFieldDofs(InhomStrain);
     for ( int i = 1; i <= ndofs_xm; i++ ) {
@@ -2149,40 +2134,7 @@ Shell7Base :: computeGeneralizedStrainVector(FloatArray &answer, const FloatArra
     for ( int i = 1; i <= ndofs_gam; i++ ) { //1 dof
         answer.at(18) += B53.at(1, i) * solVec.at(i + ndofs_xm * 2);            // gamma
     }
-#else
-    
-    /*    18   18   6
-     * 6 [B_u   0   0
-     * 6   0   B_w  0
-     * 3   0   N_w  0
-     * 2   0    0  B_gam
-     * 1   0    0  N_gam]
-     */
-    int ndofs_xm  = this->giveNumberOfFieldDofs(Midplane);
-    int ndofs_gam = this->giveNumberOfFieldDofs(InhomStrain);
-    for ( int i = 1; i <= ndofs_xm; i++ ) {
-        for ( int j = 1; j <= 6; j++ ) { // 3dofs*2
-            answer.at(j)      += B.at(    j, i           ) * solVec.at(i);                   // dx/dxi
-            answer.at(6 + j)  += B.at(6 + j, i + ndofs_xm) * solVec.at(i + ndofs_xm);        // dm/dxi
-        }
-    }
 
-    for ( int i = 1; i <= ndofs_xm; i++ ) {
-        for ( int j = 1; j <= 3; j++ ) { // 3 dofs
-            answer.at(12 + j) += B.at(12 + j, i + ndofs_xm) * solVec.at(i + ndofs_xm);        // m
-        }
-    }
-
-    for ( int i = 1; i <= ndofs_gam; i++ ) {
-        for ( int j = 1; j <= 2; j++ ) { // 2 dofs
-            answer.at(15 + j) += B.at(15+j, i + ndofs_xm*2) * solVec.at(i + ndofs_xm * 2);    // dgamma/dxi
-        }
-    }
-
-    for ( int i = 1; i <= ndofs_gam; i++ ) { //1 dof
-        answer.at(18) += B.at(18, i + ndofs_xm*2) * solVec.at(i + ndofs_xm * 2);            // gamma
-    }
-#endif
 }
 
 
@@ -2227,7 +2179,7 @@ Shell7Base :: computeGeneralizedStrainVectorNew(FloatArray &answer, const FloatA
 
 }
 
-
+// two copies of the same function?
 void
 Shell7Base :: computeSolutionFields(FloatArray &xbar, FloatArray &m, double &gam, const FloatArray &solVec, const FloatMatrix &N11, const FloatMatrix &N22, const FloatMatrix &N33)
 {
@@ -2480,7 +2432,7 @@ Shell7Base :: giveNumberOfFieldDofs(SolutionField fieldType)
 }
 
 
-
+//Remove
 void
 Shell7Base :: computeFieldBmatrix(FloatMatrix &answer, FloatMatrix &dNdxi, SolutionField fieldType)
 {
@@ -2742,6 +2694,9 @@ Shell7Base :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, Float
     nodeLocalXi2Coords.setValues(15, 0., 1., 0., 0., 1., 0., .5, .5, 0., .5, .5, 0., 0., 1., 0.);
     nodeLocalXi3Coords.setValues(15, -z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.);
 }
+
+
+
 
 // Misc functions
 
