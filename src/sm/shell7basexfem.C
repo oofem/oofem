@@ -521,9 +521,9 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
     this->computeStiffnessMatrixOpt(answer, rMode, tStep);
     FloatMatrix test(8,8);
     test.beSubMatrixOf(answer,1,8,1,8);
-    test.printYourself();
+//    test.printYourself();
 
-//#else 
+#else 
     int ndofs = this->giveNumberOfDofs();
     answer.resize(ndofs, ndofs);
     answer.zero();
@@ -614,9 +614,10 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
         */
     }
     //answer.printYourself();
+
+    #endif
     test.beSubMatrixOf(answer,1,8,1,8);
     test.printYourself();
-    #endif
 #endif
 }
 
@@ -657,7 +658,8 @@ Shell7BaseXFEM :: computeStiffnessMatrixOpt(FloatMatrix &answer, MatResponseMode
 
         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             IntegrationPoint *ip = iRule->getIntegrationPoint(i);
-
+            
+            /*
             // continuous part
             this->computeBmatrixAt(ip, B, 0, 0);
             this->computeGeneralizedStrainVectorNew(genEpsC, solVecC , B);
@@ -693,7 +695,8 @@ Shell7BaseXFEM :: computeStiffnessMatrixOpt(FloatMatrix &answer, MatResponseMode
             KCD.assemble(KCDtemp, ordering, ordering);
             KDD.assemble(KDDtemp, ordering, ordering);
             //KDC.beTranspositionOf(KCD);
-            
+            */
+            this->discComputeBulkTangentMatrixOpt(KCC, KCD, KDD, ip, mat, layer, tStep);
 
             answer.assemble(KCC, orderingC, orderingC);
 
@@ -741,80 +744,55 @@ Shell7BaseXFEM :: computeStiffnessMatrixOpt(FloatMatrix &answer, MatResponseMode
 }
 
 void
-Shell7BaseXFEM :: discComputeBulkTangentMatrixOpt(FloatMatrix &answer, FloatArray &solVec,  FloatArray &solVecI, FloatArray &solVecJ, MatResponseMode rMode, TimeStep *tStep,
-                    EnrichmentItem *ei, int enrichmentDomainNumberI, int enrichmentDomainNumberJ)
+Shell7BaseXFEM :: discComputeBulkTangentMatrixOpt(FloatMatrix &KCC, FloatMatrix &KCD, FloatMatrix &KDD, IntegrationPoint *ip, Material *mat, int layer, TimeStep *tStep)
 {
-    FloatMatrix A [ 3 ] [ 3 ], lambdaI [ 3 ], lambdaJ [ 3 ];
-    FloatMatrix L(18,18);
-    FloatMatrix B;
-    FloatMatrix K(42,42), tempAnswer(42,42);
-    K.zero(); tempAnswer.zero();
-    double xi0I = 0.0; 
-    double xi0J = 0.0;
-    Delamination *dei =  dynamic_cast< Delamination * >( ei );
-    if( enrichmentDomainNumberI == 0 ) {
-        xi0I = -1.0e6;
-    } else {
-        xi0I = dei->enrichmentDomainXiCoords.at(enrichmentDomainNumberI);
-    }
-    if( enrichmentDomainNumberJ == 0 ) {
-        xi0J = -1.0e6;
-    } else {
-        xi0J = dei->enrichmentDomainXiCoords.at(enrichmentDomainNumberJ);
-    }
-
-
-    int numberOfLayers = this->layeredCS->giveNumberOfLayers();     
-    FloatArray genEpsI, genEpsJ, genEps;
-    FloatMatrix temp, Ktemp;
-
-    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
-        Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
-
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(i);
+    FloatArray genEpsC;
+    FloatMatrix temp, B;
+    FloatMatrix A [ 3 ] [ 3 ], lambdaC [ 3 ], lambdaD [ 3 ];
+    
+    FloatArray solVecC;
+    this->giveUpdatedSolutionVector(solVecC, tStep);            
+    // continuous part
+    this->computeBmatrixAt(ip, B, 0, 0);
+    this->computeGeneralizedStrainVectorNew(genEpsC, solVecC , B);
+    Shell7Base :: computeLinearizedStiffness(ip, mat, tStep, A, genEpsC);
             
-            if ( gp->giveCoordinate(3) > xi0I  &&   gp->giveCoordinate(3) > xi0J  ) { // Should be enriched ///@todo not general!
+    double zeta = giveGlobalZcoord(ip);
+    this->computeLambdaGMatrices(lambdaC, genEpsC, zeta);
+    this->computeLambdaGMatricesDis(lambdaD, zeta);
+    double dV = this->computeVolumeAroundLayer(ip, layer);
 
-                this->computeBmatrixAt(gp, B, 0, 0);
-
-                this->computeGeneralizedStrainVectorNew(genEpsI, solVecI, B);
-                this->computeGeneralizedStrainVectorNew(genEpsJ, solVecJ, B);
-                this->computeGeneralizedStrainVectorNew(genEps , solVec , B);
-
-                // Material stiffness
-                Shell7Base :: computeLinearizedStiffness(gp, mat, tStep, A, genEps);
-
-                double zeta = giveGlobalZcoord(gp);
-                this->computeLambdaGMatrices(lambdaI, genEpsI, zeta);
-                this->computeLambdaGMatrices(lambdaJ, genEpsJ, zeta);
-
-                // L = sum_{i,j} (lambdaI_i)^T * A^ij * lambdaJ_j
-                // Naive implementation - should be optimized 
-                // note: L will only be symmetric if lambdaI = lambdaJ
-                // but if gamma is not enriched then they should all be the same, or?
-                L.zero();
-                for ( int j = 0; j < 3; j++ ) {
-                    for ( int k = 0; k < 3; k++ ) {
-                        this->computeTripleProduct(temp, lambdaI [ j ], A [ j ][ k ], lambdaJ [ k ]);
-                        L.add(temp);
-                    }
-                }
-                
-                this->computeTripleProduct(K, B, L, B);
-                double dV = this->computeVolumeAroundLayer(gp, layer);
-                tempAnswer.add(dV, K);
-            }
+    FloatMatrix LCAC(18,18), LCAD(18,18), LDAD(18,18); 
+    LCAC.zero(); LCAD.zero(); LDAD.zero();
+    for ( int j = 0; j < 3; j++ ) {
+        for ( int k = 0; k < 3; k++ ) {
+            this->computeTripleProduct(temp, lambdaC [ j ], A [ j ][ k ], lambdaC [ k ]);
+            LCAC.add(temp); temp.zero();
+            this->computeTripleProduct(temp, lambdaC [ j ], A [ j ][ k ], lambdaD [ k ]);
+            LCAD.add(temp); temp.zero();
+            this->computeTripleProduct(temp, lambdaD [ j ], A [ j ][ k ], lambdaD [ k ]);
+            LDAD.add(temp); temp.zero();
         }
     }
+            
+    // should use symmetry here
+    FloatMatrix KCCtemp, KCDtemp, KDDtemp;
+    this->computeTripleProduct(KCCtemp, B, LCAC, B);
+    this->computeTripleProduct(KCDtemp, B, LCAD, B);
+    this->computeTripleProduct(KDDtemp, B, LDAD, B);
 
-
+    KCCtemp.times(dV);
+    KCDtemp.times(dV);
+    KDDtemp.times(dV);
+    
     int ndofs = Shell7Base :: giveNumberOfDofs();
-    answer.resize(ndofs, ndofs);
-    answer.zero();
+    KCC.resize(ndofs,ndofs); KCD.resize(ndofs,ndofs); KDD.resize(ndofs,ndofs); 
+    KCC.zero(); KCD.zero(); KDD.zero();
     const IntArray &ordering = this->giveOrdering(All);
-    answer.assemble(tempAnswer, ordering, ordering);
+    KCC.assemble(KCCtemp, ordering, ordering);
+    KCD.assemble(KCDtemp, ordering, ordering);
+    KDD.assemble(KDDtemp, ordering, ordering);
+
 }
 
 

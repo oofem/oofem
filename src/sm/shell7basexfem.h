@@ -115,8 +115,11 @@ protected:
     virtual void computeStiffnessMatrixOpt(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, FloatArray &solVecI, FloatArray &solVecJ, MatResponseMode rMode, TimeStep *tStep,
          EnrichmentItem *ei, int enrichmentDomainNumberI, int enrichmentDomainNumberJ);
-    virtual void discComputeBulkTangentMatrixOpt(FloatMatrix &answer, FloatArray &solVec, FloatArray &solVecI, FloatArray &solVecJ, MatResponseMode rMode, TimeStep *tStep,
-         EnrichmentItem *ei, int enrichmentDomainNumberI, int enrichmentDomainNumberJ);
+    //virtual void discComputeBulkTangentMatrixOpt(FloatMatrix &answer, FloatArray &solVec, FloatArray &solVecI, FloatArray &solVecJ, MatResponseMode rMode, TimeStep *tStep,
+    //     EnrichmentItem *ei, int enrichmentDomainNumberI, int enrichmentDomainNumberJ);
+    virtual void discComputeBulkTangentMatrixOpt(FloatMatrix &KCC, FloatMatrix &KCD, FloatMatrix &KDD, IntegrationPoint *ip, Material *mat, int layer, TimeStep *tStep);
+
+
     void computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep);
     void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, Delamination *dei, int enrichmentDomainNumber);
 
