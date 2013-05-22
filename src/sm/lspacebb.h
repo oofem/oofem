@@ -51,6 +51,7 @@ public:
     LSpaceBB(int n, Domain *d);
     virtual ~LSpaceBB() { }
 
+    virtual const char *giveInputRecordName() const { return _IFT_LSpaceBB_Name; }
     virtual const char *giveClassName() const { return "LSpaceBB"; }
     virtual classType giveClassID() const { return LSpaceBBClass; }
 

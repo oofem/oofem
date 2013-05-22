@@ -159,6 +159,7 @@ public:
     virtual void updateDomainLinks();
 
     // Identification
+    virtual const char *giveInputRecordName() const { return _IFT_NonLinearDynamic_Name; }
     virtual const char *giveClassName() const { return "NonLinearDynamic"; }
     virtual classType giveClassID() const { return NonLinearDynamicClass; }
     virtual int isIncremental() { return 1; }

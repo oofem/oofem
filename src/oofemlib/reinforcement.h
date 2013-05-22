@@ -41,7 +41,7 @@
 
 ///@name Input fields for Reinforcement
 //@{
-#define _IFT_Reinforcement_Name "Reinforcement"
+#define _IFT_Reinforcement_Name "reinforcement"
 #define _IFT_Reinforcement_porosity "porosity"
 #define _IFT_Reinforcement_permeability "permeability"
 #define _IFT_Reinforcement_shapeFactor "shapefactor"
@@ -74,27 +74,22 @@ public:
      * @param coords Global coordinates, which are used to evaluate components values.
      * @param mode Determines response mode-
      */
-    void computeValueAt(FloatArray &answer, TimeStep *atTime, FloatArray &coords, ValueModeType mode)
+    virtual void computeValueAt(FloatArray &answer, TimeStep *atTime, FloatArray &coords, ValueModeType mode)
     { computeComponentArrayAt(answer, atTime, mode); }
 
-    bcValType giveBCValType() const { return ReinforceBVT; }
-    bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
+    virtual bcValType giveBCValType() const { return ReinforceBVT; }
+    virtual bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
     
-    IRResultType initializeFrom(InputRecord *ir);
-    classType giveClassID() const { return ReinforcementClass; }
-    const char *giveClassName() const { return "Reinforcement"; }
-    const char *giveInputRecordName() const { return _IFT_Reinforcement_Name; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual classType giveClassID() const { return ReinforcementClass; }
+    virtual const char *giveClassName() const { return "Reinforcement"; }
+    virtual const char *giveInputRecordName() const { return _IFT_Reinforcement_Name; }
 
-    ///Accessor
-    double givePorosity(){ return porosity; }
+    /// Accessor
+    double givePorosity() { return porosity; }
     double giveshapefactor() { return shapefactor; }
     FloatArray* givePermeability() { return &permeability; }
 };
 } // end namespace oofem
 #endif // deadwght_h
-
-
-
-
-
 

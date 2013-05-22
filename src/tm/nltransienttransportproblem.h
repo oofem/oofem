@@ -79,6 +79,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     // identification
+    virtual const char *giveInputRecordName() const { return _IFT_NLTransientTransportProblem_Name; }
     virtual const char *giveClassName() const { return "NLTransientTransportProblem"; }
     virtual classType giveClassID() const { return NLTransientTransportProblemClass; }
     virtual fMode giveFormulation() { return nonLinFormulation; }

@@ -331,7 +331,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         double dV = elem->computeVolumeAround(gp);
         interpol->evalN( n, *gp->giveCoordinates(), FEIElementGeometryWrapper(elem));
-        fullAnswer.plusDyadSymmUpper(n, n, dV);
+        fullAnswer.plusDyadSymmUpper(n, dV);
         pok += ( n.at(1) * dV ); ///@todo What is this? Completely unused.
         volume += dV;
     }

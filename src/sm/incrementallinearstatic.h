@@ -115,6 +115,7 @@ public:
 
     virtual fMode giveFormulation() { return TL; }
 
+    virtual const char *giveInputRecordName() const { return _IFT_IncrementalLinearStatic_Name; }
     virtual const char *giveClassName() const { return "IncrementalLinearStatic"; }
     virtual classType giveClassID() const { return IncrementalLinearStaticClass; }
 

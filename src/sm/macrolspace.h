@@ -64,6 +64,7 @@ public:
     MacroLSpace(int n, Domain *d);
     virtual ~MacroLSpace();
 
+    virtual const char *giveInputRecordName() const { return _IFT_MacroLSpace_Name; }
     virtual const char *giveClassName() const { return "MacroLSpace"; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

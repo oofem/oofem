@@ -357,7 +357,7 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
         EdB.beProductOf(Ed,B);
         K.plusProductSymmUpper(B, EdB, dV);
         G.plusDyadUnsym(dN_V, Nlin, -dV);
-        C.plusDyadSymmUpper(Nlin, Nlin, Cp*dV);
+        C.plusDyadSymmUpper(Nlin, Cp*dV);
 
         tmpA.beTProductOf(B, Ep);
         Dp.plusDyadUnsym(tmpA, Nlin, dV);

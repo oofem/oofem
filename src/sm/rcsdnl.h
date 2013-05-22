@@ -77,6 +77,7 @@ public:
     void setLocalStrainVectorForAverage(const FloatArray &ls) { localStrainVectorForAverage = ls; }
 
     // definition
+    virtual const char *giveInputRecordName() const { return _IFT_RCSDNLMaterial_Name; }
     virtual const char *giveClassName() const { return "RCSDNLMaterialStatus"; }
     virtual classType giveClassID() const { return RCSDNLMaterialStatusClass; }
 

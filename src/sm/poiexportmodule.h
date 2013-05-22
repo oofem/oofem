@@ -90,6 +90,7 @@ public:
     virtual void doOutput(TimeStep *tStep);
     virtual void initialize();
     virtual void terminate();
+    virtual const char *giveInputRecordName() const { return _IFT_POIExportModule_Name; }
     virtual const char *giveClassName() const { return "POIExportModule"; }
 
 protected:

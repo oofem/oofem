@@ -65,7 +65,6 @@ public:
     EnrichmentDomain() { }
     virtual ~EnrichmentDomain() { }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
-    virtual const char *giveClassName() const = 0;
 
     virtual bool isDofManagerEnriched(DofManager *dMan) = 0;
     // Default is to loop through the dofman and check if any of them are enriched
@@ -77,9 +76,14 @@ public:
 
     // Spatial search methods
     virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element) { }
-    virtual int computeNumberOfIntersectionPoints(Element *element){return 0;};
+    virtual int computeNumberOfIntersectionPoints(Element *element) { return 0; }
+
+    virtual const char *giveInputRecordName() const = 0;
+    virtual const char *giveClassName() const = 0;
+
 private:
     int number;
+    
 };
 
 
@@ -98,15 +102,13 @@ public:
 
     virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element) { bg->computeIntersectionPoints(element, intersectionPoints); }
     virtual int computeNumberOfIntersectionPoints(Element *element) { return bg->computeNumberOfIntersectionPoints(element); }
-
-    virtual const char *giveClassName() const { return "EnrichmentDomain_BG"; }
 };
 
 
 class EDBGCircle : public EnrichmentDomain_BG
 {
 public:
-    EDBGCircle(){ bg = new Circle; }; 
+    EDBGCircle () { bg = new Circle; }; 
     virtual ~EDBGCircle() { }
     virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir); }
     virtual bool isDofManagerEnriched(DofManager *dMan);
@@ -114,6 +116,7 @@ public:
     virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element) { bg->computeIntersectionPoints(element, intersectionPoints); }
     virtual int computeNumberOfIntersectionPoints(Element *element) { return static_cast<Circle *>(bg)->computeNumberOfIntersectionPoints(element); }
 
+    virtual const char *giveInputRecordName() const { return _IFT_EDBGCircle_Name; }
     virtual const char *giveClassName() const { return "EDBGCircle"; }
 };
 
@@ -133,6 +136,7 @@ public:
     void addDofManagers(IntArray &dofManNumbers);
     virtual void updateEnrichmentDomain(IntArray &dofManNumbers);
 
+    virtual const char *giveInputRecordName() const { return _IFT_DofManList_Name; }
     virtual const char *giveClassName() const { return "DofManList"; }
 };
 
@@ -150,6 +154,7 @@ public:
     virtual bool isDofManagerEnriched(DofManager *dMan) { return true; }
     virtual bool isElementEnriched(Element *element) { return true; }
 
+    virtual const char *giveInputRecordName() const { return _IFT_WholeDomain_Name; }
     virtual const char *giveClassName() const { return "WholeDomain"; }
 };
 

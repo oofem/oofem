@@ -1145,7 +1145,7 @@ Domain :: giveSpatialLocalizer()
 {
     //  if (spatialLocalizer == NULL) spatialLocalizer = new DummySpatialLocalizer(1, this);
     if ( spatialLocalizer == NULL ) {
-        spatialLocalizer = new OctreeSpatialLocalizer(1, this);
+        spatialLocalizer = new OctreeSpatialLocalizer(this);
     }
 
     return spatialLocalizer;
@@ -1396,7 +1396,7 @@ void Domain :: createDofs()
             }
 
             // Finally create the new DOF:
-            printf("Creating: node %d, id = %d, dofType = %d, bc = %d, ic = %d\n", i, id, dtype, bcid, icid);
+            //printf("Creating: node %d, id = %d, dofType = %d, bc = %d, ic = %d\n", i, id, dtype, bcid, icid);
             Dof *dof = classFactory.createDof(dtype, ++c, dman);
             dof->setDofID(id);
             dof->setBcId(bcid); // Note: slave dofs and such will simple ignore this.

@@ -306,7 +306,7 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
             for ( int j = 0; j < 4; j++) {
                 n(j) -= 0.25;
             }
-            drillStiffness.plusDyadSymmUpper(n, n, this->alpha * Et * dV); ///@todo Decide on how to alpha should be defined.
+            drillStiffness.plusDyadSymmUpper(n, this->alpha * Et * dV); ///@todo Decide on how to alpha should be defined.
         }
     }
     shellStiffness.symmetrized();

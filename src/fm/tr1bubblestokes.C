@@ -363,7 +363,7 @@ void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
         EdB.beProductOf(Ed,B);
         K.plusProductSymmUpper(B, EdB, dA);
         G.plusDyadUnsym(dNv, N, -dA);
-        C.plusDyadSymmUpper(N, N, Cp*dA);
+        C.plusDyadSymmUpper(N, Cp*dA);
 
         tmpA.beTProductOf(B, Ep);
         Dp.plusDyadUnsym(tmpA, N, dA);
