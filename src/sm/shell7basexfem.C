@@ -640,6 +640,8 @@ Shell7BaseXFEM :: computeStiffnessMatrixOpt(FloatMatrix &answer, MatResponseMode
     IntArray orderingC, activeDofsC;
     IntArray orderingJ, orderingK, activeDofsJ, activeDofsK;
     this->computeOrderingArray(orderingC, activeDofsC, 0, All);
+    std::vector<IntArray> orderingArrays;
+    std::vector<IntArray> activeDofsArrays;
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
@@ -655,11 +657,19 @@ Shell7BaseXFEM :: computeStiffnessMatrixOpt(FloatMatrix &answer, MatResponseMode
             // Discontinuous part
             for ( int m = 1; m <= this->xMan->giveNumberOfEnrichmentItems(); m++ ) { // Only one is supported at the moment
                 if ( Delamination *dei = dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(m) ) ) {
-                    
-                    for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
+                    int numED = dei->giveNumberOfEnrichmentDomains();
+                    if ( orderingArrays.size() == 0 ) {
+                        orderingArrays.resize(numED);
+                        activeDofsArrays.resize(numED);
+                    }
+                    for ( int j = 1; j <= numED; j++ ) {
                         if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
                             double xi0J = dei->enrichmentDomainXiCoords.at(j);
-                            this->computeOrderingArray(orderingJ, activeDofsJ, j, All);
+                            if( orderingArrays[j-1].giveSize() == 0 ) {
+                                this->computeOrderingArray( orderingArrays[j-1], activeDofsArrays[j-1], j, All);
+                            }
+                            IntArray &orderingJ = orderingArrays[j-1];
+                            IntArray &activeDofsJ = activeDofsArrays[j-1];
 
                             // con-dis & dis-con
                             if ( ip->giveCoordinate(3) > xi0J ) {
@@ -674,7 +684,8 @@ Shell7BaseXFEM :: computeStiffnessMatrixOpt(FloatMatrix &answer, MatResponseMode
                                 if ( dei->isElementEnrichedByEnrichmentDomain(this, k) ) {
                                     double xi0K = dei->enrichmentDomainXiCoords.at(k);
                                     if ( ip->giveCoordinate(3) > xi0J  &&   ip->giveCoordinate(3) > xi0K  ) {
-                                        this->computeOrderingArray(orderingK, activeDofsK, k, All);  
+                                        IntArray &orderingK = orderingArrays[k-1];
+                                        IntArray &activeDofsK = activeDofsArrays[k-1];
                                         tempRed.beSubMatrixOf(KDD, activeDofsJ, activeDofsK);
                                         answer.assemble(tempRed, orderingJ, orderingK);
                                     }
@@ -722,57 +733,28 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrixOpt(FloatMatrix &KCC, FloatMatrix 
             LCAC.plusProductSymmUpper(lambdaC [ j ],temp,1.0);
             temp.beProductOf(A [ j ][ k ], lambdaD [ k ]);
             LDAD.plusProductSymmUpper(lambdaD [ j ],temp,1.0);
-
+            temp.beProductOf(A [ j ][ k ], lambdaD [ k ]);
+            LCAD.plusProductUnsym(lambdaC [ j ],temp,1.0);
             
         }
     }
-    //for ( int j = 0; j < 3; j++ ) {
-    //    temp.beProductOf(A [ j ][ j ], lambdaC [ j ]);
-    //    LCAC.plusProductSymmUpper(lambdaC [ j ],temp,1.0);
-    //    temp.beProductOf(A [ j ][ j ], lambdaD [ j ]);
-    //    LDAD.plusProductSymmUpper(lambdaD [ j ],temp,1.0);
-
-    //    for ( int k = 0, i = 0; k < 3, i>j; k++, i++ ) {
-
-    //        temp.beProductOf(A [ j ][ k ], lambdaC [ k ]);
-    //        LCAC.plusProductSymmUpper(lambdaC [ j ],temp,1.0);
-    //        LCAC.plusProductSymmUpper(temp,lambdaC [ j ],1.0);
-
-    //        temp.beProductOf(A [ j ][ k ], lambdaD [ k ]);
-    //        LDAD.plusProductSymmUpper(lambdaD [ j ],temp,1.0);
-    //        LDAD.plusProductSymmUpper(temp,lambdaD [ j ],1.0);
-
-
-    //    }
-    //}
     LCAC.symmetrized();
     LDAD.symmetrized();
 
 
-    for ( int j = 0; j < 3; j++ ) {
-        for ( int k = 0; k < 3; k++ ) {
-            this->computeTripleProduct(temp, lambdaC [ j ], A [ j ][ k ], lambdaD [ k ]);
-            LCAD.add(temp); 
-        }
-    }
-            
+           
     // should use symmetry here
     FloatMatrix KCCtemp, KCDtemp, KDDtemp;
-    FloatMatrix LCACB, LDADB;
-    //this->computeTripleProduct(KCCtemp, B, LCAC, B);
-    //this->computeTripleProduct(KDDtemp, B, LDAD, B);
+    FloatMatrix LCACB, LDADB, LCADB;
     LCACB.beProductOf(LCAC,B);
     LDADB.beProductOf(LDAD,B);
+    LCADB.beProductOf(LCAD,B);
     KCCtemp.plusProductSymmUpper(B,LCACB,dV);
     KDDtemp.plusProductSymmUpper(B,LDADB,dV);
-    this->computeTripleProduct(KCDtemp, B, LCAD, B);
-    
-
-    //KCCtemp.times(dV);
-    //KDDtemp.times(dV);
+    KCDtemp.plusProductUnsym(B,LCADB,dV);
     KCCtemp.symmetrized();
     KDDtemp.symmetrized();
-    KCDtemp.times(dV);
+
     
     
     int ndofs = Shell7Base :: giveNumberOfDofs();
