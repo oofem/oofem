@@ -79,6 +79,8 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual void scale(double s) { }
+
+    virtual const char *giveInputRecordName() const { return _IFT_RotatingBoundary_Name; }
     virtual const char *giveClassName() const { return "RotatingBoundary"; }
     virtual classType giveClassID() const { return RotatingBoundaryClass; }
 };

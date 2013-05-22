@@ -70,6 +70,7 @@ public:
     void setLocalEquivalentStrainForAverage(double ls) { localEquivalentStrainForAverage = ls; }
 
     // definition
+    virtual const char *giveInputRecordName() const { return _IFT_MazarsNLMaterial_Name; }
     virtual const char *giveClassName() const { return "MazarsNLMaterialStatus"; }
     virtual classType giveClassID() const { return IsotropicDamageMaterialStatusClass; }
 

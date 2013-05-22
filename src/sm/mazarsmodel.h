@@ -115,6 +115,7 @@ public:
     virtual ~MazarsMaterial();
 
     // identification and auxiliary functions
+    virtual const char *giveInputRecordName() const { return _IFT_MazarsMaterial_Name; }
     virtual const char *giveClassName() const { return "MazarsMaterial"; }
     virtual classType giveClassID() const { return MazarsMaterialClass; }
 

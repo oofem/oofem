@@ -157,6 +157,7 @@ public:
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
     // identification
+    virtual const char *giveInputRecordName() const { return _IFT_NlDEIDynamic_Name; }
     virtual const char *giveClassName() const { return "NlDEIDynamic"; }
     virtual classType giveClassID() const { return NlDEIDynamicClass; }
     virtual fMode giveFormulation() { return TL; }

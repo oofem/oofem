@@ -35,9 +35,9 @@
 #ifndef spatiallocalizer_h
 #define spatiallocalizer_h
 
-#include "femcmpnn.h"
 #include "interface.h"
 #include "logger.h"
+#include "error.h"
 
 #include <set>
 #include <list>
@@ -47,6 +47,8 @@ class Domain;
 class Element;
 class TimeStep;
 class GaussPoint;
+class FloatArray;
+class IntArray;
 
 /**
  * The spatial localizer element interface associated to spatial localizer.
@@ -110,8 +112,12 @@ public:
  * Typical services include searching the closes node to give position, searching of an element containing given point, etc.
  * If special element algorithms required, these should be included using interface concept.
  */
-class SpatialLocalizer : public FEMComponent
+class SpatialLocalizer
 {
+protected:
+    /// Link to domain object
+    Domain *domain;
+
 public:
     /// Typedefs to introduce the container type for element numbers, returned by some services.
     typedef std :: set< int >elementContainerType;
@@ -119,7 +125,10 @@ public:
     typedef std :: list< int >nodeContainerType;
 
     /// Constructor
-    SpatialLocalizer(int n, Domain *d) : FEMComponent(n, d) { }
+    SpatialLocalizer(Domain *d) : domain(d) { }
+
+    /// Returns the domain that localizer acts on.
+    Domain *giveDomain() { return domain; }
 
     /**
      * Returns the element, containing given point and belonging to one of the region in region list.
@@ -194,8 +203,7 @@ public:
      */
     virtual int init(bool force = false) { return 1; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
-    virtual const char *giveInputRecordName() const { return NULL; }
+    virtual const char *giveClassName() const = 0;
 };
 } // end namespace oofem
 #endif // spatiallocalizer_h

@@ -191,14 +191,14 @@ IDGMaterial :: computeEta(FloatMatrix &answer, const FloatArray &strain, GaussPo
                         double e = principalStrains.at(i);
                         for(int j = 1; j<3;j++)
                             n.at(j) = N.at(i,j);
-                        m.beDyadicProductOf(n,n);
-                        m.times(e);
-                        Eta.add(m);
+
+                        Eta.plusDyadSymmUpper(n, e);
                     }
                 }
                 if ( principalStrains.at(i) > 0.0 ) 
                     posNorm += principalStrains.at(i) * principalStrains.at(i);
             }
+            Eta.symmetrized();
             double kappa = sqrt(posNorm);
             Eta.times(1./kappa);
             answer.at(1,1) = Eta.at(1,1);

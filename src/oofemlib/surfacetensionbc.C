@@ -216,10 +216,10 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
                 }
 
                 double dV = 2 * M_PI * gamma * J * gp->giveWeight();
-                answer.plusDyadSymmUpper(tmpA, tmpB, dV);
-                answer.plusDyadSymmUpper(tmpB, tmpA, dV);
+                answer.plusDyadUnsym(tmpA, tmpB, dV);
+                answer.plusDyadUnsym(tmpB, tmpA, dV);
                 answer.plusProductSymmUpper(B, B, r*dV);
-                answer.plusDyadSymmUpper(tmpA, tmpA, -r*dV);
+                answer.plusDyadUnsym(tmpA, tmpA, -r*dV);
             }
 
         } else {
@@ -240,7 +240,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
 
                 double dV = t * gamma * J * gp->giveWeight();
                 answer.plusProductSymmUpper(B, B, dV);
-                answer.plusDyadSymmUpper(tmpA, tmpA, -dV);
+                answer.plusDyadSymmUpper(tmpA, -dV);
             }
         }
 
