@@ -460,9 +460,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
                         n.at(j) = N.at(j, i);
                     }
 
-                    m.beDyadicProductOf(n, n);
-                    m.times( principalStrains.at(i) );
-                    Eta.add(m);
+                    Eta.plusDyadSymmUpper(n, principalStrains.at(i) );
                 }
             }
 
@@ -470,6 +468,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
                 posNorm += principalStrains.at(i) * principalStrains.at(i);
             }
         }
+        Eta.symmetrized();
 
         double kappa = sqrt(posNorm);
         Eta.times(1. / kappa);
@@ -526,9 +525,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
                         }
                     }
 
-                    m.beDyadicProductOf(n, n);
-                    m.times( principalStress.at(i) );
-                    Eta.add(m);
+                    Eta.plusDyadSymmUpper(n, principalStress.at(i));
                 } else if ( sum < principalStress.at(i) ) {
                     sum = principalStress.at(i);
                     index = i;
@@ -538,6 +535,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
                 index = i;
             }
         }
+        Eta.symmetrized();
 
         int numberOfEl = ( dim * ( dim - 1 ) / 2 + dim );
         eta.resize(numberOfEl);

@@ -339,7 +339,7 @@ TransportElement :: computeCapacitySubMatrix(FloatMatrix &answer, MatResponseMod
         // ask for capacity coefficient. In basic units [J/K/m3]
         double c = mat->giveCharacteristicValue(rmode, gp, tStep);
         double dV = this->computeVolumeAround(gp);
-        answer.plusDyadSymmUpper(n, n, dV * c);
+        answer.plusDyadSymmUpper(n, dV * c);
     }
 
     answer.symmetrized();
@@ -492,7 +492,7 @@ TransportElement :: computeIntSourceLHSSubMatrix(FloatMatrix &answer, MatRespons
         // ask for coefficient from material
         double c = mat->giveCharacteristicValue(rmode, gp, tStep);
         double dV = this->computeVolumeAround(gp);
-        answer.plusDyadSymmUpper(n, n, dV * c);
+        answer.plusDyadSymmUpper(n, dV * c);
     }
 
     answer.symmetrized();
@@ -752,7 +752,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                     GaussPoint *gp = iRule.getIntegrationPoint(igp);
                     this->computeEgdeNAt( n, id, * gp->giveCoordinates() );
                     double dV = this->computeEdgeVolumeAround(gp, id);
-                    subAnswer.plusDyadSymmUpper( n, n, dV * edgeLoad->giveProperty('a') );
+                    subAnswer.plusDyadSymmUpper( n, dV * edgeLoad->giveProperty('a') );
                 }
 
                 subAnswer.symmetrized();
@@ -776,7 +776,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                     GaussPoint *gp = iRule->getIntegrationPoint(igp);
                     this->computeSurfaceNAt( n, id, * gp->giveCoordinates() );
                     double dV = this->computeSurfaceVolumeAround(gp, id);
-                    subAnswer.plusDyadSymmUpper( n, n, dV * surfLoad->giveProperty('a') );
+                    subAnswer.plusDyadSymmUpper( n, dV * surfLoad->giveProperty('a') );
                 }
 
                 delete iRule;

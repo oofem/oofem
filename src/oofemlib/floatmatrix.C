@@ -78,7 +78,16 @@ extern void dgetrs_(const char *trans, const int *n, const int *nrhs, double *a,
 /// General matrix multiplication
 extern void dgemm_(const char *transa, const char *transb, const int *m, const int *n, const int *k, const double *alpha, 
                    const double *a, const int *lda, const double *b, const int *ldb, const double *beta, double *c, const int *ldc,
-                   int a_len, int b_len, int c_len);
+                   int a_columns, int b_columns, int c_columns);
+/// General dyad product of vectors
+extern void dger_(const int *m, const int *n, const double *alpha, const double *x, const int *incx, 
+                  const double *y, const int *incy, double *a, const int *lda,
+                  int x_len, int y_len, int a_columns);
+/// Symmetric dyad product of vector
+extern void dsyr_(const char *uplo, const int *n, const double *alpha, const double *x, const int *incx, 
+                  double *a, const int *lda, int x_len, int a_columns);
+/// Y = Y + alpha * X
+extern void daxpy_(const int *n, const double *alpha, const double *x, const int *incx, double *y, const int *incy, int xsize, int ysize);
 }
 #endif
 
@@ -690,18 +699,25 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
 }
 
 
-void FloatMatrix :: plusDyadSymmUpper(const FloatArray &a, const FloatArray &b, double dV)
+void FloatMatrix :: plusDyadSymmUpper(const FloatArray &a, double dV)
 {
     if ( !this->isNotEmpty() ) {
-        this->resize(a.giveSize(), b.giveSize());
+        this->resize(a.giveSize(), a.giveSize());
         this->zero();
     }
-
+#ifdef __LAPACK_MODULE
+    int inc = 1;
+    int sizeA = a.giveSize();
+    dsyr_("u", & sizeA, & dV, a.givePointer(), &inc,
+          this->values, & this->nRows,
+          sizeA, this->nColumns);
+#else
     for ( int i = 1; i <= nRows; i++ ) {
         for ( int j = i; j <= nColumns; j++ ) {
-            this->at(i, j) += a.at(i)*b.at(j) * dV;
+            this->at(i, j) += a.at(i)*a.at(j) * dV;
         }
     }
+#endif
 }
 
 
@@ -715,7 +731,13 @@ void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b,
         this->resize(a.nColumns, b.nColumns);
         this->zero();
     }
-
+#ifdef __LAPACK_MODULE
+    double beta = 1.;
+    dgemm_("t", "n", & this->nRows, & this->nColumns, & a.nRows, 
+        & dV, a.values, & a.nRows, b.values, & b.nRows, 
+        & beta, this->values, & this->nRows,
+        a.nColumns, b.nColumns, this->nColumns);
+#else
     for ( int i = 1; i <= nRows; i++ ) {
         for ( int j = 1; j <= nColumns; j++ ) {
             double summ = 0.;
@@ -726,6 +748,7 @@ void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b,
             this->at(i, j) += summ * dV;
         }
     }
+#endif
 }
 
 
@@ -735,12 +758,20 @@ void FloatMatrix :: plusDyadUnsym(const FloatArray &a, const FloatArray &b, doub
         this->resize(a.giveSize(), b.giveSize());
         this->zero();
     }
-
+#ifdef __LAPACK_MODULE
+    int inc = 1;
+    int sizeA = a.giveSize();
+    int sizeB = b.giveSize();
+    dger_(& sizeA, & sizeB, & dV, a.givePointer(), &inc,
+          b.givePointer(), &inc, this->values, & this->nRows,
+          sizeA, sizeB, this->nColumns);
+#else
     for ( int i = 1; i <= nRows; i++ ) {
         for ( int j = 1; j <= nColumns; j++ ) {
             this->at(i, j) += a.at(i) * b.at(j) * dV;
         }
     }
+#endif
 }
 
 
@@ -937,26 +968,30 @@ void FloatMatrix :: add(const FloatMatrix &aMatrix)
 // Adds aMatrix to the receiver. If the receiver has a null size,
 // adjusts its size to that of aMatrix. Returns the modified receiver.
 {
-    register int i;
-    int n, m;
-    double *P1, *P2;
-
-    n = aMatrix.nRows;
-    m = aMatrix.nColumns;
     if ( nRows * nColumns == 0 ) {
         this->operator = ( aMatrix );
     } else {
 #     ifdef DEBUG
-        if ( (n != nRows || m != nColumns) && aMatrix.isNotEmpty() )
-            OOFEM_ERROR5("FloatMatrix::add : dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, n, m);
+        if ( (aMatrix.nRows != nRows || aMatrix.nColumns != nColumns) && aMatrix.isNotEmpty() )
+            OOFEM_ERROR5("FloatMatrix::add : dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
 #     endif
 
-        P1 = values;
-        P2 = aMatrix.values;
-        i  = n * m;
+#ifdef __LAPACK_MODULE
+        int aSize = aMatrix.nRows * aMatrix.nColumns;
+        int inc = 1;
+        double s = 1.;
+        daxpy_( &aSize, &s, aMatrix.values, &inc, this->values, &inc, aSize, aSize);
+#else
+        int n = aMatrix.nRows;
+        int m = aMatrix.nColumns;
+
+        double *P1 = values;
+        double *P2 = aMatrix.values;
+        register int i  = n * m;
         while ( i-- ) {
             * P1++ += * P2++;
         }
+#endif
     }
 }
 
@@ -965,27 +1000,30 @@ void FloatMatrix :: add(double s, const FloatMatrix &aMatrix)
 // Adds aMatrix to the receiver. If the receiver has a null size,
 // adjusts its size to that of aMatrix. Returns the modified receiver.
 {
-    register int i;
-    int n, m;
-    double *P1, *P2;
-
-    n = aMatrix.nRows;
-    m = aMatrix.nColumns;
-    if ( nRows * nColumns == 0 ) {
+    if ( !this->isNotEmpty() ) {
         this->operator = ( aMatrix );
         this->times(s);
     } else {
-        #     ifdef DEBUG
-        if ( (n != nRows || m != nColumns) && aMatrix.isNotEmpty() )
-            OOFEM_ERROR5("FloatMatrix::add : dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, n, m);
-        #     endif
+#     ifdef DEBUG
+        if ( (aMatrix.nRows != nRows || aMatrix.nColumns != nColumns) && aMatrix.isNotEmpty() )
+            OOFEM_ERROR5("FloatMatrix::add : dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
+#     endif
 
-            P1 = values;
-            P2 = aMatrix.values;
-            i  = n * m;
-            while ( i-- ) {
-                * P1++ += s *(* P2++);
-            }
+#ifdef __LAPACK_MODULE
+        int aSize = aMatrix.nRows * aMatrix.nColumns;
+        int inc = 1;
+        daxpy_( &aSize, &s, aMatrix.values, &inc, this->values, &inc, aSize, aSize);
+#else
+        int n = aMatrix.nRows;
+        int m = aMatrix.nColumns;
+
+        double *P1 = values;
+        double *P2 = aMatrix.values;
+        register int i  = n * m;
+        while ( i-- ) {
+            * P1++ += s *(* P2++);
+        }
+#endif
     }
 }
 
@@ -993,26 +1031,30 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
 // Adds aMatrix to the receiver. If the receiver has a null size,
 // adjusts its size to that of aMatrix. Returns the modified receiver.
 {
-    register int i;
-    int n, m;
-    double *P1, *P2;
-
-    n = aMatrix.nRows;
-    m = aMatrix.nColumns;
-    if ( nRows * nColumns == 0 ) {
+    if ( !this->isNotEmpty() ) {
         this->operator=(aMatrix);
     } else {
 #     ifdef DEBUG
-        if ( (n != nRows || m != nColumns) && aMatrix.isNotEmpty() )
-            OOFEM_ERROR5("FloatMatrix::subtract : dimensions mismatch : (r1,c1)-(r2,c2) : (%d,%d)-(%d,%d)", nRows, nColumns, n, m);
+        if ( (aMatrix.nRows != nRows || aMatrix.nColumns != nColumns) && aMatrix.isNotEmpty() )
+            OOFEM_ERROR5("FloatMatrix::subtract : dimensions mismatch : (r1,c1)-(r2,c2) : (%d,%d)-(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
 #     endif
 
-        P1 = values;
-        P2 = aMatrix.values;
-        i  = n * m;
+#ifdef __LAPACK_MODULE
+        int aSize = aMatrix.nRows * aMatrix.nColumns;
+        int inc = 1;
+        double s = -1.;
+        daxpy_( &aSize, &s, aMatrix.values, &inc, this->values, &inc, aSize, aSize);
+#else
+        int n = aMatrix.nRows;
+        int m = aMatrix.nColumns;
+
+        double *P1 = values;
+        double *P2 = aMatrix.values;
+        register int i  = n * m;
         while ( i-- ) {
             * P1++ -= * P2++;
         }
+#endif
     }
 }
 
@@ -1313,10 +1355,8 @@ void FloatMatrix :: resizeWithData(int rows, int columns)
     this->nRows = rows;
     this->nColumns = columns;
 
-    int ii, jj;
-
-    ii = min( rows, old.giveNumberOfRows() );
-    jj = min( columns, old.giveNumberOfColumns() );
+    int ii = min( rows, old.giveNumberOfRows() );
+    int jj = min( columns, old.giveNumberOfColumns() );
     // copy old values if possible
     for ( int i = 1; i <= ii; i++ ) {
         for ( int j = 1; j <= jj; j++ ) {
@@ -1444,11 +1484,8 @@ void FloatMatrix :: times(double factor)
 // Multiplies every coefficient of the receiver by factor. Answers the
 // modified receiver.
 {
-    int i;
-    double *p;
-
-    p = values;
-    i = nRows * nColumns;
+    int i = nRows * nColumns;
+    double *p = values;
     while ( i-- ) {
         * p++ *= factor;
     }
@@ -1457,11 +1494,8 @@ void FloatMatrix :: times(double factor)
 
 void FloatMatrix :: negated()
 {
-    int i;
-    double *p;
-
-    p = values;
-    i = nRows * nColumns;
+    double *p = values;
+    int i = nRows * nColumns;
     while ( i-- ) {
         *p = -(*p);
         p++;

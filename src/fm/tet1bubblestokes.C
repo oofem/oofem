@@ -435,7 +435,7 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *t
         EdB.beProductOf(Ed,B);
         K.plusProductSymmUpper(B, EdB, dV);
         G.plusDyadUnsym(dNv, N, -dV);
-        C.plusDyadSymmUpper(N, N, Cp*dV);
+        C.plusDyadSymmUpper(N, Cp*dV);
 
         tmpA.beTProductOf(B, Ep);
         Dp.plusDyadUnsym(tmpA, N, dV);

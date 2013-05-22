@@ -359,7 +359,7 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
         EdB.beProductOf(Ed,B);
         K.plusProductSymmUpper(B, EdB, dA);
         G.plusDyadUnsym(dN_V, Nlin, -dA);
-        C.plusDyadSymmUpper(Nlin, Nlin, Cp*dA);
+        C.plusDyadSymmUpper(Nlin, Cp*dA);
 
         tmpA.beTProductOf(B, Ep);
         Dp.plusDyadUnsym(tmpA, Nlin, dA);

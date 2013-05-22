@@ -343,9 +343,10 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
         mat->giveVolumetricPressureStiffness(Cp, TangentStiffness, gp, tStep); // deps_vol/dp
 
         EdB.beProductOf(Ed,B);
-        K.plusProductSymmUpper(B, EdB, dV);
+        //K.plusProductSymmUpper(B, EdB, dV);
+        K.plusProductUnsym(B, EdB, dV);
         G.plusDyadUnsym(dN_V, Nlin, -dV);
-        C.plusDyadSymmUpper(Nlin, Nlin, Cp*dV);
+        C.plusDyadSymmUpper(Nlin, Cp*dV);
 
         tmpA.beTProductOf(B, Ep);
         Dp.plusDyadUnsym(tmpA, Nlin, dV);
@@ -353,7 +354,7 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
         tmpB.beTProductOf(B, Cd);
         DvT.plusDyadUnsym(Nlin, tmpB, dV);
     }
-    K.symmetrized();
+    //K.symmetrized();
     C.symmetrized();
     FloatMatrix GTDvT, GDp;
     GTDvT.beTranspositionOf(G);
@@ -367,6 +368,7 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
     answer.assemble(GDp, this->momentum_ordering, this->conservation_ordering);
     answer.assemble(GTDvT, this->conservation_ordering, this->momentum_ordering);
     answer.assemble(C, this->conservation_ordering);
+    OOFEM_ERROR("STOP!");
 }
 
 FEInterpolation *Hexa21Stokes :: giveInterpolation()
