@@ -106,10 +106,6 @@ Tr2Shell7XFEM :: computeGaussPoints()
         int nPointsEdge = 2;   // edge integration
         specialIntegrationRulesArray = new IntegrationRule * [ 3 ];
 
-        // Cohessive zone // @todo only temporary solution
-        //specialIntegrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
-        //specialIntegrationRulesArray [ 0 ]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
-
         // need to check if interface has failed but need to update the integration rule later
         XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
         for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { 
@@ -129,8 +125,8 @@ Tr2Shell7XFEM :: computeGaussPoints()
 
         // Midplane (Mass matrix integrated analytically through the thickness)
         specialIntegrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
-        specialIntegrationRulesArray [ 1 ]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
-
+        //specialIntegrationRulesArray [ 1 ]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle 
+        specialIntegrationRulesArray [ 1 ]->SetUpPointsOnTriangle(nPointsTri, _3dMat); //@todo replce with triangle 
 
         // Edge
         specialIntegrationRulesArray [ 2 ] = new GaussIntegrationRule(1, this);
@@ -185,16 +181,20 @@ Tr2Shell7XFEM :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 // Integration
 
 double 
-Tr2Shell7XFEM :: computeAreaAround(GaussPoint *gp)
+Tr2Shell7XFEM :: computeAreaAround(GaussPoint *gp, double xi)
 {
     FloatArray G1, G2, temp;
     FloatMatrix Gcov;
-    this->evalInitialCovarBaseVectorsAt(gp, Gcov);
+    FloatArray lCoords(3);
+    lCoords.at(1) = gp->giveCoordinate(1);
+    lCoords.at(2) = gp->giveCoordinate(2);
+    lCoords.at(3) = xi;
+    this->evalInitialCovarBaseVectorsAt(lCoords, Gcov);
     G1.beColumnOf(Gcov,1);
     G2.beColumnOf(Gcov,2);
     temp.beVectorProductOf(G1, G2);
     double detJ = temp.computeNorm();
-    return detJ * gp->giveWeight()*0.5 ;
+    return detJ * gp->giveWeight() ;
 }
 
 
@@ -203,7 +203,9 @@ Tr2Shell7XFEM :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
 {
     double detJ;
     FloatMatrix Gcov;
-    this->evalInitialCovarBaseVectorsAt(gp, Gcov);
+    FloatArray lcoords;
+    lcoords = *gp->giveCoordinates();
+    this->evalInitialCovarBaseVectorsAt(lcoords, Gcov);
     detJ = Gcov.giveDeterminant() * 0.5 * this->layeredCS->giveLayerThickness(layer);
     return detJ * gp->giveWeight();
 }

@@ -91,7 +91,7 @@ protected:
 
     //virtual double computeVolumeAround(GaussPoint *gp);
     virtual double computeVolumeAroundLayer(GaussPoint *mastergp, int layer);
-    virtual double computeAreaAround(GaussPoint *gp);
+    virtual double computeAreaAround(GaussPoint *gp, double xi);
 
     virtual void computeGaussPoints();
     virtual void giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords);
