@@ -1872,7 +1872,8 @@ Shell7Base :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, int layer, I
         gp  = iRule->getIntegrationPoint(i);
         double dV = this->computeVolumeAroundLayer(gp, layer);
         this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(n, gp, type);
-        fullAnswer.plusDyadSymmUpper(n, n, dV);
+        //fullAnswer.plusDyadSymmUpper(n, n, dV);
+        fullAnswer.plusDyadSymmUpper(n, dV);
         volume += dV;
     }
 

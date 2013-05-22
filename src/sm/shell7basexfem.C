@@ -515,7 +515,7 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
 
 
 void
-Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+Shell7BaseXFEM :: computeStiffnessMatrixOpt(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
 #if 1
     this->computeStiffnessMatrixOpt(answer, rMode, tStep);
@@ -627,7 +627,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
 //---------------------------------------------
 // Optimized version
 void
-Shell7BaseXFEM :: computeStiffnessMatrixOpt(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
 
     int ndofs = this->giveNumberOfDofs();
@@ -728,34 +728,22 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrixOpt(FloatMatrix &KCC, FloatMatrix 
     LCAC.zero(); LCAD.zero(); LDAD.zero();
     for ( int j = 0; j < 3; j++ ) {
         for ( int k = 0; k < 3; k++ ) {
-
-            temp.beProductOf(A [ j ][ k ], lambdaC [ k ]);
-            LCAC.plusProductSymmUpper(lambdaC [ j ],temp,1.0);
-            temp.beProductOf(A [ j ][ k ], lambdaD [ k ]);
-            LDAD.plusProductSymmUpper(lambdaD [ j ],temp,1.0);
-            temp.beProductOf(A [ j ][ k ], lambdaD [ k ]);
-            LCAD.plusProductUnsym(lambdaC [ j ],temp,1.0);
-            
+            this->computeTripleProduct(temp, lambdaC [ j ], A [ j ][ k ], lambdaC [ k ] );
+            LCAC.add(dV,temp);
+            this->computeTripleProduct(temp, lambdaC [ j ], A [ j ][ k ], lambdaD [ k ] );
+            LCAD.add(dV,temp);
+            this->computeTripleProduct(temp, lambdaD [ j ], A [ j ][ k ], lambdaD [ k ] );
+            LDAD.add(dV,temp);
         }
     }
-    LCAC.symmetrized();
-    LDAD.symmetrized();
 
 
-           
-    // should use symmetry here
     FloatMatrix KCCtemp, KCDtemp, KDDtemp;
     FloatMatrix LCACB, LDADB, LCADB;
-    LCACB.beProductOf(LCAC,B);
-    LDADB.beProductOf(LDAD,B);
-    LCADB.beProductOf(LCAD,B);
-    KCCtemp.plusProductSymmUpper(B,LCACB,dV);
-    KDDtemp.plusProductSymmUpper(B,LDADB,dV);
-    KCDtemp.plusProductUnsym(B,LCADB,dV);
-    KCCtemp.symmetrized();
-    KDDtemp.symmetrized();
 
-    
+    this->computeTripleProduct(KCCtemp, B, LCAC, B );    
+    this->computeTripleProduct(KCDtemp, B, LCAD, B );    
+    this->computeTripleProduct(KDDtemp, B, LDAD, B );    
     
     int ndofs = Shell7Base :: giveNumberOfDofs();
     KCC.resize(ndofs,ndofs); KCD.resize(ndofs,ndofs); KDD.resize(ndofs,ndofs); 
