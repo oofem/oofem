@@ -37,7 +37,11 @@
 
 #include "boundaryload.h"
 
+///@name Input fields for ConstantPressureLoad
+//@{
+#define _IFT_ConstantPressureLoad_LoadOffset "loadoffset"
 #define _IFT_ConstantPressureLoad_Name "constantpressureload"
+//@}
 
 namespace oofem {
 /**
@@ -62,7 +66,8 @@ namespace oofem {
 class ConstantPressureLoad : public BoundaryLoad
 {
 public:
-    ConstantPressureLoad(int i, Domain *d) : BoundaryLoad(i, d) { }
+    //ConstantPressureLoad(int i, Domain *d) : BoundaryLoad(i, d)
+    ConstantPressureLoad(int i, Domain *d);
 
     // Overloaded methods:
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
@@ -80,9 +85,10 @@ public:
     virtual classType giveClassID() const { return ConstantPressureLoadClass; }
     virtual const char *giveClassName() const { return "ConstantPressureLoad"; }
     virtual const char *giveInputRecordName() const { return _IFT_ConstantPressureLoad_Name; }
-
+    double giveLoadOffset() { return this->loadOffset; }
 private:
     virtual void computeNArray(FloatArray &answer, FloatArray &coords) const { answer.resize(0); }
+    double loadOffset;  // xi-coord offset of load. xi=-1 -> bottom, xi=0 -> midsurface (default), xi=1 -> top surface
 };
 } // end namespace oofem
 #endif

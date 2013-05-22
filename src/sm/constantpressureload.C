@@ -42,6 +42,10 @@ namespace oofem {
 
 REGISTER_BoundaryCondition( ConstantPressureLoad );
 
+ConstantPressureLoad :: ConstantPressureLoad(int i, Domain *d) : BoundaryLoad(i, d) {
+    this->loadOffset = 0.0;
+}
+
 IRResultType
 ConstantPressureLoad :: initializeFrom(InputRecord *ir)
 {
@@ -50,6 +54,9 @@ ConstantPressureLoad :: initializeFrom(InputRecord *ir)
         _error("instanciateFrom: componentArray size mismatch");
     }
 
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    IR_GIVE_OPTIONAL_FIELD(ir, this->loadOffset, _IFT_ConstantPressureLoad_LoadOffset);
     return IRRT_OK;
 }
 
