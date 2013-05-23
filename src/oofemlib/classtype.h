@@ -141,6 +141,7 @@ enum classType {
     QTrPlaneStrainClass,
     QTrPlaneStrainGradClass,
     QPlaneStress2dClass,
+    Q9PlaneStress2dClass,
     QPlaneStressGradClass,
     TrPlaneStress2dClass,
     QTrPlaneStressGradClass,
