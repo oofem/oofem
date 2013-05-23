@@ -54,9 +54,16 @@
  #include "combuff.h"
 #endif
 
+#ifdef __LAPACK_MODULE
+extern "C" {
+extern void dgemv_(const char *trans, const int *m, const int *n, const double *alpha, const double *a, const int *lda, const double *x,
+                   const int *incx, const double *beta, double *y, const int *incy, int aColumns, int xSize, int ySize);
+}
+#endif
+
 namespace oofem {
 
-FloatArray::FloatArray() : size (0), allocatedSize (0), values (NULL) {}
+FloatArray :: FloatArray() : size (0), allocatedSize (0), values (NULL) {}
 
 
 FloatArray :: FloatArray(int n) :
@@ -88,13 +95,11 @@ FloatArray :: FloatArray(const FloatArray &src) :
         if ( !values ) {
             OOFEM_FATAL2("FloatArray :: FloatArray - Failed in allocating %d doubles", size);
         }
-
 #endif
+        memcpy(this->values, src.values, size * sizeof(double));
     } else {
         values = NULL;
     }
-
-    memcpy(this->values, src.values, size * sizeof(double));
 }
 
 FloatArray :: ~FloatArray()
@@ -569,9 +574,6 @@ void FloatArray :: resize(int n)
     if ( !values ) {
         OOFEM_FATAL2("FloatArray :: simple - Failed in allocating %d doubles", n);
     }
-    //for ( int i = 0; i < n; ++i ) {
-    //    values[ i ] = -1e12;
-    //}
 #endif
 #endif
 }
@@ -617,51 +619,62 @@ void FloatArray :: zero()
 void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anArray)
 // Stores the product of aMatrix * anArray in to receiver
 {
-    int nColumns, nRows;
-    double sum;
+    int nColumns = aMatrix.giveNumberOfColumns();
+    int nRows = aMatrix.giveNumberOfRows();
+
+    this->resize( nRows );
 
 #  ifdef DEBUG
-    if ( ( nColumns = aMatrix.giveNumberOfColumns() ) - anArray.giveSize() ) {
+    if ( aMatrix.giveNumberOfColumns() != anArray.giveSize() ) {
         OOFEM_ERROR("FloatArray :: beProductOf : dimension mismatch");
     }
-
 #  endif
 
-    nColumns = aMatrix.giveNumberOfColumns();
-    this->resize( nRows = aMatrix.giveNumberOfRows() );
+#ifdef __LAPACK_MODULE
+    double alpha = 1., beta = 0.;
+    int inc = 1;
+    dgemv_("n", &nRows, &nColumns, &alpha, aMatrix.givePointer(), &nRows, anArray.values, &inc, &beta, this->values, &inc, nColumns, nColumns, nRows );
+#else
     for ( int i = 1; i <= nRows; i++ ) {
-        sum = 0.;
+        double sum = 0.;
         for ( int j = 1; j <= nColumns; j++ ) {
             sum += aMatrix.at(i, j) * anArray.at(j);
         }
 
         this->at(i) = sum;
     }
+#endif
 }
 
 
 void FloatArray :: beTProductOf(const FloatMatrix &aMatrix, const FloatArray &anArray)
 // Stores the product of aMatrix^T * anArray in to receiver
 {
-    int nColumns, nRows;
+    int nRows = aMatrix.giveNumberOfRows();
+    int nColumns = aMatrix.giveNumberOfColumns();
 
 #  ifdef DEBUG
-    if ( ( nColumns = aMatrix.giveNumberOfRows() ) - anArray.giveSize() ) {
+    if ( aMatrix.giveNumberOfRows() - anArray.giveSize() ) {
         OOFEM_ERROR("FloatArray :: beTProductOf : dimension mismatch");
     }
 
 #  endif
+    this->resize( nColumns );
 
-    nColumns = aMatrix.giveNumberOfRows();
-    this->resize( nRows = aMatrix.giveNumberOfColumns() );
-    for ( int i = 1; i <= nRows; i++ ) {
+#ifdef __LAPACK_MODULE
+    double alpha = 1., beta = 0.;
+    int inc = 1;
+    dgemv_("t", &nRows, &nColumns, &alpha, aMatrix.givePointer(), &nRows, anArray.values, &inc, &beta, this->values, &inc, nColumns, nColumns, nRows );
+#else
+    for ( int i = 1; i <= nColumns; i++ ) {
         double sum = 0.;
-        for ( int j = 1; j <= nColumns; j++ ) {
+        for ( int j = 1; j <= nRows; j++ ) {
             sum += aMatrix.at(j, i) * anArray.at(j);
         }
 
         this->at(i) = sum;
     }
+#endif
 }
 
 
