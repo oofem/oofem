@@ -64,7 +64,7 @@ class Shell7BaseXFEM : public Shell7Base, public XfemElementInterface
 protected:
     Material *czMat; // cohesive zone material
     int czMatNum;
-    virtual double giveGlobalZcoord(GaussPoint *gp);
+    virtual double giveGlobalZcoord(double xi);
     std::list< std::pair<int, double> > delaminationXiCoordList;
     void setupDelaminationXiCoordList();
     void setupDelaminationXiCoordsAtGP();
@@ -98,10 +98,9 @@ protected:
 
     void computeOrderingArray(IntArray &orderingArray, IntArray &activeDofsArray, int enrichmentDomainNumber, SolutionField field);
     
-   // virtual void evalCovarBaseVectorsAt(GaussPoint *gp, FloatMatrix &gcon, FloatArray &solVec);
+   
     virtual void evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcon, FloatArray &solVec);
     void discGiveInitialSolutionVector(FloatArray &answer, IntArray &eiDofIdArray); // should be replaced with general function
-    //void computeDiscGeneralizedStrainVector(FloatArray &dGenEps, GaussPoint *gp, EnrichmentItem *ei, int enrichmentDomainNumber, TimeStep *tStep);
     void computeDiscGeneralizedStrainVector(FloatArray &dGenEps, FloatArray &lCoords, EnrichmentItem *ei, int enrichmentDomainNumber, TimeStep *tStep);
 
     // Internal forces
@@ -113,17 +112,15 @@ protected:
 
     // Tangent matrices
     void computeLambdaGMatricesDis(FloatMatrix lambdaD [ 3 ], double zeta);
+    void computeLambdaNMatrixDis(FloatMatrix &lambda_xd, double zeta);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    virtual void computeStiffnessMatrixOpt(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    virtual void discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, FloatArray &solVecI, FloatArray &solVecJ, MatResponseMode rMode, TimeStep *tStep,
-         EnrichmentItem *ei, int enrichmentDomainNumberI, int enrichmentDomainNumberJ);
-    //virtual void discComputeBulkTangentMatrixOpt(FloatMatrix &answer, FloatArray &solVec, FloatArray &solVecI, FloatArray &solVecJ, MatResponseMode rMode, TimeStep *tStep,
-    //     EnrichmentItem *ei, int enrichmentDomainNumberI, int enrichmentDomainNumberJ);
-    virtual void discComputeBulkTangentMatrixOpt(FloatMatrix &KCC, FloatMatrix &KCD, FloatMatrix &KDD, IntegrationPoint *ip, Material *mat, int layer, TimeStep *tStep);
+    virtual void discComputeBulkTangentMatrix(FloatMatrix &KCC, FloatMatrix &KCD, FloatMatrix &KDD, IntegrationPoint *ip, Material *mat, int layer, TimeStep *tStep);
 
 
     void computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep);
-    void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, Delamination *dei, int enrichmentDomainNumber);
+    void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep, FloatArray &solVecD, Delamination *dei, int enrichmentDomainNumber);
+
+    void computePressureTangentMatrixDis(FloatMatrix &answer, FloatArray &solVecJ, FloatArray &solVecK, Load *load, const int iSurf, TimeStep *tStep);
 
     // External loads
     virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode);

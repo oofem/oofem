@@ -142,8 +142,9 @@ protected:
     void edgeEvalCovarBaseVectorsAt(FloatArray &lCoords, const int iedge, FloatMatrix &gcov, TimeStep *tStep);
 
     virtual double giveGlobalZcoord(double xi);
-    double giveGlobalZcoordInLayer(double xi, int layer);
+    virtual double giveGlobalZcoordInLayer(double xi, int layer);
 
+    FloatMatrix giveAxialMatrix(const FloatArray &vec);
 
     // Stress and strain
     void computeFAt(GaussPoint *gp, FloatMatrix &answer, FloatArray &genEps);
