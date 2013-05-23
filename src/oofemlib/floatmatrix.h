@@ -460,9 +460,8 @@ public:
      * zero receiver is necessary.
      * @param rows New number of rows.
      * @param cols New number of columns.
-     * @param allocChunk if reallocation needed, an additional space for allocChunk values
      */
-    void resize(int rows, int cols, int allocChunk = 0);
+    void resize(int rows, int cols);
     /**
      * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly.

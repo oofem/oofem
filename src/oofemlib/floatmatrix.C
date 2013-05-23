@@ -104,9 +104,6 @@ FloatMatrix :: FloatMatrix(int n, int m) :
     ///@todo Should we really automatically zero matrices?
     values = (double*)calloc(allocatedSize, sizeof(double));
 #ifdef DEBUG
-    //for (int i = 0; i < allocatedSize; ++i) values[i] = NaN;
-#endif
-#ifdef DEBUG
     if ( !values ) {
         OOFEM_FATAL2("FloatArray :: FloatArray - Failed in allocating %d doubles", n);
     }
@@ -1300,7 +1297,7 @@ void FloatMatrix :: bePinvID()
 }
 
 
-void FloatMatrix :: resize(int rows, int columns, int allocChunk)
+void FloatMatrix :: resize(int rows, int columns)
 //
 // resizes receiver, all data will be lost
 //
@@ -1311,16 +1308,9 @@ void FloatMatrix :: resize(int rows, int columns, int allocChunk)
             free(values);
         }
 
-        if ( allocChunk < 0 ) {
-            allocChunk = 0;
-        }
-
-        allocatedSize = rows * columns + allocChunk; // REMEMBER NEW ALLOCATED SIZE
+        allocatedSize = rows * columns; // REMEMBER NEW ALLOCATED SIZE
         ///@todo Should we set all values to zeros or not?
         values = (double*)calloc(allocatedSize, sizeof(double));
-#ifdef DEBUG
-        //for (int i = 0; i < allocatedSize; ++i) values[i] = NaN;
-#endif
     } else {
         // reuse previously allocated space
     }
@@ -1345,9 +1335,6 @@ void FloatMatrix :: resizeWithData(int rows, int columns)
 
         allocatedSize = rows * columns; // REMEMBER NEW ALLOCATED SIZE
         values = (double*)calloc(allocatedSize, sizeof(double));
-#ifdef DEBUG
-        //for (int i = 0; i < allocatedSize; ++i) values[i] = NaN;
-#endif
     } else {
         // reuse previously allocated space
     }
@@ -1378,9 +1365,6 @@ void FloatMatrix :: hardResize(int rows, int columns)
 
     allocatedSize = rows * columns; // REMEMBER NEW ALLOCATED SIZE
     values = (double*)calloc(allocatedSize, sizeof(double));
-#ifdef DEBUG
-    //for (int i = 0; i < allocatedSize; ++i) values[i] = NaN;
-#endif
 
     this->nRows = rows;
     this->nColumns = columns;
