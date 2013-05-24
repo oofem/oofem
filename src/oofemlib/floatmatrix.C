@@ -1168,7 +1168,7 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
     answer = b;
     dgetrf_( &this->nRows, &this->nRows, this->values, &this->nRows, ipiv.givePointer(), &info );
     if (info == 0)
-        dgetrs_( transpose ? "Transpose" : "No transpose", &this->nRows, &this->nRows, this->values, &this->nRows, ipiv.givePointer(), answer.givePointer(), &this->nRows, &info );
+        dgetrs_( transpose ? "t" : "n", &this->nRows, &answer.nColumns, this->values, &this->nRows, ipiv.givePointer(), answer.givePointer(), &this->nRows, &info );
     if (info != 0) {
         OOFEM_ERROR2("FloatMatrix::solveForRhs : error %d", info);
     }
