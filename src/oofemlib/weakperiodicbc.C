@@ -50,6 +50,7 @@
 #include "fei2dtrlin.h"
 #include "fei2dtrquad.h"
 #include "classfactory.h"
+#include "set.h"
 
 namespace oofem {
 
@@ -83,40 +84,28 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
 	IR_GIVE_OPTIONAL_FIELD(ir, ngp, _IFT_WeakPeriodicBoundaryCondition_ngp);
 
 	IntArray temp;
-	IR_GIVE_OPTIONAL_FIELD(ir, temp, _IFT_WeakPeriodicBoundaryCondition_elementSidesPositive);
-	for ( int i = 0; i < temp.giveSize() / 2; i++ ) {
-		//printf("Add positive edge, element %u, side %u\n", temp.at(2*i+2), temp.at(2*i+1));
-		side [ 0 ].push_back( temp.at(2 * i + 1) );
-		element [ 0 ].push_back( temp.at(2 * i + 2) );
+
+	posSet=-1;
+	negSet=-1;
+
+	IR_GIVE_OPTIONAL_FIELD(ir, posSet, _IFT_WeakPeriodicBoundaryCondition_elementSidesPositiveSet);
+	IR_GIVE_OPTIONAL_FIELD(ir, negSet, _IFT_WeakPeriodicBoundaryCondition_elementSidesNegativeSet);
+
+	if (posSet==-1) {
+		IR_GIVE_OPTIONAL_FIELD(ir, temp, _IFT_WeakPeriodicBoundaryCondition_elementSidesPositive);
+		for ( int i = 0; i < temp.giveSize() / 2; i++ ) {
+			side [ 0 ].push_back( temp.at(2 * i + 1) );
+			element [ 0 ].push_back( temp.at(2 * i + 2) );
+		}
 	}
 
-	IR_GIVE_OPTIONAL_FIELD(ir, temp, _IFT_WeakPeriodicBoundaryCondition_elementSidesNegative);
-	for ( int i = 0; i < temp.giveSize() / 2; i++ ) {
-		//printf("Add negative edge, element %u, side %u\n", temp.at(2*i+2), temp.at(2*i+1));
-		side [ 1 ].push_back( temp.at(2 * i + 1) );
-		element [ 1 ].push_back( temp.at(2 * i + 2) );
+	if (negSet==-1) {
+		IR_GIVE_OPTIONAL_FIELD(ir, temp, _IFT_WeakPeriodicBoundaryCondition_elementSidesNegative);
+		for ( int i = 0; i < temp.giveSize() / 2; i++ ) {
+			side [ 1 ].push_back( temp.at(2 * i + 1) );
+			element [ 1 ].push_back( temp.at(2 * i + 2) );
+		}
 	}
-
-	// Check that elements are added
-	if (element[0].size()==0) {
-		OOFEM_ERROR("No elements on positive side\n");
-	}
-	if (element[1].size()==0) {
-		OOFEM_ERROR("No elements on negative side\n");
-	}
-
-	// Determine which is the positive and which is the negative side
-	FloatArray normal;
-	giveEdgeNormal( normal, element [ 0 ].at(0), side [ 0 ].at(0) );
-
-	if ((normal.at(1)+normal.at(2)) > - 0.000001) { // No support for 3D yet
-		sideSign [ 0 ] = 1;
-		sideSign [ 1 ] = -1;
-	} else {
-		sideSign [ 0 ] = -1;
-		sideSign [ 1 ] = 1;
-	}
-
 
 	if (this->domain->giveNumberOfSpatialDimensions()==2)
 		ndof=orderOfPolygon+1;
@@ -124,16 +113,6 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
 		ndof=1;
 		for (int i=1; i<=orderOfPolygon; i++) ndof=ndof + (i+1);
 	}
-
-	//	for (size_t i=0; i< element[0].size(); i++) {
-	//		giveEdgeNormal( normal, element [ 0 ].at(i), side [ 0 ].at(i) );
-	//		normal.printYourself();
-	//	}
-	//
-	//	for (size_t i=0; i< element[1].size(); i++) {
-	//		giveEdgeNormal( normal, element [ 1 ].at(i), side [ 1 ].at(i) );
-	//		normal.printYourself();
-	//	}
 
 	// Create dofs for coefficients
 	bcID = this->giveNumber();
@@ -160,7 +139,7 @@ void WeakPeriodicBoundaryCondition :: giveEdgeNormal(FloatArray &answer, int ele
 		xi(0)=0.5;
 	}
 
-	Element *thisElement = this->domain->giveGlobalElement( element );
+	Element *thisElement = this->domain->giveElement( element );
 	FEInterpolation *interpolation = thisElement->giveInterpolation( (DofIDItem)dofid );
 
 	interpolation->boundaryEvalNormal(answer, side, xi, FEIElementGeometryWrapper(thisElement));
@@ -171,8 +150,6 @@ void WeakPeriodicBoundaryCondition :: updateDirection()
 {
 	// Check orientation for s
 	FloatArray normal;
-
-	giveEdgeNormal( normal, element [ 0 ].at(0), side [ 0 ].at(0) );
 
 	if (this->domain->giveNumberOfSpatialDimensions()==2) {
 		surfaceIndexes.resize(1);
@@ -185,6 +162,8 @@ void WeakPeriodicBoundaryCondition :: updateDirection()
 		smax.resize(2);
 		sideGeom = _Triangle;
 	}
+
+	giveEdgeNormal( normal, element [ 0 ].at(0), side [ 0 ].at(0) );
 
 	if ( fabs(normal.at(1))>0.99999 ) {              // Normal points in X direction
 		direction = 1;
@@ -213,13 +192,45 @@ void WeakPeriodicBoundaryCondition :: updateDirection()
 		}
 	} else {
 		normal.printYourself();
-		_error1("Only surfaces with normal in x, y or z direction supported.\n");
+		Element *thisElement=this->giveDomain()->giveElement(element[0].at(0));
+		_error3("Only surfaces with normal in x, y or z direction supported. (el=%d, side=%d) \n", thisElement->giveLabel(), side [ 0 ].at(0));
 	}
 }
 
 void WeakPeriodicBoundaryCondition :: updateSminmax()
 {
 	if ( doUpdateSminmax ) {
+
+		// If sets are used, now is the time to update lists of elements and sides since the sets are unknown in initializeFrom
+		if (posSet!=-1) {
+			IntArray posBoundary, negBoundary;
+
+			posBoundary=this->giveDomain()->giveSet(posSet)->giveBoundaryList();
+			for (int i=0; i<posBoundary.giveSize() / 2; i++) {
+				side [ 0 ].push_back( posBoundary.at(2 * i + 2) );
+				element [ 0 ].push_back( posBoundary.at(2 * i + 1) );
+			}
+
+			negBoundary=this->giveDomain()->giveSet(negSet)->giveBoundaryList();
+			for (int i=0; i<negBoundary.giveSize() / 2; i++) {
+				side [ 1 ].push_back( negBoundary.at(2 * i + 2) );
+				element [ 1 ].push_back( negBoundary.at(2 * i + 1) );
+			}
+
+		}
+
+		// Determine which is the positive and which is the negative side
+		FloatArray normal;
+		giveEdgeNormal( normal, element [ 0 ].at(0), side [ 0 ].at(0) );
+
+		if ((normal.at(1)+normal.at(2)+normal.at(3)) > - 0.000001) { // No support for 3D yet
+			sideSign [ 0 ] = 1;
+			sideSign [ 1 ] = -1;
+		} else {
+			sideSign [ 0 ] = -1;
+			sideSign [ 1 ] = 1;
+		}
+
 		updateDirection();
 
 		for (int i=1; i<=surfaceIndexes.giveSize(); i++) {
@@ -259,7 +270,6 @@ void WeakPeriodicBoundaryCondition :: addElementSide(int newElement, int newSide
 	} else {
 		// Otherwise, check the normal in order to decide upon which direction the parameter runs (x or y)
 		giveEdgeNormal(normalNew, newElement, newSide);
-		//normalNew.printYourself();
 		if ( abs(abs( normalNew.at(1) ) - 1) < 0.0001 ) {               // Normal point in x direction, thus set direction to y
 			direction = 2;
 		} else {
@@ -267,7 +277,6 @@ void WeakPeriodicBoundaryCondition :: addElementSide(int newElement, int newSide
 		}
 	}
 
-	//printf(" to list %u\n", addToList);
 	element [ addToList ].push_back(newElement);
 	side [ addToList ].push_back(newSide);
 }
@@ -347,7 +356,7 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
 		normalSign = sideSign[thisSide];
 
 		for ( size_t ielement = 0; ielement < element [ thisSide ].size(); ielement++ ) {       // Loop over each element on this edge
-			Element *thisElement = this->domain->giveGlobalElement( element [ thisSide ].at(ielement) );
+			Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
 
 			// Find dofs for this element side
 			IntArray r_sideLoc, c_sideLoc;
@@ -390,6 +399,7 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
 			answer->assemble(r_loc, c_sideLoc, BT);
 		}
 	}
+
 }
 
 double WeakPeriodicBoundaryCondition :: computeBaseFunctionValue(int baseID, double coordinate)
@@ -456,7 +466,7 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
 
 		for ( size_t ielement = 0; ielement < element [ thisSide ].size(); ielement++ ) {           // Loop over each element on this edge
 
-			Element *thisElement = this->domain->giveGlobalElement( element [ thisSide ].at(ielement) );
+			Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
 
 			///@todo Support explicitly asking specifying dofids instead of equation ids (Jim needed this feature as well, and it makes sense to have it)
 			//thisElement->giveBoundaryLocationArray(sideLocation, side [ thisSide ].at(ielement), &dofids, eid, s, &masterDofIDs);
