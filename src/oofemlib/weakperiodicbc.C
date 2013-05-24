@@ -223,7 +223,10 @@ void WeakPeriodicBoundaryCondition :: updateSminmax()
 		FloatArray normal;
 		giveEdgeNormal( normal, element [ 0 ].at(0), side [ 0 ].at(0) );
 
-		if ((normal.at(1)+normal.at(2)+normal.at(3)) > - 0.000001) { // No support for 3D yet
+		double normalSum=-1;
+		(this->giveDomain()->giveNumberOfSpatialDimensions()<=2) ? normalSum=normal.at(1)+normal.at(2) : normalSum=normal.at(1)+normal.at(2)+normal.at(3);
+
+		if (normalSum > - 0.000001) { // No support for 3D yet
 			sideSign [ 0 ] = 1;
 			sideSign [ 1 ] = -1;
 		} else {
