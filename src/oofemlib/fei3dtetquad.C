@@ -99,6 +99,7 @@ void
 FEI3dTetQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatMatrix jacobianMatrix;
+    FloatMatrix jinv;
     FloatMatrix dNdxi;
     FloatMatrix coords(10,3);
     this->evaldNdxi(dNdxi, lcoords, cellgeo);
@@ -109,7 +110,8 @@ FEI3dTetQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
         coords.at(i,3) = c->at(3);
     }
     jacobianMatrix.beProductOf(dNdxi, coords);
-    jacobianMatrix.solveForRhs(dNdxi, answer);
+    jinv.beInverseOf(jacobianMatrix);
+    answer.beProductOf(jinv, dNdxi);
 }
 
 void
