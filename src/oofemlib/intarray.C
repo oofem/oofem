@@ -176,7 +176,7 @@ void IntArray :: checkBounds(int i) const
 #endif
 
 
-void IntArray :: resize(int n, int allocChunk)
+void IntArray :: resizeWithValues(int n, int allocChunk)
 {
 #ifdef DEBUG
     if ( allocChunk < 0 ) {
@@ -195,7 +195,7 @@ void IntArray :: resize(int n, int allocChunk)
     int *newValues = (int*)malloc(allocatedSize * sizeof(int));
 #ifdef DEBUG
     if ( !newValues ) {
-        OOFEM_FATAL2("FloatArray :: resize - Failed in allocating %d doubles", allocatedSize);
+        OOFEM_FATAL2("FloatArray :: resizeWithValues - Failed in allocating %d doubles", allocatedSize);
     }
 #endif
     memcpy(newValues, values, size * sizeof(int) );
@@ -204,6 +204,29 @@ void IntArray :: resize(int n, int allocChunk)
     if ( values ) free(values);
     values = newValues;
     size = n;
+}
+
+void IntArray :: resize(int n)
+{
+#if 1
+    // TO BE REMOVED:
+    this->resizeWithValues(n);
+    return;
+#endif
+    size = n;
+    if ( n <= allocatedSize ) {
+        memset(values, 0, size * sizeof(int) );
+        return;
+    }
+    allocatedSize = n;
+
+    if ( values ) free(values);
+    values = (int*)calloc(allocatedSize, sizeof(int));
+#ifdef DEBUG
+    if ( !values ) {
+        OOFEM_FATAL2("FloatArray :: resize - Failed in allocating %d doubles", allocatedSize);
+    }
+#endif
 }
 
 
