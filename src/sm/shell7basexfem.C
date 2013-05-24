@@ -488,117 +488,6 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
 
 
 
-#if 0
-void
-Shell7BaseXFEM :: computeStiffnessMatrixOpt(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
-{
-#if 1
-    this->computeStiffnessMatrixOpt(answer, rMode, tStep);
-    FloatMatrix test(8,8);
-    //test.beSubMatrixOf(answer,1,8,1,8);
-//    test.printYourself();
-
-#else 
-    int ndofs = this->giveNumberOfDofs();
-    answer.resize(ndofs, ndofs);
-    answer.zero();
-    
-    FloatMatrix temp;
-    FloatArray solVec;
-    
-    // Continuous part
-    this->giveUpdatedSolutionVector(solVec, tStep);
-    this->new_computeBulkTangentMatrix(temp, solVec, solVec, solVec, rMode, tStep);
-    IntArray ordering, activeDofs;
-    this->computeOrderingArray(ordering, activeDofs, 0, All);
-    answer.assemble(temp, ordering, ordering);
-
-
-    // Disccontinuous part
-    FloatMatrix tempRed;FloatMatrix tempRedT;
-    IntArray orderingJ, orderingK, activeDofsJ, activeDofsK;IntArray eiDofIdArray;
-    FloatArray solVecJ;FloatArray solVecK;
-    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
-        Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
-
-    #if 1
-        for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
-            if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
-                dei->giveEIDofIdArray(eiDofIdArray, j);
-                this->giveSolutionVector(solVecJ, eiDofIdArray, tStep);  
-
-                for ( int k = 1; k <= dei->giveNumberOfEnrichmentDomains(); k++ ) {
-                    if ( dei->isElementEnrichedByEnrichmentDomain(this, k) ) {
-                        dei->giveEIDofIdArray(eiDofIdArray, k);
-                        this->giveSolutionVector(solVecK, eiDofIdArray, tStep);  
-                        discComputeBulkTangentMatrix(temp, solVec, solVecJ, solVecK, rMode, tStep, dei, j, k);
-
-                        // Assemble part correpsonding to active dofs
-                        computeOrderingArray(orderingJ, activeDofsJ, j, All);
-                        computeOrderingArray(orderingK, activeDofsK, k, All);                
-                        tempRed.beSubMatrixOf(temp, activeDofsJ, activeDofsK);
-                        answer.assemble(tempRed, orderingJ, orderingK);
-
-                        // cohesive zone
-                        if( this->hasCohesiveZone() ) {
-                            this->computeCohesiveTangentAt(temp, tStep, solVec, solVecK, dei, k); // should be 2 inputs K,J
-                            // Assemble part correpsonding to active dofs
-                            tempRed.beSubMatrixOf(temp, activeDofsJ, activeDofsK);
-                            answer.assemble(tempRed, orderingJ, orderingK);
-                        }
-
-                    }
-                }
-            }
-        }
-
-
-        // First column and row
-        for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
-            if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
-                dei->giveEIDofIdArray(eiDofIdArray, j);
-                this->giveSolutionVector(solVecJ, eiDofIdArray, tStep);  
-                discComputeBulkTangentMatrix(temp, solVec, solVecJ, solVec, rMode, tStep, dei, j, 0);
-
-                // Assemble part correpsonding to active dofs
-                computeOrderingArray(orderingJ, activeDofsJ, j, All);
-
-                // First column K_{di,c}
-                tempRed.beSubMatrixOf(temp, activeDofsJ, activeDofs);
-                answer.assemble(tempRed, orderingJ, ordering);
-
-                // First row  K_{c,di} = K_{di,c}^T
-                tempRedT.beTranspositionOf(tempRed);
-                answer.assemble(tempRedT, ordering, orderingJ);       
-            } 
-        }
-
-
-        /*
-        // Cohesive zone model
-        for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
-            if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
-                
-                if( this->hasCohesiveZone() ) {
-                    FloatMatrix tangentCZ;
-                    this->computeCohesiveTangent(tangentCZ, tStep);
-                    answer.add(tangentCZ);
-                }
-            }
-        }
-        */
-    }
-    //answer.printYourself();
-
-    #endif
-    test.beSubMatrixOf(answer,1,8,1,8);
-    test.printYourself();
-#endif
-}
-#endif
-
-
-
 //---------------------------------------------
 // Optimized version
 void
@@ -677,16 +566,16 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
         }
     }
 
-    FloatMatrix Kcoh;
-            
     // Cohesive zones
+#if 0
+    FloatMatrix Kcoh;
     if ( this->hasCohesiveZone() ) {
         this->computeCohesiveTangent(Kcoh, tStep);
         answer.add(Kcoh);
     }
-    
+#endif
 
-#if 1
+#if 0
     // Add contribution due to pressure load
     // not finished!
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
@@ -1142,11 +1031,11 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
                                          int iSurf, TimeStep *tStep, ValueModeType mode)
 {
     BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >( load );
+
     if ( surfLoad ) {
-        
         answer.resize( this->giveNumberOfDofs() );
         answer.zero();
-
+#if 0
         // Continuous part
         FloatArray solVec, force;
         this->giveUpdatedSolutionVector(solVec, tStep);
@@ -1155,18 +1044,14 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         IntArray activeDofs, ordering, eiDofIdArray;
         this->computeOrderingArray(ordering, activeDofs, 0, All);
         answer.assemble(force, ordering);     
-
-        //IntArray mask;
-        //this->giveSurfaceDofMapping(mask, 1);         // same dofs regardless of iSurf
-
-        /*
+       
         // Disccontinuous part
-        FloatArray componentsTemp, coordsTemp(1), solVecD;
-        coordsTemp.at(1) = 0.0; // 
-        surfLoad->computeValueAt(componentsTemp, tStep, coordsTemp, VM_Total);
+
+        FloatArray componentsTemp, solVecD;
+
         double xi = 0.0; // defaults to geometric midplane
-        if ( componentsTemp.giveSize() == 2 ) {
-            xi = componentsTemp.at(2);   // use the 8th component to store the-xi coord where the load acts
+        if ( ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( load ) ) {
+            xi = pLoad->giveLoadOffset();
         }
         
         FloatArray temp;
@@ -1190,7 +1075,7 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
                 }
             }
         }
-        */
+#endif
         return;
     } else {
         _error("Shell7Base :: computeSurfaceLoadVectorAt: load type not supported");

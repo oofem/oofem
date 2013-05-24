@@ -1441,35 +1441,39 @@ void
 Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const int iSurf, BoundaryLoad *surfLoad, TimeStep *tStep)
 {
     // Computes pressure loading. Acts normal to the current (deformed) surface.
-
-    // Should be special integration rule for top and bottom surface!!
-    IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];   // rule #2 for mid-plane integration only
-    GaussPoint *gp;
-
-    FloatMatrix N, B;
-    FloatArray Fp, fp, genEps, lCoords;
-
+    ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( surfLoad );
+    IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];   // rule #2 for surface integration
+    
+    FloatMatrix N, B, lambda;
+    FloatArray Fp, fp, genEps, genEpsC, lCoords, traction, solVecC;
     answer.resize( Shell7Base :: giveNumberOfDofs() );
     answer.zero();
+    double zeta = this->giveGlobalZcoord(pLoad->giveLoadOffset());
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
-        lCoords = *gp->giveCoordinates();
+        IntegrationPoint *ip = iRule->getIntegrationPoint(i);
+        lCoords = *ip->giveCoordinates();
         this->computeBmatrixAt(lCoords, B);
         this->computeNmatrixAt(lCoords, N);
-        genEps.beProductOf(B, solVec);        // [dxdxi, dmdxi, m, dgamdxi, gam]^T
+        this->giveUpdatedSolutionVector(solVecC, tStep);
+        genEpsC.beProductOf(B, solVecC);       
+        this->computePressureForceAt(ip, traction, iSurf, genEpsC, surfLoad, tStep);
+      
+        genEps.beProductOf(B, solVec);
+        this->computeLambdaNMatrix(lambda, genEps, zeta);
+        fp.beTProductOf(lambda,traction);
 
-        this->computePressureForceAt(gp, fp, iSurf, genEps, surfLoad, tStep);
-        double xi = 0.0;
-        double dA = this->computeAreaAround(gp, xi);
+        double xi = pLoad->giveLoadOffset();
+        double dA = this->computeAreaAround(ip, xi);
         Fp.beTProductOf(N, fp);
         Fp.times(dA);
-        answer.add(Fp);
+        //answer.add(dA,Fp);
+        answer.assemble(Fp, this->giveOrdering(All));
     }
 }
 
 
 void
-Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &answer, const int iSurf, FloatArray genEps, BoundaryLoad *surfLoad, TimeStep *tStep)
+Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &traction, const int iSurf, FloatArray genEps, BoundaryLoad *surfLoad, TimeStep *tStep)
 {
     // Computes pressure loading. Acts normal to the current (deformed) surface.
     //@todo traction load should be moved outside this method
@@ -1478,7 +1482,7 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &answer, const i
         _error("computePressureForceAt: incompatible load surface must be 0 for this element");
     }
 
-    FloatArray load, traction;
+    FloatArray load;
     if ( ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( surfLoad ) ) {
         FloatMatrix gcov; 
         FloatArray g1, g2;
@@ -1486,6 +1490,7 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &answer, const i
         lcoords.at(1) = gp->giveCoordinate(1);
         lcoords.at(2) = gp->giveCoordinate(2);
         lcoords.at(3) = pLoad->giveLoadOffset();
+
         this->evalCovarBaseVectorsAt(lcoords, gcov, genEps); 
         g1.beColumnOf(gcov,1);
         g2.beColumnOf(gcov,2);
@@ -1500,12 +1505,12 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &answer, const i
         _error("computePressureForceAt: incompatible load type");
     }
     
-    answer.resize(7);
-    answer.zero();
-    FloatMatrix lambda;
-    
-    this->computeLambdaNMatrix(lambda, genEps, zeta);
-    answer.beTProductOf(lambda,traction);
+    //answer.resize(7);
+    //answer.zero();
+    //FloatMatrix lambda;
+    //
+    //this->computeLambdaNMatrix(lambda, genEps, zeta);
+    //answer.beTProductOf(lambda,traction);
 
 }
 
