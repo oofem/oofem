@@ -686,7 +686,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
     }
     
 
-#if 0
+#if 1
     // Add contribution due to pressure load
     // not finished!
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
@@ -696,60 +696,58 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
         int iSurf = this->boundaryLoadArray.at(2 * k);         // load_id
         Load *load = this->domain->giveLoad(load_number);
 
-        if ( dynamic_cast< ConstantPressureLoad * >( load ) ) {
+        if ( ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( load ) ) {
             FloatMatrix K_pressure;
 
-            // Continuous part
-            //answer.assemble(KCC, orderingC, orderingC);            
-            this->computePressureTangentMatrix(KCC, load, iSurf, tStep);
-            
-            answer.assemble(KCC, orderingC, orderingC);
+            IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];
 
-            //IntegrationPoint *ip = iRule->getIntegrationPoint(i);
-            // Discontinuous part
-            for ( int m = 1; m <= this->xMan->giveNumberOfEnrichmentItems(); m++ ) { // Only one is supported at the moment
-                if ( Delamination *dei = dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(m) ) ) {
-                    int numED = dei->giveNumberOfEnrichmentDomains();
 
-                    for ( int j = 1; j <= numED; j++ ) {
-                        if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
-                            double xi0J = dei->enrichmentDomainXiCoords.at(j);
-                            //dei->giveEIDofIdArray(eiDofIdArray, j);
-                            //this->giveSolutionVector(solVecJ, eiDofIdArray, tStep);  
-                            //this->computePressureTangentMatrixDis
+            for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+                IntegrationPoint *ip = iRule->getIntegrationPoint(i);
+                //this->discComputeBulkTangentMatrix(KCC, KCD, KDD, ip, mat, layer, tStep);
+                this->computePressureTangentMatrixDis(KCC, KCD, KDD, ip, load, iSurf, tStep);
+                // Continuous part
+                answer.assemble(KCC, orderingC, orderingC);
 
-                            IntArray &orderingJ = orderingArrays[j-1];
-                            IntArray &activeDofsJ = activeDofsArrays[j-1];
+                // Discontinuous part
+                for ( int m = 1; m <= this->xMan->giveNumberOfEnrichmentItems(); m++ ) { // Only one is supported at the moment
+                    if ( Delamination *dei = dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(m) ) ) {
+                        int numED = dei->giveNumberOfEnrichmentDomains();
 
-                            // con-dis & dis-con
-                            if ( ip->giveCoordinate(3) > xi0J ) {
-                                tempRed.beSubMatrixOf(KCD, activeDofsC, activeDofsJ);
-                                answer.assemble(tempRed, orderingC, orderingJ);
-                                tempRedT.beTranspositionOf(tempRed);
-                                answer.assemble(tempRedT, orderingJ, orderingC);
-                            }
+                        for ( int j = 1; j <= numED; j++ ) {
+                            if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
+                                double xi0J = dei->enrichmentDomainXiCoords.at(j);
+                                IntArray &orderingJ = orderingArrays[j-1];
+                                IntArray &activeDofsJ = activeDofsArrays[j-1];
 
-                            // dis-dis
-                            for ( int k = 1; k <= dei->giveNumberOfEnrichmentDomains(); k++ ) {
-                                if ( dei->isElementEnrichedByEnrichmentDomain(this, k) ) {
-                                    double xi0K = dei->enrichmentDomainXiCoords.at(k);
-                                    //dei->giveEIDofIdArray(eiDofIdArray, k);
-                                    //this->giveSolutionVector(solVecK, eiDofIdArray, tStep);  
+                                // con-dis & dis-con
+                                if ( pLoad->giveLoadOffset() > xi0J ) {
+                                    tempRed.beSubMatrixOf(KCD, activeDofsC, activeDofsJ);
+                                    answer.assemble(tempRed, orderingC, orderingJ);
+                                    tempRedT.beTranspositionOf(tempRed);
+                                    answer.assemble(tempRedT, orderingJ, orderingC);
+                                }
 
-                                    if ( ip->giveCoordinate(3) > xi0J  &&   ip->giveCoordinate(3) > xi0K  ) {
-                                        IntArray &orderingK = orderingArrays[k-1];
-                                        IntArray &activeDofsK = activeDofsArrays[k-1];
-                                        tempRed.beSubMatrixOf(KDD, activeDofsJ, activeDofsK);
-                                        answer.assemble(tempRed, orderingJ, orderingK);
+                                // dis-dis
+                                for ( int k = 1; k <= dei->giveNumberOfEnrichmentDomains(); k++ ) {
+                                    if ( dei->isElementEnrichedByEnrichmentDomain(this, k) ) {
+                                        double xi0K = dei->enrichmentDomainXiCoords.at(k);
+                                        if ( pLoad->giveLoadOffset() > xi0J  &&   pLoad->giveLoadOffset() > xi0K  ) {
+                                            IntArray &orderingK = orderingArrays[k-1];
+                                            IntArray &activeDofsK = activeDofsArrays[k-1];
+                                            tempRed.beSubMatrixOf(KDD, activeDofsJ, activeDofsK);
+                                            answer.assemble(tempRed, orderingJ, orderingK);
+                                        }
                                     }
                                 }
+
+
                             }
 
-
                         }
-
                     }
                 }
+
             }
             
 
@@ -854,58 +852,80 @@ Shell7BaseXFEM :: computeLambdaNMatrixDis(FloatMatrix &lambda_xd, double zeta)
 
 
 void
-Shell7BaseXFEM :: computePressureTangentMatrixDis(FloatMatrix &answer, FloatArray &solVecJ, FloatArray &solVecK, Load *load, const int iSurf, TimeStep *tStep)
+Shell7BaseXFEM :: computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix &KCD, FloatMatrix &KDD, IntegrationPoint *ip, Load *load, const int iSurf, TimeStep *tStep)
 {
     // Computes tangent matrix associated with the linearization of pressure loading. Assumes constant pressure.
-    IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];   // rule #2 for surface integration
     ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( load );
     
     FloatMatrix N, B, NLB, L(7, 18), gcov, W1, W2;
     FloatArray lcoords(3), solVec, pressure;
     FloatArray g1, g2, genEps, genEpsJ, genEpsK;
-    FloatMatrix lambdaG [ 3 ], lambdaN;
-
+    FloatMatrix lambdaGC [ 3 ], lambdaNC, lambdaGD [ 3 ], lambdaND;
     double xi   = pLoad->giveLoadOffset();
     double zeta = this->giveGlobalZcoord(xi);
     this->giveUpdatedSolutionVector(solVec, tStep);
-
+    // compute w1,w2, KC
     int ndof = Shell7Base :: giveNumberOfDofs();
-    answer.resize(ndof, ndof);
-    answer.zero();
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-        IntegrationPoint *ip = iRule->getIntegrationPoint(i);
-        lcoords.at(1) = ip->giveCoordinate(1);
-        lcoords.at(2) = ip->giveCoordinate(2);
-        lcoords.at(3) = xi;     // local coord where load is applied
 
-        this->computeNmatrixAt(lcoords, N);
-        this->computeBmatrixAt(lcoords, B);
-        genEpsJ.beProductOf(B, solVecJ);     
-        genEpsK.beProductOf(B, solVecK);     
 
-        // Traction tangent, L =  lambdaN * ( W2*lambdaG_1 - W1*lambdaG_2  ) 
-        load->computeValueAt(pressure, tStep, * ( ip->giveCoordinates() ), VM_Total);        // pressure component   
-        this->evalCovarBaseVectorsAt(lcoords, gcov, genEps);
-        g1.beColumnOf(gcov,1);
-        g2.beColumnOf(gcov,2);
-        W1 = this->giveAxialMatrix(g1);
-        W2 = this->giveAxialMatrix(g2);
+    lcoords.at(1) = ip->giveCoordinate(1);
+    lcoords.at(2) = ip->giveCoordinate(2);
+    lcoords.at(3) = xi;     // local coord where load is applied
+
+    this->computeNmatrixAt(lcoords, N);
+    this->computeBmatrixAt(lcoords, B);
+    genEps.beProductOf(B, solVec);  
+
+    
+    FloatMatrix LCC(18,18), LCD(18,18), LDD(18,18); 
+    LCC.zero(); LCD.zero(); LDD.zero();
         
-        this->computeLambdaGMatrices(lambdaG, genEpsK, zeta);
-        this->computeLambdaNMatrix(lambdaN, genEpsJ, zeta);
-        FloatMatrix W2L, W1L;
-        W2L.beProductOf(W2,lambdaG[0]);
-        W1L.beProductOf(W1,lambdaG[1]);
-        W2L.subtract(W1L);
-        L.beTProductOf(lambdaN, W2L);
-        L.times( -pressure.at(1) );
+    //(xc+xd)*(g1xg2)=xc*g1xg2 + xd*g1xg2 -> xc*(W2*Dg1 - W1*Dg2) + xd*(W2*Dg1 - W1*Dg2)
+    // Traction tangent, L =  lambdaN * ( W2*lambdaG_1 - W1*lambdaG_2  ) 
+    load->computeValueAt(pressure, tStep, * ( ip->giveCoordinates() ), VM_Total);        // pressure component   
+    this->evalCovarBaseVectorsAt(lcoords, gcov, genEps);
+    g1.beColumnOf(gcov,1);
+    g2.beColumnOf(gcov,2);
+    W1 = this->giveAxialMatrix(g1);
+    W2 = this->giveAxialMatrix(g2);
+        
+    this->computeLambdaGMatrices(lambdaGC, genEps, zeta);
+    this->computeLambdaNMatrix(lambdaNC, genEps, zeta);
+    this->computeLambdaGMatricesDis(lambdaGD, zeta);
+    this->computeLambdaNMatrixDis(lambdaND, zeta);
+
+    FloatMatrix W2L, W1L;
+    W2L.beProductOf(W2,lambdaGC[0]);
+    W1L.beProductOf(W1,lambdaGC[1]);
+    W2L.subtract(W1L);
+    LCC.beTProductOf(lambdaNC, W2L);
+    LCC.times( -pressure.at(1) );
+
+    W2L.beProductOf(W2,lambdaGD[0]);
+    W1L.beProductOf(W1,lambdaGD[1]);
+    W2L.subtract(W1L);
+    LCD.beTProductOf(lambdaNC, W2L);
+    LCD.times( -pressure.at(1) );
+
+    W2L.beProductOf(W2,lambdaGD[0]);
+    W1L.beProductOf(W1,lambdaGD[1]);
+    W2L.subtract(W1L);
+    LDD.beTProductOf(lambdaND, W2L);
+    LDD.times( -pressure.at(1) );
 
 
-        // Tangent matrix (K = N^T*L*B*dA)
-        this->computeTripleProduct(NLB, N, L, B);
-        double dA = this->computeAreaAround(ip, xi);
-        answer.add(dA, NLB);
-    }
+    FloatMatrix KCCtemp, KCDtemp, KDDtemp;
+    this->computeTripleProduct(KCCtemp, N, LCC, B );    
+    this->computeTripleProduct(KCDtemp, N, LCD, B );    
+    this->computeTripleProduct(KDDtemp, N, LDD, B );    
+    
+    int ndofs = Shell7Base :: giveNumberOfDofs();
+    KCC.resize(ndofs,ndofs); KCD.resize(ndofs,ndofs); KDD.resize(ndofs,ndofs); 
+    KCC.zero(); KCD.zero(); KDD.zero();
+    const IntArray &ordering = this->giveOrdering(All);
+    KCC.assemble(KCCtemp, ordering, ordering);
+    KCD.assemble(KCDtemp, ordering, ordering);
+    KDD.assemble(KDDtemp, ordering, ordering);
 }
 
 void

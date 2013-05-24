@@ -120,7 +120,7 @@ protected:
     void computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep);
     void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep, FloatArray &solVecD, Delamination *dei, int enrichmentDomainNumber);
 
-    void computePressureTangentMatrixDis(FloatMatrix &answer, FloatArray &solVecJ, FloatArray &solVecK, Load *load, const int iSurf, TimeStep *tStep);
+    void computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix &KCD, FloatMatrix &KDD, IntegrationPoint *ip, Load *load, const int iSurf, TimeStep *tStep);
 
     // External loads
     virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode);
