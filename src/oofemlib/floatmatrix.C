@@ -91,6 +91,7 @@ extern void daxpy_(const int *n, const double *alpha, const double *x, const int
 }
 #endif
 
+
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
 #endif
@@ -476,7 +477,6 @@ void FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &
 void FloatMatrix :: beNMatrixOf(const FloatArray &n, int nsd)
 {
     this->resize(nsd, n.giveSize()*nsd);
-    this->zero();
     for (int i = 0; i < n.giveSize(); ++i) {
         for (int j = 0; j < nsd; ++j) {
             (*this)(j, i*nsd+j) = n(i);
@@ -680,7 +680,6 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
 {
     if ( !this->isNotEmpty() ) {
         this->resize(a.nColumns, b.nColumns);
-        this->zero();
     }
 
     for ( int i = 1; i <= nRows; i++ ) {
@@ -700,7 +699,6 @@ void FloatMatrix :: plusDyadSymmUpper(const FloatArray &a, double dV)
 {
     if ( !this->isNotEmpty() ) {
         this->resize(a.giveSize(), a.giveSize());
-        this->zero();
     }
 #ifdef __LAPACK_MODULE
     int inc = 1;
@@ -726,7 +724,6 @@ void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b,
 {
     if ( !this->isNotEmpty() ) {
         this->resize(a.nColumns, b.nColumns);
-        this->zero();
     }
 #ifdef __LAPACK_MODULE
     double beta = 1.;
@@ -753,7 +750,6 @@ void FloatMatrix :: plusDyadUnsym(const FloatArray &a, const FloatArray &b, doub
 {
     if ( !this->isNotEmpty() ) {
         this->resize(a.giveSize(), b.giveSize());
-        this->zero();
     }
 #ifdef __LAPACK_MODULE
     int inc = 1;
@@ -847,7 +843,6 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         //
         double piv, linkomb;
         FloatMatrix tmp = src;
-        this->zero();
         // initialize answer to be unity matrix;
         for ( int i = 1; i <= nRows; i++ ) {
             this->at(i, i) = 1.0;
@@ -1290,7 +1285,6 @@ void FloatMatrix :: bePinvID()
 // and the inverse scaling matrix Pinv
 {
     this->resize(6, 6);
-    this->zero();
     values [ 0 ] = values [ 7 ] = values [ 14 ] = 2. / 3.;
     values [ 1 ] = values [ 2 ] = values [ 6 ] = values [ 8 ] = values [ 12 ] = values [ 13 ] = -1. / 3.;
     values [ 21 ] = values [ 28 ] = values [ 35 ] = 0.5;
@@ -1302,6 +1296,9 @@ void FloatMatrix :: resize(int rows, int columns)
 // resizes receiver, all data will be lost
 //
 {
+    this->nRows = rows;
+    this->nColumns = columns;
+
     if ( rows * columns > allocatedSize ) {
         // memory realocation necessary
         if ( values ) {
@@ -1312,11 +1309,8 @@ void FloatMatrix :: resize(int rows, int columns)
         ///@todo Should we set all values to zeros or not?
         values = (double*)calloc(allocatedSize, sizeof(double));
     } else {
-        // reuse previously allocated space
+        memset(values, 0, rows*columns*sizeof(double) );
     }
-
-    this->nRows = rows;
-    this->nColumns = columns;
 }
 
 
@@ -1335,8 +1329,6 @@ void FloatMatrix :: resizeWithData(int rows, int columns)
 
         allocatedSize = rows * columns; // REMEMBER NEW ALLOCATED SIZE
         values = (double*)calloc(allocatedSize, sizeof(double));
-    } else {
-        // reuse previously allocated space
     }
 
     this->nRows = rows;

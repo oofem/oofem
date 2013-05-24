@@ -456,8 +456,7 @@ public:
     /**
      * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly.
-     * Warning: after this operation array values are in undefined state, programmer should
-     * zero receiver is necessary.
+     * Content is always zeroed.
      * @param rows New number of rows.
      * @param cols New number of columns.
      */
@@ -470,6 +469,7 @@ public:
     void resizeWithData(int, int);
     /**
      * Resizing that enforces reallocation of memory.
+     * Data is zeroed.
      * @param r Number of rows.
      * @param c Number of columns.
      */

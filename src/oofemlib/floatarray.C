@@ -554,27 +554,26 @@ void FloatArray :: resizeWithValues(int n, int allocChunk)
 
 void FloatArray :: resize(int n)
 {
+#if 1
+    // TO BE REMOVED:
+    this->resizeWithValues(n);
+    return;
+#endif
     // This will be changed, either to calloc or malloc without copying the old data.
     // For now it is left as the old default implementation until code using these classes are properly adjusted.
-#if 1
-    this->resizeWithValues(n);
-#else
-    ///@todo Decide on if we should zero it unconditionally (memset is pretty cheap anyway), or just leave it, and leave calling zero() to the caller.
     size = n;
     if ( n <= allocatedSize ) {
-        //memset(this->values, 0, this->size * sizeof(double) );
+        memset(this->values, 0, this->size * sizeof(double) );
         return;
     }
     allocatedSize = n;
 
     if ( values ) free(values);
-    values = (double*)malloc(allocatedSize * sizeof(double));
-    //values = (double*)calloc(allocatedSize, sizeof(double));
+    values = (double*)calloc(allocatedSize, sizeof(double));
 #ifdef DEBUG
     if ( !values ) {
         OOFEM_FATAL2("FloatArray :: simple - Failed in allocating %d doubles", n);
     }
-#endif
 #endif
 }
 
