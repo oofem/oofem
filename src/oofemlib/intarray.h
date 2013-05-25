@@ -277,19 +277,6 @@ public:
      * @param pos Position to erase.
      */
     void erase(int pos);
-
-    /**
-     * Add given array to receiver values starting at position si.
-     * @param src Array to add from.
-     * @param si Index to start adding from.
-     */
-    void addSubVector(const IntArray &src, int si);
-    /**
-     * Copy given array to receiver values starting at position si.
-     * @param src Array to copy from.
-     * @param si Index to start copying from.
-     */
-    void copySubVector(const IntArray &src, int si);
     /**
      * Sets the array to be a sequence of values.
      * @param n Number of integers in the sequence to follow.
