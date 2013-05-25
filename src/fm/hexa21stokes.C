@@ -368,7 +368,6 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
     answer.assemble(GDp, this->momentum_ordering, this->conservation_ordering);
     answer.assemble(GTDvT, this->conservation_ordering, this->momentum_ordering);
     answer.assemble(C, this->conservation_ordering);
-    OOFEM_ERROR("STOP!");
 }
 
 FEInterpolation *Hexa21Stokes :: giveInterpolation()
