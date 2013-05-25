@@ -209,7 +209,7 @@ Tetrah1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArra
     } else {
         FloatArray helpCoords = coords;
 
-        helpCoords.resize(gsize);
+        helpCoords.resizeWithValues(gsize);
         dist = helpCoords.distance(gcoords);
     }
 

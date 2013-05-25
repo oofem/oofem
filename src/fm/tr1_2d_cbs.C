@@ -716,7 +716,7 @@ TR1_2D_CBS :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArra
     } else {
         FloatArray helpCoords = coords;
 
-        helpCoords.resize(gsize);
+        helpCoords.resizeWithValues(gsize);
         dist = helpCoords.distance(gcoords);
     }
 
