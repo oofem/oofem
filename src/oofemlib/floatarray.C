@@ -54,6 +54,16 @@
  #include "combuff.h"
 #endif
 
+#define RESIZE(n) \
+    { \
+        size = n; \
+        if ( n > allocatedSize ) { \
+            allocatedSize = n; \
+            if ( values ) free(values); \
+            values = (double*)malloc(allocatedSize * sizeof(double)); \
+        } \
+    }
+
 #ifdef __LAPACK_MODULE
 extern "C" {
 extern void dgemv_(const char *trans, const int *m, const int *n, const double *alpha, const double *a, const int *lda, const double *x,
@@ -112,7 +122,7 @@ FloatArray &
 FloatArray :: operator = ( const FloatArray & src )
 {
     if ( this != & src ) { // beware of s=s;
-        this->resize(src.size);
+        RESIZE(src.size);
         memcpy(this->values, src.values, size * sizeof(double));
     }
 
@@ -145,7 +155,7 @@ FloatArray :: setValues(int n, ...)
 {
     va_list vl;
     va_start(vl,n);
-    this->resize(n);
+    RESIZE(n);
     for (int i = 0; i < n; i++ ) {
         this->values [ i ] = va_arg(vl, double);
     }
@@ -156,7 +166,7 @@ FloatArray :: setValues(int n, ...)
 void
 FloatArray :: beScaled(double s, const FloatArray &b)
 {
-    this->resize(b.size);
+    RESIZE(b.size);
     for ( int i = 0; i < this->size; ++i ) {
         this->values [ i ] = s * b.values [ i ];
     }
@@ -228,7 +238,7 @@ void FloatArray :: subtract(const FloatArray &src)
     }
 
     if ( !size ) {
-        this->resize(src.size);
+        RESIZE(src.size);
         for ( int i = 0; i < this->size; ++i ) {
             this->values [ i ] = -src.values [ i ];
         }
@@ -260,7 +270,7 @@ void FloatArray :: beMaxOf(const FloatArray &a, const FloatArray &b)
 
 #  endif
 
-    this->resize(n);
+    RESIZE(n);
     for ( int i = 0; i < n; i++ ) {
         this->values [ i ] = max( a(i), b(i) );
     }
@@ -278,7 +288,7 @@ void FloatArray :: beMinOf(const FloatArray &a, const FloatArray &b)
 
 #  endif
 
-    this->resize(n);
+    RESIZE(n);
     for ( int i = 0; i < n; i++ ) {
         this->values [ i ] = min( a(i), b(i) );
     }
@@ -293,7 +303,7 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b)
     }
 
 #endif
-    this->resize(a.size);
+    RESIZE(a.size);
     for ( int i = 0; i < this->size; ++i ) {
         this->values [ i ] = a.values [ i ] - b.values [ i ];
     }
@@ -307,7 +317,7 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b, int 
     }
 
 #endif
-    this->resize(n);
+    RESIZE(n);
     for ( int i = 0; i < n; ++i ) {
         this->values [ i ] = a.values [ i ] - b.values [ i ];
     }
@@ -327,7 +337,7 @@ void FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx)
 #endif
 
     int n = indx.giveSize();
-    this->resize(n);
+    RESIZE(n);
     for ( int i = 1; i <= n; i++ ) {
         this->at(i) = src.at( indx.at(i) ) ;
     }
@@ -341,7 +351,7 @@ void FloatArray :: addSubVector(const FloatArray &src, int si)
     si--;
     reqSize = si + n;
     if ( this->giveSize() < reqSize ) {
-        this->resize(reqSize);
+        this->resizeWithValues(reqSize);
     }
 
     for ( int i = 1; i <= n; i++ ) {
@@ -359,7 +369,7 @@ void FloatArray :: beVectorProductOf(const FloatArray &v1, const FloatArray &v2)
     }
 #  endif
 
-    this->resize(3);
+    RESIZE(3);
 
     this->at(1) = v1.at(2) * v2.at(3) - v1.at(3) * v2.at(2);
     this->at(2) = v1.at(3) * v2.at(1) - v1.at(1) * v2.at(3);
@@ -517,7 +527,7 @@ void FloatArray :: checkSizeTowards(const IntArray &loc)
     }
 
     if ( high > size ) {   // receiver must be expanded
-        this->resize(high);
+        RESIZE(high);
     }
 }
 
@@ -554,11 +564,19 @@ void FloatArray :: resizeWithValues(int n, int allocChunk)
 
 void FloatArray :: resize(int n)
 {
+#if 0
+    // Check if code is calling resize instead of resizeWithValues with minumum false-positives:
+    if ( n != 0 && size != 0 && this->computeSquaredNorm() > 0 ) {
+        this->printYourself();
+        printf("check\n");
+    }
+#endif
 #if 1
-    // TO BE REMOVED:
+    ///@todo To be removed:
     this->resizeWithValues(n);
     return;
 #endif
+
     // This will be changed, either to calloc or malloc without copying the old data.
     // For now it is left as the old default implementation until code using these classes are properly adjusted.
     size = n;
@@ -621,7 +639,7 @@ void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anA
     int nColumns = aMatrix.giveNumberOfColumns();
     int nRows = aMatrix.giveNumberOfRows();
 
-    this->resize( nRows );
+    RESIZE( nRows );
 
 #  ifdef DEBUG
     if ( aMatrix.giveNumberOfColumns() != anArray.giveSize() ) {
@@ -658,7 +676,7 @@ void FloatArray :: beTProductOf(const FloatMatrix &aMatrix, const FloatArray &an
     }
 
 #  endif
-    this->resize( nColumns );
+    RESIZE( nColumns );
 
 #ifdef __LAPACK_MODULE
     double alpha = 1., beta = 0.;
@@ -790,7 +808,7 @@ void FloatArray :: copySubVector(const FloatArray &src, int si)
     si--;
 
     int reqSize = si + src.size;
-    this->resize(reqSize);
+    this->resizeWithValues(reqSize);
  
     memcpy(values + si, src.values, src.size * sizeof(double));
 }
@@ -872,7 +890,7 @@ int FloatArray :: unpackFromCommBuffer(CommunicationBuffer &buff)
     // unpack size
     result &= buff.unpackInt(newSize);
     // resize yourself
-    this->resize(newSize);
+    RESIZE(newSize);
     result &= buff.unpackArray(this->values, newSize);
 
     return result;
@@ -1040,7 +1058,7 @@ void FloatArray :: beFullVectorForm(const FloatMatrix &aMatrix)
     }
 
 #  endif
-    this->resize(9);
+    RESIZE(9);
     this->at(1) = aMatrix.at(1,1); this->at(2) = aMatrix.at(2,2); this->at(3) = aMatrix.at(3,3);
     this->at(4) = aMatrix.at(2,3); this->at(5) = aMatrix.at(1,3); this->at(6) = aMatrix.at(1,2);
     this->at(7) = aMatrix.at(3,2); this->at(8) = aMatrix.at(3,1); this->at(9) = aMatrix.at(2,1);
@@ -1056,7 +1074,7 @@ void FloatArray :: beReducedVectorForm(const FloatMatrix &aMatrix)
 
 #  endif
     
-    this->resize(6);
+    RESIZE(6);
     this->at(1) = aMatrix.at(1,1); this->at(2) = aMatrix.at(2,2); this->at(3) = aMatrix.at(3,3);
     this->at(4) = 0.5*( aMatrix.at(2,3) + aMatrix.at(3,2) );
     this->at(5) = 0.5*( aMatrix.at(1,3) + aMatrix.at(3,1) );
