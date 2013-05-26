@@ -59,6 +59,33 @@ Shell7BaseXFEM :: checkConsistency()
         this->czMat = this->giveDomain()->giveMaterial(this->czMatNum);
     }
 
+    // check if defined xi-coords in delamination EI corresponds to actual layer boundaries
+    //@todo should be improved
+#if 1
+    int numLayers = this->layeredCS->giveNumberOfLayers();
+    FloatArray interfaceXi(numLayers-1), delamXiCoords;
+    this->layeredCS->giveInterfaceXiCoords(interfaceXi);
+    
+    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
+        EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
+        if ( Delamination *dei = dynamic_cast< Delamination * >( ei ) ) {
+            dei->giveActiveDelaminationXiCoords(delamXiCoords, this);
+            for ( int j = 1; j <= delamXiCoords.giveSize(); j++ ) {
+            bool flag = false;
+                for ( int k = 1; k <= interfaceXi.giveSize(); k++ ) {
+                    if ( abs(delamXiCoords.at(j)-interfaceXi.at(k)) < 1.0e-3 ) {
+                        flag = true;
+                    }
+                    
+                }
+                if ( !flag ) {
+                    OOFEM_ERROR2("checkConsistency: Delamination xi-coord (%e) does not correspond to a layer interface (check input).", delamXiCoords.at(j));
+                }
+                
+            }
+        }
+    }
+#endif
     return 1;
 }
 
@@ -500,9 +527,8 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
     
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     
     FloatMatrix tempRed, tempRedT;
-    FloatMatrix KCC, KCD, KDC, KDD;
+    FloatMatrix KCC, KCD, KDD;
     IntArray orderingC, activeDofsC;
-    IntArray orderingJ, orderingK, activeDofsJ, activeDofsK;
     this->computeOrderingArray(orderingC, activeDofsC, 0, All);
     std::vector<IntArray> orderingArrays;
     std::vector<IntArray> activeDofsArrays;
@@ -514,8 +540,9 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             IntegrationPoint *ip = iRule->getIntegrationPoint(i);
             this->discComputeBulkTangentMatrix(KCC, KCD, KDD, ip, mat, layer, tStep);
+            double xi = ip->giveCoordinate(3);
 
-            // Continuous part
+            // Continuous part K_{c,c}
             answer.assemble(KCC, orderingC, orderingC);
 
             // Discontinuous part
@@ -526,32 +553,30 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
                         orderingArrays.resize(numED);
                         activeDofsArrays.resize(numED);
                     }
+
                     for ( int j = 1; j <= numED; j++ ) {
                         if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
                             double xi0J = dei->enrichmentDomainXiCoords.at(j);
                             if( orderingArrays[j-1].giveSize() == 0 ) {
                                 this->computeOrderingArray( orderingArrays[j-1], activeDofsArrays[j-1], j, All);
                             }
-                            IntArray &orderingJ = orderingArrays[j-1];
-                            IntArray &activeDofsJ = activeDofsArrays[j-1];
-
-                            // con-dis & dis-con
-                            if ( ip->giveCoordinate(3) > xi0J ) {
-                                tempRed.beSubMatrixOf(KCD, activeDofsC, activeDofsJ);
-                                answer.assemble(tempRed, orderingC, orderingJ);
+                            
+                            // K_{c,dk} & K_{dk,c}
+                            if ( xi > xi0J ) {
+                                tempRed.beSubMatrixOf(KCD, activeDofsC, activeDofsArrays[j-1]);
+                                answer.assemble(tempRed, orderingC, orderingArrays[j-1]);
                                 tempRedT.beTranspositionOf(tempRed);
-                                answer.assemble(tempRedT, orderingJ, orderingC);
+                                answer.assemble(tempRedT, orderingArrays[j-1], orderingC);
                             }
 
-                            // dis-dis
-                            for ( int k = 1; k <= dei->giveNumberOfEnrichmentDomains(); k++ ) {
+                            // K_{dk,dl}
+                            for ( int k = 1; k <= numED; k++ ) {
                                 if ( dei->isElementEnrichedByEnrichmentDomain(this, k) ) {
                                     double xi0K = dei->enrichmentDomainXiCoords.at(k);
-                                    if ( ip->giveCoordinate(3) > xi0J  &&   ip->giveCoordinate(3) > xi0K  ) {
-                                        IntArray &orderingK = orderingArrays[k-1];
-                                        IntArray &activeDofsK = activeDofsArrays[k-1];
-                                        tempRed.beSubMatrixOf(KDD, activeDofsJ, activeDofsK);
-                                        answer.assemble(tempRed, orderingJ, orderingK);
+                                    if ( xi > xi0J  &&  xi > xi0K  ) {
+                                        tempRed.beSubMatrixOf(KDD, activeDofsArrays[j-1], activeDofsArrays[k-1]);
+                                        answer.assemble(tempRed, orderingArrays[j-1], orderingArrays[k-1]);
+                                        //tempRed.printYourself();
                                     }
                                 }
                             }
@@ -566,8 +591,9 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
         }
     }
 
+
     // Cohesive zones
-#if 0
+#if 1
     FloatMatrix Kcoh;
     if ( this->hasCohesiveZone() ) {
         this->computeCohesiveTangent(Kcoh, tStep);
@@ -575,9 +601,10 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
     }
 #endif
 
-#if 0
+
     // Add contribution due to pressure load
-    // not finished!
+#if 1
+
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
 
     for ( int k = 1; k <= nLoads; k++ ) {     // For each pressure load that is applied
@@ -1035,7 +1062,7 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
     if ( surfLoad ) {
         answer.resize( this->giveNumberOfDofs() );
         answer.zero();
-#if 0
+
         // Continuous part
         FloatArray solVec, force;
         this->giveUpdatedSolutionVector(solVec, tStep);
@@ -1046,7 +1073,7 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         answer.assemble(force, ordering);     
        
         // Disccontinuous part
-
+#if 1
         FloatArray componentsTemp, solVecD;
 
         double xi = 0.0; // defaults to geometric midplane

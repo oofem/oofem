@@ -140,7 +140,7 @@ IRResultType Inclusion :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, material, _IFT_Inclusion_material); 
     this->mat = this->giveDomain()->giveMaterial(material);
     this->numberOfEnrichmentFunctions = 1;
-    // Not sure this should be input at but instead be determined by the ei which describes the physical model /JB
+    // Not sure this should be an input paramter but should instead be determined by the ei which describes the physical model /JB
     //IR_GIVE_OPTIONAL_FIELD(ir, numberOfEnrichmentFunctions, _IFT_XfemManager_numberOfEnrichmentFunctions, "numberofenrichmentfunctions");
     return IRRT_OK;
 }
@@ -203,7 +203,8 @@ void
 EnrichmentItem :: giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber)
 {
     // Returns an array containing the dof Id's of the new enrichment dofs pertinent to the ei. 
-    // Note: the dof managers may not support these dofsall potential dof id's
+    // Note: the dof managers may not support all/any of these new potential dof id's. Eg. a 
+    // beam will not be able to account for a pressure dof. 
     IntArray *enrichesDofsWithIdArray = this->giveEnrichesDofsWithIdArray();
     int eiEnrSize = enrichesDofsWithIdArray->giveSize();
 
@@ -217,11 +218,12 @@ EnrichmentItem :: giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber)
 void
 EnrichmentItem :: computeDofManDofIdArray(IntArray &answer, DofManager *dMan, int enrichmentDomainNumber)
 {
-    // Gives an array containing the dofId's that should be created as new dofs (what dofs to enrich).
+    // Gives an array containing the dofId's that should be created as new dofs (which dofs to enrich).
     IntArray *enrichesDofsWithIdArray = this->giveEnrichesDofsWithIdArray();
     int eiEnrSize = enrichesDofsWithIdArray->giveSize();
     
-    // Go through the list of dofs that the EI supports and compare with the available dofs in the dofMan. 
+    // Go through the list of dofs that the EI supports and compare with the available dofs in the dofMan.
+    // If the dofMan has support for the particular dof add it to the list.
     // Store matches in dofMask
     IntArray dofMask(eiEnrSize); dofMask.zero();
     int count = 0; 
@@ -243,13 +245,11 @@ EnrichmentItem :: computeDofManDofIdArray(IntArray &answer, DofManager *dMan, in
 int 
 EnrichmentItem :: giveNumberOfEnrDofs() 
 { 
-    // returns the array of dofs a particular EI s
+    // returns the number of new xfem dofs a particular EI wants to add per regular dof
     int temp=0;
     for ( int i = 1; i <= this->giveNumberOfEnrichmentfunctions(); i++ ) { 
         EnrichmentFunction *ef = this->giveEnrichmentFunction(i);
-        // This is per regular dof
-        temp += ef->giveNumberOfDofs(); // = number of functions associated with a particular enrichment function, e.g. 4 for branch function.
-
+        temp += ef->giveNumberOfDofs(); // = number of functions associated with a particular enrichment function, e.g. 4 for the common branch functions.
     }
     return temp; 
 } 
@@ -266,7 +266,6 @@ Inclusion :: Inclusion(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem
 
 Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
 { 
-    //this->enrichesDofsWithIdArray->setValues(7, D_u, D_v, D_w, W_u, W_v, W_w, Gamma);
     this->enrichesDofsWithIdArray->setValues(6, D_u, D_v, D_w, W_u, W_v, W_w);
 }
 
@@ -293,6 +292,23 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+
+void 
+Delamination :: giveActiveDelaminationXiCoords(FloatArray &xiCoords, Element *element) 
+{
+    //AList<double> *xiCoordList;
+    int nDelam = this->giveNumberOfEnrichmentDomains(); // max possible number
+    int pos = 1;
+    xiCoords.resize(0);
+    for ( int i = 1; i <= nDelam; i++ ) {
+        if( this->isElementEnrichedByEnrichmentDomain(element, i) ) {
+            xiCoords.resizeWithValues(pos);
+            xiCoords.at(pos) = this->giveDelaminationXiCoord(i);
+            pos++;
+        } 
+    }
+    xiCoords.printYourself();
+};
 
 
 

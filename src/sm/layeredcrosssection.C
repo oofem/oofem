@@ -1157,6 +1157,21 @@ LayeredCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
 }
 
 
+void
+LayeredCrossSection :: giveInterfaceXiCoords(FloatArray &answer)
+{
+    // returns an array with the xi-coords corresponding to the boundaries where
+    // the layers meet (size = number of layers -1)
+
+    int numInterfaces = this->giveNumberOfLayers() - 1;
+    answer.resize(numInterfaces);
+    double totalThickness = this->computeIntegralThick();
+    for ( int i = 1; i <= numInterfaces; i++  ){
+        double midZ = this->giveLayerMidZ(i);
+        double interfaceZ  = midZ + this->giveLayerThickness(i)*0.5;
+        answer.at(i) = interfaceZ *(2.0/totalThickness);
+    }
+}
 
 void
 LayeredCrossSection :: setupLayeredIntegrationRule(IntegrationRule **&integrationRulesArray, Element *el, int numInPlanePoints)

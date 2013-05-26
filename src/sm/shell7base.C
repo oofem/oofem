@@ -324,7 +324,6 @@ void
 Shell7Base :: evalCovarBaseVectorsAt(FloatArray &lcoords, FloatMatrix &gcov, FloatArray &genEps)
 {
     FloatArray g1; FloatArray g2; FloatArray g3;
-    //double zeta = giveGlobalZcoord(gp);
     double zeta = giveGlobalZcoord(lcoords.at(3));
 
     FloatArray dxdxi1, dxdxi2, m, dmdxi1, dmdxi2;
@@ -756,21 +755,22 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
 
 
 FloatMatrix 
-Shell7Base :: giveAxialMatrix(const FloatArray &vec)
+Shell7Base :: giveAxialMatrix(const FloatArray &v)
 {
-    // skew-symmetric matrix
-    // W = [   0   g(3)  -g(2)
-    //       -g(3)   0    g(1)
-    //        g(2) -g(1)   0  ]
+    // creates the skew-symmetric matrix W defined such that 
+    // crossProduct(u,v) = W(u)*v
+    // W = [   0   v(3)  -v(2)
+    //      -v(3)   0     v(1)
+    //       v(2) -v(1)    0  ]
     //
     FloatMatrix answer(3,3);
     answer.zero();
-    answer.at(2, 3) =  vec.at(1);
-    answer.at(3, 2) = -vec.at(1);
-    answer.at(1, 3) = -vec.at(2);
-    answer.at(3, 1) =  vec.at(2);
-    answer.at(1, 2) =  vec.at(3);
-    answer.at(2, 1) = -vec.at(3);
+    answer.at(2, 3) =  v.at(1);
+    answer.at(3, 2) = -v.at(1);
+    answer.at(1, 3) = -v.at(2);
+    answer.at(3, 1) =  v.at(2);
+    answer.at(1, 2) =  v.at(3);
+    answer.at(2, 1) = -v.at(3);
     return answer;
 }
 

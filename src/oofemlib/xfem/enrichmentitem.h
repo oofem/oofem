@@ -177,6 +177,10 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     FloatArray enrichmentDomainXiCoords; 
+    double giveDelaminationXiCoord(int delamNum){
+        return this->enrichmentDomainXiCoords.at(delamNum);
+    }
+    void giveActiveDelaminationXiCoords(FloatArray &xiCoords, Element *element);
     std::list<std::pair<int, double> > delaminationXiCoordList;
     double giveDelaminationZCoord(int n, Element *element); 
 

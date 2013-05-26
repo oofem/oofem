@@ -170,6 +170,7 @@ public:
     double giveMidSurfaceXiCoordFromBottom() {
         return this->midSurfaceXiCoordFromBottom;
     }
+    void giveInterfaceXiCoords(FloatArray &answer);
 
     // identification and auxiliary functions
     virtual const char *giveInputRecordName() const { return _IFT_LayeredCrossSection_Name; }
