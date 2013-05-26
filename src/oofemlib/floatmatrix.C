@@ -699,7 +699,7 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
 
 #ifdef __LAPACK_MODULE
     double beta = 1.;
-    ///@todo We should determine which is the best choice overall. For large systems, a 4-way split is about optimal.
+    ///@todo We should determine which is the best choice overall. For large systems more block matrix operations is necessary.
     /// For smaller systems the overhead from function calls might be larger, but the overhead might be tiny, or using symmetry at all might be undesireable.
     if ( this->nRows < 20 ) {
         // Split the matrix into 2 columns, s1 + s2 = n ( = nRows = nColumns ).
@@ -710,21 +710,19 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
         // Second column block starting a memory position c * nRows
         dgemm_("t", "n", & this->nRows, & s2, & a.nRows, & dV, a.values, & a.nRows, &b.values[s1*b.nRows], & b.nRows, & beta, &this->values[s1*this->nRows], & this->nRows, a.nColumns, b.nColumns, this->nColumns);
     } else {
-        // Split the matrix into 4 columns, s1 + s2 + s3 + s4 = n ( = nRows = nColumns ).
-        int r1 = this->nRows >> 2;
-        int r2 = this->nRows >> 1;
-        int r3 = this->nRows - r1;
-        int r4 = this->nRows;
-
-        int s1 = r1;
-        int s2 = r2 - r1;
-        int s3 = r3 - r2;
-        int s4 = r4 - r3;
-
-        dgemm_("t", "n", & r1, & s1, & a.nRows, & dV, a.values, & a.nRows, &b.values[ 0*b.nRows], & b.nRows, & beta, &this->values[ 0*this->nRows], & this->nRows, a.nColumns, b.nColumns, this->nColumns);
-        dgemm_("t", "n", & r2, & s2, & a.nRows, & dV, a.values, & a.nRows, &b.values[r1*b.nRows], & b.nRows, & beta, &this->values[r1*this->nRows], & this->nRows, a.nColumns, b.nColumns, this->nColumns);
-        dgemm_("t", "n", & r3, & s3, & a.nRows, & dV, a.values, & a.nRows, &b.values[r2*b.nRows], & b.nRows, & beta, &this->values[r2*this->nRows], & this->nRows, a.nColumns, b.nColumns, this->nColumns);
-        dgemm_("t", "n", & r4, & s4, & a.nRows, & dV, a.values, & a.nRows, &b.values[r3*b.nRows], & b.nRows, & beta, &this->values[r3*this->nRows], & this->nRows, a.nColumns, b.nColumns, this->nColumns);
+        // Get suitable blocksize. Around 10 rows should be suitable (slightly adjusted to minimize number of blocks):
+        // Smaller blocks than ~10 didn't show any performance gains in my benchmarks. / Mikael
+        int block = (this->nRows - 1) / (this->nRows / 10) + 1;
+        int start = 0;
+        int end = block;
+        while ( start < this->nRows ) {
+            int s = end-start;
+            dgemm_("t", "n", & end, & s, & a.nRows, & dV, a.values, & a.nRows, &b.values[start*b.nRows], & b.nRows, & beta, &this->values[start*this->nRows], 
+                   & this->nRows, a.nColumns, b.nColumns, this->nColumns);
+            start = end;
+            end += block;
+            if ( end > this->nRows ) end = this->nRows;
+        }
     }
 #else
     for ( int i = 1; i <= nRows; i++ ) {
