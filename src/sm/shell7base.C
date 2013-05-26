@@ -2615,24 +2615,23 @@ Shell7Base :: computeInterLaminarStressesAt(int interfaceNum, TimeStep *tStep, s
 void
 Shell7Base :: evaluateFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep) 
 {
-    // Stress ordering (1, 5, 9, 6, 3, 2) = (xx, yy, zz, yz, xz, xy)
-    int numInterfaces = this->layeredCS->giveNumberOfLayers() - 1;
-    
     switch ( fc->giveType() ) {
-    
+
     case FC_MaxShearStress:
+        // Stress ordering (1, 5, 9, 6, 3, 2) = (xx, yy, zz, yz, xz, xy)
+        int numInterfaces = this->layeredCS->giveNumberOfLayers() - 1;
+        std::vector < FloatArray > interLamStresses;
         fc->quantities.resize(numInterfaces); // will overwrite this every time
-        for (int i = 1; i <= numInterfaces; i++ ) {
-            std::vector < FloatArray > interLamStresses;
-            this->computeInterLaminarStressesAt(i, tStep, interLamStresses); // all 6 components
+        for (int i = 1; i <= numInterfaces; i++ ) {    
+            this->computeInterLaminarStressesAt(i, tStep, interLamStresses); // all 6 components in each evaluation point (ip)
             int numEvalPoints = interLamStresses.size();
             fc->quantities[i-1].resize(numEvalPoints); // most often = numIP
             
             for ( int j = 1; j <= numEvalPoints; j++) {
                 FloatArray &values = fc->quantities[i-1][j-1]; // one resulting shear stress
                 FloatArray &vS = interLamStresses[j-1];        // Stress in eval point
-                values.resize(1);
-                values.at(1) = sqrt( vS.at(4)*vS.at(4) + vS.at(5)*vS.at(5) );
+                values.resize(1);                              // scalar measure in this case
+                values.at(1) = sqrt( vS.at(4)*vS.at(4) + vS.at(5)*vS.at(5) ); // components can't be right here? shouldn't it be a traction vector?
 
             }
         }

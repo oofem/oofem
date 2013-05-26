@@ -116,17 +116,19 @@ void
 FractureManager :: evaluateFailureCriterias(TimeStep *tStep)
 {
     // For element wise evaluation of failure criteria
+    /* Go through all elements and evaluate all failure criterias that are applicable to the given element.
+       Should maybe be applied to element sets instead  
+
+       How to know if a certain fc should be evaluated? what if the element has already failed? 
+    */
     this->needsUpdate = false;
-    Domain *domain;
-    domain = this->giveDomain();   
-    Element *el;
-    FailureCriteria *fc;
-    FailureCriteriaType type = FC_MaxShearStress;
-    for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
+    Domain *domain= this->giveDomain();   
+
+    for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) { 
         printf( "\n -------------------------------\n");
-        el = domain->giveElement(i);
+        Element *el = domain->giveElement(i);
         for ( int j = 1; j <= this->failureCriterias->giveSize(); j++ ) {
-            fc = this->failureCriterias->at(j);
+            FailureCriteria *fc = this->failureCriterias->at(j);
             this->evaluateFailureCriteria(fc, el, tStep);
 
             if( fc->hasFailed() ) {
@@ -173,11 +175,11 @@ FractureManager :: evaluateFailureCriteria(FailureCriteria *fc, Element *el, Tim
 {
     // If we have a layered cross section it needs special treatment
     // or only check CS when a special quantity is asked for, e.g interlam eval.
-
+    // Probably must separate FC into 2 groups: regular and layered CS
     if ( ! fc->evaluateFCQuantities() ) { // cannot evaluate on its own, ask element for implementation
         FailureModuleElementInterface *fmInterface =
             dynamic_cast< FailureModuleElementInterface * >( el->giveInterface(FailureModuleElementInterfaceType) );
-        if ( fmInterface ) { // if element supports the failure interface
+        if ( fmInterface ) { // if element supports the failure module interface
             fmInterface->evaluateFailureCriteriaQuantities(fc, tStep); // computeQuantities
         }
     }
@@ -243,9 +245,9 @@ FailureCriteria :: evaluateFailureCriteria()
     // Compare quantity with threshold
     // should save bool for all values
 
-    for ( int i = 1; i <= this->quantities.size(); i++ ) {
-        for ( int j = 1; j <= this->quantities[i-1].size(); j++ ) {
-            FloatArray &values = this->quantities[i-1][j-1];
+    for ( int i = 1; i <= this->quantities.size(); i++ ) { // if there are several quantities like interfaces
+        for ( int j = 1; j <= this->quantities[i-1].size(); j++ ) { // all the evaluation points (often the integration points)
+            FloatArray &values = this->quantities[i-1][j-1];        // quantities in each evaluation point (e.g. max stress will check stress components in different directions)
             for ( int k = 1; k <= values.giveSize(); k++ ) {
                 // assumes there is only one value to compare against which is generally 
                 // not true, e.g. tension/compression thresholds

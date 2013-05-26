@@ -58,14 +58,15 @@ void
 StaticFracture :: solveYourselfAt(TimeStep *tStep)
 {
 
-    // Initiates the total displacement to zero in the UnknownsDictionary.
+    // Initiates the total displacement to zero in the UnknownsDictionary at the first time step.
+    // this must be done in order to support a dynamic equation system
     if ( tStep->isTheFirstStep() ) {
         printf("Initializing DofUnknownsDictionary... \n");
         this->initializeDofUnknownsDictionary(tStep);
     }
     
     // Initialization
-    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()); // 1 stands for?
     if ( totalDisplacement.giveSize() != neq ) {
         totalDisplacement.resize(neq);
         totalDisplacement.zero();
@@ -75,10 +76,11 @@ StaticFracture :: solveYourselfAt(TimeStep *tStep)
     }
     
     // Instanciate fracture manager
+    // should be made in a more proper way with input and the like
     if ( tStep->isTheFirstStep() ) {
     
-        this->fMan =  new FractureManager( this->giveDomain(1) );
-        this->fMan->failureCriterias = new AList< FailureCriteria >(1);
+        this->fMan = new FractureManager( this->giveDomain(1) );
+        this->fMan->failureCriterias = new AList< FailureCriteria >(1); // list of all the criterias to evaluate
         FailureCriteria *fc = new FailureCriteria(FC_MaxShearStress);
         fc->thresholds.resize(1);
         fc->thresholds.at(1) = 0.0009;
@@ -97,18 +99,19 @@ StaticFracture :: updateYourself(TimeStep *stepN)
     
     NonLinearStatic :: updateYourself(stepN);
 
-    // new - not working
-    /*
+    // new - not finished
+    // Fracture/failure mechanics evaluation
     this->fMan->evaluateFailureCriterias(stepN);
     if ( this->fMan->needsUpdate ) {
-        this->setCrackGrowthFlag( this->fMan->needsUpdate );
-        // update geometries
-        this->fMan->update(stepN);
+        this->setCrackGrowthFlag( this->fMan->needsUpdate ); // change name
+        
+        // Update geometries if applicable
+        this->fMan->update(stepN); // not complete!
     }
-    */
+    
 
-    // old - working
-    this->evaluatePropagationLaw(stepN); 
+    // old - kind of working for one delam
+    //this->evaluatePropagationLaw(stepN); 
 
 
 
@@ -312,9 +315,9 @@ StaticFracture :: setTotalDisplacementFromUnknownsInDictionary(EquationID type, 
 #endif
 
 
-
+// Deprecated remove!
 // Fracture mechanics evaluation 
-// Should be in a searate class probably - FractureManager maybe
+// Should be in a searate class  - FractureManager maybe
 
 void 
 StaticFracture :: evaluatePropagationLaw(TimeStep *tStep)
@@ -353,7 +356,7 @@ StaticFracture :: evaluatePropagationLaw(TimeStep *tStep)
     }
 }
 
-
+// remove
 void 
 StaticFracture :: evaluatePropagationLawForDelamination(Element *el, EnrichmentDomain *ed, TimeStep *tStep)
 {
@@ -401,7 +404,7 @@ StaticFracture :: evaluatePropagationLawForDelamination(Element *el, EnrichmentD
 
 
 
-
+// remove
 void 
 StaticFracture :: computeInterLaminarStressesAt(int interfaceNum, Element *el, TimeStep *tStep, std::vector < FloatArray > &interLamStresses)
 {
@@ -459,7 +462,7 @@ StaticFracture :: computeInterLaminarStressesAt(int interfaceNum, Element *el, T
 }
 
 
-
+// remove
 void 
 StaticFracture :: evaluateFractureCriterion(std::vector < FloatArray > &interLamStresses, bool &propagateFlag)
 {

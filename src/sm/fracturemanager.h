@@ -91,7 +91,11 @@ private:
     FailureCriteriaType type; 
     bool failedFlag;
 public:
-    FailureCriteria(FailureCriteriaType type){ this->type = type; };
+    FailureCriteria(FailureCriteriaType type)
+    { 
+        this->type = type;
+        this->failedFlag = false;
+    };
     ~FailureCriteria(){}; // must destroy object correctly
 
 
