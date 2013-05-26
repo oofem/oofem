@@ -54,13 +54,15 @@
  #include "combuff.h"
 #endif
 
+#define ALLOC(size) (double*)malloc(sizeof(double) * size);
+
 #define RESIZE(n) \
     { \
         size = n; \
         if ( n > allocatedSize ) { \
             allocatedSize = n; \
             if ( values ) free(values); \
-            values = (double*)malloc(allocatedSize * sizeof(double)); \
+            values = ALLOC(size); \
         } \
     }
 
@@ -68,6 +70,8 @@
 extern "C" {
 extern void dgemv_(const char *trans, const int *m, const int *n, const double *alpha, const double *a, const int *lda, const double *x,
                    const int *incx, const double *beta, double *y, const int *incy, int aColumns, int xSize, int ySize);
+// Y = Y + alpha * X
+extern void daxpy_(const int *n, const double *alpha, const double *x, const int *incx, double *y, const int *incy, int xsize, int ysize);
 }
 #endif
 
@@ -79,10 +83,10 @@ FloatArray :: FloatArray() : size (0), allocatedSize (0), values (NULL) {}
 FloatArray :: FloatArray(int n) :
     size(n),
     allocatedSize(n)
-// Constructor : creates an array of size n (filled with garbage).
 {
     if ( size ) {
-        values = (double*)calloc(size, sizeof(double)); // calloc actually *does* zero everything, and some code seems to rely on this.
+        values = ALLOC(size);
+        memset(values, 0, size * sizeof(double) );
 #ifdef DEBUG
         if ( !values ) {
             OOFEM_FATAL2("FloatArray :: FloatArray - Failed in allocating %d doubles", n);
@@ -100,7 +104,7 @@ FloatArray :: FloatArray(const FloatArray &src) :
 {
     // copy constructor
     if ( size ) {
-        values = (double*)malloc(size * sizeof(double));
+        values = ALLOC(size);
 #ifdef DEBUG
         if ( !values ) {
             OOFEM_FATAL2("FloatArray :: FloatArray - Failed in allocating %d doubles", size);
@@ -194,9 +198,15 @@ void FloatArray :: add(const FloatArray &b)
 
 #  endif
 
+#ifdef __LAPACK_MODULE
+    int inc = 1;
+    double s = 1.;
+    daxpy_( &size, &s, b.values, &inc, this->values, &inc, b.size, this->size);
+#else
     for ( int i = 0; i < this->size; i++ ) {
         this->values [ i ] += b.values [ i ];
     }
+#endif
 }
 
 
@@ -224,9 +234,14 @@ void FloatArray :: add(const double factor, const FloatArray &b)
 
 #  endif
 
+#ifdef __LAPACK_MODULE
+    int inc = 1;
+    daxpy_( &size, &factor, b.values, &inc, this->values, &inc, b.size, this->size);
+#else
     for ( int i = 0; i < this->size; ++i ) {
         this->values [ i ] += factor * b.values [ i ];
     }
+#endif
 }
 
 void FloatArray :: subtract(const FloatArray &src)
@@ -548,7 +563,7 @@ void FloatArray :: resizeWithValues(int n, int allocChunk)
     allocatedSize = n + allocChunk;
 
     // For the typical small sizes we have, realloc doesn't seem to be worth it, better with just malloc.
-    double *newValues = (double*)malloc(allocatedSize * sizeof(double));
+    double *newValues = ALLOC(allocatedSize);
 #ifdef DEBUG
     if ( !newValues ) {
         OOFEM_FATAL2("FloatArray :: resizeWithValues - Failed in allocating %d doubles", n + allocChunk);
@@ -577,8 +592,6 @@ void FloatArray :: resize(int n)
     return;
 #endif
 
-    // This will be changed, either to calloc or malloc without copying the old data.
-    // For now it is left as the old default implementation until code using these classes are properly adjusted.
     size = n;
     if ( n <= allocatedSize ) {
         memset(this->values, 0, this->size * sizeof(double) );
@@ -587,7 +600,8 @@ void FloatArray :: resize(int n)
     allocatedSize = n;
 
     if ( values ) free(values);
-    values = (double*)calloc(allocatedSize, sizeof(double));
+    values = ALLOC(allocatedSize);
+    memset(this->values, 0, allocatedSize);
 #ifdef DEBUG
     if ( !values ) {
         OOFEM_FATAL2("FloatArray :: simple - Failed in allocating %d doubles", n);
@@ -600,7 +614,7 @@ void FloatArray :: hardResize(int n)
 // Reallocates the receiver with new size.
 {
     allocatedSize = n;
-    double *newValues = (double*)malloc(allocatedSize * sizeof(double));
+    double *newValues = ALLOC(allocatedSize);
 #ifdef DEBUG
     if ( !newValues ) {
         OOFEM_FATAL2("FloatArray :: hardResize - Failed in allocating %d doubles", n);
@@ -850,7 +864,7 @@ contextIOResultType FloatArray :: restoreYourself(DataStream *stream, ContextMod
     if ( size > allocatedSize ) {
         if ( values ) free(values);
 
-        values = (double*)malloc(size * sizeof(double));
+        values = ALLOC(size);
 #ifdef DEBUG
         if ( !values ) {
             OOFEM_FATAL2("FloatArray :: restoreYourself - Failed in allocating %d doubles", size);
