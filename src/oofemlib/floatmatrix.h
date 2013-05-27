@@ -240,7 +240,7 @@ public:
     double giveDeterminant() const;
 
     /// Zeroes all coefficient of receiver.
-    void zero() const;
+    void zero();
     /// Sets size of receiver to be an empty matrix. It will have zero rows and zero columns size.
     void beEmptyMtrx() { this->resize(0, 0); }
     /// Sets receiver to unity matrix.

@@ -1306,7 +1306,7 @@ void FloatMatrix :: initFromVector(const FloatArray &vector, bool transposed)
 }
 
 
-void FloatMatrix :: zero() const
+void FloatMatrix :: zero()
 {
     memset(this->values, 0, nRows * nColumns * sizeof(double) );
 }
