@@ -66,6 +66,7 @@
 #define _IFT_Domain_nrandgen "nrandgen"
 #define _IFT_Domain_topology "topology"
 #define _IFT_Domain_nxfemman "nxfemman"
+#define _IFT_Domain_numberOfSpatialDimensions "nsd" ///< Specifies how many spatial dimensions the domain has.
 //@}
 
 namespace oofem {
@@ -168,6 +169,8 @@ private:
     int number;
     /// Domain serial (version) number. Used for domain version identification during Adaptive computations.
     int serialNumber;
+    /// Number of spatial dimensions
+    int nsd;
     /// nodal recovery object associated to receiver.
     NodalRecoveryModel *smoother;
     /**

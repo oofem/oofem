@@ -501,9 +501,14 @@ Domain :: instanciateYourself(DataReader *dr)
     IR_GIVE_FIELD(ir, nload, _IFT_Domain_nbc);
     IR_GIVE_FIELD(ir, nic, _IFT_Domain_nic);
     IR_GIVE_FIELD(ir, nloadtimefunc, _IFT_Domain_nloadtimefunct);
+    nset = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, nset, _IFT_Domain_nset);
+    nxfemman = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, nxfemman, _IFT_Domain_nxfemman);
+    topologytype = "";
     IR_GIVE_OPTIONAL_FIELD(ir, topologytype, _IFT_Domain_topology);
+    this->nsd = -1; ///@todo Change this to default 0 when the domaintype record has been removed.
+    IR_GIVE_OPTIONAL_FIELD(ir, this->nsd, _IFT_Domain_numberOfSpatialDimensions);
 
     // read optional number of nonlocalBarriers
     nbarrier = 0;
@@ -982,6 +987,10 @@ Domain :: giveDefaultNodeDofIDArry()
 int
 Domain :: giveNumberOfSpatialDimensions()
 {
+    if ( nsd >= 0 ) {
+        return nsd;
+    }
+    ///@todo Backwards compatible option:
     //_HeatTransferMode _HeatMass1Mode // Are these deprecated?
     // Perhaps i shouldn't use the modes to determine this at all, but i couldn't see any other good way.
     if ( dType == _1dTrussMode ) {
