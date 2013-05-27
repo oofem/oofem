@@ -54,10 +54,24 @@
  #include "combuff.h"
 #endif
 
+#define ALLOC(size) (double*)malloc(sizeof(double) * size);
+
+#define RESIZE(n) \
+    { \
+        size = n; \
+        if ( n > allocatedSize ) { \
+            allocatedSize = n; \
+            if ( values ) free(values); \
+            values = ALLOC(size); \
+        } \
+    }
+
 #ifdef __LAPACK_MODULE
 extern "C" {
 extern void dgemv_(const char *trans, const int *m, const int *n, const double *alpha, const double *a, const int *lda, const double *x,
                    const int *incx, const double *beta, double *y, const int *incy, int aColumns, int xSize, int ySize);
+// Y = Y + alpha * X
+extern void daxpy_(const int *n, const double *alpha, const double *x, const int *incx, double *y, const int *incy, int xsize, int ysize);
 }
 #endif
 
@@ -69,10 +83,10 @@ FloatArray :: FloatArray() : size (0), allocatedSize (0), values (NULL) {}
 FloatArray :: FloatArray(int n) :
     size(n),
     allocatedSize(n)
-// Constructor : creates an array of size n (filled with garbage).
 {
     if ( size ) {
-        values = (double*)calloc(size, sizeof(double)); // calloc actually *does* zero everything, and some code seems to rely on this.
+        values = ALLOC(size);
+        memset(values, 0, size * sizeof(double) );
 #ifdef DEBUG
         if ( !values ) {
             OOFEM_FATAL2("FloatArray :: FloatArray - Failed in allocating %d doubles", n);
@@ -90,7 +104,7 @@ FloatArray :: FloatArray(const FloatArray &src) :
 {
     // copy constructor
     if ( size ) {
-        values = (double*)malloc(size * sizeof(double));
+        values = ALLOC(size);
 #ifdef DEBUG
         if ( !values ) {
             OOFEM_FATAL2("FloatArray :: FloatArray - Failed in allocating %d doubles", size);
@@ -112,7 +126,7 @@ FloatArray &
 FloatArray :: operator = ( const FloatArray & src )
 {
     if ( this != & src ) { // beware of s=s;
-        this->resize(src.size);
+        RESIZE(src.size);
         memcpy(this->values, src.values, size * sizeof(double));
     }
 
@@ -145,7 +159,7 @@ FloatArray :: setValues(int n, ...)
 {
     va_list vl;
     va_start(vl,n);
-    this->resize(n);
+    RESIZE(n);
     for (int i = 0; i < n; i++ ) {
         this->values [ i ] = va_arg(vl, double);
     }
@@ -156,7 +170,7 @@ FloatArray :: setValues(int n, ...)
 void
 FloatArray :: beScaled(double s, const FloatArray &b)
 {
-    this->resize(b.size);
+    RESIZE(b.size);
     for ( int i = 0; i < this->size; ++i ) {
         this->values [ i ] = s * b.values [ i ];
     }
@@ -184,9 +198,15 @@ void FloatArray :: add(const FloatArray &b)
 
 #  endif
 
+#ifdef __LAPACK_MODULE
+    int inc = 1;
+    double s = 1.;
+    daxpy_( &size, &s, b.values, &inc, this->values, &inc, b.size, this->size);
+#else
     for ( int i = 0; i < this->size; i++ ) {
         this->values [ i ] += b.values [ i ];
     }
+#endif
 }
 
 
@@ -214,9 +234,14 @@ void FloatArray :: add(const double factor, const FloatArray &b)
 
 #  endif
 
+#ifdef __LAPACK_MODULE
+    int inc = 1;
+    daxpy_( &size, &factor, b.values, &inc, this->values, &inc, b.size, this->size);
+#else
     for ( int i = 0; i < this->size; ++i ) {
         this->values [ i ] += factor * b.values [ i ];
     }
+#endif
 }
 
 void FloatArray :: subtract(const FloatArray &src)
@@ -228,7 +253,7 @@ void FloatArray :: subtract(const FloatArray &src)
     }
 
     if ( !size ) {
-        this->resize(src.size);
+        RESIZE(src.size);
         for ( int i = 0; i < this->size; ++i ) {
             this->values [ i ] = -src.values [ i ];
         }
@@ -260,7 +285,7 @@ void FloatArray :: beMaxOf(const FloatArray &a, const FloatArray &b)
 
 #  endif
 
-    this->resize(n);
+    RESIZE(n);
     for ( int i = 0; i < n; i++ ) {
         this->values [ i ] = max( a(i), b(i) );
     }
@@ -278,7 +303,7 @@ void FloatArray :: beMinOf(const FloatArray &a, const FloatArray &b)
 
 #  endif
 
-    this->resize(n);
+    RESIZE(n);
     for ( int i = 0; i < n; i++ ) {
         this->values [ i ] = min( a(i), b(i) );
     }
@@ -293,7 +318,7 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b)
     }
 
 #endif
-    this->resize(a.size);
+    RESIZE(a.size);
     for ( int i = 0; i < this->size; ++i ) {
         this->values [ i ] = a.values [ i ] - b.values [ i ];
     }
@@ -307,7 +332,7 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b, int 
     }
 
 #endif
-    this->resize(n);
+    RESIZE(n);
     for ( int i = 0; i < n; ++i ) {
         this->values [ i ] = a.values [ i ] - b.values [ i ];
     }
@@ -327,7 +352,7 @@ void FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx)
 #endif
 
     int n = indx.giveSize();
-    this->resize(n);
+    RESIZE(n);
     for ( int i = 1; i <= n; i++ ) {
         this->at(i) = src.at( indx.at(i) ) ;
     }
@@ -341,7 +366,7 @@ void FloatArray :: addSubVector(const FloatArray &src, int si)
     si--;
     reqSize = si + n;
     if ( this->giveSize() < reqSize ) {
-        this->resize(reqSize);
+        this->resizeWithValues(reqSize);
     }
 
     for ( int i = 1; i <= n; i++ ) {
@@ -359,7 +384,7 @@ void FloatArray :: beVectorProductOf(const FloatArray &v1, const FloatArray &v2)
     }
 #  endif
 
-    this->resize(3);
+    RESIZE(3);
 
     this->at(1) = v1.at(2) * v2.at(3) - v1.at(3) * v2.at(2);
     this->at(2) = v1.at(3) * v2.at(1) - v1.at(1) * v2.at(3);
@@ -517,7 +542,7 @@ void FloatArray :: checkSizeTowards(const IntArray &loc)
     }
 
     if ( high > size ) {   // receiver must be expanded
-        this->resize(high);
+        RESIZE(high);
     }
 }
 
@@ -538,7 +563,7 @@ void FloatArray :: resizeWithValues(int n, int allocChunk)
     allocatedSize = n + allocChunk;
 
     // For the typical small sizes we have, realloc doesn't seem to be worth it, better with just malloc.
-    double *newValues = (double*)malloc(allocatedSize * sizeof(double));
+    double *newValues = ALLOC(allocatedSize);
 #ifdef DEBUG
     if ( !newValues ) {
         OOFEM_FATAL2("FloatArray :: resizeWithValues - Failed in allocating %d doubles", n + allocChunk);
@@ -554,27 +579,33 @@ void FloatArray :: resizeWithValues(int n, int allocChunk)
 
 void FloatArray :: resize(int n)
 {
-    // This will be changed, either to calloc or malloc without copying the old data.
-    // For now it is left as the old default implementation until code using these classes are properly adjusted.
+#if 0
+    // Check if code is calling resize instead of resizeWithValues with minumum false-positives:
+    if ( n != 0 && size != 0 && this->computeSquaredNorm() > 0 ) {
+        this->printYourself();
+        printf("check\n");
+    }
+#endif
 #if 1
+    ///@todo To be removed:
     this->resizeWithValues(n);
-#else
-    ///@todo Decide on if we should zero it unconditionally (memset is pretty cheap anyway), or just leave it, and leave calling zero() to the caller.
+    return;
+#endif
+
     size = n;
     if ( n <= allocatedSize ) {
-        //memset(this->values, 0, this->size * sizeof(double) );
+        memset(this->values, 0, this->size * sizeof(double) );
         return;
     }
     allocatedSize = n;
 
     if ( values ) free(values);
-    values = (double*)malloc(allocatedSize * sizeof(double));
-    //values = (double*)calloc(allocatedSize, sizeof(double));
+    values = ALLOC(allocatedSize);
+    memset(this->values, 0, allocatedSize);
 #ifdef DEBUG
     if ( !values ) {
         OOFEM_FATAL2("FloatArray :: simple - Failed in allocating %d doubles", n);
     }
-#endif
 #endif
 }
 
@@ -583,7 +614,7 @@ void FloatArray :: hardResize(int n)
 // Reallocates the receiver with new size.
 {
     allocatedSize = n;
-    double *newValues = (double*)malloc(allocatedSize * sizeof(double));
+    double *newValues = ALLOC(allocatedSize);
 #ifdef DEBUG
     if ( !newValues ) {
         OOFEM_FATAL2("FloatArray :: hardResize - Failed in allocating %d doubles", n);
@@ -622,7 +653,7 @@ void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anA
     int nColumns = aMatrix.giveNumberOfColumns();
     int nRows = aMatrix.giveNumberOfRows();
 
-    this->resize( nRows );
+    RESIZE( nRows );
 
 #  ifdef DEBUG
     if ( aMatrix.giveNumberOfColumns() != anArray.giveSize() ) {
@@ -659,7 +690,7 @@ void FloatArray :: beTProductOf(const FloatMatrix &aMatrix, const FloatArray &an
     }
 
 #  endif
-    this->resize( nColumns );
+    RESIZE( nColumns );
 
 #ifdef __LAPACK_MODULE
     double alpha = 1., beta = 0.;
@@ -791,7 +822,7 @@ void FloatArray :: copySubVector(const FloatArray &src, int si)
     si--;
 
     int reqSize = si + src.size;
-    this->resize(reqSize);
+    this->resizeWithValues(reqSize);
  
     memcpy(values + si, src.values, src.size * sizeof(double));
 }
@@ -833,7 +864,7 @@ contextIOResultType FloatArray :: restoreYourself(DataStream *stream, ContextMod
     if ( size > allocatedSize ) {
         if ( values ) free(values);
 
-        values = (double*)malloc(size * sizeof(double));
+        values = ALLOC(size);
 #ifdef DEBUG
         if ( !values ) {
             OOFEM_FATAL2("FloatArray :: restoreYourself - Failed in allocating %d doubles", size);
@@ -873,7 +904,7 @@ int FloatArray :: unpackFromCommBuffer(CommunicationBuffer &buff)
     // unpack size
     result &= buff.unpackInt(newSize);
     // resize yourself
-    this->resize(newSize);
+    RESIZE(newSize);
     result &= buff.unpackArray(this->values, newSize);
 
     return result;
@@ -1041,7 +1072,7 @@ void FloatArray :: beFullVectorForm(const FloatMatrix &aMatrix)
     }
 
 #  endif
-    this->resize(9);
+    RESIZE(9);
     this->at(1) = aMatrix.at(1,1); this->at(2) = aMatrix.at(2,2); this->at(3) = aMatrix.at(3,3);
     this->at(4) = aMatrix.at(2,3); this->at(5) = aMatrix.at(1,3); this->at(6) = aMatrix.at(1,2);
     this->at(7) = aMatrix.at(3,2); this->at(8) = aMatrix.at(3,1); this->at(9) = aMatrix.at(2,1);
@@ -1057,7 +1088,7 @@ void FloatArray :: beReducedVectorForm(const FloatMatrix &aMatrix)
 
 #  endif
     
-    this->resize(6);
+    RESIZE(6);
     this->at(1) = aMatrix.at(1,1); this->at(2) = aMatrix.at(2,2); this->at(3) = aMatrix.at(3,3);
     this->at(4) = 0.5*( aMatrix.at(2,3) + aMatrix.at(3,2) );
     this->at(5) = 0.5*( aMatrix.at(1,3) + aMatrix.at(3,1) );

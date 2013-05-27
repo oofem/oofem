@@ -329,7 +329,7 @@ InterfaceElem1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) 
 void
 InterfaceElem1d :: computeLocalSlipDir(FloatArray &normal)
 {
-    normal.resize(3);
+    normal.resizeWithValues(3);
     if ( this->referenceNode ) {
         // normal
         normal.at(1) = domain->giveNode(this->referenceNode)->giveCoordinate(1) - this->giveNode(1)->giveCoordinate(1);

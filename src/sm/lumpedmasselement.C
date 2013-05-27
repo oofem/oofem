@@ -124,13 +124,14 @@ LumpedMassElement :: computeNumberOfDofs(EquationID ut)
 void
 LumpedMassElement :: giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const
 {
-    answer.resize(0, 6);
+    answer.resize(6);
+    answer.resize(0);
     DofManager *dman = this->giveDofManager(inode);
-    int _i, _ndof = dman->giveNumberOfDofs();
+    int _ndof = dman->giveNumberOfDofs();
     DofIDItem _dofid;
 
     // simply collect all "structural" dofs of element node
-    for ( _i = 1; _i <= _ndof; _i++ ) {
+    for ( int _i = 1; _i <= _ndof; _i++ ) {
         _dofid = dman->giveDof(_i)->giveDofID();
         if ( ( _dofid == D_u ) || ( _dofid == D_v ) || ( _dofid == D_w ) ||
             ( _dofid == R_u ) || ( _dofid == R_v ) || ( _dofid == R_w ) ) {
