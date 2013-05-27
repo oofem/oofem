@@ -1133,7 +1133,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
 
         if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >( bc ) ) ) {
             abc->assembleVector(answer, tStep, eid, type, mode, s, eNorms);
-        } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >( bc ) ) ) {
+        } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >( bc ) ) && bc->isImposed(tStep) ) {
             IntArray dofids, loc, dofIDarry;
             FloatArray charVec;
             FloatMatrix R;
