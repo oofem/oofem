@@ -1,10 +1,10 @@
-weakPeriodicTriangularObstacle.out
-Test for weak periodic boundary conditions on velocity and pressure in a Stokesflow
-stokesflow nsteps 1 lstype 0  smtype 1  rtolv 0.01  linesearch 0  maxiter 1000 nmodules 0
-#vtkxml tstep_all domain_all primvars 2 4 5
+/home/carl/Documents/data/Tests/SolutionbasedShapeFunction/ssfTest.out
+Test for SolutionbasedFormFunction
+stokesflow nsteps 1 lstype 0  smtype 1  rtolv 0.01  linesearch 0  maxiter 1000 nmodules 1
+vtkxml tstep_all domain_all primvars 2 4 5
 domain 2dIncompFlow
 OutputManager tstep_all dofman_all element_all
-ndofman 24       nelem 8       ncrosssect  1 nmat 1 nbc 8 nic 0 nltf 1 
+ndofman 24       nelem 8       ncrosssect  1 nmat 1 nbc 8 nic 0 nltf 1  nset 4
 node 1  coords 3 0.0 	0.0 	0.0 ndofs 3 DofIDMask 3 7 8 11 
 node 2  coords 3 2.0 	0.0 	0.0 ndofs 3 DofIDMask 3 7 8 11
 node 3  coords 3 2.0 	2.0 	0.0 ndofs 3 DofIDMask 3 7 8 11 
@@ -41,13 +41,22 @@ emptycs 1
 newtonianfluid 1 mu 1.000000  d 1.000000
 deadweight 1 components 2 -1.0 -0.0 loadTimeFunction 1 valtype 4
 BoundaryCondition  2 loadTimeFunction 1 prescribedvalue 0.00000000000000000000
-weakperiodicbc 3 elementsides 6  3 1 6 1 8 1 loadTimeFunction 1 order 2 dofid 7
-weakperiodicbc 4 elementsides 4  1 1 5 1 loadTimeFunction 1 order 2 dofid 7
-weakperiodicbc 5 elementsides 6  3 1 6 1 8 1 loadTimeFunction 1 order 2 dofid 8
-weakperiodicbc 6 elementsides 4  1 1 5 1 loadTimeFunction 1 order 2 dofid 8
-weakperiodicbc 7 elementsides 6  3 1 6 1 8 1 loadTimeFunction 1 order 2 dofid 11
-weakperiodicbc 8 elementsides 4  1 1 5 1 loadTimeFunction 1 order 2 dofid 11
+weakperiodicbc 3 elementsidespositiveset 1 elementsidesnegativeset 2 loadTimeFunction 1 order 2 dofid 7
+weakperiodicbc 4 elementsidespositiveset 3 elementsidesnegativeset 4 loadTimeFunction 1 order 2 dofid 7
+weakperiodicbc 5 elementsidespositiveset 1 elementsidesnegativeset 2 loadTimeFunction 1 order 2 dofid 8
+weakperiodicbc 6 elementsidespositiveset 3 elementsidesnegativeset 4 loadTimeFunction 1 order 2 dofid 8
+weakperiodicbc 7 elementsidespositiveset 1 elementsidesnegativeset 2 loadTimeFunction 1 order 2 dofid 11
+weakperiodicbc 8 elementsidespositiveset 3 elementsidesnegativeset 4 loadTimeFunction 1 order 2 dofid 11
 ConstantFunction 1 f(t) 1.0
+# Positive X
+set 1 elementboundaries 2 3 1
+# Negative X
+set 2 elementboundaries 4 6 1 8 1
+# Positive Y
+set 3 elementboundaries 2 5 1
+# Negative Y
+set 4 elementboundaries 2 1 1
+
 #%BEGIN_CHECK%
 #NODE tStep 0 number 5 dof 1 unknown v value -1.10902370e-01
 #NODE tStep 0 number 5 dof 2 unknown v value 2.25887023e-08
