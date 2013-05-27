@@ -57,7 +57,7 @@ void XfemElementInterface :: XfemElementInterface_partitionElement(AList< Triang
 void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 {
     // This will only work for one active ei
-    XfemManager *xMan = this->element->giveDomain()->giveXfemManager(1);
+    XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
     if ( xMan->isElementEnriched(element) ) { // unneccessary but extra check
         IntArray activeEI;
         xMan->giveActiveEIsFor(activeEI, element); 
@@ -117,7 +117,7 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 
 void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(AList< FloatArray > *answer1, AList< FloatArray > *answer2)
 {
-    XfemManager *xMan = this->element->giveDomain()->giveXfemManager(1);
+    XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
     IntArray interactedEI;
     xMan->giveActiveEIsFor(interactedEI, element); //give the EI's for the el
     // in intersecPoints the points of Element with interaction to EnrichmentItem will be stored

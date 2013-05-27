@@ -54,7 +54,7 @@ int
 Shell7BaseXFEM :: checkConsistency()
 {
     Shell7Base :: checkConsistency();
-    this->xMan =  this->giveDomain()->giveXfemManager(1);
+    this->xMan =  this->giveDomain()->giveXfemManager();
     return 1;
 }
 

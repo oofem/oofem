@@ -65,8 +65,8 @@
 #define _IFT_Domain_nbarrier "nbarrier"
 #define _IFT_Domain_nrandgen "nrandgen"
 #define _IFT_Domain_topology "topology"
-#define _IFT_Domain_nxfemman "nxfemman"
-#define _IFT_Domain_numberOfSpatialDimensions "nsd" ///< Specifies how many spatial dimensions the domain has.
+#define _IFT_Domain_nxfemman "nxfemman" /// [in,optional] Specifies if there is an xfem-manager.
+#define _IFT_Domain_numberOfSpatialDimensions "nsd" ///< [in,optional] Specifies how many spatial dimensions the domain has.
 //@}
 
 namespace oofem {
@@ -184,8 +184,8 @@ private:
      * because in case of multiple domains stateCounter should be kept independently for each domain.
      */
     StateCounterType nonlocalUpdateStateCounter;
-    /// XFEM Manager  ///@todo: currently only supports one since most methods assumes there to be one xMan
-    AList< XfemManager > *xfemManagerList;
+    /// XFEM Manager
+    XfemManager *xfemManager;
      
     /// Topology description
     TopologyDescription *topology;
@@ -428,8 +428,8 @@ public:
     /// Temporary function, sets xfemManager.
     void setXfemManager(XfemManager *xfemManager);
 
-    XfemManager *giveXfemManager(int i);
-    bool hasXfemManager(int i);
+    XfemManager *giveXfemManager();
+    bool hasXfemManager();
     /// List of Xfemmanagers.
     /**
      * Sets receiver's associated topology description.
