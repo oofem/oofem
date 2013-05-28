@@ -58,7 +58,7 @@ FEI3dHexaLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICe
     answer.at(8)  = 0.125 * ( 1. + x ) * ( 1. - y ) * ( 1. - z );
 }
 
-void
+double
 FEI3dHexaLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatMatrix jacobianMatrix, inv, dNduvw, coords;
@@ -72,7 +72,7 @@ FEI3dHexaLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
     inv.beInverseOf(jacobianMatrix);
     
     answer.beProductOf(dNduvw, inv);
-    //return detJ;
+    return jacobianMatrix.giveDeterminant();
 }
 
 void

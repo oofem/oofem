@@ -226,13 +226,13 @@ void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
 }
 
 
-void BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     const FloatArray *vertexCoordsPtr;
     FloatMatrix jacobian(nsd, nsd);
     IntArray span(nsd);
-    double Jacob;
+    double Jacob = 0.;
     int count, cnt, i, l, k, m, ind, indx, uind, vind, tind;
 #ifdef HAVE_VARIABLE_ARRAY_SIZE
     FloatMatrix ders [ nsd ];
@@ -412,6 +412,7 @@ void BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
 #ifndef HAVE_VARIABLE_ARRAY_SIZE
     delete [] ders;
 #endif
+    return Jacob;
 }
 
 

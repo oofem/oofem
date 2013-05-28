@@ -66,7 +66,7 @@ FEI3dWedgeQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEI
     answer.at(15) = y * (1. - z * z);
 }
 
-void
+double
 FEI3dWedgeQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatMatrix jacobianMatrix, inv, dNduvw, coords;
@@ -79,7 +79,7 @@ FEI3dWedgeQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const
     inv.beInverseOf(jacobianMatrix);
 
     answer.beProductOf(dNduvw, inv);
-    //return detJ;
+    return jacobianMatrix.giveDeterminant();
 }
 
 

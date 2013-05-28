@@ -169,8 +169,7 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         const FloatArray &lcoords = * gp->giveCoordinates();
 
-        double detJ = fabs( this->interpolation_quad.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this)) );
-        this->interpolation_quad.evaldNdx(dN, lcoords, FEIElementGeometryWrapper(this));
+        double detJ = fabs( this->interpolation_quad.evaldNdx(dN, lcoords, FEIElementGeometryWrapper(this)) );
         this->interpolation_lin.evalN(Nh, lcoords, FEIElementGeometryWrapper(this));
         double dV = detJ * gp->giveWeight();
 
@@ -324,10 +323,8 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         const FloatArray &lcoords = *gp->giveCoordinates();
 
-        double detJ = fabs( this->interpolation_quad.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this)) );
+        double detJ = fabs( this->interpolation_quad.evaldNdx(dN, lcoords, FEIElementGeometryWrapper(this)) );
         double dV = detJ * gp->giveWeight();
-
-        this->interpolation_quad.evaldNdx(dN, lcoords, FEIElementGeometryWrapper(this));
         this->interpolation_lin.evalN(Nlin, lcoords, FEIElementGeometryWrapper(this));
 
         for ( int j = 0, k = 0; j < dN.giveNumberOfRows(); j++, k+=3 ) {

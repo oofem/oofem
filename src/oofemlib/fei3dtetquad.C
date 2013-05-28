@@ -136,7 +136,7 @@ FEI3dTetQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICe
     answer(9) = 4*x3*x4;
 }
 
-void
+double
 FEI3dTetQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatMatrix jacobianMatrix;
@@ -153,6 +153,7 @@ FEI3dTetQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
     jacobianMatrix.beProductOf(dNdxi, coords);
     jinv.beInverseOf(jacobianMatrix);
     answer.beProductOf(jinv, dNdxi);
+    return jacobianMatrix.giveDeterminant();
 }
 
 void

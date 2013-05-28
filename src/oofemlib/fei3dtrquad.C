@@ -44,10 +44,11 @@ FEI3dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICel
     this->surfaceEvalN(answer, 1, lcoords, cellgeo);
 }
 
-void
+double
 FEI3dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     OOFEM_ERROR("FEI3dTrQuad :: evaldNdx - Not supported");
+    return 0.;
 }
 
 

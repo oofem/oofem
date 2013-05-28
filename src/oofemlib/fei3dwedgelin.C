@@ -57,7 +57,7 @@ FEI3dWedgeLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIC
 }
 
 
-void
+double
 FEI3dWedgeLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatMatrix jacobianMatrix(2, 2), inv, dNduvw, coords;
@@ -71,7 +71,7 @@ FEI3dWedgeLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const 
     inv.beInverseOf(jacobianMatrix);
 
     answer.beProductOf(dNduvw, inv);
-    //return detJ;
+    return jacobianMatrix.giveDeterminant();
 }
 
 

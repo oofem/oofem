@@ -175,8 +175,7 @@ void Hexa1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSt
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
-        double detJ = fabs(this->interp.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)));
-        this->interp.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
+        double detJ = fabs( this->interp.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this)) );
         this->interp.evalN(N, * lcoords, FEIElementGeometryWrapper(this));
         double dV = detJ * gp->giveWeight();
                 
@@ -418,10 +417,8 @@ void Hexa1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
-        double detJ = fabs(this->interp.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)));
+        double detJ = fabs( this->interp.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this)) );
         double dV = detJ * gp->giveWeight();
-
-        this->interp.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
         this->interp.evalN(N, * lcoords, FEIElementGeometryWrapper(this));
  
         for ( int j = 0, k = 0; j < dN.giveNumberOfRows(); j++, k += 3 ) {

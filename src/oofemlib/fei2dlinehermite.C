@@ -61,7 +61,7 @@ void FEI2dLineHermite :: evalN(FloatArray &answer, const FloatArray &lcoords, co
     answer.at(4) = -0.125 * l * (1.0 + ksi) * (1.0 + ksi) * (1.0 - ksi);
 }
 
-void FEI2dLineHermite :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double FEI2dLineHermite :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     // This is dNds projected on the direction if the linear edge. If any other interpolation is used for geometry, this can't be used anymore.
     FloatArray dNds;
@@ -70,9 +70,10 @@ void FEI2dLineHermite :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords
     FloatArray vec(2);
     vec.at(1) = cellgeo.giveVertexCoordinates(2)->at(xind) - cellgeo.giveVertexCoordinates(1)->at(xind);
     vec.at(2) = cellgeo.giveVertexCoordinates(2)->at(yind) - cellgeo.giveVertexCoordinates(1)->at(yind);
-    vec.normalize();
+    double detJ = vec.normalize() * 0.5;
 
     answer.beDyadicProductOf(dNds, vec);
+    return detJ;
 }
 
 void FEI2dLineHermite :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)

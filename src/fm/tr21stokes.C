@@ -183,8 +183,7 @@ void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tSt
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
-        double detJ = fabs(this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)));
-        this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
+        double detJ = fabs( this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this)) );
         this->interpolation_lin.evalN(Nh, * lcoords, FEIElementGeometryWrapper(this));
         double dA = detJ * gp->giveWeight();
 
@@ -340,11 +339,10 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
-        double detJ = fabs(this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)));
+        this->interpolation_lin.evalN(Nlin, * lcoords, FEIElementGeometryWrapper(this));
+        double detJ = fabs( this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this)) );
         double dA = detJ * gp->giveWeight();
 
-        this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
-        this->interpolation_lin.evalN(Nlin, * lcoords, FEIElementGeometryWrapper(this));
         for ( int j = 0, k = 0; j < 6; j++, k += 2 ) {
             dN_V(k)     = B(0, k)     = B(2, k + 1) = dN(j, 0);
             dN_V(k + 1) = B(1, k + 1) = B(2, k)     = dN(j, 1);

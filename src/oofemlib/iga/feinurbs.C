@@ -124,13 +124,13 @@ void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, 
 
 
 
-void NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     const FloatArray *vertexCoordsPtr;
     FloatMatrix jacobian(nsd, nsd);
     IntArray span(nsd);
-    double Jacob, product, w, weight;
+    double Jacob = 0., product, w, weight;
     int count, cnt, i, l, k, m, ind, indx, uind, vind, tind;
 #ifdef HAVE_VARIABLE_ARRAY_SIZE
     FloatMatrix ders [ nsd ];
@@ -564,6 +564,7 @@ void NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoor
 #ifndef HAVE_VARIABLE_ARRAY_SIZE
     delete [] ders;
 #endif
+    return Jacob;
 }
 
 

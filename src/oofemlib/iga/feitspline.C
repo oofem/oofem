@@ -185,7 +185,7 @@ void TSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
 
 
 
-void TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     const FloatArray *vertexCoordsPtr;
@@ -193,7 +193,7 @@ void TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
     FloatArray temp(nsd);
     IntArray span(nsd);
     IntArray mask;
-    double Jacob, product, w, xw, yw, weight;
+    double Jacob = 0., product, w, xw, yw, weight;
     int count, i, k;
 #ifdef HAVE_VARIABLE_ARRAY_SIZE
     FloatArray tmp_ders [ nsd ];
@@ -323,6 +323,8 @@ void TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
     delete [] tmp_ders;
     delete [] ders;
 #endif
+    
+    return Jacob;
 }
 
 

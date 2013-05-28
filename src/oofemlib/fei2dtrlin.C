@@ -48,7 +48,7 @@ FEI2dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICell
     answer.at(3) = 1. - lcoords.at(1) - lcoords.at(2);
 }
 
-void
+double
 FEI2dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double x1, x2, x3, y1, y2, y3, detJ;
@@ -72,6 +72,8 @@ FEI2dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEI
 
     answer.at(3, 1) = ( y1 - y2 ) / detJ;
     answer.at(3, 2) = ( x2 - x1 ) / detJ;
+
+    return detJ;
 }
 
 void

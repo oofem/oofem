@@ -104,7 +104,7 @@ public:
     virtual const IntArray * giveKnotMultiplicity(int dim) { return & this->knotMultiplicity [ dim - 1 ]; }
     virtual const FloatArray * giveKnotValues(int dim) { return & this->knotValues [ dim - 1 ]; }
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual int global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) {
         OOFEM_ERROR("BSplineInterpolation :: global2local - Not yet implemented.");
