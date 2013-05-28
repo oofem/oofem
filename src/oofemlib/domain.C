@@ -1410,7 +1410,7 @@ void Domain :: createDofs()
     }
 
     // XFEM manager create additional dofs themselves:
-    xfemManager->createEnrichedDofs();
+    if ( xfemManager ) xfemManager->createEnrichedDofs();
 }
 
 
