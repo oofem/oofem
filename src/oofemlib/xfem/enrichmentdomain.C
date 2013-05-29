@@ -114,6 +114,7 @@ DofManList :: addDofManagers(IntArray &dofManNumbers)
             this->dofManList.push_back( dofManNumbers.at(i) );
         }       
     }
+    int sz =dofManList.size();
 }
 
 

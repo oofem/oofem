@@ -63,7 +63,8 @@ template< class T > class AList;
 class BasicGeometry;
 class EnrichmentFunction;
 class EnrichmentDomain;
-
+class FractureManager;
+class FailureCriteria;
 /**
  * Abstract class representing entity, which is included in the FE model using one (or more)
  * global functions. Such entity may represent crack, material interface, etc.
@@ -78,9 +79,10 @@ class EnrichmentDomain;
 class EnrichmentItem : public FEMComponent
 {
 public:
-    /// Constructor.
+    /// Constructor / destructor
     EnrichmentItem(int n, XfemManager *xm, Domain *aDomain);
     virtual ~EnrichmentItem();
+
     virtual IRResultType initializeFrom(InputRecord *ir);
     int instanciateYourself(DataReader *dr);
     virtual const char *giveClassName() const = 0;
@@ -92,6 +94,7 @@ public:
     BasicGeometry *giveGeometry();
     EnrichmentDomain *giveEnrichmentDomain(int i) { return this->enrichmentDomainList->at(i); }
     int giveNumberOfEnrichmentDomains() { return this->numberOfEnrichmentDomains; }
+    void addEnrichmentDomain( EnrichmentDomain *ed );
 
     // Enrichment functions
     EnrichmentFunction *giveEnrichmentFunction(int n);
@@ -105,6 +108,8 @@ public:
 
     // Should update receiver geometry to the state reached at given time step.
     virtual void updateGeometry(TimeStep *tStep) {};
+    virtual void updateGeometry(TimeStep *tStep, FractureManager *fMan);
+
 
     int giveStartOfDofIdPool() { return this->startOfDofIdPool; };
     void computeDofManDofIdArray(IntArray &DofIdArray, DofManager *dMan, int enrichmentDomainNumber); // list of id's a particular dof manager supports
@@ -133,7 +138,7 @@ protected:
 
 };
 
-/** Sub classes to EnrichmentItem. */
+// CrackInterior (not in use)
 class CrackTip : public EnrichmentItem // only for 2D. Only the tip element belong to this
 {
 public:
@@ -142,7 +147,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_CrackTip_Name; }
 };
 
-/** Concrete representation of EnrichmentItem. */
+// CrackInterior (not in use)
 class CrackInterior : public EnrichmentItem // rest of the crack el. that does not contain any tip 
 {
 public:
@@ -151,7 +156,8 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_CrackInterior_Name; }
 };
 
-/** Concrete representation of EnrichmentItem. */
+
+// Inclusion
 class Inclusion : public EnrichmentItem
 {
 protected:
@@ -165,7 +171,7 @@ public:
 };
 
 
-/** Concrete representation of Delamination. */
+// Delamination
 class Delamination : public EnrichmentItem 
 {
 protected:
@@ -177,6 +183,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     FloatArray enrichmentDomainXiCoords; 
+    IntArray enrichmentDomainInterfaceList; // list of what interface each delam corresponds to
     double giveDelaminationXiCoord(int delamNum){
         return this->enrichmentDomainXiCoords.at(delamNum);
     }
@@ -194,6 +201,8 @@ public:
     void giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &zBottom, Element *e);
     double heaviside(double xi, double xi0);
     virtual Material *giveMaterial() { return mat; }
+
+    void updateGeometry(TimeStep *tStep, FractureManager *fMan, Element *el, FailureCriteria *fc);
 };
 
 } // end namespace oofem

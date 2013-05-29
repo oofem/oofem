@@ -51,6 +51,8 @@
 
 #include "layeredcrosssection.h"
 #include "xfemmanager.h"
+#include "enrichmentdomain.h"
+#include "classfactory.h"
 namespace oofem {
 FractureManager :: FractureManager(Domain *domain)
 {
@@ -139,27 +141,6 @@ FractureManager :: evaluateFailureCriterias(TimeStep *tStep)
 
     }
      
-    //EnrichmentItem *ei;
-    //for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        //domain = this->giveDomain(idomain);        
-        //xMan = domain->giveXfemManager(1);
-        
-
-            //for ( int j = 1; j <= xMan->giveNumberOfEnrichmentItems(); j++ ) {    
-              //  ei = xMan->giveEnrichmentItem(j);
-                // Different actions depending on ei
-                // Delamination 
-               // if ( Delamination *dei = dynamic_cast< Delamination * > (ei) )  {
-               //     for ( int k = 1; k <= ei->giveNumberOfEnrichmentDomains(); k++ ) {                
-               //         EnrichmentDomain *ed; 
-               //         ed = ei->giveEnrichmentDomain(k);
-               //         this->evaluatePropagationLawForDelamination(el, ed, tStep); 
-               //     }
-               // }
-           // }
-       // }
-
-    //}
 
     // Create additional dofs if any Enrichment Domain is updated
     /*
@@ -173,26 +154,80 @@ FractureManager :: evaluateFailureCriterias(TimeStep *tStep)
 void 
 FractureManager :: evaluateFailureCriteria(FailureCriteria *fc, Element *el, TimeStep *tStep) 
 {
+    // 1. compute quantities necessary for evaluation of fc
+    // 2. evaluate fc
+    // 3. if failure, update necessary geometry
+
     // If we have a layered cross section it needs special treatment
     // or only check CS when a special quantity is asked for, e.g interlam eval.
     // Probably must separate FC into 2 groups: regular and layered CS
-    if ( ! fc->evaluateFCQuantities() ) { // cannot evaluate on its own, ask element for implementation
+
+    // Compute fc quantities
+    if ( ! fc->evaluateFCQuantities() ) { // cannot evaluate on its own, ask element for implementation through an interface
         FailureModuleElementInterface *fmInterface =
             dynamic_cast< FailureModuleElementInterface * >( el->giveInterface(FailureModuleElementInterfaceType) );
         if ( fmInterface ) { // if element supports the failure module interface
-            fmInterface->evaluateFailureCriteriaQuantities(fc, tStep); // computeQuantities
+            fmInterface->evaluateFailureCriteriaQuantities(fc, tStep); // compute quantities
         }
     }
-    //if ( dynamic_cast< LayeredCrossSection *>( el->giveCrossSection() ) ) {
-      
 
-
-    // Compare quantity with threshold
+    // Compare quantity with thresholds
     fc->evaluateFailureCriteria();
+    // agent - *ei
+    // ask agent what to do with this failure data. write output, update geometry etc
+    // this case => ei,     giveDataToAgent?
 
-    // Store which layers, interfaces that has failed and send it back 
+    //Domain *domain = this->giveDomain();   
+    //XfemManager *xMan; 
+    //xMan = domain->giveXfemManager(1);
+    //EnrichmentItem *ei;
 
 
+    //if( fc->hasFailed() ) {
+    //    for ( int i = 1; i <= fc->quantities.size(); i++ ) {
+    //        if ( fc->hasFailed(i) ) { // interface has failed
+    //            
+    //            // update *ed
+
+    //            for ( int k = 1; k <= xMan->giveNumberOfEnrichmentItems(); k++ ) {    
+    //                ei = xMan->giveEnrichmentItem(k);
+
+    //                if ( Delamination *dei = dynamic_cast< Delamination * > (ei) )  {
+    //                    dei->updateGeometry(tStep);
+    //                    // should create a new *ed
+    //                    int numED = dei->giveNumberOfEnrichmentDomains();
+    //                    EnrichmentDomain *ed = classFactory.createEnrichmentDomain( "DofManList" ); 
+    //                    DofManList *dml = dynamic_cast< DofManList * > ( ed );
+    //                    dml->addDofManagers( el->giveDofManArray() ); // add the dofmans of the el to the list
+    //                    dei->addEnrichmentDomain(ed);
+    //                    
+    //                    // add coord
+    //                    dei->enrichmentDomainXiCoords.resizeWithValues(numED+1);
+    //                    dei->enrichmentDomainXiCoords.at(numED+1) = 0.3333;
+
+    //                  
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
+     
+}
+
+void 
+FractureManager :: updateXFEM(TimeStep *tStep)
+{
+    Domain *domain = this->giveDomain();   
+    XfemManager *xMan; 
+    xMan = domain->giveXfemManager(1);
+    EnrichmentItem *ei;
+    for ( int k = 1; k <= xMan->giveNumberOfEnrichmentItems(); k++ ) {    
+        ei = xMan->giveEnrichmentItem(k);
+        ei->updateGeometry(tStep, this);
+    }
+    //if ( this->requiresUnknownsDictionaryUpdate() ) {
+        xMan->createEnrichedDofs();
+    //}
 }
 
 
@@ -242,10 +277,12 @@ bool
 FailureCriteria :: evaluateFailureCriteria() 
 {
     this->failedFlag = false;
+    failedFlags.resize(this->quantities.size());
     // Compare quantity with threshold
     // should save bool for all values
 
     for ( int i = 1; i <= this->quantities.size(); i++ ) { // if there are several quantities like interfaces
+        failedFlags.at(i-1) = false;
         for ( int j = 1; j <= this->quantities[i-1].size(); j++ ) { // all the evaluation points (often the integration points)
             FloatArray &values = this->quantities[i-1][j-1];        // quantities in each evaluation point (e.g. max stress will check stress components in different directions)
             for ( int k = 1; k <= values.giveSize(); k++ ) {
@@ -255,6 +292,7 @@ FailureCriteria :: evaluateFailureCriteria()
                     //printf( "Eval. point %d in interface %d fails (%e >= %e) \n", 
                     //    j, i, values.at(k), this->thresholds.at(k) );
                     this->failedFlag = true;
+                    failedFlags.at(i-1) = true;
                     return true;
                 }
             }

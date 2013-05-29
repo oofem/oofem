@@ -106,12 +106,16 @@ Tr2Shell7XFEM :: computeGaussPoints()
         int nPointsEdge = 2;   // edge integration
         specialIntegrationRulesArray = new IntegrationRule * [ 3 ];
 
+        LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( Tr2Shell7XFEM :: giveCrossSection() );
+
         // need to check if interface has failed but need to update the integration rule later
         XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
         for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { 
             Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) ); 
             if (dei) {
-                int numberOfDealam = dei->giveNumberOfEnrichmentDomains();
+                //int numberOfDealam = dei->giveNumberOfEnrichmentDomains();
+                //czIntegrationRulesArray = new IntegrationRule * [ numberOfDealam ];
+                int numberOfDealam = layeredCS->giveNumberOfLayers()-1;
                 czIntegrationRulesArray = new IntegrationRule * [ numberOfDealam ];
                 for ( int i = 0; i < numberOfDealam; i++ ) {
                     czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
@@ -134,7 +138,7 @@ Tr2Shell7XFEM :: computeGaussPoints()
         
         // Layered cross section for bulk integration
         //@todo - must use a cast here since check consistency has not been called yet
-        LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( Tr2Shell7XFEM :: giveCrossSection() );
+       // LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( Tr2Shell7XFEM :: giveCrossSection() );
         if ( layeredCS == NULL ) {
             OOFEM_ERROR("Tr2Shell7 only supports layered cross section");
         }

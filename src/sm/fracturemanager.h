@@ -90,6 +90,7 @@ private:
 
     FailureCriteriaType type; 
     bool failedFlag;
+    std::vector<bool> failedFlags;
 public:
     FailureCriteria(FailureCriteriaType type)
     { 
@@ -109,6 +110,10 @@ public:
     bool evaluateFCQuantities() { return false; };
 
     bool hasFailed() { return failedFlag; }
+    bool hasFailed( int i) { return failedFlags.at(i-1); }
+
+
+
 
 /*
 class LocalFailureCriteria : public FalureCriteria
@@ -156,7 +161,7 @@ public:
     virtual void evaluateFailureCriteria(FailureCriteria *fc, Element *el, TimeStep *tStep);
     
     void update(TimeStep *tStep);
-    
+    void updateXFEM(TimeStep *tStep);
     //evaluatePropagationLaws(){};
     /// Constructor.
     FractureManager(Domain *domain);

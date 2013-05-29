@@ -133,8 +133,8 @@ protected:
     // VTK
     virtual void vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
 
-
-
+    IntArray DelaminatedInterfaceList;
+     void evaluateFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep);
 public:
     Shell7BaseXFEM(int n, Domain *d);   
     virtual ~Shell7BaseXFEM() {};		
