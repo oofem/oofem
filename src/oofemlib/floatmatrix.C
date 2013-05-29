@@ -891,6 +891,7 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         double piv, linkomb;
         FloatMatrix tmp = src;
         // initialize answer to be unity matrix;
+        this->zero();
         for ( int i = 1; i <= nRows; i++ ) {
             this->at(i, i) = 1.0;
         }
