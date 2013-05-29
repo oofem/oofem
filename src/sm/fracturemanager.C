@@ -123,7 +123,6 @@ FractureManager :: evaluateFailureCriterias(TimeStep *tStep)
 
        How to know if a certain fc should be evaluated? what if the element has already failed? 
     */
-    this->needsUpdate = false;
     Domain *domain= this->giveDomain();   
 
     for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) { 
@@ -135,19 +134,12 @@ FractureManager :: evaluateFailureCriterias(TimeStep *tStep)
 
             if( fc->hasFailed() ) {
                 printf( "Element %d fails \n", el->giveNumber() );
-                this->needsUpdate = true;
+                this->setUpdateFlag(true);
             }
         }
 
     }
-     
 
-    // Create additional dofs if any Enrichment Domain is updated
-    /*
-    if ( this->requiresUnknownsDictionaryUpdate() ) {
-        xMan->createEnrichedDofs();
-    }
-    */
 }
 
 
@@ -167,16 +159,12 @@ FractureManager :: evaluateFailureCriteria(FailureCriteria *fc, Element *el, Tim
         FailureModuleElementInterface *fmInterface =
             dynamic_cast< FailureModuleElementInterface * >( el->giveInterface(FailureModuleElementInterfaceType) );
         if ( fmInterface ) { // if element supports the failure module interface
-            fmInterface->evaluateFailureCriteriaQuantities(fc, tStep); // compute quantities
+            fmInterface->computeFailureCriteriaQuantities(fc, tStep); // compute quantities
         }
     }
 
     // Compare quantity with thresholds
     fc->evaluateFailureCriteria();
-    // agent - *ei
-    // ask agent what to do with this failure data. write output, update geometry etc
-    // this case => ei,     giveDataToAgent?
-
 
      
 }
@@ -227,11 +215,6 @@ FractureManager :: update(TimeStep *tStep)
                 }
             }
 
-
-
-
-
-
         }
 
     }
@@ -243,10 +226,9 @@ FractureManager :: update(TimeStep *tStep)
 bool 
 FailureCriteria :: evaluateFailureCriteria() 
 {
-    this->failedFlag = false;
+    // Compare quantity with threshold    
+    //this->failedFlag = false;
     failedFlags.resize(this->quantities.size());
-    // Compare quantity with threshold
-    // should save bool for all values
 
     for ( int i = 1; i <= this->quantities.size(); i++ ) { // if there are several quantities like interfaces
         failedFlags.at(i-1) = false;
@@ -256,15 +238,14 @@ FailureCriteria :: evaluateFailureCriteria()
                 // assumes there is only one value to compare against which is generally 
                 // not true, e.g. tension/compression thresholds
                 if ( values.at(k) >= this->thresholds.at(k) ) {
-                    //printf( "Eval. point %d in interface %d fails (%e >= %e) \n", 
-                    //    j, i, values.at(k), this->thresholds.at(k) );
-                    this->failedFlag = true;
+                    //this->failedFlag = true;
                     failedFlags.at(i-1) = true;
-                    return true;
+                    //return true;
                 }
             }
         }
     }
+
     return false;
 }
 

@@ -139,21 +139,24 @@ class FailureModuleElementInterface : public Interface
 public:
     FailureModuleElementInterface() : Interface() {}
     virtual const char *giveClassName() const { return "FailureModuleElementInterface"; }
-    virtual void evaluateFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep) {};
+    virtual void computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep) {};
 };
 
 
 class FractureManager
 {
-public:
+private:
+    bool updateFlag;
     Domain *domain;
 
-    
-    AList < Crack           > *crackList;        // Keep track of all cracks - each crack may have several fronts/tips
+public:
+
+    //AList < Crack           > *crackList;        // Keep track of all cracks - each crack may have several fronts/tips
     AList < FailureCriteria > *failureCriterias; // All failure criterias to evaluate
-    AList < PropagationLaw  > *propagationLaws;
+    //AList < PropagationLaw  > *propagationLaws;
+    void setUpdateFlag(bool flag) { this->updateFlag = flag; };
+    bool giveUpdateFlag() { return this->updateFlag; };
     
-    bool needsUpdate;
     //createCrack(){}; //Should be able to create a new crack based on failure criterias?
     //removeCrack(int number){};
     
@@ -163,6 +166,7 @@ public:
     void update(TimeStep *tStep);
     void updateXFEM(TimeStep *tStep);
     //evaluatePropagationLaws(){};
+
     /// Constructor.
     FractureManager(Domain *domain);
     /// Destructor.

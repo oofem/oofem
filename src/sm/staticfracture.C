@@ -46,7 +46,7 @@ REGISTER_EngngModel( StaticFracture );
 
 StaticFracture :: StaticFracture(int i, EngngModel *_master) : NonLinearStatic(i, _master)
 {
-    crackGrowthFlag = true; // if true, then the internal structure needs to be updated
+    updateStructureFlag = false; // if true, then the internal structure needs to be updated
 }
 
 
@@ -79,53 +79,47 @@ StaticFracture :: solveYourselfAt(TimeStep *tStep)
         this->fMan->failureCriterias = new AList< FailureCriteria >(1); // list of all the criterias to evaluate
         FailureCriteria *fc = new FailureCriteria(FC_MaxShearStress);
         fc->thresholds.resize(1);
-        fc->thresholds.at(1) = 500.0;
+        fc->thresholds.at(1) = 000.0;
         this->fMan->failureCriterias->put(1, fc);
     }
 
 
-    crackGrowthFlag = false;
+    this->setUpdateStructureFlag(false);
     NonLinearStatic :: solveYourselfAt(tStep);
 
 }
 
 void 
-StaticFracture :: updateYourself(TimeStep *stepN)
+StaticFracture :: updateYourself(TimeStep *tStep)
 {
     
-    NonLinearStatic :: updateYourself(stepN);
+    NonLinearStatic :: updateYourself(tStep);
 
     // Fracture/failure mechanics evaluation
     // Upadate components like the XFEM manager and its sub-components
-    this->fMan->updateXFEM(stepN);
-    
-    
-    
+    this->fMan->update(tStep);
+    this->fMan->setUpdateFlag(false);
+    this->fMan->updateXFEM(tStep);
 
-    //this->fMan->evaluateFailureCriterias(stepN);
-    this->setCrackGrowthFlag( this->fMan->needsUpdate ); // if the internal structure need to be updated // change name
 
+    this->setUpdateStructureFlag( this->fMan->giveUpdateFlag() ); // if the internal structure need to be updated
 
     // Update the UnknownsDictionary if needed
-    if ( this->requiresUnknownsDictionaryUpdate() ) {
+    if ( this->needsStructureUpdate() ) {
         printf(" Updating DofUnknownsDictionary... \n");
         for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
             Domain *domain = this->giveDomain(idomain);
             int nnodes = domain->giveNumberOfDofManagers();
             for ( int inode = 1; inode <= nnodes; inode++ ) {
-                this->updateDofUnknownsDictionary(domain->giveDofManager(inode), stepN);
+                this->updateDofUnknownsDictionary(domain->giveDofManager(inode), tStep);
             }
         }
     }
 
 
-    this->forceEquationNumbering(1);
-    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()); // 1 stands for domain?
-
-
 }
 
-
+// remove
 void
 StaticFracture :: terminate(TimeStep *tStep)
 {
@@ -135,13 +129,13 @@ StaticFracture :: terminate(TimeStep *tStep)
 
 
 void
-StaticFracture :: updateLoadVectors(TimeStep *stepN)
+StaticFracture :: updateLoadVectors(TimeStep *tStep)
 {
-    MetaStep *mstep = this->giveMetaStep( stepN->giveMetaStepNumber() );
-    bool isLastMetaStep = ( stepN->giveNumber() == mstep->giveLastStepNumber() );
+    MetaStep *mstep = this->giveMetaStep( tStep->giveMetaStepNumber() );
+    bool isLastMetaStep = ( tStep->giveNumber() == mstep->giveLastStepNumber() );
 
     if ( controlMode == nls_indirectControl ) { //todo@: not checked 
-        //if ((stepN->giveNumber() == mstep->giveLastStepNumber()) && ir->hasField("fixload")) {
+        //if ((tStep->giveNumber() == mstep->giveLastStepNumber()) && ir->hasField("fixload")) {
         if ( isLastMetaStep ) {
             if ( !mstep->giveAttributesRecord()->hasField(_IFT_NonLinearStatic_donotfixload) ) {
                 OOFEM_LOG_INFO("Fixed load level\n");

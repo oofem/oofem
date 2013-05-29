@@ -307,6 +307,7 @@ Delamination :: updateGeometry(TimeStep *tStep, FractureManager *fMan, Element *
     for ( int i = 1; i <= fc->quantities.size(); i++ ) {
         if ( fc->hasFailed(i) ) { // interface has failed
             printf( "Element %d fails in interface %d \n", el->giveNumber(), i );
+            fMan->setUpdateFlag(true);
 
             // should create a new *ed at the level given by interface i iff it does not already exist
             // add coord

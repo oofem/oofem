@@ -64,17 +64,27 @@ int
 Shell7Base :: checkConsistency()
 {
     NLStructuralElement :: checkConsistency();
-    this->layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection()  );
-    this->fei       = dynamic_cast< FEInterpolation3d   * >( this->giveInterpolation() );
-    this->setupInitialNodeDirectors();
+    //this->layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection()  );
+    //this->fei       = dynamic_cast< FEInterpolation3d   * >( this->giveInterpolation() );
+    //this->setupInitialNodeDirectors();
 
-    if ( layeredCS == NULL ) {
+    if ( this->layeredCS == NULL ) {
         OOFEM_ERROR("Elements derived from Shell7Base only supports layered cross section");
     }
     return ( this->layeredCS != NULL  &&  this->fei != NULL);
 }
 
 
+void
+Shell7Base :: postInitialize()
+{
+    Element :: postInitialize();
+
+    this->layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection()  );
+    this->fei       = dynamic_cast< FEInterpolation3d   * >( this->giveInterpolation() );
+    this->setupInitialNodeDirectors();
+
+}
 
 
 Interface *Shell7Base :: giveInterface(InterfaceType it)

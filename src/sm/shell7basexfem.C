@@ -54,10 +54,10 @@ int
 Shell7BaseXFEM :: checkConsistency()
 {
     Shell7Base :: checkConsistency();
-    this->xMan =  this->giveDomain()->giveXfemManager();
-    if ( this->czMatNum > 0 ) {
-        this->czMat = this->giveDomain()->giveMaterial(this->czMatNum);
-    }
+    //this->xMan =  this->giveDomain()->giveXfemManager();
+    //if ( this->czMatNum > 0 ) {
+    //    this->czMat = this->giveDomain()->giveMaterial(this->czMatNum);
+    //}
 
     // check if defined xi-coords in delamination EI corresponds to actual layer boundaries
     //@todo should be improved
@@ -92,9 +92,49 @@ Shell7BaseXFEM :: checkConsistency()
     return 1;
 }
 
+void
+Shell7BaseXFEM :: postInitialize()
+{
+    Shell7Base :: postInitialize();
+
+    this->xMan =  this->giveDomain()->giveXfemManager();
+    if ( this->czMatNum > 0 ) {
+        this->czMat = this->giveDomain()->giveMaterial(this->czMatNum);
+    }
+
+    int numLayers = this->layeredCS->giveNumberOfLayers();
+    FloatArray interfaceXi(numLayers-1), delamXiCoords;
+    this->layeredCS->giveInterfaceXiCoords(interfaceXi);
+    DelaminatedInterfaceList.resize(0);
+
+    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
+        EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
+        if ( Delamination *dei = dynamic_cast< Delamination * >( ei ) ) {
+            dei->giveActiveDelaminationXiCoords(delamXiCoords, this);
+            for ( int j = 1; j <= delamXiCoords.giveSize(); j++ ) {
+                for ( int k = 1; k <= interfaceXi.giveSize(); k++ ) {
+                    if ( abs(delamXiCoords.at(j)-interfaceXi.at(k)) < 1.0e-3 ) {
+                        this->DelaminatedInterfaceList.followedBy(k); //check for duplicates? 
+                    }
+                    
+                }
+
+                
+            }
+        }
+    }
+    DelaminatedInterfaceList.printYourself();
+}
 
 void
-Shell7BaseXFEM :: evaluateFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep) 
+Shell7BaseXFEM :: updateYourself(TimeStep *tStep)
+{
+    StructuralElement :: updateYourself(tStep);
+
+}
+
+void
+Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep) 
 {
     switch ( fc->giveType() ) {
 

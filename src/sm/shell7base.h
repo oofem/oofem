@@ -65,6 +65,7 @@ public:
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeNumberOfDofs(EquationID ut) { return this->giveNumberOfDofs(); }
     virtual int checkConsistency();
+    virtual void postInitialize();
 
     // Definition & identification
     virtual const char *giveClassName() const { return "Shell7Base"; }

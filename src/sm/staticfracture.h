@@ -53,10 +53,10 @@ protected:
     // from nlinearstatic
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual void terminate(TimeStep *tStep);
-    virtual void updateLoadVectors(TimeStep *stepN);
+    virtual void updateLoadVectors(TimeStep *tStep);
 
 
-    virtual void updateYourself(TimeStep *stepN);
+    virtual void updateYourself(TimeStep *tStep);
 
 
     virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
@@ -70,7 +70,7 @@ protected:
     void evaluatePropagationLawForDelamination(Element *el, EnrichmentDomain *ed, TimeStep *tStep);
     void computeInterLaminarStressesAt(int layer, Element *el, TimeStep *tStep, std::vector < FloatArray > &interLamStresses);
     void evaluateFractureCriterion(std::vector < FloatArray > &interLamStresses, bool &propagateFlag);
-    bool crackGrowthFlag;
+    bool updateStructureFlag;
 
     // Fracture manager stuff
     FractureManager *fMan;
@@ -78,9 +78,10 @@ protected:
 public:
     StaticFracture(int i, EngngModel *_master = NULL);
     virtual ~StaticFracture(){};
-    virtual int requiresUnknownsDictionaryUpdate() { return crackGrowthFlag; }
-    virtual bool requiresEquationRenumbering(TimeStep *) { return crackGrowthFlag; }
-    void setCrackGrowthFlag(bool flag) { crackGrowthFlag = flag; }
+    virtual int requiresUnknownsDictionaryUpdate() { return updateStructureFlag; }
+    virtual bool requiresEquationRenumbering(TimeStep *) { return updateStructureFlag; }
+    void setUpdateStructureFlag(bool flag) { updateStructureFlag = flag; }
+    bool needsStructureUpdate() {return updateStructureFlag; };
 };
 
 } // end namespace oofem

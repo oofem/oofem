@@ -95,7 +95,8 @@ protected:
         return a.second < b.second;
     }
     IntegrationRule **czIntegrationRulesArray;
-
+    virtual void updateYourself(TimeStep *tStep);
+    virtual void postInitialize();
     void computeOrderingArray(IntArray &orderingArray, IntArray &activeDofsArray, int enrichmentDomainNumber, SolutionField field);
     
    
@@ -134,7 +135,7 @@ protected:
     virtual void vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
 
     IntArray DelaminatedInterfaceList;
-     void evaluateFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep);
+     void computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep);
 public:
     Shell7BaseXFEM(int n, Domain *d);   
     virtual ~Shell7BaseXFEM() {};		
