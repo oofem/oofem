@@ -109,7 +109,7 @@ Tr2Shell7XFEM :: computeGaussPoints()
         LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( Tr2Shell7XFEM :: giveCrossSection() );
 
         // need to check if interface has failed but need to update the integration rule later
-        XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+        XfemManager *xMan = this->giveDomain()->giveXfemManager();
         for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { 
             Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) ); 
             if (dei) {

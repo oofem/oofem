@@ -48,6 +48,18 @@
 #include <cstring>
 #include <ostream>
 
+#define ALLOC(size) (double*)malloc(size* sizeof(double));
+
+#define RESIZE(nr, nc) \
+    { \
+        this->nRows = nr; this->nColumns = nc; \
+        if ( nr * nc > allocatedSize ) { \
+            allocatedSize = nr * nc; \
+            if ( this->values ) free(this->values); \
+            this->values = ALLOC(allocatedSize); \
+        } \
+    }
+
 #ifdef BOOST_PYTHON
 #include <boost/python.hpp>
 #include <boost/python/extract.hpp>
@@ -88,8 +100,11 @@ extern void dsyr_(const char *uplo, const int *n, const double *alpha, const dou
                   double *a, const int *lda, int x_len, int a_columns);
 /// Y = Y + alpha * X
 extern void daxpy_(const int *n, const double *alpha, const double *x, const int *incx, double *y, const int *incy, int xsize, int ysize);
+/// X = alpha * X
+extern void dscal_(const int *n, const double *alpha, const double *x, const int *incx, int size);
 }
 #endif
+
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
@@ -101,11 +116,8 @@ FloatMatrix :: FloatMatrix(int n, int m) :
     nRows(n), nColumns(m),
     allocatedSize(n * m)
 {
-    ///@todo Should we really automatically zero matrices?
-    values = (double*)calloc(allocatedSize, sizeof(double));
-#ifdef DEBUG
-    //for (int i = 0; i < allocatedSize; ++i) values[i] = NaN;
-#endif
+    values = ALLOC(allocatedSize);
+    memset(this->values, 0, allocatedSize * sizeof(double) );
 #ifdef DEBUG
     if ( !values ) {
         OOFEM_FATAL2("FloatArray :: FloatArray - Failed in allocating %d doubles", n);
@@ -137,7 +149,7 @@ FloatMatrix :: FloatMatrix(const FloatArray *vector, bool transpose)
     }
 
     allocatedSize = nRows * nColumns;
-    values = (double*)malloc(allocatedSize * sizeof(double));
+    values = ALLOC(allocatedSize);
     memcpy(values, vector->givePointer(), allocatedSize * sizeof(double) );
 }
 
@@ -146,7 +158,7 @@ FloatMatrix :: FloatMatrix(const FloatMatrix &src) :
     nRows(src.nRows), nColumns(src.nColumns)
 {
     allocatedSize = nRows * nColumns;
-    values = (double*)malloc(allocatedSize * sizeof(double));
+    values = ALLOC(allocatedSize);
     memcpy(values, src.values, allocatedSize * sizeof(double) );
 }
 
@@ -183,7 +195,7 @@ void FloatMatrix :: checkBounds(int i, int j) const
 FloatMatrix & FloatMatrix :: operator = ( const FloatMatrix & src )
 {
     // assignment: cleanup and copy
-    this->resize(src.nRows, src.nColumns);
+    RESIZE(src.nRows, src.nColumns);
 
     memcpy(values, src.values, nRows * nColumns * sizeof(double));
 
@@ -298,7 +310,7 @@ void FloatMatrix :: beTranspositionOf(const FloatMatrix &src)
 {
     // receiver becomes a transposition of src
     int nrows = src.giveNumberOfColumns(), ncols = src.giveNumberOfRows();
-    this->resize(nrows, ncols);
+    RESIZE(nrows, ncols);
 
     for ( int i = 1; i <= nrows; i++ ) {
         for ( int j = 1; j <= ncols; j++ ) {
@@ -316,7 +328,7 @@ void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &b
         OOFEM_ERROR("FloatMatrix::beProductOf : error in product A*B : dimensions do not match");
     }
 #  endif
-    this->resize(aMatrix.nRows, bMatrix.nColumns);
+    RESIZE(aMatrix.nRows, bMatrix.nColumns);
 #  ifdef __LAPACK_MODULE
     double alpha = 1., beta = 0.;
     dgemm_("n", "n", & this->nRows, & this->nColumns, & aMatrix.nColumns, 
@@ -346,7 +358,7 @@ void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &
         OOFEM_ERROR("FloatMatrix::beTProductOf : error in product A*B : dimensions do not match");
     }
 #  endif
-    this->resize(aMatrix.nColumns, bMatrix.nColumns);
+    RESIZE(aMatrix.nColumns, bMatrix.nColumns);
 #  ifdef __LAPACK_MODULE
     double alpha = 1., beta = 0.;
     dgemm_("t", "n", & this->nRows, & this->nColumns, & aMatrix.nRows, 
@@ -376,7 +388,7 @@ void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &
         OOFEM_ERROR("FloatMatrix::beProductTOf : error in product A*B : dimensions do not match");
     }
 #  endif
-    this->resize(aMatrix.nRows, bMatrix.nRows);
+    RESIZE(aMatrix.nRows, bMatrix.nRows);
 #  ifdef __LAPACK_MODULE
     double alpha = 1., beta = 0.;
     dgemm_("n", "t", & this->nRows, & this->nColumns, & aMatrix.nColumns, 
@@ -468,7 +480,7 @@ void FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &
 {
     int n1 = vec1.giveSize();
     int n2 = vec2.giveSize();
-    this->resize(n1, n2);
+    RESIZE(n1, n2);
     for ( int j = 1; j <= n2; j++ ) {
         for ( int i = 1; i <= n1; i++ ) {
             this->at(i, j) = vec1.at(i) * vec2.at(j);
@@ -479,7 +491,6 @@ void FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &
 void FloatMatrix :: beNMatrixOf(const FloatArray &n, int nsd)
 {
     this->resize(nsd, n.giveSize()*nsd);
-    this->zero();
     for (int i = 0; i < n.giveSize(); ++i) {
         for (int j = 0; j < nsd; ++j) {
             (*this)(j, i*nsd+j) = n(i);
@@ -682,10 +693,38 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
 // not compute the transposition of matrix a.
 {
     if ( !this->isNotEmpty() ) {
-        this->resize(a.nColumns, b.nColumns);
-        this->zero();
+        RESIZE(a.nColumns, b.nColumns);
+        memset(this->values, 0, allocatedSize * sizeof(double));
     }
 
+#ifdef __LAPACK_MODULE
+    double beta = 1.;
+    ///@todo We should determine which is the best choice overall. For large systems more block matrix operations is necessary.
+    /// For smaller systems the overhead from function calls might be larger, but the overhead might be tiny, or using symmetry at all might be undesireable.
+    if ( this->nRows < 20 ) {
+        // Split the matrix into 2 columns, s1 + s2 = n ( = nRows = nColumns ).
+        int s1 = this->nRows/2;
+        int s2 = this->nRows - s1;
+        // First column block, we only take the first s rows by only taking the first s columns in the matrix a.
+        dgemm_("t", "n", & s1, & s1, & a.nRows, & dV, a.values, & a.nRows, b.values, & b.nRows, & beta, this->values, & this->nRows, a.nColumns, b.nColumns, this->nColumns);
+        // Second column block starting a memory position c * nRows
+        dgemm_("t", "n", & this->nRows, & s2, & a.nRows, & dV, a.values, & a.nRows, &b.values[s1*b.nRows], & b.nRows, & beta, &this->values[s1*this->nRows], & this->nRows, a.nColumns, b.nColumns, this->nColumns);
+    } else {
+        // Get suitable blocksize. Around 10 rows should be suitable (slightly adjusted to minimize number of blocks):
+        // Smaller blocks than ~10 didn't show any performance gains in my benchmarks. / Mikael
+        int block = (this->nRows - 1) / (this->nRows / 10) + 1;
+        int start = 0;
+        int end = block;
+        while ( start < this->nRows ) {
+            int s = end-start;
+            dgemm_("t", "n", & end, & s, & a.nRows, & dV, a.values, & a.nRows, &b.values[start*b.nRows], & b.nRows, & beta, &this->values[start*this->nRows], 
+                   & this->nRows, a.nColumns, b.nColumns, this->nColumns);
+            start = end;
+            end += block;
+            if ( end > this->nRows ) end = this->nRows;
+        }
+    }
+#else
     for ( int i = 1; i <= nRows; i++ ) {
         for ( int j = i; j <= nColumns; j++ ) {
             double summ = 0.;
@@ -696,14 +735,15 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
             this->at(i, j) += summ * dV;
         }
     }
+#endif
 }
 
 
 void FloatMatrix :: plusDyadSymmUpper(const FloatArray &a, double dV)
 {
     if ( !this->isNotEmpty() ) {
-        this->resize(a.giveSize(), a.giveSize());
-        this->zero();
+        RESIZE(a.giveSize(), a.giveSize());
+        memset(this->values, 0, allocatedSize * sizeof(double));
     }
 #ifdef __LAPACK_MODULE
     int inc = 1;
@@ -728,8 +768,8 @@ void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b,
 // Advantage : does not compute the transposition of matrix a.
 {
     if ( !this->isNotEmpty() ) {
-        this->resize(a.nColumns, b.nColumns);
-        this->zero();
+        RESIZE(a.nColumns, b.nColumns);
+        memset(this->values, 0, allocatedSize * sizeof(double));
     }
 #ifdef __LAPACK_MODULE
     double beta = 1.;
@@ -755,8 +795,8 @@ void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b,
 void FloatMatrix :: plusDyadUnsym(const FloatArray &a, const FloatArray &b, double dV)
 {
     if ( !this->isNotEmpty() ) {
-        this->resize(a.giveSize(), b.giveSize());
-        this->zero();
+        RESIZE(a.giveSize(), b.giveSize());
+        memset(this->values, 0, allocatedSize * sizeof(double));
     }
 #ifdef __LAPACK_MODULE
     int inc = 1;
@@ -786,7 +826,7 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
     }
 #  endif
 
-    this->resize(src.nRows, src.nColumns);
+    RESIZE(src.nRows, src.nColumns);
 
     if ( nRows == 1 ) {
         this->at(1, 1) = 1. / src.at(1, 1);
@@ -850,7 +890,6 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         //
         double piv, linkomb;
         FloatMatrix tmp = src;
-        this->zero();
         // initialize answer to be unity matrix;
         for ( int i = 1; i <= nRows; i++ ) {
             this->at(i, i) = 1.0;
@@ -970,29 +1009,29 @@ void FloatMatrix :: add(const FloatMatrix &aMatrix)
 {
     if ( nRows * nColumns == 0 ) {
         this->operator = ( aMatrix );
-    } else {
+        return;
+    }
 #     ifdef DEBUG
-        if ( (aMatrix.nRows != nRows || aMatrix.nColumns != nColumns) && aMatrix.isNotEmpty() )
-            OOFEM_ERROR5("FloatMatrix::add : dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
+    if ( (aMatrix.nRows != nRows || aMatrix.nColumns != nColumns) && aMatrix.isNotEmpty() )
+        OOFEM_ERROR5("FloatMatrix::add : dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
 #     endif
 
 #ifdef __LAPACK_MODULE
-        int aSize = aMatrix.nRows * aMatrix.nColumns;
-        int inc = 1;
-        double s = 1.;
-        daxpy_( &aSize, &s, aMatrix.values, &inc, this->values, &inc, aSize, aSize);
+    int aSize = aMatrix.nRows * aMatrix.nColumns;
+    int inc = 1;
+    double s = 1.;
+    daxpy_( &aSize, &s, aMatrix.values, &inc, this->values, &inc, aSize, aSize);
 #else
-        int n = aMatrix.nRows;
-        int m = aMatrix.nColumns;
+    int n = aMatrix.nRows;
+    int m = aMatrix.nColumns;
 
-        double *P1 = values;
-        double *P2 = aMatrix.values;
-        register int i  = n * m;
-        while ( i-- ) {
-            * P1++ += * P2++;
-        }
-#endif
+    double *P1 = values;
+    double *P2 = aMatrix.values;
+    register int i  = n * m;
+    while ( i-- ) {
+        * P1++ += * P2++;
     }
+#endif
 }
 
 
@@ -1003,28 +1042,28 @@ void FloatMatrix :: add(double s, const FloatMatrix &aMatrix)
     if ( !this->isNotEmpty() ) {
         this->operator = ( aMatrix );
         this->times(s);
-    } else {
+        return;
+    }
 #     ifdef DEBUG
-        if ( (aMatrix.nRows != nRows || aMatrix.nColumns != nColumns) && aMatrix.isNotEmpty() )
-            OOFEM_ERROR5("FloatMatrix::add : dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
+    if ( (aMatrix.nRows != nRows || aMatrix.nColumns != nColumns) && aMatrix.isNotEmpty() )
+        OOFEM_ERROR5("FloatMatrix::add : dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
 #     endif
 
 #ifdef __LAPACK_MODULE
-        int aSize = aMatrix.nRows * aMatrix.nColumns;
-        int inc = 1;
-        daxpy_( &aSize, &s, aMatrix.values, &inc, this->values, &inc, aSize, aSize);
+    int aSize = aMatrix.nRows * aMatrix.nColumns;
+    int inc = 1;
+    daxpy_( &aSize, &s, aMatrix.values, &inc, this->values, &inc, aSize, aSize);
 #else
-        int n = aMatrix.nRows;
-        int m = aMatrix.nColumns;
+    int n = aMatrix.nRows;
+    int m = aMatrix.nColumns;
 
-        double *P1 = values;
-        double *P2 = aMatrix.values;
-        register int i  = n * m;
-        while ( i-- ) {
-            * P1++ += s *(* P2++);
-        }
-#endif
+    double *P1 = values;
+    double *P2 = aMatrix.values;
+    register int i  = n * m;
+    while ( i-- ) {
+        * P1++ += s *(* P2++);
     }
+#endif
 }
 
 void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
@@ -1033,29 +1072,29 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
 {
     if ( !this->isNotEmpty() ) {
         this->operator=(aMatrix);
-    } else {
+        return;
+    }
 #     ifdef DEBUG
-        if ( (aMatrix.nRows != nRows || aMatrix.nColumns != nColumns) && aMatrix.isNotEmpty() )
-            OOFEM_ERROR5("FloatMatrix::subtract : dimensions mismatch : (r1,c1)-(r2,c2) : (%d,%d)-(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
+    if ( (aMatrix.nRows != nRows || aMatrix.nColumns != nColumns) && aMatrix.isNotEmpty() )
+        OOFEM_ERROR5("FloatMatrix::subtract : dimensions mismatch : (r1,c1)-(r2,c2) : (%d,%d)-(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
 #     endif
 
 #ifdef __LAPACK_MODULE
-        int aSize = aMatrix.nRows * aMatrix.nColumns;
-        int inc = 1;
-        double s = -1.;
-        daxpy_( &aSize, &s, aMatrix.values, &inc, this->values, &inc, aSize, aSize);
+    int aSize = aMatrix.nRows * aMatrix.nColumns;
+    int inc = 1;
+    double s = -1.;
+    daxpy_( &aSize, &s, aMatrix.values, &inc, this->values, &inc, aSize, aSize);
 #else
-        int n = aMatrix.nRows;
-        int m = aMatrix.nColumns;
+    int n = aMatrix.nRows;
+    int m = aMatrix.nColumns;
 
-        double *P1 = values;
-        double *P2 = aMatrix.values;
-        register int i  = n * m;
-        while ( i-- ) {
-            * P1++ -= * P2++;
-        }
-#endif
+    double *P1 = values;
+    double *P2 = aMatrix.values;
+    register int i  = n * m;
+    while ( i-- ) {
+        * P1++ -= * P2++;
     }
+#endif
 }
 
 
@@ -1171,7 +1210,7 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
     answer = b;
     dgetrf_( &this->nRows, &this->nRows, this->values, &this->nRows, ipiv.givePointer(), &info );
     if (info == 0)
-        dgetrs_( transpose ? "Transpose" : "No transpose", &this->nRows, &this->nRows, this->values, &this->nRows, ipiv.givePointer(), answer.givePointer(), &this->nRows, &info );
+        dgetrs_( transpose ? "t" : "n", &this->nRows, &answer.nColumns, this->values, &this->nRows, ipiv.givePointer(), answer.givePointer(), &this->nRows, &info );
     if (info != 0) {
         OOFEM_ERROR2("FloatMatrix::solveForRhs : error %d", info);
     }
@@ -1267,7 +1306,7 @@ void FloatMatrix :: initFromVector(const FloatArray &vector, bool transposed)
 }
 
 
-void FloatMatrix :: zero() const
+void FloatMatrix :: zero()
 {
     memset(this->values, 0, nRows * nColumns * sizeof(double) );
 }
@@ -1293,40 +1332,30 @@ void FloatMatrix :: bePinvID()
 // and the inverse scaling matrix Pinv
 {
     this->resize(6, 6);
-    this->zero();
     values [ 0 ] = values [ 7 ] = values [ 14 ] = 2. / 3.;
     values [ 1 ] = values [ 2 ] = values [ 6 ] = values [ 8 ] = values [ 12 ] = values [ 13 ] = -1. / 3.;
     values [ 21 ] = values [ 28 ] = values [ 35 ] = 0.5;
 }
 
 
-void FloatMatrix :: resize(int rows, int columns, int allocChunk)
+void FloatMatrix :: resize(int rows, int columns)
 //
 // resizes receiver, all data will be lost
 //
 {
+    this->nRows = rows;
+    this->nColumns = columns;
+
     if ( rows * columns > allocatedSize ) {
         // memory realocation necessary
         if ( values ) {
             free(values);
         }
 
-        if ( allocChunk < 0 ) {
-            allocChunk = 0;
-        }
-
-        allocatedSize = rows * columns + allocChunk; // REMEMBER NEW ALLOCATED SIZE
-        ///@todo Should we set all values to zeros or not?
-        values = (double*)calloc(allocatedSize, sizeof(double));
-#ifdef DEBUG
-        //for (int i = 0; i < allocatedSize; ++i) values[i] = NaN;
-#endif
-    } else {
-        // reuse previously allocated space
+        allocatedSize = rows * columns;
+        values = ALLOC(allocatedSize);
     }
-
-    this->nRows = rows;
-    this->nColumns = columns;
+    memset(values, 0, allocatedSize * sizeof(double) );
 }
 
 
@@ -1344,12 +1373,8 @@ void FloatMatrix :: resizeWithData(int rows, int columns)
         }
 
         allocatedSize = rows * columns; // REMEMBER NEW ALLOCATED SIZE
-        values = (double*)calloc(allocatedSize, sizeof(double));
-#ifdef DEBUG
-        //for (int i = 0; i < allocatedSize; ++i) values[i] = NaN;
-#endif
-    } else {
-        // reuse previously allocated space
+        values = ALLOC(allocatedSize);
+        memset(values, 0, allocatedSize*sizeof(double) );
     }
 
     this->nRows = rows;
@@ -1377,10 +1402,8 @@ void FloatMatrix :: hardResize(int rows, int columns)
     }
 
     allocatedSize = rows * columns; // REMEMBER NEW ALLOCATED SIZE
-    values = (double*)calloc(allocatedSize, sizeof(double));
-#ifdef DEBUG
-    //for (int i = 0; i < allocatedSize; ++i) values[i] = NaN;
-#endif
+    values = ALLOC(allocatedSize);
+    memset(values, 0, allocatedSize*sizeof(double) );
 
     this->nRows = rows;
     this->nColumns = columns;
@@ -1420,7 +1443,7 @@ void FloatMatrix :: printYourself() const
            nRows, nColumns);
     if ( nRows <= 250 && nColumns <= 250 ) {
         for ( int i = 1; i <= nRows; ++i ) {
-            for ( int j = 1; j <= nColumns && j <= 50; ++j ) {
+            for ( int j = 1; j <= nColumns && j <= 100; ++j ) {
                 printf( "%10.3e  ", this->at(i, j) );
             }
 
@@ -1484,6 +1507,7 @@ void FloatMatrix :: times(double factor)
 // Multiplies every coefficient of the receiver by factor. Answers the
 // modified receiver.
 {
+    // dscal_ seemed to be slower for typical usage of this function.
     int i = nRows * nColumns;
     double *p = values;
     while ( i-- ) {
@@ -1699,7 +1723,7 @@ contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream, ContextMo
 
     if ( nRows * nColumns ) {
         allocatedSize = nRows * nColumns;
-        values = (double*)malloc(allocatedSize * sizeof(double));
+        values = ALLOC(allocatedSize);
     } else {
         values = NULL;
         allocatedSize = 0;

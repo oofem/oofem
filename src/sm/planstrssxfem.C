@@ -64,7 +64,7 @@ PlaneStress2dXfem :: giveInterface(InterfaceType it)
 void
 PlaneStress2dXfem :: computeGaussPoints()
 {
-    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     EnrichmentItem *ei = xMan->giveEnrichmentItem(1);
     EnrichmentDomain *ed = ei->giveEnrichmentDomain(1);
     Inclusion *iei = dynamic_cast< Inclusion * > (ei); 
@@ -98,7 +98,7 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     }
 
     // Assemble xfem part of strain-displacement matrix
-    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     FloatMatrix Bd[4];
 
     int counter = 8; // 8 continuous dofs
@@ -167,7 +167,7 @@ void PlaneStress2dXfem :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     FloatArray Nc;
     interpolation.evalN( Nc, *gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     // assemble xfem part of strain-displacement matrix
-    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     FloatArray Nd;
     Nd.resize(4);
     IntArray mask(4);
@@ -238,7 +238,7 @@ PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer
 
 void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     ///@todo: only works for circles
     EDBGCircle *edc = static_cast< EDBGCircle * > ( xMan->giveEnrichmentItem(1)->giveEnrichmentDomain(1) );
     
@@ -258,7 +258,7 @@ PlaneStress2dXfem :: computeStressVector(FloatArray &answer, GaussPoint *gp, Tim
 {
     FloatArray Epsilon;
     this->computeStrainVector(Epsilon, gp, stepN);
-    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     EDBGCircle *edc = dynamic_cast< EDBGCircle * > ( xMan->giveEnrichmentItem(1)->giveEnrichmentDomain(1) );
     FloatArray coords;
     this->computeGlobalCoordinates(coords, *(gp->giveCoordinates()) );
@@ -286,7 +286,7 @@ PlaneStress2dXfem :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
 Element_Geometry_Type 
 PlaneStress2dXfem :: giveGeometryType() const 
 { 
-    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     if ( xMan->isElementEnriched(this) ) {
         //return EGT_Composite;
         return EGT_quad_1; 

@@ -54,7 +54,7 @@ int
 Shell7BaseXFEM :: checkConsistency()
 {
     Shell7Base :: checkConsistency();
-    this->xMan =  this->giveDomain()->giveXfemManager(1);
+    this->xMan =  this->giveDomain()->giveXfemManager();
     if ( this->czMatNum > 0 ) {
         this->czMat = this->giveDomain()->giveMaterial(this->czMatNum);
     }
@@ -184,7 +184,7 @@ Shell7BaseXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer
 
     // Continuous part
     Shell7Base ::giveDofManDofIDMask(inode, ut, answer);
-    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     // Discontinuous part
     DofManager *dMan = this->giveDofManager(inode);
     //for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment

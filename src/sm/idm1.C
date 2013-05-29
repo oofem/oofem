@@ -438,7 +438,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
             dim = 2;
             StrainVector  fullStrain(strain, _PlaneStress);
             fullStrain.computePrincipalValDir(principalStrains, N);
-            principalStrains.resize(3);
+            principalStrains.resizeWithValues(3);
             principalStrains.at(3) = -nu * ( principalStrains.at(1) + principalStrains.at(2) ) / ( 1. - nu );
         } else if ( gp->giveMaterialMode() == _3dMat || gp->giveMaterialMode() == _3dMatGrad )     {
             dim = 3;
@@ -499,7 +499,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         if ( gp->giveMaterialMode() == _PlaneStress || gp->giveMaterialMode() == _PlaneStressGrad ) {
             StressVector fullStress(stress, _PlaneStress);
             fullStress.computePrincipalValDir(principalStress, N);
-            principalStress.resize(3);
+            principalStress.resizeWithValues(3);
             dim = 2;
         } else if ( gp->giveMaterialMode() == _3dMat || gp->giveMaterialMode() == _3dMatGrad ) {
             StressVector fullStress(stress, _3dMat);

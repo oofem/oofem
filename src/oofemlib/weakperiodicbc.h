@@ -51,6 +51,8 @@
 #define _IFT_WeakPeriodicBoundaryCondition_ngp "ngp"
 #define _IFT_WeakPeriodicBoundaryCondition_elementSidesPositive "elementsidespositive"
 #define _IFT_WeakPeriodicBoundaryCondition_elementSidesNegative "elementsidesnegative"
+#define _IFT_WeakPeriodicBoundaryCondition_elementSidesPositiveSet "elementsidespositiveset"
+#define _IFT_WeakPeriodicBoundaryCondition_elementSidesNegativeSet "elementsidesnegativeset"
 //@}
 
 namespace oofem {
@@ -83,6 +85,11 @@ private:
     /** Number of degrees of freedom */
     int ndof;
 
+    /** Set containing positive side */
+    int posSet;
+
+    /** Set containing negative side */
+    int negSet;
 
     /** ID of dofs on which weak periodicity is imposed */
     int dofid;

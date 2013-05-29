@@ -901,7 +901,7 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
             answer.at(5) = 3;
             break;
         case _3dBeam:
-            answer.resize(6);
+            answer.resize(12);
             answer.at(1) = 1;
             answer.at(5) = 2;
             answer.at(6) = 3;

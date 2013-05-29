@@ -113,7 +113,7 @@ int FractureManager :: instanciateYourself(DataReader *dr)
 }
 
 
-
+// remove?
 void 
 FractureManager :: evaluateFailureCriterias(TimeStep *tStep)
 {
@@ -177,40 +177,7 @@ FractureManager :: evaluateFailureCriteria(FailureCriteria *fc, Element *el, Tim
     // ask agent what to do with this failure data. write output, update geometry etc
     // this case => ei,     giveDataToAgent?
 
-    //Domain *domain = this->giveDomain();   
-    //XfemManager *xMan; 
-    //xMan = domain->giveXfemManager(1);
-    //EnrichmentItem *ei;
 
-
-    //if( fc->hasFailed() ) {
-    //    for ( int i = 1; i <= fc->quantities.size(); i++ ) {
-    //        if ( fc->hasFailed(i) ) { // interface has failed
-    //            
-    //            // update *ed
-
-    //            for ( int k = 1; k <= xMan->giveNumberOfEnrichmentItems(); k++ ) {    
-    //                ei = xMan->giveEnrichmentItem(k);
-
-    //                if ( Delamination *dei = dynamic_cast< Delamination * > (ei) )  {
-    //                    dei->updateGeometry(tStep);
-    //                    // should create a new *ed
-    //                    int numED = dei->giveNumberOfEnrichmentDomains();
-    //                    EnrichmentDomain *ed = classFactory.createEnrichmentDomain( "DofManList" ); 
-    //                    DofManList *dml = dynamic_cast< DofManList * > ( ed );
-    //                    dml->addDofManagers( el->giveDofManArray() ); // add the dofmans of the el to the list
-    //                    dei->addEnrichmentDomain(ed);
-    //                    
-    //                    // add coord
-    //                    dei->enrichmentDomainXiCoords.resizeWithValues(numED+1);
-    //                    dei->enrichmentDomainXiCoords.at(numED+1) = 0.3333;
-
-    //                  
-    //                }
-    //            }
-    //        }
-    //    }
-    //}
      
 }
 
@@ -219,7 +186,7 @@ FractureManager :: updateXFEM(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain();   
     XfemManager *xMan; 
-    xMan = domain->giveXfemManager(1);
+    xMan = domain->giveXfemManager();
     EnrichmentItem *ei;
     for ( int k = 1; k <= xMan->giveNumberOfEnrichmentItems(); k++ ) {    
         ei = xMan->giveEnrichmentItem(k);
@@ -239,7 +206,7 @@ FractureManager :: update(TimeStep *tStep)
     Element *el;
     FailureCriteria *fc;
     XfemManager *xMan; 
-    xMan = domain->giveXfemManager(1);
+    xMan = domain->giveXfemManager();
 
     for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
         el = domain->giveElement(i);

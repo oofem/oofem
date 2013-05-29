@@ -53,10 +53,11 @@ FEI1dHermite :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICe
     answer.at(4) = -0.125 * l * (1.0 + ksi) * (1.0 + ksi) * (1.0 - ksi);
 }
 
-void
+double
 FEI1dHermite :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double l_inv = this->giveLength(cellgeo);
+    double l = this->giveLength(cellgeo);
+    double l_inv = 1.0 / l;
     double ksi = lcoords.at(1);
 
     answer.resize(1, 4);
@@ -66,12 +67,14 @@ FEI1dHermite :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
     answer.at(1, 2) =  0.25 * (ksi - 1.0) * (1.0 + 3.0 * ksi);
     answer.at(1, 3) = -1.5 * (-1.0 + ksi * ksi) * l_inv;
     answer.at(1, 4) =  0.25 * (ksi - 1.0) * (1.0 + 3.0 * ksi);
+
+    return 0.5 * l;
 }
 
 void
 FEI1dHermite :: evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double l_inv = this->giveLength(cellgeo);
+    double l_inv = 1.0 / this->giveLength(cellgeo);
     double ksi = lcoords.at(1);
     answer.resize(1, 4);
     answer.zero();

@@ -79,7 +79,7 @@ StaticFracture :: solveYourselfAt(TimeStep *tStep)
         this->fMan->failureCriterias = new AList< FailureCriteria >(1); // list of all the criterias to evaluate
         FailureCriteria *fc = new FailureCriteria(FC_MaxShearStress);
         fc->thresholds.resize(1);
-        fc->thresholds.at(1) = 1500.0;
+        fc->thresholds.at(1) = 500.0;
         this->fMan->failureCriterias->put(1, fc);
     }
 

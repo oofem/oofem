@@ -171,8 +171,7 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
-        double detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
-        this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
+        double detJ = fabs( this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this)) );
         this->interpolation_lin.evalN(Nh, * lcoords, FEIElementGeometryWrapper(this));
         double dV = detJ * gp->giveWeight();
 
@@ -332,15 +331,14 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
-        double detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
+        double detJ = fabs( this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this)) );
         double dV = detJ * gp->giveWeight();
-
-        this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
         this->interpolation_lin.evalN(Nlin, * lcoords, FEIElementGeometryWrapper(this));
 
 //        dN.printYourself();
 
         for ( int j = 0, k = 0; j < dN.giveNumberOfColumns(); j++, k+=3 ) {
+            ///@todo This column-row order of dN is inconsistent with every other interpolator class:
             dN_V(k + 0) = B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(0, j);
             dN_V(k + 1) = B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(1, j);
             dN_V(k + 2) = B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(2, j);

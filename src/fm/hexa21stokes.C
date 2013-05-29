@@ -169,8 +169,7 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         const FloatArray &lcoords = * gp->giveCoordinates();
 
-        double detJ = fabs( this->interpolation_quad.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this)) );
-        this->interpolation_quad.evaldNdx(dN, lcoords, FEIElementGeometryWrapper(this));
+        double detJ = fabs( this->interpolation_quad.evaldNdx(dN, lcoords, FEIElementGeometryWrapper(this)) );
         this->interpolation_lin.evalN(Nh, lcoords, FEIElementGeometryWrapper(this));
         double dV = detJ * gp->giveWeight();
 
@@ -324,10 +323,8 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         const FloatArray &lcoords = *gp->giveCoordinates();
 
-        double detJ = fabs( this->interpolation_quad.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this)) );
+        double detJ = fabs( this->interpolation_quad.evaldNdx(dN, lcoords, FEIElementGeometryWrapper(this)) );
         double dV = detJ * gp->giveWeight();
-
-        this->interpolation_quad.evaldNdx(dN, lcoords, FEIElementGeometryWrapper(this));
         this->interpolation_lin.evalN(Nlin, lcoords, FEIElementGeometryWrapper(this));
 
         for ( int j = 0, k = 0; j < dN.giveNumberOfRows(); j++, k+=3 ) {
@@ -343,8 +340,7 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
         mat->giveVolumetricPressureStiffness(Cp, TangentStiffness, gp, tStep); // deps_vol/dp
 
         EdB.beProductOf(Ed,B);
-        //K.plusProductSymmUpper(B, EdB, dV);
-        K.plusProductUnsym(B, EdB, dV);
+        K.plusProductSymmUpper(B, EdB, dV);
         G.plusDyadUnsym(dN_V, Nlin, -dV);
         C.plusDyadSymmUpper(Nlin, Cp*dV);
 
@@ -354,7 +350,7 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
         tmpB.beTProductOf(B, Cd);
         DvT.plusDyadUnsym(Nlin, tmpB, dV);
     }
-    //K.symmetrized();
+    K.symmetrized();
     C.symmetrized();
     FloatMatrix GTDvT, GDp;
     GTDvT.beTranspositionOf(G);
@@ -368,7 +364,6 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
     answer.assemble(GDp, this->momentum_ordering, this->conservation_ordering);
     answer.assemble(GTDvT, this->conservation_ordering, this->momentum_ordering);
     answer.assemble(C, this->conservation_ordering);
-    OOFEM_ERROR("STOP!");
 }
 
 FEInterpolation *Hexa21Stokes :: giveInterpolation()

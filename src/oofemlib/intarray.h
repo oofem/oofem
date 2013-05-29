@@ -82,7 +82,7 @@ private:
 public:
     /// Constructor for zero sized array
     IntArray();
-    /// Constructor for sized array
+    /// Constructor for sized array. Data is zeroed.
     IntArray(int n);
     /// Copy constructor. Creates the array from another array.
     IntArray(const IntArray &);
@@ -148,13 +148,18 @@ public:
 #endif
     /**
      * Checks size of receiver towards requested bounds.
-     * If dimension mismatch, size is adjusted accordingly.
-     * @note{After this operation array values are in undefined state, programmer should zero receiver.}
+     * If dimension mismatch, size is adjusted accordingly and memory is copied over.
      * @param n New size of array.
      * @param allocChunk If reallocation needed, an additional space for allocChunk values will be allocated
      * to prevent excessive reallocation.
      */
-    void resize(int n, int allocChunk = 0);
+    void resizeWithValues(int n, int allocChunk = 0);
+    /**
+     * Checks size of receiver towards requested bounds.
+     * Data is always zeroed.
+     * @param n New size of array.
+     */
+    void resize(int n);
     /**
      * Preallocates receiver to given futureSize if larger then allocatedSize.
      * @note{After this operation array values are in undefined state, programmer should zero receiver.}
@@ -272,19 +277,6 @@ public:
      * @param pos Position to erase.
      */
     void erase(int pos);
-
-    /**
-     * Add given array to receiver values starting at position si.
-     * @param src Array to add from.
-     * @param si Index to start adding from.
-     */
-    void addSubVector(const IntArray &src, int si);
-    /**
-     * Copy given array to receiver values starting at position si.
-     * @param src Array to copy from.
-     * @param si Index to start copying from.
-     */
-    void copySubVector(const IntArray &src, int si);
     /**
      * Sets the array to be a sequence of values.
      * @param n Number of integers in the sequence to follow.
