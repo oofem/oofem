@@ -91,6 +91,7 @@ bool EnrichmentItem :: isElementEnriched(const Element *element)
 
 bool EnrichmentItem :: isElementEnrichedByEnrichmentDomain(const Element *element, int edNumber) 
 {
+    // Checks if any of the dofmanagers are enriched
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
         DofManager *dMan = element->giveDofManager(i);
         if ( isDofManEnrichedByEnrichmentDomain(dMan, edNumber) ){
@@ -98,6 +99,19 @@ bool EnrichmentItem :: isElementEnrichedByEnrichmentDomain(const Element *elemen
         }
     }
     return false;
+}
+
+bool EnrichmentItem :: isElementFullyEnrichedByEnrichmentDomain(const Element *element, int edNumber) 
+{
+    // Checks if all of the dofmanagers are enriched
+    int count = 0;
+    for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
+        DofManager *dMan = element->giveDofManager(i);
+        if ( isDofManEnrichedByEnrichmentDomain(dMan, edNumber) ){
+            count++;
+        }
+    }
+    return count == element->giveNumberOfDofManagers();
 }
 
 bool EnrichmentItem :: isDofManEnriched(DofManager *dMan)
@@ -282,7 +296,7 @@ EnrichmentItem :: updateGeometry(TimeStep *tStep, FractureManager *fMan)
             fMan->evaluateFailureCriteria(fc, el, tStep);
 
             if ( Delamination *dei = dynamic_cast< Delamination * > (this) )  {
-                dei->updateGeometry(tStep, fMan, el, fc);
+                dei->updateGeometry(tStep, fMan, el, fc); //not an overloaded function, change the name
             }
         }
     }
@@ -345,7 +359,7 @@ Delamination :: updateGeometry(TimeStep *tStep, FractureManager *fMan, Element *
             }
             
 
-            dofManNumbers.printYourself();
+            //dofManNumbers.printYourself();
 
             if ( flag ) { //in list only add dofmans
                 dynamic_cast< DofManList * > ( this->giveEnrichmentDomain(num) )->addDofManagers( dofManNumbers );
@@ -406,7 +420,7 @@ Delamination :: giveActiveDelaminationXiCoords(FloatArray &xiCoords, Element *el
     int pos = 1;
     xiCoords.resize(0);
     for ( int i = 1; i <= nDelam; i++ ) {
-        if( this->isElementEnrichedByEnrichmentDomain(element, i) ) {
+        if( this->isElementFullyEnrichedByEnrichmentDomain(element, i) ) {
             xiCoords.resizeWithValues(pos);
             xiCoords.at(pos) = this->giveDelaminationXiCoord(i);
             pos++;
