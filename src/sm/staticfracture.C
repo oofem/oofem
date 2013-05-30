@@ -98,8 +98,7 @@ StaticFracture :: updateYourself(TimeStep *tStep)
     // Fracture/failure mechanics evaluation
     // Upadate components like the XFEM manager and its sub-components
     this->fMan->update(tStep);
-    this->fMan->setUpdateFlag(false);
-    this->fMan->updateXFEM(tStep);
+
 
 
     this->setUpdateStructureFlag( this->fMan->giveUpdateFlag() ); // if the internal structure need to be updated

@@ -154,6 +154,9 @@ FractureManager :: evaluateFailureCriteria(FailureCriteria *fc, Element *el, Tim
     // or only check CS when a special quantity is asked for, e.g interlam eval.
     // Probably must separate FC into 2 groups: regular and layered CS
 
+    // reset fc
+    fc->quantities.clear();
+
     // Compute fc quantities
     if ( ! fc->evaluateFCQuantities() ) { // cannot evaluate on its own, ask element for implementation through an interface
         FailureModuleElementInterface *fmInterface =
@@ -171,10 +174,8 @@ FractureManager :: evaluateFailureCriteria(FailureCriteria *fc, Element *el, Tim
 
 void 
 FractureManager :: updateXFEM(TimeStep *tStep)
-{
-    Domain *domain = this->giveDomain();   
-    XfemManager *xMan; 
-    xMan = domain->giveXfemManager();
+{ 
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     EnrichmentItem *ei;
     for ( int k = 1; k <= xMan->giveNumberOfEnrichmentItems(); k++ ) {    
         ei = xMan->giveEnrichmentItem(k);
@@ -189,35 +190,9 @@ FractureManager :: updateXFEM(TimeStep *tStep)
 void
 FractureManager :: update(TimeStep *tStep)
 {
-    Domain *domain;
-    domain = this->giveDomain();   
-    Element *el;
-    FailureCriteria *fc;
-    XfemManager *xMan; 
-    xMan = domain->giveXfemManager();
+    this->setUpdateFlag(false);
+    this->updateXFEM(tStep);
 
-    for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
-        el = domain->giveElement(i);
-
-        for ( int j = 1; j <= this->failureCriterias->giveSize(); j++ ) {
-            fc = this->failureCriterias->at(j);
-            if( fc->hasFailed() ) {
-                // need to check which layer and create a new crack
-            }
-
-            EnrichmentItem *ei;
-            for ( int k = 1; k <= xMan->giveNumberOfEnrichmentItems(); k++ ) {    
-                ei = xMan->giveEnrichmentItem(k);
-
-                if ( Delamination *dei = dynamic_cast< Delamination * > (ei) )  {
-                    for ( int m = 1; m <= ei->giveNumberOfEnrichmentDomains(); m++ ) {   
-                    }
-                }
-            }
-
-        }
-
-    }
 }
 
 
@@ -227,10 +202,9 @@ bool
 FailureCriteria :: evaluateFailureCriteria() 
 {
     // Compare quantity with threshold    
-    //this->failedFlag = false;
     failedFlags.resize(this->quantities.size());
-
     for ( int i = 1; i <= this->quantities.size(); i++ ) { // if there are several quantities like interfaces
+
         failedFlags.at(i-1) = false;
         for ( int j = 1; j <= this->quantities[i-1].size(); j++ ) { // all the evaluation points (often the integration points)
             FloatArray &values = this->quantities[i-1][j-1];        // quantities in each evaluation point (e.g. max stress will check stress components in different directions)
@@ -240,7 +214,6 @@ FailureCriteria :: evaluateFailureCriteria()
                 if ( values.at(k) >= this->thresholds.at(k) ) {
                     //this->failedFlag = true;
                     failedFlags.at(i-1) = true;
-                    //return true;
                 }
             }
         }

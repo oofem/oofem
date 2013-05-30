@@ -102,28 +102,28 @@ Shell7BaseXFEM :: postInitialize()
         this->czMat = this->giveDomain()->giveMaterial(this->czMatNum);
     }
 
-    int numLayers = this->layeredCS->giveNumberOfLayers();
-    FloatArray interfaceXi(numLayers-1), delamXiCoords;
-    this->layeredCS->giveInterfaceXiCoords(interfaceXi);
-    DelaminatedInterfaceList.resize(0);
+    //int numLayers = this->layeredCS->giveNumberOfLayers();
+    //FloatArray interfaceXi(numLayers-1), delamXiCoords;
+    //this->layeredCS->giveInterfaceXiCoords(interfaceXi);
+    //DelaminatedInterfaceList.resize(0);
 
-    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
-        EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
-        if ( Delamination *dei = dynamic_cast< Delamination * >( ei ) ) {
-            dei->giveActiveDelaminationXiCoords(delamXiCoords, this);
-            for ( int j = 1; j <= delamXiCoords.giveSize(); j++ ) {
-                for ( int k = 1; k <= interfaceXi.giveSize(); k++ ) {
-                    if ( abs(delamXiCoords.at(j)-interfaceXi.at(k)) < 1.0e-3 ) {
-                        this->DelaminatedInterfaceList.followedBy(k); //check for duplicates? 
-                    }
-                    
-                }
+    //for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
+    //    EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
+    //    if ( Delamination *dei = dynamic_cast< Delamination * >( ei ) ) {
+    //        dei->giveActiveDelaminationXiCoords(delamXiCoords, this);
+    //        for ( int j = 1; j <= delamXiCoords.giveSize(); j++ ) {
+    //            for ( int k = 1; k <= interfaceXi.giveSize(); k++ ) {
+    //                if ( abs(delamXiCoords.at(j)-interfaceXi.at(k)) < 1.0e-3 ) {
+    //                    this->DelaminatedInterfaceList.followedBy(k); //check for duplicates? 
+    //                }
+    //                
+    //            }
 
-                
-            }
-        }
-    }
-    DelaminatedInterfaceList.printYourself();
+    //            
+    //        }
+    //    }
+    //}
+    //DelaminatedInterfaceList.printYourself();
 }
 
 void
@@ -134,25 +134,57 @@ Shell7BaseXFEM :: updateYourself(TimeStep *tStep)
 }
 
 void
+    Shell7BaseXFEM :: computeDelaminatedInterfaceList(IntArray &list) 
+{
+    int numLayers = this->layeredCS->giveNumberOfLayers();
+    FloatArray interfaceXi(numLayers-1), delamXiCoords;
+    this->layeredCS->giveInterfaceXiCoords(interfaceXi);
+    list.resize(0);
+
+    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
+        EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
+        if ( Delamination *dei = dynamic_cast< Delamination * >( ei ) ) {
+            dei->giveActiveDelaminationXiCoords(delamXiCoords, this);
+            for ( int j = 1; j <= delamXiCoords.giveSize(); j++ ) {
+                for ( int k = 1; k <= interfaceXi.giveSize(); k++ ) {
+                    if ( abs(delamXiCoords.at(j)-interfaceXi.at(k)) < 1.0e-3 ) {
+                        list.followedBy(k); //check for duplicates? 
+                    }
+                    
+                }
+
+                
+            }
+        }
+    }
+    //DelaminatedInterfaceList.printYourself();
+}
+
+void
 Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep) 
 {
     switch ( fc->giveType() ) {
 
     case FC_MaxShearStress:
+        IntArray DelaminatedInterfaceList;
+        this->computeDelaminatedInterfaceList(DelaminatedInterfaceList);
+        DelaminatedInterfaceList.printYourself();
+
         // Stress ordering (1, 5, 9, 6, 3, 2) = (xx, yy, zz, yz, xz, xy)
         int numInterfaces = this->layeredCS->giveNumberOfLayers() - 1;
         std::vector < FloatArray > interLamStresses;
         fc->quantities.resize(numInterfaces); // will overwrite this every time
-        for (int intface = 1; intface <= numInterfaces; intface++ ) {    
+        for (int intface = 1; intface <= numInterfaces; intface++ ) { 
+            
             if ( ! DelaminatedInterfaceList.contains(intface) ) { // interface is whole
                 this->computeInterLaminarStressesAt(intface, tStep, interLamStresses); // all 6 components in each evaluation point (ip)
                 int numEvalPoints = interLamStresses.size();
                 fc->quantities[intface-1].resize(numEvalPoints); // most often = numIP
             
                 for ( int evalPoint = 1; evalPoint <= numEvalPoints; evalPoint++) {
-                    FloatArray &values = fc->quantities[intface-1][evalPoint-1]; // one resulting shear stress
-                    FloatArray &vS = interLamStresses[evalPoint-1];        // Stress in eval point
-                    values.resize(1);                              // scalar measure in this case
+                    FloatArray &values = fc->quantities[intface-1][evalPoint-1];  // one resulting shear stress
+                    FloatArray &vS = interLamStresses[evalPoint-1];               // Stress in eval point
+                    values.resize(1);                                             // scalar measure in this case
                     values.at(1) = sqrt( vS.at(4)*vS.at(4) + vS.at(5)*vS.at(5) ); // components can't be right here? shouldn't it be a traction vector?
 
                 }

@@ -74,7 +74,7 @@ protected:
     int giveDelaminationGroupAt(double zeta); 
     void giveDelaminationGroupXiLimits(int &dGroup, double &zTop, double &zBottom);
     double giveDelaminationGroupMidXi(int dGroup);
-
+    void computeDelaminatedInterfaceList(IntArray &list);
     XfemManager *xMan;
     
     // remove
