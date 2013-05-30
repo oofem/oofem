@@ -175,7 +175,7 @@ QTRSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int
         for ( int k = 0; k < 10; k++ ) {
             for ( int l = 0; l < 3; l++ ) {
                 for ( int j = 1; j <= 30; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, i) * dnx.at( ( j - 1 ) / 3 + 1, i );
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(i, k + 1) * dnx.at( i, ( j - 1 ) / 3 + 1 );
                 }
             }
         }
@@ -183,7 +183,7 @@ QTRSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int
         for ( int k = 0; k < 10; k++ ) {
             for ( int l = 0; l < 3; l++ ) {
                 for ( int j = 1; j <= 30; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 2 );
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(2, k + 1) * dnx.at( 3, ( j - 1 ) / 3 + 1 ) + dnx.at(3, k + 1) * dnx.at( 2, ( j - 1 ) / 3 + 1 );
                 }
             }
         }
@@ -191,7 +191,7 @@ QTRSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int
         for ( int k = 0; k < 10; k++ ) {
             for ( int l = 0; l < 3; l++ ) {
                 for ( int j = 1; j <= 30; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(1, k + 1) * dnx.at(3, ( j - 1 ) / 3 + 1 ) + dnx.at(3, k + 1) * dnx.at(1, ( j - 1 ) / 3 + 1 );
                 }
             }
         }
@@ -199,11 +199,12 @@ QTRSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int
         for ( int k = 0; k < 10; k++ ) {
             for ( int l = 0; l < 3; l++ ) {
                 for ( int j = 1; j <= 30; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 2 ) + dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(1, k + 1) * dnx.at(2, ( j - 1 ) / 3 + 1 ) + dnx.at(2, k + 1) * dnx.at(1, ( j - 1 ) / 3 + 1 );
                 }
             }
         }
     }
+
 }
 
 
@@ -221,18 +222,19 @@ QTRSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
     answer.zero();
 
     for ( int i = 1; i <= 10; i++ ) {
-        answer.at(1, 3 * i - 2) = dnx.at(i, 1);
-        answer.at(2, 3 * i - 1) = dnx.at(i, 2);
-        answer.at(3, 3 * i - 0) = dnx.at(i, 3);
+        answer.at(1, 3 * i - 2) = dnx.at(1, i);
+        answer.at(2, 3 * i - 1) = dnx.at(2, i);
+        answer.at(3, 3 * i - 0) = dnx.at(3, i);
 
-        answer.at(4, 3 * i - 1) = dnx.at(i, 3);
-        answer.at(4, 3 * i - 0) = dnx.at(i, 2);
+        answer.at(4, 3 * i - 1) = dnx.at(3, i);
+        answer.at(4, 3 * i - 0) = dnx.at(2, i);
 
-        answer.at(5, 3 * i - 2) = dnx.at(i, 3);
-        answer.at(5, 3 * i - 0) = dnx.at(i, 1);
+        answer.at(5, 3 * i - 2) = dnx.at(3, i);
+        answer.at(5, 3 * i - 0) = dnx.at(1, i);
 
-        answer.at(6, 3 * i - 2) = dnx.at(i, 2);
-        answer.at(6, 3 * i - 1) = dnx.at(i, 1);
+        answer.at(6, 3 * i - 2) = dnx.at(2, i);
+        answer.at(6, 3 * i - 1) = dnx.at(1, i);
+
     }
 }
 

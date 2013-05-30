@@ -1226,6 +1226,7 @@ Element :: giveSpatialDimension(void) const
     case EGT_triangle_2:
     case EGT_quad_1:
     case EGT_quad_2:
+    case EGT_quad9_2:
         return 2;
 
     case EGT_tetra_1:
@@ -1265,6 +1266,7 @@ Element :: giveNumberOfBoundarySides(void) const
 
     case EGT_quad_1:
     case EGT_quad_2:
+    case EGT_quad9_2:
         return 4;
 
     case EGT_tetra_1:
