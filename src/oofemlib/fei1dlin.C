@@ -55,7 +55,7 @@ FEI1dLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGe
     answer.at(2) = ( 1. + ksi ) * 0.5;
 }
 
-void
+double
 FEI1dLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double l = cellgeo.giveVertexCoordinates(2)->at(cindx) - cellgeo.giveVertexCoordinates(1)->at(cindx);
@@ -63,6 +63,7 @@ FEI1dLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICe
 
     answer.at(1, 1) = -1.0 / l;
     answer.at(2, 1) =  1.0 / l;
+    return 0.5 * l;
 }
 
 void

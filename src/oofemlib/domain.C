@@ -101,10 +101,10 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
     nonlocalBarierList       = new AList< NonlocalBarrier >(0);
     setList                  = new AList< Set >(0);
     randomFieldGeneratorList = new AList< RandomFieldGenerator >(0);
-    xfemManagerList          = new AList< XfemManager >(0);
 
     dType                 = _unknownMode;
 
+    xfemManager           = NULL;
     connectivityTable     = NULL;
     spatialLocalizer      = NULL;
     outputManager         = new OutputManager(this);
@@ -135,7 +135,7 @@ Domain :: ~Domain()
     delete nonlocalBarierList;
     delete setList;
     delete randomFieldGeneratorList;
-    delete xfemManagerList;
+    delete xfemManager;
     delete connectivityTable;
     delete spatialLocalizer;
     delete outputManager;
@@ -161,7 +161,8 @@ Domain :: clear()
     nonlocalBarierList->clear();
     setList->clear();
     randomFieldGeneratorList->clear();
-    xfemManagerList->clear();
+    delete xfemManager;
+    xfemManager = NULL;
 
     if ( connectivityTable ) {
         connectivityTable->reset();
@@ -207,10 +208,8 @@ Domain :: giveGlobalElement(int n)
         }
     }
 
-#ifdef DEBUG
     _error2("giveGlobalElement: undefined element id (%d)", n);
     return NULL;
-#endif
 }
 
 Load *
@@ -403,20 +402,20 @@ Domain :: giveSet(int n)
 }
 
 XfemManager *
-Domain :: giveXfemManager(int i)
+Domain :: giveXfemManager()
 {
 #ifdef DEBUG
-    if ( !xfemManagerList->includes(i) ) {
-        _error2("giveXfemManager: undefined xfem manager (%d)", i);
+    if ( !xfemManager ) {
+        _error("giveXfemManager: undefined xfem manager");
     }
 #endif
-    return this->xfemManagerList->at(i);
+    return xfemManager;
 }
 
 bool
-Domain :: hasXfemManager(int i)
+Domain :: hasXfemManager()
 {
-    return xfemManagerList->includes(i);
+    return xfemManager != NULL;
 }
 
 
@@ -467,7 +466,8 @@ Domain :: instanciateYourself(DataReader *dr)
 
     int num;
     std :: string name, topologytype;
-    int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg, nset=0, nxfemman=0;
+    int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg, nset=0;
+    bool nxfemman = false;
     RandomFieldGenerator *rfg;
     //XfemManager *xMan;
     // mapping from label to local numbers for dofmans and elements
@@ -506,6 +506,8 @@ Domain :: instanciateYourself(DataReader *dr)
     IR_GIVE_OPTIONAL_FIELD(ir, nset, _IFT_Domain_nset);
     IR_GIVE_OPTIONAL_FIELD(ir, nxfemman, _IFT_Domain_nxfemman);
     IR_GIVE_OPTIONAL_FIELD(ir, topologytype, _IFT_Domain_topology);
+    this->nsd = -1; ///@todo Change this to default 0 when the domaintype record has been removed.
+    IR_GIVE_OPTIONAL_FIELD(ir, this->nsd, _IFT_Domain_numberOfSpatialDimensions);
 
     // read optional number of nonlocalBarriers
     nbarrier = 0;
@@ -836,18 +838,11 @@ Domain :: instanciateYourself(DataReader *dr)
     if ( nset ) VERBOSE_PRINT0("Instanciated sets ", nset)
 #  endif
 
-// instantiate xfemmanager
-    ///@todo Do we actually need multiple xfemmanagers per domain? This made sense when they were stored in EngngModel, but not now.
-    xfemManagerList->growTo(nxfemman);
-    for ( int i = 1; i <= nxfemman; i++ ) {
-        //xMan =  new XfemManager(this->giveEngngModel(), i);
-        XfemManager *xMan = new XfemManager(this);
+    if ( nxfemman ) {
+        xfemManager = new XfemManager(this);
         ir = dr->giveInputRecord(DataReader :: IR_xfemManRec, 1);
-        // XfemManager has to be put into xfemManagerList before xm->initializeFrom, otherwise Enrichmentitem cannot access XfemManager
-        // or we have to make a reference from EnrichmentItem also
-        xfemManagerList->put(i, xMan);
-        xMan->initializeFrom(ir);
-        xMan->instanciateYourself(dr);
+        xfemManager->initializeFrom(ir);
+        xfemManager->instanciateYourself(dr);
     }
 #  ifdef VERBOSE
     if ( nxfemman ) VERBOSE_PRINT0("Instanciated xfem ", nxfemman);
@@ -984,6 +979,10 @@ Domain :: giveDefaultNodeDofIDArry()
 int
 Domain :: giveNumberOfSpatialDimensions()
 {
+    if ( nsd >= 0 ) {
+        return nsd;
+    }
+    ///@todo Backwards compatible option:
     //_HeatTransferMode _HeatMass1Mode // Are these deprecated?
     // Perhaps i shouldn't use the modes to determine this at all, but i couldn't see any other good way.
     if ( dType == _1dTrussMode ) {
@@ -1410,11 +1409,8 @@ void Domain :: createDofs()
         }
     }
 
-    // XFEM managers create additional dofs themselves:
-    for ( int i = 1; i <= this->xfemManagerList->giveSize(); i++ ) {
-        xfemManagerList->at(i)->createEnrichedDofs();
-    }
-
+    // XFEM manager create additional dofs themselves:
+    if ( xfemManager ) xfemManager->createEnrichedDofs();
 }
 
 
@@ -1643,7 +1639,9 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         nonlocalBarierList->clear();
         randomFieldGeneratorList->clear();
         setList->clear();
-        xfemManagerList->clear();
+        ///@todo Saving and restoring xfemmanagers.
+        delete xfemManager;
+        xfemManager = NULL;
         //this->clear();
 
         RESTORE_COMPONENTS(nmat, Material, this->resizeMaterials, classFactory.createMaterial, this->giveMaterial, this->setMaterial);

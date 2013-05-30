@@ -152,12 +152,13 @@ SlaveDof :: giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberin
 {
     IntArray mstrEqNmbrs;
 
-    masterEqNumbers.resize( this->giveNumberOfPrimaryMasterDofs() );
+    int masterDofs = this->giveNumberOfPrimaryMasterDofs();
+    masterEqNumbers.preallocate( masterDofs );
+    masterEqNumbers.resize( 0 );
 
-    for (int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
+    for (int i = 1; i <= countOfMasterDofs; i++ ) {
         this->giveMasterDof(i)->giveEquationNumbers(mstrEqNmbrs, s);
-        masterEqNumbers.copySubVector(mstrEqNmbrs, k);
-        k += mstrEqNmbrs.giveSize();
+        masterEqNumbers.followedBy(mstrEqNmbrs);
     }
 }
 
@@ -167,12 +168,13 @@ SlaveDof :: giveDofIDs(IntArray &masterDofIDs)
 {
     IntArray temp;
 
-    masterDofIDs.resize( this->giveNumberOfPrimaryMasterDofs() );
+    int masterDofs = this->giveNumberOfPrimaryMasterDofs();
+    masterDofIDs.preallocate( masterDofs );
+    masterDofIDs.resize( 0 );
 
-    for (int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
+    for (int i = 1; i <= countOfMasterDofs; i++ ) {
         this->giveMasterDof(i)->giveDofIDs(temp);
-        masterDofIDs.copySubVector(temp, k);
-        k += temp.giveSize();
+        masterDofIDs.followedBy(temp);
     }
 
 }
@@ -317,12 +319,13 @@ SlaveDof :: giveMasterDofManArray(IntArray &answer)
 {
     IntArray mstrDofManArry;
 
-    answer.resize( this->giveNumberOfPrimaryMasterDofs() );
+    int masterDofs = this->giveNumberOfPrimaryMasterDofs();
+    answer.preallocate( masterDofs );
+    answer.resize( 0 );
 
-    for (int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
+    for (int i = 1; i <= countOfMasterDofs; i++ ) {
         this->giveMasterDof(i)->giveMasterDofManArray(mstrDofManArry);
-        answer.copySubVector(mstrDofManArry, k);
-        k += mstrDofManArry.giveSize();
+        answer.followedBy(mstrDofManArry);
     }
 }
 } // end namespace oofem

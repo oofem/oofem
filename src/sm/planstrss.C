@@ -1283,7 +1283,7 @@ PlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatA
     } else {
         FloatArray helpCoords = coords;
 
-        helpCoords.resize(gsize);
+        helpCoords.resizeWithValues(gsize);
         dist = helpCoords.distance(gcoords);
     }
 

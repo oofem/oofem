@@ -197,7 +197,7 @@ QTrPlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Float
     } else {
         FloatArray helpCoords = coords;
 
-        helpCoords.resize(gsize);
+        helpCoords.resizeWithValues(gsize);
         dist = helpCoords.distance(gcoords);
     }
 

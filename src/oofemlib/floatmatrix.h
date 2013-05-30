@@ -240,7 +240,7 @@ public:
     double giveDeterminant() const;
 
     /// Zeroes all coefficient of receiver.
-    void zero() const;
+    void zero();
     /// Sets size of receiver to be an empty matrix. It will have zero rows and zero columns size.
     void beEmptyMtrx() { this->resize(0, 0); }
     /// Sets receiver to unity matrix.
@@ -456,13 +456,11 @@ public:
     /**
      * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly.
-     * Warning: after this operation array values are in undefined state, programmer should
-     * zero receiver is necessary.
+     * Content is always zeroed.
      * @param rows New number of rows.
      * @param cols New number of columns.
-     * @param allocChunk if reallocation needed, an additional space for allocChunk values
      */
-    void resize(int rows, int cols, int allocChunk = 0);
+    void resize(int rows, int cols);
     /**
      * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly.
@@ -471,6 +469,7 @@ public:
     void resizeWithData(int, int);
     /**
      * Resizing that enforces reallocation of memory.
+     * Data is zeroed.
      * @param r Number of rows.
      * @param c Number of columns.
      */

@@ -663,7 +663,6 @@ StructuralMaterial :: givePrincipalStressStrainMask(IntArray &answer, MatRespons
             for ( int i = 1; i <= 3; i++ ) {
                 answer.at(i) = i;
             }
-
             break;
         case _PlaneStress:
             answer.resize(2);
@@ -682,12 +681,8 @@ StructuralMaterial :: givePrincipalStressStrainMask(IntArray &answer, MatRespons
         switch ( mmode ) {
         case _3dMat:
         case _3dMat_F:
-        case _PlaneStrain:
-            for ( int i = 1; i <= 6; i++ ) {
-                answer.at(i) = i;
-            }
-            break;
         case _PlaneStress:
+        case _PlaneStrain:
             answer.at(1) = 1;
             answer.at(2) = 2;
             answer.at(3) = 3;
@@ -901,7 +896,7 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
             answer.at(5) = 3;
             break;
         case _3dBeam:
-            answer.resize(6);
+            answer.resize(12);
             answer.at(1) = 1;
             answer.at(5) = 2;
             answer.at(6) = 3;
@@ -1832,17 +1827,7 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
         answer.at(1) = 0.5 * ( ast - D );
         answer.at(2) = 0.5 * ( ast + D );
         if ( size == 4 ) {
-            answer.at(3) = s(3);
-        }
-
-        // sort result (first two principal values only)
-        if ( answer.at(1) > answer.at(2) ) {
-            return;
-        } else {
-            swap = answer.at(1);
-            answer.at(1) = answer.at(2);
-            answer.at(2) = swap;
-            return;
+            answer.at(3) = s.at(3);
         }
     } else {
         // 3D problem
@@ -1907,19 +1892,19 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
         if ( n > 2 ) {
             answer.at(3) = s3;
         }
-
-        // sort results
-        for ( int i = 1; i < 3; i++ ) {
-            for ( int j = 1; j < 3; j++ ) {
-                if ( answer.at(j + 1) > answer.at(j) ) {
-                    swap = answer.at(j + 1);
-                    answer.at(j + 1) = answer.at(j);
-                    answer.at(j) = swap;
-                }
+    }
+    
+    //sort the results
+    for ( int i = 1; i < answer.giveSize(); i++ ) {
+        for ( int j = 1; j < answer.giveSize(); j++ ) {
+            if ( answer.at(j + 1) > answer.at(j) ) {
+                swap = answer.at(j + 1);
+                answer.at(j + 1) = answer.at(j);
+                answer.at(j) = swap;
             }
         }
-
     }
+
 }
 
 void

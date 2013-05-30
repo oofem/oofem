@@ -266,9 +266,9 @@ StructuralEngngModel :: buildReactionTable(IntArray &restrDofMans, IntArray &res
         }
     }
     // Trim to size.
-    restrDofMans.resize(count);
-    restrDofs.resize(count);
-    eqn.resize(count);
+    restrDofMans.resizeWithValues(count);
+    restrDofs.resizeWithValues(count);
+    eqn.resizeWithValues(count);
 }
 
 

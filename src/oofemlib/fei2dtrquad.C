@@ -55,7 +55,7 @@ FEI2dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICel
     answer.at(6) = 4. * l3 * l1;
 }
 
-void
+double
 FEI2dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatMatrix jacobianMatrix(2, 2), inv, dn;
@@ -73,6 +73,7 @@ FEI2dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FE
     inv.beInverseOf(jacobianMatrix);
 
     answer.beProductTOf(dn, inv);
+    return jacobianMatrix.giveDeterminant();
 }
 
 void

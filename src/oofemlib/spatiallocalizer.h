@@ -126,6 +126,8 @@ public:
 
     /// Constructor
     SpatialLocalizer(Domain *d) : domain(d) { }
+    
+    virtual ~SpatialLocalizer() { }
 
     /// Returns the domain that localizer acts on.
     Domain *giveDomain() { return domain; }

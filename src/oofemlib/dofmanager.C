@@ -253,15 +253,14 @@ void DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locati
 
     } else {
         IntArray dofArray, mstrEqNmbrs;
-        int masterDofs = giveNumberOfPrimaryMasterDofs(dofArray);
-
         this->giveDofArray(dofIDArry, dofArray);
-        locationArray.resize( masterDofs );
+        int masterDofs = giveNumberOfPrimaryMasterDofs(dofArray);
+        locationArray.preallocate(masterDofs);
+        locationArray.resize(0);
 
-        for ( int k = 1, i = 1; i <= dofArray.giveSize(); i++ ) {
+        for ( int i = 1; i <= dofArray.giveSize(); i++ ) {
             this->giveDof(dofArray.at(i))->giveEquationNumbers(mstrEqNmbrs, s);
-            locationArray.copySubVector(mstrEqNmbrs, k);
-            k += mstrEqNmbrs.giveSize();
+            locationArray.followedBy(mstrEqNmbrs);
         }
     }
 }
@@ -273,15 +272,14 @@ void DofManager :: giveMasterDofIDArray(const IntArray &dofIDArry, IntArray &mas
         masterDofIDs = dofIDArry;
     } else {
         IntArray dofArray, temp;
-        int masterDofs = giveNumberOfPrimaryMasterDofs(dofArray);
-
         this->giveDofArray(dofIDArry, dofArray);
-        masterDofIDs.resize( masterDofs );
+        int masterDofs = giveNumberOfPrimaryMasterDofs(dofArray);
+        masterDofIDs.preallocate(masterDofs);
+        masterDofIDs.resize(0);
 
-        for ( int k = 1, i = 1; i <= numberOfDofs; i++ ) {
+        for ( int i = 1; i <= numberOfDofs; i++ ) {
             this->giveDof(i)->giveDofIDs(temp);
-            masterDofIDs.copySubVector(temp, k);
-            k += temp.giveSize();
+            masterDofIDs.followedBy(temp);
         }
     }
 }
@@ -302,11 +300,11 @@ void DofManager :: giveCompleteLocationArray(IntArray &locationArray, const Unkn
         for ( int i = 1; i <= numberOfDofs; i++ ) {
             nMasterDofs += this->giveDof(i)->giveNumberOfPrimaryMasterDofs();
         }
-        locationArray.resize(nMasterDofs);
-        for ( int k = 1, i = 1; i <= numberOfDofs; i++ ) {
+        locationArray.preallocate(nMasterDofs);
+        locationArray.resize(0);
+        for ( int i = 1; i <= numberOfDofs; i++ ) {
             this->giveDof(i)->giveEquationNumbers(temp, s);
-            locationArray.copySubVector(temp, k);
-            k += temp.giveSize();
+            locationArray.followedBy(temp);
         }
     }
 }
@@ -325,11 +323,11 @@ void DofManager :: giveCompleteMasterDofIDArray(IntArray &dofIDArray) const
         for ( int i = 1; i <= numberOfDofs; i++ ) {
             nMasterDofs += this->giveDof(i)->giveNumberOfPrimaryMasterDofs();
         }
-        dofIDArray.resize(nMasterDofs);
-        for ( int k = 1, i = 1; i <= numberOfDofs; i++ ) {
+        dofIDArray.preallocate(nMasterDofs);
+        dofIDArray.resize(0);
+        for ( int i = 1; i <= numberOfDofs; i++ ) {
             this->giveDof(i)->giveDofIDs(temp);
-            dofIDArray.copySubVector(temp, k);
-            k += temp.giveSize();
+            dofIDArray.followedBy(temp);
         }
     }
 }

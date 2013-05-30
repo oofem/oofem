@@ -288,7 +288,7 @@ QTrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Flo
     } else {
         FloatArray helpCoords = coords;
 
-        helpCoords.resize(gsize);
+        helpCoords.resizeWithValues(gsize);
         dist = helpCoords.distance(gcoords);
     }
 
