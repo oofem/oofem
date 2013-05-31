@@ -103,54 +103,59 @@ GPExportModule :: doOutput(TimeStep *tStep)
     // loop over elements
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         elem = d->giveElement(ielem);
-        iRule = elem->giveDefaultIntegrationRulePtr();
+        //iRule = elem->giveDefaultIntegrationRulePtr();
+        //int numIntRules = elem->giveNumberOfIntegrationRules();
+        for ( int i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
+            iRule = elem->giveIntegrationRule(i);
 
-        // loop over Gauss points
-        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
-            gp = iRule->getIntegrationPoint(j);
-            // export:
-            // 1) element number
-            // 2) material number
-            // 3) Gauss point number
-            // 4) contributing volume around Gauss point
-            weight = gp->giveElement()->computeVolumeAround(gp);
-            fprintf(stream, "%d %d %d %.6e ", elem->giveNumber(), elem->giveMaterial()->giveNumber(), j + 1, weight);
+            // loop over Gauss points
+            for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+                gp = iRule->getIntegrationPoint(j);
+                // export:
+                // 1) element number
+                // 2) material number
+                // 3) Integration rule number
+                // 4) Gauss point number
+                // 5) contributing volume around Gauss point
+                weight = gp->giveElement()->computeVolumeAround(gp);
+                fprintf(stream, "%d %d %d %d %.6e ", elem->giveNumber(), elem->giveMaterial()->giveNumber(), i + 1, j + 1, weight);
 
-            // export Gauss point coordinates
-            if ( ncoords ) { // no coordinates exported if ncoords==0
-                elem->computeGlobalCoordinates( gcoords, * ( gp->giveCoordinates() ) );
-                nc = gcoords.giveSize();
-                if ( ncoords >= 0 ) {
-                    fprintf(stream, "%d ", ncoords);
-                } else {
-                    fprintf(stream, "%d ", nc);
+                // export Gauss point coordinates
+                if ( ncoords ) { // no coordinates exported if ncoords==0
+                    elem->computeGlobalCoordinates( gcoords, * ( gp->giveCoordinates() ) );
+                    nc = gcoords.giveSize();
+                    if ( ncoords >= 0 ) {
+                        fprintf(stream, "%d ", ncoords);
+                    } else {
+                        fprintf(stream, "%d ", nc);
+                    }
+
+                    if ( ncoords > 0 && ncoords < nc ) {
+                        nc = ncoords;
+                    }
+
+                    for ( ic = 1; ic <= nc; ic++ ) {
+                        fprintf( stream, "%.6e ", gcoords.at(ic) );
+                    }
+
+                    for ( ic = nc + 1; ic <= ncoords; ic++ ) {
+                        fprintf(stream, "%g ", 0.0);
+                    }
                 }
 
-                if ( ncoords > 0 && ncoords < nc ) {
-                    nc = ncoords;
+                // export internal variables
+                for ( iv = 1; iv <= nvars; iv++ ) {
+                    vartype = ( InternalStateType ) vartypes.at(iv);
+                    elem->giveIPValue(intvar, gp, vartype, tStep);
+                    nv = intvar.giveSize();
+                    fprintf(stream, "%d ", nv);
+                    for ( ic = 1; ic <= nv; ic++ ) {
+                        fprintf( stream, "%.6e ", intvar.at(ic) );
+                    }
                 }
 
-                for ( ic = 1; ic <= nc; ic++ ) {
-                    fprintf( stream, "%.6e ", gcoords.at(ic) );
-                }
-
-                for ( ic = nc + 1; ic <= ncoords; ic++ ) {
-                    fprintf(stream, "%g ", 0.0);
-                }
+                fprintf(stream, "\n");
             }
-
-            // export internal variables
-            for ( iv = 1; iv <= nvars; iv++ ) {
-                vartype = ( InternalStateType ) vartypes.at(iv);
-                elem->giveIPValue(intvar, gp, vartype, tStep);
-                nv = intvar.giveSize();
-                fprintf(stream, "%d ", nv);
-                for ( ic = 1; ic <= nv; ic++ ) {
-                    fprintf( stream, "%.6e ", intvar.at(ic) );
-                }
-            }
-
-            fprintf(stream, "\n");
         }
 
 #if 0
