@@ -54,10 +54,6 @@ int
 Shell7BaseXFEM :: checkConsistency()
 {
     Shell7Base :: checkConsistency();
-    //this->xMan =  this->giveDomain()->giveXfemManager();
-    //if ( this->czMatNum > 0 ) {
-    //    this->czMat = this->giveDomain()->giveMaterial(this->czMatNum);
-    //}
 
     // check if defined xi-coords in delamination EI corresponds to actual layer boundaries
     //@todo should be improved
@@ -65,29 +61,32 @@ Shell7BaseXFEM :: checkConsistency()
     int numLayers = this->layeredCS->giveNumberOfLayers();
     FloatArray interfaceXi(numLayers-1), delamXiCoords;
     this->layeredCS->giveInterfaceXiCoords(interfaceXi);
-    DelaminatedInterfaceList.resize(0);
-
+    IntArray DelaminatedInterfaceList;
+    this->computeDelaminatedInterfaceList(DelaminatedInterfaceList);
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
         EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
         if ( Delamination *dei = dynamic_cast< Delamination * >( ei ) ) {
             dei->giveActiveDelaminationXiCoords(delamXiCoords, this);
-            for ( int j = 1; j <= delamXiCoords.giveSize(); j++ ) {
-            bool flag = false;
-                for ( int k = 1; k <= interfaceXi.giveSize(); k++ ) {
-                    if ( abs(delamXiCoords.at(j)-interfaceXi.at(k)) < 1.0e-3 ) {
-                        flag = true;
-                        this->DelaminatedInterfaceList.followedBy(k); //check for duplicates? 
-                    }
-                    
-                }
-                if ( !flag ) {
-                    OOFEM_ERROR2("checkConsistency: Delamination xi-coord (%e) does not correspond to a layer interface (check input).", delamXiCoords.at(j));
-                }
-                
+
+            if( delamXiCoords.giveSize() && DelaminatedInterfaceList.giveSize() == 0  ) {
+                OOFEM_ERROR("Shell7BaseXFEM :: checkConsistency - Delamination xi-coords in input does not correspond to layer interfaces");
             }
+
+            //for ( int j = 1; j <= delamXiCoords.giveSize(); j++ ) {
+            //bool flag = false;
+            //    for ( int k = 1; k <= interfaceXi.giveSize(); k++ ) {
+            //        if ( abs(delamXiCoords.at(j)-interfaceXi.at(k)) < 1.0e-3 ) {
+            //            flag = true;
+            //            //this->DelaminatedInterfaceList.followedBy(k); //check for duplicates? 
+            //        }
+            //    }
+            //    if ( !flag ) {
+            //        OOFEM_ERROR2("checkConsistency: Delamination xi-coord (%e) does not correspond to a layer interface (check input).", delamXiCoords.at(j));
+            //    }
+            //    
+            //}
         }
     }
-    DelaminatedInterfaceList.printYourself();
 #endif
     return 1;
 }
@@ -102,45 +101,23 @@ Shell7BaseXFEM :: postInitialize()
         this->czMat = this->giveDomain()->giveMaterial(this->czMatNum);
     }
 
-    //int numLayers = this->layeredCS->giveNumberOfLayers();
-    //FloatArray interfaceXi(numLayers-1), delamXiCoords;
-    //this->layeredCS->giveInterfaceXiCoords(interfaceXi);
-    //DelaminatedInterfaceList.resize(0);
-
-    //for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
-    //    EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
-    //    if ( Delamination *dei = dynamic_cast< Delamination * >( ei ) ) {
-    //        dei->giveActiveDelaminationXiCoords(delamXiCoords, this);
-    //        for ( int j = 1; j <= delamXiCoords.giveSize(); j++ ) {
-    //            for ( int k = 1; k <= interfaceXi.giveSize(); k++ ) {
-    //                if ( abs(delamXiCoords.at(j)-interfaceXi.at(k)) < 1.0e-3 ) {
-    //                    this->DelaminatedInterfaceList.followedBy(k); //check for duplicates? 
-    //                }
-    //                
-    //            }
-
-    //            
-    //        }
-    //    }
-    //}
-    //DelaminatedInterfaceList.printYourself();
 }
 
 void
 Shell7BaseXFEM :: updateYourself(TimeStep *tStep)
 {
     StructuralElement :: updateYourself(tStep);
-
 }
+
 
 void
     Shell7BaseXFEM :: computeDelaminatedInterfaceList(IntArray &list) 
 {
     int numLayers = this->layeredCS->giveNumberOfLayers();
     FloatArray interfaceXi(numLayers-1), delamXiCoords;
-    this->layeredCS->giveInterfaceXiCoords(interfaceXi);
+    this->layeredCS->giveInterfaceXiCoords(interfaceXi); // coords defining each layer interface in the cross section
+    
     list.resize(0);
-
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
         EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
         if ( Delamination *dei = dynamic_cast< Delamination * >( ei ) ) {
@@ -149,26 +126,22 @@ void
                 for ( int k = 1; k <= interfaceXi.giveSize(); k++ ) {
                     if ( abs(delamXiCoords.at(j)-interfaceXi.at(k)) < 1.0e-3 ) {
                         list.followedBy(k); //check for duplicates? 
-                    }
-                    
+                    }                    
                 }
-
-                
             }
         }
     }
-    //DelaminatedInterfaceList.printYourself();
 }
 
 void
 Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep) 
 {
+    // Compute necessary quantities for evaluation of failure criterias
     switch ( fc->giveType() ) {
 
     case FC_MaxShearStress:
-        IntArray DelaminatedInterfaceList;
-        this->computeDelaminatedInterfaceList(DelaminatedInterfaceList);
-        DelaminatedInterfaceList.printYourself();
+        IntArray delaminatedInterfaceList;
+        this->computeDelaminatedInterfaceList(delaminatedInterfaceList);
 
         // Stress ordering (1, 5, 9, 6, 3, 2) = (xx, yy, zz, yz, xz, xy)
         int numInterfaces = this->layeredCS->giveNumberOfLayers() - 1;
@@ -176,7 +149,7 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep
         fc->quantities.resize(numInterfaces); // will overwrite this every time
         for (int intface = 1; intface <= numInterfaces; intface++ ) { 
             
-            if ( ! DelaminatedInterfaceList.contains(intface) ) { // interface is whole
+            if ( ! delaminatedInterfaceList.contains(intface) ) { // interface is whole
                 this->computeInterLaminarStressesAt(intface, tStep, interLamStresses); // all 6 components in each evaluation point (ip)
                 int numEvalPoints = interLamStresses.size();
                 fc->quantities[intface-1].resize(numEvalPoints); // most often = numIP
@@ -681,7 +654,6 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
                                     if ( xi > xi0J  &&  xi > xi0K  ) {
                                         tempRed.beSubMatrixOf(KDD, activeDofsArrays[j-1], activeDofsArrays[k-1]);
                                         answer.assemble(tempRed, orderingArrays[j-1], orderingArrays[k-1]);
-                                        //tempRed.printYourself();
                                     }
                                 }
                             }

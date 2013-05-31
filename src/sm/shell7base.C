@@ -64,9 +64,6 @@ int
 Shell7Base :: checkConsistency()
 {
     NLStructuralElement :: checkConsistency();
-    //this->layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection()  );
-    //this->fei       = dynamic_cast< FEInterpolation3d   * >( this->giveInterpolation() );
-    //this->setupInitialNodeDirectors();
 
     if ( this->layeredCS == NULL ) {
         OOFEM_ERROR("Elements derived from Shell7Base only supports layered cross section");
