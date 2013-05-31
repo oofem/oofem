@@ -47,6 +47,7 @@ namespace oofem {
     ENUM_ITEM(EGT_triangle_2) /* triangle element with 6 nodes */ \
     ENUM_ITEM(EGT_quad_1)   /* quadrialateral with 4 nodes */   \
     ENUM_ITEM(EGT_quad_2)   /* quadratic quadrialateral with 8 nodes */   \
+	ENUM_ITEM(EGT_quad9_2)   /* quadratic quadrialateral with 9 nodes */   \
     ENUM_ITEM(EGT_tetra_1)  /* tetrahedron with 4 nodes */   \
     ENUM_ITEM(EGT_tetra_2)  /* tetrahedron with 10 nodes */   \
     ENUM_ITEM(EGT_hexa_1)   /* hexahedron with 8 nodes */   \

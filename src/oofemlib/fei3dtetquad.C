@@ -211,7 +211,7 @@ FEI3dTetQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
     this->evalN(N, lcoords, cellgeo);
     answer.resize(0);
     for ( int i = 1; i <= N.giveSize(); i++ ) {
-        answer.add( N(i), *cellgeo.giveVertexCoordinates(i));
+        answer.add( N.at(i), *cellgeo.giveVertexCoordinates(i));
     }
 }
 
