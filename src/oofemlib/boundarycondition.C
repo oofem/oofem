@@ -85,7 +85,6 @@ BoundaryCondition :: initializeFrom(InputRecord *ir)
         values.zero();
         values.add(prescribedValue);
     }
-    values.printYourself();
 
     return IRRT_OK;
 }
