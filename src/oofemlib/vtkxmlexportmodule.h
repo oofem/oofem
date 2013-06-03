@@ -65,6 +65,31 @@
 //@}
 
 namespace oofem {
+
+
+    // New 
+class Cell 
+{
+public:
+    Cell(){};
+    int cellType;
+    std::vector<FloatArray> nodeCoords;
+    IntArray connectivity;
+    IntArray primVarsToExport;
+    std::vector< std::vector<FloatArray> > nodeVars;
+    std::vector<FloatArray> elVars;
+    int offset;
+};
+
+class CompositeCell 
+{
+public:
+    CompositeCell(){}; 
+    int numSubEl;
+    int numTotalNodes;
+    std::vector<Cell> elements;
+};
+
 /**
  * Represents VTK (Visualization Toolkit) export module. It uses VTK (.vtu) file format, Unstructured grid dataset.
  * The export of data is done on Region By Region basis, possibly taking care about possible nonsmooth character of
@@ -236,7 +261,14 @@ protected:
                                 Domain *domain, int reg);
 
     /// Returns true if element geometry type is composite (not a single cell).
+    CompositeCell compositeCell;
     bool isElementComposite(Element *elem);
+
+    void exportCompositeElement(FILE *stream, VTKXMLExportModule *expModule, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep);
+    void exportCompositeElement(FILE *stream, Element *el,  IntArray &primaryVarsToExport,  IntArray &internalVarsToExport, TimeStep *tStep);
+    void exportNodalVarAs(InternalStateType type, int nodeVarNum, FILE *stream, TimeStep *tStep);
+
+    void exportCellVarAs(InternalStateType type, std::vector<FloatArray> &cellVars, FILE *stream, TimeStep *tStep);
 
     /**
      * Writes a VTK collection file where time step data is stored.
@@ -245,29 +277,6 @@ protected:
 };
 
 
-
-// New 
-class VTKElement 
-{
-public:
-    VTKElement(){};
-    int cellType;
-    std::vector<FloatArray> nodeCoords;
-    IntArray connectivity;
-    IntArray primVarsToExport;
-    std::vector< std::vector<FloatArray> > nodeVars;
-    std::vector<FloatArray> elVars;
-    int offset;
-};
-
-class VTKCompositeElement 
-{
-public:
-    VTKCompositeElement(){}; 
-    int numSubEl;
-    int numTotalNodes;
-    std::vector<VTKElement> elements;
-};
 
 
 /**
@@ -281,12 +290,7 @@ class VTKXMLExportModuleElementInterface : public Interface
 public:
     VTKXMLExportModuleElementInterface() : Interface() {}
     virtual const char *giveClassName() const { return "VTKXMLExportModuleElementInterface"; }
-    virtual void _export(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep) {};
-    virtual void exportCompositeElement(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep);
-    virtual void giveCompositeExportData(IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep ){};
-    void exportCellVarAs(InternalStateType type, std::vector<FloatArray> &cellVars, FILE *stream, TimeStep *tStep);
-    void exportNodalVarAs(InternalStateType type, int nodeVarNum, FILE *stream, TimeStep *tStep);
-    VTKCompositeElement compositeEl;
+    virtual void giveCompositeExportData(CompositeCell &compositeCell, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep ){};
 };
 
 

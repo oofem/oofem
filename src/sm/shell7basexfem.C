@@ -158,7 +158,7 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep
                     FloatArray &values = fc->quantities[intface-1][evalPoint-1];  // one resulting shear stress
                     FloatArray &vS = interLamStresses[evalPoint-1];               // Stress in eval point
                     values.resize(1);                                             // scalar measure in this case
-                    values.at(1) = sqrt( vS.at(4)*vS.at(4) + vS.at(5)*vS.at(5) ); // components can't be right here? shouldn't it be a traction vector?
+                    values.at(1) = sqrt( vS.at(2)*vS.at(2) + vS.at(3)*vS.at(3) ); // components can't be right here? shouldn't it be a traction vector?
 
                 }
             }

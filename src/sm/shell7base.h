@@ -134,6 +134,8 @@ protected:
     
     virtual void evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov, FloatArray &solVec);
 
+    virtual void evalCovarNormalAt(FloatArray &nCov, FloatArray &lCoords, FloatArray &genEpsC);
+    virtual void evalInitialCovarNormalAt(FloatArray &nCov, FloatArray &lCoords);
     void evalContravarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcon,  FloatArray &solVec);
 
     void edgeEvalInitialDirectorAt(FloatArray &lCoords, FloatArray &answer, const int iEdge);
@@ -234,7 +236,8 @@ protected:
     virtual void vtkEvalInitialGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords);
     virtual void vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
     
-    void giveCompositeExportData( IntArray &primaryVarsToExport, IntArray &cellVarsToExport, TimeStep *tStep  );
+    //void giveCompositeExportData( IntArray &primaryVarsToExport, IntArray &cellVarsToExport, TimeStep *tStep  );
+    void giveCompositeExportData(CompositeCell &compositeCell, IntArray &primaryVarsToExport, IntArray &cellVarsToExport, TimeStep *tStep  );
     void giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer);
     void giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep);
     void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords);
