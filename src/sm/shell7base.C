@@ -125,16 +125,10 @@ int
 Shell7Base :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
     // should it return coord in reference or updated config?
+    //@todo move VTK method into this
     return 1;
 }
 
-#if 0
-double
-Shell7Base :: giveGlobalZcoord(GaussPoint *gp)
-{
-    return gp->giveCoordinate(3) * this->layeredCS->give(CS_Thickness) * 0.5;
-}
-#endif
 
 double
 Shell7Base :: giveGlobalZcoord(double xi)
@@ -1768,6 +1762,7 @@ Shell7Base :: giveBondTransMatrix(FloatMatrix &answer, FloatMatrix &Q)
 
 void Shell7Base :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
 {
+    // what is this?
     answer.resize(0);
 }
 
@@ -2531,6 +2526,7 @@ Shell7Base :: giveCompositeExportData(CompositeCell &compositeCell, IntArray &pr
         for ( int i = 1; i <= numCellNodes; i++ ) {
             el.connectivity.at(i) = val++;
         }
+        ConnectivityTable *ct =this->giveDomain()->giveConnectivityTable();
         
         // Offset
         offset += numCellNodes;
@@ -2566,7 +2562,11 @@ Shell7Base :: giveCompositeExportData(CompositeCell &compositeCell, IntArray &pr
 
         for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
             InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);;
-            ZZNodalRecoveryMI_recoverValues(el.nodeVars[nodeVarNum], layer, type, tStep);
+            recoverValuesFromIP(el.nodeVars[nodeVarNum], layer, type, tStep);
+
+            this->recoverShearStress(tStep);
+
+            //ZZNodalRecoveryMI_recoverValues(el.nodeVars[nodeVarNum], layer, type, tStep);
 
             nodeVarNum++;
         }        
@@ -2598,6 +2598,146 @@ Shell7Base :: giveCompositeExportData(CompositeCell &compositeCell, IntArray &pr
         }
     }
 }
+
+
+
+
+
+void 
+Shell7Base :: recoverValuesFromIP(std::vector<FloatArray> &recoveredValues, int layer, InternalStateType type, TimeStep *tStep)
+{
+    // recover nodal values by coosing the ip closest to the node
+
+    // composite element interpolator
+
+    int numNodes = 15;
+    recoveredValues.resize(numNodes);
+    
+    IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
+    IntegrationPoint *ip;
+
+    // Find closest ip to the nodes
+    IntArray closestIPArray(numNodes);
+    FloatArray nodeCoords, ipCoords, distVec, ipValues;
+    FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords;
+    giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords);   
+
+    for ( int i = 1; i <= numNodes; i++ ) {
+        nodeCoords.setValues(3, nodeLocalXi1Coords.at(i), nodeLocalXi2Coords.at(i), nodeLocalXi3Coords.at(i) );
+        double distOld = 3.0; // should not be larger??
+        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+            ip = iRule->getIntegrationPoint(j);
+            ipCoords = *ip->giveCoordinates();
+            double dist = nodeCoords.distance(ipCoords);
+            if ( dist < distOld ) {
+                closestIPArray.at(i) = j;
+                distOld = dist;
+            }
+        }
+    }
+
+    // recover ip values
+    for ( int i = 1; i <= numNodes; i++ ) {
+        ip = iRule->getIntegrationPoint( closestIPArray.at(i) );
+        this->giveIPValue(ipValues, ip, type, tStep);
+        recoveredValues[i-1].resize(9);
+        recoveredValues[i-1] = convV6ToV9Stress(ipValues);
+    }
+
+}
+
+
+void 
+Shell7Base :: recoverShearStress(TimeStep *tStep)
+{
+    FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
+    std::vector<FloatArray> recoveredValues;
+    int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of types
+    IntegrationRule *iRuleThickness = specialIntegrationRulesArray[ 0 ];
+    FloatArray lCoords, dS, Sold;
+    FloatMatrix B, Smat(2,6);
+    Smat.zero();
+
+     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+        IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
+        this->recoverValuesFromIP(recoveredValues, layer, IST_StressTensor, tStep);
+        //this->ZZNodalRecoveryMI_recoverValues(recoveredValues, layer, IST_StressTensor, tStep);
+        double thickness = this->layeredCS->giveLayerThickness(layer);
+
+        //set up solution vector a = [S_xx, S_yy, S_xy, ...]
+        int numNodes = 15;
+        FloatArray aS(numNodes*3); 
+        
+        for ( int j = 1, pos = 0; j <= numNodes; j++, pos+=3 ) {
+            aS.at(pos + 1) = recoveredValues[j-1].at(1);   
+            aS.at(pos + 2) = recoveredValues[j-1].at(2);
+            aS.at(pos + 3) = recoveredValues[j-1].at(6);
+        }
+
+                
+        for ( int i = 0; i < iRuleThickness->getNumberOfIntegrationPoints(); i++ ) { 
+            double  dz = thickness * iRuleThickness->getIntegrationPoint(i)->giveWeight();
+            
+            for ( int j = 0; j < 6; j++ ) { 
+
+                int point = i*6 + j;
+                GaussPoint *gp = iRuleL->getIntegrationPoint(point);
+
+                lCoords = *gp->giveCoordinates();
+                this->computeBmatrixForStressRecAt(lCoords, B);
+                dS.beProductOf(B,aS);
+            
+                //status->letTempStressVectorBe(answer);
+                StructuralMaterialStatus* status = dynamic_cast< StructuralMaterialStatus* > (gp->giveMaterialStatus(1));
+                Sold  = status->giveStressVector();
+                
+                Smat(0,j) -= dz*dS.at(1);
+                Smat(1,j) -= dz*dS.at(2);
+
+                Sold.at(5) = Smat(0,j);
+                Sold.at(4) = Smat(1,j);
+                status->letStressVectorBe(Sold);
+            }
+        }
+
+
+    }
+
+}
+
+
+void
+Shell7Base :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &answer)
+{
+    // Returns the  special matrix {B} of the receiver, evaluated at aGaussPoint. Such that
+    // B*a = [dS_xx/dx + dS_xy/dy, dS_yx/dx + dS_yy/dy ]^T, where a is the vector of in plane 
+    // stresses [S_xx, S_yy, S_xy]
+ 
+    int numNodes = 15;
+    int ndofs = numNodes*3;
+    answer.resize(2, ndofs);
+
+    FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
+    FloatMatrix dNdx;
+    this->fei->evaldNdxi( dNdx, lcoords, FEIElementGeometryWrapper(this) );
+
+    /*    
+     * 1 [d/dx  0   d/dy
+     * 1   0   d/dy d/dx]
+     */
+    int ndofman = this->giveNumberOfDofManagers();
+
+    for ( int i = 1, j = 0; i <= ndofman; i++, j += 3 ) {
+        answer.at(1, j + 1) = dNdx.at(i, 1);
+        answer.at(1, j + 3) = dNdx.at(i, 2);
+        answer.at(2, j + 2) = dNdx.at(i, 2);
+        answer.at(2, j + 3) = dNdx.at(i, 1);
+    }
+
+}
+
+
+
 
 
 void 

@@ -242,6 +242,11 @@ protected:
     void giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep);
     void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords);
 
+    void recoverValuesFromIP(std::vector<FloatArray> &nodes, int layer, InternalStateType type, TimeStep *tStep);
+    void recoverShearStress(TimeStep *tStep);
+    void computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &answer);
+
+
     // N and B matrices
     int giveFieldSize(SolutionField fieldType);
     int giveNumberOfFieldDofs(SolutionField fieldType);

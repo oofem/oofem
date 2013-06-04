@@ -117,7 +117,7 @@ Tr2Shell7 :: computeGaussPoints()
         specialIntegrationRulesArray [ 2 ] = new GaussIntegrationRule(1, this);
         specialIntegrationRulesArray [ 2 ]->SetUpPointsOnLine(nPointsEdge, _3dMat);
 
-
+        
         // Layered cross section for bulk integration
         //@todo - must use a cast here since check consistency has not been called yet
         LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( Tr2Shell7 :: giveCrossSection() );
@@ -127,6 +127,12 @@ Tr2Shell7 :: computeGaussPoints()
         this->numberOfIntegrationRules = layeredCS->giveNumberOfLayers();
         this->numberOfGaussPoints = layeredCS->giveNumberOfLayers()*nPointsTri*layeredCS->giveNumIntegrationPointsInLayer();
         layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
+
+
+        // Thickness integration for stress recovery
+        specialIntegrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
+        specialIntegrationRulesArray [ 0 ]->SetUpPointsOnLine(layeredCS->giveNumIntegrationPointsInLayer(), _3dMat);
+
 
     }
 }
