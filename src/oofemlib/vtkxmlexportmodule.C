@@ -568,9 +568,12 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 
             if ( this->isElementComposite(elem) ) {
 #ifndef __VTK_MODULE
+                //VTKXMLExportModule :: exportCompositeElement(FILE *stream, VTKXMLExportModule *expModule, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep) 
+                this->exportCompositeElement(stream, elem, primaryVarsToExport, internalVarsToExport, tStep);
                 ///@todo Not sure how to deal with this.
                 // multi cell (composite) elements should support vtkxmlexportmoduleinterface
                 // and are exported as individual pieces (see VTKXMLExportModuleElementInterface)
+               /*
                 VTKXMLExportModuleElementInterface *interface =
                     static_cast< VTKXMLExportModuleElementInterface * >( elem->giveInterface(VTKXMLExportModuleElementInterfaceType) );
                 if ( interface ) {
@@ -578,6 +581,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
                     //interface->_export(stream, this, primaryVarsToExport, internalVarsToExport, tStep);
                     interface->exportCompositeElement(stream, this, primaryVarsToExport, internalVarsToExport, tStep);
                 }
+                */
 #endif
             }
         } // end loop over multi-cell elements
@@ -1475,6 +1479,196 @@ void VTKXMLExportModule::writeVTKCollection()
 
 
 
+// Export composite elements
+void VTKXMLExportModule :: exportCompositeElement(FILE *stream, Element *el, IntArray &primaryVarsToExport,  IntArray &internalVarsToExport, TimeStep *tStep)
+{
+
+    VTKXMLExportModuleElementInterface *interface =
+    static_cast< VTKXMLExportModuleElementInterface * >( el->giveInterface(VTKXMLExportModuleElementInterfaceType) );
+    if ( interface ) {
+        
+        interface->giveCompositeExportData(this->compositeCell, primaryVarsToExport, internalVarsToExport, tStep);
+
+        int numSubEl = this->compositeCell.numSubEl; 
+        int numNodes = this->compositeCell.numTotalNodes; 
+    
+        fprintf(stream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", numNodes, numSubEl);
+
+        // Export nodes in region as vtk vertices
+        fprintf(stream, "<Points>\n <DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\"> ");
+
+    
+        // Export (fictious) node coords
+        for ( int cell = 0; cell < numSubEl; cell++ ) {
+            Cell &el = this->compositeCell.elements[cell];
+            for ( int inode = 1; inode <= el.nodeCoords.size(); inode++ ) {
+            
+                FloatArray &coords = el.nodeCoords[inode-1]; 
+                for ( int i = 1; i <= coords.giveSize(); i++ ) {
+                    fprintf( stream, "%e ", coords.at(i) );
+                }
+                if ( coords.giveSize() < 3 ) { // fix for 1d
+                    fprintf( stream, "%e ", 0.0 );
+                }
+            
+            }
+        }
+        fprintf(stream, "</DataArray>\n</Points>\n");
+    
+        // output all cells of the piece
+        fprintf(stream, "<Cells>\n");
+        // output the connectivity data
+        fprintf(stream, " <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> ");
+    
+        for ( int cell = 0; cell < numSubEl; cell++ ) {
+            Cell &el = this->compositeCell.elements[cell];
+            for ( int i = 1; i <= el.connectivity.giveSize(); i++ ) {
+                fprintf(stream, "%d ", el.connectivity.at(i) );
+            }
+            fprintf(stream, " ");
+        }
+
+
+        // Output the offsets (index of individual element data in connectivity array)
+        fprintf(stream, "</DataArray>\n");
+        fprintf(stream, " <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\"> ");
+        for ( int cell = 0; cell < numSubEl; cell++ ) {
+            Cell &el = this->compositeCell.elements[cell];
+            fprintf(stream, "%d ", el.offset);
+        }
+        fprintf(stream, "</DataArray>\n");
+
+
+        // Output cell types
+        fprintf(stream, " <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\"> ");
+        for ( int cell = 0; cell < numSubEl; cell++ ) {
+            Cell &el = this->compositeCell.elements[cell];
+            fprintf(stream, "%d ", el.cellType);
+        }
+        fprintf(stream, "</DataArray>\n");
+        fprintf(stream, "</Cells>\n");
+
+
+
+        // Export primary and internal variables
+        int nodeVarNum = 0;
+        
+        this->exportPointDataHeader(stream, tStep);
+        for (int i = 1; i <= primaryVarsToExport.giveSize(); i++ ) {
+            UnknownType type = ( UnknownType ) primaryVarsToExport.at(i);
+            FloatArray val;
+            int varSize = this->compositeCell.elements[0].nodeVars[nodeVarNum][0].giveSize();  // assumes they all have the same size
+            val.resize(varSize);
+            fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%i\" format=\"ascii\"> ", __UnknownTypeToString(type), varSize );
+            for ( int cell = 0; cell < numSubEl; cell++ ) {
+                Cell &el = this->compositeCell.elements[cell];
+                for ( int j = 1; j <= el.connectivity.giveSize(); j++ ) {
+                
+                    val = el.nodeVars[nodeVarNum][j-1];
+                    for ( int component = 1; component <= val.giveSize(); component++ ) {
+                        fprintf( stream, "%e ", val.at(component) );
+                    }
+                }    
+            }
+            fprintf(stream, "</DataArray>\n");
+            nodeVarNum++;
+        }
+
+        for (int i = 1; i <= internalVarsToExport.giveSize(); i++ ) {
+            InternalStateType type = ( InternalStateType ) internalVarsToExport.at(i);
+            exportNodalVarAs(type, nodeVarNum, stream, tStep);
+            nodeVarNum++;
+        }
+        fprintf(stream, "</PointData>\n");
+
+
+
+        // Export cell data
+        fprintf(stream, "<CellData Scalars=\"\" Vectors=\"\" Tensors=\"\">\n");  // should contain a list of InternalStateType
+
+        for (int i = 1; i <= internalVarsToExport.giveSize(); i++ ) {
+            InternalStateType type = ( InternalStateType ) internalVarsToExport.at(i);
+            int varSize = giveInternalStateTypeSize(type);
+
+            fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%i\" format=\"ascii\">", __InternalStateTypeToString(type), varSize );
+            for ( int cell = 0; cell < numSubEl; cell++ ) {
+                FloatArray &var = this->compositeCell.elements[cell].elVars[i-1];
+            
+                for ( int component = 1; component <= var.giveSize(); component++ ) {
+                    fprintf( stream, "%e ", var.at(component) );
+                }
+            }
+
+            fprintf(stream, "</DataArray>\n");
+        
+        }
+        fprintf(stream, "</CellData>\n");
+
+    
+        // end of piece record
+        fprintf(stream, "</Piece>\n");
+    
+
+
+    }
+}
+
+void 
+VTKXMLExportModule :: exportNodalVarAs(InternalStateType type, int nodeVarNum, FILE *stream, TimeStep *tStep)
+{
+    FloatArray val;
+    int varSize = this->compositeCell.elements[0].nodeVars[nodeVarNum][0].giveSize();  // assumes they all have the same size
+    val.resize(varSize);
+    fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%i\" format=\"ascii\"> ", __InternalStateTypeToString(type), varSize );
+    for ( int cell = 0; cell < this->compositeCell.elements.size(); cell++ ) {
+        Cell &el = this->compositeCell.elements[cell];
+        for ( int j = 1; j <= el.connectivity.giveSize(); j++ ) {
+                
+            val = el.nodeVars[nodeVarNum][j-1];
+            for ( int component = 1; component <= val.giveSize(); component++ ) {
+                fprintf( stream, "%e ", val.at(component) );
+            }
+        }    
+    }
+    fprintf(stream, "</DataArray>\n");
+    nodeVarNum++;
+       
+}
+
+
+
+void
+VTKXMLExportModule :: exportCellVarAs(InternalStateType type, std::vector<FloatArray> &cellVars, FILE *stream, TimeStep *tStep)
+{
+    int varSize = giveInternalStateTypeSize(type);
+    
+    fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%i\" format=\"ascii\">\n", __InternalStateTypeToString(type), varSize );
+
+    for (int i = 1; i <= cellVars.at(1).giveSize(); i++) {
+        for ( int cell = 0; cell < cellVars.size(); cell++ ) {
+            fprintf( stream, "%e ", cellVars.at(cell).at(i) );
+        }
+    }
+    fprintf( stream, "\n" );
+    fprintf(stream, "</DataArray>\n");
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if 0
 // Export interface for composite elements
 void 
 VTKXMLExportModuleElementInterface :: exportCompositeElement(FILE *stream, VTKXMLExportModule *expModule, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep) 
@@ -1667,6 +1861,7 @@ fprintf( stream, "\n" );
     fprintf(stream, "</DataArray>\n");
 
 }
+#endif
 
 
 } // end namespace oofem
