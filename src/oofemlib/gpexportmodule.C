@@ -89,16 +89,16 @@ GPExportModule :: doOutput(TimeStep *tStep)
     FILE *stream = this->giveOutputStream(tStep);
 
     // print the header
-    fprintf(stream, "# gauss point data file\n");
-    fprintf( stream, "# output for time %g\n", tStep->giveTargetTime() );
-    fprintf(stream, "# variables: ");
+    fprintf(stream, "%%# gauss point data file\n");
+    fprintf( stream, "%%# output for time %g\n", tStep->giveTargetTime() );
+    fprintf(stream, "%%# variables: ");
     nvars = vartypes.giveSize();
     fprintf(stream, "%d  ", nvars);
     for ( iv = 1; iv <= nvars; iv++ ) {
         fprintf( stream, "%d ", vartypes.at(iv) );
     }
 
-    fprintf(stream, "\n# for interpretation see internalstatetype.h\n");
+    fprintf(stream, "\n %%# for interpretation see internalstatetype.h\n");
 
     // loop over elements
     for ( ielem = 1; ielem <= nelem; ielem++ ) {

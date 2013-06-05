@@ -2515,6 +2515,8 @@ Shell7Base :: recoverValuesFromIP(std::vector<FloatArray> &recoveredValues, int 
 {
     // recover nodal values by coosing the ip closest to the node
 
+    FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
+
     // composite element interpolator
 
     int numNodes = 15;
@@ -2525,13 +2527,18 @@ Shell7Base :: recoverValuesFromIP(std::vector<FloatArray> &recoveredValues, int 
 
     // Find closest ip to the nodes
     IntArray closestIPArray(numNodes);
-    FloatArray nodeCoords, ipCoords, distVec, ipValues;
+    FloatArray nodeCoords, ipCoords, distVec, ipValues, n;
     FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords;
     giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords);   
 
     for ( int i = 1; i <= numNodes; i++ ) {
+        //int VTKWedge2EL [] = { 3, 1, 2, 6, 4, 5, 9, 7, 8, 12, 10, 11, 15, 13, 14 };
+        //nodeCoords.setValues(3, nodeLocalXi1Coords.at(VTKWedge2EL[i-1]), nodeLocalXi2Coords.at(VTKWedge2EL[i-1]), nodeLocalXi3Coords.at(VTKWedge2EL[i-1]) );
+        //interpol->evalN(n, nodeCoords,  FEIVoidCellGeometry());
+        //n.printYourself();
+
         nodeCoords.setValues(3, nodeLocalXi1Coords.at(i), nodeLocalXi2Coords.at(i), nodeLocalXi3Coords.at(i) );
-        double distOld = 3.0; // should not be larger??
+        double distOld = 3.0; // should not be larger
         for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
             ip = iRule->getIntegrationPoint(j);
             ipCoords = *ip->giveCoordinates();
@@ -2557,7 +2564,7 @@ Shell7Base :: recoverValuesFromIP(std::vector<FloatArray> &recoveredValues, int 
 void 
 Shell7Base :: recoverShearStress(TimeStep *tStep)
 {
-    FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
+    //FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
     std::vector<FloatArray> recoveredValues;
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of types
     IntegrationRule *iRuleThickness = specialIntegrationRulesArray[ 0 ];
@@ -2576,35 +2583,35 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
         
         for ( int j = 1, pos = 0; j <= numNodes; j++, pos+=3 ) {
             aS.at(pos + 1) = recoveredValues[j-1].at(1);       // S_xx
-            aS.at(pos + 2) = recoveredValues[j-1].at(2)*1.0;   // S_yy
-            aS.at(pos + 3) = recoveredValues[j-1].at(6)*1.0;   // S_xy
+            aS.at(pos + 2) = recoveredValues[j-1].at(2)*0.0;   // S_yy
+            aS.at(pos + 3) = recoveredValues[j-1].at(6)*0.0;   // S_xy
         }
-        //aS.printYourself();
-                
+        int numInPlaneIP = 6;
+
         for ( int i = 0; i < iRuleThickness->getNumberOfIntegrationPoints(); i++ ) { 
             double  dz = thickness * iRuleThickness->getIntegrationPoint(i)->giveWeight();
             
-            for ( int j = 0; j < 6; j++ ) { 
+            for ( int j = 0; j < numInPlaneIP; j++ ) { 
 
-                int point = i*6 + j; // integration point number
+                int point = i*numInPlaneIP + j; // integration point number
                 GaussPoint *gp = iRuleL->getIntegrationPoint(point);
 
-                lCoords = *gp->giveCoordinates();
-                this->computeBmatrixForStressRecAt(lCoords, B);
+                this->computeBmatrixForStressRecAt(*gp->giveCoordinates(), B, layer);
                 dS.beProductOf(B,aS); // stress increment
                 dS.times(-dz);
+                dS.printYourself();
 
                 StructuralMaterialStatus* status = dynamic_cast< StructuralMaterialStatus* > (gp->giveMaterialStatus(1));
                 Sold = status->giveStressVector();
-                //dS.printYourself();
                 
                 Smat.at(1,j+1) += dS.at(1);
                 Smat.at(2,j+1) += dS.at(2);
-                //Smat.printYourself();
+                Smat.printYourself();
 
-                Sold.at(5) = Smat.at(1,j+1);
-                Sold.at(4) = Smat.at(2,j+1);
-                //Sold.printYourself();
+                // Replace old stresses with new
+                Sold.at(5) = Smat.at(1,j+1); // S_xz
+                Sold.at(4) = Smat.at(2,j+1); // S_yz
+
                 status->letStressVectorBe(Sold);
             }
         }
@@ -2616,34 +2623,51 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
 
 
 void
-Shell7Base :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &answer)
+Shell7Base :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &answer, int layer)
 {
     // Returns the  special matrix {B} of the receiver, evaluated at aGaussPoint. Such that
     // B*a = [dS_xx/dx + dS_xy/dy, dS_yx/dx + dS_yy/dy ]^T, where a is the vector of in plane 
     // stresses [S_xx, S_yy, S_xy]
  
-    int numNodes = 15;
+    const int numNodes = 15;
     int ndofs = numNodes*3;
     answer.resize(2, ndofs);
 
     FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
-    FloatMatrix dNdx;
-    this->fei->evaldNdxi( dNdx, lcoords, FEIElementGeometryWrapper(this) );
+    int VTKWedge2EL [] = { 3, 1, 2, 6, 4, 5, 9, 7, 8, 12, 10, 11, 15, 13, 14 };
+    //int VTKWedge2EL [] = { 5, 4, 6, 2, 1, 3, 10, 12, 11, 7, 9, 12, 14, 13, 15 };
+    std::vector<FloatArray> nodes;
+    giveFictiousNodeCoordsForExport(nodes, layer);
 
+    FloatArray *coords[numNodes];
+    for ( int i = 1; i <= numNodes; i++ ) {
+        int pos = VTKWedge2EL[i-1];
+        coords[ i - 1 ] = new FloatArray();
+        coords[ i - 1 ] = &nodes[ pos - 1];
+        coords[ i - 1 ] ->printYourself();
+        //FloatArray n;
+        //interpol->evalN(n, nodes[pos-1],  FEIVoidCellGeometry());
+        //n.printYourself();
+    }
+    
+    FloatMatrix dNdx;
+
+    double detJ = interpol->evaldNdx( dNdx, lcoords, FEIVertexListGeometryWrapper(numNodes, (const FloatArray **)coords ) );
+    printf("determinant = %e \n", detJ);
+    dNdx.printYourself();
     /*    
      * 1 [d/dx  0   d/dy
      * 1   0   d/dy d/dx]
      */
-    //int WedgeQuadNodeMapping [] = { 4, 6, 5, 1, 3, 2, 12, 11, 10, 9, 8, 7, 13, 15,14 };
+
 
     for ( int i = 1, j = 0; i <= numNodes; i++, j += 3 ) {
-      //  int pos = WedgeQuadNodeMapping[i-1];
         answer.at(1, j + 1) = dNdx.at(i, 1);
         answer.at(1, j + 3) = dNdx.at(i, 2);
         answer.at(2, j + 2) = dNdx.at(i, 2);
         answer.at(2, j + 3) = dNdx.at(i, 1);
     }
-
+    
 }
 
 
@@ -2666,6 +2690,7 @@ Shell7Base :: giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes, in
         this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, coords);
         nodes[i-1].resize(3); 
         nodes[i-1] = coords;
+        //nodes[i-1] = localCoords;
     }
 
 }
