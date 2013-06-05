@@ -244,7 +244,7 @@ protected:
 
     void recoverValuesFromIP(std::vector<FloatArray> &nodes, int layer, InternalStateType type, TimeStep *tStep);
     void recoverShearStress(TimeStep *tStep);
-    void computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &answer);
+    void computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &answer, int layer);
 
 
     // N and B matrices
