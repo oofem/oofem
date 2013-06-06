@@ -2532,11 +2532,6 @@ Shell7Base :: recoverValuesFromIP(std::vector<FloatArray> &recoveredValues, int 
     giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords);   
 
     for ( int i = 1; i <= numNodes; i++ ) {
-        //int VTKWedge2EL [] = { 3, 1, 2, 6, 4, 5, 9, 7, 8, 12, 10, 11, 15, 13, 14 };
-        //nodeCoords.setValues(3, nodeLocalXi1Coords.at(VTKWedge2EL[i-1]), nodeLocalXi2Coords.at(VTKWedge2EL[i-1]), nodeLocalXi3Coords.at(VTKWedge2EL[i-1]) );
-        //interpol->evalN(n, nodeCoords,  FEIVoidCellGeometry());
-        //n.printYourself();
-
         nodeCoords.setValues(3, nodeLocalXi1Coords.at(i), nodeLocalXi2Coords.at(i), nodeLocalXi3Coords.at(i) );
         double distOld = 3.0; // should not be larger
         for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
@@ -2564,7 +2559,7 @@ Shell7Base :: recoverValuesFromIP(std::vector<FloatArray> &recoveredValues, int 
 void 
 Shell7Base :: recoverShearStress(TimeStep *tStep)
 {
-    //FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
+    // Recover shear stresses at ip by numerical integration of the momentum balance through the thickness
     std::vector<FloatArray> recoveredValues;
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of types
     IntegrationRule *iRuleThickness = specialIntegrationRulesArray[ 0 ];
@@ -2575,16 +2570,16 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
      for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
         this->recoverValuesFromIP(recoveredValues, layer, IST_StressTensor, tStep);
+        //this->ZZNodalRecoveryMI_recoverValues(recoveredValues, layer, IST_StressTensor, tStep);
         double thickness = this->layeredCS->giveLayerThickness(layer);
 
-        //set up solution vector a = [S1_xx, S1_yy, S1_xy, ..., Sn_xx, Sn_yy, Sn_xy]
+        //set up vector of stresses in the ip's = [S1_xx, S1_yy, S1_xy, ..., Sn_xx, Sn_yy, Sn_xy]
         int numNodes = 15;
         FloatArray aS(numNodes*3); 
-        
         for ( int j = 1, pos = 0; j <= numNodes; j++, pos+=3 ) {
-            aS.at(pos + 1) = recoveredValues[j-1].at(1);       // S_xx
-            aS.at(pos + 2) = recoveredValues[j-1].at(2)*0.0;   // S_yy
-            aS.at(pos + 3) = recoveredValues[j-1].at(6)*0.0;   // S_xy
+            aS.at(pos + 1) = recoveredValues[j-1].at(1);   // S_xx
+            aS.at(pos + 2) = recoveredValues[j-1].at(2);   // S_yy
+            aS.at(pos + 3) = recoveredValues[j-1].at(6);   // S_xy
         }
         int numInPlaneIP = 6;
 
@@ -2597,21 +2592,17 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
                 GaussPoint *gp = iRuleL->getIntegrationPoint(point);
 
                 this->computeBmatrixForStressRecAt(*gp->giveCoordinates(), B, layer);
-                dS.beProductOf(B,aS); // stress increment
-                dS.times(-dz);
-                dS.printYourself();
+                dS.beProductOf(B,aS*(-dz)); // stress increment
 
                 StructuralMaterialStatus* status = dynamic_cast< StructuralMaterialStatus* > (gp->giveMaterialStatus(1));
                 Sold = status->giveStressVector();
                 
-                Smat.at(1,j+1) += dS.at(1);
+                Smat.at(1,j+1) += dS.at(1); // add increment from each level
                 Smat.at(2,j+1) += dS.at(2);
-                Smat.printYourself();
 
-                // Replace old stresses with new
+                // Replace old stresses with  - this should probably not be done as it may affect the convergence in a nonlinear case
                 Sold.at(5) = Smat.at(1,j+1); // S_xz
                 Sold.at(4) = Smat.at(2,j+1); // S_yz
-
                 status->letStressVectorBe(Sold);
             }
         }
@@ -2629,38 +2620,28 @@ Shell7Base :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &ans
     // B*a = [dS_xx/dx + dS_xy/dy, dS_yx/dx + dS_yy/dy ]^T, where a is the vector of in plane 
     // stresses [S_xx, S_yy, S_xy]
  
+    // set up virtual cell geometry for an qwedge
     const int numNodes = 15;
-    int ndofs = numNodes*3;
-    answer.resize(2, ndofs);
-
-    FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
-    int VTKWedge2EL [] = { 3, 1, 2, 6, 4, 5, 9, 7, 8, 12, 10, 11, 15, 13, 14 };
-    //int VTKWedge2EL [] = { 5, 4, 6, 2, 1, 3, 10, 12, 11, 7, 9, 12, 14, 13, 15 };
     std::vector<FloatArray> nodes;
     giveFictiousNodeCoordsForExport(nodes, layer);
 
     FloatArray *coords[numNodes];
     for ( int i = 1; i <= numNodes; i++ ) {
-        int pos = VTKWedge2EL[i-1];
+        int pos = i;
         coords[ i - 1 ] = new FloatArray();
         coords[ i - 1 ] = &nodes[ pos - 1];
-        coords[ i - 1 ] ->printYourself();
-        //FloatArray n;
-        //interpol->evalN(n, nodes[pos-1],  FEIVoidCellGeometry());
-        //n.printYourself();
     }
     
+    FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
     FloatMatrix dNdx;
-
     double detJ = interpol->evaldNdx( dNdx, lcoords, FEIVertexListGeometryWrapper(numNodes, (const FloatArray **)coords ) );
-    printf("determinant = %e \n", detJ);
-    dNdx.printYourself();
+    
     /*    
      * 1 [d/dx  0   d/dy
      * 1   0   d/dy d/dx]
      */
-
-
+    int ndofs = numNodes*3;
+    answer.resize(2, ndofs);
     for ( int i = 1, j = 0; i <= numNodes; i++, j += 3 ) {
         answer.at(1, j + 1) = dNdx.at(i, 1);
         answer.at(1, j + 3) = dNdx.at(i, 2);
@@ -2668,6 +2649,10 @@ Shell7Base :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &ans
         answer.at(2, j + 3) = dNdx.at(i, 1);
     }
     
+    // how to destruct?
+    for ( int i = 1; i <= numNodes; i++ ) {
+        //~coords [ i - 1 ]; 
+    }
 }
 
 
