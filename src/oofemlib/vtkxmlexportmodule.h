@@ -248,6 +248,14 @@ protected:
 #endif
                          TimeStep *tStep);
 
+
+    void NewexportCellVarAs(InternalStateType type, int region,
+#ifdef __VTK_MODULE
+                         vtkSmartPointer<vtkUnstructuredGrid> &stream,
+#else
+                         FILE *stream,
+#endif
+                         TimeStep *tStep);
     /**
      * Assembles the region node map. Also computes the total number of nodes in region.
      * The region are numbered starting from offset+1.
