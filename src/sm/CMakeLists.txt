@@ -38,6 +38,7 @@ set (sm_element
 	tr2shell7.C
     shell7basexfem.C
     tr2shell7xfem.C
+    trplanestressrotallman.C
     )
 
 set (sm_crosssection

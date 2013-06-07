@@ -164,6 +164,7 @@ enum classType {
     LIBeam2dClass,
     TrPlaneStrRotClass,
     TrPlaneStrRot3dClass,
+    TrPlanestressRotAllmanClass,
     Axisymm3dClass,
     QTrPlaneStress2dClass,
     Q4AxisymmClass,
