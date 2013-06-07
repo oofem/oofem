@@ -486,16 +486,15 @@ void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep
             // We just use the tangent, less duplicated code (the addition of sigmaDev is linear).
             fe_v.beProductOf(Ke, e_v);
             fe_s.beTProductOf(Ke, s_dev);
+            // Note: The terms appear negative in the equations:
+            fe_v.negated();
+            fe_s.negated();
             
             answer.assemble(fe_s, loc); // Contributions to delta_v equations
             answer.assemble(fe_v, sigma_loc); // Contribution to delta_s_i equations
             if ( eNorms ) {
-                for ( int i = 1; i <= loc.giveSize(); ++i ) {
-                    if ( loc.at(i) ) eNorms->at(masterDofIDs.at(i)) += fe_s.at(i) * fe_s.at(i);
-                }
-                for ( int i = 1; i <= sigma_loc.giveSize(); ++i ) {
-                    if ( sigma_loc.at(i) ) eNorms->at(sigmaMasterDofIDs.at(i)) += fe_v.at(i) * fe_v.at(i);
-                }
+                eNorms->assembleSquared(fe_s, masterDofIDs);
+                eNorms->assembleSquared(fe_v, sigmaMasterDofIDs);
             }
         }
     }
@@ -529,6 +528,7 @@ void MixedGradientPressureNeumann :: assemble(SparseMtrx *answer, TimeStep *tSte
             e->giveBoundaryLocationArray(loc_r, boundary, eid, r_s);
             e->giveBoundaryLocationArray(loc_c, boundary, eid, c_s);
             this->integrateDevTangent(Ke, e, boundary);
+            Ke.negated();
             KeT.beTranspositionOf(Ke);
 
             answer->assemble(sigma_loc_r, loc_c, Ke); // Contribution to delta_s_i equations

@@ -47,8 +47,8 @@ FEI2dQuadBiQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FE
     u = lcoords.at(1);
     v = lcoords.at(2);
 
-    double a[] = {0.5*(u-1.0)*u, 0.5*(u+1.0)*u, 1.0-u*u};
-    double b[] = {0.5*(v-1.0)*v, 0.5*(v+1.0)*v, 1.0-v*v};
+    double a[] = {0.5*(u-1.0)*u, 1.0-u*u, 0.5*(u+1.0)*u};
+    double b[] = {0.5*(v-1.0)*v, 1.0-v*v, 0.5*(v+1.0)*v};
 
     answer.at(1) = a[0] * b[0];
     answer.at(5) = a[1] * b[0];
@@ -72,11 +72,21 @@ FEI2dQuadBiQuad :: giveDerivatives(FloatMatrix &dN, const FloatArray &lc)
     double u = lc.at(1);
     double v = lc.at(2);
 
+/*
     double a[] = {0.5*(u-1.0)*u, 0.5*(u+1.0)*u, 1.0-u*u};
     double b[] = {0.5*(v-1.0)*v, 0.5*(v+1.0)*v, 1.0-v*v};
 
     double da[] = {u - 0.5, u + 0.5, -2.0 * u};
     double db[] = {v - 0.5, v + 0.5, -2.0 * v};
+*/
+
+    double a[] = {0.5*(u-1.0)*u, 1.0-u*u, 0.5*(u+1.0)*u};
+    double b[] = {0.5*(v-1.0)*v, 1.0-v*v, 0.5*(v+1.0)*v};
+
+    double da[] = {u - 0.5, -2.0 * u, u + 0.5};
+    double db[] = {v - 0.5, -2.0 * v, v + 0.5};
+
+    dN.resize(9, 2);
 
     dN.at(1,1) = da[0] * b[0];
     dN.at(5,1) = da[1] * b[0];

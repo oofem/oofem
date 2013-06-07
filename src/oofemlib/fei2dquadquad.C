@@ -100,7 +100,7 @@ FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIC
     answer.at(8) = 0.5 * ( 1. + ksi ) * ( 1. - eta * eta );
 }
 
-void
+double
 FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatMatrix jacobianMatrix(2, 2), inv, dn;
@@ -118,6 +118,7 @@ FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const 
     inv.beInverseOf(jacobianMatrix);
 
     answer.beProductTOf(dn, inv);
+    return jacobianMatrix.giveDeterminant();
 }
 
 void

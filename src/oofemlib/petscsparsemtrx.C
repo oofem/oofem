@@ -516,7 +516,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 
     {
         // allocation map:
-        std :: vector< std :: set< int > >rows_upper(leqs), rows_lower(leqs);
+        std :: vector< std :: set< int > >rows_upper(leqs);
 
         nelem = domain->giveNumberOfElements();
         for ( int n = 1; n <= nelem; n++ ) {
@@ -527,12 +527,8 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
                 if ( ( ii = loc.at(i) ) ) {
                     for ( int j = 1; j <= loc.giveSize(); j++ ) {
                         jj = loc.at(j);
-                        if ( jj ) {
-                            if ( jj >= ii ) {
-                                rows_upper[ ii - 1 ].insert( jj - 1 );
-                            } else {
-                                rows_lower[ ii - 1 ].insert( jj - 1 );
-                            }
+                        if ( jj >= ii ) {
+                            rows_upper[ ii - 1 ].insert( jj - 1 );
                         }
                     }
                 }
@@ -554,12 +550,8 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
                         if ( ( ii = krloc.at(i) ) ) {
                             for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
                                 jj = kcloc.at(j);
-                                if ( jj ) {
-                                    if ( jj >= ii ) {
-                                        rows_upper[ ii - 1 ].insert( jj - 1 );
-                                    } else {
-                                        rows_lower[ ii - 1 ].insert( jj - 1 );
-                                    }
+                                if ( jj >= ii ) {
+                                    rows_upper[ ii - 1 ].insert( jj - 1 );
                                 }
                             }
                         }
@@ -570,7 +562,11 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 
         for ( int i = 0; i < leqs; i++ ) {
             d_nnz_sym( i ) = rows_upper[ i ].size();
-            d_nnz( i ) = d_nnz_sym( i ) + rows_lower[ i ].size();
+            // We can optimize to use only rows_upper by using the fact that the problem has symmetric nonzero-structure. 
+            d_nnz( i ) += d_nnz_sym( i );
+            for ( std::set< int >::iterator it = rows_upper[ i ].begin(); it != rows_upper[ i ].end(); ++it ) {
+                if ( *it != i ) d_nnz( *it )++;
+            }
         }
     }
 
@@ -733,7 +729,7 @@ void
 PetscSparseMtrx :: printStatistics() const
 {
     PetscViewerSetFormat(PETSC_VIEWER_STDOUT_SELF, PETSC_VIEWER_ASCII_INFO);
-    MatView(this->mtrx, PETSC_VIEWER_STDOUT_WORLD);
+    MatView(this->mtrx, PETSC_VIEWER_STDOUT_SELF);
 }
 
 void

@@ -50,7 +50,7 @@ FEI1dQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellG
     answer.at(3) = (1. - ksi * ksi);
 }
 
-void
+double
 FEI1dQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double J = this->giveTransformationJacobian(lcoords,cellgeo);
@@ -61,6 +61,7 @@ FEI1dQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEIC
     answer.at(1, 1) = (-1./2. + ksi)/J;
     answer.at(1, 2) =  (1./2. + ksi)/J;
     answer.at(1, 3) =  -2.*ksi/J;
+    return J;
 }
 
 void

@@ -39,11 +39,15 @@
 #include "bctype.h"
 #include "valuemodetype.h"
 
-///@name Input fields for Dirichlet boundary condition
+/**
+ * @name Dirichlet boundary condition.
+ * 
+ */
 //@{
 #define _IFT_BoundaryCondition_Name "boundarycondition"
-#define _IFT_BoundaryCondition_PrescribedValue "prescribedvalue"
-#define _IFT_BoundaryCondition_PrescribedValue_d "d" ///< Alternative input field
+#define _IFT_BoundaryCondition_PrescribedValue "prescribedvalue" ///< [rn,optional] Prescribed value of all DOFs
+#define _IFT_BoundaryCondition_PrescribedValue_d "d" ///< [rn,optional] Alternative input field
+#define _IFT_BoundaryCondition_values "values" ///< [ra,optional] Vector of prescribed values for each respective DOF.
 //@}
 
 namespace oofem {
@@ -78,9 +82,9 @@ class Dof;
 class BoundaryCondition : public GeneralBoundaryCondition
 {
 protected:
-    /// Prescribed value of DOF.
-    double prescribedValue;
-    
+    /// Prescribed values for each resp. dof
+    FloatArray values;
+
 public:
     /**
      * Constructor. Creates boundary condition with given number, belonging to given domain.
@@ -107,14 +111,15 @@ public:
     /**
      * Set prescribed value at the input record string of receiver
      * @param s prescribed value
+     * @todo This function isn't as meaningful anymore. Possibly keep it if we change it to a vector. No inheriting b.c.s can overload this in a meaningful way.
      */
-    virtual void setPrescribedValue(double s) { prescribedValue = s; }
+    virtual void setPrescribedValue(double s);
 
     // Overloaded methods:
     virtual bcType giveType() const { return DirichletBT; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual void scale(double s) { prescribedValue *= s; }
+    virtual void scale(double s);
     virtual const char *giveClassName() const { return "BoundaryCondition"; }
     virtual const char *giveInputRecordName() const { return _IFT_BoundaryCondition_Name; }
     virtual classType giveClassID() const { return BoundaryConditionClass; }

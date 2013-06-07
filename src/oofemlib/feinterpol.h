@@ -139,8 +139,9 @@ public:
      * @param answer Contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
+     * @return Determinant of the Jacobian.
      */
-    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
      * Evaluates the matrix of second derivatives of interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
