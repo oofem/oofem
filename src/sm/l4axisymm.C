@@ -370,7 +370,7 @@ L4Axisymm :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, i
 int
 L4Axisymm :: SPRNodalRecoveryMI_giveNumberOfIP()
 {
-    return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
+    return this->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
 }
 
 
@@ -718,7 +718,7 @@ void L4Axisymm :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].y = 0.25 * ( pp [ 0 ].y + pp [ 1 ].y + pp [ 2 ].y + pp [ 3 ].y );
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
-        for ( ip = 1; ip <= numberOfGaussPoints; ip++ ) {
+        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
             gpCoords = gp->giveCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {

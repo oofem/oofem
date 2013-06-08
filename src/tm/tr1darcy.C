@@ -98,7 +98,7 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *atTime)
     answer.resize(3, 3);
     answer.zero();
 
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         lcoords = gp->giveCoordinates();
 
@@ -138,7 +138,7 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *atTim
     answer.resize(3);
     answer.zero();
 
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         lcoords = gp->giveCoordinates();
 
@@ -212,7 +212,7 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
 
         iRule.setUpIntegrationPoints(_Line, numberOfEdgeIPs, _Unknown);
 
-        for ( int i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
             this->interpolation_lin.edgeEvalN(N, iEdge, *lcoords, FEIElementGeometryWrapper(this));

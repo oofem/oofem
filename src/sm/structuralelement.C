@@ -124,7 +124,7 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
     answer.resize(0);
 
     if ( force.giveSize() ) {
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
             this->computeNmatrixAt(gp, n);
             dV  = this->computeVolumeAround(gp);
@@ -198,7 +198,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
         IntArray mask;
         FloatMatrix n;
 
-        for ( int i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule.getIntegrationPoint(i);
             this->computeEgdeNMatrixAt(n, iEdge, gp);
             dV  = this->computeEdgeVolumeAround(gp, iEdge);
@@ -279,7 +279,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder();
 
         iRule = this->GetSurfaceIntegrationRule(approxOrder);
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
             this->computeSurfaceNMatrixAt(n, iSurf, gp);
             dV  = this->computeSurfaceVolumeAround(gp, iSurf);
@@ -342,7 +342,7 @@ StructuralElement :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer
     // perform assembling of load vector over
     // complete volume
     answer.resize(0);
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
         cs->computeStressIndependentStrainVector(et, gp, tStep, mode);
         if ( et.giveSize() ) {
@@ -398,7 +398,7 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     //density = this->giveMaterial()->give('d');
     mass = 0.;
 
-    for ( int i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
         gp = iRule.getIntegrationPoint(i);
         this->computeNmatrixAt(gp, n);
         density = this->giveMaterial()->give('d', gp);
@@ -655,13 +655,13 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
                 jEndIndx   = integrationRulesArray [ j ]->getEndIndexOfLocalStrainWhereApply();
                 if ( i == j ) {
                     iRule = integrationRulesArray [ i ];
-                } else if ( integrationRulesArray [ i ]->getNumberOfIntegrationPoints() < integrationRulesArray [ j ]->getNumberOfIntegrationPoints() ) {
+                } else if ( integrationRulesArray [ i ]->giveNumberOfIntegrationPoints() < integrationRulesArray [ j ]->giveNumberOfIntegrationPoints() ) {
                     iRule = integrationRulesArray [ i ];
                 } else {
                     iRule = integrationRulesArray [ j ];
                 }
 
-                for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+                for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
                     gp = iRule->getIntegrationPoint(k);
                     this->computeBmatrixAt(gp, bi, iStartIndx, iEndIndx);
                     this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
@@ -685,7 +685,7 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     } else { // numberOfIntegrationRules == 1
         iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 
-        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
             this->computeBmatrixAt(gp, bj);
             this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
@@ -727,7 +727,7 @@ void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatri
     for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
         iRule = integrationRulesArray [ ir ];
         // loop over individual integration points
-        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
             this->computeBmatrixAt(gp, bj);
             this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
@@ -820,7 +820,7 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
     // zero answer will resize accordingly when adding first contribution
     answer.resize(0);
 
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         this->computeBmatrixAt(gp, b);
 
@@ -892,7 +892,7 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
     for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
         iRule = integrationRulesArray [ ir ];
 
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule->getIntegrationPoint(i);
             this->computeBmatrixAt(gp, b);
 
@@ -1012,7 +1012,7 @@ StructuralElement :: updateInternalState(TimeStep *stepN)
     // force updating strains & stresses
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             computeStressVector(stress, iRule->getIntegrationPoint(j), stepN);
         }
     }
@@ -1051,7 +1051,7 @@ StructuralElement :: updateBeforeNonlocalAverage(TimeStep *atTime)
     // force updating local quantities
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             this->computeStrainVector(epsilon, iRule->getIntegrationPoint(j), atTime);
             // provide material local strain increment - as is provided to computeRealStresVector
             // allows to update internal vars to be averaged to new state
@@ -1209,7 +1209,7 @@ StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const Un
 
         locationArray.resize(0);
         // loop over element IP
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             integrationDomainList = interface->
                                     NonlocalMaterialStiffnessInterface_giveIntegrationDomainList( iRule->getIntegrationPoint(i) );
             // loop over IP influencing IPs, extract corresponding element numbers and their code numbers
@@ -1244,7 +1244,7 @@ StructuralElement :: addNonlocalStiffnessContributions(SparseMtrx &dest, const U
     } else {
         IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
         // loop over element IP
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             interface->NonlocalMaterialStiffnessInterface_addIPContribution(dest, s, iRule->getIntegrationPoint(i), atTime);
         }
     }
@@ -1267,7 +1267,7 @@ StructuralElement :: adaptiveUpdate(TimeStep *tStep)
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             this->computeStrainVector(strain, iRule->getIntegrationPoint(j), tStep);
             result &= interface->MMI_update(iRule->getIntegrationPoint(j), tStep, & strain);
         }
@@ -1408,7 +1408,7 @@ StructuralElement :: showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphic
 
         IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
         // loop over element IP
-        for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             interface->NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(iRule->getIntegrationPoint(i), gc, atTime);
         }
     }

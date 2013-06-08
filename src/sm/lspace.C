@@ -276,7 +276,7 @@ double
 LSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
 {
     if ( normalToCrackPlane.giveSize() != 0 ) {
-        double factor = pow( ( double ) this->numberOfGaussPoints, 1. / 3. );
+        double factor = cbrt( ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
         return this->giveLenghtInDir(normalToCrackPlane) / factor;
     } else {
         IntegrationRule *iRule;
@@ -284,12 +284,12 @@ LSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCra
         double volume = 0.0;
 
         iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
             volume += this->computeVolumeAround(gp);
         }
 
-        return pow(volume, 1. / 3.);
+        return cbrt(volume);
     }
 }
 
@@ -327,7 +327,7 @@ LSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int 
 int
 LSpace :: SPRNodalRecoveryMI_giveNumberOfIP()
 {
-    return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
+    return this->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
 }
 
 
@@ -358,7 +358,7 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
         r.resize(4, size);
         A.zero();
         r.zero();
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule->getIntegrationPoint(i);
             giveIPValue(val, gp, type, tStep);
 
@@ -623,7 +623,7 @@ LSpace :: HuertaRemeshingCriteriaI_giveCharacteristicSize() {
     double volume = 0.0;
 
     iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
         volume += this->computeVolumeAround(gp);
     }
@@ -888,7 +888,7 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
         FloatArray crackDir;
 
         iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-        for ( igp = 0; igp < iRule->getNumberOfIntegrationPoints(); igp++ ) {
+        for ( igp = 0; igp < iRule->giveNumberOfIntegrationPoints(); igp++ ) {
             gp = iRule->getIntegrationPoint(igp);
             if ( mat->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;

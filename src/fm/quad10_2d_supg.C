@@ -327,7 +327,7 @@ Quad10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     iRule = integrationRulesArray [ 1 ];
     mu_min = 1;
     rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
-    for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+    for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         gp = iRule->getIntegrationPoint(j);
         mu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, atTime);
         if ( mu_min > mu ) {
@@ -416,7 +416,7 @@ Quad10_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *atTime)
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* consistent part + supg stabilization term */
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
@@ -440,7 +440,7 @@ Quad10_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *atTim
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* consistent part + supg stabilization term */
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
@@ -464,7 +464,7 @@ Quad10_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
     answer.zero();
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* mtrx for computing t_supg, norm of this mtrx is computed */
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
@@ -487,7 +487,7 @@ Quad10_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *atTime)
     answer.zero();
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
         rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
@@ -515,7 +515,7 @@ Quad10_2D_SUPG :: computeAdvectionEpsilonTerm(FloatMatrix &answer, TimeStep *atT
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
 
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeGradPMatrix(g, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
@@ -540,7 +540,7 @@ Quad10_2D_SUPG :: computeMassEpsilonTerm(FloatMatrix &answer, TimeStep *atTime)
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
 
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeGradPMatrix(g, gp);
         this->computeNuMatrix(n, gp);

@@ -773,7 +773,7 @@ NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
         mat = static_cast< CemhydMat * >( element->giveMaterial() );
         if ( mat ) {
             iRule = element->giveDefaultIntegrationRulePtr();
-            for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+            for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
                 gp  = iRule->getIntegrationPoint(i);
                 element->giveIPValue(vecTemperature, gp, IST_Temperature, tStep);
                 //mat->IP_volume += dV;

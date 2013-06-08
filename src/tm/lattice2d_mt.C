@@ -196,7 +196,7 @@ Lattice2d_mt :: updateInternalState(TimeStep *stepN)
     // force updating ip values
     for ( i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
             this->computeNmatrixAt( n, gp->giveCoordinates() );
             this->computeVectorOf(EID_ConservationEquation, VM_Total, stepN, r);

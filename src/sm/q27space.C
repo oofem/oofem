@@ -106,7 +106,7 @@ Q27Space :: computeVolumeAround(GaussPoint *aGaussPoint)
 double
 Q27Space :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
 {
-    double factor = pow( ( double ) this->numberOfGaussPoints, 1. / 3. );
+    double factor = cbrt( ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
     return this->giveLenghtInDir(normalToCrackPlane) / factor;
 }
 

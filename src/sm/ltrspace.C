@@ -377,7 +377,7 @@ LTRSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, in
 
 int
 LTRSpace :: SPRNodalRecoveryMI_giveNumberOfIP()
-{ return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints(); }
+{ return this->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints(); }
 
 
 SPRPatchType
@@ -619,7 +619,7 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc)
             return;
         }
 
-        //   for (igp=1 ; igp<= numberOfGaussPoints ; igp++) {
+        //   for (igp=1 ; igp<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; igp++) {
         {
             gp = iRule->getIntegrationPoint(0);
             if ( mat->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {

@@ -60,7 +60,7 @@ LayeredCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm for
     ///@todo I'm not sure how we should design this, but it'll work for now:
     if ( gp->giveIntegrationRule()->giveIntegrationDomain() == _Cube || gp->giveIntegrationRule()->giveIntegrationDomain() == _Wedge ) {
         // Determine which layer the gp belongs to. This code assumes that the gauss point are created consistently (through CrossSection::setupIntegrationPoints)
-        int ngps = gp->giveIntegrationRule()->getNumberOfIntegrationPoints();
+        int ngps = gp->giveIntegrationRule()->giveNumberOfIntegrationPoints();
         int gpnum = gp->giveNumber();
         int gpsperlayer = ngps / this->numberOfLayers;
         int layer = (gpnum - 1) / gpsperlayer + 1;
@@ -930,7 +930,7 @@ LayeredCrossSection :: mapLayerGpCoordsToShellCoords(LayeredCrossSection *layere
     for( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRule = layerIntegrationRulesArray [layer-1]; 
 
-        for( int j = 1; j <= iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for( int j = 1; j <= iRule->giveNumberOfIntegrationPoints(); j++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(j-1);
 
             // Map local layer cs to local shell cs

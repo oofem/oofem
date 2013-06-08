@@ -86,7 +86,7 @@ TR_SHELL01 :: initializeFrom(InputRecord *ir)
     membrane->computeGaussPoints();
 
     // check the compatibility of irules of plate and membrane
-    if (plate->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints() != membrane->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints()) {
+    if (plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() != membrane->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints()) {
       OOFEM_ERROR ("TR_SHELL01: incompatible integration rules detected");
     }
     
@@ -316,7 +316,7 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
       gp  = iRule->getIntegrationPoint(i);
       fprintf(file, "  GP %2d.%-2d :", iRule->giveNumber(), gp->giveNumber());
       membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
@@ -387,7 +387,7 @@ TR_SHELL01 :: ZZErrorEstimatorI_giveIntegrationRule()
         return this->compositeIR;
     } else {
         this->compositeIR = new GaussIntegrationRule(1, this, 1, 12);
-        this->compositeIR->setUpIntegrationPoints(_Triangle, plate->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints(), _3dShell);
+        this->compositeIR->setUpIntegrationPoints(_Triangle, plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints(), _3dShell);
         return this->compositeIR;
     }
 }
@@ -601,7 +601,7 @@ TR_SHELL01  :: drawScalar(oofegGraphicContext &context)
         result += this->giveInternalStateAtNode(v2, context.giveIntVarType(), context.giveIntVarMode(), 2, tStep);
         result += this->giveInternalStateAtNode(v3, context.giveIntVarType(), context.giveIntVarMode(), 3, tStep);
     } else if ( context.giveIntVarMode() == ISM_local ) {
-        int nip = plate->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
+        int nip = plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
         FloatArray a, v(12);
         v.zero();
         for (int _i=1; _i<= nip; _i++) {

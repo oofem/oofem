@@ -432,7 +432,7 @@ void InterfaceElem1d :: drawScalar(oofegGraphicContext &context)
     result += giveIPValue(v1, iRule->getIntegrationPoint(0), context.giveIntVarType(), tStep);
 
 
-    for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         result = 0;
         gp  = iRule->getIntegrationPoint(i);
         result += giveIPValue(v1, gp, context.giveIntVarType(), tStep);

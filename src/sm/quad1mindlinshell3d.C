@@ -127,7 +127,7 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
 
     if ( gravity.giveSize() ) {
         IntegrationRule *ir = integrationRulesArray [ 0 ];
-        for ( int i = 0; i < ir->getNumberOfIntegrationPoints(); ++i) {
+        for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i) {
             gp = ir->getIntegrationPoint(i);
 
             this->interp.evalN(n, *gp->giveCoordinates(), FEIVoidCellGeometry());
@@ -237,7 +237,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         this->computeBmatrixAt(gp, b);
         double dV = this->computeVolumeAround(gp);
@@ -287,7 +287,7 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
     drillStiffness.zero();
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         this->computeBmatrixAt(gp, b);
         double dV = this->computeVolumeAround(gp);
@@ -381,7 +381,7 @@ Quad1MindlinShell3D :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tS
     double dV, mass = 0.;
 
     IntegrationRule *ir = integrationRulesArray [ 0 ];
-    for ( int i = 0; i < ir->getNumberOfIntegrationPoints(); ++i) {
+    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i) {
         gp = ir->getIntegrationPoint(i);
 
         dV = this->computeVolumeAround(gp);

@@ -312,7 +312,7 @@ QWedge :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int 
 int
 QWedge :: SPRNodalRecoveryMI_giveNumberOfIP()
 {
-    return numberOfGaussPoints;
+    return integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints();
 }
 
 

@@ -277,7 +277,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
 
     // compute  the e-norm and s-norm
     if ( norm == ZZErrorEstimator :: L2Norm ) {
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
             double dV = elem->computeVolumeAround(gp);
             interpol->evalN( n, *gp->giveCoordinates(), FEIElementGeometryWrapper(elem));
@@ -295,7 +295,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
         FloatArray help;
         FloatMatrix DInv;
 
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
             double dV = elem->computeVolumeAround(gp);
             interpol->evalN( n, *gp->giveCoordinates(), FEIElementGeometryWrapper(elem));

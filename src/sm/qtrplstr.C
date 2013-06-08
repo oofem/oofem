@@ -177,9 +177,9 @@ double
 QTrPlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
 {
     if ( normalToCrackPlane.at(3) < 0.999999 ) { //ensure that characteristic length is in the plane of element
-        return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) this->numberOfGaussPoints );
+        return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
     } else { //otherwise compute out-of-plane characteristic length from element area
-        return sqrt(this->computeVolumeAreaOrLength() / ( double ) this->numberOfGaussPoints);
+        return sqrt(this->computeVolumeAreaOrLength() / ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints());
     }
 }
 
@@ -504,7 +504,7 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
             }
         }
 
-        for ( ip = 1; ip <= numberOfGaussPoints; ip++ ) {
+        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
             //gpCoords = gp->giveCoordinates();
             switch ( ip ) {
@@ -630,7 +630,7 @@ QTrPlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
     GaussPoint *gp;
     double volume = 0.0;
 
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
         volume += this->computeVolumeAround(gp);
     }

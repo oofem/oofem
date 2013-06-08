@@ -356,7 +356,7 @@ TrPlaneStrRot3d :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
     for ( i = 0; i < numberOfIntegrationRules; i++ ) {
-        for ( j = 0; j < integrationRulesArray [ i ]->getNumberOfIntegrationPoints(); j++ ) {
+        for ( j = 0; j < integrationRulesArray [ i ]->giveNumberOfIntegrationPoints(); j++ ) {
             gp = integrationRulesArray [ i ]->getIntegrationPoint(j);
 
             // gp   -> printOutputAt(file,stepN) ;

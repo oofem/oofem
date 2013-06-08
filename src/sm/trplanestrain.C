@@ -716,14 +716,14 @@ void TrPlaneStrain :: drawScalar(oofegGraphicContext &context)
  * if (mode == yieldState) {
  * // loop over available GPs
  * nPlastGp = 0;
- * for (i=1 ; i<= numberOfGaussPoints ; i++) {
+ * for (i=1 ; i<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; i++) {
  *  gp = integrationRulesArray[0]-> getIntegrationPoint(i-1) ;
  *  nPlastGp += (mat->giveStatusCharFlag(gp,ms_yield_flag) != 0);
  * }
  * if (nPlastGp == 0) return;
  * // nPlastGp should contain number of yielded gp in element
  * // good way should be select color accordingly
- * ratio = nPlastGp / numberOfGaussPoints;
+ * ratio = nPlastGp / integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints();
  * EASValsSetLayer(OOFEG_YIELD_PATTERN_LAYER);
  * for (i=0; i< 3; i++) {
  * if (gc.getInternalVarsDefGeoFlag()) {
@@ -750,7 +750,7 @@ void TrPlaneStrain :: drawScalar(oofegGraphicContext &context)
  * double ax,ay,bx,by,norm,xc,yc,length;
  * FloatMatrix crackDir;
  *
- * for (i=1 ; i<= numberOfGaussPoints ; i++) {
+ * for (i=1 ; i<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; i++) {
  *  gp = integrationRulesArray[0]-> getIntegrationPoint(i-1);
  *
  *  if (mat->giveStatusCharFlag (gp,ms_isCracked_flag) == 0) return;

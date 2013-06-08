@@ -304,7 +304,7 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
 	}
 	iRule.setUpIntegrationPoints(sideGeom, ngp, _Unknown);
 
-	for ( int i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
+	for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
 		GaussPoint *gp = iRule.getIntegrationPoint(i);
 		FloatArray *lcoords = gp->giveCoordinates();
 

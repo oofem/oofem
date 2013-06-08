@@ -354,13 +354,13 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
                 val = iRule->giveMaterial();
  #else
                 val = 0.0;
-                for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+                for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
                     GaussPoint *gp = iRule->getIntegrationPoint(0);
                     result += giveIPValue(v, gp, context.giveIntVarType(), tStep);
                     val += v.at(indx);
                 }
 
-                val /= iRule->getNumberOfIntegrationPoints();
+                val /= iRule->giveNumberOfIntegrationPoints();
  #endif
                 s.at(1) = s.at(2) = s.at(3) = val;
                 iRule->givePatch()->drawWD(context, s);

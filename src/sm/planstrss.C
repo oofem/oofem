@@ -432,7 +432,7 @@ PlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &norm
 // for crack formed in plane with normal normalToCrackPlane.
 //
 {
-    // return this -> giveLenghtInDir(normalToCrackPlane) / sqrt (this->numberOfGaussPoints);
+    // return this -> giveLenghtInDir(normalToCrackPlane) / sqrt ((double) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints());
     if ( normalToCrackPlane.at(3) < 0.999999 ) { //ensure that characteristic length is in the plane of element
         return this->giveLenghtInDir(normalToCrackPlane);
     } else { //otherwise compute out-of-plane characteristic length from element area
@@ -461,7 +461,7 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
     // evaluate average strain and its maximum principal direction
     FloatArray sumstrain, averageNormal;
     IntegrationRule *iRule = giveDefaultIntegrationRulePtr();
-    int nGP = iRule->getNumberOfIntegrationPoints();
+    int nGP = iRule->giveNumberOfIntegrationPoints();
     for ( int i = 0; i < nGP; i++ ) {
         GaussPoint *gpi = iRule->getIntegrationPoint(i);
         StructuralMaterialStatus *matstatus = dynamic_cast< StructuralMaterialStatus* >( this->giveMaterial()->giveStatus(gpi));
@@ -810,7 +810,7 @@ void PlaneStress2d :: drawScalar(oofegGraphicContext &context)
             EMAddGraphicsToModel(ESIModel(), tr);
         }
     } else if ( context.giveIntVarMode() == ISM_local ) {
-        if ( numberOfGaussPoints != 4 ) {
+        if ( integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() != 4 ) {
             return;
         }
 
@@ -848,7 +848,7 @@ void PlaneStress2d :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].y = 0.25 * ( pp [ 0 ].y + pp [ 1 ].y + pp [ 2 ].y + pp [ 3 ].y );
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
-        for ( ip = 1; ip <= numberOfGaussPoints; ip++ ) {
+        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
             gpCoords = gp->giveCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
@@ -926,7 +926,7 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
         FloatArray crackDir;
         FloatArray gpglobalcoords;
 
-        for ( igp = 1; igp <= numberOfGaussPoints; igp++ ) {
+        for ( igp = 1; igp <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); igp++ ) {
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(igp - 1);
 
             if ( mat->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
@@ -1033,14 +1033,14 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
  * if (mode == yieldState) {
  * // loop over available GPs
  * nPlastGp = 0;
- * for (i=1 ; i<= numberOfGaussPoints ; i++) {
+ * for (i=1 ; i<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; i++) {
  *  gp = integrationRulesArray[0]-> getIntegrationPoint(i-1) ;
  *  nPlastGp += (mat->giveStatusCharFlag(gp,ms_yield_flag) != 0);
  * }
  * if (nPlastGp == 0) return;
  * // nPlastGp should contain number of yielded gp in element
  * // good way should be select color accordingly
- * ratio = nPlastGp / numberOfGaussPoints;
+ * ratio = nPlastGp / integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints();
  * EASValsSetLayer(OOFEG_YIELD_PATTERN_LAYER);
  * for (i=0; i< 4; i++) {
  * if (gc.getInternalVarsDefGeoFlag()) {
@@ -1068,7 +1068,7 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
  * FloatMatrix crackDir;
  * FloatArray gpglobalcoords;
  *
- * for (igp=1 ; igp<= numberOfGaussPoints ; igp++) {
+ * for (igp=1 ; igp<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; igp++) {
  *  gp = integrationRulesArray[0]-> getIntegrationPoint(igp-1);
  *
  *  if (mat->giveStatusCharFlag (gp,ms_isCracked_flag) == 0) return;
@@ -1138,11 +1138,11 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
  * }
  * } else if (mode == damageLevel) {
  * double damage= 0.0;
- * for (i=1 ; i<= numberOfGaussPoints ; i++) {
+ * for (i=1 ; i<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; i++) {
  *  gp = integrationRulesArray[0]-> getIntegrationPoint(i-1) ;
  *  damage += mat->giveStatusCharValue(gp,ms_damage_flag);
  * }
- * damage /= numberOfGaussPoints;
+ * damage /= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints();
  * EASValsSetLayer(OOFEG_YIELD_PATTERN_LAYER);
  * for (i=0; i< 4; i++) {
  * if (gc.getInternalVarsDefGeoFlag()) {
@@ -1244,7 +1244,7 @@ PlaneStress2d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answe
 int
 PlaneStress2d :: SPRNodalRecoveryMI_giveNumberOfIP()
 {
-    return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
+    return this->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
 }
 
 
@@ -1299,7 +1299,7 @@ PlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
     double volume = 0.0;
 
     iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
         volume += this->computeVolumeAround(gp);
     }

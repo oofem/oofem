@@ -324,14 +324,14 @@ Tet1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     nu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, atTime->givePreviousStep());
     nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
 
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeDivUMatrix(du, gp);
         divu.beProductOf(du, u);
         sum += divu.at(1);
     }
 
-    sum *= ( 1. / lscale / iRule->getNumberOfIntegrationPoints() );
+    sum *= ( 1. / lscale / iRule->giveNumberOfIntegrationPoints() );
 
     /*
      * for (i=1; i<=3;i++) {
@@ -479,7 +479,7 @@ Tet1_3D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
     }
 
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
         interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
@@ -512,7 +512,7 @@ Tet1_3D_SUPG :: LS_PCS_computeVolume()
     GaussPoint *gp;
 
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         answer += this->computeVolumeAround(gp);
     }

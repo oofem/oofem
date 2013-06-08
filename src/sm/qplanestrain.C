@@ -171,6 +171,11 @@ QPlaneStrain :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 }
 
 
+double
+QPlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+{
+    return this->giveLenghtInDir(normalToCrackPlane) / sqrt((double) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints());
+}
 
 
 #ifdef __OOFEG
@@ -366,7 +371,7 @@ void QPlaneStrain :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].y = 0.25 * ( pp [ 0 ].y + pp [ 1 ].y + pp [ 2 ].y + pp [ 3 ].y );
         pp [ 8 ].z = 0.;
 
-        for ( ip = 1; ip <= numberOfGaussPoints; ip++ ) {
+        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
             gpCoords = gp->giveCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {

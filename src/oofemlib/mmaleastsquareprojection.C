@@ -90,7 +90,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     int state = 0;
     if ( this->stateFilter ) {
         iRule = sourceElement->giveDefaultIntegrationRulePtr();
-        nip = iRule->getNumberOfIntegrationPoints();
+        nip = iRule->giveNumberOfIntegrationPoints();
         for ( int j = 0; j < nip; j++ ) {
             sourceElement->giveIPValue(dam, iRule->getIntegrationPoint(j), IST_PrincipalDamageTensor, tStep);
             if ( dam.computeNorm() > 1.e-3 ) {
@@ -105,7 +105,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     patchList.resize(1);
     patchList.at(1) = sourceElement->giveNumber();
     int minNumberOfPoints = this->giveNumberOfUnknownPolynomialCoefficients(this->patchType);
-    int actualNumberOfPoints = sourceElement->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
+    int actualNumberOfPoints = sourceElement->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
     int nite = 0;
     int elemFlag;
     // check if number of IP in patchList is sufficient
@@ -125,7 +125,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
                 }
 
                 iRule = element->giveDefaultIntegrationRulePtr();
-                nip = iRule->getNumberOfIntegrationPoints();
+                nip = iRule->giveNumberOfIntegrationPoints();
                 elemFlag = 0;
                 for ( int j = 0; j < nip; j++ ) {
                     element->giveIPValue(dam, iRule->getIntegrationPoint(j), IST_PrincipalDamageTensor, tStep);
@@ -149,7 +149,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
                     continue;
                 }
 
-                actualNumberOfPoints += element->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
+                actualNumberOfPoints += element->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
 
                 patchList.followedBy(neighborList.at(i), 10);
             }
@@ -182,7 +182,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     for ( int ielem = 1; ielem <= patchList.giveSize(); ielem++ ) {
         element = patchDomain->giveElement( patchList.at(ielem) );
         iRule = element->giveDefaultIntegrationRulePtr();
-        nip = iRule->getNumberOfIntegrationPoints();
+        nip = iRule->giveNumberOfIntegrationPoints();
         for ( int i = 0; i < nip; i++ ) {
             srcgp  = iRule->getIntegrationPoint(i);
             if ( element->computeGlobalCoordinates( srcgpcoords, * ( srcgp->giveCoordinates() ) ) ) {
@@ -253,7 +253,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     for ( int ielem = 1; ielem <= patchList.giveSize(); ielem++ ) {
         element = patchDomain->giveElement( patchList.at(ielem) );
         iRule = element->giveDefaultIntegrationRulePtr();
-        nip = iRule->getNumberOfIntegrationPoints();
+        nip = iRule->giveNumberOfIntegrationPoints();
         for ( int i = 0; i < nip; i++ ) {
             patchGPList.push_front( iRule->getIntegrationPoint(i) );
         }

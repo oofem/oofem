@@ -180,7 +180,7 @@ CBSElement :: updateInternalState(TimeStep *stepN)
     // force updating strains & stresses
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             computeDeviatoricStress(stress, iRule->getIntegrationPoint(j), stepN);
         }
     }

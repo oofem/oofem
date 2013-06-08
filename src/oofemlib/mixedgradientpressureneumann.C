@@ -314,7 +314,7 @@ void MixedGradientPressureNeumann :: integrateVolTangent(FloatArray &answer, Ele
     IntegrationRule *ir = this->CreateIntegrationRule(e, order);
 
     answer.resize(0);
-    for (int i = 0; i < ir->getNumberOfIntegrationPoints(); i++) {
+    for (int i = 0; i < ir->giveNumberOfIntegrationPoints(); i++) {
         GaussPoint *gp = ir->getIntegrationPoint(i);
         FloatArray &lcoords = *gp->giveCoordinates();
         FEIElementGeometryWrapper cellgeo(e);
@@ -352,7 +352,7 @@ void MixedGradientPressureNeumann :: integrateDevTangent(FloatMatrix &answer, El
     IntegrationRule *ir = this->CreateIntegrationRule(e, order);
     
     answer.resize(0,0);
-    for (int i = 0; i < ir->getNumberOfIntegrationPoints(); i++) {
+    for (int i = 0; i < ir->giveNumberOfIntegrationPoints(); i++) {
         GaussPoint *gp = ir->getIntegrationPoint(i);
         FloatArray &lcoords = *gp->giveCoordinates();
         FEIElementGeometryWrapper cellgeo(e);

@@ -139,10 +139,10 @@ public:
     /**
      * Returns number of integration points of receiver.
      */
-    int getNumberOfIntegrationPoints() const { return numberOfIntegrationPoints; }
+    int giveNumberOfIntegrationPoints() const { return numberOfIntegrationPoints; }
     /**
      * Access particular integration point of receiver.
-     * @param n Integration point number (should be in range 0,.., getNumberOfIntegrationPoints()-1).
+     * @param n Integration point number (should be in range 0,.., giveNumberOfIntegrationPoints()-1).
      */
     GaussPoint *getIntegrationPoint(int n);
     /**

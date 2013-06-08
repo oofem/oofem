@@ -268,7 +268,7 @@ LIBeam2dNL :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 
     iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     // assemble initial stress matrix
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         dV = this->computeVolumeAround(gp);
         stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();

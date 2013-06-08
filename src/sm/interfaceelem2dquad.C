@@ -212,7 +212,7 @@ InterfaceElem2dQuad :: computeGtoLRotationMatrix(FloatMatrix &answer)
  *
  * iRule = integrationRulesArray[giveDefaultIntegrationRule()];
  *
- * for (j=0 ; j < iRule->getNumberOfIntegrationPoints() ; j++) {
+ * for (j=0 ; j < iRule->giveNumberOfIntegrationPoints() ; j++) {
  *  gp = iRule->getIntegrationPoint(j) ;
  *  this -> computeBmatrixAt(gp, bjl) ;
  *  this -> computeConstitutiveMatrixAt(d, rMode, gp, tStep);
@@ -320,7 +320,7 @@ void InterfaceElem2dQuad :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         result = 0;
         gp  = iRule->getIntegrationPoint(i);
         result += giveIPValue(v1, gp, context.giveIntVarType(), tStep);

@@ -1048,7 +1048,7 @@ Element :: ipEvaluator( T *src, void ( T :: *f )( GaussPoint * gp ) )
     GaussPoint *gp;
 
     for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        nip = integrationRulesArray [ ir ]->getNumberOfIntegrationPoints();
+        nip = integrationRulesArray [ ir ]->giveNumberOfIntegrationPoints();
         for ( ip = 0; ip < nip; ip++ ) {
             gp = integrationRulesArray [ ir ]->getIntegrationPoint(ip);
             ( src->*f )(gp);
@@ -1063,7 +1063,7 @@ Element :: ipEvaluator(T *src, void ( T :: *f )( GaussPoint *, S & ), S &_val)
     GaussPoint *gp;
 
     for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        nip = integrationRulesArray [ ir ]->getNumberOfIntegrationPoints();
+        nip = integrationRulesArray [ ir ]->giveNumberOfIntegrationPoints();
         for ( ip = 0; ip < nip; ip++ ) {
             gp = integrationRulesArray [ ir ]->getIntegrationPoint(ip);
             ( src->*f )(gp, _val);

@@ -507,7 +507,7 @@ Shell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solV
         IntegrationRule *iRule = layerIntegrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
 
 
@@ -590,7 +590,7 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, 
         IntegrationRule *iRule = layerIntegrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
 
             double gam, dg1, dg2;
@@ -1046,7 +1046,7 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
     int ndof = this->giveNumberOfDofs();
     answer.resize(ndof, ndof);
     answer.zero();
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         lcoords = * gp->giveCoordinates();
 
@@ -1293,7 +1293,7 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
         IntegrationRule *iRuleL = layerIntegrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
-        for ( int j = 1; j <= iRuleL->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 1; j <= iRuleL->giveNumberOfIntegrationPoints(); j++ ) {
             GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
             FloatMatrix B11, B22, B32, B43, B53;
             this->computeBmatricesAt(gp, B11, B22, B32, B43, B53);
@@ -1518,7 +1518,7 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     ///@todo: Should be changed to integration over the layers and use the corresponding material
     Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(1) );     // for now, while I don't have an analytical exp.
 
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
 
         this->computeNmatrixAt(gp, N);
@@ -1647,7 +1647,7 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
         IntegrationRule *iRuleL = layerIntegrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
-        for ( int j = 1; j <= iRuleL->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 1; j <= iRuleL->giveNumberOfIntegrationPoints(); j++ ) {
             GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
 
             FloatMatrix N11, N22, N33;
@@ -1777,7 +1777,7 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
 
     answer.resize(42);
     answer.zero();
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         this->computeNmatrixAt(gp, N);
         this->giveUpdatedSolutionVector(aVec, tStep);
@@ -1907,7 +1907,7 @@ Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const 
 
     answer.resize( this->giveNumberOfDofs() );
     answer.zero();
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         this->computeBmatrixAt(gp, B);
         this->computeNmatrixAt(gp, N);
@@ -1988,7 +1988,7 @@ Shell7Base :: computeTractionForce(FloatArray &answer, const int iedge, Boundary
     answer.resize( this->giveNumberOfEdgeDofs() );
     answer.zero();
 
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         lcoords = * gp->giveCoordinates();
 

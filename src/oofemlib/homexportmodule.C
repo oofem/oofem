@@ -111,7 +111,7 @@ HOMExportModule :: doOutput(TimeStep *tStep)
             elem = d->giveElement(ielem);
             if ( this->matnum.giveSize() == 0 || this->matnum.contains( elem->giveMaterial()->giveNumber() ) ) {
                 iRule = elem->giveDefaultIntegrationRulePtr();
-                for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+                for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
                     gp  = iRule->getIntegrationPoint(i);
                     dV  = elem->computeVolumeAround(gp);
                     VolTot += dV;
@@ -148,7 +148,7 @@ HOMExportModule :: doOutput(TimeStep *tStep)
             elem = d->giveElement(ielem);
             if ( this->matnum.giveSize() == 0 || this->matnum.contains( elem->giveMaterial()->giveNumber() ) ) {
                 iRule = elem->giveDefaultIntegrationRulePtr();
-                for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+                for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
                     gp  = iRule->getIntegrationPoint(i);
                     structElem = static_cast< StructuralElement * >( gp->giveElement() );
                     structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Incremental);

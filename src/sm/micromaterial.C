@@ -196,7 +196,7 @@ void MicroMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm f
     //     for ( ielem = 1; ielem <= nelem; ielem++ ) { //return stress as average through all elements of the same MicroMaterial
     //         elem = microDomain->giveElement(ielem);
     //         iRule = elem->giveDefaultIntegrationRulePtr();
-    //         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    //         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
     //             gpL  = iRule->getIntegrationPoint(i);
     //             gpL->giveCoordinate(1);
     //             dV  = elem->computeVolumeAround(gpL);

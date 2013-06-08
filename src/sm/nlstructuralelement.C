@@ -156,7 +156,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
         }
     }
 
-    for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         this->computeBmatrixAt(gp, b);
         if ( nlGeometry ) {
@@ -255,7 +255,7 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
     for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
         iRule = integrationRulesArray [ ir ];
 
-        for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule->getIntegrationPoint(i);
             this->computeBmatrixAt(gp, b);
             if ( nlGeometry ) {
@@ -364,13 +364,13 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                 jEndIndx   = integrationRulesArray [ j ]->getEndIndexOfLocalStrainWhereApply();
                 if ( i == j ) {
                     iRule = integrationRulesArray [ i ];
-                } else if ( integrationRulesArray [ i ]->getNumberOfIntegrationPoints() < integrationRulesArray [ j ]->getNumberOfIntegrationPoints() ) {
+                } else if ( integrationRulesArray [ i ]->giveNumberOfIntegrationPoints() < integrationRulesArray [ j ]->giveNumberOfIntegrationPoints() ) {
                     iRule = integrationRulesArray [ i ];
                 } else {
                     iRule = integrationRulesArray [ j ];
                 }
 
-                for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+                for ( k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
                     gp = iRule->getIntegrationPoint(k);
                     this->computeBmatrixAt(gp, bi, iStartIndx, iEndIndx);
                     if ( i != j ) {
@@ -421,7 +421,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
         }
     } else { // numberOfIntegrationRules == 1
         iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
             this->computeBmatrixAt(gp, bj);
             if ( nlGeometry ) {
@@ -457,7 +457,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
     if ( nlGeometry ) {
         iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
         // assemble initial stress matrix
-        for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule->getIntegrationPoint(i);
             dV = this->computeVolumeAround(gp);
             stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveTempStressVector();
@@ -523,7 +523,7 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
     // loop over individual integration rules
     for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
         iRule = integrationRulesArray [ ir ];
-        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
             this->computeBmatrixAt(gp, bj);
             if ( nlGeometry ) {
@@ -564,7 +564,7 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
             iRule = integrationRulesArray [ ir ];
 
             // assemble initial stress matrix
-            for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+            for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
                 gp = iRule->getIntegrationPoint(i);
                 dV = this->computeVolumeAround(gp);
                 stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();

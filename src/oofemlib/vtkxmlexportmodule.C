@@ -1355,7 +1355,7 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, VTKStr
             iRule = elem->giveDefaultIntegrationRulePtr();
             if (iRule) {
                 MaterialMode mmode = _Unknown;
-                for (int i = 0; i < iRule->getNumberOfIntegrationPoints(); ++i) {
+                for (int i = 0; i < iRule->giveNumberOfIntegrationPoints(); ++i) {
                     gp = iRule->getIntegrationPoint(i);
                     mmode = gp->giveMaterialMode();
                     elem->giveIPValue(temp, gp, type, tStep);

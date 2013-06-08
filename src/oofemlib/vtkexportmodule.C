@@ -633,7 +633,7 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
 #endif
                     gptot = 0;
                     vec.resize(0);
-                    for (int i = 0; i < elem->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints(); ++i) {
+                    for (int i = 0; i < elem->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints(); ++i) {
                         gp = elem->giveDefaultIntegrationRulePtr()->getIntegrationPoint(i);
                         elem->giveMaterial()->giveIPValue(temp, gp, type, tStep);
                         gptot += gp->giveWeight();

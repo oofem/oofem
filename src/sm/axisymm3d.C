@@ -416,7 +416,7 @@ Axisymm3d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, i
 int
 Axisymm3d :: SPRNodalRecoveryMI_giveNumberOfIP()
 {
-    return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
+    return this->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
 }
 
 
@@ -775,14 +775,14 @@ Axisymm3d :: drawScalar(oofegGraphicContext &context)
  * if (gc.getDrawMode() == yieldState) {
  * // loop over available GPs
  * nPlastGp = 0;
- * for (i=1 ; i<= iRule->getNumberOfIntegrationPoints() ; i++) {
+ * for (i=1 ; i<= iRule->giveNumberOfIntegrationPoints() ; i++) {
  *  gp = iRule-> getIntegrationPoint(i) ;
  *  nPlastGp += (mat->giveStatusCharFlag(gp,ms_yield_flag) != 0);
  * }
  * if (nPlastGp == 0) return;
  * // nPlastGp should contain number of yielded gp in element
  * // good way should be select color accordingly
- * ratio = nPlastGp / numberOfGaussPoints;
+ * ratio = nPlastGp / integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints();
  * EASValsSetLayer(OOFEG_YIELD_PATTERN_LAYER);
  * if (gc.getInternalVarsDefGeoFlag()) {
  * // use deformed geometry
@@ -820,7 +820,7 @@ Axisymm3d :: drawScalar(oofegGraphicContext &context)
  * FloatMatrix crackDir;
  *
  * if (numberOfGaussPoints != 1) return;
- * //   for (igp=1 ; igp<= numberOfGaussPoints ; igp++) {
+ * //   for (igp=1 ; igp<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; igp++) {
  * {
  *  gp = iRule-> getIntegrationPoint(0);
  *

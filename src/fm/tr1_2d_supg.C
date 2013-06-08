@@ -1048,7 +1048,7 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 
     // compute averaged viscosity based on rule of mixture
     GaussPoint *gp;
-    if ( integrationRulesArray [ 0 ]->getNumberOfIntegrationPoints() ) {
+    if ( integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     } else {
         gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
@@ -1284,7 +1284,7 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 
     // compute averaged viscosity based on rule of mixture
     GaussPoint *gp;
-    if ( integrationRulesArray [ 0 ]->getNumberOfIntegrationPoints() ) {
+    if ( integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     } else {
         gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);

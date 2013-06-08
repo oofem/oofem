@@ -194,7 +194,7 @@ HTSelement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     for(int i = 0; i < numberOfEdges; i++ ) {
         iRule = this->giveIntegrationRule(i);
         this->computeOutwardNormalMatrix(N,i+1);
-        for(int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for(int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
             dV = this->computeVolumeAround(gp,i+1);
             this->computeFMatrixAt(Fedge,N,gp,i+1);
@@ -276,7 +276,7 @@ HTSelement :: computePrescribedDisplacementLoadVectorAt(FloatArray &answer, Time
     for ( int i = 0; i < numberOfEdges; i++ ) {
         this -> computeOutwardNormalMatrix(N,i+1);
         iRule =  this->giveIntegrationRule(i);
-        for(int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for(int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
             dV = this->computeVolumeAround(gp,i+1);
             this -> computePuVectorAt(PuEdge,N,u,gp,i+1);  
@@ -302,7 +302,7 @@ HTSelement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
     answer.resize(numberOfDofs);
     for ( int i = 0; i < numberOfEdges; i++) {
         iRule = this->giveIntegrationRule(i);
-        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
             edgeLoad->computeValueAt(force, tStep, * ( gp->giveCoordinates() ), mode);
             dV = this->computeVolumeAround(gp,i+1);

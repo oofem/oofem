@@ -104,7 +104,7 @@ QSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
 double
 QSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
 {
-    double factor = pow( ( double ) this->numberOfGaussPoints, 1. / 3. );
+    double factor = cbrt( ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
     return this->giveLenghtInDir(normalToCrackPlane) / factor;
 }
 
@@ -431,7 +431,7 @@ QSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int 
 int
 QSpace :: SPRNodalRecoveryMI_giveNumberOfIP()
 {
-    return this->integrationRulesArray[0]->getNumberOfIntegrationPoints();
+    return this->integrationRulesArray[0]->giveNumberOfIntegrationPoints();
 }
 
 

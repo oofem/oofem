@@ -171,7 +171,7 @@ void Hexa1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSt
     momentum.zero();
     conservation.zero();
 
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
@@ -267,7 +267,7 @@ void Hexa1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, Char
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
-        for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+        for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(k);
             FloatArray *lcoords = gp->giveCoordinates();
 
@@ -312,7 +312,7 @@ void Hexa1BubbleStokes :: computeEdgeLoadVector(FloatArray &answer, Load *load, 
         f.zero();
         iRule.setUpIntegrationPoints(_Line, numberOfEdgeIPs, _Unknown);
 
-        for ( int i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
@@ -365,7 +365,7 @@ void Hexa1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, Load *lo
         f.zero();
         iRule.setUpIntegrationPoints(_Triangle, numberOfIPs, _Unknown);
 
-        for ( int i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
@@ -412,7 +412,7 @@ void Hexa1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *
     G.zero();
     B.zero();
 
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         // Compute Gauss point and determinant at current element
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();

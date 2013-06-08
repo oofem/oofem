@@ -99,7 +99,7 @@ Quad1Mindlin :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeS
     force.resize(0);
     if ( gravity.giveSize() ) {
         IntegrationRule *ir = integrationRulesArray [ 0 ]; ///@todo Other/higher integration for lumped mass matrices perhaps?
-        for ( int i = 0; i < ir->getNumberOfIntegrationPoints(); ++i) {
+        for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i) {
             gp = ir->getIntegrationPoint(i);
 
             this->interp_lin.evalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
@@ -220,7 +220,7 @@ Quad1Mindlin :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     double dV, mass = 0.;
 
     IntegrationRule *ir = integrationRulesArray [ 0 ]; ///@todo Other/higher integration for lumped mass matrices perhaps?
-    for ( int i = 0; i < ir->getNumberOfIntegrationPoints(); ++i) {
+    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i) {
         gp = ir->getIntegrationPoint(i);
 
         dV = this->computeVolumeAround(gp);

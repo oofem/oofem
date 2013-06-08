@@ -144,9 +144,9 @@ double
 Q9PlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
 {
     if ( normalToCrackPlane.at(3) < 0.999999 ) { //ensure that characteristic length is in the plane of element
-        return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) this->numberOfGaussPoints );
+        return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
     } else { //otherwise compute out-of-plane characteristic length from element area
-        return sqrt(this->computeVolumeAreaOrLength() / ( double ) this->numberOfGaussPoints);
+        return sqrt(this->computeVolumeAreaOrLength() / ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints());
     }
 }
 
@@ -265,7 +265,7 @@ void Q9PlaneStress2d :: drawScalar(oofegGraphicContext &context)
         // computed as average of the values at all Gauss points
 
         s [ 8 ] = 0.;
-        for ( ip = 1; ip <= numberOfGaussPoints; ip++ ) {
+        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
             if ( giveIPValue(v [ 0 ], gp, context.giveIntVarType(), tStep) == 0 ) {
                 return;
@@ -274,7 +274,7 @@ void Q9PlaneStress2d :: drawScalar(oofegGraphicContext &context)
             s [ 8 ] +=  v [ 0 ].at(indx);
         }
 
-        s [ 8 ] /= numberOfGaussPoints;
+        s [ 8 ] /= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints();
         //s[8] = (s[4]+s[5]+s[6]+s[7])/4.;
 
         for ( i = 0; i < 8; i++ ) {
@@ -421,7 +421,7 @@ void Q9PlaneStress2d :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].y = 0.25 * ( pp [ 0 ].y + pp [ 1 ].y + pp [ 2 ].y + pp [ 3 ].y );
         pp [ 8 ].z = 0.;
 
-        for ( ip = 1; ip <= numberOfGaussPoints; ip++ ) {
+        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
             gpCoords = gp->giveCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {

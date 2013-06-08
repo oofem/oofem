@@ -474,7 +474,7 @@ QTrPlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
     GaussPoint *gp;
     double volume = 0.0;
 
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
         volume += this->computeVolumeAround(gp);
     }
@@ -511,4 +511,13 @@ QTrPlaneStrain :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &ans
 {
     giveDofManDofIDMask(1, EID_MomentumBalance, answer);
 }
+
+
+double
+QTrPlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+{
+    return this->giveLenghtInDir(normalToCrackPlane) / sqrt((double) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints());
+}
+
+
 } // end namespace oofem

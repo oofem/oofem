@@ -169,7 +169,7 @@ void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep
     momentum.zero();
     conservation.zero();
 
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
@@ -249,7 +249,7 @@ void Tr1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharTy
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
-        for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+        for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(k);
             FloatArray *lcoords = gp->giveCoordinates();
 
@@ -291,7 +291,7 @@ void Tr1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, Load *load
         f.zero();
         iRule.setUpIntegrationPoints(_Line, numberOfEdgeIPs, _Unknown);
 
-        for ( int i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
@@ -335,7 +335,7 @@ void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     G.zero();
     B.zero();
 
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         // Compute Gauss point and determinant at current element
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();

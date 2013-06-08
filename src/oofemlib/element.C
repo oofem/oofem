@@ -963,7 +963,7 @@ Element :: computeVolumeAreaOrLength()
     double answer = 0.;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     if ( iRule ) {
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
             answer += this->computeVolumeAround(gp);
         }
@@ -1307,7 +1307,7 @@ Element :: adaptiveMap(Domain *oldd, TimeStep *tStep)
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             result &= interface->MMI_map(iRule->getIntegrationPoint(j), oldd, tStep);
         }
     }
@@ -1330,7 +1330,7 @@ Element :: adaptiveFinish(TimeStep *tStep)
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             result &= interface->MMI_finish(tStep);
         }
     }
@@ -1357,7 +1357,7 @@ Element :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN)
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             result &= this->giveCrossSection()->packUnknowns( buff, stepN, iRule->getIntegrationPoint(j) );
         }
     }
@@ -1374,7 +1374,7 @@ Element :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN)
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             result &= this->giveCrossSection()->unpackAndUpdateUnknowns( buff, stepN, iRule->getIntegrationPoint(j) );
         }
     }
@@ -1391,7 +1391,7 @@ Element :: estimatePackSize(CommunicationBuffer &buff)
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             result += this->giveCrossSection()->estimatePackSize( buff, iRule->getIntegrationPoint(j) );
         }
     }
@@ -1406,7 +1406,7 @@ Element :: predictRelativeComputationalCost()
     int nip;
     double wgt = 0;
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
-    nip = iRule->getNumberOfIntegrationPoints();
+    nip = iRule->giveNumberOfIntegrationPoints();
     for ( int j = 0; j < nip; j++ ) {
         wgt += this->giveCrossSection()->predictRelativeComputationalCost( iRule->getIntegrationPoint(j) );
     }

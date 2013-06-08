@@ -309,7 +309,7 @@ Quad1PlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &n
 // for crack formed in plane with normal normalToCrackPlane.
 //
 {
-    // return this -> giveLenghtInDir(normalToCrackPlane) / sqrt (this->numberOfGaussPoints);
+    // return this -> giveLenghtInDir(normalToCrackPlane) / sqrt((double) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints());
     return this->giveLenghtInDir(normalToCrackPlane);
 }
 
@@ -614,7 +614,7 @@ void Quad1PlaneStrain :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].y = 0.25 * ( pp [ 0 ].y + pp [ 1 ].y + pp [ 2 ].y + pp [ 3 ].y );
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
-        for ( ip = 1; ip <= numberOfGaussPoints; ip++ ) {
+        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
             gpCoords = gp->giveCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
@@ -690,7 +690,7 @@ Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc)
         FloatArray crackDir;
         FloatArray gpglobalcoords;
 
-        for ( igp = 1; igp <= numberOfGaussPoints; igp++ ) {
+        for ( igp = 1; igp <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); igp++ ) {
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(igp - 1);
 
             if ( mat->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
@@ -811,7 +811,7 @@ Quad1PlaneStrain :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &an
 int
 Quad1PlaneStrain :: SPRNodalRecoveryMI_giveNumberOfIP()
 {
-    return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
+    return this->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
 }
 
 
@@ -869,7 +869,7 @@ Quad1PlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
     double volume = 0.0;
 
     iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
         volume += this->computeVolumeAround(gp);
     }

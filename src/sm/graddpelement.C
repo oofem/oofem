@@ -237,7 +237,7 @@ GradDpElement :: giveNonlocalInternalForcesVector(FloatArray &answer,
     IntegrationRule *iRule =  elem->giveIntegrationRule(0); 
     answer.resize(size);
     answer.zero();
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         this->computeNkappaMatrixAt(gp, Nk);
         for(int j = 1; j<=nlSize;j++)
@@ -285,7 +285,7 @@ GradDpElement :: giveLocalInternalForcesVector(FloatArray &answer, TimeStep *tSt
         }
     }
   
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         elem->computeBmatrixAt(gp, b);
         /////////////////////////////////
@@ -438,7 +438,7 @@ void GradDpElement::computeDistanceToBoundary()
     nelem = d->giveNumberOfElements();
     
     for ( int i = 1; i <= nelem; i++ ) {
-        for ( int j = 0 ; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0 ; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(j);
             FloatArray lcoord(2);
             FloatArray coord(2);
@@ -518,7 +518,7 @@ GradDpElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode 
     if (!elem->isActivated(tStep)) return;
     
     Material *mat = elem->giveMaterial();
-    for (int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+    for (int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         gp = iRule->getIntegrationPoint(j);
         elem->computeBmatrixAt(gp, B);
         if ( nlGeo ) {
@@ -552,7 +552,7 @@ GradDpElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode 
 
     if ( nlGeo ) {
         // assemble initial stress matrix
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule->getIntegrationPoint(i);
             dV = elem->computeVolumeAround(gp);
             FloatArray stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveTempStressVector();
@@ -605,7 +605,7 @@ GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode 
     }
  
 
-    for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+    for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         gp = iRule->getIntegrationPoint(j);
         elem->computeBmatrixAt(gp, B);
         if ( nlGeo ) {
@@ -713,7 +713,7 @@ GradDpElement :: computeStiffnessMatrix_kk(FloatMatrix &answer, MatResponseMode 
     answer.zero();
     //  mat->getGradientFormulation(averType);
 
-    for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+    for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         gp = iRule->getIntegrationPoint(j);
         this->computeNkappaMatrixAt(gp,N);
         Nt.beTranspositionOf(N);
@@ -827,7 +827,7 @@ GradDpElement :: computeStiffnessMatrix_uk(FloatMatrix &answer, MatResponseMode 
         }
     }
  
-    for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+    for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         gp = iRule->getIntegrationPoint(j);
         mat-> giveCharacteristicMatrix(gPSigma,PDGrad_uk,rMode, gp, tStep);
         this->computeNkappaMatrixAt(gp,Nk);

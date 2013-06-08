@@ -65,9 +65,7 @@ public:
 
     virtual int computeNumberOfDofs(EquationID ut) { return 12; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
-    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) {
-        return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) this->numberOfGaussPoints );
-    }
+    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
     virtual double computeVolumeAround(GaussPoint *gp);
 

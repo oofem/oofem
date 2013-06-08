@@ -116,7 +116,7 @@ void Line2SurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType 
     answer.resize(6);
     answer.zero();
 
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(k);
         //interpolation.evaldNdx(dN, domain, dofManArray, * gp->giveCoordinates(), 0.0);
         double xi = gp->giveCoordinate(1);
@@ -176,7 +176,7 @@ void Line2SurfaceTension :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
 
     answer.resize(6,6);
     answer.zero();
-    for (int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for (int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(k);
 
         double xi = gp->giveCoordinate(1);

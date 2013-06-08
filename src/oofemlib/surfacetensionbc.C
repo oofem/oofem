@@ -196,7 +196,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
             FloatArray N;
             FloatArray gcoords;
             FloatArray tmpB(2*nodes);
-            for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+            for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
                 GaussPoint *gp = iRule->getIntegrationPoint(k);
                 fei2d->edgeEvaldNds(dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
                 fei->boundaryEvalN(N, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
@@ -224,7 +224,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
 
         } else {
             double t = e->giveCrossSection()->give(CS_Thickness); ///@todo The thickness is not often relevant or used in FM.
-            for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+            for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
                 GaussPoint *gp = iRule->getIntegrationPoint(k);
                 fei2d->edgeEvaldNds(dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
                 double J = fei->boundaryGiveTransformationJacobian(side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
@@ -261,7 +261,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
         FloatArray n;
         answer.resize(3*nodes, 3*nodes);
         answer.zero();
-        for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+        for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(k);
             fei3d->surfaceEvaldNdx(dNdx, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
             /*double J = */fei->boundaryEvalNormal(n, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
@@ -317,7 +317,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
         if (e->giveDomain()->giveDomainType() == _3dAxisymmMode) {
             FloatArray N;
             FloatArray gcoords;
-            for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+            for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
                 GaussPoint *gp = iRule->getIntegrationPoint(k);
                 fei2d->edgeEvaldNds(dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
                 fei->boundaryEvalN(N, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
@@ -337,7 +337,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
 
         } else {
             double t = e->giveCrossSection()->give(CS_Thickness);
-            for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+            for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
                 GaussPoint *gp = iRule->getIntegrationPoint(k);
                 fei2d->edgeEvaldNds(dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
                 double J = fei->boundaryGiveTransformationJacobian(side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
@@ -367,7 +367,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
         FloatArray n;
         answer.resize(3*nodes);
         answer.zero();
-        for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+        for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(k);
             fei3d->surfaceEvaldNdx(dNdx, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
             double J = fei->boundaryEvalNormal(n, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));

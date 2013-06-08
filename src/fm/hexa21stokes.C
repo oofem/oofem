@@ -165,7 +165,7 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
     FloatArray momentum, conservation;
 
     B.zero();
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         const FloatArray &lcoords = * gp->giveCoordinates();
 
@@ -236,7 +236,7 @@ void Hexa21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType 
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
-        for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+        for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(k);
             FloatArray *lcoords = gp->giveCoordinates();
 
@@ -277,7 +277,7 @@ void Hexa21Stokes :: computeBoundaryLoadVector(FloatArray &answer, Load *load, i
         f.zero();
         iRule.setUpIntegrationPoints(_Triangle, numberOfSurfaceIPs, _Unknown);
 
-        for ( int i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
@@ -318,7 +318,7 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
 
     B.zero();
 
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         // Compute Gauss point and determinant at current element
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         const FloatArray &lcoords = *gp->giveCoordinates();

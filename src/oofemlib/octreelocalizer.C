@@ -393,9 +393,9 @@ OctreeSpatialLocalizer :: initElementIPDataStructure()
         ielem = this->giveDomain()->giveElement(i);
         if (ielem->giveNumberOfIntegrationRules() > 0) {
             iRule = ielem->giveDefaultIntegrationRulePtr();
-            nip = iRule->getNumberOfIntegrationPoints();
+            nip = iRule->giveNumberOfIntegrationPoints();
             if ( nip ) {
-                for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+                for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
                     jGp = iRule->getIntegrationPoint(j);
                     if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
                         this->insertIPElementIntoOctree(this->rootCell, i, jGpCoords);
@@ -983,7 +983,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region)
             // test if element already visited
             // if (!visitedElems.insert(*pos).second) continue;
             iRule = ielem->giveDefaultIntegrationRulePtr();
-            for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+            for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
                 jGp = iRule->getIntegrationPoint(j);
                 if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
                     // compute distance
@@ -1062,7 +1062,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region)
                 //igp   = ipContainer[i].giveGp();
                 if (region == ielem->giveRegionNumber()) {
                     iRule = ielem->giveDefaultIntegrationRulePtr ();
-                    for (j=0 ; j < iRule->getNumberOfIntegrationPoints() ; j++) {
+                    for (j=0 ; j < iRule->giveNumberOfIntegrationPoints() ; j++) {
                         jGp = iRule->getIntegrationPoint(j) ;
                         if (ielem->computeGlobalCoordinates (jGpCoords, *(jGp->giveCoordinates()))) {
                             // compute distance
@@ -1122,7 +1122,7 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
                 // if (!visitedElems.insert(*pos).second) continue;
                 // is one of his ip's  within given bbox -> inset it into elemSet
                 iRule = ielem->giveDefaultIntegrationRulePtr();
-                for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+                for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
                     if ( ielem->computeGlobalCoordinates( jGpCoords, * ( iRule->getIntegrationPoint(j)->giveCoordinates() ) ) ) {
                         currDist = coords.distance(jGpCoords);
                         // multiple insertion are handled by STL set implementation
@@ -1216,7 +1216,7 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
                  */
                 // is one of his ip's  within given bbox -> inset it into elemSet
                 iRule = ielem->giveDefaultIntegrationRulePtr();
-                for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+                for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
                     if ( ielem->computeGlobalCoordinates( jGpCoords, * ( iRule->getIntegrationPoint(j)->giveCoordinates() ) ) ) {
                         currDist = coords.distance(jGpCoords);
                         // multiple insertion are handled by STL set implementation
