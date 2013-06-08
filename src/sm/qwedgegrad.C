@@ -113,12 +113,18 @@ QWedgeGrad :: computeGaussPoints ()
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule* [numberOfIntegrationRules];
     integrationRulesArray[0] = new GaussIntegrationRule (1,this,1, 7);
-    MaterialMode mode = _3dMatGrad; // material model is based on strain (standard approach)
-    if ( nlGeometry > 1 )
-        mode = _3dMatGrad_F; // material model is based on deformation gradient, not on strain
-    integrationRulesArray[0]->setUpIntegrationPoints (_Wedge, numberOfGaussPoints, mode);
+    this->giveCrossSection()->setupIntegrationPoints(*integrationRulesArray[0], numberOfGaussPoints, _Wedge, this);
 }
 
+
+MaterialMode
+QWedgeGrad :: giveMaterialMode()
+{
+    if ( this->nlGeometry > 1 )
+        return _3dMatGrad_F;
+    else
+        return _3dMatGrad;
+}
 
 void
 QWedgeGrad :: computeNkappaMatrixAt (GaussPoint* aGaussPoint,FloatMatrix& answer)

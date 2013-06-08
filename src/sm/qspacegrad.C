@@ -38,6 +38,7 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -46,7 +47,7 @@ REGISTER_Element( QSpaceGrad );
 
 FEI3dHexaLin QSpaceGrad :: interpolation;
 
-QSpaceGrad :: QSpaceGrad (int n, Domain* aDomain) :  QSpace(n, aDomain), GradDpElement()
+QSpaceGrad :: QSpaceGrad(int n, Domain* aDomain) :  QSpace(n, aDomain), GradDpElement()
 // Constructor.
 {
     nPrimNodes = 8;
@@ -60,7 +61,7 @@ QSpaceGrad :: QSpaceGrad (int n, Domain* aDomain) :  QSpace(n, aDomain), GradDpE
 
 
 IRResultType
-QSpaceGrad :: initializeFrom (InputRecord* ir)
+QSpaceGrad :: initializeFrom(InputRecord* ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
@@ -75,7 +76,7 @@ QSpaceGrad :: initializeFrom (InputRecord* ir)
 
 
 void
-QSpaceGrad :: giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) const
+QSpaceGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray& answer) const
 {
     if ( inode<=nSecNodes ) {
         answer.setValues(4, D_u, D_v, D_w, G_0);
@@ -84,19 +85,30 @@ QSpaceGrad :: giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) c
     }
 }
 
+
 void
-QSpaceGrad :: computeGaussPoints ()
+QSpaceGrad :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule* [numberOfIntegrationRules];
     integrationRulesArray[0] = new GaussIntegrationRule (1,this,1, 7);
-    integrationRulesArray[0]->setUpIntegrationPoints (_Cube, numberOfGaussPoints, _3dMatGrad);
+    this->giveCrossSection()->setupIntegrationPoints(*integrationRulesArray[0], numberOfGaussPoints, _Cube, this);
+}
+
+
+MaterialMode
+QSpaceGrad :: giveMaterialMode()
+{
+    if ( this->nlGeometry > 1 )
+        return _3dMatGrad_F;
+    else
+        return _3dMatGrad;
 }
 
 
 void
-QSpaceGrad :: computeNkappaMatrixAt (GaussPoint* aGaussPoint,FloatMatrix& answer)
+QSpaceGrad :: computeNkappaMatrixAt(GaussPoint* aGaussPoint,FloatMatrix& answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {

@@ -115,7 +115,7 @@ QWedge :: computeGaussPoints()
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Wedge, numberOfGaussPoints,this->giveMaterialMode());
+    this->giveCrossSection()->setupIntegrationPoints(*integrationRulesArray[0], numberOfGaussPoints, _Wedge, this);
 }
 
 

@@ -41,6 +41,7 @@
 #include "intarray.h"
 #include "domain.h"
 #include "mathfem.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -207,12 +208,7 @@ void LSpace :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-        MaterialMode mode = _3dMat; // material model is based on strain (standard approach)
-        if ( nlGeometry > 1 ) {
-            mode = _3dMat_F; // material model is based on deformation gradient, not on strain
-        }
-
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, mode);
+        this->giveCrossSection()->setupIntegrationPoints(*integrationRulesArray[0], numberOfGaussPoints, _Cube, this);
     }
 }
 

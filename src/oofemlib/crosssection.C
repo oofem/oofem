@@ -37,8 +37,17 @@
 #include "gausspoint.h"
 #include "material.h"
 #include "contextioerr.h"
+#include "gaussintegrationrule.h"
 
 namespace oofem {
+
+int
+CrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoints, integrationDomain intd, Element *element)
+{
+    return irule.setUpIntegrationPoints(intd, npoints, element->giveMaterialMode());
+}
+
+
 IRResultType
 CrossSection :: initializeFrom(InputRecord *ir)
 //
@@ -113,7 +122,6 @@ CrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat)
 {
     return domain->giveMaterial(mat)->isCharacteristicMtrxSymmetric(rMode);
 }
-
 
 #ifdef __PARALLEL_MODE
 double

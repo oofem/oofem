@@ -377,7 +377,7 @@ CemhydMat :: giveIPValueType(InternalStateType type)
 int
 CemhydMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
-    if ( ( type == IST_HydrationDegree ) ) {
+    if ( type == IST_HydrationDegree ) {
         answer.resize(1);
         answer.at(1) = 1;
         return 1;

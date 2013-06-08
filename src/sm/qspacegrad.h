@@ -68,9 +68,10 @@ public:
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QSpaceGrad_Name; }
-    virtual const char* giveClassName () const { return "QSpaceGrad"; }
-    virtual classType giveClassID () const { return QSpaceGradClass; }
-    virtual int computeNumberOfDofs (EquationID ut) { return 68; }
+    virtual const char* giveClassName() const { return "QSpaceGrad"; }
+    virtual classType giveClassID() const { return QSpaceGradClass; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 68; }
+    virtual MaterialMode giveMaterialMode();
 
 protected:
     virtual void computeGaussPoints ();
@@ -78,7 +79,6 @@ protected:
     virtual void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual StructuralElement* giveStructuralElement() { return this; }
     virtual NLStructuralElement* giveNLStructuralElement() { return this; }
-    
 };
 
 }

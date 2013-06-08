@@ -106,6 +106,8 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
+    virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, integrationDomain intd, Element *element);
+
     virtual void giveRealStresses(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                   const FloatArray &reducedStrainIncrement, TimeStep *tStep);
 
@@ -212,11 +214,6 @@ protected:
                                                GaussPoint *gp,
                                                StructuralMaterial *mat,
                                                TimeStep *tStep);
-    void giveDerivedMaterialStiffnessMatrix(FloatMatrix &answer,
-                                            MatResponseForm form,
-                                            MatResponseMode mode,
-                                            GaussPoint *, StructuralMaterial *mat,
-                                            TimeStep *tStep);
 
     void give2dPlateMaterialStiffnessMatrix(FloatMatrix &answer,
                                             MatResponseForm form,

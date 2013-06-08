@@ -57,6 +57,18 @@ LayeredCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm for
 // IMPORTANT:
 //
 {
+    ///@todo I'm not sure how we should design this, but it'll work for now:
+    if ( gp->giveIntegrationRule()->giveIntegrationDomain() == _Cube || gp->giveIntegrationRule()->giveIntegrationDomain() == _Wedge ) {
+        // Determine which layer the gp belongs to. This code assumes that the gauss point are created consistently (through CrossSection::setupIntegrationPoints)
+        int ngps = gp->giveIntegrationRule()->getNumberOfIntegrationPoints();
+        int gpnum = gp->giveNumber();
+        int gpsperlayer = ngps / this->numberOfLayers;
+        int layer = (gpnum - 1) / gpsperlayer + 1;
+        Material *layerMat = this->domain->giveMaterial( this->giveLayerMaterial(layer) );
+        static_cast< StructuralMaterial * >( layerMat )->giveRealStressVector(answer, form, gp, totalStrain, tStep);
+        return;
+    }
+
     FloatArray stressVector3d;
     FloatArray layerStrain, fullLayerStrain, fullStressVect, stressVect;
     StructuralElement *element = static_cast< StructuralElement * >( gp->giveElement() );
@@ -149,46 +161,21 @@ LayeredCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
                                                      GaussPoint *gp,
                                                      StructuralMaterial *mat,
                                                      TimeStep *tStep)
-
 //
 // only interface to material class, forcing returned matrix to be in form form.
 //
 {
-    //Material *mat = gp->giveElement()->giveMaterial();
     MaterialMode mode = gp->giveMaterialMode();
-    if ( ( mode == _2dPlate ) || ( mode == _3dShell ) || ( mode == _2dBeam ) ) {
-        this->giveDerivedMaterialStiffnessMatrix(answer, form, rMode, gp, mat, tStep);
-    } else if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-        mat->giveCharacteristicMatrix(answer, form, rMode, gp, tStep);
-    } else {
-        _error("giveMaterialStiffnessMatrixOf: unsupported StressStrainMode");
-    }
-}
-
-
-void
-LayeredCrossSection :: giveDerivedMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                          MatResponseForm form,
-                                                          MatResponseMode rMode,
-                                                          GaussPoint *gp,
-                                                          StructuralMaterial *mat,
-                                                          TimeStep *tStep)
-//
-// return material stiffness matrix for derived types of stressStreinState
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    //
-    // integral layer modes
-    //
     if ( mode == _2dPlate ) {
         this->give2dPlateMaterialStiffnessMatrix(answer, form, rMode, gp, mat, tStep);
     } else if ( mode == _2dBeam ) {
         this->give2dBeamMaterialStiffnessMatrix(answer, form, rMode, gp, mat, tStep);
     } else if ( mode == _3dShell ) {
         this->give3dShellMaterialStiffness(answer, form, rMode, gp, mat, tStep);
+    } else if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
+        mat->giveCharacteristicMatrix(answer, form, rMode, gp, tStep);
     } else {
-        _error("giveDerivedMaterialStiffnessMatrix: unsupported StressStrainMode");
+        _error("giveMaterialStiffnessMatrixOf: unsupported StressStrainMode");
     }
 }
 
@@ -845,6 +832,23 @@ LayeredCrossSection :: setupLayerMidPlanes()
 }
 
 
+int
+LayeredCrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoints, integrationDomain intd, Element *element)
+{
+    if ( intd == _Cube ) {
+        return irule.SetUpPointsOnCubeLayers(npoints, element->giveMaterialMode(), this->layerThicks);
+    } else if ( intd == _Wedge ) {
+        ///@todo We must send arrays for integration points instead of just a single scalar.
+        if ( npoints == 2 ) {
+            return irule.SetUpPointsOnWedgeLayers(1, 2, element->giveMaterialMode(), this->layerThicks);
+        } else {
+            return irule.SetUpPointsOnWedgeLayers(3, 3, element->giveMaterialMode(), this->layerThicks);
+        }
+    } else {
+        return irule.setUpIntegrationPoints(intd, npoints, element->giveMaterialMode());
+    }
+}
+
 GaussPoint *
 LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
 //
@@ -1191,4 +1195,5 @@ LayeredCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
         _error("computeStressIndependentStrainVector: temperature loading not supported");
     }
 }
+
 } // end namespace oofem

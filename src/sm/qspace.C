@@ -41,6 +41,7 @@
 #include "intarray.h"
 #include "domain.h"
 #include "mathfem.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -116,7 +117,8 @@ QSpace :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, this->giveMaterialMode());
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, _Cube, this );
+        //integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, this->giveMaterialMode());
     }
 }
 
@@ -429,7 +431,7 @@ QSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int 
 int
 QSpace :: SPRNodalRecoveryMI_giveNumberOfIP()
 {
-    return numberOfGaussPoints;
+    return this->integrationRulesArray[0]->getNumberOfIntegrationPoints();
 }
 
 

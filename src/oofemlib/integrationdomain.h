@@ -50,7 +50,6 @@ enum integrationDomain {
     _Cube,
     _Tetrahedra,
     _Wedge,
-    _Wedge2,
     _Embedded2dLine,
 };
 } // end namespace oofem

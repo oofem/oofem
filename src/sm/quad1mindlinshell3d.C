@@ -253,9 +253,8 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
 
         // Drilling stiffness is here for improved numerical properties
         if (alpha > 0.) {
-            ///@todo Sort out the drilling stiffness thing.
             this->computeConstitutiveMatrixAt(d, ElasticStiffness, gp, tStep);
-            double Et = d.at(1,1); ///@todo Elasticity modulus * thickness, taken from the membrane part of d
+            double Et = d.at(1,1); // Elasticity modulus * thickness, taken from the membrane part of d
             this->interp.evalN(n, *gp->giveCoordinates(), FEIVoidCellGeometry());
             for ( int j = 0; j < 4; j++) {
                 n(j) -= 0.25;
