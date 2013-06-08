@@ -199,26 +199,31 @@ protected:
         FILE *stream,
 #endif
         IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int region, TimeStep *tStep);
-    /**
-     * Tries to find the value of a primary field on the given DofManager.
-     * Some elements have different interpolation of some fields, and requires some additional code to compute node values (if available).
-     */
+
+
+//  Tries to find the value of a primary field on the given DofManager.
+//  Some elements have different interpolation of some fields, and requires some additional code to compute node values (if available).
+//
     void getPrimaryVariable(FloatArray &answer, DofManager *dman, TimeStep *tStep, UnknownType type, int ireg);
-    /**
-     * Exports single internal variable by smoothing.
-     */
-    void exportIntVarAs(InternalStateType valID, InternalStateValueType type, IntArray &mapG2L, IntArray &mapL2G,
-                        int regionDofMans, int ireg,
+
+
+// 
+//  Exports single internal variable by smoothing.
+//  
+void exportIntVarAs(InternalStateType valID, IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int ireg,
 #ifdef __VTK_MODULE
                         vtkSmartPointer<vtkUnstructuredGrid> &stream,
 #else
                         FILE *stream,
 #endif
                         TimeStep *tStep);
-    /**
-     * Exports single primary variable.
-     */
-    void exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntArray &mapL2G,
+void getNodalVariableFromIS(FloatArray &answer, Node *node, IntArray &regionVarMap, TimeStep *tStep, InternalStateType type, int ireg); 
+
+
+//
+//  Exports single primary variable.
+// 
+void exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntArray &mapL2G,
                          int regionDofMans, int region,
 #ifdef __VTK_MODULE
                          vtkSmartPointer<vtkUnstructuredGrid> &stream,
@@ -227,29 +232,24 @@ protected:
 #endif
                          TimeStep *tStep);
 
-    /**
-     * Exports cell variables (typically internal variables).
-     */
-    void exportCellVars(
+
+
+
+// 
+//  Exports cell variables (typically internal variables).
+//
+void exportCellVars(
 #ifdef __VTK_MODULE
         vtkSmartPointer<vtkUnstructuredGrid> &stream,
 #else
         FILE *stream,
 #endif
         int region, TimeStep *tStep);
-    /**
-     * Exports a single cell variable (typically an internal variable).
-     */
-    void exportCellVarAs(InternalStateType type, int region,
-#ifdef __VTK_MODULE
-                         vtkSmartPointer<vtkUnstructuredGrid> &stream,
-#else
-                         FILE *stream,
-#endif
-                         TimeStep *tStep);
 
-
-    void NewexportCellVarAs(InternalStateType type, int region,
+//
+//  Exports a single cell variable (typically an internal variable).
+//
+void exportCellVarAs(InternalStateType type, int region,
 #ifdef __VTK_MODULE
                          vtkSmartPointer<vtkUnstructuredGrid> &stream,
 #else
@@ -267,10 +267,17 @@ protected:
     int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
                                 int &regionDofMans, int &totalcells,
                                 Domain *domain, int reg);
+    /**
+     * Writes a VTK collection file where time step data is stored.
+     */
+    void writeVTKCollection();
 
-    /// Returns true if element geometry type is composite (not a single cell).
+
+
+    // Export of composite elements (built up from several subcells)
+    
     CompositeCell compositeCell;
-    bool isElementComposite(Element *elem);
+    bool isElementComposite(Element *elem); /// Returns true if element geometry type is composite (not a single cell).
 
     void exportCompositeElement(FILE *stream, VTKXMLExportModule *expModule, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep);
     void exportCompositeElement(FILE *stream, Element *el,  IntArray &primaryVarsToExport,  IntArray &internalVarsToExport, TimeStep *tStep);
@@ -278,10 +285,7 @@ protected:
 
     void exportCellVarAs(InternalStateType type, std::vector<FloatArray> &cellVars, FILE *stream, TimeStep *tStep);
 
-    /**
-     * Writes a VTK collection file where time step data is stored.
-     */
-    void writeVTKCollection();
+
 };
 
 
