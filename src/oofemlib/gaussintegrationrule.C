@@ -151,16 +151,13 @@ GaussIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode)
 }
 
 
-int GaussIntegrationRule::SetUpPointsOnCubeLayers(int nPoints, MaterialMode mode, const FloatArray &layerThickness)
+int GaussIntegrationRule::SetUpPointsOnCubeLayers(int nPoints1, int nPoints2, int nPointsDepth, MaterialMode mode, const FloatArray &layerThickness)
 {
-    int nPoints_xi1 = floor(cbrt( double( nPoints ) ) + 0.5);
-    int nPoints_xi2 = nPoints_xi1;
-    int nPoints_xi3 = nPoints_xi1;
     FloatArray coords_xi1, weights1, coords_xi2, weights2, coords_xi3, weights3;
-    this->giveLineCoordsAndWeights(nPoints_xi1, coords_xi1, weights1);
-    this->giveLineCoordsAndWeights(nPoints_xi2, coords_xi2, weights2);
-    this->giveLineCoordsAndWeights(nPoints_xi3, coords_xi3, weights3);
-    int pointsPerLayer = nPoints_xi1 * nPoints_xi2 * nPoints_xi3;
+    this->giveLineCoordsAndWeights(nPoints1, coords_xi1, weights1);
+    this->giveLineCoordsAndWeights(nPoints2, coords_xi2, weights2);
+    this->giveLineCoordsAndWeights(nPointsDepth, coords_xi3, weights3);
+    int pointsPerLayer = nPoints1 * nPoints2 * nPointsDepth;
     this->numberOfIntegrationPoints = pointsPerLayer * layerThickness.giveSize();
     this->gaussPointArray  = new GaussPoint * [ this->numberOfIntegrationPoints ];
 
@@ -172,9 +169,9 @@ int GaussIntegrationRule::SetUpPointsOnCubeLayers(int nPoints, MaterialMode mode
     double scaledThickness;
     for ( int t = 1; t <= layerThickness.giveSize(); t++ ) {
         scaledThickness = layerThickness.at(t) * ( 2.0 / totalThickness );
-        for ( int i = 1; i <= nPoints_xi1; i++ ) {
-            for ( int j = 1; j <= nPoints_xi2; j++ ) {
-                for ( int k = 1; k <= nPoints_xi3; k++ ) {
+        for ( int i = 1; i <= nPoints1; i++ ) {
+            for ( int j = 1; j <= nPoints2; j++ ) {
+                for ( int k = 1; k <= nPointsDepth; k++ ) {
                     FloatArray *coord = new FloatArray(3);
                     coord->at(1) = coords_xi1.at(i);
                     coord->at(2) = coords_xi2.at(j);

@@ -40,6 +40,7 @@
 #include "structuralms.h"
 #include "floatarray.h"
 #include "contextioerr.h"
+#include "mathfem.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -835,14 +836,19 @@ LayeredCrossSection :: setupLayerMidPlanes()
 int
 LayeredCrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element)
 {
+    ///@todo We must send arrays for integration points instead of just a single scalar.
     if ( element->giveIntegrationDomain() == _Cube ) {
-        return irule.SetUpPointsOnCubeLayers(npoints, element->giveMaterialMode(), this->layerThicks);
+        int points1 = floor(cbrt( double( npoints ) ) + 0.5);
+        // If numberOfIntegrationPoints > 0 then use that, otherwise use the element's default.
+        return irule.SetUpPointsOnCubeLayers(points1, points1, this->numberOfIntegrationPoints ? numberOfIntegrationPoints : points1,
+                                             element->giveMaterialMode(), this->layerThicks);
     } else if ( element->giveIntegrationDomain() == _Wedge ) {
-        ///@todo We must send arrays for integration points instead of just a single scalar.
         if ( npoints == 2 ) {
-            return irule.SetUpPointsOnWedgeLayers(1, 2, element->giveMaterialMode(), this->layerThicks);
+            return irule.SetUpPointsOnWedgeLayers(1, this->numberOfIntegrationPoints ? numberOfIntegrationPoints : 2,
+                                                  element->giveMaterialMode(), this->layerThicks);
         } else {
-            return irule.SetUpPointsOnWedgeLayers(3, 3, element->giveMaterialMode(), this->layerThicks);
+            return irule.SetUpPointsOnWedgeLayers(3, this->numberOfIntegrationPoints ? numberOfIntegrationPoints : 3,
+                                                  element->giveMaterialMode(), this->layerThicks);
         }
     } else {
         return irule.setUpIntegrationPoints(element->giveIntegrationDomain(), npoints, element->giveMaterialMode());
