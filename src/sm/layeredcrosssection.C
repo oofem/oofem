@@ -173,10 +173,18 @@ LayeredCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
         this->give2dBeamMaterialStiffnessMatrix(answer, form, rMode, gp, mat, tStep);
     } else if ( mode == _3dShell ) {
         this->give3dShellMaterialStiffness(answer, form, rMode, gp, mat, tStep);
-    } else if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-        mat->giveCharacteristicMatrix(answer, form, rMode, gp, tStep);
     } else {
-        _error("giveMaterialStiffnessMatrixOf: unsupported StressStrainMode");
+        ///@todo We shouldn't send "mat" argument to these functions. The cross-section should define this.
+        int ngps = gp->giveIntegrationRule()->giveNumberOfIntegrationPoints();
+        int gpnum = gp->giveNumber();
+        int gpsperlayer = ngps / this->numberOfLayers;
+        int layer = (gpnum - 1) / gpsperlayer + 1;
+        mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(layer) ) );
+        if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
+            mat->giveCharacteristicMatrix(answer, form, rMode, gp, tStep);
+        } else {
+            _error("giveMaterialStiffnessMatrixOf: unsupported StressStrainMode");
+        }
     }
 }
 
