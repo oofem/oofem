@@ -168,20 +168,20 @@ int GaussIntegrationRule::SetUpPointsOnCubeLayers(int nPoints1, int nPoints2, in
     double bottom = -1.;
     double scaledThickness;
     for ( int t = 1; t <= layerThickness.giveSize(); t++ ) {
-        scaledThickness = layerThickness.at(t) * ( 2.0 / totalThickness );
+        scaledThickness = layerThickness.at(t) / totalThickness;
         for ( int i = 1; i <= nPoints1; i++ ) {
             for ( int j = 1; j <= nPoints2; j++ ) {
                 for ( int k = 1; k <= nPointsDepth; k++ ) {
                     FloatArray *coord = new FloatArray(3);
                     coord->at(1) = coords_xi1.at(i);
                     coord->at(2) = coords_xi2.at(j);
-                    coord->at(3) = coords_xi3.at(k) * scaledThickness + bottom;
-                    this->gaussPointArray [ count ] = new GaussPoint(this, count+1, coord, weights1.at(i) * weights2.at(j) * (weights3.at(k) * scaledThickness * 0.5), mode);
+                    coord->at(3) = (coords_xi3.at(k) + 1.) * scaledThickness + bottom;
+                    this->gaussPointArray [ count ] = new GaussPoint(this, count+1, coord, weights1.at(i) * weights2.at(j) * (weights3.at(k) * scaledThickness), mode);
                     count++;
                 }
             }
         }
-        bottom += scaledThickness;
+        bottom += 2.0 * scaledThickness;
     }
 
     this->intdomain = _Cube;
@@ -272,18 +272,18 @@ GaussIntegrationRule :: SetUpPointsOnWedgeLayers(int nPointsTri, int nPointsDept
     double bottom = -1.;
     double scaledThickness;
     for ( int k = 1; k <= layerThickness.giveSize(); k++ ) {
-        scaledThickness = layerThickness.at(k) * (2.0 / totalThickness);
+        scaledThickness = layerThickness.at(k) / totalThickness;
         for ( int i = 1; i <= nPointsTri; i++ ) {
             for ( int j = 1; j <= nPointsDepth; j++ ) {
                 FloatArray *coord = new FloatArray(3);
                 coord->at(1) = coords_xi1.at(i);
                 coord->at(2) = coords_xi2.at(i);
-                coord->at(3) = coords_xi3.at(j) * scaledThickness + bottom;
-                this->gaussPointArray [ count ] = new GaussPoint(this, count+1, coord, weightsTri.at(i) * (weightsDepth.at(j) * scaledThickness * 0.5), mode);
+                coord->at(3) = (coords_xi3.at(j) + 1.) * scaledThickness + bottom;
+                this->gaussPointArray [ count ] = new GaussPoint(this, count+1, coord, weightsTri.at(i) * (weightsDepth.at(j) * scaledThickness), mode);
                 count++;
             }
         }
-        bottom += scaledThickness;
+        bottom += 2.0 * scaledThickness;
     }
 
     this->intdomain = _Wedge;
