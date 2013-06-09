@@ -70,7 +70,7 @@ CCTPlate :: CCTPlate(int n, Domain *aDomain) :
 
 
 FEInterpolation *
-CCTPlate :: giveInterpolation(DofIDItem id)
+CCTPlate :: giveInterpolation(DofIDItem id) const
 {
     if ( id == D_w ) {
         return & interp_lin;
@@ -88,7 +88,7 @@ CCTPlate :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _2dPlate);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
     }
 }
 
@@ -111,7 +111,7 @@ CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
     }
 
     GaussIntegrationRule irule(1, this, 1, 5);
-    irule.setUpIntegrationPoints(_Triangle, 1, _2dPlate);
+    irule.SetUpPointsOnTriangle(1, _2dPlate);
 
     // note: force is assumed to be in global coordinate system.
     forLoad->computeComponentArrayAt(force, stepN, mode);

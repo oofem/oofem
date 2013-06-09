@@ -62,7 +62,7 @@ Quad1Mindlin :: Quad1Mindlin(int n, Domain *aDomain) :
 
 
 FEInterpolation *
-Quad1Mindlin :: giveInterpolation(DofIDItem id)
+Quad1Mindlin :: giveInterpolation(DofIDItem id) const
 {
     return & interp_lin;
 }
@@ -76,7 +76,7 @@ Quad1Mindlin :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _2dPlate);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
     }
 }
 

@@ -74,7 +74,7 @@ public:
     virtual ~LineSurfaceTension();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual FEInterpolation *giveInterpolation();
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
@@ -91,7 +91,6 @@ public:
      */
     virtual void computeTangent(FloatMatrix &answer, TimeStep *tStep);
 
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
     virtual int computeNumberOfDofs(EquationID ut) { return ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ? 4 : 0;}
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 

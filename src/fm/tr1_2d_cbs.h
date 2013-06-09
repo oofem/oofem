@@ -87,7 +87,7 @@ public:
     TR1_2D_CBS(int n, Domain *aDomain);
     virtual ~TR1_2D_CBS();
 
-    virtual FEInterpolation *giveInterpolation() { return &interp; }
+    virtual FEInterpolation *giveInterpolation() const { return &interp; }
 
     virtual void computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *);
     virtual void computeDiagonalMassMtrx(FloatArray &answer, TimeStep *);
@@ -105,7 +105,6 @@ public:
     virtual const char *giveClassName() const { return "TR1_2D_CBS"; }
     virtual const char *giveInputRecordName() const { return _IFT_TR1_2D_CBS_Name; }
     virtual classType giveClassID() const { return TR1_2D_CBSClass; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;

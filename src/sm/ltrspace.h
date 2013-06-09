@@ -71,7 +71,7 @@ public:
     LTRSpace(int n, Domain *d);
     virtual ~LTRSpace() { }
 
-    virtual FEInterpolation *giveInterpolation();
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
@@ -91,9 +91,6 @@ public:
     virtual const char *giveClassName() const { return "LTRSpace"; }
     virtual classType giveClassID() const { return LTRSpaceClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_tetra_1; }
-
-    virtual integrationDomain giveIntegrationDomain() { return _Tetrahedra; }
     virtual MaterialMode giveMaterialMode();
 
 #ifdef __OOFEG

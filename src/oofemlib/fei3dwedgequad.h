@@ -52,6 +52,9 @@ protected:
 public:
     FEI3dWedgeQuad() : FEInterpolation3d(1) { }
 
+    virtual integrationDomain giveIntegrationDomain() const { return _Wedge; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_wedge_2; }
+
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

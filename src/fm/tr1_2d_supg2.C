@@ -52,6 +52,7 @@
 #include "fei2dquadlin.h"
 #include "geotoolbox.h"
 #include "contextioerr.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG

@@ -82,8 +82,8 @@ public:
 
     virtual Interface *giveInterface(InterfaceType);
 
-    virtual FEInterpolation *giveInterpolation() { return &interp_geom; }
-    virtual FEInterpolation *giveInterpolation(DofIDItem id) { return NULL; }
+    virtual FEInterpolation *giveInterpolation() const { return &interp_geom; }
+    virtual FEInterpolation *giveInterpolation(DofIDItem id) const { return NULL; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 6; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
@@ -94,7 +94,6 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Beam2d_Name; }
     virtual classType giveClassID() const { return Beam2dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
@@ -121,7 +120,6 @@ protected:
     virtual void computeLocalStiffnessMatrix(FloatMatrix &answer,
                                              MatResponseMode rMode, TimeStep *tStep);
     virtual void computeGaussPoints();
-    virtual integrationDomain giveIntegrationDomain() { return _Line; }
     virtual MaterialMode giveMaterialMode() { return _2dBeam; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };

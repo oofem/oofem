@@ -170,7 +170,6 @@ public:
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void computeBoundaryLoadVector(FloatArray &answer, Load *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
 
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_27; }
     virtual const char *giveClassName() const { return "Hexa21Stokes"; }
     virtual const char *giveInputRecordName() const { return _IFT_Hexa21Stokes_Name; }
     virtual classType giveClassID() const { return Hexa21StokesElementClass; }
@@ -178,8 +177,8 @@ public:
 
     virtual int computeNumberOfDofs(EquationID ut);
 
-    virtual FEInterpolation *giveInterpolation();
-    virtual FEInterpolation *giveInterpolation(DofIDItem id);
+    virtual FEInterpolation *giveInterpolation() const;
+    virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 

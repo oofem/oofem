@@ -42,9 +42,9 @@
 namespace oofem {
 
 int
-CrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoints, integrationDomain intd, Element *element)
+CrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element)
 {
-    return irule.setUpIntegrationPoints(intd, npoints, element->giveMaterialMode());
+    return irule.setUpIntegrationPoints(element->giveIntegrationDomain(), npoints, element->giveMaterialMode());
 }
 
 

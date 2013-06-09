@@ -71,10 +71,9 @@ public:
     CCTPlate(int n, Domain *d);
     virtual ~CCTPlate() { }
 
-    virtual FEInterpolation *giveInterpolation() { return &interp_lin; }
-    virtual FEInterpolation *giveInterpolation(DofIDItem id);
+    virtual FEInterpolation *giveInterpolation() const { return &interp_lin; }
+    virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
-    virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }
     virtual int giveApproxOrder() { return 2; }
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
@@ -107,7 +106,6 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_CCTPlate_Name; }
     virtual classType giveClassID() const { return CCTPlateClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 9; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;

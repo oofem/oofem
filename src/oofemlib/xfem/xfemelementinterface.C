@@ -107,7 +107,7 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
             PatchIntegrationRule *pir = new PatchIntegrationRule(i, element, patch);
             int pointNr = 3;
             MaterialMode matMode = element->giveMaterialMode();
-            pir->setUpIntegrationPoints(_Triangle, pointNr, matMode);
+            pir->SetUpPointsOnTriangle(pointNr, matMode);
             irlist.put(i, pir);
         }
 

@@ -59,7 +59,7 @@ IRResultType LineSurfaceTension :: initializeFrom(InputRecord *ir)
     return Element :: initializeFrom(ir);
 }
 
-FEInterpolation * LineSurfaceTension :: giveInterpolation()
+FEInterpolation * LineSurfaceTension :: giveInterpolation() const
 {
     return &this->interp;
 }

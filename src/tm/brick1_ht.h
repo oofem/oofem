@@ -62,7 +62,7 @@ public:
     virtual ~Brick1_ht();
 
     virtual double computeVolumeAround(GaussPoint *gp);
-    virtual FEInterpolation *giveInterpolation() { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Brick1_ht_Name; }
     virtual const char *giveClassName() const { return "Brick1_ht"; }
@@ -71,7 +71,7 @@ public:
     // virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 8 : 16; }
     virtual int computeNumberOfDofs(EquationID ut) { return 8; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_1; }
+    virtual MaterialMode giveMaterialMode() { return _3dHeat; }
 
     virtual Interface *giveInterface(InterfaceType t);
     virtual int testElementExtension(ElementExtension ext)
@@ -119,6 +119,7 @@ public:
     virtual const char *giveClassName() const { return "Brick1_hmt"; }
     virtual classType giveClassID() const { return Brick1_hmtClass; }
     virtual int computeNumberOfDofs(EquationID ut) { return 16; }
+    virtual MaterialMode giveMaterialMode() { return _3dHeMo; }
 };
 
 /**
@@ -133,6 +134,7 @@ public:
     virtual const char *giveClassName() const { return "Brick1_mt"; }
     virtual classType giveClassID() const { return Brick1_mtClass; }
     virtual int computeNumberOfDofs(EquationID ut) { return 8; }
+    virtual MaterialMode giveMaterialMode() { return _3dHeat; }
 };
 } // end namespace oofem
 #endif // brick1_ht_h

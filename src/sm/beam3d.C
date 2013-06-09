@@ -117,7 +117,7 @@ void Beam3d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 3, _3dBeam);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 3, this );
     }
 }
 

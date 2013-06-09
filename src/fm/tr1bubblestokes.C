@@ -45,6 +45,7 @@
 #include "fluiddynamicmaterial.h"
 #include "fei2dtrlin.h"
 #include "masterdof.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -86,7 +87,7 @@ void Tr1BubbleStokes :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, this->numberOfGaussPoints, _2dFlow);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], this->numberOfGaussPoints, this );
     }
 }
 
@@ -289,7 +290,7 @@ void Tr1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, Load *load
         IntArray edge_mapping;
 
         f.zero();
-        iRule.setUpIntegrationPoints(_Line, numberOfEdgeIPs, _Unknown);
+        iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
 
         for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule.getIntegrationPoint(i);
@@ -386,12 +387,12 @@ void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     answer.assemble(C, this->conservation_ordering);
 }
 
-FEInterpolation *Tr1BubbleStokes :: giveInterpolation()
+FEInterpolation *Tr1BubbleStokes :: giveInterpolation() const
 {
     return &interp;
 }
 
-FEInterpolation *Tr1BubbleStokes :: giveInterpolation(DofIDItem id)
+FEInterpolation *Tr1BubbleStokes :: giveInterpolation(DofIDItem id) const
 {
     return &interp;
 }

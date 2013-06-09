@@ -47,6 +47,7 @@
 #include "fluiddynamicmaterial.h"
 #include "fei3dhexalin.h"
 #include "fei3dhexatriquad.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -83,7 +84,7 @@ void Hexa21Stokes :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, this->numberOfGaussPoints, _3dFlow);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
     }
 }
 
@@ -275,7 +276,7 @@ void Hexa21Stokes :: computeBoundaryLoadVector(FloatArray &answer, Load *load, i
         FloatArray N, t, f(27);
 
         f.zero();
-        iRule.setUpIntegrationPoints(_Triangle, numberOfSurfaceIPs, _Unknown);
+        iRule.SetUpPointsOnTriangle(numberOfSurfaceIPs, _Unknown);
 
         for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule.getIntegrationPoint(i);
@@ -366,12 +367,12 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
     answer.assemble(C, this->conservation_ordering);
 }
 
-FEInterpolation *Hexa21Stokes :: giveInterpolation()
+FEInterpolation *Hexa21Stokes :: giveInterpolation() const
 {
     return &interpolation_quad;
 }
 
-FEInterpolation *Hexa21Stokes :: giveInterpolation(DofIDItem id)
+FEInterpolation *Hexa21Stokes :: giveInterpolation(DofIDItem id) const
 {
     if (id == P_f) return &interpolation_lin;
     else return &interpolation_quad;

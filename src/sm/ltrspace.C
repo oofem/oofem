@@ -42,6 +42,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "fei3dtetlin.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -103,7 +104,7 @@ LTRSpace :: giveInterface(InterfaceType interface)
 
 
 FEInterpolation *
-LTRSpace:: giveInterpolation()
+LTRSpace :: giveInterpolation() const
 {
     return &interpolation;
 }
@@ -270,7 +271,7 @@ void LTRSpace :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, numberOfGaussPoints, this->giveMaterialMode());
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
     }
 }
 
@@ -1021,7 +1022,7 @@ LTRSpace :: GetSurfaceIntegrationRule(int approxOrder)
 {
     IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
     int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, approxOrder);
-    iRule->setUpIntegrationPoints(_Triangle, npoints, _Unknown);
+    iRule->SetUpPointsOnTriangle(npoints, _Unknown);
     return iRule;
 }
 

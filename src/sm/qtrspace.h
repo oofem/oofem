@@ -70,7 +70,7 @@ public:
     QTRSpace(int, Domain *);
     virtual ~QTRSpace() {}
 
-    virtual FEInterpolation *giveInterpolation();
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
@@ -100,9 +100,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_QTRSpace_Name; }
     virtual const char *giveClassName() const { return "QTRSpace"; }
     virtual classType giveClassID() const { return QTRSpaceClass; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_tetra_2; }
     virtual int computeNumberOfDofs(EquationID ut) { return 30; }
-    virtual integrationDomain  giveIntegrationDomain() { return _Tetrahedra; }
     virtual MaterialMode giveMaterialMode();
 
 protected:

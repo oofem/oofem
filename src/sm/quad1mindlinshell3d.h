@@ -96,8 +96,8 @@ public:
     Quad1MindlinShell3D(int n, Domain *d);
     virtual ~Quad1MindlinShell3D();
 
-    virtual FEInterpolation *giveInterpolation();
-    virtual FEInterpolation *giveInterpolation(DofIDItem id);
+    virtual FEInterpolation *giveInterpolation() const;
+    virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
     virtual MaterialMode giveMaterialMode()  { return _3dShell; }
     virtual int giveApproxOrder() { return 1; }
@@ -111,7 +111,6 @@ public:
     virtual const char *giveClassName() const { return "Quad1MindlinShell3D"; }
     virtual classType giveClassID() const { return Quad1MindlinShell3DClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 24; }
     virtual int computeNumberOfGlobalDofs(EquationID ut) { return 24; }

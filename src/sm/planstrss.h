@@ -78,7 +78,7 @@ public:
 
     virtual double computeVolumeAround(GaussPoint *gp);
 
-    virtual FEInterpolation *giveInterpolation() { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
@@ -129,8 +129,6 @@ public:
     virtual const char *giveClassName() const { return "PlaneStress2d"; }
     virtual classType giveClassID() const { return PlaneStress2dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
-    virtual integrationDomain giveIntegrationDomain() { return _Square; }
     virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
 
 protected:

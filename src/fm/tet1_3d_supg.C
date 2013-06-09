@@ -45,6 +45,7 @@
 #include "mathfem.h"
 #include "engngm.h"
 #include "timestep.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -140,10 +141,10 @@ Tet1_3D_SUPG :: computeGaussPoints()
         numberOfIntegrationRules = 2;
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, 1, _3dFlow);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
 
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Tetrahedra, 4, _3dFlow);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[1], 4, this );
     }
 }
 

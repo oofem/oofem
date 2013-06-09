@@ -80,7 +80,6 @@ public:
     virtual classType giveClassID() const { return TrPlaneStrRotClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _PlaneStressRot; }
-    virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 9; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;

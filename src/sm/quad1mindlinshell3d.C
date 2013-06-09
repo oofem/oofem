@@ -80,14 +80,14 @@ Quad1MindlinShell3D :: ~Quad1MindlinShell3D()
 
 
 FEInterpolation*
-Quad1MindlinShell3D :: giveInterpolation()
+Quad1MindlinShell3D :: giveInterpolation() const
 {
     return &interp;
 }
 
 
 FEInterpolation*
-Quad1MindlinShell3D :: giveInterpolation(DofIDItem id)
+Quad1MindlinShell3D :: giveInterpolation(DofIDItem id) const
 {
     return &interp;
 }
@@ -101,7 +101,7 @@ Quad1MindlinShell3D :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _3dShell);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
     }
     ///@todo Deal with updated geometries and such.
     this->computeLCS();

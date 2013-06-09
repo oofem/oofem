@@ -62,7 +62,7 @@ public:
     Q4Axisymm(int n, Domain *d);
     virtual ~Q4Axisymm();
 
-    virtual FEInterpolation *giveInterpolation() { return &interp; }
+    virtual FEInterpolation *giveInterpolation() const { return &interp; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 16; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
@@ -75,7 +75,6 @@ public:
     virtual const char *giveClassName() const { return "Q4axisymm"; }
     virtual classType giveClassID() const { return Q4AxisymmClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual integrationDomain giveIntegrationDomain() { return _Square; }
     virtual MaterialMode giveMaterialMode() { return _3dMat; }
 
 protected:

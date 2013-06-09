@@ -90,8 +90,7 @@ public:
 
     virtual void giveDofManDofIDMask(int i, EquationID eid, IntArray &nodeDofIDMask) const;
 
-    virtual FEInterpolation *giveInterpolation();
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
+    virtual FEInterpolation *giveInterpolation() const;
     virtual int computeNumberOfDofs(EquationID eid) { return 6; }
 
     virtual const char *giveClassName() const { return "Line2BoundaryElement"; }

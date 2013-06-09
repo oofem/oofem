@@ -68,7 +68,7 @@ public:
 
     virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 3 : 6; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
+    virtual MaterialMode giveMaterialMode() { return _2dHeat; }
 
     virtual Interface *giveInterface(InterfaceType t);
 
@@ -79,7 +79,7 @@ public:
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
-    virtual FEInterpolation *giveInterpolation() { return &this->interp; }
+    virtual FEInterpolation *giveInterpolation() const { return &this->interp; }
 
 #ifdef __OOFEG
     // Graphics output
@@ -104,6 +104,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Tr1_hmt_Name; }
     virtual const char *giveClassName() const { return "Tr1_hmt"; }
     virtual classType giveClassID() const { return Tr1_hmtClass; }
+    virtual MaterialMode giveMaterialMode() { return _2dHeMo; }
 };
 
 } // end namespace oofem

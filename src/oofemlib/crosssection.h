@@ -140,7 +140,7 @@ public:
      * @param li Upper index of the "strain" components (or equivalent).
      * @return Number of integration points.
      */
-    virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, integrationDomain intd, Element *element);
+    virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element);
     /**
      * Returns nonzero, if receiver implements required extension.
      * @param ext Required extension.

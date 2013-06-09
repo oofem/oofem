@@ -1211,7 +1211,7 @@ Element :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 
 
 int
-Element :: giveSpatialDimension(void) const
+Element :: giveSpatialDimension()
 {
     ///@todo Just ask the interpolator instead?
     switch ( this->giveGeometryType() ) {
@@ -1249,7 +1249,7 @@ Element :: giveSpatialDimension(void) const
 
 
 int
-Element :: giveNumberOfBoundarySides(void) const
+Element :: giveNumberOfBoundarySides()
 {
     ///@todo Just ask the interpolator instead?
     switch ( this->giveGeometryType() ) {
@@ -1345,6 +1345,22 @@ Element :: updateLocalNumbering(EntityRenumberingFunctor &f)
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
         dofManArray.at(i) = f(dofManArray.at(i), ERS_DofManager);
     }
+}
+
+
+integrationDomain
+Element :: giveIntegrationDomain() const
+{
+    FEInterpolation *fei = this->giveInterpolation();
+    return fei ? fei->giveIntegrationDomain() : _Unknown_integrationDomain;
+}
+
+
+Element_Geometry_Type
+Element :: giveGeometryType() const
+{
+    FEInterpolation *fei = this->giveInterpolation();
+    return fei ? fei->giveGeometryType() : EGT_unknown;
 }
 
 

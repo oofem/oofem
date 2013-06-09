@@ -60,8 +60,6 @@ public:
     virtual const char *giveClassName() const { return "QTrPlaneStressGrad"; }
     virtual classType giveClassID() const { return QTrPlaneStressGradClass; }
 
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
-    virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
     virtual MaterialMode giveMaterialMode() { return _PlaneStressGrad; }
     virtual int computeNumberOfDofs(EquationID ut) { return 15; }
 

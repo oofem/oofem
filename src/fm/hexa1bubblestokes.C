@@ -45,6 +45,7 @@
 #include "fluiddynamicmaterial.h"
 #include "fei3dhexalin.h"
 #include "masterdof.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -87,7 +88,7 @@ void Hexa1BubbleStokes :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, this->numberOfGaussPoints, _3dFlow);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
     }
 }
 
@@ -310,7 +311,7 @@ void Hexa1BubbleStokes :: computeEdgeLoadVector(FloatArray &answer, Load *load, 
         IntArray edge_mapping;
 
         f.zero();
-        iRule.setUpIntegrationPoints(_Line, numberOfEdgeIPs, _Unknown);
+        iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
 
         for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule.getIntegrationPoint(i);
@@ -363,7 +364,7 @@ void Hexa1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, Load *lo
         IntArray edge_mapping;
 
         f.zero();
-        iRule.setUpIntegrationPoints(_Triangle, numberOfIPs, _Unknown);
+        iRule.SetUpPointsOnTriangle(numberOfIPs, _Unknown);
 
         for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule.getIntegrationPoint(i);
@@ -475,12 +476,12 @@ void Hexa1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *
     answer.assemble(C, this->conservation_ordering);
 }
 
-FEInterpolation *Hexa1BubbleStokes :: giveInterpolation()
+FEInterpolation *Hexa1BubbleStokes :: giveInterpolation() const
 {
     return &interp;
 }
 
-FEInterpolation *Hexa1BubbleStokes :: giveInterpolation(DofIDItem id)
+FEInterpolation *Hexa1BubbleStokes :: giveInterpolation(DofIDItem id) const
 {
     return &interp;
 }

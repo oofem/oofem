@@ -64,8 +64,9 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_QPlaneStress2d_Name; }
     virtual const char *giveClassName() const { return "QPlaneStress2d"; }
     virtual classType giveClassID() const { return QPlaneStress2dClass; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
-    virtual FEInterpolation *giveInterpolation() { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
+    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
+
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int testElementExtension(ElementExtension ext) { return ( ext == Element_EdgeLoadSupport ); }
@@ -91,9 +92,6 @@ public:
     void drawScalar(oofegGraphicContext &context);
     //void drawInternalState(DrawMode mode);
 #endif
-
-    virtual integrationDomain giveIntegrationDomain() { return _Square; }
-    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);

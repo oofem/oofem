@@ -113,7 +113,7 @@ QWedgeGrad :: computeGaussPoints ()
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule* [numberOfIntegrationRules];
     integrationRulesArray[0] = new GaussIntegrationRule (1,this,1, 7);
-    this->giveCrossSection()->setupIntegrationPoints(*integrationRulesArray[0], numberOfGaussPoints, _Wedge, this);
+    this->giveCrossSection()->setupIntegrationPoints(*integrationRulesArray[0], numberOfGaussPoints, this);
 }
 
 

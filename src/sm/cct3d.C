@@ -354,7 +354,7 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
     }
 
     GaussIntegrationRule irule(1, this, 1, 5);
-    irule.setUpIntegrationPoints(_Triangle, 1, _2dPlate);
+    irule.SetUpPointsOnTriangle(1, _2dPlate);
 
     // note: force is assumed to be in global coordinate system.
     forLoad->computeComponentArrayAt(force, stepN, mode);

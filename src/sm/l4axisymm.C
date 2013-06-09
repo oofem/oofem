@@ -42,6 +42,7 @@
 #include "domain.h"
 #include "engngm.h"
 #include "mathfem.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -189,10 +190,10 @@ L4Axisymm :: computeGaussPoints()
         numberOfIntegrationRules = 2;
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _3dMat);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
 
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);
-        integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Square, numberOfFiAndShGaussPoints, _3dMat);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[1], numberOfFiAndShGaussPoints, this );
     }
 }
 

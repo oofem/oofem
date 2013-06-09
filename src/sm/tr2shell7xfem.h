@@ -99,7 +99,7 @@ protected:
     //only used for debugging 
     void compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matrix2, FloatMatrix &answer);
 
-    virtual FEInterpolation *giveInterpolation();
+    virtual FEInterpolation *giveInterpolation() const;
 
     // VTK
     void vtkGiveFictiousNodeCoords(FloatArray nodeCoords[15], int layer);
@@ -114,13 +114,13 @@ public:
     //virtual int giveNumberOfDofs()           { return 42+14; }///@todo temporary! remove!
     virtual int giveNumberOfEdgeDofs()       { return 21; }
     //virtual int giveNumberOfEdgeDofs()       { return 35; } ///@todo temporary! remove!
-    virtual int giveNumberOfEdgeDofManagers(){ return 3;  }
+    virtual int giveNumberOfEdgeDofManagers() { return 3;  }
     virtual const char *giveInputRecordName() const { return _IFT_Tr2Shell7XFEM_Name; }
     virtual const char *giveClassName() const { return "Tr2Shell7XFEM"; }
     virtual classType giveClassID() const { return Tr2Shell7XFEMClass; }
     //virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_Composite; }
-    virtual integrationDomain giveIntegrationDomain() { return _Triangle; } // write new wedge-like type 'layeredWedge'
+    virtual integrationDomain giveIntegrationDomain() const { return _Triangle; } // write new wedge-like type 'layeredWedge'
 };
 
 

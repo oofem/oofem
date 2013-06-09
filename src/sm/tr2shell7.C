@@ -94,7 +94,7 @@ Tr2Shell7 :: giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &node
 }
 
 
-FEInterpolation *Tr2Shell7 :: giveInterpolation() { return & interpolation; }
+FEInterpolation *Tr2Shell7 :: giveInterpolation() const { return & interpolation; }
 
 
 

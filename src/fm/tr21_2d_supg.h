@@ -66,14 +66,13 @@ public:
     TR21_2D_SUPG(int n, Domain *aDomain);
     virtual ~TR21_2D_SUPG();
 
-    virtual FEInterpolation *giveInterpolation();
-    virtual FEInterpolation *giveInterpolation(DofIDItem id);
+    virtual FEInterpolation *giveInterpolation() const;
+    virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
     // definition
     virtual const char *giveClassName() const { return "TR21_2D_SUPG"; }
     virtual const char *giveInputRecordName() const { return _IFT_TR21_2D_SUPG_Name; }
     virtual classType giveClassID() const { return TR21_2D_SUPGClass; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;

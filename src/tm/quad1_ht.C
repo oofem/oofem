@@ -80,19 +80,11 @@ void
 Quad1_ht :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    MaterialMode mmode;
-
-    if ( emode == HeatTransferEM || emode == Mass1TransferEM ) {
-        mmode = _2dHeat;
-    } else {
-        mmode = _2dHeMo;
-    }
-
     if ( !integrationRulesArray ) {
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, mmode);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
     }
 }
 

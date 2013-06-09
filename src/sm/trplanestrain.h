@@ -73,7 +73,7 @@ public:
     TrPlaneStrain(int n, Domain *d);
     virtual ~TrPlaneStrain() { }
 
-    virtual FEInterpolation* giveInterpolation() { return &interp; }
+    virtual FEInterpolation* giveInterpolation() const { return &interp; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 6; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
@@ -154,8 +154,6 @@ public:
     virtual const char *giveClassName() const { return "TrPlaneStrain"; }
     virtual classType giveClassID() const { return TrPlaneStrainClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
-    virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
     virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
 
 protected:

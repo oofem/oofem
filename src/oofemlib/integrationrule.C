@@ -339,7 +339,7 @@ IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPoints,
         }
         return numberOfIntegrationPoints;
     default:
-        OOFEM_ERROR("IntegrationRule::setUpIntegrationPoints - unknown mode");
+        OOFEM_ERROR2("IntegrationRule::setUpIntegrationPoints - unknown mode (%d)", mode);
     }
 
     return 0;

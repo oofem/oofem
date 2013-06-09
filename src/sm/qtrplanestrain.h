@@ -84,8 +84,8 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_QTrPlaneStrain_Name; }
     virtual const char *giveClassName() const { return "QTrPlaneStrain"; }
     virtual classType giveClassID() const { return QTrPlaneStrainClass; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
 
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
@@ -107,9 +107,6 @@ public:
                                                                  FloatArray &answer);
 
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
-
-    virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
-    virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);

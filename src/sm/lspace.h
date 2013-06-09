@@ -74,7 +74,7 @@ public:
     virtual int computeNumberOfDofs(EquationID ut) { return 24; }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual double computeVolumeAround(GaussPoint *gp);
-    virtual FEInterpolation *giveInterpolation() { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
@@ -129,7 +129,6 @@ public:
     virtual const char *giveClassName() const { return "LSpace"; }
     virtual classType giveClassID() const { return LSpaceClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_1; }
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
@@ -139,7 +138,6 @@ public:
     void drawTriad(FloatArray &, int isurf);
 #endif
 
-    virtual integrationDomain giveIntegrationDomain() { return _Cube; }
     virtual MaterialMode giveMaterialMode();
 
 protected:

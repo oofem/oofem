@@ -537,14 +537,14 @@ public:
      */
     virtual ElementSide *giveSide(int i) const;
     /// @return Interpolation of the element geometry, or NULL if none exist.
-    virtual FEInterpolation *giveInterpolation() { return NULL; }
+    virtual FEInterpolation *giveInterpolation() const { return NULL; }
     /**
      * Returns the interpolation for the specific dof id.
      * Special elements which uses a mixed interpolation should reimplement this method.
      * @param id ID of the dof for the for the requested interpolation.
      * @return Appropriate interpolation, or NULL if none exists.
      */
-    virtual FEInterpolation *giveInterpolation(DofIDItem id) { return giveInterpolation(); }
+    virtual FEInterpolation *giveInterpolation(DofIDItem id) const { return giveInterpolation(); }
     /// @return Reference to the associated material of element.
     Material *giveMaterial();
     /// @return Reference to the associated crossSection of element.
@@ -581,14 +581,11 @@ public:
     void setIntegrationRules(AList< IntegrationRule > *irlist);
     /**
      * Returns integration domain for receiver, used to initialize
-     * integration point over receiver volume. Must be specialized.
-     * @see IntegrationRule
+     * integration point over receiver volume.
+     * Default behavior is taken from the default interpolation.
      * @return Integration domain of element.
      */
-    virtual integrationDomain giveIntegrationDomain() {
-        IntegrationRule *ir = giveDefaultIntegrationRulePtr();
-        return ir ? ir->giveIntegrationDomain() : _Unknown_integrationDomain;
-    }
+    virtual integrationDomain giveIntegrationDomain() const;
     /**
      * Returns material mode for receiver integration points. Should be specialized.
      * @return Material mode of element.
@@ -686,17 +683,17 @@ public:
      * it is required only for some specialized tasks.
      * @return Geometry type of element.
      */
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_unknown; }
+    virtual Element_Geometry_Type giveGeometryType() const;
     /**
      * Returns the element spatial dimension (1, 2, or 3).
      * This is completely based on the geometrical shape, so a plane in space counts as 2 dimensions.
      * @return Number of spatial dimensions of element.
      */
-    virtual int giveSpatialDimension() const;
+    virtual int giveSpatialDimension();
     /**
      * @return Number of boundaries of element.
      */
-    virtual int giveNumberOfBoundarySides() const;
+    virtual int giveNumberOfBoundarySides();
     /**
      * Returns id of default integration rule. Various element types can use
      * different integration rules for implementation of selective or reduced

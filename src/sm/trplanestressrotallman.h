@@ -83,7 +83,7 @@ public:
     virtual classType giveClassID() const { return TrPlanestressRotAllmanClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
-    virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
+    virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
     /** Computes the stiffness matrix of receiver. Overloaded to add stabilization of zero-energy mode (equal rotations) */
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
 

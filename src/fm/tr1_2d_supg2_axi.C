@@ -51,6 +51,7 @@
 #include "fei2dtrlin.h"
 #include "fei2dquadlin.h"
 #include "geotoolbox.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -1611,7 +1612,7 @@ TR1_2D_SUPG2_AXI :: updateIntegrationRules()
             nip = 4;
         }
 
-        integrationRulesArray [ i ]->setUpIntegrationPoints(id [ i ], nip, _2dAxiFlow);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[i], nip, this );
 
         // remap ip coords into area coords of receiver
         for ( int ip = 0; ip < integrationRulesArray [ i ]->giveNumberOfIntegrationPoints(); ip++ ) {

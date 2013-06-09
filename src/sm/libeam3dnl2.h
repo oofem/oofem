@@ -99,7 +99,7 @@ public:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
 
-    virtual integrationDomain giveIntegrationDomain() { return _Line; }
+    virtual integrationDomain giveIntegrationDomain() const { return _Line; }
     virtual MaterialMode giveMaterialMode() { return _3dBeam; }
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj);

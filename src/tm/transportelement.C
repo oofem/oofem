@@ -44,6 +44,7 @@
 #include "floatmatrix.h"
 #include "verbose.h"
 #include "mathfem.h"
+#include "crosssection.h"
 #include "feinterpol.h"
 #include "feinterpol2d.h"
 #include "feinterpol3d.h"
@@ -625,7 +626,7 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
         int approxOrder = edgeLoad->giveApproxOrder() + this->giveApproxOrder(indx);
         int numberOfEdgeIPs = ( int ) ceil( ( approxOrder + 1. ) / 2. );
         GaussIntegrationRule iRule(1, this, 1, 1);
-        iRule.setUpIntegrationPoints(_Line, numberOfEdgeIPs, _Unknown);
+        iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
         FloatArray reducedAnswer, val, n;
         IntArray mask;
         double dV, coeff = 1.0;
@@ -743,7 +744,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 int approxOrder = 2 * this->giveApproxOrder(indx);
                 int numberOfEdgeIPs = ( int ) ceil( ( approxOrder + 1. ) / 2. );
                 GaussIntegrationRule iRule(1, this, 1, 1);
-                iRule.setUpIntegrationPoints(_Line, numberOfEdgeIPs, _Unknown);
+                iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
                 FloatArray val, n;
                 IntArray mask;
                 FloatMatrix subAnswer;

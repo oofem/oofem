@@ -48,6 +48,9 @@ class FEI3dTetQuad : public FEInterpolation3d
 public:
     FEI3dTetQuad() : FEInterpolation3d(2) { }
 
+    virtual integrationDomain giveIntegrationDomain() const { return _Tetrahedra; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_tetra_2; }
+
     virtual double giveVolume(const FEICellGeometry &cellgeo) const;
 
     // Bulk

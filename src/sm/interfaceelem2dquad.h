@@ -41,6 +41,8 @@
 
 namespace oofem {
 
+class FEI2dLineQuad;
+
 /**
  * This class implements a two dimensional interface element.
  * Even if geometry approx is quadratic, the element is assumed straight
@@ -49,12 +51,14 @@ namespace oofem {
  */
 class InterfaceElem2dQuad : public StructuralElement
 {
+protected:
+    static FEI2dLineQuad interp;
+
 public:
     InterfaceElem2dQuad(int n, Domain *d);
     virtual ~InterfaceElem2dQuad() { }
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual int computeNumberOfDofs(EquationID ut) { return 12; }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
@@ -77,9 +81,6 @@ public:
     virtual const char *giveClassName() const { return "InterfaceElem2dQuad"; }
     virtual classType giveClassID() const { return InterfaceElem2dQuadClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
-
-    virtual integrationDomain giveIntegrationDomain() { return _Line; }
     virtual MaterialMode giveMaterialMode() { return _2dInterface; }
 
 protected:

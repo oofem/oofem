@@ -121,7 +121,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
+    virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
     virtual MaterialMode giveMaterialMode() { return _3dShell; }
 
 protected:

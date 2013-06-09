@@ -46,6 +46,9 @@ class FEI3dLineLin : public FEInterpolation3d
 public:
     FEI3dLineLin() : FEInterpolation3d(1) { };
 
+    virtual integrationDomain giveIntegrationDomain() const { return _Line; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+
     virtual double giveVolume(const FEICellGeometry &cellgeo) const { return 0.0; }
     virtual double giveLength(const FEICellGeometry &cellgeo) const;
 

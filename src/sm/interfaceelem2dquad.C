@@ -41,6 +41,7 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "fei2dlinequad.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -52,6 +53,9 @@
 namespace oofem {
 
 REGISTER_Element( InterfaceElem2dQuad );
+
+FEI2dLineQuad InterfaceElem2dQuad :: interp(1, 2);
+
 
 InterfaceElem2dQuad :: InterfaceElem2dQuad(int n, Domain *aDomain) :
     StructuralElement(n, aDomain)
@@ -67,6 +71,7 @@ InterfaceElem2dQuad :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &an
 // Returns the linear part of the B matrix
 //
 {
+    ///@todo Use the interpolator everywhere in this file:
     double ksi, n1, n2, n3;
 
     ksi = aGaussPoint->giveCoordinate(1);
@@ -85,6 +90,7 @@ InterfaceElem2dQuad :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &an
     answer.at(1, 12) = answer.at(2, 11) = n3;
 }
 
+
 void
 InterfaceElem2dQuad :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
@@ -94,35 +100,8 @@ InterfaceElem2dQuad :: computeGaussPoints()
         integrationRulesArray = new IntegrationRule * [ 1 ];
         //integrationRulesArray[0] = new LobattoIntegrationRule (1,domain, 1, 2);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 4, _2dInterface);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 4, this );
     }
-}
-
-
-int
-InterfaceElem2dQuad :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    double ksi, n1, n2, n3;
-
-    ksi = lcoords.at(1);
-    n3  = 1. - ksi * ksi;
-    n1  = ( 1. - ksi ) * 0.5 - 0.5 * n3;
-    n2  = ( 1. + ksi ) * 0.5 - 0.5 * n3;
-
-
-    answer.resize(2);
-    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this->giveNode(2)->giveCoordinate(1) + n3 *this->giveNode(3)->giveCoordinate(1);
-    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 *this->giveNode(2)->giveCoordinate(2) + n3 *this->giveNode(3)->giveCoordinate(2);
-
-    return 1;
-}
-
-
-int
-InterfaceElem2dQuad :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
-{
-    _error("Not implemented");
-    return 0;
 }
 
 
@@ -191,6 +170,13 @@ InterfaceElem2dQuad :: computeGtoLRotationMatrix(FloatMatrix &answer)
     }
 
     return 1;
+}
+
+
+FEInterpolation *
+InterfaceElem2dQuad :: giveInterpolation() const
+{
+    return &interp;
 }
 
 ///@todo Deprecated? Is so, remove it. / Mikael

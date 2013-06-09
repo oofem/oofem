@@ -98,7 +98,6 @@ protected:
     void evaluateCenter();
     void evaluateLocalCoordinateSystem();
 public:
-    virtual integrationDomain giveIntegrationDomain() { return _Line; }
     virtual MaterialMode giveMaterialMode() { return _3dInterface; }
 };
 } // namespace oofem

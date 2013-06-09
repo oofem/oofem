@@ -38,6 +38,8 @@
 #include "error.h"
 #include "inputrecord.h"
 #include "intarray.h"
+#include "integrationdomain.h"
+#include "elementgeometrytype.h"
 
 namespace oofem {
 class Element;
@@ -122,6 +124,16 @@ protected:
 public:
     FEInterpolation(int o) { order = o; }
     virtual ~FEInterpolation() { }
+
+    /**
+     * Returns the integration domain of the interpolator.
+     */
+    virtual integrationDomain giveIntegrationDomain() const = 0;
+    /**
+     * Returns the geometry type fo the interpolator.
+     */
+    virtual Element_Geometry_Type giveGeometryType() const = 0;
+
     /**
      * Returns the interpolation order.
      */

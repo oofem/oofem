@@ -132,7 +132,6 @@ public:
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void computeBoundaryLoadVector(FloatArray &answer, Load *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
 
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_tetra_2; }
     virtual const char *giveClassName() const { return "Tet21Stokes"; }
     virtual const char *giveInputRecordName() const { return _IFT_Tet21Stokes_Name; }
     virtual classType giveClassID() const { return Tet21StokesElementClass; }
@@ -140,8 +139,8 @@ public:
 
     virtual int computeNumberOfDofs(EquationID ut);
 
-    virtual FEInterpolation *giveInterpolation();
-    virtual FEInterpolation *giveInterpolation(DofIDItem id);
+    virtual FEInterpolation *giveInterpolation() const;
+    virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
     /**
      * Gives the dof ID mask for the element.

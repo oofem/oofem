@@ -68,7 +68,7 @@ public:
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &crackToNormalPlane);
 
-    virtual FEInterpolation *giveInterpolation() { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 
     virtual Interface *giveInterface(InterfaceType it);
 
@@ -79,7 +79,6 @@ public:
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
 
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
@@ -101,7 +100,6 @@ public:
     //void drawInternalState(oofegGraphicContext &);
 #endif
 
-    virtual integrationDomain giveIntegrationDomain() { return _Square; }
     virtual MaterialMode giveMaterialMode() { return _3dMat; }
 
 protected:

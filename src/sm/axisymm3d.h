@@ -82,7 +82,7 @@ public:
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType it);
-    virtual FEInterpolation *giveInterpolation() { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
@@ -116,11 +116,9 @@ public:
     virtual const char *giveClassName() const { return "Axisymm3d"; }
     virtual const char *giveInputRecordName() const { return _IFT_Axisymm3d_Name; }
     virtual classType giveClassID() const { return Axisymm3dClass; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
     virtual MaterialMode giveMaterialMode() { return _3dMat; }
 
 protected:

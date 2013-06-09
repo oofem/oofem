@@ -116,7 +116,6 @@ public:
     virtual const char *giveClassName() const { return "TR1_2D_SUPG2"; }
     virtual const char *giveInputRecordName() const { return _IFT_TR1_2D_SUPG2_Name; }
     virtual classType giveClassID() const { return TR1_2D_SUPG2Class; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;

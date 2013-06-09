@@ -47,6 +47,7 @@
 #include "load.h"
 #include "boundaryload.h"
 #include "fluiddynamicmaterial.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -74,7 +75,7 @@ TR1_2D_SUPG_AXI :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, 7, _2dAxiFlow);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 7, this );
     }
 }
 

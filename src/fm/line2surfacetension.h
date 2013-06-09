@@ -63,7 +63,7 @@ public:
     /// Destructor.
     virtual ~Line2SurfaceTension();
 
-    virtual FEInterpolation *giveInterpolation();
+    virtual FEInterpolation *giveInterpolation() const;
 
     void computeTangent(FloatMatrix &answer, TimeStep *tStep);
     void computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep);
@@ -88,7 +88,6 @@ public:
                                                                  TimeStep *tStep, const FloatArray &lcoords,
                                                                  FloatArray &answer);
 
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
     virtual int computeNumberOfDofs(EquationID ut) { return 6; }
 
     virtual const char *giveClassName() const { return "Line2SurfaceTension"; }

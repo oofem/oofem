@@ -70,7 +70,7 @@ public:
     virtual int computeNumberOfDofs(EquationID ut) { return 8; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
-    virtual FEInterpolation *giveInterpolation() { return &interp; }
+    virtual FEInterpolation *giveInterpolation() const { return &interp; }
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
@@ -131,9 +131,6 @@ public:
     virtual const char *giveClassName() const { return "Quad1PlaneStrain"; }
     virtual classType giveClassID() const { return Quad1PlaneStrainClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
-    virtual integrationDomain giveIntegrationDomain() { return _Square; }
     virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
 
 protected:

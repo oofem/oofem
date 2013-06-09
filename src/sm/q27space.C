@@ -51,7 +51,7 @@ REGISTER_Element( Q27Space );
 
 FEI3dHexaTriQuad Q27Space :: interpolation;
 
-FEInterpolation* Q27Space :: giveInterpolation()
+FEInterpolation* Q27Space :: giveInterpolation() const
 {
     return &interpolation;
 }
@@ -119,7 +119,7 @@ Q27Space :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-        this->giveCrossSection()->setupIntegrationPoints(*integrationRulesArray[0], numberOfGaussPoints, _Cube, this);
+        this->giveCrossSection()->setupIntegrationPoints(*integrationRulesArray[0], numberOfGaussPoints, this);
     }
 }
 
@@ -247,7 +247,7 @@ Q27Space :: GetSurfaceIntegrationRule(int approxOrder)
 {
     IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
     int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Square, approxOrder);
-    iRule->setUpIntegrationPoints(_Square, npoints, _Unknown);
+    iRule->SetUpPointsOnSquare(npoints, _Unknown);
     return iRule;
 }
 

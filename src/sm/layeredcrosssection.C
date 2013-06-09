@@ -833,11 +833,11 @@ LayeredCrossSection :: setupLayerMidPlanes()
 
 
 int
-LayeredCrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoints, integrationDomain intd, Element *element)
+LayeredCrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element)
 {
-    if ( intd == _Cube ) {
+    if ( element->giveIntegrationDomain() == _Cube ) {
         return irule.SetUpPointsOnCubeLayers(npoints, element->giveMaterialMode(), this->layerThicks);
-    } else if ( intd == _Wedge ) {
+    } else if ( element->giveIntegrationDomain() == _Wedge ) {
         ///@todo We must send arrays for integration points instead of just a single scalar.
         if ( npoints == 2 ) {
             return irule.SetUpPointsOnWedgeLayers(1, 2, element->giveMaterialMode(), this->layerThicks);
@@ -845,7 +845,7 @@ LayeredCrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoint
             return irule.SetUpPointsOnWedgeLayers(3, 3, element->giveMaterialMode(), this->layerThicks);
         }
     } else {
-        return irule.setUpIntegrationPoints(intd, npoints, element->giveMaterialMode());
+        return irule.setUpIntegrationPoints(element->giveIntegrationDomain(), npoints, element->giveMaterialMode());
     }
 }
 

@@ -82,7 +82,7 @@ QTRSpace :: initializeFrom(InputRecord *ir)
 
 
 FEInterpolation*
-QTRSpace :: giveInterpolation()
+QTRSpace :: giveInterpolation() const
 {
     return &interpolation;
 }
@@ -120,7 +120,7 @@ QTRSpace :: computeGaussPoints()
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, numberOfGaussPoints, this->giveMaterialMode());
+    this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
 }
 
 

@@ -49,6 +49,7 @@
 #include "timestep.h"
 #include "boundaryload.h"
 #include "geotoolbox.h"
+#include "crosssection.h"
 #include "contextioerr.h"
 #include "classfactory.h"
 
@@ -150,7 +151,7 @@ TR1_2D_CBS :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, 1, _2dFlow);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
     }
 }
 

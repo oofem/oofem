@@ -63,6 +63,8 @@ public:
     Q9PlaneStress2d(int n, Domain *d);
     virtual ~Q9PlaneStress2d() { }
 
+    virtual IRResultType initializeFrom(InputRecord *ir);
+
     virtual int computeNumberOfDofs(EquationID ut) { return 18; }
 
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
@@ -71,9 +73,8 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Q9PlaneStress2d_Name; }
     virtual const char *giveClassName() const { return "Q9PlaneStress2d"; }
     virtual classType giveClassID() const { return Q9PlaneStress2dClass; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad9_2; }
-    virtual FEInterpolation *giveInterpolation() { return & interpolation; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
+    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
 
     virtual int testElementExtension(ElementExtension ext) { return ( ext == Element_EdgeLoadSupport ); }
 
@@ -98,9 +99,6 @@ public:
     void drawScalar(oofegGraphicContext &context);
     //void drawInternalState(DrawMode mode);
 #endif
-
-    virtual integrationDomain giveIntegrationDomain() { return _Square; }
-    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);

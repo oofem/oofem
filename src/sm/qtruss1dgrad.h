@@ -63,8 +63,6 @@ public:
     virtual const char *giveClassName() const { return "QTruss1dGrad"; }
     virtual classType giveClassID() const { return QTruss1dGradClass; }
 
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
-    virtual integrationDomain  giveIntegrationDomain() { return _Line; }
     virtual MaterialMode giveMaterialMode() { return _1dMatGrad; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int computeNumberOfDofs(EquationID ut) { return 5; }

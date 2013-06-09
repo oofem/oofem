@@ -49,6 +49,9 @@ protected:
 public:
     FEI2dTrLin(int ind1, int ind2) : FEInterpolation2d(1), xind(ind1), yind(ind2) { }
 
+    virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
+
     // Bulk
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

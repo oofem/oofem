@@ -46,6 +46,7 @@
 #include "fluiddynamicmaterial.h"
 #include "fei2dtrlin.h"
 #include "fei2dtrquad.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -85,7 +86,7 @@ void Tr21Stokes :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, this->numberOfGaussPoints, _2dFlow);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], this->numberOfGaussPoints, this );
     }
 }
 
@@ -290,7 +291,7 @@ void Tr21Stokes :: computeBoundaryLoadVector(FloatArray &answer, Load *load, int
         IntArray edge_mapping;
 
         f.zero();
-        iRule.setUpIntegrationPoints(_Line, numberOfEdgeIPs, _Unknown);
+        iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
 
         for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule.getIntegrationPoint(i);
@@ -382,12 +383,12 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.assemble(C, this->conservation_ordering);
 }
 
-FEInterpolation *Tr21Stokes :: giveInterpolation()
+FEInterpolation *Tr21Stokes :: giveInterpolation() const
 {
     return &interpolation_quad;
 }
 
-FEInterpolation *Tr21Stokes :: giveInterpolation(DofIDItem id)
+FEInterpolation *Tr21Stokes :: giveInterpolation(DofIDItem id) const
 {
     if (id == P_f) return &interpolation_lin; else return &interpolation_quad;
 }
@@ -525,7 +526,7 @@ void Tr21Stokes :: giveGradP(FloatMatrix &answer, TimeStep * tStep )
     FloatArray Normal, N, *lcoords, p;
     FloatMatrix temp, int_Np_edge;
 
-    iRuleEdge.setUpIntegrationPoints(_Line, this->numberOfGaussPoints, _Unknown);
+    iRuleEdge.setUpPointsOnLine(this->numberOfGaussPoints, _Unknown);
 
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, p);
 

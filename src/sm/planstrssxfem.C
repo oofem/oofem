@@ -284,7 +284,7 @@ PlaneStress2dXfem :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
 }
 
 Element_Geometry_Type 
-PlaneStress2dXfem :: giveGeometryType() const 
+PlaneStress2dXfem :: giveGeometryType() const
 { 
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
     if ( xMan->isElementEnriched(this) ) {

@@ -102,6 +102,8 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Beam3d_Name; }
     virtual classType giveClassID() const { return Beam3dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
+    ///@todo Introduce interpolator and remove these two:
+    virtual integrationDomain giveIntegrationDomain() const { return _Line; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
 
 #ifdef __OOFEG
@@ -127,7 +129,6 @@ protected:
     virtual void computeLocalStiffnessMatrix(FloatMatrix &answer,
                                              MatResponseMode rMode, TimeStep *tStep);
     virtual void computeGaussPoints();
-    virtual integrationDomain giveIntegrationDomain() { return _Line; }
     virtual MaterialMode giveMaterialMode() { return _3dBeam; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };

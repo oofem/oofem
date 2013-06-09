@@ -47,6 +47,7 @@
 #include "fluiddynamicmaterial.h"
 #include "fei3dtetlin.h"
 #include "fei3dtetquad.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -85,7 +86,7 @@ void Tet21Stokes :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, this->numberOfGaussPoints, _3dFlow);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], this->numberOfGaussPoints, this );
     }
 }
 
@@ -285,7 +286,7 @@ void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, Load *load, in
         FloatArray N, t, f(18);
 
         f.zero();
-        iRule.setUpIntegrationPoints(_Triangle, numberOfSurfaceIPs, _Unknown);
+        iRule.SetUpPointsOnTriangle(numberOfSurfaceIPs, _Unknown);
 
         for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule.getIntegrationPoint(i);
@@ -383,12 +384,12 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 //    C.printYourself();
 }
 
-FEInterpolation *Tet21Stokes :: giveInterpolation()
+FEInterpolation *Tet21Stokes :: giveInterpolation() const
 {
     return &interpolation_quad;
 }
 
-FEInterpolation *Tet21Stokes :: giveInterpolation(DofIDItem id)
+FEInterpolation *Tet21Stokes :: giveInterpolation(DofIDItem id) const
 {
     if (id == P_f) return &interpolation_lin; else return &interpolation_quad;
 }

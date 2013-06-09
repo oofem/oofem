@@ -77,7 +77,7 @@ public:
         if (this->compositeIR) delete this->compositeIR;
     }
 
-    virtual FEInterpolation *giveInterpolation() { return plate->giveInterpolation(); }
+    virtual FEInterpolation *giveInterpolation() const { return plate->giveInterpolation(); }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
@@ -110,7 +110,7 @@ public:
     virtual int giveDefaultIntegrationRule() const { return plate->giveDefaultIntegrationRule();}
     virtual IntegrationRule *giveDefaultIntegrationRulePtr() {return plate->giveDefaultIntegrationRulePtr();}
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
-    virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
+    virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
     virtual MaterialMode giveMaterialMode() { return _Unknown; }
 
     virtual Interface *giveInterface(InterfaceType it);

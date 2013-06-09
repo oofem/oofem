@@ -53,6 +53,9 @@ public:
         yind = ind2;
     }
 
+    virtual integrationDomain giveIntegrationDomain() const { return _Square; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
+
     virtual double giveArea(const FEICellGeometry &cellgeo) const;
 
     // Bulk

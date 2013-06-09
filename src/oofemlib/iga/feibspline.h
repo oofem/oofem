@@ -83,6 +83,14 @@ public:
     BSplineInterpolation(int nsd) : FEInterpolation(0) { this->nsd = nsd; }
     virtual ~BSplineInterpolation();
 
+    virtual integrationDomain giveIntegrationDomain() const {
+        if ( nsd == 3 ) return _Cube;
+        else if ( nsd == 2 ) return _Square;
+        else if ( nsd == 1 ) return _Line;
+        else return _Unknown_integrationDomain;
+    }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_unknown; }
+
     virtual int giveNsd() { return nsd; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     

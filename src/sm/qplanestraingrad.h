@@ -59,8 +59,6 @@ public:
     virtual const char *giveClassName() const { return "QPlaneStrainGrad"; }
     virtual classType giveClassID() const { return QPlaneStrainGradClass; }
 
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
-    virtual integrationDomain  giveIntegrationDomain() { return _Square; }
     virtual MaterialMode giveMaterialMode() { return _PlaneStrainGrad; }
     virtual int computeNumberOfDofs(EquationID ut) { return 20; }
 

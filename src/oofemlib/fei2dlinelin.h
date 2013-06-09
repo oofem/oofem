@@ -54,6 +54,9 @@ public:
         yind = ind2;
     }
 
+    virtual integrationDomain giveIntegrationDomain() const { return _Line; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+
     virtual double giveArea(const FEICellGeometry &cellgeo) const { return 0.0; }
 
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

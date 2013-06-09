@@ -71,10 +71,10 @@ TrPlaneStrRot :: computeGaussPoints()
         numberOfIntegrationRules = 2;
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _PlaneStressRot);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
 
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 4, 4);
-        integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Triangle, numberOfRotGaussPoints, _PlaneStressRot);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[1], numberOfRotGaussPoints, this );
     }
 }
 
@@ -153,7 +153,7 @@ TrPlaneStrRot :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, 
 
     if ( ( li <= 3 ) && ( ui >= 3 ) ) {
         GaussIntegrationRule ir(1, this, 1, 3);
-        ir.setUpIntegrationPoints(_Triangle, 1, _PlaneStress);
+        ir.SetUpPointsOnTriangle(1, _PlaneStress);
 
         nx = this->GiveDerivativeVX( ir.getIntegrationPoint(0) );
         ny = this->GiveDerivativeUY( ir.getIntegrationPoint(0) );

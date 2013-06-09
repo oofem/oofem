@@ -38,6 +38,7 @@
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "intarray.h"
+#include "crosssection.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -90,7 +91,7 @@ QTrPlaneStrainGrad :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule* [numberOfIntegrationRules];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _PlaneStrainGrad);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
     }
 }
 

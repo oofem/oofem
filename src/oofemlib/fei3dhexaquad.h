@@ -72,6 +72,9 @@ class FEI3dHexaQuad : public FEInterpolation3d
 public:
     FEI3dHexaQuad() : FEInterpolation3d(2) { }
 
+    virtual integrationDomain giveIntegrationDomain() const { return _Cube; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_2; }
+
     virtual double giveCharacteristicLength(const FEICellGeometry &cellgeo) const;
 
     // Bulk

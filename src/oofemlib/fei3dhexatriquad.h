@@ -47,6 +47,9 @@ class FEI3dHexaTriQuad : public FEI3dHexaQuad
 public:
     FEI3dHexaTriQuad() : FEI3dHexaQuad() { }
 
+    virtual integrationDomain giveIntegrationDomain() const { return _Cube; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_27; }
+
     // Bulk
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 

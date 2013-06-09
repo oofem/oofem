@@ -46,6 +46,9 @@ class FEI3dTetLin : public FEInterpolation3d
 public:
     FEI3dTetLin() : FEInterpolation3d(1) { }
 
+    virtual integrationDomain giveIntegrationDomain() const { return _Tetrahedra; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_tetra_1; }
+
     // Bulk
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

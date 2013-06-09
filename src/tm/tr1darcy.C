@@ -77,7 +77,7 @@ void Tr1Darcy :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _2dHeat);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
     }
 }
 
@@ -210,7 +210,7 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
         reducedAnswer.zero();
         IntArray mask;
 
-        iRule.setUpIntegrationPoints(_Line, numberOfEdgeIPs, _Unknown);
+        iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
 
         for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule.getIntegrationPoint(i);

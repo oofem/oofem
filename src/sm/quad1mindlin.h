@@ -68,8 +68,8 @@ public:
     Quad1Mindlin(int n, Domain *d);
     virtual ~Quad1Mindlin() { }
 
-    virtual FEInterpolation *giveInterpolation() { return &interp_lin; }
-    virtual FEInterpolation *giveInterpolation(DofIDItem id);
+    virtual FEInterpolation *giveInterpolation() const { return &interp_lin; }
+    virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }
     virtual int giveApproxOrder() { return 1; }
@@ -80,7 +80,6 @@ public:
     virtual const char *giveClassName() const { return "Quad1Mindlin"; }
     virtual classType giveClassID() const { return Quad1MindlinClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 12; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;

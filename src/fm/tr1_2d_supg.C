@@ -52,6 +52,7 @@
 #include "materialinterface.h"
 #include "contextioerr.h"
 #include "reinforcement.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -146,7 +147,7 @@ TR1_2D_SUPG :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, 1, _2dFlow);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
     }
 }
 

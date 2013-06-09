@@ -106,7 +106,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, integrationDomain intd, Element *element);
+    virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element);
 
     virtual void giveRealStresses(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                   const FloatArray &reducedStrainIncrement, TimeStep *tStep);

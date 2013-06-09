@@ -117,8 +117,7 @@ QSpace :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, _Cube, this );
-        //integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, this->giveMaterialMode());
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
     }
 }
 
@@ -245,7 +244,7 @@ QSpace :: GetSurfaceIntegrationRule(int approxOrder)
 {
     IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
     int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Square, approxOrder);
-    iRule->setUpIntegrationPoints(_Square, npoints, _Unknown);
+    iRule->SetUpPointsOnSquare(npoints, _Unknown);
     return iRule;
 }
 

@@ -45,6 +45,7 @@
 #include "fluiddynamicmaterial.h"
 #include "fei3dtetlin.h"
 #include "masterdof.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -87,7 +88,7 @@ void Tet1BubbleStokes :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, this->numberOfGaussPoints, _3dFlow);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], this->numberOfGaussPoints, this );
     }
 }
 
@@ -301,7 +302,7 @@ void Tet1BubbleStokes :: computeEdgeLoadVector(FloatArray &answer, Load *load, i
         IntArray edge_mapping;
 
         f.zero();
-        iRule.setUpIntegrationPoints(_Line, numberOfEdgeIPs, _Unknown);
+        iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
 
         for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule.getIntegrationPoint(i);
@@ -354,7 +355,7 @@ void Tet1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, Load *loa
         IntArray edge_mapping;
 
         f.zero();
-        iRule.setUpIntegrationPoints(_Triangle, numberOfIPs, _Unknown);
+        iRule.SetUpPointsOnTriangle(numberOfIPs, _Unknown);
 
         for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule.getIntegrationPoint(i);
@@ -457,12 +458,12 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *t
     answer.assemble(C, this->conservation_ordering);
 }
 
-FEInterpolation *Tet1BubbleStokes :: giveInterpolation()
+FEInterpolation *Tet1BubbleStokes :: giveInterpolation() const
 {
     return &interp;
 }
 
-FEInterpolation *Tet1BubbleStokes :: giveInterpolation(DofIDItem id)
+FEInterpolation *Tet1BubbleStokes :: giveInterpolation(DofIDItem id) const
 {
     return &interp;
 }

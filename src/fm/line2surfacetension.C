@@ -38,6 +38,7 @@
 #include "gausspoint.h"
 #include "material.h"
 #include "fei2dlinequad.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -52,7 +53,7 @@ Line2SurfaceTension :: Line2SurfaceTension(int n, Domain *aDomain) : LineSurface
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 2, _Unknown);
+    this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 2, this );
 }
 
 Line2SurfaceTension :: ~Line2SurfaceTension()
@@ -64,7 +65,7 @@ void Line2SurfaceTension :: computeN(FloatArray &answer, const FloatArray &lcoor
     this->fei.evalN(answer, lcoords, FEIElementGeometryWrapper(this));
 }
 
-FEInterpolation *Line2SurfaceTension :: giveInterpolation()
+FEInterpolation *Line2SurfaceTension :: giveInterpolation() const
 {
     return &this->fei;
 }

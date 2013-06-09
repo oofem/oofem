@@ -192,7 +192,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
         approxOrder = edgeLoad->giveApproxOrder() + this->giveApproxOrder();
         numberOfGaussPoints = ( int ) ceil( ( approxOrder + 1. ) / 2. );
         GaussIntegrationRule iRule(1, this, 1, 1);
-        iRule.setUpIntegrationPoints(_Line, numberOfGaussPoints, _Unknown);
+        iRule.SetUpPointsOnLine(numberOfGaussPoints, _Unknown);
         GaussPoint *gp;
         FloatArray reducedAnswer, force, ntf;
         IntArray mask;

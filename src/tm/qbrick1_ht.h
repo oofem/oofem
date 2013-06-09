@@ -62,7 +62,7 @@ public:
     virtual ~ QBrick1_ht();
 
     virtual double computeVolumeAround(GaussPoint *gp);
-    virtual FEInterpolation *giveInterpolation() { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QBrick1_ht_Name; }
     virtual const char *giveClassName() const { return "QBrick1_ht"; }
@@ -70,7 +70,7 @@ public:
 
     virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 20 : 40; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_2; }
+    virtual MaterialMode giveMaterialMode() { return _3dHeat; }
 
     virtual Interface *giveInterface(InterfaceType t);
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
@@ -100,6 +100,7 @@ class QBrick1_hmt : public QBrick1_ht
 public:
     QBrick1_hmt(int n, Domain *d);
 
+    virtual MaterialMode giveMaterialMode() { return _3dHeMo; }
     virtual const char *giveInputRecordName() const { return _IFT_QBrick1_hmt_Name; }
     virtual const char *giveClassName() const { return "QBrick1_hmt"; }
     virtual classType giveClassID() const { return QBrick1_hmtClass; }

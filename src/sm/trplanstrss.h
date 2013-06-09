@@ -73,7 +73,7 @@ public:
     TrPlaneStress2d(int n, Domain *d);
     virtual ~TrPlaneStress2d() { }
 
-    virtual FEInterpolation *giveInterpolation() { return &interp; }
+    virtual FEInterpolation *giveInterpolation() const { return &interp; }
     virtual int computeNumberOfDofs(EquationID ut) { return 6; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
@@ -98,7 +98,7 @@ public:
     virtual const char *giveClassName() const { return "TrPlaneStress2d"; }
     virtual classType giveClassID() const { return TrPlaneStress2dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
+    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
 
     //void ZZNodalRecoveryMI_computeNValProduct (FloatArray& answer, InternalStateType type, TimeStep* tStep);
     //void ZZNodalRecoveryMI_computeNNMatrix (FloatArray& answer, InternalStateType type);
@@ -157,9 +157,6 @@ public:
     virtual void MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
                                                                       coordType ct, nodalValContainerType &list,
                                                                       InternalStateType type, TimeStep *tStep);
-
-    virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
-    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
 
 protected:
     // edge load support

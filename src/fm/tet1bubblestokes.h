@@ -119,7 +119,6 @@ public:
     virtual void computeBoundaryLoadVector(FloatArray &answer, Load *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void computeEdgeLoadVector(FloatArray &answer, Load *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep);
 
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_tetra_1; }
     virtual const char *giveClassName() const { return "Tet1BubbleStokes"; }
     virtual const char *giveInputRecordName() const { return _IFT_Tet1BubbleStokes_Name; }
     virtual classType giveClassID() const { return Tet1BubbleStokesElementClass; }
@@ -131,8 +130,8 @@ public:
     virtual DofManager *giveInternalDofManager(int i) const { return bubble; }
     virtual void giveInternalDofManDofIDMask(int i, EquationID eid, IntArray &answer) const;
 
-    virtual FEInterpolation *giveInterpolation();
-    virtual FEInterpolation *giveInterpolation(DofIDItem id);
+    virtual FEInterpolation *giveInterpolation() const;
+    virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
     virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
 

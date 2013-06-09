@@ -57,7 +57,9 @@ public:
     QPlaneStrain(int N, Domain *d);
     virtual ~QPlaneStrain() { }
 
-    virtual FEInterpolation *giveInterpolation() { return &interpolation; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+
+    virtual FEInterpolation *giveInterpolation() const { return &interpolation; }
 
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
@@ -65,9 +67,8 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_QPlaneStrain_Name; }
     virtual const char *giveClassName() const { return "QPlaneStrain"; }
     virtual classType giveClassID() const { return QPlaneStrainClass; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int computeNumberOfDofs(EquationID ut) { return 16; }
+    virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
 
@@ -86,9 +87,6 @@ public:
     void drawScalar(oofegGraphicContext &context);
     //void drawInternalState(DrawMode mode);
 #endif
-
-    virtual integrationDomain giveIntegrationDomain() { return _Square; }
-    virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
 
 protected:
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
