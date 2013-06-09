@@ -46,6 +46,7 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "fei2dquadlin.h"
+#include "constantpressureload.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -160,6 +161,44 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
 
     } else {
         answer.resize(0);
+    }
+}
+
+
+void
+Quad1MindlinShell3D :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
+                                                int iSurf, TimeStep *tStep, ValueModeType mode)
+{
+    BoundaryLoad *surfLoad = static_cast< BoundaryLoad * >(load);
+    if ( dynamic_cast< ConstantPressureLoad * >(surfLoad) ) { // Just checking the type of b.c.
+        // EXPERIMENTAL CODE:
+        IntegrationRule *iRule;
+        FloatArray force, n, gcoords, pressure;
+
+        answer.resize( 24 );
+        answer.zero();
+
+        //int approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder();
+
+        iRule = this->integrationRulesArray[ 0 ];
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+            GaussPoint *gp = iRule->getIntegrationPoint(i);
+            double dV = this->computeVolumeAround(gp);
+            this->interp.evalN(n, *gp->giveCoordinates(), FEIVoidCellGeometry());
+            this->interp.local2global(gcoords, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+            surfLoad->computeValueAt(pressure, tStep, gcoords, mode);
+
+            answer.at( 3) += n.at(1) * pressure.at(1) * dV;
+            answer.at( 9) += n.at(2) * pressure.at(1) * dV;
+            answer.at(15) += n.at(3) * pressure.at(1) * dV;
+            answer.at(21) += n.at(4) * pressure.at(1) * dV;
+        }
+        // Second surface is the outside;
+        if ( iSurf == 2 ) {
+            answer.negated();
+        }
+    } else {
+        OOFEM_ERROR("Quad1MindlinShell3D only supports constant pressure boundary load.");
     }
 }
 
