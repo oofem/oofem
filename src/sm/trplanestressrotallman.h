@@ -32,36 +32,33 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef trplanrot_h
-#define trplanrot_h
+#ifndef trplanestressrotallman_h
+#define trplanestressrotallman_h
 
 #include "trplanstrss.h"
+#include "fei2dtrquad.h"
 
 ///@name Input fields for TrPlaneStrRot
 //@{
-#define _IFT_TrPlaneStrRot_Name "trplanestrrot"
-#define _IFT_TrPlaneStrRot_niprot "niprot"
+#define _IFT_TrPlanestressRotAllman_Name "trplanestressrotallman"
 //@}
 
 namespace oofem {
 /**
  * Class implements an triangular three-node  plane-
- * stress elasticity finite element with independent rotation field.
+ * stress elasticity finite element with independentvertex rotations.
  * Each node has 3 degrees of freedom.
- * 
- * This element is based on the following paper: 
- *   Ibrahimbegovic, A., Taylor, R.L., Wilson, E. L.: A robust membrane qudritelar element with rotational degrees of freedom, 
- *   Int. J. Num. Meth. Engng., 30, 445-457, 1990.
- * 
+ * For reference, see: Allman, D.J. A compatible triangular element including vertex rotations for plane elas-
+ticity analysis. Computers & Structures Vol. 19, No. 1-2, pp. 1-8, 1984.
  */
-class TrPlaneStrRot : public TrPlaneStress2d
+class TrPlanestressRotAllman : public TrPlaneStress2d
 {
 protected:
-    int numberOfRotGaussPoints;
+  static FEI2dTrQuad qinterpolation; // quadratic interpolation for constructing shape functons
 
 public:
-    TrPlaneStrRot(int, Domain *);
-    virtual ~TrPlaneStrRot() { }
+    TrPlanestressRotAllman(int, Domain *);
+    virtual ~TrPlanestressRotAllman() { }
 
 protected:
     virtual void computeGaussPoints();
@@ -69,35 +66,37 @@ protected:
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
     virtual double giveArea();
-    virtual void giveNodeCoordinates(FloatArray &x, FloatArray &y);
-
-    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode);
-
+    virtual int giveApproxOrder() { return 2; }
+    void computeLocalCoordinates(FloatArray lxy[6]);
+    /** 
+     * Computes the stiffness matrix stabilization of zero energy mode (equal rotations)
+     * 
+     * @param answer Computed stiffness matrix (symmetric).
+     * @param rMode Response mode.
+     * @param tStep Time step.
+     */
+    void computeStiffnessMatrixZeroEnergyStabilization(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
 public:
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_TrPlaneStrRot_Name; }
-    virtual const char *giveClassName() const { return "TrPlaneStrRot"; }
-    virtual classType giveClassID() const { return TrPlaneStrRotClass; }
+    virtual const char *giveInputRecordName() const { return _IFT_TrPlanestressRotAllman_Name; }
+    virtual const char *giveClassName() const { return "TrPlanestressRotAllman"; }
+    virtual classType giveClassID() const { return TrPlanestressRotAllmanClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual MaterialMode giveMaterialMode() { return _PlaneStressRot; }
+    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
     virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
+    /** Computes the stiffness matrix of receiver. Overloaded to add stabilization of zero-energy mode (equal rotations) */
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
 
     virtual int computeNumberOfDofs(EquationID ut) { return 9; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
-    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) { return 0.; }
-
-    FloatArray *GivePitch();
-    FloatArray *GiveDerivativeUX(GaussPoint *gp);
-    FloatArray *GiveDerivativeVX(GaussPoint *gp);
-    FloatArray *GiveDerivativeUY(GaussPoint *gp);
-    FloatArray *GiveDerivativeVY(GaussPoint *gp);
-    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
-
-    virtual int testElementExtension(ElementExtension ext) { return 0; }
-
-    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    Interface* giveInterface(InterfaceType interface);
+    virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 2; };
+    
+    void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
+    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    int SPRNodalRecoveryMI_giveNumberOfIP();
 
 };
 } // end namespace oofem
-#endif //  trplanrot_h
+#endif //  trplanestressrotallman_h
