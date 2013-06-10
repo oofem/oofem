@@ -208,6 +208,9 @@ public:
      * @return Nonzero if supported, zero otherwise.
      */
     virtual int hasMaterialModeCapability(MaterialMode mode);
+
+    ///@name Access functions for internal states. Usually overloaded by new material models.
+    //@{
     /**
      * Sets the value of a certain variable at a given integration point to the given value.
      * @param value Contains the value(s) to be set (in reduced form).
@@ -252,6 +255,7 @@ public:
         _error("giveIPValueType: unsupported InternalStateType");
         return ISVT_UNDEFINED;
     }
+    //@}
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
