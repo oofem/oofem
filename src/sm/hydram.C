@@ -99,7 +99,8 @@ HydrationModelStatus :: restoreContext(DataStream *stream, ContextMode mode, voi
 
 // ======= class HydrationModel implementation =======
 // default constructor - Lafarge mixture
-HydrationModel :: HydrationModel() : Material(0, NULL) {
+HydrationModel :: HydrationModel() : Material(0, NULL)
+{
     setMixture(mtLafarge);
     useFindRoot = frMixed;
 }
@@ -664,4 +665,5 @@ HydrationModelInterface :: giveHydrationDegree(GaussPoint *gp, TimeStep *atTime,
         return constantHydrationDegree;
     }
 }
+
 } // end namespace oofem

@@ -126,9 +126,8 @@ void Tr1Darcy :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Val
 
 void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *atTime)
 {
-    FloatArray *lcoords, w, a, gradP, I;
+    FloatArray w, a, gradP, P(1), n, I;
     FloatMatrix BT;
-    GaussPoint *gp;
 
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
@@ -139,15 +138,17 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *atTim
     answer.zero();
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
-        lcoords = gp->giveCoordinates();
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
+        FloatArray *lcoords = gp->giveCoordinates();
 
         double detJ = this->interpolation_lin.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
         this->interpolation_lin.evaldNdx( BT, * lcoords, FEIElementGeometryWrapper(this) );
+        this->interpolation_lin.evalN( n, *lcoords, FEIElementGeometryWrapper(this) );
+        P.at(1) = n.dotProduct(a); // Evaluates the field at this point.
 
         gradP.beTProductOf(BT, a);
 
-        mat->giveFluxVector(w, gp, gradP, atTime);
+        mat->giveFluxVector(w, gp, gradP, P, atTime);
 
         I.beProductOf(BT, w);
         answer.add(- gp->giveWeight() * detJ, I);

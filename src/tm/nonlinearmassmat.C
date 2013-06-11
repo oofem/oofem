@@ -65,8 +65,8 @@ NonlinearMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
                                                           TimeStep *atTime)
 {
     MaterialMode mMode = gp->giveMaterialMode();
-    AnisotropicMassTransferMaterialStatus *status = static_cast< AnisotropicMassTransferMaterialStatus * >( this->giveStatus(gp) );
-    FloatArray eps = status->giveGradP();
+    TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
+    FloatArray eps = status->giveTempGradient();
     double gradPNorm;
     FloatMatrix t1, t2;
 
@@ -109,33 +109,29 @@ NonlinearMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
 }
 
 void
-NonlinearMassTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
+NonlinearMassTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
 {
-    AnisotropicMassTransferMaterialStatus *thisMaterialStatus = static_cast< AnisotropicMassTransferMaterialStatus * >( this->giveStatus(gp) );
+    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
 
-    thisMaterialStatus->setPressureGradient(eps);
+    double gradPNorm = grad.computeNorm();
+    answer.beScaled( -(1. + C * pow(gradPNorm, alpha)), grad);
 
-    double gradPNorm = eps.computeNorm();
-
-    answer = eps;
-    answer.times( 1 + C * pow(gradPNorm, alpha) );
-    answer.negated();
-
-    thisMaterialStatus->setSeepageValocity(answer);
+    ms->setTempGradient(grad);
+    ms->setTempField(field);
+    ms->setTempFlux(answer);
 }
 
 int
 NonlinearMassTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    AnisotropicMassTransferMaterialStatus *thisMaterialStatus = static_cast< AnisotropicMassTransferMaterialStatus * >( this->giveStatus(aGaussPoint) );
-    FloatMatrix temp;
-
+    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(aGaussPoint) );
+ 
     switch ( type ) {
     case IST_Velocity:
-        answer = thisMaterialStatus->giveSeepageVelocity();
+        answer = ms->giveFlux();
         break;
     case IST_PressureGradient:
-        answer = thisMaterialStatus->giveGradP();
+        answer = ms->giveGradient();
         break;
     default:
       return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);

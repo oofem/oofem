@@ -138,6 +138,8 @@ public:
 
     virtual ~LatticeTransportMaterial() {}
 
+    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
+
     virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
                                    MatResponseForm form,
                                    MatResponseMode mode,

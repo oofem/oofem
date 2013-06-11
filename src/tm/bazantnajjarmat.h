@@ -85,12 +85,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual double giveHumidity(GaussPoint *gp, ValueModeType mode);
-
-    /*
-     * virtual double give(int aProperty, GaussPoint *gp);
-     */
-
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp);  }
 };
 } // end namespace oofem
 #endif // bazantnajjarmat_h

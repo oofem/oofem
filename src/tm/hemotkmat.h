@@ -94,6 +94,8 @@ public:
     /// Destructor.
     virtual ~HeMoTKMaterial() { }
 
+    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
+
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseForm form,
                                           MatResponseMode mode,
@@ -116,8 +118,6 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_HeMoTKMaterial_Name; }
     virtual const char *giveClassName() const { return "HeMoTKMaterial"; }
     virtual classType giveClassID() const { return HeMoTKMaterialClass; }
-
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp); }
 
     double sorption_isotherm(double phi);
     double inverse_sorption_isotherm(double w);

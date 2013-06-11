@@ -44,22 +44,6 @@ namespace oofem {
 
 REGISTER_Material( AnisotropicMassTransferMaterial );
 
-AnisotropicMassTransferMaterialStatus :: AnisotropicMassTransferMaterialStatus(int n, Domain *d, GaussPoint *g) : TransportMaterialStatus(n, d, g)
-{
-}
-
-void
-AnisotropicMassTransferMaterialStatus :: setPressureGradient(const FloatArray &gradP)
-{
-    pressureGradient = gradP;
-}
-
-void
-AnisotropicMassTransferMaterialStatus :: setSeepageValocity(const FloatArray &w)
-{
-    seepageVelocity = w;
-}
-
 IRResultType
 AnisotropicMassTransferMaterial :: initializeFrom(InputRecord *ir)
 {
@@ -70,6 +54,7 @@ AnisotropicMassTransferMaterial :: initializeFrom(InputRecord *ir)
 
     FloatArray temp;
 
+    ///@todo Why hardcode this for 2d ? Just take the whole matrix as the input instead and not worry about it.
     IR_GIVE_FIELD(ir, temp, _IFT_AnisotropicMassTransferMaterial_c);     // Read permeability matrix c from input file
     k.resize(2, 2);
     k.at(1, 1) = temp.at(1);
@@ -79,6 +64,21 @@ AnisotropicMassTransferMaterial :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
+
+
+void
+AnisotropicMassTransferMaterial :: giveFluxVector(FloatArray& answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
+{
+    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
+
+    answer.beProductOf(k, grad);
+    answer.negated();
+
+    ms->setTempField(field);
+    ms->setTempGradient(grad);
+    ms->setTempFlux(answer);
+}
+
 
 void
 AnisotropicMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
@@ -109,35 +109,24 @@ AnisotropicMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
     return 0.;
 }
 
-void
-AnisotropicMassTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
-{
-    AnisotropicMassTransferMaterialStatus *thisMaterialStatus = static_cast< AnisotropicMassTransferMaterialStatus * >( this->giveStatus(gp) );
-
-    thisMaterialStatus->setPressureGradient(eps);
-
-    answer.beProductOf(k, eps);
-    answer.negated();
-
-    thisMaterialStatus->setSeepageValocity(answer);
-}
 
 int
 AnisotropicMassTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    AnisotropicMassTransferMaterialStatus *thisMaterialStatus = static_cast< AnisotropicMassTransferMaterialStatus * >( this->giveStatus(aGaussPoint) );
+    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(aGaussPoint) );
     FloatMatrix temp;
 
     switch ( type ) {
     case IST_Velocity:
-        answer = thisMaterialStatus->giveSeepageVelocity();
+        answer = ms->giveFlux();
         break;
     case IST_PressureGradient:
-        answer = thisMaterialStatus->giveGradP();
+        answer = ms->giveGradient();
         break;
     default:
       return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
     return 1;
 }
+
 } // end namespace oofem

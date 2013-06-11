@@ -50,6 +50,8 @@ public:
     IsotropicMoistureTransferMaterial(int n, Domain *d) : TransportMaterial(n, d) { }
     virtual ~IsotropicMoistureTransferMaterial() { }
 
+    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
+
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseForm form,
                                           MatResponseMode mode,
@@ -69,12 +71,6 @@ public:
     virtual classType giveClassID() const { return IsotropicMoistureTransferMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-
-    /*
-     * virtual double give(int aProperty, GaussPoint *gp);
-     */
-
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp);  }
 };
 } // end namespace oofem
 #endif // isomoisturemat_h

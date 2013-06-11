@@ -91,6 +91,43 @@ HeMoTKMaterial :: give(int aProperty, GaussPoint *gp)
 }
 
 
+void
+HeMoTKMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
+{
+    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
+
+    FloatArray s;
+    s = ms->giveTempStateVector();
+    if ( s.isEmpty() ) {
+        _error("matcond1d: undefined state vector");
+    }
+    double w = s.at(2);
+    double t = s.at(1);
+
+    FloatArray ans_w, ans_t;
+    FloatArray grad_w, grad_t;
+    int size = grad.giveSize() / 2;
+    for (int i = 1; i <= size; ++i) {
+        grad_w.at(i) = grad.at(i);
+    }
+    for (int i = size+1; i <= size*2; ++i) {
+        grad_t.at(i) = grad.at(i);
+    }
+    ans_w.beScaled(perm_ww(w, t), grad_w);
+    ans_w.beScaled(perm_wt(w, t), grad_t);
+    ans_t.beScaled(perm_ww(w, t) * get_latent(w, t), grad_w);
+    ans_t.beScaled(get_chi(w, t) + get_latent(w, t) * perm_wt(w, t), grad_t);
+
+    answer.resize(size * 2);
+    answer.zero();
+    answer.addSubVector(ans_w, 1);
+    answer.addSubVector(ans_t, size+1);
+
+    ms->setTempField(field);
+    ms->setTempGradient(grad);
+    ms->setTempFlux(answer);
+}
+
 
 void
 HeMoTKMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
