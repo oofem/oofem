@@ -61,13 +61,15 @@ public:
     IsotropicHeatTransferMaterial(int n, Domain *d) : TransportMaterial(n, d) { }
     virtual ~IsotropicHeatTransferMaterial() { }
 
+    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
+
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseForm form,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *atTime);
 
-    virtual double giveIsotropicConductivity(GaussPoint *gp) {return conductivity;};
+    virtual double giveIsotropicConductivity(GaussPoint *gp) { return conductivity; }
 
     virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,
@@ -84,8 +86,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual double give(int aProperty, GaussPoint *gp);
-
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp);  }
 };
 } // end namespace oofem
 #endif // isoheatmat_h

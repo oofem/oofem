@@ -139,7 +139,7 @@ LayeredCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
                                         tStep);
 }
 
-
+///@todo Why are these here? Seems like pointless duplicates.
 void
 LayeredCrossSection :: giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
                                                          MatResponseForm form,
@@ -185,6 +185,23 @@ LayeredCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
         } else {
             _error("giveMaterialStiffnessMatrixOf: unsupported StressStrainMode");
         }
+    }
+}
+
+
+void
+LayeredCrossSection :: giveLayerMaterialStiffnessMatrix(FloatMatrix &layerMatrix, MatResponseForm form,
+                                                        MatResponseMode rMode, GaussPoint *layerGp,
+                                                        TimeStep *tStep)
+{
+    ///@todo The logic in this whole class is pretty messy to support both slave-gp's and normal gps. Rethinking the approach is necessary.
+    /// This function is a helper for *only* slave-gp's used in shell stiffness etc.
+    /// Just using the gp number is to simplistic, and doesn't nicely support more than 1 gp per layer. Must rethink.
+    StructuralMaterial *mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(layerGp->giveNumber()) ) );
+    if ( mat->hasMaterialModeCapability( layerGp->giveMaterialMode() ) ) {
+        mat->giveCharacteristicMatrix(layerMatrix, form, rMode, layerGp, tStep);
+    } else {
+        _error("giveLayerMaterialStiffnessMatrix: unsupported StressStrainMode");
     }
 }
 
@@ -1183,18 +1200,6 @@ LayeredCrossSection :: giveArea()
 
     return area;
 }
-
-
-void
-LayeredCrossSection :: giveLayerMaterialStiffnessMatrix(FloatMatrix &layerMatrix, MatResponseForm form,
-                                                        MatResponseMode rMode, GaussPoint *layerGp,
-                                                        TimeStep *tStep)
-{
-    this->giveMaterialStiffnessMatrixOf(layerMatrix, form, rMode, layerGp,
-                                        dynamic_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at( layerGp->giveNumber() ) ) ),
-                                        tStep);
-}
-
 
 void
 LayeredCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,

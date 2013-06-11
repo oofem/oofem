@@ -518,7 +518,7 @@ public:
 #ifdef BOOST_PYTHON
     void __setitem__ (boost::python::api::object t, double val);
     double __getitem__ (boost::python::api::object t);
-    void beCopyOf(FloatMatrix &src) { this->operator=(src); }
+    void beCopyOf(const FloatMatrix &src) { this->operator=(src); }
 #endif
 };
 } // end namespace oofem

@@ -104,6 +104,13 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
 }
 
 
+void
+LatticeTransportMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
+{
+    ///@todo Is there anything meaningful to do here for lattice models?
+}
+
+
 double
 LatticeTransportMaterial :: give(int aProperty, GaussPoint *gp)
 {
@@ -299,4 +306,5 @@ LatticeTransportMaterialStatus :: LatticeTransportMaterialStatus(int n, Domain *
     // tempStateVector = stateVector;
     mass = 0.;
 }
+
 } // end namespace oofem

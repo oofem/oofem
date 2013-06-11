@@ -51,9 +51,6 @@ namespace oofem {
 class RVEStokesFlowMaterialStatus : public TransportMaterialStatus
 {
 protected:
-
-    FloatArray gradPVector, temp_gradPVector;
-    FloatArray velocityVector, temp_velocityVector;
     FloatMatrix temp_TangentMatrix, tangentMatrix;
     FloatArray *solutionVector;
 
@@ -69,15 +66,8 @@ public:
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    const FloatArray &giveGradP() { return gradPVector; }
-    const FloatArray &giveTempGradP() { return temp_gradPVector; }
-    const FloatArray &giveVelocityVector() { return velocityVector; }
-    const FloatArray &giveTempVelocityVector() { return temp_velocityVector; }
     const FloatMatrix &giveTangentMatrix() { return tangentMatrix; }
     const FloatMatrix &giveTempTangentMatrix() { return temp_TangentMatrix; }
-
-    void letTempGradPVectorBe(const FloatArray &v) { temp_gradPVector = v; }
-    void letTempVelocityVectorBe(const FloatArray &v) { temp_velocityVector = v; }
     void letTempTangentMatrixBe(const FloatMatrix &K) { temp_TangentMatrix = K; }
 
     /**
@@ -112,7 +102,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
+    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
     virtual void giveCharacteristicMatrix(FloatMatrix & answer,  MatResponseForm form, MatResponseMode, GaussPoint * gp, TimeStep * atTime);
     virtual double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) {return 0.0;};
 

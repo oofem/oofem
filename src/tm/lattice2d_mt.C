@@ -141,12 +141,12 @@ Lattice2d_mt :: giveMass()
 
 
 void
-Lattice2d_mt :: computeNSubMatrixAt(FloatMatrix &answer, FloatArray *coords)
+Lattice2d_mt :: computeNSubMatrixAt(FloatMatrix &answer, const FloatArray &coords)
 {
     double ksi, n1, n2;
     //FloatMatrix* answer ;
 
-    ksi = coords->at(1);
+    ksi = coords.at(1);
     n1  = ( 1. - ksi ) * 0.5;
     n2  = ( 1. + ksi ) * 0.5;
     //answer = new FloatMatrix(2,4) ;
@@ -160,7 +160,7 @@ Lattice2d_mt :: computeNSubMatrixAt(FloatMatrix &answer, FloatArray *coords)
 }
 
 void
-Lattice2d_mt :: computeNmatrixAt(FloatMatrix &answer, FloatArray *coords)
+Lattice2d_mt :: computeNmatrixAt(FloatMatrix &answer, const FloatArray &coords)
 {
     this->computeNSubMatrixAt(answer, coords);
 }
@@ -198,7 +198,7 @@ Lattice2d_mt :: updateInternalState(TimeStep *stepN)
         iRule = integrationRulesArray [ i ];
         for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
-            this->computeNmatrixAt( n, gp->giveCoordinates() );
+            this->computeNmatrixAt( n, *gp->giveCoordinates() );
             this->computeVectorOf(EID_ConservationEquation, VM_Total, stepN, r);
             f.beProductOf(n, r);
             mat->updateInternalState(f, gp, stepN);

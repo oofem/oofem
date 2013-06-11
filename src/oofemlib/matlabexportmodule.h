@@ -83,7 +83,7 @@ public:
     MatlabExportModule(int n, EngngModel *e);
     virtual ~MatlabExportModule();
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void doOutput(TimeStep *tStep);
+    virtual void doOutput(TimeStep *tStep, bool forcedOutput=false);
     virtual void initialize();
     virtual void terminate();
 

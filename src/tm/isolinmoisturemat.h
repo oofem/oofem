@@ -69,8 +69,6 @@ public:
     virtual classType giveClassID() const { return IsotropicLinMoistureTransferMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp);  }
 };
 } // end namespace oofem
 #endif // isolinmoisturemat_h

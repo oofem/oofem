@@ -37,6 +37,25 @@
 #include "contextioerr.h"
 
 namespace oofem {
+
+void
+TransportMaterialStatus :: setTempGradient(const FloatArray &grad)
+{
+    this->temp_gradient = grad;
+}
+
+void
+TransportMaterialStatus :: setTempField(const FloatArray &field)
+{
+    this->temp_field = field;
+}
+
+void
+TransportMaterialStatus :: setTempFlux(const FloatArray &w)
+{
+    this->temp_flux = w;
+}
+
 void
 TransportMaterial :: updateInternalState(const FloatArray &stateVec, GaussPoint *gp, TimeStep *)
 {
@@ -76,10 +95,14 @@ void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 }
 
 
-void TransportMaterialStatus :: updateYourself(TimeStep *tStep)
+void
+TransportMaterialStatus :: updateYourself(TimeStep *tStep)
 // Performs end-of-step updates.
 {
     MaterialStatus :: updateYourself(tStep);
+    gradient = temp_gradient;
+    field = temp_field;
+    flux = temp_flux;
     stateVector = tempStateVector;
 }
 
@@ -91,6 +114,9 @@ TransportMaterialStatus :: initTempStatus()
 //
 {
     MaterialStatus :: initTempStatus();
+    temp_gradient = gradient;
+    temp_field = field;
+    temp_flux = flux;
     tempStateVector = stateVector;
 }
 
@@ -107,6 +133,18 @@ TransportMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, voi
     }
 
     if ( ( iores = MaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = gradient.storeYourself(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = field.storeYourself(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = flux.storeYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -134,6 +172,15 @@ TransportMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, 
         THROW_CIOERR(iores);
     }
 
+    if ( ( iores = gradient.restoreYourself(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+    if ( ( iores = field.restoreYourself(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+    if ( ( iores = flux.restoreYourself(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
     if ( ( iores = stateVector.restoreYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -146,8 +193,9 @@ int
 TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 // IST_Humidity must be overriden!
 {
-    if ( ( type == IST_Temperature ) || ( type == IST_MassConcentration_1 ) || ( type == IST_Humidity ) ) {
-        FloatArray vec = static_cast< TransportMaterialStatus * >( this->giveStatus(aGaussPoint) )->giveStateVector();
+    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(aGaussPoint) );
+    if ( type == IST_Temperature || type == IST_MassConcentration_1 || type == IST_Humidity ) {
+        FloatArray vec = ms->giveStateVector();
         answer.resize(1);
         answer.at(1) = vec.at( ( type == IST_Temperature ) ? 1 : 2 );
         return 1;
@@ -155,17 +203,23 @@ TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
         TransportElement *transpElem = static_cast< TransportElement * >( aGaussPoint->giveElement() );
         transpElem->computeFlow(answer, aGaussPoint, atTime);
         return 1;
+    } else if ( type == IST_Velocity ) { ///@todo Shouldn't be named velocity.. instead, "MassFlow" or something suitable like that.
+        answer = ms->giveFlux();
+        return 1;
+    } else if ( type == IST_PressureGradient ) {
+        answer = ms->giveGradient();
+        return 1;
     } else if ( type == IST_Density ) {
         answer.resize(1);
-        answer.at(1)=this->give('d',aGaussPoint);
+        answer.at(1) = this->give('d', aGaussPoint);
         return 1;
     } else if ( type == IST_HeatCapacity ) {
         answer.resize(1);
-        answer.at(1)=this->give('c',aGaussPoint);
+        answer.at(1) = this->give('c', aGaussPoint);
         return 1;
     } else if ( type == IST_ThermalConductivityIsotropic ) {
         answer.resize(1);
-        answer.at(1)=this->give('k',aGaussPoint);
+        answer.at(1) = this->give('k', aGaussPoint);
         return 1;
     }
     return Material :: giveIPValue(answer, aGaussPoint, type, atTime);
@@ -175,8 +229,10 @@ TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
 InternalStateValueType
 TransportMaterial :: giveIPValueType(InternalStateType type)
 {
-    if ( type == IST_Temperature || type == IST_MassConcentration_1 || type == IST_Humidity ) {
+    if ( type == IST_Temperature || type == IST_Pressure || type == IST_MassConcentration_1 || type == IST_Humidity ) {
         return ISVT_SCALAR;
+    } else if ( type == IST_Velocity || IST_PressureGradient ) {
+        return ISVT_VECTOR;
     } else {
         return Material :: giveIPValueType(type);
     }

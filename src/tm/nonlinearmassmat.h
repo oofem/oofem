@@ -36,7 +36,6 @@
 #define nonlinearheatmat_h
 
 #include "transportmaterial.h"
-#include "anisomassmat.h"
 
 ///@name Input fields for NonlinearMassTransferMaterial
 //@{
@@ -81,7 +80,7 @@ public:
                                            GaussPoint *gp,
                                            TimeStep *atTime);
 
-    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
+    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 
@@ -90,8 +89,6 @@ public:
     virtual classType giveClassID() const { return NonlinearMassTransferMaterialClass; };
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new AnisotropicMassTransferMaterialStatus(1, domain, gp);  };
 };
 } // end namespace oofem
 #endif // nonlinearheatmat_h

@@ -54,11 +54,11 @@ REGISTER_Material( RVEStokesFlow );
 RVEStokesFlowMaterialStatus :: RVEStokesFlowMaterialStatus(int n, Domain *d, GaussPoint *g) :
     TransportMaterialStatus(n, d, g)
 {
-    temp_gradPVector.resize(2);
-    temp_gradPVector.zero();
+    temp_gradient.resize(2);
+    temp_gradient.zero();
 
-    temp_velocityVector.resize(2);
-    temp_velocityVector.zero();
+    temp_flux.resize(2);
+    temp_flux.zero();
 
     temp_TangentMatrix.resize(2, 2);
     temp_TangentMatrix.zero();
@@ -83,7 +83,7 @@ RVEStokesFlowMaterialStatus :: exportFilter(EngngModel *E, GaussPoint *gp, TimeS
     filename = filenameStringStream.str();
 
     // Update fields on subscale
-    FloatArray grapP = this->giveTempGradP(), seepageVelocity;
+    FloatArray grapP = this->giveTempGradient(), seepageVelocity;
 
     rveEngngModel *rveE;
     rveE = dynamic_cast< rveEngngModel * >(E);
@@ -102,17 +102,12 @@ void
 RVEStokesFlowMaterialStatus :: initTempStatus()
 {
     TransportMaterialStatus :: initTempStatus();
-
-    temp_gradPVector = gradPVector;
-    temp_velocityVector = velocityVector;
 }
 
 void
 RVEStokesFlowMaterialStatus :: updateYourself(TimeStep *tStep)
 {
     TransportMaterialStatus :: updateYourself(tStep);
-    gradPVector = temp_gradPVector;
-    velocityVector = temp_velocityVector;
     tangentMatrix = temp_TangentMatrix;
 
     EngngModel *E;
@@ -139,10 +134,6 @@ RVEStokesFlowMaterialStatus :: saveContext(DataStream *stream, ContextMode mode,
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = velocityVector.storeYourself(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
     return CIO_OK;
 }
 
@@ -156,10 +147,6 @@ RVEStokesFlowMaterialStatus :: restoreContext(DataStream *stream, ContextMode mo
     }
 
     if ( ( iores = TransportMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = velocityVector.restoreYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -190,10 +177,10 @@ RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Intern
 
     switch ( type ) {
     case IST_Velocity:
-        answer.copySubVector(thisMaterialStatus->giveVelocityVector(), 1);
+        answer.copySubVector(thisMaterialStatus->giveFlux(), 1);
         break;
     case IST_PressureGradient:
-        answer.copySubVector(thisMaterialStatus->giveGradP(), 1);
+        answer.copySubVector(thisMaterialStatus->giveGradient(), 1);
         break;
     case IST_TangentNorm:
         temp = thisMaterialStatus->giveTangentMatrix();
@@ -216,36 +203,37 @@ RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Intern
 }
 
 void
-RVEStokesFlow :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
+RVEStokesFlow :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
 {
     this->suppressStdout();
 
     OOFEM_LOG_DEBUG("\n****** Enter giveFluxVector ********************** Element number %u, Gauss point %u, rve @ %p \n", gp->giveElement()->giveGlobalNumber(), gp->giveNumber(), this->rve);
 
     RVEStokesFlowMaterialStatus *status = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(gp) );
-    FloatArray temp = status->giveTempGradP();
+    FloatArray temp = status->giveTempGradient();
 
-    if ( temp.giveSize() >= 3 && temp.at(1) == eps.at(1) && temp.at(2) == eps.at(2) ) {
+    if ( temp.giveSize() >= 3 && temp.at(1) == grad.at(1) && temp.at(2) == grad.at(2) ) {
         OOFEM_LOG_DEBUG("This pressure gradient has already been evaluated\n");
-        answer = status->giveTempVelocityVector();
+        answer = status->giveTempFlux();
     } else {
         FloatArray X;
         rveEngngModel *rveE;
 
         rveE = dynamic_cast< rveEngngModel * >(this->rve);
 
-        X = eps;
+        X = grad;
 
-        OOFEM_LOG_DEBUG( "Solve RVE problem with boundary conditions (type=%u) for macroscale pressure gradient gradP=[%f, %f]\n ", BCType, eps.at(1), eps.at(2) );
+        OOFEM_LOG_DEBUG( "Solve RVE problem with boundary conditions (type=%u) for macroscale pressure gradient gradP=[%f, %f]\n ", BCType, grad.at(1), grad.at(2) );
 
         // Compute seepage velocity
-        rveE->rveSetBoundaryConditions(BCType, eps);
+        rveE->rveSetBoundaryConditions(BCType, grad);
         rveE->rveGiveCharacteristicData(1, &X, &answer, tStep);
 
         OOFEM_LOG_DEBUG( "Pressure gradient gradP=[%f %f] yields velocity vector [%f %f]\n", X.at(1), X.at(2), answer.at(1), answer.at(2) );
 
-        status->letTempGradPVectorBe(X);
-        status->letTempVelocityVectorBe(answer);
+        
+        status->setTempGradient(X);
+        status->setTempFlux(answer);
 
         // Compute tangent
         FloatMatrix K;

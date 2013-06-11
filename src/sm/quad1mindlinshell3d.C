@@ -173,7 +173,7 @@ Quad1MindlinShell3D :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load
     if ( dynamic_cast< ConstantPressureLoad * >(surfLoad) ) { // Just checking the type of b.c.
         // EXPERIMENTAL CODE:
         IntegrationRule *iRule;
-        FloatArray force, n, gcoords, pressure;
+        FloatArray n, gcoords, pressure;
 
         answer.resize( 24 );
         answer.zero();

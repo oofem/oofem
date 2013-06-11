@@ -110,12 +110,12 @@ TrPlanestressRotAllman :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix 
     answer.at(1,1) = answer.at(2,2) = n.at(1)+n.at(4)/2.+n.at(6)/2.;
     answer.at(1,4) = answer.at(2,5) = n.at(2)+n.at(4)/2.+n.at(5)/2.;
     answer.at(1,7) = answer.at(2,8) = n.at(3)+n.at(5)/2.+n.at(6)/2.;
-    answer.at(1,3) = n.at(6)*(lxy[0].at(2)-lxy[2].at(2))/8.0+n.at(4)*(lxy[1].at(2)-lxy[0].at(2))/8.0;
-    answer.at(1,6) = n.at(4)*(lxy[1].at(2)-lxy[0].at(1))/8.0+n.at(5)*(lxy[2].at(2)-lxy[1].at(2))/8.0;
-    answer.at(1,9) = n.at(5)*(lxy[2].at(2)-lxy[1].at(2))/8.0+n.at(6)*(lxy[0].at(2)-lxy[2].at(2))/8.0;
-    answer.at(2,3) = n.at(6)*(lxy[0].at(1)-lxy[2].at(1))/8.0+n.at(4)*(lxy[1].at(1)-lxy[0].at(1))/8.0;
-    answer.at(2,6) = n.at(4)*(lxy[1].at(1)-lxy[0].at(1))/8.0+n.at(5)*(lxy[2].at(1)-lxy[1].at(1))/8.0;
-    answer.at(2,9) = n.at(5)*(lxy[2].at(1)-lxy[1].at(1))/8.0+n.at(6)*(lxy[0].at(1)-lxy[2].at(1))/8.0;
+    answer.at(1,3) = n.at(6)*(lxy[0].at(2)-lxy[2].at(2))/8.0-n.at(4)*(lxy[1].at(2)-lxy[0].at(2))/8.0;
+    answer.at(1,6) = n.at(4)*(lxy[1].at(2)-lxy[0].at(2))/8.0-n.at(5)*(lxy[2].at(2)-lxy[1].at(2))/8.0;
+    answer.at(1,9) = n.at(5)*(lxy[2].at(2)-lxy[1].at(2))/8.0-n.at(6)*(lxy[0].at(2)-lxy[2].at(2))/8.0;
+    answer.at(2,3) =-n.at(6)*(lxy[0].at(1)-lxy[2].at(1))/8.0+n.at(4)*(lxy[1].at(1)-lxy[0].at(1))/8.0;
+    answer.at(2,6) =-n.at(4)*(lxy[1].at(1)-lxy[0].at(1))/8.0+n.at(5)*(lxy[2].at(1)-lxy[1].at(1))/8.0;
+    answer.at(2,9) =-n.at(5)*(lxy[2].at(1)-lxy[1].at(1))/8.0+n.at(6)*(lxy[0].at(1)-lxy[2].at(1))/8.0;
     // linear approx for rotations
     answer.at(3,3) = L.at(1);
     answer.at(3,6) = L.at(2);
@@ -141,17 +141,17 @@ TrPlanestressRotAllman :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix 
   answer.at(1,1)=dnx.at(1, 1) + 0.5*dnx.at(4, 1) + 0.5*dnx.at(6, 1);
   answer.at(1,4)=dnx.at(2, 1) + 0.5*dnx.at(4, 1) + 0.5*dnx.at(5, 1);
   answer.at(1,7)=dnx.at(3, 1) + 0.5*dnx.at(5, 1) + 0.5*dnx.at(6, 1);
-  answer.at(1,3)=dnx.at(6, 1)*(lxy[0].at(2)-lxy[2].at(2))/8.0+dnx.at(4, 1)*(lxy[1].at(2)-lxy[0].at(2))/8.0;
-  answer.at(1,6)=dnx.at(4, 1)*(lxy[1].at(2)-lxy[0].at(1))/8.0+dnx.at(5, 1)*(lxy[2].at(2)-lxy[1].at(2))/8.0;
-  answer.at(1,9)=dnx.at(5, 1)*(lxy[2].at(2)-lxy[1].at(2))/8.0+dnx.at(6, 1)*(lxy[0].at(2)-lxy[2].at(2))/8.0;
+  answer.at(1,3)=dnx.at(6, 1)*(lxy[0].at(2)-lxy[2].at(2))/8.0-dnx.at(4, 1)*(lxy[1].at(2)-lxy[0].at(2))/8.0;
+  answer.at(1,6)=dnx.at(4, 1)*(lxy[1].at(2)-lxy[0].at(2))/8.0-dnx.at(5, 1)*(lxy[2].at(2)-lxy[1].at(2))/8.0;
+  answer.at(1,9)=dnx.at(5, 1)*(lxy[2].at(2)-lxy[1].at(2))/8.0-dnx.at(6, 1)*(lxy[0].at(2)-lxy[2].at(2))/8.0;
 
   // epsilon_y
   answer.at(2,2)=dnx.at(1, 2) + 0.5*dnx.at(4, 2) + 0.5*dnx.at(6, 2);
   answer.at(2,5)=dnx.at(2, 2) + 0.5*dnx.at(4, 2) + 0.5*dnx.at(5, 2);
   answer.at(2,8)=dnx.at(3, 2) + 0.5*dnx.at(5, 2) + 0.5*dnx.at(6, 2);
-  answer.at(2,3)=dnx.at(6, 2)*(lxy[0].at(1)-lxy[2].at(1))/8.0+dnx.at(4, 2)*(lxy[1].at(1)-lxy[0].at(1))/8.0;
-  answer.at(2,6)=dnx.at(4, 2)*(lxy[1].at(1)-lxy[0].at(1))/8.0+dnx.at(5, 2)*(lxy[2].at(1)-lxy[1].at(1))/8.0;
-  answer.at(2,9)=dnx.at(5, 2)*(lxy[2].at(1)-lxy[1].at(1))/8.0+dnx.at(6, 2)*(lxy[0].at(1)-lxy[2].at(1))/8.0;
+  answer.at(2,3)=-dnx.at(6, 2)*(lxy[0].at(1)-lxy[2].at(1))/8.0+dnx.at(4, 2)*(lxy[1].at(1)-lxy[0].at(1))/8.0;
+  answer.at(2,6)=-dnx.at(4, 2)*(lxy[1].at(1)-lxy[0].at(1))/8.0+dnx.at(5, 2)*(lxy[2].at(1)-lxy[1].at(1))/8.0;
+  answer.at(2,9)=-dnx.at(5, 2)*(lxy[2].at(1)-lxy[1].at(1))/8.0+dnx.at(6, 2)*(lxy[0].at(1)-lxy[2].at(1))/8.0;
 
   // gamma_xy (shear)
   answer.at(3,1)=dnx.at(1, 2) + 0.5*dnx.at(4, 2) + 0.5*dnx.at(6, 2);
@@ -161,12 +161,12 @@ TrPlanestressRotAllman :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix 
   answer.at(3,7)=dnx.at(3, 2) + 0.5*dnx.at(5, 2) + 0.5*dnx.at(6, 2);
   answer.at(3,8)=dnx.at(3, 1) + 0.5*dnx.at(5, 1) + 0.5*dnx.at(6, 1);
 
-  answer.at(3,3) =dnx.at(6, 2)*(lxy[0].at(2)-lxy[2].at(2))/8.0+dnx.at(4, 2)*(lxy[1].at(2)-lxy[0].at(2))/8.0;
-  answer.at(3,3)+=dnx.at(6, 1)*(lxy[0].at(1)-lxy[2].at(1))/8.0+dnx.at(4, 1)*(lxy[1].at(1)-lxy[0].at(1))/8.0;
-  answer.at(3,6) =dnx.at(4, 2)*(lxy[1].at(2)-lxy[0].at(1))/8.0+dnx.at(5, 2)*(lxy[2].at(2)-lxy[1].at(2))/8.0;
-  answer.at(3,6)+=dnx.at(4, 1)*(lxy[1].at(1)-lxy[0].at(1))/8.0+dnx.at(5, 1)*(lxy[2].at(1)-lxy[1].at(1))/8.0;
-  answer.at(3,9) =dnx.at(5, 2)*(lxy[2].at(2)-lxy[1].at(2))/8.0+dnx.at(6, 2)*(lxy[0].at(2)-lxy[2].at(2))/8.0;
-  answer.at(3,9)+=dnx.at(5, 1)*(lxy[2].at(1)-lxy[1].at(1))/8.0+dnx.at(6, 1)*(lxy[0].at(1)-lxy[2].at(1))/8.0;
+  answer.at(3,3) = dnx.at(6, 2)*(lxy[0].at(2)-lxy[2].at(2))/8.0-dnx.at(4, 2)*(lxy[1].at(2)-lxy[0].at(2))/8.0;
+  answer.at(3,3)+=-dnx.at(6, 1)*(lxy[0].at(1)-lxy[2].at(1))/8.0+dnx.at(4, 1)*(lxy[1].at(1)-lxy[0].at(1))/8.0;
+  answer.at(3,6) = dnx.at(4, 2)*(lxy[1].at(2)-lxy[0].at(2))/8.0-dnx.at(5, 2)*(lxy[2].at(2)-lxy[1].at(2))/8.0;
+  answer.at(3,6)+=-dnx.at(4, 1)*(lxy[1].at(1)-lxy[0].at(1))/8.0+dnx.at(5, 1)*(lxy[2].at(1)-lxy[1].at(1))/8.0;
+  answer.at(3,9) = dnx.at(5, 2)*(lxy[2].at(2)-lxy[1].at(2))/8.0-dnx.at(6, 2)*(lxy[0].at(2)-lxy[2].at(2))/8.0;
+  answer.at(3,9)+=-dnx.at(5, 1)*(lxy[2].at(1)-lxy[1].at(1))/8.0+dnx.at(6, 1)*(lxy[0].at(1)-lxy[2].at(1))/8.0;
 }
 
 
@@ -202,11 +202,11 @@ TrPlanestressRotAllman :: computeStiffnessMatrixZeroEnergyStabilization(FloatMat
   b.at(1,8)=dnx.at(3, 1) + 0.5*dnx.at(5, 1) + 0.5*dnx.at(6, 1);
 
   b.at(1,3) =-dnx.at(6, 2)*(lxy[0].at(2)-lxy[2].at(2))/8.0+dnx.at(4, 2)*(lxy[1].at(2)-lxy[0].at(2))/8.0;
-  b.at(1,3)+= dnx.at(6, 1)*(lxy[0].at(1)-lxy[2].at(1))/8.0+dnx.at(4, 1)*(lxy[1].at(1)-lxy[0].at(1))/8.0;
-  b.at(1,6) =-dnx.at(4, 2)*(lxy[1].at(2)-lxy[0].at(1))/8.0+dnx.at(5, 2)*(lxy[2].at(2)-lxy[1].at(2))/8.0;
-  b.at(1,6)+= dnx.at(4, 1)*(lxy[1].at(1)-lxy[0].at(1))/8.0+dnx.at(5, 1)*(lxy[2].at(1)-lxy[1].at(1))/8.0;
+  b.at(1,3)+=-dnx.at(6, 1)*(lxy[0].at(1)-lxy[2].at(1))/8.0+dnx.at(4, 1)*(lxy[1].at(1)-lxy[0].at(1))/8.0;
+  b.at(1,6) =-dnx.at(4, 2)*(lxy[1].at(2)-lxy[0].at(2))/8.0+dnx.at(5, 2)*(lxy[2].at(2)-lxy[1].at(2))/8.0;
+  b.at(1,6)+=-dnx.at(4, 1)*(lxy[1].at(1)-lxy[0].at(1))/8.0+dnx.at(5, 1)*(lxy[2].at(1)-lxy[1].at(1))/8.0;
   b.at(1,9) =-dnx.at(5, 2)*(lxy[2].at(2)-lxy[1].at(2))/8.0+dnx.at(6, 2)*(lxy[0].at(2)-lxy[2].at(2))/8.0;
-  b.at(1,9)+= dnx.at(5, 1)*(lxy[2].at(1)-lxy[1].at(1))/8.0+dnx.at(6, 1)*(lxy[0].at(1)-lxy[2].at(1))/8.0;
+  b.at(1,9)+=-dnx.at(5, 1)*(lxy[2].at(1)-lxy[1].at(1))/8.0+dnx.at(6, 1)*(lxy[0].at(1)-lxy[2].at(1))/8.0;
   b.times(0.5);
   // add -1.0*sum(r_w)/3.0
   b.at(1,3)-=1.0/3.0;
