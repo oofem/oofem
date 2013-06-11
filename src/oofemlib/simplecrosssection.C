@@ -43,6 +43,7 @@ namespace oofem {
 
 REGISTER_CrossSection( SimpleCrossSection );
 
+#if 0 //@todo don't see any difference from base class /JB
 void
 SimpleCrossSection :: giveRealStresses(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                        const FloatArray &totalStrain, TimeStep *tStep)
@@ -63,7 +64,7 @@ SimpleCrossSection :: giveRealStresses(FloatArray &answer, MatResponseForm form,
         _error("giveRealStresses : unsupported mode");
     }
 }
-
+#endif
 
 void
 SimpleCrossSection :: giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
@@ -92,7 +93,6 @@ SimpleCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
 // otherwise special methods called to obtain required stiffness from 3d case.
 //
 {
-    // Material *mat = gp->giveElement()->giveMaterial();
     if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
         mat->giveCharacteristicMatrix(answer, form, rMode, gp, tStep);
         return;

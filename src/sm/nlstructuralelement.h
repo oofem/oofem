@@ -103,6 +103,12 @@ public:
      * 2 - deformation gradient mode
     */
     int giveGeometryMode(){return nlGeometry;}
+
+
+    void computeFirstPKStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
+
+
+
     /**
      * Computes the stiffness matrix of receiver.
      * The response is evaluated using @f$ \int (B_1+B_2(r))^{\mathrm{T}} D(B_1+B_2(r))\;\mathrm{d}v @f$, where
@@ -181,6 +187,12 @@ public:
      * @param tStep Time step.
      */
     void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+
+
+
+    void computeFVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
+    void computeEVectorFromF(FloatArray &answer, FloatArray &F);
+
 
     // data management
     virtual IRResultType initializeFrom(InputRecord *ir);

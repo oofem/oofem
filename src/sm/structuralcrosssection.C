@@ -52,14 +52,46 @@ StructuralCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm 
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    Material *mat = gp->giveElement()->giveMaterial();
+    //Material *mat = gp->giveElement()->giveMaterial();
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
 
     if ( mat->hasMaterialModeCapability(mode) ) {
-        static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() )
-        ->giveRealStressVector(answer, form, gp, strain, tStep);
+        //static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() )
+        //->giveRealStressVector(answer, form, gp, strain, tStep);
+        mat->giveRealStressVector(answer, form, gp, strain, tStep);
         return;
     } else {
         _error("giveRealStresses : unsupported mode");
+    }
+}
+
+
+void
+StructuralCrossSection ::  giveFirstPKStresses(FloatArray &answer, MatResponseForm form,
+                                            GaussPoint *gp,
+                                            const FloatArray &F,
+                                            TimeStep *tStep)
+{
+    // This function returns the first Piola-Kirchoff stress in vector format
+    // corresponding to a given deformation gradient according to stressStrain (stress-deformation?) 
+    // mode stored in each gp.
+
+    MaterialMode mode = gp->giveMaterialMode();
+    Material *mat = gp->giveElement()->giveMaterial(); // shouldn't it ask the cs?
+
+    if ( mat->hasMaterialModeCapability(mode) ) {
+        static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() )
+        ->giveFirstPKStressVector(answer, form, gp, F, tStep);
+        return;
+    } else if ( mode == _3dMat_F && mat->hasMaterialModeCapability(_3dMat)) {
+        // Compute second Piola-Kirchoff stress 
+        //FloatArray strain;
+        //Compute Green-Lagrange strain or small def strain
+        //this->giveRealStresses(answer, form, gp, strain, tStep);
+    } else {
+        _error("giveFirstPKStresses : unsupported mode");
+        
+
     }
 }
 

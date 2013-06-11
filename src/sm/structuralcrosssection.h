@@ -95,6 +95,25 @@ public:
     virtual void giveRealStresses(FloatArray & answer, MatResponseForm form,
                                   GaussPoint *gp, const FloatArray &reducedStrainIncrement, TimeStep *tStep);
 
+
+    /**
+     * Computes the first Piola-Kirchoff stress vector for given deformation gradient and integration point.
+     * The service should use previously reached equilibrium history variables. Also
+     * it should update temporary history variables in status according to newly reached state.
+     * The temporary history variables are moved into equilibrium ones after global structure
+     * equilibrium has been reached by iteration process.
+     * Elements should always pass their requests to their cross section model, which
+     * performs necessary integration over its volume and invokes necessary material
+     * services for corresponding material model defined for given integration point.
+     * @param answer Contains the First Piola-Kirchoff stresses .
+     * @param form Material response form.
+     * @param gp Integration point.
+     * @param reducedStrainIncrement Strain increment vector in reduced form.
+     * @param tStep Current time step (most models are able to respond only when tStep is current time step).
+     */
+    virtual void giveFirstPKStresses(FloatArray & answer, MatResponseForm form,
+                                  GaussPoint *gp, const FloatArray &reducedStrainIncrement, TimeStep *tStep);
+
     /**
      * Computes the stiffness matrix of receiver in given integration point, respecting its history.
      * The algorithm should use temporary or equilibrium  history variables stored in integration point status

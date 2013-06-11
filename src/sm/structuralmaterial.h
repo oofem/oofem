@@ -167,6 +167,9 @@ public:
     virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep) = 0;
 
+    virtual void giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+        const FloatArray &reducedF, TimeStep *tStep) {};
+
     /**
      * Returns a vector of coefficients of thermal dilatation in direction of each material principal (local) axis.
      * @param answer Vector of thermal dilatation coefficients.
@@ -233,6 +236,13 @@ public:
                                                GaussPoint *gp,
                                                TimeStep *tStep)
     { _error("give3dMaterialStiffnessMatrix: not implemented "); }
+
+
+    virtual void give3dFMaterialStiffnessMatrix(FloatMatrix &answer,
+                                               MatResponseForm form, MatResponseMode mode,
+                                               GaussPoint *gp,
+                                               TimeStep *tStep);
+    //{ _error("give3dMaterialStiffnessMatrix: not implemented "); }
 
     /**
      * This method returns index of reduced (if form == ReducedForm) or

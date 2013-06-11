@@ -59,6 +59,20 @@ StructuralMaterial :: hasMaterialModeCapability(MaterialMode mode)
            mode == _3dShellLayer || mode == _1dFiber;
 }
 
+
+void
+StructuralMaterial :: give3dFMaterialStiffnessMatrix(FloatMatrix &answer,
+                                               MatResponseForm form, MatResponseMode mode,
+                                               GaussPoint *gp,
+                                               TimeStep *tStep)
+{
+    // If not overloaded use regular stiffness and convert to dP/dF
+    FloatMatrix dSdE;
+    this->give3dMaterialStiffnessMatrix(dSdE, form, mode, gp, tStep);
+    // this->dSdE_2_dPdF(dSdE, answer);
+    answer = dSdE;
+}
+
 void
 StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
                                                MatResponseForm form, MatResponseMode rMode,
@@ -71,8 +85,11 @@ StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     switch ( mMode ) {
     case _3dMat:
     case _3dMatGrad:
-    case _3dMat_F: // even if material uses deformation gradient, stiffness is computed in the usual way
+    //case _3dMat_F: // even if material uses deformation gradient, stiffness is computed in the usual way
         this->give3dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+        break;
+    case _3dMat_F: // if material uses deformation gradient, returned stiffness should be dP/dF 
+        this->give3dFMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
         break;
     case _PlaneStress:
     case _PlaneStressGrad:

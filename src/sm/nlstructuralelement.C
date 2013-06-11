@@ -42,6 +42,7 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
+#include "structuralcrosssection.h"
 
 namespace oofem {
 NLStructuralElement :: NLStructuralElement(int n, Domain *aDomain) :
@@ -93,6 +94,9 @@ NLStructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, T
             // Green-Lagrange strain tensor (in vector form)
             // loop over all components of strain vector
             if ( nlGeometry == 1 ) {
+
+                printf("mupp");
+
                 n = answer.giveSize();
                 for ( i = 1; i <= n; i++ ) {
                     // nonlinear part of the strain-displacement relation
@@ -117,6 +121,88 @@ NLStructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, T
     } // end of total Lagrangian formulation
     else if ( mode == AL ) { // updated Lagrangian formulation
         OOFEM_ERROR("computeStrainVector : AL mode not supported now");
+    }
+}
+
+
+void
+NLStructuralElement :: computeFVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+{
+    // Computes the deformation gradient stored as a vector (11, 21, 31, 12, 22, 32, 13, 23, 33) 
+    // @todo rearange to the order (11, 22, 33, 23, 13, 12, 32, 31, 21)
+    FloatMatrix b;
+    FloatArray u;
+
+    if ( !this->isActivated(stepN) ) {
+        answer.resize( this->giveCrossSection()->giveIPValueSize(IST_StrainTensor, gp) );
+        return;
+    }
+
+    fMode mode = domain->giveEngngModel()->giveFormulation();
+    
+    if ( mode == TL ) { // Total Lagrangian formulation 
+        
+        this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u); // solution vector
+        // subtract the initial displacements, if defined
+        if ( initialDisplacements ) {
+            u.subtract(*initialDisplacements);
+        }
+
+        this->computeBFmatrixAt(gp, b);
+        answer.beProductOf(b, u);   // displacement gradient H 
+        
+        // F = H + I 
+        MaterialMode matMode = gp->giveMaterialMode();
+        if ( matMode == _3dMat_F ) {
+            answer.at(1) += 1.;
+            answer.at(5) += 1.;
+            answer.at(9) += 1.;
+        } else {
+            // handle plane stress/strain, axisym etc.
+            OOFEM_ERROR("computeFVector : bad MaterialMode, only 3dMat_F mode is currently supported");
+        }    
+    } 
+    else if ( mode == AL ) { // updated Lagrangian formulation
+        OOFEM_ERROR("computeStrainVector : AL mode not supported now");
+    }
+}
+
+
+void
+NLStructuralElement :: computeEVectorFromF(FloatArray &answer, FloatArray &vF)
+{
+    // Computes the Green-Lagrange strain tensor: E=0.5(C-I)
+    FloatMatrix F, E;
+    F.beMatrixForm(vF);
+
+    E.beTProductOf(F, F);    // C-Right Caucy-Green deformation tensor
+    E.at(1, 1) += -1;
+    E.at(2, 2) += -1;
+    E.at(3, 3) += -1;
+    E.times(0.5);
+
+    FloatArray temp(6);
+    temp.beReducedVectorForm(E);     // Convert to Voight form Todo: add specific methods for strain/stress
+    answer = temp;
+    answer.at(4) = temp.at(4) * 2.0;   // correction of shear strains
+    answer.at(5) = temp.at(5) * 2.0;
+    answer.at(6) = temp.at(6) * 2.0;
+}
+
+void
+NLStructuralElement :: computeFirstPKStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+// Computes the first Piola-Kirchoff stress vector containing the stresses at the Gauss point gp of
+// the receiver, at time step stepN. The nature of these stresses depends
+// on the element's type.
+{
+    if ( this->nlGeometry == 0 ) {
+        StructuralElement ::computeStressVector(answer, gp, stepN);
+    } else {
+        FloatArray F;
+        StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+
+        this->computeFVector(F, gp, stepN);
+        cs->giveFirstPKStresses(answer, ReducedForm, gp, F, stepN);
     }
 }
 
@@ -592,16 +678,6 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
     answer.symmetrized();
 }
 
-
-/*
- * void   NLStructuralElement :: updateYourself (TimeStep* stepN)
- * // Updates the receiver at end of step.
- * {
- *
- * StructuralElement :: updateYouself(stepN) ;
- *
- * }
- */
 
 
 IRResultType
