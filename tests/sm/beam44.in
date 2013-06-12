@@ -1,0 +1,79 @@
+beam44.out
+TEST OF trplanestressrotallman ELEMENTS (clamped beam loaded by uniform load)
+#domain section
+LinearStatic nsteps 1
+domain 2dPlaneStressrot
+OutputManager tstep_all dofman_all element_all
+#nnode nelem ncrosssect nyield nmat nloa nloatime
+ndofman 25 nelem 32 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
+node 1 coords 3 0.0 0.0 0 bc 3 1 1 1
+node 2 coords 3 0.0 0.2 0 bc 3 1 1 1
+node 3 coords 3 0.0 0.4 0 bc 3 1 1 1
+node 4 coords 3 0.0 0.6 0 bc 3 1 1 1
+node 5 coords 3 0.0 0.8 0 bc 3 1 1 1
+node 6 coords 3 0.6 0.0 0
+node 7 coords 3 0.6 0.2 0
+node 8 coords 3 0.6 0.4 0
+node 9 coords 3 0.6 0.6 0
+node 10 coords 3 0.6 0.8 0
+node 11 coords 3 1.2 0.0 0
+node 12 coords 3 1.2 0.2 0
+node 13 coords 3 1.2 0.4 0
+node 14 coords 3 1.2 0.6 0
+node 15 coords 3 1.2 0.8 0
+node 16 coords 3 1.8 0.0 0
+node 17 coords 3 1.8 0.2 0
+node 18 coords 3 1.8 0.4 0
+node 19 coords 3 1.8 0.6 0
+node 20 coords 3 1.8 0.8 0
+node 21 coords 3 2.4 0.0 0 bc 3 1 1 1
+node 22 coords 3 2.4 0.2 0 bc 3 1 1 1
+node 23 coords 3 2.4 0.4 0 bc 3 1 1 1
+node 24 coords 3 2.4 0.6 0 bc 3 1 1 1
+node 25 coords 3 2.4 0.8 0 bc 3 1 1 1
+trplanestressrotallman  1 nodes 3  1 6 7 mat 1 crosssect 1 boundaryloads 2 2 1
+trplanestressrotallman  2 nodes 3  2 1 7 mat 1 crosssect 1
+trplanestressrotallman  3 nodes 3  6 11 12 mat 1 crosssect 1 boundaryloads 2 2 1
+trplanestressrotallman  4 nodes 3  7 6 12 mat 1 crosssect 1
+trplanestressrotallman  5 nodes 3  11 16 17 mat 1 crosssect 1 boundaryloads 2 2 1
+trplanestressrotallman  6 nodes 3  12 11 17 mat 1 crosssect 1
+trplanestressrotallman  7 nodes 3  16 21 22 mat 1 crosssect 1 boundaryloads 2 2 1
+trplanestressrotallman  8 nodes 3  17 16 22 mat 1 crosssect 1
+trplanestressrotallman  9 nodes 3  2 7 8 mat 1 crosssect 1
+trplanestressrotallman  10 nodes 3  3 2 8 mat 1 crosssect 1
+trplanestressrotallman  11 nodes 3  7 12 13 mat 1 crosssect 1
+trplanestressrotallman  12 nodes 3  8 7 13 mat 1 crosssect 1
+trplanestressrotallman  13 nodes 3  12 17 18 mat 1 crosssect 1
+trplanestressrotallman  14 nodes 3  13 12 18 mat 1 crosssect 1
+trplanestressrotallman  15 nodes 3  17 22 23 mat 1 crosssect 1
+trplanestressrotallman  16 nodes 3  18 17 23 mat 1 crosssect 1
+trplanestressrotallman  17 nodes 3  3 8 9 mat 1 crosssect 1
+trplanestressrotallman  18 nodes 3  4 3 9 mat 1 crosssect 1
+trplanestressrotallman  19 nodes 3  8 13 14 mat 1 crosssect 1
+trplanestressrotallman  20 nodes 3  9 8 14 mat 1 crosssect 1
+trplanestressrotallman  21 nodes 3  13 18 19 mat 1 crosssect 1
+trplanestressrotallman  22 nodes 3  14 13 19 mat 1 crosssect 1
+trplanestressrotallman  23 nodes 3  18 23 24 mat 1 crosssect 1
+trplanestressrotallman  24 nodes 3  19 18 24 mat 1 crosssect 1
+trplanestressrotallman  25 nodes 3  4 9 10 mat 1 crosssect 1
+trplanestressrotallman  26 nodes 3  5 4 10 mat 1 crosssect 1 boundaryloads 2 2 3
+trplanestressrotallman  27 nodes 3  9 14 15 mat 1 crosssect 1
+trplanestressrotallman  28 nodes 3  10 9 15 mat 1 crosssect 1 boundaryloads 2 2 3
+trplanestressrotallman  29 nodes 3  14 19 20 mat 1 crosssect 1
+trplanestressrotallman  30 nodes 3  15 14 20 mat 1 crosssect 1 boundaryloads 2 2 3
+trplanestressrotallman  31 nodes 3  19 24 25 mat 1 crosssect 1
+trplanestressrotallman  32 nodes 3  20 19 25 mat 1 crosssect 1 boundaryloads 2 2 3
+#crossSect section
+SimpleCS 1 thick 1.0
+#material section
+IsoLE 1 d 1.0 E 2.3e7 n 0.0 tAlpha 0.000012
+#load and boundary condition section
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+ConstantEdgeLoad 2 loadTimeFunction 1 ndofs 3 Components 3 0. 100.0 0.0
+#load time function list
+ConstantFunction 1 f(t) 1.0
+#%BEGIN_CHECK% tolerance 1.e-4
+## check nodes nodes
+#NODE tStep 1 number 11 dof 2 unknown d value 2.91761456e-05
+#NODE tStep 1 number 13 dof 2 unknown d value 2.81594730e-05
+#%END_CHECK%
