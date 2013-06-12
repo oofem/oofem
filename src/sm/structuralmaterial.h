@@ -287,44 +287,10 @@ public:
     void giveStressDependentPartOfStrainVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrainVector,
                                                TimeStep *tStep, ValueModeType mode);
 
-    /**
-     * Sets the value of a certain variable at a given integration point to the given value.
-     * @param value contains the value(s) to be set (in reduced form).
-     * @param gp Integration point.
-     * @param type Determines the type of internal variable.
-     * @returns Nonzero if ok, zero if var not supported.
-     */
     virtual int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type);
-    /**
-     * Returns the integration point corresponding value in Reduced form.
-     * @param answer Contain corresponding ip value, zero sized if not available.
-     * @param gp Integration point.
-     * @param type Determines the type of internal variable.
-     * @param tStep Time step.
-     * @returns Nonzero if ok, zero if type not supported.
-     */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    /**
-     * Returns the mask of reduced indexes of Internal Variable component.
-     * @param answer Mask of Full VectorSize, with components being the indexes to reduced form vectors.
-     * @param type Determines the internal variable requested (physical meaning).
-     * @param mmode Material response mode.
-     * @returns Nonzero if ok or error is generated for unknown mat mode.
-     */
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
-
-    /**
-     * Returns the type of internal variable (scalar, vector, tensor,...).
-     * @param type Determines the type of internal variable.
-     * @returns Type of internal variable.
-     */
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    /**
-     * Returns the corresponding integration point  value size in Reduced form.
-     * @param gp Integration point.
-     * @param type Determines the type of internal variable.
-     * @returns Value size, zero if type is not supported.
-     */
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
 
     /**

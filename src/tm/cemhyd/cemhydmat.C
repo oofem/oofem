@@ -54,9 +54,9 @@
 #include "cemhydmat.h"
 #include "homogenize.h"
 #include "mathfem.h"
-#include "classfactory.h"
 
 #ifdef __TM_MODULE //OOFEM transport module
+ #include "classfactory.h"
  #include "domain.h"
  #include "floatmatrix.h"
  #include "gausspoint.h"
