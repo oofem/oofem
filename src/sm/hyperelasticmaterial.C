@@ -62,7 +62,7 @@ HyperElasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
 void
 HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode, GaussPoint *gp, TimeStep *atTime)
 
-// returns the 6x6 tangent stiffness matrix
+// returns the 6x6 tangent stiffness matrix - dS/dE
 
 {
     double J2, c11, c22, c33, c12, c13, c23, A, B;
@@ -156,6 +156,23 @@ HyperElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm
     status->letTempStressVectorBe(answer);
 }
 
+
+void
+HyperElasticMaterial :: giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+        const FloatArray &reducedF, TimeStep *tStep) 
+{
+    // Compute P from S, since the material model is formulated in terms of S
+
+    // FloatArray vS, vE, vF;
+    // FloatMatrix S, E, F, P; 
+    // F.beMatrixForm(vF, form);
+    // computeGreenLagrangeStrain(E,F);
+    // vE.beVectorForm(E);
+    // giveRealStressVector(vS, form, gp, vE, tStep);
+    // S.beMatrixForm(vS);
+    // P.beProductOf(F,S);
+    // answer.beVectorForm(P);
+}
 
 MaterialStatus *
 HyperElasticMaterial :: CreateStatus(GaussPoint *gp) const

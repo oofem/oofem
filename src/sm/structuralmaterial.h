@@ -168,7 +168,7 @@ public:
                                       const FloatArray &reducedStrain, TimeStep *tStep) = 0;
 
     virtual void giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-        const FloatArray &reducedF, TimeStep *tStep) {};
+                                      const FloatArray &reducedF, TimeStep *tStep);
 
     /**
      * Returns a vector of coefficients of thermal dilatation in direction of each material principal (local) axis.

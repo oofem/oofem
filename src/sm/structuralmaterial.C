@@ -66,12 +66,32 @@ StructuralMaterial :: give3dFMaterialStiffnessMatrix(FloatMatrix &answer,
                                                GaussPoint *gp,
                                                TimeStep *tStep)
 {
-    // If not overloaded use regular stiffness and convert to dP/dF
+    // If not overloaded use regular stiffness dSdE and convert to dP/dF
     FloatMatrix dSdE;
     this->give3dMaterialStiffnessMatrix(dSdE, form, mode, gp, tStep);
     // this->dSdE_2_dPdF(dSdE, answer);
     answer = dSdE;
 }
+
+
+void 
+StructuralMaterial :: giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+        const FloatArray &reducedvF, TimeStep *tStep) 
+{
+    // default implementation if not overloaded by material
+    // call standard implementation -> S and convert to P
+    
+    // compute reduced E from reduced F
+
+    //FloatArray S, reducedE;
+    //reducedE
+    //giveRealStressVector(S, form, gp, reducedE, tStep);
+
+    // Compute P = F*S
+    //answer.beProductOf(F, S);
+
+};
+
 
 void
 StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
@@ -85,11 +105,8 @@ StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     switch ( mMode ) {
     case _3dMat:
     case _3dMatGrad:
-    //case _3dMat_F: // even if material uses deformation gradient, stiffness is computed in the usual way
+    case _3dMat_F: // even if material uses deformation gradient, stiffness is computed in the usual way
         this->give3dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
-        break;
-    case _3dMat_F: // if material uses deformation gradient, returned stiffness should be dP/dF 
-        this->give3dFMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
         break;
     case _PlaneStress:
     case _PlaneStressGrad:
@@ -2808,6 +2825,8 @@ StructuralMaterial :: giveReducedCharacteristicVector(FloatArray &answer, GaussP
         OOFEM_ERROR("StructuralMaterial :: giveFullCharacteristicVector - invalid mode");
     }
 }
+
+
 
 
 IRResultType

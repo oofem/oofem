@@ -181,8 +181,8 @@ NLStructuralElement :: computeEVectorFromF(FloatArray &answer, FloatArray &vF)
     E.at(3, 3) += -1;
     E.times(0.5);
 
-    FloatArray temp(6);
-    temp.beReducedVectorForm(E);     // Convert to Voight form Todo: add specific methods for strain/stress
+    FloatArray temp;
+    temp.beReducedVectorForm(E);       // Convert to Voight form Todo: add specific methods for strain/stress
     answer = temp;
     answer.at(4) = temp.at(4) * 2.0;   // correction of shear strains
     answer.at(5) = temp.at(5) * 2.0;
@@ -195,7 +195,8 @@ NLStructuralElement :: computeFirstPKStressVector(FloatArray &answer, GaussPoint
 // the receiver, at time step stepN. The nature of these stresses depends
 // on the element's type.
 {
-    if ( this->nlGeometry == 0 ) {
+    if ( this->nlGeometry >= 0 ) { // old code
+    //if ( this->nlGeometry == 0 ) { // small def.
         StructuralElement ::computeStressVector(answer, gp, stepN);
     } else {
         FloatArray F;
@@ -208,7 +209,7 @@ NLStructuralElement :: computeFirstPKStressVector(FloatArray &answer, GaussPoint
 
 
 void
-NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
+NLStructuralElement :: SDgiveInternalForcesVector(FloatArray &answer,
                                                 TimeStep *tStep, int useUpdatedGpRecord)
 //
 // returns nodal representation of real internal forces - necessary only for
@@ -293,6 +294,64 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
         answer.zero();
         return;
     }
+}
+
+
+void
+NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
+                                                TimeStep *tStep, int useUpdatedGpRecord)
+//
+// returns nodal representation of real internal forces computed from first Piola-Kirchoff stress
+// if useGpRecord == 1 then data stored in gp->giveStressVector() are used
+// instead computing stressVector through this->ComputeStressVector();
+// this must be done after you want internal forces after element->updateYourself()
+// has been called for the same time step.
+//
+{
+    GaussPoint *gp;
+    Material *mat; 
+    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+
+    FloatMatrix B;
+    FloatArray BP, P;
+
+    // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
+    // as this is valid only if receiver has no nodes with slaves
+    // zero answer will resize accordingly when adding first contribution
+    answer.resize(0);
+
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+        gp = iRule->getIntegrationPoint(i);
+        this->computeBFmatrixAt(gp, B);
+
+        // updates gp stress and strain record  acording to current
+        // increment of displacement
+        // now every gauss point has real stress vector
+        if ( useUpdatedGpRecord == 1 ) {
+            P = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+        } else {
+            this->computeFirstPKStressVector(P, gp, tStep);
+        }
+
+        if ( P.giveSize() == 0 ) {
+            break;
+        }
+
+        //
+        // compute nodal representation of internal forces using f = B^T*P dV
+        //
+        double dV  = this->computeVolumeAround(gp);
+        BP.beTProductOf(B, P);
+        answer.add(dV, BP);
+    }
+
+
+    // if inactive: update fields but do not contribute to structure
+    if ( !this->isActivated(tStep) ) {
+        answer.zero();
+        return;
+    }
+    
 }
 
 
@@ -408,7 +467,7 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
 
 
 void
-NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
+NLStructuralElement :: SDcomputeStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseMode rMode, TimeStep *tStep)
 //
 // Computes numerically the stiffness matrix of the receiver.
@@ -565,6 +624,94 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
         answer.symmetrized();
     }
 }
+
+
+
+
+void
+NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
+                                              MatResponseMode rMode, TimeStep *tStep)
+//
+// Computes numerically the stiffness matrix dP/dF of the receiver.
+// taking into account possible effects of nonlinear geometry
+//
+{
+    int iStartIndx, iEndIndx, jStartIndx, jEndIndx;
+    FloatMatrix dPdF;
+    FloatMatrix bi, bj, dbj, dPdFij;
+    FloatArray u, stress;
+    GaussPoint *gp;
+    IntegrationRule *iRule;
+    bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode, this->material);
+
+    answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
+    if ( !this->isActivated(tStep) ) {
+        return;
+    }
+
+    Material *mat = this->giveMaterial();
+
+
+    if ( numberOfIntegrationRules > 1 ) {
+        for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
+            iStartIndx = integrationRulesArray [ i ]->getStartIndexOfLocalStrainWhereApply();
+            iEndIndx   = integrationRulesArray [ i ]->getEndIndexOfLocalStrainWhereApply();
+            for ( int j = 0; j < numberOfIntegrationRules; j++ ) {
+                jStartIndx = integrationRulesArray [ j ]->getStartIndexOfLocalStrainWhereApply();
+                jEndIndx   = integrationRulesArray [ j ]->getEndIndexOfLocalStrainWhereApply();
+                if ( i == j ) {
+                    iRule = integrationRulesArray [ i ];
+                } else if ( integrationRulesArray [ i ]->giveNumberOfIntegrationPoints() < integrationRulesArray [ j ]->giveNumberOfIntegrationPoints() ) {
+                    iRule = integrationRulesArray [ i ];
+                } else {
+                    iRule = integrationRulesArray [ j ];
+                }
+
+                for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
+                    gp = iRule->getIntegrationPoint(k);
+                    this->computeBmatrixAt(gp, bi, iStartIndx, iEndIndx);
+                    if ( i != j ) {
+                        this->computeBmatrixAt(gp, bj, jStartIndx, jEndIndx);
+                    } else {
+                        bj = bi;
+                    }
+
+
+                    this->computeConstitutiveMatrixAt(dPdF, rMode, gp, tStep);
+                    dPdFij.beSubMatrixOf(dPdF, iStartIndx, iEndIndx, jStartIndx, jEndIndx);
+                    double dV  = this->computeVolumeAround(gp);
+                    dbj.beProductOf(dPdFij, bj);
+                    if ( matStiffSymmFlag ) {
+                        answer.plusProductSymmUpper(bi, dbj, dV);
+                    } else {
+                        answer.plusProductUnsym(bi, dbj, dV);
+                    }
+                }
+            }
+        }
+    } else { // numberOfIntegrationRules == 1
+        iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
+            gp = iRule->getIntegrationPoint(j);
+            this->computeBFmatrixAt(gp, bj);
+
+            this->computeConstitutiveMatrixAt(dPdF, rMode, gp, tStep);
+            double dV = this->computeVolumeAround(gp);
+            dbj.beProductOf(dPdF, bj);
+            if ( matStiffSymmFlag ) {
+                answer.plusProductSymmUpper(bj, dbj, dV);
+            } else {
+                answer.plusProductUnsym(bj, dbj, dV);
+            }
+        }
+    }
+
+
+    if ( matStiffSymmFlag ) {
+        answer.symmetrized();
+    }
+}
+
 
 void
 NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &answer,

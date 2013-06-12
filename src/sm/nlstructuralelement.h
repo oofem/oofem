@@ -123,6 +123,9 @@ public:
     virtual void computeStiffnessMatrix(FloatMatrix &answer,
                                         MatResponseMode rMode, TimeStep *tStep);
 
+    virtual void SDcomputeStiffnessMatrix(FloatMatrix &answer,
+                                        MatResponseMode rMode, TimeStep *tStep);
+
     /**
      * Computes numerically stiffness matrix of receiver. The response is evaluated
      * using @f$ \int (B_1+B_2(r))^{\mathrm{T}}D(B_1+B_2(r))\;\mathrm{d}v @f$, where
@@ -154,8 +157,13 @@ public:
      * @param tStep Time step
      * @param useUpdatedGpRecord If equal to zero, the stresses in integration points are computed (slow but safe).
      */
+    virtual void SDgiveInternalForcesVector(FloatArray &answer,
+                                          TimeStep *tStep, int useUpdatedGpRecord = 0);
+
+
     virtual void giveInternalForcesVector(FloatArray &answer,
                                           TimeStep *tStep, int useUpdatedGpRecord = 0);
+
     /**
      * Evaluates nodal representation of real internal forces.
      * The response is evaluated using @f$ F = \int (B+B_2)^{\mathrm{T}}\sigma\;\mathrm{d}V @f$ formula, where

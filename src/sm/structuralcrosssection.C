@@ -83,13 +83,8 @@ StructuralCrossSection ::  giveFirstPKStresses(FloatArray &answer, MatResponseFo
         static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() )
         ->giveFirstPKStressVector(answer, form, gp, F, tStep);
         return;
-    } else if ( mode == _3dMat_F && mat->hasMaterialModeCapability(_3dMat)) {
-        // Compute second Piola-Kirchoff stress 
-        //FloatArray strain;
-        //Compute Green-Lagrange strain or small def strain
-        //this->giveRealStresses(answer, form, gp, strain, tStep);
     } else {
-        _error("giveFirstPKStresses : unsupported mode");
+        _error("giveFirstPKStresses : unsupported MaterialMode");
         
 
     }
@@ -149,6 +144,7 @@ StructuralCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
 //
 {
     static_cast< StructuralMaterial * >( mat )->giveCharacteristicMatrix(answer, form, rMode, gp, tStep);
+    //static_cast< StructuralMaterial * >( mat )->giveCharacteristicMatrix(answer, form, rMode, gp, tStep);
 }
 
 
