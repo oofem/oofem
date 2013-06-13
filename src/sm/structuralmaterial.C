@@ -81,17 +81,41 @@ StructuralMaterial :: giveFirstPKStressVector(FloatArray &answer, MatResponseFor
     // default implementation if not overloaded by material
     // call standard implementation -> S and convert to P
     
-    // compute reduced E from reduced F
+    FloatMatrix F, E, S, P;
+    F.beMatrixForm(reducedvF);
+    this->computeGreenLagrangeStrain(E, F);
 
-    //FloatArray S, reducedE;
-    //reducedE
-    //giveRealStressVector(S, form, gp, reducedE, tStep);
+    FloatArray vS, reducedE;
+    reducedE.beReducedVectorForm(E);
+    giveRealStressVector(vS, form, gp, reducedE, tStep);
 
+    S.beMatrixForm(vS);
     // Compute P = F*S
-    //answer.beProductOf(F, S);
+    P.beProductOf(F, S);
+    answer.beFullVectorForm(P); //@todo need to convert to the right size
 
 };
 
+void 
+StructuralMaterial :: computeGreenLagrangeStrain(FloatMatrix &answer, FloatMatrix &F)
+{
+    // Computes the Green-Lagrange strain tensor: E=0.5(C-I)
+    
+    // 
+
+    answer.beTProductOf(F, F);    // C-Right Caucy-Green deformation tensor
+    answer.at(1, 1) += -1;
+    answer.at(2, 2) += -1;
+    answer.at(3, 3) += -1;
+    answer.times(0.5);
+
+    //FloatArray temp;
+    //temp.beReducedVectorForm(E);       // Convert to Voight form Todo: add specific methods for strain/stress
+    //answer = temp;
+    //answer.at(4) = temp.at(4) * 2.0;   // correction of shear strains
+    //answer.at(5) = temp.at(5) * 2.0;
+    //answer.at(6) = temp.at(6) * 2.0;
+}
 
 void
 StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
@@ -997,6 +1021,59 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
     }
 }
 
+
+
+/*
+void
+StructuralMaterial :: LDgiveStressStrainMask(IntArray &answer, MatResponseForm form,
+                                           MaterialMode mmode) const
+//
+// this function returns mask of reduced(if form == ReducedForm)
+// or Full(if form==FullForm) stressStrain vector in full or
+// reduced StressStrainVector
+// according to stressStrain mode of given gp.
+//
+//
+// mask has size of reduced or full StressStrain Vector and  i-th component
+// is index to full or reduced StressStrainVector where corresponding
+// stressStrain resides.
+//
+// Reduced form is sub-vector (of stress or strain components),
+// where components corresponding to imposed zero stress (plane stress,...)
+// are not included. On the other hand, if zero strain component is imposed
+// (Plane strain, ..) this condition must be taken into account in geometrical
+// relations, and corresponding component is included in reduced vector.
+//
+{
+    if ( form == ReducedForm ) {
+        switch ( mmode ) {
+        case _3dMat:
+            answer.resize(9);
+            for ( int i = 1; i <= 9; i++ ) {
+                answer.at(i) = i;
+            }
+            break;
+        default:
+            OOFEM_ERROR2( "StructuralMaterial :: giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode) );
+        }
+    } else if ( form == FullForm ) {
+        switch ( mmode ) {
+        case _3dMat:
+            answer.resize(9);
+            answer.zero();
+            for ( int i = 1; i <= 9; i++ ) {
+                answer.at(i) = i;
+            }
+            break;
+
+        default:
+            OOFEM_ERROR2( "StructuralMaterial :: LDgiveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode) );
+        }
+    } else {
+        OOFEM_ERROR("StructuralMaterial :: LDgiveStressStrainMask : unknown form mode");
+    }
+}
+*/
 
 void
 StructuralMaterial :: reduceToPlaneStressStiffMtrx(FloatMatrix &answer,
@@ -2787,6 +2864,49 @@ StructuralMaterial :: giveFullCharacteristicVector(FloatArray &answer,
         OOFEM_ERROR("StructuralMaterial :: giveFullCharacteristicVector - invalid mode");
     }
 }
+
+
+//@todo implement
+void
+StructuralMaterial :: giveFullDeformationGradient(FloatArray &answer,
+                                                   GaussPoint *gp,
+                                                   const FloatArray &vF)
+//
+// returns full 3d general deformation gradient from deformation gradient in reducedMode
+// based on StressStrainMode in gp. Included are strains which
+// perform nonzero work.
+// General strain vector has one of the following forms:
+// 1) F3d {F11, F22, F33, F23, F13, F12, F32, F31, F21}
+//
+// you must assigng your stress strain mode to one of the folloving modes (or add new)
+// FullForm of MaterialStiffnessMatrix must have the same form.
+//
+{
+    MaterialMode mode = gp->giveMaterialMode();
+    IntArray indx;
+
+    if ( this->hasMaterialModeCapability(mode) ) {
+        if ( mode == _3dMat ) {
+            answer = vF;
+            return;
+        }
+
+        answer.resize(9);
+        answer.zero();
+
+        this->giveStressStrainMask( indx, ReducedForm, gp->giveMaterialMode() );
+        for ( int i = 1; i <= indx.giveSize(); i++ ) {
+            int j;
+            if ( ( j = indx.at(i) ) ) {
+                answer.at(j) = vF.at(i);
+            }
+        }
+
+    } else {
+        OOFEM_ERROR("StructuralMaterial :: giveFullDeformationGradient - invalid mode");
+    }
+}
+
 
 
 void

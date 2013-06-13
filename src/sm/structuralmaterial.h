@@ -170,6 +170,9 @@ public:
     virtual void giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                       const FloatArray &reducedF, TimeStep *tStep);
 
+
+    virtual void computeGreenLagrangeStrain(FloatMatrix &answer, FloatMatrix &F);
+
     /**
      * Returns a vector of coefficients of thermal dilatation in direction of each material principal (local) axis.
      * @param answer Vector of thermal dilatation coefficients.
@@ -354,6 +357,9 @@ public:
      * @param strainVector Reduced vector.
      */
     void giveFullCharacteristicVector(FloatArray &answer,  GaussPoint *gp,
+                                      const FloatArray &strainVector);
+
+    void giveFullDeformationGradient(FloatArray &answer,  GaussPoint *gp,
                                       const FloatArray &strainVector);
 
 protected:

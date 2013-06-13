@@ -197,9 +197,8 @@ public:
     void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
 
-
-    void computeFVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
-    void computeEVectorFromF(FloatArray &answer, FloatArray &F);
+    void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
+    void computeGreenLagrangeStrainVector(FloatArray &answer, FloatArray &F, MaterialMode matMode);
 
 
     // data management
