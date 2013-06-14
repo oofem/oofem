@@ -314,8 +314,8 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
     Material *mat; 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 
-    FloatMatrix B, BF, A;
-    FloatArray BP, vP, totalStressVector, u, BFu;
+    FloatMatrix B;
+    FloatArray BS, vP, vS, u, BFu;
 
     // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
     // as this is valid only if receiver has no nodes with slaves
@@ -328,22 +328,19 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
-        this->computeBmatrixAt(gp, B);
+
         if ( nlGeometry == 0 ) {
-            
-        if ( useUpdatedGpRecord == 1 ) {
-            totalStressVector = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
-        } else {
-            this->computeStressVector(totalStressVector, gp, tStep);
-        }
+            this->computeBmatrixAt(gp, B);
+            if ( useUpdatedGpRecord == 1 ) {
+                vS = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+            } else {
+                this->computeStressVector(vS, gp, tStep);
+            }
 
         } else if ( nlGeometry > 0 ) {
          
-            this->computeBFmatrixAt(gp, BF);
-            BFu.beProductOf(BF,u);
-            A.beTProductOf(BF,BF);
+            this->computeGLBMatrixAt(B, gp, u, tStep); 
 
-            //B.addTProductOf(BFu,BF);
             // updates gp stress and strain record  acording to current increment of displacement
             // now every gauss point has real stress vector
             if ( useUpdatedGpRecord == 1 ) {
@@ -351,16 +348,18 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
             } else {
                 this->computeFirstPKStressVector(vP, gp, tStep);
             }
-
+            // Compute Second Piola-Kirchoff stress vector from vP
+            // vS = ...
         }
 
-            if ( vP.giveSize() == 0 ) {
-                break;
-            }
-             // compute nodal representtion of internal forces at nodes as f = B^T*P dV
-            double dV  = this->computeVolumeAround(gp);
-            BP.beTProductOf(B, vP);
-            answer.add(dV, BP);
+        if ( vS.giveSize() == 0 ) {
+            break;
+        }
+        
+        // compute nodal representtion of internal forces at nodes as f = B^T*P dV
+        double dV  = this->computeVolumeAround(gp);
+        BS.beTProductOf(B, vS);
+        answer.add(dV, BS);
          
     }
 
@@ -487,7 +486,7 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
 
 // old method
 void
-NLStructuralElement :: SDcomputeStiffnessMatrix(FloatMatrix &answer,
+NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseMode rMode, TimeStep *tStep)
 //
 // Computes numerically the stiffness matrix of the receiver.
@@ -603,6 +602,14 @@ NLStructuralElement :: SDcomputeStiffnessMatrix(FloatMatrix &answer,
                 }
             } // end nlGeometry
 
+            /*
+            bj.printYourself();
+            FloatMatrix Btest;
+            computeGLBMatrixAt(Btest, gp, tStep); 
+            Btest.add(-1.0, bj);
+            Btest.printYourself();
+            */
+
             this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
             dV = this->computeVolumeAround(gp);
             dbj.beProductOf(d, bj);
@@ -649,7 +656,7 @@ NLStructuralElement :: SDcomputeStiffnessMatrix(FloatMatrix &answer,
 
 
 void
-NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
+NLStructuralElement :: SDcomputeStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseMode rMode, TimeStep *tStep)
 //
 // Computes the stiffness matrix B^T(dP/dF)B of the receiver.
@@ -661,22 +668,44 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
     GaussPoint *gp;
     IntegrationRule *iRule;
     bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode, this->material);
+    Material *mat = this->giveMaterial();
+
 
     answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
     if ( !this->isActivated(tStep) ) {
         return;
     }
 
+    FloatArray u;
+    if ( nlGeometry > 0 ) {
+            this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    }
 
+    FloatMatrix B, D;
+    FloatArray vS;
     if ( numberOfIntegrationRules == 1 ) {
         iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
-            this->computeBFmatrixAt(gp, bj);
 
-            this->computeConstitutiveMatrixAt(dPdF, rMode, gp, tStep);
+            if ( nlGeometry == 0 ) {
+                this->computeBmatrixAt(gp, B);
+                this->computeConstitutiveMatrixAt(D, rMode, gp, tStep);
+            
+            } else if ( nlGeometry > 0 ) {
+
+                this->computeGLBMatrixAt(B, gp, u, tStep); 
+
+                this->computeConstitutiveMatrixAt(dPdF, rMode, gp, tStep);
+
+                // Convert to dS/dE
+
+                // add stress stiffness
+                vS = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveTempStressVector();
+            }
+
             double dV = this->computeVolumeAround(gp);
-            dbj.beProductOf(dPdF, bj);
+            dbj.beProductOf(D, bj);
             if ( matStiffSymmFlag ) {
                 answer.plusProductSymmUpper(bj, dbj, dV);
             } else {
@@ -729,6 +758,220 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
     if ( matStiffSymmFlag ) {
         answer.symmetrized();
     }
+}
+
+void
+NLStructuralElement :: v9x9_d_v9(FloatMatrix &A, FloatArray &B, FloatMatrix &C)
+{
+
+
+
+}
+
+
+int
+NLStructuralElement :: giveVoigtIndex(int ind1, int ind2)
+{
+    // Returns the Voigt index corresponding to two given tensor indices.
+    if ( ind1 == 1 && ind2 == 1 ) {
+        return 1;
+    } else if ( ind1 == 2 && ind2 == 2 ) {
+        return 2;
+    } else if ( ind1 == 3 && ind2 == 3 ) {
+        return 3;
+    } else if ( ( ind1 == 2 && ind2 == 3 ) || ( ind1 == 3 && ind2 == 2 ) ) {
+        return 4;
+    } else if ( ( ind1 == 1 && ind2 == 3 ) || ( ind1 == 3 && ind2 == 1 ) ) {
+        return 5;
+    } else if ( ( ind1 == 1 && ind2 == 2 ) || ( ind1 == 2 && ind2 == 1 ) ) {
+        return 6;
+    } else {
+        OOFEM_ERROR("Error in giveVoigtIndex - bad indices");
+        return -1;
+    }
+};
+
+/*
+!============================================================================== V9x9_2_T4
+!   Purpose: Transforms a 4th order tensor in Voigt format to pure 
+!            tensor format.
+!   
+!   Modified by: Jim Brouzoulis 10-10-2008
+!==============================================================================    
+SUBROUTINE V9x9_2_T4(C_2,C_4)
+! Old name: us_two_2_four      
+Implicit none
+      !                        |1 4 7|
+!   [1 2 3 4 5 6 7 8 9]   =>   |8 2 5|
+!                              |6 9 3|
+    DOUBLE PRECISION, INTENT(IN)  :: C_2(9,9)
+    DOUBLE PRECISION, INTENT(OUT) :: C_4(3,3,3,3)
+    INTEGER i, j, k, l, index1, index2
+
+    do i=1,3
+      do j=1,3
+        do k=1,3
+          do l=1,3
+
+            index1=0 
+            index2=0
+
+            if ((i==1).and.(j==1)) then
+              index1=1;
+            elseif ((i==1).and.(j==2)) then
+              index1=4; 
+            elseif ((i==2).and.(j==1)) then
+              index1=8; 
+            elseif ((i==1).and.(j==3)) then
+              index1=7; 
+            elseif ((i==3).and.(j==1)) then 
+              index1=6;       
+            elseif ((i==2).and.(j==2)) then
+              index1=2;
+            elseif ((i==2).and.(j==3)) then 
+              index1=5;
+            elseif ((i==3).and.(j==2)) then 
+              index1=9;
+            elseif ((i==3).and.(j==3)) then
+              index1=3;
+            end if
+
+
+            if ((k==1).and.(l==1)) then
+              index2=1;
+            elseif ((k==1).and.(l==2)) then
+              index2=4; 
+            elseif ((k==2).and.(l==1)) then
+              index2=8; 
+            elseif ((k==1).and.(l==3)) then
+              index2=7; 
+            elseif ((k==3).and.(l==1)) then
+              index2=6;       
+            elseif ((k==2).and.(l==2)) then
+              index2=2;
+            elseif ((k==2).and.(l==3)) then
+              index2=5;
+            elseif ((k==3).and.(l==2)) then
+              index2=9;
+            elseif ((k==3).and.(l==3)) then
+              index2=3;
+            end if
+
+            C_4(i,j,k,l)=c_2(index1,index2);
+
+            end do
+          end do
+        end do
+      end do
+ 
+END SUBROUTINE
+!==============================================================================    
+*/
+
+
+/*
+SUBROUTINE T4_2_V9x9(C_4,C_2)
+     
+Implicit none
+      
+    DOUBLE PRECISION :: C_2(9,9)
+    DOUBLE PRECISION :: C_4(3,3,3,3)
+    INTEGER i, j, k, l, index1, index2
+
+    do i=1,3
+      do j=1,3
+        do k=1,3
+          do l=1,3
+
+            index1=0 
+            index2=0
+
+            if ((i==1).and.(j==1)) then
+              index1=1;
+            elseif ((i==1).and.(j==2)) then
+              index1=4; 
+            elseif ((i==2).and.(j==1)) then
+              index1=8; 
+            elseif ((i==1).and.(j==3)) then
+              index1=7; 
+            elseif ((i==3).and.(j==1)) then 
+              index1=6;       
+            elseif ((i==2).and.(j==2)) then
+              index1=2;
+            elseif ((i==2).and.(j==3)) then 
+              index1=5;
+            elseif ((i==3).and.(j==2)) then 
+              index1=9;
+            elseif ((i==3).and.(j==3)) then
+              index1=3;
+            end if
+
+
+            if ((k==1).and.(l==1)) then
+              index2=1;
+            elseif ((k==1).and.(l==2)) then
+              index2=4; 
+            elseif ((k==2).and.(l==1)) then
+              index2=8; 
+            elseif ((k==1).and.(l==3)) then
+              index2=7; 
+            elseif ((k==3).and.(l==1)) then
+              index2=6;       
+            elseif ((k==2).and.(l==2)) then
+              index2=2;
+            elseif ((k==2).and.(l==3)) then
+              index2=5;
+            elseif ((k==3).and.(l==2)) then
+              index2=9;
+            elseif ((k==3).and.(l==3)) then
+              index2=3;
+            end if
+
+            c_2(index1,index2)=C_4(i,j,k,l);
+
+            end do
+          end do
+        end do
+      end do
+ 
+END SUBROUTINE
+!==============================================================================    
+*/
+
+
+void
+NLStructuralElement :: computeGLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, FloatArray &u, TimeStep *tStep) 
+{
+    // B-matrix associated with the variation of the Green-Lagrange Strain E
+    
+    FloatArray test;
+
+    
+    FloatMatrix *ut = NULL;
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    if ( u.giveSize() ) {
+        ut = new FloatMatrix( &u, 1);
+    } else {
+        ut = NULL;
+    }
+
+    FloatMatrix B2, A;
+    this->computeBmatrixAt(gp, answer);
+    for ( int j = 1; j <= answer.giveNumberOfRows(); j++ ) {
+        // loop over each component of strain vector
+        this->computeNLBMatrixAt(A, gp, j);
+        if ( ( A.isNotEmpty() ) && ( u.giveSize() ) ) {
+            B2.beProductOf(*ut,A);
+            test.beProductOf(A, u);
+            for ( int k = 1; k <= answer.giveNumberOfColumns(); k++ ) {
+                // add nonlinear contribution to each component
+                //answer.at(j, k) += B2.at(1, k); //mj
+                answer.at(j, k) += test.at(k); //mj
+            }
+        }
+    }
+            
+
 }
 
 

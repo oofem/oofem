@@ -221,6 +221,12 @@ protected:
         answer.resize(0, 0);
         return;
     }
+
+    void v9x9_d_v9(FloatMatrix &A, FloatArray &B, FloatMatrix &C);
+    int giveVoigtIndex(int ind1, int ind2);
+
+    void computeGLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, FloatArray &u, TimeStep *tStep); 
+
     /**
      * Computes a matrix which, multiplied by the column matrix of nodal displacements,
      * gives the displacement gradient stored by columns.
