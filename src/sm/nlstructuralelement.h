@@ -222,7 +222,8 @@ protected:
         return;
     }
 
-    void v9x9_d_v9(FloatMatrix &A, FloatArray &B, FloatMatrix &C);
+    void computeStiffnessProduct(FloatMatrix &answer, FloatArray &vF, FloatArray &vS, FloatMatrix &C);
+    void computeProductTOfVoigt(FloatArray &answer, FloatArray &A, FloatArray &B);
     int giveVoigtIndex(int ind1, int ind2);
 
     void computeGLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, FloatArray &u, TimeStep *tStep); 

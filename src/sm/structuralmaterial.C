@@ -298,6 +298,8 @@ StructuralMaterial :: giveSizeOfReducedStressStrainVector(MaterialMode mode)
 {
     switch ( mode ) {
     case _3dMat:
+        return 6;
+
     case _3dMat_F:
         return 6;
 
