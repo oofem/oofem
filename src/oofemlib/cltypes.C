@@ -101,6 +101,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_BeamStrainCurvatureTensor:
     case IST_ShellForceMomentumTensor:
     case IST_ShellStrainCurvatureTensor:
+    case IST_DeformationGradientTensor:
         return ISVT_TENSOR_G;
 
     case IST_PrincipalStressTensor:
