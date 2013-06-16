@@ -67,24 +67,23 @@ StructuralCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm 
 
 
 void
-StructuralCrossSection ::  giveFirstPKStresses(FloatArray &answer, MatResponseForm form,
+StructuralCrossSection ::  giveSecondPKStresses(FloatArray &answer, MatResponseForm form,
                                             GaussPoint *gp,
                                             const FloatArray &F,
                                             TimeStep *tStep)
 {
-    // This function returns the first Piola-Kirchoff stress in vector format
+    // This function returns the second Piola-Kirchoff stress in vector format
     // corresponding to a given deformation gradient according to stressStrain (stress-deformation?) 
     // mode stored in each gp.
 
     MaterialMode mode = gp->giveMaterialMode();
-    Material *mat = gp->giveElement()->giveMaterial(); // shouldn't it ask the cs?
-
+    //Material *mat = gp->giveElement()->giveMaterial(); // shouldn't it ask the cs?
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
     if ( mat->hasMaterialModeCapability(mode) ) {
-        static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() )
-        ->giveFirstPKStressVector(answer, form, gp, F, tStep);
+        mat->giveSecondPKStressVector(answer, form, gp, F, tStep);
         return;
     } else {
-        _error("giveFirstPKStresses : unsupported MaterialMode");
+        _error("giveSecondPKStresses : unsupported MaterialMode");
         
 
     }

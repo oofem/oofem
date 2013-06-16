@@ -105,7 +105,7 @@ public:
     int giveGeometryMode(){return nlGeometry;}
 
 
-    void computeFirstPKStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
+    void computeSecondPKStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
 
 
 
@@ -223,9 +223,7 @@ protected:
     }
 
     void dyadicProductBelow(FloatMatrix &answer, FloatArray &A, FloatArray &B);
-    void computeStiffnessProduct(FloatMatrix &answer, FloatArray &vF, FloatArray &vS, FloatMatrix &C);
-    void computeProductTOfVoigt(FloatArray &answer, FloatArray &A, FloatArray &B);
-    int giveVoigtIndex(int ind1, int ind2);
+    int giveVoigtIndexSym(int ind1, int ind2);
 
     void computeGLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep); 
 
@@ -236,7 +234,7 @@ protected:
      * but they are arranged in a somewhat different way from the usual B matrix.
      * @param gp Integration point.
      * @param answer BF matrix at this point.
-     */
+     */ //@todo rename to computeBHmatrix as it is more appropriate /JB
     virtual void computeBFmatrixAt(GaussPoint *gp, FloatMatrix &answer) {
         OOFEM_ERROR("NLStructuralElement::computeBFMatrixAt : method not implemented for this element");
         return;

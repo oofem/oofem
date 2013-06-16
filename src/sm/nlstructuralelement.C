@@ -156,7 +156,7 @@ NLStructuralElement :: computeDeformationGradientVector(FloatArray &answer, Gaus
 
 }
 
-
+// remove, not in use
 void 
 NLStructuralElement :: computeGreenLagrangeStrainVector(FloatArray &answer, FloatArray &vF, MaterialMode matMode)
 {
@@ -172,124 +172,53 @@ NLStructuralElement :: computeGreenLagrangeStrainVector(FloatArray &answer, Floa
     E.times(0.5);
 
     FloatArray temp;
-    temp.beReducedVectorForm(E);       // Convert to Voight form Todo: add specific methods for strain/stress
-    answer = temp;
-    answer.at(4) = temp.at(4) * 2.0;   // correction of shear strains
-    answer.at(5) = temp.at(5) * 2.0;
-    answer.at(6) = temp.at(6) * 2.0;
+    answer.beReducedVectorFormOfStrain(E);       // Convert to Voight form Todo: add specific methods for strain/stress
 }
 
 
 void 
 NLStructuralElement :: dyadicProductBelow(FloatMatrix &answer, FloatArray &A, FloatArray &B)
 {
+    // computes the non-standard "below" open product between two second order tensors
+    // defined as C_ijkl = A_il * B_jk
+    //@todo this should be improved by utilizing symmetry etc. C(9,9), A(9), B(6)(sym)
     answer.resize(9,9);
-
-answer(0,0) = A(0) * B(0); 
-answer(0,1) = A(5) * B(5); 
-answer(0,2) = A(4) * B(4); 
-answer(0,3) = A(5) * B(4); 
-answer(0,4) = A(0) * B(4); 
-answer(0,5) = A(0) * B(5); 
-answer(0,6) = A(4) * B(5); 
-answer(0,7) = A(4) * B(0); 
-answer(0,8) = A(5) * B(0); 
-answer(1,0) = A(8) * B(5); 
-answer(1,1) = A(1) * B(1); 
-answer(1,2) = A(3) * B(3); 
-answer(1,3) = A(1) * B(3); 
-answer(1,4) = A(8) * B(3); 
-answer(1,5) = A(8) * B(1); 
-answer(1,6) = A(3) * B(1); 
-answer(1,7) = A(3) * B(5); 
-answer(1,8) = A(1) * B(5); 
-answer(2,0) = A(7) * B(4); 
-answer(2,1) = A(6) * B(3); 
-answer(2,2) = A(2) * B(2); 
-answer(2,3) = A(6) * B(2); 
-answer(2,4) = A(7) * B(2); 
-answer(2,5) = A(7) * B(3); 
-answer(2,6) = A(2) * B(3); 
-answer(2,7) = A(2) * B(4); 
-answer(2,8) = A(6) * B(4); 
-answer(3,0) = A(8) * B(4); 
-answer(3,1) = A(1) * B(3); 
-answer(3,2) = A(3) * B(2); 
-answer(3,3) = A(1) * B(2); 
-answer(3,4) = A(8) * B(2); 
-answer(3,5) = A(8) * B(3); 
-answer(3,6) = A(3) * B(3); 
-answer(3,7) = A(3) * B(4); 
-answer(3,8) = A(1) * B(4); 
-answer(4,0) = A(0) * B(4); 
-answer(4,1) = A(5) * B(3); 
-answer(4,2) = A(4) * B(2); 
-answer(4,3) = A(5) * B(2); 
-answer(4,4) = A(0) * B(2); 
-answer(4,5) = A(0) * B(3); 
-answer(4,6) = A(4) * B(3); 
-answer(4,7) = A(4) * B(4); 
-answer(4,8) = A(5) * B(4); 
-answer(5,0) = A(0) * B(5); 
-answer(5,1) = A(5) * B(1); 
-answer(5,2) = A(4) * B(3); 
-answer(5,3) = A(5) * B(3); 
-answer(5,4) = A(0) * B(3); 
-answer(5,5) = A(0) * B(1); 
-answer(5,6) = A(4) * B(1); 
-answer(5,7) = A(4) * B(5); 
-answer(5,8) = A(5) * B(5); 
-answer(6,0) = A(7) * B(5); 
-answer(6,1) = A(6) * B(1); 
-answer(6,2) = A(2) * B(3); 
-answer(6,3) = A(6) * B(3); 
-answer(6,4) = A(7) * B(3); 
-answer(6,5) = A(7) * B(1); 
-answer(6,6) = A(2) * B(1); 
-answer(6,7) = A(2) * B(5); 
-answer(6,8) = A(6) * B(5); 
-answer(7,0) = A(7) * B(0); 
-answer(7,1) = A(6) * B(5); 
-answer(7,2) = A(2) * B(4); 
-answer(7,3) = A(6) * B(4); 
-answer(7,4) = A(7) * B(4); 
-answer(7,5) = A(7) * B(5); 
-answer(7,6) = A(2) * B(5); 
-answer(7,7) = A(2) * B(0); 
-answer(7,8) = A(6) * B(0); 
-answer(8,0) = A(8) * B(0); 
-answer(8,1) = A(1) * B(5); 
-answer(8,2) = A(3) * B(4); 
-answer(8,3) = A(1) * B(4); 
-answer(8,4) = A(8) * B(4); 
-answer(8,5) = A(8) * B(5); 
-answer(8,6) = A(3) * B(5); 
-answer(8,7) = A(3) * B(0); 
-answer(8,8) = A(1) * B(0); 
+    answer(0,0) = A(0) * B(0); answer(0,1) = A(5) * B(5); answer(0,2) = A(4) * B(4); answer(0,3) = A(5) * B(4); 
+    answer(0,4) = A(0) * B(4); answer(0,5) = A(0) * B(5); answer(0,6) = A(4) * B(5); answer(0,7) = A(4) * B(0); 
+    answer(0,8) = A(5) * B(0); answer(1,0) = A(8) * B(5); answer(1,1) = A(1) * B(1); answer(1,2) = A(3) * B(3); 
+    answer(1,3) = A(1) * B(3); answer(1,4) = A(8) * B(3); answer(1,5) = A(8) * B(1); answer(1,6) = A(3) * B(1); 
+    answer(1,7) = A(3) * B(5); answer(1,8) = A(1) * B(5); answer(2,0) = A(7) * B(4); answer(2,1) = A(6) * B(3); 
+    answer(2,2) = A(2) * B(2); answer(2,3) = A(6) * B(2); answer(2,4) = A(7) * B(2); answer(2,5) = A(7) * B(3); 
+    answer(2,6) = A(2) * B(3); answer(2,7) = A(2) * B(4); answer(2,8) = A(6) * B(4); answer(3,0) = A(8) * B(4); 
+    answer(3,1) = A(1) * B(3); answer(3,2) = A(3) * B(2); answer(3,3) = A(1) * B(2); answer(3,4) = A(8) * B(2); 
+    answer(3,5) = A(8) * B(3); answer(3,6) = A(3) * B(3); answer(3,7) = A(3) * B(4); answer(3,8) = A(1) * B(4); 
+    answer(4,0) = A(0) * B(4); answer(4,1) = A(5) * B(3); answer(4,2) = A(4) * B(2); answer(4,3) = A(5) * B(2); 
+    answer(4,4) = A(0) * B(2); answer(4,5) = A(0) * B(3); answer(4,6) = A(4) * B(3); answer(4,7) = A(4) * B(4); 
+    answer(4,8) = A(5) * B(4); answer(5,0) = A(0) * B(5); answer(5,1) = A(5) * B(1); answer(5,2) = A(4) * B(3); 
+    answer(5,3) = A(5) * B(3); answer(5,4) = A(0) * B(3); answer(5,5) = A(0) * B(1); answer(5,6) = A(4) * B(1); 
+    answer(5,7) = A(4) * B(5); answer(5,8) = A(5) * B(5); answer(6,0) = A(7) * B(5); answer(6,1) = A(6) * B(1); 
+    answer(6,2) = A(2) * B(3); answer(6,3) = A(6) * B(3); answer(6,4) = A(7) * B(3); answer(6,5) = A(7) * B(1); 
+    answer(6,6) = A(2) * B(1); answer(6,7) = A(2) * B(5); answer(6,8) = A(6) * B(5); answer(7,0) = A(7) * B(0); 
+    answer(7,1) = A(6) * B(5); answer(7,2) = A(2) * B(4); answer(7,3) = A(6) * B(4); answer(7,4) = A(7) * B(4); 
+    answer(7,5) = A(7) * B(5); answer(7,6) = A(2) * B(5); answer(7,7) = A(2) * B(0); answer(7,8) = A(6) * B(0); 
+    answer(8,0) = A(8) * B(0); answer(8,1) = A(1) * B(5); answer(8,2) = A(3) * B(4); answer(8,3) = A(1) * B(4); 
+    answer(8,4) = A(8) * B(4); answer(8,5) = A(8) * B(5); answer(8,6) = A(3) * B(5); answer(8,7) = A(3) * B(0); 
+    answer(8,8) = A(1) * B(0); 
 
 
 }
 
+
 void
-NLStructuralElement :: computeFirstPKStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
-// Computes the first Piola-Kirchoff stress vector containing the stresses at the Gauss point gp of
-// the receiver, at time step stepN. The nature of these stresses depends
-// on the element's type.
+NLStructuralElement :: computeSecondPKStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
-    if ( this->nlGeometry >= 0 ) { // old code
-    //if ( this->nlGeometry == 0 ) { // small def.
-        StructuralElement ::computeStressVector(answer, gp, stepN);
-    } else {
-        StructuralElement ::computeStressVector(answer, gp, stepN);
-        /*
-        FloatArray F;
-        StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    // Computes the second Piola-Kirchoff stress vector containing the stresses at the Gauss point gp of
+    // the receiver, at time step tStep. 
+    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
 
-        this->computeDeformationGradientVector(F, gp, stepN);
-
-        cs->giveFirstPKStresses(answer, ReducedForm, gp, F, stepN);
-        */
-    }
+    FloatArray vF;
+    this->computeDeformationGradientVector(vF, gp, tStep);
+    cs->giveSecondPKStresses(answer, ReducedForm, gp, vF, tStep);
 }
 
 // Old method
@@ -425,19 +354,18 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
 
         } else if ( nlGeometry == -1 ) {
          
-            this->computeGLBMatrixAt(B, gp, tStep); 
+
             // updates gp stress and strain record  acording to current increment of displacement
             // now every gauss point has real stress vector
-            //if ( useUpdatedGpRecord == 1 ) {
-            //    vP = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
-            //} else {
-            //    this->computeFirstPKStressVector(vP, gp, tStep); // currently gives S
-            //}
             if ( useUpdatedGpRecord == 1 ) {
                 vS = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
             } else {
-                this->computeStressVector(vS, gp, tStep);
+                this->computeSecondPKStressVector(vS, gp, tStep); // currently gives S
             }
+
+            // Compute stresses first in order to store the deformation gradient in the MaterialStatus
+            // which is needed to compute GLB
+            this->computeGLBMatrixAt(B, gp, tStep); 
 
         }
 
@@ -459,13 +387,10 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
         answer.zero();
         return;
     }
-    
-
-    //answer.printYourself();
 
 }
 
-//@todo needs to be updated for P
+//@todo needs to be updated/rewritten /JB
 void
 NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &answer,
                                                                      TimeStep *tStep, int useUpdatedGpRecord)
@@ -694,10 +619,6 @@ NLStructuralElement :: OLDcomputeStiffnessMatrix(FloatMatrix &answer,
                 }
             } // end nlGeometry
 
-            //bj.printYourself();
-            //FloatMatrix B;
-            //this->computeGLBMatrixAt(B, gp, tStep);
-            //B.printYourself();
             this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
             dV = this->computeVolumeAround(gp);
             dbj.beProductOf(d, bj);
@@ -738,11 +659,6 @@ NLStructuralElement :: OLDcomputeStiffnessMatrix(FloatMatrix &answer,
     if ( matStiffSymmFlag ) {
         answer.symmetrized();
     }
-    
-    FloatMatrix test;
-    test.beSubMatrixOf(answer,1,8,1,8);
-    //test.printYourself();
-
 
 }
 
@@ -752,162 +668,142 @@ NLStructuralElement :: OLDcomputeStiffnessMatrix(FloatMatrix &answer,
 void
 NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseMode rMode, TimeStep *tStep)
-//
-// Computes the stiffness matrix B^T(dP/dF)B of the receiver.
-//
 {
-    if ( nlGeometry == 1 ) {
+    /* Computes the stiffness matrix of the receiver.
+     * nlGeometry = 0   ->  small strain theory
+     * nlGeometry = -1  ->  finite deformation theory based on Green-Lagrange strain E
+     *                      and Second Piola-Kirchoff stress S in the virtual work
+     */
+
+    if ( nlGeometry == 1 ) { // old and soon redundant code
         OLDcomputeStiffnessMatrix(answer, rMode, tStep);
         return;
     }
 
-    int iStartIndx, iEndIndx, jStartIndx, jEndIndx;
-    FloatMatrix dSdE;
-    FloatMatrix bi, bj, dbj, dPdFij;
+
     GaussPoint *gp;
     IntegrationRule *iRule;
     bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode, this->material);
-    Material *mat = this->giveMaterial();
-
 
     answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
     if ( !this->isActivated(tStep) ) {
         return;
     }
 
-
-    FloatMatrix B, BF, D;
-    FloatArray vS;
-    FloatMatrix Smat;
-    FloatArray vI;
-    vI.setValues( 9, 1., 1., 1., 0., 0., 0., 0., 0., 0.);
-
+    // Compute matrix from material stiffness (total stiffness for small def.) - B^T * dS/dE * B
+    FloatMatrix B, D, DB;
     if ( numberOfIntegrationRules == 1 ) {
         iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
             
-            
             if ( nlGeometry == 0 ) {
-                this->computeBmatrixAt(gp, B);    
-                this->computeConstitutiveMatrixAt(D, rMode, gp, tStep);
-            
+                this->computeBmatrixAt(gp, B);            
             } else if ( nlGeometry == -1 ) {
                 this->computeGLBMatrixAt(B, gp, tStep); 
-                this->computeBFmatrixAt(gp, BF);
-
-                this->computeConstitutiveMatrixAt(dSdE, rMode, gp, tStep);
-                D = dSdE;
-
-                vS = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveTempStressVector();
-
-                dyadicProductBelow(Smat, vI, vS);
-
-
             }
 
+            this->computeConstitutiveMatrixAt(D, rMode, gp, tStep); // dSdE
             double dV = this->computeVolumeAround(gp);
-            dbj.beProductOf(D, B);
+            DB.beProductOf(D, B);
             if ( matStiffSymmFlag ) {
-                answer.plusProductSymmUpper(B, dbj, dV);
+                answer.plusProductSymmUpper(B, DB, dV);
             } else {
-                answer.plusProductUnsym(B, dbj, dV);
+                answer.plusProductUnsym(B, DB, dV);
             }
+        }
 
-            if ( nlGeometry == -1 ) {
-
-                dbj.beProductOf(Smat, BF);
-                if ( matStiffSymmFlag ) {
-                    answer.plusProductSymmUpper(BF, dbj, dV);
+    } else { // @todo totally unchecked
+        int iStartIndx, iEndIndx, jStartIndx, jEndIndx;
+        FloatMatrix Bi, BHi, Bj, BHj, Dij, DBj;
+        for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
+            iStartIndx = integrationRulesArray [ i ]->getStartIndexOfLocalStrainWhereApply();
+            iEndIndx   = integrationRulesArray [ i ]->getEndIndexOfLocalStrainWhereApply();
+            for ( int j = 0; j < numberOfIntegrationRules; j++ ) {
+                jStartIndx = integrationRulesArray [ j ]->getStartIndexOfLocalStrainWhereApply();
+                jEndIndx   = integrationRulesArray [ j ]->getEndIndexOfLocalStrainWhereApply();
+                if ( i == j ) {
+                    iRule = integrationRulesArray [ i ];
+                } else if ( integrationRulesArray [ i ]->giveNumberOfIntegrationPoints() < integrationRulesArray [ j ]->giveNumberOfIntegrationPoints() ) {
+                    iRule = integrationRulesArray [ i ];
                 } else {
-                    answer.plusProductUnsym(BF, dbj, dV);
+                    iRule = integrationRulesArray [ j ];
                 }
 
+                for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
+                    gp = iRule->getIntegrationPoint(k);
+
+                    if ( nlGeometry == 0 ) {
+                        this->computeBmatrixAt(gp, Bi, iStartIndx, iEndIndx);
+
+                    } else if ( nlGeometry == -1 ) { // @todo add support for Indx
+                        this->computeGLBMatrixAt(Bi, gp, tStep);      
+                    }
+
+                    if ( i != j ) {
+                        if ( nlGeometry == 0 ) {
+                            this->computeBmatrixAt(gp, Bj, jStartIndx, jEndIndx);
+
+                        } else if ( nlGeometry == -1 ) { // @todo add support for Indx
+                            this->computeGLBMatrixAt(Bj, gp, tStep); 
+                        }
+
+                    } else {
+                        Bj  = Bi;
+                        BHj = BHi;
+                    }
+
+                    this->computeConstitutiveMatrixAt(D, rMode, gp, tStep);
+                    Dij.beSubMatrixOf(D, iStartIndx, iEndIndx, jStartIndx, jEndIndx);
+                    double dV = this->computeVolumeAround(gp);
+                    DBj.beProductOf(Dij, Bj);
+                    if ( matStiffSymmFlag ) {
+                        answer.plusProductSymmUpper(Bi, DBj, dV);
+                    } else {
+                        answer.plusProductUnsym(Bi, DBj, dV);
+                    }
+                }
             }
         }
     }
+
+    // Add geometric stiffness ("initial stress" stiffness)  - BH^T * S * BH
+    // @todo The old code does not have any selective integration for this term, maybe it is never needed
+    if ( nlGeometry == -1 ) {
+        
+        FloatArray vS, vEye;
+        FloatMatrix Smat, BH, SB;
+        vEye.setValues( 9, 1., 1., 1., 0., 0., 0., 0., 0., 0.);
+        iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+        
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
+            gp = iRule->getIntegrationPoint(j);
+
+            this->computeBFmatrixAt(gp, BH);
+            Material *mat = this->giveMaterial(); // shouldn't ask cross section?
+            
+            vS = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveTempStressVector();
+            dyadicProductBelow(Smat, vEye, vS);
+            SB.beProductOf(Smat, BH);
+            double dV = this->computeVolumeAround(gp);
+            if ( matStiffSymmFlag ) {
+                answer.plusProductSymmUpper(BH, SB, dV);
+            } else {
+                answer.plusProductUnsym(BH, SB, dV);
+            }
+        }
+    }
+        
 
     if ( matStiffSymmFlag ) {
         answer.symmetrized();
     }
 
-
-    FloatMatrix test;
-    test.beSubMatrixOf(answer,1,8,1,8);
-    //test.printYourself();
-}
-
-void
-NLStructuralElement :: computeStiffnessProduct(FloatMatrix &answer, FloatArray &F, FloatArray &S, FloatMatrix &C)
-{
-    // Computes the product A_ijkl = F_im * C_mjkn * (F_nl)^t = F_im * C_mjkn * F_ln 
-    // where F(9), C(6,6) 
-    // used to convert the material stiffness dS/dE to an effective stiffness
-    // @todo use the symmetry to only compute the upper part
-    //FloatArray S(6);
-    S.zero();
-    answer.resize(6,6);
-answer(0,0) = F(0) * C(0,0) * F(0) + F(0) * C(0,5) * F(5) + F(0) * C(0,4) * F(4) + F(5) * C(5,0) * F(0) + F(5) * C(5,5) * F(5) + F(5) * C(5,4) * F(4) + F(4) * C(4,0) * F(0) + F(4) * C(4,5) * F(5) + F(4) * C(4,4) * F(4); 
-answer(0,1) = F(0) * C(0,5) * F(8) + F(0) * C(0,1) * F(1) + F(0) * C(0,3) * F(3) + F(5) * C(5,5) * F(8) + F(5) * C(5,1) * F(1) + F(5) * C(5,3) * F(3) + F(4) * C(4,5) * F(8) + F(4) * C(4,1) * F(1) + F(4) * C(4,3) * F(3); 
-answer(0,2) = F(0) * C(0,4) * F(7) + F(0) * C(0,3) * F(6) + F(0) * C(0,2) * F(2) + F(5) * C(5,4) * F(7) + F(5) * C(5,3) * F(6) + F(5) * C(5,2) * F(2) + F(4) * C(4,4) * F(7) + F(4) * C(4,3) * F(6) + F(4) * C(4,2) * F(2); 
-answer(0,3) = F(0) * C(0,5) * F(7) + F(0) * C(0,1) * F(6) + F(0) * C(0,3) * F(2) + F(5) * C(5,5) * F(7) + F(5) * C(5,1) * F(6) + F(5) * C(5,3) * F(2) + F(4) * C(4,5) * F(7) + F(4) * C(4,1) * F(6) + F(4) * C(4,3) * F(2); 
-answer(0,4) = F(0) * C(0,0) * F(7) + F(0) * C(0,5) * F(6) + F(0) * C(0,4) * F(2) + F(5) * C(5,0) * F(7) + F(5) * C(5,5) * F(6) + F(5) * C(5,4) * F(2) + F(4) * C(4,0) * F(7) + F(4) * C(4,5) * F(6) + F(4) * C(4,4) * F(2); 
-answer(0,5) = F(0) * C(0,0) * F(8) + F(0) * C(0,5) * F(1) + F(0) * C(0,4) * F(3) + F(5) * C(5,0) * F(8) + F(5) * C(5,5) * F(1) + F(5) * C(5,4) * F(3) + F(4) * C(4,0) * F(8) + F(4) * C(4,5) * F(1) + F(4) * C(4,4) * F(3); 
-answer(1,0) = F(8) * C(5,0) * F(0) + F(8) * C(5,5) * F(5) + F(8) * C(5,4) * F(4) + F(1) * C(1,0) * F(0) + F(1) * C(1,5) * F(5) + F(1) * C(1,4) * F(4) + F(3) * C(3,0) * F(0) + F(3) * C(3,5) * F(5) + F(3) * C(3,4) * F(4); 
-answer(1,1) = F(8) * C(5,5) * F(8) + F(8) * C(5,1) * F(1) + F(8) * C(5,3) * F(3) + F(1) * C(1,5) * F(8) + F(1) * C(1,1) * F(1) + F(1) * C(1,3) * F(3) + F(3) * C(3,5) * F(8) + F(3) * C(3,1) * F(1) + F(3) * C(3,3) * F(3); 
-answer(1,2) = F(8) * C(5,4) * F(7) + F(8) * C(5,3) * F(6) + F(8) * C(5,2) * F(2) + F(1) * C(1,4) * F(7) + F(1) * C(1,3) * F(6) + F(1) * C(1,2) * F(2) + F(3) * C(3,4) * F(7) + F(3) * C(3,3) * F(6) + F(3) * C(3,2) * F(2); 
-answer(1,3) = F(8) * C(5,5) * F(7) + F(8) * C(5,1) * F(6) + F(8) * C(5,3) * F(2) + F(1) * C(1,5) * F(7) + F(1) * C(1,1) * F(6) + F(1) * C(1,3) * F(2) + F(3) * C(3,5) * F(7) + F(3) * C(3,1) * F(6) + F(3) * C(3,3) * F(2); 
-answer(1,4) = F(8) * C(5,0) * F(7) + F(8) * C(5,5) * F(6) + F(8) * C(5,4) * F(2) + F(1) * C(1,0) * F(7) + F(1) * C(1,5) * F(6) + F(1) * C(1,4) * F(2) + F(3) * C(3,0) * F(7) + F(3) * C(3,5) * F(6) + F(3) * C(3,4) * F(2); 
-answer(1,5) = F(8) * C(5,0) * F(8) + F(8) * C(5,5) * F(1) + F(8) * C(5,4) * F(3) + F(1) * C(1,0) * F(8) + F(1) * C(1,5) * F(1) + F(1) * C(1,4) * F(3) + F(3) * C(3,0) * F(8) + F(3) * C(3,5) * F(1) + F(3) * C(3,4) * F(3); 
-answer(2,0) = F(7) * C(4,0) * F(0) + F(7) * C(4,5) * F(5) + F(7) * C(4,4) * F(4) + F(6) * C(3,0) * F(0) + F(6) * C(3,5) * F(5) + F(6) * C(3,4) * F(4) + F(2) * C(2,0) * F(0) + F(2) * C(2,5) * F(5) + F(2) * C(2,4) * F(4); 
-answer(2,1) = F(7) * C(4,5) * F(8) + F(7) * C(4,1) * F(1) + F(7) * C(4,3) * F(3) + F(6) * C(3,5) * F(8) + F(6) * C(3,1) * F(1) + F(6) * C(3,3) * F(3) + F(2) * C(2,5) * F(8) + F(2) * C(2,1) * F(1) + F(2) * C(2,3) * F(3); 
-answer(2,2) = F(7) * C(4,4) * F(7) + F(7) * C(4,3) * F(6) + F(7) * C(4,2) * F(2) + F(6) * C(3,4) * F(7) + F(6) * C(3,3) * F(6) + F(6) * C(3,2) * F(2) + F(2) * C(2,4) * F(7) + F(2) * C(2,3) * F(6) + F(2) * C(2,2) * F(2); 
-answer(2,3) = F(7) * C(4,5) * F(7) + F(7) * C(4,1) * F(6) + F(7) * C(4,3) * F(2) + F(6) * C(3,5) * F(7) + F(6) * C(3,1) * F(6) + F(6) * C(3,3) * F(2) + F(2) * C(2,5) * F(7) + F(2) * C(2,1) * F(6) + F(2) * C(2,3) * F(2); 
-answer(2,4) = F(7) * C(4,0) * F(7) + F(7) * C(4,5) * F(6) + F(7) * C(4,4) * F(2) + F(6) * C(3,0) * F(7) + F(6) * C(3,5) * F(6) + F(6) * C(3,4) * F(2) + F(2) * C(2,0) * F(7) + F(2) * C(2,5) * F(6) + F(2) * C(2,4) * F(2); 
-answer(2,5) = F(7) * C(4,0) * F(8) + F(7) * C(4,5) * F(1) + F(7) * C(4,4) * F(3) + F(6) * C(3,0) * F(8) + F(6) * C(3,5) * F(1) + F(6) * C(3,4) * F(3) + F(2) * C(2,0) * F(8) + F(2) * C(2,5) * F(1) + F(2) * C(2,4) * F(3); 
-answer(3,0) = F(8) * C(4,0) * F(0) + F(8) * C(4,5) * F(5) + F(8) * C(4,4) * F(4) + F(1) * C(3,0) * F(0) + F(1) * C(3,5) * F(5) + F(1) * C(3,4) * F(4) + F(3) * C(2,0) * F(0) + F(3) * C(2,5) * F(5) + F(3) * C(2,4) * F(4); 
-answer(3,1) = F(8) * C(4,5) * F(8) + F(8) * C(4,1) * F(1) + F(8) * C(4,3) * F(3) + F(1) * C(3,5) * F(8) + F(1) * C(3,1) * F(1) + F(1) * C(3,3) * F(3) + F(3) * C(2,5) * F(8) + F(3) * C(2,1) * F(1) + F(3) * C(2,3) * F(3); 
-answer(3,2) = F(8) * C(4,4) * F(7) + F(8) * C(4,3) * F(6) + F(8) * C(4,2) * F(2) + F(1) * C(3,4) * F(7) + F(1) * C(3,3) * F(6) + F(1) * C(3,2) * F(2) + F(3) * C(2,4) * F(7) + F(3) * C(2,3) * F(6) + F(3) * C(2,2) * F(2); 
-answer(3,3) = F(8) * C(4,5) * F(7) + F(8) * C(4,1) * F(6) + F(8) * C(4,3) * F(2) + F(1) * C(3,5) * F(7) + F(1) * C(3,1) * F(6) + F(1) * C(3,3) * F(2) + F(3) * C(2,5) * F(7) + F(3) * C(2,1) * F(6) + F(3) * C(2,3) * F(2); 
-answer(3,4) = F(8) * C(4,0) * F(7) + F(8) * C(4,5) * F(6) + F(8) * C(4,4) * F(2) + F(1) * C(3,0) * F(7) + F(1) * C(3,5) * F(6) + F(1) * C(3,4) * F(2) + F(3) * C(2,0) * F(7) + F(3) * C(2,5) * F(6) + F(3) * C(2,4) * F(2); 
-answer(3,5) = F(8) * C(4,0) * F(8) + F(8) * C(4,5) * F(1) + F(8) * C(4,4) * F(3) + F(1) * C(3,0) * F(8) + F(1) * C(3,5) * F(1) + F(1) * C(3,4) * F(3) + F(3) * C(2,0) * F(8) + F(3) * C(2,5) * F(1) + F(3) * C(2,4) * F(3); 
-answer(4,0) = F(0) * C(4,0) * F(0) + F(0) * C(4,5) * F(5) + F(0) * C(4,4) * F(4) + F(5) * C(3,0) * F(0) + F(5) * C(3,5) * F(5) + F(5) * C(3,4) * F(4) + F(4) * C(2,0) * F(0) + F(4) * C(2,5) * F(5) + F(4) * C(2,4) * F(4); 
-answer(4,1) = F(0) * C(4,5) * F(8) + F(0) * C(4,1) * F(1) + F(0) * C(4,3) * F(3) + F(5) * C(3,5) * F(8) + F(5) * C(3,1) * F(1) + F(5) * C(3,3) * F(3) + F(4) * C(2,5) * F(8) + F(4) * C(2,1) * F(1) + F(4) * C(2,3) * F(3); 
-answer(4,2) = F(0) * C(4,4) * F(7) + F(0) * C(4,3) * F(6) + F(0) * C(4,2) * F(2) + F(5) * C(3,4) * F(7) + F(5) * C(3,3) * F(6) + F(5) * C(3,2) * F(2) + F(4) * C(2,4) * F(7) + F(4) * C(2,3) * F(6) + F(4) * C(2,2) * F(2); 
-answer(4,3) = F(0) * C(4,5) * F(7) + F(0) * C(4,1) * F(6) + F(0) * C(4,3) * F(2) + F(5) * C(3,5) * F(7) + F(5) * C(3,1) * F(6) + F(5) * C(3,3) * F(2) + F(4) * C(2,5) * F(7) + F(4) * C(2,1) * F(6) + F(4) * C(2,3) * F(2); 
-answer(4,4) = F(0) * C(4,0) * F(7) + F(0) * C(4,5) * F(6) + F(0) * C(4,4) * F(2) + F(5) * C(3,0) * F(7) + F(5) * C(3,5) * F(6) + F(5) * C(3,4) * F(2) + F(4) * C(2,0) * F(7) + F(4) * C(2,5) * F(6) + F(4) * C(2,4) * F(2); 
-answer(4,5) = F(0) * C(4,0) * F(8) + F(0) * C(4,5) * F(1) + F(0) * C(4,4) * F(3) + F(5) * C(3,0) * F(8) + F(5) * C(3,5) * F(1) + F(5) * C(3,4) * F(3) + F(4) * C(2,0) * F(8) + F(4) * C(2,5) * F(1) + F(4) * C(2,4) * F(3); 
-answer(5,0) = F(0) * C(5,0) * F(0) + F(0) * C(5,5) * F(5) + F(0) * C(5,4) * F(4) + F(5) * C(1,0) * F(0) + F(5) * C(1,5) * F(5) + F(5) * C(1,4) * F(4) + F(4) * C(3,0) * F(0) + F(4) * C(3,5) * F(5) + F(4) * C(3,4) * F(4); 
-answer(5,1) = F(0) * C(5,5) * F(8) + F(0) * C(5,1) * F(1) + F(0) * C(5,3) * F(3) + F(5) * C(1,5) * F(8) + F(5) * C(1,1) * F(1) + F(5) * C(1,3) * F(3) + F(4) * C(3,5) * F(8) + F(4) * C(3,1) * F(1) + F(4) * C(3,3) * F(3); 
-answer(5,2) = F(0) * C(5,4) * F(7) + F(0) * C(5,3) * F(6) + F(0) * C(5,2) * F(2) + F(5) * C(1,4) * F(7) + F(5) * C(1,3) * F(6) + F(5) * C(1,2) * F(2) + F(4) * C(3,4) * F(7) + F(4) * C(3,3) * F(6) + F(4) * C(3,2) * F(2); 
-answer(5,3) = F(0) * C(5,5) * F(7) + F(0) * C(5,1) * F(6) + F(0) * C(5,3) * F(2) + F(5) * C(1,5) * F(7) + F(5) * C(1,1) * F(6) + F(5) * C(1,3) * F(2) + F(4) * C(3,5) * F(7) + F(4) * C(3,1) * F(6) + F(4) * C(3,3) * F(2); 
-answer(5,4) = F(0) * C(5,0) * F(7) + F(0) * C(5,5) * F(6) + F(0) * C(5,4) * F(2) + F(5) * C(1,0) * F(7) + F(5) * C(1,5) * F(6) + F(5) * C(1,4) * F(2) + F(4) * C(3,0) * F(7) + F(4) * C(3,5) * F(6) + F(4) * C(3,4) * F(2); 
-answer(5,5) = F(0) * C(5,0) * F(8) + F(0) * C(5,5) * F(1) + F(0) * C(5,4) * F(3) + F(5) * C(1,0) * F(8) + F(5) * C(1,5) * F(1) + F(5) * C(1,4) * F(3) + F(4) * C(3,0) * F(8) + F(4) * C(3,5) * F(1) + F(4) * C(3,4) * F(3); 
-}
-
-
-void
-NLStructuralElement :: computeProductTOfVoigt(FloatArray &answer, FloatArray &A, FloatArray &B)
-{
-    // scalar product A*B^t between two second order tensors in Voigt Format
-    // size(A) = 6, size(B) = 9
-    answer.resize(9);
-
-    answer(0) = A(0) * B(0) + A(5) * B(5) + A(4) * B(4); 
-    answer(1) = A(5) * B(8) + A(1) * B(1) + A(3) * B(3); 
-    answer(2) = A(4) * B(7) + A(3) * B(6) + A(2) * B(2); 
-    answer(3) = A(5) * B(7) + A(1) * B(6) + A(3) * B(2); 
-    answer(4) = A(0) * B(7) + A(5) * B(6) + A(4) * B(2); 
-    answer(5) = A(0) * B(8) + A(5) * B(1) + A(4) * B(3); 
-    answer(6) = A(4) * B(8) + A(3) * B(1) + A(2) * B(3); 
-    answer(7) = A(4) * B(0) + A(3) * B(5) + A(2) * B(4); 
-    answer(8) = A(5) * B(0) + A(1) * B(5) + A(3) * B(4); 
-
 }
 
 
 int
-NLStructuralElement :: giveVoigtIndex(int ind1, int ind2)
+NLStructuralElement :: giveVoigtIndexSym(int ind1, int ind2)
 {
     // Returns the Voigt index corresponding to two given tensor indices.
     if ( ind1 == 1 && ind2 == 1 ) {
@@ -928,129 +824,47 @@ NLStructuralElement :: giveVoigtIndex(int ind1, int ind2)
     }
 };
 
-/*
-!============================================================================== V9x9_2_T4
-!   Purpose: Transforms a 4th order tensor in Voigt format to pure 
-!            tensor format.
-!   
-!   Modified by: Jim Brouzoulis 10-10-2008
-!==============================================================================    
-SUBROUTINE V9x9_2_T4(C_2,C_4)
-! Old name: us_two_2_four      
-Implicit none
-      !                        |1 4 7|
-!   [1 2 3 4 5 6 7 8 9]   =>   |8 2 5|
-!                              |6 9 3|
-    DOUBLE PRECISION, INTENT(IN)  :: C_2(9,9)
-    DOUBLE PRECISION, INTENT(OUT) :: C_4(3,3,3,3)
-    INTEGER i, j, k, l, index1, index2
-
-    do i=1,3
-      do j=1,3
-        do k=1,3
-          do l=1,3
-
-            index1=0 
-            index2=0
-
-            if ((i==1).and.(j==1)) then
-              index1=1;
-            elseif ((i==1).and.(j==2)) then
-              index1=4; 
-            elseif ((i==2).and.(j==1)) then
-              index1=8; 
-            elseif ((i==1).and.(j==3)) then
-              index1=7; 
-            elseif ((i==3).and.(j==1)) then 
-              index1=6;       
-            elseif ((i==2).and.(j==2)) then
-              index1=2;
-            elseif ((i==2).and.(j==3)) then 
-              index1=5;
-            elseif ((i==3).and.(j==2)) then 
-              index1=9;
-            elseif ((i==3).and.(j==3)) then
-              index1=3;
-            end if
-
-
-            if ((k==1).and.(l==1)) then
-              index2=1;
-            elseif ((k==1).and.(l==2)) then
-              index2=4; 
-            elseif ((k==2).and.(l==1)) then
-              index2=8; 
-            elseif ((k==1).and.(l==3)) then
-              index2=7; 
-            elseif ((k==3).and.(l==1)) then
-              index2=6;       
-            elseif ((k==2).and.(l==2)) then
-              index2=2;
-            elseif ((k==2).and.(l==3)) then
-              index2=5;
-            elseif ((k==3).and.(l==2)) then
-              index2=9;
-            elseif ((k==3).and.(l==3)) then
-              index2=3;
-            end if
-
-            C_4(i,j,k,l)=c_2(index1,index2);
-
-            end do
-          end do
-        end do
-      end do
- 
-END SUBROUTINE
-!==============================================================================    
-*/
-
-
 
 
 void
 NLStructuralElement :: computeGLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) 
 {
-    // B-matrix associated with the variation of the Green-Lagrange Strain E
-#if 0
-    FloatArray test;
-
-    
-    FloatMatrix *ut = NULL;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-    if ( u.giveSize() ) {
-        ut = new FloatMatrix( &u, 1);
-    } else {
-        ut = NULL;
-    }
-
-    FloatMatrix B2, A;
-    this->computeBmatrixAt(gp, answer);
-    for ( int j = 1; j <= answer.giveNumberOfRows(); j++ ) {
-        // loop over each component of strain vector
-        this->computeNLBMatrixAt(A, gp, j);
-        if ( ( A.isNotEmpty() ) && ( u.giveSize() ) ) {
-            B2.beProductOf(*ut,A);
-            test.beProductOf(A, u);
-            for ( int k = 1; k <= answer.giveNumberOfColumns(); k++ ) {
-                // add nonlinear contribution to each component
-                //answer.at(j, k) += B2.at(1, k); //mj
-                answer.at(j, k) += test.at(k); //mj
-            }
-        }
-    }
-#else
+    // Computes the B-matrix associated with the variation of the Green-Lagrange Strain E
+    // @todo generalize to handle special case like plane strain etc
 
     FloatArray vH;
-    this->computeBmatrixAt(gp, answer);
+    this->computeBmatrixAt(gp, answer); // symmetric (small strain) B-matrix
 
-    // compute H
-    this->computeDeformationGradientVector(vH, gp, tStep);
+    // Compute displacement gradient H
+    Material *mat = this->giveMaterial();
+    vH = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveTempFVector();
+    if ( !vH.giveSize() ) {
+        this->computeDeformationGradientVector(vH, gp, tStep); 
+    }
     vH.at(1) -= 1.0;
     vH.at(2) -= 1.0;
     vH.at(3) -= 1.0;
 
-    // compute A(H) - full 3d
+    /**
+     Compute A(H) - 0.5*A(H)*H gives the quadratic terms in the GL strain 
+     such that E = sym(H) + 0.5 * A(H)*H = ( B + 0.5 * A(H) * BH ) * a 
+
+     Full 3d: 
+        H = [ du/dx  dv/dy  dw/dz  dv/dz  du/dz  du/dy  dw/dy  dw/dx  dv/dx ]
+        du/dx     0      0      0      0      0      0    dw/dx  dv/dx    
+          0     dv/dy    0      0      0    du/dy  dw/dy    0      0
+          0       0    dw/dz  dv/dz  du/dz    0      0      0      0
+          0     dv/dz  dw/dy  dv/dy  du/dy  du/dz  dw/dz    0      0
+        du/dz     0    dw/dx  dv/dx  du/dx    0      0    dw/dz  dv/dz
+        du/dy   dv/dx    0      0      0    du/dx  dw/dx  dw/dy  dv/dy
+
+     Plane strain - can be condensed from the above, keep: row 1,2,6, col 1, 2, 6, 9
+        H = [ du/dx  dv/dy  du/dy  dv/dx ]
+        du/dx     0      0     dv/dx    
+          0     dv/dy  du/dy     0
+        du/dy   dv/dx  du/dx   dv/dy
+
+    */
     FloatMatrix A;
     A.resize(6,9);
 
@@ -1070,16 +884,12 @@ NLStructuralElement :: computeGLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, T
     A.at(6,6) = vH.at(1); A.at(6,7) = vH.at(8);
     A.at(6,8) = vH.at(7); A.at(6,9) = vH.at(2);
 
-    //A.times(0.5);
-
     // add A*BH to Blin
     FloatMatrix BF;
     this->computeBFmatrixAt(gp, BF);
 
     answer.addProductOf(A,BF);
 
-
-#endif
 
 }
 

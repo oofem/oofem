@@ -116,6 +116,22 @@ HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRe
     answer.at(5, 6) = answer.at(6, 5) = A * c13 * c12 + B / 2. * ( c11 * c23 + c12 * c13 );
 }
 
+void
+HyperElasticMaterial :: giveSecondPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+        const FloatArray &reducedvF, TimeStep *tStep)
+{
+    // this is the same as the deault implementation of this method
+    FloatMatrix F, E;
+    FloatArray vE;
+    F.beMatrixForm(reducedvF);
+    this->computeGreenLagrangeStrain(E, F);
+    vE.beReducedVectorFormOfStrain(E);
+    this->giveRealStressVector(answer, form, gp, vE, tStep);
+    
+    
+    HyperElasticMaterialStatus *status = static_cast< HyperElasticMaterialStatus * >( this->giveStatus(gp) );
+    status->letTempFVectorBe(reducedvF);
+}
 
 void
 HyperElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
@@ -154,6 +170,7 @@ HyperElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm
     // update gp
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(answer);
+
 }
 
 

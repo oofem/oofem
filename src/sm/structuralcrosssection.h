@@ -111,7 +111,7 @@ public:
      * @param reducedStrainIncrement Strain increment vector in reduced form.
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void giveFirstPKStresses(FloatArray & answer, MatResponseForm form,
+    virtual void giveSecondPKStresses(FloatArray & answer, MatResponseForm form,
                                   GaussPoint *gp, const FloatArray &reducedStrainIncrement, TimeStep *tStep);
 
     /**
