@@ -73,6 +73,10 @@ protected:
     FloatArray tempStressVector;
     /// Temporary strain vector in reduced form (to find balanced state)
     FloatArray tempStrainVector;
+    /// Equilibrated deformation gradient in reduced form
+    FloatArray FVector;
+    /// Temporary deformation gradient in reduced form (to find balanced state)
+    FloatArray tempFVector;
 
 public:
     /// Constructor. Creates new StructuralMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
@@ -92,18 +96,26 @@ public:
     const FloatArray &giveStrainVector() { return strainVector; }
     /// Returns the const pointer to receiver's stress vector.
     const FloatArray &giveStressVector() { return stressVector; }
+    /// Returns the const pointer to receiver's deformation gradient vector.
+    const FloatArray &giveFVector() { return FVector; }
     /// Returns the const pointer to receiver's temporary strain vector.
     const FloatArray &giveTempStrainVector() { return tempStrainVector; }
     /// Returns the const pointer to receiver's temporary stress vector.
     const FloatArray &giveTempStressVector() { return tempStressVector; }
+    /// Returns the const pointer to receiver's temporary deformation gradient vector.
+    const FloatArray &giveTempFVector() { return tempFVector; }
     /// Assigns strain vector to given vector v.
     void letStrainVectorBe(const FloatArray &v) { strainVector = v; }
     /// Assigns stressVector to given vector v.
     void letStressVectorBe(const FloatArray &v) { stressVector = v; }
+    /// Assigns FVector to given vector v.
+    void letFVectorBe(const FloatArray &v) { FVector = v; }
     /// Assigns tempStressVector to given vector v.
     void letTempStressVectorBe(const FloatArray &v) { tempStressVector = v; }
     /// Assigns tempStrainVector to given vector v
     void letTempStrainVectorBe(const FloatArray &v) { tempStrainVector = v; }
+    /// Assigns tempFVector to given vector v
+    void letTempFVectorBe(const FloatArray &v) { tempFVector = v; }
 
     virtual const char *giveClassName() const { return "StructuralMaterialStatus"; }
     virtual classType giveClassID() const { return StructuralMaterialStatusClass; }

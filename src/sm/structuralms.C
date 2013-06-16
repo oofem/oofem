@@ -36,22 +36,26 @@
 #include "structuralcrosssection.h"
 #include "structuralmaterial.h"
 #include "contextioerr.h"
-
+#include "nlstructuralelement.h"
 namespace oofem {
 StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    MaterialStatus(n, d, g), strainVector(), stressVector(),
-    tempStressVector(), tempStrainVector()
+    MaterialStatus(n, d, g), strainVector(), stressVector(), FVector(),
+    tempStressVector(), tempStrainVector(), tempFVector()
 {
     int rsize = static_cast< StructuralMaterial * >( gp->giveMaterial() )->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
-
     strainVector.resize(rsize);
-    strainVector.zero();
     stressVector.resize(rsize);
-    stressVector.zero();
 
     // reset temp vars.
     tempStressVector = stressVector;
     tempStrainVector = strainVector;
+
+    if ( static_cast< NLStructuralElement * > ( gp->giveElement() )->giveGeometryMode() == -1  ) { // if large def, store F
+        rsize = static_cast< StructuralMaterial * >( gp->giveMaterial() )->giveSizeOfReducedFVector( gp->giveMaterialMode() );
+        //FVector.resize(rsize);
+        tempFVector = FVector;
+    }
+
 }
 
 
@@ -94,6 +98,7 @@ void StructuralMaterialStatus :: updateYourself(TimeStep *tStep)
 
     stressVector = tempStressVector;
     strainVector = tempStrainVector;
+    FVector      = tempFVector;
 }
 
 
