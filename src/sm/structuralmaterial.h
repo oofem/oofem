@@ -92,7 +92,7 @@ class GaussPoint;
  *
  * Derived classes can of course extend those modes.
  * Generally speaking, there are following major tasks, covered by declared services.
- * - Computing real stress vector (tensor) at integration point for given strain increment and updating its
+ * - Computing real/second PK stress vector (tensor) at integration point for given strain increment and updating its
  *   state (still temporary state, after overall equilibrium is reached).
  * - Updating its state (final state), when equilibrium has been reached.
  * - Returning its material stiffness (and/or flexibility) matrices for given material mode.
@@ -167,11 +167,34 @@ public:
     virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep) = 0;
 
-    virtual void giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    /**
+     * Methods associated with large deformation analyses
+     */
+
+    /**
+     * Computes the second Piola-Kirchoff stress vector for given total deformation gradient and integration point.
+     * The total deformation gradient is computed directly from displacement field at the given time step.
+     * The stress independent parts (temperature, eigenstrains) are subtracted in constitutive
+     * driver.
+     * The service should use previously reached equilibrium history variables. Also
+     * it should update temporary history variables in status according to newly reached state.
+     * The temporary history variables are moved into equilibrium ones after global structure
+     * equilibrium has been reached by iteration process.
+     * @param answer Contains result.
+     * @param form Material response form.
+     * @param gp Integration point.
+     * @param reducedF Deformation gradient in in reduced form.
+     * @param tStep Current time step (most models are able to respond only when atTime is current time step).
+     */
+    virtual void giveSecondPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                       const FloatArray &reducedF, TimeStep *tStep);
 
 
     virtual void computeGreenLagrangeStrain(FloatMatrix &answer, FloatMatrix &F);
+
+
+
+
 
     /**
      * Returns a vector of coefficients of thermal dilatation in direction of each material principal (local) axis.
@@ -241,12 +264,6 @@ public:
     { _error("give3dMaterialStiffnessMatrix: not implemented "); }
 
 
-    virtual void give3dFMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
-    //{ _error("give3dMaterialStiffnessMatrix: not implemented "); }
-
     /**
      * This method returns index of reduced (if form == ReducedForm) or
      * full (if form = FullForm) stress/strain component in Full or Reduced
@@ -281,6 +298,14 @@ public:
      * @param mmode Material response mode.
      */
     virtual int giveSizeOfReducedStressStrainVector(MaterialMode mmode);
+
+    /**
+     * Returns the size of reduced stress/strain vector according to given mode.
+     * @param mmode Material response mode.
+     */
+    virtual int giveSizeOfReducedFVector(MaterialMode mmode);
+    
+
     /**
      * Returns the size of reduced principal stress/strain vector according to given mode.
      * @param mmode Material response mode.

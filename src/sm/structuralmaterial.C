@@ -60,61 +60,32 @@ StructuralMaterial :: hasMaterialModeCapability(MaterialMode mode)
 }
 
 
-void
-StructuralMaterial :: give3dFMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep)
-{
-    // If not overloaded use regular stiffness dSdE and convert to dP/dF
-    FloatMatrix dSdE;
-    this->give3dMaterialStiffnessMatrix(dSdE, form, mode, gp, tStep);
-    // this->dSdE_2_dPdF(dSdE, answer);
-    answer = dSdE;
-}
-
 
 void 
-StructuralMaterial :: giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+StructuralMaterial :: giveSecondPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
         const FloatArray &reducedvF, TimeStep *tStep) 
 {
-    // default implementation if not overloaded by material
-    // call standard implementation -> S and convert to P
+    // Default implementation used if this method is not overloaded by the particular material model.
+    // Compute Green-Lagrange strain and call standard method for small strains.
     
-    FloatMatrix F, E, S, P;
+    FloatMatrix F, E;
+    FloatArray vE;
     F.beMatrixForm(reducedvF);
     this->computeGreenLagrangeStrain(E, F);
-
-    FloatArray vS, reducedE;
-    reducedE.beReducedVectorForm(E);
-    giveRealStressVector(vS, form, gp, reducedE, tStep);
-
-    S.beMatrixForm(vS);
-    // Compute P = F*S
-    P.beProductOf(F, S);
-    answer.beFullVectorForm(P); //@todo need to convert to the right size
-
+    vE.beReducedVectorFormOfStrain(E);
+    this->giveRealStressVector(answer, form, gp, vE, tStep);
 };
 
 void 
 StructuralMaterial :: computeGreenLagrangeStrain(FloatMatrix &answer, FloatMatrix &F)
 {
-    // Computes the Green-Lagrange strain tensor: E=0.5(C-I)
-    
-    // 
-
-    answer.beTProductOf(F, F);    // C-Right Caucy-Green deformation tensor
-    answer.at(1, 1) += -1;
-    answer.at(2, 2) += -1;
-    answer.at(3, 3) += -1;
+    // Computes the Green-Lagrange strain tensor: E = 0.5*( C - I )
+    answer.beTProductOf(F, F);    // C - Right Caucy-Green deformation tensor
+    answer.at(1, 1) -= 1.0;
+    answer.at(2, 2) -= 1.0;
+    answer.at(3, 3) -= 1.0;
     answer.times(0.5);
-
-    //FloatArray temp;
-    //temp.beReducedVectorForm(E);       // Convert to Voight form Todo: add specific methods for strain/stress
-    //answer = temp;
-    //answer.at(4) = temp.at(4) * 2.0;   // correction of shear strains
-    //answer.at(5) = temp.at(5) * 2.0;
-    //answer.at(6) = temp.at(6) * 2.0;
+    
 }
 
 void
@@ -349,6 +320,24 @@ StructuralMaterial :: giveSizeOfReducedStressStrainVector(MaterialMode mode)
     case _3dMatGrad:
         return 7;
 
+    default:
+        OOFEM_ERROR2( "StructuralMaterial :: giveSizeOfReducedStressStrainVector : unknown mode (%s)", __MaterialModeToString(mode) );
+    }
+
+    return 0;
+}
+
+
+int
+StructuralMaterial :: giveSizeOfReducedFVector(MaterialMode mode)
+//
+// returns the size of reduced stress-strain vector
+// according to mode given by gp.
+// @todo add support for other modes
+{
+    switch ( mode ) {
+    case _3dMat:
+        return 9;
     default:
         OOFEM_ERROR2( "StructuralMaterial :: giveSizeOfReducedStressStrainVector : unknown mode (%s)", __MaterialModeToString(mode) );
     }
@@ -2547,7 +2536,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
     } else if ( type == IST_Temperature ) {
         /* add external source, if provided, such as staggered analysis */
         FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-	FM_FieldPtr tf;
+    FM_FieldPtr tf;
         int err;
         if ( ( tf = fm->giveField(FT_Temperature) ) ) {
             // temperature field registered
@@ -2589,6 +2578,10 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
             answer = val;
         }
 
+        return 1;
+
+    } else if ( ( type == IST_DeformationGradientTensor ) ) {
+        answer = status->giveFVector();
         return 1;
     } else {
         return Material :: giveIPValue(answer, aGaussPoint, type, atTime);
