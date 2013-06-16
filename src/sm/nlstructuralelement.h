@@ -123,7 +123,7 @@ public:
     virtual void computeStiffnessMatrix(FloatMatrix &answer,
                                         MatResponseMode rMode, TimeStep *tStep);
 
-    virtual void SDcomputeStiffnessMatrix(FloatMatrix &answer,
+    virtual void OLDcomputeStiffnessMatrix(FloatMatrix &answer,
                                         MatResponseMode rMode, TimeStep *tStep);
 
     /**
@@ -157,7 +157,7 @@ public:
      * @param tStep Time step
      * @param useUpdatedGpRecord If equal to zero, the stresses in integration points are computed (slow but safe).
      */
-    virtual void SDgiveInternalForcesVector(FloatArray &answer,
+    virtual void OLDgiveInternalForcesVector(FloatArray &answer,
                                           TimeStep *tStep, int useUpdatedGpRecord = 0);
 
 
@@ -222,11 +222,12 @@ protected:
         return;
     }
 
+    void dyadicProductBelow(FloatMatrix &answer, FloatArray &A, FloatArray &B);
     void computeStiffnessProduct(FloatMatrix &answer, FloatArray &vF, FloatArray &vS, FloatMatrix &C);
     void computeProductTOfVoigt(FloatArray &answer, FloatArray &A, FloatArray &B);
     int giveVoigtIndex(int ind1, int ind2);
 
-    void computeGLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, FloatArray &u, TimeStep *tStep); 
+    void computeGLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep); 
 
     /**
      * Computes a matrix which, multiplied by the column matrix of nodal displacements,
