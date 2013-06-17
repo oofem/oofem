@@ -128,8 +128,7 @@ void
 NLStructuralElement :: computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
 {
     // Computes the deformation gradient stored as a vector (11, 21, 31, 12, 22, 32, 13, 23, 33) 
-    // @todo rearange BF matrix to the order (11, 22, 33, 23, 13, 12, 32, 31, 21)
-    FloatMatrix b;
+    FloatMatrix B;
     FloatArray u;
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u); // solution vector
@@ -138,8 +137,8 @@ NLStructuralElement :: computeDeformationGradientVector(FloatArray &answer, Gaus
         u.subtract(*initialDisplacements);
     }
 
-    this->computeBFmatrixAt(gp, b);
-    answer.beProductOf(b, u);   // displacement gradient H 
+    this->computeBHmatrixAt(gp, B);
+    answer.beProductOf(B, u);   // displacement gradient H 
        
     // F = H + I 
     MaterialMode matMode = gp->giveMaterialMode();
@@ -172,7 +171,7 @@ NLStructuralElement :: computeGreenLagrangeStrainVector(FloatArray &answer, Floa
     E.times(0.5);
 
     FloatArray temp;
-    answer.beReducedVectorFormOfStrain(E);       // Convert to Voight form Todo: add specific methods for strain/stress
+    answer.beReducedVectorFormOfStrain(E);   
 }
 
 
@@ -360,7 +359,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
             if ( useUpdatedGpRecord == 1 ) {
                 vS = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
             } else {
-                this->computeSecondPKStressVector(vS, gp, tStep); // currently gives S
+                this->computeSecondPKStressVector(vS, gp, tStep); 
             }
 
             // Compute stresses first in order to store the deformation gradient in the MaterialStatus
@@ -701,9 +700,10 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                 this->computeBmatrixAt(gp, B);            
             } else if ( nlGeometry == -1 ) {
                 this->computeGLBMatrixAt(B, gp, tStep); 
-            }
+            } 
 
             this->computeConstitutiveMatrixAt(D, rMode, gp, tStep); // dSdE
+
             double dV = this->computeVolumeAround(gp);
             DB.beProductOf(D, B);
             if ( matStiffSymmFlag ) {
@@ -779,7 +779,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
 
-            this->computeBFmatrixAt(gp, BH);
+            this->computeBHmatrixAt(gp, BH);
             Material *mat = this->giveMaterial(); // shouldn't ask cross section?
             
             vS = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveTempStressVector();
@@ -886,12 +886,12 @@ NLStructuralElement :: computeGLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, T
 
     // add A*BH to Blin
     FloatMatrix BF;
-    this->computeBFmatrixAt(gp, BF);
-
+    this->computeBHmatrixAt(gp, BF);
     answer.addProductOf(A,BF);
 
 
 }
+
 
 
 //@todo rewrite for dPdF

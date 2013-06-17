@@ -200,6 +200,7 @@ public:
     void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
     void computeGreenLagrangeStrainVector(FloatArray &answer, FloatArray &F, MaterialMode matMode);
 
+    //void trans_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &dSdE, const FloatArray &F, const FloatArray &S );
 
     // data management
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -236,7 +237,12 @@ protected:
      * @param answer BF matrix at this point.
      */ //@todo rename to computeBHmatrix as it is more appropriate /JB
     virtual void computeBFmatrixAt(GaussPoint *gp, FloatMatrix &answer) {
-        OOFEM_ERROR("NLStructuralElement::computeBFMatrixAt : method not implemented for this element");
+        OOFEM_ERROR("NLStructuralElement::computeBFmatrixAt : method not implemented for this element");
+        return;
+    }
+
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer) {
+        OOFEM_ERROR("NLStructuralElement::computeBHmatrixAt : method not implemented for this element");
         return;
     }
     friend class GradDpElement;
