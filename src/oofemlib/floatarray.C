@@ -1067,7 +1067,7 @@ void FloatArray :: beFullVectorForm(const FloatMatrix &aMatrix)
 {
     // Revrites the matrix on vector form, order: 11, 22, 33, 23, 13, 12, 32, 31, 21
 #  ifdef DEBUG
-    if (  aMatrix.giveNumberOfColumns() || aMatrix.giveNumberOfColumns() !=3) {
+    if (  aMatrix.giveNumberOfColumns() !=3 || aMatrix.giveNumberOfColumns() !=3) {
         OOFEM_ERROR("FloatArray :: beFullVectorForm : matrix dimension is not 3x3");
     }
 
