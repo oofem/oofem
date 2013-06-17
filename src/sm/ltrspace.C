@@ -230,6 +230,47 @@ LTRSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     }
 }
 
+
+void
+LTRSpace :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+// Returns the [9x24] displacement gradient matrix {BH} of the receiver,
+// evaluated at aGaussPoint.
+// BH matrix  -  9 rows : du/dx, dv/dy, dw/dz, dv/dz, du/dz, du/dy, dw/dy, dw/dx, dv/dx
+//@todo unchecked
+{
+    FloatMatrix dnx;
+
+    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+
+    answer.resize(9, 12);
+    answer.zero();
+   
+    for ( int i = 1; i <= 4; i++ ) {
+        answer.at(1, 3 * i - 2) = dnx.at(i, 1);     // du/dx
+        answer.at(2, 3 * i - 1) = dnx.at(i, 2);     // dv/dy
+        answer.at(3, 3 * i - 0) = dnx.at(i, 3);     // dw/dz
+        answer.at(4, 3 * i - 1) = dnx.at(i, 3);     // dv/dz 
+        answer.at(7, 3 * i - 0) = dnx.at(i, 2);     // dw/dy
+        answer.at(5, 3 * i - 2) = dnx.at(i, 3);     // du/dz 
+        answer.at(8, 3 * i - 0) = dnx.at(i, 1);     // dw/dx
+        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy 
+        answer.at(9, 3 * i - 1) = dnx.at(i, 1);     // dv/dx
+    }
+
+#if 1
+    // test if sym(BH) = H*BH == Bsym
+    FloatMatrix H, Bsym, Btest;
+    H.resize(6,9);
+    H.at(1,1) = H.at(2,2) = H.at(3,3) = H.at(4,4) = H.at(4,7) = H.at(5,5) = H.at(5,8) = H.at(6,6) = H.at(6,9) = 1.0;
+    Btest.beProductOf(H,answer);
+    computeBmatrixAt(aGaussPoint, Bsym);
+    Btest.printYourself();
+    Bsym.printYourself();
+#endif
+
+}
+
+
 double LTRSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {

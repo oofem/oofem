@@ -121,7 +121,6 @@ LSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // evaluated at aGaussPoint.
 // BF matrix  -  9 rows : du/dx, dv/dx, dw/dx, du/dy, dv/dy, dw/dy, du/dz, dv/dz, dw/dz
 {
-#if 0
     FloatMatrix dnx;
 
     this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
@@ -136,38 +135,44 @@ LSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
                 answer.at(3 * i, 3 * j) = dnx.at(j, i);     // derivative of Nj wrt Xi
         }
     }
-#else
-    // temporary - test with new ordering of F 
-    FloatMatrix dnx, temp;
+
+}
+
+void
+LSpace :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+// Returns the [9x24] displacement gradient matrix {BH} of the receiver,
+// evaluated at aGaussPoint.
+// BH matrix  -  9 rows : du/dx, dv/dy, dw/dz, dv/dz, du/dz, du/dy, dw/dy, dw/dx, dv/dx
+{
+    FloatMatrix dnx;
 
     this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
-    temp.resize(9, 24);
-    temp.zero();
+    answer.resize(9, 24);
+    answer.zero();
+   
+    for ( int i = 1; i <= 8; i++ ) {
+        answer.at(1, 3 * i - 2) = dnx.at(i, 1);     // du/dx
+        answer.at(2, 3 * i - 1) = dnx.at(i, 2);     // dv/dy
+        answer.at(3, 3 * i - 0) = dnx.at(i, 3);     // dw/dz
+        answer.at(4, 3 * i - 1) = dnx.at(i, 3);     // dv/dz 
+        answer.at(7, 3 * i - 0) = dnx.at(i, 2);     // dw/dy
+        answer.at(5, 3 * i - 2) = dnx.at(i, 3);     // du/dz 
+        answer.at(8, 3 * i - 0) = dnx.at(i, 1);     // dw/dx
+        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy 
+        answer.at(9, 3 * i - 1) = dnx.at(i, 1);     // dv/dx
 
-    for ( int i = 1; i <= 3; i++ ) { // 3 spatial dimensions
-        for ( int j = 1; j <= 8; j++ ) { // 8 nodes
-            temp.at(3 * i - 2, 3 * j - 2) =
-                temp.at(3 * i - 1, 3 * j - 1) =
-                temp.at(3 * i, 3 * j) = dnx.at(j, i);     // derivative of Nj wrt Xi
-        }
     }
 
-    // reorder rows     11 22 33 23 13 12 32 31 21
-    //                   1  2  3  4  5  6  7  8  9
-    IntArray orderR, orderC;
-    orderR.setValues(9,  1, 9, 8, 6, 2, 7, 5, 4, 3);
-
-    orderC.resize(24);
-    for ( int i = 1; i <= 24; i++ ) { // 3 spatial dimensions
-        orderC.at(i) = i;  
-    }
-    answer.resize(9,24);
-    answer.assemble(temp, orderR, orderC);
-
-
-
-
+#if 0
+    // test if sym(BH) = H*BH == Bsym
+    FloatMatrix H, Bsym, Btest;
+    H.resize(6,9);
+    H.at(1,1) = H.at(2,2) = H.at(3,3) = H.at(4,4) = H.at(4,7) = H.at(5,5) = H.at(5,8) = H.at(6,6) = H.at(6,9) = 1.0;
+    Btest.beProductOf(H,answer);
+    computeBmatrixAt(aGaussPoint, Bsym);
+    Btest.printYourself();
+    Bsym.printYourself();
 #endif
 
 }

@@ -168,6 +168,7 @@ protected:
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i);
     virtual void computeBFmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
 
     /**
