@@ -194,7 +194,10 @@ public:
      * @param gp Integration point.
      * @param tStep Time step.
      */
+    // should be small strain only
     void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+
+    void OLDcomputeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
 
     void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
@@ -227,7 +230,7 @@ protected:
     int giveVoigtIndexSym(int ind1, int ind2);
 
     void computeGLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep); 
-
+    int checkConsistency();
     /**
      * Computes a matrix which, multiplied by the column matrix of nodal displacements,
      * gives the displacement gradient stored by columns.

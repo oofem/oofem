@@ -74,6 +74,9 @@ StructuralMaterial :: giveSecondPKStressVector(FloatArray &answer, MatResponseFo
     this->computeGreenLagrangeStrain(E, F);
     vE.beReducedVectorFormOfStrain(E);
     this->giveRealStressVector(answer, form, gp, vE, tStep);
+
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    status->letTempFVectorBe(reducedvF);
 };
 
 void 
