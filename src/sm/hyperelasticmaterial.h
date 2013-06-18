@@ -88,10 +88,6 @@ public:
     
     virtual void giveSecondPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
         const FloatArray &reducedvF, TimeStep *tStep);
-    
-
-    virtual void giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-        const FloatArray &reducedF, TimeStep *tStep);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

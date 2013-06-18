@@ -121,6 +121,7 @@ LSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // evaluated at aGaussPoint.
 // BF matrix  -  9 rows : du/dx, dv/dx, dw/dx, du/dy, dv/dy, dw/dy, du/dz, dv/dz, dw/dz
 {
+    OOFEM_CLASS_WARNING("LSpace :: computeBFmatrixAt - deprecated code should not be called");
     FloatMatrix dnx;
 
     this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );

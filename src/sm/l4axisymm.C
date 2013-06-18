@@ -288,6 +288,8 @@ L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
         if ( nlGeometry ) {
             for ( int i = 1; i <= 6; i++ ) {
                 // nonlin part of strain vector
+                OOFEM_WARNING("L4Axisymm :: computeStrainVector - computeNLBMatrixAt is not implemented");
+
                 this->computeNLBMatrixAt(A, gp, i);
                 if ( A.isNotEmpty() ) {
                     help.beProductOf(A, u);

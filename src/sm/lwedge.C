@@ -198,7 +198,7 @@ LWedge :: giveMaterialMode()
 
 void
 LWedge :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
-// Returns the [6x60] strain-displacement matrix {B} of the receiver, eva-
+// Returns the [6 x 18] strain-displacement matrix {B} of the receiver, eva-
 // luated at aGaussPoint.
 // B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
 {
@@ -229,6 +229,7 @@ LWedge :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 void
 LWedge :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 {
+    OOFEM_CLASS_WARNING("LWedge :: computeBFmatrixAt - deprecated code should not be called");
     FloatMatrix dnx;
 
     this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
@@ -242,6 +243,30 @@ LWedge :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
                 answer.at(3 * i - 1, 3 * j - 1) =
                 answer.at(3 * i, 3 * j) = dnx.at(j, i); // derivative of Nj wrt Xi
         }
+    }
+}
+
+
+void
+LWedge :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+{
+    FloatMatrix dnx;
+
+    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+
+    answer.resize(6, 18);
+    answer.zero();
+
+    for ( int i = 1; i <= 6; i++ ) {
+        answer.at(1, 3 * i - 2) = dnx.at(i, 1);     // du/dx
+        answer.at(2, 3 * i - 1) = dnx.at(i, 2);     // dv/dy
+        answer.at(3, 3 * i - 0) = dnx.at(i, 3);     // dw/dz
+        answer.at(4, 3 * i - 1) = dnx.at(i, 3);     // dv/dz 
+        answer.at(7, 3 * i - 0) = dnx.at(i, 2);     // dw/dy
+        answer.at(5, 3 * i - 2) = dnx.at(i, 3);     // du/dz 
+        answer.at(8, 3 * i - 0) = dnx.at(i, 1);     // dw/dx
+        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy 
+        answer.at(9, 3 * i - 1) = dnx.at(i, 1);     // dv/dx
     }
 }
 

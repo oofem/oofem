@@ -188,6 +188,26 @@ TrPlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
 
 
 void
+TrPlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+// Returns the [3x6] displacement gradient matrix {BH} of the receiver,
+// evaluated at aGaussPoint.
+// @todo not checked if correct
+{
+    FloatMatrix dnx;
+    this->interp.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+
+    answer.resize(3, 6);
+    answer.zero();
+
+    for ( int i = 1; i <= 3; i++ ) {
+        answer.at(1, 2 * i - 2) = dnx.at(i, 1);     // du/dx -1
+        answer.at(2, 2 * i - 1) = dnx.at(i, 2);     // dv/dy -2
+        answer.at(3, 2 * i - 2) = dnx.at(i, 2);     // du/dy -6
+        answer.at(4, 2 * i - 1) = dnx.at(i, 1);     // dv/dx -9
+    }
+}
+
+void
 TrPlaneStress2d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
 //
 // Returns nonlinear part of geometrical equations of the receiver at gp.

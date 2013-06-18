@@ -110,6 +110,42 @@ PlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, 
     }
 }
 
+
+void
+PlaneStress2d :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+//
+// Returns the [4x8] displacement gradient matrix {BH} of the receiver,
+// evaluated at aGaussPoint.
+// @todo not checked if correct
+{
+
+    FloatMatrix dnx;
+#ifdef  PlaneStress2d_reducedShearIntegration
+    FloatArray coord;
+#endif
+
+    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+
+    answer.resize(4, 8);
+    answer.zero();
+
+    for ( int i = 1; i <= 4; i++ ) {
+        answer.at(1, 2 * i - 2) = dnx.at(i, 1);     // du/dx -1
+        answer.at(2, 2 * i - 1) = dnx.at(i, 2);     // dv/dy -2
+    }
+
+#ifdef  PlaneStress2d_reducedShearIntegration
+    coord.resize(2);
+    coord.zero();
+    this->interpolation.evaldNdx( dnx, coord, FEIElementGeometryWrapper(this) );
+#endif
+
+    for ( int i = 1; i <= 4; i++ ) {
+        answer.at(3, 2 * i - 2) = dnx.at(i, 2);     // du/dy -6
+        answer.at(4, 2 * i - 1) = dnx.at(i, 1);     // dv/dx -9
+    }
+}
+
 void
 PlaneStress2d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i)
 //

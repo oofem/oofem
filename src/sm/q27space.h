@@ -98,6 +98,7 @@ protected:
     virtual void computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     virtual void computeBFmatrixAt(GaussPoint *, FloatMatrix &);
+    virtual void computeBHmatrixAt(GaussPoint *, FloatMatrix &);
 
     virtual int giveApproxOrder() { return 2; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 27; }

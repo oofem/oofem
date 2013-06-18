@@ -70,6 +70,10 @@ Truss2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li
 // Returns the linear part of the B matrix
 //
 {
+    // eps = B*a = [-cos -sin cos sin]/l *[u1 v1 u2 v2]^t
+    // cos = (x2 - x1) / l 
+    // sin = (z2 - z1) / l
+
     double l, x1, x2, z1, z2;
     //determine in which plane the truss is defined
     int c1, c2;
@@ -89,6 +93,14 @@ Truss2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li
 
     l = this->giveLength();
     answer.times( 1.0 / l / l );
+}
+
+
+void
+Truss2d :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+{
+    // Will be the same as the regular B-matrix
+    this->computeBmatrixAt(aGaussPoint, answer);
 }
 
 void

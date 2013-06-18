@@ -231,8 +231,34 @@ QWedge :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 
 
 void
+QWedge :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+{
+    FloatMatrix dnx;
+    
+    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+
+    answer.resize(9, 45);
+    answer.zero();
+
+    for ( int i = 1; i <= dnx.giveNumberOfRows(); i++ ) {
+        answer.at(1, 3 * i - 2) = dnx.at(i, 1);     // du/dx
+        answer.at(2, 3 * i - 1) = dnx.at(i, 2);     // dv/dy
+        answer.at(3, 3 * i - 0) = dnx.at(i, 3);     // dw/dz
+        answer.at(4, 3 * i - 1) = dnx.at(i, 3);     // dv/dz 
+        answer.at(7, 3 * i - 0) = dnx.at(i, 2);     // dw/dy
+        answer.at(5, 3 * i - 2) = dnx.at(i, 3);     // du/dz 
+        answer.at(8, 3 * i - 0) = dnx.at(i, 1);     // dw/dx
+        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy 
+        answer.at(9, 3 * i - 1) = dnx.at(i, 1);     // dv/dx
+    }
+}
+
+
+void
 QWedge :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 {
+    OOFEM_CLASS_WARNING("QWedge :: computeBFmatrixAt - deprecated code should not be called");
+
     FloatMatrix dnx;
     
     this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));

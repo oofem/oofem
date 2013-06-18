@@ -174,23 +174,6 @@ HyperElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm
 }
 
 
-void
-HyperElasticMaterial :: giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-        const FloatArray &reducedF, TimeStep *tStep) 
-{
-    // Compute P from S, since the material model is formulated in terms of S
-
-    // FloatArray vS, vE, vF;
-    // FloatMatrix S, E, F, P; 
-    // F.beMatrixForm(vF, form);
-    // computeGreenLagrangeStrain(E,F);
-    // vE.beVectorForm(E);
-    // giveRealStressVector(vS, form, gp, vE, tStep);
-    // S.beMatrixForm(vS);
-    // P.beProductOf(F,S);
-    // answer.beVectorForm(P);
-}
-
 MaterialStatus *
 HyperElasticMaterial :: CreateStatus(GaussPoint *gp) const
 {

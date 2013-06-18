@@ -142,7 +142,7 @@ protected:
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i);
     void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-
+    void computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer);
     virtual void computeGaussPoints();
 
     int giveApproxOrder() { return 1; }
