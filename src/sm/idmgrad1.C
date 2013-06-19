@@ -121,35 +121,7 @@ IDGMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 // Returns characteristic material stiffness matrix of the receiver
 //
 {
-    MaterialMode mMode = gp->giveMaterialMode();
-    switch ( mMode ) {
-    case _1dMatGrad:
-        if ( form == PDGrad_uu ) {
-            give1dStressStiffMtrx(answer, form, rMode, gp, atTime);
-        } else if ( form == PDGrad_ku ) {
-            give1dKappaMatrix(answer, form, rMode, gp, atTime);
-        } else if ( form == PDGrad_uk ) {
-            give1dGprime(answer, form, rMode, gp, atTime);
-        } else if ( form == PDGrad_kk ) {
-            giveInternalLength(answer, form, rMode, gp, atTime);
-        }
-    case _PlaneStressGrad:
-        if ( form == PDGrad_uu ) {
-            givePlaneStressStiffMtrx(answer, form, rMode, gp, atTime);
-        } else if ( form == PDGrad_ku ) {
-            givePlaneStressKappaMatrix(answer, form, rMode, gp, atTime);
-        } else if ( form == PDGrad_uk ) {
-            givePlaneStressGprime(answer, form, rMode, gp, atTime);
-        } else if ( form == PDGrad_kk ) {
-            giveInternalLength(answer, form, rMode, gp, atTime);
-        } else if ( form == PDGrad_LD ) {
-            giveInternalLengthDerivative(answer, form, rMode, gp, atTime);
-        }
-        break;
-
-    default:
-        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
-    }
+    _error( "giveCharacteristicMatrix : Shouldn't be called.");
 }
 
 
@@ -816,6 +788,83 @@ IDGMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *
     }
 
     return CIO_OK;
+}
+
+void
+IDGMaterial :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) 
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    case _1dMatGrad:
+        give1dStressStiffMtrx(answer, form, mode, gp, tStep);
+        break;
+    case _PlaneStressGrad:
+        givePlaneStressStiffMtrx(answer, form, mode, gp, tStep);
+        break;
+    default:
+        OOFEM_ERROR2("IDGMaterial :: givePDGradMatrix_uu - mMode = %d not supported\n", mMode);
+    }
+}
+
+void
+IDGMaterial :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint* gp, TimeStep* tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    case _1dMatGrad:
+        give1dKappaMatrix(answer, form, mode, gp, tStep);
+        break;
+    case _PlaneStressGrad:
+        givePlaneStressKappaMatrix(answer, form, mode, gp, tStep);
+        break;
+    default:
+        OOFEM_ERROR2("IDGMaterial :: givePDGradMatrix_ku - mMode = %d not supported\n", mMode);
+    }
+}
+
+void
+IDGMaterial :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    case _1dMatGrad:
+        give1dGprime(answer, form, mode, gp, tStep);
+        break;
+    case _PlaneStressGrad:
+        givePlaneStressGprime(answer, form, mode, gp, tStep);
+        break;
+    default:
+        OOFEM_ERROR2("IDGMaterial :: givePDGradMatrix_uk - mMode = %d not supported\n", mMode);
+    }
+}
+
+void
+IDGMaterial :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    case _1dMatGrad:
+        giveInternalLength(answer, form, mode, gp, tStep);
+        break;
+    case _PlaneStressGrad:
+        giveInternalLength(answer, form, mode, gp, tStep);
+        break;
+    default:
+        OOFEM_ERROR2("IDGMaterial :: givePDGradMatrix_kk - mMode = %d not supported\n", mMode);
+    }
+}
+
+void
+IDGMaterial :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    case _PlaneStressGrad:
+        giveInternalLengthDerivative(answer, form, mode, gp, tStep);
+        break;
+    default:
+        OOFEM_ERROR2("IDGMaterial :: giveDPGradMatrix_LD - mMode = %d not supported\n", mMode);
+    }
 }
 
 }     // end namespace oofem

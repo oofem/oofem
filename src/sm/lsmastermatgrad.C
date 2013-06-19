@@ -84,42 +84,87 @@ LsMasterMatGrad :: giveCharacteristicMatrix(FloatMatrix &answer,
 // Returns characteristic material stiffness matrix of the receiver
 //
 {
+    _error( "giveCharacteristicMatrix : shouldn't be called");
+}
+
+
+void
+LsMasterMatGrad :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) 
+{
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _3dMatGrad_F:
     case _3dMatGrad:
-        if ( form == PDGrad_uu ) {
-            give3dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
-        } else if ( form == PDGrad_ku ) {
-            give3dKappaMatrix(answer, form, rMode, gp, atTime);
-        } else if ( form == PDGrad_uk ) {
-            give3dGprime(answer, form, rMode, gp, atTime);
-        } else if ( form == PDGrad_kk ) {
-            giveInternalLength(answer, form, rMode, gp, atTime);
-        }
+        give3dMaterialStiffnessMatrix(answer, form, mode, gp, tStep);
         break;
-
     default:
         _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
-        return;
     }
 }
+
+void
+LsMasterMatGrad :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint* gp, TimeStep* tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    case _3dMatGrad_F:
+    case _3dMatGrad:
+        give3dKappaMatrix(answer, form, mode, gp, tStep);
+        break;
+    default:
+        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+    }
+}
+
+void
+LsMasterMatGrad :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    case _3dMatGrad_F:
+    case _3dMatGrad:
+        give3dGprime(answer, form, mode, gp, tStep);
+        break;
+    default:
+        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+    }
+}
+
+void
+LsMasterMatGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    case _3dMatGrad_F:
+    case _3dMatGrad:
+        giveInternalLength(answer, form, mode, gp, tStep);
+        break;
+    default:
+        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+    }
+}
+
+void
+LsMasterMatGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    default:
+        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+    }
+}
+
 
 void
 LsMasterMatGrad :: giveInternalLength(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     this->initTempStatus(gp);
-    Material *mat;
-    StructuralMaterial *sMat;
-    mat = domain->giveMaterial(slaveMat);
-    sMat = dynamic_cast< StructuralMaterial * >(mat);
-    if ( sMat == NULL ) {
+    GradDpMaterialExtensionInterface *graddpmat = dynamic_cast< GradDpMaterialExtensionInterface * >(domain->giveMaterial(slaveMat)->giveInterface(GradDpMaterialExtensionInterfaceType));
+    if ( graddpmat == NULL ) {
         _warning2("checkConsistency: material %d has no Structural support", slaveMat);
         return;
     }
-
-    sMat-> giveCharacteristicMatrix(answer,PDGrad_kk,mode, gp, atTime);
-
+    graddpmat->givePDGradMatrix_kk(answer, form, mode, gp, atTime);
 }
 
 void
@@ -127,24 +172,20 @@ LsMasterMatGrad :: give3dGprime(FloatMatrix &answer, MatResponseForm form, MatRe
 {
     LsMasterMatGradStatus *status = static_cast< LsMasterMatGradStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
-    Material *mat;
-    StructuralMaterial *sMat;
     FloatMatrix P;
     FloatMatrix gPrime;
     MaterialMode mMode = gp->giveMaterialMode();
-    mat = domain->giveMaterial(slaveMat);
-    sMat = dynamic_cast< StructuralMaterial * >(mat);
-    if ( sMat == NULL ) {
+    GradDpMaterialExtensionInterface *graddpmat = dynamic_cast< GradDpMaterialExtensionInterface * >(domain->giveMaterial(slaveMat)->giveInterface(GradDpMaterialExtensionInterfaceType));
+    if ( graddpmat == NULL ) {
         _warning2("checkConsistency: material %d has no Structural support", slaveMat);
         return;
     }
 
     if ( mMode == _3dMatGrad ) {
-        sMat-> giveCharacteristicMatrix(answer,PDGrad_uk,mode, gp, atTime);
+        graddpmat->givePDGradMatrix_uk(answer, form, mode, gp, atTime);
     }
     else {
-        // sMat-> giveCharacteristicMatrix(answer,PDGrad_uk,mode, gp, atTime);
-        sMat-> giveCharacteristicMatrix(gPrime,PDGrad_uk,mode, gp, atTime);
+        graddpmat->givePDGradMatrix_uk(gPrime, form, mode, gp, atTime);
         gPrime.at(4,1) =  2.* gPrime.at(4,1); 
         gPrime.at(5,1) =  2.* gPrime.at(5,1); 
         gPrime.at(6,1) =  2.* gPrime.at(6,1); 
@@ -160,21 +201,17 @@ LsMasterMatGrad :: give3dKappaMatrix(FloatMatrix &answer, MatResponseForm form, 
 {
     LsMasterMatGradStatus *status = static_cast< LsMasterMatGradStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
-    Material *mat;
-    StructuralMaterial *sMat;
     FloatMatrix kappaMatrix,kappaTMatrix,P;
-    mat = domain->giveMaterial(slaveMat);
-    sMat = dynamic_cast< StructuralMaterial * >(mat);
-    if ( sMat == NULL ) {
+    GradDpMaterialExtensionInterface *graddpmat = dynamic_cast< GradDpMaterialExtensionInterface * >(domain->giveMaterial(slaveMat)->giveInterface(GradDpMaterialExtensionInterfaceType));
+    if ( graddpmat == NULL ) {
         _warning2("checkConsistency: material %d has no Structural support", slaveMat);
         return;
     }
     MaterialMode mMode = gp->giveMaterialMode();
     if ( mMode == _3dMatGrad ) {
-        sMat-> giveCharacteristicMatrix(answer,PDGrad_ku,mode, gp, atTime);
+        graddpmat->givePDGradMatrix_ku(answer, form, mode, gp, atTime);
     } else {
-        //  sMat-> giveCharacteristicMatrix(answer,PDGrad_ku,mode, gp, atTime);
-        sMat-> giveCharacteristicMatrix(kappaMatrix,PDGrad_ku,mode, gp, atTime);
+        graddpmat->givePDGradMatrix_ku(kappaMatrix, form, mode, gp, atTime);
         status->givePmatrix(P);
         kappaMatrix.at(1,4) = 2.*kappaMatrix.at(1,4);
         kappaMatrix.at(1,5) = 2.*kappaMatrix.at(1,5);

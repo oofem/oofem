@@ -36,6 +36,7 @@
 #define idmgrad1_h
 
 #include "idm1.h"
+#include "graddpmaterialextensioninterface.h"
 
 #define _IFT_IDGMaterial_Name "idmgrad1"
 
@@ -44,7 +45,7 @@ namespace oofem {
 /**
  * Gradient-enhanced Isotropic Damage model for concrete in tension,
  */
-class IDGMaterial : public IsotropicDamageMaterial1
+class IDGMaterial : public IsotropicDamageMaterial1, GradDpMaterialExtensionInterface
 {
 protected:
     /// Length scale parameter
@@ -70,8 +71,15 @@ public:
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime);
     virtual IRResultType initializeFrom(InputRecord *ir);
 
+    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) return static_cast< GradDpMaterialExtensionInterface* >(this); else return NULL; }
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
+    virtual void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePDGradMatrix_ku(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePDGradMatrix_uk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePDGradMatrix_kk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    
     void giveCharacteristicMatrix(FloatMatrix &answer,  MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
     virtual void give1dStressStiffMtrx(FloatMatrix & answer,  MatResponseForm, MatResponseMode, GaussPoint * gp,  TimeStep * tStep);
     void give1dKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
