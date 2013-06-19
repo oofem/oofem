@@ -127,11 +127,10 @@ PlaneStress2d :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(4, 8);
-    answer.zero();
 
     for ( int i = 1; i <= 4; i++ ) {
-        answer.at(1, 2 * i - 2) = dnx.at(i, 1);     // du/dx -1
-        answer.at(2, 2 * i - 1) = dnx.at(i, 2);     // dv/dy -2
+        answer.at(1, 2 * i - 1) = dnx.at(i, 1);     // du/dx -1
+        answer.at(2, 2 * i - 0) = dnx.at(i, 2);     // dv/dy -2
     }
 
 #ifdef  PlaneStress2d_reducedShearIntegration
@@ -141,8 +140,8 @@ PlaneStress2d :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 #endif
 
     for ( int i = 1; i <= 4; i++ ) {
-        answer.at(3, 2 * i - 2) = dnx.at(i, 2);     // du/dy -6
-        answer.at(4, 2 * i - 1) = dnx.at(i, 1);     // dv/dx -9
+        answer.at(3, 2 * i - 1) = dnx.at(i, 2);     // du/dy -6
+        answer.at(4, 2 * i - 0) = dnx.at(i, 1);     // dv/dx -9
     }
 }
 

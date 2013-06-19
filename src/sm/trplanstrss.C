@@ -200,10 +200,10 @@ TrPlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     answer.zero();
 
     for ( int i = 1; i <= 3; i++ ) {
-        answer.at(1, 2 * i - 2) = dnx.at(i, 1);     // du/dx -1
-        answer.at(2, 2 * i - 1) = dnx.at(i, 2);     // dv/dy -2
-        answer.at(3, 2 * i - 2) = dnx.at(i, 2);     // du/dy -6
-        answer.at(4, 2 * i - 1) = dnx.at(i, 1);     // dv/dx -9
+        answer.at(1, 2 * i - 1) = dnx.at(i, 1);     // du/dx -1
+        answer.at(2, 2 * i - 0) = dnx.at(i, 2);     // dv/dy -2
+        answer.at(3, 2 * i - 1) = dnx.at(i, 2);     // du/dy -6
+        answer.at(4, 2 * i - 0) = dnx.at(i, 1);     // dv/dx -9
     }
 }
 

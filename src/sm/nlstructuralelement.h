@@ -100,7 +100,7 @@ public:
      * Return nlgeometry mode
      * 0 - small stran mode
      * 1 - G-L strain mode
-     * 2 - deformation gradient mode
+     * 2 - deformation gradient mode (deprecated)
     */
     int giveGeometryMode(){return nlGeometry;}
 
@@ -144,6 +144,8 @@ public:
     void computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &answer,
                                                      MatResponseMode rMode, TimeStep *tStep);
 
+    void OLDcomputeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &answer,
+                                                     MatResponseMode rMode, TimeStep *tStep);
 
     // stress equivalent vector (vector of internal forces) - for nonLinear Analysis.
     /**
@@ -181,6 +183,9 @@ public:
     void giveInternalForcesVector_withIRulesAsSubcells(FloatArray &answer,
                                                        TimeStep *tStep, int useUpdatedGpRecord = 0);
 
+    void OLDgiveInternalForcesVector_withIRulesAsSubcells(FloatArray &answer,
+                                                       TimeStep *tStep, int useUpdatedGpRecord = 0);
+
     /**
      * Compute strain vector of receiver evaluated at given integration point at time
      * step stepN from element displacement vector.
@@ -196,14 +201,11 @@ public:
      */
     // should be small strain only
     void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
-
     void OLDcomputeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-
     void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
-    void computeGreenLagrangeStrainVector(FloatArray &answer, FloatArray &F, MaterialMode matMode);
+    void computeGreenLagrangeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-    //void trans_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &dSdE, const FloatArray &F, const FloatArray &S );
 
     // data management
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -226,10 +228,12 @@ protected:
         return;
     }
 
-    void dyadicProductBelow(FloatMatrix &answer, FloatArray &A, FloatArray &B);
+    void computeStressStiffness(FloatMatrix &answer, FloatArray &S, MaterialMode matMode);
     int giveVoigtIndexSym(int ind1, int ind2);
-
+    void giveSymPartOf(const FloatArray &A, FloatArray &answer);
     void computeGLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep); 
+    void computeGLAMatrixAt(FloatMatrix &answer, FloatArray &vF, MaterialMode matMode); 
+
     int checkConsistency();
     /**
      * Computes a matrix which, multiplied by the column matrix of nodal displacements,

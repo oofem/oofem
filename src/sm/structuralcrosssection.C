@@ -91,6 +91,23 @@ StructuralCrossSection ::  giveSecondPKStresses(FloatArray &answer, MatResponseF
 
 
 void
+StructuralCrossSection :: give_dSdE_StiffnessMatrix(FloatMatrix &answer,
+                                                          MatResponseMode rMode, GaussPoint *gp,
+                                                          TimeStep *tStep)
+{
+
+    //this->giveMaterialStiffnessMatrixOf(answer, ReducedForm, rMode, gp,
+    //                                    dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() ),
+    //                                    tStep);
+    //mat->giveCharacteristicMatrix(answer, form, rMode, gp, tStep);
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * > ( gp->giveElement()->giveMaterial() );
+    //mat->giveCharacteristicMatrix(answer, ReducedForm, rMode, gp, tStep);
+    mat->give_dSdE_StiffnessMatrix(answer, ReducedForm, rMode, gp, tStep);
+}
+
+
+
+void
 StructuralCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
                                                           MatResponseMode rMode, GaussPoint *gp,
                                                           TimeStep *tStep)

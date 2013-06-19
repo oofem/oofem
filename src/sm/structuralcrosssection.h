@@ -97,7 +97,7 @@ public:
 
 
     /**
-     * Computes the first Piola-Kirchoff stress vector for given deformation gradient and integration point.
+     * Computes the second Piola-Kirchoff stress vector for given deformation gradient and integration point.
      * The service should use previously reached equilibrium history variables. Also
      * it should update temporary history variables in status according to newly reached state.
      * The temporary history variables are moved into equilibrium ones after global structure
@@ -105,14 +105,19 @@ public:
      * Elements should always pass their requests to their cross section model, which
      * performs necessary integration over its volume and invokes necessary material
      * services for corresponding material model defined for given integration point.
-     * @param answer Contains the First Piola-Kirchoff stresses .
+     * @param answer Contains the second Piola-Kirchoff stresses .
      * @param form Material response form.
      * @param gp Integration point.
-     * @param reducedStrainIncrement Strain increment vector in reduced form.
+     * @param reducedFIncrement Increment of the deformation gradient vector in reduced form.
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveSecondPKStresses(FloatArray & answer, MatResponseForm form,
-                                  GaussPoint *gp, const FloatArray &reducedStrainIncrement, TimeStep *tStep);
+                                  GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);
+
+
+    void give_dSdE_StiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+
+
 
     /**
      * Computes the stiffness matrix of receiver in given integration point, respecting its history.

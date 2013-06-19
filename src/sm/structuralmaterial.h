@@ -192,7 +192,8 @@ public:
 
     virtual void computeGreenLagrangeStrain(FloatMatrix &answer, FloatMatrix &F);
 
-
+    virtual void give_dSdE_StiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+                                               GaussPoint *gp, TimeStep *atTime);
 
 
 
@@ -262,6 +263,11 @@ public:
                                                GaussPoint *gp,
                                                TimeStep *tStep)
     { _error("give3dMaterialStiffnessMatrix: not implemented "); }
+
+    virtual void give3dMaterialStiffnessMatrix_dSdE(FloatMatrix &answer,
+                                       MatResponseForm form, MatResponseMode mode,
+                                       GaussPoint *gp, TimeStep *tStep)
+    { this->give3dMaterialStiffnessMatrix(answer, form, mode, gp, tStep); }
 
 
     /**

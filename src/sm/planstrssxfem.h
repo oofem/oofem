@@ -66,6 +66,8 @@ public:
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                           int lowerIndx = 1, int upperIndx = ALL_STRAINS);
+    virtual void computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+        { OOFEM_ERROR("PlaneStress2dXfem :: computeBHmatrixAt() not implemented"); }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray & answer) const;
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
     virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);

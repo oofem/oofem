@@ -139,10 +139,10 @@ protected:
     void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
     int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
 
-    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i);
-    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    void computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer);
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer);
     virtual void computeGaussPoints();
 
     int giveApproxOrder() { return 1; }

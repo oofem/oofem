@@ -38,6 +38,7 @@
 #include "verbose.h"
 #include "structuralms.h"
 #include "structuralelement.h"
+#include "nlstructuralelement.h"
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
@@ -68,11 +69,12 @@ StructuralMaterial :: giveSecondPKStressVector(FloatArray &answer, MatResponseFo
     // Default implementation used if this method is not overloaded by the particular material model.
     // Compute Green-Lagrange strain and call standard method for small strains.
     
-    FloatMatrix F, E;
+    //FloatMatrix F, E;
     FloatArray vE;
-    F.beMatrixForm(reducedvF);
-    this->computeGreenLagrangeStrain(E, F);
-    vE.beReducedVectorFormOfStrain(E);
+    //F.beMatrixForm(reducedvF);
+    //this->computeGreenLagrangeStrain(E, F);
+    //vE.beReducedVectorFormOfStrain(E);
+    static_cast< NLStructuralElement * > ( gp->giveElement() )->computeGreenLagrangeStrainVector(vE, gp, tStep);
     this->giveRealStressVector(answer, form, gp, vE, tStep);
 
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
@@ -134,6 +136,55 @@ StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         OOFEM_ERROR2( "StructuralMaterial :: giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
+
+
+void 
+StructuralMaterial :: give_dSdE_StiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+                                               GaussPoint *gp, TimeStep *tStep)
+{
+
+    //this->giveCharacteristicMatrix(answer, rForm, rMode, gp, tStep);
+
+    //
+    // Returns characteristic material stiffness matrix of the receiver
+    //
+
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    case _3dMat:
+    case _3dMatGrad:
+        this->give3dMaterialStiffnessMatrix_dSdE(answer, form, rMode, gp, tStep);
+        break;
+    case _PlaneStress:
+    case _PlaneStressGrad:
+        this->givePlaneStressStiffMtrx(answer, form, rMode, gp, tStep);
+        break;
+    case _PlaneStrain:
+    case _PlaneStrainGrad:
+        this->givePlaneStrainStiffMtrx(answer, form, rMode, gp, tStep);
+        break;
+    case _1dMat:
+    case _1dMatGrad:
+        this->give1dStressStiffMtrx(answer, form, rMode, gp, tStep);
+        break;
+    case _2dPlateLayer:
+        this->give2dPlateLayerStiffMtrx(answer, form, rMode, gp, tStep);
+        break;
+    case _3dShellLayer:
+        this->give3dShellLayerStiffMtrx(answer, form, rMode, gp, tStep);
+        break;
+    case _2dBeamLayer:
+        this->give2dBeamLayerStiffMtrx(answer, form, rMode, gp, tStep);
+        break;
+    case _1dFiber:
+        this->give1dFiberStiffMtrx(answer, form, rMode, gp, tStep);
+        break;
+    default:
+        OOFEM_ERROR2( "StructuralMaterial :: giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+    }
+
+}
+
 
 
 void
