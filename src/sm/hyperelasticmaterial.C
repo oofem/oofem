@@ -116,6 +116,30 @@ HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRe
     answer.at(5, 6) = answer.at(6, 5) = A * c13 * c12 + B / 2. * ( c11 * c23 + c12 * c13 );
 }
 
+
+void
+HyperElasticMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
+                                               MatResponseForm form, MatResponseMode mode, GaussPoint *gp,
+                                               TimeStep *tStep)
+{
+    FloatMatrix dSdE;
+    give3dMaterialStiffnessMatrix(dSdE, form, mode, gp, tStep); // dSdE
+    HyperElasticMaterialStatus *status = static_cast< HyperElasticMaterialStatus * >( this->giveStatus(gp) );
+    FloatArray vF, vS, vP;
+    vF = status->giveTempFVector();
+    vP = status->giveTempStressVector();    // 1st PK
+
+    // Compute PK2 stress needed for transformation of stiffness
+    FloatMatrix F, P, S, invF;
+    F.beMatrixForm(vF);
+    P.beMatrixForm(vP);
+    invF.beInverseOf(F);
+    S.beProductOf(invF,P);
+    vS.beReducedVectorForm(S);
+    this->convert_dSdE_2_dPdF(answer, dSdE, vS, vF, _3dMat);
+}
+
+
 void
 HyperElasticMaterial :: giveSecondPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
         const FloatArray &reducedvF, TimeStep *tStep)
@@ -171,6 +195,33 @@ HyperElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(answer);
 
+}
+
+
+void
+HyperElasticMaterial :: giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &vF, TimeStep *atTime)
+{
+    // Computes th first Piola-Kirchoff stress vector - 9 components
+    
+    FloatMatrix F, E;
+    F.beMatrixForm(vF);
+    this->computeGreenLagrangeStrain(E, F);
+    FloatArray vE, vS;
+    vE.beReducedVectorFormOfStrain(E);
+
+    this->giveRealStressVector(vS, form, gp, vE, atTime);   // second PK stress
+    HyperElasticMaterialStatus *status = static_cast< HyperElasticMaterialStatus * >( this->giveStatus(gp) );
+
+    // Convert S to P
+    FloatMatrix P, S;
+    S.beMatrixForm(vS);
+    P.beProductOf(F,S);
+    answer.beFullVectorForm(P);
+
+    // update gp
+    status->letTempStrainVectorBe(vE);
+    status->letTempStressVectorBe(answer);
+    status->letTempFVectorBe(vF);
 }
 
 

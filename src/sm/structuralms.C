@@ -50,10 +50,24 @@ StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoin
     tempStressVector = stressVector;
     tempStrainVector = strainVector;
 
-    if ( static_cast< NLStructuralElement * > ( gp->giveElement() )->giveGeometryMode() == -1  ) { // if large def, store F
+    NLStructuralElement *el = static_cast< NLStructuralElement * > ( gp->giveElement() );
+    if ( el->giveGeometryMode() == 1  ||  el->giveGeometryMode() == -1  ) { // if large def, store F
         rsize = static_cast< StructuralMaterial * >( gp->giveMaterial() )->giveSizeOfReducedFVector( gp->giveMaterialMode() );
-        //FVector.resize(rsize);
+        // create initial deformation gradient //@todo should be improved
+        FVector.resize(rsize);
+        if (rsize == 9 || rsize == 5 ) {
+            FVector.at(1) = FVector.at(2) = FVector.at(3) = 1.0; 
+        } else if ( rsize == 4 ) {
+            FVector.at(1) = FVector.at(2) = 1.0 ; 
+        }else if (rsize == 1 ) {
+            FVector.at(1) = 1.0; 
+        } else {
+            OOFEM_ERROR("StructuralMaterialStatus :: StructuralMaterialStatus - cannot create initial FVector for the given MaterialMode" ) ;
+        }
         tempFVector = FVector;
+
+        //el->computeDeformationGradientVector(FVector, g, );
+
     }
 
 }

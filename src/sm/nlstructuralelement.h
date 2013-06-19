@@ -105,6 +105,7 @@ public:
     int giveGeometryMode(){return nlGeometry;}
 
 
+    void computeFirstPKStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
     void computeSecondPKStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
 
 

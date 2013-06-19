@@ -111,9 +111,13 @@ public:
      * @param reducedFIncrement Increment of the deformation gradient vector in reduced form.
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
+    virtual void giveFirstPKStresses(FloatArray & answer, MatResponseForm form,
+                                  GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);
+
     virtual void giveSecondPKStresses(FloatArray & answer, MatResponseForm form,
                                   GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);
 
+    void give_dPdF_StiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     void give_dSdE_StiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 

@@ -1615,7 +1615,10 @@ double FloatMatrix :: computeReciprocalCondition(char p) const
 
 void FloatMatrix ::beMatrixForm(const FloatArray &aArray)
 {
-    // Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
+    // Revrites the vector on matrix form (symmetrized matrix used if size is 6), 
+    // order: 11, 22, 33, 23, 13, 12
+    // order: 11, 22, 33, 23, 13, 12, 32, 31, 21
+    // @todo should take MaterialMode as input
 #  ifdef DEBUG
     if ( aArray.giveSize() !=6 && aArray.giveSize() !=9 ) {
         OOFEM_ERROR("FloatArray :: beMatrixForm : matrix dimension is not 3x3");

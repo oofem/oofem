@@ -67,6 +67,30 @@ StructuralCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm 
 
 
 void
+StructuralCrossSection ::  giveFirstPKStresses(FloatArray &answer, MatResponseForm form,
+                                            GaussPoint *gp,
+                                            const FloatArray &F,
+                                            TimeStep *tStep)
+{
+    // This function returns the first Piola-Kirchoff stress in vector format
+    // corresponding to a given deformation gradient according to stressStrain (stress-deformation?) 
+    // mode stored in each gp.
+
+    MaterialMode mode = gp->giveMaterialMode();
+    //Material *mat = gp->giveElement()->giveMaterial(); // shouldn't it ask the cs?
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+    if ( mat->hasMaterialModeCapability(mode) ) {
+        mat->giveFirstPKStressVector(answer, form, gp, F, tStep);
+        return;
+    } else {
+        _error("giveSecondPKStresses : unsupported MaterialMode");
+        
+
+    }
+}
+
+
+void
 StructuralCrossSection ::  giveSecondPKStresses(FloatArray &answer, MatResponseForm form,
                                             GaussPoint *gp,
                                             const FloatArray &F,
@@ -89,22 +113,24 @@ StructuralCrossSection ::  giveSecondPKStresses(FloatArray &answer, MatResponseF
     }
 }
 
+void
+StructuralCrossSection :: give_dPdF_StiffnessMatrix(FloatMatrix &answer,
+                                                          MatResponseMode rMode, GaussPoint *gp,
+                                                          TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * > ( gp->giveElement()->giveMaterial() );
+    mat->give_dPdF_StiffnessMatrix(answer, ReducedForm, rMode, gp, tStep);
+}
+
 
 void
 StructuralCrossSection :: give_dSdE_StiffnessMatrix(FloatMatrix &answer,
                                                           MatResponseMode rMode, GaussPoint *gp,
                                                           TimeStep *tStep)
 {
-
-    //this->giveMaterialStiffnessMatrixOf(answer, ReducedForm, rMode, gp,
-    //                                    dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() ),
-    //                                    tStep);
-    //mat->giveCharacteristicMatrix(answer, form, rMode, gp, tStep);
     StructuralMaterial *mat = dynamic_cast< StructuralMaterial * > ( gp->giveElement()->giveMaterial() );
-    //mat->giveCharacteristicMatrix(answer, ReducedForm, rMode, gp, tStep);
     mat->give_dSdE_StiffnessMatrix(answer, ReducedForm, rMode, gp, tStep);
 }
-
 
 
 void

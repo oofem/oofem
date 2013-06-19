@@ -186,16 +186,22 @@ public:
      * @param reducedF Deformation gradient in in reduced form.
      * @param tStep Current time step (most models are able to respond only when atTime is current time step).
      */
+    virtual void giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+                                      const FloatArray &reducedF, TimeStep *tStep);
+
     virtual void giveSecondPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                       const FloatArray &reducedF, TimeStep *tStep);
 
 
     virtual void computeGreenLagrangeStrain(FloatMatrix &answer, FloatMatrix &F);
 
+    virtual void give_dPdF_StiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+                                               GaussPoint *gp, TimeStep *atTime);
+
     virtual void give_dSdE_StiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
                                                GaussPoint *gp, TimeStep *atTime);
 
-
+    static void convert_dSdE_2_dPdF(FloatMatrix &answer, FloatMatrix &dSdE, FloatArray &S, FloatArray &F, MaterialMode matMode);
 
     /**
      * Returns a vector of coefficients of thermal dilatation in direction of each material principal (local) axis.
@@ -268,6 +274,10 @@ public:
                                        MatResponseForm form, MatResponseMode mode,
                                        GaussPoint *gp, TimeStep *tStep)
     { this->give3dMaterialStiffnessMatrix(answer, form, mode, gp, tStep); }
+
+    virtual void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
+                                       MatResponseForm form, MatResponseMode mode,
+                                       GaussPoint *gp, TimeStep *tStep);
 
 
     /**
@@ -562,6 +572,11 @@ protected:
     virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
                                           MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
                                           TimeStep *tStep);
+
+    virtual void givePlaneStressStiffMtrx_dPdF(FloatMatrix &answer,
+                                          MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                          TimeStep *tStep);
+
     /**
      * Method for computing plane strain stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
