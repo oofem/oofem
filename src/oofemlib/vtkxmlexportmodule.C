@@ -352,9 +352,9 @@ VTKXMLExportModule :: giveNumberOfElementCells(Element *elem)
 
 
 void
-VTKXMLExportModule :: doOutput(TimeStep *tStep)
+VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
-    if ( !testTimeStepOutput(tStep) ) {
+    if ( !(testTimeStepOutput(tStep) || forcedOutput) ) {
         return;
     }
 #ifdef __VTK_MODULE

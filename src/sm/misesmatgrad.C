@@ -88,64 +88,92 @@ MisesMatGrad :: giveCharacteristicMatrix(FloatMatrix &answer,
 // Returns characteristic material stiffness matrix of the receiver
 //
 {
+    _error( "giveCharacteristicMatrix : Shouldn't be called.");
+}
+
+
+
+void
+MisesMatGrad :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) 
+{
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _1dMatGrad:
-        if ( form == PDGrad_uu ) {
-            give1dStressStiffMtrx(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_ku ) {
-            give1dKappaMatrix(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_uk ) {
-            give1dGprime(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_kk ) {
-            giveInternalLength(answer, form, rMode, gp, atTime);
-            break;
-        }
-
-    case _PlaneStrainGrad:
-        if ( form == PDGrad_uu ) {
-            givePlaneStrainStiffMtrx(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_ku ) {
-            givePlaneStrainKappaMatrix(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_uk ) {
-            givePlaneStrainGprime(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_kk ) {
-            giveInternalLength(answer, form, rMode, gp, atTime);
-            break;
-        }
-
-    case _PlaneStressGrad:
-        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+        give1dStressStiffMtrx(answer, form, mode, gp, tStep);
         break;
-
+    case _PlaneStrainGrad:
+        givePlaneStrainStiffMtrx(answer, form, mode, gp, tStep);
+        break;
     case _3dMatGrad:
-        if ( form == PDGrad_uu ) {
-            give3dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_ku ) {
-            give3dKappaMatrix(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_uk ) {
-            give3dGprime(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_kk ) {
-            giveInternalLength(answer, form, rMode, gp, atTime);
-            break;
-        }
-
-
-
-
-
+        give3dMaterialStiffnessMatrix(answer, form, mode, gp, tStep);
+        break;
     default:
-        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
-        return;
+        _error2( "givePDGradMatrix_uu : unknown mode (%s)", __MaterialModeToString(mMode) );
+    }
+}
+
+void
+MisesMatGrad :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint* gp, TimeStep* tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+        give1dKappaMatrix(answer, form, mode, gp, tStep);
+        break;
+    case _PlaneStrainGrad:
+        givePlaneStrainKappaMatrix(answer, form, mode, gp, tStep);
+        break;
+    case _3dMatGrad:
+        give3dKappaMatrix(answer, form, mode, gp, tStep);
+        break;
+    default:
+        _error2( "givePDGradMatrix_ku : unknown mode (%s)", __MaterialModeToString(mMode) );
+    }
+}
+
+void
+MisesMatGrad :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+        give1dGprime(answer, form, mode, gp, tStep);
+        break;
+    case _PlaneStrainGrad:
+        givePlaneStrainGprime(answer, form, mode, gp, tStep);
+        break;
+    case _3dMatGrad:
+        give3dGprime(answer, form, mode, gp, tStep);
+        break;
+    default:
+        _error2( "givePDGradMatrix_uk : unknown mode (%s)", __MaterialModeToString(mMode) );
+    }
+}
+
+void
+MisesMatGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    case _1dMatGrad:
+        giveInternalLength(answer, form, mode, gp, tStep);
+        break;
+    case _PlaneStrainGrad:
+        giveInternalLength(answer, form, mode, gp, tStep);
+        break;
+    case _3dMatGrad:
+        giveInternalLength(answer, form, mode, gp, tStep);
+        break;
+    default:
+        _error2( "givePDGradMatrix_kk : unknown mode (%s)", __MaterialModeToString(mMode) );
+    }
+}
+
+void
+MisesMatGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    default:
+        _error2( "givePDGradMatrix_LD : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -590,4 +618,5 @@ MisesMatGradStatus :: updateYourself(TimeStep *atTime)
 {
     MisesMatStatus :: updateYourself(atTime);
 }
+
 } // end namespace oofem

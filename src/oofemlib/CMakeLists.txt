@@ -214,6 +214,7 @@ set (core_bc
     mixedgradientpressurebc.C
     mixedgradientpressuredirichlet.C
     mixedgradientpressureneumann.C
+    mixedgradientpressureweakperiodic.C
     load.C
     boundaryload.C
     pointload.C

@@ -43,7 +43,8 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 
-#define _IFT_MixedGradientPressureNeumann_Name   "mixedgradientpressureneumann"
+#define _IFT_MixedGradientPressureWeakPeriodic_Name "mixedgradientpressureweakperiodic"
+#define _IFT_MixedGradientPressureWeakPeriodic_order "order" ///< Order of global polynomial in the unknown tractions. Should be at least 1.
 
 namespace oofem {
 class MasterDof;
@@ -53,43 +54,15 @@ class SparseMtrx;
 class SparseLinearSystemNM;
 
 /**
- * Applies a mean deviatoric shear rate and pressure (Neumann boundary condition).
- * Introduces unknowns for the deviatoric stress, and this boundary condition adds contributions to both the left and right hand side of the system.
- * The approach expresses the deviatoric stresses/strain(rates) in a special (nonsymmetric) base;
- * @f[
- \boldsymbol A_{\mathrm{dev}} = \sum_{i=1}^{n} A_{\mathrm{dev},i} \boldsymbol E_i
- * @f]
- * where the bases @f$ \boldsymbol E_i @f$ can be chosen as 
- * @f[
- \boldsymbol E_1 = \frac{1}{\sqrt{2}}\begin{pmatrix}1 & 0 \\ 0 & -1\end{pmatrix}, \quad
- \boldsymbol E_2 = \begin{pmatrix}0 & 1 \\ 0 & 0\end{pmatrix}, \quad
- \boldsymbol E_3 = \begin{pmatrix}0 & 0 \\ 1 & 0\end{pmatrix}.
- * @f]
- * in 2D, and
- * @f[
- \boldsymbol E_1 = \frac{1}{\sqrt{6}}\begin{pmatrix}2 & 0 & 0\\ 0 & -1 & 0 \\ 0 & 0 & -1\end{pmatrix}, \quad
- \boldsymbol E_2 = \frac{1}{\sqrt{2}}\begin{pmatrix}0 & 0 & 0\\ 0 &  1 & 0 \\ 0 & 0 & -1\end{pmatrix}, \quad
- \boldsymbol E_3 = \begin{pmatrix}0 & 1 & 0\\ 0 & 0 & 0 \\ 0 & 0 & 0\end{pmatrix}, \ldots\quad
- \boldsymbol E_8 = \begin{pmatrix}0 & 0 & 0\\ 0 & 0 & 0 \\ 0 & 1 & 0\end{pmatrix}
- * @f]
- * in 3D (in 1D no deviatoric component exists).
- * 
- * Either bulk elements + side number can be used, or a boundary element (line in 2D, surface in 3D) can be used directly.
- * 
- * @note The 2D case assumes plane strain(rate), as is the case in _2dFlow.
- * @note This is only applicable to momentum balance equation. Both solid or fluids, incompressible or compressible, should work.
- * @note Should typically be prescribed on the entire external boundary of an representative volume element.
- * @note Should be applied to element boundaries, not DOFs.
- * @note The implementation doesn't assume that the stress is symmetric, so rigid body rotations are automatically removed.
- * @note Rigid body translations must be controlled separately.
+ * Applies a mean deviatoric shear rate and pressure (Neumann boundary condition) in a weakly periodic way.
  * 
  * @author Mikael Öhman
  */
-class MixedGradientPressureNeumann : public MixedGradientPressureBC
+class MixedGradientPressureWeakPeriodic : public MixedGradientPressureBC
 {
 protected:
-    /// Prescribed gradient @f$ d_{\mathrm{dev},ij} @f$ in Voigt form.
-    FloatArray devGradient;
+    /// Prescribed gradient @f$ d_{\mathrm{dev},ij} @f$.
+    FloatMatrix devGradient;
     /**
      * The volumetric part of what was sent in (needed to return the difference).
      * If caller takes care and sends in a deviatoric gradient, then this will be zero and the return value for the volumetric part will be the true volumetric change.
@@ -99,8 +72,13 @@ protected:
     /// Prescribed pressure.
     double pressure;
 
-    /// DOF-manager containing the unknown deviatoric stress.
-    Node *sigmaDev;
+    /// Order if polynomials
+    double order;
+
+    /// DOF-manager containing the unknown volumetric gradient (always exactly one dof).
+    Node *voldman;
+    /// DOF-manager containing the unknown tractions (Lagrange mult. for micro-periodic velocity)
+    Node *tractionsdman;
 
 public:
     /**
@@ -108,15 +86,14 @@ public:
      * @param n Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    MixedGradientPressureNeumann(int n, Domain *d);
+    MixedGradientPressureWeakPeriodic(int n, Domain *d);
 
     /// Destructor
-    virtual ~MixedGradientPressureNeumann();
+    virtual ~MixedGradientPressureWeakPeriodic();
 
     /**
      * Returns the number of internal DOF managers (=2).
-     * This boundary condition stores its own DOF managers, one for @f$ d_{\mathrm{dev},ij} @f$ in which the DOFs are prescribed
-     * and one for @f$ d_{\mathrm{vol}} @f$ for single free volumetric strain rate.
+     * This boundary condition stores its own DOF managers, one for tractions and one for @f$ d_{\mathrm{vol}} @f$ which is a single DOF for the volumetric gradient.
      */
     virtual int giveNumberOfInternalDofManagers();
     /**
@@ -155,27 +132,16 @@ public:
     virtual void giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
                                     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
-    virtual const char *giveClassName() const { return "MixedGradientPressureNeumann"; }
-    virtual const char *giveInputRecordName() const { return _IFT_MixedGradientPressureNeumann_Name; }
-    virtual classType giveClassID() const { return MixedGradientPressureNeumannClass; }
+    virtual const char *giveClassName() const { return "MixedGradientPressureWeakPeriodic"; }
+    virtual const char *giveInputRecordName() const { return _IFT_MixedGradientPressureWeakPeriodic_Name; }
     
 protected:
     /// Helper function that creates suitable integration rule
     IntegrationRule *CreateIntegrationRule(Element *e, int boundary, int order);
-    
-    /// Helper function that integrates the deviatoric tangent contribution from a single element boundary.
-    void integrateDevTangent(FloatMatrix &answer, Element *e, int boundary);
-    /// Helper function that integrates the volumetric tangent contribution from a single element boundary.
-    void integrateVolTangent(FloatArray &answer, Element *e, int boundary);
 
-    /// Converts from deviatoric to (normal) cartesian base (arrays are second order 2D tensors in Voigt notation)
-    void fromDeviatoricBase2D(FloatArray &cartesian, FloatArray &deviatoric);
-    /// Converts from deviatoric to (normal) cartesian base (arrays are second order 3D tensors in Voigt notation)
-    void fromDeviatoricBase3D(FloatArray &cartesian, FloatArray &deviatoric);
-    /// Converts from deviatoric to (normal) cartesian base (arrays are fourth order 2D tensors in Voigt notation)
-    void fromDeviatoricBase2D(FloatMatrix &cartesian, FloatMatrix &deviatoric);
-    /// Converts from deviatoric to (normal) cartesian base (arrays are fourth order 3D tensors in Voigt notation)
-    void fromDeviatoricBase3D(FloatMatrix &cartesian, FloatMatrix &deviatoric);
+    void integrateTractionVelocityTangent(FloatMatrix &answer, Element *el, int boundary);
+    void integrateTractionXTangent(FloatMatrix &answer, Element *el, int boundary);
+    void integrateTractionDev(FloatArray &answer, Element *el, int boundary);
 };
 } // end namespace oofem
 

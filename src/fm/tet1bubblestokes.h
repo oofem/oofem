@@ -122,7 +122,7 @@ public:
     virtual const char *giveClassName() const { return "Tet1BubbleStokes"; }
     virtual const char *giveInputRecordName() const { return _IFT_Tet1BubbleStokes_Name; }
     virtual classType giveClassID() const { return Tet1BubbleStokesElementClass; }
-    virtual MaterialMode giveMaterialMode() { return _2dFlow; }
+    virtual MaterialMode giveMaterialMode() { return _3dFlow; }
 
     virtual int computeNumberOfDofs(EquationID ut);
     

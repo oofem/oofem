@@ -32,23 +32,36 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef matesponseform_h
-#define matesponseform_h
+#ifndef graddpmaterialextensioninterface_h
+#define graddpmaterialextensioninterface_h
+
+#include "interface.h"
+#include "matresponseform.h"
+#include "matresponsemode.h"
 
 namespace oofem {
-/**
- * Type representing the form of returned characteristic value (for cross section and material models).
- * The response can be returned in so called full or reduced form.
- * Generally, the full form contain all components, even if they are generally always zero (based on MaterialMode of
- * given integration point). On the other hand, the reduced form contain only generally nonzero components.
- * For example the "full-like" strain vector contains six components. For integration point in plane stress mode
- * the "reduced-like" strain vector contains only 3 generally nonzero components. The contents of full and reduced forms
- * is defined by corresponding (material or cross section level) base classes.
- */
-enum MatResponseForm {
-    ReducedForm, ///< Only stiffness for necessary stresses are given.
-    FullForm,    ///< all component of 3d stresses are available, even if they equal 0.
-};
-} // end namespace oofem
-#endif // matesponseform_h
 
+class FloatMatrix;
+class GaussPoint;
+class TimeStep;
+
+/**
+ * Material interface for gradient material models.
+ */
+class GradDpMaterialExtensionInterface : public Interface
+{
+public:
+    /// Left upper block
+    virtual void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+    /// Left lower block
+    virtual void givePDGradMatrix_ku(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+    /// Right upper block
+    virtual void givePDGradMatrix_uk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+    /// Right lower block
+    virtual void givePDGradMatrix_kk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+    /// Stress-based averaging
+    virtual void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+};
+
+}
+#endif

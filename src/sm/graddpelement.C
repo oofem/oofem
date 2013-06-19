@@ -50,6 +50,7 @@
 #include "nlstructuralelement.h"
 #include "nonlocalbarrier.h"
 #include "nlstructuralelement.h"
+#include "graddpmaterialextensioninterface.h"
 
 #include <cstdio>
 
@@ -252,7 +253,7 @@ GradDpElement :: giveNonlocalInternalForcesVector(FloatArray &answer,
    }
 
     this->computeStiffnessMatrix_kk(stiffKappa,rMode,tStep);
-    this-> computeNonlocalDegreesOfFreedom(dKappa,tStep);
+    this->computeNonlocalDegreesOfFreedom(dKappa,tStep);
     answer.beProductOf(stiffKappa,dKappa);
     answer.add(aux);
 }
@@ -458,15 +459,15 @@ void
 GradDpElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
     //set displacement and nonlocal location array
-    this-> setDisplacementLocationArray(locU,nPrimNodes, nPrimVars, nSecNodes, nSecVars);
-    this-> setNonlocalLocationArray(locK,nPrimNodes, nPrimVars, nSecNodes, nSecVars);
+    this->setDisplacementLocationArray(locU,nPrimNodes, nPrimVars, nSecNodes, nSecVars);
+    this->setNonlocalLocationArray(locK,nPrimNodes, nPrimVars, nSecNodes, nSecVars);
     
     
     answer.resize(totalSize,totalSize);
     answer.zero();
 
 
-    if(averType == 1)
+    if ( averType == 1 )
         this->computeDistanceToBoundary();
     
 
@@ -493,7 +494,6 @@ GradDpElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode 
     IntegrationRule *iRule = elem->giveIntegrationRule(0); 
     FloatMatrix A, *ut = NULL;
     FloatArray u;
-    //MatResponseForm form = PDGrad_uu;
     bool matStiffSymmFlag = elem->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode, elem->material);
     //////////////////////////////////////////////////// 
     
@@ -518,6 +518,11 @@ GradDpElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode 
     if (!elem->isActivated(tStep)) return;
     
     Material *mat = elem->giveMaterial();
+    GradDpMaterialExtensionInterface *dpmat = static_cast< GradDpMaterialExtensionInterface * >( mat->giveInterface(GradDpMaterialExtensionInterfaceType) );
+    if ( !dpmat ) {
+        OOFEM_ERROR("GradDpElement :: computeStiffnessMatrix_uu - Material doesn't implement the required DpGrad interface!");
+    }
+
     for (int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         gp = iRule->getIntegrationPoint(j);
         elem->computeBmatrixAt(gp, B);
@@ -536,7 +541,7 @@ GradDpElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode 
             }
         } // end nlGeometry
       
-        mat-> giveCharacteristicMatrix(D,PDGrad_uu,rMode, gp, tStep);
+        dpmat->givePDGradMatrix_uu(D, ReducedForm, rMode, gp, tStep);
         dV = elem->computeVolumeAround(gp);
         DB.beProductOf(D, B);
         if ( matStiffSymmFlag ) {
@@ -583,13 +588,16 @@ GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode 
     double dV;
     GaussPoint *gp;
     IntegrationRule *iRule = elem->giveIntegrationRule(0); 
-    //MatResponseForm form = PDGrad_uu;
     ///////////////////////////////////////////////////////////////////
     FloatMatrix B,DB,D,Nk,NkT, NkDB;
     answer.resize(nlSize,locSize);
     answer.zero();
-    Material *mat =elem->giveMaterial();
-    // mat->getGradientFormulation(averType);
+    Material *mat = elem->giveMaterial();
+    GradDpMaterialExtensionInterface *dpmat = static_cast< GradDpMaterialExtensionInterface * >( mat->giveInterface(GradDpMaterialExtensionInterfaceType) );
+    if ( !dpmat ) {
+        OOFEM_ERROR("GradDpElement :: computeStiffnessMatrix_ku - Material doesn't implement the required DpGrad interface!");
+    }
+
     FloatArray u;
     FloatMatrix A, *ut = NULL;
     if ( nlGeo ) {
@@ -622,7 +630,7 @@ GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode 
                 }
             }
         } // end nlGeometry
-        mat->giveCharacteristicMatrix(D,PDGrad_ku,rMode, gp, tStep);
+        dpmat->givePDGradMatrix_ku(D, ReducedForm, rMode, gp, tStep);
         this->computeNkappaMatrixAt(gp,Nk);
         NkT.beTranspositionOf(Nk);
         dV = elem->computeVolumeAround(gp);
@@ -639,12 +647,12 @@ GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode 
             FloatArray Gk,bl;
             FloatArray n1(3);
             FloatArray n2(3);
-            elem ->computeBmatrixAt(gp,B);
-            this ->computeBkappaMatrixAt(gp,Bk);
+            elem->computeBmatrixAt(gp,B);
+            this->computeBkappaMatrixAt(gp,Bk);
 
-            mat-> giveCharacteristicMatrix(lStiffDerivative1,PDGrad_LD,rMode, gp, tStep);
-            mat-> giveCharacteristicMatrix(D,PDGrad_uu,rMode, gp, tStep);
-            this -> computeNonlocalGradient(Gk, gp,tStep);
+            dpmat->givePDGradMatrix_LD(lStiffDerivative1, ReducedForm, rMode, gp, tStep);
+            dpmat->givePDGradMatrix_uu(D, ReducedForm, rMode, gp, tStep);
+            this->computeNonlocalGradient(Gk, gp,tStep);
             N1.at(1,1) = lStiffDerivative1.at(1,1)*lStiffDerivative1.at(1,1);
             N1.at(1,2) = lStiffDerivative1.at(2,1)*lStiffDerivative1.at(1,1);
             N1.at(2,1) = N1.at(1,2);
@@ -709,9 +717,13 @@ GradDpElement :: computeStiffnessMatrix_kk(FloatMatrix &answer, MatResponseMode 
     FloatMatrix Bk,Bt,BtB,N,Nt,NtN;
 
     Material *mat = elem->giveMaterial();
+    GradDpMaterialExtensionInterface *dpmat = static_cast< GradDpMaterialExtensionInterface * >( mat->giveInterface(GradDpMaterialExtensionInterfaceType) );
+    if ( !dpmat ) {
+        OOFEM_ERROR("GradDpElement :: computeStiffnessMatrix_kk - Material doesn't implement the required DpGrad interface!");
+    }
+
     answer.resize(nlSize,nlSize);
     answer.zero();
-    //  mat->getGradientFormulation(averType);
 
     for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         gp = iRule->getIntegrationPoint(j);
@@ -720,7 +732,7 @@ GradDpElement :: computeStiffnessMatrix_kk(FloatMatrix &answer, MatResponseMode 
         this->computeBkappaMatrixAt(gp,Bk);
         Bt.beTranspositionOf(Bk);
         dV = elem->computeVolumeAround(gp);
-        mat-> giveCharacteristicMatrix(lStiff,PDGrad_kk,rMode, gp, tStep);
+        dpmat->givePDGradMatrix_kk(lStiff, ReducedForm, rMode, gp, tStep);
         NtN.beProductOf(Nt,N);
         NtN.times(dV);
         answer.add(NtN);
@@ -744,9 +756,9 @@ GradDpElement :: computeStiffnessMatrix_kk(FloatMatrix &answer, MatResponseMode 
             BtB.beProductOf(BtL,Bk);
             BtB.times(dV);
             elem->computeBmatrixAt(gp,B);
-            //mat-> giveCharacteristicMatrix(lStiffDerivative1,PDGrad_LD,rMode, gp, tStep);
-            mat-> giveCharacteristicMatrix(D,PDGrad_ku,rMode, gp, tStep);
-            this -> computeNonlocalGradient(Gk, gp,tStep);
+            //dpmat->giveDPGradMatrix_LD(lStiffDerivative1, rMode, gp, tStep);
+            dpmat->givePDGradMatrix_ku(D, ReducedForm, rMode, gp, tStep);
+            this->computeNonlocalGradient(Gk, gp,tStep);
             N1.at(1,1) = lStiffDerivative1.at(1,1)*lStiffDerivative1.at(1,1);
             N1.at(1,2) = lStiffDerivative1.at(2,1)*lStiffDerivative1.at(1,1);
             N1.at(2,1) = N1.at(1,2);
@@ -804,6 +816,11 @@ GradDpElement :: computeStiffnessMatrix_uk(FloatMatrix &answer, MatResponseMode 
     double dV;
     GaussPoint *gp;
     Material *mat = elem->giveMaterial();
+    GradDpMaterialExtensionInterface *dpmat = static_cast< GradDpMaterialExtensionInterface * >( mat->giveInterface(GradDpMaterialExtensionInterfaceType) );
+    if ( !dpmat ) {
+        OOFEM_ERROR("GradDpElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
+    }
+
     IntegrationRule *iRule = elem->giveIntegrationRule(0); 
     ///////////////////////////////////////////////////////////////////
     FloatMatrix B,Bt,Nk,BSN;
@@ -829,7 +846,7 @@ GradDpElement :: computeStiffnessMatrix_uk(FloatMatrix &answer, MatResponseMode 
  
     for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         gp = iRule->getIntegrationPoint(j);
-        mat-> giveCharacteristicMatrix(gPSigma,PDGrad_uk,rMode, gp, tStep);
+        dpmat->givePDGradMatrix_uk(gPSigma, ReducedForm, rMode, gp, tStep);
         this->computeNkappaMatrixAt(gp,Nk);
         elem->computeBmatrixAt(gp,B);
         if ( nlGeo ) {

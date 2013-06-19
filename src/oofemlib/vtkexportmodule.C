@@ -106,9 +106,9 @@ VTKExportModule :: initializeFrom(InputRecord *ir)
 
 
 void
-VTKExportModule :: doOutput(TimeStep *tStep)
+VTKExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
-    if ( !testTimeStepOutput(tStep) ) {
+    if ( !(testTimeStepOutput(tStep) || forcedOutput) ) {
         return;
     }
 

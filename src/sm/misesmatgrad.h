@@ -37,6 +37,7 @@
 #include "misesmat.h"
 #include "structuralnonlocalmaterialext.h"
 #include "nonlocmatstiffinterface.h"
+#include "graddpmaterialextensioninterface.h"
 #include "cltypes.h"
 
 #ifdef __OOFEG
@@ -79,7 +80,7 @@ public:
 /**
  * Gradient Mises material.
  */
-class MisesMatGrad : public MisesMat
+class MisesMatGrad : public MisesMat, GradDpMaterialExtensionInterface
 {
 protected:
     double R;
@@ -96,12 +97,20 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int hasMaterialModeCapability(MaterialMode mode);
+    
+    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) return static_cast< GradDpMaterialExtensionInterface* >(this); else return NULL; }
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual void give1dStressStiffMtrx(FloatMatrix & answer,  MatResponseForm, MatResponseMode, GaussPoint * gp,  TimeStep * tStep);
     virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer,  MatResponseForm, MatResponseMode, GaussPoint * gp,  TimeStep * tStep);
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,  MatResponseForm, MatResponseMode, GaussPoint * gp,  TimeStep * tStep);
+
+    virtual void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePDGradMatrix_ku(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePDGradMatrix_uk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePDGradMatrix_kk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     void give1dKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void givePlaneStrainKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);

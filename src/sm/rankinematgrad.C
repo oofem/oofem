@@ -68,26 +68,68 @@ RankineMatGrad :: giveCharacteristicMatrix(FloatMatrix &answer,
 // Returns characteristic material matrix of the receiver
 //
 {
+    _error( "giveCharacteristicMatrix : Shouldn't be called.");
+}
+
+void
+RankineMatGrad :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) 
+{
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _PlaneStressGrad:
-        if ( form == PDGrad_uu ) {
-            givePlaneStressStiffMtrx(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_ku ) {
-            givePlaneStressKappaMatrix(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_uk ) {
-            givePlaneStressGprime(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_kk ) {
-            giveInternalLength(answer, form, rMode, gp, atTime);
-            break;
-        }
-
+        givePlaneStressStiffMtrx(answer, form, mode, gp, tStep);
+        break;
     default:
-        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
-        return;
+        OOFEM_ERROR2("RankineMatGrad :: givePDGradMatrix_uu - mMode = %d not supported\n", mMode);
+    }
+}
+
+void
+RankineMatGrad :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint* gp, TimeStep* tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    case _PlaneStressGrad:
+        givePlaneStressKappaMatrix(answer, form, mode, gp, tStep);
+        break;
+    default:
+        OOFEM_ERROR2("RankineMatGrad :: givePDGradMatrix_ku - mMode = %d not supported\n", mMode);
+    }
+}
+
+void
+RankineMatGrad :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    case _PlaneStressGrad:
+        givePlaneStressGprime(answer, form, mode, gp, tStep);
+        break;
+    default:
+        OOFEM_ERROR2("RankineMatGrad :: givePDGradMatrix_uk - mMode = %d not supported\n", mMode);
+    }
+}
+
+void
+RankineMatGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    case _PlaneStressGrad:
+        giveInternalLength(answer, form, mode, gp, tStep);
+        break;
+    default:
+        OOFEM_ERROR2("RankineMatGrad :: givePDGradMatrix_kk - mMode = %d not supported\n", mMode);
+    }
+}
+
+void
+RankineMatGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    default:
+        OOFEM_ERROR2("RankineMatGrad :: giveDPGradMatrix_LD - mMode = %d not supported\n", mMode);
     }
 }
 

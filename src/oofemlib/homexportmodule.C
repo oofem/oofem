@@ -86,10 +86,10 @@ HOMExportModule :: initializeFrom(InputRecord *ir)
 
 
 void
-HOMExportModule :: doOutput(TimeStep *tStep)
+HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
     Element *elem;
-    if ( !testTimeStepOutput(tStep) ) {
+    if ( !(testTimeStepOutput(tStep) || forcedOutput) ) {
         return;
     }
 

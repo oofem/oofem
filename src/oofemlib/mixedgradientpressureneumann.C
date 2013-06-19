@@ -270,7 +270,7 @@ void MixedGradientPressureNeumann :: giveLocationArrays(std::vector<IntArray> &r
 }
 
 
-IntegrationRule *MixedGradientPressureNeumann :: CreateIntegrationRule(Element *e, int order)
+IntegrationRule *MixedGradientPressureNeumann :: CreateIntegrationRule(Element *e, int boundary, int order)
 {
     // The element should give us most/all of this information;
     GaussIntegrationRule *ir = new GaussIntegrationRule(1, e);
@@ -311,7 +311,7 @@ void MixedGradientPressureNeumann :: integrateVolTangent(FloatArray &answer, Ele
     
     int nsd = e->giveDomain()->giveNumberOfSpatialDimensions();
     int order = interp->giveInterpolationOrder() + interpUnknown->giveInterpolationOrder();
-    IntegrationRule *ir = this->CreateIntegrationRule(e, order);
+    IntegrationRule *ir = this->CreateIntegrationRule(e, boundary, order);
 
     answer.resize(0);
     for (int i = 0; i < ir->giveNumberOfIntegrationPoints(); i++) {
@@ -349,7 +349,7 @@ void MixedGradientPressureNeumann :: integrateDevTangent(FloatMatrix &answer, El
     
     int nsd = e->giveDomain()->giveNumberOfSpatialDimensions();
     int order = interp->giveInterpolationOrder() + interpUnknown->giveInterpolationOrder();
-    IntegrationRule *ir = this->CreateIntegrationRule(e, order);
+    IntegrationRule *ir = this->CreateIntegrationRule(e, boundary, order);
     
     answer.resize(0,0);
     for (int i = 0; i < ir->giveNumberOfIntegrationPoints(); i++) {
@@ -456,9 +456,7 @@ void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep
             fe.times(-this->pressure);
             answer.assemble(fe, loc);
             if ( eNorms ) {
-                for ( int i = 1; i <= loc.giveSize(); ++i ) {
-                    if ( loc.at(i) ) eNorms->at(masterDofIDs.at(i)) += fe.at(i) * fe.at(i);
-                }
+                eNorms->assembleSquared(fe, masterDofIDs);
             }
         }
         
@@ -707,7 +705,7 @@ void MixedGradientPressureNeumann :: giveInputRecord(DynamicInputRecord &input)
 {
     MixedGradientPressureBC :: giveInputRecord(input);
     input.setField(this->pressure, _IFT_MixedGradientPressure_pressure);
-    OOFEM_ERROR("MixedGradientPressureDirichlet :: giveInputRecord - Not supported yet\n");
+    OOFEM_ERROR("MixedGradientPressureNeumann :: giveInputRecord - Not supported yet\n");
     //FloatArray devGradientVoigt;
     //input.setField(devGradientVoigt, _IFT_MixedGradientPressure_devGradient);
 }

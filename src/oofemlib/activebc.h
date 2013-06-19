@@ -139,10 +139,13 @@ public:
                                     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) {}
 
 
-    /// @name Functions related to boundary conditions which have to deal with special DOFs.
+    /**
+     * @name Functions related to boundary conditions which have to deal with special slave DOFs.
+     * Boundary conditions that do not require slave dofs do not need to overload these functions.
+     * @see ActiveDof The active DOF passes these functions here.
+     */
     //@{
     /**
-     * NOT ACTUALLY USED YET due to some design difficulties.
      * Checks to see if active boundary condition requires special DOFs.
      * @return True if ActiveDof should be created.
      */
