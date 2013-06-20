@@ -42,6 +42,7 @@
 #include "verbose.h"
 #include "sparsemtrxtype.h"
 #include "classfactory.h"
+#include "activebc.h"
 
 #include <climits>
 #include <cstdlib>
@@ -443,6 +444,35 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
             int ieq = loc.at(j);
             if ( ieq != 0 ) {
                 mht->at(ieq) = min( maxle, mht->at(ieq) );
+            }
+        }
+    }
+
+    // loop over active boundary conditions
+    int nbc = domain->giveNumberOfBoundaryConditions();
+    std::vector<IntArray> rows;
+    std::vector<IntArray> cols;
+    
+    for ( int i = 1; i <= nbc; ++i ) {
+        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
+        if ( bc != NULL ) {
+            bc->giveLocationArrays(rows, cols, ut, UnknownCharType, s, s);
+            for(std::vector<IntArray>::iterator it = rows.begin(); it != rows.end(); ++it) {
+                loc = *it;
+                js = loc.giveSize();
+                maxle = INT_MAX;
+                for ( int j = 1; j <= js; j++ ) {
+                    int ieq = loc.at(j);
+                    if ( ieq != 0 ) {
+                        maxle = min(maxle, ieq);
+                    }
+                }
+                for ( int j = 1; j <= js; j++ ) {
+                    int ieq = loc.at(j);
+                    if ( ieq != 0 ) {
+                        mht->at(ieq) = min( maxle, mht->at(ieq) );
+                    }
+                }
             }
         }
     }
