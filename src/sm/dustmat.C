@@ -515,7 +515,6 @@ DustMaterial :: computeQFromPlastVolEps(double &answer, double q, double deltaVo
 
 void
 DustMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                              MatResponseForm form,
                                               MatResponseMode mode,
                                               GaussPoint *gp,
                                               TimeStep *atTime)
@@ -525,10 +524,10 @@ DustMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     double ym = status->giveYoungsModulus();
     double coeff = status->giveVolumetricPlasticStrain() < 0 ? ym / ym0 : 1.0;
     if ( mode == ElasticStiffness ) {
-        LEMaterial->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
         answer.times(coeff);
     } else if ( mode == SecantStiffness || mode == TangentStiffness ) {
-        LEMaterial->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
         answer.times(coeff);
     } else {
         _error("Unsupported MatResponseMode\n");

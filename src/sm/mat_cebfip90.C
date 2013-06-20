@@ -75,7 +75,6 @@ CebFipSlip90Material :: hasMaterialModeCapability(MaterialMode mode)
 
 void
 CebFipSlip90Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                      MatResponseForm form,
                                                       MatResponseMode mode,
                                                       GaussPoint *gp,
                                                       TimeStep *atTime)

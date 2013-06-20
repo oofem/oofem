@@ -104,7 +104,7 @@ public:
     virtual classType giveClassID() const { return CohesiveInterfaceMaterialClass; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                               MatResponseForm, MatResponseMode,
+                                               MatResponseMode,
                                                GaussPoint *gp,
                                                TimeStep *atTime);
 

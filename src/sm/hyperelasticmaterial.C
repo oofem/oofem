@@ -60,7 +60,7 @@ HyperElasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 
 void
-HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode, GaussPoint *gp, TimeStep *atTime)
+HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *atTime)
 
 // returns the 6x6 tangent stiffness matrix
 

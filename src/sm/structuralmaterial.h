@@ -223,13 +223,12 @@ public:
      * Computes full 3d material stiffness matrix at given integration point, time, respecting load history
      * in integration point.
      * @param answer Computed results.
-     * @param form Material response form.
      * @param mode Material response mode.
      * @param gp Integration point.
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode,
+                                               MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *tStep)
     { _error("give3dMaterialStiffnessMatrix: not implemented "); }

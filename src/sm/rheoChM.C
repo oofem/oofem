@@ -459,15 +459,14 @@ RheoChainMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 void
 RheoChainMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                   MatResponseForm form, MatResponseMode mode,
+                                                   MatResponseMode mode,
                                                    GaussPoint *gp,
                                                    TimeStep *atTime)
 {
     //
     // Returns the incremental material stiffness matrix of the receiver
     //
-    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, form, mode, gp,
-                                                                     atTime);
+    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
     answer.times( this->giveEModulus(gp, atTime) );
 }
 

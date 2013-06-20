@@ -72,7 +72,7 @@ TrabBoneGrad3D :: giveCharacteristicMatrix(FloatMatrix &answer,
     case _3dMatGrad_F:
     case _3dMatGrad:
         if ( form == PDGrad_uu ) {
-            give3dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+            give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
         } else if ( form == PDGrad_ku ) {
             give3dKappaMatrix(answer, form, rMode, gp, atTime);
         } else if ( form == PDGrad_uk ) {

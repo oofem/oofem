@@ -965,7 +965,7 @@ public:
     /// Compute the derivative of R with respect to costheta.
     double computeDRDCosTheta(const double theta, const double ecc) const;
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     void computeSecantStiffness(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);

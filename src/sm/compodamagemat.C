@@ -130,7 +130,7 @@ void CompoDamageMat :: giveInputRecord(DynamicInputRecord &input)
 
 
 //called at the beginning of each time increment (not iteration), no influence of parameter
-void CompoDamageMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+void CompoDamageMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     FloatMatrix rotationMatrix;
 

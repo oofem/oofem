@@ -185,7 +185,7 @@ public:
                                       const FloatArray &, TimeStep *atTime);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode,
+                                               MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *atTime);
 

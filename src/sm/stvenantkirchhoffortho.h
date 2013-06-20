@@ -78,7 +78,7 @@ class StVenantKirchhoffOrthoMaterialStatus : public StructuralMaterialStatus
 {
 public:
     /// Constructor
-	StVenantKirchhoffOrthoMaterialStatus(int n, Domain *d, GaussPoint *g);
+    StVenantKirchhoffOrthoMaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor
     virtual ~StVenantKirchhoffOrthoMaterialStatus();
 
@@ -95,17 +95,17 @@ public:
 class StVenantKirchhoffOrtho : public StructuralMaterial
 {
 protected:
-	FloatArray VecA; // Fiber direction
-	double E_i, nu_i, EA, GA;
+    FloatArray VecA; // Fiber direction
+    double E_i, nu_i, EA, GA;
 
 public:
-	StVenantKirchhoffOrtho(int n, Domain *d);
-	virtual ~StVenantKirchhoffOrtho();
+    StVenantKirchhoffOrtho(int n, Domain *d);
+    virtual ~StVenantKirchhoffOrtho();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode, GaussPoint *gp,
+                                               MatResponseMode mode, GaussPoint *gp,
                                                TimeStep *tStep);
 
     virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,

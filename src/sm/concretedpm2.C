@@ -2296,7 +2296,6 @@ ConcreteDPM2 :: computeHardeningTwoPrime(const double kappa) const
 
 void
 ConcreteDPM2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                              MatResponseForm form,
                                               MatResponseMode mode,
                                               GaussPoint *gp,
                                               TimeStep *atTime)
@@ -2305,9 +2304,9 @@ ConcreteDPM2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
          gp->giveMaterialMode() ==  _PlaneStrain ||
          gp->giveMaterialMode() == _3dRotContinuum  ) {
         if ( mode == ElasticStiffness ) {
-            this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+            this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
         } else if ( mode == SecantStiffness ) {
-            computeSecantStiffness(answer, form, mode, gp, atTime);
+            computeSecantStiffness(answer, FullForm, mode, gp, atTime);
         } else if ( mode == TangentStiffness ) {
             _error("Tangent stiffness not implemented. Use either elastic or secant stiffness.\n");
         }

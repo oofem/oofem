@@ -76,7 +76,6 @@ SimpleInterfaceMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 void
 SimpleInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                         MatResponseForm form,
                                                          MatResponseMode mode,
                                                          GaussPoint *gp,
                                                          TimeStep *atTime)

@@ -129,7 +129,7 @@ public:
     virtual classType giveClassID() const { return CebFipSlip90MaterialClass; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode,
+                                               MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *tStep);
 

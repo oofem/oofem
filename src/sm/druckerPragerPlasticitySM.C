@@ -601,18 +601,17 @@ DruckerPragerPlasticitySM :: computeYieldStressPrime(double kappa, double eM) co
 
 void
 DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                           MatResponseForm form,
                                                            MatResponseMode mode,
                                                            GaussPoint *gp,
                                                            TimeStep *atTime)
 {
     switch ( mode ) {
     case ElasticStiffness:
-        LEMaterial->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
         break;
 
     case SecantStiffness:
-        LEMaterial->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        LEMaterial->give3dMaterialStiffnessMatrix(answer,  mode, gp, atTime);
         break;
 
 
@@ -621,17 +620,17 @@ DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                 ->giveTempStateFlag() ) {
         case DruckerPragerPlasticitySMStatus :: DP_Elastic:        // elastic stiffness
         case DruckerPragerPlasticitySMStatus :: DP_Unloading:        // elastic stiffness
-            LEMaterial->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+            LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
             break;
         case DruckerPragerPlasticitySMStatus :: DP_Yielding:
             // elasto-plastic stiffness for regular case
             //printf("\nAssembling regular algorithmic stiffness matrix.") ;
-            giveRegAlgorithmicStiffMatrix(answer, form, mode, gp, atTime);
+            giveRegAlgorithmicStiffMatrix(answer, FullForm, mode, gp, atTime);
             break;
         case DruckerPragerPlasticitySMStatus :: DP_Vertex:
             // elasto-plastic stiffness for vertex case
             //printf("\nAssembling vertex case algorithmic stiffness matrix.") ;
-            giveVertexAlgorithmicStiffMatrix(answer, form, mode, gp, atTime);
+            giveVertexAlgorithmicStiffMatrix(answer, FullForm, mode, gp, atTime);
             break;
         default:
             _error("Case did not match.\n");

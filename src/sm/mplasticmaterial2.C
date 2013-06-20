@@ -1731,7 +1731,7 @@ MPlasticMaterial2 :: computeReducedElasticModuli(FloatMatrix &answer,
 // overloaded from structural material
 
 void
-MPlasticMaterial2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
+MPlasticMaterial2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                    MatResponseMode mode,
                                                    GaussPoint *gp,
                                                    TimeStep *atTime)
@@ -1766,12 +1766,12 @@ MPlasticMaterial2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRespo
     // calling GiveMaterailStiffenssMatrix, which imposes constrains correctly.
     if ( mode == TangentStiffness ) {
         if ( rmType == mpm_ClosestPoint ) {
-            this->giveConsistentStiffnessMatrix(answer, form, mode, gp, atTime);
+            this->giveConsistentStiffnessMatrix(answer, FullForm, mode, gp, atTime);
         } else {
-            this->giveElastoPlasticStiffnessMatrix(answer, form, mode, gp, atTime);
+            this->giveElastoPlasticStiffnessMatrix(answer, FullForm, mode, gp, atTime);
         }
     } else {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
     }
 }
 

@@ -66,7 +66,7 @@ void TrabBoneEmbed :: computeCumPlastStrain(double &tempAlpha, GaussPoint *gp, T
 
 void
 TrabBoneEmbed :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode, GaussPoint *gp,
+                                               MatResponseMode mode, GaussPoint *gp,
                                                TimeStep *atTime)
 {
     TrabBoneEmbedStatus *status = static_cast< TrabBoneEmbedStatus * >( this->giveStatus(gp) );

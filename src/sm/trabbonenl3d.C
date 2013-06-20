@@ -90,7 +90,7 @@ TrabBoneNL3D :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
 
 void
 TrabBoneNL3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                              MatResponseForm form, MatResponseMode mode, GaussPoint *gp,
+                                              MatResponseMode mode, GaussPoint *gp,
                                               TimeStep *atTime)
 {
     TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );

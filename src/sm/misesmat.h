@@ -116,7 +116,7 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseForm form, MatResponseMode mode,
+                                       MatResponseMode mode,
                                        GaussPoint *gp,
                                        TimeStep *tStep);
 
@@ -137,13 +137,13 @@ protected:
     void computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatMatrix b, double J);
 
     void give3dSSMaterialStiffnessMatrix(FloatMatrix &answer,
-                                         MatResponseForm form, MatResponseMode mode,
+                                         MatResponseMode mode,
                                          GaussPoint *gp,
                                          TimeStep *tStep);
     virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dLSMaterialStiffnessMatrix(FloatMatrix &answer,
-                                         MatResponseForm form, MatResponseMode mode,
+                                         MatResponseMode mode,
                                          GaussPoint *gp,
                                          TimeStep *tStep);
 

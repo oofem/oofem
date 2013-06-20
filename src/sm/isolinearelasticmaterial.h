@@ -140,7 +140,7 @@ public:
     double giveBulkModulus() { return E / ( 3. * ( 1. - 2. * nu ) ); }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                       MatResponseForm, MatResponseMode,
+                                       MatResponseMode,
                                        GaussPoint * gp,
                                        TimeStep * atTime);
 

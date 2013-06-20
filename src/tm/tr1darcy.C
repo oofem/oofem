@@ -105,7 +105,7 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *atTime)
         double detJ = this->interpolation_lin.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
         this->interpolation_lin.evaldNdx( BT, * lcoords, FEIElementGeometryWrapper(this) );
         
-        mat->giveCharacteristicMatrix(K, FullForm, TangentStiffness, gp, atTime);
+        mat->giveCharacteristicMatrix(K, ReducedForm, TangentStiffness, gp, atTime);
 
         B.beTranspositionOf(BT);
         KB.beProductOf(K, B);

@@ -1283,7 +1283,6 @@ Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray *strainIncrement)
 
 void
 Concrete2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
                                            MatResponseMode rMode,
                                            GaussPoint *gp,
                                            TimeStep *atTime)
@@ -1295,7 +1294,7 @@ Concrete2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 //
 {
     // error ("Give3dMaterialStiffnessMatrix: unable to compute");
-    linearElasticMaterial->give3dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+    linearElasticMaterial->give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
 }
 
 

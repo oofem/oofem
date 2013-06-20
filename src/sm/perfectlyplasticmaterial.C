@@ -370,7 +370,6 @@ PerfectlyPlasticMaterial :: giveMaterialStiffnessMatrix(FloatMatrix &answer, Mat
 
 void
 PerfectlyPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                          MatResponseForm form,
                                                           MatResponseMode mode,
                                                           GaussPoint *gp,
                                                           TimeStep *atTime)
@@ -388,11 +387,6 @@ PerfectlyPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 // in order to take possible failure (tension cracking) into account
 //
 //
-// WARNING !!
-// the same form as in GiveMaterialStiffnessMatrix, but no reduction to stress strain
-// subspaces is performed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// 3d_response is forced, not regarding current MaterilMode in gp.
-//
 {
     MaterialMode originalMode = gp->giveMaterialMode();
     if ( originalMode != _3dMat ) {
@@ -409,7 +403,7 @@ PerfectlyPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     // calling GiveMaterailStiffenssMatrix, which imposes constrains correctly.
 
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
     } else {
         this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
     }

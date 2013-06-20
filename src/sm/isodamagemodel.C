@@ -77,7 +77,6 @@ IsotropicDamageMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 void
 IsotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                         MatResponseForm form,
                                                          MatResponseMode mode,
                                                          GaussPoint *gp,
                                                          TimeStep *atTime)
@@ -94,7 +93,7 @@ IsotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         om = min(om, maxOmega);
     }
 
-    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
     answer.times(1.0 - om);
 }
 

@@ -314,8 +314,6 @@ public:
     virtual void computeEdgeLoadVector(FloatArray &answer, Load *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep);
     //@}
 
-    //virtual MaterialMode giveMaterialMode() {return _Unknown;}
-
     /**@name General element functions */
     //@{
     /**
