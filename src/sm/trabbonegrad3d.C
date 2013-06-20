@@ -67,25 +67,75 @@ TrabBoneGrad3D :: giveCharacteristicMatrix(FloatMatrix &answer,
 // Returns characteristic material stiffness matrix of the receiver
 //
 {
+    _error( "giveCharacteristicMatrix : Shouldn't be called");
+}
+
+void
+TrabBoneGrad3D :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) 
+{
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _3dMatGrad_F:
     case _3dMatGrad:
-        if ( form == PDGrad_uu ) {
-            give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
-        } else if ( form == PDGrad_ku ) {
-            give3dKappaMatrix(answer, form, rMode, gp, atTime);
-        } else if ( form == PDGrad_uk ) {
-            give3dGprime(answer, form, rMode, gp, atTime);
-        } else if ( form == PDGrad_kk ) {
-            giveInternalLength(answer, form, rMode, gp, atTime);
-        }
+        give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
         break;
-
     default:
-        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+        _error2( "givePDGradMatrix_uu : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
+
+void
+TrabBoneGrad3D :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint* gp, TimeStep* tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    case _3dMatGrad_F:
+    case _3dMatGrad:
+        give3dKappaMatrix(answer, form, rMode, gp, atTime);
+        break;
+    default:
+        _error2( "givePDGradMatrix_ku : unknown mode (%s)", __MaterialModeToString(mMode) );
+    }
+}
+
+void
+TrabBoneGrad3D :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    case _3dMatGrad_F:
+    case _3dMatGrad:
+        give3dGprime(answer, form, rMode, gp, atTime);
+        break;
+    default:
+        _error2( "givePDGradMatrix_uk : unknown mode (%s)", __MaterialModeToString(mMode) );
+    }
+}
+
+void
+TrabBoneGrad3D :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    case _3dMatGrad_F:
+    case _3dMatGrad:
+        giveInternalLength(answer, form, rMode, gp, atTime);
+        break;
+    default:
+        _error2( "givePDGradMatrix_kk : unknown mode (%s)", __MaterialModeToString(mMode) );
+    }
+}
+
+void
+TrabBoneGrad3D :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    default:
+        _error2( "givePDGradMatrix_LD : unknown mode (%s)", __MaterialModeToString(mMode) );
+    }
+}
+
 
 void
 TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
