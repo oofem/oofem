@@ -113,7 +113,7 @@ public:
 
     virtual const char *giveClassName() const { return "Hexa1BubbleStokes"; }
     virtual const char *giveInputRecordName() const { return _IFT_Hexa1BubbleStokes_Name; }
-    virtual MaterialMode giveMaterialMode() { return _2dFlow; }
+    virtual MaterialMode giveMaterialMode() { return _3dFlow; }
 
     virtual int computeNumberOfDofs(EquationID ut);
     
