@@ -52,12 +52,9 @@ StructuralCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm 
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    //Material *mat = gp->giveElement()->giveMaterial();
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
 
     if ( mat->hasMaterialModeCapability(mode) ) {
-        //static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() )
-        //->giveRealStressVector(answer, form, gp, strain, tStep);
         mat->giveRealStressVector(answer, form, gp, strain, tStep);
         return;
     } else {
@@ -77,7 +74,6 @@ StructuralCrossSection ::  giveFirstPKStresses(FloatArray &answer, MatResponseFo
     // mode stored in each gp.
 
     MaterialMode mode = gp->giveMaterialMode();
-    //Material *mat = gp->giveElement()->giveMaterial(); // shouldn't it ask the cs?
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
     if ( mat->hasMaterialModeCapability(mode) ) {
         mat->giveFirstPKStressVector(answer, form, gp, F, tStep);

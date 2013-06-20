@@ -116,29 +116,23 @@ HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRe
     answer.at(5, 6) = answer.at(6, 5) = A * c13 * c12 + B / 2. * ( c11 * c23 + c12 * c13 );
 }
 
-
+/*
 void
 HyperElasticMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
                                                MatResponseForm form, MatResponseMode mode, GaussPoint *gp,
                                                TimeStep *tStep)
 {
     FloatMatrix dSdE;
-    give3dMaterialStiffnessMatrix(dSdE, form, mode, gp, tStep); // dSdE
+    give3dMaterialStiffnessMatrix(dSdE, form, mode, gp, tStep); 
     HyperElasticMaterialStatus *status = static_cast< HyperElasticMaterialStatus * >( this->giveStatus(gp) );
     FloatArray vF, vS, vP;
     vF = status->giveTempFVector();
-    vP = status->giveTempStressVector();    // 1st PK
+    vP = status->giveTempPVector();  
 
-    // Compute PK2 stress needed for transformation of stiffness
-    FloatMatrix F, P, S, invF;
-    F.beMatrixForm(vF);
-    P.beMatrixForm(vP);
-    invF.beInverseOf(F);
-    S.beProductOf(invF,P);
-    vS.beReducedVectorForm(S);
+    this->convert_P_2_S( vS, vP, vF, _3dMat);
     this->convert_dSdE_2_dPdF(answer, dSdE, vS, vF, _3dMat);
 }
-
+*/
 
 void
 HyperElasticMaterial :: giveSecondPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
@@ -181,7 +175,7 @@ HyperElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm
     C.at(2, 3) = C.at(3, 2) = strainVector.at(4);
     invC.beInverseOf(C);
     J2 = C.giveDeterminant();
-
+    
     answer.resize(6);
     double aux = ( K - 2. / 3. * G ) * ( J2 - 1. ) / 2. - G;
     answer.at(1) = aux * invC.at(1, 1) + G;
@@ -197,7 +191,7 @@ HyperElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm
 
 }
 
-
+/*
 void
 HyperElasticMaterial :: giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &vF, TimeStep *atTime)
 {
@@ -212,18 +206,15 @@ HyperElasticMaterial :: giveFirstPKStressVector(FloatArray &answer, MatResponseF
     this->giveRealStressVector(vS, form, gp, vE, atTime);   // second PK stress
     HyperElasticMaterialStatus *status = static_cast< HyperElasticMaterialStatus * >( this->giveStatus(gp) );
 
-    // Convert S to P
-    FloatMatrix P, S;
-    S.beMatrixForm(vS);
-    P.beProductOf(F,S);
-    answer.beFullVectorForm(P);
+
+    //this->convert_S_2_P(answer, vS, vF, gp->giveMaterialMode() );
+    this->convert_S_2_P(answer, vS, vF, _3dMat );
 
     // update gp
-    status->letTempStrainVectorBe(vE);
-    status->letTempStressVectorBe(answer);
     status->letTempFVectorBe(vF);
+    status->letTempPVectorBe(answer);
 }
-
+*/
 
 MaterialStatus *
 HyperElasticMaterial :: CreateStatus(GaussPoint *gp) const

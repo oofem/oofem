@@ -203,6 +203,8 @@ public:
 
     static void convert_dSdE_2_dPdF(FloatMatrix &answer, FloatMatrix &dSdE, FloatArray &S, FloatArray &F, MaterialMode matMode);
 
+    void convert_P_2_S(FloatArray &answer, const FloatArray &reducedvP, const FloatArray &reducedvF, MaterialMode matMode);
+    void convert_S_2_P(FloatArray &answer, const FloatArray &reducedvS, const FloatArray &reducedvF, MaterialMode matMode);
     /**
      * Returns a vector of coefficients of thermal dilatation in direction of each material principal (local) axis.
      * @param answer Vector of thermal dilatation coefficients.
@@ -308,6 +310,7 @@ public:
      * @return For unknown mode error is generated.
      */
     virtual void giveStressStrainMask(IntArray &answer, MatResponseForm form, MaterialMode mmode) const;
+    virtual void giveFullStressStrainMask(IntArray &answer, MatResponseForm form, MaterialMode mmode) const;
     virtual void givePrincipalStressStrainMask(IntArray &answer, MatResponseForm form, MaterialMode mmode) const;
     /**
      * Returns the size of reduced stress/strain vector according to given mode.
@@ -366,8 +369,11 @@ public:
     void giveFullCharacteristicVector(FloatArray &answer,  GaussPoint *gp,
                                       const FloatArray &strainVector);
 
-    void giveFullDeformationGradient(FloatArray &answer,  GaussPoint *gp,
-                                      const FloatArray &strainVector);
+    void giveFullVectorForm(FloatArray &answer, const FloatArray &strainVector,  MaterialMode matMode);
+    void giveFullVectorFormF(FloatArray &answer, const FloatArray &strainVector,  MaterialMode matMode);
+    void giveSymFullVectorForm(FloatArray &answer,const FloatArray &vec, MaterialMode matMode);
+    void giveReducedVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode);
+    void giveSymReducedVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode);
 
 protected:
     /**
@@ -612,6 +618,10 @@ protected:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void give1dStressStiffMtrx(FloatMatrix &answer,
+                                       MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                       TimeStep *tStep);
+
+    virtual void give1dStressStiffMtrx_dPdF(FloatMatrix &answer,
                                        MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
                                        TimeStep *tStep);
     /**

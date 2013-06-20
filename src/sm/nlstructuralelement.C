@@ -194,6 +194,7 @@ NLStructuralElement :: computeStressStiffness(FloatMatrix &answer, FloatArray &S
 
     // 1D - keep first index
     answer.resize(1,1);
+    answer(0,0) = S(0);
     } else {
         OOFEM_ERROR2("computeStressStiffness : MaterialMode is not supported (%s)", __MaterialModeToString(matMode) );
     }
@@ -274,7 +275,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
 
         } else if ( nlGeometry == -1 ) { // dPdF
             if ( useUpdatedGpRecord == 1 ) {
-                vS = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+                vS = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->givePVector();
             } else {
                 this->computeFirstPKStressVector(vS, gp, tStep); 
             }
@@ -361,7 +362,7 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
 
             } else if ( nlGeometry == -1 ) { // dPdF
                 if ( useUpdatedGpRecord == 1 ) {
-                    vS = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+                    vS = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->givePVector();
                 } else {
                     this->computeFirstPKStressVector(vS, gp, tStep); 
                 }
@@ -516,6 +517,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
             }
         }
     }
+    
 
     // Add geometric stiffness ("initial stress" stiffness)  - BH^T * S * BH
     // @todo The old code does not have any selective integration for this term, maybe it is never needed
@@ -546,7 +548,8 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
     if ( matStiffSymmFlag ) {
         answer.symmetrized();
     }
-
+    
+    //answer.printYourself();
 }
 
 // Helper method (not in use)
