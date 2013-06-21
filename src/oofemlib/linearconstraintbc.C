@@ -40,6 +40,8 @@
 #include "unknownnumberingscheme.h"
 #include "loadtimefunction.h"
 #include "timestep.h"
+#include "datastream.h"
+#include "contextioerr.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(LinearConstraintBC);
@@ -73,19 +75,19 @@ IRResultType LinearConstraintBC :: initializeFrom(InputRecord *ir)
 }
 
 
-void LinearConstraintBC :: giveLocArray(const UnknownNumberingScheme &r_s,  IntArray &locr)
+void LinearConstraintBC :: giveLocArray(const UnknownNumberingScheme &r_s,  IntArray &locr, int& lambda_eq)
 {
     int size = this->weights.giveSize();
     Dof *idof;
 
-    locr.resize(size + 1);
+    locr.resize(size);
     // assemble location array
     for ( int _i = 1; _i <= size; _i++ ) {
         idof = this->domain->giveDofManager( this->dofmans.at(_i) )->giveDof( this->dofs.at(_i) );
         locr.at(_i) = r_s.giveDofEquationNumber(idof);
     }
 
-    locr.at(size + 1) = r_s.giveDofEquationNumber( md->giveDof(1) );
+    lambda_eq = r_s.giveDofEquationNumber( md->giveDof(1) );
 }
 
 
@@ -94,45 +96,119 @@ void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep, Equatio
                                     const UnknownNumberingScheme &c_s)
 {
     int size = this->weights.giveSize();
-    FloatMatrix contrib(size + 1, size + 1);
-    IntArray locr(size + 1), locc(size + 1);
+    IntArray lambdaeq(1);
+    FloatMatrix contrib(size, 1), contribt;
+    IntArray locr(size), locc(size);
 
     for ( int _i = 1; _i <= size; _i++ ) { // loop over dofs
         double factor=1.;
         if(weightsLtf.giveSize()){
-            domain->giveLoadTimeFunction(weightsLtf.at(_i))->__at(tStep->giveIntrinsicTime());
+            factor = domain->giveLoadTimeFunction(weightsLtf.at(_i))->__at(tStep->giveIntrinsicTime());
         }
-        contrib.at(_i, size + 1) = this->weights.at(_i)*factor;
-        contrib.at(size + 1, _i) = this->weights.at(_i)*factor;
+        contrib.at(_i, 1) = this->weights.at(_i)*factor;
     }
+    contribt.beTranspositionOf(contrib);
 
-    contrib.at(size + 1, size + 1) = 0.0; // internal Lagrange multiplier
+    this->giveLocArray(r_s, locr, lambdaeq.at(1));
+    answer->assemble(lambdaeq, locr, contrib);
+    answer->assemble(locr, lambdaeq, contribt);
 
-    this->giveLocArray(r_s, locr);
-    this->giveLocArray(c_s, locc);
-    answer->assemble(locr, contrib);
 }
 
 void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                           CharType type, ValueModeType mode,
                                           const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
-    IntArray loc;
-    FloatArray vec;
-    double factor=1.;
+  IntArray loc, lambdaeq(1);
+  FloatArray vec(1);
+  double factor=1.;
+
     if(rhsLtf){
-        domain->giveLoadTimeFunction(rhsLtf)->__at(tStep->giveIntrinsicTime());
+        factor = domain->giveLoadTimeFunction(rhsLtf)->__at(tStep->giveIntrinsicTime());
     }
-    this->giveLocArray(s, loc);
-    vec.resize( loc.giveSize() );
-    vec.at( vec.giveSize() ) = rhs*factor;
-    answer.assemble(vec, loc);
+    this->giveLocArray(s, loc, lambdaeq.at(1));
+    vec.at(1) = rhs*factor;
+    answer.assemble(vec, lambdaeq);
 }
 
 void LinearConstraintBC :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) {
-    rows.resize(1);
-    IntArray loc;
-    this->giveLocArray(r_s, loc);
+    rows.resize(2);
+    cols.resize(2);
+
+    IntArray loc, lambdaeq(1);
+    this->giveLocArray(r_s, loc, lambdaeq.at(1));
+    // column block
     rows [ 0 ] = loc;
+    cols [ 0 ] = lambdaeq;
+    // row block
+    cols [ 1 ] = loc;
+    rows [ 1 ] = lambdaeq;
 }
+
+
+contextIOResultType
+LinearConstraintBC :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+{
+    contextIOResultType iores;
+    if ( mode & CM_Definition ) {
+        if ( ( iores = weights.storeYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( ( iores = weightsLtf.storeYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( ( iores = dofmans.storeYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( ( iores = dofs.storeYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( !stream->write(& rhs, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream->write(& rhsLtf, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+    }
+    
+    if ( ( iores = md->saveContext(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
+    }
+
+    return CIO_OK;
+}
+
+
+contextIOResultType
+LinearConstraintBC :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+{
+    contextIOResultType iores;
+    if ( mode & CM_Definition ) {
+        if ( ( iores = weights.restoreYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( ( iores = weightsLtf.restoreYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( ( iores = dofmans.restoreYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( ( iores = dofs.restoreYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( !stream->read(& rhs, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream->read(& rhsLtf, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+    }
+
+    if ( ( iores = md->restoreContext(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
+    }
+
+    return CIO_OK;
+}
+
 } //end of oofem namespace
