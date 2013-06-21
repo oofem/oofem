@@ -41,6 +41,7 @@
 #include "dofmanager.h"
 #include "sparsemtrxtype.h"
 #include "classfactory.h"
+#include "activebc.h"
 #include "DSSolver.h"
 
 #include <set>
@@ -152,6 +153,31 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
         }
     }
 
+    // loop over active boundary conditions
+    int nbc = domain->giveNumberOfBoundaryConditions();
+    std::vector<IntArray> r_locs;
+    std::vector<IntArray> c_locs;
+    
+    for ( i = 1; i <= nbc; ++i ) {
+        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
+        if ( bc != NULL ) {
+            bc->giveLocationArrays(r_locs, c_locs, ut, UnknownCharType, s, s);
+	    for (std::size_t k = 0; k < r_locs.size(); k++) {
+	      IntArray &krloc = r_locs[k];
+	      IntArray &kcloc = c_locs[k];
+	      for ( int ri = 1; ri <= krloc.giveSize(); ri++ ) {
+		if ( ( ii = krloc.at(ri) ) ) {
+		  for ( j = 1; j <= kcloc.giveSize(); j++ ) {
+		    if ( (jj = kcloc.at(j) ) ) {
+		      columns [ jj - 1 ].insert(ii - 1);
+		    }
+		  }
+		}
+	      }
+	    }
+	}
+    }
+    
     for ( i = 0; i < neq; i++ ) {
         nz_ += columns [ i ].size();
     }
@@ -189,7 +215,13 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
 
     bool _succ = true;
     int _ndofs, _neq, ndofmans = domain->giveNumberOfDofManagers();
-    long *mcn = new long [ ndofmans * bsize ];
+    int ndofmansbc = 0;
+    // count number of internal dofmans on active bc
+    for (n=1; n<=nbc; n++) {
+      ndofmansbc+=domain->giveBc(n)->giveNumberOfInternalDofManagers();
+    }
+
+    long *mcn = new long [ (ndofmans+ndofmansbc) * bsize ];
     long _c = 0;
     DofManager *dman;
 
@@ -221,9 +253,37 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
         }
     }
 
+    // loop over internal dofmans of active bc
+    for (int ibc=1; ibc<=nbc; ibc++) {
+      int ndman = domain->giveBc(ibc)->giveNumberOfInternalDofManagers();
+      for (int idman = 1; idman <= ndman; idman ++) {
+	dman = domain->giveBc(ibc)->giveInternalDofManager(idman);
+	_ndofs = dman->giveNumberOfDofs();
+        if ( _ndofs > bsize ) {
+	  _succ = false;
+	  break;
+        }
+
+        for ( i = 1; i <= _ndofs; i++ ) {
+	  if ( dman->giveDof(i)->isPrimaryDof() ) {
+	    _neq = dman->giveDof(i)->giveEquationNumber(s);
+	    if ( _neq > 0 ) {
+	      mcn [ _c++ ] = _neq - 1;
+	    } else {
+	      mcn [ _c++ ] = -1; // no corresponding row in sparse mtrx structure
+	    }
+	  }
+        }
+
+        for ( i = _ndofs + 1; i <= bsize; i++ ) {
+	  mcn [ _c++ ] = -1;                         // no corresponding row in sparse mtrx structure
+        }
+      }
+    }
+    
     if ( _succ ) {
         _dss->SetMatrixPattern(_sm, bsize);
-        _dss->LoadMCN(ndofmans, bsize, mcn);
+        _dss->LoadMCN(ndofmans+ndofmansbc, bsize, mcn);
     } else {
         OOFEM_LOG_INFO("DSSMatrix: using assumed block structure");
         _dss->SetMatrixPattern(_sm, bsize);
@@ -301,16 +361,30 @@ int DSSMatrix :: assemble(const IntArray &rloc, const IntArray &cloc, const Floa
 
     dim1 = mat.giveNumberOfRows();
     dim2 = mat.giveNumberOfColumns();
-    for ( i = 1; i <= dim1; i++ ) {
+    if ( _type == unsym_LU ) {
+      for ( i = 1; i <= dim1; i++ ) {
         ii = rloc.at(i);
         if ( ii ) {
-            for ( j = 1; j <= dim2; j++ ) {
-                jj = cloc.at(j);
-                if ( jj ) {
-                    _dss->ElementAt(ii - 1, jj - 1) += mat.at(i, j);
-                }
-            }
+	  for ( j = 1; j <= dim2; j++ ) {
+	    jj = cloc.at(j);
+	    if ( jj ) {
+	      _dss->ElementAt(ii - 1, jj - 1) += mat.at(i, j);
+	    }
+	  }
         }
+      }
+    } else { // symmetric pattern
+      for ( i = 1; i <= dim1; i++ ) {
+        ii = rloc.at(i);
+        if ( ii ) {
+	  for ( j = 1; j <= dim2; j++ ) {
+	    jj = cloc.at(j);
+	    if ( jj && (jj <= ii) ) {
+	      _dss->ElementAt(ii - 1, jj - 1) += mat.at(i, j);
+	    }
+	  }
+        }
+      }
     }
 
     // increment version
