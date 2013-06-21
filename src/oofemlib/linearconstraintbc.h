@@ -53,6 +53,9 @@
 #define _IFT_LinearConstraintBC_rhsltf "rhsltf"
 #define _IFT_LinearConstraintBC_dofmans "dofmans"
 #define _IFT_LinearConstraintBC_dofs "dofs"
+#define _IFT_LinearConstraintBC_lhstype "lhstype"
+#define _IFT_LinearConstraintBC_rhstype "rhstype"
+
 //@}
 
 namespace oofem {
@@ -76,6 +79,12 @@ protected:
     IntArray dofmans;
     IntArray dofs;
     DofManager *md;
+    
+
+    // characteristicType of LHS and RHS contributions (this makes this bc trully general, as one can customize, to which 
+    // characteristic component the contibution will be assembled)
+    IntArray lhsType;
+    int rhsType;
 
 public:
     LinearConstraintBC(int n, Domain *d);

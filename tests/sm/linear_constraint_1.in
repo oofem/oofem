@@ -10,7 +10,11 @@ Truss2d 1 nodes 2 1 2 mat 1 crossSect 1
 SimpleCS 1 thick 0.1 width 0.2
 IsoLE 1  tAlpha 0.000012  d 1.0  E 1.0  n 0.2  
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
-LinearConstraintBC 2 loadTimeFunction 1 weights 1 1 weightsLtf 1 2 rhs -0.15 rhsLtf 1 dofmans 1 2 dofs 1 1
+#
+# LinearConstraintBC contributes to the following characteristic terms:
+# lhstype 4 1 2 3 4  - StiffnessMatrix, TangentStiffnessMatrix, SecantStiffnessMatrix, ElasticStiffnessMatrix
+# rhsType 48 - ExternalForcesVector
+LinearConstraintBC 2 loadTimeFunction 1 weights 1 1 weightsLtf 1 2 rhs -0.15 rhsLtf 1 dofmans 1 2 dofs 1 1 lhstype 4 1 2 3 4 rhsType 48
 ConstantFunction 1 f(t) 1.0
 ConstantFunction 2 f(t) 0.5
 #%BEGIN_CHECK% tolerance 1.e-6

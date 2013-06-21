@@ -52,6 +52,8 @@ LinearConstraintBC :: LinearConstraintBC(int n, Domain *d) : ActiveBoundaryCondi
     this->md = new Node(0, domain);
     // this is internal lagrange multiplier uses to enforce the receiver constrain
     this->md->appendDof( new MasterDof( 0, this->md, ( DofIDItem ) ( d->giveNextFreeDofID() ) ) );
+    this->lhsType.resize(0); 
+    this->rhsType = UnknownCharType;
 }
 
 
@@ -71,6 +73,10 @@ IRResultType LinearConstraintBC :: initializeFrom(InputRecord *ir)
     }
     IR_GIVE_OPTIONAL_FIELD(ir, weightsLtf, _IFT_LinearConstraintBC_weightsltf);
     IR_GIVE_OPTIONAL_FIELD(ir, rhsLtf, _IFT_LinearConstraintBC_rhsltf);
+
+    IR_GIVE_FIELD(ir, lhsType, _IFT_LinearConstraintBC_lhstype); 
+    IR_GIVE_FIELD(ir, rhsType, _IFT_LinearConstraintBC_rhstype);
+
     return IRRT_OK;
 }
 
@@ -95,10 +101,15 @@ void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep, Equatio
                                     CharType type, const UnknownNumberingScheme &r_s,
                                     const UnknownNumberingScheme &c_s)
 {
+
+
     int size = this->weights.giveSize();
     IntArray lambdaeq(1);
     FloatMatrix contrib(size, 1), contribt;
     IntArray locr(size), locc(size);
+
+    if (!this->lhsType.contains((int) type)) return ;
+
 
     for ( int _i = 1; _i <= size; _i++ ) { // loop over dofs
         double factor=1.;
@@ -123,12 +134,14 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
   FloatArray vec(1);
   double factor=1.;
 
-    if(rhsLtf){
-        factor = domain->giveLoadTimeFunction(rhsLtf)->__at(tStep->giveIntrinsicTime());
-    }
-    this->giveLocArray(s, loc, lambdaeq.at(1));
-    vec.at(1) = rhs*factor;
-    answer.assemble(vec, lambdaeq);
+  if ((int) type != this->rhsType) return ;
+
+  if(rhsLtf){
+    factor = domain->giveLoadTimeFunction(rhsLtf)->__at(tStep->giveIntrinsicTime());
+  }
+  this->giveLocArray(s, loc, lambdaeq.at(1));
+  vec.at(1) = rhs*factor;
+  answer.assemble(vec, lambdaeq);
 }
 
 void LinearConstraintBC :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) {
@@ -169,6 +182,13 @@ LinearConstraintBC :: saveContext(DataStream *stream, ContextMode mode, void *ob
         if ( !stream->write(& rhsLtf, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
+        if ( ( iores = lhsType.storeYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( !stream->write(& rhsType, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
     }
     
     if ( ( iores = md->saveContext(stream, mode) ) != CIO_OK ) {
@@ -200,6 +220,12 @@ LinearConstraintBC :: restoreContext(DataStream *stream, ContextMode mode, void 
             THROW_CIOERR(CIO_IOERR);
         }
         if ( !stream->read(& rhsLtf, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( ( iores = lhsType.restoreYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( !stream->read(& rhsType, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
