@@ -326,7 +326,9 @@ int Skyline :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatM
             for ( j = 1; j <= dim2; j++ ) {
                 jj = cloc.at(j);
                 if ( jj ) {
+		  if (ii<=jj) {
                     this->at(ii, jj) += mat.at(i, j);
+		  }
                 }
             }
         }

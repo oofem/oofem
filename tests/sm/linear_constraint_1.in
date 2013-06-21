@@ -18,6 +18,6 @@ LinearConstraintBC 2 loadTimeFunction 1 weights 1 1 weightsLtf 1 2 rhs -0.15 rhs
 ConstantFunction 1 f(t) 1.0
 ConstantFunction 2 f(t) 0.5
 #%BEGIN_CHECK% tolerance 1.e-6
-#NODE tStep 1.0 number 2 dof 1 unknown d value -0.15
-#REACTION tStep 1.0 number 1 dof 1 value 1.5e-3
+#NODE tStep 1.0 number 2 dof 1 unknown d value -0.30
+#REACTION tStep 1.0 number 1 dof 1 value 3.e-3
 #%END_CHECK%
