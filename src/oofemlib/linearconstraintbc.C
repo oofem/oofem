@@ -123,7 +123,6 @@ void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep, Equatio
     this->giveLocArray(r_s, locr, lambdaeq.at(1));
     answer->assemble(lambdaeq, locr, contrib);
     answer->assemble(locr, lambdaeq, contribt);
-
 }
 
 void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
@@ -145,8 +144,8 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
 }
 
 void LinearConstraintBC :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) {
-    rows.resize(2);
-    cols.resize(2);
+    rows.resize(3);
+    cols.resize(3);
 
     IntArray loc, lambdaeq(1);
     this->giveLocArray(r_s, loc, lambdaeq.at(1));
@@ -156,6 +155,10 @@ void LinearConstraintBC :: giveLocationArrays(std :: vector< IntArray > &rows, s
     // row block
     cols [ 1 ] = loc;
     rows [ 1 ] = lambdaeq;
+    // diagonal enry (some sparse mtrx implementation requaire this)
+    rows [ 2 ] = lambdaeq;
+    cols [ 2 ] = lambdaeq;
+    
 }
 
 
