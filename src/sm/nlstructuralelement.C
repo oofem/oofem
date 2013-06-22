@@ -374,8 +374,8 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
                 break;
             }
         
-            // compute nodal representation of internal forces at nodes as f = B^T*P dV
-            double dV  = this->computeVolumeAround(gp);
+            // compute nodal representation of internal forces at nodes as f = B^T*stress dV
+            double dV = this->computeVolumeAround(gp);
             BS.beTProductOf(B, vS);
             m->add(dV, BS);
 
@@ -504,7 +504,6 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                         BHj = BHi;
                     }
 
-                    //this->computeConstitutiveMatrixAt(D, rMode, gp, tStep);
                     Dij.beSubMatrixOf(D, iStartIndx, iEndIndx, jStartIndx, jEndIndx);
                     double dV = this->computeVolumeAround(gp);
                     DBj.beProductOf(Dij, Bj);
@@ -549,7 +548,6 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
         answer.symmetrized();
     }
     
-    //answer.printYourself();
 }
 
 // Helper method (not in use)
@@ -704,7 +702,7 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
         m = & temp;
     }
 
-    // Compute matrix from material stiffness (total stiffness for small def.) - B^T * dS/dE * B
+    // Compute matrix from material stiffness 
     FloatMatrix B, D, DB;
     FloatArray vS;
     FloatMatrix Smat, BH, SB;
@@ -716,8 +714,12 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
             
             if ( nlGeometry == 0 ) {
                 this->computeBmatrixAt(gp, B);            
-                cs->giveCharMaterialStiffnessMatrix(D, rMode, gp, tStep);
-                //cs->give_dSigdEps_StiffnessMatrix(D, rMode, gp, tStep);
+                //cs->giveCharMaterialStiffnessMatrix(D, rMode, gp, tStep);
+
+                //@todo This is a special treatment - asks the element instead of the cross section
+                // This whole methid is only used by one XFEM element which deals with inclusions
+                this->computeConstitutiveMatrixAt(D, rMode, gp, tStep); 
+
 
             } else if ( nlGeometry == 1 ) {
                 this->computeGLBMatrixAt(B, gp, tStep); 
@@ -761,7 +763,10 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
 
     }
 
-    answer.symmetrized();
+    if ( matStiffSymmFlag ) {
+        answer.symmetrized();
+    }
+
 }
 
 

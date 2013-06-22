@@ -310,20 +310,28 @@ public:
      * @return For unknown mode error is generated.
      */
     virtual void giveStressStrainMask(IntArray &answer, MatResponseForm form, MaterialMode mmode) const;
-    virtual void giveFullStressStrainMask(IntArray &answer, MatResponseForm form, MaterialMode mmode) const;
+    
+    /**
+     Returns a mask of the vector indicies in the general (non-symmetric) second 
+     order tensor on vector form corresponding to the particular MaterialMode.
+     E.g. PlaneStress -> [1 2 6 9]
+     */
+    virtual void giveVoigtVectorMask(IntArray &answer, MaterialMode mmode) const;
+    virtual void giveSymVoigtVectorMask(IntArray &answer, MaterialMode mmode) const;
     virtual void givePrincipalStressStrainMask(IntArray &answer, MatResponseForm form, MaterialMode mmode) const;
     /**
      * Returns the size of reduced stress/strain vector according to given mode.
      * @param mmode Material response mode.
      */
-    virtual int giveSizeOfReducedStressStrainVector(MaterialMode mmode);
+    virtual int giveSizeOfReducedStressStrainVector(MaterialMode mmode)
+    { return this->giveSizeOfSymVoigtVector(mmode); };
 
     /**
      * Returns the size of reduced stress/strain vector according to given mode.
      * @param mmode Material response mode.
      */
-    virtual int giveSizeOfReducedFVector(MaterialMode mmode);
-    
+    virtual int giveSizeOfVoigtVector(MaterialMode mmode);
+    virtual int giveSizeOfSymVoigtVector(MaterialMode mmode);
 
     /**
      * Returns the size of reduced principal stress/strain vector according to given mode.
