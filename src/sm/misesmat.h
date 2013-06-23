@@ -120,7 +120,7 @@ public:
                                        GaussPoint *gp,
                                        TimeStep *tStep);
 
-    virtual void give3dMaterialStiffnessMatrix_dSdE(FloatMatrix &answer,
+    virtual void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
                                        MatResponseForm form, MatResponseMode mode,
                                        GaussPoint *gp,
                                        TimeStep *tStep);
@@ -137,11 +137,9 @@ protected:
     void giveRealStressVectorComputedFromDefGrad(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                                  const FloatArray & F, TimeStep *tStep);
 
-    void giveSecondPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    void giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
         const FloatArray &reducedvF, TimeStep *tStep);
 
-    /// Converts the deformation gradient F into the Green-Lagrange strain E
-    void convertDefGradToGLStrain(const FloatMatrix &F, FloatMatrix &E);
     void computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatMatrix b, double J);
 
     void give3dSSMaterialStiffnessMatrix(FloatMatrix &answer,

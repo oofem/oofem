@@ -123,11 +123,8 @@ MisesMat :: giveRealStressVector(FloatArray &answer,
 {
     MaterialMode mode = gp->giveMaterialMode();
 
-
     if ( ( mode == _3dMat ) || ( mode == _1dMat ) || ( mode == _PlaneStrain ) ) {
         giveRealStressVectorComputedFromStrain(answer, form, gp, totalStrain, atTime);
-    //} else if ( mode == _3dMat_F ) {
-    //    giveRealStressVectorComputedFromDefGrad(answer, form, gp, totalStrain, atTime);
     } else {
         OOFEM_ERROR("MisesMat::giveRealStressVector : unknown material response mode");
     }
@@ -135,10 +132,21 @@ MisesMat :: giveRealStressVector(FloatArray &answer,
 
 
 void
-MisesMat :: giveSecondPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+MisesMat :: giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
         const FloatArray &reducedvF, TimeStep *tStep)
 {
-    this->giveRealStressVectorComputedFromDefGrad(answer, form, gp, reducedvF, tStep);
+    MaterialMode mode = gp->giveMaterialMode();
+    if (  mode == _3dMat  ) {
+        FloatArray reducedvS;
+        this->giveRealStressVectorComputedFromDefGrad(reducedvS, form, gp, reducedvF, tStep);
+        this->convert_S_2_P(answer, reducedvS, reducedvF, gp->giveMaterialMode());
+        StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+        status->letTempPVectorBe(answer);
+        status->letTempFVectorBe(reducedvF);
+    } else {
+        OOFEM_ERROR("MisesMat::giveFirstPKStressVector : unsupported material response mode");
+    }
+    
 }
 
 
@@ -151,41 +159,17 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
                                                     const FloatArray &totalDefGradOOFEM,
                                                     TimeStep *atTime)
 {
-    // This code is based on the old (column major) ordering of F; therefore, 
-    // we need to reorder the input
-    FloatArray totalDefGrad(9);
-    totalDefGrad.at(1) = totalDefGradOOFEM.at(1); // 11
-    totalDefGrad.at(2) = totalDefGradOOFEM.at(9); // 21
-    totalDefGrad.at(3) = totalDefGradOOFEM.at(8); // 31
-    totalDefGrad.at(4) = totalDefGradOOFEM.at(6); // 12
-    totalDefGrad.at(5) = totalDefGradOOFEM.at(2); // 22
-    totalDefGrad.at(6) = totalDefGradOOFEM.at(7); // 32
-    totalDefGrad.at(7) = totalDefGradOOFEM.at(5); // 13
-    totalDefGrad.at(8) = totalDefGradOOFEM.at(4); // 23
-    totalDefGrad.at(9) = totalDefGradOOFEM.at(3); // 33
-    
+
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
 
-
     double kappa, dKappa, yieldValue, mi;
     FloatMatrix F, oldF, invOldF;
     FloatArray totalStrain;
     FloatArray s(6);
-
-    //convers deformation gradient from array into 3x3 matrix
-    F.resize(3, 3);
-    F.at(1, 1) = totalDefGrad(0);
-    F.at(2, 1) = totalDefGrad(1);
-    F.at(3, 1) = totalDefGrad(2);
-    F.at(1, 2) = totalDefGrad(3);
-    F.at(2, 2) = totalDefGrad(4);
-    F.at(3, 2) = totalDefGrad(5);
-    F.at(1, 3) = totalDefGrad(6);
-    F.at(2, 3) = totalDefGrad(7);
-    F.at(3, 3) = totalDefGrad(8);
+    F.beMatrixForm(totalDefGradOOFEM); //(method assumes full 3D)
 
     kappa = status->giveCumulativePlasticStrain();
     /////////////////////////////////////////////
@@ -194,7 +178,6 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
     invOldF.beInverseOf(oldF);
     //relative deformation radient
     FloatMatrix f;
-    f.resize(3, 3);
     f.beProductOf(F, invOldF);
 
     //compute elastic predictor
@@ -214,30 +197,16 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
     help.beProductOf(f, oldLeftCauchyGreen);
     trialLeftCauchyGreen.beProductTOf(help, f);
     FloatMatrix def;
-    def.beProductTOf(F, F);
-    def.at(1, 1) = def.at(1, 1) - 1;
-    def.at(2, 2) = def.at(2, 2) - 1;
-    def.at(3, 3) = def.at(3, 3) - 1;
-    def.times(1. / 2.);
+    this->computeGreenLagrangeStrain(def, F);
+
     FloatArray vDef(6);
-    vDef.at(1) = def.at(1, 1);
-    vDef.at(2) = def.at(2, 2);
-    vDef.at(3) = def.at(3, 3);
-    vDef.at(4) = 2. * def.at(2, 3);
-    vDef.at(5) = 2. * def.at(1, 3);
-    vDef.at(6) = 2. * def.at(1, 2);
+    vDef.beReducedVectorFormOfStrain(def);
 
     StrainVector leftCauchyGreen(_3dMat);
     StrainVector leftCauchyGreenDev(_3dMat);
     double leftCauchyGreenVol;
 
-    leftCauchyGreen(0) = trialLeftCauchyGreen.at(1, 1);
-    leftCauchyGreen(1) = trialLeftCauchyGreen.at(2, 2);
-    leftCauchyGreen(2) = trialLeftCauchyGreen.at(3, 3);
-    leftCauchyGreen(3) = 2. * trialLeftCauchyGreen.at(2, 3);
-    leftCauchyGreen(4) = 2. * trialLeftCauchyGreen.at(1, 3);
-    leftCauchyGreen(5) = 2. * trialLeftCauchyGreen.at(1, 2);
-
+    leftCauchyGreen.beReducedVectorFormOfStrain(trialLeftCauchyGreen);
 
     leftCauchyGreen.computeDeviatoricVolumetricSplit(leftCauchyGreenDev, leftCauchyGreenVol);
     StressVector trialStressDev(_3dMat);
@@ -268,35 +237,24 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
         kappa += sqrt(2. / 3.) * dKappa;
 
 
-        //update of intermediate configuration
-        trialLeftCauchyGreen.at(1, 1) = s(0) / G + leftCauchyGreenVol;
-        trialLeftCauchyGreen.at(2, 2) = s(1) / G + leftCauchyGreenVol;
-        trialLeftCauchyGreen.at(3, 3) = s(2) / G + leftCauchyGreenVol;
-        trialLeftCauchyGreen.at(2, 3) = s(3) / G;
-        trialLeftCauchyGreen.at(1, 3) = s(4) / G;
-        trialLeftCauchyGreen.at(1, 2) = s(5) / G;
-        trialLeftCauchyGreen.at(3, 2) = trialLeftCauchyGreen.at(2, 3);
-        trialLeftCauchyGreen.at(3, 1) = trialLeftCauchyGreen.at(1, 3);
-        trialLeftCauchyGreen.at(2, 1) = trialLeftCauchyGreen.at(1, 2);
+        //update of intermediate configuration      
+        trialLeftCauchyGreen.beMatrixForm(s);
+        trialLeftCauchyGreen.times(1.0/G);
+        trialLeftCauchyGreen.at(1, 1) += leftCauchyGreenVol;
+        trialLeftCauchyGreen.at(2, 2) += leftCauchyGreenVol;
+        trialLeftCauchyGreen.at(2, 2) += leftCauchyGreenVol;
         trialLeftCauchyGreen.times(J * J);
     }
 
     //addition of the elastic mean stress
-
-
     FloatMatrix kirchhoffStress;
-    kirchhoffStress.resize(3, 3);
-    kirchhoffStress.at(1, 1) = s(0) + 1. / 2. *  K * ( J * J - 1 );
-    kirchhoffStress.at(2, 2) = s(1) + 1. / 2. *  K * ( J * J - 1 );
-    kirchhoffStress.at(3, 3) = s(2) + 1. / 2. *  K * ( J * J - 1 );
-    kirchhoffStress.at(2, 3) = s(3);
-    kirchhoffStress.at(1, 3) = s(4);
-    kirchhoffStress.at(1, 2) = s(5);
-    kirchhoffStress.at(3, 2) = kirchhoffStress.at(2, 3);
-    kirchhoffStress.at(3, 1) = kirchhoffStress.at(1, 3);
-    kirchhoffStress.at(2, 1) = kirchhoffStress.at(1, 2);
+    kirchhoffStress.beMatrixForm(s);
+    kirchhoffStress.at(1, 1) += 1. / 2. *  K * ( J * J - 1 );
+    kirchhoffStress.at(2, 2) += 1. / 2. *  K * ( J * J - 1 );
+    kirchhoffStress.at(3, 3) += 1. / 2. *  K * ( J * J - 1 );
 
     //transform Kirchhoff stress into Second Piola - Kirchhoff stress
+    // @todo here we might as well convert to first Piola since (change later) 
     FloatMatrix iF;
     iF.beInverseOf(F);
     FloatMatrix S;
@@ -309,30 +267,11 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
     FloatArray ep(6);
     FloatArray e(6);
     this->computeGLPlasticStrain(F, Ep, trialLeftCauchyGreen, J);
-    this->convertDefGradToGLStrain(F, E);
 
-    ep(0) = Ep.at(1, 1);
-    ep(1) = Ep.at(2, 2);
-    ep(2) = Ep.at(3, 3);
-    ep(3) = 2 * Ep.at(2, 3);
-    ep(4) = 2 * Ep.at(1, 3);
-    ep(5) = 2 * Ep.at(1, 2);
-
-    e(0) = E.at(1, 1);
-    e(1) = E.at(2, 2);
-    e(2) = E.at(3, 3);
-    e(3) = 2 * E.at(2, 3);
-    e(4) = 2 * E.at(1, 3);
-    e(5) = 2 * E.at(1, 2);
-
-    answer.resize(6);
-    answer(0) =  S.at(1, 1);
-    answer(1) =  S.at(2, 2);
-    answer(2) =  S.at(3, 3);
-    answer(3) =  S.at(2, 3);
-    answer(4) =  S.at(1, 3);
-    answer(5) =  S.at(1, 2);
-
+    this->computeGreenLagrangeStrain(E, F);
+    ep.beReducedVectorFormOfStrain(Ep);
+    e.beReducedVectorFormOfStrain(E);
+    answer.beReducedVectorForm(S);
 
     status->setTrialStressVol(mi);
     status->letTempDefGradBe(F);
@@ -343,17 +282,7 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
     status->letTempPlasticStrainBe(ep);
 }
 
-// converts the deformation gradient stored by columns in FloatArray F
-// into the Green-Lagrange strain with components E11,E22,E33,E23,E31,E12 stored in FloatArray E
-void
-MisesMat :: convertDefGradToGLStrain(const FloatMatrix &F, FloatMatrix &E)
-{
-    E.beTProductOf(F, F);
-    E.at(1, 1) = E.at(1, 1) - 1;
-    E.at(2, 2) = E.at(2, 2) - 1;
-    E.at(3, 3) = E.at(3, 3) - 1;
-    E.times(1. / 2.);
-}
+
 void
 MisesMat :: computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatMatrix b, double J)
 {
@@ -542,16 +471,16 @@ MisesMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm f
 }
 
 void
-MisesMat :: give3dMaterialStiffnessMatrix_dSdE(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+MisesMat :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     MaterialMode mMode = gp->giveMaterialMode();
 
     if ( mMode == _3dMat ) {
-    //    give3dSSMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
-    //} else if ( mMode == _3dMat_F ) {
-        give3dLSMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
+        FloatMatrix dSdE;
+        this->give3dLSMaterialStiffnessMatrix(dSdE, form, mode, gp, atTime);
+        this->give_dPdF_from(dSdE, answer, gp);
     } else {
-        OOFEM_ERROR("MisesMat::give3dMaterialStiffnessMatrix_dSdE : unknown material response mode");
+        OOFEM_ERROR("MisesMat::give3dMaterialStiffnessMatrix_dPdF : unknown material response mode");
     }
 }
 

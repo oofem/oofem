@@ -66,16 +66,23 @@ StructuralMaterial :: giveFirstPKStressVector(FloatArray &answer, MatResponseFor
         const FloatArray &reducedvF, TimeStep *tStep) 
 {
     // Default implementation used if this method is not overloaded by the particular material model.
-    // Compute Green-Lagrange strain and call standard method for small strains. 
+    // 1) Compute Green-Lagrange strain and call standard method for small strains. 
+    // 2) Treat stress as second Piola-Kirchhoff stress and convert to first Piola-Kirchhoff stress.
+    // 3) Set state variables F, P 
     
-
     FloatArray reducedvE, reducedvS;
-    static_cast< NLStructuralElement * > ( gp->giveElement() )->computeGreenLagrangeStrainVector(reducedvE, gp, tStep);
-    this->giveRealStressVector(reducedvS, form, gp, reducedvE, tStep); // PK2 stress
-
+    FloatArray vF, vE;
+    FloatMatrix F, E;
+    this->giveFullVectorFormF(vF, reducedvF, gp->giveMaterialMode()); // 9
+    F.beMatrixForm(vF);
+    this->computeGreenLagrangeStrain(E,F);  // 3x3
+    vE.beReducedVectorFormOfStrain(E);      // 6
+    this->giveSymReducedVectorForm(reducedvE, vE, gp->giveMaterialMode()); //reduced
+    
+    this->giveRealStressVector(reducedvS, form, gp, reducedvE, tStep); // Treat stress obtained as second PK stress
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
     
-    // compute PK1 stress from PK2
+    // Compute first PK stress from second PK stress
     this->convert_S_2_P(answer, reducedvS, reducedvF, gp->giveMaterialMode());
 
     status->letTempPVectorBe(answer);
@@ -84,25 +91,10 @@ StructuralMaterial :: giveFirstPKStressVector(FloatArray &answer, MatResponseFor
 
 
 void 
-StructuralMaterial :: giveSecondPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-        const FloatArray &reducedvF, TimeStep *tStep) 
-{
-    // Default implementation used if this method is not overloaded by the particular material model.
-    // Compute Green-Lagrange strain and call standard method for small strains.
-    
-    FloatArray vE;
-    static_cast< NLStructuralElement * > ( gp->giveElement() )->computeGreenLagrangeStrainVector(vE, gp, tStep);
-    this->giveRealStressVector(answer, form, gp, vE, tStep);
-
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    status->letTempFVectorBe(reducedvF);
-};
-
-void 
 StructuralMaterial :: computeGreenLagrangeStrain(FloatMatrix &answer, FloatMatrix &F)
 {
-    // Computes the Green-Lagrange strain tensor: E = 0.5*( C - I )
-    // The size will be the same as input matrix
+    // Computes the Green-Lagrange strain tensor, E = 0.5*( C - I ), on matrix form. 
+    // The size of the output matrix will be the same as the input matrix.
 
     answer.beTProductOf(F, F);    // C - Right Caucy-Green deformation tensor
 
@@ -118,18 +110,21 @@ StructuralMaterial :: computeGreenLagrangeStrain(FloatMatrix &answer, FloatMatri
     } else {
         OOFEM_ERROR2("StructuralMaterial :: computeGreenLagrangeStrain - wrong size of input matrix (num rows = %d)", answer.giveNumberOfRows());
     }
-        
     answer.times(0.5);
-    
+  
 }
 
 
 void 
-StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, FloatMatrix &C, FloatArray &S, FloatArray &F, MaterialMode matMode)
+StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &C, FloatArray &S, FloatArray &F, MaterialMode matMode)
 {
+    // Converts the reduced dSdE-stiffness to reduced dPdF-sitiffness for different MaterialModes
+    // Performs the following operation dPdF = I_ik * S_jl + F_im F_kn C_mjnl, 
+    // See for example: G.A. Holzapfel, Nonlinear Solid Mechanics: A Continuum Approach for 
+    // Engineering, 2000, ISBN-10: 0471823198.
     
-        if ( matMode == _3dMat ) {    
-        // Converts the full (6x6) sitiffness dSdE to full (9x9) dPdF
+    if ( matMode == _3dMat ) {   
+        //Save terms associated with H = [du/dx, dv/dy, dw/dz, dv/dz, du/dz, du/dy, dw/dy, dw/dx, dv/dx] 
 
         answer.resize(9,9);
         answer(0,0) = F(0)*C(0,0)*F(0) + F(0)*C(0,5)*F(5) + F(0)*C(0,4)*F(4) + F(5)*C(5,0)*F(0) + F(5)*C(5,5)*F(5) + F(5)*C(5,4)*F(4) + F(4)*C(4,0)*F(0) + F(4)*C(4,5)*F(5) + F(4)*C(4,4)*F(4) + S(0); 
@@ -216,9 +211,9 @@ StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, FloatMatrix &C, F
 
 
     } else if ( matMode == _PlaneStress ) {
-        // H = [du/dx dv/dy du/dy dv/dx]
-        answer.resize(4,4);
+        // Save terms associated with H = [du/dx dv/dy du/dy dv/dx]
 
+        answer.resize(4,4);
         answer(0,0) = F(0)*C(0,0)*F(0) + F(0)*C(0,2)*F(2) + F(2)*C(2,0)*F(0) + F(2)*C(2,2)*F(2) + S(0); 
         answer(0,1) = F(0)*C(0,2)*F(3) + F(0)*C(0,1)*F(1) + F(2)*C(2,2)*F(3) + F(2)*C(2,1)*F(1) + 0.0; 
         answer(0,2) = F(0)*C(0,2)*F(0) + F(0)*C(0,1)*F(2) + F(2)*C(2,2)*F(0) + F(2)*C(2,1)*F(2) + S(2); 
@@ -237,6 +232,8 @@ StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, FloatMatrix &C, F
         answer(3,3) = F(3)*C(0,0)*F(3) + F(3)*C(0,2)*F(1) + F(1)*C(2,0)*F(3) + F(1)*C(2,2)*F(1) + S(0); 
 
     } else if ( matMode == _PlaneStrain ) {
+        //Save terms associated with H = [du/dx, dv/dy, dw/dz, du/dy, dv/dx] //@todo not fully checked
+
         answer.resize(5,5);
         answer(0,0) = F(0)*C(0,0)*F(0) + F(0)*C(0,3)*F(3) + F(3)*C(3,0)*F(0) + F(3)*C(3,3)*F(3) + S(0); 
         answer(0,1) = F(0)*C(0,3)*F(4) + F(0)*C(0,1)*F(1) + F(3)*C(3,3)*F(4) + F(3)*C(3,1)*F(1) + 0.0; 
@@ -265,11 +262,28 @@ StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, FloatMatrix &C, F
         answer(4,4) = F(4)*C(0,0)*F(4) + F(4)*C(0,3)*F(1) + F(1)*C(3,0)*F(4) + F(1)*C(3,3)*F(1) + S(0);    
 
     } else if ( matMode == _1dMat ) {
+        //Save terms associated with H = [du/dx] //@todo is this really correct??
+
         answer.resize(1,1);
         answer(0,0) = F(0)*C(0,0)*F(0) + S(0);
     }
 }
 
+void 
+StructuralMaterial :: give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp)
+{
+    // Default implementation for converting dSdE to dPdF. This includes updating the 
+    // state variables of P and F. 
+    
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    FloatArray reducedvF, reducedvP, reducedvS, vP;
+    reducedvF = status->giveTempFVector();
+    reducedvP = status->giveTempPVector();   
+    
+    MaterialMode matMode = gp->giveMaterialMode();
+    this->convert_P_2_S(reducedvS, reducedvP, reducedvF, matMode);
+    this->convert_dSdE_2_dPdF(answer, dSdE, reducedvS, reducedvF, matMode);
+}
 
 
 void
@@ -284,7 +298,6 @@ StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     switch ( mMode ) {
     case _3dMat:
     case _3dMatGrad:
-    case _3dMat_F: // even if material uses deformation gradient, stiffness is computed in the usual way
         this->give3dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
         break;
     case _PlaneStress:
@@ -318,55 +331,11 @@ StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 
 void 
-StructuralMaterial :: give_dSdE_StiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+StructuralMaterial :: giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
                                                GaussPoint *gp, TimeStep *tStep)
 {
-    //
-    // Returns characteristic material stiffness matrix of the receiver
-    //
-
-    MaterialMode mMode = gp->giveMaterialMode();
-    switch ( mMode ) {
-    case _3dMat:
-    case _3dMatGrad:
-        this->give3dMaterialStiffnessMatrix_dSdE(answer, form, rMode, gp, tStep);
-        break;
-    case _PlaneStress:
-    case _PlaneStressGrad:
-        this->givePlaneStressStiffMtrx(answer, form, rMode, gp, tStep);
-        break;
-    case _PlaneStrain:
-    case _PlaneStrainGrad:
-        this->givePlaneStrainStiffMtrx(answer, form, rMode, gp, tStep);
-        break;
-    case _1dMat:
-    case _1dMatGrad:
-        this->give1dStressStiffMtrx(answer, form, rMode, gp, tStep);
-        break;
-    case _2dPlateLayer:
-        this->give2dPlateLayerStiffMtrx(answer, form, rMode, gp, tStep);
-        break;
-    case _3dShellLayer:
-        this->give3dShellLayerStiffMtrx(answer, form, rMode, gp, tStep);
-        break;
-    case _2dBeamLayer:
-        this->give2dBeamLayerStiffMtrx(answer, form, rMode, gp, tStep);
-        break;
-    case _1dFiber:
-        this->give1dFiberStiffMtrx(answer, form, rMode, gp, tStep);
-        break;
-    default:
-        OOFEM_ERROR2( "StructuralMaterial :: giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
-    }
-
-}
-
-
-void 
-StructuralMaterial :: give_dPdF_StiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
-                                               GaussPoint *gp, TimeStep *tStep)
-{
-
+    // Returns the stiffness matrix dPdF of the reciever according to MatResponseMode 
+    // and MaterialMode
 
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -380,29 +349,32 @@ StructuralMaterial :: give_dPdF_StiffnessMatrix(FloatMatrix &answer, MatResponse
         break;
     case _PlaneStrain:
     case _PlaneStrainGrad:
-        this->givePlaneStrainStiffMtrx(answer, form, rMode, gp, tStep);
+        this->givePlaneStrainStiffMtrx_dPdF(answer, form, rMode, gp, tStep);
         break;
     case _1dMat:
     case _1dMatGrad:
         this->give1dStressStiffMtrx_dPdF(answer, form, rMode, gp, tStep);
         break;
     case _2dPlateLayer:
-        this->give2dPlateLayerStiffMtrx(answer, form, rMode, gp, tStep);
+        this->give2dPlateLayerStiffMtrx_dPdF(answer, form, rMode, gp, tStep);
         break;
     case _3dShellLayer:
-        this->give3dShellLayerStiffMtrx(answer, form, rMode, gp, tStep);
+        this->give3dShellLayerStiffMtrx_dPdF(answer, form, rMode, gp, tStep);
         break;
     case _2dBeamLayer:
-        this->give2dBeamLayerStiffMtrx(answer, form, rMode, gp, tStep);
+        this->give2dBeamLayerStiffMtrx_dPdF(answer, form, rMode, gp, tStep);
         break;
     case _1dFiber:
-        this->give1dFiberStiffMtrx(answer, form, rMode, gp, tStep);
+        this->give1dFiberStiffMtrx_dPdF(answer, form, rMode, gp, tStep);
         break;
     default:
         OOFEM_ERROR2( "StructuralMaterial :: giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 
 }
+
+
+
 
 void
 StructuralMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
@@ -411,19 +383,7 @@ StructuralMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
 { 
     FloatMatrix dSdE;
     this->give3dMaterialStiffnessMatrix(dSdE, form, mode, gp, tStep); 
-
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    FloatArray reducedvF, reducedvP, vS, vP;
-    reducedvF = status->giveTempFVector();
-    reducedvP = status->giveTempPVector();   
-
-    MaterialMode matMode = gp->giveMaterialMode();
-    this->convert_P_2_S(vS, reducedvP, reducedvF, matMode);
-    FloatArray reducedvS;
-    
-    this->giveReducedCharacteristicVector(reducedvS, gp, vS);
-    
-    this->convert_dSdE_2_dPdF(answer, dSdE, reducedvS, reducedvF, matMode);
+    this->give_dPdF_from(dSdE, answer, gp);
 }
 
 
@@ -434,17 +394,18 @@ StructuralMaterial :: givePlaneStressStiffMtrx_dPdF(FloatMatrix &answer,
 { 
     FloatMatrix dSdE;
     this->givePlaneStressStiffMtrx(dSdE, form, mode, gp, tStep); 
-    
+    this->give_dPdF_from(dSdE, answer, gp);
+}
 
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    FloatArray reducedvF, reducedvP, reducedvS, vP;
-    reducedvF = status->giveTempFVector();
-    reducedvP = status->giveTempPVector();   
-    
-    MaterialMode matMode = gp->giveMaterialMode();
-    this->convert_P_2_S(reducedvS, reducedvP, reducedvF, matMode);
-    this->convert_dSdE_2_dPdF(answer, dSdE, reducedvS, reducedvF, matMode);
-    
+
+void
+StructuralMaterial :: givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
+                                       MatResponseForm form, MatResponseMode mode,
+                                       GaussPoint *gp, TimeStep *tStep)
+{ 
+    FloatMatrix dSdE;
+    this->givePlaneStrainStiffMtrx(dSdE, form, mode, gp, tStep); 
+    this->give_dPdF_from(dSdE, answer, gp);
 }
 
 
@@ -455,57 +416,109 @@ StructuralMaterial :: give1dStressStiffMtrx_dPdF(FloatMatrix &answer,
 { 
     FloatMatrix dSdE;
     this->give1dStressStiffMtrx(dSdE, form, mode, gp, tStep); 
-    
-
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    FloatArray reducedvF, reducedvP, reducedvS, vP;
-    reducedvF = status->giveTempFVector();
-    reducedvP = status->giveTempPVector();   
-    
-    MaterialMode matMode = gp->giveMaterialMode();
-    this->convert_P_2_S(reducedvS, reducedvP, reducedvF, matMode);
-    this->convert_dSdE_2_dPdF(answer, dSdE, reducedvS, reducedvF, matMode);
-    
+    this->give_dPdF_from(dSdE, answer, gp);
 }
+
+void
+StructuralMaterial :: give2dPlateLayerStiffMtrx_dPdF(FloatMatrix &answer,
+                                       MatResponseForm form, MatResponseMode mode,
+                                       GaussPoint *gp, TimeStep *tStep)
+{ 
+    FloatMatrix dSdE;
+    this->give2dPlateLayerStiffMtrx(dSdE, form, mode, gp, tStep); 
+    this->give_dPdF_from(dSdE, answer, gp);
+}
+
+
+void
+StructuralMaterial :: give3dShellLayerStiffMtrx_dPdF(FloatMatrix &answer,
+                                       MatResponseForm form, MatResponseMode mode,
+                                       GaussPoint *gp, TimeStep *tStep)
+{ 
+    FloatMatrix dSdE;
+    this->give3dShellLayerStiffMtrx(dSdE, form, mode, gp, tStep); 
+    this->give_dPdF_from(dSdE, answer, gp);
+}
+
+
+void
+StructuralMaterial :: give2dBeamLayerStiffMtrx_dPdF(FloatMatrix &answer,
+                                       MatResponseForm form, MatResponseMode mode,
+                                       GaussPoint *gp, TimeStep *tStep)
+{ 
+    FloatMatrix dSdE;
+    this->give2dBeamLayerStiffMtrx(dSdE, form, mode, gp, tStep); 
+    this->give_dPdF_from(dSdE, answer, gp);
+}
+
+
+void
+StructuralMaterial :: give1dFiberStiffMtrx_dPdF(FloatMatrix &answer,
+                                       MatResponseForm form, MatResponseMode mode,
+                                       GaussPoint *gp, TimeStep *tStep)
+{ 
+    FloatMatrix dSdE;
+    this->give1dFiberStiffMtrx(dSdE, form, mode, gp, tStep); 
+    this->give_dPdF_from(dSdE, answer, gp);
+}
+
+
 
 void
 StructuralMaterial :: convert_P_2_S(FloatArray &answer, const FloatArray &reducedvP, const FloatArray &reducedvF, MaterialMode matMode)
 { 
-    // S = inv(F)*P
-
+    // Converts first Piola-Kirchhoff stress to second Piola-Kirchhoff stress: S = inv(F)*P
+    // Output size will be according to MaterialMode
+    
     FloatArray vF, vP;
-    this->giveFullVectorFormF(vF, reducedvF, matMode);
+    this->giveFullVectorFormF(vF, reducedvF, matMode); // 9 components
     this->giveFullVectorForm(vP, reducedvP, matMode);
     FloatMatrix F, P, S, invF;
     F.beMatrixForm(vF);
     P.beMatrixForm(vP);
     invF.beInverseOf(F);
     S.beProductOf(invF,P);
-    //S.printYourself();
     FloatArray vS;
-    vS.beReducedVectorForm(S);
-
-    this->giveSymReducedVectorForm(answer, vS, matMode);
+    vS.beReducedVectorForm(S); // 6 components 
+    this->giveSymReducedVectorForm(answer, vS, matMode); // convert back to reduced size
     
 }
 
 void
 StructuralMaterial :: convert_S_2_P(FloatArray &answer, const FloatArray &reducedvS, const FloatArray &reducedvF, MaterialMode matMode)
 { 
-    // P = F*S
-    FloatArray vF, vS, vP;
+    // Converts second Piola-Kirchhoff stress to first Piola-Kirchhoff stress: P = F*S
+    // Output size will be according to MaterialMode
 
-    this->giveFullVectorFormF(vF, reducedvF, matMode);
-    this->giveSymFullVectorForm(vS, reducedvS, matMode); 
+    FloatArray vF, vS, vP;
+    this->giveFullVectorFormF(vF, reducedvF, matMode);   // 9 components
+    this->giveSymFullVectorForm(vS, reducedvS, matMode); // 6 components
     FloatMatrix F, P, S, invF;
     F.beMatrixForm(vF);
     S.beMatrixForm(vS);
     P.beProductOf(F,S);
-    vP.beFullVectorForm(P);
-   
-    // convert back to reduced size
-    this->giveReducedVectorForm(answer, vP, matMode);
+    vP.beFullVectorForm(P); 
+    this->giveReducedVectorForm(answer, vP, matMode);   // convert back to reduced size
 
+}
+
+void StructuralMaterial :: giveIdentityVector(FloatArray &answer, MaterialMode matMode)
+{
+    // Create identity tensor on Voigt form according to MaterialMode.
+
+
+    int size = this->giveSizeOfVoigtVector( matMode );
+    answer.resize(size);
+
+    if ( size == 9 || size == 5 ) {
+        answer.at(1) = answer.at(2) = answer.at(3) = 1.0; 
+    } else if ( size == 4 ) {
+        answer.at(1) = answer.at(2) = 1.0 ; 
+    }else if (size == 1 ) {
+        answer.at(1) = 1.0; 
+    } else {
+        OOFEM_ERROR2("StructuralMaterial :: giveIdentityVector - identityVector not implemented for the given MaterialMode (%s)", __MaterialModeToString(matMode) );
+    }
 }
 
 void
@@ -638,11 +651,10 @@ StructuralMaterial :: giveStressDependentPartOfStrainVector(FloatArray &answer, 
 
 int              
 StructuralMaterial :: giveSizeOfSymVoigtVector(MaterialMode mode)
-//
-// returns the size of reduced stress-strain vector
-// according to mode given by gp.
-//
 {
+    // Returns the size of reduced symmetric second order tensor 
+    // on Voigt form according to the MaterialMode given by gp.
+
     switch ( mode ) {
     case _3dMat:
         return 6;
@@ -697,7 +709,7 @@ StructuralMaterial :: giveSizeOfSymVoigtVector(MaterialMode mode)
         return 7;
 
     default:
-        OOFEM_ERROR2( "StructuralMaterial :: giveSizeOfReducedStressStrainVector : unknown mode (%s)", __MaterialModeToString(mode) );
+        OOFEM_ERROR2( "StructuralMaterial :: giveSizeOfSymVoigtVector : unknown mode (%s)", __MaterialModeToString(mode) );
     }
 
     return 0;
@@ -706,13 +718,14 @@ StructuralMaterial :: giveSizeOfSymVoigtVector(MaterialMode mode)
 
 int              
 StructuralMaterial :: giveSizeOfVoigtVector(MaterialMode mode)
-//
-// returns the size of reduced second order tensor on vector form
-// according to MaterialMode given by gp.
-// @todo add support for other modes
 {
+    // Returns the size of reduced second order tensor 
+    // on Voigt form according to the MaterialMode given by gp.
+    // @todo add support for other modes
+
     switch ( mode ) {
     case _3dMat:
+    case _3dBeam:
         return 9;
 
     case _PlaneStrain:
@@ -725,7 +738,7 @@ StructuralMaterial :: giveSizeOfVoigtVector(MaterialMode mode)
         return 1;
 
     default:
-        OOFEM_ERROR2( "StructuralMaterial :: giveSizeOfReducedStressStrainVector : unknown mode (%s)", __MaterialModeToString(mode) );
+        OOFEM_ERROR2( "StructuralMaterial :: giveSizeOfVoigtVector : unknown mode (%s)", __MaterialModeToString(mode) );
     }
 
     return 0;
@@ -1156,6 +1169,7 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
 // (Plane strain, ..) this condition must be taken into account in geometrical
 // relations, and corresponding component is included in reduced vector.
 //
+//@todo rewrite the calls to this method to remove MatResponseForm and then replace with giveSymVoigtVectorMask
 {
     if ( form == ReducedForm ) {
         switch ( mmode ) {
@@ -1400,24 +1414,18 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
 
 void               
 StructuralMaterial :: giveSymVoigtVectorMask(IntArray &answer, MaterialMode mmode) const
-// this function returns mask of reduced(if form == ReducedForm)
-// or Full(if form==FullForm) stressStrain vector in full or
-// reduced StressStrainVector
-// according to stressStrain mode of given gp.
-//
-//
-// mask has size of reduced or full StressStrain Vector and  i-th component
-// is index to full or reduced StressStrainVector where corresponding
-// stressStrain resides.
-//
-// Reduced form is sub-vector (of stress or strain components),
-// where components corresponding to imposed zero stress (plane stress,...)
-// are not included. On the other hand, if zero strain component is imposed
-// (Plane strain, ..) this condition must be taken into account in geometrical
-// relations, and corresponding component is included in reduced vector.
-//
 {
-
+    // The same as giveVoigtVectorMask but returns a mask corresponding to a symmetric 
+    // second order tensor.
+    //
+    // Returns a mask of the vector indicies corresponding to components in a symmetric
+    // second order tensor of some stress/strain/deformation measure that performes work. 
+    // Thus, components corresponding to imposed zero stress (e.g. plane stress etc.) are
+    // not included. On the other hand, if zero strain components are imposed( e.g. plane 
+    // strain etc.) this condition must be taken into account in geometrical relations. 
+    // Therefore, these corresponding components are included in the reduced vector.
+    // Which compnents to include are given by the particular MaterialMode.
+    
     switch ( mmode ) {
     case _3dMat:
     case _3dMat_F:
@@ -1536,13 +1544,16 @@ StructuralMaterial :: giveSymVoigtVectorMask(IntArray &answer, MaterialMode mmod
 void               
 StructuralMaterial :: giveVoigtVectorMask(IntArray &answer, MaterialMode mmode) const
 {
-    /**
-     This function returns a mask of the vector indicies in the general 
-     (non-symmetric) second order tensor on vector form corresponding 
-     to the particular MaterialMode.
-     //@todo add additional modes
-     //@todo maybe these arrays hould be static?
-     */
+    // Returns a mask of the vector indicies corresponding to components in a general
+    // (non-symmetric) second order tensor of some stress/strain/deformation measure that 
+    // performes work. Thus, components corresponding to imposed zero stress (e.g. plane 
+    // stress etc.) are not included. On the other hand, if zero strain components are 
+    // imposed( e.g. plane strain etc.) this condition must be taken into account in 
+    // geometrical relations. Therefore, these corresponding components are included in 
+    // the reduced vector. Which compnents to include are given by the particular MaterialMode.
+    //
+    //@todo add additional modes
+     
     switch ( mmode ) {
     case _3dMat:
         answer.resize(9);

@@ -42,7 +42,8 @@ StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoin
     MaterialStatus(n, d, g), strainVector(), stressVector(), FVector(),
     tempStressVector(), tempStrainVector(), tempFVector()
 {
-    int rsize = static_cast< StructuralMaterial * >( gp->giveMaterial() )->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveMaterial() );
+    int rsize = mat->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
     strainVector.resize(rsize);
     stressVector.resize(rsize);
 
@@ -51,24 +52,11 @@ StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoin
     tempStrainVector = strainVector;
 
     if ( NLStructuralElement *el = dynamic_cast< NLStructuralElement * > ( gp->giveElement() ) ) {
-        //if ( el->giveGeometryMode() == 1  ||  el->giveGeometryMode() == -1  ) { // if large def, store F
-        if ( el->giveGeometryMode() == -1  ) { // if large def, store F
-            rsize = static_cast< StructuralMaterial * >( gp->giveMaterial() )->giveSizeOfVoigtVector( gp->giveMaterialMode() );
-            PVector.resize(rsize);
-            // create initial deformation gradient //@todo should be improved
-            FVector.resize(rsize);
-            if (rsize == 9 || rsize == 5 ) {
-                FVector.at(1) = FVector.at(2) = FVector.at(3) = 1.0; 
-            } else if ( rsize == 4 ) {
-                FVector.at(1) = FVector.at(2) = 1.0 ; 
-            }else if (rsize == 1 ) {
-                FVector.at(1) = 1.0; 
-            } else {
-                OOFEM_ERROR("StructuralMaterialStatus :: StructuralMaterialStatus - cannot create initial FVector for the given MaterialMode" ) ;
-            }
+        if ( el->giveGeometryMode() == 1  ) { // if large def, initialize F and P
+            mat->giveIdentityVector(FVector, gp->giveMaterialMode());
+            PVector.resize(FVector.giveSize());                        
             tempPVector = PVector;
             tempFVector = FVector;
-        
         }
     }
 
@@ -140,6 +128,8 @@ void StructuralMaterialStatus :: initTempStatus()
     // reset temp vars.
     tempStressVector = stressVector;
     tempStrainVector = strainVector;
+    tempPVector      = PVector;
+    tempFVector      = FVector;
 }
 
 
