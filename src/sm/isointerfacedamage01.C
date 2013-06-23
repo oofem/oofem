@@ -77,7 +77,6 @@ IsoInterfaceDamageMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 void
 IsoInterfaceDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                            MatResponseForm form,
                                                             MatResponseMode mode,
                                                             GaussPoint *gp,
                                                             TimeStep *atTime)

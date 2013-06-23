@@ -91,7 +91,7 @@ void TrabBone3D :: computePlasStrainEnerDensity(GaussPoint *gp, const FloatArray
 
 void
 TrabBone3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                            MatResponseForm form, MatResponseMode mode, GaussPoint *gp,
+                                            MatResponseMode mode, GaussPoint *gp,
                                             TimeStep *atTime)
 {
     double tempDam, beta, tempKappa, kappa;

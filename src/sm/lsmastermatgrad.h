@@ -85,7 +85,7 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const;
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                       MatResponseForm, MatResponseMode,
+                                       MatResponseMode,
                                        GaussPoint * gp,
                                        TimeStep * atTime);
 

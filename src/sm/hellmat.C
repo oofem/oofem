@@ -1046,7 +1046,7 @@ void HellmichMaterial :: give1dMaterialStiffnessMatrix(FloatMatrix &answer,
 }
 
 void HellmichMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                       MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
+                                                       MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
 //
 // consistent tangents for 3D
 // isotropic linear elastic matrix + Kv creep coeff + plasticity
@@ -2662,7 +2662,7 @@ HellmichMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     if ( mMode == _1dMat ) {
         give1dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
     } else if ( mMode == _3dMat ) {
-        give3dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+        give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
     } else if ( !( options & moPlasticity ) ) {
         giveLinearElasticMaterial(gp, atTime)->giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
         answer.times( 1 / giveKvCoeff(gp, atTime) );

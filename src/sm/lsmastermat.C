@@ -500,7 +500,7 @@ LsMasterMat :: giveRealStressVector(FloatArray &answer,
 }
 
  void 
- LsMasterMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,MatResponseForm form, MatResponseMode mode,GaussPoint * gp,TimeStep * atTime)
+ LsMasterMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode,GaussPoint * gp,TimeStep * atTime)
 {
     LsMasterMatStatus *status = static_cast< LsMasterMatStatus * >( this->giveStatus(gp) );
     Material *mat;
@@ -516,7 +516,7 @@ LsMasterMat :: giveRealStressVector(FloatArray &answer,
             _warning2("checkConsistency: material %d has no Structural support", slaveMat);
             return;
         }
-        sMat->give3dMaterialStiffnessMatrix(answer,form,mode,gp,atTime);
+        sMat->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
     } else {
         mat = domain->giveMaterial(slaveMat);
         sMat = dynamic_cast< StructuralMaterial * >(mat);
@@ -524,7 +524,7 @@ LsMasterMat :: giveRealStressVector(FloatArray &answer,
             _warning2("checkConsistency: material %d has no Structural support", slaveMat);
             return;
         }
-        sMat->give3dMaterialStiffnessMatrix(stiffness,form,mode,gp,atTime);
+        sMat->give3dMaterialStiffnessMatrix(stiffness, mode, gp, atTime);
         FloatMatrix P,TL,F,junk;
         FloatArray stress;
         stress =   status ->giveTempStressVector();

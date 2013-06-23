@@ -101,7 +101,6 @@ CohesiveInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 void
 CohesiveInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                           MatResponseForm form,
                                                            MatResponseMode mode,
                                                            GaussPoint *gp,
                                                            TimeStep *atTime)

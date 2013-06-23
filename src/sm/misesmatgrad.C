@@ -105,7 +105,7 @@ MisesMatGrad :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form, M
         givePlaneStrainStiffMtrx(answer, form, mode, gp, tStep);
         break;
     case _3dMatGrad:
-        give3dMaterialStiffnessMatrix(answer, form, mode, gp, tStep);
+        give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         break;
     default:
         _error2( "givePDGradMatrix_uu : unknown mode (%s)", __MaterialModeToString(mMode) );
@@ -284,10 +284,10 @@ MisesMatGrad :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm fo
 
 
 void
-MisesMatGrad :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+MisesMatGrad :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
     // start from the elastic stiffness
     if ( mode != TangentStiffness ) {
         return;

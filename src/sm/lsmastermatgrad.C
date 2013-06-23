@@ -95,7 +95,7 @@ LsMasterMatGrad :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form
     switch ( mMode ) {
     case _3dMatGrad_F:
     case _3dMatGrad:
-        give3dMaterialStiffnessMatrix(answer, form, mode, gp, tStep);
+        give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         break;
     default:
         _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
@@ -559,7 +559,7 @@ LsMasterMatGrad :: giveRealStressVector(FloatArray &answer,
 }
 
  void 
- LsMasterMatGrad :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,MatResponseForm form, MatResponseMode mode,GaussPoint * gp,TimeStep * atTime)
+ LsMasterMatGrad :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode,GaussPoint * gp,TimeStep * atTime)
 {
     LsMasterMatGradStatus *status = static_cast< LsMasterMatGradStatus * >( this->giveStatus(gp) );
     Material *mat;
@@ -573,9 +573,9 @@ LsMasterMatGrad :: giveRealStressVector(FloatArray &answer,
         return;
     }
     if ( mMode ==  _3dMatGrad ) {
-        sMat->give3dMaterialStiffnessMatrix(answer,form,mode,gp,atTime);
+        sMat->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
     } else {
-        sMat->give3dMaterialStiffnessMatrix(stiffness,form,mode,gp,atTime);
+        sMat->give3dMaterialStiffnessMatrix(stiffness, mode, gp, atTime);
  
 
         stiffness.at(1,4) = 2.*stiffness.at(1,4);

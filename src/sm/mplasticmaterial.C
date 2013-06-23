@@ -1225,7 +1225,7 @@ MPlasticMaterial :: computeReducedElasticModuli(FloatMatrix &answer,
 // overloaded from structural material
 
 void
-MPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
+MPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                   MatResponseMode mode,
                                                   GaussPoint *gp,
                                                   TimeStep *atTime)
@@ -1259,11 +1259,11 @@ MPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRespon
     // then programming simple inteface function for you stressstrain state
     // calling GiveMaterailStiffenssMatrix, which imposes constrains correctly.
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
-        this->giveConsistentStiffnessMatrix(answer, form, mode, gp, atTime);
+        this->giveConsistentStiffnessMatrix(answer,  FullForm, mode, gp, atTime);
     } else {
-        this->giveElastoPlasticStiffnessMatrix(answer, form, mode, gp, atTime);
+        this->giveElastoPlasticStiffnessMatrix(answer,  FullForm, mode, gp, atTime);
     }
 }
 

@@ -152,7 +152,7 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new CompoDamageMatStatus(1, domain, gp); }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                       MatResponseForm form, MatResponseMode mmode,
+                                       MatResponseMode mmode,
                                        GaussPoint * gp,
                                        TimeStep * atTime);
 

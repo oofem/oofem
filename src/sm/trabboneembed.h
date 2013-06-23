@@ -115,7 +115,7 @@ public:
     void constructIsoComplTensor(FloatMatrix &answer, const double eps0, const double nu0);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode, GaussPoint *gp,
+                                               MatResponseMode mode, GaussPoint *gp,
                                                TimeStep *tStep);
 
     virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,

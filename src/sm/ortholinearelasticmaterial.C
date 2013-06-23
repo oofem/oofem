@@ -232,7 +232,6 @@ OrthotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp)
 
 void
 OrthotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                                  MatResponseForm form,
                                                                   MatResponseMode mode,
                                                                   GaussPoint *gp,
                                                                   TimeStep *atTime)
@@ -242,7 +241,7 @@ OrthotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &a
 {
     FloatMatrix rotationMatrix;
 
-    this->give3dLocalMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
+    this->give3dLocalMaterialStiffnessMatrix(answer, mode, gp, atTime);
 
     this->giveRotationMatrix(rotationMatrix, gp);
     answer.rotatedWith(rotationMatrix);
@@ -251,7 +250,6 @@ OrthotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &a
 
 void
 OrthotropicLinearElasticMaterial :: give3dLocalMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                                       MatResponseForm form,
                                                                        MatResponseMode mode,
                                                                        GaussPoint *gp,
                                                                        TimeStep *atTime)

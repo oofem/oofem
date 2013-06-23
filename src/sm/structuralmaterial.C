@@ -298,7 +298,7 @@ StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     switch ( mMode ) {
     case _3dMat:
     case _3dMatGrad:
-        this->give3dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+        this->give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
         break;
     case _PlaneStress:
     case _PlaneStressGrad:
@@ -341,7 +341,7 @@ StructuralMaterial :: giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseF
     switch ( mMode ) {
     case _3dMat:
     case _3dMatGrad:
-        this->give3dMaterialStiffnessMatrix_dPdF(answer, form, rMode, gp, tStep);
+        this->give3dMaterialStiffnessMatrix_dPdF(answer, rMode, gp, tStep);
         break;
     case _PlaneStress:
     case _PlaneStressGrad:
@@ -378,11 +378,11 @@ StructuralMaterial :: giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseF
 
 void
 StructuralMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
-                                       MatResponseForm form, MatResponseMode mode,
+                                       MatResponseMode mode,
                                        GaussPoint *gp, TimeStep *tStep)
 { 
     FloatMatrix dSdE;
-    this->give3dMaterialStiffnessMatrix(dSdE, form, mode, gp, tStep); 
+    this->give3dMaterialStiffnessMatrix(dSdE, mode, gp, tStep); 
     this->give_dPdF_from(dSdE, answer, gp);
 }
 
@@ -2284,7 +2284,7 @@ StructuralMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 {
     FloatMatrix m3d;
 
-    this->give3dMaterialStiffnessMatrix(m3d, FullForm, mode, gp, atTime);
+    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
     this->reduceToPlaneStressStiffMtrx(answer, form, gp, m3d);
 }
 
@@ -2299,7 +2299,7 @@ StructuralMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
 {
     FloatMatrix m3d;
 
-    this->give3dMaterialStiffnessMatrix(m3d, FullForm, mode, gp, atTime);
+    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
     this->reduceToPlaneStrainStiffMtrx(answer, form, gp, m3d);
 }
 
@@ -2314,7 +2314,7 @@ StructuralMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
 {
     FloatMatrix m3d;
 
-    this->give3dMaterialStiffnessMatrix(m3d, FullForm, mode, gp, atTime);
+    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
     this->reduceTo1dStressStiffMtrx(answer, form, gp, m3d);
 }
 
@@ -2330,7 +2330,7 @@ StructuralMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 {
     FloatMatrix m3d;
 
-    this->give3dMaterialStiffnessMatrix(m3d, FullForm, mode, gp, atTime);
+    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
     this->reduceTo2dBeamLayerStiffMtrx(answer, form, gp, m3d);
 }
 
@@ -2346,7 +2346,7 @@ StructuralMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
 {
     FloatMatrix m3d;
 
-    this->give3dMaterialStiffnessMatrix(m3d, FullForm, mode, gp, atTime);
+    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
     this->reduceTo2dPlateLayerStiffMtrx(answer, form, gp, m3d);
 }
 
@@ -2361,7 +2361,7 @@ StructuralMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
 {
     FloatMatrix m3d;
 
-    this->give3dMaterialStiffnessMatrix(m3d, FullForm, mode, gp, atTime);
+    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
     this->reduceTo1dFiberStiffMtrx(answer, form, gp, m3d);
 }
 
@@ -2377,7 +2377,7 @@ StructuralMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
 {
     FloatMatrix m3d;
 
-    this->give3dMaterialStiffnessMatrix(m3d, FullForm, mode, gp, atTime);
+    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
     this->reduceTo3dShellLayerStiffMtrx(answer, form, gp, m3d);
 }
 

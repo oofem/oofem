@@ -467,7 +467,7 @@ public:
                                       const FloatArray &strainVector,
                                       TimeStep *atTime);
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep);
 
     virtual int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type);

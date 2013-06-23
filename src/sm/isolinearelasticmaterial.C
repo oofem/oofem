@@ -174,7 +174,6 @@ IsotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp)
 
 void
 IsotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                                MatResponseForm form,
                                                                 MatResponseMode mode,
                                                                 GaussPoint *gp,
                                                                 TimeStep *atTime)
@@ -340,7 +339,7 @@ IsotropicLinearElasticMaterial :: give2dBeamStiffMtrx(FloatMatrix &answer,
         _error(" Give2dBeamStiffMtrx : no SimpleCrossSection");
     }
 
-    this->give1dStressStiffMtrx(mat3d, FullForm, rMode, gp, tStep);
+    this->give1dStressStiffMtrx(mat3d, ReducedForm, rMode, gp, tStep);
     area = crossSection->give(CS_Area);
     Iy   = crossSection->give(CS_InertiaMomentY);
     shearAreaz = crossSection->give(CS_SHEAR_AREA_Z);
@@ -387,7 +386,7 @@ IsotropicLinearElasticMaterial :: give3dBeamStiffMtrx(FloatMatrix &answer,
         _error("give3dBeamStiffMtrx : no SimpleCrossSection");
     }
 
-    this->give1dStressStiffMtrx(mat3d, FullForm, rMode, gp, tStep);
+    this->give1dStressStiffMtrx(mat3d, ReducedForm, rMode, gp, tStep);
     E    = mat3d.at(1, 1);
     area = crossSection->give(CS_Area);
     Iy   = crossSection->give(CS_InertiaMomentY);

@@ -982,7 +982,6 @@ RCM2Material :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 
 void
 RCM2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                              MatResponseForm form,
                                               MatResponseMode mode,
                                               GaussPoint *gp,
                                               TimeStep *atTime)
@@ -990,7 +989,7 @@ RCM2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     //
     // returns receiver 3d material matrix
     //
-    this->giveMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, FullForm, mode, gp, atTime);
 }
 
 

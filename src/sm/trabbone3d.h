@@ -234,7 +234,7 @@ public:
 
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                               MatResponseForm, MatResponseMode, GaussPoint * gp,
+                                               MatResponseMode, GaussPoint * gp,
                                                TimeStep * atTime);
 
     virtual void giveRealStressVector(FloatArray & answer, MatResponseForm, GaussPoint *,

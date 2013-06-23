@@ -457,27 +457,27 @@ void MisesMat :: computeCumPlastStrain(double &tempKappa, GaussPoint *gp, TimeSt
 }
 
 void
-MisesMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+MisesMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     MaterialMode mMode = gp->giveMaterialMode();
 
     if ( mMode == _3dMat ) {
-        give3dSSMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
+        give3dSSMaterialStiffnessMatrix(answer, mode, gp, atTime);
     //} else if ( mMode == _3dMat_F ) {
-    //    give3dLSMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
+    //    give3dLSMaterialStiffnessMatrix(answer, mode, gp, atTime);
     } else {
         OOFEM_ERROR("MisesMat::give3dMaterialStiffnessMatrix : unknown material response mode");
     }
 }
 
 void
-MisesMat :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+MisesMat :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     MaterialMode mMode = gp->giveMaterialMode();
 
     if ( mMode == _3dMat ) {
         FloatMatrix dSdE;
-        this->give3dLSMaterialStiffnessMatrix(dSdE, form, mode, gp, atTime);
+        this->give3dLSMaterialStiffnessMatrix(dSdE, mode, gp, atTime);
         this->give_dPdF_from(dSdE, answer, gp);
     } else {
         OOFEM_ERROR("MisesMat::give3dMaterialStiffnessMatrix_dPdF : unknown material response mode");
@@ -486,13 +486,13 @@ MisesMat :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseF
 
 // returns the consistent (algorithmic) tangent stiffness matrix
 void
-MisesMat :: give3dSSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
+MisesMat :: give3dSSMaterialStiffnessMatrix(FloatMatrix &answer,
                                             MatResponseMode mode,
                                             GaussPoint *gp,
                                             TimeStep *atTime)
 {
     // start from the elastic stiffness
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
     if ( mode != TangentStiffness ) {
         return;
     }
@@ -641,7 +641,7 @@ MisesMat :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form,
 }
 
 void
-MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     // start from the elastic stiffness

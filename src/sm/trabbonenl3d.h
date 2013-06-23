@@ -122,7 +122,7 @@ public:
         TrabBone3D :: computeCumPlastStrain(kappa, gp, tStep);
     }
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,  MatResponseForm form, MatResponseMode mode, GaussPoint *gp,  TimeStep *tStep);
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp,  TimeStep *tStep);
 
 #ifdef __OOFEG
     // Plots the sparse structure of stiffness contribution.

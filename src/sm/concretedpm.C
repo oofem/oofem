@@ -1678,7 +1678,6 @@ ConcreteDPM :: computeHardeningOnePrime(const double kappa) const
 
 void
 ConcreteDPM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                             MatResponseForm form,
                                              MatResponseMode mode,
                                              GaussPoint *gp,
                                              TimeStep *atTime)
@@ -1687,14 +1686,14 @@ ConcreteDPM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         double omega = 0.;
         ConcreteDPMStatus *status = giveStatus(gp);
         if ( mode == ElasticStiffness ) {
-            this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+            this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
         } else if ( mode == SecantStiffness || mode == TangentStiffness ) {
             omega = status->giveTempDamage();
             if ( omega > 0.9999 ) {
                 omega = 0.9999;
             }
 
-            this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+            this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
             answer.times(1. - omega);
         }
     }

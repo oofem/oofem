@@ -505,7 +505,7 @@ TransportElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
                                                 MatResponseMode rMode, GaussPoint *gp,
                                                 TimeStep *tStep)
 {
-    static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicMatrix(answer, FullForm, rMode, gp, tStep);
+    static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicMatrix(answer, ReducedForm, rMode, gp, tStep);
 }
 
 void

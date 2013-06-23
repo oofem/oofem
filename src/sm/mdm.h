@@ -244,7 +244,7 @@ public:
                                       const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode,
+                                               MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *tStep);
 

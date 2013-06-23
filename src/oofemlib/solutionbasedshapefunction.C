@@ -204,7 +204,7 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray *coords, Dof
 			}
 		}
 
-		for (int i=0; i<pow(2,n); i++) {
+		for (int i=0; i<pow(2.0,n); i++) {
 
 			int mask=n, counter=1;
 			FloatArray *newCoord = new (FloatArray)(coords->giveSize());

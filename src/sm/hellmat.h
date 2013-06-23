@@ -668,7 +668,7 @@ protected:
     virtual void give1dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
+                                               MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
 
     /**
      * Returns time function for temperature given as direct input.
