@@ -122,35 +122,6 @@ Truss3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
     answer.at(1, 6) = dN.at(2,3);
 }
 
-void
-Truss3d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
-//
-// Returns nonlinear part of geometrical equations of the receiver at gp.
-//
-// Returns A matrix (see Bittnar & Sejnoha Num. Met. Mech. part II, chap 9)
-{
-    double coeff, l;
-
-    l = this->computeLength();
-    coeff = 1.0 / l / l;
-
-    answer.resize(6, 6);
-    answer.zero();
-
-    answer.at(1, 1) = coeff;
-    answer.at(1, 4) = coeff * ( -1 );
-    answer.at(2, 2) = coeff;
-    answer.at(2, 5) = coeff * ( -1 );
-    answer.at(3, 3) = coeff;
-    answer.at(3, 6) = coeff * ( -1 );
-    answer.at(4, 1) = coeff * ( -1 );
-    answer.at(4, 4) = coeff;
-    answer.at(5, 2) = coeff * ( -1 );
-    answer.at(5, 5) = coeff;
-    answer.at(6, 3) = coeff * ( -1 );
-    answer.at(6, 6) = coeff;
-}
-
 
 void
 Truss3d :: computeGaussPoints()

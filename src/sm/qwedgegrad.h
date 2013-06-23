@@ -76,6 +76,7 @@ public:
     virtual void computeGaussPoints ();
     virtual void computeNkappaMatrixAt(GaussPoint*, FloatMatrix&);
     virtual void computeBkappaMatrixAt(GaussPoint*, FloatMatrix&);
+    virtual void computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
     virtual StructuralElement* giveStructuralElement() { return this; }
     virtual NLStructuralElement* giveNLStructuralElement() { return this; }
 

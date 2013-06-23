@@ -207,96 +207,6 @@ TrPlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     }
 }
 
-void
-TrPlaneStress2d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
-//
-// Returns nonlinear part of geometrical equations of the receiver at gp.
-//
-// Returns A matrix (see Bittnar & Sejnoha Num. Met. Mech. part II, chap 9)
-{
-    double b1, b2, b3, c1, c2, c3;
-    FloatArray *b, *c;
-
-    answer.resize(6, 6);
-    answer.zero();
-
-    b = this->GivebCoeff();
-    c = this->GivecCoeff();
-
-    b1 = b->at(1);
-    b2 = b->at(2);
-    b3 = b->at(3);
-
-    c1 = c->at(1);
-    c2 = c->at(2);
-    c3 = c->at(3);
-
-    if ( i == 1 ) {
-        answer.at(1, 1) = b1 * b1;
-        answer.at(1, 3) = b1 * b2;
-        answer.at(1, 5) = b1 * b3;
-        answer.at(2, 2) = b1 * b1;
-        answer.at(2, 4) = b1 * b2;
-        answer.at(2, 6) = b1 * b3;
-        answer.at(3, 1) = b2 * b1;
-        answer.at(3, 3) = b2 * b2;
-        answer.at(3, 5) = b2 * b3;
-        answer.at(4, 2) = b2 * b1;
-        answer.at(4, 4) = b2 * b2;
-        answer.at(4, 6) = b2 * b3;
-        answer.at(5, 1) = b3 * b1;
-        answer.at(5, 3) = b3 * b2;
-        answer.at(5, 5) = b3 * b3;
-        answer.at(6, 2) = b3 * b1;
-        answer.at(6, 4) = b3 * b2;
-        answer.at(6, 6) = b3 * b3;
-    }
-
-    if ( i == 2 ) {
-        answer.at(1, 1) = c1 * c1;
-        answer.at(1, 3) = c1 * c2;
-        answer.at(1, 5) = c1 * c3;
-        answer.at(2, 2) = c1 * c1;
-        answer.at(2, 4) = c1 * c2;
-        answer.at(2, 6) = c1 * c3;
-        answer.at(3, 1) = c2 * c1;
-        answer.at(3, 3) = c2 * c2;
-        answer.at(3, 5) = c2 * c3;
-        answer.at(4, 2) = c2 * c1;
-        answer.at(4, 4) = c2 * c2;
-        answer.at(4, 6) = c2 * c3;
-        answer.at(5, 1) = c3 * c1;
-        answer.at(5, 3) = c3 * c2;
-        answer.at(5, 5) = c3 * c3;
-        answer.at(6, 2) = c3 * c1;
-        answer.at(6, 4) = c3 * c2;
-        answer.at(6, 6) = c3 * c3;
-    }
-
-    if ( i == 3 ) {
-        answer.at(1, 1) = b1 * c1 + b1 * c1;
-        answer.at(1, 3) = b1 * c2 + b2 * c1;
-        answer.at(1, 5) = b1 * c3 + b3 * c1;
-        answer.at(2, 2) = b1 * c1 + b1 * c1;
-        answer.at(2, 4) = b1 * c2 + b2 * c1;
-        answer.at(2, 6) = b1 * c3 + b3 * c1;
-        answer.at(3, 1) = b2 * c1 + b1 * c2;
-        answer.at(3, 3) = b2 * c2 + b2 * c2;
-        answer.at(3, 5) = b2 * c3 + b3 * c2;
-        answer.at(4, 2) = b2 * c1 + b1 * c2;
-        answer.at(4, 4) = b2 * c2 + b2 * c2;
-        answer.at(4, 6) = b2 * c3 + b3 * c2;
-        answer.at(5, 1) = b3 * c1 + b1 * c3;
-        answer.at(5, 3) = b3 * c2 + b2 * c3;
-        answer.at(5, 5) = b3 * c3 + b3 * c3;
-        answer.at(6, 2) = b3 * c1 + b1 * c3;
-        answer.at(6, 4) = b3 * c2 + b2 * c3;
-        answer.at(6, 6) = b3 * c3 + b3 * c3;
-    }
-
-    delete b;
-    delete c;
-}
 
 void TrPlaneStress2d :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
@@ -452,7 +362,7 @@ TrPlaneStress2d :: initializeFrom(InputRecord *ir)
 
     /*  if ( numberOfGaussPoints != 1 ) {
            numberOfGaussPoints = 1;
-	}
+    }
     */
 
     return IRRT_OK;

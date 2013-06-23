@@ -286,16 +286,7 @@ L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
         answer.at(6) = Epsilon.at(4);
 
         if ( nlGeometry ) {
-            for ( int i = 1; i <= 6; i++ ) {
-                // nonlin part of strain vector
-                OOFEM_WARNING("L4Axisymm :: computeStrainVector - computeNLBMatrixAt is not implemented");
-
-                this->computeNLBMatrixAt(A, gp, i);
-                if ( A.isNotEmpty() ) {
-                    help.beProductOf(A, u);
-                    answer.at(i) += 0.5 * u.dotProduct(help);
-                }
-            }
+            OOFEM_ERROR("L4Axisymm :: computeStrainVector - only supports nlGeometry = 0");
         }
     } else if ( mode == AL ) { // actualized Lagrange formulation
         _error("computeStrainVector : unsupported mode");

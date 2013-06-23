@@ -167,7 +167,7 @@ GradDpElement :: computeLocalStrainVector(FloatArray &answer, GaussPoint *gp, Ti
             n = answer.giveSize();
             for ( int i = 1; i <= n; i++ ) {
                 // nonlinear part of the strain-displacement relation
-                elem->computeNLBMatrixAt(A, gp, i);
+                this->computeNLBMatrixAt(A, gp, i);
                 if ( A.isNotEmpty() ) {
                     help.beProductOf(A, u);
                     answer.at(i) += 0.5 * u.dotProduct(help);
@@ -175,16 +175,7 @@ GradDpElement :: computeLocalStrainVector(FloatArray &answer, GaussPoint *gp, Ti
             }
         }
     }
-    else if ( nlGeo == 2 ) {
-        // deformation gradient will be used instead of strain
-        elem->computeBFmatrixAt(gp, b);
-        answer.beProductOf(b, u); // this gives the displacement gradient
-        // unit matrix needs to be added
-        // (needs to be adjusted if the mode is not 3d)
-        answer.at(1) += 1.;
-        answer.at(5) += 1.;
-        answer.at(9) += 1.;
-    }
+
 }
 
 
@@ -293,7 +284,7 @@ GradDpElement :: giveLocalInternalForcesVector(FloatArray &answer, TimeStep *tSt
         if ( nlGeo ) {
             for ( int j = 1; j <= b.giveNumberOfRows(); j++ ) {
                 // loop over each component of strain vector
-                elem->computeNLBMatrixAt(A, gp, j);
+                this->computeNLBMatrixAt(A, gp, j);
                 if (( A.isNotEmpty() ) && ( ut != NULL ) ) {
                     FloatMatrix b2;
                     b2.beProductOf(*ut,A);
@@ -529,7 +520,7 @@ GradDpElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode 
         if ( nlGeo ) {
             for ( int l = 1; l <=  B.giveNumberOfRows(); l++ ) {
                 // loop over each component of strain vector
-                elem->computeNLBMatrixAt(A, gp, l);
+                this->computeNLBMatrixAt(A, gp, l);
                 if ( ( A.isNotEmpty() ) && ( ut != NULL ) ) {
                     FloatMatrix b2;
                     b2.beProductOf(* ut, A);
@@ -565,7 +556,7 @@ GradDpElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode 
             if ( n ) {
                 for ( int j = 1; j <= n; j++ ) {
                     // loop over each component of strain vector
-                    elem->computeNLBMatrixAt(A, gp, j);
+                    this->computeNLBMatrixAt(A, gp, j);
                     if ( A.isNotEmpty() ) {
                         A.times(stress.at(j) * dV);
                         answer.add(A);
@@ -619,7 +610,7 @@ GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode 
         if ( nlGeo ) {
             for ( int l = 1; l <=  B.giveNumberOfRows(); l++ ) {
                 // loop over each component of strain vector
-                elem->computeNLBMatrixAt(A, gp, l);
+                this->computeNLBMatrixAt(A, gp, l);
                 if ( ( A.isNotEmpty() ) && ( ut != NULL ) ) {
                     FloatMatrix b2;
                     b2.beProductOf(* ut, A);
@@ -852,7 +843,7 @@ GradDpElement :: computeStiffnessMatrix_uk(FloatMatrix &answer, MatResponseMode 
         if ( nlGeo ) {
             for ( int l = 1; l <=  B.giveNumberOfRows(); l++ ) {
                 // loop over each component of strain vector
-                elem->computeNLBMatrixAt(A, gp, l);
+                this->computeNLBMatrixAt(A, gp, l);
                 if ( ( A.isNotEmpty() ) && ( ut != NULL ) ) {
                     FloatMatrix b2;
                     b2.beProductOf(* ut, A);

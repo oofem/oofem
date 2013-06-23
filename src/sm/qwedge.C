@@ -138,65 +138,13 @@ QWedge :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     }
 }
 
+#if 1
 
-void
-QWedge :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i) 
-// Returns the [45x45] nonlinear part of strain-displacement matrix {B} of the receiver,
-// evaluated at aGaussPoint
-
-{
-    FloatMatrix dnx;
-
-    // compute the derivatives of shape functions
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    answer.resize(45, 45);
-    answer.zero();
-
-    // put the products of derivatives of shape functions into the "nonlinear B matrix",
-    // depending on parameter i, which is the number of the strain component
-    if ( i <= 3 ) {
-        for ( int k = 0; k < 15; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 45; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, i) * dnx.at( ( j - 1 ) / 3 + 1, i );
-                }
-            }
-        }
-    } else if ( i == 4 )        {
-        for ( int k = 0; k < 15; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 45; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 2 );
-                }
-            }
-        }
-    } else if ( i == 5 )        {
-        for ( int k = 0; k < 15; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 45; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
-                }
-            }
-        }
-    } else if ( i == 6 )        {
-        for ( int k = 0; k < 15; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 45; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 2 ) + dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
-                }
-            }
-        }
-    }
-
-}
+#endif
 
 MaterialMode
 QWedge :: giveMaterialMode()
 {
-    if(this->nlGeometry > 1)
-        return _3dMat_F;
-    else
         return _3dMat;
 }
 
@@ -253,27 +201,6 @@ QWedge :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     }
 }
 
-
-void
-QWedge :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-{
-    OOFEM_CLASS_WARNING("QWedge :: computeBFmatrixAt - deprecated code should not be called");
-
-    FloatMatrix dnx;
-    
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    answer.resize(9, 45);
-    answer.zero();
-
-    for ( int i = 1; i <= 3; i++ ) { // 3 spatial dimensions
-        for ( int j = 1; j <= 15; j++ ) { // 15 nodes
-            answer.at(3 * i - 2, 3 * j - 2) =
-                answer.at(3 * i - 1, 3 * j - 1) =
-                    answer.at(3 * i, 3 * j) = dnx.at(j, i); // derivative of Nj wrt Xi
-        }
-    }
-}
 
 Interface *
 QWedge :: giveInterface(InterfaceType interface)

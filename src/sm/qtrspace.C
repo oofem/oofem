@@ -154,59 +154,9 @@ QTRSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     }
 }
 
+#if 1
 
-void
-QTRSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i) 
-// Returns the [45x45] nonlinear part of strain-displacement matrix {B} of the receiver,
-// evaluated at aGaussPoint
-
-{
-    FloatMatrix dnx;
-
-    // compute the derivatives of shape functions
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    answer.resize(30, 30);
-    answer.zero();
-
-    // put the products of derivatives of shape functions into the "nonlinear B matrix",
-    // depending on parameter i, which is the number of the strain component
-    if ( i <= 3 ) {
-        for ( int k = 0; k < 10; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 30; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(i, k + 1) * dnx.at( i, ( j - 1 ) / 3 + 1 );
-                }
-            }
-        }
-    } else if ( i == 4 ) {
-        for ( int k = 0; k < 10; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 30; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(2, k + 1) * dnx.at( 3, ( j - 1 ) / 3 + 1 ) + dnx.at(3, k + 1) * dnx.at( 2, ( j - 1 ) / 3 + 1 );
-                }
-            }
-        }
-    } else if ( i == 5 ) {
-        for ( int k = 0; k < 10; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 30; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(1, k + 1) * dnx.at(3, ( j - 1 ) / 3 + 1 ) + dnx.at(3, k + 1) * dnx.at(1, ( j - 1 ) / 3 + 1 );
-                }
-            }
-        }
-    } else if ( i == 6 ) {
-        for ( int k = 0; k < 10; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 30; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(1, k + 1) * dnx.at(2, ( j - 1 ) / 3 + 1 ) + dnx.at(2, k + 1) * dnx.at(1, ( j - 1 ) / 3 + 1 );
-                }
-            }
-        }
-    }
-
-}
-
+#endif
 
 void
 QTRSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
@@ -238,26 +188,6 @@ QTRSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
     }
 }
 
-
-void
-QTRSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-{
-  OOFEM_CLASS_WARNING("QTRSpace :: computeBFmatrixAt - deprecated code should not be called");
-  FloatMatrix dnx;
-  
-  this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-  answer.resize(9, 30);
-  answer.zero();
-
-    for ( int i = 1; i <= 3; i++ ) { // 3 spatial dimensions
-        for ( int j = 1; j <= 10; j++ ) { // 10 nodes
-            answer.at(3 * i - 2, 3 * j - 2) =
-                answer.at(3 * i - 1, 3 * j - 1) =
-                    answer.at(3 * i, 3 * j) = dnx.at(j, i); // derivative of Nj wrt Xi
-        }
-    }
-}
 
 void
 QTRSpace :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)

@@ -159,78 +159,6 @@ LTRSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     }
 }
 
-void
-LTRSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i)
-//
-// Returns the [12x12] nonlinear part of the strain-displacement matrix {B} of the receiver,
-// evaluated at aGaussPoint
-{
-    FloatMatrix dnx;
-
-    interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(12, 12);
-    answer.zero();
-
-    if ( i <= 3 ) {
-        for ( int k = 0; k < 4; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 12; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, i) * dnx.at( ( j - 1 ) / 3 + 1, i );
-                }
-            }
-        }
-    } else if ( i == 4 ) {
-        for ( int k = 0; k < 4; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 12; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 2 );
-                }
-            }
-        }
-    } else if ( i == 5 ) {
-        for ( int k = 0; k < 4; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 12; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
-                }
-            }
-        }
-    } else if ( i == 6 ) {
-        for ( int k = 0; k < 4; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 12; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 2 ) + dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
-                }
-            }
-        }
-    }
-}
-
-
-void
-LTRSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-// Returns the [9x12] defgrad-displacement matrix {BF} of the receiver,
-// evaluated at aGaussPoint.
-// BF matrix  -  9 rows : du/dx, dv/dx, dw/dx, du/dy, dv/dy, dw/dy, du/dz, dv/dz, dw/dz
-{
-    OOFEM_CLASS_WARNING("LTRSpace :: computeBFmatrixAt - deprecated code should not be called");
-    FloatMatrix dnx;
-
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(9, 12);
-    answer.zero();
-
-    for ( int i = 1; i <= 3; i++ ) { // 3 spatial dimensions
-        for ( int j = 1; j <= 4; j++ ) { // 8 nodes
-            answer.at(3 * i - 2, 3 * j - 2) =
-                answer.at(3 * i - 1, 3 * j - 1) =
-                answer.at(3 * i, 3 * j) = dnx.at(j, i);     // derivative of Nj wrt Xi
-        }
-    }
-}
-
 
 void
 LTRSpace :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
@@ -258,7 +186,7 @@ LTRSpace :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
         answer.at(9, 3 * i - 1) = dnx.at(i, 1);     // dv/dx
     }
 
-#if 1
+#if 0
     // test if sym(BH) = H*BH == Bsym
     FloatMatrix H, Bsym, Btest;
     H.resize(6,9);

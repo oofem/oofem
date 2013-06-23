@@ -370,18 +370,6 @@ Q4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
         answer.at(3) = Epsilon.at(1);
         answer.at(6) = Epsilon.at(4);
 
-        /*
-         * if (nlGeometry) {
-         * for (i = 1; i<= 6; i++) {
-         * // nonlin part of strain vector
-         * this -> computeNLBMatrixAt(A, gp,i);
-         * if (A.isNotEmpty()) {
-         * help.beProductOf (A, u);
-         * answer.at(i) += 0.5 * dotProduct(u, help, u.giveSize());
-         * }
-         * }
-         * }
-         */
     } else if ( mode == AL ) { // actualized Lagrange formulation
         _error("ComputeStrainVector : unsupported mode");
     }

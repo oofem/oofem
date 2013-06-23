@@ -103,31 +103,6 @@ Truss2d :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     this->computeBmatrixAt(aGaussPoint, answer);
 }
 
-void
-Truss2d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i)
-//
-// Returns nonlinear part of geometrical equations of the receiver at gp.
-//
-// Returns A matrix (see Bittnar & Sejnoha Num. Met. Mech. part II, chap 9)
-{
-    double coeff, l;
-
-    l = this->giveLength();
-    coeff = 1.0 / l / l;
-
-    answer.resize(4, 4);
-    answer.zero();
-
-    answer.at(1, 1) = coeff;
-    answer.at(1, 3) = coeff * ( -1 );
-    answer.at(2, 2) = coeff;
-    answer.at(2, 4) = coeff * ( -1 );
-    answer.at(3, 1) = coeff * ( -1 );
-    answer.at(3, 3) = coeff;
-    answer.at(4, 2) = coeff * ( -1 );
-    answer.at(4, 4) = coeff;
-}
-
 
 
 void Truss2d :: computeGaussPoints()

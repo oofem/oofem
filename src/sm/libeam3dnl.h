@@ -120,8 +120,6 @@ protected:
     { _error("computeBmatrixAt: not implemented"); }
     //int computeGtoLRotationMatrix(FloatMatrix& answer);
 
-    // nonlinear part of geometrical eqs. for i-th component of strain vector.
-    //void computeNLBMatrixAt (FloatMatrix& answer, GaussPoint*, int ) ;
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
     double giveLength();

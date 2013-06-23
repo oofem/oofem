@@ -101,9 +101,9 @@ public:
 protected:
     virtual void computeGaussPoints();
     virtual void computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    void computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
+    
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void computeBFmatrixAt(GaussPoint *, FloatMatrix &);
+    //void computeBFmatrixAt(GaussPoint *, FloatMatrix &);
     void computeBHmatrixAt(GaussPoint *, FloatMatrix &);
 
     virtual int giveApproxOrder() { return 2; }

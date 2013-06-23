@@ -158,4 +158,57 @@ QWedgeGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix& answer
     }
 }
 
+
+void
+QWedgeGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i) 
+// Returns the [45x45] nonlinear part of strain-displacement matrix {B} of the receiver,
+// evaluated at aGaussPoint
+
+{
+    FloatMatrix dnx;
+
+    // compute the derivatives of shape functions
+    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+
+    answer.resize(45, 45);
+    answer.zero();
+
+    // put the products of derivatives of shape functions into the "nonlinear B matrix",
+    // depending on parameter i, which is the number of the strain component
+    if ( i <= 3 ) {
+        for ( int k = 0; k < 15; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 45; j += 3 ) {
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, i) * dnx.at( ( j - 1 ) / 3 + 1, i );
+                }
+            }
+        }
+    } else if ( i == 4 )        {
+        for ( int k = 0; k < 15; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 45; j += 3 ) {
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 2 );
+                }
+            }
+        }
+    } else if ( i == 5 )        {
+        for ( int k = 0; k < 15; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 45; j += 3 ) {
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
+                }
+            }
+        }
+    } else if ( i == 6 )        {
+        for ( int k = 0; k < 15; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 45; j += 3 ) {
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 2 ) + dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
+                }
+            }
+        }
+    }
+
+}
+
 }
