@@ -41,6 +41,7 @@
 #include "nonlocalmaterialext.h"
 #include "contextioerr.h"
 #include "classfactory.h"
+#include <cemhydmat.h>
 
 namespace oofem {
 
@@ -210,8 +211,12 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
             int ii, jj;
 
             minG = G = this->give(pscm_G, gp);
+
+            ///@todo Double-Check the logic here with the mask:
+            IntArray indx;
+            StructuralMaterial :: giveSymVoigtVectorMask(indx, gp->giveMaterialMode());
             for ( int i = 4; i <= 6; i++ ) {
-                if ( ( this->giveStressStrainComponentIndOf(FullForm, gp->giveMaterialMode(), i) ) ) {
+                if ( indx.contains(i) ) {
                     if ( i == 4 ) {
                         ii = 2;
                         jj = 3;
@@ -447,11 +452,9 @@ RCSDNLMaterialStatus :: RCSDNLMaterialStatus(int n, Domain *d, GaussPoint *g) :
     RCSDEMaterialStatus(n, d, g), StructuralNonlocalMaterialStatusExtensionInterface(), nonlocalStrainVector(),
     tempNonlocalStrainVector(), localStrainVectorForAverage()
 {
-    nonlocalStrainVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
-                                giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+    nonlocalStrainVector.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
 
-    localStrainVectorForAverage.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
-                                       giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+    localStrainVectorForAverage.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
 }
 
 
@@ -487,13 +490,11 @@ RCSDNLMaterialStatus :: initTempStatus()
     RCSDEMaterialStatus :: initTempStatus();
 
     if ( nonlocalStrainVector.giveSize() == 0 ) {
-        nonlocalStrainVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
-                                    giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+        nonlocalStrainVector.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
     }
 
     if ( localStrainVectorForAverage.giveSize() == 0 ) {
-        localStrainVectorForAverage.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
-                                           giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+        localStrainVectorForAverage.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
     }
 
     tempNonlocalStrainVector = nonlocalStrainVector;

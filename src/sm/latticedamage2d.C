@@ -555,19 +555,6 @@ LatticeDamage2d :: computeDeltaDissipation(double omega,
     return tempDeltaDissipation;
 }
 
-void
-LatticeDamage2d :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
-                                        MaterialMode mmode) const
-{
-    if ( mmode == _2dLattice ) {
-        answer.resize(3);
-        for ( int i = 1; i <= 3; i++ ) {
-            answer.at(i) = i;
-        }
-    } else {
-        _error("Error: Unknown materialmode");
-    }
-}
 
 void LatticeDamage2d :: giveRandomParameters(FloatArray &param)
 {
@@ -588,31 +575,6 @@ LatticeDamage2d :: giveInterface(InterfaceType type)
     return NULL;
 }
 
-
-int
-LatticeDamage2d :: giveStressStrainComponentIndOf(MatResponseForm form, MaterialMode mmode, int ind)
-{
-    if ( mmode == _2dLattice ) {
-        return ind;
-    } else {
-        _error("Unknown material mode\n");
-    }
-
-    return 0;
-}
-
-int
-LatticeDamage2d :: giveSizeOfReducedStressStrainVector(MaterialMode mode)
-{
-    switch ( mode ) {
-    case _2dLattice:
-        return 3;
-
-    default:
-        _error("Unknown material mode \n");
-        return 0;
-    }
-}
 
 void
 LatticeDamage2d :: giveCharacteristicMatrix(FloatMatrix &answer,

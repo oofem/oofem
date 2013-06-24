@@ -272,7 +272,7 @@ MPSMaterial :: giveShrinkageStrainVector(FloatArray &answer,
             answer.resize(6);
             answer.zero();
         } else {
-            answer.resize( this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+            answer.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
             answer.zero();
         }
     } else {

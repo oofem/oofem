@@ -124,7 +124,6 @@ public:
 
     virtual void updateVolumetricStressTo(Microplane *mPlane, double sigv);
 
-    virtual int giveSizeOfReducedStressStrainVector(MaterialMode);
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
     virtual IRResultType initializeFrom(InputRecord *ir);

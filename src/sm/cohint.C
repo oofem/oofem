@@ -111,69 +111,6 @@ CohesiveInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     _error("give3dMaterialStiffnessMatrix: not implemented");
 }
 
-int
-CohesiveInterfaceMaterial :: giveSizeOfReducedStressStrainVector(MaterialMode mode)
-//
-// returns the size of reduced stress-strain vector
-// acording to mode given by gp.
-//
-{
-    switch ( mode ) {
-    case _3dInterface:
-        return 3;
-
-    default:
-        return StructuralMaterial :: giveSizeOfReducedStressStrainVector(mode);
-    }
-}
-
-int
-CohesiveInterfaceMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, MaterialMode mmode, int ind)
-//
-// this function returns index of reduced(if form == ReducedForm)
-// or Full(if form==FullForm) stressStrain component in Full or reduced
-// stressStrainVector acording to stressStrain mode of given gp.
-//
-{
-    if ( mmode == _3dInterface ) {
-        return ind;
-    } else {
-        return StructuralMaterial :: giveStressStrainComponentIndOf(form, mmode, ind);
-    }
-}
-
-void
-CohesiveInterfaceMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
-                                                  MaterialMode mmode) const
-//
-// this function returns mask of reduced(if form == ReducedForm)
-// or Full(if form==FullForm) stressStrain vector in full or
-// reduced StressStrainVector
-// acording to stressStrain mode of given gp.
-//
-//
-// mask has size of reduced or full StressStrain Vector and  i-th component
-// is index to full or reduced StressStrainVector where corresponding
-// stressStrain resides.
-//
-// Reduced form is sub-vector (of stress or strain components),
-// where components corresponding to imposed zero stress (plane stress,...)
-// are not included. On the other hand, if zero strain component is imposed
-// (Plane strain, ..) this condition must be taken into account in geometrical
-// relations, and corresponding component is included in reduced vector.
-//
-{
-    int i;
-
-    if ( mmode == _3dInterface ) {
-        answer.resize(3);
-        for ( i = 1; i <= 3; i++ ) {
-            answer.at(i) = i;
-        }
-    } else {
-        StructuralMaterial :: giveStressStrainMask(answer, form, mmode);
-    }
-}
 
 void
 CohesiveInterfaceMaterial :: giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,

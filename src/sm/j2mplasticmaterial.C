@@ -205,7 +205,7 @@ J2MPlasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer, GaussPo
 
     /* kinematic hardening variables are first */
     if ( this->kinematicHardeningFlag ) {
-        int ksize = this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+        int ksize = StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() );
         for ( i = 1; i <= ksize; i++ ) {
             answer.at(i, i) = this->kinematicModuli;
         }
@@ -322,7 +322,7 @@ J2MPlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int isur
     double f, f32, f12, ax, ay, az;
 
     this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-    size = giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) +
+    size = StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) +
            this->giveSizeOfReducedHardeningVarsVector(gp);
 
     answer.resize(size, size);
@@ -467,7 +467,7 @@ J2MPlasticMaterial :: giveSizeOfReducedHardeningVarsVector(GaussPoint *gp)
     int size = 0;
 
     if ( kinematicHardeningFlag ) {
-        size += this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+        size += StructuralMaterial :: StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() );
     }
 
     if ( isotropicHardeningFlag ) {

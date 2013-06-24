@@ -566,10 +566,10 @@ MDM :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
         answer = de;
     } else {
         IntArray mask;
-        this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
+        StructuralMaterial :: giveSymVoigtVectorMask( mask, gp->giveMaterialMode() );
         answer.resize(6,6);
         answer.zero();
-        answer.assemble(de,mask,mask);
+        answer.assemble(de,mask);
     }
 }
 

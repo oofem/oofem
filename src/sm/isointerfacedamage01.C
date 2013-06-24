@@ -67,11 +67,7 @@ IsoInterfaceDamageMaterial :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-    if ( ( mode == _2dInterface ) || ( mode == _3dInterface ) ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _2dInterface || mode == _3dInterface;
 }
 
 
@@ -162,81 +158,6 @@ IsoInterfaceDamageMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         break;
     default:
         StructuralMaterial :: giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
-    }
-}
-
-
-int
-IsoInterfaceDamageMaterial :: giveSizeOfReducedStressStrainVector(MaterialMode mode)
-//
-// returns the size of reduced stress-strain vector
-// according to mode given by gp.
-//
-{
-    switch ( mode ) {
-    case _2dInterface:
-        return 2;
-
-    case _3dInterface:
-        return 3;
-
-    default:
-        return StructuralMaterial :: giveSizeOfReducedStressStrainVector(mode);
-    }
-}
-
-
-int
-IsoInterfaceDamageMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, MaterialMode mmode, int ind)
-//
-// this function returns index of reduced(if form == ReducedForm)
-// or Full(if form==FullForm) stressStrain component in Full or reduced
-// stressStrainVector acording to stressStrain mode of given gp.
-//
-{
-    //MaterialMode mode  = gp -> giveMaterialMode ();
-
-    if ( ( mmode == _2dInterface ) || ( mmode == _3dInterface ) ) {
-        return ind;
-    } else {
-        return StructuralMaterial :: giveStressStrainComponentIndOf(form, mmode, ind);
-    }
-}
-
-
-void
-IsoInterfaceDamageMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
-                                                   MaterialMode mmode) const
-//
-// this function returns mask of reduced(if form == ReducedForm)
-// or Full(if form==FullForm) stressStrain vector in full or
-// reduced StressStrainVector
-// acording to stressStrain mode of given gp.
-//
-//
-// mask has size of reduced or full StressStrain Vector and  i-th component
-// is index to full or reduced StressStrainVector where corresponding
-// stressStrain resides.
-//
-// Reduced form is sub-vector (of stress or strain components),
-// where components corresponding to imposed zero stress (plane stress,...)
-// are not included. On the other hand, if zero strain component is imposed
-// (Plane strain, ..) this condition must be taken into account in geometrical
-// relations, and corresponding component is included in reduced vector.
-//
-{
-    if ( mmode == _2dInterface ) {
-        answer.resize(2);
-        for ( int i = 1; i <= 2; i++ ) {
-            answer.at(i) = i;
-        }
-    } else if ( mmode == _3dInterface ) {
-        answer.resize(3);
-        for ( int i = 1; i <= 3; i++ ) {
-            answer.at(i) = i;
-        }
-    } else {
-        StructuralMaterial :: giveStressStrainMask(answer, form, mmode);
     }
 }
 

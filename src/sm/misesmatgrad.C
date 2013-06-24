@@ -592,13 +592,13 @@ MisesMatGradStatus :: initTempStatus()
 
     if ( plasticStrain.giveSize() == 0 ) {
         if ( gp->giveMaterialMode() == _1dMatGrad ) {
-            plasticStrain.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->giveSizeOfReducedStressStrainVector(_1dMat) );
+            plasticStrain.resize( StructuralMaterial :: giveSizeOfSymVoigtVector(_1dMat) );
         } else if ( gp->giveMaterialMode() == _PlaneStrainGrad ) {
-            plasticStrain.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->giveSizeOfReducedStressStrainVector(_PlaneStrain) );
+            plasticStrain.resize( StructuralMaterial :: giveSizeOfSymVoigtVector(_PlaneStrain) );
         } else if ( gp->giveMaterialMode() == _PlaneStressGrad ) {
-            plasticStrain.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->giveSizeOfReducedStressStrainVector(_PlaneStress) );
+            plasticStrain.resize( StructuralMaterial :: giveSizeOfSymVoigtVector(_PlaneStress) );
         } else if ( gp->giveMaterialMode() == _3dMatGrad ) {
-            plasticStrain.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->giveSizeOfReducedStressStrainVector(_3dMat) );
+            plasticStrain.resize( StructuralMaterial :: giveSizeOfSymVoigtVector(_3dMat) );
         }
 
         plasticStrain.zero();

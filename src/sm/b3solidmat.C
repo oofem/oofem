@@ -504,7 +504,7 @@ B3SolidMaterial :: giveShrinkageStrainVector(FloatArray &answer,
             answer.resize(6);
             answer.zero();
         } else {
-            answer.resize( this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+            answer.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
             answer.zero();
         }
 
@@ -775,7 +775,7 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, MatResponseF
     if ( status->giveStressVector().giveSize() ) {
         stressVector = status->giveStressVector();
     } else {
-        stressVector.resize( this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+        stressVector.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
         stressVector.zero();
     }
 
@@ -808,7 +808,7 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, MatResponseF
     } else { // total values required
         FloatArray ssv, fssv;
         if ( status->giveShrinkageStrainVector()->giveSize() == 0 ) {
-            ssv.resize( this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+            ssv.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
             ssv.zero();
         } else {
             ssv = * status->giveShrinkageStrainVector();

@@ -139,9 +139,6 @@ public:
                                            GaussPoint *gp,
                                            TimeStep *tStep);
 
-    virtual int giveStressStrainComponentIndOf(MatResponseForm form, MaterialMode mmode, int ind);
-    virtual void giveStressStrainMask(IntArray &answer, MatResponseForm form, MaterialMode mmode) const;
-    virtual int giveSizeOfReducedStressStrainVector(MaterialMode mmode);
     void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
                                          const FloatArray &charVector3d);
     void giveFullCharacteristicVector(FloatArray &answer,  GaussPoint *gp,

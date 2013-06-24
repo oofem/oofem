@@ -297,12 +297,6 @@ public:
     virtual const char *giveClassName() const { return "LatticeDamage2d"; }
     virtual classType giveClassID() const { return LatticeDamage2dClass; }
 
-    virtual int giveStressStrainComponentIndOf(MatResponseForm, MaterialMode mmode, int);
-
-    virtual void giveStressStrainMask(IntArray & answer, MatResponseForm, MaterialMode mmode) const;
-
-    virtual int giveSizeOfReducedStressStrainVector(MaterialMode);
-
     virtual void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *,
                                                  const FloatArray &charVector3d);
 

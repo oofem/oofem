@@ -2720,23 +2720,16 @@ HellmichMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Int
         if ( options & moPlasticity ) {
             status->givePlasticStrainVector(answer);
         } else {
-            answer.resize( this->giveSizeOfReducedStressStrainVector( aGaussPoint->giveMaterialMode() ) );
+            answer.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( aGaussPoint->giveMaterialMode() ) );
             answer.zero();
         }
 
         return 1;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        int indx;
         FloatArray st(6), s;
         if ( options & moPlasticity ) {
             status->givePlasticStrainVector(s);
-            for ( int i = 1; i <= s.giveSize(); i++ ) {
-                indx = this->giveStressStrainComponentIndOf(ReducedForm, aGaussPoint->giveMaterialMode(), i);
-                if ( indx ) {
-                    st.at(indx) = s.at(i);
-                }
-            }
-
+            StructuralMaterial :: giveSymFullVectorForm(st, s, aGaussPoint->giveMaterialMode());
             this->computePrincipalValues(answer, st, principal_strain);
         } else {
             answer.resize(3);
@@ -2764,6 +2757,7 @@ HellmichMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Int
         return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 }
+
 MaterialStatus *
 HellmichMaterial :: CreateStatus(GaussPoint *gp) const
 {
@@ -2847,7 +2841,7 @@ int
 HellmichMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
     if ( type == IST_PlasticStrainTensor ) {
-        return this->giveSizeOfReducedStressStrainVector( aGaussPoint->giveMaterialMode() );
+        return StructuralMaterial :: giveSizeOfSymVoigtVector( aGaussPoint->giveMaterialMode() );
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         return 3;
     } else if ( ( type == IST_DamageTensor ) || ( type == IST_HydrationDegree ) || ( type == IST_Temperature ) ) {
@@ -2958,7 +2952,7 @@ void PlastData :: initTempStatus(GaussPoint *gp)
 {
     // initialization
     if ( !plasticStrainVector.giveSize() ) {
-        int n = ( ( HellmichMaterial * ) ( gp->giveMaterial() ) )->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+        int n = StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() );
 
         plasticStrainVector.resize(n);
     }
@@ -2975,7 +2969,7 @@ void CreepData :: initTempStatus(GaussPoint *gp)
 {
     // initialization
     if ( !viscousStrainVector.giveSize() ) {
-        int n = ( ( HellmichMaterial * ) ( gp->giveMaterial() ) )->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+        int n = StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() );
         viscousStrainVector.resize(n);
         flowStrainVector.resize(n);
     }

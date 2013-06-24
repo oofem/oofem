@@ -309,15 +309,6 @@ M4Material :: updateVolumetricStressTo(Microplane *mPlane, double sigv)
     status->letTempStressVectorBe(stress);
 }
 
-int
-M4Material :: giveSizeOfReducedStressStrainVector(MaterialMode mode)
-{
-    if ( mode == _3dMicroplane ) {
-        return 4;
-    }
-
-    return MicroplaneMaterial_Bazant :: giveSizeOfReducedStressStrainVector(mode);
-}
 
 void
 M4Material :: giveThermalDilatationVector(FloatArray &answer,

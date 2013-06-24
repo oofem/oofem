@@ -290,7 +290,7 @@ void DruckerPragerCutMat :: computeKGradientVector(FloatArray &answer, functType
 //Computes second mixed derivative of loading function with respect to stress and hardening vars. 
 void DruckerPragerCutMat :: computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix, int isurf, GaussPoint *gp, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables)
 {
-    int size = this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+    int size = StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() );
     gradientMatrix.resize(size, 1);//six stresses in 3D and one kappa
     gradientMatrix.zero();
 }
@@ -298,7 +298,7 @@ void DruckerPragerCutMat :: computeReducedSKGradientMatrix(FloatMatrix &gradient
 // computes dKappa_i/dsig_j gradient matrix
 void DruckerPragerCutMat :: computeReducedHardeningVarsSigmaGradient(FloatMatrix &answer, GaussPoint *gp, const IntArray &activeConditionMap, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVars, const FloatArray &dlambda)
 {
-    int size = this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+    int size = StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() );
     answer.resize(1, size);
     answer.zero();
 }

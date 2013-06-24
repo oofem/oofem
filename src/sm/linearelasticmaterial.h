@@ -122,8 +122,6 @@ public:
                               const FloatArray &reducedStrain,
                               TimeStep *tStep);
 
-    virtual int giveStressStrainComponentIndOf(MatResponseForm form, MaterialMode mmode, int ind);
-    virtual void giveStressStrainMask(IntArray &, MatResponseForm form, MaterialMode mmode) const;
     virtual int hasNonLinearBehaviour() { return 0; }
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "LinearElasticMaterial"; }

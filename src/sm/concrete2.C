@@ -1440,13 +1440,13 @@ Concrete2MaterialStatus :: initTempStatus()
 
     if ( plasticStrainVector.giveSize() == 0 ) {
         plasticStrainVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
-                                   giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+                                   StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
         plasticStrainVector.zero();
     }
 
     if ( plasticStrainIncrementVector.giveSize() == 0 ) {
         plasticStrainIncrementVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
-                                            giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+                                            StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
         plasticStrainIncrementVector.zero();
     } else {
         plasticStrainIncrementVector.zero();

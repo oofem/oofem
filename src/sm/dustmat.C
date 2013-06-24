@@ -596,7 +596,7 @@ DustMaterial :: giveIPValueSize(InternalStateType type,
                                 GaussPoint *gp)
 {
     if ( type == IST_PlasticStrainTensor ) {
-        return this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+        return StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() );
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         return 3;
     } else if ( type == IST_VolumetricPlasticStrain || type == IST_StressCapPos ) {

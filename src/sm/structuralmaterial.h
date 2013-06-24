@@ -145,11 +145,11 @@ public:
      * @param gp Integration point.
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
-    virtual void  giveCharacteristicComplianceMatrix(FloatMatrix &answer,
-                                                     MatResponseForm form,
-                                                     MatResponseMode mode,
-                                                     GaussPoint *gp,
-                                                     TimeStep *tStep);
+    void  giveCharacteristicComplianceMatrix(FloatMatrix &answer,
+                                             MatResponseForm form,
+                                             MatResponseMode mode,
+                                             GaussPoint *gp,
+                                             TimeStep *tStep);
 
     /**
      * Computes the real stress vector for given total strain and integration point.
@@ -169,10 +169,8 @@ public:
     virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep) = 0;
 
-    /**
-     * Methods associated with large deformation analyses
-     */
-
+    /// @name Methods associated with large deformation analysis
+    //@{
     /**
      * Computes the second Piola-Kirchoff stress vector for given total deformation gradient and integration point.
      * The total deformation gradient is computed directly from displacement field at the given time step.
@@ -189,29 +187,40 @@ public:
      * @param tStep Current time step (most models are able to respond only when atTime is current time step).
      */
     virtual void giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                                      const FloatArray &reducedF, TimeStep *tStep);
+                                         const FloatArray &reducedF, TimeStep *tStep);
 
 
-    virtual void computeGreenLagrangeStrain(FloatMatrix &answer, FloatMatrix &F);
+    /**
+     * Helper function for computing the common Green-Lagrange strain from a given deformation gradient.
+     * @param answer Green-Lagrange strain (symmetric part only) in Voigt form.
+     */
+    static void computeGreenLagrangeStrain(FloatMatrix &answer, FloatMatrix &F);
 
 
+    /**
+     * Gives the tangent: @f$ \frac{\partial P}{\partial F} @f$.
+     * @param answer The computed tangent from the last evaluated first-PK-stress.
+     * @param form Material response form.
+     * @param rMode Material mode.
+     * @param gp Gauss point.
+     * @param tStep Time step.
+     */
     virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
-                                               GaussPoint *gp, TimeStep *atTime);
+                                          GaussPoint *gp, TimeStep *tStep);
 
-
-
-    static void convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &dSdE, FloatArray &S, FloatArray &F, MaterialMode matMode);
     void give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp);
+    static void convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &dSdE, FloatArray &S, FloatArray &F, MaterialMode matMode);
 
-    void convert_P_2_S(FloatArray &answer, const FloatArray &reducedvP, const FloatArray &reducedvF, MaterialMode matMode);
-    void convert_S_2_P(FloatArray &answer, const FloatArray &reducedvS, const FloatArray &reducedvF, MaterialMode matMode);
-    
+    static void convert_P_2_S(FloatArray &answer, const FloatArray &reducedvP, const FloatArray &reducedvF, MaterialMode matMode);
+    static void convert_S_2_P(FloatArray &answer, const FloatArray &reducedvS, const FloatArray &reducedvF, MaterialMode matMode);
+    //@}
+
     /**
      * Returns the sencond order identity tensor on Voigt form. The size is according to the MaterialMode
      * @param answer Voigt form of the the identity tensor.
      * @param matMode Material response mode.
      */
-    void giveIdentityVector(FloatArray &answer, MaterialMode matMode);
+    static void giveIdentityVector(FloatArray &answer, MaterialMode matMode);
 
     /**
      * Returns a vector of coefficients of thermal dilatation in direction of each material principal (local) axis.
@@ -244,7 +253,6 @@ public:
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "StructuralMaterial"; }
-    virtual classType giveClassID() const { return StructuralMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
@@ -254,7 +262,7 @@ public:
      * @param s Stress/strain vector which eigenvalues are computed.
      * @param mode Stress strain principal mode..
      */
-    void computePrincipalValues(FloatArray &answer, const FloatArray &s, stressStrainPrincMode mode);
+    static void computePrincipalValues(FloatArray &answer, const FloatArray &s, stressStrainPrincMode mode);
     /**
      * Computes principal values and directions of stress or strain vector.
      * @param answer Computed principal values.
@@ -262,7 +270,7 @@ public:
      * @param s Stress/strain vector.
      * @param mode Stress strain principal mode.
      */
-    void computePrincipalValDir(FloatArray &answer, FloatMatrix &dir, const FloatArray &s,
+    static void computePrincipalValDir(FloatArray &answer, FloatMatrix &dir, const FloatArray &s,
                                 stressStrainPrincMode mode);
 
     /**
@@ -284,17 +292,6 @@ public:
                                        MatResponseMode mode,
                                        GaussPoint *gp, TimeStep *tStep);
 
-
-    /**
-     * This method returns index of reduced (if form == ReducedForm) or
-     * full (if form = FullForm) stress/strain component in Full or Reduced
-     * stress/strain vector according to stress/strain mode in given integration point.
-     * @param form Material response form.
-     * @param mmode Material response mode.
-     * @param ind Index of component.
-     * @return Component index or 0 or error is generated for unknown Material Mode.
-     */
-    virtual int giveStressStrainComponentIndOf(MatResponseForm form, MaterialMode mmode, int ind);
     /**
      * This method returns mask of reduced (if form == ReducedForm)
      * or Full (if form==FullForm) stress/strain vector in full or
@@ -311,9 +308,9 @@ public:
      * @param form Material response form.
      * @param mmode Material response mode.
      * @return For unknown mode error is generated.
+     * @todo Remove this in favor of "giveSymVoigtVectorMask"
      */
-    virtual void giveStressStrainMask(IntArray &answer, MatResponseForm form, MaterialMode mmode) const;
-    
+    static void giveStressStrainMask(IntArray &answer, MatResponseForm form, MaterialMode mmode);
     /**
      * Returns a mask of the vector indicies corresponding to components in a general
      * (non-symmetric) second order tensor of some stress/strain/deformation measure that 
@@ -327,7 +324,7 @@ public:
      * @param answer Returned mask.
      * @param mmode Material response mode.
      */
-    virtual void giveVoigtVectorMask(IntArray &answer, MaterialMode mmode) const;
+    static void giveVoigtVectorMask(IntArray &answer, MaterialMode mmode);
 
     /**
      * The same as giveVoigtVectorMask but returns a mask corresponding to a symmetric 
@@ -345,29 +342,25 @@ public:
      * @param answer Returned mask.
      * @param mmode Material response mode.
      */
-    virtual void giveSymVoigtVectorMask(IntArray &answer, MaterialMode mmode) const;
-
-
-    virtual void givePrincipalStressStrainMask(IntArray &answer, MatResponseForm form, MaterialMode mmode) const;
-    /**
-     * Returns the size of reduced stress/strain vector according to given mode.
-     * @param mmode Material response mode.
-     */
-    virtual int giveSizeOfReducedStressStrainVector(MaterialMode mmode)
-    { return this->giveSizeOfSymVoigtVector(mmode); };
+    static void giveSymVoigtVectorMask(IntArray &answer, MaterialMode mmode);
 
     /**
      * Returns the size of reduced stress/strain vector according to given mode.
      * @param mmode Material response mode.
      */
-    virtual int giveSizeOfVoigtVector(MaterialMode mmode);
-    virtual int giveSizeOfSymVoigtVector(MaterialMode mmode);
-
+    static int giveSizeOfVoigtVector(MaterialMode mmode);
+    /** 
+     * Returns the size of symmetric part of a reduced stress/strain vector according to given mode.
+     * @param mmode Material response mode.
+     */
+    static int giveSizeOfSymVoigtVector(MaterialMode mmode);
     /**
      * Returns the size of reduced principal stress/strain vector according to given mode.
      * @param mmode Material response mode.
      */
-    virtual int giveSizeOfReducedPrincipalStressStrainVector(MaterialMode mmode);
+    static int giveSizeOfReducedPrincipalStressStrainVector(MaterialMode mmode);
+
+
     /**
      * Method for subtracting from reduced space strain vector its stress-independent parts
      * (caused by temperature, shrinkage, creep and possibly by other phenomena).
@@ -394,6 +387,7 @@ public:
      * @param answer Reduced version of charVector3d.
      * @param gp Integration point.
      * @param charVector3d Full 3d stress/strain vector.
+     * @todo Replace with giveSymReducedVectorForm ? 
      */
     void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
                                          const FloatArray &charVector3d);
@@ -403,16 +397,21 @@ public:
      * @param answer Full form of stress/strain vector.
      * @param gp Integration point.
      * @param strainVector Reduced vector.
+     * @todo Replace with giveSymFullVectorForm ? 
      */
     void giveFullCharacteristicVector(FloatArray &answer,  GaussPoint *gp,
                                       const FloatArray &strainVector);
-    //@todo add documentation
-    //@todo maybe these should convert from/to matrices instead?
-    void giveFullVectorForm(FloatArray &answer, const FloatArray &strainVector,  MaterialMode matMode);
-    void giveFullVectorFormF(FloatArray &answer, const FloatArray &strainVector,  MaterialMode matMode);
-    void giveSymFullVectorForm(FloatArray &answer,const FloatArray &vec, MaterialMode matMode);
-    void giveReducedVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode);
-    void giveSymReducedVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode);
+
+    /// Converts the reduced symmetric Voigt vector (2nd order tensor) to full form.
+    static void giveFullVectorForm(FloatArray &answer, const FloatArray &strainVector,  MaterialMode matMode);
+    /// Converts the reduced deformation gradient Voigt vector (2nd order tensor).
+    static void giveFullVectorFormF(FloatArray &answer, const FloatArray &strainVector,  MaterialMode matMode);
+    /// Converts the reduced unsymmetric Voigt vector (2nd order tensor) to full form.
+    static void giveSymFullVectorForm(FloatArray &answer,const FloatArray &vec, MaterialMode matMode);
+    /// Converts the full symmetric Voigt vector (2nd order tensor) to reduced form.
+    static void giveReducedVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode);
+    /// Converts the full unsymmetric Voigt vector (2nd order tensor) to reduced form.
+    static void giveSymReducedVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode);
 
 protected:
     /**

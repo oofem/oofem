@@ -38,12 +38,12 @@
 #include "contextioerr.h"
 #include "nlstructuralelement.h"
 namespace oofem {
+
 StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    MaterialStatus(n, d, g), strainVector(), stressVector(), FVector(),
-    tempStressVector(), tempStrainVector(), tempFVector()
+    MaterialStatus(n, d, g), strainVector(), stressVector(),
+    tempStressVector(), tempStrainVector(), FVector(), tempFVector()
 {
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveMaterial() );
-    int rsize = mat->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+    int rsize = StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() );
     strainVector.resize(rsize);
     stressVector.resize(rsize);
 
@@ -53,13 +53,12 @@ StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoin
 
     if ( NLStructuralElement *el = dynamic_cast< NLStructuralElement * > ( gp->giveElement() ) ) {
         if ( el->giveGeometryMode() == 1  ) { // if large def, initialize F and P
-            mat->giveIdentityVector(FVector, gp->giveMaterialMode());
-            PVector.resize(FVector.giveSize());                        
+            StructuralMaterial :: giveIdentityVector(FVector, gp->giveMaterialMode());
+            PVector.resize(FVector.giveSize());
             tempPVector = PVector;
             tempFVector = FVector;
         }
     }
-
 }
 
 
@@ -93,8 +92,6 @@ void StructuralMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 }
 
 
-
-
 void StructuralMaterialStatus :: updateYourself(TimeStep *tStep)
 // Performs end-of-step updates.
 {
@@ -116,13 +113,11 @@ void StructuralMaterialStatus :: initTempStatus()
 
     // see if vectors describing reached equilibrium are defined
     if ( this->giveStrainVector().giveSize() == 0 ) {
-        strainVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
-                            giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+        strainVector.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
     }
 
     if ( this->giveStressVector().giveSize() == 0 ) {
-        stressVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
-                            giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+        stressVector.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
     }
 
     // reset temp vars.

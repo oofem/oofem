@@ -231,7 +231,7 @@ RCSDEMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
             if ( form == ReducedForm ) {
                 answer = reducedAnswer;
             } else {
-                this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
+                StructuralMaterial :: giveSymVoigtVectorMask( mask, gp->giveMaterialMode() );
                 answer.resize(mask.maximum(), mask.maximum());
                 answer.zero();
                 answer.assemble(reducedAnswer, mask, mask);

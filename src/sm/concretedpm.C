@@ -1973,7 +1973,7 @@ ConcreteDPM :: giveIPValueSize(InternalStateType type,
 {
     if ( type == IST_PlasticStrainTensor ) {
         //return 6;
-        return this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+        return StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() );
     } else if ( ( type == IST_CumPlasticStrain ) || ( type == IST_CumPlasticStrain_2 ) || ( type == IST_VolumetricPlasticStrain ) || ( type == IST_PrincipalDamageTensor ) || ( type == IST_PrincipalDamageTempTensor ) || ( type == IST_DamageScalar ) || ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ) {
         return 1;
     } else {

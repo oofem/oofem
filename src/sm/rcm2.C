@@ -408,8 +408,9 @@ RCM2Material :: checkForNewActiveCracks(IntArray &answer, GaussPoint *gp,
     for ( int i = 1; i <= 3; i++ ) { // loop over each possible crack plane
         // test previous status of each possible crack plane
         upd = 0;
-        if ( ( crackMap.at(i) == 0 ) &&
-            ( this->giveStressStrainComponentIndOf(FullForm, gp->giveMaterialMode(), i) ) ) {
+        IntArray indx;
+        StructuralMaterial :: giveSymVoigtVectorMask(indx, gp->giveMaterialMode());
+        if ( crackMap.at(i) == 0 && indx.contains(i) ) {
             if ( status->giveTempMaxCrackStrain(i) > 0. ) {
                 // if (status->giveTempCrackStatus()->at(i) != pscm_NONE) {
                 //
@@ -514,9 +515,10 @@ RCM2Material :: updateCrackStatus(GaussPoint *gp, const FloatArray &crackStrain)
     //
     // local stress is updated according to reached local crack strain
     //
+    IntArray indx;
+    StructuralMaterial :: giveSymVoigtVectorMask(indx, gp->giveMaterialMode());
     for ( int i = 1; i <= 3; i++ ) { // loop over each possible crack plane
-        if ( ( crackMap.at(i) != 0 ) &&
-            ( this->giveStressStrainComponentIndOf(FullForm, gp->giveMaterialMode(), i) ) ) {
+        if ( crackMap.at(i) != 0 && indx.contains(i) ) {
             if ( status->giveTempMaxCrackStrain(i) < crackStrain.at(i) ) {
                 status->setTempMaxCrackStrain( i,  crackStrain.at(i) );
             }
@@ -617,8 +619,11 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
         //
         // first find spatial dimension of problem
         sd = 0;
+
+        IntArray indx;
+        StructuralMaterial :: giveSymVoigtVectorMask(indx, gp->giveMaterialMode());
         for ( int i = 1; i <= 3; i++ ) {
-            if ( ( this->giveStressStrainComponentIndOf(FullForm, gp->giveMaterialMode(), i) ) ) {
+            if ( indx.contains(i) ) {
                 sd++;
             }
         }
@@ -678,9 +683,11 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     // first we set compliances for normal streses in
     // local coordinate system defined by crackplane
     for ( int i = 1; i <= 3; i++ ) {
-        if ( ( indi = this->giveStressStrainComponentIndOf(FullForm, gp->giveMaterialMode(), i) ) ) {
+        IntArray indx;
+        StructuralMaterial :: giveSymVoigtVectorMask(indx, gp->giveMaterialMode());
+        if ( ( indi = indx.findFirstIndexOf(i) ) ) {
             for ( int j = 1; j <= 3; j++ ) {
-                if ( ( indj = this->giveStressStrainComponentIndOf(FullForm, gp->giveMaterialMode(), j) ) ) {
+                if ( ( indj = indx.findFirstIndexOf(j) ) ) {
                     compliance.at(indi, indj) += invDe.at(i, j);
                 }
             }
@@ -700,8 +707,11 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
 
     // now remain to set shears
     G = this->give(pscm_G, gp);
+
+    IntArray indx;
+    StructuralMaterial :: giveSymVoigtVectorMask(indx, gp->giveMaterialMode());
     for ( int i = 4; i <= 6; i++ ) {
-        if ( ( indi = this->giveStressStrainComponentIndOf(FullForm, gp->giveMaterialMode(), i) ) ) {
+        if ( ( indi = indx.findFirstIndexOf(i) ) ) {
             if ( i == 4 ) {
                 ii = 2;
                 jj = 3;
