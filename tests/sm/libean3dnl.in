@@ -14,7 +14,7 @@ node 5 coords 3 4.0  0.    0.0 bc 6 0 0 0 0 0 0
 node 6 coords 3 5.   0.    0.  bc 6 0 0 0 0 0 0
 node 7 coords 3 6.   0.    0.0 bc 6 0 0 0 0 0 0
 node 8 coords 3 7.   0.    0.0 bc 6 0 0 0 0 0 0
-node 9 coords 3 8.0  0.    0.0 bc 6 0 0 0  0 0 0 load 1 2
+node 9 coords 3 8.0  0.    0.0 bc 6 0 0 0 0 0 0 load 1 2
 # common reference node
 node 10 coords 3 8.0  8.    0.0 bc 6 1 1 1 1 1 1
 #

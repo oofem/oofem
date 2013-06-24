@@ -504,7 +504,7 @@ StructuralMaterial :: giveIdentityVector(FloatArray &answer, MaterialMode matMod
 {
     // Create identity tensor on Voigt form according to MaterialMode.
 
-
+    ///@todo This is a hack. We should just store 3D tensors always and be done with it.
     int size = StructuralMaterial :: giveSizeOfVoigtVector( matMode );
     answer.resize(size);
 
