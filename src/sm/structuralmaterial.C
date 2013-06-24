@@ -716,6 +716,9 @@ StructuralMaterial :: giveSizeOfSymVoigtVector(MaterialMode mode)
     case _2dLattice:
         return 3;
 
+    case _Unknown:
+        return 0;
+
     default:
         OOFEM_ERROR2( "StructuralMaterial :: giveSizeOfSymVoigtVector : unknown mode (%s)", __MaterialModeToString(mode) );
     }
@@ -2691,7 +2694,16 @@ StructuralMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGauss
         return StructuralMaterial :: giveSizeOfSymVoigtVector( aGaussPoint->giveMaterialMode() );
     } else if ( ( type == IST_PrincipalStressTensor ) || ( type == IST_PrincipalStrainTensor ) || ( type == IST_PrincipalPlasticStrainTensor ) ||
                ( type == IST_PrincipalStressTempTensor ) || ( type == IST_PrincipalStrainTempTensor ) ) {
-        return this->giveSizeOfReducedPrincipalStressStrainVector( aGaussPoint->giveMaterialMode() );
+        MaterialMode m = aGaussPoint->giveMaterialMode();
+        if ( m == _3dMat || m == _3dMat_F || m == _PlaneStrain ) {
+            return 3;
+        } else if ( m == _PlaneStress ) {
+            return 2;
+        } else if ( m == _1dMat ) {
+            return 1;
+        } else {
+            return 0;
+        }
     } else if ( ( type == IST_Temperature ) || ( type == IST_vonMisesStress ) ) {
         return 1;
     } else if ( ( type == IST_DeformationGradientTensor ) || ( type == IST_FirstPKStressTensor ) ) {
