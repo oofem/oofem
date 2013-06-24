@@ -121,8 +121,8 @@ void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep, Equatio
     contribt.beTranspositionOf(contrib);
 
     this->giveLocArray(r_s, locr, lambdaeq.at(1));
-    answer->assemble(lambdaeq, locr, contrib);
-    answer->assemble(locr, lambdaeq, contribt);
+    answer->assemble(lambdaeq, locr, contribt);
+    answer->assemble(locr, lambdaeq, contrib);
 }
 
 void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
