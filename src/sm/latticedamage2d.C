@@ -300,9 +300,7 @@ LatticeDamage2d :: initDamaged(double kappa, FloatArray &strainVector, GaussPoin
     //get the random variable from the status
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
 
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
-
-    crossSection->giveFullCharacteristicVector(fullstrain, gp, strainVector);
+    StructuralMaterial :: giveFullSymVectorForm(fullstrain, strainVector, gp->giveMaterialMode());
 
     if ( ( kappa > e0 ) && ( status->giveDamage() == 0. ) ) {
         this->computePrincipalValDir(principalStrains, principalDir, fullstrain, principal_strain);
@@ -648,27 +646,6 @@ LatticeDamage2d :: giveElasticStiffnessMatrix(FloatMatrix &answer,
 }
 
 
-
-void
-LatticeDamage2d :: giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                                   const FloatArray &charVector3d)
-//
-// returns reduced stressVector or strainVector from full 3d vector reduced
-// to vector required by gp->giveStressStrainMode()
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-
-    if ( mode == _2dLattice ) {
-        answer = charVector3d;
-        return;
-    } else {
-        _error("Unknown material mode\n");
-    }
-}
-
-
-
 void
 LatticeDamage2d :: giveThermalDilatationVector(FloatArray &answer,
                                                GaussPoint *gp,  TimeStep *tStep)
@@ -694,21 +671,6 @@ LatticeDamage2d :: give(int aProperty, GaussPoint *gp)
     }
 }
 
-
-void
-LatticeDamage2d :: giveFullCharacteristicVector(FloatArray &answer,
-                                                GaussPoint *gp,
-                                                const FloatArray &strainVector)
-
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    if ( mode == _2dLattice ) {
-        answer = strainVector;
-        return;
-    } else {
-        _error("Unknown material model\n");
-    }
-}
 
 int
 LatticeDamage2d :: giveIPValue(FloatArray &answer,

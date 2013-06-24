@@ -297,12 +297,6 @@ public:
     virtual const char *giveClassName() const { return "LatticeDamage2d"; }
     virtual classType giveClassID() const { return LatticeDamage2dClass; }
 
-    virtual void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *,
-                                                 const FloatArray &charVector3d);
-
-    virtual void giveFullCharacteristicVector(FloatArray &answer,  GaussPoint *,
-                                              const FloatArray &);
-
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }

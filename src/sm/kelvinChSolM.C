@@ -119,8 +119,7 @@ KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, MatRespons
         }
 
         // expand the strain to full form if requested
-        static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
-        giveFullCharacteristicVector(answer, gp, reducedAnswer);
+        StructuralMaterial :: giveFullSymVectorForm(answer, reducedAnswer, gp->giveMaterialMode());
     } else {
         /* error - total mode not implemented yet */
         _error("giveEigenStrainVector - mode is not supported");

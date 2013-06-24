@@ -134,7 +134,6 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
     FloatArray reducedTotalStrainVector, principalStrain, strainVector;
     FloatMatrix tempCrackDirs;
     RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
@@ -145,7 +144,7 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
     this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, atTime, VM_Total);
     //
 
-    crossSection->giveFullCharacteristicVector(strainVector, gp, reducedTotalStrainVector);
+    StructuralMaterial :: giveFullSymVectorForm(strainVector, reducedTotalStrainVector, gp->giveMaterialMode());
 
     status->giveTempCrackDirs(tempCrackDirs);
     this->computePrincipalValDir(principalStrain, tempCrackDirs,
@@ -159,7 +158,7 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
     this->transformStressVectorTo(answer, tempCrackDirs, princStress, 1);
 
     status->letTempStrainVectorBe(totalStrain);
-    crossSection->giveReducedCharacteristicVector(reducedStressVector, gp, answer);
+    StructuralMaterial :: giveReducedSymVectorForm(reducedStressVector, answer, gp->giveMaterialMode());
     status->letTempStressVectorBe(reducedStressVector);
     status->giveCrackStrainVector(crackStrain);
     this->updateCrackStatus(gp, crackStrain);
@@ -168,7 +167,7 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
         return;
     }
 
-    crossSection->giveReducedCharacteristicVector(reducedAnswer, gp, answer);
+    StructuralMaterial :: giveReducedSymVectorForm(reducedAnswer, answer, gp->giveMaterialMode());
     answer = reducedAnswer;
 }
 
@@ -409,7 +408,7 @@ RCM2Material :: checkForNewActiveCracks(IntArray &answer, GaussPoint *gp,
         // test previous status of each possible crack plane
         upd = 0;
         IntArray indx;
-        StructuralMaterial :: giveSymVoigtVectorMask(indx, gp->giveMaterialMode());
+        StructuralMaterial :: giveVoigtSymVectorMask(indx, gp->giveMaterialMode());
         if ( crackMap.at(i) == 0 && indx.contains(i) ) {
             if ( status->giveTempMaxCrackStrain(i) > 0. ) {
                 // if (status->giveTempCrackStatus()->at(i) != pscm_NONE) {
@@ -516,7 +515,7 @@ RCM2Material :: updateCrackStatus(GaussPoint *gp, const FloatArray &crackStrain)
     // local stress is updated according to reached local crack strain
     //
     IntArray indx;
-    StructuralMaterial :: giveSymVoigtVectorMask(indx, gp->giveMaterialMode());
+    StructuralMaterial :: giveVoigtSymVectorMask(indx, gp->giveMaterialMode());
     for ( int i = 1; i <= 3; i++ ) { // loop over each possible crack plane
         if ( crackMap.at(i) != 0 && indx.contains(i) ) {
             if ( status->giveTempMaxCrackStrain(i) < crackStrain.at(i) ) {
@@ -621,7 +620,7 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
         sd = 0;
 
         IntArray indx;
-        StructuralMaterial :: giveSymVoigtVectorMask(indx, gp->giveMaterialMode());
+        StructuralMaterial :: giveVoigtSymVectorMask(indx, gp->giveMaterialMode());
         for ( int i = 1; i <= 3; i++ ) {
             if ( indx.contains(i) ) {
                 sd++;
@@ -684,7 +683,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     // local coordinate system defined by crackplane
     for ( int i = 1; i <= 3; i++ ) {
         IntArray indx;
-        StructuralMaterial :: giveSymVoigtVectorMask(indx, gp->giveMaterialMode());
+        StructuralMaterial :: giveVoigtSymVectorMask(indx, gp->giveMaterialMode());
         if ( ( indi = indx.findFirstIndexOf(i) ) ) {
             for ( int j = 1; j <= 3; j++ ) {
                 if ( ( indj = indx.findFirstIndexOf(j) ) ) {
@@ -709,7 +708,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     G = this->give(pscm_G, gp);
 
     IntArray indx;
-    StructuralMaterial :: giveSymVoigtVectorMask(indx, gp->giveMaterialMode());
+    StructuralMaterial :: giveVoigtSymVectorMask(indx, gp->giveMaterialMode());
     for ( int i = 4; i <= 6; i++ ) {
         if ( ( indi = indx.findFirstIndexOf(i) ) ) {
             if ( i == 4 ) {

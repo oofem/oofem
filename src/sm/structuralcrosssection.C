@@ -195,56 +195,6 @@ StructuralCrossSection :: giveCharMaterialComplianceMatrixOf(FloatMatrix &answer
     }
 }
 
-void
-StructuralCrossSection :: giveFullCharacteristicVector(FloatArray &answer,
-                                                       GaussPoint *gp,
-                                                       const FloatArray &strainVector)
-//
-// returns full 3d general strain vector from strainVector in reducedMode
-// based on StressStrainMode in gp. Included are strains which
-// perform nonzero work.
-// General strain vector has one of the following forms:
-// 1) strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
-// 2) strainVectorShell {eps_x,eps_y,gamma_xy, kappa_x, kappa_y, kappa_xy, gamma_zx, gamma_zy}
-//
-// you must assigng your stress strain mode to one of the folloving modes (or add new)
-// FullForm of MaterialStiffnessMatrix must have the same form.
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
-
-    if ( ( mode == _3dMat ) || ( mode == _3dMicroplane ) ) {
-        answer = strainVector;
-        return;
-    } else {
-        mat->giveFullCharacteristicVector(answer, gp, strainVector);
-    }
-}
-
-
-
-void
-StructuralCrossSection :: giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                                          const FloatArray &charVector3d)
-//
-// returns reduced stressVector or strainVector from full 3d vector reduced
-// to vector required by gp->giveStressStrainMode()
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
-
-    if ( ( mode == _3dMat ) || ( mode == _3dMicroplane ) ) {
-        answer = charVector3d;
-        return;
-    } else {
-        mat->giveReducedCharacteristicVector(answer, gp, charVector3d);
-    }
-}
-
-
-
 
 FloatArray *
 StructuralCrossSection :: imposeStressConstrainsOnGradient(GaussPoint *gp,

@@ -139,11 +139,6 @@ public:
                                            GaussPoint *gp,
                                            TimeStep *tStep);
 
-    void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                         const FloatArray &charVector3d);
-    void giveFullCharacteristicVector(FloatArray &answer,  GaussPoint *gp,
-                                      const FloatArray &strainVector);
-
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
 

@@ -306,7 +306,6 @@ void
 IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
 {
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     if ( strain.isEmpty() ) {
         kappa = 0.;
@@ -317,7 +316,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         double posNorm = 0.0;
         FloatArray principalStrains, fullstrain;
 
-        crossSection->giveFullCharacteristicVector(fullstrain, gp, strain);
+        StructuralMaterial :: giveFullSymVectorForm(fullstrain, strain, gp->giveMaterialMode());
 
         // if plane stress mode -> compute strain in z-direction from condition of zero stress in corresponding direction
         if ( gp->giveMaterialMode() == _PlaneStress ) {
@@ -346,7 +345,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
 
         lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
         stress.beProductOf(de, strain);
-        crossSection->giveFullCharacteristicVector(fullStress, gp, stress);
+        StructuralMaterial :: giveFullSymVectorForm(fullStress, stress, gp->giveMaterialMode());
         this->computePrincipalValues(principalStress, fullStress, principal_stress);
         for ( int i = 1; i <= 3; i++ ) {
             if ( principalStress.at(i) > 0.0 ) {
@@ -379,7 +378,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         } else if ( this->equivStrainType == EST_ElasticEnergyPositiveStress ) {
             // elastic energy corresponding to positive part of stress
             FloatArray fullStress, principalStress;
-            crossSection->giveFullCharacteristicVector(fullStress, gp, stress);
+            StructuralMaterial :: giveFullSymVectorForm(fullStress, stress, gp->giveMaterialMode());
             this->computePrincipalValues(principalStress, fullStress, principal_stress);
             // TO BE FINISHED
             sum = 0.;
@@ -395,7 +394,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
     } else if ( this->equivStrainType == EST_Mises ) {
         double nu = lmat->give(NYxz, NULL);
         FloatArray principalStrains, fullstrain;
-        crossSection->giveFullCharacteristicVector(fullstrain, gp, strain);
+        StructuralMaterial :: giveFullSymVectorForm(fullstrain, strain, gp->giveMaterialMode());
         if ( gp->giveMaterialMode() == _PlaneStress ) {
             fullstrain.at(3) = -nu * ( fullstrain.at(1) + fullstrain.at(2) ) / ( 1. - nu );
         } else if ( gp->giveMaterialMode() == _1dMat ) {
@@ -819,7 +818,6 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
     FloatArray principalStrains, crackPlaneNormal(3), fullstrain, crackVect(3);
     FloatMatrix principalDir(3, 3);
     IsotropicDamageMaterial1Status *status = static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     const double e0 = this->give(e0_ID, gp);
     const double ef = this->give(ef_ID, gp);
@@ -841,7 +839,7 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         }
     }
 
-    crossSection->giveFullCharacteristicVector(fullstrain, gp, strainVector);
+    StructuralMaterial :: giveFullSymVectorForm(fullstrain, strainVector, gp->giveMaterialMode());
 
     if ( ( kappa > e0 ) && ( status->giveDamage() == 0. ) ) {
         this->computePrincipalValDir(principalStrains, principalDir, fullstrain, principal_strain);

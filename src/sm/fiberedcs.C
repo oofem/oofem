@@ -82,14 +82,14 @@ FiberedCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm for
         // another approach - use several functions with assumed
         // kinematic constraints
         interface->FiberedCrossSectionInterface_computeStrainVectorInFiber(fullFiberStrain, gp, fiberGp, tStep);
-        this->giveReducedCharacteristicVector(fiberStrain, fiberGp, fullFiberStrain);
+        StructuralMaterial :: giveReducedSymVectorForm(fiberStrain, fullFiberStrain, gp->giveMaterialMode());
 
 
         static_cast< StructuralMaterial * >( fiberMat )->giveRealStressVector(stressVector3d, FullForm, fiberGp, fiberStrain, tStep);
     }
 
     fullStressVect = this->GiveIntegrated3dBeamStress(gp);
-    giveReducedCharacteristicVector(stressVect, gp, * fullStressVect);
+    StructuralMaterial :: giveReducedSymVectorForm(stressVect, * fullStressVect, gp->giveMaterialMode());
     delete fullStressVect;
     answer = stressVect;
     status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
@@ -222,83 +222,6 @@ FiberedCrossSection :: give3dBeamMaterialStiffnessMatrix(FloatMatrix &answer, Ma
     G /= A;
     Ik = A * A * A * A / ( 40.0 * Ip );
     answer.at(4, 4) = G * Ik;
-}
-
-
-void
-FiberedCrossSection :: giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                                       const FloatArray &charVector3d)
-//
-// returns reduced charVector3d from full 3d  vector reduced
-// to  vector required by gp->giveStressStrainMode()
-//
-// enhaced method in order to support cases with integral bending (3dbeam)
-// in such cases full strain vector has the form:
-// 2) strainVectorShell {eps_x, gamma_xz, gamma_xy, \der{phi_x}{x}, kappa_y, kappa_z}
-
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    int size = charVector3d.giveSize();
-
-    if ( mode == _1dFiber ) {
-        if ( size != 6 ) {
-            _error("giveReducedCharacteristicVector: stressVector3d size mismatch");
-        }
-
-        answer.resize(3);
-
-        answer.at(1) = charVector3d.at(1);
-        answer.at(2) = charVector3d.at(5);
-        answer.at(3) = charVector3d.at(6);
-    } else if ( mode == _3dBeam ) {
-        if ( size != 6 ) {
-            _error("giveReducedCharacteristicVector: stressVector3d size mismatch");
-        }
-
-        answer = charVector3d;
-    } else {
-        this->StructuralCrossSection :: giveReducedCharacteristicVector(answer, gp, charVector3d);
-    }
-}
-
-
-void
-FiberedCrossSection :: giveFullCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                                    const FloatArray &charVector)
-//
-// returns reduced charVector3d from full 3d  vector reduced
-// to  vector required by gp->giveStressStrainMode()
-//
-// enhaced method in order to support cases with integral bending (3dbeam..)
-// in such cases full strain vector has the form:
-// 2) strainVectorShell {eps_x, gamma_xz, gamma_xy, \der{phi_x}{x}, kappa_y, kappa_z}
-
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    int size = charVector.giveSize();
-
-    if ( mode == _1dFiber ) {
-        if ( size != 3 ) {
-            _error("giveFullCharacteristicVector: stressVector size mismatch");
-        }
-
-        answer.resize(6);
-        answer.zero();
-
-        answer.at(1) = charVector.at(1);
-        answer.at(5) = charVector.at(2);
-        answer.at(6) = charVector.at(3);
-    } else if ( mode == _3dBeam ) {
-        if ( size != 6 ) {
-            _error("giveFullCharacteristicVector: stressVector size mismatch");
-        }
-
-        answer = charVector;
-    } else {
-        this->StructuralCrossSection :: giveFullCharacteristicVector(answer, gp, charVector);
-    }
 }
 
 
@@ -680,7 +603,7 @@ FiberedCrossSection :: GiveIntegrated3dBeamStress(GaussPoint *masterGp)
 
         if ( fiberStatus->giveTempStressVector().giveSize() ) { // there exist total sress in gp
             reducedFiberStress = fiberStatus->giveTempStressVector();
-            giveFullCharacteristicVector(fiberStress, fiberGp, reducedFiberStress);
+            StructuralMaterial :: giveFullSymVectorForm(fiberStress, reducedFiberStress, fiberGp->giveMaterialMode());
         } else { // no total stress
             continue; // skip gp without stress
         }

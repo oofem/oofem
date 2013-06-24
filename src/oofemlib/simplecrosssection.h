@@ -88,9 +88,6 @@ public:
      */
     SimpleCrossSection(int n, Domain *d) : StructuralCrossSection(n, d) { }
 
-    virtual void giveFullCharacteristicVector(FloatArray &answer,  GaussPoint *gp, const FloatArray &strainVector);
-    virtual void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                          const FloatArray &charVector3d);
     //virtual void giveRealStresses(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
     //                      const FloatArray &reducedStrainIncrement, TimeStep *tStep);
 

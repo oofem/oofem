@@ -272,7 +272,7 @@ B3Material :: giveShrinkageStrainVector(FloatArray &answer,
             answer.resize(6);
             answer.zero();
         } else {
-            answer.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
+            answer.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
             answer.zero();
         }
 
@@ -346,8 +346,7 @@ B3Material :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, MatRe
         return;
     }
 
-    static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
-    giveReducedCharacteristicVector(answer, gp, fullAnswer);
+    StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
 }
 
 void
@@ -416,12 +415,12 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, MatResponseForm f
     if ( status->giveStressVector().giveSize() ) {
         stressVector      = status->giveStressVector();
     } else {
-        stressVector.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
+        stressVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
         stressVector.zero();
     }
 
-    giveFullCharacteristicVector(fullStressVector, gp, stressVector);
-    // commpute volumetric stress
+    StructuralMaterial :: giveFullSymVectorForm(fullStressVector, stressVector, gp->giveMaterialMode());
+    // compute volumetric stress
     sv = 0.0;
     for ( int i = 1; i <= 3; i++ ) {
         sv += stressVector.at(i);
@@ -447,19 +446,18 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, MatResponseForm f
             return;
         }
 
-        static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
-        giveReducedCharacteristicVector(answer, gp, fullAnswer);
+        StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
         return;
     } else { // total values required
         FloatArray ssv, fssv;
         if ( status->giveShrinkageStrainVector()->giveSize() == 0 ) {
-            ssv.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
+            ssv.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
             ssv.zero();
         } else {
             ssv = * status->giveShrinkageStrainVector();
         }
 
-        this->giveFullCharacteristicVector(fssv, gp, ssv);
+        StructuralMaterial :: giveFullSymVectorForm(fssv, ssv, gp->giveMaterialMode());
         // add increment to total values
         fullAnswer.add(fssv);
 
@@ -468,8 +466,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, MatResponseForm f
             return;
         }
 
-        static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
-        giveReducedCharacteristicVector(answer, gp, fullAnswer);
+        StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
         return;
     }
 }

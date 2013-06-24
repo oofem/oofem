@@ -481,7 +481,6 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
     // Initialize temp variables for this gauss point
     status->initTempStatus();
 
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     // subtract stress-independent part of strain
     // (due to temperature changes, shrinkage, etc.)
@@ -518,7 +517,7 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
     if ( form == ReducedForm ) {
         answer = stress;
     } else {
-        crossSection->giveFullCharacteristicVector(answer, gp, stress);
+        StructuralMaterial :: giveFullSymVectorForm(answer, stress, gp->giveMaterialMode());
     }
 }
 
@@ -1973,7 +1972,7 @@ ConcreteDPM :: giveIPValueSize(InternalStateType type,
 {
     if ( type == IST_PlasticStrainTensor ) {
         //return 6;
-        return StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() );
+        return StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
     } else if ( ( type == IST_CumPlasticStrain ) || ( type == IST_CumPlasticStrain_2 ) || ( type == IST_VolumetricPlasticStrain ) || ( type == IST_PrincipalDamageTensor ) || ( type == IST_PrincipalDamageTempTensor ) || ( type == IST_DamageScalar ) || ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ) {
         return 1;
     } else {

@@ -163,51 +163,6 @@ IsoInterfaceDamageMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 
 void
-IsoInterfaceDamageMaterial :: giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                                              const FloatArray &charVector3d)
-//
-// returns reduced stressVector or strainVector from full 3d vector reduced
-// to vector required by gp->giveStressStrainMode()
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-
-    if ( ( mode == _2dInterface ) || ( mode == _3dInterface ) ) {
-        answer = charVector3d;
-        return;
-    } else {
-        StructuralMaterial :: giveReducedCharacteristicVector(answer, gp, charVector3d);
-    }
-}
-
-
-void
-IsoInterfaceDamageMaterial :: giveFullCharacteristicVector(FloatArray &answer,
-                                                           GaussPoint *gp,
-                                                           const FloatArray &strainVector)
-//
-// returns full 3d general strain vector from strainVector in reducedMode
-// based on StressStrainMode in gp. Included are strains which
-// perform nonzero work.
-// General strain vector has one of the following forms:
-// 1) strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
-// 2) strainVectorShell {eps_x,eps_y,gamma_xy, kappa_x, kappa_y, kappa_xy, gamma_zx, gamma_zy}
-//
-// you must assigng your stress strain mode to one of the folloving modes (or add new)
-// FullForm of MaterialStiffnessMatrix must have the same form.
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    if ( ( mode == _2dInterface ) || ( mode == _3dInterface ) ) {
-        answer = strainVector;
-        return;
-    } else {
-        StructuralMaterial :: giveFullCharacteristicVector(answer, gp, strainVector);
-    }
-}
-
-
-void
 IsoInterfaceDamageMaterial :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
                                                                      GaussPoint *gp, TimeStep *atTime)
 {

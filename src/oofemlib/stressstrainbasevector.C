@@ -44,15 +44,15 @@
 namespace oofem {
 StressStrainBaseVector :: StressStrainBaseVector(MaterialMode m) : FloatArray()
 {
-    this->resize( StructuralMaterial :: giveSizeOfSymVoigtVector(m) );
+    this->resize( StructuralMaterial :: giveSizeOfVoigtSymVector(m) );
     this->zero();
     this->mode = m;
 }
 
 StressStrainBaseVector :: StressStrainBaseVector(const FloatArray &src, MaterialMode m) : FloatArray(src)
 {
-    if ( StructuralMaterial :: giveSizeOfSymVoigtVector(m) != src.giveSize() ) {
-        OOFEM_ERROR4("StressStrainBaseVector::StressStrainBaseVector: size mismatch. The source has size %d and a new MaterialMode %s has reduced size %d", src.giveSize(), __MaterialModeToString(m), StructuralMaterial :: giveSizeOfSymVoigtVector(m));
+    if ( StructuralMaterial :: giveSizeOfVoigtSymVector(m) != src.giveSize() ) {
+        OOFEM_ERROR4("StressStrainBaseVector::StressStrainBaseVector: size mismatch. The source has size %d and a new MaterialMode %s has reduced size %d", src.giveSize(), __MaterialModeToString(m), StructuralMaterial :: giveSizeOfVoigtSymVector(m));
     }
 
     this->mode = m;
@@ -94,7 +94,7 @@ StressStrainBaseVector :: convertToFullForm(FloatArray &answer) const
         OOFEM_ERROR("StressStrainBaseVector::convertToFullForm: Fullform not available for 3dRotContinuum");
     }
 
-    StructuralMaterial :: giveSymVoigtVectorMask(indx, (MaterialMode)mode);
+    StructuralMaterial :: giveVoigtSymVectorMask(indx, (MaterialMode)mode);
     answer.assemble(*this, indx);
 }
 
@@ -113,8 +113,8 @@ StressStrainBaseVector :: convertFromFullForm(const FloatArray &vector, Material
             this->at(i) = vector.at(i);
         }
     } else {
-        StructuralMaterial :: giveSymVoigtVectorMask(indx, (MaterialMode)mode);
-        this->resize( StructuralMaterial :: giveSizeOfSymVoigtVector(mode) );
+        StructuralMaterial :: giveVoigtSymVectorMask(indx, (MaterialMode)mode);
+        this->resize( StructuralMaterial :: giveSizeOfVoigtSymVector(mode) );
         this->zero();
 
         for ( int i = 1; i <= indx.giveSize(); i++ ) {
@@ -164,7 +164,7 @@ void
 StressStrainBaseVector :: letStressStrainModeBe(const MaterialMode newMode)
 {
     this->mode = ( StressStrainMatMode ) newMode;
-    this->resize( StructuralMaterial :: giveSizeOfSymVoigtVector(newMode) );
+    this->resize( StructuralMaterial :: giveSizeOfVoigtSymVector(newMode) );
     this->zero();
 }
 

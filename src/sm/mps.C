@@ -272,7 +272,7 @@ MPSMaterial :: giveShrinkageStrainVector(FloatArray &answer,
             answer.resize(6);
             answer.zero();
         } else {
-            answer.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
+            answer.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
             answer.zero();
         }
     } else {
@@ -692,8 +692,7 @@ MPSMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
         }
 
         // expand the strain to full form if requested
-        static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
-        giveFullCharacteristicVector(answer, gp, reducedAnswer);
+        StructuralMaterial :: giveFullSymVectorForm(answer, reducedAnswer, gp->giveMaterialMode());
     } else {
         /* error - total mode not implemented yet */
         _error("giveEigenStrainVector - mode is not supported");
@@ -731,8 +730,7 @@ MPSMaterial :: computePointShrinkageStrainVector(FloatArray &answer, MatResponse
         return;
     }
 
-    static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
-    giveReducedCharacteristicVector(answer, gp, fullAnswer);
+    StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
 }
 
 double

@@ -122,8 +122,6 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
     FloatMatrix helpMtrx, helpMtrx2;
 
     PlasticMaterialStatus *status = static_cast< PlasticMaterialStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
-                                           ( gp->giveElement()->giveCrossSection() );
 
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
@@ -227,7 +225,7 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
     // update temp state variables in gp and associted material status
 
     status->letTempStrainVectorBe(totalStrain);
-    crossSection->giveReducedCharacteristicVector(helpVec, gp, fullStressVector);
+    StructuralMaterial :: giveReducedSymVectorForm(helpVec, fullStressVector, gp->giveMaterialMode());
     status->letTempStressVectorBe(helpVec);
     status->letTempPlasticStrainVectorBe(plasticStrainVectorR);
     status->letTempStrainSpaceHardeningVarsVectorBe(strainSpaceHardeningVariables);
@@ -252,7 +250,7 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
         answer = fullStressVector;
         return;
     } else {
-        crossSection->giveReducedCharacteristicVector(answer, gp, fullStressVector);
+        answer = status->giveTempStressVector();
         return;
     }
 }
@@ -274,14 +272,12 @@ PlasticMaterial :: ComputeGradientVector(GaussPoint *gp,
      */
     FloatArray *stressGradient, stressGradientR;
     FloatArray *stressSpaceHardVarGradient, *answer;
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
-                                           ( gp->giveElement()->giveCrossSection() );
     int isize, size;
 
     stressGradient = this->ComputeStressGradient(gp, fullStressVector,
                                                  fullStressSpaceHardeningVars);
 
-    crossSection->giveReducedCharacteristicVector(stressGradientR, gp, * stressGradient);
+    StructuralMaterial :: giveReducedSymVectorForm(stressGradientR, * stressGradient, gp->giveMaterialMode());
 
     stressSpaceHardVarGradient = this->ComputeStressSpaceHardeningVarsReducedGradient(gp, fullStressVector, fullStressSpaceHardeningVars);
 
@@ -430,8 +426,6 @@ PlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     double s, Gamma;
     int sizeR;
     PlasticMaterialStatus *status = static_cast< PlasticMaterialStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
-                                           ( gp->giveElement()->giveCrossSection() );
 
     // ask for plastic consistency parameter
     Gamma = status->giveTempPlasticConsistencyPrameter();
@@ -468,7 +462,7 @@ PlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     }
 
     stressVector = status->giveStressVector();
-    crossSection->giveFullCharacteristicVector(fullStressVector, gp, stressVector);
+    StructuralMaterial :: giveFullSymVectorForm(fullStressVector, stressVector, gp->giveMaterialMode());
     status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
     stressSpaceHardeningVars = this->ComputeStressSpaceHardeningVars(gp, & strainSpaceHardeningVariables);
 
@@ -755,7 +749,7 @@ PlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Inte
 
         status->givePlasticStrainVector(s);
 
-        StructuralMaterial :: giveSymFullVectorForm(st, s, aGaussPoint->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm(st, s, aGaussPoint->giveMaterialMode());
 
         this->computePrincipalValues(answer, st, principal_strain);
         return 1;
@@ -801,7 +795,7 @@ int
 PlasticMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
     if ( type == IST_PlasticStrainTensor ) {
-        return StructuralMaterial :: giveSizeOfSymVoigtVector( aGaussPoint->giveMaterialMode() );
+        return StructuralMaterial :: giveSizeOfVoigtSymVector( aGaussPoint->giveMaterialMode() );
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         return 3;
     } else {
@@ -864,7 +858,7 @@ void PlasticMaterialStatus :: initTempStatus()
     StructuralMaterialStatus :: initTempStatus();
 
     if ( plasticStrainVector.giveSize() == 0 ) {
-        plasticStrainVector.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
+        plasticStrainVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
         plasticStrainVector.zero();
     }
 

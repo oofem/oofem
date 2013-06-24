@@ -229,24 +229,6 @@ public:
     virtual void computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     /**
-     * Computes reduced stress/strain vector from full stress/strain vector.
-     * The stress/strain mode is determined form given integration point.
-     * @param answer Characteristic vector in reduced form.
-     * @param gp Integration point.
-     * @param charVector3d Full 3d stress/strain vector.
-     */
-    virtual void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                                 const FloatArray &charVector3d);
-    /**
-     * Computes full form of stress/strain from its reduced form, based on stress/strain mode
-     * stored in given integration point.
-     * @param answer Full form of stress/strain vector.
-     * @param gp Integration point.
-     * @param strainVector Reduced vector.
-     */
-    virtual void giveFullCharacteristicVector(FloatArray &answer,  GaussPoint *gp,
-                                              const FloatArray &strainVector);
-    /**
      * Returns modified gradient of stress vector, which is used to
      * bring stresses back to yield surface.
      * Method imposes zeros on places, where zero stress occurs. if energetically connected

@@ -117,10 +117,6 @@ public:
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);
-    void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                         const FloatArray &charVector3d);
-    void giveFullCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &strainVector);
 
     virtual int giveSizeOfFullHardeningVarsVector() { return 3; }
     virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *) { return 3; }

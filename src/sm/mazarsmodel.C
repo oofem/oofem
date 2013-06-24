@@ -137,7 +137,7 @@ MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strai
         return;
     }
 
-    crossSection->giveFullCharacteristicVector(strainb, gp, strain);
+    StructuralMaterial :: giveFullSymVectorForm(strainb, strain, gp->giveMaterialMode());
     // if plane stress mode -> compute strain in z-direction from condition of zero stress in corresponding direction
     int ndim = giveNumberOfSpatialDimensions(gp);
     if ( ndim == 2 ) {

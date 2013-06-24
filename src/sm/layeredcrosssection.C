@@ -96,7 +96,7 @@ LayeredCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm for
         //prevLayerStrain = (((StructuralMaterialStatus*) layerMat->giveStatus(layerGp))
         //  ->giveStrainVector());
         interface->computeStrainVectorInLayer(fullLayerStrain, gp, layerGp, tStep);
-        this->giveReducedCharacteristicVector(layerStrain, layerGp, fullLayerStrain);
+        StructuralMaterial :: giveReducedSymVectorForm(layerStrain, fullLayerStrain, gp->giveMaterialMode());
 
         /*
          * if (prevLayerStrain.giveSize()) {
@@ -115,7 +115,7 @@ LayeredCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm for
     }
 
     this->giveIntegrated3dShellStress(fullStressVect, gp);
-    this->giveReducedCharacteristicVector(stressVect, gp, fullStressVect);
+    StructuralMaterial :: giveReducedSymVectorForm(stressVect, fullStressVect, gp->giveMaterialMode());
     answer = stressVect;
     status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
 
@@ -460,174 +460,6 @@ LayeredCrossSection :: give2dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
             answer.at(7, 1) += layerMatrix.at(2, 1) * layerWidth * layerThick;
             answer.at(7, 7) += layerMatrix.at(2, 2) * layerWidth * layerThick;
         }
-    }
-}
-
-
-void
-LayeredCrossSection :: giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                                       const FloatArray &charVector3d)
-//
-// returns reduced charVector3d from full 3d  vector reduced
-// to  vector required by gp->giveStressStrainMode()
-//
-// enhanced method in order to support cases with integral bending (2dplate, 3dshell..)
-// in such cases full strain vector has the form:
-// strainVector {eps_x,eps_y,gamma_xy, kappa_x, kappa_y, kappa_xy, gamma_zx, gamma_zy}
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    int size = charVector3d.giveSize();
-
-    if ( mode == _2dPlateLayer ) {
-        if ( size != 6 ) {
-            _error("giveReducedCharacteristicVector: stressVector3d size mismatch");
-        }
-
-        answer.resize(5);
-
-        answer.at(1) = charVector3d.at(1);
-        answer.at(2) = charVector3d.at(2);
-        answer.at(3) = charVector3d.at(4);
-        answer.at(4) = charVector3d.at(5);
-        answer.at(5) = charVector3d.at(6);
-    } else if ( mode == _2dBeamLayer ) {
-        if ( size != 6 ) {
-            _error("giveReducedCharacteristicVector: stressVector3d size mismatch");
-        }
-
-        answer.resize(2);
-
-        answer.at(1) = charVector3d.at(1);
-        answer.at(2) = charVector3d.at(5);
-    } else if ( mode == _3dShellLayer ) {
-        if ( size != 6 ) {
-            _error("giveReducedCharacteristicVector: stressVector3d size mismatch");
-        }
-
-        answer.resize(5);
-
-        answer.at(1) = charVector3d.at(1);
-        answer.at(2) = charVector3d.at(2);
-        answer.at(3) = charVector3d.at(4);
-        answer.at(4) = charVector3d.at(5);
-        answer.at(5) = charVector3d.at(6);
-    } else if ( mode == _2dPlate ) {
-        if ( size != 8 ) {
-            _error("giveReducedCharacteristicVector: stressVector3d size mismatch");
-        }
-
-        answer.resize(5);
-
-        answer.at(1) = charVector3d.at(4);
-        answer.at(2) = charVector3d.at(5);
-        answer.at(3) = charVector3d.at(6);
-        answer.at(4) = charVector3d.at(7);
-        answer.at(5) = charVector3d.at(8);
-    } else if ( mode == _2dBeam ) {
-        if ( size != 8 ) {
-            _error("giveReducedCharacteristicVector: stressVector3d size mismatch");
-        }
-
-        answer.resize(3);
-
-        answer.at(1) = charVector3d.at(1);
-        answer.at(2) = charVector3d.at(4);
-        answer.at(3) = charVector3d.at(7);
-    } else if ( mode == _3dShell ) {
-        if ( size != 8 ) {
-            _error("giveReducedCharacteristicVector: stressVector3d size mismatch");
-        }
-
-        answer = charVector3d;
-    } else {
-        this->StructuralCrossSection :: giveReducedCharacteristicVector(answer, gp, charVector3d);
-    }
-}
-
-void
-LayeredCrossSection :: giveFullCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                                    const FloatArray &charVector)
-//
-// returns reduced charVector3d from full 3d  vector reduced
-// to  vector required by gp->giveStressStrainMode()
-//
-// enhaced method in order to support cases with integral bending (2dplate, 3dshell..)
-// in such cases full strain vector has the form:
-// strainVector {eps_x,eps_y,gamma_xy, kappa_x, kappa_y, kappa_xy, gamma_zx, gamma_zy}
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    int size = charVector.giveSize();
-
-    if ( mode == _2dPlateLayer ) {
-        if ( size != 5 ) {
-            _error("giveFullCharacteristicVector: stressVector size mismatch");
-        }
-
-        answer.resize(6);
-        answer.zero();
-
-        answer.at(1) = charVector.at(1);
-        answer.at(2) = charVector.at(2);
-        answer.at(4) = charVector.at(3);
-        answer.at(5) = charVector.at(4);
-        answer.at(6) = charVector.at(5);
-    } else if ( mode == _2dBeamLayer ) {
-        if ( size != 2 ) {
-            _error("giveFullCharacteristicVector: stressVector size mismatch");
-        }
-
-        answer.resize(6);
-        answer.zero();
-
-        answer.at(1) = charVector.at(1);
-        answer.at(5) = charVector.at(2);
-    } else if ( mode == _3dShellLayer ) {
-        if ( size != 5 ) {
-            _error("giveFullCharacteristicVector: stressVector size mismatch");
-        }
-
-        answer.resize(6);
-        answer.zero();
-
-        answer.at(1) = charVector.at(1);
-        answer.at(2) = charVector.at(2);
-        answer.at(4) = charVector.at(3);
-        answer.at(5) = charVector.at(4);
-        answer.at(6) = charVector.at(5);
-    } else if ( mode == _2dPlate ) {
-        if ( size != 5 ) {
-            _error("giveFullCharacteristicVector: stressVector size mismatch");
-        }
-
-        answer.resize(8);
-        answer.zero();
-
-        answer.at(4) = charVector.at(1);
-        answer.at(5) = charVector.at(2);
-        answer.at(6) = charVector.at(3);
-        answer.at(7) = charVector.at(4);
-        answer.at(8) = charVector.at(5);
-    } else if ( mode == _2dBeam ) {
-        if ( size != 3 ) {
-            _error("giveFullCharacteristicVector: stressVector size mismatch");
-        }
-
-        answer.resize(8);
-        answer.zero();
-
-        answer.at(1) = charVector.at(1);
-        answer.at(4) = charVector.at(2);
-        answer.at(7) = charVector.at(3);
-    } else if ( mode == _3dShell ) {
-        if ( size != 8 ) {
-            _error("giveFullCharacteristicVector: stressVector size mismatch");
-        }
-
-        answer = charVector;
-    } else {
-        this->StructuralCrossSection :: giveFullCharacteristicVector(answer, gp, charVector);
     }
 }
 
@@ -1130,9 +962,9 @@ LayeredCrossSection :: giveIntegrated3dShellStress(FloatArray &answer, GaussPoin
         layerMat = domain->giveMaterial( layerMaterials.at(i) );
         layerStatus = static_cast< StructuralMaterialStatus * >( layerMat->giveStatus(layerGp) );
 
-        if ( layerStatus->giveTempStressVector().giveSize() ) { // there exist total sress in gp
+        if ( layerStatus->giveTempStressVector().giveSize() ) { // there exist total stress in gp
             reducedLayerStress = layerStatus->giveTempStressVector();
-            giveFullCharacteristicVector(layerStress, layerGp, reducedLayerStress);
+            StructuralMaterial :: giveFullSymVectorForm(layerStress, reducedLayerStress, layerGp->giveMaterialMode());
         } else { // no total stress
             continue; // skip gp without stress
         }

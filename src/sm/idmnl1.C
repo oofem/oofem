@@ -772,7 +772,6 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     int ncols, nsize;
     double coeff = 0.0, sum;
     IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
     StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
     FloatMatrix b, de, den, princDir(3, 3), t;
     FloatArray stress, fullStress, strain, principalStress, help, nu;
@@ -788,7 +787,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
         lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
         strain = status->giveTempStrainVector();
         stress.beProductOf(de, strain);
-        crossSection->giveFullCharacteristicVector(fullStress, gp, stress);
+        StructuralMaterial :: giveFullSymVectorForm(fullStress, stress, gp->giveMaterialMode());
         if ( gp->giveMaterialMode() == _1dMat ) {
             principalStress = fullStress;
         } else {
@@ -888,7 +887,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
         }
 
         fullHelp.beTProductOf(t, fullPrincStress);
-        crossSection->giveReducedCharacteristicVector(help, gp, fullHelp);
+        StructuralMaterial :: giveReducedSymVectorForm(help, fullHelp, gp->giveMaterialMode());
 
         nu.beProductOf(de, help);
     } else if ( this->equivStrainType == EST_ElasticEnergy ) {

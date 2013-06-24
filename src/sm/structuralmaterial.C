@@ -77,7 +77,7 @@ StructuralMaterial :: giveFirstPKStressVector(FloatArray &answer, MatResponseFor
     F.beMatrixForm(vF);
     StructuralMaterial :: computeGreenLagrangeStrain(E,F);  // 3x3
     vE.beReducedVectorFormOfStrain(E);      // 6
-    StructuralMaterial :: giveSymReducedVectorForm(reducedvE, vE, gp->giveMaterialMode()); //reduced
+    StructuralMaterial :: giveReducedSymVectorForm(reducedvE, vE, gp->giveMaterialMode()); //reduced
     
     this->giveRealStressVector(reducedvS, form, gp, reducedvE, tStep); // Treat stress obtained as second PK stress
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
@@ -477,7 +477,7 @@ StructuralMaterial :: convert_P_2_S(FloatArray &answer, const FloatArray &reduce
     S.beProductOf(invF,P);
     FloatArray vS;
     vS.beReducedVectorForm(S); // 6 components 
-    StructuralMaterial :: giveSymReducedVectorForm(answer, vS, matMode); // convert back to reduced size
+    StructuralMaterial :: giveReducedSymVectorForm(answer, vS, matMode); // convert back to reduced size
 }
 
 
@@ -489,7 +489,7 @@ StructuralMaterial :: convert_S_2_P(FloatArray &answer, const FloatArray &reduce
 
     FloatArray vF, vS, vP;
     StructuralMaterial :: giveFullVectorFormF(vF, reducedvF, matMode);   // 9 components
-    StructuralMaterial :: giveSymFullVectorForm(vS, reducedvS, matMode); // 6 components
+    StructuralMaterial :: giveFullSymVectorForm(vS, reducedvS, matMode); // 6 components
     FloatMatrix F, P, S, invF;
     F.beMatrixForm(vF);
     S.beMatrixForm(vS);
@@ -509,11 +509,11 @@ StructuralMaterial :: giveIdentityVector(FloatArray &answer, MaterialMode matMod
     answer.resize(size);
 
     if ( size == 9 || size == 5 ) {
-        answer.at(1) = answer.at(2) = answer.at(3) = 1.0; 
+        answer.at(1) = answer.at(2) = answer.at(3) = 1.0;
     } else if ( size == 4 ) {
-        answer.at(1) = answer.at(2) = 1.0 ; 
+        answer.at(1) = answer.at(2) = 1.0;
     } else if (size == 1 ) {
-        answer.at(1) = 1.0; 
+        answer.at(1) = 1.0;
     } else {
         OOFEM_ERROR2("StructuralMaterial :: giveIdentityVector - identityVector not implemented for the given MaterialMode (%s)", __MaterialModeToString(matMode) );
     }
@@ -647,112 +647,20 @@ StructuralMaterial :: giveStressDependentPartOfStrainVector(FloatArray &answer, 
 
 
 int
-StructuralMaterial :: giveSizeOfSymVoigtVector(MaterialMode mode)
+StructuralMaterial :: giveSizeOfVoigtSymVector(MaterialMode mode)
 {
-    // Returns the size of reduced symmetric second order tensor 
-    // on Voigt form according to the MaterialMode given by gp.
-
-    switch ( mode ) {
-    case _3dMat:
-    case _3dMat_F:
-        return 6;
-
-    case _PlaneStress:
-        return 3;
-
-    case _PlaneStrain:
-        return 4;
-
-    case _PlaneStressRot:
-        return 4;
-
-    case _1dMat:
-        return 1;
-
-    case _2dPlate:
-    case _2dPlateLayer:
-    case _3dShellLayer:
-        return 5;
-
-    case _2dBeamLayer:
-        return 2;
-
-    case _2dBeam:
-        return 3;
-
-    case _3dShell:
-        return 8;
-
-    case _3dBeam:
-        return 6;
-
-    case _1dFiber:
-        return 3;
-
-    case _1dMatGrad:
-        return 2;
-
-    case _PlaneStressGrad:
-        return 4;
-
-    case _PlaneStrainGrad:
-        return 5;
-
-    case _3dMatGrad:
-        return 7;
-
-    case _1dInterface:
-        return 1;
-
-    case _2dInterface:
-        return 2;
-
-    case _3dInterface:
-        return 3;
-
-    case _3dMicroplane:
-        return 4;
-
-    case _2dLattice:
-        return 3;
-
-    case _Unknown:
-        return 0;
-
-    default:
-        OOFEM_ERROR2( "StructuralMaterial :: giveSizeOfSymVoigtVector : unknown mode (%s)", __MaterialModeToString(mode) );
-    }
-
-    return 0;
+    IntArray indx;
+    StructuralMaterial :: giveVoigtSymVectorMask(indx, mode);
+    return indx.giveSize();
 }
 
 
 int
 StructuralMaterial :: giveSizeOfVoigtVector(MaterialMode mode)
 {
-    // Returns the size of reduced second order tensor 
-    // on Voigt form according to the MaterialMode given by gp.
-    /// @todo add support for other modes
-
-    switch ( mode ) {
-    case _3dMat:
-    case _3dBeam:
-        return 9;
-
-    case _PlaneStrain:
-        return 5;
-
-    case _PlaneStress:
-        return 4;
-
-    case _1dMat:
-        return 1;
-
-    default:
-        OOFEM_ERROR2( "StructuralMaterial :: giveSizeOfVoigtVector : unknown mode (%s)", __MaterialModeToString(mode) );
-    }
-
-    return 0;
+    IntArray indx;
+    StructuralMaterial :: giveVoigtVectorMask(indx, mode);
+    return indx.giveSize();
 }
 
 
@@ -776,13 +684,13 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
 // (Plane strain, ..) this condition must be taken into account in geometrical
 // relations, and corresponding component is included in reduced vector.
 //
-//@todo rewrite the calls to this method to remove MatResponseForm and then replace with giveSymVoigtVectorMask
 {
     if ( form == ReducedForm ) {
-        StructuralMaterial :: giveSymVoigtVectorMask(answer, mmode);
+        StructuralMaterial :: giveVoigtSymVectorMask(answer, mmode);
     } else if ( form == FullForm ) {
         switch ( mmode ) {
         case _3dMat:
+        case _3dMicroplane:
             answer.resize(6);
             answer.zero();
             for ( int i = 1; i <= 6; i++ ) {
@@ -929,46 +837,48 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
     }
 }
 
-void
-StructuralMaterial :: giveSymVoigtVectorMask(IntArray &answer, MaterialMode mmode)
+
+int
+StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmode)
 {
     // The same as giveVoigtVectorMask but returns a mask corresponding to a symmetric 
     // second order tensor.
     //
-    // Returns a mask of the vector indicies corresponding to components in a symmetric
-    // second order tensor of some stress/strain/deformation measure that performes work. 
+    // Returns a mask of the vector indices corresponding to components in a symmetric
+    // second order tensor of some stress/strain/deformation measure that performs work. 
     // Thus, components corresponding to imposed zero stress (e.g. plane stress etc.) are
     // not included. On the other hand, if zero strain components are imposed( e.g. plane 
     // strain etc.) this condition must be taken into account in geometrical relations. 
     // Therefore, these corresponding components are included in the reduced vector.
-    // Which compnents to include are given by the particular MaterialMode.
+    // Which components to include are given by the particular MaterialMode.
     
     switch ( mmode ) {
     case _3dMat:
     case _3dMat_F:
+    case _3dMicroplane:
         answer.resize(6);
         for ( int i = 1; i <= 6; i++ ) {
             answer.at(i) = i;
         }
 
-        break;
+        return 6;
     case _PlaneStress:
         answer.resize(3);
         answer.at(1) = 1;
         answer.at(2) = 2;
         answer.at(3) = 6;
-        break;
+        return 6;
     case _PlaneStrain:
         answer.resize(4);
         answer.at(1) = 1;
         answer.at(2) = 2;
         answer.at(3) = 3;
         answer.at(4) = 6;
-        break;
+        return 6;
     case _1dMat:
         answer.resize(1);
         answer.at(1) = 1;
-        break;
+        return 6;
     case _2dPlateLayer:
     case _3dShellLayer:
         answer.resize(5);
@@ -977,12 +887,12 @@ StructuralMaterial :: giveSymVoigtVectorMask(IntArray &answer, MaterialMode mmod
         answer.at(3) = 4;
         answer.at(4) = 5;
         answer.at(5) = 6;
-        break;
+        return 6;
     case _2dBeamLayer:
         answer.resize(2);
         answer.at(1) = 1;
         answer.at(2) = 5;
-        break;
+        return 6;
     case _2dPlate:
         answer.resize(5);
         answer.at(1) = 7;
@@ -990,13 +900,13 @@ StructuralMaterial :: giveSymVoigtVectorMask(IntArray &answer, MaterialMode mmod
         answer.at(3) = 12;
         answer.at(4) = 5;
         answer.at(5) = 4;
-        break;
+        return 12;
     case _2dBeam:
         answer.resize(3);
         answer.at(1) = 1;
         answer.at(2) = 8;
         answer.at(3) = 5;
-        break;
+        return 12;
     case _3dBeam:
         answer.resize(6);
         answer.at(1) = 1;
@@ -1005,13 +915,13 @@ StructuralMaterial :: giveSymVoigtVectorMask(IntArray &answer, MaterialMode mmod
         answer.at(4) = 7;
         answer.at(5) = 8;
         answer.at(6) = 9;
-        break;
+        return 12;
     case _1dFiber:
         answer.resize(3);
         answer.at(1) = 1;
         answer.at(2) = 5;
         answer.at(3) = 6;
-        break;
+        return 6;
     case _3dShell:
         answer.resize(8);
         answer.at(1) = 1;
@@ -1022,21 +932,21 @@ StructuralMaterial :: giveSymVoigtVectorMask(IntArray &answer, MaterialMode mmod
         answer.at(6) = 12;
         answer.at(7) = 5;
         answer.at(8) = 4;
-        break;
+        return 12;
     case _3dMatGrad:
         answer.resize(7);
         for ( int i = 1; i <= 7; i++ ) {
             answer.at(i) = i;
         }
 
-        break;
+        return 7;
     case _PlaneStressGrad:
         answer.resize(4);
         answer.at(1) = 1;
         answer.at(2) = 2;
         answer.at(3) = 6;
         answer.at(4) = 7;
-        break;
+        return 7;
     case _PlaneStrainGrad:
         answer.resize(5);
         answer.at(1) = 1;
@@ -1044,47 +954,51 @@ StructuralMaterial :: giveSymVoigtVectorMask(IntArray &answer, MaterialMode mmod
         answer.at(3) = 3;
         answer.at(4) = 6;
         answer.at(5) = 7;
-        break;
+        return 7;
     case _1dMatGrad:
         answer.resize(2);
         answer.at(1) = 1;
         answer.at(2) = 7;
-        break;
+        return 7;
     case _PlaneStressRot:
         answer.resize(4);
         answer.at(1) = 1;
         answer.at(2) = 2;
         answer.at(3) = 6;
         answer.at(4) = 7;
-        break;
+        return 7;
     case _1dInterface:
         answer.setValues(1, 1);
-        break;
+        return 1;
     case _2dInterface:
         answer.setValues(2, 1, 2);
-        break;
+        return 2;
     case _3dInterface:
         answer.setValues(3, 1, 2, 3);
-        break;
+        return 3;
     case _2dLattice:
-        answer.setValues(3, 1, 2,3);
-        break;
+        answer.setValues(3, 1, 2, 3);
+        return 3;
+    case _Unknown:
+        answer.resize(0);
+        return 0;
     default:
-        OOFEM_ERROR2( "StructuralMaterial :: giveSymVoigtVectorMask : unknown mode (%s)", __MaterialModeToString(mmode) );
+        OOFEM_ERROR2( "StructuralMaterial :: giveVoigtSymVectorMask : unknown mode (%s)", __MaterialModeToString(mmode) );
+        return 0;
     }
 }
 
 
-void
+int
 StructuralMaterial :: giveVoigtVectorMask(IntArray &answer, MaterialMode mmode)
 {
-    // Returns a mask of the vector indicies corresponding to components in a general
+    // Returns a mask of the vector indices corresponding to components in a general
     // (non-symmetric) second order tensor of some stress/strain/deformation measure that 
-    // performes work. Thus, components corresponding to imposed zero stress (e.g. plane 
+    // performs work. Thus, components corresponding to imposed zero stress (e.g. plane 
     // stress etc.) are not included. On the other hand, if zero strain components are 
     // imposed( e.g. plane strain etc.) this condition must be taken into account in 
     // geometrical relations. Therefore, these corresponding components are included in 
-    // the reduced vector. Which compnents to include are given by the particular MaterialMode.
+    // the reduced vector. Which components to include are given by the particular MaterialMode.
     //
     /// @todo add additional modes if they relevant.
 
@@ -1094,14 +1008,14 @@ StructuralMaterial :: giveVoigtVectorMask(IntArray &answer, MaterialMode mmode)
         for ( int i = 1; i <= 9; i++ ) {
             answer.at(i) = i;
         }
-        break;
+        return 9;
     case _PlaneStress:
         answer.resize(4);
         answer.at(1) = 1;
         answer.at(2) = 2;
         answer.at(3) = 6;
         answer.at(4) = 9;
-        break;
+        return 9;
     case _PlaneStrain:
         answer.resize(5);
         answer.at(1) = 1;
@@ -1109,13 +1023,14 @@ StructuralMaterial :: giveVoigtVectorMask(IntArray &answer, MaterialMode mmode)
         answer.at(3) = 3;
         answer.at(4) = 6;
         answer.at(5) = 9;
-        break;
+        return 9;
     case _1dMat:
         answer.resize(1);
         answer.at(1) = 1;
-        break;
+        return 9;
     default:
         OOFEM_ERROR2( "StructuralMaterial :: giveVoigtVectorMask: unknown mode (%s)", __MaterialModeToString(mmode) );
+        return 0;
     }
 
 }
@@ -2559,7 +2474,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
             s = status->giveTempStressVector();
         }
 
-        //StructuralMaterial :: giveSymFullVectorForm(st, s, aGaussPoint->giveMaterialMode());
+        //StructuralMaterial :: giveFullSymVectorForm(st, s, aGaussPoint->giveMaterialMode());
         this->computePrincipalValues(answer, s, principal_stress);
         return 1;
     } else if ( type == IST_PrincipalStrainTensor || type == IST_PrincipalStrainTempTensor ) {
@@ -2571,7 +2486,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
             s = status->giveTempStrainVector();
         }
 
-        StructuralMaterial :: giveSymFullVectorForm(st, s, aGaussPoint->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm(st, s, aGaussPoint->giveMaterialMode());
 
         this->computePrincipalValues(answer, st, principal_strain);
         return 1;
@@ -2691,7 +2606,7 @@ StructuralMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGauss
         ( type == IST_StressTensorTemp ) || ( type == IST_StrainTensorTemp ) ||
         ( type == IST_CylindricalStressTensor ) || ( type == IST_CylindricalStrainTensor ) ||
         ( type == IST_ShellForceMomentumTensor ) ) {
-        return StructuralMaterial :: giveSizeOfSymVoigtVector( aGaussPoint->giveMaterialMode() );
+        return StructuralMaterial :: giveSizeOfVoigtSymVector( aGaussPoint->giveMaterialMode() );
     } else if ( ( type == IST_PrincipalStressTensor ) || ( type == IST_PrincipalStrainTensor ) || ( type == IST_PrincipalPlasticStrainTensor ) ||
                ( type == IST_PrincipalStressTempTensor ) || ( type == IST_PrincipalStrainTempTensor ) ) {
         MaterialMode m = aGaussPoint->giveMaterialMode();
@@ -2746,8 +2661,8 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
         selem->computeResultingIPEigenstrainAt(eigenstrain, stepN, gp, mode);
     }
 
-    if ( eigenstrain.giveSize() != 0 && eigenstrain.giveSize() != giveSizeOfSymVoigtVector(matmode) ) {
-        OOFEM_ERROR5( "StructuralMaterial :: Number of given eigenstrain components %d is different than required %d by material mode %s, element %d", eigenstrain.giveSize(), giveSizeOfSymVoigtVector(matmode), __MaterialModeToString(matmode), elem->giveNumber() );
+    if ( eigenstrain.giveSize() != 0 && eigenstrain.giveSize() != giveSizeOfVoigtSymVector(matmode) ) {
+        OOFEM_ERROR5( "StructuralMaterial :: Number of given eigenstrain components %d is different than required %d by material mode %s, element %d", eigenstrain.giveSize(), giveSizeOfVoigtSymVector(matmode), __MaterialModeToString(matmode), elem->giveNumber() );
     }
 
     /* add external source, if provided */
@@ -2838,7 +2753,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
                     fullAnswer.times( et.at(1) );
                 }
 
-                this->giveReducedCharacteristicVector(answerTemper, gp, fullAnswer);
+                StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
             }
         }
     }
@@ -2881,78 +2796,28 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 }
 
 
-void
-StructuralMaterial :: giveFullCharacteristicVector(FloatArray &answer,
-                                                   GaussPoint *gp,
-                                                   const FloatArray &strainVector)
-//
-// returns full 3d general strain vector from strainVector in reducedMode
-// based on StressStrainMode in gp. Included are strains which
-// perform nonzero work.
-// General strain vector has one of the following forms:
-// 1) strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
-// 2) strainVectorShell {eps_x,eps_y,gamma_xy, kappa_x, kappa_y, kappa_xy, gamma_zx, gamma_zy}
-//
-// you must assigng your stress strain mode to one of the folloving modes (or add new)
-// FullForm of MaterialStiffnessMatrix must have the same form.
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    IntArray indx;
-
-    if ( this->hasMaterialModeCapability(mode) ) {
-        if ( mode == _3dMat ) {
-            answer = strainVector;
-            return;
-        }
-
-        answer.resize(6);
-        answer.zero();
-
-        this->giveStressStrainMask( indx, ReducedForm, gp->giveMaterialMode() );
-        for ( int i = 1; i <= indx.giveSize(); i++ ) {
-            int j;
-            if ( ( j = indx.at(i) ) ) {
-                answer.at(j) = strainVector.at(i);
-            }
-        }
-
-    } else {
-        OOFEM_ERROR("StructuralMaterial :: giveFullCharacteristicVector - invalid mode");
-    }
-}
-
-
-
-
 void 
-StructuralMaterial :: giveSymFullVectorForm(FloatArray &answer,const FloatArray &vec, MaterialMode matMode)
+StructuralMaterial :: giveFullSymVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode)
 {
-    // Returns (symmetric) full vector form (size = 6) from reduced (symmetric) vector 
     IntArray indx;
-    answer.resize(6);
-    StructuralMaterial :: giveSymVoigtVectorMask(indx, matMode);
+    answer.resize( StructuralMaterial :: giveVoigtSymVectorMask(indx, matMode) );
+    answer.zero();
     answer.assemble(vec, indx);
 }
 
-//@todo improve
+
 void
 StructuralMaterial :: giveFullVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode)
 {
-    // Returns vector on full form (size = 9) from reduced (non-symmetric) vector 
-
     IntArray indx;
-    answer.resize(9);
-    StructuralMaterial :: giveVoigtVectorMask(indx, matMode);
+    answer.resize( StructuralMaterial :: giveVoigtVectorMask(indx, matMode) );
+    answer.zero();
     answer.assemble(vec, indx);
 }
 
 
 void
 StructuralMaterial :: giveFullVectorFormF(FloatArray &answer,const FloatArray &vec, MaterialMode matMode)
-//
-// returns full deformation gradient (size = 9) from deformation gradient in reducedMode
-// based on StressStrainMode in gp. Included are components which perform nonzero work.
 {
     IntArray indx;
     answer.resize(9);
@@ -2969,8 +2834,6 @@ StructuralMaterial :: giveFullVectorFormF(FloatArray &answer,const FloatArray &v
 void
 StructuralMaterial :: giveReducedVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode)
 {
-    // returns reduced (non-symmetric) vector from full (non-symmetric) vector (size = 9) 
-
     IntArray indx;
     StructuralMaterial :: giveVoigtVectorMask(indx, matMode);
     answer.resize( indx.giveSize() );
@@ -2982,57 +2845,17 @@ StructuralMaterial :: giveReducedVectorForm(FloatArray &answer, const FloatArray
 
 
 void
-StructuralMaterial :: giveSymReducedVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode)
+StructuralMaterial :: giveReducedSymVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode)
 {
     // returns reduced (symmetric) vector from full (symmetric) vector (size = 6) 
 
     IntArray indx;
-    StructuralMaterial :: giveSymVoigtVectorMask(indx, matMode);
+    StructuralMaterial :: giveVoigtSymVectorMask(indx, matMode);
     answer.resize( indx.giveSize() );
     for ( int i = 1; i <= indx.giveSize(); i++ ) {
         answer.at(i) = vec.at( indx.at(i) );
     }
 }
-
-
-void
-StructuralMaterial :: giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                                      const FloatArray &charVector3d)
-//
-// returns reduced stressVector or strainVector from full 3d vector reduced
-// to vector required by gp->giveStressStrainMode()
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    IntArray indx;
-    int size = charVector3d.giveSize();
-
-    if ( this->hasMaterialModeCapability(mode) ) {
-        if ( ( mode == _3dMat ) || ( mode == _3dMicroplane ) ) {
-            if ( size != 6 ) {
-                OOFEM_ERROR("StructuralMaterial :: giveReducedCharacteristicVector - charVector3d size mismatch");
-            }
-
-            answer = charVector3d;
-            return;
-        }
-
-        this->giveStressStrainMask( indx, ReducedForm, gp->giveMaterialMode() );
-        answer.resize( indx.giveSize() );
-        answer.zero();
-
-        for ( int i = 1; i <= indx.giveSize(); i++ ) {
-            int j;
-            if ( ( j = indx.at(i) ) ) {
-                answer.at(i) = charVector3d.at(j);
-            }
-        }
-    } else {
-        OOFEM_ERROR("StructuralMaterial :: giveFullCharacteristicVector - invalid mode");
-    }
-}
-
-
 
 
 IRResultType

@@ -125,8 +125,6 @@ MPlasticMaterial :: giveRealStressVector(FloatArray &answer,
     FloatArray gamma;
 
     MPlasticMaterialStatus *status = static_cast< MPlasticMaterialStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
-                                           ( gp->giveElement()->giveCrossSection() );
 
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
@@ -153,7 +151,7 @@ MPlasticMaterial :: giveRealStressVector(FloatArray &answer,
 
 
     status->letTempStrainVectorBe(totalStrain);
-    crossSection->giveReducedCharacteristicVector(helpVec, gp, fullStressVector);
+    StructuralMaterial :: giveReducedSymVectorForm(helpVec, fullStressVector, gp->giveMaterialMode());
     status->letTempStressVectorBe(helpVec);
 
     status->letTempPlasticStrainVectorBe(plasticStrainVectorR);
@@ -188,7 +186,7 @@ MPlasticMaterial :: giveRealStressVector(FloatArray &answer,
         answer = fullStressVector;
         return;
     } else {
-        crossSection->giveReducedCharacteristicVector(answer, gp, fullStressVector);
+        answer = status->giveTempStressVector();
         return;
     }
 }
@@ -460,8 +458,6 @@ MPlasticMaterial :: cuttingPlaneReturn(FloatArray &answer,
     int size, sizeR, i, j, elastic, restart, actSurf, indx, iindx, jindx;
 
     MPlasticMaterialStatus *status = static_cast< MPlasticMaterialStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
-                                           ( gp->giveElement()->giveCrossSection() );
 
     if ( this->plType == associatedPT ) {
         yieldGradVecPtr = loadGradVecPtr = & yieldGradVec;
@@ -488,7 +484,7 @@ MPlasticMaterial :: cuttingPlaneReturn(FloatArray &answer,
     elasticStrainVectorR.subtract(plasticStrainVectorR);
     // stress vector in full form due to computational convinience
     this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
-    crossSection->giveReducedCharacteristicVector(trialStressIncrement, gp, fullStressVector);
+    StructuralMaterial :: giveReducedSymVectorForm(trialStressIncrement, fullStressVector, gp->giveMaterialMode());
     trialStressIncrement.subtract( status->giveStressVector() );
     this->computeStressSpaceHardeningVars(fullStressSpaceHardeningVars, gp, strainSpaceHardeningVariables);
 
@@ -702,18 +698,16 @@ MPlasticMaterial :: computeGradientVector(FloatArray &answer, functType ftype, i
      * with respect to stresses and with respect to
      * strain space hardening variables
      *
-     * Note: variablex with R posfix are in reduced stress-space.
+     * Note: variables with R postfix are in reduced stress-space.
      */
     FloatArray stressGradient, stressGradientR;
     FloatArray stressSpaceHardVarGradient;
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
-                                           ( gp->giveElement()->giveCrossSection() );
     int i, isize, size;
 
     this->computeStressGradientVector(stressGradient, ftype, isurf, gp, fullStressVector,
                                       fullStressSpaceHardeningVars);
 
-    crossSection->giveReducedCharacteristicVector(stressGradientR, gp, stressGradient);
+    StructuralMaterial :: giveReducedSymVectorForm(stressGradientR, stressGradient, gp->giveMaterialMode());
 
     this->computeStressSpaceHardeningVarsReducedGradient(stressSpaceHardVarGradient, ftype, isurf, gp,
                                                          fullStressVector, fullStressSpaceHardeningVars);
@@ -782,16 +776,11 @@ MPlasticMaterial :: computeTrialStressIncrement(FloatArray &answer, GaussPoint *
 
     FloatMatrix de;
     FloatArray reducedAnswer;
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
-                                           ( gp->giveElement()->giveCrossSection() );
 
     this->computeReducedElasticModuli(de, gp, atTime);
-    /*
-     *    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(de, ReducedForm, TangentStiffness,
-     *                                                                                                                                                                                                                                                    gp, atTime) ;
-     */
+    //this->giveLinearElasticMaterial()->giveCharacteristicMatrix(de, ReducedForm, TangentStiffness,                                                                                                                                                                gp, atTime);
     reducedAnswer.beProductOf(de, elasticStrainVectorR);
-    crossSection->giveFullCharacteristicVector(answer, gp, reducedAnswer);
+    StructuralMaterial :: giveFullSymVectorForm(answer, reducedAnswer, gp->giveMaterialMode());
 }
 
 
@@ -893,8 +882,6 @@ MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     int size, sizeR, i, j, iindx, actSurf = 0;
 
     MPlasticMaterialStatus *status = static_cast< MPlasticMaterialStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
-                                           ( gp->giveElement()->giveCrossSection() );
 
     if ( this->plType == associatedPT ) {
         yieldGradVecPtr = loadGradVecPtr = & yieldGradVec;
@@ -939,7 +926,7 @@ MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     }
 
     stressVector = status->giveStressVector();
-    crossSection->giveFullCharacteristicVector(fullStressVector, gp, stressVector);
+    StructuralMaterial :: giveFullSymVectorForm(fullStressVector, stressVector, gp->giveMaterialMode());
     status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
     this->computeStressSpaceHardeningVars(stressSpaceHardeningVars, gp, strainSpaceHardeningVariables);
 
@@ -1053,8 +1040,6 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     int size, sizeR, i, j, iindx, actSurf = 0;
 
     MPlasticMaterialStatus *status = static_cast< MPlasticMaterialStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
-                                           ( gp->giveElement()->giveCrossSection() );
 
     // ask for plastic consistency parameter
     status->giveTempGamma(gamma);
@@ -1086,7 +1071,7 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     this->computeHardeningReducedModuli(hardeningModuli, gp, strainSpaceHardeningVariables, atTime);
 
     stressVector = status->giveStressVector();
-    crossSection->giveFullCharacteristicVector(fullStressVector, gp, stressVector);
+    StructuralMaterial :: giveFullSymVectorForm(fullStressVector, stressVector, gp->giveMaterialMode());
     status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
     this->computeStressSpaceHardeningVars(stressSpaceHardeningVars, gp, strainSpaceHardeningVariables);
 
@@ -1441,7 +1426,7 @@ MPlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Int
 
         status->givePlasticStrainVector(s);
 
-        StructuralMaterial :: giveSymFullVectorForm(st, s, aGaussPoint->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm(st, s, aGaussPoint->giveMaterialMode());
 
         this->computePrincipalValues(answer, st, principal_strain);
         return 1;
@@ -1487,7 +1472,7 @@ int
 MPlasticMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
     if ( type == IST_PlasticStrainTensor ) {
-        return StructuralMaterial :: giveSizeOfSymVoigtVector( aGaussPoint->giveMaterialMode() );
+        return StructuralMaterial :: giveSizeOfVoigtSymVector( aGaussPoint->giveMaterialMode() );
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         return 3;
     } else {
@@ -1551,7 +1536,7 @@ void MPlasticMaterialStatus :: initTempStatus()
     StructuralMaterialStatus :: initTempStatus();
 
     if ( plasticStrainVector.giveSize() == 0 ) {
-        plasticStrainVector.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
+        plasticStrainVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
         plasticStrainVector.zero();
     }
 

@@ -84,7 +84,6 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
     FloatArray reducedSpaceStressVector;
     FloatMatrix tempCrackDirs;
     RCSDEMaterialStatus *status = static_cast< RCSDEMaterialStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
@@ -95,7 +94,7 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
     this->giveStressDependentPartOfStrainVector(reducedStrainVector, gp, totalStrain,
                                                 atTime, VM_Total);
 
-    crossSection->giveFullCharacteristicVector(strainVector, gp, reducedStrainVector);
+    StructuralMaterial :: giveFullSymVectorForm(strainVector, reducedStrainVector, gp->giveMaterialMode());
 
     status->giveTempCrackDirs(tempCrackDirs);
     this->computePrincipalValDir(principalStrain, tempCrackDirs,
@@ -111,14 +110,14 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
         status->giveTempCrackDirs(tempCrackDirs);
         this->transformStressVectorTo(answer, tempCrackDirs, princStress, 1);
 
-        crossSection->giveReducedCharacteristicVector(reducedSpaceStressVector, gp, answer);
+        StructuralMaterial :: giveReducedSymVectorForm(reducedSpaceStressVector, answer, gp->giveMaterialMode());
         status->letTempStressVectorBe(reducedSpaceStressVector);
 
         status->giveCrackStrainVector(crackStrain);
         this->updateCrackStatus(gp, crackStrain);
 
         if ( form == ReducedForm ) {
-            crossSection->giveReducedCharacteristicVector(reducedAnswer, gp, answer);
+            StructuralMaterial :: giveReducedSymVectorForm(reducedAnswer, answer, gp->giveMaterialMode());
             answer = reducedAnswer;
         }
 
@@ -180,7 +179,7 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
         reducedSpaceStressVector.times(1.0 - damage);
 
         if ( form == FullForm ) {
-            crossSection->giveFullCharacteristicVector(answer, gp, reducedSpaceStressVector);
+            StructuralMaterial :: giveFullSymVectorForm(answer, reducedSpaceStressVector, gp->giveMaterialMode());
         } else {
             answer = reducedSpaceStressVector;
         }
@@ -231,7 +230,7 @@ RCSDEMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
             if ( form == ReducedForm ) {
                 answer = reducedAnswer;
             } else {
-                StructuralMaterial :: giveSymVoigtVectorMask( mask, gp->giveMaterialMode() );
+                StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode() );
                 answer.resize(mask.maximum(), mask.maximum());
                 answer.zero();
                 answer.assemble(reducedAnswer, mask, mask);
@@ -268,7 +267,7 @@ RCSDEMaterial :: computeCurrEquivStrain(GaussPoint *gp, const FloatArray &reduce
     StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
     linearElasticMaterial->giveCharacteristicMatrix(De, ReducedForm, TangentStiffness, gp, atTime);
     effStress.beProductOf(De, reducedTotalStrainVector);
-    crossSection->giveFullCharacteristicVector(fullEffStress, gp, effStress);
+    StructuralMaterial :: giveFullSymVectorForm(fullEffStress, effStress, gp->giveMaterialMode());
 
     this->computePrincipalValues(princEffStress, fullEffStress, principal_stress);
     for ( int i = 1; i <= 3; i++ ) {

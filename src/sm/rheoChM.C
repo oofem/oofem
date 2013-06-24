@@ -151,8 +151,7 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm fo
     }
 
     // expand the stress to full form if needed
-    static_cast< StructuralCrossSection * >( gp->giveCrossSection() )
-    ->giveFullCharacteristicVector(answer, gp, stressVector);
+    StructuralMaterial :: giveFullSymVectorForm(answer, stressVector, gp->giveMaterialMode());
 }
 
 
@@ -718,8 +717,7 @@ RheoChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
     fprintf(file, "{hidden variables: ");
     for ( int i = 0; i < nUnits; i++ ) {
-        static_cast< StructuralCrossSection * >( gp->giveCrossSection() )
-            ->giveFullCharacteristicVector( helpVec, gp, * ( hiddenVars [ i ] ) );
+        StructuralMaterial :: giveFullSymVectorForm(helpVec, * ( hiddenVars [ i ] ), gp->giveMaterialMode());
         fprintf(file, "{ ");
         for ( int j = 1; j <= helpVec.giveSize(); j++ ) {
             fprintf( file, "%f ", helpVec.at(j) );

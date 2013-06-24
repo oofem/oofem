@@ -104,7 +104,6 @@ MDM :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint
     FloatArray tempDamageTensorEigenVals;
     FloatMatrix tempDamageTensor, tempDamageTensorEigenVec;
     MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp, totalStrain,
                                                 atTime, VM_Total);
@@ -164,7 +163,7 @@ MDM :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint
     if ( form == ReducedForm ) {
         answer = stress;
     } else {
-        crossSection->giveFullCharacteristicVector(answer, gp, stress);
+        StructuralMaterial :: giveFullSymVectorForm(answer, stress, gp->giveMaterialMode());
     }
 }
 
@@ -297,9 +296,8 @@ MDM :: computeDamageOnPlane(GaussPoint *gp, Microplane *mplane, const FloatArray
     IntArray mask;
     FloatArray fullStrain, prevStress = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) )->giveStressVector();
     this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
-    crossSection->giveFullCharacteristicVector(fullStrain, gp, strain);
+    StructuralMaterial :: giveFullSymVectorForm(fullStrain, strain, gp->giveMaterialMode());
     en = this->computeNormalStrainComponent(mplane, fullStrain);
     em = this->computeShearMStrainComponent(mplane, fullStrain);
     el = this->computeShearLStrainComponent(mplane, fullStrain);
@@ -390,8 +388,7 @@ MDM :: transformStrainToPDC(FloatArray &answer, FloatArray &strain,
     FloatArray fullStrain;
 
     if ( mdmMode == mdm_3d ) {
-        ( static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() ) )
-        ->giveFullCharacteristicVector(fullStrain, gp, strain);
+        StructuralMaterial :: giveFullSymVectorForm(fullStrain, strain, gp->giveMaterialMode());
 
         answer.resize(6);
         answer.at(1) = N(1, 1) * ( N(1, 1) * E(1) + N(1, 2) * E(6) + N(1, 3) * E(5) )
@@ -523,8 +520,7 @@ MDM :: transformStressFromPDC(FloatArray &answer, const FloatArray &stressPDC, c
                            + Nt(1, 2) * ( Nt(2, 1) * S(6)  + Nt(2, 2) * S(2)  + Nt(2, 3) * S(4) )
                            + Nt(1, 3) * ( Nt(2, 1) * S(5)  + Nt(2, 2) * S(4)  + Nt(2, 3) * S(3) );
 
-        ( static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() ) )
-        ->giveReducedCharacteristicVector(answer, gp, fullAnswer);
+        StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
     } else if ( mdmMode == mdm_2d ) {
         answer.resize(3);
 
@@ -566,7 +562,7 @@ MDM :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
         answer = de;
     } else {
         IntArray mask;
-        StructuralMaterial :: giveSymVoigtVectorMask( mask, gp->giveMaterialMode() );
+        StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode() );
         answer.resize(6,6);
         answer.zero();
         answer.assemble(de,mask);
@@ -1101,12 +1097,11 @@ MDM :: giveRawMDMParameters(double &Efp, double &Ep, const FloatArray &reducedSt
         Ep = this->mdm_Ep   = f / EModulus;
         return;
     } else { // local model
-        StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
         FloatArray strainVector, principalStrain;
         FloatMatrix dirs;
         double h;
 
-        crossSection->giveFullCharacteristicVector(strainVector, gp, reducedStrain);
+        StructuralMaterial :: giveFullSymVectorForm(strainVector, reducedStrain, gp->giveMaterialMode());
         this->computePrincipalValDir(principalStrain, dirs,
                                      strainVector,
                                      principal_strain);

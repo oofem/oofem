@@ -106,7 +106,6 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
     FloatArray reducedNonlocStrainVector, fullNonlocStrainVector, principalStrain;
     FloatMatrix tempCrackDirs;
     RCSDNLMaterialStatus *nonlocStatus, *status = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     FloatArray nonlocalContribution;
     FloatArray reducedLocalStrainVector, localStrain;
@@ -145,7 +144,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
     this->giveStressDependentPartOfStrainVector(localStrain, gp, reducedLocalStrainVector,
                                                 atTime, VM_Total);
 
-    crossSection->giveFullCharacteristicVector(fullNonlocStrainVector, gp, nonlocalStrain);
+    StructuralMaterial :: giveFullSymVectorForm(fullNonlocStrainVector, nonlocalStrain, gp->giveMaterialMode());
 
     status->giveTempCrackDirs(tempCrackDirs);
     this->computePrincipalValDir(principalStrain, tempCrackDirs,
@@ -214,7 +213,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
 
             ///@todo Double-Check the logic here with the mask:
             IntArray indx;
-            StructuralMaterial :: giveSymVoigtVectorMask(indx, gp->giveMaterialMode());
+            StructuralMaterial :: giveVoigtSymVectorMask(indx, gp->giveMaterialMode());
             for ( int i = 4; i <= 6; i++ ) {
                 if ( indx.contains(i) ) {
                     if ( i == 4 ) {
@@ -349,7 +348,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
     reducedSpaceStressVector.beProductOf(Ds0, localStrain);
 
     if ( form == FullForm ) {
-        crossSection->giveFullCharacteristicVector(answer, gp, reducedSpaceStressVector);
+        StructuralMaterial :: giveFullSymVectorForm(answer, reducedSpaceStressVector, gp->giveMaterialMode());
     } else {
         answer = reducedSpaceStressVector;
     }
@@ -452,9 +451,9 @@ RCSDNLMaterialStatus :: RCSDNLMaterialStatus(int n, Domain *d, GaussPoint *g) :
     RCSDEMaterialStatus(n, d, g), StructuralNonlocalMaterialStatusExtensionInterface(), nonlocalStrainVector(),
     tempNonlocalStrainVector(), localStrainVectorForAverage()
 {
-    nonlocalStrainVector.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
+    nonlocalStrainVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
 
-    localStrainVectorForAverage.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
+    localStrainVectorForAverage.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
 }
 
 
@@ -471,7 +470,7 @@ RCSDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
     fprintf(file, "nonlocstatus { ");
     fprintf(file, "  nonloc strains ");
-    static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->giveFullCharacteristicVector(helpVec, gp, nonlocalStrainVector);
+    StructuralMaterial :: giveFullSymVectorForm(helpVec, nonlocalStrainVector, gp->giveMaterialMode());
     for ( int i = 1; i <= helpVec.giveSize(); i++ ) {
         fprintf( file, " % .4e", helpVec.at(i) );
     }
@@ -490,11 +489,11 @@ RCSDNLMaterialStatus :: initTempStatus()
     RCSDEMaterialStatus :: initTempStatus();
 
     if ( nonlocalStrainVector.giveSize() == 0 ) {
-        nonlocalStrainVector.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
+        nonlocalStrainVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
     }
 
     if ( localStrainVectorForAverage.giveSize() == 0 ) {
-        localStrainVectorForAverage.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
+        localStrainVectorForAverage.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
     }
 
     tempNonlocalStrainVector = nonlocalStrainVector;

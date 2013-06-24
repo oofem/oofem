@@ -516,50 +516,6 @@ Masonry02 :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 
 void
-Masonry02 :: giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                             const FloatArray &charVector3d)
-//
-// returns reduced stressVector or strainVector from full 3d vector reduced
-// to vector required by gp->giveStressStrainMode()
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-
-    if ( mode == _2dInterface ) {
-        answer = charVector3d;
-        return;
-    } else {
-        MPlasticMaterial2 :: giveReducedCharacteristicVector(answer, gp, charVector3d);
-    }
-}
-
-
-void
-Masonry02 :: giveFullCharacteristicVector(FloatArray &answer,
-                                          GaussPoint *gp,
-                                          const FloatArray &strainVector)
-//
-// returns full 3d general strain vector from strainVector in reducedMode
-// based on StressStrainMode in gp. Included are strains which
-// perform nonzero work.
-// General strain vector has one of the following forms:
-// 1) strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
-// 2) strainVectorShell {eps_x,eps_y,gamma_xy, kappa_x, kappa_y, kappa_xy, gamma_zx, gamma_zy}
-//
-// you must assign your stress strain mode to one of the following modes (or add new)
-// FullForm of MaterialStiffnessMatrix must have the same form.
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    if ( mode == _2dInterface ) {
-        answer = strainVector;
-        return;
-    } else {
-        MPlasticMaterial2 :: giveFullCharacteristicVector(answer, gp, strainVector);
-    }
-}
-
-void
 Masonry02 :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode,
                                                     GaussPoint *gp, TimeStep *atTime)
 {

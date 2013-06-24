@@ -425,9 +425,9 @@ RankineMatGradStatus :: initTempStatus()
 
     if ( plasticStrain.giveSize() == 0 ) {
         if ( gp->giveMaterialMode() == _PlaneStressGrad ) {
-            plasticStrain.resize( StructuralMaterial :: giveSizeOfSymVoigtVector(_PlaneStress) );
+            plasticStrain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector(_PlaneStress) );
         } else if ( gp->giveMaterialMode() == _3dMatGrad ) {
-            plasticStrain.resize( StructuralMaterial :: giveSizeOfSymVoigtVector(_3dMat) );
+            plasticStrain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector(_3dMat) );
         }
 
         plasticStrain.zero();

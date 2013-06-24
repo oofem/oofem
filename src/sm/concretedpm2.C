@@ -191,10 +191,8 @@ ConcreteDPM2Status :: printOutputAt(FILE *file, TimeStep *tStep)
     StrainVector plasticStrainVector( gp->giveMaterialMode() );
     giveFullPlasticStrainVector(plasticStrainVector);
 
-    //    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
-
-    StrainVector inelasticStrainVector( gp->giveMaterialMode() );
-    static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->giveFullCharacteristicVector(inelasticStrainVector, gp, strainVector);
+    StrainVector inelasticStrainVector( gp->giveMaterialMode() ); ///@todo Is this material mode really correct? Shouldn't it be the full material mode?
+    StructuralMaterial :: giveFullSymVectorForm(inelasticStrainVector, strainVector, gp->giveMaterialMode());
 
     inelasticStrainVector.subtract(plasticStrainVector);
     inelasticStrainVector.times(damage);
@@ -574,8 +572,6 @@ ConcreteDPM2 :: giveRealStressVector(FloatArray &answer,
 
     //  ConcreteDPM2Status *status = giveStatus (gp) ;
 
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
-
     StrainVector strain(strainVector, matMode);
     //Calculate the strain increment!
     StrainVector deltaStrain(matMode);
@@ -641,7 +637,7 @@ ConcreteDPM2 :: giveRealStressVector(FloatArray &answer,
     if ( form == ReducedForm ) {
         answer = stress;
     } else {
-        crossSection->giveFullCharacteristicVector(answer, gp, stress);
+        StructuralMaterial :: giveFullSymVectorForm(answer, stress, gp->giveMaterialMode());
     }
 }
 

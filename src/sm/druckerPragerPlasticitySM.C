@@ -312,8 +312,7 @@ DruckerPragerPlasticitySM :: giveRealStressVector(FloatArray &answer,
     if ( form == ReducedForm ) {
         answer = status->giveTempStressVector();
     } else {
-        ( static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() ) )
-        ->giveFullCharacteristicVector( answer, gp, status->giveTempStressVector() );
+        StructuralMaterial :: giveFullSymVectorForm(answer, status->giveTempStressVector(), gp->giveMaterialMode());
     }
 }
 
@@ -655,12 +654,10 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
     int i, j;
     DruckerPragerPlasticitySMStatus *status =
         static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection =
-        static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     const FloatArray stressVector = status->giveTempStressVector();
     FloatArray fullStressVector;
-    crossSection->giveFullCharacteristicVector(fullStressVector, gp, stressVector);
+    StructuralMaterial :: giveFullSymVectorForm(fullStressVector, stressVector, gp->giveMaterialMode());
     const StressVector stress(fullStressVector, _3dMat);
     StressVector deviatoricStress(_3dMat);
     double volumetricStress;
@@ -749,8 +746,6 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
 {
     DruckerPragerPlasticitySMStatus *status =
         static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection =
-        static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     double tempKappa = status->giveTempKappa();
     double deltaKappa = tempKappa - status->giveKappa();
@@ -772,8 +767,7 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
 
     // compute elastic trial strain deviator of latest temp-state
     FloatArray fullStrainVector;
-    crossSection->giveFullCharacteristicVector( fullStrainVector, gp,
-                                               status->giveTempStrainVector() );
+    StructuralMaterial :: giveFullSymVectorForm(fullStrainVector, status->giveTempStrainVector(), gp->giveMaterialMode());
     StrainVector strain(fullStrainVector, _3dMat);
     StrainVector strainDeviator(_3dMat);
     double volumetricStrain;

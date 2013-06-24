@@ -134,7 +134,7 @@ J2Mat :: giveSizeOfReducedHardeningVarsVector(GaussPoint *gp)
     int size = 0;
 
     if ( kinematicHardeningFlag ) {
-        size += StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() );
+        size += StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
     }
 
     if ( isotropicHardeningFlag ) {
@@ -271,7 +271,7 @@ J2Mat :: computeReducedHardeningVarsSigmaGradient(FloatMatrix &answer, GaussPoin
                                                   const FloatArray &strainSpaceHardeningVars,
                                                   const FloatArray &gamma)
 {
-    int rsize = StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() );
+    int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
     answer.resize(giveSizeOfReducedHardeningVarsVector(gp), rsize);
     answer.zero();
 
@@ -329,7 +329,7 @@ J2Mat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int isurf,
     double f, f32, f12, ax, ay, az;
 
     this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-    size = StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() );
+    size = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
 
     gradientMatrix.resize(size, size);
     gradientMatrix.zero();
@@ -423,7 +423,7 @@ J2Mat :: computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix,  int i, Gau
     // something will be here for k1 vector
     int size = giveSizeOfReducedHardeningVarsVector(gp);
     FloatMatrix helpMat;
-    gradientMatrix.resize(StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ), size);
+    gradientMatrix.resize(StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ), size);
     gradientMatrix.zero();
 
     if ( this->kinematicHardeningFlag ) {
@@ -478,7 +478,7 @@ J2Mat :: giveStressBackVector(FloatArray &answer, GaussPoint *gp,
         int isize, i;
 
         answer.resize(6);
-        StructuralMaterial :: giveSymVoigtVectorMask( mask, gp->giveMaterialMode() );
+        StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode() );
         isize = mask.giveSize();
         //int rSize = this->giveSizeOfReducedHardeningVarsVector(gp);
 

@@ -249,7 +249,6 @@ LinearElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseFor
 {
     FloatArray stressIncrement, stressVector, strainVector;
     FloatMatrix d;
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     // subtract stress independent part
@@ -273,7 +272,7 @@ LinearElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseFor
     status->letTempStressVectorBe(stressVector);
 
     if ( form == FullForm ) {
-        crossSection->giveFullCharacteristicVector(answer, gp, stressVector);
+        StructuralMaterial :: giveFullSymVectorForm(answer, stressVector, gp->giveMaterialMode());
         return;
     }
 

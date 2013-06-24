@@ -308,7 +308,7 @@ public:
      * @param form Material response form.
      * @param mmode Material response mode.
      * @return For unknown mode error is generated.
-     * @todo Remove this in favor of "giveSymVoigtVectorMask"
+     * @todo Remove this in favor of "giveVoigtSymVectorMask"
      */
     static void giveStressStrainMask(IntArray &answer, MatResponseForm form, MaterialMode mmode);
     /**
@@ -323,8 +323,9 @@ public:
      *
      * @param answer Returned mask.
      * @param mmode Material response mode.
+     * @return The number of components in the corresponding full vector.
      */
-    static void giveVoigtVectorMask(IntArray &answer, MaterialMode mmode);
+    static int giveVoigtVectorMask(IntArray &answer, MaterialMode mmode);
 
     /**
      * The same as giveVoigtVectorMask but returns a mask corresponding to a symmetric 
@@ -341,8 +342,9 @@ public:
      *
      * @param answer Returned mask.
      * @param mmode Material response mode.
+     * @return The number of components in the corresponding full vector.
      */
-    static void giveSymVoigtVectorMask(IntArray &answer, MaterialMode mmode);
+    static int giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmode);
 
     /**
      * Returns the size of reduced stress/strain vector according to given mode.
@@ -353,9 +355,19 @@ public:
      * Returns the size of symmetric part of a reduced stress/strain vector according to given mode.
      * @param mmode Material response mode.
      */
-    static int giveSizeOfSymVoigtVector(MaterialMode mmode);
+    static int giveSizeOfVoigtSymVector(MaterialMode mmode);
 
-    
+    /// Converts the reduced symmetric Voigt vector (2nd order tensor) to full form.
+    static void giveFullVectorForm(FloatArray &answer, const FloatArray &strainVector,  MaterialMode matMode);
+    /// Converts the reduced deformation gradient Voigt vector (2nd order tensor).
+    static void giveFullVectorFormF(FloatArray &answer, const FloatArray &strainVector,  MaterialMode matMode);
+    /// Converts the reduced unsymmetric Voigt vector (2nd order tensor) to full form.
+    static void giveFullSymVectorForm(FloatArray &answer,const FloatArray &vec, MaterialMode matMode);
+    /// Converts the full symmetric Voigt vector (2nd order tensor) to reduced form.
+    static void giveReducedVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode);
+    /// Converts the full unsymmetric Voigt vector (2nd order tensor) to reduced form.
+    static void giveReducedSymVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode);
+
     /**
      * Method for subtracting from reduced space strain vector its stress-independent parts
      * (caused by temperature, shrinkage, creep and possibly by other phenomena).
@@ -375,38 +387,6 @@ public:
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
-
-    /**
-     * Computes reduced stress/strain vector from full stress/strain vector.
-     * The stress/strain mode is determined form given integration point.
-     * @param answer Reduced version of charVector3d.
-     * @param gp Integration point.
-     * @param charVector3d Full 3d stress/strain vector.
-     * @todo Replace with giveSymReducedVectorForm ? 
-     */
-    void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                         const FloatArray &charVector3d);
-    /**
-     * Computes full form of stress/strain from its reduced form, based on stress/strain mode
-     * stored in given integration point.
-     * @param answer Full form of stress/strain vector.
-     * @param gp Integration point.
-     * @param strainVector Reduced vector.
-     * @todo Replace with giveSymFullVectorForm ? 
-     */
-    void giveFullCharacteristicVector(FloatArray &answer,  GaussPoint *gp,
-                                      const FloatArray &strainVector);
-
-    /// Converts the reduced symmetric Voigt vector (2nd order tensor) to full form.
-    static void giveFullVectorForm(FloatArray &answer, const FloatArray &strainVector,  MaterialMode matMode);
-    /// Converts the reduced deformation gradient Voigt vector (2nd order tensor).
-    static void giveFullVectorFormF(FloatArray &answer, const FloatArray &strainVector,  MaterialMode matMode);
-    /// Converts the reduced unsymmetric Voigt vector (2nd order tensor) to full form.
-    static void giveSymFullVectorForm(FloatArray &answer,const FloatArray &vec, MaterialMode matMode);
-    /// Converts the full symmetric Voigt vector (2nd order tensor) to reduced form.
-    static void giveReducedVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode);
-    /// Converts the full unsymmetric Voigt vector (2nd order tensor) to reduced form.
-    static void giveSymReducedVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode);
 
 protected:
     /**

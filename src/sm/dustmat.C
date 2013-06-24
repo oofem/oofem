@@ -287,8 +287,7 @@ DustMaterial :: giveRealStressVector(FloatArray &answer,
     if ( form == ReducedForm ) {
         answer = status->giveTempStressVector();
     } else {
-        static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() )
-        ->giveFullCharacteristicVector( answer, gp, status->giveTempStressVector() );
+        StructuralMaterial :: giveFullSymVectorForm(answer, status->giveTempStressVector(), gp->giveMaterialMode());
     }
 }
 
@@ -596,7 +595,7 @@ DustMaterial :: giveIPValueSize(InternalStateType type,
                                 GaussPoint *gp)
 {
     if ( type == IST_PlasticStrainTensor ) {
-        return StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() );
+        return StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         return 3;
     } else if ( type == IST_VolumetricPlasticStrain || type == IST_StressCapPos ) {

@@ -106,19 +106,16 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
 
     reducedStrainIncrement.beDifferenceOf(reducedStrain, status->giveStrainVector());
 
-    crossSection->giveFullCharacteristicVector(strainIncrement, gp, reducedStrainIncrement);
+    StructuralMaterial :: giveFullSymVectorForm(strainIncrement, reducedStrainIncrement, gp->giveMaterialMode());
     status->givePlasticStrainVector(plasticStrainVector);
-    crossSection->giveFullCharacteristicVector(statusFullPlasticVector,
-                                               gp, plasticStrainVector);
-    crossSection->giveFullCharacteristicVector( statusFullStressVector, gp,
-                                               status->giveStressVector() );
+    StructuralMaterial :: giveFullSymVectorForm(statusFullPlasticVector, plasticStrainVector, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm(statusFullStressVector, status->giveStressVector(), gp->giveMaterialMode());
 
     //
     // Note : formulated in full stress strain space
     //
     this->
     computeTrialStressIncrement(elasticStressIncrement, gp, strainIncrement, atTime);
-    // strainVector3d = crossSection -> GiveStrainVector3d (gp, gp->giveStrainVector());
     //
     // calculate deltaSigmaPlastic
     //
@@ -245,7 +242,7 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
         //  totalStressIncrement.add (stressVector3d);
         // update gp
         FloatArray helpArry;
-        crossSection->giveReducedCharacteristicVector(helpArry, gp, stressVector3d);
+        StructuralMaterial :: giveReducedSymVectorForm(helpArry, stressVector3d, gp->giveMaterialMode());
 
         status->letTempStressVectorBe(helpArry);
         status->letTempStrainVectorBe(totalStrain);
@@ -258,13 +255,13 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
         this->updateIfFailure(gp, & stressVector3d, & PlasticStrainVector3d);
         // update gp
         status->letTempStrainVectorBe(totalStrain);
-        crossSection->giveReducedCharacteristicVector(helpArray, gp, stressVector3d);
+        StructuralMaterial :: giveReducedSymVectorForm(helpArray, stressVector3d, gp->giveMaterialMode());
         status->letTempStressVectorBe(helpArray);
     }
 
     // update gp plastic strain
     plasticStrainIncrement3d.beDifferenceOf(PlasticStrainVector3d, statusFullPlasticVector);
-    crossSection->giveReducedCharacteristicVector(helpArray, gp, plasticStrainIncrement3d);
+    StructuralMaterial :: giveReducedSymVectorForm(helpArray, plasticStrainIncrement3d, gp->giveMaterialMode());
     status->letPlasticStrainIncrementVectorBe(helpArray);
 
     if ( form == FullForm ) {
@@ -272,7 +269,7 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
         return;
     }
 
-    crossSection->giveReducedCharacteristicVector(answer, gp, stressVector3d);
+    StructuralMaterial :: giveReducedSymVectorForm(answer, stressVector3d, gp->giveMaterialMode());
 }
 
 
@@ -331,8 +328,6 @@ PerfectlyPlasticMaterial :: giveMaterialStiffnessMatrix(FloatMatrix &answer, Mat
     FloatArray statusFullStressVector, statusFullPlasticVector, plasticStrainVector;
     double lambda;
     PerfectlyPlasticMaterialStatus *status = static_cast< PerfectlyPlasticMaterialStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
-                                           ( gp->giveElement()->giveCrossSection() );
 
     // double f = domain->giveYieldCriteria(yieldCriteria)->
     //  computeValueAt(gp->giveStressVector(), gp->givePlasticStrainVector(),
@@ -352,10 +347,8 @@ PerfectlyPlasticMaterial :: giveMaterialStiffnessMatrix(FloatMatrix &answer, Mat
     }
 
     status->givePlasticStrainVector(plasticStrainVector);
-    crossSection->giveFullCharacteristicVector(statusFullPlasticVector, gp,
-                                               plasticStrainVector);
-    crossSection->giveFullCharacteristicVector( statusFullStressVector, gp,
-                                               status->giveStressVector() );
+    StructuralMaterial :: giveFullSymVectorForm(statusFullPlasticVector, plasticStrainVector, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm(statusFullStressVector, status->giveStressVector(), gp->giveMaterialMode());
 
     // yield condition satisfied
     FloatMatrix dp;
@@ -788,7 +781,7 @@ PerfectlyPlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPo
 
         status->givePlasticStrainVector(s);
 
-        StructuralMaterial :: giveSymFullVectorForm(st, s, aGaussPoint->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm(st, s, aGaussPoint->giveMaterialMode());
 
         this->computePrincipalValues(answer, st, principal_strain);
         return 1;
@@ -836,7 +829,7 @@ int
 PerfectlyPlasticMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
     if ( type == IST_PlasticStrainTensor ) {
-        return StructuralMaterial :: giveSizeOfSymVoigtVector( aGaussPoint->giveMaterialMode() );
+        return StructuralMaterial :: giveSizeOfVoigtSymVector( aGaussPoint->giveMaterialMode() );
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         return 3;
     } else {
@@ -928,12 +921,12 @@ PerfectlyPlasticMaterialStatus :: initTempStatus()
     StructuralMaterialStatus :: initTempStatus();
 
     if ( plasticStrainVector.giveSize() == 0 ) {
-        plasticStrainVector.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
+        plasticStrainVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
         plasticStrainVector.zero();
     }
 
     if ( plasticStrainIncrementVector.giveSize() == 0 ) {
-        plasticStrainIncrementVector.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
+        plasticStrainIncrementVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
         plasticStrainIncrementVector.zero();
     } else {
         plasticStrainIncrementVector.zero();

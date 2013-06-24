@@ -126,13 +126,6 @@ public:
                                                    GaussPoint *, StructuralMaterial *,
                                                    TimeStep *tStep);
 
-
-
-    virtual void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                                 const FloatArray &charVector3d);
-    virtual void giveFullCharacteristicVector(FloatArray &answer,
-                                              GaussPoint *gp, const FloatArray &strainVector);
-
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *);
 

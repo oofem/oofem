@@ -43,7 +43,7 @@ StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoin
     MaterialStatus(n, d, g), strainVector(), stressVector(),
     tempStressVector(), tempStrainVector(), FVector(), tempFVector()
 {
-    int rsize = StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() );
+    int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
     strainVector.resize(rsize);
     stressVector.resize(rsize);
 
@@ -75,14 +75,14 @@ void StructuralMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
     MaterialStatus :: printOutputAt(File, tNow);
 
     fprintf(File, "  strains ");
-    cs->giveFullCharacteristicVector(helpVec, gp, strainVector);
+    StructuralMaterial :: giveFullSymVectorForm(helpVec, strainVector, gp->giveMaterialMode());
     n = helpVec.giveSize();
     for ( int i = 1; i <= n; i++ ) {
         fprintf( File, " % .4e", helpVec.at(i) );
     }
 
     fprintf(File, "\n              stresses");
-    cs->giveFullCharacteristicVector(helpVec, gp, stressVector);
+    StructuralMaterial :: giveFullSymVectorForm(helpVec, stressVector, gp->giveMaterialMode());
 
     n = helpVec.giveSize();
     for ( int i = 1; i <= n; i++ ) {
@@ -113,11 +113,11 @@ void StructuralMaterialStatus :: initTempStatus()
 
     // see if vectors describing reached equilibrium are defined
     if ( this->giveStrainVector().giveSize() == 0 ) {
-        strainVector.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
+        strainVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
     }
 
     if ( this->giveStressVector().giveSize() == 0 ) {
-        stressVector.resize( StructuralMaterial :: giveSizeOfSymVoigtVector( gp->giveMaterialMode() ) );
+        stressVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
     }
 
     // reset temp vars.
