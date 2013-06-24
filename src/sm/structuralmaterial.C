@@ -752,28 +752,6 @@ StructuralMaterial :: giveSizeOfVoigtVector(MaterialMode mode)
     return 0;
 }
 
-int
-StructuralMaterial :: giveSizeOfReducedPrincipalStressStrainVector(MaterialMode mode)
-{
-    switch ( mode ) {
-    case _3dMat:
-    case _3dMat_F:
-    case _PlaneStrain:
-        return 3;
-
-    case _PlaneStress:
-        return 2;
-
-    case _1dMat:
-        return 1;
-
-    default:
-        OOFEM_ERROR2( "StructuralMaterial :: giveSizeOfReducedPrincipalStressStrainVector : unknown mode (%s)", __MaterialModeToString(mode) );
-    }
-
-    return 0;
-}
-
 
 void
 StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm form,

@@ -354,13 +354,8 @@ public:
      * @param mmode Material response mode.
      */
     static int giveSizeOfSymVoigtVector(MaterialMode mmode);
-    /**
-     * Returns the size of reduced principal stress/strain vector according to given mode.
-     * @param mmode Material response mode.
-     */
-    static int giveSizeOfReducedPrincipalStressStrainVector(MaterialMode mmode);
 
-
+    
     /**
      * Method for subtracting from reduced space strain vector its stress-independent parts
      * (caused by temperature, shrinkage, creep and possibly by other phenomena).
