@@ -142,7 +142,6 @@ MisesMat :: giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, Ga
     } else {
         OOFEM_ERROR("MisesMat::giveFirstPKStressVector : unsupported material response mode");
     }
-    
 }
 
 
@@ -169,7 +168,7 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
 
     kappa = status->giveCumulativePlasticStrain();
     /////////////////////////////////////////////
-    status->giveTempDefGrad(oldF);
+    oldF.beMatrixForm(status->giveFVector());
     /////////////////////////////////////////////
     invOldF.beInverseOf(oldF);
     //relative deformation radient
@@ -270,7 +269,6 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
     answer.beReducedVectorForm(S);
 
     status->setTrialStressVol(mi);
-    status->letTempDefGradBe(F);
     status->letTempLeftCauchyGreenBe(trialLeftCauchyGreen);
     status->setTempCumulativePlasticStrain(kappa);
     status->letTempStressVectorBe(answer);
@@ -647,7 +645,7 @@ MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     delta.at(1) = delta.at(2) = delta.at(3) = 1;
 
     FloatMatrix F, F_Tr;
-    status->giveTempDefGrad(F);
+    F.beMatrixForm(status->giveTempFVector());
     double J;
     J = F.giveDeterminant();
 
@@ -943,10 +941,6 @@ MisesMatStatus :: MisesMatStatus(int n, Domain *d, GaussPoint *g) :
     effStress.resize(6);
     tempEffStress.resize(6);
     //if(gp->giveMaterialMode() == _3dMat_F){
-      defGrad.resize(3, 3);
-      defGrad.at(1, 1) = defGrad.at(2, 2) = defGrad.at(3, 3) = 1;
-      tempDefGrad.resize(3, 3);
-      tempDefGrad.at(1, 1) = tempDefGrad.at(2, 2) = tempDefGrad.at(3, 3) = 1;
       //tempLeftCauchyGreen.resize(3,3);
       //tempLeftCauchyGreen.at(1,1) = tempLeftCauchyGreen.at(2,2) = tempLeftCauchyGreen.at(3,3) = 1;
       leftCauchyGreen.resize(3, 3);
@@ -1034,7 +1028,6 @@ void MisesMatStatus :: initTempStatus()
     tempKappa = kappa;
     trialStressD.resize(0); // to indicate that it is not defined yet
     //if(gp->giveMaterialMode()== _3dMat_F){
-      tempDefGrad = defGrad;
       tempLeftCauchyGreen = leftCauchyGreen;
     //}
 }
@@ -1051,7 +1044,6 @@ MisesMatStatus :: updateYourself(TimeStep *atTime)
     damage = tempDamage;
     trialStressD.resize(0); // to indicate that it is not defined any more
     //if(gp->giveMaterialMode()==_3dMat_F){
-      defGrad = tempDefGrad;
       leftCauchyGreen = tempLeftCauchyGreen;
     //}
 }

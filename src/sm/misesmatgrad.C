@@ -607,7 +607,6 @@ MisesMatGradStatus :: initTempStatus()
     tempDamage = damage;
     tempPlasticStrain = plasticStrain;
     tempKappa = kappa;
-    tempDefGrad = defGrad;
     tempLeftCauchyGreen = leftCauchyGreen;
     trialStressD.resize(0);
 }
