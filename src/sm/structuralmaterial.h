@@ -138,20 +138,6 @@ public:
                                            TimeStep *tStep);
 
     /**
-     * Computes compliance matrix of receiver in given integration point.
-     * @param answer Contains result
-     * @param form Material response form.
-     * @param mode Material response mode.
-     * @param gp Integration point.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
-     */
-    void  giveCharacteristicComplianceMatrix(FloatMatrix &answer,
-                                             MatResponseForm form,
-                                             MatResponseMode mode,
-                                             GaussPoint *gp,
-                                             TimeStep *tStep);
-
-    /**
      * Computes the real stress vector for given total strain and integration point.
      * The total strain is defined as strain computed directly from displacement field at given time.
      * The stress independent parts (temperature, eigenstrains) are subtracted in constitutive

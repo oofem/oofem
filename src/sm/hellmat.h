@@ -627,7 +627,7 @@ protected:
      * @param coeff determines whether creep viscosity coefficients should be taken into account (true)
      */
     void elasticStiffness(FloatArray &stress, FloatArray &strain, GaussPoint *gp, TimeStep *atTime, MatResponseForm form, int coeff);
-    void elasticCompliance(FloatArray &strain, FloatArray &stress, GaussPoint *gp, TimeStep *atTime, MatResponseForm form, int coeff);
+    void elasticCompliance(FloatArray &strain, FloatArray &stress, GaussPoint *gp, TimeStep *atTime, int coeff);
 
     /// autogenous shrinkage strains
     double autoShrinkageCoeff(double ksi);

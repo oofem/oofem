@@ -528,7 +528,7 @@ HellmichMaterial :: elasticStiffness(FloatArray &stress, FloatArray &strain, Gau
     }
 }
 
-void HellmichMaterial :: elasticCompliance(FloatArray &strain, FloatArray &stress, GaussPoint *gp, TimeStep *atTime, MatResponseForm form, int coeff)
+void HellmichMaterial :: elasticCompliance(FloatArray &strain, FloatArray &stress, GaussPoint *gp, TimeStep *atTime, int coeff)
 // Returns the isotropic linear elastic strain vector for the given stress vector
 {
     int i;
@@ -546,12 +546,7 @@ void HellmichMaterial :: elasticCompliance(FloatArray &strain, FloatArray &stres
     }
 
     if ( mmode == _1dMat ) {
-        if ( form == ReducedForm ) {
-            strain.resize(1);
-        } else {
-            strain.resize(6);
-            strain.zero();
-        }
+        strain.resize(1);
 
         strain(0) = stress(0) / E;
     } else if ( mmode == _3dMat ) {
@@ -577,11 +572,12 @@ void HellmichMaterial :: elasticCompliance(FloatArray &strain, FloatArray &stres
     } else if ( stress.containsOnlyZeroes() ) {
         strain = stress;
     } else {
-        FloatMatrix d;
+        FloatMatrix d, di;
         LinearElasticMaterial *lMat;
         lMat = giveLinearElasticMaterial(gp, atTime);
         if ( lMat->hasMaterialModeCapability(mmode) ) {
-            lMat->giveCharacteristicComplianceMatrix(d, form, ElasticStiffness, gp, atTime);
+            lMat->giveCharacteristicMatrix(d, ReducedForm, ElasticStiffness, gp, atTime);
+            di.beInverseOf(d);
             strain.beProductOf(d, stress);
         } else {
             _error("elasticCompliance: unsupported material mode.");
@@ -2155,7 +2151,7 @@ void HellmichMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFo
         redvec.add(auxvec); // Sum into redvec
 
         // Compute auxvec creep strains, don't use creep coeffs
-        elasticCompliance(auxvec, redvec, gp, atTime, ReducedForm, false);
+        elasticCompliance(auxvec, redvec, gp, atTime, false);
         redvec = auxvec;
 
         // subtract previous viscous creep strains dev_n(auxvec)
@@ -2401,7 +2397,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
             auxStress = redStressVector;
         }
 
-        elasticCompliance(elasticStrain, auxStress, gp, atTime, ReducedForm, false); // using no Kv, Gv!
+        elasticCompliance(elasticStrain, auxStress, gp, atTime, false); // using no Kv, Gv!
         elasticStrain.times(jv * E);
         status->giveViscousStrainVector(auxStrain);
         elasticStrain.subtract(auxStrain);
@@ -2418,7 +2414,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
             auxStress = redStressVector;
         }
 
-        elasticCompliance(elasticStrain, auxStress, gp, atTime, ReducedForm, false); // using no Kv, Gv!
+        elasticCompliance(elasticStrain, auxStress, gp, atTime, false); // using no Kv, Gv!
         elasticStrain.times(dt * giveViscosity(gp) * E);
         status->giveFlowStrainVector(auxStrain);
         elasticStrain.add(auxStrain);

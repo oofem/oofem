@@ -524,34 +524,6 @@ StructuralMaterial :: giveIdentityVector(FloatArray &answer, MaterialMode matMod
     }
 }
 
-void
-StructuralMaterial :: giveCharacteristicComplianceMatrix(FloatMatrix &answer,
-                                                         MatResponseForm form, MatResponseMode rMode,
-                                                         GaussPoint *gp,
-                                                         TimeStep *atTime)
-//
-// Returns characteristic material compliance matrix of the receiver
-// works for positive definite associated stiffnesses only
-//
-{
-    FloatMatrix redInvAnswer, redAnswer;
-    IntArray mask;
-
-    this->giveCharacteristicMatrix(redInvAnswer, ReducedForm, rMode, gp, atTime);
-    redAnswer.beInverseOf(redInvAnswer);
-
-    if ( form == FullForm ) {
-        int size = StructuralMaterial :: giveVoigtSymVectorMask(mask, gp->giveMaterialMode());
-        answer.resize(size, size);
-        answer.zero();
-        answer.assemble(redAnswer,mask,mask);
-    } else if ( form == ReducedForm ) {
-        answer = redAnswer;
-    } else {
-        OOFEM_ERROR("StructuralMaterial :: giveCharacteristicComplianceMatrix - unsupported form mode");
-    }
-}
-
 
 void
 StructuralMaterial ::  reduceStiffMtrx3d(FloatMatrix &answer, MatResponseForm form, GaussPoint *gp,
