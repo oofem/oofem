@@ -314,7 +314,7 @@ J2plasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer,
     IntArray mask;
     double f, f32, f12, ax, ay, az;
 
-    this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
+    StructuralMaterial :: giveInvertedVoigtVectorMask(mask, gp->giveMaterialMode() );
     size = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) +
            this->giveSizeOfReducedHardeningVarsVector(gp);
 

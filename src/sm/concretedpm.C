@@ -1987,7 +1987,7 @@ ConcreteDPM :: giveIntVarCompFullIndx(IntArray &answer,
 {
     switch ( type ) {
     case IST_PlasticStrainTensor:
-        this->giveStressStrainMask(answer, FullForm, mmode);
+        StructuralMaterial :: giveInvertedVoigtVectorMask(answer, mmode);
         /*
          * answer.resize(6);
          * answer.zero();

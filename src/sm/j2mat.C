@@ -328,7 +328,7 @@ J2Mat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int isurf,
     IntArray mask;
     double f, f32, f12, ax, ay, az;
 
-    this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
+    StructuralMaterial :: giveInvertedVoigtVectorMask(mask, gp->giveMaterialMode() );
     size = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
 
     gradientMatrix.resize(size, size);

@@ -295,7 +295,7 @@ MDM :: computeDamageOnPlane(GaussPoint *gp, Microplane *mplane, const FloatArray
     double fmicroplane;
     IntArray mask;
     FloatArray fullStrain, prevStress = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) )->giveStressVector();
-    this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
+    StructuralMaterial :: giveInvertedVoigtVectorMask(mask, gp->giveMaterialMode() );
 
     StructuralMaterial :: giveFullSymVectorForm(fullStrain, strain, gp->giveMaterialMode());
     en = this->computeNormalStrainComponent(mplane, fullStrain);

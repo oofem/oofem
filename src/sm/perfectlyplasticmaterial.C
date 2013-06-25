@@ -792,7 +792,7 @@ int
 PerfectlyPlasticMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
     if ( type == IST_PlasticStrainTensor ) {
-        this->giveStressStrainMask(answer, FullForm, mmode);
+        StructuralMaterial :: giveInvertedVoigtVectorMask(answer, mmode);
         return 1;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         answer.resize(6);

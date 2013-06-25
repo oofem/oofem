@@ -279,25 +279,6 @@ public:
                                        GaussPoint *gp, TimeStep *tStep);
 
     /**
-     * This method returns mask of reduced (if form == ReducedForm)
-     * or Full (if form==FullForm) stress/strain vector in full or
-     * reduced StressStrainVector according to stressStrain mode of given gp.
-     * Mask has size of reduced or full stress/strain Vector and  i-th component
-     * is index to full or reduced stress/strainVector where corresponding
-     * component is mapped.
-     * Reduced form is sub-vector (of stress or strain components),
-     * where components corresponding to imposed zero stress (plane stress,...)
-     * are not included. On the other hand, if zero strain component is imposed
-     * (Plane strain, ..) this condition must be taken into account in geometrical
-     * relations, and corresponding component has to be included in reduced vector.
-     * @param answer Returned mask.
-     * @param form Material response form.
-     * @param mmode Material response mode.
-     * @return For unknown mode error is generated.
-     * @todo Remove this in favor of "giveVoigtSymVectorMask"
-     */
-    static void giveStressStrainMask(IntArray &answer, MatResponseForm form, MaterialMode mmode);
-    /**
      * Returns a mask of the vector indicies corresponding to components in a general
      * (non-symmetric) second order tensor of some stress/strain/deformation measure that 
      * performes work. Thus, components corresponding to imposed zero stress (e.g. plane 
@@ -331,6 +312,11 @@ public:
      * @return The number of components in the corresponding full vector.
      */
     static int giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmode);
+    /**
+     * Gives the inverted version of giveVoigtVectorMask.
+     * @deprecated This will eventually be removed. The normal mapping given in giveVoigtVectorMask can be used instead.
+     */
+    static void giveInvertedVoigtVectorMask(IntArray &answer, MaterialMode mmode);
 
     /**
      * Returns the size of reduced stress/strain vector according to given mode.

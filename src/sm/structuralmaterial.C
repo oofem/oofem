@@ -642,37 +642,13 @@ StructuralMaterial :: giveSizeOfVoigtVector(MaterialMode mode)
 
 
 void
-StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
-                                           MaterialMode mmode)
-//
-// this function returns mask of reduced(if form == ReducedForm)
-// or Full(if form==FullForm) stressStrain vector in full or
-// reduced StressStrainVector
-// according to stressStrain mode of given gp.
-//
-//
-// mask has size of reduced or full StressStrain Vector and  i-th component
-// is index to full or reduced StressStrainVector where corresponding
-// stressStrain resides.
-//
-// Reduced form is sub-vector (of stress or strain components),
-// where components corresponding to imposed zero stress (plane stress,...)
-// are not included. On the other hand, if zero strain component is imposed
-// (Plane strain, ..) this condition must be taken into account in geometrical
-// relations, and corresponding component is included in reduced vector.
-//
+StructuralMaterial :: giveInvertedVoigtVectorMask(IntArray &answer, MaterialMode mmode)
 {
-    if ( form == ReducedForm ) {
-        StructuralMaterial :: giveVoigtSymVectorMask(answer, mmode);
-    } else if ( form == FullForm ) {
-        IntArray mask;
-        answer.resize( StructuralMaterial :: giveVoigtSymVectorMask(mask, mmode) );
-        answer.zero();
-        for ( int i = 1; i <= mask.giveSize(); i++ ) {
-            answer.at(mask.at(i)) = i;
-        }
-    } else {
-        OOFEM_ERROR("StructuralMaterial :: giveStressStrainMask : unknown form mode");
+    IntArray mask;
+    answer.resize( StructuralMaterial :: giveVoigtSymVectorMask(mask, mmode) );
+    answer.zero();
+    for ( int i = 1; i <= mask.giveSize(); i++ ) {
+        answer.at(mask.at(i)) = i;
     }
 }
 
@@ -2416,7 +2392,7 @@ StructuralMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType
         ( type == IST_StressTensorTemp ) || ( type == IST_StrainTensorTemp ) ||
         ( type == IST_CylindricalStressTensor ) || ( type == IST_CylindricalStrainTensor ) ||
         ( type == IST_ShellForceMomentumTensor ) ) {
-        this->giveStressStrainMask(answer, FullForm, mmode);
+        StructuralMaterial :: giveInvertedVoigtVectorMask(answer, mmode);
         return 1;
     } else if ( ( type == IST_PrincipalStressTensor ) || ( type == IST_PrincipalStrainTensor ) ||
                ( type == IST_PrincipalStressTempTensor ) || ( type == IST_PrincipalStrainTempTensor ) ) {

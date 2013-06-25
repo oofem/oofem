@@ -631,7 +631,7 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
         answer.zero();
 
         // copy fullAnswer to reduced one
-        this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
+        StructuralMaterial :: giveInvertedVoigtVectorMask(mask, gp->giveMaterialMode() );
         for ( int i = 1; i <= sd; i++ ) {
             int iidx = mask.findFirstIndexOf(i);
             for ( int j = 1; j <= sd; j++ ) {
