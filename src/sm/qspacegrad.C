@@ -100,10 +100,7 @@ QSpaceGrad :: computeGaussPoints()
 MaterialMode
 QSpaceGrad :: giveMaterialMode()
 {
-    if ( this->nlGeometry > 1 )
-        return _3dMatGrad_F;
-    else
-        return _3dMatGrad;
+    return _3dMatGrad;
 }
 
 
