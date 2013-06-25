@@ -613,7 +613,34 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
     if ( form == FullForm ) { // 3x3 full form required
         answer = fullAnswer;
     } else {
-        StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode());
+        // reduced form for only
+        // nonzero normal stresses
+        //
+        // first find spatial dimension of problem
+        sd = 0;
+
+        IntArray indx;
+        StructuralMaterial :: giveVoigtSymVectorMask(indx, gp->giveMaterialMode());
+        for ( int i = 1; i <= 3; i++ ) {
+            if ( indx.contains(i) ) {
+                sd++;
+            }
+        }
+
+        answer.resize(sd, sd);
+        answer.zero();
+
+        // copy fullAnswer to reduced one
+        this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
+        for ( int i = 1; i <= sd; i++ ) {
+            int iidx = mask.findFirstIndexOf(i);
+            for ( int j = 1; j <= sd; j++ ) {
+                int jidx = mask.findFirstIndexOf(j);
+                if ( iidx && jidx ) {
+                    answer.at( i, j ) = fullAnswer.at(iidx, jidx);
+                }
+            }
+        }
     }
 }
 
