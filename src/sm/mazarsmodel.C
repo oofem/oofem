@@ -130,7 +130,6 @@ MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strai
 {
     double posNorm = 0.0;
     FloatArray principalStrains, strainb;
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     if ( strain.isEmpty() ) {
         kappa = 0.;

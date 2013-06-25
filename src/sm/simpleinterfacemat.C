@@ -160,9 +160,6 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
     answer.at(1) = min( normalStress, lim );//threshold on maximum
     answer.at(1) = max( answer.at(1), -lim );//threshold on minimum
     //answer.at(1) = normalStress > lim ? lim : normalStress < -lim ? -lim : normalStress;
-    answer.printYourself();
-strainVector.printYourself();
-printf("mMode = %d, %d\n", mMode, gp->giveMaterialMode());
     // update gp
     status->setTempShearStressShift(tempShearStressShift);
     status->letTempStrainVectorBe(strainVector);
