@@ -41,7 +41,6 @@
 #include "nonlocalmaterialext.h"
 #include "contextioerr.h"
 #include "classfactory.h"
-#include <cemhydmat.h>
 
 namespace oofem {
 
