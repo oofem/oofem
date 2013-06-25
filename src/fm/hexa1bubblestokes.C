@@ -272,7 +272,7 @@ void Hexa1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, Char
             GaussPoint *gp = iRule->getIntegrationPoint(k);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, tStep);
+            double rho = this->giveMaterial()->give('d', gp);
             double detJ = fabs( this->interp.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
             double dV = detJ * gp->giveWeight() * rho;
 

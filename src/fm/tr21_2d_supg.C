@@ -391,7 +391,7 @@ TR21_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *atTime)
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
         dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+        rho = this->giveMaterial()->give('d', gp);
         answer.plusProductUnsym(n, b, rho * dV);
     }
 }
@@ -415,7 +415,7 @@ TR21_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
         dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+        rho = this->giveMaterial()->give('d', gp);
 
         answer.plusProductUnsym(b, b, rho * dV);
     }
@@ -440,7 +440,7 @@ TR21_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
         dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+        rho = this->giveMaterial()->give('d', gp);
 
         answer.plusProductUnsym(b, n, rho * dV);
     }
@@ -461,7 +461,7 @@ TR21_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *atTime)
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+        rho = this->giveMaterial()->give('d', gp);
         this->computeDivUMatrix(b, gp);
 
         answer.plusProductSymmUpper(b, b, dV * rho);
