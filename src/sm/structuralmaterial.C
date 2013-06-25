@@ -2012,7 +2012,7 @@ StructuralMaterial :: computeVonMisesStress(const FloatArray *currentStress)
 void
 StructuralMaterial :: giveStrainVectorTranformationMtrx(FloatMatrix &answer,
                                                         const FloatMatrix &base,
-                                                        bool transpose) const
+                                                        bool transpose)
 //
 // returns transformation matrix for 3d - strains to another system of axes,
 // given by base.
@@ -2079,7 +2079,7 @@ StructuralMaterial :: giveStrainVectorTranformationMtrx(FloatMatrix &answer,
 void
 StructuralMaterial :: giveStressVectorTranformationMtrx(FloatMatrix &answer,
                                                         const FloatMatrix &base,
-                                                        bool transpose) const
+                                                        bool transpose)
 //
 // returns transformation matrix for 3d - stress to another system of axes,
 // given by base.
@@ -2146,7 +2146,7 @@ StructuralMaterial :: giveStressVectorTranformationMtrx(FloatMatrix &answer,
 void
 StructuralMaterial :: givePlaneStressVectorTranformationMtrx(FloatMatrix &answer,
                                                              const FloatMatrix &base,
-                                                             bool transpose) const
+                                                             bool transpose)
 //
 // returns transformation matrix for 2d - stress to another system of axes,
 // given by base.
@@ -2182,7 +2182,7 @@ StructuralMaterial :: givePlaneStressVectorTranformationMtrx(FloatMatrix &answer
 
 void
 StructuralMaterial :: transformStrainVectorTo(FloatArray &answer, const FloatMatrix &base,
-                                              const FloatArray &strainVector, bool transpose) const
+                                              const FloatArray &strainVector, bool transpose)
 //
 // performs transformation of 3d-strain vector to another system of axes,
 // given by base.
@@ -2194,14 +2194,14 @@ StructuralMaterial :: transformStrainVectorTo(FloatArray &answer, const FloatMat
 {
     FloatMatrix tt;
 
-    this->giveStrainVectorTranformationMtrx(tt, base, transpose);
+    StructuralMaterial :: giveStrainVectorTranformationMtrx(tt, base, transpose);
     answer.beProductOf(tt, strainVector);
 }
 
 
 void
 StructuralMaterial :: transformStressVectorTo(FloatArray &answer, const FloatMatrix &base,
-                                              const FloatArray &stressVector, bool transpose) const
+                                              const FloatArray &stressVector, bool transpose)
 //
 //
 // performs transformation of 3d-stress vector to another system of axes,
@@ -2215,7 +2215,7 @@ StructuralMaterial :: transformStressVectorTo(FloatArray &answer, const FloatMat
 {
     FloatMatrix tt;
 
-    this->giveStressVectorTranformationMtrx(tt, base, transpose);
+    StructuralMaterial :: giveStressVectorTranformationMtrx(tt, base, transpose);
     answer.beProductOf(tt, stressVector);
 }
 
