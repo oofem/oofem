@@ -133,7 +133,7 @@ J2MPlasticMaterial :: computeStressSpaceHardeningVars(FloatArray &answer, GaussP
     }
 
     answer.resize(size);
-    this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
+    StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode());
     isize = mask.giveSize();
     rSize = this->giveSizeOfReducedHardeningVarsVector(gp);
 

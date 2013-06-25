@@ -125,8 +125,6 @@ public:
 
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStressVector3d);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStrainVector3d);
-    virtual void giveStressStrainMask(IntArray &answer, MatResponseForm form,
-                                      MaterialMode mmode, StructuralMaterial *mat) const;
 
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode, Material *mat);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);

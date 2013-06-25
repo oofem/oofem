@@ -69,7 +69,6 @@ void StructuralMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 // Prints the strains and stresses on the data file.
 {
     FloatArray helpVec;
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( gp->giveCrossSection() );
     int n;
 
     MaterialStatus :: printOutputAt(File, tNow);

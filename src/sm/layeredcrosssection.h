@@ -129,11 +129,9 @@ public:
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *);
 
-    virtual void giveStressStrainMask(IntArray &answer, MatResponseForm form,
-                                      MaterialMode mmode, StructuralMaterial *mat) const;
-    virtual void giveLayerMaterialStiffnessMatrix(FloatMatrix &layerMatrix, MatResponseForm form,
-                                                  MatResponseMode rMode, GaussPoint *layerGp,
-                                                  TimeStep *tStep);
+    void giveLayerMaterialStiffnessMatrix(FloatMatrix &layerMatrix, MatResponseForm form,
+                                          MatResponseMode rMode, GaussPoint *layerGp,
+                                          TimeStep *tStep);
 
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode);

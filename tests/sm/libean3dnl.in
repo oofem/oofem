@@ -41,12 +41,12 @@ ConstantFunction 1 f(t) 1.
 #NODE tStep 5 number 9 dof 2 unknown d value  0.0
 ##
 #ELEMENT tStep 5 number 1 gp 1 keyword "stresses" component 1  value 0.0
-#ELEMENT tStep 5 number 1 gp 1 keyword "stresses" component 5  value 0.0
-#ELEMENT tStep 5 number 1 gp 1 keyword "stresses" component 9  value 7.854e-1
+#ELEMENT tStep 5 number 1 gp 1 keyword "stresses" component 2  value 0.0
+#ELEMENT tStep 5 number 1 gp 1 keyword "stresses" component 6  value 7.854e-1
 ##
 #ELEMENT tStep 5 number 8 gp 1 keyword "stresses" component 1  value 0.0
-#ELEMENT tStep 5 number 8 gp 1 keyword "stresses" component 5  value 0.0
-#ELEMENT tStep 5 number 8 gp 1 keyword "stresses" component 9  value 7.854e-1
+#ELEMENT tStep 5 number 8 gp 1 keyword "stresses" component 2  value 0.0
+#ELEMENT tStep 5 number 8 gp 1 keyword "stresses" component 6  value 7.854e-1
 ##
 #REACTION tStep 5 number 1 dof 1 value 0.0
 #REACTION tStep 5 number 1 dof 2 value 0.0
