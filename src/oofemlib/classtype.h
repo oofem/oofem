@@ -202,6 +202,7 @@ enum classType {
     Tetrah1_htClass,
     Tetrah1_hmtClass,
     PlaneStress2dXfemClass,
+    TrPlaneStress2dXFEMClass,
     LumpedMassElementClass,
     SpringElementClass,
     LatticeStructuralElementClass,
