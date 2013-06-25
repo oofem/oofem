@@ -96,7 +96,7 @@ LayeredCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm for
         //prevLayerStrain = (((StructuralMaterialStatus*) layerMat->giveStatus(layerGp))
         //  ->giveStrainVector());
         interface->computeStrainVectorInLayer(fullLayerStrain, gp, layerGp, tStep);
-        StructuralMaterial :: giveReducedSymVectorForm(layerStrain, fullLayerStrain, gp->giveMaterialMode());
+        StructuralMaterial :: giveReducedSymVectorForm(layerStrain, fullLayerStrain, layerGp->giveMaterialMode());
 
         /*
          * if (prevLayerStrain.giveSize()) {

@@ -505,7 +505,12 @@ StructuralMaterial :: giveIdentityVector(FloatArray &answer, MaterialMode matMod
     // Create identity tensor on Voigt form according to MaterialMode.
 
     ///@todo This is a hack. We should just store 3D tensors always and be done with it.
-    int size = StructuralMaterial :: giveSizeOfVoigtVector( matMode );
+    int size;
+    if ( matMode == _3dBeam ) {
+        size = 9;
+    } else {
+        size = StructuralMaterial :: giveSizeOfVoigtVector( matMode );
+    }
     answer.resize(size);
 
     if ( size == 9 || size == 5 ) {
@@ -515,7 +520,7 @@ StructuralMaterial :: giveIdentityVector(FloatArray &answer, MaterialMode matMod
     } else if (size == 1 ) {
         answer.at(1) = 1.0;
     } else {
-        OOFEM_ERROR2("StructuralMaterial :: giveIdentityVector - identityVector not implemented for the given MaterialMode (%s)", __MaterialModeToString(matMode) );
+        answer.resize(0);
     }
 }
 
@@ -895,20 +900,26 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         return 6;
     case _2dPlate:
         answer.resize(5);
-        answer.at(1) = 7;
-        answer.at(2) = 8;
-        answer.at(3) = 12;
-        answer.at(4) = 5;
-        answer.at(5) = 4;
-        return 12;
+        answer.at(1) = 4;
+        answer.at(2) = 5;
+        answer.at(3) = 6;
+        answer.at(4) = 7;
+        answer.at(5) = 8;
+        return 8;
     case _2dBeam:
         answer.resize(3);
         answer.at(1) = 1;
-        answer.at(2) = 8;
-        answer.at(3) = 5;
-        return 12;
-    case _3dBeam:
+        answer.at(2) = 4;
+        answer.at(3) = 7;
+        return 8;
+    case _3dBeam: ///@todo This isn't actually fixed yet. Should be made compatible with 3dShell and 2dBeam
         answer.resize(6);
+#if 1
+        for ( int i = 1; i <= 6; i++ ) {
+            answer.at(i) = i;
+        }
+        return 6;
+#else
         answer.at(1) = 1;
         answer.at(2) = 5;
         answer.at(3) = 6;
@@ -916,29 +927,24 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         answer.at(5) = 8;
         answer.at(6) = 9;
         return 12;
+#endif
+    case _3dShell:
+        answer.resize(8);
+        for ( int i = 1; i <= 8; i++ ) {
+            answer.at(i) = i;
+        }
+        return 8;
     case _1dFiber:
         answer.resize(3);
         answer.at(1) = 1;
         answer.at(2) = 5;
         answer.at(3) = 6;
         return 6;
-    case _3dShell:
-        answer.resize(8);
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-        answer.at(3) = 6;
-        answer.at(4) = 7;
-        answer.at(5) = 8;
-        answer.at(6) = 12;
-        answer.at(7) = 5;
-        answer.at(8) = 4;
-        return 12;
     case _3dMatGrad:
         answer.resize(7);
         for ( int i = 1; i <= 7; i++ ) {
             answer.at(i) = i;
         }
-
         return 7;
     case _PlaneStressGrad:
         answer.resize(4);
@@ -1029,7 +1035,7 @@ StructuralMaterial :: giveVoigtVectorMask(IntArray &answer, MaterialMode mmode)
         answer.at(1) = 1;
         return 9;
     default:
-        OOFEM_ERROR2( "StructuralMaterial :: giveVoigtVectorMask: unknown mode (%s)", __MaterialModeToString(mmode) );
+        //OOFEM_ERROR2( "StructuralMaterial :: giveVoigtVectorMask: unknown mode (%s)", __MaterialModeToString(mmode) );
         return 0;
     }
 

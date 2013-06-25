@@ -356,7 +356,7 @@ IsotropicLinearElasticMaterial :: give2dBeamStiffMtrx(FloatMatrix &answer,
         answer.zero();
 
         answer.at(1, 1) = mat3d.at(1, 1) * area;
-        answer.at(5, 5) = mat3d.at(1, 1) * Iy;
+        answer.at(4, 4) = mat3d.at(1, 1) * Iy;
         answer.at(7, 7) = shearAreaz * mat3d.at(1, 1) / ( 2. * ( 1 + nu ) );
     }
 }
