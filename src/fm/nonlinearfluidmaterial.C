@@ -98,17 +98,6 @@ NonlinearFluidMaterial :: giveCharacteristicValue(MatResponseMode mode,
     }
 }
 
-void
-NonlinearFluidMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                   MatResponseForm form,
-                                                   MatResponseMode mode,
-                                                   GaussPoint *gp,
-                                                   TimeStep *atTime)
-{
-    if ( mode == MRM_Viscosity ) {
-        this->giveDeviatoricStiffnessMatrix(answer, mode, gp, atTime);
-    }
-}
 
 double
 NonlinearFluidMaterial :: give(int aProperty, GaussPoint *gp)
