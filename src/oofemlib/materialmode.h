@@ -42,7 +42,6 @@ namespace oofem {
 #define MaterialMode_DEF \
     ENUM_ITEM(_Unknown)   \
     ENUM_ITEM(_3dMat) \
-    ENUM_ITEM(_3dMat_F)  /* 3d deformation gradient */ \
     ENUM_ITEM(_3dMatGrad)  /* 3d model with gradient of internal variable */ \
     ENUM_ITEM(_3dMatGrad_F)  /* 3d deformation gradient with gradient of internal variable */ \
     ENUM_ITEM(_1dMatGrad)  /* 1d model with gradient of internal variable */ \

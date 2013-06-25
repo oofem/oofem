@@ -130,10 +130,7 @@ void AbaqusUserMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
             ncomp = 3;
         } else if ( mMode == _PlaneStrain ) {
             ncomp = 4;
-        } /*else if ( mMode == _3dMat_F ) {
-           * ncomp = 9;
-           * } */
-        else if ( mMode == _1dMat ) {
+        } else if ( mMode == _1dMat ) {
             ncomp = 1;
         }
 
@@ -190,11 +187,7 @@ void AbaqusUserMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
     } else if ( mMode == _PlaneStrain ) {
         ndi = 3;
         nshr = 1;
-    } /*else if ( mMode == _3dMat_F ) {
-       * ndi = 3;
-       * nshr = 6;
-       * } */
-    else if ( mMode == _1dMat ) {
+    } else if ( mMode == _1dMat ) {
         ndi = 1;
         nshr = 0;
     } else {

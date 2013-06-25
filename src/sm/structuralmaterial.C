@@ -721,7 +721,6 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
     
     switch ( mmode ) {
     case _3dMat:
-    case _3dMat_F:
     case _3dMicroplane:
         answer.resize(6);
         for ( int i = 1; i <= 6; i++ ) {
@@ -2449,7 +2448,7 @@ StructuralMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType
         return 1;
     } else if ( ( type == IST_PrincipalStressTensor ) || ( type == IST_PrincipalStrainTensor ) ||
                ( type == IST_PrincipalStressTempTensor ) || ( type == IST_PrincipalStrainTempTensor ) ) {
-        if ( mmode == _3dMat || mmode == _3dMat_F || mmode == _PlaneStress || mmode == _PlaneStrain ) {
+        if ( mmode == _3dMat || mmode == _PlaneStress || mmode == _PlaneStrain ) {
             answer.setValues(3, 1, 2, 3);
         } else if ( mmode == _1dMat ) {
             answer.setValues(3, 1, 0, 0);
@@ -2478,7 +2477,7 @@ StructuralMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGauss
     } else if ( ( type == IST_PrincipalStressTensor ) || ( type == IST_PrincipalStrainTensor ) || ( type == IST_PrincipalPlasticStrainTensor ) ||
                ( type == IST_PrincipalStressTempTensor ) || ( type == IST_PrincipalStrainTempTensor ) ) {
         MaterialMode m = aGaussPoint->giveMaterialMode();
-        if ( m == _3dMat || m == _3dMat_F || m == _PlaneStrain ) {
+        if ( m == _3dMat || m == _PlaneStrain ) {
             return 3;
         } else if ( m == _PlaneStress ) {
             return 2;
@@ -2630,7 +2629,6 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
         switch ( matmode ) {
         case _1dMat:
         case _3dMat:
-        case _3dMat_F:
         case _PlaneStress:
         case _PlaneStrain:
         case _3dRotContinuum:

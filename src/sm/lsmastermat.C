@@ -64,11 +64,7 @@ LsMasterMat :: ~LsMasterMat()
 int
 LsMasterMat :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( mode == _3dMat_F || mode == _3dMat) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _3dMat;
 }
 
 // reads the model parameters from the input file

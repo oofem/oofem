@@ -69,7 +69,7 @@ IsotropicLinearElasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
         ( mode == _3dShellLayer ) || ( mode == _2dPlate ) ||
         ( mode == _2dBeam ) || ( mode == _3dShell ) ||
         ( mode == _3dBeam ) || ( mode == _PlaneStressRot ) ||
-        ( mode == _1dFiber ) || ( mode == _3dMat_F ) ) {
+        ( mode == _1dFiber ) ) {
         return 1;
     }
 

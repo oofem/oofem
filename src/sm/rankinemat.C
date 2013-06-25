@@ -596,8 +596,8 @@ RankineMat :: giveIPValueType(InternalStateType type)
 int
 RankineMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
-    if ( ( type == IST_PlasticStrainTensor ) || ( type == IST_DamageTensor ) ) {
-        if ( ( mmode == _3dMat ) || ( mmode == _3dMat_F ) ) {
+    if ( type == IST_PlasticStrainTensor || type == IST_DamageTensor ) {
+        if ( mmode == _3dMat ) {
             answer.resize(6);
             answer.at(1) = 1;
             answer.at(2) = 2;
@@ -627,7 +627,7 @@ RankineMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, M
         return 1;
 
 #ifdef keep_track_of_dissipated_energy
-    } else if ( ( type == IST_DissWorkDensity ) || ( type == IST_StressWorkDensity ) || ( type == IST_FreeEnergyDensity ) ) {
+    } else if ( type == IST_DissWorkDensity || type == IST_StressWorkDensity || type == IST_FreeEnergyDensity ) {
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
@@ -642,9 +642,9 @@ RankineMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, M
 int
 RankineMat :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
-    if ( ( type == IST_PlasticStrainTensor ) || ( type == IST_DamageTensor ) ) {
+    if ( type == IST_PlasticStrainTensor || type == IST_DamageTensor ) {
         MaterialMode mode = gp->giveMaterialMode();
-        if ( mode == _3dMat || mode == _3dMat_F ) {
+        if ( mode == _3dMat ) {
             return 6;
         } else if ( mode == _PlaneStrain ) {
             return 4;
@@ -661,8 +661,8 @@ RankineMat :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
         return 1;
 
 #ifdef keep_track_of_dissipated_energy
-    } else if ( ( type == IST_StressWorkDensity ) ||
-               ( type == IST_DissWorkDensity ) || ( type == IST_FreeEnergyDensity ) ) {
+    } else if ( type == IST_StressWorkDensity ||
+               type == IST_DissWorkDensity || type == IST_FreeEnergyDensity ) {
         return 1;
 
 #endif

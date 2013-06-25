@@ -69,11 +69,7 @@ MisesMat :: ~MisesMat()
 int
 MisesMat :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( ( mode == _3dMat ) || ( mode == _3dMat_F ) || ( mode == _1dMat ) || ( mode == _PlaneStrain ) ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _3dMat || mode == _1dMat || mode == _PlaneStrain;
 }
 
 // reads the model parameters from the input file
@@ -463,8 +459,6 @@ MisesMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode m
 
     if ( mMode == _3dMat ) {
         give3dSSMaterialStiffnessMatrix(answer, mode, gp, atTime);
-    //} else if ( mMode == _3dMat_F ) {
-    //    give3dLSMaterialStiffnessMatrix(answer, mode, gp, atTime);
     } else {
         OOFEM_ERROR("MisesMat::give3dMaterialStiffnessMatrix : unknown material response mode");
     }
@@ -875,7 +869,7 @@ int
 MisesMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
     if ( type == IST_PlasticStrainTensor ) {
-        if ( ( mmode == _3dMat ) || ( mmode == _3dMat_F ) ) {
+        if ( mmode == _3dMat ) {
             answer.resize(6);
             answer.at(1) = 1;
             answer.at(2) = 2;
@@ -915,19 +909,19 @@ MisesMat :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
     if ( type == IST_PlasticStrainTensor ) {
         MaterialMode mode = gp->giveMaterialMode();
-        if (mode == _3dMat || mode == _3dMat_F)
+        if ( mode == _3dMat )
             return 6;
-        else if (mode == _PlaneStrain)
+        else if ( mode == _PlaneStrain )
             return 4;
-        else if (mode == _PlaneStress)
+        else if ( mode == _PlaneStress )
             return 3;
-        else if (mode == _1dMat)
+        else if ( mode == _1dMat )
             return 1;
         else
             return 0;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         return 1;
-    } else if ( type == IST_DamageScalar || type == IST_DamageTensor) {
+    } else if ( type == IST_DamageScalar || type == IST_DamageTensor ) {
         return 1;
     } else {
         return StructuralMaterial :: giveIPValueSize(type, gp);

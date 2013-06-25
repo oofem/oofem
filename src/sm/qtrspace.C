@@ -127,11 +127,7 @@ QTRSpace :: computeGaussPoints()
 MaterialMode
 QTRSpace :: giveMaterialMode()
 {
-    if ( nlGeometry > 1 ) {
-        return _3dMat_F;
-    } else {
-        return _3dMat;
-    }
+    return _3dMat;
 }
 
 

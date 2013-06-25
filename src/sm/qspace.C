@@ -83,10 +83,7 @@ QSpace :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 MaterialMode
 QSpace :: giveMaterialMode()
 {
-    if ( this->nlGeometry > 1 )
-        return _3dMat_F;
-    else
-        return _3dMat;
+    return _3dMat;
 }
 
 

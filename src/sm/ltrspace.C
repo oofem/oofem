@@ -223,16 +223,12 @@ LTRSpace :: initializeFrom(InputRecord *ir)
 }
 
 
-
 MaterialMode
 LTRSpace :: giveMaterialMode()
 {
-    if ( nlGeometry > 1 ) {
-        return _3dMat_F;
-    } else {
-        return _3dMat;
-    }
+    return _3dMat;
 }
+
 
 void LTRSpace :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
