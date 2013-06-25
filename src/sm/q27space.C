@@ -85,10 +85,7 @@ Q27Space :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) cons
 MaterialMode
 Q27Space :: giveMaterialMode()
 {
-    if ( this->nlGeometry > 1 )
-        return _3dMat_F;
-    else
-        return _3dMat;
+    return _3dMat;
 }
 
 

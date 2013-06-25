@@ -91,26 +91,13 @@ NonlinearFluidMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                   GaussPoint *gp,
                                                   TimeStep *atTime)
 {
-    if ( mode == MRM_Density ) {
-        return this->give('d', gp);
-    } else if ( mode == MRM_Viscosity ) {
+    if ( mode == MRM_Viscosity ) {
         return this->viscosity;
     } else {
         return FluidDynamicMaterial :: giveCharacteristicValue(mode, gp, atTime);
     }
 }
 
-void
-NonlinearFluidMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                   MatResponseForm form,
-                                                   MatResponseMode mode,
-                                                   GaussPoint *gp,
-                                                   TimeStep *atTime)
-{
-    if ( mode == MRM_Viscosity ) {
-        this->giveDeviatoricStiffnessMatrix(answer, mode, gp, atTime);
-    }
-}
 
 double
 NonlinearFluidMaterial :: give(int aProperty, GaussPoint *gp)

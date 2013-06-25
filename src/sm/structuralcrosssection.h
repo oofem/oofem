@@ -252,20 +252,6 @@ public:
      */
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStressVector3d);
 
-    /**
-     * This method returns mask of reduced(if form == ReducedForm)
-     * or Full(if form==FullForm) stressStrain vector in full or
-     * reduced StressStrainVector acording to stressStrain mode of given gp.
-     * Mask has size of reduced or full StressStrain Vector and  i-th component
-     * is index to full or reduced StressStrainVector where corresponding
-     * stressStrain resides.
-     * @param answer Assembled mask.
-     * @param form Material response form.
-     * @param mode Determines load mode.
-     * @param mat Material to evaluate for.
-     */
-    virtual void giveStressStrainMask(IntArray &answer, MatResponseForm form, MaterialMode mode, StructuralMaterial *mat) const;
-
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "StructuralCrossSection"; }
     virtual classType giveClassID() const { return StructuralCrossSectionClass; }

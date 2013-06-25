@@ -190,9 +190,6 @@ protected:
     /// Cumulative plastic strain (final).
     double tempKappa;
 
-    /// Deformation gradient(final).
-    FloatMatrix tempDefGrad, defGrad;
-
     /************************/
     double tempDamage, damage;
     /******************************/
@@ -219,9 +216,6 @@ public:
     double giveCumulativePlasticStrain() { return kappa; }
     double giveTempCumulativePlasticStrain() { return tempKappa; }
 
-    void giveTempDefGrad(FloatMatrix &answer) { answer = tempDefGrad; }
-    void giveDefGrad(FloatMatrix &answer) { answer = defGrad; }
-
     void giveTempLeftCauchyGreen(FloatMatrix &answer) { answer = tempLeftCauchyGreen; }
     void giveLeftCauchyGreen(FloatMatrix &answer) { answer = leftCauchyGreen; }
 
@@ -243,8 +237,6 @@ public:
     /****************************************/
     void setTempDamage(double value) { tempDamage = value; }
     /************************************************/
-    void letDefGradBe(FloatMatrix values) { defGrad = values; }
-    void letTempDefGradBe(FloatMatrix values) { tempDefGrad = values; }
 
     void letTempLeftCauchyGreenBe(FloatMatrix values) { tempLeftCauchyGreen = values; }
     void letLeftCauchyGreenBe(FloatMatrix values) { leftCauchyGreen = values; }

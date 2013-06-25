@@ -367,6 +367,10 @@ public:
     static void giveReducedVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode);
     /// Converts the full unsymmetric Voigt vector (2nd order tensor) to reduced form.
     static void giveReducedSymVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode);
+    /// Converts the full symmetric Voigt matrix (4th order tensor) to reduced form.
+    static void giveReducedMatrixForm(FloatMatrix &answer, const FloatMatrix &vec, MaterialMode matMode);
+    /// Converts the full unsymmetric Voigt matrix (4th order tensor) to reduced form.
+    static void giveReducedSymMatrixForm(FloatMatrix &answer, const FloatMatrix &vec, MaterialMode matMode);
 
     /**
      * Method for subtracting from reduced space strain vector its stress-independent parts
@@ -732,8 +736,8 @@ protected:
      * @param strainVector 3d strain.
      * @param transpose Determines if we transpose matrix before transforming.
      */
-    void transformStrainVectorTo(FloatArray &answer, const FloatMatrix &base,
-                                 const FloatArray &strainVector, bool transpose = false) const;
+    static void transformStrainVectorTo(FloatArray &answer, const FloatMatrix &base,
+                                 const FloatArray &strainVector, bool transpose = false);
     /**
      * Transforms 3d stress vector into another coordinate system.
      * @param answer Transformed stress vector.
@@ -743,14 +747,14 @@ protected:
      * @param stressVector Transformed 3d strain.
      * @param transpose Determines if we transpose matrix before transforming.
      */
-    void transformStressVectorTo(FloatArray &answer, const FloatMatrix &base,
-                                 const FloatArray &stressVector, bool transpose = false) const;
+    static void transformStressVectorTo(FloatArray &answer, const FloatMatrix &base,
+                                 const FloatArray &stressVector, bool transpose = false);
 
     /**
      * Computes equivalent of von Mises stress. Returns 0 if six stress components do not exist on the material.
      * @param currentStress Stress vector given by 6 components.
      */
-    double computeVonMisesStress(const FloatArray *currentStress);
+    static double computeVonMisesStress(const FloatArray *currentStress);
 
     /**
      * Computes 3d strain vector transformation matrix from standard vector transformation matrix.
@@ -759,8 +763,8 @@ protected:
      * local coordinate axes to which we do transformation.
      * @param transpose Determines if we transpose matrix before transforming.
      */
-    void giveStrainVectorTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
-                                           bool transpose = false) const;
+    static void giveStrainVectorTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
+                                           bool transpose = false);
     /**
      * Computes 3d stress vector transformation matrix from standard vector transformation matrix.
      * @param answer Transformation matrix for stress vector.
@@ -768,8 +772,8 @@ protected:
      * local coordinate axes to which we do transformation.
      * @param transpose Determines if we transpose matrix before transforming.
      */
-    void giveStressVectorTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
-                                           bool transpose = false) const;
+    static void giveStressVectorTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
+                                           bool transpose = false);
     /**
      * Computes 2d stress vector transformation matrix from standard vector transformation matrix.
      * @param answer Transformation matrix for stress vector.
@@ -777,8 +781,8 @@ protected:
      * local coordinate axes to which we do transformation.
      * @param transpose Determines if we transpose matrix before transforming.
      */
-    void givePlaneStressVectorTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
-                                                bool transpose = false) const;
+    static void givePlaneStressVectorTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
+                                                bool transpose = false);
     /**
      * Method for sorting newly computed principal values (pVal) and
      * corresponding principal directions (pDir) to be closed
@@ -788,7 +792,7 @@ protected:
      * @param pDir New eigenvectors.
      * @param toPDir Old eigenvector.
      */
-    void sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *pDir, FloatMatrix *toPDir);
+    static void sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *pDir, FloatMatrix *toPDir);
 
     friend class CrossSection;
     friend class StructuralCrossSection;

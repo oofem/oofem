@@ -419,7 +419,6 @@ PerfectlyPlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 // this implementation should be faster.
 {
     FloatMatrix fullAnswer;
-    IntArray mask;
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
     } else {
@@ -427,10 +426,7 @@ PerfectlyPlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
         if ( form == FullForm ) {
             answer = fullAnswer;
         } else { // reduced form asked
-            this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-            answer.resize(mask.maximum(),mask.maximum());
-            answer.zero();
-            answer.assemble(fullAnswer, mask, mask);
+            StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode());
         }
     }
 }
@@ -450,7 +446,6 @@ PerfectlyPlasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
 //
 {
     FloatMatrix fullAnswer;
-    IntArray mask;
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
     } else {
@@ -458,10 +453,7 @@ PerfectlyPlasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
         if ( form == FullForm ) {
             answer =  fullAnswer;
         } else { // reduced form asked
-            this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-            answer.resize(mask.maximum(),mask.maximum());
-            answer.zero();
-            answer.assemble(fullAnswer, mask, mask);
+            StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode());
         }
     }
 }
@@ -479,18 +471,14 @@ PerfectlyPlasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
 // (1d case ==> sigma_y = sigma_z = tau_yz = tau_zx = tau_xy  = 0.)
 {
     FloatMatrix fullAnswer;
-    IntArray mask;
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
     } else {
         this->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, atTime);
         if ( form == FullForm ) {
-            answer =  fullAnswer;
+            answer = fullAnswer;
         } else { // reduced form asked
-            this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-            answer.resize(mask.maximum(),mask.maximum());
-            answer.zero();
-            answer.assemble(fullAnswer, mask, mask);
+            StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode());
         }
     }
 }
@@ -520,10 +508,7 @@ PerfectlyPlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
         if ( form == FullForm ) {
             answer = fullAnswer;
         } else { // reduced form asked
-            this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-            answer.resize(mask.maximum(),mask.maximum());
-            answer.zero();
-            answer.assemble(fullAnswer, mask, mask);
+            StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode());
         }
     }
 }
@@ -544,7 +529,6 @@ PerfectlyPlasticMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
 // this implementation should be faster.
 {
     FloatMatrix fullAnswer;
-    IntArray mask;
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
     } else {
@@ -552,10 +536,7 @@ PerfectlyPlasticMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
         if ( form == FullForm ) {
             answer = fullAnswer;
         } else { // reduced form asked
-            this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-            answer.resize(mask.maximum(),mask.maximum());
-            answer.zero();
-            answer.assemble(fullAnswer, mask, mask);
+            StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode());
         }
     }
 }

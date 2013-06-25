@@ -377,7 +377,7 @@ SUPGElement2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix( b, gp, atTime->givePreviousStep() );
         dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+        rho = this->giveMaterial()->give('d', gp);
         /* consistent part */
         answer.plusProductUnsym(n, n, rho * dV);
         /* supg stabilization */
@@ -410,7 +410,7 @@ SUPGElement2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
         this->computeUDotGradUMatrix(b, gp, atTime);
         v.beProductOf(b, u);
         dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+        rho = this->giveMaterial()->give('d', gp);
         /* consistent part */
         coeff = rho * dV;
         for ( i = 1; i <= undofs; i++ ) {
@@ -453,7 +453,7 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep 
         this->computeUDotGradUMatrix( bn, gp, atTime->givePreviousStep() );
         this->computeUDotGradUMatrix(b, gp, atTime);
         dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+        rho = this->giveMaterial()->give('d', gp);
 
         this->computeGradUMatrix(grad_u, gp, atTime);
 
@@ -605,7 +605,7 @@ SUPGElement2 :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *a
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+        rho = this->giveMaterial()->give('d', gp);
         this->computeDivUMatrix(b, gp);
 
         answer.plusProductSymmUpper(b, b, dV * rho * t_lsic);
@@ -719,7 +719,7 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+        rho = this->giveMaterial()->give('d', gp);
 
         coeff = ( -1.0 ) * dV * t_pspg / rho;
         //( ( FluidDynamicMaterial * ) this->giveMaterial() )->giveDeviatoricStiffnessMatrix(_d, TangentStiffness,gp, atTime);
@@ -753,7 +753,7 @@ SUPGElement2 :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *atTime)
      * for ( k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
      *  gp = iRule->getIntegrationPoint(k);
      *  dV  = this->computeVolumeAround(gp);
-     *  rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+     *  rho = this->giveMaterial()->give('d', gp);
      *
      *  coeff = (-1.0) * dV * t_pspg / rho;
      *
@@ -823,7 +823,7 @@ SUPGElement2 :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime)
         gp = iRule->getIntegrationPoint(k);
         this->computeGradPMatrix(g, gp);
         dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+        rho = this->giveMaterial()->give('d', gp);
         coeff = dV * t_pspg / rho;
         answer.plusProductSymmUpper(g, g, coeff);
     }
@@ -864,7 +864,7 @@ SUPGElement2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
                     this->computeUDotGradUMatrix( b, gp, atTime->givePreviousStep() );
                     this->computeNuMatrix(nu, gp);
                     dV  = this->computeVolumeAround(gp);
-                    rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+                    rho = this->giveMaterial()->give('d', gp);
                     s.beTProductOf(b, gVector);
                     s.times(t_supg * rho * dV);
                     answer.add(s);

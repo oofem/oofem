@@ -75,9 +75,8 @@ TrabBoneGrad3D :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form,
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
-    case _3dMatGrad_F:
     case _3dMatGrad:
-        give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
+        give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         break;
     default:
         _error2( "givePDGradMatrix_uu : unknown mode (%s)", __MaterialModeToString(mMode) );
@@ -89,9 +88,8 @@ TrabBoneGrad3D :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseForm form,
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
-    case _3dMatGrad_F:
     case _3dMatGrad:
-        give3dKappaMatrix(answer, form, rMode, gp, atTime);
+        give3dKappaMatrix(answer, form, mode, gp, tStep);
         break;
     default:
         _error2( "givePDGradMatrix_ku : unknown mode (%s)", __MaterialModeToString(mMode) );
@@ -103,9 +101,8 @@ TrabBoneGrad3D :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseForm form,
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
-    case _3dMatGrad_F:
     case _3dMatGrad:
-        give3dGprime(answer, form, rMode, gp, atTime);
+        give3dGprime(answer, form, mode, gp, tStep);
         break;
     default:
         _error2( "givePDGradMatrix_uk : unknown mode (%s)", __MaterialModeToString(mMode) );
@@ -117,9 +114,8 @@ TrabBoneGrad3D :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseForm form,
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
-    case _3dMatGrad_F:
     case _3dMatGrad:
-        giveInternalLength(answer, form, rMode, gp, atTime);
+        giveInternalLength(answer, form, mode, gp, tStep);
         break;
     default:
         _error2( "givePDGradMatrix_kk : unknown mode (%s)", __MaterialModeToString(mMode) );

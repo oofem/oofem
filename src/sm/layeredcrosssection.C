@@ -96,7 +96,7 @@ LayeredCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm for
         //prevLayerStrain = (((StructuralMaterialStatus*) layerMat->giveStatus(layerGp))
         //  ->giveStrainVector());
         interface->computeStrainVectorInLayer(fullLayerStrain, gp, layerGp, tStep);
-        StructuralMaterial :: giveReducedSymVectorForm(layerStrain, fullLayerStrain, gp->giveMaterialMode());
+        StructuralMaterial :: giveReducedSymVectorForm(layerStrain, fullLayerStrain, layerGp->giveMaterialMode());
 
         /*
          * if (prevLayerStrain.giveSize()) {
@@ -545,100 +545,6 @@ LayeredCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
 
     return gradientStrainVector3d;
 }
-
-
-void
-LayeredCrossSection :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
-                                            MaterialMode mmode, StructuralMaterial *mat) const
-{
-    //
-    // this function returns mask of reduced(if form == ReducedForm)
-    // or Full(if form==FullForm) stressStrain vector in full or
-    // reduced StressStrainVector
-    // acording to stressStrain mode of given gp.
-    //
-    // mask has size of reduced or full StressStrain Vector and  i-th component
-    // is index to full or reduced StressStrainVector where corresponding
-    // stressStrain resides.
-    //
-    int i;
-    if ( mat->hasMaterialModeCapability(mmode) ) {
-        mat->giveStressStrainMask(answer, form, mmode);
-        return;
-    } else {
-        if ( form == ReducedForm ) {
-            switch ( mmode ) {
-            case _2dPlate:
-                answer.resize(5);
-                answer.at(1) = 4;
-                answer.at(2) = 5;
-                answer.at(3) = 6;
-                answer.at(4) = 7;
-                answer.at(5) = 8;
-                break;
-            case _2dBeam:
-                answer.resize(3);
-                answer.at(1) = 1;
-                answer.at(2) = 5;
-                answer.at(3) = 7;
-                break;
-            /*   case _3dRotContinuum:
-             * indx->at(1) = 1;
-             * indx->at(2) = 2;
-             * indx->at(3) = 3;
-             * indx->at(4) = 6;
-             * break;*/
-            case _3dShell:
-                answer.resize(8);
-                for ( i = 1; i <= 8; i++ ) {
-                    answer.at(i) = i;
-                }
-
-                break;
-            default:
-                _error2( "giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode) );
-            }
-        } else if ( form == FullForm ) {
-            switch ( mmode ) {
-            case _2dPlate:
-                answer.resize(8);
-                answer.zero();
-                answer.at(4) = 1;
-                answer.at(5) = 2;
-                answer.at(6) = 3;
-                answer.at(7) = 4;
-                answer.at(8) = 5;
-                break;
-            case _2dBeam:
-                answer.resize(8);
-                answer.zero();
-                answer.at(1) = 1;
-                answer.at(5) = 2;
-                answer.at(7) = 3;
-                break;
-            /*   case _3dRotContinuum:
-             * indx->at(1) = 1;
-             * indx->at(2) = 2;
-             * indx->at(3) = 3;
-             * indx->at(6) = 4;
-             * break;*/
-            case _3dShell:
-                answer.resize(8);
-                answer.zero();
-                for ( i = 1; i <= 8; i++ ) {
-                    answer.at(i) = i;
-                }
-
-                break;
-            default:
-                _error2( "giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode) );
-            }
-        } else {
-            _error("giveStressStrainMask : unknown form mode");
-        }
-    }
-}
-
 
 
 IRResultType

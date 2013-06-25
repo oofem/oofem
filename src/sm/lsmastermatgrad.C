@@ -60,11 +60,7 @@ LsMasterMatGrad :: ~LsMasterMatGrad()
 int
 LsMasterMatGrad :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( mode == _3dMatGrad_F || _3dMatGrad) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _3dMatGrad;
 }
 
 // creates a new material status  corresponding to this class
@@ -93,7 +89,6 @@ LsMasterMatGrad :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
-    case _3dMatGrad_F:
     case _3dMatGrad:
         give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         break;
@@ -107,7 +102,6 @@ LsMasterMatGrad :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseForm form
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
-    case _3dMatGrad_F:
     case _3dMatGrad:
         give3dKappaMatrix(answer, form, mode, gp, tStep);
         break;
@@ -121,7 +115,6 @@ LsMasterMatGrad :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseForm form
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
-    case _3dMatGrad_F:
     case _3dMatGrad:
         give3dGprime(answer, form, mode, gp, tStep);
         break;
@@ -135,7 +128,6 @@ LsMasterMatGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseForm form
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
-    case _3dMatGrad_F:
     case _3dMatGrad:
         giveInternalLength(answer, form, mode, gp, tStep);
         break;

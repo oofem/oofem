@@ -263,7 +263,7 @@ void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharT
             gp = iRule->getIntegrationPoint(k);
             lcoords = gp->giveCoordinates();
 
-            rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, tStep);
+            rho = this->giveMaterial()->give('d', gp);
             detJ = fabs( this->interp.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
             dV = detJ * gp->giveWeight() * rho;
 

@@ -437,10 +437,10 @@ PlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
             answer = elasticModuli;
             return;
         } else {
-            this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
-            answer.resize(6,6);
+            int fullsize = StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode());
+            answer.resize(fullsize, fullsize);
             answer.zero();
-            answer.assemble(elasticModuli, mask, mask);
+            answer.assemble(elasticModuli, mask);
             return;
         }
     }
@@ -494,10 +494,10 @@ PlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     if ( form == ReducedForm ) {
         answer =  answerR;
     } else {
-        this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
-        answer.resize(6,6);
+        int fullsize = StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode());
+        answer.resize(fullsize, fullsize);
         answer.zero();
-        answer.assemble(answerR, mask, mask);
+        answer.assemble(answerR, mask);
     }
 }
 

@@ -1006,11 +1006,11 @@ MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     if ( form == ReducedForm ) {
         return;
     } else {
-        this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
+        int fullsize = StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode());
         answerR = answer;
-        answer.resize(6,6);
+        answer.resize(fullsize,fullsize);
         answer.zero();
-        answer.assemble(answerR,mask,mask);
+        answer.assemble(answerR, mask);
     }
 }
 
@@ -1153,11 +1153,11 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     if ( form == ReducedForm ) {
         return;
     } else {
-        this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
+        int fullsize = StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode());
         helpMtrx = answer;
-        answer.resize(6,6);
+        answer.resize(fullsize, fullsize);
         answer.zero();
-        answer.assemble(helpMtrx, mask, mask);
+        answer.assemble(helpMtrx, mask);
     }
 }
 

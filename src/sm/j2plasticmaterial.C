@@ -122,7 +122,7 @@ J2plasticMaterial :: ComputeStressSpaceHardeningVars(GaussPoint *gp,
     }
 
     FloatArray *answer = new FloatArray(size);
-    this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
+    StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode());
     isize = mask.giveSize();
     rSize = this->giveSizeOfReducedHardeningVarsVector(gp);
 

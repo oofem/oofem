@@ -214,7 +214,7 @@ TR1_2D_SUPG2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
         for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
-            rho = this->_giveMaterial(ifluid)->giveCharacteristicValue(MRM_Density, gp, atTime);
+            rho = this->_giveMaterial(ifluid)->give('d', gp);
             this->computeNVector(n, gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
             // compute integral here
@@ -234,7 +234,7 @@ TR1_2D_SUPG2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
         for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
-            rho = this->_giveMaterial(ifluid)->giveCharacteristicValue(MRM_Density, gp, atTime);
+            rho = this->_giveMaterial(ifluid)->give('d', gp);
             this->computeNVector(n, gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
             u1 = n.at(1) * un.at(1) + n.at(2) * un.at(3) + n.at(3) * un.at(5);
@@ -326,7 +326,7 @@ TR1_2D_SUPG2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
         for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
-            rho = this->_giveMaterial(ifluid)->giveCharacteristicValue(MRM_Density, gp, atTime);
+            rho = this->_giveMaterial(ifluid)->give('d', gp);
             this->computeNVector(n, gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
 
@@ -343,7 +343,7 @@ TR1_2D_SUPG2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
         for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
-            rho = this->_giveMaterial(ifluid)->giveCharacteristicValue(MRM_Density, gp, atTime);
+            rho = this->_giveMaterial(ifluid)->give('d', gp);
             this->computeNVector(n, gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
 
@@ -409,7 +409,7 @@ TR1_2D_SUPG2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep 
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
         for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
-            rho = this->_giveMaterial(ifluid)->giveCharacteristicValue(MRM_Density, gp, atTime);
+            rho = this->_giveMaterial(ifluid)->give('d', gp);
             this->computeNVector(n, gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
 
@@ -434,7 +434,7 @@ TR1_2D_SUPG2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep 
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
         for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
-            rho = this->_giveMaterial(ifluid)->giveCharacteristicValue(MRM_Density, gp, atTime);
+            rho = this->_giveMaterial(ifluid)->give('d', gp);
             this->computeNVector(n, gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
 
@@ -693,7 +693,7 @@ TR1_2D_SUPG2 :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *a
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
         for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
-            rho = this->_giveMaterial(ifluid)->giveCharacteristicValue(MRM_Density, gp, atTime);
+            rho = this->_giveMaterial(ifluid)->give('d', gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
 
 
@@ -818,7 +818,7 @@ TR1_2D_SUPG2 :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime)
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
         for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
-            rho = this->_giveMaterial(ifluid)->giveCharacteristicValue(MRM_Density, gp, atTime);
+            rho = this->_giveMaterial(ifluid)->give('d', gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
 
 
@@ -879,7 +879,7 @@ TR1_2D_SUPG2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
                     for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
                         gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
 
-                        rho = this->_giveMaterial(ifluid)->giveCharacteristicValue(MRM_Density, gp, atTime);
+                        rho = this->_giveMaterial(ifluid)->give('d', gp);
                         dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
                         this->computeNVector(n, gp);
 
@@ -1039,7 +1039,7 @@ TR1_2D_SUPG2 :: updateStabilizationCoeffs(TimeStep *atTime)
     for ( ifluid = 0; ifluid < 2; ifluid++ ) {
         for ( ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
-            rho = this->_giveMaterial(ifluid)->giveCharacteristicValue(MRM_Density, gp, atTime);
+            rho = this->_giveMaterial(ifluid)->give('d', gp);
             this->computeNVector(n, gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
 
@@ -1067,7 +1067,7 @@ TR1_2D_SUPG2 :: updateStabilizationCoeffs(TimeStep *atTime)
     for ( ifluid = 0; ifluid < 2; ifluid++ ) {
         for ( ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
-            rho = this->_giveMaterial(ifluid)->giveCharacteristicValue(MRM_Density, gp, atTime);
+            rho = this->_giveMaterial(ifluid)->give('d', gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
 
             for ( i = 1; i <= 6; i++ ) {
@@ -1086,7 +1086,7 @@ TR1_2D_SUPG2 :: updateStabilizationCoeffs(TimeStep *atTime)
     for ( ifluid = 0; ifluid < 2; ifluid++ ) {
         for ( ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
-            rho = this->_giveMaterial(ifluid)->giveCharacteristicValue(MRM_Density, gp, atTime);
+            rho = this->_giveMaterial(ifluid)->give('d', gp);
             this->computeNVector(n, gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
 
@@ -1882,7 +1882,7 @@ TR1_2D_SUPG2 :: computeVolumeAroundID(GaussPoint *gp, integrationDomain id, cons
  */
 
 int
-TR1_2D_SUPG2 :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+TR1_2D_SUPG2 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 {
     if ( type == IST_VOFFraction ) {
         answer.resize(1);
@@ -1890,10 +1890,10 @@ TR1_2D_SUPG2 :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Interna
         return 1;
     } else if ( type == IST_Density ) {
         answer.resize(1);
-        answer.at(1) = this->giveMaterial()->giveCharacteristicValue(MRM_Density, aGaussPoint, atTime);
+        answer.at(1) = this->giveMaterial()->give('d', gp);
         return 1;
     } else {
-        return TR1_2D_SUPG :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return TR1_2D_SUPG :: giveIPValue(answer, gp, type, atTime);
     }
 }
 
@@ -2020,7 +2020,7 @@ TR1_2D_SUPG2 :: printOutputAt(FILE *file, TimeStep *stepN)
         gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
     }
 
-    double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, stepN);
+    double rho = this->giveMaterial()->give('d', gp);
     fprintf(file, "VOF %e, density %e\n\n", this->giveVolumeFraction(), rho);
 }
 
@@ -2081,7 +2081,7 @@ TR1_2D_SUPG2 :: giveInternalStateAtNode(FloatArray &answer, InternalStateType ty
      * return 1;
      * } else if (type == IST_Density) {
      * answer.resize(1);
-     * answer.at(1) = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray[0]-> getIntegrationPoint(0), atTime);
+     * answer.at(1) = this->giveMaterial()->give('d', integrationRulesArray[0]-> getIntegrationPoint(0));
      * return 1;
      *
      * } else

@@ -69,7 +69,7 @@ IsotropicLinearElasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
         ( mode == _3dShellLayer ) || ( mode == _2dPlate ) ||
         ( mode == _2dBeam ) || ( mode == _3dShell ) ||
         ( mode == _3dBeam ) || ( mode == _PlaneStressRot ) ||
-        ( mode == _1dFiber ) || ( mode == _3dMat_F ) ) {
+        ( mode == _1dFiber ) ) {
         return 1;
     }
 
@@ -356,7 +356,7 @@ IsotropicLinearElasticMaterial :: give2dBeamStiffMtrx(FloatMatrix &answer,
         answer.zero();
 
         answer.at(1, 1) = mat3d.at(1, 1) * area;
-        answer.at(5, 5) = mat3d.at(1, 1) * Iy;
+        answer.at(4, 4) = mat3d.at(1, 1) * Iy;
         answer.at(7, 7) = shearAreaz * mat3d.at(1, 1) / ( 2. * ( 1 + nu ) );
     }
 }

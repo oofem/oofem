@@ -351,7 +351,7 @@ int
 DruckerPragerCutMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
     if ( type == IST_PlasticStrainTensor ) {
-        if ( ( mmode == _3dMat ) || ( mmode == _3dMat_F ) ) {
+        if ( mmode == _3dMat ) {
             answer.resize(6);
             answer.at(1) = 1;
             answer.at(2) = 2;
@@ -391,7 +391,7 @@ DruckerPragerCutMat :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
     if ( type == IST_PlasticStrainTensor ) {
         MaterialMode mode = gp->giveMaterialMode();
-        if (mode == _3dMat || mode == _3dMat_F)
+        if ( mode == _3dMat )
             return 6;
         else if (mode == _PlaneStrain)
             return 4;

@@ -87,11 +87,7 @@ TwoFluidMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                             GaussPoint *gp,
                                             TimeStep *atTime)
 {
-    if ( mode == MRM_Density ) {
-        double vof = this->giveTempVOF(gp);
-        return ( ( 1.0 - vof ) * giveMaterial(0)->giveCharacteristicValue(MRM_Density, gp, atTime) +
-                vof * giveMaterial(1)->giveCharacteristicValue(MRM_Density, gp, atTime) );
-    } else if ( mode == MRM_Viscosity ) {
+    if ( mode == MRM_Viscosity ) {
         double vof = this->giveTempVOF(gp);
         return ( ( 1.0 - vof ) * giveMaterial(0)->giveCharacteristicValue(MRM_Viscosity, gp, atTime) +
                 vof * giveMaterial(1)->giveCharacteristicValue(MRM_Viscosity, gp, atTime) );

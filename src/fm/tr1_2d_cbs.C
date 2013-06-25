@@ -160,8 +160,7 @@ TR1_2D_CBS :: computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *atTime)
 {
     answer.resize(9, 9);
     answer.zero();
-    //double rho = this->giveMaterial()->give('d');
-    double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
+    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
 
     double ar6 = rho * area / 6.0;
     double ar12 = rho * area / 12.0;
@@ -186,8 +185,7 @@ TR1_2D_CBS :: computeDiagonalMassMtrx(FloatArray &answer, TimeStep *atTime)
     answer.resize(9);
     answer.zero();
 
-    //double rho = this->giveMaterial()->give('d');
-    double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
+    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
     double mm = rho * this->area / 3.0;
     for ( int i = 0; i < 3; i++ ) {
         answer.at(i * 3 + 1) = mm;
@@ -206,7 +204,7 @@ TR1_2D_CBS :: computeConvectionTermsI(FloatArray &answer, TimeStep *stepN)
     double adu12, adu22, adu32, adv12, adv22, adv32;
     double dt = stepN->giveTimeIncrement();
     //double rho = this->giveMaterial()->give('d');
-    double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), stepN);
+    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
     int nLoads;
     bcGeomType ltype;
     Load *load;
@@ -289,7 +287,7 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
     int nLoads;
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
-    double coeff, rho = mat->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
+    double coeff, rho = mat->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     bcGeomType ltype;
     Load *load;
@@ -399,7 +397,7 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
     double velu = 0.0, velv = 0.0; // dudx=0.0, dvdy=0.0;
     //double rho = this->giveMaterial()->give('d');
     double theta1 = static_cast< CBS * >(domain->giveEngngModel())->giveTheta1();
-    double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
+    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
     FloatArray u(6), ustar(6);
 
     answer.resize(9);
@@ -1105,7 +1103,7 @@ TR1_2D_CBS :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
     //</RESTRICTED_SECTION>
     if ( type == IST_Density ) {
         answer.resize(1);
-        answer.at(1) = this->giveMaterial()->giveCharacteristicValue(MRM_Density, aGaussPoint, atTime);
+        answer.at(1) = this->giveMaterial()->give('d', aGaussPoint);
         return 1;
     } else {
         return CBSElement :: giveIPValue(answer, aGaussPoint, type, atTime);
@@ -1212,7 +1210,7 @@ TR1_2D_CBS :: printOutputAt(FILE *file, TimeStep *stepN)
 {
     CBSElement :: printOutputAt(file, stepN);
     //<RESTRICTED_SECTION>
-    double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), stepN);
+    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
     fprintf(file, "VOF %e, density %e\n\n", this->giveVolumeFraction(), rho);
     //</RESTRICTED_SECTION>
 }
@@ -1281,7 +1279,7 @@ TR1_2D_CBS :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type
     //</RESTRICTED_SECTION>
     if ( type == IST_Density ) {
         answer.resize(1);
-        answer.at(1) = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
+        answer.at(1) = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
         return 1;
     } else {
         return CBSElement :: giveInternalStateAtNode(answer, type, mode, node, atTime);

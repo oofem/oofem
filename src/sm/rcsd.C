@@ -224,10 +224,10 @@ RCSDMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
             if ( form == ReducedForm ) {
                 answer = reducedAnswer;
             } else {
-                this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
-                answer.resize(mask.maximum(), mask.maximum());
+                int size = StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode() );
+                answer.resize( size, size );
                 answer.zero();
-                answer.assemble(reducedAnswer, mask, mask);
+                answer.assemble(reducedAnswer, mask);
             }
         } else if ( rMode == ElasticStiffness ) {
             this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, rMode, gp, atTime);

@@ -104,12 +104,6 @@ public:
 
     virtual ~NonlinearFluidMaterial() { }
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseForm form,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *atTime);
-
     virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *atTime);

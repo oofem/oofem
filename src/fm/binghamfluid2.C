@@ -115,9 +115,7 @@ BinghamFluidMaterial2 :: giveCharacteristicValue(MatResponseMode mode,
                                                  GaussPoint *gp,
                                                  TimeStep *atTime)
 {
-    if ( mode == MRM_Density ) {
-        return this->give('d', gp);
-    } else if ( mode == MRM_Viscosity ) {
+    if ( mode == MRM_Viscosity ) {
         BinghamFluidMaterial2Status *status = static_cast< BinghamFluidMaterial2Status * >( this->giveStatus(gp) );
         //double temp_tau=status->giveTempDevStressMagnitude();
         //double temp_gamma=status->giveTempDevStrainMagnitude();

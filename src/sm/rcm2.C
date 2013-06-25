@@ -632,14 +632,15 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
 
         // copy fullAnswer to reduced one
         this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-        for ( int i = 1; i <= 3; i++ ) {
-            for ( int j = 1; j <= 3; j++ ) {
-                if ( mask.at(i) && mask.at(j) ) {
-                    answer.at( mask.at(i), mask.at(j) ) = fullAnswer.at(i, j);
+        for ( int i = 1; i <= sd; i++ ) {
+            int iidx = mask.findFirstIndexOf(i);
+            for ( int j = 1; j <= sd; j++ ) {
+                int jidx = mask.findFirstIndexOf(j);
+                if ( iidx && jidx ) {
+                    answer.at( i, j ) = fullAnswer.at(iidx, jidx);
                 }
             }
         }
-        return;
     }
 }
 
@@ -675,7 +676,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
                                            tempCrackDirs);
     invDe.beInverseOf(de);
     this->giveCrackedStiffnessMatrix(dcr, rMode, gp, atTime);
-    this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
+    StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode());
     compliance.resize( mask.giveSize(), mask.giveSize() );
 
     // we will set
@@ -742,10 +743,10 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     //
     // now let d to grow to Full Format
     //
-    this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
+    StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode());
     df.resize(6,6);
     df.zero();
-    df.assemble(d, mask, mask);
+    df.assemble(d, mask);
     //
     // final step - transform stiffnes to global c.s
     //
@@ -758,10 +759,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     if ( form == FullForm ) {
         answer = df;
     } else { // reduced form asked
-        this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-        answer.resize(mask.maximum(), mask.maximum());
-        answer.zero();
-        answer.assemble(df, mask, mask);
+        StructuralMaterial :: giveReducedSymMatrixForm( answer, df, gp->giveMaterialMode());
     }
 }
 

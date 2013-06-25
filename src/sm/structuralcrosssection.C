@@ -182,11 +182,10 @@ StructuralCrossSection :: giveCharMaterialComplianceMatrixOf(FloatMatrix &answer
     redAnswer.beInverseOf(redInvAnswer);
 
     if ( form == FullForm ) {
-        this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode(),
-                                   static_cast< StructuralMaterial * >( gp->giveMaterial() ) );
+        StructuralMaterial :: giveVoigtSymVectorMask(mask, gp->giveMaterialMode());
         answer.resize(6,6);
         answer.zero();
-        answer.assemble(redAnswer,mask,mask);
+        answer.assemble(redAnswer,mask);
 
     } else if ( form == ReducedForm ) {
         answer = redAnswer;
@@ -296,31 +295,6 @@ StructuralCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
     }
 
     return gradientStrainVector3d;
-}
-
-
-void
-StructuralCrossSection :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
-                                               MaterialMode mmode, StructuralMaterial *mat) const
-{
-    //
-    // this function returns mask of reduced(if form == ReducedForm)
-    // or Full(if form==FullForm) stressStrain vector in full or
-    // reduced StressStrainVector
-    // acording to stressStrain mode of given gp.
-    //
-    // mask has size of reduced or full StressStrain Vector and  i-th component
-    // is index to full or reduced StressStrainVector where corresponding
-    // stressStrain resides.
-    //
-    //MaterialMode mode = gp-> giveMaterialMode ();
-    //StructuralMaterial * mat = (StructuralMaterial*) gp->giveElement()->giveMaterial();
-    if ( mat->hasMaterialModeCapability(mmode) ) {
-        mat->giveStressStrainMask(answer, form, mmode);
-        return;
-    } else {
-        _error("giveStressStrainMask : unsupported mode");
-    }
 }
 
 
