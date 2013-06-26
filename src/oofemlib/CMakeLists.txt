@@ -190,6 +190,7 @@ set (core_xfem
     xfem/enrichmentitem.C
     xfem/patchintegrationrule.C
     xfem/enrichmentdomain.C
+    xfem/XFEMDebugTools.C
     )
 
 set (core_parallel

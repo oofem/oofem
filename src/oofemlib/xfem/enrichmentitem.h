@@ -57,6 +57,8 @@
 //#define _IFT_MultipleDelamination_Name "multipledelamination"
 //@}
 
+#define _IFT_Crack_Name "crack"
+
 namespace oofem {
 template< class T > class AList;
 class BasicGeometry;
@@ -187,6 +189,18 @@ public:
     void giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &zBottom, Element *e);
     double heaviside(double xi, double xi0);
 
+};
+
+/** Concrete representation of Crack. */
+class Crack : public EnrichmentItem
+{
+//protected:
+
+public:
+    Crack(int n, XfemManager *xm, Domain *aDomain);
+    virtual const char *giveClassName() const { return "Crack"; }
+    virtual const char *giveInputRecordName() const { return _IFT_Crack_Name; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
 };
 
 } // end namespace oofem

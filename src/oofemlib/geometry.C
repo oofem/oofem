@@ -39,6 +39,9 @@
 #include "dofmanager.h"
 #include "classfactory.h"
 
+
+#include <fstream>
+
 namespace oofem {
 
 REGISTER_Geometry(Line)
@@ -549,6 +552,396 @@ void Circle :: printYourself()
     printf("\n");
 }
 
+
+
+
+#ifdef __BOOST_MODULE
+int PolygonLine::nextLineIdNumber = 0;
+
+PolygonLine :: PolygonLine() : BasicGeometry()
+{
+	LC.x(0.0);
+	LC.y(0.0);
+
+	UC.x(0.0);
+	UC.y(0.0);
+
+	lineIdNumber = nextLineIdNumber++;
+}
+
+
+
+
+double PolygonLine :: computeDistanceTo(FloatArray *point)
+{
+	double minDist = 1.0e9;
+	int numSeg = this->giveNrVertices()-1;
+
+	bPoint2 p( point->at(1), point->at(2) );
+
+	for( int segId = 1; segId <= numSeg; segId++ )
+	{
+		// Crack segment
+		bPoint2 crackP1( this->giveVertex(segId)->at(1), this->giveVertex(segId)->at(2) );
+		bPoint2 crackP2( this->giveVertex(segId+1)->at(1), this->giveVertex(segId+1)->at(2) );
+		bSeg2 crackSeg( crackP1, crackP2 );
+
+		double dist = bDist(p, crackSeg);
+
+		bPoint2 t( crackP2.x() - crackP1.x(), crackP2.y() - crackP1.y() );
+		bPoint2 n( -t.y(), t.x() );
+
+		bPoint2 lineToP( point->at(1) - crackP1.x(), point->at(2) - crackP1.y() );
+
+		double sign = sgn( bDot( lineToP, n ) );
+
+		if(dist < fabs(minDist) )
+		{
+			minDist = sign*dist;
+		}
+	}
+
+	return minDist;
+}
+
+IRResultType PolygonLine :: initializeFrom(InputRecord *ir)
+{
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result; // Required by IR_GIVE_FIELD macro
+
+
+    FloatArray *points = new FloatArray();
+    IR_GIVE_FIELD(ir, * points, _IFT_PolygonLine_points);
+
+    int numPoints = points->giveSize()/2;
+
+    for( int i = 1; i <= numPoints; i++)
+    {
+        FloatArray *pos = new FloatArray(2);
+    	pos->at(1) = points->at( 2*(i-1	) + 1	);
+    	pos->at(2) = points->at( 2*(i	)		);
+        vertices->put(i, pos);
+
+//        printf("Setting point %d with coordinates (%e, %e)\n", i, pos->at(1), pos->at(2) );
+    }
+
+
+    // Precompute bounding box to speed up calculation of intersection points.
+    calcBoundingBox(LC, UC);
+
+    printVTK();
+
+    return IRRT_OK;
+}
+
+bool PolygonLine :: boundingBoxIntersects(Element *element)
+{
+	// Compute element bounding box
+	bPoint2 eLC, eUC;
+	eLC.x( element->giveNode(1)->giveCoordinate(1) );
+	eLC.y( element->giveNode(1)->giveCoordinate(2) );
+
+	eUC.x( element->giveNode(1)->giveCoordinate(1) );
+	eUC.y( element->giveNode(1)->giveCoordinate(2) );
+
+	int numNodes = element->giveNumberOfNodes();
+	for(int i = 2; i <= numNodes; i++)
+	{
+		eLC.x( min( eLC.x(), element->giveNode(i)->giveCoordinate(1) ) );
+		eLC.y( min( eLC.y(), element->giveNode(i)->giveCoordinate(2) ) );
+
+		eUC.x( max( eUC.x(), element->giveNode(i)->giveCoordinate(1) ) );
+		eUC.y( max( eUC.y(), element->giveNode(i)->giveCoordinate(2) ) );
+	}
+
+//	printf("eLC: (%e, %e) eUC: (%e, %e) ", eLC.x(), eLC.y(), eUC.x(), eUC.y() );
+//	printf(" LC: (%e, %e)  UC: (%e, %e)\n",  LC.x(),  LC.y(),  UC.x(),  UC.y() );
+
+
+	// Check if there is any chance of overlap
+	if( !bOverlap( eLC, eUC, LC, UC ) )
+	{
+		// If the bounding boxes do not overlap,
+		// there will certainly not be any intersections
+		return false;
+	}
+
+
+	return true;
+}
+
+bool PolygonLine :: intersects(Element *element)
+{
+
+
+	if( !boundingBoxIntersects(element) )
+	{
+		return false;
+	}
+
+
+	double distTol = 1.0e-9;
+
+	int numSeg = this->giveNrVertices()-1;
+
+
+	// Loop over the crack segments and test each segment for
+	// overlap with the element
+	for( int segId = 1; segId <= numSeg; segId++ )
+	{
+		if( element->giveClassID() == TrPlaneStress2dXFEMClass )
+		{
+			// Crack segment
+			bPoint2 crackP1( this->giveVertex(segId)->at(1), this->giveVertex(segId)->at(2) );
+			bPoint2 crackP2( this->giveVertex(segId+1)->at(1), this->giveVertex(segId+1)->at(2) );
+			bSeg2 crackSeg( crackP1, crackP2 );
+
+
+			// Triangle vertices
+			bPoint2 x1( element->giveNode(1)->giveCoordinate(1), element->giveNode(1)->giveCoordinate(2) );
+			bPoint2 x2( element->giveNode(2)->giveCoordinate(1), element->giveNode(2)->giveCoordinate(2) );
+			bPoint2 x3( element->giveNode(3)->giveCoordinate(1), element->giveNode(3)->giveCoordinate(2) );
+
+			bSeg2 edge1( x1, x2 );
+			bSeg2 edge2( x2, x3 );
+			bSeg2 edge3( x3, x1 );
+
+			double d1 = bDist( crackSeg, edge1 );
+			if( d1 < distTol)
+			{
+				return true;
+			}
+
+			double d2 = bDist( crackSeg, edge2 );
+			if( d2 < distTol)
+			{
+				return true;
+			}
+
+			double d3 = bDist( crackSeg, edge3 );
+			if( d3 < distTol)
+			{
+				return true;
+			}
+
+		}
+
+	}
+
+
+
+
+	return false;
+
+}
+
+
+bool PolygonLine :: isInside(Element *element)
+{
+	return false;
+}
+
+bool
+PolygonLine :: isInside(FloatArray &point)
+{
+    return false;
+}
+
+
+
+void PolygonLine :: calcBoundingBox(bPoint2 &oLC, bPoint2 &oUC)
+{
+	oLC.x(vertices->at(1)->at(1));
+	oLC.y(vertices->at(1)->at(2));
+
+	oUC.x(vertices->at(1)->at(1));
+	oUC.y(vertices->at(1)->at(2));
+
+	int numPoints = vertices->giveSize();
+	for(int i = 2; i <= numPoints; i++)
+	{
+		oLC.x( min( oLC.x(), vertices->at(i)->at(1) ) );
+		oLC.y( min( oLC.y(), vertices->at(i)->at(2) ) );
+
+		oUC.x( max( oUC.x(), vertices->at(i)->at(1) ) );
+		oUC.y( max( oUC.y(), vertices->at(i)->at(2) ) );
+	}
+
+}
+
+
+
+void PolygonLine :: computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints)
+{
+
+	if( !boundingBoxIntersects(element) )
+	{
+		return;
+	}
+
+
+	for ( int i = 1; i <= element->giveNumberOfBoundarySides(); i++ ) {
+		AList< FloatArray >oneLineIntersects;
+		FloatArray *a = new FloatArray( *( element->giveDofManager(i)->giveCoordinates() ) );
+		FloatArray *b = NULL;
+		if ( i != element->giveNumberOfBoundarySides() ) {
+			b = new FloatArray( *( element->giveDofManager(i + 1)->giveCoordinates() ) );
+		} else {
+			b = new FloatArray( *( element->giveDofManager(1)->giveCoordinates() ) );
+		}
+
+		Line *l = new Line(a, b);
+		computeIntersectionPoints(l, & oneLineIntersects);
+		for ( int j = 1; j <= oneLineIntersects.giveSize(); j++ ) {
+			int sz = intersecPoints->giveSize();
+			intersecPoints->put( sz + 1, oneLineIntersects.at(j) );
+			oneLineIntersects.unlink(j);
+		}
+
+		delete l;
+	}
+
+}
+
+void PolygonLine :: computeIntersectionPoints(Line *l, AList< FloatArray > *intersecPoints)
+{
+
+#ifdef __BOOST_MODULE
+
+	int numSeg = this->giveNrVertices()-1;
+
+
+	// Segment
+	bPoint2 lineP1( l->giveVertex(1)->at(1), l->giveVertex(1)->at(2) );
+	bPoint2 lineP2( l->giveVertex(2)->at(1), l->giveVertex(2)->at(2) );
+	bSeg2 lineSeg( lineP1, lineP2 );
+
+
+	double distTol = 1.0e-9;
+
+	bool foundOverlap = false;
+
+	// Loop over the crack segments and test each segment for
+	// overlap with the element
+	for( int segId = 1; segId <= numSeg; segId++ )
+	{
+
+		// Crack segment
+		bPoint2 crackP1( this->giveVertex(segId)->at(1), this->giveVertex(segId)->at(2) );
+		bPoint2 crackP2( this->giveVertex(segId+1)->at(1), this->giveVertex(segId+1)->at(2) );
+		bSeg2 crackSeg( crackP1, crackP2 );
+
+		bPoint2 intersectionPoint;
+		double d = bDist( crackSeg, lineSeg, &intersectionPoint );
+		if( d < distTol)
+		{
+			if(!foundOverlap)
+			{
+				foundOverlap = true;
+
+
+				int sz = intersecPoints->giveSize();
+				FloatArray *pos = new FloatArray(2);
+				pos->at(1) = intersectionPoint.x();
+				pos->at(2) = intersectionPoint.y();
+				intersecPoints->put( sz + 1, pos );
+
+			}
+		}
+
+
+	}
+
+
+
+
+#else
+	printf("__BOOST_MODULE is not defined!!\n");
+#endif
+
+}
+
+int
+PolygonLine :: computeNumberOfIntersectionPoints(Element *element)
+{
+    AList< FloatArray > intersecPoints;
+    this->computeIntersectionPoints(element, &intersecPoints);
+    return intersecPoints.giveSize();
+}
+
+bool PolygonLine :: isOutside(BasicGeometry *bg)
+{
+	return true;
+}
+
+void PolygonLine :: printYourself()
+{
+	printf("PolygonLine: start: ");
+    vertices->at(1)->printYourself();
+	printf(" end: ");
+    vertices->at(2)->printYourself();
+    printf("\n");
+}
+
+void PolygonLine :: printVTK()
+{
+	// Debugging function: write crack geometry to vtk.
+
+	// Write crack geometry to vtk
+	std::string vtkFileName;
+	vtkFileName.append("crack");
+	char lineIdNumberString[100];
+	sprintf(lineIdNumberString, "%d", lineIdNumber);
+	vtkFileName.append(lineIdNumberString);
+	vtkFileName.append(".vtk");
+
+
+	int numPoints = this->giveNrVertices();
+
+
+	std::ofstream file;
+	file.open (vtkFileName.data());
+
+	// Write header
+	file << "# vtk DataFile Version 2.0\n";
+	file << "Geometry of a PolygonLine\n";
+	file << "ASCII\n";
+
+	file << "DATASET UNSTRUCTURED_GRID\n";
+
+
+	// Write points
+	file << "POINTS " << numPoints << "double\n";
+
+	for(int i = 1; i <= numPoints; i++)
+	{
+		file << this->giveVertex(i)->at(1) << " " << this->giveVertex(i)->at(2) << " 0.0\n";
+	}
+
+
+	// Write segments
+	int numSeg = numPoints-1;
+	file << "CELLS " << numSeg << " " << numSeg*3 << "\n";
+
+	int numPointsPerSeg = 2;
+	for(int i = 0; i < numSeg; i++)
+	{
+		file << numPointsPerSeg << " " << i << " " << i+1 << "\n";
+	}
+
+
+	// Write cell types
+	file << "CELL_TYPES " << numSeg << "\n";
+	int vtkCellType = 3; // line segment
+	for(int i = 0; i < numSeg; i++)
+	{
+		file << vtkCellType << "\n";
+	}
+
+	file.close();
+}
+
+#endif // __BOOST_MODULE
 
 
 IRResultType PointSwarm :: initializeFrom(InputRecord *ir)

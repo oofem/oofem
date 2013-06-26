@@ -50,6 +50,11 @@ namespace oofem {
 #define _IFT_DofManList_Name "dofmanlist"
 #define _IFT_WholeDomain_Name "wholedomain"
 #define _IFT_EDBGCircle_Name "circle"
+
+#ifdef __BOOST_MODULE
+#define _IFT_EDCrack_Name "polygoncrack"
+#endif
+
 //#define _IFT_BasicGeometryDomain<Line>_Name "line" // Odd one out, how should we treat these?
 //@}
 
@@ -110,6 +115,23 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_EDBGCircle_Name; }
     virtual const char *giveClassName() const { return "EDBGCircle"; }
 };
+
+#ifdef __BOOST_MODULE
+class EDCrack : public EnrichmentDomain_BG
+{
+public:
+	EDCrack () { bg = new PolygonLine; printf("Entering EDCrack().\n"); }
+    virtual ~EDCrack() { }
+    virtual IRResultType initializeFrom(InputRecord *ir) { printf("Initializing a crack.\n"); return bg->initializeFrom(ir); }
+    virtual bool isDofManagerEnriched(DofManager *dMan);
+    virtual bool isElementEnriched(Element *element);
+    virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element) { bg->computeIntersectionPoints(element, intersectionPoints); }
+    virtual int computeNumberOfIntersectionPoints(Element *element) { return static_cast<PolygonLine *>(bg)->computeNumberOfIntersectionPoints(element); }
+
+    virtual const char *giveInputRecordName() const { return _IFT_EDCrack_Name; }
+    virtual const char *giveClassName() const { return "EDCrack"; }
+};
+#endif
 
 /**
  * List of DofManagers 

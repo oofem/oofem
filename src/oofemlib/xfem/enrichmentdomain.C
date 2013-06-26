@@ -48,6 +48,10 @@ namespace oofem {
 REGISTER_EnrichmentDomain( DofManList )
 REGISTER_EnrichmentDomain( WholeDomain )
 REGISTER_EnrichmentDomain( EDBGCircle )
+
+#ifdef __BOOST_MODULE
+REGISTER_EnrichmentDomain( EDCrack )
+#endif
 //REGISTER_EnrichmentDomain( BasicGeometryDomain<Line> )
 
 // General 
@@ -136,5 +140,60 @@ EDBGCircle :: isElementEnriched(Element *element)
     }
     return false;
 };
+
+
+
+
+
+#ifdef __BOOST_MODULE
+// Crack
+bool
+EDCrack :: isDofManagerEnriched(DofManager *dMan)
+{
+	// If the dofman belongs to an element that is intersected twice by the crack,
+	// the dofman will be enriched
+
+    int node = dMan->giveGlobalNumber();
+    Domain *d = dMan->giveDomain();
+
+    const IntArray *nodeElements = d->giveConnectivityTable()->giveDofManConnectivityArray(node);
+    int numEl = nodeElements->giveSize();
+
+    Element *el;
+
+    for( int i = 1; i <= numEl; i++ )
+    {
+    	el = d->giveElement( nodeElements->at(i) );
+
+    	// TODO: For now, enrich only elements that are completely cut by the
+    	//		 crack and therefore have (exactly) two intersection points.
+    	// 		 (This approach may be problematic if using other elements
+    	//		  than linear triangles.)
+//    	if( this->bg->intersects(el) )
+    	if( this->bg->computeNumberOfIntersectionPoints(el) == 2 )
+    	{
+    		return true;
+    	}
+    }
+
+
+    return false;
+};
+
+
+bool
+EDCrack :: isElementEnriched(Element *element)
+{
+
+    for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
+        if ( this->isDofManagerEnriched( element->giveDofManager(i) ) ) {
+            return true;
+        }
+    }
+
+    return false;
+};
+#endif // __BOOST_MODULE
+
 
 } // end namespace oofem

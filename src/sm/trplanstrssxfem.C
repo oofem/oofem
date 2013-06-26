@@ -56,6 +56,7 @@ TrPlaneStress2dXFEM::~TrPlaneStress2dXFEM() {
 
 void TrPlaneStress2dXFEM :: XfemElementInterface_partitionElement(AList< Triangle > *answer, AList< FloatArray > *together)
 {
+#ifdef __BOOST_MODULE
 
 	// Two cases may occur when partitioning: we will get a subdomain
 	// with either 3 or 4 nodes.
@@ -308,6 +309,10 @@ void TrPlaneStress2dXFEM :: XfemElementInterface_partitionElement(AList< Triangl
 
 		}
 	}
+
+#else
+	OOFEM_ERROR ("TrPlaneStress2dXFEM requires __BOOST_MODULE");
+#endif // __BOOST_MODULE
 
 }
 
