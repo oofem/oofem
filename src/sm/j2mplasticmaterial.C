@@ -465,7 +465,7 @@ J2MPlasticMaterial :: giveSizeOfReducedHardeningVarsVector(GaussPoint *gp)
     int size = 0;
 
     if ( kinematicHardeningFlag ) {
-        size += StructuralMaterial :: StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
+        size += StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
     }
 
     if ( isotropicHardeningFlag ) {
