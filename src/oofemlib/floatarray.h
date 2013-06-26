@@ -405,12 +405,13 @@ public:
      * Order of matrix components in vector: 11, 22, 33, 23, 13, 12
      * @param aMatrix Matrix to transform.
      */
-    void beReducedVectorForm(const FloatMatrix &aMatrix);
-
+    void beReducedVectorFormOfStress(const FloatMatrix &aMatrix);
     void beReducedVectorFormOfStrain(const FloatMatrix &aMatrix);
 
+    /**
+     * Reciever will be set to a given column in a matrix 
+     */
     void beColumnOf(const FloatMatrix &mat, int col);
-
 #ifdef __PARALLEL_MODE
     int packToCommBuffer(CommunicationBuffer &buff) const;
     int unpackFromCommBuffer(CommunicationBuffer &buff);

@@ -502,7 +502,6 @@ public:
      * @param aArray Array to transform.
      */
     void beMatrixFormOfStress(const FloatArray &aArray);
-    void beMatrixForm(const FloatArray &aArray);
 
     // Overloaded methods:
     contextIOResultType storeYourself(DataStream *stream, ContextMode mode);
