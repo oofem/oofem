@@ -670,7 +670,7 @@ MDM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                      GaussPoint *gp,
                                      TimeStep *atTime)
 {
-    this->giveMaterialStiffnessMatrix(answer, FullForm, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, ReducedForm, mode, gp, atTime);
 }
 
 void

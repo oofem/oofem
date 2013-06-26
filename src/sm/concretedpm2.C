@@ -2302,7 +2302,7 @@ ConcreteDPM2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         if ( mode == ElasticStiffness ) {
             this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
         } else if ( mode == SecantStiffness ) {
-            computeSecantStiffness(answer, FullForm, mode, gp, atTime);
+            computeSecantStiffness(answer, mode, gp, atTime);
         } else if ( mode == TangentStiffness ) {
             _error("Tangent stiffness not implemented. Use either elastic or secant stiffness.\n");
         }
@@ -2311,7 +2311,6 @@ ConcreteDPM2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
 void
 ConcreteDPM2 :: computeSecantStiffness(FloatMatrix &answer,
-                                       MatResponseForm form,
                                        MatResponseMode mode,
                                        GaussPoint *gp,
                                        TimeStep *atTime)
@@ -2327,7 +2326,7 @@ ConcreteDPM2 :: computeSecantStiffness(FloatMatrix &answer,
         omegaTension = 0.999999;
     }
 
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, FullForm, mode, gp, atTime);
 
 
     if ( isotropicFlag == 1 ) {

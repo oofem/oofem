@@ -624,12 +624,12 @@ DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         case DruckerPragerPlasticitySMStatus :: DP_Yielding:
             // elasto-plastic stiffness for regular case
             //printf("\nAssembling regular algorithmic stiffness matrix.") ;
-            giveRegAlgorithmicStiffMatrix(answer, FullForm, mode, gp, atTime);
+            giveRegAlgorithmicStiffMatrix(answer, mode, gp, atTime);
             break;
         case DruckerPragerPlasticitySMStatus :: DP_Vertex:
             // elasto-plastic stiffness for vertex case
             //printf("\nAssembling vertex case algorithmic stiffness matrix.") ;
-            giveVertexAlgorithmicStiffMatrix(answer, FullForm, mode, gp, atTime);
+            giveVertexAlgorithmicStiffMatrix(answer, mode, gp, atTime);
             break;
         default:
             _error("Case did not match.\n");
@@ -646,7 +646,6 @@ DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
 void
 DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
-                                                           MatResponseForm form,
                                                            MatResponseMode mode,
                                                            GaussPoint *gp,
                                                            TimeStep *atTime)
@@ -731,7 +730,7 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
     }
 
     FloatMatrix De;
-    LEMaterial->giveCharacteristicMatrix(De, form, mode, gp, atTime);
+    LEMaterial->give3dMaterialStiffnessMatrix(De, mode, gp, atTime);
 
     // answer is A_Matrix^-1 * De
     A_Matrix.solveForRhs(De, answer);
@@ -739,7 +738,6 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
 
 void
 DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answer,
-                                                              MatResponseForm form,
                                                               MatResponseMode mode,
                                                               GaussPoint *gp,
                                                               TimeStep *atTime)
@@ -758,7 +756,7 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
     if ( deltaKappa <= 0. ) {
         // This case occurs in the first iteration of a step.
         // printf("deltaKappa<=0. for vertex case algorithmic stiffness, i.e. continuum tangent stiffness. Since the continuum tangent stiffness does not exist at the vertex, elastic stiffness is used instead. This will cause the loss of quadratic convergence.\n") ;
-        LEMaterial->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
     }
 
     double deltaVolumetricPlasticStrain =

@@ -245,7 +245,7 @@ protected:
     void giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *,
                                          FloatArray &, FloatMatrix &, TimeStep *);
     void giveNormalElasticStiffnessMatrix(FloatMatrix & answer,
-                                          MatResponseForm, MatResponseMode,
+                                          bool reduce, MatResponseMode,
                                           GaussPoint *, TimeStep * tStep,
                                           const FloatMatrix &);
     void updateActiveCrackMap(GaussPoint *gp, const IntArray *activatedCracks = NULL);

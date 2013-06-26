@@ -585,7 +585,7 @@ PlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
     } else {
-        this->giveConsistentStiffnessMatrix(answer, FullForm, mode, gp, atTime);
+        this->giveConsistentStiffnessMatrix(answer, ReducedForm, mode, gp, atTime);
     }
 }
 

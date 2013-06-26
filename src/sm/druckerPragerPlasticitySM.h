@@ -322,26 +322,22 @@ public:
     /**
      * Compute and give back algorithmic stiffness matrix for the regular case (no vertex).
      * @param answer Consistent stiffness matrix.
-     * @param form Material response form.
      * @param mode Material reponse mode.
      * @param gp Gauss point.
      * @param tStep Time step.
      */
     void giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
-                                       MatResponseForm form,
                                        MatResponseMode mode,
                                        GaussPoint *gp,
                                        TimeStep *tStep);
     /**
      * Compute consistent stiffness matrix for the vertex case.
      * @param answer Consistent stiffness matrix.
-     * @param form Material response form.
      * @param mode Material reponse mode.
      * @param gp Gauss point.
      * @param tStep Time step.
      */
     void giveVertexAlgorithmicStiffMatrix(FloatMatrix &answer,
-                                          MatResponseForm form,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);

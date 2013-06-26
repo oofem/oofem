@@ -241,7 +241,7 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
     strainIncrement.beDifferenceOf(principalStrain, prevPrincipalStrain);
     status->letPrincipalStrainVectorBe(principalStrain);
 
-    this->giveNormalElasticStiffnessMatrix(de, FullForm, TangentStiffness,
+    this->giveNormalElasticStiffnessMatrix(de, false, TangentStiffness,
                                            gp, atTime, tempCrackDirs);
     //
     // construct mapping matrix of active cracks
@@ -588,7 +588,7 @@ RCM2Material :: checkIfClosedCracks(GaussPoint *gp, FloatArray &crackStrainVecto
 
 void
 RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
-                                                 MatResponseForm form, MatResponseMode rMode,
+                                                 bool reduce, MatResponseMode rMode,
                                                  GaussPoint *gp, TimeStep *atTime,
                                                  const FloatMatrix &dir)
 //
@@ -610,7 +610,7 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
         }
     }
 
-    if ( form == FullForm ) { // 3x3 full form required
+    if ( !reduce ) { // 3x3 full form required
         answer = fullAnswer;
     } else {
         // reduced form for only
@@ -672,7 +672,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     // this->updateActiveCrackMap(gp) must be done after restart.
     this->updateActiveCrackMap(gp);
     status->giveTempCrackDirs(tempCrackDirs);
-    this->giveNormalElasticStiffnessMatrix(de, ReducedForm, rMode, gp, atTime,
+    this->giveNormalElasticStiffnessMatrix(de, true, rMode, gp, atTime,
                                            tempCrackDirs);
     invDe.beInverseOf(de);
     this->giveCrackedStiffnessMatrix(dcr, rMode, gp, atTime);
@@ -996,7 +996,7 @@ RCM2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     //
     // returns receiver 3d material matrix
     //
-    this->giveMaterialStiffnessMatrix(answer, FullForm, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, ReducedForm, mode, gp, atTime);
 }
 
 

@@ -1246,9 +1246,9 @@ MPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
-        this->giveConsistentStiffnessMatrix(answer,  FullForm, mode, gp, atTime);
+        this->giveConsistentStiffnessMatrix(answer, ReducedForm, mode, gp, atTime);
     } else {
-        this->giveElastoPlasticStiffnessMatrix(answer,  FullForm, mode, gp, atTime);
+        this->giveElastoPlasticStiffnessMatrix(answer, ReducedForm, mode, gp, atTime);
     }
 }
 

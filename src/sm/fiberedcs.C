@@ -85,7 +85,7 @@ FiberedCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm for
         StructuralMaterial :: giveReducedSymVectorForm(fiberStrain, fullFiberStrain, gp->giveMaterialMode());
 
 
-        static_cast< StructuralMaterial * >( fiberMat )->giveRealStressVector(stressVector3d, FullForm, fiberGp, fiberStrain, tStep);
+        static_cast< StructuralMaterial * >( fiberMat )->giveRealStressVector(stressVector3d, ReducedForm, fiberGp, fiberStrain, tStep);
     }
 
     fullStressVect = this->GiveIntegrated3dBeamStress(gp);
@@ -189,7 +189,7 @@ FiberedCrossSection :: give3dBeamMaterialStiffnessMatrix(FloatMatrix &answer, Ma
 
     for ( int i = 1; i <= numberOfFibers; i++ ) {
         fiberGp = giveSlaveGaussPoint(gp, i - 1);
-        this->giveFiberMaterialStiffnessMatrix(fiberMatrix, FullForm, rMode, fiberGp, tStep);
+        this->giveFiberMaterialStiffnessMatrix(fiberMatrix, ReducedForm, rMode, fiberGp, tStep);
         //
         // resolve current layer z-coordinate
         //
@@ -205,15 +205,15 @@ FiberedCrossSection :: give3dBeamMaterialStiffnessMatrix(FloatMatrix &answer, Ma
         // 1) membrane terms N, Qz, Qy
         answer.at(1, 1) += fiberMatrix.at(1, 1) * fiberWidth * fiberThick;
 
-        answer.at(2, 2) += fiberMatrix.at(5, 5) * fiberWidth * fiberThick;
+        answer.at(2, 2) += fiberMatrix.at(2, 2) * fiberWidth * fiberThick;
 
-        answer.at(3, 3) += fiberMatrix.at(6, 6) * fiberWidth * fiberThick;
+        answer.at(3, 3) += fiberMatrix.at(3, 3) * fiberWidth * fiberThick;
 
         // 2) bending terms mx, my, mz
 
         Ip             += fiberWidth * fiberThick * fiberZCoord2 + fiberWidth * fiberThick * fiberYCoord2;
         A              += fiberWidth * fiberThick;
-        G               = fiberMatrix.at(5, 5) * fiberWidth * fiberThick;
+        G               = fiberMatrix.at(2, 2) * fiberWidth * fiberThick;
 
         answer.at(5, 5) += fiberMatrix.at(1, 1) * fiberWidth * fiberThick * fiberZCoord2;
         answer.at(6, 6) += fiberMatrix.at(1, 1) * fiberWidth * fiberThick * fiberYCoord2;

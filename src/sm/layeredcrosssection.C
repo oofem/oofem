@@ -110,7 +110,7 @@ LayeredCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm for
          */
 
         static_cast< StructuralMaterial * >( layerMat )
-        ->giveRealStressVector(stressVector3d, FullForm, layerGp, layerStrain, tStep);
+        ->giveRealStressVector(stressVector3d, ReducedForm, layerGp, layerStrain, tStep);
         // reducedStressIncrement = this -> GiveReducedStressVector (gp, stressIncrement3d);
     }
 
@@ -253,7 +253,7 @@ LayeredCrossSection :: give2dPlateMaterialStiffnessMatrix(FloatMatrix &answer,
 
     for ( i = 1; i <= numberOfLayers; i++ ) {
         layerGp = giveSlaveGaussPoint(gp, i - 1);
-        this->giveLayerMaterialStiffnessMatrix(layerMatrix, FullForm, rMode, layerGp, tStep);
+        this->giveLayerMaterialStiffnessMatrix(layerMatrix, ReducedForm, rMode, layerGp, tStep);
 
         //
         // resolve current layer z-coordinate
@@ -274,21 +274,21 @@ LayeredCrossSection :: give2dPlateMaterialStiffnessMatrix(FloatMatrix &answer,
 
         answer.at(1 + jj, 1 + jj) += layerMatrix.at(1, 1) * layerWidth * layerThick * layerZCoord2;
         answer.at(1 + jj, 2 + jj) += layerMatrix.at(1, 2) * layerWidth * layerThick * layerZCoord2;
-        answer.at(1 + jj, 3 + jj) += layerMatrix.at(1, 6) * layerWidth * layerThick * layerZCoord2;
+        answer.at(1 + jj, 3 + jj) += layerMatrix.at(1, 5) * layerWidth * layerThick * layerZCoord2;
 
         answer.at(2 + jj, 1 + jj) += layerMatrix.at(2, 1) * layerWidth * layerThick * layerZCoord2;
         answer.at(2 + jj, 2 + jj) += layerMatrix.at(2, 2) * layerWidth * layerThick * layerZCoord2;
-        answer.at(2 + jj, 3 + jj) += layerMatrix.at(2, 6) * layerWidth * layerThick * layerZCoord2;
+        answer.at(2 + jj, 3 + jj) += layerMatrix.at(2, 5) * layerWidth * layerThick * layerZCoord2;
 
-        answer.at(3 + jj, 1 + jj) += layerMatrix.at(6, 1) * layerWidth * layerThick * layerZCoord2;
-        answer.at(3 + jj, 2 + jj) += layerMatrix.at(6, 2) * layerWidth * layerThick * layerZCoord2;
-        answer.at(3 + jj, 3 + jj) += layerMatrix.at(6, 6) * layerWidth * layerThick * layerZCoord2;
+        answer.at(3 + jj, 1 + jj) += layerMatrix.at(5, 1) * layerWidth * layerThick * layerZCoord2;
+        answer.at(3 + jj, 2 + jj) += layerMatrix.at(5, 2) * layerWidth * layerThick * layerZCoord2;
+        answer.at(3 + jj, 3 + jj) += layerMatrix.at(5, 5) * layerWidth * layerThick * layerZCoord2;
 
         // 2) shear terms qx = qxz, qy = qyz
-        answer.at(4 + jj, 4 + jj) += layerMatrix.at(5, 5) * layerWidth * layerThick;
-        answer.at(4 + jj, 5 + jj) += layerMatrix.at(5, 4) * layerWidth * layerThick;
-        answer.at(5 + jj, 4 + jj) += layerMatrix.at(4, 5) * layerWidth * layerThick;
-        answer.at(5 + jj, 5 + jj) += layerMatrix.at(4, 4) * layerWidth * layerThick;
+        answer.at(4 + jj, 4 + jj) += layerMatrix.at(4, 4) * layerWidth * layerThick;
+        answer.at(4 + jj, 5 + jj) += layerMatrix.at(4, 3) * layerWidth * layerThick;
+        answer.at(5 + jj, 4 + jj) += layerMatrix.at(3, 4) * layerWidth * layerThick;
+        answer.at(5 + jj, 5 + jj) += layerMatrix.at(3, 3) * layerWidth * layerThick;
     }
 }
 
@@ -334,7 +334,7 @@ LayeredCrossSection :: give3dShellMaterialStiffness(FloatMatrix &answer, MatResp
 
     for ( i = 1; i <= numberOfLayers; i++ ) {
         layerGp = giveSlaveGaussPoint(gp, i - 1);
-        this->giveLayerMaterialStiffnessMatrix(layerMatrix, FullForm, rMode, layerGp, tStep);
+        this->giveLayerMaterialStiffnessMatrix(layerMatrix, ReducedForm, rMode, layerGp, tStep);
         //
         // resolve current layer z-coordinate
         //
@@ -349,35 +349,35 @@ LayeredCrossSection :: give3dShellMaterialStiffness(FloatMatrix &answer, MatResp
         // 1) membrane terms sx, sy, sxy
         answer.at(1, 1) += layerMatrix.at(1, 1) * layerWidth * layerThick;
         answer.at(1, 2) += layerMatrix.at(1, 2) * layerWidth * layerThick;
-        answer.at(1, 3) += layerMatrix.at(1, 6) * layerWidth * layerThick;
+        answer.at(1, 3) += layerMatrix.at(1, 5) * layerWidth * layerThick;
 
         answer.at(2, 1) += layerMatrix.at(2, 1) * layerWidth * layerThick;
         answer.at(2, 2) += layerMatrix.at(2, 2) * layerWidth * layerThick;
-        answer.at(2, 3) += layerMatrix.at(2, 6) * layerWidth * layerThick;
+        answer.at(2, 3) += layerMatrix.at(2, 5) * layerWidth * layerThick;
 
-        answer.at(3, 1) += layerMatrix.at(6, 1) * layerWidth * layerThick;
-        answer.at(3, 2) += layerMatrix.at(6, 2) * layerWidth * layerThick;
-        answer.at(3, 3) += layerMatrix.at(6, 6) * layerWidth * layerThick;
+        answer.at(3, 1) += layerMatrix.at(5, 1) * layerWidth * layerThick;
+        answer.at(3, 2) += layerMatrix.at(5, 2) * layerWidth * layerThick;
+        answer.at(3, 3) += layerMatrix.at(5, 5) * layerWidth * layerThick;
 
         // 2) bending terms mx, my, mxy
 
         answer.at(4, 4) += layerMatrix.at(1, 1) * layerWidth * layerThick * layerZCoord2;
         answer.at(4, 5) += layerMatrix.at(1, 2) * layerWidth * layerThick * layerZCoord2;
-        answer.at(4, 6) += layerMatrix.at(1, 6) * layerWidth * layerThick * layerZCoord2;
+        answer.at(4, 6) += layerMatrix.at(1, 5) * layerWidth * layerThick * layerZCoord2;
 
         answer.at(5, 4) += layerMatrix.at(2, 1) * layerWidth * layerThick * layerZCoord2;
         answer.at(5, 5) += layerMatrix.at(2, 2) * layerWidth * layerThick * layerZCoord2;
-        answer.at(5, 6) += layerMatrix.at(2, 6) * layerWidth * layerThick * layerZCoord2;
+        answer.at(5, 6) += layerMatrix.at(2, 5) * layerWidth * layerThick * layerZCoord2;
 
-        answer.at(6, 4) += layerMatrix.at(6, 1) * layerWidth * layerThick * layerZCoord2;
-        answer.at(6, 5) += layerMatrix.at(6, 2) * layerWidth * layerThick * layerZCoord2;
-        answer.at(6, 6) += layerMatrix.at(6, 6) * layerWidth * layerThick * layerZCoord2;
+        answer.at(6, 4) += layerMatrix.at(5, 1) * layerWidth * layerThick * layerZCoord2;
+        answer.at(6, 5) += layerMatrix.at(5, 2) * layerWidth * layerThick * layerZCoord2;
+        answer.at(6, 6) += layerMatrix.at(5, 5) * layerWidth * layerThick * layerZCoord2;
 
         // 3) shear terms qx, qy
-        answer.at(7, 7) += layerMatrix.at(5, 5) * layerWidth * layerThick;
-        answer.at(7, 8) += layerMatrix.at(5, 4) * layerWidth * layerThick;
-        answer.at(8, 7) += layerMatrix.at(4, 5) * layerWidth * layerThick;
-        answer.at(8, 8) += layerMatrix.at(4, 4) * layerWidth * layerThick;
+        answer.at(7, 7) += layerMatrix.at(4, 4) * layerWidth * layerThick;
+        answer.at(7, 8) += layerMatrix.at(4, 3) * layerWidth * layerThick;
+        answer.at(8, 7) += layerMatrix.at(3, 4) * layerWidth * layerThick;
+        answer.at(8, 8) += layerMatrix.at(3, 3) * layerWidth * layerThick;
     }
 }
 

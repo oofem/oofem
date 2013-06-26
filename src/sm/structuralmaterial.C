@@ -2669,6 +2669,17 @@ StructuralMaterial :: giveReducedSymVectorForm(FloatArray &answer, const FloatAr
 
 
 void
+StructuralMaterial :: giveFullSymMatrixForm(FloatMatrix &answer, const FloatMatrix &red, MaterialMode matMode)
+{
+    IntArray indx;
+    int size = StructuralMaterial :: giveVoigtSymVectorMask(indx, matMode);
+    answer.resize(size, size);
+    answer.zero();
+    answer.assemble(red, indx, indx);
+}
+
+
+void
 StructuralMaterial :: giveReducedMatrixForm(FloatMatrix &answer, const FloatMatrix &full, MaterialMode matMode)
 {
     IntArray indx;

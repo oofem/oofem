@@ -1753,9 +1753,9 @@ MPlasticMaterial2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     // calling GiveMaterailStiffenssMatrix, which imposes constrains correctly.
     if ( mode == TangentStiffness ) {
         if ( rmType == mpm_ClosestPoint ) {
-            this->giveConsistentStiffnessMatrix(answer, FullForm, mode, gp, atTime);
+            this->giveConsistentStiffnessMatrix(answer, ReducedForm, mode, gp, atTime);
         } else {
-            this->giveElastoPlasticStiffnessMatrix(answer, FullForm, mode, gp, atTime);
+            this->giveElastoPlasticStiffnessMatrix(answer, ReducedForm, mode, gp, atTime);
         }
     } else {
         this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);

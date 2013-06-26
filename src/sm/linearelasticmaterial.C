@@ -106,7 +106,7 @@ LinearElasticMaterial :: give2dPlateStiffMtrx(FloatMatrix &answer,
         _error(" Give2dPlateStiffMtrx : no SimpleCrossSection");
     }
 
-    this->givePlaneStressStiffMtrx(mat3d, FullForm, rMode, gp, tStep);
+    this->givePlaneStressStiffMtrx(mat3d, ReducedForm, rMode, gp, tStep);
     thickness = crossSection->give(CS_Thickness);
     thickness3 = thickness * thickness * thickness;
 
@@ -120,9 +120,9 @@ LinearElasticMaterial :: give2dPlateStiffMtrx(FloatMatrix &answer,
             }
         }
 
-        answer.at(3, 3) = mat3d.at(6, 6) * thickness3 / 12.;
+        answer.at(3, 3) = mat3d.at(3, 3) * thickness3 / 12.;
 
-        answer.at(4, 4) = mat3d.at(6, 6) * thickness * ( 5. / 6. );
+        answer.at(4, 4) = mat3d.at(3, 3) * thickness * ( 5. / 6. );
 
         answer.at(5, 5) = answer.at(4, 4);
     } else {
@@ -135,8 +135,8 @@ LinearElasticMaterial :: give2dPlateStiffMtrx(FloatMatrix &answer,
             }
         }
 
-        answer.at(6, 6) = mat3d.at(6, 6) * thickness3 / 12.;
-        answer.at(7, 7) = mat3d.at(6, 6) * thickness * ( 5. / 6. );
+        answer.at(6, 6) = mat3d.at(3, 3) * thickness3 / 12.;
+        answer.at(7, 7) = mat3d.at(3, 3) * thickness * ( 5. / 6. );
         answer.at(8, 8) = answer.at(7, 7);
     }
 }
@@ -154,7 +154,6 @@ LinearElasticMaterial :: give2dPlaneStressRotStiffMtrx(FloatMatrix &answer,
 {
     MaterialMode mode = gp->giveMaterialMode();
     FloatMatrix mat;
-    int i, j;
 
     if ( mode != _PlaneStressRot ) {
         _error("Give2dPlaneStressRotStiffMtrx : unsupported mode");
@@ -166,8 +165,8 @@ LinearElasticMaterial :: give2dPlaneStressRotStiffMtrx(FloatMatrix &answer,
         answer.resize(4, 4);
         answer.zero();
 
-        for ( i = 1; i <= 3; i++ ) {
-            for ( j = 1; j <= 3; j++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
+            for ( int j = 1; j <= 3; j++ ) {
                 answer.at(i, j) = mat.at(i, j);
             }
         }
@@ -177,8 +176,8 @@ LinearElasticMaterial :: give2dPlaneStressRotStiffMtrx(FloatMatrix &answer,
         answer.resize(7, 7);
         answer.zero();
 
-        for ( i = 1; i <= 2; i++ ) {
-            for ( j = 1; j <= 2; j++ ) {
+        for ( int i = 1; i <= 2; i++ ) {
+            for ( int j = 1; j <= 2; j++ ) {
                 answer.at(i, j) = mat.at(i, j);
             }
         }
@@ -201,10 +200,9 @@ LinearElasticMaterial :: give3dShellStiffMtrx(FloatMatrix &answer,
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    SimpleCrossSection *crossSection =  dynamic_cast< SimpleCrossSection * >( gp->giveCrossSection() );
+    SimpleCrossSection *crossSection = dynamic_cast< SimpleCrossSection * >( gp->giveCrossSection() );
     FloatMatrix mat3d;
     double thickness3, thickness;
-    int i, j;
 
     if ( mode != _3dShell ) {
         _error("Give3dShellMaterialStiffness : unsupported mode");
@@ -214,7 +212,7 @@ LinearElasticMaterial :: give3dShellStiffMtrx(FloatMatrix &answer,
         _error(" Give2dBeamStiffMtrx : no SimpleCrossSection");
     }
 
-    this->givePlaneStressStiffMtrx(mat3d, FullForm, rMode, gp, tStep);
+    this->givePlaneStressStiffMtrx(mat3d, ReducedForm, rMode, gp, tStep);
     thickness = crossSection->give(CS_Thickness);
     thickness3 = thickness * thickness * thickness;
 
@@ -222,21 +220,21 @@ LinearElasticMaterial :: give3dShellStiffMtrx(FloatMatrix &answer,
     answer.zero();
 
 
-    for ( i = 1; i <= 2; i++ ) {
-        for ( j = 1; j <= 2; j++ ) {
+    for ( int i = 1; i <= 2; i++ ) {
+        for ( int j = 1; j <= 2; j++ ) {
             answer.at(i, j) = mat3d.at(i, j) * thickness;
             answer.at(i + 3, j + 3) = mat3d.at(i, j) * thickness3 / 12.0;
         }
     }
 
-    answer.at(3, 1) = mat3d.at(6, 1) * thickness;
-    answer.at(3, 2) = mat3d.at(6, 2) * thickness;
-    answer.at(3, 3) = mat3d.at(6, 6) * thickness;
-    answer.at(6, 4) = mat3d.at(6, 1) * thickness3 / 12.0;
-    answer.at(6, 5) = mat3d.at(6, 2) * thickness3 / 12.0;
-    answer.at(6, 6) = mat3d.at(6, 6) * thickness3 / 12.0;
+    answer.at(3, 1) = mat3d.at(3, 1) * thickness;
+    answer.at(3, 2) = mat3d.at(3, 2) * thickness;
+    answer.at(3, 3) = mat3d.at(3, 3) * thickness;
+    answer.at(6, 4) = mat3d.at(3, 1) * thickness3 / 12.0;
+    answer.at(6, 5) = mat3d.at(3, 2) * thickness3 / 12.0;
+    answer.at(6, 6) = mat3d.at(3, 3) * thickness3 / 12.0;
 
-    answer.at(7, 7) = mat3d.at(6, 6) * thickness * ( 5. / 6. );
+    answer.at(7, 7) = mat3d.at(3, 3) * thickness * ( 5. / 6. );
     answer.at(8, 8) = answer.at(7, 7);
 }
 

@@ -577,8 +577,7 @@ PerfectlyPlasticMaterial :: computeTrialStressIncrement(FloatArray &answer, Gaus
         return;
     }
 
-    this->giveEffectiveMaterialStiffnessMatrix(materialMatrix, TangentStiffness, gp,
-                                               atTime);
+    this->giveEffectiveMaterialStiffnessMatrix(materialMatrix, TangentStiffness, gp, atTime);
     answer.beProductOf(materialMatrix, strainIncrement);
 }
 

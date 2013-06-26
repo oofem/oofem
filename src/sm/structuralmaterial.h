@@ -339,10 +339,13 @@ public:
     static void giveReducedVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode);
     /// Converts the full unsymmetric Voigt vector (2nd order tensor) to reduced form.
     static void giveReducedSymVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode);
-    /// Converts the full symmetric Voigt matrix (4th order tensor) to reduced form.
-    static void giveReducedMatrixForm(FloatMatrix &answer, const FloatMatrix &vec, MaterialMode matMode);
+
     /// Converts the full unsymmetric Voigt matrix (4th order tensor) to reduced form.
-    static void giveReducedSymMatrixForm(FloatMatrix &answer, const FloatMatrix &vec, MaterialMode matMode);
+    static void giveFullSymMatrixForm(FloatMatrix &answer, const FloatMatrix &red, MaterialMode matMode);
+    /// Converts the full symmetric Voigt matrix (4th order tensor) to reduced form.
+    static void giveReducedMatrixForm(FloatMatrix &answer, const FloatMatrix &full, MaterialMode matMode);
+    /// Converts the full unsymmetric Voigt matrix (4th order tensor) to reduced form.
+    static void giveReducedSymMatrixForm(FloatMatrix &answer, const FloatMatrix &full, MaterialMode matMode);
 
     /**
      * Method for subtracting from reduced space strain vector its stress-independent parts
