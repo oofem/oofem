@@ -54,10 +54,10 @@
 */
 namespace oofem {
 class Domain;
-//class EnrichmentItem;
 class IntArray;
 class Element;
-//class DataStream;
+
+class FractureManager;
 
 /**
  * This class manages the fracture mechanics part
@@ -67,7 +67,8 @@ class Element;
 #include "enumitem.h"
 #define FailureCriteria_DEF \
     ENUM_ITEM_WITH_VALUE(FC_Undefined, 0) \
-    ENUM_ITEM_WITH_VALUE(FC_MaxShearStress, 1) 
+    ENUM_ITEM_WITH_VALUE(FC_MaxShearStress, 1) \
+    ENUM_ITEM_WITH_VALUE(FC_DamagedNeighborCZ, 2) 
 
 enum FailureCriteriaType {
     FailureCriteria_DEF
@@ -87,15 +88,16 @@ class FailureCriteria
 {
 private:    
     
-
+    FractureManager *fMan;
     FailureCriteriaType type; 
     bool failedFlag;
     std::vector<bool> failedFlags;
 public:
-    FailureCriteria(FailureCriteriaType type)
+    FailureCriteria(FailureCriteriaType type, FractureManager *fMan)
     { 
         this->type = type;
         this->failedFlag = false;
+        this->fMan = fMan;
     };
     ~FailureCriteria(){}; // must destroy object correctly
 
@@ -107,7 +109,7 @@ public:
 
     FailureCriteriaType giveType() { return this->type; }
     bool evaluateFailureCriteria();
-    bool evaluateFCQuantities() { return false; };
+    bool evaluateFCQuantities( Element *el); 
 
     bool hasFailed() { return failedFlag; }
     bool hasFailed( int i) { return failedFlags.at(i-1); }

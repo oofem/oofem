@@ -77,9 +77,14 @@ StaticFracture :: solveYourselfAt(TimeStep *tStep)
     
         this->fMan = new FractureManager( this->giveDomain(1) );
         this->fMan->failureCriterias = new AList< FailureCriteria >(1); // list of all the criterias to evaluate
-        FailureCriteria *fc = new FailureCriteria(FC_MaxShearStress);
+        //FailureCriteria *fc = new FailureCriteria(FC_MaxShearStress);
+        //FailureCriteria *fc = new FailureCriteria(FC_DamagedNeighborCZ);
+        
+        FailureCriteria *fc = new FailureCriteria(FC_DamagedNeighborCZ, this->fMan);
+        
+        
         fc->thresholds.resize(1);
-        fc->thresholds.at(1) = 000.0;
+        fc->thresholds.at(1) = 0.0;
         this->fMan->failureCriterias->put(1, fc);
     }
 

@@ -94,7 +94,7 @@ protected:
     static bool sortFunc(std::pair<int, double> a, std::pair<int, double> b) {
         return a.second < b.second;
     }
-    IntegrationRule **czIntegrationRulesArray;
+
     virtual void updateYourself(TimeStep *tStep);
     virtual void postInitialize();
     void computeOrderingArray(IntArray &orderingArray, IntArray &activeDofsArray, int enrichmentDomainNumber, SolutionField field);
@@ -140,7 +140,8 @@ public:
     Shell7BaseXFEM(int n, Domain *d);   
     virtual ~Shell7BaseXFEM() {};		
     virtual int checkConsistency();
-
+    IntegrationRule **czIntegrationRulesArray;
+    void giveMaxCZDamages(FloatArray &answer);
     virtual const char *giveClassName()  const { return "Shell7BaseXFEM"; }
     //virtual classType giveClassID()      const { return Shell7BaseXFEMClass; }
     virtual Interface *giveInterface(InterfaceType it);
@@ -150,6 +151,7 @@ public:
     void discGiveDofManDofIDMask(int inode,  int enrichmentdomainNumber, IntArray &answer) const;
     virtual int giveNumberOfDofs();
     bool hasCohesiveZone();
+    IntegrationRule giveCZIntegrationRulesArray() { return **czIntegrationRulesArray; };
 };
 
 

@@ -145,6 +145,13 @@ Tr2Shell7XFEM :: computeGaussPoints()
         this->numberOfIntegrationRules = layeredCS->giveNumberOfLayers();
         this->numberOfGaussPoints = layeredCS->giveNumberOfLayers()*nPointsTri*layeredCS->giveNumIntegrationPointsInLayer();
         layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
+
+        // Thickness integration for stress recovery
+        specialIntegrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
+        specialIntegrationRulesArray [ 0 ]->SetUpPointsOnLine(layeredCS->giveNumIntegrationPointsInLayer(), _3dMat);
+
+
+
     }
 
 }

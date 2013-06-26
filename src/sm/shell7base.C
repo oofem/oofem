@@ -2469,11 +2469,9 @@ Shell7Base :: giveCompositeExportData(CompositeCell &compositeCell, IntArray &pr
 
         for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
             InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);;
+
             this->recoverShearStress(tStep);
             recoverValuesFromIP(el.nodeVars[nodeVarNum], layer, type, tStep);
-
-            
-
             //ZZNodalRecoveryMI_recoverValues(el.nodeVars[nodeVarNum], layer, type, tStep);
 
             nodeVarNum++;
@@ -2567,7 +2565,8 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
     FloatArray lCoords, dS, Sold;
     FloatMatrix B, Smat(2,6); // 2 stress components * num of in plane ip
     Smat.zero();
-
+    FloatArray Tcon(6), Trec(6);  Tcon.zero(); Trec.zero();
+    
      for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
         this->recoverValuesFromIP(recoveredValues, layer, IST_StressTensor, tStep);
@@ -2601,16 +2600,25 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
                 Smat.at(1,j+1) += dS.at(1); // add increment from each level
                 Smat.at(2,j+1) += dS.at(2);
 
+                //Tcon.at(j+1) += Sold.at(5)*dz;
+
                 // Replace old stresses with  - this should probably not be done as it may affect the convergence in a nonlinear case
                 Sold.at(5) = Smat.at(1,j+1); // S_xz
                 Sold.at(4) = Smat.at(2,j+1); // S_yz
+
+
                 status->letStressVectorBe(Sold);
+                //Trec.at(j+1) += Sold.at(5)*dz;
             }
         }
 
 
     }
 
+    //printf("Shear force from continuum stress [N/M] \n");
+    //Tcon.printYourself();
+    //printf("Shear force from recovered stress [N/M] \n");
+    //Trec.printYourself();
 }
 
 
@@ -2626,9 +2634,12 @@ Shell7Base :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &ans
     std::vector<FloatArray> nodes;
     giveFictiousNodeCoordsForExport(nodes, layer);
 
+    //int VTKWedge2EL [] = { 3, 1, 2, 6, 4, 5, 9, 7, 8, 12, 10, 11, 15, 13, 14 };
+    int VTKWedge2EL [] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
     FloatArray *coords[numNodes];
     for ( int i = 1; i <= numNodes; i++ ) {
-        int pos = i;
+        //int pos = i;
+        int pos = VTKWedge2EL[ i-1 ];
         coords[ i - 1 ] = new FloatArray();
         coords[ i - 1 ] = &nodes[ pos - 1];
     }
@@ -2780,8 +2791,6 @@ Shell7Base :: computeInterLaminarStressesAt(int interfaceNum, TimeStep *tStep, s
         vSMean = 0.5 * ( vSUpper + vSLower );
         SMean.beMatrixFormOfStress(vSMean);
         stressVec.beProductOf(SMean,nCov);
-        //interLamStresses.at(i-1).resize( vSUpper.giveSize() );
-        //interLamStresses.at(i-1) = 0.5 * ( vSUpper + vSLower );
         interLamStresses.at(i-1).resize( stressVec.giveSize() );
         interLamStresses.at(i-1) = stressVec;
     }

@@ -53,6 +53,11 @@
 #include "xfemmanager.h"
 #include "enrichmentdomain.h"
 #include "classfactory.h"
+
+
+
+#include "shell7basexfem.h"
+
 namespace oofem {
 FractureManager :: FractureManager(Domain *domain)
 {
@@ -157,8 +162,12 @@ FractureManager :: evaluateFailureCriteria(FailureCriteria *fc, Element *el, Tim
     // reset fc
     fc->quantities.clear();
 
+
+
+
+
     // Compute fc quantities
-    if ( ! fc->evaluateFCQuantities() ) { // cannot evaluate on its own, ask element for implementation through an interface
+    if ( ! fc->evaluateFCQuantities(el) ) { // cannot evaluate on its own, ask element for implementation through an interface
         FailureModuleElementInterface *fmInterface =
             dynamic_cast< FailureModuleElementInterface * >( el->giveInterface(FailureModuleElementInterfaceType) );
         if ( fmInterface ) { // if element supports the failure module interface
@@ -170,6 +179,56 @@ FractureManager :: evaluateFailureCriteria(FailureCriteria *fc, Element *el, Tim
     fc->evaluateFailureCriteria();
 
      
+}
+
+
+bool
+FailureCriteria :: evaluateFCQuantities(Element *el)
+{
+    
+    IntArray neighbors;
+    IntArray elements(1);
+    ConnectivityTable *conTable = el->giveDomain()->giveConnectivityTable();
+    elements.at(1) = el->giveNumber();
+    conTable->giveElementNeighbourList(neighbors, elements); 
+    FloatArray damageArray;
+
+    switch ( this->giveType() ) {
+
+    case FC_DamagedNeighborCZ:
+        // Ugly code specifically for Shell7BaseXFEM
+        /*
+        Go through the neighbors of the element and check for each layer if the 
+        corresponding cz is damaged (if applicable)
+
+        */
+        this->quantities.resize( neighbors.giveSize() );
+
+        for ( int i = 1; i <= neighbors.giveSize(); i++ ) {
+
+            this->quantities[ i-1 ].resize(1);
+
+            Shell7BaseXFEM *neighbor = 
+                dynamic_cast< Shell7BaseXFEM * > (this->fMan->giveDomain()->giveElement( neighbors.at(i) ));
+            if ( neighbor ) {
+                 if ( neighbor->hasCohesiveZone() ) {
+
+                     neighbor->giveMaxCZDamages(damageArray); // damage parameter for each interface
+                     this->quantities[ i-1 ][0] = damageArray;
+                     //neighbor->giveMaxCZDamages(this->quantities[ i-1 ]);
+                     //IntegrationRule *iRuleL = neighbor->czIntegrationRulesArray[1]; 
+
+                 }
+            }
+
+        }
+ 
+   
+
+        return true;
+    default:
+        return false;
+    }
 }
 
 void 
@@ -211,7 +270,8 @@ FailureCriteria :: evaluateFailureCriteria()
             for ( int k = 1; k <= values.giveSize(); k++ ) {
                 // assumes there is only one value to compare against which is generally 
                 // not true, e.g. tension/compression thresholds
-                if ( values.at(k) >= this->thresholds.at(k) ) {
+                //if ( values.at(k) >= this->thresholds.at(k) ) {
+                if ( values.at(k) > this->thresholds.at(1) ) {
                     //this->failedFlag = true;
                     failedFlags.at(i-1) = true;
                 }

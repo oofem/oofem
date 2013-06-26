@@ -470,6 +470,37 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
 }
 
 
+void
+Shell7BaseXFEM :: giveMaxCZDamages(FloatArray &answer)
+{
+
+    int numZones = this->layeredCS->giveNumberOfLayers() - 1;
+    answer.resize(numZones);
+    
+    FloatArray ipValues, vales;
+    for ( int i = 0; i < numZones; i++ ) {
+        IntegrationRule *iRuleL = czIntegrationRulesArray [ i ];
+        int numIP = iRuleL->giveNumberOfIntegrationPoints();
+        //ipValues.resize(numIP);
+        double max = 0.0;    
+        for ( int j = 0; j < iRuleL->giveNumberOfIntegrationPoints(); j++ ) {
+            IntegrationPoint *ip = iRuleL->getIntegrationPoint(j);
+            
+            //this->layeredCS->giveIPValue(ipValues, ip, type, tStep);
+            //StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * > ( ip->giveMaterialStatus(1) ); 
+            double val = 0.0;
+            if ( val > max ) {
+                max = val;
+            }
+
+        }
+        answer(i) = max;
+    }
+
+    
+
+}
+
 
 void
 Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, int useUpdatedGpRecord, 
