@@ -368,7 +368,7 @@ NonlocalMaterialExtensionInterface :: computeWeightFunction(double distance)
     }
 
     double aux = distance / this->cl;
-    double iwf = giveIntegralOfWeightFunction(2); // 2D formulation assumed !!!!
+    double iwf = giveIntegralOfWeightFunction(this->domain->giveNumberOfSpatialDimensions()); 
 
     switch ( weightFun ) {
     case WFT_Bell: // Bell shaped function (quartic spline)
