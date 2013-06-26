@@ -266,7 +266,7 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
     this->computeGreenLagrangeStrain(E, F);
     ep.beReducedVectorFormOfStrain(Ep);
     e.beReducedVectorFormOfStrain(E);
-    answer.beReducedVectorForm(S);
+    answer.beReducedVectorFormOfStress(S);
 
     status->setTrialStressVol(mi);
     status->letTempLeftCauchyGreenBe(trialLeftCauchyGreen);

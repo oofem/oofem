@@ -851,7 +851,7 @@ Shell7Base :: computeCauchyStressVector(FloatArray &answer, GaussPoint *gp, Time
     temp.beProductTOf(S,F); 
     sigma.beProductOf(F,temp);
     sigma.times( 1.0/F.giveDeterminant() );
-    answer.beReducedVectorForm(sigma);
+    answer.beReducedVectorFormOfStress(sigma);
 }
 
 

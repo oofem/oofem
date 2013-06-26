@@ -476,7 +476,7 @@ StructuralMaterial :: convert_P_2_S(FloatArray &answer, const FloatArray &reduce
     invF.beInverseOf(F);
     S.beProductOf(invF,P);
     FloatArray vS;
-    vS.beReducedVectorForm(S); // 6 components 
+    vS.beReducedVectorFormOfStress(S); // 6 components 
     StructuralMaterial :: giveReducedSymVectorForm(answer, vS, matMode); // convert back to reduced size
 }
 
