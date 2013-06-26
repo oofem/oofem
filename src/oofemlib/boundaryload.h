@@ -115,6 +115,7 @@ public:
     enum BL_CoordSystType {
         BL_GlobalMode, ///< Global mode i.e. load is specified in global c.s.
         BL_LocalMode, ///< Local entity (edge or surface) coordinate system.
+        BL_UpdatedGlobalMode, ///< Load is specified in global c.s. and follows the deformation (only supported on el. level)
     };
 
     /**

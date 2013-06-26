@@ -88,9 +88,9 @@ protected:
     void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
     void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
 
-    virtual double computeVolumeAround(GaussPoint *gp);
+    //virtual double computeVolumeAround(GaussPoint *gp);
     virtual double computeVolumeAroundLayer(GaussPoint *mastergp, int layer);
-    virtual double computeAreaAround(GaussPoint *gp);
+    virtual double computeAreaAround(GaussPoint *gp, double xi);
 
     virtual void computeGaussPoints();
     virtual void giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords);
@@ -100,10 +100,6 @@ protected:
 
     virtual FEInterpolation *giveInterpolation() const;
 
-    // VTK
-    void vtkGiveFictiousNodeCoords(FloatArray nodeCoords[15], int layer);
-    void vtkGiveUpdatedFictiousNodeCoords(FloatArray nodeCoords[15], int layer, TimeStep *tStep);
-    void exportPrimVarAs(UnknownType valID, int regionDofMans, int ireg, FILE *stream, TimeStep *tStep);
 
 public:
     Tr2Shell7(int n, Domain *d);        // constructor
@@ -118,6 +114,9 @@ public:
     //virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_Composite; }
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }     // write new wedge-like type 'layeredWedge'
+
+    //friend class Tr2Shell7XFEM;
+
 };
 } // end namespace oofem
 #endif

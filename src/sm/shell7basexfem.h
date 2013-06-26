@@ -35,12 +35,15 @@
 #ifndef Shell7BaseXFEM_h
 #define Shell7BaseXFEM_h
 
-//#include "eleminterpmapperinterface.h"
-//#include "nodalaveragingrecoverymodel.h"
-//#include "layeredcrosssection.h"
-//#include "nlstructuralelement.h"
 #include "shell7base.h"
 #include "xfemelementinterface.h"
+
+
+///@name Input fields for el
+//@{
+#define _IFT_Shell7BaseXFEM_CohesiveZoneMaterial "czmaterial"
+//@}
+
 
 namespace oofem {
 
@@ -59,8 +62,9 @@ class EnrichmentItem;
 class Shell7BaseXFEM : public Shell7Base, public XfemElementInterface
 {
 protected:
-
-    virtual double giveGlobalZcoord(GaussPoint *gp);
+    Material *czMat; // cohesive zone material
+    int czMatNum;
+    virtual double giveGlobalZcoord(double xi);
     std::list< std::pair<int, double> > delaminationXiCoordList;
     void setupDelaminationXiCoordList();
     void setupDelaminationXiCoordsAtGP();
@@ -70,9 +74,10 @@ protected:
     int giveDelaminationGroupAt(double zeta); 
     void giveDelaminationGroupXiLimits(int &dGroup, double &zTop, double &zBottom);
     double giveDelaminationGroupMidXi(int dGroup);
-
+    void computeDelaminatedInterfaceList(IntArray &list);
     XfemManager *xMan;
     
+    // remove
     static bool __initializedFieldDofId;
     static IntArray dofId_Midplane;
     static IntArray dofId_Director;
@@ -89,53 +94,62 @@ protected:
     static bool sortFunc(std::pair<int, double> a, std::pair<int, double> b) {
         return a.second < b.second;
     }
+    IntegrationRule **czIntegrationRulesArray;
+    virtual void updateYourself(TimeStep *tStep);
+    virtual void postInitialize();
+    void computeOrderingArray(IntArray &orderingArray, IntArray &activeDofsArray, int enrichmentDomainNumber, SolutionField field);
     
+   
+    virtual void evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcon, FloatArray &solVec);
+    void discGiveInitialSolutionVector(FloatArray &answer, IntArray &eiDofIdArray); // should be replaced with general function
+    void computeDiscGeneralizedStrainVector(FloatArray &dGenEps, FloatArray &lCoords, EnrichmentItem *ei, int enrichmentDomainNumber, TimeStep *tStep);
 
-
-    virtual void evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, FloatArray &genEpsC);
-    //void discEvalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &gd1, FloatArray &gd2, FloatArray &gd3, FloatArray &genEps);
-    //void discGiveGeneralizedStrainComponents(FloatArray &genEps, FloatArray &dxdxi1, FloatArray &dxdxi2, FloatArray &dmdxi1, 
-    //     FloatArray &dmdxi2, FloatArray &m);
-    //void discComputeGeneralizedStrainVector(FloatArray &dGenEps, const FloatArray &dSolVec, const FloatMatrix &B11,
-    //     const FloatMatrix &B22, const FloatMatrix &B32);
-    void discGiveInitialSolutionVector(FloatArray &answer, IntArray &eiDofIdArray);
-    void computeDiscGeneralizedStrainVector(FloatArray &dGenEps, GaussPoint *gp, EnrichmentItem *ei, int enrichmentDomainNumber, TimeStep *tStep);
-
-    // compute solution vector
-    //void temp_computeVectorOf(IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer);
+    // Internal forces
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
     void discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, int useUpdatedGpRecord,  
           EnrichmentItem *ei, int enrichmentDomainNumber);
-
-    void computeOrderingArray(IntArray &orderingArray, IntArray &activeDofsArray, int enrichmentDomainNumber, SolutionField field);
-
+    void computeCohesiveForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, int useUpdatedGpRecord,  
+          Delamination *dei, int enrichmentDomainNumber);
 
     // Tangent matrices
+    void computeLambdaGMatricesDis(FloatMatrix lambdaD [ 3 ], double zeta);
+    void computeLambdaNMatrixDis(FloatMatrix &lambda_xd, double zeta);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    virtual void discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, FloatArray &solVecI, FloatArray &solVecJ, MatResponseMode rMode, TimeStep *tStep,
-         EnrichmentItem *ei, int enrichmentDomainNumberI, int enrichmentDomainNumberJ);
+    virtual void discComputeBulkTangentMatrix(FloatMatrix &KCC, FloatMatrix &KCD, FloatMatrix &KDD, IntegrationPoint *ip, Material *mat, int layer, TimeStep *tStep);
 
+
+    void computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep);
+    void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep, FloatArray &solVecD, Delamination *dei, int enrichmentDomainNumber);
+
+    void computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix &KCD, FloatMatrix &KDD, IntegrationPoint *ip, Load *load, const int iSurf, TimeStep *tStep);
+
+    // External loads
+    virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode);
+    virtual void computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
+                                         int iSurf, TimeStep *tStep, ValueModeType mode);
 
     // Mass matrices
     void computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep); 
 
     // VTK
-    void vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
+    virtual void vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
 
+    IntArray DelaminatedInterfaceList;
+     void computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep);
 public:
-    // constructor
-    Shell7BaseXFEM(int n, Domain *d);   // : Shell7Base(n, d),  XfemElementInterface(this);
-    virtual ~Shell7BaseXFEM() {};		// destructor -> declaring as virtual will make each subclass call their respective destr.
+    Shell7BaseXFEM(int n, Domain *d);   
+    virtual ~Shell7BaseXFEM() {};		
     virtual int checkConsistency();
 
     virtual const char *giveClassName()  const { return "Shell7BaseXFEM"; }
-    virtual classType giveClassID()      const { return Shell7BaseXFEMClass; }
+    //virtual classType giveClassID()      const { return Shell7BaseXFEMClass; }
     virtual Interface *giveInterface(InterfaceType it);
     
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     void discGiveDofManDofIDMask(int inode,  int enrichmentdomainNumber, IntArray &answer) const;
     virtual int giveNumberOfDofs();
+    bool hasCohesiveZone();
 };
 
 

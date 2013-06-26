@@ -39,6 +39,7 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "interface.h"
+#include "gaussintegrationrule.h"
 
 ///@name Input fields for LayeredCrossSection
 //@{
@@ -162,6 +163,7 @@ public:
     double giveMidSurfaceXiCoordFromBottom() {
         return this->midSurfaceXiCoordFromBottom;
     }
+    void giveInterfaceXiCoords(FloatArray &answer);
 
     // identification and auxiliary functions
     virtual const char *giveInputRecordName() const { return _IFT_LayeredCrossSection_Name; }
@@ -176,8 +178,10 @@ public:
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
 
 
-    void mapLayerGpCoordsToShellCoords(LayeredCrossSection *layeredCS, IntegrationRule **layerIntegrationRulesArray);
+    void mapLayerGpCoordsToShellCoords(IntegrationRule **&layerIntegrationRulesArray);
 
+    void setupLayeredIntegrationRule(IntegrationRule **&layerIntegrationRulesArray, Element *el, int numInPlanePoints);
+    
 #ifdef __PARALLEL_MODE
     int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
     {
@@ -253,5 +257,29 @@ public:
     virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
         GaussPoint *slaveGp, TimeStep *tStep) {} ;
 };
+
+class LayeredIntegrationRule : public IntegrationRule
+{
+    public:
+    LayeredIntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic = false);
+    LayeredIntegrationRule(int n, Element *e);
+    virtual ~LayeredIntegrationRule();
+
+    //virtual classType giveClassID() const { return LayeredIntegrationRuleClass; }
+    virtual const char *giveClassName() const { return "LayeredIntegrationRule"; }
+    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+
+    //virtual int getRequiredNumberOfIntegrationPoints(integrationDomain dType, int approxOrder);
+
+    // Stores the ip numbers of the points lying on the lower and upper surface of the element.
+    // Thus they will correspond to points lying on the interface between layers.
+    IntArray lowerInterfacePoints, upperInterfacePoints;
+
+    //virtual int SetUpPointsOnLine(int, MaterialMode);      // could be used for beams
+    //virtual int SetUpPointsOnCube(int, MaterialMode mode); // could be used for plates/shells/solids
+    virtual int SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, MaterialMode mode);
+};
+
+
 } // end namespace oofem
 #endif // layeredcrosssection_h

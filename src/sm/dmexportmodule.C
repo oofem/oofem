@@ -39,12 +39,16 @@
 #include "dof.h"
 #include "classfactory.h"
 
+#include "structengngmodel.h"// JB
+
 namespace oofem {
 
 REGISTER_ExportModule( DofManExportModule )
 
 DofManExportModule :: DofManExportModule(int n, EngngModel *e) : ExportModule(n, e)
-{}
+{
+    this->dofManList.resize(0);
+}
 
 
 DofManExportModule :: ~DofManExportModule()
@@ -54,6 +58,12 @@ DofManExportModule :: ~DofManExportModule()
 IRResultType
 DofManExportModule :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+
+    // Read in dofMan's to export - defaults to all
+    IR_GIVE_OPTIONAL_FIELD(ir, this->dofManList, _IFT_DofManExportModule_dmlist);
+    
     ExportModule :: initializeFrom(ir);
     return IRRT_OK;
 }
@@ -67,33 +77,76 @@ DofManExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     }
 
     FILE *stream = this->giveOutputStream(tStep);
-    fprintf(stream, "%% DofMan DataFile Version 1.1\n");
+    fprintf(stream, "%% DofMan DataFile Version 1.1\n"); // Version 1.1 ??
     fprintf( stream, "%% Output for time %f\n", tStep->giveTargetTime() );
 
     DofManager *dm;
     double x, y, z, displacement;
-    int idof, idm, ndofs;
     Dof *dof;
+    int domainIndex = 1;
+    Domain *d  = emodel->giveDomain(domainIndex);
+    FloatArray reactions;
+    
+    
+    IntArray dofManMap, dofMap, eqnMap;
+    StructuralEngngModel *strEngMod = dynamic_cast<StructuralEngngModel*>(emodel); 
+    int numRestrDofs = 0;
+    if ( strEngMod ) {
+        strEngMod->buildReactionTable(dofManMap, dofMap, eqnMap, tStep, domainIndex);
+        strEngMod->computeReaction(reactions, tStep, 1);
+        numRestrDofs = strEngMod->giveNumberOfDomainEquations(domainIndex, EModelDefaultPrescribedEquationNumbering());
+    }
 
-    Domain *d  = emodel->giveDomain(1);
-    int ndm = d->giveNumberOfDofManagers();
+    
 
-    for ( idm = 1; idm <= ndm; idm++ ) {
-        dm = d->giveDofManager(idm);
+    int nTotaldm = d->giveNumberOfDofManagers();
+    int ndmInList = this->dofManList.giveSize();
+    
+    int ndm = (ndmInList > 0) ? ndmInList : nTotaldm;
+    /*
+    fprintf(stream, "%% Primary fields \n");
+    for ( int idm = 1; idm <= ndm; idm++ ) {
+        if ( ndm < nTotaldm ) {
+            dm = d->giveDofManager( this->dofManList.at(idm) );
+        } else {
+            dm = d->giveDofManager(idm);
+        }
         x = dm->giveCoordinate(1);
         y = dm->giveCoordinate(2);
         z = dm->giveCoordinate(3);
         fprintf(stream, "%d %g %g %g ", dm->giveNumber(), x, y, z);
-        ndofs = dm->giveNumberOfDofs();
-        for ( idof = 1; idof <= ndofs; idof++ ) {
+        int ndofs = dm->giveNumberOfDofs();
+        for ( int idof = 1; idof <= ndofs; idof++ ) {
             dof = dm->giveDof(idof);
             displacement = dof->giveUnknown(VM_Total, tStep);
             fprintf(stream, " %g", displacement);
         }
+        fprintf(stream, "\n");
+    }
+    */
 
+    fprintf(stream, "%% Reaction forces \n");
+    for ( int idm = 1; idm <= ndm; idm++ ) {
+        int dManNum = this->dofManList.at(idm);
+        dm = d->giveDofManager( dManNum );
+        fprintf(stream, "%d", dManNum);
+
+        for ( int i = 1; i <= numRestrDofs; i++ ) {
+            if ( dofManMap.at(i) == dManNum ) { // dofman has reaction
+                //double reaction =  reactions.at( eqnMap.at(i) ); 
+                double reaction =  reactions.at( i ); 
+                fprintf(stream, " %g", reaction);
+            }
+        }
         fprintf(stream, "\n");
     }
 
+    /*
+    for ( int i = 1; i <= numRestrDofs; i++ ) {   
+        double reaction =  reactions.at( i ); 
+        fprintf(stream, " %g", reaction);
+    }
+    */
     fclose(stream);
 }
 

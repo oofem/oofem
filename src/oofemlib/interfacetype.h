@@ -79,7 +79,9 @@ enum InterfaceType {
     LevelSetPCSElementInterfaceType,
 
     XfemElementInterfaceType,
-    VTKXMLExportModuleElementInterfaceType
+    VTKXMLExportModuleElementInterfaceType,
+    FailureModuleElementInterfaceType
+
 };
 } // end namespace oofem
 #endif // interfacetype_h

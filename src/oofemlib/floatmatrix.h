@@ -501,6 +501,7 @@ public:
      * If size(aArray) = 6, a symmetric matrix will be created.
      * @param aArray Array to transform.
      */
+    void beMatrixFormOfStress(const FloatArray &aArray);
     void beMatrixForm(const FloatArray &aArray);
 
     // Overloaded methods:

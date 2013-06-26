@@ -40,8 +40,10 @@
 #include "structuralms.h"
 #include "floatarray.h"
 #include "contextioerr.h"
+#include "gaussintegrationrule.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "lobattoir.h"
 
 namespace oofem {
 
@@ -587,11 +589,11 @@ LayeredCrossSection :: setupLayerMidPlanes()
 {
     // z-coord of each layer midplane measured from the global cross section z-coord
     this->layerMidZ.resize(this->numberOfLayers);
-    double layerTopZ = -midSurfaceZcoordFromBottom;
+    double layerBottomZ = -midSurfaceZcoordFromBottom; // initialize to the bottom coord
     for ( int j = 1; j <= numberOfLayers; j++ ) {
         double thickness = this->layerThicks.at(j);
-        layerTopZ += thickness;
-        this->layerMidZ.at(j) = layerTopZ - thickness * 0.5; 
+        this->layerMidZ.at(j) = layerBottomZ + thickness * 0.5; 
+        layerBottomZ += thickness;
     }
 }
 
@@ -677,44 +679,6 @@ LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
 
 
 
-
-void
-LayeredCrossSection :: mapLayerGpCoordsToShellCoords(LayeredCrossSection *layeredCS, IntegrationRule **layerIntegrationRulesArray)
-/*
-  Maps the local xi-coord (z-coord) in each layer [-1,1] to the corresponding 
-  xi-coord in the cross section coordinate system.
-  Also renames the gp numbering from layerwise to glabal
-
-        --------  1               --------  1
-               |                         |  
-               |                         |
-        -------- -1       =>      --------  x
-        --------  1               --------  x
-               |                         |  
-        -------- -1               -------- -1
-*/
-{
-    double totalThickness = this->computeIntegralThick();
-    int number = 1;
-    for( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        IntegrationRule *iRule = layerIntegrationRulesArray [layer-1]; 
-
-        for( int j = 1; j <= iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(j-1);
-
-            // Map local layer cs to local shell cs
-            double zMid_i = layeredCS->giveLayerMidZ(layer);
-            double xiMid_i = 1.0 - 2.0*(totalThickness - this->midSurfaceZcoordFromBottom - zMid_i)/totalThickness; 
-            double xi = xiMid_i; 
-            double xi2 = gp->coordinates->at(3)*layeredCS->giveLayerThickness(layer)/totalThickness;
-            double xinew = xi+xi2;
-            iRule->getIntegrationPoint(j-1)->coordinates->at(3) = xinew;
-            iRule->getIntegrationPoint(j-1)->number = number;
-            number++;
-        }
-    }
-
-}
 
 
 
@@ -952,5 +916,137 @@ LayeredCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
         _error("computeStressIndependentStrainVector: temperature loading not supported");
     }
 }
+
+
+void
+LayeredCrossSection :: giveInterfaceXiCoords(FloatArray &answer)
+{
+    // returns an array with the xi-coords corresponding to the boundaries where
+    // the layers meet (size = number of layers -1)
+
+    int numInterfaces = this->giveNumberOfLayers() - 1;
+    answer.resize(numInterfaces);
+    double totalThickness = this->computeIntegralThick();
+    for ( int i = 1; i <= numInterfaces; i++  ){
+        double midZ = this->giveLayerMidZ(i);
+        double interfaceZ  = midZ + this->giveLayerThickness(i)*0.5;
+        answer.at(i) = interfaceZ *(2.0/totalThickness);
+    }
+}
+
+void
+LayeredCrossSection :: setupLayeredIntegrationRule(IntegrationRule **&integrationRulesArray, Element *el, int numInPlanePoints)
+{
+    // Loop over each layer and set up an integration rule as if each layer was an independent element
+    // @todo - only works for wedge integration at the moment
+    int numberOfLayers     = this->giveNumberOfLayers();
+    int numPointsThickness = this->giveNumIntegrationPointsInLayer();
+
+    integrationRulesArray = new IntegrationRule * [ numberOfLayers ];
+    for ( int i = 0; i < numberOfLayers; i++ ) {
+        integrationRulesArray [ i ] = new LayeredIntegrationRule(1, el);
+        integrationRulesArray [ i ]->SetUpPointsOnWedge(numInPlanePoints, numPointsThickness, _3dMat);
+    }
+    this->mapLayerGpCoordsToShellCoords(integrationRulesArray);
+}
+
+
+void
+LayeredCrossSection :: mapLayerGpCoordsToShellCoords(IntegrationRule **&layerIntegrationRulesArray)
+/*
+  Maps the local xi-coord (z-coord) in each layer [-1,1] to the corresponding 
+  xi-coord in the cross section coordinate system.
+  Also renames the gp numbering from layerwise to global (1,2,1,2 -> 1,2,3,4)
+    xi
+    ^    --------  1               --------  1
+    |           |                         |  
+    |           |                         |
+         -------- -1       =>      --------  x
+    ^    --------  1               --------  x
+    |           |                         |  
+    |    -------- -1               -------- -1
+*/
+{
+    double scaleFactor = 0.999; // Will be numerically unstable with xfem if the endpoints lie at +-1
+    double totalThickness = this->computeIntegralThick();
+    int number = 1;
+    for( int layer = 1; layer <= numberOfLayers; layer++ ) {
+        IntegrationRule *iRule = layerIntegrationRulesArray [layer-1]; 
+        
+        for( int j = 1; j <= iRule->giveNumberOfIntegrationPoints(); j++ ) {
+            GaussPoint *gp = iRule->getIntegrationPoint(j-1);
+
+            // Map local layer cs to local shell cs
+            double zMid_i = this->giveLayerMidZ(layer); // global z-coord
+            double xiMid_i = 1.0 - 2.0*(totalThickness - this->midSurfaceZcoordFromBottom - zMid_i)/totalThickness; // local z-coord
+            double deltaxi = gp->coordinates->at(3)*this->giveLayerThickness(layer)/totalThickness; // distance from layer mid
+            double xinew = xiMid_i + deltaxi * scaleFactor;
+            iRule->getIntegrationPoint(j-1)->coordinates->at(3) = xinew;
+            iRule->getIntegrationPoint(j-1)->number = number;   // fix gp ordering
+            number++;
+            }
+        }
+
+}
+
+
+
+
+LayeredIntegrationRule :: LayeredIntegrationRule(int n, Element *e,
+                                             int startIndx, int endIndx, bool dynamic) :
+    IntegrationRule(n, e, startIndx, endIndx, dynamic) { }
+
+LayeredIntegrationRule :: LayeredIntegrationRule(int n, Element *e) :
+    IntegrationRule(n, e) { }
+
+LayeredIntegrationRule :: ~LayeredIntegrationRule()
+{ }
+
+int
+LayeredIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsThickness, MaterialMode mode)
+{
+    // Set up integration rule for a specific layer
+
+    int nPoints = nPointsTri * nPointsThickness;    
+    //@todo - is not really a Gauss point but rather a hybrid. 
+    this->gaussPointArray = new GaussPoint * [ nPoints ]; 
+    this->numberOfIntegrationPoints = nPoints;
+
+    // uses Gauss integration in the plane and Lobatto in the thickness
+    FloatArray coords_xi1, coords_xi2, coords_xi, weights_tri, weights_thickness;
+    GaussIntegrationRule   :: giveTriCoordsAndWeights(nPointsTri, coords_xi1, coords_xi2, weights_tri );
+    //LobattoIntegrationRule :: giveLineCoordsAndWeights(nPointsThickness, coords_xi, weights_thickness );
+    GaussIntegrationRule :: giveLineCoordsAndWeights(nPointsThickness, coords_xi, weights_thickness );
+
+    // Assumes that the integration rules of the layers are the same such that the ordering of the ip's are also 
+    // the same =>  upperInterfacePoints.at(i) of one layer is paired with lowerInterfacePoints.at(i) of the next.
+    // This will be used to estimate interlaminar stresses, sice values in the two ip will generally be different 
+    // due to beam/plate/shell theory assumptions.
+    if ( nPointsThickness != 1 ) { // otherwise there are no points on the interface
+        this->lowerInterfacePoints.resize(nPointsTri);
+        this->upperInterfacePoints.resize(nPointsTri);
+    }
+    for ( int i = 1, ind = 0; i <= nPointsThickness; i++ ) {
+        for ( int j = 1; j <= nPointsTri; j++ ) {
+            FloatArray *coord = new FloatArray(3);
+            coord->at(1) = coords_xi1.at(j);
+            coord->at(2) = coords_xi2.at(j);
+            coord->at(3) = coords_xi.at(i);
+            this->gaussPointArray [ ind ] = 
+                new GaussPoint(this, 1, coord, weights_tri.at(j) * weights_thickness.at(i), mode);
+            
+            // store interface points
+            if ( i == 1 && nPointsThickness > 1 ) { //then lower surface
+                this->lowerInterfacePoints.at(j) = ind;
+            } else if ( i == nPointsThickness && nPointsThickness >1){  //then upper surface
+                this->upperInterfacePoints.at(j) = ind;
+            }
+            ind++;
+        }
+        
+    }
+    return numberOfIntegrationPoints;
+}
+
 
 } // end namespace oofem

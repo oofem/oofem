@@ -409,6 +409,8 @@ public:
 
     void beReducedVectorFormOfStrain(const FloatMatrix &aMatrix);
 
+    void beColumnOf(const FloatMatrix &mat, int col);
+
 #ifdef __PARALLEL_MODE
     int packToCommBuffer(CommunicationBuffer &buff) const;
     int unpackFromCommBuffer(CommunicationBuffer &buff);

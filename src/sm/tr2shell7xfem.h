@@ -89,20 +89,16 @@ protected:
     void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
     void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
 
-    virtual double computeVolumeAround(GaussPoint *gp);
+    //virtual double computeVolumeAround(GaussPoint *gp);
     virtual double computeVolumeAroundLayer(GaussPoint *mastergp, int layer);
-    virtual double computeAreaAround(GaussPoint *gp);
+    virtual double computeAreaAround(GaussPoint *gp, double xi);
 
     virtual void computeGaussPoints();
     virtual void giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords);
 
-    //only used for debugging 
-    void compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matrix2, FloatMatrix &answer);
-
     virtual FEInterpolation *giveInterpolation() const;
 
     // VTK
-    void vtkGiveFictiousNodeCoords(FloatArray nodeCoords[15], int layer);
     void vtkGiveUpdatedFictiousNodeCoords(FloatArray nodeCoords[15], int layer, TimeStep *tStep);
 
 public:
@@ -110,8 +106,6 @@ public:
     virtual ~Tr2Shell7XFEM() { }     // destructor -> declaring as virtual will make each subclass call their respective destr.
     // definition & identification
     //virtual int giveNumberOfDofs()           { return 42; }
-    //virtual int giveNumberOfDofs()           { return 42+14; }///@todo temporary! remove!
-    //virtual int giveNumberOfDofs()           { return 42+14; }///@todo temporary! remove!
     virtual int giveNumberOfEdgeDofs()       { return 21; }
     //virtual int giveNumberOfEdgeDofs()       { return 35; } ///@todo temporary! remove!
     virtual int giveNumberOfEdgeDofManagers() { return 3;  }
@@ -121,6 +115,11 @@ public:
     //virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_Composite; }
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; } // write new wedge-like type 'layeredWedge'
+    virtual void giveCompositeExportData( IntArray &primaryVarsToExport, IntArray &cellVarsToExport,
+                 std::vector<FloatArray> &nodeCoords, std::vector<IntArray> &cellNodes, IntArray &cellTypes, 
+                 std::vector<FloatArray> &primaryVars, std::vector<FloatArray> &cellVars, TimeStep *tStep ){};
+
+    //virtual void giveCompositeExportData( IntArray &primaryVarsToExport, IntArray &cellVarsToExport, TimeStep *tStep );
 };
 
 

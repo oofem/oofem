@@ -41,6 +41,7 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
+#include "enrichmentitem.h"
 ///@name Input fields for XfemManager
 //@{
 #define _IFT_XfemManager_Name "xfemmanager"
@@ -73,6 +74,8 @@ protected:
     /// Index of next available dofId from pool.
     int numberOfEnrichmentItems;
 
+    
+
 public:
     enum XfemType { // not in use right now
         SPLIT = 1, TIP = 4, STANDARD = 0
@@ -94,6 +97,7 @@ public:
     int giveNumberOfEnrichmentItems() { return enrichmentItemList->giveSize(); }
 
     void createEnrichedDofs();
+    void addEnrichedDofsTo( DofManager *dMan, IntArray &dofIdArray );
 
     /// Computes the type of node enrichment, returns zero if the node is not enriched.
     // Old method: should instead return an array if there are several active /JB

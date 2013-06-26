@@ -84,7 +84,7 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     FloatArray N;
     interpolation.evaldNdx( dNdx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     interpolation.evalN(     N  , * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
- 
+
     FloatMatrix Bc[4];
     // Assemble standard FEM part of strain-displacement matrix
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
@@ -101,7 +101,7 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
     FloatMatrix Bd[4];
 
-    int counter = 8;
+    int counter = 8; // 8 continuous dofs
     for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
         EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
         EnrichmentDomain *ed = ei->giveEnrichmentDomain(1);
@@ -111,8 +111,8 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
         FloatArray efgpD;
         ef->evaluateDerivativeAt(efgpD, gp, ed);
 
-        // adds up the number of the dofs from an enrichment item
-        // this part is used for the construction of a shifted enrichment
+        // Compute the value of the enrichment function in the nodes 
+        // in order to construction a shifted enrichment
         for ( int j = 1; j <= this->giveNumberOfDofManagers(); j++ ) {
 
             DofManager *dMan = this->giveDofManager(j);

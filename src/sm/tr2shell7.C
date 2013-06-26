@@ -102,39 +102,38 @@ void
 Tr2Shell7 :: computeGaussPoints()
 {
     if ( !integrationRulesArray ) {
-        int nPointsTri = 6;                     // points in the plane
-        int nPointsEdge = 2;
-        integrationRulesArray = new IntegrationRule * [ 3 ];
+        int nPointsTri  = 6;   // points in the plane
+        int nPointsEdge = 2;   // edge integration
+        specialIntegrationRulesArray = new IntegrationRule * [ 3 ];
 
         // Midplane and thickness
 
-        // Midplane only (Mass matrix integrated analytically through the thickness)
-        integrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
-        integrationRulesArray [ 1 ]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat);
+        // Midplane (Mass matrix integrated analytically through the thickness)
+        specialIntegrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
+        specialIntegrationRulesArray [ 1 ]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
 
 
         // Edge
-        integrationRulesArray [ 2 ] = new GaussIntegrationRule(1, this);
-        integrationRulesArray [ 2 ]->SetUpPointsOnLine(nPointsEdge, _3dMat);
+        specialIntegrationRulesArray [ 2 ] = new GaussIntegrationRule(1, this);
+        specialIntegrationRulesArray [ 2 ]->SetUpPointsOnLine(nPointsEdge, _3dMat);
 
-
-        // Layered cross section
+        
+        // Layered cross section for bulk integration
+        //@todo - must use a cast here since check consistency has not been called yet
         LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( Tr2Shell7 :: giveCrossSection() );
         if ( layeredCS == NULL ) {
             OOFEM_ERROR("Tr2Shell7 only supports layered cross section");
         }
+        this->numberOfIntegrationRules = layeredCS->giveNumberOfLayers();
+        this->numberOfGaussPoints = layeredCS->giveNumberOfLayers()*nPointsTri*layeredCS->giveNumIntegrationPointsInLayer();
+        layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
 
-        int numberOfLayers = layeredCS->giveNumberOfLayers();
-        layerIntegrationRulesArray = new IntegrationRule * [ numberOfLayers ];
 
-        // may need to extend this to handle Newton-Cotes integration in the thickness direction
-        for ( int i = 1; i <= numberOfLayers; i++ ) {
-            layerIntegrationRulesArray [ i - 1 ] = new GaussIntegrationRule(1, this);
-            layerIntegrationRulesArray [ i - 1 ]->SetUpPointsOnWedge(nPointsTri, layeredCS->giveNumIntegrationPointsInLayer(), _3dMat);
-        }
+        // Thickness integration for stress recovery
+        specialIntegrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
+        specialIntegrationRulesArray [ 0 ]->SetUpPointsOnLine(layeredCS->giveNumIntegrationPointsInLayer(), _3dMat);
 
-        layeredCS->mapLayerGpCoordsToShellCoords(layeredCS, layerIntegrationRulesArray);
-        layeredCS->printYourself();
+
     }
 }
 
@@ -174,44 +173,36 @@ Tr2Shell7 :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 }
 
 
-// Integration
-
 double
-Tr2Shell7 :: computeVolumeAround(GaussPoint *gp)
+Tr2Shell7 :: computeAreaAround(GaussPoint *gp, double xi)
 {
-    FloatArray G1, G2, G3, temp;
-    double detJ;
-    this->evalInitialCovarBaseVectorsAt(gp, G1, G2, G3);
-    temp.beVectorProductOf(G1, G2);
-    detJ = temp.dotProduct(G3) * 0.5 * this->giveCrossSection()->give(CS_Thickness);
-    return detJ * gp->giveWeight();
-}
-
-double
-Tr2Shell7 :: computeAreaAround(GaussPoint *gp)
-{
-    FloatArray G1, G2, G3, temp;
-    this->evalInitialCovarBaseVectorsAt(gp, G1, G2, G3);
+    FloatArray G1, G2, temp;
+    FloatMatrix Gcov;
+    FloatArray lcoords(3);
+    lcoords.at(1) = gp->giveCoordinate(1);
+    lcoords.at(2) = gp->giveCoordinate(2);
+    lcoords.at(3) = xi;
+    this->evalInitialCovarBaseVectorsAt(lcoords, Gcov);
+    G1.beColumnOf(Gcov,1);
+    G2.beColumnOf(Gcov,2);
     temp.beVectorProductOf(G1, G2);
     double detJ = temp.computeNorm();
-    return detJ * gp->giveWeight() * 0.5;
+    return detJ * gp->giveWeight();
 }
-
 
 
 
 double
 Tr2Shell7 :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
 {
-    FloatArray G1, G2, G3, temp;
     double detJ;
-    this->evalInitialCovarBaseVectorsAt(gp, G1, G2, G3);
-    temp.beVectorProductOf(G1, G2);
-    LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection() );
-    detJ = temp.dotProduct(G3) * 0.5 * layeredCS->giveLayerThickness(layer);
+    FloatMatrix Gcov;
+    FloatArray lcoords;
+    lcoords = *gp->giveCoordinates();
+    this->evalInitialCovarBaseVectorsAt(lcoords, Gcov);
+    detJ = Gcov.giveDeterminant() * 0.5 * this->layeredCS->giveLayerThickness(layer);
     return detJ * gp->giveWeight();
 }
-
 
 
 void
@@ -239,121 +230,6 @@ Tr2Shell7 :: compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matr
 }
 
 
-void 
-Tr2Shell7 :: vtkGiveFictiousNodeCoords(FloatArray nodeCoords[15], int layer)
-{
-    // compute fictious node coords
-    FloatArray nodeLocalXiCoords, nodeLocalEtaCoords;
-    this->giveLocalNodeCoords( nodeLocalXiCoords, nodeLocalEtaCoords);
-
-    for ( int i = 1; i <= 3; i++ ){
-        FloatArray coords, localCoords(3);
-        localCoords.at(1) = nodeLocalXiCoords.at(i);
-        localCoords.at(2) = nodeLocalEtaCoords.at(i);
-
-        localCoords.at(3) = -1.0;
-        this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, coords);
-        nodeCoords[i-1].resize(3); 
-        nodeCoords[i-1].at(1) = coords.at(1);
-        nodeCoords[i-1].at(2) = coords.at(2);
-        nodeCoords[i-1].at(3) = coords.at(3);
-
-        localCoords.at(3) = 1.0;
-        this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, coords);
-        nodeCoords[i+3-1].resize(3); 
-        nodeCoords[i+3-1].at(1) = coords.at(1);
-        nodeCoords[i+3-1].at(2) = coords.at(2);
-        nodeCoords[i+3-1].at(3) = coords.at(3);
-    }
-
-    for ( int i = 1; i <= 3; i++ ){
-        FloatArray coords, localCoords(3);
-        localCoords.at(1) = nodeLocalXiCoords.at(i+3);
-        localCoords.at(2) = nodeLocalEtaCoords.at(i+3);
-
-        localCoords.at(3) = -1.0;
-        this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, coords);
-        nodeCoords[i+6-1].resize(3); 
-        nodeCoords[i+6-1].at(1) = coords.at(1);
-        nodeCoords[i+6-1].at(2) = coords.at(2);
-        nodeCoords[i+6-1].at(3) = coords.at(3);
-
-        localCoords.at(3) = 1.0;
-        this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, coords);
-        nodeCoords[i+6+3-1].resize(3); 
-        nodeCoords[i+6+3-1].at(1) = coords.at(1);
-        nodeCoords[i+6+3-1].at(2) = coords.at(2);
-        nodeCoords[i+6+3-1].at(3) = coords.at(3);
-    }
-    
-
-    //Middle nodes - linear variation in the thickness direction -> mean value of top and bottom
-        for ( int i = 1; i <= 3; i++ ){
-        nodeCoords[12+i-1].resize(3);
-        nodeCoords[12+i-1].at(1) = 0.5 * ( nodeCoords[i-1].at(1) + nodeCoords[i+3-1].at(1) );
-        nodeCoords[12+i-1].at(2) = 0.5 * ( nodeCoords[i-1].at(2) + nodeCoords[i+3-1].at(2) );
-        nodeCoords[12+i-1].at(3) = 0.5 * ( nodeCoords[i-1].at(3) + nodeCoords[i+3-1].at(3) );
-        }
-}
-
-
-void 
-Tr2Shell7 :: vtkGiveUpdatedFictiousNodeCoords(FloatArray nodeCoords[15], int layer, TimeStep *tStep)
-{
-    // compute fictious node coords
-    FloatArray nodeLocalXiCoords, nodeLocalEtaCoords;
-    this->giveLocalNodeCoords( nodeLocalXiCoords, nodeLocalEtaCoords);
-
-    for ( int i = 1; i <= 3; i++ ){
-        FloatArray coords, localCoords(3);
-        localCoords.at(1) = nodeLocalXiCoords.at(i);
-        localCoords.at(2) = nodeLocalEtaCoords.at(i);
-
-        localCoords.at(3) = -1.0;
-        this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, layer, coords, tStep);
-        nodeCoords[i-1].resize(3); 
-        nodeCoords[i-1].at(1) = coords.at(1);
-        nodeCoords[i-1].at(2) = coords.at(2);
-        nodeCoords[i-1].at(3) = coords.at(3);
-
-        localCoords.at(3) = 1.0;
-        this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, layer, coords, tStep);
-        nodeCoords[i+3-1].resize(3); 
-        nodeCoords[i+3-1].at(1) = coords.at(1);
-        nodeCoords[i+3-1].at(2) = coords.at(2);
-        nodeCoords[i+3-1].at(3) = coords.at(3);
-    }
-
-    for ( int i = 1; i <= 3; i++ ){
-        FloatArray coords, localCoords(3);
-        localCoords.at(1) = nodeLocalXiCoords.at(i+3);
-        localCoords.at(2) = nodeLocalEtaCoords.at(i+3);
-
-        localCoords.at(3) = -1.0;
-        this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, layer, coords, tStep);
-        nodeCoords[i+6-1].resize(3); 
-        nodeCoords[i+6-1].at(1) = coords.at(1);
-        nodeCoords[i+6-1].at(2) = coords.at(2);
-        nodeCoords[i+6-1].at(3) = coords.at(3);
-
-        localCoords.at(3) = 1.0;
-        this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, layer, coords, tStep);
-        nodeCoords[i+6+3-1].resize(3); 
-        nodeCoords[i+6+3-1].at(1) = coords.at(1);
-        nodeCoords[i+6+3-1].at(2) = coords.at(2);
-        nodeCoords[i+6+3-1].at(3) = coords.at(3);
-    }
-    
-
-    //Middle nodes - linear variation in the thickness direction -> mean value of top and bottom
-        for ( int i = 1; i <= 3; i++ ){
-        nodeCoords[12+i-1].resize(3);
-        nodeCoords[12+i-1].at(1) = 0.5 * ( nodeCoords[i-1].at(1) + nodeCoords[i+3-1].at(1) );
-        nodeCoords[12+i-1].at(2) = 0.5 * ( nodeCoords[i-1].at(2) + nodeCoords[i+3-1].at(2) );
-        nodeCoords[12+i-1].at(3) = 0.5 * ( nodeCoords[i-1].at(3) + nodeCoords[i+3-1].at(3) );
-        }
-
-}
 
 
 } // end namespace oofem

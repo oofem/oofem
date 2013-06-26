@@ -95,6 +95,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_CylindricalStrainTensor:
     case IST_DeviatoricStrain:
     case IST_DeviatoricStress:
+    case IST_CauchyStressTensor:
         return ISVT_TENSOR_S3;
 
     case IST_BeamForceMomentumTensor:
@@ -172,6 +173,25 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     }
 }
 
+
+int giveInternalStateTypeSize(InternalStateType type)
+{
+    InternalStateValueType valueType = giveInternalStateValueType(type);
+    switch ( valueType ) {
+    case ISVT_TENSOR_S3:
+    case ISVT_TENSOR_G:
+        return 9;
+
+    case ISVT_VECTOR:
+        return 3;
+
+    case ISVT_SCALAR:
+        return 1;
+
+    default:
+        return 0;
+    }
+}
 
 
 ContextIOERR :: ContextIOERR(contextIOResultType e, const char *file, int line)

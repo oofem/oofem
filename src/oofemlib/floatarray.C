@@ -1114,6 +1114,23 @@ void FloatArray :: beReducedVectorForm(const FloatMatrix &aMatrix)
 }
 
 
+
+void FloatArray :: beColumnOf(const FloatMatrix &mat, int col)
+{
+#  ifdef DEBUG
+    if (  col > mat.giveNumberOfColumns() ) {
+        OOFEM_ERROR3("FloatArray :: beColumnOf: column index (%d) exceeds number of columns in input matrix (%d)", col, mat.giveNumberOfColumns() );
+    }
+#  endif
+
+    int nRows = mat.giveNumberOfRows();
+    this->resize(nRows);
+    for ( int i = 1; i <= nRows; i++ ) {
+        this->at(i) = mat.at(i,col);
+    }
+
+}
+
 std::ostream& operator<< (std::ostream &out, const FloatArray &x)
 {
     out << x.size;

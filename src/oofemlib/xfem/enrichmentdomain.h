@@ -69,6 +69,10 @@ public:
     virtual bool isDofManagerEnriched(DofManager *dMan) = 0;
     // Default is to loop through the dofman and check if any of them are enriched
     virtual bool isElementEnriched(Element *element);
+    int giveNumber() { return number; };
+    void setNumber(int i) { this->number = i; };
+    // Update of description
+    virtual void updateEnrichmentDomain();
 
     // Spatial search methods
     virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element) { }
@@ -76,6 +80,10 @@ public:
 
     virtual const char *giveInputRecordName() const = 0;
     virtual const char *giveClassName() const = 0;
+
+private:
+    int number;
+    
 };
 
 
@@ -95,6 +103,7 @@ public:
     virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element) { bg->computeIntersectionPoints(element, intersectionPoints); }
     virtual int computeNumberOfIntersectionPoints(Element *element) { return bg->computeNumberOfIntersectionPoints(element); }
 };
+
 
 class EDBGCircle : public EnrichmentDomain_BG
 {
@@ -124,6 +133,8 @@ public:
     virtual ~DofManList() { }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual bool isDofManagerEnriched(DofManager *dMan);
+    void addDofManagers(IntArray &dofManNumbers);
+    virtual void updateEnrichmentDomain(IntArray &dofManNumbers);
 
     virtual const char *giveInputRecordName() const { return _IFT_DofManList_Name; }
     virtual const char *giveClassName() const { return "DofManList"; }

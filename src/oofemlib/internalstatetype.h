@@ -138,7 +138,8 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_Tangent, 88)\
     ENUM_ITEM_WITH_VALUE(IST_DirectorField, 89) \
     ENUM_ITEM_WITH_VALUE(IST_DeformationGradientTensor, 90) \
-    ENUM_ITEM_WITH_VALUE(IST_FirstPKStressTensor, 91)
+    ENUM_ITEM_WITH_VALUE(IST_FirstPKStressTensor, 91) \
+    ENUM_ITEM_WITH_VALUE(IST_CauchyStressTensor, 92)    
 
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.

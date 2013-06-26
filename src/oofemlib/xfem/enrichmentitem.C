@@ -42,7 +42,7 @@
 #include "connectivitytable.h"
 #include "oofem_limits.h"
 #include "classfactory.h"
-
+#include "fracturemanager.h"
 namespace oofem {
 
 REGISTER_EnrichmentItem( CrackTip )
@@ -91,6 +91,7 @@ bool EnrichmentItem :: isElementEnriched(const Element *element)
 
 bool EnrichmentItem :: isElementEnrichedByEnrichmentDomain(const Element *element, int edNumber) 
 {
+    // Checks if any of the dofmanagers are enriched
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
         DofManager *dMan = element->giveDofManager(i);
         if ( isDofManEnrichedByEnrichmentDomain(dMan, edNumber) ){
@@ -98,6 +99,19 @@ bool EnrichmentItem :: isElementEnrichedByEnrichmentDomain(const Element *elemen
         }
     }
     return false;
+}
+
+bool EnrichmentItem :: isElementFullyEnrichedByEnrichmentDomain(const Element *element, int edNumber) 
+{
+    // Checks if all of the dofmanagers are enriched
+    int count = 0;
+    for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
+        DofManager *dMan = element->giveDofManager(i);
+        if ( isDofManEnrichedByEnrichmentDomain(dMan, edNumber) ){
+            count++;
+        }
+    }
+    return count == element->giveNumberOfDofManagers();
 }
 
 bool EnrichmentItem :: isDofManEnriched(DofManager *dMan)
@@ -140,7 +154,7 @@ IRResultType Inclusion :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, material, _IFT_Inclusion_material); 
     this->mat = this->giveDomain()->giveMaterial(material);
     this->numberOfEnrichmentFunctions = 1;
-    // Not sure this should be input at but instead be determined by the ei which describes the physical model /JB
+    // Not sure this should be an input paramter but should instead be determined by the ei which describes the physical model /JB
     //IR_GIVE_OPTIONAL_FIELD(ir, numberOfEnrichmentFunctions, _IFT_XfemManager_numberOfEnrichmentFunctions, "numberofenrichmentfunctions");
     return IRRT_OK;
 }
@@ -185,24 +199,39 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
         if ( ed == NULL ) {
             OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment domain (%s)", name.c_str() );
         }
+        ed->setNumber(i);
         this->enrichmentDomainList->put(i, ed);
         ed->initializeFrom(mir);
 
     }
 
     // Set start of the enrichment dof pool for the given EI
-    int xDofPoolAllocSize = this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs() * this->giveNumberOfEnrichmentDomains(); 
+//    int xDofPoolAllocSize = this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs() * this->giveNumberOfEnrichmentDomains(); 
+    int xDofPoolAllocSize = this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs() * 100; //@todo should allocate max number of dofs but this requires knowing the max number of layers in my case /JB
     this->startOfDofIdPool = this->giveDomain()->giveNextFreeDofID(xDofPoolAllocSize);
 
     return 1;
 }
 
 
+void 
+EnrichmentItem :: addEnrichmentDomain( EnrichmentDomain *ed )
+{
+    // Appends the enrichment domain ed to the list
+    // Does not check if there is a duplicate in the list
+    this->numberOfEnrichmentDomains++;
+    enrichmentDomainList->growTo(numberOfEnrichmentDomains);
+
+    ed->setNumber(this->numberOfEnrichmentDomains);
+    this->enrichmentDomainList->put(this->numberOfEnrichmentDomains, ed);
+}
+
 void
 EnrichmentItem :: giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber)
 {
     // Returns an array containing the dof Id's of the new enrichment dofs pertinent to the ei. 
-    // Note: the dof managers may not support these dofsall potential dof id's
+    // Note: the dof managers may not support all/any of these new potential dof id's. Eg. a 
+    // beam will not be able to account for a pressure dof. 
     IntArray *enrichesDofsWithIdArray = this->giveEnrichesDofsWithIdArray();
     int eiEnrSize = enrichesDofsWithIdArray->giveSize();
 
@@ -216,11 +245,12 @@ EnrichmentItem :: giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber)
 void
 EnrichmentItem :: computeDofManDofIdArray(IntArray &answer, DofManager *dMan, int enrichmentDomainNumber)
 {
-    // Gives an array containing the dofId's that should be created as new dofs (what dofs to enrich).
+    // Gives an array containing the dofId's that should be created as new dofs (which dofs to enrich).
     IntArray *enrichesDofsWithIdArray = this->giveEnrichesDofsWithIdArray();
     int eiEnrSize = enrichesDofsWithIdArray->giveSize();
     
-    // Go through the list of dofs that the EI supports and compare with the available dofs in the dofMan. 
+    // Go through the list of dofs that the EI supports and compare with the available dofs in the dofMan.
+    // If the dofMan has support for the particular dof add it to the list.
     // Store matches in dofMask
     IntArray dofMask(eiEnrSize); dofMask.zero();
     int count = 0; 
@@ -242,16 +272,37 @@ EnrichmentItem :: computeDofManDofIdArray(IntArray &answer, DofManager *dMan, in
 int 
 EnrichmentItem :: giveNumberOfEnrDofs() 
 { 
-    // returns the array of dofs a particular EI s
+    // returns the number of new xfem dofs a particular EI wants to add per regular dof
     int temp=0;
     for ( int i = 1; i <= this->giveNumberOfEnrichmentfunctions(); i++ ) { 
         EnrichmentFunction *ef = this->giveEnrichmentFunction(i);
-        // This is per regular dof
-        temp += ef->giveNumberOfDofs(); // = number of functions associated with a particular enrichment function, e.g. 4 for branch function.
-
+        temp += ef->giveNumberOfDofs(); // = number of functions associated with a particular enrichment function, e.g. 4 for the common branch functions.
     }
     return temp; 
 } 
+
+void 
+EnrichmentItem :: updateGeometry(TimeStep *tStep, FractureManager *fMan)
+{
+    //this->needsUpdate = false;
+    Domain *domain= this->giveDomain();   
+
+    for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) { 
+        printf( "\n -------------------------------\n");
+        Element *el = domain->giveElement(i);
+
+        for ( int j = 1; j <= fMan->failureCriterias->giveSize(); j++ ) {
+            FailureCriteria *fc = fMan->failureCriterias->at(j);
+            fMan->evaluateFailureCriteria(fc, el, tStep);
+
+            if ( Delamination *dei = dynamic_cast< Delamination * > (this) )  {
+                dei->updateGeometry(tStep, fMan, el, fc); //not an overloaded function, change the name
+            }
+        }
+    }
+
+}
+
 
 
 Inclusion :: Inclusion(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
@@ -260,12 +311,78 @@ Inclusion :: Inclusion(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem
 }
 
 
-
+//------------------
 // DELAMINATION
+//------------------
+
+void 
+Delamination :: updateGeometry(TimeStep *tStep, FractureManager *fMan, Element *el, FailureCriteria *fc)
+{
+    for ( int i = 1; i <= fc->quantities.size(); i++ ) {
+        if ( fc->hasFailed(i) ) { // interface has failed
+            printf( "Element %d fails in interface %d \n", el->giveNumber(), i );
+            fMan->setUpdateFlag(true);
+
+            // should create a new *ed at the level given by interface i iff it does not already exist
+            // add coord
+            FloatArray xiCoords;
+            dynamic_cast <LayeredCrossSection * > ( el->giveCrossSection() )->giveInterfaceXiCoords(xiCoords);
+            double xi = xiCoords.at(i); // current xi-coord
+            // find if xi is in this->enrichmentDomainXiCoords
+            bool flag=false;
+            int num = 0;
+            for ( int j = 1; j <= this->enrichmentDomainXiCoords.giveSize(); j++ ) {
+                if ( abs(xi-this->enrichmentDomainXiCoords.at(j)) < 1.0e-6 ) {
+                    flag = true;
+                    num = j;
+                }
+            }
+
+
+            IntArray dofManNumbers, elDofMans;
+            elDofMans = el->giveDofManArray();
+            for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {  
+                // ugly piece of code that will skip enrichment of dofmans that have any bc's
+                // which is not generally what you want
+                #if 1
+                bool hasBc= false;
+                for ( int j = 1; j <= el->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
+                    if ( el->giveDofManager(i)->giveDof(j)->hasBc(tStep) ) {
+                        hasBc = true;
+                        continue;
+                    }
+                }
+                #endif
+                if ( !hasBc) {
+                    dofManNumbers.followedBy(elDofMans.at(i));
+                }
+            }
+            
+
+            //dofManNumbers.printYourself();
+
+            if ( flag ) { //in list only add dofmans
+                dynamic_cast< DofManList * > ( this->giveEnrichmentDomain(num) )->addDofManagers( dofManNumbers );
+                //dynamic_cast< DofManList * > ( this->giveEnrichmentDomain(num) )->updateEnrichmentDomain(dofManNumbers);
+            } else { //create ed
+                int numED = this->giveNumberOfEnrichmentDomains();
+                EnrichmentDomain *ed = classFactory.createEnrichmentDomain( "DofManList" ); 
+                DofManList *dml = dynamic_cast< DofManList * > ( ed );
+                dml->addDofManagers( dofManNumbers ); // add the dofmans of the el to the list
+                this->addEnrichmentDomain(ed);
+                this->enrichmentDomainXiCoords.resizeWithValues(numED+1);
+                this->enrichmentDomainXiCoords.at(numED+1) = xiCoords.at(i);
+
+            }                        
+
+        }
+    }
+
+
+}
 
 Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
 { 
-    //this->enrichesDofsWithIdArray->setValues(7, D_u, D_v, D_w, W_u, W_v, W_w, Gamma);
     this->enrichesDofsWithIdArray->setValues(6, D_u, D_v, D_w, W_u, W_v, W_w);
 }
 
@@ -278,19 +395,41 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, this->enrichmentDomainXiCoords, _IFT_Delamination_xiCoords);
-    if ( this->numberOfEnrichmentDomains != this->enrichmentDomainXiCoords.giveSize() ) {
+    if ( this->numberOfEnrichmentDomains != this->enrichmentDomainXiCoords.giveSize() ) { // move to checkConsistency
         OOFEM_ERROR3( "EnrichmentItem :: initializeFrom: size of enrichmentDomainXiCoords (%i) differs from numberOfEnrichmentDomains (%i)", 
                        this->enrichmentDomainXiCoords.giveSize(), this->numberOfEnrichmentDomains );
     }
-
+    int material = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, material, _IFT_Delamination_CohesiveZoneMaterial);
+    if ( material > 0 ) {
+        this->mat = this->giveDomain()->giveMaterial(material);
+    }
     //write an instanciate method
+
+    //enrichmentDomainInterfaceList
 
     return IRRT_OK;
 }
 
 
+void 
+Delamination :: giveActiveDelaminationXiCoords(FloatArray &xiCoords, Element *element) 
+{
+    // Goes through the list of delaminations and checks which are active for a given element
+    int nDelam = this->giveNumberOfEnrichmentDomains(); // max possible number
+    int pos = 1;
+    xiCoords.resize(0);
+    for ( int i = 1; i <= nDelam; i++ ) {
+        if( this->isElementFullyEnrichedByEnrichmentDomain(element, i) ) {
+            xiCoords.resizeWithValues(pos);
+            xiCoords.at(pos) = this->giveDelaminationXiCoord(i);
+            pos++;
+        } 
+    }
+};
 
 
+// remove???
 double 
 Delamination :: giveDelaminationZCoord(int n, Element *element) 
 {
@@ -351,6 +490,7 @@ Delamination :: giveDelaminationGroupThickness(int dGroup, Element *e)
     return zTop - zBottom;
 }
 
+// unneccesary??
 void 
 Delamination :: giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &zBottom, Element *e)
 {
@@ -373,6 +513,9 @@ Delamination :: giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &
     }
 #endif
 }
+
+
+
 
 
 } // end namespace oofem

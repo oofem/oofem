@@ -89,8 +89,8 @@ public:
     virtual int SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mode, const FloatArray **coords);
 
     void giveTetCoordsAndWeights(int nPoints, FloatArray &coords_xi1, FloatArray &coords_xi2, FloatArray &coords_xi3, FloatArray &weights);
-    void giveTriCoordsAndWeights(int nPoints, FloatArray &coords_xi1, FloatArray &coords_xi2, FloatArray &weights);
-    void giveLineCoordsAndWeights(int nPoints, FloatArray &coords_xi, FloatArray &weights);
+    static void giveTriCoordsAndWeights(int nPoints, FloatArray &coords_xi1, FloatArray &coords_xi2, FloatArray &weights);
+    static void giveLineCoordsAndWeights(int nPoints, FloatArray &coords_xi, FloatArray &weights);
 
 
 };

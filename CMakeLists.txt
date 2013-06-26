@@ -611,14 +611,28 @@ endforeach (case)
 #add_test (test-${case}-check "python" "${oofem_SOURCE_DIR}/tools/extractor.py" "-f" ${case} "-c")
 
 # Custom targets for test and benchmarks (which can conveniently be accessed from IDEs)
-add_custom_target (tests
-    COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "test"
-    WORKING_DIRECTORY ${oofem_BINARY_DIR}
-    )
-add_custom_target (benchmarks
-    COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "benchmark"
-    WORKING_DIRECTORY ${oofem_BINARY_DIR}
-    )
+
+if (MSVC)
+    add_custom_target (tests
+        COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "test" "-C" "Debug"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        )
+    add_custom_target (benchmarks
+        COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "benchmark" "-C" "Debug"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        )
+else ()
+    add_custom_target (tests
+        COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "test"
+        WORKING_DIRECTORY ${oofem_BINARY_DIR}
+        )
+    add_custom_target (benchmarks
+        COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "benchmark"
+        WORKING_DIRECTORY ${oofem_BINARY_DIR}
+        )
+endif ()
+    
+
 
 #######################################################################
 ######################## Packing ######################################
