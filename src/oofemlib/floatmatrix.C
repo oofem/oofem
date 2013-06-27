@@ -1168,7 +1168,7 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
         for ( int j = i + 1; j <= nRows; j++ ) {
             linkomb = mtrx->at(j, i) / mtrx->at(i, i);
             for ( int k = i; k <= nRows; k++ ) {
-                this->at(j, k) -= mtrx->at(i, k) * linkomb;
+                mtrx->at(j, k) -= mtrx->at(i, k) * linkomb;
             }
 
             answer.at(j) -= answer.at(i) * linkomb;
@@ -1615,9 +1615,7 @@ double FloatMatrix :: computeReciprocalCondition(char p) const
 
 void FloatMatrix ::beMatrixForm(const FloatArray &aArray)
 {
-    // Revrites the vector on matrix form (symmetrized matrix used if size is 6), 
-    // order: 11, 22, 33, 23, 13, 12
-    // order: 11, 22, 33, 23, 13, 12, 32, 31, 21
+    // Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
 #  ifdef DEBUG
     if ( aArray.giveSize() !=6 && aArray.giveSize() !=9 ) {
         OOFEM_ERROR("FloatArray :: beMatrixForm : matrix dimension is not 3x3");
