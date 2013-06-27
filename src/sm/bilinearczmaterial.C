@@ -87,7 +87,7 @@ BilinearCZMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm f
     this->initGpForNewStep(gp);
 
 
-    answer.resize( jumpVector.giveSize() );
+    answer.resize( jumpVector.giveSize() -9);
     answer.zero();
     //@todo for now only study normal stress
     // no degradation in shear

@@ -131,6 +131,8 @@ protected:
     // VTK
     virtual void vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
 
+	virtual void updateYourself(TimeStep *tStep);
+
 
 public:
     // constructor

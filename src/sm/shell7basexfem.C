@@ -409,7 +409,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
 
 
 void
-Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, int useUpdatedGpRecord, 
+Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVecC, FloatArray &solVecD, int useUpdatedGpRecord, 
                      Delamination *dei, int enrichmentDomainNumber)
 {
     //Computes the cohesive nodal forces for a given interface
@@ -417,7 +417,7 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
     answerTemp.resize(Shell7Base :: giveNumberOfDofs() ); 
     answerTemp.zero();
 
-    FloatMatrix N, B;  
+    FloatMatrix N, B, F;  
 
     IntegrationRule *iRuleL = czIntegrationRulesArray [ enrichmentDomainNumber - 1 ];
     StructuralMaterial *mat = static_cast < StructuralMaterial * > (this->czMat);
@@ -440,6 +440,23 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         FloatArray xd, unknowns;
         unknowns.beProductOf(N, solVecD);
         xd.beProductOf(lambda,unknowns); // spatial jump
+		xd.resizeWithValues(12);
+
+		FloatArray genEpsC;
+		genEpsC.beProductOf(B, solVecC);
+		this->computeFAt(ip, F, genEpsC);
+		xd.at(4) = F.at(1,1);
+		xd.at(5) = F.at(2,2);
+		xd.at(6) = F.at(3,3);
+		xd.at(7) = F.at(2,3);
+		xd.at(8) = F.at(1,3);
+		xd.at(9) = F.at(1,2);
+		xd.at(10) = F.at(2,1);
+		xd.at(11) = F.at(3,1);
+		xd.at(12) = F.at(3,2);
+
+		
+		
        
         // Compute cohesive traction based on jump
         mat->giveRealStressVector(cTraction, FullForm, ip, xd, tStep);
@@ -456,7 +473,23 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
 
 }
 
+void
+Shell7BaseXFEM :: updateYourself(TimeStep *tStep)
+// Updates the receiver at end of step.
+{
+	Shell7Base :: updateYourself(tStep);
 
+#  ifdef VERBOSE
+    // VERBOSE_PRINT1("Updating Element ",number)
+#  endif
+    for ( int i = 0; i < this->xMan->giveNumberOfEnrichmentItems(); i++ ) {
+        czIntegrationRulesArray [ i ]->updateYourself(tStep);
+		for ( int j = 0; j < czIntegrationRulesArray [ i ]->getNumberOfIntegrationPoints(); j++ ) {
+			GaussPoint *gp = czIntegrationRulesArray [ i ]->getIntegrationPoint(j);
+			this->czMat->updateYourself(gp, tStep);
+		}
+    }
+}
 
 void
 Shell7BaseXFEM :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
