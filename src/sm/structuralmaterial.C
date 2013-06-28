@@ -62,25 +62,24 @@ StructuralMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 
 void 
-StructuralMaterial :: giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-        const FloatArray &reducedvF, TimeStep *tStep) 
+StructuralMaterial :: giveFirstPKStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep) 
 {
     ///@todo Move this to StructuralCrossSection ? 
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _3dMat ) {
-        this->giveFirstPKStressVector_3d(answer, form, gp, reducedvF, tStep);
+        this->giveFirstPKStressVector_3d(answer, gp, reducedvF, tStep);
     } else if ( mode == _PlaneStrain ) {
-        this->giveFirstPKStressVector_PlaneStrain(answer, form, gp, reducedvF, tStep);
+        this->giveFirstPKStressVector_PlaneStrain(answer, gp, reducedvF, tStep);
     } else if ( mode == _PlaneStress ) {
-        this->giveFirstPKStressVector_PlaneStress(answer, form, gp, reducedvF, tStep);
+        this->giveFirstPKStressVector_PlaneStress(answer, gp, reducedvF, tStep);
     } else if ( mode == _1dMat ) {
-        this->giveFirstPKStressVector_1d(answer, form, gp, reducedvF, tStep);
+        this->giveFirstPKStressVector_1d(answer, gp, reducedvF, tStep);
     }
 }
 
+
 void 
-StructuralMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-        const FloatArray &vF, TimeStep *tStep) 
+StructuralMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep) 
 {
     // Default implementation used if this method is not overloaded by the particular material model.
     // 1) Compute Green-Lagrange strain and call standard method for small strains. 
@@ -98,8 +97,8 @@ StructuralMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, MatResponse
     vE.beReducedVectorFormOfStrain(E);      // 6
 
     ///@todo Have this function:
-    //this->giveRealStressVector_3d(vS, form, gp, vE, tStep);
-    this->giveRealStressVector(vS, form, gp, vE, tStep); // Treat stress obtained as second PK stress
+    //this->giveRealStressVector_3d(vS, gp, vE, tStep);
+    this->giveRealStressVector(vS, ReducedForm, gp, vE, tStep); // Treat stress obtained as second PK stress
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     // Compute first PK stress from second PK stress
@@ -114,22 +113,20 @@ StructuralMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, MatResponse
 
 
 void
-StructuralMaterial :: giveFirstPKStressVector_PlaneStrain(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-        const FloatArray &reducedvF, TimeStep *tStep) 
+StructuralMaterial :: giveFirstPKStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep) 
 {
     if ( gp->giveMaterialMode() != _PlaneStrain ) {
         OOFEM_ERROR("StructuralMaterial :: giveFirstPKStressVector_PlaneStrain - Wrong material mode in GP");
     }
     FloatArray vF, vP;
     StructuralMaterial :: giveFullVectorFormF(vF, reducedvF, _PlaneStrain);
-    this->giveFirstPKStressVector_3d(vP, form, gp, vF, tStep);
+    this->giveFirstPKStressVector_3d(vP, gp, vF, tStep);
     StructuralMaterial :: giveReducedVectorForm(answer, vP, _PlaneStrain);
 }
 
 
 void
-StructuralMaterial :: giveFirstPKStressVector_PlaneStress(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-        const FloatArray &reducedvF, TimeStep *tStep) 
+StructuralMaterial :: giveFirstPKStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep) 
 {
     if ( gp->giveMaterialMode() != _PlaneStress ) {
         OOFEM_ERROR("StructuralMaterial :: giveFirstPKStressVector_PlaneStress - Wrong material mode in GP");
@@ -154,7 +151,7 @@ StructuralMaterial :: giveFirstPKStressVector_PlaneStress(FloatArray &answer, Ma
     }
     // Iterate to find full vF.
     for (int k = 0; k < 100; k++) { // Allow for a generous 100 iterations.
-        this->giveFirstPKStressVector_3d(vP, form, gp, vF, tStep);
+        this->giveFirstPKStressVector_3d(vP, gp, vF, tStep);
         vP_control.beSubArrayOf(vP, P_control);
         if ( vP_control.computeNorm() < 1e-6 ) { ///@todo We need a tolerance here!
             StructuralMaterial :: giveReducedVectorForm(answer, vP, _1dMat);
@@ -172,8 +169,7 @@ StructuralMaterial :: giveFirstPKStressVector_PlaneStress(FloatArray &answer, Ma
 
 
 void
-StructuralMaterial :: giveFirstPKStressVector_1d(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-        const FloatArray &reducedvF, TimeStep *tStep) 
+StructuralMaterial :: giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep) 
 {
     if ( gp->giveMaterialMode() != _1dMat) {
         OOFEM_ERROR("StructuralMaterial :: giveFirstPKStressVector_1d - Wrong material mode in GP");
@@ -194,7 +190,7 @@ StructuralMaterial :: giveFirstPKStressVector_1d(FloatArray &answer, MatResponse
     vF.at(1) = reducedvF.at(1);
     // Iterate to find full vF.
     for (int k = 0; k < 100; k++) { // Allow for a generous 100 iterations.
-        this->giveFirstPKStressVector_3d(vP, form, gp, vF, tStep);
+        this->giveFirstPKStressVector_3d(vP, gp, vF, tStep);
         vP_control.beSubArrayOf(vP, P_control);
         if ( vP_control.computeNorm() < 1e-6 ) { ///@todo We need a tolerance here!
             StructuralMaterial :: giveReducedVectorForm(answer, vP, _1dMat);
@@ -432,7 +428,7 @@ StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 
 void 
-StructuralMaterial :: giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+StructuralMaterial :: giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode,
                                                GaussPoint *gp, TimeStep *tStep)
 {
     // Returns the stiffness matrix dPdF of the reciever according to MatResponseMode 
@@ -446,27 +442,27 @@ StructuralMaterial :: giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseF
         break;
     case _PlaneStress:
     case _PlaneStressGrad:
-        this->givePlaneStressStiffMtrx_dPdF(answer, form, rMode, gp, tStep);
+        this->givePlaneStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
         break;
     case _PlaneStrain:
     case _PlaneStrainGrad:
-        this->givePlaneStrainStiffMtrx_dPdF(answer, form, rMode, gp, tStep);
+        this->givePlaneStrainStiffMtrx_dPdF(answer, rMode, gp, tStep);
         break;
     case _1dMat:
     case _1dMatGrad:
-        this->give1dStressStiffMtrx_dPdF(answer, form, rMode, gp, tStep);
+        this->give1dStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
         break;
     case _2dPlateLayer:
-        this->give2dPlateLayerStiffMtrx_dPdF(answer, form, rMode, gp, tStep);
+        this->give2dPlateLayerStiffMtrx_dPdF(answer, rMode, gp, tStep);
         break;
     case _3dShellLayer:
-        this->give3dShellLayerStiffMtrx_dPdF(answer, form, rMode, gp, tStep);
+        this->give3dShellLayerStiffMtrx_dPdF(answer, rMode, gp, tStep);
         break;
     case _2dBeamLayer:
-        this->give2dBeamLayerStiffMtrx_dPdF(answer, form, rMode, gp, tStep);
+        this->give2dBeamLayerStiffMtrx_dPdF(answer, rMode, gp, tStep);
         break;
     case _1dFiber:
-        this->give1dFiberStiffMtrx_dPdF(answer, form, rMode, gp, tStep);
+        this->give1dFiberStiffMtrx_dPdF(answer, rMode, gp, tStep);
         break;
     default:
         OOFEM_ERROR2( "StructuralMaterial :: giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
@@ -488,76 +484,76 @@ StructuralMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
 
 void
 StructuralMaterial :: givePlaneStressStiffMtrx_dPdF(FloatMatrix &answer,
-                                       MatResponseForm form, MatResponseMode mode,
+                                       MatResponseMode mode,
                                        GaussPoint *gp, TimeStep *tStep)
 { 
     FloatMatrix dSdE;
-    this->givePlaneStressStiffMtrx(dSdE, form, mode, gp, tStep); 
+    this->givePlaneStressStiffMtrx(dSdE, ReducedForm, mode, gp, tStep); 
     this->give_dPdF_from(dSdE, answer, gp);
 }
 
 
 void
 StructuralMaterial :: givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
-                                       MatResponseForm form, MatResponseMode mode,
+                                       MatResponseMode mode,
                                        GaussPoint *gp, TimeStep *tStep)
 { 
     FloatMatrix dSdE;
-    this->givePlaneStrainStiffMtrx(dSdE, form, mode, gp, tStep); 
+    this->givePlaneStrainStiffMtrx(dSdE, ReducedForm, mode, gp, tStep); 
     this->give_dPdF_from(dSdE, answer, gp);
 }
 
 
 void
 StructuralMaterial :: give1dStressStiffMtrx_dPdF(FloatMatrix &answer,
-                                       MatResponseForm form, MatResponseMode mode,
+                                       MatResponseMode mode,
                                        GaussPoint *gp, TimeStep *tStep)
 { 
     FloatMatrix dSdE;
-    this->give1dStressStiffMtrx(dSdE, form, mode, gp, tStep); 
+    this->give1dStressStiffMtrx(dSdE, ReducedForm, mode, gp, tStep); 
     this->give_dPdF_from(dSdE, answer, gp);
 }
 
 void
 StructuralMaterial :: give2dPlateLayerStiffMtrx_dPdF(FloatMatrix &answer,
-                                       MatResponseForm form, MatResponseMode mode,
+                                       MatResponseMode mode,
                                        GaussPoint *gp, TimeStep *tStep)
 { 
     FloatMatrix dSdE;
-    this->give2dPlateLayerStiffMtrx(dSdE, form, mode, gp, tStep); 
+    this->give2dPlateLayerStiffMtrx(dSdE, ReducedForm, mode, gp, tStep); 
     this->give_dPdF_from(dSdE, answer, gp);
 }
 
 
 void
 StructuralMaterial :: give3dShellLayerStiffMtrx_dPdF(FloatMatrix &answer,
-                                       MatResponseForm form, MatResponseMode mode,
+                                       MatResponseMode mode,
                                        GaussPoint *gp, TimeStep *tStep)
 { 
     FloatMatrix dSdE;
-    this->give3dShellLayerStiffMtrx(dSdE, form, mode, gp, tStep); 
+    this->give3dShellLayerStiffMtrx(dSdE, ReducedForm, mode, gp, tStep); 
     this->give_dPdF_from(dSdE, answer, gp);
 }
 
 
 void
 StructuralMaterial :: give2dBeamLayerStiffMtrx_dPdF(FloatMatrix &answer,
-                                       MatResponseForm form, MatResponseMode mode,
+                                       MatResponseMode mode,
                                        GaussPoint *gp, TimeStep *tStep)
 { 
     FloatMatrix dSdE;
-    this->give2dBeamLayerStiffMtrx(dSdE, form, mode, gp, tStep); 
+    this->give2dBeamLayerStiffMtrx(dSdE, ReducedForm, mode, gp, tStep); 
     this->give_dPdF_from(dSdE, answer, gp);
 }
 
 
 void
 StructuralMaterial :: give1dFiberStiffMtrx_dPdF(FloatMatrix &answer,
-                                       MatResponseForm form, MatResponseMode mode,
+                                       MatResponseMode mode,
                                        GaussPoint *gp, TimeStep *tStep)
 { 
     FloatMatrix dSdE;
-    this->give1dFiberStiffMtrx(dSdE, form, mode, gp, tStep); 
+    this->give1dFiberStiffMtrx(dSdE, ReducedForm, mode, gp, tStep); 
     this->give_dPdF_from(dSdE, answer, gp);
 }
 
@@ -2483,6 +2479,9 @@ StructuralMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
+    } else if ( type == IST_DeformationGradientTensor || type == IST_FirstPKStressTensor ) {
+        answer.setValues(9, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+        return 1;
     } else {
         return Material :: giveIntVarCompFullIndx(answer, type, mmode);
     }
@@ -2512,7 +2511,7 @@ StructuralMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGauss
     } else if ( ( type == IST_Temperature ) || ( type == IST_vonMisesStress ) ) {
         return 1;
     } else if ( ( type == IST_DeformationGradientTensor ) || ( type == IST_FirstPKStressTensor ) ) {
-        return this->giveSizeOfVoigtVector( aGaussPoint->giveMaterialMode() );
+        return 9;
     } else {
         return Material :: giveIPValueSize(type, aGaussPoint);
     }

@@ -173,30 +173,24 @@ public:
      * @param reducedF Deformation gradient in in reduced form.
      * @param tStep Current time step (most models are able to respond only when atTime is current time step).
      */
-    virtual void giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                                         const FloatArray &reducedF, TimeStep *tStep);
+    virtual void giveFirstPKStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
     /// Default implementation relies on giveRealStressVector for second Piola-Kirchoff stress
-    virtual void giveFirstPKStressVector_3d(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                                         const FloatArray &reducedF, TimeStep *tStep);
+    virtual void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
     /// Default implementation relies on giveRealStressVector_3d
-    virtual void giveFirstPKStressVector_PlaneStrain(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                                         const FloatArray &reducedF, TimeStep *tStep);
+    virtual void giveFirstPKStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
     /// Default implementation relies on giveRealStressVector_3d
-    virtual void giveFirstPKStressVector_PlaneStress(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                                         const FloatArray &reducedF, TimeStep *tStep);
+    virtual void giveFirstPKStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
     /// Default implementation relies on giveRealStressVector_3d
-    virtual void giveFirstPKStressVector_1d(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                                         const FloatArray &reducedF, TimeStep *tStep);
+    virtual void giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
 
     /**
      * Gives the tangent: @f$ \frac{\partial P}{\partial F} @f$.
      * @param answer The computed tangent from the last evaluated first-PK-stress.
-     * @param form Material response form.
      * @param rMode Material mode.
      * @param gp Gauss point.
      * @param tStep Time step.
      */
-    virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+    virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode,
                                           GaussPoint *gp, TimeStep *tStep);
 
     void give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp);
@@ -570,7 +564,7 @@ protected:
                                           TimeStep *tStep);
 
     virtual void givePlaneStressStiffMtrx_dPdF(FloatMatrix &answer,
-                                          MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                          MatResponseMode mmode, GaussPoint *gp,
                                           TimeStep *tStep);
 
     /**
@@ -596,7 +590,7 @@ protected:
                                           TimeStep *tStep);
 
     virtual void givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
-                                          MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                          MatResponseMode mmode, GaussPoint *gp,
                                           TimeStep *tStep);
 
     /**
@@ -617,7 +611,7 @@ protected:
                                        TimeStep *tStep);
 
     virtual void give1dStressStiffMtrx_dPdF(FloatMatrix &answer,
-                                       MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                       MatResponseMode mmode, GaussPoint *gp,
                                        TimeStep *tStep);
     /**
      * Method for computing 2d beam layer stiffness matrix of receiver.
@@ -637,7 +631,7 @@ protected:
                                           TimeStep *tStep);
 
     virtual void give2dBeamLayerStiffMtrx_dPdF(FloatMatrix &answer,
-                                          MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                          MatResponseMode mmode, GaussPoint *gp,
                                           TimeStep *tStep);
     /**
      * Method for computing 2d plate layer stiffness matrix of receiver.
@@ -657,7 +651,7 @@ protected:
                                            TimeStep *tStep);
 
     virtual void give2dPlateLayerStiffMtrx_dPdF(FloatMatrix &answer,
-                                           MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                           MatResponseMode mmode, GaussPoint *gp,
                                            TimeStep *tStep);
     /**
      * Method for computing 3d shell layer stiffness matrix of receiver.
@@ -677,7 +671,7 @@ protected:
                                            TimeStep * tStep);
 
     virtual void give3dShellLayerStiffMtrx_dPdF(FloatMatrix & answer,
-                                           MatResponseForm form, MatResponseMode mmode, GaussPoint * gp,
+                                           MatResponseMode mmode, GaussPoint * gp,
                                            TimeStep * tStep);
     /**
      * Method for computing 1d fiber stiffness matrix of receiver.
@@ -697,7 +691,7 @@ protected:
                                       TimeStep *tStep);
 
     virtual void give1dFiberStiffMtrx_dPdF(FloatMatrix &answer,
-                                      MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                      MatResponseMode mmode, GaussPoint *gp,
                                       TimeStep *tStep);
 
     /**

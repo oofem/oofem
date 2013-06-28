@@ -70,8 +70,8 @@ NLStructuralElement :: computeDeformationGradientVector(FloatArray &answer, Gaus
     // Displacement gradient H = du/dX 
     FloatMatrix B;
     this->computeBHmatrixAt(gp, B);
-    answer.beProductOf(B, u);   
-       
+    answer.beProductOf(B, u);
+    
     // Deformation gradient F = H + I 
     MaterialMode matMode = gp->giveMaterialMode();
     //@todo add support for additional MaterialModes
@@ -84,13 +84,12 @@ NLStructuralElement :: computeDeformationGradientVector(FloatArray &answer, Gaus
         answer.at(1) += 1.0;
         answer.at(2) += 1.0;
 
-    } else if ( matMode == _1dMat ) {        
+    } else if ( matMode == _1dMat ) {
         answer.at(1) += 1.0;
 
     } else {
         OOFEM_ERROR2("computeDeformationGradientVector : MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
-    }    
-        
+    }
 
 }
 
@@ -105,7 +104,7 @@ NLStructuralElement :: computeFirstPKStressVector(FloatArray &answer, GaussPoint
 
     FloatArray vF;
     this->computeDeformationGradientVector(vF, gp, tStep);
-    cs->giveFirstPKStresses(answer, ReducedForm, gp, vF, tStep);
+    cs->giveFirstPKStresses(answer, gp, vF, tStep);
 
 }
 
