@@ -166,6 +166,7 @@ public:
      * it should update temporary history variables in status according to newly reached state.
      * The temporary history variables are moved into equilibrium ones after global structure
      * equilibrium has been reached by iteration process.
+     * 
      * @param answer Contains result.
      * @param form Material response form.
      * @param gp Integration point.
@@ -174,14 +175,18 @@ public:
      */
     virtual void giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                          const FloatArray &reducedF, TimeStep *tStep);
-
-
-    /**
-     * Helper function for computing the common Green-Lagrange strain from a given deformation gradient.
-     * @param answer Green-Lagrange strain (symmetric part only) in Voigt form.
-     */
-    static void computeGreenLagrangeStrain(FloatMatrix &answer, FloatMatrix &F);
-
+    /// Default implementation relies on giveRealStressVector for second Piola-Kirchoff stress
+    virtual void giveFirstPKStressVector_3d(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+                                         const FloatArray &reducedF, TimeStep *tStep);
+    /// Default implementation relies on giveRealStressVector_3d
+    virtual void giveFirstPKStressVector_PlaneStrain(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+                                         const FloatArray &reducedF, TimeStep *tStep);
+    /// Default implementation relies on giveRealStressVector_3d
+    virtual void giveFirstPKStressVector_PlaneStress(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+                                         const FloatArray &reducedF, TimeStep *tStep);
+    /// Default implementation relies on giveRealStressVector_3d
+    virtual void giveFirstPKStressVector_1d(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+                                         const FloatArray &reducedF, TimeStep *tStep);
 
     /**
      * Gives the tangent: @f$ \frac{\partial P}{\partial F} @f$.
@@ -200,13 +205,6 @@ public:
     static void convert_P_2_S(FloatArray &answer, const FloatArray &reducedvP, const FloatArray &reducedvF, MaterialMode matMode);
     static void convert_S_2_P(FloatArray &answer, const FloatArray &reducedvS, const FloatArray &reducedvF, MaterialMode matMode);
     //@}
-
-    /**
-     * Returns the sencond order identity tensor on Voigt form. The size is according to the MaterialMode
-     * @param answer Voigt form of the the identity tensor.
-     * @param matMode Material response mode.
-     */
-    static void giveIdentityVector(FloatArray &answer, MaterialMode matMode);
 
     /**
      * Returns a vector of coefficients of thermal dilatation in direction of each material principal (local) axis.

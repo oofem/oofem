@@ -191,11 +191,15 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
     status->giveTempLeftCauchyGreen(oldLeftCauchyGreen);
     help.beProductOf(f, oldLeftCauchyGreen);
     trialLeftCauchyGreen.beProductTOf(help, f);
-    FloatMatrix def;
-    this->computeGreenLagrangeStrain(def, F);
+    FloatMatrix E;
+    E.beTProductOf(F, F);
+    E.at(1, 1) -= 1.0;
+    E.at(2, 2) -= 1.0;
+    E.at(3, 3) -= 1.0;
+    E.times(0.5);
 
-    FloatArray vDef(6);
-    vDef.beReducedVectorFormOfStrain(def);
+    FloatArray e;
+    e.beReducedVectorFormOfStrain(E);
 
     StrainVector leftCauchyGreen(_3dMat);
     StrainVector leftCauchyGreenDev(_3dMat);
@@ -258,14 +262,10 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
     S.beProductTOf(help, iF);
 
     FloatMatrix Ep(3, 3);
-    FloatMatrix E(3, 3);
     FloatArray ep(6);
-    FloatArray e(6);
     this->computeGLPlasticStrain(F, Ep, trialLeftCauchyGreen, J);
 
-    this->computeGreenLagrangeStrain(E, F);
     ep.beReducedVectorFormOfStrain(Ep);
-    e.beReducedVectorFormOfStrain(E);
     answer.beReducedVectorForm(S);
 
     status->setTrialStressVol(mi);

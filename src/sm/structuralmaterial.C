@@ -65,52 +65,149 @@ void
 StructuralMaterial :: giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
         const FloatArray &reducedvF, TimeStep *tStep) 
 {
+    ///@todo Move this to StructuralCrossSection ? 
+    MaterialMode mode = gp->giveMaterialMode();
+    if ( mode == _3dMat ) {
+        this->giveFirstPKStressVector_3d(answer, form, gp, reducedvF, tStep);
+    } else if ( mode == _PlaneStrain ) {
+        this->giveFirstPKStressVector_PlaneStrain(answer, form, gp, reducedvF, tStep);
+    } else if ( mode == _PlaneStress ) {
+        this->giveFirstPKStressVector_PlaneStress(answer, form, gp, reducedvF, tStep);
+    } else if ( mode == _1dMat ) {
+        this->giveFirstPKStressVector_1d(answer, form, gp, reducedvF, tStep);
+    }
+}
+
+void 
+StructuralMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+        const FloatArray &vF, TimeStep *tStep) 
+{
     // Default implementation used if this method is not overloaded by the particular material model.
     // 1) Compute Green-Lagrange strain and call standard method for small strains. 
     // 2) Treat stress as second Piola-Kirchhoff stress and convert to first Piola-Kirchhoff stress.
     // 3) Set state variables F, P 
-    
-    FloatArray reducedvE, reducedvS;
-    FloatArray vF, vE;
+
+    FloatArray vE, vS;
     FloatMatrix F, E;
-    StructuralMaterial :: giveFullVectorFormF(vF, reducedvF, gp->giveMaterialMode()); // 9
     F.beMatrixForm(vF);
-    StructuralMaterial :: computeGreenLagrangeStrain(E,F);  // 3x3
+    E.beTProductOf(F, F);
+    E.at(1, 1) -= 1.0;
+    E.at(2, 2) -= 1.0;
+    E.at(3, 3) -= 1.0;
+    E.times(0.5);
     vE.beReducedVectorFormOfStrain(E);      // 6
-    StructuralMaterial :: giveReducedSymVectorForm(reducedvE, vE, gp->giveMaterialMode()); //reduced
-    
-    this->giveRealStressVector(reducedvS, form, gp, reducedvE, tStep); // Treat stress obtained as second PK stress
+
+    ///@todo Have this function:
+    //this->giveRealStressVector_3d(vS, form, gp, vE, tStep);
+    this->giveRealStressVector(vS, form, gp, vE, tStep); // Treat stress obtained as second PK stress
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    
+
     // Compute first PK stress from second PK stress
-    this->convert_S_2_P(answer, reducedvS, reducedvF, gp->giveMaterialMode());
+    FloatMatrix P, S;
+    S.beMatrixForm(vS);
+    P.beProductOf(F,S);
+    answer.beFullVectorForm(P);
 
     status->letTempPVectorBe(answer);
-    status->letTempFVectorBe(reducedvF);
+    status->letTempFVectorBe(vF);
 }
 
 
-void 
-StructuralMaterial :: computeGreenLagrangeStrain(FloatMatrix &answer, FloatMatrix &F)
+void
+StructuralMaterial :: giveFirstPKStressVector_PlaneStrain(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+        const FloatArray &reducedvF, TimeStep *tStep) 
 {
-    // Computes the Green-Lagrange strain tensor, E = 0.5*( C - I ), on matrix form. 
-    // The size of the output matrix will be the same as the input matrix.
-
-    answer.beTProductOf(F, F);    // C - Right Caucy-Green deformation tensor
-
-    if ( answer.giveNumberOfRows() == 3 ) {
-        answer.at(1, 1) -= 1.0;
-        answer.at(2, 2) -= 1.0;
-        answer.at(3, 3) -= 1.0;
-    } else if ( answer.giveNumberOfRows() == 2 ) {
-        answer.at(1, 1) -= 1.0;
-        answer.at(2, 2) -= 1.0;
-    } else if ( answer.giveNumberOfRows() == 1 ) {
-        answer.at(1, 1) -= 1.0;
-    } else {
-        OOFEM_ERROR2("StructuralMaterial :: computeGreenLagrangeStrain - wrong size of input matrix (num rows = %d)", answer.giveNumberOfRows());
+    if ( gp->giveMaterialMode() != _PlaneStrain ) {
+        OOFEM_ERROR("StructuralMaterial :: giveFirstPKStressVector_PlaneStrain - Wrong material mode in GP");
     }
-    answer.times(0.5);
+    FloatArray vF, vP;
+    StructuralMaterial :: giveFullVectorFormF(vF, reducedvF, _PlaneStrain);
+    this->giveFirstPKStressVector_3d(vP, form, gp, vF, tStep);
+    StructuralMaterial :: giveReducedVectorForm(answer, vP, _PlaneStrain);
+}
+
+
+void
+StructuralMaterial :: giveFirstPKStressVector_PlaneStress(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+        const FloatArray &reducedvF, TimeStep *tStep) 
+{
+    if ( gp->giveMaterialMode() != _PlaneStress ) {
+        OOFEM_ERROR("StructuralMaterial :: giveFirstPKStressVector_PlaneStress - Wrong material mode in GP");
+    }
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    IntArray F_control, P_control; // Determines which components are controlled by F and P resp.
+    FloatArray vF, increment_vF, vP, vP_control;
+    FloatMatrix tangent, tangent_Pcontrol;
+    // Iterate to find full vF.
+    StructuralMaterial :: giveVoigtVectorMask(F_control, _PlaneStress);
+    // Compute the negated the array of control since we need P_control as well;
+    P_control.resize(9 - F_control.giveSize());
+    for (int i = 1, j = 1; i <= 9; i++) {
+        if ( !F_control.contains(i) ) P_control.at(j++) = i;
+    }
+
+    // Initial guess;
+    vF = status->giveFVector();
+    for (int i = 1; i <= F_control.giveSize(); ++i) {
+        vF.at(F_control.at(i)) = reducedvF.at(i);
+    }
+    // Iterate to find full vF.
+    for (int k = 0; k < 100; k++) { // Allow for a generous 100 iterations.
+        this->giveFirstPKStressVector_3d(vP, form, gp, vF, tStep);
+        vP_control.beSubArrayOf(vP, P_control);
+        if ( vP_control.computeNorm() < 1e-6 ) { ///@todo We need a tolerance here!
+            StructuralMaterial :: giveReducedVectorForm(answer, vP, _1dMat);
+            return;
+        }
+        this->give3dMaterialStiffnessMatrix_dPdF(tangent, TangentStiffness, gp, tStep);
+        tangent_Pcontrol.beSubMatrixOf(tangent, P_control, P_control);
+        tangent_Pcontrol.solveForRhs(vP_control, increment_vF);
+        vF.assemble(increment_vF, P_control);
+    }
+
+    OOFEM_WARNING("StructuralMaterial :: giveFirstPKStressVector_PlaneStress - Iteration did not converge");
+    answer.resize(0);
+}
+
+
+void
+StructuralMaterial :: giveFirstPKStressVector_1d(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+        const FloatArray &reducedvF, TimeStep *tStep) 
+{
+    if ( gp->giveMaterialMode() != _1dMat) {
+        OOFEM_ERROR("StructuralMaterial :: giveFirstPKStressVector_1d - Wrong material mode in GP");
+    }
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    IntArray P_control; // Determines which components are controlled by P resp.
+    FloatArray old_vF, vF, increment_vF, vP, vP_control;
+    FloatMatrix tangent, tangent_Pcontrol;
+    // Compute the negated the array of control since we need P_control as well;
+    P_control.resize(8);
+    for (int i = 1; i <= 8; i++) {
+        P_control.at(i) = i+1;
+    }
+
+    // Initial guess;
+    vF = status->giveFVector();
+    vF.at(1) = reducedvF.at(1);
+    // Iterate to find full vF.
+    for (int k = 0; k < 100; k++) { // Allow for a generous 100 iterations.
+        this->giveFirstPKStressVector_3d(vP, form, gp, vF, tStep);
+        vP_control.beSubArrayOf(vP, P_control);
+        if ( vP_control.computeNorm() < 1e-6 ) { ///@todo We need a tolerance here!
+            StructuralMaterial :: giveReducedVectorForm(answer, vP, _1dMat);
+            return;
+        }
+        this->give3dMaterialStiffnessMatrix_dPdF(tangent, TangentStiffness, gp, tStep);
+        tangent_Pcontrol.beSubMatrixOf(tangent, P_control, P_control);
+        tangent_Pcontrol.solveForRhs(vP_control, increment_vF);
+        vF.assemble(increment_vF, P_control);
+    }
+
+    OOFEM_WARNING("StructuralMaterial :: giveFirstPKStressVector_1d - Iteration did not converge");
+    answer.resize(0);
 }
 
 
@@ -274,14 +371,18 @@ StructuralMaterial :: give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answe
 {
     // Default implementation for converting dSdE to dPdF. This includes updating the 
     // state variables of P and F. 
-    
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    FloatArray reducedvF, reducedvP, reducedvS, vP;
-    reducedvF = status->giveTempFVector();
-    reducedvP = status->giveTempPVector();   
-    
+    FloatArray reducedvF, reducedvP, reducedvS;
+    const FloatArray &vF = status->giveTempFVector();
+    const FloatArray &vP = status->giveTempPVector();
+    const FloatArray &vS = status->giveTempStressVector();
+
     MaterialMode matMode = gp->giveMaterialMode();
-    this->convert_P_2_S(reducedvS, reducedvP, reducedvF, matMode);
+    ///@todo This is unnecessary and inefficient, just a hack for now (it will be changed when everything is in working order!)
+    StructuralMaterial :: giveReducedVectorForm(reducedvF, vF, matMode);
+    StructuralMaterial :: giveReducedVectorForm(reducedvP, vP, matMode);
+    StructuralMaterial :: giveReducedSymVectorForm(reducedvS, vS, matMode);
+    //this->convert_P_2_S(reducedvS, reducedvP, reducedvF, matMode);
     this->convert_dSdE_2_dPdF(answer, dSdE, reducedvS, reducedvF, matMode);
 }
 
@@ -490,38 +591,12 @@ StructuralMaterial :: convert_S_2_P(FloatArray &answer, const FloatArray &reduce
     FloatArray vF, vS, vP;
     StructuralMaterial :: giveFullVectorFormF(vF, reducedvF, matMode);   // 9 components
     StructuralMaterial :: giveFullSymVectorForm(vS, reducedvS, matMode); // 6 components
-    FloatMatrix F, P, S, invF;
+    FloatMatrix F, P, S;
     F.beMatrixForm(vF);
     S.beMatrixForm(vS);
     P.beProductOf(F,S);
     vP.beFullVectorForm(P); 
     StructuralMaterial :: giveReducedVectorForm(answer, vP, matMode);   // convert back to reduced size
-}
-
-
-void
-StructuralMaterial :: giveIdentityVector(FloatArray &answer, MaterialMode matMode)
-{
-    // Create identity tensor on Voigt form according to MaterialMode.
-
-    ///@todo This is a hack. We should just store 3D tensors always and be done with it.
-    int size;
-    if ( matMode == _3dBeam ) {
-        size = 9;
-    } else {
-        size = StructuralMaterial :: giveSizeOfVoigtVector( matMode );
-    }
-    answer.resize(size);
-
-    if ( size == 9 || size == 5 ) {
-        answer.at(1) = answer.at(2) = answer.at(3) = 1.0;
-    } else if ( size == 4 ) {
-        answer.at(1) = answer.at(2) = 1.0;
-    } else if (size == 1 ) {
-        answer.at(1) = 1.0;
-    } else {
-        answer.resize(0);
-    }
 }
 
 
