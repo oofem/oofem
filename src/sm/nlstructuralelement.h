@@ -128,7 +128,7 @@ public:
      * The response is evaluated using @f$ \int B_{\mathrm{H}}^{\mathrm{T}} D B_{\mathrm{H}} \;\mathrm{d}v @f$, where
      * @f$ B_{\mathrm{H}} @f$ is the B-matrix which produces the displacement gradient vector H_{\mathrm{V}} when multiplied with 
      * the solution vector a.
-     * Necessary transformations and reduced integration are taken into account. @todo which transformations are meant? /JB
+     * Reduced integration are taken into account.
      *
      * @param answer Computed stiffness matrix.
      * @param rMode Response mode.
