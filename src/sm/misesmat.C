@@ -94,9 +94,6 @@ MisesMat :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, a, _IFT_MisesMat_a); // exponent in damage law
     /********************************************************************************************************/
 
-
-
-
     return IRRT_OK;
 }
 
@@ -109,6 +106,7 @@ MisesMat :: CreateStatus(GaussPoint *gp) const
     return status;
 }
 
+
 // returns the stress vector in 3d stress space
 void
 MisesMat :: giveRealStressVector(FloatArray &answer,
@@ -119,7 +117,7 @@ MisesMat :: giveRealStressVector(FloatArray &answer,
 {
     MaterialMode mode = gp->giveMaterialMode();
 
-    if ( ( mode == _3dMat ) || ( mode == _1dMat ) || ( mode == _PlaneStrain ) ) {
+    if ( mode == _3dMat || mode == _1dMat || mode == _PlaneStrain ) {
         giveRealStressVectorComputedFromStrain(answer, form, gp, totalStrain, atTime);
     } else {
         OOFEM_ERROR("MisesMat::giveRealStressVector : unknown material response mode");
@@ -130,7 +128,6 @@ MisesMat :: giveRealStressVector(FloatArray &answer,
 void
 MisesMat :: giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep)
 {
-    MaterialMode mode = gp->giveMaterialMode();
     FloatArray vS;
     this->giveRealStressVectorComputedFromDefGrad(vS, ReducedForm, gp, vF, tStep);
     StructuralMaterial :: convert_S_2_P(answer, vS, vF, gp->giveMaterialMode());
@@ -287,7 +284,6 @@ MisesMat :: computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatM
 }
 
 
-
 // returns the stress vector in 3d stress space
 // computed from the previous plastic strain and current total strain
 void
@@ -312,6 +308,7 @@ MisesMat :: giveRealStressVectorComputedFromStrain(FloatArray &answer,
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(answer);
 }
+
 
 void MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, MaterialMode mode)
 {

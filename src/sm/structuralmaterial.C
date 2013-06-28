@@ -394,21 +394,18 @@ StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _3dMat:
-    case _3dMatGrad:
         this->give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
         break;
     case _PlaneStress:
-    case _PlaneStressGrad:
         this->givePlaneStressStiffMtrx(answer, form, rMode, gp, atTime);
         break;
     case _PlaneStrain:
-    case _PlaneStrainGrad:
         this->givePlaneStrainStiffMtrx(answer, form, rMode, gp, atTime);
         break;
     case _1dMat:
-    case _1dMatGrad:
         this->give1dStressStiffMtrx(answer, form, rMode, gp, atTime);
         break;
+
     case _2dPlateLayer:
         this->give2dPlateLayerStiffMtrx(answer, form, rMode, gp, atTime);
         break;
@@ -437,21 +434,18 @@ StructuralMaterial :: giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseM
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _3dMat:
-    case _3dMatGrad:
         this->give3dMaterialStiffnessMatrix_dPdF(answer, rMode, gp, tStep);
         break;
     case _PlaneStress:
-    case _PlaneStressGrad:
         this->givePlaneStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
         break;
     case _PlaneStrain:
-    case _PlaneStrainGrad:
         this->givePlaneStrainStiffMtrx_dPdF(answer, rMode, gp, tStep);
         break;
     case _1dMat:
-    case _1dMatGrad:
         this->give1dStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
         break;
+#if 0
     case _2dPlateLayer:
         this->give2dPlateLayerStiffMtrx_dPdF(answer, rMode, gp, tStep);
         break;
@@ -464,6 +458,7 @@ StructuralMaterial :: giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseM
     case _1dFiber:
         this->give1dFiberStiffMtrx_dPdF(answer, rMode, gp, tStep);
         break;
+#endif
     default:
         OOFEM_ERROR2( "StructuralMaterial :: giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
@@ -514,6 +509,7 @@ StructuralMaterial :: give1dStressStiffMtrx_dPdF(FloatMatrix &answer,
     this->give_dPdF_from(dSdE, answer, gp);
 }
 
+#if 0
 void
 StructuralMaterial :: give2dPlateLayerStiffMtrx_dPdF(FloatMatrix &answer,
                                        MatResponseMode mode,
@@ -556,6 +552,7 @@ StructuralMaterial :: give1dFiberStiffMtrx_dPdF(FloatMatrix &answer,
     this->give1dFiberStiffMtrx(dSdE, ReducedForm, mode, gp, tStep); 
     this->give_dPdF_from(dSdE, answer, gp);
 }
+#endif
 
 
 void

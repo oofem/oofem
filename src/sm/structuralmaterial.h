@@ -629,10 +629,11 @@ protected:
     virtual void give2dBeamLayerStiffMtrx(FloatMatrix &answer,
                                           MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
                                           TimeStep *tStep);
-
+#if 0
     virtual void give2dBeamLayerStiffMtrx_dPdF(FloatMatrix &answer,
                                           MatResponseMode mmode, GaussPoint *gp,
                                           TimeStep *tStep);
+#endif
     /**
      * Method for computing 2d plate layer stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -649,10 +650,11 @@ protected:
     virtual void give2dPlateLayerStiffMtrx(FloatMatrix &answer,
                                            MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
                                            TimeStep *tStep);
-
+#if 0
     virtual void give2dPlateLayerStiffMtrx_dPdF(FloatMatrix &answer,
                                            MatResponseMode mmode, GaussPoint *gp,
                                            TimeStep *tStep);
+#endif
     /**
      * Method for computing 3d shell layer stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -669,10 +671,11 @@ protected:
     virtual void give3dShellLayerStiffMtrx(FloatMatrix & answer,
                                            MatResponseForm form, MatResponseMode mmode, GaussPoint * gp,
                                            TimeStep * tStep);
-
+#if 0
     virtual void give3dShellLayerStiffMtrx_dPdF(FloatMatrix & answer,
                                            MatResponseMode mmode, GaussPoint * gp,
                                            TimeStep * tStep);
+#endif
     /**
      * Method for computing 1d fiber stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -689,11 +692,11 @@ protected:
     virtual void give1dFiberStiffMtrx(FloatMatrix &answer,
                                       MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
                                       TimeStep *tStep);
-
+#if 0
     virtual void give1dFiberStiffMtrx_dPdF(FloatMatrix &answer,
                                       MatResponseMode mmode, GaussPoint *gp,
                                       TimeStep *tStep);
-
+#endif
     /**
      * Transforms 3d strain vector into another coordinate system.
      * @param answer Transformed strain vector
