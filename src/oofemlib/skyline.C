@@ -468,7 +468,7 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
         }
     }
 
-    // loop over active boundary conditions
+    // loop over active boundary conditions (e.g. relative kinematic constraints)
     int ii, jj, nbc = domain->giveNumberOfBoundaryConditions();
     std::vector<IntArray> r_locs;
     std::vector<IntArray> c_locs;
