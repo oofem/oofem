@@ -49,6 +49,7 @@ enum classType {
     GeneralBoundaryConditionClass,
     ActiveBoundaryConditionClass,
     SurfaceTensionBoundaryConditionClass,
+    LinearConstraintClass,
     LoadClass,
     BoundaryConditionClass,
     PrescribedGradientClass,

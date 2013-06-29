@@ -43,6 +43,7 @@
 #include "verbose.h"
 #include "error.h"
 #include "sparsemtrxtype.h"
+#include "activebc.h"
 #include "classfactory.h"
 
 #ifdef TIME_REPORT
@@ -263,7 +264,7 @@ SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut
     // Warning : case diagonal (lumped) matrix to expected.
 
     IntArray loc;
-    int n, i, first, ii, nonlocal;
+    int n, i, first, ii, jj, nonlocal;
     Domain *domain = eModel->giveDomain(di);
     int neq = eModel->giveNumberOfDomainEquations(di, s);
     int nelem = domain->giveNumberOfElements();
@@ -324,6 +325,35 @@ SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut
             }
         }
     }
+
+    // loop over active boundary conditions
+    int nbc = domain->giveNumberOfBoundaryConditions();
+    std::vector<IntArray> r_locs;
+    std::vector<IntArray> c_locs;
+    
+    for ( int i = 1; i <= nbc; ++i ) {
+        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
+        if ( bc != NULL ) {
+            bc->giveLocationArrays(r_locs, c_locs, ut, UnknownCharType, s, s);
+	    for (std::size_t k = 0; k < r_locs.size(); k++) {
+	      IntArray &krloc = r_locs[k];
+	      IntArray &kcloc = c_locs[k];
+	      first = neq;
+	      for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
+		if ( ( jj = kcloc.at(j) ) ) {
+		  first = min(first, jj);
+		}
+	      }
+	      for ( int i = 1; i <= krloc.giveSize(); i++ ) {
+		ii = krloc.at(i);
+		if ( ii & ( first < firstIndex.at(ii) ) ) {
+		  firstIndex.at(ii) = first;
+		}
+	      }
+	    }
+        }
+    }
+
 
     // Enlarge the rowcolumns
     for ( i = 1; i <= neq; i++ ) {

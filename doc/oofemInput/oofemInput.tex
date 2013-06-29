@@ -2382,6 +2382,22 @@ corresponding nodes. This boundary condition implements this pressure
 bc. The value of bc is determined from applied tractions, that  should be specified on element edges/surfaces using
 suitable boundary loads.
 
+\item Linear constraint boundary condition
+
+\noindent
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{LinearConstraintBC}}{\field{weights}{ra}} 
+  \recentry{}{\optField{weightsLtf}{in}}
+  \recentry{}{\field{dofmans}{in}} \recentry{}{\field{dofs}{in}} 
+  \recentry{}{\field{rhs}{rn}} \recentry{}{\optField{rhsLtf}{in}}
+  \recentry{}{\field{lhstype}{ia}} \recentry{}{\field{rhsType}{in}}
+\end{record}
+
+This boundary condition implements a linear constraint in the form $\sum_i w_ir_i = c$,
+where $r_i$ are unknowns related to DOFs determined by \param{dofmans} and \param{dofs}, the weights are determined by \param{weights} and \param{weightsLtf}. The constant is determined by \param{rhs} and \param{rhsLtf} parameters. This boundary condition is introduced as additional stationary condition using Lagrange multiplier, which is an additional degree of freedom introduced by this boundary condition.
+
+The individual DOFs are determined using dof manager numbers (\param{dofmans} array) and corresponding DOF indices (\param{dofs}). The weights corresponding to participating DOFs are specified using \param{weights} array. The weights are multiplied by value returned by load time function, associated to individual weight using optional \param{weightsLtf} array. By default, all weights are set to 1. The constant $c$ is determined by \param{rhs} parameter and it is multiplied by the value of load time function, specified using \param{rhsLtf} parameter, or by 1 by default. The characteristic component, to which this boundary condition contributes must be identified using \param{lhstype} and \param{rhsType} parameters, values of which are corresponding to CharType enum. The left hand side contribution is assembled into terms identified by \param{lhstype}. Note, that multiple values are allowed, this allows to select all variants of stifness matrix, for example. The rhs contribution is assembled into the term identified by \param{rhsType} parameter. Note, that the size of \param{dofmans}, \param{dofs}, \param{weights}, \param{weightsLtf} arrays should be equal.
+
 \end{itemize}
 \paragraph{Body loads}
 \begin{itemize}
