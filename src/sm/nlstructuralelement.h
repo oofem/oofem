@@ -136,6 +136,8 @@ public:
      */
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
 
+    virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
+
     /**
      * Computes the stiffness matrix of receiver.
      * The response is evaluated using @f$ \int B_{\mathrm{H}}^{\mathrm{T}} D B_{\mathrm{H}} \;\mathrm{d}v @f$, where

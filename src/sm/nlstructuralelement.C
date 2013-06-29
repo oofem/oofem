@@ -380,11 +380,9 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
         }
     }
 
-    //@todo shouldn't this be inside the loop? What if we have different material models with mixed matStiffSymmFlags? /JB
     if ( matStiffSymmFlag ) {
         answer.symmetrized();
     }
-    
 }
 
 
@@ -392,18 +390,6 @@ void
 NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &answer,
                                                                    MatResponseMode rMode, TimeStep *tStep)
 {
-    /**
-     * Computes the stiffness matrix of receiver.
-     * The response is evaluated using @f$ \int B_{\mathrm{H}}^{\mathrm{T}} D B_{\mathrm{H}} \;\mathrm{d}v @f$, where
-     * @f$ B_{\mathrm{H}} @f$ is the B-matrix which produces the displacement gradient vector H_{\mathrm{V}} when multiplied with 
-     * the solution vector a.
-     * @Note: reduced intergration is not taken into account.
-     * nlGeometry = 0  ->  D = dSig/dEps 
-     * nlGeometry = 1  ->  D = dP/dF   
-     * The integration procedure uses an integrationRulesArray for numerical integration. Each integration rule is
-     * considered to represent a separate sub-cell/element. Typically this would be used when integration of the element 
-     * domain needs special treatment, e.g. when using the XFEM.
-     */
     GaussPoint *gp;
     IntegrationRule *iRule;
     StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
@@ -463,7 +449,62 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
     if ( matStiffSymmFlag ) {
         answer.symmetrized();
     }
+}
 
+
+void
+NLStructuralElement :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
+{
+    FloatArray stress, stressFull(6);
+    FloatMatrix B, stress_ident, stress_identFull;
+    IntArray indx;
+    Material *mat = this->giveMaterial();
+
+    answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
+    answer.zero();
+
+    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    // assemble initial stress matrix
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
+        stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+        if ( stress.giveSize() ) {
+            // Construct the stress_ident matrix
+            StructuralMaterial :: giveVoigtSymVectorMask(indx, gp->giveMaterialMode());
+            stressFull.zero();
+            stressFull.assemble(stress, indx);
+            // The complicated part, the not-so-pretty product here: s_il delta_jk
+            {
+                stress_ident.at(1,1) = stress.at(1);
+                stress_ident.at(2,2) = stress.at(2);
+                stress_ident.at(3,3) = stress.at(3);
+                stress_ident.at(4,4) = stress.at(2) + stress.at(3);
+                stress_ident.at(5,5) = stress.at(1) + stress.at(3);
+                stress_ident.at(6,6) = stress.at(1) + stress.at(2);
+
+                stress_ident.at(1,5) = stress.at(5);
+                stress_ident.at(1,6) = stress.at(6);
+
+                stress_ident.at(2,4) = stress.at(4);
+                stress_ident.at(2,5) = stress.at(6);
+
+                stress_ident.at(3,4) = stress.at(4);
+                stress_ident.at(3,5) = stress.at(5);
+
+                stress_ident.at(4,5) = stress.at(6);
+                stress_ident.at(4,6) = stress.at(5);
+                stress_ident.at(5,6) = stress.at(4);
+            }
+            stress_ident.beSubMatrixOf(stress_identFull, indx, indx);
+            stress_ident.symmetrized();
+            OOFEM_WARNING("NLStructuralElement :: computeInitialStressMatrix - Implementation not tested yet!");
+
+            this->computeBmatrixAt(gp, B);
+            answer.plusProductSymmUpper(B, stress_ident, this->computeVolumeAround(gp));
+        }
+    }
+
+    answer.symmetrized();
 }
 
 
@@ -497,8 +538,6 @@ NLStructuralElement :: checkConsistency()
     }
 
 }
-
-
 
 
 } // end namespace oofem
