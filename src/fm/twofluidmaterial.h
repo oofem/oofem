@@ -75,13 +75,10 @@ public:
                                            GaussPoint *gp,
                                            TimeStep *atTime) { }
 
-    virtual double  giveCharacteristicValue(MatResponseMode mode,
-                                            GaussPoint *gp,
-                                            TimeStep *atTime);
-
     virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
     virtual void giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
+    virtual double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep);
     virtual double give(int aProperty, GaussPoint *gp);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);

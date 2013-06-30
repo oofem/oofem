@@ -1105,7 +1105,7 @@ TR1_2D_SUPG_AXI :: updateStabilizationCoeffs(TimeStep *atTime)
         gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
     }
 
-    nu = this->giveMaterial()->giveCharacteristicValue( MRM_Viscosity, gp, atTime->givePreviousStep() );
+    nu = static_cast< FluidDynamicMaterial* >(this->giveMaterial())->giveEffectiveViscosity( gp, atTime->givePreviousStep() );
     nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
 
     dt = atTime->giveTimeIncrement() * tscale;

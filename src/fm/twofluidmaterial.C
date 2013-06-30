@@ -83,19 +83,11 @@ TwoFluidMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 
 double
-TwoFluidMaterial :: giveCharacteristicValue(MatResponseMode mode,
-                                            GaussPoint *gp,
-                                            TimeStep *atTime)
+TwoFluidMaterial :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep)
 {
-    if ( mode == MRM_Viscosity ) {
-        double vof = this->giveTempVOF(gp);
-        return ( ( 1.0 - vof ) * giveMaterial(0)->giveCharacteristicValue(MRM_Viscosity, gp, atTime) +
-                vof * giveMaterial(1)->giveCharacteristicValue(MRM_Viscosity, gp, atTime) );
-    } else {
-        _error2("giveCharacteristicValue: sorry, do not know, how to handle mode value %d", ( int ) mode);
-    }
-
-    return 0.0;
+    double vof = this->giveTempVOF(gp);
+    return ( 1.0 - vof ) * giveMaterial(0)->giveEffectiveViscosity(gp, tStep) +
+                     vof * giveMaterial(1)->giveEffectiveViscosity(gp, tStep);
 }
 
 

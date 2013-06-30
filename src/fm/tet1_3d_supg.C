@@ -322,7 +322,7 @@ Tet1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     gp = iRule->getIntegrationPoint(0);
-    nu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, atTime->givePreviousStep());
+    nu = static_cast< FluidDynamicMaterial* >(this->giveMaterial())->giveEffectiveViscosity(gp, atTime->givePreviousStep());
     nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
 
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
