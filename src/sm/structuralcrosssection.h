@@ -106,13 +106,11 @@ public:
      * performs necessary integration over its volume and invokes necessary material
      * services for corresponding material model defined for given integration point.
      * @param answer Contains the second Piola-Kirchoff stresses .
-     * @param form Material response form.
      * @param gp Integration point.
      * @param reducedFIncrement Increment of the deformation gradient vector in reduced form. @todo should this then be in a multiplicative way? /JB
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void giveFirstPKStresses(FloatArray & answer, MatResponseForm form,
-                                  GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);
+    virtual void giveFirstPKStresses(FloatArray & answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);
 
 
     /**

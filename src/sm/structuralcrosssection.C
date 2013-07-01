@@ -64,8 +64,7 @@ StructuralCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm 
 
 
 void
-StructuralCrossSection ::  giveFirstPKStresses(FloatArray &answer, MatResponseForm form,
-                                            GaussPoint *gp, const FloatArray &F, TimeStep *tStep)
+StructuralCrossSection ::  giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &F, TimeStep *tStep)
 {
     // This function returns the first Piola-Kirchoff stress in vector format
     // corresponding to a given deformation gradient according to the stress-deformation 
@@ -74,12 +73,10 @@ StructuralCrossSection ::  giveFirstPKStresses(FloatArray &answer, MatResponseFo
     MaterialMode mode = gp->giveMaterialMode();
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
     if ( mat->hasMaterialModeCapability(mode) ) {
-        mat->giveFirstPKStressVector(answer, form, gp, F, tStep);
+        mat->giveFirstPKStressVector(answer, gp, F, tStep);
         return;
     } else {
-        _error("giveSecondPKStresses : unsupported MaterialMode");
-        
-
+        _error("giveFirstPKStresses : unsupported MaterialMode");
     }
 }
 
@@ -90,7 +87,7 @@ StructuralCrossSection :: giveStiffnessMatrix_dPdF(FloatMatrix &answer,
                                                           TimeStep *tStep)
 {
     StructuralMaterial *mat = dynamic_cast< StructuralMaterial * > ( gp->giveElement()->giveMaterial() );
-    mat->giveStiffnessMatrix_dPdF(answer, ReducedForm, rMode, gp, tStep);
+    mat->giveStiffnessMatrix_dPdF(answer, rMode, gp, tStep);
 }
 
 

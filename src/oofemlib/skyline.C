@@ -42,6 +42,7 @@
 #include "verbose.h"
 #include "sparsemtrxtype.h"
 #include "classfactory.h"
+#include "activebc.h"
 
 #include <climits>
 #include <cstdlib>
@@ -315,8 +316,28 @@ int Skyline :: assemble(const IntArray &loc, const FloatMatrix &mat)
 
 int Skyline :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat)
 {
-    OOFEM_ERROR("Skyline::assemble : assemble of 'mat' using  'rloc and cloc' unsupported");
-    return 0;
+    int i, j, ii, jj, dim1, dim2;
+
+    dim1 = mat.giveNumberOfRows();
+    dim2 = mat.giveNumberOfColumns();
+    for ( i = 1; i <= dim1; i++ ) {
+        ii = rloc.at(i);
+        if ( ii ) {
+            for ( j = 1; j <= dim2; j++ ) {
+                jj = cloc.at(j);
+                if ( jj ) {
+		  if (ii<=jj) {
+                    this->at(ii, jj) += mat.at(i, j);
+		  }
+                }
+            }
+        }
+    }
+
+    // increment version
+    this->version++;
+
+    return 1;
 }
 
 
@@ -444,6 +465,34 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
             if ( ieq != 0 ) {
                 mht->at(ieq) = min( maxle, mht->at(ieq) );
             }
+        }
+    }
+
+    // loop over active boundary conditions (e.g. relative kinematic constraints)
+    int ii, jj, nbc = domain->giveNumberOfBoundaryConditions();
+    std::vector<IntArray> r_locs;
+    std::vector<IntArray> c_locs;
+    
+    for ( int i = 1; i <= nbc; ++i ) {
+        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
+        if ( bc != NULL ) {
+            bc->giveLocationArrays(r_locs, c_locs, ut, UnknownCharType, s, s);
+	    for (std::size_t k = 0; k < r_locs.size(); k++) {
+	      IntArray &krloc = r_locs[k];
+	      IntArray &kcloc = c_locs[k];
+	      maxle = INT_MAX;
+	      for ( int i = 1; i <= krloc.giveSize(); i++ ) {
+		if ( ( ii = krloc.at(i) ) ) {
+		  maxle = min(maxle, ii);
+		}
+	      }
+	      for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
+		jj = kcloc.at(j);
+		if ( jj ) {
+		  mht->at(jj) = min( maxle, mht->at(jj) );
+		}
+	      }
+	    }
         }
     }
 
