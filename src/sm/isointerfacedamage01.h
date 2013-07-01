@@ -147,11 +147,10 @@ public:
                                                GaussPoint *gp,
                                                TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseForm form,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);
@@ -186,9 +185,9 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IsoInterfaceDamageMaterialStatus(1, domain, gp); }
 
 protected:
-    void give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+    void give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *tStep);
-    void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+    void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *tStep);
 };
 } // end namespace oofem

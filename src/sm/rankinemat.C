@@ -137,7 +137,6 @@ RankineMat :: CreateStatus(GaussPoint *gp) const
 // computes the stress vector corresponding to given (final) strain
 void
 RankineMat :: giveRealStressVector(FloatArray &answer,
-                                   MatResponseForm form,
                                    GaussPoint *gp,
                                    const FloatArray &totalStrain,
                                    TimeStep *atTime)
@@ -385,7 +384,7 @@ void RankineMat :: computeCumPlastStrain(double &tempKappa, GaussPoint *gp, Time
 
 // returns the consistent (algorithmic) stiffness matrix
 void
-RankineMat :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
+RankineMat :: givePlaneStressStiffMtrx(FloatMatrix &answer,
                                        MatResponseMode mode,
                                        GaussPoint *gp,
                                        TimeStep *atTime)
@@ -393,13 +392,13 @@ RankineMat :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form
     RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
     double tempKappa = status->giveTempCumulativePlasticStrain();
     double gprime = computeDamageParamPrime(tempKappa);
-    evaluatePlaneStressStiffMtrx(answer, form, mode, gp, atTime, gprime);
+    evaluatePlaneStressStiffMtrx(answer, mode, gp, atTime, gprime);
 }
 
 // this method is also used by the gradient version,
 // with gprime replaced by gprime*m and evaluated for kappa hat
 void
-RankineMat :: evaluatePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
+RankineMat :: evaluatePlaneStressStiffMtrx(FloatMatrix &answer,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *atTime, double gprime)
@@ -407,7 +406,7 @@ RankineMat :: evaluatePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm 
     RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
     if ( mode == ElasticStiffness || mode == SecantStiffness ) {
         // start from the elastic stiffness
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
         if ( mode == SecantStiffness ) {
             // transform to secant stiffness
             double damage = status->giveTempDamage();
@@ -421,7 +420,7 @@ RankineMat :: evaluatePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm 
     double kappa = status->giveCumulativePlasticStrain();
     double tempKappa = status->giveTempCumulativePlasticStrain();
     if ( tempKappa <= kappa ) { // tangent matrix requested, but unloading takes place - use secant
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
         double damage = status->giveTempDamage();
         answer.times(1. - damage);
         return;

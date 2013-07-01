@@ -98,7 +98,7 @@ StructuralMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint 
 
     ///@todo Have this function:
     //this->giveRealStressVector_3d(vS, gp, vE, tStep);
-    this->giveRealStressVector(vS, ReducedForm, gp, vE, tStep); // Treat stress obtained as second PK stress
+    this->giveRealStressVector(vS, gp, vE, tStep); // Treat stress obtained as second PK stress
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     // Compute first PK stress from second PK stress
@@ -385,7 +385,7 @@ StructuralMaterial :: give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answe
 
 void
 StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode rMode,
+                                               MatResponseMode rMode,
                                                GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
@@ -397,26 +397,26 @@ StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         this->give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
         break;
     case _PlaneStress:
-        this->givePlaneStressStiffMtrx(answer, form, rMode, gp, atTime);
+        this->givePlaneStressStiffMtrx(answer, rMode, gp, atTime);
         break;
     case _PlaneStrain:
-        this->givePlaneStrainStiffMtrx(answer, form, rMode, gp, atTime);
+        this->givePlaneStrainStiffMtrx(answer, rMode, gp, atTime);
         break;
     case _1dMat:
-        this->give1dStressStiffMtrx(answer, form, rMode, gp, atTime);
+        this->give1dStressStiffMtrx(answer, rMode, gp, atTime);
         break;
 
     case _2dPlateLayer:
-        this->give2dPlateLayerStiffMtrx(answer, form, rMode, gp, atTime);
+        this->give2dPlateLayerStiffMtrx(answer, rMode, gp, atTime);
         break;
     case _3dShellLayer:
-        this->give3dShellLayerStiffMtrx(answer, form, rMode, gp, atTime);
+        this->give3dShellLayerStiffMtrx(answer, rMode, gp, atTime);
         break;
     case _2dBeamLayer:
-        this->give2dBeamLayerStiffMtrx(answer, form, rMode, gp, atTime);
+        this->give2dBeamLayerStiffMtrx(answer, rMode, gp, atTime);
         break;
     case _1dFiber:
-        this->give1dFiberStiffMtrx(answer, form, rMode, gp, atTime);
+        this->give1dFiberStiffMtrx(answer, rMode, gp, atTime);
         break;
     default:
         OOFEM_ERROR2( "StructuralMaterial :: giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
@@ -483,7 +483,7 @@ StructuralMaterial :: givePlaneStressStiffMtrx_dPdF(FloatMatrix &answer,
                                        GaussPoint *gp, TimeStep *tStep)
 { 
     FloatMatrix dSdE;
-    this->givePlaneStressStiffMtrx(dSdE, ReducedForm, mode, gp, tStep); 
+    this->givePlaneStressStiffMtrx(dSdE, mode, gp, tStep); 
     this->give_dPdF_from(dSdE, answer, gp);
 }
 
@@ -494,7 +494,7 @@ StructuralMaterial :: givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
                                        GaussPoint *gp, TimeStep *tStep)
 { 
     FloatMatrix dSdE;
-    this->givePlaneStrainStiffMtrx(dSdE, ReducedForm, mode, gp, tStep); 
+    this->givePlaneStrainStiffMtrx(dSdE, mode, gp, tStep); 
     this->give_dPdF_from(dSdE, answer, gp);
 }
 
@@ -505,7 +505,7 @@ StructuralMaterial :: give1dStressStiffMtrx_dPdF(FloatMatrix &answer,
                                        GaussPoint *gp, TimeStep *tStep)
 { 
     FloatMatrix dSdE;
-    this->give1dStressStiffMtrx(dSdE, ReducedForm, mode, gp, tStep); 
+    this->give1dStressStiffMtrx(dSdE, mode, gp, tStep); 
     this->give_dPdF_from(dSdE, answer, gp);
 }
 
@@ -516,7 +516,7 @@ StructuralMaterial :: give2dPlateLayerStiffMtrx_dPdF(FloatMatrix &answer,
                                        GaussPoint *gp, TimeStep *tStep)
 { 
     FloatMatrix dSdE;
-    this->give2dPlateLayerStiffMtrx(dSdE, ReducedForm, mode, gp, tStep); 
+    this->give2dPlateLayerStiffMtrx(dSdE, mode, gp, tStep); 
     this->give_dPdF_from(dSdE, answer, gp);
 }
 
@@ -527,7 +527,7 @@ StructuralMaterial :: give3dShellLayerStiffMtrx_dPdF(FloatMatrix &answer,
                                        GaussPoint *gp, TimeStep *tStep)
 { 
     FloatMatrix dSdE;
-    this->give3dShellLayerStiffMtrx(dSdE, ReducedForm, mode, gp, tStep); 
+    this->give3dShellLayerStiffMtrx(dSdE, mode, gp, tStep); 
     this->give_dPdF_from(dSdE, answer, gp);
 }
 
@@ -538,7 +538,7 @@ StructuralMaterial :: give2dBeamLayerStiffMtrx_dPdF(FloatMatrix &answer,
                                        GaussPoint *gp, TimeStep *tStep)
 { 
     FloatMatrix dSdE;
-    this->give2dBeamLayerStiffMtrx(dSdE, ReducedForm, mode, gp, tStep); 
+    this->give2dBeamLayerStiffMtrx(dSdE, mode, gp, tStep); 
     this->give_dPdF_from(dSdE, answer, gp);
 }
 
@@ -549,7 +549,7 @@ StructuralMaterial :: give1dFiberStiffMtrx_dPdF(FloatMatrix &answer,
                                        GaussPoint *gp, TimeStep *tStep)
 { 
     FloatMatrix dSdE;
-    this->give1dFiberStiffMtrx(dSdE, ReducedForm, mode, gp, tStep); 
+    this->give1dFiberStiffMtrx(dSdE, mode, gp, tStep); 
     this->give_dPdF_from(dSdE, answer, gp);
 }
 #endif
@@ -594,7 +594,7 @@ StructuralMaterial :: convert_S_2_P(FloatArray &answer, const FloatArray &reduce
 
 
 void
-StructuralMaterial ::  reduceStiffMtrx3d(FloatMatrix &answer, MatResponseForm form, GaussPoint *gp,
+StructuralMaterial ::  reduceStiffMtrx3d(FloatMatrix &answer, GaussPoint *gp,
                                          FloatMatrix &stiffMtrx3d) const
 //
 // Returns characteristic material stiffness matrix of the receiver
@@ -606,25 +606,25 @@ StructuralMaterial ::  reduceStiffMtrx3d(FloatMatrix &answer, MatResponseForm fo
         answer = stiffMtrx3d;
         break;
     case _PlaneStress:
-        this->reduceToPlaneStressStiffMtrx(answer, form, gp, stiffMtrx3d);
+        this->reduceToPlaneStressStiffMtrx(answer, gp, stiffMtrx3d);
         break;
     case _PlaneStrain:
-        this->reduceToPlaneStrainStiffMtrx(answer, form, gp, stiffMtrx3d);
+        this->reduceToPlaneStrainStiffMtrx(answer, gp, stiffMtrx3d);
         break;
     case _1dMat:
-        this->reduceTo1dStressStiffMtrx(answer, form, gp, stiffMtrx3d);
+        this->reduceTo1dStressStiffMtrx(answer, gp, stiffMtrx3d);
         break;
     case _2dPlateLayer:
-        this->reduceTo2dPlateLayerStiffMtrx(answer, form, gp, stiffMtrx3d);
+        this->reduceTo2dPlateLayerStiffMtrx(answer, gp, stiffMtrx3d);
         break;
     case _3dShellLayer:
-        this->reduceTo3dShellLayerStiffMtrx(answer, form, gp, stiffMtrx3d);
+        this->reduceTo3dShellLayerStiffMtrx(answer, gp, stiffMtrx3d);
         break;
     case _2dBeamLayer:
-        this->reduceTo2dBeamLayerStiffMtrx(answer, form, gp, stiffMtrx3d);
+        this->reduceTo2dBeamLayerStiffMtrx(answer, gp, stiffMtrx3d);
         break;
     case _1dFiber:
-        this->reduceTo1dFiberStiffMtrx(answer, form, gp, stiffMtrx3d);
+        this->reduceTo1dFiberStiffMtrx(answer, gp, stiffMtrx3d);
         break;
     default:
         OOFEM_ERROR2( "StructuralMaterial :: reduceStiffMtrx3d : unknown mode (%s)", __MaterialModeToString(mode) );
@@ -633,7 +633,7 @@ StructuralMaterial ::  reduceStiffMtrx3d(FloatMatrix &answer, MatResponseForm fo
 
 
 void
-StructuralMaterial :: reduceComplMtrx3d(FloatMatrix &answer, MatResponseForm form, GaussPoint *gp,
+StructuralMaterial :: reduceComplMtrx3d(FloatMatrix &answer, GaussPoint *gp,
                                         FloatMatrix &complMtrx3d) const
 //
 // Returns characteristic material compliance matrix of the receiver
@@ -645,25 +645,25 @@ StructuralMaterial :: reduceComplMtrx3d(FloatMatrix &answer, MatResponseForm for
         answer = complMtrx3d;
         break;
     case _PlaneStress:
-        this->reduceToPlaneStressComplMtrx(answer, form, gp, complMtrx3d);
+        this->reduceToPlaneStressComplMtrx(answer, gp, complMtrx3d);
         break;
     case _PlaneStrain:
-        this->reduceToPlaneStrainComplMtrx(answer, form, gp, complMtrx3d);
+        this->reduceToPlaneStrainComplMtrx(answer, gp, complMtrx3d);
         break;
     case _1dMat:
-        this->reduceTo1dStressComplMtrx(answer, form, gp, complMtrx3d);
+        this->reduceTo1dStressComplMtrx(answer, gp, complMtrx3d);
         break;
     case _2dPlateLayer:
-        this->reduceTo2dPlateLayerComplMtrx(answer, form, gp, complMtrx3d);
+        this->reduceTo2dPlateLayerComplMtrx(answer, gp, complMtrx3d);
         break;
     case _3dShellLayer:
-        this->reduceTo3dShellLayerComplMtrx(answer, form, gp, complMtrx3d);
+        this->reduceTo3dShellLayerComplMtrx(answer, gp, complMtrx3d);
         break;
     case _2dBeamLayer:
-        this->reduceTo2dBeamLayerComplMtrx(answer, form, gp, complMtrx3d);
+        this->reduceTo2dBeamLayerComplMtrx(answer, gp, complMtrx3d);
         break;
     case _1dFiber:
-        this->reduceTo1dFiberComplMtrx(answer, form, gp, complMtrx3d);
+        this->reduceTo1dFiberComplMtrx(answer, gp, complMtrx3d);
         break;
     default:
         OOFEM_ERROR2( "StructuralMaterial :: reduceComplMtrx3d : unknown mode (%s)", __MaterialModeToString(mode) );
@@ -922,7 +922,7 @@ StructuralMaterial :: giveVoigtVectorMask(IntArray &answer, MaterialMode mmode)
 #if 1
 void
 StructuralMaterial :: reduceToPlaneStressStiffMtrx(FloatMatrix &answer,
-                                                   MatResponseForm form, GaussPoint *gp,
+                                                   GaussPoint *gp,
                                                    FloatMatrix &stiffMtrx3d) const
 //
 // returns receiver's 2dPlaneStressMtrx constructed from
@@ -953,22 +953,7 @@ StructuralMaterial :: reduceToPlaneStressStiffMtrx(FloatMatrix &answer,
 
         reducedAnswer.beInverseOf(invAnswer);
 
-        if ( form == ReducedForm ) {
-            answer = reducedAnswer;
-        } else {
-            answer.resize(6, 6);
-            answer.zero();
-
-            answer.at(1, 1) = reducedAnswer.at(1, 1);
-            answer.at(1, 2) = reducedAnswer.at(1, 2);
-            answer.at(1, 6) = reducedAnswer.at(1, 3);
-            answer.at(2, 1) = reducedAnswer.at(2, 1);
-            answer.at(2, 2) = reducedAnswer.at(2, 2);
-            answer.at(2, 6) = reducedAnswer.at(2, 3);
-            answer.at(6, 6) = reducedAnswer.at(3, 3);
-            answer.at(6, 1) = reducedAnswer.at(3, 1);
-            answer.at(6, 2) = reducedAnswer.at(3, 2);
-        }
+        answer = reducedAnswer;
 
     } else {
         OOFEM_ERROR("StructuralMaterial :: reduceToPlaneStressStiffMtrx : stiffMtrx size mismatch");
@@ -978,7 +963,7 @@ StructuralMaterial :: reduceToPlaneStressStiffMtrx(FloatMatrix &answer,
 
 void
 StructuralMaterial :: reduceToPlaneStrainStiffMtrx(FloatMatrix &answer,
-                                                   MatResponseForm form, GaussPoint *gp,
+                                                   GaussPoint *gp,
                                                    FloatMatrix &stiffMtrx3d) const
 //
 // returns receiver's 2dPlaneStrainMtrx constructed from
@@ -989,46 +974,24 @@ StructuralMaterial :: reduceToPlaneStrainStiffMtrx(FloatMatrix &answer,
 {
     // check if stiffMtrx is proper
     if ( ( stiffMtrx3d.isSquare() ) && ( stiffMtrx3d.giveNumberOfRows() == 6 ) ) {
-        if ( form == ReducedForm ) {
-            answer.resize(4, 4);
-            answer.zero();
+        answer.resize(4, 4);
+        answer.zero();
 
-            answer.at(1, 1) = stiffMtrx3d.at(1, 1);
-            answer.at(1, 2) = stiffMtrx3d.at(1, 2);
-            answer.at(1, 4) = stiffMtrx3d.at(1, 6);
+        answer.at(1, 1) = stiffMtrx3d.at(1, 1);
+        answer.at(1, 2) = stiffMtrx3d.at(1, 2);
+        answer.at(1, 4) = stiffMtrx3d.at(1, 6);
 
-            answer.at(2, 1) = stiffMtrx3d.at(2, 1);
-            answer.at(2, 2) = stiffMtrx3d.at(2, 2);
-            answer.at(2, 4) = stiffMtrx3d.at(2, 6);
+        answer.at(2, 1) = stiffMtrx3d.at(2, 1);
+        answer.at(2, 2) = stiffMtrx3d.at(2, 2);
+        answer.at(2, 4) = stiffMtrx3d.at(2, 6);
 
-            answer.at(3, 1) = stiffMtrx3d.at(3, 1);
-            answer.at(3, 2) = stiffMtrx3d.at(3, 2);
-            answer.at(3, 4) = stiffMtrx3d.at(3, 6);
+        answer.at(3, 1) = stiffMtrx3d.at(3, 1);
+        answer.at(3, 2) = stiffMtrx3d.at(3, 2);
+        answer.at(3, 4) = stiffMtrx3d.at(3, 6);
 
-            answer.at(4, 1) = stiffMtrx3d.at(6, 1);
-            answer.at(4, 2) = stiffMtrx3d.at(6, 2);
-            answer.at(4, 4) = stiffMtrx3d.at(6, 6);
-        } else {
-            answer.resize(6, 6);
-            answer.zero();
-
-            answer.at(1, 1) = stiffMtrx3d.at(1, 1);
-            answer.at(1, 2) = stiffMtrx3d.at(1, 2);
-            answer.at(1, 6) = stiffMtrx3d.at(1, 6);
-
-            answer.at(2, 1) = stiffMtrx3d.at(2, 1);
-            answer.at(2, 2) = stiffMtrx3d.at(2, 2);
-            answer.at(2, 6) = stiffMtrx3d.at(2, 6);
-
-            answer.at(3, 1) = stiffMtrx3d.at(3, 1);
-            answer.at(3, 2) = stiffMtrx3d.at(3, 2);
-            answer.at(3, 6) = stiffMtrx3d.at(3, 6);
-
-            answer.at(6, 6) = stiffMtrx3d.at(3, 3);
-            answer.at(6, 1) = stiffMtrx3d.at(6, 1);
-            answer.at(6, 2) = stiffMtrx3d.at(6, 2);
-        }
-
+        answer.at(4, 1) = stiffMtrx3d.at(6, 1);
+        answer.at(4, 2) = stiffMtrx3d.at(6, 2);
+        answer.at(4, 4) = stiffMtrx3d.at(6, 6);
     } else {
         OOFEM_ERROR("StructuralMaterial :: reduceToPlaneStrainStiffMtrx :: stiffMtrx size mismatch");
     }
@@ -1037,7 +1000,7 @@ StructuralMaterial :: reduceToPlaneStrainStiffMtrx(FloatMatrix &answer,
 
 void
 StructuralMaterial :: reduceTo1dStressStiffMtrx(FloatMatrix &answer,
-                                                MatResponseForm form, GaussPoint *gp,
+                                                GaussPoint *gp,
                                                 FloatMatrix &stiffMtrx3d) const
 //
 //
@@ -1055,16 +1018,9 @@ StructuralMaterial :: reduceTo1dStressStiffMtrx(FloatMatrix &answer,
         inv3d.beInverseOf(stiffMtrx3d);
         val11 = inv3d.at(1, 1);
 
-        if ( form == ReducedForm ) {
-            answer.resize(1, 1);
+        answer.resize(1, 1);
 
-            answer.at(1, 1) = 1. / val11;
-        } else {
-            answer.resize(6, 6);
-            answer.zero();
-
-            answer.at(1, 1) = 1. / val11;
-        }
+        answer.at(1, 1) = 1. / val11;
 
     } else {
         OOFEM_ERROR("StructuralMaterial :: reduceTo1dStressStiffMtrx:: stiffMtrx3d size mismatch");
@@ -1074,7 +1030,6 @@ StructuralMaterial :: reduceTo1dStressStiffMtrx(FloatMatrix &answer,
 
 void
 StructuralMaterial :: reduceTo2dPlateLayerStiffMtrx(FloatMatrix &answer,
-                                                    MatResponseForm form,
                                                     GaussPoint *gp,
                                                     FloatMatrix &stiffMtrx3d) const
 //
@@ -1086,7 +1041,7 @@ StructuralMaterial :: reduceTo2dPlateLayerStiffMtrx(FloatMatrix &answer,
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    FloatMatrix invMat3d, invMatLayer(5, 5), matLayer;
+    FloatMatrix invMat3d, invMatLayer(5, 5);
 
     if ( !( ( mode == _2dPlateLayer ) || ( mode == _3dShellLayer ) ) ) {
         _error("ReduceTo2dPlateLayerStiffMtrx : unsupported mode");
@@ -1116,33 +1071,7 @@ StructuralMaterial :: reduceTo2dPlateLayerStiffMtrx(FloatMatrix &answer,
             }
         }
 
-        matLayer.beInverseOf(invMatLayer);
-
-        if ( form == ReducedForm ) {
-            answer = matLayer;
-        } else {
-            answer.resize(6, 6);
-            answer.zero();
-
-            for ( int i = 1; i <= 2; i++ ) {
-                for ( int j = 1; j <= 2; j++ ) {
-                    answer.at(i, j) = matLayer.at(i, j);
-                }
-            }
-
-            for ( int i = 4; i <= 6; i++ ) {
-                for ( int j = 4; j <= 6; j++ ) {
-                    answer.at(i, j) = matLayer.at(i - 1, j - 1);
-                }
-            }
-
-            for ( int i = 1; i <= 2; i++ ) {
-                for ( int j = 4; j <= 6; j++ ) {
-                    answer.at(i, j) = matLayer.at(i, j - 1);
-                    answer.at(j, i) = matLayer.at(j - 1, i);
-                }
-            }
-        }
+        answer.beInverseOf(invMatLayer);
     } else {
         OOFEM_ERROR("StructuralMaterial :: reduceTo2dPlateLayerStiffMtrx : stiffMtrx size mismatch");
     }
@@ -1151,7 +1080,6 @@ StructuralMaterial :: reduceTo2dPlateLayerStiffMtrx(FloatMatrix &answer,
 
 void
 StructuralMaterial :: reduceTo3dShellLayerStiffMtrx(FloatMatrix &answer,
-                                                    MatResponseForm form,
                                                     GaussPoint *gp,
                                                     FloatMatrix &stiffMtrx3d) const
 //
@@ -1162,13 +1090,12 @@ StructuralMaterial :: reduceTo3dShellLayerStiffMtrx(FloatMatrix &answer,
 // 1) strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
 
 {
-    this->reduceTo2dPlateLayerStiffMtrx(answer, form, gp, stiffMtrx3d);
+    this->reduceTo2dPlateLayerStiffMtrx(answer, gp, stiffMtrx3d);
 }
 
 
 void
 StructuralMaterial :: reduceTo2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                                   MatResponseForm form,
                                                    GaussPoint *gp,
                                                    FloatMatrix &stiffMtrx3d) const
 //
@@ -1180,7 +1107,7 @@ StructuralMaterial :: reduceTo2dBeamLayerStiffMtrx(FloatMatrix &answer,
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    FloatMatrix invMat3d, invMatLayer(2, 2), matLayer;
+    FloatMatrix invMat3d, invMatLayer(2, 2);
 
     if ( mode != _2dBeamLayer ) {
         OOFEM_ERROR("StructuralMaterial :: ReduceTo2dBeamLayerStiffMtrx : unsupported mode");
@@ -1194,19 +1121,7 @@ StructuralMaterial :: reduceTo2dBeamLayerStiffMtrx(FloatMatrix &answer,
         invMatLayer.at(2, 1) = invMat3d.at(5, 1);
         invMatLayer.at(2, 2) = invMat3d.at(5, 5);
 
-        matLayer.beInverseOf(invMatLayer);
-
-        if ( form == ReducedForm ) {
-            answer = matLayer;
-        } else {
-            answer.resize(6, 6);
-            answer.zero();
-
-            answer.at(1, 1) = matLayer.at(1, 1);
-            answer.at(1, 5) = matLayer.at(1, 2);
-            answer.at(5, 1) = matLayer.at(2, 1);
-            answer.at(5, 5) = matLayer.at(2, 2);
-        }
+        answer.beInverseOf(invMatLayer);
     } else {
         OOFEM_ERROR("StructuralMaterial :: reduceTo2dBeamLayerStiffMtrx: stiffMtrx3d size mismatch");
     }
@@ -1215,7 +1130,6 @@ StructuralMaterial :: reduceTo2dBeamLayerStiffMtrx(FloatMatrix &answer,
 
 void
 StructuralMaterial :: reduceTo1dFiberStiffMtrx(FloatMatrix &answer,
-                                               MatResponseForm form,
                                                GaussPoint *gp,
                                                FloatMatrix &stiffMtrx3d) const
 //
@@ -1227,7 +1141,7 @@ StructuralMaterial :: reduceTo1dFiberStiffMtrx(FloatMatrix &answer,
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    FloatMatrix invMat3d, invMatLayer(3, 3), matLayer;
+    FloatMatrix invMat3d, invMatLayer(3, 3);
 
     if ( mode != _1dFiber ) {
         OOFEM_ERROR("StructuralMaterial :: reduceTo1dFiberStiffMtrx : unsupported mode");
@@ -1246,24 +1160,8 @@ StructuralMaterial :: reduceTo1dFiberStiffMtrx(FloatMatrix &answer,
         invMatLayer.at(3, 2) = invMat3d.at(6, 5);
         invMatLayer.at(3, 3) = invMat3d.at(6, 6);
 
-        matLayer.beInverseOf(invMatLayer);
+        answer.beInverseOf(invMatLayer);
 
-        if ( form == ReducedForm ) {
-            answer = matLayer;
-        } else {
-            answer.resize(6, 6);
-            answer.zero();
-
-            answer.at(1, 1) = matLayer.at(1, 1);
-            answer.at(1, 5) = matLayer.at(1, 2);
-            answer.at(1, 6) = matLayer.at(1, 3);
-            answer.at(5, 1) = matLayer.at(2, 1);
-            answer.at(5, 5) = matLayer.at(2, 2);
-            answer.at(5, 6) = matLayer.at(2, 3);
-            answer.at(6, 1) = matLayer.at(3, 1);
-            answer.at(6, 5) = matLayer.at(3, 2);
-            answer.at(6, 6) = matLayer.at(3, 3);
-        }
     } else {
         OOFEM_ERROR("StructuralMaterial :: reduceTo1dFiberStiffMtrx: stiffMtrx3d size mismatch");
     }
@@ -1275,7 +1173,7 @@ StructuralMaterial :: reduceTo1dFiberStiffMtrx(FloatMatrix &answer,
 #if 1
 void
 StructuralMaterial :: reduceToPlaneStressComplMtrx(FloatMatrix &answer,
-                                                   MatResponseForm form, GaussPoint *gp,
+                                                   GaussPoint *gp,
                                                    FloatMatrix &complMtrx3d) const
 //
 // returns receiver's 2dPlaneComplMtrx constructed from
@@ -1286,33 +1184,18 @@ StructuralMaterial :: reduceToPlaneStressComplMtrx(FloatMatrix &answer,
 {
     // check if complMtrx is proper
     if ( ( complMtrx3d.isSquare() ) && ( complMtrx3d.giveNumberOfRows() == 6 ) ) {
-        if ( form == ReducedForm ) {
-            answer.resize(3, 3);
-            answer.zero();
+        answer.resize(3, 3);
+        answer.zero();
 
-            answer.at(1, 1) = complMtrx3d.at(1, 1);
-            answer.at(1, 2) = complMtrx3d.at(1, 2);
-            answer.at(1, 3) = complMtrx3d.at(1, 6);
-            answer.at(2, 1) = complMtrx3d.at(2, 1);
-            answer.at(2, 2) = complMtrx3d.at(2, 2);
-            answer.at(2, 3) = complMtrx3d.at(2, 6);
-            answer.at(3, 3) = complMtrx3d.at(6, 6);
-            answer.at(3, 1) = complMtrx3d.at(6, 1);
-            answer.at(3, 2) = complMtrx3d.at(6, 2);
-        } else {
-            answer.resize(6, 6);
-            answer.zero();
-
-            answer.at(1, 1) = complMtrx3d.at(1, 1);
-            answer.at(1, 2) = complMtrx3d.at(1, 2);
-            answer.at(1, 6) = complMtrx3d.at(1, 6);
-            answer.at(2, 1) = complMtrx3d.at(2, 1);
-            answer.at(2, 2) = complMtrx3d.at(2, 2);
-            answer.at(2, 6) = complMtrx3d.at(2, 6);
-            answer.at(6, 6) = complMtrx3d.at(6, 6);
-            answer.at(6, 1) = complMtrx3d.at(6, 1);
-            answer.at(6, 2) = complMtrx3d.at(6, 2);
-        }
+        answer.at(1, 1) = complMtrx3d.at(1, 1);
+        answer.at(1, 2) = complMtrx3d.at(1, 2);
+        answer.at(1, 3) = complMtrx3d.at(1, 6);
+        answer.at(2, 1) = complMtrx3d.at(2, 1);
+        answer.at(2, 2) = complMtrx3d.at(2, 2);
+        answer.at(2, 3) = complMtrx3d.at(2, 6);
+        answer.at(3, 3) = complMtrx3d.at(6, 6);
+        answer.at(3, 1) = complMtrx3d.at(6, 1);
+        answer.at(3, 2) = complMtrx3d.at(6, 2);
     } else {
         OOFEM_ERROR("StructuralMaterial :: reduceToPlaneStressComplMtrx : complMtrx size mismatch");
     }
@@ -1321,7 +1204,7 @@ StructuralMaterial :: reduceToPlaneStressComplMtrx(FloatMatrix &answer,
 
 void
 StructuralMaterial :: reduceToPlaneStrainComplMtrx(FloatMatrix &answer,
-                                                   MatResponseForm form, GaussPoint *gp,
+                                                   GaussPoint *gp,
                                                    FloatMatrix &complMtrx3d) const
 //
 // returns receiver's 2dPlaneStrainMtrx constructed from
@@ -1349,35 +1232,19 @@ StructuralMaterial :: reduceToPlaneStrainComplMtrx(FloatMatrix &answer,
 
         reducedAnswer.beInverseOf(invAnswer);
 
-        if ( form == ReducedForm ) {
-            answer.resize(4, 4);
-            answer.zero();
+        answer.resize(4, 4);
+        answer.zero();
 
-            for ( int i = 1; i <= 2; i++ ) {
-                for ( int j = 1; j <= 2; j++ ) {
-                    answer.at(i, j) = reducedAnswer.at(i, j);
-                }
-            }
+        answer.at(1, 1) = reducedAnswer.at(1, 1);
+        answer.at(1, 2) = reducedAnswer.at(1, 2);
+        answer.at(2, 1) = reducedAnswer.at(2, 1);
+        answer.at(2, 2) = reducedAnswer.at(2, 2);
 
-            answer.at(1, 4) = reducedAnswer.at(1, 3);
-            answer.at(2, 4) = reducedAnswer.at(2, 3);
-            answer.at(4, 1) = reducedAnswer.at(3, 1);
-            answer.at(4, 2) = reducedAnswer.at(3, 2);
-            answer.at(4, 4) = reducedAnswer.at(3, 3);
-        } else {
-            answer.resize(6, 6);
-            answer.zero();
-
-            answer.at(1, 1) = reducedAnswer.at(1, 1);
-            answer.at(1, 2) = reducedAnswer.at(1, 2);
-            answer.at(1, 6) = reducedAnswer.at(1, 3);
-            answer.at(2, 1) = reducedAnswer.at(2, 1);
-            answer.at(2, 2) = reducedAnswer.at(2, 2);
-            answer.at(2, 6) = reducedAnswer.at(2, 3);
-            answer.at(6, 6) = reducedAnswer.at(3, 3);
-            answer.at(6, 1) = reducedAnswer.at(3, 1);
-            answer.at(6, 2) = reducedAnswer.at(3, 2);
-        }
+        answer.at(1, 4) = reducedAnswer.at(1, 3);
+        answer.at(2, 4) = reducedAnswer.at(2, 3);
+        answer.at(4, 1) = reducedAnswer.at(3, 1);
+        answer.at(4, 2) = reducedAnswer.at(3, 2);
+        answer.at(4, 4) = reducedAnswer.at(3, 3);
 
     } else {
         OOFEM_ERROR("StructuralMaterial :: reduceToPlaneStrainComplMtrx :: complMtrx size mismatch");
@@ -1387,7 +1254,7 @@ StructuralMaterial :: reduceToPlaneStrainComplMtrx(FloatMatrix &answer,
 
 void
 StructuralMaterial :: reduceTo1dStressComplMtrx(FloatMatrix &answer,
-                                                MatResponseForm form, GaussPoint *gp,
+                                                GaussPoint *gp,
                                                 FloatMatrix &complMtrx3d) const
 //
 //
@@ -1397,18 +1264,9 @@ StructuralMaterial :: reduceTo1dStressComplMtrx(FloatMatrix &answer,
 {
     // check if complMtrx is proper
     if ( ( complMtrx3d.isSquare() ) && ( complMtrx3d.giveNumberOfRows() == 6 ) ) {
-        if ( form == ReducedForm ) {
-            answer.resize(1, 1);
-
-            answer.at(1, 1) = complMtrx3d.at(1, 1);
-        } else {
-            answer.resize(6, 6);
-            answer.zero();
-
-            answer.at(1, 1) = complMtrx3d.at(1, 1);
-        }
-
-        return;
+        answer.resize(1, 1);
+        answer.at(1, 1) = complMtrx3d.at(1, 1);
+        
     } else {
         OOFEM_ERROR("StructuralMaterial :: reduceTo1dStressComplMtrx:: complMtrx3d size mismatch");
     }
@@ -1418,7 +1276,6 @@ StructuralMaterial :: reduceTo1dStressComplMtrx(FloatMatrix &answer,
 
 void
 StructuralMaterial :: reduceTo2dPlateLayerComplMtrx(FloatMatrix &answer,
-                                                    MatResponseForm form,
                                                     GaussPoint *gp,
                                                     FloatMatrix &complMtrx3d) const
 //
@@ -1438,49 +1295,25 @@ StructuralMaterial :: reduceTo2dPlateLayerComplMtrx(FloatMatrix &answer,
 
     // check if complMtrx is proper
     if ( ( complMtrx3d.isSquare() ) && ( complMtrx3d.giveNumberOfRows() == 6 ) ) {
-        if ( form == ReducedForm ) {
-            answer.resize(5, 5);
-            answer.zero();
+        answer.resize(5, 5);
+        answer.zero();
 
-            for ( int i = 1; i <= 2; i++ ) {
-                for ( int j = 1; j <= 2; j++ ) {
-                    answer.at(i, j) = complMtrx3d.at(i, j);
-                }
+        for ( int i = 1; i <= 2; i++ ) {
+            for ( int j = 1; j <= 2; j++ ) {
+                answer.at(i, j) = complMtrx3d.at(i, j);
             }
+        }
 
-            for ( int i = 4; i <= 6; i++ ) {
-                for ( int j = 4; j <= 6; j++ ) {
-                    answer.at(i - 1, j - 1) = complMtrx3d.at(i, j);
-                }
+        for ( int i = 4; i <= 6; i++ ) {
+            for ( int j = 4; j <= 6; j++ ) {
+                answer.at(i - 1, j - 1) = complMtrx3d.at(i, j);
             }
+        }
 
-            for ( int i = 1; i <= 2; i++ ) {
-                for ( int j = 4; j <= 6; j++ ) {
-                    answer.at(i, j - 1) = complMtrx3d.at(i, j);
-                    answer.at(j - 1, i) = complMtrx3d.at(j, i);
-                }
-            }
-        } else {
-            answer.resize(6, 6);
-            answer.zero();
-
-            for ( int i = 1; i <= 2; i++ ) {
-                for ( int j = 1; j <= 2; j++ ) {
-                    answer.at(i, j) = complMtrx3d.at(i, j);
-                }
-            }
-
-            for ( int i = 4; i <= 6; i++ ) {
-                for ( int j = 4; j <= 6; j++ ) {
-                    answer.at(i, j) = complMtrx3d.at(i, j);
-                }
-            }
-
-            for ( int i = 1; i <= 2; i++ ) {
-                for ( int j = 4; j <= 6; j++ ) {
-                    answer.at(i, j) = complMtrx3d.at(i, j);
-                    answer.at(j, i) = complMtrx3d.at(j, i);
-                }
+        for ( int i = 1; i <= 2; i++ ) {
+            for ( int j = 4; j <= 6; j++ ) {
+                answer.at(i, j - 1) = complMtrx3d.at(i, j);
+                answer.at(j - 1, i) = complMtrx3d.at(j, i);
             }
         }
 
@@ -1492,7 +1325,6 @@ StructuralMaterial :: reduceTo2dPlateLayerComplMtrx(FloatMatrix &answer,
 
 void
 StructuralMaterial :: reduceTo3dShellLayerComplMtrx(FloatMatrix &answer,
-                                                    MatResponseForm form,
                                                     GaussPoint *gp,
                                                     FloatMatrix &complMtrx3d) const
 //
@@ -1503,14 +1335,13 @@ StructuralMaterial :: reduceTo3dShellLayerComplMtrx(FloatMatrix &answer,
 // 1) strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
 
 {
-    this->reduceTo2dPlateLayerComplMtrx(answer, form, gp, complMtrx3d);
+    this->reduceTo2dPlateLayerComplMtrx(answer, gp, complMtrx3d);
 }
 
 
 
 void
 StructuralMaterial :: reduceTo2dBeamLayerComplMtrx(FloatMatrix &answer,
-                                                   MatResponseForm form,
                                                    GaussPoint *gp,
                                                    FloatMatrix &complMtrx3d) const
 //
@@ -1528,22 +1359,12 @@ StructuralMaterial :: reduceTo2dBeamLayerComplMtrx(FloatMatrix &answer,
     }
 
     if ( ( complMtrx3d.isSquare() ) && ( complMtrx3d.giveNumberOfRows() == 6 ) ) {
-        if ( form == ReducedForm ) {
-            answer.resize(2, 2);
+        answer.resize(2, 2);
 
-            answer.at(1, 1) = complMtrx3d.at(1, 1);
-            answer.at(1, 2) = complMtrx3d.at(1, 5);
-            answer.at(2, 1) = complMtrx3d.at(5, 1);
-            answer.at(2, 2) = complMtrx3d.at(5, 5);
-        } else {
-            answer.resize(6, 6);
-            answer.zero();
-
-            answer.at(1, 1) = complMtrx3d.at(1, 1);
-            answer.at(1, 5) = complMtrx3d.at(1, 5);
-            answer.at(5, 1) = complMtrx3d.at(5, 1);
-            answer.at(5, 5) = complMtrx3d.at(5, 5);
-        }
+        answer.at(1, 1) = complMtrx3d.at(1, 1);
+        answer.at(1, 2) = complMtrx3d.at(1, 5);
+        answer.at(2, 1) = complMtrx3d.at(5, 1);
+        answer.at(2, 2) = complMtrx3d.at(5, 5);
 
     } else {
         OOFEM_ERROR("StructuralMaterial :: reduceTo2dBeamLayerStiffMtrx: stiffMtrx3d size mismatch");
@@ -1553,7 +1374,6 @@ StructuralMaterial :: reduceTo2dBeamLayerComplMtrx(FloatMatrix &answer,
 
 void
 StructuralMaterial :: reduceTo1dFiberComplMtrx(FloatMatrix &answer,
-                                               MatResponseForm form,
                                                GaussPoint *gp,
                                                FloatMatrix &complMtrx3d) const
 //
@@ -1571,32 +1391,17 @@ StructuralMaterial :: reduceTo1dFiberComplMtrx(FloatMatrix &answer,
     }
 
     if ( ( complMtrx3d.isSquare() ) && ( complMtrx3d.giveNumberOfRows() == 6 ) ) {
-        if ( form == ReducedForm ) {
-            answer.resize(3, 3);
+        answer.resize(3, 3);
 
-            answer.at(1, 1) = complMtrx3d.at(1, 1);
-            answer.at(1, 2) = complMtrx3d.at(1, 5);
-            answer.at(1, 3) = complMtrx3d.at(1, 6);
-            answer.at(2, 1) = complMtrx3d.at(5, 1);
-            answer.at(2, 2) = complMtrx3d.at(5, 5);
-            answer.at(2, 3) = complMtrx3d.at(5, 6);
-            answer.at(3, 1) = complMtrx3d.at(6, 1);
-            answer.at(3, 2) = complMtrx3d.at(6, 5);
-            answer.at(3, 3) = complMtrx3d.at(6, 6);
-        } else {
-            answer.resize(6, 6);
-            answer.zero();
-
-            answer.at(1, 1) = complMtrx3d.at(1, 1);
-            answer.at(1, 5) = complMtrx3d.at(1, 5);
-            answer.at(1, 6) = complMtrx3d.at(1, 6);
-            answer.at(5, 1) = complMtrx3d.at(5, 1);
-            answer.at(5, 5) = complMtrx3d.at(5, 5);
-            answer.at(5, 6) = complMtrx3d.at(5, 6);
-            answer.at(6, 1) = complMtrx3d.at(6, 1);
-            answer.at(6, 5) = complMtrx3d.at(6, 5);
-            answer.at(6, 6) = complMtrx3d.at(6, 6);
-        }
+        answer.at(1, 1) = complMtrx3d.at(1, 1);
+        answer.at(1, 2) = complMtrx3d.at(1, 5);
+        answer.at(1, 3) = complMtrx3d.at(1, 6);
+        answer.at(2, 1) = complMtrx3d.at(5, 1);
+        answer.at(2, 2) = complMtrx3d.at(5, 5);
+        answer.at(2, 3) = complMtrx3d.at(5, 6);
+        answer.at(3, 1) = complMtrx3d.at(6, 1);
+        answer.at(3, 2) = complMtrx3d.at(6, 5);
+        answer.at(3, 3) = complMtrx3d.at(6, 6);
 
     } else {
         OOFEM_ERROR("StructuralMaterial :: reduceTo1dFiberComplMtrx: stiffMtrx3d size mismatch");
@@ -1607,7 +1412,7 @@ StructuralMaterial :: reduceTo1dFiberComplMtrx(FloatMatrix &answer,
 
 void
 StructuralMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode,
+                                               MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *atTime)
 //
@@ -1617,12 +1422,12 @@ StructuralMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
     FloatMatrix m3d;
 
     this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
-    this->reduceToPlaneStressStiffMtrx(answer, form, gp, m3d);
+    this->reduceToPlaneStressStiffMtrx(answer, gp, m3d);
 }
 
 void
 StructuralMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode,
+                                               MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *atTime)
 //
@@ -1632,12 +1437,12 @@ StructuralMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
     FloatMatrix m3d;
 
     this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
-    this->reduceToPlaneStrainStiffMtrx(answer, form, gp, m3d);
+    this->reduceToPlaneStrainStiffMtrx(answer, gp, m3d);
 }
 
 void
 StructuralMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
-                                            MatResponseForm form, MatResponseMode mode,
+                                            MatResponseMode mode,
                                             GaussPoint *gp,
                                             TimeStep *atTime)
 //
@@ -1647,13 +1452,13 @@ StructuralMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
     FloatMatrix m3d;
 
     this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
-    this->reduceTo1dStressStiffMtrx(answer, form, gp, m3d);
+    this->reduceTo1dStressStiffMtrx(answer, gp, m3d);
 }
 
 
 void
 StructuralMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode,
+                                               MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *atTime)
 //
@@ -1663,13 +1468,13 @@ StructuralMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
     FloatMatrix m3d;
 
     this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
-    this->reduceTo2dBeamLayerStiffMtrx(answer, form, gp, m3d);
+    this->reduceTo2dBeamLayerStiffMtrx(answer, gp, m3d);
 }
 
 
 void
 StructuralMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
-                                                MatResponseForm form, MatResponseMode mode,
+                                                MatResponseMode mode,
                                                 GaussPoint *gp,
                                                 TimeStep *atTime)
 //
@@ -1679,12 +1484,12 @@ StructuralMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
     FloatMatrix m3d;
 
     this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
-    this->reduceTo2dPlateLayerStiffMtrx(answer, form, gp, m3d);
+    this->reduceTo2dPlateLayerStiffMtrx(answer, gp, m3d);
 }
 
 void
 StructuralMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
-                                           MatResponseForm form, MatResponseMode mode,
+                                           MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *atTime)
 //
@@ -1694,13 +1499,13 @@ StructuralMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
     FloatMatrix m3d;
 
     this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
-    this->reduceTo1dFiberStiffMtrx(answer, form, gp, m3d);
+    this->reduceTo1dFiberStiffMtrx(answer, gp, m3d);
 }
 
 
 void
 StructuralMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
-                                                MatResponseForm form, MatResponseMode mode,
+                                                MatResponseMode mode,
                                                 GaussPoint *gp,
                                                 TimeStep *atTime)
 //
@@ -1710,7 +1515,7 @@ StructuralMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
     FloatMatrix m3d;
 
     this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
-    this->reduceTo3dShellLayerStiffMtrx(answer, form, gp, m3d);
+    this->reduceTo3dShellLayerStiffMtrx(answer, gp, m3d);
 }
 
 

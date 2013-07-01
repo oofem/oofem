@@ -343,7 +343,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         FloatArray stress, fullStress, principalStress;
         FloatMatrix de;
 
-        lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
+        lmat->giveCharacteristicMatrix(de, SecantStiffness, gp, atTime);
         stress.beProductOf(de, strain);
         StructuralMaterial :: giveFullSymVectorForm(fullStress, stress, gp->giveMaterialMode());
         this->computePrincipalValues(principalStress, fullStress, principal_stress);
@@ -370,7 +370,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         FloatArray stress;
         double sum;
 
-        lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
+        lmat->giveCharacteristicMatrix(de, SecantStiffness, gp, atTime);
         if ( this->equivStrainType == EST_ElasticEnergy ) {
             // standard elastic energy
             stress.beProductOf(de, strain);
@@ -493,7 +493,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         FloatArray stress, principalStress, eta;
         FloatMatrix de, N, m, Eta;
 
-        lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
+        lmat->giveCharacteristicMatrix(de, SecantStiffness, gp, atTime);
         stress.beProductOf(de, strain);
         if ( gp->giveMaterialMode() == _PlaneStress || gp->giveMaterialMode() == _PlaneStressGrad ) {
             StressVector fullStress(stress, _PlaneStress);
@@ -573,7 +573,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         FloatArray stress;
         double sum;
 
-        lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
+        lmat->giveCharacteristicMatrix(de, SecantStiffness, gp, atTime);
         // standard elastic energy
         stress.beProductOf(de, strain);
         sum = strain.dotProduct(stress);
@@ -1017,9 +1017,9 @@ IsotropicDamageMaterial1 :: MMI_update(GaussPoint *gp,  TimeStep *tStep, FloatAr
     // now update all internal vars accordingly
     strain = status->giveStrainVector();
 #ifdef IDM_USE_MAPPEDSTRAIN
-    this->giveRealStressVector(intVal, ReducedForm, gp, strain, tStep);
+    this->giveRealStressVector(intVal, gp, strain, tStep);
 #else
-    this->giveRealStressVector(intVal, ReducedForm, gp, * estrain, tStep);
+    this->giveRealStressVector(intVal, gp, * estrain, tStep);
 #endif
     this->updateYourself(gp, tStep);
     return result;

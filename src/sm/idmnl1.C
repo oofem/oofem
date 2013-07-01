@@ -739,7 +739,7 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
         elem->computeBmatrixAt(gp, b);
 
         LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-        lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
+        lmat->giveCharacteristicMatrix(de, SecantStiffness, gp, atTime);
         stress.beProductOf(de, strain);
 
         f = ( e0 / ( equivStrain * equivStrain ) ) * exp( -( equivStrain - e0 ) / ( ef - e0 ) )
@@ -784,7 +784,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
         FloatArray fullHelp, fullNu;
         LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
 
-        lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
+        lmat->giveCharacteristicMatrix(de, SecantStiffness, gp, atTime);
         strain = status->giveTempStrainVector();
         stress.beProductOf(de, strain);
         StructuralMaterial :: giveFullSymVectorForm(fullStress, stress, gp->giveMaterialMode());
@@ -894,7 +894,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
         double equivStrain;
 
         LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-        lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
+        lmat->giveCharacteristicMatrix(de, SecantStiffness, gp, atTime);
         strain = status->giveTempStrainVector();
         stress.beProductOf(de, strain);
         this->computeLocalEquivalentStrain(equivStrain, strain, gp, atTime);
@@ -932,7 +932,7 @@ IDNLMaterial :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
 
     lMat->give3dMaterialStiffnessMatrix(de, rMode, gp, atTime);
     // This isn't used? Do we need one with zeroed entries (below) or the general 3d stiffness (above)?
-    //lMat->giveCharacteristicMatrix(de, ReducedForm, rMode, gp, atTime);
+    //lMat->giveCharacteristicMatrix(de, rMode, gp, atTime);
     //StructuralMaterial :: giveFullSymMatrixForm( de, deRed, gp->giveMaterialMode());
 
     answer.resize(3, 3);

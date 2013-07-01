@@ -118,7 +118,7 @@ HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRe
 
 
 void
-HyperElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+HyperElasticMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 
 // returns 6 components of the stress corresponding to the given total strain
 

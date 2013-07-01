@@ -88,7 +88,7 @@ SimpleInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
 
 void
-SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                                 const FloatArray &totalStrain,
                                                 TimeStep *atTime)
 //
@@ -169,7 +169,7 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
 
 void
 SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                    MatResponseForm form, MatResponseMode rMode,
+                                                    MatResponseMode rMode,
                                                     GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
@@ -240,7 +240,7 @@ SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         return;
 
     default:
-        StructuralMaterial :: giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
+        StructuralMaterial :: giveCharacteristicMatrix(answer, rMode, gp, atTime);
     }
 }
 

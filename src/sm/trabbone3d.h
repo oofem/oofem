@@ -237,7 +237,7 @@ public:
                                                MatResponseMode, GaussPoint * gp,
                                                TimeStep * atTime);
 
-    virtual void giveRealStressVector(FloatArray & answer, MatResponseForm, GaussPoint *,
+    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
                                       const FloatArray &, TimeStep *);
 
     virtual int hasMaterialModeCapability(MaterialMode);

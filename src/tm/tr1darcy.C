@@ -45,7 +45,6 @@
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "crosssection.h"
-#include "matresponseform.h"
 #include "matresponsemode.h"
 #include "fei2dtrlin.h"
 #include "classfactory.h"
@@ -105,7 +104,7 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *atTime)
         double detJ = this->interpolation_lin.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
         this->interpolation_lin.evaldNdx( BT, * lcoords, FEIElementGeometryWrapper(this) );
         
-        mat->giveCharacteristicMatrix(K, ReducedForm, TangentStiffness, gp, atTime);
+        mat->giveCharacteristicMatrix(K, TangentStiffness, gp, atTime);
 
         B.beTranspositionOf(BT);
         KB.beProductOf(K, B);

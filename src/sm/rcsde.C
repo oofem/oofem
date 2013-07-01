@@ -68,7 +68,7 @@ RCSDEMaterial :: ~RCSDEMaterial()
 
 
 void
-RCSDEMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+RCSDEMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &totalStrain,
                                       TimeStep *atTime)
 //
@@ -116,10 +116,8 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
         status->giveCrackStrainVector(crackStrain);
         this->updateCrackStatus(gp, crackStrain);
 
-        if ( form == ReducedForm ) {
-            StructuralMaterial :: giveReducedSymVectorForm(reducedAnswer, answer, gp->giveMaterialMode());
-            answer = reducedAnswer;
-        }
+        StructuralMaterial :: giveReducedSymVectorForm(reducedAnswer, answer, gp->giveMaterialMode());
+        answer = reducedAnswer;
 
         // test if transition to scalar damage mode take place
         double minSofteningPrincStress = this->Ft, E, Le, CurrFt, Ft, Gf, Gf0, Gf1, e0, ef, ef2, damage;
@@ -149,7 +147,7 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
 
             ef2 = Gf1 / princStress.at(ipos);
 
-            this->giveMaterialStiffnessMatrix(Ds0, ReducedForm, SecantStiffness, gp, atTime);
+            this->giveMaterialStiffnessMatrix(Ds0, SecantStiffness, gp, atTime);
             // compute reached equivalent strain
             equivStrain = this->computeCurrEquivStrain(gp, reducedStrainVector, E, atTime);
             damage = this->computeDamageCoeff(equivStrain, e0, ef2);
@@ -178,11 +176,7 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
         damage = this->computeDamageCoeff(equivStrain, e0, ef2);
         reducedSpaceStressVector.times(1.0 - damage);
 
-        if ( form == FullForm ) {
-            StructuralMaterial :: giveFullSymVectorForm(answer, reducedSpaceStressVector, gp->giveMaterialMode());
-        } else {
-            answer = reducedSpaceStressVector;
-        }
+        answer = reducedSpaceStressVector;
 
         status->letTempStressVectorBe(reducedSpaceStressVector);
 
@@ -196,7 +190,6 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
 
 void
 RCSDEMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                      MatResponseForm form,
                                                       MatResponseMode rMode, GaussPoint *gp,
                                                       TimeStep *atTime)
 //
@@ -209,7 +202,7 @@ RCSDEMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     if ( status->giveTempMode() == RCSDEMaterialStatus :: rcMode ) {
         // rotating crack mode
 
-        RCM2Material :: giveEffectiveMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+        RCM2Material :: giveEffectiveMaterialStiffnessMatrix(answer, rMode, gp, atTime);
         return;
     } else {
         // rcsd mode
@@ -227,16 +220,9 @@ RCSDEMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
 
             reducedAnswer.times(dCoeff);
 
-            if ( form == ReducedForm ) {
-                answer = reducedAnswer;
-            } else {
-                StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode() );
-                answer.resize(mask.maximum(), mask.maximum());
-                answer.zero();
-                answer.assemble(reducedAnswer, mask, mask);
-            }
+            answer = reducedAnswer;
         } else if ( rMode == ElasticStiffness ) {
-            this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
+            this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, rMode, gp, atTime);
             return;
         } else {
             _error("giveEffectiveMaterialStiffnessMatrix: usupported mode");
@@ -264,7 +250,7 @@ RCSDEMaterial :: computeCurrEquivStrain(GaussPoint *gp, const FloatArray &reduce
     FloatMatrix De;
     double answer = 0.0;
 
-    linearElasticMaterial->giveCharacteristicMatrix(De, ReducedForm, TangentStiffness, gp, atTime);
+    linearElasticMaterial->giveCharacteristicMatrix(De, TangentStiffness, gp, atTime);
     effStress.beProductOf(De, reducedTotalStrainVector);
     StructuralMaterial :: giveFullSymVectorForm(fullEffStress, effStress, gp->giveMaterialMode());
 

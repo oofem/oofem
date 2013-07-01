@@ -296,7 +296,7 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
                 stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
             } else {
                 this->computeStrainVector(strain, gp, tStep, u); ///@todo This part computes the B matrix again; Inefficient.
-                cs->giveRealStresses(stress, ReducedForm, gp, strain, tStep);
+                cs->giveRealStresses(stress, gp, strain, tStep);
             }
 
             if ( stress.giveSize() == 0 ) {
@@ -377,7 +377,7 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
         for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
             this->computeStrainVector(strain, gp, tStep, u);
-            cs->giveRealStresses(stress, ReducedForm, gp, strain, tStep);
+            cs->giveRealStresses(stress, gp, strain, tStep);
         }
     }
 

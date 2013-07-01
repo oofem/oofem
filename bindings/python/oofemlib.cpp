@@ -714,7 +714,7 @@ void pyclass_Material()
 struct PyStructuralMaterial : StructuralMaterial , wrapper<StructuralMaterial>
 {
     PyStructuralMaterial(int i, Domain *d) : StructuralMaterial(i,d) {}
-    void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) {
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) {
         if (override f = this->get_override("giveRealStressVector")) { f(answer,form,gp,reducedStrain,tStep);}
         this->get_override("giveRealStressVector")(answer,form,gp,reducedStrain,tStep);
     }
@@ -1142,18 +1142,6 @@ void pyenum_MatResponseMode()
 
 
 /*****************************************************
-* MatResponseFrom
-*****************************************************/
-void pyenum_MatResponseForm()
-{
-    enum_<MatResponseForm>("MatResponseForm")
-        .value("ReducedForm", ReducedForm)
-        .value("FullForm", FullForm)
-        ;
-}
-
-
-/*****************************************************
 * domainType
 *****************************************************/
 void pyenum_domainType()
@@ -1573,7 +1561,6 @@ BOOST_PYTHON_MODULE (liboofem)
     pyenum_FieldType();
     pyenum_InternalStateType();
     pyenum_MatResponseMode();
-    pyenum_MatResponseForm();
     pyenum_domainType();
 
 

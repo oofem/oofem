@@ -62,7 +62,7 @@ TrabBoneGrad3D :: hasMaterialModeCapability(MaterialMode mode)
 }
 void
 TrabBoneGrad3D :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                         MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
+                                           MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -71,7 +71,7 @@ TrabBoneGrad3D :: giveCharacteristicMatrix(FloatMatrix &answer,
 }
 
 void
-TrabBoneGrad3D :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) 
+TrabBoneGrad3D :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) 
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -84,7 +84,7 @@ TrabBoneGrad3D :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form,
 }
 
 void
-TrabBoneGrad3D :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint* gp, TimeStep* tStep)
+TrabBoneGrad3D :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint* gp, TimeStep* tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -97,7 +97,7 @@ TrabBoneGrad3D :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseForm form,
 }
 
 void
-TrabBoneGrad3D :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+TrabBoneGrad3D :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -110,7 +110,7 @@ TrabBoneGrad3D :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseForm form,
 }
 
 void
-TrabBoneGrad3D :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+TrabBoneGrad3D :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -123,7 +123,7 @@ TrabBoneGrad3D :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseForm form,
 }
 
 void
-TrabBoneGrad3D :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+TrabBoneGrad3D :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -134,7 +134,7 @@ TrabBoneGrad3D :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseForm form,
 
 
 void
-TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
  
     double tempDam, beta, tempKappa, kappa;
@@ -219,7 +219,7 @@ TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponse
 
 
 void
-TrabBoneGrad3D :: give3dKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+TrabBoneGrad3D :: give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
 
     answer.resize(1,6);
@@ -250,7 +250,7 @@ TrabBoneGrad3D :: give3dKappaMatrix(FloatMatrix &answer, MatResponseForm form, M
 
 
 void
-TrabBoneGrad3D :: give3dGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+TrabBoneGrad3D :: give3dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     answer.resize(6, 1);
     answer.zero();
@@ -281,14 +281,14 @@ TrabBoneGrad3D :: give3dGprime(FloatMatrix &answer, MatResponseForm form, MatRes
 }
 
 void
-TrabBoneGrad3D :: giveInternalLength(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+TrabBoneGrad3D :: giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     answer.resize(1, 1);
     answer.at(1, 1) = l;
 }
 
 void
-TrabBoneGrad3D :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+TrabBoneGrad3D :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                      const FloatArray &totalStrain, TimeStep *atTime)
 {
     TrabBoneGrad3DStatus *status = static_cast< TrabBoneGrad3DStatus * >( this->giveStatus(gp) );

@@ -862,7 +862,7 @@ Shell7Base :: computeLinearizedStiffness(GaussPoint *gp, Material *mat, TimeStep
     FloatMatrix D, Dcart, S;
 
     //A = L^iklj * (g_k x g_l) + S^ij*I
-    mat->giveCharacteristicMatrix(Dcart, ReducedForm, TangentStiffness, gp, tStep);     // L_ijkl - cartesian system (Voigt)
+    mat->giveCharacteristicMatrix(Dcart, TangentStiffness, gp, tStep);     // L_ijkl - cartesian system (Voigt)
     this->transInitialCartesianToInitialContravar(gp, Dcart, D);      // L^ijkl - curvilinear system (Voigt)
 
 
@@ -1234,7 +1234,7 @@ Shell7Base :: computeStressVector(FloatArray &answer, FloatArray &genEps, GaussP
 {
     FloatArray E;
     this->computeStrainVector(E, gp, stepN, genEps);     // Green-Lagrange strain vector
-    static_cast< StructuralMaterial * >( mat )->giveRealStressVector(answer, ReducedForm, gp, E, stepN);
+    static_cast< StructuralMaterial * >( mat )->giveRealStressVector(answer, gp, E, stepN);
 }
 
 void

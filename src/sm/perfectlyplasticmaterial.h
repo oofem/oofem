@@ -133,7 +133,7 @@ public:
 
     virtual ~PerfectlyPlasticMaterial() { delete linearElasticMaterial; }
 
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void updateYourself(GaussPoint *gp, TimeStep *tStep);
@@ -178,27 +178,27 @@ protected:
                                                       TimeStep *tStep);
 
     virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                          MatResponseForm form, MatResponseMode mode,
+                                          MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);
     virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                          MatResponseForm form, MatResponseMode mode,
+                                          MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);
     virtual void give1dStressStiffMtrx(FloatMatrix &answer,
-                                       MatResponseForm form, MatResponseMode mode,
+                                       MatResponseMode mode,
                                        GaussPoint *gp,
                                        TimeStep *tStep);
     virtual void give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                          MatResponseForm form, MatResponseMode mode,
+                                          MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);
     virtual void give2dPlateLayerStiffMtrx(FloatMatrix &answer,
-                                           MatResponseForm form, MatResponseMode mode,
+                                           MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *tStep);
     virtual void give3dShellLayerStiffMtrx(FloatMatrix &answer,
-                                           MatResponseForm form, MatResponseMode mode,
+                                           MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *tStep);
 

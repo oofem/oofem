@@ -92,8 +92,7 @@ public:
      * @param reducedStrainIncrement Strain increment vector in reduced form.
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void giveRealStresses(FloatArray & answer, MatResponseForm form,
-                                  GaussPoint *gp, const FloatArray &reducedStrainIncrement, TimeStep *tStep);
+    virtual void giveRealStresses(FloatArray & answer, GaussPoint *gp, const FloatArray &reducedStrainIncrement, TimeStep *tStep);
 
 
     /**
@@ -166,7 +165,7 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                   MatResponseForm form, MatResponseMode mode,
+                                                   MatResponseMode mode,
                                                    GaussPoint *gp, StructuralMaterial *mat,
                                                    TimeStep *tStep);
     /**
@@ -207,7 +206,6 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveCharMaterialComplianceMatrixOf(FloatMatrix &answer,
-                                                    MatResponseForm form,
                                                     MatResponseMode mode,
                                                     GaussPoint *gp, StructuralMaterial *mat,
                                                     TimeStep *tStep);
@@ -263,7 +261,6 @@ protected:
      * @see Material::giveCharacteristicMatrix
      */
     void giveMaterialStiffnessMatrix(FloatMatrix &answer,
-                                     MatResponseForm form,
                                      MatResponseMode mode,
                                      GaussPoint *gp,
                                      TimeStep *tStep);
@@ -286,7 +283,6 @@ protected:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                               MatResponseForm form,
                                                MatResponseMode mode,
                                                GaussPoint *gp,
                                                StructuralMaterial *mat,

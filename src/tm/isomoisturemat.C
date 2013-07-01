@@ -77,7 +77,6 @@ IsotropicMoistureTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoi
 
 void
 IsotropicMoistureTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                              MatResponseForm form,
                                                               MatResponseMode mode,
                                                               GaussPoint *gp,
                                                               TimeStep *atTime)

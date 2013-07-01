@@ -305,7 +305,7 @@ TrabBoneNL3D :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
 
 
 void
-TrabBoneNL3D :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+TrabBoneNL3D :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                      const FloatArray &totalStrain, TimeStep *atTime)
 {
     TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );

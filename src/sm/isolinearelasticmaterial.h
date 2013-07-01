@@ -98,7 +98,6 @@ public:
     virtual ~IsotropicLinearElasticMaterial() { }
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                  MatResponseForm form,
                                   MatResponseMode mode,
                                   GaussPoint *gp,
                                   TimeStep *atTime);
@@ -176,24 +175,24 @@ public:
 
 protected:
     virtual void givePlaneStressStiffMtrx(FloatMatrix & answer,
-                                  MatResponseForm, MatResponseMode, GaussPoint * gp,
+                                  MatResponseMode, GaussPoint * gp,
                                   TimeStep * atTime);
 
     virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer,
-                                  MatResponseForm, MatResponseMode, GaussPoint * gp,
+                                  MatResponseMode, GaussPoint * gp,
                                   TimeStep * atTime);
 
     virtual void give1dStressStiffMtrx(FloatMatrix & answer,
-                               MatResponseForm, MatResponseMode, GaussPoint * gp,
+                               MatResponseMode, GaussPoint * gp,
                                TimeStep * atTime);
 
     virtual void give2dBeamStiffMtrx(FloatMatrix &answer,
-                             MatResponseForm form, MatResponseMode rMode,
+                             MatResponseMode rMode,
                              GaussPoint *gp,
                              TimeStep *tStep);
 
     virtual void give3dBeamStiffMtrx(FloatMatrix &answer,
-                             MatResponseForm form, MatResponseMode rMode,
+                             MatResponseMode rMode,
                              GaussPoint *gp,
                              TimeStep *tStep);
 

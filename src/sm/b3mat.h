@@ -108,8 +108,7 @@ public:
     B3Material(int n, Domain *d) : MaxwellChainMaterial(n, d) { shMode = B3_NoShrinkage; }
     virtual ~B3Material() { }
 
-    virtual void giveShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
-                                           GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+    virtual void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
 
     virtual const char *giveClassName() const { return "B3Material"; }
     virtual const char *giveInputRecordName() const { return _IFT_B3Material_Name; }
@@ -121,11 +120,9 @@ public:
 protected:
     virtual int hasIncrementalShrinkageFormulation() { return 1; }
 
-    virtual void computeTotalAverageShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
-                                                  GaussPoint *gp, TimeStep *atTime);
+    virtual void computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime);
     /// Free shrinkage at material point, requires staggered analysis.
-    virtual void computeShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
-                                      GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+    virtual void computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
     void predictParametersFrom(double, double, double, double, double, double, double);
     virtual double computeCreepFunction(GaussPoint *gp, double atTime, double ofAge);
 

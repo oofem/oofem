@@ -134,7 +134,7 @@ MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
 
 
 void
-MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
+MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer,
                                               GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
 //
 // computes the strain due to creep at constant stress during the increment
@@ -149,7 +149,7 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFor
     MaxwellChainMaterialStatus *status = static_cast< MaxwellChainMaterialStatus * >( this->giveStatus(gp) );
 
     if ( mode == VM_Incremental ) {
-        this->giveUnitComplianceMatrix(B, ReducedForm, gp, atTime);
+        this->giveUnitComplianceMatrix(B, gp, atTime);
         reducedAnswer.resize( B.giveNumberOfRows() );
         reducedAnswer.zero();
 
@@ -167,13 +167,7 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFor
         E = this->giveEModulus(gp, atTime);
         reducedAnswer.times(1.0 / E);
 
-        if ( form == ReducedForm ) {
-            answer =  reducedAnswer;
-            return;
-        }
-
-        // expand the strain to full form if requested
-        StructuralMaterial :: giveFullSymVectorForm(answer, reducedAnswer, gp->giveMaterialMode());
+        answer =  reducedAnswer;
     } else {
         /* error - total mode not implemented yet */
         _error("giveEigenStrainVector - mode is not supported");
@@ -200,7 +194,7 @@ MaxwellChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
     MaxwellChainMaterialStatus *status =
         static_cast< MaxwellChainMaterialStatus * >( this->giveStatus(gp) );
 
-    this->giveUnitStiffnessMatrix(Binv, ReducedForm, gp, tNow);
+    this->giveUnitStiffnessMatrix(Binv, gp, tNow);
     help = status->giveTempStrainVector();
     help.subtract( status->giveStrainVector() );
 

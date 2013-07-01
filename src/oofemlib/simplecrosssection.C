@@ -45,7 +45,7 @@ REGISTER_CrossSection( SimpleCrossSection );
 
 #if 0 //@todo don't see any difference from base class /JB
 void
-SimpleCrossSection :: giveRealStresses(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+SimpleCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp,
                                        const FloatArray &totalStrain, TimeStep *tStep)
 //
 // this function returns a real stresses corresponding to
@@ -58,7 +58,7 @@ SimpleCrossSection :: giveRealStresses(FloatArray &answer, MatResponseForm form,
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
 
     if ( mat->hasMaterialModeCapability(mode) ) {
-        StructuralCrossSection :: giveRealStresses(answer, form, gp, totalStrain, tStep);
+        StructuralCrossSection :: giveRealStresses(answer, gp, totalStrain, tStep);
         return;
     } else {
         _error("giveRealStresses : unsupported mode");
@@ -68,7 +68,6 @@ SimpleCrossSection :: giveRealStresses(FloatArray &answer, MatResponseForm form,
 
 void
 SimpleCrossSection :: giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                        MatResponseForm form,
                                                         MatResponseMode rMode,
                                                         GaussPoint *gp,
                                                         StructuralMaterial *mat,
@@ -77,13 +76,12 @@ SimpleCrossSection :: giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
 // only interface to material class, forcing returned matrix to be in reduced form.
 //
 {
-    this->giveMaterialStiffnessMatrixOf(answer, form, rMode, gp, mat, tStep);
+    this->giveMaterialStiffnessMatrixOf(answer, rMode, gp, mat, tStep);
 }
 
 
 void
 SimpleCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                    MatResponseForm form,
                                                     MatResponseMode rMode,
                                                     GaussPoint *gp,
                                                     StructuralMaterial *mat,
@@ -94,7 +92,7 @@ SimpleCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
 //
 {
     if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-        mat->giveCharacteristicMatrix(answer, form, rMode, gp, tStep);
+        mat->giveCharacteristicMatrix(answer, rMode, gp, tStep);
         return;
     } else {
         OOFEM_ERROR3("GiveMaterialStiffnessMatrixOf: unsupported StressStrainMode %s on Element number %d", __MaterialModeToString(gp->giveMaterialMode()), gp->giveElement()->giveGlobalNumber() );

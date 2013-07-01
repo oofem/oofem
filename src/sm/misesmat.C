@@ -110,7 +110,6 @@ MisesMat :: CreateStatus(GaussPoint *gp) const
 // returns the stress vector in 3d stress space
 void
 MisesMat :: giveRealStressVector(FloatArray &answer,
-                                 MatResponseForm form,
                                  GaussPoint *gp,
                                  const FloatArray &totalStrain,
                                  TimeStep *atTime)
@@ -118,7 +117,7 @@ MisesMat :: giveRealStressVector(FloatArray &answer,
     MaterialMode mode = gp->giveMaterialMode();
 
     if ( mode == _3dMat || mode == _1dMat || mode == _PlaneStrain ) {
-        giveRealStressVectorComputedFromStrain(answer, form, gp, totalStrain, atTime);
+        giveRealStressVectorComputedFromStrain(answer, gp, totalStrain, atTime);
     } else {
         OOFEM_ERROR("MisesMat::giveRealStressVector : unknown material response mode");
     }
@@ -129,7 +128,7 @@ void
 MisesMat :: giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep)
 {
     FloatArray vS;
-    this->giveRealStressVectorComputedFromDefGrad(vS, ReducedForm, gp, vF, tStep);
+    this->giveRealStressVectorComputedFromDefGrad(vS, gp, vF, tStep);
     StructuralMaterial :: convert_S_2_P(answer, vS, vF, gp->giveMaterialMode());
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
     status->letTempPVectorBe(answer);
@@ -141,7 +140,6 @@ MisesMat :: giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const
 // computed from the previous plastic strain and current deformation gradient
 void
 MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
-                                                    MatResponseForm form,
                                                     GaussPoint *gp,
                                                     const FloatArray &totalDefGradOOFEM,
                                                     TimeStep *atTime)
@@ -288,7 +286,6 @@ MisesMat :: computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatM
 // computed from the previous plastic strain and current total strain
 void
 MisesMat :: giveRealStressVectorComputedFromStrain(FloatArray &answer,
-                                                   MatResponseForm form,
                                                    GaussPoint *gp,
                                                    const FloatArray &totalStrain,
                                                    TimeStep *atTime)
@@ -531,12 +528,12 @@ MisesMat :: give3dSSMaterialStiffnessMatrix(FloatMatrix &answer,
 }
 
 void
-MisesMat :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
+MisesMat :: give1dStressStiffMtrx(FloatMatrix &answer,
                                   MatResponseMode mode,
                                   GaussPoint *gp,
                                   TimeStep *atTime)
 {
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
     FloatArray stressVector;
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     double kappa = status->giveCumulativePlasticStrain();
@@ -563,12 +560,12 @@ MisesMat :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
 }
 
 void
-MisesMat :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form,
+MisesMat :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
                                      MatResponseMode mode,
                                      GaussPoint *gp,
                                      TimeStep *atTime)
 {
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
     if ( mode != TangentStiffness ) {
         return;
     }

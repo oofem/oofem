@@ -151,7 +151,6 @@ LsMasterMat :: constructTransformationMatrix(FloatMatrix F, GaussPoint *gp)
 // returns the stress vector in 3d stress space
 void
 LsMasterMat :: giveRealStressVector(FloatArray &answer,
-                                 MatResponseForm form,
                                  GaussPoint *gp,
                                  const FloatArray &totalStrain,
                                  TimeStep *atTime)
@@ -169,7 +168,7 @@ LsMasterMat :: giveRealStressVector(FloatArray &answer,
             _warning2("checkConsistency: material %d has no Structural support", slaveMat);
             return;
         }
-        sMat->giveRealStressVector(answer, form, gp, totalStrain, atTime);
+        sMat->giveRealStressVector(answer, gp, totalStrain, atTime);
         
         status->letTempStressVectorBe(answer);
         status->letTempStrainVectorBe(totalStrain);
@@ -252,7 +251,7 @@ LsMasterMat :: giveRealStressVector(FloatArray &answer,
         }
         FloatMatrix stress(3,3);
         FloatArray stressA;
-        sMat->giveRealStressVector(stressA, form, gp, strainArray, atTime);
+        sMat->giveRealStressVector(stressA, gp, strainArray, atTime);
         //////////////////////////////////////////////////////////
         //  this->constructTransformationMatrix(F,gp);
         

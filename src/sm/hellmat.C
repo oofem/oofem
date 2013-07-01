@@ -520,7 +520,7 @@ HellmichMaterial :: elasticStiffness(FloatArray &stress, FloatArray &strain, Gau
         LinearElasticMaterial *lMat;
         lMat = giveLinearElasticMaterial(gp, atTime);
         if ( lMat->hasMaterialModeCapability(mmode) ) {
-            lMat->giveCharacteristicMatrix(d, form, ElasticStiffness, gp, atTime);
+            lMat->giveCharacteristicMatrix(d, ElasticStiffness, gp, atTime);
             stress.beProductOf(d, strain);
         } else {
             _error("elasticStiffness: unsupported material mode.");
@@ -576,7 +576,7 @@ void HellmichMaterial :: elasticCompliance(FloatArray &strain, FloatArray &stres
         LinearElasticMaterial *lMat;
         lMat = giveLinearElasticMaterial(gp, atTime);
         if ( lMat->hasMaterialModeCapability(mmode) ) {
-            lMat->giveCharacteristicMatrix(d, ReducedForm, ElasticStiffness, gp, atTime);
+            lMat->giveCharacteristicMatrix(d, ElasticStiffness, gp, atTime);
             di.beInverseOf(d);
             strain.beProductOf(d, stress);
         } else {
@@ -996,7 +996,7 @@ void HellmichMaterial :: stressReturn(FloatArray &stress, FloatArray &trialStres
 }
 
 void HellmichMaterial :: give1dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                       MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
+                                                       MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
 //
 // consistent tangents for 1D
 // Young modulus E + Kv creep coeff + plasticity
@@ -1031,13 +1031,7 @@ void HellmichMaterial :: give1dMaterialStiffnessMatrix(FloatMatrix &answer,
         _error("Unknown active surface.");
     }
 
-    if ( form == ReducedForm ) {
-        answer.resize(1, 1);
-    } else { // FullForm
-        answer.resize(6, 6);
-        answer.zero();
-    }
-
+    answer.resize(1, 1);
     answer(0, 0) = Eep;
 }
 
@@ -2167,7 +2161,7 @@ void HellmichMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFo
 }
 
 void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
-                                              MatResponseForm form, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+                                              GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current strain increment
 // calls stress return method - updates temporary status variables
@@ -2422,11 +2416,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
     } // end creep
 
     // return full/reduced stress vector
-    if ( form == FullForm ) {
-        answer = fullStressVector;
-    } else {
-        answer = redStressVector;
-    }
+    answer = redStressVector;
 
     // update temp status stress and strain vector (reduced)
     status->letTempStrainVectorBe(totalStrain);
@@ -2456,7 +2446,7 @@ HellmichMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     if ( et.giveSize() ) {
         if ( fullAnswer.giveSize() ) {
             fullAnswer.add(et);
-        } else {
+    } else {
             fullAnswer = et;
         }
     }
@@ -2634,7 +2624,7 @@ HellmichMaterial :: updateYourself(GaussPoint *gp, TimeStep *atTime)
 
 void
 HellmichMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                             MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
+                                             MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
 {
     MaterialMode mMode = gp->giveMaterialMode();
 
@@ -2645,11 +2635,11 @@ HellmichMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     //  _warning("HellmichMaterial::giveCharMtrx: No stiffness - zero hydration degree.",10);
 
     if ( mMode == _1dMat ) {
-        give1dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+        give1dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
     } else if ( mMode == _3dMat ) {
         give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
     } else if ( !( options & moPlasticity ) ) {
-        giveLinearElasticMaterial(gp, atTime)->giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
+        giveLinearElasticMaterial(gp, atTime)->giveCharacteristicMatrix(answer, rMode, gp, atTime);
         answer.times( 1 / giveKvCoeff(gp, atTime) );
     } else {
         _error("giveCharMtrx: unsupported stress-strain mode!");

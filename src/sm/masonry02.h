@@ -113,7 +113,6 @@ public:
     virtual classType giveClassID() const { return Masonry02Class; }
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseForm form,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);
@@ -160,7 +159,7 @@ protected:
                                                 const FloatArray &strainSpaceHardeningVariables);
 
 
-    void give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+    void give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *atTime);
 
     virtual void computeReducedElasticModuli(FloatMatrix &answer, GaussPoint *gp,

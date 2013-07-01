@@ -69,7 +69,6 @@ public:
     virtual ~NewtonianFluidMaterial() { }
 
     virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *tStep) { }

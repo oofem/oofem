@@ -131,7 +131,6 @@ HeMoTKMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const Float
 
 void
 HeMoTKMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *atTime)

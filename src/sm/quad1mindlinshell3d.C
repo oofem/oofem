@@ -285,7 +285,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
             stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
         } else {
             strain.beProductOf(b, shellUnknowns);
-            mat->giveRealStressVector(stress, ReducedForm, gp, strain, tStep);
+            mat->giveRealStressVector(stress, gp, strain, tStep);
         }
         bs.beTProductOf(b, stress);
         shellForces.add(dV, bs);

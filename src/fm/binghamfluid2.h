@@ -127,7 +127,6 @@ public:
     virtual ~BinghamFluidMaterial2() { }
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseForm form,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *atTime) { }

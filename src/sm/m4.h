@@ -103,7 +103,6 @@ public:
     virtual ~M4Material() { }
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseForm form,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);

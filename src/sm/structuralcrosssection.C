@@ -40,7 +40,7 @@
 
 namespace oofem {
 void
-StructuralCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm form,
+StructuralCrossSection ::  giveRealStresses(FloatArray &answer, 
                                             GaussPoint *gp,
                                             const FloatArray &strain,
                                             TimeStep *tStep)
@@ -55,7 +55,7 @@ StructuralCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm 
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
 
     if ( mat->hasMaterialModeCapability(mode) ) {
-        mat->giveRealStressVector(answer, form, gp, strain, tStep);
+        mat->giveRealStressVector(answer, gp, strain, tStep);
         return;
     } else {
         _error("giveRealStresses : unsupported mode");
@@ -100,14 +100,13 @@ StructuralCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
 // only interface to material class, forcing returned matrix to be in reduced form.
 //
 {
-    this->giveMaterialStiffnessMatrixOf(answer, ReducedForm, rMode, gp,
+    this->giveMaterialStiffnessMatrixOf(answer, rMode, gp,
                                         dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() ),
                                         tStep);
 }
 
 void
 StructuralCrossSection :: giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                            MatResponseForm form,
                                                             MatResponseMode rMode,
                                                             GaussPoint *gp, StructuralMaterial *mat,
                                                             TimeStep *tStep)
@@ -115,19 +114,18 @@ StructuralCrossSection :: giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
 // only interface to material class, forcing returned matrix to be in reduced form.
 //
 {
-    this->giveMaterialStiffnessMatrixOf(answer, form, rMode, gp, mat, tStep);
+    this->giveMaterialStiffnessMatrixOf(answer, rMode, gp, mat, tStep);
 }
 
 
 void
 StructuralCrossSection :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                      MatResponseForm form,
                                                       MatResponseMode rMode,
                                                       GaussPoint *gp,
                                                       TimeStep *tStep)
 {
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
-    this->giveMaterialStiffnessMatrixOf(answer, form, rMode, gp,
+    this->giveMaterialStiffnessMatrixOf(answer, rMode, gp,
                                         mat, tStep);
 }
 
@@ -135,7 +133,6 @@ StructuralCrossSection :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
 
 void
 StructuralCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                        MatResponseForm form,
                                                         MatResponseMode rMode,
                                                         GaussPoint *gp,
                                                         StructuralMaterial *mat,
@@ -144,7 +141,7 @@ StructuralCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
 // only interface to material class, forcing returned matrix to be in reduced form.
 //
 {
-    static_cast< StructuralMaterial * >( mat )->giveCharacteristicMatrix(answer, form, rMode, gp, tStep);
+    static_cast< StructuralMaterial * >( mat )->giveCharacteristicMatrix(answer, rMode, gp, tStep);
 }
 
 
@@ -165,30 +162,16 @@ StructuralCrossSection :: giveCharMaterialComplianceMatrix(FloatMatrix &answer,
 
 void
 StructuralCrossSection :: giveCharMaterialComplianceMatrixOf(FloatMatrix &answer,
-                                                             MatResponseForm form,
                                                              MatResponseMode rMode,
                                                              GaussPoint *gp, StructuralMaterial *mat,
                                                              TimeStep *tStep)
 {
     /* returns compliance matrix according to stress strain mode in gp */
-    FloatMatrix redInvAnswer, redAnswer;
+    FloatMatrix redInvAnswer;
     IntArray mask;
 
-    this->giveCharMaterialStiffnessMatrixOf(redInvAnswer, ReducedForm, rMode, gp, mat,
-                                            tStep);
-    redAnswer.beInverseOf(redInvAnswer);
-
-    if ( form == FullForm ) {
-        StructuralMaterial :: giveVoigtSymVectorMask(mask, gp->giveMaterialMode());
-        answer.resize(6,6);
-        answer.zero();
-        answer.assemble(redAnswer,mask);
-
-    } else if ( form == ReducedForm ) {
-        answer = redAnswer;
-    } else {
-        _error("giveCharMaterialComplianceMatrix - unsupported form mode");
-    }
+    this->giveCharMaterialStiffnessMatrixOf(redInvAnswer, rMode, gp, mat, tStep);
+    answer.beInverseOf(redInvAnswer);
 }
 
 

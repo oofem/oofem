@@ -43,7 +43,7 @@
 namespace oofem {
 void
 Material :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                     MatResponseForm form, MatResponseMode rMode,
+                                     MatResponseMode rMode,
                                      GaussPoint *gp,
                                      TimeStep *atTime)
 //

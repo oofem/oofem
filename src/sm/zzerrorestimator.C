@@ -300,7 +300,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
             double dV = elem->computeVolumeAround(gp);
             interpol->evalN( n, *gp->giveCoordinates(), FEIElementGeometryWrapper(elem));
             static_cast< StructuralMaterial * >( elem->giveMaterial() )->
-                giveCharacteristicMatrix(D, ReducedForm, TangentStiffness, gp, tStep);
+                giveCharacteristicMatrix(D, TangentStiffness, gp, tStep);
             DInv.beInverseOf(D);
 
             diff.beTProductOf(nodalRecoveredStreses, n);

@@ -62,7 +62,7 @@ RankineMatNl :: RankineMatNl(int n, Domain *d) : RankineMat(n, d), StructuralNon
 {}
 
 void
-RankineMatNl :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+RankineMatNl :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                      const FloatArray &totalStrain, TimeStep *atTime)
 {
     RankineMatNlStatus *nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
@@ -88,17 +88,17 @@ RankineMatNl :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
 }
 
 void
-RankineMatNl :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+RankineMatNl :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
         return;
     }
 
     RankineMatNlStatus *status = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
 
     if ( mode == SecantStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
         double damage = status->giveTempDamage();
         answer.times(1. - damage);
         return;
@@ -117,7 +117,7 @@ RankineMatNl :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm fo
             gprime *= ( 1. - mm );
         }
 
-        evaluatePlaneStressStiffMtrx(answer, form, mode, gp, atTime, gprime);
+        evaluatePlaneStressStiffMtrx(answer, mode, gp, atTime, gprime);
         return;
     }
 

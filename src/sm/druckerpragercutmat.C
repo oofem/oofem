@@ -259,9 +259,7 @@ DruckerPragerCutMat :: computeReducedElasticModuli(FloatMatrix &answer,
                                          TimeStep *atTime)
 {  /* Returns elastic moduli in reduced stress-strain space*/
     //MaterialMode mode = gp->giveMaterialMode();
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, ReducedForm,
-                                                                    ElasticStiffness,
-                                                                    gp, atTime);
+    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, ElasticStiffness, gp, atTime);
 }
 
 //answer is dkappa (cumulative plastic strain), flow rule

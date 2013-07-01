@@ -85,7 +85,7 @@ IsoInterfaceDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
 
 void
-IsoInterfaceDamageMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+IsoInterfaceDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                                    const FloatArray &totalStrain,
                                                    TimeStep *atTime)
 //
@@ -125,7 +125,7 @@ IsoInterfaceDamageMaterial :: giveRealStressVector(FloatArray &answer, MatRespon
         this->computeDamageParam(omega, tempKappa, reducedTotalStrainVector, gp);
     }
 
-    this->giveCharacteristicMatrix(de, ReducedForm, ElasticStiffness, gp, atTime);
+    this->giveCharacteristicMatrix(de, ElasticStiffness, gp, atTime);
     // damage in tension only
     if ( equivStrain >= 0.0 ) {
         de.times(1.0 - omega);
@@ -142,7 +142,7 @@ IsoInterfaceDamageMaterial :: giveRealStressVector(FloatArray &answer, MatRespon
 
 void
 IsoInterfaceDamageMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                       MatResponseForm form, MatResponseMode rMode,
+                                                       MatResponseMode rMode,
                                                        GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
@@ -151,19 +151,19 @@ IsoInterfaceDamageMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _2dInterface:
-        give2dInterfaceMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+        give2dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, atTime);
         break;
     case _3dInterface:
-        give3dInterfaceMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+        give3dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, atTime);
         break;
     default:
-        StructuralMaterial :: giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
+        StructuralMaterial :: giveCharacteristicMatrix(answer, rMode, gp, atTime);
     }
 }
 
 
 void
-IsoInterfaceDamageMaterial :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+IsoInterfaceDamageMaterial :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                                      GaussPoint *gp, TimeStep *atTime)
 {
     double om, un;
@@ -222,7 +222,7 @@ IsoInterfaceDamageMaterial :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix
 
 
 void
-IsoInterfaceDamageMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+IsoInterfaceDamageMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                                      GaussPoint *gp, TimeStep *atTime)
 {
     double om, un;

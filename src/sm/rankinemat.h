@@ -135,12 +135,12 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducesStrain, TimeStep *tStep);
 
 protected:
     virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                  MatResponseForm form, MatResponseMode mode,
+                                  MatResponseMode mode,
                                   GaussPoint *gp,
                                   TimeStep *tStep);
     /**
@@ -148,7 +148,7 @@ protected:
      * (with different parameters gprime)
      */
     void evaluatePlaneStressStiffMtrx(FloatMatrix &answer,
-                                      MatResponseForm form, MatResponseMode mode,
+                                      MatResponseMode mode,
                                       GaussPoint *gp,
                                       TimeStep *tStep, double gprime);
 

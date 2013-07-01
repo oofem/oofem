@@ -125,16 +125,16 @@ public:
                                        GaussPoint *gp,
                                        TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
 protected:
     /// Evaluates the stress from Green-Lagrange strain E.
-    void giveRealStressVectorComputedFromStrain(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    void giveRealStressVectorComputedFromStrain(FloatArray &answer, GaussPoint *gp,
                                                 const FloatArray &E, TimeStep *tStep);
 
     /// evaluates the stress from deformation gradient F.
-    void giveRealStressVectorComputedFromDefGrad(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    void giveRealStressVectorComputedFromDefGrad(FloatArray &answer, GaussPoint *gp,
                                                  const FloatArray & F, TimeStep *tStep);
 
     void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep);
@@ -145,8 +145,8 @@ protected:
                                          MatResponseMode mode,
                                          GaussPoint *gp,
                                          TimeStep *tStep);
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dLSMaterialStiffnessMatrix(FloatMatrix &answer,
                                          MatResponseMode mode,
                                          GaussPoint *gp,

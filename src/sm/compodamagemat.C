@@ -142,7 +142,7 @@ void CompoDamageMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRes
 }
 
 //called in each iteration, support for 3D and 1D material mode
-void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 {
     int i_max, s;
     double delta, sigma, charLen, tmp=0., Gf_tmp;

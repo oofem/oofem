@@ -551,7 +551,6 @@ ConcreteDPM2 :: hasMaterialModeCapability(MaterialMode mMode)
 
 void
 ConcreteDPM2 :: giveRealStressVector(FloatArray &answer,
-                                     MatResponseForm form,
                                      GaussPoint *gp,
                                      const FloatArray &strainVector,
                                      TimeStep *atTime)
@@ -634,11 +633,7 @@ ConcreteDPM2 :: giveRealStressVector(FloatArray &answer,
 
     assignStateFlag(gp);
 
-    if ( form == ReducedForm ) {
-        answer = stress;
-    } else {
-        StructuralMaterial :: giveFullSymVectorForm(answer, stress, gp->giveMaterialMode());
-    }
+    answer = stress;
 }
 
 
@@ -2326,7 +2321,7 @@ ConcreteDPM2 :: computeSecantStiffness(FloatMatrix &answer,
         omegaTension = 0.999999;
     }
     FloatMatrix stiff;
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(stiff, ReducedForm, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(stiff, mode, gp, atTime);
     this->giveFullSymMatrixForm(answer, stiff, gp->giveMaterialMode());
 
     if ( isotropicFlag == 1 ) {

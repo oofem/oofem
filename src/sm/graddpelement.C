@@ -125,7 +125,7 @@ GradDpElement :: computeStressVector(FloatArray &answer, GaussPoint *gp, TimeSte
     StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( elem->giveCrossSection() );
 
     this->computeStrainVector(Epsilon, gp, stepN);
-    cs->giveRealStresses(answer, ReducedForm, gp, Epsilon, stepN);
+    cs->giveRealStresses(answer, gp, Epsilon, stepN);
     int size = answer.giveSize()-1;
     answer.resize(size);
 }
@@ -532,7 +532,7 @@ GradDpElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode 
             }
         } // end nlGeometry
       
-        dpmat->givePDGradMatrix_uu(D, ReducedForm, rMode, gp, tStep);
+        dpmat->givePDGradMatrix_uu(D, rMode, gp, tStep);
         dV = elem->computeVolumeAround(gp);
         DB.beProductOf(D, B);
         if ( matStiffSymmFlag ) {
@@ -621,7 +621,7 @@ GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode 
                 }
             }
         } // end nlGeometry
-        dpmat->givePDGradMatrix_ku(D, ReducedForm, rMode, gp, tStep);
+        dpmat->givePDGradMatrix_ku(D, rMode, gp, tStep);
         this->computeNkappaMatrixAt(gp,Nk);
         NkT.beTranspositionOf(Nk);
         dV = elem->computeVolumeAround(gp);
@@ -641,8 +641,8 @@ GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode 
             elem->computeBmatrixAt(gp,B);
             this->computeBkappaMatrixAt(gp,Bk);
 
-            dpmat->givePDGradMatrix_LD(lStiffDerivative1, ReducedForm, rMode, gp, tStep);
-            dpmat->givePDGradMatrix_uu(D, ReducedForm, rMode, gp, tStep);
+            dpmat->givePDGradMatrix_LD(lStiffDerivative1, rMode, gp, tStep);
+            dpmat->givePDGradMatrix_uu(D, rMode, gp, tStep);
             this->computeNonlocalGradient(Gk, gp,tStep);
             N1.at(1,1) = lStiffDerivative1.at(1,1)*lStiffDerivative1.at(1,1);
             N1.at(1,2) = lStiffDerivative1.at(2,1)*lStiffDerivative1.at(1,1);
@@ -723,7 +723,7 @@ GradDpElement :: computeStiffnessMatrix_kk(FloatMatrix &answer, MatResponseMode 
         this->computeBkappaMatrixAt(gp,Bk);
         Bt.beTranspositionOf(Bk);
         dV = elem->computeVolumeAround(gp);
-        dpmat->givePDGradMatrix_kk(lStiff, ReducedForm, rMode, gp, tStep);
+        dpmat->givePDGradMatrix_kk(lStiff, rMode, gp, tStep);
         NtN.beProductOf(Nt,N);
         NtN.times(dV);
         answer.add(NtN);
@@ -748,7 +748,7 @@ GradDpElement :: computeStiffnessMatrix_kk(FloatMatrix &answer, MatResponseMode 
             BtB.times(dV);
             elem->computeBmatrixAt(gp,B);
             //dpmat->giveDPGradMatrix_LD(lStiffDerivative1, rMode, gp, tStep);
-            dpmat->givePDGradMatrix_ku(D, ReducedForm, rMode, gp, tStep);
+            dpmat->givePDGradMatrix_ku(D, rMode, gp, tStep);
             this->computeNonlocalGradient(Gk, gp,tStep);
             N1.at(1,1) = lStiffDerivative1.at(1,1)*lStiffDerivative1.at(1,1);
             N1.at(1,2) = lStiffDerivative1.at(2,1)*lStiffDerivative1.at(1,1);
@@ -837,7 +837,7 @@ GradDpElement :: computeStiffnessMatrix_uk(FloatMatrix &answer, MatResponseMode 
  
     for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         gp = iRule->getIntegrationPoint(j);
-        dpmat->givePDGradMatrix_uk(gPSigma, ReducedForm, rMode, gp, tStep);
+        dpmat->givePDGradMatrix_uk(gPSigma, rMode, gp, tStep);
         this->computeNkappaMatrixAt(gp,Nk);
         elem->computeBmatrixAt(gp,B);
         if ( nlGeo ) {

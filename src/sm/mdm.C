@@ -97,7 +97,7 @@ MDM :: hasMaterialModeCapability(MaterialMode mode)
 }
 
 void
-MDM :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+MDM :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                             const FloatArray &totalStrain, TimeStep *atTime)
 {
     FloatArray reducedStrain, strainPDC, stressPDC, stress;
@@ -160,11 +160,7 @@ MDM :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint
      * // end debug test
      */
 
-    if ( form == ReducedForm ) {
-        answer = stress;
-    } else {
-        StructuralMaterial :: giveFullSymVectorForm(answer, stress, gp->giveMaterialMode());
-    }
+    answer = stress;
 }
 
 
@@ -483,7 +479,7 @@ MDM :: computeEffectiveStress(FloatArray &stressPDC, const FloatArray &strainPDC
         // PDC components in 3d mode are in full 3d format, even in planeStrain situation
         this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(de, TangentStiffness, gp, atTime);
     } else {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(de, ReducedForm, TangentStiffness, gp, atTime);
+        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(de, TangentStiffness, gp, atTime);
     }
 
     stressPDC.beProductOf(de, strainPDC);
@@ -537,35 +533,22 @@ MDM :: transformStressFromPDC(FloatArray &answer, const FloatArray &stressPDC, c
 
 void
 MDM :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
-                                   MatResponseForm form,
                                    MatResponseMode mode,
                                    GaussPoint *gp,
                                    TimeStep *atTime)
 {
-    FloatMatrix de;
     MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
 
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(de, ReducedForm, TangentStiffness, gp, atTime);
+    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, TangentStiffness, gp, atTime);
     //answer = de;
     //return;
     // if (isVirgin()) return ;
     if ( ( mode == TangentStiffness ) || ( mode == SecantStiffness ) ) {
         // Apply damage in principal coordinates
-        this->applyDamageToStiffness(de, gp);
+        this->applyDamageToStiffness(answer, gp);
 
         // Transform to global coordinates (in reduced space)
-        this->transformStiffnessfromPDC( de, * ( status->giveTempDamageTensorEigenVec() ) );
-    }
-
-
-    if ( form == ReducedForm ) {
-        answer = de;
-    } else {
-        IntArray mask;
-        StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode() );
-        answer.resize(6,6);
-        answer.zero();
-        answer.assemble(de,mask);
+        this->transformStiffnessfromPDC(answer, * ( status->giveTempDamageTensorEigenVec() ) );
     }
 }
 
@@ -670,22 +653,22 @@ MDM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                      GaussPoint *gp,
                                      TimeStep *atTime)
 {
-    this->giveMaterialStiffnessMatrix(answer, ReducedForm, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
 }
 
 void
-MDM :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode,
+MDM :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
                                 GaussPoint *gp, TimeStep *atTime)
 {
-    this->giveMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
 }
 
 
 void
-MDM :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode,
+MDM :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
                                 GaussPoint *gp, TimeStep *atTime)
 {
-    this->giveMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
 }
 
 
@@ -1357,7 +1340,7 @@ MDM :: MMI_update(GaussPoint *gp,  TimeStep *tStep, FloatArray *estrain)
 
     // now update all internal vars accordingly
     strain = status->giveStrainVector();
-    this->giveRealStressVector(intVal, ReducedForm, gp, strain, tStep);
+    this->giveRealStressVector(intVal, gp, strain, tStep);
     this->updateYourself(gp, tStep);
     return result;
 }

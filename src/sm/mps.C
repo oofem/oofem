@@ -257,7 +257,6 @@ MPSMaterial :: giveThermalDilatationVector(FloatArray &answer,
 
 void
 MPSMaterial :: giveShrinkageStrainVector(FloatArray &answer,
-                                         MatResponseForm form,
                                          GaussPoint *gp,
                                          TimeStep *atTime,
                                          ValueModeType mode)
@@ -268,15 +267,10 @@ MPSMaterial :: giveShrinkageStrainVector(FloatArray &answer,
 
 
     if ( this->kSh == 0. ) {
-        if ( form == FullForm ) {
-            answer.resize(6);
-            answer.zero();
-        } else {
-            answer.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
-            answer.zero();
-        }
+        answer.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+        answer.zero();
     } else {
-        this->computePointShrinkageStrainVector(answer, form, gp, atTime);
+        this->computePointShrinkageStrainVector(answer, gp, atTime);
     }
 }
 
@@ -625,8 +619,7 @@ MPSMaterial :: giveInitViscosity(TimeStep *atTime)
 
 
 void
-MPSMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
-                                     GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
+MPSMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
 //
 // computes the strain due to creep at constant stress during the increment
 // (in fact, the INCREMENT of creep strain is computed for mode == VM_Incremental)
@@ -642,7 +635,7 @@ MPSMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
 
     if ( mode == VM_Incremental ) {
         sigma = status->giveStressVector();       //stress vector at the beginning of time-step
-        this->giveUnitComplianceMatrix(C, ReducedForm, gp, atTime);
+        this->giveUnitComplianceMatrix(C, gp, atTime);
         reducedAnswer.resize( C.giveNumberOfRows() );
         reducedAnswer.beProductOf(C, sigma);
 
@@ -683,16 +676,11 @@ MPSMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
         }
 
         //computes creep component of the Kelvin Chain
-        KelvinChainSolidMaterial :: giveEigenStrainVector(KelvinEigenStrain, ReducedForm, gp, atTime, mode);
+        KelvinChainSolidMaterial :: giveEigenStrainVector(KelvinEigenStrain, gp, atTime, mode);
         reducedAnswer.add(KelvinEigenStrain);
 
-        if ( form == ReducedForm ) {
-            answer =  reducedAnswer;
-            return;
-        }
-
-        // expand the strain to full form if requested
-        StructuralMaterial :: giveFullSymVectorForm(answer, reducedAnswer, gp->giveMaterialMode());
+        answer = reducedAnswer;
+        return;
     } else {
         /* error - total mode not implemented yet */
         _error("giveEigenStrainVector - mode is not supported");
@@ -701,8 +689,7 @@ MPSMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
 
 
 void
-MPSMaterial :: computePointShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
-                                                 GaussPoint *gp, TimeStep *atTime)
+MPSMaterial :: computePointShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime)
 {
     /* dEpsSh/dt = kSh * dh/dt   (h = humidity)
      * ->> EpsSh = kSh * h_difference
@@ -724,11 +711,6 @@ MPSMaterial :: computePointShrinkageStrainVector(FloatArray &answer, MatResponse
     fullAnswer.resize(size);
     fullAnswer.zero();
     fullAnswer.at(1) = fullAnswer.at(2) = fullAnswer.at(3) = EpsSh;
-
-    if ( form == FullForm ) {
-        answer = fullAnswer;
-        return;
-    }
 
     StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
 }

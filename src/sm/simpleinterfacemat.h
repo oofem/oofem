@@ -120,11 +120,10 @@ public:
                                                GaussPoint *gp,
                                                TimeStep *atTime);
 
-    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
+    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
                               const FloatArray &, TimeStep *);
 
     virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *atTime);

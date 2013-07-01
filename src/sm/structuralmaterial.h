@@ -132,7 +132,6 @@ public:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *tStep);
@@ -152,7 +151,7 @@ public:
      * @param reducedStrain Strain vector in reduced form.
      * @param tStep Current time step (most models are able to respond only when atTime is current time step).
      */
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep) = 0;
 
     /// @name Methods associated with large deformation analysis
@@ -373,7 +372,7 @@ protected:
      * @param gp Integration point.
      * @param stiffMtrx3d 3d stiffness matrix (full form) in given integration point.
      */
-    void reduceStiffMtrx3d(FloatMatrix &answer, MatResponseForm form, GaussPoint *gp,
+    void reduceStiffMtrx3d(FloatMatrix &answer, GaussPoint *gp,
                            FloatMatrix &stiffMtrx3d) const;
     /**
      * Computes characteristic compliance matrix corresponding to given material mode
@@ -388,7 +387,7 @@ protected:
      * @param gp Integration point.
      * @param complMtrx3d 3d compliance matrix (full form) in given integration point.
      */
-    void reduceComplMtrx3d(FloatMatrix &answer, MatResponseForm form, GaussPoint *gp,
+    void reduceComplMtrx3d(FloatMatrix &answer, GaussPoint *gp,
                            FloatMatrix &complMtrx3d) const;
     /**
      * Reduces full 3d stiffness matrix to 2d plane stress matrix.
@@ -398,8 +397,7 @@ protected:
      * @param gp Integration point.
      * @param stiffMtrx3d 3d stiffness matrix (in full form).
      */
-    void reduceToPlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
-                                      GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
+    void reduceToPlaneStressStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
     /**
      * Reduces full 3d stiffness matrix to 2d plane strain matrix.
      * The 3d stiffness should be computed for integration point passed as parameter.
@@ -413,8 +411,7 @@ protected:
      * @param gp Integration point.
      * @param stiffMtrx3d 3d stiffness matrix (in full form).
      */
-    void reduceToPlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form,
-                                      GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
+    void reduceToPlaneStrainStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
     /**
      * Reduces full 3d stiffness matrix to 1d matrix
      * 1d case: @f$ \sigma_y = \sigma_z = \tau_{yz} = \tau_{zx} = \tau_{xy} = 0 @f$.
@@ -424,8 +421,7 @@ protected:
      * @param gp Integration point.
      * @param stiffMtrx3d 3d stiffness matrix (in full form).
      */
-    void reduceTo1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
-                                   GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
+    void reduceTo1dStressStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
     /**
      * Reduces full 3d stiffness matrix to 2d beam layer matrix.
      * 2dbeamLayer: @f$ \sigma_y = \sigma_z = \tau_{zy} = \tau_{xy} = 0 @f$.
@@ -435,8 +431,7 @@ protected:
      * @param gp Integration point.
      * @param stiffMtrx3d 3d stiffness matrix (in full form).
      */
-    void reduceTo2dBeamLayerStiffMtrx(FloatMatrix &answer, MatResponseForm form,
-                                      GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
+    void reduceTo2dBeamLayerStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
     /**
      * Reduces full 3d stiffness matrix to 2d plate layer stiffness matrix.
      * 2dplatelayermode: @f$ \sigma_z = 0 @f$.
@@ -445,8 +440,7 @@ protected:
      * @param gp Integration point.
      * @param stiffMtrx3d 3d stiffness matrix (in full form).
      */
-    void reduceTo2dPlateLayerStiffMtrx(FloatMatrix &answer, MatResponseForm form,
-                                       GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
+    void reduceTo2dPlateLayerStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
     /**
      * Reduces full 3d stiffness matrix to 1d fiber stiffness matrix.
      * 2dplatelayermode: @f$ \sigma_y = \sigma_z = \tau_{yz} = 0 @f$.
@@ -455,8 +449,7 @@ protected:
      * @param gp Integration point.
      * @param stiffMtrx3d 3d stiffness matrix (in full form).
      */
-    void reduceTo1dFiberStiffMtrx(FloatMatrix &answer, MatResponseForm form,
-                                  GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
+    void reduceTo1dFiberStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
     /**
      * Reduces full 3d stiffness matrix to 3d shell layer stiffness matrix.
      * @see StructuralMaterial::reduceTo2dPlateLayerStiffMtrx
@@ -465,8 +458,7 @@ protected:
      * @param gp Integration point.
      * @param stiffMtrx3d 3d stiffness matrix (in full form).
      */
-    void reduceTo3dShellLayerStiffMtrx(FloatMatrix &answer, MatResponseForm form,
-                                       GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
+    void reduceTo3dShellLayerStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
 
 
     /**
@@ -477,8 +469,7 @@ protected:
      * @param gp Integration point.
      * @param complMtrx3d 3d compliance matrix (in full form).
      */
-    void reduceToPlaneStressComplMtrx(FloatMatrix &answer, MatResponseForm form,
-                                      GaussPoint *gp, FloatMatrix &complMtrx3d) const;
+    void reduceToPlaneStressComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
     /**
      * Reduces full 3d compliance matrix to 2d plane strain matrix.
      * The 3d compliance should be computed for integration point passed as parameter.
@@ -492,8 +483,7 @@ protected:
      * @param gp Integration point.
      * @param complMtrx3d 3d compliance matrix (in full form).
      */
-    void reduceToPlaneStrainComplMtrx(FloatMatrix &answer, MatResponseForm form,
-                                      GaussPoint *gp, FloatMatrix &complMtrx3d) const;
+    void reduceToPlaneStrainComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
     /**
      * Reduces full 3d compliance matrix to 1d matrix
      * 1d case: @f$ \sigma_y = \sigma_z = \tau_{yz} = \tau_{zx} = \tau_{xy} = 0 @f$.
@@ -503,8 +493,7 @@ protected:
      * @param gp Integration point.
      * @param complMtrx3d 3d compliance matrix (in full form).
      */
-    void reduceTo1dStressComplMtrx(FloatMatrix &answer, MatResponseForm form,
-                                   GaussPoint *gp, FloatMatrix &complMtrx3d) const;
+    void reduceTo1dStressComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
     /**
      * Reduces full 3d compliance matrix to 2d beam layer matrix.
      * 2dbeamLayer: @f$ \sigma_y = \sigma_z = \tau_{zy} = \tau_{xy} = 0 @f$.
@@ -513,8 +502,7 @@ protected:
      * @param gp Integration point.
      * @param complMtrx3d 3d compliance matrix (in full form).
      */
-    void reduceTo2dBeamLayerComplMtrx(FloatMatrix &answer, MatResponseForm form,
-                                      GaussPoint *gp, FloatMatrix &complMtrx3d) const;
+    void reduceTo2dBeamLayerComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
     /**
      * Reduces full 3d compliance matrix to 2d plate layer compliance matrix.
      * 2dplatelayermode: @f$ \sigma_z = 0 @f$.
@@ -523,8 +511,7 @@ protected:
      * @param gp Integration point.
      * @param complMtrx3d 3d compliance matrix (in full form).
      */
-    void reduceTo2dPlateLayerComplMtrx(FloatMatrix &answer, MatResponseForm form,
-                                       GaussPoint *gp, FloatMatrix &complMtrx3d) const;
+    void reduceTo2dPlateLayerComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
     /**
      * Reduces full 3d compliance matrix to 3d shell layer compliance matrix.
      * @param answer Computed reduced compliance matrix.
@@ -532,8 +519,7 @@ protected:
      * @param gp Integration point.
      * @param complMtrx3d 3d compliance matrix (in full form).
      */
-    void reduceTo3dShellLayerComplMtrx(FloatMatrix &answer, MatResponseForm form,
-                                       GaussPoint *gp, FloatMatrix &complMtrx3d) const;
+    void reduceTo3dShellLayerComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
     /**
      * Reduces full 3d compliance matrix to 1d fiber layer compliance matrix.
      * 1dfiber: @f$ \sigma_y = \sigma_z = \tau_{yz} = 0 @f$.
@@ -542,8 +528,7 @@ protected:
      * @param gp Integration point.
      * @param complMtrx3d 3d compliance matrix (in full form).
      */
-    void reduceTo1dFiberComplMtrx(FloatMatrix &answer, MatResponseForm form,
-                                  GaussPoint *gp, FloatMatrix &complMtrx3d) const;
+    void reduceTo1dFiberComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
 
 
     /**
@@ -560,7 +545,7 @@ protected:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                          MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                          MatResponseMode mmode, GaussPoint *gp,
                                           TimeStep *tStep);
 
     virtual void givePlaneStressStiffMtrx_dPdF(FloatMatrix &answer,
@@ -586,7 +571,7 @@ protected:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                          MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                          MatResponseMode mmode, GaussPoint *gp,
                                           TimeStep *tStep);
 
     virtual void givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
@@ -607,7 +592,7 @@ protected:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void give1dStressStiffMtrx(FloatMatrix &answer,
-                                       MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                       MatResponseMode mmode, GaussPoint *gp,
                                        TimeStep *tStep);
 
     virtual void give1dStressStiffMtrx_dPdF(FloatMatrix &answer,
@@ -627,7 +612,7 @@ protected:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                          MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                          MatResponseMode mmode, GaussPoint *gp,
                                           TimeStep *tStep);
 #if 0
     virtual void give2dBeamLayerStiffMtrx_dPdF(FloatMatrix &answer,
@@ -648,7 +633,7 @@ protected:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void give2dPlateLayerStiffMtrx(FloatMatrix &answer,
-                                           MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                           MatResponseMode mmode, GaussPoint *gp,
                                            TimeStep *tStep);
 #if 0
     virtual void give2dPlateLayerStiffMtrx_dPdF(FloatMatrix &answer,
@@ -669,7 +654,7 @@ protected:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void give3dShellLayerStiffMtrx(FloatMatrix & answer,
-                                           MatResponseForm form, MatResponseMode mmode, GaussPoint * gp,
+                                           MatResponseMode mmode, GaussPoint * gp,
                                            TimeStep * tStep);
 #if 0
     virtual void give3dShellLayerStiffMtrx_dPdF(FloatMatrix & answer,
@@ -690,7 +675,7 @@ protected:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void give1dFiberStiffMtrx(FloatMatrix &answer,
-                                      MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                      MatResponseMode mmode, GaussPoint *gp,
                                       TimeStep *tStep);
 #if 0
     virtual void give1dFiberStiffMtrx_dPdF(FloatMatrix &answer,

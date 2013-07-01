@@ -116,7 +116,7 @@ IDGMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 void
 IDGMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                         MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
+                                        MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -184,7 +184,7 @@ IDGMaterial :: computeEta(FloatMatrix &answer, const FloatArray &strain, GaussPo
 
 
 void
-IDGMaterial ::  give1dStressStiffMtrx(FloatMatrix & answer,  MatResponseForm form, MatResponseMode mode, GaussPoint * gp,  TimeStep * tStep)
+IDGMaterial ::  give1dStressStiffMtrx(FloatMatrix & answer, MatResponseMode mode, GaussPoint * gp,  TimeStep * tStep)
 {
     IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
@@ -197,7 +197,7 @@ IDGMaterial ::  give1dStressStiffMtrx(FloatMatrix & answer,  MatResponseForm for
 }
 
 void
-IDGMaterial :: give1dKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+IDGMaterial :: give1dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     IDGMaterialStatus *status = static_cast< IDGMaterialStatus * >( this->giveStatus(gp) );
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
@@ -211,7 +211,7 @@ IDGMaterial :: give1dKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatR
 }
 
 void
-IDGMaterial :: give1dGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+IDGMaterial :: give1dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     IDGMaterialStatus *status = static_cast< IDGMaterialStatus * >( this->giveStatus(gp) );
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
@@ -234,7 +234,7 @@ IDGMaterial :: give1dGprime(FloatMatrix &answer, MatResponseForm form, MatRespon
 
 
 void
-IDGMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+IDGMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     IDGMaterialStatus *status = static_cast< IDGMaterialStatus * >( this->giveStatus(gp) );
     double tempDamage;
@@ -245,7 +245,7 @@ IDGMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm for
     if ( tempDamage > 0.0 )
         tempDamage = min(tempDamage, maxOmega);
     }
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
     answer.times(1.0 - tempDamage);
     
 #if 0
@@ -273,7 +273,7 @@ IDGMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm for
 
 
 void
-IDGMaterial :: givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+IDGMaterial :: givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     // only for Mazars equivalent deformation ...answer = <eps>/eps_eq 
     // only plane-stress case
@@ -294,7 +294,7 @@ IDGMaterial :: givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseForm f
 }
   
 void
-IDGMaterial :: givePlaneStressGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+IDGMaterial :: givePlaneStressGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
 
     IDGMaterialStatus *status = static_cast< IDGMaterialStatus * >( this->giveStatus(gp) );
@@ -314,7 +314,7 @@ IDGMaterial :: givePlaneStressGprime(FloatMatrix &answer, MatResponseForm form, 
 
 
 void
-IDGMaterial :: giveInternalLength(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
+IDGMaterial :: giveInternalLength(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
 {
     if ( averType == 0 ) {
         answer.resize(1, 1);
@@ -367,7 +367,7 @@ IDGMaterial :: giveInternalLength(FloatMatrix &answer, MatResponseForm form, Mat
 
 
 void
-IDGMaterial :: giveInternalLengthDerivative(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+IDGMaterial :: giveInternalLengthDerivative(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
   
     if ( averType == 1 ) {
@@ -451,7 +451,7 @@ IDGMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, 
         FloatArray stress, fullStress, principalStress;
         double sum = 0.;
 
-        lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
+        lmat->giveCharacteristicMatrix(de, SecantStiffness, gp, atTime);
         stress.beProductOf(de, strain);
         StructuralMaterial :: giveFullSymVectorForm(fullStress, stress, gp->giveMaterialMode());
         this->computePrincipalValues(principalStress, fullStress, principal_stress);
@@ -478,7 +478,7 @@ IDGMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, 
         FloatArray stress;
         double sum;
 
-        lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
+        lmat->giveCharacteristicMatrix(de, SecantStiffness, gp, atTime);
         if ( this->equivStrainType == EST_ElasticEnergy ) {
             // standard elastic energy
             stress.beProductOf(de, strain);
@@ -625,7 +625,7 @@ IDGMaterial :: initDamaged(double kappa, FloatArray &strainVector, GaussPoint *g
 
 
 void
-IDGMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,const FloatArray &totalStrain, TimeStep *atTime)
+IDGMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,const FloatArray &totalStrain, TimeStep *atTime)
 //
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current
@@ -687,7 +687,7 @@ IDGMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, Ga
     }
 
 
-    lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
+    lmat->giveCharacteristicMatrix(de, SecantStiffness, gp, atTime);
     de.times(1.0 - omega);
     answer.beProductOf(de, strain);
 
@@ -789,15 +789,15 @@ IDGMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *
 }
 
 void
-IDGMaterial :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) 
+IDGMaterial :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) 
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _1dMatGrad:
-        give1dStressStiffMtrx(answer, form, mode, gp, tStep);
+        give1dStressStiffMtrx(answer, mode, gp, tStep);
         break;
     case _PlaneStressGrad:
-        givePlaneStressStiffMtrx(answer, form, mode, gp, tStep);
+        givePlaneStressStiffMtrx(answer, mode, gp, tStep);
         break;
     default:
         OOFEM_ERROR2("IDGMaterial :: givePDGradMatrix_uu - mMode = %d not supported\n", mMode);
@@ -805,15 +805,15 @@ IDGMaterial :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form, Ma
 }
 
 void
-IDGMaterial :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint* gp, TimeStep* tStep)
+IDGMaterial :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint* gp, TimeStep* tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _1dMatGrad:
-        give1dKappaMatrix(answer, form, mode, gp, tStep);
+        give1dKappaMatrix(answer, mode, gp, tStep);
         break;
     case _PlaneStressGrad:
-        givePlaneStressKappaMatrix(answer, form, mode, gp, tStep);
+        givePlaneStressKappaMatrix(answer, mode, gp, tStep);
         break;
     default:
         OOFEM_ERROR2("IDGMaterial :: givePDGradMatrix_ku - mMode = %d not supported\n", mMode);
@@ -821,15 +821,15 @@ IDGMaterial :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseForm form, Ma
 }
 
 void
-IDGMaterial :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+IDGMaterial :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _1dMatGrad:
-        give1dGprime(answer, form, mode, gp, tStep);
+        give1dGprime(answer, mode, gp, tStep);
         break;
     case _PlaneStressGrad:
-        givePlaneStressGprime(answer, form, mode, gp, tStep);
+        givePlaneStressGprime(answer, mode, gp, tStep);
         break;
     default:
         OOFEM_ERROR2("IDGMaterial :: givePDGradMatrix_uk - mMode = %d not supported\n", mMode);
@@ -837,15 +837,15 @@ IDGMaterial :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseForm form, Ma
 }
 
 void
-IDGMaterial :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+IDGMaterial :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _1dMatGrad:
-        giveInternalLength(answer, form, mode, gp, tStep);
+        giveInternalLength(answer, mode, gp, tStep);
         break;
     case _PlaneStressGrad:
-        giveInternalLength(answer, form, mode, gp, tStep);
+        giveInternalLength(answer, mode, gp, tStep);
         break;
     default:
         OOFEM_ERROR2("IDGMaterial :: givePDGradMatrix_kk - mMode = %d not supported\n", mMode);
@@ -853,12 +853,12 @@ IDGMaterial :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseForm form, Ma
 }
 
 void
-IDGMaterial :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+IDGMaterial :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _PlaneStressGrad:
-        giveInternalLengthDerivative(answer, form, mode, gp, tStep);
+        giveInternalLengthDerivative(answer, mode, gp, tStep);
         break;
     default:
         OOFEM_ERROR2("IDGMaterial :: giveDPGradMatrix_LD - mMode = %d not supported\n", mMode);

@@ -88,11 +88,11 @@ public:
      */
     SimpleCrossSection(int n, Domain *d) : StructuralCrossSection(n, d) { }
 
-    //virtual void giveRealStresses(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    //virtual void giveRealStresses(FloatArray &answer, GaussPoint *gp,
     //                      const FloatArray &reducedStrainIncrement, TimeStep *tStep);
 
     virtual void giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                   MatResponseForm form, MatResponseMode mode,
+                                                   MatResponseMode mode,
                                                    GaussPoint *gp, StructuralMaterial *mat,
                                                    TimeStep *tStep);
 
@@ -123,7 +123,6 @@ public:
 
 protected:
     virtual void giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                       MatResponseForm form,
                                        MatResponseMode rMode,
                                        GaussPoint *gp,
                                        StructuralMaterial *mat,

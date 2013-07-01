@@ -124,7 +124,7 @@ TrabBoneEmbed :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
 
 
 void
-TrabBoneEmbed :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+TrabBoneEmbed :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &totalStrain,
                                       TimeStep *atTime)
 {

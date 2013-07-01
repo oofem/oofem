@@ -87,7 +87,7 @@ CebFipSlip90Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
 
 void
-CebFipSlip90Material :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+CebFipSlip90Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                              const FloatArray &totalStrain,
                                              TimeStep *atTime)
 //
@@ -137,7 +137,7 @@ CebFipSlip90Material :: giveRealStressVector(FloatArray &answer, MatResponseForm
 
 void
 CebFipSlip90Material :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                 MatResponseForm form, MatResponseMode rMode,
+                                                 MatResponseMode rMode,
                                                  GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
@@ -146,16 +146,16 @@ CebFipSlip90Material :: giveCharacteristicMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _1dInterface:
-        give1dInterfaceMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+        give1dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, atTime);
         break;
     default:
-        StructuralMaterial :: giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
+        StructuralMaterial :: giveCharacteristicMatrix(answer, rMode, gp, atTime);
     }
 }
 
 
 void
-CebFipSlip90Material :: give1dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+CebFipSlip90Material :: give1dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                                GaussPoint *gp, TimeStep *atTime)
 {
     double kappa;

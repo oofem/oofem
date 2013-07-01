@@ -78,8 +78,7 @@ KelvinChainSolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
 }
 
 void
-KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
-                                                  GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
+KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
 //
 // computes the strain due to creep at constant stress during the increment
 // (in fact, the INCREMENT of creep strain is computed for mode == VM_Incremental)
@@ -107,19 +106,13 @@ KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, MatRespons
 
         if ( sigmaVMu ) {
             help = reducedAnswer;
-            this->giveUnitComplianceMatrix(C, ReducedForm, gp, atTime);
+            this->giveUnitComplianceMatrix(C, gp, atTime);
             reducedAnswer.beProductOf(C, help);
             v = this->computeSolidifiedVolume(gp, atTime);
             reducedAnswer.times(1. / v);
         }
 
-        if ( form == ReducedForm ) {
-            answer =  reducedAnswer;
-            return;
-        }
-
-        // expand the strain to full form if requested
-        StructuralMaterial :: giveFullSymVectorForm(answer, reducedAnswer, gp->giveMaterialMode());
+        answer = reducedAnswer;
     } else {
         /* error - total mode not implemented yet */
         _error("giveEigenStrainVector - mode is not supported");
@@ -190,7 +183,7 @@ KelvinChainSolidMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
     }
 
 
-    this->giveUnitStiffnessMatrix(D, ReducedForm, gp, tNow);
+    this->giveUnitStiffnessMatrix(D, gp, tNow);
 
 
     help.times( this->giveEModulus(gp, tNow) );

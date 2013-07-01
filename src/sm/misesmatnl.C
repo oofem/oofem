@@ -75,7 +75,7 @@ MisesMatNl :: ~MisesMatNl()
 
 
 void
-MisesMatNl :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+MisesMatNl :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                    const FloatArray &totalStrain, TimeStep *atTime)
 {
     MisesMatNlStatus *nlStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
@@ -95,7 +95,7 @@ MisesMatNl :: giveRealStressVector(FloatArray &answer, MatResponseForm form, Gau
 
 
 void
-MisesMatNl :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+MisesMatNl :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     answer.resize(1, 1);
     answer.zero();

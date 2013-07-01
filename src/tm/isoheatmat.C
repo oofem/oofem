@@ -90,7 +90,6 @@ IsotropicHeatTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *
 
 void
 IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                          MatResponseForm form,
                                                           MatResponseMode mode,
                                                           GaussPoint *gp,
                                                           TimeStep *atTime)

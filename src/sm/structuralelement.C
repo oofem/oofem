@@ -791,7 +791,7 @@ StructuralElement :: computeStressVector(FloatArray &answer, GaussPoint *gp, Tim
     StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
 
     this->computeStrainVector(Epsilon, gp, stepN);
-    cs->giveRealStresses(answer, ReducedForm, gp, Epsilon, stepN);
+    cs->giveRealStresses(answer, gp, Epsilon, stepN);
 }
 
 

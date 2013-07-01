@@ -247,7 +247,7 @@ void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRe
     if ( edc->bg->isInside( coords ) ) {
         Inclusion *ei = static_cast< Inclusion * > ( xMan->giveEnrichmentItem(1) );    
         StructuralMaterial *sm = static_cast< StructuralMaterial * >( ei->giveMaterial() );
-        sm->giveCharacteristicMatrix(answer, ReducedForm, rMode, gp, tStep);
+        sm->giveCharacteristicMatrix(answer, rMode, gp, tStep);
     } else {
         PlaneStress2d :: computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
     }
@@ -265,10 +265,10 @@ PlaneStress2dXfem :: computeStressVector(FloatArray &answer, GaussPoint *gp, Tim
     if ( edc->bg->isInside( coords ) ) {
         Inclusion *ei = static_cast< Inclusion * > ( xMan->giveEnrichmentItem(1) );
         StructuralMaterial *sm = static_cast< StructuralMaterial * >( ei->giveMaterial() );
-        sm->giveRealStressVector(answer, ReducedForm, gp, Epsilon, stepN);
+        sm->giveRealStressVector(answer, gp, Epsilon, stepN);
     } else {
         StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
-        cs->giveRealStresses(answer, ReducedForm, gp, Epsilon, stepN);
+        cs->giveRealStresses(answer, gp, Epsilon, stepN);
     }
 }
 

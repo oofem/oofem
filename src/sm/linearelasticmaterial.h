@@ -72,7 +72,6 @@ public:
     virtual ~LinearElasticMaterial() { }
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                  MatResponseForm form,
                                   MatResponseMode mode,
                                   GaussPoint *gp,
                                   TimeStep *atTime);
@@ -86,7 +85,6 @@ public:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     void give2dPlateStiffMtrx(FloatMatrix &answer,
-                              MatResponseForm form,
                               MatResponseMode mode,
                               GaussPoint *gp,
                               TimeStep *tStep);
@@ -99,7 +97,6 @@ public:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     void give3dShellStiffMtrx(FloatMatrix &answer,
-                              MatResponseForm form,
                               MatResponseMode mode,
                               GaussPoint *gp,
                               TimeStep *tStep);
@@ -113,12 +110,11 @@ public:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     void give2dPlaneStressRotStiffMtrx(FloatMatrix &answer,
-                                       MatResponseForm form,
                                        MatResponseMode mode,
                                        GaussPoint *gp,
                                        TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain,
                               TimeStep *tStep);
 

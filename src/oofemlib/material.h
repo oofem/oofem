@@ -43,7 +43,6 @@
 #include "timestep.h"
 #include "internalstatetype.h"
 #include "internalstatevaluetype.h"
-#include "matresponseform.h"
 #include "matresponsemode.h"
 #include "dictionary.h"
 
@@ -132,7 +131,6 @@ public:
      * @param atTime Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseForm form,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *atTime);

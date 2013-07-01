@@ -63,7 +63,7 @@ RankineMatGrad :: hasMaterialModeCapability(MaterialMode mode)
 
 void
 RankineMatGrad :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
+                                           MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material matrix of the receiver
 //
@@ -72,12 +72,12 @@ RankineMatGrad :: giveCharacteristicMatrix(FloatMatrix &answer,
 }
 
 void
-RankineMatGrad :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) 
+RankineMatGrad :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) 
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _PlaneStressGrad:
-        givePlaneStressStiffMtrx(answer, form, mode, gp, tStep);
+        givePlaneStressStiffMtrx(answer, mode, gp, tStep);
         break;
     default:
         OOFEM_ERROR2("RankineMatGrad :: givePDGradMatrix_uu - mMode = %d not supported\n", mMode);
@@ -85,12 +85,12 @@ RankineMatGrad :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form,
 }
 
 void
-RankineMatGrad :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint* gp, TimeStep* tStep)
+RankineMatGrad :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint* gp, TimeStep* tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _PlaneStressGrad:
-        givePlaneStressKappaMatrix(answer, form, mode, gp, tStep);
+        givePlaneStressKappaMatrix(answer, mode, gp, tStep);
         break;
     default:
         OOFEM_ERROR2("RankineMatGrad :: givePDGradMatrix_ku - mMode = %d not supported\n", mMode);
@@ -98,12 +98,12 @@ RankineMatGrad :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseForm form,
 }
 
 void
-RankineMatGrad :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+RankineMatGrad :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _PlaneStressGrad:
-        givePlaneStressGprime(answer, form, mode, gp, tStep);
+        givePlaneStressGprime(answer, mode, gp, tStep);
         break;
     default:
         OOFEM_ERROR2("RankineMatGrad :: givePDGradMatrix_uk - mMode = %d not supported\n", mMode);
@@ -111,12 +111,12 @@ RankineMatGrad :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseForm form,
 }
 
 void
-RankineMatGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+RankineMatGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _PlaneStressGrad:
-        giveInternalLength(answer, form, mode, gp, tStep);
+        giveInternalLength(answer, mode, gp, tStep);
         break;
     default:
         OOFEM_ERROR2("RankineMatGrad :: givePDGradMatrix_kk - mMode = %d not supported\n", mMode);
@@ -124,7 +124,7 @@ RankineMatGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseForm form,
 }
 
 void
-RankineMatGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+RankineMatGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -134,7 +134,7 @@ RankineMatGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseForm form,
 }
 
 void
-RankineMatGrad :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+RankineMatGrad :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
     double tempDamage = status->giveTempDamage();
@@ -159,12 +159,12 @@ RankineMatGrad :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm 
         gprime *= ( 1. - mParam );
     }
 
-    evaluatePlaneStressStiffMtrx(answer, form, mode, gp, atTime, gprime);
+    evaluatePlaneStressStiffMtrx(answer, mode, gp, atTime, gprime);
 }
 
 // derivative of kappa (result of stress return) wrt final strain
 void
-RankineMatGrad :: givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+RankineMatGrad :: givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     RankineMatGradStatus *status = static_cast< RankineMatGradStatus * >( this->giveStatus(gp) );
     answer.resize(1, 3);
@@ -221,7 +221,7 @@ RankineMatGrad :: givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseFor
 
 // minus derivative of total stress wrt nonlocal kappa
 void
-RankineMatGrad :: givePlaneStressGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+RankineMatGrad :: givePlaneStressGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     answer.resize(3, 1);
     answer.zero();
@@ -249,14 +249,14 @@ RankineMatGrad :: givePlaneStressGprime(FloatMatrix &answer, MatResponseForm for
 }
 
 void
-RankineMatGrad :: giveInternalLength(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+RankineMatGrad :: giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     answer.resize(1, 1);
     answer.at(1, 1) = R;
 }
 
 void
-RankineMatGrad :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+RankineMatGrad :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                        const FloatArray &totalStrain, TimeStep *atTime)
 {
     RankineMatGradStatus *status = static_cast< RankineMatGradStatus * >( this->giveStatus(gp) );
