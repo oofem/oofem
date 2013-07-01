@@ -126,11 +126,6 @@ public:
     /// Destructor.
     virtual ~BinghamFluidMaterial2() { }
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *atTime) { }
-
     virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
 
     virtual void giveDeviatoricStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp,

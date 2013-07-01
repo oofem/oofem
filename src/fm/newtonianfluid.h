@@ -68,11 +68,6 @@ public:
     /// Destructor.
     virtual ~NewtonianFluidMaterial() { }
 
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep) { }
-
     virtual double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep);
 
     virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
