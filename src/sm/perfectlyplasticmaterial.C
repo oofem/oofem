@@ -296,7 +296,9 @@ PerfectlyPlasticMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &an
     StructuralMaterial *lMat = static_cast< StructuralMaterial * >( this->giveLinearElasticMaterial() );
 
     if ( lMat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-        lMat->giveCharacteristicMatrix(answer, FullForm, mode, gp, atTime);
+        FloatMatrix stiff;
+        lMat->giveCharacteristicMatrix(stiff, ReducedForm, mode, gp, atTime);
+        this->giveFullSymMatrixForm(answer, stiff, gp->giveMaterialMode());
     } else {
         OOFEM_ERROR("PerfectlyPlasticMaterial :: giveEffectiveMaterialStiffnessMatrix - unsupported material mode");
     }

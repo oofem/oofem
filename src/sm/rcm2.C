@@ -597,12 +597,15 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
 // (not supported now)
 //
 {
-    StructuralMaterial *lMat = static_cast< StructuralMaterial * >( this->giveLinearElasticMaterial() );
+    StructuralMaterial *lMat = this->giveLinearElasticMaterial();
     FloatMatrix de, fullAnswer(3, 3);
     IntArray mask;
     int sd;
 
-    lMat->giveCharacteristicMatrix(de, FullForm, rMode, gp, atTime);
+    FloatMatrix stiff;
+    lMat->giveCharacteristicMatrix(stiff, ReducedForm, rMode, gp, atTime);
+    this->giveFullSymMatrixForm(de, stiff, gp->giveMaterialMode());
+
     // copy first 3x3 submatrix to answer
     for ( int i = 1; i <= 3; i++ ) {
         for ( int j = 1; j <= 3; j++ ) {
