@@ -24,9 +24,9 @@ IsoLE 1 d 0. E 10.0 n 0.25 tAlpha 0.000012
 IsoLE 2 d 0. E 2.0 n 0.25 tAlpha 0.000012
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
 #vertical sides
-LinearConstraintBC 2 loadTimeFunction 1 dofmans 2 3 1 dofs 2 1 1 weights 2 1. -1. rhs 0.2 lhstype 1 1 rhsType 48
-LinearConstraintBC 3 loadTimeFunction 1 dofmans 2 6 4 dofs 2 1 1 weights 2 1. -1. rhs 0.2 lhstype 1 1 rhsType 48
-LinearConstraintBC 4 loadTimeFunction 1 dofmans 2 9 7 dofs 2 1 1 weights 2 1. -1. rhs 0.2 lhstype 1 1 rhsType 48
+LinearConstraintBC 2 loadTimeFunction 1 dofmans 2 3 1 dofs 2 1 1 weights 2 1. -1. rhs 0.2 lhstype 1 1 rhsType 1 48
+LinearConstraintBC 3 loadTimeFunction 1 dofmans 2 6 4 dofs 2 1 1 weights 2 1. -1. rhs 0.2 lhstype 1 1 rhsType 1 48
+LinearConstraintBC 4 loadTimeFunction 1 dofmans 2 9 7 dofs 2 1 1 weights 2 1. -1. rhs 0.2 lhstype 1 1 rhsType 1 48
 ConstantFunction 1 f(t) 1.0
 #
 #
