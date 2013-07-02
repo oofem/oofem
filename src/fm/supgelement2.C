@@ -497,9 +497,7 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
         static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->computeDeviatoricStressVector(stress, gp, eps, atTime);
         dDB_u.beProductOf(dDB, u);
         /* consistent part */
-        stress.times(dV / Re);
-        bs.beTProductOf(b, stress);
-        answer.add(bs);
+        answer.plusProduct(b, stress, dV / Re);
 
         /* SUPG term */
         //answer.plusProductUnsym(un_gu,dDB_u, t_supg * dV * (-1.0) * (1./Re));
@@ -865,12 +863,8 @@ SUPGElement2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
                     this->computeNuMatrix(nu, gp);
                     dV  = this->computeVolumeAround(gp);
                     rho = this->giveMaterial()->give('d', gp);
-                    s.beTProductOf(b, gVector);
-                    s.times(t_supg * rho * dV);
-                    answer.add(s);
-                    s.beTProductOf(nu, gVector);
-                    s.times(rho * dV);
-                    answer.add(s);
+                    answer.plusProduct(b, gVector, t_supg * rho * dV);
+                    answer.plusProduct(nu, gVector, rho * dV);
                 }
             }
         }
@@ -933,9 +927,7 @@ SUPGElement2 :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime)
                     gp = iRule->getIntegrationPoint(k);
                     this->computeGradPMatrix(g, gp);
                     dV  = this->computeVolumeAround(gp);
-                    s.beTProductOf(g, gVector);
-                    s.times(t_pspg * dV);
-                    answer.add(s);
+                    answer.plusProduct(g, gVector, t_pspg * dV);
                 }
             }
         }

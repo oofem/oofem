@@ -112,7 +112,7 @@ public:
     virtual const char *giveClassName() const { return "Masonry02"; }
     virtual classType giveClassID() const { return Masonry02Class; }
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
+    virtual void giveStiffnessMatrix(FloatMatrix &answer,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);

@@ -533,7 +533,7 @@ MisesMat :: give1dStressStiffMtrx(FloatMatrix &answer,
                                   GaussPoint *gp,
                                   TimeStep *atTime)
 {
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     FloatArray stressVector;
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     double kappa = status->giveCumulativePlasticStrain();
@@ -565,7 +565,7 @@ MisesMat :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
                                      GaussPoint *gp,
                                      TimeStep *atTime)
 {
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     if ( mode != TangentStiffness ) {
         return;
     }

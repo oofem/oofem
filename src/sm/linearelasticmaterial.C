@@ -57,7 +57,7 @@ LinearElasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 
 void
-LinearElasticMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
+LinearElasticMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
                                                   MatResponseMode rMode,
                                                   GaussPoint *gp,
                                                   TimeStep *atTime)
@@ -227,7 +227,7 @@ LinearElasticMaterial :: giveRealStressVector(FloatArray &answer,
         stressVector.resize( strainVector.giveSize() );
     }
 
-    this->giveCharacteristicMatrix(d, TangentStiffness, gp, atTime);
+    this->giveStiffnessMatrix(d, TangentStiffness, gp, atTime);
     stressVector.beProductOf(d, strainVector);
 
     // update gp

@@ -1678,9 +1678,7 @@ MPlasticMaterial2 :: computeReducedElasticModuli(FloatMatrix &answer,
                                                  GaussPoint *gp,
                                                  TimeStep *atTime)
 {  /* Returns elastic moduli in reduced stress-strain space*/
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer,
-                                                                ElasticStiffness,
-                                                                gp, atTime);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, ElasticStiffness, gp, atTime);
 }
 
 
@@ -1753,7 +1751,7 @@ MPlasticMaterial2 :: givePlaneStressStiffMtrx(FloatMatrix &answer,
             this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, atTime);
         }
     } else {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     }
 }
 
@@ -1777,7 +1775,7 @@ MPlasticMaterial2 :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
             this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, atTime);
         }
     } else {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     }
 }
 
@@ -1799,7 +1797,7 @@ MPlasticMaterial2 :: give1dStressStiffMtrx(FloatMatrix &answer,
             this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, atTime);
         }
     } else {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     }
 }
 
@@ -1825,7 +1823,7 @@ MPlasticMaterial2 :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
             this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, atTime);
         }
     } else {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     }
 }
 
@@ -1851,7 +1849,7 @@ MPlasticMaterial2 :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
             this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, atTime);
         }
     } else {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     }
 }
 
@@ -1875,7 +1873,7 @@ MPlasticMaterial2 :: give1dFiberStiffMtrx(FloatMatrix &answer,
             this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, atTime);
         }
     } else {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     }
 }
 
@@ -1901,7 +1899,7 @@ MPlasticMaterial2 :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
             this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, atTime);
         }
     } else {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     }
 }
 

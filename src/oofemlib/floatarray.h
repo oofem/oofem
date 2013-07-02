@@ -253,6 +253,14 @@ public:
      */
     void add(double factor, const FloatArray &b);
     /**
+     * Adds the product @f$ b^T . s dV @f$.
+     * If the receiver's size is zero, it adjusts its size.
+     * @param b Matrix b in the equation.
+     * @param s Array s in the equation.
+     * @param dV Scalar dV in the equation.
+     */
+    void plusProduct(const FloatMatrix &b, const FloatArray &s, double dV);
+    /**
      * Adds scalar to receiver.
      * @param offset Scalar to add
      */

@@ -108,7 +108,6 @@ void Line2SurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType 
         xy.at(2, i) = node->giveCoordinate(2);
     }
 
-    FloatArray A;
     FloatArray dNdxi(3);
     FloatArray es(2); // tangent vector to curve
     FloatMatrix BJ(2, 6);
@@ -138,8 +137,7 @@ void Line2SurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType 
         BJ.at(1, 3) = BJ.at(2, 4) = dNdxi.at(2);
         BJ.at(1, 5) = BJ.at(2, 6) = dNdxi.at(3);
 
-        A.beTProductOf(BJ, es);
-        answer.add( - gamma_s * t * gp->giveWeight(), A); // Note! Negative sign!
+        answer.plusProduct(BJ, es, - gamma_s * t * gp->giveWeight()); // Note! Negative sign!
     }
 }
 

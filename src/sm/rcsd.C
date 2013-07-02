@@ -216,7 +216,7 @@ RCSDMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
 
             answer = reducedAnswer;
         } else if ( rMode == ElasticStiffness ) {
-            this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, rMode, gp, atTime);
+            this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, rMode, gp, atTime);
             return;
         } else {
             _error("giveEffectiveMaterialStiffnessMatrix: usupported mode");
@@ -244,7 +244,7 @@ RCSDMaterial :: computeCurrEquivStrain(GaussPoint *gp, const FloatArray &reduced
     FloatMatrix De;
     double answer = 0.0;
 
-    linearElasticMaterial->giveCharacteristicMatrix(De, TangentStiffness, gp, atTime);
+    linearElasticMaterial->giveStiffnessMatrix(De, TangentStiffness, gp, atTime);
     effStress.beProductOf(De, reducedTotalStrainVector);
     StructuralMaterial :: giveFullSymVectorForm(fullEffStress, effStress, gp->giveMaterialMode());
 

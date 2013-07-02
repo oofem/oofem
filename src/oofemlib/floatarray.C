@@ -218,7 +218,7 @@ void FloatArray :: add(double offset)
 }
 
 
-void FloatArray :: add(const double factor, const FloatArray &b)
+void FloatArray :: add(double factor, const FloatArray &b)
 // Performs the operation a=a+factor*b, where a stands for the receiver. If the
 // receiver's size is 0, adjusts its size to that of b.
 {
@@ -243,6 +243,38 @@ void FloatArray :: add(const double factor, const FloatArray &b)
     }
 #endif
 }
+
+
+void FloatArray :: plusProduct(const FloatMatrix &b, const FloatArray &s, double dV)
+// Performs the operation a += b^T . s * dV
+{
+    if ( this->size == 0 ) {
+        this->beTProductOf(b, s);
+        this->times(dV);
+        return;
+    }
+
+#  ifdef DEBUG
+    if ( size != b.giveNumberOfColumns() ) {
+        OOFEM_ERROR3("FloatArray :: plusProduct :  dimension mismatch in a[%d] and b[%d, *]\n", size, b.giveNumberOfColumns());
+    }
+#  endif
+
+#ifdef __LAPACK_MODULE
+    double beta = 1.;
+    int inc = 1;
+    dgemv_("t", &nRows, &nColumns, &dV, aMatrix.givePointer(), &nRows, anArray.values, &inc, &beta, this->values, &inc, nColumns, nColumns, nRows );
+#else
+    for ( int i = 1; i <= b.giveNumberOfColumns(); i++ ) {
+        double sum = 0.;
+        for ( int j = 1; j <= b.giveNumberOfRows(); j++ ) {
+            sum += b.at(j, i) * s.at(j);
+        }
+        this->at(i) += sum * dV;
+    }
+#endif
+}
+
 
 void FloatArray :: subtract(const FloatArray &src)
 // Performs the operation a=a-src, where a stands for the receiver. If the

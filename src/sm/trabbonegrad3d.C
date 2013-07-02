@@ -61,13 +61,13 @@ TrabBoneGrad3D :: hasMaterialModeCapability(MaterialMode mode)
     return 0;
 }
 void
-TrabBoneGrad3D :: giveCharacteristicMatrix(FloatMatrix &answer,
+TrabBoneGrad3D :: giveStiffnessMatrix(FloatMatrix &answer,
                                            MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
 {
-    _error( "giveCharacteristicMatrix : Shouldn't be called");
+    _error( "giveStiffnessMatrix : Shouldn't be called");
 }
 
 void

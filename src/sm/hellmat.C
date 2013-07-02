@@ -520,7 +520,7 @@ HellmichMaterial :: elasticStiffness(FloatArray &stress, FloatArray &strain, Gau
         LinearElasticMaterial *lMat;
         lMat = giveLinearElasticMaterial(gp, atTime);
         if ( lMat->hasMaterialModeCapability(mmode) ) {
-            lMat->giveCharacteristicMatrix(d, ElasticStiffness, gp, atTime);
+            lMat->giveStiffnessMatrix(d, ElasticStiffness, gp, atTime);
             stress.beProductOf(d, strain);
         } else {
             _error("elasticStiffness: unsupported material mode.");
@@ -576,7 +576,7 @@ void HellmichMaterial :: elasticCompliance(FloatArray &strain, FloatArray &stres
         LinearElasticMaterial *lMat;
         lMat = giveLinearElasticMaterial(gp, atTime);
         if ( lMat->hasMaterialModeCapability(mmode) ) {
-            lMat->giveCharacteristicMatrix(d, ElasticStiffness, gp, atTime);
+            lMat->giveStiffnessMatrix(d, ElasticStiffness, gp, atTime);
             di.beInverseOf(d);
             strain.beProductOf(d, stress);
         } else {
@@ -2623,8 +2623,7 @@ HellmichMaterial :: updateYourself(GaussPoint *gp, TimeStep *atTime)
 }
 
 void
-HellmichMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                             MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
+HellmichMaterial :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
 {
     MaterialMode mMode = gp->giveMaterialMode();
 
@@ -2639,7 +2638,7 @@ HellmichMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     } else if ( mMode == _3dMat ) {
         give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
     } else if ( !( options & moPlasticity ) ) {
-        giveLinearElasticMaterial(gp, atTime)->giveCharacteristicMatrix(answer, rMode, gp, atTime);
+        giveLinearElasticMaterial(gp, atTime)->giveStiffnessMatrix(answer, rMode, gp, atTime);
         answer.times( 1 / giveKvCoeff(gp, atTime) );
     } else {
         _error("giveCharMtrx: unsupported stress-strain mode!");

@@ -160,7 +160,7 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FluidDynamicMaterial *mat = static_cast<FluidDynamicMaterial * >( this->giveMaterial() );
-    FloatArray a_pressure, a_velocity, devStress, epsp, BTs, Nh, dN_V(30);
+    FloatArray a_pressure, a_velocity, devStress, epsp, Nh, dN_V(30);
     FloatMatrix dN, B(6, 30);
     double r_vol, pressure;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
@@ -184,9 +184,8 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
         epsp.beProductOf(B, a_velocity);
         pressure = Nh.dotProduct(a_pressure);
         mat->computeDeviatoricStressVector(devStress, r_vol, gp, epsp, pressure, tStep);
-        BTs.beTProductOf(B, devStress);
 
-        momentum.add(dV, BTs);
+        momentum.plusProduct(B, devStress, dV);
         momentum.add(-pressure*dV, dN_V);
         conservation.add(r_vol*dV, Nh);
     }

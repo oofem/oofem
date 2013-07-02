@@ -158,7 +158,7 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FluidDynamicMaterial *mat = static_cast<FluidDynamicMaterial * >( this->giveMaterial() );
-    FloatArray a_pressure, a_velocity, devStress, epsp, BTs, Nh, dN_V(81);
+    FloatArray a_pressure, a_velocity, devStress, epsp, Nh, dN_V(81);
     FloatMatrix dN, B(6, 81);
     double r_vol, pressure;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
@@ -183,9 +183,8 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
         epsp.beProductOf(B, a_velocity);
         pressure = Nh.dotProduct(a_pressure);
         mat->computeDeviatoricStressVector(devStress, r_vol, gp, epsp, pressure, tStep);
-        BTs.beTProductOf(B, devStress);
 
-        momentum.add(dV, BTs);
+        momentum.plusProduct(B, devStress, dV);
         momentum.add(-pressure*dV, dN_V);
         conservation.add(r_vol*dV, Nh);
     }

@@ -303,7 +303,6 @@ TR1_2D_SUPG2_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime
     double _u, _v, _r;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
     FloatMatrix _b(4, 6);
-    FloatArray bs;
 
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
         FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->_giveMaterial(ifluid) );
@@ -314,9 +313,7 @@ TR1_2D_SUPG2_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime
             this->computeBMtrx(_b, gp);
             eps.beProductOf(_b, u);
             mat->computeDeviatoricStressVector(stress, gp, eps, atTime);
-            stress.times(dV / Re);
-            bs.beTProductOf(_b, stress);
-            answer.add(bs);
+            answer.plusProduct(_b, stress, dV / Re);
 
 #if 1
             // stabilization term k_delta
@@ -327,7 +324,7 @@ TR1_2D_SUPG2_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime
 
             for ( int i = 1; i <= 3; i++ ) {
                 answer.at(2 * i - 1) -= t_supg * ( _u * b [ i - 1 ] + _v * c [ i - 1 ] ) * ( stress.at(1) / _r );
-                answer.at(2 * i)   -= t_supg * ( _u * b [ i - 1 ] + _v * c [ i - 1 ] ) * ( stress.at(4) / _r );
+                answer.at(2 * i)     -= t_supg * ( _u * b [ i - 1 ] + _v * c [ i - 1 ] ) * ( stress.at(4) / _r );
             }
 
 #endif

@@ -416,7 +416,7 @@ PerfectlyPlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 {
     FloatMatrix fullAnswer;
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else {
         this->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, atTime);
         StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode());
@@ -438,7 +438,7 @@ PerfectlyPlasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
 {
     FloatMatrix fullAnswer;
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else {
         this->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, atTime);
         StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode());
@@ -458,7 +458,7 @@ PerfectlyPlasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
 {
     FloatMatrix fullAnswer;
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else {
         this->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, atTime);
         StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode());
@@ -483,7 +483,7 @@ PerfectlyPlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
     FloatMatrix fullAnswer;
     IntArray mask;
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else {
         this->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, atTime);
         StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode());
@@ -506,7 +506,7 @@ PerfectlyPlasticMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
 {
     FloatMatrix fullAnswer;
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else {
         this->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, atTime);
         StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode());

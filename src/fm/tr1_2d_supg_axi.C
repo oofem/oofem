@@ -248,9 +248,7 @@ TR1_2D_SUPG_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
         this->computeBMtrx(_b, gp);
         eps.beProductOf(_b, u);
         mat->computeDeviatoricStressVector(stress, gp, eps, atTime);
-        stress.times(dV / Re);
-        bs.beTProductOf(_b, stress);
-        answer.add(bs);
+        answer.plusProduct(_b, stress, dV / Re);
 
 #if 1
         // stabilization term k_delta

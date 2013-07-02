@@ -157,7 +157,7 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
     }
 
 
-    lmat->giveCharacteristicMatrix(de, SecantStiffness, gp, atTime);
+    lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
     //mj
     // damage deactivation in compression for 1D model
     if ( ( reducedTotalStrainVector.giveSize() > 1 ) || ( reducedTotalStrainVector.at(1) > 0. ) ) {
@@ -190,7 +190,7 @@ void IsotropicDamageMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, Ma
         tempDamage = min(tempDamage, maxOmega);
     }
 
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     answer.times(1.0 - tempDamage);
     if ( mode == TangentStiffness ) {
         double damage = status->giveDamage();
@@ -230,7 +230,7 @@ void IsotropicDamageMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, Ma
         om = min(om, maxOmega);
     }
 
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     answer.times(1.0 - om);
 }
 
@@ -247,7 +247,7 @@ void IsotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatRe
         om = min(om, maxOmega);
     }
 
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     answer.times(1.0 - om);
 }
 

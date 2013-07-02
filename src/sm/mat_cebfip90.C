@@ -136,7 +136,7 @@ CebFipSlip90Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
 
 void
-CebFipSlip90Material :: giveCharacteristicMatrix(FloatMatrix &answer,
+CebFipSlip90Material :: giveStiffnessMatrix(FloatMatrix &answer,
                                                  MatResponseMode rMode,
                                                  GaussPoint *gp, TimeStep *atTime)
 //

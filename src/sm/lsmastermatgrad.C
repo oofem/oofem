@@ -74,8 +74,7 @@ LsMasterMatGrad :: CreateStatus(GaussPoint *gp) const
 
 
 void
-LsMasterMatGrad :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                         MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
+LsMasterMatGrad :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //

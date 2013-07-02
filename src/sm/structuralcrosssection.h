@@ -257,8 +257,8 @@ public:
 protected:
     /**
      * For internal usage by cross section model.
-     * It is direct interface to material model service giveCharacteristicMatrix.
-     * @see Material::giveCharacteristicMatrix
+     * It is direct interface to material model service giveStiffnessMatrix.
+     * @see Material::giveStiffnessMatrix
      */
     void giveMaterialStiffnessMatrix(FloatMatrix &answer,
                                      MatResponseMode mode,
@@ -267,14 +267,14 @@ protected:
 
     /**
      * For internal usage by cross section model.
-     * It is direct interface to material model service giveCharacteristicMatrix.
+     * It is direct interface to material model service giveStiffnessMatrix.
      * Material model passed as parameter is used instead of material, to which given integration point
      * belongs to. It should always be the same material as integration point belongs to, because in
      * integration point are stored load history variables related only to its associated material model.
      * Different model can be used only if it does not depend on any internal history variables, like
      * linear elastic material. Accessing load history variables, which are not in integration point status
      * can lead to segmentation fault error.
-     * @see Material::giveCharacteristicMatrix
+     * @see Material::giveStiffnessMatrix
      * @param answer Contains result.
      * @param form Material response form.
      * @param mode Material response mode.

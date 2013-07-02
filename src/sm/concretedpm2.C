@@ -2321,7 +2321,7 @@ ConcreteDPM2 :: computeSecantStiffness(FloatMatrix &answer,
         omegaTension = 0.999999;
     }
     FloatMatrix stiff;
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(stiff, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(stiff, mode, gp, atTime);
     this->giveFullSymMatrixForm(answer, stiff, gp->giveMaterialMode());
 
     if ( isotropicFlag == 1 ) {

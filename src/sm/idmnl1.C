@@ -739,7 +739,7 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
         elem->computeBmatrixAt(gp, b);
 
         LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-        lmat->giveCharacteristicMatrix(de, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
         stress.beProductOf(de, strain);
 
         f = ( e0 / ( equivStrain * equivStrain ) ) * exp( -( equivStrain - e0 ) / ( ef - e0 ) )
@@ -784,7 +784,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
         FloatArray fullHelp, fullNu;
         LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
 
-        lmat->giveCharacteristicMatrix(de, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
         strain = status->giveTempStrainVector();
         stress.beProductOf(de, strain);
         StructuralMaterial :: giveFullSymVectorForm(fullStress, stress, gp->giveMaterialMode());
@@ -894,7 +894,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
         double equivStrain;
 
         LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-        lmat->giveCharacteristicMatrix(de, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
         strain = status->giveTempStrainVector();
         stress.beProductOf(de, strain);
         this->computeLocalEquivalentStrain(equivStrain, strain, gp, atTime);

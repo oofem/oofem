@@ -115,13 +115,13 @@ IDGMaterial :: hasMaterialModeCapability(MaterialMode mode)
 }
 
 void
-IDGMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
+IDGMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
                                         MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
 {
-    _error( "giveCharacteristicMatrix : Shouldn't be called.");
+    _error( "giveStiffnessMatrix : Shouldn't be called.");
 }
 
 
@@ -245,7 +245,7 @@ IDGMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mod
     if ( tempDamage > 0.0 )
         tempDamage = min(tempDamage, maxOmega);
     }
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     answer.times(1.0 - tempDamage);
     
 #if 0
@@ -451,7 +451,7 @@ IDGMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, 
         FloatArray stress, fullStress, principalStress;
         double sum = 0.;
 
-        lmat->giveCharacteristicMatrix(de, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
         stress.beProductOf(de, strain);
         StructuralMaterial :: giveFullSymVectorForm(fullStress, stress, gp->giveMaterialMode());
         this->computePrincipalValues(principalStress, fullStress, principal_stress);
@@ -478,7 +478,7 @@ IDGMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, 
         FloatArray stress;
         double sum;
 
-        lmat->giveCharacteristicMatrix(de, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
         if ( this->equivStrainType == EST_ElasticEnergy ) {
             // standard elastic energy
             stress.beProductOf(de, strain);
@@ -687,7 +687,7 @@ IDGMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,const Flo
     }
 
 
-    lmat->giveCharacteristicMatrix(de, SecantStiffness, gp, atTime);
+    lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
     de.times(1.0 - omega);
     answer.beProductOf(de, strain);
 

@@ -574,7 +574,7 @@ LatticeDamage2d :: giveInterface(InterfaceType type)
 
 
 void
-LatticeDamage2d :: giveCharacteristicMatrix(FloatMatrix &answer,
+LatticeDamage2d :: giveStiffnessMatrix(FloatMatrix &answer,
                                             MatResponseMode rMode,
                                             GaussPoint *gp, TimeStep *atTime)
 {

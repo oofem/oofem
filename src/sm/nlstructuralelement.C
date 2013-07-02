@@ -111,8 +111,8 @@ void
 NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
     FloatMatrix B;
-    FloatArray BS, vStress;
-    
+    FloatArray vStress;
+
     // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
     // as this is valid only if receiver has no nodes with slaves
     // zero answer will resize accordingly when adding first contribution
@@ -130,6 +130,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
                 vStress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
             } else {
                 this->computeStressVector(vStress, gp, tStep);
+                ///@todo This is actaully inefficient since it constructs B and twice and collects the nodal unknowns over and over.
             }
 
         // First Piola-Kirchhoff stress 
@@ -151,6 +152,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
                     vStress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->givePVector();
                 } else {
                     this->computeFirstPKStressVector(vStress, gp, tStep); 
+                    ///@todo This is actaully inefficient since it constructs B and twice and collects the nodal unknowns over and over.
                 }
 
                 this->computeBHmatrixAt(gp, B);
@@ -163,8 +165,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
         
         // Compute nodal internal forces at nodes as f = B^T*Stress dV
         double dV  = this->computeVolumeAround(gp);
-        BS.beTProductOf(B, vStress);
-        answer.add(dV, BS);
+        answer.plusProduct(B, vStress, dV);
     }
 
     // If inactive: update fields but do not give any contribution to the internal forces
@@ -238,8 +239,7 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
         
             // compute nodal representation of internal forces at nodes as f = B^T*stress dV
             double dV = this->computeVolumeAround(gp);
-            BS.beTProductOf(B, vS);
-            m->add(dV, BS);
+            m->plusProduct(B, vS, dV);
 
             // localize irule contribution into element matrix
             if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule, EID_MomentumBalance) ) {
@@ -266,7 +266,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseMode rMode, TimeStep *tStep)
 {
     StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
-    bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode, this->material);
+    bool matStiffSymmFlag = true;
 
     answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
     if ( !this->isActivated(tStep) ) {

@@ -497,7 +497,7 @@ Masonry02 :: CreateStatus(GaussPoint *gp) const
 }
 
 void
-Masonry02 :: giveCharacteristicMatrix(FloatMatrix &answer,
+Masonry02 :: giveStiffnessMatrix(FloatMatrix &answer,
                                       MatResponseMode rMode,
                                       GaussPoint *gp, TimeStep *atTime)
 //
@@ -543,7 +543,7 @@ Masonry02 :: computeReducedElasticModuli(FloatMatrix &answer,
         answer.at(2, 2) = ks;
         answer.at(1, 2) = answer.at(2, 1) = 0.0;
     } else {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, ElasticStiffness, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, ElasticStiffness, gp, atTime);
     }
 }
 

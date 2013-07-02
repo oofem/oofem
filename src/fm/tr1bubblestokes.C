@@ -158,7 +158,7 @@ void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
-    FloatArray a_pressure, a_velocity, devStress, epsp, BTs, N, dNv(8);
+    FloatArray a_pressure, a_velocity, devStress, epsp, N, dNv(8);
     double r_vol, pressure;
     FloatMatrix dN, B(3, 8);
     B.zero();
@@ -190,9 +190,8 @@ void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep
         epsp.beProductOf(B, a_velocity);
 
         mat->computeDeviatoricStressVector(devStress, r_vol, gp, epsp, pressure, tStep);
-        BTs.beTProductOf(B, devStress);
 
-        momentum.add(dA, BTs);
+        momentum.plusProduct(B, devStress, dA);
         momentum.add(-pressure*dA, dNv);
         conservation.add(r_vol*dA, N);
     }

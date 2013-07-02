@@ -139,7 +139,7 @@ public:
     RheoChainMaterial(int n, Domain *d);
     virtual ~RheoChainMaterial();
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
+    virtual void giveStiffnessMatrix(FloatMatrix &answer,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);

@@ -301,7 +301,7 @@ public:
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
+    virtual void  giveStiffnessMatrix(FloatMatrix &answer,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *atTime);

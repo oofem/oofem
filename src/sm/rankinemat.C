@@ -406,7 +406,7 @@ RankineMat :: evaluatePlaneStressStiffMtrx(FloatMatrix &answer,
     RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
     if ( mode == ElasticStiffness || mode == SecantStiffness ) {
         // start from the elastic stiffness
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
         if ( mode == SecantStiffness ) {
             // transform to secant stiffness
             double damage = status->giveTempDamage();
@@ -420,7 +420,7 @@ RankineMat :: evaluatePlaneStressStiffMtrx(FloatMatrix &answer,
     double kappa = status->giveCumulativePlasticStrain();
     double tempKappa = status->giveTempCumulativePlasticStrain();
     if ( tempKappa <= kappa ) { // tangent matrix requested, but unloading takes place - use secant
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
         double damage = status->giveTempDamage();
         answer.times(1. - damage);
         return;

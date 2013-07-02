@@ -701,7 +701,6 @@ void pyclass_Material()
     class_<Material, bases<FEMComponent>, boost::noncopyable >("Material", no_init)
         .def("giveIPValue", &Material::giveIPValue)
         .def("setIPValue", &Material::setIPValue)
-        .def("giveCharacteristicMatrix", &Material::giveCharacteristicMatrix)
         .def("giveStatus", &Material::giveStatus, return_internal_reference<>())
         ;
 }

@@ -168,7 +168,7 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
 
 
 void
-SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
+SimpleInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
                                                     MatResponseMode rMode,
                                                     GaussPoint *gp, TimeStep *atTime)
 //

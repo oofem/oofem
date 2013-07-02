@@ -419,7 +419,7 @@ StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
         this->give1dFiberStiffMtrx(answer, rMode, gp, atTime);
         break;
     default:
-        OOFEM_ERROR2( "StructuralMaterial :: giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR2( "StructuralMaterial :: giveStiffnessMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -460,7 +460,7 @@ StructuralMaterial :: giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseM
         break;
 #endif
     default:
-        OOFEM_ERROR2( "StructuralMaterial :: giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR2( "StructuralMaterial :: giveStiffnessMatrix_dPdF : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 
 }

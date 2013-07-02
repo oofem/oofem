@@ -78,7 +78,7 @@ IsotropicLinearElasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 
 void
-IsotropicLinearElasticMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
+IsotropicLinearElasticMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
                                                            MatResponseMode rMode,
                                                            GaussPoint *gp,
                                                            TimeStep *atTime)
@@ -96,7 +96,7 @@ IsotropicLinearElasticMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         this->give3dBeamStiffMtrx(answer, rMode, gp, atTime);
         break;
     default:
-        LinearElasticMaterial :: giveCharacteristicMatrix(answer, rMode, gp, atTime);
+        LinearElasticMaterial :: giveStiffnessMatrix(answer, rMode, gp, atTime);
     }
 
     if ( !isActivated(atTime) ) {

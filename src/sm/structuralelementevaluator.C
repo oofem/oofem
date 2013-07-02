@@ -271,7 +271,7 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
     IntegrationRule *iRule;
     int ndofs = elem->computeNumberOfDofs(EID_MomentumBalance);
     FloatMatrix b;
-    FloatArray bs, strain, stress, u, temp;
+    FloatArray strain, stress, u, temp;
     IntArray irlocnum;
     double dV;
 
@@ -305,8 +305,7 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
 
             // compute nodal representation of internal forces using f = B^T*Sigma dV
             dV = this->computeVolumeAround(gp);
-            bs.beTProductOf(b, stress);
-            m->add(dV, bs);
+            m->plusProduct(b, stress, dV);
         }
         // localize irule contribution into element matrix
         if ( this->giveIntegrationElementLocalCodeNumbers(irlocnum, elem, iRule, EID_MomentumBalance) ) {

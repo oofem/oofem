@@ -82,13 +82,12 @@ MisesMatGrad :: hasMaterialModeCapability(MaterialMode mode)
 
 
 void
-MisesMatGrad :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                         MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
+MisesMatGrad :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
 {
-    _error( "giveCharacteristicMatrix : Shouldn't be called.");
+    _error( "giveStiffnessMatrix : Shouldn't be called.");
 }
 
 
@@ -224,7 +223,7 @@ MisesMatGrad :: give1dStressStiffMtrx(FloatMatrix &answer,
 void
 MisesMatGrad :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     if ( mode != TangentStiffness ) {
         return;
     }

@@ -820,7 +820,7 @@ public:
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
+    virtual void giveStiffnessMatrix(FloatMatrix &answer,
                                           MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
 
     virtual void computeStressIndependentStrainVector(FloatArray &answer,

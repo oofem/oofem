@@ -136,7 +136,7 @@ public:
     virtual void giveRealStressVector(FloatArray & answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
+    virtual void  giveStiffnessMatrix(FloatMatrix &answer,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *tStep);

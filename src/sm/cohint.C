@@ -81,7 +81,7 @@ CohesiveInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint
 }
 
 void
-CohesiveInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
+CohesiveInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
                                                       MatResponseMode rMode,
                                                       GaussPoint *gp, TimeStep *atTime)
 //

@@ -887,7 +887,7 @@ MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     // check for elastic cases
     //
     if ( ( status->giveTempStateFlag() == MPlasticMaterialStatus :: PM_Elastic ) || ( status->giveTempStateFlag() == MPlasticMaterialStatus :: PM_Unloading ) ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, TangentStiffness, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, TangentStiffness, gp, atTime);
         return;
     }
 
@@ -1026,7 +1026,7 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     // check for elastic cases
     //
     if ( ( status->giveTempStateFlag() == MPlasticMaterialStatus :: PM_Elastic ) || ( status->giveTempStateFlag() == MPlasticMaterialStatus :: PM_Unloading ) ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, TangentStiffness, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, TangentStiffness, gp, atTime);
         return;
     }
 
@@ -1168,7 +1168,7 @@ MPlasticMaterial :: computeReducedElasticModuli(FloatMatrix &answer,
                                                 GaussPoint *gp,
                                                 TimeStep *atTime)
 {  /* Returns elastic moduli in reduced stress-strain space*/
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer,
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer,
                                                                 ElasticStiffness,
                                                                 gp, atTime);
 }
@@ -1235,7 +1235,7 @@ MPlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 // this implementation should be faster.
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
         this->giveConsistentStiffnessMatrix(answer, mode, gp, atTime);
     } else {
@@ -1257,7 +1257,7 @@ MPlasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
 //
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
         this->giveConsistentStiffnessMatrix(answer, mode, gp, atTime);
     } else {
@@ -1277,7 +1277,7 @@ MPlasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
 // (1d case ==> sigma_y = sigma_z = tau_yz = tau_zx = tau_xy  = 0.)
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
         this->giveConsistentStiffnessMatrix(answer, mode, gp, atTime);
     } else {
@@ -1300,7 +1300,7 @@ MPlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 // this implementation should be faster.
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
         this->giveConsistentStiffnessMatrix(answer, mode, gp, atTime);
     } else {
@@ -1323,7 +1323,7 @@ MPlasticMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
 // this implementation should be faster.
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
         this->giveConsistentStiffnessMatrix(answer, mode, gp, atTime);
     } else {
@@ -1346,7 +1346,7 @@ MPlasticMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
 // this implementation should be faster.
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
         this->giveConsistentStiffnessMatrix(answer, mode, gp, atTime);
     } else {
@@ -1370,7 +1370,7 @@ MPlasticMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
 // this implementation should be faster.
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
         this->giveConsistentStiffnessMatrix(answer, mode, gp, atTime);
     } else {

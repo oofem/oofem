@@ -116,7 +116,7 @@ MaterialStatus *AbaqusUserMaterial :: CreateStatus(GaussPoint *gp) const
     return new AbaqusUserMaterialStatus(n++, this->giveDomain(), gp, this->numState);
 }
 
-void AbaqusUserMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
+void AbaqusUserMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
                                                     MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     AbaqusUserMaterialStatus *ms = dynamic_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );

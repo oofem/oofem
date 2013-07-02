@@ -123,7 +123,7 @@ public:
     virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
                               const FloatArray &, TimeStep *);
 
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
+    virtual void  giveStiffnessMatrix(FloatMatrix &answer,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *atTime);

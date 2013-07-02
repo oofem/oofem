@@ -434,7 +434,7 @@ RheoChainMaterial :: computeCharTimes()
 
 
 void
-RheoChainMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
+RheoChainMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseMode mode,
                                               GaussPoint *gp,
                                               TimeStep *atTime)

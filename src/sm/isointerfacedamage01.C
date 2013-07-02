@@ -125,7 +125,7 @@ IsoInterfaceDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoin
         this->computeDamageParam(omega, tempKappa, reducedTotalStrainVector, gp);
     }
 
-    this->giveCharacteristicMatrix(de, ElasticStiffness, gp, atTime);
+    this->giveStiffnessMatrix(de, ElasticStiffness, gp, atTime);
     // damage in tension only
     if ( equivStrain >= 0.0 ) {
         de.times(1.0 - omega);
@@ -141,7 +141,7 @@ IsoInterfaceDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoin
 }
 
 void
-IsoInterfaceDamageMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
+IsoInterfaceDamageMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
                                                        MatResponseMode rMode,
                                                        GaussPoint *gp, TimeStep *atTime)
 //

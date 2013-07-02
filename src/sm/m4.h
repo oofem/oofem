@@ -102,7 +102,7 @@ public:
     /// Destructor.
     virtual ~M4Material() { }
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
+    virtual void giveStiffnessMatrix(FloatMatrix &answer,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);

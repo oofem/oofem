@@ -95,7 +95,7 @@ public:
     /// Destructor.
     virtual ~IsotropicLinearElasticMaterial() { }
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
+    virtual void giveStiffnessMatrix(FloatMatrix &answer,
                                   MatResponseMode mode,
                                   GaussPoint *gp,
                                   TimeStep *atTime);

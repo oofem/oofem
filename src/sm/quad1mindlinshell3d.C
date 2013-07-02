@@ -256,7 +256,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     // We need to overload this for practical reasons (this 3d shell has all 9 dofs, but the shell part only cares for the first 8)
     // This elements adds an additional stiffness for the so called drilling dofs, meaning we need to work with all 9 components.
     FloatMatrix b, d;
-    FloatArray n, strain, stress, bs;
+    FloatArray n, strain, stress;
     FloatArray shellUnknowns(20), drillUnknowns(4), unknowns;
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, unknowns);
@@ -287,8 +287,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
             strain.beProductOf(b, shellUnknowns);
             mat->giveRealStressVector(stress, gp, strain, tStep);
         }
-        bs.beTProductOf(b, stress);
-        shellForces.add(dV, bs);
+        shellForces.plusProduct(b, stress, dV);
 
         // Drilling stiffness is here for improved numerical properties
         if (alpha > 0.) {

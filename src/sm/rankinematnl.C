@@ -91,14 +91,14 @@ void
 RankineMatNl :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
         return;
     }
 
     RankineMatNlStatus *status = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
 
     if ( mode == SecantStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
         double damage = status->giveTempDamage();
         answer.times(1. - damage);
         return;

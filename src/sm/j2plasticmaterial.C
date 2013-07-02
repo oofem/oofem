@@ -413,7 +413,7 @@ J2plasticMaterial :: computeTrialStressIncrement(FloatArray &answer, GaussPoint 
     FloatArray reducedAnswer;
     FloatMatrix reducedModuli;
 
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(reducedModuli, ElasticStiffness,
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(reducedModuli, ElasticStiffness,
                                                                 gp, atTime);
 
     reducedAnswer.beProductOf(reducedModuli, strainIncrement);

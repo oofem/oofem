@@ -115,7 +115,7 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
+    virtual void giveStiffnessMatrix(FloatMatrix &answer,
                                   MatResponseMode mode,
                                   GaussPoint *gp,
                                   TimeStep *tStep);
