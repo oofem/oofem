@@ -52,10 +52,8 @@ namespace oofem {
 class GaussPoint;
 
 /**
- * Class implementing isotropic linear elastic material.
- * This class implements an isotropic linear elastic material in a finite
- * element problem. A material
- * is an attribute of a domain. It is usually also attribute of many elements.
+ * This class implements an isotropic linear elastic material in a finite element problem.
+ * For large deformation analysis it becomes the St. Venant-Kirchoff hyperelasticity model.
  *
  * Tasks:
  * - Returning standard material stiffness matrix for 3d-case.

@@ -142,7 +142,7 @@ FiberedCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
     if ( mode == _3dBeam ) {
         this->give3dBeamMaterialStiffnessMatrix(answer, rMode, gp, mat, tStep);
     } else if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-        mat->giveCharacteristicMatrix(answer, rMode, gp, tStep);
+        mat->giveStiffnessMatrix(answer, rMode, gp, tStep);
     } else {
         _error("giveMaterialStiffnessMatrixOf: unsupported StressStrainMode");
     }

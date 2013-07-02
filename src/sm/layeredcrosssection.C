@@ -179,7 +179,7 @@ LayeredCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
         int layer = (gpnum - 1) / gpsperlayer + 1;
         mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(layer) ) );
         if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-            mat->giveCharacteristicMatrix(answer, rMode, gp, tStep);
+            mat->giveStiffnessMatrix(answer, rMode, gp, tStep);
         } else {
             _error("giveMaterialStiffnessMatrixOf: unsupported StressStrainMode");
         }
@@ -197,7 +197,7 @@ LayeredCrossSection :: giveLayerMaterialStiffnessMatrix(FloatMatrix &layerMatrix
     /// Just using the gp number is to simplistic, and doesn't nicely support more than 1 gp per layer. Must rethink.
     StructuralMaterial *mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(layerGp->giveNumber()) ) );
     if ( mat->hasMaterialModeCapability( layerGp->giveMaterialMode() ) ) {
-        mat->giveCharacteristicMatrix(layerMatrix, rMode, layerGp, tStep);
+        mat->giveStiffnessMatrix(layerMatrix, rMode, layerGp, tStep);
     } else {
         _error("giveLayerMaterialStiffnessMatrix: unsupported StressStrainMode");
     }

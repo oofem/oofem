@@ -92,7 +92,7 @@ SimpleCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
 //
 {
     if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-        mat->giveCharacteristicMatrix(answer, rMode, gp, tStep);
+        mat->giveStiffnessMatrix(answer, rMode, gp, tStep);
         return;
     } else {
         OOFEM_ERROR3("GiveMaterialStiffnessMatrixOf: unsupported StressStrainMode %s on Element number %d", __MaterialModeToString(gp->giveMaterialMode()), gp->giveElement()->giveGlobalNumber() );

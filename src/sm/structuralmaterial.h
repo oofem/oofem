@@ -122,7 +122,7 @@ public:
     virtual ~StructuralMaterial() { }
 
     /**
-     * Computes the stiffness matrix of receiver in given integration point, respecting its history.
+     * Computes the stiffness matrix for giveRealStressVector of receiver in given integration point, respecting its history.
      * The algorithm should use temporary or equilibrium  history variables stored in integration point status
      * to compute and return required result.
      * @param answer Contains result.
@@ -131,24 +131,23 @@ public:
      * @param gp Integration point.
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
+    virtual void giveStiffnessMatrix(FloatMatrix &answer,
+                                     MatResponseMode mode,
+                                     GaussPoint *gp,
+                                     TimeStep *tStep);
 
     /**
      * Computes the real stress vector for given total strain and integration point.
      * The total strain is defined as strain computed directly from displacement field at given time.
-     * The stress independent parts (temperature, eigenstrains) are subtracted in constitutive
-     * driver.
+     * The stress independent parts (temperature, eigenstrains) are subtracted in constitutive driver.
      * The service should use previously reached equilibrium history variables. Also
      * it should update temporary history variables in status according to newly reached state.
      * The temporary history variables are moved into equilibrium ones after global structure
      * equilibrium has been reached by iteration process.
-     * @param answer Contains result.
+     * @param answer Stress vector in reduced form. For large deformations it is treated as the second Piola-Kirchoff stress.
      * @param form Material response form.
      * @param gp Integration point.
-     * @param reducedStrain Strain vector in reduced form.
+     * @param reducedStrain Strain vector in reduced form. For large deformations it is treated as the Green-Lagrange strain.
      * @param tStep Current time step (most models are able to respond only when atTime is current time step).
      */
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
@@ -175,11 +174,11 @@ public:
     virtual void giveFirstPKStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
     /// Default implementation relies on giveRealStressVector for second Piola-Kirchoff stress
     virtual void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
-    /// Default implementation relies on giveRealStressVector_3d
+    /// Default implementation relies on giveFirstPKStressVector_3d
     virtual void giveFirstPKStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
-    /// Default implementation relies on giveRealStressVector_3d
+    /// Default implementation relies on giveFirstPKStressVector_3d
     virtual void giveFirstPKStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
-    /// Default implementation relies on giveRealStressVector_3d
+    /// Default implementation relies on giveFirstPKStressVector_3d
     virtual void giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
 
     /**

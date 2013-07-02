@@ -598,7 +598,7 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
     int sd;
 
     FloatMatrix stiff;
-    lMat->giveCharacteristicMatrix(stiff, rMode, gp, atTime);
+    lMat->giveStiffnessMatrix(stiff, rMode, gp, atTime);
     this->giveFullSymMatrixForm(de, stiff, gp->giveMaterialMode());
 
     // copy first 3x3 submatrix to answer
@@ -662,7 +662,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     IntArray mask;
 
     if ( ( rMode == ElasticStiffness ) || ( numberOfActiveCracks == 0 ) ) {
-        lMat->giveCharacteristicMatrix(answer, rMode, gp, atTime);
+        lMat->giveStiffnessMatrix(answer, rMode, gp, atTime);
         return;
     }
 

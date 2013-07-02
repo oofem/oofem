@@ -77,7 +77,7 @@ LinearElasticMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         this->give3dShellStiffMtrx(answer, rMode, gp, atTime);
         break;
     default:
-        StructuralMaterial :: giveCharacteristicMatrix(answer, rMode, gp, atTime);
+        StructuralMaterial :: giveStiffnessMatrix(answer, rMode, gp, atTime);
     }
 }
 

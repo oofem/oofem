@@ -141,7 +141,7 @@ StructuralCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
 // only interface to material class, forcing returned matrix to be in reduced form.
 //
 {
-    static_cast< StructuralMaterial * >( mat )->giveCharacteristicMatrix(answer, rMode, gp, tStep);
+    static_cast< StructuralMaterial * >( mat )->giveStiffnessMatrix(answer, rMode, gp, tStep);
 }
 
 

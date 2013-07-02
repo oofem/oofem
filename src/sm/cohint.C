@@ -94,7 +94,7 @@ CohesiveInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         give3dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, atTime);
         break;
     default:
-        StructuralMaterial :: giveCharacteristicMatrix(answer, rMode, gp, atTime);
+        StructuralMaterial :: giveStiffnessMatrix(answer, rMode, gp, atTime);
     }
 }
 

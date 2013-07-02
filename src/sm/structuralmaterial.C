@@ -384,9 +384,9 @@ StructuralMaterial :: give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answe
 
 
 void
-StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                               MatResponseMode rMode,
-                                               GaussPoint *gp, TimeStep *atTime)
+StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
+                                          MatResponseMode rMode,
+                                          GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //

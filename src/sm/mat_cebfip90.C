@@ -149,7 +149,7 @@ CebFipSlip90Material :: giveCharacteristicMatrix(FloatMatrix &answer,
         give1dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, atTime);
         break;
     default:
-        StructuralMaterial :: giveCharacteristicMatrix(answer, rMode, gp, atTime);
+        StructuralMaterial :: giveStiffnessMatrix(answer, rMode, gp, atTime);
     }
 }
 

@@ -510,7 +510,7 @@ Masonry02 :: giveCharacteristicMatrix(FloatMatrix &answer,
         give2dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, atTime);
         break;
     default:
-        MPlasticMaterial2 :: giveCharacteristicMatrix(answer, rMode, gp, atTime);
+        MPlasticMaterial2 :: giveStiffnessMatrix(answer, rMode, gp, atTime);
     }
 }
 

@@ -247,7 +247,7 @@ void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRe
     if ( edc->bg->isInside( coords ) ) {
         Inclusion *ei = static_cast< Inclusion * > ( xMan->giveEnrichmentItem(1) );    
         StructuralMaterial *sm = static_cast< StructuralMaterial * >( ei->giveMaterial() );
-        sm->giveCharacteristicMatrix(answer, rMode, gp, tStep);
+        sm->giveStiffnessMatrix(answer, rMode, gp, tStep);
     } else {
         PlaneStress2d :: computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
     }

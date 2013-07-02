@@ -1396,7 +1396,7 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     //
     if ( ( status->giveTempStateFlag() == MPlasticMaterial2Status :: PM_Elastic ) ||
         ( status->giveTempStateFlag() == MPlasticMaterial2Status :: PM_Unloading ) ) {
-        this->giveCharacteristicMatrix(answer, ElasticStiffness, gp, atTime);
+        this->giveStiffnessMatrix(answer, ElasticStiffness, gp, atTime);
         return;
     }
 
@@ -1551,7 +1551,7 @@ MPlasticMaterial2 :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     //
     if ( ( status->giveTempStateFlag() == MPlasticMaterial2Status :: PM_Elastic ) ||
         ( status->giveTempStateFlag() == MPlasticMaterial2Status :: PM_Unloading ) ) {
-        this->giveCharacteristicMatrix(answer, ElasticStiffness, gp, atTime);
+        this->giveStiffnessMatrix(answer, ElasticStiffness, gp, atTime);
         return;
     }
 

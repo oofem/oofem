@@ -479,7 +479,7 @@ MDM :: computeEffectiveStress(FloatArray &stressPDC, const FloatArray &strainPDC
         // PDC components in 3d mode are in full 3d format, even in planeStrain situation
         this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(de, TangentStiffness, gp, atTime);
     } else {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(de, TangentStiffness, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(de, TangentStiffness, gp, atTime);
     }
 
     stressPDC.beProductOf(de, strainPDC);
@@ -539,7 +539,7 @@ MDM :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
 {
     MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
 
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, TangentStiffness, gp, atTime);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, TangentStiffness, gp, atTime);
     //answer = de;
     //return;
     // if (isVirgin()) return ;
