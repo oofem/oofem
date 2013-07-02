@@ -84,7 +84,7 @@ protected:
     // characteristicType of LHS and RHS contributions (this makes this bc trully general, as one can customize, to which 
     // characteristic component the contibution will be assembled)
     IntArray lhsType;
-    int rhsType;
+    IntArray rhsType;
 
 public:
     LinearConstraintBC(int n, Domain *d);

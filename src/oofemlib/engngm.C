@@ -1131,10 +1131,6 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
         ActiveBoundaryCondition *abc;
         Load *load;
         
-        if(type==InternalForcesVector && bc->giveClassID()==LinearConstraintClass){//skip Lagrange DOFs
-            continue;
-        }
-        
         if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >( bc ) ) ) {
             abc->assembleVector(answer, tStep, eid, type, mode, s, eNorms);
         } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >( bc ) ) && bc->isImposed(tStep) ) {
