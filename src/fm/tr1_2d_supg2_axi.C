@@ -323,8 +323,8 @@ TR1_2D_SUPG2_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime
             _v = n.at(1) * un.at(2) + n.at(2) * un.at(4) + n.at(3) * un.at(6);
 
             for ( int i = 1; i <= 3; i++ ) {
-                answer.at(2 * i - 1) -= t_supg * ( _u * b [ i - 1 ] + _v * c [ i - 1 ] ) * ( stress.at(1) / _r );
-                answer.at(2 * i)     -= t_supg * ( _u * b [ i - 1 ] + _v * c [ i - 1 ] ) * ( stress.at(4) / _r );
+                answer.at(2 * i - 1) -= t_supg * ( _u * b [ i - 1 ] + _v * c [ i - 1 ] ) * ( stress.at(1) / _r ) * dV / Re;
+                answer.at(2 * i)     -= t_supg * ( _u * b [ i - 1 ] + _v * c [ i - 1 ] ) * ( stress.at(4) / _r ) * dV / Re;
             }
 
 #endif
