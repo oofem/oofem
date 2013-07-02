@@ -53,7 +53,7 @@ LinearConstraintBC :: LinearConstraintBC(int n, Domain *d) : ActiveBoundaryCondi
     // this is internal lagrange multiplier uses to enforce the receiver constrain
     this->md->appendDof( new MasterDof( 0, this->md, ( DofIDItem ) ( d->giveNextFreeDofID() ) ) );
     this->lhsType.resize(0); 
-    this->rhsType = UnknownCharType;
+    this->rhsType.resize(0); 
 }
 
 
@@ -133,14 +133,33 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
   FloatArray vec(1);
   double factor=1.;
 
-  if ((int) type != this->rhsType) return ;
+  if (!this->rhsType.contains((int) type)) return ;
+  if (type == InternalForcesVector) {
+    // compute true residual
+    int size = this->weights.giveSize();
+    Dof *idof;
 
-  if(rhsLtf){
-    factor = domain->giveLoadTimeFunction(rhsLtf)->__at(tStep->giveIntrinsicTime());
+    // assemble location array
+    for ( int _i = 1; _i <= size; _i++ ) {
+        factor=1.;
+        if(weightsLtf.giveSize()){
+            factor = domain->giveLoadTimeFunction(weightsLtf.at(_i))->__at(tStep->giveIntrinsicTime());
+        }
+        idof = this->domain->giveDofManager( this->dofmans.at(_i) )->giveDof( this->dofs.at(_i) );
+	answer.at(s.giveDofEquationNumber(idof)) += md->giveDof(1)->giveUnknown(mode, tStep) * this->weights.at(_i)*factor;
+	answer.at(s.giveDofEquationNumber( md->giveDof(1) )) += idof->giveUnknown(mode, tStep) * this->weights.at(_i)*factor;
+    }
+
+  } else {
+    // use rhs value
+
+    if(rhsLtf){
+      factor = domain->giveLoadTimeFunction(rhsLtf)->__at(tStep->giveIntrinsicTime());
+    }
+    this->giveLocArray(s, loc, lambdaeq.at(1));
+    vec.at(1) = rhs*factor;
+    answer.assemble(vec, lambdaeq);
   }
-  this->giveLocArray(s, loc, lambdaeq.at(1));
-  vec.at(1) = rhs*factor;
-  answer.assemble(vec, lambdaeq);
 }
 
 void LinearConstraintBC :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) {
@@ -188,8 +207,8 @@ LinearConstraintBC :: saveContext(DataStream *stream, ContextMode mode, void *ob
         if ( ( iores = lhsType.storeYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( !stream->write(& rhsType, 1) ) {
-            THROW_CIOERR(CIO_IOERR);
+        if ( ( iores = rhsType.storeYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
         }
 
     }
@@ -228,8 +247,8 @@ LinearConstraintBC :: restoreContext(DataStream *stream, ContextMode mode, void 
         if ( ( iores = lhsType.restoreYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( !stream->read(& rhsType, 1) ) {
-            THROW_CIOERR(CIO_IOERR);
+        if ( ( iores = rhsType.restoreYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
         }
     }
 
