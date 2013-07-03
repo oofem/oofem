@@ -35,8 +35,6 @@
 #ifndef MisesMatGrad_h
 
 #include "misesmat.h"
-#include "structuralnonlocalmaterialext.h"
-#include "nonlocmatstiffinterface.h"
 #include "graddpmaterialextensioninterface.h"
 #include "cltypes.h"
 
@@ -48,16 +46,15 @@
 ///@name Input fields for MisesMatGrad
 //@{
 #define _IFT_MisesMatGrad_Name "misesmatgrad"
-#define _IFT_MisesMatGrad_r "r"
+#define _IFT_MisesMatGrad_l "l"
 #define _IFT_MisesMatGrad_m "m"
 //@}
 
 namespace oofem {
-
 /**
  * Gradient Mises maaterial status.
  */
-class MisesMatGradStatus : public MisesMatStatus
+class MisesMatGradStatus : public MisesMatStatus, GradDpMaterialStatusExtensionInterface
 {
 protected:
     double localCumPlastStrainForAverage;
@@ -74,6 +71,9 @@ public:
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
+
+    virtual double giveNonlocalCumulatedStrain() { return nonlocalCumulatedStrain; }
+    virtual void setNonlocalCumulatedStrain(double nonlocalCumulatedStrain) { this->nonlocalCumulatedStrain = nonlocalCumulatedStrain; }
 };
 
 
@@ -83,7 +83,7 @@ public:
 class MisesMatGrad : public MisesMat, GradDpMaterialExtensionInterface
 {
 protected:
-    double R;
+    double L;
     double mParam;
 
 public:
@@ -97,8 +97,8 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int hasMaterialModeCapability(MaterialMode mode);
-    
-    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) return static_cast< GradDpMaterialExtensionInterface* >(this); else return NULL; }
+
+    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) { return static_cast< GradDpMaterialExtensionInterface * >( this ); } else { return NULL; } }
 
     virtual void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
@@ -111,6 +111,8 @@ public:
     virtual void givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *atTime);
+
 
     void give1dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void givePlaneStrainKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
@@ -122,7 +124,7 @@ public:
 
     void giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
-    void giveRealStressVector(FloatArray &answer,  GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
+
     virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }

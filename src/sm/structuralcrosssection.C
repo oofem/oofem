@@ -40,7 +40,7 @@
 
 namespace oofem {
 void
-StructuralCrossSection ::  giveRealStresses(FloatArray &answer, 
+StructuralCrossSection ::  giveRealStresses(FloatArray &answer,
                                             GaussPoint *gp,
                                             const FloatArray &strain,
                                             TimeStep *tStep)
@@ -67,7 +67,7 @@ void
 StructuralCrossSection ::  giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &F, TimeStep *tStep)
 {
     // This function returns the first Piola-Kirchoff stress in vector format
-    // corresponding to a given deformation gradient according to the stress-deformation 
+    // corresponding to a given deformation gradient according to the stress-deformation
     // mode stored in the each gp.
 
     MaterialMode mode = gp->giveMaterialMode();
@@ -82,12 +82,40 @@ StructuralCrossSection ::  giveFirstPKStresses(FloatArray &answer, GaussPoint *g
 
 
 void
-StructuralCrossSection :: giveStiffnessMatrix_dPdF(FloatMatrix &answer,
-                                                          MatResponseMode rMode, GaussPoint *gp,
-                                                          TimeStep *tStep)
+StructuralCrossSection ::  giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &F, TimeStep *tStep)
 {
-    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * > ( gp->giveElement()->giveMaterial() );
+    // This function returns the Cauchy stress in vector format
+    // corresponding to a given deformation gradient according to the stress-deformation
+    // mode stored in the each gp.
+
+    MaterialMode mode = gp->giveMaterialMode();
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+    if ( mat->hasMaterialModeCapability(mode) ) {
+        mat->giveCauchyStressVector(answer, gp, F, tStep);
+        return;
+    } else {
+        _error("giveCauchyStresses : unsupported MaterialMode");
+    }
+}
+
+
+void
+StructuralCrossSection :: giveStiffnessMatrix_dPdF(FloatMatrix &answer,
+                                                   MatResponseMode rMode, GaussPoint *gp,
+                                                   TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
     mat->giveStiffnessMatrix_dPdF(answer, rMode, gp, tStep);
+}
+
+
+void
+StructuralCrossSection :: giveStiffnessMatrix_dCde(FloatMatrix &answer,
+                                                   MatResponseMode rMode, GaussPoint *gp,
+                                                   TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+    mat->giveStiffnessMatrix_dCde(answer, rMode, gp, tStep);
 }
 
 
@@ -141,7 +169,7 @@ StructuralCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
 // only interface to material class, forcing returned matrix to be in reduced form.
 //
 {
-    static_cast< StructuralMaterial * >( mat )->giveStiffnessMatrix(answer, rMode, gp, tStep);
+    static_cast< StructuralMaterial * >(mat)->giveStiffnessMatrix(answer, rMode, gp, tStep);
 }
 
 

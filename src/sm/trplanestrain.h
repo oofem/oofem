@@ -50,7 +50,6 @@
 #define _IFT_TrPlaneStrain_Name "trplanestrain"
 
 namespace oofem {
-
 /**
  * This class implements an triangular three-node  plane-
  * strain elasticity finite element. Each node has 2 degrees of freedom.
@@ -73,7 +72,7 @@ public:
     TrPlaneStrain(int n, Domain *d);
     virtual ~TrPlaneStrain() { }
 
-    virtual FEInterpolation* giveInterpolation() const { return &interp; }
+    virtual FEInterpolation *giveInterpolation() const { return & interp; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 6; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
@@ -89,9 +88,9 @@ public:
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                   InternalStateType type, TimeStep *tStep);
+                                                           InternalStateType type, TimeStep *tStep);
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
 
@@ -164,6 +163,8 @@ protected:
     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *gp);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &);
+
 
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &);
     virtual void computeGaussPoints();

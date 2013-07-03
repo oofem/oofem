@@ -37,22 +37,24 @@
 
 #include "trabbone3d.h"
 #include "graddpmaterialextensioninterface.h"
+#include "cltypes.h"
 
 #define _IFT_TrabBoneGrad3D_Name "trabbonegrad3d"
+#define _IFT_TrabBoneGrad3D_L "l"
+#define _IFT_TrabBoneGrad3D_m "mParam"
 
 namespace oofem {
-
 class LinearElasticMaterial;
 
 /**
  * Gradient bone damage-plastic material status.
  */
-class TrabBoneGrad3DStatus : public TrabBone3DStatus
+class TrabBoneGrad3DStatus : public TrabBone3DStatus, GradDpMaterialStatusExtensionInterface
 {
 protected:
     /// Equivalent strain for avaraging
     double nlKappa;
-     /// Reference to the basic elastic material
+    /// Reference to the basic elastic material
     LinearElasticMaterial *linearElasticMaterial;
 
 public:
@@ -64,8 +66,10 @@ public:
     virtual const char *giveClassName() const { return "TrabBoneGrad3DStatus"; }
     virtual classType giveClassID() const { return TrabBoneGrad3DClass; }
 
-    double giveNlKappa(){return nlKappa;}
-    void setNlKappa(double kappa){nlKappa = kappa;}
+
+    virtual double giveNonlocalCumulatedStrain() { return nonlocalCumulatedStrain; }
+    virtual void setNonlocalCumulatedStrain(double nonlocalCumulatedStrain) { this->nonlocalCumulatedStrain = nonlocalCumulatedStrain; }
+
     virtual void initTempStatus();
 
     virtual void updateYourself(TimeStep *);
@@ -78,7 +82,7 @@ public:
 class TrabBoneGrad3D : public TrabBone3D, GradDpMaterialExtensionInterface
 {
 protected:
-    double l;
+    double L;
     double mParam;
 
 public:
@@ -91,7 +95,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int hasMaterialModeCapability(MaterialMode mode);
-    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) return static_cast< GradDpMaterialExtensionInterface* >(this); else return NULL; }
+    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) { return static_cast< GradDpMaterialExtensionInterface * >( this ); } else { return NULL; } }
 
     virtual void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
@@ -104,7 +108,7 @@ public:
     void give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
     void give3dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
     void giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-    virtual void giveRealStressVector(FloatArray &answer,  GaussPoint *gp, const FloatArray &strainVector, TimeStep *atTime);
+    virtual void giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *atTime);
     virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *atTime);
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
     //LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }

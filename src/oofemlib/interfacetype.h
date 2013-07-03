@@ -66,6 +66,7 @@ enum InterfaceType {
 
     NonlocalMaterialStatusExtensionInterfaceType,
     GradDpMaterialExtensionInterfaceType,
+	GradDpMaterialStatusExtensionInterfaceType,
 
     NonlocalMaterialExtensionInterfaceType,
     NonlocalMaterialStiffnessInterfaceType,

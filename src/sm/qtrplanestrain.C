@@ -51,8 +51,7 @@
 
 
 namespace oofem {
-
-REGISTER_Element( QTrPlaneStrain );
+REGISTER_Element(QTrPlaneStrain);
 
 FEI2dTrQuad QTrPlaneStrain :: interpolation(1, 2);
 
@@ -71,15 +70,15 @@ QTrPlaneStrain :: giveInterface(InterfaceType interface)
 {
     //if (interface == NodalAveragingRecoveryModelInterfaceType) return (NodalAveragingRecoveryModelInterface*) this;
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >( this );
+        return static_cast< DirectErrorIndicatorRCInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
+        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     }
 
     return NULL;
@@ -140,6 +139,26 @@ QTrPlaneStrain :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer,
     }
 }
 
+void
+QTrPlaneStrain :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+// Returns the [5x12] displacement gradient matrix {BH} of the receiver,
+// evaluated at aGaussPoint.
+// @todo not checked if correct
+{
+    FloatMatrix dnx;
+    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+
+    answer.resize(5, 12);
+
+    // 3rd row is zero -> dw/dz = 0
+    for ( int i = 1; i <= 6; i++ ) {
+        answer.at(1, 2 * i - 1) = dnx.at(i, 1);     // du/dx -1
+        answer.at(2, 2 * i - 0) = dnx.at(i, 2);     // dv/dy -2
+        answer.at(4, 2 * i - 1) = dnx.at(i, 2);     // du/dy -6
+        answer.at(5, 2 * i - 0) = dnx.at(i, 1);     // dv/dx -9
+    }
+}
+
 double
 QTrPlaneStrain :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
@@ -159,7 +178,7 @@ void QTrPlaneStrain :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
@@ -516,8 +535,6 @@ QTrPlaneStrain :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &ans
 double
 QTrPlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
 {
-    return this->giveLenghtInDir(normalToCrackPlane) / sqrt((double) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints());
+    return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
 }
-
-
 } // end namespace oofem

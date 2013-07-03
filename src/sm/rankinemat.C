@@ -46,8 +46,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( RankineMat );
+REGISTER_Material(RankineMat);
 
 // constructor
 RankineMat :: RankineMat(int n, Domain *d) : StructuralMaterial(n, d)
@@ -78,8 +77,8 @@ RankineMat :: initializeFrom(InputRecord *ir)
 
     StructuralMaterial :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir); // takes care of elastic constants
-    E = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveYoungsModulus();
-    nu = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->givePoissonsRatio();
+    E = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->giveYoungsModulus();
+    nu = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->givePoissonsRatio();
 
     IR_GIVE_FIELD(ir, sig0, _IFT_RankineMat_sig0); // uniaxial yield stress
 
@@ -90,8 +89,8 @@ RankineMat :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, plasthardtype, _IFT_RankineMat_plasthardtype); // type of plastic hardening (0=linear, 1=exponential)
 
     delSigY = 0.;
-    if ( plasthardtype == 1 ){
-      IR_GIVE_FIELD(ir, delSigY, _IFT_RankineMat_delsigy); // final increment of yield stress (at infinite cumulative plastic strain)
+    if ( plasthardtype == 1 ) {
+        IR_GIVE_FIELD(ir, delSigY, _IFT_RankineMat_delsigy); // final increment of yield stress (at infinite cumulative plastic strain)
     }
 
     yieldtol = 1.e-10;
@@ -153,7 +152,7 @@ RankineMat :: giveRealStressVector(FloatArray &answer,
     this->initGpForNewStep(gp);
 
     // elastoplasticity
-    this->performPlasticityReturn(gp, totalStrain, mode);
+    this->performPlasticityReturn(gp, totalStrain);
 
     // damage
     double omega = computeDamage(gp, atTime);
@@ -185,9 +184,9 @@ RankineMat :: evalYieldStress(const double kappa)
         return sig0 + H0 * kappa;
     } else { // exponential hardening
         if ( delSigY == 0. ) {
-        return sig0;
+            return sig0;
         } else {
-        return sig0 + delSigY * ( 1. - exp(-H0*kappa/delSigY) );
+            return sig0 + delSigY * ( 1. - exp(-H0 * kappa / delSigY) );
         }
     }
 }
@@ -198,7 +197,7 @@ RankineMat :: evalPlasticModulus(const double kappa)
     if ( plasthardtype == 0 ) { // linear hardening
         return H0;
     } else { // exponential hardening
-        return H0 * exp(-H0*kappa/delSigY);
+        return H0 * exp(-H0 * kappa / delSigY);
     }
 }
 
@@ -206,13 +205,13 @@ RankineMat :: evalPlasticModulus(const double kappa)
 // computes the stress according to elastoplasticity
 // (return of trial stress to the yield surface)
 void
-RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, MaterialMode mode)
+RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain)
 {
-  double kappa, tempKappa, H;
+    double kappa, tempKappa, H;
     FloatArray reducedStress;
     FloatArray strain, tempPlasticStrain;
     RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
-
+    MaterialMode mode = gp->giveMaterialMode();
     // get the initial plastic strain and initial kappa from the status
     status->givePlasticStrain(tempPlasticStrain);
     kappa = tempKappa = status->giveCumulativePlasticStrain();
@@ -251,7 +250,7 @@ RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
             sigPrinc.at(2) -= nu * Enu * ddKappa;
             tempKappa += ddKappa;
             f = evalYieldFunction(sigPrinc, tempKappa);
-        } while ( fabs(f) > yieldtol*sig0 );
+        } while ( fabs(f) > yieldtol * sig0 );
 
         if ( sigPrinc.at(2) > sigPrinc.at(1) ) {
             // plastic corrector - vertex case
@@ -287,7 +286,7 @@ RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
                 } else {
                     C = alpha + H *sqrt(2.);
                 }
-            } while ( fabs(f) > yieldtol*sig0 );
+            } while ( fabs(f) > yieldtol * sig0 );
 
             sigPrinc.at(1) = sigPrinc.at(2) = sigstar - alpha * dkap1;
             status->setDKappa(dkap1, dkap1 - dkap0);
@@ -661,7 +660,7 @@ RankineMat :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 
 #ifdef keep_track_of_dissipated_energy
     } else if ( type == IST_StressWorkDensity ||
-               type == IST_DissWorkDensity || type == IST_FreeEnergyDensity ) {
+                type == IST_DissWorkDensity || type == IST_FreeEnergyDensity ) {
         return 1;
 
 #endif
@@ -885,5 +884,4 @@ RankineMatStatus :: computeWork(GaussPoint *gp, MaterialMode mode, double gf)
     }
 }
 #endif
-
 } // end namespace oofem

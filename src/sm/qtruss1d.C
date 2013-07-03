@@ -48,8 +48,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( QTruss1d );
+REGISTER_Element(QTruss1d);
 
 FEI1dQuad QTruss1d :: interpolation(1);
 
@@ -103,7 +102,7 @@ void QTruss1d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
@@ -134,5 +133,15 @@ QTruss1d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
     answer.zero();
 
     this->interpolation.evaldNdx( answer, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+}
+
+void
+QTruss1d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+//
+// Returns the [1x3] displacement gradient matrix {BH} of the receiver,
+// evaluated at aGaussPoint.
+// @todo not checked if correct
+{
+    this->computeBmatrixAt(gp, answer);
 }
 } // end namespace oofem

@@ -42,43 +42,44 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Element( QSpaceGrad );
+REGISTER_Element(QSpaceGrad);
 
 FEI3dHexaLin QSpaceGrad :: interpolation;
 
-QSpaceGrad :: QSpaceGrad(int n, Domain* aDomain) :  QSpace(n, aDomain), GradDpElement()
-// Constructor.
+QSpaceGrad :: QSpaceGrad(int n, Domain *aDomain) :  QSpace(n, aDomain), GradDpElement()
+    // Constructor.
 {
     nPrimNodes = 8;
     nPrimVars = 2;
     nSecNodes = 4;
     nSecVars = 1;
-    totalSize = nPrimVars*nPrimNodes+nSecVars*nSecNodes;
-    locSize   = nPrimVars*nPrimNodes;
-    nlSize    = nSecVars*nSecNodes;
+    totalSize = nPrimVars * nPrimNodes + nSecVars * nSecNodes;
+    locSize   = nPrimVars * nPrimNodes;
+    nlSize    = nSecVars * nSecNodes;
 }
 
 
 IRResultType
-QSpaceGrad :: initializeFrom(InputRecord* ir)
+QSpaceGrad :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    this->StructuralElement :: initializeFrom (ir);
-    IR_GIVE_OPTIONAL_FIELD (ir, numberOfGaussPoints, _IFT_Element_nip);
+    this->StructuralElement :: initializeFrom(ir);
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
 
-    if ((numberOfGaussPoints != 8) && (numberOfGaussPoints != 14) && (numberOfGaussPoints != 27) && (numberOfGaussPoints != 64)) numberOfGaussPoints = 27;
+    if ( ( numberOfGaussPoints != 8 ) && ( numberOfGaussPoints != 14 ) && ( numberOfGaussPoints != 27 ) && ( numberOfGaussPoints != 64 ) ) {
+        numberOfGaussPoints = 27;
+    }
 
     return IRRT_OK;
 }
 
 
 void
-QSpaceGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray& answer) const
+QSpaceGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    if ( inode<=nSecNodes ) {
+    if ( inode <= nSecNodes ) {
         answer.setValues(4, D_u, D_v, D_w, G_0);
     } else {
         answer.setValues(3, D_u, D_v, D_w);
@@ -91,27 +92,21 @@ QSpaceGrad :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
     numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule* [numberOfIntegrationRules];
-    integrationRulesArray[0] = new GaussIntegrationRule (1,this,1, 7);
-    this->giveCrossSection()->setupIntegrationPoints(*integrationRulesArray[0], numberOfGaussPoints, this);
+    integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 7);
+    this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 }
 
-
-MaterialMode
-QSpaceGrad :: giveMaterialMode()
-{
-    return _3dMatGrad;
-}
 
 
 void
-QSpaceGrad :: computeNkappaMatrixAt(GaussPoint* aGaussPoint,FloatMatrix& answer)
+QSpaceGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
     FloatArray n(8);
-    this->interpolation.evalN (n, *aGaussPoint->giveCoordinates(),FEIElementGeometryWrapper(this));
-    answer.resize(1,8);
+    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    answer.resize(1, 8);
     answer.zero();
 
     for ( int i = 1; i <= 8; i++ ) {
@@ -120,28 +115,28 @@ QSpaceGrad :: computeNkappaMatrixAt(GaussPoint* aGaussPoint,FloatMatrix& answer)
 }
 
 void
-QSpaceGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix& answer)
+QSpaceGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 {
     FloatMatrix dnx;
     IntArray a(8);
-    for( int i = 1; i < 9; i++ ) {
+    for ( int i = 1; i < 9; i++ ) {
         a.at(i) = dofManArray.at(i);
     }
-    answer.resize(3,8);
+
+    answer.resize(3, 8);
     answer.zero();
 
-    this->interpolation.evaldNdx (dnx, *aGaussPoint->giveCoordinates(),FEIElementGeometryWrapper(this));
+    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= 8; i++ ) {
-        answer.at(1, i) = dnx.at(i,1);
-        answer.at(2, i) = dnx.at(i,2);
-        answer.at(3, i) = dnx.at(i,3);
+        answer.at(1, i) = dnx.at(i, 1);
+        answer.at(2, i) = dnx.at(i, 2);
+        answer.at(3, i) = dnx.at(i, 3);
     }
-
 }
 
 
 void
-QSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i) 
+QSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i)
 // Returns the [60x60] nonlinear part of strain-displacement matrix {B} of the receiver,
 // evaluated at aGaussPoint
 
@@ -149,7 +144,7 @@ QSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, i
     FloatMatrix dnx;
 
     // compute the derivatives of shape functions
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(60, 60);
     answer.zero();
@@ -164,7 +159,7 @@ QSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, i
                 }
             }
         }
-    } else if ( i == 4 )        {
+    } else if ( i == 4 ) {
         for ( int k = 0; k < 20; k++ ) {
             for ( int l = 0; l < 3; l++ ) {
                 for ( int j = 1; j <= 60; j += 3 ) {
@@ -172,7 +167,7 @@ QSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, i
                 }
             }
         }
-    } else if ( i == 5 )        {
+    } else if ( i == 5 ) {
         for ( int k = 0; k < 20; k++ ) {
             for ( int l = 0; l < 3; l++ ) {
                 for ( int j = 1; j <= 60; j += 3 ) {
@@ -180,7 +175,7 @@ QSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, i
                 }
             }
         }
-    } else if ( i == 6 )        {
+    } else if ( i == 6 ) {
         for ( int k = 0; k < 20; k++ ) {
             for ( int l = 0; l < 3; l++ ) {
                 for ( int j = 1; j <= 60; j += 3 ) {
@@ -192,5 +187,4 @@ QSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, i
 
     return;
 }
-
 }

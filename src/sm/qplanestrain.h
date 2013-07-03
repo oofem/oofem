@@ -59,7 +59,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual FEInterpolation *giveInterpolation() const { return &interpolation; }
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
@@ -90,6 +90,7 @@ public:
 
 protected:
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     void computeGaussPoints();
 };

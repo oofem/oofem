@@ -44,7 +44,6 @@
 #define _IFT_L4Axisymm_Name "l4axisymm"
 
 namespace oofem {
-
 /**
  * This class implements an isoparametric four-node quadrilateral axisymmetric
  * finite element. Each node has 2 degrees of freedom.
@@ -104,6 +103,7 @@ public:
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
 
