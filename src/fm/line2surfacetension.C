@@ -60,37 +60,13 @@ Line2SurfaceTension :: ~Line2SurfaceTension()
 {
 }
 
-void Line2SurfaceTension :: computeN(FloatArray &answer, const FloatArray &lcoords) const
-{
-    this->fei.evalN(answer, lcoords, FEIElementGeometryWrapper(this));
-}
-
 FEInterpolation *Line2SurfaceTension :: giveInterpolation() const
 {
     return &this->fei;
 }
 
-double Line2SurfaceTension :: computeNXIntegral() const
-{
-    Node *node;
-    double x1, x2, x3, y1, y2, y3;
 
-    node = this->giveNode(1);
-    x1 = node->giveCoordinate(1);
-    y1 = node->giveCoordinate(2);
-
-    node = this->giveNode(2);
-    x2 = node->giveCoordinate(1);
-    y2 = node->giveCoordinate(2);
-
-    node = this->giveNode(3);
-    x3 = node->giveCoordinate(1);
-    y3 = node->giveCoordinate(2);
-
-    return (x3*(8*y1 - y2) + 2*x1*(y2 - 4*y3) + x2*(-2*y1 + y3))/6;
-}
-
-void Line2SurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep)
+void Line2SurfaceTension :: computeInternalForcesVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep)
 {
     ///@todo Support axisymm.
     //domainType dt = this->giveDomain()->giveDomainType();
@@ -227,7 +203,7 @@ void Line2SurfaceTension :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLoca
         TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     FloatArray n;
-    this->computeN(n, lcoords);
+    this->fei.evalN(n, lcoords, FEIElementGeometryWrapper(this));
 
     answer.resize(2);
     answer.zero();
