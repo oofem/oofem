@@ -98,14 +98,16 @@ TwoFluidMaterial :: give(int aProperty, GaussPoint *gp)
 // 'E') of the receiver.
 //
 {
-    if (  aProperty == Viscosity ) {
+    if ( (aProperty == Viscosity) || (aProperty == 'd' ) ) {
         double vof = this->giveTempVOF(gp);
-        return ( ( 1.0 - vof ) * giveMaterial(0)->give(Viscosity, gp) +
-            vof * giveMaterial(1)->give(Viscosity, gp) );
+        return ( ( 1.0 - vof ) * giveMaterial(0)->give(aProperty, gp) +
+            vof * giveMaterial(1)->give(aProperty, gp) );
+    /*
     } else if ( aProperty == YieldStress ) {
         double vof = this->giveTempVOF(gp);
         return ( ( 1.0 - vof ) * giveMaterial(0)->give(YieldStress, gp) +
             vof * giveMaterial(1)->give(YieldStress, gp) );
+    */
     } else {
         _error("give: sorry, do not know, how to return any property for two fluid material");
     }
