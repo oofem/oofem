@@ -101,6 +101,8 @@ public:
 
     virtual double give(CrossSectionProperty a);
 
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
+
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "SimpleCrossSection"; }
     virtual const char *giveInputRecordName() const { return _IFT_SimpleCrossSection_Name; }

@@ -116,6 +116,8 @@ public:
                                                  GaussPoint *gp,
                                                  TimeStep *tStep);
 
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
+
     // next function is intended to be used if we would like to obtain
     // char matrix form different material which is not associated with gp and its element.
     // (mainly for obtaining linear elastic matrix)

@@ -919,4 +919,14 @@ LayeredCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
     }
 }
 
+bool LayeredCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat)
+{
+    for ( int i = 1; i <= this->numberOfLayers; i++ ) {
+        if ( !this->domain->giveMaterial(this->giveLayerMaterial(i))->isCharacteristicMtrxSymmetric(rMode) ) {
+            return false;
+        }
+    }
+    return true;
+}
+
 } // end namespace oofem

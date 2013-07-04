@@ -271,4 +271,11 @@ SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
 #endif
     mat->computeStressIndependentStrainVector(answer, gp, stepN, mode);
 }
+
+
+bool SimpleCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat)
+{
+    return domain->giveMaterial(mat)->isCharacteristicMtrxSymmetric(rMode);
+}
+
 } // end namespace oofem

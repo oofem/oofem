@@ -215,6 +215,7 @@ FiberedCrossSection :: give3dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
         answer.at(6, 6) += fiberMatrix.at(1, 1) * fiberWidth * fiberThick * fiberYCoord2;
     }
 
+    ///@todo This must be wrong, it will use the last evaluated G (from the last fiber), outside the loop. FIXME!
     G /= A;
     Ik = A * A * A * A / ( 40.0 * Ip );
     answer.at(4, 4) = G * Ik;
@@ -616,6 +617,12 @@ FiberedCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
     if ( et.isNotEmpty() ) {
         _error("computeStressIndependentStrainVector: temperature loading not supported");
     }
+}
+
+bool FiberedCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat)
+{
+    ///@todo As far as I can see, it only uses diagonal components for the 3dbeam, but there is no way to check here.
+    return domain->giveMaterial(mat)->isCharacteristicMtrxSymmetric(rMode);
 }
 
 } // end namespace oofem

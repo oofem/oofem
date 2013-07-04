@@ -662,12 +662,6 @@ PerfectlyPlasticMaterial :: GiveStressCorrectionBackToYieldSurface(GaussPoint *g
 IRResultType
 PerfectlyPlasticMaterial :: initializeFrom(InputRecord *ir)
 {
-    // int value ;
-
-    //   if (this->readWhetherHas("d")) {
-    //      value = this -> read("d") ;
-    //      propertyDictionary -> add('d',value) ;}
-
     Material :: initializeFrom(ir);
     this->giveLinearElasticMaterial()->initializeFrom(ir);
 
@@ -706,19 +700,6 @@ PerfectlyPlasticMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-void
-PerfectlyPlasticMaterial :: updateYourself(GaussPoint *gp, TimeStep *atTime)
-//
-//
-// We call PerfectlyPlasticMaterialStatus->updateYourself()
-//
-{
-    PerfectlyPlasticMaterialStatus *status = static_cast< PerfectlyPlasticMaterialStatus * >( this->giveStatus(gp) );
-    status->updateYourself(atTime);
-    // update yield criteria
-}
-
-
 int
 PerfectlyPlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
@@ -739,7 +720,6 @@ PerfectlyPlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPo
         return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 }
-
 
 
 

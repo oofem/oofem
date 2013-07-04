@@ -275,13 +275,9 @@ Material :: initMaterial(Element *element)
 void
 Material :: updateYourself(GaussPoint *gp, TimeStep *atTime)
 //
-//
 // We call MaterialStatus->updateYourself()
 //
 {
-    MaterialStatus *status = this->giveStatus(gp);
-    if ( status ) {
-        status->updateYourself(atTime);
-    }
+    this->giveStatus(gp)->updateYourself(atTime);
 }
 } // end namespace oofem

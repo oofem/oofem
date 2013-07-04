@@ -136,8 +136,6 @@ public:
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
-    virtual void updateYourself(GaussPoint *gp, TimeStep *tStep);
-
     // can be moved to parent classes
     virtual void updateIfFailure(GaussPoint *gp,
                                  FloatArray *stressVector3d,

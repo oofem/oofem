@@ -123,6 +123,8 @@ public:
                                                    GaussPoint *, StructuralMaterial *,
                                                    TimeStep *tStep);
 
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
+
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStressVector3d);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStrainVector3d);
 
