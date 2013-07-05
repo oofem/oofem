@@ -56,7 +56,6 @@ FEI3dHexaLin Hexa1BubbleStokes :: interp;
 // Set up ordering vectors (for assembling)
 IntArray Hexa1BubbleStokes :: momentum_ordering(27);
 IntArray Hexa1BubbleStokes :: conservation_ordering(4);
-IntArray Hexa1BubbleStokes :: edge_ordering [ 12 ] = { IntArray(6), IntArray(6), IntArray(6), IntArray(6), IntArray(6), IntArray(6), IntArray(6), IntArray(6), IntArray(6), IntArray(6), IntArray(6), IntArray(6) };
 IntArray Hexa1BubbleStokes :: surf_ordering [ 6 ] = { IntArray(12), IntArray(12), IntArray(12), IntArray(12), IntArray(12), IntArray(12) };
 bool Hexa1BubbleStokes :: __initialized = Hexa1BubbleStokes :: initOrdering();
 
@@ -231,8 +230,6 @@ void Hexa1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeSt
 
         if ( ltype == SurfaceLoadBGT ) {
             this->computeBoundaryLoadVector(vec, load, load_id, ExternalForcesVector, VM_Total, tStep);
-        } else if ( ltype == EdgeLoadBGT ) {
-            this->computeEdgeLoadVector(vec, load, load_id, ExternalForcesVector, VM_Total, tStep);
         } else {
             OOFEM_ERROR2("Hexa1BubbleStokes :: computeLoadVector - Unsupported boundary condition: %d", load_id);
         }
@@ -290,58 +287,6 @@ void Hexa1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, Char
     answer.resize(35);
     answer.zero();
     answer.assemble( temparray, this->momentum_ordering );
-}
-
-void Hexa1BubbleStokes :: computeEdgeLoadVector(FloatArray &answer, Load *load, int iEdge, CharType type, ValueModeType mode, TimeStep *tStep)
-{
-    if ( type != ExternalForcesVector ) {
-        answer.resize(0);
-        return;
-    }
-
-    if ( load->giveType() == TransmissionBC ) { // Neumann boundary conditions (traction)
-        BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >( load );
-
-        int numberOfEdgeIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 2. ) / 2. );
-
-        GaussIntegrationRule iRule(1, this, 1, 1);
-        GaussPoint *gp;
-        FloatArray N, t, f(6);
-        IntArray edge_mapping;
-
-        f.zero();
-        iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
-
-        for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
-            gp = iRule.getIntegrationPoint(i);
-            FloatArray *lcoords = gp->giveCoordinates();
-
-            this->interp.edgeEvalN(N, iEdge, * lcoords, FEIElementGeometryWrapper(this));
-            double detJ = fabs(this->interp.edgeGiveTransformationJacobian(iEdge, * lcoords, FEIElementGeometryWrapper(this)));
-            double dS = gp->giveWeight() * detJ;
-
-            if ( boundaryLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) { // Edge load in xi-eta system
-                boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
-            } else { // Edge load in x-y system
-                FloatArray gcoords;
-                this->interp.edgeLocal2global(gcoords, iEdge, * lcoords, FEIElementGeometryWrapper(this));
-                boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
-            }
-
-            // Reshape the vector
-            for ( int j = 0; j < N.giveSize(); j++ ) {
-                f(3 * j + 0) += N(j) * t(0) * dS;
-                f(3 * j + 1) += N(j) * t(1) * dS;
-                f(3 * j + 2) += N(j) * t(2) * dS;
-            }
-        }
-
-        answer.resize(35);
-        answer.zero();
-        answer.assemble(f, this->edge_ordering [ iEdge - 1 ]);
-    } else {
-        OOFEM_ERROR("Hexa1BubbleStokes :: computeEdgeLoadVector - Strange boundary condition type");
-    }
 }
 
 

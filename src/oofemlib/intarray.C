@@ -254,6 +254,15 @@ void IntArray :: preallocate(int futureSize)
 }
 
 
+void IntArray :: enumerate(int maxValue)
+{
+    this->resize(maxValue);
+    for ( int i = 1; i <= maxValue; ++i ) {
+        this->at(i) = i;
+    }
+}
+
+
 void IntArray :: followedBy(const IntArray &b, int allocChunk)
 // Appends the array 'b' the receiver. Returns the receiver.
 {

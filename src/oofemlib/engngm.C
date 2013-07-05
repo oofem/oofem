@@ -60,6 +60,7 @@
 #include "outputmanager.h"
 #include "exportmodulemanager.h"
 #include "initmodulemanager.h"
+#include "feinterpol3d.h"
 #include "classfactory.h"
 #include "oofem_limits.h"
 
@@ -1134,7 +1135,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
         if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >( bc ) ) ) {
             abc->assembleVector(answer, tStep, eid, type, mode, s, eNorms);
         } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >( bc ) ) && bc->isImposed(tStep) ) {
-            IntArray dofids, loc, dofIDarry;
+            IntArray dofids, loc, dofIDarry, bNodes;
             FloatArray charVec;
             FloatMatrix R;
 
@@ -1165,10 +1166,10 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                 element->computeBoundaryLoadVector(charVec, load, boundary, type, mode, tStep);
 
                 if ( charVec.isNotEmpty() ) {
-                    ///@todo Work out rotations at boundaries:
-                    //if ( element->giveBoundaryRotationMatrix(R, eid, boundary) ) {
-                    if ( element->giveRotationMatrix(R, eid) ) {
-                        OOFEM_ERROR("EngngModel :: assembleVectorFromBC : Boundary-load assembling with rotation not supported yet");
+                    ///@todo Should be have a similar interface for rotation or should elements expect to work in global c.s. for loads?
+                    /// Right now it's the latter, just the global->real dof transformation is performed here.
+                    element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+                    if ( element->computeDofTransformationMatrix(R, bNodes, eid) ) {
                         charVec.rotatedWith(R, 't');
                     }
 
@@ -1179,7 +1180,8 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                 }
             }
 
-            // Edge load:
+            // Edge load: 
+            ///@todo Do we even want to support edge loads on 3d geometries at all? Consider removing this.
             const IntArray &edges = set->giveEdgeList();
             for (int iedge = 1; iedge <= edges.giveSize()/2; ++iedge) {
                 Element *element = domain->giveElement(edges.at(iedge*2-1));
@@ -1187,9 +1189,8 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                 element->computeEdgeLoadVector(charVec, load, edge, type, mode, tStep);
 
                 if ( charVec.isNotEmpty() ) {
-                    //if ( element->giveEdgeRotationMatrix(R, eid, edge) ) {
-                    if ( element->giveRotationMatrix(R, eid) ) {
-                        OOFEM_ERROR("EngngModel :: assembleVectorFromBC : Edge-load assembling with rotation not supported yet");
+                    static_cast< FEInterpolation3d* >( element->giveInterpolation() )->computeLocalEdgeMapping(bNodes, edge);
+                    if (  element->computeDofTransformationMatrix(R, bNodes, eid) ) {
                         charVec.rotatedWith(R, 't');
                     }
 

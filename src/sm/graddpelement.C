@@ -278,7 +278,6 @@ void
 GradDpElement :: giveLocalInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
     NLStructuralElement *elem = this->giveNLStructuralElement();
-    GaussPoint *gp;
     IntegrationRule *iRule = elem->giveIntegrationRule(0);
     nlGeo = elem->giveGeometryMode();
     FloatArray BS, vStress;

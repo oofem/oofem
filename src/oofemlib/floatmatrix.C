@@ -1365,6 +1365,11 @@ void FloatMatrix :: resizeWithData(int rows, int columns)
 // resizes receiver, all data kept
 //
 {
+    // Check of resize if necessary at all.
+    if ( rows == this->nRows && columns == this->nColumns ) {
+        return;
+    }
+
     FloatMatrix old(*this);
 
     if ( rows * columns > allocatedSize ) {
