@@ -219,7 +219,7 @@ void Tr1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeStep
         ltype = load->giveBCGeoType();
 
         if ( ltype == EdgeLoadBGT ) {
-            this->computeBoundaryLoadVector(vec, load, load_id, ExternalForcesVector, VM_Total, tStep);
+            this->computeBoundaryLoadVector(vec, static_cast<BoundaryLoad*>(load), load_id, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         }
     }
@@ -272,7 +272,7 @@ void Tr1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharTy
     answer.assemble( temparray, this->momentum_ordering );
 }
 
-void Tr1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, Load *load, int iEdge, CharType type, ValueModeType mode, TimeStep *tStep)
+void Tr1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iEdge, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
         answer.resize(0);

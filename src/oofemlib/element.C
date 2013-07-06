@@ -449,37 +449,6 @@ Element :: giveBoundaryLocationArray(IntArray &locationArray, int boundary, Equa
 }
 
 
-void
-Element :: giveEdgeLocationArray(IntArray &locationArray, int edge, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIdArray)
-{
-    IntArray bNodes;
-    IntArray dofIDMask, masterDofIDs;
-    IntArray nodalArray;
-
-    FEInterpolation3d *interp;
-#if DEBUG
-    if ( !( interp = dynamic_cast< FEInterpolation3d* >( this->giveInterpolation() ) ) ) {
-        OOFEM_ERROR("Element :: giveEdgeLocationArray - No 3D-interpolator found");
-    }
-#else
-    interp = static_cast< FEInterpolation3d* >( this->giveInterpolation() );
-#endif
-    
-    interp->computeLocalEdgeMapping(bNodes, edge);
-    locationArray.resize(0);
-    if (dofIdArray) dofIdArray->resize(0);
-    for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
-        this->giveDofManDofIDMask(bNodes.at(i), eid, dofIDMask);
-        this->giveDofManager(bNodes.at(i))->giveLocationArray(dofIDMask, nodalArray, s);
-        locationArray.followedBy(nodalArray);
-        if (dofIdArray) {
-            this->giveDofManager(bNodes.at(i))->giveMasterDofIDArray(dofIDMask, masterDofIDs);
-            dofIdArray->followedBy(masterDofIDs);
-        }
-    }
-}
-
-
 Material *Element :: giveMaterial()
 // Returns the material of the receiver.
 {
@@ -608,7 +577,7 @@ Element :: computeLoadVector(FloatArray &answer, Load *load, CharType type, Valu
 
 
 void
-Element :: computeBoundaryLoadVector(FloatArray &answer, Load *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
+Element :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     _error("computeBoundaryLoadVector: Unknown load type.");
 }

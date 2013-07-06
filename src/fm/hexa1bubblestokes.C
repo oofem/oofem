@@ -229,7 +229,7 @@ void Hexa1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeSt
         bcGeomType ltype = load->giveBCGeoType();
 
         if ( ltype == SurfaceLoadBGT ) {
-            this->computeBoundaryLoadVector(vec, load, load_id, ExternalForcesVector, VM_Total, tStep);
+            this->computeBoundaryLoadVector(vec, static_cast<BoundaryLoad*>(load), load_id, ExternalForcesVector, VM_Total, tStep);
         } else {
             OOFEM_ERROR2("Hexa1BubbleStokes :: computeLoadVector - Unsupported boundary condition: %d", load_id);
         }
@@ -290,7 +290,7 @@ void Hexa1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, Char
 }
 
 
-void Hexa1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, Load *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep)
+void Hexa1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
         answer.resize(0);

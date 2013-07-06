@@ -86,6 +86,7 @@ class CrossSection;
 class ElementSide;
 class FEInterpolation;
 class Load;
+class BoundaryLoad;
 
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;
@@ -220,11 +221,6 @@ public:
      */
     void giveBoundaryLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
     /**
-     * Returns the location array for the edge of the element.
-     * The element must be in 3D. For 2D edges, use Element::giveBoundaryLocationArray.
-     */
-    void giveEdgeLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
-    /**
      * @return Number of DOFs in element.
      */
     virtual int giveNumberOfDofs() { return 0; }
@@ -301,7 +297,7 @@ public:
      * @param mode Determines mode of answer.
      * @param tStep Time step when answer is computed.
      */
-    virtual void computeBoundaryLoadVector(FloatArray &answer, Load *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
     /**
      * Computes the contribution of the given load at the given edge.
      * @param answer Requested contribution of load.
@@ -810,8 +806,9 @@ public:
     /**
      * Computes the element local coordinates from given global coordinates.
      * Should compute local coordinates even if point is outside element (for mapping purposes in adaptivity)
+     * @param answer Local coordinates.
+     * @param gcoords Global coordinates.
      * @return Nonzero if point is inside element; zero otherwise.
-     * @
      */
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     /**
