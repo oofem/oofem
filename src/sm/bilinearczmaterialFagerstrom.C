@@ -111,6 +111,9 @@ namespace oofem {
 		F.at(2,1) = jumpVector.at(10);
 		F.at(3,1) = jumpVector.at(11);
 		F.at(3,2) = jumpVector.at(12);
+
+        double xi = jumpVector.at(13);  //local xi coord ///@todo remove as input argument (should not be needed)
+
 		Finv.beInverseOf(F);
 
 		status->letTempInverseDefGradBe(Finv);
@@ -135,8 +138,11 @@ namespace oofem {
 			if ( !shell ) {
 				OOFEM_ERROR("BilinearCZMaterialFagerstrom :: giveRealStressVector - oh no wrong element type");
 			}
-
-            shell->evalInitialCovarBaseVectorsAt(*gp->giveCoordinates(), Gcov);
+            FloatArray lCoords(3);
+            lCoords.at(1) = gp->giveCoordinate(1);
+            lCoords.at(2) = gp->giveCoordinate(2);
+            lCoords.at(3) = xi;
+            shell->evalInitialCovarBaseVectorsAt(lCoords, Gcov);
 
 			FloatArray G1, G2;
 			Gcov.copyColumn(G1,1);
@@ -324,12 +330,14 @@ namespace oofem {
 		
 		status->letTempDamageBe(oldDamage + dAlpha);
 		status->letTempEffectiveMandelTractionBe(Qtemp);		// NEW!
+        printf("damage %e \n", oldDamage + dAlpha );
 	}
 
-	void
-		BilinearCZMaterialFagerstrom :: giveCharacteristicMatrix(FloatMatrix &answer,
-		MatResponseMode rMode,
-		GaussPoint *gp, TimeStep *atTime)
+void
+BilinearCZMaterialFagerstrom :: giveStiffnessMatrix(FloatMatrix &answer,
+                                            		MatResponseMode rMode,
+		                                            GaussPoint *gp, 
+                                                    TimeStep *atTime)
 		//
 		// Returns characteristic material stiffness matrix of the receiver
 		//
@@ -408,7 +416,7 @@ namespace oofem {
 		//@todoMartin Insert code for full compressive stiffness!!!
 		//Finv.printYourself();
 		//Kstiff.printYourself();
-		answer.printYourself();
+		//answer.printYourself();
 
 	}
 
@@ -416,14 +424,17 @@ namespace oofem {
 
 
 
-	int
-		BilinearCZMaterialFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
-	{
-		//@todoMartin Insert code here if necessary!!
-		BilinearCZMaterialFagerstromStatus *status = static_cast< BilinearCZMaterialFagerstromStatus * >( this->giveStatus(aGaussPoint) );
-		return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+int
+BilinearCZMaterialFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+{
+    if ( type == IST_DamageScalar ) {
+	    BilinearCZMaterialFagerstromStatus *status = static_cast< BilinearCZMaterialFagerstromStatus * >( this->giveStatus(aGaussPoint) );
+        return status->giveTempDamage();
+    } else {
+        return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+    }
 
-	}
+}
 
 
 	InternalStateValueType
@@ -527,7 +538,7 @@ namespace oofem {
 		oldMaterialJump.zero();
 		tempMaterialJump = oldMaterialJump;
 
-		damage = tempDamage = 0.;
+		damage = tempDamage = 0.0;
 
 		QEffective = oldMaterialJump;
 		tempQEffective = oldMaterialJump;
@@ -548,7 +559,10 @@ namespace oofem {
 		if ( !shell ) {
 			OOFEM_ERROR("BilinearCZMaterialFagerstrom :: giveRealStressVector - oh no wrong element type");
 		}
-		shell->evalInitialCovarBaseVectorsAt(*gp->giveCoordinates(), Gcov);
+        FloatArray lCoords(3);
+        lCoords.at(1) = gp->giveCoordinate(1);
+        lCoords.at(2) = gp->giveCoordinate(2);
+		shell->evalInitialCovarBaseVectorsAt(lCoords, Gcov);
 
 		FloatArray G1, G2;
 		Gcov.copyColumn(G1,1);

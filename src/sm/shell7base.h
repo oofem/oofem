@@ -152,7 +152,7 @@ protected:
     FloatMatrix giveAxialMatrix(const FloatArray &vec);
 
     // Stress and strain
-    void computeFAt(GaussPoint *gp, FloatMatrix &answer, FloatArray &genEps);
+    void computeFAt(FloatArray &lCoords, FloatMatrix &answer, FloatArray &genEps);
     void computeE(FloatMatrix &answer, FloatMatrix &F);
     void computeCovarStressAt(GaussPoint *gp, FloatArray &answer);
     void giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &dphidxi1, FloatArray &dphidxi2, FloatArray &dmdxi1,

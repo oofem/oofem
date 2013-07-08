@@ -65,6 +65,7 @@ public:
     /// Destructor
     virtual ~BilinearCZMaterialStatus();
 
+    double giveDamage() { return 0.0; } // no damage in this model
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     // definition
@@ -128,7 +129,7 @@ public:
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
+    virtual void giveStiffnessMatrix(FloatMatrix &answer,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);

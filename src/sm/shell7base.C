@@ -571,7 +571,8 @@ Shell7Base :: computeLinearizedStiffness(GaussPoint *gp, StructuralMaterial *mat
     FloatMatrix D, Dcart, S;
 
     //A = L^iklj * (g_k x g_l) + S^ij*I
-    mat->giveStiffnessMatrix(Dcart, TangentStiffness, gp, tStep);     // L_ijkl - cartesian system (Voigt)
+    //mat->giveStiffnessMatrix(Dcart, TangentStiffness, gp, tStep);     // L_ijkl - cartesian system (Voigt)
+    mat->give3dMaterialStiffnessMatrix(Dcart, TangentStiffness, gp, tStep);     // L_ijkl - cartesian system (Voigt)
     this->transInitialCartesianToInitialContravar(gp, Dcart, D);      // L^ijkl - curvilinear system (Voigt)
 
     FloatArray lcoords = *gp->giveCoordinates();
@@ -784,15 +785,15 @@ Shell7Base :: giveAxialMatrix(const FloatArray &v)
 #if 1
 
 void
-Shell7Base :: computeFAt(GaussPoint *gp, FloatMatrix &answer, FloatArray &genEps)
+Shell7Base :: computeFAt(FloatArray &lCoords, FloatMatrix &answer, FloatArray &genEps)
 {
     // Compute deformation gradient as open product(g_i, G^i) = gcov*Gcon^T
     // Output is a 3x3 matrix
     FloatMatrix gcov, Gcon;
-    FloatArray lcoords;
-    lcoords = *gp->giveCoordinates();
-    this->evalCovarBaseVectorsAt(lcoords, gcov, genEps);
-    this->evalInitialContravarBaseVectorsAt(lcoords, Gcon);
+    //FloatArray lcoords;
+    //lcoords = *gp->giveCoordinates();
+    this->evalCovarBaseVectorsAt(lCoords, gcov, genEps);
+    this->evalInitialContravarBaseVectorsAt(lCoords, Gcon);
     answer.beProductTOf(gcov, Gcon);
 }
 
@@ -814,7 +815,9 @@ Shell7Base :: computeStrainVectorF(FloatArray &answer, GaussPoint *gp, TimeStep 
 {
     // Computes the Green-Lagrange strain tensor: E=0.5(C-I)
     FloatMatrix F, E;
-    this->computeFAt(gp, F, genEps);       // Deformation gradient
+    FloatArray lcoords;
+    lcoords = *gp->giveCoordinates();
+    this->computeFAt(lcoords, F, genEps);       // Deformation gradient
     this->computeE(E, F);                  // Green-Lagrange strain tensor
     answer.beReducedVectorFormOfStrain(E); // Convert to reduced Voight form (6 components)
 }
@@ -824,7 +827,7 @@ Shell7Base :: computeStressMatrix(FloatArray &answer, FloatArray &genEps, GaussP
             //computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
 {
     FloatArray vE;
-    this->computeStrainVectorF(vE, gp, stepN, genEps);     // Green-Lagrange strain vector in Voight form
+    this->computeStrainVectorF(vE, gp, stepN, genEps);     // Green-Lagrange strain vector in Voigt form
     static_cast< StructuralMaterial * >( mat )->giveRealStressVector(answer, gp, vE, stepN);
 }
 
@@ -841,7 +844,7 @@ Shell7Base :: computeCauchyStressVector(FloatArray &answer, GaussPoint *gp, Time
     FloatArray genEps;
     this->computeGeneralizedStrainVectorNew(genEps, solVec, B);
     FloatMatrix F;
-    this->computeFAt(gp, F, genEps);   
+    this->computeFAt(lCoords, F, genEps);   
 
     FloatArray vS;
     giveIPValue(vS, gp, IST_StressTensor, tStep); // expects Second PK stress

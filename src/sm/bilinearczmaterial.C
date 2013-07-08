@@ -122,8 +122,9 @@ BilinearCZMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     
 }
 
+
 void
-BilinearCZMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
+BilinearCZMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode rMode,
                                                GaussPoint *gp, 
                                                TimeStep *atTime)

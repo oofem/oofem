@@ -39,6 +39,9 @@
 #include "dofmanager.h"
 #include "constantpressureload.h"
 #include "simpleinterfacemat.h"
+
+#include "bilinearczmaterialFagerstrom.H" ///@todo change to .h
+
 namespace oofem {
 IntArray Shell7BaseXFEM :: dofId_Midplane(3);
 IntArray Shell7BaseXFEM :: dofId_Director(3);
@@ -471,24 +474,24 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
 
 
 void
-Shell7BaseXFEM :: giveMaxCZDamages(FloatArray &answer)
+Shell7BaseXFEM :: giveMaxCZDamages(FloatArray &answer, TimeStep *tStep)
 {
-
+    // for each interface get maximum interface damage
     int numZones = this->layeredCS->giveNumberOfLayers() - 1;
     answer.resize(numZones);
     
-    FloatArray ipValues, vales;
+    FloatArray ipValues;
     for ( int i = 0; i < numZones; i++ ) {
-        IntegrationRule *iRuleL = czIntegrationRulesArray [ i ];
-        int numIP = iRuleL->giveNumberOfIntegrationPoints();
-        //ipValues.resize(numIP);
+        IntegrationRule *iRule = czIntegrationRulesArray [ i ];
         double max = 0.0;    
-        for ( int j = 0; j < iRuleL->giveNumberOfIntegrationPoints(); j++ ) {
-            IntegrationPoint *ip = iRuleL->getIntegrationPoint(j);
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
+            IntegrationPoint *ip = iRule->getIntegrationPoint(j);
             
-            //this->layeredCS->giveIPValue(ipValues, ip, type, tStep);
-            //StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * > ( ip->giveMaterialStatus(1) ); 
-            double val = 0.0;
+            //ip->giveMaterial()->giveIPValue(ipValues, ip, IST_DamageScalar, tStep);
+
+            BilinearCZMaterialFagerstromStatus *status = 
+                dynamic_cast< BilinearCZMaterialFagerstromStatus * > ( ip->giveMaterialStatus(this->czMatNum) ); 
+            double val = status->giveTempDamage();
             if ( val > max ) {
                 max = val;
             }
@@ -507,7 +510,7 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
                      Delamination *dei, int enrichmentDomainNumber)
 {
     //Computes the cohesive nodal forces for a given interface
-    FloatArray answerTemp, lCoords;
+    FloatArray answerTemp, lCoords(3);
     answerTemp.resize(Shell7Base :: giveNumberOfDofs() ); 
     answerTemp.zero();
 
@@ -519,7 +522,12 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
     FloatArray Fp, cTraction;
     for ( int i = 1; i <= iRuleL->giveNumberOfIntegrationPoints(); i++ ) {
         IntegrationPoint *ip = iRuleL->getIntegrationPoint(i - 1);
-        lCoords = *ip->giveCoordinates();
+        lCoords.at(1) = ip->giveCoordinate(1);
+        lCoords.at(2) = ip->giveCoordinate(2);
+        FloatArray interfaceXiCoords;
+        this->layeredCS->giveInterfaceXiCoords(interfaceXiCoords);
+        lCoords.at(3) = interfaceXiCoords.at(enrichmentDomainNumber);
+
         this->computeBmatrixAt(lCoords, B);
         this->computeNmatrixAt(lCoords, N);
 
@@ -535,11 +543,11 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         FloatArray xd, unknowns;
         unknowns.beProductOf(N, solVecD);
         xd.beProductOf(lambda,unknowns); // spatial jump
-		xd.resizeWithValues(12);
+		xd.resizeWithValues(13);
 
 		FloatArray genEpsC;
 		genEpsC.beProductOf(B, solVecC);
-		this->computeFAt(ip, F, genEpsC);
+		this->computeFAt(lCoords, F, genEpsC);
 		xd.at(4) = F.at(1,1);
 		xd.at(5) = F.at(2,2);
 		xd.at(6) = F.at(3,3);
@@ -550,13 +558,15 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
 		xd.at(11) = F.at(3,1);
 		xd.at(12) = F.at(3,2);
 
+        xd.at(13) = lCoords.at(3);
+
 		
 		
        
         // Compute cohesive traction based on jump
         FloatArray cTractionRed;
-        mat->giveRealStressVector(cTractionRed, ip, xd, tStep);
-        StructuralMaterial ::giveFullVectorForm(cTraction, cTractionRed, ip->giveMaterialMode() );
+        mat->giveRealStressVector(cTraction, ip, xd, tStep);
+        //StructuralMaterial ::giveFullVectorForm(cTraction, cTractionRed, ip->giveMaterialMode() );
         lambdaN.beProductOf(lambda,N);
         Fp.beTProductOf(lambdaN, cTraction);
         double dA = this->computeAreaAround(ip,xi);
@@ -583,7 +593,9 @@ Shell7BaseXFEM :: updateYourself(TimeStep *tStep)
         czIntegrationRulesArray [ i ]->updateYourself(tStep);
 		for ( int j = 0; j < czIntegrationRulesArray [ i ]->giveNumberOfIntegrationPoints(); j++ ) {
 			GaussPoint *gp = czIntegrationRulesArray [ i ]->getIntegrationPoint(j);
-			this->czMat->updateYourself(gp, tStep);
+            if ( this->czMat ) {
+			    this->czMat->updateYourself(gp, tStep);
+            }
 		}
     }
 }
@@ -644,7 +656,7 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
         this->computeNmatrixAt(lCoords, N);
         
         //mat->giveCharacteristicMatrix(K, TangentStiffness, ip, tStep);
-        mat->give3dMaterialStiffnessMatrix_dPdF(K, TangentStiffness, ip, tStep);
+        mat->giveStiffnessMatrix(K, TangentStiffness, ip, tStep);
         this->computeTripleProduct(temp, lambda, K, lambda);
         this->computeTripleProduct(tangent, N, temp, N);
         double dA = this->computeAreaAround(ip,xi);
