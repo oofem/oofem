@@ -78,6 +78,8 @@ public:
     virtual int giveNumberOfEdgeDofs() = 0;
     virtual int giveNumberOfEdgeDofManagers() = 0;
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    //void evalInitialCovarBaseVectorsAt(GaussPoint *gp, FloatMatrix &Gcov);
+    void evalInitialCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &Gcov);
 
 protected:
     virtual Interface *giveInterface(InterfaceType it);
@@ -126,7 +128,7 @@ protected:
     void evalInitialDirectorAt(GaussPoint *gp, FloatArray &answer);
     void evalInitialDirectorAt(FloatArray &lCoords, FloatArray &answer);
 
-    void evalInitialCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &Gcov);
+
 
     void evalInitialContravarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &Gcon);
 
