@@ -103,7 +103,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
-    virtual void giveCharacteristicMatrix(FloatMatrix & answer,  MatResponseForm form, MatResponseMode, GaussPoint * gp, TimeStep * atTime);
+    virtual void giveCharacteristicMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * atTime);
     virtual double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) {return 0.0;};
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;

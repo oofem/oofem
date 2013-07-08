@@ -82,7 +82,6 @@ AnisotropicMassTransferMaterial :: giveFluxVector(FloatArray& answer, GaussPoint
 
 void
 AnisotropicMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                            MatResponseForm form,
                                                             MatResponseMode mode,
                                                             GaussPoint *gp,
                                                             TimeStep *atTime)

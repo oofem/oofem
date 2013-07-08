@@ -462,7 +462,6 @@ public:
     virtual classType giveClassID() const { return DustMaterialClass; }
 
     virtual void giveRealStressVector(FloatArray &answer,
-                                      MatResponseForm form,
                                       GaussPoint *gp,
                                       const FloatArray &strainVector,
                                       TimeStep *atTime);

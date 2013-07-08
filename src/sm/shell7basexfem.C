@@ -554,7 +554,9 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
 		
        
         // Compute cohesive traction based on jump
-        mat->giveRealStressVector(cTraction, FullForm, ip, xd, tStep);
+        FloatArray cTractionRed;
+        mat->giveRealStressVector(cTractionRed, ip, xd, tStep);
+        StructuralMaterial ::giveFullVectorForm(cTraction, cTractionRed, ip->giveMaterialMode() );
         lambdaN.beProductOf(lambda,N);
         Fp.beTProductOf(lambdaN, cTraction);
         double dA = this->computeAreaAround(ip,xi);
@@ -641,8 +643,8 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
         this->computeBmatrixAt(lCoords, B);
         this->computeNmatrixAt(lCoords, N);
         
-        mat->giveCharacteristicMatrix(K, FullForm, TangentStiffness, ip, tStep);
-        
+        //mat->giveCharacteristicMatrix(K, TangentStiffness, ip, tStep);
+        mat->give3dMaterialStiffnessMatrix_dPdF(K, TangentStiffness, ip, tStep);
         this->computeTripleProduct(temp, lambda, K, lambda);
         this->computeTripleProduct(tangent, N, temp, N);
         double dA = this->computeAreaAround(ip,xi);
@@ -828,7 +830,9 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &KCC, FloatMatrix &KC
     lCoords = *ip->giveCoordinates();
     this->computeBmatrixAt(lCoords, B, 0, 0);
     this->computeGeneralizedStrainVectorNew(genEpsC, solVecC , B);
-    Shell7Base :: computeLinearizedStiffness(ip, mat, tStep, A, genEpsC);
+
+    StructuralMaterial *material = static_cast< StructuralMaterial* >( domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) ) );
+    Shell7Base :: computeLinearizedStiffness(ip, material, tStep, A, genEpsC);
             
     double zeta = giveGlobalZcoord(ip->giveCoordinate(3));
     this->computeLambdaGMatrices(lambdaC, genEpsC, zeta);

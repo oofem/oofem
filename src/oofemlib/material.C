@@ -41,31 +41,6 @@
 #include "contextioerr.h"
 
 namespace oofem {
-void
-Material :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                     MatResponseForm form, MatResponseMode rMode,
-                                     GaussPoint *gp,
-                                     TimeStep *atTime)
-//
-// Returns characteristic material stiffness matrix of the receiver
-//
-{
-    _error("Material::giveCharacteristicMatrix is fully abstract, no implementation");
-}
-
-
-double
-Material :: giveCharacteristicValue(MatResponseMode rMode,
-                                    GaussPoint *gp,
-                                    TimeStep *atTime)
-//
-// Returns characteristic value of the receiver
-//
-{
-    _error("Material :: giveCharacteristicValue is purely abstract");
-    return 0.0;
-}
-
 
 double
 Material :: give(int aProperty, GaussPoint *gp)
@@ -300,13 +275,9 @@ Material :: initMaterial(Element *element)
 void
 Material :: updateYourself(GaussPoint *gp, TimeStep *atTime)
 //
-//
 // We call MaterialStatus->updateYourself()
 //
 {
-    MaterialStatus *status = this->giveStatus(gp);
-    if ( status ) {
-        status->updateYourself(atTime);
-    }
+    this->giveStatus(gp)->updateYourself(atTime);
 }
 } // end namespace oofem

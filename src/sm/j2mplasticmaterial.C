@@ -43,8 +43,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( J2MPlasticMaterial );
+REGISTER_Material(J2MPlasticMaterial);
 
 J2MPlasticMaterial :: J2MPlasticMaterial(int n, Domain *d) : MPlasticMaterial(n, d)
 {
@@ -133,7 +132,7 @@ J2MPlasticMaterial :: computeStressSpaceHardeningVars(FloatArray &answer, GaussP
     }
 
     answer.resize(size);
-    StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode());
+    StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode() );
     isize = mask.giveSize();
     rSize = this->giveSizeOfReducedHardeningVarsVector(gp);
 
@@ -283,7 +282,7 @@ J2MPlasticMaterial :: computeStressSpaceHardeningVarsReducedGradient(FloatArray 
     /* kinematic hardening variables first */
     if ( this->kinematicHardeningFlag ) {
         this->computeStressGradientVector(fullKinematicGradient, ftype, isurf, gp, stressVector, stressSpaceHardeningVars);
-        StructuralMaterial :: giveReducedSymVectorForm(reducedKinematicGrad, fullKinematicGradient, gp->giveMaterialMode());
+        StructuralMaterial :: giveReducedSymVectorForm( reducedKinematicGrad, fullKinematicGradient, gp->giveMaterialMode() );
 
         kcount = reducedKinematicGrad.giveSize();
     }
@@ -319,7 +318,7 @@ J2MPlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int isur
     IntArray mask;
     double f, f32, f12, ax, ay, az;
 
-    StructuralMaterial :: giveInvertedVoigtVectorMask(mask, gp->giveMaterialMode() );
+    StructuralMaterial :: giveInvertedVoigtVectorMask( mask, gp->giveMaterialMode() );
     size = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) +
            this->giveSizeOfReducedHardeningVarsVector(gp);
 
@@ -489,6 +488,7 @@ J2MPlasticMaterial :: giveStressBackVector(FloatArray &answer,
 
         return;
     }
+
     answer.resize(0);
 }
 

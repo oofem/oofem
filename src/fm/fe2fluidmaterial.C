@@ -254,10 +254,7 @@ void FE2FluidMaterial :: giveVolumetricPressureStiffness(double &answer, MatResp
 
 int FE2FluidMaterial :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( mode == _PlaneStress ) { // _2dFlow
-        return 1;
-    }
-    return 0;
+    return mode == _2dFlow || mode == _3dFlow;
 }
 
 IRResultType FE2FluidMaterial :: initializeFrom(InputRecord *ir)
@@ -265,7 +262,7 @@ IRResultType FE2FluidMaterial :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom";
     IRResultType result;
     IR_GIVE_FIELD(ir, this->inputfile, _IFT_FE2FluidMaterial_fileName);
-    return this->FluidDynamicMaterial::initializeFrom(ir);
+    return this->FluidDynamicMaterial :: initializeFrom(ir);
 }
 
 int FE2FluidMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
@@ -409,7 +406,7 @@ void FE2FluidMaterialStatus :: markOldTangents() { this->oldTangents = true; }
 
 void FE2FluidMaterialStatus :: computeTangents(TimeStep *tStep)
 {
-    if ( this->oldTangents ) {
+    if ( this->oldTangents ) { ///@todo Consider tStep
         bc->computeTangents(this->giveDeviatoricTangent(),
                     this->giveDeviatoricPressureTangent(),
                     this->giveVolumetricDeviatoricTangent(),
@@ -417,6 +414,28 @@ void FE2FluidMaterialStatus :: computeTangents(TimeStep *tStep)
                     EID_MomentumBalance_ConservationEquation, tStep);
     }
     this->oldTangents = false;
+}
+
+double FE2FluidMaterial :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep)
+{
+    FE2FluidMaterialStatus *status = static_cast<FE2FluidMaterialStatus *>(this->giveStatus(gp));
+    status->computeTangents(tStep);
+    const FloatMatrix &t = status->giveDeviatoricTangent();
+    // Project against the normalized I_dev
+    double v;
+    if ( gp->giveMaterialMode() == _3dFlow ) {
+        v = (t.at(1,1)*2. + t.at(1,2) + t.at(1,3))/3. + 
+            (t.at(2,1) + t.at(2,2)*2. + t.at(2,3))/3. + 
+            (t.at(3,1) + t.at(3,2) + t.at(2,3)*2.)/3. + 
+            t.at(4,4) + t.at(5,5) + t.at(6,6);
+        v /= 5.;
+    } else {
+        v = (t.at(1,1)*2. + t.at(1,2))/3. + 
+            (t.at(2,1) + t.at(2,2)*2.)/3. + 
+            t.at(3,3);
+        v *= 19./9.;
+    }
+    return v;
 }
 
 } // end namespace oofem

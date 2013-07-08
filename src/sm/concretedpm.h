@@ -481,11 +481,9 @@ public:
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
     virtual void giveRealStressVector(FloatArray &answer,
-                                      MatResponseForm form,
                                       GaussPoint *gp,
                                       const FloatArray &reducedStrain,
                                       TimeStep *tStep);
-
 
     /**
      * @param gp Gauss point.

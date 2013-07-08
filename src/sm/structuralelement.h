@@ -40,7 +40,6 @@
 #include "domain.h"
 #include "floatmatrix.h"
 #include "loadtimefunction.h"
-#include "matresponseform.h"
 #include "matresponsemode.h"
 #include "valuemodetype.h"
 #include "integrationdomain.h"
@@ -325,6 +324,10 @@ public:
     virtual void showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *atTime);
 
 #endif
+
+    // Interface for b.c.s applied by Sets:
+    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
 
 protected:
     /**

@@ -90,7 +90,7 @@ RCSDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, Gaus
 
 
 void
-RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                        const FloatArray &totalStrain,
                                        TimeStep *atTime)
 //
@@ -170,7 +170,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
         this->updateCrackStatus(gp, crackStrain);
 
         ////#
-        this->giveMaterialStiffnessMatrix(Ds0, ReducedForm, SecantStiffness, gp, atTime);
+        this->giveMaterialStiffnessMatrix(Ds0, SecantStiffness, gp, atTime);
 
         ////#  if (form == ReducedForm) {
         ////#   crossSection->giveReducedCharacteristicVector(reducedAnswer, gp, answer);
@@ -289,7 +289,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
 
                 ef2 = Gf1 / princStress.at(ipos);
 
-                //this->giveMaterialStiffnessMatrix (Ds0, ReducedForm, SecantStiffness, gp, atTime);
+                //this->giveMaterialStiffnessMatrix (Ds0, SecantStiffness, gp, atTime);
                 // compute reached equivalent strain
                 equivStrain = this->computeCurrEquivStrain(gp, nonlocalStrain, E, atTime);
                 damage = this->computeDamageCoeff(equivStrain, e0, ef2);
@@ -329,11 +329,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
         ////#
         ////# reducedSpaceStressVector.times (1.0 - damage);
 
-        ////#  if (form == FullForm) {
-        ////#   crossSection->giveFullCharacteristicVector(answer, gp, reducedSpaceStressVector);
-        ////#  } else {
-        ////#   answer = reducedSpaceStressVector;
-        ////#  }
+        ////# answer = reducedSpaceStressVector;
 
         ////#  stressIncrement = reducedSpaceStressVector;
         ////#  stressIncrement.subtract (status -> giveStressVector());
@@ -346,11 +342,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
     ////# common part
     reducedSpaceStressVector.beProductOf(Ds0, localStrain);
 
-    if ( form == FullForm ) {
-        StructuralMaterial :: giveFullSymVectorForm(answer, reducedSpaceStressVector, gp->giveMaterialMode());
-    } else {
-        answer = reducedSpaceStressVector;
-    }
+    answer = reducedSpaceStressVector;
 
     status->letTempStressVectorBe(reducedSpaceStressVector);
 

@@ -156,7 +156,7 @@ public:
                                        GaussPoint * gp,
                                        TimeStep * atTime);
 
-    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *gp,
                               const FloatArray &, TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);

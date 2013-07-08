@@ -94,6 +94,119 @@ StructuralElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
 }
 
 
+void StructuralElement :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+{
+    if ( type != ExternalForcesVector ) {
+        answer.resize(0);
+        return;
+    }
+    // Just a wrapper for the deadweight body load computations:
+    PointLoad *p = dynamic_cast< PointLoad* >( load );
+    if ( p ) {
+        FloatArray gcoords, lcoords;
+        p->giveCoordinates(gcoords);
+        if ( this->computeLocalCoordinates(lcoords, gcoords) ) {
+            this->computePointLoadVectorAt(answer, load, tStep, mode);
+        }
+    } else {
+        ///@todo This assumption of dead-weight loads needs to be lifted. We can have other body loads, such as
+        this->computeBodyLoadVectorAt(answer, load, tStep, mode);
+    }
+}
+
+void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
+{
+    if ( type != ExternalForcesVector ) {
+        answer.resize(0);
+        return;
+    }
+
+    FEInterpolation *fei = this->giveInterpolation();
+    if ( !fei ) {
+        OOFEM_ERROR("StructuralElement :: computeBoundaryLoadVector - No interpolator available\n");
+    }
+
+    ///@todo This determines if its a edge or surface. We should make it more general and just have a "boundary"
+    bool surface;
+    if ( this->testElementExtension(Element_SurfaceLoadSupport) ) {
+        surface = true;
+    } else if ( this->testElementExtension(Element_EdgeLoadSupport) ) {
+        surface = false;
+    } else {
+        _error("computeBoundaryLoadVector : no boundary load support");
+        surface = true;
+    }
+
+    FloatArray n_vec;
+    FloatMatrix n, T;
+    FloatArray force, globalIPcoords;
+    int nsd = fei->giveNsd();
+
+    int approxOrder = load->giveApproxOrder() + this->giveApproxOrder();
+
+    ///@todo Have interpolator set up integration rule here instead.
+    IntegrationRule *iRule;
+
+    if ( surface ) {
+        iRule = this->GetSurfaceIntegrationRule(approxOrder);
+    } else {
+        iRule = new GaussIntegrationRule(1, this, 1, 1);
+        iRule->SetUpPointsOnLine(( int ) ceil( ( approxOrder + 1. ) / 2. ), _Unknown);
+    }
+
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
+        FloatArray &lcoords = *gp->giveCoordinates();
+
+        if ( load->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+            load->computeValueAt(force, tStep, lcoords, mode);
+        } else {
+            fei->boundaryLocal2Global(globalIPcoords, boundary, lcoords, FEIElementGeometryWrapper(this));
+            load->computeValueAt(force, tStep, globalIPcoords, mode);
+        }
+
+        ///@todo Make sure this part is correct.
+        // We always want the global values in the end, so we might as well compute them here directly:
+        // transform force
+        if ( load->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
+            // then just keep it in global c.s
+        } else {
+            // transform from local edge to element local c.s
+            ///@todo This determines if its a edge or surface. We should make it more general and just have a "boundary"
+            if ( surface ) {
+                if ( this->computeLoadLSToLRotationMatrix(T, boundary, gp) ) {
+                    force.rotatedWith(T, 'n');
+                }
+            } else {
+                if ( this->computeLoadLEToLRotationMatrix(T, boundary, gp) ) {
+                    force.rotatedWith(T, 'n');
+                }
+            }
+            // then to global c.s
+            if ( this->computeLoadGToLRotationMtrx(T) ) {
+                force.rotatedWith(T, 't');
+            }
+        }
+
+        // Construct n-matrix
+        fei->boundaryEvalN(n_vec, boundary, lcoords, FEIElementGeometryWrapper(this));
+        n.beNMatrixOf(n_vec, nsd);
+
+        double dV;
+        ///@todo This determines if its a edge or surface. We should make it more general and just have a "boundary"
+        if ( surface ) {
+            dV = this->computeSurfaceVolumeAround(gp, boundary);
+        } else {
+            dV = this->computeEdgeVolumeAround(gp, boundary);
+        }
+
+        answer.plusProduct(n, force, dV);
+    }
+
+    delete iRule;
+}
+
+
 void
 StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
 // Computes numerically the load vector of the receiver due to the body
@@ -791,7 +904,7 @@ StructuralElement :: computeStressVector(FloatArray &answer, GaussPoint *gp, Tim
     StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
 
     this->computeStrainVector(Epsilon, gp, stepN);
-    cs->giveRealStresses(answer, ReducedForm, gp, Epsilon, stepN);
+    cs->giveRealStresses(answer, gp, Epsilon, stepN);
 }
 
 

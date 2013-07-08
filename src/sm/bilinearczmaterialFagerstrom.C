@@ -75,7 +75,7 @@ namespace oofem {
 
 
 	void
-		BilinearCZMaterialFagerstrom :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+		BilinearCZMaterialFagerstrom :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 		const FloatArray &jumpVector,
 		TimeStep *atTime)
 		//
@@ -328,7 +328,7 @@ namespace oofem {
 
 	void
 		BilinearCZMaterialFagerstrom :: giveCharacteristicMatrix(FloatMatrix &answer,
-		MatResponseForm form, MatResponseMode rMode,
+		MatResponseMode rMode,
 		GaussPoint *gp, TimeStep *atTime)
 		//
 		// Returns characteristic material stiffness matrix of the receiver
@@ -338,16 +338,17 @@ namespace oofem {
 		switch ( mMode ) {
 		case _3dInterface:
 		case _3dMat:
-			give3dInterfaceMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+			give3dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, atTime);
 			break;
 		default:
-			StructuralMaterial :: giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
+			//StructuralMaterial :: giveCharacteristicMatrix(answer, rMode, gp, atTime);
+            StructuralMaterial :: give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
 		}
 	}
 
 
 	void
-		BilinearCZMaterialFagerstrom :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+		BilinearCZMaterialFagerstrom :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
 		GaussPoint *gp, TimeStep *atTime)
 	{
 		BilinearCZMaterialFagerstromStatus *status = static_cast< BilinearCZMaterialFagerstromStatus * >( this->giveStatus(gp) );

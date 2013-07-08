@@ -128,6 +128,9 @@ public:
     /**
      * Gives a list of location arrays that will be assembled.
      * This should only be used to construct zero structure in sparse matrices.
+     * The rows and columns location arrays returned in tuples (stored in vector),
+     * allowing to efficiently assemble and allocate off-diagonal blocks.
+     * The nonzero entries are assembled and allocated for entries at (rows[i], cols[i]) positions.
      * @param rows List of location arrays for r_s.
      * @param cols List of location arrays for c_s.
      * @param eid Equation ID.

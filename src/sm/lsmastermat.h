@@ -42,11 +42,11 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 
-///@name Input fields for LsMasterMat
+///@name Input fields for LargeStrainMasterMaterial
 //@{
-#define _IFT_LsMasterMat_Name "lsmastermat"
-#define _IFT_LsMasterMat_m "m"
-#define _IFT_LsMasterMat_slaveMat "slavemat"
+#define _IFT_LargeStrainMasterMaterial_Name "lsmastermat"
+#define _IFT_LargeStrainMasterMaterial_m "m"
+#define _IFT_LargeStrainMasterMaterial_slaveMat "slavemat"
 //@}
 
 namespace oofem {
@@ -55,12 +55,12 @@ class Domain;
 
 /**
  * Large strain master material.
- * Stress and stiffness are computed from small strain(slaveMat) material model 
+ * Stress and stiffness are computed from small strain(slaveMat) material model
  * using a strain tensor from the Seth-Hill strain tensors family (depends on parameter m,
  * m = 0 logarithmic strain,m = 1 Green-Lagrange strain ...)
- * then stress and stiffness are transformed 2.PK stress and appropriate stiffness 
+ * then stress and stiffness are transformed 2.PK stress and appropriate stiffness
  */
-class LsMasterMat : public StructuralMaterial
+class LargeStrainMasterMaterial : public StructuralMaterial
 {
 protected:
     /// Reference to the basic elastic material.
@@ -71,18 +71,18 @@ protected:
     /// Specifies the strain tensor.
     double m;
 
- 
+
 public:
-    LsMasterMat(int n, Domain *d);
-    virtual ~LsMasterMat();
+    LargeStrainMasterMaterial(int n, Domain *d);
+    virtual ~LargeStrainMasterMaterial();
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int hasNonLinearBehaviour() { return 1; }
-    virtual const char *giveInputRecordName() const { return _IFT_LsMasterMat_Name; }
-    virtual const char *giveClassName() const { return "LsMasterMat"; }
-    virtual classType giveClassID() const { return LsMasterMatClass; }
+    virtual const char *giveInputRecordName() const { return _IFT_LargeStrainMasterMaterial_Name; }
+    virtual const char *giveClassName() const { return "LargeStrainMasterMaterial"; }
+    virtual classType giveClassID() const { return LargeStrainMasterMaterialClass; }
 
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
@@ -91,17 +91,19 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                       MatResponseMode,
-                                       GaussPoint * gp,
-                                       TimeStep * atTime);
+                                               MatResponseMode,
+                                               GaussPoint * gp,
+                                               TimeStep * atTime);
 
-    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
-                              const FloatArray &, TimeStep *);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *, const FloatArray &, TimeStep *)
+    { OOFEM_ERROR("LsMasterMat: giveRealStressVector is not implemented, this material is designed for large strains only"); }
+    virtual void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep);
 
-    /// transformation matrix
-    void constructTransformationMatrix(FloatMatrix F, GaussPoint *gp);
+    /// transformation matrices
+    void constructTransformationMatrix(FloatMatrix &answer, const FloatMatrix &eigenVectors);
+    void constructL1L2TransformationMatrices(FloatMatrix &answer1, FloatMatrix &answer2, const FloatMatrix &eigenVectors, FloatArray &stress, double E1, double E2, double E3);
 
-    
+
 protected:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
@@ -112,15 +114,15 @@ protected:
 //=============================================================================
 
 
-class LsMasterMatStatus : public StructuralMaterialStatus
+class LargeStrainMasterMaterialStatus : public StructuralMaterialStatus
 {
 protected:
-    FloatMatrix Pmatrix,TLmatrix, transformationMatrix;
+    FloatMatrix Pmatrix, TLmatrix, transformationMatrix;
     int slaveMat;
 
 public:
-    LsMasterMatStatus(int n, Domain *d, GaussPoint *g, int s);
-    virtual ~LsMasterMatStatus();
+    LargeStrainMasterMaterialStatus(int n, Domain *d, GaussPoint *g, int s);
+    virtual ~LargeStrainMasterMaterialStatus();
 
 
     void givePmatrix(FloatMatrix &answer)
@@ -128,11 +130,11 @@ public:
     void giveTLmatrix(FloatMatrix &answer)
     { answer = TLmatrix; }
     void giveTransformationMatrix(FloatMatrix &answer)
-    { answer = transformationMatrix;}
+    { answer = transformationMatrix; }
 
     void setPmatrix(FloatMatrix values) { Pmatrix = values; }
     void setTLmatrix(FloatMatrix values) { TLmatrix = values; }
-    void setTransformationMatrix(FloatMatrix values){transformationMatrix = values;}
+    void setTransformationMatrix(FloatMatrix values) { transformationMatrix = values; }
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
@@ -144,9 +146,9 @@ public:
 
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    virtual const char *giveClassName() const { return "LsMasterMatStatus"; }
+    virtual const char *giveClassName() const { return "LargeStrainMasterMaterialStatus"; }
 
-    virtual classType giveClassID() const { return LsMasterMatStatusClass; }
+    virtual classType giveClassID() const { return LargeStrainMasterMaterialStatusClass; }
 };
 } // end namespace oofem
 #endif // misesmat_h

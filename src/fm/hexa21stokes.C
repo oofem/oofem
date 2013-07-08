@@ -158,7 +158,7 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FluidDynamicMaterial *mat = static_cast<FluidDynamicMaterial * >( this->giveMaterial() );
-    FloatArray a_pressure, a_velocity, devStress, epsp, BTs, Nh, dN_V(81);
+    FloatArray a_pressure, a_velocity, devStress, epsp, Nh, dN_V(81);
     FloatMatrix dN, B(6, 81);
     double r_vol, pressure;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
@@ -183,9 +183,8 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
         epsp.beProductOf(B, a_velocity);
         pressure = Nh.dotProduct(a_pressure);
         mat->computeDeviatoricStressVector(devStress, r_vol, gp, epsp, pressure, tStep);
-        BTs.beTProductOf(B, devStress);
 
-        momentum.add(dV, BTs);
+        momentum.plusProduct(B, devStress, dV);
         momentum.add(-pressure*dV, dN_V);
         conservation.add(r_vol*dV, Nh);
     }
@@ -209,7 +208,7 @@ void Hexa21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *t
         Load *load = this->domain->giveLoad(load_number);
 
         if ( load->giveBCGeoType() == SurfaceLoadBGT ) {
-            this->computeBoundaryLoadVector(vec, load, load_id, ExternalForcesVector, VM_Total, tStep);
+            this->computeBoundaryLoadVector(vec, static_cast<BoundaryLoad*>(load), load_id, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         }
     }
@@ -259,7 +258,7 @@ void Hexa21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType 
     answer.assemble( temparray, this->momentum_ordering );
 }
 
-void Hexa21Stokes :: computeBoundaryLoadVector(FloatArray &answer, Load *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep)
+void Hexa21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
         answer.resize(0);

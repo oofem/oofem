@@ -457,7 +457,6 @@ ConcreteDPM :: hasMaterialModeCapability(MaterialMode mMode)
 
 void
 ConcreteDPM :: giveRealStressVector(FloatArray &answer,
-                                    MatResponseForm form,
                                     GaussPoint *gp,
                                     const FloatArray &strainVector,
                                     TimeStep *atTime)
@@ -514,11 +513,7 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
 
     assignStateFlag(gp);
 
-    if ( form == ReducedForm ) {
-        answer = stress;
-    } else {
-        StructuralMaterial :: giveFullSymVectorForm(answer, stress, gp->giveMaterialMode());
-    }
+    answer = stress;
 }
 
 

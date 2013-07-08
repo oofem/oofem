@@ -44,7 +44,6 @@ class FEI2dLineQuad;
 
 /**
  * 3 node line elements for surface tension.
- * @see LineSurfaceTension
  * @author Mikael Öhman
  */
 class Line2SurfaceTension :
@@ -65,17 +64,9 @@ public:
 
     virtual FEInterpolation *giveInterpolation() const;
 
-    void computeTangent(FloatMatrix &answer, TimeStep *tStep);
-    void computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep);
+    virtual void computeTangent(FloatMatrix &answer, TimeStep *tStep);
 
-    /**
-     * Computes the integral @f$ \int n \cdot x \mathrm{d}s @f$.
-     * The normal is defined as left in the direction parameterization.
-     * @return Evaluated integral.
-     */
-    virtual double computeNXIntegral() const;
-
-    virtual void computeN(FloatArray &answer, const FloatArray &lcoords) const;
+    virtual void computeInternalForcesVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep);
 
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &gcoords) { return false; }
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &gcoords);
@@ -92,7 +83,6 @@ public:
 
     virtual const char *giveClassName() const { return "Line2SurfaceTension"; }
     virtual const char *giveInputRecordName() const { return _IFT_Line2SurfaceTension_Name; }
-    virtual classType giveClassID() const { return Line2SurfaceTensionElementClass; }
 };
 }
 

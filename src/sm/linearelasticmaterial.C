@@ -57,8 +57,8 @@ LinearElasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 
 void
-LinearElasticMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                  MatResponseForm form, MatResponseMode rMode,
+LinearElasticMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
+                                                  MatResponseMode rMode,
                                                   GaussPoint *gp,
                                                   TimeStep *atTime)
 {
@@ -68,23 +68,22 @@ LinearElasticMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _2dPlate:
-        this->give2dPlateStiffMtrx(answer, form, rMode, gp, atTime);
+        this->give2dPlateStiffMtrx(answer, rMode, gp, atTime);
         break;
     case _PlaneStressRot:
-        this->give2dPlaneStressRotStiffMtrx(answer, form, rMode, gp, atTime);
+        this->give2dPlaneStressRotStiffMtrx(answer, rMode, gp, atTime);
         break;
     case _3dShell:
-        this->give3dShellStiffMtrx(answer, form, rMode, gp, atTime);
+        this->give3dShellStiffMtrx(answer, rMode, gp, atTime);
         break;
     default:
-        StructuralMaterial :: giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
+        StructuralMaterial :: giveStiffnessMatrix(answer, rMode, gp, atTime);
     }
 }
 
 
 void
 LinearElasticMaterial :: give2dPlateStiffMtrx(FloatMatrix &answer,
-                                              MatResponseForm form,
                                               MatResponseMode rMode,
                                               GaussPoint *gp,
                                               TimeStep *tStep)
@@ -106,45 +105,27 @@ LinearElasticMaterial :: give2dPlateStiffMtrx(FloatMatrix &answer,
         _error(" Give2dPlateStiffMtrx : no SimpleCrossSection");
     }
 
-    this->givePlaneStressStiffMtrx(mat3d, ReducedForm, rMode, gp, tStep);
+    this->givePlaneStressStiffMtrx(mat3d, rMode, gp, tStep);
     thickness = crossSection->give(CS_Thickness);
     thickness3 = thickness * thickness * thickness;
 
-    if ( form == ReducedForm ) {
-        answer.resize(5, 5);
-        answer.zero();
+    answer.resize(5, 5);
+    answer.zero();
 
-        for ( i = 1; i <= 2; i++ ) {
-            for ( j = 1; j <= 2; j++ ) {
-                answer.at(i, j) = mat3d.at(i, j) * thickness3 / 12.;
-            }
+    for ( i = 1; i <= 2; i++ ) {
+        for ( j = 1; j <= 2; j++ ) {
+            answer.at(i, j) = mat3d.at(i, j) * thickness3 / 12.;
         }
-
-        answer.at(3, 3) = mat3d.at(3, 3) * thickness3 / 12.;
-
-        answer.at(4, 4) = mat3d.at(3, 3) * thickness * ( 5. / 6. );
-
-        answer.at(5, 5) = answer.at(4, 4);
-    } else {
-        answer.resize(8, 8);
-        answer.zero();
-
-        for ( i = 1; i <= 2; i++ ) {
-            for ( j = 1; j <= 2; j++ ) {
-                answer.at(i + 3, j + 3) = mat3d.at(i, j) * thickness3 / 12.;
-            }
-        }
-
-        answer.at(6, 6) = mat3d.at(3, 3) * thickness3 / 12.;
-        answer.at(7, 7) = mat3d.at(3, 3) * thickness * ( 5. / 6. );
-        answer.at(8, 8) = answer.at(7, 7);
     }
+
+    answer.at(3, 3) = mat3d.at(3, 3) * thickness3 / 12.;
+    answer.at(4, 4) = mat3d.at(3, 3) * thickness * ( 5. / 6. );
+    answer.at(5, 5) = answer.at(4, 4);
 }
 
 
 void
 LinearElasticMaterial :: give2dPlaneStressRotStiffMtrx(FloatMatrix &answer,
-                                                       MatResponseForm form,
                                                        MatResponseMode rMode,
                                                        GaussPoint *gp,
                                                        TimeStep *tStep)
@@ -159,39 +140,23 @@ LinearElasticMaterial :: give2dPlaneStressRotStiffMtrx(FloatMatrix &answer,
         _error("Give2dPlaneStressRotStiffMtrx : unsupported mode");
     }
 
-    this->givePlaneStressStiffMtrx(mat, ReducedForm, rMode, gp, tStep);
+    this->givePlaneStressStiffMtrx(mat, rMode, gp, tStep);
 
-    if ( form == ReducedForm ) {
-        answer.resize(4, 4);
-        answer.zero();
+    answer.resize(4, 4);
+    answer.zero();
 
-        for ( int i = 1; i <= 3; i++ ) {
-            for ( int j = 1; j <= 3; j++ ) {
-                answer.at(i, j) = mat.at(i, j);
-            }
+    for ( int i = 1; i <= 3; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
+            answer.at(i, j) = mat.at(i, j);
         }
-
-        answer.at(4, 4) = mat.at(3, 3);
-    } else {
-        answer.resize(7, 7);
-        answer.zero();
-
-        for ( int i = 1; i <= 2; i++ ) {
-            for ( int j = 1; j <= 2; j++ ) {
-                answer.at(i, j) = mat.at(i, j);
-            }
-        }
-
-        answer.at(1, 6) = answer.at(6, 1) = mat.at(1, 3);
-        answer.at(2, 6) = answer.at(6, 2) = mat.at(2, 3);
-        answer.at(6, 6) = answer.at(7, 7) = mat.at(3, 3);
     }
+
+    answer.at(4, 4) = mat.at(3, 3);
 }
 
 
 void
 LinearElasticMaterial :: give3dShellStiffMtrx(FloatMatrix &answer,
-                                              MatResponseForm form,
                                               MatResponseMode rMode,
                                               GaussPoint *gp,
                                               TimeStep *tStep)
@@ -212,7 +177,7 @@ LinearElasticMaterial :: give3dShellStiffMtrx(FloatMatrix &answer,
         _error(" Give2dBeamStiffMtrx : no SimpleCrossSection");
     }
 
-    this->givePlaneStressStiffMtrx(mat3d, ReducedForm, rMode, gp, tStep);
+    this->givePlaneStressStiffMtrx(mat3d, rMode, gp, tStep);
     thickness = crossSection->give(CS_Thickness);
     thickness3 = thickness * thickness * thickness;
 
@@ -240,7 +205,7 @@ LinearElasticMaterial :: give3dShellStiffMtrx(FloatMatrix &answer,
 
 
 void
-LinearElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
+LinearElasticMaterial :: giveRealStressVector(FloatArray &answer,
                                               GaussPoint *gp,
                                               const FloatArray &reducedStrain,
                                               TimeStep *atTime)
@@ -262,17 +227,12 @@ LinearElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseFor
         stressVector.resize( strainVector.giveSize() );
     }
 
-    this->giveCharacteristicMatrix(d, ReducedForm, TangentStiffness, gp, atTime);
+    this->giveStiffnessMatrix(d, TangentStiffness, gp, atTime);
     stressVector.beProductOf(d, strainVector);
 
     // update gp
     status->letTempStrainVectorBe(reducedStrain);
     status->letTempStressVectorBe(stressVector);
-
-    if ( form == FullForm ) {
-        StructuralMaterial :: giveFullSymVectorForm(answer, stressVector, gp->giveMaterialMode());
-        return;
-    }
 
     answer = stressVector;
 }

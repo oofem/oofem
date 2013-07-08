@@ -49,6 +49,7 @@ enum classType {
     GeneralBoundaryConditionClass,
     ActiveBoundaryConditionClass,
     SurfaceTensionBoundaryConditionClass,
+    LinearConstraintClass,
     LoadClass,
     BoundaryConditionClass,
     PrescribedGradientClass,
@@ -354,8 +355,8 @@ enum classType {
     CebFipSlip90MaterialClass,
     DustMaterialClass,
     RVEMaterialClass,
-    LsMasterMatClass,
-    LsMasterMatStatusClass,
+    LargeStrainMasterMaterialClass,
+    LargeStrainMasterMaterialStatusClass,
     LsMasterMatGradClass,
     LsMasterMatGradStatusClass,
 

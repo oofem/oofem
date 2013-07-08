@@ -38,7 +38,6 @@
 #include "error.h"
 #include "datastream.h"
 #include "materialmode.h"
-#include "matresponseform.h"
 #include <structuralmaterial.h>
 
 namespace oofem {

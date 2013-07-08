@@ -157,7 +157,7 @@ public:
     void giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &rloc, const UnknownNumberingScheme &s,
                                                  FloatArray &rcontrib, TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
 
     virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep);
 

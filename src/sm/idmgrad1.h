@@ -41,7 +41,6 @@
 #define _IFT_IDGMaterial_Name "idmgrad1"
 
 namespace oofem {
-
 /**
  * Gradient-enhanced Isotropic Damage model for concrete in tension,
  */
@@ -50,11 +49,11 @@ class IDGMaterial : public IsotropicDamageMaterial1, GradDpMaterialExtensionInte
 protected:
     /// Length scale parameter
     double internalLength;
-    /// Parameter specifiying which averaging type(0 - classical, 1 - distance based, 2 - stress based)
+    /// Parameter specifiying averaging type(0 - classical, 1 - distance based, 2 - stress based)
     int averType;
     /// Parameters specifying how the length scale parameter l is adjusted
-    double beta,t;
-    
+    double beta, t;
+
 
 public:
     /// Constructor
@@ -67,39 +66,37 @@ public:
     virtual const char *giveClassName() const { return "IDGMaterial"; }
     virtual classType giveClassID() const { return IDGMaterialClass; }
     virtual const char *giveInputRecordName() const { return _IFT_IDGMaterial_Name; }
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,const FloatArray &totalStrain,TimeStep *atTime);
-    virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime);
+    virtual void giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *atTime);
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) return static_cast< GradDpMaterialExtensionInterface* >(this); else return NULL; }
+    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) { return static_cast< GradDpMaterialExtensionInterface * >( this ); } else { return NULL; } }
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
-    virtual void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePDGradMatrix_ku(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePDGradMatrix_uk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePDGradMatrix_kk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    
-    void giveCharacteristicMatrix(FloatMatrix &answer,  MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
-    virtual void give1dStressStiffMtrx(FloatMatrix & answer,  MatResponseForm, MatResponseMode, GaussPoint * gp,  TimeStep * tStep);
-    void give1dKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    void give1dGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-    void givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-    void givePlaneStressGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-    void giveInternalLength(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-    void giveInternalLengthDerivative(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    virtual void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void initDamaged(double kappa, FloatArray &strainVector, GaussPoint *gp);
- 
-    void computeEta(FloatMatrix &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime);
+    void giveStiffnessMatrix(FloatMatrix &answer,  MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
+    virtual void give1dStressStiffMtrx(FloatMatrix & answer, MatResponseMode, GaussPoint * gp,  TimeStep * tStep);
+    void give1dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void give1dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    void givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    void givePlaneStressGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    void givePlaneStrainKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    void givePlaneStrainGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    void giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    void giveInternalLengthDerivative(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
 };
 
 
 /**
  * Material status for gradient-enhanced isotropic damage model for concrete in tension.
  */
-class IDGMaterialStatus : public IsotropicDamageMaterial1Status
+class IDGMaterialStatus : public IsotropicDamageMaterial1Status, GradDpMaterialStatusExtensionInterface
 {
 public:
     IDGMaterialStatus(int n, Domain *d, GaussPoint *g);
@@ -113,7 +110,9 @@ public:
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-};
 
+    virtual double giveNonlocalCumulatedStrain() { return nonlocalCumulatedStrain; }
+    virtual void setNonlocalCumulatedStrain(double nonlocalCumulatedStrain) { this->nonlocalCumulatedStrain = nonlocalCumulatedStrain; }
+};
 } // end namespace oofem
 #endif // idmgrad1_h

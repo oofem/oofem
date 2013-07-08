@@ -58,7 +58,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_QPlaneStressGrad_Name; }
     virtual const char *giveClassName() const { return "QPlaneStressGrad"; }
     virtual classType giveClassID() const { return QPlaneStressGradClass; }
-    virtual MaterialMode giveMaterialMode() { return _PlaneStressGrad; }
+    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
     virtual int computeNumberOfDofs(EquationID ut) { return 20; }
 
 protected:
@@ -71,7 +71,6 @@ protected:
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual StructuralElement *giveStructuralElement() { return this; }
     virtual NLStructuralElement *giveNLStructuralElement() { return this; }
-    
 };
 } // end namespace oofem
 #endif // qplanestressgrad_h

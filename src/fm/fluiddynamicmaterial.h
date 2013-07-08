@@ -172,6 +172,14 @@ public:
     virtual void giveVolumetricPressureStiffness(double &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     /**
+     * Gives the effective viscosity for the given integration point.
+     * @param gp Gauss point of interest.
+     * @param tStep Time step.
+     * @return The effective viscosity in the point.
+     */
+    virtual double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) = 0;
+
+    /**
      * Updates internal state of material according to new state vector.
      * @param vec New state vector.
      * @param gp Integration point.

@@ -57,8 +57,7 @@ namespace oofem {
     ENUM_ITEM(IntSource_ww) /* material level internal source submatrix - water source */ \
     ENUM_ITEM(IntSource_hh) /*  - heat source */ \
     ENUM_ITEM(IntSource_hw) /*  - heat source dependency on water content change */ \
-    ENUM_ITEM(IntSource_wh) /*  - water source dependency on temperature change */ \
-    ENUM_ITEM(MRM_Viscosity)
+    ENUM_ITEM(IntSource_wh) /*  - water source dependency on temperature change */
 
 /**
  * Describes the character of characteristic material matrix.

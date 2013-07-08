@@ -128,7 +128,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
+    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
                               const FloatArray &, TimeStep *);
 
     /**

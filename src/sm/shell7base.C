@@ -181,8 +181,8 @@ Shell7Base :: evalInitialCovarBaseVectorsAt(FloatArray &lcoords, FloatMatrix &Gc
 void
 Shell7Base :: edgeEvalInitialCovarBaseVectorsAt(FloatArray &lcoords, const int iedge, FloatArray &G1, FloatArray &G3)
 {
-    //double zeta = 0.0;     // no variation i z (yet)
-    double zeta = lcoords.at(3);
+    double zeta = 0.0;     // no variation i z (yet)
+    //double zeta = lcoords.at(3);
     FloatArray M, dNdxi;
 
     IntArray edgeNodes;
@@ -521,7 +521,7 @@ Shell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solV
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
-        Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
+        StructuralMaterial *mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) ) );
 
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
@@ -564,14 +564,14 @@ Shell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solV
 }
 
 void
-Shell7Base :: computeLinearizedStiffness(GaussPoint *gp, Material *mat, TimeStep *tStep,
+Shell7Base :: computeLinearizedStiffness(GaussPoint *gp, StructuralMaterial *mat, TimeStep *tStep,
                                          FloatMatrix A [ 3 ] [ 3 ], FloatArray &genEps) 
 {
     FloatArray cartStressVector, contravarStressVector;
     FloatMatrix D, Dcart, S;
 
     //A = L^iklj * (g_k x g_l) + S^ij*I
-    mat->giveCharacteristicMatrix(Dcart, ReducedForm, TangentStiffness, gp, tStep);     // L_ijkl - cartesian system (Voigt)
+    mat->giveStiffnessMatrix(Dcart, TangentStiffness, gp, tStep);     // L_ijkl - cartesian system (Voigt)
     this->transInitialCartesianToInitialContravar(gp, Dcart, D);      // L^ijkl - curvilinear system (Voigt)
 
     FloatArray lcoords = *gp->giveCoordinates();
@@ -825,7 +825,7 @@ Shell7Base :: computeStressMatrix(FloatArray &answer, FloatArray &genEps, GaussP
 {
     FloatArray vE;
     this->computeStrainVectorF(vE, gp, stepN, genEps);     // Green-Lagrange strain vector in Voight form
-    static_cast< StructuralMaterial * >( mat )->giveRealStressVector(answer, ReducedForm, gp, vE, stepN);
+    static_cast< StructuralMaterial * >( mat )->giveRealStressVector(answer, gp, vE, stepN);
 }
 
 

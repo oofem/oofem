@@ -68,8 +68,6 @@ protected:
     static FEI3dHexaLin interp;
     /// Ordering of dofs in element. Used to assemble the element stiffness
     static IntArray momentum_ordering, conservation_ordering;
-    /// Ordering of dofs on edges. Used to assemble edge loads
-    static IntArray edge_ordering [ 12 ];
     /// Ordering of dofs on surfaces. Used to assemble surface loads
     static IntArray surf_ordering [ 6 ];
     /// Dummy variable
@@ -78,10 +76,6 @@ protected:
     static bool initOrdering() {
         momentum_ordering.setValues(27,  1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19, 21, 22, 23, 25, 26, 27, 29, 30, 31, 33, 34, 35);
         conservation_ordering.setValues(8, 4, 8, 12, 16, 20, 24, 28, 32);
-        /*
-        edge_ordering [ 0 ].setValues(6,  );
-        surf_ordering [ 0 ].setValues(12,  );
-        */
         return true;
     }
 
@@ -108,8 +102,7 @@ public:
 
     void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep);
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual void computeBoundaryLoadVector(FloatArray &answer, Load *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual void computeEdgeLoadVector(FloatArray &answer, Load *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
 
     virtual const char *giveClassName() const { return "Hexa1BubbleStokes"; }
     virtual const char *giveInputRecordName() const { return _IFT_Hexa1BubbleStokes_Name; }

@@ -301,8 +301,7 @@ public:
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
+    virtual void  giveStiffnessMatrix(FloatMatrix &answer,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *atTime);
@@ -370,7 +369,7 @@ public:
     virtual Interface *giveInterface(InterfaceType);
 
 
-    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
+    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
                                       const FloatArray &, TimeStep *);
 
     /** Reimplemented from RandomMaterialInterface */

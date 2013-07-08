@@ -47,8 +47,7 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-
-REGISTER_Material( IsotropicDamageMaterial1 );
+REGISTER_Material(IsotropicDamageMaterial1);
 
 #ifdef IDM_USE_MMAClosestIPTransfer
 MMAClosestIPTransfer IsotropicDamageMaterial1 :: mapper;
@@ -297,8 +296,6 @@ IsotropicDamageMaterial1 :: giveInputRecord(DynamicInputRecord &input)
     if ( softType == ST_Exponential_Cohesive_Crack || softType == ST_Linear_Cohesive_Crack || softType == ST_BiLinear_Cohesive_Crack ) {
         input.setField(this->ecsMethod, _IFT_IsotropicDamageMaterial1_ecsm);
     }
-
-
 }
 
 
@@ -316,7 +313,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         double posNorm = 0.0;
         FloatArray principalStrains, fullstrain;
 
-        StructuralMaterial :: giveFullSymVectorForm(fullstrain, strain, gp->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( fullstrain, strain, gp->giveMaterialMode() );
 
         // if plane stress mode -> compute strain in z-direction from condition of zero stress in corresponding direction
         if ( gp->giveMaterialMode() == _PlaneStress ) {
@@ -343,9 +340,9 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         FloatArray stress, fullStress, principalStress;
         FloatMatrix de;
 
-        lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
         stress.beProductOf(de, strain);
-        StructuralMaterial :: giveFullSymVectorForm(fullStress, stress, gp->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
         this->computePrincipalValues(principalStress, fullStress, principal_stress);
         for ( int i = 1; i <= 3; i++ ) {
             if ( principalStress.at(i) > 0.0 ) {
@@ -370,7 +367,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         FloatArray stress;
         double sum;
 
-        lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
         if ( this->equivStrainType == EST_ElasticEnergy ) {
             // standard elastic energy
             stress.beProductOf(de, strain);
@@ -378,7 +375,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         } else if ( this->equivStrainType == EST_ElasticEnergyPositiveStress ) {
             // elastic energy corresponding to positive part of stress
             FloatArray fullStress, principalStress;
-            StructuralMaterial :: giveFullSymVectorForm(fullStress, stress, gp->giveMaterialMode());
+            StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
             this->computePrincipalValues(principalStress, fullStress, principal_stress);
             // TO BE FINISHED
             sum = 0.;
@@ -394,7 +391,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
     } else if ( this->equivStrainType == EST_Mises ) {
         double nu = lmat->give(NYxz, NULL);
         FloatArray principalStrains, fullstrain;
-        StructuralMaterial :: giveFullSymVectorForm(fullstrain, strain, gp->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( fullstrain, strain, gp->giveMaterialMode() );
         if ( gp->giveMaterialMode() == _PlaneStress ) {
             fullstrain.at(3) = -nu * ( fullstrain.at(1) + fullstrain.at(2) ) / ( 1. - nu );
         } else if ( gp->giveMaterialMode() == _1dMat ) {
@@ -432,14 +429,24 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         FloatArray principalStrains, fullstrain;
         FloatMatrix N, m;
 
-        // if plane stress mode -> compute strain in z-direction from condition of zero stress in corresponding direction
-        if ( gp->giveMaterialMode() == _PlaneStress || gp->giveMaterialMode() == _PlaneStressGrad  ) {
+        if ( gp->giveMaterialMode() == _1dMat ) {
+            dim = 1;
+            StrainVector  fullStrain(strain, _1dMat);
+            fullStrain.computePrincipalValDir(principalStrains, N);
+            principalStrains.resizeWithValues(3);
+            principalStrains.at(2) = -nu *principalStrains.at(1);
+            principalStrains.at(3) = -nu *principalStrains.at(1);
+        } else if ( gp->giveMaterialMode() == _PlaneStress ) {
             dim = 2;
             StrainVector  fullStrain(strain, _PlaneStress);
             fullStrain.computePrincipalValDir(principalStrains, N);
             principalStrains.resizeWithValues(3);
             principalStrains.at(3) = -nu * ( principalStrains.at(1) + principalStrains.at(2) ) / ( 1. - nu );
-        } else if ( gp->giveMaterialMode() == _3dMat || gp->giveMaterialMode() == _3dMatGrad )     {
+        } else if ( gp->giveMaterialMode() == _PlaneStrain ) {
+            dim = 3;
+            StrainVector  fullStrain(strain, _PlaneStrain);
+            fullStrain.computePrincipalValDir(principalStrains, N);
+        } else if ( gp->giveMaterialMode() == _3dMat ) {
             dim = 3;
             StrainVector fullStrain(strain, _3dMat);
             fullStrain.computePrincipalValDir(principalStrains, N);
@@ -459,7 +466,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
                         n.at(j) = N.at(j, i);
                     }
 
-                    Eta.plusDyadSymmUpper(n, principalStrains.at(i) );
+                    Eta.plusDyadSymmUpper( n, principalStrains.at(i) );
                 }
             }
 
@@ -467,19 +474,34 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
                 posNorm += principalStrains.at(i) * principalStrains.at(i);
             }
         }
+
         Eta.symmetrized();
 
         double kappa = sqrt(posNorm);
-        Eta.times(1. / kappa);
 
         int numberOfEl = ( dim * ( dim - 1 ) / 2 + dim );
         answer.resize(numberOfEl);
 
-        if ( gp->giveMaterialMode() == _PlaneStress || gp->giveMaterialMode() == _PlaneStressGrad ) {
+        if ( kappa != 0 ) {
+            Eta.times(1. / kappa);
+        } else {
+            answer.zero();
+            return;
+        }
+
+        if ( gp->giveMaterialMode() == _1dMat ) {
+            answer.at(1) = Eta.at(1, 1);
+        } else if ( gp->giveMaterialMode() == _PlaneStress ) {
             answer.at(1) = Eta.at(1, 1);
             answer.at(2) = Eta.at(2, 2);
             answer.at(3) = Eta.at(1, 2);
-        } else if ( gp->giveMaterialMode() == _3dMat || gp->giveMaterialMode() == _3dMatGrad ) {
+        } else if ( gp->giveMaterialMode() == _PlaneStrain ) {
+            answer.resize(4);
+            answer.at(1) = Eta.at(1, 1);
+            answer.at(2) = Eta.at(2, 2);
+            answer.at(3) = Eta.at(3, 3);
+            answer.at(4) = Eta.at(1, 2);
+        } else if ( gp->giveMaterialMode() == _3dMat ) {
             answer.at(1) = Eta.at(1, 1);
             answer.at(2) = Eta.at(2, 2);
             answer.at(3) = Eta.at(3, 3);
@@ -493,14 +515,24 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         FloatArray stress, principalStress, eta;
         FloatMatrix de, N, m, Eta;
 
-        lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
         stress.beProductOf(de, strain);
-        if ( gp->giveMaterialMode() == _PlaneStress || gp->giveMaterialMode() == _PlaneStressGrad ) {
+
+        if ( gp->giveMaterialMode() == _1dMat ) {
+            StressVector  fullStress(stress, _1dMat);
+            fullStress.computePrincipalValDir(principalStress, N);
+            principalStress.resizeWithValues(3);
+            dim = 1;
+        } else if ( gp->giveMaterialMode() == _PlaneStress ) {
             StressVector fullStress(stress, _PlaneStress);
             fullStress.computePrincipalValDir(principalStress, N);
             principalStress.resizeWithValues(3);
             dim = 2;
-        } else if ( gp->giveMaterialMode() == _3dMat || gp->giveMaterialMode() == _3dMatGrad ) {
+        } else if ( gp->giveMaterialMode() == _PlaneStrain ) {
+            StressVector fullStress(stress, _PlaneStrain);
+            fullStress.computePrincipalValDir(principalStress, N);
+            dim = 3;
+        } else if ( gp->giveMaterialMode() == _3dMat ) {
             StressVector fullStress(stress, _3dMat);
             fullStress.computePrincipalValDir(principalStress, N);
             dim = 3;
@@ -524,7 +556,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
                         }
                     }
 
-                    Eta.plusDyadSymmUpper(n, principalStress.at(i));
+                    Eta.plusDyadSymmUpper( n, principalStress.at(i) );
                 } else if ( sum < principalStress.at(i) ) {
                     sum = principalStress.at(i);
                     index = i;
@@ -534,17 +566,25 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
                 index = i;
             }
         }
+
         Eta.symmetrized();
 
         int numberOfEl = ( dim * ( dim - 1 ) / 2 + dim );
         eta.resize(numberOfEl);
-        eta.zero();
 
         if ( this->equivStrainType == EST_Rankine_Smooth ) {
             sum = sqrt(sum);
             double kappa =  sum / lmat->give('E', gp);
-            Eta.times(1. / kappa);
-        } else if ( this->equivStrainType == EST_Rankine_Standard )   {
+
+            if ( kappa != 0 ) {
+                Eta.times(1. / kappa);
+            } else {
+                answer.zero();
+                return;
+            }
+
+            Eta.times( 1. / kappa / lmat->give('E', gp) / lmat->give('E', gp) );
+        } else if ( this->equivStrainType == EST_Rankine_Standard ) {
             for ( int i = 1; i <= dim; i++ ) {
                 n.at(i) = N.at(i, index);
             }
@@ -553,12 +593,19 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
             Eta.times( 1. / lmat->give('E', gp) );
         }
 
-
-        if ( gp->giveMaterialMode() == _PlaneStress || gp->giveMaterialMode() == _PlaneStressGrad ) {
+        if ( gp->giveMaterialMode() == _1dMat ) {
+            eta.at(1) = Eta.at(1, 1);
+        } else if ( gp->giveMaterialMode() == _PlaneStress ) {
             eta.at(1) = Eta.at(1, 1);
             eta.at(2) = Eta.at(2, 2);
             eta.at(3) = Eta.at(1, 2);
-        } else if ( gp->giveMaterialMode() == _3dMat || gp->giveMaterialMode() == _3dMatGrad ) {
+        }  else if ( gp->giveMaterialMode() == _PlaneStrain ) {
+            eta.resize(4);
+            eta.at(1) = Eta.at(1, 1);
+            eta.at(2) = Eta.at(2, 2);
+            eta.at(3) = Eta.at(3, 3);
+            eta.at(4) = 2. * Eta.at(1, 2);
+        } else if ( gp->giveMaterialMode() == _3dMat ) {
             eta.at(1) = Eta.at(1, 1);
             eta.at(2) = Eta.at(2, 2);
             eta.at(3) = Eta.at(3, 3);
@@ -573,7 +620,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         FloatArray stress;
         double sum;
 
-        lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
         // standard elastic energy
         stress.beProductOf(de, strain);
         sum = strain.dotProduct(stress);
@@ -839,7 +886,7 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         }
     }
 
-    StructuralMaterial :: giveFullSymVectorForm(fullstrain, strainVector, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( fullstrain, strainVector, gp->giveMaterialMode() );
 
     if ( ( kappa > e0 ) && ( status->giveDamage() == 0. ) ) {
         this->computePrincipalValDir(principalStrains, principalDir, fullstrain, principal_strain);
@@ -1017,9 +1064,9 @@ IsotropicDamageMaterial1 :: MMI_update(GaussPoint *gp,  TimeStep *tStep, FloatAr
     // now update all internal vars accordingly
     strain = status->giveStrainVector();
 #ifdef IDM_USE_MAPPEDSTRAIN
-    this->giveRealStressVector(intVal, ReducedForm, gp, strain, tStep);
+    this->giveRealStressVector(intVal, gp, strain, tStep);
 #else
-    this->giveRealStressVector(intVal, ReducedForm, gp, * estrain, tStep);
+    this->giveRealStressVector(intVal, gp, * estrain, tStep);
 #endif
     this->updateYourself(gp, tStep);
     return result;

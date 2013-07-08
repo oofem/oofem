@@ -122,7 +122,7 @@ public:
     virtual ~StructuralMaterial() { }
 
     /**
-     * Computes the stiffness matrix of receiver in given integration point, respecting its history.
+     * Computes the stiffness matrix for giveRealStressVector of receiver in given integration point, respecting its history.
      * The algorithm should use temporary or equilibrium  history variables stored in integration point status
      * to compute and return required result.
      * @param answer Contains result.
@@ -131,34 +131,32 @@ public:
      * @param gp Integration point.
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
+    virtual void giveStiffnessMatrix(FloatMatrix &answer,
+                                     MatResponseMode mode,
+                                     GaussPoint *gp,
+                                     TimeStep *tStep);
 
     /**
      * Computes the real stress vector for given total strain and integration point.
      * The total strain is defined as strain computed directly from displacement field at given time.
-     * The stress independent parts (temperature, eigenstrains) are subtracted in constitutive
-     * driver.
+     * The stress independent parts (temperature, eigenstrains) are subtracted in constitutive driver.
      * The service should use previously reached equilibrium history variables. Also
      * it should update temporary history variables in status according to newly reached state.
      * The temporary history variables are moved into equilibrium ones after global structure
      * equilibrium has been reached by iteration process.
-     * @param answer Contains result.
+     * @param answer Stress vector in reduced form. For large deformations it is treated as the second Piola-Kirchoff stress.
      * @param form Material response form.
      * @param gp Integration point.
-     * @param reducedStrain Strain vector in reduced form.
+     * @param reducedStrain Strain vector in reduced form. For large deformations it is treated as the Green-Lagrange strain.
      * @param tStep Current time step (most models are able to respond only when atTime is current time step).
      */
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep) = 0;
 
     /// @name Methods associated with large deformation analysis
     //@{
     /**
-     * Computes the second Piola-Kirchoff stress vector for given total deformation gradient and integration point.
+     * Computes the first Piola-Kirchhoff stress vector for given total deformation gradient and integration point.
      * The total deformation gradient is computed directly from displacement field at the given time step.
      * The stress independent parts (temperature, eigenstrains) are subtracted in constitutive
      * driver.
@@ -166,47 +164,81 @@ public:
      * it should update temporary history variables in status according to newly reached state.
      * The temporary history variables are moved into equilibrium ones after global structure
      * equilibrium has been reached by iteration process.
+     * The First Piola-Kirchhoff stress vector is computed in Total Lagrangian mode
+     *
      * @param answer Contains result.
      * @param form Material response form.
      * @param gp Integration point.
      * @param reducedF Deformation gradient in in reduced form.
      * @param tStep Current time step (most models are able to respond only when atTime is current time step).
      */
-    virtual void giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                                         const FloatArray &reducedF, TimeStep *tStep);
-
-
+    virtual void giveFirstPKStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    /// Default implementation relies on giveRealStressVector for second Piola-Kirchoff stress
+    virtual void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    /// Default implementation relies on giveFirstPKStressVector_3d
+    virtual void giveFirstPKStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    /// Default implementation relies on giveFirstPKStressVector_3d
+    virtual void giveFirstPKStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    /// Default implementation relies on giveFirstPKStressVector_3d
+    virtual void giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
     /**
-     * Helper function for computing the common Green-Lagrange strain from a given deformation gradient.
-     * @param answer Green-Lagrange strain (symmetric part only) in Voigt form.
+     * Computes the Cauchy stress vector for given increment of deformation gradient and given integration point.
+     * The increment of deformation gradient is computed directly from displacement field at the given time step
+     * and it is computed wrt configuration which was reached in the last step.
+     * The stress independent parts (temperature, eigenstrains) are subtracted in constitutive
+     * driver.
+     * The service should use previously reached equilibrium history variables. Also
+     * it should update temporary history variables in status according to newly reached state.
+     * The temporary history variables are moved into equilibrium ones after global structure
+     * equilibrium has been reached by iteration process.
+     * The Cauchy stress vector is computed in Updated Lagrangian mode
+     *
+     * @param answer Contains result.
+     * @param form Material response form.
+     * @param gp Integration point.
+     * @param reducedF Deformation gradient in in reduced form.
+     * @param tStep Current time step (most models are able to respond only when atTime is current time step).
      */
-    static void computeGreenLagrangeStrain(FloatMatrix &answer, FloatMatrix &F);
-
+    virtual void giveCauchyStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    virtual void giveCauchyStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
+    { _error("giveCauchyStressVector_3d: not implemented "); }
+    virtual void giveCauchyStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
+    { _error("giveCauchyStressVector_PlaneStrain: not implemented "); }
+    virtual void giveCauchyStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
+    { _error("giveCauchyStressVector_PlaneStress: not implemented "); }
+    virtual void giveCauchyStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
+    { _error("giveCauchyStressVector__1d: not implemented "); }
 
     /**
      * Gives the tangent: @f$ \frac{\partial P}{\partial F} @f$.
      * @param answer The computed tangent from the last evaluated first-PK-stress.
-     * @param form Material response form.
      * @param rMode Material mode.
      * @param gp Gauss point.
      * @param tStep Time step.
      */
-    virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+    virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode,
                                           GaussPoint *gp, TimeStep *tStep);
+
+    /**
+     * Gives the tangent: @f$ \frac{\partial C}{\partial e} @f$.
+     * @param answer The computed tangent from the last evaluated first-PK-stress.
+     * @param rMode Material mode.
+     * @param gp Gauss point.
+     * @param tStep Time step.
+     */
+    virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     void give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp);
     static void convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &dSdE, FloatArray &S, FloatArray &F, MaterialMode matMode);
 
     static void convert_P_2_S(FloatArray &answer, const FloatArray &reducedvP, const FloatArray &reducedvF, MaterialMode matMode);
     static void convert_S_2_P(FloatArray &answer, const FloatArray &reducedvS, const FloatArray &reducedvF, MaterialMode matMode);
+    //@todo is it neccesary to have these functions ?
+    static void convert_P_2_C(FloatArray &answer, const FloatArray &reducedvP, const FloatArray &reducedvF, MaterialMode matMode);
+    static void convert_C_2_P(FloatArray &answer, const FloatArray &reducedvS, const FloatArray &reducedvF, MaterialMode matMode);
+    static void convert_S_2_C(FloatArray &answer, const FloatArray &reducedvP, const FloatArray &reducedvF, MaterialMode matMode);
+    static void convert_C_2_S(FloatArray &answer, const FloatArray &reducedvS, const FloatArray &reducedvF, MaterialMode matMode);
     //@}
-
-    /**
-     * Returns the sencond order identity tensor on Voigt form. The size is according to the MaterialMode
-     * @param answer Voigt form of the the identity tensor.
-     * @param matMode Material response mode.
-     */
-    static void giveIdentityVector(FloatArray &answer, MaterialMode matMode);
 
     /**
      * Returns a vector of coefficients of thermal dilatation in direction of each material principal (local) axis.
@@ -257,7 +289,7 @@ public:
      * @param mode Stress strain principal mode.
      */
     static void computePrincipalValDir(FloatArray &answer, FloatMatrix &dir, const FloatArray &s,
-                                stressStrainPrincMode mode);
+                                       stressStrainPrincMode mode);
 
     /**
      * Computes full 3d material stiffness matrix at given integration point, time, respecting load history
@@ -275,16 +307,20 @@ public:
 
 
     virtual void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
-                                       MatResponseMode mode,
-                                       GaussPoint *gp, TimeStep *tStep);
+                                                    MatResponseMode mode,
+                                                    GaussPoint *gp, TimeStep *tStep);
+
+    virtual void give3dMaterialStiffnessMatrix_dCde(FloatMatrix &answer,
+                                                    MatResponseMode mode,
+                                                    GaussPoint *gp, TimeStep *tStep);
 
     /**
      * Returns a mask of the vector indicies corresponding to components in a general
-     * (non-symmetric) second order tensor of some stress/strain/deformation measure that 
-     * performes work. Thus, components corresponding to imposed zero stress (e.g. plane 
-     * stress etc.) are not included. On the other hand, if zero strain components are 
-     * imposed( e.g. plane strain etc.) this condition must be taken into account in 
-     * geometrical relations. Therefore, these corresponding components are included in 
+     * (non-symmetric) second order tensor of some stress/strain/deformation measure that
+     * performes work. Thus, components corresponding to imposed zero stress (e.g. plane
+     * stress etc.) are not included. On the other hand, if zero strain components are
+     * imposed( e.g. plane strain etc.) this condition must be taken into account in
+     * geometrical relations. Therefore, these corresponding components are included in
      * the reduced vector. Which compnents to include are given by the particular MaterialMode.
      * Ex: PlaneStress -> [1 2 6 9]
      *
@@ -295,17 +331,17 @@ public:
     static int giveVoigtVectorMask(IntArray &answer, MaterialMode mmode);
 
     /**
-     * The same as giveVoigtVectorMask but returns a mask corresponding to a symmetric 
+     * The same as giveVoigtVectorMask but returns a mask corresponding to a symmetric
      * second order tensor.
-     * 
+     *
      * Returns a mask of the vector indicies corresponding to components in a symmetric
-     * second order tensor of some stress/strain/deformation measure that performes work. 
+     * second order tensor of some stress/strain/deformation measure that performes work.
      * Thus, components corresponding to imposed zero stress (e.g. plane stress etc.) are
-     * not included. On the other hand, if zero strain components are imposed( e.g. plane 
-     * strain etc.) this condition must be taken into account in geometrical relations. 
+     * not included. On the other hand, if zero strain components are imposed( e.g. plane
+     * strain etc.) this condition must be taken into account in geometrical relations.
      * Therefore, these corresponding components are included in the reduced vector.
      * Which compnents to include are given by the particular MaterialMode.
-     * Ex: PlaneStress -> [1 2 6] 
+     * Ex: PlaneStress -> [1 2 6]
      *
      * @param answer Returned mask.
      * @param mmode Material response mode.
@@ -323,7 +359,7 @@ public:
      * @param mmode Material response mode.
      */
     static int giveSizeOfVoigtVector(MaterialMode mmode);
-    /** 
+    /**
      * Returns the size of symmetric part of a reduced stress/strain vector according to given mode.
      * @param mmode Material response mode.
      */
@@ -334,7 +370,7 @@ public:
     /// Converts the reduced deformation gradient Voigt vector (2nd order tensor).
     static void giveFullVectorFormF(FloatArray &answer, const FloatArray &strainVector,  MaterialMode matMode);
     /// Converts the reduced unsymmetric Voigt vector (2nd order tensor) to full form.
-    static void giveFullSymVectorForm(FloatArray &answer,const FloatArray &vec, MaterialMode matMode);
+    static void giveFullSymVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode);
     /// Converts the full symmetric Voigt vector (2nd order tensor) to reduced form.
     static void giveReducedVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode);
     /// Converts the full unsymmetric Voigt vector (2nd order tensor) to reduced form.
@@ -381,7 +417,7 @@ protected:
      * @param gp Integration point.
      * @param stiffMtrx3d 3d stiffness matrix (full form) in given integration point.
      */
-    void reduceStiffMtrx3d(FloatMatrix &answer, MatResponseForm form, GaussPoint *gp,
+    void reduceStiffMtrx3d(FloatMatrix &answer, GaussPoint *gp,
                            FloatMatrix &stiffMtrx3d) const;
     /**
      * Computes characteristic compliance matrix corresponding to given material mode
@@ -396,7 +432,7 @@ protected:
      * @param gp Integration point.
      * @param complMtrx3d 3d compliance matrix (full form) in given integration point.
      */
-    void reduceComplMtrx3d(FloatMatrix &answer, MatResponseForm form, GaussPoint *gp,
+    void reduceComplMtrx3d(FloatMatrix &answer, GaussPoint *gp,
                            FloatMatrix &complMtrx3d) const;
     /**
      * Reduces full 3d stiffness matrix to 2d plane stress matrix.
@@ -406,8 +442,7 @@ protected:
      * @param gp Integration point.
      * @param stiffMtrx3d 3d stiffness matrix (in full form).
      */
-    void reduceToPlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
-                                      GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
+    void reduceToPlaneStressStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
     /**
      * Reduces full 3d stiffness matrix to 2d plane strain matrix.
      * The 3d stiffness should be computed for integration point passed as parameter.
@@ -421,8 +456,7 @@ protected:
      * @param gp Integration point.
      * @param stiffMtrx3d 3d stiffness matrix (in full form).
      */
-    void reduceToPlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form,
-                                      GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
+    void reduceToPlaneStrainStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
     /**
      * Reduces full 3d stiffness matrix to 1d matrix
      * 1d case: @f$ \sigma_y = \sigma_z = \tau_{yz} = \tau_{zx} = \tau_{xy} = 0 @f$.
@@ -432,8 +466,7 @@ protected:
      * @param gp Integration point.
      * @param stiffMtrx3d 3d stiffness matrix (in full form).
      */
-    void reduceTo1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
-                                   GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
+    void reduceTo1dStressStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
     /**
      * Reduces full 3d stiffness matrix to 2d beam layer matrix.
      * 2dbeamLayer: @f$ \sigma_y = \sigma_z = \tau_{zy} = \tau_{xy} = 0 @f$.
@@ -443,8 +476,7 @@ protected:
      * @param gp Integration point.
      * @param stiffMtrx3d 3d stiffness matrix (in full form).
      */
-    void reduceTo2dBeamLayerStiffMtrx(FloatMatrix &answer, MatResponseForm form,
-                                      GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
+    void reduceTo2dBeamLayerStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
     /**
      * Reduces full 3d stiffness matrix to 2d plate layer stiffness matrix.
      * 2dplatelayermode: @f$ \sigma_z = 0 @f$.
@@ -453,8 +485,7 @@ protected:
      * @param gp Integration point.
      * @param stiffMtrx3d 3d stiffness matrix (in full form).
      */
-    void reduceTo2dPlateLayerStiffMtrx(FloatMatrix &answer, MatResponseForm form,
-                                       GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
+    void reduceTo2dPlateLayerStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
     /**
      * Reduces full 3d stiffness matrix to 1d fiber stiffness matrix.
      * 2dplatelayermode: @f$ \sigma_y = \sigma_z = \tau_{yz} = 0 @f$.
@@ -463,8 +494,7 @@ protected:
      * @param gp Integration point.
      * @param stiffMtrx3d 3d stiffness matrix (in full form).
      */
-    void reduceTo1dFiberStiffMtrx(FloatMatrix &answer, MatResponseForm form,
-                                  GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
+    void reduceTo1dFiberStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
     /**
      * Reduces full 3d stiffness matrix to 3d shell layer stiffness matrix.
      * @see StructuralMaterial::reduceTo2dPlateLayerStiffMtrx
@@ -473,8 +503,7 @@ protected:
      * @param gp Integration point.
      * @param stiffMtrx3d 3d stiffness matrix (in full form).
      */
-    void reduceTo3dShellLayerStiffMtrx(FloatMatrix &answer, MatResponseForm form,
-                                       GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
+    void reduceTo3dShellLayerStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
 
 
     /**
@@ -485,8 +514,7 @@ protected:
      * @param gp Integration point.
      * @param complMtrx3d 3d compliance matrix (in full form).
      */
-    void reduceToPlaneStressComplMtrx(FloatMatrix &answer, MatResponseForm form,
-                                      GaussPoint *gp, FloatMatrix &complMtrx3d) const;
+    void reduceToPlaneStressComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
     /**
      * Reduces full 3d compliance matrix to 2d plane strain matrix.
      * The 3d compliance should be computed for integration point passed as parameter.
@@ -500,8 +528,7 @@ protected:
      * @param gp Integration point.
      * @param complMtrx3d 3d compliance matrix (in full form).
      */
-    void reduceToPlaneStrainComplMtrx(FloatMatrix &answer, MatResponseForm form,
-                                      GaussPoint *gp, FloatMatrix &complMtrx3d) const;
+    void reduceToPlaneStrainComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
     /**
      * Reduces full 3d compliance matrix to 1d matrix
      * 1d case: @f$ \sigma_y = \sigma_z = \tau_{yz} = \tau_{zx} = \tau_{xy} = 0 @f$.
@@ -511,8 +538,7 @@ protected:
      * @param gp Integration point.
      * @param complMtrx3d 3d compliance matrix (in full form).
      */
-    void reduceTo1dStressComplMtrx(FloatMatrix &answer, MatResponseForm form,
-                                   GaussPoint *gp, FloatMatrix &complMtrx3d) const;
+    void reduceTo1dStressComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
     /**
      * Reduces full 3d compliance matrix to 2d beam layer matrix.
      * 2dbeamLayer: @f$ \sigma_y = \sigma_z = \tau_{zy} = \tau_{xy} = 0 @f$.
@@ -521,8 +547,7 @@ protected:
      * @param gp Integration point.
      * @param complMtrx3d 3d compliance matrix (in full form).
      */
-    void reduceTo2dBeamLayerComplMtrx(FloatMatrix &answer, MatResponseForm form,
-                                      GaussPoint *gp, FloatMatrix &complMtrx3d) const;
+    void reduceTo2dBeamLayerComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
     /**
      * Reduces full 3d compliance matrix to 2d plate layer compliance matrix.
      * 2dplatelayermode: @f$ \sigma_z = 0 @f$.
@@ -531,8 +556,7 @@ protected:
      * @param gp Integration point.
      * @param complMtrx3d 3d compliance matrix (in full form).
      */
-    void reduceTo2dPlateLayerComplMtrx(FloatMatrix &answer, MatResponseForm form,
-                                       GaussPoint *gp, FloatMatrix &complMtrx3d) const;
+    void reduceTo2dPlateLayerComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
     /**
      * Reduces full 3d compliance matrix to 3d shell layer compliance matrix.
      * @param answer Computed reduced compliance matrix.
@@ -540,8 +564,7 @@ protected:
      * @param gp Integration point.
      * @param complMtrx3d 3d compliance matrix (in full form).
      */
-    void reduceTo3dShellLayerComplMtrx(FloatMatrix &answer, MatResponseForm form,
-                                       GaussPoint *gp, FloatMatrix &complMtrx3d) const;
+    void reduceTo3dShellLayerComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
     /**
      * Reduces full 3d compliance matrix to 1d fiber layer compliance matrix.
      * 1dfiber: @f$ \sigma_y = \sigma_z = \tau_{yz} = 0 @f$.
@@ -550,8 +573,7 @@ protected:
      * @param gp Integration point.
      * @param complMtrx3d 3d compliance matrix (in full form).
      */
-    void reduceTo1dFiberComplMtrx(FloatMatrix &answer, MatResponseForm form,
-                                  GaussPoint *gp, FloatMatrix &complMtrx3d) const;
+    void reduceTo1dFiberComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
 
 
     /**
@@ -568,12 +590,16 @@ protected:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                          MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                          MatResponseMode mmode, GaussPoint *gp,
                                           TimeStep *tStep);
 
     virtual void givePlaneStressStiffMtrx_dPdF(FloatMatrix &answer,
-                                          MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
-                                          TimeStep *tStep);
+                                               MatResponseMode mmode, GaussPoint *gp,
+                                               TimeStep *tStep);
+
+    virtual void givePlaneStressStiffMtrx_dCde(FloatMatrix &answer,
+                                               MatResponseMode mmode, GaussPoint *gp,
+                                               TimeStep *tStep);
 
     /**
      * Method for computing plane strain stiffness matrix of receiver.
@@ -594,12 +620,16 @@ protected:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                          MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                          MatResponseMode mmode, GaussPoint *gp,
                                           TimeStep *tStep);
 
     virtual void givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
-                                          MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
-                                          TimeStep *tStep);
+                                               MatResponseMode mmode, GaussPoint *gp,
+                                               TimeStep *tStep);
+
+    virtual void givePlaneStrainStiffMtrx_dCde(FloatMatrix &answer,
+                                               MatResponseMode mmode, GaussPoint *gp,
+                                               TimeStep *tStep);
 
     /**
      * Method for computing 1d stiffness matrix of receiver.
@@ -615,12 +645,16 @@ protected:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void give1dStressStiffMtrx(FloatMatrix &answer,
-                                       MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                       MatResponseMode mmode, GaussPoint *gp,
                                        TimeStep *tStep);
 
     virtual void give1dStressStiffMtrx_dPdF(FloatMatrix &answer,
-                                       MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
-                                       TimeStep *tStep);
+                                            MatResponseMode mmode, GaussPoint *gp,
+                                            TimeStep *tStep);
+
+    virtual void give1dStressStiffMtrx_dCde(FloatMatrix &answer,
+                                            MatResponseMode mmode, GaussPoint *gp,
+                                            TimeStep *tStep);
     /**
      * Method for computing 2d beam layer stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -635,12 +669,13 @@ protected:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                          MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                          MatResponseMode mmode, GaussPoint *gp,
                                           TimeStep *tStep);
-
+#if 0
     virtual void give2dBeamLayerStiffMtrx_dPdF(FloatMatrix &answer,
-                                          MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
-                                          TimeStep *tStep);
+                                               MatResponseMode mmode, GaussPoint *gp,
+                                               TimeStep *tStep);
+#endif
     /**
      * Method for computing 2d plate layer stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -655,12 +690,13 @@ protected:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void give2dPlateLayerStiffMtrx(FloatMatrix &answer,
-                                           MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                           MatResponseMode mmode, GaussPoint *gp,
                                            TimeStep *tStep);
-
+#if 0
     virtual void give2dPlateLayerStiffMtrx_dPdF(FloatMatrix &answer,
-                                           MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
-                                           TimeStep *tStep);
+                                                MatResponseMode mmode, GaussPoint *gp,
+                                                TimeStep *tStep);
+#endif
     /**
      * Method for computing 3d shell layer stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -674,13 +710,14 @@ protected:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
-    virtual void give3dShellLayerStiffMtrx(FloatMatrix & answer,
-                                           MatResponseForm form, MatResponseMode mmode, GaussPoint * gp,
-                                           TimeStep * tStep);
-
-    virtual void give3dShellLayerStiffMtrx_dPdF(FloatMatrix & answer,
-                                           MatResponseForm form, MatResponseMode mmode, GaussPoint * gp,
-                                           TimeStep * tStep);
+    virtual void give3dShellLayerStiffMtrx(FloatMatrix &answer,
+                                           MatResponseMode mmode, GaussPoint *gp,
+                                           TimeStep *tStep);
+#if 0
+    virtual void give3dShellLayerStiffMtrx_dPdF(FloatMatrix &answer,
+                                                MatResponseMode mmode, GaussPoint *gp,
+                                                TimeStep *tStep);
+#endif
     /**
      * Method for computing 1d fiber stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -695,13 +732,13 @@ protected:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void give1dFiberStiffMtrx(FloatMatrix &answer,
-                                      MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                      MatResponseMode mmode, GaussPoint *gp,
                                       TimeStep *tStep);
-
+#if 0
     virtual void give1dFiberStiffMtrx_dPdF(FloatMatrix &answer,
-                                      MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
-                                      TimeStep *tStep);
-
+                                           MatResponseMode mmode, GaussPoint *gp,
+                                           TimeStep *tStep);
+#endif
     /**
      * Transforms 3d strain vector into another coordinate system.
      * @param answer Transformed strain vector
@@ -712,7 +749,7 @@ protected:
      * @param transpose Determines if we transpose matrix before transforming.
      */
     static void transformStrainVectorTo(FloatArray &answer, const FloatMatrix &base,
-                                 const FloatArray &strainVector, bool transpose = false);
+                                        const FloatArray &strainVector, bool transpose = false);
     /**
      * Transforms 3d stress vector into another coordinate system.
      * @param answer Transformed stress vector.
@@ -723,7 +760,7 @@ protected:
      * @param transpose Determines if we transpose matrix before transforming.
      */
     static void transformStressVectorTo(FloatArray &answer, const FloatMatrix &base,
-                                 const FloatArray &stressVector, bool transpose = false);
+                                        const FloatArray &stressVector, bool transpose = false);
 
     /**
      * Computes equivalent of von Mises stress. Returns 0 if six stress components do not exist on the material.
@@ -739,7 +776,7 @@ protected:
      * @param transpose Determines if we transpose matrix before transforming.
      */
     static void giveStrainVectorTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
-                                           bool transpose = false);
+                                                  bool transpose = false);
     /**
      * Computes 3d stress vector transformation matrix from standard vector transformation matrix.
      * @param answer Transformation matrix for stress vector.
@@ -748,7 +785,7 @@ protected:
      * @param transpose Determines if we transpose matrix before transforming.
      */
     static void giveStressVectorTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
-                                           bool transpose = false);
+                                                  bool transpose = false);
     /**
      * Computes 2d stress vector transformation matrix from standard vector transformation matrix.
      * @param answer Transformation matrix for stress vector.
@@ -757,7 +794,7 @@ protected:
      * @param transpose Determines if we transpose matrix before transforming.
      */
     static void givePlaneStressVectorTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
-                                                bool transpose = false);
+                                                       bool transpose = false);
     /**
      * Method for sorting newly computed principal values (pVal) and
      * corresponding principal directions (pDir) to be closed

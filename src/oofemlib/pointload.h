@@ -35,9 +35,7 @@
 #ifndef pointload_h
 #define pointload_h
 
-#include "load.h"
-#include "gausspoint.h"
-#include "dictionary.h"
+#include "bodyload.h"
 
 ///@name Input fields for PointLoad
 //@{
@@ -62,7 +60,7 @@ class TimeStep;
  * This class is not restricted to structural problems. For example, in thermal
  * analysis, a point load load could be a point heat source.
  */
-class PointLoad : public Load
+class PointLoad : public BodyLoad
 {
 public:
     /**
@@ -99,7 +97,7 @@ public:
      * @param n Load number.
      * @param d Domain to which new object will belongs.
      */
-    PointLoad(int n, Domain *d) : Load(n, d) {
+    PointLoad(int n, Domain *d) : BodyLoad(n, d) {
         nDofs = 0;
         coordSystemType = PL_GlobalMode;
     }

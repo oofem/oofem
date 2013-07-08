@@ -80,14 +80,12 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void  giveShrinkageStrainVector(FloatArray &answer,
-                                            MatResponseForm form,
                                             GaussPoint *gp,
                                             TimeStep *tStep,
                                             ValueModeType mode)
     { answer.resize(0); }
 
-    virtual void  giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
-                                        GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    virtual void  giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

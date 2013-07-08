@@ -43,6 +43,7 @@
 #include "verbose.h"
 #include "element.h"
 #include "sparsemtrxtype.h"
+#include "activebc.h"
 #include "classfactory.h"
 
 #ifdef TIME_REPORT
@@ -351,6 +352,35 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
             }
         }
     }
+
+
+    // loop over active boundary conditions
+    int nbc = domain->giveNumberOfBoundaryConditions();
+    std::vector<IntArray> r_locs;
+    std::vector<IntArray> c_locs;
+    
+    for ( int i = 1; i <= nbc; ++i ) {
+        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
+        if ( bc != NULL ) {
+            bc->giveLocationArrays(r_locs, c_locs, ut, UnknownCharType, s, s);
+	    for (std::size_t k = 0; k < r_locs.size(); k++) {
+	      IntArray &krloc = r_locs[k];
+	      IntArray &kcloc = c_locs[k];
+	      for ( int i = 1; i <= krloc.giveSize(); i++ ) {
+		if ( ( ii = krloc.at(i) ) ) {
+		  for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
+		    if ( (jj = kcloc.at(j) ) ) {
+		      this->insertColInRow(ii - 1, jj - 1);
+		    }
+		  }
+		}
+	      }
+	    }
+	}
+    }
+
+
+
 
     int nz_ = 0;
     for ( j = 0; j < neq; j++ ) {

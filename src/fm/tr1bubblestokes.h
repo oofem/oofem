@@ -105,7 +105,7 @@ public:
 
     void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep);
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual void computeBoundaryLoadVector(FloatArray &answer, Load *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
 
     virtual const char *giveClassName() const { return "Tr1BubbleStokes"; }
     virtual const char *giveInputRecordName() const { return _IFT_Tr1BubbleStokes_Name; }

@@ -73,7 +73,7 @@ BilinearCZMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 
 void
-BilinearCZMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+BilinearCZMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                                    const FloatArray &jumpVector,
                                                    TimeStep *atTime)
 //
@@ -124,8 +124,9 @@ BilinearCZMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm f
 
 void
 BilinearCZMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                       MatResponseForm form, MatResponseMode rMode,
-                                                       GaussPoint *gp, TimeStep *atTime)
+                                               MatResponseMode rMode,
+                                               GaussPoint *gp, 
+                                               TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -134,16 +135,17 @@ BilinearCZMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     switch ( mMode ) {
     case _3dInterface:
     case _3dMat:
-        give3dInterfaceMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+        give3dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, atTime);
         break;
     default:
-        StructuralMaterial :: giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
+        //StructuralMaterial :: giveCharacteristicMatrix(answer, rMode, gp, atTime);
+        StructuralMaterial ::give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
     }
 }
 
 
 void
-BilinearCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+BilinearCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                                      GaussPoint *gp, TimeStep *atTime)
 {
     BilinearCZMaterialStatus *status = static_cast< BilinearCZMaterialStatus * >( this->giveStatus(gp) );

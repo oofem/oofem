@@ -82,7 +82,6 @@ TrabBoneNLEmbed :: updateBeforeNonlocAverage(const FloatArray &strainVector, Gau
 
 void
 TrabBoneNLEmbed :: giveRealStressVector(FloatArray &answer,
-                                        MatResponseForm form,
                                         GaussPoint *gp,
                                         const FloatArray &strainVector,
                                         TimeStep *atTime)

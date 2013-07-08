@@ -37,7 +37,6 @@
 
 #include "floatarray.h"
 #include "materialmode.h"
-#include "matresponseform.h"
 
 namespace oofem {
 typedef char StressStrainMatMode;

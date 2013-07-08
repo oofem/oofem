@@ -104,15 +104,12 @@ public:
 
     virtual ~NonlinearFluidMaterial() { }
 
-    virtual double giveCharacteristicValue(MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *atTime);
-
     virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
 
     virtual void giveDeviatoricStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp,
                                                TimeStep * atTime);
 
+    virtual double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep);
     virtual double give(int aProperty, GaussPoint *);
 
     virtual IRResultType initializeFrom(InputRecord *ir);

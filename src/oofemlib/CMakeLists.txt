@@ -225,7 +225,7 @@ set (core_bc
     deadweight.C
     reinforcement.C
     surfacetensionbc.C
-    linearconstrainbc.C
+    linearconstraintbc.C
     )
 
 set (core_mapping

@@ -54,7 +54,7 @@ CohesiveInterfaceMaterial :: CohesiveInterfaceMaterial(int n, Domain *d) : Struc
 {}
 
 void
-CohesiveInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+CohesiveInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                                   const FloatArray &totalStrain,
                                                   TimeStep *atTime)
 //
@@ -81,8 +81,8 @@ CohesiveInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatRespons
 }
 
 void
-CohesiveInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                      MatResponseForm form, MatResponseMode rMode,
+CohesiveInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
+                                                      MatResponseMode rMode,
                                                       GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
@@ -91,10 +91,10 @@ CohesiveInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _3dInterface:
-        give3dInterfaceMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+        give3dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, atTime);
         break;
     default:
-        StructuralMaterial :: giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
+        StructuralMaterial :: giveStiffnessMatrix(answer, rMode, gp, atTime);
     }
 }
 
@@ -113,7 +113,7 @@ CohesiveInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
 
 void
-CohesiveInterfaceMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+CohesiveInterfaceMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                                     GaussPoint *gp, TimeStep *atTime)
 {
     // assemble elastic stiffness

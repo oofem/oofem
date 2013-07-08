@@ -99,7 +99,7 @@ IsotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
 
 void
-IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                                 const FloatArray &totalStrain,
                                                 TimeStep *atTime)
 //
@@ -157,7 +157,7 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
     }
 
 
-    lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
+    lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
     //mj
     // damage deactivation in compression for 1D model
     if ( ( reducedTotalStrainVector.giveSize() > 1 ) || ( reducedTotalStrainVector.at(1) > 0. ) ) {
@@ -178,7 +178,7 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
 }
 
 
-void IsotropicDamageMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode,
+void IsotropicDamageMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
                                                          GaussPoint *gp, TimeStep *atTime)
 {
     IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
@@ -190,7 +190,7 @@ void IsotropicDamageMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, Ma
         tempDamage = min(tempDamage, maxOmega);
     }
 
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     answer.times(1.0 - tempDamage);
     if ( mode == TangentStiffness ) {
         double damage = status->giveDamage();
@@ -218,7 +218,7 @@ void IsotropicDamageMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, Ma
 }
 
 
-void IsotropicDamageMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode,
+void IsotropicDamageMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
                                                          GaussPoint *gp, TimeStep *atTime)
 {
     IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
@@ -230,12 +230,12 @@ void IsotropicDamageMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, Ma
         om = min(om, maxOmega);
     }
 
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     answer.times(1.0 - om);
 }
 
 
-void IsotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode,
+void IsotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
                                                       GaussPoint *gp, TimeStep *atTime)
 {
     IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
@@ -247,7 +247,7 @@ void IsotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatRe
         om = min(om, maxOmega);
     }
 
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     answer.times(1.0 - om);
 }
 

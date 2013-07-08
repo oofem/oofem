@@ -39,13 +39,15 @@
 #include "floatarray.h"
 #include "mathfem.h"
 #include "error.h"
+#include "classfactory.h"
 
 
 namespace oofem {
+REGISTER_Material(TrabBoneGrad3D);
 
-TrabBoneGrad3D :: TrabBoneGrad3D(int n, Domain *d) : TrabBone3D(n, d)
+TrabBoneGrad3D :: TrabBoneGrad3D(int n, Domain *d) : TrabBone3D(n, d), GradDpMaterialExtensionInterface(d)
 {
-    l = 0.;
+    L = 0.;
 }
 
 TrabBoneGrad3D :: ~TrabBoneGrad3D()
@@ -54,28 +56,28 @@ TrabBoneGrad3D :: ~TrabBoneGrad3D()
 int
 TrabBoneGrad3D :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( mode == _3dMatGrad ) {
+    if ( mode == _3dMat ) {
         return 1;
     }
 
     return 0;
 }
 void
-TrabBoneGrad3D :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                         MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
+TrabBoneGrad3D :: giveStiffnessMatrix(FloatMatrix &answer,
+                                      MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
 {
-    _error( "giveCharacteristicMatrix : Shouldn't be called");
+    _error("giveStiffnessMatrix : Shouldn't be called");
 }
 
 void
-TrabBoneGrad3D :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) 
+TrabBoneGrad3D :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
-    case _3dMatGrad:
+    case _3dMat:
         give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         break;
     default:
@@ -84,12 +86,12 @@ TrabBoneGrad3D :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form,
 }
 
 void
-TrabBoneGrad3D :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint* gp, TimeStep* tStep)
+TrabBoneGrad3D :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
-    case _3dMatGrad:
-        give3dKappaMatrix(answer, form, mode, gp, tStep);
+    case _3dMat:
+        give3dKappaMatrix(answer, mode, gp, tStep);
         break;
     default:
         _error2( "givePDGradMatrix_ku : unknown mode (%s)", __MaterialModeToString(mMode) );
@@ -97,12 +99,12 @@ TrabBoneGrad3D :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseForm form,
 }
 
 void
-TrabBoneGrad3D :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+TrabBoneGrad3D :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
-    case _3dMatGrad:
-        give3dGprime(answer, form, mode, gp, tStep);
+    case _3dMat:
+        give3dGprime(answer, mode, gp, tStep);
         break;
     default:
         _error2( "givePDGradMatrix_uk : unknown mode (%s)", __MaterialModeToString(mMode) );
@@ -110,12 +112,12 @@ TrabBoneGrad3D :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseForm form,
 }
 
 void
-TrabBoneGrad3D :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+TrabBoneGrad3D :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
-    case _3dMatGrad:
-        giveInternalLength(answer, form, mode, gp, tStep);
+    case _3dMat:
+        giveInternalLength(answer, mode, gp, tStep);
         break;
     default:
         _error2( "givePDGradMatrix_kk : unknown mode (%s)", __MaterialModeToString(mMode) );
@@ -123,7 +125,7 @@ TrabBoneGrad3D :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseForm form,
 }
 
 void
-TrabBoneGrad3D :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+TrabBoneGrad3D :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -134,21 +136,22 @@ TrabBoneGrad3D :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseForm form,
 
 
 void
-TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
- 
     double tempDam, beta, tempKappa, kappa;
     FloatArray tempEffectiveStress, tempTensor2, prodTensor, plasFlowDirec;
     FloatMatrix elasticity, compliance, SSaTensor, secondTerm, thirdTerm, tangentMatrix;
     TrabBoneGrad3DStatus *status = static_cast< TrabBoneGrad3DStatus * >( this->giveStatus(gp) );
-    
+
     if ( mode == ElasticStiffness ) {
         this->constructAnisoComplTensor(compliance);
         elasticity.beInverseOf(compliance);
         answer = elasticity;
-    } else if ( mode == SecantStiffness || ( (mode == TangentStiffness) && (status->giveNsubsteps()>1) ) ) {
-        if (printflag)
+    } else if ( mode == SecantStiffness || ( ( mode == TangentStiffness ) && ( status->giveNsubsteps() > 1 ) ) ) {
+        if ( printflag ) {
             printf("secant\n");
+        }
+
         this->constructAnisoComplTensor(compliance);
         elasticity.beInverseOf(compliance);
         tempDam = status->giveTempDam();
@@ -160,39 +163,36 @@ TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponse
         tempDam = status->giveTempDam();
         if ( tempKappa > kappa ) {
             // plastic loading
-        // Imports
-        tempEffectiveStress = * status->giveTempEffectiveStress();
-        plasFlowDirec = * status->givePlasFlowDirec();
-        SSaTensor = * status->giveSSaTensor();
-        beta = status->giveBeta();
-        // Construction of the dyadic product tensor
-        prodTensor.beTProductOf(SSaTensor, plasFlowDirec);
-        // Construction of the tangent stiffness third term
-        double dam = status->giveDam();
-        // Construction of the tangent stiffness second term
-        tempTensor2.beProductOf(SSaTensor, plasFlowDirec);
-        secondTerm.beDyadicProductOf(tempTensor2, prodTensor);
-        secondTerm.times(-( 1.0 - tempDam ) / beta);
-        // Construction of the tangent stiffness
-        tangentMatrix = SSaTensor;
-        tangentMatrix.times(1.0 - tempDam);
-        tangentMatrix.add(secondTerm);
-        if(tempDam > status->giveDam()) {
-            //double nlKappa =  status->giveTempStrainVector().at(7);
-            double nlKappa =  status->giveNlKappa();
-            kappa = mParam * nlKappa + ( 1. - mParam ) * tempKappa;
-            FloatArray tempEffStress =  *status->giveTempEffectiveStress();   
-            double gPrime = TrabBone3D::computeDamageParamPrime(kappa);     
-            // Construction of the tangent stiffness third term
-            thirdTerm.beDyadicProductOf(tempEffectiveStress, prodTensor);
-            thirdTerm.times( -expDam * critDam * exp(-expDam * kappa) );
-            thirdTerm.times((1.-mParam) / beta);
-            tangentMatrix.add(thirdTerm);
-        }
-        answer = tangentMatrix;
-        //answer.beTranspositionOf(tangentMatrix);  
+            // Imports
+            tempEffectiveStress = * status->giveTempEffectiveStress();
+            plasFlowDirec = * status->givePlasFlowDirec();
+            SSaTensor = * status->giveSSaTensor();
+            beta = status->giveBeta();
+            // Construction of the dyadic product tensor
+            prodTensor.beTProductOf(SSaTensor, plasFlowDirec);
+            // Construction of the tangent stiffness second term
+            tempTensor2.beProductOf(SSaTensor, plasFlowDirec);
+            secondTerm.beDyadicProductOf(tempTensor2, prodTensor);
+            secondTerm.times(-( 1.0 - tempDam ) / beta);
+            // Construction of the tangent stiffness
+            tangentMatrix = SSaTensor;
+            tangentMatrix.times(1.0 - tempDam);
+            tangentMatrix.add(secondTerm);
+            if ( tempDam > status->giveDam() ) {
+                double nlKappa =  status->giveNonlocalCumulatedStrain();
+                kappa = mParam * nlKappa + ( 1. - mParam ) * tempKappa;
+                FloatArray tempEffStress =  * status->giveTempEffectiveStress();
+                double gPrime = TrabBone3D :: computeDamageParamPrime(kappa);
+                // Construction of the tangent stiffness third term
+                thirdTerm.beDyadicProductOf(tempEffectiveStress, prodTensor);
+                thirdTerm.times(gPrime);
+                thirdTerm.times( ( 1. - mParam ) / beta );
+                tangentMatrix.add(thirdTerm);
+            }
+
+            answer = tangentMatrix;
         } else {
-        // elastic behavior with damage
+            // elastic behavior with damage
             // Construction of the secant stiffness
             this->constructAnisoComplTensor(compliance);
             elasticity.beInverseOf(compliance);
@@ -201,17 +201,18 @@ TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponse
         }
     }
 
-    double g = status ->giveDensG();
+    double g = status->giveDensG();
     if ( g <= 0 ) {
-        double factor = gammaL0 * __OOFEM_POW(rho,rL) + gammaP0 * __OOFEM_POW(rho,rP)*(tDens-1) * __OOFEM_POW(g,tDens-2);
-        tangentMatrix.resize(6,6);
+        double factor = gammaL0 * pow(rho, rL) + gammaP0 *pow(rho, rP) * ( tDens - 1 ) * pow(g, tDens - 2);
+        tangentMatrix.resize(6, 6);
         tangentMatrix.zero();
-        tangentMatrix.at(1,1) = tangentMatrix.at(1,2)=tangentMatrix.at(1,3) = 1;
-        tangentMatrix.at(2,1) = tangentMatrix.at(2,2)=tangentMatrix.at(2,3) = 1;
-        tangentMatrix.at(3,1) = tangentMatrix.at(3,2)=tangentMatrix.at(3,3) = 1;
+        tangentMatrix.at(1, 1) = tangentMatrix.at(1, 2) = tangentMatrix.at(1, 3) = 1;
+        tangentMatrix.at(2, 1) = tangentMatrix.at(2, 2) = tangentMatrix.at(2, 3) = 1;
+        tangentMatrix.at(3, 1) = tangentMatrix.at(3, 2) = tangentMatrix.at(3, 3) = 1;
         tangentMatrix.times(factor);
         answer.add(tangentMatrix);
     }
+
     status->setSmtrx(answer);
 }
 
@@ -219,38 +220,38 @@ TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponse
 
 
 void
-TrabBoneGrad3D :: give3dKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+TrabBoneGrad3D :: give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
-
-    answer.resize(1,6);
+    answer.resize(1, 6);
     answer.zero();
     if ( mode == TangentStiffness ) {
         TrabBoneGrad3DStatus *status = static_cast< TrabBoneGrad3DStatus * >( this->giveStatus(gp) );
         double beta;
-        FloatArray plasFlowDirec,prodTensor;
+        FloatArray plasFlowDirec, prodTensor;
         FloatMatrix SSaTensor;
-        
+
         double kappa = status->giveKappa();
         double tempKappa = status->giveTempKappa();
         double dKappa = tempKappa - kappa;
-        
-        if ( dKappa > 0.0 ) {
 
+        if ( dKappa > 0.0 ) {
             plasFlowDirec = * status->givePlasFlowDirec();
             SSaTensor = * status->giveSSaTensor();
             beta = status->giveBeta();
             prodTensor.beTProductOf(SSaTensor, plasFlowDirec);
-            for(int i = 1; i<= 6; i++)
-                answer.at(1,i) = prodTensor.at(i);
-            answer.times(1./beta);
-        } 
+            for ( int i = 1; i <= 6; i++ ) {
+                answer.at(1, i) = prodTensor.at(i);
+            }
+
+            answer.times(1. / beta);
+        }
     }
 }
 
 
 
 void
-TrabBoneGrad3D :: give3dGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+TrabBoneGrad3D :: give3dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     answer.resize(6, 1);
     answer.zero();
@@ -262,86 +263,68 @@ TrabBoneGrad3D :: give3dGprime(FloatMatrix &answer, MatResponseForm form, MatRes
         double gPrime;
         double tempKappa = status->giveTempKappa();
         damage = status->giveDam();
-        //nlKappa =  status->giveTempStrainVector().at(7);
-        nlKappa =  status->giveNlKappa();
+        nlKappa =  status->giveNonlocalCumulatedStrain();
         kappa = mParam * nlKappa + ( 1. - mParam ) * tempKappa;
-        tempDamage = TrabBone3D::computeDamageParam(kappa);
+        tempDamage = TrabBone3D :: computeDamageParam(kappa);
 
-        
+
         if ( ( tempDamage - damage ) > 0 ) {
-            tempEffStress =  *status->giveTempEffectiveStress();   
-            for ( int i = 1; i <= 6; i++ ) 
+            tempEffStress =  * status->giveTempEffectiveStress();
+            for ( int i = 1; i <= 6; i++ ) {
                 answer.at(i, 1) = tempEffStress.at(i);
+            }
+
             kappa = mParam * nlKappa + ( 1. - mParam ) * tempKappa;
-            gPrime = TrabBone3D::computeDamageParamPrime(kappa);
+            gPrime = TrabBone3D :: computeDamageParamPrime(kappa);
             answer.times(gPrime * mParam);
-        } 
+        }
     }
-    
 }
 
 void
-TrabBoneGrad3D :: giveInternalLength(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+TrabBoneGrad3D :: giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     answer.resize(1, 1);
-    answer.at(1, 1) = l;
+    answer.at(1, 1) = L;
 }
 
 void
-TrabBoneGrad3D :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                                     const FloatArray &totalStrain, TimeStep *atTime)
+TrabBoneGrad3D ::  giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *atTime)
 {
     TrabBoneGrad3DStatus *status = static_cast< TrabBoneGrad3DStatus * >( this->giveStatus(gp) );
     this->initGpForNewStep(gp);
     this->initTempStatus(gp);
-    MaterialMode plReturnMode;
-    if ( gp->giveMaterialMode() == _3dMatGrad ) {
-        plReturnMode = _3dMat;
-    }
-    
-    
-    double tempDam;
-    FloatArray tempEffStress, totalStress, locTotalStrain;
 
-    int size = totalStrain.giveSize();
-    status->letTempStrainVectorBe(totalStrain);
-    status -> setNlKappa(totalStrain.at(7));
-    locTotalStrain = totalStrain;
-    locTotalStrain.resize(size - 1);
-    
-    TrabBone3D ::  performPlasticityReturn(gp, locTotalStrain,atTime, plReturnMode);
-    
-    double localCumPlastStrain = status->giveTempKappa();
-    tempDam = computeDamage(gp, atTime);
-    tempEffStress = *status->giveTempEffectiveStress();
-    answer = ( 1 - tempDam ) * tempEffStress;
-    if(densCrit != 0) {
+    TrabBone3D ::  performPlasticityReturn(gp, totalStrain, atTime);
+
+    double tempDamage = computeDamage(gp, atTime);
+    FloatArray tempEffStress = * status->giveTempEffectiveStress();
+    answer1.beScaled(1 - tempDamage, tempEffStress);
+    answer2 = status->giveTempKappa();
+
+
+    if ( densCrit != 0 ) {
         FloatArray densStress;
         computeDensificationStress(densStress, gp, totalStrain, atTime);
-        answer.add(densStress);
+        answer1.add(densStress);
     }
-    
-    size = tempEffStress.giveSize();
-    answer.resize(size + 1);
-    answer.at(size + 1) = localCumPlastStrain;
 
-    status->setTempDam(tempDam);
+
+    status->letTempStrainVectorBe(totalStrain);
+    status->setNonlocalCumulatedStrain(nonlocalCumulatedStrain);
+
+    status->setTempDam(tempDamage);
     status->setTempEffectiveStress(tempEffStress);
-    status->letTempStressVectorBe(answer);
+    status->letTempStressVectorBe(answer1);
 }
 
 
 void
 TrabBoneGrad3D :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *atTime)
 {
-    double nlCumPlastStrain;
     TrabBoneGrad3DStatus *status = static_cast< TrabBoneGrad3DStatus * >( this->giveStatus(gp) );
     double localCumPlastStrain = status->giveTempKappa();
-    FloatArray strain;
-    /*  strain = status->giveTempStrainVector();
-    int size = strain.giveSize();
-    nlCumPlastStrain = strain.at(size);*/
-    nlCumPlastStrain = status->giveNlKappa();
+    double nlCumPlastStrain = status->giveNonlocalCumulatedStrain();
     kappa = mParam * nlCumPlastStrain + ( 1 - mParam ) * localCumPlastStrain;
 }
 
@@ -354,9 +337,9 @@ TrabBoneGrad3D :: initializeFrom(InputRecord *ir)
 
     TrabBone3D :: initializeFrom(ir);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, l, _IFT_TrabBoneGrad3D_l, "l");
-    if ( l < 0.0 ) {
-        l = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, L, _IFT_TrabBoneGrad3D_L);
+    if ( L < 0.0 ) {
+        L = 0.0;
     }
 
     mParam = 2.;
@@ -380,7 +363,7 @@ TrabBoneGrad3DStatus :: ~TrabBoneGrad3DStatus()
 void
 TrabBoneGrad3DStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    TrabBone3DStatus:: printOutputAt(file, tStep);
+    TrabBone3DStatus :: printOutputAt(file, tStep);
 }
 
 

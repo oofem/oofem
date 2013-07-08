@@ -116,8 +116,8 @@ MaterialStatus *AbaqusUserMaterial :: CreateStatus(GaussPoint *gp) const
     return new AbaqusUserMaterialStatus(n++, this->giveDomain(), gp, this->numState);
 }
 
-void AbaqusUserMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                    MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+void AbaqusUserMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
+                                                    MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     AbaqusUserMaterialStatus *ms = dynamic_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
     if ( !ms->hasTangent() ) { ///@todo Make this hack fit more nicely into OOFEM in general;
@@ -136,7 +136,7 @@ void AbaqusUserMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 
         FloatArray stress(ncomp), strain(ncomp);
         strain.zero();
-        this->giveRealStressVector(stress, form, gp, strain, tStep);
+        this->giveRealStressVector(stress, gp, strain, tStep);
     }
 
     answer = ms->giveTempTangent();
@@ -163,7 +163,7 @@ void AbaqusUserMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 #endif
 }
 
-void AbaqusUserMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+void AbaqusUserMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                                 const FloatArray &reducedStrain, TimeStep *tStep)
 {
     AbaqusUserMaterialStatus *ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );

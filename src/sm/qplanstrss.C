@@ -44,8 +44,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Element( QPlaneStress2d );
+REGISTER_Element(QPlaneStress2d);
 
 FEI2dQuadQuad QPlaneStress2d :: interpolation(1, 2);
 
@@ -61,9 +60,9 @@ Interface *
 QPlaneStress2d :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     }
 
     return NULL;
@@ -88,6 +87,27 @@ QPlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer,
 
         answer.at(3, 2 * i - 1) = dnx.at(i, 2);
         answer.at(3, 2 * i - 0) = dnx.at(i, 1);
+    }
+}
+
+void
+QPlaneStress2d :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+//
+// Returns the [4x16] displacement gradient matrix {BH} of the receiver,
+// evaluated at aGaussPoint.
+// @todo not checked if correct
+{
+    FloatMatrix dnx;
+
+    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+
+    answer.resize(4, 16);
+
+    for ( int i = 1; i <= 8; i++ ) {
+        answer.at(1, 2 * i - 1) = dnx.at(i, 1);     // du/dx -1
+        answer.at(2, 2 * i - 0) = dnx.at(i, 2);     // dv/dy -2
+        answer.at(3, 2 * i - 1) = dnx.at(i, 2);     // du/dy -6
+        answer.at(4, 2 * i - 0) = dnx.at(i, 1);     // dv/dx -9
     }
 }
 
@@ -137,7 +157,7 @@ QPlaneStress2d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
@@ -169,7 +189,7 @@ QPlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &nor
     if ( normalToCrackPlane.at(3) < 0.999999 ) { //ensure that characteristic length is in the plane of element
         return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
     } else { //otherwise compute out-of-plane characteristic length from element area
-        return sqrt(this->computeVolumeAreaOrLength() / ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints());
+        return sqrt( this->computeVolumeAreaOrLength() / ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
     }
 }
 
@@ -622,7 +642,7 @@ QPlaneStress2d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * aGaussPoint->giveCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
-    return result *aGaussPoint->giveWeight();
+    return result * aGaussPoint->giveWeight();
 }
 
 void

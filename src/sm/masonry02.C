@@ -497,8 +497,8 @@ Masonry02 :: CreateStatus(GaussPoint *gp) const
 }
 
 void
-Masonry02 :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                      MatResponseForm form, MatResponseMode rMode,
+Masonry02 :: giveStiffnessMatrix(FloatMatrix &answer,
+                                      MatResponseMode rMode,
                                       GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
@@ -507,23 +507,23 @@ Masonry02 :: giveCharacteristicMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _2dInterface:
-        give2dInterfaceMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+        give2dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, atTime);
         break;
     default:
-        MPlasticMaterial2 :: giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
+        MPlasticMaterial2 :: giveStiffnessMatrix(answer, rMode, gp, atTime);
     }
 }
 
 
 void
-Masonry02 :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode,
+Masonry02 :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode,
                                                     GaussPoint *gp, TimeStep *atTime)
 {
     if ( mode == TangentStiffness ) {
         if ( rmType == mpm_ClosestPoint ) {
-            this->giveConsistentStiffnessMatrix(answer, form, mode, gp, atTime);
+            this->giveConsistentStiffnessMatrix(answer, mode, gp, atTime);
         } else {
-            this->giveElastoPlasticStiffnessMatrix(answer, form, mode, gp, atTime);
+            this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, atTime);
         }
     } else {
         this->computeReducedElasticModuli(answer, gp, atTime);
@@ -543,9 +543,7 @@ Masonry02 :: computeReducedElasticModuli(FloatMatrix &answer,
         answer.at(2, 2) = ks;
         answer.at(1, 2) = answer.at(2, 1) = 0.0;
     } else {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, ReducedForm,
-                                                                    ElasticStiffness,
-                                                                    gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, ElasticStiffness, gp, atTime);
     }
 }
 

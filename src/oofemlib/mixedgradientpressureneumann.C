@@ -297,7 +297,7 @@ IntegrationRule *MixedGradientPressureNeumann :: CreateIntegrationRule(Element *
 
 void MixedGradientPressureNeumann :: integrateVolTangent(FloatArray &answer, Element *e, int boundary)
 {
-    FloatArray normal, n, contrib;
+    FloatArray normal, n;
     FloatMatrix nMatrix;
     IntArray boundaryNodes;
     
@@ -325,9 +325,7 @@ void MixedGradientPressureNeumann :: integrateVolTangent(FloatArray &answer, Ele
         interpUnknown->boundaryEvalN(n, boundary, lcoords, cellgeo);
         nMatrix.beNMatrixOf(n, nsd);
 
-        contrib.beTProductOf(nMatrix, normal);
-        
-        answer.add(detJ*gp->giveWeight(), contrib);
+        answer.plusProduct(nMatrix, normal, detJ*gp->giveWeight());
     }
     delete ir;
 }

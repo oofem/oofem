@@ -175,7 +175,7 @@ protected:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     //virtual void computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, MatResponseMode rMode, TimeStep *tStep);
     virtual void new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, FloatArray &solVecI, FloatArray &solVecJ, MatResponseMode rMode, TimeStep *tStep);
-    void computeLinearizedStiffness(GaussPoint * gp,  Material * mat, TimeStep * tStep,
+    void computeLinearizedStiffness(GaussPoint * gp,  StructuralMaterial * mat, TimeStep * tStep,
                                     FloatMatrix A [ 3 ] [ 3 ], FloatArray & solVec);
     void computePressureTangentMatrix(FloatMatrix &answer, Load *load, const int iSurf, TimeStep *tStep);
     void computeLambdaGMatrices(FloatMatrix lambda [ 3 ], FloatArray &genEps, double zeta);

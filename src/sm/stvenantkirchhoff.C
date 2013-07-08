@@ -109,7 +109,7 @@ StVenantKirchhoff :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRespo
 
 
 void
-StVenantKirchhoff :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+StVenantKirchhoff :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 
 // returns 6 components of the stress corresponding to the given total strain
 
