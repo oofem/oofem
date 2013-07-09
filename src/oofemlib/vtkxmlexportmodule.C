@@ -44,6 +44,10 @@
 #include "material.h"
 #include "classfactory.h"
 
+#include "xfemmanager.h"
+#include "enrichmentitem.h"
+#include "enrichmentdomain.h"
+
 #include <string>
 #include <sstream>
 #include <fstream>
@@ -1228,6 +1232,8 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, VTKStr
     case IST_MaterialNumber:
     case IST_ElementNumber:
     case IST_Pressure:
+    case IST_XFEMEnrichment:
+    case IST_XFEMNumIntersecPoints:
         // if it wasn't for IST_Pressure,
 #ifdef __VTK_MODULE
         cellVarsArray->SetNumberOfComponents(1);
@@ -1271,6 +1277,65 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, VTKStr
                     fprintf( stream, "%f ", answer.at(1) );
 #endif
                 }
+            } else if (type == IST_XFEMEnrichment) {
+
+//            	printf("Printing IST_XFEMEnrichment.\n");
+
+            	int xfemEnrichment = 0;
+
+            	int numDMan = elem->giveNumberOfDofManagers();
+
+            	XfemManager *xMan = elem->giveDomain()->giveXfemManager(1);
+            	if( xMan != NULL )
+            	{
+
+            		for( int k = 1; k <= numDMan; k++)
+            		{
+            			DofManager *dMan = elem->giveDofManager(k);
+            			for ( int j = 1; j <= xMan->giveNumberOfEnrichmentItems(); j++ ){
+
+            				if ( xMan->giveEnrichmentItem(j)->isDofManEnriched(dMan) ){
+            					xfemEnrichment++;
+            				}
+            			}
+            		}
+            	}
+
+#ifdef __VTK_MODULE
+                cellVarsArray->SetTuple1(ielem-1, xfemEnrichment );
+#else
+                fprintf( stream, "%d ", xfemEnrichment );
+#endif
+            } else if (type == IST_XFEMNumIntersecPoints) {
+
+            	int numPoints = 0;
+
+            	XfemManager *xMan = elem->giveDomain()->giveXfemManager(1);
+            	if( xMan != NULL )
+            	{
+
+//            		printf("xMan->giveNumberOfEnrichmentItems(): %d\n", xMan->giveNumberOfEnrichmentItems() );
+            		for ( int j = 1; j <= xMan->giveNumberOfEnrichmentItems(); j++ ){
+            				EnrichmentItem *enrItem = xMan->giveEnrichmentItem(j);
+
+            				for( int k = 1; k <= enrItem->giveNumberOfEnrichmentDomains(); k++ )
+            				{
+            					EnrichmentDomain *enrDomain = enrItem->giveEnrichmentDomain(k);
+
+            					numPoints += enrDomain->computeNumberOfIntersectionPoints(elem);
+//            					printf("enrDomain->computeNumberOfIntersectionPoints(elem): %d\n", enrDomain->computeNumberOfIntersectionPoints(elem) );
+            				}
+
+            		}
+            	}
+
+#ifdef __VTK_MODULE
+                cellVarsArray->SetTuple1(ielem-1, numPoints );
+#else
+                fprintf( stream, "%d ", numPoints );
+#endif
+
+
             }
         }
 #ifdef __VTK_MODULE

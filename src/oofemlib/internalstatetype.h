@@ -136,7 +136,9 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_StressCapPos, 86)\
     ENUM_ITEM_WITH_VALUE(IST_TangentNorm, 87)\
     ENUM_ITEM_WITH_VALUE(IST_Tangent, 88)\
-    ENUM_ITEM_WITH_VALUE(IST_DirectorField, 89)
+    ENUM_ITEM_WITH_VALUE(IST_DirectorField, 89)\
+    ENUM_ITEM_WITH_VALUE(IST_XFEMEnrichment, 90)\
+	ENUM_ITEM_WITH_VALUE(IST_XFEMNumIntersecPoints, 91)
 
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.
