@@ -76,6 +76,7 @@ set (sm_loads
 set (sm_material
     abaqususermaterial.C
     structuralmaterial.C
+    structuralinterfacematerial.C
     linearelasticmaterial.C
     isolinearelasticmaterial.C
     ortholinearelasticmaterial.C
