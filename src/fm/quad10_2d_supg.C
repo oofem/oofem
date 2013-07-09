@@ -48,6 +48,7 @@
 #include "timestep.h"
 #include "materialinterface.h"
 #include "contextioerr.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -72,13 +73,13 @@ Quad10_2D_SUPG :: ~Quad10_2D_SUPG()
 { }
 
 FEInterpolation *
-Quad10_2D_SUPG :: giveInterpolation()
+Quad10_2D_SUPG :: giveInterpolation() const
 {
     return & this->velocityInterpolation;
 }
 
 FEInterpolation *
-Quad10_2D_SUPG :: giveInterpolation(DofIDItem id)
+Quad10_2D_SUPG :: giveInterpolation(DofIDItem id) const
 {
     if (id == P_f) {
         return & this->pressureInterpolation;
@@ -180,11 +181,11 @@ Quad10_2D_SUPG :: computeGaussPoints()
 
 
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, 4, _2dFlow);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 4, this );
 
         //seven point Gauss integration
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3);
-        integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Square, 4, _2dFlow);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[1], 4, this );
     }
 }
 
@@ -326,10 +327,10 @@ Quad10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 
     iRule = integrationRulesArray [ 1 ];
     mu_min = 1;
-    rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
-    for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+    rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+    for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         gp = iRule->getIntegrationPoint(j);
-        mu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, atTime);
+        mu = static_cast< FluidDynamicMaterial* >(this->giveMaterial())->giveEffectiveViscosity(gp, atTime);
         if ( mu_min > mu ) {
             mu_min = mu;
         }
@@ -416,12 +417,12 @@ Quad10_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *atTime)
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* consistent part + supg stabilization term */
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
         dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+        rho = this->giveMaterial()->give('d', gp);
         answer.plusProductUnsym(n, b, rho * dV);
     }
 }
@@ -440,12 +441,12 @@ Quad10_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *atTim
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* consistent part + supg stabilization term */
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
         dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+        rho = this->giveMaterial()->give('d', gp);
 
         answer.plusProductUnsym(b, b, rho * dV);
     }
@@ -464,12 +465,12 @@ Quad10_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
     answer.zero();
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* mtrx for computing t_supg, norm of this mtrx is computed */
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
         dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+        rho = this->giveMaterial()->give('d', gp);
 
         answer.plusProductUnsym(b, n, rho * dV);
     }
@@ -487,10 +488,10 @@ Quad10_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *atTime)
     answer.zero();
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+        rho = this->giveMaterial()->give('d', gp);
         this->computeDivUMatrix(b, gp);
 
         answer.plusProductSymmUpper(b, b, dV * rho);
@@ -515,7 +516,7 @@ Quad10_2D_SUPG :: computeAdvectionEpsilonTerm(FloatMatrix &answer, TimeStep *atT
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
 
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeGradPMatrix(g, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
@@ -540,7 +541,7 @@ Quad10_2D_SUPG :: computeMassEpsilonTerm(FloatMatrix &answer, TimeStep *atTime)
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
 
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeGradPMatrix(g, gp);
         this->computeNuMatrix(n, gp);
@@ -665,7 +666,7 @@ Quad10_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Inter
         }
     } else if ( type == IST_Density ) {
         answer.resize(1);
-        answer.at(1) = this->giveMaterial()->giveCharacteristicValue(MRM_Density, aGaussPoint, atTime);
+        answer.at(1) = this->giveMaterial()->give('d', aGaussPoint);
         return 1;
     } else {
         return SUPGElement :: giveIPValue(answer, aGaussPoint, type, atTime);

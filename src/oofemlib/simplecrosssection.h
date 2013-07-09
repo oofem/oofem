@@ -88,14 +88,11 @@ public:
      */
     SimpleCrossSection(int n, Domain *d) : StructuralCrossSection(n, d) { }
 
-    virtual void giveFullCharacteristicVector(FloatArray &answer,  GaussPoint *gp, const FloatArray &strainVector);
-    virtual void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                          const FloatArray &charVector3d);
-    virtual void giveRealStresses(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                          const FloatArray &reducedStrainIncrement, TimeStep *tStep);
+    //virtual void giveRealStresses(FloatArray &answer, GaussPoint *gp,
+    //                      const FloatArray &reducedStrainIncrement, TimeStep *tStep);
 
     virtual void giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                   MatResponseForm form, MatResponseMode mode,
+                                                   MatResponseMode mode,
                                                    GaussPoint *gp, StructuralMaterial *mat,
                                                    TimeStep *tStep);
 
@@ -103,6 +100,8 @@ public:
                                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     virtual double give(CrossSectionProperty a);
+
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "SimpleCrossSection"; }
@@ -126,7 +125,6 @@ public:
 
 protected:
     virtual void giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                       MatResponseForm form,
                                        MatResponseMode rMode,
                                        GaussPoint *gp,
                                        StructuralMaterial *mat,

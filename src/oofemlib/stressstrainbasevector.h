@@ -37,7 +37,6 @@
 
 #include "floatarray.h"
 #include "materialmode.h"
-#include "matresponseform.h"
 
 namespace oofem {
 typedef char StressStrainMatMode;
@@ -126,28 +125,6 @@ public:
     double computeVolumetricPart() const;
 
 protected:
-    /**
-     * Returns the reduced size of stress/strain vector for given material mode
-     * @param mode Mode to check.
-     */
-    static int giveReducedSize(MaterialMode mode);
-    /**
-     * This method returns mask of reduced (if form == ReducedForm)
-     * or Full (if form==FullForm) stress/strain vector in full or
-     * reduced StressStrainVector according to stressStrain mode.
-     * Mask has size of reduced or full stress/strain Vector and  i-th component
-     * is index to full or reduced stress/strainVector where corresponding
-     * component is mapped.
-     * Reduced form is sub-vector (of stress or strain components),
-     * where components corresponding to imposed zero stress (plane stress,...)
-     * are not included. On the other hand, if zero strain component is imposed
-     * (Plane strain, ..) this condition must be taken into account in geometrical
-     * relations, and corresponding component has to be included in reduced vector.
-     * @param answer Requested mask.
-     * @param form Material response form.
-     * @param mmode Material mode.
-     */
-    void giveStressStrainMask(IntArray &answer, MatResponseForm form, MaterialMode mmode) const;
     /**
      * Computes 3d transformation matrix from standard vector transformation matrix.
      * @param answer transformation matrix for strain vector

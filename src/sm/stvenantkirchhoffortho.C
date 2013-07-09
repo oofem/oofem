@@ -38,16 +38,16 @@ StVenantKirchhoffOrtho :: hasMaterialModeCapability(MaterialMode mode)
 }
 
 void
-StVenantKirchhoffOrtho :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode, GaussPoint *gp, TimeStep *atTime)
+StVenantKirchhoffOrtho :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *atTime)
 
 // returns the 6x6 tangent stiffness matrix
 
 {
 
-	// Isotropic part
-	double lambda_i = E_i*nu_i/((1.0+nu_i)*(1.0-2.0*nu_i));
-	double G = E_i/(2.0*(1.0+nu_i));
-	double c1 = lambda_i + 2.0*G;
+    // Isotropic part
+    double lambda_i = E_i*nu_i/((1.0+nu_i)*(1.0-2.0*nu_i));
+    double G = E_i/(2.0*(1.0+nu_i));
+    double c1 = lambda_i + 2.0*G;
 
     answer.resize(6, 6);
     answer.zero();
@@ -175,15 +175,15 @@ StVenantKirchhoffOrtho :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, Mat
 }
 
 void
-StVenantKirchhoffOrtho :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+StVenantKirchhoffOrtho :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 
 // returns 6 components of the stress corresponding to the given total strain
 
 {
-	// Isotropic part
+    // Isotropic part
 
-	double lambda_i = E_i*nu_i/((1.0+nu_i)*(1.0-2.0*nu_i));
-	double G = E_i/(2.0*(1.0+nu_i));
+    double lambda_i = E_i*nu_i/((1.0+nu_i)*(1.0-2.0*nu_i));
+    double G = E_i/(2.0*(1.0+nu_i));
 
     FloatArray strainVector;
 

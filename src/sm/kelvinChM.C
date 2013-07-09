@@ -151,8 +151,7 @@ KelvinChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
 }
 
 void
-KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
-                                             GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
+KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
 //
 // computes the strain due to creep at constant stress during the increment
 // (in fact, the INCREMENT of creep strain is computed for mode == VM_Incremental)
@@ -182,14 +181,7 @@ KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm
             }
         }
 
-        if ( form == ReducedForm ) {
-            answer =  reducedAnswer;
-            return;
-        }
-
-        // expand the strain to full form if requested
-        static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
-        giveFullCharacteristicVector(answer, gp, reducedAnswer);
+        answer =  reducedAnswer;
     } else {
         /* error - total mode not implemented yet */
         _error("giveEigenStrainVector - mode is not supported");

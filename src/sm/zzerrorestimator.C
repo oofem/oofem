@@ -277,7 +277,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
 
     // compute  the e-norm and s-norm
     if ( norm == ZZErrorEstimator :: L2Norm ) {
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
             double dV = elem->computeVolumeAround(gp);
             interpol->evalN( n, *gp->giveCoordinates(), FEIElementGeometryWrapper(elem));
@@ -293,25 +293,26 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
         }
     } else if ( norm == ZZErrorEstimator :: EnergyNorm ) {
         FloatArray help;
-        FloatMatrix DInv;
+        FloatMatrix D, DInv;
 
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
             double dV = elem->computeVolumeAround(gp);
             interpol->evalN( n, *gp->giveCoordinates(), FEIElementGeometryWrapper(elem));
-            static_cast< StructuralMaterial * >( elem->giveMaterial() )
-            ->giveCharacteristicComplianceMatrix(DInv, ReducedForm, TangentStiffness, gp, tStep);
+            static_cast< StructuralMaterial * >( elem->giveMaterial() )->
+                giveStiffnessMatrix(D, TangentStiffness, gp, tStep);
+            DInv.beInverseOf(D);
 
             diff.beTProductOf(nodalRecoveredStreses, n);
 
             elem->giveIPValue(sig, gp, type, tStep); 
             diff.subtract(sig);
-	    /* the internal stress difference is in global coordinate system */
-	    /* needs to be transformed into local system to compute associated energy */
-	    this->ZZErrorEstimatorI_computeLocalStress(ldiff, diff);
+            /* the internal stress difference is in global coordinate system */
+            /* needs to be transformed into local system to compute associated energy */
+            this->ZZErrorEstimatorI_computeLocalStress(ldiff, diff);
             help.beProductOf(DInv, ldiff);
             eNorm += ldiff.dotProduct(help) * dV;
-	    this->ZZErrorEstimatorI_computeLocalStress(lsig, sig);
+            this->ZZErrorEstimatorI_computeLocalStress(lsig, sig);
             help.beProductOf(DInv, lsig);
             sNorm += lsig.dotProduct(help) * dV;
         }

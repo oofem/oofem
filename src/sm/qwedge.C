@@ -115,7 +115,7 @@ QWedge :: computeGaussPoints()
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Wedge, numberOfGaussPoints,this->giveMaterialMode());
+    this->giveCrossSection()->setupIntegrationPoints(*integrationRulesArray[0], numberOfGaussPoints, this);
 }
 
 
@@ -138,65 +138,13 @@ QWedge :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     }
 }
 
+#if 1
 
-void
-QWedge :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i) 
-// Returns the [45x45] nonlinear part of strain-displacement matrix {B} of the receiver,
-// evaluated at aGaussPoint
-
-{
-    FloatMatrix dnx;
-
-    // compute the derivatives of shape functions
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    answer.resize(45, 45);
-    answer.zero();
-
-    // put the products of derivatives of shape functions into the "nonlinear B matrix",
-    // depending on parameter i, which is the number of the strain component
-    if ( i <= 3 ) {
-        for ( int k = 0; k < 15; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 45; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, i) * dnx.at( ( j - 1 ) / 3 + 1, i );
-                }
-            }
-        }
-    } else if ( i == 4 )        {
-        for ( int k = 0; k < 15; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 45; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 2 );
-                }
-            }
-        }
-    } else if ( i == 5 )        {
-        for ( int k = 0; k < 15; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 45; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
-                }
-            }
-        }
-    } else if ( i == 6 )        {
-        for ( int k = 0; k < 15; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 45; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 2 ) + dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
-                }
-            }
-        }
-    }
-
-}
+#endif
 
 MaterialMode
 QWedge :: giveMaterialMode()
 {
-    if(this->nlGeometry > 1)
-        return _3dMat_F;
-    else
         return _3dMat;
 }
 
@@ -231,7 +179,7 @@ QWedge :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 
 
 void
-QWedge :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+QWedge :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 {
     FloatMatrix dnx;
     
@@ -240,14 +188,19 @@ QWedge :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.resize(9, 45);
     answer.zero();
 
-    for ( int i = 1; i <= 3; i++ ) { // 3 spatial dimensions
-        for ( int j = 1; j <= 15; j++ ) { // 15 nodes
-            answer.at(3 * i - 2, 3 * j - 2) =
-                answer.at(3 * i - 1, 3 * j - 1) =
-                    answer.at(3 * i, 3 * j) = dnx.at(j, i); // derivative of Nj wrt Xi
-        }
+    for ( int i = 1; i <= dnx.giveNumberOfRows(); i++ ) {
+        answer.at(1, 3 * i - 2) = dnx.at(i, 1);     // du/dx
+        answer.at(2, 3 * i - 1) = dnx.at(i, 2);     // dv/dy
+        answer.at(3, 3 * i - 0) = dnx.at(i, 3);     // dw/dz
+        answer.at(4, 3 * i - 1) = dnx.at(i, 3);     // dv/dz 
+        answer.at(7, 3 * i - 0) = dnx.at(i, 2);     // dw/dy
+        answer.at(5, 3 * i - 2) = dnx.at(i, 3);     // du/dz 
+        answer.at(8, 3 * i - 0) = dnx.at(i, 1);     // dw/dx
+        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy 
+        answer.at(9, 3 * i - 1) = dnx.at(i, 1);     // dv/dx
     }
 }
+
 
 Interface *
 QWedge :: giveInterface(InterfaceType interface)
@@ -312,7 +265,7 @@ QWedge :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int 
 int
 QWedge :: SPRNodalRecoveryMI_giveNumberOfIP()
 {
-    return numberOfGaussPoints;
+    return integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints();
 }
 
 

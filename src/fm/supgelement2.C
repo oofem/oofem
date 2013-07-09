@@ -260,7 +260,7 @@ SUPGElement2 :: updateInternalState(TimeStep *stepN)
     // force updating strains & stresses
     for ( i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             computeDeviatoricStress(stress, iRule->getIntegrationPoint(j), stepN);
         }
     }
@@ -372,12 +372,12 @@ SUPGElement2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime
     int rule = this->giveTermIntergationRuleIndex(AccelerationTerm_MB);
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     /* consistent part + supg stabilization term */
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix( b, gp, atTime->givePreviousStep() );
         dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+        rho = this->giveMaterial()->give('d', gp);
         /* consistent part */
         answer.plusProductUnsym(n, n, rho * dV);
         /* supg stabilization */
@@ -403,14 +403,14 @@ SUPGElement2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
     int rule = this->giveTermIntergationRuleIndex(AdvectionTerm_MB);
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     /* consistent part + supg stabilization term */
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix( bn, gp, atTime->givePreviousStep() );
         this->computeUDotGradUMatrix(b, gp, atTime);
         v.beProductOf(b, u);
         dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+        rho = this->giveMaterial()->give('d', gp);
         /* consistent part */
         coeff = rho * dV;
         for ( i = 1; i <= undofs; i++ ) {
@@ -447,13 +447,13 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep 
     int rule = this->giveTermIntergationRuleIndex(AdvectionDerivativeTerm_MB);
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     /* consistent part + supg stabilization term */
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix( bn, gp, atTime->givePreviousStep() );
         this->computeUDotGradUMatrix(b, gp, atTime);
         dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+        rho = this->giveMaterial()->give('d', gp);
 
         this->computeGradUMatrix(grad_u, gp, atTime);
 
@@ -487,7 +487,7 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
 
     int rule = this->giveTermIntergationRuleIndex(DiffusionTerm_MB);
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
         this->computeBMatrix(b, gp);
@@ -497,9 +497,7 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
         static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->computeDeviatoricStressVector(stress, gp, eps, atTime);
         dDB_u.beProductOf(dDB, u);
         /* consistent part */
-        stress.times(dV / Re);
-        bs.beTProductOf(b, stress);
-        answer.add(bs);
+        answer.plusProduct(b, stress, dV / Re);
 
         /* SUPG term */
         //answer.plusProductUnsym(un_gu,dDB_u, t_supg * dV * (-1.0) * (1./Re));
@@ -529,7 +527,7 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
 
     int rule = this->giveTermIntergationRuleIndex(DiffusionDerivativeTerm_MB);
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
         this->computeBMatrix(_b, gp);
@@ -562,7 +560,7 @@ SUPGElement2 :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 
     int rule = this->giveTermIntergationRuleIndex(PressureTerm_MB);
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
         this->computeDivUMatrix(gu, gp);
@@ -579,7 +577,7 @@ SUPGElement2 :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
     }
 
     iRule = this->integrationRulesArray [ 1 ];
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
         this->computeUDotGradUMatrix( b, gp, atTime->givePreviousStep() );
@@ -602,10 +600,10 @@ SUPGElement2 :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *a
 
     int rule = this->giveTermIntergationRuleIndex(LSICStabilizationTerm_MB);
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+        rho = this->giveMaterial()->give('d', gp);
         this->computeDivUMatrix(b, gp);
 
         answer.plusProductSymmUpper(b, b, dV * rho * t_lsic);
@@ -628,7 +626,7 @@ SUPGElement2 :: computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atT
 
     int rule = this->giveTermIntergationRuleIndex(LinearAdvectionTerm_MC);
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
         this->computeDivUMatrix(gu, gp);
@@ -659,7 +657,7 @@ SUPGElement2 :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime)
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
     /* pspg stabilization term */
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeGradPMatrix(g, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
@@ -692,7 +690,7 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
     int rule = this->giveTermIntergationRuleIndex(AdvectionDerivativeTerm_MC);
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     /* pspg stabilization term */
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeGradPMatrix(g, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
@@ -716,10 +714,10 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
     int rule = this->giveTermIntergationRuleIndex(DiffusionDerivativeTerm_MC);
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
 
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+        rho = this->giveMaterial()->give('d', gp);
 
         coeff = ( -1.0 ) * dV * t_pspg / rho;
         //( ( FluidDynamicMaterial * ) this->giveMaterial() )->giveDeviatoricStiffnessMatrix(_d, TangentStiffness,gp, atTime);
@@ -750,10 +748,10 @@ SUPGElement2 :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *atTime)
      *
      * this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
      *
-     * for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+     * for ( k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
      *  gp = iRule->getIntegrationPoint(k);
      *  dV  = this->computeVolumeAround(gp);
-     *  rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+     *  rho = this->giveMaterial()->give('d', gp);
      *
      *  coeff = (-1.0) * dV * t_pspg / rho;
      *
@@ -796,7 +794,7 @@ SUPGElement2 :: computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime
     int rule = this->giveTermIntergationRuleIndex(AccelerationTerm_MC);
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
 
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeGradPMatrix(g, gp);
         this->computeNuMatrix(n, gp);
@@ -819,11 +817,11 @@ SUPGElement2 :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime)
     int rule = this->giveTermIntergationRuleIndex(PressureTerm_MC);
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
 
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeGradPMatrix(g, gp);
         dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+        rho = this->giveMaterial()->give('d', gp);
         coeff = dV * t_pspg / rho;
         answer.plusProductSymmUpper(g, g, coeff);
     }
@@ -859,18 +857,14 @@ SUPGElement2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
             load->computeComponentArrayAt(gVector, atTime, VM_Total);
             if ( gVector.giveSize() ) {
-                for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+                for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
                     gp = iRule->getIntegrationPoint(k);
                     this->computeUDotGradUMatrix( b, gp, atTime->givePreviousStep() );
                     this->computeNuMatrix(nu, gp);
                     dV  = this->computeVolumeAround(gp);
-                    rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
-                    s.beTProductOf(b, gVector);
-                    s.times(t_supg * rho * dV);
-                    answer.add(s);
-                    s.beTProductOf(nu, gVector);
-                    s.times(rho * dV);
-                    answer.add(s);
+                    rho = this->giveMaterial()->give('d', gp);
+                    answer.plusProduct(b, gVector, t_supg * rho * dV);
+                    answer.plusProduct(nu, gVector, rho * dV);
                 }
             }
         }
@@ -929,13 +923,11 @@ SUPGElement2 :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime)
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
             load->computeComponentArrayAt(gVector, atTime, VM_Total);
             if ( gVector.giveSize() ) {
-                for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+                for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
                     gp = iRule->getIntegrationPoint(k);
                     this->computeGradPMatrix(g, gp);
                     dV  = this->computeVolumeAround(gp);
-                    s.beTProductOf(g, gVector);
-                    s.times(t_pspg * dV);
-                    answer.add(s);
+                    answer.plusProduct(g, gVector, t_pspg * dV);
                 }
             }
         }

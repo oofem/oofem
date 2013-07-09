@@ -68,7 +68,7 @@ public:
     QWedge(int, Domain *);
     virtual ~QWedge() {}
 
-    virtual FEInterpolation *giveInterpolation() { return &interpolation; }
+    virtual FEInterpolation *giveInterpolation() const { return &interpolation; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
@@ -98,17 +98,16 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_QWedge_Name; }
     virtual const char *giveClassName() const { return "QWedge"; }
     virtual classType giveClassID() const { return QWedgeClass; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_wedge_2; }
     virtual int computeNumberOfDofs(EquationID ut) { return 45; }
-    virtual integrationDomain giveIntegrationDomain() { return _Wedge; }
     virtual MaterialMode giveMaterialMode();
 
 protected:
     virtual void computeGaussPoints();
     virtual void computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    virtual void computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
+    
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    virtual void computeBFmatrixAt(GaussPoint *, FloatMatrix &);
+    //virtual void computeBFmatrixAt(GaussPoint *, FloatMatrix &);
+    virtual void computeBHmatrixAt(GaussPoint *, FloatMatrix &);
 
 };
 } // end namespace oofem

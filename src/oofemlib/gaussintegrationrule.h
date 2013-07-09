@@ -78,12 +78,14 @@ public:
     virtual int getRequiredNumberOfIntegrationPoints(integrationDomain dType, int approxOrder);
 
 
-    virtual int SetUpPointsOnLine(int, MaterialMode);
-    virtual int SetUpPointsOnTriangle(int, MaterialMode);
-    virtual int SetUpPointsOnSquare(int, MaterialMode);
-    virtual int SetUpPointsOnCube(int, MaterialMode);
-    virtual int SetUpPointsOnTetrahedra(int, MaterialMode);
+    virtual int SetUpPointsOnLine(int nPoints, MaterialMode mode);
+    virtual int SetUpPointsOnTriangle(int nPoints, MaterialMode mode);
+    virtual int SetUpPointsOnSquare(int nPoints, MaterialMode mode);
+    virtual int SetUpPointsOnCubeLayers(int nPoints1, int nPoints2, int nPointsDepth, MaterialMode mode, const FloatArray &layerThickness);
+    virtual int SetUpPointsOnCube(int nPoints, MaterialMode mode);
+    virtual int SetUpPointsOnTetrahedra(int nPoints, MaterialMode mode);
     virtual int SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, MaterialMode mode);
+    virtual int SetUpPointsOnWedgeLayers(int nPointsTri, int nPointsDepth, MaterialMode mode, const FloatArray &layerThickness);
     virtual int SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mode, const FloatArray **coords);
 
     void giveTetCoordsAndWeights(int nPoints, FloatArray &coords_xi1, FloatArray &coords_xi2, FloatArray &coords_xi3, FloatArray &weights);

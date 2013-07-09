@@ -129,7 +129,7 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
 double
 NlIsoMoistureMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *atTime)
 {
-    double humidity = this->giveHumidity(gp);
+    double humidity = this->giveHumidity(gp, VM_Total);
 
     if ( this->Isotherm == linear ) {
         return moistureCapacity;
@@ -168,7 +168,7 @@ double
 NlIsoMoistureMaterial :: givePermeability(GaussPoint *gp, TimeStep *atTime)
 {
     double permeability = 0.;
-    double humidity = this->giveHumidity(gp);
+    double humidity = this->giveHumidity(gp, VM_Total);
 
     if ( this->Permeability == multilin ) {
         double tol = 1.e-10;
@@ -194,7 +194,7 @@ NlIsoMoistureMaterial :: givePermeability(GaussPoint *gp, TimeStep *atTime)
 }
 
 double
-NlIsoMoistureMaterial :: giveHumidity(GaussPoint *gp)
+NlIsoMoistureMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
 {
     const FloatArray &tempState = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) )->giveTempStateVector();
     if ((tempState.at(1) > 1.0)||(tempState.at(1) < 0.0)) {

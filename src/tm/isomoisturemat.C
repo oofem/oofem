@@ -63,8 +63,20 @@ IsotropicMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
  */
 
 void
+IsotropicMoistureTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
+{
+    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
+
+    ///@todo Shouldn't the permeability typically depend on the primary field and/or its gradient?
+    answer.beScaled(-this->givePermeability(gp, tStep), grad);
+
+    ms->setTempField(field);
+    ms->setTempGradient(grad);
+    ms->setTempFlux(answer);
+}
+
+void
 IsotropicMoistureTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                              MatResponseForm form,
                                                               MatResponseMode mode,
                                                               GaussPoint *gp,
                                                               TimeStep *atTime)

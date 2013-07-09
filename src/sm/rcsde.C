@@ -68,7 +68,7 @@ RCSDEMaterial :: ~RCSDEMaterial()
 
 
 void
-RCSDEMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+RCSDEMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &totalStrain,
                                       TimeStep *atTime)
 //
@@ -84,7 +84,6 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
     FloatArray reducedSpaceStressVector;
     FloatMatrix tempCrackDirs;
     RCSDEMaterialStatus *status = static_cast< RCSDEMaterialStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
@@ -95,7 +94,7 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
     this->giveStressDependentPartOfStrainVector(reducedStrainVector, gp, totalStrain,
                                                 atTime, VM_Total);
 
-    crossSection->giveFullCharacteristicVector(strainVector, gp, reducedStrainVector);
+    StructuralMaterial :: giveFullSymVectorForm(strainVector, reducedStrainVector, gp->giveMaterialMode());
 
     status->giveTempCrackDirs(tempCrackDirs);
     this->computePrincipalValDir(principalStrain, tempCrackDirs,
@@ -111,16 +110,14 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
         status->giveTempCrackDirs(tempCrackDirs);
         this->transformStressVectorTo(answer, tempCrackDirs, princStress, 1);
 
-        crossSection->giveReducedCharacteristicVector(reducedSpaceStressVector, gp, answer);
+        StructuralMaterial :: giveReducedSymVectorForm(reducedSpaceStressVector, answer, gp->giveMaterialMode());
         status->letTempStressVectorBe(reducedSpaceStressVector);
 
         status->giveCrackStrainVector(crackStrain);
         this->updateCrackStatus(gp, crackStrain);
 
-        if ( form == ReducedForm ) {
-            crossSection->giveReducedCharacteristicVector(reducedAnswer, gp, answer);
-            answer = reducedAnswer;
-        }
+        StructuralMaterial :: giveReducedSymVectorForm(reducedAnswer, answer, gp->giveMaterialMode());
+        answer = reducedAnswer;
 
         // test if transition to scalar damage mode take place
         double minSofteningPrincStress = this->Ft, E, Le, CurrFt, Ft, Gf, Gf0, Gf1, e0, ef, ef2, damage;
@@ -150,7 +147,7 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
 
             ef2 = Gf1 / princStress.at(ipos);
 
-            this->giveMaterialStiffnessMatrix(Ds0, ReducedForm, SecantStiffness, gp, atTime);
+            this->giveMaterialStiffnessMatrix(Ds0, SecantStiffness, gp, atTime);
             // compute reached equivalent strain
             equivStrain = this->computeCurrEquivStrain(gp, reducedStrainVector, E, atTime);
             damage = this->computeDamageCoeff(equivStrain, e0, ef2);
@@ -179,11 +176,7 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
         damage = this->computeDamageCoeff(equivStrain, e0, ef2);
         reducedSpaceStressVector.times(1.0 - damage);
 
-        if ( form == FullForm ) {
-            crossSection->giveFullCharacteristicVector(answer, gp, reducedSpaceStressVector);
-        } else {
-            answer = reducedSpaceStressVector;
-        }
+        answer = reducedSpaceStressVector;
 
         status->letTempStressVectorBe(reducedSpaceStressVector);
 
@@ -197,7 +190,6 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
 
 void
 RCSDEMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                      MatResponseForm form,
                                                       MatResponseMode rMode, GaussPoint *gp,
                                                       TimeStep *atTime)
 //
@@ -210,7 +202,7 @@ RCSDEMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     if ( status->giveTempMode() == RCSDEMaterialStatus :: rcMode ) {
         // rotating crack mode
 
-        RCM2Material :: giveEffectiveMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+        RCM2Material :: giveEffectiveMaterialStiffnessMatrix(answer, rMode, gp, atTime);
         return;
     } else {
         // rcsd mode
@@ -228,16 +220,9 @@ RCSDEMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
 
             reducedAnswer.times(dCoeff);
 
-            if ( form == ReducedForm ) {
-                answer = reducedAnswer;
-            } else {
-                this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
-                answer.resize(mask.maximum(), mask.maximum());
-                answer.zero();
-                answer.assemble(reducedAnswer, mask, mask);
-            }
+            answer = reducedAnswer;
         } else if ( rMode == ElasticStiffness ) {
-            this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
+            this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, rMode, gp, atTime);
             return;
         } else {
             _error("giveEffectiveMaterialStiffnessMatrix: usupported mode");
@@ -265,10 +250,9 @@ RCSDEMaterial :: computeCurrEquivStrain(GaussPoint *gp, const FloatArray &reduce
     FloatMatrix De;
     double answer = 0.0;
 
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
-    linearElasticMaterial->giveCharacteristicMatrix(De, ReducedForm, TangentStiffness, gp, atTime);
+    linearElasticMaterial->giveStiffnessMatrix(De, TangentStiffness, gp, atTime);
     effStress.beProductOf(De, reducedTotalStrainVector);
-    crossSection->giveFullCharacteristicVector(fullEffStress, gp, effStress);
+    StructuralMaterial :: giveFullSymVectorForm(fullEffStress, effStress, gp->giveMaterialMode());
 
     this->computePrincipalValues(princEffStress, fullEffStress, principal_stress);
     for ( int i = 1; i <= 3; i++ ) {

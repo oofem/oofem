@@ -40,6 +40,7 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "mathfem.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -210,7 +211,7 @@ void CohesiveSurface3d :: computeGaussPoints()
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _3dInterface);
+    this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
 }
 
 

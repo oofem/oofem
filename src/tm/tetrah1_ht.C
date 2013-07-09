@@ -39,6 +39,7 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "crosssection.h"
 #include "fei3dtetlin.h"
 #include "classfactory.h"
 
@@ -71,7 +72,7 @@ Tetrah1_ht :: ~Tetrah1_ht()
 
 
 FEInterpolation *
-Tetrah1_ht :: giveInterpolation()
+Tetrah1_ht :: giveInterpolation() const
 {
     return &interpolation;
 }
@@ -81,19 +82,11 @@ void
 Tetrah1_ht :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    MaterialMode mmode;
-
-    if ( emode == HeatTransferEM ) {
-        mmode = _3dHeat;
-    } else {
-        mmode = _3dHeMo;
-    }
-
     if ( !integrationRulesArray ) {
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, numberOfGaussPoints, mmode);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
     }
 }
 
@@ -145,7 +138,7 @@ Tetrah1_ht :: GetSurfaceIntegrationRule(int approxOrder)
 {
     IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
     int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, approxOrder);
-    iRule->setUpIntegrationPoints(_Triangle, npoints, _Unknown);
+    iRule->SetUpPointsOnTriangle(npoints, _Unknown);
     return iRule;
 }
 
@@ -209,7 +202,7 @@ Tetrah1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArra
     } else {
         FloatArray helpCoords = coords;
 
-        helpCoords.resize(gsize);
+        helpCoords.resizeWithValues(gsize);
         dist = helpCoords.distance(gcoords);
     }
 

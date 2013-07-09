@@ -64,8 +64,9 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_QPlaneStress2d_Name; }
     virtual const char *giveClassName() const { return "QPlaneStress2d"; }
     virtual classType giveClassID() const { return QPlaneStress2dClass; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
-    virtual FEInterpolation *giveInterpolation() { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
+    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
+
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int testElementExtension(ElementExtension ext) { return ( ext == Element_EdgeLoadSupport ); }
@@ -79,9 +80,9 @@ public:
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                   InternalStateType type, TimeStep *tStep);
+                                                           InternalStateType type, TimeStep *tStep);
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
 
@@ -92,11 +93,9 @@ public:
     //void drawInternalState(DrawMode mode);
 #endif
 
-    virtual integrationDomain giveIntegrationDomain() { return _Square; }
-    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
-
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
 
@@ -106,7 +105,6 @@ protected:
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
-
 };
 } // end namespace oofem
 #endif // qplanstrss_h

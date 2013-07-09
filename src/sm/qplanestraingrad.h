@@ -59,9 +59,7 @@ public:
     virtual const char *giveClassName() const { return "QPlaneStrainGrad"; }
     virtual classType giveClassID() const { return QPlaneStrainGradClass; }
 
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
-    virtual integrationDomain  giveIntegrationDomain() { return _Square; }
-    virtual MaterialMode giveMaterialMode() { return _PlaneStrainGrad; }
+    virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
     virtual int computeNumberOfDofs(EquationID ut) { return 20; }
 
 protected:
@@ -74,7 +72,6 @@ protected:
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual StructuralElement *giveStructuralElement() { return this; }
     virtual NLStructuralElement *giveNLStructuralElement() { return this; }
-
 };
 } // end namespace oofem
 #endif // qplanestraingrad_h

@@ -39,7 +39,6 @@
 #include "floatarray.h"
 
 namespace oofem {
-
 class GaussPoint;
 class Dictionary;
 class Domain;
@@ -74,6 +73,19 @@ protected:
     /// Temporary strain vector in reduced form (to find balanced state)
     FloatArray tempStrainVector;
 
+    /// Equilibrated first Piola-Kirchhoff stress vector
+    FloatArray PVector;
+    /// Temporary first Piola-Kirchhoff stress vector (to find balanced state)
+    FloatArray tempPVector;
+    /// Equilibrated Cauchy stress vector
+    FloatArray CVector;
+    /// Temporary Cauchy stress vector (to find balanced state)
+    FloatArray tempCVector;
+    /// Equilibrated deformation gradient in reduced form
+    FloatArray FVector;
+    /// Temporary deformation gradient in reduced form (to find balanced state)
+    FloatArray tempFVector;
+
 public:
     /// Constructor. Creates new StructuralMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
     StructuralMaterialStatus(int n, Domain *d, GaussPoint *g);
@@ -92,18 +104,42 @@ public:
     const FloatArray &giveStrainVector() { return strainVector; }
     /// Returns the const pointer to receiver's stress vector.
     const FloatArray &giveStressVector() { return stressVector; }
+    /// Returns the const pointer to receiver's first Piola-Kirchhoff stress vector.
+    const FloatArray &givePVector() { return PVector; }
+    /// Returns the const pointer to receiver's Cauchy stress vector.
+    const FloatArray &giveCVector() { return CVector; }
+    /// Returns the const pointer to receiver's deformation gradient vector.
+    const FloatArray &giveFVector() { return FVector; }
     /// Returns the const pointer to receiver's temporary strain vector.
     const FloatArray &giveTempStrainVector() { return tempStrainVector; }
     /// Returns the const pointer to receiver's temporary stress vector.
     const FloatArray &giveTempStressVector() { return tempStressVector; }
+    /// Returns the const pointer to receiver's temporary first Piola-Kirchhoff stress vector.
+    const FloatArray &giveTempPVector() { return tempPVector; }
+    /// Returns the const pointer to receiver's temporary Cauchy stress vector.
+    const FloatArray &giveTempCVector() { return tempCVector; }
+    /// Returns the const pointer to receiver's temporary deformation gradient vector.
+    const FloatArray &giveTempFVector() { return tempFVector; }
     /// Assigns strain vector to given vector v.
     void letStrainVectorBe(const FloatArray &v) { strainVector = v; }
     /// Assigns stressVector to given vector v.
     void letStressVectorBe(const FloatArray &v) { stressVector = v; }
+    /// Assigns PVector to given vector v.
+    void letPVectorBe(const FloatArray &v) { PVector = v; }
+    /// Assigns CVector to given vector v.
+    void letCVectorBe(const FloatArray &v) { CVector = v; }
+    /// Assigns FVector to given vector v.
+    void letFVectorBe(const FloatArray &v) { FVector = v; }
     /// Assigns tempStressVector to given vector v.
     void letTempStressVectorBe(const FloatArray &v) { tempStressVector = v; }
     /// Assigns tempStrainVector to given vector v
     void letTempStrainVectorBe(const FloatArray &v) { tempStrainVector = v; }
+    /// Assigns tempPVector to given vector v
+    void letTempPVectorBe(const FloatArray &v) { tempPVector = v; }
+    /// Assigns tempPVector to given vector v
+    void letTempCVectorBe(const FloatArray &v) { tempCVector = v; }
+    /// Assigns tempFVector to given vector v
+    void letTempFVectorBe(const FloatArray &v) { tempFVector = v; }
 
     virtual const char *giveClassName() const { return "StructuralMaterialStatus"; }
     virtual classType giveClassID() const { return StructuralMaterialStatusClass; }

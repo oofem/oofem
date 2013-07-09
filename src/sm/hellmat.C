@@ -520,7 +520,7 @@ HellmichMaterial :: elasticStiffness(FloatArray &stress, FloatArray &strain, Gau
         LinearElasticMaterial *lMat;
         lMat = giveLinearElasticMaterial(gp, atTime);
         if ( lMat->hasMaterialModeCapability(mmode) ) {
-            lMat->giveCharacteristicMatrix(d, form, ElasticStiffness, gp, atTime);
+            lMat->giveStiffnessMatrix(d, ElasticStiffness, gp, atTime);
             stress.beProductOf(d, strain);
         } else {
             _error("elasticStiffness: unsupported material mode.");
@@ -528,7 +528,7 @@ HellmichMaterial :: elasticStiffness(FloatArray &stress, FloatArray &strain, Gau
     }
 }
 
-void HellmichMaterial :: elasticCompliance(FloatArray &strain, FloatArray &stress, GaussPoint *gp, TimeStep *atTime, MatResponseForm form, int coeff)
+void HellmichMaterial :: elasticCompliance(FloatArray &strain, FloatArray &stress, GaussPoint *gp, TimeStep *atTime, int coeff)
 // Returns the isotropic linear elastic strain vector for the given stress vector
 {
     int i;
@@ -546,12 +546,7 @@ void HellmichMaterial :: elasticCompliance(FloatArray &strain, FloatArray &stres
     }
 
     if ( mmode == _1dMat ) {
-        if ( form == ReducedForm ) {
-            strain.resize(1);
-        } else {
-            strain.resize(6);
-            strain.zero();
-        }
+        strain.resize(1);
 
         strain(0) = stress(0) / E;
     } else if ( mmode == _3dMat ) {
@@ -577,11 +572,12 @@ void HellmichMaterial :: elasticCompliance(FloatArray &strain, FloatArray &stres
     } else if ( stress.containsOnlyZeroes() ) {
         strain = stress;
     } else {
-        FloatMatrix d;
+        FloatMatrix d, di;
         LinearElasticMaterial *lMat;
         lMat = giveLinearElasticMaterial(gp, atTime);
         if ( lMat->hasMaterialModeCapability(mmode) ) {
-            lMat->giveCharacteristicComplianceMatrix(d, form, ElasticStiffness, gp, atTime);
+            lMat->giveStiffnessMatrix(d, ElasticStiffness, gp, atTime);
+            di.beInverseOf(d);
             strain.beProductOf(d, stress);
         } else {
             _error("elasticCompliance: unsupported material mode.");
@@ -1000,7 +996,7 @@ void HellmichMaterial :: stressReturn(FloatArray &stress, FloatArray &trialStres
 }
 
 void HellmichMaterial :: give1dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                       MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
+                                                       MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
 //
 // consistent tangents for 1D
 // Young modulus E + Kv creep coeff + plasticity
@@ -1035,18 +1031,12 @@ void HellmichMaterial :: give1dMaterialStiffnessMatrix(FloatMatrix &answer,
         _error("Unknown active surface.");
     }
 
-    if ( form == ReducedForm ) {
-        answer.resize(1, 1);
-    } else { // FullForm
-        answer.resize(6, 6);
-        answer.zero();
-    }
-
+    answer.resize(1, 1);
     answer(0, 0) = Eep;
 }
 
 void HellmichMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                       MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
+                                                       MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
 //
 // consistent tangents for 3D
 // isotropic linear elastic matrix + Kv creep coeff + plasticity
@@ -1989,7 +1979,7 @@ void HellmichMaterial :: giveShrinkageStrainVector(FloatArray &answer, MatRespon
 
         if ( form == ReducedForm ) {
             FloatArray auxvec = answer;
-            ( ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection() )->giveReducedCharacteristicVector(answer, gp, auxvec);
+            StructuralMaterial :: giveReducedSymVectorForm(answer, auxvec, gp->giveMaterialMode());
         }
     }
 }
@@ -2023,7 +2013,7 @@ void HellmichMaterial :: givePrestressStrainVector(FloatArray &answer, MatRespon
 
     if ( form == ReducedForm ) {
         FloatArray auxvec = answer;
-        ( ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection() )->giveReducedCharacteristicVector(answer, gp, auxvec);
+        StructuralMaterial :: giveFullSymVectorForm(answer, auxvec, gp->giveMaterialMode());
     }
 }
 
@@ -2155,7 +2145,7 @@ void HellmichMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFo
         redvec.add(auxvec); // Sum into redvec
 
         // Compute auxvec creep strains, don't use creep coeffs
-        elasticCompliance(auxvec, redvec, gp, atTime, ReducedForm, false);
+        elasticCompliance(auxvec, redvec, gp, atTime, false);
         redvec = auxvec;
 
         // subtract previous viscous creep strains dev_n(auxvec)
@@ -2164,24 +2154,14 @@ void HellmichMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFo
         redvec.subtract(auxvec); // can't use ev, here isn't JvE
 
         // convert to FullForm and add to answer
-        StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
-        crossSection->giveFullCharacteristicVector(auxvec, gp, redvec);
-        if ( !answer.giveSize() ) {
-            if ( ( mmode == _3dShell ) || ( mmode ==  _3dBeam ) || ( mmode == _2dPlate ) || ( mmode == _2dBeam ) ) {
-                answer.resize(12);
-            } else {
-                answer.resize(6);
-            }
-
-            //answer.resize(6); answer.zero();
-        }
+        StructuralMaterial :: giveFullSymVectorForm(auxvec, redvec, gp->giveMaterialMode());
 
         answer.add(auxvec);
     }
 }
 
 void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
-                                              MatResponseForm form, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+                                              GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current strain increment
 // calls stress return method - updates temporary status variables
@@ -2191,7 +2171,6 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
     FloatArray auxStrain, strainIncrement, elasticStrain;
     FloatArray auxStress, trialStressVector, fullStressVector(6), redStressVector;
     HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
     ValueModeType mode = VM_Incremental;
     MaterialMode mmode = gp->giveMaterialMode();
     double E=-1.0, dt;
@@ -2397,7 +2376,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
             }
         } else { // elastic
             redStressVector = trialStressVector;
-            crossSection->giveFullCharacteristicVector(fullStressVector, gp, redStressVector);
+            StructuralMaterial :: giveFullSymVectorForm(fullStressVector, redStressVector, gp->giveMaterialMode());
         }
     }
 
@@ -2412,7 +2391,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
             auxStress = redStressVector;
         }
 
-        elasticCompliance(elasticStrain, auxStress, gp, atTime, ReducedForm, false); // using no Kv, Gv!
+        elasticCompliance(elasticStrain, auxStress, gp, atTime, false); // using no Kv, Gv!
         elasticStrain.times(jv * E);
         status->giveViscousStrainVector(auxStrain);
         elasticStrain.subtract(auxStrain);
@@ -2429,7 +2408,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
             auxStress = redStressVector;
         }
 
-        elasticCompliance(elasticStrain, auxStress, gp, atTime, ReducedForm, false); // using no Kv, Gv!
+        elasticCompliance(elasticStrain, auxStress, gp, atTime, false); // using no Kv, Gv!
         elasticStrain.times(dt * giveViscosity(gp) * E);
         status->giveFlowStrainVector(auxStrain);
         elasticStrain.add(auxStrain);
@@ -2437,11 +2416,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
     } // end creep
 
     // return full/reduced stress vector
-    if ( form == FullForm ) {
-        answer = fullStressVector;
-    } else {
-        answer = redStressVector;
-    }
+    answer = redStressVector;
 
     // update temp status stress and strain vector (reduced)
     status->letTempStrainVectorBe(totalStrain);
@@ -2471,14 +2446,14 @@ HellmichMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     if ( et.giveSize() ) {
         if ( fullAnswer.giveSize() ) {
             fullAnswer.add(et);
-        } else {
+    } else {
             fullAnswer = et;
         }
     }
 
     // export reduced answer
     if ( fullAnswer.giveSize() ) {
-        this->giveReducedCharacteristicVector(answer, gp, fullAnswer);
+        StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
         return;
     }
 
@@ -2648,8 +2623,7 @@ HellmichMaterial :: updateYourself(GaussPoint *gp, TimeStep *atTime)
 }
 
 void
-HellmichMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                             MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
+HellmichMaterial :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
 {
     MaterialMode mMode = gp->giveMaterialMode();
 
@@ -2660,11 +2634,11 @@ HellmichMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     //  _warning("HellmichMaterial::giveCharMtrx: No stiffness - zero hydration degree.",10);
 
     if ( mMode == _1dMat ) {
-        give1dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+        give1dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
     } else if ( mMode == _3dMat ) {
-        give3dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+        give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
     } else if ( !( options & moPlasticity ) ) {
-        giveLinearElasticMaterial(gp, atTime)->giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
+        giveLinearElasticMaterial(gp, atTime)->giveStiffnessMatrix(answer, rMode, gp, atTime);
         answer.times( 1 / giveKvCoeff(gp, atTime) );
     } else {
         _error("giveCharMtrx: unsupported stress-strain mode!");
@@ -2720,23 +2694,16 @@ HellmichMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Int
         if ( options & moPlasticity ) {
             status->givePlasticStrainVector(answer);
         } else {
-            answer.resize( this->giveSizeOfReducedStressStrainVector( aGaussPoint->giveMaterialMode() ) );
+            answer.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( aGaussPoint->giveMaterialMode() ) );
             answer.zero();
         }
 
         return 1;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        int indx;
         FloatArray st(6), s;
         if ( options & moPlasticity ) {
             status->givePlasticStrainVector(s);
-            for ( int i = 1; i <= s.giveSize(); i++ ) {
-                indx = this->giveStressStrainComponentIndOf(ReducedForm, aGaussPoint->giveMaterialMode(), i);
-                if ( indx ) {
-                    st.at(indx) = s.at(i);
-                }
-            }
-
+            StructuralMaterial :: giveFullSymVectorForm(st, s, aGaussPoint->giveMaterialMode());
             this->computePrincipalValues(answer, st, principal_strain);
         } else {
             answer.resize(3);
@@ -2764,6 +2731,7 @@ HellmichMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Int
         return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 }
+
 MaterialStatus *
 HellmichMaterial :: CreateStatus(GaussPoint *gp) const
 {
@@ -2822,7 +2790,7 @@ int
 HellmichMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
     if ( type == IST_PlasticStrainTensor ) {
-        this->giveStressStrainMask(answer, FullForm, mmode);
+        StructuralMaterial :: giveInvertedVoigtVectorMask(answer, mmode);
         return 1;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         answer.resize(6);
@@ -2847,7 +2815,7 @@ int
 HellmichMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
     if ( type == IST_PlasticStrainTensor ) {
-        return this->giveSizeOfReducedStressStrainVector( aGaussPoint->giveMaterialMode() );
+        return StructuralMaterial :: giveSizeOfVoigtSymVector( aGaussPoint->giveMaterialMode() );
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         return 3;
     } else if ( ( type == IST_DamageTensor ) || ( type == IST_HydrationDegree ) || ( type == IST_Temperature ) ) {
@@ -2958,7 +2926,7 @@ void PlastData :: initTempStatus(GaussPoint *gp)
 {
     // initialization
     if ( !plasticStrainVector.giveSize() ) {
-        int n = ( ( HellmichMaterial * ) ( gp->giveMaterial() ) )->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+        int n = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
 
         plasticStrainVector.resize(n);
     }
@@ -2975,7 +2943,7 @@ void CreepData :: initTempStatus(GaussPoint *gp)
 {
     // initialization
     if ( !viscousStrainVector.giveSize() ) {
-        int n = ( ( HellmichMaterial * ) ( gp->giveMaterial() ) )->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+        int n = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
         viscousStrainVector.resize(n);
         flowStrainVector.resize(n);
     }
@@ -3053,7 +3021,6 @@ void HellmichMaterialStatus :: printOutputAt(FILE *stream, TimeStep *atTime)
     HellmichMaterial *mat = ( HellmichMaterial * ) ( gp->giveMaterial() );
     MaterialOptions options = giveMaterialOptions();
     ActiveSurface as;
-    StructuralCrossSection *cs = ( StructuralCrossSection * ) ( gp->giveCrossSection() );
     // output material gp status if necessary
     if ( options & moIsothermal ) {
         mat->printOutputAt(stream, atTime);
@@ -3100,7 +3067,7 @@ void HellmichMaterialStatus :: printOutputAt(FILE *stream, TimeStep *atTime)
 
             fprintf( stream, " chi1 %.5e eps_pl ", giveHardeningVar() );
             givePlasticStrainVector(helpVec);
-            cs->giveFullCharacteristicVector(fullHelpVec, gp, helpVec);
+            StructuralMaterial :: giveFullSymVectorForm(fullHelpVec, helpVec, gp->giveMaterialMode());
             n = fullHelpVec.giveSize();
             for ( i = 0; i < n; i++ ) {
                 fprintf( stream, " %.4e", fullHelpVec(i) );
@@ -3115,14 +3082,14 @@ void HellmichMaterialStatus :: printOutputAt(FILE *stream, TimeStep *atTime)
         }
 
         fprintf(stream, " eps_visc");
-        cs->giveFullCharacteristicVector(helpVec, gp, creepData->viscousStrainVector);
+        StructuralMaterial :: giveFullSymVectorForm(helpVec, creepData->viscousStrainVector, gp->giveMaterialMode());
         n = helpVec.giveSize();
         for ( i = 0; i < n; i++ ) {
             fprintf( stream, " %.4e", helpVec(i) );
         }
 
         fprintf(stream, " eps_flow ");
-        cs->giveFullCharacteristicVector(helpVec, gp, creepData->flowStrainVector);
+        StructuralMaterial :: giveFullSymVectorForm(helpVec, creepData->flowStrainVector, gp->giveMaterialMode());
         for ( i = 0; i < n; i++ ) {
             fprintf( stream, " %.4e", helpVec(i) );
         }

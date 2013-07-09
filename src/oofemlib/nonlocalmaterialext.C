@@ -165,7 +165,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
         ielem = this->giveDomain()->giveElement(* pos);
         if ( regionMap.at( ielem->giveRegionNumber() ) == 0 ) {
             iRule = ielem->giveDefaultIntegrationRulePtr();
-            for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+            for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
                 jGp = iRule->getIntegrationPoint(j);
                 if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
                     weight = this->computeWeightFunction(gpCoords, jGpCoords);
@@ -206,7 +206,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
      * ielem = this->giveDomain()->giveElement(i);
      * if (regionMap.at(ielem->giveRegionNumber()) == 0) {
      * iRule = ielem->giveDefaultIntegrationRulePtr ();
-     * for (j=0 ; j < iRule->getNumberOfIntegrationPoints() ; j++) {
+     * for (j=0 ; j < iRule->giveNumberOfIntegrationPoints() ; j++) {
      * jGp = iRule->getIntegrationPoint(j) ;
      * if (ielem->computeGlobalCoordinates (jGpCoords, *(jGp->giveCoordinates()))) {
      *   weight = this->computeWeightFunction (gpCoords, jGpCoords);
@@ -278,7 +278,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
             ielem = this->giveDomain()->giveElement( contributingElems->at(_e) );
             if ( regionMap.at( ielem->giveRegionNumber() ) == 0 ) {
                 iRule = ielem->giveDefaultIntegrationRulePtr();
-                for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+                for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
                     jGp = iRule->getIntegrationPoint(j);
                     if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
                         weight = this->computeWeightFunction(gpCoords, jGpCoords);
@@ -368,7 +368,7 @@ NonlocalMaterialExtensionInterface :: computeWeightFunction(double distance)
     }
 
     double aux = distance / this->cl;
-    double iwf = giveIntegralOfWeightFunction(2); // 2D formulation assumed !!!!
+    double iwf = giveIntegralOfWeightFunction(this->domain->giveNumberOfSpatialDimensions()); 
 
     switch ( weightFun ) {
     case WFT_Bell: // Bell shaped function (quartic spline)
@@ -452,7 +452,7 @@ NonlocalMaterialExtensionInterface :: giveIntegralOfWeightFunction(const int spa
 double
 NonlocalMaterialExtensionInterface :: maxValueOfWeightFunction()
 {
-    double iwf = giveIntegralOfWeightFunction(2); // 2D formulation assumed !!!!
+    double iwf = giveIntegralOfWeightFunction(this->domain->giveNumberOfSpatialDimensions());
     return 1. / iwf;
 }
 
@@ -615,7 +615,7 @@ NonlocalMaterialExtensionInterface :: manipulateWeight(double &weight, GaussPoin
 
     if ( ielem->giveMaterial()->hasProperty(AVERAGING_TYPE, jGp) ) {
         if ( ielem->giveMaterial()->give(AVERAGING_TYPE, jGp) == 1 ) {
-            weight = 1. / ( iRule->getNumberOfIntegrationPoints() ); //asign the same weights over the whole element
+            weight = 1. / ( iRule->giveNumberOfIntegrationPoints() ); //asign the same weights over the whole element
         }
     }
 }

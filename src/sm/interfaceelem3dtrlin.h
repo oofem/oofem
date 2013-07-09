@@ -47,6 +47,7 @@ namespace oofem {
 class InterfaceElement3dTrLin : public StructuralElement
 {
 protected:
+    ///@todo Implement FEI3dTrLin, then remove giveIntegrationDomain and giveElementGeometry
     static FEI2dTrLin interpolation;
 
 public:
@@ -77,9 +78,8 @@ public:
     virtual classType giveClassID() const { return InterfaceElement3dTrLinClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
-
-    virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
-    virtual MaterialMode giveMaterialMode()  { return _3dInterface; }
+    virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
+    virtual MaterialMode giveMaterialMode() { return _3dInterface; }
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);

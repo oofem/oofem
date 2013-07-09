@@ -37,6 +37,7 @@
 #include "rankinemat.h"
 #include "structuralnonlocalmaterialext.h"
 #include "nonlocmatstiffinterface.h"
+#include "graddpmaterialextensioninterface.h"
 #include "cltypes.h"
 
 #ifdef __OOFEG
@@ -47,7 +48,7 @@
 ///@name Input fields for RankineMatGrad
 //@{
 #define _IFT_RankineMatGrad_Name "rankmatgrad"
-#define _IFT_RankineMatGrad_r "r"
+#define _IFT_RankineMatGrad_L "l"
 #define _IFT_RankineMatGrad_m "m"
 #define _IFT_RankineMatGrad_negligibleDamage "negligible_damage"
 //@}
@@ -56,7 +57,7 @@ namespace oofem {
 /**
  * Gradient rankine material status.
  */
-class RankineMatGradStatus : public RankineMatStatus
+class RankineMatGradStatus : public RankineMatStatus, public GradDpMaterialStatusExtensionInterface
 {
 protected:
     double kappa_nl;
@@ -79,16 +80,18 @@ public:
     void setKappa_hat(double kap) { kappa_hat = kap; }
     double giveKappa_nl() { return kappa_nl; }
     double giveKappa_hat() { return kappa_hat; }
+    virtual double giveNonlocalCumulatedStrain() { return nonlocalCumulatedStrain; }
+    virtual void setNonlocalCumulatedStrain(double nonlocalCumulatedStrain) { this->nonlocalCumulatedStrain = nonlocalCumulatedStrain; }
 };
 
 
 /**
  * Gradient Rankine material.
  */
-class RankineMatGrad : public RankineMat
+class RankineMatGrad : public RankineMat, GradDpMaterialExtensionInterface
 {
 protected:
-    double R;
+    double L;
     double mParam;
     double negligible_damage;
 
@@ -102,13 +105,21 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int hasMaterialModeCapability(MaterialMode mode);
+    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) { return static_cast< GradDpMaterialExtensionInterface * >( this ); } else { return NULL; } }
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePlaneStressStiffMtrx(FloatMatrix & answer,  MatResponseForm, MatResponseMode, GaussPoint * gp,  TimeStep * tStep);
-    void givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    void givePlaneStressGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    void giveInternalLength(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
+    virtual void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+
+    virtual void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+
+    virtual void givePlaneStressStiffMtrx(FloatMatrix & answer, MatResponseMode, GaussPoint * gp,  TimeStep * tStep);
+    void givePlaneStressGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *atTime);
 
     virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
     double giveNonlocalCumPlasticStrain(GaussPoint *gp);

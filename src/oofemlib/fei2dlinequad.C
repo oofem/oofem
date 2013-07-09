@@ -47,10 +47,11 @@ void FEI2dLineQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const
     answer(2) = 1.0-xi*xi;
 }
 
-void FEI2dLineQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double FEI2dLineQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     // Not meaningful to return anything.
     answer.resize(0,0);
+    return 0.;
 }
 
 void FEI2dLineQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)

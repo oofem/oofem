@@ -70,7 +70,7 @@ GPExportModule :: initializeFrom(InputRecord *ir)
 
 
 void
-GPExportModule :: doOutput(TimeStep *tStep)
+GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
     if ( !testTimeStepOutput(tStep) ) {
         return;
@@ -106,7 +106,7 @@ GPExportModule :: doOutput(TimeStep *tStep)
         iRule = elem->giveDefaultIntegrationRulePtr();
 
         // loop over Gauss points
-        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
             // export:
             // 1) element number

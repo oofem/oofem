@@ -118,7 +118,7 @@ MatlabExportModule :: computeArea()
 
 
 void
-MatlabExportModule :: doOutput(TimeStep *tStep)
+MatlabExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
 	FILE *FID;
 	FID = giveOutputStream(tStep);
@@ -290,7 +290,7 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 
 	fprintf(FID, "\tspecials.velocitymean=[");
 	for (int i=0; i<ndim; i++) {
-		fprintf(FID, "%f", V.at(i));
+		fprintf(FID, "%e", V.at(i));
 		if (i!=(ndim-1)) fprintf (FID, ", ");
 	}
 	fprintf(FID, "];\n");

@@ -97,14 +97,13 @@ MDM :: hasMaterialModeCapability(MaterialMode mode)
 }
 
 void
-MDM :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+MDM :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                             const FloatArray &totalStrain, TimeStep *atTime)
 {
     FloatArray reducedStrain, strainPDC, stressPDC, stress;
     FloatArray tempDamageTensorEigenVals;
     FloatMatrix tempDamageTensor, tempDamageTensorEigenVec;
     MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp, totalStrain,
                                                 atTime, VM_Total);
@@ -161,11 +160,7 @@ MDM :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint
      * // end debug test
      */
 
-    if ( form == ReducedForm ) {
-        answer = stress;
-    } else {
-        crossSection->giveFullCharacteristicVector(answer, gp, stress);
-    }
+    answer = stress;
 }
 
 
@@ -296,10 +291,9 @@ MDM :: computeDamageOnPlane(GaussPoint *gp, Microplane *mplane, const FloatArray
     double fmicroplane;
     IntArray mask;
     FloatArray fullStrain, prevStress = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) )->giveStressVector();
-    this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
+    StructuralMaterial :: giveInvertedVoigtVectorMask(mask, gp->giveMaterialMode() );
 
-    crossSection->giveFullCharacteristicVector(fullStrain, gp, strain);
+    StructuralMaterial :: giveFullSymVectorForm(fullStrain, strain, gp->giveMaterialMode());
     en = this->computeNormalStrainComponent(mplane, fullStrain);
     em = this->computeShearMStrainComponent(mplane, fullStrain);
     el = this->computeShearLStrainComponent(mplane, fullStrain);
@@ -390,8 +384,7 @@ MDM :: transformStrainToPDC(FloatArray &answer, FloatArray &strain,
     FloatArray fullStrain;
 
     if ( mdmMode == mdm_3d ) {
-        ( static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() ) )
-        ->giveFullCharacteristicVector(fullStrain, gp, strain);
+        StructuralMaterial :: giveFullSymVectorForm(fullStrain, strain, gp->giveMaterialMode());
 
         answer.resize(6);
         answer.at(1) = N(1, 1) * ( N(1, 1) * E(1) + N(1, 2) * E(6) + N(1, 3) * E(5) )
@@ -483,10 +476,10 @@ MDM :: computeEffectiveStress(FloatArray &stressPDC, const FloatArray &strainPDC
 {
     FloatMatrix de;
     if ( mdmMode == mdm_3d ) {
-        /// PDC components in 3d mode are in full 3d format, even in planeStrain situation
-        this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(de, ReducedForm, TangentStiffness, gp, atTime);
+        // PDC components in 3d mode are in full 3d format, even in planeStrain situation
+        this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(de, TangentStiffness, gp, atTime);
     } else {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(de, ReducedForm, TangentStiffness, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(de, TangentStiffness, gp, atTime);
     }
 
     stressPDC.beProductOf(de, strainPDC);
@@ -523,8 +516,7 @@ MDM :: transformStressFromPDC(FloatArray &answer, const FloatArray &stressPDC, c
                            + Nt(1, 2) * ( Nt(2, 1) * S(6)  + Nt(2, 2) * S(2)  + Nt(2, 3) * S(4) )
                            + Nt(1, 3) * ( Nt(2, 1) * S(5)  + Nt(2, 2) * S(4)  + Nt(2, 3) * S(3) );
 
-        ( static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() ) )
-        ->giveReducedCharacteristicVector(answer, gp, fullAnswer);
+        StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
     } else if ( mdmMode == mdm_2d ) {
         answer.resize(3);
 
@@ -541,35 +533,22 @@ MDM :: transformStressFromPDC(FloatArray &answer, const FloatArray &stressPDC, c
 
 void
 MDM :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
-                                   MatResponseForm form,
                                    MatResponseMode mode,
                                    GaussPoint *gp,
                                    TimeStep *atTime)
 {
-    FloatMatrix de;
     MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
 
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(de, ReducedForm, TangentStiffness, gp, atTime);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, TangentStiffness, gp, atTime);
     //answer = de;
     //return;
     // if (isVirgin()) return ;
     if ( ( mode == TangentStiffness ) || ( mode == SecantStiffness ) ) {
         // Apply damage in principal coordinates
-        this->applyDamageToStiffness(de, gp);
+        this->applyDamageToStiffness(answer, gp);
 
         // Transform to global coordinates (in reduced space)
-        this->transformStiffnessfromPDC( de, * ( status->giveTempDamageTensorEigenVec() ) );
-    }
-
-
-    if ( form == ReducedForm ) {
-        answer = de;
-    } else {
-        IntArray mask;
-        this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
-        answer.resize(6,6);
-        answer.zero();
-        answer.assemble(de,mask,mask);
+        this->transformStiffnessfromPDC(answer, * ( status->giveTempDamageTensorEigenVec() ) );
     }
 }
 
@@ -670,27 +649,26 @@ MDM :: transformStiffnessfromPDC(FloatMatrix &de, const FloatMatrix &t)
 
 void
 MDM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                     MatResponseForm form,
                                      MatResponseMode mode,
                                      GaussPoint *gp,
                                      TimeStep *atTime)
 {
-    this->giveMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
 }
 
 void
-MDM :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode,
+MDM :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
                                 GaussPoint *gp, TimeStep *atTime)
 {
-    this->giveMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
 }
 
 
 void
-MDM :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode,
+MDM :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
                                 GaussPoint *gp, TimeStep *atTime)
 {
-    this->giveMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
 }
 
 
@@ -1102,12 +1080,11 @@ MDM :: giveRawMDMParameters(double &Efp, double &Ep, const FloatArray &reducedSt
         Ep = this->mdm_Ep   = f / EModulus;
         return;
     } else { // local model
-        StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
         FloatArray strainVector, principalStrain;
         FloatMatrix dirs;
         double h;
 
-        crossSection->giveFullCharacteristicVector(strainVector, gp, reducedStrain);
+        StructuralMaterial :: giveFullSymVectorForm(strainVector, reducedStrain, gp->giveMaterialMode());
         this->computePrincipalValDir(principalStrain, dirs,
                                      strainVector,
                                      principal_strain);
@@ -1363,7 +1340,7 @@ MDM :: MMI_update(GaussPoint *gp,  TimeStep *tStep, FloatArray *estrain)
 
     // now update all internal vars accordingly
     strain = status->giveStrainVector();
-    this->giveRealStressVector(intVal, ReducedForm, gp, strain, tStep);
+    this->giveRealStressVector(intVal, gp, strain, tStep);
     this->updateYourself(gp, tStep);
     return result;
 }

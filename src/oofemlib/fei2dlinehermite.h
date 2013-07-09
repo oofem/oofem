@@ -55,6 +55,9 @@ public:
         yind = ind2;
     }
 
+    virtual integrationDomain giveIntegrationDomain() const { return _Line; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+
     virtual double giveArea(const FEICellGeometry &cellgeo) const { return 0.0; }
     virtual double giveLength(const FEICellGeometry &cellgeo) const;
 
@@ -63,7 +66,7 @@ public:
 
     // "Bulk"
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double giveArea(const FEICellGeometry &cellgeo) { return 0.0;};
 

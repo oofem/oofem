@@ -54,7 +54,7 @@ int
 Shell7BaseXFEM :: checkConsistency()
 {
     Shell7Base :: checkConsistency();
-    this->xMan =  this->giveDomain()->giveXfemManager(1);
+    this->xMan =  this->giveDomain()->giveXfemManager();
     return 1;
 }
 
@@ -319,7 +319,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
         IntegrationRule *iRuleL = layerIntegrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
-        for ( int j = 1; j <= iRuleL->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 1; j <= iRuleL->giveNumberOfIntegrationPoints(); j++ ) {
             GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
 
 
@@ -527,9 +527,9 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRule = layerIntegrationRulesArray [ layer - 1 ];
-        Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
+        StructuralMaterial *mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) ) );
 
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
             double zeta = giveGlobalZcoord(gp);
 
@@ -610,7 +610,7 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
         IntegrationRule *iRuleL = layerIntegrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( layeredCS->giveLayerMaterial(layer) );
 
-        for ( int j = 1; j <= iRuleL->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 1; j <= iRuleL->giveNumberOfIntegrationPoints(); j++ ) {
             GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
 
             FloatMatrix N11, N22, N33;
@@ -776,7 +776,7 @@ Shell7BaseXFEM :: setupGPDelaminationGroupList()
         for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
             IntegrationRule *iRule = layerIntegrationRulesArray [ layer - 1 ];
 
-            for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+            for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
                 GaussPoint *gp = iRule->getIntegrationPoint(i);
                 std::pair<int, int> pid;
                 pid.first  = gp->giveNumber();

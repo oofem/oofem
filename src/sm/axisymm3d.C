@@ -42,6 +42,7 @@
 #include "domain.h"
 #include "engngm.h"
 #include "mathfem.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -51,8 +52,7 @@
 
 
 namespace oofem {
-
-REGISTER_Element( Axisymm3d );
+REGISTER_Element(Axisymm3d);
 
 FEI2dTrLin Axisymm3d :: interpolation(1, 2);
 
@@ -75,13 +75,13 @@ Interface *
 Axisymm3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     }
 
     return NULL;
@@ -175,6 +175,43 @@ Axisymm3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
 }
 
 
+void
+Axisymm3d :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+// Returns the [9x6] displacement gradient matrix {BH} of the receiver,
+// evaluated at aGaussPoint.
+// BH matrix  -  9 rows : du/dx, dv/dy, dw/dz = u/r, 0, 0, du/dy,  0, 0, dv/dx
+// @todo not checked if correct
+{
+    FloatArray n;
+    FloatMatrix dnx;
+
+    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+
+    answer.resize(9, 6);
+    answer.zero();
+
+    double r = 0., x;
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
+        x  = this->giveNode(i)->giveCoordinate(1);
+        r += x * n.at(i);
+    }
+
+
+    // mode is _3dMat !!!!!! answer.at(4,*), answer.at(5,*), answer.at(7,*), and answer.at(8,*) is zero
+    for ( int i = 1; i <= 6; i++ ) {
+        answer.at(1, 3 * i - 2) = dnx.at(i, 1);     // du/dx
+        answer.at(2, 3 * i - 1) = dnx.at(i, 2);     // dv/dy
+        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy
+        answer.at(9, 3 * i - 1) = dnx.at(i, 1);     // dv/dx
+    }
+
+    answer.at(3, 1) = n.at(1) / r;
+    answer.at(3, 3) = n.at(2) / r;
+    answer.at(3, 5) = n.at(3) / r;
+}
+
+
+
 double
 Axisymm3d :: giveArea()
 // returns the area occupied by the receiver
@@ -220,9 +257,9 @@ Axisymm3d :: computeGaussPoints()
         numberOfIntegrationRules = 2;
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _3dMat);
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);
-        integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Triangle, numberOfFiAndShGaussPoints, _3dMat);
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], numberOfFiAndShGaussPoints, this);
     }
 }
 
@@ -299,14 +336,7 @@ Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
         answer.at(6) = Epsilon.at(4);
 
         if ( nlGeometry ) {
-            for ( int i = 1; i <= 6; i++ ) {
-                // nonlin part of strain vector
-                this->computeNLBMatrixAt(A, gp, i);
-                if ( A.isNotEmpty() ) {
-                    help.beProductOf(A, u);
-                    answer.at(i) += 0.5 * u.dotProduct(help);
-                }
-            }
+            OOFEM_ERROR("Axisymm3d :: computeStrainVector - only supports nlGeometry = 0");
         }
     } else if ( mode == AL ) { // actualized Lagrange formulation
         _error("computeStrainVector : unsupported mode");
@@ -416,7 +446,7 @@ Axisymm3d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, i
 int
 Axisymm3d :: SPRNodalRecoveryMI_giveNumberOfIP()
 {
-    return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
+    return this->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
 }
 
 
@@ -580,7 +610,7 @@ Axisymm3d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray
     } else {
         FloatArray helpCoords = coords;
 
-        helpCoords.resize(gsize);
+        helpCoords.resizeWithValues(gsize);
         dist = helpCoords.distance(gcoords);
     }
 
@@ -775,14 +805,14 @@ Axisymm3d :: drawScalar(oofegGraphicContext &context)
  * if (gc.getDrawMode() == yieldState) {
  * // loop over available GPs
  * nPlastGp = 0;
- * for (i=1 ; i<= iRule->getNumberOfIntegrationPoints() ; i++) {
+ * for (i=1 ; i<= iRule->giveNumberOfIntegrationPoints() ; i++) {
  *  gp = iRule-> getIntegrationPoint(i) ;
  *  nPlastGp += (mat->giveStatusCharFlag(gp,ms_yield_flag) != 0);
  * }
  * if (nPlastGp == 0) return;
  * // nPlastGp should contain number of yielded gp in element
  * // good way should be select color accordingly
- * ratio = nPlastGp / numberOfGaussPoints;
+ * ratio = nPlastGp / integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints();
  * EASValsSetLayer(OOFEG_YIELD_PATTERN_LAYER);
  * if (gc.getInternalVarsDefGeoFlag()) {
  * // use deformed geometry
@@ -820,7 +850,7 @@ Axisymm3d :: drawScalar(oofegGraphicContext &context)
  * FloatMatrix crackDir;
  *
  * if (numberOfGaussPoints != 1) return;
- * //   for (igp=1 ; igp<= numberOfGaussPoints ; igp++) {
+ * //   for (igp=1 ; igp<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; igp++) {
  * {
  *  gp = iRule-> getIntegrationPoint(0);
  *

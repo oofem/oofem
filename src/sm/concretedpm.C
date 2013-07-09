@@ -457,7 +457,6 @@ ConcreteDPM :: hasMaterialModeCapability(MaterialMode mMode)
 
 void
 ConcreteDPM :: giveRealStressVector(FloatArray &answer,
-                                    MatResponseForm form,
                                     GaussPoint *gp,
                                     const FloatArray &strainVector,
                                     TimeStep *atTime)
@@ -481,7 +480,6 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
     // Initialize temp variables for this gauss point
     status->initTempStatus();
 
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     // subtract stress-independent part of strain
     // (due to temperature changes, shrinkage, etc.)
@@ -515,11 +513,7 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
 
     assignStateFlag(gp);
 
-    if ( form == ReducedForm ) {
-        answer = stress;
-    } else {
-        crossSection->giveFullCharacteristicVector(answer, gp, stress);
-    }
+    answer = stress;
 }
 
 
@@ -1678,7 +1672,6 @@ ConcreteDPM :: computeHardeningOnePrime(const double kappa) const
 
 void
 ConcreteDPM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                             MatResponseForm form,
                                              MatResponseMode mode,
                                              GaussPoint *gp,
                                              TimeStep *atTime)
@@ -1687,14 +1680,14 @@ ConcreteDPM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         double omega = 0.;
         ConcreteDPMStatus *status = giveStatus(gp);
         if ( mode == ElasticStiffness ) {
-            this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+            this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
         } else if ( mode == SecantStiffness || mode == TangentStiffness ) {
             omega = status->giveTempDamage();
             if ( omega > 0.9999 ) {
                 omega = 0.9999;
             }
 
-            this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+            this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
             answer.times(1. - omega);
         }
     }
@@ -1974,7 +1967,7 @@ ConcreteDPM :: giveIPValueSize(InternalStateType type,
 {
     if ( type == IST_PlasticStrainTensor ) {
         //return 6;
-        return this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+        return StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
     } else if ( ( type == IST_CumPlasticStrain ) || ( type == IST_CumPlasticStrain_2 ) || ( type == IST_VolumetricPlasticStrain ) || ( type == IST_PrincipalDamageTensor ) || ( type == IST_PrincipalDamageTempTensor ) || ( type == IST_DamageScalar ) || ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ) {
         return 1;
     } else {
@@ -1989,7 +1982,7 @@ ConcreteDPM :: giveIntVarCompFullIndx(IntArray &answer,
 {
     switch ( type ) {
     case IST_PlasticStrainTensor:
-        this->giveStressStrainMask(answer, FullForm, mmode);
+        StructuralMaterial :: giveInvertedVoigtVectorMask(answer, mmode);
         /*
          * answer.resize(6);
          * answer.zero();

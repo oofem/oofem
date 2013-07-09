@@ -58,7 +58,7 @@ FEI3dHexaLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICe
     answer.at(8)  = 0.125 * ( 1. + x ) * ( 1. - y ) * ( 1. - z );
 }
 
-void
+double
 FEI3dHexaLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatMatrix jacobianMatrix, inv, dNduvw, coords;
@@ -72,7 +72,7 @@ FEI3dHexaLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
     inv.beInverseOf(jacobianMatrix);
     
     answer.beProductOf(dNduvw, inv);
-    //return detJ;
+    return jacobianMatrix.giveDeterminant();
 }
 
 void
@@ -515,7 +515,7 @@ FEI3dHexaLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
         c4(2)*(c1(1)*(-c2(0) - c3(0)) + c2(1)*( c1(0) - c3(0)) + c3(1)*( c1(0) + c2(0))                         ) +
         c3(2)*(c1(1)*(-c2(0) + c4(0)) + c2(1)*( c1(0) + c4(0)) +                          c4(1)*(-c1(0) - c2(0))) +
         c2(2)*(c1(1)*( c3(0) + c4(0)) +                          c3(1)*(-c1(0) - c4(0)) + c4(1)*(-c1(0) + c3(0))) +
-        c1(2)*(                         c2(1)*(-c3(0) - c4(0)) + c3(1)*( c2(0) - c4(0)) + c4(1)*( c2(0) + c3(0))) )*0.24;
+        c1(2)*(                         c2(1)*(-c3(0) - c4(0)) + c3(1)*( c2(0) - c4(0)) + c4(1)*( c2(0) + c3(0))) )*0.25;
 }
 
 } // end namespace oofem

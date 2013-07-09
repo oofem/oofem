@@ -106,11 +106,11 @@ GaussIntegrationRule :: SetUpPointsOnSquare(int nPoints, MaterialMode mode)
     int count = 0;
     for ( int i = 1; i <= nPoints_xi1; i++ ) {
         for ( int j = 1; j <= nPoints_xi2; j++ ) {
-            count++;
             FloatArray *coord = new FloatArray(2);
             coord->at(1) = coords_xi1.at(i);
             coord->at(2) = coords_xi2.at(j);
-            this->gaussPointArray [ count - 1 ] = new GaussPoint(this, count, coord, weights1.at(i) * weights2.at(j), mode);
+            this->gaussPointArray [ count ] = new GaussPoint(this, count+1, coord, weights1.at(i) * weights2.at(j), mode);
+            count++;
         }
     }
 
@@ -136,14 +136,52 @@ GaussIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode)
     for ( int i = 1; i <= nPoints_xi1; i++ ) {
         for ( int j = 1; j <= nPoints_xi2; j++ ) {
             for ( int k = 1; k <= nPoints_xi3; k++ ) {
-                count++;
                 FloatArray *coord = new FloatArray(3);
                 coord->at(1) = coords_xi1.at(i);
                 coord->at(2) = coords_xi2.at(j);
                 coord->at(3) = coords_xi3.at(k);
-                this->gaussPointArray [ count - 1 ] = new GaussPoint(this, count, coord, weights1.at(i) * weights2.at(j) * weights3.at(k), mode);
+                this->gaussPointArray [ count ] = new GaussPoint(this, count+1, coord, weights1.at(i) * weights2.at(j) * weights3.at(k), mode);
+                count++;
             }
         }
+    }
+
+    this->intdomain = _Cube;
+    return this->numberOfIntegrationPoints;
+}
+
+
+int GaussIntegrationRule::SetUpPointsOnCubeLayers(int nPoints1, int nPoints2, int nPointsDepth, MaterialMode mode, const FloatArray &layerThickness)
+{
+    FloatArray coords_xi1, weights1, coords_xi2, weights2, coords_xi3, weights3;
+    this->giveLineCoordsAndWeights(nPoints1, coords_xi1, weights1);
+    this->giveLineCoordsAndWeights(nPoints2, coords_xi2, weights2);
+    this->giveLineCoordsAndWeights(nPointsDepth, coords_xi3, weights3);
+    int pointsPerLayer = nPoints1 * nPoints2 * nPointsDepth;
+    this->numberOfIntegrationPoints = pointsPerLayer * layerThickness.giveSize();
+    this->gaussPointArray  = new GaussPoint * [ this->numberOfIntegrationPoints ];
+
+    int count = 0;
+    double totalThickness = layerThickness.sum();
+
+    // bottom is scaled so that it goes from -1 to 1.
+    double bottom = -1.;
+    double scaledThickness;
+    for ( int t = 1; t <= layerThickness.giveSize(); t++ ) {
+        scaledThickness = layerThickness.at(t) / totalThickness;
+        for ( int i = 1; i <= nPoints1; i++ ) {
+            for ( int j = 1; j <= nPoints2; j++ ) {
+                for ( int k = 1; k <= nPointsDepth; k++ ) {
+                    FloatArray *coord = new FloatArray(3);
+                    coord->at(1) = coords_xi1.at(i);
+                    coord->at(2) = coords_xi2.at(j);
+                    coord->at(3) = (coords_xi3.at(k) + 1.) * scaledThickness + bottom;
+                    this->gaussPointArray [ count ] = new GaussPoint(this, count+1, coord, weights1.at(i) * weights2.at(j) * (weights3.at(k) * scaledThickness), mode);
+                    count++;
+                }
+            }
+        }
+        bottom += 2.0 * scaledThickness;
     }
 
     this->intdomain = _Cube;
@@ -169,6 +207,7 @@ GaussIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
     this->intdomain = _Triangle;
     return numberOfIntegrationPoints;
 }
+
 
 int
 GaussIntegrationRule :: SetUpPointsOnTetrahedra(int nPoints, MaterialMode mode)
@@ -200,14 +239,15 @@ GaussIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
     this->numberOfIntegrationPoints = nPointsTri * nPointsDepth;
     this->gaussPointArray = new GaussPoint * [ this->numberOfIntegrationPoints ];
 
-    for ( int i = 1, ind = 0; i <= nPointsTri; i++ ) {
+    int count = 0;
+    for ( int i = 1; i <= nPointsTri; i++ ) {
         for ( int j = 1; j <= nPointsDepth; j++ ) {
             FloatArray *coord = new FloatArray(3);
             coord->at(1) = coords_xi1.at(i);
             coord->at(2) = coords_xi2.at(i);
             coord->at(3) = coords_xi3.at(j);
-            this->gaussPointArray [ ind ] = new GaussPoint(this, 1, coord, weightsTri.at(i) * weightsDepth.at(j), mode);
-            ind++;
+            this->gaussPointArray [ count ] = new GaussPoint(this, count+1, coord, weightsTri.at(i) * weightsDepth.at(j), mode);
+            count++;
         }
     }
 
@@ -215,6 +255,40 @@ GaussIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
     return numberOfIntegrationPoints;
 }
 
+int
+GaussIntegrationRule :: SetUpPointsOnWedgeLayers(int nPointsTri, int nPointsDepth, MaterialMode mode, const FloatArray &layerThickness)
+{
+    FloatArray coords_xi1, coords_xi2, coords_xi3, weightsTri, weightsDepth;
+    this->giveTriCoordsAndWeights(nPointsTri, coords_xi1, coords_xi2, weightsTri);
+    this->giveLineCoordsAndWeights(nPointsDepth, coords_xi3, weightsDepth);
+    int pointsPerLayer = nPointsTri * nPointsDepth;
+    this->numberOfIntegrationPoints = pointsPerLayer * layerThickness.giveSize();
+    this->gaussPointArray = new GaussPoint * [ this->numberOfIntegrationPoints ];
+
+    int count = 0;
+    double totalThickness = layerThickness.sum();
+
+    // bottom is scaled so that it goes from -1 to 1.
+    double bottom = -1.;
+    double scaledThickness;
+    for ( int k = 1; k <= layerThickness.giveSize(); k++ ) {
+        scaledThickness = layerThickness.at(k) / totalThickness;
+        for ( int i = 1; i <= nPointsTri; i++ ) {
+            for ( int j = 1; j <= nPointsDepth; j++ ) {
+                FloatArray *coord = new FloatArray(3);
+                coord->at(1) = coords_xi1.at(i);
+                coord->at(2) = coords_xi2.at(i);
+                coord->at(3) = (coords_xi3.at(j) + 1.) * scaledThickness + bottom;
+                this->gaussPointArray [ count ] = new GaussPoint(this, count+1, coord, weightsTri.at(i) * (weightsDepth.at(j) * scaledThickness), mode);
+                count++;
+            }
+        }
+        bottom += 2.0 * scaledThickness;
+    }
+
+    this->intdomain = _Wedge;
+    return numberOfIntegrationPoints;
+}
 
 int
 GaussIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain dType,
@@ -1482,4 +1556,5 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
         OOFEM_ERROR2("SetUpPointsOnLine: unsupported number of IPs (%d)", nPoints);
     }
 }
+
 } // end namespace oofem

@@ -224,7 +224,7 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
 #ifdef COMPUTE_STRESS
                         FloatArray strain;
                         this->computeStrainVector (strain, &gp, tStep, u);
-                        ((StructuralCrossSection*)this->giveCrossSection())->giveRealStresses(val, ReducedForm, &gp, strain, tStep);
+                        ((StructuralCrossSection*)this->giveCrossSection())->giveRealStresses(val, &gp, strain, tStep);
 #endif
                         s [ k ] = val.at(indx);
                     }
@@ -345,7 +345,7 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context)
 #ifdef COMPUTE_STRESS
                         FloatArray strain;
                         this->computeStrainVector (strain, &gp, tStep, u);
-                        ((StructuralCrossSection*)this->giveCrossSection())->giveRealStresses(val, ReducedForm, &gp, strain, tStep);
+                        ((StructuralCrossSection*)this->giveCrossSection())->giveRealStresses(val, &gp, strain, tStep);
 #endif
                         s [ k ] = val.at(indx);
 
@@ -544,7 +544,7 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
 #ifdef COMPUTE_STRESS
                         FloatArray strain;
                         this->computeStrainVector (strain, &gp, tStep, u);
-                        ((StructuralCrossSection*)this->giveCrossSection())->giveRealStresses(val, ReducedForm, &gp, strain, tStep);
+                        ((StructuralCrossSection*)this->giveCrossSection())->giveRealStresses(val, &gp, strain, tStep);
 #endif
                         s [ k ] = val.at(indx);
                     }
@@ -741,7 +741,7 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context)
 #ifdef COMPUTE_STRESS
                             FloatArray strain;
                             this->computeStrainVector (strain, &gp, tStep, u);
-                            ((StructuralCrossSection*)this->giveCrossSection())->giveRealStresses(val, ReducedForm, &gp, strain, tStep);
+                            ((StructuralCrossSection*)this->giveCrossSection())->giveRealStresses(val, &gp, strain, tStep);
 #endif
                             s [ k ] = val.at(indx);
 

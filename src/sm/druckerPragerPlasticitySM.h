@@ -253,12 +253,11 @@ public:
     virtual classType giveClassID() const { return DruckerPragerPlasticitySMClass; }
 
     virtual void giveRealStressVector(FloatArray &answer,
-                              MatResponseForm form,
                               GaussPoint *gp,
                               const FloatArray &strainVector,
                               TimeStep *atTime);
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep);
 
     /**
@@ -322,26 +321,22 @@ public:
     /**
      * Compute and give back algorithmic stiffness matrix for the regular case (no vertex).
      * @param answer Consistent stiffness matrix.
-     * @param form Material response form.
      * @param mode Material reponse mode.
      * @param gp Gauss point.
      * @param tStep Time step.
      */
     void giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
-                                       MatResponseForm form,
                                        MatResponseMode mode,
                                        GaussPoint *gp,
                                        TimeStep *tStep);
     /**
      * Compute consistent stiffness matrix for the vertex case.
      * @param answer Consistent stiffness matrix.
-     * @param form Material response form.
      * @param mode Material reponse mode.
      * @param gp Gauss point.
      * @param tStep Time step.
      */
     void giveVertexAlgorithmicStiffMatrix(FloatMatrix &answer,
-                                          MatResponseForm form,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);

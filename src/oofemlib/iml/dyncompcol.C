@@ -41,6 +41,7 @@
 #include "mathfem.h"
 #include "element.h"
 #include "sparsemtrxtype.h"
+#include "activebc.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -429,6 +430,31 @@ int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
         }
     }
 
+    // loop over active boundary conditions
+    int nbc = domain->giveNumberOfBoundaryConditions();
+    std::vector<IntArray> r_locs;
+    std::vector<IntArray> c_locs;
+    
+    for ( int i = 1; i <= nbc; ++i ) {
+        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
+        if ( bc != NULL ) {
+            bc->giveLocationArrays(r_locs, c_locs, ut, UnknownCharType, s, s);
+	    for (std::size_t k = 0; k < r_locs.size(); k++) {
+	      IntArray &krloc = r_locs[k];
+	      IntArray &kcloc = c_locs[k];
+	      for ( int i = 1; i <= krloc.giveSize(); i++ ) {
+		if ( ( ii = krloc.at(i) ) ) {
+		  for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
+		    if ( (jj = kcloc.at(j) ) ) {
+		      this->insertRowInColumn(jj - 1, ii - 1);
+		    }
+		  }
+		}
+	      }
+	    }
+	}
+    }
+
     int nz_ = 0;
     for ( j = 0; j < neq; j++ ) {
         nz_ += this->rowind_ [ j ]->giveSize();
@@ -545,8 +571,8 @@ int DynCompCol :: assemble(const IntArray &rloc, const IntArray &cloc, const Flo
                     //     if (rowindx == 0) {
                     /*
                      *    int oldsize = rowind_[ii1]->giveSize();
-                     *    rowind_[ii1]->resize(oldsize+1, DynCompCol_CHUNK);
-                     *    columns_[ii1]->resize(oldsize+1, DynCompCol_CHUNK);
+                     *    rowind_[ii1]->resizeWithValues(oldsize+1, DynCompCol_CHUNK);
+                     *    columns_[ii1]->resizeWithValues(oldsize+1, DynCompCol_CHUNK);
                      *    rowindx = oldsize+1;
                      *    rowind_[ii1]->at(oldsize+1) = jj1;
                      */
@@ -952,7 +978,7 @@ DynCompCol :: insertRowInColumn(int col, int row)
     int middleVal;
 
     if ( oldsize == 0 ) {
-        rowind_ [ col ]->resize(1, DynCompCol_CHUNK);
+        rowind_ [ col ]->resizeWithValues(1, DynCompCol_CHUNK);
         columns_ [ col ]->resizeWithValues(1, DynCompCol_CHUNK);
         columns_ [ col ]->at(1) = 0.0;
         rowind_ [ col ]->at(1) = row;
@@ -985,7 +1011,7 @@ DynCompCol :: insertRowInColumn(int col, int row)
     }
 
     // insert row at middle+1 position
-    rowind_ [ col ]->resize(oldsize + 1, DynCompCol_CHUNK);
+    rowind_ [ col ]->resizeWithValues(oldsize + 1, DynCompCol_CHUNK);
     columns_ [ col ]->resizeWithValues(oldsize + 1, DynCompCol_CHUNK);
 
     for ( i = oldsize; i >= right; i-- ) {

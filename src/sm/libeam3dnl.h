@@ -100,7 +100,7 @@ public:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
 
-    virtual integrationDomain giveIntegrationDomain() { return _Line; }
+    virtual integrationDomain giveIntegrationDomain() const { return _Line; }
     virtual MaterialMode giveMaterialMode() { return _3dBeam; }
 
 protected:
@@ -120,8 +120,6 @@ protected:
     { _error("computeBmatrixAt: not implemented"); }
     //int computeGtoLRotationMatrix(FloatMatrix& answer);
 
-    // nonlinear part of geometrical eqs. for i-th component of strain vector.
-    //void computeNLBMatrixAt (FloatMatrix& answer, GaussPoint*, int ) ;
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
     double giveLength();

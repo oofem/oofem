@@ -95,16 +95,15 @@ void PrescribedGradient :: setPrescribedGradientVoigt(const FloatArray &t)
 {
     int n = t.giveSize();
     if ( n == 3 ) { // Then 2D
-        this->gradient.resize(2, 2, 0);
+        this->gradient.resize(2, 2);
         this->gradient.at(1, 1) = t.at(1);
         this->gradient.at(2, 2) = t.at(2);
         this->gradient.at(1, 2) = this->gradient.at(2, 1) = t.at(3);
     } else if ( n == 6 ) { // Then 3D
-        OOFEM_ERROR("setPrescribedTensorVoigt: Check the order of voigt vectors in OOFEM");
-        this->gradient.resize(2, 2, 0);
+        this->gradient.resize(3, 3);
         this->gradient.at(1, 1) = t.at(1);
         this->gradient.at(2, 2) = t.at(2);
-        this->gradient.at(2, 2) = t.at(3);
+        this->gradient.at(3, 3) = t.at(3);
         // In voigt form, assuming the use of gamma_12 instead of eps_12
         this->gradient.at(1, 2) = this->gradient.at(2, 1) = t.at(6) * 0.5;
         this->gradient.at(1, 3) = this->gradient.at(3, 1) = t.at(5) * 0.5;

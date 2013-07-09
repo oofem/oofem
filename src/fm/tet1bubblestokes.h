@@ -78,14 +78,7 @@ protected:
     static bool initOrdering() {
         momentum_ordering.setValues(15,  1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19);
         conservation_ordering.setValues(4, 4, 8, 12, 16);
-        // Note; Still possibilities or errors here, check again if results look strange
-        edge_ordering [ 0 ].setValues(6,  1,  2,  3,  5,  6,  7);
-        edge_ordering [ 1 ].setValues(6,  5,  6,  7,  9, 10, 11);
-        edge_ordering [ 2 ].setValues(6,  9, 10, 11,  1,  2,  3);
-        edge_ordering [ 3 ].setValues(6,  1,  2,  3, 13, 14, 15);
-        edge_ordering [ 4 ].setValues(6,  5,  6,  7, 13, 14, 15);
-        edge_ordering [ 5 ].setValues(6,  9, 10, 11, 13, 14, 15);
-        
+
         surf_ordering [ 0 ].setValues(9,  1, 2, 3,  9, 10, 11,  5,  6,  7);
         surf_ordering [ 1 ].setValues(9,  1, 2, 3,  5,  6,  7, 13, 14, 15);
         surf_ordering [ 2 ].setValues(9,  5, 6, 7,  9, 10, 11, 13, 14, 15);
@@ -116,14 +109,12 @@ public:
 
     void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep);
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual void computeBoundaryLoadVector(FloatArray &answer, Load *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual void computeEdgeLoadVector(FloatArray &answer, Load *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
 
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_tetra_1; }
     virtual const char *giveClassName() const { return "Tet1BubbleStokes"; }
     virtual const char *giveInputRecordName() const { return _IFT_Tet1BubbleStokes_Name; }
     virtual classType giveClassID() const { return Tet1BubbleStokesElementClass; }
-    virtual MaterialMode giveMaterialMode() { return _2dFlow; }
+    virtual MaterialMode giveMaterialMode() { return _3dFlow; }
 
     virtual int computeNumberOfDofs(EquationID ut);
     
@@ -131,8 +122,8 @@ public:
     virtual DofManager *giveInternalDofManager(int i) const { return bubble; }
     virtual void giveInternalDofManDofIDMask(int i, EquationID eid, IntArray &answer) const;
 
-    virtual FEInterpolation *giveInterpolation();
-    virtual FEInterpolation *giveInterpolation(DofIDItem id);
+    virtual FEInterpolation *giveInterpolation() const;
+    virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
     virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
 

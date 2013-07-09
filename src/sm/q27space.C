@@ -41,6 +41,7 @@
 #include "intarray.h"
 #include "domain.h"
 #include "mathfem.h"
+#include "crosssection.h"
 #include "classfactory.h"
 #include "fei3dhexatriquad.h"
 
@@ -50,7 +51,7 @@ REGISTER_Element( Q27Space );
 
 FEI3dHexaTriQuad Q27Space :: interpolation;
 
-FEInterpolation* Q27Space :: giveInterpolation()
+FEInterpolation* Q27Space :: giveInterpolation() const
 {
     return &interpolation;
 }
@@ -84,10 +85,7 @@ Q27Space :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) cons
 MaterialMode
 Q27Space :: giveMaterialMode()
 {
-    if ( this->nlGeometry > 1 )
-        return _3dMat_F;
-    else
-        return _3dMat;
+    return _3dMat;
 }
 
 
@@ -105,7 +103,7 @@ Q27Space :: computeVolumeAround(GaussPoint *aGaussPoint)
 double
 Q27Space :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
 {
-    double factor = pow( ( double ) this->numberOfGaussPoints, 1. / 3. );
+    double factor = cbrt( ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
     return this->giveLenghtInDir(normalToCrackPlane) / factor;
 }
 
@@ -118,7 +116,7 @@ Q27Space :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, this->giveMaterialMode());
+        this->giveCrossSection()->setupIntegrationPoints(*integrationRulesArray[0], numberOfGaussPoints, this);
     }
 }
 
@@ -164,78 +162,31 @@ Q27Space :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
     }
 }
 
-void
-Q27Space :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i) 
-// Returns the [60x60] nonlinear part of strain-displacement matrix {B} of the receiver,
-// evaluated at aGaussPoint
-
-{
- 
-    FloatMatrix dnx;
-
-    // compute the derivatives of shape functions
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    answer.resize(81, 81);
-    answer.zero();
-
-    // put the products of derivatives of shape functions into the "nonlinear B matrix",
-    // depending on parameter i, which is the number of the strain component
-    if ( i <= 3 ) {
-        for ( int k = 0; k < 27; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 81; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, i) * dnx.at( ( j - 1 ) / 3 + 1, i );
-                }
-            }
-        }
-    } else if ( i == 4 )        {
-        for ( int k = 0; k < 27; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 81; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 2 );
-                }
-            }
-        }
-    } else if ( i == 5 )        {
-        for ( int k = 0; k < 27; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 81; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
-                }
-            }
-        }
-    } else if ( i == 6 )        {
-        for ( int k = 0; k < 20; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 81; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 2 ) + dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
-                }
-            }
-        }
-    }
-
-    return;
-}
 
 void
-Q27Space :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer) 
+Q27Space :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer) 
 {
-    FloatMatrix dnx;
     
+    FloatMatrix dnx;
+
     this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
-    answer.resize(9, 81);
+    answer.resize(6, 81);
     answer.zero();
 
-    for ( int i = 1; i <= 3; i++ ) { // 3 spatial dimensions
-        for ( int j = 1; j <= 27; j++ ) {
-            answer.at(3 * i - 2, 3 * j - 2) =
-                answer.at(3 * i - 1, 3 * j - 1) =
-                answer.at(3 * i, 3 * j) = dnx.at(j, i); // derivative of Nj wrt Xi
-        }
+    for ( int i = 1; i <= dnx.giveNumberOfRows(); i++ ) {
+        answer.at(1, 3 * i - 2) = dnx.at(i, 1);     // du/dx
+        answer.at(2, 3 * i - 1) = dnx.at(i, 2);     // dv/dy
+        answer.at(3, 3 * i - 0) = dnx.at(i, 3);     // dw/dz
+        answer.at(4, 3 * i - 1) = dnx.at(i, 3);     // dv/dz 
+        answer.at(7, 3 * i - 0) = dnx.at(i, 2);     // dw/dy
+        answer.at(5, 3 * i - 2) = dnx.at(i, 3);     // du/dz 
+        answer.at(8, 3 * i - 0) = dnx.at(i, 1);     // dw/dx
+        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy 
+        answer.at(9, 3 * i - 1) = dnx.at(i, 1);     // dv/dx
     }
 }
+
 
 // ******************************
 // ***  Surface load support  ***
@@ -246,7 +197,7 @@ Q27Space :: GetSurfaceIntegrationRule(int approxOrder)
 {
     IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
     int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Square, approxOrder);
-    iRule->setUpIntegrationPoints(_Square, npoints, _Unknown);
+    iRule->SetUpPointsOnSquare(npoints, _Unknown);
     return iRule;
 }
 

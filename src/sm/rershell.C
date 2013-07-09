@@ -170,7 +170,7 @@ RerShell :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 8);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _3dShell);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
     }
 }
 
@@ -658,7 +658,7 @@ RerShell :: printOutputAt(FILE *file, TimeStep *stepN)
 
     fprintf(file, "element %d :\n", number);
 
-    for ( int i = 1; i <= numberOfGaussPoints; i++ ) {
+    for ( int i = 1; i <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); i++ ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(i - 1);
         if ( !domain->giveEngngModel()->isIncremental() ) {
             // delete this -> ComputeStrainVector(gp,stepN) ;

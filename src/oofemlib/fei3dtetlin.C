@@ -49,10 +49,10 @@ FEI3dTetLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICel
     answer.at(4) = 1. - lcoords.at(1) - lcoords.at(2) - lcoords.at(3);
 }
 
-void
+double
 FEI3dTetLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4, vol;
+    double x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4, detJ;
     answer.resize(4, 3);
 
     x1 = cellgeo.giveVertexCoordinates(1)->at(1);
@@ -70,11 +70,11 @@ FEI3dTetLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FE
     z3 = cellgeo.giveVertexCoordinates(3)->at(3);
     z4 = cellgeo.giveVertexCoordinates(4)->at(3);
 
-    vol = ( ( x4 - x1 ) * ( y2 - y1 ) * ( z3 - z1 ) - ( x4 - x1 ) * ( y3 - y1 ) * ( z2 - z1 ) +
-           ( x3 - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) +
-           ( x2 - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x3 - x1 ) * ( y2 - y1 ) * ( z4 - z1 ) ) / 6.;
+    detJ = ( ( x4 - x1 ) * ( y2 - y1 ) * ( z3 - z1 ) - ( x4 - x1 ) * ( y3 - y1 ) * ( z2 - z1 ) +
+             ( x3 - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) +
+             ( x2 - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x3 - x1 ) * ( y2 - y1 ) * ( z4 - z1 ) );
 
-    if ( vol <= 0.0 ) {
+    if ( detJ <= 0.0 ) {
         OOFEM_ERROR("FEI3dTetLin :: evaldNdx: negative volume");
     }
 
@@ -93,7 +93,9 @@ FEI3dTetLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FE
     answer.at(3, 3) = -( ( x1 - x4 ) * ( y2 - y4 ) - ( x2 - x4 ) * ( y1 - y4 ) );
     answer.at(4, 3) = ( x2 - x1 ) * ( y3 - y1 ) - ( x3 - x1 ) * ( y2 - y1 );
 
-    answer.times( 1. / ( 6. * vol ) );
+    answer.times( 1. / detJ );
+    
+    return detJ;
 }
 
 void

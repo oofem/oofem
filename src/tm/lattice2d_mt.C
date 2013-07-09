@@ -141,12 +141,12 @@ Lattice2d_mt :: giveMass()
 
 
 void
-Lattice2d_mt :: computeNSubMatrixAt(FloatMatrix &answer, FloatArray *coords)
+Lattice2d_mt :: computeNSubMatrixAt(FloatMatrix &answer, const FloatArray &coords)
 {
     double ksi, n1, n2;
     //FloatMatrix* answer ;
 
-    ksi = coords->at(1);
+    ksi = coords.at(1);
     n1  = ( 1. - ksi ) * 0.5;
     n2  = ( 1. + ksi ) * 0.5;
     //answer = new FloatMatrix(2,4) ;
@@ -160,7 +160,7 @@ Lattice2d_mt :: computeNSubMatrixAt(FloatMatrix &answer, FloatArray *coords)
 }
 
 void
-Lattice2d_mt :: computeNmatrixAt(FloatMatrix &answer, FloatArray *coords)
+Lattice2d_mt :: computeNmatrixAt(FloatMatrix &answer, const FloatArray &coords)
 {
     this->computeNSubMatrixAt(answer, coords);
 }
@@ -196,9 +196,9 @@ Lattice2d_mt :: updateInternalState(TimeStep *stepN)
     // force updating ip values
     for ( i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
-            this->computeNmatrixAt( n, gp->giveCoordinates() );
+            this->computeNmatrixAt( n, *gp->giveCoordinates() );
             this->computeVectorOf(EID_ConservationEquation, VM_Total, stepN, r);
             f.beProductOf(n, r);
             mat->updateInternalState(f, gp, stepN);
@@ -285,7 +285,7 @@ Lattice2d_mt :: computeConductivityMatrix(FloatMatrix &answer, MatResponseMode r
     answer.at(2, 1) = -1;
     answer.at(2, 2) = 1.;
 
-    k = ( ( TransportMaterial * ) this->giveMaterial() )->giveCharacteristicValue(Conductivity, gp, tStep);
+    k = static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicValue(Conductivity, gp, tStep);
     dV      = this->computeVolumeAround(gp);
     double temp = k * dV / pow(length, 2.);
     answer.times(temp);
@@ -306,8 +306,8 @@ Lattice2d_mt :: computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.at(1, 2) = 1.;
     answer.at(2, 1) = 1.;
     answer.at(2, 2) = 2.;
-    c = ( static_cast< TransportMaterial * >( this->giveMaterial() ) )->giveCharacteristicValue(Capacity, gp, tStep);
-    dV      = this->computeVolumeAround(gp) / ( 6.0 * this->dimension );
+    c = static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicValue(Capacity, gp, tStep);
+    dV = this->computeVolumeAround(gp) / ( 6.0 * this->dimension );
     answer.times(c * dV);
 }
 
@@ -356,7 +356,7 @@ Lattice2d_mt :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *a
             dV  = this->computeVolumeAround(gp);
             load->computeValueAt(val, atTime, deltaX, mode);
 
-            k = ( static_cast< TransportMaterial * >( this->giveMaterial() ) )->giveCharacteristicValue(Conductivity_hh, gp, atTime);
+            k = static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicValue(Conductivity_hh, gp, atTime);
 
             double helpFactor = val.at(1) * k * dV;
 

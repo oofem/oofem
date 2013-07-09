@@ -297,24 +297,11 @@ public:
     virtual const char *giveClassName() const { return "LatticeDamage2d"; }
     virtual classType giveClassID() const { return LatticeDamage2dClass; }
 
-    virtual int giveStressStrainComponentIndOf(MatResponseForm, MaterialMode mmode, int);
-
-    virtual void giveStressStrainMask(IntArray & answer, MatResponseForm, MaterialMode mmode) const;
-
-    virtual int giveSizeOfReducedStressStrainVector(MaterialMode);
-
-    virtual void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *,
-                                                 const FloatArray &charVector3d);
-
-    virtual void giveFullCharacteristicVector(FloatArray &answer,  GaussPoint *,
-                                              const FloatArray &);
-
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
+    virtual void  giveStiffnessMatrix(FloatMatrix &answer,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *atTime);
@@ -382,7 +369,7 @@ public:
     virtual Interface *giveInterface(InterfaceType);
 
 
-    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
+    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
                                       const FloatArray &, TimeStep *);
 
     /** Reimplemented from RandomMaterialInterface */

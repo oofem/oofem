@@ -90,7 +90,7 @@ public:
     MisesMat(int n, Domain *d);
     virtual ~MisesMat();
 
-    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, MaterialMode mode);
+    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
     double computeDamage(GaussPoint *gp, TimeStep *atTime);
     double computeDamageParam(double tempKappa);
     double computeDamageParamPrime(double tempKappa);
@@ -116,36 +116,41 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseForm form, MatResponseMode mode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep);
+                                               MatResponseMode mode,
+                                               GaussPoint *gp,
+                                               TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                              const FloatArray &reducedStrain, TimeStep *tStep);
+    virtual void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
+                                                    MatResponseMode mode,
+                                                    GaussPoint *gp,
+                                                    TimeStep *tStep);
+
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                                      const FloatArray &reducedStrain, TimeStep *tStep);
 
 protected:
     /// Evaluates the stress from Green-Lagrange strain E.
-    void giveRealStressVectorComputedFromStrain(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    void giveRealStressVectorComputedFromStrain(FloatArray &answer, GaussPoint *gp,
                                                 const FloatArray &E, TimeStep *tStep);
 
     /// evaluates the stress from deformation gradient F.
-    void giveRealStressVectorComputedFromDefGrad(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                                                 const FloatArray & F, TimeStep *tStep);
+    void giveRealStressVectorComputedFromDefGrad(FloatArray &answer, GaussPoint *gp,
+                                                 const FloatArray &F, TimeStep *tStep);
 
-    /// Converts the deformation gradient F into the Green-Lagrange strain E
-    void convertDefGradToGLStrain(const FloatMatrix &F, FloatMatrix &E);
+    void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep);
+
     void computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatMatrix b, double J);
 
     void give3dSSMaterialStiffnessMatrix(FloatMatrix &answer,
-                                         MatResponseForm form, MatResponseMode mode,
+                                         MatResponseMode mode,
                                          GaussPoint *gp,
                                          TimeStep *tStep);
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dLSMaterialStiffnessMatrix(FloatMatrix &answer,
-                                         MatResponseForm form, MatResponseMode mode,
-                                         GaussPoint *gp,
-                                         TimeStep *tStep);
+                                                 MatResponseMode mode,
+                                                 GaussPoint *gp,
+                                                 TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
@@ -184,9 +189,6 @@ protected:
     /// Cumulative plastic strain (final).
     double tempKappa;
 
-    /// Deformation gradient(final).
-    FloatMatrix tempDefGrad, defGrad;
-
     /************************/
     double tempDamage, damage;
     /******************************/
@@ -213,9 +215,6 @@ public:
     double giveCumulativePlasticStrain() { return kappa; }
     double giveTempCumulativePlasticStrain() { return tempKappa; }
 
-    void giveTempDefGrad(FloatMatrix &answer) { answer = tempDefGrad; }
-    void giveDefGrad(FloatMatrix &answer) { answer = defGrad; }
-
     void giveTempLeftCauchyGreen(FloatMatrix &answer) { answer = tempLeftCauchyGreen; }
     void giveLeftCauchyGreen(FloatMatrix &answer) { answer = leftCauchyGreen; }
 
@@ -237,8 +236,6 @@ public:
     /****************************************/
     void setTempDamage(double value) { tempDamage = value; }
     /************************************************/
-    void letDefGradBe(FloatMatrix values) { defGrad = values; }
-    void letTempDefGradBe(FloatMatrix values) { tempDefGrad = values; }
 
     void letTempLeftCauchyGreenBe(FloatMatrix values) { tempLeftCauchyGreen = values; }
     void letLeftCauchyGreenBe(FloatMatrix values) { leftCauchyGreen = values; }

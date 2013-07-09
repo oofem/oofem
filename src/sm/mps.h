@@ -207,8 +207,7 @@ public:
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void giveShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
-                                           GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+    virtual void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
@@ -233,15 +232,13 @@ protected:
     /// Returns initial value of the flow term viscosity
     double giveInitViscosity(TimeStep *atTime);
 
-    virtual void  giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
-                                        GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+    virtual void  giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
 
     virtual int hasIncrementalShrinkageFormulation() { return 1; }
 
 
     /// Evaluation of the shrinkageStrainVector - shrinkage is fully dependent on humidity rate in given GP
-    void computePointShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
-                                           GaussPoint *gp, TimeStep *atTime);
+    void computePointShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime);
 
 
     double inverse_sorption_isotherm(double w);

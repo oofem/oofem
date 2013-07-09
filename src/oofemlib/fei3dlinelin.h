@@ -46,11 +46,14 @@ class FEI3dLineLin : public FEInterpolation3d
 public:
     FEI3dLineLin() : FEInterpolation3d(1) { };
 
+    virtual integrationDomain giveIntegrationDomain() const { return _Line; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+
     virtual double giveVolume(const FEICellGeometry &cellgeo) const { return 0.0; }
     virtual double giveLength(const FEICellGeometry &cellgeo) const;
 
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual int global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo);

@@ -270,7 +270,7 @@ void MixedGradientPressureNeumann :: giveLocationArrays(std::vector<IntArray> &r
 }
 
 
-IntegrationRule *MixedGradientPressureNeumann :: CreateIntegrationRule(Element *e, int order)
+IntegrationRule *MixedGradientPressureNeumann :: CreateIntegrationRule(Element *e, int boundary, int order)
 {
     // The element should give us most/all of this information;
     GaussIntegrationRule *ir = new GaussIntegrationRule(1, e);
@@ -297,7 +297,7 @@ IntegrationRule *MixedGradientPressureNeumann :: CreateIntegrationRule(Element *
 
 void MixedGradientPressureNeumann :: integrateVolTangent(FloatArray &answer, Element *e, int boundary)
 {
-    FloatArray normal, n, contrib;
+    FloatArray normal, n;
     FloatMatrix nMatrix;
     IntArray boundaryNodes;
     
@@ -311,10 +311,10 @@ void MixedGradientPressureNeumann :: integrateVolTangent(FloatArray &answer, Ele
     
     int nsd = e->giveDomain()->giveNumberOfSpatialDimensions();
     int order = interp->giveInterpolationOrder() + interpUnknown->giveInterpolationOrder();
-    IntegrationRule *ir = this->CreateIntegrationRule(e, order);
+    IntegrationRule *ir = this->CreateIntegrationRule(e, boundary, order);
 
     answer.resize(0);
-    for (int i = 0; i < ir->getNumberOfIntegrationPoints(); i++) {
+    for (int i = 0; i < ir->giveNumberOfIntegrationPoints(); i++) {
         GaussPoint *gp = ir->getIntegrationPoint(i);
         FloatArray &lcoords = *gp->giveCoordinates();
         FEIElementGeometryWrapper cellgeo(e);
@@ -325,9 +325,7 @@ void MixedGradientPressureNeumann :: integrateVolTangent(FloatArray &answer, Ele
         interpUnknown->boundaryEvalN(n, boundary, lcoords, cellgeo);
         nMatrix.beNMatrixOf(n, nsd);
 
-        contrib.beTProductOf(nMatrix, normal);
-        
-        answer.add(detJ*gp->giveWeight(), contrib);
+        answer.plusProduct(nMatrix, normal, detJ*gp->giveWeight());
     }
     delete ir;
 }
@@ -349,10 +347,10 @@ void MixedGradientPressureNeumann :: integrateDevTangent(FloatMatrix &answer, El
     
     int nsd = e->giveDomain()->giveNumberOfSpatialDimensions();
     int order = interp->giveInterpolationOrder() + interpUnknown->giveInterpolationOrder();
-    IntegrationRule *ir = this->CreateIntegrationRule(e, order);
+    IntegrationRule *ir = this->CreateIntegrationRule(e, boundary, order);
     
     answer.resize(0,0);
-    for (int i = 0; i < ir->getNumberOfIntegrationPoints(); i++) {
+    for (int i = 0; i < ir->giveNumberOfIntegrationPoints(); i++) {
         GaussPoint *gp = ir->getIntegrationPoint(i);
         FloatArray &lcoords = *gp->giveCoordinates();
         FEIElementGeometryWrapper cellgeo(e);
@@ -456,9 +454,7 @@ void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep
             fe.times(-this->pressure);
             answer.assemble(fe, loc);
             if ( eNorms ) {
-                for ( int i = 1; i <= loc.giveSize(); ++i ) {
-                    if ( loc.at(i) ) eNorms->at(masterDofIDs.at(i)) += fe.at(i) * fe.at(i);
-                }
+                eNorms->assembleSquared(fe, masterDofIDs);
             }
         }
         
@@ -486,16 +482,15 @@ void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep
             // We just use the tangent, less duplicated code (the addition of sigmaDev is linear).
             fe_v.beProductOf(Ke, e_v);
             fe_s.beTProductOf(Ke, s_dev);
+            // Note: The terms appear negative in the equations:
+            fe_v.negated();
+            fe_s.negated();
             
             answer.assemble(fe_s, loc); // Contributions to delta_v equations
             answer.assemble(fe_v, sigma_loc); // Contribution to delta_s_i equations
             if ( eNorms ) {
-                for ( int i = 1; i <= loc.giveSize(); ++i ) {
-                    if ( loc.at(i) ) eNorms->at(masterDofIDs.at(i)) += fe_s.at(i) * fe_s.at(i);
-                }
-                for ( int i = 1; i <= sigma_loc.giveSize(); ++i ) {
-                    if ( sigma_loc.at(i) ) eNorms->at(sigmaMasterDofIDs.at(i)) += fe_v.at(i) * fe_v.at(i);
-                }
+                eNorms->assembleSquared(fe_s, masterDofIDs);
+                eNorms->assembleSquared(fe_v, sigmaMasterDofIDs);
             }
         }
     }
@@ -529,6 +524,7 @@ void MixedGradientPressureNeumann :: assemble(SparseMtrx *answer, TimeStep *tSte
             e->giveBoundaryLocationArray(loc_r, boundary, eid, r_s);
             e->giveBoundaryLocationArray(loc_c, boundary, eid, c_s);
             this->integrateDevTangent(Ke, e, boundary);
+            Ke.negated();
             KeT.beTranspositionOf(Ke);
 
             answer->assemble(sigma_loc_r, loc_c, Ke); // Contribution to delta_s_i equations
@@ -707,7 +703,7 @@ void MixedGradientPressureNeumann :: giveInputRecord(DynamicInputRecord &input)
 {
     MixedGradientPressureBC :: giveInputRecord(input);
     input.setField(this->pressure, _IFT_MixedGradientPressure_pressure);
-    OOFEM_ERROR("MixedGradientPressureDirichlet :: giveInputRecord - Not supported yet\n");
+    OOFEM_ERROR("MixedGradientPressureNeumann :: giveInputRecord - Not supported yet\n");
     //FloatArray devGradientVoigt;
     //input.setField(devGradientVoigt, _IFT_MixedGradientPressure_devGradient);
 }

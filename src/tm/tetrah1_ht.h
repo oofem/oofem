@@ -59,7 +59,7 @@ public:
     Tetrah1_ht(int n, Domain *d);
     virtual ~Tetrah1_ht();
 
-    virtual FEInterpolation *giveInterpolation();
+    virtual FEInterpolation *giveInterpolation() const;
     
     virtual double computeVolumeAround(GaussPoint *gp);
 
@@ -70,7 +70,7 @@ public:
 
     virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 4 : 8; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_tetra_1; }
+    virtual MaterialMode giveMaterialMode() { return _3dHeat; }
 
     virtual Interface *giveInterface(InterfaceType t);
     virtual int testElementExtension(ElementExtension ext)
@@ -107,6 +107,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Tetrah1_hmt_Name; }
     virtual const char *giveClassName() const { return "Tetrah1_hmt"; }
     virtual classType giveClassID() const { return Tetrah1_hmtClass; }
+    virtual MaterialMode giveMaterialMode() { return _3dHeMo; }
 };
 
 } // end namespace oofem

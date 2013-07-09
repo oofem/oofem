@@ -229,7 +229,7 @@ void StructuralElementEvaluator :: computeConsistentMassMatrix(FloatMatrix &answ
 
     mass = 0.;
 
-    for ( int ip = 0; ip < iRule->getNumberOfIntegrationPoints(); ip++ ) {
+    for ( int ip = 0; ip < iRule->giveNumberOfIntegrationPoints(); ip++ ) {
         gp      = iRule->getIntegrationPoint(ip);
         density = elem->giveMaterial()->give('d', gp);
         dV      = this->computeVolumeAround(gp);
@@ -271,7 +271,7 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
     IntegrationRule *iRule;
     int ndofs = elem->computeNumberOfDofs(EID_MomentumBalance);
     FloatMatrix b;
-    FloatArray bs, strain, stress, u, temp;
+    FloatArray strain, stress, u, temp;
     IntArray irlocnum;
     double dV;
 
@@ -289,14 +289,14 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
     for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
         m->resize(0);
         iRule = elem->giveIntegrationRule(ir);
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule->getIntegrationPoint(i);
             this->computeBMatrixAt(b, gp);
             if ( useUpdatedGpRecord ) {
                 stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
             } else {
                 this->computeStrainVector(strain, gp, tStep, u); ///@todo This part computes the B matrix again; Inefficient.
-                cs->giveRealStresses(stress, ReducedForm, gp, strain, tStep);
+                cs->giveRealStresses(stress, gp, strain, tStep);
             }
 
             if ( stress.giveSize() == 0 ) {
@@ -305,8 +305,7 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
 
             // compute nodal representation of internal forces using f = B^T*Sigma dV
             dV = this->computeVolumeAround(gp);
-            bs.beTProductOf(b, stress);
-            m->add(dV, bs);
+            m->plusProduct(b, stress, dV);
         }
         // localize irule contribution into element matrix
         if ( this->giveIntegrationElementLocalCodeNumbers(irlocnum, elem, iRule, EID_MomentumBalance) ) {
@@ -374,10 +373,10 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
         if (this->giveElement()->giveKnotSpanParallelMode(i) == Element_remote) continue;
 #endif
         iRule = elem->giveIntegrationRule(i);
-        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
             this->computeStrainVector(strain, gp, tStep, u);
-            cs->giveRealStresses(stress, ReducedForm, gp, strain, tStep);
+            cs->giveRealStresses(stress, gp, strain, tStep);
         }
     }
 
@@ -393,7 +392,7 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
          if (this->giveElement()->giveKnotSpanParallelMode(i) == Element_remote) continue;
      #endif
         iRule = elem->giveIntegrationRule(i);
-        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             computeStressVector(stress, iRule->getIntegrationPoint(j), tStep);
         }
      }
@@ -433,7 +432,7 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
         m->resize(0, 0);
         iRule = elem->giveIntegrationRule(ir);
         // loop over individual integration points
-        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
             this->computeBMatrixAt(bj, gp);
             //elem->computeConstitutiveMatrixAt(d, rMode, gp, tStep);

@@ -48,11 +48,6 @@ namespace oofem {
 enum MatResponseForm {
     ReducedForm, ///< Only stiffness for necessary stresses are given.
     FullForm,    ///< all component of 3d stresses are available, even if they equal 0.
-    PDGrad_uu,   ///< gradient model, left upper block.
-    PDGrad_ku,   ///< gradient model, left lower block.
-    PDGrad_uk,   ///< gradient model, right upper block.
-    PDGrad_kk,   ///< gradient model, right lower block.
-    PDGrad_LD,   ///< gradient model, stress-based averaging.
 };
 } // end namespace oofem
 #endif // matesponseform_h

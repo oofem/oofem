@@ -52,10 +52,8 @@ namespace oofem {
 class GaussPoint;
 
 /**
- * Class implementing isotropic linear elastic material.
- * This class implements an isotropic linear elastic material in a finite
- * element problem. A material
- * is an attribute of a domain. It is usually also attribute of many elements.
+ * This class implements an isotropic linear elastic material in a finite element problem.
+ * For large deformation analysis it becomes the St. Venant-Kirchoff hyperelasticity model.
  *
  * Tasks:
  * - Returning standard material stiffness matrix for 3d-case.
@@ -97,8 +95,7 @@ public:
     /// Destructor.
     virtual ~IsotropicLinearElasticMaterial() { }
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                  MatResponseForm form,
+    virtual void giveStiffnessMatrix(FloatMatrix &answer,
                                   MatResponseMode mode,
                                   GaussPoint *gp,
                                   TimeStep *atTime);
@@ -140,7 +137,7 @@ public:
     double giveBulkModulus() { return E / ( 3. * ( 1. - 2. * nu ) ); }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                       MatResponseForm, MatResponseMode,
+                                       MatResponseMode,
                                        GaussPoint * gp,
                                        TimeStep * atTime);
 
@@ -176,24 +173,24 @@ public:
 
 protected:
     virtual void givePlaneStressStiffMtrx(FloatMatrix & answer,
-                                  MatResponseForm, MatResponseMode, GaussPoint * gp,
+                                  MatResponseMode, GaussPoint * gp,
                                   TimeStep * atTime);
 
     virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer,
-                                  MatResponseForm, MatResponseMode, GaussPoint * gp,
+                                  MatResponseMode, GaussPoint * gp,
                                   TimeStep * atTime);
 
     virtual void give1dStressStiffMtrx(FloatMatrix & answer,
-                               MatResponseForm, MatResponseMode, GaussPoint * gp,
+                               MatResponseMode, GaussPoint * gp,
                                TimeStep * atTime);
 
     virtual void give2dBeamStiffMtrx(FloatMatrix &answer,
-                             MatResponseForm form, MatResponseMode rMode,
+                             MatResponseMode rMode,
                              GaussPoint *gp,
                              TimeStep *tStep);
 
     virtual void give3dBeamStiffMtrx(FloatMatrix &answer,
-                             MatResponseForm form, MatResponseMode rMode,
+                             MatResponseMode rMode,
                              GaussPoint *gp,
                              TimeStep *tStep);
 

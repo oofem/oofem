@@ -126,26 +126,17 @@ public:
     virtual classType giveClassID() const { return StructuralMaterialClass; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode,
+                                               MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
+    virtual void  giveStiffnessMatrix(FloatMatrix &answer,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *tStep);
-
-    virtual int giveStressStrainComponentIndOf(MatResponseForm form, MaterialMode mmode, int ind);
-    virtual void giveStressStrainMask(IntArray &answer, MatResponseForm form, MaterialMode mmode) const;
-    virtual int giveSizeOfReducedStressStrainVector(MaterialMode mmode);
-    void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                         const FloatArray &charVector3d);
-    void giveFullCharacteristicVector(FloatArray &answer,  GaussPoint *gp,
-                                      const FloatArray &strainVector);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
@@ -167,7 +158,7 @@ public:
 
 protected:
     // Overloaded to use specialized versions of these services possibly implemented by linearElastic member
-    void give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+    void give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *tStep);
 };
 } // end namespace oofem

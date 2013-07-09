@@ -77,6 +77,7 @@ protected:
     void computeGaussPoints();
     void computeNkappaMatrixAt(GaussPoint*, FloatMatrix&);
     void computeBkappaMatrixAt(GaussPoint*, FloatMatrix&);
+    virtual void computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
     StructuralElement* giveStructuralElement() { return this; }
     NLStructuralElement* giveNLStructuralElement() { return this; }
 

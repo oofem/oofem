@@ -45,7 +45,6 @@
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "crosssection.h"
-#include "matresponseform.h"
 #include "matresponsemode.h"
 #include "fei2dtrlin.h"
 #include "classfactory.h"
@@ -77,7 +76,7 @@ void Tr1Darcy :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _2dHeat);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
     }
 }
 
@@ -98,14 +97,14 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *atTime)
     answer.resize(3, 3);
     answer.zero();
 
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         lcoords = gp->giveCoordinates();
 
         double detJ = this->interpolation_lin.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
         this->interpolation_lin.evaldNdx( BT, * lcoords, FEIElementGeometryWrapper(this) );
         
-        mat->giveCharacteristicMatrix(K, FullForm, TangentStiffness, gp, atTime);
+        mat->giveCharacteristicMatrix(K, TangentStiffness, gp, atTime);
 
         B.beTranspositionOf(BT);
         KB.beProductOf(K, B);
@@ -126,9 +125,8 @@ void Tr1Darcy :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Val
 
 void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *atTime)
 {
-    FloatArray *lcoords, w, a, gradP, I;
-    FloatMatrix BT;
-    GaussPoint *gp;
+    FloatArray w, a, gradP, P(1), n;
+    FloatMatrix B, BT;
 
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
@@ -138,19 +136,21 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *atTim
     answer.resize(3);
     answer.zero();
 
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
-        lcoords = gp->giveCoordinates();
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
+        FloatArray *lcoords = gp->giveCoordinates();
 
         double detJ = this->interpolation_lin.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
         this->interpolation_lin.evaldNdx( BT, * lcoords, FEIElementGeometryWrapper(this) );
+        this->interpolation_lin.evalN( n, *lcoords, FEIElementGeometryWrapper(this) );
+        B.beTranspositionOf(BT);
+        P.at(1) = n.dotProduct(a); // Evaluates the field at this point.
 
-        gradP.beTProductOf(BT, a);
+        gradP.beProductOf(B, a);
 
-        mat->giveFluxVector(w, gp, gradP, atTime);
+        mat->giveFluxVector(w, gp, gradP, P, atTime);
 
-        I.beProductOf(BT, w);
-        answer.add(- gp->giveWeight() * detJ, I);
+        answer.plusProduct(B, w, - gp->giveWeight() * detJ);
     }
 }
 
@@ -210,9 +210,9 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
         reducedAnswer.zero();
         IntArray mask;
 
-        iRule.setUpIntegrationPoints(_Line, numberOfEdgeIPs, _Unknown);
+        iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
 
-        for ( int i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
             this->interpolation_lin.edgeEvalN(N, iEdge, *lcoords, FEIElementGeometryWrapper(this));

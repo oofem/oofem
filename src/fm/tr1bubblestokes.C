@@ -45,6 +45,7 @@
 #include "fluiddynamicmaterial.h"
 #include "fei2dtrlin.h"
 #include "masterdof.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -86,7 +87,7 @@ void Tr1BubbleStokes :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, this->numberOfGaussPoints, _2dFlow);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], this->numberOfGaussPoints, this );
     }
 }
 
@@ -157,7 +158,7 @@ void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
-    FloatArray a_pressure, a_velocity, devStress, epsp, BTs, N, dNv(8);
+    FloatArray a_pressure, a_velocity, devStress, epsp, N, dNv(8);
     double r_vol, pressure;
     FloatMatrix dN, B(3, 8);
     B.zero();
@@ -169,12 +170,11 @@ void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep
     momentum.zero();
     conservation.zero();
 
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
-        double detJ = fabs(this->interp.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)));
-        this->interp.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
+        double detJ = fabs( this->interp.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this)) );
         this->interp.evalN(N, * lcoords, FEIElementGeometryWrapper(this));
         double dA = detJ * gp->giveWeight();
 
@@ -190,9 +190,8 @@ void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep
         epsp.beProductOf(B, a_velocity);
 
         mat->computeDeviatoricStressVector(devStress, r_vol, gp, epsp, pressure, tStep);
-        BTs.beTProductOf(B, devStress);
 
-        momentum.add(dA, BTs);
+        momentum.plusProduct(B, devStress, dA);
         momentum.add(-pressure*dA, dNv);
         conservation.add(r_vol*dA, N);
     }
@@ -220,7 +219,7 @@ void Tr1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeStep
         ltype = load->giveBCGeoType();
 
         if ( ltype == EdgeLoadBGT ) {
-            this->computeBoundaryLoadVector(vec, load, load_id, ExternalForcesVector, VM_Total, tStep);
+            this->computeBoundaryLoadVector(vec, static_cast<BoundaryLoad*>(load), load_id, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         }
     }
@@ -250,11 +249,11 @@ void Tr1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharTy
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
-        for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+        for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(k);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, tStep);
+            double rho = this->giveMaterial()->give('d', gp);
             double detJ = fabs( this->interp.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
             double dA = detJ * gp->giveWeight();
 
@@ -273,7 +272,7 @@ void Tr1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharTy
     answer.assemble( temparray, this->momentum_ordering );
 }
 
-void Tr1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, Load *load, int iEdge, CharType type, ValueModeType mode, TimeStep *tStep)
+void Tr1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iEdge, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
         answer.resize(0);
@@ -290,9 +289,9 @@ void Tr1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, Load *load
         IntArray edge_mapping;
 
         f.zero();
-        iRule.setUpIntegrationPoints(_Line, numberOfEdgeIPs, _Unknown);
+        iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
 
-        for ( int i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
@@ -336,15 +335,13 @@ void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     G.zero();
     B.zero();
 
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         // Compute Gauss point and determinant at current element
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
-        double detJ = fabs(this->interp.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)));
+        double detJ = fabs( this->interp.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this)) );
         double dA = detJ * gp->giveWeight();
-
-        this->interp.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
         this->interp.evalN(N, * lcoords, FEIElementGeometryWrapper(this));
         for ( int j = 0, k = 0; j < 3; j++, k += 2 ) {
             dNv(k)     = B(0, k)     = B(2, k + 1) = dN(j, 0);
@@ -389,12 +386,12 @@ void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     answer.assemble(C, this->conservation_ordering);
 }
 
-FEInterpolation *Tr1BubbleStokes :: giveInterpolation()
+FEInterpolation *Tr1BubbleStokes :: giveInterpolation() const
 {
     return &interp;
 }
 
-FEInterpolation *Tr1BubbleStokes :: giveInterpolation(DofIDItem id)
+FEInterpolation *Tr1BubbleStokes :: giveInterpolation(DofIDItem id) const
 {
     return &interp;
 }

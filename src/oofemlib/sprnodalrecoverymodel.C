@@ -602,7 +602,7 @@ SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int 
         element = domain->giveElement( patchElems.at(ielem) );
         if ( ( interface = static_cast< SPRNodalRecoveryModelInterface * >( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) ) {
             iRule = element->giveDefaultIntegrationRulePtr();
-            nip = iRule->getNumberOfIntegrationPoints();
+            nip = iRule->giveNumberOfIntegrationPoints();
             for ( int i = 0; i < nip; i++ ) {
                 gp  = iRule->getIntegrationPoint(i);
                 if ( !element->giveIPValue(ipVal, gp, type, tStep) ) {

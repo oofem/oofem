@@ -300,9 +300,7 @@ LatticeDamage2d :: initDamaged(double kappa, FloatArray &strainVector, GaussPoin
     //get the random variable from the status
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
 
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
-
-    crossSection->giveFullCharacteristicVector(fullstrain, gp, strainVector);
+    StructuralMaterial :: giveFullSymVectorForm(fullstrain, strainVector, gp->giveMaterialMode());
 
     if ( ( kappa > e0 ) && ( status->giveDamage() == 0. ) ) {
         this->computePrincipalValDir(principalStrains, principalDir, fullstrain, principal_strain);
@@ -352,7 +350,6 @@ LatticeDamage2d :: giveStatus(GaussPoint *gp) const
 
 void
 LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
-                                        MatResponseForm form,
                                         GaussPoint *gp,
                                         const FloatArray &totalStrain,
                                         TimeStep *atTime)
@@ -555,19 +552,6 @@ LatticeDamage2d :: computeDeltaDissipation(double omega,
     return tempDeltaDissipation;
 }
 
-void
-LatticeDamage2d :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
-                                        MaterialMode mmode) const
-{
-    if ( mmode == _2dLattice ) {
-        answer.resize(3);
-        for ( int i = 1; i <= 3; i++ ) {
-            answer.at(i) = i;
-        }
-    } else {
-        _error("Error: Unknown materialmode");
-    }
-}
 
 void LatticeDamage2d :: giveRandomParameters(FloatArray &param)
 {
@@ -589,34 +573,9 @@ LatticeDamage2d :: giveInterface(InterfaceType type)
 }
 
 
-int
-LatticeDamage2d :: giveStressStrainComponentIndOf(MatResponseForm form, MaterialMode mmode, int ind)
-{
-    if ( mmode == _2dLattice ) {
-        return ind;
-    } else {
-        _error("Unknown material mode\n");
-    }
-
-    return 0;
-}
-
-int
-LatticeDamage2d :: giveSizeOfReducedStressStrainVector(MaterialMode mode)
-{
-    switch ( mode ) {
-    case _2dLattice:
-        return 3;
-
-    default:
-        _error("Unknown material mode \n");
-        return 0;
-    }
-}
-
 void
-LatticeDamage2d :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                            MatResponseForm form, MatResponseMode rMode,
+LatticeDamage2d :: giveStiffnessMatrix(FloatMatrix &answer,
+                                            MatResponseMode rMode,
                                             GaussPoint *gp, TimeStep *atTime)
 {
     MaterialMode mMode = gp->giveMaterialMode();
@@ -686,27 +645,6 @@ LatticeDamage2d :: giveElasticStiffnessMatrix(FloatMatrix &answer,
 }
 
 
-
-void
-LatticeDamage2d :: giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                                   const FloatArray &charVector3d)
-//
-// returns reduced stressVector or strainVector from full 3d vector reduced
-// to vector required by gp->giveStressStrainMode()
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-
-    if ( mode == _2dLattice ) {
-        answer = charVector3d;
-        return;
-    } else {
-        _error("Unknown material mode\n");
-    }
-}
-
-
-
 void
 LatticeDamage2d :: giveThermalDilatationVector(FloatArray &answer,
                                                GaussPoint *gp,  TimeStep *tStep)
@@ -732,21 +670,6 @@ LatticeDamage2d :: give(int aProperty, GaussPoint *gp)
     }
 }
 
-
-void
-LatticeDamage2d :: giveFullCharacteristicVector(FloatArray &answer,
-                                                GaussPoint *gp,
-                                                const FloatArray &strainVector)
-
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    if ( mode == _2dLattice ) {
-        answer = strainVector;
-        return;
-    } else {
-        _error("Unknown material model\n");
-    }
-}
 
 int
 LatticeDamage2d :: giveIPValue(FloatArray &answer,

@@ -109,9 +109,8 @@ public:
 
     void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep);
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual void computeBoundaryLoadVector(FloatArray &answer, Load *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
 
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     virtual const char *giveClassName() const { return "Tr21Stokes"; }
     virtual const char *giveInputRecordName() const { return _IFT_Tr21Stokes_Name; }
     virtual classType giveClassID() const { return Tr21StokesElementClass; }
@@ -119,8 +118,8 @@ public:
 
     virtual int computeNumberOfDofs(EquationID ut);
 
-    virtual FEInterpolation *giveInterpolation();
-    virtual FEInterpolation *giveInterpolation(DofIDItem id);
+    virtual FEInterpolation *giveInterpolation() const;
+    virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
     /**
      * Gives the dof ID mask for the element.

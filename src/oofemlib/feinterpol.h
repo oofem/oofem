@@ -38,6 +38,8 @@
 #include "error.h"
 #include "inputrecord.h"
 #include "intarray.h"
+#include "integrationdomain.h"
+#include "elementgeometrytype.h"
 
 namespace oofem {
 class Element;
@@ -122,6 +124,16 @@ protected:
 public:
     FEInterpolation(int o) { order = o; }
     virtual ~FEInterpolation() { }
+
+    /**
+     * Returns the integration domain of the interpolator.
+     */
+    virtual integrationDomain giveIntegrationDomain() const = 0;
+    /**
+     * Returns the geometry type fo the interpolator.
+     */
+    virtual Element_Geometry_Type giveGeometryType() const = 0;
+
     /**
      * Returns the interpolation order.
      */
@@ -139,8 +151,9 @@ public:
      * @param answer Contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
+     * @return Determinant of the Jacobian.
      */
-    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
      * Evaluates the matrix of second derivatives of interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)

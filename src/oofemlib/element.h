@@ -86,6 +86,7 @@ class CrossSection;
 class ElementSide;
 class FEInterpolation;
 class Load;
+class BoundaryLoad;
 
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;
@@ -220,11 +221,6 @@ public:
      */
     void giveBoundaryLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
     /**
-     * Returns the location array for the edge of the element.
-     * The element must be in 3D. For 2D edges, use Element::giveBoundaryLocationArray.
-     */
-    void giveEdgeLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
-    /**
      * @return Number of DOFs in element.
      */
     virtual int giveNumberOfDofs() { return 0; }
@@ -301,7 +297,7 @@ public:
      * @param mode Determines mode of answer.
      * @param tStep Time step when answer is computed.
      */
-    virtual void computeBoundaryLoadVector(FloatArray &answer, Load *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
     /**
      * Computes the contribution of the given load at the given edge.
      * @param answer Requested contribution of load.
@@ -313,8 +309,6 @@ public:
      */
     virtual void computeEdgeLoadVector(FloatArray &answer, Load *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep);
     //@}
-
-    //virtual MaterialMode giveMaterialMode() {return _Unknown;}
 
     /**@name General element functions */
     //@{
@@ -395,10 +389,7 @@ public:
      * @param answer Computed rotation matrix.
      * @return Nonzero if transformation is necessary, zero otherwise.
      */
-    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer) {
-        answer.beEmptyMtrx();
-        return false;
-    }
+    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
     /**
      * Transformation matrices updates rotation matrix between element-local and primary DOFs,
      * taking into account nodal c.s. and master DOF weights.
@@ -415,10 +406,11 @@ public:
      * Local stiffness matrix of element should be rotated with answer before assembly.
      * @note Function does most likely NOT need to be overridden.
      * @param answer Computed rotation matrix.
+     * @param nodes Nodes to include in element local ordering.
      * @param eid Equation ID.
      * @return True if transformation is necessary, false otherwise.
      */
-    virtual bool computeDofTransformationMatrix(FloatMatrix &answer, EquationID eid);
+    virtual bool computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &nodes, EquationID eid);
     /**
      * Returns dofmanager dof mask for node. This mask defines the dofs which are used by element
      * in node. Mask influences the code number ordering for particular node. Code numbers are
@@ -435,7 +427,7 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const { answer.resize(0); }
     /**
      * Calls giveDofManDofIDMask with the default equation id for the type of problem.
-     * @todo Can have a pure virtual method because of the hacks in HellmichMaterial :: createMaterialGp()
+     * @todo Cant have a pure virtual method because of the hacks in HellmichMaterial :: createMaterialGp()
      */
     virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { }
     /**
@@ -537,14 +529,14 @@ public:
      */
     virtual ElementSide *giveSide(int i) const;
     /// @return Interpolation of the element geometry, or NULL if none exist.
-    virtual FEInterpolation *giveInterpolation() { return NULL; }
+    virtual FEInterpolation *giveInterpolation() const { return NULL; }
     /**
      * Returns the interpolation for the specific dof id.
      * Special elements which uses a mixed interpolation should reimplement this method.
      * @param id ID of the dof for the for the requested interpolation.
      * @return Appropriate interpolation, or NULL if none exists.
      */
-    virtual FEInterpolation *giveInterpolation(DofIDItem id) { return giveInterpolation(); }
+    virtual FEInterpolation *giveInterpolation(DofIDItem id) const { return giveInterpolation(); }
     /// @return Reference to the associated material of element.
     Material *giveMaterial();
     /// @return Reference to the associated crossSection of element.
@@ -581,14 +573,11 @@ public:
     void setIntegrationRules(AList< IntegrationRule > *irlist);
     /**
      * Returns integration domain for receiver, used to initialize
-     * integration point over receiver volume. Must be specialized.
-     * @see IntegrationRule
+     * integration point over receiver volume.
+     * Default behavior is taken from the default interpolation.
      * @return Integration domain of element.
      */
-    virtual integrationDomain giveIntegrationDomain() {
-        IntegrationRule *ir = giveDefaultIntegrationRulePtr();
-        return ir ? ir->giveIntegrationDomain() : _Unknown_integrationDomain;
-    }
+    virtual integrationDomain giveIntegrationDomain() const;
     /**
      * Returns material mode for receiver integration points. Should be specialized.
      * @return Material mode of element.
@@ -686,17 +675,17 @@ public:
      * it is required only for some specialized tasks.
      * @return Geometry type of element.
      */
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_unknown; }
+    virtual Element_Geometry_Type giveGeometryType() const;
     /**
      * Returns the element spatial dimension (1, 2, or 3).
      * This is completely based on the geometrical shape, so a plane in space counts as 2 dimensions.
      * @return Number of spatial dimensions of element.
      */
-    virtual int giveSpatialDimension() const;
+    virtual int giveSpatialDimension();
     /**
      * @return Number of boundaries of element.
      */
-    virtual int giveNumberOfBoundarySides() const;
+    virtual int giveNumberOfBoundarySides();
     /**
      * Returns id of default integration rule. Various element types can use
      * different integration rules for implementation of selective or reduced
@@ -817,8 +806,9 @@ public:
     /**
      * Computes the element local coordinates from given global coordinates.
      * Should compute local coordinates even if point is outside element (for mapping purposes in adaptivity)
+     * @param answer Local coordinates.
+     * @param gcoords Global coordinates.
      * @return Nonzero if point is inside element; zero otherwise.
-     * @
      */
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     /**
@@ -1048,7 +1038,7 @@ Element :: ipEvaluator( T *src, void ( T :: *f )( GaussPoint * gp ) )
     GaussPoint *gp;
 
     for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        nip = integrationRulesArray [ ir ]->getNumberOfIntegrationPoints();
+        nip = integrationRulesArray [ ir ]->giveNumberOfIntegrationPoints();
         for ( ip = 0; ip < nip; ip++ ) {
             gp = integrationRulesArray [ ir ]->getIntegrationPoint(ip);
             ( src->*f )(gp);
@@ -1063,7 +1053,7 @@ Element :: ipEvaluator(T *src, void ( T :: *f )( GaussPoint *, S & ), S &_val)
     GaussPoint *gp;
 
     for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        nip = integrationRulesArray [ ir ]->getNumberOfIntegrationPoints();
+        nip = integrationRulesArray [ ir ]->giveNumberOfIntegrationPoints();
         for ( ip = 0; ip < nip; ip++ ) {
             gp = integrationRulesArray [ ir ]->getIntegrationPoint(ip);
             ( src->*f )(gp, _val);

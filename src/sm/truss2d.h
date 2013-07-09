@@ -96,8 +96,9 @@ public:
     virtual const char *giveClassName() const { return "Truss2d"; }
     virtual classType giveClassID() const { return Truss2dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
+    ///@todo Introduce interpolator and remove these:
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
-    virtual integrationDomain giveIntegrationDomain() { return _Line; }
+    virtual integrationDomain giveIntegrationDomain() const { return _Line; }
     virtual MaterialMode giveMaterialMode() { return _1dMat; }
 
 protected:
@@ -109,7 +110,7 @@ protected:
     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *gp);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    virtual void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int);
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &);
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &);
     virtual void computeGaussPoints();
 

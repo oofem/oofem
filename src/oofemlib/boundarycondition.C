@@ -47,9 +47,12 @@ double BoundaryCondition :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 // Returns the value at stepN of the prescribed value of the kinematic
 // unknown 'u'. Returns 0 if 'u' has no prescribed value.
 {
-    double factor;
-
-    factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
+    double factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
+    int index = this->dofs.findFirstIndexOf(dof->giveDofID());
+    if ( !index ) {
+        index = 1;
+    }
+    double prescribedValue = this->values.at(index);
     return prescribedValue * factor;
 }
 
@@ -64,10 +67,23 @@ BoundaryCondition :: initializeFrom(InputRecord *ir)
 
     GeneralBoundaryCondition :: initializeFrom(ir);
 
-    if ( ir->hasField(_IFT_BoundaryCondition_PrescribedValue) ) {
-        IR_GIVE_FIELD(ir, prescribedValue, _IFT_BoundaryCondition_PrescribedValue);
+    if ( ir->hasField(_IFT_BoundaryCondition_values) ) {
+        IR_GIVE_FIELD(ir, values, _IFT_BoundaryCondition_values);
     } else {
-        IR_GIVE_FIELD(ir, prescribedValue, _IFT_BoundaryCondition_PrescribedValue_d);
+        double prescribedValue;
+        if ( ir->hasField(_IFT_BoundaryCondition_PrescribedValue) ) {
+            IR_GIVE_FIELD(ir, prescribedValue, _IFT_BoundaryCondition_PrescribedValue);
+        } else {
+            IR_GIVE_FIELD(ir, prescribedValue, _IFT_BoundaryCondition_PrescribedValue_d);
+        }
+        // Backwards compatibility with old input method:
+        if ( this->dofs.giveSize() ) {
+            values.resize(this->dofs.giveSize());
+        } else {
+            values.resize(1);
+        }
+        values.zero();
+        values.add(prescribedValue);
     }
 
     return IRRT_OK;
@@ -78,7 +94,22 @@ void
 BoundaryCondition :: giveInputRecord(DynamicInputRecord &input)
 {
     GeneralBoundaryCondition :: giveInputRecord(input);
-    input.setField(this->prescribedValue, _IFT_BoundaryCondition_PrescribedValue);
+    input.setField(this->values, _IFT_BoundaryCondition_values);
+}
+
+
+void
+BoundaryCondition :: setPrescribedValue(double s)
+{
+    values.zero();
+    values.add(s);
+}
+
+
+void
+BoundaryCondition :: scale(double s)
+{
+    values.times(s);
 }
 
 } // end namespace oofem

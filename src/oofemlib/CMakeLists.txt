@@ -15,6 +15,7 @@ set (core_unsorted
     set.C
     rvematerial.C
     weakperiodicbc.C
+    solutionbasedshapefunction.C
     # Semi sorted:
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C
@@ -214,6 +215,7 @@ set (core_bc
     mixedgradientpressurebc.C
     mixedgradientpressuredirichlet.C
     mixedgradientpressureneumann.C
+    mixedgradientpressureweakperiodic.C
     load.C
     boundaryload.C
     pointload.C
@@ -224,6 +226,7 @@ set (core_bc
     deadweight.C
     reinforcement.C
     surfacetensionbc.C
+    linearconstraintbc.C
     )
 
 set (core_mapping

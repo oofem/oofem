@@ -108,8 +108,6 @@ public:
     virtual const FloatMatrix *computeGtoLRotationMatrix();
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
 
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
-
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 

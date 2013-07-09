@@ -39,6 +39,7 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -94,7 +95,7 @@ QTruss1dGrad :: computeGaussPoints()
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule* [numberOfIntegrationRules];
     integrationRulesArray[0] = new GaussIntegrationRule (1,this,1, 1);
-    integrationRulesArray[0]->setUpIntegrationPoints (_Line, numberOfGaussPoints, _1dMatGrad);
+    this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
 }
 
 

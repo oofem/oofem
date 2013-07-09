@@ -80,12 +80,13 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode, GaussPoint *gp,
+                                               MatResponseMode mode, GaussPoint *gp,
                                                TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
 
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                                      const FloatArray &reducedStrain, TimeStep *tStep);
+    
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     virtual int hasMaterialModeCapability(MaterialMode);

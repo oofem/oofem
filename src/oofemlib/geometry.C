@@ -793,9 +793,38 @@ void PolygonLine :: computeIntersectionPoints(Element *element, AList< FloatArra
 		Line *l = new Line(a, b);
 		computeIntersectionPoints(l, & oneLineIntersects);
 		for ( int j = 1; j <= oneLineIntersects.giveSize(); j++ ) {
-			int sz = intersecPoints->giveSize();
-			intersecPoints->put( sz + 1, oneLineIntersects.at(j) );
-			oneLineIntersects.unlink(j);
+
+			// Check that the intersection point has not already been identified.
+			// This may happen if the crack intersects the element exactly at a node,
+			// so that intersection is detected for both element edges in that node.
+
+			// TODO: Set tolerance in a more transparent way.
+			double distTol = 1.0e-9;
+
+			bool alreadyFound = false;
+
+			bPoint2 pNew( oneLineIntersects.at(j)->at(1), oneLineIntersects.at(j)->at(2) );
+
+			int numPointsOld = intersecPoints->giveSize();
+			for(int k = 1; k <= numPointsOld; k++)
+			{
+				bPoint2 pOld( intersecPoints->at(k)->at(1), intersecPoints->at(k)->at(2) );
+
+				if( bDist(pOld, pNew) < distTol )
+				{
+					alreadyFound = true;
+					break;
+				}
+
+			}
+
+			if(!alreadyFound)
+			{
+				int sz = intersecPoints->giveSize();
+				intersecPoints->put( sz + 1, oneLineIntersects.at(j) );
+				oneLineIntersects.unlink(j);
+			}
+
 		}
 
 		delete l;
@@ -831,7 +860,7 @@ void PolygonLine :: computeIntersectionPoints(Line *l, AList< FloatArray > *inte
 		bPoint2 crackP2( this->giveVertex(segId+1)->at(1), this->giveVertex(segId+1)->at(2) );
 		bSeg2 crackSeg( crackP1, crackP2 );
 
-		bPoint2 intersectionPoint;
+		bPoint2 intersectionPoint(0.0, 0.0);
 		double d = bDist( crackSeg, lineSeg, &intersectionPoint );
 		if( d < distTol)
 		{

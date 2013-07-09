@@ -68,7 +68,7 @@ public:
     Truss1d(int n, Domain *d);
     virtual ~Truss1d() { }
 
-    virtual FEInterpolation* giveInterpolation() { return & interp; }
+    virtual FEInterpolation *giveInterpolation() const { return & interp; }
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
@@ -98,7 +98,7 @@ public:
     virtual const char *giveClassName() const { return "Truss1d"; }
     virtual classType giveClassID() const { return Truss1dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+    virtual MaterialMode giveMaterialMode() { return _1dMat; }
 
     // ZZNodalRecoveryMInterface
     //void ZZNodalRecoveryMI_computeNValProduct (FloatArray& answer, InternalStateType type, TimeStep* tStep);
@@ -108,10 +108,10 @@ public:
 
     // NodalAveragingRecoveryMInterface
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
 
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                   InternalStateType type, TimeStep *tStep);
+                                                           InternalStateType type, TimeStep *tStep);
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
 
@@ -156,11 +156,9 @@ public:
                                                                       coordType ct, nodalValContainerType &list,
                                                                       InternalStateType type, TimeStep *tStep);
 
-    virtual integrationDomain giveIntegrationDomain() { return _Line; }
-    virtual MaterialMode giveMaterialMode() { return _1dMat; }
-
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
     virtual int giveApproxOrder() { return 1; }

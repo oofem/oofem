@@ -119,7 +119,7 @@ protected:
     virtual void computeGaussPoints();
 
     virtual void  computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *);
-    virtual void  computeNmatrixAt(FloatMatrix &n, FloatArray *);
+    virtual void  computeNmatrixAt(FloatMatrix &n, const FloatArray &);
 
     virtual double giveCrackFactor();
 
@@ -133,7 +133,7 @@ protected:
 
     /* computes the submatrix of interpolation matrix cooresponding to single unknown.
      */
-    virtual void  computeNSubMatrixAt(FloatMatrix &n, FloatArray *);
+    virtual void  computeNSubMatrixAt(FloatMatrix &n, const FloatArray &);
 
     virtual double giveLength();
 

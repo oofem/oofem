@@ -70,7 +70,7 @@ FEI2dQuadLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICe
     answer.at(4) = ( 1. + ksi ) * ( 1. - eta ) * 0.25;
 }
 
-void
+double
 FEI2dQuadLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatMatrix jacobianMatrix(2, 2), inv, dn;
@@ -88,6 +88,7 @@ FEI2dQuadLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
     inv.beInverseOf(jacobianMatrix);
 
     answer.beProductTOf(dn, inv);
+    return jacobianMatrix.giveDeterminant();
 }
 
 void

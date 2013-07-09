@@ -63,7 +63,7 @@ ScalarErrorIndicator :: giveElementError(EE_ErrorType type, Element *elem, TimeS
 {
     FloatArray val;
     IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
-    int result = 1, nip = iRule->getNumberOfIntegrationPoints();
+    int result = 1, nip = iRule->giveNumberOfIntegrationPoints();
     double sval, maxVal = 0.0;
 
     if ( type != indicatorET ) {

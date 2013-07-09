@@ -88,8 +88,7 @@ public:
     virtual classType giveClassID() const { return InterfaceElem1dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_point; }
-
-    virtual integrationDomain giveIntegrationDomain() { return _Point; }
+    virtual integrationDomain giveIntegrationDomain() const { return _Point; }
     virtual MaterialMode giveMaterialMode();
 
 protected:

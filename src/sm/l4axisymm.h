@@ -44,7 +44,6 @@
 #define _IFT_L4Axisymm_Name "l4axisymm"
 
 namespace oofem {
-
 /**
  * This class implements an isoparametric four-node quadrilateral axisymmetric
  * finite element. Each node has 2 degrees of freedom.
@@ -68,7 +67,7 @@ public:
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &crackToNormalPlane);
 
-    virtual FEInterpolation *giveInterpolation() { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 
     virtual Interface *giveInterface(InterfaceType it);
 
@@ -79,7 +78,6 @@ public:
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
 
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
@@ -101,11 +99,11 @@ public:
     //void drawInternalState(oofegGraphicContext &);
 #endif
 
-    virtual integrationDomain giveIntegrationDomain() { return _Square; }
     virtual MaterialMode giveMaterialMode() { return _3dMat; }
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
 

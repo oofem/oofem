@@ -191,10 +191,8 @@ ConcreteDPM2Status :: printOutputAt(FILE *file, TimeStep *tStep)
     StrainVector plasticStrainVector( gp->giveMaterialMode() );
     giveFullPlasticStrainVector(plasticStrainVector);
 
-    //    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
-
-    StrainVector inelasticStrainVector( gp->giveMaterialMode() );
-    static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->giveFullCharacteristicVector(inelasticStrainVector, gp, strainVector);
+    StrainVector inelasticStrainVector( gp->giveMaterialMode() ); ///@todo Is this material mode really correct? Shouldn't it be the full material mode?
+    StructuralMaterial :: giveFullSymVectorForm(inelasticStrainVector, strainVector, gp->giveMaterialMode());
 
     inelasticStrainVector.subtract(plasticStrainVector);
     inelasticStrainVector.times(damage);
@@ -553,7 +551,6 @@ ConcreteDPM2 :: hasMaterialModeCapability(MaterialMode mMode)
 
 void
 ConcreteDPM2 :: giveRealStressVector(FloatArray &answer,
-                                     MatResponseForm form,
                                      GaussPoint *gp,
                                      const FloatArray &strainVector,
                                      TimeStep *atTime)
@@ -573,8 +570,6 @@ ConcreteDPM2 :: giveRealStressVector(FloatArray &answer,
     FloatArray testStrain;
 
     //  ConcreteDPM2Status *status = giveStatus (gp) ;
-
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     StrainVector strain(strainVector, matMode);
     //Calculate the strain increment!
@@ -638,11 +633,7 @@ ConcreteDPM2 :: giveRealStressVector(FloatArray &answer,
 
     assignStateFlag(gp);
 
-    if ( form == ReducedForm ) {
-        answer = stress;
-    } else {
-        crossSection->giveFullCharacteristicVector(answer, gp, stress);
-    }
+    answer = stress;
 }
 
 
@@ -2296,7 +2287,6 @@ ConcreteDPM2 :: computeHardeningTwoPrime(const double kappa) const
 
 void
 ConcreteDPM2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                              MatResponseForm form,
                                               MatResponseMode mode,
                                               GaussPoint *gp,
                                               TimeStep *atTime)
@@ -2305,9 +2295,9 @@ ConcreteDPM2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
          gp->giveMaterialMode() ==  _PlaneStrain ||
          gp->giveMaterialMode() == _3dRotContinuum  ) {
         if ( mode == ElasticStiffness ) {
-            this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+            this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
         } else if ( mode == SecantStiffness ) {
-            computeSecantStiffness(answer, form, mode, gp, atTime);
+            computeSecantStiffness(answer, mode, gp, atTime);
         } else if ( mode == TangentStiffness ) {
             _error("Tangent stiffness not implemented. Use either elastic or secant stiffness.\n");
         }
@@ -2316,7 +2306,6 @@ ConcreteDPM2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
 void
 ConcreteDPM2 :: computeSecantStiffness(FloatMatrix &answer,
-                                       MatResponseForm form,
                                        MatResponseMode mode,
                                        GaussPoint *gp,
                                        TimeStep *atTime)
@@ -2331,9 +2320,9 @@ ConcreteDPM2 :: computeSecantStiffness(FloatMatrix &answer,
     if ( omegaTension > 0.999999 ) {
         omegaTension = 0.999999;
     }
-
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
-
+    FloatMatrix stiff;
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(stiff, mode, gp, atTime);
+    this->giveFullSymMatrixForm(answer, stiff, gp->giveMaterialMode());
 
     if ( isotropicFlag == 1 ) {
         answer.times(1. - omegaTension);

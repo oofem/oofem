@@ -54,9 +54,9 @@
 #include "cemhydmat.h"
 #include "homogenize.h"
 #include "mathfem.h"
-#include "classfactory.h"
 
 #ifdef __TM_MODULE //OOFEM transport module
+ #include "classfactory.h"
  #include "domain.h"
  #include "floatmatrix.h"
  #include "gausspoint.h"
@@ -377,7 +377,7 @@ CemhydMat :: giveIPValueType(InternalStateType type)
 int
 CemhydMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
-    if ( ( type == IST_HydrationDegree ) ) {
+    if ( type == IST_HydrationDegree ) {
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
@@ -394,7 +394,7 @@ CemhydMat :: initMaterial(Element *element)
     CemhydMatStatus *ms;
 
     iRule = element->giveDefaultIntegrationRulePtr();
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
         if ( !MasterCemhydMatStatus && !eachGP ) {
             ms = new CemhydMatStatus(1, domain, gp, NULL, this, 1);
@@ -419,7 +419,7 @@ void CemhydMat :: clearWeightTemperatureProductVolume(Element *element)
     int i;
     iRule = element->giveDefaultIntegrationRulePtr();
 
-    for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
         ms = ( CemhydMatStatus * ) this->giveStatus(gp);
         ms->setAverageTemperatureVolume(0.0, 0.0);
@@ -436,7 +436,7 @@ void CemhydMat :: storeWeightTemperatureProductVolume(Element *element, TimeStep
     iRule = element->giveDefaultIntegrationRulePtr();
 
     if ( !eachGP ) {
-        for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
             //when more GPs are lumped to a master GP
             dV  = element->computeVolumeAround(gp);

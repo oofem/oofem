@@ -43,6 +43,7 @@
 #include "verbose.h"
 #include "element.h"
 #include "sparsemtrxtype.h"
+#include "activebc.h"
 #include "classfactory.h"
 
 #ifdef TIME_REPORT
@@ -351,6 +352,35 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
             }
         }
     }
+
+
+    // loop over active boundary conditions
+    int nbc = domain->giveNumberOfBoundaryConditions();
+    std::vector<IntArray> r_locs;
+    std::vector<IntArray> c_locs;
+    
+    for ( int i = 1; i <= nbc; ++i ) {
+        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
+        if ( bc != NULL ) {
+            bc->giveLocationArrays(r_locs, c_locs, ut, UnknownCharType, s, s);
+	    for (std::size_t k = 0; k < r_locs.size(); k++) {
+	      IntArray &krloc = r_locs[k];
+	      IntArray &kcloc = c_locs[k];
+	      for ( int i = 1; i <= krloc.giveSize(); i++ ) {
+		if ( ( ii = krloc.at(i) ) ) {
+		  for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
+		    if ( (jj = kcloc.at(j) ) ) {
+		      this->insertColInRow(ii - 1, jj - 1);
+		    }
+		  }
+		}
+	      }
+	    }
+	}
+    }
+
+
+
 
     int nz_ = 0;
     for ( j = 0; j < neq; j++ ) {
@@ -662,7 +692,7 @@ DynCompRow :: insertColInRow(int row, int col)
     int middleVal;
 
     if ( oldsize == 0 ) {
-        colind_ [ row ]->resize(1, DynCompRow_CHUNK);
+        colind_ [ row ]->resizeWithValues(1, DynCompRow_CHUNK);
         rows_ [ row ]->resizeWithValues(1, DynCompRow_CHUNK);
         rows_ [ row ]->at(1) = 0.0;
         colind_ [ row ]->at(1) = col;
@@ -695,7 +725,7 @@ DynCompRow :: insertColInRow(int row, int col)
     }
 
     // insert col at middle+1 position
-    colind_ [ row ]->resize(oldsize + 1, DynCompRow_CHUNK);
+    colind_ [ row ]->resizeWithValues(oldsize + 1, DynCompRow_CHUNK);
     rows_ [ row ]->resizeWithValues(oldsize + 1, DynCompRow_CHUNK);
 
     for ( i = oldsize; i >= right; i-- ) {
@@ -808,7 +838,7 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
         inorm = sqrt(inorm);
 
         w.resizeWithValues(rows_ [ i ]->giveSize(), ILU_ROW_CHUNK);
-        iw.resize(rows_ [ i ]->giveSize(), ILU_ROW_CHUNK);
+        iw.resizeWithValues(rows_ [ i ]->giveSize(), ILU_ROW_CHUNK);
         for ( kk = 1; kk <= rows_ [ i ]->giveSize(); kk++ ) {
             irw( colind_ [ i ]->at(kk) ) = kk;
             iw(kk - 1) = colind_ [ i ]->at(kk);
@@ -840,7 +870,7 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
                             // insert new entry
                             int newsize = w.giveSize() + 1;
                             w.resizeWithValues(newsize, ILU_ROW_CHUNK);
-                            iw.resize(newsize, ILU_ROW_CHUNK);
+                            iw.resizeWithValues(newsize, ILU_ROW_CHUNK);
 
                             iw.at(newsize) = jcol;
                             w.at(newsize) = -multiplier * rows_ [ krow ]->at(j + 1);

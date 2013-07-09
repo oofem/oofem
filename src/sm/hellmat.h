@@ -92,6 +92,7 @@ class GaussPoint;
 // absolute error bound for plastic local iteration (D f1) - has same scale as stress ... 1e-8/1e6 = 1e-14
  #define FINDROOT_SMALLNUM 1e-8
 
+enum MatResponseForm { FullForm, ReducedForm };
 // active plastic surface
 enum ActiveSurface { asNone = 0, asDP = 1, asTC = 2, asCorner = 3 };
 // material options mask {
@@ -627,7 +628,7 @@ protected:
      * @param coeff determines whether creep viscosity coefficients should be taken into account (true)
      */
     void elasticStiffness(FloatArray &stress, FloatArray &strain, GaussPoint *gp, TimeStep *atTime, MatResponseForm form, int coeff);
-    void elasticCompliance(FloatArray &strain, FloatArray &stress, GaussPoint *gp, TimeStep *atTime, MatResponseForm form, int coeff);
+    void elasticCompliance(FloatArray &strain, FloatArray &stress, GaussPoint *gp, TimeStep *atTime, int coeff);
 
     /// autogenous shrinkage strains
     double autoShrinkageCoeff(double ksi);
@@ -666,9 +667,9 @@ protected:
     void stressReturn(FloatArray &stress, FloatArray &trialStress, GaussPoint *gp, TimeStep *atTime);
 
     virtual void give1dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
+                                               MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
+                                               MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
 
     /**
      * Returns time function for temperature given as direct input.
@@ -791,7 +792,7 @@ public:
     void giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
                                GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
 
-    virtual void giveRealStressVector(FloatArray &, MatResponseForm, GaussPoint *,
+    virtual void giveRealStressVector(FloatArray &, GaussPoint *,
                               const FloatArray &, TimeStep *);
 
     virtual void printOutputAt(FILE *file, TimeStep *atTime);
@@ -819,8 +820,8 @@ public:
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
+    virtual void giveStiffnessMatrix(FloatMatrix &answer,
+                                          MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
 
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
@@ -856,7 +857,7 @@ public:
     HellmichMaterial(int n, Domain *d);
     virtual ~HellmichMaterial() {}
 
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm f, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &strain, TimeStep *tstep) { answer.resize(0); }
 
     virtual const char *giveClassName() const { return "HellmichMaterial"; }

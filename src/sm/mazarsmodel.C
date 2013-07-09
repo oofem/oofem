@@ -130,14 +130,13 @@ MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strai
 {
     double posNorm = 0.0;
     FloatArray principalStrains, strainb;
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     if ( strain.isEmpty() ) {
         kappa = 0.;
         return;
     }
 
-    crossSection->giveFullCharacteristicVector(strainb, gp, strain);
+    StructuralMaterial :: giveFullSymVectorForm(strainb, strain, gp->giveMaterialMode());
     // if plane stress mode -> compute strain in z-direction from condition of zero stress in corresponding direction
     int ndim = giveNumberOfSpatialDimensions(gp);
     if ( ndim == 2 ) {
@@ -189,7 +188,7 @@ MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strai
  *  int i, j;
  *
  *  answer.resize(3, 3);
- *  lMat->give3dMaterialStiffnessMatrix(de, FullForm, rMode, gp, atTime);
+ *  lMat->give3dMaterialStiffnessMatrix(de, rMode, gp, atTime);
  *  // copy first 3x3 submatrix to answer
  *  for ( i = 1; i <= 3; i++ ) {
  *      for ( j = 1; j <= 3; j++ ) {

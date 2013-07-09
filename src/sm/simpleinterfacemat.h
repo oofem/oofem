@@ -116,30 +116,17 @@ public:
     virtual classType giveClassID() const { return SimpleInterfaceMaterialClass; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm from,
                                                MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *atTime);
 
-    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
+    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
                               const FloatArray &, TimeStep *);
 
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
+    virtual void  giveStiffnessMatrix(FloatMatrix &answer,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *atTime);
-
-    virtual int giveStressStrainComponentIndOf(MatResponseForm, MaterialMode mmode, int);
-    virtual void giveStressStrainMask(IntArray & answer, MatResponseForm, MaterialMode mmode) const;
-    virtual int giveSizeOfReducedStressStrainVector(MaterialMode);
-    void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                         const FloatArray &charVector3d);
-    void giveFullCharacteristicVector(FloatArray &answer,  GaussPoint *gp,
-                                      const FloatArray &strainVector);
-
-#ifdef __OOFEG
-#endif
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);

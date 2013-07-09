@@ -83,6 +83,7 @@ enum CS_type {
 /**
  * This class implements a orthotropic linear elastic material in a finite
  * element problem.
+ * For large deformations it becomes the orthotropic St. Venant-Kirchoff hyperelasticity model.
  *
  * Tasks:
  * - Returning standard material stiffness marix for 3d-case.
@@ -132,14 +133,14 @@ public:
     virtual double give(int aProperty, GaussPoint *gp);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseForm form, MatResponseMode mode, GaussPoint * gp,
+                                       MatResponseMode mode, GaussPoint * gp,
                                        TimeStep *tStep);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     /// Computes local 3d stiffness matrix of the receiver.
     virtual void give3dLocalMaterialStiffnessMatrix(FloatMatrix &answer,
-                                            MatResponseForm form, MatResponseMode mode, GaussPoint *gp,
+                                            MatResponseMode mode, GaussPoint *gp,
                                             TimeStep *tStep);
 
 protected:

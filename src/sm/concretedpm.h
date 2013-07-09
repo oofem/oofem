@@ -481,11 +481,9 @@ public:
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
     virtual void giveRealStressVector(FloatArray &answer,
-                                      MatResponseForm form,
                                       GaussPoint *gp,
                                       const FloatArray &reducedStrain,
                                       TimeStep *tStep);
-
 
     /**
      * @param gp Gauss point.
@@ -733,7 +731,7 @@ public:
     /// Compute the derivative of R with respect to costheta.
     double computeDRDCosTheta(const double theta, const double ecc) const;
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
 

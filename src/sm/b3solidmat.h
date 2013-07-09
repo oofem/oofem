@@ -111,8 +111,7 @@ public:
 
     virtual void updateYourself(GaussPoint *gp, TimeStep *tStep);
 
-    virtual void giveShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
-                                           GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    virtual void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     virtual const char *giveClassName() const { return "B3SolidMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_B3SolidMaterial_Name; }
@@ -126,15 +125,12 @@ public:
 protected:
     virtual int hasIncrementalShrinkageFormulation() { return 1; }
 
-    void computeTotalAverageShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
-                                                  GaussPoint *gp, TimeStep *tStep);
+    void computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     /// Evaluation of the shrinkageStrainVector. Shrinkage is fully dependent on humidity rate in given GP
-    void computePointShrinkageStrainVectorMPS(FloatArray &answer, MatResponseForm form,
-                                              GaussPoint *gp, TimeStep *tStep);
+    void computePointShrinkageStrainVectorMPS(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-    void computeShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
-                                      GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    void computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
     void predictParametersFrom(double, double, double, double, double, double, double);
 
     /// Evaluation of the compliance function of the non-aging solidifying constituent.
@@ -157,8 +153,7 @@ protected:
 
     virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep);
 
-    virtual void giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
-                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    virtual void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     /**
      * Computes microprestress at given time step and GP.

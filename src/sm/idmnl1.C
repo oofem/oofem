@@ -739,7 +739,7 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
         elem->computeBmatrixAt(gp, b);
 
         LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-        lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
         stress.beProductOf(de, strain);
 
         f = ( e0 / ( equivStrain * equivStrain ) ) * exp( -( equivStrain - e0 ) / ( ef - e0 ) )
@@ -772,7 +772,6 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     int ncols, nsize;
     double coeff = 0.0, sum;
     IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
     StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
     FloatMatrix b, de, den, princDir(3, 3), t;
     FloatArray stress, fullStress, strain, principalStress, help, nu;
@@ -785,10 +784,10 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
         FloatArray fullHelp, fullNu;
         LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
 
-        lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
         strain = status->giveTempStrainVector();
         stress.beProductOf(de, strain);
-        crossSection->giveFullCharacteristicVector(fullStress, gp, stress);
+        StructuralMaterial :: giveFullSymVectorForm(fullStress, stress, gp->giveMaterialMode());
         if ( gp->giveMaterialMode() == _1dMat ) {
             principalStress = fullStress;
         } else {
@@ -888,14 +887,14 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
         }
 
         fullHelp.beTProductOf(t, fullPrincStress);
-        crossSection->giveReducedCharacteristicVector(help, gp, fullHelp);
+        StructuralMaterial :: giveReducedSymVectorForm(help, fullHelp, gp->giveMaterialMode());
 
         nu.beProductOf(de, help);
     } else if ( this->equivStrainType == EST_ElasticEnergy ) {
         double equivStrain;
 
         LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-        lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
         strain = status->giveTempStrainVector();
         stress.beProductOf(de, strain);
         this->computeLocalEquivalentStrain(equivStrain, strain, gp, atTime);
@@ -929,14 +928,17 @@ IDNLMaterial :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
     //
     // return Elastic Stiffness matrix for normal Stresses
     LinearElasticMaterial *lMat = this->giveLinearElasticMaterial();
-    FloatMatrix de;
-    int i, j;
+    FloatMatrix deRed, de;
+
+    lMat->give3dMaterialStiffnessMatrix(de, rMode, gp, atTime);
+    // This isn't used? Do we need one with zeroed entries (below) or the general 3d stiffness (above)?
+    //lMat->giveCharacteristicMatrix(de, rMode, gp, atTime);
+    //StructuralMaterial :: giveFullSymMatrixForm( de, deRed, gp->giveMaterialMode());
 
     answer.resize(3, 3);
-    lMat->giveCharacteristicMatrix(de, FullForm, rMode, gp, atTime);
     // copy first 3x3 submatrix to answer
-    for ( i = 1; i <= 3; i++ ) {
-        for ( j = 1; j <= 3; j++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             answer.at(i, j) = de.at(i, j);
         }
     }

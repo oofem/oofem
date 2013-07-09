@@ -50,7 +50,6 @@ namespace bp = boost::python;
 #include "gausspoint.h"
 #include "internalstatetype.h"
 #include "matresponsemode.h"
-#include "matresponseform.h"
 #include "structuralmaterial.h"
 #include "matstatus.h"
 #include "structuralms.h"
@@ -71,7 +70,6 @@ namespace oofem {
 /*****************************************************
 * FloatArray
 *****************************************************/
-//BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(flotarry_overloads_resize, resize, 1, 2)
 void (FloatArray::*floatarray_add_1)(const FloatArray&) = &FloatArray::add;
 void (FloatArray::*floatarray_add_2)(double, const FloatArray&) = &FloatArray::add;
 void (FloatArray::*floatarray_add_3)(double) = &FloatArray::add;
@@ -124,7 +122,6 @@ void pyclass_FloatArray()
 /*****************************************************
 * FloatMatrix
 *****************************************************/
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(floatmatrix_overloads_resize, resize, 2, 3)
 void (FloatMatrix::*solveForRhs_1)(const FloatArray &b, FloatArray &answer, bool) = &FloatMatrix::solveForRhs;
 void (FloatMatrix::*solveForRhs_2)(const FloatMatrix &b, FloatMatrix &answer, bool) = &FloatMatrix::solveForRhs;
 void (FloatMatrix::*assemble_1)(const FloatMatrix&, const IntArray&) = &FloatMatrix::assemble;
@@ -163,7 +160,7 @@ void pyclass_FloatMatrix()
         .def("negated", &FloatMatrix::negated, "Changes sign of receiver values")
         .def("symmetrized", &FloatMatrix::symmetrized, "Initializes the lower half of the receiver according to the upper half")
         .def("rotatedWith", &FloatMatrix::rotatedWith, "Returns the receiver 'a' transformed using give transformation matrix r. The method performs the operation  a = r^T * a * r")
-        .def("resize", &FloatMatrix::resize, floatmatrix_overloads_resize("Checks size of receiver towards requested bounds. If dimension mismatch, size is adjusted accordingly"))
+        .def("resize", &FloatMatrix::resize, "Checks size of receiver towards requested bounds. If dimension mismatch, size is adjusted accordingly")
         .def("printYourself", &FloatMatrix::printYourself, "Prints matrix to stdout")
 
         .def("__setitem__", &FloatMatrix::__setitem__, "Coefficient access function. Implements 0-based indexing")
@@ -176,13 +173,12 @@ void pyclass_FloatMatrix()
 /*****************************************************
 * IntArray
 *****************************************************/
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(intarray_overloads_resize, resize, 1, 2)
 void pyclass_IntArray()
 {
     class_<IntArray, boost::noncopyable>("IntArray")
         .def(init< optional<int> >())
         .def(init< IntArray& >())
-        .def("resize", &IntArray::resize, intarray_overloads_resize("Checks size of receiver towards requested bounds. If dimension mismatch, size is adjusted accordingly"))
+        .def("resize", &IntArray::resize, "Checks size of receiver towards requested bounds. If dimension mismatch, size is adjusted accordingly")
         .def("giveSize", &IntArray::giveSize, "Returns size of receiver")
         .def("isEmpty", &IntArray::isEmpty, "Checks if receiver is empty (i.e., zero sized)")
         .def("containsOnlyZeroes", &IntArray::containsOnlyZeroes, "Checks if receiver is all zero")
@@ -424,22 +420,25 @@ void pyclass_ExportModuleManager()
 /*****************************************************
 * ExportModule
 *****************************************************/
+//BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(exportmodule_overloads_dooutput, resize, 1, 2);
 class PyExportModule : public ExportModule, public wrapper<ExportModule>
 {
 public:
     PyExportModule(int i, EngngModel * e) : ExportModule(i, e) {}
 
-    void doOutput(TimeStep *tStep) {
+    void doOutput(TimeStep *tStep, bool forcedOutput=false) {
         this->get_override("doOutput")();
     }
 
-    void default_doOutput(TimeStep *tStep) {this->ExportModule::doOutput(tStep);}
+    void default_doOutput(TimeStep *tStep, bool forcedOutput=false) {this->ExportModule::doOutput(tStep,forcedOutput);}
 };
 
 void pyclass_ExportModule()
 {
     class_<PyExportModule, boost::noncopyable>("ExportModule", no_init)
-        .def("doOutput", pure_virtual(&ExportModule::doOutput))
+        .def("doOutput", pure_virtual(&ExportModule::doOutput), (bp::arg("tStep"), bp::arg("forcedOutput")=false ) )
+        .def("doForcedOutput", &ExportModule::doForcedOutput)
+        //.def("doOutput", pure_virtual(&ExportModule::doOutput), exportmodule_overloads_dooutput() )
         ;
 }
 
@@ -702,7 +701,6 @@ void pyclass_Material()
     class_<Material, bases<FEMComponent>, boost::noncopyable >("Material", no_init)
         .def("giveIPValue", &Material::giveIPValue)
         .def("setIPValue", &Material::setIPValue)
-        .def("giveCharacteristicMatrix", &Material::giveCharacteristicMatrix)
         .def("giveStatus", &Material::giveStatus, return_internal_reference<>())
         ;
 }
@@ -714,9 +712,9 @@ void pyclass_Material()
 struct PyStructuralMaterial : StructuralMaterial , wrapper<StructuralMaterial>
 {
     PyStructuralMaterial(int i, Domain *d) : StructuralMaterial(i,d) {}
-    void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) {
-        if (override f = this->get_override("giveRealStressVector")) { f(answer,form,gp,reducedStrain,tStep);}
-        this->get_override("giveRealStressVector")(answer,form,gp,reducedStrain,tStep);
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) {
+        if (override f = this->get_override("giveRealStressVector")) { f(answer,gp,reducedStrain,tStep);}
+        this->get_override("giveRealStressVector")(answer,gp,reducedStrain,tStep);
     }
 };
 void pyclass_StructuralMaterial()
@@ -776,7 +774,7 @@ struct PyLoad : Load , wrapper<Load>
 };
 void pyclass_Load()
 {
-    class_<PyLoad, bases<GeneralBoundaryCondition>, boost::noncopyable >("Load", init<int, Domain*>())
+    class_<PyLoad, bases<GeneralBoundaryCondition>, boost::noncopyable >("Load", no_init)
         .def("setComponentArray", &Load::setComponentArray)
         .def("giveCopyOfComponentArray", &Load::giveCopyOfComponentArray)
         .def("computeValueAt", pure_virtual( &Load::computeValueAt))
@@ -950,7 +948,7 @@ void pyclass_IntegrationRule()
 {
     class_<IntegrationRule, boost::noncopyable >("IntegrationRule", init<int, Element*>())
         .def("getIntegrationPoint", &IntegrationRule::getIntegrationPoint, return_internal_reference<>())
-        .def("getNumberOfIntegrationPoints", &IntegrationRule::getNumberOfIntegrationPoints)
+        .def("giveNumberOfIntegrationPoints", &IntegrationRule::giveNumberOfIntegrationPoints)
         ;
 }
 
@@ -1142,18 +1140,6 @@ void pyenum_MatResponseMode()
 
 
 /*****************************************************
-* MatResponseFrom
-*****************************************************/
-void pyenum_MatResponseForm()
-{
-    enum_<MatResponseForm>("MatResponseForm")
-        .value("ReducedForm", ReducedForm)
-        .value("FullForm", FullForm)
-        ;
-}
-
-
-/*****************************************************
 * domainType
 *****************************************************/
 void pyenum_domainType()
@@ -1195,10 +1181,6 @@ void pyenum_domainType()
 /*****************************************************
 * Auxiliary functions
 *****************************************************/
-#if 0
-// construct auxiliary global object (for eval and exec functions) only once
-bp::dict temp_global(import("__main__").attr("__dict__"));
-#endif
 
 /*
 make oofem input line from **kw arguments. This function is used by "constructor" methods
@@ -1577,7 +1559,6 @@ BOOST_PYTHON_MODULE (liboofem)
     pyenum_FieldType();
     pyenum_InternalStateType();
     pyenum_MatResponseMode();
-    pyenum_MatResponseForm();
     pyenum_domainType();
 
 

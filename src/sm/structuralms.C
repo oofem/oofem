@@ -36,22 +36,32 @@
 #include "structuralcrosssection.h"
 #include "structuralmaterial.h"
 #include "contextioerr.h"
-
+#include "nlstructuralelement.h"
 namespace oofem {
+
 StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoint *g) :
     MaterialStatus(n, d, g), strainVector(), stressVector(),
-    tempStressVector(), tempStrainVector()
+    tempStressVector(), tempStrainVector(), FVector(), tempFVector()
 {
-    int rsize = static_cast< StructuralMaterial * >( gp->giveMaterial() )->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
-
+    int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
     strainVector.resize(rsize);
-    strainVector.zero();
     stressVector.resize(rsize);
-    stressVector.zero();
 
     // reset temp vars.
     tempStressVector = stressVector;
     tempStrainVector = strainVector;
+
+    if ( NLStructuralElement *el = dynamic_cast< NLStructuralElement * > ( gp->giveElement() ) ) {
+        if ( el->giveGeometryMode() == 1  ) { // if large def, initialize F and P
+            PVector.resize(9);
+            PVector.zero();
+            FVector.resize(9);
+            FVector.zero();
+            FVector.at(1) = FVector.at(2) = FVector.at(3) = 1.;
+        }
+        tempPVector = PVector;
+        tempFVector = FVector;
+    }
 }
 
 
@@ -62,20 +72,19 @@ void StructuralMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 // Prints the strains and stresses on the data file.
 {
     FloatArray helpVec;
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( gp->giveCrossSection() );
     int n;
 
     MaterialStatus :: printOutputAt(File, tNow);
 
     fprintf(File, "  strains ");
-    cs->giveFullCharacteristicVector(helpVec, gp, strainVector);
+    StructuralMaterial :: giveFullSymVectorForm(helpVec, strainVector, gp->giveMaterialMode());
     n = helpVec.giveSize();
     for ( int i = 1; i <= n; i++ ) {
         fprintf( File, " % .4e", helpVec.at(i) );
     }
 
     fprintf(File, "\n              stresses");
-    cs->giveFullCharacteristicVector(helpVec, gp, stressVector);
+    StructuralMaterial :: giveFullSymVectorForm(helpVec, stressVector, gp->giveMaterialMode());
 
     n = helpVec.giveSize();
     for ( int i = 1; i <= n; i++ ) {
@@ -85,8 +94,6 @@ void StructuralMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 }
 
 
-
-
 void StructuralMaterialStatus :: updateYourself(TimeStep *tStep)
 // Performs end-of-step updates.
 {
@@ -94,6 +101,8 @@ void StructuralMaterialStatus :: updateYourself(TimeStep *tStep)
 
     stressVector = tempStressVector;
     strainVector = tempStrainVector;
+    PVector      = tempPVector;
+    FVector      = tempFVector;
 }
 
 
@@ -106,18 +115,18 @@ void StructuralMaterialStatus :: initTempStatus()
 
     // see if vectors describing reached equilibrium are defined
     if ( this->giveStrainVector().giveSize() == 0 ) {
-        strainVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
-                            giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+        strainVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
     }
 
     if ( this->giveStressVector().giveSize() == 0 ) {
-        stressVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
-                            giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+        stressVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
     }
 
     // reset temp vars.
     tempStressVector = stressVector;
     tempStrainVector = strainVector;
+    tempPVector      = PVector;
+    tempFVector      = FVector;
 }
 
 

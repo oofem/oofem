@@ -24,6 +24,7 @@ set (fm_element
     hexa21stokes.C
     tr1bubblestokes.C
     tet1bubblestokes.C
+    hexa1bubblestokes.C
     linesurfacetension.C
     line2surfacetension.C
     line2boundaryelement.C

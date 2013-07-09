@@ -47,6 +47,7 @@
 #include "fluiddynamicmaterial.h"
 #include "fei3dtetlin.h"
 #include "fei3dtetquad.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -85,7 +86,7 @@ void Tet21Stokes :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, this->numberOfGaussPoints, _3dFlow);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], this->numberOfGaussPoints, this );
     }
 }
 
@@ -159,7 +160,7 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FluidDynamicMaterial *mat = static_cast<FluidDynamicMaterial * >( this->giveMaterial() );
-    FloatArray a_pressure, a_velocity, devStress, epsp, BTs, Nh, dN_V(30);
+    FloatArray a_pressure, a_velocity, devStress, epsp, Nh, dN_V(30);
     FloatMatrix dN, B(6, 30);
     double r_vol, pressure;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
@@ -167,12 +168,11 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
     FloatArray momentum, conservation;
 
     B.zero();
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
-        double detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
-        this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
+        double detJ = fabs( this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this)) );
         this->interpolation_lin.evalN(Nh, * lcoords, FEIElementGeometryWrapper(this));
         double dV = detJ * gp->giveWeight();
 
@@ -184,9 +184,8 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
         epsp.beProductOf(B, a_velocity);
         pressure = Nh.dotProduct(a_pressure);
         mat->computeDeviatoricStressVector(devStress, r_vol, gp, epsp, pressure, tStep);
-        BTs.beTProductOf(B, devStress);
 
-        momentum.add(dV, BTs);
+        momentum.plusProduct(B, devStress, dV);
         momentum.add(-pressure*dV, dN_V);
         conservation.add(r_vol*dV, Nh);
     }
@@ -214,7 +213,7 @@ void Tet21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *tS
         ltype = load->giveBCGeoType();
 
         if ( ltype == SurfaceLoadBGT ) {
-            this->computeBoundaryLoadVector(vec, load, load_id, ExternalForcesVector, VM_Total, tStep);
+            this->computeBoundaryLoadVector(vec, static_cast<BoundaryLoad*>(load), load_id, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         }
     }
@@ -243,11 +242,11 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType t
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
-        for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+        for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(k);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, tStep);
+            double rho = this->giveMaterial()->give('d', gp);
             double detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
             double dA = detJ * gp->giveWeight();
 
@@ -266,7 +265,7 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType t
 
 }
 
-void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, Load *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep)
+void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
         answer.resize(0);
@@ -286,9 +285,9 @@ void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, Load *load, in
         FloatArray N, t, f(18);
 
         f.zero();
-        iRule.setUpIntegrationPoints(_Triangle, numberOfSurfaceIPs, _Unknown);
+        iRule.SetUpPointsOnTriangle(numberOfSurfaceIPs, _Unknown);
 
-        for ( int i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
@@ -327,20 +326,19 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 
     B.zero();
 
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         // Compute Gauss point and determinant at current element
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
-        double detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
+        double detJ = fabs( this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this)) );
         double dV = detJ * gp->giveWeight();
-
-        this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
         this->interpolation_lin.evalN(Nlin, * lcoords, FEIElementGeometryWrapper(this));
 
 //        dN.printYourself();
 
         for ( int j = 0, k = 0; j < dN.giveNumberOfColumns(); j++, k+=3 ) {
+            ///@todo This column-row order of dN is inconsistent with every other interpolator class:
             dN_V(k + 0) = B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(0, j);
             dN_V(k + 1) = B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(1, j);
             dN_V(k + 2) = B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(2, j);
@@ -385,12 +383,12 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 //    C.printYourself();
 }
 
-FEInterpolation *Tet21Stokes :: giveInterpolation()
+FEInterpolation *Tet21Stokes :: giveInterpolation() const
 {
     return &interpolation_quad;
 }
 
-FEInterpolation *Tet21Stokes :: giveInterpolation(DofIDItem id)
+FEInterpolation *Tet21Stokes :: giveInterpolation(DofIDItem id) const
 {
     if (id == P_f) return &interpolation_lin; else return &interpolation_quad;
 }
@@ -537,7 +535,7 @@ void Tet21Stokes :: giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep 
 
     Nmatrix.resize(3,30);
 
-    for (i=0; i<iRule->getNumberOfIntegrationPoints(); i++) {
+    for (i=0; i<iRule->giveNumberOfIntegrationPoints(); i++) {
 
         gp = iRule->getIntegrationPoint(i);
 

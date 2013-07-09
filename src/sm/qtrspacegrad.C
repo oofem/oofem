@@ -107,10 +107,7 @@ QTRSpaceGrad :: computeGaussPoints ()
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule* [numberOfIntegrationRules];
     integrationRulesArray[0] = new GaussIntegrationRule (1,this,1, 7);
-    MaterialMode mode = _3dMatGrad; // material model is based on strain (standard approach)
-    if ( nlGeometry > 1 )
-        mode = _3dMatGrad_F; // material model is based on deformation gradient, not on strain
-    integrationRulesArray[0]->setUpIntegrationPoints (_Tetrahedra, numberOfGaussPoints, mode);
+    this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
 }
 
 
@@ -143,5 +140,60 @@ QTRSpaceGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix& answ
         answer.at(3, i) = dnx.at(i,3);
     }
 }
+
+
+
+void
+QTRSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i) 
+// Returns the [45x45] nonlinear part of strain-displacement matrix {B} of the receiver,
+// evaluated at aGaussPoint
+
+{
+    FloatMatrix dnx;
+
+    // compute the derivatives of shape functions
+    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+
+    answer.resize(30, 30);
+    answer.zero();
+
+    // put the products of derivatives of shape functions into the "nonlinear B matrix",
+    // depending on parameter i, which is the number of the strain component
+    if ( i <= 3 ) {
+        for ( int k = 0; k < 10; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 30; j += 3 ) {
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(i, k + 1) * dnx.at( i, ( j - 1 ) / 3 + 1 );
+                }
+            }
+        }
+    } else if ( i == 4 ) {
+        for ( int k = 0; k < 10; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 30; j += 3 ) {
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(2, k + 1) * dnx.at( 3, ( j - 1 ) / 3 + 1 ) + dnx.at(3, k + 1) * dnx.at( 2, ( j - 1 ) / 3 + 1 );
+                }
+            }
+        }
+    } else if ( i == 5 ) {
+        for ( int k = 0; k < 10; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 30; j += 3 ) {
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(1, k + 1) * dnx.at(3, ( j - 1 ) / 3 + 1 ) + dnx.at(3, k + 1) * dnx.at(1, ( j - 1 ) / 3 + 1 );
+                }
+            }
+        }
+    } else if ( i == 6 ) {
+        for ( int k = 0; k < 10; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 30; j += 3 ) {
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(1, k + 1) * dnx.at(2, ( j - 1 ) / 3 + 1 ) + dnx.at(2, k + 1) * dnx.at(1, ( j - 1 ) / 3 + 1 );
+                }
+            }
+        }
+    }
+
+}
+
 
 }

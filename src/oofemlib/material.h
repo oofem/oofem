@@ -43,7 +43,6 @@
 #include "timestep.h"
 #include "internalstatetype.h"
 #include "internalstatevaluetype.h"
-#include "matresponseform.h"
 #include "matresponsemode.h"
 #include "dictionary.h"
 
@@ -122,33 +121,6 @@ public:
     virtual ~Material() { delete propertyDictionary; }
 
     /**
-     * Computes characteristic matrix of receiver in given integration point.
-     * The algorithm should use temporary or equilibrium  history variables stored in integration point status
-     * to compute and return required result.
-     * @param answer Contains result.
-     * @param form Material response form.
-     * @param mode Material response mode.
-     * @param gp Integration point.
-     * @param atTime Time step (most models are able to respond only when atTime is current time step).
-     */
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseForm form,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *atTime);
-    /**
-     * Computes the characteristic value of receiver in given integration point, respecting its history.
-     * The algorithm should use temporary or equilibrium  history variables stored in integration point status
-     * to compute and return required result.
-     * @param mode Material response mode.
-     * @param gp Integration point.
-     * @param atTime Time step (most models are able to respond only when atTime is current time step).
-     */
-    virtual double giveCharacteristicValue(MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *atTime);
-
-    /**
      * Returns true if stiffness matrix of receiver is symmetric
      * Default implementation returns true.
      */
@@ -208,6 +180,9 @@ public:
      * @return Nonzero if supported, zero otherwise.
      */
     virtual int hasMaterialModeCapability(MaterialMode mode);
+
+    ///@name Access functions for internal states. Usually overloaded by new material models.
+    //@{
     /**
      * Sets the value of a certain variable at a given integration point to the given value.
      * @param value Contains the value(s) to be set (in reduced form).
@@ -252,6 +227,7 @@ public:
         _error("giveIPValueType: unsupported InternalStateType");
         return ISVT_UNDEFINED;
     }
+    //@}
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);

@@ -41,6 +41,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "load.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -75,24 +76,15 @@ Brick1_mt :: Brick1_mt(int n, Domain *aDomain) : Brick1_ht(n, aDomain)
 Brick1_ht :: ~Brick1_ht()
 { }
 
-
 void
 Brick1_ht :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    MaterialMode mmode;
-
-    if ( emode == HeatTransferEM || emode == Mass1TransferEM ) {
-        mmode = _3dHeat;
-    } else {
-        mmode = _3dHeMo;
-    }
-
     if ( !integrationRulesArray ) {
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, mmode);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
     }
 }
 
@@ -144,7 +136,7 @@ Brick1_ht :: GetSurfaceIntegrationRule(int approxOrder)
 {
     IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
     int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Square, approxOrder);
-    iRule->setUpIntegrationPoints(_Square, npoints, _Unknown);
+    iRule->SetUpPointsOnSquare(npoints, _Unknown);
     return iRule;
 }
 

@@ -268,7 +268,7 @@ LIBeam2dNL :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 
     iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     // assemble initial stress matrix
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         dV = this->computeVolumeAround(gp);
         stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
@@ -293,7 +293,7 @@ void LIBeam2dNL :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _2dBeam);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
     }
 }
 

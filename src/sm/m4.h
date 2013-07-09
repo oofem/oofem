@@ -102,8 +102,7 @@ public:
     /// Destructor.
     virtual ~M4Material() { }
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseForm form,
+    virtual void giveStiffnessMatrix(FloatMatrix &answer,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);
@@ -124,7 +123,6 @@ public:
 
     virtual void updateVolumetricStressTo(Microplane *mPlane, double sigv);
 
-    virtual int giveSizeOfReducedStressStrainVector(MaterialMode);
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
     virtual IRResultType initializeFrom(InputRecord *ir);

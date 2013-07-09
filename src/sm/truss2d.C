@@ -70,6 +70,10 @@ Truss2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li
 // Returns the linear part of the B matrix
 //
 {
+    // eps = B*a = [-cos -sin cos sin]/l *[u1 v1 u2 v2]^t
+    // cos = (x2 - x1) / l 
+    // sin = (z2 - z1) / l
+
     double l, x1, x2, z1, z2;
     //determine in which plane the truss is defined
     int c1, c2;
@@ -91,29 +95,12 @@ Truss2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li
     answer.times( 1.0 / l / l );
 }
 
+
 void
-Truss2d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i)
-//
-// Returns nonlinear part of geometrical equations of the receiver at gp.
-//
-// Returns A matrix (see Bittnar & Sejnoha Num. Met. Mech. part II, chap 9)
+Truss2d :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 {
-    double coeff, l;
-
-    l = this->giveLength();
-    coeff = 1.0 / l / l;
-
-    answer.resize(4, 4);
-    answer.zero();
-
-    answer.at(1, 1) = coeff;
-    answer.at(1, 3) = coeff * ( -1 );
-    answer.at(2, 2) = coeff;
-    answer.at(2, 4) = coeff * ( -1 );
-    answer.at(3, 1) = coeff * ( -1 );
-    answer.at(3, 3) = coeff;
-    answer.at(4, 2) = coeff * ( -1 );
-    answer.at(4, 4) = coeff;
+    // Will be the same as the regular B-matrix
+    this->computeBmatrixAt(aGaussPoint, answer);
 }
 
 
@@ -125,7 +112,7 @@ void Truss2d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _1dMat);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
     }
 }
 

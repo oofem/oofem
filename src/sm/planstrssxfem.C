@@ -64,7 +64,7 @@ PlaneStress2dXfem :: giveInterface(InterfaceType it)
 void
 PlaneStress2dXfem :: computeGaussPoints()
 {
-    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     EnrichmentItem *ei = xMan->giveEnrichmentItem(1);
     EnrichmentDomain *ed = ei->giveEnrichmentDomain(1);
     Inclusion *iei = dynamic_cast< Inclusion * > (ei); 
@@ -98,7 +98,7 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     }
 
     // Assemble xfem part of strain-displacement matrix
-    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     FloatMatrix Bd[4];
 
     int counter = 8;
@@ -167,7 +167,7 @@ void PlaneStress2dXfem :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     FloatArray Nc;
     interpolation.evalN( Nc, *gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     // assemble xfem part of strain-displacement matrix
-    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     FloatArray Nd;
     Nd.resize(4);
     IntArray mask(4);
@@ -238,7 +238,7 @@ PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer
 
 void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     ///@todo: only works for circles
     EDBGCircle *edc = static_cast< EDBGCircle * > ( xMan->giveEnrichmentItem(1)->giveEnrichmentDomain(1) );
     
@@ -247,7 +247,7 @@ void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRe
     if ( edc->bg->isInside( coords ) ) {
         Inclusion *ei = static_cast< Inclusion * > ( xMan->giveEnrichmentItem(1) );    
         StructuralMaterial *sm = static_cast< StructuralMaterial * >( ei->giveMaterial() );
-        sm->giveCharacteristicMatrix(answer, ReducedForm, rMode, gp, tStep);
+        sm->giveStiffnessMatrix(answer, rMode, gp, tStep);
     } else {
         PlaneStress2d :: computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
     }
@@ -258,17 +258,17 @@ PlaneStress2dXfem :: computeStressVector(FloatArray &answer, GaussPoint *gp, Tim
 {
     FloatArray Epsilon;
     this->computeStrainVector(Epsilon, gp, stepN);
-    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     EDBGCircle *edc = dynamic_cast< EDBGCircle * > ( xMan->giveEnrichmentItem(1)->giveEnrichmentDomain(1) );
     FloatArray coords;
     this->computeGlobalCoordinates(coords, *(gp->giveCoordinates()) );
     if ( edc->bg->isInside( coords ) ) {
         Inclusion *ei = static_cast< Inclusion * > ( xMan->giveEnrichmentItem(1) );
         StructuralMaterial *sm = static_cast< StructuralMaterial * >( ei->giveMaterial() );
-        sm->giveRealStressVector(answer, ReducedForm, gp, Epsilon, stepN);
+        sm->giveRealStressVector(answer, gp, Epsilon, stepN);
     } else {
         StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
-        cs->giveRealStresses(answer, ReducedForm, gp, Epsilon, stepN);
+        cs->giveRealStresses(answer, gp, Epsilon, stepN);
     }
 }
 
@@ -284,9 +284,9 @@ PlaneStress2dXfem :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
 }
 
 Element_Geometry_Type 
-PlaneStress2dXfem :: giveGeometryType() const 
+PlaneStress2dXfem :: giveGeometryType() const
 { 
-    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     if ( xMan->isElementEnriched(this) ) {
         //return EGT_Composite;
         return EGT_quad_1; 
@@ -354,13 +354,13 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
                 val = iRule->giveMaterial();
  #else
                 val = 0.0;
-                for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+                for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
                     GaussPoint *gp = iRule->getIntegrationPoint(0);
                     result += giveIPValue(v, gp, context.giveIntVarType(), tStep);
                     val += v.at(indx);
                 }
 
-                val /= iRule->getNumberOfIntegrationPoints();
+                val /= iRule->giveNumberOfIntegrationPoints();
  #endif
                 s.at(1) = s.at(2) = s.at(3) = val;
                 iRule->givePatch()->drawWD(context, s);

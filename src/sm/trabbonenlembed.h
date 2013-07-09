@@ -112,7 +112,7 @@ public:
 
     virtual void computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
 
     void computeLocalCumPlastStrain(double &alpha, const StrainVector &strain, GaussPoint *gp, TimeStep *tStep)
     {

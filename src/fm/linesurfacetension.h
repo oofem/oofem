@@ -74,24 +74,21 @@ public:
     virtual ~LineSurfaceTension();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual FEInterpolation *giveInterpolation();
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
 
     /**
-     * Computes the load vector.
+     * Computes the load from surface tension
      */
-    virtual void computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep);
+    virtual void computeInternalForcesVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep);
 
     /**
-     * Computes tangent to load vector.
-     * @param answer Tangent @f$ \frac{\partial F}{\partial x}\Delta t@f$.
-     * @param tStep Time step.
+     * Computes tangent to the surface tension.
      */
     virtual void computeTangent(FloatMatrix &answer, TimeStep *tStep);
 
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
     virtual int computeNumberOfDofs(EquationID ut) { return ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ? 4 : 0;}
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
@@ -112,7 +109,6 @@ public:
 
     virtual const char *giveClassName() const { return "LineSurfaceTension"; }
     virtual const char *giveInputRecordName() const { return _IFT_LineSurfaceTension_Name; }
-    virtual classType giveClassID() const { return LineSurfaceTensionElementClass; }
 };
 
 } // end namespace oofem

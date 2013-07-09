@@ -167,7 +167,7 @@ Concrete2 :: give(int aProperty, GaussPoint *gp)
 
 
 void
-Concrete2 ::  giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+Concrete2 ::  giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                    const FloatArray &strain,
                                    TimeStep *atTime)
 //
@@ -183,7 +183,7 @@ Concrete2 ::  giveRealStressVector(FloatArray &answer, MatResponseForm form, Gau
     switch ( mode ) {
     case _3dShellLayer:
     case _2dPlateLayer:
-        giveRealStresses3dShellLayer(answer, form, gp, strain, atTime);
+        giveRealStresses3dShellLayer(answer, gp, strain, atTime);
         break;
     default:
         _error("giveRealStresses : unsupported stressMode\n");
@@ -192,7 +192,7 @@ Concrete2 ::  giveRealStressVector(FloatArray &answer, MatResponseForm form, Gau
 
 
 void
-Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm form,
+Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer,
                                            GaussPoint *gp,
                                            const FloatArray &totalStrain,
                                            TimeStep *atTime)
@@ -249,7 +249,6 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
     FloatArray plasticStrainVector, plasticStrainIncrementVector;
 
     Concrete2MaterialStatus *status = static_cast< Concrete2MaterialStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
     FloatArray currentStress, currentStrain, currentEffStrain(6), pVal, * ep, * pStress,
     * strainIncr, plasticStrain, help, reducedStrain, helpR;
     FloatMatrix pDir;
@@ -265,10 +264,9 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
     // therefore it is necessary to subtract always the total eigen strain value
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp,
                                                 totalStrain, atTime, VM_Total);
-    crossSection->giveFullCharacteristicVector(currentStrain, gp, reducedStrain);
-
-    crossSection->giveFullCharacteristicVector( currentStress, gp, status->giveStressVector() );
-    //crossSection->giveFullCharacteristicVector(currentStrain, gp, status->giveStrainVector());
+    
+    StructuralMaterial :: giveFullSymVectorForm(currentStrain, reducedStrain, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm(currentStress, status->giveStressVector(), gp->giveMaterialMode());
 
     if ( status->giveTempCurrentTensionStrength() < 0. ) {
         //
@@ -282,7 +280,7 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
     }
 
     status->givePlasticStrainVector(plasticStrainVector);
-    crossSection->giveFullCharacteristicVector(plasticStrain, gp, plasticStrainVector);
+    StructuralMaterial :: giveFullSymVectorForm(plasticStrain, plasticStrainVector, gp->giveMaterialMode());
 
     ep = new FloatArray(3);
 
@@ -350,10 +348,12 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
         // note in status are reduced space variables
         status->letTempStrainVectorBe(totalStrain);
 
-        crossSection->giveReducedCharacteristicVector(helpR, gp, currentStress);
+        StructuralMaterial :: giveReducedSymVectorForm(helpR, currentStress, gp->giveMaterialMode());
+
         status->letTempStressVectorBe(helpR);
 
-        crossSection->giveReducedCharacteristicVector(help, gp, plasticStrain);
+        StructuralMaterial :: giveReducedSymVectorForm(help, plasticStrain, gp->giveMaterialMode());
+
         status->givePlasticStrainIncrementVector(plasticStrainIncrementVector);
         plasticStrainIncrementVector.subtract(plasticStrainVector);
         plasticStrainIncrementVector.add(help);
@@ -361,12 +361,7 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
         //   plasticStrain->negated()->add (status->givePlasticStrainVector());
         //      status->givePlasticStrainIncrementVector()-> add(plasticStrain);
 
-        if ( form == FullForm ) {
-            answer =  currentStress;
-            return;
-        }
-
-        crossSection->giveReducedCharacteristicVector(answer, gp, currentStress);
+        StructuralMaterial :: giveReducedSymVectorForm(answer, currentStress, gp->giveMaterialMode());
         return;
     }
 
@@ -680,10 +675,10 @@ label18:
     //totalStrainVector.add (totalStrainIncrement);
     status->letTempStrainVectorBe(totalStrain);
 
-    crossSection->giveReducedCharacteristicVector(helpR, gp, currentStress);
+    StructuralMaterial :: giveReducedSymVectorForm(helpR, currentStress, gp->giveMaterialMode());
     status->letTempStressVectorBe(helpR);
 
-    crossSection->giveReducedCharacteristicVector(help, gp, plasticStrain);
+    StructuralMaterial :: giveFullSymVectorForm(help, plasticStrain, gp->giveMaterialMode());
     status->givePlasticStrainIncrementVector(plasticStrainIncrementVector);
     plasticStrainIncrementVector.subtract(plasticStrainVector);
     plasticStrainIncrementVector.add(help);
@@ -692,12 +687,7 @@ label18:
     //plasticStrain->negated()->add (status->givePlasticStrainVector());
     //status->givePlasticStrainIncrementVector()-> add(plasticStrain);
 
-    if ( form == FullForm ) {
-        answer =  currentStress;
-        return;
-    }
-
-    crossSection->giveReducedCharacteristicVector(answer, gp, currentStress);
+    StructuralMaterial :: giveFullSymVectorForm(answer, currentStress, gp->giveMaterialMode());
 }
 
 
@@ -1283,7 +1273,6 @@ Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray *strainIncrement)
 
 void
 Concrete2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
                                            MatResponseMode rMode,
                                            GaussPoint *gp,
                                            TimeStep *atTime)
@@ -1295,7 +1284,7 @@ Concrete2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 //
 {
     // error ("Give3dMaterialStiffnessMatrix: unable to compute");
-    linearElasticMaterial->give3dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+    linearElasticMaterial->give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
 }
 
 
@@ -1441,13 +1430,13 @@ Concrete2MaterialStatus :: initTempStatus()
 
     if ( plasticStrainVector.giveSize() == 0 ) {
         plasticStrainVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
-                                   giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+                                   StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
         plasticStrainVector.zero();
     }
 
     if ( plasticStrainIncrementVector.giveSize() == 0 ) {
         plasticStrainIncrementVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
-                                            giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+                                            StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
         plasticStrainIncrementVector.zero();
     } else {
         plasticStrainIncrementVector.zero();

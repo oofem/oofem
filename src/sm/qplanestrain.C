@@ -42,8 +42,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Element( QPlaneStrain );
+REGISTER_Element(QPlaneStrain);
 
 FEI2dQuadQuad QPlaneStrain :: interpolation(1, 2);
 
@@ -59,7 +58,7 @@ Interface *
 QPlaneStrain :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     }
 
     return NULL;
@@ -84,6 +83,27 @@ QPlaneStrain :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, i
 
         answer.at(4, 2 * i - 1) = dnx.at(i, 2);
         answer.at(4, 2 * i - 0) = dnx.at(i, 1);
+    }
+}
+
+void
+QPlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+// Returns the [5x16] displacement gradient matrix {BH} of the receiver,
+// evaluated at aGaussPoint.
+// @todo not checked if correct
+{
+    FloatMatrix dnx;
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+
+    answer.resize(5, 16);
+    answer.zero();
+
+    // 3rd row is zero -> dw/dz = 0
+    for ( int i = 1; i <= 8; i++ ) {
+        answer.at(1, 2 * i - 1) = dnx.at(i, 1);     // du/dx -1
+        answer.at(2, 2 * i - 0) = dnx.at(i, 2);     // dv/dy -2
+        answer.at(4, 2 * i - 1) = dnx.at(i, 2);     // du/dy -6
+        answer.at(5, 2 * i - 0) = dnx.at(i, 1);     // dv/dx -9
     }
 }
 
@@ -133,7 +153,7 @@ QPlaneStrain :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _PlaneStrain);
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
@@ -171,6 +191,11 @@ QPlaneStrain :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 }
 
 
+double
+QPlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+{
+    return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
+}
 
 
 #ifdef __OOFEG
@@ -366,7 +391,7 @@ void QPlaneStrain :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].y = 0.25 * ( pp [ 0 ].y + pp [ 1 ].y + pp [ 2 ].y + pp [ 3 ].y );
         pp [ 8 ].z = 0.;
 
-        for ( ip = 1; ip <= numberOfGaussPoints; ip++ ) {
+        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
             gpCoords = gp->giveCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {

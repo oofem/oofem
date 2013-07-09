@@ -65,9 +65,7 @@ public:
 
     virtual int computeNumberOfDofs(EquationID ut) { return 12; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
-    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) {
-        return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) this->numberOfGaussPoints );
-    }
+    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
     virtual double computeVolumeAround(GaussPoint *gp);
 
@@ -86,8 +84,8 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_QTrPlaneStrain_Name; }
     virtual const char *giveClassName() const { return "QTrPlaneStrain"; }
     virtual classType giveClassID() const { return QTrPlaneStrainClass; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
 
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
@@ -110,11 +108,9 @@ public:
 
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
-    virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
-    virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
-
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &);
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
     virtual int giveApproxOrder() { return 2; }

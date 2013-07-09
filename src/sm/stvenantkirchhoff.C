@@ -52,7 +52,8 @@ REGISTER_Material( StVenantKirchhoff );
 StVenantKirchhoff :: StVenantKirchhoff(int n, Domain *d) : StructuralMaterial(n, d)
 {}
 
-StVenantKirchhoff::~StVenantKirchhoff() {
+StVenantKirchhoff::~StVenantKirchhoff()
+{
 
 }
 
@@ -71,13 +72,13 @@ StVenantKirchhoff :: hasMaterialModeCapability(MaterialMode mode)
 
 
 void
-StVenantKirchhoff :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode, GaussPoint *gp, TimeStep *atTime)
+StVenantKirchhoff :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *atTime)
 
 // returns the 6x6 tangent stiffness matrix
 
 {
 
-	double c1 = Lambda + 2.0*Mu;
+    double c1 = Lambda + 2.0*Mu;
 
     answer.resize(6, 6);
 
@@ -108,7 +109,7 @@ StVenantKirchhoff :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRespo
 
 
 void
-StVenantKirchhoff :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+StVenantKirchhoff :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 
 // returns 6 components of the stress corresponding to the given total strain
 

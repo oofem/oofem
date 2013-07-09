@@ -32,15 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
- * stvenantkirchhoff.h
- *
- *		Description: Material model for isotropic St.Venant-Kirchhoff elasticity
- *
- *  	Created on: May 24, 2013
- *      Author: Erik Svenning
- */
-
 #ifndef STVENANTKIRCHHOFF_H_
 #define STVENANTKIRCHHOFF_H_
 
@@ -58,12 +49,13 @@ namespace oofem {
 
 /**
  * This class implements associated MaterialStatus for StVenantKirchhoff.
+ * @author Erik Svenning
  */
 class StVenantKirchhoffMaterialStatus : public StructuralMaterialStatus
 {
 public:
     /// Constructor
-	StVenantKirchhoffMaterialStatus(int n, Domain *d, GaussPoint *g);
+    StVenantKirchhoffMaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor
     virtual ~StVenantKirchhoffMaterialStatus();
 
@@ -77,6 +69,10 @@ public:
     virtual void updateYourself(TimeStep *tStep);
 };
 
+/**
+ * Material model for isotropic St.Venant-Kirchhoff elasticity
+ * @author Erik Svenning
+ */
 class StVenantKirchhoff : public StructuralMaterial
 {
 protected:
@@ -85,16 +81,16 @@ protected:
 
 public:
 
-	StVenantKirchhoff(int n, Domain *d);
-	virtual ~StVenantKirchhoff();
+    StVenantKirchhoff(int n, Domain *d);
+    virtual ~StVenantKirchhoff();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode, GaussPoint *gp,
+                                               MatResponseMode mode, GaussPoint *gp,
                                                TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;

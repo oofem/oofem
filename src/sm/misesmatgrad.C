@@ -43,28 +43,16 @@
 
 
 namespace oofem {
-
-REGISTER_Material( MisesMatGrad );
+REGISTER_Material(MisesMatGrad);
 
 /////////////////////////////////////////////////////////////////
-//gradient regularization of Mises plasticity coupled with isotropic damage////////////////////
+//gradient regularization of Mises plasticity coupled with isotropic damage
 /////////////////////////////////////////////////////////////////
-double sig(double number)
-{
-    if ( number < 0 ) {
-        return -1;
-    } else if ( number > 0 ) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
 
-MisesMatGrad :: MisesMatGrad(int n, Domain *d) : MisesMat(n, d)
+MisesMatGrad :: MisesMatGrad(int n, Domain *d) : MisesMat(n, d), GradDpMaterialExtensionInterface(d)
 {
-    R = 0.;
+    L = 0.;
 }
-
 
 MisesMatGrad :: ~MisesMatGrad()
 {}
@@ -73,7 +61,7 @@ MisesMatGrad :: ~MisesMatGrad()
 int
 MisesMatGrad :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( ( mode == _1dMatGrad ) || ( mode == _PlaneStrainGrad ) || ( mode == _3dMatGrad ) ) {
+    if ( ( mode == _1dMat ) || ( mode == _PlaneStrain ) || ( mode == _3dMat ) ) {
         return 1;
     }
 
@@ -82,82 +70,107 @@ MisesMatGrad :: hasMaterialModeCapability(MaterialMode mode)
 
 
 void
-MisesMatGrad :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                         MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
+MisesMatGrad :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
 {
+    _error("giveStiffnessMatrix : Shouldn't be called.");
+}
+
+
+
+void
+MisesMatGrad :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
-    case _1dMatGrad:
-        if ( form == PDGrad_uu ) {
-            give1dStressStiffMtrx(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_ku ) {
-            give1dKappaMatrix(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_uk ) {
-            give1dGprime(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_kk ) {
-            giveInternalLength(answer, form, rMode, gp, atTime);
-            break;
-        }
-
-    case _PlaneStrainGrad:
-        if ( form == PDGrad_uu ) {
-            givePlaneStrainStiffMtrx(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_ku ) {
-            givePlaneStrainKappaMatrix(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_uk ) {
-            givePlaneStrainGprime(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_kk ) {
-            giveInternalLength(answer, form, rMode, gp, atTime);
-            break;
-        }
-
-    case _PlaneStressGrad:
-        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+    case _1dMat:
+        give1dStressStiffMtrx(answer, mode, gp, tStep);
         break;
-
-    case _3dMatGrad:
-        if ( form == PDGrad_uu ) {
-            give3dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_ku ) {
-            give3dKappaMatrix(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_uk ) {
-            give3dGprime(answer, form, rMode, gp, atTime);
-            break;
-        } else if ( form == PDGrad_kk ) {
-            giveInternalLength(answer, form, rMode, gp, atTime);
-            break;
-        }
-
-
-
-
-
+    case _PlaneStrain:
+        givePlaneStrainStiffMtrx(answer, mode, gp, tStep);
+        break;
+    case _3dMat:
+        give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        break;
     default:
-        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
-        return;
+        _error2( "givePDGradMatrix_uu : unknown mode (%s)", __MaterialModeToString(mMode) );
+    }
+}
+
+void
+MisesMatGrad :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    case _1dMat:
+        give1dKappaMatrix(answer, mode, gp, tStep);
+        break;
+    case _PlaneStrain:
+        givePlaneStrainKappaMatrix(answer, mode, gp, tStep);
+        break;
+    case _3dMat:
+        give3dKappaMatrix(answer, mode, gp, tStep);
+        break;
+    default:
+        _error2( "givePDGradMatrix_ku : unknown mode (%s)", __MaterialModeToString(mMode) );
+    }
+}
+
+void
+MisesMatGrad :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    case _1dMat:
+        give1dGprime(answer, mode, gp, tStep);
+        break;
+    case _PlaneStrain:
+        givePlaneStrainGprime(answer, mode, gp, tStep);
+        break;
+    case _3dMat:
+        give3dGprime(answer, mode, gp, tStep);
+        break;
+    default:
+        _error2( "givePDGradMatrix_uk : unknown mode (%s)", __MaterialModeToString(mMode) );
+    }
+}
+
+void
+MisesMatGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    case _1dMat:
+        giveInternalLength(answer, mode, gp, tStep);
+        break;
+    case _PlaneStrain:
+        giveInternalLength(answer, mode, gp, tStep);
+        break;
+    case _3dMat:
+        giveInternalLength(answer, mode, gp, tStep);
+        break;
+    default:
+        _error2( "givePDGradMatrix_kk : unknown mode (%s)", __MaterialModeToString(mMode) );
+    }
+}
+
+void
+MisesMatGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    MaterialMode mMode = gp->giveMaterialMode();
+    switch ( mMode ) {
+    default:
+        _error2( "givePDGradMatrix_LD : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
 
 void
-MisesMatGrad :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
-                                      MatResponseMode mode,
-                                      GaussPoint *gp,
-                                      TimeStep *atTime)
+MisesMatGrad :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     answer.resize(1, 1);
-    answer.zero();
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
     double E = lmat->give('E', gp);
     answer.at(1, 1) = E;
@@ -166,7 +179,7 @@ MisesMatGrad :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
     }
 
     FloatArray stressVector;
-    MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
+    MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
     double tempKappa = status->giveTempCumulativePlasticStrain();
     // increment of cumulative plastic strain as an indicator of plastic loading
     double dKappa = ( tempKappa - status->giveCumulativePlasticStrain() );
@@ -174,7 +187,7 @@ MisesMatGrad :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
     double tempDamage = status->giveTempDamage();
     double damage = status->giveDamage();
     /*********************************************************************/
-    double nlKappa =  status->giveTempStrainVector().at(2);
+    double nlKappa =  status->giveNonlocalCumulatedStrain();
     double kappa = mParam * nlKappa + ( 1. - mParam ) * tempKappa;
     if ( dKappa <= 0.0 ) {
         answer.at(1, 1) = ( 1. - tempDamage ) * E;
@@ -188,20 +201,20 @@ MisesMatGrad :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
 
     answer.at(1, 1) = ( 1. - tempDamage ) * E * H / ( E + H );
     if ( ( tempDamage - damage ) > 0 ) {
-        answer.at(1, 1) = answer.at(1, 1) - ( 1. - mParam ) * computeDamageParamPrime(kappa) * E / ( E + H ) * sig(stress) * stress;
+        answer.at(1, 1) = answer.at(1, 1) - ( 1. - mParam ) * computeDamageParamPrime(kappa) * E / ( E + H ) * signum(stress) * stress;
     }
 }
 
 
 void
-MisesMatGrad :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+MisesMatGrad :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     if ( mode != TangentStiffness ) {
         return;
     }
 
-    MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
+    MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
     double tempKappa = status->giveTempCumulativePlasticStrain();
     double kappa = status->giveCumulativePlasticStrain();
     double dKappa = tempKappa - kappa;
@@ -244,7 +257,7 @@ MisesMatGrad :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm fo
         FloatArray effStress, totalStress;
         totalStress = status->giveTempStressVector();
         status->giveTempEffectiveStress(effStress);
-        double nlKappa = status->giveTempStrainVector().at(5);
+        double nlKappa = status->giveNonlocalCumulatedStrain();
         double kappa = mParam * nlKappa + ( 1. - mParam ) * tempKappa;
         double omegaPrime = computeDamageParamPrime(kappa);
         double scalar = -omegaPrime *sqrt(6.) * G / ( 3. * G + H ) / trialS;
@@ -256,10 +269,10 @@ MisesMatGrad :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm fo
 
 
 void
-MisesMatGrad :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+MisesMatGrad :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
     // start from the elastic stiffness
     if ( mode != TangentStiffness ) {
         return;
@@ -299,7 +312,7 @@ MisesMatGrad :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseFo
             FloatArray effStress, totalStress;
             totalStress = status->giveTempStressVector();
             status->giveTempEffectiveStress(effStress);
-            double nlKappa =  status->giveTempStrainVector().at(7);
+            double nlKappa =  status->giveNonlocalCumulatedStrain();
             double kappa = mParam * nlKappa + ( 1. - mParam ) * tempKappa;
             double omegaPrime = computeDamageParamPrime(kappa);
             double scalar = -omegaPrime *sqrt(6.) * G / ( 3. * G + H ) / trialS;
@@ -312,7 +325,7 @@ MisesMatGrad :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseFo
 
 
 void
-MisesMatGrad :: give1dKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+MisesMatGrad :: give1dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     answer.resize(1, 1);
     answer.zero();
@@ -325,7 +338,7 @@ MisesMatGrad :: give1dKappaMatrix(FloatMatrix &answer, MatResponseForm form, Mat
     status->giveTempEffectiveStress(effStress);
     double stress = effStress.at(1);
     if ( dKappa > 0 ) {
-        double trialS = sig(stress);
+        double trialS = signum(stress);
         double factor = trialS * E / ( E + H );
         answer.at(1, 1) = factor;
     }
@@ -333,7 +346,7 @@ MisesMatGrad :: give1dKappaMatrix(FloatMatrix &answer, MatResponseForm form, Mat
 
 
 void
-MisesMatGrad :: givePlaneStrainKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+MisesMatGrad :: givePlaneStrainKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
     answer.resize(1, 4);
@@ -355,7 +368,7 @@ MisesMatGrad :: givePlaneStrainKappaMatrix(FloatMatrix &answer, MatResponseForm 
 
 
 void
-MisesMatGrad :: give3dKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+MisesMatGrad :: give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
     answer.resize(1, 6);
@@ -376,7 +389,7 @@ MisesMatGrad :: give3dKappaMatrix(FloatMatrix &answer, MatResponseForm form, Mat
 
 
 void
-MisesMatGrad :: give1dGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+MisesMatGrad :: give1dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
     double damage, tempDamage;
@@ -387,7 +400,7 @@ MisesMatGrad :: give1dGprime(FloatMatrix &answer, MatResponseForm form, MatRespo
     answer.resize(1, 1);
     damage = status->giveDamage();
     tempDamage = status->giveTempDamage();
-    nlKappa =  status->giveTempStrainVector().at(2);
+    nlKappa =  status->giveNonlocalCumulatedStrain();
     kappa = mParam * nlKappa + ( 1 - mParam ) * tempKappa;
     status->giveTempEffectiveStress(tempEffStress);
     if ( ( tempDamage - damage ) > 0 ) {
@@ -400,7 +413,7 @@ MisesMatGrad :: give1dGprime(FloatMatrix &answer, MatResponseForm form, MatRespo
 }
 
 void
-MisesMatGrad :: givePlaneStrainGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+MisesMatGrad :: givePlaneStrainGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
     double damage, tempDamage;
@@ -412,7 +425,7 @@ MisesMatGrad :: givePlaneStrainGprime(FloatMatrix &answer, MatResponseForm form,
     double gPrime;
     damage = status->giveDamage();
     tempDamage = status->giveTempDamage();
-    nlKappa =  status->giveTempStrainVector().at(5);
+    nlKappa =  status->giveNonlocalCumulatedStrain();
     kappa = mParam * nlKappa + ( 1. - mParam ) * tempKappa;
     status->giveTempEffectiveStress(tempEffStress);
     if ( ( tempDamage - damage ) > 0 ) {
@@ -428,7 +441,7 @@ MisesMatGrad :: givePlaneStrainGprime(FloatMatrix &answer, MatResponseForm form,
 }
 
 void
-MisesMatGrad :: give3dGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+MisesMatGrad :: give3dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
     answer.resize(6, 1);
@@ -440,7 +453,7 @@ MisesMatGrad :: give3dGprime(FloatMatrix &answer, MatResponseForm form, MatRespo
     double tempKappa = status->giveTempCumulativePlasticStrain();
     damage = status->giveDamage();
     tempDamage = status->giveTempDamage();
-    nlKappa =  status->giveTempStrainVector().at(7);
+    nlKappa =  status->giveNonlocalCumulatedStrain();
     status->giveTempEffectiveStress(tempEffStress);
     kappa = mParam * nlKappa + ( 1. - mParam ) * tempKappa;
     if ( ( tempDamage - damage ) > 0 ) {
@@ -456,63 +469,45 @@ MisesMatGrad :: give3dGprime(FloatMatrix &answer, MatResponseForm form, MatRespo
 }
 
 void
-MisesMatGrad :: giveInternalLength(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+MisesMatGrad :: giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     answer.resize(1, 1);
-    answer.at(1, 1) = R;
+    answer.at(1, 1) = L;
 }
 
+
 void
-MisesMatGrad :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                                     const FloatArray &totalStrain, TimeStep *atTime)
+MisesMatGrad :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *atTime)
 {
     MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
     this->initGpForNewStep(gp);
     this->initTempStatus(gp);
-    MaterialMode mode = gp->giveMaterialMode();
-    MaterialMode plReturnMode = _Unknown;
-    if ( mode == _1dMatGrad ) {
-        plReturnMode = _1dMat;
-    } else if ( mode == _PlaneStrainGrad ) {
-        plReturnMode = _PlaneStrain;
-    } else if ( mode == _PlaneStressGrad ) {
-        plReturnMode = _PlaneStress;
-    } else if ( mode == _3dMatGrad ) {
-        plReturnMode = _3dMat;
-    }
 
-    double tempDam;
+    double tempDamage;
     FloatArray tempEffStress, totalStress, locTotalStrain;
 
-    int size = totalStrain.giveSize();
-    locTotalStrain = totalStrain;
-    locTotalStrain.resize(size - 1);
-    MisesMat ::  performPlasticityReturn(gp, locTotalStrain, plReturnMode);
+    MisesMat ::  performPlasticityReturn(gp, locTotalStrain);
     status->letTempStrainVectorBe(totalStrain);
-    double localCumPlastStrain = status->giveTempCumulativePlasticStrain();
-    tempDam = computeDamage(gp, atTime);
+    tempDamage = computeDamage(gp, atTime);
     status->giveTempEffectiveStress(tempEffStress);
-    answer.beScaled( 1.0 - tempDam, tempEffStress);
-    size = tempEffStress.giveSize();
-    answer.resize(size + 1);
-    answer.at(size + 1) = localCumPlastStrain;
+    answer1.beScaled(1.0 - tempDamage, tempEffStress);
+    answer2 = status->giveTempCumulativePlasticStrain();
+    ;
 
-    status->setTempDamage(tempDam);
+    status->setNonlocalCumulatedStrain(nonlocalCumulatedStrain);
+    status->setTempDamage(tempDamage);
     status->letTempEffectiveStressBe(tempEffStress);
-    status->letTempStressVectorBe(answer);
+    status->letTempStressVectorBe(answer1);
 }
 
 
 void
 MisesMatGrad :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *atTime)
 {
-    double nlCumPlastStrain;
     MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
     double localCumPlastStrain = status->giveTempCumulativePlasticStrain();
-    FloatArray strain;
-    strain = status->giveTempStrainVector();
-    int size = strain.giveSize();
-    nlCumPlastStrain = strain.at(size);
+    double nlCumPlastStrain = status->giveNonlocalCumulatedStrain();
+
     kappa = mParam * nlCumPlastStrain + ( 1 - mParam ) * localCumPlastStrain;
 }
 
@@ -525,9 +520,9 @@ MisesMatGrad :: initializeFrom(InputRecord *ir)
 
     MisesMat :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, R, _IFT_MisesMatGrad_r);
-    if ( R < 0.0 ) {
-        R = 0.0;
+    IR_GIVE_FIELD(ir, L, _IFT_MisesMatGrad_l);
+    if ( L < 0.0 ) {
+        L = 0.0;
     }
 
     mParam = 2.;
@@ -539,7 +534,9 @@ MisesMatGrad :: initializeFrom(InputRecord *ir)
 
 MisesMatGradStatus :: MisesMatGradStatus(int n, Domain *d, GaussPoint *g) :
     MisesMatStatus(n, d, g)
-{}
+{
+    nonlocalCumulatedStrain = 0;
+}
 
 
 MisesMatGradStatus :: ~MisesMatGradStatus()
@@ -563,14 +560,14 @@ MisesMatGradStatus :: initTempStatus()
     StructuralMaterialStatus :: initTempStatus();
 
     if ( plasticStrain.giveSize() == 0 ) {
-        if ( gp->giveMaterialMode() == _1dMatGrad ) {
-            plasticStrain.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->giveSizeOfReducedStressStrainVector(_1dMat) );
-        } else if ( gp->giveMaterialMode() == _PlaneStrainGrad ) {
-            plasticStrain.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->giveSizeOfReducedStressStrainVector(_PlaneStrain) );
-        } else if ( gp->giveMaterialMode() == _PlaneStressGrad ) {
-            plasticStrain.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->giveSizeOfReducedStressStrainVector(_PlaneStress) );
-        } else if ( gp->giveMaterialMode() == _3dMatGrad ) {
-            plasticStrain.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->giveSizeOfReducedStressStrainVector(_3dMat) );
+        if ( gp->giveMaterialMode() == _1dMat ) {
+            plasticStrain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector(_1dMat) );
+        } else if ( gp->giveMaterialMode() == _PlaneStrain ) {
+            plasticStrain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector(_PlaneStrain) );
+        } else if ( gp->giveMaterialMode() == _PlaneStress ) {
+            plasticStrain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector(_PlaneStress) );
+        } else if ( gp->giveMaterialMode() == _3dMat ) {
+            plasticStrain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector(_3dMat) );
         }
 
         plasticStrain.zero();
@@ -579,7 +576,6 @@ MisesMatGradStatus :: initTempStatus()
     tempDamage = damage;
     tempPlasticStrain = plasticStrain;
     tempKappa = kappa;
-    tempDefGrad = defGrad;
     tempLeftCauchyGreen = leftCauchyGreen;
     trialStressD.resize(0);
 }

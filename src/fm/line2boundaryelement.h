@@ -55,7 +55,6 @@ class Line2BoundaryElement :
     public EIPrimaryUnknownMapperInterface
 {
 protected:
-    int boundaryNumber;
     static FEI2dLineQuad fei;
 
 public:
@@ -73,30 +72,13 @@ public:
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) { answer.resize(0); }
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) { answer.resize(0,0); }
 
-    virtual void computeN(FloatArray &answer, const FloatArray &lcoords) const;
-
-    /**
-     * Gives the boundary number.
-     * @todo Use regions instead?
-     * @return Boundary number.
-     */
-    virtual int giveBoundaryNumber() const { return boundaryNumber; }
-    /**
-     * Computes the integral @f$ \int_S n \cdot x \mathrm{d}s @f$.
-     * The normal is defined as left in the direction parameterization.
-     * @return Evaluated integral.
-     */
-    virtual double computeNXIntegral() const;
-
     virtual void giveDofManDofIDMask(int i, EquationID eid, IntArray &nodeDofIDMask) const;
 
-    virtual FEInterpolation *giveInterpolation();
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
+    virtual FEInterpolation *giveInterpolation() const;
     virtual int computeNumberOfDofs(EquationID eid) { return 6; }
 
     virtual const char *giveClassName() const { return "Line2BoundaryElement"; }
     virtual const char *giveInputRecordName() const { return _IFT_Line2BoundaryElement_Name; }
-    virtual classType giveClassID() const { return Line2BoundaryElementClass; }
 
     // Interfaces
     virtual Interface* giveInterface(InterfaceType it);

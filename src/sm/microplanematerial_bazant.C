@@ -43,7 +43,7 @@ MicroplaneMaterial_Bazant :: MicroplaneMaterial_Bazant(int n, Domain *d) : Micro
 
 
 void
-MicroplaneMaterial_Bazant :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
+MicroplaneMaterial_Bazant :: giveRealStressVector(FloatArray &answer,
                                                   GaussPoint *gp,
                                                   const FloatArray &totalStrain,
                                                   TimeStep *atTime)

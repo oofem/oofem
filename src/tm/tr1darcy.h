@@ -59,7 +59,9 @@ public:
     virtual ~Tr1Darcy();
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual FEInterpolation *giveInterpolation() { return &interpolation_lin; }
+    virtual FEInterpolation *giveInterpolation() const { return &interpolation_lin; }
+
+    virtual MaterialMode giveMaterialMode() { return _2dHeat; } ///@todo This isn't actually correct.
 
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep);
@@ -73,8 +75,6 @@ public:
     void computeInternalForcesVector(FloatArray &answer, TimeStep *atTime);
 
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 
     // From NodalAveragingRecoveryModelInterface
     virtual const char *giveInputRecordName() const { return _IFT_Tr1Darcy_Name; }

@@ -47,9 +47,12 @@ class FEI3dTrQuad : public FEInterpolation3d
 public:
     FEI3dTrQuad() : FEInterpolation3d(2) { }
 
+    virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
+
     // Bulk
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);    
-    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);

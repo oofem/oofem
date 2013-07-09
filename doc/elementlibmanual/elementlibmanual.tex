@@ -79,6 +79,12 @@
 \newcommand{\Pfieldnotype   }[1]{\parallel{\fieldnotype{#1}}}
 \newcommand{\PoptField      }[2]{\parallel{\optField{#1}{#2}}}
 \newcommand{\PoptFieldnotype}[1]{\parallel{\optFieldnotype{#1}}}
+% user defined math commands
+\newcommand{\mbf}[1]{\mbox{\boldmath$#1$}}
+\font\mbff=cmbsy10\def\mbfx#1{\hbox{\mbff#1}}%\let\mbf\Mbff
+\newcommand{\del}[2]{\mbox{$\displaystyle\frac{#1}{#2}$}}
+\newcommand{\pard}[2]{\frac{\partial{#1}}{\partial{#2}}}
+\newcommand{\der}[2]{\frac{{\rm d}{#1}}{{\rm d}{#2}}}
 
 
 \newcommand{\templabel}{}% stores the label
@@ -481,6 +487,12 @@ default) or in 7 points (using \param{NIP} parameter).}
 Implementation of triangular three-node  plane-stress 
 finite element with independent rotation field.
 Each node has 3 degrees of freedom. The element features are summarized in Table~\ref{trplanestrrotsummary}.
+The implementation is based on the following paper: Ibrahimbegovic, A., Taylor, R.L., Wilson, E. L.: A robust membrane qudritelar element with rotational degrees of freedom, Int. J. Num. Meth. Engng., 30, 445-457, 1990.
+The rotation field is defined as $\omega = \del{1}{2}(\der{v}{x}-\der{u}{y}) = \nabla_u\mbf{u}$. The following form of potential energy functial is assumed:
+\begin{equation*}
+\Pi = \del{1}{2}\int_{\Omega}\mbf{\sigma}^T\mbf{\varepsilon}\ d\Omega + \int_{\Omega}\mbf{\tau}^T(\nabla_u\mbf{u}-\omega)\ d\Omega - \int_\Omega \mbf{X}^T\mbf{u}\ d\Omega
+\end{equation*}
+where $\mbf{\tau}$ is pseudo-stress (component of anti-symmetric stress tensor) working on dislocation $(\nabla_u\mbf{u}-\omega)$; the following constitutive relation foris assumed: $\mbf{\tau} = G(\nabla_u\mbf{u}-\omega)$, where $G$ is elasticity modulus in shear.
 
 \begin{elementsummary}{trplanestrrot}{2D linear triangular plane stress element with rotational DOFs}{\optField{NIP}{in} \optField{NIPRot}{in}}{trplanestrrot element summary}{trplanestrrotsummary}
 \elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
@@ -495,6 +507,34 @@ Each node has 3 degrees of freedom. The element features are summarized in Table
 \elementDescription{Status}{-}
 \end{elementsummary}
 
+\subsubsection{TrPlaneStressRotAllman}
+Implementation of triangular three-node  plane-stress 
+with nodal rotations.
+Each node has 3 degrees of freedom. The element features are summarized in Table~\ref{TrPlaneStressRotAllmansummary}.
+The implementation is based on the following paper: Allman, D.J.: A compatible triangular element including vertex rotations for plane elasticity analysis, Computers \& Structures, vol. 19, no. 1-2, pp. 1-8, 1984.
+The element is based on plane stress element with quadratic interpolation. The displacements in midside nodes are expressed using vertex displacements and vertex rotations (for edge normal displacement component); the tangential component is interpolated from vertex values. For particular element side starting at i-th vertex and ending in j-th vertex the normal and tangential displacements at edge midpoint can be expressed as
+\begin{eqnarray*}
+u_n\vert_{l/2} &=& \del{u_{ni}+u_{nj}}{2}+\del{l}{8}(\omega_i-\omega_j)\\
+u_t\vert_{l/2} &=& \del{u_{ti}+u_{tj}}{2}
+\end{eqnarray*}
+where $l$ is edge length. This allows to express global displacements in element midside nodes using vertex displacements and rotations. For a single edge, one obtains:
+\begin{eqnarray*}
+u\vert_{l/2} &=&-\del{u_{ni}+u_{nj}}{2}+\del{l}{8}(\omega_i-\omega_j)\del{\Delta y_{ji}}{l}+(\del{u_{t1}+u_{t2}}{2})\del{\Delta x_{ji}}{l}\\
+v\vert_{l/2} &=& \del{u_{ni}+u_{nj}}{2}+\del{l}{8}(\omega_i-\omega_j)\del{\Delta x_{ji}}{l}+(\del{u_{t1}+u_{t2}}{2})\del{\Delta y_{ji}}{l}\\
+\end{eqnarray*}
+
+\begin{elementsummary}{trplanestressrotallman}{2D linear triangular plane stress element with rotational DOFs}{}{trplanestressrotallman element summary}{TrPlaneStressRotAllmansummary}
+\elementDescription{Unknowns}{Three dofs (u-displacement, v-displacement, z-rotation) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of geometry, quadratic interpolation of displacements.}
+\elementDescription{Integration}{Integration of membrane strain terms using gauss integration formula in 4 points.}
+\elementDescription{Zero energy mode}{The zero energy mode (equal rotations) is handled by adding additional energy term preventing spurious modes.}
+
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{Cross section thickness is required.}
+\elementDescription{Loads}{-}
+\elementDescription{Nlgeo}{0.}
+\elementDescription{Status}{-}
+\end{elementsummary}
 
 
 

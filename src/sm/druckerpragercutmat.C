@@ -259,9 +259,7 @@ DruckerPragerCutMat :: computeReducedElasticModuli(FloatMatrix &answer,
                                          TimeStep *atTime)
 {  /* Returns elastic moduli in reduced stress-strain space*/
     //MaterialMode mode = gp->giveMaterialMode();
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, ReducedForm,
-                                                                    ElasticStiffness,
-                                                                    gp, atTime);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, ElasticStiffness, gp, atTime);
 }
 
 //answer is dkappa (cumulative plastic strain), flow rule
@@ -290,7 +288,7 @@ void DruckerPragerCutMat :: computeKGradientVector(FloatArray &answer, functType
 //Computes second mixed derivative of loading function with respect to stress and hardening vars. 
 void DruckerPragerCutMat :: computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix, int isurf, GaussPoint *gp, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables)
 {
-    int size = this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+    int size = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
     gradientMatrix.resize(size, 1);//six stresses in 3D and one kappa
     gradientMatrix.zero();
 }
@@ -298,7 +296,7 @@ void DruckerPragerCutMat :: computeReducedSKGradientMatrix(FloatMatrix &gradient
 // computes dKappa_i/dsig_j gradient matrix
 void DruckerPragerCutMat :: computeReducedHardeningVarsSigmaGradient(FloatMatrix &answer, GaussPoint *gp, const IntArray &activeConditionMap, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVars, const FloatArray &dlambda)
 {
-    int size = this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+    int size = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
     answer.resize(1, size);
     answer.zero();
 }
@@ -351,7 +349,7 @@ int
 DruckerPragerCutMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
     if ( type == IST_PlasticStrainTensor ) {
-        if ( ( mmode == _3dMat ) || ( mmode == _3dMat_F ) ) {
+        if ( mmode == _3dMat ) {
             answer.resize(6);
             answer.at(1) = 1;
             answer.at(2) = 2;
@@ -391,7 +389,7 @@ DruckerPragerCutMat :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
     if ( type == IST_PlasticStrainTensor ) {
         MaterialMode mode = gp->giveMaterialMode();
-        if (mode == _3dMat || mode == _3dMat_F)
+        if ( mode == _3dMat )
             return 6;
         else if (mode == _PlaneStrain)
             return 4;

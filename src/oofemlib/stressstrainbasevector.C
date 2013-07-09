@@ -38,20 +38,20 @@
 #include "error.h"
 #include "datastream.h"
 #include "materialmode.h"
-#include "matresponseform.h"
+#include <structuralmaterial.h>
 
 namespace oofem {
 StressStrainBaseVector :: StressStrainBaseVector(MaterialMode m) : FloatArray()
 {
-    this->resize( this->giveReducedSize(m) );
+    this->resize( StructuralMaterial :: giveSizeOfVoigtSymVector(m) );
     this->zero();
     this->mode = m;
 }
 
 StressStrainBaseVector :: StressStrainBaseVector(const FloatArray &src, MaterialMode m) : FloatArray(src)
 {
-    if ( this->giveReducedSize(m) != src.giveSize() ) {
-        OOFEM_ERROR4("StressStrainBaseVector::StressStrainBaseVector: size mismatch. The source has size %d and a new MaterialMode %s has reduced size %d", src.giveSize(), __MaterialModeToString(m), this->giveReducedSize(m));
+    if ( StructuralMaterial :: giveSizeOfVoigtSymVector(m) != src.giveSize() ) {
+        OOFEM_ERROR4("StressStrainBaseVector::StressStrainBaseVector: size mismatch. The source has size %d and a new MaterialMode %s has reduced size %d", src.giveSize(), __MaterialModeToString(m), StructuralMaterial :: giveSizeOfVoigtSymVector(m));
     }
 
     this->mode = m;
@@ -80,7 +80,7 @@ void
 StressStrainBaseVector :: convertToFullForm(FloatArray &answer) const
 {
     IntArray indx;
-    int i, j, answerSize = 6;
+    int answerSize = 6;
 
     if ( mode == _3dMat ) {
         answer = * this;
@@ -93,21 +93,14 @@ StressStrainBaseVector :: convertToFullForm(FloatArray &answer) const
         OOFEM_ERROR("StressStrainBaseVector::convertToFullForm: Fullform not available for 3dRotContinuum");
     }
 
-    this->giveStressStrainMask(indx, ReducedForm, ( MaterialMode ) mode);
-    for ( i = 1; i <= indx.giveSize(); i++ ) {
-        if ( ( j = indx.at(i) ) ) {
-            answer.at(j) = this->at(i);
-        }
-    }
-
-    return;
+    StructuralMaterial :: giveVoigtSymVectorMask(indx, (MaterialMode)mode);
+    answer.assemble(*this, indx);
 }
 
 void
 StressStrainBaseVector :: convertFromFullForm(const FloatArray &vector, MaterialMode mode)
 {
     IntArray indx;
-    int i, j;
 
     if ( mode == _3dMat ) {
         if ( size != 6 ) {
@@ -115,23 +108,20 @@ StressStrainBaseVector :: convertFromFullForm(const FloatArray &vector, Material
         }
 
         this->resize(6);
-        for ( i = 1; i <= 6; i++ ) {
+        for ( int i = 1; i <= 6; i++ ) {
             this->at(i) = vector.at(i);
         }
-
-        return;
     } else {
-        this->giveStressStrainMask(indx, ReducedForm, mode);
-        this->resize( giveReducedSize(mode) );
+        StructuralMaterial :: giveVoigtSymVectorMask(indx, (MaterialMode)mode);
+        this->resize( StructuralMaterial :: giveSizeOfVoigtSymVector(mode) );
         this->zero();
 
-        for ( i = 1; i <= indx.giveSize(); i++ ) {
+        for ( int i = 1; i <= indx.giveSize(); i++ ) {
+            int j;
             if ( ( j = indx.at(i) ) ) {
                 this->at(i) = vector.at(j);
             }
         }
-
-        return;
     }
 }
 
@@ -169,134 +159,11 @@ StressStrainBaseVector :: restoreYourself(DataStream *stream, ContextMode mode)
 }
 
 
-int
-StressStrainBaseVector :: giveReducedSize(MaterialMode mode)
-//
-// returns the size of reduced stress-strain vector
-// acording to mode given by gp.
-//
-{
-    switch ( mode ) {
-    case _3dMat:
-        return 6;
-
-    case _PlaneStress:
-        return 3;
-
-    case _PlaneStrain:
-        return 4;
-
-    case _1dMat:
-        return 1;
-
-    case _3dRotContinuum:
-        return 4;
-
-    case _Unknown:
-        return 0;
-
-    case _3dMatGrad:
-        return 7;
-
-    case _PlaneStressGrad:
-        return 4;
-
-    case _PlaneStrainGrad:
-        return 5;
-
-    case _1dMatGrad:
-        return 2;
-
-    default:
-        OOFEM_ERROR2( "StressStrainBaseVector::giveReducedSize : unknown mode (%s)", __MaterialModeToString(mode) );
-    }
-
-    return 0;
-}
-
-
-void
-StressStrainBaseVector :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
-                                               MaterialMode mmode) const
-{
-    if ( form == ReducedForm ) {
-        switch ( mmode ) {
-        case _3dMat:
-            answer.resize(6);
-            for ( int i = 1; i <= 6; i++ ) {
-                answer.at(i) = i;
-            }
-
-            break;
-        case _PlaneStress:
-            answer.resize(3);
-            answer.at(1) = 1;
-            answer.at(2) = 2;
-            answer.at(3) = 6;
-            break;
-        case _PlaneStrain:
-            answer.resize(4);
-            answer.at(1) = 1;
-            answer.at(2) = 2;
-            answer.at(3) = 3;
-            answer.at(4) = 6;
-            break;
-        case _1dMat:
-            answer.resize(1);
-            answer.at(1) = 1;
-            break;
-        case _3dRotContinuum:
-            OOFEM_ERROR("giveStressMask :  No Mask for 3dRotContinuum");
-            break;
-        default:
-            OOFEM_ERROR2( "giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode) );
-        }
-    } else if ( form == FullForm ) {
-        switch ( mmode ) {
-        case _3dMat:
-            answer.resize(6);
-            answer.zero();
-            for ( int i = 1; i <= 6; i++ ) {
-                answer.at(i) = i;
-            }
-
-            break;
-        case _PlaneStress:
-            answer.resize(6);
-            answer.zero();
-            answer.at(1) = 1;
-            answer.at(2) = 2;
-            answer.at(6) = 3;
-            break;
-        case _PlaneStrain:
-            answer.resize(6);
-            answer.zero();
-            answer.at(1) = 1;
-            answer.at(2) = 2;
-            answer.at(3) = 3;
-            answer.at(6) = 4;
-            break;
-        case _1dMat:
-            answer.resize(6);
-            answer.zero();
-            answer.at(1) = 1;
-            break;
-        case _3dRotContinuum:
-            OOFEM_ERROR("giveStressMask :  No Mask for 3dRotContinuum");
-            break;
-        default:
-            OOFEM_ERROR2( "giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode) );
-        }
-    } else {
-        OOFEM_ERROR("giveStressStrainMask : unknown form mode");
-    }
-}
-
 void
 StressStrainBaseVector :: letStressStrainModeBe(const MaterialMode newMode)
 {
     this->mode = ( StressStrainMatMode ) newMode;
-    this->resize( this->giveReducedSize(newMode) );
+    this->resize( StructuralMaterial :: giveSizeOfVoigtSymVector(newMode) );
     this->zero();
 }
 

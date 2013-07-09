@@ -194,11 +194,11 @@ public:
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode,
+                                               MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
@@ -225,7 +225,7 @@ protected:
     virtual double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
                                        double effStrain, int i) { return 1.e20; }
 
-    virtual void giveMaterialStiffnessMatrix(FloatMatrix & answer, MatResponseForm, MatResponseMode,
+    virtual void giveMaterialStiffnessMatrix(FloatMatrix & answer, MatResponseMode,
                                              GaussPoint * gp,
                                              TimeStep * tStep);
 
@@ -238,14 +238,14 @@ protected:
      * const FloatArray& strainIncrement, TimeStep* tStep);
      */
     FloatMatrix *GiveCrackTransformationMtrx(GaussPoint *gp, int i);
-    virtual void giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
+    virtual void giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
                                                       MatResponseMode rMode,
                                                       GaussPoint *gp, TimeStep *tStep);
 
     void giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *,
                                          FloatArray &, FloatMatrix &, TimeStep *);
     void giveNormalElasticStiffnessMatrix(FloatMatrix & answer,
-                                          MatResponseForm, MatResponseMode,
+                                          bool reduce, MatResponseMode,
                                           GaussPoint *, TimeStep * tStep,
                                           const FloatMatrix &);
     void updateActiveCrackMap(GaussPoint *gp, const IntArray *activatedCracks = NULL);
@@ -254,22 +254,22 @@ protected:
     double giveResidualStrength() { return 0.01 * this->Ft; }
 
 
-    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
+    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
                                   GaussPoint *gp,
                                   TimeStep *tStep);
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
+    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
                                   GaussPoint *gp,
                                   TimeStep *tStep);
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
+    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
                                GaussPoint *gp,
                                TimeStep *tStep);
-    virtual void give2dBeamLayerStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
+    virtual void give2dBeamLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
                                   GaussPoint *gp,
                                   TimeStep *tStep);
-    virtual void give2dPlateLayerStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
+    virtual void give2dPlateLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
                                    GaussPoint *gp,
                                    TimeStep *tStep);
-    virtual void give3dShellLayerStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
+    virtual void give3dShellLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
                                    GaussPoint *gp,
                                    TimeStep *tStep);
 };

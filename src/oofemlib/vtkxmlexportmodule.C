@@ -356,9 +356,9 @@ VTKXMLExportModule :: giveNumberOfElementCells(Element *elem)
 
 
 void
-VTKXMLExportModule :: doOutput(TimeStep *tStep)
+VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
-    if ( !testTimeStepOutput(tStep) ) {
+    if ( !(testTimeStepOutput(tStep) || forcedOutput) ) {
         return;
     }
 #ifdef __VTK_MODULE
@@ -1420,7 +1420,7 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, VTKStr
             iRule = elem->giveDefaultIntegrationRulePtr();
             if (iRule) {
                 MaterialMode mmode = _Unknown;
-                for (int i = 0; i < iRule->getNumberOfIntegrationPoints(); ++i) {
+                for (int i = 0; i < iRule->giveNumberOfIntegrationPoints(); ++i) {
                     gp = iRule->getIntegrationPoint(i);
                     mmode = gp->giveMaterialMode();
                     elem->giveIPValue(temp, gp, type, tStep);

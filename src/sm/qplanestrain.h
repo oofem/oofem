@@ -57,7 +57,9 @@ public:
     QPlaneStrain(int N, Domain *d);
     virtual ~QPlaneStrain() { }
 
-    virtual FEInterpolation *giveInterpolation() { return &interpolation; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
@@ -65,9 +67,8 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_QPlaneStrain_Name; }
     virtual const char *giveClassName() const { return "QPlaneStrain"; }
     virtual classType giveClassID() const { return QPlaneStrainClass; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int computeNumberOfDofs(EquationID ut) { return 16; }
+    virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
 
@@ -75,9 +76,7 @@ public:
 
     virtual double computeVolumeAround(GaussPoint *gp);
 
-    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) {
-        return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) this->numberOfGaussPoints );
-    }
+    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
@@ -89,11 +88,9 @@ public:
     //void drawInternalState(DrawMode mode);
 #endif
 
-    virtual integrationDomain giveIntegrationDomain() { return _Square; }
-    virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
-
 protected:
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     void computeGaussPoints();
 };

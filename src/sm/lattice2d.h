@@ -128,7 +128,7 @@ protected:
     virtual int giveNumberOfCrossSectionNodes() { return 2; }
     double givePitch();
     virtual void computeGaussPoints();
-    virtual integrationDomain giveIntegrationDomain() { return _Line; }
+    virtual integrationDomain giveIntegrationDomain() const { return _Line; }
     virtual void  giveGpCoordinates(FloatArray &coords);
 };
 } // end namespace oofem

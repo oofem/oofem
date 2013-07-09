@@ -181,18 +181,18 @@ public:
     Concrete2(int n, Domain *d);
     virtual ~Concrete2();
 
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &, TimeStep *atTime);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode,
+                                               MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *atTime);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:
-    void giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    void giveRealStresses3dShellLayer(FloatArray &answer, GaussPoint *gp,
                                        const FloatArray &strain, TimeStep *atTime);
     void dtp3(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
                double SCC, double SCT, int *ifplas);

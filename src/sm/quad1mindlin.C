@@ -62,7 +62,7 @@ Quad1Mindlin :: Quad1Mindlin(int n, Domain *aDomain) :
 
 
 FEInterpolation *
-Quad1Mindlin :: giveInterpolation(DofIDItem id)
+Quad1Mindlin :: giveInterpolation(DofIDItem id) const
 {
     return & interp_lin;
 }
@@ -76,7 +76,7 @@ Quad1Mindlin :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _2dPlate);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
     }
 }
 
@@ -99,7 +99,7 @@ Quad1Mindlin :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeS
     force.resize(0);
     if ( gravity.giveSize() ) {
         IntegrationRule *ir = integrationRulesArray [ 0 ]; ///@todo Other/higher integration for lumped mass matrices perhaps?
-        for ( int i = 0; i < ir->getNumberOfIntegrationPoints(); ++i) {
+        for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i) {
             gp = ir->getIntegrationPoint(i);
 
             this->interp_lin.evalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
@@ -220,7 +220,7 @@ Quad1Mindlin :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     double dV, mass = 0.;
 
     IntegrationRule *ir = integrationRulesArray [ 0 ]; ///@todo Other/higher integration for lumped mass matrices perhaps?
-    for ( int i = 0; i < ir->getNumberOfIntegrationPoints(); ++i) {
+    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i) {
         gp = ir->getIntegrationPoint(i);
 
         dV = this->computeVolumeAround(gp);

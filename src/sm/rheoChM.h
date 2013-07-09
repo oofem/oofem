@@ -139,13 +139,12 @@ public:
     RheoChainMaterial(int n, Domain *d);
     virtual ~RheoChainMaterial();
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseForm form,
+    virtual void giveStiffnessMatrix(FloatMatrix &answer,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
@@ -172,7 +171,7 @@ public:
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode,
+                                               MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *tStep);
 
@@ -189,7 +188,6 @@ public:
      * @param mode Determines response mode (Total or incremental).
      */
     virtual void giveShrinkageStrainVector(FloatArray &answer,
-                                           MatResponseForm form,
                                            GaussPoint *gp,
                                            TimeStep *tStep,
                                            ValueModeType mode)
@@ -205,8 +203,7 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is the current time step).
      * @param mode Determines response mode.
      */
-    virtual void giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
-                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode) {};
+    virtual void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) {};
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
@@ -253,11 +250,9 @@ protected:
                                            double t0, double tr);
 
     /// Evaluation of elastic compliance matrix for unit Young's modulus.
-    void giveUnitComplianceMatrix(FloatMatrix &answer, MatResponseForm form,
-                                  GaussPoint *gp, TimeStep *tStep);
+    void giveUnitComplianceMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
     /// Evaluation of elastic stiffness matrix for unit Young's modulus.
-    void giveUnitStiffnessMatrix(FloatMatrix &answer,
-                                 MatResponseForm form, GaussPoint *gp, TimeStep *tStep);
+    void giveUnitStiffnessMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
 
     /// Update of partial moduli of individual chain units
     void updateEparModuli(GaussPoint *gp, double atTime);
@@ -281,27 +276,27 @@ protected:
     double giveEndOfTimeOfInterest();
 
     virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                          MatResponseForm, MatResponseMode mmode,
+                                          MatResponseMode mmode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);
     virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                          MatResponseForm, MatResponseMode mmode,
+                                          MatResponseMode mmode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);
     virtual void give1dStressStiffMtrx(FloatMatrix &answer,
-                                       MatResponseForm, MatResponseMode mmode,
+                                       MatResponseMode mmode,
                                        GaussPoint *gp,
                                        TimeStep *tStep);
     virtual void give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                          MatResponseForm, MatResponseMode mmode,
+                                          MatResponseMode mmode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);
     virtual void give2dPlateLayerStiffMtrx(FloatMatrix &answer,
-                                           MatResponseForm, MatResponseMode mmode,
+                                           MatResponseMode mmode,
                                            GaussPoint *gp,
                                            TimeStep *tStep);
     virtual void give3dShellLayerStiffMtrx(FloatMatrix &answer,
-                                           MatResponseForm, MatResponseMode mmode,
+                                           MatResponseMode mmode,
                                            GaussPoint *gp,
                                            TimeStep *tStep);
     /**

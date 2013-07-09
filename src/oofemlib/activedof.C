@@ -94,12 +94,12 @@ void ActiveDof :: giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNu
 
     IntArray mstrEqNmbrs;
 
-    masterEqNumbers.resize( this->giveNumberOfPrimaryMasterDofs() );
     int countOfMasterDofs = this->giveNumberOfMasterDofs();
-    for (int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
+    masterEqNumbers.preallocate( countOfMasterDofs );
+    masterEqNumbers.resize( 0 );
+    for (int i = 1; i <= countOfMasterDofs; i++ ) {
         this->giveMasterDof(i)->giveEquationNumbers(mstrEqNmbrs, s);
-        masterEqNumbers.copySubVector(mstrEqNmbrs, k);
-        k += mstrEqNmbrs.giveSize();
+        masterEqNumbers.followedBy(mstrEqNmbrs);
     }
 }
 
@@ -113,12 +113,12 @@ void ActiveDof :: giveDofIDs(IntArray &masterDofIDs)
 
     IntArray mstrDofIDs;
 
-    masterDofIDs.resize( this->giveNumberOfPrimaryMasterDofs() );
     int countOfMasterDofs = this->giveNumberOfMasterDofs();
-    for (int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
+    masterDofIDs.preallocate( countOfMasterDofs );
+    masterDofIDs.resize( 0 );
+    for (int i = 1; i <= countOfMasterDofs; i++ ) {
         this->giveMasterDof(i)->giveDofIDs(mstrDofIDs);
-        masterDofIDs.copySubVector(mstrDofIDs, k);
-        k += mstrDofIDs.giveSize();
+        masterDofIDs.followedBy(mstrDofIDs);
     }
 }
 
@@ -134,10 +134,9 @@ void ActiveDof :: giveMasterDofManArray(IntArray &answer)
 
     answer.resize( this->giveNumberOfPrimaryMasterDofs() );
     int countOfMasterDofs = this->giveNumberOfMasterDofs();
-    for ( int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
+    for ( int i = 1; i <= countOfMasterDofs; i++ ) {
         this->giveMasterDof(i)->giveMasterDofManArray(subMasterDofManArray);
-        answer.copySubVector(subMasterDofManArray, k);
-        k += subMasterDofManArray.giveSize();
+        answer.followedBy(subMasterDofManArray);
     }
 }
 

@@ -240,11 +240,11 @@ public:
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode,
+                                               MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *tStep);
 
@@ -317,18 +317,18 @@ protected:
     void transformStressFromPDC(FloatArray &answer, const FloatArray &stressPDC, const FloatMatrix &t, GaussPoint *gp);
     void computeEffectiveStress(FloatArray &stressPDC, const FloatArray &strainPDC,
                                 GaussPoint *gp, TimeStep *tStep);
-    void giveMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
+    void giveMaterialStiffnessMatrix(FloatMatrix &answer,
                                      MatResponseMode mode, GaussPoint *gp,
                                      TimeStep *tStep);
     void applyDamageToStiffness(FloatMatrix &d, GaussPoint *gp);
     void transformStiffnessfromPDC(FloatMatrix &de, const FloatMatrix &t);
 
-    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
+    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
                                   GaussPoint *gp,
                                   TimeStep *tStep);
 
     virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer,
-                                  MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
+                                  MatResponseMode mmode, GaussPoint *gp,
                                   TimeStep *tStep);
 
     void rotateTensor4(FloatMatrix &Dlocal, const FloatMatrix &t);

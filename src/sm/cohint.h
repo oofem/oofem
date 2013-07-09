@@ -104,28 +104,19 @@ public:
     virtual classType giveClassID() const { return CohesiveInterfaceMaterialClass; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                               MatResponseForm, MatResponseMode,
+                                               MatResponseMode,
                                                GaussPoint *gp,
                                                TimeStep *atTime);
 
     double computeVolumetricStrain(GaussPoint *gp, TimeStep *atTime);
 
-    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
+    virtual void  giveStiffnessMatrix(FloatMatrix &answer,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *atTime);
-
-    virtual int giveStressStrainComponentIndOf(MatResponseForm, MaterialMode mmode, int);
-    virtual void giveStressStrainMask(IntArray & answer, MatResponseForm, MaterialMode mmode) const;
-    virtual int giveSizeOfReducedStressStrainVector(MaterialMode);
-    void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                         const FloatArray &charVector3d);
-    void giveFullCharacteristicVector(FloatArray &answer,  GaussPoint *gp,
-                                      const FloatArray &strainVector);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
@@ -141,7 +132,7 @@ public:
 
 protected:
     // Overloaded to use specialized versions of these services possibly implemented by linearElastic member
-    void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+    void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *atTime);
 };
 } // namespace oofem

@@ -278,7 +278,6 @@ DruckerPragerPlasticitySM :: hasMaterialModeCapability(MaterialMode mMode)
 
 void
 DruckerPragerPlasticitySM :: giveRealStressVector(FloatArray &answer,
-                                                  MatResponseForm form,
                                                   GaussPoint *gp,
                                                   const FloatArray &totalStrain,
                                                   TimeStep *atTime)
@@ -309,12 +308,7 @@ DruckerPragerPlasticitySM :: giveRealStressVector(FloatArray &answer,
     status->letTempStrainVectorBe(totalStrain);
 
     // give back correct form of stressVector to giveRealStressVector
-    if ( form == ReducedForm ) {
-        answer = status->giveTempStressVector();
-    } else {
-        ( static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() ) )
-        ->giveFullCharacteristicVector( answer, gp, status->giveTempStressVector() );
-    }
+    answer = status->giveTempStressVector();
 }
 
 void
@@ -601,18 +595,17 @@ DruckerPragerPlasticitySM :: computeYieldStressPrime(double kappa, double eM) co
 
 void
 DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                           MatResponseForm form,
                                                            MatResponseMode mode,
                                                            GaussPoint *gp,
                                                            TimeStep *atTime)
 {
     switch ( mode ) {
     case ElasticStiffness:
-        LEMaterial->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
         break;
 
     case SecantStiffness:
-        LEMaterial->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        LEMaterial->give3dMaterialStiffnessMatrix(answer,  mode, gp, atTime);
         break;
 
 
@@ -621,17 +614,17 @@ DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                 ->giveTempStateFlag() ) {
         case DruckerPragerPlasticitySMStatus :: DP_Elastic:        // elastic stiffness
         case DruckerPragerPlasticitySMStatus :: DP_Unloading:        // elastic stiffness
-            LEMaterial->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+            LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
             break;
         case DruckerPragerPlasticitySMStatus :: DP_Yielding:
             // elasto-plastic stiffness for regular case
             //printf("\nAssembling regular algorithmic stiffness matrix.") ;
-            giveRegAlgorithmicStiffMatrix(answer, form, mode, gp, atTime);
+            giveRegAlgorithmicStiffMatrix(answer, mode, gp, atTime);
             break;
         case DruckerPragerPlasticitySMStatus :: DP_Vertex:
             // elasto-plastic stiffness for vertex case
             //printf("\nAssembling vertex case algorithmic stiffness matrix.") ;
-            giveVertexAlgorithmicStiffMatrix(answer, form, mode, gp, atTime);
+            giveVertexAlgorithmicStiffMatrix(answer, mode, gp, atTime);
             break;
         default:
             _error("Case did not match.\n");
@@ -648,7 +641,6 @@ DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
 void
 DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
-                                                           MatResponseForm form,
                                                            MatResponseMode mode,
                                                            GaussPoint *gp,
                                                            TimeStep *atTime)
@@ -656,12 +648,10 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
     int i, j;
     DruckerPragerPlasticitySMStatus *status =
         static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection =
-        static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     const FloatArray stressVector = status->giveTempStressVector();
     FloatArray fullStressVector;
-    crossSection->giveFullCharacteristicVector(fullStressVector, gp, stressVector);
+    StructuralMaterial :: giveFullSymVectorForm(fullStressVector, stressVector, gp->giveMaterialMode());
     const StressVector stress(fullStressVector, _3dMat);
     StressVector deviatoricStress(_3dMat);
     double volumetricStress;
@@ -735,7 +725,7 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
     }
 
     FloatMatrix De;
-    LEMaterial->giveCharacteristicMatrix(De, form, mode, gp, atTime);
+    LEMaterial->give3dMaterialStiffnessMatrix(De, mode, gp, atTime);
 
     // answer is A_Matrix^-1 * De
     A_Matrix.solveForRhs(De, answer);
@@ -743,15 +733,12 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
 
 void
 DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answer,
-                                                              MatResponseForm form,
                                                               MatResponseMode mode,
                                                               GaussPoint *gp,
                                                               TimeStep *atTime)
 {
     DruckerPragerPlasticitySMStatus *status =
         static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection =
-        static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     double tempKappa = status->giveTempKappa();
     double deltaKappa = tempKappa - status->giveKappa();
@@ -764,7 +751,7 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
     if ( deltaKappa <= 0. ) {
         // This case occurs in the first iteration of a step.
         // printf("deltaKappa<=0. for vertex case algorithmic stiffness, i.e. continuum tangent stiffness. Since the continuum tangent stiffness does not exist at the vertex, elastic stiffness is used instead. This will cause the loss of quadratic convergence.\n") ;
-        LEMaterial->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
     }
 
     double deltaVolumetricPlasticStrain =
@@ -773,8 +760,7 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
 
     // compute elastic trial strain deviator of latest temp-state
     FloatArray fullStrainVector;
-    crossSection->giveFullCharacteristicVector( fullStrainVector, gp,
-                                               status->giveTempStrainVector() );
+    StructuralMaterial :: giveFullSymVectorForm(fullStrainVector, status->giveTempStrainVector(), gp->giveMaterialMode());
     StrainVector strain(fullStrainVector, _3dMat);
     StrainVector strainDeviator(_3dMat);
     double volumetricStrain;

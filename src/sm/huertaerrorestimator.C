@@ -837,7 +837,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
                 // huerta + error indicator
                 maxVal = 0.0;
                 iRule = ielem->giveDefaultIntegrationRulePtr();
-                nip = iRule->getNumberOfIntegrationPoints();
+                nip = iRule->giveNumberOfIntegrationPoints();
                 for ( int k = 0; k < nip; k++ ) {
                     result = ielem->giveIPValue(val, iRule->getIntegrationPoint(k), IST_PrincipalDamageTensor, tStep);
                     if ( result ) {
@@ -953,7 +953,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
         // huerta + error indicator
         maxVal = 0.0;
         iRule = ielem->giveDefaultIntegrationRulePtr();
-        nip = iRule->getNumberOfIntegrationPoints();
+        nip = iRule->giveNumberOfIntegrationPoints();
         for ( int k = 0; k < nip; k++ ) {
             result = ielem->giveIPValue(val, iRule->getIntegrationPoint(k), IST_PrincipalDamageTensor, tStep);
             if ( result ) {
@@ -3181,7 +3181,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
             iRule = element->giveDefaultIntegrationRulePtr();
 
             elementNorm = patchNorm = mixedNorm = 0.0;
-            for ( igp = 0; igp < iRule->getNumberOfIntegrationPoints(); igp++ ) {
+            for ( igp = 0; igp < iRule->giveNumberOfIntegrationPoints(); igp++ ) {
                 gp = iRule->getIntegrationPoint(igp);
                 dV = element->computeVolumeAround(gp);
 
@@ -3310,7 +3310,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     maxVal = 0.0;
     element = domain->giveElement(elemId);
     iRule = element->giveDefaultIntegrationRulePtr();
-    nip = iRule->getNumberOfIntegrationPoints();
+    nip = iRule->giveNumberOfIntegrationPoints();
     for ( k = 0; k < nip; k++ ) {
         result = element->giveIPValue(val, iRule->getIntegrationPoint(k), IST_PrincipalDamageTensor, tStep);
         if ( result ) {
@@ -3965,7 +3965,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
             interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
             iRule = element->giveDefaultIntegrationRulePtr();
 
-            for ( igp = 0; igp < iRule->getNumberOfIntegrationPoints(); igp++ ) {
+            for ( igp = 0; igp < iRule->giveNumberOfIntegrationPoints(); igp++ ) {
                 gp = iRule->getIntegrationPoint(igp);
                 dV = element->computeVolumeAround(gp);
 

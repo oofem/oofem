@@ -63,6 +63,9 @@ class IntArray;
  *
  * The activation of non-linear effects can be generally controlled on element level
  * using nlGeometry, allowing elements to be used also in linear computations.
+ * nlGeometry = 0 - Small strain theory based on the engineering stress and strain
+ * nlGeometry = 1 - Finite deformation theory formulated in terms of the deformation gradient F
+ *                  and first Piola-Kirchoff stress P in the virtual work
  *
  * @note
  * Methods ComputeStressVector and computeStrainVector as they are implemented here
@@ -79,6 +82,8 @@ class IntArray;
  * - Performing end-of-step operations:
  *   - calculating the strains and stresses at its Gauss points ;
  *   - printing its output in the data file and updating itself ;
+ *
+ * @author Jim Brouzoulis (among others)
  */
 class NLStructuralElement : public StructuralElement
 {
@@ -97,90 +102,110 @@ public:
     virtual ~NLStructuralElement() { }
 
     /**
-     * Return nlgeometry mode
-     * 0 - small stran mode
-     * 1 - G-L strain mode
-     * 2 - deformation gradient mode
-    */
-    int giveGeometryMode(){return nlGeometry;}
+     * Returns the geometry mode describing the formulation used in the internal work
+     * 0 - Engineering (small deformation) stress-strain mode
+     * 1 - First Piola-Kirchhoff - Deformation gradient mode, P is defined as FS
+     * 2 - Second Piola-Kirchhoff - Green-Lagrange strain mode with deformation gradient as input (deprecated and not supported)
+     */
+    int giveGeometryMode() { return nlGeometry; }
+
+    /**
+     * Computes the first Piola-Kirchhoff stress tensor on Voigt format. This method will
+     * be called if nlGeo = 1 and mode = TL. This method computes the deformation gradient F and passes
+     * it on to the crossection which then asks for the stress from the material.
+     * @Note: P is related to S through F*S.
+     *
+     * @param answer Computed stress vector in Voigt form.
+     * @param gp Gauss point at which the stress is evaluated.
+     * @param tStep Time step.
+     */
+    void computeFirstPKStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+
+    /**
+     * Computes the Cauchy stress tensor on Voigt format. This method will
+     * be called if nlGeo = 1 and mode = UL. This method computes the deformation gradient F and passes
+     * it on to the crossection which then asks for the stress from the material.
+     *
+     * @param answer Computed stress vector in Voigt form.
+     * @param gp Gauss point at which the stress is evaluated.
+     * @param tStep Time step.
+     */
+    void computeCauchyStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+
     /**
      * Computes the stiffness matrix of receiver.
-     * The response is evaluated using @f$ \int (B_1+B_2(r))^{\mathrm{T}} D(B_1+B_2(r))\;\mathrm{d}v @f$, where
-     * @f$ B_2 @f$ is nonlinear contribution evaluated using computeNLBMatrixAt service for each strain component
-     * (@f$ B_2(i) = \Delta r^{\mathrm{T}} A(i) @f$).
-     * Necessary transformations and reduced integration are taken into account.
+     * The response is evaluated using @f$ \int B_{\mathrm{H}}^{\mathrm{T}} D B_{\mathrm{H}} \;\mathrm{d}v @f$, where
+     * @f$ B_{\mathrm{H}} @f$ is the B-matrix which produces the displacement gradient vector H_{\mathrm{V}} when multiplied with
+     * the solution vector a.
+     * Reduced integration are taken into account.
      *
-     * @param answer Computed stiffness matrix (symmetric).
+     * @param answer Computed stiffness matrix.
      * @param rMode Response mode.
      * @param tStep Time step.
      */
-    virtual void computeStiffnessMatrix(FloatMatrix &answer,
-                                        MatResponseMode rMode, TimeStep *tStep);
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+
 
     /**
-     * Computes numerically stiffness matrix of receiver. The response is evaluated
-     * using @f$ \int (B_1+B_2(r))^{\mathrm{T}}D(B_1+B_2(r))\;\mathrm{d}v @f$, where
-     * @f$ B_2 @f$ is nonlinear contribution evaluated using computeNLBMatrixAt service for each strain component
-     * (@f$ B_2(i) = \Delta r^{\mathrm{T}} A(i) @f$).
-     * Numerical integration procedure uses integrationRulesArray
-     * for numerical integration. This implementation regards element integration rules as that they represent sub-cells
-     * so that the integration is performed over all subcells for all terms.
-     * For higher numerical performance, only one half of stiffness matrix is computed and answer is then symmetrized.
-     * Therefore, if element matrix will be generally nonsymmetric, one must specialize this method.
-     * Finally, the result is transformed into global coordinate system (or nodal coordinate system, if it is defined).
-     * @param answer Computed stiffness matrix (symmetric).
+     * Computes the initial stiffness matrix of receiver. This method is used only if mode = UL
+     * The response is evaluated using @f$ \int B ({\mathrm{\Cauchy}}\otime \delta )B_{\mathrm{H}} \;\mathrm{d}v @f$, where
+     * @f$ B @f$ is the classical B-matrix, but computed wrt updated node position
+     *
+     * @param answer Computed initial stiffness matrix.
+     * @param tStep Time step.
+     */
+    virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
+
+    /**
+     * Computes the stiffness matrix of receiver.
+     * The response is evaluated using @f$ \int B_{\mathrm{H}}^{\mathrm{T}} D B_{\mathrm{H}} \;\mathrm{d}v @f$, where
+     * @f$ B_{\mathrm{H}} @f$ is the B-matrix which produces the displacement gradient vector H_{\mathrm{V}} when multiplied with
+     * the solution vector a.
+     * @Note: reduced intergration is not taken into account.
+     * The integration procedure uses an integrationRulesArray for numerical integration. Each integration rule is
+     * considered to represent a separate sub-cell/element. Typically this would be used when integration of the element
+     * domain needs special treatment, e.g. when using the XFEM.
+     *
+     * @param answer Computed stiffness matrix.
      * @param rMode Response mode.
      * @param tStep Time step.
      */
-    void computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &answer,
-                                                     MatResponseMode rMode, TimeStep *tStep);
+    void computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
 
-
-    // stress equivalent vector (vector of internal forces) - for nonLinear Analysis.
     /**
      * Evaluates nodal representation of real internal forces.
-     * The response is evaluated using @f$ F = \int (B+B_2)^{\mathrm{T}}\sigma\;\mathrm{d}V @f$ formula, where
-     * @f$ B @f$ is linear strain-displacement contribution, @f$ B_2 @f$ is nonlinear contribution evaluated using
-     * computeNLBMatrixAt service for each strain component (@f$ B_2(i) = \Delta r^{\mathrm{T}} A(i) @f$).
-     * Necessary transformations are taken into account.
+     * Necessary transformations are taken into account. @todo what is meant?
      *
      * @param answer Equivalent nodal forces vector.
      * @param tStep Time step
      * @param useUpdatedGpRecord If equal to zero, the stresses in integration points are computed (slow but safe).
      */
-    virtual void giveInternalForcesVector(FloatArray &answer,
-                                          TimeStep *tStep, int useUpdatedGpRecord = 0);
+
+    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
+
     /**
      * Evaluates nodal representation of real internal forces.
-     * The response is evaluated using @f$ F = \int (B+B_2)^{\mathrm{T}}\sigma\;\mathrm{d}V @f$ formula, where
-     * @f$ B @f$ is linear strain-displacement contribution, @f$ B_2 @f$ is nonlinear contribution evaluated using
-     * computeNLBMatrixAt service for each strain component (@f$ B_2(i) = \Delta r^{\mathrm{T}} A(i) @f$).
+     *
      * Numerical integration procedure uses integrationRulesArray
-     * for numerical integration. This implementation regards element integration rules as that they represent sub-cells
-     * so that the integration is performed over all subcells for all terms.
-     * Necessary transformations are taken into account.
+     * for numerical integration. The integration procedure uses an integrationRulesArray for numerical integration.
+     * Each integration rule is considered to represent a separate sub-cell/element. Typically this would be used when
+     * integration of the element domain needs special treatment, e.g. when using the XFEM.
      *
      * @param answer Equivalent nodal forces vector.
      * @param tStep Time step.
-     * @param useUpdatedGpRecord If equal to zero, the stresses in integration points are computed (slow but safe).
+     * @param useUpdatedGpRecord If equal to zero, the stresses in the integration points are computed (slow but safe).
      */
-    void giveInternalForcesVector_withIRulesAsSubcells(FloatArray &answer,
-                                                       TimeStep *tStep, int useUpdatedGpRecord = 0);
+    void giveInternalForcesVector_withIRulesAsSubcells(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
 
     /**
-     * Compute strain vector of receiver evaluated at given integration point at time
-     * step stepN from element displacement vector.
-     * Total (green) strains are computed using following scheme
-     * @f$ \varepsilon_G = Br+B_2(r) @f$, where @f$ B_2 @f$ is obtained using
-     * computeNLBMatrixAt service for each strain component (@f$ B_2(i) = \Delta r^{\mathrm{T}} A(i) @f$)
-     * and @f$ B @f$ is usual linear strain-displacement matrix.
-     * Necessary transformation are taken into account.
+     * Computes the deformation gradient in Voigt form at integration point ip and at time
+     * step tStep. Computes the displacement gradient and adds an identitiy tensor.
      *
-     * @param answer Element strain vector.
-     * @param gp Integration point.
+     * @param answer Deformation gradient vector
+     * @param gp Gauss point.
      * @param tStep Time step.
      */
-    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     // data management
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -198,10 +223,13 @@ protected:
      * @param i Determines the component of strain vector for which contribution is assembled.
      * @see computeStrainVector
      */
-    virtual void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i) {
-        answer.resize(0, 0);
-        return;
-    }
+
+
+    void computeStressStiffness(FloatMatrix &answer, FloatArray &S, MaterialMode matMode);
+    int giveVoigtIndexSym(int ind1, int ind2);
+    void giveSymPartOf(const FloatArray &A, FloatArray &answer);
+
+    int checkConsistency();
     /**
      * Computes a matrix which, multiplied by the column matrix of nodal displacements,
      * gives the displacement gradient stored by columns.
@@ -210,8 +238,9 @@ protected:
      * @param gp Integration point.
      * @param answer BF matrix at this point.
      */
-    virtual void computeBFmatrixAt(GaussPoint *gp, FloatMatrix &answer) {
-        OOFEM_ERROR("NLStructuralElement::computeBFMatrixAt : method not implemented for this element");
+
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer) {
+        OOFEM_ERROR("NLStructuralElement::computeBHmatrixAt : method not implemented for this element");
         return;
     }
     friend class GradDpElement;

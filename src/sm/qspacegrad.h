@@ -47,7 +47,6 @@
 #define _IFT_QSpaceGrad_Name "qspacegrad"
 
 namespace oofem {
-
 /**
  * Quadratic 3d  20 - node element with quadratic approximation of displacements and linear approximation of gradient
  *
@@ -60,27 +59,27 @@ protected:
     static FEI3dHexaLin interpolation;
 
 public:
-    QSpaceGrad(int n,Domain *d);
+    QSpaceGrad(int n, Domain *d);
     virtual ~QSpaceGrad() {}
 
-    virtual IRResultType initializeFrom (InputRecord* ir);
-    virtual void giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) const;
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QSpaceGrad_Name; }
-    virtual const char* giveClassName () const { return "QSpaceGrad"; }
-    virtual classType giveClassID () const { return QSpaceGradClass; }
-    virtual int computeNumberOfDofs (EquationID ut) { return 68; }
+    virtual const char *giveClassName() const { return "QSpaceGrad"; }
+    virtual classType giveClassID() const { return QSpaceGradClass; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 68; }
+    virtual MaterialMode giveMaterialMode() { return _3dMat; }
 
 protected:
-    virtual void computeGaussPoints ();
+    virtual void computeGaussPoints();
     virtual void computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual StructuralElement* giveStructuralElement() { return this; }
-    virtual NLStructuralElement* giveNLStructuralElement() { return this; }
-    
+    virtual void computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
+    virtual StructuralElement *giveStructuralElement() { return this; }
+    virtual NLStructuralElement *giveNLStructuralElement() { return this; }
 };
-
 }
 #endif // end namespace oofem
 

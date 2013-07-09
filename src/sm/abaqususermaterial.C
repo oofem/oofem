@@ -116,8 +116,8 @@ MaterialStatus *AbaqusUserMaterial :: CreateStatus(GaussPoint *gp) const
     return new AbaqusUserMaterialStatus(n++, this->giveDomain(), gp, this->numState);
 }
 
-void AbaqusUserMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                    MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+void AbaqusUserMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
+                                                    MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     AbaqusUserMaterialStatus *ms = dynamic_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
     if ( !ms->hasTangent() ) { ///@todo Make this hack fit more nicely into OOFEM in general;
@@ -130,16 +130,13 @@ void AbaqusUserMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
             ncomp = 3;
         } else if ( mMode == _PlaneStrain ) {
             ncomp = 4;
-        } /*else if ( mMode == _3dMat_F ) {
-           * ncomp = 9;
-           * } */
-        else if ( mMode == _1dMat ) {
+        } else if ( mMode == _1dMat ) {
             ncomp = 1;
         }
 
         FloatArray stress(ncomp), strain(ncomp);
         strain.zero();
-        this->giveRealStressVector(stress, form, gp, strain, tStep);
+        this->giveRealStressVector(stress, gp, strain, tStep);
     }
 
     answer = ms->giveTempTangent();
@@ -166,7 +163,7 @@ void AbaqusUserMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 #endif
 }
 
-void AbaqusUserMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+void AbaqusUserMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                                 const FloatArray &reducedStrain, TimeStep *tStep)
 {
     AbaqusUserMaterialStatus *ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
@@ -190,11 +187,7 @@ void AbaqusUserMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
     } else if ( mMode == _PlaneStrain ) {
         ndi = 3;
         nshr = 1;
-    } /*else if ( mMode == _3dMat_F ) {
-       * ndi = 3;
-       * nshr = 6;
-       * } */
-    else if ( mMode == _1dMat ) {
+    } else if ( mMode == _1dMat ) {
         ndi = 1;
         nshr = 0;
     } else {
@@ -351,4 +344,36 @@ void AbaqusUserMaterialStatus :: updateYourself(TimeStep *tStep)
     StructuralMaterialStatus :: updateYourself(tStep);
     stateVector = tempStateVector;
 }
+
+int AbaqusUserMaterial :: giveIPValue(FloatArray& answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
+{
+    AbaqusUserMaterialStatus *ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
+    if ( type == IST_Undefined ) {
+        // The undefined value is used to just dump the entire state vector.
+        answer = ms->giveStateVector();
+        return 1;
+    } else {
+        return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
+    }
+}
+
+InternalStateValueType AbaqusUserMaterial :: giveIPValueType(InternalStateType type)
+{
+    if ( type == IST_Undefined ) {
+        return ISVT_VECTOR;
+    } else {
+        return StructuralMaterial :: giveIPValueType(type);
+    }
+}
+
+int AbaqusUserMaterial :: giveIPValueSize(InternalStateType type, GaussPoint* gp)
+{
+    AbaqusUserMaterialStatus *ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
+    if ( type == IST_Undefined ) {
+        return ms->giveStateVector().giveSize();
+    } else {
+        return StructuralMaterial :: giveIPValueSize(type, gp);
+    }
+}
+
 } // end namespace oofem

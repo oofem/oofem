@@ -47,15 +47,8 @@ REGISTER_Material( NewtonianFluidMaterial );
 
 int
 NewtonianFluidMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
 {
-    if ( ( mode == _2dFlow ) || ( mode == _3dFlow ) ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _2dFlow || mode == _3dFlow;
 }
 
 
@@ -82,18 +75,11 @@ NewtonianFluidMaterial :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->viscosity, _IFT_NewtonianFluidMaterial_mu);
 }
 
+
 double
-NewtonianFluidMaterial :: giveCharacteristicValue(MatResponseMode mode,
-                                                  GaussPoint *gp,
-                                                  TimeStep *atTime)
+NewtonianFluidMaterial :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep)
 {
-    if ( mode == MRM_Density ) {
-        return this->give('d', gp);
-    } else if ( mode == MRM_Viscosity ) {
-        return this->viscosity;
-    } else {
-        return FluidDynamicMaterial :: giveCharacteristicValue(mode, gp, atTime);
-    }
+    return this->viscosity;
 }
 
 

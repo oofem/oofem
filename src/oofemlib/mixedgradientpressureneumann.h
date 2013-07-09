@@ -43,8 +43,6 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 
-#include <list>
-
 #define _IFT_MixedGradientPressureNeumann_Name   "mixedgradientpressureneumann"
 
 namespace oofem {
@@ -84,8 +82,6 @@ class SparseLinearSystemNM;
  * @note Should be applied to element boundaries, not DOFs.
  * @note The implementation doesn't assume that the stress is symmetric, so rigid body rotations are automatically removed.
  * @note Rigid body translations must be controlled separately.
- *
- * @see MixedGradientPressureNeumann
  * 
  * @author Mikael Öhman
  */
@@ -165,7 +161,7 @@ public:
     
 protected:
     /// Helper function that creates suitable integration rule
-    IntegrationRule *CreateIntegrationRule(Element *e, int order);
+    IntegrationRule *CreateIntegrationRule(Element *e, int boundary, int order);
     
     /// Helper function that integrates the deviatoric tangent contribution from a single element boundary.
     void integrateDevTangent(FloatMatrix &answer, Element *e, int boundary);

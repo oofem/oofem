@@ -173,12 +173,12 @@ public:
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return true; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                               MatResponseForm, MatResponseMode,
+                                               MatResponseMode,
                                                GaussPoint * gp,
                                                TimeStep * atTime);
 
 
-    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
+    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
                               const FloatArray &, TimeStep *);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
@@ -195,12 +195,12 @@ public:
 
 protected:
     void closestPointReturn(FloatArray &answer, IntArray &activeConditionMap, FloatArray &gamma,
-                            MatResponseForm form, GaussPoint *gp,
+                            GaussPoint *gp,
                             const FloatArray &totalStrain, FloatArray &plasticStrainR,
                             FloatArray &strainSpaceHardeningVariables, TimeStep *atTime);
 
     void cuttingPlaneReturn(FloatArray &answer, IntArray &activeConditionMap, FloatArray &gamma,
-                            MatResponseForm form, GaussPoint *gp,
+                            GaussPoint *gp,
                             const FloatArray &totalStrain, FloatArray &plasticStrainR,
                             FloatArray &strainSpaceHardeningVariables, TimeStep *atTime);
 
@@ -210,13 +210,11 @@ protected:
                                const IntArray &activeConditionMap, const FloatArray &plasticStrainVectorR,
                                const FloatArray &strainSpaceHardeningVariables, std :: vector< FloatArray > &gradVec);
     virtual void giveConsistentStiffnessMatrix(FloatMatrix & answer,
-                                               MatResponseForm,
                                                MatResponseMode,
                                                GaussPoint * gp,
                                                TimeStep * atTime);
 
     virtual void giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
-                                                  MatResponseForm form,
                                                   MatResponseMode mode,
                                                   GaussPoint *gp,
                                                   TimeStep *atTime);
@@ -259,32 +257,32 @@ protected:
 
     // next functions overloaded from structural material level
     virtual void givePlaneStressStiffMtrx(FloatMatrix & answer,
-                                          MatResponseForm, MatResponseMode,
+                                          MatResponseMode,
                                           GaussPoint * gp,
                                           TimeStep * atTime);
     virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer,
-                                          MatResponseForm, MatResponseMode,
+                                          MatResponseMode,
                                           GaussPoint * gp,
                                           TimeStep * atTime);
     virtual void give1dStressStiffMtrx(FloatMatrix & answer,
-                                       MatResponseForm, MatResponseMode,
+                                       MatResponseMode,
                                        GaussPoint * gp,
                                        TimeStep * atTime);
     virtual void give2dBeamLayerStiffMtrx(FloatMatrix & answer,
-                                          MatResponseForm, MatResponseMode,
+                                          MatResponseMode,
                                           GaussPoint * gp,
                                           TimeStep * atTime);
     virtual void give2dPlateLayerStiffMtrx(FloatMatrix & answer,
-                                           MatResponseForm, MatResponseMode,
+                                           MatResponseMode,
                                            GaussPoint * gp,
                                            TimeStep * atTime);
 
     virtual void give1dFiberStiffMtrx(FloatMatrix & answer,
-                                      MatResponseForm, MatResponseMode, GaussPoint * gp,
+                                      MatResponseMode, GaussPoint * gp,
                                       TimeStep * atTime);
 
     virtual void give3dShellLayerStiffMtrx(FloatMatrix & answer,
-                                           MatResponseForm, MatResponseMode,
+                                           MatResponseMode,
                                            GaussPoint * gp,
                                            TimeStep * atTime);
 };

@@ -84,7 +84,7 @@ public:
     void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
 #endif
 
-    virtual integrationDomain giveIntegrationDomain() { return _Line; }
+    virtual integrationDomain giveIntegrationDomain() const { return _Line; }
     virtual MaterialMode giveMaterialMode() { return _2dBeam; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
 

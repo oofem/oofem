@@ -67,7 +67,7 @@ public:
     QSpace(int n, Domain *d);
     virtual ~QSpace() {}
 
-    virtual FEInterpolation *giveInterpolation() { return &interpolation; }
+    virtual FEInterpolation *giveInterpolation() const { return &interpolation; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
@@ -95,18 +95,16 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_QSpace_Name; }
     virtual const char *giveClassName() const { return "QSpace"; }
     virtual classType giveClassID() const { return QSpaceClass; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_2; }
     virtual int computeNumberOfDofs(EquationID ut) { return 60; }
-
-    virtual integrationDomain giveIntegrationDomain() { return _Cube; }
     virtual MaterialMode giveMaterialMode();
 
 protected:
     virtual void computeGaussPoints();
     virtual void computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    void computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
+    
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void computeBFmatrixAt(GaussPoint *, FloatMatrix &);
+    //void computeBFmatrixAt(GaussPoint *, FloatMatrix &);
+    void computeBHmatrixAt(GaussPoint *, FloatMatrix &);
 
     virtual int giveApproxOrder() { return 2; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 27; }

@@ -52,6 +52,7 @@
 #include "materialinterface.h"
 #include "contextioerr.h"
 #include "reinforcement.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -146,7 +147,7 @@ TR1_2D_SUPG :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, 1, _2dFlow);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
     }
 }
 
@@ -157,7 +158,7 @@ TR1_2D_SUPG :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime)
     answer.resize(6, 6);
     answer.zero();
     FloatArray un;
-    double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
+    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
 
     double ar6 = rho * area / 6.0;
     double ar12 = rho * area / 12.0;
@@ -216,7 +217,7 @@ TR1_2D_SUPG :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
     answer.zero();
 
     FloatArray u, un;
-    double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
+    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
     double dudx, dudy, dvdx, dvdy, usum, vsum, coeff;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
@@ -260,7 +261,7 @@ TR1_2D_SUPG :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *
     answer.zero();
 
     FloatArray u, un;
-    double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
+    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
 
@@ -448,7 +449,7 @@ TR1_2D_SUPG :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *at
 {
     answer.resize(6, 6);
     answer.zero();
-    double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
+    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
     double coeff = area * t_lsic * rho;
     double n[] = {
         b [ 0 ], c [ 0 ], b [ 1 ], c [ 1 ], b [ 2 ], c [ 2 ]
@@ -567,7 +568,7 @@ TR1_2D_SUPG :: computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime)
 void
 TR1_2D_SUPG :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime)
 {
-    double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
+    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
     double coeff = t_pspg * area / rho;
     answer.resize(3, 3);
 
@@ -872,7 +873,7 @@ TR1_2D_SUPG :: computeHomogenizedReinforceTerm_MC(FloatMatrix &answer, Load *loa
     double ky = reinfload->givePermeability()->at(2);
     // double tau_0 = this->giveMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     double mu_0 = this->giveMaterial()->give( Viscosity, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-    double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
+    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
     coeffx = area * mu_0 / (3.0 * kx * rho);
     coeffy = area * mu_0 / (3.0 * ky * rho);
     for( int i = 1; i <= 3; i++){
@@ -893,7 +894,7 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
     double usum [ 2 ];
     Load *load;
     bcGeomType ltype;
-    double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
+    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
     FloatArray un, gVector;
 
     // add body load (gravity) termms
@@ -1020,7 +1021,7 @@ TR1_2D_SUPG :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime)
             double kx = load->givePermeability()->at(1);
             double ky = load->givePermeability()->at(2);
             double tau_0 = this->giveMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-            double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
+            double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
             //double mu_0 = this->giveMaterial()->give( Viscosity, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
             gVector.resize(2);
             gVector.at(1) = tau_0 * sqrt(kx * phi) / (kx * alpha * rho);
@@ -1048,14 +1049,14 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 
     // compute averaged viscosity based on rule of mixture
     GaussPoint *gp;
-    if ( integrationRulesArray [ 0 ]->getNumberOfIntegrationPoints() ) {
+    if ( integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     } else {
         gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
     }
 
     nu = this->giveMaterial()->giveCharacteristicValue( MRM_Viscosity, gp, atTime->givePreviousStep() );
-    rho = this->giveMaterial()->giveCharacteristicValue( MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime->givePreviousStep() );
+    rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
 
     //this -> computeVectorOf(EID_MomentumBalance,VM_Total,atTime->givePreviousStep(),un) ;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), u);
@@ -1284,13 +1285,13 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 
     // compute averaged viscosity based on rule of mixture
     GaussPoint *gp;
-    if ( integrationRulesArray [ 0 ]->getNumberOfIntegrationPoints() ) {
+    if ( integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     } else {
         gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
     }
 
-    nu = this->giveMaterial()->giveCharacteristicValue( MRM_Viscosity, gp, atTime->givePreviousStep() );
+    nu = static_cast< FluidDynamicMaterial* >(this->giveMaterial())->giveEffectiveViscosity(gp, atTime->givePreviousStep() );
     nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
 
     dt = atTime->giveTimeIncrement() * tscale;
@@ -1459,7 +1460,7 @@ TR1_2D_SUPG :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArr
     } else {
         FloatArray helpCoords = coords;
 
-        helpCoords.resize(gsize);
+        helpCoords.resizeWithValues(gsize);
         dist = helpCoords.distance(gcoords);
     }
 
@@ -1920,7 +1921,7 @@ TR1_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Internal
         }
     } else if ( type == IST_Density ) {
         answer.resize(1);
-        answer.at(1) = this->giveMaterial()->giveCharacteristicValue(MRM_Density, aGaussPoint, atTime);
+        answer.at(1) = this->giveMaterial()->give('d', aGaussPoint);
         return 1;
     } else {
         return SUPGElement :: giveIPValue(answer, aGaussPoint, type, atTime);
@@ -2029,7 +2030,7 @@ TR1_2D_SUPG :: printOutputAt(FILE *file, TimeStep *stepN)
 // Performs end-of-step operations.
 {
     SUPGElement :: printOutputAt(file, stepN);
-    double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), stepN);
+    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
     fprintf(file, "VOF %e, density %e\n\n", this->giveVolumeFraction(), rho);
 }
 

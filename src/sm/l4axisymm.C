@@ -42,6 +42,7 @@
 #include "domain.h"
 #include "engngm.h"
 #include "mathfem.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -51,8 +52,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( L4Axisymm );
+REGISTER_Element(L4Axisymm);
 
 FEI2dQuadLin L4Axisymm :: interpolation(1, 2);
 
@@ -73,11 +73,11 @@ Interface *
 L4Axisymm :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     }
 
     return NULL;
@@ -182,6 +182,44 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
 
 
 void
+L4Axisymm :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+// Returns the [9x8] displacement gradient matrix {BH} of the receiver,
+// evaluated at aGaussPoint.
+// BH matrix  -  9 rows : du/dx, dv/dy, dw/dz = u/r, 0, 0, du/dy,  0, 0, dv/dx
+// @todo not checked if correct
+{
+    FloatArray n;
+    FloatMatrix dnx;
+
+    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+
+    answer.resize(9, 8);
+    answer.zero();
+
+    double r = 0., x;
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
+        x  = this->giveNode(i)->giveCoordinate(1);
+        r += x * n.at(i);
+    }
+
+
+    // mode is _3dMat !!!!!! answer.at(4,*), answer.at(5,*), answer.at(7,*), and answer.at(8,*) is zero
+    for ( int i = 1; i <= 8; i++ ) {
+        answer.at(1, 3 * i - 2) = dnx.at(i, 1);     // du/dx
+        answer.at(2, 3 * i - 1) = dnx.at(i, 2);     // dv/dy
+        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy
+        answer.at(9, 3 * i - 1) = dnx.at(i, 1);     // dv/dx
+    }
+
+    answer.at(3, 1) = n.at(1) / r;
+    answer.at(3, 3) = n.at(2) / r;
+    answer.at(3, 5) = n.at(3) / r;
+    answer.at(3, 7) = n.at(4) / r;
+}
+
+
+
+void
 L4Axisymm :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
@@ -189,10 +227,10 @@ L4Axisymm :: computeGaussPoints()
         numberOfIntegrationRules = 2;
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _3dMat);
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);
-        integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Square, numberOfFiAndShGaussPoints, _3dMat);
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], numberOfFiAndShGaussPoints, this);
     }
 }
 
@@ -285,14 +323,7 @@ L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
         answer.at(6) = Epsilon.at(4);
 
         if ( nlGeometry ) {
-            for ( int i = 1; i <= 6; i++ ) {
-                // nonlin part of strain vector
-                this->computeNLBMatrixAt(A, gp, i);
-                if ( A.isNotEmpty() ) {
-                    help.beProductOf(A, u);
-                    answer.at(i) += 0.5 * u.dotProduct(help);
-                }
-            }
+            OOFEM_ERROR("L4Axisymm :: computeStrainVector - only supports nlGeometry = 0");
         }
     } else if ( mode == AL ) { // actualized Lagrange formulation
         _error("computeStrainVector : unsupported mode");
@@ -370,7 +401,7 @@ L4Axisymm :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, i
 int
 L4Axisymm :: SPRNodalRecoveryMI_giveNumberOfIP()
 {
-    return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
+    return this->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
 }
 
 
@@ -718,7 +749,7 @@ void L4Axisymm :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].y = 0.25 * ( pp [ 0 ].y + pp [ 1 ].y + pp [ 2 ].y + pp [ 3 ].y );
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
-        for ( ip = 1; ip <= numberOfGaussPoints; ip++ ) {
+        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
             gpCoords = gp->giveCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {

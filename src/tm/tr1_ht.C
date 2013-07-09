@@ -73,19 +73,11 @@ void
 Tr1_ht :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    MaterialMode mmode;
-
-    if ( emode == HeatTransferEM ) {
-        mmode = _2dHeat;
-    } else {
-        mmode = _2dHeMo;
-    }
-
     if ( !integrationRulesArray ) {
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, mmode);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
     }
 }
 
@@ -99,7 +91,7 @@ Tr1_ht :: initializeFrom(InputRecord *ir)
     this->TransportElement :: initializeFrom(ir);
 
     numberOfGaussPoints = 1;
-    //IR_GIVE_OPTIONAL_FIELD (ir, numberOfGaussPoints, "nip");
+    //IR_GIVE_OPTIONAL_FIELD (ir, numberOfGaussPoints, _IFT_Element_nip);
     //if ( numberOfGaussPoints != 1) numberOfGaussPoints = 1;
 
     return IRRT_OK;

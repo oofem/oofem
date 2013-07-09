@@ -164,7 +164,7 @@ IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
 
 //original pure virtual function has to be declared here
 //this function should not be used, internal forces are calculated based on reactions not stresses in GPs
-void MicroMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+void MicroMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 {
     //perform average over microproblem
     //     int j, index, ielem;
@@ -196,7 +196,7 @@ void MicroMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm f
     //     for ( ielem = 1; ielem <= nelem; ielem++ ) { //return stress as average through all elements of the same MicroMaterial
     //         elem = microDomain->giveElement(ielem);
     //         iRule = elem->giveDefaultIntegrationRulePtr();
-    //         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    //         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
     //             gpL  = iRule->getIntegrationPoint(i);
     //             gpL->giveCoordinate(1);
     //             dV  = elem->computeVolumeAround(gpL);

@@ -38,6 +38,7 @@
 #include "gausspoint.h"
 #include "material.h"
 #include "fei2dlinequad.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -52,44 +53,20 @@ Line2SurfaceTension :: Line2SurfaceTension(int n, Domain *aDomain) : LineSurface
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 2, _Unknown);
+    this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 2, this );
 }
 
 Line2SurfaceTension :: ~Line2SurfaceTension()
 {
 }
 
-void Line2SurfaceTension :: computeN(FloatArray &answer, const FloatArray &lcoords) const
-{
-    this->fei.evalN(answer, lcoords, FEIElementGeometryWrapper(this));
-}
-
-FEInterpolation *Line2SurfaceTension :: giveInterpolation()
+FEInterpolation *Line2SurfaceTension :: giveInterpolation() const
 {
     return &this->fei;
 }
 
-double Line2SurfaceTension :: computeNXIntegral() const
-{
-    Node *node;
-    double x1, x2, x3, y1, y2, y3;
 
-    node = this->giveNode(1);
-    x1 = node->giveCoordinate(1);
-    y1 = node->giveCoordinate(2);
-
-    node = this->giveNode(2);
-    x2 = node->giveCoordinate(1);
-    y2 = node->giveCoordinate(2);
-
-    node = this->giveNode(3);
-    x3 = node->giveCoordinate(1);
-    y3 = node->giveCoordinate(2);
-
-    return (x3*(8*y1 - y2) + 2*x1*(y2 - 4*y3) + x2*(-2*y1 + y3))/6;
-}
-
-void Line2SurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep)
+void Line2SurfaceTension :: computeInternalForcesVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep)
 {
     ///@todo Support axisymm.
     //domainType dt = this->giveDomain()->giveDomainType();
@@ -107,7 +84,6 @@ void Line2SurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType 
         xy.at(2, i) = node->giveCoordinate(2);
     }
 
-    FloatArray A;
     FloatArray dNdxi(3);
     FloatArray es(2); // tangent vector to curve
     FloatMatrix BJ(2, 6);
@@ -116,7 +92,7 @@ void Line2SurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType 
     answer.resize(6);
     answer.zero();
 
-    for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(k);
         //interpolation.evaldNdx(dN, domain, dofManArray, * gp->giveCoordinates(), 0.0);
         double xi = gp->giveCoordinate(1);
@@ -137,8 +113,7 @@ void Line2SurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType 
         BJ.at(1, 3) = BJ.at(2, 4) = dNdxi.at(2);
         BJ.at(1, 5) = BJ.at(2, 6) = dNdxi.at(3);
 
-        A.beTProductOf(BJ, es);
-        answer.add( - gamma_s * t * gp->giveWeight(), A); // Note! Negative sign!
+        answer.plusProduct(BJ, es, - gamma_s * t * gp->giveWeight()); // Note! Negative sign!
     }
 }
 
@@ -176,7 +151,7 @@ void Line2SurfaceTension :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
 
     answer.resize(6,6);
     answer.zero();
-    for (int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+    for (int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(k);
 
         double xi = gp->giveCoordinate(1);
@@ -228,7 +203,7 @@ void Line2SurfaceTension :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLoca
         TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     FloatArray n;
-    this->computeN(n, lcoords);
+    this->fei.evalN(n, lcoords, FEIElementGeometryWrapper(this));
 
     answer.resize(2);
     answer.zero();

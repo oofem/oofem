@@ -85,7 +85,7 @@ GPInitModule :: doInit()
         Material *mat = elem->giveMaterial();
         IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
         // loop over Gauss points
-        for ( igp = 0; igp < iRule->getNumberOfIntegrationPoints(); igp++ ) {
+        for ( igp = 0; igp < iRule->giveNumberOfIntegrationPoints(); igp++ ) {
             gp = iRule->getIntegrationPoint(igp);
             MaterialStatus *status = mat->giveStatus(gp);
             if ( fscanf(initStream, "%d %d", & ie, & ig) != 2 ) {

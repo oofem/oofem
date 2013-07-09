@@ -139,10 +139,10 @@ public:
     /**
      * Returns number of integration points of receiver.
      */
-    int getNumberOfIntegrationPoints() const { return numberOfIntegrationPoints; }
+    int giveNumberOfIntegrationPoints() const { return numberOfIntegrationPoints; }
     /**
      * Access particular integration point of receiver.
-     * @param n Integration point number (should be in range 0,.., getNumberOfIntegrationPoints()-1).
+     * @param n Integration point number (should be in range 0,.., giveNumberOfIntegrationPoints()-1).
      */
     GaussPoint *getIntegrationPoint(int n);
     /**
@@ -241,35 +241,45 @@ public:
 
 
     /**
-     * Sets up receiver's  integration points on unit line integration domain.
+     * Sets up receiver's integration points on unit line integration domain.
      * Default implementation does not sets up any integration points and returns 0.
      * Must be overloaded by derived classes.
      * @return Number of integration points.
      */
     virtual int SetUpPointsOnLine(int, MaterialMode mode) { return 0; }
     /**
-     * Sets up receiver's  integration points on triangular (area coords) integration domain.
+     * Sets up receiver's integration points on triangular (area coords) integration domain.
      * Default implementation does not sets up any integration points and returns 0.
      * Must be overloaded by derived classes.
      * @return Number of integration points.
      */
     virtual int SetUpPointsOnTriangle(int, MaterialMode mode) { return 0; }
     /**
-     * Sets up receiver's  integration points on unit square integration domain.
+     * Sets up receiver's integration points on unit square integration domain.
      * Default implementation does not sets up any integration points and returns 0.
      * Must be overloaded by derived classes.
      * @return Number of integration points.
      */
     virtual int SetUpPointsOnSquare(int, MaterialMode mode) { return 0; }
     /**
-     * Sets up receiver's  integration points on unit cube integration domain.
+     * Sets up receiver's integration points on unit cube integration domain.
      * Default implementation does not sets up any integration points and returns 0.
      * Must be overloaded by derived classes.
      * @return Number of integration points.
      */
     virtual int SetUpPointsOnCube(int, MaterialMode mode) { return 0; }
     /**
-     * Sets up receiver's  integration points on tetrahedra (volume coords) integration domain.
+     * Sets up receiver's integration points on unit cube integration domain divided into layers in the zeta-direction.
+     * Default implementation does not sets up any integration points and returns 0.
+     * Must be overloaded by derived classes.
+     * @param nPoints1 Number of integration points in the "xi"-direction.
+     * @param nPoints2 Number of integration points in the "eta"-direction.
+     * @param nPointsDepth Number of integration points in the "zeta"-direction
+     * @return Number of integration points.
+     */
+    virtual int SetUpPointsOnCubeLayers(int nPoints1, int nPoints2, int nPointsDepth, MaterialMode mode, const FloatArray &layerThickness) { return 0; }
+    /**
+     * Sets up receiver's integration points on tetrahedra (volume coords) integration domain.
      * Default implementation does not sets up any integration points and returns 0.
      * Must be overloaded by derived classes.
      * @return Number of integration points.
@@ -292,6 +302,15 @@ public:
      * @return Number of integration points.
      */
     virtual int SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, MaterialMode mode) { return 0; }
+    /**
+     * Sets up receiver's integration points on a wedge integration domain divided into layers in the zeta-direction.
+     * Default implementation does not sets up any integration points and returns 0.
+     * Must be overloaded by derived classes.
+     * @param nPointsTri Number of points over the triangle cross-section.
+     * @param nPointsDepth Number of points over the depth.
+     * @return Number of integration points.
+     */
+    virtual int SetUpPointsOnWedgeLayers(int nPointsTri, int nPointsDepth, MaterialMode mode, const FloatArray &layerThickness) { return 0; }
 };
 } // end namespace oofem
 #endif // integrationrule_h

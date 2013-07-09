@@ -230,8 +230,7 @@ InterfaceElem1d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        //integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, this->giveMaterialMode());
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _1dInterface);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, this->giveMaterialMode());
     }
 }
 
@@ -329,7 +328,7 @@ InterfaceElem1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) 
 void
 InterfaceElem1d :: computeLocalSlipDir(FloatArray &normal)
 {
-    normal.resize(3);
+    normal.resizeWithValues(3);
     if ( this->referenceNode ) {
         // normal
         normal.at(1) = domain->giveNode(this->referenceNode)->giveCoordinate(1) - this->giveNode(1)->giveCoordinate(1);
@@ -432,7 +431,7 @@ void InterfaceElem1d :: drawScalar(oofegGraphicContext &context)
     result += giveIPValue(v1, iRule->getIntegrationPoint(0), context.giveIntVarType(), tStep);
 
 
-    for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         result = 0;
         gp  = iRule->getIntegrationPoint(i);
         result += giveIPValue(v1, gp, context.giveIntVarType(), tStep);

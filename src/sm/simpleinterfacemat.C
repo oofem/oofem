@@ -76,7 +76,6 @@ SimpleInterfaceMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 void
 SimpleInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                         MatResponseForm form,
                                                          MatResponseMode mode,
                                                          GaussPoint *gp,
                                                          TimeStep *atTime)
@@ -89,7 +88,7 @@ SimpleInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
 
 void
-SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                                 const FloatArray &totalStrain,
                                                 TimeStep *atTime)
 //
@@ -161,7 +160,6 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
     answer.at(1) = min( normalStress, lim );//threshold on maximum
     answer.at(1) = max( answer.at(1), -lim );//threshold on minimum
     //answer.at(1) = normalStress > lim ? lim : normalStress < -lim ? -lim : normalStress;
-
     // update gp
     status->setTempShearStressShift(tempShearStressShift);
     status->letTempStrainVectorBe(strainVector);
@@ -170,8 +168,8 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
 
 
 void
-SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                    MatResponseForm form, MatResponseMode rMode,
+SimpleInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
+                                                    MatResponseMode rMode,
                                                     GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
@@ -242,117 +240,7 @@ SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         return;
 
     default:
-        StructuralMaterial :: giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
-    }
-}
-
-
-int
-SimpleInterfaceMaterial :: giveSizeOfReducedStressStrainVector(MaterialMode mode)
-//
-// returns the size of reduced stress-strain vector
-// according to mode given by gp.
-//
-{
-    switch ( mode ) {
-    case _1dInterface: return 1;
-
-    case _2dInterface: return 2;
-
-    case _3dInterface: return 3;
-
-    default:
-        return StructuralMaterial :: giveSizeOfReducedStressStrainVector(mode);
-    }
-}
-
-
-int
-SimpleInterfaceMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, MaterialMode mMode, int ind)
-//
-// this function returns index of reduced(if form == ReducedForm)
-// or Full(if form==FullForm) stressStrain component in Full or reduced
-// stressStrainVector acording to stressStrain mode of given gp.
-//
-{
-    if ( mMode == _1dInterface ) {
-        return ind;
-    } else {
-        return StructuralMaterial :: giveStressStrainComponentIndOf(form, mMode, ind);
-    }
-}
-
-void
-SimpleInterfaceMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
-                                                MaterialMode mMode) const
-//
-// this function returns mask of reduced(if form == ReducedForm)
-// or Full(if form==FullForm) stressStrain vector in full or
-// reduced StressStrainVector
-// acording to stressStrain mode of given gp.
-//
-//
-// mask has size of reduced or full StressStrain Vector and  i-th component
-// is index to full or reduced StressStrainVector where corresponding
-// stressStrain resides.
-//
-// Reduced form is sub-vector (of stress or strain components),
-// where components corresponding to imposed zero stress (plane stress,...)
-// are not included. On the other hand, if zero strain component is imposed
-// (Plane strain, ..) this condition must be taken into account in geometrical
-// relations, and corresponding component is included in reduced vector.
-//
-{
-    if ( mMode == _1dInterface ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-    } else {
-        StructuralMaterial :: giveStressStrainMask(answer, form, mMode);
-    }
-}
-
-
-void
-SimpleInterfaceMaterial :: giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                                           const FloatArray &charVector3d)
-//
-// returns reduced stressVector or strainVector from full 3d vector reduced
-// to vector required by gp->giveStressStrainMode()
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-
-    if ( mode == _1dInterface ) {
-        answer = charVector3d;
-        return;
-    } else {
-        StructuralMaterial :: giveReducedCharacteristicVector(answer, gp, charVector3d);
-    }
-}
-
-
-void
-SimpleInterfaceMaterial :: giveFullCharacteristicVector(FloatArray &answer,
-                                                        GaussPoint *gp,
-                                                        const FloatArray &strainVector)
-//
-// returns full 3d general strain vector from strainVector in reducedMode
-// based on StressStrainMode in gp. Included are strains which
-// perform nonzero work.
-// General strain vector has one of the following forms:
-// 1) strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
-// 2) strainVectorShell {eps_x,eps_y,gamma_xy, kappa_x, kappa_y, kappa_xy, gamma_zx, gamma_zy}
-//
-// you must assigng your stress strain mode to one of the folloving modes (or add new)
-// FullForm of MaterialStiffnessMatrix must have the same form.
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    if ( mode == _1dInterface ) {
-        answer = strainVector;
-        return;
-    } else {
-        StructuralMaterial :: giveFullCharacteristicVector(answer, gp, strainVector);
+        StructuralMaterial :: giveStiffnessMatrix(answer, rMode, gp, atTime);
     }
 }
 

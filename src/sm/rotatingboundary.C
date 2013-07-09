@@ -73,17 +73,17 @@ double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
     double &nz = axis.at(3);
 
     if ( coords->giveSize() == 1 ) {
-        R.resize(1, 1, 0);
+        R.resize(1, 1);
         R.at(1, 1) = cos( theta ) + nx * nx * ( 1 - cos( theta ) );
     }
     if ( coords->giveSize() == 2 ) {
-        R.resize(2, 2, 0);
+        R.resize(2, 2);
         R.at(1, 1) = cos( theta ) + nx * nx * ( 1 - cos( theta ) );
         R.at(1, 2) = nx * ny * ( 1 - cos( theta ) ) - nz * sin( theta );
         R.at(2, 1) = ny * nx * ( 1 - cos( theta ) ) + nz * sin( theta );
         R.at(2, 2) = cos( theta ) + ny * ny * ( 1 - cos( theta ) );
     } else if ( coords->giveSize() == 3  ) {
-        R.resize(3, 3, 0);
+        R.resize(3, 3);
 
         R.at(1, 1) = cos( theta ) + nx * nx * ( 1 - cos( theta ) );
         R.at(1, 2) = nx * ny * ( 1 - cos( theta ) ) - nz * sin( theta );

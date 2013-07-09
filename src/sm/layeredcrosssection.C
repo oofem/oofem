@@ -40,6 +40,7 @@
 #include "structuralms.h"
 #include "floatarray.h"
 #include "contextioerr.h"
+#include "mathfem.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -47,7 +48,7 @@ namespace oofem {
 REGISTER_CrossSection( LayeredCrossSection );
 
 void
-LayeredCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm form,
+LayeredCrossSection ::  giveRealStresses(FloatArray &answer,
                                          GaussPoint *gp,
                                          const FloatArray &totalStrain, TimeStep *tStep)
 //
@@ -57,6 +58,18 @@ LayeredCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm for
 // IMPORTANT:
 //
 {
+    ///@todo I'm not sure how we should design this, but it'll work for now:
+    if ( gp->giveIntegrationRule()->giveIntegrationDomain() == _Cube || gp->giveIntegrationRule()->giveIntegrationDomain() == _Wedge ) {
+        // Determine which layer the gp belongs to. This code assumes that the gauss point are created consistently (through CrossSection::setupIntegrationPoints)
+        int ngps = gp->giveIntegrationRule()->giveNumberOfIntegrationPoints();
+        int gpnum = gp->giveNumber();
+        int gpsperlayer = ngps / this->numberOfLayers;
+        int layer = (gpnum - 1) / gpsperlayer + 1;
+        Material *layerMat = this->domain->giveMaterial( this->giveLayerMaterial(layer) );
+        static_cast< StructuralMaterial * >( layerMat )->giveRealStressVector(answer, gp, totalStrain, tStep);
+        return;
+    }
+
     FloatArray stressVector3d;
     FloatArray layerStrain, fullLayerStrain, fullStressVect, stressVect;
     StructuralElement *element = static_cast< StructuralElement * >( gp->giveElement() );
@@ -83,7 +96,7 @@ LayeredCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm for
         //prevLayerStrain = (((StructuralMaterialStatus*) layerMat->giveStatus(layerGp))
         //  ->giveStrainVector());
         interface->computeStrainVectorInLayer(fullLayerStrain, gp, layerGp, tStep);
-        this->giveReducedCharacteristicVector(layerStrain, layerGp, fullLayerStrain);
+        StructuralMaterial :: giveReducedSymVectorForm(layerStrain, fullLayerStrain, layerGp->giveMaterialMode());
 
         /*
          * if (prevLayerStrain.giveSize()) {
@@ -97,12 +110,12 @@ LayeredCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm for
          */
 
         static_cast< StructuralMaterial * >( layerMat )
-        ->giveRealStressVector(stressVector3d, FullForm, layerGp, layerStrain, tStep);
+        ->giveRealStressVector(stressVector3d, layerGp, layerStrain, tStep);
         // reducedStressIncrement = this -> GiveReducedStressVector (gp, stressIncrement3d);
     }
 
     this->giveIntegrated3dShellStress(fullStressVect, gp);
-    this->giveReducedCharacteristicVector(stressVect, gp, fullStressVect);
+    StructuralMaterial :: giveReducedSymVectorForm(stressVect, fullStressVect, gp->giveMaterialMode());
     answer = stressVect;
     status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
 
@@ -121,15 +134,14 @@ LayeredCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
 // only interface to material class, forcing returned matrix to be in reduced form.
 //
 {
-    this->giveMaterialStiffnessMatrixOf(answer, ReducedForm, rMode, gp,
+    this->giveMaterialStiffnessMatrixOf(answer, rMode, gp,
                                         dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() ),
                                         tStep);
 }
 
-
+///@todo Why are these here? Seems like pointless duplicates.
 void
 LayeredCrossSection :: giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                         MatResponseForm form,
                                                          MatResponseMode rMode,
                                                          GaussPoint *gp,
                                                          StructuralMaterial *mat,
@@ -138,64 +150,62 @@ LayeredCrossSection :: giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
 // only interface to material class, forcing returned matrix to be in reduced form.
 //
 {
-    this->giveMaterialStiffnessMatrixOf(answer, form, rMode, gp, mat, tStep);
+    this->giveMaterialStiffnessMatrixOf(answer, rMode, gp, mat, tStep);
 }
 
 
 void
 LayeredCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                     MatResponseForm form,
                                                      MatResponseMode rMode,
                                                      GaussPoint *gp,
                                                      StructuralMaterial *mat,
                                                      TimeStep *tStep)
-
 //
 // only interface to material class, forcing returned matrix to be in form form.
 //
 {
-    //Material *mat = gp->giveElement()->giveMaterial();
     MaterialMode mode = gp->giveMaterialMode();
-    if ( ( mode == _2dPlate ) || ( mode == _3dShell ) || ( mode == _2dBeam ) ) {
-        this->giveDerivedMaterialStiffnessMatrix(answer, form, rMode, gp, mat, tStep);
-    } else if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-        mat->giveCharacteristicMatrix(answer, form, rMode, gp, tStep);
+    if ( mode == _2dPlate ) {
+        this->give2dPlateMaterialStiffnessMatrix(answer, rMode, gp, mat, tStep);
+    } else if ( mode == _2dBeam ) {
+        this->give2dBeamMaterialStiffnessMatrix(answer, rMode, gp, mat, tStep);
+    } else if ( mode == _3dShell ) {
+        this->give3dShellMaterialStiffness(answer, rMode, gp, mat, tStep);
     } else {
-        _error("giveMaterialStiffnessMatrixOf: unsupported StressStrainMode");
+        ///@todo We shouldn't send "mat" argument to these functions. The cross-section should define this.
+        int ngps = gp->giveIntegrationRule()->giveNumberOfIntegrationPoints();
+        int gpnum = gp->giveNumber();
+        int gpsperlayer = ngps / this->numberOfLayers;
+        int layer = (gpnum - 1) / gpsperlayer + 1;
+        mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(layer) ) );
+        if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
+            mat->giveStiffnessMatrix(answer, rMode, gp, tStep);
+        } else {
+            _error("giveMaterialStiffnessMatrixOf: unsupported StressStrainMode");
+        }
     }
 }
 
 
 void
-LayeredCrossSection :: giveDerivedMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                          MatResponseForm form,
-                                                          MatResponseMode rMode,
-                                                          GaussPoint *gp,
-                                                          StructuralMaterial *mat,
-                                                          TimeStep *tStep)
-//
-// return material stiffness matrix for derived types of stressStreinState
-//
+LayeredCrossSection :: giveLayerMaterialStiffnessMatrix(FloatMatrix &layerMatrix,
+                                                        MatResponseMode rMode, GaussPoint *layerGp,
+                                                        TimeStep *tStep)
 {
-    MaterialMode mode = gp->giveMaterialMode();
-    //
-    // integral layer modes
-    //
-    if ( mode == _2dPlate ) {
-        this->give2dPlateMaterialStiffnessMatrix(answer, form, rMode, gp, mat, tStep);
-    } else if ( mode == _2dBeam ) {
-        this->give2dBeamMaterialStiffnessMatrix(answer, form, rMode, gp, mat, tStep);
-    } else if ( mode == _3dShell ) {
-        this->give3dShellMaterialStiffness(answer, form, rMode, gp, mat, tStep);
+    ///@todo The logic in this whole class is pretty messy to support both slave-gp's and normal gps. Rethinking the approach is necessary.
+    /// This function is a helper for *only* slave-gp's used in shell stiffness etc.
+    /// Just using the gp number is to simplistic, and doesn't nicely support more than 1 gp per layer. Must rethink.
+    StructuralMaterial *mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(layerGp->giveNumber()) ) );
+    if ( mat->hasMaterialModeCapability( layerGp->giveMaterialMode() ) ) {
+        mat->giveStiffnessMatrix(layerMatrix, rMode, layerGp, tStep);
     } else {
-        _error("giveDerivedMaterialStiffnessMatrix: unsupported StressStrainMode");
+        _error("giveLayerMaterialStiffnessMatrix: unsupported StressStrainMode");
     }
 }
 
 
 void
 LayeredCrossSection :: give2dPlateMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                          MatResponseForm form,
                                                           MatResponseMode rMode,
                                                           GaussPoint *gp,
                                                           StructuralMaterial *mat,
@@ -217,30 +227,22 @@ LayeredCrossSection :: give2dPlateMaterialStiffnessMatrix(FloatMatrix &answer,
     GaussPoint *layerGp;
     double layerThick, layerWidth, layerZCoord, top, bottom, layerZeta;
     double layerZCoord2;
-    int i, jj;
 
     if ( mode != _2dPlate ) {
         _error("give2dPlateMaterialStiffnessMatrix : unsupported mode");
     }
 
-    // if (form != ReducedForm) error ("give2dPlateMaterialStiffnessMatrix : full form unsupported");
-
-    if ( form == ReducedForm ) {
-        answer.resize(5, 5);
-        answer.zero();
-    } else {
-        answer.resize(8, 8);
-        answer.zero();
-    }
+    answer.resize(5, 5);
+    answer.zero();
 
     // perform integration over layers
     this->computeIntegralThick(); // ensure that total thick has been computed
     bottom = -midSurfaceZcoordFromBottom;
     top    = totalThick - midSurfaceZcoordFromBottom;
 
-    for ( i = 1; i <= numberOfLayers; i++ ) {
+    for ( int i = 1; i <= numberOfLayers; i++ ) {
         layerGp = giveSlaveGaussPoint(gp, i - 1);
-        this->giveLayerMaterialStiffnessMatrix(layerMatrix, FullForm, rMode, layerGp, tStep);
+        this->giveLayerMaterialStiffnessMatrix(layerMatrix, rMode, layerGp, tStep);
 
         //
         // resolve current layer z-coordinate
@@ -254,34 +256,30 @@ LayeredCrossSection :: give2dPlateMaterialStiffnessMatrix(FloatMatrix &answer,
         // perform integration
         //
         // 1) bending terms mx, my, mxy
-        jj = 3; // FullForm assumed
-        if ( form == ReducedForm ) {
-            jj = 0;
-        }
 
-        answer.at(1 + jj, 1 + jj) += layerMatrix.at(1, 1) * layerWidth * layerThick * layerZCoord2;
-        answer.at(1 + jj, 2 + jj) += layerMatrix.at(1, 2) * layerWidth * layerThick * layerZCoord2;
-        answer.at(1 + jj, 3 + jj) += layerMatrix.at(1, 6) * layerWidth * layerThick * layerZCoord2;
+        answer.at(1, 1) += layerMatrix.at(1, 1) * layerWidth * layerThick * layerZCoord2;
+        answer.at(1, 2) += layerMatrix.at(1, 2) * layerWidth * layerThick * layerZCoord2;
+        answer.at(1, 3) += layerMatrix.at(1, 5) * layerWidth * layerThick * layerZCoord2;
 
-        answer.at(2 + jj, 1 + jj) += layerMatrix.at(2, 1) * layerWidth * layerThick * layerZCoord2;
-        answer.at(2 + jj, 2 + jj) += layerMatrix.at(2, 2) * layerWidth * layerThick * layerZCoord2;
-        answer.at(2 + jj, 3 + jj) += layerMatrix.at(2, 6) * layerWidth * layerThick * layerZCoord2;
+        answer.at(2, 1) += layerMatrix.at(2, 1) * layerWidth * layerThick * layerZCoord2;
+        answer.at(2, 2) += layerMatrix.at(2, 2) * layerWidth * layerThick * layerZCoord2;
+        answer.at(2, 3) += layerMatrix.at(2, 5) * layerWidth * layerThick * layerZCoord2;
 
-        answer.at(3 + jj, 1 + jj) += layerMatrix.at(6, 1) * layerWidth * layerThick * layerZCoord2;
-        answer.at(3 + jj, 2 + jj) += layerMatrix.at(6, 2) * layerWidth * layerThick * layerZCoord2;
-        answer.at(3 + jj, 3 + jj) += layerMatrix.at(6, 6) * layerWidth * layerThick * layerZCoord2;
+        answer.at(3, 1) += layerMatrix.at(5, 1) * layerWidth * layerThick * layerZCoord2;
+        answer.at(3, 2) += layerMatrix.at(5, 2) * layerWidth * layerThick * layerZCoord2;
+        answer.at(3, 3) += layerMatrix.at(5, 5) * layerWidth * layerThick * layerZCoord2;
 
         // 2) shear terms qx = qxz, qy = qyz
-        answer.at(4 + jj, 4 + jj) += layerMatrix.at(5, 5) * layerWidth * layerThick;
-        answer.at(4 + jj, 5 + jj) += layerMatrix.at(5, 4) * layerWidth * layerThick;
-        answer.at(5 + jj, 4 + jj) += layerMatrix.at(4, 5) * layerWidth * layerThick;
-        answer.at(5 + jj, 5 + jj) += layerMatrix.at(4, 4) * layerWidth * layerThick;
+        answer.at(4, 4) += layerMatrix.at(4, 4) * layerWidth * layerThick;
+        answer.at(4, 5) += layerMatrix.at(4, 3) * layerWidth * layerThick;
+        answer.at(5, 4) += layerMatrix.at(3, 4) * layerWidth * layerThick;
+        answer.at(5, 5) += layerMatrix.at(3, 3) * layerWidth * layerThick;
     }
 }
 
 
 void
-LayeredCrossSection :: give3dShellMaterialStiffness(FloatMatrix &answer, MatResponseForm form,
+LayeredCrossSection :: give3dShellMaterialStiffness(FloatMatrix &answer,
                                                     MatResponseMode rMode,
                                                     GaussPoint *gp,
                                                     StructuralMaterial *mat,
@@ -321,7 +319,7 @@ LayeredCrossSection :: give3dShellMaterialStiffness(FloatMatrix &answer, MatResp
 
     for ( i = 1; i <= numberOfLayers; i++ ) {
         layerGp = giveSlaveGaussPoint(gp, i - 1);
-        this->giveLayerMaterialStiffnessMatrix(layerMatrix, FullForm, rMode, layerGp, tStep);
+        this->giveLayerMaterialStiffnessMatrix(layerMatrix, rMode, layerGp, tStep);
         //
         // resolve current layer z-coordinate
         //
@@ -336,42 +334,41 @@ LayeredCrossSection :: give3dShellMaterialStiffness(FloatMatrix &answer, MatResp
         // 1) membrane terms sx, sy, sxy
         answer.at(1, 1) += layerMatrix.at(1, 1) * layerWidth * layerThick;
         answer.at(1, 2) += layerMatrix.at(1, 2) * layerWidth * layerThick;
-        answer.at(1, 3) += layerMatrix.at(1, 6) * layerWidth * layerThick;
+        answer.at(1, 3) += layerMatrix.at(1, 5) * layerWidth * layerThick;
 
         answer.at(2, 1) += layerMatrix.at(2, 1) * layerWidth * layerThick;
         answer.at(2, 2) += layerMatrix.at(2, 2) * layerWidth * layerThick;
-        answer.at(2, 3) += layerMatrix.at(2, 6) * layerWidth * layerThick;
+        answer.at(2, 3) += layerMatrix.at(2, 5) * layerWidth * layerThick;
 
-        answer.at(3, 1) += layerMatrix.at(6, 1) * layerWidth * layerThick;
-        answer.at(3, 2) += layerMatrix.at(6, 2) * layerWidth * layerThick;
-        answer.at(3, 3) += layerMatrix.at(6, 6) * layerWidth * layerThick;
+        answer.at(3, 1) += layerMatrix.at(5, 1) * layerWidth * layerThick;
+        answer.at(3, 2) += layerMatrix.at(5, 2) * layerWidth * layerThick;
+        answer.at(3, 3) += layerMatrix.at(5, 5) * layerWidth * layerThick;
 
         // 2) bending terms mx, my, mxy
 
         answer.at(4, 4) += layerMatrix.at(1, 1) * layerWidth * layerThick * layerZCoord2;
         answer.at(4, 5) += layerMatrix.at(1, 2) * layerWidth * layerThick * layerZCoord2;
-        answer.at(4, 6) += layerMatrix.at(1, 6) * layerWidth * layerThick * layerZCoord2;
+        answer.at(4, 6) += layerMatrix.at(1, 5) * layerWidth * layerThick * layerZCoord2;
 
         answer.at(5, 4) += layerMatrix.at(2, 1) * layerWidth * layerThick * layerZCoord2;
         answer.at(5, 5) += layerMatrix.at(2, 2) * layerWidth * layerThick * layerZCoord2;
-        answer.at(5, 6) += layerMatrix.at(2, 6) * layerWidth * layerThick * layerZCoord2;
+        answer.at(5, 6) += layerMatrix.at(2, 5) * layerWidth * layerThick * layerZCoord2;
 
-        answer.at(6, 4) += layerMatrix.at(6, 1) * layerWidth * layerThick * layerZCoord2;
-        answer.at(6, 5) += layerMatrix.at(6, 2) * layerWidth * layerThick * layerZCoord2;
-        answer.at(6, 6) += layerMatrix.at(6, 6) * layerWidth * layerThick * layerZCoord2;
+        answer.at(6, 4) += layerMatrix.at(5, 1) * layerWidth * layerThick * layerZCoord2;
+        answer.at(6, 5) += layerMatrix.at(5, 2) * layerWidth * layerThick * layerZCoord2;
+        answer.at(6, 6) += layerMatrix.at(5, 5) * layerWidth * layerThick * layerZCoord2;
 
         // 3) shear terms qx, qy
-        answer.at(7, 7) += layerMatrix.at(5, 5) * layerWidth * layerThick;
-        answer.at(7, 8) += layerMatrix.at(5, 4) * layerWidth * layerThick;
-        answer.at(8, 7) += layerMatrix.at(4, 5) * layerWidth * layerThick;
-        answer.at(8, 8) += layerMatrix.at(4, 4) * layerWidth * layerThick;
+        answer.at(7, 7) += layerMatrix.at(4, 4) * layerWidth * layerThick;
+        answer.at(7, 8) += layerMatrix.at(4, 3) * layerWidth * layerThick;
+        answer.at(8, 7) += layerMatrix.at(3, 4) * layerWidth * layerThick;
+        answer.at(8, 8) += layerMatrix.at(3, 3) * layerWidth * layerThick;
     }
 }
 
 
 void
 LayeredCrossSection :: give2dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                         MatResponseForm form,
                                                          MatResponseMode rMode,
                                                          GaussPoint *gp,
                                                          StructuralMaterial *mat,
@@ -392,7 +389,6 @@ LayeredCrossSection :: give2dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
     GaussPoint *layerGp;
     double layerThick, layerWidth, layerZCoord, top, bottom, layerZeta;
     double layerZCoord2;
-    int i;
 
     if ( mode != _2dBeam ) {
         _error("give2dBeamMaterialStiffnessMatrix : unsupported mode");
@@ -403,18 +399,13 @@ LayeredCrossSection :: give2dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
     bottom = -midSurfaceZcoordFromBottom;
     top    = totalThick - midSurfaceZcoordFromBottom;
 
-    if ( form == ReducedForm ) {
-        answer.resize(3, 3);
-    } else {
-        answer.resize(8, 8);
-    }
+    answer.resize(3, 3);
 
     answer.zero();
 
-    for ( i = 1; i <= numberOfLayers; i++ ) {
+    for ( int i = 1; i <= numberOfLayers; i++ ) {
         layerGp = giveSlaveGaussPoint(gp, i - 1);
-        this->giveLayerMaterialStiffnessMatrix(layerMatrix, ReducedForm, rMode,
-                                               layerGp, tStep);
+        this->giveLayerMaterialStiffnessMatrix(layerMatrix, rMode, layerGp, tStep);
         //
         // resolve current layer z-coordinate
         //
@@ -426,195 +417,15 @@ LayeredCrossSection :: give2dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
         //
         // perform integration
         //
-        if ( form == ReducedForm ) {
-            // 1) membrane terms sx
-            answer.at(1, 1) += layerMatrix.at(1, 1) * layerWidth * layerThick;
-            answer.at(1, 3) += layerMatrix.at(1, 2) * layerWidth * layerThick;
-            // 2) bending terms my
-            answer.at(2, 2) += layerMatrix.at(1, 1) * layerWidth * layerThick * layerZCoord2;
-            answer.at(2, 3) += layerMatrix.at(1, 2) * layerWidth * layerThick * layerZCoord2;
-            // 3) shear terms qx
-            answer.at(3, 1) += layerMatrix.at(2, 1) * layerWidth * layerThick;
-            answer.at(3, 3) += layerMatrix.at(2, 2) * layerWidth * layerThick;
-        } else {
-            // 1) membrane terms sx
-            answer.at(1, 1) += layerMatrix.at(1, 1) * layerWidth * layerThick;
-            answer.at(1, 7) += layerMatrix.at(1, 2) * layerWidth * layerThick;
-            // 2) bending terms my
-            answer.at(5, 5) += layerMatrix.at(1, 1) * layerWidth * layerThick * layerZCoord2;
-            answer.at(5, 7) += layerMatrix.at(1, 2) * layerWidth * layerThick * layerZCoord2;
-            // 3) shear terms qx
-            answer.at(7, 1) += layerMatrix.at(2, 1) * layerWidth * layerThick;
-            answer.at(7, 7) += layerMatrix.at(2, 2) * layerWidth * layerThick;
-        }
-    }
-}
-
-
-void
-LayeredCrossSection :: giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                                       const FloatArray &charVector3d)
-//
-// returns reduced charVector3d from full 3d  vector reduced
-// to  vector required by gp->giveStressStrainMode()
-//
-// enhanced method in order to support cases with integral bending (2dplate, 3dshell..)
-// in such cases full strain vector has the form:
-// strainVector {eps_x,eps_y,gamma_xy, kappa_x, kappa_y, kappa_xy, gamma_zx, gamma_zy}
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    int size = charVector3d.giveSize();
-
-    if ( mode == _2dPlateLayer ) {
-        if ( size != 6 ) {
-            _error("giveReducedCharacteristicVector: stressVector3d size mismatch");
-        }
-
-        answer.resize(5);
-
-        answer.at(1) = charVector3d.at(1);
-        answer.at(2) = charVector3d.at(2);
-        answer.at(3) = charVector3d.at(4);
-        answer.at(4) = charVector3d.at(5);
-        answer.at(5) = charVector3d.at(6);
-    } else if ( mode == _2dBeamLayer ) {
-        if ( size != 6 ) {
-            _error("giveReducedCharacteristicVector: stressVector3d size mismatch");
-        }
-
-        answer.resize(2);
-
-        answer.at(1) = charVector3d.at(1);
-        answer.at(2) = charVector3d.at(5);
-    } else if ( mode == _3dShellLayer ) {
-        if ( size != 6 ) {
-            _error("giveReducedCharacteristicVector: stressVector3d size mismatch");
-        }
-
-        answer.resize(5);
-
-        answer.at(1) = charVector3d.at(1);
-        answer.at(2) = charVector3d.at(2);
-        answer.at(3) = charVector3d.at(4);
-        answer.at(4) = charVector3d.at(5);
-        answer.at(5) = charVector3d.at(6);
-    } else if ( mode == _2dPlate ) {
-        if ( size != 8 ) {
-            _error("giveReducedCharacteristicVector: stressVector3d size mismatch");
-        }
-
-        answer.resize(5);
-
-        answer.at(1) = charVector3d.at(4);
-        answer.at(2) = charVector3d.at(5);
-        answer.at(3) = charVector3d.at(6);
-        answer.at(4) = charVector3d.at(7);
-        answer.at(5) = charVector3d.at(8);
-    } else if ( mode == _2dBeam ) {
-        if ( size != 8 ) {
-            _error("giveReducedCharacteristicVector: stressVector3d size mismatch");
-        }
-
-        answer.resize(3);
-
-        answer.at(1) = charVector3d.at(1);
-        answer.at(2) = charVector3d.at(4);
-        answer.at(3) = charVector3d.at(7);
-    } else if ( mode == _3dShell ) {
-        if ( size != 8 ) {
-            _error("giveReducedCharacteristicVector: stressVector3d size mismatch");
-        }
-
-        answer = charVector3d;
-    } else {
-        this->StructuralCrossSection :: giveReducedCharacteristicVector(answer, gp, charVector3d);
-    }
-}
-
-void
-LayeredCrossSection :: giveFullCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                                    const FloatArray &charVector)
-//
-// returns reduced charVector3d from full 3d  vector reduced
-// to  vector required by gp->giveStressStrainMode()
-//
-// enhaced method in order to support cases with integral bending (2dplate, 3dshell..)
-// in such cases full strain vector has the form:
-// strainVector {eps_x,eps_y,gamma_xy, kappa_x, kappa_y, kappa_xy, gamma_zx, gamma_zy}
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    int size = charVector.giveSize();
-
-    if ( mode == _2dPlateLayer ) {
-        if ( size != 5 ) {
-            _error("giveFullCharacteristicVector: stressVector size mismatch");
-        }
-
-        answer.resize(6);
-        answer.zero();
-
-        answer.at(1) = charVector.at(1);
-        answer.at(2) = charVector.at(2);
-        answer.at(4) = charVector.at(3);
-        answer.at(5) = charVector.at(4);
-        answer.at(6) = charVector.at(5);
-    } else if ( mode == _2dBeamLayer ) {
-        if ( size != 2 ) {
-            _error("giveFullCharacteristicVector: stressVector size mismatch");
-        }
-
-        answer.resize(6);
-        answer.zero();
-
-        answer.at(1) = charVector.at(1);
-        answer.at(5) = charVector.at(2);
-    } else if ( mode == _3dShellLayer ) {
-        if ( size != 5 ) {
-            _error("giveFullCharacteristicVector: stressVector size mismatch");
-        }
-
-        answer.resize(6);
-        answer.zero();
-
-        answer.at(1) = charVector.at(1);
-        answer.at(2) = charVector.at(2);
-        answer.at(4) = charVector.at(3);
-        answer.at(5) = charVector.at(4);
-        answer.at(6) = charVector.at(5);
-    } else if ( mode == _2dPlate ) {
-        if ( size != 5 ) {
-            _error("giveFullCharacteristicVector: stressVector size mismatch");
-        }
-
-        answer.resize(8);
-        answer.zero();
-
-        answer.at(4) = charVector.at(1);
-        answer.at(5) = charVector.at(2);
-        answer.at(6) = charVector.at(3);
-        answer.at(7) = charVector.at(4);
-        answer.at(8) = charVector.at(5);
-    } else if ( mode == _2dBeam ) {
-        if ( size != 3 ) {
-            _error("giveFullCharacteristicVector: stressVector size mismatch");
-        }
-
-        answer.resize(8);
-        answer.zero();
-
-        answer.at(1) = charVector.at(1);
-        answer.at(4) = charVector.at(2);
-        answer.at(7) = charVector.at(3);
-    } else if ( mode == _3dShell ) {
-        if ( size != 8 ) {
-            _error("giveFullCharacteristicVector: stressVector size mismatch");
-        }
-
-        answer = charVector;
-    } else {
-        this->StructuralCrossSection :: giveFullCharacteristicVector(answer, gp, charVector);
+        // 1) membrane terms sx
+        answer.at(1, 1) += layerMatrix.at(1, 1) * layerWidth * layerThick;
+        answer.at(1, 3) += layerMatrix.at(1, 2) * layerWidth * layerThick;
+        // 2) bending terms my
+        answer.at(2, 2) += layerMatrix.at(1, 1) * layerWidth * layerThick * layerZCoord2;
+        answer.at(2, 3) += layerMatrix.at(1, 2) * layerWidth * layerThick * layerZCoord2;
+        // 3) shear terms qx
+        answer.at(3, 1) += layerMatrix.at(2, 1) * layerWidth * layerThick;
+        answer.at(3, 3) += layerMatrix.at(2, 2) * layerWidth * layerThick;
     }
 }
 
@@ -702,100 +513,6 @@ LayeredCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
 }
 
 
-void
-LayeredCrossSection :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
-                                            MaterialMode mmode, StructuralMaterial *mat) const
-{
-    //
-    // this function returns mask of reduced(if form == ReducedForm)
-    // or Full(if form==FullForm) stressStrain vector in full or
-    // reduced StressStrainVector
-    // acording to stressStrain mode of given gp.
-    //
-    // mask has size of reduced or full StressStrain Vector and  i-th component
-    // is index to full or reduced StressStrainVector where corresponding
-    // stressStrain resides.
-    //
-    int i;
-    if ( mat->hasMaterialModeCapability(mmode) ) {
-        mat->giveStressStrainMask(answer, form, mmode);
-        return;
-    } else {
-        if ( form == ReducedForm ) {
-            switch ( mmode ) {
-            case _2dPlate:
-                answer.resize(5);
-                answer.at(1) = 4;
-                answer.at(2) = 5;
-                answer.at(3) = 6;
-                answer.at(4) = 7;
-                answer.at(5) = 8;
-                break;
-            case _2dBeam:
-                answer.resize(3);
-                answer.at(1) = 1;
-                answer.at(2) = 5;
-                answer.at(3) = 7;
-                break;
-            /*   case _3dRotContinuum:
-             * indx->at(1) = 1;
-             * indx->at(2) = 2;
-             * indx->at(3) = 3;
-             * indx->at(4) = 6;
-             * break;*/
-            case _3dShell:
-                answer.resize(8);
-                for ( i = 1; i <= 8; i++ ) {
-                    answer.at(i) = i;
-                }
-
-                break;
-            default:
-                _error2( "giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode) );
-            }
-        } else if ( form == FullForm ) {
-            switch ( mmode ) {
-            case _2dPlate:
-                answer.resize(8);
-                answer.zero();
-                answer.at(4) = 1;
-                answer.at(5) = 2;
-                answer.at(6) = 3;
-                answer.at(7) = 4;
-                answer.at(8) = 5;
-                break;
-            case _2dBeam:
-                answer.resize(8);
-                answer.zero();
-                answer.at(1) = 1;
-                answer.at(5) = 2;
-                answer.at(7) = 3;
-                break;
-            /*   case _3dRotContinuum:
-             * indx->at(1) = 1;
-             * indx->at(2) = 2;
-             * indx->at(3) = 3;
-             * indx->at(6) = 4;
-             * break;*/
-            case _3dShell:
-                answer.resize(8);
-                answer.zero();
-                for ( i = 1; i <= 8; i++ ) {
-                    answer.at(i) = i;
-                }
-
-                break;
-            default:
-                _error2( "giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode) );
-            }
-        } else {
-            _error("giveStressStrainMask : unknown form mode");
-        }
-    }
-}
-
-
-
 IRResultType
 LayeredCrossSection :: initializeFrom(InputRecord *ir)
 {
@@ -844,6 +561,28 @@ LayeredCrossSection :: setupLayerMidPlanes()
     }
 }
 
+
+int
+LayeredCrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element)
+{
+    ///@todo We must send arrays for integration points instead of just a single scalar.
+    if ( element->giveIntegrationDomain() == _Cube ) {
+        int points1 = floor(cbrt( double( npoints ) ) + 0.5);
+        // If numberOfIntegrationPoints > 0 then use that, otherwise use the element's default.
+        return irule.SetUpPointsOnCubeLayers(points1, points1, this->numberOfIntegrationPoints ? numberOfIntegrationPoints : points1,
+                                             element->giveMaterialMode(), this->layerThicks);
+    } else if ( element->giveIntegrationDomain() == _Wedge ) {
+        if ( npoints == 2 ) {
+            return irule.SetUpPointsOnWedgeLayers(1, this->numberOfIntegrationPoints ? numberOfIntegrationPoints : 2,
+                                                  element->giveMaterialMode(), this->layerThicks);
+        } else {
+            return irule.SetUpPointsOnWedgeLayers(3, this->numberOfIntegrationPoints ? numberOfIntegrationPoints : 3,
+                                                  element->giveMaterialMode(), this->layerThicks);
+        }
+    } else {
+        return irule.setUpIntegrationPoints(element->giveIntegrationDomain(), npoints, element->giveMaterialMode());
+    }
+}
 
 GaussPoint *
 LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
@@ -926,7 +665,7 @@ LayeredCrossSection :: mapLayerGpCoordsToShellCoords(LayeredCrossSection *layere
     for( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRule = layerIntegrationRulesArray [layer-1]; 
 
-        for( int j = 1; j <= iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for( int j = 1; j <= iRule->giveNumberOfIntegrationPoints(); j++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(j-1);
 
             // Map local layer cs to local shell cs
@@ -1095,9 +834,9 @@ LayeredCrossSection :: giveIntegrated3dShellStress(FloatArray &answer, GaussPoin
         layerMat = domain->giveMaterial( layerMaterials.at(i) );
         layerStatus = static_cast< StructuralMaterialStatus * >( layerMat->giveStatus(layerGp) );
 
-        if ( layerStatus->giveTempStressVector().giveSize() ) { // there exist total sress in gp
+        if ( layerStatus->giveTempStressVector().giveSize() ) { // there exist total stress in gp
             reducedLayerStress = layerStatus->giveTempStressVector();
-            giveFullCharacteristicVector(layerStress, layerGp, reducedLayerStress);
+            StructuralMaterial :: giveFullSymVectorForm(layerStress, reducedLayerStress, layerGp->giveMaterialMode());
         } else { // no total stress
             continue; // skip gp without stress
         }
@@ -1166,18 +905,6 @@ LayeredCrossSection :: giveArea()
     return area;
 }
 
-
-void
-LayeredCrossSection :: giveLayerMaterialStiffnessMatrix(FloatMatrix &layerMatrix, MatResponseForm form,
-                                                        MatResponseMode rMode, GaussPoint *layerGp,
-                                                        TimeStep *tStep)
-{
-    this->giveMaterialStiffnessMatrixOf(layerMatrix, form, rMode, layerGp,
-                                        dynamic_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at( layerGp->giveNumber() ) ) ),
-                                        tStep);
-}
-
-
 void
 LayeredCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
                                                             GaussPoint *gp, TimeStep *stepN, ValueModeType mode)
@@ -1191,4 +918,15 @@ LayeredCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
         _error("computeStressIndependentStrainVector: temperature loading not supported");
     }
 }
+
+bool LayeredCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat)
+{
+    for ( int i = 1; i <= this->numberOfLayers; i++ ) {
+        if ( !this->domain->giveMaterial(this->giveLayerMaterial(i))->isCharacteristicMtrxSymmetric(rMode) ) {
+            return false;
+        }
+    }
+    return true;
+}
+
 } // end namespace oofem

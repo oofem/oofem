@@ -130,7 +130,7 @@ void CompoDamageMat :: giveInputRecord(DynamicInputRecord &input)
 
 
 //called at the beginning of each time increment (not iteration), no influence of parameter
-void CompoDamageMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+void CompoDamageMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     FloatMatrix rotationMatrix;
 
@@ -142,7 +142,7 @@ void CompoDamageMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRes
 }
 
 //called in each iteration, support for 3D and 1D material mode
-void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 {
     int i_max, s;
     double delta, sigma, charLen, tmp=0., Gf_tmp;

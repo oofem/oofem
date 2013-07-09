@@ -90,7 +90,7 @@ RCSDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, Gaus
 
 
 void
-RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                        const FloatArray &totalStrain,
                                        TimeStep *atTime)
 //
@@ -105,7 +105,6 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
     FloatArray reducedNonlocStrainVector, fullNonlocStrainVector, principalStrain;
     FloatMatrix tempCrackDirs;
     RCSDNLMaterialStatus *nonlocStatus, *status = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(gp) );
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     FloatArray nonlocalContribution;
     FloatArray reducedLocalStrainVector, localStrain;
@@ -144,7 +143,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
     this->giveStressDependentPartOfStrainVector(localStrain, gp, reducedLocalStrainVector,
                                                 atTime, VM_Total);
 
-    crossSection->giveFullCharacteristicVector(fullNonlocStrainVector, gp, nonlocalStrain);
+    StructuralMaterial :: giveFullSymVectorForm(fullNonlocStrainVector, nonlocalStrain, gp->giveMaterialMode());
 
     status->giveTempCrackDirs(tempCrackDirs);
     this->computePrincipalValDir(principalStrain, tempCrackDirs,
@@ -171,7 +170,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
         this->updateCrackStatus(gp, crackStrain);
 
         ////#
-        this->giveMaterialStiffnessMatrix(Ds0, ReducedForm, SecantStiffness, gp, atTime);
+        this->giveMaterialStiffnessMatrix(Ds0, SecantStiffness, gp, atTime);
 
         ////#  if (form == ReducedForm) {
         ////#   crossSection->giveReducedCharacteristicVector(reducedAnswer, gp, answer);
@@ -210,8 +209,12 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
             int ii, jj;
 
             minG = G = this->give(pscm_G, gp);
+
+            ///@todo Double-Check the logic here with the mask:
+            IntArray indx;
+            StructuralMaterial :: giveVoigtSymVectorMask(indx, gp->giveMaterialMode());
             for ( int i = 4; i <= 6; i++ ) {
-                if ( ( this->giveStressStrainComponentIndOf(FullForm, gp->giveMaterialMode(), i) ) ) {
+                if ( indx.contains(i) ) {
                     if ( i == 4 ) {
                         ii = 2;
                         jj = 3;
@@ -286,7 +289,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
 
                 ef2 = Gf1 / princStress.at(ipos);
 
-                //this->giveMaterialStiffnessMatrix (Ds0, ReducedForm, SecantStiffness, gp, atTime);
+                //this->giveMaterialStiffnessMatrix (Ds0, SecantStiffness, gp, atTime);
                 // compute reached equivalent strain
                 equivStrain = this->computeCurrEquivStrain(gp, nonlocalStrain, E, atTime);
                 damage = this->computeDamageCoeff(equivStrain, e0, ef2);
@@ -326,11 +329,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
         ////#
         ////# reducedSpaceStressVector.times (1.0 - damage);
 
-        ////#  if (form == FullForm) {
-        ////#   crossSection->giveFullCharacteristicVector(answer, gp, reducedSpaceStressVector);
-        ////#  } else {
-        ////#   answer = reducedSpaceStressVector;
-        ////#  }
+        ////# answer = reducedSpaceStressVector;
 
         ////#  stressIncrement = reducedSpaceStressVector;
         ////#  stressIncrement.subtract (status -> giveStressVector());
@@ -343,11 +342,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
     ////# common part
     reducedSpaceStressVector.beProductOf(Ds0, localStrain);
 
-    if ( form == FullForm ) {
-        crossSection->giveFullCharacteristicVector(answer, gp, reducedSpaceStressVector);
-    } else {
-        answer = reducedSpaceStressVector;
-    }
+    answer = reducedSpaceStressVector;
 
     status->letTempStressVectorBe(reducedSpaceStressVector);
 
@@ -447,11 +442,9 @@ RCSDNLMaterialStatus :: RCSDNLMaterialStatus(int n, Domain *d, GaussPoint *g) :
     RCSDEMaterialStatus(n, d, g), StructuralNonlocalMaterialStatusExtensionInterface(), nonlocalStrainVector(),
     tempNonlocalStrainVector(), localStrainVectorForAverage()
 {
-    nonlocalStrainVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
-                                giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+    nonlocalStrainVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
 
-    localStrainVectorForAverage.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
-                                       giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+    localStrainVectorForAverage.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
 }
 
 
@@ -468,7 +461,7 @@ RCSDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
     fprintf(file, "nonlocstatus { ");
     fprintf(file, "  nonloc strains ");
-    static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->giveFullCharacteristicVector(helpVec, gp, nonlocalStrainVector);
+    StructuralMaterial :: giveFullSymVectorForm(helpVec, nonlocalStrainVector, gp->giveMaterialMode());
     for ( int i = 1; i <= helpVec.giveSize(); i++ ) {
         fprintf( file, " % .4e", helpVec.at(i) );
     }
@@ -487,13 +480,11 @@ RCSDNLMaterialStatus :: initTempStatus()
     RCSDEMaterialStatus :: initTempStatus();
 
     if ( nonlocalStrainVector.giveSize() == 0 ) {
-        nonlocalStrainVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
-                                    giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+        nonlocalStrainVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
     }
 
     if ( localStrainVectorForAverage.giveSize() == 0 ) {
-        localStrainVectorForAverage.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
-                                           giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+        localStrainVectorForAverage.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
     }
 
     tempNonlocalStrainVector = nonlocalStrainVector;

@@ -106,7 +106,9 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void giveRealStresses(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element);
+
+    virtual void giveRealStresses(FloatArray &answer, GaussPoint *gp,
                                   const FloatArray &reducedStrainIncrement, TimeStep *tStep);
 
     virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
@@ -114,31 +116,24 @@ public:
                                                  GaussPoint *gp,
                                                  TimeStep *tStep);
 
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
+
     // next function is intended to be used if we would like to obtain
     // char matrix form different material which is not associated with gp and its element.
     // (mainly for obtaining linear elastic matrix)
     // stress-strain mode is taken from gp.
     // NORMALLY - PLEASE USE GiveCharMaterialStiffnessMatrix function
     virtual void giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                   MatResponseForm form, MatResponseMode rMode,
+                                                   MatResponseMode rMode,
                                                    GaussPoint *, StructuralMaterial *,
                                                    TimeStep *tStep);
-
-
-
-    virtual void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                                 const FloatArray &charVector3d);
-    virtual void giveFullCharacteristicVector(FloatArray &answer,
-                                              GaussPoint *gp, const FloatArray &strainVector);
 
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *);
 
-    virtual void giveStressStrainMask(IntArray &answer, MatResponseForm form,
-                                      MaterialMode mmode, StructuralMaterial *mat) const;
-    virtual void giveLayerMaterialStiffnessMatrix(FloatMatrix &layerMatrix, MatResponseForm form,
-                                                  MatResponseMode rMode, GaussPoint *layerGp,
-                                                  TimeStep *tStep);
+    void giveLayerMaterialStiffnessMatrix(FloatMatrix &layerMatrix,
+                                          MatResponseMode rMode, GaussPoint *layerGp,
+                                          TimeStep *tStep);
 
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
@@ -207,31 +202,22 @@ public:
 
 protected:
     virtual void giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                               MatResponseForm form,
                                                MatResponseMode mode,
                                                GaussPoint *gp,
                                                StructuralMaterial *mat,
                                                TimeStep *tStep);
-    void giveDerivedMaterialStiffnessMatrix(FloatMatrix &answer,
-                                            MatResponseForm form,
-                                            MatResponseMode mode,
-                                            GaussPoint *, StructuralMaterial *mat,
-                                            TimeStep *tStep);
 
     void give2dPlateMaterialStiffnessMatrix(FloatMatrix &answer,
-                                            MatResponseForm form,
                                             MatResponseMode mode,
                                             GaussPoint *gp,
                                             StructuralMaterial *mat,
                                             TimeStep *tStep);
     void give3dShellMaterialStiffness(FloatMatrix &answer,
-                                      MatResponseForm form,
                                       MatResponseMode mode,
                                       GaussPoint *gp,
                                       StructuralMaterial *mat,
                                       TimeStep *tStep);
     void give2dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            StructuralMaterial *mat,

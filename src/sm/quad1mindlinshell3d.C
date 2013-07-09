@@ -46,6 +46,7 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "fei2dquadlin.h"
+#include "constantpressureload.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -80,14 +81,14 @@ Quad1MindlinShell3D :: ~Quad1MindlinShell3D()
 
 
 FEInterpolation*
-Quad1MindlinShell3D :: giveInterpolation()
+Quad1MindlinShell3D :: giveInterpolation() const
 {
     return &interp;
 }
 
 
 FEInterpolation*
-Quad1MindlinShell3D :: giveInterpolation(DofIDItem id)
+Quad1MindlinShell3D :: giveInterpolation(DofIDItem id) const
 {
     return &interp;
 }
@@ -101,7 +102,7 @@ Quad1MindlinShell3D :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _3dShell);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
     }
     ///@todo Deal with updated geometries and such.
     this->computeLCS();
@@ -127,7 +128,7 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
 
     if ( gravity.giveSize() ) {
         IntegrationRule *ir = integrationRulesArray [ 0 ];
-        for ( int i = 0; i < ir->getNumberOfIntegrationPoints(); ++i) {
+        for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i) {
             gp = ir->getIntegrationPoint(i);
 
             this->interp.evalN(n, *gp->giveCoordinates(), FEIVoidCellGeometry());
@@ -160,6 +161,44 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
 
     } else {
         answer.resize(0);
+    }
+}
+
+
+void
+Quad1MindlinShell3D :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
+                                                int iSurf, TimeStep *tStep, ValueModeType mode)
+{
+    BoundaryLoad *surfLoad = static_cast< BoundaryLoad * >(load);
+    if ( dynamic_cast< ConstantPressureLoad * >(surfLoad) ) { // Just checking the type of b.c.
+        // EXPERIMENTAL CODE:
+        IntegrationRule *iRule;
+        FloatArray n, gcoords, pressure;
+
+        answer.resize( 24 );
+        answer.zero();
+
+        //int approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder();
+
+        iRule = this->integrationRulesArray[ 0 ];
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+            GaussPoint *gp = iRule->getIntegrationPoint(i);
+            double dV = this->computeVolumeAround(gp);
+            this->interp.evalN(n, *gp->giveCoordinates(), FEIVoidCellGeometry());
+            this->interp.local2global(gcoords, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+            surfLoad->computeValueAt(pressure, tStep, gcoords, mode);
+
+            answer.at( 3) += n.at(1) * pressure.at(1) * dV;
+            answer.at( 9) += n.at(2) * pressure.at(1) * dV;
+            answer.at(15) += n.at(3) * pressure.at(1) * dV;
+            answer.at(21) += n.at(4) * pressure.at(1) * dV;
+        }
+        // Second surface is the outside;
+        if ( iSurf == 2 ) {
+            answer.negated();
+        }
+    } else {
+        OOFEM_ERROR("Quad1MindlinShell3D only supports constant pressure boundary load.");
     }
 }
 
@@ -217,7 +256,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     // We need to overload this for practical reasons (this 3d shell has all 9 dofs, but the shell part only cares for the first 8)
     // This elements adds an additional stiffness for the so called drilling dofs, meaning we need to work with all 9 components.
     FloatMatrix b, d;
-    FloatArray n, strain, stress, bs;
+    FloatArray n, strain, stress;
     FloatArray shellUnknowns(20), drillUnknowns(4), unknowns;
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, unknowns);
@@ -237,7 +276,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         this->computeBmatrixAt(gp, b);
         double dV = this->computeVolumeAround(gp);
@@ -246,16 +285,14 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
             stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
         } else {
             strain.beProductOf(b, shellUnknowns);
-            mat->giveRealStressVector(stress, ReducedForm, gp, strain, tStep);
+            mat->giveRealStressVector(stress, gp, strain, tStep);
         }
-        bs.beTProductOf(b, stress);
-        shellForces.add(dV, bs);
+        shellForces.plusProduct(b, stress, dV);
 
         // Drilling stiffness is here for improved numerical properties
         if (alpha > 0.) {
-            ///@todo Sort out the drilling stiffness thing.
             this->computeConstitutiveMatrixAt(d, ElasticStiffness, gp, tStep);
-            double Et = d.at(1,1); ///@todo Elasticity modulus * thickness, taken from the membrane part of d
+            double Et = d.at(1,1); // Elasticity modulus * thickness, taken from the membrane part of d
             this->interp.evalN(n, *gp->giveCoordinates(), FEIVoidCellGeometry());
             for ( int j = 0; j < 4; j++) {
                 n(j) -= 0.25;
@@ -288,7 +325,7 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
     drillStiffness.zero();
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         this->computeBmatrixAt(gp, b);
         double dV = this->computeVolumeAround(gp);
@@ -382,7 +419,7 @@ Quad1MindlinShell3D :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tS
     double dV, mass = 0.;
 
     IntegrationRule *ir = integrationRulesArray [ 0 ];
-    for ( int i = 0; i < ir->getNumberOfIntegrationPoints(); ++i) {
+    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i) {
         gp = ir->getIntegrationPoint(i);
 
         dV = this->computeVolumeAround(gp);

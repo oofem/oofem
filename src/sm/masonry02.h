@@ -112,18 +112,10 @@ public:
     virtual const char *giveClassName() const { return "Masonry02"; }
     virtual classType giveClassID() const { return Masonry02Class; }
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseForm form,
+    virtual void giveStiffnessMatrix(FloatMatrix &answer,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);
-    virtual int giveStressStrainComponentIndOf(MatResponseForm, MaterialMode mmode, int);
-    virtual void giveStressStrainMask(IntArray & answer, MatResponseForm, MaterialMode mmode) const;
-    virtual int giveSizeOfReducedStressStrainVector(MaterialMode);
-    void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                         const FloatArray &charVector3d);
-    void giveFullCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &strainVector);
 
     virtual int giveSizeOfFullHardeningVarsVector() { return 3; }
     virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *) { return 3; }
@@ -167,7 +159,7 @@ protected:
                                                 const FloatArray &strainSpaceHardeningVariables);
 
 
-    void give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+    void give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *atTime);
 
     virtual void computeReducedElasticModuli(FloatMatrix &answer, GaussPoint *gp,

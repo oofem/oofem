@@ -98,8 +98,7 @@ public:
      */
     FloatArray();
     /**
-     * Constructor. Array is not zeroed.
-     * @see FloatArray::zero
+     * Constructor. Array is zeroed.
      * @param size Size of array.
      */
     FloatArray(int size);
@@ -173,18 +172,19 @@ public:
     /**
      * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly.
+     * Old values are copied over and new space is zeroed.
      * @param s New size.
      * @param allocChunk Additional space to allocate.
      */
     void resizeWithValues(int s, int allocChunk = 0);
     /**
-     * Resizes receiver towards requested size.
+     * Resizes receiver towards requested size. Array is zeroed.
      * @param s New size.
      */
     void resize(int s);
     /**
      * Resizes the size of the receiver to requested bounds. Memory allocation always happens, more preferably use
-     * resize() function instead.
+     * resize() function instead. Array is zeroed.
      * @param s New size.
      */
     void hardResize(int s);
@@ -252,6 +252,14 @@ public:
      * @param b Will be multiplied by factor and added to receiver.
      */
     void add(double factor, const FloatArray &b);
+    /**
+     * Adds the product @f$ b^T . s dV @f$.
+     * If the receiver's size is zero, it adjusts its size.
+     * @param b Matrix b in the equation.
+     * @param s Array s in the equation.
+     * @param dV Scalar dV in the equation.
+     */
+    void plusProduct(const FloatMatrix &b, const FloatArray &s, double dV);
     /**
      * Adds scalar to receiver.
      * @param offset Scalar to add
@@ -407,6 +415,8 @@ public:
      */
     void beReducedVectorForm(const FloatMatrix &aMatrix);
 
+    void beReducedVectorFormOfStrain(const FloatMatrix &aMatrix);
+
 #ifdef __PARALLEL_MODE
     int packToCommBuffer(CommunicationBuffer &buff) const;
     int unpackFromCommBuffer(CommunicationBuffer &buff);
@@ -427,7 +437,7 @@ public:
 #ifdef BOOST_PYTHON
     void __setitem__(int i, double val) { this->at(i+1) = val; }
     double __getitem__(int i) { return this->at(i+1); }
-    void beCopyOf(FloatArray &src) { this->operator=(src); }
+    void beCopyOf(const FloatArray &src) { this->operator=(src); }
 #endif
 };
 

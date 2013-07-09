@@ -105,7 +105,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
                 integrationRulesArray [ indx ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _PlaneStress); // HUHU _PlaneStress, rectangle
 
                 // remap local subelement gp coordinates into knot span coordinates and update integration weight
-                for ( int i = 0; i < numberOfGaussPoints; i++ ) {
+                for ( int i = 0; i < integrationRulesArray[ indx ]->giveNumberOfIntegrationPoints(); i++ ) {
                     gpcoords = integrationRulesArray [ indx ]->getIntegrationPoint(i)->giveCoordinates();
 
                     newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords->at(1) / 2.0 + 0.5 );
@@ -156,7 +156,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
                     integrationRulesArray [ indx ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, _3dMat);
 
                     // remap local subelement gp coordinates into knot span coordinates and update integration weight
-                    for ( int i = 0; i < numberOfGaussPoints; i++ ) {
+                    for ( int i = 0; i < integrationRulesArray [ indx ]->giveNumberOfIntegrationPoints(); i++ ) {
                         gpcoords = integrationRulesArray [ indx ]->getIntegrationPoint(i)->giveCoordinates();
 
                         newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords->at(1) / 2.0 + 0.5 );
@@ -259,7 +259,7 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
                 integrationRulesArray [ indx ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _PlaneStress); // HUHU _PlaneStress, rectangle
 
                 // remap local subelement gp coordinates into knot span coordinates and update integration weight
-                for ( i = 0; i < numberOfGaussPoints; i++ ) {
+                for ( i = 0; i < integrationRulesArray [ indx ]->giveNumberOfIntegrationPoints(); i++ ) {
                     gpcoords = integrationRulesArray [ indx ]->getIntegrationPoint(i)->giveCoordinates();
 
                     newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords->at(1) / 2.0 + 0.5 );

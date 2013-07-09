@@ -41,6 +41,7 @@
 #include "intarray.h"
 #include "domain.h"
 #include "mathfem.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -113,12 +114,11 @@ LSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
     }
 }
 
-
 void
-LSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-// Returns the [9x24] defgrad-displacement matrix {BF} of the receiver,
+LSpace :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+// Returns the [9x24] displacement gradient matrix {BH} of the receiver,
 // evaluated at aGaussPoint.
-// BF matrix  -  9 rows : du/dx, dv/dx, dw/dx, du/dy, dv/dy, dw/dy, du/dz, dv/dz, dw/dz
+// BH matrix  -  9 rows : du/dx, dv/dy, dw/dz, dv/dz, du/dz, du/dy, dw/dy, dw/dx, dv/dx
 {
     FloatMatrix dnx;
 
@@ -126,78 +126,38 @@ LSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 
     answer.resize(9, 24);
     answer.zero();
+   
+    for ( int i = 1; i <= 8; i++ ) {
+        answer.at(1, 3 * i - 2) = dnx.at(i, 1);     // du/dx
+        answer.at(2, 3 * i - 1) = dnx.at(i, 2);     // dv/dy
+        answer.at(3, 3 * i - 0) = dnx.at(i, 3);     // dw/dz
+        answer.at(4, 3 * i - 1) = dnx.at(i, 3);     // dv/dz 
+        answer.at(7, 3 * i - 0) = dnx.at(i, 2);     // dw/dy
+        answer.at(5, 3 * i - 2) = dnx.at(i, 3);     // du/dz 
+        answer.at(8, 3 * i - 0) = dnx.at(i, 1);     // dw/dx
+        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy 
+        answer.at(9, 3 * i - 1) = dnx.at(i, 1);     // dv/dx
 
-    for ( int i = 1; i <= 3; i++ ) { // 3 spatial dimensions
-        for ( int j = 1; j <= 8; j++ ) { // 8 nodes
-            answer.at(3 * i - 2, 3 * j - 2) =
-                answer.at(3 * i - 1, 3 * j - 1) =
-                answer.at(3 * i, 3 * j) = dnx.at(j, i);     // derivative of Nj wrt Xi
-        }
     }
-}
 
+#if 0
+    // test if sym(BH) = H*BH == Bsym
+    FloatMatrix H, Bsym, Btest;
+    H.resize(6,9);
+    H.at(1,1) = H.at(2,2) = H.at(3,3) = H.at(4,4) = H.at(4,7) = H.at(5,5) = H.at(5,8) = H.at(6,6) = H.at(6,9) = 1.0;
+    Btest.beProductOf(H,answer);
+    computeBmatrixAt(aGaussPoint, Bsym);
+    Btest.printYourself();
+    Bsym.printYourself();
+#endif
 
-void
-LSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i)
-//
-// Returns the [24x24] nonlinear part of strain-displacement matrix {B} of the receiver,
-// evaluated at aGaussPoint
-
-{
-    FloatMatrix dnx;
-
-    // compute the derivatives of shape functions
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(24, 24);
-    answer.zero();
-
-    // put the products of derivatives of shape functions into the "nonlinear B matrix",
-    // depending on parameter i, which is the number of the strain component
-    if ( i <= 3 ) {
-        for ( int k = 0; k < 8; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 24; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, i) * dnx.at( ( j - 1 ) / 3 + 1, i );
-                }
-            }
-        }
-    } else if ( i == 4 ) {
-        for ( int k = 0; k < 8; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 24; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 2 );
-                }
-            }
-        }
-    } else if ( i == 5 ) {
-        for ( int k = 0; k < 8; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 24; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
-                }
-            }
-        }
-    } else if ( i == 6 ) {
-        for ( int k = 0; k < 8; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 24; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 2 ) + dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
-                }
-            }
-        }
-    }
 }
 
 
 MaterialMode
 LSpace :: giveMaterialMode()
 {
-    if ( nlGeometry > 1 ) {
-        return _3dMat_F;
-    } else {
-        return _3dMat;
-    }
+    return _3dMat;
 }
 
 void LSpace :: computeGaussPoints()
@@ -207,12 +167,7 @@ void LSpace :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-        MaterialMode mode = _3dMat; // material model is based on strain (standard approach)
-        if ( nlGeometry > 1 ) {
-            mode = _3dMat_F; // material model is based on deformation gradient, not on strain
-        }
-
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, mode);
+        this->giveCrossSection()->setupIntegrationPoints(*integrationRulesArray[0], numberOfGaussPoints, this);
     }
 }
 
@@ -280,7 +235,7 @@ double
 LSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
 {
     if ( normalToCrackPlane.giveSize() != 0 ) {
-        double factor = pow( ( double ) this->numberOfGaussPoints, 1. / 3. );
+        double factor = cbrt( ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
         return this->giveLenghtInDir(normalToCrackPlane) / factor;
     } else {
         IntegrationRule *iRule;
@@ -288,12 +243,12 @@ LSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCra
         double volume = 0.0;
 
         iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
             volume += this->computeVolumeAround(gp);
         }
 
-        return pow(volume, 1. / 3.);
+        return cbrt(volume);
     }
 }
 
@@ -331,7 +286,7 @@ LSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int 
 int
 LSpace :: SPRNodalRecoveryMI_giveNumberOfIP()
 {
-    return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
+    return this->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
 }
 
 
@@ -362,7 +317,7 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
         r.resize(4, size);
         A.zero();
         r.zero();
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule->getIntegrationPoint(i);
             giveIPValue(val, gp, type, tStep);
 
@@ -492,7 +447,7 @@ LSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &c
     } else {
         FloatArray helpCoords = coords;
 
-        helpCoords.resize(gsize);
+        helpCoords.resizeWithValues(gsize);
         dist = helpCoords.distance(gcoords);
     }
 
@@ -627,7 +582,7 @@ LSpace :: HuertaRemeshingCriteriaI_giveCharacteristicSize() {
     double volume = 0.0;
 
     iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
         volume += this->computeVolumeAround(gp);
     }
@@ -892,7 +847,7 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
         FloatArray crackDir;
 
         iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-        for ( igp = 0; igp < iRule->getNumberOfIntegrationPoints(); igp++ ) {
+        for ( igp = 0; igp < iRule->giveNumberOfIntegrationPoints(); igp++ ) {
             gp = iRule->getIntegrationPoint(igp);
             if ( mat->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
@@ -1261,7 +1216,7 @@ LSpace :: GetSurfaceIntegrationRule(int approxOrder)
 {
     IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
     int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Square, approxOrder);
-    iRule->setUpIntegrationPoints(_Square, npoints, _Unknown);
+    iRule->SetUpPointsOnSquare(npoints, _Unknown);
     return iRule;
 }
 

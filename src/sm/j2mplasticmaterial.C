@@ -43,8 +43,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( J2MPlasticMaterial );
+REGISTER_Material(J2MPlasticMaterial);
 
 J2MPlasticMaterial :: J2MPlasticMaterial(int n, Domain *d) : MPlasticMaterial(n, d)
 {
@@ -133,7 +132,7 @@ J2MPlasticMaterial :: computeStressSpaceHardeningVars(FloatArray &answer, GaussP
     }
 
     answer.resize(size);
-    this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
+    StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode() );
     isize = mask.giveSize();
     rSize = this->giveSizeOfReducedHardeningVarsVector(gp);
 
@@ -205,7 +204,7 @@ J2MPlasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer, GaussPo
 
     /* kinematic hardening variables are first */
     if ( this->kinematicHardeningFlag ) {
-        int ksize = this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+        int ksize = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
         for ( i = 1; i <= ksize; i++ ) {
             answer.at(i, i) = this->kinematicModuli;
         }
@@ -272,8 +271,6 @@ J2MPlasticMaterial :: computeStressSpaceHardeningVarsReducedGradient(FloatArray 
     int kcount = 0, size = this->giveSizeOfReducedHardeningVarsVector(gp);
     //double f,ax,ay,az,sx,sy,sz;
     FloatArray fullKinematicGradient, reducedKinematicGrad;
-    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
-                                           ( gp->giveElement()->giveCrossSection() );
 
     if ( !hasHardening() ) {
         answer.resize(0);
@@ -285,7 +282,7 @@ J2MPlasticMaterial :: computeStressSpaceHardeningVarsReducedGradient(FloatArray 
     /* kinematic hardening variables first */
     if ( this->kinematicHardeningFlag ) {
         this->computeStressGradientVector(fullKinematicGradient, ftype, isurf, gp, stressVector, stressSpaceHardeningVars);
-        crossSection->giveReducedCharacteristicVector(reducedKinematicGrad, gp, fullKinematicGradient);
+        StructuralMaterial :: giveReducedSymVectorForm( reducedKinematicGrad, fullKinematicGradient, gp->giveMaterialMode() );
 
         kcount = reducedKinematicGrad.giveSize();
     }
@@ -321,8 +318,8 @@ J2MPlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int isur
     IntArray mask;
     double f, f32, f12, ax, ay, az;
 
-    this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-    size = giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) +
+    StructuralMaterial :: giveInvertedVoigtVectorMask( mask, gp->giveMaterialMode() );
+    size = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) +
            this->giveSizeOfReducedHardeningVarsVector(gp);
 
     answer.resize(size, size);
@@ -418,7 +415,7 @@ J2MPlasticMaterial :: compute3dElasticModuli(FloatMatrix &answer,
                                              TimeStep *atTime)
 {
     /* Returns 3d elastic moduli */
-    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, FullForm, ElasticStiffness, gp, atTime);
+    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, ElasticStiffness, gp, atTime);
 }
 
 
@@ -467,7 +464,7 @@ J2MPlasticMaterial :: giveSizeOfReducedHardeningVarsVector(GaussPoint *gp)
     int size = 0;
 
     if ( kinematicHardeningFlag ) {
-        size += this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+        size += StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
     }
 
     if ( isotropicHardeningFlag ) {
@@ -491,6 +488,7 @@ J2MPlasticMaterial :: giveStressBackVector(FloatArray &answer,
 
         return;
     }
+
     answer.resize(0);
 }
 

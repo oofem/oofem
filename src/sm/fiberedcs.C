@@ -48,8 +48,7 @@ namespace oofem {
 REGISTER_CrossSection( FiberedCrossSection );
 
 void
-FiberedCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm form,
-                                         GaussPoint *gp,
+FiberedCrossSection ::  giveRealStresses(FloatArray &answer, GaussPoint *gp,
                                          const FloatArray &totalStrain, TimeStep *tStep)
 //
 // this function returns a real stresses corresponding to
@@ -82,14 +81,14 @@ FiberedCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm for
         // another approach - use several functions with assumed
         // kinematic constraints
         interface->FiberedCrossSectionInterface_computeStrainVectorInFiber(fullFiberStrain, gp, fiberGp, tStep);
-        this->giveReducedCharacteristicVector(fiberStrain, fiberGp, fullFiberStrain);
+        StructuralMaterial :: giveReducedSymVectorForm(fiberStrain, fullFiberStrain, gp->giveMaterialMode());
 
 
-        static_cast< StructuralMaterial * >( fiberMat )->giveRealStressVector(stressVector3d, FullForm, fiberGp, fiberStrain, tStep);
+        static_cast< StructuralMaterial * >( fiberMat )->giveRealStressVector(stressVector3d, fiberGp, fiberStrain, tStep);
     }
 
     fullStressVect = this->GiveIntegrated3dBeamStress(gp);
-    giveReducedCharacteristicVector(stressVect, gp, * fullStressVect);
+    StructuralMaterial :: giveReducedSymVectorForm(stressVect, * fullStressVect, gp->giveMaterialMode());
     delete fullStressVect;
     answer = stressVect;
     status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
@@ -110,14 +109,12 @@ FiberedCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
 //
 {
     StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
-    this->giveMaterialStiffnessMatrixOf(answer, ReducedForm, rMode, gp,
-                                        mat, tStep);
+    this->giveMaterialStiffnessMatrixOf(answer, rMode, gp, mat, tStep);
 }
 
 
 void
 FiberedCrossSection :: giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                         MatResponseForm form,
                                                          MatResponseMode rMode,
                                                          GaussPoint *gp,
                                                          StructuralMaterial *mat,
@@ -126,13 +123,12 @@ FiberedCrossSection :: giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
 // only interface to material class, forcing returned matrix to be in reduced form.
 //
 {
-    this->giveMaterialStiffnessMatrixOf(answer, form, rMode, gp, mat, tStep);
+    this->giveMaterialStiffnessMatrixOf(answer, rMode, gp, mat, tStep);
 }
 
 
 void
 FiberedCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                     MatResponseForm form,
                                                      MatResponseMode rMode,
                                                      GaussPoint *gp,
                                                      StructuralMaterial *mat,
@@ -144,9 +140,9 @@ FiberedCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
 {
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _3dBeam ) {
-        this->give3dBeamMaterialStiffnessMatrix(answer, form, rMode, gp, mat, tStep);
+        this->give3dBeamMaterialStiffnessMatrix(answer, rMode, gp, mat, tStep);
     } else if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-        mat->giveCharacteristicMatrix(answer, form, rMode, gp, tStep);
+        mat->giveStiffnessMatrix(answer, rMode, gp, tStep);
     } else {
         _error("giveMaterialStiffnessMatrixOf: unsupported StressStrainMode");
     }
@@ -154,7 +150,7 @@ FiberedCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
 
 
 void
-FiberedCrossSection :: give3dBeamMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
+FiberedCrossSection :: give3dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
                                                          MatResponseMode rMode,
                                                          GaussPoint *gp,
                                                          StructuralMaterial *mat,
@@ -189,7 +185,7 @@ FiberedCrossSection :: give3dBeamMaterialStiffnessMatrix(FloatMatrix &answer, Ma
 
     for ( int i = 1; i <= numberOfFibers; i++ ) {
         fiberGp = giveSlaveGaussPoint(gp, i - 1);
-        this->giveFiberMaterialStiffnessMatrix(fiberMatrix, FullForm, rMode, fiberGp, tStep);
+        this->giveFiberMaterialStiffnessMatrix(fiberMatrix, rMode, fiberGp, tStep);
         //
         // resolve current layer z-coordinate
         //
@@ -205,100 +201,24 @@ FiberedCrossSection :: give3dBeamMaterialStiffnessMatrix(FloatMatrix &answer, Ma
         // 1) membrane terms N, Qz, Qy
         answer.at(1, 1) += fiberMatrix.at(1, 1) * fiberWidth * fiberThick;
 
-        answer.at(2, 2) += fiberMatrix.at(5, 5) * fiberWidth * fiberThick;
+        answer.at(2, 2) += fiberMatrix.at(2, 2) * fiberWidth * fiberThick;
 
-        answer.at(3, 3) += fiberMatrix.at(6, 6) * fiberWidth * fiberThick;
+        answer.at(3, 3) += fiberMatrix.at(3, 3) * fiberWidth * fiberThick;
 
         // 2) bending terms mx, my, mz
 
         Ip             += fiberWidth * fiberThick * fiberZCoord2 + fiberWidth * fiberThick * fiberYCoord2;
         A              += fiberWidth * fiberThick;
-        G               = fiberMatrix.at(5, 5) * fiberWidth * fiberThick;
+        G               = fiberMatrix.at(2, 2) * fiberWidth * fiberThick;
 
         answer.at(5, 5) += fiberMatrix.at(1, 1) * fiberWidth * fiberThick * fiberZCoord2;
         answer.at(6, 6) += fiberMatrix.at(1, 1) * fiberWidth * fiberThick * fiberYCoord2;
     }
 
+    ///@todo This must be wrong, it will use the last evaluated G (from the last fiber), outside the loop. FIXME!
     G /= A;
     Ik = A * A * A * A / ( 40.0 * Ip );
     answer.at(4, 4) = G * Ik;
-}
-
-
-void
-FiberedCrossSection :: giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                                       const FloatArray &charVector3d)
-//
-// returns reduced charVector3d from full 3d  vector reduced
-// to  vector required by gp->giveStressStrainMode()
-//
-// enhaced method in order to support cases with integral bending (3dbeam)
-// in such cases full strain vector has the form:
-// 2) strainVectorShell {eps_x, gamma_xz, gamma_xy, \der{phi_x}{x}, kappa_y, kappa_z}
-
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    int size = charVector3d.giveSize();
-
-    if ( mode == _1dFiber ) {
-        if ( size != 6 ) {
-            _error("giveReducedCharacteristicVector: stressVector3d size mismatch");
-        }
-
-        answer.resize(3);
-
-        answer.at(1) = charVector3d.at(1);
-        answer.at(2) = charVector3d.at(5);
-        answer.at(3) = charVector3d.at(6);
-    } else if ( mode == _3dBeam ) {
-        if ( size != 6 ) {
-            _error("giveReducedCharacteristicVector: stressVector3d size mismatch");
-        }
-
-        answer = charVector3d;
-    } else {
-        this->StructuralCrossSection :: giveReducedCharacteristicVector(answer, gp, charVector3d);
-    }
-}
-
-
-void
-FiberedCrossSection :: giveFullCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                                    const FloatArray &charVector)
-//
-// returns reduced charVector3d from full 3d  vector reduced
-// to  vector required by gp->giveStressStrainMode()
-//
-// enhaced method in order to support cases with integral bending (3dbeam..)
-// in such cases full strain vector has the form:
-// 2) strainVectorShell {eps_x, gamma_xz, gamma_xy, \der{phi_x}{x}, kappa_y, kappa_z}
-
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    int size = charVector.giveSize();
-
-    if ( mode == _1dFiber ) {
-        if ( size != 3 ) {
-            _error("giveFullCharacteristicVector: stressVector size mismatch");
-        }
-
-        answer.resize(6);
-        answer.zero();
-
-        answer.at(1) = charVector.at(1);
-        answer.at(5) = charVector.at(2);
-        answer.at(6) = charVector.at(3);
-    } else if ( mode == _3dBeam ) {
-        if ( size != 6 ) {
-            _error("giveFullCharacteristicVector: stressVector size mismatch");
-        }
-
-        answer = charVector;
-    } else {
-        this->StructuralCrossSection :: giveFullCharacteristicVector(answer, gp, charVector);
-    }
 }
 
 
@@ -369,71 +289,6 @@ FiberedCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
     }
 
     return gradientStrainVector3d;
-}
-
-
-void
-FiberedCrossSection :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
-                                            MaterialMode mmode, StructuralMaterial *mat) const
-{
-    //
-    // this function returns mask of reduced(if form == ReducedForm)
-    // or Full(if form==FullForm) stressStrain vector in full or
-    // reduced StressStrainVector
-    // acording to stressStrain mode of given gp.
-    //
-    // mask has size of reduced or full StressStrain Vector and  i-th component
-    // is index to full or reduced StressStrainVector where corresponding
-    // stressStrain resides.
-    //
-    if ( mat->hasMaterialModeCapability(mmode) ) {
-        mat->giveStressStrainMask(answer, form, mmode);
-        return;
-    } else {
-        if ( form == ReducedForm ) {
-            switch ( mmode ) {
-            case _1dFiber:
-                answer.resize(3);
-                answer.at(1) = 1;
-                answer.at(2) = 5;
-                answer.at(3) = 6;
-                break;
-            case _3dBeam:
-                answer.resize(6);
-                for ( int i = 1; i <= 6; i++ ) {
-                    answer.at(i) = i;
-                }
-
-                break;
-            default:
-                _error2( "giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode) );
-            }
-        } else if ( form == FullForm ) {
-            switch ( mmode ) {
-            case _1dFiber:
-                answer.resize(6);
-                answer.zero();
-                answer.at(1) = 1;
-                answer.at(5) = 2;
-                answer.at(6) = 3;
-                break;
-            case _3dBeam:
-                answer.resize(6);
-                answer.zero();
-                for ( int i = 1; i <= 6; i++ ) {
-                    answer.at(i) = i;
-                }
-
-                break;
-            default:
-                _error2( "giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode) );
-            }
-        } else {
-            _error("giveStressStrainMask : unknown form mode");
-        }
-
-        return;
-    }
 }
 
 
@@ -680,7 +535,7 @@ FiberedCrossSection :: GiveIntegrated3dBeamStress(GaussPoint *masterGp)
 
         if ( fiberStatus->giveTempStressVector().giveSize() ) { // there exist total sress in gp
             reducedFiberStress = fiberStatus->giveTempStressVector();
-            giveFullCharacteristicVector(fiberStress, fiberGp, reducedFiberStress);
+            StructuralMaterial :: giveFullSymVectorForm(fiberStress, reducedFiberStress, fiberGp->giveMaterialMode());
         } else { // no total stress
             continue; // skip gp without stress
         }
@@ -740,11 +595,11 @@ double FiberedCrossSection :: giveArea()
 
 
 void
-FiberedCrossSection :: giveFiberMaterialStiffnessMatrix(FloatMatrix &fiberMatrix, MatResponseForm form,
+FiberedCrossSection :: giveFiberMaterialStiffnessMatrix(FloatMatrix &fiberMatrix,
                                                         MatResponseMode rMode, GaussPoint *layerGp,
                                                         TimeStep *tStep)
 {
-    this->giveMaterialStiffnessMatrixOf(fiberMatrix, form, rMode, layerGp,
+    this->giveMaterialStiffnessMatrixOf(fiberMatrix, rMode, layerGp,
                                         dynamic_cast< StructuralMaterial * >( domain->giveMaterial( fiberMaterials.at( layerGp->giveNumber() ) ) ),
                                         tStep);
 }
@@ -762,6 +617,12 @@ FiberedCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
     if ( et.isNotEmpty() ) {
         _error("computeStressIndependentStrainVector: temperature loading not supported");
     }
+}
+
+bool FiberedCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat)
+{
+    ///@todo As far as I can see, it only uses diagonal components for the 3dbeam, but there is no way to check here.
+    return domain->giveMaterial(mat)->isCharacteristicMtrxSymmetric(rMode);
 }
 
 } // end namespace oofem

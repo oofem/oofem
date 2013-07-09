@@ -60,9 +60,9 @@ HyperElasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 
 void
-HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode, GaussPoint *gp, TimeStep *atTime)
+HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *atTime)
 
-// returns the 6x6 tangent stiffness matrix
+// returns the 6x6 tangent stiffness matrix - dS/dE
 
 {
     double J2, c11, c22, c33, c12, c13, c23, A, B;
@@ -118,7 +118,7 @@ HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRe
 
 
 void
-HyperElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+HyperElasticMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 
 // returns 6 components of the stress corresponding to the given total strain
 
@@ -141,7 +141,7 @@ HyperElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm
     C.at(2, 3) = C.at(3, 2) = strainVector.at(4);
     invC.beInverseOf(C);
     J2 = C.giveDeterminant();
-
+    
     answer.resize(6);
     double aux = ( K - 2. / 3. * G ) * ( J2 - 1. ) / 2. - G;
     answer.at(1) = aux * invC.at(1, 1) + G;
@@ -154,6 +154,7 @@ HyperElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm
     // update gp
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(answer);
+
 }
 
 

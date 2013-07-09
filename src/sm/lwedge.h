@@ -65,7 +65,7 @@ public:
     LWedge(int, Domain *);
     virtual ~LWedge() {}
 
-    virtual FEInterpolation *giveInterpolation() { return &interpolation; }
+    virtual FEInterpolation *giveInterpolation() const { return &interpolation; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
@@ -98,17 +98,14 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_LWedge_Name; }
     virtual const char *giveClassName() const { return "LWedge"; }
     virtual classType giveClassID() const { return LWedgeClass; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_wedge_1; }
     virtual int computeNumberOfDofs(EquationID ut) { return 18; }
-    virtual integrationDomain giveIntegrationDomain() { return _Wedge; }
     virtual MaterialMode giveMaterialMode();
 
 protected:
     virtual void computeGaussPoints();
     virtual void computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    virtual void computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    virtual void computeBFmatrixAt(GaussPoint *, FloatMatrix &);
+    virtual void computeBHmatrixAt(GaussPoint *, FloatMatrix &);
 };
 } // end namespace oofem
 #endif

@@ -48,6 +48,11 @@ namespace oofem {
  * Class implements an triangular three-node  plane-
  * stress elasticity finite element with independent rotation field.
  * Each node has 3 degrees of freedom.
+ * 
+ * This element is based on the following paper: 
+ *   Ibrahimbegovic, A., Taylor, R.L., Wilson, E. L.: A robust membrane qudritelar element with rotational degrees of freedom, 
+ *   Int. J. Num. Meth. Engng., 30, 445-457, 1990.
+ * 
  */
 class TrPlaneStrRot : public TrPlaneStress2d
 {
@@ -75,7 +80,6 @@ public:
     virtual classType giveClassID() const { return TrPlaneStrRotClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _PlaneStressRot; }
-    virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 9; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;

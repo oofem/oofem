@@ -195,11 +195,11 @@ public:
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode,
+                                               MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer,  GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep);
 
 
@@ -259,15 +259,15 @@ protected:
     virtual double damageFunctionPrime(double kappa, GaussPoint *gp) { _error("IsotropicDamageMaterial: damageFunctionPrime is not implemented");
                                                                        return 0; }
 
-    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
+    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);
 
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
+    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);
 
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
+    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
                                        GaussPoint *gp,
                                        TimeStep *tStep);
 };

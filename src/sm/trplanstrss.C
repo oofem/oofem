@@ -50,8 +50,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( TrPlaneStress2d );
+REGISTER_Element(TrPlaneStress2d);
 
 FEI2dTrLin TrPlaneStress2d :: interp(1, 2);
 
@@ -71,27 +70,27 @@ Interface *
 TrPlaneStress2d :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >( this );
+        return static_cast< DirectErrorIndicatorRCInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
+        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
-        return static_cast< ZZErrorEstimatorInterface * >(this );
+        return static_cast< ZZErrorEstimatorInterface * >(this);
     } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return static_cast< ZZRemeshingCriteriaInterface * >( this );
+        return static_cast< ZZRemeshingCriteriaInterface * >(this);
     } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
-        return static_cast< MMAShapeFunctProjectionInterface * >( this );
+        return static_cast< MMAShapeFunctProjectionInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
-        return static_cast< HuertaErrorEstimatorInterface * >( this );
+        return static_cast< HuertaErrorEstimatorInterface * >(this);
     } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return static_cast< HuertaRemeshingCriteriaInterface * >( this );
+        return static_cast< HuertaRemeshingCriteriaInterface * >(this);
     }
 
     return NULL;
@@ -188,95 +187,25 @@ TrPlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
 
 
 void
-TrPlaneStress2d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
-//
-// Returns nonlinear part of geometrical equations of the receiver at gp.
-//
-// Returns A matrix (see Bittnar & Sejnoha Num. Met. Mech. part II, chap 9)
+TrPlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+// Returns the [4x6] displacement gradient matrix {BH} of the receiver,
+// evaluated at aGaussPoint.
+// @todo not checked if correct
 {
-    double b1, b2, b3, c1, c2, c3;
-    FloatArray *b, *c;
+    FloatMatrix dnx;
+    this->interp.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
-    answer.resize(6, 6);
+    answer.resize(4, 6);
     answer.zero();
 
-    b = this->GivebCoeff();
-    c = this->GivecCoeff();
-
-    b1 = b->at(1);
-    b2 = b->at(2);
-    b3 = b->at(3);
-
-    c1 = c->at(1);
-    c2 = c->at(2);
-    c3 = c->at(3);
-
-    if ( i == 1 ) {
-        answer.at(1, 1) = b1 * b1;
-        answer.at(1, 3) = b1 * b2;
-        answer.at(1, 5) = b1 * b3;
-        answer.at(2, 2) = b1 * b1;
-        answer.at(2, 4) = b1 * b2;
-        answer.at(2, 6) = b1 * b3;
-        answer.at(3, 1) = b2 * b1;
-        answer.at(3, 3) = b2 * b2;
-        answer.at(3, 5) = b2 * b3;
-        answer.at(4, 2) = b2 * b1;
-        answer.at(4, 4) = b2 * b2;
-        answer.at(4, 6) = b2 * b3;
-        answer.at(5, 1) = b3 * b1;
-        answer.at(5, 3) = b3 * b2;
-        answer.at(5, 5) = b3 * b3;
-        answer.at(6, 2) = b3 * b1;
-        answer.at(6, 4) = b3 * b2;
-        answer.at(6, 6) = b3 * b3;
+    for ( int i = 1; i <= 3; i++ ) {
+        answer.at(1, 2 * i - 1) = dnx.at(i, 1);     // du/dx -1
+        answer.at(2, 2 * i - 0) = dnx.at(i, 2);     // dv/dy -2
+        answer.at(3, 2 * i - 1) = dnx.at(i, 2);     // du/dy -6
+        answer.at(4, 2 * i - 0) = dnx.at(i, 1);     // dv/dx -9
     }
-
-    if ( i == 2 ) {
-        answer.at(1, 1) = c1 * c1;
-        answer.at(1, 3) = c1 * c2;
-        answer.at(1, 5) = c1 * c3;
-        answer.at(2, 2) = c1 * c1;
-        answer.at(2, 4) = c1 * c2;
-        answer.at(2, 6) = c1 * c3;
-        answer.at(3, 1) = c2 * c1;
-        answer.at(3, 3) = c2 * c2;
-        answer.at(3, 5) = c2 * c3;
-        answer.at(4, 2) = c2 * c1;
-        answer.at(4, 4) = c2 * c2;
-        answer.at(4, 6) = c2 * c3;
-        answer.at(5, 1) = c3 * c1;
-        answer.at(5, 3) = c3 * c2;
-        answer.at(5, 5) = c3 * c3;
-        answer.at(6, 2) = c3 * c1;
-        answer.at(6, 4) = c3 * c2;
-        answer.at(6, 6) = c3 * c3;
-    }
-
-    if ( i == 3 ) {
-        answer.at(1, 1) = b1 * c1 + b1 * c1;
-        answer.at(1, 3) = b1 * c2 + b2 * c1;
-        answer.at(1, 5) = b1 * c3 + b3 * c1;
-        answer.at(2, 2) = b1 * c1 + b1 * c1;
-        answer.at(2, 4) = b1 * c2 + b2 * c1;
-        answer.at(2, 6) = b1 * c3 + b3 * c1;
-        answer.at(3, 1) = b2 * c1 + b1 * c2;
-        answer.at(3, 3) = b2 * c2 + b2 * c2;
-        answer.at(3, 5) = b2 * c3 + b3 * c2;
-        answer.at(4, 2) = b2 * c1 + b1 * c2;
-        answer.at(4, 4) = b2 * c2 + b2 * c2;
-        answer.at(4, 6) = b2 * c3 + b3 * c2;
-        answer.at(5, 1) = b3 * c1 + b1 * c3;
-        answer.at(5, 3) = b3 * c2 + b2 * c3;
-        answer.at(5, 5) = b3 * c3 + b3 * c3;
-        answer.at(6, 2) = b3 * c1 + b1 * c3;
-        answer.at(6, 4) = b3 * c2 + b2 * c3;
-        answer.at(6, 6) = b3 * c3 + b3 * c3;
-    }
-
-    delete b;
-    delete c;
 }
+
 
 void TrPlaneStress2d :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
@@ -285,7 +214,7 @@ void TrPlaneStress2d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _PlaneStress);
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
@@ -349,7 +278,7 @@ double
 TrPlaneStress2d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    return detJ *gp->giveWeight();
+    return detJ * gp->giveWeight();
 }
 
 
@@ -416,7 +345,7 @@ double TrPlaneStress2d :: computeVolumeAround(GaussPoint *gp)
     weight = gp->giveWeight();
     detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
 
-    return detJ *weight *this->giveCrossSection()->give(CS_Thickness);
+    return detJ * weight * this->giveCrossSection()->give(CS_Thickness);
 }
 
 
@@ -431,9 +360,9 @@ TrPlaneStress2d :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
 
     /*  if ( numberOfGaussPoints != 1 ) {
-           numberOfGaussPoints = 1;
-	}
-    */
+     *     numberOfGaussPoints = 1;
+     * }
+     */
 
     return IRRT_OK;
 }
@@ -819,7 +748,7 @@ TrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
         double ax, ay, bx, by, norm, xc, yc, length;
         FloatArray crackDir;
 
-        for ( int i = 1; i <= numberOfGaussPoints; i++ ) {
+        for ( int i = 1; i <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); i++ ) {
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(i - 1);
             if ( mat->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
@@ -916,14 +845,14 @@ TrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
  * if (mode == yieldState) {
  * // loop over available GPs
  * nPlastGp = 0;
- * for (i=1 ; i<= numberOfGaussPoints ; i++) {
+ * for (i=1 ; i<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; i++) {
  *  gp = integrationRulesArray[0]-> getIntegrationPoint(i-1) ;
  *  nPlastGp += (mat->giveStatusCharFlag(gp,ms_yield_flag) != 0);
  * }
  * if (nPlastGp == 0) return;
  * // nPlastGp should contain number of yielded gp in element
  * // good way should be select color accordingly
- * ratio = nPlastGp / numberOfGaussPoints;
+ * ratio = nPlastGp / integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints();
  * EASValsSetLayer(OOFEG_YIELD_PATTERN_LAYER);
  * for (i=0; i< 3; i++) {
  * if (gc.getInternalVarsDefGeoFlag()) {
@@ -950,7 +879,7 @@ TrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
  * double ax,ay,bx,by,norm,xc,yc,length;
  * FloatMatrix crackDir;
  *
- * for (i=1 ; i<= numberOfGaussPoints ; i++) {
+ * for (i=1 ; i<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; i++) {
  *  gp = integrationRulesArray[0]-> getIntegrationPoint(i-1);
  *
  *  if (mat->giveStatusCharFlag (gp,ms_isCracked_flag) == 0) return;
@@ -1008,11 +937,11 @@ TrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
  * }
  * } else if (mode == damageLevel) {
  * double damage= 0.0;
- * for (i=1 ; i<= numberOfGaussPoints ; i++) {
+ * for (i=1 ; i<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; i++) {
  *  gp = integrationRulesArray[0]-> getIntegrationPoint(i-1) ;
  *  damage += mat->giveStatusCharValue(gp,ms_damage_flag);
  * }
- * damage /= numberOfGaussPoints;
+ * damage /= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints();
  * EASValsSetLayer(OOFEG_YIELD_PATTERN_LAYER);
  * for (i=0; i< 3; i++) {
  * if (gc.getInternalVarsDefGeoFlag()) {
@@ -1132,7 +1061,7 @@ TrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Floa
     } else {
         FloatArray helpCoords = coords;
 
-        helpCoords.resize(gsize);
+        helpCoords.resizeWithValues(gsize);
         dist = helpCoords.distance(gcoords);
     }
 

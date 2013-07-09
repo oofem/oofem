@@ -54,6 +54,13 @@ TrPlaneStress2dXFEM::~TrPlaneStress2dXFEM() {
 
 }
 
+int TrPlaneStress2dXFEM::checkConsistency()
+{
+	TrPlaneStress2d :: checkConsistency();
+    this->xMan =  this->giveDomain()->giveXfemManager(1);
+    return 1;
+}
+
 void TrPlaneStress2dXFEM :: XfemElementInterface_partitionElement(AList< Triangle > *answer, AList< FloatArray > *together)
 {
 #ifdef __BOOST_MODULE
@@ -696,10 +703,52 @@ void TrPlaneStress2dXFEM :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer
 
 
 void
-TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     // Returns the total id mask of the dof manager = regular id's + enriched id's
-    this->giveDofManager(inode)->giveCompleteMasterDofIDArray(answer);
+
+	if( this->xMan != NULL )
+	{
+		this->giveDofManager(inode)->giveCompleteMasterDofIDArray(answer);
+	}
+	else
+	{
+	    // Continuous part
+		TrPlaneStress2d ::giveDofManDofIDMask(inode, ut, answer);
+	}
+
+
+
+    // Returns the total id mask of the dof manager - regular id's + enriched id's
+/*
+    // Continuous part
+	TrPlaneStress2d ::giveDofManDofIDMask(inode, ut, answer);
+
+	if( this->xMan != NULL )
+	{
+//		printf("xMan is initialized.\n");
+
+	    // Discontinuous part
+	    DofManager *dMan = this->giveDofManager(inode);
+
+	    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) {
+	        EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
+	        for ( int j = 1; j <= ei->giveNumberOfEnrichmentDomains(); j++ ) {
+	            if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,j) ) {
+	                IntArray eiDofIdArray;
+	                ei->giveEIDofIdArray(eiDofIdArray, j);
+	                answer.followedBy(eiDofIdArray);
+	            }
+	        }
+	    }
+	}
+*/
+//	else
+//	{
+//		printf("xMan = NULL.\n");
+//	}
+
+
 }
 
 

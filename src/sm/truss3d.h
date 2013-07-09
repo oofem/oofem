@@ -63,7 +63,7 @@ public:
     Truss3d(int n, Domain *d);
     virtual ~Truss3d() { }
 
-    virtual FEInterpolation *giveInterpolation() { return &interp; }
+    virtual FEInterpolation *giveInterpolation() const { return &interp; }
 
     virtual double computeLength();
 
@@ -104,9 +104,6 @@ public:
     virtual const char *giveClassName() const { return "Truss3d"; }
     virtual classType giveClassID() const { return Truss3dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
-
-    virtual integrationDomain giveIntegrationDomain() { return _Line; }
     virtual MaterialMode giveMaterialMode() { return _1dMat; }
 
 protected:
@@ -118,7 +115,6 @@ protected:
     { computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) ); }
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int);
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
 

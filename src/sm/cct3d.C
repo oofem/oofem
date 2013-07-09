@@ -37,6 +37,7 @@
 #include "load.h"
 #include "structuralms.h"
 #include "mathfem.h"
+#include "gaussintegrationrule.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -352,11 +353,14 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
         _error("computeBodyLoadVectorAt: unknown load type");
     }
 
+    GaussIntegrationRule irule(1, this, 1, 5);
+    irule.SetUpPointsOnTriangle(1, _2dPlate);
+
     // note: force is assumed to be in global coordinate system.
     forLoad->computeComponentArrayAt(force, stepN, mode);
 
     if ( force.giveSize() ) {
-        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+        gp = irule.getIntegrationPoint(0);
 
         dens = this->giveMaterial()->give('d', gp);
         dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
@@ -400,7 +404,7 @@ CCTPlate3d :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
     for ( i = 0; i < numberOfIntegrationRules; i++ ) {
-        for ( j = 0; j < integrationRulesArray [ i ]->getNumberOfIntegrationPoints(); j++ ) {
+        for ( j = 0; j < integrationRulesArray [ i ]->giveNumberOfIntegrationPoints(); j++ ) {
             gp = integrationRulesArray [ i ]->getIntegrationPoint(j);
 
             // gp   -> printOutputAt(file,stepN) ;

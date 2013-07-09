@@ -36,6 +36,7 @@
 #include "node.h"
 #include "fei2dlinequad.h"
 #include "gaussintegrationrule.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -50,7 +51,7 @@ Line2BoundaryElement :: Line2BoundaryElement(int n, Domain *aDomain) : FMElement
     this->numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 2, _Unknown);
+    this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 2, this );
 }
 
 Line2BoundaryElement :: ~Line2BoundaryElement()
@@ -62,19 +63,9 @@ IRResultType Line2BoundaryElement :: initializeFrom(InputRecord *ir)
     return FMElement :: initializeFrom(ir);
 }
 
-void Line2BoundaryElement :: computeN(FloatArray &answer, const FloatArray &lcoords) const
-{
-    this->fei.evalN(answer, lcoords, FEIElementGeometryWrapper(this));
-}
-
-FEInterpolation * Line2BoundaryElement :: giveInterpolation()
+FEInterpolation * Line2BoundaryElement :: giveInterpolation() const
 {
     return &this->fei;
-}
-
-double Line2BoundaryElement :: computeNXIntegral() const
-{
-    return this->fei.evalNXIntegral(1, FEIElementGeometryWrapper(this));
 }
 
 void Line2BoundaryElement :: giveDofManDofIDMask(int i, EquationID eid, IntArray &nodeDofIDMask) const
@@ -128,7 +119,7 @@ void Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLoc
         TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     FloatArray n;
-    this->computeN(n, lcoords);
+    this->fei.evalN(answer, lcoords, FEIElementGeometryWrapper(this));
 
     IntArray dofIDs;
     this->EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(dofIDs);

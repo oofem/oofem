@@ -70,7 +70,7 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    virtual FEInterpolation *giveInterpolation() { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 
@@ -85,7 +85,6 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_QTrPlaneStress2d_Name; }
     virtual const char *giveClassName() const { return "QTrPlaneStress2d"; }
     virtual classType giveClassID() const { return QTrPlaneStress2dClass; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
@@ -105,11 +104,11 @@ public:
                                                                  FloatArray &answer);
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
-    virtual integrationDomain  giveIntegrationDomain() { return _Triangle; }
     virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
     virtual int giveApproxOrder() { return 2; }

@@ -44,6 +44,9 @@
 #include "element.h"
 #include "set.h"
 #include "load.h"
+#include "bodyload.h"
+#include "boundaryload.h"
+#include "nodalload.h"
 #include "oofemcfg.h"
 #include "timer.h"
 #include "dofmanager.h"
@@ -60,6 +63,7 @@
 #include "outputmanager.h"
 #include "exportmodulemanager.h"
 #include "initmodulemanager.h"
+#include "feinterpol3d.h"
 #include "classfactory.h"
 #include "oofem_limits.h"
 
@@ -1133,86 +1137,66 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
 
         if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >( bc ) ) ) {
             abc->assembleVector(answer, tStep, eid, type, mode, s, eNorms);
-        } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >( bc ) ) ) {
-            IntArray dofids, loc, dofIDarry;
+        } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >( bc ) ) && bc->isImposed(tStep) ) {
+            // Now we assemble the corresponding load type fo the respective components in the set:
+            IntArray dofids, loc, dofIDarry, bNodes;
             FloatArray charVec;
             FloatMatrix R;
-
-            // If there is a set connected to the load, then assemble that:
+            BodyLoad *bodyLoad;
+            BoundaryLoad *bLoad;
+            NodalLoad *nLoad;
             Set *set = domain->giveSet(bc->giveSetNumber());
 
-            // Bulk load:
-            const IntArray &elements = set->giveElementList();
-            for (int ielem = 1; ielem <= elements.giveSize(); ++ielem) {
-                Element *element = domain->giveElement(elements.at(ielem));
-                element->computeLoadVector(charVec, load, type, mode, tStep);
+            if ( (bodyLoad = dynamic_cast< BodyLoad* >(load)) ) { // Body load:
+                const IntArray &elements = set->giveElementList();
+                for (int ielem = 1; ielem <= elements.giveSize(); ++ielem) {
+                    Element *element = domain->giveElement(elements.at(ielem));
+                    element->computeLoadVector(charVec, bodyLoad, type, mode, tStep);
 
-                if ( charVec.isNotEmpty() ) {
-                    if ( element->giveRotationMatrix(R, eid) ) charVec.rotatedWith(R, 't');
+                    if ( charVec.isNotEmpty() ) {
+                        if ( element->giveRotationMatrix(R, eid) ) charVec.rotatedWith(R, 't');
 
-                    element->giveLocationArray(loc, eid, s, &dofids);
-                    answer.assemble(charVec, loc);
+                        element->giveLocationArray(loc, eid, s, &dofids);
+                        answer.assemble(charVec, loc);
 
-                    if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
-                }
-            }
-
-            // Boundary load:
-            const IntArray &boundaries = set->giveBoundaryList();
-            for (int ibnd = 1; ibnd <= boundaries.giveSize()/2; ++ibnd) {
-                Element *element = domain->giveElement(boundaries.at(ibnd*2-1));
-                int boundary = boundaries.at(ibnd*2);
-                element->computeBoundaryLoadVector(charVec, load, boundary, type, mode, tStep);
-
-                if ( charVec.isNotEmpty() ) {
-                    ///@todo Work out rotations at boundaries:
-                    //if ( element->giveBoundaryRotationMatrix(R, eid, boundary) ) {
-                    if ( element->giveRotationMatrix(R, eid) ) {
-                        OOFEM_ERROR("EngngModel :: assembleVectorFromBC : Boundary-load assembling with rotation not supported yet");
-                        charVec.rotatedWith(R, 't');
+                        if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
                     }
-
-                    element->giveBoundaryLocationArray(loc, boundary, eid, s, &dofids);
-                    answer.assemble(charVec, loc);
-
-                    if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
                 }
-            }
+            } else if ( (bLoad = dynamic_cast< BoundaryLoad* >(load)) ) { // Boundary load:
+                const IntArray &boundaries = set->giveBoundaryList();
+                for (int ibnd = 1; ibnd <= boundaries.giveSize()/2; ++ibnd) {
+                    Element *element = domain->giveElement(boundaries.at(ibnd*2-1));
+                    int boundary = boundaries.at(ibnd*2);
+                    element->computeBoundaryLoadVector(charVec, bLoad, boundary, type, mode, tStep);
 
-            // Edge load:
-            const IntArray &edges = set->giveEdgeList();
-            for (int iedge = 1; iedge <= edges.giveSize()/2; ++iedge) {
-                Element *element = domain->giveElement(edges.at(iedge*2-1));
-                int edge = edges.at(iedge*2);
-                element->computeEdgeLoadVector(charVec, load, edge, type, mode, tStep);
+                    if ( charVec.isNotEmpty() ) {
+                        ///@todo Should be have a similar interface for rotation or should elements expect to work in global c.s. for loads?
+                        /// Right now it's the latter, just the global->real dof transformation is performed here.
+                        element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+                        if ( element->computeDofTransformationMatrix(R, bNodes, eid) ) {
+                            charVec.rotatedWith(R, 't');
+                        }
 
-                if ( charVec.isNotEmpty() ) {
-                    //if ( element->giveEdgeRotationMatrix(R, eid, edge) ) {
-                    if ( element->giveRotationMatrix(R, eid) ) {
-                        OOFEM_ERROR("EngngModel :: assembleVectorFromBC : Edge-load assembling with rotation not supported yet");
-                        charVec.rotatedWith(R, 't');
+                        element->giveBoundaryLocationArray(loc, boundary, eid, s, &dofids);
+                        answer.assemble(charVec, loc);
+
+                        if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
                     }
-
-                    element->giveEdgeLocationArray(loc, edge, eid, s, &dofids);
-                    answer.assemble(charVec, loc);
-
-                    if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
                 }
-            }
+            } else if ( (nLoad = dynamic_cast< NodalLoad* >(load)) ) { // Nodal load:
+                const IntArray &nodes = set->giveNodeList();
+                for (int idman = 1; idman <= nodes.giveSize(); ++idman) {
+                    DofManager *node = domain->giveDofManager(nodes.at(idman));
+                    node->computeLoadVector(charVec, nLoad, type, tStep, mode);
 
-            // Nodal load:
-            const IntArray &nodes = set->giveNodeList();
-            for (int idman = 1; idman <= nodes.giveSize(); ++idman) {
-                DofManager *node = domain->giveDofManager(nodes.at(idman));
-                node->computeLoadVector(charVec, load, type, tStep, mode);
+                    if ( charVec.isNotEmpty() ) {
+                        if ( node->computeM2LTransformation(R, dofIDarry) ) charVec.rotatedWith(R, 't');
 
-                if ( charVec.isNotEmpty() ) {
-                    if ( node->computeM2LTransformation(R, dofIDarry) ) charVec.rotatedWith(R, 't');
+                        node->giveCompleteLocationArray(loc, s);
+                        answer.assemble(charVec, loc);
 
-                    node->giveCompleteLocationArray(loc, s);
-                    answer.assemble(charVec, loc);
-
-                    if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
+                        if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
+                    }
                 }
             }
         }

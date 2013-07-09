@@ -62,6 +62,9 @@ public:
 
 	virtual ~TrPlaneStress2dXFEM();
 
+
+	virtual int checkConsistency();
+
 	// Overloaded functions from XfemElementInterface
     /// Partitions the element into patches by a triangulation.
     virtual void XfemElementInterface_partitionElement(AList< Triangle > *answer, AList< FloatArray > *together);
@@ -71,6 +74,7 @@ public:
     virtual void XfemElementInterface_prepareNodesForDelaunay(AList< FloatArray > *answer1, AList< FloatArray > *answer2);
 
 
+    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 
     virtual Interface *giveInterface(InterfaceType it);
 
@@ -83,7 +87,7 @@ public:
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                           int lowerIndx = 1, int upperIndx = ALL_STRAINS);
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray & answer) const;
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray & answer) const;
 //    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
     virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);

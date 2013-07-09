@@ -50,8 +50,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( QTrPlaneStress2d );
+REGISTER_Element(QTrPlaneStress2d);
 
 FEI2dTrQuad QTrPlaneStress2d :: interpolation(1, 2);
 
@@ -76,83 +75,19 @@ QTrPlaneStress2d :: giveInterface(InterfaceType interface)
      *    return ( ZZNodalRecoveryModelInterface * ) this;
      */
     if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >( this );
+        return static_cast< DirectErrorIndicatorRCInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
+        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     }
 
     return NULL;
 }
 
 
-/*
- * void
- * QTrPlaneStress2d :: computeBmatrixAt (GaussPoint *aGaussPoint, FloatMatrix& answer, int li, int ui)
- * // Returns the [3x12] strain-displacement matrix {B} of the receiver, eva-
- * // luated at aGaussPoint.
- * {
- * double x1,x2,x3,y1,y2,y3,b1,b2,b3,c1,c2,c3,area,l1,l2,l3;
- *
- * x1 = this -> giveNode(1) -> giveCoordinate(1);
- * x2 = this -> giveNode(2) -> giveCoordinate(1);
- * x3 = this -> giveNode(3) -> giveCoordinate(1);
- *
- * y1 = this -> giveNode(1) -> giveCoordinate(2);
- * y2 = this -> giveNode(2) -> giveCoordinate(2);
- * y3 = this -> giveNode(3) -> giveCoordinate(2);
- *
- * area = 0.5*(x2*y3+x1*y2+y1*x3-x2*y1-x3*y2-x1*y3);
- *
- * b1 = y2-y3;
- * b2 = y3-y1;
- * b3 = y1-y2;
- *
- * c1 = x3-x2;
- * c2 = x1-x3;
- * c3 = x2-x1;
- *
- * l1 = aGaussPoint -> giveCoordinate(1);
- * l2 = aGaussPoint -> giveCoordinate(2);
- * l3 = 1.-l1-l2;
- *
- * answer.resize (3,12);
- * answer.zero();
- *
- * answer.at(1,1)  = 2.*b1*l1+(2.*l1-1.)*b1;
- * answer.at(1,3)  = 2.*b2*l2+(2.*l2-1.)*b2;
- * answer.at(1,5)  = 2.*b3*l3+(2.*l3-1.)*b3;
- * answer.at(1,7)  = 4.*b1*l2+4.*l1*b2;
- * answer.at(1,9)  = 4.*b2*l3+4.*l2*b3;
- * answer.at(1,11) = 4.*b3*l1+4.*l3*b1;
- *
- * answer.at(2,2)  = 2.*c1*l1+(2.*l1-1.)*c1;
- * answer.at(2,4)  = 2.*c2*l2+(2.*l2-1.)*c2;
- * answer.at(2,6)  = 2.*c3*l3+(2.*l3-1.)*c3;
- * answer.at(2,8)  = 4.*c1*l2+4.*l1*c2;
- * answer.at(2,10) = 4.*c2*l3+4.*l2*c3;
- * answer.at(2,12) = 4.*c3*l1+4.*l3*c1;
- *
- * answer.at(3,1)  = 2.*c1*l1+(2.*l1-1.)*c1;
- * answer.at(3,3)  = 2.*c2*l2+(2.*l2-1.)*c2;
- * answer.at(3,5)  = 2.*c3*l3+(2.*l3-1.)*c3;
- * answer.at(3,7)  = 4.*c1*l2+4.*l1*c2;
- * answer.at(3,9)  = 4.*c2*l3+4.*l2*c3;
- * answer.at(3,11) = 4.*c3*l1+4.*l3*c1;
- *
- * answer.at(3,2)  = 2.*b1*l1+(2.*l1-1.)*b1;
- * answer.at(3,4)  = 2.*b2*l2+(2.*l2-1.)*b2;
- * answer.at(3,6)  = 2.*b3*l3+(2.*l3-1.)*b3;
- * answer.at(3,8)  = 4.*b1*l2+4.*l1*b2;
- * answer.at(3,10) = 4.*b2*l3+4.*l2*b3;
- * answer.at(3,12) = 4.*b3*l1+4.*l3*b1;
- *
- * answer.times(1./(2.*area));
- * }
- */
 
 void
 QTrPlaneStress2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
@@ -177,9 +112,9 @@ double
 QTrPlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
 {
     if ( normalToCrackPlane.at(3) < 0.999999 ) { //ensure that characteristic length is in the plane of element
-        return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) this->numberOfGaussPoints );
+        return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
     } else { //otherwise compute out-of-plane characteristic length from element area
-        return sqrt(this->computeVolumeAreaOrLength() / ( double ) this->numberOfGaussPoints);
+        return sqrt( this->computeVolumeAreaOrLength() / ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
     }
 }
 
@@ -228,6 +163,26 @@ QTrPlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answe
     }
 }
 
+void
+QTrPlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+// Returns the [4x12] displacement gradient matrix {BH} of the receiver,
+// evaluated at aGaussPoint.
+// @todo not checked if correct
+{
+    FloatMatrix dnx;
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+
+    answer.resize(4, 12);
+    answer.zero();
+
+    for ( int i = 1; i <= 6; i++ ) {
+        answer.at(1, 2 * i - 1) = dnx.at(i, 1);     // du/dx -1
+        answer.at(2, 2 * i - 0) = dnx.at(i, 2);     // dv/dy -2
+        answer.at(3, 2 * i - 1) = dnx.at(i, 2);     // du/dy -6
+        answer.at(4, 2 * i - 0) = dnx.at(i, 1);     // dv/dx -9
+    }
+}
+
 
 double
 QTrPlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
@@ -250,7 +205,7 @@ void QTrPlaneStress2d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _PlaneStress);
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
@@ -288,7 +243,7 @@ QTrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Flo
     } else {
         FloatArray helpCoords = coords;
 
-        helpCoords.resize(gsize);
+        helpCoords.resizeWithValues(gsize);
         dist = helpCoords.distance(gcoords);
     }
 
@@ -504,7 +459,7 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
             }
         }
 
-        for ( ip = 1; ip <= numberOfGaussPoints; ip++ ) {
+        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
             //gpCoords = gp->giveCoordinates();
             switch ( ip ) {
@@ -630,7 +585,7 @@ QTrPlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
     GaussPoint *gp;
     double volume = 0.0;
 
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
         volume += this->computeVolumeAround(gp);
     }
@@ -725,7 +680,7 @@ QTrPlaneStress2d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge
 {
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * aGaussPoint->giveCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
-    return result *aGaussPoint->giveWeight();
+    return result * aGaussPoint->giveWeight();
 }
 
 void

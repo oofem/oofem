@@ -60,11 +60,14 @@ public:
         yind = ind2;
     }
 
+    virtual integrationDomain giveIntegrationDomain() const { return _Square; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
+
     virtual double giveArea(const FEICellGeometry &cellgeo) const;
 
     // Bulk
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual int  global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo);
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);

@@ -45,19 +45,23 @@
 namespace oofem {
 
 /**
- * This class implements a transport material status information. It is attribute of
- * a Gauss point. This is only an abstract class, for every instance of material class
- * there should be specialized derived class, which handles are history variables.
- * It only adds attributes common to all "transport problem" material models - the
- * state value vectors (both the temp and equilibrium) containing the state values
- * in associated integration point. The corresponding services
- * for accessing, setting, initializing and updating these attributes are provided.
+ * This class implements a transport material status information.
+ * When needed, new materials should specialized a derived class from this base.
+ * It is attribute of a Gauss point.
  *
  * @see MaterialStatus For general description of material status, and its role.
  */
 class TransportMaterialStatus : public MaterialStatus
 {
 protected:
+    FloatArray temp_field; ///< Vector containing the last used field.
+    FloatArray temp_gradient; ///< Vector containing the last used gradient
+    FloatArray temp_flux; ///< Vector containing the last computed flux.
+
+    FloatArray field; ///< Vector containing the last equilibrated field. The physical meaning corresponds to temperature, concentration etc.
+    FloatArray gradient; ///< Vector containing the last equilibrated gradient. It is the spatial gradient of the field.
+    FloatArray flux; ///< Vector containing the last equilibrated flux. The physical meaning corresponds to energy flux, mass flow, etc.
+
     /// Equilibrated state vector in reduced form. The physical meaning corresponds to temperature, concentration etc.
     FloatArray stateVector;
     /// Temporary state vector in a reduced form, used mainly in a nonlinear analysis
@@ -77,6 +81,7 @@ public:
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
+    ///@todo REMOVE THESE:
     /// Returns the const pointer to receiver's state vector.
     const FloatArray &giveStateVector() { return stateVector; }
     /// Returns the const pointer to receiver's temporary state vector.
@@ -86,11 +91,32 @@ public:
 
     virtual const char *giveClassName() const { return "TransportMaterialStatus"; }
     virtual classType giveClassID() const { return TransportMaterialStatusClass; }
+
+    /// Set gradient.
+    void setTempGradient(const FloatArray &grad);
+    /// Set field.
+    void setTempField(const FloatArray &field);
+    /// Set flux.
+    void setTempFlux(const FloatArray &w);
+
+    /// Return last gradient.
+    const FloatArray &giveGradient() { return gradient; }
+    /// Return last field.
+    const FloatArray &giveField() { return field; }
+    /// Returns last flux.
+    const FloatArray &giveFlux() { return flux; }
+
+    /// Return last gradient.
+    const FloatArray &giveTempGradient() { return temp_gradient; }
+    /// Return last field.
+    const FloatArray &giveTempField() { return temp_field; }
+    /// Returns last flux.
+    const FloatArray &giveTempFlux() { return temp_flux; }
 };
 
 
 /**
- * Abstract base class for all constitutive models for transport problems. It declares common  services provided
+ * Abstract base class for all constitutive models for transport problems. It declares common services provided
  * by all structural material models. The implementation of these services is partly left on derived classes,
  * which will implement constitutive model dependent part.
  * Some general purpose services are implemented on this level. For details, how to store
@@ -114,14 +140,41 @@ public:
     /// Destructor.
     virtual ~TransportMaterial() { }
 
-    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep) {};
+    /**
+     * Returns the flux for the field and its gradient.
+     * @todo { Should the field variable just be a scalar? This might change when we rethink the coupled-fields approach. 
+     * Now its either just [temperature], or [temperature, concentration] so to cover both cases there is a floatarray. }
+     * @param answer The flux.
+     * @param gp Gauss point.
+     * @param grad Gradient of the primary field, usually the main input.
+     * @param field The value of the field itself.
+     * @param tStep Active time step.
+     */
+    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) = 0;
 
+    /**
+     * Computes characteristic matrix of receiver in given integration point.
+     * The algorithm should use temporary or equilibrium  history variables stored in integration point status
+     * to compute and return required result.
+     * @param answer Contains result.
+     * @param form Material response form.
+     * @param mode Material response mode.
+     * @param gp Integration point.
+     * @param atTime Time step (most models are able to respond only when atTime is current time step).
+     */
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseForm form,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *atTime) = 0;
 
+    /**
+     * Computes the characteristic value of receiver in given integration point, respecting its history.
+     * The algorithm should use temporary or equilibrium  history variables stored in integration point status
+     * to compute and return required result.
+     * @param mode Material response mode.
+     * @param gp Integration point.
+     * @param atTime Time step (most models are able to respond only when atTime is current time step).
+     */
     virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *atTime) = 0;
@@ -160,6 +213,8 @@ public:
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
+
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp); }
 };
 } // end namespace oofem
 #endif // transportmaterial_h

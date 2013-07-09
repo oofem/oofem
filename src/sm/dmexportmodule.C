@@ -60,9 +60,9 @@ DofManExportModule :: initializeFrom(InputRecord *ir)
 
 
 void
-DofManExportModule :: doOutput(TimeStep *tStep)
+DofManExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
-    if ( !testTimeStepOutput(tStep) ) {
+    if ( !(testTimeStepOutput(tStep) || forcedOutput) ) {
         return;
     }
 

@@ -46,9 +46,7 @@
 
 ///@name Input fields for active boundary condition
 //@{
-#define _IFT_ActiveBoundaryCondition_elements "elements"
 #define _IFT_ActiveBoundaryCondition_elementSides "elementsides"
-#define _IFT_ActiveBoundaryCondition_dofManagers "dofmanagers"
 //@}
 
 namespace oofem {
@@ -81,17 +79,9 @@ public:
         const char *__proc = "initializeFrom";
         IRResultType result;
         IntArray tempA, tempB, tempC;
-        IR_GIVE_OPTIONAL_FIELD(ir, tempA, _IFT_ActiveBoundaryCondition_elements);
-        for (int i = 0; i < tempA.giveSize(); ++i) {
-            this->addElement(tempA(i));
-        }
         IR_GIVE_OPTIONAL_FIELD(ir, tempB, _IFT_ActiveBoundaryCondition_elementSides);
         for (int i = 0; i < tempB.giveSize()/2; ++i) {
             this->addElementSide(tempB(i*2),tempB(i*2+1));
-        }
-        IR_GIVE_OPTIONAL_FIELD(ir, tempC, _IFT_ActiveBoundaryCondition_dofManagers);
-        for (int i = 0; i < tempC.giveSize(); ++i) {
-            this->addDofman(tempC(i));
         }
 
         return IRRT_OK;
@@ -102,21 +92,9 @@ public:
     /**
      * Adds element for active boundary condition.
      * @param elem Element number.
-     */
-    virtual void addElement(int elem) { OOFEM_ERROR2("%s :: addElement - Not supported", giveClassName()); }
-
-    /**
-     * Adds element for active boundary condition.
-     * @param elem Element number.
      * @param side Side number.
      */
     virtual void addElementSide(int elem, int side) { OOFEM_ERROR2("%s :: addElement - Not supported", giveClassName()); }
-
-    /**
-     * Adds dof manager for active boundary condition.
-     * @param dman Dof manager number.
-     */
-    virtual void addDofman(int dman) { OOFEM_ERROR2("%s :: addElement - Not supported", giveClassName()); }
     //@}
 
     /**
@@ -150,6 +128,9 @@ public:
     /**
      * Gives a list of location arrays that will be assembled.
      * This should only be used to construct zero structure in sparse matrices.
+     * The rows and columns location arrays returned in tuples (stored in vector),
+     * allowing to efficiently assemble and allocate off-diagonal blocks.
+     * The nonzero entries are assembled and allocated for entries at (rows[i], cols[i]) positions.
      * @param rows List of location arrays for r_s.
      * @param cols List of location arrays for c_s.
      * @param eid Equation ID.
@@ -161,10 +142,13 @@ public:
                                     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) {}
 
 
-    /// @name Functions related to boundary conditions which have to deal with special DOFs.
+    /**
+     * @name Functions related to boundary conditions which have to deal with special slave DOFs.
+     * Boundary conditions that do not require slave dofs do not need to overload these functions.
+     * @see ActiveDof The active DOF passes these functions here.
+     */
     //@{
     /**
-     * NOT ACTUALLY USED YET due to some design difficulties.
      * Checks to see if active boundary condition requires special DOFs.
      * @return True if ActiveDof should be created.
      */
