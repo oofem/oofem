@@ -45,7 +45,6 @@
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "crosssection.h"
-#include "matresponseform.h"
 #include "matresponsemode.h"
 #include "fei2dtrlin.h"
 #include "classfactory.h"
@@ -105,7 +104,7 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *atTime)
         double detJ = this->interpolation_lin.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
         this->interpolation_lin.evaldNdx( BT, * lcoords, FEIElementGeometryWrapper(this) );
         
-        mat->giveCharacteristicMatrix(K, ReducedForm, TangentStiffness, gp, atTime);
+        mat->giveCharacteristicMatrix(K, TangentStiffness, gp, atTime);
 
         B.beTranspositionOf(BT);
         KB.beProductOf(K, B);
@@ -126,8 +125,8 @@ void Tr1Darcy :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Val
 
 void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *atTime)
 {
-    FloatArray w, a, gradP, P(1), n, I;
-    FloatMatrix BT;
+    FloatArray w, a, gradP, P(1), n;
+    FloatMatrix B, BT;
 
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
@@ -144,14 +143,14 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *atTim
         double detJ = this->interpolation_lin.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
         this->interpolation_lin.evaldNdx( BT, * lcoords, FEIElementGeometryWrapper(this) );
         this->interpolation_lin.evalN( n, *lcoords, FEIElementGeometryWrapper(this) );
+        B.beTranspositionOf(BT);
         P.at(1) = n.dotProduct(a); // Evaluates the field at this point.
 
-        gradP.beTProductOf(BT, a);
+        gradP.beProductOf(B, a);
 
         mat->giveFluxVector(w, gp, gradP, P, atTime);
 
-        I.beProductOf(BT, w);
-        answer.add(- gp->giveWeight() * detJ, I);
+        answer.plusProduct(B, w, - gp->giveWeight() * detJ);
     }
 }
 

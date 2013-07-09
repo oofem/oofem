@@ -122,9 +122,10 @@ void LineSurfaceTension :: giveDofManDofIDMask(int inode, EquationID ut, IntArra
 void LineSurfaceTension :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep)
 {
     if( mtrx == ExternalForcesVector ) {
-        this->computeLoadVector(answer, mode, tStep);
-    } else if ( mtrx == InternalForcesVector ){
         answer.resize(0);
+        return;
+    } else if ( mtrx == InternalForcesVector ) {
+        this->computeInternalForcesVector(answer, mode, tStep);
     } else {
         OOFEM_ERROR2("giveCharacteristicVector: Unknown CharType (%s).",__CharTypeToString(mtrx));
     }
@@ -139,7 +140,7 @@ void LineSurfaceTension :: giveCharacteristicMatrix(FloatMatrix &answer, CharTyp
     }
 }
 
-void LineSurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep)
+void LineSurfaceTension :: computeInternalForcesVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep)
 {
     domainType dt = this->giveDomain()->giveDomainType();
 
@@ -180,7 +181,7 @@ void LineSurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType m
         answer.at(4) = -v.at(2)*t;
     }
 
-    answer.times(gamma_s);
+    answer.times(-gamma_s);
 }
 
 void LineSurfaceTension :: computeTangent(FloatMatrix &answer, TimeStep *tStep)

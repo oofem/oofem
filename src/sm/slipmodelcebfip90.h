@@ -130,11 +130,10 @@ public:
                                                GaussPoint *gp,
                                                TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
+    virtual void  giveStiffnessMatrix(FloatMatrix &answer,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *tStep);
@@ -159,7 +158,7 @@ public:
 
 protected:
     // Overloaded to use specialized versions of these services possibly implemented by linearElastic member
-    void give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+    void give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *tStep);
 };
 } // end namespace oofem

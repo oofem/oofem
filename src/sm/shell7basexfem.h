@@ -141,7 +141,7 @@ public:
     virtual ~Shell7BaseXFEM() {};		
     virtual int checkConsistency();
     IntegrationRule **czIntegrationRulesArray;
-    void giveMaxCZDamages(FloatArray &answer);
+    void giveMaxCZDamages(FloatArray &answer, TimeStep *tStep);
     virtual const char *giveClassName()  const { return "Shell7BaseXFEM"; }
     //virtual classType giveClassID()      const { return Shell7BaseXFEMClass; }
     virtual Interface *giveInterface(InterfaceType it);

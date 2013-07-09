@@ -158,7 +158,7 @@ void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
-    FloatArray a_pressure, a_velocity, devStress, epsp, BTs, N, dNv(8);
+    FloatArray a_pressure, a_velocity, devStress, epsp, N, dNv(8);
     double r_vol, pressure;
     FloatMatrix dN, B(3, 8);
     B.zero();
@@ -190,9 +190,8 @@ void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep
         epsp.beProductOf(B, a_velocity);
 
         mat->computeDeviatoricStressVector(devStress, r_vol, gp, epsp, pressure, tStep);
-        BTs.beTProductOf(B, devStress);
 
-        momentum.add(dA, BTs);
+        momentum.plusProduct(B, devStress, dA);
         momentum.add(-pressure*dA, dNv);
         conservation.add(r_vol*dA, N);
     }
@@ -220,7 +219,7 @@ void Tr1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeStep
         ltype = load->giveBCGeoType();
 
         if ( ltype == EdgeLoadBGT ) {
-            this->computeBoundaryLoadVector(vec, load, load_id, ExternalForcesVector, VM_Total, tStep);
+            this->computeBoundaryLoadVector(vec, static_cast<BoundaryLoad*>(load), load_id, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         }
     }
@@ -273,7 +272,7 @@ void Tr1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharTy
     answer.assemble( temparray, this->momentum_ordering );
 }
 
-void Tr1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, Load *load, int iEdge, CharType type, ValueModeType mode, TimeStep *tStep)
+void Tr1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iEdge, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
         answer.resize(0);

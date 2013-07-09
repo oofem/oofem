@@ -110,11 +110,10 @@ public:
 
     double computeVolumetricStrain(GaussPoint *gp, TimeStep *atTime);
 
-    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
+    virtual void  giveStiffnessMatrix(FloatMatrix &answer,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *atTime);
@@ -133,7 +132,7 @@ public:
 
 protected:
     // Overloaded to use specialized versions of these services possibly implemented by linearElastic member
-    void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+    void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *atTime);
 };
 } // namespace oofem

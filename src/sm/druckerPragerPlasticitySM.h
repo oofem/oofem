@@ -253,7 +253,6 @@ public:
     virtual classType giveClassID() const { return DruckerPragerPlasticitySMClass; }
 
     virtual void giveRealStressVector(FloatArray &answer,
-                              MatResponseForm form,
                               GaussPoint *gp,
                               const FloatArray &strainVector,
                               TimeStep *atTime);

@@ -65,6 +65,7 @@ public:
     /// Destructor
     virtual ~BilinearCZMaterialStatus();
 
+    double giveDamage() { return 0.0; } // no damage in this model
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     // definition
@@ -109,7 +110,7 @@ protected:
     double kn1;   // slope during softening part
 
     virtual int checkConsistency();
-    void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+    void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                                      GaussPoint *gp, TimeStep *atTime);
 public:
     /// Constructor
@@ -125,11 +126,10 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_BilinearCZMaterial_Name; }
     
 
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseForm form,
+    virtual void giveStiffnessMatrix(FloatMatrix &answer,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);

@@ -492,7 +492,6 @@ B3SolidMaterial :: computeCreepFunction(GaussPoint *gp, double atTime, double of
 
 void
 B3SolidMaterial :: giveShrinkageStrainVector(FloatArray &answer,
-                                             MatResponseForm form,
                                              GaussPoint *gp,
                                              TimeStep *atTime,
                                              ValueModeType mode)
@@ -500,14 +499,8 @@ B3SolidMaterial :: giveShrinkageStrainVector(FloatArray &answer,
     FloatArray prevAnswer;
 
     if ( this->shMode == B3_NoShrinkage ) {
-        if ( form == FullForm ) {
-            answer.resize(6);
-            answer.zero();
-        } else {
-            answer.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
-            answer.zero();
-        }
-
+        answer.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+        answer.zero();
         return;
     }
 
@@ -516,22 +509,21 @@ B3SolidMaterial :: giveShrinkageStrainVector(FloatArray &answer,
     }
 
     if ( this->shMode == B3_AverageShrinkage ) {
-        this->computeTotalAverageShrinkageStrainVector(answer, form, gp, atTime);
+        this->computeTotalAverageShrinkageStrainVector(answer, gp, atTime);
 
         if ( ( mode == VM_Incremental ) && ( !atTime->isTheFirstStep() ) ) {
-            this->computeTotalAverageShrinkageStrainVector( prevAnswer, form, gp, atTime->givePreviousStep() );
+            this->computeTotalAverageShrinkageStrainVector( prevAnswer, gp, atTime->givePreviousStep() );
             answer.subtract(prevAnswer);
         }
     } else if ( this->shMode == B3_PointShrinkageMPS ) {
-        this->computePointShrinkageStrainVectorMPS(answer, form, gp, atTime);
+        this->computePointShrinkageStrainVectorMPS(answer, gp, atTime);
     } else {
-        this->computeShrinkageStrainVector(answer, form, gp, atTime, mode);
+        this->computeShrinkageStrainVector(answer, gp, atTime, mode);
     }
 }
 
 void
-B3SolidMaterial :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
-                                                            GaussPoint *gp, TimeStep *atTime)
+B3SolidMaterial :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime)
 {
     /*
      * returns average shrinkage strain vector of cross section at drying
@@ -577,18 +569,12 @@ B3SolidMaterial :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, 
 
     fullAnswer.at(1) = fullAnswer.at(2) = fullAnswer.at(3) = EpsSh * 1.e-6;
 
-    if ( form == FullForm ) {
-        answer = fullAnswer;
-        return;
-    }
-
     StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
 }
 
 
 void
-B3SolidMaterial :: computePointShrinkageStrainVectorMPS(FloatArray &answer, MatResponseForm form,
-                                                        GaussPoint *gp, TimeStep *atTime)
+B3SolidMaterial :: computePointShrinkageStrainVectorMPS(FloatArray &answer, GaussPoint *gp, TimeStep *atTime)
 {
     /* dEpsSh/dt = kSh * dh/dt   (h = humidity)
      * ->> EpsSh = kSh * h_difference
@@ -610,11 +596,6 @@ B3SolidMaterial :: computePointShrinkageStrainVectorMPS(FloatArray &answer, MatR
     fullAnswer.resize(size);
     fullAnswer.zero();
     fullAnswer.at(1) = fullAnswer.at(2) = fullAnswer.at(3) = EpsSh;
-
-    if ( form == FullForm ) {
-        answer = fullAnswer;
-        return;
-    }
 
     StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
 }
@@ -662,8 +643,7 @@ B3SolidMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
 
 
 void
-B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
-                                         GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
+B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
 //
 // computes the strain due to creep at constant stress during the increment
 // (in fact, the INCREMENT of creep strain is computed for mode == VM_Incremental)
@@ -680,25 +660,19 @@ B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm for
         eta = this->computeFlowTermViscosity(gp, atTime);         //evaluated too in the middle of the time-step
 
         sigma = status->giveStressVector();         //stress vector at the beginning of time-step
-        this->giveUnitComplianceMatrix(C, ReducedForm, gp, atTime);
+        this->giveUnitComplianceMatrix(C, gp, atTime);
         reducedAnswer.resize( C.giveNumberOfRows() );
 
         reducedAnswer.beProductOf(C, sigma);
         reducedAnswer.times( atTime->giveTimeIncrement() / ( timeFactor * eta ) );
 
         //computes non-aging creep component of the Kelvin Chain
-        KelvinChainMaterial :: giveEigenStrainVector(help, ReducedForm, gp, atTime, mode);
+        KelvinChainMaterial :: giveEigenStrainVector(help, gp, atTime, mode);
 
         help.times(1 / v);
         reducedAnswer.add(help);
 
-        if ( form == ReducedForm ) {
-            answer =  reducedAnswer;
-            return;
-        }
-
-        // expand the strain to full form if requested
-        StructuralMaterial :: giveFullSymVectorForm(answer, reducedAnswer, gp->giveMaterialMode());
+        answer = reducedAnswer;
     } else {
         /* error - total mode not implemented yet */
         _error("giveEigenStrainVector - mode is not supported");
@@ -707,8 +681,7 @@ B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm for
 
 
 void
-B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
-                                                GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
+B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
 {
     // free shrinkage at material point, requires staggered analaysis
     // additional material parameters required:
@@ -794,11 +767,6 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, MatResponseF
     fullAnswer.at(3) = h1 * ( 1.0 + sn * ( r * fullStressVector.at(3) + rprime * sv ) ) * ( wrate + at * trate );
 
     if ( mode == VM_Incremental ) {
-        if ( form == FullForm ) {
-            answer = fullAnswer;
-            return;
-        }
-
         StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
         return;
     } else { // total values required
@@ -813,11 +781,6 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, MatResponseF
         StructuralMaterial :: giveFullSymVectorForm(fssv, ssv, gp->giveMaterialMode());
         // add increment to total values
         fullAnswer.add(fssv);
-
-        if ( form == FullForm ) {
-            answer = fullAnswer;
-            return;
-        }
 
         StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
         return;

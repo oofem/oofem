@@ -261,7 +261,6 @@ DustMaterial :: hasMaterialModeCapability(MaterialMode mMode)
 
 void
 DustMaterial :: giveRealStressVector(FloatArray &answer,
-                                     MatResponseForm form,
                                      GaussPoint *gp,
                                      const FloatArray &totalStrain,
                                      TimeStep *atTime)
@@ -284,11 +283,7 @@ DustMaterial :: giveRealStressVector(FloatArray &answer,
     status->letTempStrainVectorBe(totalStrain);
 
     // pass the correct form of stressVector to giveRealStressVector
-    if ( form == ReducedForm ) {
-        answer = status->giveTempStressVector();
-    } else {
-        StructuralMaterial :: giveFullSymVectorForm(answer, status->giveTempStressVector(), gp->giveMaterialMode());
-    }
+    answer = status->giveTempStressVector();
 }
 
 void

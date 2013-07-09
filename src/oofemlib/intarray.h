@@ -167,6 +167,11 @@ public:
      */
     void preallocate(int futureSize);
     /**
+     * Resizes receiver and enumerates from 1 to the maximum value given.
+     * @param maxVal to enumerate to.
+     */
+    void enumerate(int maxVal);
+    /**
      * Appends array b at the end of receiver.
      * @param b Array to be appended at the end of receiver
      * @param allocChunk If reallocation needed, an additional space for allocChunk values will be allocated

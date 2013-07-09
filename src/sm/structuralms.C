@@ -53,11 +53,14 @@ StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoin
 
     if ( NLStructuralElement *el = dynamic_cast< NLStructuralElement * > ( gp->giveElement() ) ) {
         if ( el->giveGeometryMode() == 1  ) { // if large def, initialize F and P
-            StructuralMaterial :: giveIdentityVector(FVector, gp->giveMaterialMode());
-            PVector.resize(FVector.giveSize());
-            tempPVector = PVector;
-            tempFVector = FVector;
+            PVector.resize(9);
+            PVector.zero();
+            FVector.resize(9);
+            FVector.zero();
+            FVector.at(1) = FVector.at(2) = FVector.at(3) = 1.;
         }
+        tempPVector = PVector;
+        tempFVector = FVector;
     }
 }
 

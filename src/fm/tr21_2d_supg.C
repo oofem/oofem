@@ -334,7 +334,7 @@ TR21_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     mu_min = 1;
     for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         gp = iRule->getIntegrationPoint(j);
-        mu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, atTime);
+        mu = static_cast< FluidDynamicMaterial* >(this->giveMaterial())->giveEffectiveViscosity(gp, atTime);
         if ( mu_min > mu ) {
             mu_min = mu;
         }

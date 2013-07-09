@@ -303,7 +303,6 @@ TR1_2D_SUPG2_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime
     double _u, _v, _r;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
     FloatMatrix _b(4, 6);
-    FloatArray bs;
 
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
         FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->_giveMaterial(ifluid) );
@@ -314,9 +313,7 @@ TR1_2D_SUPG2_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime
             this->computeBMtrx(_b, gp);
             eps.beProductOf(_b, u);
             mat->computeDeviatoricStressVector(stress, gp, eps, atTime);
-            stress.times(dV / Re);
-            bs.beTProductOf(_b, stress);
-            answer.add(bs);
+            answer.plusProduct(_b, stress, dV / Re);
 
 #if 1
             // stabilization term k_delta
@@ -326,8 +323,8 @@ TR1_2D_SUPG2_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime
             _v = n.at(1) * un.at(2) + n.at(2) * un.at(4) + n.at(3) * un.at(6);
 
             for ( int i = 1; i <= 3; i++ ) {
-                answer.at(2 * i - 1) -= t_supg * ( _u * b [ i - 1 ] + _v * c [ i - 1 ] ) * ( stress.at(1) / _r );
-                answer.at(2 * i)   -= t_supg * ( _u * b [ i - 1 ] + _v * c [ i - 1 ] ) * ( stress.at(4) / _r );
+                answer.at(2 * i - 1) -= t_supg * ( _u * b [ i - 1 ] + _v * c [ i - 1 ] ) * ( stress.at(1) / _r ) * dV / Re;
+                answer.at(2 * i)     -= t_supg * ( _u * b [ i - 1 ] + _v * c [ i - 1 ] ) * ( stress.at(4) / _r ) * dV / Re;
             }
 
 #endif
@@ -1057,8 +1054,8 @@ TR1_2D_SUPG2_AXI :: updateStabilizationCoeffs(TimeStep *atTime)
         gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
     }
 
-    nu0 = this->_giveMaterial(0)->giveCharacteristicValue(MRM_Viscosity, gp, atTime->givePreviousStep());
-    nu1 = this->_giveMaterial(1)->giveCharacteristicValue(MRM_Viscosity, gp, atTime->givePreviousStep());
+    nu0 = static_cast< FluidDynamicMaterial* >(this->_giveMaterial(0))->giveEffectiveViscosity(gp, atTime->givePreviousStep());
+    nu1 = static_cast< FluidDynamicMaterial* >(this->_giveMaterial(1))->giveEffectiveViscosity(gp, atTime->givePreviousStep());
     nu = vof * nu0 + ( 1. - vof ) * nu1;
     nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
 

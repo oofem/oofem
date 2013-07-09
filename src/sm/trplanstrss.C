@@ -50,8 +50,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( TrPlaneStress2d );
+REGISTER_Element(TrPlaneStress2d);
 
 FEI2dTrLin TrPlaneStress2d :: interp(1, 2);
 
@@ -71,27 +70,27 @@ Interface *
 TrPlaneStress2d :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >( this );
+        return static_cast< DirectErrorIndicatorRCInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
+        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
-        return static_cast< ZZErrorEstimatorInterface * >(this );
+        return static_cast< ZZErrorEstimatorInterface * >(this);
     } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return static_cast< ZZRemeshingCriteriaInterface * >( this );
+        return static_cast< ZZRemeshingCriteriaInterface * >(this);
     } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
-        return static_cast< MMAShapeFunctProjectionInterface * >( this );
+        return static_cast< MMAShapeFunctProjectionInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
-        return static_cast< HuertaErrorEstimatorInterface * >( this );
+        return static_cast< HuertaErrorEstimatorInterface * >(this);
     } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return static_cast< HuertaRemeshingCriteriaInterface * >( this );
+        return static_cast< HuertaRemeshingCriteriaInterface * >(this);
     }
 
     return NULL;
@@ -189,14 +188,14 @@ TrPlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
 
 void
 TrPlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the [3x6] displacement gradient matrix {BH} of the receiver,
+// Returns the [4x6] displacement gradient matrix {BH} of the receiver,
 // evaluated at aGaussPoint.
 // @todo not checked if correct
 {
     FloatMatrix dnx;
     this->interp.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
-    answer.resize(3, 6);
+    answer.resize(4, 6);
     answer.zero();
 
     for ( int i = 1; i <= 3; i++ ) {
@@ -215,7 +214,7 @@ void TrPlaneStress2d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
@@ -279,7 +278,7 @@ double
 TrPlaneStress2d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    return detJ *gp->giveWeight();
+    return detJ * gp->giveWeight();
 }
 
 
@@ -346,7 +345,7 @@ double TrPlaneStress2d :: computeVolumeAround(GaussPoint *gp)
     weight = gp->giveWeight();
     detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
 
-    return detJ *weight *this->giveCrossSection()->give(CS_Thickness);
+    return detJ * weight * this->giveCrossSection()->give(CS_Thickness);
 }
 
 
@@ -361,9 +360,9 @@ TrPlaneStress2d :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
 
     /*  if ( numberOfGaussPoints != 1 ) {
-           numberOfGaussPoints = 1;
-    }
-    */
+     *     numberOfGaussPoints = 1;
+     * }
+     */
 
     return IRRT_OK;
 }

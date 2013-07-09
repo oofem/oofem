@@ -80,14 +80,12 @@ public:
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
 
     /**
-     * Computes the load vector.
+     * Computes the load from surface tension
      */
-    virtual void computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep);
+    virtual void computeInternalForcesVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep);
 
     /**
-     * Computes tangent to load vector.
-     * @param answer Tangent @f$ \frac{\partial F}{\partial x}\Delta t@f$.
-     * @param tStep Time step.
+     * Computes tangent to the surface tension.
      */
     virtual void computeTangent(FloatMatrix &answer, TimeStep *tStep);
 
@@ -111,7 +109,6 @@ public:
 
     virtual const char *giveClassName() const { return "LineSurfaceTension"; }
     virtual const char *giveInputRecordName() const { return _IFT_LineSurfaceTension_Name; }
-    virtual classType giveClassID() const { return LineSurfaceTensionElementClass; }
 };
 
 } // end namespace oofem

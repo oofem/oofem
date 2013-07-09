@@ -112,7 +112,7 @@ public:
     double evalYieldFunction(const FloatArray &sigPrinc, const double kappa);
     double evalYieldStress(const double kappa);
     double evalPlasticModulus(const double kappa);
-    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, MaterialMode mode);
+    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
     double computeDamage(GaussPoint *gp, TimeStep *atTime);
     double computeDamageParam(double tempKappa);
     double computeDamageParamPrime(double tempKappa);
@@ -135,20 +135,20 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                              const FloatArray &reducesStrain, TimeStep *tStep);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                                      const FloatArray &reducesStrain, TimeStep *tStep);
 
 protected:
     virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                  MatResponseForm form, MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep);
+                                          MatResponseMode mode,
+                                          GaussPoint *gp,
+                                          TimeStep *tStep);
     /**
      * Executive method used by local and gradient version.
      * (with different parameters gprime)
      */
     void evaluatePlaneStressStiffMtrx(FloatMatrix &answer,
-                                      MatResponseForm form, MatResponseMode mode,
+                                      MatResponseMode mode,
                                       GaussPoint *gp,
                                       TimeStep *tStep, double gprime);
 

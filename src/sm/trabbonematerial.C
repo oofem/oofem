@@ -68,7 +68,7 @@ void TrabBoneMaterial :: computeCumPlastStrain(double &alpha, GaussPoint *gp, Ti
 
 void
 TrabBoneMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
-                                          MatResponseForm form, MatResponseMode mode, GaussPoint *gp,
+                                          MatResponseMode mode, GaussPoint *gp,
                                           TimeStep *atTime)
 {
     TrabBoneMaterialStatus *status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
@@ -217,7 +217,7 @@ TrabBoneMaterial :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
 
 
 void
-TrabBoneMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+TrabBoneMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                          const FloatArray &totalStrain,
                                          TimeStep *atTime)
 {

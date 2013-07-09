@@ -167,7 +167,7 @@ Concrete2 :: give(int aProperty, GaussPoint *gp)
 
 
 void
-Concrete2 ::  giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+Concrete2 ::  giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                    const FloatArray &strain,
                                    TimeStep *atTime)
 //
@@ -183,7 +183,7 @@ Concrete2 ::  giveRealStressVector(FloatArray &answer, MatResponseForm form, Gau
     switch ( mode ) {
     case _3dShellLayer:
     case _2dPlateLayer:
-        giveRealStresses3dShellLayer(answer, form, gp, strain, atTime);
+        giveRealStresses3dShellLayer(answer, gp, strain, atTime);
         break;
     default:
         _error("giveRealStresses : unsupported stressMode\n");
@@ -192,7 +192,7 @@ Concrete2 ::  giveRealStressVector(FloatArray &answer, MatResponseForm form, Gau
 
 
 void
-Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm form,
+Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer,
                                            GaussPoint *gp,
                                            const FloatArray &totalStrain,
                                            TimeStep *atTime)
@@ -360,11 +360,6 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
         status->letPlasticStrainIncrementVectorBe(plasticStrainIncrementVector);
         //   plasticStrain->negated()->add (status->givePlasticStrainVector());
         //      status->givePlasticStrainIncrementVector()-> add(plasticStrain);
-
-        if ( form == FullForm ) {
-            answer =  currentStress;
-            return;
-        }
 
         StructuralMaterial :: giveReducedSymVectorForm(answer, currentStress, gp->giveMaterialMode());
         return;
@@ -691,11 +686,6 @@ label18:
 
     //plasticStrain->negated()->add (status->givePlasticStrainVector());
     //status->givePlasticStrainIncrementVector()-> add(plasticStrain);
-
-    if ( form == FullForm ) {
-        answer =  currentStress;
-        return;
-    }
 
     StructuralMaterial :: giveFullSymVectorForm(answer, currentStress, gp->giveMaterialMode());
 }

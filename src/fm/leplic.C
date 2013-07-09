@@ -48,8 +48,8 @@
 #endif
 
 namespace oofem {
-#define LEPLIC_ZERO_VOF  1.e-12
-#define LEPLIC_BRENT_EPS 1.e-12
+#define LEPLIC_ZERO_VOF  1.e-8
+#define LEPLIC_BRENT_EPS 1.e-8
 
 
 
@@ -646,7 +646,8 @@ LEPlic :: findCellLineConstant(double &p, FloatArray &fvgrad, int ie, bool coord
              */
 #endif
         } else {
-            OOFEM_ERROR("LEPlic::findCellLineConstant: finding lower and uper bounds of line constant value failed");
+	  //fprintf (stderr, "target_vof = %le, fvi=%le\n", target_vof, fvi);
+	  OOFEM_ERROR3("LEPlic::findCellLineConstant: finding lower and uper bounds of line constant value failed (lowerVOF = %lf, upperVOF=%lf)", lower_vof, upper_vof );
         }
     }
 }

@@ -83,6 +83,7 @@ enum CS_type {
 /**
  * This class implements a orthotropic linear elastic material in a finite
  * element problem.
+ * For large deformations it becomes the orthotropic St. Venant-Kirchoff hyperelasticity model.
  *
  * Tasks:
  * - Returning standard material stiffness marix for 3d-case.

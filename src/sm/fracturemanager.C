@@ -167,7 +167,7 @@ FractureManager :: evaluateFailureCriteria(FailureCriteria *fc, Element *el, Tim
 
 
     // Compute fc quantities
-    if ( ! fc->evaluateFCQuantities(el) ) { // cannot evaluate on its own, ask element for implementation through an interface
+    if ( ! fc->evaluateFCQuantities(el, tStep) ) { // cannot evaluate on its own, ask element for implementation through an interface
         FailureModuleElementInterface *fmInterface =
             dynamic_cast< FailureModuleElementInterface * >( el->giveInterface(FailureModuleElementInterfaceType) );
         if ( fmInterface ) { // if element supports the failure module interface
@@ -183,7 +183,7 @@ FractureManager :: evaluateFailureCriteria(FailureCriteria *fc, Element *el, Tim
 
 
 bool
-FailureCriteria :: evaluateFCQuantities(Element *el)
+FailureCriteria :: evaluateFCQuantities(Element *el, TimeStep *tStep)
 {
     
     IntArray neighbors;
@@ -213,10 +213,8 @@ FailureCriteria :: evaluateFCQuantities(Element *el)
             if ( neighbor ) {
                  if ( neighbor->hasCohesiveZone() ) {
 
-                     neighbor->giveMaxCZDamages(damageArray); // damage parameter for each interface
+                     neighbor->giveMaxCZDamages(damageArray, tStep); // damage parameter for each interface
                      this->quantities[ i-1 ][0] = damageArray;
-                     //neighbor->giveMaxCZDamages(this->quantities[ i-1 ]);
-                     //IntegrationRule *iRuleL = neighbor->czIntegrationRulesArray[1]; 
 
                  }
             }

@@ -112,7 +112,6 @@ TrabBoneNL :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoi
 
 void
 TrabBoneNL :: giveRealStressVector(FloatArray &answer,
-                                   MatResponseForm form,
                                    GaussPoint *gp,
                                    const FloatArray &strainVector,
                                    TimeStep *atTime)

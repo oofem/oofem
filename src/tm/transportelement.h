@@ -37,7 +37,6 @@
 
 #include "element.h"
 #include "floatmatrix.h"
-
 #include "primaryfield.h"
 #include "matresponsemode.h"
 

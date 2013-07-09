@@ -118,7 +118,7 @@ HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRe
 
 
 void
-HyperElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+HyperElasticMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 
 // returns 6 components of the stress corresponding to the given total strain
 
@@ -157,30 +157,6 @@ HyperElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm
 
 }
 
-/*
-void
-HyperElasticMaterial :: giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &vF, TimeStep *atTime)
-{
-    // Computes th first Piola-Kirchoff stress vector - 9 components
-    
-    FloatMatrix F, E;
-    F.beMatrixForm(vF);
-    this->computeGreenLagrangeStrain(E, F);
-    FloatArray vE, vS;
-    vE.beReducedVectorFormOfStrain(E);
-
-    this->giveRealStressVector(vS, form, gp, vE, atTime);   // second PK stress
-    HyperElasticMaterialStatus *status = static_cast< HyperElasticMaterialStatus * >( this->giveStatus(gp) );
-
-
-    //this->convert_S_2_P(answer, vS, vF, gp->giveMaterialMode() );
-    this->convert_S_2_P(answer, vS, vF, _3dMat );
-
-    // update gp
-    status->letTempFVectorBe(vF);
-    status->letTempPVectorBe(answer);
-}
-*/
 
 MaterialStatus *
 HyperElasticMaterial :: CreateStatus(GaussPoint *gp) const

@@ -39,7 +39,6 @@
 #include "structuralmaterial.h"
 
 namespace oofem {
-
 class GaussPoint;
 class Element;
 class FloatArray;
@@ -92,12 +91,11 @@ public:
      * @param reducedStrainIncrement Strain increment vector in reduced form.
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void giveRealStresses(FloatArray & answer, MatResponseForm form,
-                                  GaussPoint *gp, const FloatArray &reducedStrainIncrement, TimeStep *tStep);
+    virtual void giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrainIncrement, TimeStep *tStep);
 
 
     /**
-     * Computes the first Piola-Kirchoff stress vector for a given deformation gradient and integration point.
+     * Computes the First Piola-Kirchoff stress vector for a given deformation gradient and integration point.
      * The service should use previously reached equilibrium history variables. Also
      * it should update temporary history variables in status according to newly reached state.
      * The temporary history variables are moved into equilibrium ones after global structure
@@ -105,14 +103,28 @@ public:
      * Elements should always pass their requests to their cross section model, which
      * performs necessary integration over its volume and invokes necessary material
      * services for corresponding material model defined for given integration point.
-     * @param answer Contains the second Piola-Kirchoff stresses .
-     * @param form Material response form.
+     * @param answer Contains the First Piola-Kirchoff stresses.
      * @param gp Integration point.
      * @param reducedFIncrement Increment of the deformation gradient vector in reduced form. @todo should this then be in a multiplicative way? /JB
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void giveFirstPKStresses(FloatArray & answer, MatResponseForm form,
-                                  GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);
+    virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);
+
+    /**
+     * Computes the Cauchy stress vector for a given increment of deformation gradient and given integration point.
+     * The service should use previously reached equilibrium history variables. Also
+     * it should update temporary history variables in status according to newly reached state.
+     * The temporary history variables are moved into equilibrium ones after global structure
+     * equilibrium has been reached by iteration process.
+     * Elements should always pass their requests to their cross section model, which
+     * performs necessary integration over its volume and invokes necessary material
+     * services for corresponding material model defined for given integration point.
+     * @param answer Contains the Cauchy stress.
+     * @param gp Integration point.
+     * @param reducedFIncrement Increment of the deformation gradient vector in reduced form. @todo should this then be in a multiplicative way? /JB
+     * @param tStep Current time step (most models are able to respond only when tStep is current time step).
+     */
+    virtual void giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);
 
 
     /**
@@ -128,6 +140,20 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+
+    /**
+     * Computes the material stiffness matrix dCde of receiver in a given integration point, respecting its history.
+     * The algorithm should use temporary or equilibrium  history variables stored in integration point status
+     * to compute and return required result.
+     * Elements should always pass their requests to their cross section model, which
+     * performs necessary integration over its volume and invokes necessary material
+     * services for corresponding material model defined for given integration point.
+     * @param answer Contains result.
+     * @param mode Material response mode.
+     * @param gp Integration point.
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
+     */
+    void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
 
 
@@ -168,7 +194,7 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                   MatResponseForm form, MatResponseMode mode,
+                                                   MatResponseMode mode,
                                                    GaussPoint *gp, StructuralMaterial *mat,
                                                    TimeStep *tStep);
     /**
@@ -209,7 +235,6 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveCharMaterialComplianceMatrixOf(FloatMatrix &answer,
-                                                    MatResponseForm form,
                                                     MatResponseMode mode,
                                                     GaussPoint *gp, StructuralMaterial *mat,
                                                     TimeStep *tStep);
@@ -261,25 +286,24 @@ public:
 protected:
     /**
      * For internal usage by cross section model.
-     * It is direct interface to material model service giveCharacteristicMatrix.
-     * @see Material::giveCharacteristicMatrix
+     * It is direct interface to material model service giveStiffnessMatrix.
+     * @see Material::giveStiffnessMatrix
      */
     void giveMaterialStiffnessMatrix(FloatMatrix &answer,
-                                     MatResponseForm form,
                                      MatResponseMode mode,
                                      GaussPoint *gp,
                                      TimeStep *tStep);
 
     /**
      * For internal usage by cross section model.
-     * It is direct interface to material model service giveCharacteristicMatrix.
+     * It is direct interface to material model service giveStiffnessMatrix.
      * Material model passed as parameter is used instead of material, to which given integration point
      * belongs to. It should always be the same material as integration point belongs to, because in
      * integration point are stored load history variables related only to its associated material model.
      * Different model can be used only if it does not depend on any internal history variables, like
      * linear elastic material. Accessing load history variables, which are not in integration point status
      * can lead to segmentation fault error.
-     * @see Material::giveCharacteristicMatrix
+     * @see Material::giveStiffnessMatrix
      * @param answer Contains result.
      * @param form Material response form.
      * @param mode Material response mode.
@@ -288,7 +312,6 @@ protected:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                               MatResponseForm form,
                                                MatResponseMode mode,
                                                GaussPoint *gp,
                                                StructuralMaterial *mat,

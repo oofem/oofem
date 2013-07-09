@@ -27,6 +27,10 @@
 #include "engngm.h"
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
+#include "dynamicinputrecord.h"
+#include "bodyload.h"
+
+//#include "classfactory.h"
 
 #include <vector>
 
@@ -36,6 +40,7 @@ REGISTER_BoundaryCondition( SolutionbasedShapeFunction );
 
 SolutionbasedShapeFunction::SolutionbasedShapeFunction(int n, Domain *d) : ActiveBoundaryCondition(n, d)
 {
+	isLoaded=false;
 	// TODO Auto-generated constructor stub
 
 }
@@ -56,9 +61,9 @@ SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
 
 	// Load and solve problem file
 	this->filename="";
-	IR_GIVE_FIELD(ir, this->filename, _IFT_SolutionbasedShapeFunction_ShapeFunctionFile);
+	IR_GIVE_OPTIONAL_FIELD(ir, this->filename, _IFT_SolutionbasedShapeFunction_ShapeFunctionFile);
 	useConstantBase = (this->filename == "") ? true : false;
-	if (!useConstantBase) {loadProblem();};
+//	if (!useConstantBase) {loadProblem();};
 
 	// Set up master dofs
 	myNode = new Node(0, this->giveDomain());
@@ -84,11 +89,9 @@ SolutionbasedShapeFunction :: init()
 	for (int i=1; i<=this->giveDomain()->giveNumberOfDofManagers(); i++) {
 		for (int j=1; j<=maxCoord.giveSize(); j++) {
 			maxCoord.at(j)=max( this->giveDomain()->giveDofManager(i)->giveCoordinate(j), maxCoord.at(j) );
+			minCoord.at(j)=min( this->giveDomain()->giveDofManager(i)->giveCoordinate(j), minCoord.at(j) );
 		}
 	}
-
-	maxCoord.printYourself();
-	minCoord.printYourself();
 
 }
 
@@ -163,24 +166,63 @@ SolutionbasedShapeFunction :: loadProblem()
 	this->myEngngModel->initMetaStepAttributes( this->myEngngModel->giveMetaStep( 1 ) );
 	thisTimestep = this->myEngngModel->giveNextStep();
 	this->myEngngModel->init();
+
+	this->setLoads();
+
 	this->myEngngModel->solveYourselfAt(thisTimestep);
 	this->myEngngModel->doStepOutput(thisTimestep);
 
+	isLoaded=true;
+
 	OOFEM_LOG_INFO("************************** Microproblem at %p instanciated \n", this->myEngngModel);
+}
+
+void
+SolutionbasedShapeFunction :: setLoads()
+{
+	DynamicInputRecord ir;
+	FloatArray gradP;
+
+	for (int i=1; i<=this->domain->giveNumberOfBoundaryConditions(); i++) {
+		BodyLoad *bl;
+		bl = dynamic_cast<BodyLoad*> (this->domain->giveBc(i));
+		if (bl!=NULL) {
+			gradP = bl->giveCopyOfComponentArray();
+		}
+	}
+
+	ir.setRecordKeywordField("deadweight", 1);
+	ir.setField(gradP, _IFT_Load_components);
+	ir.setField(1, _IFT_GeneralBoundaryCondition_LoadTimeFunct);
+
+	int bcID = this->myEngngModel->giveDomain(1)->giveNumberOfBoundaryConditions()+1;
+	GeneralBoundaryCondition *myBodyLoad;
+	myBodyLoad = classFactory.createBoundaryCondition("deadweight", bcID, this->myEngngModel->giveDomain(1));
+	myBodyLoad->initializeFrom(&ir);
+	this->myEngngModel->giveDomain(1)->setBoundaryCondition(bcID, myBodyLoad);
+
+	for (int i=1; i<=this->myEngngModel->giveDomain(1)->giveNumberOfElements(); i++) {
+		IntArray *blArray;
+		blArray = this->myEngngModel->giveDomain(1)->giveElement(i)->giveBodyLoadArray();
+		blArray->resizeWithValues(blArray->giveSize()+1);
+		blArray->at(blArray->giveSize())=bcID;
+	}
 }
 
 double
 SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray *coords, Dof *dof)
 {
+
 	if (useConstantBase) {
 		return 1.0;
 	} else {
 		FloatArray closest, lcoords, values;
 		std :: vector <FloatArray *> checkcoords;
 		std :: vector <int> permuteIndex;
-		IntArray coordUnion;
 		double outvalue=0.0;
 		int n=0;
+
+		if (!isLoaded) loadProblem();
 
 		this->myEngngModel->giveDomain(1)->giveSpatialLocalizer()->init(false);
 
@@ -188,17 +230,10 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray *coords, Dof
 			coords->resize(2);
 		}
 
-		coordUnion.resize(coords->giveSize());
-
+		// Determine if current coordinate is at a max or min point and if so, which type (on a surface, edge or a corner?)
+		// n is the number of dimensions at which the point is an extremum, permuteIndex keeps track of the dimension
 		for (int i=1; i<=coords->giveSize(); i++) {
-			coordUnion.at(i)=0;
-			if (fabs(maxCoord.at(i)-coords->at(i))<1e-8) {
-				coordUnion.at(i)=1;
-				permuteIndex.push_back(i);
-				n++;
-			}
-			if (fabs(minCoord.at(i)-coords->at(i))<1e-8) {
-				coordUnion.at(i)=1;
+			if ( ( fabs(maxCoord.at(i)-coords->at(i))<1e-8) || (fabs(minCoord.at(i)-coords->at(i))<1e-8) ){
 				permuteIndex.push_back(i);
 				n++;
 			}
@@ -211,10 +246,11 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray *coords, Dof
 			*newCoord = *coords;
 
 			while ( mask > 0 ) {
+				double d=1e-15;
 				if ( (i & mask) == 0 ) { // Max
-					newCoord->at(permuteIndex.at(counter-1))=minCoord.at( permuteIndex.at(counter-1) )+1e-4;
+					newCoord->at(permuteIndex.at(counter-1))=minCoord.at( permuteIndex.at(counter-1) )+d;
 				} else { // Min
-					newCoord->at(permuteIndex.at(counter-1))=maxCoord.at( permuteIndex.at(counter-1) )-1e-4;
+					newCoord->at(permuteIndex.at(counter-1))=maxCoord.at( permuteIndex.at(counter-1) )-d;
 				}
 				counter ++;
 				mask = mask >> 1;
@@ -225,24 +261,26 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray *coords, Dof
 		for (size_t i=0; i<checkcoords.size(); i++) {
 
 			Element *elementAtCoords = this->myEngngModel->giveDomain(1)->giveSpatialLocalizer()->giveElementClosestToPoint(lcoords, closest, *checkcoords.at(i), 1);
-			printf("Closest element: ");
-			elementAtCoords->printYourself();
+//			printf("Closest element: ");
+//			elementAtCoords->printYourself();
 			EIPrimaryUnknownMapperInterface *em = dynamic_cast<EIPrimaryUnknownMapperInterface*> ( elementAtCoords->giveInterface ( EIPrimaryUnknownMapperInterfaceType ) );
 
 			IntArray dofids;
 
 			em->EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(dofids);
-			if (fabs(checkcoords.at(i)->at(1)-1.0)<1e-3) {
-				printf("faulty!\n");
-			}
+//			if (fabs(checkcoords.at(i)->at(1)-1.0)<1e-3) {
+//				printf("faulty!\n");
+//				elementAtCoords = this->myEngngModel->giveDomain(1)->giveSpatialLocalizer()->giveElementClosestToPoint(lcoords, closest, *checkcoords.at(i), 1);
+//			}
 			em->EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(VM_Total, thisTimestep, *checkcoords.at(i), values);
 
-			printf("Values at (%f, %f) are ", checkcoords.at(i)->at(1), checkcoords.at(i)->at(2) );
-			for (int j = 1; j<values.giveSize(); j++) printf("%f ", values.at(j));
-			printf("\n");
+//			printf("Values at (%f, %f) are (", checkcoords.at(i)->at(1), checkcoords.at(i)->at(2) );
+//			for (int j = 1; j<values.giveSize(); j++) printf("%f ", values.at(j));
+//			printf(")\n");
 
-			outvalue = outvalue + values.at(dofids.findFirstIndexOf(dof->giveDofID())) / ( (double) n );
+			outvalue = outvalue + values.at(dofids.findFirstIndexOf(dof->giveDofID())) / ( (double) pow(2.0, n));
 		}
+//		printf("Output value at (%f, %f) are %f, n=%u\n", coords->at(1), coords->at(2) , outvalue, n);
 		return outvalue;
 	}
 }

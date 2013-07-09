@@ -125,7 +125,7 @@ public:
     virtual const char *giveClassName() const { return "NlIsoMoistureMaterial"; }
     virtual classType giveClassID() const { return NlIsoMoistureMaterialClass; }
 
-    double giveHumidity(GaussPoint *gp);
+    virtual double giveHumidity(GaussPoint *gp, ValueModeType mode);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

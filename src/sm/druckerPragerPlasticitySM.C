@@ -278,7 +278,6 @@ DruckerPragerPlasticitySM :: hasMaterialModeCapability(MaterialMode mMode)
 
 void
 DruckerPragerPlasticitySM :: giveRealStressVector(FloatArray &answer,
-                                                  MatResponseForm form,
                                                   GaussPoint *gp,
                                                   const FloatArray &totalStrain,
                                                   TimeStep *atTime)
@@ -309,11 +308,7 @@ DruckerPragerPlasticitySM :: giveRealStressVector(FloatArray &answer,
     status->letTempStrainVectorBe(totalStrain);
 
     // give back correct form of stressVector to giveRealStressVector
-    if ( form == ReducedForm ) {
-        answer = status->giveTempStressVector();
-    } else {
-        StructuralMaterial :: giveFullSymVectorForm(answer, status->giveTempStressVector(), gp->giveMaterialMode());
-    }
+    answer = status->giveTempStressVector();
 }
 
 void

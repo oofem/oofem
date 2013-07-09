@@ -49,60 +49,48 @@ class GaussPoint;
 class Domain;
 
 /**
- * This class implements an isotropic elastoplastic material
- * with Mises yield condition, associated flow rule
- * and linear isotropic hardening.
- *
- * It differs from other similar materials (such as J2Mat)
- * by implementation - here we use the radial return, which
- * is the most efficient algorithm for this specific model.
- * Also, an extension to large strain will be available.
- *
+ * This class implements an gradient version of LargeStrainMasterMaterial
  */
-class LsMasterMatGrad : public LsMasterMat, GradDpMaterialExtensionInterface
+class LargeStrainMasterMaterialGrad : public LargeStrainMasterMaterial, GradDpMaterialExtensionInterface
 {
 public:
-    LsMasterMatGrad(int n, Domain *d);
-    virtual ~LsMasterMatGrad();
+    LargeStrainMasterMaterialGrad(int n, Domain *d);
+    virtual ~LargeStrainMasterMaterialGrad();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int hasMaterialModeCapability(MaterialMode mode);
-    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) return static_cast< GradDpMaterialExtensionInterface* >(this); else return NULL; }
+    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) { return static_cast< GradDpMaterialExtensionInterface * >( this ); } else { return NULL; } }
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
-    
-    virtual void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePDGradMatrix_ku(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePDGradMatrix_uk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePDGradMatrix_kk(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    
-    void give3dKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-    void give3dGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-    void giveInternalLength(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-    virtual const char *giveClassName() const { return "LsMasterMatGrad"; }
-    virtual classType giveClassID() const { return LsMasterMatClass; }
+    virtual void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
+
+    virtual void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+
+    void give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    void give3dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    void giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    virtual const char *giveClassName() const { return "LargeStrainMasterMaterialGrad"; }
+    virtual classType giveClassID() const { return LargeStrainMasterMaterialClass; }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const;
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                       MatResponseMode,
-                                       GaussPoint * gp,
-                                       TimeStep * atTime);
 
-    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
-                              const FloatArray &, TimeStep *);
+    //virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *, const FloatArray &, TimeStep *);
+    virtual void giveFirstPKStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalDamageDrivningVariable, TimeStep *atTime);
 };
 
 //=============================================================================
 
 
-class LsMasterMatGradStatus : public LsMasterMatStatus
+class LargeStrainMasterMaterialGradStatus : public LargeStrainMasterMaterialStatus
 {
 public:
-    LsMasterMatGradStatus(int n, Domain *d, GaussPoint *g, int s);
-    virtual ~LsMasterMatGradStatus();
+    LargeStrainMasterMaterialGradStatus(int n, Domain *d, GaussPoint *g, int s);
+    virtual ~LargeStrainMasterMaterialGradStatus();
 
-    virtual  void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void initTempStatus();
 
@@ -110,9 +98,9 @@ public:
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual const char *giveClassName() const { return "LsMasterMatGradStatus"; }
+    virtual const char *giveClassName() const { return "LargeStrainMasterMaterialGradStatus"; }
 
-    classType giveClassID() const { return LsMasterMatStatusClass; }
+    classType giveClassID() const { return LargeStrainMasterMaterialStatusClass; }
 };
 } // end namespace oofem
 #endif // misesmat_h

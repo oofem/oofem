@@ -106,12 +106,12 @@ public:
      * 0 - Engineering (small deformation) stress-strain mode
      * 1 - First Piola-Kirchhoff - Deformation gradient mode, P is defined as FS
      * 2 - Second Piola-Kirchhoff - Green-Lagrange strain mode with deformation gradient as input (deprecated and not supported)
-    */
-    int giveGeometryMode(){ return nlGeometry; }
+     */
+    int giveGeometryMode() { return nlGeometry; }
 
     /**
-     * Computes the first Piola-Kirchhoff stress tensor on Voigt format. This method will 
-     * be called if nlGeo = 1. This method computes the deformation gradient F and passes
+     * Computes the first Piola-Kirchhoff stress tensor on Voigt format. This method will
+     * be called if nlGeo = 1 and mode = TL. This method computes the deformation gradient F and passes
      * it on to the crossection which then asks for the stress from the material.
      * @Note: P is related to S through F*S.
      *
@@ -121,14 +121,23 @@ public:
      */
     void computeFirstPKStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-
+    /**
+     * Computes the Cauchy stress tensor on Voigt format. This method will
+     * be called if nlGeo = 1 and mode = UL. This method computes the deformation gradient F and passes
+     * it on to the crossection which then asks for the stress from the material.
+     *
+     * @param answer Computed stress vector in Voigt form.
+     * @param gp Gauss point at which the stress is evaluated.
+     * @param tStep Time step.
+     */
+    void computeCauchyStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     /**
      * Computes the stiffness matrix of receiver.
      * The response is evaluated using @f$ \int B_{\mathrm{H}}^{\mathrm{T}} D B_{\mathrm{H}} \;\mathrm{d}v @f$, where
-     * @f$ B_{\mathrm{H}} @f$ is the B-matrix which produces the displacement gradient vector H_{\mathrm{V}} when multiplied with 
+     * @f$ B_{\mathrm{H}} @f$ is the B-matrix which produces the displacement gradient vector H_{\mathrm{V}} when multiplied with
      * the solution vector a.
-     * Necessary transformations and reduced integration are taken into account. @todo which transformations are meant? /JB
+     * Reduced integration are taken into account.
      *
      * @param answer Computed stiffness matrix.
      * @param rMode Response mode.
@@ -136,14 +145,25 @@ public:
      */
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
 
+
+    /**
+     * Computes the initial stiffness matrix of receiver. This method is used only if mode = UL
+     * The response is evaluated using @f$ \int B ({\mathrm{\Cauchy}}\otime \delta )B_{\mathrm{H}} \;\mathrm{d}v @f$, where
+     * @f$ B @f$ is the classical B-matrix, but computed wrt updated node position
+     *
+     * @param answer Computed initial stiffness matrix.
+     * @param tStep Time step.
+     */
+    virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
+
     /**
      * Computes the stiffness matrix of receiver.
      * The response is evaluated using @f$ \int B_{\mathrm{H}}^{\mathrm{T}} D B_{\mathrm{H}} \;\mathrm{d}v @f$, where
-     * @f$ B_{\mathrm{H}} @f$ is the B-matrix which produces the displacement gradient vector H_{\mathrm{V}} when multiplied with 
+     * @f$ B_{\mathrm{H}} @f$ is the B-matrix which produces the displacement gradient vector H_{\mathrm{V}} when multiplied with
      * the solution vector a.
      * @Note: reduced intergration is not taken into account.
      * The integration procedure uses an integrationRulesArray for numerical integration. Each integration rule is
-     * considered to represent a separate sub-cell/element. Typically this would be used when integration of the element 
+     * considered to represent a separate sub-cell/element. Typically this would be used when integration of the element
      * domain needs special treatment, e.g. when using the XFEM.
      *
      * @param answer Computed stiffness matrix.
@@ -165,10 +185,10 @@ public:
 
     /**
      * Evaluates nodal representation of real internal forces.
-     * 
+     *
      * Numerical integration procedure uses integrationRulesArray
-     * for numerical integration. The integration procedure uses an integrationRulesArray for numerical integration. 
-     * Each integration rule is considered to represent a separate sub-cell/element. Typically this would be used when 
+     * for numerical integration. The integration procedure uses an integrationRulesArray for numerical integration.
+     * Each integration rule is considered to represent a separate sub-cell/element. Typically this would be used when
      * integration of the element domain needs special treatment, e.g. when using the XFEM.
      *
      * @param answer Equivalent nodal forces vector.
@@ -186,7 +206,7 @@ public:
      * @param tStep Time step.
      */
     void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
-    
+
     // data management
     virtual IRResultType initializeFrom(InputRecord *ir);
 
@@ -203,7 +223,7 @@ protected:
      * @param i Determines the component of strain vector for which contribution is assembled.
      * @see computeStrainVector
      */
-    
+
 
     void computeStressStiffness(FloatMatrix &answer, FloatArray &S, MaterialMode matMode);
     int giveVoigtIndexSym(int ind1, int ind2);
@@ -217,7 +237,7 @@ protected:
      * but they are arranged in a somewhat different way from the usual B matrix.
      * @param gp Integration point.
      * @param answer BF matrix at this point.
-     */ 
+     */
 
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer) {
         OOFEM_ERROR("NLStructuralElement::computeBHmatrixAt : method not implemented for this element");

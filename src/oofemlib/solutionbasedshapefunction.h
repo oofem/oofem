@@ -50,6 +50,7 @@ private:
 	int set;
 	std::string filename;
 	bool useConstantBase;
+	bool isLoaded;
     EngngModel *myEngngModel;
     TimeStep *thisTimestep;
 
@@ -57,6 +58,7 @@ private:
 
 	double computeBaseFunctionValueAt(FloatArray *coords, Dof *dof);
 
+	void setLoads();
 	void loadProblem();
 	void init();
 

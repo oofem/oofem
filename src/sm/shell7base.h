@@ -78,6 +78,8 @@ public:
     virtual int giveNumberOfEdgeDofs() = 0;
     virtual int giveNumberOfEdgeDofManagers() = 0;
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    //void evalInitialCovarBaseVectorsAt(GaussPoint *gp, FloatMatrix &Gcov);
+    void evalInitialCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &Gcov);
 
 protected:
     virtual Interface *giveInterface(InterfaceType it);
@@ -126,7 +128,7 @@ protected:
     void evalInitialDirectorAt(GaussPoint *gp, FloatArray &answer);
     void evalInitialDirectorAt(FloatArray &lCoords, FloatArray &answer);
 
-    void evalInitialCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &Gcov);
+
 
     void evalInitialContravarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &Gcon);
 
@@ -150,7 +152,7 @@ protected:
     FloatMatrix giveAxialMatrix(const FloatArray &vec);
 
     // Stress and strain
-    void computeFAt(GaussPoint *gp, FloatMatrix &answer, FloatArray &genEps);
+    void computeFAt(FloatArray &lCoords, FloatMatrix &answer, FloatArray &genEps);
     void computeE(FloatMatrix &answer, FloatMatrix &F);
     void computeCovarStressAt(GaussPoint *gp, FloatArray &answer);
     void giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &dphidxi1, FloatArray &dphidxi2, FloatArray &dmdxi1,
@@ -173,7 +175,7 @@ protected:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     //virtual void computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, MatResponseMode rMode, TimeStep *tStep);
     virtual void new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, FloatArray &solVecI, FloatArray &solVecJ, MatResponseMode rMode, TimeStep *tStep);
-    void computeLinearizedStiffness(GaussPoint * gp,  Material * mat, TimeStep * tStep,
+    void computeLinearizedStiffness(GaussPoint * gp,  StructuralMaterial * mat, TimeStep * tStep,
                                     FloatMatrix A [ 3 ] [ 3 ], FloatArray & solVec);
     void computePressureTangentMatrix(FloatMatrix &answer, Load *load, const int iSurf, TimeStep *tStep);
     void computeLambdaGMatrices(FloatMatrix lambda [ 3 ], FloatArray &genEps, double zeta);

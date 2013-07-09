@@ -100,7 +100,6 @@ RCM2Material :: hasMaterialModeCapability(MaterialMode mode)
 
 void
 RCM2Material :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
-                                            MatResponseForm form,
                                             MatResponseMode mode,
                                             GaussPoint *gp,
                                             TimeStep *atTime)
@@ -115,13 +114,13 @@ RCM2Material :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
      *
      * CrossSection *crossSection = gp -> giveElement()->giveCrossSection();
      */
-    this->giveEffectiveMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
+    this->giveEffectiveMaterialStiffnessMatrix(answer, mode, gp, atTime);
     // def is full matrix for current gp stress strain mode.
 }
 
 
 void
-RCM2Material :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+RCM2Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                      const FloatArray &totalStrain,
                                      TimeStep *atTime)
 //
@@ -162,10 +161,6 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
     status->letTempStressVectorBe(reducedStressVector);
     status->giveCrackStrainVector(crackStrain);
     this->updateCrackStatus(gp, crackStrain);
-
-    if ( form == FullForm ) {
-        return;
-    }
 
     StructuralMaterial :: giveReducedSymVectorForm(reducedAnswer, answer, gp->giveMaterialMode());
     answer = reducedAnswer;
@@ -597,12 +592,15 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
 // (not supported now)
 //
 {
-    StructuralMaterial *lMat = static_cast< StructuralMaterial * >( this->giveLinearElasticMaterial() );
+    StructuralMaterial *lMat = this->giveLinearElasticMaterial();
     FloatMatrix de, fullAnswer(3, 3);
     IntArray mask;
     int sd;
 
-    lMat->giveCharacteristicMatrix(de, FullForm, rMode, gp, atTime);
+    FloatMatrix stiff;
+    lMat->giveStiffnessMatrix(stiff, rMode, gp, atTime);
+    this->giveFullSymMatrixForm(de, stiff, gp->giveMaterialMode());
+
     // copy first 3x3 submatrix to answer
     for ( int i = 1; i <= 3; i++ ) {
         for ( int j = 1; j <= 3; j++ ) {
@@ -647,7 +645,6 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
 
 void
 RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                     MatResponseForm form,
                                                      MatResponseMode rMode, GaussPoint *gp,
                                                      TimeStep *atTime)
 //
@@ -665,7 +662,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     IntArray mask;
 
     if ( ( rMode == ElasticStiffness ) || ( numberOfActiveCracks == 0 ) ) {
-        lMat->giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
+        lMat->giveStiffnessMatrix(answer, rMode, gp, atTime);
         return;
     }
 
@@ -755,12 +752,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     tt.beTranspositionOf(t);
     df.rotatedWith(tt);
 
-
-    if ( form == FullForm ) {
-        answer = df;
-    } else { // reduced form asked
-        StructuralMaterial :: giveReducedSymMatrixForm( answer, df, gp->giveMaterialMode());
-    }
+    StructuralMaterial :: giveReducedSymMatrixForm( answer, df, gp->giveMaterialMode());
 }
 
 
@@ -996,14 +988,13 @@ RCM2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     //
     // returns receiver 3d material matrix
     //
-    this->giveMaterialStiffnessMatrix(answer, ReducedForm, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
 }
 
 
 
 void
 RCM2Material :: givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                         MatResponseForm form,
                                          MatResponseMode mode,
                                          GaussPoint *gp,
                                          TimeStep *atTime)
@@ -1016,13 +1007,12 @@ RCM2Material :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    this->giveMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
 }
 
 
 void
 RCM2Material :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                         MatResponseForm form,
                                          MatResponseMode mode,
                                          GaussPoint *gp,
                                          TimeStep *atTime)
@@ -1033,13 +1023,12 @@ RCM2Material :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
 // (2dPlaneStrain ==> eps_z = gamma_xz = gamma_yz = 0.)
 //
 {
-    this->giveMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
 }
 
 
 void
 RCM2Material :: give1dStressStiffMtrx(FloatMatrix &answer,
-                                      MatResponseForm form,
                                       MatResponseMode mode,
                                       GaussPoint *gp,
                                       TimeStep *atTime)
@@ -1048,13 +1037,12 @@ RCM2Material :: give1dStressStiffMtrx(FloatMatrix &answer,
 // returns receiver's 1dMaterialStiffnessMAtrix
 // (1d case ==> sigma_y = sigma_z = tau_yz = tau_zx = tau_xy  = 0.)
 {
-    this->giveMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
 }
 
 
 void
 RCM2Material :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                         MatResponseForm form,
                                          MatResponseMode mode,
                                          GaussPoint *gp,
                                          TimeStep *atTime)
@@ -1066,13 +1054,12 @@ RCM2Material :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    this->giveMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
 }
 
 
 void
 RCM2Material :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
-                                          MatResponseForm form,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *atTime)
@@ -1084,13 +1071,12 @@ RCM2Material :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    this->giveMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
 }
 
 
 void
 RCM2Material :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
-                                          MatResponseForm form,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *atTime)
@@ -1103,7 +1089,7 @@ RCM2Material :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    this->give2dPlateLayerStiffMtrx(answer, form, mode, gp, atTime);
+    this->give2dPlateLayerStiffMtrx(answer, mode, gp, atTime);
 }
 
 

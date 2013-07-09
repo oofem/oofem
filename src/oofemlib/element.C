@@ -268,16 +268,16 @@ Element :: computeNumberOfGlobalDofs(EquationID eid)
 int
 Element :: computeNumberOfPrimaryMasterDofs(EquationID ut)
 {
-    int i, answer = 0;
+    int answer = 0;
     IntArray nodeDofIDMask, dofMask;
 
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
         this->giveDofManDofIDMask(i, ut, nodeDofIDMask);
         this->giveDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
         answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
     }
 
-    for ( i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
+    for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
         this->giveInternalDofManDofIDMask(i, ut, nodeDofIDMask);
         this->giveInternalDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
         answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
@@ -291,9 +291,11 @@ Element :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
 {
     bool is_GtoL, is_NtoG;
     FloatMatrix GtoL, NtoG;
+    IntArray nodes;
+    nodes.enumerate(this->giveNumberOfDofManagers());
 
     is_GtoL = this->computeGtoLRotationMatrix(GtoL);
-    is_NtoG = this->computeDofTransformationMatrix(NtoG, eid);
+    is_NtoG = this->computeDofTransformationMatrix(NtoG, nodes, eid);
 
 #ifdef DEBUG
     if ( is_GtoL ) {
@@ -329,14 +331,14 @@ Element :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
 
 
 bool
-Element :: computeDofTransformationMatrix(FloatMatrix &answer, EquationID eid)
+Element :: computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &nodes, EquationID eid)
 {
     bool flag = false;
-    int numberOfDofMans = this->giveNumberOfDofManagers();
+    int numberOfDofMans = nodes.giveSize();
 
     // test if transformation is necessary
     for (int i = 1; i <= numberOfDofMans; i++ ) {
-        flag = flag || this->giveDofManager(i)->requiresTransformation();
+        flag = flag || this->giveDofManager(nodes.at(i))->requiresTransformation();
     }
 
     if ( !flag ) {
@@ -354,8 +356,8 @@ Element :: computeDofTransformationMatrix(FloatMatrix &answer, EquationID eid)
     int nr, nc, lastRowPos = 0, lastColPos = 0;
     // loop over nodes
     for (int i = 1; i <= numberOfDofMans; i++ ) {
-        this->giveDofManDofIDMask(i, eid, dofIDmask);
-        if (!this->giveDofManager(i)->computeM2GTransformation(dofManT, dofIDmask)) {
+        this->giveDofManDofIDMask(nodes.at(i), eid, dofIDmask);
+        if (!this->giveDofManager(nodes.at(i))->computeM2GTransformation(dofManT, dofIDmask)) {
             dofManT.resize(dofIDmask.giveSize(), dofIDmask.giveSize());
             dofManT.zero();
             dofManT.beUnitMatrix();
@@ -372,6 +374,7 @@ Element :: computeDofTransformationMatrix(FloatMatrix &answer, EquationID eid)
         lastRowPos += nr;
         lastColPos += nc;
     }
+    answer.resizeWithData(answer.giveNumberOfRows(), lastColPos);
     return true;
 }
 
@@ -432,37 +435,6 @@ Element :: giveBoundaryLocationArray(IntArray &locationArray, int boundary, Equa
     IntArray nodalArray;
 
     this->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-    locationArray.resize(0);
-    if (dofIdArray) dofIdArray->resize(0);
-    for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
-        this->giveDofManDofIDMask(bNodes.at(i), eid, dofIDMask);
-        this->giveDofManager(bNodes.at(i))->giveLocationArray(dofIDMask, nodalArray, s);
-        locationArray.followedBy(nodalArray);
-        if (dofIdArray) {
-            this->giveDofManager(bNodes.at(i))->giveMasterDofIDArray(dofIDMask, masterDofIDs);
-            dofIdArray->followedBy(masterDofIDs);
-        }
-    }
-}
-
-
-void
-Element :: giveEdgeLocationArray(IntArray &locationArray, int edge, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIdArray)
-{
-    IntArray bNodes;
-    IntArray dofIDMask, masterDofIDs;
-    IntArray nodalArray;
-
-    FEInterpolation3d *interp;
-#if DEBUG
-    if ( !( interp = dynamic_cast< FEInterpolation3d* >( this->giveInterpolation() ) ) ) {
-        OOFEM_ERROR("Element :: giveEdgeLocationArray - No 3D-interpolator found");
-    }
-#else
-    interp = static_cast< FEInterpolation3d* >( this->giveInterpolation() );
-#endif
-    
-    interp->computeLocalEdgeMapping(bNodes, edge);
     locationArray.resize(0);
     if (dofIdArray) dofIdArray->resize(0);
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
@@ -605,7 +577,7 @@ Element :: computeLoadVector(FloatArray &answer, Load *load, CharType type, Valu
 
 
 void
-Element :: computeBoundaryLoadVector(FloatArray &answer, Load *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
+Element :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     _error("computeBoundaryLoadVector: Unknown load type.");
 }
@@ -1361,6 +1333,14 @@ Element :: giveGeometryType() const
 {
     FEInterpolation *fei = this->giveInterpolation();
     return fei ? fei->giveGeometryType() : EGT_unknown;
+}
+
+
+bool
+Element :: computeGtoLRotationMatrix(FloatMatrix &answer)
+{
+    answer.beEmptyMtrx();
+    return false;
 }
 
 

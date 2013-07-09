@@ -86,6 +86,7 @@ class CrossSection;
 class ElementSide;
 class FEInterpolation;
 class Load;
+class BoundaryLoad;
 
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;
@@ -220,11 +221,6 @@ public:
      */
     void giveBoundaryLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
     /**
-     * Returns the location array for the edge of the element.
-     * The element must be in 3D. For 2D edges, use Element::giveBoundaryLocationArray.
-     */
-    void giveEdgeLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
-    /**
      * @return Number of DOFs in element.
      */
     virtual int giveNumberOfDofs() { return 0; }
@@ -301,7 +297,7 @@ public:
      * @param mode Determines mode of answer.
      * @param tStep Time step when answer is computed.
      */
-    virtual void computeBoundaryLoadVector(FloatArray &answer, Load *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
     /**
      * Computes the contribution of the given load at the given edge.
      * @param answer Requested contribution of load.
@@ -393,10 +389,7 @@ public:
      * @param answer Computed rotation matrix.
      * @return Nonzero if transformation is necessary, zero otherwise.
      */
-    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer) {
-        answer.beEmptyMtrx();
-        return false;
-    }
+    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
     /**
      * Transformation matrices updates rotation matrix between element-local and primary DOFs,
      * taking into account nodal c.s. and master DOF weights.
@@ -413,10 +406,11 @@ public:
      * Local stiffness matrix of element should be rotated with answer before assembly.
      * @note Function does most likely NOT need to be overridden.
      * @param answer Computed rotation matrix.
+     * @param nodes Nodes to include in element local ordering.
      * @param eid Equation ID.
      * @return True if transformation is necessary, false otherwise.
      */
-    virtual bool computeDofTransformationMatrix(FloatMatrix &answer, EquationID eid);
+    virtual bool computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &nodes, EquationID eid);
     /**
      * Returns dofmanager dof mask for node. This mask defines the dofs which are used by element
      * in node. Mask influences the code number ordering for particular node. Code numbers are
@@ -433,7 +427,7 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const { answer.resize(0); }
     /**
      * Calls giveDofManDofIDMask with the default equation id for the type of problem.
-     * @todo Can have a pure virtual method because of the hacks in HellmichMaterial :: createMaterialGp()
+     * @todo Cant have a pure virtual method because of the hacks in HellmichMaterial :: createMaterialGp()
      */
     virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { }
     /**
@@ -812,8 +806,9 @@ public:
     /**
      * Computes the element local coordinates from given global coordinates.
      * Should compute local coordinates even if point is outside element (for mapping purposes in adaptivity)
+     * @param answer Local coordinates.
+     * @param gcoords Global coordinates.
      * @return Nonzero if point is inside element; zero otherwise.
-     * @
      */
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     /**

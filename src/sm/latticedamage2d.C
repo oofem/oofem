@@ -350,7 +350,6 @@ LatticeDamage2d :: giveStatus(GaussPoint *gp) const
 
 void
 LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
-                                        MatResponseForm form,
                                         GaussPoint *gp,
                                         const FloatArray &totalStrain,
                                         TimeStep *atTime)
@@ -575,8 +574,8 @@ LatticeDamage2d :: giveInterface(InterfaceType type)
 
 
 void
-LatticeDamage2d :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                            MatResponseForm form, MatResponseMode rMode,
+LatticeDamage2d :: giveStiffnessMatrix(FloatMatrix &answer,
+                                            MatResponseMode rMode,
                                             GaussPoint *gp, TimeStep *atTime)
 {
     MaterialMode mMode = gp->giveMaterialMode();

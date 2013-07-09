@@ -133,11 +133,10 @@ public:
                                                GaussPoint *gp,
                                                TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
+    virtual void  giveStiffnessMatrix(FloatMatrix &answer,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *tStep);
@@ -166,7 +165,7 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new CebFipSlip90MaterialStatus(1, domain, gp); }
 
 protected:
-    void give1dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+    void give1dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *tStep);
 };
 } // end namespace oofem

@@ -111,8 +111,7 @@ M4Material ::  FT(double sn, double ev, double k1, double k2, double c10,
 
 
 void
-M4Material :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                       MatResponseForm form,
+M4Material :: giveStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseMode mode,
                                        GaussPoint *gp,
                                        TimeStep *atTime)

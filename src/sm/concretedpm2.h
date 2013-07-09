@@ -693,7 +693,6 @@ public:
      * given macroscopic strain vector.
      */
     virtual void giveRealStressVector(FloatArray &answer,
-                                      MatResponseForm form,
                                       GaussPoint *gp,
                                       const FloatArray &strainVector,
                                       TimeStep *atTime);

@@ -50,7 +50,6 @@ namespace bp = boost::python;
 #include "gausspoint.h"
 #include "internalstatetype.h"
 #include "matresponsemode.h"
-#include "matresponseform.h"
 #include "structuralmaterial.h"
 #include "matstatus.h"
 #include "structuralms.h"
@@ -702,7 +701,6 @@ void pyclass_Material()
     class_<Material, bases<FEMComponent>, boost::noncopyable >("Material", no_init)
         .def("giveIPValue", &Material::giveIPValue)
         .def("setIPValue", &Material::setIPValue)
-        .def("giveCharacteristicMatrix", &Material::giveCharacteristicMatrix)
         .def("giveStatus", &Material::giveStatus, return_internal_reference<>())
         ;
 }
@@ -714,9 +712,9 @@ void pyclass_Material()
 struct PyStructuralMaterial : StructuralMaterial , wrapper<StructuralMaterial>
 {
     PyStructuralMaterial(int i, Domain *d) : StructuralMaterial(i,d) {}
-    void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) {
-        if (override f = this->get_override("giveRealStressVector")) { f(answer,form,gp,reducedStrain,tStep);}
-        this->get_override("giveRealStressVector")(answer,form,gp,reducedStrain,tStep);
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) {
+        if (override f = this->get_override("giveRealStressVector")) { f(answer,gp,reducedStrain,tStep);}
+        this->get_override("giveRealStressVector")(answer,gp,reducedStrain,tStep);
     }
 };
 void pyclass_StructuralMaterial()
@@ -1142,18 +1140,6 @@ void pyenum_MatResponseMode()
 
 
 /*****************************************************
-* MatResponseFrom
-*****************************************************/
-void pyenum_MatResponseForm()
-{
-    enum_<MatResponseForm>("MatResponseForm")
-        .value("ReducedForm", ReducedForm)
-        .value("FullForm", FullForm)
-        ;
-}
-
-
-/*****************************************************
 * domainType
 *****************************************************/
 void pyenum_domainType()
@@ -1573,7 +1559,6 @@ BOOST_PYTHON_MODULE (liboofem)
     pyenum_FieldType();
     pyenum_InternalStateType();
     pyenum_MatResponseMode();
-    pyenum_MatResponseForm();
     pyenum_domainType();
 
 

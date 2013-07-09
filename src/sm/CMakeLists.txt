@@ -101,9 +101,9 @@ set (sm_material
     micromaterial.C
     hyperelasticmaterial.C
     misesmat.C misesmatgrad.C misesmatnl.C
-    graddpelement.C qtruss1d.C qtruss1dgrad.C qplanestrain.C qplanestraingrad.C qtrplanestrain.C qtrplanestraingrad.C qspacegrad.C
+    graddpelement.C graddpmaterialextensioninterface.C qtruss1d.C qtruss1dgrad.C qplanestrain.C qplanestraingrad.C qtrplanestrain.C qtrplanestraingrad.C qspacegrad.C
     stvenantkirchhoff.C stvenantkirchhoffortho.C
-    trabbonematerial.C trabbonenl3d.C trabbonenl.C trabbone3d.C trabboneembed.C trabbonenlembed.C
+    trabbonematerial.C trabbonenl3d.C trabbonenl.C trabbone3d.C trabboneembed.C trabbonenlembed.C trabbonegrad3d.C
     cohint.C
     mps.C
     rankinemat.C
@@ -116,6 +116,7 @@ set (sm_material
     dustmat.C
     lsmastermat.C lsmastermatgrad.C
     bilinearczmaterial.C
+	bilinearczmaterialFagerstrom.C
     )
 
 set (sm_error

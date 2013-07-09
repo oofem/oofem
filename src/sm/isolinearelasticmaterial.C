@@ -78,8 +78,7 @@ IsotropicLinearElasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 
 void
-IsotropicLinearElasticMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                           MatResponseForm form,
+IsotropicLinearElasticMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
                                                            MatResponseMode rMode,
                                                            GaussPoint *gp,
                                                            TimeStep *atTime)
@@ -91,13 +90,13 @@ IsotropicLinearElasticMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 
     switch ( mMode ) {
     case _2dBeam:
-        this->give2dBeamStiffMtrx(answer, form, rMode, gp, atTime);
+        this->give2dBeamStiffMtrx(answer, rMode, gp, atTime);
         break;
     case _3dBeam:
-        this->give3dBeamStiffMtrx(answer, form, rMode, gp, atTime);
+        this->give3dBeamStiffMtrx(answer, rMode, gp, atTime);
         break;
     default:
-        LinearElasticMaterial :: giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
+        LinearElasticMaterial :: giveStiffnessMatrix(answer, rMode, gp, atTime);
     }
 
     if ( !isActivated(atTime) ) {
@@ -210,7 +209,6 @@ IsotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &ans
 
 void
 IsotropicLinearElasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                                           MatResponseForm form,
                                                            MatResponseMode mode,
                                                            GaussPoint *gp,
                                                            TimeStep *atTime)
@@ -222,31 +220,19 @@ IsotropicLinearElasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
     ee    = e / ( 1. - nu * nu );
     shear = this->G;
 
-    if ( form == FullForm ) {
-        answer.resize(6, 6);
-        answer.zero();
+    answer.resize(3, 3);
+    answer.zero();
 
-        answer.at(1, 1) = ee;
-        answer.at(1, 2) = nu * ee;
-        answer.at(2, 1) = nu * ee;
-        answer.at(2, 2) = ee;
-        answer.at(6, 6) = shear;
-    } else {
-        answer.resize(3, 3);
-        answer.zero();
-
-        answer.at(1, 1) = ee;
-        answer.at(1, 2) = nu * ee;
-        answer.at(2, 1) = nu * ee;
-        answer.at(2, 2) = ee;
-        answer.at(3, 3) = shear;
-    }
+    answer.at(1, 1) = ee;
+    answer.at(1, 2) = nu * ee;
+    answer.at(2, 1) = nu * ee;
+    answer.at(2, 2) = ee;
+    answer.at(3, 3) = shear;
 }
 
 
 void
 IsotropicLinearElasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                                           MatResponseForm form,
                                                            MatResponseMode mode,
                                                            GaussPoint *gp,
                                                            TimeStep *atTime)
@@ -258,66 +244,35 @@ IsotropicLinearElasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
     ee    = e / ( 1.0 + nu ) / ( 1. - 2.0 * nu );
     shear = this->G;
 
-    if ( form == FullForm ) {
-        answer.resize(6, 6);
-        answer.zero();
+    answer.resize(4, 4);
+    answer.zero();
 
-        answer.at(1, 1) = ee * ( 1.0 - nu );
-        answer.at(1, 2) = nu * ee;
-        answer.at(1, 3) = nu * ee;
-        answer.at(2, 1) = nu * ee;
-        answer.at(2, 2) = ee * ( 1.0 - nu );
-        answer.at(2, 3) = nu * ee;
-        answer.at(3, 1) = nu * ee;
-        answer.at(3, 2) = nu * ee;
-        answer.at(3, 3) = ee * ( 1.0 - nu );
-        answer.at(6, 6) = shear;
-    } else {
-        answer.resize(4, 4);
-        answer.zero();
-
-        answer.at(1, 1) = ee * ( 1.0 - nu );
-        answer.at(1, 2) = nu * ee;
-        answer.at(1, 3) = nu * ee;
-        answer.at(2, 1) = nu * ee;
-        answer.at(2, 2) = ee * ( 1.0 - nu );
-        answer.at(2, 3) = nu * ee;
-        answer.at(3, 1) = ee * nu;
-        answer.at(3, 2) = ee * nu;
-        answer.at(3, 3) = ee * ( 1.0 - nu );
-        answer.at(4, 4) = shear;
-    }
+    answer.at(1, 1) = ee * ( 1.0 - nu );
+    answer.at(1, 2) = nu * ee;
+    answer.at(1, 3) = nu * ee;
+    answer.at(2, 1) = nu * ee;
+    answer.at(2, 2) = ee * ( 1.0 - nu );
+    answer.at(2, 3) = nu * ee;
+    answer.at(3, 1) = ee * nu;
+    answer.at(3, 2) = ee * nu;
+    answer.at(3, 3) = ee * ( 1.0 - nu );
+    answer.at(4, 4) = shear;
 }
 
 
 void
 IsotropicLinearElasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
-                                                        MatResponseForm form,
                                                         MatResponseMode mode,
                                                         GaussPoint *gp,
                                                         TimeStep *atTime)
 {
-    double e;
-
-    e     = this->E;
-
-    if ( form == FullForm ) {
-        answer.resize(6, 6);
-        answer.zero();
-
-        answer.at(1, 1) = e;
-    } else {
-        answer.resize(1, 1);
-        answer.zero();
-
-        answer.at(1, 1) = e;
-    }
+    answer.resize(1, 1);
+    answer.at(1, 1) = this->E;;
 }
 
 
 void
 IsotropicLinearElasticMaterial :: give2dBeamStiffMtrx(FloatMatrix &answer,
-                                                      MatResponseForm form,
                                                       MatResponseMode rMode,
                                                       GaussPoint *gp,
                                                       TimeStep *tStep)
@@ -339,32 +294,22 @@ IsotropicLinearElasticMaterial :: give2dBeamStiffMtrx(FloatMatrix &answer,
         _error(" Give2dBeamStiffMtrx : no SimpleCrossSection");
     }
 
-    this->give1dStressStiffMtrx(mat3d, ReducedForm, rMode, gp, tStep);
+    this->give1dStressStiffMtrx(mat3d, rMode, gp, tStep);
     area = crossSection->give(CS_Area);
     Iy   = crossSection->give(CS_InertiaMomentY);
     shearAreaz = crossSection->give(CS_SHEAR_AREA_Z);
 
-    if ( form == ReducedForm ) {
-        answer.resize(3, 3);
-        answer.zero();
+    answer.resize(3, 3);
+    answer.zero();
 
-        answer.at(1, 1) = mat3d.at(1, 1) * area;
-        answer.at(2, 2) = mat3d.at(1, 1) * Iy;
-        answer.at(3, 3) = shearAreaz * mat3d.at(1, 1) / ( 2. * ( 1 + nu ) );
-    } else {
-        answer.resize(8, 8);
-        answer.zero();
-
-        answer.at(1, 1) = mat3d.at(1, 1) * area;
-        answer.at(4, 4) = mat3d.at(1, 1) * Iy;
-        answer.at(7, 7) = shearAreaz * mat3d.at(1, 1) / ( 2. * ( 1 + nu ) );
-    }
+    answer.at(1, 1) = mat3d.at(1, 1) * area;
+    answer.at(2, 2) = mat3d.at(1, 1) * Iy;
+    answer.at(3, 3) = shearAreaz * mat3d.at(1, 1) / ( 2. * ( 1 + nu ) );
 }
 
 
 void
 IsotropicLinearElasticMaterial :: give3dBeamStiffMtrx(FloatMatrix &answer,
-                                                      MatResponseForm form,
                                                       MatResponseMode rMode,
                                                       GaussPoint *gp,
                                                       TimeStep *tStep)
@@ -386,7 +331,7 @@ IsotropicLinearElasticMaterial :: give3dBeamStiffMtrx(FloatMatrix &answer,
         _error("give3dBeamStiffMtrx : no SimpleCrossSection");
     }
 
-    this->give1dStressStiffMtrx(mat3d, ReducedForm, rMode, gp, tStep);
+    this->give1dStressStiffMtrx(mat3d, rMode, gp, tStep);
     E    = mat3d.at(1, 1);
     area = crossSection->give(CS_Area);
     Iy   = crossSection->give(CS_InertiaMomentY);

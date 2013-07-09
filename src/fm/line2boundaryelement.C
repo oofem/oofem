@@ -63,19 +63,9 @@ IRResultType Line2BoundaryElement :: initializeFrom(InputRecord *ir)
     return FMElement :: initializeFrom(ir);
 }
 
-void Line2BoundaryElement :: computeN(FloatArray &answer, const FloatArray &lcoords) const
-{
-    this->fei.evalN(answer, lcoords, FEIElementGeometryWrapper(this));
-}
-
 FEInterpolation * Line2BoundaryElement :: giveInterpolation() const
 {
     return &this->fei;
-}
-
-double Line2BoundaryElement :: computeNXIntegral() const
-{
-    return this->fei.evalNXIntegral(1, FEIElementGeometryWrapper(this));
 }
 
 void Line2BoundaryElement :: giveDofManDofIDMask(int i, EquationID eid, IntArray &nodeDofIDMask) const
@@ -129,7 +119,7 @@ void Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLoc
         TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     FloatArray n;
-    this->computeN(n, lcoords);
+    this->fei.evalN(answer, lcoords, FEIElementGeometryWrapper(this));
 
     IntArray dofIDs;
     this->EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(dofIDs);

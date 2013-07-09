@@ -59,7 +59,7 @@ public:
     /// Destructor.
     virtual ~MicroplaneMaterial_Bazant() { }
 
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep);
 
 

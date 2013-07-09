@@ -269,7 +269,7 @@ RVEStokesFlow :: exportFilter(EngngModel *E, GaussPoint *gp, TimeStep *tStep)
 }
 
 void
-RVEStokesFlow :: giveCharacteristicMatrix(FloatMatrix &answer,  MatResponseForm form, MatResponseMode, GaussPoint *gp, TimeStep *atTime)
+RVEStokesFlow :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *atTime)
 {
     this->suppressStdout();
 

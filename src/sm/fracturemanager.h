@@ -109,7 +109,7 @@ public:
 
     FailureCriteriaType giveType() { return this->type; }
     bool evaluateFailureCriteria();
-    bool evaluateFCQuantities( Element *el); 
+    bool evaluateFCQuantities(Element *el, TimeStep *tStep); 
 
     bool hasFailed() { return failedFlag; }
     bool hasFailed( int i) { return failedFlags.at(i-1); }

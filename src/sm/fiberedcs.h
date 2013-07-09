@@ -110,7 +110,7 @@ public:
 
     virtual ~FiberedCrossSection()  { }
 
-    virtual void giveRealStresses(FloatArray & answer, MatResponseForm, GaussPoint *,
+    virtual void giveRealStresses(FloatArray & answer, GaussPoint *,
                           const FloatArray &, TimeStep * tStep);
 
     virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
@@ -119,9 +119,11 @@ public:
                                          TimeStep *tStep);
 
     virtual void giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                   MatResponseForm form, MatResponseMode rMode,
+                                                   MatResponseMode rMode,
                                                    GaussPoint *, StructuralMaterial *,
                                                    TimeStep *tStep);
+
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
 
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStressVector3d);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStrainVector3d);
@@ -129,8 +131,7 @@ public:
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode, Material *mat);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 
-    virtual void giveFiberMaterialStiffnessMatrix(FloatMatrix &fiberMatrix, MatResponseForm form,
-                                                  MatResponseMode rMode, GaussPoint *layerGp,
+    virtual void giveFiberMaterialStiffnessMatrix(FloatMatrix &fiberMatrix, MatResponseMode rMode, GaussPoint *layerGp,
                                                   TimeStep *tStep);
 
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
@@ -173,14 +174,12 @@ public:
 
 protected:
     virtual void giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                               MatResponseForm form,
                                                MatResponseMode rMode,
                                                GaussPoint *gp,
                                                StructuralMaterial *mat,
                                                TimeStep *tStep);
 
     void give3dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
                                            MatResponseMode rMode,
                                            GaussPoint *gp,
                                            StructuralMaterial *mat,

@@ -134,7 +134,7 @@ public:
 
     virtual double give(int aProperty, GaussPoint *gp);
 
-    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
+    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
                               const FloatArray &, TimeStep *);
 
 #ifdef __OOFEG
@@ -148,7 +148,7 @@ protected:
     // gp's status. These variables are used to control process, when
     // we try to find equlibrium state.
 
-    virtual void giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
+    virtual void giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
                                                       MatResponseMode rMode,
                                                       GaussPoint *gp, TimeStep *atTime);
 

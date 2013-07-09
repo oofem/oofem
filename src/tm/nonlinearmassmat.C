@@ -59,7 +59,6 @@ NonlinearMassTransferMaterial :: initializeFrom(InputRecord *ir)
 
 void
 NonlinearMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                          MatResponseForm form,
                                                           MatResponseMode mode,
                                                           GaussPoint *gp,
                                                           TimeStep *atTime)

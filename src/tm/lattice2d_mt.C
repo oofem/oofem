@@ -285,7 +285,7 @@ Lattice2d_mt :: computeConductivityMatrix(FloatMatrix &answer, MatResponseMode r
     answer.at(2, 1) = -1;
     answer.at(2, 2) = 1.;
 
-    k = ( ( TransportMaterial * ) this->giveMaterial() )->giveCharacteristicValue(Conductivity, gp, tStep);
+    k = static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicValue(Conductivity, gp, tStep);
     dV      = this->computeVolumeAround(gp);
     double temp = k * dV / pow(length, 2.);
     answer.times(temp);
@@ -306,8 +306,8 @@ Lattice2d_mt :: computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.at(1, 2) = 1.;
     answer.at(2, 1) = 1.;
     answer.at(2, 2) = 2.;
-    c = ( static_cast< TransportMaterial * >( this->giveMaterial() ) )->giveCharacteristicValue(Capacity, gp, tStep);
-    dV      = this->computeVolumeAround(gp) / ( 6.0 * this->dimension );
+    c = static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicValue(Capacity, gp, tStep);
+    dV = this->computeVolumeAround(gp) / ( 6.0 * this->dimension );
     answer.times(c * dV);
 }
 
@@ -356,7 +356,7 @@ Lattice2d_mt :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *a
             dV  = this->computeVolumeAround(gp);
             load->computeValueAt(val, atTime, deltaX, mode);
 
-            k = ( static_cast< TransportMaterial * >( this->giveMaterial() ) )->giveCharacteristicValue(Conductivity_hh, gp, atTime);
+            k = static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicValue(Conductivity_hh, gp, atTime);
 
             double helpFactor = val.at(1) * k * dV;
 

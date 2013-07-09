@@ -123,7 +123,7 @@ FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
         answer = status->giveDeviatoricStressVector();
         return 1;
     } else if ( type == IST_Viscosity ) {
-        answer.resize(1); answer.at(1) = this->giveCharacteristicValue (MRM_Viscosity, gp, atTime);
+        answer.resize(1); answer.at(1) = this->giveEffectiveViscosity(gp, atTime);
         return 1;
     } else {
         return Material :: giveIPValue(answer, gp, type, atTime);

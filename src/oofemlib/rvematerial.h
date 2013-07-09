@@ -58,8 +58,8 @@ namespace oofem {
 class RVEMaterial //: virtual public Material
 {
 private:
-    int stdoutFID;
-    fpos_t stdoutPos;
+    //int stdoutFID;
+    //fpos_t stdoutPos;
 
 protected:
     /// Name of .in file containing the RVE

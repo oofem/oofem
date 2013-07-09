@@ -90,7 +90,7 @@ public:
     MisesMat(int n, Domain *d);
     virtual ~MisesMat();
 
-    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, MaterialMode mode);
+    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
     double computeDamage(GaussPoint *gp, TimeStep *atTime);
     double computeDamageParam(double tempKappa);
     double computeDamageParamPrime(double tempKappa);
@@ -116,29 +116,28 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep);
+                                               MatResponseMode mode,
+                                               GaussPoint *gp,
+                                               TimeStep *tStep);
 
     virtual void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
-                                       MatResponseMode mode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep);
+                                                    MatResponseMode mode,
+                                                    GaussPoint *gp,
+                                                    TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                              const FloatArray &reducedStrain, TimeStep *tStep);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                                      const FloatArray &reducedStrain, TimeStep *tStep);
 
 protected:
     /// Evaluates the stress from Green-Lagrange strain E.
-    void giveRealStressVectorComputedFromStrain(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    void giveRealStressVectorComputedFromStrain(FloatArray &answer, GaussPoint *gp,
                                                 const FloatArray &E, TimeStep *tStep);
 
     /// evaluates the stress from deformation gradient F.
-    void giveRealStressVectorComputedFromDefGrad(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                                                 const FloatArray & F, TimeStep *tStep);
+    void giveRealStressVectorComputedFromDefGrad(FloatArray &answer, GaussPoint *gp,
+                                                 const FloatArray &F, TimeStep *tStep);
 
-    void giveFirstPKStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-        const FloatArray &reducedvF, TimeStep *tStep);
+    void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep);
 
     void computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatMatrix b, double J);
 
@@ -146,12 +145,12 @@ protected:
                                          MatResponseMode mode,
                                          GaussPoint *gp,
                                          TimeStep *tStep);
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dLSMaterialStiffnessMatrix(FloatMatrix &answer,
-                                         MatResponseMode mode,
-                                         GaussPoint *gp,
-                                         TimeStep *tStep);
+                                                 MatResponseMode mode,
+                                                 GaussPoint *gp,
+                                                 TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 

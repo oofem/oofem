@@ -101,7 +101,6 @@ MPlasticMaterial :: CreateStatus(GaussPoint *gp) const
 
 void
 MPlasticMaterial :: giveRealStressVector(FloatArray &answer,
-                                         MatResponseForm form,
                                          GaussPoint *gp,
                                          const FloatArray &totalStrain,
                                          TimeStep *atTime)
@@ -142,10 +141,10 @@ MPlasticMaterial :: giveRealStressVector(FloatArray &answer,
     //if (0) this->cuttingPlaneReturn (fullStressVector, activeConditionMap, gamma, form, gp, totalStrain, atTime);
     //else this->closestPointReturn (fullStressVector, activeConditionMap, gamma, form, gp, totalStrain, atTime);
     if ( rmType == mpm_ClosestPoint ) {
-        this->closestPointReturn(fullStressVector, activeConditionMap, gamma, form, gp, strainVectorR,
+        this->closestPointReturn(fullStressVector, activeConditionMap, gamma, gp, strainVectorR,
                                  plasticStrainVectorR, strainSpaceHardeningVariables, atTime);
     } else {
-        this->cuttingPlaneReturn(fullStressVector, activeConditionMap, gamma, form, gp, strainVectorR,
+        this->cuttingPlaneReturn(fullStressVector, activeConditionMap, gamma, gp, strainVectorR,
                                  plasticStrainVectorR, strainSpaceHardeningVariables, atTime);
     }
 
@@ -182,13 +181,7 @@ MPlasticMaterial :: giveRealStressVector(FloatArray &answer,
 
     status->letTempStateFlagBe(newState);
 
-    if ( form == FullForm ) {
-        answer = fullStressVector;
-        return;
-    } else {
-        answer = status->giveTempStressVector();
-        return;
-    }
+    answer = status->giveTempStressVector();
 }
 
 
@@ -196,7 +189,6 @@ void
 MPlasticMaterial :: closestPointReturn(FloatArray &answer,
                                        IntArray &activeConditionMap,
                                        FloatArray &gamma,
-                                       MatResponseForm form,
                                        GaussPoint *gp,
                                        const FloatArray &totalStrain,
                                        FloatArray &plasticStrainVectorR,
@@ -439,7 +431,6 @@ void
 MPlasticMaterial :: cuttingPlaneReturn(FloatArray &answer,
                                        IntArray &activeConditionMap,
                                        FloatArray &gamma,
-                                       MatResponseForm form,
                                        GaussPoint *gp,
                                        const FloatArray &totalStrain,
                                        FloatArray &plasticStrainVectorR,
@@ -778,7 +769,7 @@ MPlasticMaterial :: computeTrialStressIncrement(FloatArray &answer, GaussPoint *
     FloatArray reducedAnswer;
 
     this->computeReducedElasticModuli(de, gp, atTime);
-    //this->giveLinearElasticMaterial()->giveCharacteristicMatrix(de, ReducedForm, TangentStiffness,                                                                                                                                                                gp, atTime);
+    //this->giveLinearElasticMaterial()->giveCharacteristicMatrix(de, TangentStiffness,                                                                                                                                                                gp, atTime);
     reducedAnswer.beProductOf(de, elasticStrainVectorR);
     StructuralMaterial :: giveFullSymVectorForm(answer, reducedAnswer, gp->giveMaterialMode());
 }
@@ -858,7 +849,6 @@ MPlasticMaterial :: computeAlgorithmicModuli(FloatMatrix &answer,
 
 void
 MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
-                                                  MatResponseForm form,
                                                   MatResponseMode mode,
                                                   GaussPoint *gp,
                                                   TimeStep *atTime)
@@ -897,8 +887,7 @@ MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     // check for elastic cases
     //
     if ( ( status->giveTempStateFlag() == MPlasticMaterialStatus :: PM_Elastic ) || ( status->giveTempStateFlag() == MPlasticMaterialStatus :: PM_Unloading ) ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, TangentStiffness,
-                                                                    gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, TangentStiffness, gp, atTime);
         return;
     }
 
@@ -1002,22 +991,11 @@ MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
         answer.beSubMatrixOf(consistentModuli, 1, sizeR, 1, sizeR);
         answer.subtract(helpMtrx2);
     }
-
-    if ( form == ReducedForm ) {
-        return;
-    } else {
-        int fullsize = StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode());
-        answerR = answer;
-        answer.resize(fullsize,fullsize);
-        answer.zero();
-        answer.assemble(answerR, mask);
-    }
 }
 
 
 void
 MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
-                                                     MatResponseForm form,
                                                      MatResponseMode mode,
                                                      GaussPoint *gp,
                                                      TimeStep *atTime)
@@ -1048,8 +1026,7 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     // check for elastic cases
     //
     if ( ( status->giveTempStateFlag() == MPlasticMaterialStatus :: PM_Elastic ) || ( status->giveTempStateFlag() == MPlasticMaterialStatus :: PM_Unloading ) ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, TangentStiffness,
-                                                                    gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, TangentStiffness, gp, atTime);
         return;
     }
 
@@ -1149,16 +1126,6 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
         answer.negated();
         answer.add(elasticModuli);
     }
-
-    if ( form == ReducedForm ) {
-        return;
-    } else {
-        int fullsize = StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode());
-        helpMtrx = answer;
-        answer.resize(fullsize, fullsize);
-        answer.zero();
-        answer.assemble(helpMtrx, mask);
-    }
 }
 
 
@@ -1201,7 +1168,7 @@ MPlasticMaterial :: computeReducedElasticModuli(FloatMatrix &answer,
                                                 GaussPoint *gp,
                                                 TimeStep *atTime)
 {  /* Returns elastic moduli in reduced stress-strain space*/
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, ReducedForm,
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer,
                                                                 ElasticStiffness,
                                                                 gp, atTime);
 }
@@ -1246,15 +1213,15 @@ MPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
-        this->giveConsistentStiffnessMatrix(answer, ReducedForm, mode, gp, atTime);
+        this->giveConsistentStiffnessMatrix(answer, mode, gp, atTime);
     } else {
-        this->giveElastoPlasticStiffnessMatrix(answer, ReducedForm, mode, gp, atTime);
+        this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, atTime);
     }
 }
 
 
 void
-MPlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
+MPlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
                                              MatResponseMode mode,
                                              GaussPoint *gp,
                                              TimeStep *atTime)
@@ -1268,17 +1235,17 @@ MPlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseFor
 // this implementation should be faster.
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
-        this->giveConsistentStiffnessMatrix(answer, form, mode, gp, atTime);
+        this->giveConsistentStiffnessMatrix(answer, mode, gp, atTime);
     } else {
-        this->giveElastoPlasticStiffnessMatrix(answer, form, mode, gp, atTime);
+        this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, atTime);
     }
 }
 
 
 void
-MPlasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form,
+MPlasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
                                              MatResponseMode mode,
                                              GaussPoint *gp,
                                              TimeStep *atTime)
@@ -1290,17 +1257,17 @@ MPlasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseFor
 //
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
-        this->giveConsistentStiffnessMatrix(answer, form, mode, gp, atTime);
+        this->giveConsistentStiffnessMatrix(answer, mode, gp, atTime);
     } else {
-        this->giveElastoPlasticStiffnessMatrix(answer, form, mode, gp, atTime);
+        this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, atTime);
     }
 }
 
 
 void
-MPlasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
+MPlasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *atTime)
@@ -1310,17 +1277,17 @@ MPlasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm f
 // (1d case ==> sigma_y = sigma_z = tau_yz = tau_zx = tau_xy  = 0.)
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
-        this->giveConsistentStiffnessMatrix(answer, form, mode, gp, atTime);
+        this->giveConsistentStiffnessMatrix(answer, mode, gp, atTime);
     } else {
-        this->giveElastoPlasticStiffnessMatrix(answer, form, mode, gp, atTime);
+        this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, atTime);
     }
 }
 
 
 void
-MPlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer, MatResponseForm form,
+MPlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
                                              MatResponseMode mode,
                                              GaussPoint *gp,
                                              TimeStep *atTime)
@@ -1333,18 +1300,17 @@ MPlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer, MatResponseFor
 // this implementation should be faster.
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
-        this->giveConsistentStiffnessMatrix(answer, form, mode, gp, atTime);
+        this->giveConsistentStiffnessMatrix(answer, mode, gp, atTime);
     } else {
-        this->giveElastoPlasticStiffnessMatrix(answer, form, mode, gp, atTime);
+        this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, atTime);
     }
 }
 
 
 void
 MPlasticMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
-                                              MatResponseForm form,
                                               MatResponseMode mode,
                                               GaussPoint *gp,
                                               TimeStep *atTime)
@@ -1357,18 +1323,17 @@ MPlasticMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
 // this implementation should be faster.
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
-        this->giveConsistentStiffnessMatrix(answer, form, mode, gp, atTime);
+        this->giveConsistentStiffnessMatrix(answer, mode, gp, atTime);
     } else {
-        this->giveElastoPlasticStiffnessMatrix(answer, form, mode, gp, atTime);
+        this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, atTime);
     }
 }
 
 
 void
 MPlasticMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
-                                         MatResponseForm form,
                                          MatResponseMode mode,
                                          GaussPoint *gp,
                                          TimeStep *atTime)
@@ -1381,17 +1346,17 @@ MPlasticMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
 // this implementation should be faster.
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
-        this->giveConsistentStiffnessMatrix(answer, form, mode, gp, atTime);
+        this->giveConsistentStiffnessMatrix(answer, mode, gp, atTime);
     } else {
-        this->giveElastoPlasticStiffnessMatrix(answer, form, mode, gp, atTime);
+        this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, atTime);
     }
 }
 
 
 void
-MPlasticMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer, MatResponseForm form,
+MPlasticMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
                                               MatResponseMode mode,
                                               GaussPoint *gp,
                                               TimeStep *atTime)
@@ -1405,11 +1370,11 @@ MPlasticMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer, MatResponseFo
 // this implementation should be faster.
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
-        this->giveConsistentStiffnessMatrix(answer, form, mode, gp, atTime);
+        this->giveConsistentStiffnessMatrix(answer, mode, gp, atTime);
     } else {
-        this->giveElastoPlasticStiffnessMatrix(answer, form, mode, gp, atTime);
+        this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, atTime);
     }
 }
 

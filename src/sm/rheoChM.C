@@ -83,7 +83,7 @@ RheoChainMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 
 void
-RheoChainMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
+RheoChainMaterial :: giveRealStressVector(FloatArray &answer, 
                                           GaussPoint *gp,
                                           const FloatArray &totalStrain,
                                           TimeStep *atTime)
@@ -127,7 +127,7 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm fo
     // evaluate the incremental modulus
     Emodulus = this->giveEModulus(gp, atTime);
     // construct the unit stiffness matrix (depends on Poisson's ratio)
-    this->giveUnitStiffnessMatrix(Binv, ReducedForm, gp, atTime);
+    this->giveUnitStiffnessMatrix(Binv, gp, atTime);
     // multiply the "net" strain increment by unit stiffness and by the incremental modulus
     stressIncrement.beProductOf(Binv, strainIncrement);
     stressIncrement.times(Emodulus);
@@ -141,17 +141,11 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm fo
     // update the shrinkage strain if needed
     if ( this->hasIncrementalShrinkageFormulation() ) {
         FloatArray shv;
-        this->giveShrinkageStrainVector(shv, ReducedForm, gp, atTime, VM_Total);
+        this->giveShrinkageStrainVector(shv, gp, atTime, VM_Total);
         status->setShrinkageStrainVector(shv);
     }
 
-    if ( form == ReducedForm ) {
-        answer = stressVector;
-        return;
-    }
-
-    // expand the stress to full form if needed
-    StructuralMaterial :: giveFullSymVectorForm(answer, stressVector, gp->giveMaterialMode());
+    answer = stressVector;
 }
 
 
@@ -245,7 +239,6 @@ RheoChainMaterial :: giveDiscreteTimes()
 
 void
 RheoChainMaterial :: giveUnitStiffnessMatrix(FloatMatrix &answer,
-                                             MatResponseForm form,
                                              GaussPoint *gp,
                                              TimeStep *tStep)
 {
@@ -263,14 +256,13 @@ RheoChainMaterial :: giveUnitStiffnessMatrix(FloatMatrix &answer,
 
     static_cast< StructuralCrossSection * >( gp->giveCrossSection() )
     ->giveCharMaterialStiffnessMatrixOf(answer,
-                                        form, TangentStiffness, gp,
+                                        TangentStiffness, gp,
                                         this->giveLinearElasticMaterial(),
                                         tStep);
 }
 
 void
 RheoChainMaterial :: giveUnitComplianceMatrix(FloatMatrix &answer,
-                                              MatResponseForm form,
                                               GaussPoint *gp,
                                               TimeStep *tStep)
 /*
@@ -280,7 +272,7 @@ RheoChainMaterial :: giveUnitComplianceMatrix(FloatMatrix &answer,
  */
 {
     static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
-    giveCharMaterialComplianceMatrixOf(answer, form, TangentStiffness, gp,
+    giveCharMaterialComplianceMatrixOf(answer, TangentStiffness, gp,
                                        this->giveLinearElasticMaterial(),
                                        tStep);
 }
@@ -340,7 +332,7 @@ RheoChainMaterial :: computeTrueStressIndependentStrainVector(FloatArray &answer
     FloatArray e0;
 
     // shrinkage strain
-    this->giveShrinkageStrainVector(answer, ReducedForm, gp, stepN, mode);
+    this->giveShrinkageStrainVector(answer, gp, stepN, mode);
     // thermally induced strain
     StructuralMaterial :: computeStressIndependentStrainVector(e0, gp, stepN, mode);
     answer.add(e0);
@@ -364,7 +356,7 @@ RheoChainMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     // strain due to temperature changes and shrinkage
     this->computeTrueStressIndependentStrainVector(answer, gp, stepN, mode);
     // strain due to creep
-    this->giveEigenStrainVector(e0, ReducedForm, gp, stepN, mode);
+    this->giveEigenStrainVector(e0, gp, stepN, mode);
     if ( e0.giveSize() ) {
         answer.add(e0);
     }
@@ -442,8 +434,7 @@ RheoChainMaterial :: computeCharTimes()
 
 
 void
-RheoChainMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                              MatResponseForm form,
+RheoChainMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseMode mode,
                                               GaussPoint *gp,
                                               TimeStep *atTime)
@@ -451,7 +442,7 @@ RheoChainMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     //
     // Returns the incremental material stiffness matrix of the receiver
     //
-    this->giveUnitStiffnessMatrix(answer, form, gp, atTime);
+    this->giveUnitStiffnessMatrix(answer, gp, atTime);
     answer.times( this->giveEModulus(gp, atTime) );
 }
 
@@ -472,83 +463,83 @@ RheoChainMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
 void
 RheoChainMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                              MatResponseForm form, MatResponseMode mode,
+                                              MatResponseMode mode,
                                               GaussPoint *gp,
                                               TimeStep *atTime)
 {
     //
     // Returns the incremental material stiffness matrix of the receiver
     //
-    this->giveLinearElasticMaterial()->givePlaneStressStiffMtrx(answer, form, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->givePlaneStressStiffMtrx(answer, mode, gp, atTime);
     answer.times( this->giveEModulus(gp, atTime) );
 }
 
 void
 RheoChainMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                              MatResponseForm form, MatResponseMode mode,
+                                              MatResponseMode mode,
                                               GaussPoint *gp,
                                               TimeStep *atTime)
 {
     //
     // Returns the incremental material stiffness matrix of the receiver
     //
-    this->giveLinearElasticMaterial()->givePlaneStrainStiffMtrx(answer, form, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->givePlaneStrainStiffMtrx(answer, mode, gp, atTime);
     answer.times( this->giveEModulus(gp, atTime) );
 }
 
 
 void
 RheoChainMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
-                                           MatResponseForm form, MatResponseMode mode,
+                                           MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *atTime)
 {
     //
     // Returns the incremental material stiffness matrix of the receiver
     //
-    this->giveLinearElasticMaterial()->give1dStressStiffMtrx(answer, form, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->give1dStressStiffMtrx(answer, mode, gp, atTime);
     answer.times( this->giveEModulus(gp, atTime) );
 }
 
 
 void
 RheoChainMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                              MatResponseForm form, MatResponseMode mode,
+                                              MatResponseMode mode,
                                               GaussPoint *gp,
                                               TimeStep *atTime)
 {
     //
     // Returns the incremental material stiffness matrix of the receiver
     //
-    this->giveLinearElasticMaterial()->give2dBeamLayerStiffMtrx(answer, form, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->give2dBeamLayerStiffMtrx(answer, mode, gp, atTime);
     answer.times( this->giveEModulus(gp, atTime) );
 }
 
 
 void
 RheoChainMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode,
+                                               MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *atTime)
 {
     //
     // Returns the incremental material stiffness matrix of the receiver
     //
-    this->giveLinearElasticMaterial()->give2dPlateLayerStiffMtrx(answer, form, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->give2dPlateLayerStiffMtrx(answer, mode, gp, atTime);
     answer.times( this->giveEModulus(gp, atTime) );
 }
 
 
 void
 RheoChainMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
-                                               MatResponseForm form, MatResponseMode mode,
+                                               MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *atTime)
 {
     //
     // Returns the incremental material stiffness matrix of the receiver
     //
-    this->giveLinearElasticMaterial()->give3dShellLayerStiffMtrx(answer, form, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->give3dShellLayerStiffMtrx(answer, mode, gp, atTime);
     answer.times( this->giveEModulus(gp, atTime) );
 }
 

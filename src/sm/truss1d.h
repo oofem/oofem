@@ -68,7 +68,7 @@ public:
     Truss1d(int n, Domain *d);
     virtual ~Truss1d() { }
 
-    virtual FEInterpolation* giveInterpolation() const { return & interp; }
+    virtual FEInterpolation *giveInterpolation() const { return & interp; }
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
@@ -108,10 +108,10 @@ public:
 
     // NodalAveragingRecoveryMInterface
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
 
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                   InternalStateType type, TimeStep *tStep);
+                                                           InternalStateType type, TimeStep *tStep);
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
 
@@ -158,6 +158,7 @@ public:
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
     virtual int giveApproxOrder() { return 1; }
