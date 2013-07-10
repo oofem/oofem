@@ -39,7 +39,7 @@
 #include "dofmanager.h"
 #include "constantpressureload.h"
 #include "simpleinterfacemat.h"
-
+#include "connectivitytable.h"
 #include "bilinearczmaterialFagerstrom.H" ///@todo change to .h
 
 namespace oofem {
@@ -140,15 +140,20 @@ void
 Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep) 
 {
     // Compute necessary quantities for evaluation of failure criterias
+    
+    std::vector < FloatArray > interLamStresses;
+    int numInterfaces = this->layeredCS->giveNumberOfLayers() - 1;
+    IntArray delaminatedInterfaceList;
+
     switch ( fc->giveType() ) {
 
     case FC_MaxShearStress:
-        IntArray delaminatedInterfaceList;
+        
         this->computeDelaminatedInterfaceList(delaminatedInterfaceList);
 
         // Stress ordering (1, 5, 9, 6, 3, 2) = (xx, yy, zz, yz, xz, xy)
-        int numInterfaces = this->layeredCS->giveNumberOfLayers() - 1;
-        std::vector < FloatArray > interLamStresses;
+        
+        
         fc->quantities.resize(numInterfaces); // will overwrite this every time
         for (int intface = 1; intface <= numInterfaces; intface++ ) { 
             
@@ -165,6 +170,38 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep
 
                 }
             }
+        }
+        break;
+
+    case FC_DamagedNeighborCZ:
+        /*
+        Go through the neighbors of the element and check for each layer if the 
+        corresponding cz is damaged (if applicable)
+
+        */
+        IntArray neighbors;
+        IntArray elements(1);
+        ConnectivityTable *conTable = this->giveDomain()->giveConnectivityTable();
+        elements.at(1) = this->giveNumber();
+        conTable->giveElementNeighbourList(neighbors, elements); 
+        FloatArray damageArray;
+        fc->quantities.resize( neighbors.giveSize() );
+
+        for ( int i = 1; i <= neighbors.giveSize(); i++ ) {
+
+            fc->quantities[ i-1 ].resize(1);
+
+            Shell7BaseXFEM *neighbor = 
+                dynamic_cast< Shell7BaseXFEM * > (this->giveDomain()->giveElement( neighbors.at(i) ));
+            if ( neighbor ) {
+                 if ( neighbor->hasCohesiveZone() ) {
+
+                     neighbor->giveMaxCZDamages(damageArray, tStep); // damage parameter for each interface
+                     fc->quantities[ i-1 ][0] = damageArray;
+
+                 }
+            }
+
         }
 
     };
@@ -479,7 +516,7 @@ Shell7BaseXFEM :: giveMaxCZDamages(FloatArray &answer, TimeStep *tStep)
     // for each interface get maximum interface damage
     int numZones = this->layeredCS->giveNumberOfLayers() - 1;
     answer.resize(numZones);
-    
+    StructuralMaterial *mat;
     FloatArray ipValues;
     for ( int i = 0; i < numZones; i++ ) {
         IntegrationRule *iRule = czIntegrationRulesArray [ i ];
@@ -487,11 +524,10 @@ Shell7BaseXFEM :: giveMaxCZDamages(FloatArray &answer, TimeStep *tStep)
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             IntegrationPoint *ip = iRule->getIntegrationPoint(j);
             
-            //ip->giveMaterial()->giveIPValue(ipValues, ip, IST_DamageScalar, tStep);
+            mat = static_cast < StructuralMaterial * > ( this->czMat );
+            mat->giveIPValue(ipValues, ip, IST_DamageScalar, tStep);
 
-            BilinearCZMaterialFagerstromStatus *status = 
-                dynamic_cast< BilinearCZMaterialFagerstromStatus * > ( ip->giveMaterialStatus(this->czMatNum) ); 
-            double val = status->giveTempDamage();
+            double val = ipValues.at(1);
             if ( val > max ) {
                 max = val;
             }
@@ -558,7 +594,7 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
 		xd.at(11) = F.at(3,1);
 		xd.at(12) = F.at(3,2);
 
-        xd.at(13) = lCoords.at(3);
+        xd.at(13) = lCoords.at(3); // xi-coord of the interface
 
 		
 		
@@ -589,7 +625,8 @@ Shell7BaseXFEM :: updateYourself(TimeStep *tStep)
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Updating Element ",number)
 #  endif
-    for ( int i = 0; i < this->xMan->giveNumberOfEnrichmentItems(); i++ ) {
+    //for ( int i = 0; i < this->xMan->giveNumberOfEnrichmentItems(); i++ ) {
+    for ( int i = 0; i < this->layeredCS->giveNumberOfLayers() - 1; i++ ) {
         czIntegrationRulesArray [ i ]->updateYourself(tStep);
 		for ( int j = 0; j < czIntegrationRulesArray [ i ]->giveNumberOfIntegrationPoints(); j++ ) {
 			GaussPoint *gp = czIntegrationRulesArray [ i ]->getIntegrationPoint(j);

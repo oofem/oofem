@@ -75,12 +75,12 @@ Shell7Base :: checkConsistency()
 void
 Shell7Base :: postInitialize()
 {
-    Element :: postInitialize();
-
+    
     this->layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection()  );
     this->fei       = dynamic_cast< FEInterpolation3d   * >( this->giveInterpolation() );
     this->setupInitialNodeDirectors();
 
+    Element :: postInitialize();
 }
 
 

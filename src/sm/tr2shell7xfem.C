@@ -104,19 +104,15 @@ Tr2Shell7XFEM :: computeGaussPoints()
     if ( !integrationRulesArray ) {
         int nPointsTri  = 6;   // points in the plane
         int nPointsEdge = 2;   // edge integration
-        specialIntegrationRulesArray = new IntegrationRule * [ 3 ];
-
-        LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( Tr2Shell7XFEM :: giveCrossSection() );
 
         // need to check if interface has failed but also need to update the integration rule later
         XfemManager *xMan = this->giveDomain()->giveXfemManager();
         for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { 
             Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) ); 
             if (dei) {
-                //int numberOfDealam = dei->giveNumberOfEnrichmentDomains();
-                int numberOfDealam = layeredCS->giveNumberOfLayers()-1;
-                czIntegrationRulesArray = new IntegrationRule * [ numberOfDealam ];
-                for ( int i = 0; i < numberOfDealam; i++ ) {
+                int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
+                czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];
+                for ( int i = 0; i < numberOfInterfaces; i++ ) {
                     czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
                     czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dMat);
                 }
@@ -124,6 +120,7 @@ Tr2Shell7XFEM :: computeGaussPoints()
         }
         
 
+        specialIntegrationRulesArray = new IntegrationRule * [ 3 ];
 
         // Midplane (Mass matrix integrated analytically through the thickness)
         specialIntegrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
@@ -134,16 +131,13 @@ Tr2Shell7XFEM :: computeGaussPoints()
         specialIntegrationRulesArray [ 2 ]->SetUpPointsOnLine(nPointsEdge, _3dMat);
         
         // Layered cross section for bulk integration
-        if ( layeredCS == NULL ) {
-            OOFEM_ERROR("Tr2Shell7 only supports layered cross section");
-        }
-        this->numberOfIntegrationRules = layeredCS->giveNumberOfLayers();
-        this->numberOfGaussPoints = layeredCS->giveNumberOfLayers()*nPointsTri*layeredCS->giveNumIntegrationPointsInLayer();
-        layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
+        this->numberOfIntegrationRules = this->layeredCS->giveNumberOfLayers();
+        this->numberOfGaussPoints = this->layeredCS->giveNumberOfLayers()*nPointsTri*this->layeredCS->giveNumIntegrationPointsInLayer();
+        this->layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
 
         // Thickness integration for stress recovery
         specialIntegrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
-        specialIntegrationRulesArray [ 0 ]->SetUpPointsOnLine(layeredCS->giveNumIntegrationPointsInLayer(), _3dMat);
+        specialIntegrationRulesArray [ 0 ]->SetUpPointsOnLine(this->layeredCS->giveNumIntegrationPointsInLayer(), _3dMat);
 
 
 
