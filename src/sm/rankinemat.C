@@ -135,16 +135,11 @@ RankineMat :: CreateStatus(GaussPoint *gp) const
 
 // computes the stress vector corresponding to given (final) strain
 void
-RankineMat :: giveRealStressVector(FloatArray &answer,
+RankineMat :: giveRealStressVector_PlaneStress(FloatArray &answer,
                                    GaussPoint *gp,
                                    const FloatArray &totalStrain,
                                    TimeStep *atTime)
 {
-    MaterialMode mode = gp->giveMaterialMode();
-    if ( mode != _PlaneStress ) {
-        OOFEM_ERROR("RankineMat::giveRealStressVector : unknown material response mode");
-    }
-
     RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
 
     // initialization
@@ -165,7 +160,7 @@ RankineMat :: giveRealStressVector(FloatArray &answer,
     status->letTempStressVectorBe(answer);
 #ifdef keep_track_of_dissipated_energy
     double gf = sig0 * sig0 / E; // only estimated, but OK for this purpose
-    status->computeWork(gp, mode, gf);
+    status->computeWork_PlaneStress(gp, gf);
 #endif
 }
 
@@ -852,15 +847,10 @@ RankineMatStatus :: restoreContext(DataStream *stream, ContextMode mode, void *o
 
 #ifdef keep_track_of_dissipated_energy
 void
-RankineMatStatus :: computeWork(GaussPoint *gp, MaterialMode mode, double gf)
+RankineMatStatus :: computeWork_PlaneStress(GaussPoint *gp, double gf)
 {
     // int n = deps.giveSize(); // would not work for gradient version
-    int n = -1;
-    if ( mode == _PlaneStress || mode == _PlaneStressGrad ) {
-        n = 3;
-    } else {
-        _error("Inappropriate material mode in RankineMatStatus :: computeWork\n");
-    }
+    int n = 3;
 
     // strain increment
     FloatArray deps;

@@ -135,7 +135,7 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+    virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducesStrain, TimeStep *tStep);
 
 protected:
@@ -281,7 +281,7 @@ public:
      * can be set to zero to get clean results, but parameter gf can be
      * set to zero if not available).
      */
-    void computeWork(GaussPoint *gp, MaterialMode mode, double gf);
+    void computeWork_PlaneStress(GaussPoint *gp, double gf);
 #endif
 
     virtual const char *giveClassName() const { return "RankineMatStatus"; }

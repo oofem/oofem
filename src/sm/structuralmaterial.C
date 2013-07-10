@@ -62,9 +62,137 @@ StructuralMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 
 void
+StructuralMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    ///@todo Move this to StructuralCrossSection ?
+    MaterialMode mode = gp->giveMaterialMode();
+    if ( mode == _3dMat ) {
+        this->giveRealStressVector_3d(answer, gp, reducedStrain, tStep);
+    } else if ( mode == _PlaneStrain ) {
+        this->giveRealStressVector_PlaneStrain(answer, gp, reducedStrain, tStep);
+    } else if ( mode == _PlaneStress ) {
+        this->giveRealStressVector_PlaneStress(answer, gp, reducedStrain, tStep);
+    } else if ( mode == _1dMat ) {
+        this->giveRealStressVector_1d(answer, gp, reducedStrain, tStep);
+    }
+}
+
+
+void
+StructuralMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    OOFEM_ERROR2("%s :: giveRealStressVector_3d - 3d mode not supported", this->giveClassName());
+}
+
+
+void
+StructuralMaterial :: giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    if ( gp->giveMaterialMode() != _PlaneStrain ) {
+        OOFEM_ERROR("StructuralMaterial :: giveRealStressVector_PlaneStrain - Wrong material mode in GP");
+    }
+
+    FloatArray vE, vS;
+    StructuralMaterial :: giveFullSymVectorForm(vE, reducedStrain, _PlaneStrain);
+    this->giveRealStressVector_3d(vS, gp, vE, tStep);
+    StructuralMaterial :: giveReducedSymVectorForm(answer, vS, _PlaneStrain);
+}
+
+
+void
+StructuralMaterial :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    if ( gp->giveMaterialMode() != _PlaneStress ) {
+        OOFEM_ERROR("StructuralMaterial :: giveRealStressVector_PlaneStress - Wrong material mode in GP");
+    }
+
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    IntArray E_control, S_control; // Determines which components are controlled by E and S resp.
+    FloatArray vE, increment_vE, vS, vS_control;
+    FloatMatrix tangent, tangent_Scontrol;
+    // Iterate to find full vF.
+    StructuralMaterial :: giveVoigtVectorMask(E_control, _PlaneStress);
+    // Compute the negated the array of control since we need S_control as well;
+    S_control.resize( 9 - E_control.giveSize() );
+    for ( int i = 1, j = 1; i <= 9; i++ ) {
+        if ( !E_control.contains(i) ) {
+            S_control.at(j++) = i;
+        }
+    }
+
+    // Initial guess;
+    vE = status->giveStrainVector();
+    for ( int i = 1; i <= E_control.giveSize(); ++i ) {
+        vE.at( E_control.at(i) ) = reducedStrain.at(i);
+    }
+
+    // Iterate to find full vF.
+    for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
+        this->giveRealStressVector_3d(vS, gp, vE, tStep);
+        vS_control.beSubArrayOf(vS, S_control);
+        if ( vS_control.computeNorm() < 1e-6 ) { ///@todo We need a tolerance here!
+            StructuralMaterial :: giveReducedVectorForm(answer, vS, _1dMat);
+            return;
+        }
+
+        this->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
+        tangent_Scontrol.beSubMatrixOf(tangent, S_control, S_control);
+        tangent_Scontrol.solveForRhs(vS_control, increment_vE);
+        vE.assemble(increment_vE, S_control);
+    }
+
+    OOFEM_WARNING("StructuralMaterial :: giveRealStressVector_PlaneStress - Iteration did not converge");
+    answer.resize(0);
+}
+
+
+void
+StructuralMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    if ( gp->giveMaterialMode() != _1dMat ) {
+        OOFEM_ERROR("StructuralMaterial :: giveRealStressVector_1d - Wrong material mode in GP");
+    }
+
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    IntArray S_control; // Determines which components are controlled by P resp.
+    FloatArray old_vE, vE, increment_vE, vS, vS_control;
+    FloatMatrix tangent, tangent_Scontrol;
+    // Compute the negated the array of control since we need P_control as well;
+    S_control.resize(8);
+    for ( int i = 1; i <= 8; i++ ) {
+        S_control.at(i) = i + 1;
+    }
+
+    // Initial guess;
+    vE = status->giveStrainVector();
+    vE.at(1) = reducedStrain.at(1);
+    // Iterate to find full vF.
+    for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
+        this->giveRealStressVector_3d(vS, gp, vE, tStep);
+        vS_control.beSubArrayOf(vS, S_control);
+        if ( vS_control.computeNorm() < 1e-6 ) { ///@todo We need a tolerance here!
+            StructuralMaterial :: giveReducedVectorForm(answer, vS, _1dMat);
+            return;
+        }
+
+        this->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
+        tangent_Scontrol.beSubMatrixOf(tangent, S_control, S_control);
+        tangent_Scontrol.solveForRhs(vS_control, increment_vE);
+        vE.assemble(increment_vE, S_control);
+    }
+
+    OOFEM_WARNING("StructuralMaterial :: giveRealStressVector_1d - Iteration did not converge");
+    answer.resize(0);
+}
+
+
+void
 StructuralMaterial :: giveFirstPKStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
 {
     ///@todo Move this to StructuralCrossSection ?
+    reducedvF.printYourself();
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _3dMat ) {
         this->giveFirstPKStressVector_3d(answer, gp, reducedvF, tStep);
@@ -94,18 +222,17 @@ StructuralMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint 
     E.at(2, 2) -= 1.0;
     E.at(3, 3) -= 1.0;
     E.times(0.5);
-    vE.beReducedVectorFormOfStrain(E);      // 6
+    vE.beSymVectorFormOfStrain(E);      // 6
 
     ///@todo Have this function:
-    //this->giveRealStressVector_3d(vS, gp, vE, tStep);
-    this->giveRealStressVector(vS, gp, vE, tStep); // Treat stress obtained as second PK stress
+    this->giveRealStressVector_3d(vS, gp, vE, tStep);
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     // Compute first PK stress from second PK stress
     FloatMatrix P, S;
     S.beMatrixForm(vS);
     P.beProductOf(F, S);
-    answer.beFullVectorForm(P);
+    answer.beVectorForm(P);
 
     status->letTempPVectorBe(answer);
     status->letTempFVectorBe(vF);
@@ -654,7 +781,7 @@ StructuralMaterial :: convert_P_2_S(FloatArray &answer, const FloatArray &reduce
     invF.beInverseOf(F);
     S.beProductOf(invF, P);
     FloatArray vS;
-    vS.beReducedVectorForm(S); // 6 components
+    vS.beSymVectorForm(S); // 6 components
     StructuralMaterial :: giveReducedSymVectorForm(answer, vS, matMode); // convert back to reduced size
 }
 
@@ -672,7 +799,7 @@ StructuralMaterial :: convert_S_2_P(FloatArray &answer, const FloatArray &reduce
     F.beMatrixForm(vF);
     S.beMatrixForm(vS);
     P.beProductOf(F, S);
-    vP.beFullVectorForm(P);
+    vP.beVectorForm(P);
     StructuralMaterial :: giveReducedVectorForm(answer, vP, matMode);   // convert back to reduced size
 }
 

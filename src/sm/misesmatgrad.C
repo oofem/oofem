@@ -492,7 +492,6 @@ MisesMatGrad :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, G
     status->giveTempEffectiveStress(tempEffStress);
     answer1.beScaled(1.0 - tempDamage, tempEffStress);
     answer2 = status->giveTempCumulativePlasticStrain();
-    ;
 
     status->setNonlocalCumulatedStrain(nonlocalCumulatedStrain);
     status->setTempDamage(tempDamage);

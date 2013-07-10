@@ -151,7 +151,15 @@ public:
      * @param tStep Current time step (most models are able to respond only when atTime is current time step).
      */
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep) = 0;
+                                      const FloatArray &reducedStrain, TimeStep *tStep);
+    /// Default implementation relies on giveRealStressVector for second Piola-Kirchoff stress
+    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    /// Default implementation relies on giveFirstPKStressVector_3d
+    virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    /// Default implementation relies on giveFirstPKStressVector_3d
+    virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    /// Default implementation relies on giveFirstPKStressVector_3d
+    virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
 
     /// @name Methods associated with large deformation analysis
     //@{

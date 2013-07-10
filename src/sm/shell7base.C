@@ -1211,6 +1211,7 @@ Shell7Base :: computeFAt(GaussPoint *gp, FloatMatrix &answer, FloatArray &genEps
 void
 Shell7Base :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &genEps)
 {
+    ///@todo Do you even need this function at all Jim? / Mikael
     // Computes the Green-Lagrange strain tensor: E=0.5(C-I)
     FloatMatrix F, E;
     this->computeFAt(gp, F, genEps);     // Deformation gradient
@@ -1221,12 +1222,7 @@ Shell7Base :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *
     E.at(3, 3) += -1;
     E.times(0.5);
 
-    FloatArray temp(6);
-    temp.beReducedVectorForm(E);     // Convert to Voight form Todo: add enum strain/stress
-    answer = temp;
-    answer.at(4) = temp.at(4) * 2.0;   // correction of shear strains
-    answer.at(5) = temp.at(5) * 2.0;
-    answer.at(6) = temp.at(6) * 2.0;
+    answer.beSymVectorFormOfStrain(E);
 }
 
 void
