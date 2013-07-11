@@ -43,59 +43,29 @@ namespace oofem {
 
 REGISTER_CrossSection( SimpleCrossSection );
 
-#if 0 //@todo don't see any difference from base class /JB
-void
-SimpleCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp,
-                                       const FloatArray &totalStrain, TimeStep *tStep)
-//
-// this function returns a real stresses corresponding to
-// given totalStrain according to stressStrain mode stored
-// in each gp.
-// IMPORTANT:
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
 
-    if ( mat->hasMaterialModeCapability(mode) ) {
-        StructuralCrossSection :: giveRealStresses(answer, gp, totalStrain, tStep);
-        return;
+void
+SimpleCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+    if ( mat->hasMaterialModeCapability(gp->giveMaterialMode()) ) {
+        mat->giveRealStressVector(answer, gp, strain, tStep);
     } else {
         _error("giveRealStresses : unsupported mode");
     }
 }
-#endif
-
-void
-SimpleCrossSection :: giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                        MatResponseMode rMode,
-                                                        GaussPoint *gp,
-                                                        StructuralMaterial *mat,
-                                                        TimeStep *tStep)
-//
-// only interface to material class, forcing returned matrix to be in reduced form.
-//
-{
-    this->giveMaterialStiffnessMatrixOf(answer, rMode, gp, mat, tStep);
-}
 
 
 void
-SimpleCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                    MatResponseMode rMode,
-                                                    GaussPoint *gp,
-                                                    StructuralMaterial *mat,
-                                                    TimeStep *tStep)
-//
-// may be only simple interface to material class, forcing returned matrix to be in reduced form.
-// otherwise special methods called to obtain required stiffness from 3d case.
-//
+SimpleCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
+                                                      MatResponseMode rMode, GaussPoint *gp,
+                                                      TimeStep *tStep)
 {
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
     if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
         mat->giveStiffnessMatrix(answer, rMode, gp, tStep);
-        return;
     } else {
-        OOFEM_ERROR3("GiveMaterialStiffnessMatrixOf: unsupported StressStrainMode %s on Element number %d", __MaterialModeToString(gp->giveMaterialMode()), gp->giveElement()->giveGlobalNumber() );
+        OOFEM_ERROR3("SimpleCrossSection :: giveCharMaterialStiffnessMatrix: unsupported StressStrainMode %s on Element number %d", __MaterialModeToString(gp->giveMaterialMode()), gp->giveElement()->giveGlobalNumber() );
     }
 }
 
@@ -192,6 +162,8 @@ SimpleCrossSection :: give(CrossSectionProperty aProperty)
 }
 
 
+///@todo  Deprecated or not? If so, remove it! / Mikael
+#if 0
 void
 SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
                                                            GaussPoint *gp, TimeStep *stepN, ValueModeType mode)
@@ -202,8 +174,6 @@ SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
 //
 {
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
-    ///@todo  Deprecated or not? If so, remove it! / Mikael
-#if 0
     MaterialMode matmode = gp-> giveMaterialMode ();
     FloatArray et, e0, fullAnswer;
     double thick, width;
@@ -268,9 +238,8 @@ SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
     } else {
         mat->computeStressIndependentStrainVector (answer, gp, stepN, mode);
     }
-#endif
-    mat->computeStressIndependentStrainVector(answer, gp, stepN, mode);
 }
+#endif
 
 
 bool SimpleCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat)

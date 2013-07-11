@@ -255,10 +255,7 @@ RheoChainMaterial :: giveUnitStiffnessMatrix(FloatMatrix &answer,
      */
 
     static_cast< StructuralCrossSection * >( gp->giveCrossSection() )
-    ->giveCharMaterialStiffnessMatrixOf(answer,
-                                        TangentStiffness, gp,
-                                        this->giveLinearElasticMaterial(),
-                                        tStep);
+    ->giveCharMaterialStiffnessMatrix(answer, ElasticStiffness, gp, tStep);
 }
 
 void
@@ -271,10 +268,10 @@ RheoChainMaterial :: giveUnitComplianceMatrix(FloatMatrix &answer,
  * and a unit value of Young's modulus.
  */
 {
+    FloatMatrix tangent;
     static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
-    giveCharMaterialComplianceMatrixOf(answer, TangentStiffness, gp,
-                                       this->giveLinearElasticMaterial(),
-                                       tStep);
+        giveCharMaterialStiffnessMatrix(tangent, ElasticStiffness, gp, tStep);
+    answer.beInverseOf(tangent);
 }
 
 
@@ -434,20 +431,6 @@ RheoChainMaterial :: computeCharTimes()
 
 
 void
-RheoChainMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
-                                              MatResponseMode mode,
-                                              GaussPoint *gp,
-                                              TimeStep *atTime)
-{
-    //
-    // Returns the incremental material stiffness matrix of the receiver
-    //
-    this->giveUnitStiffnessMatrix(answer, gp, atTime);
-    answer.times( this->giveEModulus(gp, atTime) );
-}
-
-
-void
 RheoChainMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                    MatResponseMode mode,
                                                    GaussPoint *gp,
@@ -457,6 +440,7 @@ RheoChainMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     // Returns the incremental material stiffness matrix of the receiver
     //
     this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
+    if ( mode == ElasticStiffness ) return;
     answer.times( this->giveEModulus(gp, atTime) );
 }
 
@@ -471,6 +455,7 @@ RheoChainMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
     // Returns the incremental material stiffness matrix of the receiver
     //
     this->giveLinearElasticMaterial()->givePlaneStressStiffMtrx(answer, mode, gp, atTime);
+    if ( mode == ElasticStiffness ) return;
     answer.times( this->giveEModulus(gp, atTime) );
 }
 
@@ -484,6 +469,7 @@ RheoChainMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
     // Returns the incremental material stiffness matrix of the receiver
     //
     this->giveLinearElasticMaterial()->givePlaneStrainStiffMtrx(answer, mode, gp, atTime);
+    if ( mode == ElasticStiffness ) return;
     answer.times( this->giveEModulus(gp, atTime) );
 }
 
@@ -498,48 +484,7 @@ RheoChainMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
     // Returns the incremental material stiffness matrix of the receiver
     //
     this->giveLinearElasticMaterial()->give1dStressStiffMtrx(answer, mode, gp, atTime);
-    answer.times( this->giveEModulus(gp, atTime) );
-}
-
-
-void
-RheoChainMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                              MatResponseMode mode,
-                                              GaussPoint *gp,
-                                              TimeStep *atTime)
-{
-    //
-    // Returns the incremental material stiffness matrix of the receiver
-    //
-    this->giveLinearElasticMaterial()->give2dBeamLayerStiffMtrx(answer, mode, gp, atTime);
-    answer.times( this->giveEModulus(gp, atTime) );
-}
-
-
-void
-RheoChainMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *atTime)
-{
-    //
-    // Returns the incremental material stiffness matrix of the receiver
-    //
-    this->giveLinearElasticMaterial()->give2dPlateLayerStiffMtrx(answer, mode, gp, atTime);
-    answer.times( this->giveEModulus(gp, atTime) );
-}
-
-
-void
-RheoChainMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *atTime)
-{
-    //
-    // Returns the incremental material stiffness matrix of the receiver
-    //
-    this->giveLinearElasticMaterial()->give3dShellLayerStiffMtrx(answer, mode, gp, atTime);
+    if ( mode == ElasticStiffness ) return;
     answer.times( this->giveEModulus(gp, atTime) );
 }
 

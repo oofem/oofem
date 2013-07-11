@@ -39,29 +39,6 @@
 #include "floatarray.h"
 
 namespace oofem {
-void
-StructuralCrossSection ::  giveRealStresses(FloatArray &answer,
-                                            GaussPoint *gp,
-                                            const FloatArray &strain,
-                                            TimeStep *tStep)
-//
-// this function returns a real stresses corresponding to
-// given strain according to stressStrain mode stored
-// in each gp.
-// IMPORTANT:
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
-
-    if ( mat->hasMaterialModeCapability(mode) ) {
-        mat->giveRealStressVector(answer, gp, strain, tStep);
-        return;
-    } else {
-        _error("giveRealStresses : unsupported mode");
-    }
-}
-
 
 void
 StructuralCrossSection ::  giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &F, TimeStep *tStep)
@@ -119,90 +96,6 @@ StructuralCrossSection :: giveStiffnessMatrix_dCde(FloatMatrix &answer,
 }
 
 
-
-void
-StructuralCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                          MatResponseMode rMode, GaussPoint *gp,
-                                                          TimeStep *tStep)
-//
-// only interface to material class, forcing returned matrix to be in reduced form.
-//
-{
-    this->giveMaterialStiffnessMatrixOf(answer, rMode, gp,
-                                        dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() ),
-                                        tStep);
-}
-
-void
-StructuralCrossSection :: giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                            MatResponseMode rMode,
-                                                            GaussPoint *gp, StructuralMaterial *mat,
-                                                            TimeStep *tStep)
-//
-// only interface to material class, forcing returned matrix to be in reduced form.
-//
-{
-    this->giveMaterialStiffnessMatrixOf(answer, rMode, gp, mat, tStep);
-}
-
-
-void
-StructuralCrossSection :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                      MatResponseMode rMode,
-                                                      GaussPoint *gp,
-                                                      TimeStep *tStep)
-{
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
-    this->giveMaterialStiffnessMatrixOf(answer, rMode, gp,
-                                        mat, tStep);
-}
-
-
-
-void
-StructuralCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                        MatResponseMode rMode,
-                                                        GaussPoint *gp,
-                                                        StructuralMaterial *mat,
-                                                        TimeStep *tStep)
-//
-// only interface to material class, forcing returned matrix to be in reduced form.
-//
-{
-    static_cast< StructuralMaterial * >(mat)->giveStiffnessMatrix(answer, rMode, gp, tStep);
-}
-
-
-
-void
-StructuralCrossSection :: giveCharMaterialComplianceMatrix(FloatMatrix &answer,
-                                                           MatResponseMode rMode, GaussPoint *gp,
-                                                           TimeStep *tStep)
-{
-    /* returns compliance matrix according to stress strain mode in gp */
-    FloatMatrix redInvAnswer;
-
-    this->giveCharMaterialStiffnessMatrix(redInvAnswer, rMode, gp, tStep);
-    answer.beInverseOf(redInvAnswer);
-}
-
-
-
-void
-StructuralCrossSection :: giveCharMaterialComplianceMatrixOf(FloatMatrix &answer,
-                                                             MatResponseMode rMode,
-                                                             GaussPoint *gp, StructuralMaterial *mat,
-                                                             TimeStep *tStep)
-{
-    /* returns compliance matrix according to stress strain mode in gp */
-    FloatMatrix redInvAnswer;
-    IntArray mask;
-
-    this->giveCharMaterialStiffnessMatrixOf(redInvAnswer, rMode, gp, mat, tStep);
-    answer.beInverseOf(redInvAnswer);
-}
-
-
 FloatArray *
 StructuralCrossSection :: imposeStressConstrainsOnGradient(GaussPoint *gp,
                                                            FloatArray *gradientStressVector3d)
@@ -221,8 +114,7 @@ StructuralCrossSection :: imposeStressConstrainsOnGradient(GaussPoint *gp,
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    int i, size = gradientStressVector3d->giveSize();
-    if ( size != 6 ) {
+    if ( gradientStressVector3d->giveSize() != 6 ) {
         _error("ImposeStressConstrainsOnGradient: gradientStressVector3d size mismatch");
     }
 
@@ -243,7 +135,7 @@ StructuralCrossSection :: imposeStressConstrainsOnGradient(GaussPoint *gp,
         gradientStressVector3d->at(5) = 0.;
         break;
     case _1dMat:
-        for ( i = 2; i <= 6; i++ ) {
+        for ( int i = 2; i <= 6; i++ ) {
             gradientStressVector3d->at(i) = 0.;
         }
 
@@ -270,8 +162,7 @@ StructuralCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    int i, size = gradientStrainVector3d->giveSize();
-    if ( size != 6 ) {
+    if ( gradientStrainVector3d->giveSize() != 6 ) {
         _error("ImposeStrainConstrainsOnGradient: gradientStrainVector3d size mismatch");
     }
 
@@ -292,7 +183,7 @@ StructuralCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
         gradientStrainVector3d->at(5) = 0.;
         break;
     case _1dMat:
-        for ( i = 2; i <= 6; i++ ) {
+        for ( int i = 2; i <= 6; i++ ) {
             gradientStrainVector3d->at(i) = 0.;
         }
 
@@ -316,7 +207,6 @@ StructuralCrossSection :: computeStressIndependentStrainVector(FloatArray &answe
 //
 {
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
-    FloatArray e0, fullAnswer;
     // add parts caused by  material
     mat->computeStressIndependentStrainVector(answer, gp, stepN, mode);
 }

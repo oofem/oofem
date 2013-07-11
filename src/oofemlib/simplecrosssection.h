@@ -55,7 +55,6 @@
 //@}
 
 namespace oofem {
-class GaussPoint;
 
 /**
  * Class implementing "simple" cross section model in finite element problem.
@@ -88,19 +87,10 @@ public:
      */
     SimpleCrossSection(int n, Domain *d) : StructuralCrossSection(n, d) { }
 
-    //virtual void giveRealStresses(FloatArray &answer, GaussPoint *gp,
-    //                      const FloatArray &reducedStrainIncrement, TimeStep *tStep);
-
-    virtual void giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                   MatResponseMode mode,
-                                                   GaussPoint *gp, StructuralMaterial *mat,
-                                                   TimeStep *tStep);
-
-    virtual void computeStressIndependentStrainVector(FloatArray &answer,
-                                                      GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
-
     virtual double give(CrossSectionProperty a);
 
+    virtual void giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrainIncrement, TimeStep *tStep);
+    virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
 
     // identification and auxiliary functions
@@ -122,13 +112,6 @@ public:
      */
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
-
-protected:
-    virtual void giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                       MatResponseMode rMode,
-                                       GaussPoint *gp,
-                                       StructuralMaterial *mat,
-                                       TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // simplecrosssection_h

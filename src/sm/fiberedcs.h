@@ -118,11 +118,6 @@ public:
                                          GaussPoint *,
                                          TimeStep *tStep);
 
-    virtual void giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                   MatResponseMode rMode,
-                                                   GaussPoint *, StructuralMaterial *,
-                                                   TimeStep *tStep);
-
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
 
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStressVector3d);
@@ -173,16 +168,9 @@ public:
 #endif
 
 protected:
-    virtual void giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                               MatResponseMode rMode,
-                                               GaussPoint *gp,
-                                               StructuralMaterial *mat,
-                                               TimeStep *tStep);
-
     void give3dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
                                            MatResponseMode rMode,
                                            GaussPoint *gp,
-                                           StructuralMaterial *mat,
                                            TimeStep *tStep);
 
     FloatArray *GiveIntegrated3dBeamStress(GaussPoint *gp);

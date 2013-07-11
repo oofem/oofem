@@ -139,11 +139,6 @@ public:
     RheoChainMaterial(int n, Domain *d);
     virtual ~RheoChainMaterial();
 
-    virtual void giveStiffnessMatrix(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
-
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep);
 
@@ -174,6 +169,19 @@ public:
                                                MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *tStep);
+
+    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
+                                          MatResponseMode mmode,
+                                          GaussPoint *gp,
+                                          TimeStep *tStep);
+    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
+                                          MatResponseMode mmode,
+                                          GaussPoint *gp,
+                                          TimeStep *tStep);
+    virtual void give1dStressStiffMtrx(FloatMatrix &answer,
+                                       MatResponseMode mmode,
+                                       GaussPoint *gp,
+                                       TimeStep *tStep);
 
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
@@ -275,30 +283,6 @@ protected:
     /// Access to the time up to which the response should be accurate
     double giveEndOfTimeOfInterest();
 
-    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mmode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mmode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer,
-                                       MatResponseMode mmode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep);
-    virtual void give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mmode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
-    virtual void give2dPlateLayerStiffMtrx(FloatMatrix &answer,
-                                           MatResponseMode mmode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
-    virtual void give3dShellLayerStiffMtrx(FloatMatrix &answer,
-                                           MatResponseMode mmode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
     /**
      * Computes, for the given integration point,
      * the strain vector induced by stress-independent

@@ -91,7 +91,7 @@ public:
      * @param reducedStrainIncrement Strain increment vector in reduced form.
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrainIncrement, TimeStep *tStep);
+    virtual void giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrainIncrement, TimeStep *tStep) = 0;
 
 
     /**
@@ -169,75 +169,7 @@ public:
      * @param gp Integration point.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp,
-                                                 TimeStep *tStep);
-
-    /**
-     * Computes the stiffness matrix of receiver in given integration point, respecting its history.
-     * The algorithm should use temporary or equilibrium history variables stored in integration point status
-     * to compute and return required result.
-     * Passed material mode is always used instead of mode of given integration point.
-     * (Therefore, this function should be used if some object would like to obtain
-     * char matrix with different material form than that is associated with gp and its element)
-     *
-     * Elements should always pass their requests to their cross section model, which
-     * performs necessary integration over its volume and invokes necessary material
-     * services for corresponding material model defined for given integration point.
-     *
-     * @deprecated Please use giveCharMaterialStiffnessMatrix, this service will not be supported in future releases.
-     *
-     * @param answer Contains result.
-     * @param form Material response form.
-     * @param mode Material response mode.
-     * @param gp Integration point.
-     * @param mat Material to evaluate for.
-     * @param tStep Time step (most models are able to respond only when tStep is current time step).
-     */
-    virtual void giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                   MatResponseMode mode,
-                                                   GaussPoint *gp, StructuralMaterial *mat,
-                                                   TimeStep *tStep);
-    /**
-     * Computes the compliance matrix of receiver in given integration point, respecting its history.
-     * The algorithm should use temporary or equilibrium  history variables stored in integration point status
-     * to compute and return required result.
-     * Elements should always pass their requests to their cross section model, which
-     * performs necessary integration over its volume and invokes necessary material
-     * services for corresponding material model defined for given integration point.
-     * @param answer Contains result.
-     * @param mode Material response mode.
-     * @param gp Integration point.
-     * @param tStep Time step (most models are able to respond only when tStep is current time step).
-     */
-    virtual void giveCharMaterialComplianceMatrix(FloatMatrix &answer,
-                                                  MatResponseMode mode, GaussPoint *gp,
-                                                  TimeStep *tStep);
-
-    /**
-     * Computes the compliance matrix of receiver in given integration point, respecting its history.
-     * The algorithm should use temporary or equilibrium  history variables stored in integration point status
-     * to compute and return required result.
-     * Passed material mode is always used instead of mode of given integration point.
-     * (Therefore, this function should be used if some object would like to obtain
-     * char matrix with different material form than that is associated with gp and its element)
-     *
-     * Elements should always pass their requests to their cross section model, which
-     * performs necessary integration over its volume and invokes necessary material
-     * services for corresponding material model defined for given integration point.
-     *
-     * @deprecated Please use giveCharMaterialComplianceMatrix, this service will not be supported in future releases.
-     *
-     * @param answer Contains result.
-     * @param form Material response form.
-     * @param mode Material response mode.
-     * @param gp Integration point.
-     * @param mat Material to evaluate for.
-     * @param tStep Time step (most models are able to respond only when tStep is current time step).
-     */
-    virtual void giveCharMaterialComplianceMatrixOf(FloatMatrix &answer,
-                                                    MatResponseMode mode,
-                                                    GaussPoint *gp, StructuralMaterial *mat,
-                                                    TimeStep *tStep);
+    virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
 
     /**
      * Computes reduced strain vector not dependent on stresses in given integration point.
@@ -283,39 +215,6 @@ public:
 
     virtual int testCrossSectionExtension(CrossSectExtension ext) { return ( ( ext == CS_StructuralCapability ) ? 1 : 0 ); }
 
-protected:
-    /**
-     * For internal usage by cross section model.
-     * It is direct interface to material model service giveStiffnessMatrix.
-     * @see Material::giveStiffnessMatrix
-     */
-    void giveMaterialStiffnessMatrix(FloatMatrix &answer,
-                                     MatResponseMode mode,
-                                     GaussPoint *gp,
-                                     TimeStep *tStep);
-
-    /**
-     * For internal usage by cross section model.
-     * It is direct interface to material model service giveStiffnessMatrix.
-     * Material model passed as parameter is used instead of material, to which given integration point
-     * belongs to. It should always be the same material as integration point belongs to, because in
-     * integration point are stored load history variables related only to its associated material model.
-     * Different model can be used only if it does not depend on any internal history variables, like
-     * linear elastic material. Accessing load history variables, which are not in integration point status
-     * can lead to segmentation fault error.
-     * @see Material::giveStiffnessMatrix
-     * @param answer Contains result.
-     * @param form Material response form.
-     * @param mode Material response mode.
-     * @param gp Integration point.
-     * @param mat Pointer to material model.
-     * @param tStep Time step (most models are able to respond only when tStep is current time step).
-     */
-    virtual void giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               StructuralMaterial *mat,
-                                               TimeStep *tStep);
     friend class StructuralMaterial;
 };
 } // end namespace oofem

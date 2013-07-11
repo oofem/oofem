@@ -134,50 +134,20 @@ LayeredCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
 // only interface to material class, forcing returned matrix to be in reduced form.
 //
 {
-    this->giveMaterialStiffnessMatrixOf(answer, rMode, gp,
-                                        dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() ),
-                                        tStep);
-}
-
-///@todo Why are these here? Seems like pointless duplicates.
-void
-LayeredCrossSection :: giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                         MatResponseMode rMode,
-                                                         GaussPoint *gp,
-                                                         StructuralMaterial *mat,
-                                                         TimeStep *tStep)
-//
-// only interface to material class, forcing returned matrix to be in reduced form.
-//
-{
-    this->giveMaterialStiffnessMatrixOf(answer, rMode, gp, mat, tStep);
-}
-
-
-void
-LayeredCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                     MatResponseMode rMode,
-                                                     GaussPoint *gp,
-                                                     StructuralMaterial *mat,
-                                                     TimeStep *tStep)
-//
-// only interface to material class, forcing returned matrix to be in form form.
-//
-{
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _2dPlate ) {
-        this->give2dPlateMaterialStiffnessMatrix(answer, rMode, gp, mat, tStep);
+        this->give2dPlateMaterialStiffnessMatrix(answer, rMode, gp, tStep);
     } else if ( mode == _2dBeam ) {
-        this->give2dBeamMaterialStiffnessMatrix(answer, rMode, gp, mat, tStep);
+        this->give2dBeamMaterialStiffnessMatrix(answer, rMode, gp, tStep);
     } else if ( mode == _3dShell ) {
-        this->give3dShellMaterialStiffness(answer, rMode, gp, mat, tStep);
+        this->give3dShellMaterialStiffness(answer, rMode, gp, tStep);
     } else {
         ///@todo We shouldn't send "mat" argument to these functions. The cross-section should define this.
         int ngps = gp->giveIntegrationRule()->giveNumberOfIntegrationPoints();
         int gpnum = gp->giveNumber();
         int gpsperlayer = ngps / this->numberOfLayers;
         int layer = (gpnum - 1) / gpsperlayer + 1;
-        mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(layer) ) );
+        StructuralMaterial *mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(layer) ) );
         if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
             mat->giveStiffnessMatrix(answer, rMode, gp, tStep);
         } else {
@@ -208,7 +178,6 @@ void
 LayeredCrossSection :: give2dPlateMaterialStiffnessMatrix(FloatMatrix &answer,
                                                           MatResponseMode rMode,
                                                           GaussPoint *gp,
-                                                          StructuralMaterial *mat,
                                                           TimeStep *tStep)
 
 //
@@ -282,7 +251,6 @@ void
 LayeredCrossSection :: give3dShellMaterialStiffness(FloatMatrix &answer,
                                                     MatResponseMode rMode,
                                                     GaussPoint *gp,
-                                                    StructuralMaterial *mat,
                                                     TimeStep *tStep)
 //
 // return material stiffness matrix for derived types of stressStreinState
@@ -296,13 +264,11 @@ LayeredCrossSection :: give3dShellMaterialStiffness(FloatMatrix &answer,
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    //Material * mat = gp->giveElement()->giveMaterial();
     FloatMatrix layerMatrix;
     GaussPoint *layerGp;
     double layerThick, layerWidth, layerZCoord, top, bottom, layerZeta;
     // double zi, zi1;
     double layerZCoord2;
-    int i;
 
     if ( mode != _3dShell ) {
         _error("give3dShellMaterialStiffness : unsupported mode");
@@ -317,7 +283,7 @@ LayeredCrossSection :: give3dShellMaterialStiffness(FloatMatrix &answer,
     bottom = -midSurfaceZcoordFromBottom;
     top    = totalThick - midSurfaceZcoordFromBottom;
 
-    for ( i = 1; i <= numberOfLayers; i++ ) {
+    for ( int i = 1; i <= numberOfLayers; i++ ) {
         layerGp = giveSlaveGaussPoint(gp, i - 1);
         this->giveLayerMaterialStiffnessMatrix(layerMatrix, rMode, layerGp, tStep);
         //
@@ -371,7 +337,6 @@ void
 LayeredCrossSection :: give2dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
                                                          MatResponseMode rMode,
                                                          GaussPoint *gp,
-                                                         StructuralMaterial *mat,
                                                          TimeStep *tStep)
 //
 // return material stiffness matrix for derived types of stressStreinState
@@ -448,7 +413,7 @@ LayeredCrossSection :: imposeStressConstrainsOnGradient(GaussPoint *gp,
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    int i, size = gradientStressVector3d->giveSize();
+    int size = gradientStressVector3d->giveSize();
     if ( size != 6 ) {
         _error("ImposeStressConstrainsOnGradient: gradientStressVector3d size mismatch");
     }
@@ -461,7 +426,7 @@ LayeredCrossSection :: imposeStressConstrainsOnGradient(GaussPoint *gp,
         gradientStressVector3d->at(3) = 0.;
         break;
     case _2dBeamLayer:
-        for ( i = 2; i <= 5; i++ ) {
+        for ( int i = 2; i <= 5; i++ ) {
             gradientStressVector3d->at(i) = 0.;
         }
 
@@ -487,8 +452,7 @@ LayeredCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    int i, size = gradientStrainVector3d->giveSize();
-    if ( size != 6 ) {
+    if ( gradientStrainVector3d->giveSize() != 6 ) {
         _error("ImposeStrainConstrainsOnGradient: gradientStrainVector3d size mismatch");
     }
 
@@ -500,7 +464,7 @@ LayeredCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
         gradientStrainVector3d->at(3) = 0.;
         break;
     case _2dBeamLayer:
-        for ( i = 2; i <= 5; i++ ) {
+        for ( int i = 2; i <= 5; i++ ) {
             gradientStrainVector3d->at(i) = 0.;
         }
 
