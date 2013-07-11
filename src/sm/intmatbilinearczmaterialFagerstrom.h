@@ -32,25 +32,25 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef bilinearczmaterialFagerstrom_h
-#define bilinearczmaterialFagerstrom_h
+#ifndef intmatbilinearczmaterialFagerstrom_h
+#define intmatbilinearczmaterialFagerstrom_h
 
 #include "structuralmaterial.h"
 #include "structuralms.h"
 #include "structuralinterfacematerial.h"
 
 
-///@name Input fields for BilinearCZMaterialFagerstrom
+///@name Input fields for IntMatBilinearCZFagerstrom
 //@{
-#define _IFT_BilinearCZMaterialFagerstrom_Name "bilinearczmaterialFagerstrom"
-#define _IFT_BilinearCZMaterialFagerstrom_kn "kn"
-#define _IFT_BilinearCZMaterialFagerstrom_ks "ks"
-#define _IFT_BilinearCZMaterialFagerstrom_knc "knc"
-#define _IFT_BilinearCZMaterialFagerstrom_g1c "g1c"
-#define _IFT_BilinearCZMaterialFagerstrom_g2c "g2c"
-#define _IFT_BilinearCZMaterialFagerstrom_mu "mu"
-#define _IFT_BilinearCZMaterialFagerstrom_gamma "gamma"
-#define _IFT_BilinearCZMaterialFagerstrom_sigf "sigf"
+#define _IFT_IntMatBilinearCZFagerstrom_Name "intmatbilinearczfagerstrom"
+#define _IFT_IntMatBilinearCZFagerstrom_kn "kn"
+#define _IFT_IntMatBilinearCZFagerstrom_ks "ks"
+#define _IFT_IntMatBilinearCZFagerstrom_knc "knc"
+#define _IFT_IntMatBilinearCZFagerstrom_g1c "g1c"
+#define _IFT_IntMatBilinearCZFagerstrom_g2c "g2c"
+#define _IFT_IntMatBilinearCZFagerstrom_mu "mu"
+#define _IFT_IntMatBilinearCZFagerstrom_gamma "gamma"
+#define _IFT_IntMatBilinearCZFagerstrom_sigf "sigf"
 //@}
 
 namespace oofem {
@@ -58,7 +58,8 @@ namespace oofem {
 /**
  * This class implements associated Material Status for ...
  */
-class BilinearCZMaterialFagerstromStatus : public StructuralMaterialStatus
+class IntMatBilinearCZFagerstromStatus : public StructuralMaterialStatus
+//class BilinearCZMaterialFagerstromStatus : public StructuralInterfaceMaterialStatus
 {
 protected:
 
@@ -90,14 +91,14 @@ protected:
     
 public:
     /// Constructor
-    BilinearCZMaterialFagerstromStatus(int n, Domain *d, GaussPoint *g);
+    IntMatBilinearCZFagerstromStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor
-    virtual ~BilinearCZMaterialFagerstromStatus();
+    virtual ~IntMatBilinearCZFagerstromStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     // definition
-    virtual const char *giveClassName() const { return "BilinearCZMaterialFagerstromStatus"; }
+    virtual const char *giveClassName() const { return "IntMatBilinearCZFagerstromStatus"; }
     virtual classType giveClassID() const { return MaterialStatusClass; }
 
     double giveDamage() { return damage; }
@@ -146,7 +147,8 @@ public:
  * is governed by normal component of generalized strain vector (normal relative displacement)
  * by an exponential softening law.
  */
-class BilinearCZMaterialFagerstrom : public StructuralMaterial
+//class BilinearCZMaterialFagerstrom : public StructuralMaterial
+class IntMatBilinearCZFagerstrom : public StructuralInterfaceMaterial
 {
 protected:
     /// Material parameters
@@ -164,33 +166,31 @@ protected:
     virtual int checkConsistency();
     void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                                      GaussPoint *gp, TimeStep *atTime);
+
 public:
     /// Constructor
-    BilinearCZMaterialFagerstrom(int n, Domain *d);
+    IntMatBilinearCZFagerstrom(int n, Domain *d);
     /// Destructor
-    virtual ~BilinearCZMaterialFagerstrom();
+    virtual ~IntMatBilinearCZFagerstrom();
 
     virtual int hasNonLinearBehaviour()   { return 1; }
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
-    virtual const char *giveClassName() const { return "BilinearCZMaterialFagerstrom"; }
+    virtual int hasMaterialModeCapability(MaterialMode mode); // remove
+    virtual const char *giveClassName() const { return "IntMatBilinearCZMaterialFagerstrom"; }
     virtual classType giveClassID() const { return MaterialStatusClass; }
     virtual const char *giveInputRecordName() const { return _IFT_BilinearCZMaterialFagerstrom_Name; }
     
+    
+    virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
+                                         const FloatArray &reducedF, TimeStep *tStep);
+    virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                              const FloatArray &reducedStrain, TimeStep *tStep);
 
-    virtual void giveStiffnessMatrix(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
     
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
-    //virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
 
     virtual IRResultType initializeFrom(InputRecord *ir);

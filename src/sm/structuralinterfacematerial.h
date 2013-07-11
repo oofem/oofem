@@ -92,39 +92,12 @@ public:
     /// Destructor.
     virtual ~StructuralInterfaceMaterial() { }
 
-    /**
-     * Computes the stiffness matrix of receiver in given integration point, respecting its history.
-     * The algorithm should use temporary or equilibrium  history variables stored in integration point status
-     * to compute and return required result.
-     * @param answer Contains result.
-     * @param form Material response form.
-     * @param mode Material response mode.
-     * @param gp Integration point.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
-     */
-    virtual void  giveStiffnessMatrix_Eng(FloatMatrix &answer,
-                                           MatResponseForm form,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
 
-    /**
-     * Computes the first Piola-Kirchoff traction vector for given total jump/gap and integration point.
-     * The total gap is computed from the displacement field at the given time step.
-     * The service should use previously reached equilibrium history variables. Also
-     * it should update temporary history variables in status according to newly reached state.
-     * The temporary history variables are moved into equilibrium ones after global structure
-     * equilibrium has been reached by iteration process.
-     * @param answer Contains result.
-     * @param form Material response form.
-     * @param gp Integration point.
-     * @param reducedStrain Strain vector in reduced form.
-     * @param tStep Current time step (most models are able to respond only when atTime is current time step).
-     */
-    virtual void giveEngTraction(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep) = 0;
+
+
 
     /// @name Methods associated with large deformation analysis
+
     //@{
     /**
      * Computes the first Piola-Kirchoff traction vector for given total jump/gap and integration point.
@@ -139,20 +112,58 @@ public:
      * @param reducedF Deformation gradient in in reduced form.
      * @param tStep Current time step (most models are able to respond only when atTime is current time step).
      */
-    virtual void giveFirstPKTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                         const FloatArray &reducedF, TimeStep *tStep);
+    virtual void giveFirstPKTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
+                                         const FloatArray &reducedF, TimeStep *tStep)
+                                         { _error("give1dtiffnessMatrix_Eng: not implemented "); }
+    virtual void giveFirstPKTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
+                                         const FloatArray &reducedF, TimeStep *tStep)
+                                         { _error("give1dtiffnessMatrix_Eng: not implemented "); }
+    virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
+                                         const FloatArray &reducedF, TimeStep *tStep)
+                                         { _error("give1dtiffnessMatrix_Eng: not implemented "); }
+
+    virtual void giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
+    { _error("give1dtiffnessMatrix_Eng: not implemented "); }
+    virtual void giveEngTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
+        { _error("give1dtiffnessMatrix_Eng: not implemented "); }
+    virtual void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
+        { _error("give1dtiffnessMatrix_Eng: not implemented "); }
+    
+    
+    
+        /**
+     * Computes the stiffness matrix of receiver in given integration point, respecting its history.
+     * The algorithm should use temporary or equilibrium  history variables stored in integration point status
+     * to compute and return required result.
+     * @param answer Contains result.
+     * @param form Material response form.
+     * @param mode Material response mode.
+     * @param gp Integration point.
+     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     */
 
     /**
-     * Gives the tangent: @f$ \frac{\partial P}{\partial F} @f$.
+     * Gives the tangent: @f$ \frac{\partial T}{\partial j} @f$.
+     * Where T is the first PK traction and j is the spatial jump between the two sides, x(+) - x(-)
      * @param answer The computed tangent from the last evaluated first-PK-stress.
      * @param form Material response form.
      * @param rMode Material mode.
      * @param gp Gauss point.
      * @param tStep Time step.
      */
-    virtual void giveStiffnessMatrix_dTdg(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
-                                          GaussPoint *gp, TimeStep *tStep);
+    virtual void give1dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+        { _error("give1dtiffnessMatrix_Eng: not implemented "); }
+    virtual void give2dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+        { _error("give1dtiffnessMatrix_Eng: not implemented "); }
+    virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+        { _error("give1dtiffnessMatrix_Eng: not implemented "); }
 
+    virtual void give1dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+    { _error("give1dtiffnessMatrix_Eng: not implemented "); }
+    virtual void give2dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+    { _error("give2dStiffnessMatrix_Eng: not implemented "); }
+    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+    { _error("give3dStiffnessMatrix_Eng: not implemented "); }
     //@}
 
     // identification and auxiliary functions
@@ -162,50 +173,24 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
-    
-    virtual void give3dMaterialStiffnessMatrix_Eng(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep)
-    { _error("give3dMaterialStiffnessMatrix: not implemented "); }
 
 
-    virtual void give3dMaterialStiffnessMatrix_dTdg(FloatMatrix &answer,
-                                       MatResponseMode mode,
-                                       GaussPoint *gp, TimeStep *tStep);
-
-    
-    virtual int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type);
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
+    //virtual int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type);
+    //virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    //virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
+    //virtual InternalStateValueType giveIPValueType(InternalStateType type);
+    //virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
 
 protected:
-    /**
-     * Computes characteristic stiffness matrix corresponding to given material mode
-     * (obtained form integration point) by reduction of 3d stiffness matrix.
-     * This is general method, how to obtain stiffness matrix corresponding to specific mode
-     * from general 3d stiffness. Therefore, it is only necessary to implement algorithm for
-     * computing general 3d stiffness. However, this reduction is quite time consuming
-     * and if it is possible, it is recommended to provide direct methods for computing
-     * particular stiffnesses for supported material modes.
-     * @param answer Reduced stiffness.
-     * @param form Material response form.
-     * @param gp Integration point.
-     * @param stiffMtrx3d 3d stiffness matrix (full form) in given integration point.
-     */
-    void reduceStiffMtrx3d(FloatMatrix &answer, MatResponseForm form, GaussPoint *gp,
-                           FloatMatrix &stiffMtrx3d) const;
-
+   
     
     /**
-     * Transforms 3d strain vector into another coordinate system.
-     * @param answer Transformed strain vector
-     * @param base Transformation matrix. There are on each column stored unit vectors of
-     * coordinate system (so called base vectors) to which we do transformation. These vectors must
+     * Transforms 3d traction vector into another coordinate system.
+     * @param answer Transformed traction vector
+     * @param base Transformation matrix. The columns in the matrix corresponds to the base vectors of the new 
+     * coordinate system to which we do transformation. These vectors must
      * be expressed in the same coordinate system as source strainVector.
-     * @param strainVector 3d strain.
+     * @param strainVector 3d traction.
      * @param transpose Determines if we transpose matrix before transforming.
      */
     static void transformTractionTo(FloatArray &answer, const FloatMatrix &base,

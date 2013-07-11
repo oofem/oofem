@@ -41,12 +41,13 @@
 #include "contextioerr.h"
 #include "classfactory.h"
 #include "shell7base.h"
-
+#include "intmatbilinearczmaterialFagerstrom.h"
 namespace oofem {
 
-    REGISTER_Material( BilinearCZMaterialFagerstrom );
+    REGISTER_Material( IntMatBilinearCZFagerstrom );
 
-    BilinearCZMaterialFagerstrom :: BilinearCZMaterialFagerstrom(int n, Domain *d) : StructuralMaterial(n, d)
+//    IntMatBilinearCZFagerstrom :: IntMatBilinearCZFagerstrom(int n, Domain *d) : StructuralMaterial(n, d)
+    IntMatBilinearCZFagerstrom :: IntMatBilinearCZFagerstrom(int n, Domain *d) : StructuralInterfaceMaterial(n, d)
         //
         // constructor
         //
@@ -54,14 +55,14 @@ namespace oofem {
     }
 
 
-    BilinearCZMaterialFagerstrom :: ~BilinearCZMaterialFagerstrom()
+    IntMatBilinearCZFagerstrom :: ~IntMatBilinearCZFagerstrom()
         //
         // destructor
         //
     { }
 
     int
-        BilinearCZMaterialFagerstrom :: hasMaterialModeCapability(MaterialMode mode)
+        IntMatBilinearCZFagerstrom :: hasMaterialModeCapability(MaterialMode mode)
     {
         // returns whether receiver supports given mode
         if ( mode == _3dInterface ) {
@@ -74,10 +75,13 @@ namespace oofem {
 
 
 
-    void
-        BilinearCZMaterialFagerstrom :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-        const FloatArray &jumpVector,
-        TimeStep *atTime)
+//void
+//IntMatBilinearCZFagerstrom :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+//        const FloatArray &jumpVector,
+//        TimeStep *atTime)
+void 
+IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
+                                         const FloatArray &reducedF, TimeStep *tStep)
         //
         // returns real stress vector in 3d stress space of receiver according to
         // previous level of stress and current
@@ -97,7 +101,7 @@ namespace oofem {
         FloatMatrix Finv(3,3), F(3,3);
         FloatArray d(3), dJ(3);
 
-
+        FloatArray jumpVector;
         d.at(1) = jumpVector.at(1);
         d.at(2) = jumpVector.at(2);
         d.at(3) = jumpVector.at(3);
@@ -333,11 +337,9 @@ namespace oofem {
         printf("damage %e \n", oldDamage + dAlpha );
     }
 
+
 void
-BilinearCZMaterialFagerstrom :: giveStiffnessMatrix(FloatMatrix &answer,
-                                                    MatResponseMode rMode,
-                                                    GaussPoint *gp, 
-                                                    TimeStep *atTime)
+IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
         //
         // Returns characteristic material stiffness matrix of the receiver
         //
@@ -346,125 +348,125 @@ BilinearCZMaterialFagerstrom :: giveStiffnessMatrix(FloatMatrix &answer,
         switch ( mMode ) {
         case _3dInterface:
         case _3dMat:
-            give3dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, atTime);
+            give3dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, tStep);
             break;
-        default:
+        //default:
             //StructuralMaterial :: giveCharacteristicMatrix(answer, rMode, gp, atTime);
-            StructuralMaterial :: give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
+            //StructuralMaterial :: give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
         }
     }
 
 
-    void
-        BilinearCZMaterialFagerstrom :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
+void
+IntMatBilinearCZFagerstrom :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
         GaussPoint *gp, TimeStep *atTime)
-    {
-        BilinearCZMaterialFagerstromStatus *status = static_cast< BilinearCZMaterialFagerstromStatus * >( this->giveStatus(gp) );
+{
+    BilinearCZMaterialFagerstromStatus *status = static_cast< BilinearCZMaterialFagerstromStatus * >( this->giveStatus(gp) );
 
 
-        double damage = status->giveTempDamage();
-        FloatMatrix Finv = status->giveTempInverseDefGrad();
-        FloatMatrix help;
-        FloatMatrix Kstiff(3,3);
-        FloatMatrix Rot = status->giveTempRotationMatrix();
-        Kstiff.zero();
-        Kstiff.at(1,1) = this->ks0;
-        Kstiff.at(2,2) = this->ks0;
-        Kstiff.at(3,3) = this->kn0;
-        Kstiff.rotatedWith(Rot);
+    double damage = status->giveTempDamage();
+    FloatMatrix Finv = status->giveTempInverseDefGrad();
+    FloatMatrix help;
+    FloatMatrix Kstiff(3,3);
+    FloatMatrix Rot = status->giveTempRotationMatrix();
+    Kstiff.zero();
+    Kstiff.at(1,1) = this->ks0;
+    Kstiff.at(2,2) = this->ks0;
+    Kstiff.at(3,3) = this->kn0;
+    Kstiff.rotatedWith(Rot);
 
-        if (damage >= 1.0) {
-            answer.resize(3,3);
-            answer.zero();
-        } else {
+    if (damage >= 1.0) {
+        answer.resize(3,3);
+        answer.zero();
+    } else {
         
-            if (status->giveTempDamage()-status->giveDamage()==0.0) {
-                //Kstiff.printYourself();
-                //Rot.printYourself();
-                //Kstiff.rotatedWith(Rot);
-                //Kstiff.printYourself();
-                help.beProductOf(Kstiff,Finv);
-                answer.beTProductOf(Finv,help);
-                answer.times(1-damage);						// Ea=(1-new_alpha)*MATMUL(TRANSPOSE(Fci),MATMUL(Keye3,Fci))
-            } else {
+        if (status->giveTempDamage()-status->giveDamage()==0.0) {
+            //Kstiff.printYourself();
+            //Rot.printYourself();
+            //Kstiff.rotatedWith(Rot);
+            //Kstiff.printYourself();
+            help.beProductOf(Kstiff,Finv);
+            answer.beTProductOf(Finv,help);
+            answer.times(1-damage);						// Ea=(1-new_alpha)*MATMUL(TRANSPOSE(Fci),MATMUL(Keye3,Fci))
+        } else {
 
-                FloatMatrix Iep = status->giveTempIep();
+            FloatMatrix Iep = status->giveTempIep();
 
-                answer.beProductOf(Kstiff, Iep);
-                answer.rotatedWith(Rot);						// Ea_h = MATMUL(TRANSPOSE(Rot),MATMUL(Keye3,Iep))
-                                                            // Ea_h = MATMUL(Ea_h,Rot)
+            answer.beProductOf(Kstiff, Iep);
+            answer.rotatedWith(Rot);						// Ea_h = MATMUL(TRANSPOSE(Rot),MATMUL(Keye3,Iep))
+                                                        // Ea_h = MATMUL(Ea_h,Rot)
 
-                FloatArray alpha_v = status->giveTempAlphav();
-                alpha_v.rotatedWith(Rot, 't');					// alpha_v = MATMUL(TRANSPOSE(Rot),alpha_v)
+            FloatArray alpha_v = status->giveTempAlphav();
+            alpha_v.rotatedWith(Rot, 't');					// alpha_v = MATMUL(TRANSPOSE(Rot),alpha_v)
 
-                FloatMatrix t1hatFinvOpen;
-                FloatArray temp1, temp2, Qtemp;
-                Qtemp = status->giveTempEffectiveMandelTraction();
+            FloatMatrix t1hatFinvOpen;
+            FloatArray temp1, temp2, Qtemp;
+            Qtemp = status->giveTempEffectiveMandelTraction();
 
-                temp1.beTProductOf(Finv,Qtemp);				// CALL gmopen33(MATMUL(TRANSPOSE(Fci),Q),MATMUL(alpha_v,Fci),t1halFci_o)
-                temp2.beTProductOf(Finv,alpha_v);
+            temp1.beTProductOf(Finv,Qtemp);				// CALL gmopen33(MATMUL(TRANSPOSE(Fci),Q),MATMUL(alpha_v,Fci),t1halFci_o)
+            temp2.beTProductOf(Finv,alpha_v);
 
-                t1hatFinvOpen.beDyadicProductOf(temp1,temp2);
+            t1hatFinvOpen.beDyadicProductOf(temp1,temp2);
 
-                help.beProductOf(answer,Finv);			// Ea = (1-new_alpha)*MATMUL(TRANSPOSE(Fci),MATMUL(Ea_h,Fci)) -&
-                answer.beTProductOf(Finv,help);			//			t1halFci_o
-                answer.times(1-damage);
-                answer.subtract(t1hatFinvOpen);
-            }
+            help.beProductOf(answer,Finv);			// Ea = (1-new_alpha)*MATMUL(TRANSPOSE(Fci),MATMUL(Ea_h,Fci)) -&
+            answer.beTProductOf(Finv,help);			//			t1halFci_o
+            answer.times(1-damage);
+            answer.subtract(t1hatFinvOpen);
         }
-                                                            
-        //@todoMartin Insert code for full compressive stiffness!!!
-        //Finv.printYourself();
-        //Kstiff.printYourself();
-        //answer.printYourself();
-
     }
+                                                            
+    //@todoMartin Insert code for full compressive stiffness!!!
+    //Finv.printYourself();
+    //Kstiff.printYourself();
+    //answer.printYourself();
+
+}
 
 
 
 
 
 int
-BilinearCZMaterialFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+IntMatBilinearCZFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
     if ( type == IST_DamageScalar ) {
         BilinearCZMaterialFagerstromStatus *status = static_cast< BilinearCZMaterialFagerstromStatus * >( this->giveStatus(aGaussPoint) );
         return status->giveTempDamage();
     } else {
-        return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return StructuralInterfaceMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 
 }
 
 
-    InternalStateValueType
-        BilinearCZMaterialFagerstrom :: giveIPValueType(InternalStateType type)
-    {
-        //@todoMartin Insert code here if necessaryfor returning type of internal state
-        return StructuralMaterial :: giveIPValueType(type);
-    }
+InternalStateValueType
+    IntMatBilinearCZFagerstrom :: giveIPValueType(InternalStateType type)
+{
+    //@todoMartin Insert code here if necessaryfor returning type of internal state
+    return StructuralInterfaceMaterial :: giveIPValueType(type);
+}
 
 
-    int
-        BilinearCZMaterialFagerstrom :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-    {
-        //@todoMartin check if this needs to be updated
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
+int
+    IntMatBilinearCZFagerstrom :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
+{
+    //@todoMartin check if this needs to be updated
+    return StructuralInterfaceMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
+}
 
 
-    int
-        BilinearCZMaterialFagerstrom :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-    {
-        //@todoMartin Insert code for returning size of internal state
-        return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
-    }
+int
+    IntMatBilinearCZFagerstrom :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
+{
+    //@todoMartin Insert code for returning size of internal state
+    return StructuralInterfaceMaterial :: giveIPValueSize(type, aGaussPoint);
+}
 
 
 
     const double tolerance = 1.0e-12; // small number
     IRResultType
-        BilinearCZMaterialFagerstrom :: initializeFrom(InputRecord *ir)
+        IntMatBilinearCZFagerstrom :: initializeFrom(InputRecord *ir)
     {
         const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
         IRResultType result;                    // Required by IR_GIVE_FIELD macro
@@ -493,25 +495,25 @@ BilinearCZMaterialFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *aGau
     }
 
     int
-        BilinearCZMaterialFagerstrom :: checkConsistency()
+        IntMatBilinearCZFagerstrom :: checkConsistency()
     {
         if ( this->kn0 < 0.0 ) {
-            OOFEM_ERROR2("BilinearCZMaterialFagerstrom :: initializeFrom - stiffness kn0 is negative (%.2e)", this->kn0);
+            OOFEM_ERROR2("IntMatBilinearCZFagerstrom :: initializeFrom - stiffness kn0 is negative (%.2e)", this->kn0);
         } else if ( this->ks0 < 0.0 ) {
-            OOFEM_ERROR2("BilinearCZMaterialFagerstrom :: initializeFrom - stiffness ks0 is negative (%.2e)", this->ks0);
+            OOFEM_ERROR2("IntMatBilinearCZFagerstrom :: initializeFrom - stiffness ks0 is negative (%.2e)", this->ks0);
         } else if ( this->GIc < 0.0 ) {
-            OOFEM_ERROR2("BilinearCZMaterialFagerstrom :: initializeFrom - GIc is negative (%.2e)", this->GIc);
+            OOFEM_ERROR2("IntMatBilinearCZFagerstrom :: initializeFrom - GIc is negative (%.2e)", this->GIc);
         } else if ( this->GIIc < 0.0 ) {
-            OOFEM_ERROR2("BilinearCZMaterialFagerstrom :: initializeFrom - GIIc is negative (%.2e)", this->GIIc);
+            OOFEM_ERROR2("IntMatBilinearCZFagerstrom :: initializeFrom - GIIc is negative (%.2e)", this->GIIc);
         } else if ( this->gamma < 0.0  ) { 
-            OOFEM_ERROR2("BilinearCZMaterialFagerstrom :: initializeFrom - gamma (%.2e) is below zero which is unphysical" ,
+            OOFEM_ERROR2("IntMatBilinearCZFagerstrom :: initializeFrom - gamma (%.2e) is below zero which is unphysical" ,
                 this->gamma);
         }
         return 1;
     }
 
     void
-        BilinearCZMaterialFagerstrom  :: printYourself()
+        IntMatBilinearCZFagerstrom  :: printYourself()
     {
         printf("Paramters for BilinearCZMaterial: \n");
 
@@ -532,7 +534,7 @@ BilinearCZMaterialFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *aGau
 
     }
 
-    BilinearCZMaterialFagerstromStatus :: BilinearCZMaterialFagerstromStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
+    IntMatBilinearCZFagerstromStatus :: IntMatBilinearCZFagerstromStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
     {
         oldMaterialJump.resize(3);
         oldMaterialJump.zero();
@@ -583,12 +585,12 @@ BilinearCZMaterialFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *aGau
     }
 
 
-    BilinearCZMaterialFagerstromStatus :: ~BilinearCZMaterialFagerstromStatus()
+    IntMatBilinearCZFagerstromStatus :: ~IntMatBilinearCZFagerstromStatus()
     { }
 
 
     void
-        BilinearCZMaterialFagerstromStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+        IntMatBilinearCZFagerstromStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     {
         //@todo Martin: kolla behovet av denna
         StructuralMaterialStatus :: printOutputAt(file, tStep);
@@ -604,7 +606,7 @@ BilinearCZMaterialFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *aGau
 
 
     void
-        BilinearCZMaterialFagerstromStatus :: initTempStatus()
+        IntMatBilinearCZFagerstromStatus :: initTempStatus()
     {
         //@todo Martin: Is this really necessary in this particular case??
         StructuralMaterialStatus :: initTempStatus();
@@ -628,7 +630,7 @@ BilinearCZMaterialFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *aGau
     }
 
     void
-        BilinearCZMaterialFagerstromStatus :: updateYourself(TimeStep *atTime)
+        IntMatBilinearCZFagerstromStatus :: updateYourself(TimeStep *atTime)
     {
         //@todo Martin: kolla behovet av denna
         StructuralMaterialStatus :: updateYourself(atTime);

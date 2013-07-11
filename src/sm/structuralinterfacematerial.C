@@ -54,20 +54,21 @@ StructuralInterfaceMaterial :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-    return mode == _1dMat  ||  mode == _2dMat ||
-           mode == _3dMat;
+    return mode == _1dInterface  ||  mode == _2dInterface ||
+           mode == _3dInterface;
 }
 
-
-void
-StructuralInterfaceMaterial :: giveFirstPKTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                         const FloatArray &reducedF, TimeStep *tStep)
-{
-    // compute F
-    // compute jump vector
-    // transform to local orthogonal coord system
-    // call stress from material
-}
+//
+//void
+//StructuralInterfaceMaterial :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
+//                                         const FloatArray &reducedF, TimeStep *tStep)
+//{
+//    // what should be done before call:
+//    // compute F
+//    // compute jump vector
+//    // transform to local orthogonal coord system
+//    // call stress from material
+//}
 
 
 
