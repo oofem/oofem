@@ -413,178 +413,6 @@ public:
 
 protected:
     /**
-     * Computes characteristic stiffness matrix corresponding to given material mode
-     * (obtained form integration point) by reduction of 3d stiffness matrix.
-     * This is general method, how to obtain stiffness matrix corresponding to specific mode
-     * from general 3d stiffness. Therefore, it is only necessary to implement algorithm for
-     * computing general 3d stiffness. However, this reduction is quite time consuming
-     * and if it is possible, it is recommended to provide direct methods for computing
-     * particular stiffnesses for supported material modes.
-     * @param answer Reduced stiffness.
-     * @param form Material response form.
-     * @param gp Integration point.
-     * @param stiffMtrx3d 3d stiffness matrix (full form) in given integration point.
-     */
-    void reduceStiffMtrx3d(FloatMatrix &answer, GaussPoint *gp,
-                           FloatMatrix &stiffMtrx3d) const;
-    /**
-     * Computes characteristic compliance matrix corresponding to given material mode
-     * (obtained form integration point) by reduction of full 3d compliance matrix.
-     * This is general method, how to obtain compliance matrix corresponding to specific mode
-     * from general 3d compliance. Therefore, it is only necessary to implement algorithm for
-     * computing general 3d compliance. However, this reduction is quite time consuming
-     * and if it is possible, it is recommended to provide direct methods for computing
-     * particular compliances for supported material modes.
-     * @param answer Reduced compliance matrix.
-     * @param form Material response form.
-     * @param gp Integration point.
-     * @param complMtrx3d 3d compliance matrix (full form) in given integration point.
-     */
-    void reduceComplMtrx3d(FloatMatrix &answer, GaussPoint *gp,
-                           FloatMatrix &complMtrx3d) const;
-    /**
-     * Reduces full 3d stiffness matrix to 2d plane stress matrix.
-     * The 3d stiffness should be computed for integration point passed as parameter.
-     * @param answer Computed reduced stiffness matrix.
-     * @param form Material response form.
-     * @param gp Integration point.
-     * @param stiffMtrx3d 3d stiffness matrix (in full form).
-     */
-    void reduceToPlaneStressStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
-    /**
-     * Reduces full 3d stiffness matrix to 2d plane strain matrix.
-     * The 3d stiffness should be computed for integration point passed as parameter.
-     * Note: as already described, if zero strain component is imposed
-     * (Plane strain, ..) this condition must be taken into account in geometrical
-     * relations, and corresponding component has to be included in reduced vector.
-     * (So plane strain conditions are @f$ \epsilon_z = \gamma_{xz} = \gamma_{yz} = 0 @f$, but relations
-     * for @f$\epsilon_z @f$ and @f$ \sigma_z @f$ are included).
-     * @param answer Computed reduced stiffness matrix.
-     * @param form Material response form.
-     * @param gp Integration point.
-     * @param stiffMtrx3d 3d stiffness matrix (in full form).
-     */
-    void reduceToPlaneStrainStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
-    /**
-     * Reduces full 3d stiffness matrix to 1d matrix
-     * 1d case: @f$ \sigma_y = \sigma_z = \tau_{yz} = \tau_{zx} = \tau_{xy} = 0 @f$.
-     * The 3d stiffness should be computed for integration point passed as parameter.
-     * @param answer Computed reduced stiffness matrix.
-     * @param form Material response form.
-     * @param gp Integration point.
-     * @param stiffMtrx3d 3d stiffness matrix (in full form).
-     */
-    void reduceTo1dStressStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
-    /**
-     * Reduces full 3d stiffness matrix to 2d beam layer matrix.
-     * 2dbeamLayer: @f$ \sigma_y = \sigma_z = \tau_{zy} = \tau_{xy} = 0 @f$.
-     * The 3d stiffness should be computed for integration point passed as parameter.
-     * @param answer Computed reduced stiffness matrix.
-     * @param form Material response form.
-     * @param gp Integration point.
-     * @param stiffMtrx3d 3d stiffness matrix (in full form).
-     */
-    void reduceTo2dBeamLayerStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
-    /**
-     * Reduces full 3d stiffness matrix to 2d plate layer stiffness matrix.
-     * 2dplatelayermode: @f$ \sigma_z = 0 @f$.
-     * @param answer Computed reduced stiffness matrix.
-     * @param form Material response form.
-     * @param gp Integration point.
-     * @param stiffMtrx3d 3d stiffness matrix (in full form).
-     */
-    void reduceTo2dPlateLayerStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
-    /**
-     * Reduces full 3d stiffness matrix to 1d fiber stiffness matrix.
-     * 2dplatelayermode: @f$ \sigma_y = \sigma_z = \tau_{yz} = 0 @f$.
-     * @param answer Computed reduced stiffness matrix.
-     * @param form Material response form.
-     * @param gp Integration point.
-     * @param stiffMtrx3d 3d stiffness matrix (in full form).
-     */
-    void reduceTo1dFiberStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
-    /**
-     * Reduces full 3d stiffness matrix to 3d shell layer stiffness matrix.
-     * @see StructuralMaterial::reduceTo2dPlateLayerStiffMtrx
-     * @param answer Computed reduced stiffness matrix.
-     * @param form Material response form.
-     * @param gp Integration point.
-     * @param stiffMtrx3d 3d stiffness matrix (in full form).
-     */
-    void reduceTo3dShellLayerStiffMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &stiffMtrx3d) const;
-
-
-    /**
-     * Reduces full 3d compliance matrix to 2d plane stress matrix.
-     * The 3d compliance should be computed for integration point passed as parameter.
-     * @param answer Computed reduced stiffness matrix.
-     * @param form Material response form.
-     * @param gp Integration point.
-     * @param complMtrx3d 3d compliance matrix (in full form).
-     */
-    void reduceToPlaneStressComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
-    /**
-     * Reduces full 3d compliance matrix to 2d plane strain matrix.
-     * The 3d compliance should be computed for integration point passed as parameter.
-     * Note: as already described, if zero strain component is imposed
-     * (Plane strain, ..) this condition must be taken into account in geometrical
-     * relations, and corresponding component has to be included in reduced vector.
-     * (So plane strain conditions are @f$ \epsilon_z = \gamma_{xz} = \gamma_{yz} = 0 @f$, but relations
-     * for eps_z and sigma_z are included).
-     * @param answer Computed reduced compliance matrix.
-     * @param form Material response form.
-     * @param gp Integration point.
-     * @param complMtrx3d 3d compliance matrix (in full form).
-     */
-    void reduceToPlaneStrainComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
-    /**
-     * Reduces full 3d compliance matrix to 1d matrix
-     * 1d case: @f$ \sigma_y = \sigma_z = \tau_{yz} = \tau_{zx} = \tau_{xy} = 0 @f$.
-     * The 3d compliance should be computed for integration point passed as parameter.
-     * @param answer Computed reduced compliance matrix.
-     * @param form Material response form.
-     * @param gp Integration point.
-     * @param complMtrx3d 3d compliance matrix (in full form).
-     */
-    void reduceTo1dStressComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
-    /**
-     * Reduces full 3d compliance matrix to 2d beam layer matrix.
-     * 2dbeamLayer: @f$ \sigma_y = \sigma_z = \tau_{zy} = \tau_{xy} = 0 @f$.
-     * @param answer Computed reduced compliance matrix.
-     * @param form Material response form.
-     * @param gp Integration point.
-     * @param complMtrx3d 3d compliance matrix (in full form).
-     */
-    void reduceTo2dBeamLayerComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
-    /**
-     * Reduces full 3d compliance matrix to 2d plate layer compliance matrix.
-     * 2dplatelayermode: @f$ \sigma_z = 0 @f$.
-     * @param answer Computed reduced compliance matrix.
-     * @param form Material response form.
-     * @param gp Integration point.
-     * @param complMtrx3d 3d compliance matrix (in full form).
-     */
-    void reduceTo2dPlateLayerComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
-    /**
-     * Reduces full 3d compliance matrix to 3d shell layer compliance matrix.
-     * @param answer Computed reduced compliance matrix.
-     * @param form Material response form.
-     * @param gp Integration point.
-     * @param complMtrx3d 3d compliance matrix (in full form).
-     */
-    void reduceTo3dShellLayerComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
-    /**
-     * Reduces full 3d compliance matrix to 1d fiber layer compliance matrix.
-     * 1dfiber: @f$ \sigma_y = \sigma_z = \tau_{yz} = 0 @f$.
-     * @param answer Computed reduced compliance matrix.
-     * @param form Material response form.
-     * @param gp Integration point.
-     * @param complMtrx3d 3d compliance matrix (in full form).
-     */
-    void reduceTo1dFiberComplMtrx(FloatMatrix &answer, GaussPoint *gp, FloatMatrix &complMtrx3d) const;
-
-
-    /**
      * Method for computing plane stress stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
      * reduces it to plane stress stiffness using reduce method described above.
@@ -679,11 +507,6 @@ protected:
     virtual void give2dBeamLayerStiffMtrx(FloatMatrix &answer,
                                           MatResponseMode mmode, GaussPoint *gp,
                                           TimeStep *tStep);
-#if 0
-    virtual void give2dBeamLayerStiffMtrx_dPdF(FloatMatrix &answer,
-                                               MatResponseMode mmode, GaussPoint *gp,
-                                               TimeStep *tStep);
-#endif
     /**
      * Method for computing 2d plate layer stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -700,11 +523,6 @@ protected:
     virtual void give2dPlateLayerStiffMtrx(FloatMatrix &answer,
                                            MatResponseMode mmode, GaussPoint *gp,
                                            TimeStep *tStep);
-#if 0
-    virtual void give2dPlateLayerStiffMtrx_dPdF(FloatMatrix &answer,
-                                                MatResponseMode mmode, GaussPoint *gp,
-                                                TimeStep *tStep);
-#endif
     /**
      * Method for computing 3d shell layer stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -721,11 +539,6 @@ protected:
     virtual void give3dShellLayerStiffMtrx(FloatMatrix &answer,
                                            MatResponseMode mmode, GaussPoint *gp,
                                            TimeStep *tStep);
-#if 0
-    virtual void give3dShellLayerStiffMtrx_dPdF(FloatMatrix &answer,
-                                                MatResponseMode mmode, GaussPoint *gp,
-                                                TimeStep *tStep);
-#endif
     /**
      * Method for computing 1d fiber stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -742,11 +555,6 @@ protected:
     virtual void give1dFiberStiffMtrx(FloatMatrix &answer,
                                       MatResponseMode mmode, GaussPoint *gp,
                                       TimeStep *tStep);
-#if 0
-    virtual void give1dFiberStiffMtrx_dPdF(FloatMatrix &answer,
-                                           MatResponseMode mmode, GaussPoint *gp,
-                                           TimeStep *tStep);
-#endif
     /**
      * Transforms 3d strain vector into another coordinate system.
      * @param answer Transformed strain vector
