@@ -116,25 +116,13 @@ MaterialStatus *AbaqusUserMaterial :: CreateStatus(GaussPoint *gp) const
     return new AbaqusUserMaterialStatus(n++, this->giveDomain(), gp, this->numState);
 }
 
-void AbaqusUserMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
+void AbaqusUserMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                     MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     AbaqusUserMaterialStatus *ms = dynamic_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
     if ( !ms->hasTangent() ) { ///@todo Make this hack fit more nicely into OOFEM in general;
         // Evaluating the function once, so that the tangent can be obtained.
-        MaterialMode mMode = gp->giveMaterialMode();
-        int ncomp = 0;
-        if ( mMode == _3dMat ) {
-            ncomp = 6;
-        } else if ( mMode == _PlaneStress ) {
-            ncomp = 3;
-        } else if ( mMode == _PlaneStrain ) {
-            ncomp = 4;
-        } else if ( mMode == _1dMat ) {
-            ncomp = 1;
-        }
-
-        FloatArray stress(ncomp), strain(ncomp);
+        FloatArray stress(6), strain(6);
         strain.zero();
         this->giveRealStressVector(stress, gp, strain, tStep);
     }
@@ -163,7 +151,7 @@ void AbaqusUserMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
 #endif
 }
 
-void AbaqusUserMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                                 const FloatArray &reducedStrain, TimeStep *tStep)
 {
     AbaqusUserMaterialStatus *ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
@@ -172,28 +160,9 @@ void AbaqusUserMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
      * CMNAME. */
     //char cmname[80];
 
-    MaterialMode mMode = gp->giveMaterialMode();
     // Sizes of the tensors.
-    int ndi;
-    int nshr;
-    ///@todo Check how to deal with large deformations.
-    ///@todo Check order of entries in the Voigt notation (which order does Abaqus use? convert to that).
-    if ( mMode == _3dMat ) {
-        ndi = 3;
-        nshr = 3;
-    } else if ( mMode == _PlaneStress ) {
-        ndi = 2;
-        nshr = 1;
-    } else if ( mMode == _PlaneStrain ) {
-        ndi = 3;
-        nshr = 1;
-    } else if ( mMode == _1dMat ) {
-        ndi = 1;
-        nshr = 0;
-    } else {
-        ndi = nshr = 0;
-        OOFEM_ERROR2( "AbaqusUserMaterial :: giveRealStressVector : unsupported material mode (%s)", __MaterialModeToString(mMode) );
-    }
+    int ndi = 3;
+    int nshr = 3;
 
     int ntens = ndi + nshr;
     FloatArray stress(ntens);
