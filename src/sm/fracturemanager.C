@@ -185,45 +185,9 @@ FractureManager :: evaluateFailureCriteria(FailureCriteria *fc, Element *el, Tim
 bool
 FailureCriteria :: evaluateFCQuantities(Element *el, TimeStep *tStep)
 {
-    
-    IntArray neighbors;
-    IntArray elements(1);
-    ConnectivityTable *conTable = el->giveDomain()->giveConnectivityTable();
-    elements.at(1) = el->giveNumber();
-    conTable->giveElementNeighbourList(neighbors, elements); 
-    FloatArray damageArray;
 
     switch ( this->giveType() ) {
 
-    case FC_DamagedNeighborCZ:
-        // Ugly code specifically for Shell7BaseXFEM
-        /*
-        Go through the neighbors of the element and check for each layer if the 
-        corresponding cz is damaged (if applicable)
-
-        */
-        this->quantities.resize( neighbors.giveSize() );
-
-        for ( int i = 1; i <= neighbors.giveSize(); i++ ) {
-
-            this->quantities[ i-1 ].resize(1);
-
-            Shell7BaseXFEM *neighbor = 
-                dynamic_cast< Shell7BaseXFEM * > (this->fMan->giveDomain()->giveElement( neighbors.at(i) ));
-            if ( neighbor ) {
-                 if ( neighbor->hasCohesiveZone() ) {
-
-                     neighbor->giveMaxCZDamages(damageArray, tStep); // damage parameter for each interface
-                     this->quantities[ i-1 ][0] = damageArray;
-
-                 }
-            }
-
-        }
- 
-   
-
-        return true;
     default:
         return false;
     }

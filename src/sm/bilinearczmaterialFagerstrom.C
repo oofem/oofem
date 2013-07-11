@@ -330,7 +330,7 @@ namespace oofem {
         
         status->letTempDamageBe(oldDamage + dAlpha);
         status->letTempEffectiveMandelTractionBe(Qtemp);		// NEW!
-        printf("damage %e \n", oldDamage + dAlpha );
+        //printf("damage %e \n", oldDamage + dAlpha );
     }
 
 void
@@ -429,7 +429,9 @@ BilinearCZMaterialFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *aGau
 {
     if ( type == IST_DamageScalar ) {
         BilinearCZMaterialFagerstromStatus *status = static_cast< BilinearCZMaterialFagerstromStatus * >( this->giveStatus(aGaussPoint) );
-        return status->giveTempDamage();
+        answer.resize(1);
+        answer.at(1) = status->giveTempDamage();
+        return 1;
     } else {
         return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }

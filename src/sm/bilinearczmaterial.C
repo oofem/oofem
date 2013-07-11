@@ -87,7 +87,7 @@ BilinearCZMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     this->initGpForNewStep(gp);
 
 
-    answer.resize( jumpVector.giveSize() -9);
+    answer.resize( jumpVector.giveSize() -10);
     answer.zero();
     //@todo for now only study normal stress
     // no degradation in shear
@@ -199,8 +199,13 @@ int
 BilinearCZMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
     BilinearCZMaterialStatus *status = static_cast< BilinearCZMaterialStatus * >( this->giveStatus(aGaussPoint) );
-    return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
-    
+    if ( type == IST_DamageScalar ) {
+        answer.resize(1);
+        answer.at(1) = 0.0; // no damage
+        return 1;
+    } else {
+        return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+    }    
 }
 
 

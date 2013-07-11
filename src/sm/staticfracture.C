@@ -84,7 +84,7 @@ StaticFracture :: solveYourselfAt(TimeStep *tStep)
         
         
         fc->thresholds.resize(1);
-        fc->thresholds.at(1) = 0.0;
+        fc->thresholds.at(1) = -10.0;
         this->fMan->failureCriterias->put(1, fc);
     }
 
