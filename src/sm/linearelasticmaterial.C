@@ -95,7 +95,6 @@ LinearElasticMaterial :: give2dPlateStiffMtrx(FloatMatrix &answer,
     SimpleCrossSection *crossSection =  dynamic_cast< SimpleCrossSection * >( gp->giveCrossSection() );
     FloatMatrix mat3d;
     double thickness3, thickness;
-    int i, j;
 
     if ( mode != _2dPlate ) {
         _error("Give2dPlateStiffMtrx : unsupported mode");
@@ -112,8 +111,8 @@ LinearElasticMaterial :: give2dPlateStiffMtrx(FloatMatrix &answer,
     answer.resize(5, 5);
     answer.zero();
 
-    for ( i = 1; i <= 2; i++ ) {
-        for ( j = 1; j <= 2; j++ ) {
+    for ( int i = 1; i <= 2; i++ ) {
+        for ( int j = 1; j <= 2; j++ ) {
             answer.at(i, j) = mat3d.at(i, j) * thickness3 / 12.;
         }
     }
@@ -170,11 +169,11 @@ LinearElasticMaterial :: give3dShellStiffMtrx(FloatMatrix &answer,
     double thickness3, thickness;
 
     if ( mode != _3dShell ) {
-        _error("Give3dShellMaterialStiffness : unsupported mode");
+        _error("give3dShellStiffMtrx : unsupported mode");
     }
 
     if ( crossSection == NULL ) {
-        _error(" Give2dBeamStiffMtrx : no SimpleCrossSection");
+        _error("give3dShellStiffMtrx : no SimpleCrossSection");
     }
 
     this->givePlaneStressStiffMtrx(mat3d, rMode, gp, tStep);
@@ -199,8 +198,7 @@ LinearElasticMaterial :: give3dShellStiffMtrx(FloatMatrix &answer,
     answer.at(6, 5) = mat3d.at(3, 2) * thickness3 / 12.0;
     answer.at(6, 6) = mat3d.at(3, 3) * thickness3 / 12.0;
 
-    answer.at(7, 7) = mat3d.at(3, 3) * thickness * ( 5. / 6. );
-    answer.at(8, 8) = answer.at(7, 7);
+    answer.at(8, 8) = answer.at(7, 7) = mat3d.at(3, 3) * thickness * ( 5. / 6. );
 }
 
 
@@ -210,7 +208,7 @@ LinearElasticMaterial :: giveRealStressVector(FloatArray &answer,
                                               const FloatArray &reducedStrain,
                                               TimeStep *atTime)
 {
-    FloatArray stressIncrement, stressVector, strainVector;
+    FloatArray strainVector;
     FloatMatrix d;
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
@@ -221,20 +219,85 @@ LinearElasticMaterial :: giveRealStressVector(FloatArray &answer,
                                                 reducedStrain,
                                                 atTime, VM_Total);
 
-    if ( status->giveStressVector().giveSize() ) {
-        stressVector = status->giveStressVector();
-    } else {
-        stressVector.resize( strainVector.giveSize() );
-    }
-
     this->giveStiffnessMatrix(d, TangentStiffness, gp, atTime);
-    stressVector.beProductOf(d, strainVector);
+    answer.beProductOf(d, strainVector);
 
     // update gp
     status->letTempStrainVectorBe(reducedStrain);
-    status->letTempStressVectorBe(stressVector);
+    status->letTempStressVectorBe(answer);
+}
 
-    answer = stressVector;
+
+void
+LinearElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    FloatArray strainVector;
+    FloatMatrix d;
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    reducedStrain.printYourself();
+    this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
+
+    this->give3dMaterialStiffnessMatrix(d, TangentStiffness, gp, tStep);
+    answer.beProductOf(d, strainVector);
+
+    // update gp
+    status->letTempStrainVectorBe(reducedStrain);
+    status->letTempStressVectorBe(answer);
+}
+
+
+void
+LinearElasticMaterial :: giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    FloatArray strainVector;
+    FloatMatrix d;
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
+
+    this->givePlaneStrainStiffMtrx(d, TangentStiffness, gp, tStep);
+    answer.beProductOf(d, strainVector);
+
+    // update gp
+    status->letTempStrainVectorBe(reducedStrain);
+    status->letTempStressVectorBe(answer);
+}
+
+
+void
+LinearElasticMaterial :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    FloatArray strainVector;
+    FloatMatrix d;
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
+
+    this->givePlaneStressStiffMtrx(d, TangentStiffness, gp, tStep);
+    answer.beProductOf(d, strainVector);
+
+    // update gp
+    status->letTempStrainVectorBe(reducedStrain);
+    status->letTempStressVectorBe(answer);
+}
+
+
+void
+LinearElasticMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    FloatArray strainVector;
+    FloatMatrix d;
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
+
+    this->give1dStressStiffMtrx(d, TangentStiffness, gp, tStep);
+    answer.beProductOf(d, strainVector);
+
+    // update gp
+    status->letTempStrainVectorBe(reducedStrain);
+    status->letTempStressVectorBe(answer);
 }
 
 } // end namespace oofem

@@ -128,17 +128,9 @@ public:
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep);
 
+    virtual void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep);
+
 protected:
-    /// Evaluates the stress from Green-Lagrange strain E.
-    void giveRealStressVectorComputedFromStrain(FloatArray &answer, GaussPoint *gp,
-                                                const FloatArray &E, TimeStep *tStep);
-
-    /// evaluates the stress from deformation gradient F.
-    void giveRealStressVectorComputedFromDefGrad(FloatArray &answer, GaussPoint *gp,
-                                                 const FloatArray &F, TimeStep *tStep);
-
-    void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep);
-
     void computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatMatrix b, double J);
 
     void give3dSSMaterialStiffnessMatrix(FloatMatrix &answer,

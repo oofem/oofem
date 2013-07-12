@@ -113,35 +113,28 @@ MisesMat :: giveRealStressVector(FloatArray &answer,
                                  const FloatArray &totalStrain,
                                  TimeStep *atTime)
 {
-    MaterialMode mode = gp->giveMaterialMode();
+    MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
+    this->initTempStatus(gp);
+    this->initGpForNewStep(gp);
+    this->performPlasticityReturn(gp, totalStrain);
+    double omega = computeDamage(gp, atTime);
+    StressVector effStress(_3dMat), totalStress(_3dMat);
+    status->giveTempEffectiveStress(effStress);
+    totalStress = effStress;
+    totalStress.times(1 - omega);
+    answer = totalStress;
+    status->setTempDamage(omega);
+    status->letTempStrainVectorBe(totalStrain);
+    status->letTempStressVectorBe(answer);
 
-    if ( mode == _3dMat || mode == _1dMat || mode == _PlaneStrain ) {
-        giveRealStressVectorComputedFromStrain(answer, gp, totalStrain, atTime);
-    } else {
-        OOFEM_ERROR("MisesMat::giveRealStressVector : unknown material response mode");
-    }
 }
 
 
 void
-MisesMat :: giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep)
-{
-    FloatArray vS;
-    this->giveRealStressVectorComputedFromDefGrad(vS, gp, vF, tStep);
-    StructuralMaterial :: convert_S_2_P( answer, vS, vF, gp->giveMaterialMode() );
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    status->letTempPVectorBe(answer);
-    status->letTempFVectorBe(vF);
-}
-
-
-// returns the stress vector in 3d stress space
-// computed from the previous plastic strain and current deformation gradient
-void
-MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
-                                                    GaussPoint *gp,
-                                                    const FloatArray &totalDefGradOOFEM,
-                                                    TimeStep *atTime)
+MisesMat :: giveFirstPKStressVector_3d(FloatArray &answer,
+                                       GaussPoint *gp,
+                                       const FloatArray &totalDefGradOOFEM,
+                                       TimeStep *atTime)
 {
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
 
@@ -179,13 +172,13 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
     E.times(0.5);
 
     FloatArray e;
-    e.beReducedVectorFormOfStrain(E);
+    e.beSymVectorFormOfStrain(E);
 
     StrainVector leftCauchyGreen(_3dMat);
     StrainVector leftCauchyGreenDev(_3dMat);
     double leftCauchyGreenVol;
 
-    leftCauchyGreen.beReducedVectorFormOfStrain(trialLeftCauchyGreen);
+    leftCauchyGreen.beSymVectorFormOfStrain(trialLeftCauchyGreen);
 
     leftCauchyGreen.computeDeviatoricVolumetricSplit(leftCauchyGreenDev, leftCauchyGreenVol);
     StressVector trialStressDev(_3dMat);
@@ -232,21 +225,21 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
     kirchhoffStress.at(2, 2) += 1. / 2. *  K * ( J * J - 1 );
     kirchhoffStress.at(3, 3) += 1. / 2. *  K * ( J * J - 1 );
 
-    //transform Kirchhoff stress into Second Piola - Kirchhoff stress
-    // @todo here we might as well convert to first Piola since (change later)
-    FloatMatrix iF;
-    iF.beInverseOf(F);
-    FloatMatrix S;
 
+    FloatMatrix iF, Ep(3, 3), S;
+    FloatArray vF, vS, ep;
+
+    //transform Kirchhoff stress into Second Piola - Kirchhoff stress
+    iF.beInverseOf(F);
     help.beProductOf(iF, kirchhoffStress);
     S.beProductTOf(help, iF);
 
-    FloatMatrix Ep(3, 3);
-    FloatArray ep(6);
     this->computeGLPlasticStrain(F, Ep, trialLeftCauchyGreen, J);
 
-    ep.beReducedVectorFormOfStrain(Ep);
-    answer.beReducedVectorFormOfStress(S);
+    ep.beSymVectorFormOfStrain(Ep);
+    vS.beSymVectorForm(S);
+    vF.beVectorForm(F);
+    answer.beVectorForm(kirchhoffStress);
 
     status->setTrialStressVol(mi);
     status->letTempLeftCauchyGreenBe(trialLeftCauchyGreen);
@@ -254,6 +247,8 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
     status->letTempStressVectorBe(answer);
     status->letTempStrainVectorBe(e);
     status->letTempPlasticStrainBe(ep);
+    status->letTempPVectorBe(answer);
+    status->letTempFVectorBe(vF);
 }
 
 
@@ -274,29 +269,6 @@ MisesMat :: computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatM
 
 // returns the stress vector in 3d stress space
 // computed from the previous plastic strain and current total strain
-void
-MisesMat :: giveRealStressVectorComputedFromStrain(FloatArray &answer,
-                                                   GaussPoint *gp,
-                                                   const FloatArray &totalStrain,
-                                                   TimeStep *atTime)
-{
-    MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
-    MaterialMode mode = gp->giveMaterialMode();
-    this->initTempStatus(gp);
-    this->initGpForNewStep(gp);
-    this->performPlasticityReturn(gp, totalStrain);
-    double omega = computeDamage(gp, atTime);
-    StressVector effStress(mode), totalStress(mode);
-    status->giveTempEffectiveStress(effStress);
-    totalStress = effStress;
-    totalStress.times(1 - omega);
-    answer = totalStress;
-    status->setTempDamage(omega);
-    status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(answer);
-}
-
-
 void
 MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain)
 {
@@ -433,27 +405,16 @@ void MisesMat :: computeCumPlastStrain(double &tempKappa, GaussPoint *gp, TimeSt
 void
 MisesMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
-    MaterialMode mMode = gp->giveMaterialMode();
-
-    if ( mMode == _3dMat ) {
-        give3dSSMaterialStiffnessMatrix(answer, mode, gp, atTime);
-    } else {
-        OOFEM_ERROR("MisesMat::give3dMaterialStiffnessMatrix : unknown material response mode");
-    }
+    give3dSSMaterialStiffnessMatrix(answer, mode, gp, atTime);
 }
 
 void
 MisesMat :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
-    MaterialMode mMode = gp->giveMaterialMode();
-
-    if ( mMode == _3dMat ) {
-        FloatMatrix dSdE;
-        this->give3dLSMaterialStiffnessMatrix(dSdE, mode, gp, atTime);
-        this->give_dPdF_from(dSdE, answer, gp);
-    } else {
-        OOFEM_ERROR("MisesMat::give3dMaterialStiffnessMatrix_dPdF : unknown material response mode");
-    }
+    ///@todo Directly compute dPdF instead.
+    FloatMatrix dSdE;
+    this->give3dLSMaterialStiffnessMatrix(dSdE, mode, gp, atTime);
+    this->give_dPdF_from(dSdE, answer, gp);
 }
 
 // returns the consistent (algorithmic) tangent stiffness matrix
@@ -812,7 +773,7 @@ MisesMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
 {
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_PlasticStrainTensor ) {
-        answer  = * status->givePlasDef();
+        answer = * status->givePlasDef();
         return 1;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         answer.resize(1);
@@ -835,7 +796,7 @@ MisesMat :: giveIPValueType(InternalStateType type)
 {
     if ( type == IST_PlasticStrainTensor ) {
         return ISVT_TENSOR_S3;
-    } else if ( ( type == IST_MaxEquivalentStrainLevel ) || ( type == IST_DamageScalar ) ) {
+    } else if ( type == IST_MaxEquivalentStrainLevel || type == IST_DamageScalar ) {
         return ISVT_SCALAR;
     } else {
         return StructuralMaterial :: giveIPValueType(type);
@@ -872,7 +833,7 @@ MisesMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, Mat
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
-    } else if ( ( type == IST_DamageScalar ) || ( type == IST_DamageTensor ) ) {
+    } else if ( type == IST_DamageScalar || type == IST_DamageTensor ) {
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
@@ -921,12 +882,8 @@ MisesMatStatus :: MisesMatStatus(int n, Domain *d, GaussPoint *g) :
     kappa = tempKappa = 0.;
     effStress.resize(6);
     tempEffStress.resize(6);
-    //if(gp->giveMaterialMode() == _3dMat_F){
-    //tempLeftCauchyGreen.resize(3,3);
-    //tempLeftCauchyGreen.at(1,1) = tempLeftCauchyGreen.at(2,2) = tempLeftCauchyGreen.at(3,3) = 1;
     leftCauchyGreen.resize(3, 3);
     leftCauchyGreen.at(1, 1) = leftCauchyGreen.at(2, 2) = leftCauchyGreen.at(3, 3) = 1;
-    //}
 }
 
 MisesMatStatus :: ~MisesMatStatus()
@@ -1008,9 +965,7 @@ void MisesMatStatus :: initTempStatus()
     tempPlasticStrain = plasticStrain;
     tempKappa = kappa;
     trialStressD.resize(0); // to indicate that it is not defined yet
-    //if(gp->giveMaterialMode()== _3dMat_F){
     tempLeftCauchyGreen = leftCauchyGreen;
-    //}
 }
 
 
@@ -1024,9 +979,7 @@ MisesMatStatus :: updateYourself(TimeStep *atTime)
     kappa = tempKappa;
     damage = tempDamage;
     trialStressD.resize(0); // to indicate that it is not defined any more
-    //if(gp->giveMaterialMode()==_3dMat_F){
     leftCauchyGreen = tempLeftCauchyGreen;
-    //}
 }
 
 

@@ -47,15 +47,8 @@ HyperElasticMaterial :: HyperElasticMaterial(int n, Domain *d) : StructuralMater
 
 int
 HyperElasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports the given mode
-//
 {
-    if ( mode == _3dMat ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _3dMat;
 }
 
 
@@ -118,7 +111,7 @@ HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRe
 
 
 void
-HyperElasticMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+HyperElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 
 // returns 6 components of the stress corresponding to the given total strain
 

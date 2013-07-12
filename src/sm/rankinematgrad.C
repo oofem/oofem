@@ -279,7 +279,7 @@ RankineMatGrad :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2,
     status->letTempStressVectorBe(answer1);
 #ifdef keep_track_of_dissipated_energy
     double gf = sig0 * sig0 / E; // only estimated, but OK for this purpose
-    status->computeWork(gp, gp->giveMaterialMode(), gf);
+    status->computeWork_PlaneStress(gp, gf);
 #endif
     double knl = giveNonlocalCumPlasticStrain(gp);
     double khat = mParam * knl + ( 1. - mParam ) * answer2;

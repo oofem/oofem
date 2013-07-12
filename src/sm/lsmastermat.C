@@ -139,7 +139,7 @@ LargeStrainMasterMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, Gaus
             }
         }
 
-        SethHillStrainVector.beReducedVectorFormOfStrain(SethHillStrain);
+        SethHillStrainVector.beSymVectorFormOfStrain(SethHillStrain);
         sMat->giveRealStressVector(stressVector, gp, SethHillStrainVector, tStep);
         this->constructTransformationMatrix(T, eVecs);
         tT.beTranspositionOf(T);

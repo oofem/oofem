@@ -353,7 +353,6 @@ ConcreteDPM :: ConcreteDPM(int n, Domain *d) :
     tempDamage = damage = 0.;
     yieldTol = 0.;
     newtonIter = 0;
-    matMode = _Unknown;
     helem = 0.;
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
 #ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
@@ -462,9 +461,7 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
                                     TimeStep *atTime)
 {
     FloatArray reducedTotalStrainVector;
-    if ( matMode == _Unknown ) {
-        matMode = gp->giveMaterialMode();
-    }
+    MaterialMode matMode = gp->giveMaterialMode();
 
     if ( effectiveStress.giveStressStrainMode() == _Unknown ) {
         effectiveStress.letStressStrainModeBe(matMode);
@@ -744,6 +741,7 @@ double
 ConcreteDPM :: computeDuctilityMeasureDamage(const StrainVector &strain, GaussPoint *gp)
 {
     ConcreteDPMStatus *status = giveStatus(gp);
+    MaterialMode matMode = gp->giveMaterialMode();
     StrainVector plasticStrain(matMode);
     StrainVector tempPlasticStrain(matMode);
     status->giveTempPlasticStrain(tempPlasticStrain);
@@ -778,9 +776,7 @@ ConcreteDPM :: performPlasticityReturn(GaussPoint *gp,
                                        StrainVector &strain)
 {
     ConcreteDPMStatus *status = static_cast< ConcreteDPMStatus * >( this->giveStatus(gp) );
-    if ( matMode == _Unknown ) {
-        matMode = gp->giveMaterialMode();
-    }
+    MaterialMode matMode = gp->giveMaterialMode();
 
     if ( effectiveStress.giveStressStrainMode() == _Unknown ) {
         effectiveStress.letStressStrainModeBe(matMode);
@@ -799,7 +795,7 @@ ConcreteDPM :: performPlasticityReturn(GaussPoint *gp,
     elasticStrain.applyElasticStiffness(effectiveStress, eM, nu);
 
     //Compute trial coordinates
-    computeTrialCoordinates(effectiveStress);
+    computeTrialCoordinates(effectiveStress, gp);
 
     double yieldValue = computeYieldValue(sig, rho, thetaTrial, tempKappaP);
     // choose correct stress return and update state flag
@@ -888,6 +884,7 @@ ConcreteDPM :: performRegularReturn(StressVector &effectiveStress,
 {
     //Define status
     ConcreteDPMStatus *status = static_cast< ConcreteDPMStatus * >( this->giveStatus(gp) );
+    MaterialMode matMode = gp->giveMaterialMode();
     //Variables
     deltaLambda = 0.;
     double deltaLambdaIncrement = 0.;
@@ -1089,6 +1086,7 @@ ConcreteDPM :: performVertexReturn(StressVector &effectiveStress,
                                    GaussPoint *gp)
 {
     ConcreteDPMStatus *status = static_cast< ConcreteDPMStatus * >( this->giveStatus(gp) );
+    MaterialMode matMode = gp->giveMaterialMode();
     StressVector deviatoricStressTrial(matMode);
     double sigTrial;
     StressVector stressTemp(matMode);
@@ -1694,9 +1692,9 @@ ConcreteDPM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 }
 
 void
-ConcreteDPM :: computeTrialCoordinates(const StressVector &stress)
+ConcreteDPM :: computeTrialCoordinates(const StressVector &stress, GaussPoint *gp)
 {
-    StressVector deviatoricStress(matMode);
+    StressVector deviatoricStress(gp->giveMaterialMode());
     effectiveStress.computeDeviatoricVolumetricSplit(deviatoricStress,
                                                      sig);
     rho = deviatoricStress.computeSecondCoordinate();

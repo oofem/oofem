@@ -813,13 +813,14 @@ Shell7Base :: computeE(FloatMatrix &answer, FloatMatrix &F)
 void
 Shell7Base :: computeStrainVectorF(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &genEps)
 {
+    ///@todo Do you even need this function at all Jim? / Mikael
     // Computes the Green-Lagrange strain tensor: E=0.5(C-I)
     FloatMatrix F, E;
     FloatArray lcoords;
     lcoords = *gp->giveCoordinates();
     this->computeFAt(lcoords, F, genEps);       // Deformation gradient
     this->computeE(E, F);                  // Green-Lagrange strain tensor
-    answer.beReducedVectorFormOfStrain(E); // Convert to reduced Voight form (6 components)
+    answer.beSymVectorFormOfStrain(E); // Convert to reduced Voight form (6 components)
 }
 
 void

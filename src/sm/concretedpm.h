@@ -449,9 +449,6 @@ protected:
     /// Maximum number of iterations for stress return.
     int newtonIter;
 
-    /// Material mode for convenient access.
-    MaterialMode matMode;
-
     /// Stress and its deviatoric part.
     StressVector effectiveStress;
 
@@ -711,7 +708,7 @@ public:
 
 
     /// Compute the trial coordinates.
-    void computeTrialCoordinates(const StressVector &stress);
+    void computeTrialCoordinates(const StressVector &stress, GaussPoint *gp);
 
     /// Assign state flag.
     void assignStateFlag(GaussPoint *gp);

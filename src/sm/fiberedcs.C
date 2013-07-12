@@ -104,47 +104,17 @@ FiberedCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
                                                        MatResponseMode rMode,
                                                        GaussPoint *gp,
                                                        TimeStep *tStep)
-//
-// only interface to material class, forcing returned matrix to be in reduced form.
-//
-{
-    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
-    this->giveMaterialStiffnessMatrixOf(answer, rMode, gp, mat, tStep);
-}
-
-
-void
-FiberedCrossSection :: giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                         MatResponseMode rMode,
-                                                         GaussPoint *gp,
-                                                         StructuralMaterial *mat,
-                                                         TimeStep *tStep)
-//
-// only interface to material class, forcing returned matrix to be in reduced form.
-//
-{
-    this->giveMaterialStiffnessMatrixOf(answer, rMode, gp, mat, tStep);
-}
-
-
-void
-FiberedCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                     MatResponseMode rMode,
-                                                     GaussPoint *gp,
-                                                     StructuralMaterial *mat,
-                                                     TimeStep *tStep)
-
-//
-// only interface to material class, forcing returned matrix to be in form form.
-//
 {
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _3dBeam ) {
-        this->give3dBeamMaterialStiffnessMatrix(answer, rMode, gp, mat, tStep);
-    } else if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-        mat->giveStiffnessMatrix(answer, rMode, gp, tStep);
+        this->give3dBeamMaterialStiffnessMatrix(answer, rMode, gp, tStep);
     } else {
-        _error("giveMaterialStiffnessMatrixOf: unsupported StressStrainMode");
+        StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+        if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
+            mat->giveStiffnessMatrix(answer, rMode, gp, tStep);
+        } else {
+            _error("giveCharMaterialStiffnessMatrix: unsupported StressStrainMode");
+        }
     }
 }
 
@@ -153,7 +123,6 @@ void
 FiberedCrossSection :: give3dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
                                                          MatResponseMode rMode,
                                                          GaussPoint *gp,
-                                                         StructuralMaterial *mat,
                                                          TimeStep *tStep)
 //
 // return material stiffness matrix for derived types of stressStreinState
@@ -167,7 +136,6 @@ FiberedCrossSection :: give3dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    //Material * mat = gp->giveElement()->giveMaterial();
     FloatMatrix fiberMatrix;
     GaussPoint *fiberGp;
     double fiberThick, fiberWidth, fiberZCoord, fiberYCoord;
@@ -599,15 +567,13 @@ FiberedCrossSection :: giveFiberMaterialStiffnessMatrix(FloatMatrix &fiberMatrix
                                                         MatResponseMode rMode, GaussPoint *layerGp,
                                                         TimeStep *tStep)
 {
-    this->giveMaterialStiffnessMatrixOf(fiberMatrix, rMode, layerGp,
-                                        dynamic_cast< StructuralMaterial * >( domain->giveMaterial( fiberMaterials.at( layerGp->giveNumber() ) ) ),
-                                        tStep);
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( domain->giveMaterial( fiberMaterials.at( layerGp->giveNumber() ) ) );
+    mat->giveStiffnessMatrix(fiberMatrix, rMode, layerGp, tStep);
 }
 
 
 void
-FiberedCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
-                                                            GaussPoint *gp, TimeStep *stepN, ValueModeType mode)
+FiberedCrossSection :: computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, ValueModeType mode)
 {
     StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
     FloatArray et;

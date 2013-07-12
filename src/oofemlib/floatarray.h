@@ -406,15 +406,15 @@ public:
      * Order of matrix components in vector: 11, 22, 33, 23, 13, 12, 32, 31, 21
      * @param aMatrix Matrix to transform.
      */
-    void beFullVectorForm(const FloatMatrix &aMatrix);
+    void beVectorForm(const FloatMatrix &aMatrix);
     /**
      * Reciever will be a vector with 6 components formed from a 3x3 matrix. 
      * Off-diagonals of the matrix are symmetrized.
      * Order of matrix components in vector: 11, 22, 33, 23, 13, 12
      * @param aMatrix Matrix to transform.
      */
-    void beReducedVectorFormOfStress(const FloatMatrix &aMatrix);
-    void beReducedVectorFormOfStrain(const FloatMatrix &aMatrix);
+    void beSymVectorForm(const FloatMatrix &aMatrix);
+    void beSymVectorFormOfStrain(const FloatMatrix &aMatrix);
 
     /**
      * Reciever will be set to a given column in a matrix 

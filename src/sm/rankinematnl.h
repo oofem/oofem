@@ -170,7 +170,7 @@ public:
     // @param atTime time step
     //  void giveNormalElasticStiffnessMatrix (FloatMatrix& answer, MatResponseMode rMode, GaussPoint*gp, TimeStep* atTime) ;
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *atTime);
+    virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *atTime);
 
     virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime);
 
