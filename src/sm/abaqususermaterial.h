@@ -120,8 +120,17 @@ public:
                                   GaussPoint *gp,
                                   TimeStep *tStep);
 
+    virtual void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
+                                  MatResponseMode mode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep);
+
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain,
+                              TimeStep *tStep);
+    
+    virtual void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp,
+                              const FloatArray &reducedF,
                               TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
