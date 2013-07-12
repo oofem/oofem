@@ -75,6 +75,7 @@ class EnrichmentDomain;
  * keeps the list of its EnrichmentFunctions.
  * @author chamrova
  * @author Jim Brouzoulis
+ * @author Erik Svenning
  */
 class EnrichmentItem : public FEMComponent
 {
@@ -106,6 +107,7 @@ public:
 
     // Should update receiver geometry to the state reached at given time step.
     virtual void updateGeometry(TimeStep *tStep) {};
+    virtual void updateGeometry();
 
     int giveStartOfDofIdPool() { return this->startOfDofIdPool; };
     void computeDofManDofIdArray(IntArray &DofIdArray, DofManager *dMan, int enrichmentDomainNumber); // list of id's a particular dof manager supports
@@ -194,7 +196,6 @@ public:
 /** Concrete representation of Crack. */
 class Crack : public EnrichmentItem
 {
-//protected:
 
 public:
     Crack(int n, XfemManager *xm, Domain *aDomain);

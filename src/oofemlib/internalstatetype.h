@@ -140,7 +140,8 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_DeformationGradientTensor, 90) \
     ENUM_ITEM_WITH_VALUE(IST_FirstPKStressTensor, 91) \
     ENUM_ITEM_WITH_VALUE(IST_XFEMEnrichment, 92) \
-	ENUM_ITEM_WITH_VALUE(IST_XFEMNumIntersecPoints, 93)
+	ENUM_ITEM_WITH_VALUE(IST_XFEMNumIntersecPoints, 93) \
+	ENUM_ITEM_WITH_VALUE(IST_XFEMLevelSetPhi, 94)
 
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.

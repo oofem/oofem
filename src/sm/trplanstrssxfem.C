@@ -57,7 +57,7 @@ TrPlaneStress2dXFEM::~TrPlaneStress2dXFEM() {
 int TrPlaneStress2dXFEM::checkConsistency()
 {
 	TrPlaneStress2d :: checkConsistency();
-    this->xMan =  this->giveDomain()->giveXfemManager(1);
+    this->xMan =  this->giveDomain()->giveXfemManager();
     return 1;
 }
 
@@ -326,21 +326,20 @@ void TrPlaneStress2dXFEM :: XfemElementInterface_partitionElement(AList< Triangl
 void TrPlaneStress2dXFEM :: XfemElementInterface_updateIntegrationRule()
 {
 
-    XfemManager *xMan = this->element->giveDomain()->giveXfemManager(1);
-    if ( xMan->isElementEnriched(element) ) { // unneccessary but extra check
+    XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
 
 
         IntArray activeEI;
         xMan->giveActiveEIsFor(activeEI, element);
 
         // TODO: How do we handle the case when several cracks interact with one element?
-        AList< FloatArray > intersecPoints;
+        std::vector< FloatArray > intersecPoints;
         for ( int i = 1; i <= activeEI.giveSize(); i++ ) { // for the active enrichment items
 
         	// Loop over enrichment domains
         	for ( int j = 1; j <=  xMan->giveEnrichmentItem( activeEI.at(i) )->giveNumberOfEnrichmentDomains(); j++)
         	{
-        		xMan->giveEnrichmentItem( activeEI.at(i) )->giveEnrichmentDomain(j)->computeIntersectionPoints(& intersecPoints, element);
+        		xMan->giveEnrichmentItem( activeEI.at(i) )->giveEnrichmentDomain(j)->computeIntersectionPoints( intersecPoints, element);
         	}
         }
 
@@ -348,24 +347,24 @@ void TrPlaneStress2dXFEM :: XfemElementInterface_updateIntegrationRule()
         // TODO: Right now, we only consider the case when we have exactly two
         //		 intersection points, i.e. one crack that passes through the
         //		 whole element.
-        if( intersecPoints.giveSize() == 2 )
+        if( intersecPoints.size() == 2 )
         {
             AList< FloatArray > subDomain1, subDomain2;
 
-            for ( int i = 1; i <= intersecPoints.giveSize(); i++ ) {
+            for ( int i = 1; i <= int(intersecPoints.size()); i++ ) {
                 int sz = subDomain1.giveSize();
-                subDomain1.put( sz + 1, intersecPoints.at(i) );
+                subDomain1.put( sz + 1, new FloatArray(intersecPoints[i-1]) );
 
-                FloatArray *ip = intersecPoints.at(i);
-                FloatArray *ipCopy = new FloatArray(*ip);
+                FloatArray ip = intersecPoints[i-1];
+                FloatArray *ipCopy = new FloatArray(ip);
                 int sz2 = subDomain2.giveSize();
                 subDomain2.put(sz2 + 1, ipCopy);
             }
 
-            double x1 = intersecPoints.at(1)->at(1);
-            double x2 = intersecPoints.at(2)->at(1);
-            double y1 = intersecPoints.at(1)->at(2);
-            double y2 = intersecPoints.at(2)->at(2);
+            double x1 = intersecPoints[0].at(1);
+            double x2 = intersecPoints[1].at(1);
+            double y1 = intersecPoints[0].at(2);
+            double y2 = intersecPoints[1].at(2);
 
             double tx = x2 - x1;
             double ty = y2 - y1;
@@ -451,24 +450,17 @@ void TrPlaneStress2dXFEM :: XfemElementInterface_updateIntegrationRule()
             }
 
             element->setIntegrationRules(& irlist);
-
-
-
-            for ( int i = 1; i <= intersecPoints.giveSize(); i++ ) {
-                intersecPoints.unlink(i);
-            }
+        }
+        else
+        {
+        	TrPlaneStress2d ::computeGaussPoints();
 
         }
-
-
-    }
-
-
 }
 
 void TrPlaneStress2dXFEM :: XfemElementInterface_prepareNodesForDelaunay(AList< FloatArray > *answer1, AList< FloatArray > *answer2)
 {
-//	printf("Entering TrPlaneStress2dXFEM :: XfemElementInterface_prepareNodesForDelaunay().\n");
+
 }
 
 
@@ -498,34 +490,23 @@ int TrPlaneStress2dXFEM :: computeNumberOfDofs(EquationID ut)
 void TrPlaneStress2dXFEM :: computeGaussPoints()
 {
 
-	XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+    XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
 
-	// Loop over enrichment items
-	for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ )
-	{
-		EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+    if ( xMan->isAllElNodesEnriched(this->element) )
+    {
+        // If all element nodes are enriched, we have an element
+        // completely cut by the crack and the element needs to be partitioned.
 
-		// Loop over enrichment domains
-		for ( int j = 1; j <=  ei->giveNumberOfEnrichmentDomains(); j++)
-		{
-			EnrichmentDomain *ed = ei->giveEnrichmentDomain(j);
+		this->XfemElementInterface_updateIntegrationRule();
+    }
+    else
+    {
+    	// If we have a regular element or a blending element,
+    	// the regular Gauss quadrature will do.
 
+    	TrPlaneStress2d ::computeGaussPoints();
+    }
 
-			// TODO: For now, only consider elements that are completely cut by the crack
-			// and therefore have exactly two intersection points.
-			// If the element is cut by several cracks, we only consider
-			// the first crack that we find.
-			if ( ed->computeNumberOfIntersectionPoints(this) == 2 )
-			{
-				this->XfemElementInterface_updateIntegrationRule();
-				return;
-			}
-		}
-	}
-
-	// If no intersections are found, compute
-	// the Gauss points as usual.
-	TrPlaneStress2d ::computeGaussPoints();
 }
 
 
@@ -552,7 +533,7 @@ void TrPlaneStress2dXFEM :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer
     }
 
     // Assemble xfem part of strain-displacement matrix
-    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     FloatMatrix Bd[3];
 
 
@@ -637,7 +618,7 @@ void TrPlaneStress2dXFEM :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer
     FloatArray Nc;
     interp.evalN( Nc, *gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     // assemble xfem part of strain-displacement matrix
-    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     FloatArray Nd;
     Nd.resize(3);
     IntArray mask(3);
@@ -719,49 +700,7 @@ TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &a
 
 
 
-    // Returns the total id mask of the dof manager - regular id's + enriched id's
-/*
-    // Continuous part
-	TrPlaneStress2d ::giveDofManDofIDMask(inode, ut, answer);
-
-	if( this->xMan != NULL )
-	{
-//		printf("xMan is initialized.\n");
-
-	    // Discontinuous part
-	    DofManager *dMan = this->giveDofManager(inode);
-
-	    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) {
-	        EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
-	        for ( int j = 1; j <= ei->giveNumberOfEnrichmentDomains(); j++ ) {
-	            if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,j) ) {
-	                IntArray eiDofIdArray;
-	                ei->giveEIDofIdArray(eiDofIdArray, j);
-	                answer.followedBy(eiDofIdArray);
-	            }
-	        }
-	    }
-	}
-*/
-//	else
-//	{
-//		printf("xMan = NULL.\n");
-//	}
-
-
 }
-
-
-void
-TrPlaneStress2dXFEM :: computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
-{
-    FloatArray Epsilon;
-    this->computeStrainVector(Epsilon, gp, stepN);
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
-    cs->giveRealStresses(answer, ReducedForm, gp, Epsilon, stepN);
-}
-
-
 
 void TrPlaneStress2dXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
@@ -783,7 +722,7 @@ void TrPlaneStress2dXFEM :: drawRawGeometry(oofegGraphicContext &context)
         return;
     }
 
-    XfemManager *xf = this->giveDomain()->giveXfemManager(1);
+    XfemManager *xf = this->giveDomain()->giveXfemManager();
     if ( !xf->isElementEnriched(this) ) {
         PlaneStress2d :: drawRawGeometry(context);
     } else {
@@ -808,7 +747,7 @@ void TrPlaneStress2dXFEM :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    XfemManager *xf = this->giveDomain()->giveXfemManager(1);
+    XfemManager *xf = this->giveDomain()->giveXfemManager();
     if ( !xf->isElementEnriched(this) ) {
         PlaneStress2d :: drawScalar(context);
     } else {

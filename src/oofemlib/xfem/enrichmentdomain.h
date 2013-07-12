@@ -63,11 +63,12 @@ namespace oofem {
  * enrichment item. Includes BasicGeometry as one type of description, list of enriched dofmanagers etc.
  * Should be extended to handle implicit geometry descriptions like e.g. level-sets. 
  * @author Jim Brouzoulis
+ * @author Erik Svenning
  */
 class EnrichmentDomain 
 {
 public:
-    EnrichmentDomain() { }
+    EnrichmentDomain();
     virtual ~EnrichmentDomain() { }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
@@ -75,12 +76,49 @@ public:
     // Default is to loop through the dofman and check if any of them are enriched
     virtual bool isElementEnriched(Element *element);
 
+    virtual bool isAllElNodesEnriched(const Element *element);
+
     // Spatial search methods
-    virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element) { }
+    virtual void computeIntersectionPoints(std::vector< FloatArray > &oIntersectionPoints, Element *element) { }
     virtual int computeNumberOfIntersectionPoints(Element *element) { return 0; }
 
     virtual const char *giveInputRecordName() const = 0;
     virtual const char *giveClassName() const = 0;
+
+#ifdef __BOOST_MODULE
+    // Level set routines
+    virtual void updateLevelSets(XfemManager &ixFemMan);
+    virtual void updateNodeEnrMarker(XfemManager &ixFemMan);
+#endif
+
+    virtual void computeNormalSignDist(double &oDist, const double &iX, const double &iY) {};
+    virtual void computeTangentialSignDist(double &oDist, const double &iX, const double &iY) {};
+
+#ifdef __BOOST_MODULE
+    double giveLevelSetPhi(int iNodeIndex) const {return levelSetPhi[iNodeIndex-1];}
+    double giveLevelSetGamma(int iNodeIndex) const {return levelSetGamma[iNodeIndex-1];}
+    double giveNodeEnrMarker(int iNodeIndex) const {return nodeEnrichmentMarker[iNodeIndex-1];}
+
+protected:
+
+ // Level set for signed distance to the interface.
+ //	The sign is determined by the interface normal direction.
+ // This level set function is relevant for both open and closed interfaces.
+ std::vector<double> levelSetPhi;
+
+ // Level set for signed distance along the interface.
+ // Only relevant for open interfaces.
+ std::vector<double> levelSetGamma;
+
+
+ // Debug help: field with desired node enrichment types
+ std::vector<int> nodeEnrichmentMarker;
+
+
+ bool levelSetsNeedUpdate;
+
+ const double levelSetTol, levelSetTol2;
+#endif
 };
 
 
@@ -97,19 +135,23 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir) { return this->bg->initializeFrom(ir); }
     virtual bool isDofManagerEnriched(DofManager *dMan){ return false; }
 
-    virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element) { bg->computeIntersectionPoints(element, intersectionPoints); }
+    virtual void computeIntersectionPoints(std::vector< FloatArray > &oIntersectionPoints, Element *element) { bg->computeIntersectionPoints(element, oIntersectionPoints); }
     virtual int computeNumberOfIntersectionPoints(Element *element) { return bg->computeNumberOfIntersectionPoints(element); }
+
+    virtual void computeNormalSignDist(double &oDist, const double &iX, const double &iY);
+    virtual void computeTangentialSignDist(double &oDist, const double &iX, const double &iY);
+
 };
 
 class EDBGCircle : public EnrichmentDomain_BG
 {
 public:
     EDBGCircle () { bg = new Circle; }; 
-    virtual ~EDBGCircle() { }
+    virtual ~EDBGCircle() {delete bg; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir); }
     virtual bool isDofManagerEnriched(DofManager *dMan);
     virtual bool isElementEnriched(Element *element);
-    virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element) { bg->computeIntersectionPoints(element, intersectionPoints); }
+    virtual void computeIntersectionPoints(std::vector< FloatArray > &oIntersectionPoints, Element *element) { bg->computeIntersectionPoints(element, oIntersectionPoints); }
     virtual int computeNumberOfIntersectionPoints(Element *element) { return static_cast<Circle *>(bg)->computeNumberOfIntersectionPoints(element); }
 
     virtual const char *giveInputRecordName() const { return _IFT_EDBGCircle_Name; }
@@ -120,12 +162,12 @@ public:
 class EDCrack : public EnrichmentDomain_BG
 {
 public:
-	EDCrack () { bg = new PolygonLine; printf("Entering EDCrack().\n"); }
-    virtual ~EDCrack() { }
-    virtual IRResultType initializeFrom(InputRecord *ir) { printf("Initializing a crack.\n"); return bg->initializeFrom(ir); }
+	EDCrack () { bg = new PolygonLine; }
+    virtual ~EDCrack() { delete bg; }
+    virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir); }
     virtual bool isDofManagerEnriched(DofManager *dMan);
     virtual bool isElementEnriched(Element *element);
-    virtual void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element) { bg->computeIntersectionPoints(element, intersectionPoints); }
+    virtual void computeIntersectionPoints(std::vector< FloatArray > &oIntersectionPoints, Element *element);
     virtual int computeNumberOfIntersectionPoints(Element *element) { return static_cast<PolygonLine *>(bg)->computeNumberOfIntersectionPoints(element); }
 
     virtual const char *giveInputRecordName() const { return _IFT_EDCrack_Name; }

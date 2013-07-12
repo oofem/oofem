@@ -2,7 +2,8 @@
  * BoostInterface.h
  *
  *  Created on: Jun 5, 2013
- *  Author: Erik Svenning
+ *
+ *  @author: Erik Svenning
  *
  *  Description: Interface to some useful Boost functions.
  *  Boost is subject to the Boost license:
@@ -96,13 +97,15 @@ inline bool bOverlap( const bPoint2 &iLC1, const bPoint2 &iUC1, const bPoint2 &i
 inline double bDot( const bPoint2 &iP1, const bPoint2 &iP2 ) { return boost::geometry::dot_product(iP1, iP2); }
 
 inline double bNorm( const bPoint2 &iP1 ) { return sqrt( iP1.x()*iP1.x() + iP1.y()*iP1.y() ); }
-
+inline void bNormalized( bPoint2 &ioP );
 /////////////////////////////////////
 // Matrix operations
 inline bool bSolve2by2( const bMatrix &iA, const bPoint2 &ib, bPoint2 &ox);
 
 
-
+/////////////////////////////////////
+// Basic operations
+inline int bSign(const double &iVal) { return boost::math::sign(iVal);}
 
 
 
@@ -213,6 +216,14 @@ inline bool bOverlap( const bPoint2 &iLC1, const bPoint2 &iUC1, const bPoint2 &i
 	}
 
 	return false;
+}
+
+inline void bNormalized( bPoint2 &ioP )
+{
+	double l = bNorm(ioP);
+
+	ioP.x( ioP.x()/l );
+	ioP.y( ioP.y()/l );
 }
 
 inline bool bSolve2by2( const bMatrix &iA, const bPoint2 &ib, bPoint2 &ox)

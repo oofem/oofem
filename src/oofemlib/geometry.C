@@ -155,7 +155,7 @@ int Line :: computeNumberOfIntersectionPoints(Element *element)
     return count;
 }
 
-void Line :: computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints)
+void Line :: computeIntersectionPoints(Element *element, std::vector< FloatArray > &oIntersectionPoints)
 {
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
         int n1 = i;
@@ -173,14 +173,15 @@ void Line :: computeIntersectionPoints(Element *element, AList< FloatArray > *in
         if ( lsn1 * lsn2 <= 0 && lst1 <= 0 && lst2 <= 0 ) {
             double r = lsn1 / ( lsn1 - lsn2 );
             if ( i <= element->giveNumberOfDofManagers() ) {
-                FloatArray *answer = new FloatArray(2);
-                for ( int j = 1; j <= answer->giveSize(); j++ ) {
-                    answer->at(j) = ( 1 - r ) * element->giveDofManager(n1)->giveCoordinate(j)
+                FloatArray answer(2);
+                for ( int j = 1; j <= answer.giveSize(); j++ ) {
+                    answer.at(j) = ( 1 - r ) * element->giveDofManager(n1)->giveCoordinate(j)
                                     + r *element->giveDofManager(n2)->giveCoordinate(j);
                 }
 
-                int sz = intersecPoints->giveSize();
-                intersecPoints->put(sz + 1, answer);
+//                int sz = intersecPoints->giveSize();
+//                intersecPoints->put(sz + 1, answer);
+                oIntersectionPoints.push_back(answer);
             }
         }
     }
@@ -435,11 +436,11 @@ bool Circle :: isInside(Element *element)
 
 
 
-void Circle :: computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints)
+void Circle :: computeIntersectionPoints(Element *element, std::vector< FloatArray > &oIntersectionPoints)
 {
     if ( intersects(element) ) {
         for ( int i = 1; i <= element->giveNumberOfBoundarySides(); i++ ) {
-            AList< FloatArray >oneLineIntersects;
+        	std::vector< FloatArray > oneLineIntersects;
             FloatArray *a = new FloatArray( *( element->giveDofManager(i)->giveCoordinates() ) );
             FloatArray *b = NULL;
             if ( i != element->giveNumberOfBoundarySides() ) {
@@ -448,20 +449,20 @@ void Circle :: computeIntersectionPoints(Element *element, AList< FloatArray > *
                 b = new FloatArray( *( element->giveDofManager(1)->giveCoordinates() ) );
             }
 
-            Line *l = new Line(a, b);
-            computeIntersectionPoints(l, & oneLineIntersects);
-            for ( int j = 1; j <= oneLineIntersects.giveSize(); j++ ) {
-                int sz = intersecPoints->giveSize();
-                intersecPoints->put( sz + 1, oneLineIntersects.at(j) );
-                oneLineIntersects.unlink(j);
+            Line l(a, b);
+            computeIntersectionPoints(&l, oneLineIntersects);
+            for ( int j = 1; j <= int(oneLineIntersects.size()); j++ ) {
+//                int sz = intersecPoints->giveSize();
+//                intersecPoints->put( sz + 1, oneLineIntersects.at(j) );
+//                oneLineIntersects.unlink(j);
+            	oIntersectionPoints.push_back( oneLineIntersects[j-1] );
             }
 
-            delete l;
         }
     }
 }
 
-void Circle :: computeIntersectionPoints(Line *l, AList< FloatArray > *intersecPoints)
+void Circle :: computeIntersectionPoints(Line *l, std::vector< FloatArray > &oIntersectionPoints)
 {
     double x1 = l->giveVertex(1)->at(1);
     double y1 = l->giveVertex(1)->at(2);
@@ -495,7 +496,7 @@ void Circle :: computeIntersectionPoints(Line *l, AList< FloatArray > *intersecP
     }
 
     for ( int i = 1; i <= sz; i++ ) {
-        FloatArray *point = new FloatArray(2);
+        FloatArray point(2);
         double fn;
         if ( i == 1 ) {
             fn = sqrt(D);
@@ -504,29 +505,30 @@ void Circle :: computeIntersectionPoints(Line *l, AList< FloatArray > *intersecP
         }
 
         if ( distX != 0.0 ) {
-            point->at(1) = ( ( -1 ) * B + fn ) / ( 2 * A );
-            point->at(2) = a * point->at(1) + b;
+            point.at(1) = ( ( -1 ) * B + fn ) / ( 2 * A );
+            point.at(2) = a * point.at(1) + b;
         } else {
-            point->at(1) = x1;
-            point->at(2) = ( ( -1 ) * B + fn ) / ( 2 * A );
+            point.at(1) = x1;
+            point.at(2) = ( ( -1 ) * B + fn ) / ( 2 * A );
         }
 
-        int sez = intersecPoints->giveSize();
-        if ( l->isPointInside(point) ) {
-            intersecPoints->put(sez + 1, point);
-        } else {
-            delete point;
-        }
+//        int sez = oIntersectionPoints.size();
+        if ( l->isPointInside(&point) ) {
+//            intersecPoints->put(sez + 1, point);
+        	oIntersectionPoints.push_back(point);
+        } //else {
+//            delete point;
+//        }
     }
 }
 
 int 
 Circle :: computeNumberOfIntersectionPoints(Element *element)
 { 
-    AList< FloatArray > intersecPoints;
+	std::vector< FloatArray > intersecPoints;
 
-    this->computeIntersectionPoints(element, &intersecPoints);
-    return intersecPoints.giveSize();
+    this->computeIntersectionPoints(element, intersecPoints);
+    return intersecPoints.size();
 }
 
 bool Circle :: isOutside(BasicGeometry *bg)
@@ -602,6 +604,83 @@ double PolygonLine :: computeDistanceTo(FloatArray *point)
 	}
 
 	return minDist;
+}
+
+double PolygonLine :: computeTangentialSignDist(FloatArray *point)
+{
+//	printf("Entering PolygonLine :: computeTangentialSignDist.\n");
+
+	double minDist = 1.0e9;
+
+	int numSeg = this->giveNrVertices()-1;
+
+	bPoint2 crackPS( this->giveVertex(1)->at(1), this->giveVertex(1)->at(2) );
+	bPoint2 crackPE( this->giveVertex(numSeg+1)->at(1), this->giveVertex(numSeg+1)->at(2) );
+
+	bPoint2 x( point->at(1), point->at(2) );
+	minDist = min( bDist(crackPS,x), bDist(crackPE,x) );
+
+
+	// Find the closest segment to determine the sign of the distance
+	double minDistSeg = 1.0e9;
+	int minDistSegIndex = 0;
+	for( int segId = 1; segId <= numSeg; segId++ )
+	{
+		// Crack segment
+		bPoint2 crackP1( this->giveVertex(segId)->at(1), this->giveVertex(segId)->at(2) );
+		bPoint2 crackP2( this->giveVertex(segId+1)->at(1), this->giveVertex(segId+1)->at(2) );
+		bSeg2 crackSeg( crackP1, crackP2 );
+
+		double distSeg = bDist(x, crackSeg);
+
+		if( distSeg < minDistSeg )
+		{
+			minDistSeg = distSeg;
+			minDistSegIndex = segId;
+		}
+	}
+
+	if( minDistSegIndex > 1 && minDistSegIndex < numSeg)
+	{
+		// Interior segment is closest -> gamma is positive
+		return minDist;
+	}
+	else
+	{
+		if(minDistSegIndex == 1)
+		{
+			bPoint2 P1( this->giveVertex(1)->at(1), this->giveVertex(1)->at(2) );
+			bPoint2 P2( this->giveVertex(2)->at(1), this->giveVertex(2)->at(2) );
+
+			bPoint2 t( P1.x() - P2.x(), P1.y() - P2.y() );
+			bNormalized(t);
+
+			bPoint2 x_P1( x.x() - P1.x(), x.y() - P1.y() );
+			double sign = -bDot( x_P1, t );
+
+			return sign*minDist;
+		}
+		else if(minDistSegIndex == numSeg)
+		{
+			bPoint2 P1( this->giveVertex(minDistSegIndex)->at(1), this->giveVertex(minDistSegIndex)->at(2) );
+			bPoint2 P2( this->giveVertex(minDistSegIndex+1)->at(1), this->giveVertex(minDistSegIndex+1)->at(2) );
+
+			bPoint2 t( P2.x() - P1.x(), P2.y() - P1.y() );
+			bNormalized(t);
+
+			bPoint2 x_P2( x.x() - P2.x(), x.y() - P2.y() );
+			double sign = -bDot( x_P2, t );
+
+			return sign*minDist;
+		}
+		else
+		{
+            OOFEM_ERROR2( "PolygonLine :: computeTangentialSignDist: Index of minDistSegIndex not covered in loop: %d\n", minDistSegIndex );
+		}
+
+		return minDist;
+	}
+
 }
 
 IRResultType PolygonLine :: initializeFrom(InputRecord *ir)
@@ -771,7 +850,7 @@ void PolygonLine :: calcBoundingBox(bPoint2 &oLC, bPoint2 &oUC)
 
 
 
-void PolygonLine :: computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints)
+void PolygonLine :: computeIntersectionPoints(Element *element, std::vector< FloatArray > &oIntersectionPoints)
 {
 
 	if( !boundingBoxIntersects(element) )
@@ -781,7 +860,7 @@ void PolygonLine :: computeIntersectionPoints(Element *element, AList< FloatArra
 
 
 	for ( int i = 1; i <= element->giveNumberOfBoundarySides(); i++ ) {
-		AList< FloatArray >oneLineIntersects;
+		std::vector< FloatArray > oneLineIntersects;
 		FloatArray *a = new FloatArray( *( element->giveDofManager(i)->giveCoordinates() ) );
 		FloatArray *b = NULL;
 		if ( i != element->giveNumberOfBoundarySides() ) {
@@ -790,9 +869,10 @@ void PolygonLine :: computeIntersectionPoints(Element *element, AList< FloatArra
 			b = new FloatArray( *( element->giveDofManager(1)->giveCoordinates() ) );
 		}
 
-		Line *l = new Line(a, b);
-		computeIntersectionPoints(l, & oneLineIntersects);
-		for ( int j = 1; j <= oneLineIntersects.giveSize(); j++ ) {
+		Line l(a, b);
+
+		computeIntersectionPoints(&l, oneLineIntersects);
+		for ( int j = 1; j <= int(oneLineIntersects.size()); j++ ) {
 
 			// Check that the intersection point has not already been identified.
 			// This may happen if the crack intersects the element exactly at a node,
@@ -803,12 +883,12 @@ void PolygonLine :: computeIntersectionPoints(Element *element, AList< FloatArra
 
 			bool alreadyFound = false;
 
-			bPoint2 pNew( oneLineIntersects.at(j)->at(1), oneLineIntersects.at(j)->at(2) );
+			bPoint2 pNew( oneLineIntersects[j-1].at(1), oneLineIntersects[j-1].at(2) );
 
-			int numPointsOld = intersecPoints->giveSize();
+			int numPointsOld = oIntersectionPoints.size();
 			for(int k = 1; k <= numPointsOld; k++)
 			{
-				bPoint2 pOld( intersecPoints->at(k)->at(1), intersecPoints->at(k)->at(2) );
+				bPoint2 pOld( oIntersectionPoints[k-1].at(1), oIntersectionPoints[k-1].at(2) );
 
 				if( bDist(pOld, pNew) < distTol )
 				{
@@ -820,19 +900,19 @@ void PolygonLine :: computeIntersectionPoints(Element *element, AList< FloatArra
 
 			if(!alreadyFound)
 			{
-				int sz = intersecPoints->giveSize();
-				intersecPoints->put( sz + 1, oneLineIntersects.at(j) );
-				oneLineIntersects.unlink(j);
+//				int sz = intersecPoints->giveSize();
+//				intersecPoints->put( sz + 1, oneLineIntersects.at(j) );
+//				oneLineIntersects.unlink(j);
+				oIntersectionPoints.push_back( oneLineIntersects[j-1] );
 			}
 
 		}
 
-		delete l;
 	}
 
 }
 
-void PolygonLine :: computeIntersectionPoints(Line *l, AList< FloatArray > *intersecPoints)
+void PolygonLine :: computeIntersectionPoints(Line *l, std::vector< FloatArray > &oIntersectionPoints)
 {
 
 #ifdef __BOOST_MODULE
@@ -869,12 +949,16 @@ void PolygonLine :: computeIntersectionPoints(Line *l, AList< FloatArray > *inte
 				foundOverlap = true;
 
 
-				int sz = intersecPoints->giveSize();
-				FloatArray *pos = new FloatArray(2);
-				pos->at(1) = intersectionPoint.x();
-				pos->at(2) = intersectionPoint.y();
-				intersecPoints->put( sz + 1, pos );
+//				int sz = intersecPoints->giveSize();
+//				FloatArray *pos = new FloatArray(2);
+//				pos->at(1) = intersectionPoint.x();
+//				pos->at(2) = intersectionPoint.y();
+//				intersecPoints->put( sz + 1, pos );
 
+				FloatArray pos(2);
+				pos.at(1) = intersectionPoint.x();
+				pos.at(2) = intersectionPoint.y();
+				oIntersectionPoints.push_back(pos);
 			}
 		}
 
@@ -893,9 +977,9 @@ void PolygonLine :: computeIntersectionPoints(Line *l, AList< FloatArray > *inte
 int
 PolygonLine :: computeNumberOfIntersectionPoints(Element *element)
 {
-    AList< FloatArray > intersecPoints;
-    this->computeIntersectionPoints(element, &intersecPoints);
-    return intersecPoints.giveSize();
+	std::vector< FloatArray > intersecPoints;
+    this->computeIntersectionPoints(element, intersecPoints);
+    return intersecPoints.size();
 }
 
 bool PolygonLine :: isOutside(BasicGeometry *bg)

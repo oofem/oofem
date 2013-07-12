@@ -85,12 +85,14 @@ public:
     virtual ~BasicGeometry();
     /// Computes normal signed distance between this object and a point.
     virtual double computeDistanceTo(FloatArray *point) { return 0; }
+
+    virtual double computeTangentialSignDist(FloatArray *point) { return 0; }
     /// Checks whether an element is interacted, Element reference will be later replaced by Geometry.
     virtual bool intersects(Element *element) { return false; }
     /// Gives number of intersection points of Geometry entity with an element, Element reference will be later replaced by Geometry.
     virtual int computeNumberOfIntersectionPoints(Element *element) { return 0; }
     /// Gives intersection points between this Geometry and Element.
-    virtual void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints) { }
+    virtual void computeIntersectionPoints(Element *element, std::vector< FloatArray > &oIntersectionPoints) { }
     /// Accessor.
     FloatArray *giveVertex(int n);
     /// Modifier.
@@ -150,7 +152,7 @@ public:
     double computeTangentialDistanceToEnd(FloatArray *point);
     void computeProjection(FloatArray &answer);
     virtual int computeNumberOfIntersectionPoints(Element *element);
-    virtual void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints);
+    virtual void computeIntersectionPoints(Element *element, std::vector< FloatArray > &oIntersectionPoints);
     double computeInclinationAngle();
     void computeTransformationMatrix(FloatMatrix &answer);
     void transformIntoPolar(FloatArray *point, FloatArray &answer);
@@ -188,8 +190,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "Circle"; }
     virtual bool intersects(Element *element);
-    virtual void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints);
-    virtual void computeIntersectionPoints(Line *l, AList< FloatArray > *intersecPoints);
+    virtual void computeIntersectionPoints(Element *element, std::vector< FloatArray > &oIntersectionPoints);
+    virtual void computeIntersectionPoints(Line *l, std::vector< FloatArray > &oIntersectionPoints);
     virtual int computeNumberOfIntersectionPoints(Element *element);
     virtual bool isOutside(BasicGeometry *bg);
     virtual bool isInside(Element *element);
@@ -207,14 +209,17 @@ public:
     virtual ~PolygonLine() { }
     /// Computes the normal distance to the surface not to the center.
     virtual double computeDistanceTo(FloatArray *point);
+
+    virtual double computeTangentialSignDist(FloatArray *point);
+
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "PolygonLine"; }
 
     virtual bool boundingBoxIntersects(Element *element);
 
     virtual bool intersects(Element *element);
-    virtual void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints);
-    virtual void computeIntersectionPoints(Line *l, AList< FloatArray > *intersecPoints);
+    virtual void computeIntersectionPoints(Element *element, std::vector< FloatArray > &oIntersectionPoints);
+    virtual void computeIntersectionPoints(Line *l, std::vector< FloatArray > &oIntersectionPoints);
     virtual int computeNumberOfIntersectionPoints(Element *element);
     virtual bool isOutside(BasicGeometry *bg);
     virtual bool isInside(Element *element);

@@ -59,7 +59,7 @@ protected:
 
 public:
     /// Constructor.
-    XfemElementInterface(Element *e) : Interface() { this->element = e; }
+    XfemElementInterface(Element *e) : Interface(), xMan(NULL) { this->element = e; }
 
     virtual ~XfemElementInterface() {}
 

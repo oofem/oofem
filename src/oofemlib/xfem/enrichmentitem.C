@@ -65,7 +65,11 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FE
 
 EnrichmentItem :: ~EnrichmentItem()
 {
-    delete this->enrichesDofsWithIdArray;
+    delete this->enrichmentFunctionList;
+    delete this->enrichmentDomainList;
+
+	delete this->enrichesDofsWithIdArray;
+
 }
 
 
@@ -100,6 +104,17 @@ bool EnrichmentItem :: isElementEnrichedByEnrichmentDomain(const Element *elemen
         }
     }
     return false;
+}
+
+void EnrichmentItem :: updateGeometry()
+{
+#ifdef __BOOST_MODULE
+	// Update associated enrichment domains
+	for ( int i = 1; i <= enrichmentDomainList->giveSize(); i++ )
+	{
+		enrichmentDomainList->at(i)->updateLevelSets(*xMan);
+	}
+#endif
 }
 
 bool EnrichmentItem :: isDofManEnriched(DofManager *dMan)

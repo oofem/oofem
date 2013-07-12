@@ -89,7 +89,7 @@ public:
                           int lowerIndx = 1, int upperIndx = ALL_STRAINS);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray & answer) const;
 //    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
-    virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
+//    virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
 /*
