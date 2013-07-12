@@ -35,8 +35,6 @@
 #ifndef intmatbilinearczmaterialFagerstrom_h
 #define intmatbilinearczmaterialFagerstrom_h
 
-//#include "structuralmaterial.h"
-//#include "structuralms.h"
 #include "structuralinterfacematerial.h"
 #include "structuralinterfacematerialstatus.h"
 
@@ -56,9 +54,8 @@
 namespace oofem {
 
 /**
- * This class implements associated Material Status for ...
+ * This class implements associated Material Status for IntMatBilinearCZFagerstrom
  */
-//class IntMatBilinearCZFagerstromStatus : public StructuralMaterialStatus
 class IntMatBilinearCZFagerstromStatus : public StructuralInterfaceMaterialStatus
 {
 protected:
@@ -147,7 +144,6 @@ public:
  * is governed by normal component of generalized strain vector (normal relative displacement)
  * by an exponential softening law.
  */
-//class BilinearCZMaterialFagerstrom : public StructuralMaterial
 class IntMatBilinearCZFagerstrom : public StructuralInterfaceMaterial
 {
 protected:
@@ -156,11 +152,11 @@ protected:
     double ks0;   // initial shear stiffness
     double knc;   // stiffness in compression  
     double GIc;   // fracture energy, mode 1
-    double GIIc;   // fracture energy, mode 1
+    double GIIc;  // fracture energy, mode 1
     double sigf;  // max stress
 
-    double mu;   // loading function parameter
-    double gamma;   // loading function parameter
+    double mu;    // loading function parameter
+    double gamma; // loading function parameter
 
 
     virtual int checkConsistency();
@@ -178,7 +174,7 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode); // remove
     virtual const char *giveClassName() const { return "IntMatBilinearCZFagerstrom"; }
     virtual classType giveClassID() const { return MaterialStatusClass; }
-    virtual const char *giveInputRecordName() const { return _IFT_BilinearCZMaterialFagerstrom_Name; }
+    virtual const char *giveInputRecordName() const { return _IFT_IntMatBilinearCZFagerstrom_Name; }
     
     
     virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,

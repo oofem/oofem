@@ -32,7 +32,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "bilinearczmaterialFagerstrom.h"
+
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
@@ -41,7 +41,7 @@
 #include "contextioerr.h"
 #include "classfactory.h"
 #include "shell7base.h"
-#include "intmatbilinearczmaterialFagerstrom.h"
+#include "intmatbilinczfagerstrom.h"
 namespace oofem {
 
     REGISTER_Material( IntMatBilinearCZFagerstrom );
@@ -379,7 +379,7 @@ IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, Ma
 int
 IntMatBilinearCZFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    BilinearCZMaterialFagerstromStatus *status = static_cast< BilinearCZMaterialFagerstromStatus * >( this->giveStatus(aGaussPoint) );
+    IntMatBilinearCZFagerstromStatus *status = static_cast< IntMatBilinearCZFagerstromStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_DamageScalar ) {     
         answer.resize(1);
         answer.at(1) = status->giveTempDamage();
@@ -423,23 +423,23 @@ IntMatBilinearCZFagerstrom :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, kn0, _IFT_BilinearCZMaterialFagerstrom_kn);
+    IR_GIVE_FIELD(ir, kn0, _IFT_IntMatBilinearCZFagerstrom_kn);
     this->knc = kn0;                        // Defaults to the same stiffness in compression and tension
-    IR_GIVE_OPTIONAL_FIELD(ir, this->knc, _IFT_BilinearCZMaterialFagerstrom_knc);
+    IR_GIVE_OPTIONAL_FIELD(ir, this->knc, _IFT_IntMatBilinearCZFagerstrom_knc);
 
     this->ks0 = kn0;                        // Defaults to kn0
-    IR_GIVE_OPTIONAL_FIELD(ir, ks0, _IFT_BilinearCZMaterialFagerstrom_ks);
+    IR_GIVE_OPTIONAL_FIELD(ir, ks0, _IFT_IntMatBilinearCZFagerstrom_ks);
 
-    IR_GIVE_FIELD(ir, GIc, _IFT_BilinearCZMaterialFagerstrom_g1c);
+    IR_GIVE_FIELD(ir, GIc, _IFT_IntMatBilinearCZFagerstrom_g1c);
 
     this->GIIc = GIc;						//Defaults to GIc
-    IR_GIVE_OPTIONAL_FIELD(ir, GIIc, _IFT_BilinearCZMaterialFagerstrom_g2c);
+    IR_GIVE_OPTIONAL_FIELD(ir, GIIc, _IFT_IntMatBilinearCZFagerstrom_g2c);
 
-    IR_GIVE_FIELD(ir, sigf, _IFT_BilinearCZMaterialFagerstrom_sigf);
+    IR_GIVE_FIELD(ir, sigf, _IFT_IntMatBilinearCZFagerstrom_sigf);
 
-    IR_GIVE_FIELD(ir, mu, _IFT_BilinearCZMaterialFagerstrom_mu);
+    IR_GIVE_FIELD(ir, mu, _IFT_IntMatBilinearCZFagerstrom_mu);
 
-    IR_GIVE_FIELD(ir, gamma, _IFT_BilinearCZMaterialFagerstrom_gamma);
+    IR_GIVE_FIELD(ir, gamma, _IFT_IntMatBilinearCZFagerstrom_gamma);
 
     this->checkConsistency();                                // check validity of the material paramters
     this->printYourself();

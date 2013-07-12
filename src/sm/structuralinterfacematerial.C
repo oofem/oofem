@@ -65,7 +65,7 @@ StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, I
         return 1;
 
     } else if ( type == IST_DeformationGradientTensor ) {
-        answer.beFullVectorForm( status->giveF() );
+        answer.beVectorForm( status->giveF() );
         return 1;
 
     } else {

@@ -813,7 +813,6 @@ Shell7Base :: computeE(FloatMatrix &answer, FloatMatrix &F)
 void
 Shell7Base :: computeStrainVectorF(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &genEps)
 {
-    ///@todo Do you even need this function at all Jim? / Mikael
     // Computes the Green-Lagrange strain tensor: E=0.5(C-I)
     FloatMatrix F, E;
     FloatArray lcoords;
@@ -855,7 +854,7 @@ Shell7Base :: computeCauchyStressVector(FloatArray &answer, GaussPoint *gp, Time
     temp.beProductTOf(S,F); 
     sigma.beProductOf(F,temp);
     sigma.times( 1.0/F.giveDeterminant() );
-    answer.beReducedVectorFormOfStress(sigma);
+    answer.beSymVectorForm(sigma);
 }
 
 
