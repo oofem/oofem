@@ -114,7 +114,7 @@ Tr2Shell7XFEM :: computeGaussPoints()
                 czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];
                 for ( int i = 0; i < numberOfInterfaces; i++ ) {
                     czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
-                    czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dMat);
+                    czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
                 }
             }
         }
