@@ -116,8 +116,7 @@ set (sm_material
     dustmat.C
     lsmastermat.C lsmastermatgrad.C
     bilinearczmaterial.C
-	bilinearczmaterialFagerstrom.C
-    intmatbilinearczmaterialFagerstrom.C
+    intmatbilinczfagerstrom.C
     )
 
 set (sm_error
@@ -140,6 +139,7 @@ set (sm_barrier
 
 set (sm_status
     structuralms.C
+	structuralinterfacematerialstatus.C
     rheoChM.C maxwellChM.C kelvinChM.C
     rcm2.C
     isodamagemodel.C

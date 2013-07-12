@@ -204,7 +204,7 @@ namespace oofem {
             double alphaOld = status->giveDamage();
 
             if (alphaOld>0.1) {
-                double bbb=1;
+                double bbb=1;       ///@todo Should this be used for anything Martin? /JB
             }
 
             if (loadFun/sigf < 0.0000001) {
@@ -229,26 +229,27 @@ namespace oofem {
                 FloatMatrix Smat(4,4), Smati(4,4);
                 FloatArray R(4), inc(4);
 
-                for( int iter = 1; fabs(loadFun)/sigf>0.0001; iter++) {
+                const double errorTol = 0.0001;
+                for( int iter = 1; fabs(loadFun)/sigf > errorTol; iter++) {
                     if (iter>40) {
                         //OOFEM_ERROR("BilinearCZMaterialFagerstrom :: giveRealStressVector - no convergence in constitutive driver");
-                        double a=1;
-                        }
+                        double a=1;   ///@todo Should this be used for anything Martin? /JB
+                    }
                     Smat.zero();										// S_mat=0.d0
 
                     R.at(1) = dJElastic.at(1) - (dJ.at(1) - gammaGf*S*dAlpha*M.at(1));		// R(1:2) = dJtn_e(1:2) - (dJtn_v(1:2) - S*dalpha*M(1:2))
                     R.at(2) = dJElastic.at(2) - (dJ.at(2) - gammaGf*S*dAlpha*M.at(2));
                     R.at(3) = dJElastic.at(3) - (dJ.at(3) - S*dAlpha*M.at(3));
-                    R.at(4) = loadFun;											// R(3) = F/sig_f
+                    R.at(4) = loadFun;	 // R(3) = F/sig_f
 
-                                                                                    // dMdJtn_e(1,1:2) = (/2/(sig_f*gamma**2),0.d0/)
-                                                                                    // IF (Q_nM>0) THEN
-                                                                                    // dMdJtn_e(2,1:2) = (/0.d0,2/sig_f/)
-                                                                                    // ELSE
-                                                                                    // dMdJtn_e(2,1:2) = (/0.d0,0.d0/)
-                                                                                    // END IF
+                    // dMdJtn_e(1,1:2) = (/2/(sig_f*gamma**2),0.d0/)
+                    // IF (Q_nM>0) THEN
+                    // dMdJtn_e(2,1:2) = (/0.d0,2/sig_f/)
+                    // ELSE
+                    // dMdJtn_e(2,1:2) = (/0.d0,0.d0/)
+                    // END IF
                                 
-                                                                                    // dMdJtn_e = MATMUL(dMdJtn_e,Keye3(1:2,1:2))
+                    // dMdJtn_e = MATMUL(dMdJtn_e,Keye3(1:2,1:2))
 
                     Smat.at(1,1) = 1.0 + gammaGf*dAlpha*S*2*Kstiff.at(1,1)/(pow(gamma,2)*sigf);		// S_mat(1:2,1:2) = eye3(1:2,1:2)+ dalpha*S*dMdJtn_e(1:2,1:2)
                     Smat.at(2,2) = 1.0 + gammaGf*dAlpha*S*2*Kstiff.at(2,2)/(pow(gamma,2)*sigf);				
@@ -259,11 +260,11 @@ namespace oofem {
                         Smat.at(3,3) = 1.0;
                     }
 
-                    Smat.at(1,4) = gammaGf*S*M.at(1);											// S_mat(1:2,3) = S*M(1:2)
+                    Smat.at(1,4) = gammaGf*S*M.at(1);		// S_mat(1:2,3) = S*M(1:2)
                     Smat.at(2,4) = gammaGf*S*M.at(2);
                     Smat.at(3,4) = S*M.at(3);
                     
-                    Smat.at(4,1) = M.at(1)*Kstiff.at(1,1);								// S_mat(3,1:2) = MATMUL(M(1:2),Keye3(1:2,1:2))
+                    Smat.at(4,1) = M.at(1)*Kstiff.at(1,1);	// S_mat(3,1:2) = MATMUL(M(1:2),Keye3(1:2,1:2))
                     Smat.at(4,2) = M.at(2)*Kstiff.at(2,2);
                     Smat.at(4,3) = M.at(3)*Kstiff.at(3,3);
 
@@ -290,7 +291,7 @@ namespace oofem {
                     Qt = sqrt(pow(Qt1,2) + pow(Qt2,2));
                     Qn_M = 0.5*(Qtemp.at(3)+fabs(Qtemp.at(3)));
 
-                    M.at(1) = 2*Qt1/(pow(gamma,2)*sigf);					// Qt = sqrt(Qt1^2 + Qt2^2)
+                    M.at(1) = 2*Qt1/(pow(gamma,2)*sigf);	// Qt = sqrt(Qt1^2 + Qt2^2)
                     M.at(2) = 2*Qt2/(pow(gamma,2)*sigf);
                     M.at(3) = 2*Qn_M/sigf;	
 
@@ -298,6 +299,8 @@ namespace oofem {
                 }
                 
                 FloatMatrix Iep(3,3);
+                Iep = Smati;
+                /*
                 Iep.at(1,1) = Smati.at(1,1);
                 Iep.at(1,2) = Smati.at(1,2);
                 Iep.at(1,3) = Smati.at(1,3);
@@ -307,10 +310,11 @@ namespace oofem {
                 Iep.at(3,1) = Smati.at(3,1);
                 Iep.at(3,2) = Smati.at(3,2);
                 Iep.at(3,3) = Smati.at(3,3);
+                */
                 status->letTempIepBe(Iep);
                                                                 
                 FloatArray alpha_v(3);
-                alpha_v.at(1) = Smati.at(4,1);			// alpha_v(1:2) = S_mati(3,1:2)
+                alpha_v.at(1) = Smati.at(4,1);      // alpha_v(1:2) = S_mati(3,1:2)
                 alpha_v.at(2) = Smati.at(4,2);
                 alpha_v.at(3) = Smati.at(4,3);
                 status->letTempAlphavBe(alpha_v);
@@ -318,14 +322,14 @@ namespace oofem {
 
             }
 
-        Qtemp.rotatedWith(Rot,'t');							// Q=Qe
-        status->letTempRotationMatrix(Rot);
+            Qtemp.rotatedWith(Rot,'t');				// Q=Qe
+            status->letTempRotationMatrix(Rot);
         } else {
             dAlpha = 1.0-oldDamage;
         }
 
-        answer.beTProductOf(Finv,Qtemp);					// t_1_hat = MATMUL(TRANSPOSE(Fci),Q)
-        answer.times(1-oldDamage-dAlpha);					// t1_s = (1-al)*t_1_hat
+        answer.beTProductOf(Finv,Qtemp);			// t_1_hat = MATMUL(TRANSPOSE(Fci),Q)
+        answer.times(1-oldDamage-dAlpha);			// t1_s = (1-al)*t_1_hat
 
         
         status->letTempDamageBe(oldDamage + dAlpha);

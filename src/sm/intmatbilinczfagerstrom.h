@@ -35,10 +35,10 @@
 #ifndef intmatbilinearczmaterialFagerstrom_h
 #define intmatbilinearczmaterialFagerstrom_h
 
-#include "structuralmaterial.h"
-#include "structuralms.h"
+//#include "structuralmaterial.h"
+//#include "structuralms.h"
 #include "structuralinterfacematerial.h"
-
+#include "structuralinterfacematerialstatus.h"
 
 ///@name Input fields for IntMatBilinearCZFagerstrom
 //@{
@@ -58,8 +58,8 @@ namespace oofem {
 /**
  * This class implements associated Material Status for ...
  */
-class IntMatBilinearCZFagerstromStatus : public StructuralMaterialStatus
-//class BilinearCZMaterialFagerstromStatus : public StructuralInterfaceMaterialStatus
+//class IntMatBilinearCZFagerstromStatus : public StructuralMaterialStatus
+class IntMatBilinearCZFagerstromStatus : public StructuralInterfaceMaterialStatus
 {
 protected:
 
@@ -176,13 +176,13 @@ public:
     virtual int hasNonLinearBehaviour()   { return 1; }
 
     virtual int hasMaterialModeCapability(MaterialMode mode); // remove
-    virtual const char *giveClassName() const { return "IntMatBilinearCZMaterialFagerstrom"; }
+    virtual const char *giveClassName() const { return "IntMatBilinearCZFagerstrom"; }
     virtual classType giveClassID() const { return MaterialStatusClass; }
     virtual const char *giveInputRecordName() const { return _IFT_BilinearCZMaterialFagerstrom_Name; }
     
     
     virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                         const FloatArray &reducedF, TimeStep *tStep);
+                                         const FloatMatrix &F, TimeStep *tStep);
     virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
 
@@ -195,7 +195,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new BilinearCZMaterialFagerstromStatus(1, domain, gp); }
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IntMatBilinearCZFagerstromStatus(1, domain, gp); }
     void printYourself();
 protected:
    

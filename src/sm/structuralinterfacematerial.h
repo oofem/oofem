@@ -40,11 +40,9 @@
 #include "floatmatrix.h"
 #include "matconst.h"
 #include "matstatus.h"
-#include "stressstrainprincmode.h"
 
 ///@name Input fields for StructuralInterfaceMaterial
 //@{
-#define _IFT_StructuralInterfaceMaterial_referencetemperature "referencetemperature"
 //@}
 
 namespace oofem {
@@ -68,10 +66,10 @@ class GaussPoint;
  *
  * Structural material introduces following basic stress/strain modes
  * - 3d state - all components of general stress/strain vector are generally nonzero.
- *   General 3d jump vector has following components {g_x, g_y, g_z}
+ *   General 3d jump vector has following components {j_x, j_y, j_z}
  *
  * Generally speaking, there are following major tasks, covered by declared services.
- * - Computing engineering/first PK traction vector at integration point for given jump/gap and updating its
+ * - Computing engineering/first PK traction vector at integration point for given jump/discontinuity and updating its
  *   state (still temporary state, after overall equilibrium is reached).
  * - Updating its state (final state), when equilibrium has been reached.
  * - Storing/restoring its context to stream.
@@ -93,11 +91,6 @@ public:
     virtual ~StructuralInterfaceMaterial() { }
 
 
-
-
-
-    /// @name Methods associated with large deformation analysis
-
     //@{
     /**
      * Computes the first Piola-Kirchoff traction vector for given total jump/gap and integration point.
@@ -113,21 +106,21 @@ public:
      * @param tStep Current time step (most models are able to respond only when atTime is current time step).
      */
     virtual void giveFirstPKTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                         const FloatArray &reducedF, TimeStep *tStep)
-                                         { _error("give1dtiffnessMatrix_Eng: not implemented "); }
+        const FloatArray &reducedF, TimeStep *tStep)
+        { _error("giveFirstPKTraction_1d: not implemented "); }
     virtual void giveFirstPKTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                         const FloatArray &reducedF, TimeStep *tStep)
-                                         { _error("give1dtiffnessMatrix_Eng: not implemented "); }
+        const FloatArray &reducedF, TimeStep *tStep) 
+        { _error("giveFirstPKTraction_2d: not implemented "); }
     virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                         const FloatArray &reducedF, TimeStep *tStep)
-                                         { _error("give1dtiffnessMatrix_Eng: not implemented "); }
+        const FloatMatrix &F, TimeStep *tStep) 
+        { _error("giveFirstPKTraction_3d: not implemented "); }
 
     virtual void giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
-    { _error("give1dtiffnessMatrix_Eng: not implemented "); }
+        { _error("giveEngTraction_1d: not implemented "); }
     virtual void giveEngTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
-        { _error("give1dtiffnessMatrix_Eng: not implemented "); }
+        { _error("giveEngTraction_2d: not implemented "); }
     virtual void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
-        { _error("give1dtiffnessMatrix_Eng: not implemented "); }
+        { _error("giveEngTraction_3d: not implemented "); }
     
     
     
@@ -152,18 +145,18 @@ public:
      * @param tStep Time step.
      */
     virtual void give1dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-        { _error("give1dtiffnessMatrix_Eng: not implemented "); }
+        { _error("give1dStiffnessMatrix_dTdj: not implemented "); }
     virtual void give2dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-        { _error("give1dtiffnessMatrix_Eng: not implemented "); }
+        { _error("give2dStiffnessMatrix_dTdj: not implemented "); }
     virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-        { _error("give1dtiffnessMatrix_Eng: not implemented "); }
+        { _error("give3dStiffnessMatrix_dTdj: not implemented "); }
 
     virtual void give1dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
-    { _error("give1dtiffnessMatrix_Eng: not implemented "); }
+        { _error("give1dStiffnessMatrix_Eng: not implemented "); }
     virtual void give2dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
-    { _error("give2dStiffnessMatrix_Eng: not implemented "); }
+        { _error("give2dStiffnessMatrix_Eng: not implemented "); }
     virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
-    { _error("give3dStiffnessMatrix_Eng: not implemented "); }
+        { _error("give3dStiffnessMatrix_Eng: not implemented "); }
     //@}
 
     // identification and auxiliary functions
@@ -176,16 +169,16 @@ public:
 
 
     //virtual int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type);
-    //virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    //virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
-    //virtual InternalStateValueType giveIPValueType(InternalStateType type);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    virtual InternalStateValueType giveIPValueType(InternalStateType type);
+    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     //virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
 
 protected:
    
     
     /**
-     * Transforms 3d traction vector into another coordinate system.
+     * Transforms traction vector into another coordinate system.
      * @param answer Transformed traction vector
      * @param base Transformation matrix. The columns in the matrix corresponds to the base vectors of the new 
      * coordinate system to which we do transformation. These vectors must
@@ -198,7 +191,7 @@ protected:
 
 
     /**
-     * Computes 3d strain vector transformation matrix from standard vector transformation matrix.
+     * Computes jump vector transformation matrix from standard vector transformation matrix.
      * @param answer Transformation matrix for strain vector.
      * @param base A (3,3) matrix, where on each column are stored unit direction vectors of
      * local coordinate axes to which we do transformation.

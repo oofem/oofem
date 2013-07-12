@@ -33,18 +33,7 @@
  */
 
 #include "StructuralInterfaceMaterial.h"
-#include "structuralcrosssection.h"
-#include "domain.h"
-#include "verbose.h"
-#include "structuralms.h"
-#include "structuralelement.h"
-#include "nlstructuralelement.h"
-#include "gausspoint.h"
-#include "floatmatrix.h"
-#include "floatarray.h"
-#include "mathfem.h"
-#include "engngm.h"
-#include "fieldmanager.h"
+#include "structuralinterfacematerialstatus.h"
 #include "dynamicinputrecord.h"
 
 namespace oofem {
@@ -58,25 +47,68 @@ StructuralInterfaceMaterial :: hasMaterialModeCapability(MaterialMode mode)
            mode == _3dInterface;
 }
 
-//
-//void
-//StructuralInterfaceMaterial :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-//                                         const FloatArray &reducedF, TimeStep *tStep)
-//{
-//    // what should be done before call:
-//    // compute F
-//    // compute jump vector
-//    // transform to local orthogonal coord system
-//    // call stress from material
-//}
+
+int
+StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
+{
+    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
+    if ( type == IST_InterfaceJump ) {
+        answer = status->giveJump();
+        return 1;
+
+    } else if ( type == IST_InterfaceTraction ) {
+        answer = status->giveTraction();
+        return 1;
+
+    } else if ( type == IST_InterfaceFirstPKTraction ) {
+        answer = status->giveFirstPKTraction();
+        return 1;
+
+    } else if ( type == IST_DeformationGradientTensor ) {
+        answer.beFullVectorForm( status->giveF() );
+        return 1;
+
+    } else {
+        return Material :: giveIPValue(answer, gp, type, atTime);
+    }
+}
 
 
+InternalStateValueType
+StructuralInterfaceMaterial :: giveIPValueType(InternalStateType type)
+{
+    if ( ( type == IST_InterfaceJump ) || ( type == IST_InterfaceTraction ) ||
+        ( type == IST_InterfaceFirstPKTraction ) ) {
+        return ISVT_VECTOR; 
+    } else if ( type == IST_DeformationGradientTensor ) {
+        return ISVT_TENSOR_G;
+    } else {
+        return Material :: giveIPValueType(type);
+    }
+}
 
+
+int
+StructuralInterfaceMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
+{
+    if ( ( type == IST_InterfaceJump ) || ( type == IST_InterfaceTraction ) ||
+        ( type == IST_InterfaceFirstPKTraction ) ) {
+            answer.setValues(3, 1, 2, 3);
+
+    } else if ( type == IST_DeformationGradientTensor ) {
+        answer.setValues(9, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+        return 1;
+    } else {
+        return Material :: giveIntVarCompFullIndx(answer, type, mmode);
+    }
+}
+
+// Currently not needed
 IRResultType
 StructuralInterfaceMaterial :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     this->Material :: initializeFrom(ir);
     return IRRT_OK;
@@ -87,7 +119,6 @@ void
 StructuralInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
 {
     Material :: giveInputRecord(input);
-    //input.setField(this->referenceTemperature, _IFT_StructuralInterfaceMaterial_referencetemperature);
 }
 
 
