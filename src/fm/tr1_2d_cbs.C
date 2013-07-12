@@ -1094,16 +1094,9 @@ TR1_2D_CBS :: updateYourself(TimeStep *tStep)
 int
 TR1_2D_CBS :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    //<RESTRICTED_SECTION>
     if ( type == IST_VOFFraction ) {
         answer.resize(1);
         answer.at(1) = this->giveTempVolumeFraction();
-        return 1;
-    } else
-    //</RESTRICTED_SECTION>
-    if ( type == IST_Density ) {
-        answer.resize(1);
-        answer.at(1) = this->giveMaterial()->give('d', aGaussPoint);
         return 1;
     } else {
         return CBSElement :: giveIPValue(answer, aGaussPoint, type, atTime);
@@ -1113,7 +1106,7 @@ TR1_2D_CBS :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
 int
 TR1_2D_CBS :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
 {
-    if ( ( type == IST_VOFFraction ) || ( type == IST_Density ) ) {
+    if ( type == IST_VOFFraction ) {
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
@@ -1126,7 +1119,7 @@ TR1_2D_CBS :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
 InternalStateValueType
 TR1_2D_CBS :: giveIPValueType(InternalStateType type)
 {
-    if ( ( type == IST_VOFFraction ) || ( type == IST_Density ) ) {
+    if ( type == IST_VOFFraction ) {
         return ISVT_SCALAR;
     } else {
         return CBSElement :: giveIPValueType(type);
@@ -1137,17 +1130,17 @@ TR1_2D_CBS :: giveIPValueType(InternalStateType type)
 int
 TR1_2D_CBS :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
-    return CBSElement::giveIPValueSize(type, gp);
+    if ( type == IST_VOFFraction ) {
+        return 1;
+    } else {
+        return CBSElement::giveIPValueSize(type, gp);
+    }
 }
 
 
 int
 TR1_2D_CBS :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
-        return 4;
-    }
-
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
 }

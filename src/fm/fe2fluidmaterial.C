@@ -268,7 +268,7 @@ IRResultType FE2FluidMaterial :: initializeFrom(InputRecord *ir)
 int FE2FluidMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     FE2FluidMaterialStatus *status = static_cast<FE2FluidMaterialStatus *>(this->giveStatus(gp));
-    if (type == IST_VOFFraction) {
+    if ( type == IST_VOFFraction ) {
         answer.setValues(1, status->giveVOFFraction());
         return true;
     } else {
@@ -278,7 +278,7 @@ int FE2FluidMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
 
 InternalStateValueType FE2FluidMaterial :: giveIPValueType(InternalStateType type)
 {
-    if (type == IST_VOFFraction ) {
+    if ( type == IST_VOFFraction ) {
         return ISVT_SCALAR;
     } else {
         return FluidDynamicMaterial :: giveIPValueType(type);
@@ -287,7 +287,7 @@ InternalStateValueType FE2FluidMaterial :: giveIPValueType(InternalStateType typ
 
 int FE2FluidMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
-    if (type == IST_VOFFraction ) {
+    if ( type == IST_VOFFraction ) {
         return 1;
     } else {
         return FluidDynamicMaterial :: giveIPValueSize(type, gp);

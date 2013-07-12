@@ -608,8 +608,8 @@ Quad10_2D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
 int
 Quad10_2D_SUPG :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
-        return 4;
+    if ( type == IST_StressTensor || type == IST_StrainTensor ) {
+        return 6;
     }
 
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
@@ -676,7 +676,7 @@ Quad10_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Inter
 int
 Quad10_2D_SUPG :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
 {
-    if ( ( type == IST_VOFFraction ) || ( type == IST_Density ) ) {
+    if ( type == IST_VOFFraction || type == IST_Density ) {
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
@@ -688,7 +688,7 @@ Quad10_2D_SUPG :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType typ
 InternalStateValueType
 Quad10_2D_SUPG :: giveIPValueType(InternalStateType type)
 {
-    if ( ( type == IST_VOFFraction ) || ( type == IST_Density ) ) {
+    if ( type == IST_VOFFraction || type == IST_Density ) {
         return ISVT_SCALAR;
     } else {
         return SUPGElement :: giveIPValueType(type);
@@ -699,10 +699,10 @@ Quad10_2D_SUPG :: giveIPValueType(InternalStateType type)
 int
 Quad10_2D_SUPG :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
-    if ( ( type == IST_VOFFraction ) || ( type == IST_Density ) ) {
+    if ( type == IST_VOFFraction || type == IST_Density ) {
         return 1;
     } else {
-      return SUPGElement::giveIPValueSize(type, gp);
+        return SUPGElement::giveIPValueSize(type, gp);
     }
 }
 

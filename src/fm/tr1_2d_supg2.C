@@ -1888,10 +1888,6 @@ TR1_2D_SUPG2 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTyp
         answer.resize(1);
         answer.at(1) = this->giveTempVolumeFraction();
         return 1;
-    } else if ( type == IST_Density ) {
-        answer.resize(1);
-        answer.at(1) = this->giveMaterial()->give('d', gp);
-        return 1;
     } else {
         return TR1_2D_SUPG :: giveIPValue(answer, gp, type, atTime);
     }
@@ -1900,7 +1896,7 @@ TR1_2D_SUPG2 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTyp
 int
 TR1_2D_SUPG2 :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
 {
-    if ( ( type == IST_VOFFraction ) || ( type == IST_Density ) ) {
+    if ( type == IST_VOFFraction ) {
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
@@ -1913,7 +1909,7 @@ TR1_2D_SUPG2 :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
 InternalStateValueType
 TR1_2D_SUPG2 :: giveIPValueType(InternalStateType type)
 {
-    if ( ( type == IST_VOFFraction ) || ( type == IST_Density ) ) {
+    if ( type == IST_VOFFraction ) {
         return ISVT_SCALAR;
     } else {
         return TR1_2D_SUPG :: giveIPValueType(type);
@@ -1924,10 +1920,10 @@ TR1_2D_SUPG2 :: giveIPValueType(InternalStateType type)
 int
 TR1_2D_SUPG2 :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
-    if ( ( type == IST_VOFFraction ) || ( type == IST_Density ) ) {
+    if ( type == IST_VOFFraction ) {
         return 1;
     } else {
-      return TR1_2D_SUPG::giveIPValueSize(type, gp);
+        return TR1_2D_SUPG :: giveIPValueSize(type, gp);
     }
 }
 
@@ -1935,10 +1931,6 @@ TR1_2D_SUPG2 :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 int
 TR1_2D_SUPG2 :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
-        return 4;
-    }
-
     GaussPoint *gp;
     if ( integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);

@@ -1919,10 +1919,6 @@ TR1_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Internal
             answer.at(1) = 1.0;
             return 1;
         }
-    } else if ( type == IST_Density ) {
-        answer.resize(1);
-        answer.at(1) = this->giveMaterial()->give('d', aGaussPoint);
-        return 1;
     } else {
         return SUPGElement :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
@@ -1931,7 +1927,7 @@ TR1_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Internal
 int
 TR1_2D_SUPG :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
 {
-    if ( ( type == IST_VOFFraction ) || ( type == IST_Density ) ) {
+    if ( type == IST_VOFFraction ) {
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
@@ -1944,7 +1940,7 @@ TR1_2D_SUPG :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
 InternalStateValueType
 TR1_2D_SUPG :: giveIPValueType(InternalStateType type)
 {
-    if ( ( type == IST_VOFFraction ) || ( type == IST_Density ) ) {
+    if ( type == IST_VOFFraction ) {
         return ISVT_SCALAR;
     } else {
         return SUPGElement :: giveIPValueType(type);
@@ -1955,7 +1951,7 @@ TR1_2D_SUPG :: giveIPValueType(InternalStateType type)
 int
 TR1_2D_SUPG :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
-    if ( ( type == IST_VOFFraction ) || ( type == IST_Density ) ) {
+    if ( type == IST_VOFFraction ) {
         return 1;
     } else {
         return SUPGElement :: giveIPValueSize(type, gp);
@@ -1966,10 +1962,6 @@ TR1_2D_SUPG :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 int
 TR1_2D_SUPG :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
-        return 4;
-    }
-
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
 }
@@ -1979,8 +1971,7 @@ void
 TR1_2D_SUPG :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                           InternalStateType type, TimeStep *tStep)
 {
-    GaussPoint *gp;
-    gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     this->giveIPValue(answer, gp, type, tStep);
 }
 

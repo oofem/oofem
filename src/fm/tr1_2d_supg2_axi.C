@@ -1766,10 +1766,6 @@ TR1_2D_SUPG2_AXI :: printOutputAt(FILE *file, TimeStep *stepN)
 int
 TR1_2D_SUPG2_AXI :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
-        return 4;
-    }
-
     GaussPoint *gp;
     if ( integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);

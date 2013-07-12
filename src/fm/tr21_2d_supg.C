@@ -1436,10 +1436,6 @@ TR21_2D_SUPG :: computeQuadraticFunct(FloatArray &answer, FloatArray line)
 int
 TR21_2D_SUPG :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
-        return 4;
-    }
-
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
 }
