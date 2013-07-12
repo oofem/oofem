@@ -452,7 +452,7 @@ public:
      * The method performs the operation  @f$ a = r^{\mathrm{T}} \cdot a \cdot r@f$ .
      * @param r Transformation matrix.
      */
-    void rotatedWith(const FloatMatrix &r);
+    void rotatedWith(const FloatMatrix &r, char mode='n');
     /**
      * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly.

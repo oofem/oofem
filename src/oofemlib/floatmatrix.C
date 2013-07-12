@@ -529,13 +529,13 @@ void FloatMatrix :: beLocalCoordSys(const FloatArray &normal)
         this->at(1,2) = t(1);
         this->at(1,3) = t(2);
 
-        this->at(1,1) = b(0);
-        this->at(1,2) = b(1);
-        this->at(1,3) = b(2);
+        this->at(2,1) = b(0);
+        this->at(2,2) = b(1);
+        this->at(2,3) = b(2);
 
-        this->at(2,1) = normal(0);
-        this->at(2,2) = normal(1);
-        this->at(2,3) = normal(2);
+        this->at(3,1) = normal(0);
+        this->at(3,2) = normal(1);
+        this->at(3,3) = normal(2);
     } else {
         OOFEM_ERROR("FloatMatrix :: beLocalCoordinateTransformation - Normal needs 1 to 3 components.");
     }
@@ -1480,14 +1480,21 @@ void FloatMatrix :: pY() const
 }
 
 
-void FloatMatrix :: rotatedWith(const FloatMatrix &r)
+void FloatMatrix :: rotatedWith(const FloatMatrix &r, char mode)
 // Returns the receiver 'a' rotated according the change-of-base matrix r.
-// The method performs the operation  a = r^T . a . r .
+// The method performs the operation  a = r^T . a . r . or the inverse
 {
     FloatMatrix rta;
 
-    rta.beTProductOf(r, * this);     //  r^T . a
-    this->beProductOf(rta, r);       //  r^T . a . r
+    if ( mode == 'n' ) {
+        rta.beTProductOf(r, * this);     //  r^T . a
+        this->beProductOf(rta, r);       //  r^T . a . r
+    } else if ( mode == 't' ) {
+        rta.beProductOf(r, * this);      //  r . a
+        this->beTProductOf(rta, r);      //  r . a . r^T
+    } else {
+        OOFEM_ERROR("FloatMatrix :: rotatedWith: unsupported mode");
+    }
 }
 
 
