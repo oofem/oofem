@@ -119,6 +119,8 @@ NodalAveragingRecoveryModel :: recoverValues(InternalStateType type, TimeStep *t
                     continue;
                 } else if ( regionValSize == 0 ) { 
                     regionValSize = val.giveSize();
+                    lhs.resize(regionDofMans * regionValSize);
+                    lhs.zero();
                 } else if ( val.giveSize() != regionValSize ) {
                     OOFEM_LOG_RELEVANT( "NodalAveragingRecoveryModel :: size mismatch for InternalStateType %s, ignoring all elements that doesn't use the size %d\n", __InternalStateTypeToString(type), regionValSize );
                     continue;
