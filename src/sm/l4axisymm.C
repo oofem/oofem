@@ -423,14 +423,6 @@ L4Axisymm :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
 }
 
 
-int
-L4Axisymm :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-
 void
 L4Axisymm :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
 {

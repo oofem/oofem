@@ -467,13 +467,6 @@ void Q9PlaneStress2d :: drawScalar(oofegGraphicContext &context)
 }
 #endif
 
-int
-Q9PlaneStress2d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
 void
 Q9PlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                              InternalStateType type, TimeStep *tStep)

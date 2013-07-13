@@ -257,15 +257,10 @@ TR_SHELL01 :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 //
 // The element interface required by ZZNodalRecoveryModel
 //
-int
-TR_SHELL01 :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    return giveIPValueSize (type, this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0));
-}
 
 
 double 
-TR_SHELL01::ZZRemeshingCriteriaI_giveCharacteristicSize() 
+TR_SHELL01 :: ZZRemeshingCriteriaI_giveCharacteristicSize() 
 {
     return sqrt(plate->computeArea() * 2.0);
 }

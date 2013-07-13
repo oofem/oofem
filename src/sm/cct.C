@@ -439,21 +439,6 @@ CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
     }
 }
 
-//
-// The element interface required by ZZNodalRecoveryModel
-//
-int
-CCTPlate :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    if ( ( type == IST_ShellForceMomentumTensor || type == IST_ShellStrainCurvatureTensor ) ) {
-        return 5;
-    } else if ((type == IST_ErrorIndicatorLevel) || (type == IST_InternalStressError)) {
-      return 1;
-    }
-
-    return 0;
-}
-
 
 double 
 CCTPlate :: ZZRemeshingCriteriaI_giveCharacteristicSize() 

@@ -93,13 +93,10 @@ public:
 
     virtual Interface *giveInterface(InterfaceType t);
 
-    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);
-    virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
-    { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
     void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                             InternalStateType type, TimeStep *tStep);
 

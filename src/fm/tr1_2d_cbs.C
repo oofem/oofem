@@ -1126,14 +1126,6 @@ TR1_2D_CBS :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 }
 
 
-int
-TR1_2D_CBS :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-
 void
 TR1_2D_CBS :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                          InternalStateType type, TimeStep *tStep)

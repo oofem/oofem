@@ -1763,20 +1763,6 @@ TR1_2D_SUPG2_AXI :: printOutputAt(FILE *file, TimeStep *stepN)
 }
 
 
-int
-TR1_2D_SUPG2_AXI :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    GaussPoint *gp;
-    if ( integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ) {
-        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    } else {
-        gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
-    }
-
-    return this->giveIPValueSize(type, gp);
-}
-
-
 void
 TR1_2D_SUPG2_AXI :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                                InternalStateType type, TimeStep *tStep)

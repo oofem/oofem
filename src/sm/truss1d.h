@@ -103,7 +103,6 @@ public:
     // ZZNodalRecoveryMInterface
     //void ZZNodalRecoveryMI_computeNValProduct (FloatArray& answer, InternalStateType type, TimeStep* tStep);
     //void ZZNodalRecoveryMI_computeNNMatrix (FloatArray& answer, InternalStateType type);
-    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     // NodalAveragingRecoveryMInterface
@@ -112,8 +111,6 @@ public:
 
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                            InternalStateType type, TimeStep *tStep);
-    virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
-    { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
 
     // SpatialLocalizerInterface
     virtual Element *SpatialLocalizerI_giveElement() { return this; }

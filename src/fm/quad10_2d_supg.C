@@ -605,18 +605,6 @@ Quad10_2D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
 }
 
 
-int
-Quad10_2D_SUPG :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    if ( type == IST_StressTensor || type == IST_StrainTensor ) {
-        return 6;
-    }
-
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-
 void
 Quad10_2D_SUPG :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                           InternalStateType type, TimeStep *tStep)

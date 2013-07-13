@@ -310,104 +310,103 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
     FloatArray val, *coord;
     double u, v, w;
 
-    int size = NodalAveragingRecoveryMI_giveDofManRecordSize(type);
-    if ( size ) {
-        answer.resize(size);
-        b.resize(4, size);
-        r.resize(4, size);
-        A.zero();
-        r.zero();
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            gp = iRule->getIntegrationPoint(i);
-            giveIPValue(val, gp, type, tStep);
+    int size = 0;
 
-            coord = gp->giveCoordinates();
-            u = coord->at(1);
-            v = coord->at(2);
-            w = coord->at(3);
-
-            //status = (StructuralMaterialStatus*) this->giveMaterial()->giveStatus(gp);
-
-            A.at(1, 1) += 1;
-            A.at(1, 2) += u;
-            A.at(1, 3) += v;
-            A.at(1, 4) += w;
-            A.at(2, 1) += u;
-            A.at(2, 2) += u * u;
-            A.at(2, 3) += u * v;
-            A.at(2, 4) += u * w;
-            A.at(3, 1) += v;
-            A.at(3, 2) += v * u;
-            A.at(3, 3) += v * v;
-            A.at(3, 4) += v * w;
-            A.at(4, 1) += w;
-            A.at(4, 2) += w * u;
-            A.at(4, 3) += w * v;
-            A.at(4, 4) += w * w;
-
-            for ( int j = 1; j <= size; j++ ) {
-                y = val.at(j);
-                r.at(1, j) += y;
-                r.at(2, j) += y * u;
-                r.at(3, j) += y * v;
-                r.at(4, j) += y * w;
-            }
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+        gp = iRule->getIntegrationPoint(i);
+        giveIPValue(val, gp, type, tStep);
+        if ( i == 0 ) {
+            size = val.giveSize();
+            answer.resize(size);
+            b.resize(4, size);
+            r.resize(4, size);
+            A.zero();
+            r.zero();
         }
 
-        A.solveForRhs(r, b);
+        coord = gp->giveCoordinates();
+        u = coord->at(1);
+        v = coord->at(2);
+        w = coord->at(3);
 
-        switch ( node ) {
-        case 1:
-            x1 =  1.0;
-            x2 =  1.0;
-            x3 =  1.0;
-            break;
-        case 2:
-            x1 = -1.0;
-            x2 =  1.0;
-            x3 =  1.0;
-            break;
-        case 3:
-            x1 = -1.0;
-            x2 = -1.0;
-            x3 =  1.0;
-            break;
-        case 4:
-            x1 =  1.0;
-            x2 = -1.0;
-            x3 =  1.0;
-            break;
-        case 5:
-            x1 =  1.0;
-            x2 =  1.0;
-            x3 = -1.0;
-            break;
-        case 6:
-            x1 = -1.0;
-            x2 =  1.0;
-            x3 = -1.0;
-            break;
-        case 7:
-            x1 = -1.0;
-            x2 = -1.0;
-            x3 = -1.0;
-            break;
-        case 8:
-            x1 =  1.0;
-            x2 = -1.0;
-            x3 = -1.0;
-            break;
-        default:
-            _error("LSpace ::giveInternalStateAtNode: unsupported node");
-        }
+        //status = (StructuralMaterialStatus*) this->giveMaterial()->giveStatus(gp);
+
+        A.at(1, 1) += 1;
+        A.at(1, 2) += u;
+        A.at(1, 3) += v;
+        A.at(1, 4) += w;
+        A.at(2, 1) += u;
+        A.at(2, 2) += u * u;
+        A.at(2, 3) += u * v;
+        A.at(2, 4) += u * w;
+        A.at(3, 1) += v;
+        A.at(3, 2) += v * u;
+        A.at(3, 3) += v * v;
+        A.at(3, 4) += v * w;
+        A.at(4, 1) += w;
+        A.at(4, 2) += w * u;
+        A.at(4, 3) += w * v;
+        A.at(4, 4) += w * w;
 
         for ( int j = 1; j <= size; j++ ) {
-            answer.at(j) = b.at(1, j) + x1 *b.at(2, j) * x2 * b.at(3, j) * x3 * b.at(4, j);
+            y = val.at(j);
+            r.at(1, j) += y;
+            r.at(2, j) += y * u;
+            r.at(3, j) += y * v;
+            r.at(4, j) += y * w;
         }
+    }
 
-        return;
-    } else {
-        answer.resize(0);
+    A.solveForRhs(r, b);
+
+    switch ( node ) {
+    case 1:
+        x1 =  1.0;
+        x2 =  1.0;
+        x3 =  1.0;
+        break;
+    case 2:
+        x1 = -1.0;
+        x2 =  1.0;
+        x3 =  1.0;
+        break;
+    case 3:
+        x1 = -1.0;
+        x2 = -1.0;
+        x3 =  1.0;
+        break;
+    case 4:
+        x1 =  1.0;
+        x2 = -1.0;
+        x3 =  1.0;
+        break;
+    case 5:
+        x1 =  1.0;
+        x2 =  1.0;
+        x3 = -1.0;
+        break;
+    case 6:
+        x1 = -1.0;
+        x2 =  1.0;
+        x3 = -1.0;
+        break;
+    case 7:
+        x1 = -1.0;
+        x2 = -1.0;
+        x3 = -1.0;
+        break;
+    case 8:
+        x1 =  1.0;
+        x2 = -1.0;
+        x3 = -1.0;
+        break;
+    default:
+        _error("LSpace ::giveInternalStateAtNode: unsupported node");
+    }
+
+    answer.resize(size);
+    for ( int j = 1; j <= size; j++ ) {
+        answer.at(j) = b.at(1, j) + x1 *b.at(2, j) * x2 * b.at(3, j) * x3 * b.at(4, j);
     }
 }
 

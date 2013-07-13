@@ -343,14 +343,6 @@ Quad1PlaneStrain :: giveInterface(InterfaceType interface)
 }
 
 
-int
-Quad1PlaneStrain :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-
 void
 Quad1PlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
                                                                      IntArray &localNodeIdArray, IntArray &globalNodeIdArray,

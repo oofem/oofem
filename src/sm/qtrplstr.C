@@ -513,18 +513,6 @@ QTrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
 #endif
 
 
-int
-QTrPlaneStress2d :: SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
-        return 3;
-    }
-
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-
 void
 QTrPlaneStress2d :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {

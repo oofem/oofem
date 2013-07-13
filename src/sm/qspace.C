@@ -333,19 +333,6 @@ QSpace :: giveInterface(InterfaceType interface)
     return NULL;
 }
 
-int
-QSpace :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-int
-QSpace :: SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    return ZZNodalRecoveryMI_giveDofManRecordSize(type);
-}
-
 void
 QSpace :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
@@ -391,9 +378,7 @@ QSpace :: SPRNodalRecoveryMI_givePatchType()
 void
 QSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
-    int size = NodalAveragingRecoveryMI_giveDofManRecordSize(type);
-    answer.resize(size);
-    answer.zero();
+    answer.resize(0);
     _warning("Qspace element: IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 

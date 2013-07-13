@@ -2207,14 +2207,6 @@ void Shell7Base :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer,
     answer.resize(0);
 }
 
-int Shell7Base :: NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    if ( type == IST_DirectorField ) {
-        return 3;
-    }
-    return 0;
-}
-
 void Shell7Base :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_DirectorField ) {

@@ -179,14 +179,6 @@ QPlaneStrain :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) con
 }
 
 
-int
-QPlaneStrain :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-
 double
 QPlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
 {

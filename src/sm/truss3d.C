@@ -77,21 +77,10 @@ Truss3d :: giveInterface(InterfaceType interface)
 }
 
 
-//all tensor values appear as the first tensor component
-int
-Truss3d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-
 void
 Truss3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
-    int size = NodalAveragingRecoveryMI_giveDofManRecordSize(type);
-    answer.resize(size);
-    answer.zero();
+    answer.resize(0);
     _warning("Truss3d element: IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 

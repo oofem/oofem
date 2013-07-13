@@ -53,17 +53,9 @@ NodalAveragingRecoveryModel :: ~NodalAveragingRecoveryModel()
 int
 NodalAveragingRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
 {
-    int ireg, nregions = this->giveNumberOfVirtualRegions();
-    int ielem, nelem = domain->giveNumberOfElements();
-    int inode, nnodes = domain->giveNumberOfDofManagers();
-    int elemNodes;
-    int regionValSize;
-    int elementNode, node;
-    int regionDofMans;
-    int i, neq, eq;
-    Element *element;
-    NodalAveragingRecoveryModelInterface *interface;
-    IntArray skipRegionMap(nregions), regionRecSize(nregions);
+    int nregions = this->giveNumberOfVirtualRegions();
+    int nelem = domain->giveNumberOfElements();
+    int nnodes = domain->giveNumberOfDofManagers();
     IntArray regionNodalNumbers(nnodes);
     IntArray regionDofMansConnectivity;
     FloatArray lhs, val;
@@ -82,39 +74,23 @@ NodalAveragingRecoveryModel :: recoverValues(InternalStateType type, TimeStep *t
     // clear nodal table
     this->clear();
 
-    // init region table indicating regions to skip
-    this->initRegionMap(skipRegionMap, regionRecSize, type);
-
-#ifdef __PARALLEL_MODE
-    if (parallel) {
-        // synchronize skipRegionMap over all cpus
-        IntArray temp_skipRegionMap(skipRegionMap);
-        MPI_Allreduce(temp_skipRegionMap.givePointer(), skipRegionMap.givePointer(), nregions, MPI_INT, MPI_LOR, MPI_COMM_WORLD);
-    }
-#endif
-
     // loop over regions
-    for ( ireg = 1; ireg <= nregions; ireg++ ) {
-        // skip regions
-        if ( skipRegionMap.at(ireg) ) {
-            continue;
-        }
+    for ( int ireg = 1; ireg <= nregions; ireg++ ) {
+        int regionValSize = 0;
+        int regionDofMans;
 
         // loop over elements and determine local region node numbering and determine and check nodal values size
         if ( this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, ireg) == 0 ) {
             break;
         }
 
-        regionValSize = regionRecSize.at(ireg);
-        neq = regionDofMans * regionValSize;
-        lhs.resize(neq);
-        lhs.zero();
         regionDofMansConnectivity.resize(regionDofMans);
         regionDofMansConnectivity.zero();
 
         // assemble element contributions
-        for ( ielem = 1; ielem <= nelem; ielem++ ) {
-            element = domain->giveElement(ielem);
+        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+            NodalAveragingRecoveryModelInterface *interface;
+            Element *element = domain->giveElement(ielem);
 
 #ifdef __PARALLEL_MODE
             if ( element->giveParallelMode() != Element_local ) {
@@ -133,17 +109,22 @@ NodalAveragingRecoveryModel :: recoverValues(InternalStateType type, TimeStep *t
                 continue;
             }
 
-            elemNodes = element->giveNumberOfDofManagers();
+            int elemNodes = element->giveNumberOfDofManagers();
             // ask element contributions
-            for ( elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
-                node = element->giveDofManager(elementNode)->giveNumber();
+            for ( int elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
+                int node = element->giveDofManager(elementNode)->giveNumber();
                 interface->NodalAveragingRecoveryMI_computeNodalValue(val, elementNode, type, tStep);
                 // if the element cannot evaluate this variable, it is ignored
                 if ( val.giveSize() == 0 ) {
                     continue;
+                } else if ( regionValSize == 0 ) { 
+                    regionValSize = val.giveSize();
+                } else if ( val.giveSize() != regionValSize ) {
+                    OOFEM_LOG_RELEVANT( "NodalAveragingRecoveryModel :: size mismatch for InternalStateType %s, ignoring all elements that doesn't use the size %d\n", __InternalStateTypeToString(type), regionValSize );
+                    continue;
                 }
-                eq = ( regionNodalNumbers.at(node) - 1 ) * regionValSize;
-                for ( i = 1; i <= regionValSize; i++ ) {
+                int eq = ( regionNodalNumbers.at(node) - 1 ) * regionValSize;
+                for ( int i = 1; i <= regionValSize; i++ ) {
                     lhs.at(eq + i) += val.at(i);
                 }
 
@@ -157,10 +138,10 @@ NodalAveragingRecoveryModel :: recoverValues(InternalStateType type, TimeStep *t
 #endif
 
         // solve for recovered values of active region
-        for ( inode = 1; inode <= nnodes; inode++ ) {
+        for ( int inode = 1; inode <= nnodes; inode++ ) {
             if ( regionNodalNumbers.at(inode) ) {
-                eq = ( regionNodalNumbers.at(inode) - 1 ) * regionValSize;
-                for ( i = 1; i <= regionValSize; i++ ) {
+                int eq = ( regionNodalNumbers.at(inode) - 1 ) * regionValSize;
+                for ( int i = 1; i <= regionValSize; i++ ) {
                     if ( regionDofMansConnectivity.at( regionNodalNumbers.at(inode) ) > 0 ) {
                         lhs.at(eq + i) /= regionDofMansConnectivity.at( regionNodalNumbers.at(inode) );
                     } else {
@@ -178,69 +159,6 @@ NodalAveragingRecoveryModel :: recoverValues(InternalStateType type, TimeStep *t
     this->valType = type;
     this->stateCounter = tStep->giveSolutionStateCounter();
     return 1;
-}
-
-void
-NodalAveragingRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValSize, InternalStateType type)
-{
-    int nregions = this->giveNumberOfVirtualRegions();
-    int ielem, nelem = domain->giveNumberOfElements();
-    int i, elemVR, regionsSkipped = 0;
-    Element *element;
-    NodalAveragingRecoveryModelInterface *interface;
-
-    regionMap.resize(nregions);
-    regionMap.zero();
-    regionValSize.resize(nregions);
-    regionValSize.zero();
-
-    // loop over elements and check if implement interface
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        element = domain->giveElement(ielem);
-        if ( !element-> isActivated(domain->giveEngngModel()->giveCurrentStep()) ) {  //skip inactivated elements
-            continue;
-        }
-#ifdef __PARALLEL_MODE
-        if ( element->giveParallelMode() != Element_local ) {
-            continue;
-        }
-
-#endif
-
-        if ( ( interface =  static_cast< NodalAveragingRecoveryModelInterface * >( element->
-                           giveInterface(NodalAveragingRecoveryModelInterfaceType) ) ) == NULL ) {
-            // If an element doesn't implement the interface, it is ignored.
-
-            //regionsSkipped = 1;
-            //regionMap.at( element->giveRegionNumber() ) = 1;
-            continue;
-        } else {
-            if ((elemVR = this->giveElementVirtualRegionNumber(ielem))) { // test if elemVR is nonzero
-                if ( regionValSize.at(elemVR) ) {
-                    if ( regionValSize.at(elemVR) !=
-                        interface->NodalAveragingRecoveryMI_giveDofManRecordSize(type) ) {
-                        // This indicates a size mis-match between different elements, no choice but to skip the region.
-                        regionMap.at(elemVR) = 1;
-                        regionsSkipped = 1;
-                    }
-                } else {
-                    regionValSize.at(elemVR) = interface->
-                                            NodalAveragingRecoveryMI_giveDofManRecordSize(type);
-                }
-            }
-        }
-    }
-
-    if ( regionsSkipped ) {
-        OOFEM_LOG_RELEVANT("NodalAveragingRecoveryModel :: initRegionMap: skipping regions for InternalStateType %s\n", __InternalStateTypeToString(type) );
-        for ( i = 1; i <= nregions; i++ ) {
-            if ( regionMap.at(i) ) {
-                OOFEM_LOG_RELEVANT("%d ", i);
-            }
-        }
-
-        OOFEM_LOG_RELEVANT("\n");
-    }
 }
 
 

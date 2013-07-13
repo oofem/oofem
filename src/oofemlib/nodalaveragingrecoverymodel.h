@@ -72,15 +72,6 @@ public:
     int recoverValues(InternalStateType type, TimeStep *tStep);
 
 private:
-    /**
-     * Initializes the region table indicating regions to skip.
-     * @param regionMap Region table, the nonzero entry for region indicates region to skip due to
-     * unsupported elements or incompatible value size.
-     * @param regionValSize Contains the record size for each region.
-     * @param type Determines the type of internal variable to be recovered.
-     */
-    void initRegionMap(IntArray &regionMap, IntArray &regionValSize, InternalStateType type);
-
 #ifdef __PARALLEL_MODE
     void initCommMaps();
     void exchangeDofManValues(int ireg, FloatArray &lhs, IntArray &, IntArray &, int);
@@ -118,12 +109,6 @@ public:
      */
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                            InternalStateType type, TimeStep *tStep) = 0;
-    /**
-     * Returns the size of DofManger record required to hold recovered values for given mode.
-     * @param type Determines the type of internal variable to be recovered.
-     * @return Size of DofManger record required to hold recovered values.
-     */
-    virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type) = 0;
     //@}
 };
 } // end namespace oofem

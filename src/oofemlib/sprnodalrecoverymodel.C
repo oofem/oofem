@@ -59,13 +59,9 @@ SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
 {
     int nregions = this->giveNumberOfVirtualRegions();
     int nnodes = domain->giveNumberOfDofManagers();
-    int regionValSize;
-    int regionDofMans;
-    int neq, eq, npap, papNumber;
-    IntArray skipRegionMap(nregions), regionRecSize(nregions);
+    IntArray skipRegionMap(nregions);
     IntArray regionNodalNumbers(nnodes);
     IntArray patchElems, dofManToDetermine, pap, regionTypes;
-    SPRPatchType regType;
     FloatMatrix a;
     FloatArray dofManValues;
     IntArray dofManPatchCount;
@@ -82,7 +78,7 @@ SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
     this->clear();
 
     // init region table indicating regions to skip
-    this->initRegionMap(skipRegionMap, regionRecSize, regionTypes, type);
+    this->initRegionMap(skipRegionMap, regionTypes, type);
 
 #ifdef __PARALLEL_MODE
     // synchronize skipRegionMap over all cpus
@@ -92,35 +88,41 @@ SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
 
     // loop over regions
     for (int ireg = 1; ireg <= nregions; ireg++ ) {
+        SPRPatchType regType;
+        int regionValSize;
+        int regionDofMans;
+
         // skip regions
         if ( skipRegionMap.at(ireg) ) {
             continue;
         }
 
         regType = ( SPRPatchType ) regionTypes.at(ireg);
-        regionValSize = regionRecSize.at(ireg);
+        regionValSize = 0.;
         // loop over elements and determine local region node numbering and determine and check nodal values size
         if ( this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, ireg) == 0 ) {
             continue;
         }
 
-        neq = regionDofMans * regionValSize;
-        dofManValues.resize(neq);
-        dofManValues.zero();
         dofManPatchCount.resize(regionDofMans);
         dofManPatchCount.zero();
 
         //pap = patch assembly points
         this->determinePatchAssemblyPoints(pap, ireg, regType);
 
-        npap = pap.giveSize();
+        int npap = pap.giveSize();
         for (int ipap = 1; ipap <= npap; ipap++ ) {
-            papNumber = pap.at(ipap);
+            int papNumber = pap.at(ipap);
+            int oldSize = regionValSize;
 
             this->initPatch(patchElems, dofManToDetermine, pap, papNumber, ireg);
-            this->computePatch(a, patchElems, papNumber, regionValSize, regType, type, tStep);
+            this->computePatch(a, patchElems, regionValSize, regType, type, tStep);
+            if ( oldSize == 0 ) {
+                dofManValues.resize(regionDofMans * regionValSize);
+                dofManValues.zero();
+            }
             this->determineValuesFromPatch(dofManValues, dofManPatchCount, regionNodalNumbers,
-                                           dofManToDetermine, a, papNumber, regionValSize, regType);
+                                           dofManToDetermine, a, regType);
         }
 
 #ifdef __PARALLEL_MODE
@@ -129,7 +131,7 @@ SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
 
         // average  recovered values of active region
         bool abortFlag = false;
-        for (int i = 1; i <= nnodes; i++ ) {
+        for ( int i = 1; i <= nnodes; i++ ) {
 #ifndef __PARALLEL_MODE
             if ( regionNodalNumbers.at(i) ) {
 #else
@@ -137,9 +139,9 @@ SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
                 ( ( domain->giveDofManager(i)->giveParallelMode() == DofManager_local ) ||
                  ( domain->giveDofManager(i)->giveParallelMode() == DofManager_shared ) ) ) {
 #endif
-                eq = ( regionNodalNumbers.at(i) - 1 ) * regionValSize;
+                int eq = ( regionNodalNumbers.at(i) - 1 ) * regionValSize;
                 if ( dofManPatchCount.at( regionNodalNumbers.at(i) ) ) {
-                    for (int j = 1; j <= regionValSize; j++ ) {
+                    for ( int j = 1; j <= regionValSize; j++ ) {
                         dofManValues.at(eq + j) /= dofManPatchCount.at( regionNodalNumbers.at(i) );
                     }
                 } else {
@@ -149,7 +151,7 @@ SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
                     OOFEM_WARNING4("[%d] SPRNodalRecoveryModel::recoverValues : values of %s in dofmanager %d undetermined",
                                    domain->giveEngngModel()->giveRank(), __InternalStateTypeToString(type), i);
 #endif
-                    for (int j = 1; j <= regionValSize; j++ ) {
+                    for ( int j = 1; j <= regionValSize; j++ ) {
                         dofManValues.at(eq + j) = 0.0;
                     }
                     //abortFlag = true;
@@ -171,26 +173,21 @@ SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
 }
 
 void
-SPRNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValSize,
-                                       IntArray &regionTypes, InternalStateType type)
+SPRNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionTypes, InternalStateType type)
 {
     int nregions = this->giveNumberOfVirtualRegions();
-    int ielem, nelem = domain->giveNumberOfElements();
-    int i, regionsSkipped = 0;
-    int elemVR;
-    Element *element;
-    SPRNodalRecoveryModelInterface *interface;
+    int nelem = domain->giveNumberOfElements();
+    int regionsSkipped = 0;
 
     regionMap.resize(nregions);
     regionMap.zero();
-    regionValSize.resize(nregions);
-    regionValSize.zero();
     regionTypes.resize(nregions);
     regionTypes.zero();
 
     // loop over elements and check if implement interface
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        element = domain->giveElement(ielem);
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+        SPRNodalRecoveryModelInterface *interface;
+        Element *element = domain->giveElement(ielem);
         if ( !element-> isActivated(domain->giveEngngModel()->giveCurrentStep()) ) {  //skip inactivated elements
             continue;
         }
@@ -206,28 +203,16 @@ SPRNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValS
             //regionMap.at( element->giveRegionNumber() ) = 1;
             continue;
         } else {
+            int elemVR;
             if ( ( elemVR = this->giveElementVirtualRegionNumber(ielem) ) ) { // test if elementVR is nonzero
-                if ( regionValSize.at(elemVR) ) {
-                    if ( regionValSize.at(elemVR) != interface->SPRNodalRecoveryMI_giveDofManRecordSize(type) ) {
-                        // This indicates a size mis-match between different elements, no choice but to skip the region.
-                        regionMap.at(elemVR) = 1;
-                        regionsSkipped = 1;
-                    }
-
-                    if ( regionTypes.at(elemVR) != ( int ) interface->SPRNodalRecoveryMI_givePatchType() ) {
-                        regionMap.at(elemVR) = 1;
-                        /*
-                         *   printf ("NodalRecoveryModel :: initRegionMap: element %d has incompatible Patch type, skipping region\n",ielem);
-                         */
-                        regionsSkipped = 1;
-                    }
-                } else {
-                    regionValSize.at(elemVR) = interface->SPRNodalRecoveryMI_giveDofManRecordSize(type);
-                    regionTypes.at(elemVR) = ( int ) interface->SPRNodalRecoveryMI_givePatchType();
-                    if ( regionValSize.at(elemVR) == 0 ) {
-                        regionMap.at(elemVR) = 1;
-                        regionsSkipped = 1;
-                    }
+                if ( regionTypes.at(elemVR) == 0 ) {
+                    regionTypes.at(elemVR) = interface->SPRNodalRecoveryMI_givePatchType();
+                } else  if ( regionTypes.at(elemVR) != ( int ) interface->SPRNodalRecoveryMI_givePatchType() ) {
+                    regionMap.at(elemVR) = 1;
+                    /*
+                     *   printf ("NodalRecoveryModel :: initRegionMap: element %d has incompatible Patch type, skipping region\n",ielem);
+                     */
+                    regionsSkipped = 1;
                 }
             }
         }
@@ -235,7 +220,7 @@ SPRNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValS
 
     if ( regionsSkipped ) {
         OOFEM_LOG_RELEVANT( "SPRNodalRecoveryModel :: initRegionMap: skipping regions for InternalStateType %s\n", __InternalStateTypeToString(type) );
-        for ( i = 1; i <= nregions; i++ ) {
+        for ( int i = 1; i <= nregions; i++ ) {
             if ( regionMap.at(i) ) {
                 OOFEM_LOG_RELEVANT("%d ", i);
             }
@@ -577,20 +562,15 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
 
 
 void
-SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int papNumber, int regionValSize,
+SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int &regionValSize,
                                       SPRPatchType regType, InternalStateType type, TimeStep *tStep)
 {
-    int nelem, nip, neq;
-    Element *element;
+    int nelem, neq;
     FloatArray ipVal, coords, P;
     FloatMatrix A, rhs;
     SPRNodalRecoveryModelInterface *interface;
-    IntegrationRule *iRule;
-    GaussPoint *gp;
 
     neq = this->giveNumberOfUnknownPolynomialCoefficients(regType);
-    a.resize(neq, regionValSize);
-    a.zero();
     rhs.resize(neq, regionValSize);
     rhs.zero();
     A.resize(neq, neq);
@@ -599,15 +579,19 @@ SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int 
     // loop over elements in patch
     nelem = patchElems.giveSize();
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-        element = domain->giveElement( patchElems.at(ielem) );
+        Element *element = domain->giveElement( patchElems.at(ielem) );
         if ( ( interface = static_cast< SPRNodalRecoveryModelInterface * >( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) ) {
-            iRule = element->giveDefaultIntegrationRulePtr();
-            nip = iRule->giveNumberOfIntegrationPoints();
-            for ( int i = 0; i < nip; i++ ) {
-                gp  = iRule->getIntegrationPoint(i);
-                if ( !element->giveIPValue(ipVal, gp, type, tStep) ) {
+            IntegrationRule *iRule = element->giveDefaultIntegrationRulePtr();
+            for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+                GaussPoint *gp = iRule->getIntegrationPoint(i);
+                int hasVal = element->giveIPValue(ipVal, gp, type, tStep);
+                if ( !hasVal ) {
                     ipVal.resize(regionValSize);
                     ipVal.zero();
+                } else if ( regionValSize == 0 ) {
+                    regionValSize = ipVal.giveSize();
+                    rhs.resize(neq, regionValSize);
+                    rhs.zero();
                 }
 
                 element->computeGlobalCoordinates( coords, * gp->giveLocalCoordinates() );
@@ -633,27 +617,19 @@ SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int 
 void
 SPRNodalRecoveryModel :: determineValuesFromPatch(FloatArray &dofManValues, IntArray &dofManCount,
                                                   IntArray &regionNodalNumbers, IntArray &dofManToDetermine,
-                                                  FloatMatrix &a, int papNumber, int regionValSize,
-                                                  SPRPatchType type)
+                                                  FloatMatrix &a, SPRPatchType type)
 {
-    int eq, ndofMan = dofManToDetermine.giveSize();
-    FloatArray P, *coords, vals(regionValSize);
-    int lneq = this->giveNumberOfUnknownPolynomialCoefficients(type);
+    int ndofMan = dofManToDetermine.giveSize();
+    FloatArray P, vals;
 
     for ( int dofMan = 1; dofMan <= ndofMan; dofMan++ ) {
-        vals.zero();
-        coords = domain->giveNode( dofManToDetermine.at(dofMan) )->giveCoordinates();
+        FloatArray *coords = domain->giveNode( dofManToDetermine.at(dofMan) )->giveCoordinates();
         this->computePolynomialTerms(P, * coords, type);
-        for ( int i = 1; i <= regionValSize; i++ ) {
-            for ( int j = 1; j <= lneq; j++ ) {
-                vals.at(i) += P.at(j) * a.at(j, i);
-            }
-        }
+        vals.beTProductOf(a, P);
 
         // assemble values
-
-        eq = ( regionNodalNumbers.at( dofManToDetermine.at(dofMan) ) - 1 ) * regionValSize;
-        for ( int i = 1; i <= regionValSize; i++ ) {
+        int eq = ( regionNodalNumbers.at( dofManToDetermine.at(dofMan) ) - 1 ) * vals.giveSize();
+        for ( int i = 1; i <= vals.giveSize(); i++ ) {
             dofManValues.at(eq + i) += vals.at(i);
         }
 

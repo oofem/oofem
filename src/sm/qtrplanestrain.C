@@ -411,24 +411,6 @@ QTrPlaneStrain :: drawSpecial(oofegGraphicContext &gc)
 #endif
 
 
-
-
-int
-QTrPlaneStrain :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-
-int
-QTrPlaneStrain :: SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    return ZZNodalRecoveryMI_giveDofManRecordSize(type);
-}
-
-
-
 void
 QTrPlaneStrain :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {

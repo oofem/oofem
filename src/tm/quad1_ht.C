@@ -147,13 +147,6 @@ Quad1_ht :: giveInterface(InterfaceType interface)
 }
 
 int
-Quad1_ht :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-int
 Quad1_ht :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
 {
     FloatArray lcoords;

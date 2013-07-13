@@ -81,20 +81,16 @@ public:
     virtual int giveApproxOrder() { return 2; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 5; }
 
-    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    virtual int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
-    virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
-    { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QTRSpace_Name; }

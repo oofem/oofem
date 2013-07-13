@@ -501,10 +501,4 @@ double Hexa1BubbleStokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(c
     return center.distance(coords);
 }
 
-int Hexa1BubbleStokes :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
 } // end namespace oofem

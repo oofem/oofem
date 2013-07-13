@@ -94,7 +94,6 @@ public:
     virtual void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
 
 
-    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
 
@@ -102,8 +101,6 @@ public:
                                                     InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                    InternalStateType type, TimeStep *tStep);
-    virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
-    { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
 
     /// @name Helping functions for computing VOFFractions.
     //@{

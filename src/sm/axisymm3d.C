@@ -385,14 +385,6 @@ Axisymm3d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) con
 }
 
 
-int
-Axisymm3d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-
 void
 Axisymm3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                         InternalStateType type, TimeStep *tStep)

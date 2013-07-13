@@ -470,14 +470,6 @@ TrPlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) 
 }
 
 
-int
-TrPlaneStress2d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-
 void
 TrPlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                               InternalStateType type, TimeStep *tStep)

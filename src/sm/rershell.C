@@ -699,17 +699,6 @@ RerShell :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 }
 
 
-int
-RerShell :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    if ( type == IST_ShellForceMomentumTensor ) {
-        return 12;
-    }
-
-    return 0;
-}
-
-
 void
 RerShell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                        InternalStateType type, TimeStep *tStep)
