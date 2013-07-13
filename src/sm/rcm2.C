@@ -937,21 +937,6 @@ RCM2Material :: giveIPValueType(InternalStateType type)
 }
 
 
-int
-RCM2Material :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( type == IST_CrackedFlag ) {
-        return 1;
-    } else if ( type == IST_CrackDirs ) {
-        return 9;
-    } else if ( type == IST_CrackStatuses ) {
-        return 3;
-    } else {
-        return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
-    }
-}
-
-
 void
 RCM2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseMode mode,
@@ -963,7 +948,6 @@ RCM2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     //
     this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
 }
-
 
 
 void

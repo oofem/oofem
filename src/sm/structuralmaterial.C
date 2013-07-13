@@ -1945,26 +1945,6 @@ StructuralMaterial :: giveIPValueType(InternalStateType type)
 }
 
 
-int
-StructuralMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( type == IST_StressTensor || type == IST_StrainTensor ||
-         type == IST_StressTensorTemp || type == IST_StrainTensorTemp ||
-         type == IST_CylindricalStressTensor || type == IST_CylindricalStrainTensor ) {
-        return 6;
-    } else if ( type == IST_PrincipalStressTensor || type == IST_PrincipalStrainTensor || type == IST_PrincipalPlasticStrainTensor ||
-               type == IST_PrincipalStressTempTensor || type == IST_PrincipalStrainTempTensor ) {
-        return 3;
-    } else if ( type == IST_Temperature || type == IST_vonMisesStress ) {
-        return 1;
-    } else if ( type == IST_DeformationGradientTensor || type == IST_FirstPKStressTensor ) {
-        return 9;
-    } else {
-        return Material :: giveIPValueSize(type, aGaussPoint);
-    }
-}
-
-
 void
 StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
                                                            GaussPoint *gp, TimeStep *stepN, ValueModeType mode)

@@ -673,17 +673,6 @@ Quad10_2D_SUPG :: giveIPValueType(InternalStateType type)
 }
 
 
-int
-Quad10_2D_SUPG :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
-{
-    if ( type == IST_VOFFraction || type == IST_Density ) {
-        return 1;
-    } else {
-        return SUPGElement::giveIPValueSize(type, gp);
-    }
-}
-
-
 contextIOResultType
 Quad10_2D_SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 //

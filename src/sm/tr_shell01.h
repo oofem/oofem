@@ -114,7 +114,6 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
 
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 

@@ -973,9 +973,6 @@ public:
                             InternalStateType type,
                             TimeStep *atTime);
 
-    virtual int giveIPValueSize(InternalStateType type,
-                                GaussPoint *gp);
-
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
 protected:

@@ -357,16 +357,6 @@ CemhydMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSt
     }
 }
 
-int
-CemhydMat :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( type == IST_HydrationDegree ) {
-        return 1;
-    } else {
-        return TransportMaterial :: giveIPValueSize(type, aGaussPoint);
-    }
-}
-
 
 InternalStateValueType
 CemhydMat :: giveIPValueType(InternalStateType type)

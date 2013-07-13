@@ -806,32 +806,6 @@ MisesMat :: giveIPValueType(InternalStateType type)
 }
 
 
-int
-MisesMat :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        MaterialMode mode = gp->giveMaterialMode();
-        if ( mode == _3dMat ) {
-            return 6;
-        } else if ( mode == _PlaneStrain ) {
-            return 4;
-        } else if ( mode == _PlaneStress ) {
-            return 3;
-        } else if ( mode == _1dMat ) {
-            return 1;
-        } else {
-            return 0;
-        }
-    } else if ( type == IST_MaxEquivalentStrainLevel ) {
-        return 1;
-    } else if ( type == IST_DamageScalar || type == IST_DamageTensor ) {
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIPValueSize(type, gp);
-    }
-}
-
-
 
 
 

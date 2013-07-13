@@ -584,21 +584,6 @@ DustMaterial :: giveIPValue(FloatArray &answer,
     return 0;
 }
 
-int
-DustMaterial :: giveIPValueSize(InternalStateType type,
-                                GaussPoint *gp)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        return 6;
-    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        return 3;
-    } else if ( type == IST_VolumetricPlasticStrain || type == IST_StressCapPos ) {
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIPValueSize(type, gp);
-    }
-}
-
 
 InternalStateValueType
 DustMaterial :: giveIPValueType(InternalStateType type)

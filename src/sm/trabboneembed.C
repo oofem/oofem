@@ -240,18 +240,6 @@ TrabBoneEmbed :: giveIPValueType(InternalStateType type)
 }
 
 
-int
-TrabBoneEmbed :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( ( type == IST_DamageScalar ) || ( type == IST_MaxEquivalentStrainLevel ) || ( type == IST_BoneVolumeFraction ) || ( type == IST_ElasStrainEnerDens ) || ( type == IST_PlasStrainEnerDens ) || ( type == IST_TotalStrainEnerDens ) ) {
-        return 1;
-    } else if ( type == IST_PlasticStrainTensor ) {
-        return 6;
-    } else {
-        return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
-    }
-}
-
 /////////////////////////////////////////////////////////////////
 //////////////////TRABECULAR BONE STATUS/////////////////////////
 /////////////////////////////////////////////////////////////////

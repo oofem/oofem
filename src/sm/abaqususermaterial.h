@@ -127,7 +127,6 @@ public:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
 
     virtual int hasNonLinearBehaviour() { return true; }
     virtual int hasMaterialModeCapability(MaterialMode mode);

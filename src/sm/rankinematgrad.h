@@ -128,7 +128,6 @@ public:
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *tStep);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
 protected:

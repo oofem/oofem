@@ -142,8 +142,6 @@ public:
 
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
-
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);

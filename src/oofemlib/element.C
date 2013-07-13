@@ -1155,17 +1155,6 @@ Element :: giveIPValueType(InternalStateType type)
 
 
 int
-Element :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
-{
-    if ( type == IST_ErrorIndicatorLevel || type == IST_RelMeshDensity || type == IST_InternalStressError || type == IST_PrimaryUnknownError ) {
-        return 1;
-    } else {
-        return this->giveCrossSection()->giveIPValueSize(type, gp);
-    }
-}
-
-
-int
 Element :: giveSpatialDimension()
 {
     ///@todo Just ask the interpolator instead?

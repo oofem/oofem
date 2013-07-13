@@ -253,8 +253,6 @@ public:
 
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
-
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);

@@ -203,7 +203,6 @@ public:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RCM2MaterialStatus(1, domain, gp); }
 

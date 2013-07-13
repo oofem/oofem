@@ -216,7 +216,6 @@ public:
     virtual double computeDamage(GaussPoint *gp, const FloatArray &strainSpaceHardeningVariables, TimeStep *atTime);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
     // auxiliary functions

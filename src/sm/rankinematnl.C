@@ -398,16 +398,6 @@ RankineMatNl :: giveIPValueType(InternalStateType type)
 }
 
 
-int
-RankineMatNl :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
-{
-    if ( type == IST_CumPlasticStrain_2 || type == IST_MaxEquivalentStrainLevel ) {
-        return 1;
-    } else {
-        return RankineMat :: giveIPValueSize(type, gp);
-    }
-}
-
 
 //*******************************
 //*************status************

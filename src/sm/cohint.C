@@ -135,12 +135,6 @@ CohesiveInterfaceMaterial :: giveIPValueType(InternalStateType type)
     return StructuralMaterial :: giveIPValueType(type);
 }
 
-int
-CohesiveInterfaceMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
-}
-
 void
 CohesiveInterfaceMaterial :: giveThermalDilatationVector(FloatArray &answer,
                                                          GaussPoint *gp,  TimeStep *tStep)

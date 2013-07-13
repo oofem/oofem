@@ -143,8 +143,6 @@ public:
 
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
-
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:

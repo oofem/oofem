@@ -285,16 +285,7 @@ InternalStateValueType FE2FluidMaterial :: giveIPValueType(InternalStateType typ
     }
 }
 
-int FE2FluidMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
-{
-    if ( type == IST_VOFFraction ) {
-        return 1;
-    } else {
-        return FluidDynamicMaterial :: giveIPValueSize(type, gp);
-    }
-}
-
-void FE2FluidMaterial::giveInputRecord(DynamicInputRecord &input)
+void FE2FluidMaterial :: giveInputRecord(DynamicInputRecord &input)
 {
     FluidDynamicMaterial :: giveInputRecord(input);
     input.setField(this->inputfile, _IFT_FE2FluidMaterial_fileName);

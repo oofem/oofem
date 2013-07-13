@@ -276,16 +276,6 @@ HydratingIsoHeatMaterial :: giveIPValueType(InternalStateType type)
     }
 }
 
-int
-HydratingIsoHeatMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( type == IST_HydrationDegree ) {
-        return 1;
-    } else {
-        return TransportMaterial :: giveIPValueSize(type, aGaussPoint);
-    }
-}
-
 MaterialStatus *
 HydratingIsoHeatMaterial :: CreateStatus(GaussPoint *gp) const
 {

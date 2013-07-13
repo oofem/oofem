@@ -258,17 +258,6 @@ HydratingConcreteMat :: giveIPValueType(InternalStateType type)
 }
 
 
-int
-HydratingConcreteMat :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( type == IST_HydrationDegree ) {
-        return 1;
-    } else {
-        return TransportMaterial :: giveIPValueSize(type, aGaussPoint);
-    }
-}
-
-
 MaterialStatus *
 HydratingConcreteMat :: CreateStatus(GaussPoint *gp) const
 {

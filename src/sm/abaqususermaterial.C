@@ -462,14 +462,4 @@ InternalStateValueType AbaqusUserMaterial :: giveIPValueType(InternalStateType t
     }
 }
 
-int AbaqusUserMaterial :: giveIPValueSize(InternalStateType type, GaussPoint* gp)
-{
-    AbaqusUserMaterialStatus *ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
-    if ( type == IST_Undefined ) {
-        return ms->giveStateVector().giveSize();
-    } else {
-        return StructuralMaterial :: giveIPValueSize(type, gp);
-    }
-}
-
 } // end namespace oofem

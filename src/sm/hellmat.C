@@ -2787,19 +2787,6 @@ HellmichMaterial :: giveIPValueType(InternalStateType type)
 }
 
 
-int
-HellmichMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        return 6;
-    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        return 3;
-    } else if ( type == IST_DamageTensor || type == IST_HydrationDegree || type == IST_Temperature ) {
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
-    }
-}
 // end of HellmichMaterial implemantation
 
 // ========================  STATUS implementation ===================================

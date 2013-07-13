@@ -241,19 +241,6 @@ TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 }
 
 
-int
-TR_SHELL01 :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
-{
-    if ( ( type == IST_ShellForceMomentumTensor || type == IST_ShellStrainCurvatureTensor ) ) {
-        return 12;
-    } else if ((type == IST_ErrorIndicatorLevel) || (type == IST_InternalStressError)) {
-        return 1;
-    } else {
-        return StructuralElement::giveIPValueSize(type, gp);
-    }
-}
-
-
 //
 // The element interface required by ZZNodalRecoveryModel
 //

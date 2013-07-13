@@ -207,19 +207,6 @@ FluidDynamicMaterial :: giveIPValueType(InternalStateType type)
 }
 
 
-int
-FluidDynamicMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
-{
-    if ( type == IST_DeviatoricStress || IST_DeviatoricStrain ) {
-        return 6;
-    } else if ( type == IST_Viscosity || type == IST_Density ) {
-        return 1;
-    } else {
-        return Material :: giveIPValueSize(type, gp);
-    }
-}
-
-
 contextIOResultType
 FluidDynamicMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 //

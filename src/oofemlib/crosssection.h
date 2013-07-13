@@ -159,14 +159,6 @@ public:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *atTime)
     { return ip->giveMaterial()->giveIPValue(answer, ip, type, atTime); }
     /**
-     * Returns the corresponding integration point value size in Reduced form.
-     * @param type Determines the type of internal variable.
-     * @param ip Integration point to check.
-     * @return Nonzero if o.k, zero otherwise.
-     */
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *ip)
-    { return ip->giveMaterial()->giveIPValueSize(type, ip); }
-    /**
      * Returns the type of internal variable (scalar, vector, tensor,...).
      * @param type Determines the type of internal variable.
      * @param mat Material to check.

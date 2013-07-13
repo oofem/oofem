@@ -259,13 +259,6 @@ SimpleInterfaceMaterial :: giveIPValueType(InternalStateType type)
 }
 
 
-int
-SimpleInterfaceMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
-}
-
-
 void
 SimpleInterfaceMaterial :: giveThermalDilatationVector(FloatArray &answer,
                                                        GaussPoint *gp,  TimeStep *tStep)

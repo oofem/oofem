@@ -1936,17 +1936,6 @@ TR1_2D_SUPG :: giveIPValueType(InternalStateType type)
 }
 
 
-int
-TR1_2D_SUPG :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
-{
-    if ( type == IST_VOFFraction ) {
-        return 1;
-    } else {
-        return SUPGElement :: giveIPValueSize(type, gp);
-    }
-}
-
-
 void
 TR1_2D_SUPG :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                           InternalStateType type, TimeStep *tStep)

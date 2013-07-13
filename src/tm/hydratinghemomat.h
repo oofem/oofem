@@ -85,7 +85,6 @@ public:
     // post-processing
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
 
 protected:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;

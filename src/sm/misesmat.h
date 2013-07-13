@@ -147,8 +147,6 @@ protected:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
 };
 
 //=============================================================================

@@ -2514,23 +2514,6 @@ ConcreteDPM2 :: giveIPValue(FloatArray &answer,
     }
 }
 
-int
-ConcreteDPM2 :: giveIPValueSize(InternalStateType type,
-                                GaussPoint *gp)
-{
-    switch ( type ) {
-    case IST_PlasticStrainTensor:
-        return 6;
-
-    case IST_DamageTensor:
-        return 6;
-
-    default:
-        return StructuralMaterial :: giveIPValueSize(type, gp);
-
-    }
-}
-
 
 InternalStateValueType
 ConcreteDPM2 :: giveIPValueType(InternalStateType type)

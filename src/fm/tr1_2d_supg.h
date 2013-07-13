@@ -178,7 +178,6 @@ public:
     virtual void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
 #ifdef __OOFEG

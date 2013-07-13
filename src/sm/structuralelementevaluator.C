@@ -330,7 +330,7 @@ void StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, Gauss
     Element *elem = this->giveElement();
 
     if ( !this->isActivated(tStep) ) {
-        answer.resize( elem->giveCrossSection()->giveIPValueSize(IST_StrainTensor, gp) );
+        answer.resize( StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode()) );
         answer.zero();
         return;
     }
@@ -362,19 +362,16 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
      if (initialDisplacements) u.subtract(initialDisplacements);
 #endif
 
-    int i, j;
-    IntegrationRule *iRule;
     FloatArray strain, stress;
-    GaussPoint *gp;
 
     // force updating strains & stresses
-    for ( i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
+    for ( int i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
 #ifdef __PARALLEL_MODE
         if (this->giveElement()->giveKnotSpanParallelMode(i) == Element_remote) continue;
 #endif
-        iRule = elem->giveIntegrationRule(i);
-        for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            gp = iRule->getIntegrationPoint(j);
+        IntegrationRule *iRule = elem->giveIntegrationRule(i);
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
+            GaussPoint *gp = iRule->getIntegrationPoint(j);
             this->computeStrainVector(strain, gp, tStep, u);
             cs->giveRealStresses(stress, gp, strain, tStep);
         }

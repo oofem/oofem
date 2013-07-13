@@ -379,16 +379,6 @@ InternalStateValueType CompoDamageMat :: giveIPValueType(InternalStateType type)
 }
 
 
-int CompoDamageMat :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( type == IST_DamageTensor ) { //if defined, output is in the local material coordinates
-        return 6;
-    } else {
-        return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
-    }
-}
-
-
 void CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp)
 {
     double denom;

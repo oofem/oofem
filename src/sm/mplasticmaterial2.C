@@ -1944,18 +1944,6 @@ MPlasticMaterial2 :: giveIPValueType(InternalStateType type)
 }
 
 
-int
-MPlasticMaterial2 :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        return StructuralMaterial :: giveSizeOfVoigtSymVector( aGaussPoint->giveMaterialMode() );
-    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        return 3;
-    } else {
-        return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
-    }
-}
-
 long
 MPlasticMaterial2 :: getPopulationSignature(IntArray &mask)
 {

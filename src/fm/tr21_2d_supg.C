@@ -1482,13 +1482,6 @@ TR21_2D_SUPG :: giveIPValueType(InternalStateType type)
 }
 
 
-int
-TR21_2D_SUPG :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
-{
-    return SUPGElement2::giveIPValueSize(type, gp);
-}
-
-
 void
 TR21_2D_SUPG :: printOutputAt(FILE *file, TimeStep *stepN)
 // Performs end-of-step operations.

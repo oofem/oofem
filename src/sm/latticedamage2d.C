@@ -703,19 +703,6 @@ LatticeDamage2d :: giveIPValue(FloatArray &answer,
     }
 }
 
-int
-LatticeDamage2d :: giveIPValueSize(InternalStateType type,
-                                   GaussPoint *gp)
-{
-    if ( type == IST_DamageTensor ) {
-        return 6;
-    } else if ( type == IST_CrackStatuses || type == IST_DamageScalar || type == IST_DissWork || type == IST_DeltaDissWork ) {
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIPValueSize(type, gp);
-    }
-}
-
 
 InternalStateValueType
 LatticeDamage2d :: giveIPValueType(InternalStateType type)

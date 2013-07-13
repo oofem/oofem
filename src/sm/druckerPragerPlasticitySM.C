@@ -826,20 +826,6 @@ DruckerPragerPlasticitySM :: giveIPValue(FloatArray &answer,
     }
 }
 
-int
-DruckerPragerPlasticitySM :: giveIPValueSize(InternalStateType type,
-                                             GaussPoint *gp)
-{
-    switch ( type ) {
-    case IST_PlasticStrainTensor:
-    case IST_DamageTensor:
-        return 6;
-
-    default:
-        return StructuralMaterial :: giveIPValueSize(type, gp);
-
-    }
-}
 
 InternalStateValueType
 DruckerPragerPlasticitySM :: giveIPValueType(InternalStateType type)

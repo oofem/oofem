@@ -178,7 +178,6 @@ public:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
 
 #ifdef __PARALLEL_MODE
     virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip);

@@ -118,7 +118,6 @@ public:
     //@}
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
 #ifdef __OOFEG

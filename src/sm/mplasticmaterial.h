@@ -182,7 +182,6 @@ public:
                               const FloatArray &, TimeStep *);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
     // auxiliary functions

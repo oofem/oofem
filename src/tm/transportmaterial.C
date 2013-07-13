@@ -241,16 +241,4 @@ TransportMaterial :: giveIPValueType(InternalStateType type)
 }
 
 
-int
-TransportMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( type == IST_Temperature || type == IST_MassConcentration_1 || type == IST_HydrationDegree || type == IST_Humidity || type == IST_Density || type == IST_MaterialNumber || type == IST_ElementNumber || type == IST_ThermalConductivityIsotropic || type == IST_HeatCapacity || type == IST_AverageTemperature || type == IST_YoungModulusVirginPaste || type == IST_PoissonRatioVirginPaste || type == IST_YoungModulusConcrete || type == IST_PoissonRatioConcrete ) {
-        return 1;
-    } else if ( type == IST_TemperatureFlow || type == IST_MassConcentrationFlow_1 || type == IST_HumidityFlow || type == IST_Velocity || type == IST_PressureGradient ) {
-        return 3;
-    } else {
-        return Material :: giveIPValueSize(type, aGaussPoint);
-    }
-}
-
 } // end namespace oofem

@@ -119,16 +119,11 @@ Material :: hasMaterialModeCapability(MaterialMode mode)
     return 0;
 }
 
+
 int
 Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
     answer.resize(0);
-    return 0;
-}
-
-int
-Material :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
     return 0;
 }
 

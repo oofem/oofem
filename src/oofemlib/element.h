@@ -736,13 +736,6 @@ public:
      */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     /**
-     * Returns the corresponding integration point value size in reduced form.
-     * @param type determines the type of internal variable.
-     * @param gp Integration point to check,
-     * @return Nonzero if o.k, zero otherwise.
-     */
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
-    /**
      * Returns the type of internal variable (scalar, vector, tensor,...).
      * @param type Determines the type of internal variable.
      * @return Type of internal variable.
