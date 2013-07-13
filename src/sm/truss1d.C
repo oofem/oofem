@@ -406,10 +406,6 @@ Truss1d :: giveInterface(InterfaceType interface)
 int
 Truss1d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
-        return 1;
-    }
-
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
 }

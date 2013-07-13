@@ -127,9 +127,9 @@ FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
             answer.at(1) = vec.at(1);
             answer.at(2) = vec.at(2);
             answer.at(3) = - (vec.at(1) + vec.at(2)); ///@todo Verify that this is correct for for all models.
-            answer.at(4) = vec.at(3);
+            answer.at(4) = 0.;
             answer.at(5) = 0.;
-            answer.at(6) = 0.;
+            answer.at(6) = vec.at(3);
             return 1;
         } else if ( mmode == _2dAxiFlow ) {
             answer.resize(6);

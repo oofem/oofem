@@ -1909,13 +1909,17 @@ MPlasticMaterial2 :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
 {
     MPlasticMaterial2Status *status = static_cast< MPlasticMaterial2Status * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_PlasticStrainTensor ) {
-        status->givePlasticStrainVector(answer);
+        FloatArray ep;
+        status->givePlasticStrainVector(ep);
+        ///@todo Fill in correct full form values here! This just adds zeros!
+        StructuralMaterial :: giveFullSymVectorForm(answer, ep, aGaussPoint->giveMaterialMode());
         return 1;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         FloatArray st(6), s;
 
         status->givePlasticStrainVector(s);
 
+        ///@todo Fill in correct full form values here! This just adds zeros!
         StructuralMaterial :: giveFullSymVectorForm(st, s, aGaussPoint->giveMaterialMode());
 
         this->computePrincipalValues(answer, st, principal_strain);
@@ -1949,10 +1953,7 @@ MPlasticMaterial2 :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType 
         StructuralMaterial :: giveInvertedVoigtVectorMask(answer, mmode);
         return 1;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        answer.resize(6);
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-        answer.at(3) = 3;
+        answer.enumerate(3);
         return 1;
     } else {
         return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);

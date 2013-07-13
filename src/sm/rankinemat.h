@@ -251,7 +251,7 @@ public:
 
     void setTangentShearStiffness(double value) { tanG = value; }
 
-    const FloatArray *givePlasDef() { return & plasticStrain; }
+    const FloatArray &givePlasDef() { return plasticStrain; }
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 

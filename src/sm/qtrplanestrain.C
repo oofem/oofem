@@ -420,10 +420,6 @@ QTrPlaneStrain :: drawSpecial(oofegGraphicContext &gc)
 int
 QTrPlaneStrain :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) || ( type == IST_DamageTensor ) ) {
-        return 3;
-    }
-
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
 }
@@ -432,12 +428,7 @@ QTrPlaneStrain :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 int
 QTrPlaneStrain :: SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
-        return 3;
-    }
-
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
+    return ZZNodalRecoveryMI_giveDofManRecordSize(type);
 }
 
 

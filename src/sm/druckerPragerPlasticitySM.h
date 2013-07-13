@@ -118,7 +118,7 @@ public:
      * Get the plastic strain deviator from the material status.
      * @param answer Plastic strain deviator.
      */
-    void givePlasticStrainDeviator(StrainVector &answer) const { answer = plasticStrainDeviator; }
+    const StrainVector & givePlasticStrainDeviator() const { return plasticStrainDeviator; }
     /**
      * Get the volumetric plastic strain from the material status.
      * @return Volumetric plastic strain.

@@ -337,10 +337,6 @@ Q27Space :: giveInterface(InterfaceType interface)
 int
 Q27Space :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) || ( type == IST_DamageTensor ) ) {
-        return 6;
-    }
-
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
 }

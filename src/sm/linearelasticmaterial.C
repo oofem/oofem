@@ -44,15 +44,11 @@ LinearElasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-    if ( ( mode == _3dMat ) || ( mode == _PlaneStress ) ||
-        ( mode == _PlaneStrain ) || ( mode == _1dMat ) ||
-        ( mode == _2dPlateLayer ) || ( mode == _2dBeamLayer ) ||
-        ( mode == _3dShellLayer ) || ( mode == _2dPlate ) ||
-        ( mode == _3dShell ) || ( mode == _PlaneStressRot ) ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _3dMat || mode == _PlaneStress ||
+           mode == _PlaneStrain || mode == _1dMat ||
+           mode == _2dPlateLayer || mode == _2dBeamLayer ||
+           mode == _3dShellLayer || mode == _2dPlate ||
+           mode == _3dShell || mode == _PlaneStressRot;
 }
 
 

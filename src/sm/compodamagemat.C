@@ -361,7 +361,6 @@ int CompoDamageMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
 {
     CompoDamageMatStatus *status = static_cast< CompoDamageMatStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_DamageTensor ) {
-        answer.resize(6);
         answer = status->omega;
     } else {
         StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
@@ -392,13 +391,7 @@ int CompoDamageMat :: giveIPValueSize(InternalStateType type, GaussPoint *aGauss
 int CompoDamageMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
     if ( type == IST_DamageTensor ) {
-        answer.resize(9);
-        answer.at(1) = 1; //xx
-        answer.at(2) = 2; //yy
-        answer.at(3) = 3; //zz
-        answer.at(4) = 4; //yz
-        answer.at(5) = 5; //zx
-        answer.at(6) = 6; //xy
+        answer.enumerate(6);
         return 1;
     } else {
         return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);

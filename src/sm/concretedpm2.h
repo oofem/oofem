@@ -185,26 +185,24 @@ public:
     // give:
     // Functions used to access the value of a internal variable.
     /**
-     *   Get the full plastic strain vector from the material status.
-     *  @param answer Plastic strain vector.
+     * Get the full plastic strain vector from the material status.
+     * @param answer Plastic strain vector.
      */
-    void  giveFullPlasticStrainVector(StrainVector &answer) const
+    void giveFullPlasticStrainVector(StrainVector &answer) const
     {
-        StrainVector plasticStrainVector(_Unknown);
-        givePlasticStrain(plasticStrainVector);
-        plasticStrainVector.convertToFullForm(answer);
+        ///@todo This will just full the vector out with zeros. Is that always correct?
+        this->givePlasticStrain().convertToFullForm(answer);
     }
     /**
-     *   Get the plastic strain deviator from the material status.
-     *  @param answer Plastic strain deviator.
+     * Get the plastic strain deviator from the material status.
+     * @param answer Plastic strain deviator.
      */
-    void  givePlasticStrain(StrainVector &answer) const
-    { answer = plasticStrain; }
+    const StrainVector & givePlasticStrain() const { return plasticStrain; }
 
 
     /**
-     *  Get the deviatoric plastic strain norm from the material status.
-     *  @return Deviatoric plasticStrainNorm.
+     * Get the deviatoric plastic strain norm from the material status.
+     * @return Deviatoric plasticStrainNorm.
      */
     double giveDeviatoricPlasticStrainNorm()
     {
@@ -335,10 +333,7 @@ public:
      * Get the temp value of the full plastic strain vector from the material status.
      * @param answer Temp value of plastic strain vector.
      */
-    void giveTempPlasticStrain(StrainVector &answer) const
-    { answer = tempPlasticStrain; }
-
-
+    const StrainVector & giveTempPlasticStrain() const { return tempPlasticStrain; }
 
     /**
      *  Get the temp value of the volumetric plastic strain in plane stress

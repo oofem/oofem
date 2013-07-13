@@ -78,12 +78,10 @@ public:
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    void givePlasticStrainVector(FloatArray &answer) const { answer = plasticStrainVector; }
-    void giveTempPlasticStrainVector(FloatArray &answer) const { answer = tempPlasticStrainVector; }
-    void giveStrainSpaceHardeningVars(FloatArray &answer) const
-    { answer = strainSpaceHardeningVarsVector; }
-    void givetempStrainSpaceHardeningVarsVector(FloatArray &answer) const
-    { answer = tempStrainSpaceHardeningVarsVector; }
+    const FloatArray & givePlasticStrainVector() const { return plasticStrainVector; }
+    const FloatArray & giveTempPlasticStrainVector() const { return tempPlasticStrainVector; }
+    const FloatArray & giveStrainSpaceHardeningVars() const { return strainSpaceHardeningVarsVector; }
+    const FloatArray & givetempStrainSpaceHardeningVarsVector() const { return tempStrainSpaceHardeningVarsVector; }
 
     void letPlasticStrainVectorBe(const FloatArray &v) { plasticStrainVector = v; }
     void letTempPlasticStrainVectorBe(const FloatArray &v) { tempPlasticStrainVector = v; }

@@ -133,13 +133,13 @@ public:
     int giveNsubsteps() { return nss; }
     double giveDensG() { return densG; }
 
-    const FloatArray *givePlasDef();
-    const FloatArray *giveTempPlasDef();
-    const FloatArray *giveTempEffectiveStress();
-    const FloatArray *givePlasFlowDirec();
-    const FloatMatrix *giveTangentMatrix();
-    const FloatMatrix *giveSmtrx();
-    const FloatMatrix *giveSSaTensor();
+    const FloatArray &givePlasDef() const;
+    const FloatArray &giveTempPlasDef() const;
+    const FloatArray &giveTempEffectiveStress() const;
+    const FloatArray &givePlasFlowDirec() const;
+    const FloatMatrix &giveTangentMatrix() const;
+    const FloatMatrix &giveSmtrx() const;
+    const FloatMatrix &giveSSaTensor() const;
 
     void setTempKappa(double al) { tempKappa = al; }
     void setKappa(double values) { kappa = values; }

@@ -164,9 +164,9 @@ TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponse
         if ( tempKappa > kappa ) {
             // plastic loading
             // Imports
-            tempEffectiveStress = * status->giveTempEffectiveStress();
-            plasFlowDirec = * status->givePlasFlowDirec();
-            SSaTensor = * status->giveSSaTensor();
+            tempEffectiveStress = status->giveTempEffectiveStress();
+            plasFlowDirec = status->givePlasFlowDirec();
+            SSaTensor = status->giveSSaTensor();
             beta = status->giveBeta();
             // Construction of the dyadic product tensor
             prodTensor.beTProductOf(SSaTensor, plasFlowDirec);
@@ -181,7 +181,7 @@ TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponse
             if ( tempDam > status->giveDam() ) {
                 double nlKappa =  status->giveNonlocalCumulatedStrain();
                 kappa = mParam * nlKappa + ( 1. - mParam ) * tempKappa;
-                FloatArray tempEffStress =  * status->giveTempEffectiveStress();
+                FloatArray tempEffStress =  status->giveTempEffectiveStress();
                 double gPrime = TrabBone3D :: computeDamageParamPrime(kappa);
                 // Construction of the tangent stiffness third term
                 thirdTerm.beDyadicProductOf(tempEffectiveStress, prodTensor);
@@ -235,8 +235,8 @@ TrabBoneGrad3D :: give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, G
         double dKappa = tempKappa - kappa;
 
         if ( dKappa > 0.0 ) {
-            plasFlowDirec = * status->givePlasFlowDirec();
-            SSaTensor = * status->giveSSaTensor();
+            plasFlowDirec = status->givePlasFlowDirec();
+            SSaTensor = status->giveSSaTensor();
             beta = status->giveBeta();
             prodTensor.beTProductOf(SSaTensor, plasFlowDirec);
             for ( int i = 1; i <= 6; i++ ) {
@@ -269,7 +269,7 @@ TrabBoneGrad3D :: give3dGprime(FloatMatrix &answer, MatResponseMode mode, GaussP
 
 
         if ( ( tempDamage - damage ) > 0 ) {
-            tempEffStress =  * status->giveTempEffectiveStress();
+            tempEffStress =  status->giveTempEffectiveStress();
             for ( int i = 1; i <= 6; i++ ) {
                 answer.at(i, 1) = tempEffStress.at(i);
             }
@@ -298,7 +298,7 @@ TrabBoneGrad3D ::  giveRealStressVectorGrad(FloatArray &answer1, double &answer2
     TrabBone3D ::  performPlasticityReturn(gp, totalStrain, atTime);
 
     double tempDamage = computeDamage(gp, atTime);
-    FloatArray tempEffStress = * status->giveTempEffectiveStress();
+    FloatArray tempEffStress = status->giveTempEffectiveStress();
     answer1.beScaled(1 - tempDamage, tempEffStress);
     answer2 = status->giveTempKappa();
 

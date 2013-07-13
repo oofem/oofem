@@ -111,10 +111,10 @@ public:
 
     void setTempDamageTensorEigenVals(const FloatArray &src) { tempDamageTensorEigenValues = src; }
     void setTempDamageTensorEigenVec(const FloatMatrix &src) { tempDamageTensorEigenVectors = src; }
-    const FloatArray *giveTempDamageTensorEigenVals() { return & tempDamageTensorEigenValues; }
-    const FloatArray *giveDamageTensorEigenVals() { return & damageTensorEigenValues; }
-    const FloatMatrix *giveTempDamageTensorEigenVec() { return & tempDamageTensorEigenVectors; }
-    const FloatMatrix *giveDamageTensorEigenVec() { return & damageTensorEigenVectors; }
+    const FloatArray &giveTempDamageTensorEigenVals() { return tempDamageTensorEigenValues; }
+    const FloatArray &giveDamageTensorEigenVals() { return damageTensorEigenValues; }
+    const FloatMatrix &giveTempDamageTensorEigenVec() { return tempDamageTensorEigenVectors; }
+    const FloatMatrix &giveDamageTensorEigenVec() { return damageTensorEigenVectors; }
 
     double giveMicroplaneTempDamage(int m) { return PsiTemp.at(m); }
     double giveMicroplaneDamage(int m) { return Psi.at(m); }

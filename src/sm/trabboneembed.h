@@ -80,6 +80,8 @@ public:
     void setTempPlasDef(FloatArray epsip) { tempPlasDef = epsip; }
     void setSmtrx(FloatMatrix smt) { smtrx = smt; }
 
+    const FloatArray & givePlasDef() const { return plasDef; }
+
     // definition
     virtual const char *giveClassName() const { return "TrabBoneEmbedStatus"; }
     virtual classType giveClassID() const { return TrabBoneEmbedStatusClass; }

@@ -477,10 +477,6 @@ void Q9PlaneStress2d :: drawScalar(oofegGraphicContext &context)
 int
 Q9PlaneStress2d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( type == IST_DamageTensor ) {
-        return 3;
-    }
-
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
 }

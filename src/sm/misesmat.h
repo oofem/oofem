@@ -232,7 +232,7 @@ public:
     void letTempLeftCauchyGreenBe(FloatMatrix values) { tempLeftCauchyGreen = values; }
     void letLeftCauchyGreenBe(FloatMatrix values) { leftCauchyGreen = values; }
 
-    const FloatArray *givePlasDef() { return & plasticStrain; }
+    const FloatArray &givePlasDef() { return plasticStrain; }
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 

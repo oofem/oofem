@@ -320,10 +320,16 @@ int
 DruckerPragerCutMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
     //MaterialStatus *status = this->giveStatus(aGaussPoint);
-    if ( ( type == IST_DamageScalar ) || (type == IST_DamageTensor ) ) {
+    if ( type == IST_DamageScalar ) {
         answer.resize(1);
         answer.zero();
+        ///@todo Actually export the relevant damage value here!
         //answer.at(1) = status->giveDamage();
+        return 1;
+    } else if ( type == IST_DamageTensor ) {
+        answer.resize(6);
+        answer.zero();
+        //answer.at(1) = answer.at(2) = answer.at(3) = status->giveDamage();
         return 1;
     } else {
         return MPlasticMaterial2 :: giveIPValue(answer, aGaussPoint, type, atTime);
@@ -335,9 +341,9 @@ DruckerPragerCutMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, 
 InternalStateValueType
 DruckerPragerCutMat :: giveIPValueType(InternalStateType type)
 {
-    if ( type == IST_PlasticStrainTensor ) {
+    if ( type == IST_PlasticStrainTensor || type == IST_DamageTensor ) {
         return ISVT_TENSOR_S3;
-    } else if ( ( type == IST_MaxEquivalentStrainLevel ) || ( type == IST_DamageScalar ) ) {
+    } else if ( type == IST_MaxEquivalentStrainLevel || type == IST_DamageScalar ) {
         return ISVT_SCALAR;
     } else {
         return StructuralMaterial :: giveIPValueType(type);
@@ -348,33 +354,13 @@ DruckerPragerCutMat :: giveIPValueType(InternalStateType type)
 int
 DruckerPragerCutMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
-    if ( type == IST_PlasticStrainTensor ) {
-        if ( mmode == _3dMat ) {
-            answer.resize(6);
-            answer.at(1) = 1;
-            answer.at(2) = 2;
-            answer.at(3) = 3;
-            answer.at(4) = 4;
-            answer.at(5) = 5;
-            answer.at(6) = 6;
-            return 1;
-        } else if ( mmode == _PlaneStrain ) {
-            answer.resize(6);
-            answer.at(1) = 1;
-            answer.at(2) = 2;
-            answer.at(3) = 3;
-            answer.at(6) = 4;
-            return 1;
-        } else if ( mmode == _1dMat ) {
-            answer.resize(1);
-            answer.at(1) = 1;
-            return 1;
-        }
+    if ( type == IST_PlasticStrainTensor || type == IST_DamageTensor ) {
+        answer.enumerate(6);
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
-    } else if ( ( type == IST_DamageScalar ) || ( type == IST_DamageTensor) ) {
+    } else if ( type == IST_DamageScalar ) {
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
@@ -387,21 +373,11 @@ DruckerPragerCutMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateTyp
 int
 DruckerPragerCutMat :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
-    if ( type == IST_PlasticStrainTensor ) {
-        MaterialMode mode = gp->giveMaterialMode();
-        if ( mode == _3dMat )
-            return 6;
-        else if (mode == _PlaneStrain)
-            return 4;
-        else if (mode == _PlaneStress)
-            return 3;
-        else if (mode == _1dMat)
-            return 1;
-        else
-            return 0;
+    if ( type == IST_PlasticStrainTensor || type == IST_DamageTensor ) {
+        return 6;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         return 1;
-    } else if ( type == IST_DamageScalar || type == IST_DamageTensor) {
+    } else if ( type == IST_DamageScalar ) {
         return 1;
     } else {
         return StructuralMaterial :: giveIPValueSize(type, gp);

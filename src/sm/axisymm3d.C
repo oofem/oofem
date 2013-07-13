@@ -388,10 +388,6 @@ Axisymm3d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) con
 int
 Axisymm3d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
-        return 6;
-    }
-
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
 }

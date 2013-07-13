@@ -665,10 +665,6 @@ TrPlaneStrRot :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Time
 int
 TrPlaneStrRot :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
-        return 4;
-    }
-
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
 }

@@ -980,7 +980,7 @@ void HellmichMaterial :: stressReturn(FloatArray &stress, FloatArray &trialStres
             status->setTempHardeningVar(auxchi1 + 3 * alpha * dl1);
         }
 
-        status->givePlasticStrainVector(auxepsp);
+        auxepsp = status->givePlasticStrainVector();
         auxepsp.add(depsp);
 
         // temporary plastic status update
@@ -1439,7 +1439,7 @@ void HellmichMaterial :: plotStressStrain(FILE *outputStream, GaussPoint *gp, Ti
     }
 
     if ( options & moPlasticity ) {
-        status->giveTempPlasticStrainVector(auxVector);
+        auxVector = status->giveTempPlasticStrainVector();
         if ( auxVector.giveSize() > idx ) {
             epl = auxVector(idx);
         }
@@ -2217,8 +2217,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
         auxStrain = totalStrain;
         giveStressDependentPartOfStrainVector(elasticStrain, gp, auxStrain, atTime, VM_Total);
         if ( options & moPlasticity ) {
-            status->givePlasticStrainVector(auxStrain);
-            elasticStrain.subtract(auxStrain);
+            elasticStrain.subtract(status->givePlasticStrainVector());
         }
 
         // trial stress = Ce * eps_n+1; no creep - can use Kv and Gv, but doesn't
@@ -2271,7 +2270,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
                 status->setTempHardeningVar(auxchi1 + 3 * alpha * dl);
             }
 
-            status->givePlasticStrainVector(auxStrain);
+            auxStrain = status->givePlasticStrainVector();
             auxStrain(0) += depsp;
             status->setTempPlasticStrainVector(auxStrain);
 
@@ -2692,18 +2691,19 @@ HellmichMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Int
     HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) this->giveStatus(aGaussPoint);
     if ( type == IST_PlasticStrainTensor ) {
         if ( options & moPlasticity ) {
-            status->givePlasticStrainVector(answer);
+            ///@todo Fill in correct full form values here! This just adds zeros!
+            StructuralMaterial :: giveFullSymVectorForm(answer, status->givePlasticStrainVector(), aGaussPoint->giveMaterialMode());
         } else {
-            answer.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( aGaussPoint->giveMaterialMode() ) );
+            answer.resize(6);
             answer.zero();
         }
 
         return 1;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        FloatArray st(6), s;
         if ( options & moPlasticity ) {
-            status->givePlasticStrainVector(s);
-            StructuralMaterial :: giveFullSymVectorForm(st, s, aGaussPoint->giveMaterialMode());
+            FloatArray st(6);
+            ///@todo Fill in correct full form values here! This just adds zeros!
+            StructuralMaterial :: giveFullSymVectorForm(st, status->givePlasticStrainVector(), aGaussPoint->giveMaterialMode());
             this->computePrincipalValues(answer, st, principal_strain);
         } else {
             answer.resize(3);
@@ -2776,7 +2776,7 @@ HellmichMaterial :: giveIPValueType(InternalStateType type)
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         return ISVT_VECTOR;
     } else if ( type == IST_DamageTensor ) {
-        return ISVT_TENSOR_G;
+        return ISVT_SCALAR;
     } else if ( type == IST_HydrationDegree ) {
         return ISVT_SCALAR;
     } else if ( type == IST_Temperature ) {
@@ -2790,10 +2790,10 @@ int
 HellmichMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
     if ( type == IST_PlasticStrainTensor ) {
-        StructuralMaterial :: giveInvertedVoigtVectorMask(answer, mmode);
+        answer.enumerate(6);
         return 1;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        answer.resize(6);
+        answer.resize(3);
         answer.at(1) = 1;
         answer.at(2) = 2;
         answer.at(3) = 3;
@@ -2802,7 +2802,7 @@ HellmichMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType t
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
-    } else if ( ( type == IST_HydrationDegree ) || ( type == IST_Temperature ) ) {
+    } else if ( type == IST_HydrationDegree || type == IST_Temperature ) {
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
@@ -2815,10 +2815,10 @@ int
 HellmichMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
     if ( type == IST_PlasticStrainTensor ) {
-        return StructuralMaterial :: giveSizeOfVoigtSymVector( aGaussPoint->giveMaterialMode() );
+        return 6;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         return 3;
-    } else if ( ( type == IST_DamageTensor ) || ( type == IST_HydrationDegree ) || ( type == IST_Temperature ) ) {
+    } else if ( type == IST_DamageTensor || type == IST_HydrationDegree || type == IST_Temperature ) {
         return 1;
     } else {
         return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
@@ -3066,7 +3066,7 @@ void HellmichMaterialStatus :: printOutputAt(FILE *stream, TimeStep *atTime)
             }
 
             fprintf( stream, " chi1 %.5e eps_pl ", giveHardeningVar() );
-            givePlasticStrainVector(helpVec);
+            helpVec = this->givePlasticStrainVector();
             StructuralMaterial :: giveFullSymVectorForm(fullHelpVec, helpVec, gp->giveMaterialMode());
             n = fullHelpVec.giveSize();
             for ( i = 0; i < n; i++ ) {

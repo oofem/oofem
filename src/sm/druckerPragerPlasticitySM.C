@@ -328,8 +328,7 @@ DruckerPragerPlasticitySM :: performLocalStressReturn(GaussPoint *gp,
     // compute trial elastic strains
     volumetricElasticTrialStrain =
         volumetricStrain - status->giveVolumetricPlasticStrain();
-    StrainVector plasticStrainDeviator( gp->giveMaterialMode() );
-    status->givePlasticStrainDeviator(plasticStrainDeviator);
+    StrainVector plasticStrainDeviator = status->givePlasticStrainDeviator();
     StrainVector elasticStrainDeviator = strainDeviator;
     elasticStrainDeviator.subtract(plasticStrainDeviator);
 
@@ -762,10 +761,8 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
     double volumetricStrain;
     strain.computeDeviatoricVolumetricSplit(strainDeviator, volumetricStrain);
 
-    StrainVector plasticStrainDeviator(_3dMat);
-    status->givePlasticStrainDeviator(plasticStrainDeviator);
     StrainVector elasticStrainDeviator = strainDeviator;
-    elasticStrainDeviator.subtract(plasticStrainDeviator);
+    elasticStrainDeviator.subtract(status->givePlasticStrainDeviator());
 
     double a_const =
         kM * HBar / ( HBar * deltaVolumetricPlasticStrain + 9. / 2. * alpha * kM * deltaKappa );
@@ -818,9 +815,9 @@ DruckerPragerPlasticitySM :: giveIPValue(FloatArray &answer,
         return 1;
 
     case IST_DamageTensor:
-        answer.resize(1);
+        answer.resize(6);
         answer.zero();
-        answer.at(1) = status->giveKappa();
+        answer.at(1) = answer.at(2) = answer.at(3) = status->giveKappa();
         return 1;
 
     default:
@@ -835,10 +832,8 @@ DruckerPragerPlasticitySM :: giveIPValueSize(InternalStateType type,
 {
     switch ( type ) {
     case IST_PlasticStrainTensor:
-        return 6;
-
     case IST_DamageTensor:
-        return 1;
+        return 6;
 
     default:
         return StructuralMaterial :: giveIPValueSize(type, gp);
@@ -853,20 +848,11 @@ DruckerPragerPlasticitySM :: giveIntVarCompFullIndx(IntArray &answer,
 {
     switch ( type ) {
     case IST_PlasticStrainTensor:
-        answer.resize(6);
-        answer.zero();
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-        answer.at(3) = 3;
-        answer.at(4) = 4;
-        answer.at(5) = 5;
-        answer.at(6) = 6;
+        answer.enumerate(6);
         return 1;
 
     case IST_DamageTensor:
-        answer.resize(1);
-        answer.zero();
-        answer.at(1) = 1;
+        answer.enumerate(6);
         return 1;
 
     default:
@@ -880,10 +866,9 @@ DruckerPragerPlasticitySM :: giveIPValueType(InternalStateType type)
 {
     switch ( type ) {
     case IST_PlasticStrainTensor:      // plastic strain tensor
-        return ISVT_TENSOR_S3;
-
+        return ISVT_TENSOR_S3E;
     case IST_DamageTensor:     // damage tensor used for internal variables
-        return ISVT_TENSOR_G;
+        return ISVT_TENSOR_S3;
 
     default:
         return StructuralMaterial :: giveIPValueType(type);

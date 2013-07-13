@@ -601,9 +601,7 @@ ConcreteDPM2 :: giveRealStressVector(FloatArray &answer,
 
     // compute elastic strains and trial stress
     StrainVector elasticStrain = strain;
-    StrainVector tempPlasticStrain(matMode);
-    status->giveTempPlasticStrain(tempPlasticStrain);
-    elasticStrain.subtract(tempPlasticStrain);
+    elasticStrain.subtract(status->giveTempPlasticStrain());
     elasticStrain.applyElasticStiffness(effectiveStress, eM, nu);
 
 
@@ -899,10 +897,8 @@ ConcreteDPM2 :: computeDeltaPlasticStrainNormTension(double tempKappaD, double k
 
     ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
 
-    StrainVector tempPlasticStrain(matMode);
-    StrainVector plasticStrain(matMode);
-    status->giveTempPlasticStrain(tempPlasticStrain);
-    status->givePlasticStrain(plasticStrain);
+    const StrainVector &tempPlasticStrain = status->giveTempPlasticStrain();
+    const StrainVector &plasticStrain = status->givePlasticStrain();
 
     StrainVector deltaPlasticStrain(matMode);
     deltaPlasticStrain = tempPlasticStrain;
@@ -936,16 +932,12 @@ ConcreteDPM2 :: computeDeltaPlasticStrainNormCompression(const double tempAlpha,
 
     ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
 
-    StrainVector tempPlasticStrain(matMode);
-    StrainVector plasticStrain(matMode);
-    status->giveTempPlasticStrain(tempPlasticStrain);
-    status->givePlasticStrain(plasticStrain);
+    const StrainVector & tempPlasticStrain = status->giveTempPlasticStrain();
+    const StrainVector & plasticStrain = status->givePlasticStrain();
 
-    plasticStrain.times( status->giveAlpha() );
-    tempPlasticStrain.times(tempAlpha);
     StrainVector deltaPlasticStrain(matMode);
-    deltaPlasticStrain = tempPlasticStrain;
-    deltaPlasticStrain.subtract(plasticStrain);
+    deltaPlasticStrain.add(tempAlpha, tempPlasticStrain);
+    deltaPlasticStrain.add(-status->giveAlpha(), plasticStrain);
 
     double deltaPlasticStrainNorm = 0;
 
@@ -978,14 +970,10 @@ ConcreteDPM2 :: computeEquivalentStrain(double &tempEquivStrain,
     //compute the elastic strain based one
     ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
 
-    //get temp plastic strain and tempKappa
-    StrainVector tempPlasticStrain(matMode);
-    status->giveTempPlasticStrain(tempPlasticStrain);
-
     StressVector elasticStress(matMode);
     // compute elastic strains and trial stress
     StrainVector elasticStrain = strain;
-    elasticStrain.subtract(tempPlasticStrain);
+    elasticStrain.subtract(status->giveTempPlasticStrain());
     elasticStrain.applyElasticStiffness(elasticStress, eM, nu);
 
     //Compute trial coordinates
@@ -1097,13 +1085,6 @@ ConcreteDPM2 :: initDamaged(double kappaD,
 double
 ConcreteDPM2 :: computeDuctilityMeasureDamage(const StrainVector &strain, GaussPoint *gp)
 {
-    ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
-    StrainVector plasticStrain(matMode);
-    StrainVector tempPlasticStrain(matMode);
-    status->giveTempPlasticStrain(tempPlasticStrain);
-    status->givePlasticStrain(plasticStrain);
-    tempPlasticStrain.subtract(plasticStrain);
-    StrainVector principalStrain(matMode);
     double ductilityMeasure;
 
     //Angle in uniaxial compression is atan(1./sqrt(6.))=0.387597
@@ -1139,8 +1120,7 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
     }
 
     //get temp plastic strain and tempKappa
-    StrainVector tempPlasticStrain(matMode);
-    status->giveTempPlasticStrain(tempPlasticStrain);
+    StrainVector tempPlasticStrain = status->giveTempPlasticStrain();
     double tempKappaP = status->giveTempKappaP();
 
     // compute elastic strains and trial stress
@@ -1484,7 +1464,6 @@ ConcreteDPM2 :: performRegularReturn(StressVector &effectiveStress,
     FloatArray deltaIncrementTemp(3);
     deltaIncrementTemp.zero();
     StrainVector tempPlasticStrain(matMode);
-    StrainVector plasticStrain(matMode);
 
     double deltaLambda = 0.;
     double normOfResiduals = 0.;
@@ -1515,8 +1494,7 @@ ConcreteDPM2 :: performRegularReturn(StressVector &effectiveStress,
     rho = trialRho;
 
     // Write the old plastic strain to the temp ones
-    status->giveTempPlasticStrain(plasticStrain);
-    tempPlasticStrain = plasticStrain;
+    tempPlasticStrain = status->giveTempPlasticStrain();
 
     // Do the same for kappa
     double kappaP = status->giveTempKappaP();
@@ -2331,11 +2309,9 @@ ConcreteDPM2 :: computeSecantStiffness(FloatMatrix &answer,
 
 
     StrainVector strain(status->giveTempStrainVector(), matMode);
-    StrainVector tempPlasticStrain(matMode);
-    status->giveTempPlasticStrain(tempPlasticStrain);
     StressVector effectiveStress(matMode);
     StrainVector elasticStrain = strain;
-    elasticStrain.subtract(tempPlasticStrain);
+    elasticStrain.subtract(status->giveTempPlasticStrain());
     elasticStrain.applyElasticStiffness(effectiveStress, eM, nu);
 
     //Calculate the principal values of the effective stress
@@ -2515,18 +2491,18 @@ ConcreteDPM2 :: giveIPValue(FloatArray &answer,
                             TimeStep *atTime)
 {
     ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
-    //  const ConcreteDPM2Status* status = giveStatus(gp) ;
-    StrainVector plasticStrainVector(_3dMat);
 
     switch ( type ) {
     case IST_PlasticStrainTensor:
-        answer.resize(6);
-        status->giveFullPlasticStrainVector(plasticStrainVector);
-        answer = plasticStrainVector;
+        {
+            StrainVector e(_Unknown);
+            status->giveFullPlasticStrainVector(e);
+            answer = e;
+        }
         return 1;
 
     case IST_DamageTensor:
-        answer.resize(2);
+        answer.resize(6);
         answer.zero();
         answer.at(1) = status->giveDamageTension();
         answer.at(2) = status->giveDamageCompression();
@@ -2547,7 +2523,7 @@ ConcreteDPM2 :: giveIPValueSize(InternalStateType type,
         return 6;
 
     case IST_DamageTensor:
-        return 2;
+        return 6;
 
     default:
         return StructuralMaterial :: giveIPValueSize(type, gp);
@@ -2562,20 +2538,11 @@ ConcreteDPM2 :: giveIntVarCompFullIndx(IntArray &answer,
 {
     switch ( type ) {
     case IST_PlasticStrainTensor:
-        answer.resize(9);
-        answer.zero();
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-        answer.at(3) = 3;
-        answer.at(4) = 4;
-        answer.at(5) = 5;
-        answer.at(6) = 6;
+        answer.enumerate(6);
         return 1;
 
     case IST_DamageTensor:
-        answer.resize(9);
-        answer.at(1) = 1;
-        answer.at(2) = 2;
+        answer.enumerate(6);
         return 1;
 
     default:

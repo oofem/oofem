@@ -194,9 +194,11 @@ TrabBoneEmbed :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Intern
     if ( type == IST_DamageScalar ) {
         answer.resize(1);
         answer.at(1) = 0.;
+        OOFEM_WARNING("No damage is exported (why?!)");
         return 1;
     } else if ( type == IST_PlasticStrainTensor ) {
-        answer.resize(6);
+        answer = status->givePlasDef();
+        OOFEM_WARNING("Unsure what components are stored in the plastic strain tensor");
         return 1;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         answer.resize(1);
@@ -229,7 +231,8 @@ TrabBoneEmbed :: giveIPValueType(InternalStateType type)
 {
     if ( type == IST_PlasticStrainTensor ) {
         return ISVT_TENSOR_S3;
-    } else if ( ( type == IST_DamageScalar ) || ( type == IST_MaxEquivalentStrainLevel ) || ( type == IST_BoneVolumeFraction ) || ( type == IST_PlasStrainEnerDens ) || ( type == IST_ElasStrainEnerDens ) || ( type == IST_TotalStrainEnerDens ) ) {
+    } else if ( type == IST_DamageScalar || type == IST_MaxEquivalentStrainLevel || type == IST_BoneVolumeFraction || 
+                type == IST_PlasStrainEnerDens || type == IST_ElasStrainEnerDens || type == IST_TotalStrainEnerDens ) {
         return ISVT_SCALAR;
     } else {
         return StructuralMaterial :: giveIPValueType(type);
@@ -245,13 +248,7 @@ TrabBoneEmbed :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type
         answer.at(1) = 1;
         return 1;
     } else if ( type == IST_PlasticStrainTensor ) {
-        answer.resize(6);
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-        answer.at(3) = 3;
-        answer.at(4) = 4;
-        answer.at(5) = 5;
-        answer.at(6) = 6;
+        answer.enumerate(6);
         return 1;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         answer.resize(1);

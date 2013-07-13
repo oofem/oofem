@@ -945,18 +945,10 @@ RCM2Material :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type,
         answer.at(1) = 1;
         return 1;
     } else if ( type ==  IST_CrackDirs ) {
-        answer.resize(9);
-        for ( int i = 1; i <= 9; i++ ) {
-            answer.at(i) = i;
-        }
-
+        answer.enumerate(9);
         return 1;
     } else if ( type == IST_CrackStatuses ) {
-        answer.resize(3);
-        for ( int i = 1; i <= 3; i++ ) {
-            answer.at(i) = i;
-        }
-
+        answer.enumerate(3);
         return 1;
     } else {
         return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);

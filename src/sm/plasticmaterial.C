@@ -131,8 +131,8 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
     this->giveStressDependentPartOfStrainVector(strainVectorR, gp, totalStrain,
                                                 atTime, VM_Total);
 
-    status->givePlasticStrainVector(plasticStrainVectorR);
-    status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+    plasticStrainVectorR = status->givePlasticStrainVector();
+    strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
 
     // tady konec debugovani - strainSpaceHardeningVariables ve statusu neinicializovany
     // to musi udelat material.
@@ -314,8 +314,8 @@ PlasticMaterial :: ComputeResidualVector(GaussPoint *gp, double Gamma,
     size = gradientVectorR->giveSize();
 
     answer = new FloatArray(size);
-    status->givePlasticStrainVector(oldPlasticStrainVectorR);
-    status->giveStrainSpaceHardeningVars(oldStrainSpaceHardeningVariables);
+    oldPlasticStrainVectorR = status->givePlasticStrainVector();
+    oldStrainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
 
     for ( int i = 1; i <= isize; i++ ) {
         answer->at(i) = oldPlasticStrainVectorR.at(i) - plasticStrainVectorR->at(i) + Gamma *gradientVectorR->at(i);
@@ -447,7 +447,7 @@ PlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
 
     stressVector = status->giveStressVector();
     StructuralMaterial :: giveFullSymVectorForm(fullStressVector, stressVector, gp->giveMaterialMode());
-    status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+    strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
     stressSpaceHardeningVars = this->ComputeStressSpaceHardeningVars(gp, & strainSpaceHardeningVariables);
 
     this->computeConsistentModuli(consistentModuli, gp,
@@ -717,13 +717,15 @@ PlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Inte
 {
     PlasticMaterialStatus *status = static_cast< PlasticMaterialStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_PlasticStrainTensor ) {
-        status->givePlasticStrainVector(answer);
+        const FloatArray ep = status->givePlasticStrainVector();
+        ///@todo Fill in correct full form values here! This just adds zeros!
+        StructuralMaterial :: giveFullSymVectorForm(answer, ep, aGaussPoint->giveMaterialMode());
         return 1;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        FloatArray st(6), s;
+        FloatArray st(6);
+        const FloatArray &s = status->givePlasticStrainVector();
 
-        status->givePlasticStrainVector(s);
-
+        ///@todo Fill in correct full form values here! This just adds zeros!
         StructuralMaterial :: giveFullSymVectorForm(st, s, aGaussPoint->giveMaterialMode());
 
         this->computePrincipalValues(answer, st, principal_strain);
@@ -755,10 +757,7 @@ PlasticMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType ty
         StructuralMaterial :: giveInvertedVoigtVectorMask(answer, mmode);
         return 1;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        answer.resize(6);
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-        answer.at(3) = 3;
+        answer.enumerate(3);
         return 1;
     } else {
         return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);

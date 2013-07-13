@@ -528,7 +528,14 @@ RankineMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
 {
     RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_PlasticStrainTensor ) {
-        answer  = * status->givePlasDef();
+        const FloatArray ep = status->givePlasDef();
+        answer.resize(6);
+        answer.at(1) = ep.at(1);
+        answer.at(2) = ep.at(2);
+        answer.at(3) = 0.; ///@todo Fix this value!
+        answer.at(4) = 0.;
+        answer.at(5) = 0.;
+        answer.at(6) = ep.at(3);
         return 1;
     } else if ( type == IST_CumPlasticStrain ) {
         answer.resize(1);
@@ -540,7 +547,8 @@ RankineMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
         return 1;
     } else if ( type == IST_DamageTensor ) {
         answer.resize(6);
-        answer.at(1) = status->giveDamage();
+        answer.zero();
+        answer.at(1) = answer.at(2) = answer.at(3) = status->giveDamage();
         return 1;
 
 #ifdef keep_track_of_dissipated_energy
@@ -566,9 +574,11 @@ RankineMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
 InternalStateValueType
 RankineMat :: giveIPValueType(InternalStateType type)
 {
-    if ( ( type == IST_PlasticStrainTensor ) || ( type == IST_DamageTensor ) ) {
+    if ( type == IST_PlasticStrainTensor ) {
+        return ISVT_TENSOR_S3E;
+    } else if ( type == IST_DamageTensor ) {
         return ISVT_TENSOR_S3;
-    } else if ( ( type == IST_CumPlasticStrain ) || ( type == IST_DamageScalar ) ) {
+    } else if ( type == IST_CumPlasticStrain || type == IST_DamageScalar ) {
         return ISVT_SCALAR;
 
 #ifdef keep_track_of_dissipated_energy
@@ -590,26 +600,8 @@ int
 RankineMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
     if ( type == IST_PlasticStrainTensor || type == IST_DamageTensor ) {
-        if ( mmode == _3dMat ) {
-            answer.resize(6);
-            answer.at(1) = 1;
-            answer.at(2) = 2;
-            answer.at(3) = 3;
-            answer.at(4) = 4;
-            answer.at(5) = 5;
-            answer.at(6) = 6;
-            return 1;
-        } else if ( mmode == _PlaneStress || mmode == _PlaneStressGrad ) {
-            answer.resize(6);
-            answer.at(1) = 1;
-            answer.at(2) = 2;
-            answer.at(6) = 3;
-            return 1;
-        } else if ( mmode == _1dMat ) {
-            answer.resize(1);
-            answer.at(1) = 1;
-            return 1;
-        }
+        answer.enumerate(6);
+        return 1;
     } else if ( type == IST_CumPlasticStrain ) {
         answer.resize(1);
         answer.at(1) = 1;

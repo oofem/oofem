@@ -316,15 +316,13 @@ public:
     }
 
     // Plasticity
-    void givePlasticStrainVector(FloatArray &answer) const {
+    const FloatArray & givePlasticStrainVector() const {
         if ( !plastData ) { _error("givePlasticStrainVector: missing plastData."); }
-
-        answer = plastData->plasticStrainVector;
+        return plastData->plasticStrainVector;
     }
-    void giveTempPlasticStrainVector(FloatArray &answer) const {
+    const FloatArray & giveTempPlasticStrainVector() const {
         if ( !plastData ) { _error("giveTempPlasticStrainVector: missing plastData."); }
-
-        answer = plastData->tempPlasticStrainVector;
+        return plastData->tempPlasticStrainVector;
     }
     double giveHardeningVar() { if ( plastData ) { return plastData->hardeningVar; } else { return 0.; } }
     double giveTempHardeningVar() { if ( plastData ) { return plastData->tempHardeningVar; } else { return 0.; } }
@@ -377,25 +375,22 @@ public:
     }
 
     // Creep strain vectors
-    void giveViscousStrainVector(FloatArray &answer) const {
+    const FloatArray & giveViscousStrainVector() const {
         if ( !creepData ) { _error("giveViscousStrainVector: missing creepData."); }
 
-        answer = creepData->viscousStrainVector;
+        return creepData->viscousStrainVector;
     }
-    void giveTempViscousStrainVector(FloatArray &answer) const {
+    const FloatArray & giveTempViscousStrainVector() const {
         if ( !creepData ) { _error("giveTempViscousStrainVector: missing creepData."); }
-
-        answer = creepData->tempViscousStrainVector;
+        return creepData->tempViscousStrainVector;
     }
-    void giveFlowStrainVector(FloatArray &answer) const {
+    const FloatArray & giveFlowStrainVector() const {
         if ( !creepData ) { _error("giveFlowStrainVector: missing creepData."); }
-
-        answer = creepData->flowStrainVector;
+        return creepData->flowStrainVector;
     }
-    void giveTempFlowStrainVector(FloatArray &answer) const {
+    const FloatArray & giveTempFlowStrainVector() const {
         if ( !creepData ) { _error("giveTempFlowStrainVector: missing creepData."); }
-
-        answer = creepData->tempFlowStrainVector;
+        return creepData->tempFlowStrainVector;
     }
 
     void setViscousStrainVector(const FloatArray &v) {
@@ -440,8 +435,8 @@ public:
     void setViscosity(double v) { if ( nonisoData ) { nonisoData->viscosity = v; } }
 
     // Plasticity
-    void givePlasticStrainVector(FloatArray &answer) const { if ( plastData ) { answer = plastData->plasticStrainVector; } }
-    void giveTempPlasticStrainVector(FloatArray &answer) const { if ( plastData ) { answer = plastData->tempPlasticStrainVector; } }
+    const FloatArray & givePlasticStrainVector() const { return plastData->plasticStrainVector; }
+    const FloatArray & giveTempPlasticStrainVector() const { return plastData->tempPlasticStrainVector; }
     double giveHardeningVar() { if ( plastData ) { return plastData->hardeningVar; } else { return 0.; } }
     double giveTempHardeningVar() { if ( plastData ) { return plastData->tempHardeningVar; } else { return 0.; } }
     void giveTrialStressVector(FloatArray &answer) const { if ( plastData ) { answer = plastData->trialStressVector; } }
