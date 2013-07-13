@@ -1419,25 +1419,10 @@ MPlasticMaterial :: giveIPValueType(InternalStateType type)
 
 
 int
-MPlasticMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        StructuralMaterial :: giveInvertedVoigtVectorMask(answer, mmode);
-        return 1;
-    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        answer.enumerate(3);
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-
-int
 MPlasticMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
     if ( type == IST_PlasticStrainTensor ) {
-        return StructuralMaterial :: giveSizeOfVoigtSymVector( aGaussPoint->giveMaterialMode() );
+        return 6;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         return 3;
     } else {

@@ -599,13 +599,6 @@ DustMaterial :: giveIPValueSize(InternalStateType type,
     }
 }
 
-int
-DustMaterial :: giveIntVarCompFullIndx(IntArray &answer,
-                                       InternalStateType type,
-                                       MaterialMode mmode)
-{
-    return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-}
 
 InternalStateValueType
 DustMaterial :: giveIPValueType(InternalStateType type)

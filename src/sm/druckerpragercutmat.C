@@ -337,7 +337,6 @@ DruckerPragerCutMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, 
 }
 
 
-
 InternalStateValueType
 DruckerPragerCutMat :: giveIPValueType(InternalStateType type)
 {
@@ -348,25 +347,6 @@ DruckerPragerCutMat :: giveIPValueType(InternalStateType type)
     } else {
         return StructuralMaterial :: giveIPValueType(type);
     }
-}
-
-
-int
-DruckerPragerCutMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_PlasticStrainTensor || type == IST_DamageTensor ) {
-        answer.enumerate(6);
-    } else if ( type == IST_MaxEquivalentStrainLevel ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else if ( type == IST_DamageScalar ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    }
-
-    return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
 }
 
 

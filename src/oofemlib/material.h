@@ -210,14 +210,6 @@ public:
      */
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
     /**
-     * Returns the mask of reduced indexes of Internal Variable component.
-     * @param answer Mask of Full VectorSize, with components being the indexes to reduced form vectors.
-     * @param type Determines the internal variable requested (physical meaning).
-     * @param mmode Material mode.
-     * @returns Nonzero if ok or error is generated for unknown mat mode.
-     */
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
-    /**
      * Returns the type of internal variable (scalar, vector, tensor,...).
      * @param type Determines the type of internal variable.
      * @returns Type of internal variable.

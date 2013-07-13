@@ -156,8 +156,6 @@ protected:
 
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
-
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
 };
 

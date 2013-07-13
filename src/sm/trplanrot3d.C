@@ -275,22 +275,6 @@ TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Inte
 }
 
 
-int
-TrPlaneStrRot3d :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
-{
-    if ( ( type == IST_ShellForceMomentumTensor ) || ( type == IST_ShellStrainCurvatureTensor ) ) {
-        answer.resize(12);
-        for ( int i = 1; i <= 12; i++ ) {
-            answer.at(i) = i;
-        }
-
-        return 1;
-    } else {
-        return TrPlaneStrRot :: giveIntVarCompFullIndx(answer, type);
-    }
-}
-
-
 void
 TrPlaneStrRot3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
 // Computes numerically the load vector of the receiver due to the body loads, at stepN.
@@ -349,15 +333,13 @@ void
 TrPlaneStrRot3d :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
-    int i, j;
-    GaussPoint *gp;
     FloatArray v;
 
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
-        for ( j = 0; j < integrationRulesArray [ i ]->giveNumberOfIntegrationPoints(); j++ ) {
-            gp = integrationRulesArray [ i ]->getIntegrationPoint(j);
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
+        for ( int j = 0; j < integrationRulesArray [ i ]->giveNumberOfIntegrationPoints(); j++ ) {
+            GaussPoint *gp = integrationRulesArray [ i ]->getIntegrationPoint(j);
 
             // gp   -> printOutputAt(file,stepN) ;
 

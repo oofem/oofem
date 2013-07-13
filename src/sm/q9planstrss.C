@@ -233,7 +233,6 @@ void Q9PlaneStress2d :: drawScalar(oofegGraphicContext &context)
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v [ 8 ];
     double s [ 9 ], ss [ 4 ], defScale;
-    IntArray map;
     int ip;
     GaussPoint *gp;
 
@@ -252,10 +251,7 @@ void Q9PlaneStress2d :: drawScalar(oofegGraphicContext &context)
             return;
         }
 
-        result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-        if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-            return;
-        }
+        indx = context.giveIntVarIndx();
 
         for ( i = 1; i <= 8; i++ ) {
             s [ i - 1 ] = v [ i - 1 ].at(indx);
@@ -450,10 +446,7 @@ void Q9PlaneStress2d :: drawScalar(oofegGraphicContext &context)
                 return;
             }
 
-            this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-            if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-                return;
-            }
+            indx = context.giveIntVarIndx();
 
             for ( i = 1; i <= 4; i++ ) {
                 s [ i - 1 ] = v [ 0 ].at(indx);

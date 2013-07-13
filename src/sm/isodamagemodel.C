@@ -344,33 +344,6 @@ IsotropicDamageMaterial :: giveIPValueType(InternalStateType type)
 
 
 int
-IsotropicDamageMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_DamageTensor || type == IST_DamageTensorTemp ) {
-        answer.enumerate(6);
-        return 1;
-    } else if ( type == IST_MaxEquivalentStrainLevel || type == IST_CharacteristicLength || type == IST_CrackDirs ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else if ( type == IST_CrackVector || type == IST_PrincipalDamageTensor || type == IST_PrincipalDamageTempTensor ) {
-        answer.enumerate(3);
-        return 1;
-
-#ifdef keep_track_of_dissipated_energy
-    } else if ( type == IST_DissWorkDensity || type == IST_StressWorkDensity || type == IST_FreeEnergyDensity ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-
-#endif
-    } else {
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-
-int
 IsotropicDamageMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
     if ( type == IST_DamageTensor || type == IST_DamageTensorTemp ||

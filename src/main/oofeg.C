@@ -1753,10 +1753,6 @@ void varPlot(Widget w, XtPointer ptr, XtPointer call_data)
 void
 setupSmoother(oofegGraphicContext &gc)
 {
-    int id;
-    FloatArray var;
-    IntArray map;
-
     if ( gc.getActiveStep() == -1 ) {
         return;
     }
@@ -1764,7 +1760,7 @@ setupSmoother(oofegGraphicContext &gc)
     if ( gc.giveIntVarMode() == ISM_recovered ) {
         NodalRecoveryModel *smoother;
         Domain *domain;
-        for ( id = 1; id <= gc.getActiveProblem()->giveNumberOfDomains(); id++ ) {
+        for ( int id = 1; id <= gc.getActiveProblem()->giveNumberOfDomains(); id++ ) {
             domain = gc.getActiveProblem()->giveDomain(id);
             smoother = domain->giveSmoother();
             if ( !smoother ) {
@@ -2409,8 +2405,8 @@ void setupData(oofegGraphicContext &gc)
      * // loop over each element node
      * for (j = 1; j<= enodes; j++) {
      * if (elem -> giveInternalStateAtNode (var, gc.giveIntVarType(), gc.giveIntVarMode(),j,problem->giveCurrentStep())) {
-     *  elem->giveIntVarCompFullIndx (map, gc.giveIntVarType());
-     *  if ((indx = map.at(gc.giveIntVarIndx()))) {
+     *  indx = gc.giveIntVarIndx();
+     * {
      *   stress = var.at(indx);
      *   if (init) {maxVal = minVal = stress; init = 0;}
      *   if (stress > maxVal) maxVal = stress;
@@ -2423,8 +2419,8 @@ void setupData(oofegGraphicContext &gc)
      * // loop over each element side
      * for (j = 1; j<= esides; j++) {
      *  if (elem -> giveInternalStateAtSide (var, gc.giveIntVarType(), gc.giveIntVarMode(),j,problem->giveCurrentStep())) {
-     *   elem->giveIntVarCompFullIndx (map, gc.giveIntVarType());
-     *   if ((indx = map.at(gc.giveIntVarIndx()))) {
+     *   indx = gc.giveIntVarIndx();
+     * {
      *    stress = var.at(indx);
      *    if (init) {maxVal = minVal = stress; init = 0;}
      *    if (stress > maxVal) maxVal = stress;

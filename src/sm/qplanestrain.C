@@ -274,7 +274,6 @@ void QPlaneStrain :: drawScalar(oofegGraphicContext &context)
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v [ 4 ];
     double s [ 4 ], defScale;
-    IntArray map;
 
     if ( !context.testElementGraphicActivity(this) ) {
         return;
@@ -292,10 +291,7 @@ void QPlaneStrain :: drawScalar(oofegGraphicContext &context)
          *    return;
          * }
          *
-         * this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-         * if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-         *    return;
-         * }
+         * indx = context.giveIntVarIndx();
          *
          * for ( i = 1; i <= 4; i++ ) {
          *    s [ i - 1 ] = v [ i - 1 ].at(indx);
@@ -363,7 +359,7 @@ void QPlaneStrain :: drawScalar(oofegGraphicContext &context)
             return;
         }
 
-        int ip, result;
+        int ip;
         GaussPoint *gp;
         IntArray ind(4);
         FloatArray *gpCoords;
@@ -416,10 +412,7 @@ void QPlaneStrain :: drawScalar(oofegGraphicContext &context)
                 return;
             }
 
-            result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-            if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-                return;
-            }
+            indx = context.giveIntVarIndx();
 
             for ( i = 1; i <= 4; i++ ) {
                 s [ i - 1 ] = v [ 0 ].at(indx);

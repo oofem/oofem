@@ -938,25 +938,6 @@ RCM2Material :: giveIPValueType(InternalStateType type)
 
 
 int
-RCM2Material :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_CrackedFlag ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else if ( type ==  IST_CrackDirs ) {
-        answer.enumerate(9);
-        return 1;
-    } else if ( type == IST_CrackStatuses ) {
-        answer.enumerate(3);
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-
-int
 RCM2Material :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
     if ( type == IST_CrackedFlag ) {

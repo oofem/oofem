@@ -1891,7 +1891,6 @@ void TR1_2D_SUPG2_AXI :: drawScalar(oofegGraphicContext &context)
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v1, v2, v3;
     double s [ 3 ];
-    IntArray map;
 
     if ( !context.testElementGraphicActivity(this) ) {
         return;
@@ -1944,11 +1943,7 @@ void TR1_2D_SUPG2_AXI :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-
-    if ( (!result) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-        return;
-    }
+    indx = context.giveIntVarIndx();
 
     s [ 0 ] = v1.at(indx);
     s [ 1 ] = v2.at(indx);

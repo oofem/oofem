@@ -407,7 +407,6 @@ public:
 
     virtual int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
 

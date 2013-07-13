@@ -2786,30 +2786,6 @@ HellmichMaterial :: giveIPValueType(InternalStateType type)
     }
 }
 
-int
-HellmichMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        answer.enumerate(6);
-        return 1;
-    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        answer.resize(3);
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-        answer.at(3) = 3;
-        return 1;
-    } else if ( type == IST_DamageTensor ) { // used for internal variables
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else if ( type == IST_HydrationDegree || type == IST_Temperature ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
 
 int
 HellmichMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)

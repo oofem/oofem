@@ -1962,32 +1962,6 @@ ConcreteDPM :: giveIPValueSize(InternalStateType type,
     }
 }
 
-int
-ConcreteDPM :: giveIntVarCompFullIndx(IntArray &answer,
-                                      InternalStateType type,
-                                      MaterialMode mmode)
-{
-    switch ( type ) {
-    case IST_DamageTensor:
-    case IST_DamageTensorTemp:
-    case IST_PlasticStrainTensor:
-        answer.enumerate(6);
-        return 1;
-
-    case IST_DamageScalar:
-    case IST_CumPlasticStrain:
-    case IST_CumPlasticStrain_2:
-    case IST_VolumetricPlasticStrain:
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-
-    default:
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-
-        break;
-    }
-}
 
 InternalStateValueType
 ConcreteDPM :: giveIPValueType(InternalStateType type)

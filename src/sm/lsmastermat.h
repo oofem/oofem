@@ -103,10 +103,7 @@ public:
     void constructTransformationMatrix(FloatMatrix &answer, const FloatMatrix &eigenVectors);
     void constructL1L2TransformationMatrices(FloatMatrix &answer1, FloatMatrix &answer2, const FloatMatrix &eigenVectors, FloatArray &stress, double E1, double E2, double E3);
 
-
-protected:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
 };

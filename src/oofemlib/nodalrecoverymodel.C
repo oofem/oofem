@@ -73,12 +73,12 @@ NodalRecoveryModel :: ~NodalRecoveryModel()
 int
 NodalRecoveryModel :: clear()
 {
-    int i, nnodes = this->nodalValList.giveSize();
+    int nnodes = this->nodalValList.giveSize();
     FloatArray *valArray;
 
     if ( nnodes ) {
         TDictionaryIterator< int, FloatArray > iterator( this->nodalValList.at(1) );
-        for ( i = 1; i <= nnodes; i++ ) {
+        for ( int i = 1; i <= nnodes; i++ ) {
             // this->nodalValList->at(i)->clear();
             iterator.initialize( this->nodalValList.at(i) );
             while ( ( valArray = iterator.next() ) ) {
@@ -138,7 +138,7 @@ int
 NodalRecoveryModel :: init()
 {
     /* Initializes receiver for given domain */
-    int i, nnodes = domain->giveNumberOfDofManagers();
+    int nnodes = domain->giveNumberOfDofManagers();
     vectorDictType *dict;
 
     // allocate array of nodal dictionaries, containing nodal values for each region
@@ -151,7 +151,7 @@ NodalRecoveryModel :: init()
     this->nodalValList.clear();
     this->nodalValList.growTo(nnodes);
 
-    for ( i = 1; i <= nnodes; i++ ) {
+    for ( int i = 1; i <= nnodes; i++ ) {
         if ( this->nodalValList.at(i) == NULL ) {
             // printf("d+");
             dict = new vectorDictType();
@@ -169,11 +169,11 @@ int
 NodalRecoveryModel :: updateRegionRecoveredValues(const int ireg, const IntArray &regionNodalNumbers,
                                                   int regionValSize, const FloatArray &rhs)
 {
-    int i, node, nnodes = domain->giveNumberOfDofManagers();
+    int nnodes = domain->giveNumberOfDofManagers();
     FloatArray *nodalVal;
 
     // update recovered values
-    for ( node = 1; node <= nnodes; node++ ) {
+    for ( int node = 1; node <= nnodes; node++ ) {
         // find nodes in region
         if ( regionNodalNumbers.at(node) ) {
             if ( this->includes(node, ireg) ) {
@@ -194,7 +194,7 @@ NodalRecoveryModel :: updateRegionRecoveredValues(const int ireg, const IntArray
                 this->nodalValList.at(node)->add(ireg, nodalVal);
             }
 
-            for ( i = 1; i <= regionValSize; i++ ) {
+            for ( int i = 1; i <= regionValSize; i++ ) {
                 nodalVal->at(i) = rhs.at( ( regionNodalNumbers.at(node) - 1 ) * regionValSize + i );
             }
         }
@@ -206,27 +206,24 @@ NodalRecoveryModel :: updateRegionRecoveredValues(const int ireg, const IntArray
 int
 NodalRecoveryModel :: initRegionNodeNumbering(IntArray &regionNodalNumbers, int &regionDofMans, int reg)
 {
-    int ielem, nelem = domain->giveNumberOfElements();
+    int nelem = domain->giveNumberOfElements();
     int nnodes = domain->giveNumberOfDofManagers();
-    int elemNodes;
-    int elementNode, node;
-    Element *element;
 
     regionNodalNumbers.resize(nnodes);
     regionNodalNumbers.zero();
     regionDofMans = 0;
 
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        element = domain->giveElement(ielem);
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+        Element *element = domain->giveElement(ielem);
         if ( this->giveElementVirtualRegionNumber(ielem) != reg ) {
             continue;
         }
 
-        elemNodes = element->giveNumberOfDofManagers();
+        int elemNodes = element->giveNumberOfDofManagers();
 
         // determine local region node numbering
-        for ( elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
-            node = element->giveDofManager(elementNode)->giveNumber();
+        for ( int elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
+            int node = element->giveDofManager(elementNode)->giveNumber();
             if ( regionNodalNumbers.at(node) == 0 ) { // assign new number
                 regionNodalNumbers.at(node) = ++regionDofMans;
             }
@@ -239,10 +236,9 @@ NodalRecoveryModel :: initRegionNodeNumbering(IntArray &regionNodalNumbers, int 
 int
 NodalRecoveryModel :: giveRegionRecordSize(int reg, InternalStateType type)
 {
-    int ielem, nelem = domain->giveNumberOfElements();
-    //Element* element;
+    int nelem = domain->giveNumberOfElements();
 
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         if ( this->giveElementVirtualRegionNumber(ielem) == reg ) {
             return domain->giveElement(ielem)->giveIPValueType(type);
         }
@@ -250,25 +246,6 @@ NodalRecoveryModel :: giveRegionRecordSize(int reg, InternalStateType type)
 
     OOFEM_WARNING2("NodalRecoveryModel::giveRegionRecordSize: bad region number (%d) or no element in given region\n", reg);
     return 0;
-}
-
-
-
-void
-NodalRecoveryModel :: giveRegionRecordMap(IntArray &answer, int reg, InternalStateType type)
-{
-    int ielem, nelem = domain->giveNumberOfElements();
-    //Element* element;
-
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        if ( ( reg < 0 ) || this->giveElementVirtualRegionNumber(ielem) == reg ) {
-            domain->giveElement(ielem)->giveIntVarCompFullIndx(answer, type);
-            return;
-        }
-    }
-
-    OOFEM_WARNING2("NodalRecoveryModel::giveRegionRecordMap: bad region number (%d) or no element in given region\n", reg);
-    answer.resize(0);
 }
 
 int

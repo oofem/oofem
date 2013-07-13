@@ -128,7 +128,7 @@ public:
 #endif
 protected:
     /// Gives the full form of given symmetrically stored tensors, missing components are filled with zeros.
-    void makeFullForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType type, const IntArray &redIndx);
+    void makeFullForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType type);
 
     /// Returns the internal smoother.
     NodalRecoveryModel *giveSmoother();

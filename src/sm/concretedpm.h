@@ -742,10 +742,6 @@ public:
     virtual int giveIPValueSize(InternalStateType type,
                                 GaussPoint *gp);
 
-    virtual int giveIntVarCompFullIndx(IntArray &answer,
-                                       InternalStateType type,
-                                       MaterialMode mmode);
-
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
 protected:

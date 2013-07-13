@@ -461,7 +461,7 @@ LargeStrainMasterMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussP
     if ( type == IST_StressTensor ) {
         answer = status->giveStressVector();
         return 1;
-    } else if ( type == IST_StrainTensor )       {
+    } else if ( type == IST_StrainTensor ) {
         answer = status->giveStrainVector();
         return 1;
     } else       {
@@ -479,6 +479,7 @@ LargeStrainMasterMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussP
     }
 }
 
+
 InternalStateValueType
 LargeStrainMasterMaterial :: giveIPValueType(InternalStateType type)
 {
@@ -495,23 +496,6 @@ LargeStrainMasterMaterial :: giveIPValueType(InternalStateType type)
     return result;
 }
 
-
-int
-LargeStrainMasterMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    Material *mat;
-    StructuralMaterial *sMat;
-    FloatMatrix stiffness;
-    mat = domain->giveMaterial(slaveMat);
-    sMat = dynamic_cast< StructuralMaterial * >(mat);
-    if ( sMat == NULL ) {
-        _warning2("checkConsistency: material %d has no Structural support", slaveMat);
-        return 1;
-    }
-
-    int result = sMat->giveIntVarCompFullIndx(answer, type, mmode);
-    return result;
-}
 
 int
 LargeStrainMasterMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)

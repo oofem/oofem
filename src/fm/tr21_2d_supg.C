@@ -1482,12 +1482,6 @@ TR21_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Interna
     return SUPGElement2 :: giveIPValue(answer, aGaussPoint, type, atTime);
 }
 
-int
-TR21_2D_SUPG :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
-{
-    return SUPGElement2 :: giveIntVarCompFullIndx(answer, type);
-}
-
 
 InternalStateValueType
 TR21_2D_SUPG :: giveIPValueType(InternalStateType type)
@@ -1672,7 +1666,6 @@ void TR21_2D_SUPG :: drawScalar(oofegGraphicContext &context)
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v1, v2, v3;
     double s [ 3 ];
-    IntArray map;
 
     if ( !context.testElementGraphicActivity(this) ) {
         return;
@@ -1706,11 +1699,7 @@ void TR21_2D_SUPG :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-
-    if ( (!result) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-        return;
-    }
+    indx = context.giveIntVarIndx();
 
     s [ 0 ] = v1.at(indx);
     s [ 1 ] = v2.at(indx);

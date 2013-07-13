@@ -242,21 +242,6 @@ TransportMaterial :: giveIPValueType(InternalStateType type)
 
 
 int
-TransportMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_Temperature || type == IST_MassConcentration_1 || type == IST_Humidity || type == IST_HydrationDegree || type == IST_Density || type == IST_ThermalConductivityIsotropic || type == IST_HeatCapacity || type == IST_AverageTemperature  || type == IST_YoungModulusVirginPaste || type == IST_PoissonRatioVirginPaste || type == IST_YoungModulusConcrete || type == IST_PoissonRatioConcrete ) {
-        answer.setValues(1, 1);
-        return 1;
-    } else if ( type == IST_TemperatureFlow || type == IST_MassConcentrationFlow_1 || type == IST_HumidityFlow || type == IST_Velocity || type == IST_PressureGradient ) {
-        answer.setValues(3, 1, 2, 3);
-        return 1;
-    } else {
-        return Material :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-
-int
 TransportMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
     if ( type == IST_Temperature || type == IST_MassConcentration_1 || type == IST_HydrationDegree || type == IST_Humidity || type == IST_Density || type == IST_MaterialNumber || type == IST_ElementNumber || type == IST_ThermalConductivityIsotropic || type == IST_HeatCapacity || type == IST_AverageTemperature || type == IST_YoungModulusVirginPaste || type == IST_PoissonRatioVirginPaste || type == IST_YoungModulusConcrete || type == IST_PoissonRatioConcrete ) {

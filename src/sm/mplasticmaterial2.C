@@ -1930,8 +1930,6 @@ MPlasticMaterial2 :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
 }
 
 
-
-
 InternalStateValueType
 MPlasticMaterial2 :: giveIPValueType(InternalStateType type)
 {
@@ -1942,21 +1940,6 @@ MPlasticMaterial2 :: giveIPValueType(InternalStateType type)
         return ISVT_VECTOR;
     } else {
         return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
-int
-MPlasticMaterial2 :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        StructuralMaterial :: giveInvertedVoigtVectorMask(answer, mmode);
-        return 1;
-    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        answer.enumerate(3);
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
     }
 }
 

@@ -91,7 +91,6 @@ public:
     // post-processing
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
     virtual double giveIsotropicConductivity(GaussPoint *gp);
     virtual double giveConcreteCapacity(GaussPoint *gp);

@@ -597,49 +597,10 @@ RankineMat :: giveIPValueType(InternalStateType type)
 
 
 int
-RankineMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_PlasticStrainTensor || type == IST_DamageTensor ) {
-        answer.enumerate(6);
-        return 1;
-    } else if ( type == IST_CumPlasticStrain ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else if ( type == IST_DamageScalar ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-
-#ifdef keep_track_of_dissipated_energy
-    } else if ( type == IST_DissWorkDensity || type == IST_StressWorkDensity || type == IST_FreeEnergyDensity ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-
-#endif
-    }
-
-    return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-}
-
-
-int
 RankineMat :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
     if ( type == IST_PlasticStrainTensor || type == IST_DamageTensor ) {
-        MaterialMode mode = gp->giveMaterialMode();
-        if ( mode == _3dMat ) {
-            return 6;
-        } else if ( mode == _PlaneStrain ) {
-            return 4;
-        } else if ( mode == _PlaneStress || mode == _PlaneStressGrad ) {
-            return 3;
-        } else if ( mode == _1dMat ) {
-            return 1;
-        } else {
-            return 0;
-        }
+        return 6;
     } else if ( type == IST_CumPlasticStrain ) {
         return 1;
     } else if ( type == IST_DamageScalar ) {

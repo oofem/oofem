@@ -193,13 +193,6 @@ CebFipSlip90Material :: giveIPValueType(InternalStateType type)
 
 
 int
-CebFipSlip90Material :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-}
-
-
-int
 CebFipSlip90Material :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
     return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);

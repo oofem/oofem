@@ -136,12 +136,6 @@ CohesiveInterfaceMaterial :: giveIPValueType(InternalStateType type)
 }
 
 int
-CohesiveInterfaceMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-}
-
-int
 CohesiveInterfaceMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
     return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);

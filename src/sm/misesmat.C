@@ -807,26 +807,6 @@ MisesMat :: giveIPValueType(InternalStateType type)
 
 
 int
-MisesMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        answer.enumerate(6);
-        return 1;
-    } else if ( type == IST_MaxEquivalentStrainLevel ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else if ( type == IST_DamageScalar || type == IST_DamageTensor ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    }
-
-    return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-}
-
-
-int
 MisesMat :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
     if ( type == IST_PlasticStrainTensor ) {

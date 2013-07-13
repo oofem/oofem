@@ -325,7 +325,6 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v [ 6 ];
     double s [ 6 ], ss [ 3 ], defScale;
-    IntArray map;
 
     if ( !context.testElementGraphicActivity(this) ) {
         return;
@@ -341,10 +340,7 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
             return;
         }
 
-        result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-        if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-            return;
-        }
+        indx = context.giveIntVarIndx();
 
         for ( i = 1; i <= 6; i++ ) {
             s [ i - 1 ] = v [ i - 1 ].at(indx);
@@ -489,10 +485,7 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
                 return;
             }
 
-            this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-            if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-                return;
-            }
+            indx = context.giveIntVarIndx();
 
             for ( i = 1; i <= 3; i++ ) {
                 s [ i - 1 ] = v [ 0 ].at(indx);

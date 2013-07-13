@@ -1946,31 +1946,6 @@ StructuralMaterial :: giveIPValueType(InternalStateType type)
 
 
 int
-StructuralMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_StressTensor || type == IST_StrainTensor ||
-         type == IST_StressTensorTemp || type == IST_StrainTensorTemp ||
-         type == IST_CylindricalStressTensor || type == IST_CylindricalStrainTensor ) {
-        answer.enumerate(6);
-        return 1;
-    } else if ( type == IST_PrincipalStressTensor || type == IST_PrincipalStrainTensor ||
-               type == IST_PrincipalStressTempTensor || type == IST_PrincipalStrainTempTensor ) {
-        answer.enumerate(3);
-        return 1;
-    } else if ( type == IST_Temperature ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else if ( type == IST_DeformationGradientTensor || type == IST_FirstPKStressTensor ) {
-        answer.enumerate(9);
-        return 1;
-    } else {
-        return Material :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-
-int
 StructuralMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
     if ( type == IST_StressTensor || type == IST_StrainTensor ||

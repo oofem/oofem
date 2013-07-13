@@ -1142,22 +1142,6 @@ Element :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStat
 }
 
 
-int
-Element :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
-{
-    if ( ( type == IST_ErrorIndicatorLevel ) || ( type == IST_RelMeshDensity ) ||
-        ( type == IST_InternalStressError ) || ( type == IST_PrimaryUnknownError ) ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else {
-        return this->giveCrossSection()->giveIntVarCompFullIndx( answer, type,
-                                                                this->giveDefaultIntegrationRulePtr()->
-                                                                getIntegrationPoint(0)->giveMaterialMode(), this->giveMaterial() );
-    }
-}
-
-
 InternalStateValueType
 Element :: giveIPValueType(InternalStateType type)
 {

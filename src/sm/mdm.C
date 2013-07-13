@@ -795,24 +795,6 @@ MDM :: giveIPValueType(InternalStateType type)
 
 
 int
-MDM :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_DamageTensor || type == IST_DamageTensorTemp ) {
-        answer.enumerate(6);
-        return 1;
-    } else if ( type == IST_PrincipalDamageTensor || type == IST_PrincipalDamageTempTensor ) {
-        answer.enumerate(6);
-        return 1;
-    } else if ( type == IST_MicroplaneDamageValues ) {
-        answer.enumerate(numberOfMicroplanes);
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-
-int
 MDM :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
     if ( type == IST_DamageTensor ) {

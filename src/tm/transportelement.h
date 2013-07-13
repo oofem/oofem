@@ -105,8 +105,6 @@ public:
                                                       FloatArray &coords, IntArray &dofId, ValueModeType mode,
                                                       TimeStep *atTime);
 
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
-
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                 int node, TimeStep *atTime);

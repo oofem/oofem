@@ -1103,18 +1103,6 @@ TR1_2D_CBS :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
     }
 }
 
-int
-TR1_2D_CBS :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
-{
-    if ( type == IST_VOFFraction ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else {
-        return CBSElement :: giveIntVarCompFullIndx(answer, type);
-    }
-}
-
 
 InternalStateValueType
 TR1_2D_CBS :: giveIPValueType(InternalStateType type)
@@ -1318,7 +1306,6 @@ void TR1_2D_CBS :: drawScalar(oofegGraphicContext &context)
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v1, v2, v3;
     double s [ 3 ];
-    IntArray map;
 
     if ( !context.testElementGraphicActivity(this) ) {
         return;
@@ -1340,11 +1327,7 @@ void TR1_2D_CBS :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-
-    if ( (!result) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-        return;
-    }
+    indx = context.giveIntVarIndx();
 
     s [ 0 ] = v1.at(indx);
     s [ 1 ] = v2.at(indx);

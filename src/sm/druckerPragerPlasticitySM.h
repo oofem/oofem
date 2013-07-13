@@ -346,12 +346,7 @@ public:
                     InternalStateType type,
                     TimeStep *atTime);
 
-    virtual int giveIPValueSize(InternalStateType type,
-                        GaussPoint *gp);
-
-    virtual int giveIntVarCompFullIndx(IntArray &answer,
-                               InternalStateType type,
-                               MaterialMode mmode);
+    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
 
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 

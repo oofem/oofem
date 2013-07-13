@@ -727,22 +727,6 @@ RerShell :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int si
 
 
 int
-RerShell :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
-{
-    if ( type == IST_ShellForceMomentumTensor ) {
-        answer.resize(12);
-        for ( int i = 1; i <= 12; i++ ) {
-            answer.at(i) = i;
-        }
-
-        return 1;
-    } else {
-        return CCTPlate :: giveIntVarCompFullIndx(answer, type);
-    }
-}
-
-
-int
 RerShell :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();

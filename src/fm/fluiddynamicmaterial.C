@@ -144,7 +144,7 @@ FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
             answer = vec;
             return 1;
         } else {
-            OOFEM_ERROR ("FluidDynamicMaterial :: giveIntVarCompFullIndx: material mode not supported");
+            OOFEM_ERROR ("FluidDynamicMaterial :: giveIPValue: material mode not supported");
             return 0;
         }
         return 1;
@@ -174,7 +174,7 @@ FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
             answer = vec;
             return 1;
         } else {
-            OOFEM_ERROR ("FluidDynamicMaterial :: giveIntVarCompFullIndx: material mode not supported");
+            OOFEM_ERROR ("FluidDynamicMaterial :: giveIPValue: material mode not supported");
             return 0;
         }
         return 1;
@@ -203,22 +203,6 @@ FluidDynamicMaterial :: giveIPValueType(InternalStateType type)
         return ISVT_SCALAR;
     } else {
         return Material :: giveIPValueType(type);
-    }
-}
-
-
-int
-FluidDynamicMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_DeviatoricStress || type == IST_DeviatoricStrain ) {
-        answer.enumerate(6);
-        return 1;
-    } else if ( type == IST_Viscosity || type == IST_Density ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else {
-        return Material :: giveIntVarCompFullIndx(answer, type, mmode);
     }
 }
 

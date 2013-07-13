@@ -328,25 +328,6 @@ IsoInterfaceDamageMaterial :: giveIPValueType(InternalStateType type)
 
 
 int
-IsoInterfaceDamageMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_DamageTensor || type == IST_DamageTensorTemp ) {
-        answer.enumerate(6);
-        return 1;
-    } else if ( type == IST_PrincipalDamageTensor || type == IST_PrincipalDamageTempTensor ) {
-        answer.enumerate(3);
-        return 1;
-    } else if ( type == IST_MaxEquivalentStrainLevel ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-
-int
 IsoInterfaceDamageMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
     if ( ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ||

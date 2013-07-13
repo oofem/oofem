@@ -320,22 +320,6 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
 }
 
 
-int
-CCTPlate3d :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
-{
-    if ( ( type == IST_ShellForceMomentumTensor ) || ( type == IST_ShellStrainCurvatureTensor ) ) {
-        answer.resize(12);
-        for ( int i = 1; i <= 12; i++ ) {
-            answer.at(i) = i;
-        }
-
-        return 1;
-    } else {
-        return CCTPlate :: giveIntVarCompFullIndx(answer, type);
-    }
-}
-
-
 void
 CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
 // Computes numerically the load vector of the receiver due to the body loads, at stepN.

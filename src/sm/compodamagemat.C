@@ -388,16 +388,6 @@ int CompoDamageMat :: giveIPValueSize(InternalStateType type, GaussPoint *aGauss
     }
 }
 
-int CompoDamageMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_DamageTensor ) {
-        answer.enumerate(6);
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
 
 void CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp)
 {

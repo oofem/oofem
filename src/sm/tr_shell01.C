@@ -254,19 +254,6 @@ TR_SHELL01 :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 }
 
 
-int
-TR_SHELL01 :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
-{
-    if ( ( type == IST_ShellForceMomentumTensor || type == IST_ShellStrainCurvatureTensor ) ) {
-        answer.resize(12);
-        for (int i=1; i<=12; i++) answer.at(i) = i;
-        return 1;
-    } else {
-        return StructuralElement::giveIntVarCompFullIndx(answer, type);
-    }
-}
-
-
 //
 // The element interface required by ZZNodalRecoveryModel
 //
@@ -587,7 +574,6 @@ TR_SHELL01  :: drawScalar(oofegGraphicContext &context)
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v1, v2, v3;
     double s [ 3 ], defScale;
-    IntArray map;
     if ( !context.testElementGraphicActivity(this) ) {
         return;
     }
@@ -614,11 +600,7 @@ TR_SHELL01  :: drawScalar(oofegGraphicContext &context)
         v3 =v;
     }
 
-    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-    
-    if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-        return;
-    }
+    indx = context.giveIntVarIndx();
 
     s [ 0 ] = v1.at(indx);
     s [ 1 ] = v2.at(indx);

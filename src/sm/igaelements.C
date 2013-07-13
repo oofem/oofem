@@ -137,7 +137,6 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
     GraphicObj *go;
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     double s [ 4 ];
-    IntArray map;
     FEInterpolation *interp = this->giveInterpolation();
     FloatArray val;
 
@@ -173,12 +172,9 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
         OOFEM_ERROR2("drawRawGeometry: not implemented for nsd = %d", nsd);
     }
 
-    this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-    if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-        return;
-    }
+    indx = context.giveIntVarIndx();
 
-    StructuralElementEvaluator::computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    StructuralElementEvaluator :: computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     // loop over individual integration rules (i.e., knot spans)
     for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
@@ -258,7 +254,6 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context)
     GraphicObj *go;
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     double s [ 4 ];
-    IntArray map;
     FEInterpolation *interp = this->giveInterpolation();
     FloatArray val, u;
 
@@ -295,10 +290,7 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context)
         OOFEM_ERROR2("drawRawGeometry: not implemented for nsd = %d", nsd);
     }
 
-    this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-    if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-        return;
-    }
+    indx = context.giveIntVarIndx();
 
     StructuralElementEvaluator::computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
@@ -457,7 +449,6 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
     GraphicObj *go;
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     double s [ 4 ];
-    IntArray map;
     FEInterpolation *interp = this->giveInterpolation();
     FloatArray val;
 
@@ -494,10 +485,7 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
         OOFEM_ERROR2("drawRawGeometry: not implemented for nsd = %d", nsd);
     }
 
-    this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-    if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-        return;
-    }
+    indx = context.giveIntVarIndx();
 
     StructuralElementEvaluator::computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
@@ -579,7 +567,6 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context)
     GraphicObj *go;
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     double s [ 8 ];
-    IntArray map;
     FEInterpolation *interp = this->giveInterpolation();
     FloatArray val, u;
     //int huhu = 0;
@@ -634,23 +621,20 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context)
         OOFEM_ERROR2("drawRawGeometry: not implemented for nsd = %d", nsd);
     }
 
-    this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-    if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-        return;
-    }
+    indx = context.giveIntVarIndx();
 
 #ifdef SPHERICAL_CS
-    if(context.giveIntVarType() == IST_StrainTensor){
+    if ( context.giveIntVarType() == IST_StrainTensor ) {
         huhu = 1;
     }
 #endif
 #ifdef MISSES_STRESS
-    if(context.giveIntVarType() == IST_ErrorIndicatorLevel){
+    if ( context.giveIntVarType() == IST_ErrorIndicatorLevel ) {
         huhu = 2;
     }
 #endif
 
-    StructuralElementEvaluator::computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    StructuralElementEvaluator :: computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     //double maxs=-1.0e10, mins=1.0e10;
 

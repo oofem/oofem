@@ -527,7 +527,6 @@ void CohesiveSurface3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownT
 void
 CohesiveSurface3d :: drawScalar(oofegGraphicContext &context)
 {
-    int result;
     if ( !context.testElementGraphicActivity(this) ) {
         return;
     }
@@ -539,16 +538,10 @@ CohesiveSurface3d :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    IntArray map;
-    int indx;
-    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-    if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-        return;
-    }
+    int indx = context.giveIntVarIndx();
 
     double s [ 8 ];
-    int i;
-    for ( i = 0; i < 8; i++ ) {
+    for ( int i = 0; i < 8; i++ ) {
         s [ i ] = val.at(indx);
     }
 
@@ -600,7 +593,7 @@ CohesiveSurface3d :: drawScalar(oofegGraphicContext &context)
     p [ 3 ].y = p [ 1 ].y + d *lcs.at(2, 2);
     p [ 3 ].z = p [ 1 ].z + d *lcs.at(2, 3);
 
-    for ( i = 5; i < 8; i += 2 ) {
+    for ( int i = 5; i < 8; i += 2 ) {
         p [ i ].x = p [ i - 4 ].x + d *lcs.at(3, 1);
         p [ i ].y = p [ i - 4 ].y + d *lcs.at(3, 2);
         p [ i ].z = p [ i - 4 ].z + d *lcs.at(3, 3);

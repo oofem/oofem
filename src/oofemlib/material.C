@@ -132,13 +132,6 @@ Material :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
     return 0;
 }
 
-int
-Material :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    answer.resize(0);
-    return 0;
-}
-
 
 void
 Material :: printYourself()

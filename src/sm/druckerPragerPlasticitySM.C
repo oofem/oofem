@@ -841,26 +841,6 @@ DruckerPragerPlasticitySM :: giveIPValueSize(InternalStateType type,
     }
 }
 
-int
-DruckerPragerPlasticitySM :: giveIntVarCompFullIndx(IntArray &answer,
-                                                    InternalStateType type,
-                                                    MaterialMode mmode)
-{
-    switch ( type ) {
-    case IST_PlasticStrainTensor:
-        answer.enumerate(6);
-        return 1;
-
-    case IST_DamageTensor:
-        answer.enumerate(6);
-        return 1;
-
-    default:
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-
-    }
-}
-
 InternalStateValueType
 DruckerPragerPlasticitySM :: giveIPValueType(InternalStateType type)
 {

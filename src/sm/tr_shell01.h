@@ -82,7 +82,6 @@ public:
     virtual int computeNumberOfDofs(EquationID ut) { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
     { plate->giveDofManDofIDMask(inode, ut, answer); }
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_TR_SHELL01_Name; }
     virtual const char *giveClassName() const { return "TR_SHELL01"; }

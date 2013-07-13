@@ -261,25 +261,6 @@ FiberedCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
 
 
 int
-FiberedCrossSection :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode, Material *mat)
-{
-    if ( mmode == _3dBeam ) {
-        if ( type == IST_BeamForceMomentumTensor ) {
-            answer.resize(6);
-            answer.zero();
-            for ( int i = 1; i <= 6; i++ ) {
-                answer.at(i) = i;
-            }
-
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
-
-int
 FiberedCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( aGaussPoint->giveMaterial()->giveStatus(aGaussPoint) );

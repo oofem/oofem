@@ -716,21 +716,6 @@ LatticeDamage2d :: giveIPValueSize(InternalStateType type,
     }
 }
 
-int
-LatticeDamage2d :: giveIntVarCompFullIndx(IntArray &answer,
-                                          InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_CrackStatuses || type == IST_DamageScalar || type == IST_DissWork || type == IST_DeltaDissWork ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else if ( type == IST_DamageTensor ) {
-        answer.enumerate(6);
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
 
 InternalStateValueType
 LatticeDamage2d :: giveIPValueType(InternalStateType type)
@@ -743,6 +728,10 @@ LatticeDamage2d :: giveIPValueType(InternalStateType type)
         return StructuralMaterial :: giveIPValueType(type);
     }
 }
+
+
+
+
 
 LatticeDamage2dStatus :: LatticeDamage2dStatus(int n, Domain *d, GaussPoint *g) :
     LatticeMaterialStatus(n, d, g), RandomMaterialStatusExtensionInterface(), reducedStrain(3), tempReducedStrain(3)

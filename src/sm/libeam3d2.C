@@ -762,10 +762,8 @@ LIBeam3d2 :: drawScalar(oofegGraphicContext &context)
     WCRec p [ 2 ];
     GraphicObj *go;
     FloatArray v;
-    IntArray map;
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     double defScale;
-    int result, indx;
 
     if ( !context.testElementGraphicActivity(this) ) {
         return;
@@ -794,11 +792,6 @@ LIBeam3d2 :: drawScalar(oofegGraphicContext &context)
     double s;
     gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     if ( giveIPValue(v, gp, context.giveIntVarType(), tStep) == 0 ) {
-        return;
-    }
-
-    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-    if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
         return;
     }
 
