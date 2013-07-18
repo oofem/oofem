@@ -365,7 +365,7 @@ MPSMaterial :: computeCharTimes()
 
 
 void
-MPSMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp, double atTime)
+MPSMaterial :: computeCharCoefficients(FloatArray &answer, double atTime)
 {
     int mu;
     double tau0, tauMu;
@@ -406,14 +406,9 @@ MPSMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
     double sum = 0.0;
     double v;
 
-    double Cf=0.0; // incremental viscous flow compliance
+    double Cf = 0.0; // incremental viscous flow compliance
     double eta, dt;
     double dEtaR, etaR, L;
-
-
-    if ( EparVal.giveSize() == 0 ) {
-        this->updateEparModuli(gp, 0.); // stiffnesses are time independent (evaluated at time t = 0.)
-    }
 
     // contribution of the solidifying Kelving chain
     sum = KelvinChainSolidMaterial :: giveEModulus(gp, atTime);
@@ -748,7 +743,7 @@ MPSMaterial :: giveHumidity(GaussPoint *gp, TimeStep *atTime, int option)
     if ( ( status->giveHum() == -1. ) && ( status->giveHumIncrement() == -1. ) ) {
         FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
 
-	FM_FieldPtr tf;
+        FM_FieldPtr tf;
         int err, wflag = 0;
         FloatArray gcoords;
         FloatArray et2, ei2; // total and incremental values of water mass
@@ -777,8 +772,8 @@ MPSMaterial :: giveHumidity(GaussPoint *gp, TimeStep *atTime, int option)
         status->setHum(H_tot);
         status->setHumIncrement(H_inc);
     } else {
-        H_tot =  status->giveHum();
-        H_inc =  status->giveHumIncrement();
+        H_tot = status->giveHum();
+        H_inc = status->giveHumIncrement();
     }
 
     switch ( option ) {
@@ -805,7 +800,7 @@ MPSMaterial :: giveTemperature(GaussPoint *gp, TimeStep *atTime, int option)
     if ( ( status->giveT() == -1. ) && ( status->giveTIncrement() == -1. ) ) {
         FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
 
-	FM_FieldPtr tf;
+        FM_FieldPtr tf;
         int err, tflag = 0;
         FloatArray gcoords;
         FloatArray et1, ei1; // total and incremental values of temperature
@@ -904,7 +899,7 @@ MPSMaterial :: computeEquivalentTime(GaussPoint *gp, TimeStep *atTime, int optio
         if ( option == 0 ) { // gives time in the middle of the timestep
             return relMatAge - atTime->giveTimeIncrement() + PsiE * ( 0.5 * atTime->giveTimeIncrement() );
         } else if ( option == 1 ) { // gives time in the middle of the timestep - for UPDATING
-            return relMatAge - atTime->giveTimeIncrement() + PsiE *atTime->giveTimeIncrement();
+            return relMatAge - atTime->giveTimeIncrement() + PsiE * atTime->giveTimeIncrement();
         } else {
             _error("computeEquivalentTime - mode is not supported")
         }
@@ -915,7 +910,7 @@ MPSMaterial :: computeEquivalentTime(GaussPoint *gp, TimeStep *atTime, int optio
         if ( option == 0 ) { // gives time in the middle of the timestep
             tEquiv = tEquiv + PsiE *  0.5 * atTime->giveTimeIncrement();
         } else if ( option == 1 ) { // gives time in the middle of the timestep - for UPDATING
-            tEquiv = tEquiv + PsiE *atTime->giveTimeIncrement();
+            tEquiv = tEquiv + PsiE * atTime->giveTimeIncrement();
         } else {
             _error("computeEquivalentTime - mode is not supported")
         }

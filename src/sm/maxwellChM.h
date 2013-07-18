@@ -94,7 +94,6 @@ public:
 
 protected:
     virtual int hasIncrementalShrinkageFormulation() { return 0; }
-    virtual double computeCreepFunction(GaussPoint *gp, double ofAge, double atTime) = 0;
     /**
      * This function computes the moduli of individual Maxwell units
      * such that the corresponding Dirichlet series gives the best
@@ -110,7 +109,7 @@ protected:
      * @param gp Integration point.
      * @param atTime Age of material when load is applied ???
      */
-    virtual void computeCharCoefficients(FloatArray &answer, GaussPoint *gp, double atTime);
+    virtual void computeCharCoefficients(FloatArray &answer, double atTime);
 
     virtual double giveEModulus(GaussPoint *gp, TimeStep *atTime);
     LinearElasticMaterial *giveLinearElasticMaterial();

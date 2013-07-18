@@ -52,7 +52,7 @@ CebFip78Material :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, E28, _IFT_CebFip78Material_e28);
     IR_GIVE_FIELD(ir, fibf, _IFT_CebFip78Material_fibf);
-    IR_GIVE_FIELD(ir, kap_a, _IFT_CebFip78Material_kap_a);
+    IR_GIVE_FIELD(ir, kap_a_per_area, _IFT_CebFip78Material_kap_a_per_area);
     IR_GIVE_FIELD(ir, kap_c, _IFT_CebFip78Material_kap_c);
     IR_GIVE_FIELD(ir, kap_tt, _IFT_CebFip78Material_kap_tt);
     IR_GIVE_FIELD(ir, u, _IFT_CebFip78Material_u);
@@ -63,16 +63,14 @@ CebFip78Material :: initializeFrom(InputRecord *ir)
 
 
 double
-CebFip78Material :: computeCreepFunction(GaussPoint *gp, double atTime, double ofAge)
+CebFip78Material :: computeCreepFunction(double atTime, double ofAge)
 {
     // computes the value of creep function at time ofAge
     // when load is acting from atTime
-    // WARNING: Area returned by crossSection is assumed to be in [m^2].
 
     double e0;
     double fi, fi0, firv, fiir, hd, alpha, beta;
     double t, t0;
-    CrossSection *cs = gp->giveCrossSection();
 
     t0 = this->kap_tt * this->kap_c * ofAge;
     t  = this->kap_tt * this->kap_c * atTime;
@@ -89,7 +87,7 @@ CebFip78Material :: computeCreepFunction(GaussPoint *gp, double atTime, double o
         firv = 0.4;
     }
 
-    hd = this->kap_a * cs->give(CS_Area) * 1000. * 1000. / this->u;
+    hd = this->kap_a_per_area * 1000. * 1000. / this->u;
     if ( hd < 50. ) {
         hd = 50.;
     }

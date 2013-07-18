@@ -121,9 +121,9 @@ CBS :: initializeFrom(InputRecord *ir)
         mask.setValues(3, V_u, V_v, V_w);
 
 #ifdef FIELDMANAGER_USE_SHARED_PTR
-	//std::tr1::shared_ptr<Field> _velocityField = make_shared<MaskedPrimaryField>(FT_Velocity, &this->VelocityField, mask);
-	std::tr1::shared_ptr<Field> _velocityField (new MaskedPrimaryField(FT_Velocity, &this->VelocityField, mask));
-	fm->registerField( _velocityField, FT_Velocity);
+        //std::tr1::shared_ptr<Field> _velocityField = make_shared<MaskedPrimaryField>(FT_Velocity, &this->VelocityField, mask);
+        std::tr1::shared_ptr<Field> _velocityField (new MaskedPrimaryField(FT_Velocity, &this->VelocityField, mask));
+        fm->registerField( _velocityField, FT_Velocity);
 #else
         MaskedPrimaryField* _velocityField = new MaskedPrimaryField (FT_Velocity, &this->VelocityField, mask);
         fm->registerField( _velocityField, FT_Velocity, true);

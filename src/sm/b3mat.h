@@ -124,7 +124,7 @@ protected:
     /// Free shrinkage at material point, requires staggered analysis.
     virtual void computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
     void predictParametersFrom(double, double, double, double, double, double, double);
-    virtual double computeCreepFunction(GaussPoint *gp, double atTime, double ofAge);
+    virtual double computeCreepFunction(double atTime, double ofAge);
 
     /**
      * Function calculates relative humidity from water content (inverse relation form sorption isotherm).

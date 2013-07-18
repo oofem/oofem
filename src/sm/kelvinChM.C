@@ -46,8 +46,7 @@ KelvinChainMaterial :: KelvinChainMaterial(int n, Domain *d) : RheoChainMaterial
 {}
 
 void
-KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp,
-                                               double atTime)
+KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, double atTime)
 {
     /*
      * This function computes the moduli of individual Kelvin units
@@ -60,8 +59,8 @@ KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *g
      * atTime = age of material when load is applied
      */
 
-    int i, j, r, rSize;
-    double taui, tauj, sum, tti, ttj, sumRhs;
+    int rSize;
+    double taui, tauj, tti, ttj;
     FloatArray rhs(this->nUnits);
     FloatMatrix A(this->nUnits, this->nUnits);
 
@@ -72,18 +71,19 @@ KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *g
     // compute values of the compliance function at specified times rTimes
     // (can be done directly, since the compliance function is available)
 
-    for ( i = 1; i <= rSize; i++ ) {
-        discreteComplianceFunctionVal.at(i) = this->computeCreepFunction(gp, atTime + rTimes.at(i), atTime);
+    for ( int i = 1; i <= rSize; i++ ) {
+        discreteComplianceFunctionVal.at(i) = this->computeCreepFunction(atTime + rTimes.at(i), atTime);
     }
 
     // assemble the matrix of the set of linear equations
     // for computing the optimal compliances
     // !!! chartime exponents are assumed to be equal to 1 !!!
-    for ( i = 1; i <= this->nUnits; i++ ) {
+    for ( int i = 1; i <= this->nUnits; i++ ) {
         taui = this->giveCharTime(i);
-        for ( j = 1; j <= this->nUnits; j++ ) {
+        for ( int j = 1; j <= this->nUnits; j++ ) {
             tauj = this->giveCharTime(j);
-            for ( sum = 0., r = 1; r <= rSize; r++ ) {
+            double sum = 0.;
+            for ( int  r = 1; r <= rSize; r++ ) {
                 tti = rTimes.at(r) / taui;
                 ttj = rTimes.at(r) / tauj;
                 sum += ( 1. - exp(-tti) ) * ( 1. - exp(-ttj) );
@@ -94,7 +94,8 @@ KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *g
 
         // assemble rhs
         // !!! chartime exponents are assumed to be equal to 1 !!!
-        for ( sumRhs = 0., r = 1; r <= rSize; r++ ) {
+        double sumRhs = 0.;
+        for ( int r = 1; r <= rSize; r++ ) {
             tti = rTimes.at(r) / taui;
             sumRhs += ( 1. - exp(-tti) ) * discreteComplianceFunctionVal.at(r);
         }
@@ -106,7 +107,7 @@ KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *g
     A.solveForRhs(rhs, answer);
 
     // convert compliances into moduli
-    for ( i = 1; i <= this->nUnits; i++ ) {
+    for ( int i = 1; i <= this->nUnits; i++ ) {
         answer.at(i) = 1. / answer.at(i);
     }
 }
@@ -122,18 +123,16 @@ KelvinChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
      * Note: time -1 refers to the previous time.
      */
 
-    int mu;
     double deltaT, tauMu, lambdaMu, Dmu;
     double sum = 0.0; // return value
 
-    if ( EparVal.giveSize() == 0 ) {
-        this->updateEparModuli(gp, relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor);
-    }
+    ///@warning THREAD UNSAFE!
+    this->updateEparModuli(relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor);
 
     deltaT = atTime->giveTimeIncrement() / timeFactor;
 
     // EparVal values were determined using the least-square method
-    for ( mu = 1; mu <= nUnits; mu++ ) {
+    for ( int mu = 1; mu <= nUnits; mu++ ) {
         tauMu = this->giveCharTime(mu);
         if ( deltaT / tauMu < 1.e-5 ) {
             lambdaMu = 1 - 0.5 * ( deltaT / tauMu ) + 1 / 6 * ( pow(deltaT / tauMu, 2) ) - 1 / 24 * ( pow(deltaT / tauMu, 3) );
@@ -157,7 +156,6 @@ KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp,
 // (in fact, the INCREMENT of creep strain is computed for mode == VM_Incremental)
 //
 {
-    int mu;
     double beta;
     FloatArray *gamma, reducedAnswer, help;
     KelvinChainMaterialStatus *status = static_cast< KelvinChainMaterialStatus * >( this->giveStatus(gp) );
@@ -165,14 +163,14 @@ KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp,
     // !!! chartime exponents are assumed to be equal to 1 !!!
 
     if ( mode == VM_Incremental ) {
-        for ( mu = 1; mu <= nUnits; mu++ ) {
+        for ( int mu = 1; mu <= nUnits; mu++ ) {
             if ( ( atTime->giveTimeIncrement() / timeFactor ) / this->giveCharTime(mu) > 30 ) {
                 beta = 0;
             } else {
                 beta = exp( -( atTime->giveTimeIncrement() / timeFactor ) / ( this->giveCharTime(mu) ) );
             }
 
-            gamma =  status->giveHiddenVarsVector(mu);
+            gamma = status->giveHiddenVarsVector(mu);
             if ( gamma ) {
                 help.zero();
                 help.add(* gamma);
@@ -181,7 +179,7 @@ KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp,
             }
         }
 
-        answer =  reducedAnswer;
+        answer = reducedAnswer;
     } else {
         /* error - total mode not implemented yet */
         _error("giveEigenStrainVector - mode is not supported");
@@ -202,25 +200,24 @@ KelvinChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
     double deltaT;
     double tauMu;
 
-    FloatArray help, *muthHiddenVarsVector, deltaEps0, help1;
+    FloatArray help, *muthHiddenVarsVector, deltaEps0, delta_sigma;
     KelvinChainMaterialStatus *status = static_cast< KelvinChainMaterialStatus * >( this->giveStatus(gp) );
 
-    help = status->giveTempStrainVector(); // gives updated strain vector (at the end of time-step)
-    help.subtract( status->giveStrainVector() ); // strain increment in current time-step
+    delta_sigma = status->giveTempStrainVector(); // gives updated strain vector (at the end of time-step)
+    delta_sigma.subtract( status->giveStrainVector() ); // strain increment in current time-step
 
     // Subtract the stress-independent part of strain
     this->computeStressIndependentStrainVector(deltaEps0, gp, tNow, VM_Incremental);
     if ( deltaEps0.giveSize() ) {
-        help.subtract(deltaEps0); // should be equal to zero if there is no stress change during the time-step
+        delta_sigma.subtract(deltaEps0); // should be equal to zero if there is no stress change during the time-step
     }
 
-    help.times( this->giveEModulus(gp, tNow) ); // = delta_sigma
-    help1 = help;
+    delta_sigma.times( this->giveEModulus(gp, tNow) ); // = delta_sigma
 
     deltaT = tNow->giveTimeIncrement() / timeFactor;
 
     for ( int mu = 1; mu <= nUnits; mu++ ) {
-        help = help1;
+        help = delta_sigma;
         tauMu = ( this->giveCharTime(mu) );
 
         muthHiddenVarsVector = status->giveHiddenVarsVector(mu); //gamma_mu

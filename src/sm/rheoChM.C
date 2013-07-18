@@ -151,7 +151,6 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer,
 
 void
 RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
-                                                       GaussPoint *gp,
                                                        const FloatArray &atTimes,
                                                        double t0, double tr)
 {
@@ -166,7 +165,7 @@ RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
     answer.resize(size);
     answer.zero();
 
-    Jtrt0 = this->computeCreepFunction(gp, t0 + atTimes.at(1), t0);
+    Jtrt0 = this->computeCreepFunction(t0 + atTimes.at(1), t0);
     sig0  = 1. / Jtrt0;
     answer.at(1) = sig0;
     si = 2;
@@ -183,7 +182,7 @@ RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
                 taui = t0 + 0.5 * ( atTimes.at(i) + atTimes.at(i - 1) );
             }
 
-            sum += deltaSigma.at(i) * this->computeCreepFunction(gp, t0 + atTimes.at(k), taui);
+            sum += deltaSigma.at(i) * this->computeCreepFunction(t0 + atTimes.at(k), taui);
         }
 
         if ( k == 1 ) {
@@ -194,8 +193,8 @@ RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
             tauk = t0 + 0.5 * ( atTimes.at(k) + atTimes.at(k - 1) );
         }
 
-        deltaSigma.at(k) = ( sig0 * ( this->computeCreepFunction(gp, t0 + atTimes.at(k), t0) - Jtrt0 )
-                             - sum ) / this->computeCreepFunction(gp, t0 + atTimes.at(k), tauk);
+        deltaSigma.at(k) = ( sig0 * ( this->computeCreepFunction(t0 + atTimes.at(k), t0) - Jtrt0 )
+                             - sum ) / this->computeCreepFunction(t0 + atTimes.at(k), tauk);
 
         totalDeltaSigma += deltaSigma.at(k);
         answer.at(k) = sig0 - totalDeltaSigma;
@@ -219,20 +218,6 @@ RheoChainMaterial :: generateLogTimeScale(FloatArray &answer, double from, doubl
 const FloatArray &
 RheoChainMaterial :: giveDiscreteTimes()
 {
-    /*
-     * Function returns generated relative time scale (uniformly distributed
-     * in log time scale).
-     * Because of multiple use of these data, once generated, they are
-     * stored
-     */
-    if ( discreteTimeScale.isNotEmpty() ) {
-        return discreteTimeScale;
-    }
-
-    double endTime;
-    endTime = this->giveEndOfTimeOfInterest();
-
-    this->generateLogTimeScale(discreteTimeScale, this->begOfTimeOfInterest, endTime, MNC_NPOINTS - 1);
     return discreteTimeScale;
 }
 
@@ -287,7 +272,7 @@ RheoChainMaterial :: giveEparModulus(int iChain)
 
 
 void
-RheoChainMaterial :: updateEparModuli(GaussPoint *gp, double atTime)
+RheoChainMaterial :: updateEparModuli(double atTime)
 {
     /*
      * Computes moduli of individual units in the chain that provide
@@ -308,9 +293,9 @@ RheoChainMaterial :: updateEparModuli(GaussPoint *gp, double atTime)
     // compute new values and store them in a temporary array for further use
     if ( fabs(atTime - EparValTime) > TIME_DIFF ) {
         if ( atTime < 0 ) {
-            this->computeCharCoefficients(EparVal, gp, 1.e-3);
+            this->computeCharCoefficients(EparVal, 1.e-3);
         } else {
-            this->computeCharCoefficients(EparVal, gp, atTime);
+            this->computeCharCoefficients(EparVal, atTime);
         }
         EparValTime = atTime;
     }
@@ -361,18 +346,8 @@ RheoChainMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
 
 double
-RheoChainMaterial :: giveCharTime(int i)
+RheoChainMaterial :: giveCharTime(int i) const
 {
-    /* returns the characteristic time for the i-th unit */
-
-    if ( !charTimes.isNotEmpty() ) {
-        this->computeCharTimes();
-    }
-
-    if ( ( i <= 0 ) || ( i > nUnits ) ) {
-        _error("giveCharTime - no such unit defined");
-    }
-
     return charTimes.at(i);
 }
 
@@ -394,7 +369,6 @@ RheoChainMaterial :: computeCharTimes()
      *
      *
      */
-# define a 10.
 
     int size, nsteps;
     double endTime, Taun1, Tau1, help;
@@ -412,7 +386,7 @@ RheoChainMaterial :: computeCharTimes()
         _error("begOfTimeOfInterest must be a positive number");
     }
 
-    nsteps = ( int ) ( ( log(Taun1) - log(Tau1) ) / log(a) + 1. );
+    nsteps = ( int ) ( ( log(Taun1) - log(Tau1) ) / log(10.) + 1. );
     if ( nsteps < 8 ) {
         nsteps = 8;
     }
@@ -514,8 +488,14 @@ RheoChainMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, _IFT_RheoChainMaterial_endoftimeofinterest);
     IR_GIVE_FIELD(ir, timeFactor, _IFT_RheoChainMaterial_timefactor); // solution time/timeFactor should give time in days
 
-    this->computeCharTimes(); // sets up nUnits variable
-    this->giveDiscreteTimes(); // sets up discrete times
+    // sets up nUnits variable
+    this->computeCharTimes();
+    // sets up discrete times
+    double endTime = this->giveEndOfTimeOfInterest();
+    this->generateLogTimeScale(discreteTimeScale, this->begOfTimeOfInterest, endTime, MNC_NPOINTS - 1);
+    ///@warning Stiffness is time dependant, so the variable changes with time.
+    this->updateEparModuli(0.); // stiffnesses are time independent (evaluated at time t = 0.)
+
     return IRRT_OK;
 }
 
@@ -596,12 +576,10 @@ RheoChainMaterialStatus :: RheoChainMaterialStatus(int n, Domain *d,
                                                    GaussPoint *g, int nunits) :
     StructuralMaterialStatus(n, d, g), shrinkageStrain() {
     // constructor
-    int i;
-
     nUnits = nunits;
 
     hiddenVars = new FloatArray * [ nUnits ];
-    for ( i = 0; i < nUnits; i++ ) {
+    for ( int i = 0; i < nUnits; i++ ) {
         hiddenVars [ i ] = NULL;
     }
 }
