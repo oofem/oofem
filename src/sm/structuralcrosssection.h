@@ -86,7 +86,6 @@ public:
      * performs necessary integration over its volume and invokes necessary material
      * services for corresponding material model defined for given integration point.
      * @param answer Contains result.
-     * @param form Material response form.
      * @param gp Integration point.
      * @param reducedStrainIncrement Strain increment vector in reduced form.
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
@@ -170,6 +169,40 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+
+    /**
+     * Computes the stiffness matrix for 2d beams.
+     * @param answer The requested matrix.
+     * @param rMode Material response mode.
+     * @param gp Integration point.
+     * @param tStep Time step.
+     */
+    virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) = 0;
+    /**
+     * Computes the stiffness matrix for 2d beams.
+     * @param answer The requested matrix.
+     * @param rMode Material response mode.
+     * @param gp Integration point.
+     * @param tStep Time step.
+     */
+    virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) = 0;
+
+    /**
+     * Method for computing 2d plate stiffness matrix of receiver using generic givePlaneStressStiffMtrx.
+     * @param answer Stiffness matrix.
+     * @param mode Material response mode.
+     * @param gp Integration point, which load history is used.
+     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     */
+    virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+    /**
+     * Method for computing 3d shell stiffness matrix of receiver using generic givePlaneStressStiffMtrx.
+     * @param answer Stiffness matrix.
+     * @param mode Material response mode.
+     * @param gp Integration point, which load history is used.
+     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     */
+    virtual void give3dShellStiffMtrx(FloatMatrix &answer,MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
 
     /**
      * Computes reduced strain vector not dependent on stresses in given integration point.

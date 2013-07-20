@@ -118,15 +118,15 @@ public:
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
 
+    virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dShellStiffMtrx(FloatMatrix &answer,MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *);
 
-    void giveLayerMaterialStiffnessMatrix(FloatMatrix &layerMatrix,
-                                          MatResponseMode rMode, GaussPoint *layerGp,
-                                          TimeStep *tStep);
-
-    virtual void computeStressIndependentStrainVector(FloatArray &answer,
-                                                      GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    virtual void computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     virtual double give(CrossSectionProperty a);
     int giveNumberOfLayers();
@@ -191,18 +191,6 @@ public:
 #endif
 
 protected:
-    void give2dPlateMaterialStiffnessMatrix(FloatMatrix &answer,
-                                            MatResponseMode mode,
-                                            GaussPoint *gp,
-                                            TimeStep *tStep);
-    void give3dShellMaterialStiffness(FloatMatrix &answer,
-                                      MatResponseMode mode,
-                                      GaussPoint *gp,
-                                      TimeStep *tStep);
-    void give2dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
 
     void giveIntegrated3dShellStress(FloatArray &answer, GaussPoint *gp);
 

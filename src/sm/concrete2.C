@@ -167,9 +167,9 @@ Concrete2 :: give(int aProperty, GaussPoint *gp)
 
 
 void
-Concrete2 ::  giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                   const FloatArray &strain,
-                                   TimeStep *atTime)
+Concrete2 :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                                  const FloatArray &strain,
+                                  TimeStep *atTime)
 //
 // returns stress vector (in full or reduced form - form parameter)
 // of receiver according to previous level
@@ -181,8 +181,7 @@ Concrete2 ::  giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     //Concrete2MaterialStatus *status = (Concrete2MaterialStatus*) gp->giveMaterial()->giveStatus(gp);
 
     switch ( mode ) {
-    case _3dShellLayer:
-    case _2dPlateLayer:
+    case _PlateLayer:
         giveRealStresses3dShellLayer(answer, gp, strain, atTime);
         break;
     default:

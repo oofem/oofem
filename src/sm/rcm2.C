@@ -70,14 +70,9 @@ RCM2Material :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-    if ( ( mode == _3dMat ) || ( mode == _PlaneStress ) ||
-        ( mode == _PlaneStrain ) || ( mode == _1dMat ) ||
-        ( mode == _2dPlateLayer ) || ( mode == _2dBeamLayer ) ||
-        ( mode == _3dShellLayer ) ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _3dMat || mode == _PlaneStress ||
+        mode == _PlaneStrain || mode == _1dMat ||
+        mode == _PlateLayer || mode == _2dBeamLayer;
 }
 
 
@@ -1016,7 +1011,7 @@ RCM2Material :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 
 
 void
-RCM2Material :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
+RCM2Material :: givePlateLayerStiffMtrx(FloatMatrix &answer,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *atTime)
@@ -1030,26 +1025,6 @@ RCM2Material :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
 {
     this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
 }
-
-
-void
-RCM2Material :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *atTime)
-//
-// returns receiver's 2dPlaneStressMtrx constructed from
-// general 3dMatrialStiffnessMatrix
-// (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
-//
-// standard method from Material Class overloaded, because no inversion is needed.
-// the reduction from 3d case will not work
-// this implementation should be faster.
-{
-    this->give2dPlateLayerStiffMtrx(answer, mode, gp, atTime);
-}
-
-
 
 
 

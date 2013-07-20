@@ -264,10 +264,7 @@ protected:
     virtual void give2dBeamLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
                                   GaussPoint *gp,
                                   TimeStep *tStep);
-    virtual void give2dPlateLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                   GaussPoint *gp,
-                                   TimeStep *tStep);
-    virtual void give3dShellLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
+    virtual void givePlateLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
                                    GaussPoint *gp,
                                    TimeStep *tStep);
 };

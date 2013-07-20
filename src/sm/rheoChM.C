@@ -67,18 +67,9 @@ RheoChainMaterial :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether the receiver supports the given mode
 //
 {
-    if ( ( mode == _3dMat ) || ( mode == _PlaneStress ) ||
-        ( mode == _PlaneStrain ) || ( mode == _1dMat ) ||
-        ( mode == _2dPlateLayer ) || ( mode == _2dBeamLayer ) ||
-        ( mode == _3dShellLayer ) ) {
-        return 1;
-    }
-
-    if ( ( mode == _3dBeam ) || ( mode == _2dBeam ) || ( mode == _3dShell ) || ( mode == _2dPlate ) ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _3dMat || mode == _PlaneStress ||
+        mode == _PlaneStrain || mode == _1dMat ||
+        mode == _PlateLayer || mode == _2dBeamLayer;
 }
 
 

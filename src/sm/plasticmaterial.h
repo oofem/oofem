@@ -196,8 +196,8 @@ protected:
                                         TimeStep *tStep) = 0;
 
     // auxiliary functions
-    virtual int         giveSizeOfFullHardeningVarsVector()  { return 0; }
-    virtual int         giveSizeOfReducedHardeningVarsVector(GaussPoint *)  { return 0; }
+    virtual int giveSizeOfFullHardeningVarsVector() { return 0; }
+    virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *)  { return 0; }
 
     friend class PlasticMaterialStatus;
 
@@ -224,7 +224,7 @@ protected:
                                           GaussPoint *gp,
                                           TimeStep *tStep);
 
-    virtual void give2dPlateLayerStiffMtrx(FloatMatrix &answer,
+    virtual void givePlateLayerStiffMtrx(FloatMatrix &answer,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *tStep);
@@ -234,10 +234,6 @@ protected:
                                       GaussPoint *gp,
                                       TimeStep *atTime);
 
-    virtual void give3dShellLayerStiffMtrx(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // plasticmaterial_h

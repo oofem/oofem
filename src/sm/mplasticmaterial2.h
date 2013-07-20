@@ -350,7 +350,7 @@ protected:
                                           MatResponseMode,
                                           GaussPoint * gp,
                                           TimeStep * atTime);
-    virtual void give2dPlateLayerStiffMtrx(FloatMatrix & answer,
+    virtual void givePlateLayerStiffMtrx(FloatMatrix & answer,
                                            MatResponseMode,
                                            GaussPoint * gp,
                                            TimeStep * atTime);
@@ -358,11 +358,6 @@ protected:
     virtual void give1dFiberStiffMtrx(FloatMatrix & answer,
                                       MatResponseMode, GaussPoint * gp,
                                       TimeStep * atTime);
-
-    virtual void give3dShellLayerStiffMtrx(FloatMatrix & answer,
-                                           MatResponseMode,
-                                           GaussPoint * gp,
-                                           TimeStep * atTime);
 
 protected:
     long getPopulationSignature(IntArray &mask);

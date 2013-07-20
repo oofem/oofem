@@ -2539,32 +2539,12 @@ int HellmichMaterial :: hasMaterialModeCapability(MaterialMode mode)
 //
 {
     if ( options & ( moDeviatoricCreepE | moDeviatoricCreepF ) ) { // deviatoric creep supported only in 3D analysis
-        if ( mode == _3dMat ) {
-            return 1;
-        } else {
-            return 0;
-        }
+        return mode == _3dMat;
     } else if ( options & moPlasticity ) { // 3D and 1D plasticity fully implemented
-        if ( ( mode == _3dMat ) || ( mode == _1dMat ) ) {
-            return 1;
-        } else {
-            return 0;
-        }
+        return mode == _3dMat || mode == _1dMat;
     } else {
         return ( linMat->hasMaterialModeCapability(mode) );
     }
-
-    /* LinearElastic:
-     *
-     * if ((mode == _3dMat) || (mode == _PlaneStress) ||
-     * (mode == _PlaneStrain) || (mode == _1dMat) ||
-     * (mode == _2dPlateLayer) || (mode == _2dBeamLayer) ||
-     * (mode == _3dShellLayer) || (mode == _2dPlate) ||
-     * (mode == _2dBeam) || (mode == _3dShell) ||
-     * (mode == _3dBeam) || (mode == _PlaneStressRot) ||
-     * (mode == _1dFiber)) return 1;
-     * return 0;
-     */
 }
 
 void

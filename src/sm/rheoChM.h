@@ -190,7 +190,6 @@ public:
      * Computes, for the given integration point,
      * the strain vector induced by stress-independent shrinkage.
      * @param answer Returned strain vector.
-     * @param form Material response form.
      * @param gp Integration point.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      * @param mode Determines response mode (Total or incremental).
@@ -206,7 +205,6 @@ public:
      * Computes, for the given integration point,
      * the strain vector induced by the stress history (typically creep strain).
      * @param answer Computed strains.
-     * @param form Material response form.
      * @param gp Integration point.
      * @param tStep Time step (most models are able to respond only when tStep is the current time step).
      * @param mode Determines response mode.

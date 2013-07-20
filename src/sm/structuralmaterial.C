@@ -34,6 +34,7 @@
 
 #include "structuralmaterial.h"
 #include "structuralcrosssection.h"
+#include "simplecrosssection.h"
 #include "domain.h"
 #include "verbose.h"
 #include "structuralms.h"
@@ -54,10 +55,8 @@ StructuralMaterial :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-    return mode == _3dMat        || mode == _PlaneStress ||
-           mode == _PlaneStrain  || mode == _1dMat       ||
-           mode == _2dPlateLayer || mode == _2dBeamLayer ||
-           mode == _3dShellLayer || mode == _1dFiber;
+    return mode == _3dMat        || mode == _PlaneStress || mode == _PlaneStrain  || mode == _1dMat ||
+           mode == _PlateLayer || mode == _2dBeamLayer || mode == _Fiber;
 }
 
 
@@ -554,17 +553,14 @@ StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
         this->give1dStressStiffMtrx(answer, rMode, gp, atTime);
         break;
 
-    case _2dPlateLayer:
-        this->give2dPlateLayerStiffMtrx(answer, rMode, gp, atTime);
-        break;
-    case _3dShellLayer:
-        this->give3dShellLayerStiffMtrx(answer, rMode, gp, atTime);
+    case _PlateLayer:
+        this->givePlateLayerStiffMtrx(answer, rMode, gp, atTime);
         break;
     case _2dBeamLayer:
         this->give2dBeamLayerStiffMtrx(answer, rMode, gp, atTime);
         break;
-    case _1dFiber:
-        this->give1dFiberStiffMtrx(answer, rMode, gp, atTime);
+    case _Fiber:
+        this->giveFiberStiffMtrx(answer, rMode, gp, atTime);
         break;
     default:
         OOFEM_ERROR2( "StructuralMaterial :: giveStiffnessMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
@@ -837,8 +833,7 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         answer.at(1) = 1;
         return 6;
 
-    case _2dPlateLayer:
-    case _3dShellLayer:
+    case _PlateLayer:
         answer.resize(5);
         answer.at(1) = 1;
         answer.at(2) = 2;
@@ -851,6 +846,13 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         answer.resize(2);
         answer.at(1) = 1;
         answer.at(2) = 5;
+        return 6;
+
+    case _Fiber:
+        answer.resize(3);
+        answer.at(1) = 1;
+        answer.at(2) = 5;
+        answer.at(3) = 6;
         return 6;
 
     case _2dPlate:
@@ -895,13 +897,6 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         }
 
         return 8;
-
-    case _1dFiber:
-        answer.resize(3);
-        answer.at(1) = 1;
-        answer.at(2) = 5;
-        answer.at(3) = 6;
-        return 6;
 
     case _PlaneStressRot:
         answer.resize(4);
@@ -1079,9 +1074,9 @@ StructuralMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
 
 void
 StructuralMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *atTime)
+                                             MatResponseMode mode,
+                                             GaussPoint *gp,
+                                             TimeStep *atTime)
 //
 // return material stiffness matrix for2dBeamLayer mode
 //
@@ -1102,10 +1097,10 @@ StructuralMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 
 
 void
-StructuralMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
-                                                MatResponseMode mode,
-                                                GaussPoint *gp,
-                                                TimeStep *atTime)
+StructuralMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
+                                              MatResponseMode mode,
+                                              GaussPoint *gp,
+                                              TimeStep *atTime)
 //
 // return material stiffness matrix for 2dPlateLayer
 //
@@ -1140,10 +1135,10 @@ StructuralMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
 }
 
 void
-StructuralMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *atTime)
+StructuralMaterial :: giveFiberStiffMtrx(FloatMatrix &answer,
+                                         MatResponseMode mode,
+                                         GaussPoint *gp,
+                                         TimeStep *atTime)
 //
 // return material stiffness matrix for 2dPlateLayer
 //
@@ -1163,44 +1158,6 @@ StructuralMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
     invMatLayer.at(3, 1) = invMat3d.at(6, 1);
     invMatLayer.at(3, 2) = invMat3d.at(6, 5);
     invMatLayer.at(3, 3) = invMat3d.at(6, 6);
-
-    answer.beInverseOf(invMatLayer);
-}
-
-
-void
-StructuralMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
-                                                MatResponseMode mode,
-                                                GaussPoint *gp,
-                                                TimeStep *atTime)
-//
-// returns material stiffness matrix for 3dShellLayer
-//
-{
-    FloatMatrix m3d, invMat3d, invMatLayer(5, 5);
-
-    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
-
-    invMat3d.beInverseOf(m3d);
-
-    for ( int i = 1; i <= 2; i++ ) {
-        for ( int j = 1; j <= 2; j++ ) {
-            invMatLayer.at(i, j) = invMat3d.at(i, j);
-        }
-    }
-
-    for ( int i = 4; i <= 6; i++ ) {
-        for ( int j = 4; j <= 6; j++ ) {
-            invMatLayer.at(i - 1, j - 1) = invMat3d.at(i, j);
-        }
-    }
-
-    for ( int i = 1; i <= 2; i++ ) {
-        for ( int j = 4; j <= 6; j++ ) {
-            invMatLayer.at(i, j - 1) = invMat3d.at(i, j);
-            invMatLayer.at(j - 1, i) = invMat3d.at(j, i);
-        }
-    }
 
     answer.beInverseOf(invMatLayer);
 }

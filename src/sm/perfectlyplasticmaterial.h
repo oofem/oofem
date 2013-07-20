@@ -189,11 +189,7 @@ protected:
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);
-    virtual void give2dPlateLayerStiffMtrx(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
-    virtual void give3dShellLayerStiffMtrx(FloatMatrix &answer,
+    virtual void givePlateLayerStiffMtrx(FloatMatrix &answer,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *tStep);

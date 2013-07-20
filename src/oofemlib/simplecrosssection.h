@@ -93,6 +93,11 @@ public:
     virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
 
+    virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dShellStiffMtrx(FloatMatrix &answer,MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "SimpleCrossSection"; }
     virtual const char *giveInputRecordName() const { return _IFT_SimpleCrossSection_Name; }

@@ -38,6 +38,7 @@
 #include "floatarray.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
+#include "structuralms.h"
 
 namespace oofem {
 
@@ -47,26 +48,183 @@ REGISTER_CrossSection( SimpleCrossSection );
 void
 SimpleCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
-    if ( mat->hasMaterialModeCapability(gp->giveMaterialMode()) ) {
-        mat->giveRealStressVector(answer, gp, strain, tStep);
+    MaterialMode mode = gp->giveMaterialMode();
+    if ( mode == _2dBeam ) {
+        FloatMatrix tangent;
+        this->give2dBeamStiffMtrx(tangent, ElasticStiffness, gp, tStep);
+        answer.beProductOf(tangent, strain);
+        ///@todo Hack for now, since some elements directly try to access the material (it should all go through the cross-section!!!)
+        StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus* >( gp->giveElement()->giveMaterial()->giveStatus(gp) );
+        status->letTempStrainVectorBe(strain);
+        status->letTempStressVectorBe(answer);
+    } else if ( mode == _3dBeam ) {
+        FloatMatrix tangent;
+        this->give3dBeamStiffMtrx(tangent, ElasticStiffness, gp, tStep);
+        answer.beProductOf(tangent, strain);
+        tangent.printYourself();
+
+        StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus* >( gp->giveElement()->giveMaterial()->giveStatus(gp) );
+        status->letTempStrainVectorBe(strain);
+        status->letTempStressVectorBe(answer);
+    } else if ( mode == _2dPlate ) {
+        FloatMatrix tangent;
+        this->give2dPlateStiffMtrx(tangent, ElasticStiffness, gp, tStep);
+        answer.beProductOf(tangent, strain);
+
+        StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus* >( gp->giveElement()->giveMaterial()->giveStatus(gp) );
+        status->letTempStrainVectorBe(strain);
+        status->letTempStressVectorBe(answer);
+    } else if ( mode == _3dShell ) {
+        FloatMatrix tangent;
+        this->give3dShellStiffMtrx(tangent, ElasticStiffness, gp, tStep);
+        answer.beProductOf(tangent, strain);
+
+        StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus* >( gp->giveElement()->giveMaterial()->giveStatus(gp) );
+        status->letTempStrainVectorBe(strain);
+        status->letTempStressVectorBe(answer);
     } else {
-        _error("giveRealStresses : unsupported mode");
+        StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+        if ( mat->hasMaterialModeCapability(gp->giveMaterialMode()) ) {
+            mat->giveRealStressVector(answer, gp, strain, tStep);
+        } else {
+            _error("giveRealStresses : unsupported mode");
+        }
     }
+}
+
+void
+SimpleCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    MaterialMode mode = gp->giveMaterialMode();
+    if ( mode == _2dBeam ) {
+        this->give2dBeamStiffMtrx(answer, rMode, gp, tStep);
+    } else if ( mode == _3dBeam ) {
+        this->give3dBeamStiffMtrx(answer, rMode, gp, tStep);
+    } else if ( mode == _2dPlate ) {
+        this->give2dPlateStiffMtrx(answer, rMode, gp, tStep);
+    } else if ( mode == _3dShell ) {
+        this->give3dShellStiffMtrx(answer, rMode, gp, tStep);
+    } else {
+        StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+        if ( mat->hasMaterialModeCapability( mode ) ) {
+            mat->giveStiffnessMatrix(answer, rMode, gp, tStep);
+        } else {
+            OOFEM_ERROR3("SimpleCrossSection :: giveCharMaterialStiffnessMatrix: unsupported mode %s on element number %d", __MaterialModeToString(gp->giveMaterialMode()), gp->giveElement()->giveGlobalNumber() );
+        }
+    }
+}
+
+void
+SimpleCrossSection :: give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+    FloatMatrix mat3d;
+    double area, Iy, shearAreaz;
+
+    mat->give1dStressStiffMtrx(mat3d, rMode, gp, tStep);
+    area = this->give(CS_Area);
+    Iy   = this->give(CS_InertiaMomentY);
+    shearAreaz = this->give(CS_SHEAR_AREA_Z);
+
+    answer.resize(3, 3);
+    answer.zero();
+
+    answer.at(1, 1) = mat3d.at(1, 1) * area;
+    answer.at(2, 2) = mat3d.at(1, 1) * Iy;
+    answer.at(3, 3) = shearAreaz * mat->give('G', gp);
 }
 
 
 void
-SimpleCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                      MatResponseMode rMode, GaussPoint *gp,
-                                                      TimeStep *tStep)
+SimpleCrossSection :: give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
-    if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-        mat->giveStiffnessMatrix(answer, rMode, gp, tStep);
-    } else {
-        OOFEM_ERROR3("SimpleCrossSection :: giveCharMaterialStiffnessMatrix: unsupported StressStrainMode %s on Element number %d", __MaterialModeToString(gp->giveMaterialMode()), gp->giveElement()->giveGlobalNumber() );
+    FloatMatrix mat3d;
+    double area, E, G, Iy, Iz, Ik;
+    double shearAreay, shearAreaz;
+
+    mat->give1dStressStiffMtrx(mat3d, rMode, gp, tStep);
+    E    = mat3d.at(1, 1);
+    G    = mat->give('G', gp);
+    area = this->give(CS_Area);
+    Iy   = this->give(CS_InertiaMomentY);
+    Iz   = this->give(CS_InertiaMomentZ);
+    Ik   = this->give(CS_TorsionMomentX);
+
+    //shearCoeff = this->give(CS_BeamShearCoeff);
+    shearAreay = this->give(CS_SHEAR_AREA_Y);
+    shearAreaz = this->give(CS_SHEAR_AREA_Z);
+
+    answer.resize(6, 6);
+    answer.zero();
+
+    answer.at(1, 1) = E * area;
+    ///@todo Do this by using the general 3d tangent matrix instead somehow!!!
+    answer.at(2, 2) = shearAreay * G;
+    answer.at(3, 3) = shearAreaz * G;
+    //answer.at(2, 2) = shearCoeff * G * area;
+    //answer.at(3, 3) = shearCoeff * G * area;
+    answer.at(4, 4) = G * Ik;
+    answer.at(5, 5) = E * Iy;
+    answer.at(6, 6) = E * Iz;
+}
+
+
+void
+SimpleCrossSection :: give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+    FloatMatrix mat3d;
+    double thickness3, thickness;
+
+    mat->givePlaneStressStiffMtrx(mat3d, rMode, gp, tStep);
+    thickness = this->give(CS_Thickness);
+    thickness3 = thickness * thickness * thickness;
+
+    answer.resize(5, 5);
+    answer.zero();
+
+    for ( int i = 1; i <= 2; i++ ) {
+        for ( int j = 1; j <= 2; j++ ) {
+            answer.at(i, j) = mat3d.at(i, j) * thickness3 / 12.;
+        }
     }
+
+    answer.at(3, 3) = mat3d.at(3, 3) * thickness3 / 12.;
+    answer.at(4, 4) = mat3d.at(3, 3) * thickness * ( 5. / 6. );
+    answer.at(5, 5) = answer.at(4, 4);
+}
+
+
+void
+SimpleCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+    FloatMatrix mat3d;
+
+    double thickness = this->give(CS_Thickness);
+    double thickness3 = thickness * thickness * thickness;
+
+    mat->givePlaneStressStiffMtrx(mat3d, rMode, gp, tStep);
+
+    answer.resize(8, 8);
+    answer.zero();
+
+    for ( int i = 1; i <= 2; i++ ) {
+        for ( int j = 1; j <= 2; j++ ) {
+            answer.at(i, j) = mat3d.at(i, j) * thickness;
+            answer.at(i + 3, j + 3) = mat3d.at(i, j) * thickness3 / 12.0;
+        }
+    }
+
+    answer.at(3, 1) = mat3d.at(3, 1) * thickness;
+    answer.at(3, 2) = mat3d.at(3, 2) * thickness;
+    answer.at(3, 3) = mat3d.at(3, 3) * thickness;
+    answer.at(6, 4) = mat3d.at(3, 1) * thickness3 / 12.0;
+    answer.at(6, 5) = mat3d.at(3, 2) * thickness3 / 12.0;
+    answer.at(6, 6) = mat3d.at(3, 3) * thickness3 / 12.0;
+
+    answer.at(8, 8) = answer.at(7, 7) = mat3d.at(3, 3) * thickness * ( 5. / 6. );
 }
 
 
@@ -132,7 +290,7 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
 }
 
 
-void SimpleCrossSection::giveInputRecord(DynamicInputRecord &input)
+void SimpleCrossSection :: giveInputRecord(DynamicInputRecord &input)
 {
     StructuralCrossSection :: giveInputRecord(input);
     input.setField(this->give(CS_Thickness), _IFT_SimpleCrossSection_thick);
