@@ -59,8 +59,8 @@ public:
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    double giveMPS(void) { return microprestress_old; }
-    void setMPS(const double src) { microprestress_new = src; }
+    double giveMPS() const { return microprestress_old; }
+    void setMPS(double src) { microprestress_new = src; }
 
     // definition
     virtual const char *giveClassName() const { return "B3SolidMaterialStatus"; }
@@ -134,20 +134,20 @@ protected:
     void predictParametersFrom(double, double, double, double, double, double, double);
 
     /// Evaluation of the compliance function of the non-aging solidifying constituent.
-    double computeNonAgingCreepFunction(GaussPoint *gp, double loadDuration);
+    double computeNonAgingCreepFunction(double loadDuration);
 
     /// Evaluation of the relative volume of the solidified material.
-    double computeSolidifiedVolume(GaussPoint *gp, TimeStep *tStep);
+    double computeSolidifiedVolume(TimeStep *tStep);
 
     /// Evaluation of the flow term viscosity.
     double computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep);
 
-    virtual double computeCreepFunction(GaussPoint *gp, double tStep, double ofAge);
+    virtual double computeCreepFunction(double tStep, double ofAge);
 
     double inverse_sorption_isotherm(double w);
 
     /// Evaluation of characteristic moduli of the non-aging Kelvin chain.
-    virtual void computeCharCoefficients(FloatArray &answer, GaussPoint *gp, double);
+    virtual void computeCharCoefficients(FloatArray &answer, double atTime);
 
     virtual void computeCharTimes();
 

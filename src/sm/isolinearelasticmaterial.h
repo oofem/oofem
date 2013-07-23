@@ -95,11 +95,6 @@ public:
     /// Destructor.
     virtual ~IsotropicLinearElasticMaterial() { }
 
-    virtual void giveStiffnessMatrix(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *atTime);
-
     /**
      * Returns a vector of coefficients of thermal dilatation in direction
      * of each material principal (local) axis.
@@ -110,7 +105,6 @@ public:
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     // identification and auxiliary functions
-    virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "IsotropicLinearElasticMaterial"; }
     virtual classType giveClassID() const { return IsotropicLinearElasticMaterialClass; }
     virtual const char *giveInputRecordName() const { return _IFT_IsotropicLinearElasticMaterial_Name; }
@@ -141,6 +135,17 @@ public:
                                        GaussPoint * gp,
                                        TimeStep * atTime);
 
+    virtual void givePlaneStressStiffMtrx(FloatMatrix & answer,
+                                  MatResponseMode, GaussPoint * gp,
+                                  TimeStep * atTime);
+
+    virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer,
+                                  MatResponseMode, GaussPoint * gp,
+                                  TimeStep * atTime);
+
+    virtual void give1dStressStiffMtrx(FloatMatrix & answer,
+                               MatResponseMode, GaussPoint * gp,
+                               TimeStep * atTime);
     /**
      * Creates new copy of associated status (StructuralMaterialStatus class )
      * and inserts it into given integration point.
@@ -170,29 +175,6 @@ public:
     {
         return young / ( 2. * ( 1. + nu ) );
     }
-
-protected:
-    virtual void givePlaneStressStiffMtrx(FloatMatrix & answer,
-                                  MatResponseMode, GaussPoint * gp,
-                                  TimeStep * atTime);
-
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer,
-                                  MatResponseMode, GaussPoint * gp,
-                                  TimeStep * atTime);
-
-    virtual void give1dStressStiffMtrx(FloatMatrix & answer,
-                               MatResponseMode, GaussPoint * gp,
-                               TimeStep * atTime);
-
-    virtual void give2dBeamStiffMtrx(FloatMatrix &answer,
-                             MatResponseMode rMode,
-                             GaussPoint *gp,
-                             TimeStep *tStep);
-
-    virtual void give3dBeamStiffMtrx(FloatMatrix &answer,
-                             MatResponseMode rMode,
-                             GaussPoint *gp,
-                             TimeStep *tStep);
 
     friend class CrossSection;
 };

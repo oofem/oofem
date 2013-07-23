@@ -163,16 +163,14 @@ public:
      */
     void giveFullPlasticStrainVector(StrainVector &answer) const
     {
-        StrainVector plasticStrainVector(_Unknown);
-        givePlasticStrain(plasticStrainVector);
-        plasticStrainVector.convertToFullForm(answer);
+        ///@todo Fill in correct full form values here! This just adds zeros!
+        this->givePlasticStrain().convertToFullForm(answer);
     }
     /**
      * Get the plastic strain deviator from the material status.
      * @param answer Plastic strain deviator.
      */
-    void  givePlasticStrain(StrainVector &answer) const
-    { answer = plasticStrain; }
+    const StrainVector &  givePlasticStrain() const { return plasticStrain; }
 
 
     /**
@@ -241,7 +239,7 @@ public:
      * Get the temp value of the full plastic strain vector from the material status.
      * @param answer Temp value of plastic strain vector.
      */
-    void giveTempPlasticStrain(StrainVector &answer) const { answer = tempPlasticStrain; }
+    const StrainVector & giveTempPlasticStrain() const { return tempPlasticStrain; }
 
     /**
      * Get the temp value of the volumetric plastic strain in plane stress.
@@ -740,13 +738,6 @@ public:
                             GaussPoint *gp,
                             InternalStateType type,
                             TimeStep *tStep);
-
-    virtual int giveIPValueSize(InternalStateType type,
-                                GaussPoint *gp);
-
-    virtual int giveIntVarCompFullIndx(IntArray &answer,
-                                       InternalStateType type,
-                                       MaterialMode mmode);
 
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 

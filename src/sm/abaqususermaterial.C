@@ -116,6 +116,7 @@ MaterialStatus *AbaqusUserMaterial :: CreateStatus(GaussPoint *gp) const
     return new AbaqusUserMaterialStatus(n++, this->giveDomain(), gp, this->numState);
 }
 
+
 void AbaqusUserMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                     MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
@@ -257,7 +258,7 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
     double predef;
     double dpred;
 
-    OOFEM_LOG_DEBUG("AbaqusUserMaterial :: giveRealStressVector - Calling subroutine");
+    OOFEM_LOG_DEBUG("AbaqusUserMaterial :: giveRealStressVector_3d - Calling subroutine");
     this->umat(stress.givePointer(), // STRESS
                state.givePointer(), // STATEV
                jacobian.givePointer(), // DDSDDE
@@ -464,8 +465,9 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
     ms->letTempPVectorBe(vP);
 
 
-    OOFEM_LOG_DEBUG("AbaqusUserMaterial :: giveRealStressVector - Calling subroutine was successful");
+    OOFEM_LOG_DEBUG("AbaqusUserMaterial :: giveRealStressVector_3d - Calling subroutine was successful");
 }
+
 
 int AbaqusUserMaterial :: hasMaterialModeCapability(MaterialMode mode)
 {
@@ -511,16 +513,6 @@ InternalStateValueType AbaqusUserMaterial :: giveIPValueType(InternalStateType t
         return ISVT_VECTOR;
     } else {
         return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-int AbaqusUserMaterial :: giveIPValueSize(InternalStateType type, GaussPoint* gp)
-{
-    AbaqusUserMaterialStatus *ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
-    if ( type == IST_Undefined ) {
-        return ms->giveStateVector().giveSize();
-    } else {
-        return StructuralMaterial :: giveIPValueSize(type, gp);
     }
 }
 

@@ -80,23 +80,13 @@ protected:
     /// Time stamp of recovered values.
     StateCounterType stateCounter;
     Domain *domain;
-    /**
+    /*
      * Array of value record sizes per region.
      * It is typically determined during recovery phase.
      * The purpose of ths attribute is to cache the result for
      * future requests.
      */
     // IntArray regionValSize;
-    /**
-     * Array of region values masks, containing mask of reduced
-     * indexes of Internal Variable components.
-     * It is typically determined during recovery phase.
-     * The purpose of ths attribute is to cache the result for
-     * future requests.
-     *
-     * @see Element::giveIPValue and Element::giveIntVarCompFullIndx methods
-     */
-    // AList<IntArray> regionValueMaps;
     /**
      * Number of virtual regions, if positive.
      * When equals to zero a single virtual region, to which all real regions map, is assumed (whole domain recovery)
@@ -167,19 +157,6 @@ public:
      * for recovering values.
      */
     virtual int giveRegionRecordSize(int reg, InternalStateType type);
-    /**
-     * Returns the region values masks, containing mask of reduced
-     * indexes of Internal Variable component for given region.
-     * The default implementation scans the elements and once one belonging
-     * to given region is found it is requested for the information. Slow.
-     * The overloaded instances can cache these results, since they are easily
-     * obtainable during recovery.
-     * @param answer Contains result.
-     * @param reg Virtual region id.
-     * @param type Determines the type of variable, for which size is requested. Should be same as used
-     * for recovering values.
-     */
-    virtual void giveRegionRecordMap(IntArray &answer, int reg, InternalStateType type);
     /**
      * Sets recovery mode (region by region or whole domain mode) and allows to specify virtual region mapping.
      * @param nvr Specifies number of regions. If set to zero, the recovery is performed over whole domain (single virtual region),

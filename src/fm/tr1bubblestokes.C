@@ -467,10 +467,4 @@ double Tr1BubbleStokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(con
     return center.distance(coords);
 }
 
-int Tr1BubbleStokes :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
 } // end namespace oofem

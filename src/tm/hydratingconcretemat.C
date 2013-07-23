@@ -258,30 +258,6 @@ HydratingConcreteMat :: giveIPValueType(InternalStateType type)
 }
 
 
-int
-HydratingConcreteMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_HydrationDegree ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else {
-        return TransportMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-
-int
-HydratingConcreteMat :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( type == IST_HydrationDegree ) {
-        return 1;
-    } else {
-        return TransportMaterial :: giveIPValueSize(type, aGaussPoint);
-    }
-}
-
-
 MaterialStatus *
 HydratingConcreteMat :: CreateStatus(GaussPoint *gp) const
 {

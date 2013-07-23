@@ -77,20 +77,12 @@ MPlasticMaterial2 :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-    if ( ( mode == _3dMat ) ||
-        ( mode == _1dMat ) ||
+    return mode == _3dMat ||
+        mode == _1dMat ||
         //<RESTRICTED_SECTION>
-        ( mode == _PlaneStress )  ||
+        mode == _PlaneStress  ||
         //</RESTRICTED_SECTION>
-        ( mode == _PlaneStrain )  ||
-        ( mode == _2dPlateLayer ) ||
-        ( mode == _2dBeamLayer )  ||
-        ( mode == _3dShellLayer ) ||
-        ( mode == _1dFiber ) ) {
-        return 1;
-    }
-
-    return 0;
+        mode == _PlaneStrain;
 }
 
 MaterialStatus *
@@ -1830,7 +1822,7 @@ MPlasticMaterial2 :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 
 
 void
-MPlasticMaterial2 :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
+MPlasticMaterial2 :: givePlateLayerStiffMtrx(FloatMatrix &answer,
                                                MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *atTime)
@@ -1878,44 +1870,22 @@ MPlasticMaterial2 :: give1dFiberStiffMtrx(FloatMatrix &answer,
 }
 
 
-void
-MPlasticMaterial2 :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *atTime)
-//
-// returns receiver's 2dPlaneStressMtrx constructed from
-// general 3dMatrialStiffnessMatrix
-// (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
-//
-// standard method from Material Class overloaded, because no inversion is needed.
-// the reduction from 3d case will not work
-// this implementation should be faster.
-{
-    if ( mode == TangentStiffness ) {
-        if ( rmType == mpm_ClosestPoint ) {
-            this->giveConsistentStiffnessMatrix(answer, mode, gp, atTime);
-        } else {
-            this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, atTime);
-        }
-    } else {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
-    }
-}
-
-
 int
 MPlasticMaterial2 :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
     MPlasticMaterial2Status *status = static_cast< MPlasticMaterial2Status * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_PlasticStrainTensor ) {
-        status->givePlasticStrainVector(answer);
+        FloatArray ep;
+        status->givePlasticStrainVector(ep);
+        ///@todo Fill in correct full form values here! This just adds zeros!
+        StructuralMaterial :: giveFullSymVectorForm(answer, ep, aGaussPoint->giveMaterialMode());
         return 1;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         FloatArray st(6), s;
 
         status->givePlasticStrainVector(s);
 
+        ///@todo Fill in correct full form values here! This just adds zeros!
         StructuralMaterial :: giveFullSymVectorForm(st, s, aGaussPoint->giveMaterialMode());
 
         this->computePrincipalValues(answer, st, principal_strain);
@@ -1924,8 +1894,6 @@ MPlasticMaterial2 :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
         return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 }
-
-
 
 
 InternalStateValueType
@@ -1941,36 +1909,6 @@ MPlasticMaterial2 :: giveIPValueType(InternalStateType type)
     }
 }
 
-
-int
-MPlasticMaterial2 :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        StructuralMaterial :: giveInvertedVoigtVectorMask(answer, mmode);
-        return 1;
-    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        answer.resize(6);
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-        answer.at(3) = 3;
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-
-int
-MPlasticMaterial2 :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        return StructuralMaterial :: giveSizeOfVoigtSymVector( aGaussPoint->giveMaterialMode() );
-    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        return 3;
-    } else {
-        return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
-    }
-}
 
 long
 MPlasticMaterial2 :: getPopulationSignature(IntArray &mask)

@@ -643,8 +643,8 @@ Node :: drawYourself(oofegGraphicContext &gc)
         EASValsSetLayer(OOFEG_NODE_ANNOTATION_LAYER);
         EASValsSetMType(FILLED_CIRCLE_MARKER);
  #if 1
-        if ( this->giveDomain()->hasXfemManager(1) ) {
-            XfemManager *xf = this->giveDomain()->giveXfemManager(1);
+        if ( this->giveDomain()->hasXfemManager() ) {
+            XfemManager *xf = this->giveDomain()->giveXfemManager();
             for ( int i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
                 if ( xf->giveEnrichmentItem(i)->isDofManEnriched(this) ) {
                     EASValsSetMType(SQUARE_MARKER);

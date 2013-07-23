@@ -470,15 +470,6 @@ void Tet21Stokes :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer
     answer.resize(0);
 }
 
-int Tet21Stokes :: NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    if ( type == IST_Pressure ) {
-        return 1;
-    }
-
-    return 0;
-}
-
 void Tet21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_Pressure ) {

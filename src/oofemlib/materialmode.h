@@ -55,12 +55,11 @@ namespace oofem {
     ENUM_ITEM(_3dShell) \
     ENUM_ITEM(_3dRotContinuum) /* Axisymmetry, use _3dMat if possible */ \
   \
-    ENUM_ITEM(_2dPlateLayer) \
+    ENUM_ITEM(_PlateLayer) \
     ENUM_ITEM(_2dBeamLayer) \
-    ENUM_ITEM(_3dShellLayer) \
     ENUM_ITEM(_PlaneStressRot) /* Plane stress with rotation around z */\
   \
-    ENUM_ITEM(_1dFiber) \
+    ENUM_ITEM(_Fiber) \
     ENUM_ITEM(_3dMicroplane) \
     ENUM_ITEM(_3dInterface) \
     ENUM_ITEM(_2dInterface) \

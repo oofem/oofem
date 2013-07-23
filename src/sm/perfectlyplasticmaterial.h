@@ -157,9 +157,7 @@ public:
                                                TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime);
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
@@ -191,11 +189,7 @@ protected:
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);
-    virtual void give2dPlateLayerStiffMtrx(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
-    virtual void give3dShellLayerStiffMtrx(FloatMatrix &answer,
+    virtual void givePlateLayerStiffMtrx(FloatMatrix &answer,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *tStep);

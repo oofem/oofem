@@ -548,7 +548,7 @@ MDM :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
         this->applyDamageToStiffness(answer, gp);
 
         // Transform to global coordinates (in reduced space)
-        this->transformStiffnessfromPDC(answer, * ( status->giveTempDamageTensorEigenVec() ) );
+        this->transformStiffnessfromPDC(answer, status->giveTempDamageTensorEigenVec() );
     }
 }
 
@@ -563,13 +563,13 @@ MDM :: applyDamageToStiffness(FloatMatrix &d, GaussPoint *gp)
     if ( mdmMode == mdm_3d ) {
         double psi1 = 0.0, psi2 = 0.0, psi3 = 0.0;
         if ( formulation == COMPLIANCE_DAMAGE ) {
-            psi1 = status->giveTempDamageTensorEigenVals()->at(1);
-            psi2 = status->giveTempDamageTensorEigenVals()->at(2);
-            psi3 = status->giveTempDamageTensorEigenVals()->at(3);
+            psi1 = status->giveTempDamageTensorEigenVals().at(1);
+            psi2 = status->giveTempDamageTensorEigenVals().at(2);
+            psi3 = status->giveTempDamageTensorEigenVals().at(3);
         } else if ( formulation == STIFFNESS_DAMAGE ) {
-            psi1 = 1. / ( status->giveTempDamageTensorEigenVals()->at(1) );
-            psi2 = 1. / ( status->giveTempDamageTensorEigenVals()->at(2) );
-            psi3 = 1. / ( status->giveTempDamageTensorEigenVals()->at(3) );
+            psi1 = 1. / ( status->giveTempDamageTensorEigenVals().at(1) );
+            psi2 = 1. / ( status->giveTempDamageTensorEigenVals().at(2) );
+            psi3 = 1. / ( status->giveTempDamageTensorEigenVals().at(3) );
             //} else MicroplaneMaterial::_error ("Unknown type of formulation");
         } else {
             _error("Unknown type of formulation");
@@ -614,11 +614,11 @@ MDM :: applyDamageToStiffness(FloatMatrix &d, GaussPoint *gp)
     } else if ( mdmMode == mdm_2d ) {
         double psi1 = 0.0, psi2 = 0.0;
         if ( formulation == COMPLIANCE_DAMAGE ) {
-            psi1 = status->giveTempDamageTensorEigenVals()->at(1);
-            psi2 = status->giveTempDamageTensorEigenVals()->at(2);
+            psi1 = status->giveTempDamageTensorEigenVals().at(1);
+            psi2 = status->giveTempDamageTensorEigenVals().at(2);
         } else if ( formulation == STIFFNESS_DAMAGE ) {
-            psi1 = 1. / ( status->giveTempDamageTensorEigenVals()->at(1) );
-            psi2 = 1. / ( status->giveTempDamageTensorEigenVals()->at(2) );
+            psi1 = 1. / ( status->giveTempDamageTensorEigenVals().at(1) );
+            psi2 = 1. / ( status->giveTempDamageTensorEigenVals().at(2) );
             //} else MicroplaneMaterial::_error ("Unknown type of formulation");
         } else {
             _error("Unknown type of formulation");
@@ -690,10 +690,13 @@ MDM :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateTyp
 
         d.beProductOf(c, c);
         if ( ndc == 3 ) {
-            answer.resize(3);
+            answer.resize(6);
             answer.at(1) = 1. - d.at(1, 1);
             answer.at(2) = 1. - d.at(2, 2);
             answer.at(3) = d.at(1, 2);
+            answer.at(4) = 0.;
+            answer.at(5) = 0.;
+            answer.at(6) = 0.;
         } else {
             answer.resize(6);
             answer.at(1) = 1. - d.at(1, 1);
@@ -716,10 +719,13 @@ MDM :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateTyp
 
         d.beProductOf(c, c);
         if ( ndc == 3 ) {
-            answer.resize(3);
+            answer.resize(6);
             answer.at(1) = 1. - d.at(1, 1);
             answer.at(2) = 1. - d.at(2, 2);
             answer.at(3) = d.at(1, 2);
+            answer.at(4) = 0.;
+            answer.at(5) = 0.;
+            answer.at(6) = 0.;
         } else {
             answer.resize(6);
             answer.at(1) = 1. - d.at(1, 1);
@@ -732,35 +738,33 @@ MDM :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateTyp
 
         return 1;
     } else if ( type == IST_PrincipalDamageTensor ) {
-        int i;
-        FloatArray const *d;
+        const FloatArray &d = status->giveDamageTensorEigenVals();
 
-        answer.resize(nsd);
-        d = status->giveDamageTensorEigenVals();
+        answer.resize(3);
+        answer.zero();
         if ( formulation == COMPLIANCE_DAMAGE ) {
-            for ( i = 1; i <= nsd; i++ ) {
-                answer.at(i) = 1. - 1. / d->at(i) / d->at(i);
+            for ( int i = 1; i <= nsd; i++ ) {
+                answer.at(i) = 1. - 1. / d.at(i) / d.at(i);
             }
         } else {
-            for ( i = 1; i <= nsd; i++ ) {
-                answer.at(i) = 1. - d->at(i) * d->at(i);
+            for ( int i = 1; i <= nsd; i++ ) {
+                answer.at(i) = 1. - d.at(i) * d.at(i);
             }
         }
 
         return 1;
     } else if ( type == IST_PrincipalDamageTempTensor ) {
-        int i;
-        FloatArray const *d;
+        const FloatArray &d = status->giveTempDamageTensorEigenVals();
 
-        answer.resize(nsd);
-        d = status->giveTempDamageTensorEigenVals();
+        answer.resize(3);
+        answer.zero();
         if ( formulation == COMPLIANCE_DAMAGE ) {
-            for ( i = 1; i <= nsd; i++ ) {
-                answer.at(i) = 1. - 1. / d->at(i) / d->at(i);
+            for ( int i = 1; i <= nsd; i++ ) {
+                answer.at(i) = 1. - 1. / d.at(i) / d.at(i);
             }
         } else {
-            for ( i = 1; i <= nsd; i++ ) {
-                answer.at(i) = 1. - d->at(i) * d->at(i);
+            for ( int i = 1; i <= nsd; i++ ) {
+                answer.at(i) = 1. - d.at(i) * d.at(i);
             }
         }
 
@@ -779,67 +783,13 @@ MDM :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateTyp
 InternalStateValueType
 MDM :: giveIPValueType(InternalStateType type)
 {
-    if ( ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ||
-        ( type == IST_DamageInvTensor ) || ( type == IST_DamageInvTensorTemp ) ||
-        ( type == IST_PrincipalDamageTensor ) || ( type == IST_PrincipalDamageTempTensor ) ) {
+    if ( type == IST_DamageTensor || type == IST_DamageTensorTemp ||
+         type == IST_DamageInvTensor || type == IST_DamageInvTensorTemp ) {
         return ISVT_TENSOR_S3;
-    } else if ( type == IST_MicroplaneDamageValues ) {
+    } else if ( type == IST_MicroplaneDamageValues || type == IST_PrincipalDamageTensor || type == IST_PrincipalDamageTempTensor ) {
         return ISVT_VECTOR;
     } else {
         return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
-int
-MDM :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ) {
-        answer.resize(6);
-        if ( this->ndc == 3 ) {
-            answer.at(1) = 1;
-            answer.at(2) = 2;
-            answer.at(6) = 3;
-        } else { // ndc == 6
-            for ( int i = 1; i <= 6; i++ ) {
-                answer.at(i) = i;
-            }
-        }
-
-        return 1;
-    } else if ( ( type == IST_PrincipalDamageTensor ) || ( type == IST_PrincipalDamageTempTensor ) ) {
-        answer.resize(6);
-        answer.zero();
-        for ( int i = 1; i <= nsd; i++ ) {
-            answer.at(i) = i;
-        }
-
-        return 1;
-    } else if ( type == IST_MicroplaneDamageValues ) {
-        answer.resize(numberOfMicroplanes);
-        answer.zero();
-        for ( int i = 1; i <= numberOfMicroplanes; i++ ) {
-            answer.at(i) = i;
-        }
-
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-
-int
-MDM :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( type == IST_DamageTensor ) {
-        return ndc;
-    } else if ( ( type == IST_PrincipalDamageTensor ) || ( type == IST_PrincipalDamageTempTensor ) ) {
-        return nsd;
-    } else if ( type == IST_MicroplaneDamageValues ) {
-        return numberOfMicroplanes;
-    } else {
-        return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
     }
 }
 

@@ -34,6 +34,7 @@
 
 #include "structuralmaterial.h"
 #include "structuralcrosssection.h"
+#include "simplecrosssection.h"
 #include "domain.h"
 #include "verbose.h"
 #include "structuralms.h"
@@ -54,10 +55,8 @@ StructuralMaterial :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-    return mode == _3dMat        || mode == _PlaneStress ||
-           mode == _PlaneStrain  || mode == _1dMat       ||
-           mode == _2dPlateLayer || mode == _2dBeamLayer ||
-           mode == _3dShellLayer || mode == _1dFiber;
+    return mode == _3dMat        || mode == _PlaneStress || mode == _PlaneStrain  || mode == _1dMat ||
+           mode == _PlateLayer || mode == _2dBeamLayer || mode == _Fiber;
 }
 
 
@@ -554,17 +553,14 @@ StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
         this->give1dStressStiffMtrx(answer, rMode, gp, atTime);
         break;
 
-    case _2dPlateLayer:
-        this->give2dPlateLayerStiffMtrx(answer, rMode, gp, atTime);
-        break;
-    case _3dShellLayer:
-        this->give3dShellLayerStiffMtrx(answer, rMode, gp, atTime);
+    case _PlateLayer:
+        this->givePlateLayerStiffMtrx(answer, rMode, gp, atTime);
         break;
     case _2dBeamLayer:
         this->give2dBeamLayerStiffMtrx(answer, rMode, gp, atTime);
         break;
-    case _1dFiber:
-        this->give1dFiberStiffMtrx(answer, rMode, gp, atTime);
+    case _Fiber:
+        this->giveFiberStiffMtrx(answer, rMode, gp, atTime);
         break;
     default:
         OOFEM_ERROR2( "StructuralMaterial :: giveStiffnessMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
@@ -838,8 +834,7 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         answer.at(1) = 1;
         return 6;
 
-    case _2dPlateLayer:
-    case _3dShellLayer:
+    case _PlateLayer:
         answer.resize(5);
         answer.at(1) = 1;
         answer.at(2) = 2;
@@ -852,6 +847,13 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         answer.resize(2);
         answer.at(1) = 1;
         answer.at(2) = 5;
+        return 6;
+
+    case _Fiber:
+        answer.resize(3);
+        answer.at(1) = 1;
+        answer.at(2) = 5;
+        answer.at(3) = 6;
         return 6;
 
     case _2dPlate:
@@ -896,13 +898,6 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         }
 
         return 8;
-
-    case _1dFiber:
-        answer.resize(3);
-        answer.at(1) = 1;
-        answer.at(2) = 5;
-        answer.at(3) = 6;
-        return 6;
 
     case _PlaneStressRot:
         answer.resize(4);
@@ -1080,9 +1075,9 @@ StructuralMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
 
 void
 StructuralMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *atTime)
+                                             MatResponseMode mode,
+                                             GaussPoint *gp,
+                                             TimeStep *atTime)
 //
 // return material stiffness matrix for2dBeamLayer mode
 //
@@ -1103,10 +1098,10 @@ StructuralMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 
 
 void
-StructuralMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
-                                                MatResponseMode mode,
-                                                GaussPoint *gp,
-                                                TimeStep *atTime)
+StructuralMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
+                                              MatResponseMode mode,
+                                              GaussPoint *gp,
+                                              TimeStep *atTime)
 //
 // return material stiffness matrix for 2dPlateLayer
 //
@@ -1141,10 +1136,10 @@ StructuralMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
 }
 
 void
-StructuralMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *atTime)
+StructuralMaterial :: giveFiberStiffMtrx(FloatMatrix &answer,
+                                         MatResponseMode mode,
+                                         GaussPoint *gp,
+                                         TimeStep *atTime)
 //
 // return material stiffness matrix for 2dPlateLayer
 //
@@ -1164,44 +1159,6 @@ StructuralMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
     invMatLayer.at(3, 1) = invMat3d.at(6, 1);
     invMatLayer.at(3, 2) = invMat3d.at(6, 5);
     invMatLayer.at(3, 3) = invMat3d.at(6, 6);
-
-    answer.beInverseOf(invMatLayer);
-}
-
-
-void
-StructuralMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
-                                                MatResponseMode mode,
-                                                GaussPoint *gp,
-                                                TimeStep *atTime)
-//
-// returns material stiffness matrix for 3dShellLayer
-//
-{
-    FloatMatrix m3d, invMat3d, invMatLayer(5, 5);
-
-    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
-
-    invMat3d.beInverseOf(m3d);
-
-    for ( int i = 1; i <= 2; i++ ) {
-        for ( int j = 1; j <= 2; j++ ) {
-            invMatLayer.at(i, j) = invMat3d.at(i, j);
-        }
-    }
-
-    for ( int i = 4; i <= 6; i++ ) {
-        for ( int j = 4; j <= 6; j++ ) {
-            invMatLayer.at(i - 1, j - 1) = invMat3d.at(i, j);
-        }
-    }
-
-    for ( int i = 1; i <= 2; i++ ) {
-        for ( int j = 4; j <= 6; j++ ) {
-            invMatLayer.at(i, j - 1) = invMat3d.at(i, j);
-            invMatLayer.at(j - 1, i) = invMat3d.at(j, i);
-        }
-    }
 
     answer.beInverseOf(invMatLayer);
 }
@@ -1823,44 +1780,50 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
 {
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_StressTensor ) {
-        answer = status->giveStressVector();
+        StructuralMaterial :: giveFullSymVectorForm(answer, status->giveStressVector(), aGaussPoint->giveMaterialMode());
         return 1;
     } else if ( type == IST_vonMisesStress ) {
+        ///@todo What about the stress meassure in large deformations here? The internal state type should specify "Cauchy" or something.
         answer.resize(1);
         answer.at(1) = this->computeVonMisesStress( & status->giveStressVector() );
         return 1;
     } else if ( type == IST_StrainTensor ) {
-        answer = status->giveStrainVector();
+        ///@todo Fill in correct full form values here! This just adds zeros!
+        StructuralMaterial :: giveFullSymVectorForm(answer, status->giveStrainVector(), aGaussPoint->giveMaterialMode());
         return 1;
     } else if ( type == IST_StressTensorTemp ) {
-        answer = status->giveTempStressVector();
+        ///@todo Fill in correct full form values here! This just adds zeros!
+        StructuralMaterial :: giveFullSymVectorForm(answer, status->giveTempStressVector(), aGaussPoint->giveMaterialMode());
         return 1;
     } else if ( type == IST_StrainTensorTemp ) {
-        answer = status->giveTempStrainVector();
+        ///@todo Fill in correct full form values here! This just adds zeros!
+        StructuralMaterial :: giveFullSymVectorForm(answer, status->giveTempStrainVector(), aGaussPoint->giveMaterialMode());
         return 1;
     } else if ( type == IST_PrincipalStressTensor || type == IST_PrincipalStressTempTensor ) {
         FloatArray s;
 
         if ( type == IST_PrincipalStressTensor ) {
-            s = status->giveStressVector();
+            ///@todo Fill in correct full form values here! This just adds zeros!
+            StructuralMaterial :: giveFullSymVectorForm(s, status->giveStressVector(), aGaussPoint->giveMaterialMode());
         } else {
-            s = status->giveTempStressVector();
+            ///@todo Fill in correct full form values here! This just adds zeros!
+            StructuralMaterial :: giveFullSymVectorForm(s, status->giveTempStressVector(), aGaussPoint->giveMaterialMode());
         }
 
         this->computePrincipalValues(answer, s, principal_stress);
         return 1;
     } else if ( type == IST_PrincipalStrainTensor || type == IST_PrincipalStrainTempTensor ) {
-        FloatArray st(6), s;
+        FloatArray s;
 
         if ( type == IST_PrincipalStrainTensor ) {
-            s = status->giveStrainVector();
+            ///@todo Fill in correct full form values here! This just adds zeros!
+            StructuralMaterial :: giveFullSymVectorForm(s, status->giveStrainVector(), aGaussPoint->giveMaterialMode());
         } else {
-            s = status->giveTempStrainVector();
+            ///@todo Fill in correct full form values here! This just adds zeros!
+            StructuralMaterial :: giveFullSymVectorForm(s, status->giveTempStrainVector(), aGaussPoint->giveMaterialMode());
         }
 
-        StructuralMaterial :: giveFullSymVectorForm( st, s, aGaussPoint->giveMaterialMode() );
-
-        this->computePrincipalValues(answer, st, principal_strain);
+        this->computePrincipalValues(answer, s, principal_strain);
         return 1;
     } else if ( type == IST_Temperature ) {
         /* add external source, if provided, such as staggered analysis */
@@ -1899,9 +1862,9 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
             base.at(3, 3) = 1.0;
 
             if ( type == IST_CylindricalStressTensor ) {
-                transformStressVectorTo(answer, base, val, 0);
+                this->transformStressVectorTo(answer, base, val, false);
             } else {
-                transformStrainVectorTo(answer, base, val, 0);
+                this->transformStrainVectorTo(answer, base, val, false);
             }
         } else {
             answer = val;
@@ -1923,83 +1886,19 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
 InternalStateValueType
 StructuralMaterial :: giveIPValueType(InternalStateType type)
 {
-    if ( ( type == IST_StressTensor ) || ( type == IST_StressTensorTemp ) ||
-        ( type == IST_CylindricalStressTensor ) ) {
+    if ( type == IST_StressTensor || type == IST_StressTensorTemp || type == IST_CylindricalStressTensor ) {
         return ISVT_TENSOR_S3;
     }
     // strains components packed in engineering notation
-    else if ( ( type == IST_StrainTensor ) || ( type == IST_StrainTensorTemp ) || ( type == IST_CylindricalStrainTensor ) ) {
+    else if ( type == IST_StrainTensor || type == IST_StrainTensorTemp || type == IST_CylindricalStrainTensor ) {
         return ISVT_TENSOR_S3E;
-    } else if ( ( type == IST_PrincipalStressTensor ) || ( type == IST_PrincipalStrainTensor ) ||
-               ( type == IST_PrincipalStressTempTensor ) || ( type == IST_PrincipalStrainTempTensor ) ) {
+    } else if ( type == IST_PrincipalStressTensor || type == IST_PrincipalStrainTensor ||
+               type == IST_PrincipalStressTempTensor || type == IST_PrincipalStrainTempTensor ) {
         return ISVT_VECTOR;
-    } else if ( ( type == IST_Temperature ) || ( type == IST_vonMisesStress ) ) {
+    } else if ( type == IST_Temperature || type == IST_vonMisesStress ) {
         return ISVT_SCALAR;
     } else {
         return Material :: giveIPValueType(type);
-    }
-}
-
-
-int
-StructuralMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ||
-        ( type == IST_StressTensorTemp ) || ( type == IST_StrainTensorTemp ) ||
-        ( type == IST_CylindricalStressTensor ) || ( type == IST_CylindricalStrainTensor ) ||
-        ( type == IST_ShellForceMomentumTensor ) ) {
-        StructuralMaterial :: giveInvertedVoigtVectorMask(answer, mmode);
-        return 1;
-    } else if ( ( type == IST_PrincipalStressTensor ) || ( type == IST_PrincipalStrainTensor ) ||
-               ( type == IST_PrincipalStressTempTensor ) || ( type == IST_PrincipalStrainTempTensor ) ) {
-        if ( mmode == _3dMat || mmode == _PlaneStress || mmode == _PlaneStrain ) {
-            answer.setValues(3, 1, 2, 3);
-        } else if ( mmode == _1dMat ) {
-            answer.setValues(3, 1, 0, 0);
-        } else {
-            return 0;
-        }
-
-        return 1;
-    } else if ( type == IST_Temperature ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else if ( type == IST_DeformationGradientTensor || type == IST_FirstPKStressTensor ) {
-        answer.setValues(9, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-        return 1;
-    } else {
-        return Material :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-
-int
-StructuralMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ||
-        ( type == IST_StressTensorTemp ) || ( type == IST_StrainTensorTemp ) ||
-        ( type == IST_CylindricalStressTensor ) || ( type == IST_CylindricalStrainTensor ) ||
-        ( type == IST_ShellForceMomentumTensor )  || ( type == IST_CauchyStressTensor )) {
-        return StructuralMaterial :: giveSizeOfVoigtSymVector( aGaussPoint->giveMaterialMode() );
-    } else if ( ( type == IST_PrincipalStressTensor ) || ( type == IST_PrincipalStrainTensor ) || ( type == IST_PrincipalPlasticStrainTensor ) ||
-               ( type == IST_PrincipalStressTempTensor ) || ( type == IST_PrincipalStrainTempTensor ) ) {
-        MaterialMode m = aGaussPoint->giveMaterialMode();
-        if ( m == _3dMat || m == _PlaneStrain ) {
-            return 3;
-        } else if ( m == _PlaneStress ) {
-            return 2;
-        } else if ( m == _1dMat ) {
-            return 1;
-        } else {
-            return 0;
-        }
-    } else if ( ( type == IST_Temperature ) || ( type == IST_vonMisesStress ) ) {
-        return 1;
-    } else if ( ( type == IST_DeformationGradientTensor ) || ( type == IST_FirstPKStressTensor ) ) {
-        return 9;
-    } else {
-        return Material :: giveIPValueSize(type, aGaussPoint);
     }
 }
 

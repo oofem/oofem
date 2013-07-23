@@ -135,12 +135,7 @@ public:
                                           TimeStep *tStep);
     
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
-    //virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
-
-
     virtual IRResultType initializeFrom(InputRecord *ir);
     
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new BilinearCZMaterialStatus(1, domain, gp); }

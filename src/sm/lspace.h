@@ -86,8 +86,6 @@ public:
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    virtual int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-    { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
@@ -95,8 +93,6 @@ public:
                                                     InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                    InternalStateType type, TimeStep *tStep);
-    virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
-    { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
 
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);

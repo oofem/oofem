@@ -248,7 +248,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
                                                                            InternalStateType type,
                                                                            TimeStep *tStep)
 {
-    int size, nDofMans;
+    int nDofMans;
     Element *elem = this->ZZErrorEstimatorI_giveElement();
     IntegrationRule *iRule = this->ZZErrorEstimatorI_giveIntegrationRule();
     FEInterpolation *interpol = elem->giveInterpolation();
@@ -257,13 +257,14 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
     FloatMatrix nodalRecoveredStreses;
 
     nDofMans = elem->giveNumberOfDofManagers();
-    size = elem->giveIPValueSize(type, iRule->getIntegrationPoint(0));
-    nodalRecoveredStreses.resize(nDofMans, size);
     // assemble nodal recovered stresses
     for ( int i = 1; i <= elem->giveNumberOfNodes(); i++ ) {
         elem->giveDomain()->giveSmoother()->giveNodalVector( recoveredStress, elem->giveDofManager(i)->giveNumber(),
                                                             elem->giveRegionNumber() );
-        for ( int j = 1; j <= size; j++ ) {
+        if ( i == 1 ) {
+            nodalRecoveredStreses.resize(nDofMans, recoveredStress->giveSize());
+        }
+        for ( int j = 1; j <= recoveredStress->giveSize(); j++ ) {
             nodalRecoveredStreses.at(i, j) = recoveredStress->at(j);
         }
     }
@@ -273,7 +274,6 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
     */
 
     eNorm = sNorm = 0.0;
-    diff.resize(size);
 
     // compute  the e-norm and s-norm
     if ( norm == ZZErrorEstimator :: L2Norm ) {

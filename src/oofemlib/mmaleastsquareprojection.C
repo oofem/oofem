@@ -274,7 +274,7 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
 {
     //int nelem, ielem,
     int neq = this->giveNumberOfUnknownPolynomialCoefficients(this->patchType);
-    int nval = ( * patchGPList.begin() )->giveElement()->giveIPValueSize( type, * patchGPList.begin() );
+    int nval = 0;
     FloatArray ipVal, coords, P;
     FloatMatrix a, rhs, x;
     Element *element;
@@ -283,8 +283,6 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
 
     a.resize(neq, neq);
     a.zero();
-    rhs.resize(neq, nval);
-    rhs.zero();
 
     // determine the value from patch
     std::list< GaussPoint * > :: iterator pos;
@@ -302,6 +300,11 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
             srcgp  = * pos;
             element = srcgp->giveElement();
             element->giveIPValue(ipVal, srcgp, type, tStep);
+            if ( nval == 0 ) {
+                nval = ipVal.giveSize();
+                rhs.resize(neq, nval);
+                rhs.zero();
+            }
             if ( element->computeGlobalCoordinates( coords, * ( srcgp->giveCoordinates() ) ) ) {
                 coords.subtract(targetCoords);
                 // compute ip contribution

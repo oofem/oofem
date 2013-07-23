@@ -156,9 +156,9 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                     elem->giveIPValue(VecStrain, gp, IST_StrainTensor, tStep);
                     elem->giveIPValue(VecStress, gp, IST_StressTensor, tStep);
                     elem->giveIPValue(damage, gp, IST_DamageTensor, tStep);
-                    elem->giveIntVarCompFullIndx(Mask, IST_StrainTensor);
 
                     //truss element has strains and stresses in the first array so transform them to global coordinates
+                    ///@todo Should this be the job of giveIPValue to ensure that vectors are given in global c.s.?
                     if ( dynamic_cast< Truss3d * >( elem ) ) {
                         MaterialMode mmode = _3dMat;
                         tempStress.at(1) = VecStress.at(1);
@@ -181,30 +181,23 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                         stressVector2.convertToFullForm(VecStress);
                         strainVector2.convertToFullForm(VecStrain);
                         strainEigVector2.convertToFullForm(VecEigStrain);
-                        
-                        for ( int j = 1; j <= 6; j++ ) {
-                            Mask.at(j) = j;
-                        }
                     }
 
                     VolTot += dV;
                     VecStrain.times(dV);
                     VecStress.times(dV);
                     VecEigStrain.times(dV);
-                    if(damage.giveSize()){//only for models with damage
+                    if ( damage.giveSize() ) { //only for models with damage
                         sumDamage += damage.at(1)*dV;
                     }
                     
                     for ( int j = 0; j < 6; j++ ) {
-                        int index = Mask(j); //indexes in Mask from 1
-                        if ( index ) {
-                            SumStrain(j) += VecStrain(index - 1);
-                            if ( VecEigStrain.giveSize() ) {
-                                SumEigStrain(j) += VecEigStrain(index - 1);
-                            }
-
-                            SumStress(j) += VecStress(index - 1);
+                        SumStrain(j) += VecStrain.at(j);
+                        if ( VecEigStrain.giveSize() ) {
+                            SumEigStrain(j) += VecEigStrain.at(j);
                         }
+
+                        SumStress(j) += VecStress.at(j);
                     }
 
                     //VecStrain.printYourself();

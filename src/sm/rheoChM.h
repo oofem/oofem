@@ -146,13 +146,13 @@ public:
     { answer.resize(0); }
 
     /// Evaluation of the incremental modulus.
-    virtual double giveEModulus(GaussPoint *gp, TimeStep *atTime) { return 0.0; }
+    virtual double giveEModulus(GaussPoint *gp, TimeStep *atTime) = 0;
 
     /// Evaluation of the moduli of individual units.
-    virtual void computeCharCoefficients(FloatArray &answer, GaussPoint *gp, double atTime) {};
+    virtual void computeCharCoefficients(FloatArray &answer, double atTime) = 0;
 
     /// Update of MatStatus to the newly reached (equilibrium) state.
-    virtual void updateYourself(GaussPoint *gp, TimeStep *tStep) {};
+    virtual void updateYourself(GaussPoint *gp, TimeStep *tStep) = 0;
 
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 0; }
@@ -190,7 +190,6 @@ public:
      * Computes, for the given integration point,
      * the strain vector induced by stress-independent shrinkage.
      * @param answer Returned strain vector.
-     * @param form Material response form.
      * @param gp Integration point.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      * @param mode Determines response mode (Total or incremental).
@@ -206,7 +205,6 @@ public:
      * Computes, for the given integration point,
      * the strain vector induced by the stress history (typically creep strain).
      * @param answer Computed strains.
-     * @param form Material response form.
      * @param gp Integration point.
      * @param tStep Time step (most models are able to respond only when tStep is the current time step).
      * @param mode Determines response mode.
@@ -232,10 +230,10 @@ protected:
      * @param to End time
      * @param nsteps Number of discrete steps.
      */
-    void generateLogTimeScale(FloatArray &answer, double from, double to, int nsteps);
+    static void generateLogTimeScale(FloatArray &answer, double from, double to, int nsteps);
     const FloatArray &giveDiscreteTimes();
     /// Evaluation of the creep compliance function.
-    virtual double computeCreepFunction(GaussPoint *gp, double ofAge, double atTime) = 0;
+    virtual double computeCreepFunction(double ofAge, double atTime) = 0;
 
     /**
      * Evaluation of the relaxation function at given times.
@@ -247,15 +245,12 @@ protected:
      * where @f$ \varepsilon(t) = 1 @f$ is kept at constant value in time.
      *
      * @param[out] answer Array with evaluated relaxation function.
-     * @param gp Integration point.
      * @param t0 Age of material when load is applied.
      * @param tr Age of material when relaxation has begun ???
      * @param atTimes At which times the relaxation function will be evaluated.
      * @warning atTimes should be uniformly distributed in log time scale and relatively dense (100 intervals) in order to achieve a reasonable accuracy.
      */
-    void computeDiscreteRelaxationFunction(FloatArray &answer, GaussPoint *gp,
-                                           const FloatArray &atTimes,
-                                           double t0, double tr);
+    void computeDiscreteRelaxationFunction(FloatArray &answer, const FloatArray &atTimes, double t0, double tr);
 
     /// Evaluation of elastic compliance matrix for unit Young's modulus.
     void giveUnitComplianceMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
@@ -263,7 +258,7 @@ protected:
     void giveUnitStiffnessMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
 
     /// Update of partial moduli of individual chain units
-    void updateEparModuli(GaussPoint *gp, double atTime);
+    void updateEparModuli(double atTime);
 
     /// Access to partial modulus of a given unit
     double giveEparModulus(int iChain);
@@ -272,7 +267,7 @@ protected:
     virtual void computeCharTimes();
 
     /// Access to the characteristic time of a given unit
-    double giveCharTime(int);
+    double giveCharTime(int) const;
 
     /// Exponent to be used with the char time of a given unit, usually = 1.0
     virtual double giveCharTimeExponent(int i) { return 1.0; }

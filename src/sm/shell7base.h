@@ -226,7 +226,6 @@ protected:
     // Nodal averaging interface:
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
-    virtual int  NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type);
 
     // ZZ recovery
     virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *gp, InternalStateType type);

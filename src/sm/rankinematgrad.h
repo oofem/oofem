@@ -129,8 +129,6 @@ public:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *tStep);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
 
 protected:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RankineMatGradStatus(1, RankineMat :: domain, gp); }

@@ -831,18 +831,16 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
     Domain *d = emodel->giveDomain(1);
     int ireg, nregions = smoother->giveNumberOfVirtualRegions();
     int nnodes = d->giveNumberOfDofManagers(), inode;
-    int i, j, jsize, mapindx;
+    int i, j, jsize;
     FloatArray iVal(3);
     FloatMatrix t(3, 3);
     const FloatArray *val;
-    IntArray regionVarMap;
 
     this->giveSmoother();
 
     int nindx = 1;
     if ( type == ISVT_TENSOR_G ) {
-        this->smoother->giveRegionRecordMap(regionVarMap, 1, valID);
-        nindx = regionVarMap.giveSize();
+        nindx = this->smoother->giveRegionRecordSize(1, valID);
     }
 
     for ( int indx = 1; indx <= nindx; indx++ ) {
@@ -871,11 +869,12 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
             IntArray regionNodalNumbers(nnodes);
             int regionDofMans = 0, offset = 0;
             ireg = -1;
+            int defaultSize;
 
             this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
             if ( !( ( valID == IST_DisplacementVector ) || ( valID == IST_MaterialInterfaceVal ) ) ) {
                 // assemble local->global map
-                this->smoother->giveRegionRecordMap(regionVarMap, ireg, valID);
+                defaultSize = this->smoother->giveRegionRecordSize(ireg, valID);
             } else {
                 regionDofMans = nnodes;
             }
@@ -904,7 +903,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                     }
 
                     if ( val == NULL ) {
-                        iVal.resize( regionVarMap.giveSize() );
+                        iVal.resize( defaultSize );
                         iVal.zero();
                         val = & iVal;
                         //OOFEM_ERROR ("VTKExportModule::exportIntVars: internal error: invalid dofman data");
@@ -928,48 +927,36 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                         fprintf(stream, "0.0 ");
                     }
                 } else if ( type == ISVT_TENSOR_S3 ) {
-                    int ii, jj, iii;
                     t.zero();
-                    for ( ii = 1; ii <= regionVarMap.giveSize(); ii++ ) {
-                        iii = regionVarMap.at(ii);
+                    for ( int ii = 1; ii <= 6; ii++ ) {
 
-                        if ( ( ii == 1 ) && iii ) {
-                            t.at(1, 1) = val->at(iii);
-                        } else if ( ( ii == 2 ) && iii ) {
-                            t.at(2, 2) = val->at( regionVarMap.at(2) );
-                        } else if ( ( ii == 3 ) && iii ) {
-                            t.at(3, 3) = val->at( regionVarMap.at(3) );
-                        } else if ( ( ii == 4 ) && iii ) {
-                            t.at(2, 3) = val->at( regionVarMap.at(4) );
-                            t.at(3, 2) = val->at( regionVarMap.at(4) );
-                        } else if ( ( ii == 5 ) && iii ) {
-                            t.at(1, 3) = val->at( regionVarMap.at(5) );
-                            t.at(3, 1) = val->at( regionVarMap.at(5) );
-                        } else if ( ( ii == 6 ) && iii ) {
-                            t.at(1, 2) = val->at( regionVarMap.at(6) );
-                            t.at(2, 1) = val->at( regionVarMap.at(6) );
+                        if ( ii == 1 ) {
+                            t.at(1, 1) = val->at(ii);
+                        } else if ( ii == 2 ) {
+                            t.at(2, 2) = val->at( ii );
+                        } else if ( ii == 3 ) {
+                            t.at(3, 3) = val->at( ii );
+                        } else if ( ii == 4 ) {
+                            t.at(2, 3) = val->at( ii );
+                            t.at(3, 2) = val->at( ii );
+                        } else if ( ii == 5 ) {
+                            t.at(1, 3) = val->at( ii );
+                            t.at(3, 1) = val->at( ii );
+                        } else if ( ii == 6 ) {
+                            t.at(1, 2) = val->at( ii );
+                            t.at(2, 1) = val->at( ii );
                         }
                     }
 
-                    for ( ii = 1; ii <= 3; ii++ ) {
-                        for ( jj = 1; jj <= 3; jj++ ) {
+                    for ( int ii = 1; ii <= 3; ii++ ) {
+                        for ( int jj = 1; jj <= 3; jj++ ) {
                             fprintf( stream, "%e ", t.at(ii, jj) );
                         }
 
                         fprintf(stream, "\n");
                     }
                 } else if ( type == ISVT_TENSOR_G ) { // export general tensor values as scalars
-                    if ( ( indx > 0 ) && ( indx <= regionVarMap.giveSize() ) ) {
-                        mapindx = regionVarMap.at(indx);
-                    } else {
-                        mapindx = 0;
-                    }
-
-                    if ( ( mapindx > 0 ) && ( mapindx <= val->giveSize() ) ) {
-                        fprintf( stream, "%e ", val->at(indx) );
-                    } else {
-                        fprintf(stream, "0.0 ");
-                    }
+                    fprintf( stream, "%e ", val->at(indx) );
                 }
 
                 fprintf(stream, "\n");
@@ -985,7 +972,6 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                 if ( !( ( valID == IST_DisplacementVector ) || ( valID == IST_MaterialInterfaceVal ) ) ) {
                     // assemble local->global map
                     this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
-                    this->smoother->giveRegionRecordMap(regionVarMap, ireg, valID);
                 }
 
                 for ( inode = 1; inode <= regionDofMans; inode++ ) {
@@ -1027,48 +1013,36 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                             fprintf(stream, "0.0 ");
                         }
                     } else if ( type == ISVT_TENSOR_S3 ) {
-                        int ii, jj, iii;
                         t.zero();
-                        for ( ii = 1; ii <= regionVarMap.giveSize(); ii++ ) {
-                            iii = regionVarMap.at(ii);
+                        for ( int ii = 1; ii <= 6; ii++ ) {
 
-                            if ( ( ii == 1 ) && iii ) {
-                                t.at(1, 1) = val->at(iii);
-                            } else if ( ( ii == 2 ) && iii ) {
-                                t.at(2, 2) = val->at( regionVarMap.at(2) );
-                            } else if ( ( ii == 3 ) && iii ) {
-                                t.at(3, 3) = val->at( regionVarMap.at(3) );
-                            } else if ( ( ii == 4 ) && iii ) {
-                                t.at(2, 3) = val->at( regionVarMap.at(4) );
-                                t.at(3, 2) = val->at( regionVarMap.at(4) );
-                            } else if ( ( ii == 5 ) && iii ) {
-                                t.at(1, 3) = val->at( regionVarMap.at(5) );
-                                t.at(3, 1) = val->at( regionVarMap.at(5) );
-                            } else if ( ( ii == 6 ) && iii ) {
-                                t.at(1, 2) = val->at( regionVarMap.at(6) );
-                                t.at(2, 1) = val->at( regionVarMap.at(6) );
+                            if ( ii == 1 ) {
+                                t.at(1, 1) = val->at( ii );
+                            } else if ( ii == 2 ) {
+                                t.at(2, 2) = val->at( ii );
+                            } else if ( ii == 3 ) {
+                                t.at(3, 3) = val->at( ii );
+                            } else if ( ii == 4 ) {
+                                t.at(2, 3) = val->at( ii );
+                                t.at(3, 2) = val->at( ii );
+                            } else if ( ii == 5 ) {
+                                t.at(1, 3) = val->at( ii );
+                                t.at(3, 1) = val->at( ii );
+                            } else if ( ii == 6 ) {
+                                t.at(1, 2) = val->at( ii );
+                                t.at(2, 1) = val->at( ii );
                             }
                         }
 
-                        for ( ii = 1; ii <= 3; ii++ ) {
-                            for ( jj = 1; jj <= 3; jj++ ) {
+                        for ( int ii = 1; ii <= 3; ii++ ) {
+                            for ( int jj = 1; jj <= 3; jj++ ) {
                                 fprintf( stream, "%e ", t.at(ii, jj) );
                             }
 
                             fprintf(stream, "\n");
                         }
                     } else if ( type == ISVT_TENSOR_G ) { // export general tensor values as scalars
-                        if ( ( indx > 0 ) && ( indx <= regionVarMap.giveSize() ) ) {
-                            mapindx = regionVarMap.at(indx);
-                        } else {
-                            mapindx = 0;
-                        }
-
-                        if ( ( mapindx > 0 ) && ( mapindx <= val->giveSize() ) ) {
-                            fprintf( stream, "%e ", val->at(indx) );
-                        } else {
-                            fprintf(stream, "0.0 ");
-                        }
+                        fprintf( stream, "%e ", val->at(indx) );
                     }
 
                     fprintf(stream, "\n");
@@ -1135,7 +1109,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
     int j, jsize;
     FloatArray iVal, iValLCS;
     FloatMatrix t(3, 3);
-    IntArray regionVarMap, dofIDMask;
+    IntArray dofIDMask;
     InternalStateValueType type = ISVT_UNDEFINED;
     int nScalarComp = 1;
 

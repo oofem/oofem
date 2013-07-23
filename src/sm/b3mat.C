@@ -206,16 +206,13 @@ B3Material :: predictParametersFrom(double fc, double c, double wc, double ac,
 
 
 double
-B3Material :: computeCreepFunction(GaussPoint *gp, double atTime, double ofAge)
+B3Material :: computeCreepFunction(double atTime, double ofAge)
 {
     // computes the value of creep function at time ofAge
     // when load is acting from atTime
-    // WARNING: Area returned by crossSection is assumed to be in [m^2].
-
 
     double Qf, Z, r, Q, C0, TauSh, St1, St2, H1, H2, Cd;
     double n, m;
-
 
     m = 0.5;
     n = 0.1;
@@ -412,8 +409,8 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
         sv += stressVector.at(i);
     }
 
-    et = 1. / this->computeCreepFunction(gp, time + 0.01, time);
-    et0 = 1. / this->computeCreepFunction(gp, t0 + 0.01, t0);
+    et = 1. / this->computeCreepFunction(time + 0.01, time);
+    et0 = 1. / this->computeCreepFunction(t0 + 0.01, t0);
 
     h1 = es0 * ( et0 / et );
     sn = sgn(wrate + at * trate);

@@ -1770,14 +1770,6 @@ void Shell7Base :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer,
     answer.resize(0);
 }
 
-int Shell7Base :: NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    if ( type == IST_DirectorField ) {
-        return 3;
-    }
-    return 0;
-}
-
 void Shell7Base :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_DirectorField ) {
@@ -1807,7 +1799,8 @@ Shell7Base :: ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, int laye
     IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
     GaussPoint *gp;
 
-    int size = ZZNodalRecoveryMI_giveDofManRecordSize(type);
+    //int size = ZZNodalRecoveryMI_giveDofManRecordSize(type);
+    int size = 6; ///@todo this is hard coded for stress recovery
     int numDofMans = 15;
     answer.resize(numDofMans, size);
 
@@ -1880,10 +1873,11 @@ Shell7Base :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &an
 
     // test if underlying element provides interpolation
     if ( interpol ) {
-        if ( !this->giveIPValueSize(type, gp) ) {
-            OOFEM_ERROR3("ZZNodalRecoveryMI_computeNNMatrix: Element %d not supporting type %d", this->giveNumber(), type);
-            return;
-        }
+        ///@todo fix this whole compostie recovery thing in a better way
+        //if ( !this->giveIPValueSize(type, gp) ) {
+        //    OOFEM_ERROR3("ZZNodalRecoveryMI_computeNNMatrix: Element %d not supporting type %d", this->giveNumber(), type);
+        //    return;
+        //}
 
         interpol->evalN( answer, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     } else {

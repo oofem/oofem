@@ -284,13 +284,23 @@ int
 IsoInterfaceDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
     IsoInterfaceDamageMaterialStatus *status = static_cast< IsoInterfaceDamageMaterialStatus * >( this->giveStatus(aGaussPoint) );
-    if ( ( type == IST_DamageTensor ) || ( type == IST_PrincipalDamageTensor ) ) {
-        answer.resize(1);
-        answer.at(1) = status->giveDamage();
+    if ( type == IST_DamageTensor ) {
+        answer.resize(6);
+        answer.zero();
+        answer.at(1) = answer.at(2) = answer.at(3) = status->giveDamage();
         return 1;
-    } else if ( ( type == IST_DamageTensorTemp ) || ( type == IST_PrincipalDamageTempTensor ) ) {
-        answer.resize(1);
-        answer.at(1) = status->giveTempDamage();
+    } else if ( type == IST_DamageTensorTemp ) {
+        answer.resize(6);
+        answer.zero();
+        answer.at(1) = answer.at(2) = answer.at(3) = status->giveTempDamage();
+        return 1;
+    } else if ( type == IST_PrincipalDamageTensor ) {
+        answer.resize(3);
+        answer.at(1) = answer.at(2) = answer.at(3) = status->giveDamage();
+        return 1;
+    } else if ( type == IST_PrincipalDamageTempTensor ) {
+        answer.resize(3);
+        answer.at(1) = answer.at(2) = answer.at(3) = status->giveTempDamage();
         return 1;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         answer.resize(1);
@@ -305,44 +315,14 @@ IsoInterfaceDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGauss
 InternalStateValueType
 IsoInterfaceDamageMaterial :: giveIPValueType(InternalStateType type)
 {
-    if ( ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ||
-        ( type == IST_PrincipalDamageTensor ) || ( type == IST_PrincipalDamageTempTensor ) ) {
+    if ( type == IST_DamageTensor || type == IST_DamageTensorTemp ) {
         return ISVT_TENSOR_S3;
+    } else if ( type == IST_PrincipalDamageTensor || type == IST_PrincipalDamageTempTensor ) {
+        return ISVT_VECTOR;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         return ISVT_SCALAR;
     } else {
         return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
-int
-IsoInterfaceDamageMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ||
-        ( type == IST_PrincipalDamageTensor ) || ( type == IST_PrincipalDamageTempTensor ) ) {
-        answer.resize(9);
-        answer.at(1) = 1;
-        return 1;
-    } else if ( type == IST_MaxEquivalentStrainLevel ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-
-int
-IsoInterfaceDamageMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ||
-        ( type == IST_PrincipalDamageTensor ) || ( type == IST_PrincipalDamageTempTensor ) ||
-        ( type == IST_MaxEquivalentStrainLevel ) ) {
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
     }
 }
 

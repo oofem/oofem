@@ -366,7 +366,6 @@ RankineMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
 }
 
 
-
 int
 RankineMatNl :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
@@ -387,6 +386,7 @@ RankineMatNl :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Interna
     }
 }
 
+
 InternalStateValueType
 RankineMatNl :: giveIPValueType(InternalStateType type)
 {
@@ -397,27 +397,6 @@ RankineMatNl :: giveIPValueType(InternalStateType type)
     }
 }
 
-int
-RankineMatNl :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_CumPlasticStrain_2 || type == IST_MaxEquivalentStrainLevel ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else {
-        return RankineMat :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-int
-RankineMatNl :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
-{
-    if ( type == IST_CumPlasticStrain_2 || type == IST_MaxEquivalentStrainLevel ) {
-        return 1;
-    } else {
-        return RankineMat :: giveIPValueSize(type, gp);
-    }
-}
 
 
 //*******************************

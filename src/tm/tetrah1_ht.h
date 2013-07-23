@@ -76,7 +76,6 @@ public:
     virtual int testElementExtension(ElementExtension ext)
     { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
 
-    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual Element *SpatialLocalizerI_giveElement() { return this; }

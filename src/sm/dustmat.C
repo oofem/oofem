@@ -110,8 +110,7 @@ DustMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     }
 
     // print plastic strain vector
-    StrainVector plasticStrain( gp->giveMaterialMode() );
-    givePlasticStrain(plasticStrain);
+    const StrainVector & plasticStrain = this->givePlasticStrain();
 
     fprintf(file, ", plasticStrains ");
     int n = plasticStrain.giveSize();
@@ -298,10 +297,9 @@ DustMaterial :: performStressReturn(GaussPoint *gp, StrainVector strain)
     strain.computeDeviatoricVolumetricSplit(strainDeviator, volumetricStrain);
 
     // compute trial elastic strains
-    StrainVector plasticStrain(mode);
+    StrainVector plasticStrain = status->givePlasticStrain();
     double volumetricPlasticStrain;
     StrainVector plasticStrainDeviator(mode);
-    status->givePlasticStrain(plasticStrain);
     plasticStrain.computeDeviatoricVolumetricSplit(plasticStrainDeviator, volumetricPlasticStrain);
     double volumetricElasticStrain = volumetricStrain - volumetricPlasticStrain;
     StrainVector elasticStrainDeviator = strainDeviator;
@@ -554,8 +552,9 @@ DustMaterial :: giveIPValue(FloatArray &answer,
     if ( type == IST_PlasticStrainTensor ||
          type == IST_VolumetricPlasticStrain ||
          type == IST_PrincipalPlasticStrainTensor ) {
-        StrainVector plasticStrain( gp->giveMaterialMode() );
-        status->givePlasticStrain(plasticStrain);
+        StrainVector plasticStrain(_Unknown);
+        ///@todo Fill in correct full form values here! This just adds zeros!
+        status->givePlasticStrain().convertToFullForm(plasticStrain);
         if ( type == IST_PlasticStrainTensor ) {
             answer = plasticStrain;
             return 1;
@@ -585,28 +584,6 @@ DustMaterial :: giveIPValue(FloatArray &answer,
     return 0;
 }
 
-int
-DustMaterial :: giveIPValueSize(InternalStateType type,
-                                GaussPoint *gp)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        return StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
-    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        return 3;
-    } else if ( type == IST_VolumetricPlasticStrain || type == IST_StressCapPos ) {
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIPValueSize(type, gp);
-    }
-}
-
-int
-DustMaterial :: giveIntVarCompFullIndx(IntArray &answer,
-                                       InternalStateType type,
-                                       MaterialMode mmode)
-{
-    return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-}
 
 InternalStateValueType
 DustMaterial :: giveIPValueType(InternalStateType type)
@@ -615,7 +592,7 @@ DustMaterial :: giveIPValueType(InternalStateType type)
         return ISVT_TENSOR_S3E;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         return ISVT_VECTOR;
-    } else if ( ( type == IST_StressCapPos ) || ( type == IST_VolumetricPlasticStrain ) ) {
+    } else if ( type == IST_StressCapPos || type == IST_VolumetricPlasticStrain ) {
         return ISVT_SCALAR;
     } else {
         return StructuralMaterial :: giveIPValueType(type);
@@ -687,8 +664,7 @@ void
 DustMaterial :: solveQ0(double &answer)
 {
     double fx, dfx;
-    int i;
-    for ( i = 0; i < newtonIter; i++ ) {
+    for ( int i = 0; i < newtonIter; i++ ) {
         fx = -x0 + answer - rEll * ( alpha -      lambda * exp(beta * answer) - theta * answer );
         dfx =       1 - rEll * (      -beta * lambda * exp(beta * answer) - theta );
         answer -= fx / dfx;
@@ -707,11 +683,10 @@ DustMaterial :: solveQ0(double &answer)
 void
 DustMaterial :: computeAndSetBulkAndShearModuli(double &bulkModulus, double &shearModulus, GaussPoint *gp)
 {
+    DustMaterialStatus *status = static_cast< DustMaterialStatus * >( giveStatus(gp) );
     double ym = LEMaterial->giveYoungsModulus();
     double nu = LEMaterial->givePoissonsRatio();
-    StrainVector plasticStrain( gp->giveMaterialMode() );
-    DustMaterialStatus *status = static_cast< DustMaterialStatus * >( giveStatus(gp) );
-    status->givePlasticStrain(plasticStrain);
+    StrainVector plasticStrain = status->givePlasticStrain();
     double volumetricPlasticStrain = plasticStrain.computeVolumetricPart();
     if ( volumetricPlasticStrain < 0. ) {
         ym -= mStiff * volumetricPlasticStrain;

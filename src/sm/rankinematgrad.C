@@ -343,6 +343,7 @@ RankineMatGrad :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Inter
     }
 }
 
+
 InternalStateValueType
 RankineMatGrad :: giveIPValueType(InternalStateType type)
 {
@@ -353,27 +354,6 @@ RankineMatGrad :: giveIPValueType(InternalStateType type)
     }
 }
 
-int
-RankineMatGrad :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_CumPlasticStrain_2 || type == IST_MaxEquivalentStrainLevel ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else {
-        return RankineMat :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-int
-RankineMatGrad :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
-{
-    if ( type == IST_CumPlasticStrain_2 || type == IST_MaxEquivalentStrainLevel ) {
-        return 1;
-    } else {
-        return RankineMat :: giveIPValueSize(type, gp);
-    }
-}
 
 //=============================================================================
 // GRADIENT RANKINE MATERIAL STATUS

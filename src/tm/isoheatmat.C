@@ -142,16 +142,6 @@ IsotropicHeatTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
     return 0.;
 }
 
-int
-IsotropicHeatTransferMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( type == IST_HydrationDegree ) {
-        return 1;
-    } else {
-        return TransportMaterial :: giveIPValueSize(type, aGaussPoint);
-    }
-}
-
 
 int
 IsotropicHeatTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)

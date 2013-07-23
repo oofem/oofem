@@ -72,7 +72,6 @@ public:
 
     virtual Interface *giveInterface(InterfaceType t);
 
-    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual Element *SpatialLocalizerI_giveElement() { return this; }

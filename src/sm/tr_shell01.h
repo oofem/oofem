@@ -82,7 +82,6 @@ public:
     virtual int computeNumberOfDofs(EquationID ut) { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
     { plate->giveDofManDofIDMask(inode, ut, answer); }
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_TR_SHELL01_Name; }
     virtual const char *giveClassName() const { return "TR_SHELL01"; }
@@ -115,17 +114,13 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
 
-    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                    InternalStateType type, TimeStep *tStep);
-    virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
-    { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
     // ZZErrorEstimatorInterface
     virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
 

@@ -399,20 +399,7 @@ IntMatBilinearCZFagerstrom :: giveIPValueType(InternalStateType type)
 }
 
 
-int
-IntMatBilinearCZFagerstrom :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    //@todoMartin check if this needs to be updated
-    return StructuralInterfaceMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-}
 
-
-int
-IntMatBilinearCZFagerstrom :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    //@todoMartin Insert code for returning size of internal state
-    return StructuralInterfaceMaterial :: giveIPValueSize(type, aGaussPoint);
-}
 
 
 

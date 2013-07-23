@@ -80,6 +80,8 @@ public:
     void setTempPlasDef(FloatArray epsip) { tempPlasDef = epsip; }
     void setSmtrx(FloatMatrix smt) { smtrx = smt; }
 
+    const FloatArray & givePlasDef() const { return plasDef; }
+
     // definition
     virtual const char *giveClassName() const { return "TrabBoneEmbedStatus"; }
     virtual classType giveClassID() const { return TrabBoneEmbedStatusClass; }
@@ -132,9 +134,7 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
 };
 } // end namespace oofem
 #define trabboneembed_h

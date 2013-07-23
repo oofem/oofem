@@ -205,9 +205,11 @@ TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
         return 1;
     } else if ( type == IST_Velocity ) { ///@todo Shouldn't be named velocity.. instead, "MassFlow" or something suitable like that.
         answer = ms->giveFlux();
+        answer.resizeWithValues(3);
         return 1;
     } else if ( type == IST_PressureGradient ) {
         answer = ms->giveGradient();
+        answer.resizeWithValues(3);
         return 1;
     } else if ( type == IST_Density ) {
         answer.resize(1);
@@ -238,47 +240,5 @@ TransportMaterial :: giveIPValueType(InternalStateType type)
     }
 }
 
-
-int
-TransportMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_Temperature || type == IST_MassConcentration_1 || type == IST_Humidity || type == IST_HydrationDegree || type == IST_Density || type == IST_ThermalConductivityIsotropic || type == IST_HeatCapacity || type == IST_AverageTemperature  || type == IST_YoungModulusVirginPaste || type == IST_PoissonRatioVirginPaste || type == IST_YoungModulusConcrete || type == IST_PoissonRatioConcrete ) {
-        answer.setValues(1, 1);
-        return 1;
-    } else if ( type == IST_TemperatureFlow || type == IST_MassConcentrationFlow_1 || type == IST_HumidityFlow  ) {
-        answer.setValues(3, 1, 2, 3);
-        return 1;
-    } else {
-        return Material :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-
-int
-TransportMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    int size = 0;
-    MaterialMode mMode = aGaussPoint->giveMaterialMode();
-    switch  ( mMode ) {
-    case _2dHeat:
-    case _2dHeMo:
-        size = 2;
-        break;
-    case _3dHeat:
-    case _3dHeMo:
-        size = 3;
-        break;
-    default:
-        _error2( "Unknown mode (%s)", __MaterialModeToString(mMode) );
-    }
-
-    if ( type == IST_Temperature || type == IST_MassConcentration_1 || type == IST_HydrationDegree || type == IST_Humidity || type == IST_Density || type == IST_MaterialNumber || type == IST_ElementNumber || type == IST_ThermalConductivityIsotropic || type == IST_HeatCapacity || type == IST_AverageTemperature || type == IST_YoungModulusVirginPaste || type == IST_PoissonRatioVirginPaste || type == IST_YoungModulusConcrete || type == IST_PoissonRatioConcrete ) {
-        return 1;
-    } else if ( type == IST_TemperatureFlow || type == IST_MassConcentrationFlow_1 || type == IST_HumidityFlow ) {
-        return size;
-    } else {
-        return Material :: giveIPValueSize(type, aGaussPoint);
-    }
-}
 
 } // end namespace oofem

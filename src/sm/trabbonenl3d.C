@@ -120,12 +120,12 @@ TrabBoneNL3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
         if ( dKappa > 0.0 ) {
             // Imports
-            tempEffectiveStress = * nlStatus->giveTempEffectiveStress();
+            tempEffectiveStress = nlStatus->giveTempEffectiveStress();
             this->computeCumPlastStrain(nlKappa, gp, atTime);
             tempDam = nlStatus->giveTempDam();
             double dam = nlStatus->giveDam();
-            plasFlowDirec = * nlStatus->givePlasFlowDirec();
-            SSaTensor = * nlStatus->giveSSaTensor();
+            plasFlowDirec = nlStatus->givePlasFlowDirec();
+            SSaTensor = nlStatus->giveSSaTensor();
             beta = nlStatus->giveBeta();
             // Construction of the dyadic product tensor
             prodTensor.beTProductOf(SSaTensor, plasFlowDirec);
@@ -226,7 +226,7 @@ TrabBoneNL3D :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
 
     if ( ( tempDam - dam ) > 0.0 ) {
         elem->giveLocationArray(loc, EID_MomentumBalance, s);
-        localNu = * nlStatus->giveTempEffectiveStress();
+        localNu = nlStatus->giveTempEffectiveStress();
 
         elem->giveLocationArray( loc, EID_MomentumBalance, EModelDefaultEquationNumbering() );
         elem->computeBmatrixAt(gp, b);
@@ -278,8 +278,8 @@ TrabBoneNL3D :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     }
 
     if ( dKappa > 0.0 ) {
-        plasFlowDirec = * nlStatus->givePlasFlowDirec();
-        SSaTensor = * nlStatus->giveSSaTensor();
+        plasFlowDirec = nlStatus->givePlasFlowDirec();
+        SSaTensor = nlStatus->giveSSaTensor();
         beta = nlStatus->giveBeta();
 
         prodTensor.beTProductOf(SSaTensor, plasFlowDirec);
@@ -314,7 +314,7 @@ TrabBoneNL3D :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
     performPlasticityReturn(gp, totalStrain, atTime);
     tempDam = computeDamage(gp, atTime);
-    effStress = * nlStatus->giveTempEffectiveStress();
+    effStress = nlStatus->giveTempEffectiveStress();
 
     totalStress = ( 1 - tempDam ) * effStress;
 

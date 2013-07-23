@@ -146,11 +146,7 @@ protected:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
-
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
 };
 
 //=============================================================================
@@ -232,7 +228,7 @@ public:
     void letTempLeftCauchyGreenBe(FloatMatrix values) { tempLeftCauchyGreen = values; }
     void letLeftCauchyGreenBe(FloatMatrix values) { leftCauchyGreen = values; }
 
-    const FloatArray *givePlasDef() { return & plasticStrain; }
+    const FloatArray &givePlasDef() { return plasticStrain; }
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 

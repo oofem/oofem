@@ -157,7 +157,6 @@ public:
      * The algorithm should use temporary or equilibrium  history variables stored in integration point status
      * to compute and return required result.
      * @param answer Contains result.
-     * @param form Material response form.
      * @param mode Material response mode.
      * @param gp Integration point.
      * @param atTime Time step (most models are able to respond only when atTime is current time step).
@@ -211,8 +210,6 @@ public:
     // post-processing
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp); }
 };

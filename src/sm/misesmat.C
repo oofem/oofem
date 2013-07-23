@@ -773,7 +773,9 @@ MisesMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
 {
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_PlasticStrainTensor ) {
-        answer = * status->givePlasDef();
+        const FloatArray &ep = status->givePlasDef();
+        ///@todo Fix this so that it doesn't just fill in zeros for plane stress:
+        StructuralMaterial :: giveFullSymVectorForm(answer, ep, aGaussPoint->giveMaterialMode());
         return 1;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         answer.resize(1);
@@ -800,71 +802,6 @@ MisesMat :: giveIPValueType(InternalStateType type)
         return ISVT_SCALAR;
     } else {
         return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
-int
-MisesMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        if ( mmode == _3dMat ) {
-            answer.resize(6);
-            answer.at(1) = 1;
-            answer.at(2) = 2;
-            answer.at(3) = 3;
-            answer.at(4) = 4;
-            answer.at(5) = 5;
-            answer.at(6) = 6;
-            return 1;
-        } else if ( mmode == _PlaneStrain ) {
-            answer.resize(6);
-            answer.at(1) = 1;
-            answer.at(2) = 2;
-            answer.at(3) = 3;
-            answer.at(6) = 4;
-            return 1;
-        } else if ( mmode == _1dMat ) {
-            answer.resize(1);
-            answer.at(1) = 1;
-            return 1;
-        }
-    } else if ( type == IST_MaxEquivalentStrainLevel ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else if ( type == IST_DamageScalar || type == IST_DamageTensor ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    }
-
-    return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-}
-
-
-int
-MisesMat :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        MaterialMode mode = gp->giveMaterialMode();
-        if ( mode == _3dMat ) {
-            return 6;
-        } else if ( mode == _PlaneStrain ) {
-            return 4;
-        } else if ( mode == _PlaneStress ) {
-            return 3;
-        } else if ( mode == _1dMat ) {
-            return 1;
-        } else {
-            return 0;
-        }
-    } else if ( type == IST_MaxEquivalentStrainLevel ) {
-        return 1;
-    } else if ( type == IST_DamageScalar || type == IST_DamageTensor ) {
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIPValueSize(type, gp);
     }
 }
 

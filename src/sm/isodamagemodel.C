@@ -259,12 +259,24 @@ int
 IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
     IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(aGaussPoint) );
-    if ( ( type == IST_DamageTensor ) || ( type == IST_PrincipalDamageTensor ) ) {
-        answer.resize(1);
+    if ( type == IST_DamageTensor ) {
+        answer.resize(6);
+        answer.zero();
+        answer.at(1) = answer.at(2) = answer.at(3) = status->giveDamage();
+        return 1;
+    } else if ( type == IST_PrincipalDamageTensor ) {
+        answer.resize(3);
+        answer.zero();
         answer.at(1) = status->giveDamage();
         return 1;
-    } else if ( ( type == IST_DamageTensorTemp ) || ( type == IST_PrincipalDamageTempTensor ) ) {
-        answer.resize(1);
+    } else if ( type == IST_DamageTensorTemp ) {
+        answer.resize(6);
+        answer.zero();
+        answer.at(1) = answer.at(2) = answer.at(3) = status->giveTempDamage();
+        return 1;
+    } else if ( type == IST_PrincipalDamageTempTensor ) {
+        answer.resize(3);
+        answer.zero();
         answer.at(1) = status->giveTempDamage();
         return 1;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
@@ -309,12 +321,11 @@ IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoi
 InternalStateValueType
 IsotropicDamageMaterial :: giveIPValueType(InternalStateType type)
 {
-    if ( ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ||
-        ( type == IST_PrincipalDamageTensor ) || ( type == IST_PrincipalDamageTempTensor ) ) {
+    if ( type == IST_DamageTensor || type == IST_DamageTensorTemp ) {
         return ISVT_TENSOR_S3;
     } else if ( type == IST_MaxEquivalentStrainLevel || type == IST_CharacteristicLength || type == IST_CrackDirs ) {
         return ISVT_SCALAR;
-    } else if ( type == IST_CrackVector ) {
+    } else if ( type == IST_CrackVector || type == IST_PrincipalDamageTensor || type == IST_PrincipalDamageTempTensor ) {
         return ISVT_VECTOR;
 
 #ifdef keep_track_of_dissipated_energy
@@ -328,56 +339,6 @@ IsotropicDamageMaterial :: giveIPValueType(InternalStateType type)
 #endif
     } else {
         return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
-int
-IsotropicDamageMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ||
-        ( type == IST_PrincipalDamageTensor ) || ( type == IST_PrincipalDamageTempTensor ) ) {
-        answer.resize(9);
-        answer.at(1) = 1;
-        return 1;
-    } else if ( type == IST_MaxEquivalentStrainLevel || type == IST_CharacteristicLength || type == IST_CrackDirs ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else if ( type == IST_CrackVector ) {
-        answer.resize(3);
-        return 1;
-
-#ifdef keep_track_of_dissipated_energy
-    } else if ( ( type == IST_DissWorkDensity ) || ( type == IST_StressWorkDensity ) || ( type == IST_FreeEnergyDensity ) ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-
-#endif
-    } else {
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-
-int
-IsotropicDamageMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( type == IST_DamageTensor || type == IST_DamageTensorTemp ||
-         type == IST_PrincipalDamageTensor  ||  type == IST_PrincipalDamageTempTensor  ||
-         type == IST_MaxEquivalentStrainLevel || type == IST_CharacteristicLength || type == IST_CrackDirs ) {
-        return 1;
-    } else if ( type == IST_CrackVector ) {
-        return 3;
-
-#ifdef keep_track_of_dissipated_energy
-    } else if ( ( type == IST_StressWorkDensity ) || ( type == IST_DissWorkDensity ) || ( type == IST_FreeEnergyDensity ) ) {
-        return 1;
-
-#endif
-    } else {
-        return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
     }
 }
 

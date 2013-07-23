@@ -42,7 +42,7 @@
 #define _IFT_CebFip78Material_Name "cebfip78"
 #define _IFT_CebFip78Material_e28 "e28"
 #define _IFT_CebFip78Material_fibf "fibf"
-#define _IFT_CebFip78Material_kap_a "kap_a"
+#define _IFT_CebFip78Material_kap_a_per_area "kap_a_per_area"
 #define _IFT_CebFip78Material_kap_c "kap_c"
 #define _IFT_CebFip78Material_kap_tt "kap_tt"
 #define _IFT_CebFip78Material_u "u"
@@ -59,7 +59,7 @@ class CebFip78Material : public MaxwellChainMaterial
 protected:
     double E28;    ///< Young modulus at age of 28 days [MPa].
     double fibf;   ///< Basic creep coefficient.
-    double kap_a;  ///< Coefficient of hydrometric conditions.
+    double kap_a_per_area;  ///< Coefficient of hydrometric conditions.
     double kap_c;  ///< Coefficient of type of cement.
     double kap_tt; ///< Coefficient of temperature effects.
     double u;      ///< Surface imposed to environment [mm^2]; temporary here ; should be in crosssection level.
@@ -74,7 +74,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
 protected:
-    virtual double computeCreepFunction(GaussPoint *gp, double atTime, double ofAge);
+    virtual double computeCreepFunction(double atTime, double ofAge);
 };
 } // end namespace oofem
 #endif // cebfip78_h

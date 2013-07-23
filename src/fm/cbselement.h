@@ -103,8 +103,6 @@ public:
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual int checkConsistency();
 
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
-
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                 int node, TimeStep *atTime);

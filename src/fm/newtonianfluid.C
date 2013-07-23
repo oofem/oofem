@@ -85,10 +85,6 @@ NewtonianFluidMaterial :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep
 
 double
 NewtonianFluidMaterial :: give(int aProperty, GaussPoint *gp)
-//
-// Returns the value of the property aProperty (e.g. the Young's modulus
-// 'E') of the receiver.
-//
 {
     if ( aProperty == Viscosity ) {
         return viscosity;
@@ -102,9 +98,6 @@ NewtonianFluidMaterial :: give(int aProperty, GaussPoint *gp)
 
 MaterialStatus *
 NewtonianFluidMaterial :: CreateStatus(GaussPoint *gp) const
-/*
- * creates new  material status  corresponding to this class
- */
 {
     return new FluidDynamicMaterialStatus(1, this->giveDomain(), gp);
 }
@@ -198,9 +191,11 @@ NewtonianFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, Mat
     }
 }
 
+
 int
 NewtonianFluidMaterial :: checkConsistency()
 {
+    ///@todo Fix this, checkConsistency shouldn't be a replacement for "post-initialization" but should be completely optional.
     if ( domain->giveEngngModel()->giveEquationScalingFlag() ) {
         double scale;
         scale = domain->giveEngngModel()->giveVariableScale(VST_Density);
@@ -212,4 +207,5 @@ NewtonianFluidMaterial :: checkConsistency()
 
     return 1;
 }
+
 } // end namespace oofem

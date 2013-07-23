@@ -66,15 +66,8 @@ BinghamFluidMaterial2 :: BinghamFluidMaterial2(int n, Domain *d) : FluidDynamicM
 
 int
 BinghamFluidMaterial2 :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
 {
-    if ( ( mode == _2dFlow ) || ( mode == _3dFlow ) ) {
-        return 1;
-    } 
-
-    return 0;
+    return mode == _2dFlow || mode == _3dFlow;
 }
 
 
@@ -149,16 +142,11 @@ BinghamFluidMaterial2 :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep)
     }
 
 #endif
-    //return this->mu_0;
 }
 
 
 double
 BinghamFluidMaterial2 :: give(int aProperty, GaussPoint *gp)
-//
-// Returns the value of the property aProperty (e.g. the Young's modulus
-// 'E') of the receiver.
-//
 {
     if ( aProperty == Viscosity ) {
         return mu_0;
@@ -172,9 +160,6 @@ BinghamFluidMaterial2 :: give(int aProperty, GaussPoint *gp)
 
 MaterialStatus *
 BinghamFluidMaterial2 :: CreateStatus(GaussPoint *gp) const
-/*
- * creates new  material status  corresponding to this class
- */
 {
     return new BinghamFluidMaterial2Status(1, this->giveDomain(), gp);
 }
@@ -553,8 +538,6 @@ BinghamFluidMaterial2 :: computeDeviatoricStress(FloatArray &answer, const Float
 }
 
 
-
-
 BinghamFluidMaterial2Status :: BinghamFluidMaterial2Status(int n, Domain *d, GaussPoint *g) :
     FluidDynamicMaterialStatus(n, d, g)
 {
@@ -692,8 +675,8 @@ BinghamFluidMaterial2Status :: restoreContext(DataStream *stream, ContextMode mo
 }
 
 
-
-/*void
+#if 0
+void
 BinghamFluidMaterial2 :: __debug(GaussPoint *gp, TimeStep *atTime)
 {
     BinghamFluidMaterial2Status *status = static_cast< BinghamFluidMaterial2Status * >( this->giveStatus(gp) );
@@ -711,5 +694,7 @@ BinghamFluidMaterial2 :: __debug(GaussPoint *gp, TimeStep *atTime)
         printf( "%e %e %e  %e %e %e %e %e %e\n", eps.at(1), eps.at(2), eps.at(3), tau.at(1), tau.at(2), tau.at(3), tau_t.at(1), tau_t.at(2), tau_t.at(3) );
         tau_p = tau_t;
     }
-    }*/ 
+}
+#endif
+
 } // end namespace oofem

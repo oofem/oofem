@@ -129,9 +129,7 @@ public:
                                            TimeStep *atTime);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);

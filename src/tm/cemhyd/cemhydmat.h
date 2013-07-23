@@ -122,9 +122,7 @@ public:
     virtual double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual int initMaterial(Element *element);
     /// Clear temperatures multiplied with volume around GPs - need before temperature averaging.
     virtual void clearWeightTemperatureProductVolume(Element *element);

@@ -70,20 +70,15 @@ PlasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-    if ( ( mode == _3dMat ) ||
-        ( mode == _1dMat ) ||
+    return mode == _3dMat ||
+        mode == _1dMat ||
         //<RESTRICTED_SECTION>
-        ( mode == _PlaneStress )  ||
+        mode == _PlaneStress ||
         //</RESTRICTED_SECTION>
-        ( mode == _PlaneStrain )  ||
-        ( mode == _2dPlateLayer ) ||
-        ( mode == _2dBeamLayer )  ||
-        ( mode == _3dShellLayer ) ||
-        ( mode == _1dFiber ) ) {
-        return 1;
-    }
-
-    return 0;
+        mode == _PlaneStrain ||
+        mode == _PlateLayer ||
+        mode == _2dBeamLayer ||
+        mode == _Fiber;
 }
 
 
@@ -131,8 +126,8 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
     this->giveStressDependentPartOfStrainVector(strainVectorR, gp, totalStrain,
                                                 atTime, VM_Total);
 
-    status->givePlasticStrainVector(plasticStrainVectorR);
-    status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+    plasticStrainVectorR = status->givePlasticStrainVector();
+    strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
 
     // tady konec debugovani - strainSpaceHardeningVariables ve statusu neinicializovany
     // to musi udelat material.
@@ -314,8 +309,8 @@ PlasticMaterial :: ComputeResidualVector(GaussPoint *gp, double Gamma,
     size = gradientVectorR->giveSize();
 
     answer = new FloatArray(size);
-    status->givePlasticStrainVector(oldPlasticStrainVectorR);
-    status->giveStrainSpaceHardeningVars(oldStrainSpaceHardeningVariables);
+    oldPlasticStrainVectorR = status->givePlasticStrainVector();
+    oldStrainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
 
     for ( int i = 1; i <= isize; i++ ) {
         answer->at(i) = oldPlasticStrainVectorR.at(i) - plasticStrainVectorR->at(i) + Gamma *gradientVectorR->at(i);
@@ -447,7 +442,7 @@ PlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
 
     stressVector = status->giveStressVector();
     StructuralMaterial :: giveFullSymVectorForm(fullStressVector, stressVector, gp->giveMaterialMode());
-    status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+    strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
     stressSpaceHardeningVars = this->ComputeStressSpaceHardeningVars(gp, & strainSpaceHardeningVariables);
 
     this->computeConsistentModuli(consistentModuli, gp,
@@ -649,7 +644,7 @@ PlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 
 
 void
-PlasticMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
+PlasticMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
                                              MatResponseMode mode,
                                              GaussPoint *gp,
                                              TimeStep *atTime)
@@ -690,40 +685,20 @@ PlasticMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
 }
 
 
-void
-PlasticMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
-                                             MatResponseMode mode,
-                                             GaussPoint *gp,
-                                             TimeStep *atTime)
-//
-// returns receiver's 2dPlaneStressMtrx constructed from
-// general 3dMatrialStiffnessMatrix
-// (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
-//
-// standard method from Material Class overloaded, because no inversion is needed.
-// the reduction from 3d case will not work
-// this implementation should be faster.
-{
-    if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
-    } else {
-        this->give2dPlateLayerStiffMtrx(answer, mode, gp, atTime);
-    }
-}
-
-
 int
 PlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
     PlasticMaterialStatus *status = static_cast< PlasticMaterialStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_PlasticStrainTensor ) {
-        status->givePlasticStrainVector(answer);
+        const FloatArray ep = status->givePlasticStrainVector();
+        ///@todo Fill in correct full form values here! This just adds zeros!
+        StructuralMaterial :: giveFullSymVectorForm(answer, ep, aGaussPoint->giveMaterialMode());
         return 1;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        FloatArray st(6), s;
+        FloatArray st(6);
+        const FloatArray &s = status->givePlasticStrainVector();
 
-        status->givePlasticStrainVector(s);
-
+        ///@todo Fill in correct full form values here! This just adds zeros!
         StructuralMaterial :: giveFullSymVectorForm(st, s, aGaussPoint->giveMaterialMode());
 
         this->computePrincipalValues(answer, st, principal_strain);
@@ -744,37 +719,6 @@ PlasticMaterial :: giveIPValueType(InternalStateType type)
         return ISVT_VECTOR;
     } else {
         return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
-int
-PlasticMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        StructuralMaterial :: giveInvertedVoigtVectorMask(answer, mmode);
-        return 1;
-    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        answer.resize(6);
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-        answer.at(3) = 3;
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-
-int
-PlasticMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        return StructuralMaterial :: giveSizeOfVoigtSymVector( aGaussPoint->giveMaterialMode() );
-    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        return 3;
-    } else {
-        return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
     }
 }
 

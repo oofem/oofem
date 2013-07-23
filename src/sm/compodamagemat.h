@@ -164,8 +164,6 @@ public:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
 
     /**
      * Optional parameter determining after how many iterations within the time step the damage is calculated.

@@ -147,13 +147,6 @@ Quad1_ht :: giveInterface(InterfaceType interface)
 }
 
 int
-Quad1_ht :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-int
 Quad1_ht :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
 {
     FloatArray lcoords;
@@ -214,7 +207,6 @@ void Quad1_ht :: drawScalar(oofegGraphicContext &context)
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     double s [ 4 ];
     FloatArray v [ 4 ];
-    IntArray map;
     InternalStateType itype = context.giveIntVarType();
 
     if ( !context.testElementGraphicActivity(this) ) {
@@ -232,10 +224,7 @@ void Quad1_ht :: drawScalar(oofegGraphicContext &context)
             return;
         }
 
-        result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-        if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-            return;
-        }
+        indx = context.giveIntVarIndx();
 
         for ( i = 1; i <= 4; i++ ) {
             s [ i - 1 ] = v [ i - 1 ].at(indx);

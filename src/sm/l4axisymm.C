@@ -423,18 +423,6 @@ L4Axisymm :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
 }
 
 
-int
-L4Axisymm :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
-        return 6;
-    }
-
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-
 void
 L4Axisymm :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
 {
@@ -638,7 +626,6 @@ void L4Axisymm :: drawScalar(oofegGraphicContext &context)
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v [ 4 ];
     double s [ 4 ], defScale;
-    IntArray map;
 
     if ( !context.testElementGraphicActivity(this) ) {
         return;
@@ -654,10 +641,7 @@ void L4Axisymm :: drawScalar(oofegGraphicContext &context)
             return;
         }
 
-        result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-        if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-            return;
-        }
+        indx = context.giveIntVarIndx();
 
         for ( i = 1; i <= 4; i++ ) {
             s [ i - 1 ] = v [ i - 1 ].at(indx);
@@ -778,10 +762,7 @@ void L4Axisymm :: drawScalar(oofegGraphicContext &context)
                 return;
             }
 
-            this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-            if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-                return;
-            }
+            indx = context.giveIntVarIndx();
 
             for ( i = 1; i <= 4; i++ ) {
                 s [ i - 1 ] = v [ 0 ].at(indx);

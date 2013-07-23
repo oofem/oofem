@@ -483,10 +483,4 @@ double Tet1BubbleStokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(co
     return center.distance(coords);
 }
 
-int Tet1BubbleStokes :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
 } // end namespace oofem

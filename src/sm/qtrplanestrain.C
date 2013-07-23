@@ -298,7 +298,6 @@ void QTrPlaneStrain :: drawScalar(oofegGraphicContext &context)
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v [ 6 ];
     double s [ 6 ], ss [ 3 ], defScale;
-    IntArray map;
 
     if ( !context.testElementGraphicActivity(this) ) {
         return;
@@ -316,10 +315,7 @@ void QTrPlaneStrain :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-    if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-        return;
-    }
+    indx = context.giveIntVarIndx();
 
     for ( i = 1; i <= 6; i++ ) {
         s [ i - 1 ] = v [ i - 1 ].at(indx);
@@ -413,33 +409,6 @@ QTrPlaneStrain :: drawSpecial(oofegGraphicContext &gc)
 { }
 
 #endif
-
-
-
-
-int
-QTrPlaneStrain :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) || ( type == IST_DamageTensor ) ) {
-        return 3;
-    }
-
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-
-int
-QTrPlaneStrain :: SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
-        return 3;
-    }
-
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
 
 
 void

@@ -57,54 +57,6 @@ IsotropicLinearElasticMaterial :: IsotropicLinearElasticMaterial(int n, Domain *
     G = E / ( 2.0 * ( 1. + nu ) );
 }
 
-int
-IsotropicLinearElasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
-{
-    if ( ( mode == _3dMat ) || ( mode == _PlaneStress ) ||
-        ( mode == _PlaneStrain ) || ( mode == _1dMat ) ||
-        ( mode == _2dPlateLayer ) || ( mode == _2dBeamLayer ) ||
-        ( mode == _3dShellLayer ) || ( mode == _2dPlate ) ||
-        ( mode == _2dBeam ) || ( mode == _3dShell ) ||
-        ( mode == _3dBeam ) || ( mode == _PlaneStressRot ) ||
-        ( mode == _1dFiber ) ) {
-        return 1;
-    }
-
-    return 0;
-}
-
-
-void
-IsotropicLinearElasticMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
-                                                           MatResponseMode rMode,
-                                                           GaussPoint *gp,
-                                                           TimeStep *atTime)
-{
-    //
-    // Returns characteristic material stiffness matrix of the receiver
-    //
-    MaterialMode mMode = gp->giveMaterialMode();
-
-    switch ( mMode ) {
-    case _2dBeam:
-        this->give2dBeamStiffMtrx(answer, rMode, gp, atTime);
-        break;
-    case _3dBeam:
-        this->give3dBeamStiffMtrx(answer, rMode, gp, atTime);
-        break;
-    default:
-        LinearElasticMaterial :: giveStiffnessMatrix(answer, rMode, gp, atTime);
-    }
-
-    if ( !isActivated(atTime) ) {
-        answer.times(0.0);
-    }
-}
-
-
 
 IRResultType
 IsotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
@@ -267,92 +219,7 @@ IsotropicLinearElasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
                                                         TimeStep *atTime)
 {
     answer.resize(1, 1);
-    answer.at(1, 1) = this->E;;
-}
-
-
-void
-IsotropicLinearElasticMaterial :: give2dBeamStiffMtrx(FloatMatrix &answer,
-                                                      MatResponseMode rMode,
-                                                      GaussPoint *gp,
-                                                      TimeStep *tStep)
-//
-// return material stiffness matrix for derived types of stressStreinState
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    SimpleCrossSection *crossSection =  dynamic_cast< SimpleCrossSection * >( gp->giveCrossSection() );
-    FloatMatrix mat3d;
-    double area, Iy, shearAreaz;
-
-
-    if ( mode != _2dBeam ) {
-        _error("Give2dBeamStiffMtrx : unsupported mode");
-    }
-
-    if ( crossSection == NULL ) {
-        _error(" Give2dBeamStiffMtrx : no SimpleCrossSection");
-    }
-
-    this->give1dStressStiffMtrx(mat3d, rMode, gp, tStep);
-    area = crossSection->give(CS_Area);
-    Iy   = crossSection->give(CS_InertiaMomentY);
-    shearAreaz = crossSection->give(CS_SHEAR_AREA_Z);
-
-    answer.resize(3, 3);
-    answer.zero();
-
-    answer.at(1, 1) = mat3d.at(1, 1) * area;
-    answer.at(2, 2) = mat3d.at(1, 1) * Iy;
-    answer.at(3, 3) = shearAreaz * mat3d.at(1, 1) / ( 2. * ( 1 + nu ) );
-}
-
-
-void
-IsotropicLinearElasticMaterial :: give3dBeamStiffMtrx(FloatMatrix &answer,
-                                                      MatResponseMode rMode,
-                                                      GaussPoint *gp,
-                                                      TimeStep *tStep)
-//
-// return material stiffness matrix for derived types of stressStrainState
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    SimpleCrossSection *crossSection =  dynamic_cast< SimpleCrossSection * >( gp->giveCrossSection() );
-    FloatMatrix mat3d;
-    double area, E, Iy, Iz, Ik;
-    double shearAreay, shearAreaz;
-
-    if ( mode != _3dBeam ) {
-        _error("give3dBeamStiffMtrx : unsupported mode");
-    }
-
-    if ( crossSection == NULL ) {
-        _error("give3dBeamStiffMtrx : no SimpleCrossSection");
-    }
-
-    this->give1dStressStiffMtrx(mat3d, rMode, gp, tStep);
-    E    = mat3d.at(1, 1);
-    area = crossSection->give(CS_Area);
-    Iy   = crossSection->give(CS_InertiaMomentY);
-    Iz   = crossSection->give(CS_InertiaMomentZ);
-    Ik   = crossSection->give(CS_TorsionMomentX);
-
-    //shearCoeff = crossSection->give(CS_BeamShearCoeff);
-    shearAreay = crossSection->give(CS_SHEAR_AREA_Y);
-    shearAreaz = crossSection->give(CS_SHEAR_AREA_Z);
-
-    answer.resize(6, 6);
-    answer.zero();
-
-    answer.at(1, 1) = E * area;
-    answer.at(2, 2) = shearAreay * this->give('G',gp);
-    answer.at(3, 3) = shearAreaz * this->give('G',gp);
-    //answer.at(2, 2) = shearCoeff * this->give('G', gp) * area;
-    //answer.at(3, 3) = shearCoeff * this->give('G', gp) * area;
-    answer.at(4, 4) = this->give('G', gp) * Ik;
-    answer.at(5, 5) = E * Iy;
-    answer.at(6, 6) = E * Iz;
+    answer.at(1, 1) = this->E;
 }
 
 

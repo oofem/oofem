@@ -133,13 +133,13 @@ public:
     int giveNsubsteps() { return nss; }
     double giveDensG() { return densG; }
 
-    const FloatArray *givePlasDef();
-    const FloatArray *giveTempPlasDef();
-    const FloatArray *giveTempEffectiveStress();
-    const FloatArray *givePlasFlowDirec();
-    const FloatMatrix *giveTangentMatrix();
-    const FloatMatrix *giveSmtrx();
-    const FloatMatrix *giveSSaTensor();
+    const FloatArray &givePlasDef() const;
+    const FloatArray &giveTempPlasDef() const;
+    const FloatArray &giveTempEffectiveStress() const;
+    const FloatArray &givePlasFlowDirec() const;
+    const FloatMatrix &giveTangentMatrix() const;
+    const FloatMatrix &giveSmtrx() const;
+    const FloatMatrix &giveSSaTensor() const;
 
     void setTempKappa(double al) { tempKappa = al; }
     void setKappa(double values) { kappa = values; }
@@ -251,9 +251,7 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
 
 #ifdef __PARALLEL_MODE
     virtual double predictRelativeComputationalCost(GaussPoint *gp);

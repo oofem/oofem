@@ -454,15 +454,6 @@ void Hexa21Stokes :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answe
     answer.resize(0);
 }
 
-int Hexa21Stokes :: NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    if ( type == IST_Pressure ) {
-        return 1;
-    }
-
-    return 0;
-}
-
 void Hexa21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
     answer.resize(1);

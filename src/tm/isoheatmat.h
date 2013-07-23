@@ -75,7 +75,6 @@ public:
                                            TimeStep *atTime);
 
 
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 
     virtual const char *giveInputRecordName() const { return _IFT_IsotropicHeatTransferMaterial_Name; }

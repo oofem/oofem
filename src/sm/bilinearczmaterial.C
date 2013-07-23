@@ -216,19 +216,6 @@ BilinearCZMaterial :: giveIPValueType(InternalStateType type)
 }
 
 
-int
-BilinearCZMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-}
-
-
-int
-BilinearCZMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
-}
-
 
 
 const double tolerance = 1.0e-12; // small number

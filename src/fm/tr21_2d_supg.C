@@ -1433,18 +1433,6 @@ TR21_2D_SUPG :: computeQuadraticFunct(FloatArray &answer, FloatArray line)
 }
 
 
-int
-TR21_2D_SUPG :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
-        return 4;
-    }
-
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-
 void
 TR21_2D_SUPG :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                            InternalStateType type, TimeStep *tStep)
@@ -1486,24 +1474,11 @@ TR21_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Interna
     return SUPGElement2 :: giveIPValue(answer, aGaussPoint, type, atTime);
 }
 
-int
-TR21_2D_SUPG :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
-{
-    return SUPGElement2 :: giveIntVarCompFullIndx(answer, type);
-}
-
 
 InternalStateValueType
 TR21_2D_SUPG :: giveIPValueType(InternalStateType type)
 {
     return SUPGElement2 :: giveIPValueType(type);
-}
-
-
-int
-TR21_2D_SUPG :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
-{
-    return SUPGElement2::giveIPValueSize(type, gp);
 }
 
 
@@ -1676,7 +1651,6 @@ void TR21_2D_SUPG :: drawScalar(oofegGraphicContext &context)
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v1, v2, v3;
     double s [ 3 ];
-    IntArray map;
 
     if ( !context.testElementGraphicActivity(this) ) {
         return;
@@ -1710,11 +1684,7 @@ void TR21_2D_SUPG :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-
-    if ( (!result) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-        return;
-    }
+    indx = context.giveIntVarIndx();
 
     s [ 0 ] = v1.at(indx);
     s [ 1 ] = v2.at(indx);

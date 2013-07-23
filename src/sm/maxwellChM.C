@@ -47,8 +47,7 @@ MaxwellChainMaterial :: MaxwellChainMaterial(int n, Domain *d) : RheoChainMateri
 
 
 void
-MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp,
-                                                double atTime)
+MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, double atTime)
 {
     int i, j, r, rSize;
     double taui, tauj, sum, tti, ttj, sumRhs;
@@ -63,7 +62,7 @@ MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *
     //
     // a direct call to the relaxation function could be used, if available
     this->computeDiscreteRelaxationFunction(discreteRelaxFunctionVal,
-                                            gp, rTimes,
+                                            rTimes,
                                             atTime,
                                             atTime);
 
@@ -109,12 +108,13 @@ MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
      *
      * Note: time -1 refers to the previous time.
      */
-    int mu;
     double lambdaMu, Emu, deltaYmu;
     double E = 0.0;
 
-    this->updateEparModuli(gp, relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor);
-    for ( mu = 1; mu <= nUnits; mu++ ) {
+    ///@warning THREAD UNSAFE!
+    this->updateEparModuli(relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor);
+
+    for ( int mu = 1; mu <= nUnits; mu++ ) {
         deltaYmu = atTime->giveTimeIncrement() / timeFactor / this->giveCharTime(mu);
         if ( deltaYmu <= 0.0 ) {
             deltaYmu = 1.e-3;
@@ -123,7 +123,7 @@ MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
         deltaYmu = pow( deltaYmu, this->giveCharTimeExponent(mu) );
 
         lambdaMu = ( 1.0 - exp(-deltaYmu) ) / deltaYmu;
-        Emu      = this->giveEparModulus(mu); // previously updated by updateEparModuli
+        Emu = this->giveEparModulus(mu); // previously updated by updateEparModuli
         E += lambdaMu * Emu;
     }
 
@@ -186,8 +186,6 @@ MaxwellChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
      * Updates hidden variables used to effectively trace the load history
      */
 
-
-    int mu;
     double deltaYmu, Emu, lambdaMu;
     FloatArray help, *muthHiddenVarsVector, deltaEps0, help1;
     FloatMatrix Binv;
@@ -206,14 +204,15 @@ MaxwellChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
 
     help1.beProductOf(Binv, help);
 
-    this->updateEparModuli(gp, relMatAge + ( tNow->giveTargetTime() - 0.5 * tNow->giveTimeIncrement() ) / timeFactor);
+    ///@warning THREAD UNSAFE!
+    this->updateEparModuli(relMatAge + ( tNow->giveTargetTime() - 0.5 * tNow->giveTimeIncrement() ) / timeFactor);
 
-    for ( mu = 1; mu <= nUnits; mu++ ) {
+    for ( int mu = 1; mu <= nUnits; mu++ ) {
         deltaYmu = tNow->giveTimeIncrement() / timeFactor / this->giveCharTime(mu);
         deltaYmu = pow( deltaYmu, this->giveCharTimeExponent(mu) );
 
         lambdaMu = ( 1.0 - exp(-deltaYmu) ) / deltaYmu;
-        Emu      = this->giveEparModulus(mu);
+        Emu = this->giveEparModulus(mu);
 
         muthHiddenVarsVector = status->giveHiddenVarsVector(mu);
         help = help1;

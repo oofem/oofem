@@ -107,38 +107,38 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     /// Returns relative humidity
-    double giveHum(void) { return hum; }
+    double giveHum() { return hum; }
     /// Stores relative humidity
-    void setHum(const double src) { hum = src; }
+    void setHum(double src) { hum = src; }
     /// Returns relative humidity increment
-    double giveHumIncrement(void) { return hum_increment; }
+    double giveHumIncrement() { return hum_increment; }
     /// Stores relative humidity increment
-    void setHumIncrement(const double src) { hum_increment = src; }
+    void setHumIncrement(double src) { hum_increment = src; }
 
     /// Returns temperature
-    double giveT(void) { return T; }
+    double giveT() { return T; }
     /// Stores temperature
-    void setT(const double src) { T = src; }
+    void setT(double src) { T = src; }
 
     /// Returns temperature increment
-    double giveTIncrement(void) { return T_increment; }
+    double giveTIncrement() { return T_increment; }
     /// Stores temperature increment
-    void setTIncrement(const double src) { T_increment = src; }
+    void setTIncrement(double src) { T_increment = src; }
 
     /// Returns previously maximum reached temperature
-    double giveTmax(void) { return T_max; }
+    double giveTmax() { return T_max; }
     /// Stores maximum reached temperature
-    void setTmax(const double src) { T_max = src; }
+    void setTmax(double src) { T_max = src; }
 
     /// Returns equivalent time
-    double giveEquivalentTime(void) { return equivalentTime; }
+    double giveEquivalentTime() { return equivalentTime; }
     /// Stores equivalent time
-    void setEquivalentTime(const double src) { equivalentTimeTemp = src; }
+    void setEquivalentTime(double src) { equivalentTimeTemp = src; }
 
     /// Returns viscosity of the flow term (associated with q4 and microprestress evolution)
-    double giveFlowTermViscosity(void) { return flowTermViscosity; }
-    double giveFlowTermViscosityTemp(void) { return flowTermViscosityTemp; }
-    void setFlowTermViscosityTemp(const double src) { flowTermViscosityTemp = src; }
+    double giveFlowTermViscosity() { return flowTermViscosity; }
+    double giveFlowTermViscosityTemp() { return flowTermViscosityTemp; }
+    void setFlowTermViscosityTemp(double src) { flowTermViscosityTemp = src; }
 
     // definition
     virtual const char *giveClassName() const { return "MPSMaterialStatus"; }
@@ -217,7 +217,7 @@ protected:
     virtual void computeCharTimes();
 
     /// Evaluation of characteristic moduli of the non-aging Kelvin chain
-    virtual void computeCharCoefficients(FloatArray &answer, GaussPoint *gp, double);
+    virtual void computeCharCoefficients(FloatArray &answer, double);
 
     virtual double giveEModulus(GaussPoint *gp, TimeStep *atTime);
 

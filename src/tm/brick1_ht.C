@@ -168,19 +168,6 @@ Brick1_ht :: giveInterface(InterfaceType interface)
     return NULL;
 }
 
-int
-Brick1_ht :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-int
-Brick1_ht :: SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    return ZZNodalRecoveryMI_giveDofManRecordSize(type);
-}
-
 void
 Brick1_ht :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
@@ -278,7 +265,6 @@ void Brick1_ht :: drawScalar(oofegGraphicContext &context)
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v [ 8 ];
     double s [ 8 ];
-    IntArray map;
 
     if ( !context.testElementGraphicActivity(this) ) {
         return;
@@ -296,10 +282,7 @@ void Brick1_ht :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-    if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-        return;
-    }
+    indx = context.giveIntVarIndx();
 
     for ( int i = 1; i <= 8; i++ ) {
         s [ i - 1 ] = v [ i - 1 ].at(indx);
