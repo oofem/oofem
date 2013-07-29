@@ -55,7 +55,7 @@ StructuralMaterial :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-    return mode == _3dMat        || mode == _PlaneStress || mode == _PlaneStrain  || mode == _1dMat ||
+    return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain  || mode == _1dMat ||
            mode == _PlateLayer || mode == _2dBeamLayer || mode == _Fiber;
 }
 
@@ -73,6 +73,12 @@ StructuralMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
         this->giveRealStressVector_PlaneStress(answer, gp, reducedStrain, tStep);
     } else if ( mode == _1dMat ) {
         this->giveRealStressVector_1d(answer, gp, reducedStrain, tStep);
+    } else if ( mode == _2dBeamLayer ) {
+        this->giveRealStressVector_2dBeamLayer(answer, gp, reducedStrain, tStep);
+    } else if ( mode == _PlateLayer ) {
+        this->giveRealStressVector_PlateLayer(answer, gp, reducedStrain, tStep);
+    } else if ( mode == _Fiber ) {
+        this->giveRealStressVector_Fiber(answer, gp, reducedStrain, tStep);
     }
 }
 
@@ -87,10 +93,6 @@ StructuralMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp
 void
 StructuralMaterial :: giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
-    if ( gp->giveMaterialMode() != _PlaneStrain ) {
-        OOFEM_ERROR("StructuralMaterial :: giveRealStressVector_PlaneStrain - Wrong material mode in GP");
-    }
-
     FloatArray vE, vS;
     StructuralMaterial :: giveFullSymVectorForm(vE, reducedStrain, _PlaneStrain);
     this->giveRealStressVector_3d(vS, gp, vE, tStep);
@@ -99,91 +101,90 @@ StructuralMaterial :: giveRealStressVector_PlaneStrain(FloatArray &answer, Gauss
 
 
 void
-StructuralMaterial :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+StructuralMaterial :: giveRealStressVector_StressControl(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, const IntArray &strainControl, TimeStep *tStep)
 {
-    if ( gp->giveMaterialMode() != _PlaneStress ) {
-        OOFEM_ERROR("StructuralMaterial :: giveRealStressVector_PlaneStress - Wrong material mode in GP");
-    }
-
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
-    IntArray E_control, S_control; // Determines which components are controlled by E and S resp.
-    FloatArray vE, increment_vE, vS, vS_control;
-    FloatMatrix tangent, tangent_Scontrol;
-    // Iterate to find full vF.
-    StructuralMaterial :: giveVoigtVectorMask(E_control, _PlaneStress);
-    // Compute the negated the array of control since we need S_control as well;
-    S_control.resize( 9 - E_control.giveSize() );
+    IntArray stressControl;
+    FloatArray vE, increment_vE, vS, reducedvS;
+    FloatMatrix tangent, reducedTangent;
+    // Iterate to find full vE.
+    // Compute the negated the array of control since we need stressControl as well;
+    stressControl.resize( 9 - strainControl.giveSize() );
     for ( int i = 1, j = 1; i <= 9; i++ ) {
-        if ( !E_control.contains(i) ) {
-            S_control.at(j++) = i;
+        if ( !strainControl.contains(i) ) {
+            stressControl.at(j++) = i;
         }
     }
 
     // Initial guess;
     vE = status->giveStrainVector();
-    for ( int i = 1; i <= E_control.giveSize(); ++i ) {
-        vE.at( E_control.at(i) ) = reducedStrain.at(i);
+    for ( int i = 1; i <= strainControl.giveSize(); ++i ) {
+        vE.at( strainControl.at(i) ) = reducedStrain.at(i);
     }
 
-    // Iterate to find full vF.
+    // Iterate to find full vE.
     for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
         this->giveRealStressVector_3d(vS, gp, vE, tStep);
-        vS_control.beSubArrayOf(vS, S_control);
-        if ( vS_control.computeNorm() < 1e-6 ) { ///@todo We need a tolerance here!
+        reducedvS.beSubArrayOf(vS, stressControl);
+        if ( reducedvS.computeNorm() < 1e-6 ) { ///@todo We need a tolerance here!
             StructuralMaterial :: giveReducedVectorForm(answer, vS, _1dMat);
             return;
         }
 
         this->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
-        tangent_Scontrol.beSubMatrixOf(tangent, S_control, S_control);
-        tangent_Scontrol.solveForRhs(vS_control, increment_vE);
-        vE.assemble(increment_vE, S_control);
+        reducedTangent.beSubMatrixOf(tangent, stressControl, stressControl);
+        reducedTangent.solveForRhs(reducedvS, increment_vE);
+        vE.assemble(increment_vE, stressControl);
     }
 
-    OOFEM_WARNING("StructuralMaterial :: giveRealStressVector_PlaneStress - Iteration did not converge");
+    OOFEM_WARNING("StructuralMaterial :: giveRealStressVector_StressControl - Iteration did not converge");
     answer.resize(0);
+}
+
+
+void
+StructuralMaterial :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    IntArray strainControl;
+    StructuralMaterial :: giveVoigtSymVectorMask(strainControl, _PlaneStress);
+    this->giveRealStressVector_StressControl(answer, gp, reducedStrain, strainControl, tStep);
 }
 
 
 void
 StructuralMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
-    if ( gp->giveMaterialMode() != _1dMat ) {
-        OOFEM_ERROR("StructuralMaterial :: giveRealStressVector_1d - Wrong material mode in GP");
-    }
+    IntArray strainControl;
+    StructuralMaterial :: giveVoigtSymVectorMask(strainControl, _1dMat);
+    this->giveRealStressVector_StressControl(answer, gp, reducedStrain, strainControl, tStep);
+}
 
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
-    IntArray S_control; // Determines which components are controlled by P resp.
-    FloatArray old_vE, vE, increment_vE, vS, vS_control;
-    FloatMatrix tangent, tangent_Scontrol;
-    // Compute the negated the array of control since we need P_control as well;
-    S_control.resize(8);
-    for ( int i = 1; i <= 8; i++ ) {
-        S_control.at(i) = i + 1;
-    }
+void
+StructuralMaterial :: giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    IntArray strainControl;
+    StructuralMaterial :: giveVoigtSymVectorMask(strainControl, _2dBeamLayer);
+    this->giveRealStressVector_StressControl(answer, gp, reducedStrain, strainControl, tStep);
+}
 
-    // Initial guess;
-    vE = status->giveStrainVector();
-    vE.at(1) = reducedStrain.at(1);
-    // Iterate to find full vF.
-    for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
-        this->giveRealStressVector_3d(vS, gp, vE, tStep);
-        vS_control.beSubArrayOf(vS, S_control);
-        if ( vS_control.computeNorm() < 1e-6 ) { ///@todo We need a tolerance here!
-            StructuralMaterial :: giveReducedVectorForm(answer, vS, _1dMat);
-            return;
-        }
 
-        this->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
-        tangent_Scontrol.beSubMatrixOf(tangent, S_control, S_control);
-        tangent_Scontrol.solveForRhs(vS_control, increment_vE);
-        vE.assemble(increment_vE, S_control);
-    }
+void
+StructuralMaterial :: giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    IntArray strainControl;
+    StructuralMaterial :: giveVoigtSymVectorMask(strainControl, _PlateLayer);
+    this->giveRealStressVector_StressControl(answer, gp, reducedStrain, strainControl, tStep);
+}
 
-    OOFEM_WARNING("StructuralMaterial :: giveRealStressVector_1d - Iteration did not converge");
-    answer.resize(0);
+
+void
+StructuralMaterial :: giveRealStressVector_Fiber(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    IntArray strainControl;
+    StructuralMaterial :: giveVoigtSymVectorMask(strainControl, _Fiber);
+    this->giveRealStressVector_StressControl(answer, gp, reducedStrain, strainControl, tStep);
 }
 
 
@@ -241,10 +242,6 @@ StructuralMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint 
 void
 StructuralMaterial :: giveFirstPKStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
 {
-    if ( gp->giveMaterialMode() != _PlaneStrain ) {
-        OOFEM_ERROR("StructuralMaterial :: giveFirstPKStressVector_PlaneStrain - Wrong material mode in GP");
-    }
-
     FloatArray vF, vP;
     StructuralMaterial :: giveFullVectorFormF(vF, reducedvF, _PlaneStrain);
     this->giveFirstPKStressVector_3d(vP, gp, vF, tStep);
@@ -255,10 +252,6 @@ StructuralMaterial :: giveFirstPKStressVector_PlaneStrain(FloatArray &answer, Ga
 void
 StructuralMaterial :: giveFirstPKStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
 {
-    if ( gp->giveMaterialMode() != _PlaneStress ) {
-        OOFEM_ERROR("StructuralMaterial :: giveFirstPKStressVector_PlaneStress - Wrong material mode in GP");
-    }
-
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     IntArray F_control, P_control; // Determines which components are controlled by F and P resp.
