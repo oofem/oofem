@@ -125,7 +125,7 @@ void AbaqusUserMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         // Evaluating the function once, so that the tangent can be obtained.
         FloatArray stress(6), strain(6);
         strain.zero();
-        this->giveRealStressVector(stress, gp, strain, tStep);
+        this->giveRealStressVector_3d(stress, gp, strain, tStep);
     }
 
     answer = ms->giveTempTangent();

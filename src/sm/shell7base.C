@@ -853,7 +853,8 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, 
 
 void
 Shell7Base :: computeLinearizedStiffness(GaussPoint *gp, StructuralMaterial *mat, TimeStep *tStep,
-                                         FloatArray &S1g, FloatArray &S2g, FloatArray &S3g, FloatMatrix A [ 3 ] [ 3 ], FloatArray &genEps) {
+                                         FloatArray &S1g, FloatArray &S2g, FloatArray &S3g, FloatMatrix A [ 3 ] [ 3 ], FloatArray &genEps)
+{
     // Fix material for layered cross section
 
     FloatArray cartStressVector, contravarStressVector;
@@ -867,7 +868,7 @@ Shell7Base :: computeLinearizedStiffness(GaussPoint *gp, StructuralMaterial *mat
 
 
 
-    this->computeStressVector(cartStressVector, genEps, gp, mat, tStep);
+    this->computeStressVectorInMaterial(cartStressVector, genEps, gp, mat, tStep);
     this->transInitialCartesianToInitialContravar(gp, cartStressVector, contravarStressVector);
     S.beMatrixForm(contravarStressVector);
 
@@ -1209,7 +1210,7 @@ Shell7Base :: computeFAt(GaussPoint *gp, FloatMatrix &answer, FloatArray &genEps
 }
 
 void
-Shell7Base :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &genEps)
+Shell7Base :: computeStrainVectorFrom(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &genEps)
 {
     ///@todo Do you even need this function at all Jim? / Mikael
     // Computes the Green-Lagrange strain tensor: E=0.5(C-I)
@@ -1226,11 +1227,11 @@ Shell7Base :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *
 }
 
 void
-Shell7Base :: computeStressVector(FloatArray &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *stepN)
+Shell7Base :: computeStressVectorInMaterial(FloatArray &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *stepN)
 {
     FloatArray E;
-    this->computeStrainVector(E, gp, stepN, genEps);     // Green-Lagrange strain vector
-    static_cast< StructuralMaterial * >( mat )->giveRealStressVector(answer, gp, E, stepN);
+    this->computeStrainVectorFrom(E, gp, stepN, genEps);     // Green-Lagrange strain vector
+    static_cast< StructuralMaterial * >( mat )->giveRealStressVector_3d(answer, gp, E, stepN);
 }
 
 void
@@ -1347,7 +1348,7 @@ GaussPoint *gp, Material *mat, TimeStep *tStep, FloatArray &genEps, FloatArray &
     FloatArray cartStressVector, contravarStressVector;
     FloatMatrix lambda[3];
 
-    this->computeStressVector(cartStressVector, genEps, gp, mat, tStep);
+    this->computeStressVectorInMaterial(cartStressVector, genEps, gp, mat, tStep);
     this->transInitialCartesianToInitialContravar(gp, cartStressVector, contravarStressVector);
     this->computeStressResultantsAt(gp, contravarStressVector, S1g, S2g, S3g, genEps);
 
@@ -1396,7 +1397,7 @@ GaussPoint *gp, Material *mat, TimeStep *tStep, FloatArray &genEps, FloatArray &
 
     this->giveGeneralizedStrainComponents(genEps, temp1, temp1, dm1, dm2, m, dg1, dg2, gam);
 
-    this->computeStressVector(cartStressVector, genEps, gp, mat, tStep);
+    this->computeStressVectorInMaterial(cartStressVector, genEps, gp, mat, tStep);
 
     this->transInitialCartesianToInitialContravar(gp, cartStressVector, contravarStressVector);
     this->computeStressResultantsAt(gp, contravarStressVector, S1g, S2g, S3g, genEps);
@@ -1778,7 +1779,7 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
         this->computeNmatrixAt(gp, N);
         this->giveUpdatedSolutionVector(aVec, tStep);
         // Fix for the new numbering in B & N
-        this->computeVectorOf(EID_MomentumBalance, VM_Velocity, tStep, daVec);
+        this->computeVectorOfDofIDs(EID_MomentumBalance, VM_Velocity, tStep, daVec);
 
         a.beProductOf(N, aVec);        // [ x,  m,  gam]^T
         da.beProductOf(N, daVec);        // [dx, dm, dgam]^T
@@ -2235,7 +2236,7 @@ Shell7Base :: giveSolutionVector(FloatArray &answer, const IntArray &dofIdArray,
 {
     // Returns the solution vector corresponding to all the dofs
     FloatArray temp;
-    computeVectorOf(dofIdArray, VM_Total, tStep, temp);
+    computeVectorOfDofIDs(dofIdArray, VM_Total, tStep, temp);
     answer.resize( Shell7Base :: giveNumberOfDofs() );
     answer.zero();
     answer.assemble( temp, this->giveOrdering(AllInv) );
@@ -2243,7 +2244,7 @@ Shell7Base :: giveSolutionVector(FloatArray &answer, const IntArray &dofIdArray,
 
 
 void
-Shell7Base :: computeVectorOf(const IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+Shell7Base :: computeVectorOfDofIDs(const IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer)
 {
     // Routine to extract the solution vector for an element given an dofid array.
     // Size will be numberOfDofs and if a certain dofId does not exist a zero is used as value. 
@@ -2306,7 +2307,7 @@ Shell7Base :: giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep)
     int dummy = 0;
     IntArray dofIdArray;
     Shell7Base :: giveDofManDofIDMask(dummy, EID_MomentumBalance, dofIdArray);
-    this->computeVectorOf(dofIdArray, VM_Total, tStep, temp);
+    this->computeVectorOfDofIDs(dofIdArray, VM_Total, tStep, temp);
     
     answer.assemble( temp, this->giveOrdering(AllInv) );
 }
@@ -2820,5 +2821,13 @@ Shell7Base :: giveVoigtIndex(int ind1, int ind2)
         OOFEM_ERROR("Error in giveVoigtIndex - bad indices");
         return -1;
     }
-};
+}
+
+
+void
+Shell7Base :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *slaveGp, TimeStep *tStep)
+{
+    OOFEM_ERROR("Shell7Base :: computeStrainVectorInLayer - Should not be called! Not meaningful for this element.");
+}
+
 } // end namespace oofem

@@ -89,8 +89,7 @@ StructuralElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
 // rMode parameter determines type of stiffness matrix to be requested
 // (tangent, secant, ...)
 {
-    static_cast<StructuralCrossSection * >( this->giveCrossSection() )
-    ->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+    static_cast< StructuralCrossSection * >( this->giveCrossSection() )->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
 }
 
 
@@ -1381,8 +1380,9 @@ StructuralElement :: adaptiveUpdate(TimeStep *tStep)
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            this->computeStrainVector(strain, iRule->getIntegrationPoint(j), tStep);
-            result &= interface->MMI_update(iRule->getIntegrationPoint(j), tStep, & strain);
+            GaussPoint *gp = iRule->getIntegrationPoint(j);
+            this->computeStrainVector(strain, gp, tStep);
+            result &= interface->MMI_update(gp, tStep, & strain);
         }
     }
 

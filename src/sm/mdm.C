@@ -1279,8 +1279,6 @@ MDM :: MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tStep)
 }
 
 
-
-
 int
 MDM :: MMI_update(GaussPoint *gp,  TimeStep *tStep, FloatArray *estrain)
 {
@@ -1295,6 +1293,7 @@ MDM :: MMI_update(GaussPoint *gp,  TimeStep *tStep, FloatArray *estrain)
     return result;
 }
 
+
 int
 MDM :: MMI_finish(TimeStep *tStep)
 {
@@ -1307,8 +1306,6 @@ MDM :: MMI_finish(TimeStep *tStep)
     this->mapper2.finish(tStep);
     return 1;
 }
-
-
 
 
 Interface *

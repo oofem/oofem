@@ -129,7 +129,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
-        Material *mat  = gp->giveMaterial();
+        Material *mat = gp->giveMaterial();
 
         // Engineering (small strain) stress
         if ( nlGeometry == 0 ) {

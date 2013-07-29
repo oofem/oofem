@@ -514,28 +514,25 @@ CCTPlate :: SPRNodalRecoveryMI_givePatchType()
 // layered cross section support functions
 //
 void
-CCTPlate :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
+CCTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, 
                                        GaussPoint *slaveGp, TimeStep *tStep)
 // returns full 3d strain vector of given layer (whose z-coordinate from center-line is
 // stored in slaveGp) for given tStep
 {
-    FloatArray masterGpStrain;
     double layerZeta, layerZCoord, top, bottom;
 
-    this->computeStrainVector(masterGpStrain, masterGp, tStep);
-    top    = masterGp->giveElement()->giveCrossSection()->give(CS_TopZCoord);
-    bottom = masterGp->giveElement()->giveCrossSection()->give(CS_BottomZCoord);
+    top    = this->giveCrossSection()->give(CS_TopZCoord);
+    bottom = this->giveCrossSection()->give(CS_BottomZCoord);
     layerZeta = slaveGp->giveCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
-    answer.resize(6); // {Exx,Eyy,Ezz,GMyz,GMzx,GMxy}
-    answer.zero();
+    answer.resize(5); // {Exx,Eyy,GMyz,GMzx,GMxy}
 
     answer.at(1) = masterGpStrain.at(1) * layerZCoord;
     answer.at(2) = masterGpStrain.at(2) * layerZCoord;
-    answer.at(6) = masterGpStrain.at(3) * layerZCoord;
-    answer.at(4) = masterGpStrain.at(5);
-    answer.at(5) = masterGpStrain.at(4);
+    answer.at(5) = masterGpStrain.at(3) * layerZCoord;
+    answer.at(3) = masterGpStrain.at(5);
+    answer.at(4) = masterGpStrain.at(4);
 }
 
 // Edge load support

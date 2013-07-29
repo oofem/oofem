@@ -49,7 +49,7 @@ REGISTER_CrossSection( FiberedCrossSection );
 
 void
 FiberedCrossSection ::  giveRealStresses(FloatArray &answer, GaussPoint *gp,
-                                         const FloatArray &totalStrain, TimeStep *tStep)
+                                         const FloatArray &reducedStrain, TimeStep *tStep)
 //
 // this function returns a real stresses corresponding to
 // given strainIncrement according to stressStrain mode stored
@@ -62,44 +62,94 @@ FiberedCrossSection ::  giveRealStresses(FloatArray &answer, GaussPoint *gp,
         _error("giveRealStresses : unsupported mode (only 3dBeam supported");
     }
     FloatArray stressVector3d;
-    FloatArray fullFiberStrain, fiberStrain, fullStressVect, stressVect;
+    FloatArray fiberStrain, fullStressVect;
     StructuralElement *element = static_cast< StructuralElement * >( gp->giveElement() );
-    Material *fiberMat;
-    StructuralMaterialStatus *status;
     FiberedCrossSectionInterface *interface;
 
     if ( ( interface = static_cast< FiberedCrossSectionInterface * >( element->giveInterface(FiberedCrossSectionInterfaceType) ) ) == NULL ) {
         _error("giveRealStresses - element with no fiber support encountered");
     }
 
-    GaussPoint *fiberGp;
-
     for ( int i = 1; i <= numberOfFibers; i++ ) {
         // the question is whether this function should exist ?
         // if yes the element details will be hidden.
         // good idea also should be existence of element::GiveBmatrixOfLayer
         // and computing strains here - but first idea looks better
-        fiberGp = this->giveSlaveGaussPoint(gp, i - 1);
-        fiberMat = domain->giveMaterial( fiberMaterials.at(i) );
+        GaussPoint *fiberGp = this->giveSlaveGaussPoint(gp, i - 1);
+        Material *fiberMat = domain->giveMaterial( fiberMaterials.at(i) );
         // but treating of geometric non-linearities may become more complicated
-        // another approach - use several functions with assumed
-        // kinematic constraints
-        interface->FiberedCrossSectionInterface_computeStrainVectorInFiber(fullFiberStrain, gp, fiberGp, tStep);
-        StructuralMaterial :: giveReducedSymVectorForm(fiberStrain, fullFiberStrain, gp->giveMaterialMode());
-
+        // another approach - use several functions with assumed kinematic constraints
+        interface->FiberedCrossSectionInterface_computeStrainVectorInFiber(fiberStrain, reducedStrain, fiberGp, tStep);
 
         static_cast< StructuralMaterial * >( fiberMat )->giveRealStressVector(stressVector3d, fiberGp, fiberStrain, tStep);
     }
 
     this->giveIntegrated3dBeamStress(fullStressVect, gp);
-    StructuralMaterial :: giveReducedSymVectorForm(stressVect, fullStressVect, gp->giveMaterialMode());
-    answer = stressVect;
-    status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
+    StructuralMaterial :: giveReducedSymVectorForm(answer, fullStressVect, gp->giveMaterialMode());
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
 
     // now we must update master gp
-    status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(stressVect);
+    status->letTempStrainVectorBe(reducedStrain);
+    status->letTempStressVectorBe(answer);
 }
+
+
+void
+FiberedCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_3d - Not supported\n");
+}
+
+
+void
+FiberedCrossSection :: giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_PlaneStrain - Not supported\n");
+}
+
+
+void
+FiberedCrossSection :: giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_PlaneStress - Not supported\n");
+}
+
+
+void
+FiberedCrossSection :: giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_1d - Not supported\n");
+}
+
+
+void
+FiberedCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_Beam2d - Not supported\n");
+}
+
+
+void
+FiberedCrossSection :: giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    this->giveRealStresses(answer, gp, strain, tStep);
+}
+
+
+void
+FiberedCrossSection :: giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_Plate - Not supported\n");
+}
+
+
+void
+FiberedCrossSection :: giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_Shell - Not supported\n");
+}
+
+
 
 
 void

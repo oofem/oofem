@@ -106,6 +106,8 @@ public:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
 
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Quad1MindlinShell3D_Name; }
     virtual const char *giveClassName() const { return "Quad1MindlinShell3D"; }
@@ -126,10 +128,6 @@ public:
     { computeLumpedMassMatrix(answer, tStep); }
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-
-    // layered cross section support functions
-    virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
-                                            GaussPoint *slaveGp, TimeStep *tStep);
 
     virtual void computeLCS();
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);

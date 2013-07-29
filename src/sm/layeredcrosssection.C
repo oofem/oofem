@@ -50,15 +50,52 @@ REGISTER_CrossSection( LayeredCrossSection );
 void
 LayeredCrossSection ::  giveRealStresses(FloatArray &answer,
                                          GaussPoint *gp,
-                                         const FloatArray &totalStrain, TimeStep *tStep)
-//
-// this function returns a real stresses corresponding to
-// given strainIncrement according to stressStrain mode stored
-// in each gp.
-// IMPORTANT:
-//
+                                         const FloatArray &reducedStrain, TimeStep *tStep)
 {
     ///@todo I'm not sure how we should design this, but it'll work for now:
+    MaterialMode mode = gp->giveMaterialMode();
+    if ( mode == _3dMat ) {
+        this->giveRealStress_3d(answer, gp, reducedStrain, tStep);
+        return;
+    }
+
+    FloatArray stressVector3d;
+    FloatArray layerStrain, fullStressVect;
+    StructuralElement *element = static_cast< StructuralElement * >( gp->giveElement() );
+    LayeredCrossSectionInterface *interface = static_cast< LayeredCrossSectionInterface * >( element->giveInterface(LayeredCrossSectionInterfaceType) );
+
+    if ( interface == NULL ) {
+        _error("giveRealStresses - element with no layer support encountered");
+    }
+
+    for ( int i = 1; i <= numberOfLayers; i++ ) {
+        // the question is whether this function should exist ?
+        // if yes the element details will be hidden.
+        // good idea also should be existence of element::GiveBmatrixOfLayer
+        // and computing strains here - but first idea looks better
+        GaussPoint *layerGp = this->giveSlaveGaussPoint(gp, i - 1);
+        StructuralMaterial *layerMat = static_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(i) ) );
+        // but treating of geometric non-linearities may become more complicated
+        // another approach - use several functions with assumed kinematic constraints
+
+        interface->computeStrainVectorInLayer(layerStrain, reducedStrain, layerGp, tStep);
+
+        layerMat->giveRealStressVector(stressVector3d, layerGp, layerStrain, tStep);
+    }
+
+    this->giveIntegrated3dShellStress(fullStressVect, gp);
+    StructuralMaterial :: giveReducedSymVectorForm(answer, fullStressVect, gp->giveMaterialMode());
+
+    // now we must update master gp
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
+    status->letTempStrainVectorBe(reducedStrain);
+    status->letTempStressVectorBe(answer);
+}
+
+
+void
+LayeredCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
     if ( gp->giveIntegrationRule()->giveIntegrationDomain() == _Cube || gp->giveIntegrationRule()->giveIntegrationDomain() == _Wedge ) {
         // Determine which layer the gp belongs to. This code assumes that the gauss point are created consistently (through CrossSection::setupIntegrationPoints)
         int ngps = gp->giveIntegrationRule()->giveNumberOfIntegrationPoints();
@@ -66,62 +103,59 @@ LayeredCrossSection ::  giveRealStresses(FloatArray &answer,
         int gpsperlayer = ngps / this->numberOfLayers;
         int layer = (gpnum - 1) / gpsperlayer + 1;
         Material *layerMat = this->domain->giveMaterial( this->giveLayerMaterial(layer) );
-        static_cast< StructuralMaterial * >( layerMat )->giveRealStressVector(answer, gp, totalStrain, tStep);
-        return;
+        static_cast< StructuralMaterial * >( layerMat )->giveRealStressVector(answer, gp, strain, tStep);
+    } else {
+        OOFEM_ERROR("LayeredCrossSection :: giveRealStress_3d - Only cubes and wedges are meaningful for layered cross-sections");
     }
+}
 
-    FloatArray stressVector3d;
-    FloatArray layerStrain, fullLayerStrain, fullStressVect, stressVect;
-    StructuralElement *element = static_cast< StructuralElement * >( gp->giveElement() );
-    Material *layerMat;
-    StructuralMaterialStatus *status;
-    LayeredCrossSectionInterface *interface;
 
-    if ( ( interface = static_cast< LayeredCrossSectionInterface * >( element->giveInterface(LayeredCrossSectionInterfaceType) ) ) == NULL ) {
-        _error("giveRealStresses - element with no layer support encountered");
-    }
+void
+LayeredCrossSection :: giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("LayeredCrossSection :: giveRealStress_PlanteStrain - Not supported");
+}
 
-    GaussPoint *layerGp;
 
-    for ( int i = 1; i <= numberOfLayers; i++ ) {
-        // the question is whether this function should exist ?
-        // if yes the element details will be hidden.
-        // good idea also should be existence of element::GiveBmatrixOfLayer
-        // and computing strains here - but first idea looks better
-        layerGp = this->giveSlaveGaussPoint(gp, i - 1);
-        layerMat = domain->giveMaterial( layerMaterials.at(i) );
-        // but treating of geometric non-linearities may become more complicated
-        // another aproach - use several functions with assumed
-        // kinematic constraints
-        //prevLayerStrain = (((StructuralMaterialStatus*) layerMat->giveStatus(layerGp))
-        //  ->giveStrainVector());
-        interface->computeStrainVectorInLayer(fullLayerStrain, gp, layerGp, tStep);
-        StructuralMaterial :: giveReducedSymVectorForm(layerStrain, fullLayerStrain, layerGp->giveMaterialMode());
+void
+LayeredCrossSection :: giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("LayeredCrossSection :: giveRealStress_PlaneStress - Not supported");
+}
 
-        /*
-         * if (prevLayerStrain.giveSize()) {
-         * layerStrainIncrement = layerStrain;
-         * layerStrainIncrement.subtract(prevLayerStrain);
-         * //layerStrainIncrement = prevLayerStrain->GiveCopy()->negated();
-         * //layerStrainIncrement -> add (layerStrain);
-         * } else {
-         * layerStrainIncrement = layerStrain;
-         * }
-         */
 
-        static_cast< StructuralMaterial * >( layerMat )
-        ->giveRealStressVector(stressVector3d, layerGp, layerStrain, tStep);
-        // reducedStressIncrement = this -> GiveReducedStressVector (gp, stressIncrement3d);
-    }
+void
+LayeredCrossSection :: giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("LayeredCrossSection :: giveRealStress_1d - Not supported");
+}
 
-    this->giveIntegrated3dShellStress(fullStressVect, gp);
-    StructuralMaterial :: giveReducedSymVectorForm(stressVect, fullStressVect, gp->giveMaterialMode());
-    answer = stressVect;
-    status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
 
-    // now we must update master gp
-    status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(stressVect);
+void
+LayeredCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    this->giveRealStresses(answer, gp, strain, tStep);
+}
+
+
+void
+LayeredCrossSection :: giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("LayeredCrossSection :: giveRealStress_Beam3d - Not supported");
+}
+
+
+void
+LayeredCrossSection :: giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    this->giveRealStresses(answer, gp, strain, tStep);
+}
+
+
+void
+LayeredCrossSection :: giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    this->giveRealStresses(answer, gp, strain, tStep);
 }
 
 
@@ -189,8 +223,7 @@ LayeredCrossSection :: give2dPlateStiffMtrx(FloatMatrix &answer,
     for ( int i = 1; i <= numberOfLayers; i++ ) {
         GaussPoint *layerGp = giveSlaveGaussPoint(gp, i - 1);
 
-        ///@todo The logic in this whole class is pretty messy to support both slave-gp's and normal gps. Rethinking the approach is necessary.
-        /// Just using the gp number doesn't nicely support more than 1 gp per layer. Must rethink.
+        ///@todo Just using the gp number doesn't nicely support more than 1 gp per layer. Must rethink.
         StructuralMaterial *mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(layerGp->giveNumber()) ) );
         mat->givePlateLayerStiffMtrx(layerMatrix, rMode, layerGp, tStep);
 

@@ -108,13 +108,20 @@ public:
 
     virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element);
 
-    virtual void giveRealStresses(FloatArray &answer, GaussPoint *gp,
-                                  const FloatArray &reducedStrainIncrement, TimeStep *tStep);
+    virtual void giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
 
-    virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                 MatResponseMode mode,
-                                                 GaussPoint *gp,
-                                                 TimeStep *tStep);
+    virtual void giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+    virtual void giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+    virtual void giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+    virtual void giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+
+    virtual void giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+    virtual void giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+    virtual void giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+    virtual void giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+
+
+    virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
 
@@ -217,8 +224,7 @@ public:
      * @param slaveGp Slave integration point representing particular layer.
      * @param tStep Time step.
      */
-    virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
-        GaussPoint *slaveGp, TimeStep *tStep) {} ;
+    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *slaveGp, TimeStep *tStep) = 0;
 };
 } // end namespace oofem
 #endif // layeredcrosssection_h

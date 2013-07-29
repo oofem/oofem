@@ -100,7 +100,7 @@ public:
     void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
 #endif
 
-    virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
+    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
                                      GaussPoint *slaveGp, TimeStep *tStep);
 
 protected:

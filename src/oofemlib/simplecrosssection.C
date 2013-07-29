@@ -50,38 +50,13 @@ SimpleCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, const
 {
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _2dBeam ) {
-        FloatMatrix tangent;
-        this->give2dBeamStiffMtrx(tangent, ElasticStiffness, gp, tStep);
-        answer.beProductOf(tangent, strain);
-        ///@todo Hack for now, since some elements directly try to access the material (it should all go through the cross-section!!!)
-        StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus* >( gp->giveElement()->giveMaterial()->giveStatus(gp) );
-        status->letTempStrainVectorBe(strain);
-        status->letTempStressVectorBe(answer);
+        this->giveRealStress_Beam2d(answer, gp, strain, tStep);
     } else if ( mode == _3dBeam ) {
-        FloatMatrix tangent;
-        this->give3dBeamStiffMtrx(tangent, ElasticStiffness, gp, tStep);
-        answer.beProductOf(tangent, strain);
-        tangent.printYourself();
-
-        StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus* >( gp->giveElement()->giveMaterial()->giveStatus(gp) );
-        status->letTempStrainVectorBe(strain);
-        status->letTempStressVectorBe(answer);
+        this->giveRealStress_Beam3d(answer, gp, strain, tStep);
     } else if ( mode == _2dPlate ) {
-        FloatMatrix tangent;
-        this->give2dPlateStiffMtrx(tangent, ElasticStiffness, gp, tStep);
-        answer.beProductOf(tangent, strain);
-
-        StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus* >( gp->giveElement()->giveMaterial()->giveStatus(gp) );
-        status->letTempStrainVectorBe(strain);
-        status->letTempStressVectorBe(answer);
+        this->giveRealStress_Plate(answer, gp, strain, tStep);
     } else if ( mode == _3dShell ) {
-        FloatMatrix tangent;
-        this->give3dShellStiffMtrx(tangent, ElasticStiffness, gp, tStep);
-        answer.beProductOf(tangent, strain);
-
-        StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus* >( gp->giveElement()->giveMaterial()->giveStatus(gp) );
-        status->letTempStrainVectorBe(strain);
-        status->letTempStressVectorBe(answer);
+        this->giveRealStress_Shell(answer, gp, strain, tStep);
     } else {
         StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
         if ( mat->hasMaterialModeCapability(gp->giveMaterialMode()) ) {
@@ -91,6 +66,92 @@ SimpleCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, const
         }
     }
 }
+
+
+void
+SimpleCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+    mat->giveRealStressVector_3d(answer, gp, strain, tStep);
+}
+
+
+void
+SimpleCrossSection :: giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+    mat->giveRealStressVector_PlaneStrain(answer, gp, strain, tStep);
+}
+
+
+void
+SimpleCrossSection :: giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+    mat->giveRealStressVector_PlaneStress(answer, gp, strain, tStep);
+}
+
+
+void
+SimpleCrossSection :: giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+    mat->giveRealStressVector_1d(answer, gp, strain, tStep);
+}
+
+
+void
+SimpleCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    FloatMatrix tangent;
+    this->give2dBeamStiffMtrx(tangent, ElasticStiffness, gp, tStep);
+    answer.beProductOf(tangent, strain);
+
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus* >( gp->giveElement()->giveMaterial()->giveStatus(gp) );
+    status->letTempStrainVectorBe(strain);
+    status->letTempStressVectorBe(answer);
+}
+
+
+void
+SimpleCrossSection :: giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    FloatMatrix tangent;
+    this->give3dBeamStiffMtrx(tangent, ElasticStiffness, gp, tStep);
+    answer.beProductOf(tangent, strain);
+
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus* >( gp->giveElement()->giveMaterial()->giveStatus(gp) );
+    status->letTempStrainVectorBe(strain);
+    status->letTempStressVectorBe(answer);
+}
+
+
+void
+SimpleCrossSection :: giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    FloatMatrix tangent;
+    this->give2dPlateStiffMtrx(tangent, ElasticStiffness, gp, tStep);
+    answer.beProductOf(tangent, strain);
+
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus* >( gp->giveElement()->giveMaterial()->giveStatus(gp) );
+    status->letTempStrainVectorBe(strain);
+    status->letTempStressVectorBe(answer);
+}
+
+
+void
+SimpleCrossSection :: giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    FloatMatrix tangent;
+    this->give3dShellStiffMtrx(tangent, ElasticStiffness, gp, tStep);
+    answer.beProductOf(tangent, strain);
+
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus* >( gp->giveElement()->giveMaterial()->giveStatus(gp) );
+    status->letTempStrainVectorBe(strain);
+    status->letTempStressVectorBe(answer);
+}
+
+
 
 void
 SimpleCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)

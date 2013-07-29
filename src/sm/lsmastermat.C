@@ -98,10 +98,7 @@ LargeStrainMasterMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, Gaus
     this->initTempStatus(gp);
     MaterialMode mode = gp->giveMaterialMode();
     if  ( mode == _3dMat ) {
-        Material *mat;
-        StructuralMaterial *sMat;
-        mat = domain->giveMaterial(slaveMat);
-        sMat = dynamic_cast< StructuralMaterial * >(mat);
+        StructuralMaterial *sMat = dynamic_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
         if ( sMat == NULL ) {
             _warning2("checkConsistency: material %d has no Structural support", slaveMat);
             return;
@@ -140,7 +137,7 @@ LargeStrainMasterMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, Gaus
         }
 
         SethHillStrainVector.beSymVectorFormOfStrain(SethHillStrain);
-        sMat->giveRealStressVector(stressVector, gp, SethHillStrainVector, tStep);
+        sMat->giveRealStressVector_3d(stressVector, gp, SethHillStrainVector, tStep);
         this->constructTransformationMatrix(T, eVecs);
         tT.beTranspositionOf(T);
 
@@ -349,7 +346,6 @@ LargeStrainMasterMaterial :: constructL1L2TransformationMatrices(FloatMatrix &an
         answer2.at(1, 1) = 2 * stressM.at(1) * ( m - 1 ) * pow(lambda1, m - 2);
         answer2.at(2, 2) = 2 * stressM.at(2) * ( m - 1 ) * pow(lambda2, m - 2);
         answer2.at(3, 3) = 2 * stressM.at(3) * ( m - 1 ) * pow(lambda3, m - 2);
-        ;
 
         answer2.at(4, 4) = stressM.at(2) * gamma223 + stressM.at(3) * gamma332;
         answer2.at(5, 5) = stressM.at(1) * gamma113 + stressM.at(3) * gamma331;
@@ -500,18 +496,18 @@ LargeStrainMasterMaterial :: giveIPValueType(InternalStateType type)
 
 //=============================================================================
 
-LargeStrainMasterMaterialStatus :: LargeStrainMasterMaterialStatus(int n, Domain *d, GaussPoint *g, int s) : StructuralMaterialStatus(n, d, g)
+LargeStrainMasterMaterialStatus :: LargeStrainMasterMaterialStatus(int n, Domain *d, GaussPoint *g, int s) : StructuralMaterialStatus(n, d, g),
+    Pmatrix(6,6),
+    TLmatrix(6,6),
+    transformationMatrix(6,6),
+    slaveMat(s)
 {
-    slaveMat = s;
-    Pmatrix.resize(6, 6);
-    Pmatrix.at(1, 1) =   Pmatrix.at(2, 2) =   Pmatrix.at(3, 3) =   Pmatrix.at(4, 4) =   Pmatrix.at(5, 5) =   Pmatrix.at(6, 6) = 1;
-    TLmatrix.resize(6, 6);
-    transformationMatrix.resize(6, 6);
+    Pmatrix.beUnitMatrix();
 }
+
 
 LargeStrainMasterMaterialStatus :: ~LargeStrainMasterMaterialStatus()
 { }
-
 
 
 void
@@ -526,6 +522,7 @@ LargeStrainMasterMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     mS->printOutputAt(file, tStep);
     //  StructuralMaterialStatus :: printOutputAt(file, tStep);
 }
+
 
 // initializes temporary variables based on their values at the previous equlibrium state
 void LargeStrainMasterMaterialStatus :: initTempStatus()
@@ -574,7 +571,6 @@ LargeStrainMasterMaterialStatus :: saveContext(DataStream *stream, ContextMode m
 
     return CIO_OK;
 }
-
 
 
 contextIOResultType
