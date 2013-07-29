@@ -352,6 +352,14 @@ public:
      */
     double distance_square(const FloatArray &x) const;
 
+    /**Returns index (between 1 and Size) of minimum element in the array
+    */
+    int giveIndexMin(void);
+    
+    /**Returns index (between 1 and Size) of maximum element in the array
+    */
+    int giveIndexMax(void);
+    
     /**
      * Computes the dot product (or inner product) of receiver and argument.
      * @param x Vector to contract to receiver.
