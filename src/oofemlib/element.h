@@ -736,25 +736,11 @@ public:
      */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     /**
-     * Returns the corresponding integration point value size in reduced form.
-     * @param type determines the type of internal variable.
-     * @param gp Integration point to check,
-     * @return Nonzero if o.k, zero otherwise.
-     */
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
-    /**
      * Returns the type of internal variable (scalar, vector, tensor,...).
      * @param type Determines the type of internal variable.
      * @return Type of internal variable.
      */
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    /**
-     * Returns the mask of reduced indexes of Internal Variable component .
-     * @param answer Mask of full vector size, with components being the indices to reduced form vectors.
-     * @param type Determines the internal variable requested.
-     * @return Nonzero if o.k, zero otherwise.
-     */
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
 
     // characteristic length in gp (for some material models)
     /**

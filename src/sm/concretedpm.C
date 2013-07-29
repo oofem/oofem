@@ -353,7 +353,6 @@ ConcreteDPM :: ConcreteDPM(int n, Domain *d) :
     tempDamage = damage = 0.;
     yieldTol = 0.;
     newtonIter = 0;
-    matMode = _Unknown;
     helem = 0.;
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
 #ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
@@ -462,9 +461,7 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
                                     TimeStep *atTime)
 {
     FloatArray reducedTotalStrainVector;
-    if ( matMode == _Unknown ) {
-        matMode = gp->giveMaterialMode();
-    }
+    MaterialMode matMode = gp->giveMaterialMode();
 
     if ( effectiveStress.giveStressStrainMode() == _Unknown ) {
         effectiveStress.letStressStrainModeBe(matMode);
@@ -494,8 +491,7 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
 
     // compute elastic strains and effective stress
     StrainVector elasticStrain = strain;
-    StrainVector tempPlasticStrain(matMode);
-    status->giveTempPlasticStrain(tempPlasticStrain);
+    StrainVector tempPlasticStrain = status->giveTempPlasticStrain();
     elasticStrain.subtract(tempPlasticStrain);
     elasticStrain.applyElasticStiffness(effectiveStress, eM, nu);
 
@@ -550,7 +546,6 @@ ConcreteDPM :: computeEquivalentStrain(double &tempEquivStrain, const StrainVect
 {
     //The equivalent  strain is based on the volumetric plastic strain
     ConcreteDPMStatus *status = giveStatus(gp);
-    MaterialMode matMode = gp->giveMaterialMode();
     tempKappaP = status->giveTempKappaP();
     kappaP = status->giveKappaP();
     double equivStrain = status->giveEquivStrain();
@@ -559,10 +554,9 @@ ConcreteDPM :: computeEquivalentStrain(double &tempEquivStrain, const StrainVect
         tempEquivStrain = equivStrain;
         return;
     } else if ( tempKappaP > 1.0 && tempKappaP != kappaP ) {
-        StrainVector plasticStrain(matMode);
-        StrainVector tempPlasticStrain(matMode);
-        status->giveTempPlasticStrain(tempPlasticStrain);
-        status->givePlasticStrain(plasticStrain);
+        StrainVector plasticStrain = status->givePlasticStrain();
+        StrainVector tempPlasticStrain = status->giveTempPlasticStrain();
+
         double volumetricPlasticStrain = plasticStrain(0) + plasticStrain(1) +
                                          plasticStrain(2);
         double tempVolumetricPlasticStrain = tempPlasticStrain(0) +
@@ -744,10 +738,9 @@ double
 ConcreteDPM :: computeDuctilityMeasureDamage(const StrainVector &strain, GaussPoint *gp)
 {
     ConcreteDPMStatus *status = giveStatus(gp);
-    StrainVector plasticStrain(matMode);
-    StrainVector tempPlasticStrain(matMode);
-    status->giveTempPlasticStrain(tempPlasticStrain);
-    status->givePlasticStrain(plasticStrain);
+    MaterialMode matMode = gp->giveMaterialMode();
+    StrainVector plasticStrain = status->givePlasticStrain();
+    StrainVector tempPlasticStrain = status->giveTempPlasticStrain();
     tempPlasticStrain.subtract(plasticStrain);
     StrainVector principalStrain(matMode);
     double ductilityMeasure;
@@ -778,9 +771,7 @@ ConcreteDPM :: performPlasticityReturn(GaussPoint *gp,
                                        StrainVector &strain)
 {
     ConcreteDPMStatus *status = static_cast< ConcreteDPMStatus * >( this->giveStatus(gp) );
-    if ( matMode == _Unknown ) {
-        matMode = gp->giveMaterialMode();
-    }
+    MaterialMode matMode = gp->giveMaterialMode();
 
     if ( effectiveStress.giveStressStrainMode() == _Unknown ) {
         effectiveStress.letStressStrainModeBe(matMode);
@@ -789,8 +780,7 @@ ConcreteDPM :: performPlasticityReturn(GaussPoint *gp,
     status->initTempStatus();
 
     //get temp plastic strain and tempKappa
-    StrainVector tempPlasticStrain(matMode);
-    status->giveTempPlasticStrain(tempPlasticStrain);
+    StrainVector tempPlasticStrain = status->giveTempPlasticStrain();
     tempKappaP = status->giveTempKappaP();
 
     // compute elastic strains and trial stress
@@ -799,7 +789,7 @@ ConcreteDPM :: performPlasticityReturn(GaussPoint *gp,
     elasticStrain.applyElasticStiffness(effectiveStress, eM, nu);
 
     //Compute trial coordinates
-    computeTrialCoordinates(effectiveStress);
+    computeTrialCoordinates(effectiveStress, gp);
 
     double yieldValue = computeYieldValue(sig, rho, thetaTrial, tempKappaP);
     // choose correct stress return and update state flag
@@ -888,6 +878,7 @@ ConcreteDPM :: performRegularReturn(StressVector &effectiveStress,
 {
     //Define status
     ConcreteDPMStatus *status = static_cast< ConcreteDPMStatus * >( this->giveStatus(gp) );
+    MaterialMode matMode = gp->giveMaterialMode();
     //Variables
     deltaLambda = 0.;
     double deltaLambdaIncrement = 0.;
@@ -1089,6 +1080,7 @@ ConcreteDPM :: performVertexReturn(StressVector &effectiveStress,
                                    GaussPoint *gp)
 {
     ConcreteDPMStatus *status = static_cast< ConcreteDPMStatus * >( this->giveStatus(gp) );
+    MaterialMode matMode = gp->giveMaterialMode();
     StressVector deviatoricStressTrial(matMode);
     double sigTrial;
     StressVector stressTemp(matMode);
@@ -1694,9 +1686,9 @@ ConcreteDPM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 }
 
 void
-ConcreteDPM :: computeTrialCoordinates(const StressVector &stress)
+ConcreteDPM :: computeTrialCoordinates(const StressVector &stress, GaussPoint *gp)
 {
-    StressVector deviatoricStress(matMode);
+    StressVector deviatoricStress(gp->giveMaterialMode());
     effectiveStress.computeDeviatoricVolumetricSplit(deviatoricStress,
                                                      sig);
     rho = deviatoricStress.computeSecondCoordinate();
@@ -1911,48 +1903,44 @@ ConcreteDPM :: setIPValue(const FloatArray &value, GaussPoint *gp, InternalState
 }
 
 int
-ConcreteDPM :: giveIPValue(FloatArray &answer,
-                           GaussPoint *gp,
-                           InternalStateType type,
-                           TimeStep *atTime)
+ConcreteDPM :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 {
     const ConcreteDPMStatus *status = giveStatus(gp);
     //int state_flag = status->giveStateFlag();
     //double stateFlagValue = 0.;
-    StrainVector plasticStrainVector(_3dMat);
 
     if ( type == IST_PlasticStrainTensor ) {
-        answer.resize(6);
-        status->giveFullPlasticStrainVector(plasticStrainVector);
-        answer = plasticStrainVector;
+        StrainVector e(_Unknown);
+        status->giveFullPlasticStrainVector(e);
+        answer = e;
         return 1;
-    }
-
-    if ( ( type == IST_DamageScalar ) || ( type == IST_DamageTensor ) || ( type == IST_PrincipalDamageTensor ) ) {
+    } else if ( type == IST_DamageScalar ) {
         answer.resize(1);
         answer.at(1) = status->giveDamage();
         return 1;
-    }
-
-    if ( ( type == IST_DamageTensorTemp ) || ( type == IST_PrincipalDamageTempTensor ) ) {
+    } else if ( type == IST_DamageTensor ) {
+        answer.resize(6);
+        answer.zero();
+        answer.at(1) = answer.at(2) = answer.at(3) = status->giveDamage();
+        return 1;
+    } else if ( type == IST_PrincipalDamageTensor ) {
+        answer.resize(3);
+        answer.zero();
+        answer.at(1) = answer.at(2) = answer.at(3) = status->giveDamage();
+        return 1;
+    } else if ( type == IST_DamageTensorTemp ) {
         answer.resize(1);
         answer.at(1) = status->giveTempDamage();
         return 1;
-    }
-
-    if ( type == IST_CumPlasticStrain ) {
+    } else if ( type == IST_CumPlasticStrain ) {
         answer.resize(1);
         answer.at(1) = status->giveKappaP();
         return 1;
-    }
-
-    if ( type == IST_CumPlasticStrain_2 ) {
+    } else if ( type == IST_CumPlasticStrain_2 ) {
         answer.resize(1);
         answer.at(1) = status->giveKappaD();
         return 1;
-    }
-
-    if ( type == IST_VolumetricPlasticStrain ) {
+    } else if ( type == IST_VolumetricPlasticStrain ) {
         answer.resize(1);
         answer.at(1) = status->giveVolumetricPlasticStrain();
         return 1;
@@ -1961,70 +1949,15 @@ ConcreteDPM :: giveIPValue(FloatArray &answer,
     return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
 }
 
-int
-ConcreteDPM :: giveIPValueSize(InternalStateType type,
-                               GaussPoint *gp)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        //return 6;
-        return StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
-    } else if ( ( type == IST_CumPlasticStrain ) || ( type == IST_CumPlasticStrain_2 ) || ( type == IST_VolumetricPlasticStrain ) || ( type == IST_PrincipalDamageTensor ) || ( type == IST_PrincipalDamageTempTensor ) || ( type == IST_DamageScalar ) || ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ) {
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIPValueSize(type, gp);
-    }
-}
-
-int
-ConcreteDPM :: giveIntVarCompFullIndx(IntArray &answer,
-                                      InternalStateType type,
-                                      MaterialMode mmode)
-{
-    switch ( type ) {
-    case IST_PlasticStrainTensor:
-        StructuralMaterial :: giveInvertedVoigtVectorMask(answer, mmode);
-        /*
-         * answer.resize(6);
-         * answer.zero();
-         * answer.at(1) = 1;
-         * answer.at(2) = 2;
-         * answer.at(3) = 3;
-         * answer.at(4) = 4;
-         * answer.at(5) = 5;
-         * answer.at(6) = 6;
-         */
-        return 1;
-
-    case IST_DamageTensor:
-    case IST_DamageTensorTemp:
-        answer.resize(6);
-        answer.zero();
-        answer.at(1) = 1;
-        return 1;
-
-    case IST_DamageScalar:
-    case IST_CumPlasticStrain:
-    case IST_CumPlasticStrain_2:
-    case IST_VolumetricPlasticStrain:
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-
-    default:
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-
-        break;
-    }
-}
 
 InternalStateValueType
 ConcreteDPM :: giveIPValueType(InternalStateType type)
 {
     if ( type == IST_PlasticStrainTensor ) {
         return ISVT_TENSOR_S3E;
-    } else if ( ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ) {
+    } else if ( type == IST_DamageTensor || type == IST_DamageTensorTemp ) {
         return ISVT_TENSOR_S3;
-    } else if ( ( type == IST_DamageScalar ) || ( type == IST_CumPlasticStrain ) || ( type == IST_CumPlasticStrain_2 ) || ( type == IST_VolumetricPlasticStrain ) ) {
+    } else if ( type == IST_DamageScalar || type == IST_CumPlasticStrain || type == IST_CumPlasticStrain_2 || type == IST_VolumetricPlasticStrain ) {
         return ISVT_SCALAR;
     } else {
         return StructuralMaterial :: giveIPValueType(type);

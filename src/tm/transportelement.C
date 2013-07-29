@@ -979,15 +979,4 @@ TransportElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateTyp
 
 #endif
 
-int
-TransportElement :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
-{
-    if ( ( type == IST_Temperature ) || ( type == IST_MassConcentration_1 ) ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else {
-        return Element :: giveIntVarCompFullIndx(answer, type);
-    }
-}
 } // end namespace oofem

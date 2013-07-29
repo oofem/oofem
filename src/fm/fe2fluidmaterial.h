@@ -159,7 +159,6 @@ public:
     virtual double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
     virtual const char *giveClassName() const { return "FE2FluidMaterial"; }

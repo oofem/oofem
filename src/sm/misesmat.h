@@ -128,17 +128,9 @@ public:
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep);
 
+    virtual void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep);
+
 protected:
-    /// Evaluates the stress from Green-Lagrange strain E.
-    void giveRealStressVectorComputedFromStrain(FloatArray &answer, GaussPoint *gp,
-                                                const FloatArray &E, TimeStep *tStep);
-
-    /// evaluates the stress from deformation gradient F.
-    void giveRealStressVectorComputedFromDefGrad(FloatArray &answer, GaussPoint *gp,
-                                                 const FloatArray &F, TimeStep *tStep);
-
-    void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep);
-
     void computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatMatrix b, double J);
 
     void give3dSSMaterialStiffnessMatrix(FloatMatrix &answer,
@@ -154,11 +146,7 @@ protected:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
-
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
 };
 
 //=============================================================================
@@ -240,7 +228,7 @@ public:
     void letTempLeftCauchyGreenBe(FloatMatrix values) { tempLeftCauchyGreen = values; }
     void letLeftCauchyGreenBe(FloatMatrix values) { leftCauchyGreen = values; }
 
-    const FloatArray *givePlasDef() { return & plasticStrain; }
+    const FloatArray &givePlasDef() { return plasticStrain; }
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 

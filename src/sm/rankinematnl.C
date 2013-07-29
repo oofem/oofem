@@ -61,7 +61,7 @@ RankineMatNl :: RankineMatNl(int n, Domain *d) : RankineMat(n, d), StructuralNon
 {}
 
 void
-RankineMatNl :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+RankineMatNl :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp,
                                      const FloatArray &totalStrain, TimeStep *atTime)
 {
     RankineMatNlStatus *nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
@@ -69,7 +69,6 @@ RankineMatNl :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
     double tempDam;
     FloatArray tempEffStress, totalStress;
-    MaterialMode mode = gp->giveMaterialMode();
     //mj performPlasticityReturn(gp, totalStrain, mode);
     // nonlocal method "computeDamage" performs the plastic return
     // for all Gauss points when it is called for the first time
@@ -82,7 +81,7 @@ RankineMatNl :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     nlStatus->letTempStressVectorBe(answer);
 #ifdef keep_track_of_dissipated_energy
     double gf = sig0 * sig0 / E; // only estimated, but OK for this purpose
-    nlStatus->computeWork(gp, mode, gf);
+    nlStatus->computeWork_PlaneStress(gp, gf);
 #endif
 }
 
@@ -367,7 +366,6 @@ RankineMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
 }
 
 
-
 int
 RankineMatNl :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
@@ -388,6 +386,7 @@ RankineMatNl :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Interna
     }
 }
 
+
 InternalStateValueType
 RankineMatNl :: giveIPValueType(InternalStateType type)
 {
@@ -398,27 +397,6 @@ RankineMatNl :: giveIPValueType(InternalStateType type)
     }
 }
 
-int
-RankineMatNl :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_CumPlasticStrain_2 || type == IST_MaxEquivalentStrainLevel ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else {
-        return RankineMat :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-int
-RankineMatNl :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
-{
-    if ( type == IST_CumPlasticStrain_2 || type == IST_MaxEquivalentStrainLevel ) {
-        return 1;
-    } else {
-        return RankineMat :: giveIPValueSize(type, gp);
-    }
-}
 
 
 //*******************************

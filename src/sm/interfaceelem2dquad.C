@@ -294,7 +294,6 @@ void InterfaceElem2dQuad :: drawScalar(oofegGraphicContext &context)
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray gcoord(3), v1;
     WCRec p [ 1 ];
-    IntArray map;
     GraphicObj *go;
     double val [ 1 ];
 
@@ -310,14 +309,11 @@ void InterfaceElem2dQuad :: drawScalar(oofegGraphicContext &context)
         result = 0;
         gp  = iRule->getIntegrationPoint(i);
         result += giveIPValue(v1, gp, context.giveIntVarType(), tStep);
-        result += this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-        if ( result != 2 ) {
+        if ( result != 1 ) {
             continue;
         }
 
-        if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-            return;
-        }
+        indx = context.giveIntVarIndx();
 
         result += this->computeGlobalCoordinates( gcoord, * ( gp->giveCoordinates() ) );
 

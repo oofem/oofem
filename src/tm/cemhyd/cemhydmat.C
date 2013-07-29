@@ -357,16 +357,6 @@ CemhydMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSt
     }
 }
 
-int
-CemhydMat :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( type == IST_HydrationDegree ) {
-        return 1;
-    } else {
-        return TransportMaterial :: giveIPValueSize(type, aGaussPoint);
-    }
-}
-
 
 InternalStateValueType
 CemhydMat :: giveIPValueType(InternalStateType type)
@@ -374,17 +364,6 @@ CemhydMat :: giveIPValueType(InternalStateType type)
     return TransportMaterial :: giveIPValueType(type);
 }
 
-int
-CemhydMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_HydrationDegree ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else {
-        return TransportMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
 
 int
 CemhydMat :: initMaterial(Element *element)

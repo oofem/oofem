@@ -699,17 +699,6 @@ RerShell :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 }
 
 
-int
-RerShell :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    if ( type == IST_ShellForceMomentumTensor ) {
-        return 12;
-    }
-
-    return 0;
-}
-
-
 void
 RerShell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                        InternalStateType type, TimeStep *tStep)
@@ -723,22 +712,6 @@ RerShell :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int si
                                                       InternalStateType type, TimeStep *tStep)
 {
     answer.resize(0);
-}
-
-
-int
-RerShell :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
-{
-    if ( type == IST_ShellForceMomentumTensor ) {
-        answer.resize(12);
-        for ( int i = 1; i <= 12; i++ ) {
-            answer.at(i) = i;
-        }
-
-        return 1;
-    } else {
-        return CCTPlate :: giveIntVarCompFullIndx(answer, type);
-    }
 }
 
 

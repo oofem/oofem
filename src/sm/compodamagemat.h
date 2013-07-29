@@ -133,6 +133,9 @@ public:
  * In this particular case, only the first array component is used in all involved variables.
  *
  * @author Vit Smilauer
+ *
+ * @todo This class should overload giveRealStressVector_3d and _1d.
+ * @todo This class should overload give1dMaterialStiffMtrx
  */
 class CompoDamageMat : public StructuralMaterial
 {
@@ -161,8 +164,6 @@ public:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
 
     /**
      * Optional parameter determining after how many iterations within the time step the damage is calculated.

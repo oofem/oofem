@@ -276,18 +276,6 @@ LTRSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToC
 }
 
 
-int
-LTRSpace :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
-        return 6;
-    }
-
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-
 void
 LTRSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                        InternalStateType type, TimeStep *tStep)
@@ -509,7 +497,6 @@ void LTRSpace :: drawScalar(oofegGraphicContext &context)
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v [ 4 ];
     double s [ 4 ], defScale = 0.0;
-    IntArray map;
 
     if ( !context.testElementGraphicActivity(this) ) {
         return;
@@ -527,10 +514,7 @@ void LTRSpace :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-    if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-        return;
-    }
+    indx = context.giveIntVarIndx();
 
     for ( i = 1; i <= 4; i++ ) {
         s [ i - 1 ] = v [ i - 1 ].at(indx);

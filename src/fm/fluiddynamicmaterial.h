@@ -188,8 +188,6 @@ public:
     virtual void updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 };
 } // end namespace oofem

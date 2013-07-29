@@ -64,7 +64,6 @@ public:
     virtual double givePermeability(GaussPoint *gp, TimeStep *atTime) = 0;
     virtual double giveMoistureCapacity(GaussPoint *gp, TimeStep *atTime) = 0;
 
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual const char *giveClassName() const { return "IsotropicMoistureTransferMaterial"; }
     virtual classType giveClassID() const { return IsotropicMoistureTransferMaterialClass; }

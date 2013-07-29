@@ -135,23 +135,20 @@ VTKXMLExportModule :: terminate()
 
 
 void
-VTKXMLExportModule :: makeFullForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType type, const IntArray &redIndx)
+VTKXMLExportModule :: makeFullForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType type)
 {
     answer.resize(9);
     answer.zero();
     if ( type == ISVT_TENSOR_S3 ) {
-        for (int i = 1; i <= redIndx.giveSize(); i++) {
-            if (redIndx.at(i) > 0) {
-                answer.at(redToFull.at(i)) = reducedForm.at(redIndx.at(i));
-            }
+        for (int i = 1; i <= 6; i++) {
+            answer.at(redToFull.at(i)) = reducedForm.at(i);
         }
     } else if ( type == ISVT_TENSOR_S3E ) {
-        for (int i = 1; i <= redIndx.giveSize(); i++) {
-            if (redIndx.at(i) > 3) {
-                answer.at(redToFull.at(i)) = reducedForm.at(i)*0.5;
-            } else if (redIndx.at(i) > 0) {
-                answer.at(redToFull.at(i)) = reducedForm.at(i);
-            }
+        for (int i = 1; i <= 3; i++) {
+            answer.at(redToFull.at(i)) = reducedForm.at(i);
+        }
+        for (int i = 4; i <= 6; i++) {
+            answer.at(redToFull.at(i)) = reducedForm.at(i)*0.5;
         }
     }
     // Symmetrize
@@ -918,7 +915,7 @@ return;
 
     Domain *d = emodel->giveDomain(1);
     int inode;
-    int j, jsize, valSize;
+    int j, jsize, defaultValSize, valSize;
     FloatArray iVal(3), t(9);
     const FloatArray *val;
     IntArray regionVarMap;
@@ -965,9 +962,10 @@ return;
 #endif
 
 
-    if ( !( ( valID == IST_DisplacementVector ) || ( valID == IST_MaterialInterfaceVal ) ) ) {
+    defaultValSize = 0;
+    if ( !( valID == IST_DisplacementVector || valID == IST_MaterialInterfaceVal ) ) {
         this->smoother->recoverValues(valID, tStep);
-        this->smoother->giveRegionRecordMap(regionVarMap, ireg, valID);
+        defaultValSize = this->smoother->giveRegionRecordSize(ireg, valID);
     }
 
     for ( inode = 1; inode <= regionDofMans; inode++ ) {
@@ -988,7 +986,7 @@ return;
         } else {
             int found = this->smoother->giveNodalVector(val, mapL2G.at(inode), ireg);
             if ( !found ) {
-                iVal.resize( regionVarMap.giveSize() );
+                iVal.resize( defaultValSize );
                 iVal.zero();
                 val = & iVal;
                 //OOFEM_WARNING2("VTKXMLExportModule::exportIntVars: smoothing error: invalid data in node %d", inode);
@@ -1024,7 +1022,7 @@ return;
 #endif
 
         } else if ( type == ISVT_TENSOR_S3 || type == ISVT_TENSOR_S3E ) {
-            this->makeFullForm(t, *val, type, regionVarMap);
+            this->makeFullForm(t, *val, type);
 
             for ( j = 1; j <= 9; j++ ) {
 #ifdef __VTK_MODULE
@@ -1213,15 +1211,15 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
     InternalStateType iState = IST_DisplacementVector; // Shouldn't be necessary
 
     dofIDMask.resize(0);
-    if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) ) {
+    if ( type == DisplacementVector || type == EigenVector || type == VelocityVector ) {
         dofIDMask.setValues(3, (int)Undef, (int) Undef, (int) Undef);
-        for (int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
+        for ( int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
             id = dman->giveDof(j)->giveDofID();
-            if ( ( id == V_u ) || ( id == D_u ) ) {
+            if ( id == V_u || id == D_u ) {
                 dofIDMask.at(1) = id;
-            } else if ( ( id == V_v ) || ( id == D_v ) ) {
+            } else if ( id == V_v || id == D_v ) {
                 dofIDMask.at(2) = id;
-            } else if ( ( id == V_w ) || ( id == D_w ) ) {
+            } else if ( id == V_w || id == D_w ) {
                 dofIDMask.at(3) = id;
             }
         }
@@ -1239,10 +1237,9 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
         iState = IST_Pressure;
         answer.resize(1);
     } else if ( type == DirectorField ) {
-        
-        for (int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
+        for ( int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
             id = dman->giveDof(j)->giveDofID();
-            if ( ( id == W_u ) || ( id == W_v ) || ( id == W_w )  ) {
+            if ( id == W_u || id == W_v || id == W_w ) {
                 dofIDMask.followedBy(id);
             }
             //iState = IST_DirectorField;
@@ -1298,8 +1295,7 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
 
 void VTKXMLExportModule :: exportCellVars(VTKStream stream, int region, TimeStep *tStep)
 {
-    int i, n = cellVarsToExport.giveSize();
-    InternalStateType type;
+    int n = cellVarsToExport.giveSize();
 
     if ( n == 0 ) {
         return;
@@ -1310,8 +1306,8 @@ void VTKXMLExportModule :: exportCellVars(VTKStream stream, int region, TimeStep
     fprintf(stream, "<CellData Scalars=\"\" Vectors=\"\" Tensors=\"\">\n");  // should contain a list of InternalStateType
 #endif
 
-    for ( i = 1; i <= n; i++ ) {
-        type = ( InternalStateType ) cellVarsToExport.at(i);
+    for ( int i = 1; i <= n; i++ ) {
+        InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
         this->exportCellVarAs(type, region, stream, tStep);
     }
 
@@ -1529,21 +1525,18 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, VTKStr
             answer.resize(0);
             iRule = elem->giveDefaultIntegrationRulePtr();
             if (iRule) {
-                MaterialMode mmode = _Unknown;
                 for (int i = 0; i < iRule->giveNumberOfIntegrationPoints(); ++i) {
                     gp = iRule->getIntegrationPoint(i);
-                    mmode = gp->giveMaterialMode();
                     elem->giveIPValue(temp, gp, type, tStep);
                     gptot += gp->giveWeight();
                     answer.add(gp->giveWeight(), temp);
                 }
                 answer.times(1./gptot);
-                elem->giveMaterial()->giveIntVarCompFullIndx(redIndx, type, mmode);
             }
             // Reshape the Voigt vectors to include all components (duplicated if necessary, VTK insists on 9 components for tensors.)
             if ( reshape && answer.giveSize() != 9) { // If it has 9 components, then it is assumed to be proper already.
                 FloatArray tmp = answer;
-                this->makeFullForm(answer, tmp, vt, redIndx);
+                this->makeFullForm(answer, tmp, vt);
             } else if ( vt == ISVT_VECTOR && answer.giveSize() < 3) {
                 answer.setValues(3,
                                  answer.giveSize() > 1 ? answer.at(1) : 0.0,

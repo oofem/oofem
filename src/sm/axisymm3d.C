@@ -385,18 +385,6 @@ Axisymm3d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) con
 }
 
 
-int
-Axisymm3d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
-        return 6;
-    }
-
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-
 void
 Axisymm3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                         InternalStateType type, TimeStep *tStep)
@@ -693,7 +681,6 @@ Axisymm3d :: drawScalar(oofegGraphicContext &context)
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v1, v2, v3;
     double s [ 3 ], defScale;
-    IntArray map;
 
     if ( !context.testElementGraphicActivity(this) ) {
         return;
@@ -715,11 +702,7 @@ Axisymm3d :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-
-    if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-        return;
-    }
+    indx = context.giveIntVarIndx();
 
     s [ 0 ] = v1.at(indx);
     s [ 1 ] = v2.at(indx);

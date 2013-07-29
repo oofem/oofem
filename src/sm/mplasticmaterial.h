@@ -182,10 +182,7 @@ public:
                               const FloatArray &, TimeStep *);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
-
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
 
     // auxiliary functions
     virtual int giveSizeOfFullHardeningVarsVector()  { return 0; }
@@ -272,19 +269,14 @@ protected:
                                           MatResponseMode,
                                           GaussPoint * gp,
                                           TimeStep * atTime);
-    virtual void give2dPlateLayerStiffMtrx(FloatMatrix & answer,
-                                           MatResponseMode,
-                                           GaussPoint * gp,
-                                           TimeStep * atTime);
+    virtual void givePlateLayerStiffMtrx(FloatMatrix & answer,
+                                         MatResponseMode,
+                                         GaussPoint * gp,
+                                         TimeStep * atTime);
 
     virtual void give1dFiberStiffMtrx(FloatMatrix & answer,
                                       MatResponseMode, GaussPoint * gp,
                                       TimeStep * atTime);
-
-    virtual void give3dShellLayerStiffMtrx(FloatMatrix & answer,
-                                           MatResponseMode,
-                                           GaussPoint * gp,
-                                           TimeStep * atTime);
 };
 } // end namespace oofem
 #endif // mplasticmaterial_h

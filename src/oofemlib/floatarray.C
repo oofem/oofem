@@ -1095,9 +1095,9 @@ double norm(const FloatArray &x)
 
 // End of IML compat
 
-void FloatArray :: beFullVectorForm(const FloatMatrix &aMatrix)
+void FloatArray :: beVectorForm(const FloatMatrix &aMatrix)
 {
-    // Revrites the matrix on vector form, order: 11, 22, 33, 23, 13, 12, 32, 31, 21
+    // Rewrites the matrix on vector form, order: 11, 22, 33, 23, 13, 12, 32, 31, 21
 #  ifdef DEBUG
     if (  aMatrix.giveNumberOfColumns() !=3 || aMatrix.giveNumberOfColumns() !=3) {
         OOFEM_ERROR("FloatArray :: beFullVectorForm : matrix dimension is not 3x3");
@@ -1110,7 +1110,7 @@ void FloatArray :: beFullVectorForm(const FloatMatrix &aMatrix)
     this->at(7) = aMatrix.at(3,2); this->at(8) = aMatrix.at(3,1); this->at(9) = aMatrix.at(2,1);
 }
 
-void FloatArray :: beReducedVectorFormOfStrain(const FloatMatrix &aMatrix)
+void FloatArray :: beSymVectorFormOfStrain(const FloatMatrix &aMatrix)
 {
     // Revrites a symmetric strain matrix on reduced vector form, order: 11, 22, 33, 23, 13, 12
     // shear components are multiplied with a factor 2
@@ -1128,7 +1128,7 @@ void FloatArray :: beReducedVectorFormOfStrain(const FloatMatrix &aMatrix)
 }
 
 
-void FloatArray :: beReducedVectorForm(const FloatMatrix &aMatrix)
+void FloatArray :: beSymVectorForm(const FloatMatrix &aMatrix)
 {
     // Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
 #  ifdef DEBUG

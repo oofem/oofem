@@ -305,28 +305,6 @@ HydratingHeMoMaterial :: giveIPValueType(InternalStateType type)
     }
 }
 
-int
-HydratingHeMoMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_HydrationDegree ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else {
-        return HeMoTKMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-int
-HydratingHeMoMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( type == IST_HydrationDegree ) {
-        return 1;
-    } else {
-        return HeMoTKMaterial :: giveIPValueSize(type, aGaussPoint);
-    }
-}
-
 MaterialStatus *
 HydratingHeMoMaterial :: CreateStatus(GaussPoint *gp) const
 {

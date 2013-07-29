@@ -68,8 +68,6 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
     // retardation spectrum or least square method is used. Retardation spectrum is default (EmoduliMode==0)
     IR_GIVE_OPTIONAL_FIELD(ir, EmoduliMode, _IFT_B3Material_emodulimode);
 
-    KelvinChainMaterial :: initializeFrom(ir);
-
     int mode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, mode, _IFT_B3Material_mode);
 
@@ -184,6 +182,8 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
         this->predictParametersFrom(fc, c, wc, ac, t0, alpha1, alpha2);
     }
 
+    KelvinChainMaterial :: initializeFrom(ir);
+
     return IRRT_OK;
 }
 
@@ -278,15 +278,12 @@ B3SolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
 
     double v, eta;
     double sum = 0.0;
-    double t_halfstep;
 
-    t_halfstep = relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor;
-    v = computeSolidifiedVolume(gp, atTime);
+    v = computeSolidifiedVolume(atTime);
     eta = this->computeFlowTermViscosity(gp, atTime);     //evaluated in the middle of the time-step
 
-    if ( EparVal.giveSize() == 0 ) {
-        this->updateEparModuli(gp, t_halfstep);
-    }
+    ///@warning THREAD UNSAFE!
+    this->updateEparModuli(relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor);
 
     if ( this->EmoduliMode == 0 ) { //retardation spectrum used
         // first Kelvin units of the Kelvin chain will be computed
@@ -309,7 +306,6 @@ B3SolidMaterial :: computeCharTimes()
      * of the relaxation or creep function by the Dirichlet series
      */
 
-    int mu;
     double Tau1;
     int j;
 
@@ -337,14 +333,14 @@ B3SolidMaterial :: computeCharTimes()
 
     this->charTimes.resize(this->nUnits);
 
-    for ( mu = 1; mu <= this->nUnits; mu++ ) {
+    for ( int mu = 1; mu <= this->nUnits; mu++ ) {
         charTimes.at(mu) = Tau1 * pow(10., mu - 1);
     }
 }
 
 
 void
-B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp, double atTime)
+B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, double atTime)
 {
     /*
      * If EmoduliMode == 0 then analysis of continuous retardation spectrum is used for
@@ -352,7 +348,6 @@ B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp, d
      * Else least-squares method is used
      */
     if ( this->EmoduliMode == 0 ) {
-        int mu;
         double tau0, tauMu;
         // constant "lambda0" is assumed to be equal to 1 day (typical value)
         // constant "n" is assumed to be equal to 0.1 (typical value)
@@ -365,7 +360,7 @@ B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp, d
         // evaluation of moduli of elasticity for the remaining units
         // (aging kelvin units with retardation time tauMu)
         answer.resize(nUnits);
-        for ( mu = 1; mu <= this->nUnits; mu++ ) {
+        for ( int mu = 1; mu <= this->nUnits; mu++ ) {
             tauMu = pow(2 * this->giveCharTime(mu), 0.1);
             answer.at(mu) = 10.e6 * pow(1 + tauMu, 2) / ( log(10.0) * q2 * tauMu * ( 0.9 + tauMu ) );
             this->charTimes.at(mu) *= 1.35;
@@ -373,8 +368,8 @@ B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp, d
 
         answer.at(nUnits) /= 1.2;   //last unit moduli reduction
     } else {   // moduli computed using the least-squares method
-        int i, j, r, rSize;
-        double taui, tauj, sum, tti, ttj, sumRhs;
+        int rSize;
+        double taui, tauj, tti, ttj;
         FloatArray rhs(this->nUnits);
         FloatMatrix A(this->nUnits, this->nUnits);
 
@@ -385,18 +380,19 @@ B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp, d
         // compute values of the compliance function at specified times rTimes
         // (can be done directly, since the compliance function is available)
 
-        for ( i = 1; i <= rSize; i++ ) {
-            discreteComplianceFunctionVal.at(i) = this->computeNonAgingCreepFunction( gp, rTimes.at(i) );
+        for ( int i = 1; i <= rSize; i++ ) {
+            discreteComplianceFunctionVal.at(i) = this->computeNonAgingCreepFunction( rTimes.at(i) );
         }
 
         // assemble the matrix of the set of linear equations
         // for computing the optimal compliances
         // !!! chartime exponents are assumed to be equal to 1 !!!
-        for ( i = 1; i <= this->nUnits; i++ ) {
+        for ( int i = 1; i <= this->nUnits; i++ ) {
             taui = this->giveCharTime(i);
-            for ( j = 1; j <= this->nUnits; j++ ) {
+            for ( int j = 1; j <= this->nUnits; j++ ) {
                 tauj = this->giveCharTime(j);
-                for ( sum = 0., r = 1; r <= rSize; r++ ) {
+                double sum = 0.;
+                for ( int r = 1; r <= rSize; r++ ) {
                     tti = rTimes.at(r) / taui;
                     ttj = rTimes.at(r) / tauj;
                     sum += ( 1. - exp(-tti) ) * ( 1. - exp(-ttj) );
@@ -407,7 +403,8 @@ B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp, d
 
             // assemble rhs
             // !!! chartime exponents are assumed to be equal to 1 !!!
-            for ( sumRhs = 0., r = 1; r <= rSize; r++ ) {
+            double sumRhs = 0.;
+            for ( int r = 1; r <= rSize; r++ ) {
                 tti = rTimes.at(r) / taui;
                 sumRhs += ( 1. - exp(-tti) ) * discreteComplianceFunctionVal.at(r);
             }
@@ -419,14 +416,14 @@ B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp, d
         A.solveForRhs(rhs, answer);
 
         // convert compliances into moduli
-        for ( i = 1; i <= this->nUnits; i++ ) {
+        for ( int i = 1; i <= this->nUnits; i++ ) {
             answer.at(i) = 1.e6 / answer.at(i);
         }
     }
 }
 
 double
-B3SolidMaterial :: computeNonAgingCreepFunction(GaussPoint *gp, double loadDuration)
+B3SolidMaterial :: computeNonAgingCreepFunction(double loadDuration)
 // compute the value of the creep function of the non-aging solidifying constituent
 // corresponding to the given load duration (in days)
 
@@ -442,7 +439,7 @@ B3SolidMaterial :: computeNonAgingCreepFunction(GaussPoint *gp, double loadDurat
 
 //original function from B3Material - useless here
 double
-B3SolidMaterial :: computeCreepFunction(GaussPoint *gp, double atTime, double ofAge)
+B3SolidMaterial :: computeCreepFunction(double atTime, double ofAge)
 {
     // computes the value of creep function at time atTime
     // when load is acting from ofAge
@@ -602,7 +599,7 @@ B3SolidMaterial :: computePointShrinkageStrainVectorMPS(FloatArray &answer, Gaus
 
 
 double
-B3SolidMaterial :: computeSolidifiedVolume(GaussPoint *gp, TimeStep *atTime)
+B3SolidMaterial :: computeSolidifiedVolume(TimeStep *atTime)
 // compute the relative volume of the solidified material at given age (in days)
 {
     double m, lambda0, alpha;
@@ -630,6 +627,7 @@ B3SolidMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
     if ( this->MicroPrestress == 1 ) {
         S = this->computeMicroPrestress(gp, atTime, 0); //microprestress in the middle of the time-step
         eta = 1.e6 / ( q4 * c0 * S );
+        //static_cast< B3SolidMaterialStatus* >( gp->giveMaterialStatus() )->setMPS(S);
     } else if ( this->MicroPrestress == 0 ) {
         tHalfStep = relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor;
         eta = 1.e6 * tHalfStep / q4;
@@ -656,7 +654,7 @@ B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, Tim
 
     // !!! chartime exponents are assumed to be equal to 1 !!!
     if ( mode == VM_Incremental ) {
-        v = computeSolidifiedVolume(gp, atTime);
+        v = computeSolidifiedVolume(atTime);
         eta = this->computeFlowTermViscosity(gp, atTime);         //evaluated too in the middle of the time-step
 
         sigma = status->giveStressVector();         //stress vector at the beginning of time-step
@@ -756,8 +754,8 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *
         sv += stressVector.at(i);
     }
 
-    et = 1. / this->computeCreepFunction(gp, time + 0.01, time);
-    et0 = 1. / this->computeCreepFunction(gp, t0 + 0.01, t0);
+    et = 1. / this->computeCreepFunction(time + 0.01, time);
+    et0 = 1. / this->computeCreepFunction(t0 + 0.01, t0);
 
     h1 = es0 * ( et0 / et );
     sn = sgn(wrate + at * trate);
@@ -908,7 +906,7 @@ B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *atTime, int o
 
 
 double
-B3SolidMaterial :: giveInitMicroPrestress(void)
+B3SolidMaterial :: giveInitMicroPrestress()
 {
     double S0;
     S0 = 1 / ( c0 * tS0 );

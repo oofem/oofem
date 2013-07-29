@@ -877,7 +877,7 @@ StructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
     FloatArray u;
 
     if ( !this->isActivated(stepN) ) {
-        answer.resize( this->giveCrossSection()->giveIPValueSize(IST_StrainTensor, gp) );
+        answer.resize( StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode()) );
         answer.zero();
         return;
     }

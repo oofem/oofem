@@ -217,23 +217,6 @@ QWedge :: giveInterface(InterfaceType interface)
     return NULL;
 }
 
-int
-QWedge :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) || ( type == IST_DamageTensor ) ) {
-        return 6;
-    }
-
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-int
-QWedge :: SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    return ZZNodalRecoveryMI_giveDofManRecordSize(type);
-}
-
 void
 QWedge :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
@@ -288,9 +271,7 @@ QWedge :: SPRNodalRecoveryMI_givePatchType()
 void
 QWedge :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
-    int size = NodalAveragingRecoveryMI_giveDofManRecordSize(type);
-    answer.resize(size);
-    answer.zero();
+    answer.resize(0);
     _warning("QWedge element: IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 

@@ -167,12 +167,10 @@ IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
 void MicroMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 {
     //perform average over microproblem
-    //     int j, index, ielem;
-    //     Element *elem;
-    //     double dV, VolTot = 0.;
+    //     int index;
+        //     double dV, VolTot = 0.;
     //     double scale = 1.;
     //     FloatArray VecStrain, VecStress, SumStrain(6), SumStress(6);
-    //     IntArray Mask;
     //     GaussPoint *gpL;
     //     IntegrationRule *iRule;
     //     Domain *microDomain = problemMicro->giveDomain(1); //from engngm.h
@@ -193,11 +191,11 @@ void MicroMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
     //     microEngngModel->terminate( microEngngModel->giveCurrentStep() );
     //     OOFEM_LOG_INFO("\n*** giveRealStress microproblem %p done\n", this);
     //
-    //     for ( ielem = 1; ielem <= nelem; ielem++ ) { //return stress as average through all elements of the same MicroMaterial
-    //         elem = microDomain->giveElement(ielem);
+    //     for ( int ielem = 1; ielem <= nelem; ielem++ ) { //return stress as average through all elements of the same MicroMaterial
+    //         Element *elem = microDomain->giveElement(ielem);
     //         iRule = elem->giveDefaultIntegrationRulePtr();
     //         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-    //             gpL  = iRule->getIntegrationPoint(i);
+    //             gpL = iRule->getIntegrationPoint(i);
     //             gpL->giveCoordinate(1);
     //             dV  = elem->computeVolumeAround(gpL);
     //             VolTot += dV;
@@ -211,12 +209,9 @@ void MicroMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
     //             VecStrain.times(dV);
     //             VecStress.times(dV);
     //
-    //             for ( j = 0; j < 6; j++ ) {
-    //                 index = Mask(j); //indexes in Mask from 1
-    //                 if ( index ) {
-    //                     SumStrain(j) += VecStrain(index - 1);
-    //                     SumStress(j) += VecStress(index - 1);
-    //                 }
+    //             for ( int j = 1; j <= 6; j++ ) {
+    //                 SumStrain.at(j) += VecStrain.at(j);
+    //                 SumStress.at(j) += VecStress.at(j);
     //             }
     //
     //             //VecStrain.printYourself();

@@ -158,19 +158,6 @@ QBrick1_ht :: giveInterface(InterfaceType interface)
     return NULL;
 }
 
-int
-QBrick1_ht :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-int
-QBrick1_ht :: SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    return ZZNodalRecoveryMI_giveDofManRecordSize(type);
-}
-
 void
 QBrick1_ht :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {

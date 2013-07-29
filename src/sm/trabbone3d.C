@@ -68,7 +68,7 @@ void TrabBone3D :: computePlasStrainEnerDensity(GaussPoint *gp, const FloatArray
     oldTotalDef = status->giveStrainVector();
 
     tsed = status->giveTSED();
-    tempPlasDef = * status->giveTempPlasDef();
+    tempPlasDef = status->giveTempPlasDef();
     oldStress = status->giveTempStressVector();
 
     FloatArray elStrain, deltaStrain, tmpStress;
@@ -123,9 +123,9 @@ TrabBone3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         if ( tempKappa > kappa ) {
             // plastic loading
             // Imports
-            tempEffectiveStress = * status->giveTempEffectiveStress();
-            plasFlowDirec = * status->givePlasFlowDirec();
-            SSaTensor = * status->giveSSaTensor();
+            tempEffectiveStress = status->giveTempEffectiveStress();
+            plasFlowDirec = status->givePlasFlowDirec();
+            SSaTensor = status->giveSSaTensor();
             beta = status->giveBeta();
             // Construction of the dyadic product tensor
             prodTensor.beTProductOf(SSaTensor, plasFlowDirec);
@@ -280,7 +280,7 @@ TrabBone3D :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
     //  this->constructAnisoStiffnessTensor(elasticity);
     // initialize the plastic strain and cumulative plastic strain
     // by values after the previous step
-    tempPlasDef = * status->givePlasDef();
+    tempPlasDef = status->givePlasDef();
     tempKappa = status->giveKappa();
     convergence = true;
     // evaluate the trial stress
@@ -301,7 +301,7 @@ TrabBone3D :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
         //printf("LineSearch \n");
         tempEffectiveStress = trialEffectiveStress;
         tempKappa = status->giveKappa();
-        tempPlasDef = * status->givePlasDef();
+        tempPlasDef = status->givePlasDef();
         convergence = projectOnYieldSurface(tempKappa, tempEffectiveStress, tempPlasDef, trialEffectiveStress, elasticity, compliance, status, atTime, gp, 1);
         if ( !convergence ) {
             //printf("No convergence %d",gp->giveNumber());
@@ -728,7 +728,7 @@ TrabBone3D :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     this->initGpForNewStep(gp);
     // compute effective stress using the plasticity model
     performPlasticityReturn(gp, totalStrain, atTime);
-    effStress =  * status->giveTempEffectiveStress();
+    effStress =  status->giveTempEffectiveStress();
 
     // evaluate damage variable
     tempDam = computeDamage(gp, atTime);
@@ -1230,8 +1230,7 @@ TrabBone3D :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
         answer.at(1) = status->giveTempDam();
         return 1;
     } else if ( type == IST_PlasticStrainTensor ) {
-        answer.resize(6);
-        answer = * status->giveTempPlasDef();
+        answer = status->giveTempPlasDef();
         return 1;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         answer.resize(1);
@@ -1270,58 +1269,6 @@ TrabBone3D :: giveIPValueType(InternalStateType type)
     }
 }
 
-int
-TrabBone3D :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_DamageScalar ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else if ( type == IST_PlasticStrainTensor ) {
-        answer.resize(6);
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-        answer.at(3) = 3;
-        answer.at(4) = 4;
-        answer.at(5) = 5;
-        answer.at(6) = 6;
-        return 1;
-    } else if ( type == IST_MaxEquivalentStrainLevel ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else if ( type == IST_BoneVolumeFraction ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else if ( type == IST_PlasStrainEnerDens ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else if ( type == IST_ElasStrainEnerDens ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else if ( type == IST_TotalStrainEnerDens ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else {
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-int
-TrabBone3D :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( ( type == IST_DamageScalar ) || ( type == IST_MaxEquivalentStrainLevel ) || ( type == IST_BoneVolumeFraction ) || ( type == IST_ElasStrainEnerDens ) || ( type == IST_PlasStrainEnerDens ) || ( type == IST_TotalStrainEnerDens ) ) {
-        return 1;
-    } else if ( type == IST_PlasticStrainTensor ) {
-        return 6;
-    } else {
-        return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
-    }
-}
 
 #ifdef __PARALLEL_MODE
 double TrabBone3D :: predictRelativeComputationalCost(GaussPoint *gp)
@@ -1420,34 +1367,34 @@ TrabBone3DStatus :: giveBeta()
     return beta;
 }
 
-const FloatArray *
-TrabBone3DStatus :: giveTempEffectiveStress()
+const FloatArray &
+TrabBone3DStatus :: giveTempEffectiveStress() const
 {
-    return & tempEffectiveStress;
+    return tempEffectiveStress;
 }
 
-const FloatArray *
-TrabBone3DStatus :: givePlasFlowDirec()
+const FloatArray &
+TrabBone3DStatus :: givePlasFlowDirec() const
 {
-    return & plasFlowDirec;
+    return plasFlowDirec;
 }
 
-const FloatArray *
-TrabBone3DStatus :: givePlasDef()
+const FloatArray &
+TrabBone3DStatus :: givePlasDef() const
 {
-    return & plasDef;
+    return plasDef;
 }
 
-const FloatArray *
-TrabBone3DStatus :: giveTempPlasDef()
+const FloatArray &
+TrabBone3DStatus :: giveTempPlasDef() const
 {
-    return & tempPlasDef;
+    return tempPlasDef;
 }
 
-const FloatMatrix *
-TrabBone3DStatus :: giveSSaTensor()
+const FloatMatrix &
+TrabBone3DStatus :: giveSSaTensor() const
 {
-    return & SSaTensor;
+    return SSaTensor;
 }
 
 

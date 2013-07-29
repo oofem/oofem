@@ -120,10 +120,71 @@ FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
 {
     FluidDynamicMaterialStatus *status = static_cast< FluidDynamicMaterialStatus* >( this->giveStatus(gp) );
     if ( type == IST_DeviatoricStress ) {
-        answer = status->giveDeviatoricStressVector();
+        MaterialMode mmode = gp->giveMaterialMode();
+        const FloatArray &vec = status->giveDeviatoricStressVector();
+        if ( mmode == _2dFlow ) {
+            answer.resize(6);
+            answer.at(1) = vec.at(1);
+            answer.at(2) = vec.at(2);
+            answer.at(3) = - (vec.at(1) + vec.at(2)); ///@todo Verify that this is correct for for all models.
+            answer.at(4) = 0.;
+            answer.at(5) = 0.;
+            answer.at(6) = vec.at(3);
+            return 1;
+        } else if ( mmode == _2dAxiFlow ) {
+            answer.resize(6);
+            answer.at(1) = vec.at(1);
+            answer.at(2) = vec.at(2);
+            answer.at(3) = vec.at(3);
+            answer.at(4) = 0;
+            answer.at(5) = 0;
+            answer.at(6) = vec.at(6);
+            return 1;
+        } else if ( mmode == _3dFlow ) {
+            answer = vec;
+            return 1;
+        } else {
+            OOFEM_ERROR ("FluidDynamicMaterial :: giveIPValue: material mode not supported");
+            return 0;
+        }
+        return 1;
+    } else if ( type == IST_DeviatoricStrain ) {
+        MaterialMode mmode = gp->giveMaterialMode();
+        const FloatArray &vec = status->giveDeviatoricStrainRateVector();
+        if ( mmode == _2dFlow ) {
+            answer.resize(6);
+            answer.at(1) = vec.at(1);
+            answer.at(2) = vec.at(2);
+            answer.at(3) = 0.;
+            answer.at(4) = vec.at(3);
+            answer.at(5) = 0.;
+            answer.at(6) = 0.;
+            answer.copySubVector(vec, 1);
+            return 1;
+        } else if ( mmode == _2dAxiFlow ) {
+            answer.resize(6);
+            answer.at(1) = vec.at(1);
+            answer.at(2) = vec.at(2);
+            answer.at(3) = vec.at(3);
+            answer.at(4) = 0;
+            answer.at(5) = 0;
+            answer.at(6) = vec.at(6);
+            return 1;
+        } else if ( mmode == _3dFlow ) {
+            answer = vec;
+            return 1;
+        } else {
+            OOFEM_ERROR ("FluidDynamicMaterial :: giveIPValue: material mode not supported");
+            return 0;
+        }
         return 1;
     } else if ( type == IST_Viscosity ) {
-        answer.resize(1); answer.at(1) = this->giveEffectiveViscosity(gp, atTime);
+        answer.resize(1);
+        answer.at(1) = this->giveEffectiveViscosity(gp, atTime);
+        return 1;
+    } else if ( type == IST_Density ) {
+        answer.resize(1);
+        answer.at(1) = this->give('d', gp);
         return 1;
     } else {
         return Material :: giveIPValue(answer, gp, type, atTime);
@@ -136,60 +197,12 @@ FluidDynamicMaterial :: giveIPValueType(InternalStateType type)
 {
     if ( type == IST_DeviatoricStress ) {
         return ISVT_TENSOR_S3;
-    } else if (type == IST_Viscosity ) {
+    } else if ( type == IST_DeviatoricStrain ) {
+        return ISVT_TENSOR_S3E;
+    } else if ( type == IST_Viscosity || type == IST_Density ) {
         return ISVT_SCALAR;
     } else {
         return Material :: giveIPValueType(type);
-    }
-}
-
-
-int
-FluidDynamicMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_DeviatoricStress ) {
-        if ( mmode == _2dFlow ) {
-            answer.setValues(3, 1, 2, 3);
-            return 1;
-        } else if ( mmode == _2dAxiFlow ) {
-            answer.setValues(4, 1, 2, 3, 6);
-            return 1;
-        } else if ( mmode == _3dFlow ) {
-            answer.resize(6);
-            for ( int i = 1; i <= 6; i++ ) answer.at(i) = i;
-            return 1;
-        } else {
-            OOFEM_ERROR ("FluidDynamicMaterial :: giveIntVarCompFullIndx: material mode not supported");
-            return 0;
-        }
-    } else if ( type == IST_Viscosity ) {
-        answer.resize(1); answer.at(1) = 1;
-        return 1;
-    }  else {
-        return Material :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-
-int
-FluidDynamicMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    MaterialMode mmode = aGaussPoint->giveMaterialMode();
-    if ( type == IST_DeviatoricStress ) {
-        if ( mmode == _2dFlow ) {
-            return 3;
-        } else if (mmode == _2dAxiFlow ) {
-            return 4;
-        } else if (mmode == _3dFlow ) {
-            return 6;
-        } else {
-            OOFEM_ERROR ("FluidDynamicMaterial :: giveIPValueSize: material mode not supported");
-            return 0;
-        }
-    } else if (type == IST_Viscosity ) {
-        return 1;
-    } else {
-        return Material :: giveIPValueSize(type, aGaussPoint);
     }
 }
 

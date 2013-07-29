@@ -52,16 +52,18 @@ AnisotropicMassTransferMaterial :: initializeFrom(InputRecord *ir)
 
     this->Material :: initializeFrom(ir);
 
-    FloatArray temp;
-
     ///@todo Why hardcode this for 2d ? Just take the whole matrix as the input instead and not worry about it.
+#if 0
+    IR_GIVE_FIELD(ir, k, _IFT_AnisotropicMassTransferMaterial_c);     // Read permeability matrix c from input file
+#else
+    FloatArray temp;
     IR_GIVE_FIELD(ir, temp, _IFT_AnisotropicMassTransferMaterial_c);     // Read permeability matrix c from input file
     k.resize(2, 2);
     k.at(1, 1) = temp.at(1);
     k.at(1, 2) = temp.at(2);
     k.at(2, 1) = temp.at(3);
     k.at(2, 2) = temp.at(4);
-
+#endif
     return IRRT_OK;
 }
 
@@ -81,10 +83,7 @@ AnisotropicMassTransferMaterial :: giveFluxVector(FloatArray& answer, GaussPoint
 
 
 void
-AnisotropicMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                            MatResponseMode mode,
-                                                            GaussPoint *gp,
-                                                            TimeStep *atTime)
+AnisotropicMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch  ( mMode ) {
@@ -106,26 +105,6 @@ AnisotropicMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
     _error2( "giveCharacteristicValue : unknown mode (%s)", __MatResponseModeToString(mode) );
 
     return 0.;
-}
-
-
-int
-AnisotropicMassTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
-{
-    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(aGaussPoint) );
-    FloatMatrix temp;
-
-    switch ( type ) {
-    case IST_Velocity:
-        answer = ms->giveFlux();
-        break;
-    case IST_PressureGradient:
-        answer = ms->giveGradient();
-        break;
-    default:
-      return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
-    }
-    return 1;
 }
 
 } // end namespace oofem

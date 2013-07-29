@@ -118,25 +118,15 @@ public:
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
 
-    // next function is intended to be used if we would like to obtain
-    // char matrix form different material which is not associated with gp and its element.
-    // (mainly for obtaining linear elastic matrix)
-    // stress-strain mode is taken from gp.
-    // NORMALLY - PLEASE USE GiveCharMaterialStiffnessMatrix function
-    virtual void giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                   MatResponseMode rMode,
-                                                   GaussPoint *, StructuralMaterial *,
-                                                   TimeStep *tStep);
+    virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dShellStiffMtrx(FloatMatrix &answer,MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *);
 
-    void giveLayerMaterialStiffnessMatrix(FloatMatrix &layerMatrix,
-                                          MatResponseMode rMode, GaussPoint *layerGp,
-                                          TimeStep *tStep);
-
-    virtual void computeStressIndependentStrainVector(FloatArray &answer,
-                                                      GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    virtual void computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     virtual double give(CrossSectionProperty a);
     int giveNumberOfLayers();
@@ -201,27 +191,6 @@ public:
 #endif
 
 protected:
-    virtual void giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               StructuralMaterial *mat,
-                                               TimeStep *tStep);
-
-    void give2dPlateMaterialStiffnessMatrix(FloatMatrix &answer,
-                                            MatResponseMode mode,
-                                            GaussPoint *gp,
-                                            StructuralMaterial *mat,
-                                            TimeStep *tStep);
-    void give3dShellMaterialStiffness(FloatMatrix &answer,
-                                      MatResponseMode mode,
-                                      GaussPoint *gp,
-                                      StructuralMaterial *mat,
-                                      TimeStep *tStep);
-    void give2dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           StructuralMaterial *mat,
-                                           TimeStep *tStep);
 
     void giveIntegrated3dShellStress(FloatArray &answer, GaussPoint *gp);
 

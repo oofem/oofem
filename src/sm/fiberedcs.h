@@ -118,21 +118,31 @@ public:
                                          GaussPoint *,
                                          TimeStep *tStep);
 
-    virtual void giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                   MatResponseMode rMode,
-                                                   GaussPoint *, StructuralMaterial *,
-                                                   TimeStep *tStep);
+    virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dShellStiffMtrx(FloatMatrix &answer,MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
 
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStressVector3d);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStrainVector3d);
 
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode, Material *mat);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 
-    virtual void giveFiberMaterialStiffnessMatrix(FloatMatrix &fiberMatrix, MatResponseMode rMode, GaussPoint *layerGp,
-                                                  TimeStep *tStep);
+    /**
+     * Method for computing 1d fiber stiffness matrix of receiver.
+     * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
+     * reduces it to 1d fiber stiffness using reduce method described above.
+     * However, this reduction is quite time consuming and if it is possible,
+     * it is recommended to overload this method and provide direct method for computing
+     * particular stiffness matrix.
+     * @param answer Stiffness matrix.
+     * @param mmode Material response mode.
+     * @param layerGp Integration point.
+     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     */
+    void giveFiberMaterialStiffnessMatrix(FloatMatrix &fiberMatrix, MatResponseMode rMode, GaussPoint *layerGp, TimeStep *tStep);
 
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
@@ -173,19 +183,7 @@ public:
 #endif
 
 protected:
-    virtual void giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                               MatResponseMode rMode,
-                                               GaussPoint *gp,
-                                               StructuralMaterial *mat,
-                                               TimeStep *tStep);
-
-    void give3dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
-                                           MatResponseMode rMode,
-                                           GaussPoint *gp,
-                                           StructuralMaterial *mat,
-                                           TimeStep *tStep);
-
-    FloatArray *GiveIntegrated3dBeamStress(GaussPoint *gp);
+    void giveIntegrated3dBeamStress(FloatArray &answer, GaussPoint *gp);
 
     double giveArea();
 

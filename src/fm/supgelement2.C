@@ -253,14 +253,12 @@ SUPGElement2 :: checkConsistency()
 void
 SUPGElement2 :: updateInternalState(TimeStep *stepN)
 {
-    int i, j;
-    IntegrationRule *iRule;
     FloatArray stress;
 
     // force updating strains & stresses
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
-        for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
+        IntegrationRule *iRule = integrationRulesArray [ i ];
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             computeDeviatoricStress(stress, iRule->getIntegrationPoint(j), stepN);
         }
     }
@@ -323,40 +321,6 @@ SUPGElement2 :: giveInternalStateAtNode(FloatArray &answer, InternalStateType ty
 }
 
 #endif
-
-int
-SUPGElement2 :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
-{
-    if ( type == IST_Velocity ) {
-        IntArray mask;
-        int indx = 1;
-        answer.resize(3);
-        this->giveElementDofIDMask(EID_MomentumBalance, mask);
-        if ( mask.findFirstIndexOf(V_u) ) {
-            answer.at(1) = indx++;
-        }
-
-        if ( mask.findFirstIndexOf(V_v) ) {
-            answer.at(2) = indx++;
-        }
-
-        if ( mask.findFirstIndexOf(V_w) ) {
-            answer.at(3) = indx++;
-        }
-
-        return 1;
-    } else if ( type == IST_Pressure ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else if ( ( type == IST_VOFFraction ) || ( type == IST_Density ) ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else {
-        return Element :: giveIntVarCompFullIndx(answer, type);
-    }
-}
 
 void
 SUPGElement2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime)

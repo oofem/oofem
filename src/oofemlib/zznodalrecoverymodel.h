@@ -77,10 +77,9 @@ private:
      * Initializes the region table indicating regions to skip.
      * @param regionMap Region table, the nonzero entry for region indicates region to skip due to
      * unsupported elements or incompatible value size.
-     * @param regionValSize Contains the record size for each region.
      * @param type Determines the type of internal variable to be recovered.
      */
-    void initRegionMap(IntArray &regionMap, IntArray &regionValSize, InternalStateType type);
+    void initRegionMap(IntArray &regionMap, InternalStateType type);
 
 #ifdef __PARALLEL_MODE
     void initCommMaps();
@@ -117,13 +116,6 @@ public:
      * @param type Determines the type of internal variable to be recovered.
      */
     virtual void ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, InternalStateType type);
-    /**
-     * Returns the size of DofManger record required to hold recovered values for given mode.
-     * Default implementation uses element giveIPValueSize method.
-     * @param type Determines the type of internal variable to be recovered.
-     * @return Size of DofManger record required to hold recovered values.
-     */
-    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     /**
      * Returns the corresponding element to interface.
      */

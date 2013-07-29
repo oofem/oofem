@@ -202,9 +202,7 @@ public:
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RCM2MaterialStatus(1, domain, gp); }
 
@@ -266,10 +264,7 @@ protected:
     virtual void give2dBeamLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
                                   GaussPoint *gp,
                                   TimeStep *tStep);
-    virtual void give2dPlateLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                   GaussPoint *gp,
-                                   TimeStep *tStep);
-    virtual void give3dShellLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
+    virtual void givePlateLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
                                    GaussPoint *gp,
                                    TimeStep *tStep);
 };

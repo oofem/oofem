@@ -170,7 +170,7 @@ public:
     // @param atTime time step
     //  void giveNormalElasticStiffnessMatrix (FloatMatrix& answer, MatResponseMode rMode, GaussPoint*gp, TimeStep* atTime) ;
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *atTime);
+    virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *atTime);
 
     virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime);
 
@@ -178,8 +178,6 @@ public:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
 
 #ifdef __PARALLEL_MODE
     virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip);

@@ -470,15 +470,6 @@ void Tr21Stokes :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer,
     answer.resize(0);
 }
 
-int Tr21Stokes :: NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    if ( type == IST_Pressure ) {
-        return 1;
-    }
-
-    return 0;
-}
-
 void Tr21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_Pressure ) {
@@ -505,11 +496,6 @@ void Tr21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
     }
 }
 
-int Tr21Stokes :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
 void Tr21Stokes :: giveGradP(FloatMatrix &answer, TimeStep * tStep )
 {
     /*

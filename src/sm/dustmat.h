@@ -119,7 +119,7 @@ public:
      * Get the full plastic strain vector from the material status.
      * @param answer Plastic strain.
      */
-    void givePlasticStrain(StrainVector &answer) const { answer = plasticStrain; }
+    const StrainVector & givePlasticStrain() const { return plasticStrain; }
     /**
      * Get the full plastic strain vector from the material status.
      * @return Volumetric part of plastic strain.
@@ -140,7 +140,7 @@ public:
      * Get the temp value of the full plastic strain vector from the material status.
      * @param answer Temp value of plastic strain vector.
      */
-    void giveTempPlasticStrain(StrainVector &answer) const { answer = tempPlasticStrain; }
+    const StrainVector & giveTempPlasticStrain() const { return tempPlasticStrain; }
     /**
      * Get the temp value of the hardening variable q from the material status.
      * @return Temp value of hardening variable kappaP.
@@ -475,13 +475,6 @@ public:
                             GaussPoint *gp,
                             InternalStateType type,
                             TimeStep *atTime);
-
-    virtual int giveIPValueSize(InternalStateType type,
-                                GaussPoint *gp);
-
-    virtual int giveIntVarCompFullIndx(IntArray &answer,
-                                       InternalStateType type,
-                                       MaterialMode mmode);
 
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 

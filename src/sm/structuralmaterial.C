@@ -34,6 +34,7 @@
 
 #include "structuralmaterial.h"
 #include "structuralcrosssection.h"
+#include "simplecrosssection.h"
 #include "domain.h"
 #include "verbose.h"
 #include "structuralms.h"
@@ -54,10 +55,135 @@ StructuralMaterial :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-    return mode == _3dMat        || mode == _PlaneStress ||
-           mode == _PlaneStrain  || mode == _1dMat       ||
-           mode == _2dPlateLayer || mode == _2dBeamLayer ||
-           mode == _3dShellLayer || mode == _1dFiber;
+    return mode == _3dMat        || mode == _PlaneStress || mode == _PlaneStrain  || mode == _1dMat ||
+           mode == _PlateLayer || mode == _2dBeamLayer || mode == _Fiber;
+}
+
+
+void
+StructuralMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    ///@todo Move this to StructuralCrossSection ?
+    MaterialMode mode = gp->giveMaterialMode();
+    if ( mode == _3dMat ) {
+        this->giveRealStressVector_3d(answer, gp, reducedStrain, tStep);
+    } else if ( mode == _PlaneStrain ) {
+        this->giveRealStressVector_PlaneStrain(answer, gp, reducedStrain, tStep);
+    } else if ( mode == _PlaneStress ) {
+        this->giveRealStressVector_PlaneStress(answer, gp, reducedStrain, tStep);
+    } else if ( mode == _1dMat ) {
+        this->giveRealStressVector_1d(answer, gp, reducedStrain, tStep);
+    }
+}
+
+
+void
+StructuralMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    OOFEM_ERROR2("%s :: giveRealStressVector_3d - 3d mode not supported", this->giveClassName());
+}
+
+
+void
+StructuralMaterial :: giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    if ( gp->giveMaterialMode() != _PlaneStrain ) {
+        OOFEM_ERROR("StructuralMaterial :: giveRealStressVector_PlaneStrain - Wrong material mode in GP");
+    }
+
+    FloatArray vE, vS;
+    StructuralMaterial :: giveFullSymVectorForm(vE, reducedStrain, _PlaneStrain);
+    this->giveRealStressVector_3d(vS, gp, vE, tStep);
+    StructuralMaterial :: giveReducedSymVectorForm(answer, vS, _PlaneStrain);
+}
+
+
+void
+StructuralMaterial :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    if ( gp->giveMaterialMode() != _PlaneStress ) {
+        OOFEM_ERROR("StructuralMaterial :: giveRealStressVector_PlaneStress - Wrong material mode in GP");
+    }
+
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    IntArray E_control, S_control; // Determines which components are controlled by E and S resp.
+    FloatArray vE, increment_vE, vS, vS_control;
+    FloatMatrix tangent, tangent_Scontrol;
+    // Iterate to find full vF.
+    StructuralMaterial :: giveVoigtVectorMask(E_control, _PlaneStress);
+    // Compute the negated the array of control since we need S_control as well;
+    S_control.resize( 9 - E_control.giveSize() );
+    for ( int i = 1, j = 1; i <= 9; i++ ) {
+        if ( !E_control.contains(i) ) {
+            S_control.at(j++) = i;
+        }
+    }
+
+    // Initial guess;
+    vE = status->giveStrainVector();
+    for ( int i = 1; i <= E_control.giveSize(); ++i ) {
+        vE.at( E_control.at(i) ) = reducedStrain.at(i);
+    }
+
+    // Iterate to find full vF.
+    for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
+        this->giveRealStressVector_3d(vS, gp, vE, tStep);
+        vS_control.beSubArrayOf(vS, S_control);
+        if ( vS_control.computeNorm() < 1e-6 ) { ///@todo We need a tolerance here!
+            StructuralMaterial :: giveReducedVectorForm(answer, vS, _1dMat);
+            return;
+        }
+
+        this->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
+        tangent_Scontrol.beSubMatrixOf(tangent, S_control, S_control);
+        tangent_Scontrol.solveForRhs(vS_control, increment_vE);
+        vE.assemble(increment_vE, S_control);
+    }
+
+    OOFEM_WARNING("StructuralMaterial :: giveRealStressVector_PlaneStress - Iteration did not converge");
+    answer.resize(0);
+}
+
+
+void
+StructuralMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    if ( gp->giveMaterialMode() != _1dMat ) {
+        OOFEM_ERROR("StructuralMaterial :: giveRealStressVector_1d - Wrong material mode in GP");
+    }
+
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    IntArray S_control; // Determines which components are controlled by P resp.
+    FloatArray old_vE, vE, increment_vE, vS, vS_control;
+    FloatMatrix tangent, tangent_Scontrol;
+    // Compute the negated the array of control since we need P_control as well;
+    S_control.resize(8);
+    for ( int i = 1; i <= 8; i++ ) {
+        S_control.at(i) = i + 1;
+    }
+
+    // Initial guess;
+    vE = status->giveStrainVector();
+    vE.at(1) = reducedStrain.at(1);
+    // Iterate to find full vF.
+    for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
+        this->giveRealStressVector_3d(vS, gp, vE, tStep);
+        vS_control.beSubArrayOf(vS, S_control);
+        if ( vS_control.computeNorm() < 1e-6 ) { ///@todo We need a tolerance here!
+            StructuralMaterial :: giveReducedVectorForm(answer, vS, _1dMat);
+            return;
+        }
+
+        this->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
+        tangent_Scontrol.beSubMatrixOf(tangent, S_control, S_control);
+        tangent_Scontrol.solveForRhs(vS_control, increment_vE);
+        vE.assemble(increment_vE, S_control);
+    }
+
+    OOFEM_WARNING("StructuralMaterial :: giveRealStressVector_1d - Iteration did not converge");
+    answer.resize(0);
 }
 
 
@@ -65,6 +191,7 @@ void
 StructuralMaterial :: giveFirstPKStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
 {
     ///@todo Move this to StructuralCrossSection ?
+    reducedvF.printYourself();
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _3dMat ) {
         this->giveFirstPKStressVector_3d(answer, gp, reducedvF, tStep);
@@ -94,18 +221,17 @@ StructuralMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint 
     E.at(2, 2) -= 1.0;
     E.at(3, 3) -= 1.0;
     E.times(0.5);
-    vE.beReducedVectorFormOfStrain(E);      // 6
+    vE.beSymVectorFormOfStrain(E);      // 6
 
     ///@todo Have this function:
-    //this->giveRealStressVector_3d(vS, gp, vE, tStep);
-    this->giveRealStressVector(vS, gp, vE, tStep); // Treat stress obtained as second PK stress
+    this->giveRealStressVector_3d(vS, gp, vE, tStep);
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     // Compute first PK stress from second PK stress
     FloatMatrix P, S;
     S.beMatrixForm(vS);
     P.beProductOf(F, S);
-    answer.beFullVectorForm(P);
+    answer.beVectorForm(P);
 
     status->letTempPVectorBe(answer);
     status->letTempFVectorBe(vF);
@@ -427,17 +553,14 @@ StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
         this->give1dStressStiffMtrx(answer, rMode, gp, atTime);
         break;
 
-    case _2dPlateLayer:
-        this->give2dPlateLayerStiffMtrx(answer, rMode, gp, atTime);
-        break;
-    case _3dShellLayer:
-        this->give3dShellLayerStiffMtrx(answer, rMode, gp, atTime);
+    case _PlateLayer:
+        this->givePlateLayerStiffMtrx(answer, rMode, gp, atTime);
         break;
     case _2dBeamLayer:
         this->give2dBeamLayerStiffMtrx(answer, rMode, gp, atTime);
         break;
-    case _1dFiber:
-        this->give1dFiberStiffMtrx(answer, rMode, gp, atTime);
+    case _Fiber:
+        this->giveFiberStiffMtrx(answer, rMode, gp, atTime);
         break;
     default:
         OOFEM_ERROR2( "StructuralMaterial :: giveStiffnessMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
@@ -466,20 +589,6 @@ StructuralMaterial :: giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseM
     case _1dMat:
         this->give1dStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
         break;
-#if 0
-    case _2dPlateLayer:
-        this->give2dPlateLayerStiffMtrx_dPdF(answer, rMode, gp, tStep);
-        break;
-    case _3dShellLayer:
-        this->give3dShellLayerStiffMtrx_dPdF(answer, rMode, gp, tStep);
-        break;
-    case _2dBeamLayer:
-        this->give2dBeamLayerStiffMtrx_dPdF(answer, rMode, gp, tStep);
-        break;
-    case _1dFiber:
-        this->give1dFiberStiffMtrx_dPdF(answer, rMode, gp, tStep);
-        break;
-#endif
     default:
         OOFEM_ERROR2( "StructuralMaterial :: giveStiffnessMatrix_dPdF : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
@@ -592,53 +701,6 @@ StructuralMaterial :: give1dStressStiffMtrx_dCde(FloatMatrix &answer,
 }
 
 
-
-#if 0
-void
-StructuralMaterial :: give2dPlateLayerStiffMtrx_dPdF(FloatMatrix &answer,
-                                                     MatResponseMode mode,
-                                                     GaussPoint *gp, TimeStep *tStep)
-{
-    FloatMatrix dSdE;
-    this->give2dPlateLayerStiffMtrx(dSdE, mode, gp, tStep);
-    this->give_dPdF_from(dSdE, answer, gp);
-}
-
-
-void
-StructuralMaterial :: give3dShellLayerStiffMtrx_dPdF(FloatMatrix &answer,
-                                                     MatResponseMode mode,
-                                                     GaussPoint *gp, TimeStep *tStep)
-{
-    FloatMatrix dSdE;
-    this->give3dShellLayerStiffMtrx(dSdE, mode, gp, tStep);
-    this->give_dPdF_from(dSdE, answer, gp);
-}
-
-
-void
-StructuralMaterial :: give2dBeamLayerStiffMtrx_dPdF(FloatMatrix &answer,
-                                                    MatResponseMode mode,
-                                                    GaussPoint *gp, TimeStep *tStep)
-{
-    FloatMatrix dSdE;
-    this->give2dBeamLayerStiffMtrx(dSdE, mode, gp, tStep);
-    this->give_dPdF_from(dSdE, answer, gp);
-}
-
-
-void
-StructuralMaterial :: give1dFiberStiffMtrx_dPdF(FloatMatrix &answer,
-                                                MatResponseMode mode,
-                                                GaussPoint *gp, TimeStep *tStep)
-{
-    FloatMatrix dSdE;
-    this->give1dFiberStiffMtrx(dSdE, mode, gp, tStep);
-    this->give_dPdF_from(dSdE, answer, gp);
-}
-#endif
-
-
 void
 StructuralMaterial :: convert_P_2_S(FloatArray &answer, const FloatArray &reducedvP, const FloatArray &reducedvF, MaterialMode matMode)
 {
@@ -654,7 +716,7 @@ StructuralMaterial :: convert_P_2_S(FloatArray &answer, const FloatArray &reduce
     invF.beInverseOf(F);
     S.beProductOf(invF, P);
     FloatArray vS;
-    vS.beReducedVectorForm(S); // 6 components
+    vS.beSymVectorForm(S); // 6 components
     StructuralMaterial :: giveReducedSymVectorForm(answer, vS, matMode); // convert back to reduced size
 }
 
@@ -672,86 +734,8 @@ StructuralMaterial :: convert_S_2_P(FloatArray &answer, const FloatArray &reduce
     F.beMatrixForm(vF);
     S.beMatrixForm(vS);
     P.beProductOf(F, S);
-    vP.beFullVectorForm(P);
+    vP.beVectorForm(P);
     StructuralMaterial :: giveReducedVectorForm(answer, vP, matMode);   // convert back to reduced size
-}
-
-
-void
-StructuralMaterial ::  reduceStiffMtrx3d(FloatMatrix &answer, GaussPoint *gp,
-                                         FloatMatrix &stiffMtrx3d) const
-//
-// Returns characteristic material stiffness matrix of the receiver
-// reduced to corresponding mode obtained from gp.
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    switch ( mode ) {
-    case _3dMat:
-        answer = stiffMtrx3d;
-        break;
-    case _PlaneStress:
-        this->reduceToPlaneStressStiffMtrx(answer, gp, stiffMtrx3d);
-        break;
-    case _PlaneStrain:
-        this->reduceToPlaneStrainStiffMtrx(answer, gp, stiffMtrx3d);
-        break;
-    case _1dMat:
-        this->reduceTo1dStressStiffMtrx(answer, gp, stiffMtrx3d);
-        break;
-    case _2dPlateLayer:
-        this->reduceTo2dPlateLayerStiffMtrx(answer, gp, stiffMtrx3d);
-        break;
-    case _3dShellLayer:
-        this->reduceTo3dShellLayerStiffMtrx(answer, gp, stiffMtrx3d);
-        break;
-    case _2dBeamLayer:
-        this->reduceTo2dBeamLayerStiffMtrx(answer, gp, stiffMtrx3d);
-        break;
-    case _1dFiber:
-        this->reduceTo1dFiberStiffMtrx(answer, gp, stiffMtrx3d);
-        break;
-    default:
-        OOFEM_ERROR2( "StructuralMaterial :: reduceStiffMtrx3d : unknown mode (%s)", __MaterialModeToString(mode) );
-    }
-}
-
-
-void
-StructuralMaterial :: reduceComplMtrx3d(FloatMatrix &answer, GaussPoint *gp,
-                                        FloatMatrix &complMtrx3d) const
-//
-// Returns characteristic material compliance matrix of the receiver
-// reduced to corresponding mode obtained from gp.
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    switch ( mode ) {
-    case _3dMat:
-        answer = complMtrx3d;
-        break;
-    case _PlaneStress:
-        this->reduceToPlaneStressComplMtrx(answer, gp, complMtrx3d);
-        break;
-    case _PlaneStrain:
-        this->reduceToPlaneStrainComplMtrx(answer, gp, complMtrx3d);
-        break;
-    case _1dMat:
-        this->reduceTo1dStressComplMtrx(answer, gp, complMtrx3d);
-        break;
-    case _2dPlateLayer:
-        this->reduceTo2dPlateLayerComplMtrx(answer, gp, complMtrx3d);
-        break;
-    case _3dShellLayer:
-        this->reduceTo3dShellLayerComplMtrx(answer, gp, complMtrx3d);
-        break;
-    case _2dBeamLayer:
-        this->reduceTo2dBeamLayerComplMtrx(answer, gp, complMtrx3d);
-        break;
-    case _1dFiber:
-        this->reduceTo1dFiberComplMtrx(answer, gp, complMtrx3d);
-        break;
-    default:
-        OOFEM_ERROR2( "StructuralMaterial :: reduceComplMtrx3d : unknown mode (%s)", __MaterialModeToString(mode) );
-    }
 }
 
 
@@ -849,8 +833,7 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         answer.at(1) = 1;
         return 6;
 
-    case _2dPlateLayer:
-    case _3dShellLayer:
+    case _PlateLayer:
         answer.resize(5);
         answer.at(1) = 1;
         answer.at(2) = 2;
@@ -863,6 +846,13 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         answer.resize(2);
         answer.at(1) = 1;
         answer.at(2) = 5;
+        return 6;
+
+    case _Fiber:
+        answer.resize(3);
+        answer.at(1) = 1;
+        answer.at(2) = 5;
+        answer.at(3) = 6;
         return 6;
 
     case _2dPlate:
@@ -907,13 +897,6 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         }
 
         return 8;
-
-    case _1dFiber:
-        answer.resize(3);
-        answer.at(1) = 1;
-        answer.at(2) = 5;
-        answer.at(3) = 6;
-        return 6;
 
     case _PlaneStressRot:
         answer.resize(4);
@@ -1000,489 +983,6 @@ StructuralMaterial :: giveVoigtVectorMask(IntArray &answer, MaterialMode mmode)
     }
 }
 
-// Stiffness reduction methods
-#if 1
-void
-StructuralMaterial :: reduceToPlaneStressStiffMtrx(FloatMatrix &answer,
-                                                   GaussPoint *gp,
-                                                   FloatMatrix &stiffMtrx3d) const
-//
-// returns receiver's 2dPlaneStressMtrx constructed from
-// stiffMtrx3d (general 3dMatrialStiffnessMatrix)
-// (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
-// This method works for general 3d stiff matrix
-//
-{
-    FloatMatrix inv3d, invAnswer, reducedAnswer;
-
-    // check if stiffMtrx is proper
-    if ( ( stiffMtrx3d.isSquare() ) && ( stiffMtrx3d.giveNumberOfRows() == 6 ) ) {
-        inv3d.beInverseOf(stiffMtrx3d);
-
-        invAnswer.resize(3, 3);
-
-        invAnswer.at(1, 1) = inv3d.at(1, 1);
-        invAnswer.at(1, 2) = inv3d.at(1, 2);
-        invAnswer.at(1, 3) = inv3d.at(1, 6);
-
-        invAnswer.at(2, 1) = inv3d.at(2, 1);
-        invAnswer.at(2, 2) = inv3d.at(2, 2);
-        invAnswer.at(2, 3) = inv3d.at(2, 6);
-
-        invAnswer.at(3, 1) = inv3d.at(6, 1);
-        invAnswer.at(3, 2) = inv3d.at(6, 2);
-        invAnswer.at(3, 3) = inv3d.at(6, 6);
-
-        reducedAnswer.beInverseOf(invAnswer);
-
-        answer = reducedAnswer;
-    } else {
-        OOFEM_ERROR("StructuralMaterial :: reduceToPlaneStressStiffMtrx : stiffMtrx size mismatch");
-    }
-}
-
-
-void
-StructuralMaterial :: reduceToPlaneStrainStiffMtrx(FloatMatrix &answer,
-                                                   GaussPoint *gp,
-                                                   FloatMatrix &stiffMtrx3d) const
-//
-// returns receiver's 2dPlaneStrainMtrx constructed from
-// general 3dMatrialStiffnessMatrix
-// (2dPlaneStrain ==> eps_z = gamma_xz = gamma_yz = 0.)
-// but we take ez, SigmaZ into account.
-//
-{
-    // check if stiffMtrx is proper
-    if ( ( stiffMtrx3d.isSquare() ) && ( stiffMtrx3d.giveNumberOfRows() == 6 ) ) {
-        answer.resize(4, 4);
-        answer.zero();
-
-        answer.at(1, 1) = stiffMtrx3d.at(1, 1);
-        answer.at(1, 2) = stiffMtrx3d.at(1, 2);
-        answer.at(1, 4) = stiffMtrx3d.at(1, 6);
-
-        answer.at(2, 1) = stiffMtrx3d.at(2, 1);
-        answer.at(2, 2) = stiffMtrx3d.at(2, 2);
-        answer.at(2, 4) = stiffMtrx3d.at(2, 6);
-
-        answer.at(3, 1) = stiffMtrx3d.at(3, 1);
-        answer.at(3, 2) = stiffMtrx3d.at(3, 2);
-        answer.at(3, 4) = stiffMtrx3d.at(3, 6);
-
-        answer.at(4, 1) = stiffMtrx3d.at(6, 1);
-        answer.at(4, 2) = stiffMtrx3d.at(6, 2);
-        answer.at(4, 4) = stiffMtrx3d.at(6, 6);
-    } else {
-        OOFEM_ERROR("StructuralMaterial :: reduceToPlaneStrainStiffMtrx :: stiffMtrx size mismatch");
-    }
-}
-
-
-void
-StructuralMaterial :: reduceTo1dStressStiffMtrx(FloatMatrix &answer,
-                                                GaussPoint *gp,
-                                                FloatMatrix &stiffMtrx3d) const
-//
-//
-// returns receiver's 1dMaterialStiffnessMAtrix constructed from
-// general 3dMatrialStiffnessMatrix
-// (1d case ==> sigma_y = sigma_z = tau_yz = tau_zx = tau_xy  = 0.)
-// This method works only if 3dMateriallStiffnessMatrix
-// has two 3x3 independent blocks
-{
-    FloatMatrix m3d11, inv3d;
-    double val11;
-
-    // check if stiffMtrx is proper
-    if ( ( stiffMtrx3d.isSquare() ) && ( stiffMtrx3d.giveNumberOfRows() == 6 ) ) {
-        inv3d.beInverseOf(stiffMtrx3d);
-        val11 = inv3d.at(1, 1);
-
-        answer.resize(1, 1);
-
-        answer.at(1, 1) = 1. / val11;
-    } else {
-        OOFEM_ERROR("StructuralMaterial :: reduceTo1dStressStiffMtrx:: stiffMtrx3d size mismatch");
-    }
-}
-
-
-void
-StructuralMaterial :: reduceTo2dPlateLayerStiffMtrx(FloatMatrix &answer,
-                                                    GaussPoint *gp,
-                                                    FloatMatrix &stiffMtrx3d) const
-//
-// return material stiffness matrix for derived types of stressStreinState
-// assumption sigma_z = 0.
-//
-// General strain vector has one of the following forms:
-// 1) strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    FloatMatrix invMat3d, invMatLayer(5, 5);
-
-    if ( !( ( mode == _2dPlateLayer ) || ( mode == _3dShellLayer ) ) ) {
-        _error("ReduceTo2dPlateLayerStiffMtrx : unsupported mode");
-    }
-
-
-    // check if stiffMtrx is proper
-    if ( ( stiffMtrx3d.isSquare() ) && ( stiffMtrx3d.giveNumberOfRows() == 6 ) ) {
-        invMat3d.beInverseOf(stiffMtrx3d);
-
-        for ( int i = 1; i <= 2; i++ ) {
-            for ( int j = 1; j <= 2; j++ ) {
-                invMatLayer.at(i, j) = invMat3d.at(i, j);
-            }
-        }
-
-        for ( int i = 4; i <= 6; i++ ) {
-            for ( int j = 4; j <= 6; j++ ) {
-                invMatLayer.at(i - 1, j - 1) = invMat3d.at(i, j);
-            }
-        }
-
-        for ( int i = 1; i <= 2; i++ ) {
-            for ( int j = 4; j <= 6; j++ ) {
-                invMatLayer.at(i, j - 1) = invMat3d.at(i, j);
-                invMatLayer.at(j - 1, i) = invMat3d.at(j, i);
-            }
-        }
-
-        answer.beInverseOf(invMatLayer);
-    } else {
-        OOFEM_ERROR("StructuralMaterial :: reduceTo2dPlateLayerStiffMtrx : stiffMtrx size mismatch");
-    }
-}
-
-
-void
-StructuralMaterial :: reduceTo3dShellLayerStiffMtrx(FloatMatrix &answer,
-                                                    GaussPoint *gp,
-                                                    FloatMatrix &stiffMtrx3d) const
-//
-// return material stiffness matrix for derived types of stressStreinState
-// assumption sigma_z = 0.
-//
-// General strain vector has one of the following forms:
-// 1) strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
-
-{
-    this->reduceTo2dPlateLayerStiffMtrx(answer, gp, stiffMtrx3d);
-}
-
-
-void
-StructuralMaterial :: reduceTo2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                                   GaussPoint *gp,
-                                                   FloatMatrix &stiffMtrx3d) const
-//
-// return material stiffness matrix for derived types of stressStreinState
-// assumption sigma_z = 0.
-//
-// General strain vector has one of the following forms:
-// 1) strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    FloatMatrix invMat3d, invMatLayer(2, 2);
-
-    if ( mode != _2dBeamLayer ) {
-        OOFEM_ERROR("StructuralMaterial :: ReduceTo2dBeamLayerStiffMtrx : unsupported mode");
-    }
-
-    if ( ( stiffMtrx3d.isSquare() ) && ( stiffMtrx3d.giveNumberOfRows() == 6 ) ) {
-        invMat3d.beInverseOf(stiffMtrx3d);
-
-        invMatLayer.at(1, 1) = invMat3d.at(1, 1);
-        invMatLayer.at(1, 2) = invMat3d.at(1, 5);
-        invMatLayer.at(2, 1) = invMat3d.at(5, 1);
-        invMatLayer.at(2, 2) = invMat3d.at(5, 5);
-
-        answer.beInverseOf(invMatLayer);
-    } else {
-        OOFEM_ERROR("StructuralMaterial :: reduceTo2dBeamLayerStiffMtrx: stiffMtrx3d size mismatch");
-    }
-}
-
-
-void
-StructuralMaterial :: reduceTo1dFiberStiffMtrx(FloatMatrix &answer,
-                                               GaussPoint *gp,
-                                               FloatMatrix &stiffMtrx3d) const
-//
-// return material stiffness matrix for derived types of stressStreinState
-// assumption sigma_z = 0.
-//
-// General strain vector has one of the following forms:
-// 1) strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    FloatMatrix invMat3d, invMatLayer(3, 3);
-
-    if ( mode != _1dFiber ) {
-        OOFEM_ERROR("StructuralMaterial :: reduceTo1dFiberStiffMtrx : unsupported mode");
-    }
-
-    if ( ( stiffMtrx3d.isSquare() ) && ( stiffMtrx3d.giveNumberOfRows() == 6 ) ) {
-        invMat3d.beInverseOf(stiffMtrx3d);
-
-        invMatLayer.at(1, 1) = invMat3d.at(1, 1);
-        invMatLayer.at(1, 2) = invMat3d.at(1, 5);
-        invMatLayer.at(1, 3) = invMat3d.at(1, 6);
-        invMatLayer.at(2, 1) = invMat3d.at(5, 1);
-        invMatLayer.at(2, 2) = invMat3d.at(5, 5);
-        invMatLayer.at(2, 3) = invMat3d.at(5, 6);
-        invMatLayer.at(3, 1) = invMat3d.at(6, 1);
-        invMatLayer.at(3, 2) = invMat3d.at(6, 5);
-        invMatLayer.at(3, 3) = invMat3d.at(6, 6);
-
-        answer.beInverseOf(invMatLayer);
-    } else {
-        OOFEM_ERROR("StructuralMaterial :: reduceTo1dFiberStiffMtrx: stiffMtrx3d size mismatch");
-    }
-}
-#endif
-
-
-// Compliance reduction methods
-#if 1
-void
-StructuralMaterial :: reduceToPlaneStressComplMtrx(FloatMatrix &answer,
-                                                   GaussPoint *gp,
-                                                   FloatMatrix &complMtrx3d) const
-//
-// returns receiver's 2dPlaneComplMtrx constructed from
-// complMtrx3d (general 3dMatrialComplianceMatrix)
-// (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
-// This method works for general 3d compl matrix
-//
-{
-    // check if complMtrx is proper
-    if ( ( complMtrx3d.isSquare() ) && ( complMtrx3d.giveNumberOfRows() == 6 ) ) {
-        answer.resize(3, 3);
-        answer.zero();
-
-        answer.at(1, 1) = complMtrx3d.at(1, 1);
-        answer.at(1, 2) = complMtrx3d.at(1, 2);
-        answer.at(1, 3) = complMtrx3d.at(1, 6);
-        answer.at(2, 1) = complMtrx3d.at(2, 1);
-        answer.at(2, 2) = complMtrx3d.at(2, 2);
-        answer.at(2, 3) = complMtrx3d.at(2, 6);
-        answer.at(3, 3) = complMtrx3d.at(6, 6);
-        answer.at(3, 1) = complMtrx3d.at(6, 1);
-        answer.at(3, 2) = complMtrx3d.at(6, 2);
-    } else {
-        OOFEM_ERROR("StructuralMaterial :: reduceToPlaneStressComplMtrx : complMtrx size mismatch");
-    }
-}
-
-
-void
-StructuralMaterial :: reduceToPlaneStrainComplMtrx(FloatMatrix &answer,
-                                                   GaussPoint *gp,
-                                                   FloatMatrix &complMtrx3d) const
-//
-// returns receiver's 2dPlaneStrainMtrx constructed from
-// general 3dMatrialComplianceMatrix
-// (2dPlaneStrain ==> eps_z = gamma_xz = gamma_yz = 0.)
-//
-{
-    FloatMatrix inv3d, invAnswer(3, 3), reducedAnswer;
-
-    // check if complMtrx is proper
-    if ( ( complMtrx3d.isSquare() ) && ( complMtrx3d.giveNumberOfRows() == 6 ) ) {
-        inv3d.beInverseOf(complMtrx3d);
-
-        invAnswer.at(1, 1) = inv3d.at(1, 1);
-        invAnswer.at(1, 2) = inv3d.at(1, 2);
-        invAnswer.at(1, 3) = inv3d.at(1, 6);
-
-        invAnswer.at(2, 1) = inv3d.at(2, 1);
-        invAnswer.at(2, 2) = inv3d.at(2, 2);
-        invAnswer.at(2, 3) = inv3d.at(2, 6);
-
-        invAnswer.at(3, 1) = inv3d.at(6, 1);
-        invAnswer.at(3, 2) = inv3d.at(6, 2);
-        invAnswer.at(3, 3) = inv3d.at(6, 6);
-
-        reducedAnswer.beInverseOf(invAnswer);
-
-        answer.resize(4, 4);
-        answer.zero();
-
-        answer.at(1, 1) = reducedAnswer.at(1, 1);
-        answer.at(1, 2) = reducedAnswer.at(1, 2);
-        answer.at(2, 1) = reducedAnswer.at(2, 1);
-        answer.at(2, 2) = reducedAnswer.at(2, 2);
-
-        answer.at(1, 4) = reducedAnswer.at(1, 3);
-        answer.at(2, 4) = reducedAnswer.at(2, 3);
-        answer.at(4, 1) = reducedAnswer.at(3, 1);
-        answer.at(4, 2) = reducedAnswer.at(3, 2);
-        answer.at(4, 4) = reducedAnswer.at(3, 3);
-    } else {
-        OOFEM_ERROR("StructuralMaterial :: reduceToPlaneStrainComplMtrx :: complMtrx size mismatch");
-    }
-}
-
-
-void
-StructuralMaterial :: reduceTo1dStressComplMtrx(FloatMatrix &answer,
-                                                GaussPoint *gp,
-                                                FloatMatrix &complMtrx3d) const
-//
-//
-// returns receiver's 1dMaterialComplianceMAtrix constructed from
-// general 3dMatrialComplianceMatrix
-// (1d case ==> sigma_y = sigma_z = tau_yz = tau_zx = tau_xy  = 0.)
-{
-    // check if complMtrx is proper
-    if ( ( complMtrx3d.isSquare() ) && ( complMtrx3d.giveNumberOfRows() == 6 ) ) {
-        answer.resize(1, 1);
-        answer.at(1, 1) = complMtrx3d.at(1, 1);
-    } else {
-        OOFEM_ERROR("StructuralMaterial :: reduceTo1dStressComplMtrx:: complMtrx3d size mismatch");
-    }
-}
-
-
-
-void
-StructuralMaterial :: reduceTo2dPlateLayerComplMtrx(FloatMatrix &answer,
-                                                    GaussPoint *gp,
-                                                    FloatMatrix &complMtrx3d) const
-//
-// return material compliance matrix for derived types of stressStreinState
-// assumption sigma_z = 0.
-//
-// General strain vector has one of the following forms:
-// 1) strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-
-    if ( !( ( mode == _2dPlateLayer ) || ( mode == _3dShellLayer ) ) ) {
-        OOFEM_ERROR("StructuralMaterial :: reduceTo2dPlateLayerComplMtrx : unsupported mode");
-    }
-
-
-    // check if complMtrx is proper
-    if ( ( complMtrx3d.isSquare() ) && ( complMtrx3d.giveNumberOfRows() == 6 ) ) {
-        answer.resize(5, 5);
-        answer.zero();
-
-        for ( int i = 1; i <= 2; i++ ) {
-            for ( int j = 1; j <= 2; j++ ) {
-                answer.at(i, j) = complMtrx3d.at(i, j);
-            }
-        }
-
-        for ( int i = 4; i <= 6; i++ ) {
-            for ( int j = 4; j <= 6; j++ ) {
-                answer.at(i - 1, j - 1) = complMtrx3d.at(i, j);
-            }
-        }
-
-        for ( int i = 1; i <= 2; i++ ) {
-            for ( int j = 4; j <= 6; j++ ) {
-                answer.at(i, j - 1) = complMtrx3d.at(i, j);
-                answer.at(j - 1, i) = complMtrx3d.at(j, i);
-            }
-        }
-    } else {
-        OOFEM_ERROR("StructuralMaterial :: reduceTo2dPlateLayerComplMtrx : stiffMtrx size mismatch");
-    }
-}
-
-
-void
-StructuralMaterial :: reduceTo3dShellLayerComplMtrx(FloatMatrix &answer,
-                                                    GaussPoint *gp,
-                                                    FloatMatrix &complMtrx3d) const
-//
-// return material compliance matrix for derived types of stressStreinState
-// assumption sigma_z = 0.
-//
-// General strain vector has one of the following forms:
-// 1) strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
-
-{
-    this->reduceTo2dPlateLayerComplMtrx(answer, gp, complMtrx3d);
-}
-
-
-
-void
-StructuralMaterial :: reduceTo2dBeamLayerComplMtrx(FloatMatrix &answer,
-                                                   GaussPoint *gp,
-                                                   FloatMatrix &complMtrx3d) const
-//
-// return material compliance matrix for derived types of stressStreinState
-// assumption sigma_z = 0.
-//
-// General strain vector has one of the following forms:
-// 1) strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-
-    if ( mode != _2dBeamLayer ) {
-        OOFEM_ERROR("StructuralMaterial :: reduceTo2dBeamLayerComplMtrx : unsupported mode");
-    }
-
-    if ( ( complMtrx3d.isSquare() ) && ( complMtrx3d.giveNumberOfRows() == 6 ) ) {
-        answer.resize(2, 2);
-
-        answer.at(1, 1) = complMtrx3d.at(1, 1);
-        answer.at(1, 2) = complMtrx3d.at(1, 5);
-        answer.at(2, 1) = complMtrx3d.at(5, 1);
-        answer.at(2, 2) = complMtrx3d.at(5, 5);
-    } else {
-        OOFEM_ERROR("StructuralMaterial :: reduceTo2dBeamLayerStiffMtrx: stiffMtrx3d size mismatch");
-    }
-}
-
-
-void
-StructuralMaterial :: reduceTo1dFiberComplMtrx(FloatMatrix &answer,
-                                               GaussPoint *gp,
-                                               FloatMatrix &complMtrx3d) const
-//
-// return material compliance matrix for derived types of stressStreinState
-// assumption sigma_z = 0.
-//
-// General strain vector has one of the following forms:
-// 1) strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-
-    if ( mode != _1dFiber ) {
-        OOFEM_ERROR("StructuralMaterial :: reduceTo1dFiberComplMtrx : unsupported mode");
-    }
-
-    if ( ( complMtrx3d.isSquare() ) && ( complMtrx3d.giveNumberOfRows() == 6 ) ) {
-        answer.resize(3, 3);
-
-        answer.at(1, 1) = complMtrx3d.at(1, 1);
-        answer.at(1, 2) = complMtrx3d.at(1, 5);
-        answer.at(1, 3) = complMtrx3d.at(1, 6);
-        answer.at(2, 1) = complMtrx3d.at(5, 1);
-        answer.at(2, 2) = complMtrx3d.at(5, 5);
-        answer.at(2, 3) = complMtrx3d.at(5, 6);
-        answer.at(3, 1) = complMtrx3d.at(6, 1);
-        answer.at(3, 2) = complMtrx3d.at(6, 5);
-        answer.at(3, 3) = complMtrx3d.at(6, 6);
-    } else {
-        OOFEM_ERROR("StructuralMaterial :: reduceTo1dFiberComplMtrx: stiffMtrx3d size mismatch");
-    }
-}
-#endif
-
 
 void
 StructuralMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
@@ -1493,10 +993,28 @@ StructuralMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 // returns Mat stiffness for PlaneStress
 //
 {
-    FloatMatrix m3d;
+    FloatMatrix m3d, invMat3d, invAnswer;
 
     this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
-    this->reduceToPlaneStressStiffMtrx(answer, gp, m3d);
+
+    invMat3d.beInverseOf(m3d);
+
+    invAnswer.resize(3, 3);
+    //invAnswer.beSubMatrixOf(invMat3d, indx, indx);
+
+    invAnswer.at(1, 1) = invMat3d.at(1, 1);
+    invAnswer.at(1, 2) = invMat3d.at(1, 2);
+    invAnswer.at(1, 3) = invMat3d.at(1, 6);
+
+    invAnswer.at(2, 1) = invMat3d.at(2, 1);
+    invAnswer.at(2, 2) = invMat3d.at(2, 2);
+    invAnswer.at(2, 3) = invMat3d.at(2, 6);
+
+    invAnswer.at(3, 1) = invMat3d.at(6, 1);
+    invAnswer.at(3, 2) = invMat3d.at(6, 2);
+    invAnswer.at(3, 3) = invMat3d.at(6, 6);
+
+    answer.beInverseOf(invAnswer);
 }
 
 void
@@ -1511,7 +1029,26 @@ StructuralMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
     FloatMatrix m3d;
 
     this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
-    this->reduceToPlaneStrainStiffMtrx(answer, gp, m3d);
+
+    answer.resize(4, 4);
+    answer.zero();
+    //answer.beSubMatrixOf(m3d, indx, indx);
+
+    answer.at(1, 1) = m3d.at(1, 1);
+    answer.at(1, 2) = m3d.at(1, 2);
+    answer.at(1, 4) = m3d.at(1, 6);
+
+    answer.at(2, 1) = m3d.at(2, 1);
+    answer.at(2, 2) = m3d.at(2, 2);
+    answer.at(2, 4) = m3d.at(2, 6);
+
+    answer.at(3, 1) = m3d.at(3, 1);
+    answer.at(3, 2) = m3d.at(3, 2);
+    answer.at(3, 4) = m3d.at(3, 6);
+
+    answer.at(4, 1) = m3d.at(6, 1);
+    answer.at(4, 2) = m3d.at(6, 2);
+    answer.at(4, 4) = m3d.at(6, 6);
 }
 
 void
@@ -1523,73 +1060,106 @@ StructuralMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
 // return material stiffness matrix for 1d stress strain mode
 //
 {
-    FloatMatrix m3d;
+    FloatMatrix m3d, invMat3d;
+    double val11;
 
     this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
-    this->reduceTo1dStressStiffMtrx(answer, gp, m3d);
+
+    invMat3d.beInverseOf(m3d);
+    val11 = invMat3d.at(1, 1);
+    answer.resize(1, 1);
+    answer.at(1, 1) = 1. / val11;
 }
 
 
 void
 StructuralMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *atTime)
+                                             MatResponseMode mode,
+                                             GaussPoint *gp,
+                                             TimeStep *atTime)
 //
 // return material stiffness matrix for2dBeamLayer mode
 //
 {
-    FloatMatrix m3d;
+    FloatMatrix m3d, invMat3d, invMatLayer(2, 2);
 
     this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
-    this->reduceTo2dBeamLayerStiffMtrx(answer, gp, m3d);
+
+    invMat3d.beInverseOf(m3d);
+
+    invMatLayer.at(1, 1) = invMat3d.at(1, 1);
+    invMatLayer.at(1, 2) = invMat3d.at(1, 5);
+    invMatLayer.at(2, 1) = invMat3d.at(5, 1);
+    invMatLayer.at(2, 2) = invMat3d.at(5, 5);
+
+    answer.beInverseOf(invMatLayer);
 }
 
 
 void
-StructuralMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
-                                                MatResponseMode mode,
-                                                GaussPoint *gp,
-                                                TimeStep *atTime)
+StructuralMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
+                                              MatResponseMode mode,
+                                              GaussPoint *gp,
+                                              TimeStep *atTime)
 //
 // return material stiffness matrix for 2dPlateLayer
 //
 {
-    FloatMatrix m3d;
+    FloatMatrix m3d, invMat3d, invMatLayer(5, 5);
 
     this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
-    this->reduceTo2dPlateLayerStiffMtrx(answer, gp, m3d);
+
+    invMat3d.beInverseOf(m3d);
+    //invMatLayer.beSubMatrixOf(invMat3d, indx, indx);
+
+    for ( int i = 1; i <= 2; i++ ) {
+        for ( int j = 1; j <= 2; j++ ) {
+            invMatLayer.at(i, j) = invMat3d.at(i, j);
+        }
+    }
+
+    for ( int i = 4; i <= 6; i++ ) {
+        for ( int j = 4; j <= 6; j++ ) {
+            invMatLayer.at(i - 1, j - 1) = invMat3d.at(i, j);
+        }
+    }
+
+    for ( int i = 1; i <= 2; i++ ) {
+        for ( int j = 4; j <= 6; j++ ) {
+            invMatLayer.at(i, j - 1) = invMat3d.at(i, j);
+            invMatLayer.at(j - 1, i) = invMat3d.at(j, i);
+        }
+    }
+
+    answer.beInverseOf(invMatLayer);
 }
 
 void
-StructuralMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *atTime)
+StructuralMaterial :: giveFiberStiffMtrx(FloatMatrix &answer,
+                                         MatResponseMode mode,
+                                         GaussPoint *gp,
+                                         TimeStep *atTime)
 //
 // return material stiffness matrix for 2dPlateLayer
 //
 {
-    FloatMatrix m3d;
+    FloatMatrix m3d, invMat3d, invMatLayer(3, 3);
 
     this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
-    this->reduceTo1dFiberStiffMtrx(answer, gp, m3d);
-}
 
+    invMat3d.beInverseOf(m3d);
 
-void
-StructuralMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
-                                                MatResponseMode mode,
-                                                GaussPoint *gp,
-                                                TimeStep *atTime)
-//
-// returns material stiffness matrix for 3dShellLayer
-//
-{
-    FloatMatrix m3d;
+    invMatLayer.at(1, 1) = invMat3d.at(1, 1);
+    invMatLayer.at(1, 2) = invMat3d.at(1, 5);
+    invMatLayer.at(1, 3) = invMat3d.at(1, 6);
+    invMatLayer.at(2, 1) = invMat3d.at(5, 1);
+    invMatLayer.at(2, 2) = invMat3d.at(5, 5);
+    invMatLayer.at(2, 3) = invMat3d.at(5, 6);
+    invMatLayer.at(3, 1) = invMat3d.at(6, 1);
+    invMatLayer.at(3, 2) = invMat3d.at(6, 5);
+    invMatLayer.at(3, 3) = invMat3d.at(6, 6);
 
-    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
-    this->reduceTo3dShellLayerStiffMtrx(answer, gp, m3d);
+    answer.beInverseOf(invMatLayer);
 }
 
 
@@ -2209,47 +1779,50 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
 {
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_StressTensor ) {
-        answer = status->giveStressVector();
+        StructuralMaterial :: giveFullSymVectorForm(answer, status->giveStressVector(), aGaussPoint->giveMaterialMode());
         return 1;
     } else if ( type == IST_vonMisesStress ) {
+        ///@todo What about the stress meassure in large deformations here? The internal state type should specify "Cauchy" or something.
         answer.resize(1);
         answer.at(1) = this->computeVonMisesStress( & status->giveStressVector() );
         return 1;
     } else if ( type == IST_StrainTensor ) {
-        answer = status->giveStrainVector();
+        ///@todo Fill in correct full form values here! This just adds zeros!
+        StructuralMaterial :: giveFullSymVectorForm(answer, status->giveStrainVector(), aGaussPoint->giveMaterialMode());
         return 1;
     } else if ( type == IST_StressTensorTemp ) {
-        answer = status->giveTempStressVector();
+        ///@todo Fill in correct full form values here! This just adds zeros!
+        StructuralMaterial :: giveFullSymVectorForm(answer, status->giveTempStressVector(), aGaussPoint->giveMaterialMode());
         return 1;
     } else if ( type == IST_StrainTensorTemp ) {
-        answer = status->giveTempStrainVector();
+        ///@todo Fill in correct full form values here! This just adds zeros!
+        StructuralMaterial :: giveFullSymVectorForm(answer, status->giveTempStrainVector(), aGaussPoint->giveMaterialMode());
         return 1;
     } else if ( type == IST_PrincipalStressTensor || type == IST_PrincipalStressTempTensor ) {
-        //         int indx;
-        //         FloatArray st(6);
         FloatArray s;
 
         if ( type == IST_PrincipalStressTensor ) {
-            s = status->giveStressVector();
+            ///@todo Fill in correct full form values here! This just adds zeros!
+            StructuralMaterial :: giveFullSymVectorForm(s, status->giveStressVector(), aGaussPoint->giveMaterialMode());
         } else {
-            s = status->giveTempStressVector();
+            ///@todo Fill in correct full form values here! This just adds zeros!
+            StructuralMaterial :: giveFullSymVectorForm(s, status->giveTempStressVector(), aGaussPoint->giveMaterialMode());
         }
 
-        //StructuralMaterial :: giveFullSymVectorForm(st, s, aGaussPoint->giveMaterialMode());
         this->computePrincipalValues(answer, s, principal_stress);
         return 1;
     } else if ( type == IST_PrincipalStrainTensor || type == IST_PrincipalStrainTempTensor ) {
-        FloatArray st(6), s;
+        FloatArray s;
 
         if ( type == IST_PrincipalStrainTensor ) {
-            s = status->giveStrainVector();
+            ///@todo Fill in correct full form values here! This just adds zeros!
+            StructuralMaterial :: giveFullSymVectorForm(s, status->giveStrainVector(), aGaussPoint->giveMaterialMode());
         } else {
-            s = status->giveTempStrainVector();
+            ///@todo Fill in correct full form values here! This just adds zeros!
+            StructuralMaterial :: giveFullSymVectorForm(s, status->giveTempStrainVector(), aGaussPoint->giveMaterialMode());
         }
 
-        StructuralMaterial :: giveFullSymVectorForm( st, s, aGaussPoint->giveMaterialMode() );
-
-        this->computePrincipalValues(answer, st, principal_strain);
+        this->computePrincipalValues(answer, s, principal_strain);
         return 1;
     } else if ( type == IST_Temperature ) {
         /* add external source, if provided, such as staggered analysis */
@@ -2288,9 +1861,9 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
             base.at(3, 3) = 1.0;
 
             if ( type == IST_CylindricalStressTensor ) {
-                transformStressVectorTo(answer, base, val, 0);
+                this->transformStressVectorTo(answer, base, val, false);
             } else {
-                transformStrainVectorTo(answer, base, val, 0);
+                this->transformStrainVectorTo(answer, base, val, false);
             }
         } else {
             answer = val;
@@ -2312,83 +1885,19 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
 InternalStateValueType
 StructuralMaterial :: giveIPValueType(InternalStateType type)
 {
-    if ( ( type == IST_StressTensor ) || ( type == IST_StressTensorTemp ) ||
-        ( type == IST_CylindricalStressTensor ) ) {
+    if ( type == IST_StressTensor || type == IST_StressTensorTemp || type == IST_CylindricalStressTensor ) {
         return ISVT_TENSOR_S3;
     }
     // strains components packed in engineering notation
-    else if ( ( type == IST_StrainTensor ) || ( type == IST_StrainTensorTemp ) || ( type == IST_CylindricalStrainTensor ) ) {
+    else if ( type == IST_StrainTensor || type == IST_StrainTensorTemp || type == IST_CylindricalStrainTensor ) {
         return ISVT_TENSOR_S3E;
-    } else if ( ( type == IST_PrincipalStressTensor ) || ( type == IST_PrincipalStrainTensor ) ||
-               ( type == IST_PrincipalStressTempTensor ) || ( type == IST_PrincipalStrainTempTensor ) ) {
+    } else if ( type == IST_PrincipalStressTensor || type == IST_PrincipalStrainTensor ||
+               type == IST_PrincipalStressTempTensor || type == IST_PrincipalStrainTempTensor ) {
         return ISVT_VECTOR;
-    } else if ( ( type == IST_Temperature ) || ( type == IST_vonMisesStress ) ) {
+    } else if ( type == IST_Temperature || type == IST_vonMisesStress ) {
         return ISVT_SCALAR;
     } else {
         return Material :: giveIPValueType(type);
-    }
-}
-
-
-int
-StructuralMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ||
-        ( type == IST_StressTensorTemp ) || ( type == IST_StrainTensorTemp ) ||
-        ( type == IST_CylindricalStressTensor ) || ( type == IST_CylindricalStrainTensor ) ||
-        ( type == IST_ShellForceMomentumTensor ) ) {
-        StructuralMaterial :: giveInvertedVoigtVectorMask(answer, mmode);
-        return 1;
-    } else if ( ( type == IST_PrincipalStressTensor ) || ( type == IST_PrincipalStrainTensor ) ||
-               ( type == IST_PrincipalStressTempTensor ) || ( type == IST_PrincipalStrainTempTensor ) ) {
-        if ( mmode == _3dMat || mmode == _PlaneStress || mmode == _PlaneStrain ) {
-            answer.setValues(3, 1, 2, 3);
-        } else if ( mmode == _1dMat ) {
-            answer.setValues(3, 1, 0, 0);
-        } else {
-            return 0;
-        }
-
-        return 1;
-    } else if ( type == IST_Temperature ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else if ( type == IST_DeformationGradientTensor || type == IST_FirstPKStressTensor ) {
-        answer.setValues(9, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-        return 1;
-    } else {
-        return Material :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-
-int
-StructuralMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ||
-        ( type == IST_StressTensorTemp ) || ( type == IST_StrainTensorTemp ) ||
-        ( type == IST_CylindricalStressTensor ) || ( type == IST_CylindricalStrainTensor ) ||
-        ( type == IST_ShellForceMomentumTensor ) ) {
-        return StructuralMaterial :: giveSizeOfVoigtSymVector( aGaussPoint->giveMaterialMode() );
-    } else if ( ( type == IST_PrincipalStressTensor ) || ( type == IST_PrincipalStrainTensor ) || ( type == IST_PrincipalPlasticStrainTensor ) ||
-               ( type == IST_PrincipalStressTempTensor ) || ( type == IST_PrincipalStrainTempTensor ) ) {
-        MaterialMode m = aGaussPoint->giveMaterialMode();
-        if ( m == _3dMat || m == _PlaneStrain ) {
-            return 3;
-        } else if ( m == _PlaneStress ) {
-            return 2;
-        } else if ( m == _1dMat ) {
-            return 1;
-        } else {
-            return 0;
-        }
-    } else if ( ( type == IST_Temperature ) || ( type == IST_vonMisesStress ) ) {
-        return 1;
-    } else if ( ( type == IST_DeformationGradientTensor ) || ( type == IST_FirstPKStressTensor ) ) {
-        return 9;
-    } else {
-        return Material :: giveIPValueSize(type, aGaussPoint);
     }
 }
 

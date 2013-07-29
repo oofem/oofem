@@ -59,11 +59,10 @@ DoublePowerLawMaterial :: initializeFrom(InputRecord *ir)
 
 
 double
-DoublePowerLawMaterial :: computeCreepFunction(GaussPoint *gp, double atTime, double ofAge)
+DoublePowerLawMaterial :: computeCreepFunction(double atTime, double ofAge)
 {
     // computes the value of creep function at time ofAge
     // when load is acting from atTime
-    // WARNING: Area returned by crossSection is assumed to be in [m^2].
 
     double e0;
     double h1, h2, h3;

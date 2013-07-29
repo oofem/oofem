@@ -37,6 +37,7 @@
 
 namespace oofem {
 /// Determines the type of internal variable.
+///@todo FIXME! ISVT_TENSOR_G should be the *only* tensor type (!) This would simplify a lot of code (exporting to VTK (the primary export tool) will write all 9 components anyway.
 enum InternalStateValueType {
     ISVT_UNDEFINED, ///< Undefined.
     ISVT_SCALAR,    ///< Scalar.

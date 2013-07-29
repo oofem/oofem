@@ -276,28 +276,6 @@ HydratingIsoHeatMaterial :: giveIPValueType(InternalStateType type)
     }
 }
 
-int
-HydratingIsoHeatMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( type == IST_HydrationDegree ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else {
-        return TransportMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
-
-int
-HydratingIsoHeatMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    if ( type == IST_HydrationDegree ) {
-        return 1;
-    } else {
-        return TransportMaterial :: giveIPValueSize(type, aGaussPoint);
-    }
-}
-
 MaterialStatus *
 HydratingIsoHeatMaterial :: CreateStatus(GaussPoint *gp) const
 {

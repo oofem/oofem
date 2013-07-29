@@ -115,18 +115,18 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    virtual void giveStiffnessMatrix(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep);
+    virtual void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp,
+                                const FloatArray &defGrad, TimeStep *tStep);
+    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
+                              const FloatArray &reducedStrain, TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                              const FloatArray &reducedStrain,
-                              TimeStep *tStep);
-    
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
+                                  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
 
     virtual int hasNonLinearBehaviour() { return true; }
     virtual int hasMaterialModeCapability(MaterialMode mode);

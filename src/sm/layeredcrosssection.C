@@ -134,50 +134,21 @@ LayeredCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
 // only interface to material class, forcing returned matrix to be in reduced form.
 //
 {
-    this->giveMaterialStiffnessMatrixOf(answer, rMode, gp,
-                                        dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() ),
-                                        tStep);
-}
-
-///@todo Why are these here? Seems like pointless duplicates.
-void
-LayeredCrossSection :: giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                         MatResponseMode rMode,
-                                                         GaussPoint *gp,
-                                                         StructuralMaterial *mat,
-                                                         TimeStep *tStep)
-//
-// only interface to material class, forcing returned matrix to be in reduced form.
-//
-{
-    this->giveMaterialStiffnessMatrixOf(answer, rMode, gp, mat, tStep);
-}
-
-
-void
-LayeredCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
-                                                     MatResponseMode rMode,
-                                                     GaussPoint *gp,
-                                                     StructuralMaterial *mat,
-                                                     TimeStep *tStep)
-//
-// only interface to material class, forcing returned matrix to be in form form.
-//
-{
     MaterialMode mode = gp->giveMaterialMode();
-    if ( mode == _2dPlate ) {
-        this->give2dPlateMaterialStiffnessMatrix(answer, rMode, gp, mat, tStep);
-    } else if ( mode == _2dBeam ) {
-        this->give2dBeamMaterialStiffnessMatrix(answer, rMode, gp, mat, tStep);
+    if ( mode == _2dBeam ) {
+        this->give2dBeamStiffMtrx(answer, rMode, gp, tStep);
+    } else if ( mode == _3dBeam ) {
+        this->give3dBeamStiffMtrx(answer, rMode, gp, tStep);
+    } else if ( mode == _2dPlate ) {
+        this->give2dPlateStiffMtrx(answer, rMode, gp, tStep);
     } else if ( mode == _3dShell ) {
-        this->give3dShellMaterialStiffness(answer, rMode, gp, mat, tStep);
+        this->give3dShellStiffMtrx(answer, rMode, gp, tStep);
     } else {
-        ///@todo We shouldn't send "mat" argument to these functions. The cross-section should define this.
         int ngps = gp->giveIntegrationRule()->giveNumberOfIntegrationPoints();
         int gpnum = gp->giveNumber();
         int gpsperlayer = ngps / this->numberOfLayers;
         int layer = (gpnum - 1) / gpsperlayer + 1;
-        mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(layer) ) );
+        StructuralMaterial *mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(layer) ) );
         if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
             mat->giveStiffnessMatrix(answer, rMode, gp, tStep);
         } else {
@@ -188,31 +159,12 @@ LayeredCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
 
 
 void
-LayeredCrossSection :: giveLayerMaterialStiffnessMatrix(FloatMatrix &layerMatrix,
-                                                        MatResponseMode rMode, GaussPoint *layerGp,
-                                                        TimeStep *tStep)
-{
-    ///@todo The logic in this whole class is pretty messy to support both slave-gp's and normal gps. Rethinking the approach is necessary.
-    /// This function is a helper for *only* slave-gp's used in shell stiffness etc.
-    /// Just using the gp number is to simplistic, and doesn't nicely support more than 1 gp per layer. Must rethink.
-    StructuralMaterial *mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(layerGp->giveNumber()) ) );
-    if ( mat->hasMaterialModeCapability( layerGp->giveMaterialMode() ) ) {
-        mat->giveStiffnessMatrix(layerMatrix, rMode, layerGp, tStep);
-    } else {
-        _error("giveLayerMaterialStiffnessMatrix: unsupported StressStrainMode");
-    }
-}
-
-
-void
-LayeredCrossSection :: give2dPlateMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                          MatResponseMode rMode,
-                                                          GaussPoint *gp,
-                                                          StructuralMaterial *mat,
-                                                          TimeStep *tStep)
+LayeredCrossSection :: give2dPlateStiffMtrx(FloatMatrix &answer,
+                                            MatResponseMode rMode,
+                                            GaussPoint *gp,
+                                            TimeStep *tStep)
 
 //
-// return material stiffness matrix for derived types of stressStreinState
 // assumption sigma_z = 0.
 //
 // General strain layer vector has one of the following forms:
@@ -222,15 +174,9 @@ LayeredCrossSection :: give2dPlateMaterialStiffnessMatrix(FloatMatrix &answer,
 // 2) strainVectorShell {eps_x,eps_y,gamma_xy, kappa_x, kappa_y, kappa_xy, gamma_zx, gamma_zy}
 //
 {
-    MaterialMode mode = gp->giveMaterialMode();
     FloatMatrix layerMatrix;
-    GaussPoint *layerGp;
     double layerThick, layerWidth, layerZCoord, top, bottom, layerZeta;
     double layerZCoord2;
-
-    if ( mode != _2dPlate ) {
-        _error("give2dPlateMaterialStiffnessMatrix : unsupported mode");
-    }
 
     answer.resize(5, 5);
     answer.zero();
@@ -241,8 +187,12 @@ LayeredCrossSection :: give2dPlateMaterialStiffnessMatrix(FloatMatrix &answer,
     top    = totalThick - midSurfaceZcoordFromBottom;
 
     for ( int i = 1; i <= numberOfLayers; i++ ) {
-        layerGp = giveSlaveGaussPoint(gp, i - 1);
-        this->giveLayerMaterialStiffnessMatrix(layerMatrix, rMode, layerGp, tStep);
+        GaussPoint *layerGp = giveSlaveGaussPoint(gp, i - 1);
+
+        ///@todo The logic in this whole class is pretty messy to support both slave-gp's and normal gps. Rethinking the approach is necessary.
+        /// Just using the gp number doesn't nicely support more than 1 gp per layer. Must rethink.
+        StructuralMaterial *mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(layerGp->giveNumber()) ) );
+        mat->givePlateLayerStiffMtrx(layerMatrix, rMode, layerGp, tStep);
 
         //
         // resolve current layer z-coordinate
@@ -279,13 +229,11 @@ LayeredCrossSection :: give2dPlateMaterialStiffnessMatrix(FloatMatrix &answer,
 
 
 void
-LayeredCrossSection :: give3dShellMaterialStiffness(FloatMatrix &answer,
-                                                    MatResponseMode rMode,
-                                                    GaussPoint *gp,
-                                                    StructuralMaterial *mat,
-                                                    TimeStep *tStep)
+LayeredCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer,
+                                            MatResponseMode rMode,
+                                            GaussPoint *gp,
+                                            TimeStep *tStep)
 //
-// return material stiffness matrix for derived types of stressStreinState
 // assumption sigma_z = 0.
 //
 // General strain layer vector has one of the following forms:
@@ -295,20 +243,10 @@ LayeredCrossSection :: give3dShellMaterialStiffness(FloatMatrix &answer,
 // 2) strainVectorShell {eps_x,eps_y,gamma_xy, kappa_x, kappa_y, kappa_xy, gamma_zx, gamma_zy}
 //
 {
-    MaterialMode mode = gp->giveMaterialMode();
-    //Material * mat = gp->giveElement()->giveMaterial();
     FloatMatrix layerMatrix;
-    GaussPoint *layerGp;
     double layerThick, layerWidth, layerZCoord, top, bottom, layerZeta;
     // double zi, zi1;
     double layerZCoord2;
-    int i;
-
-    if ( mode != _3dShell ) {
-        _error("give3dShellMaterialStiffness : unsupported mode");
-    }
-
-    // if (form != ReducedForm) error ("give3dShellMaterialStiffness : full form unsupported");
 
     answer.resize(8, 8);
     answer.zero();
@@ -317,9 +255,14 @@ LayeredCrossSection :: give3dShellMaterialStiffness(FloatMatrix &answer,
     bottom = -midSurfaceZcoordFromBottom;
     top    = totalThick - midSurfaceZcoordFromBottom;
 
-    for ( i = 1; i <= numberOfLayers; i++ ) {
-        layerGp = giveSlaveGaussPoint(gp, i - 1);
-        this->giveLayerMaterialStiffnessMatrix(layerMatrix, rMode, layerGp, tStep);
+    for ( int i = 1; i <= numberOfLayers; i++ ) {
+        GaussPoint *layerGp = giveSlaveGaussPoint(gp, i - 1);
+
+        ///@todo The logic in this whole class is pretty messy to support both slave-gp's and normal gps. Rethinking the approach is necessary.
+        /// Just using the gp number doesn't nicely support more than 1 gp per layer. Must rethink.
+        StructuralMaterial *mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(layerGp->giveNumber()) ) );
+        mat->givePlateLayerStiffMtrx(layerMatrix, rMode, layerGp, tStep);
+
         //
         // resolve current layer z-coordinate
         //
@@ -368,13 +311,11 @@ LayeredCrossSection :: give3dShellMaterialStiffness(FloatMatrix &answer,
 
 
 void
-LayeredCrossSection :: give2dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                         MatResponseMode rMode,
-                                                         GaussPoint *gp,
-                                                         StructuralMaterial *mat,
-                                                         TimeStep *tStep)
+LayeredCrossSection :: give2dBeamStiffMtrx(FloatMatrix &answer,
+                                           MatResponseMode rMode,
+                                           GaussPoint *gp,
+                                           TimeStep *tStep)
 //
-// return material stiffness matrix for derived types of stressStreinState
 // assumption sigma_z = 0.
 //
 // General strain layer vector has one of the following forms:
@@ -384,15 +325,9 @@ LayeredCrossSection :: give2dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
 // 2) strainVectorShell {eps_x,eps_y,gamma_xy, kappa_x, kappa_y, kappa_xy, gamma_zx, gamma_zy}
 //
 {
-    MaterialMode mode = gp->giveMaterialMode();
     FloatMatrix layerMatrix;
-    GaussPoint *layerGp;
     double layerThick, layerWidth, layerZCoord, top, bottom, layerZeta;
     double layerZCoord2;
-
-    if ( mode != _2dBeam ) {
-        _error("give2dBeamMaterialStiffnessMatrix : unsupported mode");
-    }
 
     // perform integration over layers
     this->computeIntegralThick(); // ensure that total thick has been conputed
@@ -404,8 +339,13 @@ LayeredCrossSection :: give2dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
     answer.zero();
 
     for ( int i = 1; i <= numberOfLayers; i++ ) {
-        layerGp = giveSlaveGaussPoint(gp, i - 1);
-        this->giveLayerMaterialStiffnessMatrix(layerMatrix, rMode, layerGp, tStep);
+        GaussPoint *layerGp = giveSlaveGaussPoint(gp, i - 1);
+
+        ///@todo The logic in this whole class is pretty messy to support both slave-gp's and normal gps. Rethinking the approach is necessary.
+        /// Just using the gp number doesn't nicely support more than 1 gp per layer. Must rethink.
+        StructuralMaterial *mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(layerGp->giveNumber()) ) );
+        mat->give2dBeamLayerStiffMtrx(layerMatrix, rMode, layerGp, tStep);
+
         //
         // resolve current layer z-coordinate
         //
@@ -430,9 +370,15 @@ LayeredCrossSection :: give2dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
 }
 
 
+void
+LayeredCrossSection :: give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    OOFEM_ERROR("LayeredCrossSection :: give3dBeamStiffMtrx - Not implemented\n");
+}
+
+
 FloatArray *
-LayeredCrossSection :: imposeStressConstrainsOnGradient(GaussPoint *gp,
-                                                        FloatArray *gradientStressVector3d)
+LayeredCrossSection :: imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStressVector3d)
 //
 // returns modified gradient of stress vector, which is used to
 // bring stresses back to yield surface.
@@ -448,20 +394,17 @@ LayeredCrossSection :: imposeStressConstrainsOnGradient(GaussPoint *gp,
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    int i, size = gradientStressVector3d->giveSize();
+    int size = gradientStressVector3d->giveSize();
     if ( size != 6 ) {
         _error("ImposeStressConstrainsOnGradient: gradientStressVector3d size mismatch");
     }
 
     switch ( mode ) {
-    case _3dShellLayer:
-        gradientStressVector3d->at(3) = 0.;
-        break;
-    case _2dPlateLayer:
+    case _PlateLayer:
         gradientStressVector3d->at(3) = 0.;
         break;
     case _2dBeamLayer:
-        for ( i = 2; i <= 5; i++ ) {
+        for ( int i = 2; i <= 5; i++ ) {
             gradientStressVector3d->at(i) = 0.;
         }
 
@@ -474,10 +417,8 @@ LayeredCrossSection :: imposeStressConstrainsOnGradient(GaussPoint *gp,
 }
 
 
-
 FloatArray *
-LayeredCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
-                                                        FloatArray *gradientStrainVector3d)
+LayeredCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStrainVector3d)
 //
 // returns modified gradient of strain vector, which is used to
 // compute plastic strain increment.
@@ -487,20 +428,16 @@ LayeredCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    int i, size = gradientStrainVector3d->giveSize();
-    if ( size != 6 ) {
+    if ( gradientStrainVector3d->giveSize() != 6 ) {
         _error("ImposeStrainConstrainsOnGradient: gradientStrainVector3d size mismatch");
     }
 
     switch ( mode ) {
-    case _3dShellLayer:
-        gradientStrainVector3d->at(3) = 0.;
-        break;
-    case _2dPlateLayer:
+    case _PlateLayer:
         gradientStrainVector3d->at(3) = 0.;
         break;
     case _2dBeamLayer:
-        for ( i = 2; i <= 5; i++ ) {
+        for ( int i = 2; i <= 5; i++ ) {
             gradientStrainVector3d->at(i) = 0.;
         }
 
@@ -547,6 +484,7 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
+
 
 void
 LayeredCrossSection :: setupLayerMidPlanes() 
@@ -788,11 +726,11 @@ LayeredCrossSection :: giveCorrespondingSlaveMaterialMode(MaterialMode masterMod
 //
 {
     if ( masterMode == _2dPlate ) {
-        return _2dPlateLayer;
+        return _PlateLayer;
     } else if ( masterMode == _2dBeam ) {
         return _2dBeamLayer;
     } else if ( masterMode == _3dShell ) {
-        return _3dShellLayer;
+        return _PlateLayer;
     } else if ( masterMode == _3dMat ) {
         return _3dMat;
     } else {

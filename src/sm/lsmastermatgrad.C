@@ -261,7 +261,7 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
 
 
 
-        SethHillStrainVector.beReducedVectorFormOfStrain(SethHillStrain);
+        SethHillStrainVector.beSymVectorFormOfStrain(SethHillStrain);
         dpmat->giveRealStressVectorGrad(stressVector, answer2, gp, SethHillStrainVector, nonlocalCumulatedStrain, atTime);
         this->constructTransformationMatrix(T, eVecs);
         tT.beTranspositionOf(T);

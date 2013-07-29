@@ -94,9 +94,7 @@ public:
 protected:
     virtual int hasIncrementalShrinkageFormulation() { return 0; }
 
-    virtual double computeCreepFunction(GaussPoint *gp, double ofAge, double atTime) = 0;
-
-    virtual void computeCharCoefficients(FloatArray &answer, GaussPoint *gp, double atTime);
+    virtual void computeCharCoefficients(FloatArray &answer, double atTime);
 
     virtual double giveEModulus(GaussPoint *gp, TimeStep *atTime);
 

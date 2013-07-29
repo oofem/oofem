@@ -1763,24 +1763,6 @@ TR1_2D_SUPG2_AXI :: printOutputAt(FILE *file, TimeStep *stepN)
 }
 
 
-int
-TR1_2D_SUPG2_AXI :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
-        return 4;
-    }
-
-    GaussPoint *gp;
-    if ( integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ) {
-        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    } else {
-        gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
-    }
-
-    return this->giveIPValueSize(type, gp);
-}
-
-
 void
 TR1_2D_SUPG2_AXI :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                                InternalStateType type, TimeStep *tStep)
@@ -1895,7 +1877,6 @@ void TR1_2D_SUPG2_AXI :: drawScalar(oofegGraphicContext &context)
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v1, v2, v3;
     double s [ 3 ];
-    IntArray map;
 
     if ( !context.testElementGraphicActivity(this) ) {
         return;
@@ -1948,11 +1929,7 @@ void TR1_2D_SUPG2_AXI :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-
-    if ( (!result) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-        return;
-    }
+    indx = context.giveIntVarIndx();
 
     s [ 0 ] = v1.at(indx);
     s [ 1 ] = v2.at(indx);

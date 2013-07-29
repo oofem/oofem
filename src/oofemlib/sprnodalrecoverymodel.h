@@ -44,7 +44,7 @@ class SPRNodalRecoveryModelInterface;
 class ProcessCommunicator;
 
 enum SPRPatchType {
-    SPRPatchType_2dxy,
+    SPRPatchType_2dxy = 1,
     SPRPatchType_3dBiLin,
     SPRPatchType_2dquadratic,
     SPRPatchType_3dBiQuadratic
@@ -86,20 +86,18 @@ private:
      * Initializes the region table indicating regions to skip.
      * @param regionMap Region table, the nonzero entry for region indicates region to skip due to
      * unsupported elements or incompatible value size
-     * @param regionValSize Contains the record size for each region
      * @param regionTypes SPRPatchType of each region.
      * @param type Determines the type of internal variable to be recovered
      */
-    void initRegionMap(IntArray &regionMap, IntArray &regionValSize, IntArray &regionTypes, InternalStateType type);
+    void initRegionMap(IntArray &regionMap, IntArray &regionTypes, InternalStateType type);
 
     void determinePatchAssemblyPoints(IntArray &pap, int ireg, SPRPatchType regType);
     void initPatch(IntArray &patchElems, IntArray &dofManToDetermine, IntArray &pap, int papNumber, int ireg);
-    void computePatch(FloatMatrix &a, IntArray &patchElems, int papNumber, int regionValSize,
+    void computePatch(FloatMatrix &a, IntArray &patchElems, int &regionValSize,
                       SPRPatchType regType, InternalStateType type, TimeStep *tStep);
     void determineValuesFromPatch(FloatArray &dofManValues, IntArray &dofManCount,
                                   IntArray &regionNodalNumbers, IntArray &dofManToDetermine,
-                                  FloatMatrix &a, int papNumber, int regionValSize,
-                                  SPRPatchType type);
+                                  FloatMatrix &a, SPRPatchType type);
     void computePolynomialTerms(FloatArray &P, FloatArray &coords, SPRPatchType type);
     int  giveNumberOfUnknownPolynomialCoefficients(SPRPatchType regType);
 
@@ -126,7 +124,6 @@ public:
     //@{
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) = 0;
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) = 0;
-    virtual int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type) = 0;
     virtual int SPRNodalRecoveryMI_giveNumberOfIP() = 0;
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType() = 0;
     //@}

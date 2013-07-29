@@ -49,16 +49,12 @@ class GaussPoint;
  * is an attribute of a domain. It is usually also attribute of many elements.
  * Efficient implementation of services for obtaining characteristic matrices
  * for several material modes is provided depending on other abstract services.
- * These services include following methods: give2dPlateStiffMtrx, give2dPlateStiffMtrx,
- * give3dShellStiffMtrx and  give2dPlaneStressRotStiffMtrx. These methods can be
- * easily and generally implemented using basic services like givePlaneStressStiffMtrx
- * (must be implemented by parent) from which the response can be easily derived.
  * Also general implementation of giveRealStressVector service is provided,
  * computing the stress increment vector from strain increment multiplied by
  * stiffness.
  *
  * Tasks:
- * - Returning standard material stiffness and flexibility marices for 3d-case.
+ * - Returning standard material stiffness and flexibility matrices for 3d-case.
  *   according to current state determined by using data stored in Gausspoint.
  * - Returning a material property (method 'give'). Only for non-standard elements.
  * - Returning real stress state vector(tensor) at gauss point for 3d - case.
@@ -75,48 +71,21 @@ public:
                                   MatResponseMode mode,
                                   GaussPoint *gp,
                                   TimeStep *atTime);
-
-    /**
-     * Method for computing 2d plate stiffness matrix of receiver using generic givePlaneStressStiffMtrx.
-     * @param answer Stiffness matrix.
-     * @param form Material response form.
-     * @param mode Material response mode.
-     * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
-     */
-    void give2dPlateStiffMtrx(FloatMatrix &answer,
-                              MatResponseMode mode,
-                              GaussPoint *gp,
-                              TimeStep *tStep);
-    /**
-     * Method for computing 3d shell stiffness matrix of receiver using generic givePlaneStressStiffMtrx.
-     * @param answer Stiffness matrix.
-     * @param form Material response form.
-     * @param mode Material response mode.
-     * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
-     */
-    void give3dShellStiffMtrx(FloatMatrix &answer,
-                              MatResponseMode mode,
-                              GaussPoint *gp,
-                              TimeStep *tStep);
     /**
      * Method for computing 2d plane stress (with rotation field)
      * stiffness matrix of receiver using generic givePlaneStressStiffMtrx.
      * @param answer Stiffness matrix.
-     * @param form Material response form.
      * @param mode Material response mode.
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
-    void give2dPlaneStressRotStiffMtrx(FloatMatrix &answer,
-                                       MatResponseMode mode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep);
+    void givePlaneStressRotStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                              const FloatArray &reducedStrain,
-                              TimeStep *tStep);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
 
     virtual int hasNonLinearBehaviour() { return 0; }
     virtual int hasMaterialModeCapability(MaterialMode mode);

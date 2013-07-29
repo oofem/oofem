@@ -259,20 +259,6 @@ SimpleInterfaceMaterial :: giveIPValueType(InternalStateType type)
 }
 
 
-int
-SimpleInterfaceMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mMode)
-{
-    return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mMode);
-}
-
-
-int
-SimpleInterfaceMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-{
-    return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
-}
-
-
 void
 SimpleInterfaceMaterial :: giveThermalDilatationVector(FloatArray &answer,
                                                        GaussPoint *gp,  TimeStep *tStep)
