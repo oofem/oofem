@@ -354,11 +354,11 @@ public:
 
     /**Returns index (between 1 and Size) of minimum element in the array
     */
-    int giveIndexMin(void);
+    int giveIndexMinElem(void);
     
     /**Returns index (between 1 and Size) of maximum element in the array
     */
-    int giveIndexMax(void);
+    int giveIndexMaxElem(void);
     
     /**
      * Computes the dot product (or inner product) of receiver and argument.

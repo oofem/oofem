@@ -423,7 +423,7 @@ void FloatArray :: beVectorProductOf(const FloatArray &v1, const FloatArray &v2)
     this->at(3) = v1.at(1) * v2.at(2) - v1.at(2) * v2.at(1);
 }
 
-int FloatArray :: giveIndexMin(void){
+int FloatArray :: giveIndexMinElem(void){
     int index=1;
     if (!this->size){
         return -1;
@@ -438,7 +438,7 @@ int FloatArray :: giveIndexMin(void){
     return index;
 }
 
-int FloatArray :: giveIndexMax(void){
+int FloatArray :: giveIndexMaxElem(void){
     int index=1;
     if (!this->size){
         return -1;
