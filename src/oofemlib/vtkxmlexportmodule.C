@@ -864,7 +864,7 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
 #endif
 
 
-					this->smoother->giveRegionRecordMap(regionVarMap, ireg, valID);
+//					this->smoother->giveRegionRecordMap(regionVarMap, ireg, valID);
 
 
 					for ( inode = 1; inode <= regionDofMans; inode++ ) {
