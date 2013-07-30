@@ -55,6 +55,7 @@ class GaussPoint;
 class FloatArray;
 class IntArray;
 class SparseMtrx; // required by addNonlocalStiffnessContributions declaration
+class StructuralCrossSection;
 class IDNLMaterial;
 
 /**
@@ -330,6 +331,9 @@ public:
     virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
 
 protected:
+    /// Helper function which returns the structural cross-section for the element.
+    StructuralCrossSection *giveStructuralCrossSection();
+
     /**
      * Computes constitutive matrix of receiver. Default implementation uses element cross section
      * giveCharMaterialStiffnessMatrix service.

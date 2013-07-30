@@ -476,7 +476,7 @@ RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     midplZ = z1 * answer.at(1) + z2 *answer.at(2) + z3 *answer.at(3);
 
     //check that the z is within the element
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );;
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();;
     double elthick;
 
     elthick = cs->give(CS_Thickness);

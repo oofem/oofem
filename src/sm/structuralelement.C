@@ -89,7 +89,7 @@ StructuralElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
 // rMode parameter determines type of stiffness matrix to be requested
 // (tangent, secant, ...)
 {
-    static_cast< StructuralCrossSection * >( this->giveCrossSection() )->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+    this->giveStructuralCrossSection()->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
 }
 
 
@@ -446,7 +446,7 @@ StructuralElement :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer
     FloatArray et, de, bde;
     FloatMatrix b, d;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
     //   if (this -> giveBodyLoadArray() -> isEmpty())         // no loads
     //      return NULL ;
 
@@ -455,7 +455,7 @@ StructuralElement :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer
     // complete volume
     answer.resize(0);
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+        gp = iRule->getIntegrationPoint(i);
         cs->computeStressIndependentStrainVector(et, gp, tStep, mode);
         if ( et.giveSize() ) {
             this->computeBmatrixAt(gp, b);
@@ -900,7 +900,7 @@ StructuralElement :: computeStressVector(FloatArray &answer, GaussPoint *gp, Tim
 // this version assumes TOTAL LAGRANGE APPROACH
 {
     FloatArray Epsilon;
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
 
     this->computeStrainVector(Epsilon, gp, stepN);
     cs->giveRealStresses(answer, gp, Epsilon, stepN);
@@ -1398,6 +1398,12 @@ StructuralElement :: initializeFrom(InputRecord *ir)
     result = Element :: initializeFrom(ir);
 
     return result;
+}
+
+
+StructuralCrossSection *StructuralElement::giveStructuralCrossSection()
+{
+    return static_cast< StructuralCrossSection * >( this->giveCrossSection() );
 }
 
 

@@ -267,7 +267,7 @@ PlaneStress2dXfem :: computeStressVector(FloatArray &answer, GaussPoint *gp, Tim
         StructuralMaterial *sm = static_cast< StructuralMaterial * >( ei->giveMaterial() );
         sm->giveRealStressVector(answer, gp, Epsilon, stepN);
     } else {
-        StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+        StructuralCrossSection *cs = this->giveStructuralCrossSection();
         cs->giveRealStresses(answer, gp, Epsilon, stepN);
     }
 }

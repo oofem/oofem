@@ -273,7 +273,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     FloatArray shellForces(20), drillMoment(4);
     shellForces.zero();
     drillMoment.zero();
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
@@ -362,7 +362,7 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
 void
 Quad1MindlinShell3D :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    static_cast< StructuralCrossSection * >( this->giveCrossSection() )->give3dShellStiffMtrx(answer, rMode, gp, tStep);
+    this->giveStructuralCrossSection()->give3dShellStiffMtrx(answer, rMode, gp, tStep);
 }
 
 

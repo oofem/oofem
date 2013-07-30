@@ -95,7 +95,7 @@ NLStructuralElement :: computeFirstPKStressVector(FloatArray &answer, GaussPoint
     // Computes the first Piola-Kirchhoff stress vector containing the stresses at the  Gauss point
     // gp of the receiver at time step tStep. The deformation gradient F is computed and sent as
     // input to the material model.
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
 
     FloatArray vF;
     this->computeDeformationGradientVector(vF, gp, tStep);
@@ -108,7 +108,7 @@ NLStructuralElement :: computeCauchyStressVector(FloatArray &answer, GaussPoint 
     // Computes the first Piola-Kirchhoff stress vector containing the stresses at the  Gauss point
     // gp of the receiver at time step tStep. The deformation gradient F is computed and sent as
     // input to the material model.
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
 
     FloatArray vF;
     this->computeDeformationGradientVector(vF, gp, tStep);
@@ -275,7 +275,7 @@ void
 NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseMode rMode, TimeStep *tStep)
 {
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
     bool matStiffSymmFlag = true;
 
     answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
@@ -401,7 +401,7 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
 {
     GaussPoint *gp;
     IntegrationRule *iRule;
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
     bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode, this->material);
     answer.resize(0, 0);
     if ( !this->isActivated(tStep) ) {

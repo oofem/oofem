@@ -402,7 +402,7 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     midplZ = z [ 0 ] * answer.at(1) + z [ 1 ] * answer.at(2) + z [ 2 ] * answer.at(3);
 
     //check that the z is within the element
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
     double elthick = cs->give(CS_Thickness);
 
     if ( elthick / 2.0 + midplZ - fabs( coords.at(3) ) < -POINT_TOL ) {
