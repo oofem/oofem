@@ -91,11 +91,7 @@ IDGMaterial :: initializeFrom(InputRecord *ir)
 int
 IDGMaterial :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( mode == _1dMat || mode == _PlaneStress || mode == _PlaneStrain ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _1dMat || mode == _PlaneStress || mode == _PlaneStrain;
 }
 
 void

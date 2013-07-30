@@ -108,8 +108,6 @@ public:
 
     virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element);
 
-    virtual void giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
-
     virtual void giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
@@ -198,12 +196,7 @@ public:
 #endif
 
 protected:
-
-    void giveIntegrated3dShellStress(FloatArray &answer, GaussPoint *gp);
-
     double giveArea();
-
-    friend class Material;
 };
 
 /**

@@ -66,11 +66,7 @@ SimpleInterfaceMaterial :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-    if ( mode == _1dInterface || mode == _2dInterface || mode == _3dInterface ) {
-        return 1;
-    }
-
-    return 0;
+    return  mode == _1dInterface || mode == _2dInterface || mode == _3dInterface;
 }
 
 

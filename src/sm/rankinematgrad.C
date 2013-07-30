@@ -58,7 +58,7 @@ RankineMatGrad :: RankineMatGrad(int n, Domain *d) : RankineMat(n, d), GradDpMat
 int
 RankineMatGrad :: hasMaterialModeCapability(MaterialMode mode)
 {
-    return ( mode == _PlaneStress );
+    return mode == _PlaneStress;
 }
 
 void

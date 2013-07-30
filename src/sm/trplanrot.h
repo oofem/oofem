@@ -50,9 +50,8 @@ namespace oofem {
  * Each node has 3 degrees of freedom.
  * 
  * This element is based on the following paper: 
- *   Ibrahimbegovic, A., Taylor, R.L., Wilson, E. L.: A robust membrane qudritelar element with rotational degrees of freedom, 
+ *   Ibrahimbegovic, A., Taylor, R.L., Wilson, E. L.: A robust quadrilateral membrane finite element with drilling degrees of freedom
  *   Int. J. Num. Meth. Engng., 30, 445-457, 1990.
- * 
  */
 class TrPlaneStrRot : public TrPlaneStress2d
 {

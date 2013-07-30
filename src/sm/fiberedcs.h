@@ -98,8 +98,8 @@ protected:
     double width; ///< Total width.
     double area;  ///< Total area.
     FloatArray fiberYcoords, fiberZcoords;
-public:
 
+public:
     FiberedCrossSection(int n, Domain *d) : StructuralCrossSection(n, d), fiberMaterials(), fiberThicks(), fiberWidths(),
         fiberYcoords(), fiberZcoords()
     {
@@ -109,9 +109,6 @@ public:
     }
 
     virtual ~FiberedCrossSection()  { }
-
-
-    virtual void giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
@@ -191,11 +188,7 @@ public:
 #endif
 
 protected:
-    void giveIntegrated3dBeamStress(FloatArray &answer, GaussPoint *gp);
-
     double giveArea();
-
-    friend class Material;
 };
 
 /**

@@ -541,12 +541,7 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
 int
 ConcreteDPM2 :: hasMaterialModeCapability(MaterialMode mMode)
 {
-    if ( ( mMode == _3dMat ) ||
-         ( mMode == _PlaneStrain ) ) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return mMode == _3dMat || mMode == _PlaneStrain;
 }
 
 void

@@ -248,8 +248,6 @@ public:
      * @exception throws an ContextIOERR exception if error encountered.
      */
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
-
-    friend class Material;
 };
 } // end namespace oofem
 #endif // crosssection_h

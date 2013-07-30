@@ -110,6 +110,7 @@ StructuralMaterial :: giveRealStressVector_StressControl(FloatArray &answer, Gau
     FloatMatrix tangent, reducedTangent;
     // Iterate to find full vE.
     // Compute the negated the array of control since we need stressControl as well;
+
     stressControl.resize( 9 - strainControl.giveSize() );
     for ( int i = 1, j = 1; i <= 9; i++ ) {
         if ( !strainControl.contains(i) ) {
@@ -126,6 +127,7 @@ StructuralMaterial :: giveRealStressVector_StressControl(FloatArray &answer, Gau
     // Iterate to find full vE.
     for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
         this->giveRealStressVector_3d(vS, gp, vE, tStep);
+        vS.printYourself();
         reducedvS.beSubArrayOf(vS, stressControl);
         if ( reducedvS.computeNorm() < 1e-6 ) { ///@todo We need a tolerance here!
             StructuralMaterial :: giveReducedVectorForm(answer, vS, _1dMat);

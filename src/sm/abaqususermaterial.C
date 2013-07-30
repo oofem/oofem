@@ -414,12 +414,6 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
     ms->letTempTangentBe(tangent);
 }
 
-
-int AbaqusUserMaterial :: hasMaterialModeCapability(MaterialMode mode)
-{
-    return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain || mode == _1dMat;
-}
-
 void AbaqusUserMaterialStatus :: initTempStatus()
 {
     stateVector.resize(numState);

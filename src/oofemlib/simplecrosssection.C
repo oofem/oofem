@@ -46,29 +46,6 @@ REGISTER_CrossSection( SimpleCrossSection );
 
 
 void
-SimpleCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
-{
-    MaterialMode mode = gp->giveMaterialMode();
-    if ( mode == _2dBeam ) {
-        this->giveRealStress_Beam2d(answer, gp, strain, tStep);
-    } else if ( mode == _3dBeam ) {
-        this->giveRealStress_Beam3d(answer, gp, strain, tStep);
-    } else if ( mode == _2dPlate ) {
-        this->giveRealStress_Plate(answer, gp, strain, tStep);
-    } else if ( mode == _3dShell ) {
-        this->giveRealStress_Shell(answer, gp, strain, tStep);
-    } else {
-        StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
-        if ( mat->hasMaterialModeCapability(gp->giveMaterialMode()) ) {
-            mat->giveRealStressVector(answer, gp, strain, tStep);
-        } else {
-            _error("giveRealStresses : unsupported mode");
-        }
-    }
-}
-
-
-void
 SimpleCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
     StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );

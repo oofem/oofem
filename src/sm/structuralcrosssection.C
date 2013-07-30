@@ -41,6 +41,38 @@
 namespace oofem {
 
 void
+StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    MaterialMode mode = gp->giveMaterialMode();
+    if ( mode == _2dBeam ) {
+        this->giveRealStress_Beam2d(answer, gp, strain, tStep);
+    } else if ( mode == _3dBeam ) {
+        this->giveRealStress_Beam3d(answer, gp, strain, tStep);
+    } else if ( mode == _2dPlate ) {
+        this->giveRealStress_Plate(answer, gp, strain, tStep);
+    } else if ( mode == _3dShell ) {
+        this->giveRealStress_Shell(answer, gp, strain, tStep);
+    } else if ( mode == _3dMat ) {
+        this->giveRealStress_3d(answer, gp, strain, tStep);
+    } else if ( mode == _PlaneStrain ) {
+        this->giveRealStress_PlaneStrain(answer, gp, strain, tStep);
+    } else if ( mode == _PlaneStress ) {
+        this->giveRealStress_PlaneStress(answer, gp, strain, tStep);
+    } else if ( mode == _1dMat ) {
+        this->giveRealStress_1d(answer, gp, strain, tStep);
+    } else {
+        // This should never happen ?
+        StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+        if ( mat->hasMaterialModeCapability(gp->giveMaterialMode()) ) {
+            mat->giveRealStressVector(answer, gp, strain, tStep);
+        } else {
+            _error("giveRealStresses : unsupported mode");
+        }
+    }
+}
+
+
+void
 StructuralCrossSection ::  giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &F, TimeStep *tStep)
 {
     // This function returns the first Piola-Kirchoff stress in vector format
