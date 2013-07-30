@@ -1663,7 +1663,7 @@ ConcreteDPM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                              GaussPoint *gp,
                                              TimeStep *atTime)
 {
-    if ( gp->giveMaterialMode() == _3dMat || gp->giveMaterialMode() ==  _PlaneStrain || gp->giveMaterialMode() == _3dRotContinuum  ) {
+    if ( gp->giveMaterialMode() == _3dMat || gp->giveMaterialMode() ==  _PlaneStrain ) {
         double omega = 0.;
         ConcreteDPMStatus *status = giveStatus(gp);
         if ( mode == ElasticStiffness ) {
@@ -1677,6 +1677,8 @@ ConcreteDPM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
             this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
             answer.times(1. - omega);
         }
+    } else {
+        OOFEM_ERROR("ConcreteDPM :: give3dMaterialStiffnessMatrix - Unsupported material mode");
     }
 }
 

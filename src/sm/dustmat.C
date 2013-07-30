@@ -249,7 +249,7 @@ DustMaterial :: initializeFrom(InputRecord *ir)
 int
 DustMaterial :: hasMaterialModeCapability(MaterialMode mMode)
 {
-    return mMode == _3dMat || mMode == _PlaneStrain || mMode == _3dRotContinuum;
+    return mMode == _3dMat || mMode == _PlaneStrain;
 }
 
 void

@@ -89,9 +89,6 @@ StressStrainBaseVector :: convertToFullForm(FloatArray &answer) const
 
     answer.resize(answerSize);
     answer.zero();
-    if ( mode == _3dRotContinuum ) {
-        OOFEM_ERROR("StressStrainBaseVector::convertToFullForm: Fullform not available for 3dRotContinuum");
-    }
 
     StructuralMaterial :: giveVoigtSymVectorMask(indx, (MaterialMode)mode);
     answer.assemble(*this, indx);

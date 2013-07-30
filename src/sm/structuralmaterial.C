@@ -2032,7 +2032,6 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
         case _3dMat:
         case _PlaneStress:
         case _PlaneStrain:
-        case _3dRotContinuum:
         case _3dMicroplane:
             fullAnswer = eigenstrain;
             break;

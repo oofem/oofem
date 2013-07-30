@@ -2265,8 +2265,7 @@ ConcreteDPM2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                               TimeStep *atTime)
 {
     if ( gp->giveMaterialMode() == _3dMat ||
-         gp->giveMaterialMode() ==  _PlaneStrain ||
-         gp->giveMaterialMode() == _3dRotContinuum  ) {
+         gp->giveMaterialMode() ==  _PlaneStrain  ) {
         if ( mode == ElasticStiffness ) {
             this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
         } else if ( mode == SecantStiffness ) {
