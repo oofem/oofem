@@ -191,13 +191,13 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                         sumDamage += damage.at(1)*dV;
                     }
                     
-                    for ( int j = 0; j < 6; j++ ) {
-                        SumStrain(j) += VecStrain.at(j);
+                    for ( int j = 1; j <= 6; j++ ) {
+                        SumStrain.at(j) += VecStrain.at(j);
                         if ( VecEigStrain.giveSize() ) {
-                            SumEigStrain(j) += VecEigStrain.at(j);
+                            SumEigStrain.at(j) += VecEigStrain.at(j);
                         }
 
-                        SumStress(j) += VecStress.at(j);
+                        SumStress.at(j) += VecStress.at(j);
                     }
 
                     //VecStrain.printYourself();
