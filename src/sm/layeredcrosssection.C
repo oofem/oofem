@@ -58,7 +58,7 @@ LayeredCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, con
         int gpsperlayer = ngps / this->numberOfLayers;
         int layer = (gpnum - 1) / gpsperlayer + 1;
         Material *layerMat = this->domain->giveMaterial( this->giveLayerMaterial(layer) );
-        static_cast< StructuralMaterial * >( layerMat )->giveRealStressVector(answer, gp, strain, tStep);
+        static_cast< StructuralMaterial * >( layerMat )->giveRealStressVector_3d(answer, gp, strain, tStep);
     } else {
         OOFEM_ERROR("LayeredCrossSection :: giveRealStress_3d - Only cubes and wedges are meaningful for layered cross-sections");
     }

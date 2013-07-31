@@ -121,6 +121,14 @@ public:
     /// Destructor.
     virtual ~StructuralMaterial() { }
 
+    // identification and auxiliary functions
+
+    virtual int hasMaterialModeCapability(MaterialMode mode);
+    virtual const char *giveClassName() const { return "StructuralMaterial"; }
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
+
     /**
      * Computes the stiffness matrix for giveRealStressVector of receiver in given integration point, respecting its history.
      * The algorithm should use temporary or equilibrium  history variables stored in integration point status
@@ -167,9 +175,8 @@ public:
     /// Default implementation relies on giveRealStressVector_StressControl
     virtual void giveRealStressVector_Fiber(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
 
-    /// @name Methods associated with large deformation analysis
-    //@{
     /**
+     * @name Methods associated with the First PK stress tensor.
      * Computes the first Piola-Kirchhoff stress vector for given total deformation gradient and integration point.
      * The total deformation gradient is computed directly from displacement field at the given time step.
      * The stress independent parts (temperature, eigenstrains) are subtracted in constitutive
@@ -185,7 +192,7 @@ public:
      * @param reducedF Deformation gradient in in reduced form.
      * @param tStep Current time step (most models are able to respond only when atTime is current time step).
      */
-    virtual void giveFirstPKStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    //@{
     /// Default implementation relies on giveRealStressVector for second Piola-Kirchoff stress
     virtual void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
     /// Default implementation relies on giveFirstPKStressVector_3d
@@ -194,7 +201,10 @@ public:
     virtual void giveFirstPKStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
     /// Default implementation relies on giveFirstPKStressVector_3d
     virtual void giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    //@}
+
     /**
+     * @name Methods associated with the Cauchy stress tensor.
      * Computes the Cauchy stress vector for given increment of deformation gradient and given integration point.
      * The increment of deformation gradient is computed directly from displacement field at the given time step
      * and it is computed wrt configuration which was reached in the last step.
@@ -211,7 +221,7 @@ public:
      * @param reducedF Deformation gradient in in reduced form.
      * @param tStep Current time step (most models are able to respond only when atTime is current time step).
      */
-    virtual void giveCauchyStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    //@{
     virtual void giveCauchyStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
     { _error("giveCauchyStressVector_3d: not implemented "); }
     virtual void giveCauchyStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
@@ -220,25 +230,7 @@ public:
     { _error("giveCauchyStressVector_PlaneStress: not implemented "); }
     virtual void giveCauchyStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
     { _error("giveCauchyStressVector__1d: not implemented "); }
-
-    /**
-     * Gives the tangent: @f$ \frac{\partial P}{\partial F} @f$.
-     * @param answer The computed tangent from the last evaluated first-PK-stress.
-     * @param rMode Material mode.
-     * @param gp Gauss point.
-     * @param tStep Time step.
-     */
-    virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode,
-                                          GaussPoint *gp, TimeStep *tStep);
-
-    /**
-     * Gives the tangent: @f$ \frac{\partial C}{\partial e} @f$.
-     * @param answer The computed tangent from the last evaluated first-PK-stress.
-     * @param rMode Material mode.
-     * @param gp Gauss point.
-     * @param tStep Time step.
-     */
-    virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    //@}
 
     void give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp);
     static void convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &dSdE, FloatArray &S, FloatArray &F, MaterialMode matMode);
@@ -250,7 +242,6 @@ public:
     static void convert_C_2_P(FloatArray &answer, const FloatArray &reducedvS, const FloatArray &reducedvF, MaterialMode matMode);
     static void convert_S_2_C(FloatArray &answer, const FloatArray &reducedvP, const FloatArray &reducedvF, MaterialMode matMode);
     static void convert_C_2_S(FloatArray &answer, const FloatArray &reducedvS, const FloatArray &reducedvF, MaterialMode matMode);
-    //@}
 
     /**
      * Returns a vector of coefficients of thermal dilatation in direction of each material principal (local) axis.
@@ -279,13 +270,6 @@ public:
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
-    // identification and auxiliary functions
-
-    virtual int hasMaterialModeCapability(MaterialMode mode);
-    virtual const char *giveClassName() const { return "StructuralMaterial"; }
-
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
     /**
      * Auxiliary member function that computes principal values of stress/strain vector.
      * @param answer Computed principal values.
@@ -413,7 +397,6 @@ public:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
-protected:
     /**
      * Method for computing plane stress stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -426,6 +409,7 @@ protected:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
+    //@{
     virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
                                           MatResponseMode mmode, GaussPoint *gp,
                                           TimeStep *tStep);
@@ -437,6 +421,7 @@ protected:
     virtual void givePlaneStressStiffMtrx_dCde(FloatMatrix &answer,
                                                MatResponseMode mmode, GaussPoint *gp,
                                                TimeStep *tStep);
+    //@}
 
     /**
      * Method for computing plane strain stiffness matrix of receiver.
@@ -455,6 +440,7 @@ protected:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
+    //@{
     virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
                                           MatResponseMode mmode, GaussPoint *gp,
                                           TimeStep *tStep);
@@ -466,6 +452,7 @@ protected:
     virtual void givePlaneStrainStiffMtrx_dCde(FloatMatrix &answer,
                                                MatResponseMode mmode, GaussPoint *gp,
                                                TimeStep *tStep);
+    //@}
 
     /**
      * Method for computing 1d stiffness matrix of receiver.
@@ -479,6 +466,7 @@ protected:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
+    //@{
     virtual void give1dStressStiffMtrx(FloatMatrix &answer,
                                        MatResponseMode mmode, GaussPoint *gp,
                                        TimeStep *tStep);
@@ -490,6 +478,8 @@ protected:
     virtual void give1dStressStiffMtrx_dCde(FloatMatrix &answer,
                                             MatResponseMode mmode, GaussPoint *gp,
                                             TimeStep *tStep);
+    //@}
+
     /**
      * Method for computing 2d beam layer stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -606,7 +596,6 @@ protected:
     friend class StructuralCrossSection;
     friend class SimpleCrossSection;
     friend class LayeredCrossSection;
-    friend class RheoChainMaterial;
 };
 } // end namespace oofem
 #endif // structuralmaterial_h

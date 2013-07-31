@@ -191,24 +191,6 @@ StructuralMaterial :: giveRealStressVector_Fiber(FloatArray &answer, GaussPoint 
 
 
 void
-StructuralMaterial :: giveFirstPKStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
-{
-    ///@todo Move this to StructuralCrossSection ?
-    reducedvF.printYourself();
-    MaterialMode mode = gp->giveMaterialMode();
-    if ( mode == _3dMat ) {
-        this->giveFirstPKStressVector_3d(answer, gp, reducedvF, tStep);
-    } else if ( mode == _PlaneStrain ) {
-        this->giveFirstPKStressVector_PlaneStrain(answer, gp, reducedvF, tStep);
-    } else if ( mode == _PlaneStress ) {
-        this->giveFirstPKStressVector_PlaneStress(answer, gp, reducedvF, tStep);
-    } else if ( mode == _1dMat ) {
-        this->giveFirstPKStressVector_1d(answer, gp, reducedvF, tStep);
-    }
-}
-
-
-void
 StructuralMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep)
 {
     // Default implementation used if this method is not overloaded by the particular material model.
@@ -298,10 +280,6 @@ StructuralMaterial :: giveFirstPKStressVector_PlaneStress(FloatArray &answer, Ga
 void
 StructuralMaterial :: giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
 {
-    if ( gp->giveMaterialMode() != _1dMat ) {
-        OOFEM_ERROR("StructuralMaterial :: giveFirstPKStressVector_1d - Wrong material mode in GP");
-    }
-
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     IntArray P_control; // Determines which components are controlled by P resp.
@@ -335,23 +313,6 @@ StructuralMaterial :: giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint 
     answer.resize(0);
 }
 
-
-
-void
-StructuralMaterial :: giveCauchyStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
-{
-    ///@todo Move this to StructuralCrossSection ?
-    MaterialMode mode = gp->giveMaterialMode();
-    if ( mode == _3dMat ) {
-        this->giveCauchyStressVector_3d(answer, gp, reducedvF, tStep);
-    } else if ( mode == _PlaneStrain ) {
-        this->giveCauchyStressVector_PlaneStrain(answer, gp, reducedvF, tStep);
-    } else if ( mode == _PlaneStress ) {
-        this->giveCauchyStressVector_PlaneStress(answer, gp, reducedvF, tStep);
-    } else if ( mode == _1dMat ) {
-        this->giveCauchyStressVector_1d(answer, gp, reducedvF, tStep);
-    }
-}
 
 void
 StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &C, FloatArray &S, FloatArray &F, MaterialMode matMode)
@@ -564,33 +525,6 @@ StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
 
 
 void
-StructuralMaterial :: giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode,
-                                               GaussPoint *gp, TimeStep *tStep)
-{
-    // Returns the stiffness matrix dPdF of the reciever according to MatResponseMode
-    // and MaterialMode
-
-    MaterialMode mMode = gp->giveMaterialMode();
-    switch ( mMode ) {
-    case _3dMat:
-        this->give3dMaterialStiffnessMatrix_dPdF(answer, rMode, gp, tStep);
-        break;
-    case _PlaneStress:
-        this->givePlaneStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
-        break;
-    case _PlaneStrain:
-        this->givePlaneStrainStiffMtrx_dPdF(answer, rMode, gp, tStep);
-        break;
-    case _1dMat:
-        this->give1dStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
-        break;
-    default:
-        OOFEM_ERROR2( "StructuralMaterial :: giveStiffnessMatrix_dPdF : unknown mode (%s)", __MaterialModeToString(mMode) );
-    }
-}
-
-
-void
 StructuralMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
                                                          MatResponseMode mode,
                                                          GaussPoint *gp, TimeStep *tStep)
@@ -635,36 +569,11 @@ StructuralMaterial :: give1dStressStiffMtrx_dPdF(FloatMatrix &answer,
 
 
 void
-StructuralMaterial :: giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode,
-                                               GaussPoint *gp, TimeStep *tStep)
-{
-    // Returns the stiffness matrix dCde
-
-    MaterialMode mMode = gp->giveMaterialMode();
-    switch ( mMode ) {
-    case _3dMat:
-        this->give3dMaterialStiffnessMatrix_dCde(answer, rMode, gp, tStep);
-        break;
-    case _PlaneStress:
-        this->givePlaneStressStiffMtrx_dCde(answer, rMode, gp, tStep);
-        break;
-    case _PlaneStrain:
-        this->givePlaneStrainStiffMtrx_dCde(answer, rMode, gp, tStep);
-        break;
-    case _1dMat:
-        this->give1dStressStiffMtrx_dCde(answer, rMode, gp, tStep);
-        break;
-    default:
-        OOFEM_ERROR2( "StructuralMaterial :: giveStiffnessMatrix_dCdg : unknown mode (%s)", __MaterialModeToString(mMode) );
-    }
-}
-
-void
 StructuralMaterial :: give3dMaterialStiffnessMatrix_dCde(FloatMatrix &answer,
                                                          MatResponseMode mode,
                                                          GaussPoint *gp, TimeStep *tStep)
 {
-    //@todo what should be default implementaiton?
+    ///@todo what should be default implementaiton?
     OOFEM_ERROR("StructuralMaterial ::  give3dMaterialStiffnessMatrix_dCde - There is no default implementation");
 }
 

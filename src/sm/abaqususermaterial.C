@@ -133,13 +133,13 @@ void AbaqusUserMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 #if 0
     double h = 1e-7;
     FloatArray strain, strainh, stress, stressh;
-    strain = ( ( StructuralMaterialStatus * ) gp->giveMaterialStatus(AbaqusUserMaterialClass) )->giveTempStrainVector();
-    stress = ( ( StructuralMaterialStatus * ) gp->giveMaterialStatus(AbaqusUserMaterialClass) )->giveTempStressVector();
+    strain = ( ( StructuralMaterialStatus * ) gp->giveMaterialStatus() )->giveTempStrainVector();
+    stress = ( ( StructuralMaterialStatus * ) gp->giveMaterialStatus() )->giveTempStressVector();
     FloatMatrix En( strain.giveSize(), strain.giveSize() );
     for ( int i = 1; i <= strain.giveSize(); ++i ) {
         strainh = strain;
         strainh.at(i) += h;
-        this->giveRealStressVector(stressh, form, gp, strainh, tStep);
+        this->giveRealStressVector_3d(stressh, form, gp, strainh, tStep);
         stressh.subtract(stress);
         stressh.times(1.0 / h);
         En.setColumn(stressh, i);

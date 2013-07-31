@@ -144,10 +144,16 @@ SimpleCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatRe
         this->give3dShellStiffMtrx(answer, rMode, gp, tStep);
     } else {
         StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
-        if ( mat->hasMaterialModeCapability( mode ) ) {
-            mat->giveStiffnessMatrix(answer, rMode, gp, tStep);
+        if ( mode == _3dMat ) {
+            mat->give3dMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+        } else if ( mode == _PlaneStress ) {
+            mat->givePlaneStressStiffMtrx(answer, rMode, gp, tStep);
+        } else if ( mode == _PlaneStrain ) {
+            mat->givePlaneStrainStiffMtrx(answer, rMode, gp, tStep);
+        } else if ( mode == _1dMat ) {
+            mat->give1dStressStiffMtrx(answer, rMode, gp, tStep);
         } else {
-            OOFEM_ERROR3("SimpleCrossSection :: giveCharMaterialStiffnessMatrix: unsupported mode %s on element number %d", __MaterialModeToString(gp->giveMaterialMode()), gp->giveElement()->giveGlobalNumber() );
+            mat->giveStiffnessMatrix(answer, rMode, gp, tStep);
         }
     }
 }
@@ -162,7 +168,7 @@ SimpleCrossSection :: give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode r
     mat->give1dStressStiffMtrx(mat3d, rMode, gp, tStep);
     area = this->give(CS_Area);
     Iy   = this->give(CS_InertiaMomentY);
-    shearAreaz = this->give(CS_SHEAR_AREA_Z);
+    shearAreaz = this->give(CS_ShearAreaZ);
 
     answer.resize(3, 3);
     answer.zero();
@@ -190,8 +196,8 @@ SimpleCrossSection :: give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode r
     Ik   = this->give(CS_TorsionMomentX);
 
     //shearCoeff = this->give(CS_BeamShearCoeff);
-    shearAreay = this->give(CS_SHEAR_AREA_Y);
-    shearAreaz = this->give(CS_SHEAR_AREA_Z);
+    shearAreay = this->give(CS_ShearAreaY);
+    shearAreaz = this->give(CS_ShearAreaZ);
 
     answer.resize(6, 6);
     answer.zero();
@@ -317,12 +323,12 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_shearareay);
     if (value == 0.0) value=beamshearcoeff * area;
-    propertyDictionary->add(CS_SHEAR_AREA_Y, value);
+    propertyDictionary->add(CS_ShearAreaY, value);
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_shearareaz);
     if (value == 0.0) value=beamshearcoeff * area;
-    propertyDictionary->add(CS_SHEAR_AREA_Z, value);
+    propertyDictionary->add(CS_ShearAreaZ, value);
 
     return IRRT_OK;
 }
@@ -337,8 +343,8 @@ void SimpleCrossSection :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->give(CS_TorsionMomentX), _IFT_SimpleCrossSection_ik);
     input.setField(this->give(CS_InertiaMomentY), _IFT_SimpleCrossSection_iy);
     input.setField(this->give(CS_InertiaMomentZ), _IFT_SimpleCrossSection_iz);
-    input.setField(this->give(CS_SHEAR_AREA_Y), _IFT_SimpleCrossSection_shearareay);
-    input.setField(this->give(CS_SHEAR_AREA_Y), _IFT_SimpleCrossSection_shearareaz);
+    input.setField(this->give(CS_ShearAreaY), _IFT_SimpleCrossSection_shearareay);
+    input.setField(this->give(CS_ShearAreaY), _IFT_SimpleCrossSection_shearareaz);
     input.setField(this->give(CS_BeamShearCoeff), _IFT_SimpleCrossSection_shearcoeff);
 }
 

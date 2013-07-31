@@ -90,7 +90,8 @@ public:
      * @param reducedStrain Strain vector in reduced form.
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+    //@{
+    void giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) = 0;
     virtual void giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) = 0;
@@ -101,6 +102,7 @@ public:
     virtual void giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep) = 0;
     virtual void giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep) = 0;
     virtual void giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep) = 0;
+    //@}
 
     /**
      * Computes the First Piola-Kirchoff stress vector for a given deformation gradient and integration point.
