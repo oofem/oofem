@@ -554,7 +554,7 @@ protected:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
 
     /**
      * Computes the geometrical matrix of receiver in given integration point.

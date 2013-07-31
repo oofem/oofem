@@ -102,7 +102,8 @@ AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
 }
 
 void
-AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep) {
+AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep)
+{
     proceedStep(1, tStep);
     this->updateYourself(tStep);
 

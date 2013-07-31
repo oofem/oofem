@@ -572,8 +572,9 @@ RerShell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gauss
     answer.zero();
 
     if ( ( type == LocalForceTensor ) || ( type == GlobalForceTensor ) ) {
-        FloatArray stress;
-        this->computeStressVector(stress, gp, tStep);
+        FloatArray stress, strain;
+        this->computeStrainVector(strain, gp, tStep);
+        this->computeStressVector(stress, strain, gp, tStep);
         answer.at(1, 1) = stress.at(1);
         answer.at(2, 2) = stress.at(2);
         answer.at(1, 2) = stress.at(3);
@@ -583,8 +584,9 @@ RerShell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gauss
         answer.at(2, 3) = stress.at(8);
         answer.at(3, 2) = stress.at(8);
     } else if ( ( type == LocalMomentumTensor ) || ( type == GlobalMomentumTensor ) ) {
-        FloatArray stress;
-        this->computeStressVector(stress, gp, tStep);
+        FloatArray stress, strain;
+        this->computeStrainVector(strain, gp, tStep);
+        this->computeStressVector(stress, strain, gp, tStep);
         answer.at(1, 1) = stress.at(4);
         answer.at(2, 2) = stress.at(5);
         answer.at(1, 2) = stress.at(6);

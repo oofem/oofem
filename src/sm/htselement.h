@@ -74,9 +74,9 @@ protected:
     virtual void giveDofManDofIDMask(int inode, EquationID,IntArray &) const;
     virtual StructuralElement* giveStructuralElement() { return this; }
     //jak se pocita deformace???
-    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN){answer.resize(numberOfStressDofs);}
+    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN) { answer.resize(numberOfStressDofs); }
     //dodelat vypocet napeti!!!
-    virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN){answer.resize(numberOfStressDofs);}
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN) { answer.resize(numberOfStressDofs); }
     //dodelat internal forces, budou potreba pro nelinearni vypocet
     virtual void giveInternalForcesVector(FloatArray &answer,TimeStep *tStep, int useUpdatedGpRecord){answer.resize(numberOfDofs);}
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);

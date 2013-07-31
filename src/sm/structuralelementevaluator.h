@@ -123,6 +123,9 @@ protected:
     }
     bool isActivated(TimeStep *atTime) { return true; }
     void updateInternalState(TimeStep *stepN);
+
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+
     /**
      * Optimized version, allowing to pass element displacements as parameter.
      * Standard version has a huge performance leak; in typical IGA element the element vector is VERY large

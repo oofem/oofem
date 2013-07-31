@@ -70,7 +70,7 @@ public:
         { OOFEM_ERROR("PlaneStress2dXfem :: computeBHmatrixAt() not implemented"); }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray & answer) const;
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
-    virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
 
