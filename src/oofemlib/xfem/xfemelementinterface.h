@@ -59,15 +59,18 @@ protected:
 
 public:
     /// Constructor.
-    XfemElementInterface(Element *e) : Interface() { this->element = e; }
+    XfemElementInterface(Element *e) : Interface(), xMan(NULL) { this->element = e; }
+
+    virtual ~XfemElementInterface() {}
+
     /// Creates enriched part of B matrix.
     void XfemElementInterface_createEnrBmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     /// Partitions the element into patches by a triangulation.
-    void XfemElementInterface_partitionElement(AList< Triangle > *answer, AList< FloatArray > *together);
+    virtual void XfemElementInterface_partitionElement(AList< Triangle > *answer, AList< FloatArray > *together);
     /// Updates integration rule based on the triangulation.
-    void XfemElementInterface_updateIntegrationRule();
+    virtual void XfemElementInterface_updateIntegrationRule();
     /// Helpful routine to put the nodes for triangulation together, should be in protected members probably.
-    void XfemElementInterface_prepareNodesForDelaunay(AList< FloatArray > *answer1, AList< FloatArray > *answer2);
+    virtual void XfemElementInterface_prepareNodesForDelaunay(AList< FloatArray > *answer1, AList< FloatArray > *answer2);
 };
 } // end namespace oofem
 #endif // xfemelementinterface_h

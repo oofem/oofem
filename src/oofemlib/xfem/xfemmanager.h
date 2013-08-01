@@ -89,6 +89,8 @@ public:
 
     bool isElementEnriched(const Element *elem);
 
+    bool isAllElNodesEnriched(const Element *elem);
+
     /// Accessor.
     EnrichmentItem *giveEnrichmentItem(int n);
     int giveNumberOfEnrichmentItems() { return enrichmentItemList->giveSize(); }
@@ -133,6 +135,10 @@ public:
      * @exception ContextIOERR exception if error encountered.
      */
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+
+
+    // Update level sets
+    void updateYourself();
 };
 } // end namespace oofem
 #endif // xfemmanager_h

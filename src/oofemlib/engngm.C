@@ -66,6 +66,7 @@
 #include "feinterpol3d.h"
 #include "classfactory.h"
 #include "oofem_limits.h"
+#include "xfemmanager.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
@@ -759,6 +760,13 @@ EngngModel :: updateYourself(TimeStep *stepN)
 #  ifdef VERBOSE
         VERBOSE_PRINT0("Updated Elements ", nelem)
 #  endif
+
+
+        // Update xfem manager if it is present
+        if( domain->hasXfemManager() )
+        {
+        	domain->giveXfemManager()->updateYourself();
+        }
 
     }
 

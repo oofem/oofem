@@ -44,6 +44,10 @@
 #include "material.h"
 #include "classfactory.h"
 
+#include "xfemmanager.h"
+#include "enrichmentitem.h"
+#include "enrichmentdomain.h"
+
 #include <string>
 #include <sstream>
 #include <fstream>
@@ -795,6 +799,120 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
                                      IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int ireg,
                                      VTKStream stream, TimeStep *tStep)
 {
+
+
+#ifdef __BOOST_MODULE
+	// The xfem level set function is defined in the nodes and
+	// recovery of nodal values is trivial.
+	// Therefore it is treated separately.
+	if( valID == IST_XFEMLevelSetPhi )
+	{
+		printf("Exporting IST_XFEMLevelSetPhi.\n");
+
+	    Domain *d = emodel->giveDomain(1);
+	    int inode;
+	    FloatArray iVal(3), t(9);
+	    IntArray regionVarMap;
+
+	    this->giveSmoother();
+
+
+	    if( d->hasXfemManager() )
+	    {
+
+        	XfemManager *xFemMan = d->giveXfemManager();
+
+        	int nEnrDom = xFemMan->giveEnrichmentItem(1)->giveNumberOfEnrichmentDomains();
+
+        	for( int enrDomIndex = 1; enrDomIndex <= nEnrDom; enrDomIndex++ )
+        	{
+
+				for( int lSetIndex = 1; lSetIndex <= 3; lSetIndex++)
+				{
+
+#ifdef __VTK_MODULE
+					vtkSmartPointer<vtkDoubleArray> intVarArray = vtkSmartPointer<vtkDoubleArray>::New();
+
+					std::stringstream fileNameStream;
+					if(lSetIndex == 1)
+					{
+						fileNameStream << "Phi_Domain";
+					}
+					else if(lSetIndex == 2)
+					{
+						fileNameStream << "Gamma_Domain";
+					}
+					else if(lSetIndex == 3)
+					{
+						fileNameStream << "NodeEnrMarker_Domain";
+					}
+
+					fileNameStream << enrDomIndex;
+
+					intVarArray->SetName(fileNameStream.str().data());
+
+#endif
+
+#ifdef __VTK_MODULE
+					intVarArray->SetNumberOfComponents(1);
+#else
+					fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" format=\"ascii\"> ", __InternalStateTypeToString(valID) );
+#endif
+
+#ifdef __VTK_MODULE
+					intVarArray->SetNumberOfTuples(regionDofMans);
+#endif
+
+
+//					this->smoother->giveRegionRecordMap(regionVarMap, ireg, valID);
+
+
+					for ( inode = 1; inode <= regionDofMans; inode++ ) {
+
+						double signDist = 0.0;
+
+						if(lSetIndex == 1)
+						{
+							signDist = xFemMan->giveEnrichmentItem(1)->giveEnrichmentDomain(enrDomIndex)->giveLevelSetPhi(inode);
+						}
+						else if(lSetIndex == 2)
+						{
+							signDist = xFemMan->giveEnrichmentItem(1)->giveEnrichmentDomain(enrDomIndex)->giveLevelSetGamma(inode);
+						}
+						else if(lSetIndex == 3)
+						{
+							signDist = xFemMan->giveEnrichmentItem(1)->giveEnrichmentDomain(enrDomIndex)->giveNodeEnrMarker(inode);
+						}
+
+#ifdef __VTK_MODULE
+						intVarArray->SetTuple1(inode-1, signDist);
+#endif
+
+					} // end loop over dofmans
+
+#ifdef __VTK_MODULE
+					if (type == ISVT_SCALAR) {
+						stream->GetPointData()->SetActiveScalars(__InternalStateTypeToString(valID));
+						stream->GetPointData()->SetScalars(intVarArray);
+					}
+
+#else
+					fprintf(stream, "</DataArray>\n");
+#endif
+
+
+				} // Loop over lSetIndex
+
+        	} // Loop over enrichment domains
+
+	    } // if d->hasXfemManager()
+
+	    printf("done.\n");
+
+return;
+	}
+#endif // __BOOST_MODULE
+
     Domain *d = emodel->giveDomain(1);
     int inode;
     int j, jsize, defaultValSize, valSize;
@@ -1224,6 +1342,8 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, VTKStr
     case IST_MaterialNumber:
     case IST_ElementNumber:
     case IST_Pressure:
+    case IST_XFEMEnrichment:
+    case IST_XFEMNumIntersecPoints:
         // if it wasn't for IST_Pressure,
 #ifdef __VTK_MODULE
         cellVarsArray->SetNumberOfComponents(1);
@@ -1267,6 +1387,61 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, VTKStr
                     fprintf( stream, "%f ", answer.at(1) );
 #endif
                 }
+            } else if (type == IST_XFEMEnrichment) {
+
+            	int xfemEnrichment = 0;
+
+            	int numDMan = elem->giveNumberOfDofManagers();
+
+            	XfemManager *xMan = elem->giveDomain()->giveXfemManager();
+            	if( xMan != NULL )
+            	{
+
+            		for( int k = 1; k <= numDMan; k++)
+            		{
+            			DofManager *dMan = elem->giveDofManager(k);
+            			for ( int j = 1; j <= xMan->giveNumberOfEnrichmentItems(); j++ ){
+
+            				if ( xMan->giveEnrichmentItem(j)->isDofManEnriched(dMan) ){
+            					xfemEnrichment++;
+            				}
+            			}
+            		}
+            	}
+
+#ifdef __VTK_MODULE
+                cellVarsArray->SetTuple1(ielem-1, xfemEnrichment );
+#else
+                fprintf( stream, "%d ", xfemEnrichment );
+#endif
+            } else if (type == IST_XFEMNumIntersecPoints) {
+
+            	int numPoints = 0;
+
+            	XfemManager *xMan = elem->giveDomain()->giveXfemManager();
+            	if( xMan != NULL )
+            	{
+
+            		for ( int j = 1; j <= xMan->giveNumberOfEnrichmentItems(); j++ ){
+            				EnrichmentItem *enrItem = xMan->giveEnrichmentItem(j);
+
+            				for( int k = 1; k <= enrItem->giveNumberOfEnrichmentDomains(); k++ )
+            				{
+            					EnrichmentDomain *enrDomain = enrItem->giveEnrichmentDomain(k);
+
+            					numPoints += enrDomain->computeNumberOfIntersectionPoints(elem);
+            				}
+
+            		}
+            	}
+
+#ifdef __VTK_MODULE
+                cellVarsArray->SetTuple1(ielem-1, numPoints );
+#else
+                fprintf( stream, "%d ", numPoints );
+#endif
+
+
             }
         }
 #ifdef __VTK_MODULE

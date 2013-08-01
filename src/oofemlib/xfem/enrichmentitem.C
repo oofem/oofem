@@ -50,6 +50,8 @@ REGISTER_EnrichmentItem( CrackInterior )
 REGISTER_EnrichmentItem( Inclusion )
 REGISTER_EnrichmentItem( Delamination )
 
+REGISTER_EnrichmentItem( Crack )
+
 EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FEMComponent(n, aDomain)
 {
     this->xMan = xMan;
@@ -63,7 +65,11 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FE
 
 EnrichmentItem :: ~EnrichmentItem()
 {
-    delete this->enrichesDofsWithIdArray;
+    delete this->enrichmentFunctionList;
+    delete this->enrichmentDomainList;
+
+	delete this->enrichesDofsWithIdArray;
+
 }
 
 
@@ -98,6 +104,17 @@ bool EnrichmentItem :: isElementEnrichedByEnrichmentDomain(const Element *elemen
         }
     }
     return false;
+}
+
+void EnrichmentItem :: updateGeometry()
+{
+#ifdef __BOOST_MODULE
+	// Update associated enrichment domains
+	for ( int i = 1; i <= enrichmentDomainList->giveSize(); i++ )
+	{
+		enrichmentDomainList->at(i)->updateLevelSets(*xMan);
+	}
+#endif
 }
 
 bool EnrichmentItem :: isDofManEnriched(DofManager *dMan)
@@ -372,6 +389,20 @@ Delamination :: giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &
         OOFEM_ERROR2("giveDelaminationGroupZLimits: Bottom z-coord is larger than top z-coord in dGroup. (%i)", dGroup);
     }
 #endif
+}
+
+
+Crack :: Crack(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
+{
+    this->enrichesDofsWithIdArray->setValues(3, D_u, D_v, D_w);
+}
+
+IRResultType Crack :: initializeFrom(InputRecord *ir)
+{
+    this->numberOfEnrichmentFunctions = 1;
+    EnrichmentItem :: initializeFrom(ir);
+
+    return IRRT_OK;
 }
 
 

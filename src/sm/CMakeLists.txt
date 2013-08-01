@@ -20,6 +20,7 @@ set (sm_element
     quad1planestrain.C rershell.C tr_shell01.C qplanstrss.C q9planstrss.C qtrplstr.C q4axisymm.C
     planstrss.C
     planstrssxfem.C
+    trplanstrssxfem.C
     axisymm3d.C l4axisymm.C
     macrolspace.C
     cct.C

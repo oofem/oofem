@@ -1,0 +1,65 @@
+xFemCrackVal.out
+Test case for xfem: a crack through 3-node triangle elements. Added by Erik Svenning.
+NonLinearStatic nsteps 1 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 20 minIter 2 stiffmode 0 nmodules 0
+#vtkxml tstep_all domain_all vars 1 94 primvars 1 1 cellvars 1 1
+domain 2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+ndofman 8 nelem 6 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nxfemman 1 nset 0
+node 1     coords 2  0        0       bc 2 1 1 
+node 2     coords 2  1        0       bc 2 0 0 
+node 3     coords 2  2        0       bc 2 0 0
+node 4     coords 2  3        0       bc 2 2 3
+node 5     coords 2  3        1       bc 2 2 3
+node 6     coords 2  2        1       bc 2 0 0
+node 7     coords 2  1        1       bc 2 0 0
+node 8     coords 2  0        1       bc 2 1 1
+TrPlaneStress2dXFEM 1    nodes 3   1   2   8   mat 1 crosssect 1 nlgeo 0
+TrPlaneStress2dXFEM 2    nodes 3   2   7   8   mat 1 crosssect 1 nlgeo 0
+TrPlaneStress2dXFEM 3    nodes 3   2   6   7   mat 1 crosssect 1 nlgeo 0
+TrPlaneStress2dXFEM 4    nodes 3   2   3   6   mat 1 crosssect 1 nlgeo 0
+TrPlaneStress2dXFEM 5    nodes 3   3   4   6   mat 1 crosssect 1 nlgeo 0
+TrPlaneStress2dXFEM 6    nodes 3   4   5   6   mat 1 crosssect 1 nlgeo 0
+SimpleCS 1 thick 1.0e-3
+IsoLE 1 d 0.0 E 210.0e9 n 0.3 tAlpha 0.0
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.2
+BoundaryCondition 3 loadTimeFunction 1 prescribedvalue -0.3
+ConstantFunction 1 f(t) 1.0
+XfemManager 1 numberofenrichmentitems 1
+crack 1 enrichmentdomains 2 1 2 enrichmentfunction 1
+DiscontinuousFunction 1
+polygoncrack 1 points 6 0.0 -0.5 1.2 -0.1 2.0 -1.0
+polygoncrack 2 points 10 1.2  1.5 1.4  0.7 1.8 0.3 1.5 -0.1 2.1 -0.5
+#%BEGIN_CHECK% tolerance 1.e-8
+## Node displacements
+#NODE tStep 0 number 1 dof 1 unknown d value 0.0
+#NODE tStep 0 number 1 dof 2 unknown d value 0.0
+#NODE tStep 0 number 2 dof 1 unknown d value 0.0
+#NODE tStep 0 number 2 dof 2 unknown d value 0.0
+#NODE tStep 0 number 2 dof 3 unknown d value 0.1
+#NODE tStep 0 number 2 dof 4 unknown d value -0.15
+#NODE tStep 0 number 3 dof 1 unknown d value 0.2
+#NODE tStep 0 number 3 dof 2 unknown d value -0.3
+#NODE tStep 0 number 3 dof 3 unknown d value 0.1
+#NODE tStep 0 number 3 dof 4 unknown d value -0.15
+#NODE tStep 0 number 4 dof 1 unknown d value 0.2
+#NODE tStep 0 number 4 dof 2 unknown d value -0.3
+#NODE tStep 0 number 5 dof 1 unknown d value 0.2
+#NODE tStep 0 number 5 dof 2 unknown d value -0.3
+#NODE tStep 0 number 6 dof 1 unknown d value 0.2
+#NODE tStep 0 number 6 dof 2 unknown d value -0.3
+#NODE tStep 0 number 6 dof 3 unknown d value 0.1
+#NODE tStep 0 number 6 dof 4 unknown d value -0.15
+#NODE tStep 0 number 7 dof 1 unknown d value 0.0
+#NODE tStep 0 number 7 dof 2 unknown d value 0.0
+#NODE tStep 0 number 7 dof 3 unknown d value 0.1
+#NODE tStep 0 number 7 dof 4 unknown d value -0.15
+#NODE tStep 0 number 8 dof 1 unknown d value 0.0
+#NODE tStep 0 number 8 dof 2 unknown d value 0.0
+##
+#%END_CHECK%
+
+
+
+
+

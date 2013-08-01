@@ -93,6 +93,26 @@ bool XfemManager :: isElementEnriched(const Element *elem)
     return false;
 }
 
+bool XfemManager :: isAllElNodesEnriched(const Element *elem)
+{
+    for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ){
+
+    	EnrichmentItem *eI = this->giveEnrichmentItem(i);
+    	for( int j = 1; j <= eI->giveNumberOfEnrichmentDomains(); j++)
+    	{
+
+    		EnrichmentDomain *eD = eI->giveEnrichmentDomain(j);
+    		if( eD->isAllElNodesEnriched(elem) )
+    		{
+    			return true;
+    		}
+
+    	}
+    }
+
+    return false;
+}
+
 
 EnrichmentItem *XfemManager :: giveEnrichmentItem(int n)
 {
@@ -275,6 +295,17 @@ contextIOResultType XfemManager:: restoreContext(DataStream *stream, ContextMode
         }
     }
     return CIO_OK;
+}
+
+void XfemManager:: updateYourself()
+{
+	// Update level sets
+	for ( int i = 1; i <= enrichmentItemList->giveSize(); i++)
+	{
+		enrichmentItemList->at(i)->updateGeometry();
+
+	}
+
 }
 
 } // end namespace oofem

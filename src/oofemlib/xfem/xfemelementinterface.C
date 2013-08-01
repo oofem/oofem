@@ -121,27 +121,27 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(AList<
     IntArray interactedEI;
     xMan->giveActiveEIsFor(interactedEI, element); //give the EI's for the el
     // in intersecPoints the points of Element with interaction to EnrichmentItem will be stored
-    AList< FloatArray >intersecPoints;
+    std::vector< FloatArray >intersecPoints;
     for ( int i = 1; i <= interactedEI.giveSize(); i++ ) { // for the active enrichment items
-        xMan->giveEnrichmentItem( interactedEI.at(i) )->giveEnrichmentDomain(1)->computeIntersectionPoints(& intersecPoints, element);
+        xMan->giveEnrichmentItem( interactedEI.at(i) )->giveEnrichmentDomain(1)->computeIntersectionPoints( intersecPoints, element);
     }
 
     // here the intersection points are copied in order to be put into two groups
-    for ( int i = 1; i <= intersecPoints.giveSize(); i++ ) {
+    for ( int i = 1; i <= int(intersecPoints.size()); i++ ) {
         int sz = answer1->giveSize();
-        answer1->put( sz + 1, intersecPoints.at(i) );
-        FloatArray *ip = intersecPoints.at(i);
+        answer1->put( sz + 1, new FloatArray(intersecPoints[i-1]) );
+        FloatArray *ip = &intersecPoints[i-1];
         FloatArray *ipCopy = new FloatArray(*ip);
         int sz2 = answer2->giveSize();
         answer2->put(sz2 + 1, ipCopy);
     }
 
-    if ( intersecPoints.giveSize() == 2 ) {
+    if ( intersecPoints.size() == 2 ) {
         // here the group is determined
-        double x1 = intersecPoints.at(1)->at(1);
-        double x2 = intersecPoints.at(2)->at(1);
-        double y1 = intersecPoints.at(1)->at(2);
-        double y2 = intersecPoints.at(2)->at(2);
+        double x1 = intersecPoints[0].at(1);
+        double x2 = intersecPoints[1].at(1);
+        double y1 = intersecPoints[0].at(2);
+        double y2 = intersecPoints[1].at(2);
         for ( int i = 1; i <= this->element->giveNumberOfDofManagers(); i++ ) {
             double x = element->giveDofManager(i)->giveCoordinates()->at(1);
             double y = element->giveDofManager(i)->giveCoordinates()->at(2);
@@ -162,8 +162,8 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(AList<
     // so that the whole container of points for triangulation can be dealt with
     // more easily (e.g. deleted)
 
-    for ( int i = 1; i <= intersecPoints.giveSize(); i++ ) {
-        intersecPoints.unlink(i);
-    }
+//    for ( int i = 1; i <= intersecPoints.giveSize(); i++ ) {
+//        intersecPoints.unlink(i);
+//    }
 }
 } // end namespace oofem

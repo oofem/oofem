@@ -1,6 +1,7 @@
 xfem01.out
 Xfem test of circular inclusion in a structured plane stress square grid
 LinearStatic nsteps 1  
+#NonlinearStatic nsteps 1 controlmode 1 rtolv 1.0e-6
 #vtk tstep_all domain_all primvars 1 1 vars 4 1 2 4 5 stype 1 0
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
