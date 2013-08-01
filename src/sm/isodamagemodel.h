@@ -226,7 +226,7 @@ public:
      * @param tStep Time step.
      */
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) = 0;
-    /**Computes derivative of the equivalent strain wrt strain
+    /**Computes derivative of the equivalent strain with regards to strain
      * @param[out] answer Contains the resulting derivative.
      * @param strain Strain vector.
      * @param gp Integration point.

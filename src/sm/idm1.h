@@ -162,7 +162,7 @@ protected:
     double ek;
 
     /// Type characterizing the algorithm used to compute equivalent strain measure.
-    enum EquivStrainType { EST_Unknown, EST_Mazars, EST_Rankine_Smooth, EST_Rankine_Standard, EST_ElasticEnergy, EST_ElasticEnergyPositiveStress, EST_ElasticEnergyPositiveStrain, EST_Mises };
+    enum EquivStrainType { EST_Unknown, EST_Mazars, EST_Rankine_Smooth, EST_Rankine_Standard, EST_ElasticEnergy, EST_ElasticEnergyPositiveStress, EST_ElasticEnergyPositiveStrain, EST_Mises, EST_Griffith };
     /// Parameter specifying the definition of equivalent strain.
     EquivStrainType equivStrainType;
 
