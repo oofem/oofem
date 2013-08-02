@@ -273,7 +273,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     FloatArray shellForces(20), drillMoment(4);
     shellForces.zero();
     drillMoment.zero();
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
@@ -282,10 +282,10 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
         double dV = this->computeVolumeAround(gp);
 
         if ( useUpdatedGpRecord ) {
-            stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+            stress = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStressVector();
         } else {
             strain.beProductOf(b, shellUnknowns);
-            mat->giveRealStressVector(stress, gp, strain, tStep);
+            cs->giveRealStress_Shell(stress, gp, strain, tStep);
         }
         shellForces.plusProduct(b, stress, dV);
 
@@ -359,6 +359,13 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
 }
 
 
+void
+Quad1MindlinShell3D :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->give3dShellStiffMtrx(answer, rMode, gp, tStep);
+}
+
+
 IRResultType
 Quad1MindlinShell3D :: initializeFrom(InputRecord *ir)
 {
@@ -415,15 +422,12 @@ void
 Quad1MindlinShell3D :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver.
 {
-    GaussPoint *gp;
-    double dV, mass = 0.;
+    double mass = 0.;
 
     IntegrationRule *ir = integrationRulesArray [ 0 ];
     for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i) {
-        gp = ir->getIntegrationPoint(i);
-
-        dV = this->computeVolumeAround(gp);
-        mass += dV * this->giveMaterial()->give('d', gp);
+        GaussPoint *gp = ir->getIntegrationPoint(i);
+        mass += this->computeVolumeAround(gp) * this->giveMaterial()->give('d', gp);
     }
 
     answer.resize(12, 12);
@@ -448,35 +452,6 @@ Quad1MindlinShell3D :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
     } else {
       return NLStructuralElement::giveIPValue(answer, gp, type, atTime);
     }
-}
-
-//
-// layered cross section support functions
-//
-void
-Quad1MindlinShell3D :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
-                                       GaussPoint *slaveGp, TimeStep *tStep)
-// returns full 3d strain vector of given layer (whose z-coordinate from center-line is
-// stored in slaveGp) for given tStep
-{
-    ///@todo Untested function
-    FloatArray masterGpStrain;
-    double layerZeta, layerZCoord, top, bottom;
-
-    this->computeStrainVector(masterGpStrain, masterGp, tStep);
-    top    = masterGp->giveElement()->giveCrossSection()->give(CS_TopZCoord);
-    bottom = masterGp->giveElement()->giveCrossSection()->give(CS_BottomZCoord);
-    layerZeta = slaveGp->giveCoordinate(3);
-    layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
-
-    answer.resize(6); // {Exx,Eyy,Ezz,GMyz,GMzx,GMxy}
-    answer.zero();
-
-    answer.at(1) = masterGpStrain.at(1) * layerZCoord;
-    answer.at(2) = masterGpStrain.at(2) * layerZCoord;
-    answer.at(6) = masterGpStrain.at(3) * layerZCoord;
-    answer.at(4) = masterGpStrain.at(5);
-    answer.at(5) = masterGpStrain.at(4);
 }
 
 

@@ -95,7 +95,7 @@ NLStructuralElement :: computeFirstPKStressVector(FloatArray &answer, GaussPoint
     // Computes the first Piola-Kirchhoff stress vector containing the stresses at the  Gauss point
     // gp of the receiver at time step tStep. The deformation gradient F is computed and sent as
     // input to the material model.
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
 
     FloatArray vF;
     this->computeDeformationGradientVector(vF, gp, tStep);
@@ -108,7 +108,7 @@ NLStructuralElement :: computeCauchyStressVector(FloatArray &answer, GaussPoint 
     // Computes the first Piola-Kirchhoff stress vector containing the stresses at the  Gauss point
     // gp of the receiver at time step tStep. The deformation gradient F is computed and sent as
     // input to the material model.
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
 
     FloatArray vF;
     this->computeDeformationGradientVector(vF, gp, tStep);
@@ -119,7 +119,14 @@ void
 NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
     FloatMatrix B;
-    FloatArray vStress;
+    FloatArray vStress, vStrain, u;
+
+    // This function can be quite costly to do inside the loops when one has many slave dofs.
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    // subtract initial displacements, if defined
+    if ( initialDisplacements ) {
+        u.subtract(*initialDisplacements);
+    }
 
     // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
     // as this is valid only if receiver has no nodes with slaves
@@ -129,7 +136,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
-        Material *mat  = gp->giveMaterial();
+        Material *mat = gp->giveMaterial();
 
         // Engineering (small strain) stress
         if ( nlGeometry == 0 ) {
@@ -137,8 +144,13 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
             if ( useUpdatedGpRecord == 1 ) {
                 vStress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
             } else {
-                this->computeStressVector(vStress, gp, tStep);
-                ///@todo This is actaully inefficient since it constructs B and twice and collects the nodal unknowns over and over.
+                ///@todo Is this really what we should do for inactive elements?
+                if ( !this->isActivated(tStep) ) {
+                    vStrain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode()) );
+                    vStrain.zero();
+                }
+                vStrain.beProductOf(B, u);
+                this->computeStressVector(vStress, vStrain, gp, tStep);
             }
         } else if ( nlGeometry == 1 ) {  // First Piola-Kirchhoff stress
             if ( this->domain->giveEngngModel()->giveFormulation() == AL ) { // Cauchy stress
@@ -182,7 +194,7 @@ void
 NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &answer,
                                                                      TimeStep *tStep, int useUpdatedGpRecord)
 {
-    /**
+    /*
      * Returns nodal representation of real internal forces computed from first Piola-Kirchoff stress
      * if useGpRecord == 1 then stresses stored in the gp are used, otherwise stresses are computed
      * this must be done if you want internal forces after element->updateYourself() has been called
@@ -191,12 +203,10 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
      * Each integration rule is considered to represent a separate sub-cell/element. Typically this would be used when
      * integration of the element domain needs special treatment, e.g. when using the XFEM.
      */
-    GaussPoint *gp;
     Material *mat = this->giveMaterial();
-    IntegrationRule *iRule;
 
     FloatMatrix B;
-    FloatArray BS, vP, vStress, u, BFu;
+    FloatArray vStress, vStrain;
 
     IntArray irlocnum;
     FloatArray *m = & answer, temp;
@@ -211,17 +221,18 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
 
     // loop over individual integration rules
     for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        iRule = integrationRulesArray [ ir ];
+        IntegrationRule *iRule = integrationRulesArray [ ir ];
 
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            gp = iRule->getIntegrationPoint(i);
+            GaussPoint *gp = iRule->getIntegrationPoint(i);
 
             if ( nlGeometry == 0 ) {
                 this->computeBmatrixAt(gp, B);
                 if ( useUpdatedGpRecord == 1 ) {
                     vStress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
                 } else {
-                    this->computeStressVector(vStress, gp, tStep);
+                    this->computeStrainVector(vStrain, gp, tStep);
+                    this->computeStressVector(vStress, vStrain, gp, tStep);
                 }
             } else if ( nlGeometry == 1 ) {
                 if ( this->domain->giveEngngModel()->giveFormulation() == AL ) { // Cauchy stress
@@ -275,7 +286,7 @@ void
 NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseMode rMode, TimeStep *tStep)
 {
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
     bool matStiffSymmFlag = true;
 
     answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
@@ -283,14 +294,12 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
         return;
     }
 
-    IntegrationRule *iRule;
-    GaussPoint *gp;
     // Compute matrix from material stiffness (total stiffness for small def.) - B^T * dS/dE * B
     FloatMatrix B, D, DB;
     if ( numberOfIntegrationRules == 1 ) {
-        iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+        IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            gp = iRule->getIntegrationPoint(j);
+            GaussPoint *gp = iRule->getIntegrationPoint(j);
 
             // Engineering (small strain) stiffness dSig/dEps
             if ( nlGeometry == 0 ) {
@@ -332,6 +341,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
             iStartIndx = integrationRulesArray [ i ]->getStartIndexOfLocalStrainWhereApply();
             iEndIndx   = integrationRulesArray [ i ]->getEndIndexOfLocalStrainWhereApply();
             for ( int j = 0; j < numberOfIntegrationRules; j++ ) {
+                IntegrationRule *iRule;
                 jStartIndx = integrationRulesArray [ j ]->getStartIndexOfLocalStrainWhereApply();
                 jEndIndx   = integrationRulesArray [ j ]->getEndIndexOfLocalStrainWhereApply();
                 if ( i == j ) {
@@ -343,7 +353,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                 }
 
                 for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-                    gp = iRule->getIntegrationPoint(k);
+                    GaussPoint *gp = iRule->getIntegrationPoint(k);
 
                     // Engineering (small strain) stiffness dSig/dEps
                     if ( nlGeometry == 0 ) {
@@ -399,9 +409,7 @@ void
 NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &answer,
                                                                    MatResponseMode rMode, TimeStep *tStep)
 {
-    GaussPoint *gp;
-    IntegrationRule *iRule;
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
     bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode, this->material);
     answer.resize(0, 0);
     if ( !this->isActivated(tStep) ) {
@@ -416,13 +424,11 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
 
     // Compute matrix from material stiffness
     FloatMatrix B, D, DB;
-    FloatArray vS;
-    FloatMatrix Smat, BH, SB;
     IntArray irlocnum;
     for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        iRule = integrationRulesArray [ ir ];
+        IntegrationRule *iRule = integrationRulesArray [ ir ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            gp = iRule->getIntegrationPoint(j);
+            GaussPoint *gp = iRule->getIntegrationPoint(j);
 
             if ( nlGeometry == 0 ) {
                 this->computeBmatrixAt(gp, B);

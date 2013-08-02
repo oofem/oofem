@@ -48,58 +48,108 @@ namespace oofem {
 REGISTER_CrossSection( FiberedCrossSection );
 
 void
-FiberedCrossSection ::  giveRealStresses(FloatArray &answer, GaussPoint *gp,
-                                         const FloatArray &totalStrain, TimeStep *tStep)
-//
-// this function returns a real stresses corresponding to
-// given strainIncrement according to stressStrain mode stored
-// in each gp.
-// IMPORTANT:
-//
+FiberedCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    MaterialMode mode = gp->giveMaterialMode();
-    if ( mode != _3dBeam ) {
-        _error("giveRealStresses : unsupported mode (only 3dBeam supported");
-    }
-    FloatArray stressVector3d;
-    FloatArray fullFiberStrain, fiberStrain, fullStressVect, stressVect;
+    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_3d - Not supported\n");
+}
+
+
+void
+FiberedCrossSection :: giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_PlaneStrain - Not supported\n");
+}
+
+
+void
+FiberedCrossSection :: giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_PlaneStress - Not supported\n");
+}
+
+
+void
+FiberedCrossSection :: giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_1d - Not supported\n");
+}
+
+
+void
+FiberedCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_Beam2d - Not supported\n");
+}
+
+
+void
+FiberedCrossSection :: giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    double fiberThick, fiberWidth, fiberZCoord, fiberYCoord;
+    FloatArray fiberStrain, fullStressVect, reducedFiberStress;
     StructuralElement *element = static_cast< StructuralElement * >( gp->giveElement() );
-    Material *fiberMat;
-    StructuralMaterialStatus *status;
     FiberedCrossSectionInterface *interface;
 
     if ( ( interface = static_cast< FiberedCrossSectionInterface * >( element->giveInterface(FiberedCrossSectionInterfaceType) ) ) == NULL ) {
         _error("giveRealStresses - element with no fiber support encountered");
     }
 
-    GaussPoint *fiberGp;
+    answer.resize(6);
+    answer.zero();
 
     for ( int i = 1; i <= numberOfFibers; i++ ) {
+        GaussPoint *fiberGp = this->giveSlaveGaussPoint(gp, i - 1);
+        StructuralMaterial *fiberMat = static_cast< StructuralMaterial * >( domain->giveMaterial( fiberMaterials.at(i) ) );
         // the question is whether this function should exist ?
         // if yes the element details will be hidden.
         // good idea also should be existence of element::GiveBmatrixOfLayer
         // and computing strains here - but first idea looks better
-        fiberGp = this->giveSlaveGaussPoint(gp, i - 1);
-        fiberMat = domain->giveMaterial( fiberMaterials.at(i) );
         // but treating of geometric non-linearities may become more complicated
-        // another approach - use several functions with assumed
-        // kinematic constraints
-        interface->FiberedCrossSectionInterface_computeStrainVectorInFiber(fullFiberStrain, gp, fiberGp, tStep);
-        StructuralMaterial :: giveReducedSymVectorForm(fiberStrain, fullFiberStrain, gp->giveMaterialMode());
+        // another approach - use several functions with assumed kinematic constraints
 
+        // resolve current layer z-coordinate
+        fiberThick  = this->fiberThicks.at(i);
+        fiberWidth  = this->fiberWidths.at(i);
+        fiberYCoord = fiberGp->giveCoordinate(1);
+        fiberZCoord = fiberGp->giveCoordinate(2);
 
-        static_cast< StructuralMaterial * >( fiberMat )->giveRealStressVector(stressVector3d, fiberGp, fiberStrain, tStep);
+        interface->FiberedCrossSectionInterface_computeStrainVectorInFiber(fiberStrain, strain, fiberGp, tStep);
+
+        fiberMat->giveRealStressVector_Fiber(reducedFiberStress, fiberGp, fiberStrain, tStep);
+
+        // perform integration
+        // 1) membrane terms N, Qz, Qy
+        answer.at(1) += reducedFiberStress.at(1) * fiberWidth * fiberThick;
+        answer.at(2) += reducedFiberStress.at(2) * fiberWidth * fiberThick;
+        answer.at(3) += reducedFiberStress.at(3) * fiberWidth * fiberThick;
+        // 2) bending terms mx, my, mxy
+        answer.at(4) += ( reducedFiberStress.at(2) * fiberWidth * fiberThick * fiberYCoord -
+                          reducedFiberStress.at(3) * fiberWidth * fiberThick * fiberZCoord );
+        answer.at(5) += reducedFiberStress.at(1) * fiberWidth * fiberThick * fiberZCoord;
+        answer.at(6) -= reducedFiberStress.at(1) * fiberWidth * fiberThick * fiberYCoord;
     }
 
-    this->giveIntegrated3dBeamStress(fullStressVect, gp);
-    StructuralMaterial :: giveReducedSymVectorForm(stressVect, fullStressVect, gp->giveMaterialMode());
-    answer = stressVect;
-    status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
-
     // now we must update master gp
-    status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(stressVect);
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
+    status->letTempStrainVectorBe(strain);
+    status->letTempStressVectorBe(answer);
 }
+
+
+void
+FiberedCrossSection :: giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_Plate - Not supported\n");
+}
+
+
+void
+FiberedCrossSection :: giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_Shell - Not supported\n");
+}
+
+
 
 
 void
@@ -414,13 +464,10 @@ FiberedCrossSection :: saveIPContext(DataStream *stream, ContextMode mode, Gauss
     }
 
     // saved master gp record;
-
-    StructuralMaterial *mat;
-    GaussPoint *slaveGP;
     // and now save slave gp of master:
     for ( int i = 1; i <= numberOfFibers; i++ ) {
-        slaveGP = this->giveSlaveGaussPoint(masterGp, i - 1);
-        mat = dynamic_cast< StructuralMaterial * >( domain->giveMaterial( fiberMaterials.at(i) ) );
+        GaussPoint *slaveGP = this->giveSlaveGaussPoint(masterGp, i - 1);
+        StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( domain->giveMaterial( fiberMaterials.at(i) ) );
         if ( ( iores = mat->saveIPContext(stream, mode, slaveGP) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -445,13 +492,10 @@ FiberedCrossSection :: restoreIPContext(DataStream *stream, ContextMode mode, Ga
         THROW_CIOERR(iores);                                                                   // saved masterGp
     }
 
-    // and now save slave gp of master:
-    StructuralMaterial *mat;
-    GaussPoint *slaveGP;
     for ( int i = 1; i <= numberOfFibers; i++ ) {
         // creates also slaves if they don't exists
-        slaveGP = this->giveSlaveGaussPoint(masterGp, i - 1);
-        mat = dynamic_cast< StructuralMaterial * >( domain->giveMaterial( fiberMaterials.at(i) ) );
+        GaussPoint *slaveGP = this->giveSlaveGaussPoint(masterGp, i - 1);
+        StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( domain->giveMaterial( fiberMaterials.at(i) ) );
         if ( ( iores = mat->restoreIPContext(stream, mode, slaveGP) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -474,63 +518,6 @@ FiberedCrossSection :: giveCorrespondingSlaveMaterialMode(MaterialMode masterMod
     }
 
     return _Unknown;
-}
-
-
-void
-FiberedCrossSection :: giveIntegrated3dBeamStress(FloatArray &answer, GaussPoint *masterGp)
-//
-// computes integral internal forces for current mode
-// this functions assumes that slave gp's have updatet stresses.
-//
-// General strain layer vector has one of the following forms:
-// 1) strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
-//
-// returned strain or stress vector has the form:
-// 2) strainVectorShell {eps_x, gamma_xz, gamma_xy, \der{phi_x}{x}, kappa_y, kappa_z}
-//
-{
-    StructuralMaterialStatus *fiberStatus;
-    FloatArray fiberStress, reducedFiberStress;
-    double fiberThick, fiberWidth, fiberZCoord, fiberYCoord;
-
-    answer.resize(6);
-    // perform integration over fibers
-
-    for ( int i = 1; i <= numberOfFibers; i++ ) {
-        GaussPoint *fiberGp = giveSlaveGaussPoint(masterGp, i - 1);
-        Material *fiberMat = domain->giveMaterial( fiberMaterials.at(i) );
-        fiberStatus = static_cast< StructuralMaterialStatus * >( fiberMat->giveStatus(fiberGp) );
-
-
-        if ( fiberStatus->giveTempStressVector().giveSize() ) { // there exist total sress in gp
-            reducedFiberStress = fiberStatus->giveTempStressVector();
-            StructuralMaterial :: giveFullSymVectorForm(fiberStress, reducedFiberStress, fiberGp->giveMaterialMode());
-        } else { // no total stress
-            continue; // skip gp without stress
-        }
-
-
-        //
-        // resolve current layer z-coordinate
-        //
-        fiberThick  = this->fiberThicks.at(i);
-        fiberWidth  = this->fiberWidths.at(i);
-        fiberYCoord = fiberGp->giveCoordinate(1);
-        fiberZCoord = fiberGp->giveCoordinate(2);
-        //
-        // perform integration
-        //
-        // 1) membrane terms N, Qz, Qy
-        answer.at(1) += fiberStress.at(1) * fiberWidth * fiberThick;
-        answer.at(2) += fiberStress.at(5) * fiberWidth * fiberThick;
-        answer.at(3) += fiberStress.at(6) * fiberWidth * fiberThick;
-        // 2) bending terms mx, my, mxy
-        answer.at(4) += ( fiberStress.at(5) * fiberWidth * fiberThick * fiberYCoord -
-                          fiberStress.at(6) * fiberWidth * fiberThick * fiberZCoord );
-        answer.at(5) += fiberStress.at(1) * fiberWidth * fiberThick * fiberZCoord;
-        answer.at(6) -= fiberStress.at(1) * fiberWidth * fiberThick * fiberYCoord;
-    }
 }
 
 

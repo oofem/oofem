@@ -358,7 +358,7 @@ StressVector :: computeSecondInvariant() const
     } else if ( myMode == _PlaneStress ) {
         // 2d problem: plane stress
         return .5 * ( values [ 0 ] * values [ 0 ] + values [ 1 ] * values [ 1 ] ) + values [ 2 ] * values [ 2 ];
-    } else if ( myMode == _PlaneStrain || myMode == _3dRotContinuum ) {
+    } else if ( myMode == _PlaneStrain ) {
         //  plane strain or axisymmetry
         return .5 * ( values [ 0 ] * values [ 0 ] + values [ 1 ] * values [ 1 ] + values [ 2 ] * values [ 2 ] ) +
                values [ 3 ] * values [ 3 ];
@@ -384,7 +384,7 @@ StressVector :: computeThirdInvariant() const
         // 2d problem: plane stress
         return ( 1. / 3. ) * ( values [ 0 ] * values [ 0 ] * values [ 0 ] + 3. * values [ 1 ] * values [ 2 ] * values [ 2 ]
                                + 3. * values [ 0 ] * values [ 2 ] * values [ 2 ] + values [ 1 ] * values [ 1 ] * values [ 1 ] );
-    } else if ( myMode == _PlaneStrain || myMode == _3dRotContinuum ) {
+    } else if ( myMode == _PlaneStrain ) {
         // plane strain or axisymmetry
         return ( 1. / 3. ) * ( values [ 0 ] * values [ 0 ] * values [ 0 ] + 3. * values [ 0 ] * values [ 3 ] * values [ 3 ] +
                                3. * values [ 1 ] * values [ 3 ] * values [ 3 ] + values [ 1 ] * values [ 1 ] * values [ 1 ] +
@@ -480,12 +480,6 @@ StressVector :: applyElasticCompliance(StrainVector &strain, const double EModul
         strain(1) = ( -nu * values [ 0 ] + values [ 1 ] - nu * values [ 2 ] ) / EModulus;
         strain(2) = ( -nu * values [ 0 ] - nu * values [ 1 ] + values [ 2 ] ) / EModulus;
         strain(3) = 2. * ( 1. + nu ) * values [ 3 ] / EModulus;
-    } else if ( myMode == _3dRotContinuum ) {
-        // Order: r,  theta,  z,  zr
-        strain(0) = ( values [ 0 ] - nu * values [ 1 ] - nu * values [ 2 ] ) / EModulus;
-        strain(1) = ( -nu * values [ 0 ] + values [ 1 ] - nu * values [ 2 ] ) / EModulus;
-        strain(2) = ( -nu * values [ 0 ] - nu * values [ 1 ] + values [ 2 ] ) / EModulus;
-        strain(3) = 2. * ( 1. + nu ) * values [ 3 ] / EModulus;
     } else {
         strain(0) = ( values [ 0 ] - nu * values [ 1 ] - nu * values [ 2 ] ) / EModulus;
         strain(1) = ( -nu * values [ 0 ] + values [ 1 ] - nu * values [ 2 ] ) / EModulus;
@@ -530,12 +524,6 @@ StressVector :: applyDeviatoricElasticCompliance(StrainVector &strain,
         strain(2) = 1. / ( 2. * GModulus ) * values [ 2 ];
         strain(3) = 1. / GModulus * values [ 3 ];
         strain(4) = values[4];
-    } else if ( myMode == _3dRotContinuum ) {
-        // Order: r,  theta,  z,  zr
-        strain(0) = 1. / ( 2. * GModulus ) * values [ 0 ];
-        strain(1) = 1. / ( 2. * GModulus ) * values [ 1 ];
-        strain(2) = 1. / ( 2. * GModulus ) * values [ 2 ];
-        strain(3) = 1. / GModulus * values [ 3 ];
     } else {
         strain(0) = 1. / ( 2. * GModulus ) * values [ 0 ];
         strain(1) = 1. / ( 2. * GModulus ) * values [ 1 ];
@@ -559,7 +547,7 @@ StressVector :: computeStressNorm() const
     } else if ( myMode == _PlaneStress ) {
         // 2d problem: plane stress
         return sqrt(values [ 0 ] * values [ 0 ] + values [ 1 ] * values [ 1 ] + 2. * values [ 2 ] * values [ 2 ]);
-    } else if ( myMode == _PlaneStrain || myMode == _3dRotContinuum ) {
+    } else if ( myMode == _PlaneStrain ) {
         //  plane strain or axisymmetry
         return sqrt(values [ 0 ] * values [ 0 ] + values [ 1 ] * values [ 1 ] + values [ 2 ] * values [ 2 ] +
                     2. * values [ 3 ] * values [ 3 ]);

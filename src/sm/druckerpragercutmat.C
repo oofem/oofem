@@ -76,11 +76,7 @@ DruckerPragerCutMat :: ~DruckerPragerCutMat()
 int
 DruckerPragerCutMat :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( ( mode == _3dMat ) || ( mode == _PlaneStrain ) ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _3dMat || mode == _PlaneStrain;
 }
 
 // reads the model parameters from the input file

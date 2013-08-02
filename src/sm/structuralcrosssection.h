@@ -87,11 +87,22 @@ public:
      * services for corresponding material model defined for given integration point.
      * @param answer Contains result.
      * @param gp Integration point.
-     * @param reducedStrainIncrement Strain increment vector in reduced form.
+     * @param reducedStrain Strain vector in reduced form.
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrainIncrement, TimeStep *tStep) = 0;
+    //@{
+    void giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
 
+    virtual void giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) = 0;
+    virtual void giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) = 0;
+    virtual void giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) = 0;
+    virtual void giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) = 0;
+
+    virtual void giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep) = 0;
+    virtual void giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep) = 0;
+    virtual void giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep) = 0;
+    virtual void giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep) = 0;
+    //@}
 
     /**
      * Computes the First Piola-Kirchoff stress vector for a given deformation gradient and integration point.
@@ -244,11 +255,8 @@ public:
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "StructuralCrossSection"; }
-    virtual classType giveClassID() const { return StructuralCrossSectionClass; }
 
     virtual int testCrossSectionExtension(CrossSectExtension ext) { return ( ( ext == CS_StructuralCapability ) ? 1 : 0 ); }
-
-    friend class StructuralMaterial;
 };
 } // end namespace oofem
 #endif // structuralcrosssection_h

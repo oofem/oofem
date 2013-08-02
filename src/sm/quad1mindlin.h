@@ -95,10 +95,6 @@ public:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 
-    // layered cross section support functions
-    virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
-                                            GaussPoint *slaveGp, TimeStep *tStep);
-
 protected:
     virtual void computeGaussPoints();
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);

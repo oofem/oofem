@@ -62,11 +62,7 @@ LatticeDamage2d :: ~LatticeDamage2d()
 int
 LatticeDamage2d :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( mode == _2dLattice ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _2dLattice;
 }
 
 

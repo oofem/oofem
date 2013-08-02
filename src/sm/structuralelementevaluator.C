@@ -266,14 +266,11 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
 {
     Element *elem = this->giveElement();
     StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( elem->giveCrossSection() );
-    GaussPoint *gp;
     Material *mat = elem->giveMaterial();
-    IntegrationRule *iRule;
     int ndofs = elem->computeNumberOfDofs(EID_MomentumBalance);
     FloatMatrix b;
     FloatArray strain, stress, u, temp;
     IntArray irlocnum;
-    double dV;
 
     elem->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
@@ -288,14 +285,15 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
     // loop over individual integration rules
     for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
         m->resize(0);
-        iRule = elem->giveIntegrationRule(ir);
+        IntegrationRule *iRule = elem->giveIntegrationRule(ir);
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            gp = iRule->getIntegrationPoint(i);
+            GaussPoint *gp = iRule->getIntegrationPoint(i);
             this->computeBMatrixAt(b, gp);
             if ( useUpdatedGpRecord ) {
                 stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
             } else {
                 this->computeStrainVector(strain, gp, tStep, u); ///@todo This part computes the B matrix again; Inefficient.
+                this->computeStressVector(stress, strain, gp, tStep);
                 cs->giveRealStresses(stress, gp, strain, tStep);
             }
 
@@ -304,7 +302,7 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
             }
 
             // compute nodal representation of internal forces using f = B^T*Sigma dV
-            dV = this->computeVolumeAround(gp);
+            double dV = this->computeVolumeAround(gp);
             m->plusProduct(b, stress, dV);
         }
         // localize irule contribution into element matrix
@@ -317,6 +315,12 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
     if ( !this->isActivated(tStep) ) {
         answer.zero();
     }
+}
+
+
+void StructuralElementEvaluator :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    static_cast< StructuralCrossSection * >( this->giveElement()->giveCrossSection() )->giveRealStresses(answer, gp, strain, tStep);
 }
 
 

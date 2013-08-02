@@ -65,11 +65,7 @@ CebFipSlip90Material :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-    if ( mode == _1dInterface ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _1dInterface;
 }
 
 

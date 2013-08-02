@@ -89,8 +89,7 @@ StructuralElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
 // rMode parameter determines type of stiffness matrix to be requested
 // (tangent, secant, ...)
 {
-    static_cast<StructuralCrossSection * >( this->giveCrossSection() )
-    ->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+    this->giveStructuralCrossSection()->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
 }
 
 
@@ -447,7 +446,7 @@ StructuralElement :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer
     FloatArray et, de, bde;
     FloatMatrix b, d;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
     //   if (this -> giveBodyLoadArray() -> isEmpty())         // no loads
     //      return NULL ;
 
@@ -456,7 +455,7 @@ StructuralElement :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer
     // complete volume
     answer.resize(0);
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+        gp = iRule->getIntegrationPoint(i);
         cs->computeStressIndependentStrainVector(et, gp, tStep, mode);
         if ( et.giveSize() ) {
             this->computeBmatrixAt(gp, b);
@@ -894,17 +893,13 @@ StructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
 
 
 void
-StructuralElement :: computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+StructuralElement :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
 // Computes the vector containing the stresses at the Gauss point gp of
 // the receiver, at time step stepN. The nature of these stresses depends
 // on the element's type.
 // this version assumes TOTAL LAGRANGE APPROACH
 {
-    FloatArray Epsilon;
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
-
-    this->computeStrainVector(Epsilon, gp, stepN);
-    cs->giveRealStresses(answer, gp, Epsilon, stepN);
+    this->giveStructuralCrossSection()->giveRealStresses(answer, gp, strain, stepN);
 }
 
 
@@ -920,13 +915,18 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
 // has been called for the same time step.
 //
 {
-    GaussPoint *gp;
     Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 
-    FloatMatrix b, R, GNT;
-    FloatArray bs, TotalStressVector;
-    double dV;
+    FloatMatrix b;
+    FloatArray u, stress, strain;
+
+    // This function can be quite costly to do inside the loops when one has many slave dofs.
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    // subtract initial displacements, if defined
+    if ( initialDisplacements ) {
+        u.subtract(*initialDisplacements);
+    }
 
     // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
     // as this is valid only if receiver has no nodes with slaves
@@ -934,31 +934,30 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
     answer.resize(0);
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
         this->computeBmatrixAt(gp, b);
 
         if ( useUpdatedGpRecord == 1 ) {
-            TotalStressVector = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+            stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
         } else {
-            this->computeStressVector(TotalStressVector, gp, tStep);
+            if ( !this->isActivated(tStep) ) {
+                strain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode()) );
+                strain.zero();
+            }
+            strain.beProductOf(b, u);
+            this->computeStressVector(stress, strain, gp, tStep);
         }
 
-        //
         // updates gp stress and strain record  acording to current
         // increment of displacement
-        //
-        if ( TotalStressVector.giveSize() == 0 ) {
+        if ( stress.giveSize() == 0 ) {
             break;
         }
 
-        //
         // now every gauss point has real stress vector
-        //
         // compute nodal representation of internal forces using f = B^T*Sigma dV
-        //
-        dV  = this->computeVolumeAround(gp);
-        bs.beTProductOf(b, TotalStressVector);
-        answer.add(dV, bs);
+        double dV = this->computeVolumeAround(gp);
+        answer.plusProduct(b, stress, dV);
     }
 
     // if inactive update state, but no contribution to global system
@@ -982,14 +981,18 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
 // has been called for the same time step.
 //
 {
-    GaussPoint *gp;
     Material *mat = this->giveMaterial();
-    IntegrationRule *iRule;
 
-    FloatMatrix b, R, GNT;
-    FloatArray temp, bs, TotalStressVector;
+    FloatMatrix b, R;
+    FloatArray temp, u, stress, strain;
     IntArray irlocnum;
-    double dV;
+
+    // This function can be quite costly to do inside the loops when one has many slave dofs.
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    // subtract initial displacements, if defined
+    if ( initialDisplacements ) {
+        u.subtract(*initialDisplacements);
+    }
 
     // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
     // as this is valid only if receiver has no nodes with slaves
@@ -1003,24 +1006,28 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
 
     // loop over individual integration rules
     for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        iRule = integrationRulesArray [ ir ];
+        IntegrationRule *iRule = integrationRulesArray [ ir ];
 
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            gp = iRule->getIntegrationPoint(i);
+            GaussPoint *gp = iRule->getIntegrationPoint(i);
             this->computeBmatrixAt(gp, b);
 
             if ( useUpdatedGpRecord == 1 ) {
-                TotalStressVector = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )
-                                    ->giveStressVector();
+                stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
             } else {
-                this->computeStressVector(TotalStressVector, gp, tStep);
+                if ( !this->isActivated(tStep) ) {
+                    strain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode()) );
+                    strain.zero();
+                }
+                strain.beProductOf(b, u);
+                this->computeStressVector(stress, strain, gp, tStep);
             }
 
             //
             // updates gp stress and strain record  acording to current
             // increment of displacement
             //
-            if ( TotalStressVector.giveSize() == 0 ) {
+            if ( stress.giveSize() == 0 ) {
                 break;
             }
 
@@ -1029,10 +1036,8 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
             //
             // compute nodal representation of internal forces using f = B^T*Sigma dV
             //
-            dV  = this->computeVolumeAround(gp);
-            bs.beTProductOf(b, TotalStressVector);
-
-            m->add(dV, bs);
+            double dV = this->computeVolumeAround(gp);
+            m->plusProduct(b, stress, dV);
 
             // localize irule contribution into element matrix
             if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule, EID_MomentumBalance) ) {
@@ -1116,17 +1121,18 @@ StructuralElement :: updateYourself(TimeStep *tStep)
 
 
 void
-StructuralElement :: updateInternalState(TimeStep *stepN)
+StructuralElement :: updateInternalState(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
-    IntegrationRule *iRule;
-    FloatArray stress;
+    FloatArray stress, strain;
 
     // force updating strains & stresses
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
+        IntegrationRule *iRule = integrationRulesArray [ i ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            computeStressVector(stress, iRule->getIntegrationPoint(j), stepN);
+            GaussPoint *gp = iRule->getIntegrationPoint(j);
+            this->computeStrainVector(strain, gp, tStep);
+            this->computeStressVector(stress, strain, gp, tStep);
         }
     }
 }
@@ -1381,8 +1387,9 @@ StructuralElement :: adaptiveUpdate(TimeStep *tStep)
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            this->computeStrainVector(strain, iRule->getIntegrationPoint(j), tStep);
-            result &= interface->MMI_update(iRule->getIntegrationPoint(j), tStep, & strain);
+            GaussPoint *gp = iRule->getIntegrationPoint(j);
+            this->computeStrainVector(strain, gp, tStep);
+            result &= interface->MMI_update(gp, tStep, & strain);
         }
     }
 
@@ -1398,6 +1405,12 @@ StructuralElement :: initializeFrom(InputRecord *ir)
     result = Element :: initializeFrom(ir);
 
     return result;
+}
+
+
+StructuralCrossSection *StructuralElement::giveStructuralCrossSection()
+{
+    return static_cast< StructuralCrossSection * >( this->giveCrossSection() );
 }
 
 

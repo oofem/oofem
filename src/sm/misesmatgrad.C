@@ -61,11 +61,7 @@ MisesMatGrad :: ~MisesMatGrad()
 int
 MisesMatGrad :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( ( mode == _1dMat ) || ( mode == _PlaneStrain ) || ( mode == _3dMat ) ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _1dMat || mode == _PlaneStrain || mode == _3dMat;
 }
 
 

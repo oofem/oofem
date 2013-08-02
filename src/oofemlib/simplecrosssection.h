@@ -89,19 +89,25 @@ public:
 
     virtual double give(CrossSectionProperty a);
 
-    virtual void giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrainIncrement, TimeStep *tStep);
-    virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+    virtual void giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+    virtual void giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+    virtual void giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+
+    virtual void giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+    virtual void giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+    virtual void giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+    virtual void giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+
+
+    virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
+
 
     virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give3dShellStiffMtrx(FloatMatrix &answer,MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-
-    // identification and auxiliary functions
-    virtual const char *giveClassName() const { return "SimpleCrossSection"; }
-    virtual const char *giveInputRecordName() const { return _IFT_SimpleCrossSection_Name; }
-    virtual classType giveClassID() const { return SimpleCrossSectionClass; }
+    virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dShellStiffMtrx(FloatMatrix &answer,MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     /**
      * Initializes receiver acording to object description stored in input record.
@@ -117,6 +123,11 @@ public:
      */
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
+
+    // identification and auxiliary functions
+    virtual const char *giveClassName() const { return "SimpleCrossSection"; }
+    virtual const char *giveInputRecordName() const { return _IFT_SimpleCrossSection_Name; }
+    virtual classType giveClassID() const { return SimpleCrossSectionClass; }
 };
 } // end namespace oofem
 #endif // simplecrosssection_h

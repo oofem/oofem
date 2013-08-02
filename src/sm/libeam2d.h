@@ -64,7 +64,7 @@ public:
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
 
     // layered cross section support functions
-    virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
+    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
                                     GaussPoint *slaveGp, TimeStep *tStep);
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);

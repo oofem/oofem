@@ -143,7 +143,7 @@ public:
     virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
 
     // layered cross section support functions
-    virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
+    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
                                     GaussPoint *slaveGp, TimeStep *tStep);
 
 #ifdef __OOFEG

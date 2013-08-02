@@ -692,6 +692,11 @@ public:
                                       const FloatArray &strainVector,
                                       TimeStep *atTime);
 
+    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+
     /** 
      * Perform stress return of the plasticity model and compute history variables.
      * @param gp Gauss point.

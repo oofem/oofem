@@ -179,4 +179,58 @@ LinearElasticMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint 
     status->letTempStressVectorBe(answer);
 }
 
+
+void
+LinearElasticMaterial :: giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    FloatArray strainVector;
+    FloatMatrix d;
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
+
+    this->give2dBeamLayerStiffMtrx(d, TangentStiffness, gp, tStep);
+    answer.beProductOf(d, strainVector);
+
+    // update gp
+    status->letTempStrainVectorBe(reducedStrain);
+    status->letTempStressVectorBe(answer);
+}
+
+
+void
+LinearElasticMaterial :: giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    FloatArray strainVector;
+    FloatMatrix d;
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
+
+    this->givePlateLayerStiffMtrx(d, TangentStiffness, gp, tStep);
+    answer.beProductOf(d, strainVector);
+
+    // update gp
+    status->letTempStrainVectorBe(reducedStrain);
+    status->letTempStressVectorBe(answer);
+}
+
+
+void
+LinearElasticMaterial :: giveRealStressVector_Fiber(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    FloatArray strainVector;
+    FloatMatrix d;
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
+
+    this->giveFiberStiffMtrx(d, TangentStiffness, gp, tStep);
+    answer.beProductOf(d, strainVector);
+
+    // update gp
+    status->letTempStrainVectorBe(reducedStrain);
+    status->letTempStressVectorBe(answer);
+}
+
 } // end namespace oofem

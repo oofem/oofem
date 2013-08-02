@@ -41,7 +41,39 @@
 namespace oofem {
 
 void
-StructuralCrossSection ::  giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &F, TimeStep *tStep)
+StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    MaterialMode mode = gp->giveMaterialMode();
+    if ( mode == _2dBeam ) {
+        this->giveRealStress_Beam2d(answer, gp, strain, tStep);
+    } else if ( mode == _3dBeam ) {
+        this->giveRealStress_Beam3d(answer, gp, strain, tStep);
+    } else if ( mode == _2dPlate ) {
+        this->giveRealStress_Plate(answer, gp, strain, tStep);
+    } else if ( mode == _3dShell ) {
+        this->giveRealStress_Shell(answer, gp, strain, tStep);
+    } else if ( mode == _3dMat ) {
+        this->giveRealStress_3d(answer, gp, strain, tStep);
+    } else if ( mode == _PlaneStrain ) {
+        this->giveRealStress_PlaneStrain(answer, gp, strain, tStep);
+    } else if ( mode == _PlaneStress ) {
+        this->giveRealStress_PlaneStress(answer, gp, strain, tStep);
+    } else if ( mode == _1dMat ) {
+        this->giveRealStress_1d(answer, gp, strain, tStep);
+    } else {
+        // This should never happen ?
+        StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+        if ( mat->hasMaterialModeCapability(gp->giveMaterialMode()) ) {
+            mat->giveRealStressVector(answer, gp, strain, tStep);
+        } else {
+            _error("giveRealStresses : unsupported mode");
+        }
+    }
+}
+
+
+void
+StructuralCrossSection ::  giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
 {
     // This function returns the first Piola-Kirchoff stress in vector format
     // corresponding to a given deformation gradient according to the stress-deformation
@@ -49,17 +81,22 @@ StructuralCrossSection ::  giveFirstPKStresses(FloatArray &answer, GaussPoint *g
 
     MaterialMode mode = gp->giveMaterialMode();
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
-    if ( mat->hasMaterialModeCapability(mode) ) {
-        mat->giveFirstPKStressVector(answer, gp, F, tStep);
-        return;
+    if ( mode == _3dMat ) {
+        mat->giveFirstPKStressVector_3d(answer, gp, reducedvF, tStep);
+    } else if ( mode == _PlaneStrain ) {
+        mat->giveFirstPKStressVector_PlaneStrain(answer, gp, reducedvF, tStep);
+    } else if ( mode == _PlaneStress ) {
+        mat->giveFirstPKStressVector_PlaneStress(answer, gp, reducedvF, tStep);
+    } else if ( mode == _1dMat ) {
+        mat->giveFirstPKStressVector_1d(answer, gp, reducedvF, tStep);
     } else {
-        _error("giveFirstPKStresses : unsupported MaterialMode");
+        OOFEM_ERROR2("StructuralCrossSection :: giveStiffnessMatrix_dPdF : unknown mode (%s)", __MaterialModeToString(mode) );
     }
 }
 
 
 void
-StructuralCrossSection ::  giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &F, TimeStep *tStep)
+StructuralCrossSection ::  giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
 {
     // This function returns the Cauchy stress in vector format
     // corresponding to a given deformation gradient according to the stress-deformation
@@ -67,11 +104,14 @@ StructuralCrossSection ::  giveCauchyStresses(FloatArray &answer, GaussPoint *gp
 
     MaterialMode mode = gp->giveMaterialMode();
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
-    if ( mat->hasMaterialModeCapability(mode) ) {
-        mat->giveCauchyStressVector(answer, gp, F, tStep);
-        return;
-    } else {
-        _error("giveCauchyStresses : unsupported MaterialMode");
+    if ( mode == _3dMat ) {
+        mat->giveCauchyStressVector_3d(answer, gp, reducedvF, tStep);
+    } else if ( mode == _PlaneStrain ) {
+        mat->giveCauchyStressVector_PlaneStrain(answer, gp, reducedvF, tStep);
+    } else if ( mode == _PlaneStress ) {
+        mat->giveCauchyStressVector_PlaneStress(answer, gp, reducedvF, tStep);
+    } else if ( mode == _1dMat ) {
+        mat->giveCauchyStressVector_1d(answer, gp, reducedvF, tStep);
     }
 }
 
@@ -82,7 +122,18 @@ StructuralCrossSection :: giveStiffnessMatrix_dPdF(FloatMatrix &answer,
                                                    TimeStep *tStep)
 {
     StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
-    mat->giveStiffnessMatrix_dPdF(answer, rMode, gp, tStep);
+    MaterialMode mode = gp->giveMaterialMode();
+    if ( mode == _3dMat ) {
+        mat->give3dMaterialStiffnessMatrix_dPdF(answer, rMode, gp, tStep);
+    } else if ( mode == _PlaneStress ) {
+        mat->givePlaneStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
+    } else if ( mode == _PlaneStrain ) {
+        mat->givePlaneStrainStiffMtrx_dPdF(answer, rMode, gp, tStep);
+    } else if ( mode == _1dMat ) {
+        mat->give1dStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
+    } else {
+        OOFEM_ERROR2("StructuralCrossSection :: giveStiffnessMatrix_dPdF : unknown mode (%s)", __MaterialModeToString(mode) );
+    }
 }
 
 
@@ -92,7 +143,18 @@ StructuralCrossSection :: giveStiffnessMatrix_dCde(FloatMatrix &answer,
                                                    TimeStep *tStep)
 {
     StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
-    mat->giveStiffnessMatrix_dCde(answer, rMode, gp, tStep);
+    MaterialMode mode = gp->giveMaterialMode();
+    if ( mode == _3dMat ) {
+        mat->give3dMaterialStiffnessMatrix_dCde(answer, rMode, gp, tStep);
+    } else if ( mode == _PlaneStress ) {
+        mat->givePlaneStressStiffMtrx_dCde(answer, rMode, gp, tStep);
+    } else if ( mode == _PlaneStrain ) {
+        mat->givePlaneStrainStiffMtrx_dCde(answer, rMode, gp, tStep);
+    } else if ( mode == _1dMat ) {
+        mat->give1dStressStiffMtrx_dCde(answer, rMode, gp, tStep);
+    } else {
+        OOFEM_ERROR2("StructuralCrossSection :: giveStiffnessMatrix_dCde : unknown mode (%s)", __MaterialModeToString(mode) );
+    }
 }
 
 

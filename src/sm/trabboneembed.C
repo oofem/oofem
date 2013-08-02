@@ -50,11 +50,7 @@ TrabBoneEmbed :: TrabBoneEmbed(int n, Domain *d) : StructuralMaterial(n, d)
 int
 TrabBoneEmbed :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( mode == _3dMat ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _3dMat;
 }
 
 
@@ -124,7 +120,7 @@ TrabBoneEmbed :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
 
 
 void
-TrabBoneEmbed :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+TrabBoneEmbed :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &totalStrain,
                                       TimeStep *atTime)
 {

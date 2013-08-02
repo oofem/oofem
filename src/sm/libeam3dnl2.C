@@ -289,7 +289,7 @@ LIBeam3dNL2 :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int
     Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
-    FloatArray nm(6), TotalStressVector(6);
+    FloatArray nm(6), stress, strain;
     FloatMatrix x, tempTc;
     double s1, s2;
 
@@ -298,17 +298,17 @@ LIBeam3dNL2 :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int
     this->computeRotMtrxFromQuaternion(tempTc, this->tempQ);
 
     if ( useUpdatedGpRecord == 1 ) {
-        TotalStressVector = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )
-                            ->giveStressVector();
+        stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
     } else {
-        this->computeStressVector(TotalStressVector, gp, tStep);
+        this->computeStrainVector(strain, gp, tStep);
+        this->computeStressVector(stress, strain, gp, tStep);
     }
 
     for ( int i = 1; i <= 3; i++ ) {
         s1 = s2 = 0.0;
         for ( int j = 1; j <= 3; j++ ) {
-            s1 += tempTc.at(i, j) * TotalStressVector.at(j);
-            s2 += tempTc.at(i, j) * TotalStressVector.at(j + 3);
+            s1 += tempTc.at(i, j) * stress.at(j);
+            s2 += tempTc.at(i, j) * stress.at(j + 3);
         }
 
         nm.at(i)   = s1;
@@ -344,7 +344,7 @@ LIBeam3dNL2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode
     int i, j, k;
     double s1, s2;
     FloatMatrix d, x, xt(12, 6), dxt, sn, sm, sxd, y, tempTc;
-    FloatArray n(3), m(3), xd(3), TotalStressVector;
+    FloatArray n(3), m(3), xd(3), stress, strain;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
 
@@ -374,13 +374,14 @@ LIBeam3dNL2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode
 
     // geometric stiffness ks = ks1+ks2
     // ks1
-    this->computeStressVector(TotalStressVector, gp, tStep);
+    this->computeStrainVector(strain, gp, tStep);
+    this->computeStressVector(stress, strain, gp, tStep);
 
     for ( i = 1; i <= 3; i++ ) {
         s1 = s2 = 0.0;
         for ( j = 1; j <= 3; j++ ) {
-            s1 += tempTc.at(i, j) * TotalStressVector.at(j);
-            s2 += tempTc.at(i, j) * TotalStressVector.at(j + 3);
+            s1 += tempTc.at(i, j) * stress.at(j);
+            s2 += tempTc.at(i, j) * stress.at(j + 3);
         }
 
         n.at(i)   = s1;
