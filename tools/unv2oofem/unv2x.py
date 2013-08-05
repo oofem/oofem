@@ -14,170 +14,8 @@
 import os
 import os.path
 import sys
-
-class FEM:
-    """ a simple FEM object structure"""
-    def __init__(self):
-        self.nnodes=0
-        self.nelems=0
-        self.nnodesets=0
-        self.nelemsets=0
-        self.nodes=[]
-        self.elems=[]
-        self.nodesets=[]
-        self.elemsets=[]
-        
-class Node:
-    """ a single node object """
-    def __init__(self,id,coords,quadratic=1):
-        self.id=id
-        self.coords=coords
-        self.quadratic=quadratic
-        
-class Element:
-    """ a single finite element object"""
-    def __init__(self,id,type,material,color,nnodes,cntvt):
-        self.id=id
-        self.type=type
-        self.material=material
-        self.color=color
-        self.nnodes=nnodes
-        self.cntvt=cntvt
-
-class Group:
-    """ FE group object """
-    def __init__(self,id,name):
-        self.id=id
-        self.type=0
-        self.name=name
-        self.nitems=0
-        self.items=[]
-
-def Line2Float(line):
-    """Convert a string into a list of Float"""
-    return map(float,line.split())
-
-def Line2Int(line):
-    """Convert a string into a list of Int"""
-    return map(int,line.split())
-
-def UNV2411Reader(file,FEM):
-    """ reads an UNV2411 dataset (nodes) from file and store data in FEM structure
-        return an updated FEM object"""
-    endFlag='    -1'
-    loop=True
-    while loop:
-        line1=file.readline()
-        line2=file.readline()
-        if len(line2)>0:
-            if line1.startswith(endFlag):
-                loop=False
-                break
-            else:
-                dataline=Line2Int(line1)
-                coords=Line2Float(line2)
-                FEM.nodes.append(Node(dataline[0],coords))
-                FEM.nnodes=FEM.nnodes+1
-        else:
-            loop=False
-    return FEM
-
-def UNV2412Reader(file,FEM):
-    """ reads an UNV2412 dataset (elements) from file and store data in FEM structure
-        return an updated FEM object"""
-    endFlag='    -1'
-    loop=True
-    while loop:
-        line1=file.readline()
-        line2=file.readline()
-        if len(line2)>0:
-            if line1.startswith(endFlag):
-                loop=False
-                break
-            else:
-                dataline=Line2Int(line1)
-                eltype=dataline[1]
-                if eltype==11 or eltype==22:# types of elements which are defined on 3 lines
-                    # 1D elements have an additionnal line in their definition
-                    line3=file.readline()
-                    cntvt=Line2Int(line3)
-                elif eltype==118: # Quadratic tetrahedron has nodes on two lines
-                    line3=file.readline()
-                    cntvt=Line2Int(line2) + Line2Int(line3)
-                    FEM.nodes[cntvt[9]-1].quadratic=0
-                    FEM.nodes[cntvt[2]-1].quadratic=0
-                    FEM.nodes[cntvt[0]-1].quadratic=0
-                    FEM.nodes[cntvt[4]-1].quadratic=0
-                    # 9, 2, 0, 4
-                elif eltype==116:#Quadratic brick element has data on 4 lines
-                    line3=file.readline()
-                    line4=file.readline()
-                    cntvt = Line2Int(line2) + Line2Int(line3) + Line2Int(line4)
-                    #print cntvt, type(cntvt)
-                else:
-                    # standard elements have their connectivities on second line
-                    cntvt=Line2Int(line2)
-                if(len(dataline)<6):
-                    print "I need at least 6 entries on dataline %s" % dataline
-                    exit(0)
-                FEM.elems.append(Element(dataline[0],dataline[1],0,0,dataline[5],cntvt))
-                FEM.nelems=FEM.nelems+1
-        else:
-            loop=False
-    return FEM
-
-def UNV2467Reader(file,FEM):
-    """ reads an UNV2467 dataset (groups) from file and store data in FEM structure a group may represent a nodeset, an elementset or an edgeset ...
-    return an updated FEM object"""
-    endFlag='    -1'
-    loop=True
-    while loop:
-        line1=file.readline()
-        line2=file.readline()
-        if len(line2)>0:
-            if line1.startswith(endFlag):
-                loop=False
-                break
-            else:
-                # read group
-                dataline=Line2Int(line1)
-                groupname=line2
-                if(len(dataline)==0):
-                    print "Group %s is empty, did you remesh the object and lost the members?" % groupname
-                    exit(0)
-                id=dataline[0]
-                nitems=dataline[7]
-                nlines=(nitems+1)/2
-                # read group items
-                lst=[]
-                for i in range(nlines):
-                    dat=Line2Int(file.readline())
-                    lst.append(dat[0:3])
-                    if len(dat)>4:
-                        lst.append(dat[4:7])
-                # split group in node (7) sets, element or edge sets (8)
-                nset=Group(id,groupname)
-                elset=Group(id,groupname)
-                nset.type=7
-                elset.type=8
-                for item in lst:
-                    if item[0]==7:
-                        nset.items.append(item[1])
-                    if item[0]==8:
-                        elset.items.append(item[1])
-                nset.nitems=len(nset.items)
-                elset.nitems=len(elset.items)
-                # store non empty groups
-                if nset.nitems>0:
-                    FEM.nodesets.append(nset)
-                if elset.nitems>0:
-                    FEM.elemsets.append(elset)
-                FEM.nnodesets=len(FEM.nodesets)
-                FEM.nelemsets=len(FEM.elemsets)
-        else:
-            loop=False
-    return FEM
-
+from oofemctrlreader import *
+from FEM import *
 
 class UNVParser:
     """ Universal file parser class"""
@@ -189,8 +27,57 @@ class UNVParser:
         self.endFlag='    -1'
         # list of supported datasets and corresponding dataset handler functions
         self.datasetsIds=[2411,2412,2467]
-        self.datasetsHandlers=[UNV2411Reader,UNV2412Reader,UNV2467Reader]
+        self.datasetsHandlers=[self.UNV2411Reader, self.UNV2412Reader, self.UNV2467Reader]
         self.sections=[]
+
+    def mapping(self):
+        """Returns mapping for .unv elements"""
+    #   Table of element properties. It contains mapping of nodes, edges and faces between unv and OOFEM element.
+    
+        # TODO: Use a linked list where each oofem element is linked to the type of element and use the linked list when mapping occurs. In that way, we only need to specify each type of element (descritization) once.
+    
+        oofem_elemProp = []
+        oofem_elemProp.append(oofem_elementProperties("None", [0], [], []))#leave this line [0] as it is
+        oofem_elemProp.append(oofem_elementProperties("RepresentsBoundaryLoad", [],[],[]))#special element representing boundary load
+        oofem_elemProp.append(oofem_elementProperties("Truss1D", [0,1], [], []))
+        oofem_elemProp.append(oofem_elementProperties("Interface1d", oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("Truss2D", [0,1], [0,1],[]))
+        oofem_elemProp.append(oofem_elementProperties("Truss3D",oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("Beam2D",oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("LIBeam2D",oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("LIBeam2Dnl",oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("Beam3D",oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("LIBeam3D",oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("LIBeam3D2",oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("LIBeam3Dnl",oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("LIBeam3Dnl2",oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,2,1], [[0,2],[2,1],[1,0]],[])) #checked - current numbering of triangle nodes is anti-clockwise, the same orientation as in OOFEM.
+        #oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,1,2], [[0,1],[1,2],[2,0]],[])) #old version of UNV export in SALOME, nodes on triangular elements are numbered clockwise
+        oofem_elemProp.append(oofem_elementProperties("TrplaneStrain",oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("Axisymm3D",oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("Tr1ht",oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("Traxisym1ht",oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("TrPlaneStrRot",oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("CCTplate",oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("CCTplate3D",oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("QTrPlStr", [2,0,4,1,5,3], [[2,1,0],[0,5,4],[4,3,2]],[]))#checked
+        oofem_elemProp.append(oofem_elementProperties("PlaneStress2D", [0,1,2,3], [[0,1],[1,2],[2,3],[3,0]],[]))#checked
+        oofem_elemProp.append(oofem_elementProperties("Quad1PlaneStrain", oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("Quad1ht", oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("Quadaxisym1ht", oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("QPlaneStress2D", [2,4,6,0,3,5,7,1], [[2,3,4],[4,5,6],[6,7,0],[0,1,2]],[]))#checked
+        oofem_elemProp.append(oofem_elementProperties("LSpace", [4,7,6,5,0,3,2,1], [[4,7],[7,6],[6,5],[5,4],[4,0],[7,3],[6,2],[5,1],[0,3],[3,2],[2,0],[1,0]], [[4,7,6,5],[0,3,2,1],[4,0,3,7],[7,3,2,6],[6,2,1,5],[5,1,0,4]]))#checked
+        oofem_elemProp.append(oofem_elementProperties("Brick1ht", oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("LSpaceBB", oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("QSpace", [12,18,16,14,0,6,4,2,19,17,15,13,7,5,3,1,8,11,10,9], [[12,19,18],[18,17,16],[16,15,14],[14,13,12],[12,8,0],[18,11,6],[16,10,4],[14,9,2],[0,7,6],[6,5,4],[4,3,2],[2,1,0]], [[12,19,18,17,16,15,14,13],[0,7,6,5,4,3,2,1],[12,8,0,7,6,11,18,19],[18,11,6,5,4,10,16,17],[16,10,4,3,2,9,14,15],[14,9,2,1,0,8,12,13]])) #checked [brick nodes], [edges nodes], [faces nodes]
+        oofem_elemProp.append(oofem_elementProperties("QBrick1ht", oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("QBrick1hmt", oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("LTRSpace", [0,1,2,3], [[0,1],[1,2],[2,0],[0,3],[1,3],[2,3]], [[0,1,2],[0,1,3],[1,2,3],[0,2,3]]))#checked
+        oofem_elemProp.append(oofem_elementProperties("Tetrah1ht", oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("Tet1supg", [0,1,2,3], [[0,1],[1,2],[2,0],[0,3],[1,3],[2,3]], [[0,1,2],[0,1,3],[1,2,3],[0,2,3]]))
+        oofem_elemProp.append(oofem_elementProperties("tet21stokes", [9, 2, 0, 4, 7, 1, 6, 8, 3, 5], [], [[2,7,9,6,0,1],[2,3,4,8,9,7],
+                                                                                                          [4,3,2,1,0,5],[0,6,9,8,5,4]]))
+        return oofem_elemProp
 
     def scanfile(self):
         """ Read file & fill the section list"""
@@ -210,6 +97,123 @@ class UNVParser:
                 loop=False
         # rewind file
         self.file.seek(0)
+        
+    def UNV2411Reader(self, file, FEM):
+        """ reads an UNV2411 dataset (nodes) from file and store data in FEM structure
+            return an updated FEM object"""
+        endFlag='    -1'
+        loop=True
+        while loop:
+            line1=file.readline()
+            line2=file.readline()
+            if len(line2)>0:
+                if line1.startswith(endFlag):
+                    loop=False
+                    break
+                else:
+                    dataline=Line2Int(line1)
+                    coords=Line2Float(line2)
+                    FEM.nodes.append(Node(dataline[0],coords))
+                    FEM.nnodes=FEM.nnodes+1
+            else:
+                loop=False
+        return FEM
+    
+    def UNV2412Reader(self, file, FEM):
+        """ reads an UNV2412 dataset (elements) from file and store data in FEM structure
+            return an updated FEM object"""
+        endFlag='    -1'
+        loop=True
+        while loop:
+            line1=file.readline()
+            line2=file.readline()
+            if len(line2)>0:
+                if line1.startswith(endFlag):
+                    loop=False
+                    break
+                else:
+                    dataline=Line2Int(line1)
+                    eltype=dataline[1]
+                    if eltype==11 or eltype==22:# types of elements which are defined on 3 lines
+                        # 1D elements have an additionnal line in their definition
+                        line3=file.readline()
+                        cntvt=Line2Int(line3)
+                    elif eltype==118: # Quadratic tetrahedron has nodes on two lines
+                        line3=file.readline()
+                        cntvt=Line2Int(line2) + Line2Int(line3)
+                        FEM.nodes[cntvt[9]-1].quadratic=0
+                        FEM.nodes[cntvt[2]-1].quadratic=0
+                        FEM.nodes[cntvt[0]-1].quadratic=0
+                        FEM.nodes[cntvt[4]-1].quadratic=0
+                        # 9, 2, 0, 4
+                    elif eltype==116:#Quadratic brick element has data on 4 lines
+                        line3=file.readline()
+                        line4=file.readline()
+                        cntvt = Line2Int(line2) + Line2Int(line3) + Line2Int(line4)
+                        #print cntvt, type(cntvt)
+                    else:
+                        # standard elements have their connectivities on second line
+                        cntvt=Line2Int(line2)
+                    if(len(dataline)<6):
+                        print "I need at least 6 entries on dataline %s" % dataline
+                        exit(0)
+                    FEM.elems.append(Element(dataline[0],dataline[1],0,0,dataline[5],cntvt))
+                    FEM.nelems=FEM.nelems+1
+            else:
+                loop=False
+        return FEM
+    
+    def UNV2467Reader(self, file, FEM):
+        """ reads an UNV2467 dataset (groups) from file and store data in FEM structure a group may represent a nodeset, an elementset or an edgeset ...
+        return an updated FEM object"""
+        endFlag='    -1'
+        loop=True
+        while loop:
+            line1=file.readline()
+            line2=file.readline()
+            if len(line2)>0:
+                if line1.startswith(endFlag):
+                    loop=False
+                    break
+                else:
+                    # read group
+                    dataline=Line2Int(line1)
+                    groupname=line2
+                    if(len(dataline)==0):
+                        print "Group %s is empty, did you remesh the object and lost the members?" % groupname
+                        exit(0)
+                    id=dataline[0]
+                    nitems=dataline[7]
+                    nlines=(nitems+1)/2
+                    # read group items
+                    lst=[]
+                    for i in range(nlines):
+                        dat=Line2Int(file.readline())
+                        lst.append(dat[0:3])
+                        if len(dat)>4:
+                            lst.append(dat[4:7])
+                    # split group in node (7) sets, element or edge sets (8)
+                    nset=Group(id,groupname)
+                    elset=Group(id,groupname)
+                    nset.type=7
+                    elset.type=8
+                    for item in lst:
+                        if item[0]==7:
+                            nset.items.append(item[1])
+                        if item[0]==8:
+                            elset.items.append(item[1])
+                    nset.nitems=len(nset.items)
+                    elset.nitems=len(elset.items)
+                    # store non empty groups
+                    if nset.nitems>0:
+                        FEM.nodesets.append(nset)
+                    if elset.nitems>0:
+                        FEM.elemsets.append(elset)
+                    FEM.nnodesets=len(FEM.nodesets)
+                    FEM.nelemsets=len(FEM.elemsets)
+            else:
+                loop=False
+        return FEM
 
     def parse(self):
         """ parse UNV file to fill the FEM data structure"""

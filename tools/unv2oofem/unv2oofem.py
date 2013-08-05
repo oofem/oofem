@@ -70,7 +70,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
         print
 
         # read oofem ctrl file
-        CTRL=CTRLParser(ctrlfile)
+        CTRL=CTRLParser(ctrlfile, UNV.mapping())
         print 'Parsing ctrl file %s' % sys.argv[2]
         CTRL.parse(FEM)
         print "done"

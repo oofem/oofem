@@ -59,62 +59,11 @@ class oofem_elementProperties:
 
 class CTRLParser:
     """ a simple CTRL object structure"""
-
-#   Table of element properties. It contains mapping of nodes, edges and faces between unv and OOFEM element.
-    oofem_elemProp = []
-    oofem_elemProp.append(oofem_elementProperties("None", [0], [], []))#leave this line [0] as it is
-    oofem_elemProp.append(oofem_elementProperties("RepresentsBoundaryLoad", [],[],[]))#special element representing boundary load
-    oofem_elemProp.append(oofem_elementProperties("Truss1D", [0,1], [], []))
-    oofem_elemProp.append(oofem_elementProperties("Interface1d", oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("Truss2D", [0,1], [0,1],[]))
-    oofem_elemProp.append(oofem_elementProperties("Truss3D",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("Beam2D",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("LIBeam2D",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("LIBeam2Dnl",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("Beam3D",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("LIBeam3D",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("LIBeam3D2",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("LIBeam3Dnl",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("LIBeam3Dnl2",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,2,1], [[0,2],[2,1],[1,0]],[])) #checked - current numbering of triangle nodes is anti-clockwise, the same orientation as in OOFEM.
-    #oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,1,2], [[0,1],[1,2],[2,0]],[])) #old version of UNV export in SALOME, nodes on triangular elements are numbered clockwise
-    oofem_elemProp.append(oofem_elementProperties("TrplaneStrain",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("Axisymm3D",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("Tr1ht",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("Traxisym1ht",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("TrPlaneStrRot",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("CCTplate",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("CCTplate3D",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("QTrPlStr", [2,0,4,1,5,3], [[2,1,0],[0,5,4],[4,3,2]],[]))#checked
-    oofem_elemProp.append(oofem_elementProperties("PlaneStress2D", [0,1,2,3], [[0,1],[1,2],[2,3],[3,0]],[]))#checked
-    oofem_elemProp.append(oofem_elementProperties("Quad1PlaneStrain", oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("Quad1ht", oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("Quadaxisym1ht", oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("QPlaneStress2D", [2,4,6,0,3,5,7,1], [[2,3,4],[4,5,6],[6,7,0],[0,1,2]],[]))#checked
-    oofem_elemProp.append(oofem_elementProperties("LSpace", [4,7,6,5,0,3,2,1], [[4,7],[7,6],[6,5],[5,4],[4,0],[7,3],[6,2],[5,1],[0,3],[3,2],[2,0],[1,0]], [[4,7,6,5],[0,3,2,1],[4,0,3,7],[7,3,2,6],[6,2,1,5],[5,1,0,4]]))#checked
-    oofem_elemProp.append(oofem_elementProperties("Brick1ht", oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("LSpaceBB", oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("QSpace", [12,18,16,14,0,6,4,2,19,17,15,13,7,5,3,1,8,11,10,9], [[12,19,18],[18,17,16],[16,15,14],[14,13,12],[12,8,0],[18,11,6],[16,10,4],[14,9,2],[0,7,6],[6,5,4],[4,3,2],[2,1,0]], [[12,19,18,17,16,15,14,13],[0,7,6,5,4,3,2,1],[12,8,0,7,6,11,18,19],[18,11,6,5,4,10,16,17],[16,10,4,3,2,9,14,15],[14,9,2,1,0,8,12,13]])) #checked [brick nodes], [edges nodes], [faces nodes]
-    oofem_elemProp.append(oofem_elementProperties("QBrick1ht", oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("QBrick1hmt", oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("LTRSpace", [0,1,2,3], [[0,1],[1,2],[2,0],[0,3],[1,3],[2,3]], [[0,1,2],[0,1,3],[1,2,3],[0,2,3]]))#checked
-    oofem_elemProp.append(oofem_elementProperties("Tetrah1ht", oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("Tet1supg", [0,1,2,3], [[0,1],[1,2],[2,0],[0,3],[1,3],[2,3]], [[0,1,2],[0,1,3],[1,2,3],[0,2,3]]))
-    oofem_elemProp.append(oofem_elementProperties("tet21stokes", [9, 2, 0, 4, 7, 1, 6, 8, 3, 5], [], [[2,7,9,6,0,1],[2,3,4,8,9,7],
-                                                                                                      [4,3,2,1,0,5],[0,6,9,8,5,4]]))
-    #3    6    2    10    4    8    7    5    9    1
-    #0    1    2    3     4    5    6    7    8    9
+    #oofem_elemProp = []
+    #oofem_elemProp.append(oofem_elementProperties("None", [0], [], []))#leave this line [0] as it is
+    # Node assembly
     
-    #Sides:
-    #2    5    1    7    3    6
-    #3    7    1    9    4    8
-    #2    10   4    9    1    5
-    #4    10   2    6    3    8
-    
-    #for i in oofem_elemProp:
-        #print i.name, i.edgeMask
-    
-    def __init__(self, filename):
+    def __init__(self, filename, mapping):
         self.filename=filename
         self.file=None
         self.header=""
@@ -126,6 +75,7 @@ class CTRLParser:
         self.nltf=0
         self.nset=0
         self.wplist=[[], [], []] # wp, element, edge
+        self.oofem_elemProp=mapping
 
     def getRecordLine(self):
         while True:
@@ -174,9 +124,9 @@ class CTRLParser:
                     if lineSplit[0].lower() == 'nodeprop':
                         if (lineSplit[1].lower()=='set'):
                             for igroup in groups:
-                                X=self.getNodeGroup(FEM, igroup)
-                                if X:
-                                    X.oofem_sets.append(int(lineSplit[2]));
+                                __gr=self.getNodeGroup(FEM, igroup)
+                                if __gr:
+                                    __gr.oofem_sets.append(int(lineSplit[2]));
                                     str = "\t\tGroup of nodes belongs to set %d" % int(lineSplit[2])
                                     print str
                                 else:
