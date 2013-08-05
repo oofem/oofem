@@ -100,6 +100,16 @@ class CTRLParser:
     oofem_elemProp.append(oofem_elementProperties("LTRSpace", [0,1,2,3], [[0,1],[1,2],[2,0],[0,3],[1,3],[2,3]], [[0,1,2],[0,1,3],[1,2,3],[0,2,3]]))#checked
     oofem_elemProp.append(oofem_elementProperties("Tetrah1ht", oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("Tet1supg", [0,1,2,3], [[0,1],[1,2],[2,0],[0,3],[1,3],[2,3]], [[0,1,2],[0,1,3],[1,2,3],[0,2,3]]))
+    oofem_elemProp.append(oofem_elementProperties("tet21stokes", [9, 2, 0, 4, 7, 1, 6, 8, 3, 5], [], [[2,7,9,6,0,1],[2,3,4,8,9,7],
+                                                                                                      [4,3,2,1,0,5],[0,6,9,8,5,4]]))
+    #3    6    2    10    4    8    7    5    9    1
+    #0    1    2    3     4    5    6    7    8    9
+    
+    #Sides:
+    #2    5    1    7    3    6
+    #3    7    1    9    4    8
+    #2    10   4    9    1    5
+    #4    10   2    6    3    8
     
     #for i in oofem_elemProp:
         #print i.name, i.edgeMask
@@ -114,6 +124,8 @@ class CTRLParser:
         self.nbc=0
         self.nic=0
         self.nltf=0
+        self.nset=0
+        self.wplist=[[], [], []] # wp, element, edge
 
     def getRecordLine(self):
         while True:
@@ -160,15 +172,26 @@ class CTRLParser:
                         break;
                     #print "Line: ", line,
                     if lineSplit[0].lower() == 'nodeprop':
-                        for igroup in groups:
-                            __gr=self.getNodeGroup(FEM,igroup)
-                            if __gr:
-                                __gr.oofem_properties=' '.join(lineSplit[1:])
-                                str = "\t\tGroup of nodes \"%s\" has properties: %s" % (igroup, __gr.oofem_properties)
-                                print str
-                            else:
-                                str = "WARNING: Group of nodes \"%s\" does not exist" % igroup
-                                print str
+                        if (lineSplit[1].lower()=='set'):
+                            for igroup in groups:
+                                X=self.getNodeGroup(FEM, igroup)
+                                if X:
+                                    X.oofem_sets.append(int(lineSplit[2]));
+                                    str = "\t\tGroup of nodes belongs to set %d" % int(lineSplit[2])
+                                    print str
+                                else:
+                                    str = "WARNING: Group of nodes \"%s\" does not exist" % igroup
+                                    print str
+                        else:
+                            for igroup in groups:
+                                __gr=self.getNodeGroup(FEM,igroup)
+                                if __gr:
+                                    __gr.oofem_properties=' '.join(lineSplit[1:])
+                                    str = "\t\tGroup of nodes \"%s\" has properties: %s" % (igroup, __gr.oofem_properties)
+                                    print str
+                                else:
+                                    str = "WARNING: Group of nodes \"%s\" does not exist" % igroup
+                                    print str
                     elif lineSplit[0].lower() == 'elemprop':
                         if (lineSplit[1].lower()=='bloadnum'):#check if the group represents a boundary load
                             for igroup in groups:
@@ -180,6 +203,18 @@ class CTRLParser:
                                     print str
                                 else:
                                     str = "WARNING: Group of elements \"%s\" for boundary load does no exist" % (igroup)
+                        elif (lineSplit[1].lower()=='set'):#check if the group represents a set
+                            for igroup in groups:
+                                __gr=self.getElementGroup(FEM,igroup)
+                                if __gr:
+                                    # Save id of set
+                                    __gr.oofem_sets.append(int(lineSplit[2]))
+                                    # Save orientation
+                                    str = "\t\tGroup of elements \"%s\" belongs to set: %s" % (igroup, lineSplit[2])
+                                    print str
+                                else:
+                                    str = "WARNING: Group of elements \"%s\" for set does no exist" % (igroup)
+                                    print str
                         else:#not boundary loads
                             for igroup in groups:
                                 __gr=self.getElementGroup(FEM,igroup)
@@ -198,6 +233,8 @@ class CTRLParser:
                             if __gr:
                                 if (__gr.oofem_boundaryLoadsNum):
                                     elemName = 'RepresentsBoundaryLoad'#assign this name to an element so we know it represents a boundary load
+                                elif (__gr.oofem_sets):
+                                    elemName = 'RepresentsBoundaryLoad'
                                 else:
                                     elemName = lineSplit[1].strip().rstrip('\n')
                                 #check that elemName exists in a list and assign
@@ -246,11 +283,15 @@ class CTRLParser:
         self.nbc=int(dataline[5])
         self.nic=int(dataline[7])
         self.nltf=int(dataline[9])
+        
 
         #read crossSect, material, bc, ic, and lft records into footer
         count = 0
+         
         while count < (self.ncrosssect+self.nmat+self.nbc+self.nic+self.nltf):
             line=self.file.readline()
+            dataline=line.split()
+            
             self.footer+= line
             if not line.startswith('#'):
                 count+= 1
@@ -258,6 +299,10 @@ class CTRLParser:
         #attach all following lines until empty line is hit. This is the end of OOFEM section
         while True:
             line=self.file.readline()
+            splitLine=line.split();
+            if(len(splitLine)>0):
+                if (splitLine[0].lower()=='set'):
+                    self.nset+=1
             if line.strip() == '':
                 break
             self.footer+= line
@@ -277,11 +322,13 @@ class CTRLParser:
         #init group properties on UNV data
         for igroup in FEM.nodesets:#defined in ctrl file
             igroup.oofem_properties=""
+            igroup.oofem_sets=[]
         for igroup in FEM.elemsets:#defined in ctrl file
             igroup.oofem_properties=""
             igroup.oofem_elemtype=0
             igroup.oofem_etypemap={}
             igroup.oofem_boundaryLoadsNum=[]#numbers of boundary loads
+            igroup.oofem_sets=[]
             igroup.oofem_groupNameForLoads=""#CTRL-group name
         # read and parse individual group records
         while True:

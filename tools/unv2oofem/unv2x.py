@@ -29,9 +29,10 @@ class FEM:
         
 class Node:
     """ a single node object """
-    def __init__(self,id,coords):
+    def __init__(self,id,coords,quadratic=1):
         self.id=id
         self.coords=coords
+        self.quadratic=quadratic
         
 class Element:
     """ a single finite element object"""
@@ -100,6 +101,14 @@ def UNV2412Reader(file,FEM):
                     # 1D elements have an additionnal line in their definition
                     line3=file.readline()
                     cntvt=Line2Int(line3)
+                elif eltype==118: # Quadratic tetrahedron has nodes on two lines
+                    line3=file.readline()
+                    cntvt=Line2Int(line2) + Line2Int(line3)
+                    FEM.nodes[cntvt[9]-1].quadratic=0
+                    FEM.nodes[cntvt[2]-1].quadratic=0
+                    FEM.nodes[cntvt[0]-1].quadratic=0
+                    FEM.nodes[cntvt[4]-1].quadratic=0
+                    # 9, 2, 0, 4
                 elif eltype==116:#Quadratic brick element has data on 4 lines
                     line3=file.readline()
                     line4=file.readline()
