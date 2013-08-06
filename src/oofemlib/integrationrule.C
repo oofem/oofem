@@ -73,9 +73,8 @@ IntegrationRule :: ~IntegrationRule()
 void
 IntegrationRule :: clear()
 {
-    int i;
     if ( gaussPointArray ) {
-        for ( i = 0; i < numberOfIntegrationPoints; i++ ) {
+        for ( int i = 0; i < numberOfIntegrationPoints; i++ ) {
             delete gaussPointArray [ i ];
         }
 
@@ -103,9 +102,7 @@ void
 IntegrationRule :: printOutputAt(FILE *file, TimeStep *stepN)
 // Performs end-of-step operations.
 {
-    int i;
-
-    for ( i = 0; i < numberOfIntegrationPoints; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationPoints; i++ ) {
         gaussPointArray [ i ]->printOutputAt(file, stepN);
     }
 }
@@ -114,9 +111,7 @@ void
 IntegrationRule :: updateYourself(TimeStep *tStep)
 {
     // Updates the receiver at end of step.
-    int i;
-
-    for ( i = 0; i < numberOfIntegrationPoints; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationPoints; i++ ) {
         gaussPointArray [ i ]->updateYourself(tStep);
     }
 }
@@ -130,10 +125,7 @@ IntegrationRule :: initForNewStep()
     //
     // call material->initGpForNewStep() for all GPs.
     //
-
-    int i;
-
-    for ( i = 0; i < numberOfIntegrationPoints; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationPoints; i++ ) {
         gaussPointArray [ i ]->giveMaterial()->initGpForNewStep(gaussPointArray [ i ]);
     }
 }
@@ -148,8 +140,6 @@ IntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     //
 
     contextIOResultType iores;
-    int i;
-    GaussPoint *gp;
 
     if ( stream == NULL ) {
         OOFEM_ERROR("saveContex : can't write into NULL stream");
@@ -179,8 +169,8 @@ IntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         }
     }
 
-    for ( i = 0; i < numberOfIntegrationPoints; i++ ) {
-        gp = gaussPointArray [ i ];
+    for ( int i = 0; i < numberOfIntegrationPoints; i++ ) {
+        GaussPoint *gp = gaussPointArray [ i ];
         if ( mode & CM_Definition ) {
             // write gp weight, coordinates, element number, and material mode
             double dval = gp->giveWeight();
@@ -218,9 +208,8 @@ IntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, void *ob
     //
 
     contextIOResultType iores;
-    int i, size;
+    int size;
     bool __create = false;
-    GaussPoint *gp;
     //Element* __parelem = (Element*) obj;
 
     if ( stream == NULL ) {
@@ -260,7 +249,7 @@ IntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, void *ob
         }
     }
 
-    for ( i = 0; i < numberOfIntegrationPoints; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationPoints; i++ ) {
         if ( mode & CM_Definition ) {
             // read weight
             double w;
@@ -289,7 +278,7 @@ IntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, void *ob
             if ( __create ) {
                 gaussPointArray [ i ] = new GaussPoint(this, i + 1, ( new FloatArray(c) ), w, m);
             } else {
-                gp = gaussPointArray [ i ];
+                GaussPoint *gp = gaussPointArray [ i ];
                 gp->setWeight(w);
                 gp->setCoordinates(c);
                 //gp->setElement (__parelem);
@@ -298,7 +287,7 @@ IntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, void *ob
         }
 
         // read gp data
-        gp = gaussPointArray [ i ];
+        GaussPoint *gp = gaussPointArray [ i ];
         if ( ( iores = gp->giveCrossSection()->restoreIPContext(stream, mode, gp) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
