@@ -52,6 +52,7 @@
 #define _IFT_SimpleCrossSection_shearcoeff "beamshearcoeff"
 #define _IFT_SimpleCrossSection_shearareay "shearareay" ///< Shear area y direction
 #define _IFT_SimpleCrossSection_shearareaz "shearareaz" ///< Shear area z direction
+#define _IFT_SimpleCrossSection_drillStiffness "drillstiffness" ///< Penalty term for drilling stiffness.
 //@}
 
 namespace oofem {
@@ -98,6 +99,7 @@ public:
     virtual void giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
     virtual void giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
     virtual void giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+    virtual void giveRealStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
 
 
     virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
@@ -108,6 +110,7 @@ public:
     virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dShellStiffMtrx(FloatMatrix &answer,MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     /**
      * Initializes receiver acording to object description stored in input record.

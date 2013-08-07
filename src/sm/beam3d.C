@@ -256,14 +256,13 @@ int
 Beam3d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 {
     FloatMatrix lcs;
-    int i, j;
 
     answer.resize(6, 6);
     answer.zero();
 
     this->giveLocalCoordinateSystem(lcs);
-    for ( i = 1; i <= 3; i++ ) {
-        for ( j = 1; j <= 3; j++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             answer.at(i, j) = lcs.at(i, j);
             answer.at(3 + i, 3 + j) = lcs.at(i, j);
         }
@@ -277,14 +276,13 @@ Beam3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 // Returns the rotation matrix of the receiver.
 {
     FloatMatrix lcs;
-    int i, j;
 
     answer.resize(12, 12);
     answer.zero();
 
     this->giveLocalCoordinateSystem(lcs);
-    for ( i = 1; i <= 3; i++ ) {
-        for ( j = 1; j <= 3; j++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             answer.at(i, j) = lcs.at(i, j);
             answer.at(i + 3, j + 3) = lcs.at(i, j);
             answer.at(i + 6, j + 6) = lcs.at(i, j);
@@ -462,6 +460,20 @@ Beam3d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
     if ( prescStrainEndForces.giveSize() ) {
         answer.subtract(prescStrainEndForces);
     }
+}
+
+
+void
+Beam3d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->give3dBeamStiffMtrx(answer, rMode, gp, tStep);
+}
+
+
+void
+Beam3d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStress_Beam3d(answer, gp, strain, tStep);
 }
 
 

@@ -117,7 +117,7 @@ public:
     virtual void giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
     virtual void giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
     virtual void giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
-
+    virtual void giveRealStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
 
     virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
@@ -127,6 +127,7 @@ public:
     virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dShellStiffMtrx(FloatMatrix &answer,MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *);

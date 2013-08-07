@@ -98,6 +98,9 @@ protected:
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     virtual void computeNmatrixAt(GaussPoint *, FloatMatrix &);
     virtual void computeGaussPoints();
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+
     double giveLength();
     double givePitch();
 };

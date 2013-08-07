@@ -110,6 +110,9 @@ protected:
     virtual void computeNmatrixAt(GaussPoint *, FloatMatrix &);
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
 
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+
     void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
 
     double giveKappaCoeff();

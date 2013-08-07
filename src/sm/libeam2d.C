@@ -114,6 +114,20 @@ LIBeam2d :: computeGaussPoints()
 }
 
 
+void
+LIBeam2d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->give2dBeamStiffMtrx(answer, rMode, gp, tStep);
+}
+
+
+void
+LIBeam2d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStress_Beam2d(answer, gp, strain, tStep);
+}
+
+
 int
 LIBeam2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
