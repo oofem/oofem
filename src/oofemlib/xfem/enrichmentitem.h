@@ -148,8 +148,8 @@ public:
     bool giveLevelSetsNeedUpdate() const {return mLevelSetsNeedUpdate;}
     virtual void updateLevelSets(XfemManager &ixFemMan);
     virtual void updateNodeEnrMarker(XfemManager &ixFemMan, const EnrichmentDomain_BG &iEnrichmentDomain_BG);
-    virtual void updateNodeEnrMarker(XfemManager &ixFemMan, const DofManList &iEnrichmentDomain_BG);
-    virtual void updateNodeEnrMarker(XfemManager &ixFemMan, const WholeDomain &iEnrichmentDomain_BG);
+    virtual void updateNodeEnrMarker(XfemManager &ixFemMan, const DofManList &iDofManList);
+    virtual void updateNodeEnrMarker(XfemManager &ixFemMan, const WholeDomain &iWholeDomain);
 
     virtual void computeIntersectionPoints(std::vector< FloatArray > &oIntersectionPoints, Element *element);
 

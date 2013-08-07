@@ -150,10 +150,12 @@ public:
 class DofManList : public EnrichmentDomain
 {
 protected:
-    std::list< int > dofManList;
+    std::vector< int > dofManList;
 public:
     DofManList() { }
     virtual ~DofManList() { }
+
+    const std::vector<int> &giveDofManList() const  {return dofManList;}
 
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const {OOFEM_ERROR("DofManList::computeNormalSignDist -- not implemented");};
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const {OOFEM_ERROR("DofManList::computeTangentialSignDist -- not implemented");};

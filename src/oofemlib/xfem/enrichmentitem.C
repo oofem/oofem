@@ -752,14 +752,34 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 
 }
 
-void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const DofManList &iEnrichmentDomain_BG)
+void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const DofManList &iDofManList)
 {
+	Domain *d = ixFemMan.giveDomain();
+	int nNodes = d->giveNumberOfDofManagers();
+	mNodeEnrMarker.resize(nNodes, 0);
 
+	// Loop over nodes in the DofManList and mark nodes as enriched.
+	const std::vector< int > &dofList = iDofManList.giveDofManList();
+	for(int i = 0; i < dofList.size(); i++)
+	{
+		mNodeEnrMarker[ dofList[i]-1 ] = 1;
+	}
+
+	// Set level set fields to zero
+	mLevelSetNormalDir.resize(nNodes, 0.0);
+	mLevelSetTangDir.resize(nNodes, 0.0);
 }
 
-void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const WholeDomain &iEnrichmentDomain_BG)
+void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const WholeDomain &iWholeDomain)
 {
+	// Mark all nodes for enrichment
+	Domain *d = ixFemMan.giveDomain();
+	int nNodes = d->giveNumberOfDofManagers();
+	mNodeEnrMarker.resize(nNodes, 1);
 
+	// Set level set fields to zero
+	mLevelSetNormalDir.resize(nNodes, 0.0);
+	mLevelSetTangDir.resize(nNodes, 0.0);
 }
 
 void EnrichmentItem :: computeIntersectionPoints(std::vector< FloatArray > &oIntersectionPoints, Element *element)
