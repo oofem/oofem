@@ -31,7 +31,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
+#if 0
 #include "floatarray.h"
 #include "gausspoint.h"
 #include "integrationrule.h"
@@ -212,3 +212,4 @@ TrianglePatch :: drawWD(oofegGraphicContext &gc, FloatArray &vd)
 
 #endif
 } // end namespace oofem
+#endif

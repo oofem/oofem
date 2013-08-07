@@ -37,6 +37,7 @@
 
 #include "intarray.h"
 #include "classfactory.h"
+#include "femcmpnn.h"
 
 #define _IFT_DiscontinuousFunction_Name "discontinuousfunction"
 #define _IFT_BranchFunction_Name "branchfunction"
@@ -55,6 +56,7 @@ class GaussPoint;
  * to evaluate the value and spatial derivatives at a given point of the receiver.
  * @author chamrova
  * @author Jim Brouzoulis
+ * @author Erik Svenning
  */
 class EnrichmentFunction : public FEMComponent
 {
@@ -75,6 +77,11 @@ public:
     virtual double evaluateFunctionAt(GaussPoint *gp, EnrichmentDomain *ed);
     /// Evaluates a function derivative at a particular point
     virtual void evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentDomain *ed);
+
+    // New interface
+    virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const = 0;
+    virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const = 0;
+
     // Inserts EnrichmentItem into associatedEnrItem array
     // void insertEnrichmentItem(EnrichmentItem *er);
     // Sets a particular EnrichmentItem active
@@ -102,6 +109,9 @@ public:
     double evaluateFunctionAt(FloatArray *point, EnrichmentDomain *ed);
     void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentDomain *ed);
 
+    virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const;
+    virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const;
+
     virtual const char *giveClassName() const { return "DiscontinuousFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_DiscontinuousFunction_Name; }
 };
@@ -116,6 +126,9 @@ public:
     }
     double evaluateFunctionAt(FloatArray *point, EnrichmentDomain *ed);
     void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentDomain *ed);
+
+    virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const {};
+    virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const {};
 
     virtual const char *giveClassName() const { return "BranchFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_BranchFunction_Name; }
@@ -133,6 +146,9 @@ public:
     void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentDomain *ed);
     double evaluateFunctionAt(GaussPoint *gp, EnrichmentDomain *ed);
     void evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentDomain *ed);
+
+    virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const;
+    virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const;
 
     virtual const char *giveClassName() const { return "RampFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_RampFunction_Name; }

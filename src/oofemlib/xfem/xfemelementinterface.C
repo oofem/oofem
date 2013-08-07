@@ -38,7 +38,7 @@
 #include "gausspoint.h"
 #include "materialmode.h"
 #include "fei2dquadlin.h"
-#include "patch.h"
+//#include "patch.h"
 #include "patchintegrationrule.h"
 #include "delaunay.h"
 #include "xfemmanager.h"
@@ -46,7 +46,131 @@
 #include "floatmatrix.h"
 #include "enrichmentdomain.h"
 
+#include "XFEMDebugTools.h"
+#include <string>
+#include <sstream>
+
 namespace oofem {
+
+void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl)
+{
+	const int dim = 2;
+	const int nDofMan = iEl.giveNumberOfDofManagers();
+
+    FloatMatrix dNdx;
+    FloatArray N;
+    FEInterpolation *interp = iEl.giveInterpolation();
+    interp->evaldNdx( dNdx, * iGP.giveCoordinates(), FEIElementGeometryWrapper(&iEl) );
+    interp->evalN(     N  , * iGP.giveCoordinates(), FEIElementGeometryWrapper(&iEl) );
+
+    const IntArray &elNodes = iEl.giveDofManArray();
+
+
+    // Standard FE part of B-matrix
+    FloatMatrix Bc[nDofMan];
+    for ( int i = 1; i <= nDofMan; i++ )
+    {
+        FloatMatrix &BNode = Bc[i-1];
+        BNode.resize(3, 2);
+        BNode.zero();
+        BNode.at(1, 1) = dNdx.at(i, 1);
+        BNode.at(2, 2) = dNdx.at(i, 2);
+        BNode.at(3, 1) = dNdx.at(i, 2);
+        BNode.at(3, 2) = dNdx.at(i, 1);
+    }
+
+
+	// XFEM part of B-matrix
+    XfemManager *xMan = iEl.giveDomain()->giveXfemManager();
+
+
+	// TODO: Maybe we can allow for several enrichment items to
+	// enrich one node by having std::vector<FloatMatrix> Bd[3] instead?
+    FloatMatrix Bd[nDofMan]; // One Bd per node
+
+    int counter = nDofMan*dim;
+    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ )
+    {
+        EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+
+
+    	double levelSetGP = 0.0;
+    	ei->interpLevelSet(levelSetGP, N, elNodes);
+
+    	FloatArray gradLevelSetGP;
+    	ei->interpGradLevelSet(gradLevelSetGP, dNdx, elNodes);
+
+    	// Enrichment function derivative in Gauss point
+		FloatArray efgpD;
+		ei->evaluateEnrFuncDerivAt(efgpD, (*iGP.giveCoordinates()), levelSetGP, gradLevelSetGP);
+
+		// Enrichment function in Gauss Point
+    	double efGP = 0.0;
+    	ei->evaluateEnrFuncAt(efGP, *(iGP.giveCoordinates()), levelSetGP);
+
+
+		for ( int j = 1; j <= nDofMan; j++ )
+		{
+			DofManager *dMan = iEl.giveDofManager(j);
+
+			if( ei->isDofManEnriched(*dMan) )
+			{
+				// Different nodes can be enriched by different enrichment functions.
+				// Therefore, we have to compute enrichment functions inside this loop.
+
+				int numEnr = ei->giveNumDofManEnrichments(*dMan);
+
+				FloatMatrix &BdNode = Bd[j-1];
+				BdNode.resize(3, numEnr*dim);
+				BdNode.zero();
+
+
+				const FloatArray &nodePos = *(dMan->giveCoordinates());
+
+				double levelSetNode  = 0.0;
+				ei->evalLevelSetNormalInNode(levelSetNode, dMan->giveGlobalNumber() );
+
+				double efNode = 0.0;
+				ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode);
+
+
+
+				// matrix to be added anytime a node is enriched
+				// Creates nabla*(ef*N)
+				FloatArray grad_ef_N;
+				grad_ef_N.resize(dim);
+				for ( int p = 1; p <= dim; p++ )
+				{
+					grad_ef_N.at(p) = dNdx.at(j, p) * ( efGP - efNode ) + N.at(j) * efgpD.at(p);
+				}
+
+				BdNode.at(1, 1) = grad_ef_N.at(1);
+				BdNode.at(2, 2) = grad_ef_N.at(2);
+				BdNode.at(3, 1) = grad_ef_N.at(2);
+				BdNode.at(3, 2) = grad_ef_N.at(1);
+
+				counter += 2;
+			}
+
+		}
+
+    }
+
+	// Create the total B-matrix by appending each contribution to B after one another.
+    oAnswer.resize(3, counter);
+    oAnswer.zero();
+    int column = 1;
+    for ( int i = 0; i < nDofMan; i++ ) {
+    	oAnswer.setSubMatrix(Bc[i],1,column);
+        column += 2;
+        if ( Bd[i].isNotEmpty() ) {
+        	oAnswer.setSubMatrix(Bd[i],1,column);
+
+            column += Bd[i].giveNumberOfColumns();
+        }
+    }
+
+}
 
 void XfemElementInterface :: XfemElementInterface_partitionElement(AList< Triangle > *answer, AList< FloatArray > *together)
 {
@@ -56,11 +180,9 @@ void XfemElementInterface :: XfemElementInterface_partitionElement(AList< Triang
 
 void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 {
-    // This will only work for one active ei
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
-    if ( xMan->isElementEnriched(element) ) { // unneccessary but extra check
-        IntArray activeEI;
-        xMan->giveActiveEIsFor(activeEI, element); 
+    if ( xMan->isElementEnriched(element) ) {
+
         AList< Triangle >triangles;
         AList< Triangle >triangles2;
         // all the points coming into triangulation
@@ -70,34 +192,80 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
         this->XfemElementInterface_partitionElement(& triangles, & together1);
         this->XfemElementInterface_partitionElement(& triangles2, & together2);
 
+
+
+
+        int elIndex = element->giveGlobalNumber();
+
+        ///////////////////////////////////////////
+        // Write splitted elements to vtk.
+        std::stringstream str1;
+        str1 << "TriEl" << elIndex << "Side1.vtk";
+        std::string name1 = str1.str();
+
+        XFEMDebugTools::WriteTrianglesToVTK( name1, triangles );
+
+        std::stringstream str2;
+        str2 << "TriEl" << elIndex << "Side2.vtk";
+        std::string name2 = str2.str();
+
+        XFEMDebugTools::WriteTrianglesToVTK( name2, triangles2 );
+
+        std::vector<Triangle> allTri;
+
+
+//        for ( int i = 1; i <= triangles2.giveSize(); i++ ) {
+//            int sz = triangles.giveSize();
+//            triangles.put( sz + 1, triangles2.at(i) );
+//            triangles2.unlink(i);
+//        }
+
+
+//        for(int i = 1; i <= triangles.giveSize(); i++)
+//        {
+//        	allTri.push_back( *(triangles.at(i)) );
+//        }
+
         for ( int i = 1; i <= triangles2.giveSize(); i++ ) {
             int sz = triangles.giveSize();
-            triangles.put( sz + 1, triangles2.at(i) );
-            triangles2.unlink(i);
+//                triangles.put( sz + 1, triangles2.at(i) );
+//                triangles2.unlink(i);
+
+            triangles.put( sz + 1, new Triangle(*(triangles2.at(i)) ) );
+
         }
 
+
+
+        std::stringstream str3;
+        str3 << "TriEl" << elIndex << ".vtk";
+        std::string name3 = str3.str();
+
+        XFEMDebugTools::WriteTrianglesToVTK( name3, triangles );
+
+
+        for(int i = 1; i <= triangles.giveSize(); i++)
+        {
+        	Triangle t(*(triangles.at(i)));
+        	allTri.push_back( t );
+        }
+
+        int ruleNum = 1;
+        int numGPPerTri = 3;
         AList< IntegrationRule >irlist;
-        //EnrichmentItem *ei = xMan->giveEnrichmentItem( activeEI.at(1) );
-        //EnrichmentDomain *ed = ei->giveEnrichmentDomain(1);
+        IntegrationRule *intRule = new PatchIntegrationRule(ruleNum, element, allTri);
+
+        MaterialMode matMode = element->giveMaterialMode();
+        intRule->SetUpPointsOnTriangle(numGPPerTri, matMode);
+
+        irlist.put(1, intRule);
+        element->setIntegrationRules(&irlist);
+
+/*
+        AList< IntegrationRule >irlist;
         
         for ( int i = 1; i <= triangles.giveSize(); i++ ) {
-            /*
-            int mat = 0;
-            if ( Inclusion *iei = dynamic_cast< Inclusion * > (ei) ) { 
-                if ( EDBGCircle *edc = dynamic_cast< EDBGCircle *> (ed) ) {
-                    FloatArray circleCenter;
-                    triangles.at(i)->computeCenterOfCircumCircle(circleCenter);
-                    if ( edc->bg->isInside(circleCenter) ){
-                        mat = iei->giveMaterial()->giveNumber();
-                    }
-                }
-            } else {
-                mat = 1;
-            }
-            
 
-            Patch *patch = new TrianglePatch(element, mat);
-            */
             Patch *patch = new TrianglePatch(element);
             for ( int j = 1; j <= triangles.at(i)->giveVertices()->giveSize(); j++ ) {
                 FloatArray *nCopy = new FloatArray( *triangles.at( i )->giveVertex(j) );
@@ -112,18 +280,22 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
         }
 
         element->setIntegrationRules(& irlist);
+*/
     }
 }
 
 void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(AList< FloatArray > *answer1, AList< FloatArray > *answer2)
 {
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
-    IntArray interactedEI;
-    xMan->giveActiveEIsFor(interactedEI, element); //give the EI's for the el
-    // in intersecPoints the points of Element with interaction to EnrichmentItem will be stored
+
     std::vector< FloatArray >intersecPoints;
-    for ( int i = 1; i <= interactedEI.giveSize(); i++ ) { // for the active enrichment items
-        xMan->giveEnrichmentItem( interactedEI.at(i) )->giveEnrichmentDomain(1)->computeIntersectionPoints( intersecPoints, element);
+
+    // TODO: 	Can we do this recursively to achieve proper splitting
+    //			when several enrichment items interact with the
+    //			same element?
+    for( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++)
+    {
+        xMan->giveEnrichmentItem( i )->computeIntersectionPoints( intersecPoints, element);
     }
 
     // here the intersection points are copied in order to be put into two groups

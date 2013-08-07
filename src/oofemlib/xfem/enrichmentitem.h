@@ -41,6 +41,8 @@
 #include "layeredcrosssection.h"
 #include "dofiditem.h"
 
+#include <memory>
+
 ///@name Input fields for XFEM
 //@{
 #define _IFT_CrackTip_Name "cracktip"
@@ -50,7 +52,9 @@
 #define _IFT_Inclusion_material "material"
 
 #define _IFT_EnrichmentItem_domains "enrichmentdomains"
+#define _IFT_EnrichmentItem_domain "enrichmentdomain"
 #define _IFT_EnrichmentItem_function "enrichmentfunction"
+#define _IFT_EnrichmentItem_front "enrichmentfront"
 
 #define _IFT_Delamination_Name "delamination"
 #define _IFT_Delamination_xiCoords "delaminationxicoords"
@@ -64,6 +68,10 @@ template< class T > class AList;
 class BasicGeometry;
 class EnrichmentFunction;
 class EnrichmentDomain;
+class EnrichmentDomain_BG;
+class DofManList;
+class WholeDomain;
+class EnrichmentFront;
 
 /**
  * Abstract class representing entity, which is included in the FE model using one (or more)
@@ -90,10 +98,8 @@ public:
     int giveNumberOfEnrDofs();
 
     // Enrichment domains
-    BasicGeometry *giveGeometry(int i);
-    BasicGeometry *giveGeometry();
-    EnrichmentDomain *giveEnrichmentDomain(int i) { return this->enrichmentDomainList->at(i); }
-    int giveNumberOfEnrichmentDomains() { return this->numberOfEnrichmentDomains; }
+    EnrichmentDomain *giveEnrichmentDomain(int i) { return mpEnrichmentDomain; }
+    int giveNumberOfEnrichmentDomains() { return 1;/*this->numberOfEnrichmentDomains;*/ }
 
     // Enrichment functions
     EnrichmentFunction *giveEnrichmentFunction(int n);
@@ -105,6 +111,12 @@ public:
     bool isElementEnriched(const Element *element); 
     bool isElementEnrichedByEnrichmentDomain(const Element *element, int edNumber); 
 
+    bool isDofManEnriched(const DofManager &iDMan) const;
+    int  giveNumDofManEnrichments(const DofManager &iDMan) const;
+
+    // Returns true if the enrichment item assigns a different material to the Gauss point
+    virtual bool isMaterialModified(GaussPoint &iGP, Element &iEl, StructuralMaterial *&opSM) const;
+
     // Should update receiver geometry to the state reached at given time step.
     virtual void updateGeometry(TimeStep *tStep) {};
     virtual void updateGeometry();
@@ -114,7 +126,48 @@ public:
     void giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber); // list of id's for the enrichment dofs
 
 
+    void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet) const;
+    void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet) const;
+
+    void evalLevelSetNormalInNode(double &oLevelSet, int iNodeInd) const {oLevelSet = mLevelSetNormalDir[iNodeInd-1];}
+    void evalLevelSetTangInNode(double &oLevelSet, int iNodeInd) const {oLevelSet = mLevelSetTangDir[iNodeInd-1];}
+    void evalNodeEnrMarkerInNode(double &oLevelSet, int iNodeInd) const {oLevelSet = mNodeEnrMarker[iNodeInd-1];}
+
+
+    // By templating the function this way, we may choose if we want to pass iNodeInd as
+    // an IntArray, a std::vector<int> or something else.
+    // Any container that contains int and implements [] is legal.
+    template <typename T>
+    void interpLevelSet(double &oLevelSet, const FloatArray &iN, const T &iNodeInd) const;
+
+    template <typename T>
+    void interpGradLevelSet(FloatArray &oGradLevelSet, const FloatMatrix &idNdX, const T &iNodeInd) const;
+
+
+    // Level set routines
+    bool giveLevelSetsNeedUpdate() const {return mLevelSetsNeedUpdate;}
+    virtual void updateLevelSets(XfemManager &ixFemMan);
+    virtual void updateNodeEnrMarker(XfemManager &ixFemMan, const EnrichmentDomain_BG &iEnrichmentDomain_BG);
+    virtual void updateNodeEnrMarker(XfemManager &ixFemMan, const DofManList &iEnrichmentDomain_BG);
+    virtual void updateNodeEnrMarker(XfemManager &ixFemMan, const WholeDomain &iEnrichmentDomain_BG);
+
+    virtual void computeIntersectionPoints(std::vector< FloatArray > &oIntersectionPoints, Element *element);
+
+
+
 protected:
+
+    /////////////////////////
+    // New objects
+    EnrichmentDomain *mpEnrichmentDomain;
+    int mEnrDomainIndex;
+
+    EnrichmentFunction *mpEnrichmentFunc;
+    int mEnrFuncIndex;
+
+    EnrichmentFront *mpEnrichmentFront;
+    int mEnrFrontIndex;
+
     /// Link to associated Xfem manager.
     XfemManager *xMan;
     int startOfDofIdPool; // points to the first available dofId number associated with the ei 
@@ -134,6 +187,31 @@ protected:
     AList< EnrichmentFunction > *enrichmentFunctionList;
     int numberOfEnrichmentFunctions;
 
+
+
+
+
+
+    // Level set for signed distance to the interface.
+    //	The sign is determined by the interface normal direction.
+    // This level set function is relevant for both open and closed interfaces.
+    std::vector<double> mLevelSetNormalDir;
+
+    // Level set for signed distance along the interface.
+    // Only relevant for open interfaces.
+    std::vector<double> mLevelSetTangDir;
+
+
+    // Field with desired node enrichment types
+    std::vector<int> mNodeEnrMarker;
+
+    // Indices of enriched nodes: this list is used to tell
+    // if a given node is enriched.
+    std::vector<int> mEnrNodeIndices;
+
+    bool mLevelSetsNeedUpdate;
+
+    const double mLevelSetTol, mLevelSetTol2;
 };
 
 /** Sub classes to EnrichmentItem. */
@@ -158,9 +236,15 @@ public:
 class Inclusion : public EnrichmentItem
 {
 protected:
-    Material *mat;
+	Material *mat;
 public:
     Inclusion(int n, XfemManager *xm, Domain *aDomain);
+    virtual ~Inclusion();
+
+    // Returns true if the enrichment item assigns a different material to the Gauss point
+    virtual bool isMaterialModified(GaussPoint &iGP, Element &iEl, StructuralMaterial *&opSM) const;
+
+
     virtual const char *giveClassName() const { return "Inclusion"; }
     virtual const char *giveInputRecordName() const { return _IFT_Inclusion_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -204,6 +288,89 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 };
 
+
+/////////////////////////////////////////////////
+// Function implementations
+
+template<typename T>
+void EnrichmentItem :: interpLevelSet(double &oLevelSet, const FloatArray &iN, const T &iNodeInd) const
+{
+	oLevelSet = 0.0;
+	for(int i = 1; i <= iN.giveSize(); i++)
+	{
+		oLevelSet += iN.at(i)*mLevelSetNormalDir[ iNodeInd[i-1] - 1 ];
+	}
+}
+
+template <typename T>
+void EnrichmentItem :: interpGradLevelSet(FloatArray &oGradLevelSet, const FloatMatrix &idNdX, const T &iNodeInd) const
+{
+	int dim = idNdX.giveNumberOfColumns();
+	oGradLevelSet.resize(dim);
+	oGradLevelSet.zero();
+
+	for( int i = 1; i <= idNdX.giveNumberOfRows(); i++ )
+	{
+		for( int j = 1; j <= dim; j++ )
+		{
+			oGradLevelSet.at(j) += idNdX.at(i,j)*mLevelSetNormalDir[ iNodeInd[i-1] - 1 ];
+		}
+	}
+
+}
+
+/*
+ * Class EnrichmentFront: describes the edge or tip of an XFEM enrichment.
+ * The purpose is to add a different treatment of the front than the "interior"
+ * enrichments. We may, e.g.
+ * 	- Apply branch functions at a crack tip for the element containing the crack tip.
+ * 	- Apply branch functions on nodes within a certain radius from the crack tip.
+ * 	- Exclude nodes touched by the front.
+ *
+ * 	The desired behavior is obtained by choosing a suitable EnrichmentFront.
+ *
+ * 	Erik Svenning - August 2013
+ */
+class EnrichmentFront{
+public:
+	EnrichmentFront() {};
+	virtual ~EnrichmentFront() {};
+
+	/*
+	 * 	MarkNodesAsFront:
+	 * 	Intput:
+	 * 	-ioNodeEnrMarker: 	A vector with the same size as the number of nodes in the mesh
+	 * 						where the nodes corresponding to interior XFEM enrichments are
+	 * 						marked with 1, other entries are zero.
+	 *
+	 * 	Output:
+	 * 	-ioNodeEnrMarker:	Modifies the vector by marking tip nodes as 2, meaning that they
+	 * 						should get special treatment. May also modify the set of nodes
+	 * 						enriched by the interior enrichment.
+	 */
+	virtual void MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemManager &ixFemMan, const std::vector<double> &iLevelSetNormalDir, const std::vector<double> &iLevelSetTangDir) = 0;
+
+};
+
+class EnrFrontDoNothing: public EnrichmentFront{
+public:
+	EnrFrontDoNothing() {};
+	virtual ~EnrFrontDoNothing() {};
+
+	virtual void MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemManager &ixFemMan, const std::vector<double> &iLevelSetNormalDir, const std::vector<double> &iLevelSetTangDir) {printf("Entering EnrFrontDoNothing::MarkNodesAsFront().\n"); }
+};
+
+class EnrFrontExtend: public EnrichmentFront{
+public:
+	EnrFrontExtend() {};
+	virtual ~EnrFrontExtend() {};
+
+	virtual void MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemManager &ixFemMan, const std::vector<double> &iLevelSetNormalDir, const std::vector<double> &iLevelSetTangDir);
+};
+
+
 } // end namespace oofem
+
+
 
 #endif  // enrichmentitem_h

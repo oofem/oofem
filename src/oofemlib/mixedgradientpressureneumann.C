@@ -53,6 +53,7 @@
 #include "sparselinsystemnm.h"
 #include "set.h"
 #include "dynamicinputrecord.h"
+#include "feinterpol.h"
 
 namespace oofem {
 

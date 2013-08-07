@@ -64,7 +64,7 @@ public:
     virtual ~XfemElementInterface() {}
 
     /// Creates enriched part of B matrix.
-    void XfemElementInterface_createEnrBmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    void XfemElementInterface_createEnrBmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl);
     /// Partitions the element into patches by a triangulation.
     virtual void XfemElementInterface_partitionElement(AList< Triangle > *answer, AList< FloatArray > *together);
     /// Updates integration rule based on the triangulation.

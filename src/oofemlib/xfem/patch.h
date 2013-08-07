@@ -32,6 +32,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#if 0
 #ifndef patch_h
 #define patch_h
 
@@ -63,6 +64,11 @@ public:
     Patch(Element *parent, int material);
     Patch(Element *parent, AList< FloatArray > *vertices);
     virtual ~Patch() { }
+
+
+    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const {OOFEM_ERROR("Patch::computeNormalSignDist -- not implemented");};
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const {OOFEM_ERROR("Patch::computeTangentialSignDist -- not implemented");};
+
     /// Converts the GP into the parental system of an element.
     virtual void convertGPIntoParental(GaussPoint *gp) = 0;
     /// Returns material id associated to receiver.
@@ -90,6 +96,10 @@ public:
     TrianglePatch(Element *parent, int material) : Patch(parent, material) { }
     TrianglePatch(Element *parent, AList< FloatArray > *vertices) : Patch(parent, vertices) { }
     virtual ~TrianglePatch() { }
+
+    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const {OOFEM_ERROR("TrianglePatch::computeNormalSignDist -- not implemented");};
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const {OOFEM_ERROR("TrianglePatch::computeTangentialSignDist -- not implemented");};
+
     // interpolation
     static FEI2dTrLin interpolation;
     void convertGPIntoParental(GaussPoint *gp);
@@ -102,3 +112,4 @@ public:
 };
 } // end namespace oofem
 #endif // patch_h
+#endif

@@ -105,7 +105,7 @@ inline bool bSolve2by2( const bMatrix &iA, const bPoint2 &ib, bPoint2 &ox);
 
 /////////////////////////////////////
 // Basic operations
-inline int bSign(const double &iVal) { return boost::math::sign(iVal);}
+//inline int bSign(const double &iVal) { return boost::math::sign(iVal);}
 
 
 

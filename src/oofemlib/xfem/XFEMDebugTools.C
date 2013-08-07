@@ -70,6 +70,60 @@ void XFEMDebugTools::WriteTrianglesToVTK( const std::string &iName, const AList<
 
 }
 
+void XFEMDebugTools::WritePointsToVTK( const std::string &iName, const std::vector<FloatArray> &iPoints)
+{
+	//	printf("Entering XFEMDebugTools::WriteTrianglesToVTK().\n");
+
+
+		std::ofstream file;
+		file.open (iName.data());
+
+		// Write header
+		file << "# vtk DataFile Version 2.0\n";
+		file << "Gauss points\n";
+		file << "ASCII\n";
+
+		file << "DATASET UNSTRUCTURED_GRID\n";
+
+		int numPoints = iPoints.size();
+		// Write points
+		file << "POINTS " << numPoints << " double\n";
+
+		for(int i = 1; i <= numPoints; i++)
+		{
+//			for(int j = 1; j <= 3; j++)
+//			{
+				const double &x = iPoints[i-1].at(1);
+				const double &y = iPoints[i-1].at(2);
+//				const double &z = iPoints[i-1].at(3);
+				const double  z = 0.0;
+
+				file << x << " " << y << " " << z << "\n";
+//			}
+		}
+
+
+		// Write segments
+		file << "CELLS " << numPoints << " " << numPoints*2 << "\n";
+
+		for(int i = 0; i < numPoints; i++)
+		{
+			file << 1 << " " << i << "\n";
+		}
+
+
+		// Write cell types
+		file << "CELL_TYPES " << numPoints << "\n";
+		int vtkCellType = 1; // vertex
+		for(int i = 0; i < numPoints; i++)
+		{
+			file << vtkCellType << "\n";
+		}
+
+		file.close();
+
+
+}
 
 } /* namespace oofem */
 

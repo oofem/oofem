@@ -769,6 +769,11 @@ public:
      */
     virtual double giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method) { return giveCharacteristicLenght(gp, normalToCrackPlane); }
     /**
+     * Returns the size (length, area or volume depending on element type) of the parent
+     * element. E.g. 4.0 for a quadrilateral.
+     */
+    virtual double giveParentElSize() const {return 0.0;}
+    /**
      * Updates internal element state (in all integration points of receiver)
      * before nonlocal averaging takes place. Used by so nonlocal materials,
      * because their response in particular point depends not only on state in this point, but

@@ -39,7 +39,7 @@
 #include "errorestimatortype.h"
 #include "doftype.h"
 #include "linsystsolvertype.h"
-#include "patch.h" // for PatchType
+//#include "patch.h" // for PatchType
 #include "nodalrecoverymodel.h" // for NodalRecoveryModelType
 #include "integrationrule.h" // for IntegrationRuleType
 #include "geneigvalsolvertype.h"
@@ -451,7 +451,7 @@ public:
      * @param e Element assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    Patch *createPatch(Patch :: PatchType type, Element *e);
+//    Patch *createPatch(Patch :: PatchType type, Element *e);
     /**
      * Creates new instance of nodal recovery model corresponding to given type.
      * @param type ID determining the type of new instance.

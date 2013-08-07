@@ -75,6 +75,17 @@ double DiscontinuousFunction :: evaluateFunctionAt(FloatArray *point, Enrichment
     }
 }
 
+void DiscontinuousFunction :: evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const
+{
+	oEnrFunc = sgn( iLevelSet );
+}
+
+void DiscontinuousFunction :: evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const
+{
+	oEnrFuncDeriv.resize(2);
+	oEnrFuncDeriv.zero();
+}
+
 void DiscontinuousFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentDomain *ed)
 {
     answer.resize(2);
@@ -154,6 +165,19 @@ void RampFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, En
     answer.zero();
     answer.at(1) = dfdx * sgn(phi);
     answer.at(2) = dfdy * sgn(phi);
+}
+
+void RampFunction :: evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const
+{
+	oEnrFunc = fabs( iLevelSet );
+}
+
+void RampFunction :: evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const
+{
+	oEnrFuncDeriv.resize(2);
+	oEnrFuncDeriv.zero();
+	oEnrFuncDeriv.at(1) = iGradLevelSet.at(1) * sgn(iLevelSet);
+	oEnrFuncDeriv.at(2) = iGradLevelSet.at(2) * sgn(iLevelSet);
 }
 
 double BranchFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentDomain *ed)

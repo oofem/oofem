@@ -45,6 +45,7 @@
 #include "classfactory.h"
 #include "datastream.h"
 #include "exportmodulemanager.h"
+#include "dofmanager.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

@@ -737,6 +737,12 @@ EngngModel :: updateYourself(TimeStep *stepN)
             domain->giveDofManager(j)->updateYourself(stepN);
         }
 
+        // Update xfem manager if it is present
+        if( domain->hasXfemManager() )
+        {
+        	domain->giveXfemManager()->updateYourself();
+        }
+
 #  ifdef VERBOSE
         VERBOSE_PRINT0("Updated nodes ", nnodes)
 #  endif
@@ -762,11 +768,6 @@ EngngModel :: updateYourself(TimeStep *stepN)
 #  endif
 
 
-        // Update xfem manager if it is present
-        if( domain->hasXfemManager() )
-        {
-        	domain->giveXfemManager()->updateYourself();
-        }
 
     }
 

@@ -49,6 +49,8 @@
 #define _IFT_XfemManager_numberOfEnrichmentFunctions "numberofenrichmentfunctions"
 //@}
 
+//#define ENABLE_XFEM_CPP11
+
 namespace oofem {
 class Domain;
 class EnrichmentItem;
@@ -62,6 +64,7 @@ class DataStream;
  *
  * @author Ruzena Chamrova
  * @author Jim Brouzoulis
+ * @author Erik Svenning
  */
 class XfemManager
 {
@@ -89,7 +92,7 @@ public:
 
     bool isElementEnriched(const Element *elem);
 
-    bool isAllElNodesEnriched(const Element *elem);
+//    bool isAllElNodesEnriched(const Element *elem);
 
     /// Accessor.
     EnrichmentItem *giveEnrichmentItem(int n);

@@ -92,7 +92,7 @@ bool XfemManager :: isElementEnriched(const Element *elem)
     } 
     return false;
 }
-
+/*
 bool XfemManager :: isAllElNodesEnriched(const Element *elem)
 {
     for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ){
@@ -112,7 +112,7 @@ bool XfemManager :: isAllElNodesEnriched(const Element *elem)
 
     return false;
 }
-
+*/
 
 EnrichmentItem *XfemManager :: giveEnrichmentItem(int n)
 {

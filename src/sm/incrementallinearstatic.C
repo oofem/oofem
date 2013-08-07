@@ -41,6 +41,7 @@
 #include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "dofmanager.h"
 
 namespace oofem {
 

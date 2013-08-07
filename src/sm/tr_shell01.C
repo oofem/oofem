@@ -37,6 +37,7 @@
 #include "contextioerr.h"
 #include "gaussintegrationrule.h"
 #include "classfactory.h"
+#include "node.h"
 
 #ifdef __OOFEG
  #include "node.h"

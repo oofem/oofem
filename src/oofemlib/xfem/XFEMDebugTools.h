@@ -19,6 +19,7 @@ public:
 	virtual ~XFEMDebugTools();
 
 	static void WriteTrianglesToVTK( const std::string &iName, const AList< Triangle > &iTriangles );
+	static void WritePointsToVTK( const std::string &iName, const std::vector<FloatArray> &iPoints);
 
 
 };
