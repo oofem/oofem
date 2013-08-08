@@ -424,7 +424,8 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 	int nNodes = d->giveNumberOfDofManagers();
 
 	mNodeEnrMarker.resize(nNodes, 0);
-
+	mTipElIndices.clear();
+	mTipCoords.clear();
 
 	// Loop over elements and use the level sets to mark nodes belonging to completely cut elements.
 	for(int elIndex = 1; elIndex <= nEl; elIndex++)
@@ -435,6 +436,9 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 		int minSignPhi 	= 1, maxSignPhi 	= -1;
 		int minSignGamma = 1, maxSignGamma = -1;
 
+		FloatArray elCenter;
+		elCenter.setValues(2, 0.0, 0.0);
+
 		for(int elNodeInd = 1; elNodeInd <= nElNodes; elNodeInd++)
 		{
 			int nGlob = el->giveNode(elNodeInd)->giveGlobalNumber();
@@ -444,6 +448,9 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 
 			minSignGamma = std::min( sgn(minSignGamma), sgn( mLevelSetTangDir[nGlob-1]) );
 			maxSignGamma = std::max( sgn(maxSignGamma), sgn( mLevelSetTangDir[nGlob-1]) );
+
+			elCenter.at(1) += el->giveDofManager(elNodeInd)->giveCoordinate(1)/double(nElNodes);
+			elCenter.at(2) += el->giveDofManager(elNodeInd)->giveCoordinate(2)/double(nElNodes);
 		}
 
 
@@ -465,50 +472,55 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 
 
 		}
-/*
+
+		// Store indices of elements containing an interface tip.
+
 		if( minSignPhi*maxSignPhi < 0 && minSignGamma*maxSignGamma < 0 )
 		{
-			if(mMarkTipNodes)
+			// Check if the element is intersected by the interface
+
+			bool edgeIntersected = false;
+
+			for(int elNodeInd = 1; elNodeInd <= nElNodes-1; elNodeInd++)
 			{
-				// Check if the element is intersected by the crack
-				// (This check is actually needed!)
+				int niGlob = el->giveNode(elNodeInd  )->giveGlobalNumber();
+				int njGlob = el->giveNode(elNodeInd+1)->giveGlobalNumber();
 
-				bool edgeIntersected = false;
-				for(int elNodeInd = 1; elNodeInd <= nElNodes-1; elNodeInd++)
+				if( mLevelSetNormalDir[niGlob-1]*mLevelSetNormalDir[njGlob-1] < 0.0 )
 				{
-					int niGlob = el->giveNode(elNodeInd  )->giveGlobalNumber();
-					int njGlob = el->giveNode(elNodeInd+1)->giveGlobalNumber();
-
-					if( levelSetPhi[niGlob-1]*levelSetPhi[njGlob-1] < 0.0 )
-					{
-						if( levelSetGamma[niGlob-1] > 0.0 && levelSetGamma[njGlob-1] > 0.0 )
-						{
-							edgeIntersected = true;
-						}
-					}
-
-				}
-
-				int niGlob = el->giveNode(1  		)->giveGlobalNumber();
-				int njGlob = el->giveNode(nElNodes	)->giveGlobalNumber();
-
-				if( levelSetPhi[niGlob-1]*levelSetPhi[njGlob-1] < 0.0 )
-				{
-					if( levelSetGamma[niGlob-1] > 0.0 && levelSetGamma[njGlob-1] > 0.0 )
+					if( mLevelSetTangDir[niGlob-1] > 0.0 && mLevelSetTangDir[njGlob-1] > 0.0 )
 					{
 						edgeIntersected = true;
 					}
 				}
+			}
 
-				if( edgeIntersected )
+			int niGlob = el->giveNode(1  		)->giveGlobalNumber();
+			int njGlob = el->giveNode(nElNodes	)->giveGlobalNumber();
+
+			if( mLevelSetNormalDir[niGlob-1]*mLevelSetNormalDir[njGlob-1] < 0.0 )
+			{
+				if( mLevelSetTangDir[niGlob-1] > 0.0 && mLevelSetTangDir[njGlob-1] > 0.0 )
 				{
-
-						printf("Inserting index %d\n", elIndex );
-						tipEls.push_back(elIndex);
+					edgeIntersected = true;
 				}
 			}
+
+			if( edgeIntersected )
+			{
+				FloatArray tipCoords;
+				if( mpEnrichmentDomain->GiveClosestTipPosition(tipCoords, elCenter) )
+				{
+					printf("Adding element %d to list of tip elements.\n", elIndex );
+					mTipElIndices.push_back(elIndex);
+
+					tipCoords.printYourself();
+					mTipCoords.push_back(tipCoords);
+				}
+			}
+
 		}
-*/
+
 
 /*
 		if( minSignPhi*maxSignPhi < 0 && minSignGamma*maxSignGamma < 0 )
@@ -760,7 +772,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const DofManLi
 
 	// Loop over nodes in the DofManList and mark nodes as enriched.
 	const std::vector< int > &dofList = iDofManList.giveDofManList();
-	for(int i = 0; i < dofList.size(); i++)
+	for(int i = 0; i < int(dofList.size()); i++)
 	{
 		mNodeEnrMarker[ dofList[i]-1 ] = 1;
 	}
@@ -782,7 +794,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const WholeDom
 	mLevelSetTangDir.resize(nNodes, 0.0);
 }
 
-void EnrichmentItem :: computeIntersectionPoints(std::vector< FloatArray > &oIntersectionPoints, Element *element)
+void EnrichmentItem :: computeIntersectionPoints(std::vector< FloatArray > &oIntersectionPoints, std::vector<int> &oIntersectedEdgeInd, Element *element)
 {
 
 	if( isElementEnriched(element) )
@@ -808,6 +820,10 @@ void EnrichmentItem :: computeIntersectionPoints(std::vector< FloatArray > &oInt
 			const double &phiS = mLevelSetNormalDir[nsGlob-1];
 			const double &phiE = mLevelSetNormalDir[neGlob-1];
 
+
+			const double &gammaS = mLevelSetTangDir[nsGlob-1];
+			const double &gammaE = mLevelSetTangDir[neGlob-1];
+
 			if( phiS*phiE < mLevelSetTol2 )
 			{
 				// Intersection detected
@@ -829,45 +845,51 @@ void EnrichmentItem :: computeIntersectionPoints(std::vector< FloatArray > &oInt
 					xi = 1.0;
 				}
 
+				double gamma = 0.5*(1.0-xi)*gammaS + 0.5*(1.0+xi)*gammaE;
 
-				FloatArray ps( *( element->giveDofManager(nsLoc)->giveCoordinates() ) );
-				FloatArray pe( *( element->giveDofManager(neLoc)->giveCoordinates() ) );
-
-				int nDim = ps.giveSize();
-				FloatArray p;
-				p.resize(nDim);
-
-				for( int i = 1; i <= nDim; i++ )
+				// If we are inside in tangential direction
+				if(gamma > 0.0)
 				{
-					(p.at(i)) = 0.5*(1.0-xi)*((ps.at(i))) + 0.5*(1.0+xi)*((pe.at(i)));
-				}
+					FloatArray ps( *( element->giveDofManager(nsLoc)->giveCoordinates() ) );
+					FloatArray pe( *( element->giveDofManager(neLoc)->giveCoordinates() ) );
 
+					int nDim = ps.giveSize();
+					FloatArray p;
+					p.resize(nDim);
 
-				// Check that the intersection point has not already been identified.
-				// This may happen if the crack intersects the element exactly at a node,
-				// so that intersection is detected for both element edges in that node.
-
-				bool alreadyFound = false;
-
-
-				int numPointsOld = oIntersectionPoints.size();
-				for(int k = 1; k <= numPointsOld; k++)
-				{
-					double dist = p.distance( oIntersectionPoints[k-1] );
-
-					if( dist < mLevelSetTol )
+					for( int i = 1; i <= nDim; i++ )
 					{
-						alreadyFound = true;
-						break;
+						(p.at(i)) = 0.5*(1.0-xi)*((ps.at(i))) + 0.5*(1.0+xi)*((pe.at(i)));
+					}
+
+
+					// Check that the intersection point has not already been identified.
+					// This may happen if the crack intersects the element exactly at a node,
+					// so that intersection is detected for both element edges in that node.
+
+					bool alreadyFound = false;
+
+
+					int numPointsOld = oIntersectionPoints.size();
+					for(int k = 1; k <= numPointsOld; k++)
+					{
+						double dist = p.distance( oIntersectionPoints[k-1] );
+
+						if( dist < mLevelSetTol )
+						{
+							alreadyFound = true;
+							break;
+						}
+
+					}
+
+					if(!alreadyFound)
+					{
+						oIntersectionPoints.push_back(p);
+						oIntersectedEdgeInd.push_back(edgeIndex);
 					}
 
 				}
-
-				if(!alreadyFound)
-				{
-					oIntersectionPoints.push_back(p);
-				}
-
 			}
 
 		}
@@ -876,6 +898,24 @@ void EnrichmentItem :: computeIntersectionPoints(std::vector< FloatArray > &oInt
 	}
 
 
+}
+
+bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, int iElIndex) const
+{
+	std::vector<int>::const_iterator begin = mTipElIndices.begin();
+	std::vector<int>::const_iterator end 	= mTipElIndices.end();
+
+	std::vector<int>::const_iterator it = std::find(begin, end, iElIndex);
+
+	if( it != end )
+	{
+//		printf("it -begin: %d ", it -begin);
+		oCoord = mTipCoords[ it - begin ];
+//		oCoord.printYourself();
+		return true;
+	}
+
+	return false;
 }
 
 
@@ -1126,7 +1166,7 @@ void EnrFrontExtend :: MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemM
 
 
 	// Mark the new nodes to be enriched
-	for(int i = 0; i < newEnrNodes.size(); i++)
+	for(int i = 0; i < int(newEnrNodes.size()); i++)
 	{
 		ioNodeEnrMarker[ newEnrNodes[i]-1 ] = 1;
 	}

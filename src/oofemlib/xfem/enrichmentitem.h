@@ -151,9 +151,12 @@ public:
     virtual void updateNodeEnrMarker(XfemManager &ixFemMan, const DofManList &iDofManList);
     virtual void updateNodeEnrMarker(XfemManager &ixFemMan, const WholeDomain &iWholeDomain);
 
-    virtual void computeIntersectionPoints(std::vector< FloatArray > &oIntersectionPoints, Element *element);
+    virtual void computeIntersectionPoints(std::vector< FloatArray > &oIntersectionPoints, std::vector<int> &oIntersectedEdgeInd, Element *element);
 
 
+    // Return the coordinates of the tip in element iElIndex,
+    // if the element contains a tip.
+    bool giveElementTipCoord(FloatArray &oCoord, int iElIndex) const;
 
 protected:
 
@@ -212,6 +215,10 @@ protected:
     bool mLevelSetsNeedUpdate;
 
     const double mLevelSetTol, mLevelSetTol2;
+
+    // Indices of tip elements
+    std::vector<int> mTipElIndices;
+    std::vector<FloatArray> mTipCoords;
 };
 
 /** Sub classes to EnrichmentItem. */

@@ -96,7 +96,7 @@ public:
 
     /// Accessor.
     EnrichmentItem *giveEnrichmentItem(int n);
-    int giveNumberOfEnrichmentItems() { return enrichmentItemList->giveSize(); }
+    int giveNumberOfEnrichmentItems() { return 1; /*enrichmentItemList->giveSize();*/ }
 
     void createEnrichedDofs();
 

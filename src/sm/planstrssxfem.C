@@ -71,7 +71,8 @@ PlaneStress2dXfem :: computeGaussPoints()
     	std::vector<FloatArray> intersecPoints;
     	EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
 
-    	ei->computeIntersectionPoints(intersecPoints, this);
+        std::vector< int > intersecEdgeInd;
+    	ei->computeIntersectionPoints(intersecPoints, intersecEdgeInd, this);
     	int numIntersecPoints = intersecPoints.size();
 
         if ( numIntersecPoints > 0 )

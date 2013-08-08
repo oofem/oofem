@@ -359,12 +359,13 @@ void TrPlaneStress2dXFEM :: XfemElementInterface_updateIntegrationRule()
 */
 
         std::vector< FloatArray > intersecPoints;
+        std::vector< int > intersecEdgeInd;
 
 //        printf("In TrPlaneStress2dXFEM :: XfemElementInterface_updateIntegrationRule(): Number of enrichment items: %d\n", xMan->giveNumberOfEnrichmentItems() );
         for( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++)
         {
         	EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-        	ei->computeIntersectionPoints( intersecPoints, element);
+        	ei->computeIntersectionPoints( intersecPoints, intersecEdgeInd, element);
         }
 
 
@@ -471,8 +472,6 @@ void TrPlaneStress2dXFEM :: XfemElementInterface_updateIntegrationRule()
             }
 
 
-            printf("allTri.size(): %d\n", allTri.size() );
-
             int ruleNum = 1;
             int numGPPerTri = 3;
             AList< IntegrationRule >irlist;
@@ -512,7 +511,7 @@ void TrPlaneStress2dXFEM :: XfemElementInterface_updateIntegrationRule()
         }
 }
 
-void TrPlaneStress2dXFEM :: XfemElementInterface_prepareNodesForDelaunay(AList< FloatArray > *answer1, AList< FloatArray > *answer2)
+void TrPlaneStress2dXFEM :: XfemElementInterface_prepareNodesForDelaunay(std::vector< std::vector< FloatArray > > &oPointPartitions)
 {
 
 }

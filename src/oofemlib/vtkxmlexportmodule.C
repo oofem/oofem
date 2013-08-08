@@ -1427,7 +1427,8 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, VTKStr
             				EnrichmentItem *enrItem = xMan->giveEnrichmentItem(j);
 
             				std::vector<FloatArray> intersecPoints;
-            				enrItem->computeIntersectionPoints(intersecPoints, elem);
+            			    std::vector< int > intersecEdgeInd;
+            				enrItem->computeIntersectionPoints(intersecPoints, intersecEdgeInd, elem);
             				numPoints += intersecPoints.size();
 
 //            				for( int k = 1; k <= enrItem->giveNumberOfEnrichmentDomains(); k++ )

@@ -84,7 +84,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
     std::vector<FloatArray> newGPCoord;
 
 	// Loop over triangles
-	for(int i = 0; i < mTriangles.size(); i++)
+	for(int i = 0; i < int(mTriangles.size()); i++)
 	{
         // TODO: Probably unnecessary to allocate here
         const FloatArray **coords = new const FloatArray * [ mTriangles[i].giveNrVertices() ];

@@ -87,6 +87,8 @@ public:
 
     // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) {}
+
+    virtual bool GiveClosestTipPosition(FloatArray &oCoords, const FloatArray &iCoords) const {oCoords.setValues(2, 0.0, 0.0); return false;}
 };
 
 
@@ -139,6 +141,8 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_EDCrack_Name; }
     virtual const char *giveClassName() const { return "EDCrack"; }
+
+    virtual bool GiveClosestTipPosition(FloatArray &oCoords, const FloatArray &iCoords) const;
 
 };
 
