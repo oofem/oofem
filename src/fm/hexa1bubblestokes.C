@@ -167,9 +167,7 @@ void Hexa1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSt
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
 
-    FloatArray momentum(27), conservation(8);
-    momentum.zero();
-    conservation.zero();
+    FloatArray momentum, conservation;
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
@@ -184,10 +182,11 @@ void Hexa1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSt
             dNv(k + 1) = B(1, k + 1) = B(5, k + 0) = B(3, k + 2) = dN(j, 1);
             dNv(k + 2) = B(2, k + 2) = B(4, k + 0) = B(3, k + 1) = dN(j, 2);
         }
+
         // Bubble contribution;
         double b1 = 0., b2 = 0., b3 = 0.;
         for ( int j = 0; j < 8; ++j ) {
-            double x = 1.;
+            double x = 16777216.;
             for ( int k = 0; k < 8; ++k ) {
                 if ( k != j ) x *= N(k);
             }
@@ -196,9 +195,9 @@ void Hexa1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSt
             b3 += dN(j, 2)*x;
         }
         // The bubble we define the bubble function as := prod(N_i) * 8^8 which gives is roughly the same order of magnitude.
-        dNv(24) = B(0, 24) = B(5, 25) = B(4, 26) = 16777216.*b1;
-        dNv(25) = B(1, 25) = B(5, 24) = B(3, 26) = 16777216.*b2;
-        dNv(26) = B(2, 26) = B(4, 24) = B(3, 25) = 16777216.*b3;
+        dNv(24) = B(0, 24) = B(5, 25) = B(4, 26) = b1;
+        dNv(25) = B(1, 25) = B(5, 24) = B(3, 26) = b2;
+        dNv(26) = B(2, 26) = B(4, 24) = B(3, 25) = b3;
 
         pressure = N.dotProduct(a_pressure);
         epsp.beProductOf(B, a_velocity);
@@ -349,12 +348,9 @@ void Hexa1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *
     // Note: Working with the components; [K, G+Dp; G^T+Dv^T, C] . [v,p]
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    FloatMatrix B(6, 27), EdB, K(27,27), G, Dp, DvT, C, Ed, dN;
+    FloatMatrix B(6, 27), EdB, K, G, Dp, DvT, C, Ed, dN;
     FloatArray dNv(27), N, Ep, Cd, tmpA, tmpB;
     double Cp;
-
-    K.zero();
-    G.zero();
     B.zero();
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
@@ -371,20 +367,22 @@ void Hexa1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *
             dNv(k + 1) = B(1, k + 1) = B(5, k + 0) = B(3, k + 2) = dN(j, 1);
             dNv(k + 2) = B(2, k + 2) = B(4, k + 0) = B(3, k + 1) = dN(j, 2);
         }
+
         // Bubble contribution;
         double b1 = 0., b2 = 0., b3 = 0.;
         for ( int j = 0; j < 8; ++j ) {
-            double x = 1.;
+            double x = 16777216.;
             for ( int k = 0; k < 8; ++k ) {
                 if ( k != j ) x *= N(k);
             }
-            b1 += dN(j,0)*x;
-            b2 += dN(j,1)*x;
-            b3 += dN(j,2)*x;
+            b1 += dN(j, 0)*x;
+            b2 += dN(j, 1)*x;
+            b3 += dN(j, 2)*x;
         }
-        dNv(24) = B(0, 24) = B(5, 25) = B(4, 26) = 16777216.*b1;
-        dNv(25) = B(1, 25) = B(5, 24) = B(3, 26) = 16777216.*b2;
-        dNv(26) = B(2, 26) = B(4, 24) = B(3, 25) = 16777216.*b3;
+        b1 = b2 = b3 = 0.;
+        dNv(24) = B(0, 24) = B(5, 25) = B(4, 26) = b1;
+        dNv(25) = B(1, 25) = B(5, 24) = B(3, 26) = b2;
+        dNv(26) = B(2, 26) = B(4, 24) = B(3, 25) = b3;
 
         // Computing the internal forces should have been done first.
         mat->giveDeviatoricStiffnessMatrix(Ed, TangentStiffness, gp, tStep); // dsigma_dev/deps_dev

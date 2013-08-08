@@ -166,9 +166,7 @@ void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
 
-    FloatArray momentum(8), conservation(3);
-    momentum.zero();
-    conservation.zero();
+    FloatArray momentum, conservation;
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
@@ -327,12 +325,9 @@ void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     // Note: Working with the components; [K, G+Dp; G^T+Dv^T, C] . [v,p]
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    FloatMatrix B(3, 8), EdB, K(8,8), G, Dp, DvT, C, Ed, dN;
+    FloatMatrix B(3, 8), EdB, K, G, Dp, DvT, C, Ed, dN;
     FloatArray dNv(8), N, Ep, Cd, tmpA, tmpB;
     double Cp;
-
-    K.zero();
-    G.zero();
     B.zero();
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
