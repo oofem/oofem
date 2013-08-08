@@ -3,6 +3,7 @@
 from unv2x import *
 from oofemctrlreader import *
 import time
+from numpy.core.defchararray import splitlines
 
 if __name__=='__main__':
     helpmsg=""" 
@@ -69,7 +70,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
         print
 
         # read oofem ctrl file
-        CTRL=CTRLParser(ctrlfile)
+        CTRL=CTRLParser(ctrlfile, UNV.mapping())
         print 'Parsing ctrl file %s' % sys.argv[2]
         CTRL.parse(FEM)
         print "done"
@@ -83,6 +84,10 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
         meshElements = []
         #create auxiliary array of element numbers to be searched for boundaryLoads
         elemNotBoundary = []
+        
+        # List for sets containing boundaries
+        boundarySets=[];
+
         for elem in FEM.elems:#loop through all unv elements
             #resolve element properties
             properties=""
@@ -150,20 +155,29 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                                         if (bel.name.rstrip() != bel.oofem_groupNameForLoads):
                                             continue
                                     #build a new int list, which reflects load numbers and edges/faces
-                                    loadNum = bel.oofem_boundaryLoadsNum
-                                    newList=[-1]*(2*len(loadNum))
-                                    for j in range(len(loadNum)):
-                                        newList[2*j] = loadNum[j]
-                                        newList[2*j+1] = i+1
-                                    #print newList
-                                    elem.oofem_bLoads+=newList
-                                    print "Boundary load \"%s\" found for element %d " % (bel.name.rstrip('\n'), elem.id)
-                                    #print bel.name, elem.id, elem.oofem_bLoads
+                                    if (len(bel.oofem_boundaryLoadsNum) > 0):
+                                        loadNum = bel.oofem_boundaryLoadsNum
+                                        newList=[-1]*(2*len(loadNum))
+                                        for j in range(len(loadNum)):
+                                            newList[2*j] = loadNum[j]
+                                            newList[2*j+1] = i+1
+                                        #print newList
+                                        elem.oofem_bLoads+=newList
+                                        print "Boundary load \"%s\" found for element %d " % (bel.name.rstrip('\n'), elem.id)
+                                        #print bel.name, elem.id, elem.oofem_bLoads
+                                        
+                                    if (bel.oofem_sets):
+                                        print "Set \"%s\" found for element %d " % (bel.name.rstrip('\n'), elem.id)
+                                        setNum = bel.oofem_sets;
+                                        # setID, element id, element side
+                                        for thisSet in setNum:
+                                            boundarySets.append([thisSet, elem.id, i+1])
+                                        
                             if(success==0):
                                 print "Can not assign edge/face load \"%s\" to unv element %d" % (bel.name, elem.id)
 
         #write component record
-        of.write('ndofman %d nelem %d ncrosssect %d nmat %d nbc %d nic %d nltf %d\n' % (FEM.nnodes, len(elemNotBoundary), CTRL.ncrosssect, CTRL.nmat, CTRL.nbc, CTRL.nic, CTRL.nltf))
+        of.write('ndofman %d nelem %d ncrosssect %d nmat %d nbc %d nic %d nltf %d nset %d\n' % (FEM.nnodes, len(elemNotBoundary), CTRL.ncrosssect, CTRL.nmat, CTRL.nbc, CTRL.nic, CTRL.nltf, CTRL.nset))
         #write nodes
         for node in FEM.nodes:
             #resolve nodal properties
@@ -171,11 +185,13 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
             for coord in node.coords:
                 outputLine+= "% -8g " % coord
             properties=""
+           
             for igroup in node.oofem_groups:
                 if(len(properties)>0 and properties[-1]!=" "):#insert white space if necessary
                     properties+=" "
                 properties+=igroup.oofem_properties
             outputLine+=properties
+            
             # write nodal record
             of.write(('%s\n') % (outputLine))
 
@@ -188,7 +204,42 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
             of.write('%s\n' % str)
 
         # write final sections
-        of.write(CTRL.footer);
+        sl=CTRL.footer.splitlines()
+        for s in sl:
+            words=s.split()
+            if (words[0].lower()=='set'):
+                setID=int(words[1])
+                                
+                if (words[2].lower()=='nodes'):
+                    nodelist=[];
+                    for nodeset in FEM.nodesets:
+                        for oofemset in nodeset.oofem_sets:
+                            if (setID==oofemset):
+                                nodelist.extend(nodeset.items)
+                    setElements=list(set(nodelist))
+                    
+                elif (words[2].lower()=='elements'):
+                    ellist=[]
+                    for elemset in FEM.elemsets:
+                        for oofemset in elemset.oofem_sets:
+                            if (setID==oofemset):
+                                ellist.extend(elemset.items)
+                    setElements=list(set(ellist))
+                                      
+                elif (words[2].lower()=='elementboundaries'):
+                    setElements=[]
+                    for thisSet in boundarySets:
+                        if (thisSet[0]==int(words[1])):
+                            setElements.extend([thisSet[1], thisSet[2]])
+                                        
+                of.write('%s %s %s %u ' % ( words[0], words[1], words[2], len(setElements)) )
+                for setElement in setElements:
+                    of.write('%u ' % setElement)
+                of.write('\n')
+                    
+            else:
+                of.write('%s\n' % s)
+
         of.close()
         #
         t2 = time.time()
