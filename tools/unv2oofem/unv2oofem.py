@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from unv2x import *
+from abaqus2x import *
 from oofemctrlreader import *
 import time
 from numpy.core.defchararray import splitlines
@@ -54,9 +55,15 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
         oofemfile=sys.argv[3]
         of=open(oofemfile,'w') 
         # read UNV file in FEM object structure
-        UNV=UNVParser(unvfile)
-        print 'Parsing unv file %s' % sys.argv[1],
-        FEM=UNV.parse()
+        fileExtension = unvfile.partition('.')
+        
+        if (fileExtension[2]=='unv'):
+            Parser=UNVParser(unvfile)
+        elif (fileExtension[2]=='inp'):
+            Parser=AbaqusParser(unvfile)
+        
+        print 'Parsing mesh file %s' % sys.argv[1],
+        FEM=Parser.parse()
         print "done"
 
         print "Detected node groups:",
@@ -70,7 +77,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
         print
 
         # read oofem ctrl file
-        CTRL=CTRLParser(ctrlfile, UNV.mapping())
+        CTRL=CTRLParser(ctrlfile, Parser.mapping())
         print 'Parsing ctrl file %s' % sys.argv[2]
         CTRL.parse(FEM)
         print "done"
