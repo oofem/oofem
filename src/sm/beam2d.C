@@ -227,6 +227,20 @@ Beam2d :: computeClampedStiffnessMatrix(FloatMatrix &answer,
 }
 
 
+void
+Beam2d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->give2dBeamStiffMtrx(answer, rMode, gp, tStep);
+}
+
+
+void
+Beam2d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStress_Beam2d(answer, gp, strain, tStep);
+}
+
+
 bool
 Beam2d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 // Returns the rotation matrix of the receiver.
