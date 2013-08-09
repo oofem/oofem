@@ -169,7 +169,32 @@ XfemManager :: createEnrichedDofs()
     ///@todo: need to add check if dof already exists in the dofmanager
     int nrDofMan = this->giveDomain()->giveNumberOfDofManagers();
     IntArray dofIdArray;
- 
+
+    for (int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ )
+    {
+        EnrichmentItem *ei = this->giveEnrichmentItem(j);
+//        for ( int k = 1; k <= ei->giveNumberOfEnrichmentDomains(); k++ )
+//        {
+            for ( int i = 1; i <= nrDofMan; i++ )
+            {
+                DofManager *dMan = this->giveDomain()->giveDofManager(i);
+
+//                if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,k) )
+                if ( ei->isDofManEnriched(*dMan) )
+                {
+                    ei->computeDofManDofIdArray(dofIdArray, dMan);
+                    int nDofs = dMan->giveNumberOfDofs();
+                    for ( int m = 1; m<= dofIdArray.giveSize(); m++ )
+                    {
+//                    	printf("Creating enriched dof. dManI: %d (nDofs + m): %d dofIdArray.at(m): %d\n", i, (nDofs + m), dofIdArray.at(m) );
+                        dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
+                    }
+                }
+            }
+//        }
+    }
+
+/*
     for (int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ ) {
         EnrichmentItem *ei = this->giveEnrichmentItem(j);
         for ( int k = 1; k <= ei->giveNumberOfEnrichmentDomains(); k++ ) {
@@ -185,7 +210,7 @@ XfemManager :: createEnrichedDofs()
             }
         }
     }
-
+*/
 }
 
 

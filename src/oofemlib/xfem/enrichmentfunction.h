@@ -134,6 +134,18 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_BranchFunction_Name; }
 };
 
+/** Class representing the four classical linear elastic branch functions. */
+class LinElBranchFunction
+{
+public:
+	LinElBranchFunction() {}
+	virtual ~LinElBranchFunction() {}
+
+    virtual void evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const double &iR, const double &iTheta) const;
+    virtual void evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const double &iR, const double &iTheta) const;
+
+};
+
 /** Class representing bimaterial interface. */
 class RampFunction : public EnrichmentFunction
 {

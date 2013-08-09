@@ -65,6 +65,17 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
 
     const IntArray &elNodes = iEl.giveDofManArray();
 
+    // Compute global coordinates of Gauss point
+    FloatArray globalCoord;
+    globalCoord.setValues(2, 0.0, 0.0);
+
+    for ( int i = 1; i <= nDofMan; i++ )
+    {
+		DofManager *dMan = iEl.giveDofManager(i);
+    	globalCoord.at(1) += N.at(i)*dMan->giveCoordinate(1);
+    	globalCoord.at(2) += N.at(i)*dMan->giveCoordinate(2);
+    }
+
 
     // Standard FE part of B-matrix
     FloatMatrix Bc[nDofMan];
@@ -100,19 +111,13 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
     	FloatArray gradLevelSetGP;
     	ei->interpGradLevelSet(gradLevelSetGP, dNdx, elNodes);
 
-    	// Enrichment function derivative in Gauss point
-		FloatArray efgpD;
-		ei->evaluateEnrFuncDerivAt(efgpD, (*iGP.giveCoordinates()), levelSetGP, gradLevelSetGP);
-
-		// Enrichment function in Gauss Point
-    	double efGP = 0.0;
-    	ei->evaluateEnrFuncAt(efGP, *(iGP.giveCoordinates()), levelSetGP);
 
 
 		for ( int j = 1; j <= nDofMan; j++ )
 		{
 			DofManager *dMan = iEl.giveDofManager(j);
 
+			// TODO: Make sure that this checks for enrichments of both bulk and tip
 			if( ei->isDofManEnriched(*dMan) )
 			{
 				// Different nodes can be enriched by different enrichment functions.
@@ -125,31 +130,54 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
 				BdNode.zero();
 
 
+				int globalNodeInd = dMan->giveGlobalNumber();
+
+
+		    	// Enrichment function derivative in Gauss point
+				std::vector<FloatArray> efgpD;
+				ei->evaluateEnrFuncDerivAt(efgpD, globalCoord, levelSetGP, gradLevelSetGP, globalNodeInd);
+//				ei->evaluateEnrFuncDerivAt(efgpD, (*iGP.giveCoordinates()), levelSetGP, gradLevelSetGP, globalNodeInd);
+
+				// Enrichment function in Gauss Point
+				std::vector<double> efGP;
+		    	ei->evaluateEnrFuncAt(efGP, globalCoord, levelSetGP, globalNodeInd);
+//		    	ei->evaluateEnrFuncAt(efGP, *(iGP.giveCoordinates()), levelSetGP, globalNodeInd);
+
+
 				const FloatArray &nodePos = *(dMan->giveCoordinates());
 
 				double levelSetNode  = 0.0;
 				ei->evalLevelSetNormalInNode(levelSetNode, dMan->giveGlobalNumber() );
 
-				double efNode = 0.0;
-				ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode);
+				std::vector<double> efNode;
+				ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode, globalNodeInd);
 
 
-
-				// matrix to be added anytime a node is enriched
-				// Creates nabla*(ef*N)
-				FloatArray grad_ef_N;
-				grad_ef_N.resize(dim);
-				for ( int p = 1; p <= dim; p++ )
+				for(int k = 0; k < numEnr; k++)
 				{
-					grad_ef_N.at(p) = dNdx.at(j, p) * ( efGP - efNode ) + N.at(j) * efgpD.at(p);
+
+					// matrix to be added anytime a node is enriched
+					// Creates nabla*(ef*N)
+					FloatArray grad_ef_N;
+					grad_ef_N.resize(dim);
+					for ( int p = 1; p <= dim; p++ )
+					{
+						grad_ef_N.at(p) = dNdx.at(j, p) * ( efGP[k] - efNode[k] ) + N.at(j) * efgpD[k].at(p);
+
+					}
+
+					BdNode.at(1, 2*k+1) = grad_ef_N.at(1);
+					BdNode.at(2, 2*k+2) = grad_ef_N.at(2);
+					BdNode.at(3, 2*k+1) = grad_ef_N.at(2);
+					BdNode.at(3, 2*k+2) = grad_ef_N.at(1);
+
+//					BdNode.at(1, 1) = grad_ef_N.at(1);
+//					BdNode.at(2, 2) = grad_ef_N.at(2);
+//					BdNode.at(3, 1) = grad_ef_N.at(2);
+//					BdNode.at(3, 2) = grad_ef_N.at(1);
+
+					counter += 2;
 				}
-
-				BdNode.at(1, 1) = grad_ef_N.at(1);
-				BdNode.at(2, 2) = grad_ef_N.at(2);
-				BdNode.at(3, 1) = grad_ef_N.at(2);
-				BdNode.at(3, 2) = grad_ef_N.at(1);
-
-				counter += 2;
 			}
 
 		}
@@ -255,7 +283,9 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
         }
 
         int ruleNum = 1;
-        int numGPPerTri = 3;
+//        int numGPPerTri = 3;
+        int numGPPerTri = 12;
+//        int numGPPerTri = 25;
         AList< IntegrationRule >irlist;
         IntegrationRule *intRule = new PatchIntegrationRule(ruleNum, element, allTri);
 
