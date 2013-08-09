@@ -7,15 +7,15 @@ from FEM import *
 from oofemctrlreader import *
 
 class ElementProperties:
-    def __init__(self, name, unvType=-1, edgeMask=None, faceMask=None, surfaceElementType=-1):
+    def __init__(self, name, unvType=-1, edgeMask=None, faceMask=None, nnodes=-1, surfaceElementType=-1):
         if (edgeMask != None):
             self.name = name.lower() # string - name as Abaqus elements
             self.unvType = unvType
             self.edgeMask = edgeMask # 2D array expressing node masks for OOFEM's edge 1,2,..., original UNV node numbering
             self.faceMask = faceMask # 2D array expressing node masks for OOFEM's face 1,2,..., original UNV node numbering
+            self.nnodes = nnodes
             self.surfaceElementType = surfaceElementType # Element type on surface
-    
-
+            
 class AbaqusParser:
     '''
     classdocs
@@ -36,7 +36,8 @@ class AbaqusParser:
     
     def setupElements(self):
         es = [];
-        es.append(ElementProperties("c3d10", 118, [], [[0,1,2,4,5,6],[0,1,3,4,7,8],[1,2,3,5,8,9],[0,2,3,6,7,9]], 42))
+        es.append(ElementProperties("c3d10", 118, [], [[0,1,2,4,5,6],[0,1,3,4,7,8],[1,2,3,5,8,9],[0,2,3,6,7,9]], 10, 42))
+        es.append(ElementProperties("c3d20R", 118, [], [[0,1,2,4,5,6],[0,1,3,4,7,8],[1,2,3,5,8,9],[0,2,3,6,7,9]], 20, 42))
         return es
         
     def _read_multiple_lines(self):
@@ -82,7 +83,7 @@ class AbaqusParser:
          
          for es in self.ElementConfiguration:
              if elementType.lower() == es.name:
-                 nnodes = 10
+                 nnodes = es.nnodes
                  elType = es.unvType
                  
          if nnodes == -1:
@@ -104,7 +105,9 @@ class AbaqusParser:
                     elementSection.remove('')                 
                  
                  # Add element to FEM object (id,type,material,color,nnodes,cntvt)
-                 self.FEM.elems.append(Element(int ( elementSection[0] ), elType, 0, 0, nnodes, map(int, elementSection[1:])))
+                 for i in range (0, len(elementSection), nnodes+1):
+                     thisElement = elementSection[i:(i+nnodes+1)]
+                     self.FEM.elems.append(Element(int ( thisElement[0] ), elType, 0, 0, nnodes, map(int, thisElement[1:])))
 
              if data[0]=='*':
                  self.file.seek(start_of_line)
