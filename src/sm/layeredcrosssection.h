@@ -209,10 +209,8 @@ public:
     LayeredCrossSectionInterface() { }
 
     /**
-     * Computes full 3D strain vector in element layer. This function is necessary
-     * if layered cross section is specified. If it is implemented, the testElementExtension
-     * service should return nonzero for Element_LayeredSupport parameter. This service is used by
-     * layered cross section models.
+     * Computes full 3D strain vector in element layer.
+     * This function is necessary if layered cross section is specified..
      * @param answer Full layer strain vector.
      * @param masterGp Element integration point.
      * @param slaveGp Slave integration point representing particular layer.
