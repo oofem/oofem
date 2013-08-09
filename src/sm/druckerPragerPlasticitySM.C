@@ -268,8 +268,7 @@ int
 DruckerPragerPlasticitySM :: hasMaterialModeCapability(MaterialMode mMode)
 {
     return mMode == _3dMat || //mMode == _PlaneStress - this mode needs to be elaborated
-           mMode == _PlaneStrain ||
-           mMode == _3dRotContinuum;
+           mMode == _PlaneStrain;
 }
 
 void

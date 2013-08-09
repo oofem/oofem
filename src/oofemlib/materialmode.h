@@ -53,7 +53,6 @@ namespace oofem {
     ENUM_ITEM(_2dBeam) \
     ENUM_ITEM(_3dBeam) \
     ENUM_ITEM(_3dShell) \
-    ENUM_ITEM(_3dRotContinuum) /* Axisymmetry, use _3dMat if possible */ \
   \
     ENUM_ITEM(_PlateLayer) \
     ENUM_ITEM(_2dBeamLayer) \

@@ -121,6 +121,8 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
         this->equivStrainType = EST_ElasticEnergyPositiveStress;
     } else if ( equivStrainType == 6 ) {
         this->equivStrainType = EST_ElasticEnergyPositiveStrain;
+    } else if ( equivStrainType == 7 ) {
+        this->equivStrainType = EST_Griffith; 
     } else {
         this->equivStrainType = EST_Mazars;     // default
     }
@@ -407,11 +409,34 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         b = ( k - 1 ) * ( k - 1 ) * I1e * I1e / ( ( 1 - 2 * nu ) * ( 1 - 2 * nu ) );
         c = 12 * k * J2e / ( ( 1 + nu ) * ( 1 + nu ) );
         kappa = a + 1 / ( 2 * k ) * sqrt(b + c);
+    
+    } else if ( this->equivStrainType == EST_Griffith ) { 
+        double sum = 0.;
+        FloatArray stress, fullStress, principalStress;
+        FloatMatrix de;
+
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
+        stress.beProductOf(de, strain);
+        StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
+        this->computePrincipalValues(principalStress, fullStress, principal_stress);
+        for ( int i = 1; i <= 3; i++ ) {
+            if ( principalStress.at(i) > 0.0 && sum < principalStress.at(i) ) {
+                sum = principalStress.at(i);
+            }
+        }
+        
+        //Use Griffith criterion if Rankine not applied
+        if (sum == 0.){
+            sum = -pow(principalStress.at(1)-principalStress.at(3),2.)/8./(principalStress.at(1)+principalStress.at(3));
+        }
+        sum = max(sum,0.);
+        kappa = sum / lmat->give('E', gp);
     } else {
         _error("computeEquivalentStrain: unknown EquivStrainType");
     }
 }
 
+//Computes derivative of the equivalent strain with regards to strain
 void
 IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
 {
@@ -909,6 +934,66 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
             }
         }
 
+        // Use orientation of a worst inclusion for Griffith criterion in compression. 
+        if(this->equivStrainType == EST_Griffith){
+            FloatArray stress, fullStress, principalStress, crackV(3), crackPlaneN(3);
+            FloatMatrix de;
+            LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
+            lmat->giveStiffnessMatrix(de, SecantStiffness, gp, domain->giveEngngModel()->giveCurrentStep() );
+            stress.beProductOf(de, strainVector);
+            StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
+            this->computePrincipalValDir(principalStress, principalDir, fullStress, principal_stress);
+//             this->computePrincipalValDir(principalStrains, principalDir, fullstrain, principal_strain);
+            if(  principalStress.at(1) <= 1.e-10 && principalStress.at(2) <= 1.e-10 && principalStress.at(3) <= 1.e-10){
+                int indexMax=principalStress.giveIndexMaxElem();
+                int indexMin=principalStress.giveIndexMinElem();
+                int indexMid;
+                if(indexMin+indexMax==3){
+                    indexMid = 3;
+                } else if (indexMin+indexMax==4){
+                    indexMid = 2;
+                } else if (indexMin+indexMax==5){
+                    indexMid = 1;
+                }
+                //inclination from maximum compressive stress (plane sig_1 and sig_3)
+                double twoPsi = ( principalStress.at(indexMin) -principalStress.at(indexMax) ) / 2. / ( principalStress.at(indexMax)+principalStress.at(indexMin) );
+                double psi = acos(twoPsi)/2.;
+                for (int i=1; i<=3; i++){
+                    crackV.at(i)=principalDir.at(i,indexMin);
+                    crackPlaneN=principalDir.at(i,indexMax);
+                }
+                //rotate around indexMid axis
+                //see http://en.wikipedia.org/wiki/Rotation_matrix and Rodrigues' rotation formula
+                FloatMatrix ux(3,3), dyadU(3,3), unitMtrx(3,3), rotMtrx(3,3);
+                FloatArray u(3);
+                ux.zero();
+                ux.at(1,2) = -principalDir.at(3,indexMid);
+                ux.at(1,3) = principalDir.at(2,indexMid);
+                ux.at(2,1) = principalDir.at(3,indexMid);
+                ux.at(2,3) = -principalDir.at(1,indexMid);
+                ux.at(3,1) = -principalDir.at(2,indexMid);
+                ux.at(3,2) = principalDir.at(1,indexMid);
+                u.at(1)=principalDir.at(1,indexMid);
+                u.at(2)=principalDir.at(2,indexMid);
+                u.at(3)=principalDir.at(3,indexMid);
+                dyadU.beDyadicProductOf(u,u);
+                unitMtrx.beUnitMatrix();
+                unitMtrx.times(cos(psi));
+                ux.times(sin(psi));
+                dyadU.times(1.-cos(psi));
+                rotMtrx.zero();
+                rotMtrx.add(unitMtrx);
+                rotMtrx.add(ux);
+                rotMtrx.add(dyadU);
+                crackV.rotatedWith(rotMtrx,'n');
+                for ( int i = 1; i <= 3; i++ ) {
+                    principalDir.at(i, indx) = crackV.at(i);
+                }
+                crackPlaneNormal.rotatedWith(rotMtrx,'n');
+            }
+        }
+        
+        
         for ( i = 1; i <= 3; i++ ) {
             crackVect.at(i) = principalDir.at(i, indx);
         }
@@ -931,8 +1016,6 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         }
 
         status->setCrackAngle(ca);
-
-
 
         if ( this->gf != 0. && e0 >= ( wf / le ) ) { // case for a given fracture energy
             OOFEM_WARNING6("Fracturing strain %e is lower than the elastic strain e0=%e, possible snap-back. Element number %d, wf %e, le %e", wf / le, e0, gp->giveElement()->giveLabel(), wf, le);

@@ -1482,15 +1482,6 @@ TR21_2D_SUPG :: giveIPValueType(InternalStateType type)
 }
 
 
-void
-TR21_2D_SUPG :: printOutputAt(FILE *file, TimeStep *stepN)
-// Performs end-of-step operations.
-{
-    SUPGElement :: printOutputAt(file, stepN);
-}
-
-
-
 contextIOResultType TR21_2D_SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe

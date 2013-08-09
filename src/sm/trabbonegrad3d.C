@@ -56,11 +56,7 @@ TrabBoneGrad3D :: ~TrabBoneGrad3D()
 int
 TrabBoneGrad3D :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( mode == _3dMat ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _3dMat;
 }
 void
 TrabBoneGrad3D :: giveStiffnessMatrix(FloatMatrix &answer,

@@ -55,8 +55,9 @@ enum CrossSectionProperty {
     CS_InertiaMomentY, ///< Moment of inertia around y-axis
     CS_InertiaMomentZ, ///< Moment of inertia around z-axis
     CS_TorsionMomentX, ///< Moment of inertia around x-axis
-    CS_SHEAR_AREA_Y,   ///< Shear area in y direction
-    CS_SHEAR_AREA_Z,   ///< Shear area in z direction
+    CS_ShearAreaY,     ///< Shear area in y direction
+    CS_ShearAreaZ,     ///< Shear area in z direction
+    CS_DrillingStiffness, ///< Penalty stiffness for drilling DOFs.
     CS_TopZCoord,      ///< Top z coordinate
     CS_BottomZCoord,   ///< Bottom z coordinate
     CS_NumLayers,      ///< Number of layers that makes up the cross section
@@ -248,8 +249,6 @@ public:
      * @exception throws an ContextIOERR exception if error encountered.
      */
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
-
-    friend class Material;
 };
 } // end namespace oofem
 #endif // crosssection_h

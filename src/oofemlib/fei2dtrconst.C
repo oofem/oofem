@@ -203,4 +203,15 @@ FEI2dTrConst :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &ce
     dy = cellgeo.giveVertexCoordinates(nodeB)->at(yind) - cellgeo.giveVertexCoordinates(nodeA)->at(yind);
     return sqrt(dx * dx + dy * dy);
 }
+
+IntegrationRule *
+FEI2dTrConst :: giveIntegrationRule(int order)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 0);
+    iRule->SetUpPointsOnTriangle(points, mode);
+    return iRule;
+}
+
+
 } // end namespace oofem

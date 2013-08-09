@@ -271,31 +271,6 @@ void MixedGradientPressureNeumann :: giveLocationArrays(std::vector<IntArray> &r
 }
 
 
-IntegrationRule *MixedGradientPressureNeumann :: CreateIntegrationRule(Element *e, int boundary, int order)
-{
-    // The element should give us most/all of this information;
-    GaussIntegrationRule *ir = new GaussIntegrationRule(1, e);
-    MaterialMode matMode = e->giveMaterialMode();
-    int nsd = e->giveDomain()->giveNumberOfSpatialDimensions();
-    int npoints;
-    integrationDomain id;
-    if (nsd == 3) {
-        ///@todo I don't know how to determine this for surfaces, We need to obtain this from the element itself.
-        npoints = 4;
-        //id = _Triangle;
-        id = _Square;
-    } else if (nsd == 2) {
-        npoints = (order + 1 + 1)/2; // extra +1 for rounding up; npoints gives exact integration for order = npoints*2 - 1
-        id = _Line;
-    } else {
-        npoints = 1;
-        id = _Point;
-    }
-    ir->setUpIntegrationPoints(id, npoints, matMode);
-    return ir;
-}
-
-
 void MixedGradientPressureNeumann :: integrateVolTangent(FloatArray &answer, Element *e, int boundary)
 {
     FloatArray normal, n;
@@ -311,8 +286,9 @@ void MixedGradientPressureNeumann :: integrateVolTangent(FloatArray &answer, Ele
     }
     
     int nsd = e->giveDomain()->giveNumberOfSpatialDimensions();
-    int order = interp->giveInterpolationOrder() + interpUnknown->giveInterpolationOrder();
-    IntegrationRule *ir = this->CreateIntegrationRule(e, boundary, order);
+    // Order here should be the normal (which takes the first derivative) thus -1
+    int order = interp->giveInterpolationOrder() - 1 + interpUnknown->giveInterpolationOrder();
+    IntegrationRule *ir = interp->giveBoundaryIntegrationRule(order, boundary);
 
     answer.resize(0);
     for (int i = 0; i < ir->giveNumberOfIntegrationPoints(); i++) {
@@ -347,8 +323,9 @@ void MixedGradientPressureNeumann :: integrateDevTangent(FloatMatrix &answer, El
     }
     
     int nsd = e->giveDomain()->giveNumberOfSpatialDimensions();
-    int order = interp->giveInterpolationOrder() + interpUnknown->giveInterpolationOrder();
-    IntegrationRule *ir = this->CreateIntegrationRule(e, boundary, order);
+    // Order here should be the normal (which takes the first derivative) thus -1
+    int order = interp->giveInterpolationOrder() - 1 + interpUnknown->giveInterpolationOrder();
+    IntegrationRule *ir = interp->giveBoundaryIntegrationRule(order, boundary);
     
     answer.resize(0,0);
     for (int i = 0; i < ir->giveNumberOfIntegrationPoints(); i++) {

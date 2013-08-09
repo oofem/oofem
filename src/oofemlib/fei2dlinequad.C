@@ -36,6 +36,7 @@
 #include "mathfem.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "gaussintegrationrule.h"
 
 namespace oofem {
 void FEI2dLineQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
@@ -245,5 +246,14 @@ double FEI2dLineQuad :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo
 
     return ( x1 * y2 - x2 * y1 + 4 * ( x3 * ( y1 - y2 ) + y3 * ( x2 - x1 ) ) ) / 3.0;
 }
+
+IntegrationRule *FEI2dLineQuad :: giveIntegrationRule(int order)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    int points = iRule->getRequiredNumberOfIntegrationPoints(_Line, order + 1);
+    iRule->SetUpPointsOnLine(points, _Unknown);
+    return iRule;
+}
+
 
 } // end namespace oofem

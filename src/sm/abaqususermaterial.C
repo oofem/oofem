@@ -125,7 +125,7 @@ void AbaqusUserMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         // Evaluating the function once, so that the tangent can be obtained.
         FloatArray stress(6), strain(6);
         strain.zero();
-        this->giveRealStressVector(stress, gp, strain, tStep);
+        this->giveRealStressVector_3d(stress, gp, strain, tStep);
     }
 
     answer = ms->giveTempTangent();
@@ -133,13 +133,13 @@ void AbaqusUserMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 #if 0
     double h = 1e-7;
     FloatArray strain, strainh, stress, stressh;
-    strain = ( ( StructuralMaterialStatus * ) gp->giveMaterialStatus(AbaqusUserMaterialClass) )->giveTempStrainVector();
-    stress = ( ( StructuralMaterialStatus * ) gp->giveMaterialStatus(AbaqusUserMaterialClass) )->giveTempStressVector();
+    strain = ( ( StructuralMaterialStatus * ) gp->giveMaterialStatus() )->giveTempStrainVector();
+    stress = ( ( StructuralMaterialStatus * ) gp->giveMaterialStatus() )->giveTempStressVector();
     FloatMatrix En( strain.giveSize(), strain.giveSize() );
     for ( int i = 1; i <= strain.giveSize(); ++i ) {
         strainh = strain;
         strainh.at(i) += h;
-        this->giveRealStressVector(stressh, form, gp, strainh, tStep);
+        this->giveRealStressVector_3d(stressh, form, gp, strainh, tStep);
         stressh.subtract(stress);
         stressh.times(1.0 / h);
         En.setColumn(stressh, i);
@@ -412,12 +412,6 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
     ms->letTempPVectorBe(answer);
     ms->letTempStateVectorBe(state);
     ms->letTempTangentBe(tangent);
-}
-
-
-int AbaqusUserMaterial :: hasMaterialModeCapability(MaterialMode mode)
-{
-    return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain || mode == _1dMat;
 }
 
 void AbaqusUserMaterialStatus :: initTempStatus()

@@ -286,11 +286,7 @@ M4Material :: initializeFrom(InputRecord *ir)
 int
 M4Material :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( mode ==  _3dMat ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _3dMat;
 }
 
 

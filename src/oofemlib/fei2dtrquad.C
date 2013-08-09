@@ -36,6 +36,7 @@
 #include "mathfem.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "gaussintegrationrule.h"
 
 namespace oofem {
 void
@@ -385,7 +386,8 @@ FEI2dTrQuad :: giveDerivatives(FloatMatrix &dn, const FloatArray &lc)
     dn.at(6, 2) = -4.0 * l1;
 }
 
-double FEI2dTrQuad :: giveArea(const FEICellGeometry &cellgeo) const
+double
+FEI2dTrQuad :: giveArea(const FEICellGeometry &cellgeo) const
 {
     const FloatArray *p;
     double x1, x2, x3, x4, x5, x6, y1, y2, y3, y4, y5, y6;
@@ -413,7 +415,8 @@ double FEI2dTrQuad :: giveArea(const FEICellGeometry &cellgeo) const
             x1*(-y2 + y3 + 4*y4 - 4*y6) + x3*(-y1 + y2 - 4*y5 + 4*y6))/6;
 }
 
-double FEI2dTrQuad :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
+double
+FEI2dTrQuad :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
 {
     IntArray eNodes;
     const FloatArray *node;
@@ -434,6 +437,15 @@ double FEI2dTrQuad :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
     y3 = node->at ( yind );
 
     return - ( x1 * y2 - x2 * y1 + 4 * ( x3 * ( y1 - y2 ) + y3 * ( x2 - x1 ) ) ) / 3.0;
+}
+
+IntegrationRule *
+FEI2dTrQuad :: giveIntegrationRule(int order)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 2);
+    iRule->SetUpPointsOnTriangle(points, _Unknown);
+    return iRule;
 }
 
 } // end namespace oofem

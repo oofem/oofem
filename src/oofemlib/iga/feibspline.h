@@ -125,6 +125,11 @@ public:
     virtual const char *giveClassName() const { return "BSplineInterpolation"; }
     virtual bool hasSubPatchFormulation() { return true; }
 
+    virtual IntegrationRule *giveIntegrationRule(int order)
+    { OOFEM_ERROR("BSplineInterpolation :: giveIntegrationRule - Not supported."); return NULL; }
+    virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary)
+    { OOFEM_ERROR("BSplineInterpolation :: giveIntegrationRule - Not supported."); return NULL; }
+
 protected:
     /**
      * Evaluates the nonvanishing basis functions of 1d BSpline (algorithm A2.2 from NURBS book)

@@ -100,7 +100,7 @@ public:
     void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
 #endif
 
-    virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
+    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
                                      GaussPoint *slaveGp, TimeStep *tStep);
 
 protected:
@@ -109,6 +109,9 @@ protected:
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     virtual void computeNmatrixAt(GaussPoint *, FloatMatrix &);
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
+
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
 
     void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
 

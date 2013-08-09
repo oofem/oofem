@@ -1351,16 +1351,14 @@ in the strain space and plays a similar role to the choice of a yield
 condition in plasticity.
 The following definitions of equivalent strain are currently supported:
 \begin{itemize}
-\item
-{\bf Mazars} (1984) definition based on norm of positive part of strain:
+\item {\bf Mazars} (1984) definition based on norm of positive part of strain:
 \begin{equation}
 \label{mazars}
 \tilde\varepsilon=\sqrt{\displaystyle{\sum_{I=1}^{3}}\langle\varepsilon_I\rangle^2}
 \end{equation}
 where $\langle\varepsilon_I\rangle$ are positive parts of 
 principal values of the strain tensor $\mbf{\varepsilon}$.
-\item
-Definitions derived from the {\bf Rankine} criterion of maximum principal stress:
+\item Definitions derived from the {\bf Rankine} criterion of maximum principal stress:
 \begin{eqnarray}
 \label{rankinesmooth}
 \tilde\varepsilon&=&
@@ -1375,15 +1373,13 @@ $\bar{\sigma}_I$, $I=1,2,3$, are the principal
 values of the
 effective stress tensor $\bar{\mbf{\sigma}} = \mbf{D}_e:\mbf{\varepsilon}$
 and $\langle\bar{\sigma}_I\rangle$ are their positive parts.
-\item
-{\bf Energy} norm scaled by Young's modulus to obtain
+\item {\bf Energy} norm scaled by Young's modulus to obtain
 a strain-like quantity:
 \begin{equation}
 \label{energynorm}
 \tilde\varepsilon=\del{1}{E}\sqrt{{\mbf{\varepsilon}:\mbf{D}_e:\mbf{\varepsilon}}}
 \end{equation}
-\item
-{\bf Modified Mises} definition, proposed by de Vree \cite{Vree:95}:
+\item {\bf Modified Mises} definition, proposed by de Vree \cite{Vree:95}:
 \begin{equation}
 \label{modifiedmises}
 \tilde\varepsilon=\frac{(k-1)I_{1\varepsilon}}{2k(1-2\nu)} + \frac{1}{2k}\sqrt{\frac{(k-1)^2}{(1-2\nu)^2}I_{1\varepsilon}^2+\frac{12 k J_{2\varepsilon}}{(1+\nu)^2}} 
@@ -1398,7 +1394,22 @@ $$
 is the second deviatoric strain invariant,
 and $k$ is a model parameter that corresponds to the ratio between the uniaxial
 compressive strength $f_c$ and uniaxial tensile strength $f_t$.
+\item {\bf Griffith} definition, combining Rankine criterion in tension and 
+Griffith's solution on inclined elipsoidal inclusion. This definition
+handles materials in pure tension and also in compression, where
+tensile stresses usually appear on the elipsoidal inclusion.
+First check if Rankine criterion exists
+\begin{eqnarray}
+\label{griffith1}
+\tilde\varepsilon&=&{\del{1}{E}}\max_{I=1}^{3}\bar{\sigma}_I
+\end{eqnarray}
+and if not, use Griffith's solution with ordered principal stresses $\sigma_1>\sigma_3$
+\begin{eqnarray}
+\label{griffith2}
+\tilde\varepsilon&=&{\del{1}{E}}\cdot{\del{-(\sigma_1-\sigma_3)^2}{8(\sigma_1+\sigma_3)}}
+\end{eqnarray}
 \end{itemize}
+
 Note that all these definitions are based on the three-dimensional
 description of strain (and stress). If they are used in a reduced
 problem, the strain components that are not explicitly provided by
@@ -1643,6 +1654,10 @@ of equivalent strain:
 \item[2 -] scaled energy norm,  eq.~(\ref{energynorm})
 \item[3 -] modified Mises, eq.~(\ref{modifiedmises})
 \item[4 -] standard Rankine, eq.~(\ref{rankinestandard})
+\item[5 -] elestic energy based on positive stress
+\item[6 -] elestic energy based on positive strain
+\item[7 -] Rankine and Griffith criterion eqs.~(\ref{griffith1})(\ref{griffith2})
+
 \end{itemize}\\
 &- \param{k} ratio between uniaxial compressive and tensile strength, needed only if equivstraintype=3, default value 1\\
 &- \param{damlaw} allows to choose from different damage laws:
@@ -4091,7 +4106,7 @@ CemhydMat represents a hydrating material based on CEMHYD3D model version 3.0,
 developed at NIST \cite{NISTIR7232}. The model represents a digital hydrating
 microstructure, driven with cellular automata rules and combined with cement
 chemistry. Ordinary Portland cement is treated without any difficulties, blended
-cements are ususally decomposed into hydrating Portland contribution and intert
+cements are usually decomposed into hydrating Portland contribution and intert
 secondary cementitious material. The microstructure size can be from
 $10\times10\times10$ to over $200\times200\times200$~$\mu$m. For standard
 computations the size $50\times50\times50$ suffices.

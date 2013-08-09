@@ -480,6 +480,11 @@ public:
                                       const FloatArray &reducedStrain,
                                       TimeStep *tStep);
 
+    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+
     /**
      * @param gp Gauss point.
      * @param strain Strain vector of this Gauss point.

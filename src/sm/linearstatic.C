@@ -174,7 +174,7 @@ TimeStep *LinearStatic :: giveNextStep()
     //int mstep = 1;
     StateCounterType counter = 1;
 
-    if (previousStep != NULL){
+    if ( previousStep != NULL ) {
         delete previousStep;
     }
 

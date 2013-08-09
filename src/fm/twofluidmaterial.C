@@ -49,7 +49,8 @@ REGISTER_Material( TwoFluidMaterial );
 int
 TwoFluidMaterial :: checkConsistency()
 {
-    return this->giveMaterial(0)->checkConsistency() && this->giveMaterial(1)->checkConsistency();
+    return this->giveMaterial(0)->checkConsistency() && 
+           this->giveMaterial(1)->checkConsistency();
 }
 
 int
@@ -119,9 +120,7 @@ TwoFluidMaterial :: give(int aProperty, GaussPoint *gp)
 MaterialStatus *
 TwoFluidMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    // We can only return one of these, so we return the first one.
-    this->giveMaterial(1)->giveStatus(gp);
-    return this->giveMaterial(0)->giveStatus(gp);
+    return new TwoFluidMaterialStatus(1, this->giveDomain(), gp, this->slaveMaterial);
 }
 
 
@@ -139,6 +138,7 @@ TwoFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, GaussPoint
     answer.add(1.0 - vof, v0);
     answer.add(vof, v1);
 
+    status->letTempDeviatoricStrainRateVectorBe(eps);
     status->letTempDeviatoricStressVectorBe(answer);
 }
 
@@ -183,4 +183,76 @@ TwoFluidMaterial :: giveTempVOF(GaussPoint *gp)
         return 0.0;
     }
 }
+
+
+
+
+TwoFluidMaterialStatus :: TwoFluidMaterialStatus(int n, Domain *d, GaussPoint *g, const IntArray &slaveMaterial) :
+    FluidDynamicMaterialStatus(n, d, g)
+{
+    MaterialMode mmode = gp->giveMaterialMode();
+    int _size = 0;
+
+    if ( mmode == _2dFlow ) {
+        _size = 3;
+    } else if ( mmode == _2dAxiFlow ) {
+        _size = 4;
+    } else if ( mmode == _3dFlow ) {
+        _size = 6;
+    }
+
+    deviatoricStressVector.resize(_size);
+    deviatoricStressVector.zero();
+    deviatoricStrainRateVector.resize(_size);
+    deviatoricStrainRateVector.zero();
+
+    this->slaveStatus0 = static_cast< FluidDynamicMaterialStatus * >( domain->giveMaterial(slaveMaterial( 0 ))->CreateStatus(gp) );
+    this->slaveStatus1 = static_cast< FluidDynamicMaterialStatus * >( domain->giveMaterial(slaveMaterial( 1 ))->CreateStatus(gp) );
+}
+
+
+void
+TwoFluidMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+{
+    this->slaveStatus0->printOutputAt(file, tStep);
+    this->slaveStatus1->printOutputAt(file, tStep);
+}
+
+
+void
+TwoFluidMaterialStatus :: updateYourself(TimeStep *tStep)
+{
+    FluidDynamicMaterialStatus :: updateYourself(tStep);
+    this->slaveStatus0->updateYourself(tStep);
+    this->slaveStatus1->updateYourself(tStep);
+}
+
+
+void
+TwoFluidMaterialStatus :: initTempStatus()
+{
+    FluidDynamicMaterialStatus :: initTempStatus();
+    this->slaveStatus0->initTempStatus();
+    this->slaveStatus1->initTempStatus();
+}
+
+
+contextIOResultType
+TwoFluidMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+{
+    this->slaveStatus0->saveContext(stream, mode, obj);
+    this->slaveStatus1->saveContext(stream, mode, obj);
+    return CIO_OK;
+}
+
+
+contextIOResultType
+TwoFluidMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+{
+    this->slaveStatus0->restoreContext(stream, mode, obj);
+    this->slaveStatus1->restoreContext(stream, mode, obj);
+    return CIO_OK;
+}
+
+
 } // end namespace oofem

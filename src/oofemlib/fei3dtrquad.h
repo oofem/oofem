@@ -41,6 +41,8 @@ namespace oofem {
 /**
  * Second order triangular interpolation in 3D space (6 nodes).
  * @todo This class is entirely unchecked.
+ * @author Jim Brozoulis
+ * @author Mikael Öhman
  */
 class FEI3dTrQuad : public FEInterpolation3d
 {
@@ -87,6 +89,9 @@ public:
     virtual void computeLocalSurfaceMapping(IntArray &edgeNodes, int iedge);
     void surfaceEvalBaseVectorsAt(FloatArray &G1, FloatArray &G2, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void surfaceGiveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+
+    virtual IntegrationRule *giveIntegrationRule(int order);
+    virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary);
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);

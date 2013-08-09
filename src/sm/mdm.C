@@ -89,11 +89,7 @@ MDM :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-    if ( ( mode == _3dMat ) || ( mode == _PlaneStress ) || ( mode == _PlaneStrain ) ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain;
 }
 
 void
@@ -1279,8 +1275,6 @@ MDM :: MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tStep)
 }
 
 
-
-
 int
 MDM :: MMI_update(GaussPoint *gp,  TimeStep *tStep, FloatArray *estrain)
 {
@@ -1295,6 +1289,7 @@ MDM :: MMI_update(GaussPoint *gp,  TimeStep *tStep, FloatArray *estrain)
     return result;
 }
 
+
 int
 MDM :: MMI_finish(TimeStep *tStep)
 {
@@ -1307,8 +1302,6 @@ MDM :: MMI_finish(TimeStep *tStep)
     this->mapper2.finish(tStep);
     return 1;
 }
-
-
 
 
 Interface *

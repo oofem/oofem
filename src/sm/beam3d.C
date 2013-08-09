@@ -256,14 +256,13 @@ int
 Beam3d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 {
     FloatMatrix lcs;
-    int i, j;
 
     answer.resize(6, 6);
     answer.zero();
 
     this->giveLocalCoordinateSystem(lcs);
-    for ( i = 1; i <= 3; i++ ) {
-        for ( j = 1; j <= 3; j++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             answer.at(i, j) = lcs.at(i, j);
             answer.at(3 + i, 3 + j) = lcs.at(i, j);
         }
@@ -277,14 +276,13 @@ Beam3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 // Returns the rotation matrix of the receiver.
 {
     FloatMatrix lcs;
-    int i, j;
 
     answer.resize(12, 12);
     answer.zero();
 
     this->giveLocalCoordinateSystem(lcs);
-    for ( i = 1; i <= 3; i++ ) {
-        for ( j = 1; j <= 3; j++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             answer.at(i, j) = lcs.at(i, j);
             answer.at(i + 3, j + 3) = lcs.at(i, j);
             answer.at(i + 6, j + 6) = lcs.at(i, j);
@@ -462,6 +460,20 @@ Beam3d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
     if ( prescStrainEndForces.giveSize() ) {
         answer.subtract(prescStrainEndForces);
     }
+}
+
+
+void
+Beam3d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->give3dBeamStiffMtrx(answer, rMode, gp, tStep);
+}
+
+
+void
+Beam3d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStress_Beam3d(answer, gp, strain, tStep);
 }
 
 
@@ -896,22 +908,19 @@ Beam3d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-Beam3d :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &answer, GaussPoint *masterGp,
+Beam3d :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &answer, const FloatArray &masterGpStrain,
                                                                   GaussPoint *slaveGp, TimeStep *tStep)
 {
-    FloatArray masterGpStrain;
     double layerYCoord, layerZCoord;
 
-    this->computeStrainVector(masterGpStrain, masterGp, tStep);
     layerZCoord = slaveGp->giveCoordinate(2);
     layerYCoord = slaveGp->giveCoordinate(1);
 
-    answer.resize(6);  // {Exx,Eyy,Ezz,GMyz,GMzx,GMxy}
-    answer.zero();
+    answer.resize(3);  // {Exx,GMzx,GMxy}
 
     answer.at(1) = masterGpStrain.at(1) + masterGpStrain.at(5) * layerZCoord - masterGpStrain.at(6) * layerYCoord;
-    answer.at(5) = masterGpStrain.at(2);
-    answer.at(6) = masterGpStrain.at(3);
+    answer.at(2) = masterGpStrain.at(2);
+    answer.at(3) = masterGpStrain.at(3);
 }
 
 

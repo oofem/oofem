@@ -113,6 +113,20 @@ LIBeam3d :: computeGaussPoints()
 
 
 void
+LIBeam3d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->give3dBeamStiffMtrx(answer, rMode, gp, tStep);
+}
+
+
+void
+LIBeam3d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStress_Beam3d(answer, gp, strain, tStep);
+}
+
+
+void
 LIBeam3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver. This expression is
 // valid in both local and global axes.
@@ -121,8 +135,8 @@ LIBeam3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     double halfMass;
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
-    mat        = this->giveMaterial();
-    halfMass   = mat->give('d', gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
+    mat = this->giveMaterial();
+    halfMass = mat->give('d', gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
     answer.resize(12, 12);
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
@@ -172,14 +186,13 @@ bool
 LIBeam3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 {
     FloatMatrix lcs;
-    int i, j;
 
     answer.resize(12, 12);
     answer.zero();
 
     this->giveLocalCoordinateSystem(lcs);
-    for ( i = 1; i <= 3; i++ ) {
-        for ( j = 1; j <= 3; j++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             answer.at(i, j) = lcs.at(i, j);
             answer.at(i + 3, j + 3) = lcs.at(i, j);
             answer.at(i + 6, j + 6) = lcs.at(i, j);
@@ -213,8 +226,8 @@ LIBeam3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoor
     double ksi, n1, n2;
 
     ksi = lcoords.at(1);
-    n1  = ( 1. - ksi ) * 0.5;
-    n2  = ( 1. + ksi ) * 0.5;
+    n1 = ( 1. - ksi ) * 0.5;
+    n2 = ( 1. + ksi ) * 0.5;
 
     answer.resize(3);
     answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this->giveNode(2)->giveCoordinate(1);
@@ -411,22 +424,19 @@ LIBeam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 }
 
 void
-LIBeam3d :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &answer, GaussPoint *masterGp,
+LIBeam3d :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &answer, const FloatArray &masterGpStrain,
                                                                     GaussPoint *slaveGp, TimeStep *tStep)
 {
-    FloatArray masterGpStrain;
     double layerYCoord, layerZCoord;
 
-    this->computeStrainVector(masterGpStrain, masterGp, tStep);
     layerZCoord = slaveGp->giveCoordinate(2);
     layerYCoord = slaveGp->giveCoordinate(1);
 
-    answer.resize(6); // {Exx,Eyy,Ezz,GMyz,GMzx,GMxy}
-    answer.zero();
+    answer.resize(3); // {Exx,GMzx,GMxy}
 
     answer.at(1) = masterGpStrain.at(1) + masterGpStrain.at(5) * layerZCoord - masterGpStrain.at(6) * layerYCoord;
-    answer.at(5) = masterGpStrain.at(2);
-    answer.at(6) = masterGpStrain.at(3);
+    answer.at(2) = masterGpStrain.at(2);
+    answer.at(3) = masterGpStrain.at(3);
 }
 
 Interface *
