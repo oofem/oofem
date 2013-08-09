@@ -89,6 +89,8 @@ public:
     virtual double edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo);
 
+    virtual IntegrationRule *giveIntegrationRule(int order);
+
 protected:
     virtual void giveDerivatives(FloatMatrix &dn, const FloatArray &lc);
 };

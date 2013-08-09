@@ -36,7 +36,6 @@
 #define feinterpol1d_h
 
 #include "feinterpol.h"
-#include "floatarray.h"
 
 namespace oofem {
 /**
@@ -48,11 +47,11 @@ public:
     FEInterpolation1d(int o) : FEInterpolation(o) { }
     virtual int giveNsd() { return 1; }
 
-    virtual void boundaryGiveNodes(IntArray &answer, int boundary) { OOFEM_ERROR("FEInterpolation1d :: boundaryGiveNodes - Not implemented"); }
-    virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { answer.resize(1); answer.at(1) = 1.0; }
-    virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { OOFEM_ERROR("FEInterpolation1d :: boundaryGiveNodes - Not implemented"); return 1.; }
-    virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { return 1.0; }
-    virtual void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { answer = *cellgeo.giveVertexCoordinates(boundary); }
+    virtual void boundaryGiveNodes(IntArray &answer, int boundary);
+    virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     /**
      * Computes the exact length.
      * @param cellgeo Cell geometry for the element.
@@ -60,6 +59,9 @@ public:
      */
     virtual double giveLength(const FEICellGeometry &cellgeo) const
     { OOFEM_ERROR("FEInterpolation1d :: giveLength - Not implemented in subclass."); return 0; }
+
+    virtual IntegrationRule *giveIntegrationRule(int order);
+    virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary);
 };
 } // end namespace oofem
 #endif // feinterpol1d_h

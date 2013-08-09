@@ -136,9 +136,6 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_MixedGradientPressureWeakPeriodic_Name; }
     
 protected:
-    /// Helper function that creates suitable integration rule
-    IntegrationRule *CreateIntegrationRule(Element *e, int boundary, int order);
-
     void integrateTractionVelocityTangent(FloatMatrix &answer, Element *el, int boundary);
     void integrateTractionXTangent(FloatMatrix &answer, Element *el, int boundary);
     void integrateTractionDev(FloatArray &answer, Element *el, int boundary);

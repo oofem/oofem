@@ -193,30 +193,6 @@ void MixedGradientPressureWeakPeriodic :: giveLocationArrays(std::vector<IntArra
 }
 
 
-IntegrationRule *MixedGradientPressureWeakPeriodic :: CreateIntegrationRule(Element *e, int boundary, int order)
-{
-    // The element should give us most/all of this information;
-    GaussIntegrationRule *ir = new GaussIntegrationRule(1, e);
-    MaterialMode matMode = e->giveMaterialMode();
-    ///@todo We need to obtain this from the element itself:
-    //FEInterpolation *fei = e->giveInterpolation();
-    //integrationDomain id = fei->giveBoundaryDomainType(boundary);
-    integrationDomain id;
-    int nsd = this->domain->giveNumberOfSpatialDimensions();
-    if (nsd == 3) {
-        //id = _Triangle;
-        id = _Square;
-    } else if (nsd == 2) {
-        id = _Line;
-    } else {
-        id = _Point;
-    }
-    int nPoints = ir->getRequiredNumberOfIntegrationPoints(id, order);
-    ir->setUpIntegrationPoints(id, nPoints, matMode);
-    return ir;
-}
-
-
 void MixedGradientPressureWeakPeriodic :: integrateTractionVelocityTangent(FloatMatrix &answer, Element *el, int boundary)
 {
     // Computes the integral: int dt . dv dA
@@ -226,8 +202,9 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionVelocityTangent(Float
     
     FEInterpolation *interp = el->giveInterpolation(); // Geometry interpolation. The displacements or velocities must have the same interpolation scheme (on the boundary at least).
 
+    ///@todo Check the order here:
     int maxorder = this->order + interp->giveInterpolationOrder()*3 - 2;
-    IntegrationRule *ir = this->CreateIntegrationRule(el, boundary, maxorder);
+    IntegrationRule *ir = interp->giveBoundaryIntegrationRule(maxorder, boundary);
     int nsd = el->giveDomain()->giveNumberOfSpatialDimensions();
     int total = nsd * nsd * pow(order + 1, nsd - 1);
 
@@ -281,7 +258,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionXTangent(FloatMatrix 
     FEInterpolation *interp = el->giveInterpolation(); // Geometry interpolation. The displacements or velocities must have the same interpolation scheme (on the boundary at least).
 
     int maxorder = this->order + interp->giveInterpolationOrder()*3 - 2;
-    IntegrationRule *ir = this->CreateIntegrationRule(el, boundary, maxorder);
+    IntegrationRule *ir = interp->giveBoundaryIntegrationRule(maxorder, boundary);
     int nsd = el->giveDomain()->giveNumberOfSpatialDimensions();
     int total = nsd * nsd * pow(order + 1, nsd - 1);
 
@@ -332,7 +309,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionDev(FloatArray &answe
     FEInterpolation *interp = el->giveInterpolation(); // Geometry interpolation. The displacements or velocities must have the same interpolation scheme (on the boundary at least).
 
     int maxorder = this->order + interp->giveInterpolationOrder()*3 - 2;
-    IntegrationRule *ir = this->CreateIntegrationRule(el, boundary, maxorder);
+    IntegrationRule *ir = interp->giveBoundaryIntegrationRule(maxorder, boundary);
     int nsd = el->giveDomain()->giveNumberOfSpatialDimensions();
     int total = nsd * nsd * pow(order + 1, nsd - 1);
 

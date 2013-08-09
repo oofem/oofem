@@ -72,7 +72,7 @@ public:
 
     // Edge (same as bulk for this type, so they are all ignored) (perhaps do it the other way around?).
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) {};
-    virtual void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { };
+    virtual void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { }
     virtual double edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeEvaldNds(FloatArray &answer, int iedge,
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo);
@@ -80,7 +80,9 @@ public:
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
-                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo) {};
+                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo) {}
+
+    virtual IntegrationRule *giveIntegrationRule(int order);
 };
 } // end namespace oofem
 #endif // fei2dlinehermite_h

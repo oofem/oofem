@@ -350,4 +350,16 @@ IntegrationRule :: setUpEmbeddedIntegrationPoints(integrationDomain mode, int nP
 
     return 0;
 }
+
+
+int IntegrationRule :: SetUpPoint(MaterialMode mode)
+{
+    this->numberOfIntegrationPoints = 1;
+    this->gaussPointArray = new GaussPoint * [ this->numberOfIntegrationPoints ];
+    FloatArray *coord = new FloatArray(0);
+    this->gaussPointArray [ 0 ] = new GaussPoint(this, 1, coord, 1.0, mode);
+    this->intdomain = _Point;
+    return this->numberOfIntegrationPoints;
+}
+
 } // end namespace oofem

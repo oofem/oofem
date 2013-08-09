@@ -60,6 +60,9 @@ public:
     virtual void computeLocalSurfaceMapping(IntArray &nodes, int iSurf);
     virtual double evalNXIntegral(int iSurf, const FEICellGeometry &cellgeo);
 
+    virtual IntegrationRule *giveIntegrationRule(int order);
+    virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary);
+
 protected:
     virtual void giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords);
 };
