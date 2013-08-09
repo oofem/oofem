@@ -139,7 +139,7 @@ public:
 
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) {
-      return this->plate->computeGlobalCoordinates (answer, lcoords);
+        return this->plate->computeGlobalCoordinates (answer, lcoords);
     }
 
 protected:

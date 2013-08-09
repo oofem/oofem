@@ -40,12 +40,14 @@
 #include "intarray.h"
 #include "integrationdomain.h"
 #include "elementgeometrytype.h"
+#include "materialmode.h"
 
 namespace oofem {
 class Element;
 class FloatArray;
 class FloatMatrix;
 class IntArray;
+class IntegrationRule;
 
 /**
  * Class representing a general abstraction for cell geometry.
@@ -302,10 +304,6 @@ public:
     virtual int giveNsd() = 0;
     //@}
 
-    // Needs the jacobian matrix to determine the condition number.
-    friend class MeshQualityErrorEstimator;
-
-protected:
     /**
      * Gives the jacobian matrix at the local coordinates.
      * @param jacobianMatrix The requested matrix.
@@ -314,6 +312,22 @@ protected:
      */
     virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("FEInterpolation::giveJacobianMatrixAt : Not overloaded."); }
+
+    /**
+     * Sets up a suitable integration rule for numerical integrating over volume.
+     * The required polynomial order for the determinant of the jacobian is added automatically.
+     * @param order Polynomial order of integrand (should NOT including determinant of jacobian).
+     * @param boundary Boundary number.
+     * @param mode Material mode which is used in all the constructed GaussPoints.
+     */
+    virtual IntegrationRule *giveIntegrationRule(int order) = 0;
+    /**
+     * Sets up a suitable integration rule for integrating over the requested boundary.
+     * The required polynomial order for the determinant of the jacobian is added automatically.
+     * @param order Polynomial order of the integrand (should NOT including determinant of jacobian).
+     * @param boundary Boundary number.
+     */
+    virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary) = 0;
 };
 } // end namespace oofem
 #endif // feinterpol_h

@@ -261,9 +261,11 @@ void FloatArray :: plusProduct(const FloatMatrix &b, const FloatArray &s, double
 #  endif
 
 #ifdef __LAPACK_MODULE
+    int nRows = b.giveNumberOfRows();
+    int nColumns = b.giveNumberOfColumns();
     double beta = 1.;
     int inc = 1;
-    dgemv_("t", &nRows, &nColumns, &dV, aMatrix.givePointer(), &nRows, anArray.values, &inc, &beta, this->values, &inc, nColumns, nColumns, nRows );
+    dgemv_("t", &nRows, &nColumns, &dV, b.givePointer(), &nRows, s.values, &inc, &beta, this->values, &inc, nColumns, nColumns, nRows );
 #else
     for ( int i = 1; i <= b.giveNumberOfColumns(); i++ ) {
         double sum = 0.;

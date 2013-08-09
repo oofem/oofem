@@ -167,9 +167,7 @@ void Tet1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSte
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
 
-    FloatArray momentum(15), conservation(4);
-    momentum.zero();
-    conservation.zero();
+    FloatArray momentum, conservation;
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);

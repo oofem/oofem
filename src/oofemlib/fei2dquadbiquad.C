@@ -35,6 +35,7 @@
 #include "fei2dquadbiquad.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "gaussintegrationrule.h"
 
 namespace oofem {
 
@@ -108,5 +109,15 @@ FEI2dQuadBiQuad :: giveDerivatives(FloatMatrix &dN, const FloatArray &lc)
     dN.at(7,2) = a[1] * db[2];
     dN.at(3,2) = a[2] * db[2];
 }
+
+
+IntegrationRule *FEI2dQuadBiQuad :: giveIntegrationRule(int order)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 6);
+    iRule->SetUpPointsOnSquare(points, _Unknown);
+    return iRule;
+}
+
 
 } // end namespace oofem

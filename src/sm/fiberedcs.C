@@ -150,6 +150,11 @@ FiberedCrossSection :: giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, 
 }
 
 
+void
+FiberedCrossSection :: giveRealStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_MembraneRot - Not supported in given cross-section (yet).");
+}
 
 
 void
@@ -260,6 +265,13 @@ void
 FiberedCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     OOFEM_ERROR("FiberedCrossSection :: give3dShellStiffMtrx - Not implemented\n");
+}
+
+
+void
+FiberedCrossSection :: giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    OOFEM_ERROR("FiberedCrossSection :: giveMembraneRotStiffMtrx - Not implemented\n");
 }
 
 

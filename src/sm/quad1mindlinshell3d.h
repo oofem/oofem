@@ -40,7 +40,6 @@
 ///@name Input fields for Quad1MindlinShell3D element
 //@{
 #define _IFT_Quad1MindlinShell3D_Name "quad1mindlinshell3d"
-#define _IFT_Quad1MindlinShell3D_alpha "alpha"
 //@}
 
 namespace oofem {
@@ -75,9 +74,6 @@ protected:
 
     static FEI2dQuadLin interp;
     int numberOfGaussPoints;
-
-    /// Coefficient for the drilling stiffness.
-    double alpha;
 
     /// Ordering for the normal shell stiffness (everything but the out-of-plane rotations)
     static IntArray shellOrdering;

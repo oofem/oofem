@@ -280,7 +280,7 @@ Element :: computeNumberOfPrimaryMasterDofs(EquationID ut)
     for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
         this->giveInternalDofManDofIDMask(i, ut, nodeDofIDMask);
         this->giveInternalDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
-        answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
+        answer += this->giveInternalDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
     }
     return answer;
 }
@@ -300,18 +300,18 @@ Element :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
 #ifdef DEBUG
     if ( is_GtoL ) {
         if ( GtoL.giveNumberOfColumns() != this->computeNumberOfGlobalDofs(eid) ) {
-            _error("StructuralElement :: updateRotationMatrix - GtoL transformation matrix size mismatch in columns");
+            _error("Element :: updateRotationMatrix - GtoL transformation matrix size mismatch in columns");
         }
         if ( GtoL.giveNumberOfRows() != this->computeNumberOfDofs(eid) ) {
-            _error("StructuralElement :: updateRotationMatrix - GtoL transformation matrix size mismatch in rows");
+            _error("Element :: updateRotationMatrix - GtoL transformation matrix size mismatch in rows");
         }
     }
     if ( is_NtoG ) {
         if ( NtoG.giveNumberOfColumns() != this->computeNumberOfPrimaryMasterDofs(eid) ) {
-            _error("StructuralElement :: updateRotationMatrix - NtoG transformation matrix size mismatch in columns");
+            _error("Element :: updateRotationMatrix - NtoG transformation matrix size mismatch in columns");
         }
         if ( NtoG.giveNumberOfRows() != this->computeNumberOfGlobalDofs(eid) ) {
-            _error("StructuralElement :: updateRotationMatrix - NtoG transformation matrix size mismatch in rows");
+            _error("Element :: updateRotationMatrix - NtoG transformation matrix size mismatch in rows");
         }
     }
 #endif
@@ -374,6 +374,26 @@ Element :: computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &n
         lastRowPos += nr;
         lastColPos += nc;
     }
+    // This is really messy. I wanted to avoid two very similar functions, but the internal dof managers make it hard. These shouldn't be included for boundaries..
+    for (int i = 1; i <= this->giveNumberOfInternalDofManagers(); i++ ) {
+        this->giveInternalDofManDofIDMask(i, eid, dofIDmask);
+        if (!this->giveInternalDofManager(nodes.at(i))->computeM2GTransformation(dofManT, dofIDmask)) {
+            dofManT.resize(dofIDmask.giveSize(), dofIDmask.giveSize());
+            dofManT.zero();
+            dofManT.beUnitMatrix();
+        }
+        nc = dofManT.giveNumberOfColumns();
+        nr = dofManT.giveNumberOfRows();
+        for (int j = 1; j <= nr; j++ ) {
+            for (int k = 1; k <= nc; k++ ) {
+                // localize node contributions
+                answer.at(lastRowPos + j, lastColPos + k) = dofManT.at(j, k);
+            }
+        }
+
+        lastRowPos += nr;
+        lastColPos += nc;
+    }
     answer.resizeWithData(answer.giveNumberOfRows(), lastColPos);
     return true;
 }
@@ -420,7 +440,7 @@ Element :: giveLocationArray(IntArray &locationArray, EquationID eid, const Unkn
         this->giveInternalDofManager(i)->giveLocationArray(dofIDMask, nodalArray, s);
         locationArray.followedBy(nodalArray);
         if (dofIdArray) {
-            this->giveDofManager(i)->giveMasterDofIDArray(dofIDMask, masterDofIDs);
+            this->giveInternalDofManager(i)->giveMasterDofIDArray(dofIDMask, masterDofIDs);
             dofIdArray->followedBy(masterDofIDs);
         }
     }

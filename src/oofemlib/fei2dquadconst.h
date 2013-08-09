@@ -71,6 +71,8 @@ public:
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
+    virtual IntegrationRule *giveIntegrationRule(int order);
+
 protected:
     /**
      * Computes the length of a given edge.

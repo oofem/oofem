@@ -73,7 +73,7 @@ protected:
     double pressure;
 
     /// Order if polynomials
-    double order;
+    int order;
 
     /// DOF-manager containing the unknown volumetric gradient (always exactly one dof).
     Node *voldman;
@@ -136,12 +136,10 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_MixedGradientPressureWeakPeriodic_Name; }
     
 protected:
-    /// Helper function that creates suitable integration rule
-    IntegrationRule *CreateIntegrationRule(Element *e, int boundary, int order);
-
     void integrateTractionVelocityTangent(FloatMatrix &answer, Element *el, int boundary);
     void integrateTractionXTangent(FloatMatrix &answer, Element *el, int boundary);
     void integrateTractionDev(FloatArray &answer, Element *el, int boundary);
+    void evaluateTractionBasisFunctions(FloatArray &answer, const FloatArray &coords);
 };
 } // end namespace oofem
 

@@ -442,7 +442,6 @@ StructuralElement :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer
 {
     // TemperatureLoad   *load;
     double dV;
-    GaussPoint *gp;
     FloatArray et, de, bde;
     FloatMatrix b, d;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
@@ -455,7 +454,7 @@ StructuralElement :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer
     // complete volume
     answer.resize(0);
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
         cs->computeStressIndependentStrainVector(et, gp, tStep, mode);
         if ( et.giveSize() ) {
             this->computeBmatrixAt(gp, b);
@@ -488,7 +487,6 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     int nip, ndofs = computeNumberOfDofs(EID_MomentumBalance);
     double density, dV;
     FloatMatrix n;
-    GaussPoint *gp;
     GaussIntegrationRule iRule(1, this, 1, 1);
     IntArray mask;
 
@@ -511,7 +509,7 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     mass = 0.;
 
     for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule.getIntegrationPoint(i);
+        GaussPoint *gp = iRule.getIntegrationPoint(i);
         this->computeNmatrixAt(gp, n);
         density = this->giveMaterial()->give('d', gp);
         dV = this->computeVolumeAround(gp);

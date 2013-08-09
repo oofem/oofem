@@ -97,6 +97,7 @@ class StructuralElement : public Element
 protected:
     /// Initial displacement vector, describes the initial nodal displacements when element has been casted.
     FloatArray *initialDisplacements;
+
 public:
     /**
      * Constructor. Creates structural element with given number, belonging to given domain.

@@ -1380,8 +1380,8 @@ void FloatMatrix :: resizeWithData(int rows, int columns)
 
         allocatedSize = rows * columns; // REMEMBER NEW ALLOCATED SIZE
         values = ALLOC(allocatedSize);
-        memset(values, 0, allocatedSize*sizeof(double) );
     }
+    memset(values, 0, allocatedSize*sizeof(double) );
 
     this->nRows = rows;
     this->nColumns = columns;

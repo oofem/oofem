@@ -92,6 +92,9 @@ public:
     virtual void computeLocalSurfaceMapping(IntArray &edgeNodes, int iedge);
     virtual double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo);
 
+    virtual IntegrationRule *giveIntegrationRule(int order);
+    virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary);
+
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
 
