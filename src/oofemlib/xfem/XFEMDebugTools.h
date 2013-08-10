@@ -12,17 +12,14 @@
 #include <fstream>
 
 namespace oofem {
-
-class XFEMDebugTools {
+class XFEMDebugTools
+{
 public:
-	XFEMDebugTools();
-	virtual ~XFEMDebugTools();
+    XFEMDebugTools();
+    virtual ~XFEMDebugTools();
 
-	static void WriteTrianglesToVTK( const std::string &iName, const AList< Triangle > &iTriangles );
-	static void WritePointsToVTK( const std::string &iName, const std::vector<FloatArray> &iPoints);
-
-
+    static void WriteTrianglesToVTK(const std :: string &iName, const AList< Triangle > &iTriangles);
+    static void WritePointsToVTK(const std :: string &iName, const std :: vector< FloatArray > &iPoints);
 };
-
 } /* namespace oofem */
 #endif /* XFEMDEBUGTOOLS_H_ */

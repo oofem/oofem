@@ -46,7 +46,7 @@ class Triangle;
  * O(n4) algorithm, only for testing purposes.
  * @author chamrova
  *
- * 	// Yes, but 4th order in n. For the xfem element subdivision, n does not increase when the mesh is refined. Time
+ *  // Yes, but 4th order in n. For the xfem element subdivision, n does not increase when the mesh is refined. Time
  *	// will tell if it is too slow ... /ES
  * @author Erik Svenning
  */
@@ -56,8 +56,7 @@ public:
     bool colinear(FloatArray *p1, FloatArray *p2, FloatArray *p3);
     void printTriangles(AList< Triangle > *triangles);
     bool isInsideCC(FloatArray *p, FloatArray *p1, FloatArray *p2, FloatArray *p3);
-    void triangulate(const std::vector< FloatArray > &iVertices, AList< Triangle > *triangles);
+    void triangulate(const std :: vector< FloatArray > &iVertices, AList< Triangle > *triangles);
 };
 } // end namespace oofem
 #endif  // delaunay_h
-
