@@ -294,14 +294,14 @@ void Tr1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLo
             FloatArray *lcoords = gp->giveCoordinates();
 
             this->interp.edgeEvalN(N, iEdge, * lcoords, FEIElementGeometryWrapper(this));
-            double detJ = fabs(this->interp.edgeGiveTransformationJacobian(iEdge, * lcoords, FEIElementGeometryWrapper(this)));
+            double detJ = fabs(this->interp.boundaryGiveTransformationJacobian(iEdge, * lcoords, FEIElementGeometryWrapper(this)));
             double dS = gp->giveWeight() * detJ;
 
             if ( boundaryLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) { // Edge load in xi-eta system
                 boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
             } else { // Edge load in x-y system
                 FloatArray gcoords;
-                this->interp.edgeLocal2global(gcoords, iEdge, * lcoords, FEIElementGeometryWrapper(this));
+                this->interp.boundaryLocal2Global(gcoords, iEdge, * lcoords, FEIElementGeometryWrapper(this));
                 boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
             }
 
