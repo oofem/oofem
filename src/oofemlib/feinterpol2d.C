@@ -118,4 +118,11 @@ IntegrationRule *FEInterpolation2d :: giveBoundaryIntegrationRule(int order, int
     return iRule;
 }
 
+IntegrationRule *FEInterpolation2d :: giveBoundaryEdgeIntegrationRule(int order, int boundary)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    iRule->SetUpPoint(_Unknown);
+    return iRule;
+}
+
 } // end namespace oofem

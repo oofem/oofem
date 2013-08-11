@@ -52,28 +52,18 @@ public:
      * @param cellgeo Cell geometry for the element.
      * @return Volume of geometry.
      */
-    virtual double giveVolume(const FEICellGeometry &cellgeo) const
-    { OOFEM_ERROR("FEInterpolation3d :: giveVolume - Not implemented in subclass."); return 0; }
+    virtual double giveVolume(const FEICellGeometry &cellgeo) const;
 
-    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary)
-    { this->computeLocalEdgeMapping(answer, boundary); }
-    virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { this->edgeEvalN(answer, boundary, lcoords, cellgeo); }
-    virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { return this->edgeGiveTransformationJacobian(boundary, lcoords, cellgeo);}
-    virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { this->edgeLocal2global(answer, boundary, lcoords, cellgeo); }
+    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary);
+    virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
-    virtual void boundaryGiveNodes(IntArray &answer, int boundary)
-    { this->computeLocalSurfaceMapping(answer, boundary); }
-    virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { this->surfaceEvalN(answer, boundary, lcoords, cellgeo); }
-    virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { return this->surfaceEvalNormal(answer, boundary, lcoords, cellgeo); }
-    virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { return this->surfaceGiveTransformationJacobian(boundary, lcoords, cellgeo); }
-    virtual void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { return this->surfaceLocal2global(answer, boundary, lcoords, cellgeo); }
+    virtual void boundaryGiveNodes(IntArray &answer, int boundary);
+    virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
     /**@name Edge interpolation services */
     //@{
@@ -104,10 +94,7 @@ public:
      * @param cellgeo Underlying cell geometry.
      */
     virtual void edgeEvaldNdxi(FloatArray &answer, int iedge,
-                              const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    {
-        OOFEM_ERROR("FEInterpolation3D :: edgeEvaldNdxi - Not implemented");
-    }
+                              const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     /**
      * Evaluates edge global coordinates from given local ones.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined).
@@ -130,14 +117,7 @@ public:
                                                   const FEICellGeometry &cellgeo) = 0;
 
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) = 0;
-    void computeEdgeMapping(IntArray &edgeNodes, IntArray &elemNodes, int iedge) {
-        int size;
-        IntArray ln;
-        this->computeLocalEdgeMapping(ln, iedge);
-        size = ln.giveSize();
-        edgeNodes.resize(size);
-        for ( int i = 1; i <= size; i++ ) { edgeNodes.at(i) = elemNodes.at( ln.at(i) ); }
-    }
+    void computeEdgeMapping(IntArray &edgeNodes, IntArray &elemNodes, int iedge);
     //@}
 
     /**@name Surface interpolation services */
@@ -159,10 +139,7 @@ public:
      * @param cellgeo Underlying cell geometry.
      */
     virtual void surfaceEvaldNdx (FloatMatrix&answer, int isurf,
-            const FloatArray& lcoords, const FEICellGeometry& cellgeo)
-    {
-        OOFEM_ERROR("FEInterpolation3D :: surfaceEvaldNdx - Not implemented");
-    }
+            const FloatArray& lcoords, const FEICellGeometry& cellgeo);
     /**
      * Evaluates the normal out of the surface at given point.
      * @param answer Contains resulting normal vector.
@@ -172,11 +149,7 @@ public:
      * @return Surface mapping jacobian.
      */
     virtual double surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords,
-            const FEICellGeometry &cellgeo)
-    {
-        OOFEM_ERROR("FEInterpolation3D :: surfaceEvalNormal - Not implemented");
-        return -1.0;
-    }
+            const FEICellGeometry &cellgeo);
 
     /**
      * Evaluates edge global coordinates from given local ones.
@@ -199,15 +172,10 @@ public:
                                                      const FEICellGeometry &cellgeo) = 0;
 
     virtual void computeLocalSurfaceMapping(IntArray &surfNodes, int isurf) = 0;
-    void computeSurfaceMapping(IntArray &surfNodes, IntArray &elemNodes, int isurf) {
-        int i, size;
-        IntArray ln;
-        this->computeLocalSurfaceMapping(ln, isurf);
-        size = ln.giveSize();
-        surfNodes.resize(size);
-        for ( i = 1; i <= size; i++ ) { surfNodes.at(i) = elemNodes.at( ln.at(i) ); }
-    }
+    void computeSurfaceMapping(IntArray &surfNodes, IntArray &elemNodes, int isurf);
     //@}
+
+    virtual IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary);
 };
 } // end namespace oofem
 #endif // feinterpol3d_h

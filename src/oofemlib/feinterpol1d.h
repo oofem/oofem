@@ -71,6 +71,7 @@ public:
 
     virtual IntegrationRule *giveIntegrationRule(int order);
     virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary);
+    virtual IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary);
 };
 } // end namespace oofem
 #endif // feinterpol1d_h

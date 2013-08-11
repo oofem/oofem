@@ -373,6 +373,13 @@ public:
      * @param boundary Boundary number.
      */
     virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary) = 0;
+    /**
+     * Sets up a suitable integration rule for integrating over the requested boundary.
+     * The required polynomial order for the determinant of the jacobian is added automatically.
+     * @param order Polynomial order of the integrand (should NOT including determinant of jacobian).
+     * @param boundary Boundary number.
+     */
+    virtual IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary) = 0;
 };
 } // end namespace oofem
 #endif // feinterpol_h
