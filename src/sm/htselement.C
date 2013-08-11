@@ -62,7 +62,7 @@ HTSelement :: HTSelement(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 
 
 void
-HTSelement ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+HTSelement :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 
 {
     if(inode <= numberOfEdges)
@@ -135,7 +135,7 @@ HTSelement :: computeCenterOfGravity()
 }
 
 Node*
-HTSelement ::  giveSideNode(int elementSideNumber, int nodeNumber)
+HTSelement :: giveSideNode(int elementSideNumber, int nodeNumber)
 {
     int firstNodeNumber = elementSideNumber;
     int secondNodeNumber = elementSideNumber + 1;

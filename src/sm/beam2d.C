@@ -270,8 +270,7 @@ Beam2d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 double
 Beam2d :: computeVolumeAround(GaussPoint *gp)
 {
-    double weight  = gp->giveWeight();
-    return weight * 0.5 * this->giveLength();
+    return 0.5 * this->giveLength() * gp->giveWeight();
 }
 
 

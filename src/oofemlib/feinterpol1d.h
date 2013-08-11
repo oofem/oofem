@@ -52,7 +52,7 @@ public:
     virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); }
     virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); }
+    { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); return 0.; }
     virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); }
 

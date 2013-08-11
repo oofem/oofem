@@ -200,7 +200,7 @@ MicroplaneMaterial :: restoreIPContext(DataStream *stream, ContextMode mode, Gau
 
 
 void
-MicroplaneMaterial ::  giveMicroplaneNormal(FloatArray &answer, Microplane *mplane)
+MicroplaneMaterial :: giveMicroplaneNormal(FloatArray &answer, Microplane *mplane)
 {
     int mnumber = mplane->giveNumber();
     answer.resize(3);

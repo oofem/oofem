@@ -119,7 +119,7 @@ Tet1_3D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) 
 }
 
 void
-Tet1_3D_SUPG ::   giveElementDofIDMask(EquationID ut, IntArray &answer) const
+Tet1_3D_SUPG :: giveElementDofIDMask(EquationID ut, IntArray &answer) const
 {
     this->giveDofManDofIDMask(1, ut, answer);
 }
@@ -226,14 +226,13 @@ Tet1_3D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep
 void
 Tet1_3D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    int i;
     FloatMatrix dn(4, 3);
     interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(6, 12);
     answer.zero();
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, 3 * i - 2) = dn.at(i, 1);
         answer.at(2, 3 * i - 1) = dn.at(i, 2);
         answer.at(3, 3 * i - 0) = dn.at(i, 3);
@@ -252,14 +251,13 @@ Tet1_3D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 void
 Tet1_3D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    int i;
     FloatMatrix dn(4, 3);
     interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(1, 12);
     answer.zero();
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, 3 * i - 2) = dn.at(i, 1);
         answer.at(1, 3 * i - 1) = dn.at(i, 2);
         answer.at(1, 3 * i - 0) = dn.at(i, 3);

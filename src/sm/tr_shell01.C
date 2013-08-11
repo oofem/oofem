@@ -549,7 +549,7 @@ TR_SHELL01 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 }
 
 void
-TR_SHELL01  :: drawScalar(oofegGraphicContext &context)
+TR_SHELL01 :: drawScalar(oofegGraphicContext &context)
 {
     int i, indx, result = 0;
     WCRec p [ 3 ];
@@ -613,7 +613,7 @@ TR_SHELL01  :: drawScalar(oofegGraphicContext &context)
 
 /*
  * void
- * CCTPlate  :: drawInternalState (oofegGraphicContext & gc)
+ * CCTPlate :: drawInternalState (oofegGraphicContext & gc)
  * //
  * // Draws internal state graphics representation
  * //

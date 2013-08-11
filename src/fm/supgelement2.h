@@ -126,7 +126,7 @@ protected:
     virtual int giveNumberOfSpatialDimensions() = 0;
 
     //virtual void computeEdgeNuMatrix (FloatMatrix& answer, GaussPoint* gp) = 0;
-    //virtual double computeBoundaryVolumeAround (GaussPoint*, int iedge) = 0;
+    //virtual double computeSurfaceVolumeAround (GaussPoint*, int iedge) = 0;
     //virtual void computeEdgeIpGlobalCoords (FloatArray& answer, GaussPoint* gp, int iedge) = 0;
     //virtual int computeLoadGToLRotationMtrx (FloatMatrix& answer) = 0;
     //virtual int computeLoadLBToLRotationMatrix (FloatMatrix& answer, int iedge, GaussPoint* gp) = 0;

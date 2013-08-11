@@ -491,7 +491,7 @@ RheoChainMaterial :: initializeFrom(InputRecord *ir)
 }
 
 LinearElasticMaterial *
-RheoChainMaterial ::  giveLinearElasticMaterial()
+RheoChainMaterial :: giveLinearElasticMaterial()
 {
     if ( linearElasticMaterial == NULL ) {
         linearElasticMaterial = new IsotropicLinearElasticMaterial(this->giveNumber(),

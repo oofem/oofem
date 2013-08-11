@@ -439,7 +439,7 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
 }
 
 void
-PlaneStress2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+PlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
     answer.setValues(2, D_u, D_v);
 }
