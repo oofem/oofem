@@ -117,6 +117,8 @@ public:
 
 /**
  * Class representing a general abstraction for finite element interpolation class.
+ * The boundary functions denote the (numbered) region that is 1 spatial dimension less (i.e. edges for 2D interpolators, surfaces for 3D).
+ * The boundaryEdge functions denote the (numbered) regions that is 2 spatial dimensions less (i.e. corners for 2D interpolators, edges for 3D).
  */
 class FEInterpolation
 {
@@ -203,8 +205,11 @@ public:
 
     /// Initializes receiver according to object description stored in input record.
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
-    
-    /**@name General boundary functions */
+
+    /** @name Edge boundary functions.
+     * Boundary edges are defined as corners for 2D geometries and surfaces for 3D geometries.
+     * This is the 
+     */
     //@{
     /**
      * Gives the boundary nodes for requested boundary number.
@@ -212,8 +217,7 @@ public:
      * @param answer Array to be filled with the boundary nodes.
      * @param boundary Boundary number.
      */
-    virtual void boundaryGiveNodes(IntArray &answer, int boundary) = 0;
-    
+    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary) = 0;
     /**
      * Evaluates the basis functions on the requested boundary.
      * Only basis functions that are nonzero anywhere on the boundary are given. Ordering can be obtained from giveBoundaryNodes.
@@ -222,7 +226,48 @@ public:
      * @param boundary Boundary number.
      * @param lcoords The local coordinates (on the boundary local coordinate system).
      * @param cellgeo Underlying cell geometry.
-     * @todo Support boundary number.
+     * @todo
+     */
+    virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    /**
+     * Evaluates the determinant of the transformation Jacobian on the requested boundary.
+     * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
+     * @param boundary Boundary number.
+     * @param lcoords The local coordinates (on the boundary local coordinate system).
+     * @param cellgeo Underlying cell geometry.
+     * @return The determinant of the boundary transformation Jacobian.
+     */
+    virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    /**
+     * Maps the local boundary coordinates to global.
+     * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
+     * @param answer Global coordinates.
+     * @param boundary Boundary number.
+     * @param lcoords The local coordinates (on the boundary local coordinate system).
+     * @param cellgeo Underlying cell geometry.
+     */
+    virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    //@}
+
+    /** @name General boundary functions.
+     * Boundaries are corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
+     */
+    //@{
+    /**
+     * Gives the boundary nodes for requested boundary number.
+     * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
+     * @param answer Array to be filled with the boundary nodes.
+     * @param boundary Boundary number.
+     */
+    virtual void boundaryGiveNodes(IntArray &answer, int boundary) = 0;
+    /**
+     * Evaluates the basis functions on the requested boundary.
+     * Only basis functions that are nonzero anywhere on the boundary are given. Ordering can be obtained from giveBoundaryNodes.
+     * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
+     * @param answer Basis functions Array to be filled with the boundary nodes.
+     * @param boundary Boundary number.
+     * @param lcoords The local coordinates (on the boundary local coordinate system).
+     * @param cellgeo Underlying cell geometry.
      */
     virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**

@@ -43,8 +43,11 @@ namespace oofem {
  */
 class FEInterpolation2d : public FEInterpolation
 {
+protected:
+    int xind, yind;
+
 public:
-    FEInterpolation2d(int o) : FEInterpolation(o) { }
+    FEInterpolation2d(int o, int ind1, int ind2) : FEInterpolation(o), xind(ind1), yind(ind2) { }
 
     virtual int giveNsd() { return 2; }
 
@@ -55,6 +58,10 @@ public:
      */
     virtual double giveArea(const FEICellGeometry &cellgeo) const;
 
+    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary);
+    virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
     virtual void boundaryGiveNodes(IntArray &answer, int boundary);
     virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

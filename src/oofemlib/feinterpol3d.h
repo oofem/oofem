@@ -54,7 +54,16 @@ public:
      */
     virtual double giveVolume(const FEICellGeometry &cellgeo) const
     { OOFEM_ERROR("FEInterpolation3d :: giveVolume - Not implemented in subclass."); return 0; }
-    
+
+    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary)
+    { this->computeLocalEdgeMapping(answer, boundary); }
+    virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { this->edgeEvalN(answer, boundary, lcoords, cellgeo); }
+    virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { return this->edgeGiveTransformationJacobian(boundary, lcoords, cellgeo);}
+    virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { this->edgeLocal2global(answer, boundary, lcoords, cellgeo); }
+
     virtual void boundaryGiveNodes(IntArray &answer, int boundary)
     { this->computeLocalSurfaceMapping(answer, boundary); }
     virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
