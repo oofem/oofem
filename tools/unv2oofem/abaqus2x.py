@@ -1,7 +1,13 @@
 '''
 Created on Aug 5, 2013
 
-@author: carl
+@author: Carl Sandström
+
+This Python module is used to parse an Abaqus .inp file and store the data in the same way
+as the unv2x module. In order to do so, imaginary elements on the faces of the 3D element are 
+created from surfaces. The resulting element type depends on the input type and are defined 
+in the method setupElement (for example, the c3d10 element are convertyed to type 118 in UNV 
+and has surface element of type 42) 
 '''
 from FEM import *
 from oofemctrlreader import *
@@ -11,8 +17,8 @@ class ElementProperties:
         if (edgeMask != None):
             self.name = name.lower() # string - name as Abaqus elements
             self.unvType = unvType
-            self.edgeMask = edgeMask # 2D array expressing node masks for OOFEM's edge 1,2,..., original UNV node numbering
-            self.faceMask = faceMask # 2D array expressing node masks for OOFEM's face 1,2,..., original UNV node numbering
+            self.edgeMask = edgeMask # 2D array expressing node masks for OOFEM's edge 1,2,..., original Abaqus node numbering
+            self.faceMask = faceMask # 2D array expressing node masks for OOFEM's face 1,2,..., original Abaqus node numbering
             self.nnodes = nnodes
             self.surfaceElementType = surfaceElementType # Element type on surface
             
@@ -37,7 +43,7 @@ class AbaqusParser:
     def setupElements(self):
         es = [];
         es.append(ElementProperties("c3d10", 118, [], [[0,1,2,4,5,6],[0,1,3,4,7,8],[1,2,3,5,8,9],[0,2,3,6,7,9]], 10, 42))
-        es.append(ElementProperties("c3d20R", 118, [], [[0,1,2,4,5,6],[0,1,3,4,7,8],[1,2,3,5,8,9],[0,2,3,6,7,9]], 20, 42))
+        # es.append(ElementProperties("c3d20R", 118, [], [[0,1,2,4,5,6],[0,1,3,4,7,8],[1,2,3,5,8,9],[0,2,3,6,7,9]], 20, 42))
         return es
         
     def _read_multiple_lines(self):

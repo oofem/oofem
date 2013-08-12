@@ -53,13 +53,13 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
         unvfile=sys.argv[1]
         ctrlfile=sys.argv[2]
         oofemfile=sys.argv[3]
-        of=open(oofemfile,'w') 
-        # read UNV file in FEM object structure
-        fileExtension = unvfile.partition('.')
-        
-        if (fileExtension[2]=='unv'):
+        of=open(oofemfile,'w')
+         
+        # read file in FEM object structure
+        fileExtension = unvfile.split('.')
+        if (fileExtension[-1].lower()=='unv'): # Salome output file
             Parser=UNVParser(unvfile)
-        elif (fileExtension[2]=='inp'):
+        elif (fileExtension[-1].lower()=='inp'): # Abaqus output file
             Parser=AbaqusParser(unvfile)
         
         print 'Parsing mesh file %s' % sys.argv[1],
