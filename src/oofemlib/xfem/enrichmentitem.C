@@ -446,7 +446,7 @@ void EnrichmentItem :: evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const Fl
 	else
 	{
 		// Front enrichment
-		mpEnrichmentFront->evaluateEnrFuncAt(oEnrFunc, iPos, iLevelSet, iNodeInd, mTipElIndices, mTipCoords);
+		mpEnrichmentFront->evaluateEnrFuncAt(oEnrFunc, iPos, iLevelSet, iNodeInd, mTipInfo);
 	}
 }
 
@@ -461,7 +461,7 @@ void EnrichmentItem :: evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncD
 	else
 	{
 		// Front enrichment
-		mpEnrichmentFront->evaluateEnrFuncDerivAt(oEnrFuncDeriv, iPos, iLevelSet, iGradLevelSet, iNodeInd, mTipElIndices, mTipCoords);
+		mpEnrichmentFront->evaluateEnrFuncDerivAt(oEnrFuncDeriv, iPos, iLevelSet, iGradLevelSet, iNodeInd, mTipInfo);
 	}
 }
 
@@ -506,8 +506,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 	int nNodes = d->giveNumberOfDofManagers();
 
 	mNodeEnrMarker.resize(nNodes, 0);
-	mTipElIndices.clear();
-	mTipCoords.clear();
+	mTipInfo.clear();
 
 	// Loop over elements and use the level sets to mark nodes belonging to completely cut elements.
 	for(int elIndex = 1; elIndex <= nEl; elIndex++)
@@ -590,14 +589,11 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 
 			if( edgeIntersected )
 			{
-				FloatArray tipCoords;
-				if( mpEnrichmentDomain->GiveClosestTipPosition(tipCoords, elCenter) )
+				TipInfo tipInfo;
+				if( mpEnrichmentDomain->GiveClosestTipInfo(elCenter, tipInfo) )
 				{
-					printf("Adding element %d to list of tip elements.\n", elIndex );
-					mTipElIndices.push_back(elIndex);
-
-					tipCoords.printYourself();
-					mTipCoords.push_back(tipCoords);
+					tipInfo.mElIndex = elIndex;
+					mTipInfo.push_back(tipInfo);
 				}
 			}
 
@@ -665,7 +661,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 	}
 
 	// Mark tip nodes for special treatment.
-	mpEnrichmentFront->MarkNodesAsFront(mNodeEnrMarker, *xMan, mLevelSetNormalDir, mLevelSetTangDir, mTipElIndices, mTipCoords);
+	mpEnrichmentFront->MarkNodesAsFront(mNodeEnrMarker, *xMan, mLevelSetNormalDir, mLevelSetTangDir, mTipInfo);
 
 /*
 
@@ -984,6 +980,19 @@ void EnrichmentItem :: computeIntersectionPoints(std::vector< FloatArray > &oInt
 
 bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, int iElIndex) const
 {
+	for(int i = 0; i < mTipInfo.size(); i++)
+	{
+		if(mTipInfo[i].mElIndex == iElIndex)
+		{
+			oCoord = mTipInfo[i].mGlobalCoord;
+			return true;
+		}
+
+	}
+
+	return false;
+
+/*
 	std::vector<int>::const_iterator begin = mTipElIndices.begin();
 	std::vector<int>::const_iterator end 	= mTipElIndices.end();
 
@@ -998,6 +1007,7 @@ bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, int iElIndex) con
 	}
 
 	return false;
+*/
 }
 
 
@@ -1182,7 +1192,7 @@ IRResultType Crack :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-void EnrFrontExtend :: MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemManager &ixFemMan, const std::vector<double> &iLevelSetNormalDir, const std::vector<double> &iLevelSetTangDir, const std::vector<int> &iTipElIndices, const std::vector<FloatArray> &iTipCoords)
+void EnrFrontExtend :: MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemManager &ixFemMan, const std::vector<double> &iLevelSetNormalDir, const std::vector<double> &iLevelSetTangDir, const std::vector<TipInfo> &iTipInfo)
 {
 
 	// Extend the set of enriched nodes as follows:
@@ -1270,7 +1280,7 @@ EnrFrontLinearBranchFuncRadius :: ~EnrFrontLinearBranchFuncRadius()
 }
 
 
-void EnrFrontLinearBranchFuncRadius :: MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemManager &ixFemMan, const std::vector<double> &iLevelSetNormalDir, const std::vector<double> &iLevelSetTangDir, const std::vector<int> &iTipElIndices, const std::vector<FloatArray> &iTipCoords)
+void EnrFrontLinearBranchFuncRadius :: MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemManager &ixFemMan, const std::vector<double> &iLevelSetNormalDir, const std::vector<double> &iLevelSetTangDir, const std::vector<TipInfo> &iTipInfo)
 {
 	// Enrich all nodes within a prescribed radius around the crack tips.
 	// TODO: If performance turns out to be an issue, we may wish
@@ -1286,9 +1296,9 @@ void EnrFrontLinearBranchFuncRadius :: MarkNodesAsFront(std::vector<int> &ioNode
 		const FloatArray &nodePos = *(dMan->giveCoordinates());
 		double minRadius2 = std::numeric_limits<double>::max();
 
-		for(int j = 0; j < int(iTipCoords.size()); j++)
+		for(int j = 0; j < int(iTipInfo.size()); j++)
 		{
-			minRadius2 = min( minRadius2, iTipCoords[j].distance_square(nodePos) );
+			minRadius2 = min( minRadius2, iTipInfo[j].mGlobalCoord.distance_square(nodePos) );
 		}
 
 		if( minRadius2 < mEnrichmentRadius* mEnrichmentRadius )
@@ -1300,18 +1310,18 @@ void EnrFrontLinearBranchFuncRadius :: MarkNodesAsFront(std::vector<int> &ioNode
 
 }
 
-void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd, const std::vector<int> &iTipElIndices, const std::vector<FloatArray> &iTipCoords) const
+void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd, const std::vector<TipInfo> &iTipInfo) const
 {
 	// Find the closest tip
 	// TODO: Generalize so that enrichments for several tips can be added
 
 	double minDist2 = std::numeric_limits<double>::max();
 	int minDistIndex = -1;
-	for(int j = 0; j < int(iTipCoords.size()); j++)
+	for(int j = 0; j < int(iTipInfo.size()); j++)
 	{
-		if( iTipCoords[j].distance_square(iPos) < minDist2 )
+		if( iTipInfo[j].mGlobalCoord.distance_square(iPos) < minDist2 )
 		{
-			minDist2 = iTipCoords[j].distance_square(iPos);
+			minDist2 = iTipInfo[j].mGlobalCoord.distance_square(iPos);
 			minDistIndex = j;
 		}
 	}
@@ -1319,7 +1329,7 @@ void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncAt(std::vector<double> &oE
 	if( minDistIndex != -1 )
 	{
 		FloatArray xTip;
-		xTip.setValues(2, iTipCoords[minDistIndex].at(1), iTipCoords[minDistIndex].at(2));
+		xTip.setValues(2, iTipInfo[minDistIndex].mGlobalCoord.at(1), iTipInfo[minDistIndex].mGlobalCoord.at(2));
 
 		FloatArray pos;
 		pos.setValues(2, iPos.at(1), iPos.at(2));
@@ -1354,7 +1364,7 @@ void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncAt(std::vector<double> &oE
 
 }
 
-void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd, const std::vector<int> &iTipElIndices, const std::vector<FloatArray> &iTipCoords) const
+void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd, const std::vector<TipInfo> &iTipInfo) const
 {
 	const double pi = 3.14159265358979;
 
@@ -1363,20 +1373,18 @@ void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncDerivAt(std::vector<FloatA
 
 	double minDist2 = std::numeric_limits<double>::max();
 	int minDistIndex = -1;
-	for(int j = 0; j < int(iTipCoords.size()); j++)
+	for(int j = 0; j < int(iTipInfo.size()); j++)
 	{
-		if( iTipCoords[j].distance_square(iPos) < minDist2 )
+		if( iTipInfo[j].mGlobalCoord.distance_square(iPos) < minDist2 )
 		{
-			minDist2 = iTipCoords[j].distance_square(iPos);
+			minDist2 = iTipInfo[j].mGlobalCoord.distance_square(iPos);
 			minDistIndex = j;
 		}
 	}
 
 	if( minDistIndex != -1 )
 	{
-		const FloatArray &xTip = iTipCoords[minDistIndex];
-//		printf("\n\nxTip: "); xTip.printYourself();
-//		printf("iPos: "); iPos.printYourself();
+		const FloatArray &xTip = iTipInfo[minDistIndex].mGlobalCoord;
 
 	    // Crack tip tangent and normal
 		// TODO: Get tangent and normal from actual geometry!

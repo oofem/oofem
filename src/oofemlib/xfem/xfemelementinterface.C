@@ -350,9 +350,9 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std::v
 //            answer1->put( sz + 1, new FloatArray(intersecPoints[i-1]) );
 
             FloatArray *ip = &intersecPoints[i-1];
-            FloatArray *ipCopy = new FloatArray(*ip);
+//            FloatArray *ipCopy = new FloatArray(*ip);
 
-            oPointPartitions[1].push_back(*ipCopy);
+            oPointPartitions[1].push_back(*ip);
 //            int sz2 = answer2->giveSize();
 //            answer2->put(sz2 + 1, ipCopy);
         }
@@ -367,15 +367,15 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std::v
             double y = element->giveDofManager(i)->giveCoordinates()->at(2);
             double det = ( x1 - x ) * ( y2 - y ) - ( x2 - x ) * ( y1 - y );
             FloatArray *node = element->giveDofManager(i)->giveCoordinates();
-            FloatArray *nodesCopy = new FloatArray(*node);
+//            FloatArray *nodesCopy = new FloatArray(*node);
             if ( det > 0.00001 )
             {
-            	oPointPartitions[0].push_back(*nodesCopy);
+            	oPointPartitions[0].push_back(*node);
 //                int sz = answer1->giveSize();
 //                answer1->put(sz + 1, nodesCopy);
             } else if ( det < ( -1 ) * 0.00001 )
             {
-            	oPointPartitions[1].push_back(*nodesCopy);
+            	oPointPartitions[1].push_back(*node);
 //                int sz = answer2->giveSize();
 //                answer2->put(sz + 1, nodesCopy);
             }

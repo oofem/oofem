@@ -71,7 +71,6 @@ void EnrichmentDomain_BG :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, Xf
 
 bool EDCrack :: GiveClosestTipPosition(FloatArray &oCoords, const FloatArray &iCoords) const
 {
-	printf("Entering EDCrack :: GiveClosestTipPosition().\n");
 	int nVert = bg->giveNrVertices();
 	if( nVert > 0 )
 	{
@@ -91,6 +90,54 @@ bool EDCrack :: GiveClosestTipPosition(FloatArray &oCoords, const FloatArray &iC
 	}
 
 	oCoords.setValues(2, 0.0, 0.0);
+	return false;
+}
+
+bool EDCrack :: GiveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const
+{
+	int nVert = bg->giveNrVertices();
+	if( nVert > 1 )
+	{
+		double distS = bg->giveVertex(1)->distance(iCoords);
+		double distE = bg->giveVertex(nVert)->distance(iCoords);
+
+		if(distS < distE)
+		{
+			const FloatArray &p1 = *(bg->giveVertex(1));
+			const FloatArray &p2 = *(bg->giveVertex(2));
+
+			// Tip position
+			oInfo.mGlobalCoord = p1;
+
+			// Tip tangent
+			oInfo.mTangDir.beDifferenceOf(p1,p2);
+			oInfo.mTangDir.normalize();
+
+			// Tip normal
+			// The sign comes from the fact that we are looking at the first end
+			oInfo.mTangDir.setValues(2, oInfo.mTangDir.at(2), -oInfo.mTangDir.at(1) );
+
+			return true;
+		}
+		else
+		{
+			const FloatArray &p1 = *(bg->giveVertex(nVert-1));
+			const FloatArray &p2 = *(bg->giveVertex(nVert));
+
+			// Tip position
+			oInfo.mGlobalCoord = p2;
+
+			// Tip tangent
+			oInfo.mTangDir.beDifferenceOf(p2,p1);
+			oInfo.mTangDir.normalize();
+
+			// Tip normal
+			oInfo.mTangDir.setValues(2, -oInfo.mTangDir.at(2), oInfo.mTangDir.at(1) );
+
+			return true;
+		}
+	}
+
 	return false;
 }
 
