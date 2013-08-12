@@ -161,6 +161,7 @@ set (core_fei
     feinterpol.C
     feinterpol1d.C
     feinterpol2d.C
+    feinterpol3d.C
     fei1dlin.C
     fei1dquad.C
     fei1dhermite.C

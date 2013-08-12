@@ -66,7 +66,7 @@ QPlaneStrainGrad :: QPlaneStrainGrad(int n, Domain *aDomain) : QPlaneStrain(n, a
 
 
 void
-QPlaneStrainGrad ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+QPlaneStrainGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 
 {
     if ( inode <= nSecNodes ) {

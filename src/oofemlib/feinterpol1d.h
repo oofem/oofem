@@ -47,6 +47,15 @@ public:
     FEInterpolation1d(int o) : FEInterpolation(o) { }
     virtual int giveNsd() { return 1; }
 
+    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary)
+    { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); }
+    virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); }
+    virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); return 0.; }
+    virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); }
+
     virtual void boundaryGiveNodes(IntArray &answer, int boundary);
     virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
@@ -62,6 +71,7 @@ public:
 
     virtual IntegrationRule *giveIntegrationRule(int order);
     virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary);
+    virtual IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary);
 };
 } // end namespace oofem
 #endif // feinterpol1d_h

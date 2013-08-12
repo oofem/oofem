@@ -92,7 +92,7 @@ public:
 
     bool isElementEnriched(const Element *elem);
 
-//    bool isAllElNodesEnriched(const Element *elem);
+    //    bool isAllElNodesEnriched(const Element *elem);
 
     /// Accessor.
     EnrichmentItem *giveEnrichmentItem(int n);
@@ -102,7 +102,7 @@ public:
 
     /// Computes the type of node enrichment, returns zero if the node is not enriched.
     // Old method: should instead return an array if there are several active /JB
-    XfemType computeNodeEnrichmentType(int nodeNumber); 
+    XfemType computeNodeEnrichmentType(int nodeNumber);
 
     /// Initializes receiver according to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
@@ -110,7 +110,7 @@ public:
     int instanciateYourself(DataReader *dr);
     const char *giveClassName() const { return "XfemManager"; }
     const char *giveInputRecordName() const { return _IFT_XfemManager_Name; }
-    
+
     /// Wrapper for updating the integration rule.
     void updateIntegrationRule();
 

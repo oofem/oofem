@@ -43,9 +43,6 @@ namespace oofem {
  */
 class FEI2dTrConst : public FEInterpolation2d
 {
-protected:
-    int xind, yind;
-
 public:
     FEI2dTrConst(int ind1, int ind2) : FEInterpolation2d(0) {
         xind = ind1;

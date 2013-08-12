@@ -127,7 +127,7 @@ public:
     T *unlink(int i);
 };
 
-template< class T >AList< T > ::  AList(int s, int sizeIncrement)
+template< class T >AList< T > :: AList(int s, int sizeIncrement)
 // Constructor : creates a list of size s.
 {
     register int i;

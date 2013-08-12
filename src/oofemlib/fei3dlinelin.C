@@ -217,6 +217,7 @@ FEI3dLineLin :: giveBoundaryIntegrationRule(int order, int boundary)
 {
     ///@todo Not sure about this.
     OOFEM_ERROR("FEI3dLineLin :: giveBoundaryIntegrationRule - Not supported");
+    return NULL;
 }
 
 } // end namespace oofem

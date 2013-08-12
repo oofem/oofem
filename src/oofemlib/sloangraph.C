@@ -673,7 +673,7 @@ SloanGraph :: tryParameters(int wdeg, int wdis)
 
 
 int
-SloanGraph ::  giveFullProfileSize()
+SloanGraph :: giveFullProfileSize()
 {
     int n = this->domain->giveNumberOfDofManagers();
     return n * ( n + 1 );

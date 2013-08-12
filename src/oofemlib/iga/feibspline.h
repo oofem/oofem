@@ -93,7 +93,16 @@ public:
 
     virtual int giveNsd() { return nsd; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    
+
+    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary)
+    { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); }
+    virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); }
+    virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); return 0.; }
+    virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); }
+
     virtual void boundaryGiveNodes(IntArray &answer, int boundary)
     { OOFEM_ERROR("BSplineInterpolation :: boundaryGiveNodes - Not implemented"); }
     virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
@@ -128,6 +137,8 @@ public:
     virtual IntegrationRule *giveIntegrationRule(int order)
     { OOFEM_ERROR("BSplineInterpolation :: giveIntegrationRule - Not supported."); return NULL; }
     virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary)
+    { OOFEM_ERROR("BSplineInterpolation :: giveIntegrationRule - Not supported."); return NULL; }
+    virtual IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary)
     { OOFEM_ERROR("BSplineInterpolation :: giveIntegrationRule - Not supported."); return NULL; }
 
 protected:

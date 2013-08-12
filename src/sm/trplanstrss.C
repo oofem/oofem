@@ -316,7 +316,7 @@ TrPlaneStress2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge
         aNode = 3;
         bNode = 1;
     } else {
-        _error("computeEdgeVolumeAround: wrong egde number");
+        _error("computeLoadLEToLRotationMatrix: wrong egde number");
     }
 
     nodeA   = this->giveNode(aNode);

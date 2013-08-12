@@ -204,7 +204,7 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
 }
 
 
-double NonLinearDynamic ::  giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
+double NonLinearDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
     int eq = dof->__giveEquationNumber();
 #ifdef DEBUG
@@ -614,7 +614,7 @@ void NonLinearDynamic :: updateYourself(TimeStep *stepN)
     StructuralEngngModel :: updateYourself(stepN);
 }
 
-void NonLinearDynamic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
+void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 //
 // Updates some component, which is used by numerical method
 // to newly reached state. used mainly by numerical method

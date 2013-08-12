@@ -506,7 +506,7 @@ Axisymm3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 double
-Axisymm3d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+Axisymm3d :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
     FloatArray c(2);
     this->computeEdgeIpGlobalCoords(c, aGaussPoint, iEdge);
@@ -519,7 +519,7 @@ Axisymm3d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 
 
 void
-Axisymm3d ::   computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+Axisymm3d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
     this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 }
@@ -552,7 +552,7 @@ Axisymm3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
         aNode = 3;
         bNode = 1;
     } else {
-        _error("computeEdgeVolumeAround: wrong egde number");
+        _error("computeLoadLBtoLRotationMatrix: wrong egde number");
     }
 
     nodeA   = this->giveNode(aNode);

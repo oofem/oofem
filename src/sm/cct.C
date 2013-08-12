@@ -654,7 +654,7 @@ CCTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 //
 #ifdef __OOFEG
 void
-CCTPlate  :: drawRawGeometry(oofegGraphicContext &gc)
+CCTPlate :: drawRawGeometry(oofegGraphicContext &gc)
 {
     WCRec p [ 3 ];
     GraphicObj *go;
@@ -690,7 +690,7 @@ CCTPlate  :: drawRawGeometry(oofegGraphicContext &gc)
 
 
 void
-CCTPlate  :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+CCTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 {
     WCRec p [ 3 ];
     GraphicObj *go;
@@ -726,7 +726,7 @@ CCTPlate  :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 
 
 void
-CCTPlate  :: drawScalar(oofegGraphicContext &context)
+CCTPlate :: drawScalar(oofegGraphicContext &context)
 {
     int i, indx, result = 0;
     WCRec p [ 3 ];
@@ -792,7 +792,7 @@ CCTPlate  :: drawScalar(oofegGraphicContext &context)
 
 /*
  * void
- * CCTPlate  :: drawInternalState (oofegGraphicContext & gc)
+ * CCTPlate :: drawInternalState (oofegGraphicContext & gc)
  * //
  * // Draws internal state graphics representation
  * //

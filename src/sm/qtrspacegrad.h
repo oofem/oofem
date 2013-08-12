@@ -57,6 +57,7 @@ class QTRSpaceGrad : public QTRSpace,public GradDpElement
 {
 protected:
     int numberOfGaussPoints;
+    ///@todo FIXME: Is this really supposed to be the linear interpolator used here?!
     static FEI3dTetLin interpolation;
 
 public:

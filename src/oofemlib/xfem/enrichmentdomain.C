@@ -48,46 +48,39 @@
 #include <cmath>
 
 namespace oofem {
+REGISTER_EnrichmentDomain(DofManList)
+REGISTER_EnrichmentDomain(WholeDomain)
+REGISTER_EnrichmentDomain(EDBGCircle)
 
-REGISTER_EnrichmentDomain( DofManList )
-REGISTER_EnrichmentDomain( WholeDomain )
-REGISTER_EnrichmentDomain( EDBGCircle )
-
-REGISTER_EnrichmentDomain( EDCrack )
+REGISTER_EnrichmentDomain(EDCrack)
 
 //REGISTER_EnrichmentDomain( BasicGeometryDomain<Line> )
 
-// General 
+// General
 
-EnrichmentDomain::EnrichmentDomain()
-{
-
-}
+EnrichmentDomain :: EnrichmentDomain()
+{}
 
 void EnrichmentDomain_BG :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan)
 {
-	iEnrItem.updateNodeEnrMarker(ixFemMan, *this);
+    iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
 }
 
 bool EDCrack :: GiveClosestTipPosition(FloatArray &oCoords, const FloatArray &iCoords) const
 {
-	int nVert = bg->giveNrVertices();
-	if( nVert > 0 )
-	{
-		double distS = bg->giveVertex(1)->distance(iCoords);
-		double distE = bg->giveVertex(nVert)->distance(iCoords);
+    int nVert = bg->giveNrVertices();
+    if ( nVert > 0 ) {
+        double distS = bg->giveVertex(1)->distance(iCoords);
+        double distE = bg->giveVertex(nVert)->distance(iCoords);
 
-		if(distS < distE)
-		{
-			oCoords = *(bg->giveVertex(1));
-			return true;
-		}
-		else
-		{
-			oCoords = *(bg->giveVertex(nVert));
-			return true;
-		}
-	}
+        if ( distS < distE ) {
+            oCoords = * ( bg->giveVertex(1) );
+            return true;
+        } else   {
+            oCoords = * ( bg->giveVertex(nVert) );
+            return true;
+        }
+    }
 
 	oCoords.setValues(2, 0.0, 0.0);
 	return false;
@@ -143,7 +136,7 @@ bool EDCrack :: GiveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) co
 
 void DofManList :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan)
 {
-	iEnrItem.updateNodeEnrMarker(ixFemMan, *this);
+    iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
 }
 
 
@@ -154,16 +147,15 @@ IRResultType DofManList :: initializeFrom(InputRecord *ir)
 
     IntArray idList;
     IR_GIVE_FIELD(ir, idList, _IFT_DofManList_list);
-    for ( int i = 1; i<=idList.giveSize(); i++) {
+    for ( int i = 1; i <= idList.giveSize(); i++ ) {
         this->dofManList.push_back( idList.at(i) );
     }
+
     return IRRT_OK;
-    
 }
 
 void WholeDomain :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan)
 {
-	iEnrItem.updateNodeEnrMarker(ixFemMan, *this);
+    iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
 }
-
 } // end namespace oofem

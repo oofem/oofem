@@ -81,38 +81,34 @@ bool Delaunay :: isInsideCC(FloatArray *p, FloatArray *p1,  FloatArray *p2,  Flo
     }
 }
 
-void Delaunay :: triangulate(const std::vector< FloatArray > &iVertices, AList< Triangle > *triangles)
+void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, AList< Triangle > *triangles)
 {
     // 4th order algorithm - four loops, only for testing purposes
 
-	int n = iVertices.size();
+    int n = iVertices.size();
     int count = triangles->giveSize();
 
     // copy of vertices, since they will be shifted
-    std::vector< FloatArray > vertices(iVertices);
+    std :: vector< FloatArray >vertices(iVertices);
 
     // small shift of vertices
     for ( int i = 1; i <= n; i++ ) {
-        vertices[i-1].at(1) += vertices[i-1].at(1) * 0.000001 * double ( rand() ) / RAND_MAX;
-        vertices[i-1].at(2) += vertices[i-1].at(2) * 0.000001 * double ( rand() ) / RAND_MAX;
+        vertices [ i - 1 ].at(1) += vertices [ i - 1 ].at(1) * 0.000001 * double ( rand() ) / RAND_MAX;
+        vertices [ i - 1 ].at(2) += vertices [ i - 1 ].at(2) * 0.000001 * double ( rand() ) / RAND_MAX;
     }
 
     for ( int i = 1; i <= n; i++ ) {
         for ( int j = i + 1; j <= n; j++ ) {
             for ( int k = j + 1; k <= n; k++ ) {
-
-            	bool isTriangle = true;
-                if ( colinear( &vertices[i-1], &vertices[j-1], &vertices[k-1] ) )
-                {
+                bool isTriangle = true;
+                if ( colinear(& vertices [ i - 1 ], & vertices [ j - 1 ], & vertices [ k - 1 ]) ) {
                     isTriangle = false;
-                }
-                else
-                {
-                	for ( int a = 1; a <= n; a++ ) {
+                } else   {
+                    for ( int a = 1; a <= n; a++ ) {
                         if ( a != i && a != j && a != k ) {
                             // checks whether a point a is inside a circumcircle of a triangle ijk
-                            if ( isInsideCC( &vertices[a-1], &vertices[i-1], &vertices[j-1],
-                                            &vertices[k-1] ) ) {
+                            if ( isInsideCC(& vertices [ a - 1 ], & vertices [ i - 1 ], & vertices [ j - 1 ],
+                                            & vertices [ k - 1 ]) ) {
                                 isTriangle = false;
                                 break;
                             }
@@ -125,11 +121,11 @@ void Delaunay :: triangulate(const std::vector< FloatArray > &iVertices, AList< 
 
                     // here we switch to old vertices
                     FloatArray *p1 = new FloatArray();
-                    * p1 =  iVertices[i-1];
+                    * p1 =  iVertices [ i - 1 ];
                     FloatArray *p2 = new FloatArray();
-                    * p2 =  iVertices[j-1];
+                    * p2 =  iVertices [ j - 1 ];
                     FloatArray *p3 = new FloatArray();
-                    * p3 =  iVertices[k-1];
+                    * p3 =  iVertices [ k - 1 ];
 
 
                     Triangle *triangle = new Triangle(p1, p2, p3);
@@ -142,6 +138,5 @@ void Delaunay :: triangulate(const std::vector< FloatArray > &iVertices, AList< 
             }
         }
     }
-
 }
 } // end namespace oofem

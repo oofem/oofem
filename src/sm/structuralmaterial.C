@@ -574,7 +574,7 @@ StructuralMaterial :: give3dMaterialStiffnessMatrix_dCde(FloatMatrix &answer,
                                                          GaussPoint *gp, TimeStep *tStep)
 {
     ///@todo what should be default implementaiton?
-    OOFEM_ERROR("StructuralMaterial ::  give3dMaterialStiffnessMatrix_dCde - There is no default implementation");
+    OOFEM_ERROR("StructuralMaterial :: give3dMaterialStiffnessMatrix_dCde - There is no default implementation");
 }
 
 
@@ -583,7 +583,7 @@ StructuralMaterial :: givePlaneStressStiffMtrx_dCde(FloatMatrix &answer,
                                                     MatResponseMode mode,
                                                     GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("StructuralMaterial ::  givePlaneStressStiffMtrx_dCde - There is no default implementation");
+    OOFEM_ERROR("StructuralMaterial :: givePlaneStressStiffMtrx_dCde - There is no default implementation");
 }
 
 
@@ -592,7 +592,7 @@ StructuralMaterial :: givePlaneStrainStiffMtrx_dCde(FloatMatrix &answer,
                                                     MatResponseMode mode,
                                                     GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("StructuralMaterial ::  givePlaneStrainStiffMtrx_dCde - There is no default implementation");
+    OOFEM_ERROR("StructuralMaterial :: givePlaneStrainStiffMtrx_dCde - There is no default implementation");
 }
 
 
@@ -601,7 +601,7 @@ StructuralMaterial :: give1dStressStiffMtrx_dCde(FloatMatrix &answer,
                                                  MatResponseMode mode,
                                                  GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("StructuralMaterial ::  give1dStressStiffMtrx_dCde - There is no default implementation");
+    OOFEM_ERROR("StructuralMaterial :: give1dStressStiffMtrx_dCde - There is no default implementation");
 }
 
 

@@ -138,12 +138,11 @@ public:
 class LinElBranchFunction
 {
 public:
-	LinElBranchFunction() {}
-	virtual ~LinElBranchFunction() {}
+    LinElBranchFunction() {}
+    virtual ~LinElBranchFunction() {}
 
-    virtual void evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const double &iR, const double &iTheta) const;
-    virtual void evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const double &iR, const double &iTheta) const;
-
+    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const double &iR, const double &iTheta) const;
+    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const double &iR, const double &iTheta) const;
 };
 
 /** Class representing bimaterial interface. */
@@ -152,7 +151,7 @@ class RampFunction : public EnrichmentFunction
 public:
 
     RampFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
-        this->numberOfDofs =1;
+        this->numberOfDofs = 1;
     }
     double evaluateFunctionAt(FloatArray *point, EnrichmentDomain *ed);
     void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentDomain *ed);

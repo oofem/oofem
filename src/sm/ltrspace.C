@@ -984,7 +984,7 @@ LTRSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
     determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
 
     weight      = gp->giveWeight();
-    volume      = 2.0 * determinant * weight;
+    volume      = determinant * weight;
 
     return volume;
 

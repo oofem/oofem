@@ -121,7 +121,7 @@ TransportElement :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 
 void
-TransportElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
+TransportElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
                                               TimeStep *tStep)
 //
 // returns characteristics vector of receiver according to requested type
@@ -287,7 +287,7 @@ TransportElement :: computeEdgeIpGlobalCoords(FloatArray &answer, const FloatArr
 {
     FEInterpolation *interp = this->giveInterpolation();
     if ( dynamic_cast< FEInterpolation2d * >(interp) ) {
-        dynamic_cast< FEInterpolation3d * >(interp)->edgeLocal2global( answer, iEdge, lcoords, FEIElementGeometryWrapper(this) );
+        dynamic_cast< FEInterpolation2d * >(interp)->edgeLocal2global( answer, iEdge, lcoords, FEIElementGeometryWrapper(this) );
     } else if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
         dynamic_cast< FEInterpolation3d * >(interp)->edgeLocal2global( answer, iEdge, lcoords, FEIElementGeometryWrapper(this) );
     }
@@ -316,7 +316,7 @@ TransportElement :: computeSurfIpGlobalCoords(FloatArray &answer, const FloatArr
 {
     FEInterpolation *interp = this->giveInterpolation();
     if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
-        dynamic_cast< FEInterpolation3d * >(interp)->edgeLocal2global( answer, iSurf, lcoord, FEIElementGeometryWrapper(this) );
+        dynamic_cast< FEInterpolation3d * >(interp)->surfaceLocal2global( answer, iSurf, lcoord, FEIElementGeometryWrapper(this) );
     }
 }
 

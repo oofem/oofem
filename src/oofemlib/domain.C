@@ -1153,7 +1153,7 @@ Domain :: giveSpatialLocalizer()
 
 
 int
-Domain ::  giveCorrespondingCoordinateIndex(int idof)
+Domain :: giveCorrespondingCoordinateIndex(int idof)
 //
 // find corresponding coordinate axis to idof
 // if no - coordinate axis corespond to idof returns 0;

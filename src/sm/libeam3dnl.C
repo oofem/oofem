@@ -85,7 +85,7 @@ LIBeam3dNL :: computeSMtrx(FloatMatrix &answer, FloatArray &vec)
 
 
 void
-LIBeam3dNL ::  computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
+LIBeam3dNL :: computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
 {
     FloatMatrix S(3, 3), SS(3, 3);
     double psiSize;

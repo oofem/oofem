@@ -38,6 +38,30 @@
 
 namespace oofem {
 
+void FEInterpolation2d :: boundaryEdgeGiveNodes(IntArray &answer, int boundary)
+{
+    answer.resize(1);
+    answer.at(1) = boundary;
+}
+
+void FEInterpolation2d :: boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    answer.resize(1);
+    answer.at(1) = 1.;
+}
+
+double FEInterpolation2d :: boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    return 1.;
+}
+
+void FEInterpolation2d :: boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    answer.resize(2);
+    answer.at(1) = cellgeo.giveVertexCoordinates(boundary)->at(xind);
+    answer.at(2) = cellgeo.giveVertexCoordinates(boundary)->at(yind);
+}
+
 double FEInterpolation2d :: giveArea(const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("FEInterpolation2d :: giveArea - Not implemented in subclass.");
@@ -91,6 +115,13 @@ IntegrationRule *FEInterpolation2d :: giveBoundaryIntegrationRule(int order, int
     IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Line, order + this->order);
     iRule->SetUpPointsOnLine(points, _Unknown);
+    return iRule;
+}
+
+IntegrationRule *FEInterpolation2d :: giveBoundaryEdgeIntegrationRule(int order, int boundary)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    iRule->SetUpPoint(_Unknown);
     return iRule;
 }
 

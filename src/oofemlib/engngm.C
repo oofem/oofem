@@ -1327,7 +1327,7 @@ EngngModel :: giveElementCharacteristicVector(FloatArray &answer, int num, CharT
 
 
 void
-EngngModel ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
+EngngModel :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 //
 // updates some component, which is used by numerical method
 // to newly reached state

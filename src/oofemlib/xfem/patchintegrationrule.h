@@ -48,9 +48,9 @@ class Triangle;
 /**
  * PatchIntegrationRule provides integration over a triangle patch.
  * Input to the constructor is:
- * 	-int n: 		number of quadrature points per triangle.
- * 	-Element *e:	parent element pointer
- * 	-iTriangles:	array of triangles describing the subdivision of the element.
+ *  -int n:         number of quadrature points per triangle.
+ *  -Element *e:	parent element pointer
+ *  -iTriangles:	array of triangles describing the subdivision of the element.
  *
  *  * @author Erik Svenning (Major modifications)
  *
@@ -58,16 +58,16 @@ class Triangle;
 class PatchIntegrationRule : public GaussIntegrationRule
 {
 protected:
-	std::vector<Triangle> mTriangles;
+    std :: vector< Triangle >mTriangles;
 
-	// Interpolation used to distribute quadrature points
-	// in each triangle of the patch.
+    // Interpolation used to distribute quadrature points
+    // in each triangle of the patch.
     static FEI2dTrLin mTriInterp;
 
 
 public:
     /// Constructor.
-    PatchIntegrationRule(int n, Element *e, const std::vector<Triangle> &iTriangles);
+    PatchIntegrationRule(int n, Element *e, const std :: vector< Triangle > &iTriangles);
     /// Destructor.
     virtual ~PatchIntegrationRule();
 

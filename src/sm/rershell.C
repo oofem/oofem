@@ -766,7 +766,7 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
 #ifdef __OOFEG
 /*
  * void
- * CCTPlate  :: drawRawGeometry ()
+ * CCTPlate :: drawRawGeometry ()
  * {
  * WCRec p[3];
  * GraphicObj *go;
@@ -791,7 +791,7 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
  * }
  *
  * void
- * CCTPlate  :: drawDeformedGeometry (UnknownType defMode)
+ * CCTPlate :: drawDeformedGeometry (UnknownType defMode)
  * {
  * WCRec p[3];
  * GraphicObj *go;
@@ -819,13 +819,13 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
 
 
 //void
-//RerShell  :: drawScalar   (oofegGraphicContext& context)
+//RerShell :: drawScalar(oofegGraphicContext& context)
 //{}
 
 
 /*
  * void
- * RerShell  :: drawInternalState (oofegGraphicContext& gc)
+ * RerShell :: drawInternalState(oofegGraphicContext& gc)
  * //
  * // Draws internal state graphics representation
  * //

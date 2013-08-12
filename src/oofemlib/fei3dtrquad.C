@@ -351,6 +351,7 @@ FEI3dTrQuad :: giveBoundaryIntegrationRule(int order, int boundary)
 {
     ///@todo Not sure about what defines boundaries on these elements. 2 surfaces + 3 edges? Ask Jim about this.
     OOFEM_ERROR("FEI3dTrQuad :: giveBoundaryIntegrationRule - Not supported");
+    return NULL;
 }
 
 } // end namespace oofem

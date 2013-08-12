@@ -191,7 +191,7 @@ Concrete2 :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
 
 void
-Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer,
+Concrete2 :: giveRealStresses3dShellLayer(FloatArray &answer,
                                            GaussPoint *gp,
                                            const FloatArray &totalStrain,
                                            TimeStep *atTime)

@@ -311,7 +311,7 @@ void Tet1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryL
                 boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
             } else { // Edge load in x-y system
                 FloatArray gcoords;
-                this->interp.edgeLocal2global(gcoords, iSurf, * lcoords, FEIElementGeometryWrapper(this));
+                this->interp.boundaryLocal2Global(gcoords, iSurf, * lcoords, FEIElementGeometryWrapper(this));
                 boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
             }
 
