@@ -904,6 +904,8 @@ IRResultType PolygonLine :: initializeFrom(InputRecord *ir)
     calcBoundingBox(LC, UC);
 #endif
 
+    delete points;
+
     printVTK();
 
     return IRRT_OK;
