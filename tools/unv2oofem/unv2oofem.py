@@ -160,26 +160,26 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                                     for bel in belem.oofem_groups:
                                         #print "%d '%s' '%s'" % (len(belem.oofem_groups), bel.name.rstrip(), bel.oofem_groupNameForLoads)
                                         if (bel.name.rstrip() != bel.oofem_groupNameForLoads):
-                                            continue
-                                    #build a new int list, which reflects load numbers and edges/faces
-                                    if (len(bel.oofem_boundaryLoadsNum) > 0):
-                                        loadNum = bel.oofem_boundaryLoadsNum
-                                        newList=[-1]*(2*len(loadNum))
-                                        for j in range(len(loadNum)):
-                                            newList[2*j] = loadNum[j]
-                                            newList[2*j+1] = i+1
-                                        #print newList
-                                        elem.oofem_bLoads+=newList
-                                        print "Boundary load \"%s\" found for element %d " % (bel.name.rstrip('\n'), elem.id)
-                                        #print bel.name, elem.id, elem.oofem_bLoads
-                                        
-                                    if (bel.oofem_sets):
-                                        print "Set \"%s\" found for element %d " % (bel.name.rstrip('\n'), elem.id)
-                                        setNum = bel.oofem_sets;
-                                        # setID, element id, element side
-                                        for thisSet in setNum:
-                                            boundarySets.append([thisSet, elem.id, i+1])
-                                        
+                                            #continue
+                                            #build a new int list, which reflects load numbers and edges/faces
+                                            if (len(bel.oofem_boundaryLoadsNum) > 0):
+                                                loadNum = bel.oofem_boundaryLoadsNum
+                                                newList=[-1]*(2*len(loadNum))
+                                                for j in range(len(loadNum)):
+                                                    newList[2*j] = loadNum[j]
+                                                    newList[2*j+1] = i+1
+                                                #print newList
+                                                elem.oofem_bLoads+=newList
+                                                print "Boundary load \"%s\" found for element %d " % (bel.name.rstrip('\n'), elem.id)
+                                                #print bel.name, elem.id, elem.oofem_bLoads
+                                                
+                                            if (bel.oofem_sets):
+                                                print "Set \"%s\" found for element %d " % (bel.name.rstrip('\n'), elem.id)
+                                                setNum = bel.oofem_sets;
+                                                # setID, element id, element side
+                                                for thisSet in setNum:
+                                                    boundarySets.append([thisSet, elem.id, i+1])
+                                                
                             if(success==0):
                                 print "Can not assign edge/face load \"%s\" to unv element %d" % (bel.name, elem.id)
 
