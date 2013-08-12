@@ -97,7 +97,6 @@ public:
     virtual int checkConsistency();
 
     virtual const char *giveClassName() const { return "TransportElement"; }
-    virtual classType giveClassID() const { return TransportElementClass; }
 
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
 

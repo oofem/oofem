@@ -1,12 +1,17 @@
 xfem01.out
 Xfem test of circular inclusion in a structured plane stress square grid
-LinearStatic nsteps 1  
+LinearStatic nsteps 1 nmodules 0
+#NonlinearStatic nsteps 1 controlmode 1 rtolv 1.0e-6 MaxIter 20 minIter 2 stiffmode 0 lstype 3 smtype 7 nmodules 1
+#NonlinearStatic nsteps 1 controlmode 1 rtolv 1.0e-6 MaxIter 20 minIter 2 stiffmode 0 nmodules 1
 #NonlinearStatic nsteps 1 controlmode 1 rtolv 1.0e-6
 #vtk tstep_all domain_all primvars 1 1 vars 4 1 2 4 5 stype 1 0
+#vtk tstep_all domain_all primvars 1 1 
+#vtkxml tstep_all domain_all vars 1 94 primvars 1 1 cellvars 2 1 4
+#vtkxml tstep_all domain_all primvars 1 1 cellvars 1 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 441 nelem 400 ncrosssect 1 nmat 2 nbc 2 nic 0 nltf 1 nxfemman 1
-Node 1 coords 2 0.0 0.0 bc 2 0 1 
+Node 1 coords 2 0.0 0.0 bc 2 1 1 
 Node 2 coords 2 3.0 0.0 bc 2 0 1 
 Node 3 coords 2 6.0 0.0 bc 2 0 1 
 Node 4 coords 2 9.0 0.0 bc 2 0 1 
@@ -857,7 +862,7 @@ ConstantFunction 1 f(t) 1.0
 XfemManager 1 numberofenrichmentitems 1 
 #RampFunction 1
 #Inclusion 1 geometryitem 1 enrichmentfunction 1 material 2
-Inclusion 1 enrichmentdomains 1 1 material 2
+Inclusion 1 enrichmentdomains 1 1 enrichmentfunction 1 enrichmentdomain 1 enrichmentfront 1 material 2
 RampFunction 1
 Circle 1 center 2 30.0 30.0 radius 12.5
 #%BEGIN_CHECK% tolerance 1.e-3
@@ -872,159 +877,159 @@ Circle 1 center 2 30.0 30.0 radius 12.5
 #### element 289
 #ELEMENT tStep 1 number 289 irule 1 gp 1 keyword "strains" component 1  value -3.8526e-05
 #ELEMENT tStep 1 number 289 irule 1 gp 1 keyword "strains" component 2  value 1.2040e-05
-#ELEMENT tStep 1 number 289 irule 1 gp 1 keyword "stresses" component 1  value -1.1510e+00
-#ELEMENT tStep 1 number 289 irule 1 gp 1 keyword "stresses" component 2  value 1.5898e-02
+##ELEMENT tStep 1 number 289 irule 1 gp 1 keyword "stresses" component 1  value -1.1510e+00
+##ELEMENT tStep 1 number 289 irule 1 gp 1 keyword "stresses" component 2  value 1.5898e-02
 #ELEMENT tStep 1 number 289 irule 1 gp 2 keyword "strains" component 1  value -4.6993e-05
 #ELEMENT tStep 1 number 289 irule 1 gp 2 keyword "strains" component 2  value 1.6536e-05
-#ELEMENT tStep 1 number 289 irule 1 gp 2 keyword "stresses" component 1  value -1.3857e+00
-#ELEMENT tStep 1 number 289 irule 1 gp 2 keyword "stresses" component 2  value 8.0364e-02
+##ELEMENT tStep 1 number 289 irule 1 gp 2 keyword "stresses" component 1  value -1.3857e+00
+##ELEMENT tStep 1 number 289 irule 1 gp 2 keyword "stresses" component 2  value 8.0364e-02
 #ELEMENT tStep 1 number 289 irule 1 gp 3 keyword "strains" component 1  value -4.6940e-05
 #ELEMENT tStep 1 number 289 irule 1 gp 3 keyword "strains" component 2  value 1.5550e-05
-#ELEMENT tStep 1 number 289 irule 1 gp 3 keyword "stresses" component 1  value -1.3937e+00
-#ELEMENT tStep 1 number 289 irule 1 gp 3 keyword "stresses" component 2  value 4.8380e-02
+##ELEMENT tStep 1 number 289 irule 1 gp 3 keyword "stresses" component 1  value -1.3937e+00
+##ELEMENT tStep 1 number 289 irule 1 gp 3 keyword "stresses" component 2  value 4.8380e-02
 #####
-#ELEMENT tStep 1 number 289 irule 2 gp 1 keyword "strains" component 1  value -4.4750e-05
-#ELEMENT tStep 1 number 289 irule 2 gp 1 keyword "strains" component 2  value 2.7014e-05
-#ELEMENT tStep 1 number 289 irule 2 gp 1 keyword "stresses" component 1  value -1.2081e+00
-#ELEMENT tStep 1 number 289 irule 2 gp 1 keyword "stresses" component 2  value 4.4799e-01
-#ELEMENT tStep 1 number 289 irule 2 gp 2 keyword "strains" component 1  value -4.6055e-05
-#ELEMENT tStep 1 number 289 irule 2 gp 2 keyword "strains" component 2  value 2.0509e-05
-#ELEMENT tStep 1 number 289 irule 2 gp 2 keyword "stresses" component 1  value -1.3155e+00
-#ELEMENT tStep 1 number 289 irule 2 gp 2 keyword "stresses" component 2  value 2.2065e-01
-#ELEMENT tStep 1 number 289 irule 2 gp 3 keyword "strains" component 1  value -3.5116e-05
-#ELEMENT tStep 1 number 289 irule 2 gp 3 keyword "strains" component 2  value 3.2514e-05
-#ELEMENT tStep 1 number 289 irule 2 gp 3 keyword "stresses" component 1  value -8.3611e-01
-#ELEMENT tStep 1 number 289 irule 2 gp 3 keyword "stresses" component 2  value 7.2460e-01
+#ELEMENT tStep 1 number 289 irule 1 gp 4 keyword "strains" component 1  value -4.4750e-05
+#ELEMENT tStep 1 number 289 irule 1 gp 4 keyword "strains" component 2  value 2.7014e-05
+##ELEMENT tStep 1 number 289 irule 1 gp 4 keyword "stresses" component 1  value -1.2081e+00
+##ELEMENT tStep 1 number 289 irule 1 gp 4 keyword "stresses" component 2  value 4.4799e-01
+#ELEMENT tStep 1 number 289 irule 1 gp 5 keyword "strains" component 1  value -4.6055e-05
+#ELEMENT tStep 1 number 289 irule 1 gp 5 keyword "strains" component 2  value 2.0509e-05
+##ELEMENT tStep 1 number 289 irule 2 gp 2 keyword "stresses" component 1  value -1.3155e+00
+##ELEMENT tStep 1 number 289 irule 2 gp 2 keyword "stresses" component 2  value 2.2065e-01
+#ELEMENT tStep 1 number 289 irule 1 gp 6 keyword "strains" component 1  value -3.5116e-05
+#ELEMENT tStep 1 number 289 irule 1 gp 6 keyword "strains" component 2  value 3.2514e-05
+##ELEMENT tStep 1 number 289 irule 2 gp 3 keyword "stresses" component 1  value -8.3611e-01
+##ELEMENT tStep 1 number 289 irule 2 gp 3 keyword "stresses" component 2  value 7.2460e-01
 #####
-#ELEMENT tStep 1 number 289 irule 3 gp 1 keyword "strains" component 1  value -3.1936e-05
-#ELEMENT tStep 1 number 289 irule 3 gp 1 keyword "strains" component 2  value 2.9196e-05
-#ELEMENT tStep 1 number 289 irule 3 gp 1 keyword "stresses" component 1  value -7.6409e-01
-#ELEMENT tStep 1 number 289 irule 3 gp 1 keyword "stresses" component 2  value 6.4667e-01
-#ELEMENT tStep 1 number 289 irule 3 gp 2 keyword "strains" component 1  value -4.3975e-05
-#ELEMENT tStep 1 number 289 irule 3 gp 2 keyword "strains" component 2  value 1.8130e-05
-#ELEMENT tStep 1 number 289 irule 3 gp 2 keyword "stresses" component 1  value -1.2704e+00
-#ELEMENT tStep 1 number 289 irule 3 gp 2 keyword "stresses" component 2  value 1.6277e-01
-#ELEMENT tStep 1 number 289 irule 3 gp 3 keyword "strains" component 1  value -3.4235e-05
-#ELEMENT tStep 1 number 289 irule 3 gp 3 keyword "strains" component 2  value 1.5110e-05
-#ELEMENT tStep 1 number 289 irule 3 gp 3 keyword "stresses" component 1  value -9.7918e-01
-#ELEMENT tStep 1 number 289 irule 3 gp 3 keyword "stresses" component 2  value 1.5954e-01
+#ELEMENT tStep 1 number 289 irule 1 gp 7 keyword "strains" component 1  value -3.1936e-05
+#ELEMENT tStep 1 number 289 irule 1 gp 7 keyword "strains" component 2  value 2.9196e-05
+##ELEMENT tStep 1 number 289 irule 3 gp 1 keyword "stresses" component 1  value -7.6409e-01
+##ELEMENT tStep 1 number 289 irule 3 gp 1 keyword "stresses" component 2  value 6.4667e-01
+#ELEMENT tStep 1 number 289 irule 1 gp 8 keyword "strains" component 1  value -4.3975e-05
+#ELEMENT tStep 1 number 289 irule 1 gp 8 keyword "strains" component 2  value 1.8130e-05
+##ELEMENT tStep 1 number 289 irule 3 gp 2 keyword "stresses" component 1  value -1.2704e+00
+##ELEMENT tStep 1 number 289 irule 3 gp 2 keyword "stresses" component 2  value 1.6277e-01
+#ELEMENT tStep 1 number 289 irule 1 gp 9 keyword "strains" component 1  value -3.4235e-05
+#ELEMENT tStep 1 number 289 irule 1 gp 9 keyword "strains" component 2  value 1.5110e-05
+##ELEMENT tStep 1 number 289 irule 3 gp 3 keyword "stresses" component 1  value -9.7918e-01
+##ELEMENT tStep 1 number 289 irule 3 gp 3 keyword "stresses" component 2  value 1.5954e-01
 #### element 292
-#ELEMENT tStep 1 number 292 irule 2 gp 3 keyword "strains" component 1  value -3.8526e-05
-#ELEMENT tStep 1 number 292 irule 2 gp 3 keyword "strains" component 2  value 1.2040e-05
-#ELEMENT tStep 1 number 292 irule 2 gp 3 keyword "stresses" component 1  value -1.1510e+00
-#ELEMENT tStep 1 number 292 irule 2 gp 3 keyword "stresses" component 2  value 1.5898e-02
-#ELEMENT tStep 1 number 292 irule 2 gp 2 keyword "strains" component 1  value -4.6993e-05
-#ELEMENT tStep 1 number 292 irule 2 gp 2 keyword "strains" component 2  value 1.6536e-05
-#ELEMENT tStep 1 number 292 irule 2 gp 2 keyword "stresses" component 1  value -1.3857e+00
-#ELEMENT tStep 1 number 292 irule 2 gp 2 keyword "stresses" component 2  value 8.0364e-02
-#ELEMENT tStep 1 number 292 irule 2 gp 1 keyword "strains" component 1  value -4.6940e-05
-#ELEMENT tStep 1 number 292 irule 2 gp 1 keyword "strains" component 2  value 1.5550e-05
-#ELEMENT tStep 1 number 292 irule 2 gp 1 keyword "stresses" component 1  value -1.3937e+00
-#ELEMENT tStep 1 number 292 irule 2 gp 1 keyword "stresses" component 2  value 4.8380e-02
+#ELEMENT tStep 1 number 292 irule 1 gp 6 keyword "strains" component 1  value -3.8526e-05
+#ELEMENT tStep 1 number 292 irule 1 gp 6 keyword "strains" component 2  value 1.2040e-05
+##ELEMENT tStep 1 number 292 irule 2 gp 3 keyword "stresses" component 1  value -1.1510e+00
+##ELEMENT tStep 1 number 292 irule 2 gp 3 keyword "stresses" component 2  value 1.5898e-02
+#ELEMENT tStep 1 number 292 irule 1 gp 5 keyword "strains" component 1  value -4.6993e-05
+#ELEMENT tStep 1 number 292 irule 1 gp 5 keyword "strains" component 2  value 1.6536e-05
+##ELEMENT tStep 1 number 292 irule 2 gp 2 keyword "stresses" component 1  value -1.3857e+00
+##ELEMENT tStep 1 number 292 irule 2 gp 2 keyword "stresses" component 2  value 8.0364e-02
+#ELEMENT tStep 1 number 292 irule 1 gp 4 keyword "strains" component 1  value -4.6940e-05
+#ELEMENT tStep 1 number 292 irule 1 gp 4 keyword "strains" component 2  value 1.5550e-05
+##ELEMENT tStep 1 number 292 irule 2 gp 1 keyword "stresses" component 1  value -1.3937e+00
+##ELEMENT tStep 1 number 292 irule 2 gp 1 keyword "stresses" component 2  value 4.8380e-02
 #####
-#ELEMENT tStep 1 number 292 irule 3 gp 3 keyword "strains" component 1  value -4.4750e-05
-#ELEMENT tStep 1 number 292 irule 3 gp 3 keyword "strains" component 2  value 2.7014e-05
-#ELEMENT tStep 1 number 292 irule 3 gp 3 keyword "stresses" component 1  value -1.2081e+00
-#ELEMENT tStep 1 number 292 irule 3 gp 3 keyword "stresses" component 2  value 4.4799e-01
-#ELEMENT tStep 1 number 292 irule 3 gp 2 keyword "strains" component 1  value -4.6055e-05
-#ELEMENT tStep 1 number 292 irule 3 gp 2 keyword "strains" component 2  value 2.0509e-05
-#ELEMENT tStep 1 number 292 irule 3 gp 2 keyword "stresses" component 1  value -1.3155e+00
-#ELEMENT tStep 1 number 292 irule 3 gp 2 keyword "stresses" component 2  value 2.2065e-01
-#ELEMENT tStep 1 number 292 irule 3 gp 1 keyword "strains" component 1  value -3.5116e-05
-#ELEMENT tStep 1 number 292 irule 3 gp 1 keyword "strains" component 2  value 3.2514e-05
-#ELEMENT tStep 1 number 292 irule 3 gp 1 keyword "stresses" component 1  value -8.3611e-01
-#ELEMENT tStep 1 number 292 irule 3 gp 1 keyword "stresses" component 2  value 7.2460e-01
+#ELEMENT tStep 1 number 292 irule 1 gp 9 keyword "strains" component 1  value -4.4750e-05
+#ELEMENT tStep 1 number 292 irule 1 gp 9 keyword "strains" component 2  value 2.7014e-05
+##ELEMENT tStep 1 number 292 irule 3 gp 3 keyword "stresses" component 1  value -1.2081e+00
+##ELEMENT tStep 1 number 292 irule 3 gp 3 keyword "stresses" component 2  value 4.4799e-01
+#ELEMENT tStep 1 number 292 irule 1 gp 8 keyword "strains" component 1  value -4.6055e-05
+#ELEMENT tStep 1 number 292 irule 1 gp 8 keyword "strains" component 2  value 2.0509e-05
+##ELEMENT tStep 1 number 292 irule 3 gp 2 keyword "stresses" component 1  value -1.3155e+00
+##ELEMENT tStep 1 number 292 irule 3 gp 2 keyword "stresses" component 2  value 2.2065e-01
+#ELEMENT tStep 1 number 292 irule 1 gp 7 keyword "strains" component 1  value -3.5116e-05
+#ELEMENT tStep 1 number 292 irule 1 gp 7 keyword "strains" component 2  value 3.2514e-05
+##ELEMENT tStep 1 number 292 irule 3 gp 1 keyword "stresses" component 1  value -8.3611e-01
+##ELEMENT tStep 1 number 292 irule 3 gp 1 keyword "stresses" component 2  value 7.2460e-01
 #####
-#ELEMENT tStep 1 number 292 irule 4 gp 3 keyword "strains" component 1  value -3.1936e-05
-#ELEMENT tStep 1 number 292 irule 4 gp 3 keyword "strains" component 2  value 2.9196e-05
-#ELEMENT tStep 1 number 292 irule 4 gp 3 keyword "stresses" component 1  value -7.6409e-01
-#ELEMENT tStep 1 number 292 irule 4 gp 3 keyword "stresses" component 2  value 6.4667e-01
-#ELEMENT tStep 1 number 292 irule 4 gp 2 keyword "strains" component 1  value -4.3975e-05
-#ELEMENT tStep 1 number 292 irule 4 gp 2 keyword "strains" component 2  value 1.8130e-05
-#ELEMENT tStep 1 number 292 irule 4 gp 2 keyword "stresses" component 1  value -1.2704e+00
-#ELEMENT tStep 1 number 292 irule 4 gp 2 keyword "stresses" component 2  value 1.6277e-01
-#ELEMENT tStep 1 number 292 irule 4 gp 1 keyword "strains" component 1  value -3.4235e-05
-#ELEMENT tStep 1 number 292 irule 4 gp 1 keyword "strains" component 2  value 1.5110e-05
-#ELEMENT tStep 1 number 292 irule 4 gp 1 keyword "stresses" component 1  value -9.7918e-01
-#ELEMENT tStep 1 number 292 irule 4 gp 1 keyword "stresses" component 2  value 1.5954e-01
+#ELEMENT tStep 1 number 292 irule 1 gp 12 keyword "strains" component 1  value -3.1936e-05
+#ELEMENT tStep 1 number 292 irule 1 gp 12 keyword "strains" component 2  value 2.9196e-05
+##ELEMENT tStep 1 number 292 irule 4 gp 3 keyword "stresses" component 1  value -7.6409e-01
+##ELEMENT tStep 1 number 292 irule 4 gp 3 keyword "stresses" component 2  value 6.4667e-01
+#ELEMENT tStep 1 number 292 irule 1 gp 11 keyword "strains" component 1  value -4.3975e-05
+#ELEMENT tStep 1 number 292 irule 1 gp 11 keyword "strains" component 2  value 1.8130e-05
+##ELEMENT tStep 1 number 292 irule 4 gp 2 keyword "stresses" component 1  value -1.2704e+00
+##ELEMENT tStep 1 number 292 irule 4 gp 2 keyword "stresses" component 2  value 1.6277e-01
+#ELEMENT tStep 1 number 292 irule 1 gp 10 keyword "strains" component 1  value -3.4235e-05
+#ELEMENT tStep 1 number 292 irule 1 gp 10 keyword "strains" component 2  value 1.5110e-05
+##ELEMENT tStep 1 number 292 irule 1 gp 10 keyword "stresses" component 1  value -9.7918e-01
+##ELEMENT tStep 1 number 292 irule 1 gp 10 keyword "stresses" component 2  value 1.5954e-01
 ######## element 268
 #ELEMENT tStep 1 number 268 irule 1 gp 1 keyword "strains" component 1  value -3.1999e-05
 #ELEMENT tStep 1 number 268 irule 1 gp 1 keyword "strains" component 2  value 7.3074e-05
-#ELEMENT tStep 1 number 268 irule 1 gp 1 keyword "stresses" component 1  value -3.3219e-01
-#ELEMENT tStep 1 number 268 irule 1 gp 1 keyword "stresses" component 2  value 2.0926e+00
+##ELEMENT tStep 1 number 268 irule 1 gp 1 keyword "stresses" component 1  value -3.3219e-01
+##ELEMENT tStep 1 number 268 irule 1 gp 1 keyword "stresses" component 2  value 2.0926e+00
 #ELEMENT tStep 1 number 268 irule 1 gp 2 keyword "strains" component 1  value 2.0829e-06
 #ELEMENT tStep 1 number 268 irule 1 gp 2 keyword "strains" component 2  value 3.8646e-05
-#ELEMENT tStep 1 number 268 irule 1 gp 2 keyword "stresses" component 1  value 4.5088e-01
-#ELEMENT tStep 1 number 268 irule 1 gp 2 keyword "stresses" component 2  value 1.2947e+00
+##ELEMENT tStep 1 number 268 irule 1 gp 2 keyword "stresses" component 1  value 4.5088e-01
+##ELEMENT tStep 1 number 268 irule 1 gp 2 keyword "stresses" component 2  value 1.2947e+00
 #ELEMENT tStep 1 number 268 irule 1 gp 3 keyword "strains" component 1  value 2.5693e-07
 #ELEMENT tStep 1 number 268 irule 1 gp 3 keyword "strains" component 2  value 1.7213e-05
-#ELEMENT tStep 1 number 268 irule 1 gp 3 keyword "stresses" component 1  value 1.7871e-01
-#ELEMENT tStep 1 number 268 irule 1 gp 3 keyword "stresses" component 2  value 5.7001e-01
+##ELEMENT tStep 1 number 268 irule 1 gp 3 keyword "stresses" component 1  value 1.7871e-01
+##ELEMENT tStep 1 number 268 irule 1 gp 3 keyword "stresses" component 2  value 5.7001e-01
 #####
-#ELEMENT tStep 1 number 268 irule 2 gp 1 keyword "strains" component 1  value -7.2460e-06
-#ELEMENT tStep 1 number 268 irule 2 gp 1 keyword "strains" component 2  value 5.3247e-05
-#ELEMENT tStep 1 number 268 irule 2 gp 1 keyword "stresses" component 1  value 2.8774e-01
-#ELEMENT tStep 1 number 268 irule 2 gp 1 keyword "stresses" component 2  value 1.6837e+00
-#ELEMENT tStep 1 number 268 irule 2 gp 2 keyword "strains" component 1  value -2.2740e-06
-#ELEMENT tStep 1 number 268 irule 2 gp 2 keyword "strains" component 2  value 4.8053e-05
-#ELEMENT tStep 1 number 268 irule 2 gp 2 keyword "stresses" component 1  value 4.0028e-01
-#ELEMENT tStep 1 number 268 irule 2 gp 2 keyword "stresses" component 2  value 1.5617e+00
-#ELEMENT tStep 1 number 268 irule 2 gp 3 keyword "strains" component 1  value -3.5502e-05
-#ELEMENT tStep 1 number 268 irule 2 gp 3 keyword "strains" component 2  value 8.2259e-05
-#ELEMENT tStep 1 number 268 irule 2 gp 3 keyword "stresses" component 1  value -3.5685e-01
-#ELEMENT tStep 1 number 268 irule 2 gp 3 keyword "stresses" component 2  value 2.3607e+00
+#ELEMENT tStep 1 number 268 irule 1 gp 4 keyword "strains" component 1  value -7.2460e-06
+#ELEMENT tStep 1 number 268 irule 1 gp 4 keyword "strains" component 2  value 5.3247e-05
+##ELEMENT tStep 1 number 268 irule 2 gp 1 keyword "stresses" component 1  value 2.8774e-01
+##ELEMENT tStep 1 number 268 irule 2 gp 1 keyword "stresses" component 2  value 1.6837e+00
+#ELEMENT tStep 1 number 268 irule 1 gp 5 keyword "strains" component 1  value -2.2740e-06
+#ELEMENT tStep 1 number 268 irule 1 gp 5 keyword "strains" component 2  value 4.8053e-05
+##ELEMENT tStep 1 number 268 irule 2 gp 2 keyword "stresses" component 1  value 4.0028e-01
+##ELEMENT tStep 1 number 268 irule 2 gp 2 keyword "stresses" component 2  value 1.5617e+00
+#ELEMENT tStep 1 number 268 irule 1 gp 6 keyword "strains" component 1  value -3.5502e-05
+#ELEMENT tStep 1 number 268 irule 1 gp 6 keyword "strains" component 2  value 8.2259e-05
+##ELEMENT tStep 1 number 268 irule 2 gp 3 keyword "stresses" component 1  value -3.5685e-01
+##ELEMENT tStep 1 number 268 irule 2 gp 3 keyword "stresses" component 2  value 2.3607e+00
 #####
-#ELEMENT tStep 1 number 268 irule 3 gp 1 keyword "strains" component 1  value -3.2105e-05
-#ELEMENT tStep 1 number 268 irule 3 gp 1 keyword "strains" component 2  value 6.9251e-05
-#ELEMENT tStep 1 number 268 irule 3 gp 1 keyword "stresses" component 1  value -3.7352e-01
-#ELEMENT tStep 1 number 268 irule 3 gp 1 keyword "stresses" component 2  value 1.9655e+00
-#ELEMENT tStep 1 number 268 irule 3 gp 2 keyword "strains" component 1  value -8.2206e-06
-#ELEMENT tStep 1 number 268 irule 3 gp 2 keyword "strains" component 2  value 1.4060e-05
-#ELEMENT tStep 1 number 268 irule 3 gp 2 keyword "stresses" component 1  value -1.3195e-01
-#ELEMENT tStep 1 number 268 irule 3 gp 2 keyword "stresses" component 2  value 3.8223e-01
-#ELEMENT tStep 1 number 268 irule 3 gp 3 keyword "strains" component 1  value -2.0811e-05
-#ELEMENT tStep 1 number 268 irule 3 gp 3 keyword "strains" component 2  value 2.4524e-05
-#ELEMENT tStep 1 number 268 irule 3 gp 3 keyword "stresses" component 1  value -4.4353e-01
-#ELEMENT tStep 1 number 268 irule 3 gp 3 keyword "stresses" component 2  value 6.0266e-01
+#ELEMENT tStep 1 number 268 irule 1 gp 7 keyword "strains" component 1  value -3.2105e-05
+#ELEMENT tStep 1 number 268 irule 1 gp 7 keyword "strains" component 2  value 6.9251e-05
+##ELEMENT tStep 1 number 268 irule 3 gp 1 keyword "stresses" component 1  value -3.7352e-01
+##ELEMENT tStep 1 number 268 irule 3 gp 1 keyword "stresses" component 2  value 1.9655e+00
+#ELEMENT tStep 1 number 268 irule 1 gp 8 keyword "strains" component 1  value -8.2206e-06
+#ELEMENT tStep 1 number 268 irule 1 gp 8 keyword "strains" component 2  value 1.4060e-05
+##ELEMENT tStep 1 number 268 irule 3 gp 2 keyword "stresses" component 1  value -1.3195e-01
+##ELEMENT tStep 1 number 268 irule 3 gp 2 keyword "stresses" component 2  value 3.8223e-01
+#ELEMENT tStep 1 number 268 irule 1 gp 9 keyword "strains" component 1  value -2.0811e-05
+#ELEMENT tStep 1 number 268 irule 1 gp 9 keyword "strains" component 2  value 2.4524e-05
+##ELEMENT tStep 1 number 268 irule 3 gp 3 keyword "stresses" component 1  value -4.4353e-01
+##ELEMENT tStep 1 number 268 irule 3 gp 3 keyword "stresses" component 2  value 6.0266e-01
 ######## element 273
-#ELEMENT tStep 1 number 273 irule 2 gp 3 keyword "strains" component 1  value -3.1999e-05
-#ELEMENT tStep 1 number 273 irule 2 gp 3 keyword "strains" component 2  value 7.3074e-05
-#ELEMENT tStep 1 number 273 irule 2 gp 3 keyword "stresses" component 1  value -3.3219e-01
-#ELEMENT tStep 1 number 273 irule 2 gp 3 keyword "stresses" component 2  value 2.0926e+00
-#ELEMENT tStep 1 number 273 irule 2 gp 2 keyword "strains" component 1  value 2.0829e-06
-#ELEMENT tStep 1 number 273 irule 2 gp 2 keyword "strains" component 2  value 3.8646e-05
-#ELEMENT tStep 1 number 273 irule 2 gp 2 keyword "stresses" component 1  value 4.5088e-01
-#ELEMENT tStep 1 number 273 irule 2 gp 2 keyword "stresses" component 2  value 1.2947e+00
-#ELEMENT tStep 1 number 273 irule 2 gp 1 keyword "strains" component 1  value 2.5693e-07
-#ELEMENT tStep 1 number 273 irule 2 gp 1 keyword "strains" component 2  value 1.7213e-05
-#ELEMENT tStep 1 number 273 irule 2 gp 1 keyword "stresses" component 1  value 1.7871e-01
-#ELEMENT tStep 1 number 273 irule 2 gp 1 keyword "stresses" component 2  value 5.7001e-01
+#ELEMENT tStep 1 number 273 irule 1 gp 6 keyword "strains" component 1  value -3.1999e-05
+#ELEMENT tStep 1 number 273 irule 1 gp 6 keyword "strains" component 2  value 7.3074e-05
+##ELEMENT tStep 1 number 273 irule 1 gp 6 keyword "stresses" component 1  value -3.3219e-01
+##ELEMENT tStep 1 number 273 irule 1 gp 6 keyword "stresses" component 2  value 2.0926e+00
+#ELEMENT tStep 1 number 273 irule 1 gp 5 keyword "strains" component 1  value 2.0829e-06
+#ELEMENT tStep 1 number 273 irule 1 gp 5 keyword "strains" component 2  value 3.8646e-05
+##ELEMENT tStep 1 number 273 irule 1 gp 5 keyword "stresses" component 1  value 4.5088e-01
+##ELEMENT tStep 1 number 273 irule 1 gp 5 keyword "stresses" component 2  value 1.2947e+00
+#ELEMENT tStep 1 number 273 irule 1 gp 4 keyword "strains" component 1  value 2.5693e-07
+#ELEMENT tStep 1 number 273 irule 1 gp 4 keyword "strains" component 2  value 1.7213e-05
+##ELEMENT tStep 1 number 273 irule 2 gp 1 keyword "stresses" component 1  value 1.7871e-01
+##ELEMENT tStep 1 number 273 irule 2 gp 1 keyword "stresses" component 2  value 5.7001e-01
 #####
-#ELEMENT tStep 1 number 273 irule 3 gp 3 keyword "strains" component 1  value -7.2460e-06
-#ELEMENT tStep 1 number 273 irule 3 gp 3 keyword "strains" component 2  value 5.3247e-05
-#ELEMENT tStep 1 number 273 irule 3 gp 3 keyword "stresses" component 1  value 2.8774e-01
-#ELEMENT tStep 1 number 273 irule 3 gp 3 keyword "stresses" component 2  value 1.6837e+00
-#ELEMENT tStep 1 number 273 irule 3 gp 2 keyword "strains" component 1  value -2.2740e-06
-#ELEMENT tStep 1 number 273 irule 3 gp 2 keyword "strains" component 2  value 4.8053e-05
-#ELEMENT tStep 1 number 273 irule 3 gp 2 keyword "stresses" component 1  value 4.0028e-01
-#ELEMENT tStep 1 number 273 irule 3 gp 2 keyword "stresses" component 2  value 1.5617e+00
-#ELEMENT tStep 1 number 273 irule 3 gp 1 keyword "strains" component 1  value -3.5502e-05
-#ELEMENT tStep 1 number 273 irule 3 gp 1 keyword "strains" component 2  value 8.2259e-05
-#ELEMENT tStep 1 number 273 irule 3 gp 1 keyword "stresses" component 1  value -3.5685e-01
-#ELEMENT tStep 1 number 273 irule 3 gp 1 keyword "stresses" component 2  value 2.3607e+00
+#ELEMENT tStep 1 number 273 irule 1 gp 9 keyword "strains" component 1  value -7.2460e-06
+#ELEMENT tStep 1 number 273 irule 1 gp 9 keyword "strains" component 2  value 5.3247e-05
+##ELEMENT tStep 1 number 273 irule 3 gp 3 keyword "stresses" component 1  value 2.8774e-01
+##ELEMENT tStep 1 number 273 irule 3 gp 3 keyword "stresses" component 2  value 1.6837e+00
+#ELEMENT tStep 1 number 273 irule 1 gp 8 keyword "strains" component 1  value -2.2740e-06
+#ELEMENT tStep 1 number 273 irule 1 gp 8 keyword "strains" component 2  value 4.8053e-05
+##ELEMENT tStep 1 number 273 irule 3 gp 2 keyword "stresses" component 1  value 4.0028e-01
+##ELEMENT tStep 1 number 273 irule 3 gp 2 keyword "stresses" component 2  value 1.5617e+00
+#ELEMENT tStep 1 number 273 irule 1 gp 7 keyword "strains" component 1  value -3.5502e-05
+#ELEMENT tStep 1 number 273 irule 1 gp 7 keyword "strains" component 2  value 8.2259e-05
+##ELEMENT tStep 1 number 273 irule 3 gp 1 keyword "stresses" component 1  value -3.5685e-01
+##ELEMENT tStep 1 number 273 irule 3 gp 1 keyword "stresses" component 2  value 2.3607e+00
 #####
-#ELEMENT tStep 1 number 273 irule 4 gp 3 keyword "strains" component 1  value -3.2105e-05
-#ELEMENT tStep 1 number 273 irule 4 gp 3 keyword "strains" component 2  value 6.9251e-05
-#ELEMENT tStep 1 number 273 irule 4 gp 3 keyword "stresses" component 1  value -3.7352e-01
-#ELEMENT tStep 1 number 273 irule 4 gp 3 keyword "stresses" component 2  value 1.9655e+00
-#ELEMENT tStep 1 number 273 irule 4 gp 2 keyword "strains" component 1  value -8.2206e-06
-#ELEMENT tStep 1 number 273 irule 4 gp 2 keyword "strains" component 2  value 1.4060e-05
-#ELEMENT tStep 1 number 273 irule 4 gp 2 keyword "stresses" component 1  value -1.3195e-01
-#ELEMENT tStep 1 number 273 irule 4 gp 2 keyword "stresses" component 2  value 3.8223e-01
-#ELEMENT tStep 1 number 273 irule 4 gp 1 keyword "strains" component 1  value -2.0811e-05
-#ELEMENT tStep 1 number 273 irule 4 gp 1 keyword "strains" component 2  value 2.4524e-05
-#ELEMENT tStep 1 number 273 irule 4 gp 1 keyword "stresses" component 1  value -4.4353e-01
-#ELEMENT tStep 1 number 273 irule 4 gp 1 keyword "stresses" component 2  value 6.0266e-01
+#ELEMENT tStep 1 number 273 irule 1 gp 12 keyword "strains" component 1  value -3.2105e-05
+#ELEMENT tStep 1 number 273 irule 1 gp 12 keyword "strains" component 2  value 6.9251e-05
+##ELEMENT tStep 1 number 273 irule 4 gp 3 keyword "stresses" component 1  value -3.7352e-01
+##ELEMENT tStep 1 number 273 irule 4 gp 3 keyword "stresses" component 2  value 1.9655e+00
+#ELEMENT tStep 1 number 273 irule 1 gp 11 keyword "strains" component 1  value -8.2206e-06
+#ELEMENT tStep 1 number 273 irule 1 gp 11 keyword "strains" component 2  value 1.4060e-05
+##ELEMENT tStep 1 number 273 irule 4 gp 2 keyword "stresses" component 1  value -1.3195e-01
+##ELEMENT tStep 1 number 273 irule 4 gp 2 keyword "stresses" component 2  value 3.8223e-01
+#ELEMENT tStep 1 number 273 irule 1 gp 10 keyword "strains" component 1  value -2.0811e-05
+#ELEMENT tStep 1 number 273 irule 1 gp 10 keyword "strains" component 2  value 2.4524e-05
+##ELEMENT tStep 1 number 273 irule 4 gp 1 keyword "stresses" component 1  value -4.4353e-01
+##ELEMENT tStep 1 number 273 irule 4 gp 1 keyword "stresses" component 2  value 6.0266e-01
 #%END_CHECK%
 
 

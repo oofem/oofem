@@ -51,14 +51,8 @@ namespace oofem {
  */
 class FEI2dQuadQuad : public FEInterpolation2d
 {
-protected:
-    int xind, yind;
-
 public:
-    FEI2dQuadQuad(int ind1, int ind2) : FEInterpolation2d(2) {
-        xind = ind1;
-        yind = ind2;
-    }
+    FEI2dQuadQuad(int ind1, int ind2) : FEInterpolation2d(2, ind1, ind2) {}
 
     virtual integrationDomain giveIntegrationDomain() const { return _Square; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }

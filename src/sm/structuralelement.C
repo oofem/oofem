@@ -125,33 +125,13 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
         OOFEM_ERROR("StructuralElement :: computeBoundaryLoadVector - No interpolator available\n");
     }
 
-    ///@todo This determines if its a edge or surface. We should make it more general and just have a "boundary"
-    bool surface;
-    if ( this->testElementExtension(Element_SurfaceLoadSupport) ) {
-        surface = true;
-    } else if ( this->testElementExtension(Element_EdgeLoadSupport) ) {
-        surface = false;
-    } else {
-        _error("computeBoundaryLoadVector : no boundary load support");
-        surface = true;
-    }
-
     FloatArray n_vec;
     FloatMatrix n, T;
     FloatArray force, globalIPcoords;
     int nsd = fei->giveNsd();
 
-    int approxOrder = load->giveApproxOrder() + this->giveApproxOrder();
-
     ///@todo Have interpolator set up integration rule here instead.
-    IntegrationRule *iRule;
-
-    if ( surface ) {
-        iRule = this->GetSurfaceIntegrationRule(approxOrder);
-    } else {
-        iRule = new GaussIntegrationRule(1, this, 1, 1);
-        iRule->SetUpPointsOnLine(( int ) ceil( ( approxOrder + 1. ) / 2. ), _Unknown);
-    }
+    IntegrationRule *iRule = fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary);
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
@@ -170,17 +150,11 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
         if ( load->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
             // then just keep it in global c.s
         } else {
-            // transform from local edge to element local c.s
-            ///@todo This determines if its a edge or surface. We should make it more general and just have a "boundary"
-            if ( surface ) {
-                if ( this->computeLoadLSToLRotationMatrix(T, boundary, gp) ) {
-                    force.rotatedWith(T, 'n');
-                }
-            } else {
-                if ( this->computeLoadLEToLRotationMatrix(T, boundary, gp) ) {
-                    force.rotatedWith(T, 'n');
-                }
-            }
+            ///@todo Support this...
+            // transform from local boundary to element local c.s
+            /*if ( this->computeLoadLSToLRotationMatrix(T, boundary, gp) ) {
+                force.rotatedWith(T, 'n');
+            }*/
             // then to global c.s
             if ( this->computeLoadGToLRotationMtrx(T) ) {
                 force.rotatedWith(T, 't');
@@ -191,14 +165,9 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
         fei->boundaryEvalN(n_vec, boundary, lcoords, FEIElementGeometryWrapper(this));
         n.beNMatrixOf(n_vec, nsd);
 
-        double dV;
-        ///@todo This determines if its a edge or surface. We should make it more general and just have a "boundary"
-        if ( surface ) {
-            dV = this->computeSurfaceVolumeAround(gp, boundary);
-        } else {
-            dV = this->computeEdgeVolumeAround(gp, boundary);
-        }
-
+        ///@todo Some way to ask for the thickness at a global coordinate maybe?
+        double thickness = 1.0; // Should be the circumference for axisymm-elements.
+        double dV = thickness * gp->giveWeight() * fei->boundaryGiveTransformationJacobian(boundary, lcoords, FEIElementGeometryWrapper(this));
         answer.plusProduct(n, force, dV);
     }
 

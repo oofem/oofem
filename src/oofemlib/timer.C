@@ -142,7 +142,7 @@ void Timer :: convert2HMS(int &nhrs, int &nmin, int &nsec, long int tsec)
 
 void Timer :: convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec)
 {
-    Timer  ::  convert2HMS(nhrs, nmin, nsec, ( long int ) tsec);
+    Timer :: convert2HMS(nhrs, nmin, nsec, ( long int ) tsec);
 }
 
 void Timer :: toString(char *buff)
@@ -182,12 +182,12 @@ double EngngModelTimer :: getWtime(EngngModelTimer :: EngngModelTimerType t)
 
 void EngngModelTimer :: convert2HMS(int &nhrs, int &nmin, int &nsec, long int tsec) const
 {
-    Timer  ::  convert2HMS(nhrs, nmin, nsec, tsec);
+    Timer :: convert2HMS(nhrs, nmin, nsec, tsec);
 }
 
 void EngngModelTimer :: convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec) const
 {
-    Timer  ::  convert2HMS(nhrs, nmin, nsec, tsec);
+    Timer :: convert2HMS(nhrs, nmin, nsec, tsec);
 }
 
 void EngngModelTimer :: toString(EngngModelTimer :: EngngModelTimerType t, char *buff)

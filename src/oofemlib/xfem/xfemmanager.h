@@ -49,6 +49,8 @@
 #define _IFT_XfemManager_numberOfEnrichmentFunctions "numberofenrichmentfunctions"
 //@}
 
+//#define ENABLE_XFEM_CPP11
+
 namespace oofem {
 class Domain;
 class EnrichmentItem;
@@ -62,6 +64,7 @@ class DataStream;
  *
  * @author Ruzena Chamrova
  * @author Jim Brouzoulis
+ * @author Erik Svenning
  */
 class XfemManager
 {
@@ -89,17 +92,17 @@ public:
 
     bool isElementEnriched(const Element *elem);
 
-    bool isAllElNodesEnriched(const Element *elem);
+    //    bool isAllElNodesEnriched(const Element *elem);
 
     /// Accessor.
     EnrichmentItem *giveEnrichmentItem(int n);
-    int giveNumberOfEnrichmentItems() { return enrichmentItemList->giveSize(); }
+    int giveNumberOfEnrichmentItems() { return 1; /*enrichmentItemList->giveSize();*/ }
 
     void createEnrichedDofs();
 
     /// Computes the type of node enrichment, returns zero if the node is not enriched.
     // Old method: should instead return an array if there are several active /JB
-    XfemType computeNodeEnrichmentType(int nodeNumber); 
+    XfemType computeNodeEnrichmentType(int nodeNumber);
 
     /// Initializes receiver according to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
@@ -107,7 +110,7 @@ public:
     int instanciateYourself(DataReader *dr);
     const char *giveClassName() const { return "XfemManager"; }
     const char *giveInputRecordName() const { return _IFT_XfemManager_Name; }
-    
+
     /// Wrapper for updating the integration rule.
     void updateIntegrationRule();
 

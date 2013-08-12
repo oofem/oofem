@@ -70,7 +70,7 @@ SUPGElement2 :: initializeFrom(InputRecord *ir)
 
 
 void
-SUPGElement2 ::  giveCharacteristicMatrix(FloatMatrix &answer,
+SUPGElement2 :: giveCharacteristicMatrix(FloatMatrix &answer,
                                           CharType mtrx, TimeStep *tStep)
 //
 // returns characteristics matrix of receiver according to mtrx
@@ -138,7 +138,7 @@ SUPGElement2 ::  giveCharacteristicMatrix(FloatMatrix &answer,
 
 
 void
-SUPGElement2 ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
+SUPGElement2 :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
                                           TimeStep *tStep)
 //
 // returns characteristics vector of receiver according to requested type

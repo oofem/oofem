@@ -73,7 +73,7 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
 
 
 void
-StructuralCrossSection ::  giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
+StructuralCrossSection :: giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
 {
     // This function returns the first Piola-Kirchoff stress in vector format
     // corresponding to a given deformation gradient according to the stress-deformation
@@ -96,7 +96,7 @@ StructuralCrossSection ::  giveFirstPKStresses(FloatArray &answer, GaussPoint *g
 
 
 void
-StructuralCrossSection ::  giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
+StructuralCrossSection :: giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
 {
     // This function returns the Cauchy stress in vector format
     // corresponding to a given deformation gradient according to the stress-deformation

@@ -572,7 +572,7 @@ LIBeam3dNL2 :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 
 void
-LIBeam3dNL2 ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+LIBeam3dNL2 :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
     answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
 }

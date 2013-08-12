@@ -482,7 +482,7 @@ MisesMatGrad :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, G
     double tempDamage;
     FloatArray tempEffStress, totalStress, locTotalStrain;
 
-    MisesMat ::  performPlasticityReturn(gp, locTotalStrain);
+    MisesMat :: performPlasticityReturn(gp, locTotalStrain);
     status->letTempStrainVectorBe(totalStrain);
     tempDamage = computeDamage(gp, atTime);
     status->giveTempEffectiveStress(tempEffStress);

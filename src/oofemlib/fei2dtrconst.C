@@ -45,11 +45,13 @@ FEI2dTrConst :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICe
     answer.at(1) = 1.;
 }
 
-void
+double
 FEI2dTrConst :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     answer.resize(1, 2);
     answer.zero();
+
+    return 0.0;
 }
 
 void

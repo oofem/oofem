@@ -80,5 +80,10 @@ IntegrationRule *FEInterpolation1d :: giveBoundaryIntegrationRule(int order, int
     return iRule;
 }
 
+IntegrationRule *FEInterpolation1d :: giveBoundaryEdgeIntegrationRule(int order, int boundary)
+{
+    OOFEM_ERROR("FEInterpolation1d :: giveBoundaryEdgeIntegrationRule - Not supported by ");
+    return NULL;
+}
 
 } // end namespace oofem

@@ -8,68 +8,104 @@
 #include "XFEMDebugTools.h"
 
 namespace oofem {
+XFEMDebugTools :: XFEMDebugTools() {}
 
-XFEMDebugTools::XFEMDebugTools() {
+XFEMDebugTools :: ~XFEMDebugTools() {}
 
-}
-
-XFEMDebugTools::~XFEMDebugTools() {
-
-}
-
-void XFEMDebugTools::WriteTrianglesToVTK( const std::string &iName, const AList< Triangle > &iTriangles )
+void XFEMDebugTools :: WriteTrianglesToVTK(const std :: string &iName, const AList< Triangle > &iTriangles)
 {
-//	printf("Entering XFEMDebugTools::WriteTrianglesToVTK().\n");
-	int numTri = iTriangles.giveSize();
+    //	printf("Entering XFEMDebugTools::WriteTrianglesToVTK().\n");
+    int numTri = iTriangles.giveSize();
 
 
-	std::ofstream file;
-	file.open (iName.data());
+    std :: ofstream file;
+    file.open( iName.data() );
 
-	// Write header
-	file << "# vtk DataFile Version 2.0\n";
-	file << "Geometry of a PolygonLine\n";
-	file << "ASCII\n";
+    // Write header
+    file << "# vtk DataFile Version 2.0\n";
+    file << "Geometry of a PolygonLine\n";
+    file << "ASCII\n";
 
-	file << "DATASET UNSTRUCTURED_GRID\n";
+    file << "DATASET UNSTRUCTURED_GRID\n";
 
-	int numPoints = numTri*3;
-	// Write points
-	file << "POINTS " << numPoints << "double\n";
+    int numPoints = numTri * 3;
+    // Write points
+    file << "POINTS " << numPoints << "double\n";
 
-	for(int i = 1; i <= numTri; i++)
-	{
-		for(int j = 1; j <= 3; j++)
-		{
-			const double &x = iTriangles.at(i)->giveVertex(j)->at(1);
-			const double &y = iTriangles.at(i)->giveVertex(j)->at(2);
-			file << x << " " << y << " 0.0\n";
-		}
-	}
+    for ( int i = 1; i <= numTri; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
+            const double &x = iTriangles.at(i)->giveVertex(j)->at(1);
+            const double &y = iTriangles.at(i)->giveVertex(j)->at(2);
+            file << x << " " << y << " 0.0\n";
+        }
+    }
 
 
-	// Write segments
-	file << "CELLS " << numTri << " " << numTri*4 << "\n";
+    // Write segments
+    file << "CELLS " << numTri << " " << numTri * 4 << "\n";
 
-	for(int i = 0; i < numTri; i++)
-	{
-		file << 3 << " " << 3*i << " " << 3*i+1 << " " << 3*i+2 << "\n";
-	}
-
-
-	// Write cell types
-	file << "CELL_TYPES " << numTri << "\n";
-	int vtkCellType = 5; // triangle
-	for(int i = 0; i < numTri; i++)
-	{
-		file << vtkCellType << "\n";
-	}
-
-	file.close();
+    for ( int i = 0; i < numTri; i++ ) {
+        file << 3 << " " << 3 * i << " " << 3 * i + 1 << " " << 3 * i + 2 << "\n";
+    }
 
 
+    // Write cell types
+    file << "CELL_TYPES " << numTri << "\n";
+    int vtkCellType = 5;     // triangle
+    for ( int i = 0; i < numTri; i++ ) {
+        file << vtkCellType << "\n";
+    }
+
+    file.close();
 }
 
+void XFEMDebugTools :: WritePointsToVTK(const std :: string &iName, const std :: vector< FloatArray > &iPoints)
+{
+    //	printf("Entering XFEMDebugTools::WriteTrianglesToVTK().\n");
 
+
+    std :: ofstream file;
+    file.open( iName.data() );
+
+    // Write header
+    file << "# vtk DataFile Version 2.0\n";
+    file << "Gauss points\n";
+    file << "ASCII\n";
+
+    file << "DATASET UNSTRUCTURED_GRID\n";
+
+    int numPoints = iPoints.size();
+    // Write points
+    file << "POINTS " << numPoints << " double\n";
+
+    for ( int i = 1; i <= numPoints; i++ ) {
+        //			for(int j = 1; j <= 3; j++)
+        //			{
+        const double &x = iPoints [ i - 1 ].at(1);
+        const double &y = iPoints [ i - 1 ].at(2);
+        //				const double &z = iPoints[i-1].at(3);
+        const double z = 0.0;
+
+        file << x << " " << y << " " << z << "\n";
+        //			}
+    }
+
+
+    // Write segments
+    file << "CELLS " << numPoints << " " << numPoints * 2 << "\n";
+
+    for ( int i = 0; i < numPoints; i++ ) {
+        file << 1 << " " << i << "\n";
+    }
+
+
+    // Write cell types
+    file << "CELL_TYPES " << numPoints << "\n";
+    int vtkCellType = 1;             // vertex
+    for ( int i = 0; i < numPoints; i++ ) {
+        file << vtkCellType << "\n";
+    }
+
+    file.close();
+}
 } /* namespace oofem */
-

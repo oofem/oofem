@@ -138,6 +138,18 @@ public:
 #endif
 
 #ifdef DEBUG
+    int &operator[](int i);
+#else
+    inline int &operator[](int i) { return values [ i ]; }
+#endif
+
+#ifdef DEBUG
+    const int &operator[](int i) const;
+#else
+    inline const int &operator[](int i) const { return values [ i ]; }
+#endif
+
+#ifdef DEBUG
     /**
      * Checks size of receiver towards requested bounds.
      * Current implementation will call exit(1) if dimension

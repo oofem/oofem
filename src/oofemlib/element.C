@@ -53,6 +53,8 @@
 #include "feinterpol2d.h"
 #include "feinterpol3d.h"
 #include "loadtimefunction.h"
+#include "dofmanager.h"
+#include "node.h"
 
 #include <cstdio>
 

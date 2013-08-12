@@ -41,6 +41,7 @@
 #include "oofemtxtdatareader.h"
 #include "util.h"
 #include "classfactory.h"
+#include "node.h"
 
 namespace oofem {
 //valgrind --leak-check=full --show-reachable=no -v --log-file=valgr.txt ./oofem -f Macrolspace_1.in

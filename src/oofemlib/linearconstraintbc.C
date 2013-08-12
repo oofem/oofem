@@ -42,6 +42,7 @@
 #include "timestep.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "node.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(LinearConstraintBC);

@@ -496,6 +496,60 @@ double FloatArray :: distance(const FloatArray &x) const
     return sqrt( this->distance_square(x) );
 }
 
+double FloatArray::distance(const FloatArray &iP1, const FloatArray &iP2) const
+{
+	double dist = 0.0;
+
+	// Vector from start P1 to point X
+	FloatArray u;
+	u.beDifferenceOf(*this, iP1);
+
+	// Line tangent vector
+	FloatArray t;
+	t.beDifferenceOf(iP2, iP1);
+	double l = norm(t);
+
+	if( l > 0.0)
+	{
+		t.normalize();
+		double s = dot(u, t);
+
+		if( s < 0.0 )
+		{
+			// X is closest to P1
+			dist = this->distance(iP1);
+			return dist;
+		}
+		else
+		{
+			if( s > l )
+			{
+				// X is closest to P2
+				dist = this->distance(iP2);
+				return dist;
+			}
+			else
+			{
+				double xi = s/l;
+				FloatArray q = (1.0-xi)*iP1 + xi*iP2;
+				dist = this->distance(q);
+				return dist;
+			}
+
+		}
+
+	}
+	else
+	{
+		// If the points P1 and P2 coincide,
+		// we can compute the distance to any
+		// of these points.
+		dist = this->distance(iP1);
+		return dist;
+	}
+
+}
+
 
 double FloatArray :: distance_square(const FloatArray &from) const
 // returns distance between receiver and from from

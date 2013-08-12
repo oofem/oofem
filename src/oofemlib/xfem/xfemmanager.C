@@ -84,35 +84,38 @@ void XfemManager :: giveActiveEIsFor(IntArray &answer, const Element *elem)
 
 bool XfemManager :: isElementEnriched(const Element *elem)
 {
-    // Loop over all EI which asks if el is enriched. 
-    for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ){
-        if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ){ 
-            return true; 
-        };
-    } 
-    return false;
-}
+    // Loop over all EI which asks if el is enriched.
+    for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ) {
+        if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ) {
+            return true;
+        }
 
-bool XfemManager :: isAllElNodesEnriched(const Element *elem)
-{
-    for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ){
-
-    	EnrichmentItem *eI = this->giveEnrichmentItem(i);
-    	for( int j = 1; j <= eI->giveNumberOfEnrichmentDomains(); j++)
-    	{
-
-    		EnrichmentDomain *eD = eI->giveEnrichmentDomain(j);
-    		if( eD->isAllElNodesEnriched(elem) )
-    		{
-    			return true;
-    		}
-
-    	}
+        ;
     }
 
     return false;
 }
-
+/*
+ * bool XfemManager :: isAllElNodesEnriched(const Element *elem)
+ * {
+ *  for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ){
+ *
+ *      EnrichmentItem *eI = this->giveEnrichmentItem(i);
+ *      for( int j = 1; j <= eI->giveNumberOfEnrichmentDomains(); j++)
+ *      {
+ *
+ *              EnrichmentDomain *eD = eI->giveEnrichmentDomain(j);
+ *              if( eD->isAllElNodesEnriched(elem) )
+ *              {
+ *                      return true;
+ *              }
+ *
+ *      }
+ *  }
+ *
+ *  return false;
+ * }
+ */
 
 EnrichmentItem *XfemManager :: giveEnrichmentItem(int n)
 {
@@ -122,6 +125,7 @@ EnrichmentItem *XfemManager :: giveEnrichmentItem(int n)
     } else {
         OOFEM_ERROR2("giveEnrichmentItem: undefined enrichmentItem (%d)", n);
     }
+
     return NULL;
 }
 
@@ -146,6 +150,7 @@ XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
 
         interactedEnrEl.zero();
     }
+
     // very specialized
     // only for 2d. Won't work if several ei are active in the neighboring element to a node.
     // one node could also have several TYPEs, Tip + inclusion etc.
@@ -153,7 +158,7 @@ XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
         ret = STANDARD;
     } else if ( intersectionCount == 1 ) {
         ret = TIP;
-    } else /*if ( intersectionCount > 1 )*/ {
+    } else { /*if ( intersectionCount > 1 )*/
         ret = SPLIT;
     }
 
@@ -162,30 +167,52 @@ XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
 
 
 
-void 
+void
 XfemManager :: createEnrichedDofs()
 {
     // Creates new dofs due to enrichment and appends them to the dof managers
     ///@todo: need to add check if dof already exists in the dofmanager
     int nrDofMan = this->giveDomain()->giveNumberOfDofManagers();
     IntArray dofIdArray;
- 
-    for (int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ ) {
+
+    for ( int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ ) {
         EnrichmentItem *ei = this->giveEnrichmentItem(j);
-        for ( int k = 1; k <= ei->giveNumberOfEnrichmentDomains(); k++ ) {
-            for ( int i = 1; i <= nrDofMan; i++ ) {
-                DofManager *dMan = this->giveDomain()->giveDofManager(i); 
-                if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,k) ) {
-                    ei->computeDofManDofIdArray(dofIdArray, dMan, k);
-                    int nDofs = dMan->giveNumberOfDofs();
-                    for ( int m = 1; m<= dofIdArray.giveSize(); m++ ) {
-                        dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );   
-                    }
+        //        for ( int k = 1; k <= ei->giveNumberOfEnrichmentDomains(); k++ )
+        //        {
+        for ( int i = 1; i <= nrDofMan; i++ ) {
+            DofManager *dMan = this->giveDomain()->giveDofManager(i);
+
+            //                if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,k) )
+            if ( ei->isDofManEnriched(* dMan) ) {
+                ei->computeDofManDofIdArray(dofIdArray, dMan);
+                int nDofs = dMan->giveNumberOfDofs();
+                for ( int m = 1; m <= dofIdArray.giveSize(); m++ ) {
+                    //                      printf("Creating enriched dof. dManI: %d (nDofs + m): %d dofIdArray.at(m): %d\n", i, (nDofs + m), dofIdArray.at(m) );
+                    dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
                 }
             }
         }
+
+        //        }
     }
 
+    /*
+     *  for (int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ ) {
+     *      EnrichmentItem *ei = this->giveEnrichmentItem(j);
+     *      for ( int k = 1; k <= ei->giveNumberOfEnrichmentDomains(); k++ ) {
+     *          for ( int i = 1; i <= nrDofMan; i++ ) {
+     *              DofManager *dMan = this->giveDomain()->giveDofManager(i);
+     *              if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,k) ) {
+     *                  ei->computeDofManDofIdArray(dofIdArray, dMan, k);
+     *                  int nDofs = dMan->giveNumberOfDofs();
+     *                  for ( int m = 1; m<= dofIdArray.giveSize(); m++ ) {
+     *                      dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
+     *                  }
+     *              }
+     *          }
+     *      }
+     *  }
+     */
 }
 
 
@@ -224,6 +251,7 @@ int XfemManager :: instanciateYourself(DataReader *dr)
         ei->instanciateYourself(dr);
         this->enrichmentItemList->put(i, ei);
     }
+
     return 1;
 }
 
@@ -243,19 +271,20 @@ contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode m
 {
     contextIOResultType iores;
 
-    if (mode & CM_Definition) {
-        if ( !stream->write(&this->numberOfEnrichmentItems, 1) ) {
+    if ( mode & CM_Definition ) {
+        if ( !stream->write(& this->numberOfEnrichmentItems, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
 
     for ( int i = 1; i <= this->numberOfEnrichmentItems; i++ ) {
-        EnrichmentItem* obj = this->giveEnrichmentItem(i);
+        EnrichmentItem *obj = this->giveEnrichmentItem(i);
         if ( ( mode & CM_Definition ) ) {
-            if ( !stream->write(obj->giveInputRecordName()) ) {
+            if ( !stream->write( obj->giveInputRecordName() ) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
         }
+
         if ( ( iores = obj->saveContext(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -265,47 +294,47 @@ contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode m
 }
 
 
-contextIOResultType XfemManager:: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType XfemManager :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
-    if (mode & CM_Definition) {
-        if ( !stream->read(&this->numberOfEnrichmentItems, 1) ) {
+    if ( mode & CM_Definition ) {
+        if ( !stream->read(& this->numberOfEnrichmentItems, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
 
     if ( mode & CM_Definition ) {
-        this->enrichmentItemList->growTo(this->numberOfEnrichmentItems );
+        this->enrichmentItemList->growTo(this->numberOfEnrichmentItems);
     }
-    for ( int i = 1; i <= this->numberOfEnrichmentItems ; i++ ) {
-        EnrichmentItem  *obj;
+
+    for ( int i = 1; i <= this->numberOfEnrichmentItems; i++ ) {
+        EnrichmentItem *obj;
         if ( mode & CM_Definition ) {
-            std::string name;
+            std :: string name;
             if ( !stream->read(name) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
+
             obj = classFactory.createEnrichmentItem(name.c_str(), i, this, this->domain);
-            enrichmentItemList->put (i, obj);
+            enrichmentItemList->put(i, obj);
         } else {
-            obj = this->giveEnrichmentItem (i);
+            obj = this->giveEnrichmentItem(i);
         }
+
         if ( ( iores = obj->restoreContext(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
+
     return CIO_OK;
 }
 
-void XfemManager:: updateYourself()
+void XfemManager :: updateYourself()
 {
-	// Update level sets
-	for ( int i = 1; i <= enrichmentItemList->giveSize(); i++)
-	{
-		enrichmentItemList->at(i)->updateGeometry();
-
-	}
-
+    // Update level sets
+    for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
+        enrichmentItemList->at(i)->updateGeometry();
+    }
 }
-
 } // end namespace oofem

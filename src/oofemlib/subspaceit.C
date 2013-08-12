@@ -42,7 +42,7 @@
 #include "gjacobi.h"
 
 namespace oofem {
-SubspaceIteration ::  SubspaceIteration(Domain *d, EngngModel *m) :
+SubspaceIteration :: SubspaceIteration(Domain *d, EngngModel *m) :
     SparseGeneralEigenValueSystemNM(d, m)
 {
     //
