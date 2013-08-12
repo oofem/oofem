@@ -1,7 +1,7 @@
 '''
 Created on Aug 5, 2013
 
-@author: Carl Sandström
+@author: Carl Sandstrom
 
 This Python module is used to parse an Abaqus .inp file and store the data in the same way
 as the unv2x module. In order to do so, imaginary elements on the faces of the 3D element are 
