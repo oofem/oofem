@@ -230,6 +230,7 @@ set (core_bc
     reinforcement.C
     surfacetensionbc.C
     linearconstraintbc.C
+    userdefdirichletbc.C
     )
 
 set (core_mapping
