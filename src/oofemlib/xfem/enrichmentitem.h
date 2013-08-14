@@ -224,6 +224,9 @@ protected:
     // Indices of tip elements
  //   std::vector<int> mTipElIndices;
  //   std::vector<FloatArray> mTipCoords;
+
+    // Help functions
+    double CalcXiZeroLevel(const double &iQ1, const double &iQ2) const;
 };
 
 /** Sub classes to EnrichmentItem. */

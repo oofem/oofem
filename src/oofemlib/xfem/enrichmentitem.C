@@ -553,7 +553,13 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 
 				if( mLevelSetNormalDir[niGlob-1]*mLevelSetNormalDir[njGlob-1] < 0.0 )
 				{
-					if( mLevelSetTangDir[niGlob-1] > 0.0 && mLevelSetTangDir[njGlob-1] > 0.0 )
+					double xi = CalcXiZeroLevel(mLevelSetNormalDir[niGlob-1], mLevelSetNormalDir[njGlob-1]);
+
+					const double &gammaS = mLevelSetTangDir[niGlob-1];
+					const double &gammaE = mLevelSetTangDir[njGlob-1];
+					double gamma = 0.5*(1.0-xi)*gammaS + 0.5*(1.0+xi)*gammaE;
+
+					if( gamma > 0.0 )
 					{
 						edgeIntersected = true;
 					}
@@ -565,7 +571,13 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 
 			if( mLevelSetNormalDir[niGlob-1]*mLevelSetNormalDir[njGlob-1] < 0.0 )
 			{
-				if( mLevelSetTangDir[niGlob-1] > 0.0 && mLevelSetTangDir[njGlob-1] > 0.0 )
+				double xi = CalcXiZeroLevel(mLevelSetNormalDir[niGlob-1], mLevelSetNormalDir[njGlob-1]);
+
+				const double &gammaS = mLevelSetTangDir[niGlob-1];
+				const double &gammaE = mLevelSetTangDir[njGlob-1];
+				double gamma = 0.5*(1.0-xi)*gammaS + 0.5*(1.0+xi)*gammaE;
+
+				if( gamma > 0.0 )
 				{
 					edgeIntersected = true;
 				}
@@ -887,23 +899,7 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
 			{
 				// Intersection detected
 
-				double xi = 0.0;
-
-				if( fabs(phiS-phiE) > mLevelSetTol )
-				{
-					xi = (phiS+phiE)/(phiS-phiE);
-				}
-
-				if( xi < -1.0)
-				{
-					xi = -1.0;
-				}
-
-				if( xi > 1.0)
-				{
-					xi = 1.0;
-				}
-
+				double xi = CalcXiZeroLevel(phiS, phiE);
 				double gamma = 0.5*(1.0-xi)*gammaS + 0.5*(1.0+xi)*gammaE;
 
 				// If we are inside in tangential direction
@@ -989,6 +985,28 @@ bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, int iElIndex) con
 
 	return false;
 */
+}
+
+double EnrichmentItem :: CalcXiZeroLevel(const double &iQ1, const double &iQ2) const
+{
+	double xi = 0.0;
+
+	if( fabs(iQ1-iQ2) > mLevelSetTol )
+	{
+		xi = (iQ1+iQ2)/(iQ1-iQ2);
+	}
+
+	if( xi < -1.0)
+	{
+		xi = -1.0;
+	}
+
+	if( xi > 1.0)
+	{
+		xi = 1.0;
+	}
+
+	return xi;
 }
 
 
