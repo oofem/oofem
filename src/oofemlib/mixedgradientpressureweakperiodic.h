@@ -138,8 +138,10 @@ public:
 protected:
     void integrateTractionVelocityTangent(FloatMatrix &answer, Element *el, int boundary);
     void integrateTractionXTangent(FloatMatrix &answer, Element *el, int boundary);
-    void integrateTractionDev(FloatArray &answer, Element *el, int boundary);
+    void integrateTractionDev(FloatArray &answer, Element *el, int boundary, const FloatMatrix &ddev);
     void evaluateTractionBasisFunctions(FloatArray &answer, const FloatArray &coords);
+    
+    void constructFullMatrixForm(FloatMatrix &d, const FloatArray &d_voigt) const;
 };
 } // end namespace oofem
 

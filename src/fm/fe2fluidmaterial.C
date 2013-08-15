@@ -361,7 +361,7 @@ void FE2FluidMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
 void FE2FluidMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    double fluid_area = this->rve->giveDomain(1)->giveArea();
+    double fluid_area = this->rve->giveDomain(1)->giveSize();
     double total_area = this->bc->domainSize();
     this->voffraction = fluid_area/total_area;
     FluidDynamicMaterialStatus::updateYourself(tStep);
