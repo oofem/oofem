@@ -29,6 +29,21 @@ REGISTER_BoundaryCondition( UserDefDirichletBC );
 PythonInitializer mPythonInitializer;
 #endif
 
+UserDefDirichletBC :: UserDefDirichletBC(int i, Domain *d) : BoundaryCondition(i, d)
+{
+
+}
+
+/// Destructor
+UserDefDirichletBC :: ~UserDefDirichletBC()
+{
+#ifdef BOOST_PYTHON
+    Py_DECREF(mpName);
+    Py_DECREF(mpModule);
+    Py_DECREF(mpFunc);
+#endif
+}
+
 double UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 {
 #ifdef BOOST_PYTHON
@@ -36,56 +51,39 @@ double UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
     DofManager *dMan = dof->giveDofManager();
 
 
-    // Import Python file
-    PyObject *pName = PyString_FromString( mFileName.c_str() );
-    PyObject *pModule = PyImport_Import( pName );
-
-
-    /*
-     * Create input arguments to the Python function:
-     * (x, y, z, dofNum)
+    /**
+     * The Python function takes two input arguments:
+     * 	1) An array with node coordinates
+     * 	2) The dof id
      */
-    int numArgs = 4;
+    int numArgs = 2;
+
+    // Create array with node coordinates
+    int dim = dMan->giveCoordinates()->giveSize();
+    PyObject *pArgArray = PyList_New(dim);
+
     PyObject *pArgs = PyTuple_New(numArgs);
 
-    // X-coordinate
-    PyObject *pValX = PyFloat_FromDouble(dMan->giveCoordinate(1));
-    PyTuple_SetItem(pArgs, 0, pValX);
-
-    // Y-coordinate
-    PyObject *pValY = PyFloat_FromDouble(dMan->giveCoordinate(2));
-    PyTuple_SetItem(pArgs, 1, pValY);
-
-    // Z-coordinate
-    PyObject *pValZ = PyFloat_FromDouble(dMan->giveCoordinate(3));
-    PyTuple_SetItem(pArgs, 2, pValZ);
+    for (int i = 0; i < dim; i++) {
+        PyList_SET_ITEM(pArgArray, i, PyFloat_FromDouble( dMan->giveCoordinate(i+1) ));
+    }
+    // PyTuple_SetItem takes over responsibility for objects passed
+    // to it -> no DECREF
+    PyTuple_SetItem(pArgs, 0, pArgArray);
 
 
     // Dof number
-    PyObject *pValDofNum = PyLong_FromLong(dof->giveNumber());
-    PyTuple_SetItem(pArgs, 3, pValDofNum);
+    PyObject *pValDofNum = PyLong_FromLong(dof->giveDofID());
+    PyTuple_SetItem(pArgs, 1, pValDofNum);
 
 
-
+    // Value returned from the Python function
     PyObject *pRetVal;
 
-    if (pModule != NULL) {
-    	// Load and call Python function
-    	PyObject *pFunc = PyObject_GetAttrString(pModule, "giveUserDefBC");
-
-    	if(pFunc != NULL) {
-    	    if (PyCallable_Check(pFunc)) {
-    	    	pRetVal = PyObject_CallObject(pFunc, pArgs);
-    	    } else {
-    	    	OOFEM_ERROR("UserDefDirichletBC :: give: Python function is not callable.");
-    	    }
-    	}
-    	else {
-	    	OOFEM_ERROR("UserDefDirichletBC :: give: Failed to load Python function.");
-    	}
-    }
-    else {
-    	OOFEM_ERROR("UserDefDirichletBC :: give: Failed to load Python module.");
+    if (PyCallable_Check(mpFunc)) {
+    	pRetVal = PyObject_CallObject(mpFunc, pArgs);
+    } else {
+    	OOFEM_ERROR("UserDefDirichletBC :: give: Python function is not callable.");
     }
 
     // Get return value
@@ -98,8 +96,6 @@ double UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
     }
 
     // Decrement reference count on pointers
-    Py_DECREF(pName);
-    Py_DECREF(pModule);
     Py_DECREF(pArgs);
     Py_DECREF(pRetVal);
 
@@ -123,6 +119,22 @@ UserDefDirichletBC :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, mFileName, _IFT_UserDefDirichletBC_filename);
+
+#ifdef BOOST_PYTHON
+    // Import Python file
+    mpName = PyString_FromString( mFileName.c_str() );
+    mpModule = PyImport_Import( mpName );
+
+    if (mpModule != NULL) {
+    	// Load and call Python function
+    	mpFunc = PyObject_GetAttrString(mpModule, "giveUserDefBC");
+    }
+
+    Py_INCREF(mpName);
+    Py_INCREF(mpModule);
+    Py_INCREF(mpFunc);
+
+#endif
 
     return IRRT_OK;
 }

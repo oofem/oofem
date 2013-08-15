@@ -69,6 +69,19 @@
 
 #define _IFT_UserDefDirichletBC_filename "filename"
 
+#ifdef BOOST_PYTHON
+
+// forward declare PyObject
+// as suggested on the python mailing list
+// http://mail.python.org/pipermail/python-dev/2003-August/037601.html
+#ifndef PyObject_HEAD
+struct _object;
+typedef _object PyObject;
+#endif
+
+//class PyObject;
+#endif
+
 namespace oofem {
 
 class PythonInitializer;
@@ -89,6 +102,10 @@ protected:
      */
 #ifdef BOOST_PYTHON
     static PythonInitializer mPythonInitializer;
+
+    PyObject *mpName;
+    PyObject *mpModule;
+    PyObject *mpFunc;
 #endif
 
     std::string mFileName;
@@ -99,10 +116,10 @@ public:
      * @param i Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    UserDefDirichletBC(int i, Domain *d) : BoundaryCondition(i, d)
-    { }
+    UserDefDirichletBC(int i, Domain *d);
+
     /// Destructor
-    virtual ~UserDefDirichletBC() { }
+    virtual ~UserDefDirichletBC();
 
     /**
      * Returns the value of a prescribed unknown, respecting requested mode for given time.
