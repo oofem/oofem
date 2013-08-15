@@ -48,8 +48,8 @@ bool Delaunay :: colinear(FloatArray *p1, FloatArray *p2, FloatArray *p3)
 {
     double dist = p1->at(1) * ( p2->at(2) - p3->at(2) ) + p2->at(1) * ( p3->at(2) - p1->at(2) ) +
                   p3->at(1) * ( p1->at(2) - p2->at(2) );
-    // the tolerance probably needs a setter
-    if ( dist < 0.0001 && dist > -0.0001 ) {
+
+    if ( dist < mTol && dist > -mTol ) {
         return true;
     } else {
         return false;

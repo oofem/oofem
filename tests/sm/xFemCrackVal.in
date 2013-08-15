@@ -26,10 +26,11 @@ BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.2
 BoundaryCondition 3 loadTimeFunction 1 prescribedvalue -0.3
 ConstantFunction 1 f(t) 1.0
 XfemManager 1 numberofenrichmentitems 1
-crack 1 enrichmentdomains 1 1 enrichmentfunction 1 enrichmentdomain 1 enrichmentfront 0
+crack 1 enrichmentdomains 1 1 enrichmentfunction 1 enrichmentdomain 1 enrichmentfront 1
 DiscontinuousFunction 1
 #polygoncrack 1 points 6 0.0 -0.5 1.2 -0.1 2.0 -1.0
 polygoncrack 1 points 10 1.2  1.5 1.4  0.7 1.8 0.3 1.5 -0.1 2.1 -0.5
+EnrFrontDoNothing 1
 #%BEGIN_CHECK% tolerance 1.e-8
 ## Node displacements
 #NODE tStep 0 number 1 dof 1 unknown d value 0.0

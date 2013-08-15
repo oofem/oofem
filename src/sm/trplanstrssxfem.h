@@ -65,14 +65,15 @@ public:
 
 	virtual int checkConsistency();
 
+#if 0
 	// Overloaded functions from XfemElementInterface
     /// Partitions the element into patches by a triangulation.
-    virtual void XfemElementInterface_partitionElement(AList< Triangle > *answer, AList< FloatArray > *together);
+    virtual void XfemElementInterface_partitionElement(AList< Triangle > *answer, std :: vector< FloatArray > &together);
     /// Updates integration rule based on the triangulation.
     virtual void XfemElementInterface_updateIntegrationRule();
     /// Helpful routine to put the nodes for triangulation together, should be in protected members probably.
     virtual void XfemElementInterface_prepareNodesForDelaunay(std::vector< std::vector< FloatArray > > &oPointPartitions);
-
+#endif
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 
