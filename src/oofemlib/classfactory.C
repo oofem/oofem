@@ -353,6 +353,17 @@ bool ClassFactory :: registerEnrichmentDomain(const char *name, EnrichmentDomain
     return true;
 }
 
+EnrichmentFront* ClassFactory :: createEnrichmentFront(const char *name)
+{
+    return ( enrichmentFrontList.count(name) == 1 ) ? enrichmentFrontList [ name ]() : NULL;
+}
+
+bool ClassFactory :: registerEnrichmentFront(const char *name, EnrichmentFront * ( *creator )())
+{
+    enrichmentFrontList[name] = creator;
+    return true;
+}
+
 BasicGeometry* ClassFactory :: createGeometry(const char *name)
 {
     return ( geometryList.count(name) == 1 ) ? geometryList [ name ]() : NULL;

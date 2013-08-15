@@ -34,6 +34,7 @@
 #//ifdef __OOFEG
 #include "patchintegrationrule.h"
 //#endif
+#include "delaunay.h"
 
 #include "XFEMDebugTools.h"
 #include <string>
@@ -55,10 +56,13 @@ int TrPlaneStress2dXFEM::checkConsistency()
     this->xMan =  this->giveDomain()->giveXfemManager();
     return 1;
 }
-
-void TrPlaneStress2dXFEM :: XfemElementInterface_partitionElement(AList< Triangle > *answer, AList< FloatArray > *together)
+#if 0
+void TrPlaneStress2dXFEM :: XfemElementInterface_partitionElement(AList< Triangle > *answer, std :: vector< FloatArray > &together)
 {
-
+    Delaunay dl;
+    dl.triangulate(together, answer);
+    return;
+/*
 	// Two cases may occur when partitioning: we will get a subdomain
 	// with either 3 or 4 nodes.
 	if( together->giveSize() == 3 )
@@ -332,31 +336,21 @@ void TrPlaneStress2dXFEM :: XfemElementInterface_partitionElement(AList< Triangl
 
 		}
 	}
-
+*/
 }
 
 void TrPlaneStress2dXFEM :: XfemElementInterface_updateIntegrationRule()
 {
 
+	XfemElementInterface :: XfemElementInterface_updateIntegrationRule();
+	return;
+/*
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
 
 
-        IntArray activeEI;
-        xMan->giveActiveEIsFor(activeEI, element);
+//        IntArray activeEI;
+//        xMan->giveActiveEIsFor(activeEI, element);
 
-        // TODO: How do we handle the case when several cracks interact with one element?
-/*
-        std::vector< FloatArray > intersecPoints;
-        for ( int i = 1; i <= activeEI.giveSize(); i++ ) { // for the active enrichment items
-
-        	// Loop over enrichment domains
-//        	for ( int j = 1; j <=  xMan->giveEnrichmentItem( activeEI.at(i) )->giveNumberOfEnrichmentDomains(); j++)
-//        	{
-//        		xMan->giveEnrichmentItem( activeEI.at(i) )->giveEnrichmentDomain(j)->computeIntersectionPoints( intersecPoints, element);
-        		xMan->giveEnrichmentItem( activeEI.at(i) )->computeIntersectionPoints( intersecPoints, element);
-//        	}
-        }
-*/
 
         std::vector< FloatArray > intersecPoints;
         std::vector< int > intersecEdgeInd;
@@ -473,7 +467,8 @@ void TrPlaneStress2dXFEM :: XfemElementInterface_updateIntegrationRule()
 
 
             int ruleNum = 1;
-            int numGPPerTri = 3;
+//            int numGPPerTri = 3;
+            int numGPPerTri = 19;
             AList< IntegrationRule >irlist;
             IntegrationRule *intRule = new PatchIntegrationRule(ruleNum, element, allTri);
 
@@ -485,37 +480,20 @@ void TrPlaneStress2dXFEM :: XfemElementInterface_updateIntegrationRule()
             element->setIntegrationRules(&irlist);
 
 
-/*
-            for ( int i = 1; i <= triangles.giveSize(); i++ ) {
-
-            	Patch *patch = new TrianglePatch(element);
-                for ( int j = 1; j <= triangles.at(i)->giveVertices()->giveSize(); j++ ) {
-                    FloatArray *nCopy = new FloatArray( *triangles.at( i )->giveVertex(j) );
-                    patch->setVertex(nCopy);
-                }
-
-                PatchIntegrationRule *pir = new PatchIntegrationRule(i, element, patch);
-                int pointNr = 3;
-                MaterialMode matMode = element->giveMaterialMode();
-                pir->setUpIntegrationPoints(_Triangle, pointNr, matMode);
-                irlist.put(i, pir);
-            }
-
-            element->setIntegrationRules(& irlist);
-*/
         }
         else
         {
         	TrPlaneStress2d ::computeGaussPoints();
 
         }
+*/
 }
 
 void TrPlaneStress2dXFEM :: XfemElementInterface_prepareNodesForDelaunay(std::vector< std::vector< FloatArray > > &oPointPartitions)
 {
-
+	XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(oPointPartitions);
 }
-
+#endif
 
 Interface *
 TrPlaneStress2dXFEM :: giveInterface(InterfaceType it)
@@ -542,7 +520,28 @@ int TrPlaneStress2dXFEM :: computeNumberOfDofs(EquationID ut)
 
 void TrPlaneStress2dXFEM :: computeGaussPoints()
 {
-	this->XfemElementInterface_updateIntegrationRule();
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
+
+    for(int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++)
+    {
+    	std::vector<FloatArray> intersecPoints;
+    	EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+
+        std::vector< int > intersecEdgeInd;
+    	ei->computeIntersectionPoints(intersecPoints, intersecEdgeInd, this);
+    	int numIntersecPoints = intersecPoints.size();
+
+        if ( numIntersecPoints > 0 )
+        {
+            this->XfemElementInterface_updateIntegrationRule();
+        } else
+        {
+            TrPlaneStress2d ::computeGaussPoints();
+        }
+
+    }
+
+//	this->XfemElementInterface_updateIntegrationRule();
 }
 
 

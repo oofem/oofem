@@ -79,6 +79,8 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 
     std :: vector< FloatArray >newGPCoord;
 
+    double parentArea = this->elem->computeArea();
+
     // Loop over triangles
     for ( int i = 0; i < int( mTriangles.size() ); i++ ) {
         // TODO: Probably unnecessary to allocate here
@@ -115,7 +117,6 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 
 
 
-            double parentArea = this->elem->computeArea();
 
             double refElArea = this->elem->giveParentElSize();
 

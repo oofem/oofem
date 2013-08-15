@@ -87,6 +87,7 @@ class EnrichmentItem;
 class EnrichmentFunction;
 class EnrichmentDomain;
 class BasicGeometry;
+class EnrichmentFront;
 
 // Templates to wrap constructors into functions
 template< typename T > Element *elemCreator(int n, Domain *d) { return new T(n, d); }
@@ -116,6 +117,7 @@ template< typename T > EnrichmentItem *enrichItemCreator(int n, XfemManager *x, 
 template< typename T > EnrichmentFunction *enrichFuncCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > EnrichmentDomain *enrichmentDomainCreator() { return new T(); }
 template< typename T > BasicGeometry *geometryCreator() { return new T(); }
+template< typename T > EnrichmentFront *enrichFrontCreator() { return new T(); }
 
 ///@name Macros for registering new components. Unique dummy variables must be created as a result (design flaw in C++).
 //@{
@@ -144,6 +146,7 @@ template< typename T > BasicGeometry *geometryCreator() { return new T(); }
 #define REGISTER_EnrichmentFunction(class) static bool __dummy_##class = GiveClassFactory().registerEnrichmentFunction(_IFT_##class##_Name, enrichFuncCreator< class >);
 #define REGISTER_EnrichmentDomain(class) static bool __dummy_##class = GiveClassFactory().registerEnrichmentDomain(_IFT_##class##_Name, enrichmentDomainCreator< class >);
 #define REGISTER_Geometry(class) static bool __dummy_##class = GiveClassFactory().registerGeometry(_IFT_##class##_Name, geometryCreator< class >);
+#define REGISTER_EnrichmentFront(class) static bool __dummy_##class = GiveClassFactory().registerEnrichmentFront(_IFT_##class##_Name, enrichFrontCreator< class >);
 //@}
 
 /**
@@ -213,6 +216,8 @@ protected:
     std :: map < std :: string, BasicGeometry * ( * )(), CaseComp > geometryList;
     /// Associative container containing enrichment-domain creators
     std :: map < std :: string, EnrichmentDomain * ( * )(), CaseComp > enrichmentDomainList;
+    /// Associative container containing enrichment front creators
+    std :: map < std :: string, EnrichmentFront * ( * )(), CaseComp > enrichmentFrontList;
 
 public:
     /// Constructor, registers all classes
@@ -469,6 +474,9 @@ public:
 
     EnrichmentDomain *createEnrichmentDomain(const char *name);
     bool registerEnrichmentDomain(const char *name, EnrichmentDomain * ( *creator )());
+
+    EnrichmentFront *createEnrichmentFront(const char *name);
+    bool registerEnrichmentFront(const char *name, EnrichmentFront * ( *creator )());
 
     BasicGeometry *createGeometry(const char *name);
     bool registerGeometry(const char *name, BasicGeometry * ( *creator )());

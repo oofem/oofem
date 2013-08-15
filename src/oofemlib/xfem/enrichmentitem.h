@@ -64,6 +64,12 @@
 
 #define _IFT_Crack_Name "crack"
 
+#define _IFT_EnrFrontDoNothing_Name "enrfrontdonothing"
+#define _IFT_EnrFrontExtend_Name "enrfrontextend"
+#define _IFT_EnrFrontLinearBranchFuncRadius_Name "enrfrontlinearbranchfuncradius"
+#define _IFT_EnrFrontLinearBranchFuncRadius_Radius "radius"
+
+
 namespace oofem {
 template< class T >class AList;
 class BasicGeometry;
@@ -160,6 +166,10 @@ public:
     // if the element contains a tip.
     bool giveElementTipCoord(FloatArray &oCoord, int iElIndex) const;
 
+    // Help functions
+    double calcXiZeroLevel(const double &iQ1, const double &iQ2);
+    static void calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT);
+
 protected:
 
     /////////////////////////
@@ -225,8 +235,6 @@ protected:
  //   std::vector<int> mTipElIndices;
  //   std::vector<FloatArray> mTipCoords;
 
-    // Help functions
-    double CalcXiZeroLevel(const double &iQ1, const double &iQ2) const;
 };
 
 /** Sub classes to EnrichmentItem. */
@@ -368,6 +376,11 @@ public:
 	virtual void evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd, const std::vector<TipInfo> &iTipInfo) const = 0;
 	virtual void evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd, const std::vector<TipInfo> &iTipInfo) const = 0;
 
+    virtual const char *giveClassName() const = 0;
+    virtual const char *giveInputRecordName() const = 0;
+
+    virtual IRResultType initializeFrom(InputRecord *ir) = 0;
+
 };
 
 class EnrFrontDoNothing: public EnrichmentFront{
@@ -383,6 +396,11 @@ public:
 	// Evaluate the enrichment function and its derivative in front nodes.
 	virtual void evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd, const std::vector<TipInfo> &iTipInfo) const {};
 	virtual void evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd, const std::vector<TipInfo> &iTipInfo) const {};
+
+    virtual const char *giveClassName() const { return "EnrFrontDoNothing"; }
+    virtual const char *giveInputRecordName() const { return _IFT_EnrFrontDoNothing_Name; }
+
+    virtual IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
 
 };
 
@@ -400,6 +418,12 @@ public:
 	// Evaluate the enrichment function and its derivative in front nodes.
 	virtual void evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd, const std::vector<TipInfo> &iTipInfo) const {};
 	virtual void evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd, const std::vector<TipInfo> &iTipInfo) const {};
+
+
+    virtual const char *giveClassName() const { return "EnrFrontExtend"; }
+    virtual const char *giveInputRecordName() const { return _IFT_EnrFrontExtend_Name; }
+
+    virtual IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
 };
 
 class EnrFrontLinearBranchFuncRadius: public EnrichmentFront{
@@ -414,6 +438,11 @@ public:
 	// Evaluate the enrichment function and its derivative in front nodes.
 	virtual void evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd, const std::vector<TipInfo> &iTipInfo) const;
 	virtual void evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd, const std::vector<TipInfo> &iTipInfo) const;
+
+    virtual const char *giveClassName() const { return "EnrFrontLinearBranchFuncRadius"; }
+    virtual const char *giveInputRecordName() const { return _IFT_EnrFrontLinearBranchFuncRadius_Name; }
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
 private:
 	double mEnrichmentRadius;
