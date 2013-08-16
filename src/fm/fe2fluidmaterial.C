@@ -99,6 +99,7 @@ void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, d
 
     bc->computeFields(stress_dev, r_vol, EID_MomentumBalance_ConservationEquation, tStep);
     ms->letTempDeviatoricStressVectorBe(stress_dev);
+    ms->letTempDeviatoricStrainRateVectorBe(eps);
 
     ms->markOldTangents(); // Mark this so that tangents are reevaluated if they are needed.
     // One could also just compute them here, but you don't actually need them if the problem has converged, so this method saves on that iteration.
