@@ -409,10 +409,11 @@ public:
      * @note Function does most likely NOT need to be overridden.
      * @param answer Computed rotation matrix.
      * @param nodes Nodes to include in element local ordering.
+     * @param includeInternal Determines whether or not to include internal dof managers.
      * @param eid Equation ID.
      * @return True if transformation is necessary, false otherwise.
      */
-    virtual bool computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &nodes, EquationID eid);
+    virtual bool computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &nodes, bool includeInternal, EquationID eid);
     /**
      * Returns dofmanager dof mask for node. This mask defines the dofs which are used by element
      * in node. Mask influences the code number ordering for particular node. Code numbers are

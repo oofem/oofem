@@ -1183,7 +1183,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                         ///@todo Should be have a similar interface for rotation or should elements expect to work in global c.s. for loads?
                         /// Right now it's the latter, just the global->real dof transformation is performed here.
                         element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-                        if ( element->computeDofTransformationMatrix(R, bNodes, eid) ) {
+                        if ( element->computeDofTransformationMatrix(R, bNodes, false, eid) ) {
                             charVec.rotatedWith(R, 't');
                         }
 
