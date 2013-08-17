@@ -217,9 +217,9 @@ public:
     void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s, IntArray * dofIds = NULL) const;
     /**
      * Returns the location array for the boundary of the element.
-     * The boundary is the corner nodes for 1D elements, the edges for a 2D element and the surfaces for a 3D element.
+     * Only takes into account nodes in the bNodes vector.
      */
-    void giveBoundaryLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
+    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, EquationID eid, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
     /**
      * @return Number of DOFs in element.
      */
@@ -290,6 +290,7 @@ public:
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
     /**
      * Computes the contribution of the given load at the given boundary.
+     * @note Elements which do not have an contribution should resize the vector to be empty.
      * @param answer Requested contribution of load.
      * @param load Load to compute contribution from.
      * @param boundary Boundary number.
@@ -299,7 +300,8 @@ public:
      */
     virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
     /**
-     * Computes the contribution of the given load at the given edge.
+     * Computes the contribution of the given load at the given boundary edge.
+     * @note Elements which do not have an contribution should resize the vector to be empty.
      * @param answer Requested contribution of load.
      * @param load Load to compute contribution from.
      * @param boundary Edge number.
@@ -331,13 +333,13 @@ public:
     virtual void computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     /**
      * Boundary version of computeVectorOf.
-     * @param boundary Boundary number.
+     * @param bNodes Boundary nodes.
      * @param eid Equation ID for unknowns.
      * @param u Identifies mode of unknown (eg. total value or velocity of unknown).
      * @param stepN Time step, when vector of unknowns is requested.
      * @param answer Local vector of unknowns.
      */
-    virtual void computeBoundaryVectorOf(int boundary, EquationID eid, ValueModeType u, TimeStep *stepN, FloatArray &answer);
+    virtual void computeBoundaryVectorOf(const IntArray &bNodes, EquationID eid, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     /**
      * Returns local vector of unknowns. Local vector of unknowns is extracted from
      * given field and from boundary conditions (if dof has active boundary

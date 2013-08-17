@@ -162,6 +162,7 @@ void MixedGradientPressureWeakPeriodic :: giveLocationArrays(std::vector<IntArra
     this->voldman->giveCompleteLocationArray(e_loc_c, c_s);
 
     Set *set = this->giveDomain()->giveSet(this->set);
+    IntArray bNodes;
     const IntArray &boundaries = set->giveBoundaryList();
 
     rows.resize(boundaries.giveSize()+2);
@@ -171,8 +172,9 @@ void MixedGradientPressureWeakPeriodic :: giveLocationArrays(std::vector<IntArra
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
         int boundary = boundaries.at(pos*2);
 
-        e->giveBoundaryLocationArray(loc_r, boundary, eid, r_s);
-        e->giveBoundaryLocationArray(loc_c, boundary, eid, c_s);
+        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+        e->giveBoundaryLocationArray(loc_r, bNodes, eid, r_s);
+        e->giveBoundaryLocationArray(loc_c, bNodes, eid, c_s);
         // For most uses, *loc_r == *loc_c
         rows[i] = loc_r;
         cols[i] = t_loc_c;
@@ -389,7 +391,7 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
     const IntArray &boundaries = set->giveBoundaryList();
 
     IntArray v_loc, t_loc, e_loc;  // For the velocities and stress respectively
-    IntArray velocityDofIDs, tractionDofIDs, dvolDofID;
+    IntArray velocityDofIDs, tractionDofIDs, dvolDofID, bNodes;
     this->tractionsdman->giveCompleteLocationArray(t_loc, s);
     this->voldman->giveCompleteLocationArray(e_loc, s);
     this->tractionsdman->giveCompleteMasterDofIDArray(tractionDofIDs);
@@ -410,7 +412,8 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
             Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
             int boundary = boundaries.at(pos*2);
 
-            e->giveBoundaryLocationArray(v_loc, boundary, eid, s, &velocityDofIDs);
+            e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+            e->giveBoundaryLocationArray(v_loc, bNodes, eid, s, &velocityDofIDs);
             this->integrateTractionDev(fe, e, boundary);
             fe.negated();
 
@@ -437,8 +440,9 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
             int boundary = boundaries.at(pos*2);
             
             // Fetch the element information;
-            el->giveBoundaryLocationArray(v_loc, boundary, eid, s, &velocityDofIDs);
-            el->computeBoundaryVectorOf(boundary, eid, mode, tStep, v);
+            el->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+            el->giveBoundaryLocationArray(v_loc, bNodes, eid, s, &velocityDofIDs);
+            el->computeBoundaryVectorOf(bNodes, eid, mode, tStep, v);
 
             // Integrate the tangents;
             this->integrateTractionVelocityTangent(Ke_v, el, boundary);
@@ -478,6 +482,7 @@ void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx *answer, TimeStep 
     if (type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == StiffnessMatrix || type == ElasticStiffnessMatrix) {
         FloatMatrix Ke_v, Ke_vT, Ke_e, Ke_eT;
         IntArray v_loc_r, v_loc_c, t_loc_r, t_loc_c, e_loc_r, e_loc_c;
+        IntArray bNodes;
         Set *set = this->giveDomain()->giveSet(this->set);
         const IntArray &boundaries = set->giveBoundaryList();
 
@@ -493,8 +498,9 @@ void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx *answer, TimeStep 
             int boundary = boundaries.at(pos*2);
             
             // Fetch the element information;
-            el->giveBoundaryLocationArray(v_loc_r, boundary, eid, r_s);
-            el->giveBoundaryLocationArray(v_loc_c, boundary, eid, c_s);
+            el->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+            el->giveBoundaryLocationArray(v_loc_r, bNodes, eid, r_s);
+            el->giveBoundaryLocationArray(v_loc_c, bNodes, eid, c_s);
 
             this->integrateTractionVelocityTangent(Ke_v, el, boundary);
             this->integrateTractionXTangent(Ke_e, el, boundary);
@@ -605,7 +611,7 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
         int boundary = boundaries.at(pos*2);
 
-        e->giveBoundaryLocationArray(loc, boundary, eid, fnum);
+        e->giveBoundaryLocationArray(loc, bNodes, eid, fnum);
         this->integrateVolTangent(fe, e, boundary);
         fe.times(-1.0); // here d_p = 1.0
         p_pert.assemble(fe, loc);
@@ -634,7 +640,7 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(
         int boundary = boundaries.at(pos*2);
     
         this->integrateVolTangent(fe, e, boundary);
-        e->giveBoundaryLocationArray(loc, boundary, eid, fnum);
+        e->giveBoundaryLocationArray(loc, bNodes, eid, fnum);
         
         // Using "loc" to pick out the relevant contributions. This won't work at all if there are local coordinate systems in these nodes
         // or slave nodes etc. The goal is to compute the velocity from the sensitivity field, but we need to avoid going through the actual

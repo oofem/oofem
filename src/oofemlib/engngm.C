@@ -1153,6 +1153,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
             FloatMatrix R;
             BodyLoad *bodyLoad;
             BoundaryLoad *bLoad;
+            //BoundaryEdgeLoad *eLoad;
             NodalLoad *nLoad;
             Set *set = domain->giveSet(bc->giveSetNumber());
 
@@ -1192,7 +1193,32 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                         if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
                     }
                 }
-            } else if ( (nLoad = dynamic_cast< NodalLoad* >(load)) ) { // Nodal load:
+            } 
+#if 0
+            else if ( (eLoad = dynamic_cast< BoundaryEdgeLoad* >(load)) ) { // Boundary edge load:
+                const IntArray &boundaries = set->giveEdgeList();
+                for (int ibnd = 1; ibnd <= boundaries.giveSize()/2; ++ibnd) {
+                    Element *element = domain->giveElement(boundaries.at(ibnd*2-1));
+                    int boundary = boundaries.at(ibnd*2);
+                    element->computeBoundaryEdgeLoadVector(charVec, eLoad, boundary, type, mode, tStep);
+
+                    if ( charVec.isNotEmpty() ) {
+                        ///@todo Should be have a similar interface for rotation or should elements expect to work in global c.s. for loads?
+                        /// Right now it's the latter, just the global->real dof transformation is performed here.
+                        element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+                        if ( element->computeDofTransformationMatrix(R, bNodes, eid) ) {
+                            charVec.rotatedWith(R, 't');
+                        }
+
+                        element->giveBoundaryEdgeLocationArray(loc, boundary, eid, s, &dofids);
+                        answer.assemble(charVec, loc);
+
+                        if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
+                    }
+                }
+            } 
+#endif
+            else if ( (nLoad = dynamic_cast< NodalLoad* >(load)) ) { // Nodal load:
                 const IntArray &nodes = set->giveNodeList();
                 for (int idman = 1; idman <= nodes.giveSize(); ++idman) {
                     DofManager *node = domain->giveDofManager(nodes.at(idman));

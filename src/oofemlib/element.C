@@ -150,17 +150,14 @@ Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, Fl
 
 
 void
-Element :: computeBoundaryVectorOf(int boundary, EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+Element :: computeBoundaryVectorOf(const IntArray &bNodes, EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer)
 // Forms the vector containing the values of the unknown 'u' (e.g., the
 // Total value) of the dofs of the callers local cs.
 {
     int k;
-    IntArray bNodes;
     IntArray dofIDMask;
     FloatMatrix G2L;
     FloatArray vec;
-
-    this->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
 
     k = 0;
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
@@ -450,13 +447,11 @@ Element :: giveLocationArray(IntArray &locationArray, EquationID eid, const Unkn
 
 
 void
-Element :: giveBoundaryLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIdArray)
+Element :: giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIdArray)
 {
-    IntArray bNodes;
     IntArray dofIDMask, masterDofIDs;
     IntArray nodalArray;
 
-    this->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
     locationArray.resize(0);
     if (dofIdArray) dofIdArray->resize(0);
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
