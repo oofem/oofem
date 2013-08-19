@@ -228,13 +228,6 @@ protected:
 
     const double mLevelSetTol, mLevelSetTol2;
 
-    // Info about the tips
-    std::vector<TipInfo> mTipInfo;
-
-    // Indices of tip elements
- //   std::vector<int> mTipElIndices;
- //   std::vector<FloatArray> mTipCoords;
-
 };
 
 /** Sub classes to EnrichmentItem. */
@@ -369,18 +362,32 @@ public:
 	virtual void MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemManager &ixFemMan, const std::vector<double> &iLevelSetNormalDir, const std::vector<double> &iLevelSetTangDir, const std::vector<TipInfo> &iTipInfo) = 0;
 
     // The number of enrichment functions applied to tip nodes.
-    virtual int  giveNumEnrichments() const = 0;
+    virtual int  giveNumEnrichments(const DofManager &iDMan) const = 0;
 
 
 	// Evaluate the enrichment function and its derivative in front nodes.
-	virtual void evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd, const std::vector<TipInfo> &iTipInfo) const = 0;
-	virtual void evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd, const std::vector<TipInfo> &iTipInfo) const = 0;
+	virtual void evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const = 0;
+	virtual void evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const = 0;
 
     virtual const char *giveClassName() const = 0;
     virtual const char *giveInputRecordName() const = 0;
 
     virtual IRResultType initializeFrom(InputRecord *ir) = 0;
 
+    virtual bool giveElementTipCoord(FloatArray &oCoord, int iElIndex) const;
+
+protected:
+    std::vector<TipInfo> mTipInfo;
+
+    /**
+     * Keep record of the tips associated with an enriched node:
+     * pair.first -> node index
+     * pair.second-> tip indices
+     */
+    std::vector< std::pair<int, std::vector<int> > > mNodeTipIndices;
+
+    void addTipIndexToNode(int iNodeInd, int iTipInd); // Help function for updating mNodeTipIndices
+    void giveNodeTipIndices(int iNodeInd, std::vector<int> &oTipIndices) const;
 };
 
 class EnrFrontDoNothing: public EnrichmentFront{
@@ -391,11 +398,11 @@ public:
 	virtual void MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemManager &ixFemMan, const std::vector<double> &iLevelSetNormalDir, const std::vector<double> &iLevelSetTangDir, const std::vector<TipInfo> &iTipInfo) {printf("Entering EnrFrontDoNothing::MarkNodesAsFront().\n"); }
 
 	// No special tip enrichments are applied with this model.
-	virtual int  giveNumEnrichments() const {return 0;}
+	virtual int  giveNumEnrichments(const DofManager &iDMan) const {return 0;}
 
 	// Evaluate the enrichment function and its derivative in front nodes.
-	virtual void evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd, const std::vector<TipInfo> &iTipInfo) const {};
-	virtual void evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd, const std::vector<TipInfo> &iTipInfo) const {};
+	virtual void evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const {};
+	virtual void evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const {};
 
     virtual const char *giveClassName() const { return "EnrFrontDoNothing"; }
     virtual const char *giveInputRecordName() const { return _IFT_EnrFrontDoNothing_Name; }
@@ -413,11 +420,11 @@ public:
 
 	// No special tip enrichments are applied with this model,
 	// it only modifies the set of nodes subject to bulk enrichment.
-	virtual int  giveNumEnrichments() const {return 0;}
+	virtual int  giveNumEnrichments(const DofManager &iDMan) const {return 0;}
 
 	// Evaluate the enrichment function and its derivative in front nodes.
-	virtual void evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd, const std::vector<TipInfo> &iTipInfo) const {};
-	virtual void evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd, const std::vector<TipInfo> &iTipInfo) const {};
+	virtual void evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const {};
+	virtual void evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const {};
 
 
     virtual const char *giveClassName() const { return "EnrFrontExtend"; }
@@ -433,11 +440,11 @@ public:
 
 	virtual void MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemManager &ixFemMan, const std::vector<double> &iLevelSetNormalDir, const std::vector<double> &iLevelSetTangDir, const std::vector<TipInfo> &iTipInfo);
 
-	virtual int  giveNumEnrichments() const {return 4;}
+	virtual int  giveNumEnrichments(const DofManager &iDMan) const;
 
 	// Evaluate the enrichment function and its derivative in front nodes.
-	virtual void evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd, const std::vector<TipInfo> &iTipInfo) const;
-	virtual void evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd, const std::vector<TipInfo> &iTipInfo) const;
+	virtual void evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const;
+	virtual void evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const;
 
     virtual const char *giveClassName() const { return "EnrFrontLinearBranchFuncRadius"; }
     virtual const char *giveInputRecordName() const { return _IFT_EnrFrontLinearBranchFuncRadius_Name; }

@@ -249,11 +249,11 @@ void BranchFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *poin
 
 void LinElBranchFunction :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const double &iR, const double &iTheta) const
 {
-    oEnrFunc.resize(4, 0.0);
-    oEnrFunc [ 0 ] = sqrt(iR) * sin(0.5 * iTheta);
-    oEnrFunc [ 1 ] = sqrt(iR) * sin(0.5 * iTheta) * sin(iTheta);
-    oEnrFunc [ 2 ] = sqrt(iR) * cos(0.5 * iTheta);
-    oEnrFunc [ 3 ] = sqrt(iR) * cos(0.5 * iTheta) * sin(iTheta);
+//    oEnrFunc.resize(4, 0.0);
+    oEnrFunc.push_back( sqrt(iR) * sin(0.5 * iTheta) );
+    oEnrFunc.push_back( sqrt(iR) * sin(0.5 * iTheta) * sin(iTheta) );
+    oEnrFunc.push_back( sqrt(iR) * cos(0.5 * iTheta) );
+    oEnrFunc.push_back( sqrt(iR) * cos(0.5 * iTheta) * sin(iTheta) );
 }
 
 void LinElBranchFunction :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const double &iR, const double &iTheta) const
@@ -262,12 +262,15 @@ void LinElBranchFunction :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &
     // dPdx = dPdr*drdx + dPdt*dtdx
     // dPdy = dPdr*drdy + dPdt*dtdy
 
-    oEnrFuncDeriv.resize(4);
+//    oEnrFuncDeriv.resize(4);
 
     const double drdx =  cos(iTheta);
     const double drdy =  sin(iTheta);
     const double dtdx = -( 1.0 / iR ) * sin(iTheta);
     const double dtdy =  ( 1.0 / iR ) * cos(iTheta);
+
+    FloatArray dP;
+
     /*
      *      double dtdy = 0.0;
      *      double eps = 1.0e-12;
@@ -283,21 +286,25 @@ void LinElBranchFunction :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &
     // Psi 1
     const double dP1dr = ( 1.0 / ( 2.0 * sqrt(iR) ) ) * sin(0.5 * iTheta);
     const double dP1dt = 0.5 * sqrt(iR) * cos(0.5 * iTheta);
-    oEnrFuncDeriv [ 0 ].setValues(2, dP1dr * drdx + dP1dt * dtdx, dP1dr * drdy + dP1dt * dtdy);
+    dP.setValues(2, dP1dr * drdx + dP1dt * dtdx, dP1dr * drdy + dP1dt * dtdy);
+    oEnrFuncDeriv.push_back(dP);
 
     // Psi 2
     const double dP2dr = ( 1.0 / ( 2.0 * sqrt(iR) ) ) * sin(0.5 * iTheta) * sin(iTheta);
     const double dP2dt = 0.5 * sqrt(iR) * cos(0.5 * iTheta) * sin(iTheta) + sqrt(iR) * sin(0.5 * iTheta) * cos(iTheta);
-    oEnrFuncDeriv [ 1 ].setValues(2, dP2dr * drdx + dP2dt * dtdx, dP2dr * drdy + dP2dt * dtdy);
+    dP.setValues(2, dP2dr * drdx + dP2dt * dtdx, dP2dr * drdy + dP2dt * dtdy);
+    oEnrFuncDeriv.push_back(dP);
 
     // Psi 3
     const double dP3dr = ( 1.0 / ( 2.0 * sqrt(iR) ) ) * cos(0.5 * iTheta);
     const double dP3dt = -0.5 * sqrt(iR) * sin(0.5 * iTheta);
-    oEnrFuncDeriv [ 2 ].setValues(2, dP3dr * drdx + dP3dt * dtdx, dP3dr * drdy + dP3dt * dtdy);
+    dP.setValues(2, dP3dr * drdx + dP3dt * dtdx, dP3dr * drdy + dP3dt * dtdy);
+    oEnrFuncDeriv.push_back(dP);
 
     // Psi 4
     const double dP4dr = ( 1.0 / ( 2.0 * sqrt(iR) ) ) * cos(0.5 * iTheta) * sin(iTheta);
     const double dP4dt = -0.5 * sqrt(iR) * sin(0.5 * iTheta) * sin(iTheta) + sqrt(iR) * cos(0.5 * iTheta) * cos(iTheta);
-    oEnrFuncDeriv [ 3 ].setValues(2, dP4dr * drdx + dP4dt * dtdx, dP4dr * drdy + dP4dt * dtdy);
+    dP.setValues(2, dP4dr * drdx + dP4dt * dtdx, dP4dr * drdy + dP4dt * dtdy);
+    oEnrFuncDeriv.push_back(dP);
 }
 } // end namespace oofem

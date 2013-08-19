@@ -107,8 +107,7 @@ bool EDCrack :: GiveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) co
 			oInfo.mTangDir.normalize();
 
 			// Tip normal
-			// The sign comes from the fact that we are looking at the first end
-			oInfo.mNormalDir.setValues(2, oInfo.mTangDir.at(2), -oInfo.mTangDir.at(1) );
+			oInfo.mNormalDir.setValues(2, -oInfo.mTangDir.at(2), oInfo.mTangDir.at(1) );
 
 			return true;
 		}
