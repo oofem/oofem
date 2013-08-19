@@ -1445,7 +1445,8 @@ Domain :: checkConsistency()
     return result;
 }
 
-double Domain :: giveArea()
+double
+Domain :: giveArea()
 {
     double area = 0.0;
     for ( int i = 1; i <= this->giveNumberOfElements(); ++i ) {
@@ -1455,11 +1456,23 @@ double Domain :: giveArea()
     return area;
 }
 
-double Domain :: giveVolume()
+double
+Domain :: giveVolume()
 {
     double volume = 0.0;
     for ( int i = 1; i <= this->giveNumberOfElements(); ++i ) {
         volume += this->giveElement(i)->computeVolume();
+    }
+
+    return volume;
+}
+
+double
+Domain :: giveSize()
+{
+    double volume = 0.0;
+    for ( int i = 1; i <= this->giveNumberOfElements(); ++i ) {
+        volume += this->giveElement(i)->computeVolumeAreaOrLength();
     }
 
     return volume;

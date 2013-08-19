@@ -91,6 +91,7 @@ set (sm_material
     druckerpragercutmat.C
     masonry02.C
     isointerfacedamage01.C
+    isointerfacedamage02.C
     j2mat.C
     mat_cebfip90.C
     hellmat.C
