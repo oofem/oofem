@@ -203,14 +203,14 @@ void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRe
 void
 PlaneStress2dXfem :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
 {
-    FloatArray Epsilon;
-    this->computeStrainVector(Epsilon, gp, stepN);
+//    FloatArray Epsilon;
+//    this->computeStrainVector(Epsilon, gp, stepN);
 
 
     //////////////////
     // Necessary for postprocessing
     StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
-    cs->giveRealStresses(answer, gp, Epsilon, stepN);
+    cs->giveRealStresses(answer, gp, strain, stepN);
     //////////////////
 
 
@@ -228,7 +228,7 @@ PlaneStress2dXfem :: computeStressVector(FloatArray &answer, const FloatArray &s
 
     		if(sm != NULL)
     		{
-    	        sm->giveRealStressVector(answer, gp, Epsilon, stepN);
+    	        sm->giveRealStressVector(answer, gp, strain, stepN);
     			return;
     		}
     		else
@@ -245,7 +245,7 @@ PlaneStress2dXfem :: computeStressVector(FloatArray &answer, const FloatArray &s
 //    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
 //    cs->giveRealStresses(answer, gp, Epsilon, stepN);
 }
-
+/*
 void PlaneStress2dXfem :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
     this->computeStiffnessMatrix_withIRulesAsSubcells(answer, rMode, tStep);
@@ -256,7 +256,7 @@ PlaneStress2dXfem :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
 {
     this->giveInternalForcesVector_withIRulesAsSubcells(answer, tStep, useUpdatedGpRecord);
 }
-
+*/
 Element_Geometry_Type 
 PlaneStress2dXfem :: giveGeometryType() const
 { 
