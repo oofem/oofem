@@ -252,6 +252,7 @@ FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
         lcoords_guess.add(delta);
     }
     if ( error > convergence_limit) { // Imperfect, could give false negatives.
+    	answer.resize(4);
         answer.zero();
         return false;
     }
