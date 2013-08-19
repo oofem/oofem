@@ -146,29 +146,31 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
                 ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode, globalNodeInd);
 
 
-                for ( int k = 0; k < numEnr; k++ ) {
-                    // matrix to be added anytime a node is enriched
-                    // Creates nabla*(ef*N)
-                    FloatArray grad_ef_N;
-                    grad_ef_N.resize(dim);
-                    for ( int p = 1; p <= dim; p++ ) {
-                        grad_ef_N.at(p) = dNdx.at(j, p) * ( efGP [ k ] - efNode [ k ] ) + N.at(j) * efgpD [ k ].at(p);
-                    }
+				for(int k = 0; k < numEnr; k++) {
+					// matrix to be added anytime a node is enriched
+					// Creates nabla*(ef*N)
+					FloatArray grad_ef_N;
+					grad_ef_N.resize(dim);
+					for ( int p = 1; p <= dim; p++ ) {
+						grad_ef_N.at(p) = dNdx.at(j, p) * ( efGP[k] - efNode[k] ) + N.at(j) * efgpD[k].at(p);
+					}
 
-                    BdNode.at(1, 2 * k + 1) = grad_ef_N.at(1);
-                    BdNode.at(2, 2 * k + 2) = grad_ef_N.at(2);
-                    BdNode.at(3, 2 * k + 1) = grad_ef_N.at(2);
-                    BdNode.at(3, 2 * k + 2) = grad_ef_N.at(1);
+					BdNode.at(1, 2*k+1) = grad_ef_N.at(1);
+					BdNode.at(2, 2*k+2) = grad_ef_N.at(2);
+					BdNode.at(3, 2*k+1) = grad_ef_N.at(2);
+					BdNode.at(3, 2*k+2) = grad_ef_N.at(1);
 
-                    //BdNode.at(1, 1) = grad_ef_N.at(1);
-                    //BdNode.at(2, 2) = grad_ef_N.at(2);
-                    //BdNode.at(3, 1) = grad_ef_N.at(2);
-                    //BdNode.at(3, 2) = grad_ef_N.at(1);
+//					BdNode.at(1, 1) = grad_ef_N.at(1);
+//					BdNode.at(2, 2) = grad_ef_N.at(2);
+//					BdNode.at(3, 1) = grad_ef_N.at(2);
+//					BdNode.at(3, 2) = grad_ef_N.at(1);
 
-                    counter += 2;
-                }
-            }
-        }
+					counter += 2;
+				}
+			}
+
+		}
+
     }
 
     // Create the total B-matrix by appending each contribution to B after one another.
@@ -276,26 +278,26 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
         irlist.put(1, intRule);
         element->setIntegrationRules(& irlist);
 
-        /*
-         *      AList< IntegrationRule >irlist;
-         *
-         *      for ( int i = 1; i <= triangles.giveSize(); i++ ) {
-         *
-         *          Patch *patch = new TrianglePatch(element);
-         *          for ( int j = 1; j <= triangles.at(i)->giveVertices()->giveSize(); j++ ) {
-         *              FloatArray *nCopy = new FloatArray( *triangles.at( i )->giveVertex(j) );
-         *              patch->setVertex(nCopy);
-         *          }
-         *
-         *          PatchIntegrationRule *pir = new PatchIntegrationRule(i, element, patch);
-         *          int pointNr = 3;
-         *          MaterialMode matMode = element->giveMaterialMode();
-         *          pir->SetUpPointsOnTriangle(pointNr, matMode);
-         *          irlist.put(i, pir);
-         *      }
-         *
-         *      element->setIntegrationRules(& irlist);
-         */
+/*
+        AList< IntegrationRule >irlist;
+        
+        for ( int i = 1; i <= triangles.giveSize(); i++ ) {
+
+            Patch *patch = new TrianglePatch(element);
+            for ( int j = 1; j <= triangles.at(i)->giveVertices()->giveSize(); j++ ) {
+                FloatArray *nCopy = new FloatArray( *triangles.at( i )->giveVertex(j) );
+                patch->setVertex(nCopy);
+            }
+
+            PatchIntegrationRule *pir = new PatchIntegrationRule(i, element, patch);
+            int pointNr = 3;
+            MaterialMode matMode = element->giveMaterialMode();
+            pir->SetUpPointsOnTriangle(pointNr, matMode);
+            irlist.put(i, pir);
+        }
+
+        element->setIntegrationRules(& irlist);
+*/
     }
 }
 
@@ -321,17 +323,19 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         oPointPartitions.resize(2);
 
         // here the intersection points are copied in order to be put into two groups
-        for ( int i = 1; i <= int( intersecPoints.size() ); i++ ) {
-            oPointPartitions [ 0 ].push_back(intersecPoints [ i - 1 ]);
-            //            int sz = answer1->giveSize();
-            //            answer1->put( sz + 1, new FloatArray(intersecPoints[i-1]) );
+        for ( int i = 1; i <= int(intersecPoints.size()); i++ )
+        {
 
-            FloatArray *ip = & intersecPoints [ i - 1 ];
-            FloatArray *ipCopy = new FloatArray(*ip);
+        	oPointPartitions[0].push_back(intersecPoints[i-1]);
+//        	int sz = answer1->giveSize();
+//            answer1->put( sz + 1, new FloatArray(intersecPoints[i-1]) );
 
-            oPointPartitions [ 1 ].push_back(* ipCopy);
-            //            int sz2 = answer2->giveSize();
-            //            answer2->put(sz2 + 1, ipCopy);
+            FloatArray *ip = &intersecPoints[i-1];
+//            FloatArray *ipCopy = new FloatArray(*ip);
+
+            oPointPartitions[1].push_back(*ip);
+//            int sz2 = answer2->giveSize();
+//            answer2->put(sz2 + 1, ipCopy);
         }
 
         // here the group is determined
@@ -344,22 +348,26 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
             double y = element->giveDofManager(i)->giveCoordinates()->at(2);
             double det = ( x1 - x ) * ( y2 - y ) - ( x2 - x ) * ( y1 - y );
             FloatArray *node = element->giveDofManager(i)->giveCoordinates();
-            FloatArray *nodesCopy = new FloatArray(*node);
-            if ( det > 0.00001 ) {
-                oPointPartitions [ 0 ].push_back(* nodesCopy);
-                //                int sz = answer1->giveSize();
-                //                answer1->put(sz + 1, nodesCopy);
-            } else if ( det < ( -1 ) * 0.00001 ) {
-                oPointPartitions [ 1 ].push_back(* nodesCopy);
-                //                int sz = answer2->giveSize();
-                //                answer2->put(sz + 1, nodesCopy);
+//            FloatArray *nodesCopy = new FloatArray(*node);
+            if ( det > 0.00001 )
+            {
+            	oPointPartitions[0].push_back(*node);
+//                int sz = answer1->giveSize();
+//                answer1->put(sz + 1, nodesCopy);
+            } else if ( det < ( -1 ) * 0.00001 )
+            {
+            	oPointPartitions[1].push_back(*node);
+//                int sz = answer2->giveSize();
+//                answer2->put(sz + 1, nodesCopy);
             }
         }
-    } else if ( intersecPoints.size() == 1 )    {
-        // TODO: For now, assume that the number of edges is
-        // equal to the number of nodes.
-        int nNodes = this->element->giveNumberOfNodes();
-        std :: vector< FloatArray >edgeCoords, nodeCoords;
+    }
+    else if( intersecPoints.size() == 1 )
+    {
+    	// TODO: For now, assume that the number of edges is
+    	// equal to the number of nodes.
+    	int nNodes = this->element->giveNumberOfNodes();
+    	std::vector<FloatArray> edgeCoords, nodeCoords;
 
         FloatArray tipCoord;
         int dim = element->giveDofManager(1)->giveCoordinates()->giveSize();
@@ -375,101 +383,115 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
             }
         }
 
-        if ( foundTip ) {
-            for ( int i = 1; i <= nNodes; i++ ) {
-                // Store edge points
-                if ( i == intersecEdgeInd [ 0 ] ) {
-                    // Take the intersection point ...
-                    edgeCoords.push_back(intersecPoints [ 0 ]);
-                } else   {
-                    // ... or the center of the edge.
-                    IntArray bNodes;
-                    this->element->giveInterpolation()->boundaryGiveNodes(bNodes, i);
+        if(foundTip)
+        {
 
-                    int nsLoc = bNodes.at(1);
-                    int neLoc = bNodes.at( bNodes.giveSize() );
+			for(int i = 1; i <= nNodes; i++)
+			{
+				// Store edge points
+				if( i == intersecEdgeInd[0] )
+				{
+					// Take the intersection point ...
+					edgeCoords.push_back(intersecPoints[0]);
+				}
+				else
+				{
+					// ... or the center of the edge.
+					IntArray bNodes;
+					this->element->giveInterpolation()->boundaryGiveNodes(bNodes, i);
 
-                    const FloatArray &coordS = * ( element->giveDofManager(nsLoc)->giveCoordinates() );
-                    const FloatArray &coordE = * ( element->giveDofManager(neLoc)->giveCoordinates() );
+					int nsLoc = bNodes.at( 1 );
+					int neLoc = bNodes.at( bNodes.giveSize() );
 
-                    FloatArray coordEdge;
-                    coordEdge = 0.5 * coordS + 0.5 * coordE;
-                    edgeCoords.push_back(coordEdge);
-                }
+					const FloatArray &coordS = *(element->giveDofManager(nsLoc)->giveCoordinates());
+					const FloatArray &coordE = *(element->giveDofManager(neLoc)->giveCoordinates());
 
-                // Store node coords
-                const FloatArray &coord = * ( element->giveDofManager(i)->giveCoordinates() );
-                nodeCoords.push_back(coord);
-            }
+					FloatArray coordEdge;
+					coordEdge = 0.5*coordS + 0.5*coordE;
+					edgeCoords.push_back(coordEdge);
+				}
 
-            oPointPartitions.resize( ( 2 * nNodes ) );
+				// Store node coords
+				const FloatArray &coord = *(element->giveDofManager(i)->giveCoordinates());
+				nodeCoords.push_back( coord );
 
-            // Divide into subdomains
-            for ( int i = 1; i <= nNodes; i++ ) {
-                /*
-                 *              // Take edge center or intersection point
-                 *              oPointPartitions[i-1].push_back(edgeCoords[i-1]);
-                 *
-                 *              // Take next node
-                 *              if(i == nNodes)
-                 *              {
-                 *                  oPointPartitions[i-1].push_back( *(element->giveDofManager(1)->giveCoordinates()) );
-                 *              }
-                 *              else
-                 *              {
-                 *                  oPointPartitions[i-1].push_back( *(element->giveDofManager(i+1)->giveCoordinates()) );
-                 *              }
-                 *
-                 *              // Take center on next edge
-                 *              if(i == nNodes)
-                 *              {
-                 *                  oPointPartitions[i-1].push_back(edgeCoords[0]);
-                 *              }
-                 *              else
-                 *              {
-                 *                  oPointPartitions[i-1].push_back(edgeCoords[i]);
-                 *              }
-                 *
-                 *              // Take crack tip position
-                 *              oPointPartitions[i-1].push_back(tipCoord);
-                 */
+			}
 
-                ////////////////
-                // Take edge center or intersection point
-                oPointPartitions [ 2 * i - 1 ].push_back(edgeCoords [ i - 1 ]);
+			oPointPartitions.resize((2*nNodes));
 
-                // Take crack tip position
-                oPointPartitions [ 2 * i - 1 ].push_back(tipCoord);
+			// Divide into subdomains
+			for(int i = 1; i <= nNodes; i++)
+			{
+/*
+				// Take edge center or intersection point
+				oPointPartitions[i-1].push_back(edgeCoords[i-1]);
 
-                // Take node
-                oPointPartitions [ 2 * i - 1 ].push_back( * ( element->giveDofManager(i)->giveCoordinates() ) );
+				// Take next node
+				if(i == nNodes)
+				{
+					oPointPartitions[i-1].push_back( *(element->giveDofManager(1)->giveCoordinates()) );
+				}
+				else
+				{
+					oPointPartitions[i-1].push_back( *(element->giveDofManager(i+1)->giveCoordinates()) );
+				}
 
-                ////////////////
-                // Take edge center or intersection point
-                oPointPartitions [ 2 * i - 2 ].push_back(edgeCoords [ i - 1 ]);
+				// Take center on next edge
+				if(i == nNodes)
+				{
+					oPointPartitions[i-1].push_back(edgeCoords[0]);
+				}
+				else
+				{
+					oPointPartitions[i-1].push_back(edgeCoords[i]);
+				}
 
-                // Take next node
-                if ( i == nNodes ) {
-                    oPointPartitions [ 2 * i - 2 ].push_back( * ( element->giveDofManager(1)->giveCoordinates() ) );
-                } else   {
-                    oPointPartitions [ 2 * i - 2 ].push_back( * ( element->giveDofManager(i + 1)->giveCoordinates() ) );
-                }
+				// Take crack tip position
+				oPointPartitions[i-1].push_back(tipCoord);
+*/
 
-                // Take crack tip position
-                oPointPartitions [ 2 * i - 2 ].push_back(tipCoord);
-            }
+				////////////////
+				// Take edge center or intersection point
+				oPointPartitions[2*i-1].push_back(edgeCoords[i-1]);
+
+				// Take crack tip position
+				oPointPartitions[2*i-1].push_back(tipCoord);
+
+				// Take node
+				oPointPartitions[2*i-1].push_back( *(element->giveDofManager(i)->giveCoordinates()) );
+
+				////////////////
+				// Take edge center or intersection point
+				oPointPartitions[2*i-2].push_back(edgeCoords[i-1]);
+
+				// Take next node
+				if(i == nNodes)
+				{
+					oPointPartitions[2*i-2].push_back( *(element->giveDofManager(1)->giveCoordinates()) );
+				}
+				else
+				{
+					oPointPartitions[2*i-2].push_back( *(element->giveDofManager(i+1)->giveCoordinates()) );
+				}
+
+				// Take crack tip position
+				oPointPartitions[2*i-2].push_back(tipCoord);
+
+			}
         } // If a tip was found
-        else {
-            oPointPartitions.resize(1);
+        else
+        {
+        	oPointPartitions.resize(1);
 
-            for ( int i = 1; i <= this->element->giveNumberOfDofManagers(); i++ ) {
-                //                double x = element->giveDofManager(i)->giveCoordinates()->at(1);
-                //                double y = element->giveDofManager(i)->giveCoordinates()->at(2);
+            for ( int i = 1; i <= this->element->giveNumberOfDofManagers(); i++ )
+            {
+//                double x = element->giveDofManager(i)->giveCoordinates()->at(1);
+//                double y = element->giveDofManager(i)->giveCoordinates()->at(2);
 
                 FloatArray *node = element->giveDofManager(i)->giveCoordinates();
                 FloatArray *nodesCopy = new FloatArray(*node);
 
-                oPointPartitions [ 0 ].push_back(* nodesCopy);
+                oPointPartitions[0].push_back(*nodesCopy);
             }
         }
     }

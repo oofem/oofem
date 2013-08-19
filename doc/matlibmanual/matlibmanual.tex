@@ -2205,7 +2205,7 @@ The equivalent ``strain'', $\tilde\varepsilon$, is a scalar measure derived from
 for the equivalent strain affects the shape of the elastic domain
 in the strain space and plays a similar role to the choice of a yield
 condition in plasticity.
-Currently, in the present implementation,  $\tilde\varepsilon$ is equal to the positive part of the normal diplacement jump (opening of the interface).
+Currently, in the present implementation,  $\tilde\varepsilon$ is equal to the positive part of the normal displacement jump (opening of the interface).
 Only the exponential softening damage law is supported:
 $$
 \omega = 1 - \frac{\varepsilon_0}{\kappa}  \exp\left( - \frac{f_t( \kappa - \varepsilon_0 )}{G_f} \right)
@@ -2234,6 +2234,51 @@ Features & \\
 \hline
 \end{tabular}
 \caption{Isotropic damage model for interface elements -- summary.}
+\label{iid_table}
+%\end{center}
+\end{table}
+
+\subsubsection{Isotropic damage model for interfaces using tabulated data for damage}
+\label{sec:idmfi}
+
+The model provides an interface law, which can be used to describe a damageable interface between two materials (e.g.\ between steel reinforcement and concrete). The law is formulated in terms of the traction vector and the displacement jump vector. The basic response is elastic, with stiffness \param{kn} in 
+the normal direction and \param{ks} in the tangential direction.
+Similar to other isotropic damage models, this model assumes that the stiffness degradation is isotropic, i.e., both stiffness moduli decrease proportionally and independently of the loading 
+direction. The damaged stiffnesses are \param{kn}$\times\omega$ and \param{ks}$\times\omega$ where $\omega$ is a scalar damage variable.
+
+The equivalent ``strain'', $\tilde\varepsilon$, is a scalar measure derived from the displacement jump vector. The choice of the specific expression
+for the equivalent strain affects the shape of the elastic domain
+in the strain space and plays a similar role to the choice of a yield
+condition in plasticity.
+Currently, in the present implementation,  $\tilde\varepsilon$ is equal to the positive part of the normal displacement jump (opening of the interface).
+
+The damage evolution law is postulated in a separate file that should have the following format. Each line should contain one strain, damage pair separated by a whitespace character. The exception to this is the first line which should contain a single integer stating how many strain, damage pairs that the file will contain. The strains given in the file is defined as the equivalent strain minus the limit of elastic deformation.
+To find the damage for arbitrary strains linear interpolation between the tabulated values is used. If a strain larger than one in the given table is achieved the respective damage for the largest tabulated strain will be used. Both the strains and damages must be given in a strictly increasing order.
+
+The model parameters are summarized in Tab.~\ref{iid_table}. 
+\begin{table}[!htb]
+%\begin{center}
+  \small
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Isotropic damage model for concrete in tension\\
+\hline
+Record Format & \descitem{isointrfdm01} 
+\elemparam{kn}{rn} \elemparam{ks}{rn} \elemparam{ft}{rn} \elemparam{tablename}{rn} \optelemparam{maxomega}{rn} \elemparam{talpha}{rn} \elemparam{d}{rn}\\
+Parameters & - \param{d} material density\\
+&- \param{tAlpha} thermal dilatation coefficient\\
+&- \param{kn} elastic stifness in normal direction\\
+&- \param{ks} elastic stifness in tangential direction\\
+&- \param{ft} tensile strength\\
+&- \param{tablename} file name of the table with the strain damage pairs\\
+&- \param{maxomega} maximum damage, used for convergence improvement
+(its value is between 0 and 0.999999 (default), 
+and it affects only the secant stiffness but not the stress)\\
+Supported modes& 2dInterface, 3dInterface\\
+Features & \\
+\hline
+\end{tabular}
+\caption{Isotropic damage model for interface elements  using tabulated data for damage -- summary.}
 \label{iid_table}
 %\end{center}
 \end{table}

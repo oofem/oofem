@@ -53,10 +53,16 @@ class Triangle;
 class Delaunay
 {
 public:
+	Delaunay():mTol(1.0e-12) {}
+
     bool colinear(FloatArray *p1, FloatArray *p2, FloatArray *p3);
     void printTriangles(AList< Triangle > *triangles);
     bool isInsideCC(FloatArray *p, FloatArray *p1, FloatArray *p2, FloatArray *p3);
     void triangulate(const std :: vector< FloatArray > &iVertices, AList< Triangle > *triangles);
+
+private:
+    const double mTol; /// Tolerance used when checking if points are colinear.
+
 };
 } // end namespace oofem
 #endif  // delaunay_h

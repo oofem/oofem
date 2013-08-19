@@ -502,6 +502,11 @@ public:
      * @return Total volume.
      */
     double giveVolume();
+    /**
+     * Gives the sum of the volume or area of all elements.
+     * @return Total volume.
+     */
+    double giveSize();
     
     /**
      * Gives the next free dof ID.

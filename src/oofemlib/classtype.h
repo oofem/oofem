@@ -52,6 +52,7 @@ enum classType {
     LinearConstraintClass,
     LoadClass,
     BoundaryConditionClass,
+    UserDefDirichletBCClass,
     PrescribedGradientClass,
     MixedGradientPressureBCClass,
     MixedGradientPressureNeumannClass,

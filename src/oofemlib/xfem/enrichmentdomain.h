@@ -41,6 +41,7 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 #include "geometry.h"
+#include "tipinfo.h"
 
 namespace oofem {
 class EnrichmentItem;
@@ -87,7 +88,9 @@ public:
     // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) {}
 
-    virtual bool GiveClosestTipPosition(FloatArray &oCoords, const FloatArray &iCoords) const { oCoords.setValues(2, 0.0, 0.0); return false; }
+    virtual bool GiveClosestTipPosition(FloatArray &oCoords, const FloatArray &iCoords) const {oCoords.setValues(2, 0.0, 0.0); return false;}
+
+    virtual bool GiveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const {return false;}
 };
 
 
@@ -141,6 +144,8 @@ public:
     virtual const char *giveClassName() const { return "EDCrack"; }
 
     virtual bool GiveClosestTipPosition(FloatArray &oCoords, const FloatArray &iCoords) const;
+    virtual bool GiveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const;
+
 };
 
 
@@ -151,7 +156,7 @@ public:
 class DofManList : public EnrichmentDomain
 {
 protected:
-    std :: vector< int >dofManList;
+    std::vector< int > dofManList;
 public:
     DofManList() { }
     virtual ~DofManList() { }

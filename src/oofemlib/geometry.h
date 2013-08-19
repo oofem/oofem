@@ -41,9 +41,9 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
-//#ifdef __BOOST_MODULE
-//#include <BoostInterface.h>
-//#endif
+#ifdef __BOOST_MODULE
+#include <BoostInterface.h>
+#endif
 
 namespace oofem {
 
