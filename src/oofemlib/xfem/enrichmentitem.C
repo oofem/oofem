@@ -135,7 +135,12 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
 
         EnrichmentFunction *ef = classFactory.createEnrichmentFunction( name.c_str(), i, this->xMan->giveDomain() );
         mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), i, this->xMan->giveDomain() );
-        mpEnrichmentFunc->initializeFrom(mir);
+        if(mpEnrichmentFunc != NULL) {
+        	mpEnrichmentFunc->initializeFrom(mir);
+        }
+        else {
+            OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: failed to create enrichment function (%s)", name.c_str() );
+        }
 
         if ( ef == NULL ) {
             OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment function (%s)", name.c_str() );
@@ -190,7 +195,6 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     this->startOfDofIdPool = this->giveDomain()->giveNextFreeDofID(xDofPoolAllocSize);
 
 
-
     mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
 
     return 1;
@@ -199,6 +203,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
 int
 EnrichmentItem :: giveNumberOfEnrDofs()
 {
+	// TODO: Take branch functions into account when computing the total number of dofs.
     // returns the array of dofs a particular EI s
     int temp = 0;
     for ( int i = 1; i <= this->giveNumberOfEnrichmentfunctions(); i++ ) {
@@ -1194,11 +1199,8 @@ void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncDerivAt(std::vector<FloatA
         E.setColumn(t,1);
         E.setColumn(n,2);
 
-        if(sizeStart == 0) {
-        	sizeStart++;
-        }
 
-        for(size_t j = sizeStart-1; j < oEnrFuncDeriv.size(); j++) {
+        for(size_t j = sizeStart; j < oEnrFuncDeriv.size(); j++) {
         	FloatArray enrFuncDerivGlob;
         	enrFuncDerivGlob.beProductOf(E, oEnrFuncDeriv[j]);
         	oEnrFuncDeriv[j] = enrFuncDerivGlob;

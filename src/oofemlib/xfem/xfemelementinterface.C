@@ -95,34 +95,42 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
     std :: vector< FloatMatrix > Bd(nDofMan); // One Bd per node
 
     int counter = nDofMan * dim;
-    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-        EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
 
+    for ( int j = 1; j <= nDofMan; j++ ) {
 
-        double levelSetGP = 0.0;
-        ei->interpLevelSet(levelSetGP, N, elNodes);
+        DofManager *dMan = iEl.giveDofManager(j);
 
-        FloatArray gradLevelSetGP;
-        ei->interpGradLevelSet(gradLevelSetGP, dNdx, elNodes);
-
-
-
-        for ( int j = 1; j <= nDofMan; j++ ) {
-            DofManager *dMan = iEl.giveDofManager(j);
-
+    	// Compute the total number of enrichments for node j
+    	int numEnrNode = 0;
+        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+            EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
             if ( ei->isDofManEnriched(* dMan) ) {
-                // Different nodes can be enriched by different enrichment functions.
-                // Therefore, we have to compute enrichment functions inside this loop.
+            	numEnrNode += ei->giveNumDofManEnrichments(* dMan);
+            }
+        }
+
+        FloatMatrix &BdNode = Bd [ j - 1 ];
+        BdNode.resize(3, numEnrNode * dim);
+        BdNode.zero();
+
+
+        int globalNodeInd = dMan->giveGlobalNumber();
+
+        int nodeEnrCounter = 0;
+
+        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+        	EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+
+        	double levelSetGP = 0.0;
+        	ei->interpLevelSet(levelSetGP, N, elNodes);
+
+        	FloatArray gradLevelSetGP;
+        	ei->interpGradLevelSet(gradLevelSetGP, dNdx, elNodes);
+
+
+        	if ( ei->isDofManEnriched(* dMan) ) {
 
                 int numEnr = ei->giveNumDofManEnrichments(* dMan);
-
-                FloatMatrix &BdNode = Bd [ j - 1 ];
-                BdNode.resize(3, numEnr * dim);
-                BdNode.zero();
-
-
-                int globalNodeInd = dMan->giveGlobalNumber();
-
 
                 // Enrichment function derivative in Gauss point
                 std :: vector< FloatArray >efgpD;
@@ -151,19 +159,19 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
 						grad_ef_N.at(p) = dNdx.at(j, p) * ( efGP[k] - efNode[k] ) + N.at(j) * efgpD[k].at(p);
 					}
 
-					BdNode.at(1, 2*k+1) = grad_ef_N.at(1);
-					BdNode.at(2, 2*k+2) = grad_ef_N.at(2);
-					BdNode.at(3, 2*k+1) = grad_ef_N.at(2);
-					BdNode.at(3, 2*k+2) = grad_ef_N.at(1);
+					BdNode.at(1, nodeEnrCounter+1) = grad_ef_N.at(1);
+					BdNode.at(2, nodeEnrCounter+2) = grad_ef_N.at(2);
+					BdNode.at(3, nodeEnrCounter+1) = grad_ef_N.at(2);
+					BdNode.at(3, nodeEnrCounter+2) = grad_ef_N.at(1);
 
-
+					nodeEnrCounter += 2;
 					counter += 2;
 				}
 			}
 
 		}
-
     }
+
 
     // Create the total B-matrix by appending each contribution to B after one another.
     oAnswer.resize(3, counter);
