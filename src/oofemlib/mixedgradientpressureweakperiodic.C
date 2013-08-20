@@ -242,7 +242,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionVelocityTangent(Float
                     q++;
                 }
             }
-            // Then pass those coordinates to the function which evaluates all the basis functions at that point.
+            // Evaluate all the basis functions for a given column.
             this->evaluateTractionBasisFunctions(t, surfCoords);
             for ( int ti = 0; ti < t.giveSize(); ++ti ) {
                 for ( int ki = 0; ki < nsd; ++ki ) {
@@ -291,7 +291,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionXTangent(FloatMatrix 
                     q++;
                 }
             }
-            // Then pass those coordinates to the function which evaluates all the basis functions at that point.
+            // Evaluate all the basis functions for a given column.
             this->evaluateTractionBasisFunctions(t, surfCoords);
             for ( int ti = 0; ti < t.giveSize(); ++ti ) {
                 for ( int ki = 0; ki < nsd; ++ki ) {
@@ -345,7 +345,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionDev(FloatArray &answe
                     q++;
                 }
             }
-            // Then pass those coordinates to the function which evaluates all the basis functions at that point.
+            // Evaluate all the basis functions for a given column.
             this->evaluateTractionBasisFunctions(t, surfCoords);
             for ( int ti = 0; ti < t.giveSize(); ++ti ) {
                 for ( int ki = 0; ki < nsd; ++ki ) {
@@ -551,10 +551,9 @@ void MixedGradientPressureWeakPeriodic :: computeFields(FloatArray &sigmaDev, do
             double detJ = interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);
             // Compute v_m = d_dev . x
             interp->boundaryLocal2Global(coords, boundary, lcoords, cellgeo);
-
             // "pos" loops over all the traction lagrange multipliers.
             int pos = 0;
-            for ( int kj = 0; kj < nsd; ++kj ) {
+            for ( int kj = 0; kj < nsd; ++kj ) { // Columns of the basis functions for the tractions
                 // First we compute the surface coordinates. Its the global coordinates without the kj component.
                 for ( int c = 0, q = 0; c < nsd; ++c ) {
                     if ( c != kj ) {
@@ -562,12 +561,15 @@ void MixedGradientPressureWeakPeriodic :: computeFields(FloatArray &sigmaDev, do
                         q++;
                     }
                 }
-                // Then pass those coordinates to the function which evaluates all the basis functions at that point.
+                // Evaluate all the (scalar) basis functions for a given column.
                 this->evaluateTractionBasisFunctions(t, surfCoords);
                 for ( int ti = 0; ti < t.giveSize(); ++ti ) {
-                    for ( int ki = 0; ki < nsd; ++ki ) {
+                    for ( int ki = 0; ki < nsd; ++ki ) { // Columns of the basis functions for the tractions
                         // Order of tractions is very important here! It must in the right order here (consistent with other loops)
-                        sigma(ki, kj) += tractions(pos) * t(ti) * normal(kj) * normal(ki) * detJ * gp->giveWeight();
+                        for ( int kJ = 0; kJ < nsd; ++kJ ) {
+                            sigma(ki, kJ) += tractions(pos) * t(ti) * normal(kj) * normal(kJ) * detJ * gp->giveWeight();
+                        }
+                        //printf("pos = %d, traction = %f, t = %f, normal_j = %f, normal_i = %f\n", pos, tractions(pos), t(ti), normal(kj), normal(ki));
                         pos++;
                     }
                 }
@@ -575,8 +577,10 @@ void MixedGradientPressureWeakPeriodic :: computeFields(FloatArray &sigmaDev, do
         }
         delete ir;
     }
-    sigmaDev.times(1./rve_size);
+    sigma.times(1./rve_size);
 
+    tractions.printYourself();
+    sigma.printYourself();
     double pressure = 0.;
     for ( int i = 1; i <= nsd; i++ ) {
         pressure += sigma.at(i, i);
@@ -653,7 +657,6 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(
     FloatArray s_p(neq);
 
     // Unit pertubations for d_dev
-    int pos = 0;
     FloatArray tmp(neq), fe, ddevVoigt(nd);
     for ( int i = 1; i <= nd; ++i ) {
         ddevVoigt.zero();
@@ -741,12 +744,14 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(
                             q++;
                         }
                     }
-                    // Then pass those coordinates to the function which evaluates all the basis functions at that point.
+                    // Evaluate all the basis functions for a given column.
                     this->evaluateTractionBasisFunctions(t, surfCoords);
                     for ( int ti = 0; ti < t.giveSize(); ++ti ) {
                         for ( int ki = 0; ki < nsd; ++ki ) {
                             // Order of tractions is very important here! It must in the right order here (consistent with other loops)
-                            sigma(ki, kj) += tractions_d(pos, dpos) * t(ti) * normal(kj) * normal(ki) * detJ * gp->giveWeight();
+                            for ( int kJ = 0; kJ < nsd; ++kJ ) {
+                                sigma(ki, kJ) += tractions_d(pos, dpos) * t(ti) * normal(kj) * normal(kJ) * detJ * gp->giveWeight();
+                            }
                             pos++;
                         }
                     }
