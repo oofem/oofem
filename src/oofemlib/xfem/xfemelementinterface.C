@@ -92,49 +92,53 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
     XfemManager *xMan = iEl.giveDomain()->giveXfemManager();
 
 
-    // TODO: Maybe we can allow for several enrichment items to
     std :: vector< FloatMatrix > Bd(nDofMan); // One Bd per node
 
     int counter = nDofMan * dim;
-    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-        EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
 
+    for ( int j = 1; j <= nDofMan; j++ ) {
 
-        double levelSetGP = 0.0;
-        ei->interpLevelSet(levelSetGP, N, elNodes);
+        DofManager *dMan = iEl.giveDofManager(j);
 
-        FloatArray gradLevelSetGP;
-        ei->interpGradLevelSet(gradLevelSetGP, dNdx, elNodes);
-
-
-
-        for ( int j = 1; j <= nDofMan; j++ ) {
-            DofManager *dMan = iEl.giveDofManager(j);
-
-            // TODO: Make sure that this checks for enrichments of both bulk and tip
+    	// Compute the total number of enrichments for node j
+    	int numEnrNode = 0;
+        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+            EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
             if ( ei->isDofManEnriched(* dMan) ) {
-                // Different nodes can be enriched by different enrichment functions.
-                // Therefore, we have to compute enrichment functions inside this loop.
+            	numEnrNode += ei->giveNumDofManEnrichments(* dMan);
+            }
+        }
+
+        FloatMatrix &BdNode = Bd [ j - 1 ];
+        BdNode.resize(3, numEnrNode * dim);
+        BdNode.zero();
+
+
+        int globalNodeInd = dMan->giveGlobalNumber();
+
+        int nodeEnrCounter = 0;
+
+        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+        	EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+
+        	double levelSetGP = 0.0;
+        	ei->interpLevelSet(levelSetGP, N, elNodes);
+
+        	FloatArray gradLevelSetGP;
+        	ei->interpGradLevelSet(gradLevelSetGP, dNdx, elNodes);
+
+
+        	if ( ei->isDofManEnriched(* dMan) ) {
 
                 int numEnr = ei->giveNumDofManEnrichments(* dMan);
-
-                FloatMatrix &BdNode = Bd [ j - 1 ];
-                BdNode.resize(3, numEnr * dim);
-                BdNode.zero();
-
-
-                int globalNodeInd = dMan->giveGlobalNumber();
-
 
                 // Enrichment function derivative in Gauss point
                 std :: vector< FloatArray >efgpD;
                 ei->evaluateEnrFuncDerivAt(efgpD, globalCoord, levelSetGP, gradLevelSetGP, globalNodeInd);
-                //ei->evaluateEnrFuncDerivAt(efgpD, (*iGP.giveCoordinates()), levelSetGP, gradLevelSetGP, globalNodeInd);
 
                 // Enrichment function in Gauss Point
                 std :: vector< double >efGP;
                 ei->evaluateEnrFuncAt(efGP, globalCoord, levelSetGP, globalNodeInd);
-                //ei->evaluateEnrFuncAt(efGP, *(iGP.giveCoordinates()), levelSetGP, globalNodeInd);
 
 
                 const FloatArray &nodePos = * ( dMan->giveCoordinates() );
@@ -155,23 +159,19 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
 						grad_ef_N.at(p) = dNdx.at(j, p) * ( efGP[k] - efNode[k] ) + N.at(j) * efgpD[k].at(p);
 					}
 
-					BdNode.at(1, 2*k+1) = grad_ef_N.at(1);
-					BdNode.at(2, 2*k+2) = grad_ef_N.at(2);
-					BdNode.at(3, 2*k+1) = grad_ef_N.at(2);
-					BdNode.at(3, 2*k+2) = grad_ef_N.at(1);
+					BdNode.at(1, nodeEnrCounter+1) = grad_ef_N.at(1);
+					BdNode.at(2, nodeEnrCounter+2) = grad_ef_N.at(2);
+					BdNode.at(3, nodeEnrCounter+1) = grad_ef_N.at(2);
+					BdNode.at(3, nodeEnrCounter+2) = grad_ef_N.at(1);
 
-//					BdNode.at(1, 1) = grad_ef_N.at(1);
-//					BdNode.at(2, 2) = grad_ef_N.at(2);
-//					BdNode.at(3, 1) = grad_ef_N.at(2);
-//					BdNode.at(3, 2) = grad_ef_N.at(1);
-
+					nodeEnrCounter += 2;
 					counter += 2;
 				}
 			}
 
 		}
-
     }
+
 
     // Create the total B-matrix by appending each contribution to B after one another.
     oAnswer.resize(3, counter);
@@ -188,116 +188,46 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
     }
 }
 
-void XfemElementInterface :: XfemElementInterface_partitionElement(AList< Triangle > *answer, std :: vector< FloatArray > &together)
+void XfemElementInterface :: XfemElementInterface_partitionElement(std::vector< Triangle > &oTriangles, const std :: vector< FloatArray > &iPoints)
 {
     Delaunay dl;
-    dl.triangulate(together, answer);
+    dl.triangulate(iPoints, oTriangles);
 }
 
 void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 {
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
     if ( xMan->isElementEnriched(element) ) {
-        AList< Triangle >triangles;
-        AList< Triangle >triangles2;
-        // all the points coming into triangulation
 
         std :: vector< std :: vector< FloatArray > >pointPartitions;
+        std :: vector< Triangle >allTri;
 
+        // Get the points describing each subdivision of the element
         this->XfemElementInterface_prepareNodesForDelaunay(pointPartitions);
 
         for ( int i = 0; i < int( pointPartitions.size() ); i++ ) {
-            this->XfemElementInterface_partitionElement(& triangles, pointPartitions [ i ]);
+        	// Triangulate the subdivisions
+            this->XfemElementInterface_partitionElement( allTri, pointPartitions [ i ]);
         }
 
-
-
-
-        int elIndex = element->giveGlobalNumber();
-
-        ///////////////////////////////////////////
-        // Write splitted elements to vtk.
-        std :: stringstream str1;
-        str1 << "TriEl" << elIndex << "Side1.vtk";
-        std :: string name1 = str1.str();
-
-        XFEMDebugTools :: WriteTrianglesToVTK(name1, triangles);
-
-        std :: stringstream str2;
-        str2 << "TriEl" << elIndex << "Side2.vtk";
-        std :: string name2 = str2.str();
-
-        XFEMDebugTools :: WriteTrianglesToVTK(name2, triangles2);
-
-        std :: vector< Triangle >allTri;
-
-
-        //        for ( int i = 1; i <= triangles2.giveSize(); i++ ) {
-        //            int sz = triangles.giveSize();
-        //            triangles.put( sz + 1, triangles2.at(i) );
-        //            triangles2.unlink(i);
-        //        }
-
-
-        //        for(int i = 1; i <= triangles.giveSize(); i++) {
-        //            allTri.push_back( *(triangles.at(i)) );
-        //        }
-
-        for ( int i = 1; i <= triangles2.giveSize(); i++ ) {
-            int sz = triangles.giveSize();
-            //                triangles.put( sz + 1, triangles2.at(i) );
-            //                triangles2.unlink(i);
-
-            triangles.put( sz + 1, new Triangle( * ( triangles2.at(i) ) ) );
-        }
-
-
-
+#if XFEM_DEBUG_VTK > 0
         std :: stringstream str3;
         str3 << "TriEl" << elIndex << ".vtk";
         std :: string name3 = str3.str();
 
         XFEMDebugTools :: WriteTrianglesToVTK(name3, triangles);
+#endif
 
-
-        for ( int i = 1; i <= triangles.giveSize(); i++ ) {
-            Triangle t( *( triangles.at(i) ) );
-            allTri.push_back(t);
-        }
 
         int ruleNum = 1;
-        //        int numGPPerTri = 3;
-        int numGPPerTri = 12;
-        //        int numGPPerTri = 25;
         AList< IntegrationRule >irlist;
         IntegrationRule *intRule = new PatchIntegrationRule(ruleNum, element, allTri);
 
         MaterialMode matMode = element->giveMaterialMode();
-        intRule->SetUpPointsOnTriangle(numGPPerTri, matMode);
+        intRule->SetUpPointsOnTriangle( xMan->giveNumGpPerTri() , matMode);
 
         irlist.put(1, intRule);
         element->setIntegrationRules(& irlist);
-
-/*
-        AList< IntegrationRule >irlist;
-        
-        for ( int i = 1; i <= triangles.giveSize(); i++ ) {
-
-            Patch *patch = new TrianglePatch(element);
-            for ( int j = 1; j <= triangles.at(i)->giveVertices()->giveSize(); j++ ) {
-                FloatArray *nCopy = new FloatArray( *triangles.at( i )->giveVertex(j) );
-                patch->setVertex(nCopy);
-            }
-
-            PatchIntegrationRule *pir = new PatchIntegrationRule(i, element, patch);
-            int pointNr = 3;
-            MaterialMode matMode = element->giveMaterialMode();
-            pir->SetUpPointsOnTriangle(pointNr, matMode);
-            irlist.put(i, pir);
-        }
-
-        element->setIntegrationRules(& irlist);
-*/
     }
 }
 
@@ -322,49 +252,34 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         // one on each side of the interface.
         oPointPartitions.resize(2);
 
-        // here the intersection points are copied in order to be put into two groups
-        for ( int i = 1; i <= int(intersecPoints.size()); i++ )
-        {
-
+        for ( int i = 1; i <= int(intersecPoints.size()); i++ ) {
         	oPointPartitions[0].push_back(intersecPoints[i-1]);
-//        	int sz = answer1->giveSize();
-//            answer1->put( sz + 1, new FloatArray(intersecPoints[i-1]) );
-
-            FloatArray *ip = &intersecPoints[i-1];
-//            FloatArray *ipCopy = new FloatArray(*ip);
-
-            oPointPartitions[1].push_back(*ip);
-//            int sz2 = answer2->giveSize();
-//            answer2->put(sz2 + 1, ipCopy);
+            oPointPartitions[1].push_back(intersecPoints[i-1]);
         }
 
-        // here the group is determined
-        double x1 = intersecPoints [ 0 ].at(1);
-        double x2 = intersecPoints [ 1 ].at(1);
-        double y1 = intersecPoints [ 0 ].at(2);
-        double y2 = intersecPoints [ 1 ].at(2);
+
+        // Check on which side of the interface each node is located.
+        const double &x1 = intersecPoints [ 0 ].at(1);
+        const double &x2 = intersecPoints [ 1 ].at(1);
+        const double &y1 = intersecPoints [ 0 ].at(2);
+        const double &y2 = intersecPoints [ 1 ].at(2);
+
         for ( int i = 1; i <= this->element->giveNumberOfDofManagers(); i++ ) {
-            double x = element->giveDofManager(i)->giveCoordinates()->at(1);
-            double y = element->giveDofManager(i)->giveCoordinates()->at(2);
+        	const double &x = element->giveDofManager(i)->giveCoordinates()->at(1);
+            const double &y = element->giveDofManager(i)->giveCoordinates()->at(2);
             double det = ( x1 - x ) * ( y2 - y ) - ( x2 - x ) * ( y1 - y );
             FloatArray *node = element->giveDofManager(i)->giveCoordinates();
-//            FloatArray *nodesCopy = new FloatArray(*node);
-            if ( det > 0.00001 )
-            {
+
+            if ( det > 0.0 ) {
             	oPointPartitions[0].push_back(*node);
-//                int sz = answer1->giveSize();
-//                answer1->put(sz + 1, nodesCopy);
-            } else if ( det < ( -1 ) * 0.00001 )
-            {
+            } else {
             	oPointPartitions[1].push_back(*node);
-//                int sz = answer2->giveSize();
-//                answer2->put(sz + 1, nodesCopy);
             }
         }
     }
     else if( intersecPoints.size() == 1 )
     {
-    	// TODO: For now, assume that the number of edges is
+    	// TODO: For now, assume that the number of element edges is
     	// equal to the number of nodes.
     	int nNodes = this->element->giveNumberOfNodes();
     	std::vector<FloatArray> edgeCoords, nodeCoords;
@@ -422,34 +337,6 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
 			// Divide into subdomains
 			for(int i = 1; i <= nNodes; i++)
 			{
-/*
-				// Take edge center or intersection point
-				oPointPartitions[i-1].push_back(edgeCoords[i-1]);
-
-				// Take next node
-				if(i == nNodes)
-				{
-					oPointPartitions[i-1].push_back( *(element->giveDofManager(1)->giveCoordinates()) );
-				}
-				else
-				{
-					oPointPartitions[i-1].push_back( *(element->giveDofManager(i+1)->giveCoordinates()) );
-				}
-
-				// Take center on next edge
-				if(i == nNodes)
-				{
-					oPointPartitions[i-1].push_back(edgeCoords[0]);
-				}
-				else
-				{
-					oPointPartitions[i-1].push_back(edgeCoords[i]);
-				}
-
-				// Take crack tip position
-				oPointPartitions[i-1].push_back(tipCoord);
-*/
-
 				////////////////
 				// Take edge center or intersection point
 				oPointPartitions[2*i-1].push_back(edgeCoords[i-1]);
@@ -485,23 +372,11 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
 
             for ( int i = 1; i <= this->element->giveNumberOfDofManagers(); i++ )
             {
-//                double x = element->giveDofManager(i)->giveCoordinates()->at(1);
-//                double y = element->giveDofManager(i)->giveCoordinates()->at(2);
-
-                FloatArray *node = element->giveDofManager(i)->giveCoordinates();
-                FloatArray *nodesCopy = new FloatArray(*node);
-
-                oPointPartitions[0].push_back(*nodesCopy);
+                const FloatArray &nodeCoord = *element->giveDofManager(i)->giveCoordinates();
+                oPointPartitions[0].push_back(nodeCoord);
             }
         }
     }
 
-    // nodes of an element are copied to a different memory location
-    // so that the whole container of points for triangulation can be dealt with
-    // more easily (e.g. deleted)
-
-    //    for ( int i = 1; i <= intersecPoints.giveSize(); i++ ) {
-    //        intersecPoints.unlink(i);
-    //    }
 }
 } // end namespace oofem
