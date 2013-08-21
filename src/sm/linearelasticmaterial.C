@@ -72,7 +72,6 @@ LinearElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint 
     FloatMatrix d;
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
-    reducedStrain.printYourself();
     this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
 
     this->give3dMaterialStiffnessMatrix(d, TangentStiffness, gp, tStep);

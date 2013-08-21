@@ -42,6 +42,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "dofmanager.h"
+#include "activebc.h"
 
 namespace oofem {
 
@@ -176,6 +177,25 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
                 //dofman->giveDof(j)->updateUnknownsDictionary(tStep, VM_Incremental, 0.);
             }
         }
+
+	int nbc = d->giveNumberOfBoundaryConditions();
+	for ( int ibc = 1; ibc <= nbc; ++ibc ) {
+	  GeneralBoundaryCondition *bc = d->giveBc(ibc);
+	  ActiveBoundaryCondition *abc;
+
+	  if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >( bc ) ) ) {
+	    int ndman = abc->giveNumberOfInternalDofManagers();
+	    for ( int i = 1; i <= ndman; i++ ) {
+	      DofManager *dofman = abc->giveInternalDofManager(i);
+	      for ( int j = 1; j <= dofman->giveNumberOfDofs(); j++ ) {
+                dofman->giveDof(j)->updateUnknownsDictionary(tStep, VM_Total_Old, 0.);
+                dofman->giveDof(j)->updateUnknownsDictionary(tStep, VM_Total, 0.);
+                // This is actually redundant now;
+                //dofman->giveDof(j)->updateUnknownsDictionary(tStep, VM_Incremental, 0.);
+	      }
+	    }
+	  }
+	}
     }
 
     // Apply dirichlet b.c's on total values
