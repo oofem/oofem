@@ -279,7 +279,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
     }
     else if( intersecPoints.size() == 1 )
     {
-    	// TODO: For now, assume that the number of edges is
+    	// TODO: For now, assume that the number of element edges is
     	// equal to the number of nodes.
     	int nNodes = this->element->giveNumberOfNodes();
     	std::vector<FloatArray> edgeCoords, nodeCoords;

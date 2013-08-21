@@ -49,8 +49,6 @@
 #include <limits>
 
 namespace oofem {
-REGISTER_EnrichmentItem(CrackTip)
-REGISTER_EnrichmentItem(CrackInterior)
 REGISTER_EnrichmentItem(Inclusion)
 REGISTER_EnrichmentItem(Delamination)
 
@@ -71,7 +69,7 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FE
     this->numberOfEnrichmentFunctions = 1;
     this->numberOfEnrichmentDomains = 1;
     this->startOfDofIdPool = -1;
-    this->enrichesDofsWithIdArray = new IntArray;
+    this->mpEnrichesDofsWithIdArray = new IntArray;
 }
 
 EnrichmentItem :: ~EnrichmentItem()
@@ -79,7 +77,7 @@ EnrichmentItem :: ~EnrichmentItem()
     delete this->enrichmentFunctionList;
     delete this->enrichmentDomainList;
 
-    delete this->enrichesDofsWithIdArray;
+    delete this->mpEnrichesDofsWithIdArray;
 
     if ( mpEnrichmentDomain != NULL ) {
         delete mpEnrichmentDomain;
@@ -201,44 +199,26 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
 }
 
 int
-EnrichmentItem :: giveNumberOfEnrDofs()
+EnrichmentItem :: giveNumberOfEnrDofs() const
 {
 	// TODO: Take branch functions into account when computing the total number of dofs.
     // returns the array of dofs a particular EI s
-    int temp = 0;
-    for ( int i = 1; i <= this->giveNumberOfEnrichmentfunctions(); i++ ) {
-        EnrichmentFunction *ef = this->giveEnrichmentFunction(i);
-        // This is per regular dof
-        temp += ef->giveNumberOfDofs(); // = number of functions associated with a particular enrichment function, e.g. 4 for branch function.
-    }
 
-    return temp;
+	int numEnrDofs = mpEnrichmentFunc->giveNumberOfDofs();
+
+	if(mpEnrichmentFront != NULL) {
+		numEnrDofs = max(numEnrDofs, mpEnrichmentFront->giveMaxNumEnrichments() );
+	}
+
+	return numEnrDofs;
 }
 
-EnrichmentFunction *EnrichmentItem :: giveEnrichmentFunction(int n)
-{
-    // Returns the n-th geometry.
-    if ( enrichmentFunctionList->includes(n) ) {
-        return enrichmentFunctionList->at(n);
-    } else {
-        OOFEM_ERROR2("giveEnrichmentFunction: undefined enrichment function (%d)", n);
-    }
-
-    return NULL;
-}
-
-
-bool EnrichmentItem :: isDofManEnriched(DofManager *dMan)
+bool EnrichmentItem :: isDofManEnrichedByEnrichmentDomain(DofManager *dMan, int edNumber) const
 {
     return isDofManEnriched(* dMan);
 }
 
-bool EnrichmentItem :: isDofManEnrichedByEnrichmentDomain(DofManager *dMan, int edNumber)
-{
-    return isDofManEnriched(* dMan);
-}
-
-bool EnrichmentItem :: isElementEnriched(const Element *element)
+bool EnrichmentItem :: isElementEnriched(const Element *element) const
 {
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
         if ( this->isDofManEnriched( * ( element->giveDofManager(i) ) ) ) {
@@ -249,7 +229,7 @@ bool EnrichmentItem :: isElementEnriched(const Element *element)
     return false;
 }
 
-bool EnrichmentItem :: isElementEnrichedByEnrichmentDomain(const Element *element, int edNumber)
+bool EnrichmentItem :: isElementEnrichedByEnrichmentDomain(const Element *element, int edNumber) const
 {
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
         DofManager *dMan = element->giveDofManager(i);
@@ -337,7 +317,7 @@ void
 EnrichmentItem :: computeDofManDofIdArray(IntArray &answer, DofManager *dMan)
 {
     // Gives an array containing the dofId's that should be created as new dofs (what dofs to enrich).
-    IntArray *enrichesDofsWithIdArray = this->giveEnrichesDofsWithIdArray();
+	const IntArray *enrichesDofsWithIdArray = this->giveEnrichesDofsWithIdArray();
 
     // Number of new dofs for one enrichment function
     int eiEnrSize = enrichesDofsWithIdArray->giveSize();
@@ -390,11 +370,11 @@ EnrichmentItem :: computeDofManDofIdArray(IntArray &answer, DofManager *dMan)
 }
 
 void
-EnrichmentItem :: giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber)
+EnrichmentItem :: giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber) const
 {
     // Returns an array containing the dof Id's of the new enrichment dofs pertinent to the ei.
     // Note: the dof managers may not support these dofsall potential dof id's
-    IntArray *enrichesDofsWithIdArray = this->giveEnrichesDofsWithIdArray();
+	const IntArray *enrichesDofsWithIdArray = this->giveEnrichesDofsWithIdArray();
     int eiEnrSize = enrichesDofsWithIdArray->giveSize();
 
     answer.resize(eiEnrSize);
@@ -474,7 +454,6 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
     int nNodes = d->giveNumberOfDofManagers();
 
 	mNodeEnrMarker.resize(nNodes, 0);
-//	mTipInfo.clear();
     std::vector<TipInfo> tipInfoArray;
 
     // Loop over elements and use the level sets to mark nodes belonging to completely cut elements.
@@ -511,8 +490,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 			{
 				int nGlob = el->giveNode(elNodeInd)->giveGlobalNumber();
 
-				if( mNodeEnrMarker[nGlob-1] == 0 )
-				{
+				if( mNodeEnrMarker[nGlob-1] == 0 ) {
 					mNodeEnrMarker[nGlob-1] = 1;
 				}
 
@@ -572,7 +550,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 				if( mpEnrichmentDomain->GiveClosestTipInfo(elCenter, tipInfo) )
 				{
 					// Prevent storage of duplicates
-					double tol2 = 1.0e-20;
+					const double tol2 = 1.0e-20;
 					bool alreadyAdded = false;
 
 					for(size_t i = 0; i < tipInfoArray.size(); i++) {
@@ -736,7 +714,7 @@ bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, int iElIndex) con
 	}
 }
 
-double EnrichmentItem :: calcXiZeroLevel(const double &iQ1, const double &iQ2)
+double EnrichmentItem :: calcXiZeroLevel(const double &iQ1, const double &iQ2) const
 {
 	double xi = 0.0;
 
@@ -780,7 +758,7 @@ Inclusion :: Inclusion(int n, XfemManager *xm, Domain *aDomain) :
     EnrichmentItem(n, xm, aDomain),
     mat(NULL)
 {
-    this->enrichesDofsWithIdArray->setValues(3, D_u, D_v, D_w);
+    mpEnrichesDofsWithIdArray->setValues(3, D_u, D_v, D_w);
 }
 
 Inclusion :: ~Inclusion()
@@ -833,7 +811,7 @@ IRResultType Inclusion :: initializeFrom(InputRecord *ir)
 Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
 {
     //this->enrichesDofsWithIdArray->setValues(7, D_u, D_v, D_w, W_u, W_v, W_w, Gamma);
-    this->enrichesDofsWithIdArray->setValues(6, D_u, D_v, D_w, W_u, W_v, W_w);
+    mpEnrichesDofsWithIdArray->setValues(6, D_u, D_v, D_w, W_u, W_v, W_w);
 }
 
 
@@ -947,7 +925,7 @@ Delamination :: giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &
 
 Crack :: Crack(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
 {
-    this->enrichesDofsWithIdArray->setValues(3, D_u, D_v, D_w);
+    mpEnrichesDofsWithIdArray->setValues(3, D_u, D_v, D_w);
 }
 
 IRResultType Crack :: initializeFrom(InputRecord *ir)

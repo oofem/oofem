@@ -93,7 +93,7 @@ public:
 
     /// Accessor.
     EnrichmentItem *giveEnrichmentItem(int n);
-    int giveNumberOfEnrichmentItems() { return enrichmentItemList->giveSize(); }
+    int giveNumberOfEnrichmentItems() const { return enrichmentItemList->giveSize(); }
 
     void createEnrichedDofs();
 

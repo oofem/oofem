@@ -52,6 +52,7 @@ class XfemManager;
 
 /**
  * Provides Xfem interface for an element.
+ * @author Erik Svenning
  */
 class XfemElementInterface : public Interface
 {
