@@ -567,7 +567,7 @@ void MixedGradientPressureWeakPeriodic :: computeFields(FloatArray &sigmaDev, do
                     for ( int ki = 0; ki < nsd; ++ki ) { // Columns of the basis functions for the tractions
                         // Order of tractions is very important here! It must in the right order here (consistent with other loops)
                         for ( int kJ = 0; kJ < nsd; ++kJ ) {
-                            sigma(ki, kJ) += tractions(pos) * t(ti) * normal(kj) * normal(kJ) * detJ * gp->giveWeight();
+                            sigma(ki, kJ) += tractions(pos) * t(ti) * normal(kj) * coords(kJ) * detJ * gp->giveWeight();
                         }
                         //printf("pos = %d, traction = %f, t = %f, normal_j = %f, normal_i = %f\n", pos, tractions(pos), t(ti), normal(kj), normal(ki));
                         pos++;
@@ -579,8 +579,6 @@ void MixedGradientPressureWeakPeriodic :: computeFields(FloatArray &sigmaDev, do
     }
     sigma.times(1./rve_size);
 
-    tractions.printYourself();
-    sigma.printYourself();
     double pressure = 0.;
     for ( int i = 1; i <= nsd; i++ ) {
         pressure += sigma.at(i, i);
@@ -750,7 +748,7 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(
                         for ( int ki = 0; ki < nsd; ++ki ) {
                             // Order of tractions is very important here! It must in the right order here (consistent with other loops)
                             for ( int kJ = 0; kJ < nsd; ++kJ ) {
-                                sigma(ki, kJ) += tractions_d(pos, dpos) * t(ti) * normal(kj) * normal(kJ) * detJ * gp->giveWeight();
+                                sigma(ki, kJ) += tractions_d(pos, dpos) * t(ti) * normal(kj) * coords(kJ) * detJ * gp->giveWeight();
                             }
                             pos++;
                         }
