@@ -96,7 +96,8 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
 
 void PlaneStress2dXfem :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
-
+	OOFEM_ERROR("PlaneStress2dXfem :: computeNmatrixAt is not yet implemented.");
+/*
     FloatArray Nc;
     interpolation.evalN( Nc, *gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     // assemble xfem part of strain-displacement matrix
@@ -146,6 +147,7 @@ void PlaneStress2dXfem :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
         }
     }
     answer.beNMatrixOf(N,2);
+*/
 }
 
 

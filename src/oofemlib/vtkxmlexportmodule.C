@@ -1403,7 +1403,7 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, VTKStr
             			DofManager *dMan = elem->giveDofManager(k);
             			for ( int j = 1; j <= xMan->giveNumberOfEnrichmentItems(); j++ ){
 
-            				if ( xMan->giveEnrichmentItem(j)->isDofManEnriched(dMan) ){
+            				if ( xMan->giveEnrichmentItem(j)->isDofManEnriched(*dMan) ){
             					xfemEnrichment++;
             				}
             			}
