@@ -461,8 +461,8 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
         Element *el = d->giveElement(elIndex);
         int nElNodes = el->giveNumberOfNodes();
 
-        int minSignPhi  = 1, maxSignPhi         = -1;
-        int minSignGamma = 1, maxSignGamma = -1;
+        double minSignPhi  = 1, maxSignPhi         = -1;
+        double minSignGamma = 1, maxSignGamma = -1;
 
         FloatArray elCenter;
         elCenter.setValues(2, 0.0, 0.0);
@@ -486,6 +486,11 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 			// Element completely cut by the crack
 			// -> Apply step enrichment to all element nodes
 
+			// Note: the check
+			// minSignPhi*maxSignPhi < 0 && minSignGamma > 0 && maxSignGamma > 0
+			// captures most of the completely cut elements, but not all.
+			// The missed elements are captured later by checking
+			// if numEdgeIntersec == 2.
 			for(int elNodeInd = 1; elNodeInd <= nElNodes; elNodeInd++)
 			{
 				int nGlob = el->giveNode(elNodeInd)->giveGlobalNumber();
@@ -498,19 +503,37 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 
 
 		}
+		else {
 
-		// Store indices of elements containing an interface tip.
 
-		if( minSignPhi*maxSignPhi < 0 && minSignGamma*maxSignGamma < 0 )
-		{
-			// Check if the element is intersected by the interface
-
-			bool edgeIntersected = false;
-
-			for(int elNodeInd = 1; elNodeInd <= nElNodes-1; elNodeInd++)
+			int numEdgeIntersec = 0;
+			if( minSignPhi*maxSignPhi < 0 && minSignGamma*maxSignGamma < 0 )
 			{
-				int niGlob = el->giveNode(elNodeInd  )->giveGlobalNumber();
-				int njGlob = el->giveNode(elNodeInd+1)->giveGlobalNumber();
+				// Check if the element is intersected by the interface
+
+
+				for(int elNodeInd = 1; elNodeInd <= nElNodes-1; elNodeInd++)
+				{
+					int niGlob = el->giveNode(elNodeInd  )->giveGlobalNumber();
+					int njGlob = el->giveNode(elNodeInd+1)->giveGlobalNumber();
+
+					if( mLevelSetNormalDir[niGlob-1]*mLevelSetNormalDir[njGlob-1] < 0.0 )
+					{
+						double xi = calcXiZeroLevel(mLevelSetNormalDir[niGlob-1], mLevelSetNormalDir[njGlob-1]);
+
+						const double &gammaS = mLevelSetTangDir[niGlob-1];
+						const double &gammaE = mLevelSetTangDir[njGlob-1];
+						double gamma = 0.5*(1.0-xi)*gammaS + 0.5*(1.0+xi)*gammaE;
+
+						if( gamma > 0.0 )
+						{
+							numEdgeIntersec++;
+						}
+					}
+				}
+
+				int niGlob = el->giveNode(1  		)->giveGlobalNumber();
+				int njGlob = el->giveNode(nElNodes	)->giveGlobalNumber();
 
 				if( mLevelSetNormalDir[niGlob-1]*mLevelSetNormalDir[njGlob-1] < 0.0 )
 				{
@@ -522,47 +545,46 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 
 					if( gamma > 0.0 )
 					{
-						edgeIntersected = true;
+						numEdgeIntersec++;
 					}
 				}
-			}
 
-			int niGlob = el->giveNode(1  		)->giveGlobalNumber();
-			int njGlob = el->giveNode(nElNodes	)->giveGlobalNumber();
+				if(numEdgeIntersec == 2) {
+					// If we captured a completely cut element that was missed by the first check.
+					for(int elNodeInd = 1; elNodeInd <= nElNodes; elNodeInd++)
+					{
+						int nGlob = el->giveNode(elNodeInd)->giveGlobalNumber();
 
-			if( mLevelSetNormalDir[niGlob-1]*mLevelSetNormalDir[njGlob-1] < 0.0 )
-			{
-				double xi = calcXiZeroLevel(mLevelSetNormalDir[niGlob-1], mLevelSetNormalDir[njGlob-1]);
-
-				const double &gammaS = mLevelSetTangDir[niGlob-1];
-				const double &gammaE = mLevelSetTangDir[njGlob-1];
-				double gamma = 0.5*(1.0-xi)*gammaS + 0.5*(1.0+xi)*gammaE;
-
-				if( gamma > 0.0 )
-				{
-					edgeIntersected = true;
-				}
-			}
-
-			if( edgeIntersected )
-			{
-				TipInfo tipInfo;
-				if( mpEnrichmentDomain->GiveClosestTipInfo(elCenter, tipInfo) )
-				{
-					// Prevent storage of duplicates
-					const double tol2 = 1.0e-20;
-					bool alreadyAdded = false;
-
-					for(size_t i = 0; i < tipInfoArray.size(); i++) {
-						if( tipInfoArray[i].mGlobalCoord.distance_square( tipInfo.mGlobalCoord ) < tol2 ) {
-							alreadyAdded = true;
-							break;
+						if( mNodeEnrMarker[nGlob-1] == 0 ) {
+							mNodeEnrMarker[nGlob-1] = 1;
 						}
-					}
 
-					if(!alreadyAdded) {
-						tipInfo.mElIndex = elIndex;
-						tipInfoArray.push_back(tipInfo);
+					}
+				}
+				else {
+
+					// Store indices of elements containing an interface tip.
+					if( numEdgeIntersec == 1 )
+					{
+						TipInfo tipInfo;
+						if( mpEnrichmentDomain->GiveClosestTipInfo(elCenter, tipInfo) )
+						{
+							// Prevent storage of duplicates
+							const double tol2 = 1.0e-20;
+							bool alreadyAdded = false;
+
+							for(size_t i = 0; i < tipInfoArray.size(); i++) {
+								if( tipInfoArray[i].mGlobalCoord.distance_square( tipInfo.mGlobalCoord ) < tol2 ) {
+									alreadyAdded = true;
+									break;
+								}
+							}
+
+							if(!alreadyAdded) {
+								tipInfo.mElIndex = elIndex;
+								tipInfoArray.push_back(tipInfo);
+							}
+						}
 					}
 				}
 			}
