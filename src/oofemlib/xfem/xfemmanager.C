@@ -57,6 +57,7 @@ XfemManager :: XfemManager(Domain *domain)
     this->domain = domain;
     this->enrichmentItemList = new AList< EnrichmentItem >(0);
     numberOfEnrichmentItems = -1;
+    mNumGpPerTri = 12;
 }
 
 XfemManager :: ~XfemManager()
@@ -72,7 +73,7 @@ XfemManager :: clear()
     numberOfEnrichmentItems = -1;
 }
 
-
+#if 0
 void XfemManager :: giveActiveEIsFor(IntArray &answer, const Element *elem)
 {
     for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ) {
@@ -81,6 +82,7 @@ void XfemManager :: giveActiveEIsFor(IntArray &answer, const Element *elem)
         }
     }
 }
+#endif
 
 bool XfemManager :: isElementEnriched(const Element *elem)
 {
@@ -89,33 +91,10 @@ bool XfemManager :: isElementEnriched(const Element *elem)
         if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ) {
             return true;
         }
-
-        ;
     }
 
     return false;
 }
-/*
- * bool XfemManager :: isAllElNodesEnriched(const Element *elem)
- * {
- *  for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ){
- *
- *      EnrichmentItem *eI = this->giveEnrichmentItem(i);
- *      for( int j = 1; j <= eI->giveNumberOfEnrichmentDomains(); j++)
- *      {
- *
- *              EnrichmentDomain *eD = eI->giveEnrichmentDomain(j);
- *              if( eD->isAllElNodesEnriched(elem) )
- *              {
- *                      return true;
- *              }
- *
- *      }
- *  }
- *
- *  return false;
- * }
- */
 
 EnrichmentItem *XfemManager :: giveEnrichmentItem(int n)
 {
@@ -129,44 +108,6 @@ EnrichmentItem *XfemManager :: giveEnrichmentItem(int n)
     return NULL;
 }
 
-
-// Old method: strange workflow in this method
-///@todo: Broken but not in use and should be rewritten anyway
-XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
-{
-    XfemType ret;
-    int intersectionCount = 0;
-
-    // elements surrounding one node
-    const IntArray *neighbours = this->giveDomain()->giveConnectivityTable()->giveDofManConnectivityArray(nodeNumber);
-    for ( int i = 1; i <= neighbours->giveSize(); i++ ) {
-        IntArray interactedEnrEl;
-        // list of the EI's that are active in the element
-        giveActiveEIsFor( interactedEnrEl, this->giveDomain()->giveElement( neighbours->at(i) ) );
-        for ( int j = 1; j <= interactedEnrEl.giveSize(); j++ ) {
-            // sums up number of intersections the geometry have with a given element
-            //intersectionCount += this->giveEnrichmentItem( interactedEnrEl.at(j) )->computeNumberOfIntersectionPoints( this->giveDomain()->giveElement( neighbours->at(i) ) );
-        }
-
-        interactedEnrEl.zero();
-    }
-
-    // very specialized
-    // only for 2d. Won't work if several ei are active in the neighboring element to a node.
-    // one node could also have several TYPEs, Tip + inclusion etc.
-    if ( intersectionCount == 0 ) {
-        ret = STANDARD;
-    } else if ( intersectionCount == 1 ) {
-        ret = TIP;
-    } else { /*if ( intersectionCount > 1 )*/
-        ret = SPLIT;
-    }
-
-    return ret;
-}
-
-
-
 void
 XfemManager :: createEnrichedDofs()
 {
@@ -177,12 +118,10 @@ XfemManager :: createEnrichedDofs()
 
     for ( int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ ) {
         EnrichmentItem *ei = this->giveEnrichmentItem(j);
-        //        for ( int k = 1; k <= ei->giveNumberOfEnrichmentDomains(); k++ )
-        //        {
+
         for ( int i = 1; i <= nrDofMan; i++ ) {
             DofManager *dMan = this->giveDomain()->giveDofManager(i);
 
-            //                if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,k) )
             if ( ei->isDofManEnriched(* dMan) ) {
                 ei->computeDofManDofIdArray(dofIdArray, dMan);
                 int nDofs = dMan->giveNumberOfDofs();
@@ -223,6 +162,9 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
+
+    IR_GIVE_OPTIONAL_FIELD(ir, mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
+
     return IRRT_OK;
 }
 
@@ -253,17 +195,6 @@ int XfemManager :: instanciateYourself(DataReader *dr)
     }
 
     return 1;
-}
-
-
-
-void XfemManager :: updateIntegrationRule()
-{
-    for ( int i = 1; i <= this->giveDomain()->giveNumberOfElements(); i++ ) {
-        Element *el = this->giveDomain()->giveElement(i);
-        XfemElementInterface *xei = static_cast< XfemElementInterface * >( el->giveInterface(XfemElementInterfaceType) );
-        xei->XfemElementInterface_updateIntegrationRule();
-    }
 }
 
 

@@ -547,7 +547,7 @@ void MixedGradientPressureNeumann :: computeFields(FloatArray &sigmaDev, double 
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
         int boundary = boundaries.at(pos*2);
         
-        e->computeVectorOf(eid, VM_Total, tStep, unknowns);
+        e->computeBoundaryVectorOf(boundary, EID_MomentumBalance, VM_Total, tStep, unknowns);
         this->integrateVolTangent(fe, e, boundary);
         vol += fe.dotProduct(unknowns);
     }
@@ -610,7 +610,7 @@ void MixedGradientPressureNeumann :: computeTangents(
         int boundary = boundaries.at(pos*2);
 
         e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-        e->giveBoundaryLocationArray(loc, bNodes, eid, fnum);
+        e->giveBoundaryLocationArray(loc, bNodes, EID_MomentumBalance, fnum);
         this->integrateVolTangent(fe, e, boundary);
         fe.times(-1.0); // here d_p = 1.0
         p_pert.assemble(fe, loc);
@@ -639,8 +639,9 @@ void MixedGradientPressureNeumann :: computeTangents(
         int boundary = boundaries.at(pos*2);
     
         this->integrateVolTangent(fe, e, boundary);
+
         e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-        e->giveBoundaryLocationArray(loc, bNodes, eid, fnum);
+        e->giveBoundaryLocationArray(loc, bNodes, EID_MomentumBalance, fnum);
         
         // Using "loc" to pick out the relevant contributions. This won't work at all if there are local coordinate systems in these nodes
         // or slave nodes etc. The goal is to compute the velocity from the sensitivity field, but we need to avoid going through the actual

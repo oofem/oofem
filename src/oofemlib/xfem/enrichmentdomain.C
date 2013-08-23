@@ -54,40 +54,63 @@ REGISTER_EnrichmentDomain(EDBGCircle)
 
 REGISTER_EnrichmentDomain(EDCrack)
 
-//REGISTER_EnrichmentDomain( BasicGeometryDomain<Line> )
-
-// General
 
 EnrichmentDomain :: EnrichmentDomain()
 {}
 
-void EnrichmentDomain_BG :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan)
+void EnrichmentDomain_BG :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
     iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
 }
 
-bool EDCrack :: GiveClosestTipPosition(FloatArray &oCoords, const FloatArray &iCoords) const
+bool EDCrack :: GiveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const
 {
-    printf("Entering EDCrack :: GiveClosestTipPosition().\n");
-    int nVert = bg->giveNrVertices();
-    if ( nVert > 0 ) {
-        double distS = bg->giveVertex(1)->distance(iCoords);
-        double distE = bg->giveVertex(nVert)->distance(iCoords);
+	int nVert = bg->giveNrVertices();
+	if( nVert > 1 )
+	{
+		double distS = bg->giveVertex(1)->distance(iCoords);
+		double distE = bg->giveVertex(nVert)->distance(iCoords);
 
-        if ( distS < distE ) {
-            oCoords = * ( bg->giveVertex(1) );
-            return true;
-        } else   {
-            oCoords = * ( bg->giveVertex(nVert) );
-            return true;
-        }
-    }
+		if(distS < distE)
+		{
+			const FloatArray &p1 = *(bg->giveVertex(1));
+			const FloatArray &p2 = *(bg->giveVertex(2));
 
-    oCoords.setValues(2, 0.0, 0.0);
-    return false;
+			// Tip position
+			oInfo.mGlobalCoord = p1;
+
+			// Tip tangent
+			oInfo.mTangDir.beDifferenceOf(p1,p2);
+			oInfo.mTangDir.normalize();
+
+			// Tip normal
+			oInfo.mNormalDir.setValues(2, -oInfo.mTangDir.at(2), oInfo.mTangDir.at(1) );
+
+			return true;
+		}
+		else
+		{
+			const FloatArray &p1 = *(bg->giveVertex(nVert-1));
+			const FloatArray &p2 = *(bg->giveVertex(nVert));
+
+			// Tip position
+			oInfo.mGlobalCoord = p2;
+
+			// Tip tangent
+			oInfo.mTangDir.beDifferenceOf(p2,p1);
+			oInfo.mTangDir.normalize();
+
+			// Tip normal
+			oInfo.mNormalDir.setValues(2, -oInfo.mTangDir.at(2), oInfo.mTangDir.at(1) );
+
+			return true;
+		}
+	}
+
+	return false;
 }
 
-void DofManList :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan)
+void DofManList :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
     iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
 }
@@ -107,7 +130,7 @@ IRResultType DofManList :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-void WholeDomain :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan)
+void WholeDomain :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
     iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
 }

@@ -48,8 +48,8 @@ bool Delaunay :: colinear(FloatArray *p1, FloatArray *p2, FloatArray *p3)
 {
     double dist = p1->at(1) * ( p2->at(2) - p3->at(2) ) + p2->at(1) * ( p3->at(2) - p1->at(2) ) +
                   p3->at(1) * ( p1->at(2) - p2->at(2) );
-    // the tolerance probably needs a setter
-    if ( dist < 0.0001 && dist > -0.0001 ) {
+
+    if ( dist < mTol && dist > -mTol ) {
         return true;
     } else {
         return false;
@@ -81,12 +81,11 @@ bool Delaunay :: isInsideCC(FloatArray *p, FloatArray *p1,  FloatArray *p2,  Flo
     }
 }
 
-void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, AList< Triangle > *triangles)
+void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, std::vector< Triangle > &oTriangles)
 {
     // 4th order algorithm - four loops, only for testing purposes
 
     int n = iVertices.size();
-    int count = triangles->giveSize();
 
     // copy of vertices, since they will be shifted
     std :: vector< FloatArray >vertices(iVertices);
@@ -117,7 +116,6 @@ void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, AList
                 }
 
                 if ( isTriangle ) {
-                    count++;
 
                     // here we switch to old vertices
                     FloatArray *p1 = new FloatArray();
@@ -128,12 +126,12 @@ void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, AList
                     * p3 =  iVertices [ k - 1 ];
 
 
-                    Triangle *triangle = new Triangle(p1, p2, p3);
-                    if ( !triangle->isOrientedAnticlockwise() ) {
-                        triangle->changeToAnticlockwise();
+                    Triangle tri(p1, p2, p3);
+                    if ( !tri.isOrientedAnticlockwise() ) {
+                        tri.changeToAnticlockwise();
                     }
 
-                    triangles->put(count, triangle);
+                    oTriangles.push_back(tri);
                 }
             }
         }
