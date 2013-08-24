@@ -106,32 +106,13 @@ class TimeStep;
  */
 class BoundaryLoad : public Load
 {
-public:
-    /**
-     * Load coordinate system type. Variable of this type can have following values BL_GlobalMode
-     * (indicates that load given in global coordinate system) or BL_LocalMode
-     * (entity dependent local coordinate system will be  used).
-     */
-    enum BL_CoordSystType {
-        BL_GlobalMode, ///< Global mode i.e. load is specified in global c.s.
-        BL_LocalMode, ///< Local entity (edge or surface) coordinate system.
-    };
-
-    /**
-     * Type determining the type of formulation (entity local or global one).
-     */
-    enum BL_FormulationType {
-        BL_EntityFormulation,
-        BL_GlobalFormulation,
-    };
-
 protected:
     /// Number of "DOFs" which represent load geometry.
     int nDofs;
     /// Load type (its physical meaning).
     bcType lType;
     /// Load coordinate system.
-    BL_CoordSystType coordSystemType;
+    CoordSystType coordSystemType;
     /// Additional b.c properties.
     Dictionary propertyDictionary;
 
@@ -141,7 +122,7 @@ public:
      * @param i Load number.
      * @param d Domain to which new object will belongs.
      */
-    BoundaryLoad(int i, Domain *d) : Load(i, d), nDofs(0), coordSystemType(BL_GlobalMode) { }
+    BoundaryLoad(int i, Domain *d) : Load(i, d), nDofs(0), coordSystemType(CST_Global) { }
 
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
     /**
@@ -152,14 +133,8 @@ public:
      * @return Receiver's number of "DOFs". Should correspond to number of DOFs on loaded entity.
      */
     int giveNumberOfDofs() { return nDofs; }
-    /**
-     * @return Receiver's coordinate system.
-     */
-    BL_CoordSystType giveCoordSystMode() { return coordSystemType; }
-    /**
-     * @return Formulation type.
-     */
-    virtual BL_FormulationType giveFormulationType() { return BL_EntityFormulation; }
+
+    virtual CoordSystType giveCoordSystMode() { return coordSystemType; }
     /**
      * Initializes receiver according to object description stored in input record.
      * Reads number of dofs into nDofs attribute (i.e. the number of dofs, which are on loaded entity),
@@ -175,12 +150,6 @@ public:
      * See cltypes.h file for details.
      */
     virtual bcType giveType() const { return lType; }
-    /**
-     * Returns the value of a property 'aProperty'. Property must be identified
-     * by unique integer id.
-     * @param aProperty id of property requested
-     * @return property value
-     */
     virtual double giveProperty(int aProperty);
 
 protected:

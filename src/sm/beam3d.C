@@ -520,7 +520,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
         case 0:
 
             //edgeLoad->computeComponentArrayAt(components, tStep, mode);
-            if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+            if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
                 coords.resize(1);
                 coords.at(1) = 0.0;
             } else {
@@ -531,7 +531,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
 
 
             // prepare transformation coeffs
-            if ( edgeLoad->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
+            if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
                 if ( this->computeLoadGToLRotationMtrx(T) ) {
                     components.rotatedWith(T, 'n');
                 }
@@ -566,7 +566,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
              * edgeLoad->computeValueAt(components, tStep, coords, mode);
              */
 
-            if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+            if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
                 coords.resize(1);
                 coords.at(1) = -1.0;
             } else {
@@ -577,7 +577,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
 
 
             // prepare transformation coeffs
-            if ( edgeLoad->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
+            if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
                 if ( this->computeLoadGToLRotationMtrx(T) ) {
                     components.rotatedWith(T, 'n');
                 }
@@ -594,7 +594,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
              * coords.at(1) = 1.;
              * edgeLoad->computeValueAt(endComponents, tStep, coords, mode);
              */
-            if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+            if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
                 coords.resize(1);
                 coords.at(1) = 1.0;
             } else {
@@ -604,7 +604,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
             edgeLoad->computeValueAt(endComponents, tStep, coords, mode);
 
             // prepare transformation coeffs
-            if ( edgeLoad->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
+            if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
                 if ( T.isNotEmpty() ) {
                     endComponents.rotatedWith(T, 'n');
                 }

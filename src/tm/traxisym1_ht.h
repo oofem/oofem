@@ -54,6 +54,8 @@ public:
     virtual const char *giveClassName() const { return "TrAxisym1_htElement"; }
     virtual classType giveClassID() const { return TrAxisym1_htClass; }
 
+    virtual double giveThicknessAt(const FloatArray &gcoords);
+
 protected:
     double computeRadiusAt(GaussPoint *gp);
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);

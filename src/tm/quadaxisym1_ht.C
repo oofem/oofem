@@ -82,6 +82,12 @@ QuadAxisym1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
 }
 
 double
+QuadAxisym1_ht :: giveThicknessAt(const FloatArray &gcoords)
+{
+    return gcoords.at(1);
+}
+
+double
 QuadAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double radius;

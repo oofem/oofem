@@ -69,6 +69,7 @@ public:
     virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 3 : 6; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _2dHeat; }
+    virtual double giveThicknessAt(const FloatArray &gcoords);
 
     virtual Interface *giveInterface(InterfaceType t);
 
