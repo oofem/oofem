@@ -602,9 +602,10 @@ Element :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int
 
 
 void
-Element :: computeEdgeLoadVector(FloatArray &answer, Load *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
+Element :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
 {
-    _error("computeEdgeLoadVector: Unknown load type.");
+    ///@todo Change the load type to "BoundaryEdgeLoad" maybe?
+    _error("computeBoundaryEdgeLoadVector: Unknown load type.");
 }
 
 

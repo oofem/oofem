@@ -309,7 +309,7 @@ public:
      * @param mode Determines mode of answer.
      * @param tStep Time step when answer is computed.
      */
-    virtual void computeEdgeLoadVector(FloatArray &answer, Load *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep);
     //@}
 
     /**@name General element functions */
