@@ -376,13 +376,20 @@ else ()
 	if (USE_USERDEF_DIRICHLETBC)
 		# The USERDEF_DIRICHLETBC requires a Python interpreter,
 		# but it does not require the Boost library.
-    	# PythonLibs in cmake is bugged, have to try and rely on PythonInterp to get the suitable major and minor versions.
-	    find_package(PythonInterp REQUIRED)
-    	find_package(PythonLibs REQUIRED)
+
+		# We want to use Python 2.7, therefore we need to whipe
+		# out the interpreter found by the test section
+		set( PYTHON_EXECUTABLE "PYTHON_EXECUTABLE-NOTFOUND")
+		set( PYTHON_INCLUDE_DIR "PYTHON_INCLUDE_DIR-NOTFOUND")
+		set( PYTHON_LIBRARY "PYTHON_LIBRARY-NOTFOUND")
+
+		find_package(PythonInterp 2.7 REQUIRED)
+		find_package(PythonLibs 2.7 REQUIRED)
 	    include_directories (${PYTHON_INCLUDE_DIRS})
 	    set (EXT_LIBS ${EXT_LIBS} ${PYTHON_LIBRARIES})
 	    set (MODULE_LIST ${MODULE_LIST} "Python")
 	    add_definitions(-DUSERDEFDIRICHLETBC)
+
 	endif ()
 endif ()
 
