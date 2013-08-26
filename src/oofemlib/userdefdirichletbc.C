@@ -16,7 +16,7 @@
 
 #include "dofmanager.h"
 
-#ifdef BOOST_PYTHON
+#ifdef USERDEFDIRICHLETBC
 #include <Python.h>
 #endif
 
@@ -25,7 +25,7 @@ namespace oofem {
 
 REGISTER_BoundaryCondition( UserDefDirichletBC );
 
-#ifdef BOOST_PYTHON
+#ifdef USERDEFDIRICHLETBC
 PythonInitializer mPythonInitializer;
 #endif
 
@@ -37,7 +37,7 @@ UserDefDirichletBC :: UserDefDirichletBC(int i, Domain *d) : BoundaryCondition(i
 /// Destructor
 UserDefDirichletBC :: ~UserDefDirichletBC()
 {
-#ifdef BOOST_PYTHON
+#ifdef USERDEFDIRICHLETBC
     Py_DECREF(mpName);
     Py_DECREF(mpModule);
     Py_DECREF(mpFunc);
@@ -46,7 +46,7 @@ UserDefDirichletBC :: ~UserDefDirichletBC()
 
 double UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 {
-#ifdef BOOST_PYTHON
+#ifdef USERDEFDIRICHLETBC
     double factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
     DofManager *dMan = dof->giveDofManager();
 
@@ -102,7 +102,7 @@ double UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 
     return retVal*factor;
 #else
-	OOFEM_ERROR("UserDefDirichletBC :: give requires BOOST_PYTHON.");
+	OOFEM_ERROR("UserDefDirichletBC :: give requires USERDEFDIRICHLETBC to be defined (to enable Python).");
     return 0.0;
 #endif
 }
@@ -120,7 +120,7 @@ UserDefDirichletBC :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, mFileName, _IFT_UserDefDirichletBC_filename);
 
-#ifdef BOOST_PYTHON
+#ifdef USERDEFDIRICHLETBC
     // Import Python file
     mpName = PyString_FromString( mFileName.c_str() );
     mpModule = PyImport_Import( mpName );
@@ -162,7 +162,7 @@ UserDefDirichletBC :: scale(double s)
     values.times(s);
 }
 
-#ifdef BOOST_PYTHON
+#ifdef USERDEFDIRICHLETBC
 PythonInitializer :: PythonInitializer()
 {
     Py_Initialize();

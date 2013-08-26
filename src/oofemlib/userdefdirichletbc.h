@@ -69,7 +69,7 @@
 
 #define _IFT_UserDefDirichletBC_filename "filename"
 
-#ifdef BOOST_PYTHON
+#ifdef USERDEFDIRICHLETBC
 
 // forward declare PyObject
 // as suggested on the python mailing list
@@ -100,7 +100,7 @@ protected:
      * 	class. Creating a static PythonInitializer object ensures that Py_Initialize() and
      * 	Py_Finalize() are called exactly once, which is what we want.
      */
-#ifdef BOOST_PYTHON
+#ifdef USERDEFDIRICHLETBC
     static PythonInitializer mPythonInitializer;
 
     PyObject *mpName;
