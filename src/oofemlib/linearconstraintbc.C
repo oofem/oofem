@@ -42,6 +42,7 @@
 #include "timestep.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "node.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(LinearConstraintBC);
@@ -50,7 +51,8 @@ REGISTER_BoundaryCondition(LinearConstraintBC);
 LinearConstraintBC :: LinearConstraintBC(int n, Domain *d) : ActiveBoundaryCondition(n, d)
 {
     this->md = new Node(0, domain);
-    // this is internal lagrange multiplier uses to enforce the receiver constrain
+    // this is internal lagrange multiplier used to enforce the receiver constrain
+    // this allocates a new equation related to this constraint
     this->md->appendDof( new MasterDof( 0, this->md, ( DofIDItem ) ( d->giveNextFreeDofID() ) ) );
     this->lhsType.resize(0); 
     this->rhsType.resize(0); 
@@ -109,20 +111,29 @@ void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep, Equatio
     IntArray locr(size), locc(size);
 
     if (!this->lhsType.contains((int) type)) return ;
+    this->giveLocArray(r_s, locr, lambdaeq.at(1));
 
+    if (this->isImposed(tStep)) {
 
-    for ( int _i = 1; _i <= size; _i++ ) { // loop over dofs
+      for ( int _i = 1; _i <= size; _i++ ) { // loop over dofs
         double factor=1.;
         if(weightsLtf.giveSize()){
-            factor = domain->giveLoadTimeFunction(weightsLtf.at(_i))->__at(tStep->giveIntrinsicTime());
+	  factor = domain->giveLoadTimeFunction(weightsLtf.at(_i))->__at(tStep->giveIntrinsicTime());
         }
         contrib.at(_i, 1) = this->weights.at(_i)*factor;
-    }
-    contribt.beTranspositionOf(contrib);
+      }
+      contribt.beTranspositionOf(contrib);
 
-    this->giveLocArray(r_s, locr, lambdaeq.at(1));
-    answer->assemble(lambdaeq, locr, contribt);
-    answer->assemble(locr, lambdaeq, contrib);
+      answer->assemble(lambdaeq, locr, contribt);
+      answer->assemble(locr, lambdaeq, contrib);
+    } else {
+      // the bc is not imposed at specific time step, however in order to make the equation system regular
+      // we initialize the allocated equation to the following form 1*labmda = 0, forcing lagrange multiplier 
+      // of inactive condition to be zero.
+      FloatMatrix help(1,1);
+      help.at(1,1) = 1.0;
+      answer->assemble(lambdaeq, lambdaeq, help);
+    }
 }
 
 void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
@@ -134,6 +145,8 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
   double factor=1.;
 
   if (!this->rhsType.contains((int) type)) return ;
+  if (!this->isImposed(tStep)) return;
+
   if (type == InternalForcesVector) {
     // compute true residual
     int size = this->weights.giveSize();

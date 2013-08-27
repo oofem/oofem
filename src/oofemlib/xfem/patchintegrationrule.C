@@ -34,7 +34,7 @@
 
 #include "patchintegrationrule.h"
 #include "xfemelementinterface.h"
-#include "patch.h"
+//#include "patch.h"
 #include "integrationrule.h"
 #include "gaussintegrationrule.h"
 #include "geometry.h"
@@ -42,33 +42,109 @@
 #include "contextioerr.h"
 #include "datastream.h"
 #include "gausspoint.h"
+#include "fei2dtrlin.h"
+
+#include "XFEMDebugTools.h"
+
 
 namespace oofem {
-PatchIntegrationRule :: PatchIntegrationRule(int n, Element *e, Patch *patch) : GaussIntegrationRule(n, e)
-{
-    this->patch = patch;
-}
+PatchIntegrationRule :: PatchIntegrationRule(int n, Element *e, const std :: vector< Triangle > &iTriangles) :
+    GaussIntegrationRule(n, e),
+    mTriangles(iTriangles)
+{}
 
 PatchIntegrationRule :: ~PatchIntegrationRule()
-{
-    delete patch;
-}
+{}
+
+FEI2dTrLin PatchIntegrationRule :: mTriInterp(1, 2);
 
 int
 PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 {
-    numberOfIntegrationPoints = GaussIntegrationRule :: SetUpPointsOnTriangle(nPoints, mode);
+    int pointsPassed = 0;
+
+    // TODO: set properly
     firstLocalStrainIndx = 1;
     lastLocalStrainIndx = 3;
-    // convert patch coordinates into element based, update weights accordingly
-    for ( int j = 0; j <  numberOfIntegrationPoints; j++ ) {
-        GaussPoint *gp = this->gaussPointArray[ j ];
-        patch->convertGPIntoParental(gp); // convert coordinates into parental
-        Element *elg = patch->giveParent();
-        double parentArea = elg->computeArea();
-        Triangle *tr = ( Triangle * ) patch; ///@todo This must be a serious bug. This will do a reinterpret_cast from Patch to Triangle, which makes no sense.
-        gp->setWeight(8.0 * gp->giveWeight() * tr->getArea() / parentArea); // update integration weight
+
+
+    ////////////////////////////////////////////
+    // Allocate Gauss point array
+    int nPointsTot = nPoints * mTriangles.size();
+    FloatArray coords_xi1, coords_xi2, weights;
+    this->giveTriCoordsAndWeights(nPoints, coords_xi1, coords_xi2, weights);
+    this->gaussPointArray = new GaussPoint * [ nPointsTot ];
+    ////////////////////////////////////////////
+
+
+    std :: vector< FloatArray >newGPCoord;
+
+    double parentArea = this->elem->computeArea();
+
+    // Loop over triangles
+    for ( int i = 0; i < int( mTriangles.size() ); i++ ) {
+        // TODO: Probably unnecessary to allocate here
+        const FloatArray **coords = new const FloatArray * [ mTriangles [ i ].giveNrVertices() ];
+        // this we should put into the function before
+        for ( int k = 0; k < mTriangles [ i ].giveNrVertices(); k++ ) {
+            coords [ k ] = new FloatArray( *( mTriangles [ i ].giveVertex(k + 1) ) );
+        }
+
+        // Can not be used because it writes to the start of the array instead of appending.
+        //		int nPointsTri = GaussIntegrationRule :: SetUpPointsOnTriangle(nPoints, mode);
+
+        for ( int j = 0; j < nPoints; j++ ) {
+            FloatArray global;
+            GaussPoint * &gp = this->gaussPointArray [ pointsPassed ];
+
+            FloatArray *coord = new FloatArray(2);
+            coord->at(1) = coords_xi1.at(j + 1);
+            coord->at(2) = coords_xi2.at(j + 1);
+            gp = new GaussPoint(this, pointsPassed + 1, coord, weights.at(j + 1), mode);
+
+
+
+            mTriInterp.local2global( global, * gp->giveCoordinates(),
+                                     FEIVertexListGeometryWrapper(mTriangles [ i ].giveNrVertices(), coords) );
+
+            newGPCoord.push_back(global);
+
+
+            FloatArray local;
+            this->elem->computeLocalCoordinates(local, global);
+
+            gp->setCoordinates(local);
+
+
+
+
+            double refElArea = this->elem->giveParentElSize();
+
+            gp->setWeight(2.0 * refElArea * gp->giveWeight() * mTriangles [ i ].getArea() / parentArea); // update integration weight
+
+
+            pointsPassed++;
+        }
+
+
+        for ( int k = 0; k < mTriangles [ i ].giveNrVertices(); k++ ) {
+            delete coords [ k ];
+        }
+
+        delete [] coords;
     }
+
+#if PATCH_INT_DEBUG > 0
+    int elIndex = this->elem->giveGlobalNumber();
+    std :: stringstream str;
+    str << "GaussPoints" << elIndex << ".vtk";
+    std :: string name = str.str();
+
+    XFEMDebugTools :: WritePointsToVTK(name, newGPCoord);
+#endif
+
+    numberOfIntegrationPoints = pointsPassed;
+
 
     return numberOfIntegrationPoints;
 }
@@ -76,6 +152,8 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 contextIOResultType
 PatchIntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
+    // TODO: Implement
+
     //
     // saves full  context (saves state variables, that completely describe
     // current state)
@@ -88,25 +166,28 @@ PatchIntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *
         THROW_CIOERR(iores);
     }
 
-    // save patch data
-    if ( this->patch ) {
-        // store patch type
-        int _type = this->patch->givePatchType();
-        if ( !stream->write(& _type, 1) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-
-        patch->saveContext(stream, mode, obj);
-    } else {
-        OOFEM_ERROR("saveContex : can't store NULL patch");
-    }
-
+    /*
+     *  // save patch data
+     *  if ( this->patch ) {
+     *      // store patch type
+     *      int _type = this->patch->givePatchType();
+     *      if ( !stream->write(& _type, 1) ) {
+     *          THROW_CIOERR(CIO_IOERR);
+     *      }
+     *
+     *      patch->saveContext(stream, mode, obj);
+     *  } else {
+     *      OOFEM_ERROR("saveContex : can't store NULL patch");
+     *  }
+     */
     return CIO_OK;
 }
 
 contextIOResultType
 PatchIntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
+    // TODO: Implement
+
     //
     // restores full element context (saves state variables, that completely describe
     // current state)
@@ -122,21 +203,22 @@ PatchIntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, voi
         THROW_CIOERR(iores);
     }
 
-    // restore patch data
-    if ( this->patch ) {
-        delete this->patch;
-    }
-
+    /*
+     *  // restore patch data
+     *  if ( this->patch ) {
+     *      delete this->patch;
+     *  }
+     */
     int _ptype;
     if ( !stream->read(& _ptype, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    // create new patch
-    this->patch = classFactory.createPatch( ( Patch :: PatchType ) _ptype, this->giveElement() );
-    this->patch->restoreContext(stream, mode, obj);
-
+    /*
+     *  // create new patch
+     *  this->patch = classFactory.createPatch( ( Patch :: PatchType ) _ptype, this->giveElement() );
+     *  this->patch->restoreContext(stream, mode, obj);
+     */
     return CIO_OK;
 }
 } // end namespace oofem
-

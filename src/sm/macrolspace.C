@@ -38,6 +38,7 @@
 #include "domain.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
+#include "node.h"
 
 #ifdef __OOFEG
  #include "engngm.h"

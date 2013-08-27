@@ -46,14 +46,8 @@ namespace oofem {
  */
 class FEI2dLineHermite : public FEInterpolation2d
 {
-protected:
-    int xind, yind;
-
 public:
-    FEI2dLineHermite(int ind1, int ind2) : FEInterpolation2d(1) {
-        xind = ind1;
-        yind = ind2;
-    }
+    FEI2dLineHermite(int ind1, int ind2) : FEInterpolation2d(1, ind1, ind2) {}
 
     virtual integrationDomain giveIntegrationDomain() const { return _Line; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
@@ -72,7 +66,7 @@ public:
 
     // Edge (same as bulk for this type, so they are all ignored) (perhaps do it the other way around?).
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) {};
-    virtual void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { };
+    virtual void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { }
     virtual double edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeEvaldNds(FloatArray &answer, int iedge,
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo);
@@ -80,7 +74,9 @@ public:
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
-                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo) {};
+                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo) {}
+
+    virtual IntegrationRule *giveIntegrationRule(int order);
 };
 } // end namespace oofem
 #endif // fei2dlinehermite_h

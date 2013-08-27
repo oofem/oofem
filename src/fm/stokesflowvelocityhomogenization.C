@@ -37,6 +37,7 @@
 #include "classfactory.h"
 #include "deadweight.h"
 #include "tr21stokes.h"
+#include "dofmanager.h"
 
 namespace oofem {
 

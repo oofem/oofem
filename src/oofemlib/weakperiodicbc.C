@@ -364,10 +364,6 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
 			// Find dofs for this element side
 			IntArray r_sideLoc, c_sideLoc;
 
-			///@todo See todo on assembleVector
-			//thisElement->giveBoundaryLocationArray(r_sideLoc, side [ thisSide ].at(ielement), dofids, eid, r_s);
-			//thisElement->giveBoundaryLocationArray(c_sideLoc, side [ thisSide ].at(ielement), dofids, eid, c_s);
-
 			// Find dofs for this element which should be periodic
 			IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray;
 			periodicDofIDMask.resize(1);
@@ -375,6 +371,11 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
 
 			FEInterpolation *interpolation = thisElement->giveInterpolation( (DofIDItem)dofid );
 			interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
+
+            ///@todo See todo on assembleVector
+            //thisElement->giveBoundaryLocationArray(r_sideLoc, bNodes, dofids, eid, r_s);
+            //thisElement->giveBoundaryLocationArray(c_sideLoc, bNodes, dofids, eid, c_s);
+
 			r_sideLoc.resize(0);
 			c_sideLoc.resize(0);
 			dofCountOnBoundary = 0;
@@ -471,9 +472,6 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
 
 			Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
 
-			///@todo Support explicitly asking specifying dofids instead of equation ids (Jim needed this feature as well, and it makes sense to have it)
-			//thisElement->giveBoundaryLocationArray(sideLocation, side [ thisSide ].at(ielement), &dofids, eid, s, &masterDofIDs);
-
 			// Find dofs for this element which should be periodic
 			IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray;
 			periodicDofIDMask.resize(1);
@@ -481,6 +479,11 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
 
 			FEInterpolation *interpolation = thisElement->giveInterpolation( (DofIDItem)dofid );
 			interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
+
+            ///@todo Carl, change to this:
+            //thisElement->giveBoundaryLocationArray(sideLocation, bNodes, &dofids, eid, s, &masterDofIDs);
+            //thisElement->computeBoundaryVectorOf(bNodes, eid, VM_Total, tStep, a);
+
 			sideLocation.resize(0);
 			masterDofIDs.resize(0);
 			a.resize(0);

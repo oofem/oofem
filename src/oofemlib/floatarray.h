@@ -346,6 +346,14 @@ public:
     double distance(const FloatArray &x) const;
     /// @see distance
     double distance(const FloatArray *x) const { return this->distance(* x); }
+
+    /**
+     * Computes distance between the position represented by the reciever and a line segment represented by it's start
+     * point iP1 and it's end point iP2.
+     * Written by Erik Svenning, August 2013.
+     */
+    double distance(const FloatArray &iP1, const FloatArray &iP2) const;
+
     /**
      * Computes the square of distance between position represented by receiver and position given as parameter.
      * @param x Coordinate to calculate squared distance from.

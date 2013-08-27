@@ -239,7 +239,10 @@ public:
     virtual IntegrationRuleType giveIntegrationRuleType() const { return IRT_None; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
-
+    /**
+     * Trivial implementation, only creates a single point.
+     */
+    int SetUpPoint(MaterialMode mode);
     /**
      * Sets up receiver's integration points on unit line integration domain.
      * Default implementation does not sets up any integration points and returns 0.

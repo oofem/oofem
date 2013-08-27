@@ -89,7 +89,7 @@ Skyline :: ~Skyline()
 
 
 double &
-Skyline ::   at(int i, int j)
+Skyline :: at(int i, int j)
 {
     // returns (i,j) element of the receiver
     // indexes are checked if DEBUG is true
@@ -130,7 +130,7 @@ Skyline ::   at(int i, int j)
 }
 
 double
-Skyline ::   at(int i, int j) const
+Skyline :: at(int i, int j) const
 {
     // returns (i,j) element of the receiver
     // indexes are checked if DEBUG is true

@@ -242,6 +242,13 @@ LayeredCrossSection :: giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, 
 
 
 void
+LayeredCrossSection :: giveRealStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("LayeredCrossSection :: giveRealStress_MembraneRot - Not supported in given cross-section (yet).");
+}
+
+
+void
 LayeredCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
                                                        MatResponseMode rMode,
                                                        GaussPoint *gp,
@@ -485,6 +492,13 @@ void
 LayeredCrossSection :: give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     OOFEM_ERROR("LayeredCrossSection :: give3dBeamStiffMtrx - Not implemented\n");
+}
+
+
+void
+LayeredCrossSection :: giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    OOFEM_ERROR("LayeredCrossSection :: giveMembraneRotStiffMtrx - Not implemented\n");
 }
 
 

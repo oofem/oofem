@@ -77,7 +77,7 @@ public:
     virtual const char *giveClassName() const { return "InterfaceElement3dTrLin"; }
     virtual classType giveClassID() const { return InterfaceElement3dTrLinClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_wedge_1; }
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
     virtual MaterialMode giveMaterialMode() { return _3dInterface; }
 

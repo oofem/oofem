@@ -36,6 +36,7 @@
 #include "mathfem.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "gaussintegrationrule.h"
 
 namespace oofem {
 
@@ -200,6 +201,23 @@ FEI3dLineLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
     ///@todo Not sure about this matrix
     jacobianMatrix.resize(1,1);
     jacobianMatrix.at(1,1) = 1.0;
+}
+
+IntegrationRule *
+FEI3dLineLin :: giveIntegrationRule(int order)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    int points = iRule->getRequiredNumberOfIntegrationPoints(_Line, order + 0);
+    iRule->SetUpPointsOnLine(points, _Unknown);
+    return iRule;
+}
+
+IntegrationRule *
+FEI3dLineLin :: giveBoundaryIntegrationRule(int order, int boundary)
+{
+    ///@todo Not sure about this.
+    OOFEM_ERROR("FEI3dLineLin :: giveBoundaryIntegrationRule - Not supported");
+    return NULL;
 }
 
 } // end namespace oofem

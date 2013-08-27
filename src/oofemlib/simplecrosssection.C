@@ -129,6 +129,21 @@ SimpleCrossSection :: giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, c
 }
 
 
+void
+SimpleCrossSection :: giveRealStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    FloatMatrix tangent;
+    this->giveMembraneRotStiffMtrx(tangent, ElasticStiffness, gp, tStep);
+    answer.beProductOf(tangent, strain);
+
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus* >( gp->giveElement()->giveMaterial()->giveStatus(gp) );
+    status->letTempStrainVectorBe(strain);
+    status->letTempStressVectorBe(answer);
+
+    ///@todo We should support nonlinear behavior for the membrane part. In fact, should be even bundle the rotation part with the membrane?
+    /// We gain nothing from this design anyway as the rotation field is always separate. Separate manual integration by the element would be an option.
+}
+
 
 void
 SimpleCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
@@ -272,6 +287,17 @@ SimpleCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode 
 }
 
 
+void
+SimpleCrossSection :: giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+    //this->givePlaneStressStiffMtrx(answer, ElasticStiffness, gp, tStep);
+    mat->givePlaneStressStiffMtrx(answer, ElasticStiffness, gp, tStep);
+    answer.resizeWithData(4, 4);
+    answer.at(4,4) = this->give(CS_DrillingStiffness);
+}
+
+
 IRResultType
 SimpleCrossSection :: initializeFrom(InputRecord *ir)
 //
@@ -329,6 +355,10 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_shearareaz);
     if (value == 0.0) value=beamshearcoeff * area;
     propertyDictionary->add(CS_ShearAreaZ, value);
+
+    value = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_drillStiffness);
+    propertyDictionary->add(CS_DrillingStiffness, value);
 
     return IRRT_OK;
 }

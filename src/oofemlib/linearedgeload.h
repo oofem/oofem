@@ -71,7 +71,7 @@ class LinearEdgeLoad : public BoundaryLoad
 protected:
     /// Coordinates of start and end point
     FloatArray startCoords, endCoords;
-    BL_FormulationType formulation;
+    FormulationType formulation;
 
 public:
     LinearEdgeLoad(int i, Domain *d) : BoundaryLoad(i, d) { }
@@ -80,7 +80,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
     virtual bcGeomType giveBCGeoType() const { return EdgeLoadBGT; }
-    virtual BL_FormulationType giveFormulationType() { return formulation; }
+    virtual FormulationType giveFormulationType() { return formulation; }
 
     virtual classType giveClassID() const { return LinearEdgeLoadClass; }
     virtual const char *giveClassName() const { return "LinearEdgeLoad"; }

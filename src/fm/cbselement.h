@@ -100,7 +100,6 @@ public:
 
     // time step termination
     virtual void updateInternalState(TimeStep *tStep);
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual int checkConsistency();
 
 #ifdef __OOFEG

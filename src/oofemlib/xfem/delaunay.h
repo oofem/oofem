@@ -36,6 +36,7 @@
 #define delaunay_h
 
 #include "alist.h"
+#include <vector>
 
 namespace oofem {
 class FloatArray;
@@ -44,15 +45,24 @@ class Triangle;
 /**
  * O(n4) algorithm, only for testing purposes.
  * @author chamrova
+ *
+ *  // Yes, but 4th order in n. For the xfem element subdivision, n does not increase when the mesh is refined. Time
+ *	// will tell if it is too slow ... /ES
+ * @author Erik Svenning
  */
 class Delaunay
 {
 public:
+	Delaunay():mTol(1.0e-12) {}
+
     bool colinear(FloatArray *p1, FloatArray *p2, FloatArray *p3);
     void printTriangles(AList< Triangle > *triangles);
     bool isInsideCC(FloatArray *p, FloatArray *p1, FloatArray *p2, FloatArray *p3);
-    void triangulate(AList< FloatArray > *overtices, AList< Triangle > *triangles);
+    void triangulate(const std :: vector< FloatArray > &iVertices, std::vector< Triangle > &oTriangles);
+
+private:
+    const double mTol; /// Tolerance used when checking if points are colinear.
+
 };
 } // end namespace oofem
 #endif  // delaunay_h
-

@@ -801,7 +801,6 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
 {
 
 
-#ifdef __BOOST_MODULE
 	// The xfem level set function is defined in the nodes and
 	// recovery of nodal values is trivial.
 	// Therefore it is treated separately.
@@ -822,9 +821,9 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
 
         	XfemManager *xFemMan = d->giveXfemManager();
 
-        	int nEnrDom = xFemMan->giveEnrichmentItem(1)->giveNumberOfEnrichmentDomains();
+        	int nEnrIt = xFemMan->giveNumberOfEnrichmentItems();
 
-        	for( int enrDomIndex = 1; enrDomIndex <= nEnrDom; enrDomIndex++ )
+        	for( int enrItIndex = 1; enrItIndex <= nEnrIt; enrItIndex++ )
         	{
 
 				for( int lSetIndex = 1; lSetIndex <= 3; lSetIndex++)
@@ -836,18 +835,18 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
 					std::stringstream fileNameStream;
 					if(lSetIndex == 1)
 					{
-						fileNameStream << "Phi_Domain";
+						fileNameStream << "LevelSetNorm_Item";
 					}
 					else if(lSetIndex == 2)
 					{
-						fileNameStream << "Gamma_Domain";
+						fileNameStream << "LevelSetTang_Item";
 					}
 					else if(lSetIndex == 3)
 					{
-						fileNameStream << "NodeEnrMarker_Domain";
+						fileNameStream << "NodeEnrMarker_Item";
 					}
 
-					fileNameStream << enrDomIndex;
+					fileNameStream << enrItIndex;
 
 					intVarArray->SetName(fileNameStream.str().data());
 
@@ -873,15 +872,18 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
 
 						if(lSetIndex == 1)
 						{
-							signDist = xFemMan->giveEnrichmentItem(1)->giveEnrichmentDomain(enrDomIndex)->giveLevelSetPhi(inode);
+//							signDist = xFemMan->giveEnrichmentItem(enrItIndex)->giveEnrichmentDomain(enrDomIndex)->giveLevelSetPhi(inode);
+							xFemMan->giveEnrichmentItem(enrItIndex)->evalLevelSetNormalInNode(signDist, inode);
 						}
 						else if(lSetIndex == 2)
 						{
-							signDist = xFemMan->giveEnrichmentItem(1)->giveEnrichmentDomain(enrDomIndex)->giveLevelSetGamma(inode);
+//							signDist = xFemMan->giveEnrichmentItem(1)->giveEnrichmentDomain(enrDomIndex)->giveLevelSetGamma(inode);
+							xFemMan->giveEnrichmentItem(enrItIndex)->evalLevelSetTangInNode(signDist, inode);
 						}
 						else if(lSetIndex == 3)
 						{
-							signDist = xFemMan->giveEnrichmentItem(1)->giveEnrichmentDomain(enrDomIndex)->giveNodeEnrMarker(inode);
+//							signDist = xFemMan->giveEnrichmentItem(1)->giveEnrichmentDomain(enrDomIndex)->giveNodeEnrMarker(inode);
+							xFemMan->giveEnrichmentItem(enrItIndex)->evalNodeEnrMarkerInNode(signDist, inode);
 						}
 
 #ifdef __VTK_MODULE
@@ -911,7 +913,6 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
 
 return;
 	}
-#endif // __BOOST_MODULE
 
     Domain *d = emodel->giveDomain(1);
     int inode;
@@ -1402,7 +1403,7 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, VTKStr
             			DofManager *dMan = elem->giveDofManager(k);
             			for ( int j = 1; j <= xMan->giveNumberOfEnrichmentItems(); j++ ){
 
-            				if ( xMan->giveEnrichmentItem(j)->isDofManEnriched(dMan) ){
+            				if ( xMan->giveEnrichmentItem(j)->isDofManEnriched(*dMan) ){
             					xfemEnrichment++;
             				}
             			}
@@ -1425,12 +1426,17 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, VTKStr
             		for ( int j = 1; j <= xMan->giveNumberOfEnrichmentItems(); j++ ){
             				EnrichmentItem *enrItem = xMan->giveEnrichmentItem(j);
 
-            				for( int k = 1; k <= enrItem->giveNumberOfEnrichmentDomains(); k++ )
-            				{
-            					EnrichmentDomain *enrDomain = enrItem->giveEnrichmentDomain(k);
+            				std::vector<FloatArray> intersecPoints;
+            			    std::vector< int > intersecEdgeInd;
+            				enrItem->computeIntersectionPoints(intersecPoints, intersecEdgeInd, elem);
+            				numPoints += intersecPoints.size();
 
-            					numPoints += enrDomain->computeNumberOfIntersectionPoints(elem);
-            				}
+//            				for( int k = 1; k <= enrItem->giveNumberOfEnrichmentDomains(); k++ )
+//            				{
+//            					EnrichmentDomain *enrDomain = enrItem->giveEnrichmentDomain(k);
+
+//            					numPoints += enrDomain->computeNumberOfIntersectionPoints(elem);
+//            				}
 
             		}
             	}

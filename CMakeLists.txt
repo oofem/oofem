@@ -47,7 +47,7 @@ set (SPOOLES_DIR CACHE PATH "Manual SPOOLES directory")
 set (ELIXIR_DIR CACHE PATH "Manual Elixir directory (OOFEG only)")
 set (CKIT_DIR CACHE PATH "Manual CKit directory (OOFEG only)")
 set (PARMETIS_DIR CACHE PATH "Manual ParMetis directory")
-set (BOOST_DIR CACHE PATH "Manual Boost directory")
+#set (BOOST_DIR CACHE PATH "Manual Boost directory")
 
 #######################################################################
 ######################## Options ######################################
@@ -81,7 +81,7 @@ option (USE_SM "Enable structural mechanics module" ON)
 option (USE_FM "Enable fluid mechanics module" ON)
 option (USE_TM "Enable heat/mass transfer module" ON)
 option (USE_CEMHYD "Enable CemHyd support" OFF)
-option (USE_BOOST "Enable Boost" OFF)
+#option (USE_BOOST "Enable Boost" OFF)
 
 if (USE_PARALLEL)
     add_definitions (-D__PARALLEL_MODE)
@@ -208,17 +208,17 @@ endif ()
 ######################## External libaries ############################
 #######################################################################
 
-if (USE_BOOST) 
+#if (USE_BOOST) 
 #    set (CMAKE_LIBRARY_DIR ${CMAKE_LIBRARY_DIR} ${BOOST_DIR})
 #    find_package (BOOST REQUIRED)
 #    set (EXT_LIBS ${EXT_LIBS} ${BOOST_LIBRARIES})
-    if (BOOST_DIR)
-    	include_directories ("${BOOST_DIR}")
-    	set (MODULE_LIST ${MODULE_LIST} "BOOST")
-     endif ()
- 
-    add_definitions (-D__BOOST_MODULE)
-endif ()
+#    if (BOOST_DIR)
+#    	include_directories ("${BOOST_DIR}")
+#    	set (MODULE_LIST ${MODULE_LIST} "BOOST")
+#     endif ()
+# 
+#    add_definitions (-D__BOOST_MODULE)
+#endif ()
 
 if (USE_LAPACK)
     set (CMAKE_LIBRARY_DIR ${CMAKE_LIBRARY_DIR} ${LAPACK_DIR})

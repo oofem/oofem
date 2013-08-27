@@ -147,7 +147,7 @@ TR21_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) 
 }
 
 void
-TR21_2D_SUPG ::   giveElementDofIDMask(EquationID ut, IntArray &answer) const
+TR21_2D_SUPG :: giveElementDofIDMask(EquationID ut, IntArray &answer) const
 {
     this->giveDofManDofIDMask(1, ut, answer);
 }
@@ -1480,15 +1480,6 @@ TR21_2D_SUPG :: giveIPValueType(InternalStateType type)
 {
     return SUPGElement2 :: giveIPValueType(type);
 }
-
-
-void
-TR21_2D_SUPG :: printOutputAt(FILE *file, TimeStep *stepN)
-// Performs end-of-step operations.
-{
-    SUPGElement :: printOutputAt(file, stepN);
-}
-
 
 
 contextIOResultType TR21_2D_SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)

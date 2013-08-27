@@ -53,6 +53,7 @@
 #include "sparselinsystemnm.h"
 #include "set.h"
 #include "dynamicinputrecord.h"
+#include "feinterpol.h"
 
 namespace oofem {
 
@@ -82,9 +83,9 @@ int MixedGradientPressureWeakPeriodic :: giveNumberOfInternalDofManagers()
 DofManager *MixedGradientPressureWeakPeriodic :: giveInternalDofManager(int i)
 {
     if ( i == 1 ) {
-        return this->voldman;
-    } else {
         return this->tractionsdman;
+    } else {
+        return this->voldman;
     }
 }
 
@@ -102,7 +103,7 @@ IRResultType MixedGradientPressureWeakPeriodic :: initializeFrom(InputRecord *ir
     }
 
     int nsd = this->domain->giveNumberOfSpatialDimensions();
-    int total = nsd * nsd * (order+1)*(order+2) / 2;
+    int total = nsd * nsd * pow(order + 1, nsd - 1);
     this->tractionsdman->setNumberOfDofs( total );
     for ( int i = 1; i <= total; ++i ) {
         // Simply use t_i = S_i . n, where S_1 = [1,0,0;0,0,0;0,0,0], S_2 = [0,1,0;0,0,0;0,0,0], etc.
@@ -116,24 +117,34 @@ IRResultType MixedGradientPressureWeakPeriodic :: initializeFrom(InputRecord *ir
 
 void MixedGradientPressureWeakPeriodic :: setPrescribedDeviatoricGradientFromVoigt(const FloatArray &t)
 {
-    int n = t.giveSize();
-    if ( n == 1 ) { // Then 1D
-        this->devGradient.resize(1, 1);
-        this->devGradient.at(1, 1) = t.at(1);
-    } else if ( n == 3 ) { // Then 2D
-        this->devGradient.resize(2, 2);
-        this->devGradient.at(1, 1) = t.at(1);
-        this->devGradient.at(2, 2) = t.at(2);
-        this->devGradient.at(1, 2) = this->devGradient.at(2, 1) = t.at(3);
-    } else if ( n == 6 ) { // Then 3D
-        this->devGradient.resize(3, 3);
-        this->devGradient.at(1, 1) = t.at(1);
-        this->devGradient.at(2, 2) = t.at(2);
-        this->devGradient.at(3, 3) = t.at(3);
+    this->constructFullMatrixForm(this->devGradient, t);
+    this->volGradient = 0.;
+    for ( int i = 1; i <= this->devGradient.giveNumberOfRows(); i++ ) {
+        this->volGradient += this->devGradient.at(i, i);
+    }
+}
+
+
+void MixedGradientPressureWeakPeriodic :: constructFullMatrixForm(FloatMatrix &d, const FloatArray &d_voigt) const
+{
+    int n = d_voigt.giveSize();
+    if ( n == 6 ) { // Then 3D
+        d.resize(3, 3);
+        d.at(1, 1) = d_voigt.at(1);
+        d.at(2, 2) = d_voigt.at(2);
+        d.at(3, 3) = d_voigt.at(3);
         // In voigt form, assuming the use of gamma_12 instead of eps_12
-        this->devGradient.at(1, 2) = this->devGradient.at(2, 1) = t.at(6) * 0.5;
-        this->devGradient.at(1, 3) = this->devGradient.at(3, 1) = t.at(5) * 0.5;
-        this->devGradient.at(2, 3) = this->devGradient.at(3, 2) = t.at(4) * 0.5;
+        d.at(1, 2) = d.at(2, 1) = d_voigt.at(6) * 0.5;
+        d.at(1, 3) = d.at(3, 1) = d_voigt.at(5) * 0.5;
+        d.at(2, 3) = d.at(3, 2) = d_voigt.at(4) * 0.5;
+    } else if ( n == 3 ) { // Then 2D
+        d.resize(2, 2);
+        d.at(1, 1) = d_voigt.at(1);
+        d.at(2, 2) = d_voigt.at(2);
+        d.at(1, 2) = d.at(2, 1) = d_voigt.at(3);
+    } else if ( n == 1 ) { // Then 1D
+        d.resize(1, 1);
+        d.at(1, 1) = d_voigt.at(1);
     } else {
         OOFEM_ERROR("MixedGradientPressureWeakPeriodic :: setPrescribedDeviatoricGradientFromVoigt: Tensor is in strange voigt format. Should be 3 or 6. Use setPrescribedTensor directly if needed.");
     }
@@ -161,6 +172,7 @@ void MixedGradientPressureWeakPeriodic :: giveLocationArrays(std::vector<IntArra
     this->voldman->giveCompleteLocationArray(e_loc_c, c_s);
 
     Set *set = this->giveDomain()->giveSet(this->set);
+    IntArray bNodes;
     const IntArray &boundaries = set->giveBoundaryList();
 
     rows.resize(boundaries.giveSize()+2);
@@ -170,8 +182,9 @@ void MixedGradientPressureWeakPeriodic :: giveLocationArrays(std::vector<IntArra
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
         int boundary = boundaries.at(pos*2);
 
-        e->giveBoundaryLocationArray(loc_r, boundary, eid, r_s);
-        e->giveBoundaryLocationArray(loc_c, boundary, eid, c_s);
+        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+        e->giveBoundaryLocationArray(loc_r, bNodes, eid, r_s);
+        e->giveBoundaryLocationArray(loc_c, bNodes, eid, c_s);
         // For most uses, *loc_r == *loc_c
         rows[i] = loc_r;
         cols[i] = t_loc_c;
@@ -193,42 +206,21 @@ void MixedGradientPressureWeakPeriodic :: giveLocationArrays(std::vector<IntArra
 }
 
 
-IntegrationRule *MixedGradientPressureWeakPeriodic :: CreateIntegrationRule(Element *e, int boundary, int order)
-{
-    // The element should give us most/all of this information;
-    GaussIntegrationRule *ir = new GaussIntegrationRule(1, e);
-    MaterialMode matMode = e->giveMaterialMode();
-    ///@todo We need to obtain this from the element itself:
-    //FEInterpolation *fei = e->giveInterpolation();
-    //integrationDomain id = fei->giveBoundaryDomainType(boundary);
-    integrationDomain id;
-    int nsd = this->domain->giveNumberOfSpatialDimensions();
-    if (nsd == 3) {
-        //id = _Triangle;
-        id = _Square;
-    } else if (nsd == 2) {
-        id = _Line;
-    } else {
-        id = _Point;
-    }
-    int nPoints = ir->getRequiredNumberOfIntegrationPoints(id, order);
-    ir->setUpIntegrationPoints(id, nPoints, matMode);
-    return ir;
-}
-
-
 void MixedGradientPressureWeakPeriodic :: integrateTractionVelocityTangent(FloatMatrix &answer, Element *el, int boundary)
 {
-    FloatArray normal, n, m, coords, v_m, contrib;
+    // Computes the integral: int dt . dv dA
+    FloatArray normal, n, m, t, surfCoords, coords, contrib;
     FloatMatrix nMatrix, mMatrix;
-    IntArray boundaryNodes;
     
     FEInterpolation *interp = el->giveInterpolation(); // Geometry interpolation. The displacements or velocities must have the same interpolation scheme (on the boundary at least).
 
+    ///@todo Check the order here:
     int maxorder = this->order + interp->giveInterpolationOrder()*3 - 2;
-    IntegrationRule *ir = this->CreateIntegrationRule(el, boundary, maxorder);
+    IntegrationRule *ir = interp->giveBoundaryIntegrationRule(maxorder, boundary);
     int nsd = el->giveDomain()->giveNumberOfSpatialDimensions();
-    int total = nsd * nsd * (order+1)*(order+2) / 2;
+    int total = nsd * nsd * pow(order + 1, nsd - 1);
+
+    surfCoords.resize( nsd - 1 );
     mMatrix.resize( nsd, total );
 
     answer.resize(0,0);
@@ -239,19 +231,24 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionVelocityTangent(Float
 
         double detJ = interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);
         interp->boundaryEvalN(n, boundary, lcoords, cellgeo);
+        interp->boundaryLocal2Global(coords, boundary, lcoords, cellgeo);
 
-        ///@todo Broken!
         // Construct the basis functions for the tractions:
         mMatrix.zero();
         int pos = 0;
-        for ( int j = 0; j < (this->order+1); ++j ) {
-            if ( j > 0 ) {
-                OOFEM_ERROR("Oh no, higher order is not supported yet!\n");
+        for ( int kj = 0; kj < nsd; ++kj ) {
+            // First we compute the surface coordinates. Its the global coordinates without the kj component.
+            for ( int c = 0, q = 0; c < nsd; ++c ) {
+                if ( c != kj ) {
+                    surfCoords(q) = coords(c);
+                    q++;
+                }
             }
-            ///@todo Support more than just constant functions!
-            for ( int ki = 0; ki < nsd; ++ki ) {
-                for ( int kj = 0; kj < nsd; ++kj ) {
-                    mMatrix(ki, pos) = normal(kj);
+            // Evaluate all the basis functions for a given column.
+            this->evaluateTractionBasisFunctions(t, surfCoords);
+            for ( int ti = 0; ti < t.giveSize(); ++ti ) {
+                for ( int ki = 0; ki < nsd; ++ki ) {
+                    mMatrix(ki, pos) = t(ti) * normal(kj);
                     pos++;
                 }
             }
@@ -266,16 +263,17 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionVelocityTangent(Float
 
 void MixedGradientPressureWeakPeriodic :: integrateTractionXTangent(FloatMatrix &answer, Element *el, int boundary)
 {
-    // Computes the integral: int dt . x dA
-    FloatArray normal, coords, v_m, contrib;
-    IntArray boundaryNodes;
+    // Computes the integral: int dt . dx_m dA
+    FloatArray normal, t, surfCoords, coords, contrib;
     
     FEInterpolation *interp = el->giveInterpolation(); // Geometry interpolation. The displacements or velocities must have the same interpolation scheme (on the boundary at least).
 
     int maxorder = this->order + interp->giveInterpolationOrder()*3 - 2;
-    IntegrationRule *ir = this->CreateIntegrationRule(el, boundary, maxorder);
+    IntegrationRule *ir = interp->giveBoundaryIntegrationRule(maxorder, boundary);
     int nsd = el->giveDomain()->giveNumberOfSpatialDimensions();
-    int total = nsd * nsd * (order+1)*(order+2) / 2;
+    int total = nsd * nsd * pow(order + 1, nsd - 1);
+
+    surfCoords.resize( nsd - 1 );
 
     FloatArray tmpAnswer;
     for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
@@ -287,14 +285,19 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionXTangent(FloatMatrix 
         interp->boundaryLocal2Global(coords, boundary, lcoords, cellgeo);
         contrib.resize( total );
         int pos = 0;
-        for ( int j = 0; j < (this->order+1); ++j ) {
-            if ( j > 0 ) {
-                OOFEM_ERROR("Oh no, higher order is not supported yet!\n");
+        for ( int kj = 0; kj < nsd; ++kj ) {
+            // First we compute the surface coordinates. Its the global coordinates without the kj component.
+            for ( int c = 0, q = 0; c < nsd; ++c ) {
+                if ( c != kj ) {
+                    surfCoords(q) = coords(c);
+                    q++;
+                }
             }
-            ///@todo Support more than just constant functions!
-            for ( int ki = 0; ki < nsd; ++ki ) {
-                for ( int kj = 0; kj < nsd; ++kj ) {
-                    contrib(pos) = 1.0 * normal(kj) * coords(ki);
+            // Evaluate all the basis functions for a given column.
+            this->evaluateTractionBasisFunctions(t, surfCoords);
+            for ( int ti = 0; ti < t.giveSize(); ++ti ) {
+                for ( int ki = 0; ki < nsd; ++ki ) {
+                    contrib(pos) = t(ti) * normal(kj) * coords(ki) / 3.0;
                     pos++;
                 }
             }
@@ -302,28 +305,28 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionXTangent(FloatMatrix 
 
         tmpAnswer.add(detJ * gp->giveWeight(), contrib);
     }
-    normal.printYourself();
-    tmpAnswer.printYourself();
     delete ir;
     answer.resize(tmpAnswer.giveSize(), 1);
     answer.setColumn(tmpAnswer, 1);
 }
 
 
-void MixedGradientPressureWeakPeriodic :: integrateTractionDev(FloatArray &answer, Element *el, int boundary)
+void MixedGradientPressureWeakPeriodic :: integrateTractionDev(FloatArray &answer, Element *el, int boundary, const FloatMatrix &ddev)
 {
-    // Computes the integral: int dt . x dA
-    FloatArray normal, coords, v_m, contrib;
-    IntArray boundaryNodes;
+    // Computes the integral: int dt . dx dA
+    FloatArray normal, t, surfCoords, coords, vM_dev, contrib;
     
     FEInterpolation *interp = el->giveInterpolation(); // Geometry interpolation. The displacements or velocities must have the same interpolation scheme (on the boundary at least).
 
     int maxorder = this->order + interp->giveInterpolationOrder()*3 - 2;
-    IntegrationRule *ir = this->CreateIntegrationRule(el, boundary, maxorder);
+    IntegrationRule *ir = interp->giveBoundaryIntegrationRule(maxorder, boundary);
     int nsd = el->giveDomain()->giveNumberOfSpatialDimensions();
-    int total = nsd * nsd * (order+1)*(order+2) / 2;
+    int total = nsd * nsd * pow(order + 1, nsd - 1);
 
+    surfCoords.resize(nsd - 1);
+    contrib.resize( total );
     answer.resize(0);
+
     for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
         GaussPoint *gp = ir->getIntegrationPoint(i);
         FloatArray &lcoords = *gp->giveCoordinates();
@@ -332,17 +335,23 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionDev(FloatArray &answe
         double detJ = interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);
         // Compute v_m = d_dev . x
         interp->boundaryLocal2Global(coords, boundary, lcoords, cellgeo);
-        v_m.beProductOf(this->devGradient, coords);
-        contrib.resize( total );
+        vM_dev.beProductOf(ddev, coords);
+
+        // "pos" loops over all the traction lagrange multipliers.
         int pos = 0;
-        for ( int j = 0; j < (this->order + 1); ++j ) {
-            if ( j > 0 ) {
-                OOFEM_ERROR("Oh no, higher order is not supported yet!\n");
+        for ( int kj = 0; kj < nsd; ++kj ) {
+            // First we compute the surface coordinates. Its the global coordinates without the kj component.
+            for ( int c = 0, q = 0; c < nsd; ++c ) {
+                if ( c != kj ) {
+                    surfCoords(q) = coords(c);
+                    q++;
+                }
             }
-            ///@todo Support more than just constant functions!
-            for ( int ki = 0; ki < nsd; ++ki ) {
-                for ( int kj = 0; kj < nsd; ++kj ) {
-                    contrib(pos) = 1.0 * normal(kj) * v_m(ki);
+            // Evaluate all the basis functions for a given column.
+            this->evaluateTractionBasisFunctions(t, surfCoords);
+            for ( int ti = 0; ti < t.giveSize(); ++ti ) {
+                for ( int ki = 0; ki < nsd; ++ki ) {
+                    contrib(pos) = t(ti) * normal(kj) * vM_dev(ki);
                     pos++;
                 }
             }
@@ -351,6 +360,27 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionDev(FloatArray &answe
         answer.add(detJ * gp->giveWeight(), contrib);
     }
     delete ir;
+}
+
+
+void
+MixedGradientPressureWeakPeriodic :: evaluateTractionBasisFunctions(FloatArray &answer, const FloatArray &coords)
+{
+    // This evaluates the function x^a * y^b, for a, b in [0,order]
+    int nsd = coords.giveSize() + 1;
+    int total = pow(order + 1, nsd - 1);
+    answer.resize(total);
+    int pos = 0;
+    double tx = 1.;
+    for ( int xi = 0; xi < (this->order + 1); ++xi ) {
+        double ty = 1.;
+        for ( int yi = 0; yi < (this->order + 1); ++yi ) {
+            answer(pos) = tx * ty;
+            pos++;
+            ty *= coords(1);
+        }
+        tx *= coords(0);
+    }
 }
 
 
@@ -368,7 +398,7 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
     const IntArray &boundaries = set->giveBoundaryList();
 
     IntArray v_loc, t_loc, e_loc;  // For the velocities and stress respectively
-    IntArray velocityDofIDs, tractionDofIDs, dvolDofID;
+    IntArray velocityDofIDs, tractionDofIDs, dvolDofID, bNodes;
     this->tractionsdman->giveCompleteLocationArray(t_loc, s);
     this->voldman->giveCompleteLocationArray(e_loc, s);
     this->tractionsdman->giveCompleteMasterDofIDArray(tractionDofIDs);
@@ -389,15 +419,15 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
             Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
             int boundary = boundaries.at(pos*2);
 
-            e->giveBoundaryLocationArray(v_loc, boundary, eid, s, &velocityDofIDs);
-            this->integrateTractionDev(fe, e, boundary);
+            this->integrateTractionDev(fe, e, boundary, this->devGradient);
+            fe.negated();
 
             answer.assemble(fe, t_loc);
             if ( eNorms ) {
                 eNorms->assembleSquared(fe, velocityDofIDs);
             }
         }
-        
+
     } else if ( type == InternalForcesVector ) {
         FloatMatrix Ke_v, Ke_e;
         FloatArray fe_v, fe_t, fe_t2, fe_e(1);
@@ -407,16 +437,17 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
         this->tractionsdman->giveCompleteUnknownVector(t, mode, tStep);
         this->voldman->giveCompleteUnknownVector(e, mode, tStep);
 
-        // Assemble: int t . [[ delta_v ]] dA
-        //           int delta_t . [[ e.x - v ]] dA
-        //           int t . [[ x ]] dA delta_e
+        // Assemble: -int       t . [[ delta_v ]] dA
+        //            int delta_t . [[ e.x - v ]] dA
+        //            int       t . [[ x ]]       dA delta_e
         for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
             Element *el = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
             int boundary = boundaries.at(pos*2);
             
             // Fetch the element information;
-            el->giveBoundaryLocationArray(v_loc, boundary, eid, s, &velocityDofIDs);
-            el->computeBoundaryVectorOf(boundary, eid, mode, tStep, v);
+            el->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+            el->giveBoundaryLocationArray(v_loc, bNodes, eid, s, &velocityDofIDs);
+            el->computeBoundaryVectorOf(bNodes, eid, mode, tStep, v);
 
             // Integrate the tangents;
             this->integrateTractionVelocityTangent(Ke_v, el, boundary);
@@ -424,6 +455,7 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
             
             // We just use the tangent, less duplicated code
             fe_v.beTProductOf(Ke_v, t);
+            fe_v.negated();
             fe_t.beProductOf(Ke_v, v);
             fe_t.negated();
             fe_t2.beProductOf(Ke_e, e);
@@ -455,6 +487,7 @@ void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx *answer, TimeStep 
     if (type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == StiffnessMatrix || type == ElasticStiffnessMatrix) {
         FloatMatrix Ke_v, Ke_vT, Ke_e, Ke_eT;
         IntArray v_loc_r, v_loc_c, t_loc_r, t_loc_c, e_loc_r, e_loc_c;
+        IntArray bNodes;
         Set *set = this->giveDomain()->giveSet(this->set);
         const IntArray &boundaries = set->giveBoundaryList();
 
@@ -470,14 +503,15 @@ void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx *answer, TimeStep 
             int boundary = boundaries.at(pos*2);
             
             // Fetch the element information;
-            el->giveBoundaryLocationArray(v_loc_r, boundary, eid, r_s);
-            el->giveBoundaryLocationArray(v_loc_c, boundary, eid, c_s);
+            el->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+            el->giveBoundaryLocationArray(v_loc_r, bNodes, eid, r_s);
+            el->giveBoundaryLocationArray(v_loc_c, bNodes, eid, c_s);
 
             this->integrateTractionVelocityTangent(Ke_v, el, boundary);
             this->integrateTractionXTangent(Ke_e, el, boundary);
 
+            Ke_v.negated();
             Ke_vT.beTranspositionOf(Ke_v);
-            Ke_vT.negated();
             Ke_eT.beTranspositionOf(Ke_e);
 
             answer->assemble(t_loc_r, v_loc_c, Ke_v);
@@ -492,48 +526,97 @@ void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx *answer, TimeStep 
 
 void MixedGradientPressureWeakPeriodic :: computeFields(FloatArray &sigmaDev, double &vol, EquationID eid, TimeStep *tStep)
 {
-#if 0
-    int nsd = this->giveDomain()->giveNumberOfSpatialDimensions();
-    FloatArray sigmaDevBase;
+    int nsd = domain->giveNumberOfSpatialDimensions();
+    double rve_size = this->domainSize();
+    FloatArray tractions, t, normal, surfCoords, coords;
+    FloatMatrix sigma;
+    this->tractionsdman->giveCompleteUnknownVector(tractions, VM_Total, tStep);
+    ///@todo This would be a lot simpler if I bothered to create orthogonal basis functions for the tractions. If so, it would just be the constant terms.
     Set *set = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = set->giveBoundaryList();
-
-    // Fetch the current values of the stress in deviatoric base;
-    sigmaDevBase.resize(this->sigmaDev->giveNumberOfDofs());
-    for ( int i = 1; i <= this->sigmaDev->giveNumberOfDofs(); i++ ) {
-        sigmaDevBase.at(i) = this->sigmaDev->giveDof(i)->giveUnknown(VM_Total, tStep);
-    }
-    // Convert it back from deviatoric base:
-    if (nsd == 3) {
-        this->fromDeviatoricBase3D(sigmaDev, sigmaDevBase);
-    } else if (nsd == 2) {
-        this->fromDeviatoricBase2D(sigmaDev, sigmaDevBase);
-    } else {
-        sigmaDev.resize(0);
-    }
-
-    // Postprocessing; vol = int v . n dA
-    FloatArray unknowns, fe;
-    vol = 0.;
+    // Reminder: sigma = int t * n dA, where t = sum( C_i * n t_i ).
+    // This loop will construct sigma in matrix form.
+    sigma.resize(3, 3);
+    sigma.zero();
     for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
-        Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
+        Element *el = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
         int boundary = boundaries.at(pos*2);
-        
-        e->computeVectorOf(eid, VM_Total, tStep, unknowns);
-        this->integrateVolTangent(fe, e, boundary);
-        vol += fe.dotProduct(unknowns);
+
+        FEInterpolation *interp = el->giveInterpolation(); // Geometry interpolation. The displacements or velocities must have the same interpolation scheme (on the boundary at least).
+
+        int maxorder = this->order + interp->giveInterpolationOrder()*3 - 2;
+        IntegrationRule *ir = interp->giveBoundaryIntegrationRule(maxorder, boundary);
+
+        surfCoords.resize(nsd - 1);
+        for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
+            GaussPoint *gp = ir->getIntegrationPoint(i);
+            FloatArray &lcoords = *gp->giveCoordinates();
+            FEIElementGeometryWrapper cellgeo(el);
+
+            double detJ = interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);
+            // Compute v_m = d_dev . x
+            interp->boundaryLocal2Global(coords, boundary, lcoords, cellgeo);
+            // "pos" loops over all the traction lagrange multipliers.
+            int pos = 0;
+            for ( int kj = 0; kj < nsd; ++kj ) { // Columns of the basis functions for the tractions
+                // First we compute the surface coordinates. Its the global coordinates without the kj component.
+                for ( int c = 0, q = 0; c < nsd; ++c ) {
+                    if ( c != kj ) {
+                        surfCoords(q) = coords(c);
+                        q++;
+                    }
+                }
+                // Evaluate all the (scalar) basis functions for a given column.
+                this->evaluateTractionBasisFunctions(t, surfCoords);
+                for ( int ti = 0; ti < t.giveSize(); ++ti ) {
+                    for ( int ki = 0; ki < nsd; ++ki ) { // Columns of the basis functions for the tractions
+                        // Order of tractions is very important here! It must in the right order here (consistent with other loops)
+                        for ( int kJ = 0; kJ < nsd; ++kJ ) {
+                            sigma(ki, kJ) += tractions(pos) * t(ti) * normal(kj) * coords(kJ) * detJ * gp->giveWeight();
+                        }
+                        //printf("pos = %d, traction = %f, t = %f, normal_j = %f, normal_i = %f\n", pos, tractions(pos), t(ti), normal(kj), normal(ki));
+                        pos++;
+                    }
+                }
+            }
+        }
+        delete ir;
     }
-    double rve_size = this->domainSize();
+    sigma.times(1./rve_size);
+
+    double pressure = 0.;
+    for ( int i = 1; i <= nsd; i++ ) {
+        pressure += sigma.at(i, i);
+    }
+    pressure /= 3; // Not 100% sure about this for 2D cases.
+    if ( nsd == 3 ) {
+        sigmaDev.resize(6);
+        sigmaDev.at(1) = sigma.at(1, 1) - pressure;
+        sigmaDev.at(2) = sigma.at(2, 2) - pressure;
+        sigmaDev.at(3) = sigma.at(3, 3) - pressure;
+        sigmaDev.at(4) = 0.5 * (sigma.at(2, 3) + sigma.at(3, 2));
+        sigmaDev.at(5) = 0.5 * (sigma.at(1, 3) + sigma.at(3, 1));
+        sigmaDev.at(6) = 0.5 * (sigma.at(1, 2) + sigma.at(2, 1));
+    } else if ( nsd == 2 ) {
+        sigmaDev.resize(3);
+        sigmaDev.at(1) = sigma.at(1, 1) - pressure;
+        sigmaDev.at(2) = sigma.at(2, 2) - pressure;
+        sigmaDev.at(3) = 0.5 * (sigma.at(1, 2) + sigma.at(2, 1));
+    } else {
+        sigmaDev.resize(1);
+        sigmaDev.at(1) = sigma.at(1, 1) - pressure;
+    }
+    
+    // And the volumetric part is much easier.
+    vol = this->voldman->giveDof(1)->giveUnknown(VM_Total, tStep);
     vol /= rve_size;
     vol -= volGradient; // This is needed for consistency; We return the volumetric "residual" if a gradient with volumetric contribution is set.
-#endif
 }
 
 
 void MixedGradientPressureWeakPeriodic :: computeTangents(
     FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep)
 {
-#if 0
     //double size = this->domainSize();
     // Fetch some information from the engineering model
     EngngModel *rve = this->giveDomain()->giveEngngModel();
@@ -558,98 +641,164 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(
     int neq = Kff->giveNumberOfRows();
 
     // Indices and such of internal dofs
-    int ndev = this->sigmaDev->giveNumberOfDofs();
+    int nsd = this->devGradient.giveNumberOfColumns();
+    int nd = nsd * ( 1 + nsd ) / 2;
+
+    IntArray t_loc, e_loc;
+
+    // Fetch the positions;
+    this->tractionsdman->giveCompleteLocationArray(t_loc, EModelDefaultEquationNumbering());
+    this->voldman->giveCompleteLocationArray(e_loc, EModelDefaultEquationNumbering());
 
     // Matrices and arrays for sensitivities
-    FloatMatrix ddev_pert(neq,ndev); // In fact, npeq should most likely equal ndev
-    FloatArray p_pert(neq); // RHS for d_dev [d_dev11, d_dev22, d_dev12] in 2D
+    FloatMatrix ddev_pert(neq, nd);
+    FloatArray p_pert(neq);
+    FloatMatrix ddev_tmp(nsd, nsd);
 
-    FloatMatrix s_d(neq,ndev); // Sensitivity fields for d_dev
-    FloatArray s_p(neq); // Sensitivity fields for p
+    // Solutions for the pertubations:
+    FloatMatrix s_d(neq, nd);
+    FloatArray s_p(neq);
 
     // Unit pertubations for d_dev
-    ddev_pert.zero();
-    for (int i = 1; i <= ndev; ++i) {
-        int eqn = this->sigmaDev->giveDof(i)->giveEquationNumber(fnum);
-        ddev_pert.at(eqn, i) = -1.0*rve_size;
-    }
-    
-    // Unit pertubation for d_p
-    p_pert.zero();
-    FloatArray fe;
-    IntArray loc;
-    for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
-        Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
-        int boundary = boundaries.at(pos*2);
+    FloatArray tmp(neq), fe, ddevVoigt(nd);
+    for ( int i = 1; i <= nd; ++i ) {
+        ddevVoigt.zero();
+        ddevVoigt.at(i) = 1.0 * rve_size;
+        this->constructFullMatrixForm(ddev_tmp, ddevVoigt);
+        for (int k = 1; k <= boundaries.giveSize()/2; ++k) {
+            Element *e = this->giveDomain()->giveElement( boundaries.at(k*2-1) );
+            int boundary = boundaries.at(k*2);
 
-        e->giveBoundaryLocationArray(loc, boundary, eid, fnum);
-        this->integrateVolTangent(fe, e, boundary);
-        fe.times(-1.0); // here d_p = 1.0
-        p_pert.assemble(fe, loc);
+            this->integrateTractionDev(fe, e, boundary, ddev_tmp);
+            fe.negated();
+
+            tmp.assemble(fe, t_loc);
+        }
+        ddev_pert.setColumn(tmp, i);
     }
+
+    // Unit pertubation for p
+    p_pert.zero();
+    p_pert.at(e_loc.at(1)) = 1.0 * rve_size;
 
     // Solve all sensitivities
     solver->solve(Kff,ddev_pert,s_d);
     solver->solve(Kff,&p_pert,&s_p);
 
-    // Extract the stress response from the solutions
-    FloatArray sigma_p(ndev);
-    FloatMatrix sigma_d(ndev,ndev);
-    for (int i = 1; i <= ndev; ++i) {
-        int eqn = this->sigmaDev->giveDof(i)->giveEquationNumber(fnum);
-        sigma_p.at(i) = s_p.at(eqn);
-        for (int j = 1; j <= ndev; ++j) {
-            sigma_d.at(i,j) = s_d.at(eqn,j);
+    // Extract the tractions from the sensitivity solutions s_d and s_p:
+    FloatArray tractions_p(t_loc.giveSize());
+    FloatMatrix tractions_d(t_loc.giveSize(), nd);
+    tractions_p.beSubArrayOf(s_p, t_loc);
+    for ( int i = 1; i <= nd; ++i ) {
+        for ( int k = 1; k <= nd; ++k ) {
+            tractions_d.at(k, i) = s_d.at(t_loc.at(k), i);
         }
     }
 
-    // Post-process the volumetric rate of deformations in the sensitivity fields;
-    FloatArray e_d(ndev); e_d.zero();
-    double e_p = 0.0;
-    for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
-        Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
-        int boundary = boundaries.at(pos*2);
-    
-        this->integrateVolTangent(fe, e, boundary);
-        e->giveBoundaryLocationArray(loc, boundary, eid, fnum);
-        
-        // Using "loc" to pick out the relevant contributions. This won't work at all if there are local coordinate systems in these nodes
-        // or slave nodes etc. The goal is to compute the velocity from the sensitivity field, but we need to avoid going through the actual
-        // engineering model. If this ever becomes an issue it needs to perform the same steps as Element::giveUnknownVector does.
-        for (int i = 1; i <= fe.giveSize(); ++i) {
-            if (loc.at(i) > 0) {
-                e_p += fe.at(i) * s_p.at(loc.at(i));
-                for (int j = 1; j <= ndev; ++j) {
-                    e_d.at(j) += fe.at(i) * s_d.at(loc.at(i), j);
+    // The de/dp tangent:
+    Cp = s_p.at(e_loc.at(1)) / rve_size;
+    // The de/dd tangent:
+    Cd.resize(nd);
+    if ( nsd == 3 ) {
+        Cd.at(1) = s_d.at(e_loc.at(1), 1);
+        Cd.at(2) = s_d.at(e_loc.at(1), 2);
+        Cd.at(3) = s_d.at(e_loc.at(1), 3);
+        Cd.at(4) = s_d.at(e_loc.at(1), 4);
+        Cd.at(5) = s_d.at(e_loc.at(1), 5);
+        Cd.at(6) = s_d.at(e_loc.at(1), 6);
+    } else if ( nsd == 2 ) {
+        Cd.at(1) = s_d.at(e_loc.at(1), 1);
+        Cd.at(2) = s_d.at(e_loc.at(1), 2);
+        Cd.at(3) = s_d.at(e_loc.at(1), 3);
+    }
+    // The ds/de tangent:
+    Ep = Cd; // This is much simpler, but it's "only" correct if there is a potential (i.e. symmetric problems). This could be generalized if needed.
+    // The ds/dd tangent:
+    FloatMatrix Ed_tmp(nd, nd);
+    FloatArray surfCoords, normal, coords, t;
+    FloatMatrix sigma;
+    for (int dpos = 1; dpos <= nd; ++dpos) {
+        for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
+            Element *el = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
+            int boundary = boundaries.at(pos*2);
+
+            FEInterpolation *interp = el->giveInterpolation(); // Geometry interpolation. The displacements or velocities must have the same interpolation scheme (on the boundary at least).
+
+            int maxorder = this->order + interp->giveInterpolationOrder()*3 - 2;
+            IntegrationRule *ir = interp->giveBoundaryIntegrationRule(maxorder, boundary);
+
+            surfCoords.resize(nsd - 1);
+            for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
+                GaussPoint *gp = ir->getIntegrationPoint(i);
+                FloatArray &lcoords = *gp->giveCoordinates();
+                FEIElementGeometryWrapper cellgeo(el);
+
+                double detJ = interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);
+                // Compute v_m = d_dev . x
+                interp->boundaryLocal2Global(coords, boundary, lcoords, cellgeo);
+
+                // "pos" loops over all the traction lagrange multipliers.
+                int pos = 0;
+                for ( int kj = 0; kj < nsd; ++kj ) {
+                    // First we compute the surface coordinates. Its the global coordinates without the kj component.
+                    for ( int c = 0, q = 0; c < nsd; ++c ) {
+                        if ( c != kj ) {
+                            surfCoords(q) = coords(c);
+                            q++;
+                        }
+                    }
+                    // Evaluate all the basis functions for a given column.
+                    this->evaluateTractionBasisFunctions(t, surfCoords);
+                    for ( int ti = 0; ti < t.giveSize(); ++ti ) {
+                        for ( int ki = 0; ki < nsd; ++ki ) {
+                            // Order of tractions is very important here! It must in the right order here (consistent with other loops)
+                            for ( int kJ = 0; kJ < nsd; ++kJ ) {
+                                sigma(ki, kJ) += tractions_d(pos, dpos) * t(ti) * normal(kj) * coords(kJ) * detJ * gp->giveWeight();
+                            }
+                            pos++;
+                        }
+                    }
                 }
             }
+            delete ir;
         }
-    }
-    e_p /= rve_size;
-    e_d.times(1./rve_size);
+        sigma.times(1./rve_size);
 
-    // Now we need to express the tangents in the normal cartesian coordinate system (as opposed to the deviatoric base we use during computations
-    Cp = e_p; // Scalar components are of course the same
-    double nsd = this->giveDomain()->giveNumberOfSpatialDimensions();
-    if (nsd == 3) {
-        this->fromDeviatoricBase3D(Cd, e_d);
-        this->fromDeviatoricBase3D(Ep, sigma_p);
-        this->fromDeviatoricBase3D(Ed, sigma_d);
-        
-    } else if (nsd == 2) {
-        this->fromDeviatoricBase2D(Cd, e_d);
-        this->fromDeviatoricBase2D(Ep, sigma_p);
-        this->fromDeviatoricBase2D(Ed, sigma_d);
-
-    } else { // For 1D case, there simply are no deviatoric components!
-        Cd.resize(0);
-        Ep.resize(0);
-        Ed.beEmptyMtrx();
+        double pressure = 0.;
+        for ( int i = 1; i <= nsd; i++ ) {
+            pressure += sigma.at(i, i);
+        }
+        pressure /= 3; // Not 100% sure about this for 2D cases.
+        if ( nsd == 3 ) {
+            Ed_tmp.at(1, dpos) = sigma.at(1, 1) - pressure;
+            Ed_tmp.at(2, dpos) = 0.5 * (sigma.at(2, 3) + sigma.at(3, 2));
+            Ed_tmp.at(3, dpos) = 0.5 * (sigma.at(1, 3) + sigma.at(3, 1));
+            Ed_tmp.at(4, dpos) = sigma.at(2, 2) - pressure;
+            Ed_tmp.at(5, dpos) = 0.5 * (sigma.at(1, 2) + sigma.at(2, 1));
+            Ed_tmp.at(6, dpos) = sigma.at(3, 3) - pressure;
+        } else if ( nsd == 2 ) {
+            Ed_tmp.at(1, dpos) = sigma.at(1, 1) - pressure;
+            Ed_tmp.at(2, dpos) = 0.5 * (sigma.at(1, 2) + sigma.at(2, 1));
+            Ed_tmp.at(3, dpos) = sigma.at(2, 2) - pressure;
+        } else {
+            Ed_tmp.at(1, dpos) = sigma.at(1, 1) - pressure;
+        }
+        dpos++;
     }
+
+    // Reorder to voigt form:
+    IntArray indx(nd);
+    if ( nsd == 3 ) {
+        indx.setValues(6,  1, 4, 6, 5, 3, 2);
+    } else if ( nsd == 2 ) {
+        indx.setValues(3,  1, 3, 2);
+    } else if ( nsd == 1 ) {
+        indx.setValues(1,  1);
+    }
+    Ed.beSubMatrixOf(Ed_tmp, indx, indx);
 
     delete Kff;
-    delete solver; ///@todo Remove this when solver is taken from engngmodel
-#endif
+    delete solver;
 }
 
 void MixedGradientPressureWeakPeriodic :: giveInputRecord(DynamicInputRecord &input)

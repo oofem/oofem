@@ -163,7 +163,7 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
 
 void
-RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *gp,
+RCM2Material :: giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *gp,
                                                  FloatArray &principalStrain,
                                                  FloatMatrix &tempCrackDirs,
                                                  TimeStep *atTime)

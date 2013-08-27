@@ -125,39 +125,18 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
         OOFEM_ERROR("StructuralElement :: computeBoundaryLoadVector - No interpolator available\n");
     }
 
-    ///@todo This determines if its a edge or surface. We should make it more general and just have a "boundary"
-    bool surface;
-    if ( this->testElementExtension(Element_SurfaceLoadSupport) ) {
-        surface = true;
-    } else if ( this->testElementExtension(Element_EdgeLoadSupport) ) {
-        surface = false;
-    } else {
-        _error("computeBoundaryLoadVector : no boundary load support");
-        surface = true;
-    }
-
     FloatArray n_vec;
     FloatMatrix n, T;
     FloatArray force, globalIPcoords;
     int nsd = fei->giveNsd();
 
-    int approxOrder = load->giveApproxOrder() + this->giveApproxOrder();
-
-    ///@todo Have interpolator set up integration rule here instead.
-    IntegrationRule *iRule;
-
-    if ( surface ) {
-        iRule = this->GetSurfaceIntegrationRule(approxOrder);
-    } else {
-        iRule = new GaussIntegrationRule(1, this, 1, 1);
-        iRule->SetUpPointsOnLine(( int ) ceil( ( approxOrder + 1. ) / 2. ), _Unknown);
-    }
+    IntegrationRule *iRule = fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary);
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray &lcoords = *gp->giveCoordinates();
 
-        if ( load->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+        if ( load->giveFormulationType() == Load :: FT_Entity ) {
             load->computeValueAt(force, tStep, lcoords, mode);
         } else {
             fei->boundaryLocal2Global(globalIPcoords, boundary, lcoords, FEIElementGeometryWrapper(this));
@@ -167,20 +146,14 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
         ///@todo Make sure this part is correct.
         // We always want the global values in the end, so we might as well compute them here directly:
         // transform force
-        if ( load->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
+        if ( load->giveCoordSystMode() == Load :: CST_Global ) {
             // then just keep it in global c.s
         } else {
-            // transform from local edge to element local c.s
-            ///@todo This determines if its a edge or surface. We should make it more general and just have a "boundary"
-            if ( surface ) {
-                if ( this->computeLoadLSToLRotationMatrix(T, boundary, gp) ) {
-                    force.rotatedWith(T, 'n');
-                }
-            } else {
-                if ( this->computeLoadLEToLRotationMatrix(T, boundary, gp) ) {
-                    force.rotatedWith(T, 'n');
-                }
-            }
+            ///@todo Support this...
+            // transform from local boundary to element local c.s
+            /*if ( this->computeLoadLSToLRotationMatrix(T, boundary, gp) ) {
+                force.rotatedWith(T, 'n');
+            }*/
             // then to global c.s
             if ( this->computeLoadGToLRotationMtrx(T) ) {
                 force.rotatedWith(T, 't');
@@ -191,14 +164,9 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
         fei->boundaryEvalN(n_vec, boundary, lcoords, FEIElementGeometryWrapper(this));
         n.beNMatrixOf(n_vec, nsd);
 
-        double dV;
-        ///@todo This determines if its a edge or surface. We should make it more general and just have a "boundary"
-        if ( surface ) {
-            dV = this->computeSurfaceVolumeAround(gp, boundary);
-        } else {
-            dV = this->computeEdgeVolumeAround(gp, boundary);
-        }
-
+        ///@todo Some way to ask for the thickness at a global coordinate maybe?
+        double thickness = 1.0; // Should be the circumference for axisymm-elements.
+        double dV = thickness * gp->giveWeight() * fei->boundaryGiveTransformationJacobian(boundary, lcoords, FEIElementGeometryWrapper(this));
         answer.plusProduct(n, force, dV);
     }
 
@@ -267,7 +235,7 @@ StructuralElement :: computePointLoadVectorAt(FloatArray &answer, Load *load, Ti
     }
 
     // transform force
-    if ( pointLoad->giveCoordSystMode() == PointLoad :: PL_GlobalMode ) {
+    if ( pointLoad->giveCoordSystMode() == Load :: CST_Global ) {
         // transform from global to element local c.s
         if ( this->computeLoadGToLRotationMtrx(T) ) {
             answer.rotatedWith(T, 'n');
@@ -315,7 +283,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
             this->computeEgdeNMatrixAt(n, iEdge, gp);
             dV  = this->computeEdgeVolumeAround(gp, iEdge);
 
-            if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+            if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
                 edgeLoad->computeValueAt(force, tStep, * ( gp->giveCoordinates() ), mode);
             } else {
                 this->computeEdgeIpGlobalCoords(globalIPcoords, gp, iEdge);
@@ -323,7 +291,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
             }
 
             // transform force
-            if ( edgeLoad->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
+            if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
                 // transform from global to element local c.s
                 if ( this->computeLoadGToLRotationMtrx(T) ) {
                     force.rotatedWith(T, 'n');
@@ -396,7 +364,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
             this->computeSurfaceNMatrixAt(n, iSurf, gp);
             dV  = this->computeSurfaceVolumeAround(gp, iSurf);
 
-            if ( surfLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+            if ( surfLoad->giveFormulationType() == Load :: FT_Entity ) {
                 surfLoad->computeValueAt(force, tStep, * ( gp->giveCoordinates() ), mode);
             } else {
                 this->computeSurfIpGlobalCoords(globalIPcoords, gp, iSurf);
@@ -404,7 +372,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
             }
 
             // transform force
-            if ( surfLoad->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
+            if ( surfLoad->giveCoordSystMode() == Load :: CST_Global ) {
                 // transform from global to element local c.s
                 if ( this->computeLoadGToLRotationMtrx(T) ) {
                     force.rotatedWith(T, 'n');
@@ -442,7 +410,6 @@ StructuralElement :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer
 {
     // TemperatureLoad   *load;
     double dV;
-    GaussPoint *gp;
     FloatArray et, de, bde;
     FloatMatrix b, d;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
@@ -455,7 +422,7 @@ StructuralElement :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer
     // complete volume
     answer.resize(0);
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
         cs->computeStressIndependentStrainVector(et, gp, tStep, mode);
         if ( et.giveSize() ) {
             this->computeBmatrixAt(gp, b);
@@ -488,7 +455,6 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     int nip, ndofs = computeNumberOfDofs(EID_MomentumBalance);
     double density, dV;
     FloatMatrix n;
-    GaussPoint *gp;
     GaussIntegrationRule iRule(1, this, 1, 1);
     IntArray mask;
 
@@ -511,7 +477,7 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     mass = 0.;
 
     for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule.getIntegrationPoint(i);
+        GaussPoint *gp = iRule.getIntegrationPoint(i);
         this->computeNmatrixAt(gp, n);
         density = this->giveMaterial()->give('d', gp);
         dV = this->computeVolumeAround(gp);

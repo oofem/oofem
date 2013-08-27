@@ -149,7 +149,7 @@ Quad10_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer
 
 
 void
-Quad10_2D_SUPG ::   giveInternalDofManDofIDMask(int i, EquationID ut, IntArray &answer) const
+Quad10_2D_SUPG :: giveInternalDofManDofIDMask(int i, EquationID ut, IntArray &answer) const
 {
     if ( ut == EID_MomentumBalance ) {
         answer.resize(0);

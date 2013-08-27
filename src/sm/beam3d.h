@@ -129,6 +129,9 @@ protected:
     virtual void computeLocalStiffnessMatrix(FloatMatrix &answer,
                                              MatResponseMode rMode, TimeStep *tStep);
     virtual void computeGaussPoints();
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+
     virtual MaterialMode giveMaterialMode() { return _3dBeam; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };

@@ -167,9 +167,7 @@ void Tet1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSte
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
 
-    FloatArray momentum(15), conservation(4);
-    momentum.zero();
-    conservation.zero();
+    FloatArray momentum, conservation;
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
@@ -309,11 +307,11 @@ void Tet1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryL
             double detJ = fabs(this->interp.surfaceGiveTransformationJacobian(iSurf, * lcoords, FEIElementGeometryWrapper(this)));
             double dA = gp->giveWeight() * detJ;
 
-            if ( boundaryLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) { // Edge load in xi-eta system
+            if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) { // Edge load in xi-eta system
                 boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
             } else { // Edge load in x-y system
                 FloatArray gcoords;
-                this->interp.edgeLocal2global(gcoords, iSurf, * lcoords, FEIElementGeometryWrapper(this));
+                this->interp.boundaryLocal2Global(gcoords, iSurf, * lcoords, FEIElementGeometryWrapper(this));
                 boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
             }
 

@@ -106,7 +106,7 @@ IDGMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
 
 
 void
-IDGMaterial ::  give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp,  TimeStep *tStep)
+IDGMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp,  TimeStep *tStep)
 {
     IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
@@ -379,7 +379,7 @@ IDGMaterial :: giveInternalLengthDerivative(FloatMatrix &answer, MatResponseMode
 
 
 void
-IDGMaterial ::  giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *atTime)
+IDGMaterial :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *atTime)
 //
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current

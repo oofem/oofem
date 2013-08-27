@@ -36,6 +36,7 @@
 #include "mathfem.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "gaussintegrationrule.h"
 
 namespace oofem {
 void
@@ -149,4 +150,14 @@ FEI2dQuadConst :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &
     dy = cellgeo.giveVertexCoordinates(nodeB)->at(yind) - cellgeo.giveVertexCoordinates(nodeA)->at(yind);
     return sqrt(dx * dx + dy * dy);
 }
+
+IntegrationRule *
+FEI2dQuadConst :: giveIntegrationRule(int order)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 0);
+    iRule->SetUpPointsOnSquare(points, _Unknown);
+    return iRule;
+}
+
 } // end namespace oofem

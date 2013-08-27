@@ -637,7 +637,7 @@ void FloatMatrix :: setColumn(const FloatArray &src, int c)
     int nr = src.giveSize();
 #ifdef DEBUG
     if ( this->giveNumberOfRows() != nr || c < 1 || c > this->giveNumberOfColumns()) {
-        OOFEM_ERROR("FloatMatrix  :: setColumn - Size mismatch");
+        OOFEM_ERROR("FloatMatrix :: setColumn - Size mismatch");
     }
 #endif
 
@@ -652,7 +652,7 @@ void FloatMatrix :: copyColumn(FloatArray &dest, int c) const
     int nr = this->giveNumberOfRows();
 #ifdef DEBUG
     if ( c < 1 || c > this->giveNumberOfColumns()) {
-        OOFEM_ERROR2("FloatMatrix  :: copyColumn - Column outside range (%d)", c);
+        OOFEM_ERROR2("FloatMatrix :: copyColumn - Column outside range (%d)", c);
     }
 #endif
 
@@ -1380,8 +1380,8 @@ void FloatMatrix :: resizeWithData(int rows, int columns)
 
         allocatedSize = rows * columns; // REMEMBER NEW ALLOCATED SIZE
         values = ALLOC(allocatedSize);
-        memset(values, 0, allocatedSize*sizeof(double) );
     }
+    memset(values, 0, allocatedSize*sizeof(double) );
 
     this->nRows = rows;
     this->nColumns = columns;

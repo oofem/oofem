@@ -106,7 +106,7 @@ BoundaryLoad :: initializeFrom(InputRecord *ir)
 
     value = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_BoundaryLoad_cstype);
-    coordSystemType = ( BL_CoordSystType ) value;
+    coordSystemType = ( CoordSystType ) value;
 
     IR_GIVE_OPTIONAL_FIELD(ir, propertyDictionary, _IFT_BoundaryLoad_properties);
 

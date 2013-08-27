@@ -50,7 +50,7 @@ namespace oofem {
  *
  *      Class: TrPlaneStress2dXFEM
  *      Description: 3-node triangle with XFEM kinematics
- *      Author: Erik Svenning, June 2013
+ * 		@author Erik Svenning
  *
  */
 
@@ -65,14 +65,15 @@ public:
 
 	virtual int checkConsistency();
 
+#if 0
 	// Overloaded functions from XfemElementInterface
     /// Partitions the element into patches by a triangulation.
-    virtual void XfemElementInterface_partitionElement(AList< Triangle > *answer, AList< FloatArray > *together);
+    virtual void XfemElementInterface_partitionElement(AList< Triangle > *answer, std :: vector< FloatArray > &together);
     /// Updates integration rule based on the triangulation.
     virtual void XfemElementInterface_updateIntegrationRule();
     /// Helpful routine to put the nodes for triangulation together, should be in protected members probably.
-    virtual void XfemElementInterface_prepareNodesForDelaunay(AList< FloatArray > *answer1, AList< FloatArray > *answer2);
-
+    virtual void XfemElementInterface_prepareNodesForDelaunay(std::vector< std::vector< FloatArray > > &oPointPartitions);
+#endif
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 
@@ -90,8 +91,8 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray & answer) const;
 //    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
 //    virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
+//    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+//    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
 /*
 //    virtual Element_Geometry_Type giveGeometryType() const;
 

@@ -160,9 +160,6 @@ public:
     virtual classType giveClassID() const { return MixedGradientPressureNeumannClass; }
     
 protected:
-    /// Helper function that creates suitable integration rule
-    IntegrationRule *CreateIntegrationRule(Element *e, int boundary, int order);
-    
     /// Helper function that integrates the deviatoric tangent contribution from a single element boundary.
     void integrateDevTangent(FloatMatrix &answer, Element *e, int boundary);
     /// Helper function that integrates the volumetric tangent contribution from a single element boundary.
