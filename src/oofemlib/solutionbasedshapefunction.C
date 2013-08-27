@@ -108,11 +108,11 @@ SolutionbasedShapeFunction :: giveUnknown(ValueModeType mode, TimeStep *tStep, A
 
 	FloatArray gamma;
 
-	myNode->giveCompleteUnknownVector( gamma, mode, tStep);
 	int index = dofs.findFirstIndexOf(dof->giveDofID());
 
 	double shapeFunctionValue = computeBaseFunctionValueAt(dof->giveDofManager()->giveCoordinates(), dof);
 
+	myNode->giveCompleteUnknownVector( gamma, mode, tStep);
 	double out = gamma.at(index) * shapeFunctionValue;
 
 	return out;
@@ -191,6 +191,8 @@ SolutionbasedShapeFunction :: setLoads()
 		}
 	}
 
+	gradP.printYourself();
+
 	ir.setRecordKeywordField("deadweight", 1);
 	ir.setField(gradP, _IFT_Load_components);
 	ir.setField(1, _IFT_GeneralBoundaryCondition_LoadTimeFunct);
@@ -226,28 +228,35 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray *coords, Dof
 
 		this->myEngngModel->giveDomain(1)->giveSpatialLocalizer()->init(false);
 
+//		printf("******************** Check at coords (%f, %f, %f)\n", coords->at(1), coords->at(2), coords->at(3) );
+
+
 		if (this->giveDomain()->giveNumberOfSpatialDimensions()==2) {
 			coords->resize(2);
 		}
 
 		// Determine if current coordinate is at a max or min point and if so, which type (on a surface, edge or a corner?)
-		// n is the number of dimensions at which the point is an extremum, permuteIndex keeps track of the dimension
+		// n is the number of dimensions at which the point is an extremum, permuteIndex tells in which dimension the coordinate is max/min
+
+		int thisMask=0;
+
 		for (int i=1; i<=coords->giveSize(); i++) {
 			if ( ( fabs(maxCoord.at(i)-coords->at(i))<1e-8) || (fabs(minCoord.at(i)-coords->at(i))<1e-8) ){
 				permuteIndex.push_back(i);
 				n++;
+				thisMask = thisMask + pow(2.0,i-1);
 			}
 		}
 
 		for (int i=0; i<pow(2.0,n); i++) {
 
-			int mask=n, counter=1;
+			int mask=i, counter=1;
 			FloatArray *newCoord = new (FloatArray)(coords->giveSize());
 			*newCoord = *coords;
 
-			while ( mask > 0 ) {
+			for (int j=1; j<=n; j++) {
 				double d=1e-15;
-				if ( (i & mask) == 0 ) { // Max
+				if ( (mask & 1) == 0 ) { // Max
 					newCoord->at(permuteIndex.at(counter-1))=minCoord.at( permuteIndex.at(counter-1) )+d;
 				} else { // Min
 					newCoord->at(permuteIndex.at(counter-1))=maxCoord.at( permuteIndex.at(counter-1) )-d;
@@ -255,11 +264,25 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray *coords, Dof
 				counter ++;
 				mask = mask >> 1;
 			}
-			checkcoords.push_back(newCoord);
+//			checkcoords.push_back(newCoord);
 		}
 
-		for (size_t i=0; i<checkcoords.size(); i++) {
 
+		FloatArray *tempCoord = new FloatArray;
+		*tempCoord = *coords;
+		checkcoords.push_back(tempCoord);
+
+		for (size_t i=0; i<checkcoords.size(); i++) {
+//			checkcoords.at(i)->printYourself();
+			for (int j=1; j<=checkcoords.at(i)->giveSize(); j++) {
+				if (fabs(checkcoords.at(i)->at(j)-minCoord.at(j))<=0.00001) {
+					checkcoords.at(i)->at(j)=minCoord.at(j)+1e-10;
+				}
+				if (fabs(checkcoords.at(i)->at(j)-maxCoord.at(j))<=0.00001) {
+					checkcoords.at(i)->at(j)=maxCoord.at(j)-1e-10;
+				}
+			}
+//			checkcoords.at(i)->printYourself();
 			Element *elementAtCoords = this->myEngngModel->giveDomain(1)->giveSpatialLocalizer()->giveElementClosestToPoint(lcoords, closest, *checkcoords.at(i), 1);
 //			printf("Closest element: ");
 //			elementAtCoords->printYourself();
@@ -278,9 +301,11 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray *coords, Dof
 //			for (int j = 1; j<values.giveSize(); j++) printf("%f ", values.at(j));
 //			printf(")\n");
 
-			outvalue = outvalue + values.at(dofids.findFirstIndexOf(dof->giveDofID())) / ( (double) pow(2.0, n));
+//			outvalue = outvalue + values.at(dofids.findFirstIndexOf(dof->giveDofID())) / ( (double) pow(2.0, n));
+			outvalue = values.at(dofids.findFirstIndexOf(dof->giveDofID()));
 		}
-//		printf("Output value at (%f, %f) are %f, n=%u\n", coords->at(1), coords->at(2) , outvalue, n);
+ 		printf("Output value at (%f, %f, %f), dofID %u is %f, n=%u\n", coords->at(1), coords->at(2), coords->at(3), dof->giveDofID(), outvalue, n);
+//		printf("Output value at (%f, %f), dofID %u is %f, n=%u\n", coords->at(1), coords->at(2), dof->giveDofID(), outvalue, n);
 		return outvalue;
 	}
 }
