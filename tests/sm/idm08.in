@@ -1,0 +1,36 @@
+idm08.out
+Patch test of PlaneStress2d elements -> pure compression in y direction, Griffith/Rankine criteria
+LinearStatic nsteps 1 nmodules 1
+vtkxml tstep_step 1 cellvars 1 46 vars 4 1 4 13 82 primvars 1 1 stype 2
+domain 2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+ndofman 8 nelem 5 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
+node 1 coords 3  0.0   0.0   0.0  bc 2 1 1
+node 2 coords 3  4.0   0.0   0.0  bc 2 1 1
+node 3 coords 3  2.0   2.0   0.0  bc 2 1 0
+node 4 coords 3  1.0   3.0   0.0  bc 2 1 0
+node 5 coords 3  0.8   8.0   0.0  bc 2 1 0
+node 6 coords 3  3.0   7.0   0.0  bc 2 1 0
+node 7 coords 3  0.0   9.0   0.0  bc 2 1 2
+node 8 coords 3  4.0   9.0   0.0  bc 2 1 2
+PlaneStress2d 1 nodes 4 1 4 3 2  crossSect 1 mat 1 
+PlaneStress2d 2 nodes 4 1 7 5 4  crossSect 1 mat 1 
+PlaneStress2d 3 nodes 4 4 5 6 3  crossSect 1 mat 1
+PlaneStress2d 4 nodes 4 3 6 8 2  crossSect 1 mat 1
+PlaneStress2d 5 nodes 4 5 7 8 6  crossSect 1 mat 1
+SimpleCS 1 thick 0.15
+idm1 1 d 1.0  E 10. n 0.2  e0 0.0001 gf 1.5 equivstraintype 7 griff_n 10. talpha 0.0 damlaw 1
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
+BoundaryCondition  2 loadTimeFunction 1 prescribedvalue -0.01 
+ConstantFunction 1 f(t) 1.0
+###
+### Used for Extractor
+###
+#%BEGIN_CHECK% tolerance 1.e-4
+#ELEMENT tStep 1 number 1 gp 2 keyword "strains" component 2  value 4.1095e-04
+#ELEMENT tStep 1 number 1 gp 2 keyword "stresses" component 2  value 9.3889e-04
+#ELEMENT tStep 1 number 1 gp 2 keyword "damage" component 1  value 0.780669
+#ELEMENT tStep 1 number 5 gp 2 keyword "strains" component 2  value -5.3226e-03
+#ELEMENT tStep 1 number 5 gp 2 keyword "stresses" component 2  value -9.9926e-03
+#ELEMENT tStep 1 number 5 gp 2 keyword "damage" component 1  value 0.819769
+#%END_CHECK%

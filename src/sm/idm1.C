@@ -82,6 +82,7 @@ IsotropicDamageMaterial1 :: IsotropicDamageMaterial1(int n, Domain *d) : Isotrop
     ef = 0.;
     wf = 0.;
     gf = 0.;
+    griff_n = 8.;
     ecsMethod = ECSM_Unknown;
 }
 
@@ -122,7 +123,8 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
     } else if ( equivStrainType == 6 ) {
         this->equivStrainType = EST_ElasticEnergyPositiveStrain;
     } else if ( equivStrainType == 7 ) {
-        this->equivStrainType = EST_Griffith; 
+        this->equivStrainType = EST_Griffith;
+        IR_GIVE_OPTIONAL_FIELD(ir, griff_n, _IFT_IsotropicDamageMaterial1_n);
     } else {
         this->equivStrainType = EST_Mazars;     // default
     }
@@ -427,7 +429,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         
         //Use Griffith criterion if Rankine not applied
         if (sum == 0.){
-            sum = -pow(principalStress.at(1)-principalStress.at(3),2.)/8./(principalStress.at(1)+principalStress.at(3));
+            sum = -pow(principalStress.at(1)-principalStress.at(3),2.)/this->griff_n/(principalStress.at(1)+principalStress.at(3));
         }
         sum = max(sum,0.);
         kappa = sum / lmat->give('E', gp);
