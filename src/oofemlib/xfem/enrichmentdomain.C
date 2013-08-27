@@ -54,36 +54,13 @@ REGISTER_EnrichmentDomain(EDBGCircle)
 
 REGISTER_EnrichmentDomain(EDCrack)
 
-//REGISTER_EnrichmentDomain( BasicGeometryDomain<Line> )
-
-// General
 
 EnrichmentDomain :: EnrichmentDomain()
 {}
 
-void EnrichmentDomain_BG :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan)
+void EnrichmentDomain_BG :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
     iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
-}
-
-bool EDCrack :: GiveClosestTipPosition(FloatArray &oCoords, const FloatArray &iCoords) const
-{
-    int nVert = bg->giveNrVertices();
-    if ( nVert > 0 ) {
-        double distS = bg->giveVertex(1)->distance(iCoords);
-        double distE = bg->giveVertex(nVert)->distance(iCoords);
-
-        if ( distS < distE ) {
-            oCoords = * ( bg->giveVertex(1) );
-            return true;
-        } else   {
-            oCoords = * ( bg->giveVertex(nVert) );
-            return true;
-        }
-    }
-
-	oCoords.setValues(2, 0.0, 0.0);
-	return false;
 }
 
 bool EDCrack :: GiveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const
@@ -107,8 +84,7 @@ bool EDCrack :: GiveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) co
 			oInfo.mTangDir.normalize();
 
 			// Tip normal
-			// The sign comes from the fact that we are looking at the first end
-			oInfo.mNormalDir.setValues(2, oInfo.mTangDir.at(2), -oInfo.mTangDir.at(1) );
+			oInfo.mNormalDir.setValues(2, -oInfo.mTangDir.at(2), oInfo.mTangDir.at(1) );
 
 			return true;
 		}
@@ -134,7 +110,7 @@ bool EDCrack :: GiveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) co
 	return false;
 }
 
-void DofManList :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan)
+void DofManList :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
     iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
 }
@@ -154,7 +130,7 @@ IRResultType DofManList :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-void WholeDomain :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan)
+void WholeDomain :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
     iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
 }

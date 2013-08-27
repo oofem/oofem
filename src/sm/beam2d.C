@@ -489,7 +489,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
         switch ( edgeLoad->giveApproxOrder() ) {
         case 0:
             coords.resize(1);
-            if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+            if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
                 coords.at(1) = 0.0;
             } else {
                 coords = * ( this->giveNode(1)->giveCoordinates() );
@@ -497,7 +497,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
 
             edgeLoad->computeValueAt(components, tStep, coords, mode);
 
-            if ( edgeLoad->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
+            if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
                 fx = cosine * components.at(1) + sine *components.at(2);
                 fz = -sine *components.at(1) + cosine *components.at(2);
                 fm = components.at(3);
@@ -518,7 +518,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
         case 1:
             components.resize(6);
 
-            if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+            if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
                 coords.resize(1);
                 coords.at(1) = -1.0;
                 edgeLoad->computeValueAt(help, tStep, coords, mode);
@@ -546,7 +546,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
             }
 
 
-            if ( edgeLoad->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
+            if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
                 fx = cosine * components.at(1) + sine *components.at(2);
                 fz = -sine *components.at(1) + cosine *components.at(2);
                 fm = components.at(3);

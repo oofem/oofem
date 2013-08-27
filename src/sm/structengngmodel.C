@@ -40,6 +40,7 @@
 #include "outputmanager.h"
 #include "structuralelement.h"
 #include "structuralelementevaluator.h"
+#include "activebc.h"
 
 namespace oofem {
 
@@ -218,6 +219,19 @@ StructuralEngngModel :: updateInternalState(TimeStep *stepN)
                 this->updateDofUnknownsDictionary(domain->giveDofManager(j), stepN);
             }
         }
+
+	int nbc = domain->giveNumberOfBoundaryConditions();
+	for ( int i = 1; i <= nbc; ++i ) {
+	  GeneralBoundaryCondition *bc = domain->giveBc(i);
+	  ActiveBoundaryCondition *abc;
+
+	  if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >( bc ) ) ) {
+	    int ndman = abc->giveNumberOfInternalDofManagers();
+	    for ( int j = 1; j <= ndman; j++ ) {
+	      this->updateDofUnknownsDictionary(abc->giveInternalDofManager(j), stepN);
+	    }
+	  }
+	}
 
         if ( internalVarUpdateStamp != stepN->giveSolutionStateCounter() ) {
             int nelem = domain->giveNumberOfElements();

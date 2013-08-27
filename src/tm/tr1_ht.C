@@ -112,6 +112,13 @@ Tr1_ht :: computeVolumeAround(GaussPoint *gp)
 
 
 double
+Tr1_ht :: giveThicknessAt(const FloatArray &gcoords)
+{
+    return this->giveCrossSection()->give(CS_Thickness);
+}
+
+
+double
 Tr1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double determinant, thick;

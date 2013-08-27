@@ -56,7 +56,7 @@ LinearEdgeLoad :: initializeFrom(InputRecord *ir)
     int fType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, fType, _IFT_LinearEdgeLoad_formulation);
     if ( fType == 1 ) {
-        this->formulation = BL_GlobalFormulation;
+        this->formulation = FT_Global;
         // read start and end coordinates
         IR_GIVE_FIELD(ir, startCoords, _IFT_LinearEdgeLoad_startcoord);
         IR_GIVE_FIELD(ir, endCoords, _IFT_LinearEdgeLoad_endcoord);
@@ -64,7 +64,7 @@ LinearEdgeLoad :: initializeFrom(InputRecord *ir)
             _error("instanciateFrom: coordinates not specified");
         }
     } else {
-        this->formulation = BL_EntityFormulation;
+        this->formulation = FT_Entity;
     }
 
     return IRRT_OK;
@@ -75,7 +75,7 @@ void LinearEdgeLoad :: giveInputRecord(DynamicInputRecord& input)
 {
     BoundaryLoad :: giveInputRecord ( input );
     input.setField(this->formulation, _IFT_LinearEdgeLoad_formulation);
-    if ( this->formulation == BL_GlobalFormulation ) {
+    if ( this->formulation == FT_Global ) {
         input.setField(this->startCoords, _IFT_LinearEdgeLoad_startcoord);
         input.setField(this->endCoords, _IFT_LinearEdgeLoad_endcoord);
     }
@@ -88,7 +88,7 @@ LinearEdgeLoad :: computeNArray(FloatArray &answer, FloatArray &coords) const
     // compute local isoparametric coordinates of given point
     double ksi;
 
-    if ( formulation == BL_GlobalFormulation ) {
+    if ( formulation == FT_Global ) {
         int i;
         double length = endCoords.distance(startCoords);
         double dl     = coords.distance(startCoords);

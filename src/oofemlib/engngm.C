@@ -1153,6 +1153,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
             FloatMatrix R;
             BodyLoad *bodyLoad;
             BoundaryLoad *bLoad;
+            //BoundaryEdgeLoad *eLoad;
             NodalLoad *nLoad;
             Set *set = domain->giveSet(bc->giveSetNumber());
 
@@ -1179,14 +1180,31 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                     element->computeBoundaryLoadVector(charVec, bLoad, boundary, type, mode, tStep);
 
                     if ( charVec.isNotEmpty() ) {
-                        ///@todo Should be have a similar interface for rotation or should elements expect to work in global c.s. for loads?
-                        /// Right now it's the latter, just the global->real dof transformation is performed here.
                         element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-                        if ( element->computeDofTransformationMatrix(R, bNodes, eid) ) {
+                        if ( element->computeDofTransformationMatrix(R, bNodes, false, eid) ) {
                             charVec.rotatedWith(R, 't');
                         }
 
-                        element->giveBoundaryLocationArray(loc, boundary, eid, s, &dofids);
+                        element->giveBoundaryLocationArray(loc, bNodes, eid, s, &dofids);
+                        answer.assemble(charVec, loc);
+
+                        if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
+                    }
+                }
+                ///@todo Should we have a seperate entry for edge loads? Just sticking to the general "boundaryload" for now.
+                const IntArray &edgeBoundaries = set->giveEdgeList();
+                for (int ibnd = 1; ibnd <= edgeBoundaries.giveSize()/2; ++ibnd) {
+                    Element *element = domain->giveElement(edgeBoundaries.at(ibnd*2-1));
+                    int boundary = edgeBoundaries.at(ibnd*2);
+                    element->computeBoundaryEdgeLoadVector(charVec, bLoad, boundary, type, mode, tStep);
+
+                    if ( charVec.isNotEmpty() ) {
+                        element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+                        if ( element->computeDofTransformationMatrix(R, bNodes, false, eid) ) {
+                            charVec.rotatedWith(R, 't');
+                        }
+
+                        element->giveBoundaryLocationArray(loc, bNodes, eid, s, &dofids);
                         answer.assemble(charVec, loc);
 
                         if ( eNorms ) eNorms->assembleSquared(charVec, dofids);

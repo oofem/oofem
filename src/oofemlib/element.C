@@ -150,17 +150,14 @@ Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, Fl
 
 
 void
-Element :: computeBoundaryVectorOf(int boundary, EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+Element :: computeBoundaryVectorOf(const IntArray &bNodes, EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer)
 // Forms the vector containing the values of the unknown 'u' (e.g., the
 // Total value) of the dofs of the callers local cs.
 {
     int k;
-    IntArray bNodes;
     IntArray dofIDMask;
     FloatMatrix G2L;
     FloatArray vec;
-
-    this->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
 
     k = 0;
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
@@ -297,7 +294,7 @@ Element :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
     nodes.enumerate(this->giveNumberOfDofManagers());
 
     is_GtoL = this->computeGtoLRotationMatrix(GtoL);
-    is_NtoG = this->computeDofTransformationMatrix(NtoG, nodes, eid);
+    is_NtoG = this->computeDofTransformationMatrix(NtoG, nodes, true, eid);
 
 #ifdef DEBUG
     if ( is_GtoL ) {
@@ -333,7 +330,7 @@ Element :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
 
 
 bool
-Element :: computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &nodes, EquationID eid)
+Element :: computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &nodes, bool includeInternal, EquationID eid)
 {
     bool flag = false;
     int numberOfDofMans = nodes.giveSize();
@@ -376,25 +373,26 @@ Element :: computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &n
         lastRowPos += nr;
         lastColPos += nc;
     }
-    // This is really messy. I wanted to avoid two very similar functions, but the internal dof managers make it hard. These shouldn't be included for boundaries..
-    for (int i = 1; i <= this->giveNumberOfInternalDofManagers(); i++ ) {
-        this->giveInternalDofManDofIDMask(i, eid, dofIDmask);
-        if (!this->giveInternalDofManager(nodes.at(i))->computeM2GTransformation(dofManT, dofIDmask)) {
-            dofManT.resize(dofIDmask.giveSize(), dofIDmask.giveSize());
-            dofManT.zero();
-            dofManT.beUnitMatrix();
-        }
-        nc = dofManT.giveNumberOfColumns();
-        nr = dofManT.giveNumberOfRows();
-        for (int j = 1; j <= nr; j++ ) {
-            for (int k = 1; k <= nc; k++ ) {
-                // localize node contributions
-                answer.at(lastRowPos + j, lastColPos + k) = dofManT.at(j, k);
+    if ( includeInternal ) {
+        for (int i = 1; i <= this->giveNumberOfInternalDofManagers(); i++ ) {
+            this->giveInternalDofManDofIDMask(i, eid, dofIDmask);
+            if (!this->giveInternalDofManager(nodes.at(i))->computeM2GTransformation(dofManT, dofIDmask)) {
+                dofManT.resize(dofIDmask.giveSize(), dofIDmask.giveSize());
+                dofManT.zero();
+                dofManT.beUnitMatrix();
             }
-        }
+            nc = dofManT.giveNumberOfColumns();
+            nr = dofManT.giveNumberOfRows();
+            for (int j = 1; j <= nr; j++ ) {
+                for (int k = 1; k <= nc; k++ ) {
+                    // localize node contributions
+                    answer.at(lastRowPos + j, lastColPos + k) = dofManT.at(j, k);
+                }
+            }
 
-        lastRowPos += nr;
-        lastColPos += nc;
+            lastRowPos += nr;
+            lastColPos += nc;
+        }
     }
     answer.resizeWithData(answer.giveNumberOfRows(), lastColPos);
     return true;
@@ -450,13 +448,11 @@ Element :: giveLocationArray(IntArray &locationArray, EquationID eid, const Unkn
 
 
 void
-Element :: giveBoundaryLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIdArray)
+Element :: giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIdArray)
 {
-    IntArray bNodes;
     IntArray dofIDMask, masterDofIDs;
     IntArray nodalArray;
 
-    this->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
     locationArray.resize(0);
     if (dofIdArray) dofIdArray->resize(0);
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
@@ -606,9 +602,10 @@ Element :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int
 
 
 void
-Element :: computeEdgeLoadVector(FloatArray &answer, Load *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
+Element :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
 {
-    _error("computeEdgeLoadVector: Unknown load type.");
+    ///@todo Change the load type to "BoundaryEdgeLoad" maybe?
+    _error("computeBoundaryEdgeLoadVector: Unknown load type.");
 }
 
 

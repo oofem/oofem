@@ -72,9 +72,6 @@ public:
     virtual ~EnrichmentDomain() { }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
-    // Spatial search methods
-    virtual void computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, Element *element) { }
-    virtual int computeNumberOfIntersectionPoints(Element *element) { return 0; }
 
     virtual const char *giveInputRecordName() const = 0;
     virtual const char *giveClassName() const = 0;
@@ -86,9 +83,8 @@ public:
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const = 0;
 
     // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
-    virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) {}
+    virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const {}
 
-    virtual bool GiveClosestTipPosition(FloatArray &oCoords, const FloatArray &iCoords) const {oCoords.setValues(2, 0.0, 0.0); return false;}
 
     virtual bool GiveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const {return false;}
 };
@@ -106,17 +102,15 @@ public:
     virtual ~EnrichmentDomain_BG() { }
     virtual IRResultType initializeFrom(InputRecord *ir) { return this->bg->initializeFrom(ir); }
 
-    virtual void computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, Element *element) { printf("Entering BasicGeometry::computeIntersectionPoints()\n"); bg->computeIntersectionPoints(element, oIntersectionPoints); }
-    virtual int computeNumberOfIntersectionPoints(Element *element) { return bg->computeNumberOfIntersectionPoints(element); }
-
-
-    /// Functions for computing signed distance in normal and tangential direction.
-    /// Used by XFEM level set functions.
+    /**
+     * Functions for computing signed distance in normal and tangential direction.
+     * Used by XFEM level set functions.
+     */
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { bg->computeNormalSignDist(oDist, iPoint); };
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const { bg->computeTangentialSignDist(oDist, iPoint); };
 
     // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
-    virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan);
+    virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;
 };
 
 class EDBGCircle : public EnrichmentDomain_BG
@@ -126,13 +120,13 @@ public:
     virtual ~EDBGCircle() { delete bg; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir); }
 
-    virtual void computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, Element *element) { bg->computeIntersectionPoints(element, oIntersectionPoints); }
-    virtual int computeNumberOfIntersectionPoints(Element *element) { return static_cast< Circle * >( bg )->computeNumberOfIntersectionPoints(element); }
-
     virtual const char *giveInputRecordName() const { return _IFT_EDBGCircle_Name; }
     virtual const char *giveClassName() const { return "EDBGCircle"; }
 };
 
+/**
+ * EDCrack: Enrichment geometry described by a piecewise linear polygon.
+ */
 class EDCrack : public EnrichmentDomain_BG
 {
 public:
@@ -143,7 +137,6 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_EDCrack_Name; }
     virtual const char *giveClassName() const { return "EDCrack"; }
 
-    virtual bool GiveClosestTipPosition(FloatArray &oCoords, const FloatArray &iCoords) const;
     virtual bool GiveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const;
 
 };
@@ -167,7 +160,7 @@ public:
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("DofManList::computeTangentialSignDist -- not implemented"); };
 
     // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
-    virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan);
+    virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
@@ -190,7 +183,7 @@ public:
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("WholeDomain::computeTangentialSignDist -- not implemented"); };
 
     // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
-    virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan);
+    virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;
 
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 

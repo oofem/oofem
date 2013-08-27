@@ -48,8 +48,11 @@ class GaussPoint;
 class Element;
 class XfemManager;
 
+//#define XFEM_DEBUG_VTK 1
+
 /**
  * Provides Xfem interface for an element.
+ * @author Erik Svenning
  */
 class XfemElementInterface : public Interface
 {
@@ -66,7 +69,7 @@ public:
     /// Creates enriched part of B matrix.
     void XfemElementInterface_createEnrBmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl);
     /// Partitions the element into patches by a triangulation.
-    virtual void XfemElementInterface_partitionElement(AList< Triangle > *answer, std :: vector< FloatArray > &together);
+    virtual void XfemElementInterface_partitionElement(std::vector< Triangle > &oTriangles, const std :: vector< FloatArray > &iPoints);
     /// Updates integration rule based on the triangulation.
     virtual void XfemElementInterface_updateIntegrationRule();
 
