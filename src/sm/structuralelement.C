@@ -130,14 +130,13 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
     FloatArray force, globalIPcoords;
     int nsd = fei->giveNsd();
 
-    ///@todo Have interpolator set up integration rule here instead.
     IntegrationRule *iRule = fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary);
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray &lcoords = *gp->giveCoordinates();
 
-        if ( load->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+        if ( load->giveFormulationType() == Load :: FT_Entity ) {
             load->computeValueAt(force, tStep, lcoords, mode);
         } else {
             fei->boundaryLocal2Global(globalIPcoords, boundary, lcoords, FEIElementGeometryWrapper(this));
@@ -147,7 +146,7 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
         ///@todo Make sure this part is correct.
         // We always want the global values in the end, so we might as well compute them here directly:
         // transform force
-        if ( load->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
+        if ( load->giveCoordSystMode() == Load :: CST_Global ) {
             // then just keep it in global c.s
         } else {
             ///@todo Support this...
@@ -236,7 +235,7 @@ StructuralElement :: computePointLoadVectorAt(FloatArray &answer, Load *load, Ti
     }
 
     // transform force
-    if ( pointLoad->giveCoordSystMode() == PointLoad :: PL_GlobalMode ) {
+    if ( pointLoad->giveCoordSystMode() == Load :: CST_Global ) {
         // transform from global to element local c.s
         if ( this->computeLoadGToLRotationMtrx(T) ) {
             answer.rotatedWith(T, 'n');
@@ -284,7 +283,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
             this->computeEgdeNMatrixAt(n, iEdge, gp);
             dV  = this->computeEdgeVolumeAround(gp, iEdge);
 
-            if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+            if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
                 edgeLoad->computeValueAt(force, tStep, * ( gp->giveCoordinates() ), mode);
             } else {
                 this->computeEdgeIpGlobalCoords(globalIPcoords, gp, iEdge);
@@ -292,7 +291,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
             }
 
             // transform force
-            if ( edgeLoad->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
+            if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
                 // transform from global to element local c.s
                 if ( this->computeLoadGToLRotationMtrx(T) ) {
                     force.rotatedWith(T, 'n');
@@ -365,7 +364,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
             this->computeSurfaceNMatrixAt(n, iSurf, gp);
             dV  = this->computeSurfaceVolumeAround(gp, iSurf);
 
-            if ( surfLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+            if ( surfLoad->giveFormulationType() == Load :: FT_Entity ) {
                 surfLoad->computeValueAt(force, tStep, * ( gp->giveCoordinates() ), mode);
             } else {
                 this->computeSurfIpGlobalCoords(globalIPcoords, gp, iSurf);
@@ -373,7 +372,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
             }
 
             // transform force
-            if ( surfLoad->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
+            if ( surfLoad->giveCoordSystMode() == Load :: CST_Global ) {
                 // transform from global to element local c.s
                 if ( this->computeLoadGToLRotationMtrx(T) ) {
                     force.rotatedWith(T, 'n');

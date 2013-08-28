@@ -65,6 +65,12 @@ TrAxisym1_ht :: computeVolumeAround(GaussPoint *gp)
 }
 
 double
+TrAxisym1_ht :: giveThicknessAt(const FloatArray &gcoords)
+{
+    return gcoords.at(1);
+}
+
+double
 TrAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     FloatArray gcoords;

@@ -62,32 +62,13 @@ class TimeStep;
  */
 class PointLoad : public BodyLoad
 {
-public:
-    /**
-     * Load coordinate system type. Variable of this type can have following values BL_GlobalMode
-     * (indicates that load given in global coordinate system) or BL_LocalMode
-     * (entity dependent local coordinate system will be  used).
-     */
-    enum PL_CoordSystType {
-        PL_GlobalMode, ///< Global mode i.e. load is specified in global c.s.
-        PL_LocalMode, ///< Local entity (edge or surface) coordinate system.
-    };
-
-    /**
-     * Type determining the type of formulation (entity local or global one).
-     */
-    enum PL_FormulationType {
-        PL_EntityFormulation,
-        PL_GlobalFormulation,
-    };
-
 protected:
     /// Number of "DOFs" which represent load geometry.
     int nDofs;
     /// Load type (its physical meaning).
     bcType lType;
     /// Load coordinate system.
-    PL_CoordSystType coordSystemType;
+    CoordSystType coordSystemType;
     /// Additional properties (coordinates, point of application).
     FloatArray coords;
 
@@ -99,7 +80,7 @@ public:
      */
     PointLoad(int n, Domain *d) : BodyLoad(n, d) {
         nDofs = 0;
-        coordSystemType = PL_GlobalMode;
+        coordSystemType = CST_Global;
     }
 
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
@@ -111,14 +92,9 @@ public:
      * Return receiver's number of "DOFs". Should correspond to number of DOFs on loaded entity.
      */
     int giveNumberOfDofs() { return nDofs; }
-    /**
-     * Returns receiver's coordinate system
-     */
-    PL_CoordSystType giveCoordSystMode() { return coordSystemType; }
-    /*
-     * Return formulation type
-     */
-    //virtual PL_FormulationType giveFormulationType () {return BL_EntityFormulation;}
+
+    virtual CoordSystType giveCoordSystMode() { return coordSystemType; }
+    //virtual FormulationType giveFormulationType () { return FT_Entity; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
