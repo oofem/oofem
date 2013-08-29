@@ -949,7 +949,7 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
             if(  principalStress.at(1) <= 1.e-10 && principalStress.at(2) <= 1.e-10 && principalStress.at(3) <= 1.e-10){
                 int indexMax=principalStress.giveIndexMaxElem();
                 int indexMin=principalStress.giveIndexMinElem();
-                int indexMid;
+                int indexMid = 0;
                 if(indexMin+indexMax==3){
                     indexMid = 3;
                 } else if (indexMin+indexMax==4){
