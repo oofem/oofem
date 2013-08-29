@@ -56,7 +56,7 @@ double UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
      * 	1) An array with node coordinates
      * 	2) The dof id
      */
-    int numArgs = 2;
+    int numArgs = 3;
 
     // Create array with node coordinates
     int dim = dMan->giveCoordinates()->giveSize();
@@ -76,6 +76,10 @@ double UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
     PyObject *pValDofNum = PyLong_FromLong(dof->giveDofID());
     PyTuple_SetItem(pArgs, 1, pValDofNum);
 
+
+    // Time
+    PyObject *pTargetTime = PyFloat_FromDouble( stepN->giveTargetTime() );
+    PyTuple_SetItem(pArgs, 2, pTargetTime);
 
     // Value returned from the Python function
     PyObject *pRetVal;

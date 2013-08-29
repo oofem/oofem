@@ -44,6 +44,8 @@
 #include "classfactory.h"
 #include "mathfem.h"
 #include "feinterpol.h"
+#include "masterdof.h"
+#include "propagationlaw.h"
 
 #include <algorithm>
 #include <limits>
@@ -93,6 +95,12 @@ EnrichmentItem :: ~EnrichmentItem()
         delete mpEnrichmentFront;
         mpEnrichmentFront = NULL;
     }
+
+    if ( mpPropagationLaw != NULL ) {
+        delete mpPropagationLaw;
+        mpPropagationLaw = NULL;
+    }
+
 }
 
 IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
@@ -186,6 +194,8 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     }
 
 
+//    mpPropagationLaw = new PLCrackPrescribedDir();
+    mpPropagationLaw = new PLDoNothing();
 
     // Set start of the enrichment dof pool for the given EI
     // TODO: Compute the needed size properly
@@ -309,7 +319,14 @@ bool EnrichmentItem :: isMaterialModified(GaussPoint &iGP, Element &iEl, Structu
 
 void EnrichmentItem :: updateGeometry()
 {
+    // Propagate interfaces
+    mpPropagationLaw->propagateInterfaces(*mpEnrichmentDomain);
+
+    // Update enrichments ...
     mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
+
+    // ... and create new dofs if necessary.
+    createEnrichedDofs();
 }
 
 
@@ -533,7 +550,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
         		if( numEdgeIntersec == 1 )
         		{
         			TipInfo tipInfo;
-        			if( mpEnrichmentDomain->GiveClosestTipInfo(elCenter, tipInfo) )
+        			if( mpEnrichmentDomain->giveClosestTipInfo(elCenter, tipInfo) )
         			{
         				// Prevent storage of duplicates
         				const double tol2 = 1.0e-20;
@@ -601,6 +618,30 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const WholeDom
     // Set level set fields to zero
     mLevelSetNormalDir.resize(nNodes, 0.0);
     mLevelSetTangDir.resize(nNodes, 0.0);
+}
+
+void EnrichmentItem :: createEnrichedDofs()
+{
+    // Creates new dofs due to the enrichment and appends them to the dof managers
+
+    int nrDofMan = this->giveDomain()->giveNumberOfDofManagers();
+    IntArray dofIdArray;
+
+    for ( int i = 1; i <= nrDofMan; i++ ) {
+    	DofManager *dMan = this->giveDomain()->giveDofManager(i);
+
+    	if ( isDofManEnriched(* dMan) ) {
+    		computeDofManDofIdArray(dofIdArray, dMan);
+    		int nDofs = dMan->giveNumberOfDofs();
+    		for ( int m = 1; m <= dofIdArray.giveSize(); m++ ) {
+
+    			if ( !dMan->hasDofID( ( DofIDItem ) ( dofIdArray.at(m) ) ) ) {
+    				dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
+    			}
+    		}
+    	}
+    }
+
 }
 
 void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element)

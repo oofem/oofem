@@ -86,7 +86,13 @@ public:
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const {}
 
 
-    virtual bool GiveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const {return false;}
+    virtual bool giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const {return false;}
+
+    /// Return array with info about all tips
+    virtual bool giveTipInfos(std::vector<TipInfo> &oInfo) const {return false;}
+
+    /// Propagate tips
+    virtual bool propagateTips(const std::vector<TipPropagation> &iTipProp) {return false;}
 };
 
 
@@ -137,7 +143,9 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_EDCrack_Name; }
     virtual const char *giveClassName() const { return "EDCrack"; }
 
-    virtual bool GiveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const;
+    virtual bool giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const;
+    virtual bool giveTipInfos(std::vector<TipInfo> &oInfo) const;
+    virtual bool propagateTips(const std::vector<TipPropagation> &iTipProp);
 
 };
 

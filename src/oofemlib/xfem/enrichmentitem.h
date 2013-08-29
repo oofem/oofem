@@ -80,6 +80,7 @@ class DofManList;
 class WholeDomain;
 class EnrichmentFront;
 class LinElBranchFunction;
+class PropagationLaw;
 
 /**
  * Abstract class representing entity, which is included in the FE model using one (or more)
@@ -159,6 +160,8 @@ public:
     virtual void updateNodeEnrMarker(XfemManager &ixFemMan, const DofManList &iDofManList);
     virtual void updateNodeEnrMarker(XfemManager &ixFemMan, const WholeDomain &iWholeDomain);
 
+    void createEnrichedDofs();
+
     virtual void computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element);
 
 
@@ -182,6 +185,8 @@ protected:
 
     EnrichmentFront *mpEnrichmentFront;
     int mEnrFrontIndex;
+
+    PropagationLaw *mpPropagationLaw;
 
     /// Link to associated Xfem manager.
     XfemManager *xMan;
