@@ -62,6 +62,9 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FE
     mpEnrichmentFunc(NULL),
     mEnrFuncIndex(0),
     mpEnrichmentFront(NULL),
+    mEnrFrontIndex(0),
+    mpPropagationLaw(NULL),
+    mPropLawIndex(0),
     mLevelSetsNeedUpdate(true),
     mLevelSetTol(1.0e-12), mLevelSetTol2(1.0e-12)
 {
@@ -118,6 +121,9 @@ IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
 
 
     mEnrFuncIndex = enrichmentFunction;
+
+
+    IR_GIVE_OPTIONAL_FIELD(ir, mPropLawIndex, _IFT_EnrichmentItem_propagationlaw);
 
 
     return IRRT_OK;
@@ -194,8 +200,18 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     }
 
 
-//    mpPropagationLaw = new PLCrackPrescribedDir();
-    mpPropagationLaw = new PLDoNothing();
+    if(mPropLawIndex == 0) {
+    	printf("Creating PLDoNothing.\n");
+    	mpPropagationLaw = new PLDoNothing();
+    }
+    else if(mPropLawIndex == 1) {
+    	printf("Creating PLCrackPrescribedDir.\n");
+        mpPropagationLaw = new PLCrackPrescribedDir();
+    }
+    else {
+    	printf("mPropLawIndex: %d\n", mPropLawIndex);
+    }
+
 
     // Set start of the enrichment dof pool for the given EI
     // TODO: Compute the needed size properly

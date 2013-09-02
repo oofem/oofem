@@ -39,6 +39,8 @@
 #include "dictionary.h"
 #include "classfactory.h"
 #include "dofmanager.h"
+#include "xfemelementinterface.h"
+#include "element.h"
 
 namespace oofem {
 
@@ -279,6 +281,26 @@ XFEMStatic :: updateYourself(TimeStep *tStep)
         }
     }
 
+
+    // Update element subdivisions if necessary
+    // (e.g. if a crack has moved and cut a new element)
+    for( int domInd = 1; domInd <= this->giveNumberOfDomains(); domInd++ ) {
+
+        Domain *domain = this->giveDomain(domInd);
+    	int numEl = domain->giveNumberOfElements();
+
+    	for(int i = 1; i <= numEl; i++) {
+    		Element *el = domain->giveElement(i);
+
+    		XfemElementInterface *xfemEl = dynamic_cast<XfemElementInterface*> (el);
+
+    		if( xfemEl != NULL ) {
+    			xfemEl->recomputeGaussPoints();
+    		}
+
+    	}
+
+    }
 
 }
 

@@ -379,4 +379,46 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
     }
 
 }
+
+void XfemElementInterface :: recomputeGaussPoints() {
+
+	bool recompute = false;
+
+
+	// Do checks to determine if the Gauss points need to be recomputed
+	// For now, we choose to always recompute cut elements.
+    XfemManager *xMan = element->giveDomain()->giveXfemManager();
+
+    for(int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++) {
+    	std::vector<FloatArray> intersecPoints;
+    	EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+
+        std::vector< int > intersecEdgeInd;
+    	ei->computeIntersectionPoints(intersecPoints, intersecEdgeInd, element);
+    	int numIntersecPoints = intersecPoints.size();
+
+        if ( numIntersecPoints > 0 )
+        {
+        	recompute = true;
+        }
+
+    }
+
+
+	if( recompute ) {
+
+		// Fetch old Gauss points
+
+
+		// Create new partitioning (and delete old Gauss points)
+
+        this->XfemElementInterface_updateIntegrationRule();
+
+		// Map Gauss point variables
+		// (area weighted least squares?)
+
+	}
+
+}
+
 } // end namespace oofem
