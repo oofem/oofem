@@ -187,7 +187,7 @@ public:
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
     virtual IRResultType initializeFrom(InputRecord *ir);
     
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IntMatBilinearCZFagerstromStatus(1, domain, gp); }
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IntMatBilinearCZFagerstromStatus(1, domain, gp); } //@Martin: Why new?
     void printYourself();
 protected:
    

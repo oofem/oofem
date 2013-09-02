@@ -589,18 +589,29 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
 
         // Compute cohesive traction based on jump
         intMat->giveFirstPKTraction_3d(T, ip, xd, F, tStep);
+		//T.printYourself();
+		// lambda.printYourself();
+		// N.printYourself();
         lambdaN.beProductOf(lambda,N);
+		 // lambdaN.printYourself();
+		
         T.rotatedWith(Q,'t'); // transform back to global coord system
 
         Fp.beTProductOf(lambdaN, T);
         double dA = this->computeAreaAround(ip,xi);
         answerTemp.add(dA,Fp);
+//		answerTemp.printYourself();
     }
     int ndofs = Shell7Base :: giveNumberOfDofs();
     answer.resize(ndofs);
     answer.zero();
     const IntArray &ordering = this->giveOrdering(All);
+	//ordering.printYourself();
     answer.assemble(answerTemp, ordering);
+//	T.printYourself();
+//	 answer.printYourself();
+
+
 
 }
 

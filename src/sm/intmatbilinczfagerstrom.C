@@ -42,6 +42,8 @@
 #include "classfactory.h"
 #include "shell7base.h"
 #include "intmatbilinczfagerstrom.h"
+//#include "vld.h"
+
 namespace oofem {
 
     REGISTER_Material( IntMatBilinearCZFagerstrom );
