@@ -200,18 +200,30 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     }
 
 
-    if(mPropLawIndex == 0) {
-    	printf("Creating PLDoNothing.\n");
+
+    // Instantiate PropagationLaw
+    std::string propLawName;
+
+    InputRecord *propLawir = dr->giveInputRecord(DataReader :: IR_propagationLawRec, mPropLawIndex);
+    result = propLawir->giveRecordKeywordField(propLawName);
+
+    if( mPropLawIndex == 0 ) {
+    	// Dummy propagation law
+    	printf("Creating dummy propagation law.\n");
     	mpPropagationLaw = new PLDoNothing();
     }
-    else if(mPropLawIndex == 1) {
-    	printf("Creating PLCrackPrescribedDir.\n");
-        mpPropagationLaw = new PLCrackPrescribedDir();
-    }
     else {
-    	printf("mPropLawIndex: %d\n", mPropLawIndex);
-    }
+    	// Propagation law from input record
+    	printf("Creating propagation law from input record. propLawName.c_str(): %s \n", propLawName.c_str() );
+		mpPropagationLaw = classFactory.createPropagationLaw( propLawName.c_str() );
+		if(mpPropagationLaw != NULL) {
+			mpPropagationLaw->initializeFrom(propLawir);
+		}
+		else {
+			OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: Failed to create propagation law (%s)", propLawName.c_str() );
+		}
 
+    }
 
     // Set start of the enrichment dof pool for the given EI
     // TODO: Compute the needed size properly

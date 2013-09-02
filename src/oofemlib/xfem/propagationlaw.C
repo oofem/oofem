@@ -37,8 +37,13 @@
 #include "propagationlaw.h"
 #include "enrichmentdomain.h"
 #include "tipinfo.h"
+#include "classfactory.h"
+#include "mathfem.h"
 
 namespace oofem {
+
+REGISTER_PropagationLaw(PLDoNothing)
+REGISTER_PropagationLaw(PLCrackPrescribedDir)
 
 PropagationLaw::PropagationLaw() {
 
@@ -46,6 +51,19 @@ PropagationLaw::PropagationLaw() {
 
 PropagationLaw::~PropagationLaw() {
 
+}
+
+IRResultType PLCrackPrescribedDir :: initializeFrom(InputRecord *ir) {
+
+    const char *__proc = "initializeFrom";
+    IRResultType result;
+
+    IR_GIVE_FIELD(ir, mAngle, _IFT_PLCrackPrescribedDir_Dir);
+    IR_GIVE_FIELD(ir, mIncrementLength, _IFT_PLCrackPrescribedDir_IncLength);
+
+    printf("In PLCrackPrescribedDir :: initializeFrom: mAngle: %e mIncrementLength: %e\n", mAngle, mIncrementLength );
+
+	return IRRT_OK;
 }
 
 void PLCrackPrescribedDir::propagateInterfaces(EnrichmentDomain &ioEnrDom) {
@@ -59,17 +77,16 @@ void PLCrackPrescribedDir::propagateInterfaces(EnrichmentDomain &ioEnrDom) {
 
 	int tipIndex = 1;
 	FloatArray dir;
-//	dir.setValues(2, 1.0, -1.0);
-	dir.setValues(2, 1.0, 0.0);
+	double angleRad = mAngle*M_PI/180.0;
+	dir.setValues(2, cos(angleRad), sin(angleRad));
 	dir.normalize();
-	double inc = 0.2;
 
 
 	std::vector<TipPropagation> tipPropagations;
 	TipPropagation tipProp;
 	tipProp.mTipIndex = tipIndex;
 	tipProp.mPropagationDir = dir;
-	tipProp.mPropagationLength = inc;
+	tipProp.mPropagationLength = mIncrementLength;
 	tipPropagations.push_back(tipProp);
 
 	ioEnrDom.propagateTips(tipPropagations);
