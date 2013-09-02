@@ -370,9 +370,14 @@ double HydratingConcreteMatStatus :: giveDoHActual(void)
 void
 HydratingConcreteMatStatus :: updateYourself(TimeStep *atTime)
 {
+    HydratingConcreteMat *mat = static_cast< HydratingConcreteMat * >( this->gp->giveMaterial() );
     this->lastIntrinsicTime = atTime->giveIntrinsicTime(); //where heat power was evaluated in last equilibrium
     this->lastEquivalentTime = this->equivalentTime;
     this->lastDegreeOfHydration = this->degreeOfHydration;
+    //average from last and current temperatures, in C*hour
+    if(!atTime->isIcApply() && this->gp->giveMaterial()->giveCastingTime() < atTime->giveIntrinsicTime() ) {
+        this->maturity += ( (this->giveStateVector().at(1) + this->giveTempStateVector().at(1)) /2. - mat->giveMaturityT0() ) * atTime->giveTimeIncrement()/3600.;
+    }
     TransportMaterialStatus :: updateYourself(atTime);
 }
 

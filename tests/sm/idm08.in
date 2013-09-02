@@ -1,0 +1,26 @@
+idm08.out
+Test of PlaneStress2d element -> pure compression in y direction, Griffith/Rankine criteria
+NonLinearStatic nsteps 2 rtolv 0.0001 stiffMode 1 controlmode 1 nmodules 0
+#vtkxml tstep_step 1 cellvars 1 46 vars 4 1 4 13 82 primvars 1 1 stype 2
+domain 2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+ndofman 4 nelem 1 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 2
+node 1 coords 3  0.0   0.0   0.0  bc 2 1 1
+node 2 coords 3  2.0   0.0   0.0  bc 2 0 1
+node 3 coords 3  2.0   3.0   0.0  bc 2 0 2
+node 4 coords 3  0.0   3.0   0.0  bc 2 0 2
+PlaneStress2d 1 nodes 4 1 2 3 4  crossSect 1 mat 1 
+SimpleCS 1 thick 0.15
+idm1 1 d 1.0  E 10. n 0.2  e0 0.0001 gf 1.5 equivstraintype 7 griff_n 10. talpha 0.0 damlaw 1
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
+BoundaryCondition  2 loadTimeFunction 2 prescribedvalue -0.01 
+ConstantFunction 1 f(t) 1.0
+PiecewiseLinFunction 2 nPoints 2 t 2 0.0 200.0 f(t) 2 0.0 200.0
+###
+### Used for Extractor
+###
+#%BEGIN_CHECK% tolerance 1.e-4
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 2  value -3.3333e-03
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 2  value -1.0000e-02
+#ELEMENT tStep 1 number 1 gp 1 keyword "damage" component 1  value 0.700000
+#%END_CHECK%

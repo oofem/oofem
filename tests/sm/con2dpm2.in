@@ -19,8 +19,7 @@ ltrspace 1 nodes 4 1 2 3 4 mat 1 crossSect 1
 #
 SimpleCS 1
 #
-#isole 1 d 0 E 10.e9 n 0.15 talpha 0.
-con2dpm 1 d 0 E 30.e9 n 0.15 talpha 0. wf 9.3755e-4 fc 3.e6 ft 1.e6 hp 0.01 yieldtol 1.e-5 asoft 5. bsoft 1. stype 1 helem 0.1 kinit 0.3
+con2dpm 1 d 0 E 30.e9 n 0.15 talpha 0. wf 9.3755e-4 fc 3.e6 ft 1.e6 hp 0.01 yieldtol 1.e-5 asoft 5. stype 1 helem 0.1 kinit 0.3
 #
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.
 NodalLoad 2 loadTimeFunction 1 Components 3 1.e6 0. 0.
@@ -28,11 +27,11 @@ NodalLoad 2 loadTimeFunction 1 Components 3 1.e6 0. 0.
 ConstantFunction 1 f(t) 1. 
 PiecewiselinFunction 2 nPoints 2 t 2 0. 2. f(t) 2 0. 1.  
 #%BEGIN_CHECK%
-#ELEMENT tStep 0 number 1 gp 1 record 0 keyword "strains" component 1 value 2e-05
-#ELEMENT tStep 0 number 1 gp 1 record 0 keyword "strains" component 2 value -3.4434e-06
+#ELEMENT tStep 0 number 1 gp 1 record 0 keyword "strains" component 1 value 2.0000e-05
+#ELEMENT tStep 0 number 1 gp 1 record 0 keyword "strains" component 2 value -3.5312e-06
 #ELEMENT tStep 0 number 1 gp 1 record 0 keyword "strains" component 3 value 0
-#ELEMENT tStep 0 number 1 gp 1 record 1 keyword "stresses" component 1 value 589620
-#ELEMENT tStep 0 number 1 gp 1 record 1 keyword "stresses" component 2 value -0.45933
-#ELEMENT tStep 0 number 1 gp 1 record 1 keyword "stresses" component 3 value 86604
+#ELEMENT tStep 0 number 1 gp 1 record 1 keyword "stresses" component 1 value 6.1356e+05
+#ELEMENT tStep 0 number 1 gp 1 record 1 keyword "stresses" component 2 value 1.2713e-01
+#ELEMENT tStep 0 number 1 gp 1 record 1 keyword "stresses" component 3 value 9.2074e+04
 #TIME
 #%END_CHECK%

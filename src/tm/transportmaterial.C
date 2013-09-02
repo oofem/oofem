@@ -68,7 +68,9 @@ TransportMaterial :: updateInternalState(const FloatArray &stateVec, GaussPoint 
 
 TransportMaterialStatus :: TransportMaterialStatus(int n, Domain *d, GaussPoint *g) :
     MaterialStatus(n, d, g), stateVector(), tempStateVector()
-{ }
+{
+    maturity = 0.;
+}
 
 void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 // Print the state variable and the flow vector on the data file.
@@ -222,6 +224,10 @@ TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
     } else if ( type == IST_ThermalConductivityIsotropic ) {
         answer.resize(1);
         answer.at(1) = this->give('k', aGaussPoint);
+        return 1;
+    } else if ( type == IST_Maturity ) {
+        answer.resize(1);
+        answer.at(1) = ms->giveMaturity();
         return 1;
     }
     return Material :: giveIPValue(answer, aGaussPoint, type, atTime);

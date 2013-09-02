@@ -66,6 +66,9 @@ protected:
     FloatArray stateVector;
     /// Temporary state vector in a reduced form, used mainly in a nonlinear analysis
     FloatArray tempStateVector;
+    
+    ///A scalar containing maturity (integration of temperature over time)
+    double maturity;
 
 public:
     /// Constructor - creates new TransportMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
@@ -112,6 +115,9 @@ public:
     const FloatArray &giveTempField() { return temp_field; }
     /// Returns last flux.
     const FloatArray &giveTempFlux() { return temp_flux; }
+    /// Returns maturity.
+    double giveMaturity() { return maturity; }
+    
 };
 
 
