@@ -21,7 +21,7 @@ Job description record
 Analysis record
 Domain record
 Output manager record
-ncrosssect # nmat # nbc # nic # nltf #
+ncrosssect # nmat # nbc # nic # nltf # nxfemman #
 cross section records
 material records
 boundary condition records
@@ -163,7 +163,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                                 print "Can not assign edge/face load \"%s\" to unv element %d" % (bel.name, elem.id)
 
         #write component record
-        of.write('ndofman %d nelem %d ncrosssect %d nmat %d nbc %d nic %d nltf %d\n' % (FEM.nnodes, len(elemNotBoundary), CTRL.ncrosssect, CTRL.nmat, CTRL.nbc, CTRL.nic, CTRL.nltf))
+        of.write('ndofman %d nelem %d ncrosssect %d nmat %d nbc %d nic %d nltf %d nxfemman %d\n' % (FEM.nnodes, len(elemNotBoundary), CTRL.ncrosssect, CTRL.nmat, CTRL.nbc, CTRL.nic, CTRL.nltf, CTRL.nxfemman))
         #write nodes
         for node in FEM.nodes:
             #resolve nodal properties
