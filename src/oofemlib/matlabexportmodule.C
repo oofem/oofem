@@ -45,6 +45,7 @@
 #include "mathfem.h"
 #include "gausspoint.h"
 #include "weakperiodicbc.h"
+#include "solutionbasedshapefunction.h"
 #include "timestep.h"
 #include "classfactory.h"
 
@@ -58,7 +59,7 @@ namespace oofem {
 
 REGISTER_ExportModule( MatlabExportModule )
 
-				MatlabExportModule :: MatlabExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
+						MatlabExportModule :: MatlabExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
 {}
 
 
@@ -96,8 +97,8 @@ MatlabExportModule :: computeArea()
 			smax.at(j)=max(smax.at(j), domain->giveDofManager(i+1)->giveCoordinate(j+1));
 			smin.at(j)=min(smin.at(j), domain->giveDofManager(i+1)->giveCoordinate(j+1));
 		}
-//		std :: copy(smax.begin(), smax.end(), std :: ostream_iterator<double>(std :: cout, " "));
-//		std :: cout << std :: endl;
+		//		std :: copy(smax.begin(), smax.end(), std :: ostream_iterator<double>(std :: cout, " "));
+		//		std :: cout << std :: endl;
 	}
 
 
@@ -296,7 +297,7 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 	fprintf(FID, "];\n");
 
 	// Output weak periodic boundary conditions
-	unsigned int wpbccount = 1;
+	unsigned int wpbccount = 1, sbsfcount = 1;;
 
 	for ( int i = 1; i <= domain->giveNumberOfBoundaryConditions(); i++ ) {
 		WeakPeriodicBoundaryCondition *wpbc = dynamic_cast< WeakPeriodicBoundaryCondition * >( domain->giveBc(i) );
@@ -314,6 +315,18 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 				fprintf(FID, "];\n");
 				wpbccount++;
 			}
+		}
+		SolutionbasedShapeFunction *sbsf = dynamic_cast< SolutionbasedShapeFunction *>( domain->giveBc(i));
+		if (sbsf) {
+			fprintf(FID, "\tspecials.solutionbasedsf{%u}.values=[", sbsfcount);
+			for ( int k = 1; k <= sbsf->giveInternalDofManager(1)->giveNumberOfDofs(); k++ ) {      // Only one internal dof manager
+				FloatArray unknowns;
+				IntArray DofMask;
+				double X = sbsf->giveInternalDofManager(1)->giveDof(k)->giveUnknown(VM_Total, tStep);
+				fprintf(FID, "%e\t", X);
+			}
+			fprintf(FID, "];\n");
+			sbsfcount++;
 		}
 	}
 }
