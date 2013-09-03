@@ -274,7 +274,9 @@ FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
     }
     
     answer(3) = 1.0 - answer(0) - answer(1) - answer(2); // Do this afterwards, since it might get clamped.
-
+    if ( answer(3) < 0. - POINT_TOL ) {
+    	return false;
+    }
     return inside;
 }
 
