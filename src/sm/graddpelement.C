@@ -238,7 +238,7 @@ GradDpElement :: computeNonlocalGradient(FloatArray &answer, GaussPoint *gp, Tim
 void
 GradDpElement :: giveNonlocalInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    double dV, localCumulatedStrain;
+    double dV, localCumulatedStrain=0.;
     GaussPoint *gp;
     NLStructuralElement *elem = this->giveNLStructuralElement();
     IntegrationRule *iRule =  elem->giveIntegrationRule(0);

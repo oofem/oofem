@@ -41,6 +41,15 @@ namespace oofem {
 
 REGISTER_Material( IsotropicHeatTransferMaterial );
 
+IsotropicHeatTransferMaterial :: IsotropicHeatTransferMaterial(int n, Domain *d) : TransportMaterial(n, d) {
+    // constructor
+    maturityT0 = 0.;
+}
+
+IsotropicHeatTransferMaterial :: ~IsotropicHeatTransferMaterial(){
+    // destructor
+}
+
 IRResultType
 IsotropicHeatTransferMaterial :: initializeFrom(InputRecord *ir)
 {
@@ -52,7 +61,8 @@ IsotropicHeatTransferMaterial :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, conductivity, _IFT_IsotropicHeatTransferMaterial_k);
     IR_GIVE_FIELD(ir, capacity, _IFT_IsotropicHeatTransferMaterial_c);
-
+    IR_GIVE_OPTIONAL_FIELD(ir, maturityT0, _IFT_IsotropicHeatTransferMaterial_maturityT0);
+    
     return IRRT_OK;
 }
 

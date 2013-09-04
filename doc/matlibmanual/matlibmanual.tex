@@ -3,6 +3,7 @@
 \usepackage{graphicx}
 %\usepackage{hyperref}
 \usepackage{amssymb,amsmath}
+\usepackage{longtable}
 \input{include.tex}
 
 \renewcommand{\topfraction}{0.99}    % 99% of page top can be a float
@@ -1397,16 +1398,19 @@ compressive strength $f_c$ and uniaxial tensile strength $f_t$.
 \item {\bf Griffith} definition, combining Rankine criterion in tension and 
 Griffith's solution on inclined elipsoidal inclusion. This definition
 handles materials in pure tension and also in compression, where
-tensile stresses usually appear on the elipsoidal inclusion.
-First check if Rankine criterion exists
+tensile stresses usually appear on specifically oriented elipsoidal inclusion.
+The derivation of Griffith's criterion is summarized in \cite{Hoek}.
+In impementation, first check if Rankine criterion exists
 \begin{eqnarray}
 \label{griffith1}
 \tilde\varepsilon&=&{\del{1}{E}}\max_{I=1}^{3}\bar{\sigma}_I
 \end{eqnarray}
-and if not, use Griffith's solution with ordered principal stresses $\sigma_1>\sigma_3$
+and if not, use Griffith's solution with ordered principal stresses $\sigma_1>\sigma_3$.
+The optional parameter \param{griff\_n} is by default 8 and represents the uniaxial compression/tensile strength ratio.
+
 \begin{eqnarray}
 \label{griffith2}
-\tilde\varepsilon&=&{\del{1}{E}}\cdot{\del{-(\sigma_1-\sigma_3)^2}{8(\sigma_1+\sigma_3)}}
+\tilde\varepsilon&=&{\del{1}{E}}\cdot{\del{-(\sigma_1-\sigma_3)^2}{\param{griff\_n}(\sigma_1+\sigma_3)}}
 \end{eqnarray}
 \end{itemize}
 
@@ -1609,10 +1613,12 @@ and also because for exponential softening the approach based on an exponential 
 \end{figure}
 
 
-\begin{table}[!htb]
+% \begin{table}[!htb]
 %\begin{center}
-  \small
-\begin{tabular}{|l|p{9cm}|}
+%  \small
+% \begin{tabular}{|l|p{9cm}|}
+\begin{longtable}{|l|p{9cm}|}
+
 \hline
 Description & Isotropic damage model for concrete in tension\\
 \hline
@@ -1685,6 +1691,7 @@ of equivalent strain:
 &- \param{e1} parameter used only by damage law 7\\
 &- \param{e2} parameter used only by damage law 7\\
 &- \param{nd} exponent used only by damage law 7\\
+&- \param{griff\_n} uniaxial compression/tensile ratio for Griffith's criterion\\
 &- \param{maxOmega} maximum damage, used for convergence improvement
 (its value is between 0 and 0.999999 (default), and it affects only the secant stiffness
 but not the stress)\\
@@ -1692,11 +1699,12 @@ but not the stress)\\
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
 Features & Adaptivity support\\
 \hline
-\end{tabular}
+%\end{tabular}
 \caption{Isotropic damage model for tensile failure -- summary.}
 \label{id_table}
 %\end{center}
-\end{table}
+%\end{table}
+\end{longtable}
 
 \subsubsection{Nonlocal isotropic damage model for tensile failure - Idmnl1}
 \label{sec:nidm}
@@ -4969,6 +4977,9 @@ Note that the matrices $\mbf{K}(\mbf{r}), \mbf{C}(\mbf{r})$ and the vector $\mbf
   structures, John Wiley, 2001.
 \bibitem{Hansen} P.F. Hansen: Coupled Moisture/Heat Transport in
   Cross Sections of Structures, Beton og Konstruktionsinstituttet, 1985.
+\bibitem{Hoek} E. Hoek and Z.T. Bieniawski: Brittle Rock Fracture Propagation
+In Rock Under Compression, International Journal of Fracture Mechanics
+1(3), 137-155, 1965.
 \bibitem{Kuenzel} H.M. K{\"u}nzel, H.M.: Simultaneous heat and
   moisture transport in building components, Ph.D. thesis, IRB-Verlag,
   1995.
