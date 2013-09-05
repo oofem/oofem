@@ -32,7 +32,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "StructuralInterfaceMaterial.h"
+#include "structuralinterfacematerial.h"
 #include "structuralinterfacematerialstatus.h"
 #include "dynamicinputrecord.h"
 

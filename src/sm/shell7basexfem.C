@@ -41,6 +41,7 @@
 #include "simpleinterfacemat.h"
 #include "connectivitytable.h"
 #include "bilinearczmaterialFagerstrom.H" ///@todo change to .h
+#include "mathfem.h"
 
 namespace oofem {
 IntArray Shell7BaseXFEM :: dofId_Midplane(3);
