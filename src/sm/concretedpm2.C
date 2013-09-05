@@ -1247,7 +1247,7 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
 
 
 bool
-ConcreteDPM2 :: checkForVertexCase(double answer,
+ConcreteDPM2 :: checkForVertexCase(double &answer,
                                    const double sig,
                                    const double tempKappa)
 {
