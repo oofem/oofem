@@ -181,7 +181,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
         this->assembleVectorFromElements( rhs, & TauStep, EID_ConservationEquation, ElementInternalSourceVector, VM_Total,
                                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add nodal load
-        this->assembleVectorFromDofManagers( rhs, & TauStep, EID_ConservationEquation, ExternalForcesVector, VM_Total,
+        this->assembleVectorFromDofManagers( rhs, & TauStep, ExternalForcesVector, VM_Total,
                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         // subtract the rhs part depending on previous solution

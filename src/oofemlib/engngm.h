@@ -934,9 +934,8 @@ public:
      * @param eNorms If non-NULL, squared norms of each internal force will be added to this, split up into dof IDs.
      * @return Sum of element/node norm (squared) of assembled vector.
      */
-    double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                          CharType type, ValueModeType mode,
-                          const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
+    void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid, CharType type, ValueModeType mode,
+                        const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
     /**
      * Assembles characteristic vector of required type from dofManagers into given vector.
      * @param answer Assembled vector.
@@ -948,8 +947,7 @@ public:
      * @param domain Domain to assemble from.
      * @return Sum of element norm (squared) of assembled vector.
      */
-    void assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                       CharType type, ValueModeType mode,
+    void assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
                                        const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
     /**
      * Assembles characteristic vector of required type from elements into given vector.
