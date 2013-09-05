@@ -156,6 +156,9 @@ public:
      */
     virtual void scale(double s) { }
 
+    /// Performs post initialization steps.
+    virtual void postInitialize() { }
+
     // Overloaded methods:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
