@@ -499,7 +499,7 @@ public:
      * @param tempKappa The hardening variable.
      */
 
-    bool checkForVertexCase(double answer,
+    bool checkForVertexCase(double &answer,
                             const double sig,
                             const double tempKappa);
 

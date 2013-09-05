@@ -819,7 +819,7 @@ ConcreteDPM :: performPlasticityReturn(GaussPoint *gp,
 
 
 bool
-ConcreteDPM :: checkForVertexCase(double answer,
+ConcreteDPM :: checkForVertexCase(double &answer,
                                   const double sig,
                                   const double tempKappa)
 {
