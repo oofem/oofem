@@ -77,6 +77,7 @@ class CTRLParser:
     oofem_elemProp.append(oofem_elementProperties("LIBeam3Dnl",oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("LIBeam3Dnl2",oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,2,1], [[0,2],[2,1],[1,0]],[])) #checked - current numbering of triangle nodes is anti-clockwise, the same orientation as in OOFEM.
+    oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2dXFEM", [0,2,1], [[0,2],[2,1],[1,0]],[])) #checked - current numbering of triangle nodes is anti-clockwise, the same orientation as in OOFEM.
     #oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,1,2], [[0,1],[1,2],[2,0]],[])) #old version of UNV export in SALOME, nodes on triangular elements are numbered clockwise
     oofem_elemProp.append(oofem_elementProperties("TrplaneStrain",oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("Axisymm3D",oofem_elemProp[-1]))
@@ -87,6 +88,7 @@ class CTRLParser:
     oofem_elemProp.append(oofem_elementProperties("CCTplate3D",oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("QTrPlStr", [2,0,4,1,5,3], [[2,1,0],[0,5,4],[4,3,2]],[]))#checked
     oofem_elemProp.append(oofem_elementProperties("PlaneStress2D", [0,1,2,3], [[0,1],[1,2],[2,3],[3,0]],[]))#checked
+    oofem_elemProp.append(oofem_elementProperties("PlaneStress2DXfem", [0,1,2,3], [[0,1],[1,2],[2,3],[3,0]],[]))#checked
     oofem_elemProp.append(oofem_elementProperties("Quad1PlaneStrain", oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("Quad1ht", oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("Quadaxisym1ht", oofem_elemProp[-1]))
@@ -114,6 +116,7 @@ class CTRLParser:
         self.nbc=0
         self.nic=0
         self.nltf=0
+        self.nxfemman=0
 
     def getRecordLine(self):
         while True:
@@ -246,6 +249,10 @@ class CTRLParser:
         self.nbc=int(dataline[5])
         self.nic=int(dataline[7])
         self.nltf=int(dataline[9])
+        
+	if len(dataline)>=10:
+		if dataline[10].lower()=="nxfemman":
+			self.nxfemman=int(dataline[11])
 
         #read crossSect, material, bc, ic, and lft records into footer
         count = 0

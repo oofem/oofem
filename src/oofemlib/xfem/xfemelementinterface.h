@@ -76,6 +76,12 @@ public:
     /// Helpful routine to put the nodes for triangulation together, should be in protected members probably.
     /// Returns an array of array of points. Each array of points defines the points of a subregion of the element.
     virtual void XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions);
+
+    /**
+     * If the enrichment evolves in time, the element subdivision
+     * need to be updated. That is done by recomputeGaussPoints.
+     */
+    virtual void recomputeGaussPoints();
 };
 } // end namespace oofem
 #endif // xfemelementinterface_h

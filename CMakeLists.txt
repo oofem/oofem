@@ -82,6 +82,7 @@ option (USE_FM "Enable fluid mechanics module" ON)
 option (USE_TM "Enable heat/mass transfer module" ON)
 option (USE_CEMHYD "Enable CemHyd support" OFF)
 #option (USE_BOOST "Enable Boost" OFF)
+option (USE_USERDEF_DIRICHLETBC "Enable userdef Dirichlet BCs" OFF)
 
 if (USE_PARALLEL)
     add_definitions (-D__PARALLEL_MODE)
@@ -371,6 +372,25 @@ if (USE_PYTHON_BINDINGS)
     set (EXT_LIBS ${EXT_LIBS} ${PYTHON_LIBRARIES} ${Boost_LIBRARIES})
     set (MODULE_LIST ${MODULE_LIST} "Python")
     add_definitions(-DBOOST_PYTHON)
+else ()
+	if (USE_USERDEF_DIRICHLETBC)
+		# The USERDEF_DIRICHLETBC requires a Python interpreter,
+		# but it does not require the Boost library.
+
+		# We want to use Python 2.7, therefore we need to whipe
+		# out the interpreter found by the test section
+		set( PYTHON_EXECUTABLE "PYTHON_EXECUTABLE-NOTFOUND")
+		set( PYTHON_INCLUDE_DIR "PYTHON_INCLUDE_DIR-NOTFOUND")
+		set( PYTHON_LIBRARY "PYTHON_LIBRARY-NOTFOUND")
+
+		find_package(PythonInterp 2.7 REQUIRED)
+		find_package(PythonLibs 2.7 REQUIRED)
+	    include_directories (${PYTHON_INCLUDE_DIRS})
+	    set (EXT_LIBS ${EXT_LIBS} ${PYTHON_LIBRARIES})
+	    set (MODULE_LIST ${MODULE_LIST} "Python")
+	    add_definitions(-DUSERDEFDIRICHLETBC)
+
+	endif ()
 endif ()
 
 

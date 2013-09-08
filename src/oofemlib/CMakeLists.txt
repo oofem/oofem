@@ -194,6 +194,7 @@ set (core_xfem
     xfem/enrichmentitem.C
     xfem/patchintegrationrule.C
     xfem/enrichmentdomain.C
+    xfem/propagationlaw.C
     xfem/XFEMDebugTools.C
     )
 

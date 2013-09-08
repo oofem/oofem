@@ -978,9 +978,9 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
 }
 
 
-double EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                    CharType type, ValueModeType mode,
-                                    const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
+void EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                                  CharType type, ValueModeType mode,
+                                  const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
     if ( eNorms ) {
         int maxdofids = domain->giveMaxDofID();
@@ -995,7 +995,7 @@ double EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, Equatio
         eNorms->zero();
     }
 
-    this->assembleVectorFromDofManagers(answer, tStep, eid, type, mode, s, domain, eNorms);
+    this->assembleVectorFromDofManagers(answer, tStep, type, mode, s, domain, eNorms);
     this->assembleVectorFromElements(answer, tStep, eid, type, mode, s, domain, eNorms);
     this->assembleVectorFromBC(answer, tStep, eid, type, mode, s, domain, eNorms);
 
@@ -1008,12 +1008,10 @@ double EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, Equatio
         }
     }
 #endif
-    return eNorms ? eNorms->sum() : 0.;
 }
 
 
-void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                                 CharType type, ValueModeType mode,
+void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
                                                  const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 //
 // assembles matrix answer by  calling

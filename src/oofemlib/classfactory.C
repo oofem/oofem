@@ -364,6 +364,17 @@ bool ClassFactory :: registerEnrichmentFront(const char *name, EnrichmentFront *
     return true;
 }
 
+PropagationLaw* ClassFactory :: createPropagationLaw(const char *name)
+{
+    return ( propagationLawList.count(name) == 1 ) ? propagationLawList [ name ]() : NULL;
+}
+
+bool ClassFactory :: registerPropagationLaw(const char *name, PropagationLaw * ( *creator )())
+{
+    propagationLawList[name] = creator;
+    return true;
+}
+
 BasicGeometry* ClassFactory :: createGeometry(const char *name)
 {
     return ( geometryList.count(name) == 1 ) ? geometryList [ name ]() : NULL;

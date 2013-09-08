@@ -46,6 +46,10 @@
 
 #include "XFEMDebugTools.h"
 
+#if PATCH_INT_DEBUG > 0
+#include "timestep.h"
+#include "engngm.h"
+#endif
 
 namespace oofem {
 PatchIntegrationRule :: PatchIntegrationRule(int n, Element *e, const std :: vector< Triangle > &iTriangles) :
@@ -70,7 +74,32 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 
     ////////////////////////////////////////////
     // Allocate Gauss point array
-    int nPointsTot = nPoints * mTriangles.size();
+
+
+    // It may happen that the patch contains triangles with
+    // zero area. This does no harm, since their weights in
+    // the quadrature will be zero. However, they invoke additional
+    // computational cost and therefore we want to avoid them.
+    // Thus, count the number of triangles with finite area
+    // and keep only those triangles.
+
+    double totArea = 0.0;
+    for(int i = 0; i < mTriangles.size(); i++) {
+    	totArea += mTriangles[i].getArea();
+    }
+
+    std::vector<int> triToKeep;
+    const double triTol = ( 1.0e-6 )*totArea;
+
+    for(int i = 0; i < mTriangles.size(); i++) {
+    	if( mTriangles[i].getArea() > triTol ) {
+    		triToKeep.push_back(i);
+    	}
+    }
+
+//    printf("mTriangles.size(): %d triToKeep.size(): %d\n", mTriangles.size(), triToKeep.size() );
+
+    int nPointsTot = nPoints * triToKeep.size();
     FloatArray coords_xi1, coords_xi2, weights;
     this->giveTriCoordsAndWeights(nPoints, coords_xi1, coords_xi2, weights);
     this->gaussPointArray = new GaussPoint * [ nPointsTot ];
@@ -82,12 +111,12 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
     double parentArea = this->elem->computeArea();
 
     // Loop over triangles
-    for ( int i = 0; i < int( mTriangles.size() ); i++ ) {
+    for ( int i = 0; i < int( triToKeep.size() ); i++ ) {
         // TODO: Probably unnecessary to allocate here
-        const FloatArray **coords = new const FloatArray * [ mTriangles [ i ].giveNrVertices() ];
+        const FloatArray **coords = new const FloatArray * [ mTriangles [ triToKeep[i] ].giveNrVertices() ];
         // this we should put into the function before
-        for ( int k = 0; k < mTriangles [ i ].giveNrVertices(); k++ ) {
-            coords [ k ] = new FloatArray( *( mTriangles [ i ].giveVertex(k + 1) ) );
+        for ( int k = 0; k < mTriangles [ triToKeep[i] ].giveNrVertices(); k++ ) {
+            coords [ k ] = new FloatArray( ( mTriangles [ triToKeep[i] ].giveVertex(k + 1) ) );
         }
 
         // Can not be used because it writes to the start of the array instead of appending.
@@ -105,7 +134,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 
 
             mTriInterp.local2global( global, * gp->giveCoordinates(),
-                                     FEIVertexListGeometryWrapper(mTriangles [ i ].giveNrVertices(), coords) );
+                                     FEIVertexListGeometryWrapper(mTriangles [ triToKeep[i] ].giveNrVertices(), coords) );
 
             newGPCoord.push_back(global);
 
@@ -120,14 +149,14 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 
             double refElArea = this->elem->giveParentElSize();
 
-            gp->setWeight(2.0 * refElArea * gp->giveWeight() * mTriangles [ i ].getArea() / parentArea); // update integration weight
+            gp->setWeight(2.0 * refElArea * gp->giveWeight() * mTriangles [ triToKeep[i] ].getArea() / parentArea); // update integration weight
 
 
             pointsPassed++;
         }
 
 
-        for ( int k = 0; k < mTriangles [ i ].giveNrVertices(); k++ ) {
+        for ( int k = 0; k < mTriangles [ triToKeep[i] ].giveNrVertices(); k++ ) {
             delete coords [ k ];
         }
 
@@ -135,9 +164,25 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
     }
 
 #if PATCH_INT_DEBUG > 0
+
+    double time = 0.0;
+
+    Element *el = this->elem;
+    if(el != NULL) {
+    	Domain *dom = el->giveDomain();
+    	if(dom != NULL) {
+    		EngngModel *em = dom->giveEngngModel();
+    		if(em != NULL) {
+    			TimeStep *ts = em->giveCurrentStep();
+    			if(ts != NULL) {
+    				time = ts->giveTargetTime();
+    			}
+    		}
+    	}
+    }
     int elIndex = this->elem->giveGlobalNumber();
     std :: stringstream str;
-    str << "GaussPoints" << elIndex << ".vtk";
+    str << "GaussPointsTime" << time << "El" << elIndex << ".vtk";
     std :: string name = str.str();
 
     XFEMDebugTools :: WritePointsToVTK(name, newGPCoord);

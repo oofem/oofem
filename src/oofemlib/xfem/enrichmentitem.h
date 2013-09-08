@@ -56,6 +56,7 @@
 #define _IFT_EnrichmentItem_domain "enrichmentdomain"
 #define _IFT_EnrichmentItem_function "enrichmentfunction"
 #define _IFT_EnrichmentItem_front "enrichmentfront"
+#define _IFT_EnrichmentItem_propagationlaw "propagationlaw"
 
 #define _IFT_Delamination_Name "delamination"
 #define _IFT_Delamination_xiCoords "delaminationxicoords"
@@ -80,6 +81,7 @@ class DofManList;
 class WholeDomain;
 class EnrichmentFront;
 class LinElBranchFunction;
+class PropagationLaw;
 
 /**
  * Abstract class representing entity, which is included in the FE model using one (or more)
@@ -159,6 +161,8 @@ public:
     virtual void updateNodeEnrMarker(XfemManager &ixFemMan, const DofManList &iDofManList);
     virtual void updateNodeEnrMarker(XfemManager &ixFemMan, const WholeDomain &iWholeDomain);
 
+    void createEnrichedDofs();
+
     virtual void computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element);
 
 
@@ -182,6 +186,9 @@ protected:
 
     EnrichmentFront *mpEnrichmentFront;
     int mEnrFrontIndex;
+
+    PropagationLaw *mpPropagationLaw;
+    int mPropLawIndex;
 
     /// Link to associated Xfem manager.
     XfemManager *xMan;

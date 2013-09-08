@@ -31,6 +31,16 @@ public:
 	FloatArray 	mTangDir;
 	FloatArray 	mNormalDir;
 	int 		mElIndex;
+	int 		mTipIndex;
+};
+
+struct TipPropagation {
+	TipPropagation() {}
+	~TipPropagation() {}
+
+	int 		mTipIndex;
+	FloatArray	mPropagationDir;
+	double		mPropagationLength;
 };
 
 } // end namespace oofem

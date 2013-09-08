@@ -34,8 +34,8 @@ void XFEMDebugTools :: WriteTrianglesToVTK(const std :: string &iName, const ALi
 
     for ( int i = 1; i <= numTri; i++ ) {
         for ( int j = 1; j <= 3; j++ ) {
-            const double &x = iTriangles.at(i)->giveVertex(j)->at(1);
-            const double &y = iTriangles.at(i)->giveVertex(j)->at(2);
+            const double &x = iTriangles.at(i)->giveVertex(j).at(1);
+            const double &y = iTriangles.at(i)->giveVertex(j).at(2);
             file << x << " " << y << " 0.0\n";
         }
     }

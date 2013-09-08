@@ -99,6 +99,7 @@
 #define _IFT_IsotropicDamageMaterial1_e2 "e2"
 #define _IFT_IsotropicDamageMaterial1_nd "nd"
 #define _IFT_IsotropicDamageMaterial1_checkSnapBack "checksnapback"
+#define _IFT_IsotropicDamageMaterial1_n "griff_n"
 //@}
 
 namespace oofem {
@@ -169,6 +170,9 @@ protected:
     /// Parameter used in Mises definition of equivalent strain.
     double k;
 
+    /// Parameter used in Griffith's criterion
+    double griff_n;
+    
     /// Remporary parameter reading type of softening law, used in other isotropic damage material models.
     int damageLaw;
 
