@@ -69,27 +69,6 @@ Tet1_3D_SUPG :: ~Tet1_3D_SUPG()
 // Destructor
 { }
 
-
-int
-Tet1_3D_SUPG :: giveTermIntergationRuleIndex(CharType termType)
-{
-    if ( ( termType == AccelerationTerm_MB ) || ( termType == AdvectionTerm_MB ) || ( termType == AdvectionDerivativeTerm_MB ) ||
-        ( termType == DiffusionTerm_MB ) || ( termType == DiffusionDerivativeTerm_MB ) || ( termType == PressureTerm_MB ) ||
-        ( termType == AdvectionTerm_MC ) || ( termType == AdvectionDerivativeTerm_MC ) || ( termType == DiffusionDerivativeTerm_MC ) ||
-        ( termType == BCRhsTerm_MC ) ) {
-        return 1;
-    } else if ( ( termType == LSICStabilizationTerm_MB ) || ( termType == LinearAdvectionTerm_MC ) ||
-               ( termType == DiffusionTerm_MC ) || ( termType == AccelerationTerm_MC ) || ( termType == PressureTerm_MC ) ||
-               ( termType == BCRhsTerm_MB ) ) {
-        return 0;
-    } else {
-        _error("giveNumeberOfIntergationRule: Unknown approximation type encountered");
-    }
-
-    return 0;
-}
-
-
 int
 Tet1_3D_SUPG :: computeNumberOfDofs(EquationID ut)
 {
@@ -138,13 +117,16 @@ Tet1_3D_SUPG :: computeGaussPoints()
 // Sets up the array containing the integration points of the receiver.
 {
     if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 2;
-        integrationRulesArray = new IntegrationRule * [ 2 ];
+        numberOfIntegrationRules = 3;
+        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
 
-        integrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[1], 4, this );
+
+        integrationRulesArray [ 2 ] = new GaussIntegrationRule(3, this, 1, 3);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[2], 4, this );
     }
 }
 

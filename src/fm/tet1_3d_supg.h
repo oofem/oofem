@@ -94,8 +94,6 @@ protected:
     virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
     virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
     virtual int  giveNumberOfSpatialDimensions();
-
-    virtual int giveTermIntergationRuleIndex(CharType termType);
 };
 } // end namespace oofem
 #endif // tet1_3d_supg_h
