@@ -1509,7 +1509,11 @@ at complete failure (zero cohesive stress) and is related to fracture energy by
 a modified formula $w_f=2G_f/f_t$.
 The expression for maximum element size, $h_{max}=w_f/\varepsilon_0$, remains
 the same as for cohesive law with exponential softening, but in terms
-of the material properties it is now translated as $h_{max}=2EG_f/f_t^2$.
+of the material properties it is now translated as $h_{max}=2EG_f/f_t^2$. The derivative
+with respect to $\varepsilon$ yields
+$$
+\frac{\partial\omega}{\partial\varepsilon} = \frac{\varepsilon_0}{\varepsilon^2 \left ( 1-\frac{h \varepsilon_0}{w_f}\right )}
+$$
 \item
 {\bf Cohesive crack with bilinear softening} is implemented in an
 approximate fashion and gives for different mesh sizes the same
