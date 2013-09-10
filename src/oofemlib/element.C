@@ -422,8 +422,7 @@ Element :: giveLocationArray(IntArray &locationArray, EquationID eid, const Unkn
 // Returns the location array of the receiver. This array is obtained by
 // simply appending the location array of every node of the receiver.
 {
-    IntArray dofIDMask, masterDofIDs;
-    IntArray nodalArray;
+    IntArray masterDofIDs, nodalArray, dofIDMask;
     locationArray.resize(0);
     if (dofIdArray) dofIdArray->resize(0);
     for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
@@ -448,11 +447,40 @@ Element :: giveLocationArray(IntArray &locationArray, EquationID eid, const Unkn
 
 
 void
+Element :: giveLocationArray(IntArray &locationArray, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIdArray) const
+{
+    IntArray masterDofIDs, nodalArray, ids = dofIDMask;
+    locationArray.resize(0);
+    if (dofIdArray) dofIdArray->resize(0);
+    for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
+        if ( dofIDMask.giveSize() == 0 ) {
+            this->giveDefaultDofManDofIDMask(i, ids);
+        }
+        this->giveDofManager(i)->giveLocationArray(ids, nodalArray, s);
+        locationArray.followedBy(nodalArray);
+        if (dofIdArray) {
+            this->giveDofManager(i)->giveMasterDofIDArray(ids, masterDofIDs);
+            dofIdArray->followedBy(masterDofIDs);
+        }
+    }
+    for ( int i = 1; i <= this->giveNumberOfInternalDofManagers(); i++ ) {
+        if ( dofIDMask.giveSize() == 0 ) {
+            this->giveDefaultInternalDofManDofIDMask(i, ids);
+        }
+        this->giveInternalDofManager(i)->giveLocationArray(ids, nodalArray, s);
+        locationArray.followedBy(nodalArray);
+        if (dofIdArray) {
+            this->giveInternalDofManager(i)->giveMasterDofIDArray(ids, masterDofIDs);
+            dofIdArray->followedBy(masterDofIDs);
+        }
+    }
+}
+
+
+void
 Element :: giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIdArray)
 {
-    IntArray dofIDMask, masterDofIDs;
-    IntArray nodalArray;
-
+    IntArray masterDofIDs, nodalArray, dofIDMask;
     locationArray.resize(0);
     if (dofIdArray) dofIdArray->resize(0);
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
@@ -461,6 +489,26 @@ Element :: giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bN
         locationArray.followedBy(nodalArray);
         if (dofIdArray) {
             this->giveDofManager(bNodes.at(i))->giveMasterDofIDArray(dofIDMask, masterDofIDs);
+            dofIdArray->followedBy(masterDofIDs);
+        }
+    }
+}
+
+
+void
+Element :: giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIdArray)
+{
+    IntArray masterDofIDs, nodalArray, ids = dofIDMask;
+    locationArray.resize(0);
+    if (dofIdArray) dofIdArray->resize(0);
+    for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
+        if ( dofIDMask.giveSize() == 0 ) {
+            this->giveDefaultDofManDofIDMask(bNodes.at(i), ids);
+        }
+        this->giveDofManager(bNodes.at(i))->giveLocationArray(ids, nodalArray, s);
+        locationArray.followedBy(nodalArray);
+        if (dofIdArray) {
+            this->giveDofManager(bNodes.at(i))->giveMasterDofIDArray(ids, masterDofIDs);
             dofIdArray->followedBy(masterDofIDs);
         }
     }

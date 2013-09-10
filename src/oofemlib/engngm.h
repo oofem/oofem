@@ -907,19 +907,6 @@ public:
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
             CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
     /**
-     * Assembles characteristic matrix of required type into given sparse matrix.
-     * @param answer Assembled matrix.
-     * @param tStep Time step, when answer is assembled.
-     * @param r_id Determines type of equation and corresponding element code numbers for matrix rows.
-     * @param c_id Determines type of equation and corresponding element code numbers for matrix columns.
-     * @param s Determines the equation numbering scheme.
-     * @param type Characteristic components of type type are requested from elements and assembled.
-     * @param domain Source domain.
-     */
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id, EquationID c_id,
-            CharType type, const UnknownNumberingScheme &s, Domain *domain);
-
-    /**
      * Assembles characteristic vector of required type from dofManagers, element, and active boundary conditions, into given vector.
      * This routine is simple a convenient call to all three subroutines, since this is most likely what any engineering model will want to do.
      * The return value is used to normalize the residual when checking for convergence in nonlinear problems.
@@ -934,9 +921,8 @@ public:
      * @param eNorms If non-NULL, squared norms of each internal force will be added to this, split up into dof IDs.
      * @return Sum of element/node norm (squared) of assembled vector.
      */
-    double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                          CharType type, ValueModeType mode,
-                          const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
+    void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid, CharType type, ValueModeType mode,
+                        const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
     /**
      * Assembles characteristic vector of required type from dofManagers into given vector.
      * @param answer Assembled vector.
@@ -948,8 +934,7 @@ public:
      * @param domain Domain to assemble from.
      * @return Sum of element norm (squared) of assembled vector.
      */
-    void assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                       CharType type, ValueModeType mode,
+    void assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
                                        const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
     /**
      * Assembles characteristic vector of required type from elements into given vector.

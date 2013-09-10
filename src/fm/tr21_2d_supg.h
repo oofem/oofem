@@ -154,8 +154,6 @@ protected:
     virtual void initGeometry();
 
     virtual void updateStabilizationCoeffs(TimeStep *tStep);
-
-    virtual int giveTermIntergationRuleIndex(CharType termType);
 };
 } // end namespace oofem
 #endif // tr21_2d_supg_h

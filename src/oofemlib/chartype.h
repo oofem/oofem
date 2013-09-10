@@ -75,31 +75,6 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(CriticalTimeStep,58)                                       \
     ENUM_ITEM_WITH_VALUE(PrescribedVelocityRhsVector,59)                            \
     ENUM_ITEM_WITH_VALUE(PrescribedDensityRhsVector,60)                             \
-    /* SUPG/PSPG */                                                                      \
-    ENUM_ITEM_WITH_VALUE(AccelerationTerm_MB,100)                                        \
-    ENUM_ITEM_WITH_VALUE(AdvectionDerivativeTerm_MB,101)                                 \
-    ENUM_ITEM_WITH_VALUE(DiffusionDerivativeTerm_MB,102)                                 \
-    ENUM_ITEM_WITH_VALUE(SecantDiffusionDerivativeTerm_MB,103)                           \
-    ENUM_ITEM_WITH_VALUE(TangentDiffusionDerivativeTerm_MB,104)                          \
-    ENUM_ITEM_WITH_VALUE(InitialDiffusionDerivativeTerm_MB,105)                          \
-    ENUM_ITEM_WITH_VALUE(PressureTerm_MB,106)                                            \
-    ENUM_ITEM_WITH_VALUE(LSICStabilizationTerm_MB,107)                                   \
-    ENUM_ITEM_WITH_VALUE(LinearAdvectionTerm_MC,108)                                     \
-    ENUM_ITEM_WITH_VALUE(AdvectionTerm_MC,109)                                           \
-    ENUM_ITEM_WITH_VALUE(AdvectionDerivativeTerm_MC,110)                                 \
-    ENUM_ITEM_WITH_VALUE(AccelerationTerm_MC,111)                                        \
-    ENUM_ITEM_WITH_VALUE(DiffusionDerivativeTerm_MC,112)                                 \
-    ENUM_ITEM_WITH_VALUE(DiffusionTerm_MC,113)                                           \
-    ENUM_ITEM_WITH_VALUE(PressureTerm_MC,114)                                            \
-    ENUM_ITEM_WITH_VALUE(BCLhsTerm_MB,115)                                               \
-    ENUM_ITEM_WITH_VALUE(BCLhsPressureTerm_MB,116)                                       \
-    ENUM_ITEM_WITH_VALUE(BCLhsPressureTerm_MC,117)                                       \
-    ENUM_ITEM_WITH_VALUE(BCRhsTerm_MB,118)                                               \
-    ENUM_ITEM_WITH_VALUE(BCRhsTerm_MC,119)                                               \
-    ENUM_ITEM_WITH_VALUE(AlgorithmicRhsTerm_MB,120)                                      \
-    ENUM_ITEM_WITH_VALUE(AlgorithmicRhsTerm_MC,121)                                      \
-    ENUM_ITEM_WITH_VALUE(AdvectionTerm_MB,122)                                           \
-    ENUM_ITEM_WITH_VALUE(DiffusionTerm_MB,123)                                           \
     /* characteristic vectors */                                                         \
     ENUM_ITEM_WITH_VALUE(ExternalForcesVector,150)                                       \
     ENUM_ITEM_WITH_VALUE(InternalForcesVector,151)                                       \

@@ -210,16 +210,15 @@ public:
     /**
      * Returns the location array (array of code numbers) of receiver for given numbering scheme.
      * Results are cached at receiver for default scheme in locationArray attribute.
-     * The UnknownType parameter allows to distinguish between several possible governing equations, that
-     * can be numbered separately. The default implementation assumes that location array will be assembled only for
-     * one UnknownType value, and this array is cached on element level.
      */
     void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s, IntArray * dofIds = NULL) const;
+    void giveLocationArray(IntArray & locationArray, const IntArray &dofIDMask, const UnknownNumberingScheme & s, IntArray * dofIds = NULL) const;
     /**
      * Returns the location array for the boundary of the element.
      * Only takes into account nodes in the bNodes vector.
      */
     void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, EquationID eid, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
+    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
     /**
      * @return Number of DOFs in element.
      */
@@ -448,6 +447,10 @@ public:
      */
     virtual void giveInternalDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
     { answer.resize(0); }
+    /**
+     * Calls giveInternalDofManDofIDMask with the default equation id for the type of problem.
+     */
+    virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { answer.resize(0); }
     /**
      * Returns element dof mask for node. This mask defines the dof ordering of the element interpolation.
      * Must be defined by particular element.

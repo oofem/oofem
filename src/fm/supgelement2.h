@@ -108,11 +108,6 @@ public:
 #endif
 
 protected:
-    /**
-     * Returns index of integration rule used to evaluate given characteristic term.
-     */
-    virtual int giveTermIntergationRuleIndex(CharType termType) = 0;
-
     virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *atTime);
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *atTime);
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
