@@ -670,19 +670,23 @@ void TrPlaneStress2dXFEM :: drawRawGeometry(oofegGraphicContext &context)
 
     XfemManager *xf = this->giveDomain()->giveXfemManager();
     if ( !xf->isElementEnriched(this) ) {
-        PlaneStress2d :: drawRawGeometry(context);
+    	TrPlaneStress2d :: drawRawGeometry(context);
     } else {
         if ( numberOfIntegrationRules > 1 ) {
             int i;
-            PatchIntegrationRule *iRule;
+//            PatchIntegrationRule *iRule;
             for ( i = 0; i < numberOfIntegrationRules; i++ ) {
-                iRule = dynamic_cast< PatchIntegrationRule * >( integrationRulesArray [ i ] );
+
+            	// TODO: Implement visualization.
+/*
+            	iRule = dynamic_cast< PatchIntegrationRule * >( integrationRulesArray [ i ] );
                 if ( iRule ) {
                     iRule->givePatch()->draw(context);
                 }
+*/
             }
         } else {
-            PlaneStress2d :: drawRawGeometry(context);
+        	TrPlaneStress2d :: drawRawGeometry(context);
         }
     }
 }
@@ -692,22 +696,16 @@ void TrPlaneStress2dXFEM :: drawScalar(oofegGraphicContext &context)
     if ( !context.testElementGraphicActivity(this) ) {
         return;
     }
-
     XfemManager *xf = this->giveDomain()->giveXfemManager();
     if ( !xf->isElementEnriched(this) ) {
-        PlaneStress2d :: drawScalar(context);
+    	TrPlaneStress2d :: drawScalar(context);
     } else {
         if ( context.giveIntVarMode() == ISM_local ) {
-            int indx, ans, result = 1;
+            int indx;
             double val;
             FloatArray s(3), v;
-            IntArray map;
 
-            ans = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-            if ( ( !ans ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-                return;
-            }
-
+            indx = context.giveIntVarIndx();
 
             TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
             PatchIntegrationRule *iRule;
@@ -718,21 +716,24 @@ void TrPlaneStress2dXFEM :: drawScalar(oofegGraphicContext &context)
                 val = iRule->giveMaterial();
  #else
                 val = 0.0;
-                for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+                for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
                     GaussPoint *gp = iRule->getIntegrationPoint(0);
-                    result += giveIPValue(v, gp, context.giveIntVarType(), tStep);
+                    giveIPValue(v, gp, context.giveIntVarType(), tStep);
                     val += v.at(indx);
                 }
 
-                val /= iRule->getNumberOfIntegrationPoints();
+                val /= iRule->giveNumberOfIntegrationPoints();
  #endif
                 s.at(1) = s.at(2) = s.at(3) = val;
-                iRule->givePatch()->drawWD(context, s);
+            	// TODO: Implement visualization.
+//                iRule->givePatch()->drawWD(context, s);
+
             }
         } else {
-            PlaneStress2d :: drawScalar(context);
+        	TrPlaneStress2d :: drawScalar(context);
         }
     }
+
 }
 #endif
 

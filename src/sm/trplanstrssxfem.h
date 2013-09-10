@@ -93,7 +93,7 @@ public:
 //    virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
 //    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
 //    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
-/*
+
 //    virtual Element_Geometry_Type giveGeometryType() const;
 
 #ifdef __OOFEG
@@ -104,7 +104,7 @@ public:
     //virtual void drawSpecial(oofegGraphicContext &);
     //void drawInternalState(oofegGraphicContext&);
 #endif
-*/
+
 };
 
 } /* namespace oofem */

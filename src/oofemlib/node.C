@@ -646,7 +646,7 @@ Node :: drawYourself(oofegGraphicContext &gc)
         if ( this->giveDomain()->hasXfemManager() ) {
             XfemManager *xf = this->giveDomain()->giveXfemManager();
             for ( int i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
-                if ( xf->giveEnrichmentItem(i)->isDofManEnriched(this) ) {
+                if ( xf->giveEnrichmentItem(i)->isDofManEnriched( *this ) ) {
                     EASValsSetMType(SQUARE_MARKER);
                 }
             }
