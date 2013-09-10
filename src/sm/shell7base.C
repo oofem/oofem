@@ -1427,12 +1427,11 @@ Shell7Base :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         FloatArray solVec, force;
         this->giveUpdatedSolutionVector(solVec, tStep);
         this->computePressureForce(force, solVec, iSurf, surfLoad, tStep);
-
         IntArray mask;
         this->giveSurfaceDofMapping(mask, 1);         // same dofs regardless of iSurf->1
         answer.resize( this->computeNumberOfDofs(EID_MomentumBalance) );
         answer.zero();
-        answer.assemble(force, this->giveOrdering(All));
+        answer.assemble(force, mask);
 
         return;
     } else {
@@ -1468,9 +1467,11 @@ Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const 
 
         double xi = pLoad->giveLoadOffset();
         double dA = this->computeAreaAround(ip, xi);
+
         Fp.beTProductOf(N, fp);
         Fp.times(dA);
         answer.assemble(Fp, this->giveOrdering(All));
+		
     }
 }
 
