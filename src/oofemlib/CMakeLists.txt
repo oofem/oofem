@@ -231,8 +231,11 @@ set (core_bc
     reinforcement.C
     surfacetensionbc.C
     linearconstraintbc.C
-    userdefdirichletbc.C
     )
+
+if (USE_PYTHON)
+    list (APPEND core_bc userdefdirichletbc.C)
+endif ()
 
 set (core_mapping
     mmaclosestiptransfer.C

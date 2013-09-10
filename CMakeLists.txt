@@ -53,7 +53,6 @@ set (PARMETIS_DIR CACHE PATH "Manual ParMetis directory")
 ######################## Options ######################################
 #######################################################################
 option (USE_OOFEG "Enable OOFEG" OFF)
-option (USE_PYTHON_BINDINGS "Enable Python bidings" OFF)
 if (${CMAKE_VERSION} VERSION_GREATER "2.8.7") # Compability with older version of cmake
     if (WIN32) # Shared libraries aren't working on windows.
         option (USE_SHARED_LIB "Build shared library" OFF)
@@ -82,7 +81,8 @@ option (USE_FM "Enable fluid mechanics module" ON)
 option (USE_TM "Enable heat/mass transfer module" ON)
 option (USE_CEMHYD "Enable CemHyd support" OFF)
 #option (USE_BOOST "Enable Boost" OFF)
-option (USE_USERDEF_DIRICHLETBC "Enable userdef Dirichlet BCs" OFF)
+option (USE_PYTHON_BINDINGS "Enable Python bidings (OOFEM usable from Python). Implies USE_PYTHON." OFF)
+option (USE_PYTHON "Enable Python to be used inside OOFEM (e.g. userdef Dirichlet BCs)" OFF)
 
 if (USE_PARALLEL)
     add_definitions (-D__PARALLEL_MODE)
@@ -362,35 +362,24 @@ if (USE_SPOOLES)
     set (MODULE_LIST ${MODULE_LIST} "SPOOLES")
 endif ()
 
-if (USE_PYTHON_BINDINGS)
+# We need the interpreter for the test suite.
+find_package(PythonInterp "2.7")
+
+if (USE_PYTHON_BINDINGS OR USE_PYTHON)
     # PythonLibs in cmake is bugged, have to try and rely on PythonInterp to get the suitable major and minor versions.
-    find_package(PythonInterp REQUIRED)
+    find_package(PythonInterp "2.7" REQUIRED)
     find_package(PythonLibs ${PYTHON_VERSION_STRING} EXACT REQUIRED)
-    find_package(Boost COMPONENTS "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}" REQUIRED)
     include_directories (${PYTHON_INCLUDE_DIRS})
-    include_directories (${Boost_INCLUDE_DIRS})
-    set (EXT_LIBS ${EXT_LIBS} ${PYTHON_LIBRARIES} ${Boost_LIBRARIES})
-    set (MODULE_LIST ${MODULE_LIST} "Python")
-    add_definitions(-DBOOST_PYTHON)
-else ()
-	if (USE_USERDEF_DIRICHLETBC)
-		# The USERDEF_DIRICHLETBC requires a Python interpreter,
-		# but it does not require the Boost library.
+    list (APPEND EXT_LIBS ${PYTHON_LIBRARIES})
+    list (APPEND MODULE_LIST "Python")
+    add_definitions(-D__PYTHON_MODULE)
 
-		# We want to use Python 2.7, therefore we need to whipe
-		# out the interpreter found by the test section
-		set( PYTHON_EXECUTABLE "PYTHON_EXECUTABLE-NOTFOUND")
-		set( PYTHON_INCLUDE_DIR "PYTHON_INCLUDE_DIR-NOTFOUND")
-		set( PYTHON_LIBRARY "PYTHON_LIBRARY-NOTFOUND")
-
-		find_package(PythonInterp 2.7 REQUIRED)
-		find_package(PythonLibs 2.7 REQUIRED)
-	    include_directories (${PYTHON_INCLUDE_DIRS})
-	    set (EXT_LIBS ${EXT_LIBS} ${PYTHON_LIBRARIES})
-	    set (MODULE_LIST ${MODULE_LIST} "Python")
-	    add_definitions(-DUSERDEFDIRICHLETBC)
-
-	endif ()
+    if (USE_PYTHON_BINDINGS)
+        find_package(Boost COMPONENTS "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}" REQUIRED)
+        include_directories (${Boost_INCLUDE_DIRS})
+        list (APPEND EXT_LIBS ${Boost_LIBRARIES})
+        add_definitions(-DBOOST_PYTHON)
+    endif ()
 endif ()
 
 
@@ -562,7 +551,6 @@ add_custom_target (
 # This isn't perfect/elegant, partly due to the how tests work.
 # TODO: Would like to run oofem from the binary dir (avoids creating *.out files in the source dir)
 # unfortunately, that doesn't work for some tests that require sub-files using relative paths.
-find_package(PythonInterp)
 enable_testing ()
 #set (MEMORYCHECK_COMMAND "${CMAKE_CURRENT_BINARY_DIR}/memcheckhelper.py")
 include (CTest)
