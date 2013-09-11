@@ -285,6 +285,8 @@ void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &context)
         PlaneStress2d :: drawRawGeometry(context);
     } else {
         if ( numberOfIntegrationRules > 1 ) {
+        	// TODO: Implement visualization
+/*
             PatchIntegrationRule *iRule;
             for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
                 iRule = dynamic_cast< PatchIntegrationRule * >( integrationRulesArray [ i ] );
@@ -292,6 +294,7 @@ void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &context)
                     iRule->givePatch()->draw(context);
                 }
             }
+*/
         } else {
             PlaneStress2d :: drawRawGeometry(context);
         }
@@ -333,7 +336,8 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
                 val /= iRule->giveNumberOfIntegrationPoints();
  #endif
                 s.at(1) = s.at(2) = s.at(3) = val;
-                iRule->givePatch()->drawWD(context, s);
+            	// TODO: Implement visualization
+//                iRule->givePatch()->drawWD(context, s);
             }
         } else {
             PlaneStress2d :: drawScalar(context);

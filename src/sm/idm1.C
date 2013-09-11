@@ -411,8 +411,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         b = ( k - 1 ) * ( k - 1 ) * I1e * I1e / ( ( 1 - 2 * nu ) * ( 1 - 2 * nu ) );
         c = 12 * k * J2e / ( ( 1 + nu ) * ( 1 + nu ) );
         kappa = a + 1 / ( 2 * k ) * sqrt(b + c);
-    
-    } else if ( this->equivStrainType == EST_Griffith ) { 
+    } else if ( this->equivStrainType == EST_Griffith ) {
         double sum = 0.;
         FloatArray stress, fullStress, principalStress;
         FloatMatrix de;
@@ -426,12 +425,13 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
                 sum = principalStress.at(i);
             }
         }
-        
+
         //Use Griffith criterion if Rankine not applied
-        if (sum == 0.){
-            sum = -pow(principalStress.at(1)-principalStress.at(3),2.)/this->griff_n/(principalStress.at(1)+principalStress.at(3));
+        if ( sum == 0. ) {
+            sum = -pow(principalStress.at(1) - principalStress.at(3), 2.) / this->griff_n / ( principalStress.at(1) + principalStress.at(3) );
         }
-        sum = max(sum,0.);
+
+        sum = max(sum, 0.);
         kappa = sum / lmat->give('E', gp);
     } else {
         _error("computeEquivalentStrain: unknown EquivStrainType");
@@ -848,27 +848,47 @@ IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp)
 {
     const double e0 = this->give(e0_ID, gp);
     double ef = 0.;
+    const double E = this->giveLinearElasticMaterial()->give('E', gp);
+    IsotropicDamageMaterial1Status *status = static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) );
+    const double Le = status->giveLe();
+
     if ( softType == ST_Linear || softType == ST_Exponential || softType == ST_SmoothExtended ) {
         ef = this->give(ef_ID, gp);         // ef is the fracturing strain
     }
 
     switch ( softType ) {
     case ST_Linear:
+    {
         if ( kappa <= e0 ) {
             return 0.0;
         } else if ( kappa < ef ) {
             return ( ef * e0 ) / ( ef - e0 ) / ( kappa * kappa );
         } else {
-            return 1.0; //maximum omega (maxOmega) is adjusted just for stiffness matrix in isodamagemodel.C
+            return 0.0; //maximum omega (maxOmega) is adjusted just for stiffness matrix in isodamagemodel.C
         }
-
+    }
+        break;
     case ST_Exponential:
+    {
         if ( kappa > e0 ) {
             return ( e0 / ( kappa * kappa ) ) * exp( -( kappa - e0 ) / ( ef - e0 )  + e0 / ( kappa * ( ef - e0 ) ) ) * exp( -( kappa - e0 ) / ( ef - e0 ) );
         } else {
             return 0.0;
         }
-
+    }
+        break;
+    case ST_Linear_Cohesive_Crack:
+    {
+        double wf = 2. * gf / E / e0; // wf is the crack opening
+        if ( kappa <= e0 ) {
+            return 0.0;
+        } else if ( kappa < wf / Le ) {
+            return ( e0 / ( kappa * kappa ) / ( 1. - Le * e0 / wf ) );
+        } else {
+            return 0.0;
+        }
+    }
+    break;
     default:
         OOFEM_WARNING2("IsotropicDamageMaterial1::damageFunctionPrime ... undefined softening type %d\n", softType);
     }
@@ -936,66 +956,69 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
             }
         }
 
-        // Use orientation of a worst inclusion for Griffith criterion in compression. 
-        if(this->equivStrainType == EST_Griffith){
+        // Use orientation of a worst inclusion for Griffith criterion in compression.
+        if ( this->equivStrainType == EST_Griffith ) {
             FloatArray stress, fullStress, principalStress, crackV(3), crackPlaneN(3);
             FloatMatrix de;
             LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-            lmat->giveStiffnessMatrix(de, SecantStiffness, gp, domain->giveEngngModel()->giveCurrentStep() );
+            lmat->giveStiffnessMatrix( de, SecantStiffness, gp, domain->giveEngngModel()->giveCurrentStep() );
             stress.beProductOf(de, strainVector);
             StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
             this->computePrincipalValDir(principalStress, principalDir, fullStress, principal_stress);
-//             this->computePrincipalValDir(principalStrains, principalDir, fullstrain, principal_strain);
-            if(  principalStress.at(1) <= 1.e-10 && principalStress.at(2) <= 1.e-10 && principalStress.at(3) <= 1.e-10){
-                int indexMax=principalStress.giveIndexMaxElem();
-                int indexMin=principalStress.giveIndexMinElem();
+            //             this->computePrincipalValDir(principalStrains, principalDir, fullstrain, principal_strain);
+            if (  principalStress.at(1) <= 1.e-10 && principalStress.at(2) <= 1.e-10 && principalStress.at(3) <= 1.e-10 ) {
+                int indexMax = principalStress.giveIndexMaxElem();
+                int indexMin = principalStress.giveIndexMinElem();
                 int indexMid = 0;
-                if(indexMin+indexMax==3){
+                if ( indexMin + indexMax == 3 ) {
                     indexMid = 3;
-                } else if (indexMin+indexMax==4){
+                } else if ( indexMin + indexMax == 4 ) {
                     indexMid = 2;
-                } else if (indexMin+indexMax==5){
+                } else if ( indexMin + indexMax == 5 ) {
                     indexMid = 1;
                 }
+
                 //inclination from maximum compressive stress (plane sig_1 and sig_3)
-                double twoPsi = ( principalStress.at(indexMin) -principalStress.at(indexMax) ) / 2. / ( principalStress.at(indexMax)+principalStress.at(indexMin) );
-                double psi = acos(twoPsi)/2.;
-                for (int i=1; i<=3; i++){
-                    crackV.at(i)=principalDir.at(i,indexMin);
-                    crackPlaneN=principalDir.at(i,indexMax);
+                double twoPsi = ( principalStress.at(indexMin) - principalStress.at(indexMax) ) / 2. / ( principalStress.at(indexMax) + principalStress.at(indexMin) );
+                double psi = acos(twoPsi) / 2.;
+                for ( int i = 1; i <= 3; i++ ) {
+                    crackV.at(i) = principalDir.at(i, indexMin);
+                    crackPlaneN = principalDir.at(i, indexMax);
                 }
+
                 //rotate around indexMid axis
                 //see http://en.wikipedia.org/wiki/Rotation_matrix and Rodrigues' rotation formula
-                FloatMatrix ux(3,3), dyadU(3,3), unitMtrx(3,3), rotMtrx(3,3);
+                FloatMatrix ux(3, 3), dyadU(3, 3), unitMtrx(3, 3), rotMtrx(3, 3);
                 FloatArray u(3);
                 ux.zero();
-                ux.at(1,2) = -principalDir.at(3,indexMid);
-                ux.at(1,3) = principalDir.at(2,indexMid);
-                ux.at(2,1) = principalDir.at(3,indexMid);
-                ux.at(2,3) = -principalDir.at(1,indexMid);
-                ux.at(3,1) = -principalDir.at(2,indexMid);
-                ux.at(3,2) = principalDir.at(1,indexMid);
-                u.at(1)=principalDir.at(1,indexMid);
-                u.at(2)=principalDir.at(2,indexMid);
-                u.at(3)=principalDir.at(3,indexMid);
-                dyadU.beDyadicProductOf(u,u);
+                ux.at(1, 2) = -principalDir.at(3, indexMid);
+                ux.at(1, 3) = principalDir.at(2, indexMid);
+                ux.at(2, 1) = principalDir.at(3, indexMid);
+                ux.at(2, 3) = -principalDir.at(1, indexMid);
+                ux.at(3, 1) = -principalDir.at(2, indexMid);
+                ux.at(3, 2) = principalDir.at(1, indexMid);
+                u.at(1) = principalDir.at(1, indexMid);
+                u.at(2) = principalDir.at(2, indexMid);
+                u.at(3) = principalDir.at(3, indexMid);
+                dyadU.beDyadicProductOf(u, u);
                 unitMtrx.beUnitMatrix();
-                unitMtrx.times(cos(psi));
-                ux.times(sin(psi));
-                dyadU.times(1.-cos(psi));
+                unitMtrx.times( cos(psi) );
+                ux.times( sin(psi) );
+                dyadU.times( 1. - cos(psi) );
                 rotMtrx.zero();
                 rotMtrx.add(unitMtrx);
                 rotMtrx.add(ux);
                 rotMtrx.add(dyadU);
-                crackV.rotatedWith(rotMtrx,'n');
+                crackV.rotatedWith(rotMtrx, 'n');
                 for ( int i = 1; i <= 3; i++ ) {
                     principalDir.at(i, indx) = crackV.at(i);
                 }
-                crackPlaneNormal.rotatedWith(rotMtrx,'n');
+
+                crackPlaneNormal.rotatedWith(rotMtrx, 'n');
             }
         }
-        
-        
+
+
         for ( i = 1; i <= 3; i++ ) {
             crackVect.at(i) = principalDir.at(i, indx);
         }
