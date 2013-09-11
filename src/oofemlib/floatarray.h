@@ -45,6 +45,9 @@
 #include "contextmode.h"
 
 #include <iosfwd>
+#if __cplusplus > 199711L
+#include <initializer_list>
+#endif
 
 namespace oofem {
 class IntArray;
@@ -107,6 +110,12 @@ public:
      * @param x Array to copy.
      */
     FloatArray(const FloatArray &x);
+#if __cplusplus > 199711L
+    /// Initializer list constructor.
+    FloatArray(std::initializer_list<double> list);
+    /// Assignment operator.
+    FloatArray & operator=(std::initializer_list<double> list);
+#endif
     /// Destructor.
     virtual ~FloatArray();
 

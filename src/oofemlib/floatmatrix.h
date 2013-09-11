@@ -45,6 +45,9 @@
 #include "contextmode.h"
 
 #include <iosfwd>
+#if __cplusplus > 199711L
+#include <initializer_list>
+#endif
 
 #ifdef BOOST_PYTHON
 namespace boost { namespace python { namespace api {
@@ -114,6 +117,12 @@ public:
     FloatMatrix(const FloatArray *vector, bool transpose = false);
     /// Copy constructor.
     FloatMatrix(const FloatMatrix &);
+#if __cplusplus > 199711L
+    /// Initializer list constructor.
+    FloatMatrix(std::initializer_list<std::initializer_list<double> > mat);
+    /// Assignment operator.
+    FloatMatrix & operator=(std::initializer_list<std::initializer_list<double> > mat);
+#endif
     /// Destructor.
     ~FloatMatrix();
     /// Assignment operator, adjusts size of the receiver if necessary.
