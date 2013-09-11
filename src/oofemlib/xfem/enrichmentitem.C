@@ -963,7 +963,7 @@ Delamination :: giveDelaminationZCoord(int n, Element *element)
     }
 
     return 0.;
-};
+}
 
 // Remove!
 int

@@ -112,7 +112,6 @@ void
 XfemManager :: createEnrichedDofs()
 {
     // Creates new dofs due to enrichment and appends them to the dof managers
-    int nrDofMan = this->giveDomain()->giveNumberOfDofManagers();
     IntArray dofIdArray;
 
     for ( int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ ) {

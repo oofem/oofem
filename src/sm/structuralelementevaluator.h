@@ -61,6 +61,7 @@ protected:
     int rotationMatrixDefined;
 
     StructuralElementEvaluator();
+    virtual ~StructuralElementEvaluator() {}
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 

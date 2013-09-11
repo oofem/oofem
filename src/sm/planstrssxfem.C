@@ -46,7 +46,7 @@
 
 namespace oofem {
 
-REGISTER_Element( PlaneStress2dXfem );
+REGISTER_Element( PlaneStress2dXfem )
 
 Interface *
 PlaneStress2dXfem :: giveInterface(InterfaceType it)

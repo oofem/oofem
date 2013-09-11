@@ -84,14 +84,14 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
     // and keep only those triangles.
 
     double totArea = 0.0;
-    for(int i = 0; i < mTriangles.size(); i++) {
+    for(size_t i = 0; i < mTriangles.size(); i++) {
     	totArea += mTriangles[i].getArea();
     }
 
     std::vector<int> triToKeep;
     const double triTol = ( 1.0e-6 )*totArea;
 
-    for(int i = 0; i < mTriangles.size(); i++) {
+    for(size_t i = 0; i < mTriangles.size(); i++) {
     	if( mTriangles[i].getArea() > triTol ) {
     		triToKeep.push_back(i);
     	}
