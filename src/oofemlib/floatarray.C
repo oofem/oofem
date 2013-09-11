@@ -54,7 +54,7 @@
  #include "combuff.h"
 #endif
 
-#define ALLOC(size) (double*)malloc(sizeof(double) * size);
+#define ALLOC(size) (double*)malloc(sizeof(double) * (size));
 
 #define RESIZE(n) \
     { \
@@ -115,6 +115,36 @@ FloatArray :: FloatArray(const FloatArray &src) :
         values = NULL;
     }
 }
+
+#if __cplusplus > 199711L
+FloatArray :: FloatArray(std::initializer_list<double> list)
+{
+    this->size = this->allocatedSize = list.size();
+    if ( this->size ) {
+        this->values = ALLOC(this->size);
+        double *p = this->values;
+        for (double x: list) {
+            *p = x;
+            p++;
+        }
+    } else {
+        this->values = NULL;
+    }
+}
+
+
+FloatArray &FloatArray :: operator=(std::initializer_list<double> list)
+{
+    RESIZE(list.size());
+    double *p = this->values;
+    for (double x: list) {
+        *p = x;
+        p++;
+    }
+    return * this;
+}
+
+#endif
 
 FloatArray :: ~FloatArray()
 {

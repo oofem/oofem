@@ -58,6 +58,10 @@
  #include <slepceps.h>
 #endif
 
+#ifdef __PYTHON_MODULE
+ #include <Python.h>
+#endif
+
 #include <cstdio>
 #include <cstring>
 #include <new>
@@ -85,9 +89,6 @@ void oofem_print_epilog();
 
 // Finalize PETSc, SLEPc and MPI
 void oofem_finalize_modules();
-
-/* Global class factory */
-//ClassFactory oofem :: classFactory;
 
 int main(int argc, char *argv[])
 {
@@ -220,6 +221,13 @@ int main(int argc, char *argv[])
     SlepcInitialize(& modulesArgc, & modulesArgv, PETSC_NULL, PETSC_NULL);
 #endif
 
+#ifdef __PYTHON_MODULE
+    Py_Initialize();
+    // Adding . to the system path allows us to run Python functions stored in the working directory.
+    PyRun_SimpleString("import sys");
+    PyRun_SimpleString("sys.path.append(\".\")");
+#endif
+
 #ifdef __PARALLEL_MODE
     if ( parallelFlag ) {
         inputFileName << "." << rank;
@@ -337,6 +345,10 @@ void oofem_finalize_modules()
 
 #ifdef __USE_MPI
     MPI_Finalize();
+#endif
+
+#ifdef __PYTHON_MODULE
+    Py_Finalize();
 #endif
 }
 

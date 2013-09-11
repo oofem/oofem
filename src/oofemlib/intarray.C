@@ -50,6 +50,18 @@
  #include "combuff.h"
 #endif
 
+#define ALLOC(size) (int*)malloc(sizeof(int) * (size));
+
+#define RESIZE(n) \
+    { \
+        size = n; \
+        if ( n > allocatedSize ) { \
+            allocatedSize = n; \
+            if ( values ) free(values); \
+            values = ALLOC(size); \
+        } \
+    }
+
 namespace oofem {
 
 IntArray :: IntArray() :
@@ -79,12 +91,43 @@ IntArray :: IntArray(const IntArray &src) :
 // copy constructor
 {
     if ( size ) {
-        values = (int*)malloc(size * sizeof(int));
+        values = ALLOC(this->size);
         memcpy(values, src.values, size * sizeof(int));
     } else {
         values = NULL;
     }
 }
+
+
+#if __cplusplus > 199711L
+IntArray :: IntArray(std::initializer_list<int> list)
+{
+    this->size = this->allocatedSize = list.size();
+    if ( this->size ) {
+        this->values = ALLOC(this->size);
+        int *p = this->values;
+        for (int x: list) {
+            *p = x;
+            p++;
+        }
+    } else {
+        this->values = NULL;
+    }
+}
+
+
+IntArray &IntArray :: operator=(std::initializer_list<int> list)
+{
+    RESIZE(list.size());
+    int *p = this->values;
+    for (int x: list) {
+        *p = x;
+        p++;
+    }
+    return * this;
+}
+
+#endif
 
 
 IntArray :: ~IntArray()
@@ -104,7 +147,7 @@ IntArray &IntArray :: operator = ( const IntArray & src )
 
     allocatedSize = size = src.size;
     if ( size ) {
-        values = (int*)malloc(size * sizeof(int));
+        values = ALLOC(this->size);
         memcpy(values, src.values, size * sizeof(int));
     } else {
         values = NULL;
@@ -193,7 +236,7 @@ void IntArray :: resizeWithValues(int n, int allocChunk)
 {
 #ifdef DEBUG
     if ( allocChunk < 0 ) {
-        OOFEM_FATAL2("FloatArray :: resize - allocChunk must be non-negative; %d", allocChunk);
+        OOFEM_FATAL2("IntArray :: resize - allocChunk must be non-negative; %d", allocChunk);
     }
 
 #endif
@@ -205,10 +248,10 @@ void IntArray :: resizeWithValues(int n, int allocChunk)
     allocatedSize = n + allocChunk;
 
     // For the typical small sizes we have, realloc doesn't seem to be worth it, better with just malloc.
-    int *newValues = (int*)malloc(allocatedSize * sizeof(int));
+    int *newValues = ALLOC(allocatedSize);
 #ifdef DEBUG
     if ( !newValues ) {
-        OOFEM_FATAL2("FloatArray :: resizeWithValues - Failed in allocating %d doubles", allocatedSize);
+        OOFEM_FATAL2("IntArray :: resizeWithValues - Failed in allocating %d doubles", allocatedSize);
     }
 #endif
     memcpy(newValues, values, size * sizeof(int) );
@@ -221,14 +264,6 @@ void IntArray :: resizeWithValues(int n, int allocChunk)
 
 void IntArray :: resize(int n)
 {
-#if 0
-    // TO BE REMOVED:
-    this->resizeWithValues(n);
-    return;
-#endif
-    if ( n != 0 ) { 
-        //printf("oh");
-    }
     size = n;
     if ( n <= allocatedSize ) {
         memset(values, 0, size * sizeof(int) );
@@ -240,7 +275,7 @@ void IntArray :: resize(int n)
     values = (int*)calloc(allocatedSize, sizeof(int));
 #ifdef DEBUG
     if ( !values ) {
-        OOFEM_FATAL2("FloatArray :: resize - Failed in allocating %d doubles", allocatedSize);
+        OOFEM_FATAL2("IntArray :: resize - Failed in allocating %d doubles", allocatedSize);
     }
 #endif
 }
@@ -253,10 +288,10 @@ void IntArray :: preallocate(int futureSize)
     }
     allocatedSize = futureSize;
     
-    int *newValues = (int*)malloc(allocatedSize * sizeof(int));
+    int *newValues = ALLOC(allocatedSize);
 #ifdef DEBUG
     if ( !newValues ) {
-        OOFEM_FATAL2("FloatArray :: preallocate - Failed in allocating %d doubles", allocatedSize);
+        OOFEM_FATAL2("IntArray :: preallocate - Failed in allocating %d doubles", allocatedSize);
     }
 #endif
     memcpy(newValues, values, size * sizeof(int) );
@@ -289,7 +324,7 @@ void IntArray :: followedBy(const IntArray &b, int allocChunk)
     }
 
     if ( newSize > allocatedSize ) {
-        int *newValues = (int*)malloc((newSize + allocChunk) * sizeof(int));
+        int *newValues = ALLOC(newSize + allocChunk);
 
         memcpy(newValues, values, size * sizeof(int));
         memcpy(newValues + size, b.values, b.size * sizeof(int));
@@ -313,7 +348,6 @@ void IntArray :: followedBy(int b, int allocChunk)
     int newSize = size + 1;
 
     if ( newSize > allocatedSize ) {
-        ///@todo use malloc + memcpy/memset.
         int *newValues = (int*)calloc(newSize + allocChunk, sizeof(int));
 
         memcpy(newValues, values, size * sizeof(int));
@@ -462,7 +496,7 @@ contextIOResultType IntArray :: restoreYourself(DataStream *stream, ContextMode 
     }
 
     if ( size ) {
-        values = (int*)malloc(size*sizeof(int));
+        values = ALLOC(size);
         allocatedSize = size;
     } else {
         values = NULL;

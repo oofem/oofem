@@ -162,6 +162,53 @@ FloatMatrix :: FloatMatrix(const FloatMatrix &src) :
     memcpy(values, src.values, allocatedSize * sizeof(double) );
 }
 
+#if __cplusplus > 199711L
+FloatMatrix :: FloatMatrix(std::initializer_list<std::initializer_list<double> > mat)
+{
+    this->nColumns = mat.size();
+    this->nRows = mat.begin()->size();
+    this->allocatedSize = this->nRows * this->nColumns;
+    if ( this->allocatedSize ) {
+        this->values = ALLOC(this->allocatedSize);
+        double *p = this->values;
+        for (auto col: mat) {
+#if DEBUG
+            if ( this->nRows != col.size() ) {
+                OOFEM_ERROR("FloatMatrix :: FloatMatrix - Initializer list has inconsistent column sizes.");
+            }
+#endif
+            for (auto x: col) {
+                *p = x;
+                p++;
+            }
+        }
+    } else {
+        this->values = NULL;
+    }
+}
+
+
+FloatMatrix &FloatMatrix :: operator=(std::initializer_list<std::initializer_list<double> > mat)
+{
+    RESIZE(mat.begin()->size(), mat.size());
+    double *p = this->values;
+    for (auto col: mat) {
+        for (auto x: col) {
+#if DEBUG
+            if ( this->nRows != col.size() ) {
+                OOFEM_ERROR("FloatMatrix :: FloatMatrix - Initializer list has inconsistent column sizes.");
+            }
+#endif
+            *p = x;
+            p++;
+        }
+    }
+
+    return * this;
+}
+
+#endif
+
 
 FloatMatrix :: ~FloatMatrix()
 {
