@@ -51,14 +51,14 @@ private:
 	std::string filename;
 	bool useConstantBase;
 	bool isLoaded;
-    EngngModel *myEngngModel;
+    std::vector<EngngModel *> myEngngModels;
     TimeStep *thisTimestep;
 
     FloatArray maxCoord, minCoord;
 
-	double computeBaseFunctionValueAt(FloatArray *coords, Dof *dof);
+	double computeBaseFunctionValueAt(FloatArray *coords, Dof *dof, int d);
 
-	void setLoads();
+	void setLoads(EngngModel *myEngngModel, int d);
 	void loadProblem();
 	void init();
 
@@ -81,10 +81,8 @@ public:
 
     virtual void computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs);
 
-    virtual void giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
-                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
-    virtual int giveNumberOfMasterDofs(ActiveDof *dof) {return 1; };
+    virtual int giveNumberOfMasterDofs(ActiveDof *dof) {return this->giveDomain()->giveNumberOfSpatialDimensions(); };
     virtual Dof *giveMasterDof(ActiveDof *dof, int mdof);
 
     virtual const char *giveClassName() const { return "SolutionbasedShapeFunction"; }
