@@ -122,7 +122,97 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
 		gammaDman->appendDof( new MasterDof( i, gammaDman, (DofIDItem)this->domain->giveNextFreeDofID() ) );
 	}
 
+	//	computeOrthogonalBasis();
+
 	return IRRT_OK;
+}
+
+void WeakPeriodicBoundaryCondition :: computeOrthogonalBasis()
+{
+	/* gsMatrix contains the coefficients for the orthogonal basis. The row represents the basis and the column the coefficients. */
+	gsMatrix.resize(ndof, ndof);
+	gsMatrix.zero();
+	gsMatrix.at(1, 1) = 1;
+
+	for (int i=2; i<=ndof; i++) { // Need ndof base functions
+		gsMatrix.at(i, i)=1; // Copy from V
+
+		if (i==4) {
+			printf(" ");
+		}
+
+		// remove projection of vi on all previous base functions
+		for (int j=1; j<i; j++) {
+			FloatArray uTemp;
+			uTemp.resize(ndof);
+
+			for (int k=1; k<=ndof; uTemp.at(k)=gsMatrix.at(j,k), k++);
+
+
+			double thisValue = computeProjectionCoefficient(i, j);
+			uTemp.times(-thisValue);
+
+			for (int k=1; k<=ndof; gsMatrix.at(i,k) = gsMatrix.at(i,k)+uTemp.at(k), k++);
+
+			gsMatrix.printYourself();
+		}
+	}
+
+}
+
+double WeakPeriodicBoundaryCondition :: computeProjectionCoefficient(int vIndex, int uIndex)
+{
+
+	/* Computes <v, u>/<u, u> where vIndex is the term in the polynomial and uIndex is the number of the base v being projected on. */
+	int thisSide = 0;
+
+	double value=0.0, nom=0.0, denom=0.0;
+
+	int A, B, thisOrder;
+	getExponents(vIndex, A, B);
+	thisOrder=A+B;
+	getExponents(uIndex, A, B);
+	thisOrder=thisOrder+A+B;
+
+	// Loop over all elements
+	for ( size_t ielement = 0; ielement < element [ thisSide ].size(); ielement++ ) {
+		// Compute <v, u_i> on this element and store in FloatArray u
+
+
+		Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
+		FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
+
+		GaussIntegrationRule iRule(1, thisElement);
+
+		ngp = iRule.getRequiredNumberOfIntegrationPoints(sideGeom, thisOrder+2);
+
+		iRule.setUpIntegrationPoints(sideGeom, ngp, _Unknown);
+
+		for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
+			GaussPoint *gp = iRule.getIntegrationPoint(i);
+
+			FloatArray *lcoords = gp->giveCoordinates();
+			FloatArray gcoords;
+
+			geoInterpolation->boundaryLocal2Global( gcoords, side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) );
+			double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) ) );
+
+			int a, b;
+			getExponents(vIndex, a, b);
+			double vVal=pow(gcoords.at(surfaceIndexes.at(1)), a)*pow(gcoords.at(surfaceIndexes.at(2)), b);
+
+			for ( int j=1; j<=ndof; j++) { // j is the column in gsMatrix
+				getExponents(j, a, b);
+				double uValue = gsMatrix.at(uIndex,j)*pow(gcoords.at(surfaceIndexes.at(1)), a)*pow(gcoords.at(surfaceIndexes.at(2)), b);
+				nom=nom+vVal*uValue*detJ*gp->giveWeight();
+				denom=denom+uValue*uValue*detJ*gp->giveWeight();
+			}
+		}
+	}
+
+	value=nom/denom;
+
+	return value;
 }
 
 void WeakPeriodicBoundaryCondition :: giveEdgeNormal(FloatArray &answer, int element, int side)
@@ -248,6 +338,9 @@ void WeakPeriodicBoundaryCondition :: updateSminmax()
 
 		}
 		doUpdateSminmax = false;
+
+		computeOrthogonalBasis();
+
 	}
 }
 
@@ -372,9 +465,9 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
 			FEInterpolation *interpolation = thisElement->giveInterpolation( (DofIDItem)dofid );
 			interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
 
-            ///@todo See todo on assembleVector
-            //thisElement->giveBoundaryLocationArray(r_sideLoc, bNodes, dofids, eid, r_s);
-            //thisElement->giveBoundaryLocationArray(c_sideLoc, bNodes, dofids, eid, c_s);
+			///@todo See todo on assembleVector
+			//thisElement->giveBoundaryLocationArray(r_sideLoc, bNodes, dofids, eid, r_s);
+			//thisElement->giveBoundaryLocationArray(c_sideLoc, bNodes, dofids, eid, c_s);
 
 			r_sideLoc.resize(0);
 			c_sideLoc.resize(0);
@@ -480,9 +573,9 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
 			FEInterpolation *interpolation = thisElement->giveInterpolation( (DofIDItem)dofid );
 			interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
 
-            ///@todo Carl, change to this:
-            //thisElement->giveBoundaryLocationArray(sideLocation, bNodes, &dofids, eid, s, &masterDofIDs);
-            //thisElement->computeBoundaryVectorOf(bNodes, eid, VM_Total, tStep, a);
+			///@todo Carl, change to this:
+			//thisElement->giveBoundaryLocationArray(sideLocation, bNodes, &dofids, eid, s, &masterDofIDs);
+			//thisElement->computeBoundaryVectorOf(bNodes, eid, VM_Total, tStep, a);
 
 			sideLocation.resize(0);
 			masterDofIDs.resize(0);
