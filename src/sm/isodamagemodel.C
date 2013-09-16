@@ -80,16 +80,17 @@ IsotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 //
 {
     IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
-    double om;
+    double tempDamage;
     if ( mode == ElasticStiffness ) {
-        om = 0.0;
+        tempDamage = 0.0;
     } else {
-        om = status->giveTempDamage();
-        om = min(om, maxOmega);
+        tempDamage = status->giveTempDamage();
+        tempDamage = min(tempDamage, maxOmega);
     }
 
     this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
-    answer.times(1.0 - om);
+    answer.times(1.0 - tempDamage);
+//TODO - correction for tangent mode
 }
 
 
@@ -217,16 +218,17 @@ void IsotropicDamageMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, Ma
                                                          GaussPoint *gp, TimeStep *atTime)
 {
     IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
-    double om;
+    double tempDamage;
     if ( mode == ElasticStiffness ) {
-        om = 0.0;
+        tempDamage = 0.0;
     } else {
-        om = status->giveTempDamage();
-        om = min(om, maxOmega);
+        tempDamage = status->giveTempDamage();
+        tempDamage = min(tempDamage, maxOmega);
     }
 
     this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
-    answer.times(1.0 - om);
+    answer.times(1.0 - tempDamage);
+//TODO - correction for tangent mode
 }
 
 
@@ -234,16 +236,17 @@ void IsotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatRe
                                                       GaussPoint *gp, TimeStep *atTime)
 {
     IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
-    double om;
+    double tempDamage;
     if ( mode == ElasticStiffness ) {
-        om = 0.0;
+        tempDamage = 0.0;
     } else {
-        om = status->giveTempDamage();
-        om = min(om, maxOmega);
+        tempDamage = status->giveTempDamage();
+        tempDamage = min(tempDamage, maxOmega);
     }
 
     this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
-    answer.times(1.0 - om);
+    answer.times(1.0 - tempDamage);
+//TODO - correction for tangent mode
 }
 
 #ifdef __OOFEG

@@ -1487,6 +1487,13 @@ In the list of input variables, the tensile strength $f_t$ is not specified
 directly but through the corresponding strain at peak stress, 
 $\varepsilon_0=f_t/E$, denoted by keyword {\it e0}. Another input parameter
 is the characteristic crack opening $w_f$, denoted by keyword {\it wf}.
+
+Derivative can be expressed explicitly
+$$
+\frac{\partial\omega}{\partial\varepsilon} = - \frac{(\omega \varepsilon_f  - \varepsilon_f) \exp \left ( \frac{\omega \varepsilon}{\varepsilon_f}\right ) - \omega \varepsilon_0}{\varepsilon_f \varepsilon \exp \left ( \frac{\omega \varepsilon}{\varepsilon_f}\right ) - \varepsilon_0 \varepsilon}
+$$
+
+
 \item
 {\bf Cohesive crack with linear softening} is based on the same correspondence
 between crack opening and inelastic strain, but the cohesive law is assumed
@@ -1539,12 +1546,18 @@ $$
 \omega =\frac{\varepsilon_f}{\varepsilon_f-\varepsilon_0}\left(1-\frac{\varepsilon_0}{\varepsilon}\right)
 $$
 Again, to cover general conditions, $\varepsilon$ is replaced by $\kappa$.
+$$
+\frac{\partial\omega}{\partial\varepsilon} = \frac{\varepsilon_0 \varepsilon_f}{\varepsilon^2 ( \varepsilon_f - \varepsilon_0 )}
+$$
 \item
 {\bf Exponential softening stress-strain law} also uses two parameters
  $\varepsilon_0$ and $\varepsilon_f$, denoted by keywords {\it e0}
 and {\it ef}, but leads to a modified dependence of damage on strain:
 $$
 \omega =1-\frac{\varepsilon_0}{\varepsilon}\exp\left(-\frac{\varepsilon-\varepsilon_0}{\varepsilon_f-\varepsilon_0}\right)
+$$
+$$
+\frac{\partial\omega}{\partial\varepsilon} = \left[ \frac{1}{\varepsilon(\varepsilon_f-\varepsilon_0)} + \frac{1}{\varepsilon^2} \right] \varepsilon_0 \exp \left (\frac{\varepsilon_0-\varepsilon}{\varepsilon_f-\varepsilon_0} \right )
 $$
 \item
 {\bf Mazars stress-strain law} uses three parameters, $\varepsilon_0$,
