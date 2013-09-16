@@ -32,7 +32,7 @@ void XFEMDebugTools :: WriteTrianglesToVTK(const std :: string &iName, const std
     // Write points
     file << "POINTS " << numPoints << "double\n";
 
-    for ( int i = 0; i < numTri; i++ ) {
+    for ( size_t i = 0; i < numTri; i++ ) {
         for ( int j = 1; j <= 3; j++ ) {
             const double &x = iTriangles.at(i).giveVertex(j).at(1);
             const double &y = iTriangles.at(i).giveVertex(j).at(2);
@@ -44,7 +44,7 @@ void XFEMDebugTools :: WriteTrianglesToVTK(const std :: string &iName, const std
     // Write segments
     file << "CELLS " << numTri << " " << numTri * 4 << "\n";
 
-    for ( int i = 0; i < numTri; i++ ) {
+    for ( size_t i = 0; i < numTri; i++ ) {
         file << 3 << " " << 3 * i << " " << 3 * i + 1 << " " << 3 * i + 2 << "\n";
     }
 
@@ -52,7 +52,7 @@ void XFEMDebugTools :: WriteTrianglesToVTK(const std :: string &iName, const std
     // Write cell types
     file << "CELL_TYPES " << numTri << "\n";
     int vtkCellType = 5;     // triangle
-    for ( int i = 0; i < numTri; i++ ) {
+    for ( size_t i = 0; i < numTri; i++ ) {
         file << vtkCellType << "\n";
     }
 
