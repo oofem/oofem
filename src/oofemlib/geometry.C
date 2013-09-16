@@ -1323,6 +1323,7 @@ void PolygonLine :: printVTK()
 
 	vtkFileName.append("Step");
 	char stepString[100];
+
 	sprintf(stepString, "%d", stepInd);
 	vtkFileName.append(stepString);
 

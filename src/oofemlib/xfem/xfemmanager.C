@@ -234,4 +234,12 @@ void XfemManager :: updateYourself()
         enrichmentItemList->at(i)->updateGeometry();
     }
 }
+
+void XfemManager :: propagateFronts()
+{
+    for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
+        enrichmentItemList->at(i)->propagateFronts();
+    }
+}
+
 } // end namespace oofem

@@ -130,8 +130,10 @@ public:
     // Should update receiver geometry to the state reached at given time step.
     virtual void updateGeometry(TimeStep *tStep) {};
     virtual void updateGeometry();
+    virtual void propagateFronts();
 
     int giveStartOfDofIdPool() const { return this->startOfDofIdPool; };
+    int giveEndOfDofIdPool() const { return this->endOfDofIdPool; };
     void computeDofManDofIdArray(IntArray &DofIdArray, DofManager *dMan); // list of id's a particular dof manager supports
     void giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber) const; // list of id's for the enrichment dofs
 
@@ -193,6 +195,7 @@ protected:
     /// Link to associated Xfem manager.
     XfemManager *xMan;
     int startOfDofIdPool; // points to the first available dofId number associated with the ei
+    int endOfDofIdPool;
 
     /// Geometry associated with EnrichmentItem.
     IntArray enrichmentDomainNumbers;

@@ -133,6 +133,9 @@ public:
      * Update enrichment items (level sets).
      */
     void updateYourself();
+
+    void propagateFronts();
+
 };
 } // end namespace oofem
 #endif // xfemmanager_h
