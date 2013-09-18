@@ -36,6 +36,7 @@
 #include "mathfem.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "gaussintegrationrule.h"
 
 namespace oofem {
 void
@@ -384,7 +385,7 @@ FEI3dTetLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray
     b.beDifferenceOf(*cellgeo.giveVertexCoordinates(snodes.at(3)), *cellgeo.giveVertexCoordinates(snodes.at(1)));
     answer.beVectorProductOf(a, b);
 
-    return answer.normalize()*0.5;
+    return answer.normalize();
 }
 
 double
@@ -441,5 +442,21 @@ FEI3dTetLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
              (c1.at(1)*c2.at(2) - c2.at(1)*c1.at(2))*c3.at(3) ) * 0.5;
 }
 
+IntegrationRule *
+FEI3dTetLin :: giveIntegrationRule(int order)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    int points = iRule->getRequiredNumberOfIntegrationPoints(_Tetrahedra, order + 0);
+    iRule->SetUpPointsOnTetrahedra(points, _Unknown);
+    return iRule;
+}
 
+IntegrationRule *
+FEI3dTetLin :: giveBoundaryIntegrationRule(int order, int boundary)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 0);
+    iRule->SetUpPointsOnTriangle(points, _Unknown);
+    return iRule;
+}
 } // end namespace oofem

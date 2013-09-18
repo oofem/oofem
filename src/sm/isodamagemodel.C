@@ -66,12 +66,7 @@ IsotropicDamageMaterial :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-    if ( ( mode == _3dMat ) || ( mode == _PlaneStress ) ||
-        ( mode == _PlaneStrain ) || ( mode == _1dMat ) ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain || mode == _1dMat;
 }
 
 
@@ -203,7 +198,7 @@ void IsotropicDamageMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, Ma
             tempKappa = status->giveTempKappa();
             // effective stress
             stress.times( 1. / ( 1 - tempDamage ) );
-            //compute derivative of eqstrain wrt strain
+            //Computes derivative of the equivalent strain with regards to strain
             this->computeEta(eta, strain, gp, atTime);
             //compute derivative of damage function
             double damagePrime = damageFunctionPrime(tempKappa, gp);

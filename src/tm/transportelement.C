@@ -121,7 +121,7 @@ TransportElement :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 
 void
-TransportElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
+TransportElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
                                               TimeStep *tStep)
 //
 // returns characteristics vector of receiver according to requested type
@@ -287,7 +287,7 @@ TransportElement :: computeEdgeIpGlobalCoords(FloatArray &answer, const FloatArr
 {
     FEInterpolation *interp = this->giveInterpolation();
     if ( dynamic_cast< FEInterpolation2d * >(interp) ) {
-        dynamic_cast< FEInterpolation3d * >(interp)->edgeLocal2global( answer, iEdge, lcoords, FEIElementGeometryWrapper(this) );
+        dynamic_cast< FEInterpolation2d * >(interp)->edgeLocal2global( answer, iEdge, lcoords, FEIElementGeometryWrapper(this) );
     } else if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
         dynamic_cast< FEInterpolation3d * >(interp)->edgeLocal2global( answer, iEdge, lcoords, FEIElementGeometryWrapper(this) );
     }
@@ -316,7 +316,7 @@ TransportElement :: computeSurfIpGlobalCoords(FloatArray &answer, const FloatArr
 {
     FEInterpolation *interp = this->giveInterpolation();
     if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
-        dynamic_cast< FEInterpolation3d * >(interp)->edgeLocal2global( answer, iSurf, lcoord, FEIElementGeometryWrapper(this) );
+        dynamic_cast< FEInterpolation3d * >(interp)->surfaceLocal2global( answer, iSurf, lcoord, FEIElementGeometryWrapper(this) );
     }
 }
 
@@ -528,6 +528,187 @@ TransportElement :: computeInternalForcesVectorAt(FloatArray &answer, TimeStep *
     }
 }
 
+
+void
+TransportElement :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
+{
+    answer.resize(0);
+
+    if ( !( load->giveType() == TransmissionBC && type == ExternalForcesVector ) && 
+         !( load->giveType() == ConvectionBC && type == InternalForcesVector ) ) {
+        return;
+    }
+
+    FloatArray gcoords, val, n, unknowns;
+    IntArray dofid;
+
+    this->giveDefaultDofManDofIDMask(1, dofid);
+
+    ///@todo Deal with coupled fields (I think they should be another class of problems completely).
+    FEInterpolation *fieldInterp = this->giveInterpolation((DofIDItem)dofid.at(1));
+    FEInterpolation *interp = this->giveInterpolation();
+    IntegrationRule *iRule = interp->giveIntegrationRule(load->giveApproxOrder() + fieldInterp->giveInterpolationOrder());
+
+    if ( load->giveType() == ConvectionBC ) {
+        this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, unknowns);
+    }
+
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
+        FloatArray &lcoords = *gp->giveCoordinates();
+
+        fieldInterp->evalN(n, lcoords, FEIElementGeometryWrapper(this));
+        double detJ = interp->giveTransformationJacobian(lcoords, FEIElementGeometryWrapper(this));
+        interp->local2global(gcoords, lcoords, FEIElementGeometryWrapper(this));
+        double dV = this->giveThicknessAt(gcoords) * gp->giveWeight() * detJ;
+
+        if ( load->giveType() == TransmissionBC ) {
+            if ( load->giveFormulationType() == Load :: FT_Entity ) {
+                load->computeValueAt(val, tStep, lcoords, mode);
+            } else {
+                load->computeValueAt(val, tStep, gcoords, mode);
+            }
+            val.negated();
+        } else {
+            double field = n.dotProduct(unknowns);
+            ///@todo Rather have this:
+            //convectiveload->computeValueAt(val, field, tStep, gcoords, mode);
+            if ( load->giveFormulationType() == Load :: FT_Entity ) {
+                load->computeValueAt(val, tStep, lcoords, mode);
+            } else {
+                load->computeValueAt(val, tStep, gcoords, mode);
+            }
+            val.at(1) -= field;
+            val.times( -1.0 * load->giveProperty('a'));
+        }
+
+        answer.add(val.at(1) * dV, n);
+    }
+
+    delete iRule;
+}
+
+
+void
+TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
+{
+    answer.resize(0);
+
+    if ( !( load->giveType() == TransmissionBC && type == ExternalForcesVector ) && 
+         !( load->giveType() == ConvectionBC && type == InternalForcesVector ) ) {
+        return;
+    }
+
+    FloatArray gcoords, val, n, unknowns;
+    IntArray dofid;
+
+    this->giveDefaultDofManDofIDMask(1, dofid);
+
+    ///@todo Deal with coupled fields (I think they should be another class of problems completely).
+    FEInterpolation *fieldInterp = this->giveInterpolation((DofIDItem)dofid.at(1));
+    FEInterpolation *interp = this->giveInterpolation();
+    IntegrationRule *iRule = interp->giveBoundaryIntegrationRule(load->giveApproxOrder() + 1 + fieldInterp->giveInterpolationOrder(), boundary);
+
+    if ( load->giveType() == ConvectionBC ) {
+        IntArray bNodes;
+        fieldInterp->boundaryGiveNodes(bNodes, boundary);
+        this->computeBoundaryVectorOf(bNodes, EID_ConservationEquation, VM_Total, tStep, unknowns);
+    }
+
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
+        FloatArray &lcoords = *gp->giveCoordinates();
+
+        fieldInterp->boundaryEvalN(n, boundary, lcoords, FEIElementGeometryWrapper(this));
+        double detJ = interp->boundaryGiveTransformationJacobian(boundary, lcoords, FEIElementGeometryWrapper(this));
+        interp->boundaryLocal2Global(gcoords, boundary, lcoords, FEIElementGeometryWrapper(this));
+        double dA = this->giveThicknessAt(gcoords) * gp->giveWeight() * detJ;
+
+        if ( load->giveType() == TransmissionBC ) {
+            if ( load->giveFormulationType() == Load :: FT_Entity ) {
+                load->computeValueAt(val, tStep, lcoords, mode);
+            } else {
+                load->computeValueAt(val, tStep, gcoords, mode);
+            }
+            val.negated();
+        } else if ( load->giveType() == ConvectionBC ) {
+            double field = n.dotProduct(unknowns);
+            if ( load->giveFormulationType() == Load :: FT_Entity ) {
+                load->computeValueAt(val, tStep, lcoords, mode);
+            } else {
+                load->computeValueAt(val, tStep, gcoords, mode);
+            }
+            val.at(1) -= field;
+            val.times( -1.0 * load->giveProperty('a'));
+        }
+
+        answer.add( val.at(1) * dA, n);
+    }
+
+    delete iRule;
+}
+
+
+void
+TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
+{
+    answer.resize(0);
+
+    if ( !( load->giveType() == TransmissionBC && type == ExternalForcesVector ) && 
+         !( load->giveType() == ConvectionBC && type == InternalForcesVector ) ) {
+        return;
+    }
+
+    FloatArray gcoords, val, n, unknowns;
+    IntArray dofid;
+
+    this->giveDefaultDofManDofIDMask(1, dofid);
+
+    ///@todo Deal with coupled fields (I think they should be another class of problems completely).
+    FEInterpolation *fieldInterp = this->giveInterpolation((DofIDItem)dofid.at(1));
+    FEInterpolation *interp = this->giveInterpolation();
+    IntegrationRule *iRule = interp->giveBoundaryEdgeIntegrationRule(load->giveApproxOrder() + 1 + fieldInterp->giveInterpolationOrder(), boundary);
+
+    if ( load->giveType() == ConvectionBC ) {
+        IntArray bNodes;
+        fieldInterp->boundaryGiveNodes(bNodes, boundary);
+        this->computeBoundaryVectorOf(bNodes, EID_ConservationEquation, VM_Total, tStep, unknowns);
+    }
+
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
+        FloatArray &lcoords = *gp->giveCoordinates();
+
+        fieldInterp->boundaryEdgeEvalN(n, boundary, lcoords, FEIElementGeometryWrapper(this));
+        double detJ = interp->boundaryEdgeGiveTransformationJacobian(boundary, lcoords, FEIElementGeometryWrapper(this));
+        interp->boundaryEdgeLocal2Global(gcoords, boundary, lcoords, FEIElementGeometryWrapper(this));
+        double dL = this->giveThicknessAt(gcoords) * gp->giveWeight() * detJ;
+
+        if ( load->giveType() == TransmissionBC ) {
+            if ( load->giveFormulationType() == Load :: FT_Entity ) {
+                load->computeValueAt(val, tStep, lcoords, mode);
+            } else {
+                load->computeValueAt(val, tStep, gcoords, mode);
+            }
+            val.negated();
+        } else if ( load->giveType() == ConvectionBC ) {
+            double field = n.dotProduct(unknowns);
+            if ( load->giveFormulationType() == Load :: FT_Entity ) {
+                load->computeValueAt(val, tStep, lcoords, mode);
+            } else {
+                load->computeValueAt(val, tStep, gcoords, mode);
+            }
+            val.at(1) -= field;
+            val.times( -1.0 * load->giveProperty('a'));
+        }
+
+        answer.add( val.at(1) * dL, n);
+    }
+
+    delete iRule;
+}
+
+
 void
 TransportElement :: computeExternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
@@ -643,7 +824,7 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
             this->computeEgdeNAt(n, iEdge, * lcoords);
             dV = this->computeEdgeVolumeAround(gp, iEdge);
 
-            if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+            if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
                 edgeLoad->computeValueAt(val, tStep, * lcoords, mode);
             } else {
                 FloatArray globalIPcoords;
@@ -696,7 +877,7 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
             this->computeSurfaceNAt( n, iSurf, * gp->giveCoordinates() );
             double dV = this->computeSurfaceVolumeAround(gp, iSurf);
 
-            if ( surfLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+            if ( surfLoad->giveFormulationType() == Load :: FT_Entity ) {
                 surfLoad->computeValueAt(val, tStep, * gp->giveCoordinates(), mode);
             } else {
                 this->computeSurfIpGlobalCoords(globalIPcoords, * gp->giveCoordinates(), iSurf);

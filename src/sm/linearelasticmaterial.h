@@ -36,12 +36,8 @@
 #define linearelasticmaterial_h
 
 #include "structuralmaterial.h"
-#include "dictionary.h"
-#include "floatarray.h"
-#include "floatmatrix.h"
 
 namespace oofem {
-class GaussPoint;
 
 /**
  * This class is a abstract base class for all linear elastic material models
@@ -67,30 +63,17 @@ public:
     /// Destructor.
     virtual ~LinearElasticMaterial() { }
 
-    virtual void giveStiffnessMatrix(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *atTime);
-    /**
-     * Method for computing 2d plane stress (with rotation field)
-     * stiffness matrix of receiver using generic givePlaneStressStiffMtrx.
-     * @param answer Stiffness matrix.
-     * @param mode Material response mode.
-     * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
-     */
-    void givePlaneStressRotStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
     virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
     virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
     virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    virtual void giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    virtual void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    virtual void giveRealStressVector_Fiber(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
 
     virtual int hasNonLinearBehaviour() { return 0; }
-    virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "LinearElasticMaterial"; }
-    virtual classType giveClassID() const { return LinearElasticMaterialClass; }
 };
 } // end namespace oofem
 #endif // linearelasticmaterial_h

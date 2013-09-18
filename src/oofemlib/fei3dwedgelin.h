@@ -83,6 +83,9 @@ public:
                                                      const FEICellGeometry &cellgeo);
     virtual void computeLocalSurfaceMapping(IntArray &nodes, int iSurf);
 
+    virtual IntegrationRule *giveIntegrationRule(int order);
+    virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary);
+
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
     void giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords);

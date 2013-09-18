@@ -375,7 +375,7 @@ StrainVector :: computeStrainNorm() const
     } else if ( myMode == _PlaneStress ) {
         // 2d problem: plane stress
         return sqrt( .5 * ( 2. * values [ 0 ] * values [ 0 ] + 2 * values [ 1 ] * values [ 1 ] + values [ 2 ] * values [ 2 ] ) );
-    } else if ( myMode == _PlaneStrain || myMode == _3dRotContinuum ) {
+    } else if ( myMode == _PlaneStrain ) {
         //  plane strain or axisymmetry
         return sqrt( .5 * ( 2. * values [ 0 ] * values [ 0 ] + 2. * values [ 1 ] * values [ 1 ] + 2. * values [ 2 ] * values [ 2 ] +
                             values [ 3 ] * values [ 3 ] ) );
@@ -411,17 +411,6 @@ StrainVector :: applyElasticStiffness(StressVector &stress, const double EModulu
         stress(1) = factor * ( nu * values [ 0 ] + ( 1. - nu ) * values [ 1 ] );
         stress(2) = nu * ( stress(0) + stress(1) );
         stress(3) = factor * ( ( ( 1. - 2. * nu ) / 2. ) * values [ 3 ] );
-    } else if ( myMode == _3dRotContinuum ) {
-        // Order:  r,  theta, z,  zr
-        if ( nu >= 0.5 ) {
-            OOFEM_ERROR("StrainVector::applyElasticStiffness: nu must be less than 0.5");
-        }
-
-        const double factor = EModulus / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
-        stress(0) = factor * ( ( 1. - nu ) * values [ 0 ] + nu * values [ 1 ] + nu * values [ 2 ] );
-        stress(1) = factor * ( nu * values [ 0 ] + ( 1. - nu ) * values [ 1 ] + nu * values [ 2 ] );
-        stress(2) = factor * ( nu * values [ 0 ] + nu * values [ 1 ] + ( 1. - nu ) * values [ 2 ] );
-        stress(3) = factor * ( ( 1. - 2. * nu ) / 2. ) * values [ 3 ];
     } else {
         if ( nu >= 0.5 ) {
             OOFEM_ERROR("StrainVector::applyElasticStiffness: nu must be less than 0.5");
@@ -481,16 +470,6 @@ StrainVector :: applyDeviatoricElasticStiffness(StressVector &stress,
         stress(2) = 2. * GModulus * values [ 2 ];
         stress(3) = GModulus * values [ 3 ];
         stress(4) = values [ 4 ];
-    } else if ( myMode == _3dRotContinuum ) {
-        if ( stress.giveStressStrainMode() != _3dRotContinuum ) {
-            stress.letStressStrainModeBe(_3dRotContinuum);
-        }
-
-        // Order: r,  theta,  z,  zr
-        stress(0) = 2. * GModulus * values [ 0 ];
-        stress(1) = 2. * GModulus * values [ 1 ];
-        stress(2) = 2. * GModulus * values [ 2 ];
-        stress(3) = GModulus * values [ 3 ];
     } else {
         if ( stress.giveStressStrainMode() != _3dMat ) {
             stress.letStressStrainModeBe(_3dMat);

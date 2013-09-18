@@ -69,6 +69,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
     virtual MaterialMode giveMaterialMode() { return _2dHeat; }
+    virtual double giveThicknessAt(const FloatArray &gcoords);
 
     virtual Interface *giveInterface(InterfaceType t);
 

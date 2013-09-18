@@ -48,12 +48,14 @@
 #define _IFT_XfemManager_numberOfGeometryItems "numberofgeometryitems"  // -> numberOfEnrichmentDomains
 #define _IFT_XfemManager_numberOfEnrichmentItems "numberofenrichmentitems"
 #define _IFT_XfemManager_numberOfEnrichmentFunctions "numberofenrichmentfunctions"
+#define _IFT_XfemManager_numberOfGpPerTri "numberofgppertri"
 //@}
+
+//#define ENABLE_XFEM_CPP11
 
 namespace oofem {
 class Domain;
 class EnrichmentItem;
-//class EnrichmentFunction;
 class IntArray;
 class Element;
 class DataStream;
@@ -63,6 +65,7 @@ class DataStream;
  *
  * @author Ruzena Chamrova
  * @author Jim Brouzoulis
+ * @author Erik Svenning
  */
 class XfemManager
 {
@@ -71,37 +74,30 @@ protected:
     /// Enrichment item list.
     AList< EnrichmentItem > *enrichmentItemList;
 
-    /// Index of next available dofId from pool.
     int numberOfEnrichmentItems;
 
-    
+    /**
+     * The number of Gauss points to be used in each sub-triangle when
+     * subdividing cut elements.
+     */
+    int mNumGpPerTri;
 
 public:
-    enum XfemType { // not in use right now
-        SPLIT = 1, TIP = 4, STANDARD = 0
-    };
     /// Constructor.
     XfemManager(Domain *domain);
     /// Destructor.
     ~XfemManager();
 
-
-    // Returns the active enrichment items for a particular element, the enrichment items
-    // are referenced by a number from the domain
-    void giveActiveEIsFor(IntArray &answer, const Element *elem);
+    int giveNumGpPerTri() const {return mNumGpPerTri;} /// Number of Gauss points per sub-triangle in cut elements.
 
     bool isElementEnriched(const Element *elem);
 
     /// Accessor.
     EnrichmentItem *giveEnrichmentItem(int n);
-    int giveNumberOfEnrichmentItems() { return enrichmentItemList->giveSize(); }
+    int giveNumberOfEnrichmentItems() const { return enrichmentItemList->giveSize(); }
 
     void createEnrichedDofs();
     void addEnrichedDofsTo( DofManager *dMan, IntArray &dofIdArray );
-
-    /// Computes the type of node enrichment, returns zero if the node is not enriched.
-    // Old method: should instead return an array if there are several active /JB
-    XfemType computeNodeEnrichmentType(int nodeNumber); 
 
     /// Initializes receiver according to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
@@ -109,11 +105,7 @@ public:
     int instanciateYourself(DataReader *dr);
     const char *giveClassName() const { return "XfemManager"; }
     const char *giveInputRecordName() const { return _IFT_XfemManager_Name; }
-    
-    /// Wrapper for updating the integration rule.
-    void updateIntegrationRule();
 
-    //Domain *giveDomain() { return emodel->giveDomain(domainIndex); }
     Domain *giveDomain() { return this->domain; }
 
     /// Clear the receiver
@@ -137,6 +129,12 @@ public:
      * @exception ContextIOERR exception if error encountered.
      */
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+
+
+    /**
+     * Update enrichment items (level sets).
+     */
+    void updateYourself();
 };
 } // end namespace oofem
 #endif // xfemmanager_h

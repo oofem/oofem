@@ -109,13 +109,18 @@ public:
 
     virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element);
 
-    virtual void giveRealStresses(FloatArray &answer, GaussPoint *gp,
-                                  const FloatArray &reducedStrainIncrement, TimeStep *tStep);
+    virtual void giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+    virtual void giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+    virtual void giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+    virtual void giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
 
-    virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                 MatResponseMode mode,
-                                                 GaussPoint *gp,
-                                                 TimeStep *tStep);
+    virtual void giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+    virtual void giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+    virtual void giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+    virtual void giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+    virtual void giveRealStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+
+    virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
 
@@ -123,6 +128,7 @@ public:
     virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dShellStiffMtrx(FloatMatrix &answer,MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *);
@@ -195,12 +201,7 @@ public:
 #endif
 
 protected:
-
-    void giveIntegrated3dShellStress(FloatArray &answer, GaussPoint *gp);
-
     double giveArea();
-
-    friend class Material;
 };
 
 /**
@@ -212,17 +213,14 @@ public:
     LayeredCrossSectionInterface() { }
 
     /**
-     * Computes full 3D strain vector in element layer. This function is necessary
-     * if layered cross section is specified. If it is implemented, the testElementExtension
-     * service should return nonzero for Element_LayeredSupport parameter. This service is used by
-     * layered cross section models.
+     * Computes full 3D strain vector in element layer.
+     * This function is necessary if layered cross section is specified..
      * @param answer Full layer strain vector.
      * @param masterGp Element integration point.
      * @param slaveGp Slave integration point representing particular layer.
      * @param tStep Time step.
      */
-    virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
-        GaussPoint *slaveGp, TimeStep *tStep) {} ;
+    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *slaveGp, TimeStep *tStep) = 0;
 };
 
 class LayeredIntegrationRule : public IntegrationRule

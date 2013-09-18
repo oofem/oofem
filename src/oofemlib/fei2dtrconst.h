@@ -43,9 +43,6 @@ namespace oofem {
  */
 class FEI2dTrConst : public FEInterpolation2d
 {
-protected:
-    int xind, yind;
-
 public:
     FEI2dTrConst(int ind1, int ind2) : FEInterpolation2d(0) {
         xind = ind1;
@@ -70,6 +67,8 @@ public:
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+
+    virtual IntegrationRule *giveIntegrationRule(int order);
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);

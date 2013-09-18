@@ -54,7 +54,7 @@
  #include "combuff.h"
 #endif
 
-#define ALLOC(size) (double*)malloc(sizeof(double) * size);
+#define ALLOC(size) (double*)malloc(sizeof(double) * (size));
 
 #define RESIZE(n) \
     { \
@@ -115,6 +115,36 @@ FloatArray :: FloatArray(const FloatArray &src) :
         values = NULL;
     }
 }
+
+#if __cplusplus > 199711L
+FloatArray :: FloatArray(std::initializer_list<double> list)
+{
+    this->size = this->allocatedSize = list.size();
+    if ( this->size ) {
+        this->values = ALLOC(this->size);
+        double *p = this->values;
+        for (double x: list) {
+            *p = x;
+            p++;
+        }
+    } else {
+        this->values = NULL;
+    }
+}
+
+
+FloatArray &FloatArray :: operator=(std::initializer_list<double> list)
+{
+    RESIZE(list.size());
+    double *p = this->values;
+    for (double x: list) {
+        *p = x;
+        p++;
+    }
+    return * this;
+}
+
+#endif
 
 FloatArray :: ~FloatArray()
 {
@@ -261,9 +291,11 @@ void FloatArray :: plusProduct(const FloatMatrix &b, const FloatArray &s, double
 #  endif
 
 #ifdef __LAPACK_MODULE
+    int nRows = b.giveNumberOfRows();
+    int nColumns = b.giveNumberOfColumns();
     double beta = 1.;
     int inc = 1;
-    dgemv_("t", &nRows, &nColumns, &dV, aMatrix.givePointer(), &nRows, anArray.values, &inc, &beta, this->values, &inc, nColumns, nColumns, nRows );
+    dgemv_("t", &nRows, &nColumns, &dV, b.givePointer(), &nRows, s.values, &inc, &beta, this->values, &inc, nColumns, nColumns, nRows );
 #else
     for ( int i = 1; i <= b.giveNumberOfColumns(); i++ ) {
         double sum = 0.;
@@ -423,6 +455,35 @@ void FloatArray :: beVectorProductOf(const FloatArray &v1, const FloatArray &v2)
     this->at(3) = v1.at(1) * v2.at(2) - v1.at(2) * v2.at(1);
 }
 
+int FloatArray :: giveIndexMinElem(void){
+    int index=1;
+    if (!this->size){
+        return -1;
+    }
+    double val = this->values[0];
+    for ( int i = 1; i < this->size; i++ ) {
+        if ( val > this->values [ i ]) {
+            val = this->values [ i ];
+            index=i+1;
+        }
+    }
+    return index;
+}
+
+int FloatArray :: giveIndexMaxElem(void){
+    int index=1;
+    if (!this->size){
+        return -1;
+    }
+    double val = this->values[0];
+    for ( int i = 1; i < this->size; i++ ) {
+        if ( val < this->values [ i ]) {
+            val = this->values [ i ];
+            index=i+1;
+        }
+    }
+    return index;
+}
 
 double FloatArray :: dotProduct(const FloatArray &x) const
 {
@@ -463,6 +524,60 @@ double FloatArray :: dotProduct(const FloatArray &x, int size) const
 double FloatArray :: distance(const FloatArray &x) const
 {
     return sqrt( this->distance_square(x) );
+}
+
+double FloatArray::distance(const FloatArray &iP1, const FloatArray &iP2) const
+{
+	double dist = 0.0;
+
+	// Vector from start P1 to point X
+	FloatArray u;
+	u.beDifferenceOf(*this, iP1);
+
+	// Line tangent vector
+	FloatArray t;
+	t.beDifferenceOf(iP2, iP1);
+	double l = norm(t);
+
+	if( l > 0.0)
+	{
+		t.normalize();
+		double s = dot(u, t);
+
+		if( s < 0.0 )
+		{
+			// X is closest to P1
+			dist = this->distance(iP1);
+			return dist;
+		}
+		else
+		{
+			if( s > l )
+			{
+				// X is closest to P2
+				dist = this->distance(iP2);
+				return dist;
+			}
+			else
+			{
+				double xi = s/l;
+				FloatArray q = (1.0-xi)*iP1 + xi*iP2;
+				dist = this->distance(q);
+				return dist;
+			}
+
+		}
+
+	}
+	else
+	{
+		// If the points P1 and P2 coincide,
+		// we can compute the distance to any
+		// of these points.
+		dist = this->distance(iP1);
+		return dist;
+	}
+
 }
 
 

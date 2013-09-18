@@ -87,5 +87,35 @@ protected:
     FluidDynamicMaterial *giveMaterial(int i) const { return static_cast< FluidDynamicMaterial * >( domain->giveMaterial(slaveMaterial( i )) ); }
     double giveTempVOF(GaussPoint *gp);
 };
+
+
+class TwoFluidMaterialStatus : public FluidDynamicMaterialStatus
+{
+protected:
+    FluidDynamicMaterialStatus *slaveStatus0;
+    FluidDynamicMaterialStatus *slaveStatus1;
+
+public:
+    /// Constructor - creates new BinghamFluidMaterial2Status with number n, belonging to domain d and IntegrationPoint g.
+    TwoFluidMaterialStatus(int n, Domain *d, GaussPoint *g, const IntArray &slaveMaterial);
+    /// Destructor
+    virtual ~TwoFluidMaterialStatus() { }
+
+    virtual  void printOutputAt(FILE *file, TimeStep *tStep);
+
+    virtual void initTempStatus();
+    virtual void updateYourself(TimeStep *tStep);
+
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+
+    void setSlaveStatus0(FluidDynamicMaterialStatus *s) { this->slaveStatus0 = s; }
+    void setSlaveStatus1(FluidDynamicMaterialStatus *s) { this->slaveStatus1 = s; }
+    FluidDynamicMaterialStatus *getSlaveStatus0() const { return this->slaveStatus0; }
+    FluidDynamicMaterialStatus *getSlaveStatus1() const { return this->slaveStatus1; }
+
+    virtual const char *giveClassName() const { return "BinghamFluidMaterialStatus"; }
+};
+
 } // end namespace oofem
 #endif // twofluidmaterial_h

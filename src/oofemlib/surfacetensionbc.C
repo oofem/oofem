@@ -80,6 +80,7 @@ void SurfaceTensionBoundaryCondition :: giveLocationArrays(std::vector<IntArray>
 
     Set *set = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = set->giveBoundaryList();
+    IntArray bNodes;
 
     rows.resize(boundaries.giveSize()/2);
     cols.resize(boundaries.giveSize()/2);
@@ -88,8 +89,10 @@ void SurfaceTensionBoundaryCondition :: giveLocationArrays(std::vector<IntArray>
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
         int boundary = boundaries.at(pos*2);
 
-        e->giveBoundaryLocationArray(rows[pos], boundary, eid, r_s);
-        e->giveBoundaryLocationArray(cols[pos], boundary, eid, c_s);
+        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+
+        e->giveBoundaryLocationArray(rows[pos], bNodes, eid, r_s);
+        e->giveBoundaryLocationArray(cols[pos], bNodes, eid, c_s);
     }
 }
 
@@ -105,7 +108,7 @@ void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *t
     OOFEM_ERROR("SurfaceTensionBoundaryCondition :: assemble - Not implemented yet.");
 
     FloatMatrix Ke;
-    IntArray r_loc, c_loc;
+    IntArray r_loc, c_loc, bNodes;
 
     Set *set = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = set->giveBoundaryList();
@@ -114,8 +117,10 @@ void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *t
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
         int boundary = boundaries.at(pos*2);
 
-        e->giveBoundaryLocationArray(r_loc, boundary, eid, r_s);
-        e->giveBoundaryLocationArray(c_loc, boundary, eid, c_s);
+        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+
+        e->giveBoundaryLocationArray(r_loc, bNodes, eid, r_s);
+        e->giveBoundaryLocationArray(c_loc, bNodes, eid, c_s);
         this->computeTangentFromElement(Ke, e, boundary, tStep);
         answer->assemble(r_loc, c_loc, Ke);
     }
@@ -136,7 +141,7 @@ void SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, TimeS
     }
 
     FloatArray fe;
-    IntArray loc, dofids, masterdofids;
+    IntArray loc, dofids, masterdofids, bNodes;
 
     Set *set = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = set->giveBoundaryList();
@@ -145,7 +150,9 @@ void SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, TimeS
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
         int boundary = boundaries.at(pos*2);
 
-        e->giveBoundaryLocationArray(loc, boundary, eid, s, &masterdofids);
+        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+
+        e->giveBoundaryLocationArray(loc, bNodes, eid, s, &masterdofids);
         this->computeLoadVectorFromElement(fe, e, boundary, tStep);
         answer.assemble(fe, loc);
         if ( eNorms ) {

@@ -66,11 +66,7 @@ Masonry02 :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-    if ( mode == _2dInterface ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _2dInterface;
 }
 
 IRResultType

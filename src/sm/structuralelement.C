@@ -89,8 +89,7 @@ StructuralElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
 // rMode parameter determines type of stiffness matrix to be requested
 // (tangent, secant, ...)
 {
-    static_cast<StructuralCrossSection * >( this->giveCrossSection() )
-    ->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+    this->giveStructuralCrossSection()->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
 }
 
 
@@ -126,39 +125,18 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
         OOFEM_ERROR("StructuralElement :: computeBoundaryLoadVector - No interpolator available\n");
     }
 
-    ///@todo This determines if its a edge or surface. We should make it more general and just have a "boundary"
-    bool surface;
-    if ( this->testElementExtension(Element_SurfaceLoadSupport) ) {
-        surface = true;
-    } else if ( this->testElementExtension(Element_EdgeLoadSupport) ) {
-        surface = false;
-    } else {
-        _error("computeBoundaryLoadVector : no boundary load support");
-        surface = true;
-    }
-
     FloatArray n_vec;
     FloatMatrix n, T;
     FloatArray force, globalIPcoords;
     int nsd = fei->giveNsd();
 
-    int approxOrder = load->giveApproxOrder() + this->giveApproxOrder();
-
-    ///@todo Have interpolator set up integration rule here instead.
-    IntegrationRule *iRule;
-
-    if ( surface ) {
-        iRule = this->GetSurfaceIntegrationRule(approxOrder);
-    } else {
-        iRule = new GaussIntegrationRule(1, this, 1, 1);
-        iRule->SetUpPointsOnLine(( int ) ceil( ( approxOrder + 1. ) / 2. ), _Unknown);
-    }
+    IntegrationRule *iRule = fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary);
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray &lcoords = *gp->giveCoordinates();
 
-        if ( load->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+        if ( load->giveFormulationType() == Load :: FT_Entity ) {
             load->computeValueAt(force, tStep, lcoords, mode);
         } else {
             fei->boundaryLocal2Global(globalIPcoords, boundary, lcoords, FEIElementGeometryWrapper(this));
@@ -168,20 +146,14 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
         ///@todo Make sure this part is correct.
         // We always want the global values in the end, so we might as well compute them here directly:
         // transform force
-        if ( load->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
+        if ( load->giveCoordSystMode() == Load :: CST_Global ) {
             // then just keep it in global c.s
         } else {
-            // transform from local edge to element local c.s
-            ///@todo This determines if its a edge or surface. We should make it more general and just have a "boundary"
-            if ( surface ) {
-                if ( this->computeLoadLSToLRotationMatrix(T, boundary, gp) ) {
-                    force.rotatedWith(T, 'n');
-                }
-            } else {
-                if ( this->computeLoadLEToLRotationMatrix(T, boundary, gp) ) {
-                    force.rotatedWith(T, 'n');
-                }
-            }
+            ///@todo Support this...
+            // transform from local boundary to element local c.s
+            /*if ( this->computeLoadLSToLRotationMatrix(T, boundary, gp) ) {
+                force.rotatedWith(T, 'n');
+            }*/
             // then to global c.s
             if ( this->computeLoadGToLRotationMtrx(T) ) {
                 force.rotatedWith(T, 't');
@@ -192,14 +164,9 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
         fei->boundaryEvalN(n_vec, boundary, lcoords, FEIElementGeometryWrapper(this));
         n.beNMatrixOf(n_vec, nsd);
 
-        double dV;
-        ///@todo This determines if its a edge or surface. We should make it more general and just have a "boundary"
-        if ( surface ) {
-            dV = this->computeSurfaceVolumeAround(gp, boundary);
-        } else {
-            dV = this->computeEdgeVolumeAround(gp, boundary);
-        }
-
+        ///@todo Some way to ask for the thickness at a global coordinate maybe?
+        double thickness = 1.0; // Should be the circumference for axisymm-elements.
+        double dV = thickness * gp->giveWeight() * fei->boundaryGiveTransformationJacobian(boundary, lcoords, FEIElementGeometryWrapper(this));
         answer.plusProduct(n, force, dV);
     }
 
@@ -268,7 +235,7 @@ StructuralElement :: computePointLoadVectorAt(FloatArray &answer, Load *load, Ti
     }
 
     // transform force
-    if ( pointLoad->giveCoordSystMode() == PointLoad :: PL_GlobalMode ) {
+    if ( pointLoad->giveCoordSystMode() == Load :: CST_Global ) {
         // transform from global to element local c.s
         if ( this->computeLoadGToLRotationMtrx(T) ) {
             answer.rotatedWith(T, 'n');
@@ -316,7 +283,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
             this->computeEgdeNMatrixAt(n, iEdge, gp);
             dV  = this->computeEdgeVolumeAround(gp, iEdge);
 
-            if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+            if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
                 edgeLoad->computeValueAt(force, tStep, * ( gp->giveCoordinates() ), mode);
             } else {
                 this->computeEdgeIpGlobalCoords(globalIPcoords, gp, iEdge);
@@ -324,7 +291,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
             }
 
             // transform force
-            if ( edgeLoad->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
+            if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
                 // transform from global to element local c.s
                 if ( this->computeLoadGToLRotationMtrx(T) ) {
                     force.rotatedWith(T, 'n');
@@ -397,7 +364,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
             this->computeSurfaceNMatrixAt(n, iSurf, gp);
             dV  = this->computeSurfaceVolumeAround(gp, iSurf);
 
-            if ( surfLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+            if ( surfLoad->giveFormulationType() == Load :: FT_Entity ) {
                 surfLoad->computeValueAt(force, tStep, * ( gp->giveCoordinates() ), mode);
             } else {
                 this->computeSurfIpGlobalCoords(globalIPcoords, gp, iSurf);
@@ -405,7 +372,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
             }
 
             // transform force
-            if ( surfLoad->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
+            if ( surfLoad->giveCoordSystMode() == Load :: CST_Global ) {
                 // transform from global to element local c.s
                 if ( this->computeLoadGToLRotationMtrx(T) ) {
                     force.rotatedWith(T, 'n');
@@ -443,11 +410,10 @@ StructuralElement :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer
 {
     // TemperatureLoad   *load;
     double dV;
-    GaussPoint *gp;
     FloatArray et, de, bde;
     FloatMatrix b, d;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
     //   if (this -> giveBodyLoadArray() -> isEmpty())         // no loads
     //      return NULL ;
 
@@ -456,7 +422,7 @@ StructuralElement :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer
     // complete volume
     answer.resize(0);
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
         cs->computeStressIndependentStrainVector(et, gp, tStep, mode);
         if ( et.giveSize() ) {
             this->computeBmatrixAt(gp, b);
@@ -489,7 +455,6 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     int nip, ndofs = computeNumberOfDofs(EID_MomentumBalance);
     double density, dV;
     FloatMatrix n;
-    GaussPoint *gp;
     GaussIntegrationRule iRule(1, this, 1, 1);
     IntArray mask;
 
@@ -512,7 +477,7 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     mass = 0.;
 
     for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule.getIntegrationPoint(i);
+        GaussPoint *gp = iRule.getIntegrationPoint(i);
         this->computeNmatrixAt(gp, n);
         density = this->giveMaterial()->give('d', gp);
         dV = this->computeVolumeAround(gp);
@@ -894,17 +859,13 @@ StructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
 
 
 void
-StructuralElement :: computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+StructuralElement :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
 // Computes the vector containing the stresses at the Gauss point gp of
 // the receiver, at time step stepN. The nature of these stresses depends
 // on the element's type.
 // this version assumes TOTAL LAGRANGE APPROACH
 {
-    FloatArray Epsilon;
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
-
-    this->computeStrainVector(Epsilon, gp, stepN);
-    cs->giveRealStresses(answer, gp, Epsilon, stepN);
+    this->giveStructuralCrossSection()->giveRealStresses(answer, gp, strain, stepN);
 }
 
 
@@ -920,13 +881,18 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
 // has been called for the same time step.
 //
 {
-    GaussPoint *gp;
     Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 
-    FloatMatrix b, R, GNT;
-    FloatArray bs, TotalStressVector;
-    double dV;
+    FloatMatrix b;
+    FloatArray u, stress, strain;
+
+    // This function can be quite costly to do inside the loops when one has many slave dofs.
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    // subtract initial displacements, if defined
+    if ( initialDisplacements ) {
+        u.subtract(*initialDisplacements);
+    }
 
     // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
     // as this is valid only if receiver has no nodes with slaves
@@ -934,31 +900,30 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
     answer.resize(0);
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
         this->computeBmatrixAt(gp, b);
 
         if ( useUpdatedGpRecord == 1 ) {
-            TotalStressVector = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+            stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
         } else {
-            this->computeStressVector(TotalStressVector, gp, tStep);
+            if ( !this->isActivated(tStep) ) {
+                strain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode()) );
+                strain.zero();
+            }
+            strain.beProductOf(b, u);
+            this->computeStressVector(stress, strain, gp, tStep);
         }
 
-        //
         // updates gp stress and strain record  acording to current
         // increment of displacement
-        //
-        if ( TotalStressVector.giveSize() == 0 ) {
+        if ( stress.giveSize() == 0 ) {
             break;
         }
 
-        //
         // now every gauss point has real stress vector
-        //
         // compute nodal representation of internal forces using f = B^T*Sigma dV
-        //
-        dV  = this->computeVolumeAround(gp);
-        bs.beTProductOf(b, TotalStressVector);
-        answer.add(dV, bs);
+        double dV = this->computeVolumeAround(gp);
+        answer.plusProduct(b, stress, dV);
     }
 
     // if inactive update state, but no contribution to global system
@@ -982,14 +947,18 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
 // has been called for the same time step.
 //
 {
-    GaussPoint *gp;
     Material *mat = this->giveMaterial();
-    IntegrationRule *iRule;
 
-    FloatMatrix b, R, GNT;
-    FloatArray temp, bs, TotalStressVector;
+    FloatMatrix b, R;
+    FloatArray temp, u, stress, strain;
     IntArray irlocnum;
-    double dV;
+
+    // This function can be quite costly to do inside the loops when one has many slave dofs.
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    // subtract initial displacements, if defined
+    if ( initialDisplacements ) {
+        u.subtract(*initialDisplacements);
+    }
 
     // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
     // as this is valid only if receiver has no nodes with slaves
@@ -1003,24 +972,28 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
 
     // loop over individual integration rules
     for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        iRule = integrationRulesArray [ ir ];
+        IntegrationRule *iRule = integrationRulesArray [ ir ];
 
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            gp = iRule->getIntegrationPoint(i);
+            GaussPoint *gp = iRule->getIntegrationPoint(i);
             this->computeBmatrixAt(gp, b);
 
             if ( useUpdatedGpRecord == 1 ) {
-                TotalStressVector = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )
-                                    ->giveStressVector();
+                stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
             } else {
-                this->computeStressVector(TotalStressVector, gp, tStep);
+                if ( !this->isActivated(tStep) ) {
+                    strain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode()) );
+                    strain.zero();
+                }
+                strain.beProductOf(b, u);
+                this->computeStressVector(stress, strain, gp, tStep);
             }
 
             //
             // updates gp stress and strain record  acording to current
             // increment of displacement
             //
-            if ( TotalStressVector.giveSize() == 0 ) {
+            if ( stress.giveSize() == 0 ) {
                 break;
             }
 
@@ -1029,10 +1002,8 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
             //
             // compute nodal representation of internal forces using f = B^T*Sigma dV
             //
-            dV  = this->computeVolumeAround(gp);
-            bs.beTProductOf(b, TotalStressVector);
-
-            m->add(dV, bs);
+            double dV = this->computeVolumeAround(gp);
+            m->plusProduct(b, stress, dV);
 
             // localize irule contribution into element matrix
             if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule, EID_MomentumBalance) ) {
@@ -1116,17 +1087,18 @@ StructuralElement :: updateYourself(TimeStep *tStep)
 
 
 void
-StructuralElement :: updateInternalState(TimeStep *stepN)
+StructuralElement :: updateInternalState(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
-    IntegrationRule *iRule;
-    FloatArray stress;
+    FloatArray stress, strain;
 
     // force updating strains & stresses
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
+        IntegrationRule *iRule = integrationRulesArray [ i ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            computeStressVector(stress, iRule->getIntegrationPoint(j), stepN);
+            GaussPoint *gp = iRule->getIntegrationPoint(j);
+            this->computeStrainVector(strain, gp, tStep);
+            this->computeStressVector(stress, strain, gp, tStep);
         }
     }
 }
@@ -1381,8 +1353,9 @@ StructuralElement :: adaptiveUpdate(TimeStep *tStep)
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            this->computeStrainVector(strain, iRule->getIntegrationPoint(j), tStep);
-            result &= interface->MMI_update(iRule->getIntegrationPoint(j), tStep, & strain);
+            GaussPoint *gp = iRule->getIntegrationPoint(j);
+            this->computeStrainVector(strain, gp, tStep);
+            result &= interface->MMI_update(gp, tStep, & strain);
         }
     }
 
@@ -1398,6 +1371,12 @@ StructuralElement :: initializeFrom(InputRecord *ir)
     result = Element :: initializeFrom(ir);
 
     return result;
+}
+
+
+StructuralCrossSection *StructuralElement::giveStructuralCrossSection()
+{
+    return static_cast< StructuralCrossSection * >( this->giveCrossSection() );
 }
 
 

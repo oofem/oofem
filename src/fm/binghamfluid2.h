@@ -115,8 +115,8 @@ protected:
     double mu_inf;
     // Stress growth rate - parameter controlling the shape of regularized model.
     double stressGrowthRate;
-public:
 
+public:
     /**
      * Constructor. Creates material with given number, belonging to given domain.
      * @param n Material number.

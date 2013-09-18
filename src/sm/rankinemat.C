@@ -64,7 +64,7 @@ RankineMat :: RankineMat(int n, Domain *d) : StructuralMaterial(n, d)
 int
 RankineMat :: hasMaterialModeCapability(MaterialMode mode)
 {
-    return ( mode == _PlaneStress );
+    return mode == _PlaneStress;
 }
 
 

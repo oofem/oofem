@@ -43,6 +43,7 @@
 #include "geneigvalsolvertype.h"
 #include "contextioerr.h"
 #include "classfactory.h"
+#include "dofmanager.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

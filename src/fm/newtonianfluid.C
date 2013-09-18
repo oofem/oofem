@@ -112,8 +112,6 @@ NewtonianFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gaus
     if ( gp->giveMaterialMode() == _2dFlow ) {
         double ekk = eps.at(1) + eps.at(2);
 
-        //if (fabs(ekk) > 1.e-3) printf ("Non-zero volumetric strain (ev=%e), element %d)\n", ekk, gp->giveElement()->giveNumber());
-
         answer.at(1) = 2.0 * viscosity * ( eps.at(1) - ekk / 3.0 );
         answer.at(2) = 2.0 * viscosity * ( eps.at(2) - ekk / 3.0 );
         answer.at(3) = eps.at(3) * viscosity;

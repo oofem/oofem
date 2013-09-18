@@ -112,8 +112,8 @@ public:
     virtual int giveNumberOfInternalDofManagers() { return 0; }
     /// Gives an internal dof manager from receiver.
     virtual DofManager *giveInternalDofManager(int i) { return NULL; }
-    
-     
+
+
     /**
      * @return Associated load time function of receiver.
      */
@@ -155,6 +155,9 @@ public:
      * @param s Scale factor.
      */
     virtual void scale(double s) { }
+
+    /// Performs post initialization steps.
+    virtual void postInitialize() { }
 
     // Overloaded methods:
     virtual IRResultType initializeFrom(InputRecord *ir);

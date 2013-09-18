@@ -446,12 +446,7 @@ ConcreteDPM :: initializeFrom(InputRecord *ir)
 int
 ConcreteDPM :: hasMaterialModeCapability(MaterialMode mMode)
 {
-    if ( ( mMode == _3dMat ) ||
-        ( mMode == _PlaneStrain ) ) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return mMode == _3dMat || mMode == _PlaneStrain;
 }
 
 void
@@ -824,7 +819,7 @@ ConcreteDPM :: performPlasticityReturn(GaussPoint *gp,
 
 
 bool
-ConcreteDPM :: checkForVertexCase(double answer,
+ConcreteDPM :: checkForVertexCase(double &answer,
                                   const double sig,
                                   const double tempKappa)
 {
@@ -1668,7 +1663,7 @@ ConcreteDPM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                              GaussPoint *gp,
                                              TimeStep *atTime)
 {
-    if ( gp->giveMaterialMode() == _3dMat || gp->giveMaterialMode() ==  _PlaneStrain || gp->giveMaterialMode() == _3dRotContinuum  ) {
+    if ( gp->giveMaterialMode() == _3dMat || gp->giveMaterialMode() ==  _PlaneStrain ) {
         double omega = 0.;
         ConcreteDPMStatus *status = giveStatus(gp);
         if ( mode == ElasticStiffness ) {
@@ -1682,6 +1677,8 @@ ConcreteDPM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
             this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
             answer.times(1. - omega);
         }
+    } else {
+        OOFEM_ERROR("ConcreteDPM :: give3dMaterialStiffnessMatrix - Unsupported material mode");
     }
 }
 

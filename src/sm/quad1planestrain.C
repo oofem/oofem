@@ -250,7 +250,7 @@ Quad1PlaneStrain :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdg
         aNode = 4;
         bNode = 1;
     } else {
-        _error("computeEdgeVolumeAround: wrong egde number");
+        _error("computeLoadLEToLRotationMatrix: wrong egde number");
     }
 
     nodeA = this->giveNode(aNode);

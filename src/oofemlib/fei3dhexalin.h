@@ -79,6 +79,9 @@ public:
     virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo);
 
+    virtual IntegrationRule *giveIntegrationRule(int order);
+    virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary);
+
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
     void giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords);

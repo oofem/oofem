@@ -3,6 +3,7 @@
 \usepackage{graphicx}
 %\usepackage{hyperref}
 \usepackage{amssymb,amsmath}
+\usepackage{longtable}
 \input{include.tex}
 
 \renewcommand{\topfraction}{0.99}    % 99% of page top can be a float
@@ -1351,16 +1352,14 @@ in the strain space and plays a similar role to the choice of a yield
 condition in plasticity.
 The following definitions of equivalent strain are currently supported:
 \begin{itemize}
-\item
-{\bf Mazars} (1984) definition based on norm of positive part of strain:
+\item {\bf Mazars} (1984) definition based on norm of positive part of strain:
 \begin{equation}
 \label{mazars}
 \tilde\varepsilon=\sqrt{\displaystyle{\sum_{I=1}^{3}}\langle\varepsilon_I\rangle^2}
 \end{equation}
 where $\langle\varepsilon_I\rangle$ are positive parts of 
 principal values of the strain tensor $\mbf{\varepsilon}$.
-\item
-Definitions derived from the {\bf Rankine} criterion of maximum principal stress:
+\item Definitions derived from the {\bf Rankine} criterion of maximum principal stress:
 \begin{eqnarray}
 \label{rankinesmooth}
 \tilde\varepsilon&=&
@@ -1375,15 +1374,13 @@ $\bar{\sigma}_I$, $I=1,2,3$, are the principal
 values of the
 effective stress tensor $\bar{\mbf{\sigma}} = \mbf{D}_e:\mbf{\varepsilon}$
 and $\langle\bar{\sigma}_I\rangle$ are their positive parts.
-\item
-{\bf Energy} norm scaled by Young's modulus to obtain
+\item {\bf Energy} norm scaled by Young's modulus to obtain
 a strain-like quantity:
 \begin{equation}
 \label{energynorm}
 \tilde\varepsilon=\del{1}{E}\sqrt{{\mbf{\varepsilon}:\mbf{D}_e:\mbf{\varepsilon}}}
 \end{equation}
-\item
-{\bf Modified Mises} definition, proposed by de Vree \cite{Vree:95}:
+\item {\bf Modified Mises} definition, proposed by de Vree \cite{Vree:95}:
 \begin{equation}
 \label{modifiedmises}
 \tilde\varepsilon=\frac{(k-1)I_{1\varepsilon}}{2k(1-2\nu)} + \frac{1}{2k}\sqrt{\frac{(k-1)^2}{(1-2\nu)^2}I_{1\varepsilon}^2+\frac{12 k J_{2\varepsilon}}{(1+\nu)^2}} 
@@ -1398,7 +1395,25 @@ $$
 is the second deviatoric strain invariant,
 and $k$ is a model parameter that corresponds to the ratio between the uniaxial
 compressive strength $f_c$ and uniaxial tensile strength $f_t$.
+\item {\bf Griffith} definition, combining Rankine criterion in tension and 
+Griffith's solution on inclined elipsoidal inclusion. This definition
+handles materials in pure tension and also in compression, where
+tensile stresses usually appear on specifically oriented elipsoidal inclusion.
+The derivation of Griffith's criterion is summarized in \cite{Hoek}.
+In impementation, first check if Rankine criterion exists
+\begin{eqnarray}
+\label{griffith1}
+\tilde\varepsilon&=&{\del{1}{E}}\max_{I=1}^{3}\bar{\sigma}_I
+\end{eqnarray}
+and if not, use Griffith's solution with ordered principal stresses $\sigma_1>\sigma_3$.
+The optional parameter \param{griff\_n} is by default 8 and represents the uniaxial compression/tensile strength ratio.
+
+\begin{eqnarray}
+\label{griffith2}
+\tilde\varepsilon&=&{\del{1}{E}}\cdot{\del{-(\sigma_1-\sigma_3)^2}{\param{griff\_n}(\sigma_1+\sigma_3)}}
+\end{eqnarray}
 \end{itemize}
+
 Note that all these definitions are based on the three-dimensional
 description of strain (and stress). If they are used in a reduced
 problem, the strain components that are not explicitly provided by
@@ -1494,7 +1509,11 @@ at complete failure (zero cohesive stress) and is related to fracture energy by
 a modified formula $w_f=2G_f/f_t$.
 The expression for maximum element size, $h_{max}=w_f/\varepsilon_0$, remains
 the same as for cohesive law with exponential softening, but in terms
-of the material properties it is now translated as $h_{max}=2EG_f/f_t^2$.
+of the material properties it is now translated as $h_{max}=2EG_f/f_t^2$. The derivative
+with respect to $\varepsilon$ yields
+$$
+\frac{\partial\omega}{\partial\varepsilon} = \frac{\varepsilon_0}{\varepsilon^2 \left ( 1-\frac{h \varepsilon_0}{w_f}\right )}
+$$
 \item
 {\bf Cohesive crack with bilinear softening} is implemented in an
 approximate fashion and gives for different mesh sizes the same
@@ -1598,10 +1617,12 @@ and also because for exponential softening the approach based on an exponential 
 \end{figure}
 
 
-\begin{table}[!htb]
+% \begin{table}[!htb]
 %\begin{center}
-  \small
-\begin{tabular}{|l|p{9cm}|}
+%  \small
+% \begin{tabular}{|l|p{9cm}|}
+\begin{longtable}{|l|p{9cm}|}
+
 \hline
 Description & Isotropic damage model for concrete in tension\\
 \hline
@@ -1643,6 +1664,10 @@ of equivalent strain:
 \item[2 -] scaled energy norm,  eq.~(\ref{energynorm})
 \item[3 -] modified Mises, eq.~(\ref{modifiedmises})
 \item[4 -] standard Rankine, eq.~(\ref{rankinestandard})
+\item[5 -] elestic energy based on positive stress
+\item[6 -] elestic energy based on positive strain
+\item[7 -] Rankine and Griffith criterion eqs.~(\ref{griffith1})(\ref{griffith2})
+
 \end{itemize}\\
 &- \param{k} ratio between uniaxial compressive and tensile strength, needed only if equivstraintype=3, default value 1\\
 &- \param{damlaw} allows to choose from different damage laws:
@@ -1670,6 +1695,7 @@ of equivalent strain:
 &- \param{e1} parameter used only by damage law 7\\
 &- \param{e2} parameter used only by damage law 7\\
 &- \param{nd} exponent used only by damage law 7\\
+&- \param{griff\_n} uniaxial compression/tensile ratio for Griffith's criterion\\
 &- \param{maxOmega} maximum damage, used for convergence improvement
 (its value is between 0 and 0.999999 (default), and it affects only the secant stiffness
 but not the stress)\\
@@ -1677,11 +1703,12 @@ but not the stress)\\
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
 Features & Adaptivity support\\
 \hline
-\end{tabular}
+%\end{tabular}
 \caption{Isotropic damage model for tensile failure -- summary.}
 \label{id_table}
 %\end{center}
-\end{table}
+%\end{table}
+\end{longtable}
 
 \subsubsection{Nonlocal isotropic damage model for tensile failure - Idmnl1}
 \label{sec:nidm}
@@ -2190,7 +2217,7 @@ The equivalent ``strain'', $\tilde\varepsilon$, is a scalar measure derived from
 for the equivalent strain affects the shape of the elastic domain
 in the strain space and plays a similar role to the choice of a yield
 condition in plasticity.
-Currently, in the present implementation,  $\tilde\varepsilon$ is equal to the positive part of the normal diplacement jump (opening of the interface).
+Currently, in the present implementation,  $\tilde\varepsilon$ is equal to the positive part of the normal displacement jump (opening of the interface).
 Only the exponential softening damage law is supported:
 $$
 \omega = 1 - \frac{\varepsilon_0}{\kappa}  \exp\left( - \frac{f_t( \kappa - \varepsilon_0 )}{G_f} \right)
@@ -2219,6 +2246,51 @@ Features & \\
 \hline
 \end{tabular}
 \caption{Isotropic damage model for interface elements -- summary.}
+\label{iid_table}
+%\end{center}
+\end{table}
+
+\subsubsection{Isotropic damage model for interfaces using tabulated data for damage}
+\label{sec:idmfi}
+
+The model provides an interface law, which can be used to describe a damageable interface between two materials (e.g.\ between steel reinforcement and concrete). The law is formulated in terms of the traction vector and the displacement jump vector. The basic response is elastic, with stiffness \param{kn} in 
+the normal direction and \param{ks} in the tangential direction.
+Similar to other isotropic damage models, this model assumes that the stiffness degradation is isotropic, i.e., both stiffness moduli decrease proportionally and independently of the loading 
+direction. The damaged stiffnesses are \param{kn}$\times\omega$ and \param{ks}$\times\omega$ where $\omega$ is a scalar damage variable.
+
+The equivalent ``strain'', $\tilde\varepsilon$, is a scalar measure derived from the displacement jump vector. The choice of the specific expression
+for the equivalent strain affects the shape of the elastic domain
+in the strain space and plays a similar role to the choice of a yield
+condition in plasticity.
+Currently, in the present implementation,  $\tilde\varepsilon$ is equal to the positive part of the normal displacement jump (opening of the interface).
+
+The damage evolution law is postulated in a separate file that should have the following format. Each line should contain one strain, damage pair separated by a whitespace character. The exception to this is the first line which should contain a single integer stating how many strain, damage pairs that the file will contain. The strains given in the file is defined as the equivalent strain minus the limit of elastic deformation.
+To find the damage for arbitrary strains linear interpolation between the tabulated values is used. If a strain larger than one in the given table is achieved the respective damage for the largest tabulated strain will be used. Both the strains and damages must be given in a strictly increasing order.
+
+The model parameters are summarized in Tab.~\ref{iid_table}. 
+\begin{table}[!htb]
+%\begin{center}
+  \small
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Isotropic damage model for concrete in tension\\
+\hline
+Record Format & \descitem{isointrfdm01} 
+\elemparam{kn}{rn} \elemparam{ks}{rn} \elemparam{ft}{rn} \elemparam{tablename}{rn} \optelemparam{maxomega}{rn} \elemparam{talpha}{rn} \elemparam{d}{rn}\\
+Parameters & - \param{d} material density\\
+&- \param{tAlpha} thermal dilatation coefficient\\
+&- \param{kn} elastic stifness in normal direction\\
+&- \param{ks} elastic stifness in tangential direction\\
+&- \param{ft} tensile strength\\
+&- \param{tablename} file name of the table with the strain damage pairs\\
+&- \param{maxomega} maximum damage, used for convergence improvement
+(its value is between 0 and 0.999999 (default), 
+and it affects only the secant stiffness but not the stress)\\
+Supported modes& 2dInterface, 3dInterface\\
+Features & \\
+\hline
+\end{tabular}
+\caption{Isotropic damage model for interface elements  using tabulated data for damage -- summary.}
 \label{iid_table}
 %\end{center}
 \end{table}
@@ -4091,7 +4163,7 @@ CemhydMat represents a hydrating material based on CEMHYD3D model version 3.0,
 developed at NIST \cite{NISTIR7232}. The model represents a digital hydrating
 microstructure, driven with cellular automata rules and combined with cement
 chemistry. Ordinary Portland cement is treated without any difficulties, blended
-cements are ususally decomposed into hydrating Portland contribution and intert
+cements are usually decomposed into hydrating Portland contribution and intert
 secondary cementitious material. The microstructure size can be from
 $10\times10\times10$ to over $200\times200\times200$~$\mu$m. For standard
 computations the size $50\times50\times50$ suffices.
@@ -4909,6 +4981,9 @@ Note that the matrices $\mbf{K}(\mbf{r}), \mbf{C}(\mbf{r})$ and the vector $\mbf
   structures, John Wiley, 2001.
 \bibitem{Hansen} P.F. Hansen: Coupled Moisture/Heat Transport in
   Cross Sections of Structures, Beton og Konstruktionsinstituttet, 1985.
+\bibitem{Hoek} E. Hoek and Z.T. Bieniawski: Brittle Rock Fracture Propagation
+In Rock Under Compression, International Journal of Fracture Mechanics
+1(3), 137-155, 1965.
 \bibitem{Kuenzel} H.M. K{\"u}nzel, H.M.: Simultaneous heat and
   moisture transport in building components, Ph.D. thesis, IRB-Verlag,
   1995.

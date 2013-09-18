@@ -59,6 +59,26 @@ namespace oofem {
  */
 class Load : public GeneralBoundaryCondition
 {
+public:
+    /**
+     * Load coordinate system type. Variable of this type can have following values CST_Global
+     * (indicates that load given in global coordinate system) or CST_Local
+     * (entity dependent local coordinate system will be  used).
+     */
+    enum CoordSystType {
+        CST_Global, ///< Load is specified in global c.s.
+        CST_Local, ///< Load is specified in local element c.s.
+        CST_UpdatedGlobal, ///< Load is specified in global c.s. but follows the deformation
+    };
+
+    /**
+     * Type determining the type of formulation (entity local or global one).
+     */
+    enum FormulationType {
+        FT_Entity,
+        FT_Global,
+    };
+
 protected:
     /// Components of boundary condition.
     FloatArray componentArray;
@@ -112,6 +132,26 @@ public:
      * @return Nonzero if excluded, zero otherwise.
      */
     int isDofExcluded(int index);
+
+    /**
+     * Returns receiver's coordinate system.
+     */
+    virtual CoordSystType giveCoordSystMode() { return CST_Global; }
+    /**
+     * Specifies is load should take local or global coordinates.
+     */
+    virtual FormulationType giveFormulationType() { return FT_Entity; }
+    /**
+     * @return Approximation order of load geometry.
+     */
+    virtual int giveApproxOrder() { return 0; }
+    /**
+     * Returns the value of a property 'aProperty'. Property must be identified
+     * by unique integer id.
+     * @param aProperty id of property requested
+     * @return property value
+     */
+    virtual double giveProperty(int aProperty) { OOFEM_ERROR("Load :: giveProperty - Not supported for this boundary condition."); return 0; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);

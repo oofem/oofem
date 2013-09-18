@@ -56,11 +56,7 @@ TrabBoneGrad3D :: ~TrabBoneGrad3D()
 int
 TrabBoneGrad3D :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( mode == _3dMat ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _3dMat;
 }
 void
 TrabBoneGrad3D :: giveStiffnessMatrix(FloatMatrix &answer,
@@ -289,13 +285,13 @@ TrabBoneGrad3D :: giveInternalLength(FloatMatrix &answer, MatResponseMode mode, 
 }
 
 void
-TrabBoneGrad3D ::  giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *atTime)
+TrabBoneGrad3D :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *atTime)
 {
     TrabBoneGrad3DStatus *status = static_cast< TrabBoneGrad3DStatus * >( this->giveStatus(gp) );
     this->initGpForNewStep(gp);
     this->initTempStatus(gp);
 
-    TrabBone3D ::  performPlasticityReturn(gp, totalStrain, atTime);
+    TrabBone3D :: performPlasticityReturn(gp, totalStrain, atTime);
 
     double tempDamage = computeDamage(gp, atTime);
     FloatArray tempEffStress = status->giveTempEffectiveStress();

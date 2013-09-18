@@ -476,7 +476,7 @@ RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     midplZ = z1 * answer.at(1) + z2 *answer.at(2) + z3 *answer.at(3);
 
     //check that the z is within the element
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );;
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();;
     double elthick;
 
     elthick = cs->give(CS_Thickness);
@@ -572,8 +572,9 @@ RerShell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gauss
     answer.zero();
 
     if ( ( type == LocalForceTensor ) || ( type == GlobalForceTensor ) ) {
-        FloatArray stress;
-        this->computeStressVector(stress, gp, tStep);
+        FloatArray stress, strain;
+        this->computeStrainVector(strain, gp, tStep);
+        this->computeStressVector(stress, strain, gp, tStep);
         answer.at(1, 1) = stress.at(1);
         answer.at(2, 2) = stress.at(2);
         answer.at(1, 2) = stress.at(3);
@@ -583,8 +584,9 @@ RerShell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gauss
         answer.at(2, 3) = stress.at(8);
         answer.at(3, 2) = stress.at(8);
     } else if ( ( type == LocalMomentumTensor ) || ( type == GlobalMomentumTensor ) ) {
-        FloatArray stress;
-        this->computeStressVector(stress, gp, tStep);
+        FloatArray stress, strain;
+        this->computeStrainVector(strain, gp, tStep);
+        this->computeStressVector(stress, strain, gp, tStep);
         answer.at(1, 1) = stress.at(4);
         answer.at(2, 2) = stress.at(5);
         answer.at(1, 2) = stress.at(6);
@@ -622,30 +624,27 @@ RerShell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gauss
 
 
 void
-RerShell :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
+RerShell :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
                                        GaussPoint *slaveGp, TimeStep *tStep)
 //
 // returns full 3d strain vector of given layer (whose z-coordinate from center-line is
 // stored in slaveGp) for given tStep
 //
 {
-    FloatArray masterGpStrain;
     double layerZeta, layerZCoord, top, bottom;
 
-    this->computeStrainVector(masterGpStrain, masterGp, tStep);
-    top    = masterGp->giveElement()->giveCrossSection()->give(CS_TopZCoord);
-    bottom = masterGp->giveElement()->giveCrossSection()->give(CS_BottomZCoord);
+    top    = this->giveCrossSection()->give(CS_TopZCoord);
+    bottom = this->giveCrossSection()->give(CS_BottomZCoord);
     layerZeta = slaveGp->giveCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
-    answer.resize(6); // {Exx,Eyy,Ezz,GMyz,GMzx,GMxy}
-    answer.zero();
+    answer.resize(5); // {Exx,Eyy,GMyz,GMzx,GMxy}
 
     answer.at(1) = masterGpStrain.at(1) + masterGpStrain.at(4) * layerZCoord;
     answer.at(2) = masterGpStrain.at(2) + masterGpStrain.at(5) * layerZCoord;
-    answer.at(6) = masterGpStrain.at(3) + masterGpStrain.at(6) * layerZCoord;
-    answer.at(4) = masterGpStrain.at(8);
-    answer.at(5) = masterGpStrain.at(7);
+    answer.at(5) = masterGpStrain.at(3) + masterGpStrain.at(6) * layerZCoord;
+    answer.at(3) = masterGpStrain.at(8);
+    answer.at(4) = masterGpStrain.at(7);
 }
 
 
@@ -767,7 +766,7 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
 #ifdef __OOFEG
 /*
  * void
- * CCTPlate  :: drawRawGeometry ()
+ * CCTPlate :: drawRawGeometry ()
  * {
  * WCRec p[3];
  * GraphicObj *go;
@@ -792,7 +791,7 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
  * }
  *
  * void
- * CCTPlate  :: drawDeformedGeometry (UnknownType defMode)
+ * CCTPlate :: drawDeformedGeometry (UnknownType defMode)
  * {
  * WCRec p[3];
  * GraphicObj *go;
@@ -820,13 +819,13 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
 
 
 //void
-//RerShell  :: drawScalar   (oofegGraphicContext& context)
+//RerShell :: drawScalar(oofegGraphicContext& context)
 //{}
 
 
 /*
  * void
- * RerShell  :: drawInternalState (oofegGraphicContext& gc)
+ * RerShell :: drawInternalState(oofegGraphicContext& gc)
  * //
  * // Draws internal state graphics representation
  * //

@@ -104,7 +104,7 @@ CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m) :
 }
 
 
-CylindricalALM ::  ~CylindricalALM()
+CylindricalALM :: ~CylindricalALM()
 {
     //
     // destructor
@@ -959,7 +959,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
 }
 
 
-void CylindricalALM  :: convertHPCMap()
+void CylindricalALM :: convertHPCMap()
 //
 // converts HPC map from user input map to HPC indirect Map
 //
@@ -1014,7 +1014,7 @@ void CylindricalALM  :: convertHPCMap()
 
  #ifndef __PARALLEL_MODE
     if ( count != size ) {
-        OOFEM_WARNING("CylindricalALM  :: convertHPCMap: some dofmans/Dofs in HPCarray not recognized");
+        OOFEM_WARNING("CylindricalALM :: convertHPCMap: some dofmans/Dofs in HPCarray not recognized");
     }
 
  #endif

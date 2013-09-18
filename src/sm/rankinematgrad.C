@@ -58,7 +58,7 @@ RankineMatGrad :: RankineMatGrad(int n, Domain *d) : RankineMat(n, d), GradDpMat
 int
 RankineMatGrad :: hasMaterialModeCapability(MaterialMode mode)
 {
-    return ( mode == _PlaneStress );
+    return mode == _PlaneStress;
 }
 
 void
@@ -265,7 +265,7 @@ RankineMatGrad :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2,
 
     double tempDamage;
     FloatArray tempEffStress, totalStress, locTotalStrain;
-    RankineMat ::  performPlasticityReturn(gp, totalStrain);
+    RankineMat :: performPlasticityReturn(gp, totalStrain);
 
     tempDamage = computeDamage(gp, atTime);
     status->giveTempEffectiveStress(tempEffStress);

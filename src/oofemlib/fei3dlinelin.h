@@ -72,6 +72,9 @@ public:
     virtual void computeLocalSurfaceMapping(IntArray &surfNodes, int isurf);
 
     virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+
+    virtual IntegrationRule *giveIntegrationRule(int order);
+    virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary);
 };
 } // end namespace oofem
 #endif // fei3dlinelin_h

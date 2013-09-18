@@ -49,7 +49,7 @@ M4Material :: M4Material(int n, Domain *d) :
 
 
 inline double
-M4Material  :: macbra(double x) /* Macauley bracket = positive part of x */
+M4Material :: macbra(double x) /* Macauley bracket = positive part of x */
 {
     return ( max(x, 0.0) );
 }
@@ -80,7 +80,7 @@ M4Material :: FDminus(double ed, double k1, double c7, double c8, double c9,
 }
 
 inline double
-M4Material  :: FDplus(double ed, double k1, double c5, double c6, double c7, double c20,
+M4Material :: FDplus(double ed, double k1, double c5, double c6, double c7, double c20,
                       double E)
 /*positive deviatoric bondary */
 {
@@ -98,7 +98,7 @@ M4Material :: FN(double en, double sv, double k1, double c1, double c2, double c
 }
 
 inline double
-M4Material ::  FT(double sn, double ev, double k1, double k2, double c10,
+M4Material :: FT(double sn, double ev, double k1, double k2, double c10,
                   double c11, double c12, double Et)
 /*shear boundary */
 {
@@ -286,11 +286,7 @@ M4Material :: initializeFrom(InputRecord *ir)
 int
 M4Material :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( mode ==  _3dMat ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _3dMat;
 }
 
 

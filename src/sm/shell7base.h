@@ -158,8 +158,14 @@ protected:
     void giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &dphidxi1, FloatArray &dphidxi2, FloatArray &dmdxi1,
                                          FloatArray &dmdxi2, FloatArray &m, double &dgamdxi1, double &dgamdxi2, double &gam);
     void computeStressResultantsAt(GaussPoint *gp, FloatArray &Svec, FloatArray &S1g, FloatArray &S2g, FloatArray &S3g, FloatArray &solVec);
+
+    void computeStressVectorInMaterial(FloatArray &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *stepN)
+        { computeStressMatrix(answer, genEps, gp, mat, stepN); };
+    
     void computeStressMatrix(FloatArray &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *stepN);
     virtual void computeStrainVectorF(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &genEps);
+    void computeStrainVectorFrom(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &genEps)
+        { computeStrainVectorF(answer, gp, tStep, genEps); };
     virtual void computeCauchyStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
 
     // Mass matrices
@@ -209,7 +215,7 @@ protected:
 
     // Solution vectors
     void giveSolutionVector(FloatArray &answer, const IntArray &dofIdArray, TimeStep *tStep);
-    void computeVectorOf(const IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer);
+    void computeVectorOfDofIDs(const IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     void temp_computeBoundaryVectorOf(IntArray &dofIdArray, int boundary, ValueModeType u, TimeStep *stepN, FloatArray &answer);
    //void computeGeneralizedStrainVector(FloatArray &answer, const FloatArray &solVec, const FloatMatrix &B11,
    //                                     const FloatMatrix &B22, const FloatMatrix &B32, const FloatMatrix &B43, const FloatMatrix  &B53);
@@ -262,6 +268,8 @@ protected:
     virtual void computeBmatrixAt(FloatArray &lCoords, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
     virtual void computeNmatrixAt(FloatArray &lCoords, FloatMatrix &answer);
     virtual void edgeComputeNmatrixAt(FloatArray &lCoords, FloatMatrix &answer);
+
+    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *slaveGp, TimeStep *tStep);
     virtual void edgeComputeBmatrixAt(FloatArray &lCoords, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
 
     // Misc

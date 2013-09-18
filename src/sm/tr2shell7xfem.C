@@ -53,9 +53,6 @@ REGISTER_Element( Tr2Shell7XFEM );
 
 FEI3dTrQuad Tr2Shell7XFEM :: interpolation;
 
-IntArray Tr2Shell7XFEM :: ordering_phibar(18);
-IntArray Tr2Shell7XFEM :: ordering_m(18);
-IntArray Tr2Shell7XFEM :: ordering_gam(6);
 IntArray Tr2Shell7XFEM :: ordering_all(42);
 IntArray Tr2Shell7XFEM :: ordering_gr(42);
 IntArray Tr2Shell7XFEM :: ordering_gr_edge(21);
@@ -71,13 +68,7 @@ Tr2Shell7XFEM :: Tr2Shell7XFEM(int n, Domain *aDomain) : Shell7BaseXFEM(n, aDoma
 const IntArray &
 Tr2Shell7XFEM :: giveOrdering(SolutionField fieldType) const
 {
-    if ( fieldType == Midplane ) {
-        return this->ordering_phibar;
-    } else if ( fieldType == Director ) {
-        return this->ordering_m;
-    } else if ( fieldType == InhomStrain ) {
-        return this->ordering_gam;
-    } else if ( fieldType == All ) {
+    if ( fieldType == All ) {
         return this->ordering_all;
     } else if ( fieldType == AllInv ) {
         return this->ordering_gr;

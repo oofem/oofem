@@ -218,7 +218,7 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
             this->interpolation_lin.edgeEvalN(N, iEdge, *lcoords, FEIElementGeometryWrapper(this));
             double dV = this->computeEdgeVolumeAround(gp, iEdge);
 
-            if ( boundaryLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {                // Edge load in xi-eta system
+            if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) {                // Edge load in xi-eta system
                 boundaryLoad->computeValueAt(loadValue, tStep, *lcoords, VM_Total);
             } else {  // Edge load in x-y system
                 FloatArray gcoords;
@@ -233,6 +233,12 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
         answer.assemble(reducedAnswer, mask);
     }
 }
+
+double Tr1Darcy :: giveThicknessAt(const FloatArray &gcoords)
+{
+    return this->giveCrossSection()->give(CS_Thickness);
+}
+
 
 double Tr1Darcy :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {

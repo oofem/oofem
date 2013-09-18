@@ -162,8 +162,6 @@ protected:
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual void updateStabilizationCoeffs(TimeStep *tStep);
-
-    virtual int giveTermIntergationRuleIndex(CharType termType);
 };
 
 } // end namespace oofem

@@ -49,6 +49,10 @@ namespace oofem {
 class rveEngngModel
 {
 public:
+
+	rveEngngModel() {}
+	virtual ~rveEngngModel() {}
+
     /**
      * Abstract method for setting boundary condition on RVE.
      * @param type Specifies the type of boundary condition. Type are defines in classes which inherit rveEngngModel

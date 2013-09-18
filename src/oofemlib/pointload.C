@@ -71,7 +71,7 @@ PointLoad :: initializeFrom(InputRecord *ir)
 
     value = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_PointLoad_cstype);
-    coordSystemType = ( PL_CoordSystType ) value;
+    coordSystemType = ( CoordSystType ) value;
 
     return result;
 }

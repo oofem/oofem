@@ -99,6 +99,7 @@ void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, d
 
     bc->computeFields(stress_dev, r_vol, EID_MomentumBalance_ConservationEquation, tStep);
     ms->letTempDeviatoricStressVectorBe(stress_dev);
+    ms->letTempDeviatoricStrainRateVectorBe(eps);
 
     ms->markOldTangents(); // Mark this so that tangents are reevaluated if they are needed.
     // One could also just compute them here, but you don't actually need them if the problem has converged, so this method saves on that iteration.
@@ -361,7 +362,7 @@ void FE2FluidMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
 void FE2FluidMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    double fluid_area = this->rve->giveDomain(1)->giveArea();
+    double fluid_area = this->rve->giveDomain(1)->giveSize();
     double total_area = this->bc->domainSize();
     this->voffraction = fluid_area/total_area;
     FluidDynamicMaterialStatus::updateYourself(tStep);

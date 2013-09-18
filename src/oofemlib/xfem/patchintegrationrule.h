@@ -35,30 +35,45 @@
 #ifndef patchintegrationrule_h
 #define patchintegrationrule_h
 
+#define PATCH_INT_DEBUG 1
+
 #include "gaussintegrationrule.h"
-#include "patch.h"
+#include "classtype.h"
+//#include "patch.h"
 
 namespace oofem {
+class FEI2dTrLin;
+class Triangle;
 
 /**
- * Represents an IntegrationRule for an interacted element
- * the standard integration is replaced by an integration over a
- * patchset.
+ * PatchIntegrationRule provides integration over a triangle patch.
+ * Input to the constructor is:
+ *  -int n:         number of quadrature points per triangle.
+ *  -Element *e:	parent element pointer
+ *  -iTriangles:	array of triangles describing the subdivision of the element.
+ *
+ *  * @author Erik Svenning (Major modifications)
+ *
  */
 class PatchIntegrationRule : public GaussIntegrationRule
 {
 protected:
-    /// Patch.
-    Patch *patch;
+    std :: vector< Triangle >mTriangles;
+
+    // Interpolation used to distribute quadrature points
+    // in each triangle of the patch.
+    static FEI2dTrLin mTriInterp;
+
 
 public:
     /// Constructor.
-    PatchIntegrationRule(int n, Element *e, Patch *p);
+    PatchIntegrationRule(int n, Element *e, const std :: vector< Triangle > &iTriangles);
     /// Destructor.
     virtual ~PatchIntegrationRule();
-    virtual int SetUpPointsOnTriangle(int, MaterialMode);
-    int giveMaterial() { return this->patch->giveMaterial(); }
-    Patch *givePatch() { return this->patch; }
+
+    // TODO: Give this function a better name.
+    // Note: the fact that this function is inherited complicates name change.
+    virtual int SetUpPointsOnTriangle(int nPoints, MaterialMode mode);
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj);

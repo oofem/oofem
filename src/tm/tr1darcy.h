@@ -75,6 +75,7 @@ public:
     void computeInternalForcesVector(FloatArray &answer, TimeStep *atTime);
 
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    virtual double giveThicknessAt(const FloatArray &gcoords);
 
     // From NodalAveragingRecoveryModelInterface
     virtual const char *giveInputRecordName() const { return _IFT_Tr1Darcy_Name; }

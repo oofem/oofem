@@ -622,7 +622,6 @@ contextIOResultType LIBeam3d2 :: saveContext(DataStream *stream, ContextMode mod
 }
 
 
-
 contextIOResultType LIBeam3d2 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 //
 // restores full element context (saves state variables, that completely describe
@@ -643,23 +642,21 @@ contextIOResultType LIBeam3d2 :: restoreContext(DataStream *stream, ContextMode 
 
 
 void
-LIBeam3d2 :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &answer, GaussPoint *masterGp,
+LIBeam3d2 :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &answer, const FloatArray &masterGpStrain,
                                                                      GaussPoint *slaveGp, TimeStep *tStep)
 {
-    FloatArray masterGpStrain;
     double layerYCoord, layerZCoord;
 
-    this->computeStrainVector(masterGpStrain, masterGp, tStep);
     layerZCoord = slaveGp->giveCoordinate(2);
     layerYCoord = slaveGp->giveCoordinate(1);
 
-    answer.resize(6); // {Exx,Eyy,Ezz,GMyz,GMzx,GMxy}
-    answer.zero();
+    answer.resize(3); // {Exx,GMzx,GMxy}
 
     answer.at(1) = masterGpStrain.at(1) + masterGpStrain.at(5) * layerZCoord - masterGpStrain.at(6) * layerYCoord;
-    answer.at(5) = masterGpStrain.at(2);
-    answer.at(6) = masterGpStrain.at(3);
+    answer.at(2) = masterGpStrain.at(2);
+    answer.at(3) = masterGpStrain.at(3);
 }
+
 
 Interface *
 LIBeam3d2 :: giveInterface(InterfaceType interface)
@@ -670,7 +667,6 @@ LIBeam3d2 :: giveInterface(InterfaceType interface)
 
     return NULL;
 }
-
 
 
 #ifdef __OOFEG

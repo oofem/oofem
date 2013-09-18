@@ -51,11 +51,7 @@ TrabBoneMaterial :: TrabBoneMaterial(int n, Domain *d) : StructuralMaterial(n, d
 int
 TrabBoneMaterial :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( mode == _1dMat ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _1dMat;
 }
 
 
@@ -217,7 +213,7 @@ TrabBoneMaterial :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
 
 
 void
-TrabBoneMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+TrabBoneMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
                                          const FloatArray &totalStrain,
                                          TimeStep *atTime)
 {

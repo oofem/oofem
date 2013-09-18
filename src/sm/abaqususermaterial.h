@@ -133,10 +133,8 @@ public:
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
     virtual int hasNonLinearBehaviour() { return true; }
-    virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "AbaqusUserMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_AbaqusUserMaterial_Name; }
-    virtual classType giveClassID() const { return AbaqusUserMaterialClass; }
 };
 
 class AbaqusUserMaterialStatus : public StructuralMaterialStatus

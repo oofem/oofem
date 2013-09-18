@@ -297,14 +297,14 @@ void Tr21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *l
             FloatArray *lcoords = gp->giveCoordinates();
 
             this->interpolation_quad.edgeEvalN(N, boundary, * lcoords, FEIElementGeometryWrapper(this));
-            double detJ = fabs(this->interpolation_quad.edgeGiveTransformationJacobian(boundary, * lcoords, FEIElementGeometryWrapper(this)));
+            double detJ = fabs(this->interpolation_quad.boundaryGiveTransformationJacobian(boundary, * lcoords, FEIElementGeometryWrapper(this)));
             double dS = gp->giveWeight() * detJ;
 
-            if ( boundaryLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) { // Edge load in xi-eta system
+            if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) { // Edge load in xi-eta system
                 boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
             } else { // Edge load in x-y system
                 FloatArray gcoords;
-                this->interpolation_quad.edgeLocal2global(gcoords, boundary, * lcoords, FEIElementGeometryWrapper(this));
+                this->interpolation_quad.boundaryLocal2Global(gcoords, boundary, * lcoords, FEIElementGeometryWrapper(this));
                 boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
             }
 

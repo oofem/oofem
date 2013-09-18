@@ -36,6 +36,7 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
+#include "gaussintegrationrule.h"
 
 namespace oofem {
 void
@@ -574,6 +575,25 @@ FEI3dHexaQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
                c6(1)*(8*c1(0) + 8*c2(0) - 8*c3(0) - 8*c4(0) + 32*c5(0) - 32*c7(0)) + 
                c7(1)*(4*c1(0) - 12*c2(0) + 4*c3(0) - 60*c4(0) + 32*c5(0) + 32*c6(0)))
             ) / 60.0;
+}
+
+
+IntegrationRule *
+FEI3dHexaQuad :: giveIntegrationRule(int order)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    int points = iRule->getRequiredNumberOfIntegrationPoints(_Cube, order + 9);
+    iRule->SetUpPointsOnCube(points, _Unknown);
+    return iRule;
+}
+
+IntegrationRule *
+FEI3dHexaQuad :: giveBoundaryIntegrationRule(int order, int boundary)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 4);
+    iRule->SetUpPointsOnSquare(points, _Unknown);
+    return iRule;
 }
 
 } // end namespace oofem

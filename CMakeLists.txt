@@ -47,12 +47,12 @@ set (SPOOLES_DIR CACHE PATH "Manual SPOOLES directory")
 set (ELIXIR_DIR CACHE PATH "Manual Elixir directory (OOFEG only)")
 set (CKIT_DIR CACHE PATH "Manual CKit directory (OOFEG only)")
 set (PARMETIS_DIR CACHE PATH "Manual ParMetis directory")
+#set (BOOST_DIR CACHE PATH "Manual Boost directory")
 
 #######################################################################
 ######################## Options ######################################
 #######################################################################
 option (USE_OOFEG "Enable OOFEG" OFF)
-option (USE_PYTHON_BINDINGS "Enable Python bidings" OFF)
 if (${CMAKE_VERSION} VERSION_GREATER "2.8.7") # Compability with older version of cmake
     if (WIN32) # Shared libraries aren't working on windows.
         option (USE_SHARED_LIB "Build shared library" OFF)
@@ -80,6 +80,9 @@ option (USE_SM "Enable structural mechanics module" ON)
 option (USE_FM "Enable fluid mechanics module" ON)
 option (USE_TM "Enable heat/mass transfer module" ON)
 option (USE_CEMHYD "Enable CemHyd support" OFF)
+#option (USE_BOOST "Enable Boost" OFF)
+option (USE_PYTHON_BINDINGS "Enable Python bidings (OOFEM usable from Python). Implies USE_PYTHON." OFF)
+option (USE_PYTHON "Enable Python to be used inside OOFEM (e.g. userdef Dirichlet BCs)" OFF)
 
 if (USE_PARALLEL)
     add_definitions (-D__PARALLEL_MODE)
@@ -205,6 +208,19 @@ endif ()
 #######################################################################
 ######################## External libaries ############################
 #######################################################################
+
+#if (USE_BOOST) 
+#    set (CMAKE_LIBRARY_DIR ${CMAKE_LIBRARY_DIR} ${BOOST_DIR})
+#    find_package (BOOST REQUIRED)
+#    set (EXT_LIBS ${EXT_LIBS} ${BOOST_LIBRARIES})
+#    if (BOOST_DIR)
+#    	include_directories ("${BOOST_DIR}")
+#    	set (MODULE_LIST ${MODULE_LIST} "BOOST")
+#     endif ()
+# 
+#    add_definitions (-D__BOOST_MODULE)
+#endif ()
+
 if (USE_LAPACK)
     set (CMAKE_LIBRARY_DIR ${CMAKE_LIBRARY_DIR} ${LAPACK_DIR})
     find_package (LAPACK REQUIRED)
@@ -346,16 +362,24 @@ if (USE_SPOOLES)
     set (MODULE_LIST ${MODULE_LIST} "SPOOLES")
 endif ()
 
-if (USE_PYTHON_BINDINGS)
+# We need the interpreter for the test suite.
+find_package(PythonInterp "2.7")
+
+if (USE_PYTHON_BINDINGS OR USE_PYTHON)
     # PythonLibs in cmake is bugged, have to try and rely on PythonInterp to get the suitable major and minor versions.
-    find_package(PythonInterp REQUIRED)
+    find_package(PythonInterp "2.7" REQUIRED)
     find_package(PythonLibs ${PYTHON_VERSION_STRING} EXACT REQUIRED)
-    find_package(Boost COMPONENTS "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}" REQUIRED)
     include_directories (${PYTHON_INCLUDE_DIRS})
-    include_directories (${Boost_INCLUDE_DIRS})
-    set (EXT_LIBS ${EXT_LIBS} ${PYTHON_LIBRARIES} ${Boost_LIBRARIES})
-    set (MODULE_LIST ${MODULE_LIST} "Python")
-    add_definitions(-DBOOST_PYTHON)
+    list (APPEND EXT_LIBS ${PYTHON_LIBRARIES})
+    list (APPEND MODULE_LIST "Python")
+    add_definitions(-D__PYTHON_MODULE)
+
+    if (USE_PYTHON_BINDINGS)
+        find_package(Boost COMPONENTS "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}" REQUIRED)
+        include_directories (${Boost_INCLUDE_DIRS})
+        list (APPEND EXT_LIBS ${Boost_LIBRARIES})
+        add_definitions(-DBOOST_PYTHON)
+    endif ()
 endif ()
 
 
@@ -527,7 +551,6 @@ add_custom_target (
 # This isn't perfect/elegant, partly due to the how tests work.
 # TODO: Would like to run oofem from the binary dir (avoids creating *.out files in the source dir)
 # unfortunately, that doesn't work for some tests that require sub-files using relative paths.
-find_package(PythonInterp)
 enable_testing ()
 #set (MEMORYCHECK_COMMAND "${CMAKE_CURRENT_BINARY_DIR}/memcheckhelper.py")
 include (CTest)

@@ -52,9 +52,6 @@ REGISTER_Element( Tr2Shell7 );
 
 FEI3dTrQuad Tr2Shell7 :: interpolation;
 
-IntArray Tr2Shell7 :: ordering_phibar(18);
-IntArray Tr2Shell7 :: ordering_m(18);
-IntArray Tr2Shell7 :: ordering_gam(6);
 IntArray Tr2Shell7 :: ordering_all(42);
 IntArray Tr2Shell7 :: ordering_gr(42);
 IntArray Tr2Shell7 :: ordering_gr_edge(21);
@@ -70,13 +67,7 @@ Tr2Shell7 :: Tr2Shell7(int n, Domain *aDomain) : Shell7Base(n, aDomain)
 const IntArray &
 Tr2Shell7 :: giveOrdering(SolutionField fieldType) const
 {
-    if ( fieldType == Midplane ) {
-        return this->ordering_phibar;
-    } else if ( fieldType == Director ) {
-        return this->ordering_m;
-    } else if ( fieldType == InhomStrain ) {
-        return this->ordering_gam;
-    } else if ( fieldType == All ) {
+    if ( fieldType == All ) {
         return this->ordering_all;
     } else if ( fieldType == AllInv ) {
         return this->ordering_gr;

@@ -123,6 +123,14 @@ Quad1_ht :: computeVolumeAround(GaussPoint *gp)
     return volume;
 }
 
+
+double
+Quad1_ht :: giveThicknessAt(const FloatArray &gcoords)
+{
+    return this->giveCrossSection()->give(CS_Thickness);
+}
+
+
 double
 Quad1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {

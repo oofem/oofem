@@ -48,7 +48,7 @@ NodalLoad :: initializeFrom(InputRecord *ir)
 
     int value = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_NodalLoad_cstype);
-    coordSystemType = ( BL_CoordSystType ) value;
+    coordSystemType = ( CoordSystType ) value;
 
     return Load :: initializeFrom(ir);
 }

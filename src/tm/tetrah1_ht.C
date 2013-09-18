@@ -150,7 +150,7 @@ Tetrah1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
     detJ = fabs( interpolation.surfaceGiveTransformationJacobian(iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
 
     weight = gp->giveWeight();
-    return 2.0 * detJ * weight; ///@todo Fairly sure this should have a factor 2.0 in there......
+    return detJ * weight;
 }
 
 

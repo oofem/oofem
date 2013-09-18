@@ -97,28 +97,6 @@ Quad10_2D_SUPG :: giveInternalDofManager(int i) const
 
 
 int
-Quad10_2D_SUPG :: giveTermIntergationRuleIndex(CharType termType)
-{
-    if ( ( termType == AccelerationTerm_MB ) || ( termType == AdvectionTerm_MB ) ||
-        ( termType == AdvectionDerivativeTerm_MB ) ) {
-        return 0;
-    } else if ( ( termType == DiffusionTerm_MB ) || ( termType == DiffusionDerivativeTerm_MB ) ||
-               ( termType == PressureTerm_MB ) || ( termType == AdvectionTerm_MC ) || ( termType == AdvectionDerivativeTerm_MC ) ||
-               ( termType == DiffusionDerivativeTerm_MC ) || ( termType == BCRhsTerm_MC ) ) {
-        return 0;
-    } else if ( ( termType == LSICStabilizationTerm_MB ) || ( termType == LinearAdvectionTerm_MC ) ||
-               ( termType == DiffusionTerm_MC ) || ( termType == AccelerationTerm_MC ) ||
-               ( termType == PressureTerm_MC ) || ( termType ==  BCRhsTerm_MB ) ) {
-        return 0;
-    } else {
-        _error2( "giveTermIntergationRuleIndex: Unknown CharType encountered [%s]", __CharTypeToString(termType) );
-    }
-
-    return 0;
-}
-
-
-int
 Quad10_2D_SUPG :: computeNumberOfDofs(EquationID ut)
 {
     if ( ut == EID_MomentumBalance ) {
@@ -149,7 +127,7 @@ Quad10_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer
 
 
 void
-Quad10_2D_SUPG ::   giveInternalDofManDofIDMask(int i, EquationID ut, IntArray &answer) const
+Quad10_2D_SUPG :: giveInternalDofManDofIDMask(int i, EquationID ut, IntArray &answer) const
 {
     if ( ut == EID_MomentumBalance ) {
         answer.resize(0);
@@ -176,8 +154,8 @@ Quad10_2D_SUPG :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
     if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 2;
-        integrationRulesArray = new IntegrationRule * [ 2 ];
+        numberOfIntegrationRules = 3;
+        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
 
 
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
@@ -186,6 +164,9 @@ Quad10_2D_SUPG :: computeGaussPoints()
         //seven point Gauss integration
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[1], 4, this );
+
+        integrationRulesArray [ 2 ] = new GaussIntegrationRule(3, this, 1, 3);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[3], 4, this );
     }
 }
 

@@ -53,6 +53,7 @@ public:
     virtual ~QuadAxisym1_ht();
 
     virtual double computeVolumeAround(GaussPoint *gp);
+    virtual double giveThicknessAt(const FloatArray &gcoords);
 
     virtual const char *giveClassName() const { return "QuadAxisym1_ht"; }
     virtual classType giveClassID() const { return QuadAxisym1_htClass; }

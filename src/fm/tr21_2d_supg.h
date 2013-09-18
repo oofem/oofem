@@ -126,7 +126,6 @@ public:
     //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
 #endif
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual double computeCriticalTimeStep(TimeStep *tStep);
 
     // three terms for computing their norms due to computing t_supg
@@ -155,8 +154,6 @@ protected:
     virtual void initGeometry();
 
     virtual void updateStabilizationCoeffs(TimeStep *tStep);
-
-    virtual int giveTermIntergationRuleIndex(CharType termType);
 };
 } // end namespace oofem
 #endif // tr21_2d_supg_h

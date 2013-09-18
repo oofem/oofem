@@ -537,7 +537,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
 
 
 void
-NonLinearStatic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
+NonLinearStatic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 //
 // updates some component, which is used by numerical method
 // to newly reached state. used mainly by numerical method

@@ -577,7 +577,8 @@ Shell7Base :: computeLinearizedStiffness(GaussPoint *gp, StructuralMaterial *mat
 
     FloatArray lcoords = *gp->giveCoordinates();
 
-    this->computeStressMatrix(cartStressVector, genEps, gp, mat, tStep);
+    //this->computeStressMatrix(cartStressVector, genEps, gp, mat, tStep);
+    this->computeStressVectorInMaterial(cartStressVector, genEps, gp, mat, tStep);
     this->transInitialCartesianToInitialContravar(gp, cartStressVector, contravarStressVector);
     S.beMatrixFormOfStress(contravarStressVector);
 
@@ -812,6 +813,7 @@ Shell7Base :: computeE(FloatMatrix &answer, FloatMatrix &F)
 
 void
 Shell7Base :: computeStrainVectorF(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &genEps)
+//Shell7Base :: computeStrainVectorFrom(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &genEps)
 {
     // Computes the Green-Lagrange strain tensor: E=0.5(C-I)
     FloatMatrix F, E;
@@ -962,7 +964,8 @@ Shell7Base :: computeSectionalForcesAt(FloatArray &sectionalForces, IntegrationP
     FloatArray cartStressVector, contravarStressVector;
     FloatMatrix lambda[3];
 
-    this->computeStressMatrix(cartStressVector, genEpsC, ip, mat, tStep);
+    this->computeStressVectorInMaterial(cartStressVector, genEpsC, ip, mat, tStep);
+    //this->computeStressMatrix(cartStressVector, genEpsC, ip, mat, tStep);
     this->transInitialCartesianToInitialContravar(ip, cartStressVector, contravarStressVector);
     this->computeStressResultantsAt(ip, contravarStressVector, S1g, S2g, S3g, genEpsC);
     this->computeLambdaGMatrices(lambda, genEpsD, zeta);    
@@ -1335,7 +1338,7 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
         this->computeNmatrixAt(lCoords, N);
         this->giveUpdatedSolutionVector(aVec, tStep);
         // Fix for the new numbering in B & N
-        this->computeVectorOf(EID_MomentumBalance, VM_Velocity, tStep, daVec);
+        this->computeVectorOfDofIDs(EID_MomentumBalance, VM_Velocity, tStep, daVec);
 
         a.beProductOf(N, aVec);        // [ x,  m,  gam]^T
         da.beProductOf(N, daVec);        // [dx, dm, dgam]^T
@@ -1542,7 +1545,9 @@ Shell7Base :: computeTractionForce(FloatArray &answer, const int iEdge, Boundary
     FloatMatrix N, Q;
     FloatArray fT(7), components, lcoords;
     
-    BoundaryLoad :: BL_CoordSystType coordSystType = edgeLoad->giveCoordSystMode();
+    //BoundaryLoad :: BL_CoordSystType coordSystType = edgeLoad->giveCoordSystMode();
+    BoundaryLoad :: CoordSystType coordSystType = edgeLoad->giveCoordSystMode();
+    
 
     FloatArray Nftemp(21), Nf(21);
     Nf.zero();
@@ -1933,7 +1938,7 @@ Shell7Base :: giveSolutionVector(FloatArray &answer, const IntArray &dofIdArray,
 {
     // Returns the solution vector corresponding to all the dofs
     FloatArray temp;
-    computeVectorOf(dofIdArray, VM_Total, tStep, temp);
+    computeVectorOfDofIDs(dofIdArray, VM_Total, tStep, temp);
     answer.resize( Shell7Base :: giveNumberOfDofs() );
     answer.zero();
     answer.assemble( temp, this->giveOrdering(AllInv) );
@@ -1941,7 +1946,7 @@ Shell7Base :: giveSolutionVector(FloatArray &answer, const IntArray &dofIdArray,
 
 
 void
-Shell7Base :: computeVectorOf(const IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+Shell7Base :: computeVectorOfDofIDs(const IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer)
 {
     // Routine to extract the solution vector for an element given an dofid array.
     // Size will be numberOfDofs and if a certain dofId does not exist a zero is used as value. 
@@ -2003,7 +2008,7 @@ Shell7Base :: giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep)
     int dummy = 0;
     IntArray dofIdArray;
     Shell7Base :: giveDofManDofIDMask(dummy, EID_MomentumBalance, dofIdArray);
-    this->computeVectorOf(dofIdArray, VM_Total, tStep, temp);
+    this->computeVectorOfDofIDs(dofIdArray, VM_Total, tStep, temp);
     
     answer.assemble( temp, this->giveOrdering(AllInv) );
 }
@@ -2769,7 +2774,13 @@ Shell7Base :: giveVoigtIndex(int ind1, int ind2)
         OOFEM_ERROR("Error in giveVoigtIndex - bad indices");
         return -1;
     }
-};
+}
+
+void
+Shell7Base :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *slaveGp, TimeStep *tStep)
+{
+    OOFEM_ERROR("Shell7Base :: computeStrainVectorInLayer - Should not be called! Not meaningful for this element.");
+}
 
 
 
@@ -2778,6 +2789,8 @@ Shell7Base :: computeInterLaminarStressesAt(int interfaceNum, TimeStep *tStep, s
 {
     
     // Get integration rules on the upper and lower sides of the interface
+
+
     LayeredIntegrationRule *irLower = static_cast< LayeredIntegrationRule * >(this->giveIntegrationRule(interfaceNum-1)); // index from 0
     LayeredIntegrationRule *irUpper = static_cast< LayeredIntegrationRule * >(this->giveIntegrationRule(interfaceNum));
     IntegrationPoint *ip;

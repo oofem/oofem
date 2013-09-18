@@ -62,6 +62,8 @@ public:
     // Bulk
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
+    virtual IntegrationRule *giveIntegrationRule(int order);
+
 protected:
     virtual void giveDerivatives(FloatMatrix &answer, const FloatArray &lcoords);
 };

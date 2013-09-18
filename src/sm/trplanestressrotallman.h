@@ -48,8 +48,10 @@ namespace oofem {
  * Class implements an triangular three-node  plane-
  * stress elasticity finite element with independentvertex rotations.
  * Each node has 3 degrees of freedom.
- * For reference, see: Allman, D.J. A compatible triangular element including vertex rotations for plane elas-
-ticity analysis. Computers & Structures Vol. 19, No. 1-2, pp. 1-8, 1984.
+ * For reference, see: 
+ * Allman, D.J. 
+ * A compatible triangular element including vertex rotations for plane elasticity analysis.
+ * Computers & Structures Vol. 19, No. 1-2, pp. 1-8, 1984.
  */
 class TrPlanestressRotAllman : public TrPlaneStress2d
 {

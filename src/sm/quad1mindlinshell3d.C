@@ -60,8 +60,7 @@ bool Quad1MindlinShell3D :: __initialized = Quad1MindlinShell3D :: initOrdering(
 
 Quad1MindlinShell3D :: Quad1MindlinShell3D(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain),
-    numberOfGaussPoints(4),
-    alpha(0.)
+    numberOfGaussPoints(4)
 {
     this->numberOfDofMans = 4;
     this->lnodes[0] = new FloatArray();
@@ -273,7 +272,8 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     FloatArray shellForces(20), drillMoment(4);
     shellForces.zero();
     drillMoment.zero();
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
+    double drillCoeff = cs->give(CS_DrillingStiffness);
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
@@ -282,23 +282,21 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
         double dV = this->computeVolumeAround(gp);
 
         if ( useUpdatedGpRecord ) {
-            stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+            stress = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStressVector();
         } else {
             strain.beProductOf(b, shellUnknowns);
-            mat->giveRealStressVector(stress, gp, strain, tStep);
+            cs->giveRealStress_Shell(stress, gp, strain, tStep);
         }
         shellForces.plusProduct(b, stress, dV);
 
         // Drilling stiffness is here for improved numerical properties
-        if (alpha > 0.) {
-            this->computeConstitutiveMatrixAt(d, ElasticStiffness, gp, tStep);
-            double Et = d.at(1,1); // Elasticity modulus * thickness, taken from the membrane part of d
+        if (drillCoeff > 0.) {
             this->interp.evalN(n, *gp->giveCoordinates(), FEIVoidCellGeometry());
             for ( int j = 0; j < 4; j++) {
                 n(j) -= 0.25;
             }
             double dtheta = n.dotProduct(drillUnknowns);
-            drillMoment.add(this->alpha * Et * dV * dtheta, n); ///@todo Decide on how to alpha should be defined.
+            drillMoment.add(drillCoeff * dV * dtheta, n); ///@todo Decide on how to alpha should be defined.
         }
     }
 
@@ -306,7 +304,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     answer.zero();
     answer.assemble(shellForces, this->shellOrdering);
 
-    if (alpha > 0.) {
+    if (drillCoeff > 0.) {
         answer.assemble(drillMoment, this->drillOrdering);
     }
 }
@@ -323,6 +321,7 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
     FloatMatrix shellStiffness(20, 20), drillStiffness(4, 4);
     shellStiffness.zero();
     drillStiffness.zero();
+    double drillCoeff = this->giveStructuralCrossSection()->give(CS_DrillingStiffness);
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
@@ -336,14 +335,12 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
         shellStiffness.plusProductSymmUpper(b, db, dV);
 
         // Drilling stiffness is here for improved numerical properties
-        if (alpha > 0.) {
-            ///@todo Sort out the drilling stiffness thing.
-            double Et = d.at(1,1); ///@todo Elasticity modulus * thickness, taken from the membrane part of d
+        if (drillCoeff > 0.) {
             this->interp.evalN(n, *gp->giveCoordinates(), FEIVoidCellGeometry());
             for ( int j = 0; j < 4; j++) {
                 n(j) -= 0.25;
             }
-            drillStiffness.plusDyadSymmUpper(n, this->alpha * Et * dV); ///@todo Decide on how to alpha should be defined.
+            drillStiffness.plusDyadSymmUpper(n, drillCoeff * dV);
         }
     }
     shellStiffness.symmetrized();
@@ -352,10 +349,17 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
     answer.zero();
     answer.assemble(shellStiffness, this->shellOrdering);
 
-    if (alpha > 0.) {
+    if (drillCoeff > 0.) {
         drillStiffness.symmetrized();
         answer.assemble(drillStiffness, this->drillOrdering);
     }
+}
+
+
+void
+Quad1MindlinShell3D :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->give3dShellStiffMtrx(answer, rMode, gp, tStep);
 }
 
 
@@ -364,9 +368,6 @@ Quad1MindlinShell3D :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
-    IR_GIVE_OPTIONAL_FIELD(ir, this->alpha, _IFT_Quad1MindlinShell3D_alpha);
-    this->alpha = 1.0;
 
     IR_GIVE_OPTIONAL_FIELD(ir, this->numberOfGaussPoints, _IFT_Element_nip);
 
@@ -415,15 +416,12 @@ void
 Quad1MindlinShell3D :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver.
 {
-    GaussPoint *gp;
-    double dV, mass = 0.;
+    double mass = 0.;
 
     IntegrationRule *ir = integrationRulesArray [ 0 ];
     for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i) {
-        gp = ir->getIntegrationPoint(i);
-
-        dV = this->computeVolumeAround(gp);
-        mass += dV * this->giveMaterial()->give('d', gp);
+        GaussPoint *gp = ir->getIntegrationPoint(i);
+        mass += this->computeVolumeAround(gp) * this->giveMaterial()->give('d', gp);
     }
 
     answer.resize(12, 12);
@@ -448,35 +446,6 @@ Quad1MindlinShell3D :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
     } else {
       return NLStructuralElement::giveIPValue(answer, gp, type, atTime);
     }
-}
-
-//
-// layered cross section support functions
-//
-void
-Quad1MindlinShell3D :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
-                                       GaussPoint *slaveGp, TimeStep *tStep)
-// returns full 3d strain vector of given layer (whose z-coordinate from center-line is
-// stored in slaveGp) for given tStep
-{
-    ///@todo Untested function
-    FloatArray masterGpStrain;
-    double layerZeta, layerZCoord, top, bottom;
-
-    this->computeStrainVector(masterGpStrain, masterGp, tStep);
-    top    = masterGp->giveElement()->giveCrossSection()->give(CS_TopZCoord);
-    bottom = masterGp->giveElement()->giveCrossSection()->give(CS_BottomZCoord);
-    layerZeta = slaveGp->giveCoordinate(3);
-    layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
-
-    answer.resize(6); // {Exx,Eyy,Ezz,GMyz,GMzx,GMxy}
-    answer.zero();
-
-    answer.at(1) = masterGpStrain.at(1) * layerZCoord;
-    answer.at(2) = masterGpStrain.at(2) * layerZCoord;
-    answer.at(6) = masterGpStrain.at(3) * layerZCoord;
-    answer.at(4) = masterGpStrain.at(5);
-    answer.at(5) = masterGpStrain.at(4);
 }
 
 

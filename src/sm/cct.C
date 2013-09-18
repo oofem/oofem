@@ -402,7 +402,7 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     midplZ = z [ 0 ] * answer.at(1) + z [ 1 ] * answer.at(2) + z [ 2 ] * answer.at(3);
 
     //check that the z is within the element
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
     double elthick = cs->give(CS_Thickness);
 
     if ( elthick / 2.0 + midplZ - fabs( coords.at(3) ) < -POINT_TOL ) {
@@ -514,28 +514,25 @@ CCTPlate :: SPRNodalRecoveryMI_givePatchType()
 // layered cross section support functions
 //
 void
-CCTPlate :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
+CCTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, 
                                        GaussPoint *slaveGp, TimeStep *tStep)
 // returns full 3d strain vector of given layer (whose z-coordinate from center-line is
 // stored in slaveGp) for given tStep
 {
-    FloatArray masterGpStrain;
     double layerZeta, layerZCoord, top, bottom;
 
-    this->computeStrainVector(masterGpStrain, masterGp, tStep);
-    top    = masterGp->giveElement()->giveCrossSection()->give(CS_TopZCoord);
-    bottom = masterGp->giveElement()->giveCrossSection()->give(CS_BottomZCoord);
+    top    = this->giveCrossSection()->give(CS_TopZCoord);
+    bottom = this->giveCrossSection()->give(CS_BottomZCoord);
     layerZeta = slaveGp->giveCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
-    answer.resize(6); // {Exx,Eyy,Ezz,GMyz,GMzx,GMxy}
-    answer.zero();
+    answer.resize(5); // {Exx,Eyy,GMyz,GMzx,GMxy}
 
     answer.at(1) = masterGpStrain.at(1) * layerZCoord;
     answer.at(2) = masterGpStrain.at(2) * layerZCoord;
-    answer.at(6) = masterGpStrain.at(3) * layerZCoord;
-    answer.at(4) = masterGpStrain.at(5);
-    answer.at(5) = masterGpStrain.at(4);
+    answer.at(5) = masterGpStrain.at(3) * layerZCoord;
+    answer.at(3) = masterGpStrain.at(5);
+    answer.at(4) = masterGpStrain.at(4);
 }
 
 // Edge load support
@@ -657,7 +654,7 @@ CCTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 //
 #ifdef __OOFEG
 void
-CCTPlate  :: drawRawGeometry(oofegGraphicContext &gc)
+CCTPlate :: drawRawGeometry(oofegGraphicContext &gc)
 {
     WCRec p [ 3 ];
     GraphicObj *go;
@@ -693,7 +690,7 @@ CCTPlate  :: drawRawGeometry(oofegGraphicContext &gc)
 
 
 void
-CCTPlate  :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+CCTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 {
     WCRec p [ 3 ];
     GraphicObj *go;
@@ -729,7 +726,7 @@ CCTPlate  :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 
 
 void
-CCTPlate  :: drawScalar(oofegGraphicContext &context)
+CCTPlate :: drawScalar(oofegGraphicContext &context)
 {
     int i, indx, result = 0;
     WCRec p [ 3 ];
@@ -795,7 +792,7 @@ CCTPlate  :: drawScalar(oofegGraphicContext &context)
 
 /*
  * void
- * CCTPlate  :: drawInternalState (oofegGraphicContext & gc)
+ * CCTPlate :: drawInternalState (oofegGraphicContext & gc)
  * //
  * // Draws internal state graphics representation
  * //

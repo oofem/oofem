@@ -278,7 +278,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         this->assembleVectorFromElements( bcRhs, stepWhenIcApply, EID_ConservationEquation, ElementInternalSourceVector,
                                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add nodal load
-        this->assembleVectorFromDofManagers( bcRhs, stepWhenIcApply, EID_ConservationEquation, ExternalForcesVector,
+        this->assembleVectorFromDofManagers( bcRhs, stepWhenIcApply, ExternalForcesVector,
                                             VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 
@@ -333,7 +333,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
                                      VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     // assembling load from nodes
-    this->assembleVectorFromDofManagers( bcRhs, tStep, EID_ConservationEquation, InternalForcesVector, VM_Total,
+    this->assembleVectorFromDofManagers( bcRhs, tStep, InternalForcesVector, VM_Total,
                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
     for ( int i = 1; i <= neq; i++ ) {
         rhs.at(i) += bcRhs.at(i) * alpha;

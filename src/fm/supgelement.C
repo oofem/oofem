@@ -81,60 +81,7 @@ SUPGElement :: giveCharacteristicMatrix(FloatMatrix &answer,
 // returns characteristics matrix of receiver according to mtrx
 //
 {
-    if ( mtrx == AccelerationTerm_MB ) {
-        this->computeAccelerationTerm_MB(answer, tStep);
-    } else if ( mtrx == AdvectionDerivativeTerm_MB ) {
-        this->computeAdvectionDerivativeTerm_MB(answer, tStep);
-    } else if ( mtrx == DiffusionDerivativeTerm_MB ) {
-        this->computeDiffusionDerivativeTerm_MB(answer, TangentStiffness, tStep);
-    } else if ( mtrx == SecantDiffusionDerivativeTerm_MB ) {
-        this->computeDiffusionDerivativeTerm_MB(answer, SecantStiffness, tStep);
-    } else if ( mtrx == TangentDiffusionDerivativeTerm_MB ) {
-        this->computeDiffusionDerivativeTerm_MB(answer, TangentStiffness, tStep);
-    } else if ( mtrx == InitialDiffusionDerivativeTerm_MB ) {
-        this->computeDiffusionDerivativeTerm_MB(answer, ElasticStiffness, tStep);
-    } else if ( mtrx == PressureTerm_MB ) {
-        this->computePressureTerm_MB(answer, tStep);
-    } else if ( mtrx == LinearAdvectionTerm_MC ) {
-        this->computeLinearAdvectionTerm_MC(answer, tStep);
-    } else if ( mtrx == AdvectionDerivativeTerm_MC ) {
-        this->computeAdvectionDerivativeTerm_MC(answer, tStep);
-    } else if ( mtrx == DiffusionDerivativeTerm_MC ) {
-        this->computeDiffusionDerivativeTerm_MC(answer, tStep);
-    } else if ( mtrx == AccelerationTerm_MC ) {
-        this->computeAccelerationTerm_MC(answer, tStep);
-    } else if ( mtrx == PressureTerm_MC ) {
-        this->computePressureTerm_MC(answer, tStep);
-    } else if ( mtrx == BCLhsTerm_MB ) {
-      this->computeBCLhsTerm_MB(answer, tStep);
-    } else if ( mtrx == BCLhsPressureTerm_MB ) {
-      this->computeBCLhsPressureTerm_MB(answer, tStep);
-    } else if ( mtrx == BCLhsPressureTerm_MC ) {
-      this->computeBCLhsPressureTerm_MC(answer, tStep);
-    } else if ( mtrx == LSICStabilizationTerm_MB ) {
-      this->computeLSICStabilizationTerm_MB(answer, tStep);
-    } else if ( mtrx == StiffnessMatrix) {
-        // support for stokes solver
-        IntArray vloc, ploc;
-        FloatMatrix h;
-        int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
-        this->giveLocalVelocityDofMap(vloc);
-        this->giveLocalPressureDofMap(ploc);
-        answer.resize(size,size); answer.zero();
-        //this->computeAdvectionDerivativeTerm_MB(h, tStep);  answer.assemble(h, vloc);
-        this->computeDiffusionDerivativeTerm_MB(h, TangentStiffness, tStep); answer.assemble(h, vloc);
-        this->computePressureTerm_MB(h, tStep); answer.assemble(h, vloc, ploc);
-        this->computeLinearAdvectionTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
-        this->computeAdvectionDerivativeTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
-        this->computeDiffusionDerivativeTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
-        this->computePressureTerm_MC(h, tStep); answer.assemble(h, ploc);
-        this->computeBCLhsTerm_MB(h, tStep); answer.assemble(h, vloc);
-        this->computeBCLhsPressureTerm_MB(h, tStep); answer.assemble(h, vloc, ploc);
-        this->computeBCLhsPressureTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
-        //this->computeLSICStabilizationTerm_MB(h, tStep); answer.assemble(h, vloc);
-    } else {
-        _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
-    }
+    _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
 }
 
 
@@ -145,19 +92,7 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
 // returns characteristics vector of receiver according to requested type
 //
 {
-    if ( mtrx == AdvectionTerm_MB ) {
-        this->computeAdvectionTerm_MB(answer, tStep);
-    } else if ( mtrx == DiffusionTerm_MB ) {
-        this->computeDiffusionTerm_MB(answer, tStep);
-    } else if ( mtrx == AdvectionTerm_MC ) {
-        this->computeAdvectionTerm_MC(answer, tStep);
-    } else if ( mtrx == BCRhsTerm_MB ) {
-        this->computeBCRhsTerm_MB(answer, tStep);
-    } else if ( mtrx == BCRhsTerm_MC ) {
-        this->computeBCRhsTerm_MC(answer, tStep);
-    } else if ( mtrx == DiffusionTerm_MC ) {
-        this->computeDiffusionTerm_MC(answer, tStep);
-    } else if ( mtrx == ExternalForcesVector) {
+    if ( mtrx == ExternalForcesVector) {
         // stokes flow
         IntArray vloc, ploc;
         FloatArray h;
@@ -167,7 +102,9 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         answer.resize(size); answer.zero();
         this->computeBCRhsTerm_MB(h, tStep); answer.assemble(h, vloc);
         this->computeBCRhsTerm_MC(h, tStep); answer.assemble(h, ploc);
-    } else if ( mtrx == InternalForcesVector) {
+    }
+#if 0 
+    else if ( mtrx == InternalForcesVector) {
         // stokes flow
         IntArray vloc, ploc;
         FloatArray h;
@@ -205,7 +142,9 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         h.beProductOf(m1, v);
         answer.assemble(h, ploc);
 
-    } else {
+    } 
+#endif
+    else {
         _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }
 }

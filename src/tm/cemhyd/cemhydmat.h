@@ -175,6 +175,9 @@ public:
     virtual void updateYourself(TimeStep *atTime);
     virtual void printOutputAt(FILE *file, TimeStep *atTime);
 #elif CEMPY
+#define OUTFILES
+#define IMAGEFILES
+#define PRINTF
 class CemhydMatStatus
 {
 public:

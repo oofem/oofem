@@ -63,16 +63,10 @@ protected:
     int numberOfGaussPoints;
     static FEI3dTrQuad interpolation;
     static bool __initialized;
-    static IntArray ordering_phibar;
-    static IntArray ordering_m;
-    static IntArray ordering_gam;
     static IntArray ordering_all;
     static IntArray ordering_gr;
     static IntArray ordering_gr_edge;
     static bool initOrdering() {
-        ordering_phibar.setValues(18, 1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 29, 30 ,31, 36, 37, 38);
-        ordering_m.setValues(18, 4, 5, 6, 11, 12, 13, 18, 19, 20, 25, 26, 27, 32, 33 ,34, 39, 40, 41);
-        ordering_gam.setValues(6, 7, 14, 21, 28, 35, 42);
         ordering_all.setValues(42, 1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 29, 30 ,31, 36, 37, 38,
                                    4, 5, 6, 11, 12, 13, 18, 19, 20, 25, 26, 27, 32, 33 ,34, 39, 40, 41,
                                    7, 14, 21, 28, 35, 42);
@@ -105,21 +99,18 @@ public:
     Tr2Shell7XFEM(int n, Domain *d);
     virtual ~Tr2Shell7XFEM() { }     // destructor -> declaring as virtual will make each subclass call their respective destr.
     // definition & identification
-    //virtual int giveNumberOfDofs()           { return 42; }
     virtual int giveNumberOfEdgeDofs()       { return 21; }
-    //virtual int giveNumberOfEdgeDofs()       { return 35; } ///@todo temporary! remove!
     virtual int giveNumberOfEdgeDofManagers() { return 3;  }
     virtual const char *giveInputRecordName() const { return _IFT_Tr2Shell7XFEM_Name; }
     virtual const char *giveClassName() const { return "Tr2Shell7XFEM"; }
     virtual classType giveClassID() const { return Tr2Shell7XFEMClass; }
+
     //virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_Composite; }
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; } // write new wedge-like type 'layeredWedge'
     virtual void giveCompositeExportData( IntArray &primaryVarsToExport, IntArray &cellVarsToExport,
                  std::vector<FloatArray> &nodeCoords, std::vector<IntArray> &cellNodes, IntArray &cellTypes, 
                  std::vector<FloatArray> &primaryVars, std::vector<FloatArray> &cellVars, TimeStep *tStep ){};
-
-    //virtual void giveCompositeExportData( IntArray &primaryVarsToExport, IntArray &cellVarsToExport, TimeStep *tStep );
 };
 
 

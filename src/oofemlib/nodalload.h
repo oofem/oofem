@@ -67,22 +67,13 @@ class TimeStep;
  */
 class NodalLoad : public Load
 {
-public:
-    /**
-     * Type determining the type of formulation (entity local or global one).
-     */
-    enum BL_CoordSystType {
-        BL_GlobalMode, ///< Global mode i.e. load is specified in global c.s.
-        BL_LocalMode ///< Local entity (edge or surface) coordinate system
-    };
-
 protected:
     /**
      * Load coordinate system.
      * It is actually used only when local coordinate system in node is defined and load is specified in global
      * coordinate system
      */
-    BL_CoordSystType coordSystemType;
+    CoordSystType coordSystemType;
 
 public:
     /**
@@ -95,10 +86,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_NodalLoad_Name; }
     virtual void computeValueAt(FloatArray &answer, TimeStep *atTime, FloatArray &coords, ValueModeType mode)
     { computeComponentArrayAt(answer, atTime, mode); }
-    /**
-     * Returns receiver's coordinate system.
-     */
-    BL_CoordSystType giveCoordSystMode() { return coordSystemType; }
+    virtual CoordSystType giveCoordSystMode() { return coordSystemType; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
