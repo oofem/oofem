@@ -96,7 +96,7 @@ protected:
 
     virtual void updateYourself(TimeStep *tStep);
     virtual void postInitialize();
-    void computeOrderingArray( IntArray &orderingArray, IntArray &activeDofsArray,  EnrichmentItem *ei, SolutionField field);
+    void computeOrderingArray( IntArray &orderingArray, IntArray &activeDofsArray,  EnrichmentItem *ei);
     
    
     virtual void evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcon, FloatArray &solVec);
