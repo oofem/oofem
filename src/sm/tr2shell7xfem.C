@@ -223,12 +223,12 @@ Tr2Shell7XFEM :: compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &
     for( int i = 1; i <= ndofs; i++ ){
         for( int j = 1; j <= 18; j++ ){
 
-            if( abs(matrix1.at(i,j)) > 1.0e-12 ) {
+            if( fabs(matrix1.at(i,j)) > 1.0e-12 ) {
                 double diff = ( matrix1.at(i,j)-matrix2.at(i,j) );
                 double relDiff =  diff / matrix1.at(i,j);
-                if ( abs(relDiff)<1.0e-4) {
+                if ( fabs(relDiff)<1.0e-4) {
                     answer.at(i,j) = 0.0;
-                } else if( abs(diff)<1.0e3 ) {
+                } else if( fabs(diff)<1.0e3 ) {
                     answer.at(i,j) = 0.0;
                 } else {
                     answer.at(i,j) = relDiff;
