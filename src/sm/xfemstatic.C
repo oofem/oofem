@@ -143,6 +143,46 @@ XFEMStatic :: solveYourselfAt(TimeStep *tStep)
 }
 
 void
+XFEMStatic :: terminate(TimeStep *tStep)
+{
+    this->doStepOutput(tStep);
+    this->printReactionForces(tStep, 1);
+    // update load vectors before storing context
+    fflush(this->giveOutputStream());
+    this->updateLoadVectors(tStep);
+    this->saveStepContext(tStep);
+
+    // Propagate fronts
+    int numDom = this->giveNumberOfDomains();
+    for( int i = 1; i <= numDom; i++ ) {
+    	Domain *domain = this->giveDomain(i);
+    	XfemManager *xMan = domain->giveXfemManager();
+    	xMan->propagateFronts();
+    }
+
+    // Update element subdivisions if necessary
+    // (e.g. if a crack has moved and cut a new element)
+    for( int domInd = 1; domInd <= this->giveNumberOfDomains(); domInd++ ) {
+
+        Domain *domain = this->giveDomain(domInd);
+    	int numEl = domain->giveNumberOfElements();
+
+    	for(int i = 1; i <= numEl; i++) {
+    		Element *el = domain->giveElement(i);
+
+    		XfemElementInterface *xfemEl = dynamic_cast<XfemElementInterface*> (el);
+
+    		if( xfemEl != NULL ) {
+    			xfemEl->recomputeGaussPoints();
+    		}
+
+    	}
+
+    }
+
+}
+
+void
 XFEMStatic :: updateLoadVectors(TimeStep *tStep)
 {
     MetaStep *mstep = this->giveMetaStep( tStep->giveMetaStepNumber() );
@@ -282,25 +322,6 @@ XFEMStatic :: updateYourself(TimeStep *tStep)
     }
 
 
-    // Update element subdivisions if necessary
-    // (e.g. if a crack has moved and cut a new element)
-    for( int domInd = 1; domInd <= this->giveNumberOfDomains(); domInd++ ) {
-
-        Domain *domain = this->giveDomain(domInd);
-    	int numEl = domain->giveNumberOfElements();
-
-    	for(int i = 1; i <= numEl; i++) {
-    		Element *el = domain->giveElement(i);
-
-    		XfemElementInterface *xfemEl = dynamic_cast<XfemElementInterface*> (el);
-
-    		if( xfemEl != NULL ) {
-    			xfemEl->recomputeGaussPoints();
-    		}
-
-    	}
-
-    }
 
 }
 

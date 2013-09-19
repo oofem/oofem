@@ -74,6 +74,7 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FE
     this->numberOfEnrichmentFunctions = 1;
     this->numberOfEnrichmentDomains = 1;
     this->startOfDofIdPool = -1;
+    this->endOfDofIdPool = -1;
     this->mpEnrichesDofsWithIdArray = new IntArray;
 }
 
@@ -229,6 +230,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     // TODO: Compute the needed size properly
     int xDofPoolAllocSize = 10 * this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs() * this->giveNumberOfEnrichmentDomains();
     this->startOfDofIdPool = this->giveDomain()->giveNextFreeDofID(xDofPoolAllocSize);
+    this->endOfDofIdPool = this->startOfDofIdPool + xDofPoolAllocSize;
 
 
     mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
@@ -347,9 +349,6 @@ bool EnrichmentItem :: isMaterialModified(GaussPoint &iGP, Element &iEl, Structu
 
 void EnrichmentItem :: updateGeometry()
 {
-    // Propagate interfaces
-    mpPropagationLaw->propagateInterfaces(*mpEnrichmentDomain);
-
     // Update enrichments ...
     mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
 
@@ -357,6 +356,13 @@ void EnrichmentItem :: updateGeometry()
     createEnrichedDofs();
 }
 
+void EnrichmentItem :: propagateFronts()
+{
+    // Propagate interfaces
+    mpPropagationLaw->propagateInterfaces(*mpEnrichmentDomain);
+
+    updateGeometry();
+}
 
 void
 EnrichmentItem :: computeDofManDofIdArray(IntArray &answer, DofManager *dMan)
@@ -387,7 +393,7 @@ EnrichmentItem :: computeDofManDofIdArray(IntArray &answer, DofManager *dMan)
 
     answer.resize(count);
     for ( int i = 1; i <= count; i++ ) {
-        answer.at(i) = this->giveStartOfDofIdPool()  + i - 1;
+        answer.at(i) = this->giveStartOfDofIdPool() + i - 1;
     }
 
 /*
@@ -498,7 +504,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
     int nEl = d->giveNumberOfElements();
     int nNodes = d->giveNumberOfDofManagers();
 
-	mNodeEnrMarker.resize(nNodes, 0);
+	mNodeEnrMarker.assign(nNodes, 0);
     std::vector<TipInfo> tipInfoArray;
 
     // Loop over elements and use the level sets to mark nodes belonging to completely cut elements.
@@ -655,6 +661,7 @@ void EnrichmentItem :: createEnrichedDofs()
     int nrDofMan = this->giveDomain()->giveNumberOfDofManagers();
     IntArray dofIdArray;
 
+    // Create new dofs
     for ( int i = 1; i <= nrDofMan; i++ ) {
     	DofManager *dMan = this->giveDomain()->giveDofManager(i);
 
@@ -669,6 +676,62 @@ void EnrichmentItem :: createEnrichedDofs()
     		}
     	}
     }
+
+    // TODO: Map values from old to new dofs
+
+
+
+    // Remove old dofs
+    int poolStart 	= giveStartOfDofIdPool();
+    int poolEnd 	= giveEndOfDofIdPool();
+
+    for ( int i = 1; i <= nrDofMan; i++ ) {
+    	DofManager *dMan = this->giveDomain()->giveDofManager(i);
+
+    	computeDofManDofIdArray(dofIdArray, dMan);
+
+    	std::vector<DofIDItem> dofsToRemove;
+    	int numNodeDofs = dMan->giveNumberOfDofs();
+    	for(int j = 1; j <= numNodeDofs; j++) {
+
+    		Dof *dof = dMan->giveDof(j);
+    		DofIDItem dofID = dof->giveDofID();
+
+    		if( dofID >= DofIDItem(poolStart) && dofID <= DofIDItem(poolEnd) ) {
+
+    			bool dofIsInIdArray = false;
+    			for(int k = 1; k <= dofIdArray.giveSize(); k++) {
+    				if( dofID == DofIDItem(dofIdArray.at(k)) ) {
+    					dofIsInIdArray = true;
+    					break;
+    				}
+    			}
+
+    			if(!dofIsInIdArray) {
+					dofsToRemove.push_back(dofID);
+    			}
+
+    		}
+
+    	}
+
+    	for(size_t j = 0; j < dofsToRemove.size(); j++) {
+    		dMan->removeDof(dofsToRemove[j]);
+    	}
+
+//    	if(dofsToRemove.size() > 0) {
+//    		printf("Node: %d Number of dofs: %d\n", i, dMan->giveNumberOfDofs() );
+//    	}
+
+/*
+    	if( dMan->giveNumberOfDofs() > 2 ) {
+    		printf("dMan->giveNumberOfDofs(): %d dofs: ", dMan->giveNumberOfDofs() );
+        	computeDofManDofIdArray(dofIdArray, dMan);
+        	dofIdArray.printYourself();
+    	}
+*/
+    }
+
 
 }
 
