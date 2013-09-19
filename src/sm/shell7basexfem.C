@@ -701,7 +701,7 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
         intMat->give3dStiffnessMatrix_dTdj(K, TangentStiffness, ip, tStep);
         this->evalInitialCovarNormalAt(nCov, lCoords);
         Q.beLocalCoordSys(nCov);
-        K.rotatedWith(Q,'t');   // rotate back to global coord system
+		K.rotatedWith(Q,'t');   // rotate back to global coord system
 
         this->computeTripleProduct(temp, lambda, K, lambda);
         this->computeTripleProduct(tangent, N, temp, N);
