@@ -134,27 +134,24 @@ void WeakPeriodicBoundaryCondition :: computeOrthogonalBasis()
 	gsMatrix.zero();
 	gsMatrix.at(1, 1) = 1;
 
-	for (int i=2; i<=ndof; i++) { // Need ndof base functions
+    for (int i=2; i<=ndof; i++) { // Need ndof base functions. i indicates the row of gsMatrix, ie which polynomial is the current.
 		gsMatrix.at(i, i)=1; // Copy from V
 
-		if (i==4) {
-			printf(" ");
-		}
-
-		// remove projection of vi on all previous base functions
+        // remove projection of v_i on all previous base functions
 		for (int j=1; j<i; j++) {
 			FloatArray uTemp;
 			uTemp.resize(ndof);
 
 			for (int k=1; k<=ndof; uTemp.at(k)=gsMatrix.at(j,k), k++);
 
-
 			double thisValue = computeProjectionCoefficient(i, j);
 			uTemp.times(-thisValue);
+            //printf("Subtract from u_%u:\n", i);
+            //uTemp.pY();
 
 			for (int k=1; k<=ndof; gsMatrix.at(i,k) = gsMatrix.at(i,k)+uTemp.at(k), k++);
 
-			gsMatrix.printYourself();
+            //gsMatrix.printYourself();
 		}
 	}
 
@@ -176,17 +173,16 @@ double WeakPeriodicBoundaryCondition :: computeProjectionCoefficient(int vIndex,
 
 	// Loop over all elements
 	for ( size_t ielement = 0; ielement < element [ thisSide ].size(); ielement++ ) {
-		// Compute <v, u_i> on this element and store in FloatArray u
-
+        // Compute <v, u_i>/<u_i, u_i> on this element and store in nom/denom
 
 		Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
 		FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
 
 		GaussIntegrationRule iRule(1, thisElement);
 
-		ngp = iRule.getRequiredNumberOfIntegrationPoints(sideGeom, thisOrder+2);
+        int n = iRule.getRequiredNumberOfIntegrationPoints(sideGeom, thisOrder);
 
-		iRule.setUpIntegrationPoints(sideGeom, ngp, _Unknown);
+        iRule.setUpIntegrationPoints(sideGeom, n, _Unknown);
 
 		for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
 			GaussPoint *gp = iRule.getIntegrationPoint(i);
@@ -201,12 +197,18 @@ double WeakPeriodicBoundaryCondition :: computeProjectionCoefficient(int vIndex,
 			getExponents(vIndex, a, b);
 			double vVal=pow(gcoords.at(surfaceIndexes.at(1)), a)*pow(gcoords.at(surfaceIndexes.at(2)), b);
 
-			for ( int j=1; j<=ndof; j++) { // j is the column in gsMatrix
-				getExponents(j, a, b);
-				double uValue = gsMatrix.at(uIndex,j)*pow(gcoords.at(surfaceIndexes.at(1)), a)*pow(gcoords.at(surfaceIndexes.at(2)), b);
-				nom=nom+vVal*uValue*detJ*gp->giveWeight();
-				denom=denom+uValue*uValue*detJ*gp->giveWeight();
-			}
+//            printf("vValue x^%u*y^%u at (%f, %f) is %f\n", a, b, gcoords.at(surfaceIndexes.at(1)), gcoords.at(surfaceIndexes.at(2)), vVal);
+
+            double uValue=0.0;
+            for ( int k=1; k<ndof; k++) {
+                int c, d;
+                getExponents(k, c, d);
+                uValue=uValue + gsMatrix.at(uIndex,k)*pow(gcoords.at(surfaceIndexes.at(1)), c)*pow(gcoords.at(surfaceIndexes.at(2)), d);
+            }
+
+            nom=nom+vVal*uValue*detJ*gp->giveWeight();
+            denom=denom+uValue*uValue*detJ*gp->giveWeight();
+
 		}
 	}
 
@@ -339,7 +341,8 @@ void WeakPeriodicBoundaryCondition :: updateSminmax()
 		}
 		doUpdateSminmax = false;
 
-		computeOrthogonalBasis();
+        if (this->useBasisType == legendre)
+            computeOrthogonalBasis();
 
 	}
 }
@@ -416,11 +419,13 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
 			double fVal;
 
 			if (this->domain->giveNumberOfSpatialDimensions()==2 )
-				fVal = computeBaseFunctionValue(j, s);
-			else {
-				int a, b;
-				getExponents(j+1, a, b);
-				fVal=pow(gcoords.at(surfaceIndexes.at(1)), a)*pow(gcoords.at(surfaceIndexes.at(2)), b);
+                fVal = computeBaseFunctionValue1D(j, s);
+            else {
+                FloatArray coord;
+                coord.resize(2);
+                coord.at(1) = gcoords.at(surfaceIndexes.at(1));
+                coord.at(2) = gcoords.at(surfaceIndexes.at(2));
+                fVal = computeBaseFunctionValue2D(j+1, coord);
 			}
 
 			for ( int k = 0; k < B.giveNumberOfRows(); k++ ) {
@@ -499,7 +504,28 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
 
 }
 
-double WeakPeriodicBoundaryCondition :: computeBaseFunctionValue(int baseID, double coordinate)
+double WeakPeriodicBoundaryCondition :: computeBaseFunctionValue2D(int baseID, FloatArray coordinate)
+{
+
+    double fVal=0.0;
+
+    if (useBasisType == monomial) {
+        int a, b;
+        getExponents(baseID, a, b);
+        fVal=pow(coordinate.at(1), a)*pow(coordinate.at(2), b);
+    } else if (useBasisType == legendre) {
+        for (int i=1; i<=ndof; i++) {
+            int a, b;
+            getExponents(i, a, b);
+            fVal=fVal + gsMatrix.at(baseID, i)*pow(coordinate.at(1), a)*pow(coordinate.at(2), b);
+        }
+    }
+    // printf("Value for u_%u att coordinate %f, %f is %f\n", baseID, coordinate.at(1), coordinate.at(2), fVal);
+    return fVal;
+
+}
+
+double WeakPeriodicBoundaryCondition :: computeBaseFunctionValue1D(int baseID, double coordinate)
 {
 	double fVal=0.0;
 	FloatArray sideLength;

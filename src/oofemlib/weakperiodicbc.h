@@ -113,7 +113,9 @@ private:
 
     void updateDirection();
 
-    double computeBaseFunctionValue(int baseID, double coordinate);
+    double computeBaseFunctionValue1D(int baseID, double coordinate);
+
+    double computeBaseFunctionValue2D(int baseID, FloatArray coordinate);
 
     Node *gammaDman;
 
