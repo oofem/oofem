@@ -85,6 +85,7 @@ protected:
     FloatMatrix Iep;
     FloatArray	alphav;
 
+
     
 public:
     /// Constructor
