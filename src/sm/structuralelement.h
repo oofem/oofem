@@ -55,6 +55,7 @@ class GaussPoint;
 class FloatArray;
 class IntArray;
 class SparseMtrx; // required by addNonlocalStiffnessContributions declaration
+class StructuralCrossSection;
 class IDNLMaterial;
 
 /**
@@ -96,6 +97,7 @@ class StructuralElement : public Element
 protected:
     /// Initial displacement vector, describes the initial nodal displacements when element has been casted.
     FloatArray *initialDisplacements;
+
 public:
     /**
      * Constructor. Creates structural element with given number, belonging to given domain.
@@ -110,6 +112,7 @@ public:
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
     virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
+    virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { this->giveInternalDofManDofIDMask(inode, EID_MomentumBalance, answer); }
     /**
      * Computes mass matrix of receiver. Default implementation returns consistent mass matrix and uses
      * numerical integration. Returns result of this->computeConsistentMassMatrix service, transformed into
@@ -330,6 +333,9 @@ public:
     virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
 
 protected:
+    /// Helper function which returns the structural cross-section for the element.
+    StructuralCrossSection *giveStructuralCrossSection();
+
     /**
      * Computes constitutive matrix of receiver. Default implementation uses element cross section
      * giveCharMaterialStiffnessMatrix service.
@@ -550,7 +556,7 @@ protected:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
 
     /**
      * Computes the geometrical matrix of receiver in given integration point.

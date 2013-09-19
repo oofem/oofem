@@ -294,7 +294,7 @@ void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
             this->interpolation_quad.surfaceEvalN(N, iSurf, * lcoords, FEIElementGeometryWrapper(this));
             double dA = gp->giveWeight() * this->interpolation_quad.surfaceGiveTransformationJacobian(iSurf, * lcoords, FEIElementGeometryWrapper(this));
 
-            if ( boundaryLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) { // load in xi-eta system
+            if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) { // load in xi-eta system
                 boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
             } else { // Edge load in x-y system
                 FloatArray gcoords;

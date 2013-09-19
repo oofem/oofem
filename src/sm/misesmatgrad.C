@@ -61,11 +61,7 @@ MisesMatGrad :: ~MisesMatGrad()
 int
 MisesMatGrad :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( ( mode == _1dMat ) || ( mode == _PlaneStrain ) || ( mode == _3dMat ) ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _1dMat || mode == _PlaneStrain || mode == _3dMat;
 }
 
 
@@ -486,7 +482,7 @@ MisesMatGrad :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, G
     double tempDamage;
     FloatArray tempEffStress, totalStress, locTotalStrain;
 
-    MisesMat ::  performPlasticityReturn(gp, locTotalStrain);
+    MisesMat :: performPlasticityReturn(gp, locTotalStrain);
     status->letTempStrainVectorBe(totalStrain);
     tempDamage = computeDamage(gp, atTime);
     status->giveTempEffectiveStress(tempEffStress);

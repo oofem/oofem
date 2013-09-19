@@ -36,6 +36,7 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "intarray.h"
+#include "gaussintegrationrule.h"
 
 namespace oofem {
 void
@@ -285,6 +286,35 @@ FEI3dWedgeLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &
 {
     OOFEM_ERROR("FEI3dWedgeLin :: surfaceGiveTransformationJacobian not implemented");
     return 0;
+}
+
+
+IntegrationRule *
+FEI3dWedgeLin :: giveIntegrationRule(int order)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    ///@todo This function below isn't supported for wedges. We must decide how we should do this.
+    //int points = iRule->getRequiredNumberOfIntegrationPoints(_Wedge, order);
+    OOFEM_WARNING("Warning.. ignoring 'order' argument: FIXME");
+    int pointsZeta = 1;
+    int pointsTriangle = 1;
+    iRule->SetUpPointsOnWedge(pointsTriangle, pointsZeta, _Unknown);
+    return iRule;
+}
+
+
+IntegrationRule *
+FEI3dWedgeLin :: giveBoundaryIntegrationRule(int order, int boundary)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    if ( boundary <= 2 ) {
+        int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 0);
+        iRule->SetUpPointsOnTriangle(points, _Unknown);
+    } else {
+        int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 2);
+        iRule->SetUpPointsOnSquare(points, _Unknown);
+    }
+    return iRule;
 }
 
 } // end namespace oofem

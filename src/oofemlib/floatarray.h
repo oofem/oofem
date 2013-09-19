@@ -45,6 +45,9 @@
 #include "contextmode.h"
 
 #include <iosfwd>
+#if __cplusplus > 199711L
+#include <initializer_list>
+#endif
 
 namespace oofem {
 class IntArray;
@@ -107,6 +110,12 @@ public:
      * @param x Array to copy.
      */
     FloatArray(const FloatArray &x);
+#if __cplusplus > 199711L
+    /// Initializer list constructor.
+    FloatArray(std::initializer_list<double> list);
+    /// Assignment operator.
+    FloatArray & operator=(std::initializer_list<double> list);
+#endif
     /// Destructor.
     virtual ~FloatArray();
 
@@ -346,12 +355,28 @@ public:
     double distance(const FloatArray &x) const;
     /// @see distance
     double distance(const FloatArray *x) const { return this->distance(* x); }
+
+    /**
+     * Computes distance between the position represented by the reciever and a line segment represented by it's start
+     * point iP1 and it's end point iP2.
+     * Written by Erik Svenning, August 2013.
+     */
+    double distance(const FloatArray &iP1, const FloatArray &iP2) const;
+
     /**
      * Computes the square of distance between position represented by receiver and position given as parameter.
      * @param x Coordinate to calculate squared distance from.
      */
     double distance_square(const FloatArray &x) const;
 
+    /**Returns index (between 1 and Size) of minimum element in the array
+    */
+    int giveIndexMinElem(void);
+    
+    /**Returns index (between 1 and Size) of maximum element in the array
+    */
+    int giveIndexMaxElem(void);
+    
     /**
      * Computes the dot product (or inner product) of receiver and argument.
      * @param x Vector to contract to receiver.

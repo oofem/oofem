@@ -869,7 +869,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
             IntArray regionNodalNumbers(nnodes);
             int regionDofMans = 0, offset = 0;
             ireg = -1;
-            int defaultSize;
+            int defaultSize = 0;
 
             this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
             if ( !( ( valID == IST_DisplacementVector ) || ( valID == IST_MaterialInterfaceVal ) ) ) {

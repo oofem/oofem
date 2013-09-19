@@ -35,7 +35,7 @@
 #include "libeam3dnl2.h"
 #include "node.h"
 #include "material.h"
-#include "crosssection.h"
+#include "structuralcrosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "structuralms.h"
@@ -260,7 +260,6 @@ LIBeam3dNL2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep 
 void
 LIBeam3dNL2 :: computeXMtrx(FloatMatrix &answer, TimeStep *tStep)
 {
-    int i, j;
     FloatArray xd(3);
     FloatMatrix s(3, 3);
 
@@ -270,13 +269,13 @@ LIBeam3dNL2 :: computeXMtrx(FloatMatrix &answer, TimeStep *tStep)
     answer.resize(12, 6);
     answer.zero();
 
-    for ( i = 1; i < 4; i++ ) {
+    for ( int i = 1; i < 4; i++ ) {
         answer.at(i, i)      = -1.0;
         answer.at(i + 6, i)   =  1.0;
         answer.at(i + 3, i + 3) = -1.0;
         answer.at(i + 9, i + 3) =  1.0;
 
-        for ( j = 1; j < 4; j++ ) {
+        for ( int j = 1; j < 4; j++ ) {
             answer.at(i + 3, j) = answer.at(i + 9, j) = 0.5 * s.at(j, i);
         }
     }
@@ -289,7 +288,7 @@ LIBeam3dNL2 :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int
     Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
-    FloatArray nm(6), TotalStressVector(6);
+    FloatArray nm(6), stress, strain;
     FloatMatrix x, tempTc;
     double s1, s2;
 
@@ -298,17 +297,17 @@ LIBeam3dNL2 :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int
     this->computeRotMtrxFromQuaternion(tempTc, this->tempQ);
 
     if ( useUpdatedGpRecord == 1 ) {
-        TotalStressVector = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )
-                            ->giveStressVector();
+        stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
     } else {
-        this->computeStressVector(TotalStressVector, gp, tStep);
+        this->computeStrainVector(strain, gp, tStep);
+        this->computeStressVector(stress, strain, gp, tStep);
     }
 
     for ( int i = 1; i <= 3; i++ ) {
         s1 = s2 = 0.0;
         for ( int j = 1; j <= 3; j++ ) {
-            s1 += tempTc.at(i, j) * TotalStressVector.at(j);
-            s2 += tempTc.at(i, j) * TotalStressVector.at(j + 3);
+            s1 += tempTc.at(i, j) * stress.at(j);
+            s2 += tempTc.at(i, j) * stress.at(j + 3);
         }
 
         nm.at(i)   = s1;
@@ -341,10 +340,9 @@ LIBeam3dNL2 :: computeXdVector(FloatArray &answer, TimeStep *tStep)
 void
 LIBeam3dNL2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-    int i, j, k;
     double s1, s2;
     FloatMatrix d, x, xt(12, 6), dxt, sn, sm, sxd, y, tempTc;
-    FloatArray n(3), m(3), xd(3), TotalStressVector;
+    FloatArray n(3), m(3), xd(3), stress, strain;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
 
@@ -357,9 +355,9 @@ LIBeam3dNL2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode
     this->computeRotMtrxFromQuaternion(tempTc, this->tempQ);
     this->computeXMtrx(x, tStep);
     xt.zero();
-    for ( i = 1; i <= 12; i++ ) {
-        for ( j = 1; j <= 3; j++ ) {
-            for ( k = 1; k <= 3; k++ ) {
+    for ( int i = 1; i <= 12; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
+            for ( int k = 1; k <= 3; k++ ) {
                 // compute x*Tbar, taking into account sparsity of Tbar
                 xt.at(i, j)   += x.at(i, k) * tempTc.at(k, j);
                 xt.at(i, j + 3) += x.at(i, k + 3) * tempTc.at(k, j);
@@ -374,13 +372,14 @@ LIBeam3dNL2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode
 
     // geometric stiffness ks = ks1+ks2
     // ks1
-    this->computeStressVector(TotalStressVector, gp, tStep);
+    this->computeStrainVector(strain, gp, tStep);
+    this->computeStressVector(stress, strain, gp, tStep);
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         s1 = s2 = 0.0;
-        for ( j = 1; j <= 3; j++ ) {
-            s1 += tempTc.at(i, j) * TotalStressVector.at(j);
-            s2 += tempTc.at(i, j) * TotalStressVector.at(j + 3);
+        for ( int j = 1; j <= 3; j++ ) {
+            s1 += tempTc.at(i, j) * stress.at(j);
+            s2 += tempTc.at(i, j) * stress.at(j + 3);
         }
 
         n.at(i)   = s1;
@@ -390,8 +389,8 @@ LIBeam3dNL2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode
     this->computeSMtrx(sn, n);
     this->computeSMtrx(sm, m);
 
-    for ( i = 1; i <= 3; i++ ) {
-        for ( j = 1; j <= 3; j++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             answer.at(i, j + 3)   += sn.at(i, j);
             answer.at(i, j + 9)   += sn.at(i, j);
             answer.at(i + 3, j + 3) += sm.at(i, j);
@@ -411,8 +410,8 @@ LIBeam3dNL2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode
     y.beProductOf(sxd, sn);
     y.times(0.5);
 
-    for ( i = 1; i <= 3; i++ ) {
-        for ( j = 1; j <= 3; j++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             answer.at(i + 3, j)     -= sn.at(i, j);
             answer.at(i + 3, j + 3)   += y.at(i, j);
             answer.at(i + 3, j + 6)   += sn.at(i, j);
@@ -438,6 +437,21 @@ LIBeam3dNL2 :: computeGaussPoints()
         this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
     }
 }
+
+
+void
+LIBeam3dNL2 :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->give3dBeamStiffMtrx(answer, rMode, gp, tStep);
+}
+
+
+void
+LIBeam3dNL2 :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStress_Beam3d(answer, gp, strain, tStep);
+}
+
 
 IRResultType
 LIBeam3dNL2 :: initializeFrom(InputRecord *ir)
@@ -558,7 +572,7 @@ LIBeam3dNL2 :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 
 void
-LIBeam3dNL2 ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+LIBeam3dNL2 :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
     answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
 }
@@ -609,14 +623,12 @@ LIBeam3dNL2 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      * provides dof mapping of local edge dofs (only nonzero are taken into account)
      * to global element dofs
      */
-    int i;
-
     if ( iEdge != 1 ) {
         _error("giveEdgeDofMapping: wrong edge number");
     }
 
     answer.resize(12);
-    for ( i = 1; i <= 12; i++ ) {
+    for ( int i = 1; i <= 12; i++ ) {
         answer.at(i) = i;
     }
 }
@@ -644,7 +656,6 @@ LIBeam3dNL2 :: giveLocalCoordinateSystem(FloatMatrix &answer)
     FloatArray lx(3), ly(3), lz(3), help(3);
     double length = this->giveLength();
     Node *nodeA, *nodeB, *refNode;
-    int i;
 
     answer.resize(3, 3);
     answer.zero();
@@ -652,7 +663,7 @@ LIBeam3dNL2 :: giveLocalCoordinateSystem(FloatMatrix &answer)
     nodeB  = this->giveNode(2);
     refNode = this->giveDomain()->giveNode(this->referenceNode);
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         lx.at(i) = ( nodeB->giveCoordinate(i) - nodeA->giveCoordinate(i) ) / length;
         help.at(i) = ( refNode->giveCoordinate(i) - nodeA->giveCoordinate(i) );
     }
@@ -662,7 +673,7 @@ LIBeam3dNL2 :: giveLocalCoordinateSystem(FloatMatrix &answer)
     ly.beVectorProductOf(lz, lx);
     ly.normalize();
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(1, i) = lx.at(i);
         answer.at(2, i) = ly.at(i);
         answer.at(3, i) = lz.at(i);
@@ -711,15 +722,14 @@ LIBeam3dNL2 :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
      */
 
     FloatMatrix lcs;
-    int i, j;
 
     answer.resize(6, 6);
     answer.zero();
 
     this->giveLocalCoordinateSystem(lcs);
 
-    for ( i = 1; i <= 3; i++ ) {
-        for ( j = 1; j <= 3; j++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             answer.at(i, j) = lcs.at(i, j);
             answer.at(3 + i, 3 + j) = lcs.at(i, j);
         }
@@ -830,7 +840,6 @@ LIBeam3dNL2 :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
     FloatMatrix dR, Rn, Ro;
     FloatArray e, om, omp, acp(3), kapgn1(3);
     double acSize, coeff;
-    int i, j;
 
     this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, ui);
 
@@ -851,13 +860,13 @@ LIBeam3dNL2 :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
         om.times( 2. * tan(acSize / 2.) );
 
         coeff = ( 1. - ( acSize / sin(acSize) ) );
-        for ( i = 1; i <= 3; i++ ) {
-            for ( j = 1; j <= 3; j++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
+            for ( int j = 1; j <= 3; j++ ) {
                 h.at(i, j) = coeff * ac.at(i) * ac.at(j);
             }
         }
 
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             h.at(i, i) = 1. - h.at(i, i);
         }
 

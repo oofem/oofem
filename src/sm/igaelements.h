@@ -73,6 +73,7 @@ public:
     virtual FEInterpolation *giveInterpolation() const { return const_cast< BSplineInterpolation* >(& this->interpolation); }
     virtual Element *giveElement() { return this; }
     virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
+    virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { this->giveInternalDofManDofIDMask(inode, EID_MomentumBalance, answer); }
     virtual void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
         PlaneStressStructuralElementEvaluator :: giveDofManDofIDMask(inode, u, answer);
     }
@@ -118,6 +119,7 @@ public:
     virtual FEInterpolation *giveInterpolation() const { return const_cast< NURBSInterpolation* >(& this->interpolation); }
     virtual Element *giveElement() { return this; }
     virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
+    virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { this->giveInternalDofManDofIDMask(inode, EID_MomentumBalance, answer); }
     virtual void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
         PlaneStressStructuralElementEvaluator :: giveDofManDofIDMask(inode, u, answer);
     }
@@ -168,6 +170,7 @@ public:
     virtual FEInterpolation *giveInterpolation() const { return const_cast< TSplineInterpolation* >(& this->interpolation); }
     virtual Element *giveElement() { return this; }
     virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
+    virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { this->giveInternalDofManDofIDMask(inode, EID_MomentumBalance, answer); }
     virtual void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
         PlaneStressStructuralElementEvaluator :: giveDofManDofIDMask(inode, u, answer);
     }
@@ -208,6 +211,7 @@ public:
     virtual Element *giveElement() { return this; }
 
     virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
+    virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { this->giveInternalDofManDofIDMask(inode, EID_MomentumBalance, answer); }
     virtual void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
         Space3dStructuralElementEvaluator :: giveDofManDofIDMask(inode, u, answer);
     }

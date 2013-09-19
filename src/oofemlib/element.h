@@ -210,16 +210,15 @@ public:
     /**
      * Returns the location array (array of code numbers) of receiver for given numbering scheme.
      * Results are cached at receiver for default scheme in locationArray attribute.
-     * The UnknownType parameter allows to distinguish between several possible governing equations, that
-     * can be numbered separately. The default implementation assumes that location array will be assembled only for
-     * one UnknownType value, and this array is cached on element level.
      */
     void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s, IntArray * dofIds = NULL) const;
+    void giveLocationArray(IntArray & locationArray, const IntArray &dofIDMask, const UnknownNumberingScheme & s, IntArray * dofIds = NULL) const;
     /**
      * Returns the location array for the boundary of the element.
-     * The boundary is the corner nodes for 1D elements, the edges for a 2D element and the surfaces for a 3D element.
+     * Only takes into account nodes in the bNodes vector.
      */
-    void giveBoundaryLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
+    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, EquationID eid, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
+    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
     /**
      * @return Number of DOFs in element.
      */
@@ -290,6 +289,7 @@ public:
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
     /**
      * Computes the contribution of the given load at the given boundary.
+     * @note Elements which do not have an contribution should resize the vector to be empty.
      * @param answer Requested contribution of load.
      * @param load Load to compute contribution from.
      * @param boundary Boundary number.
@@ -299,7 +299,8 @@ public:
      */
     virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
     /**
-     * Computes the contribution of the given load at the given edge.
+     * Computes the contribution of the given load at the given boundary edge.
+     * @note Elements which do not have an contribution should resize the vector to be empty.
      * @param answer Requested contribution of load.
      * @param load Load to compute contribution from.
      * @param boundary Edge number.
@@ -307,7 +308,7 @@ public:
      * @param mode Determines mode of answer.
      * @param tStep Time step when answer is computed.
      */
-    virtual void computeEdgeLoadVector(FloatArray &answer, Load *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep);
     //@}
 
     /**@name General element functions */
@@ -331,13 +332,13 @@ public:
     virtual void computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     /**
      * Boundary version of computeVectorOf.
-     * @param boundary Boundary number.
+     * @param bNodes Boundary nodes.
      * @param eid Equation ID for unknowns.
      * @param u Identifies mode of unknown (eg. total value or velocity of unknown).
      * @param stepN Time step, when vector of unknowns is requested.
      * @param answer Local vector of unknowns.
      */
-    virtual void computeBoundaryVectorOf(int boundary, EquationID eid, ValueModeType u, TimeStep *stepN, FloatArray &answer);
+    virtual void computeBoundaryVectorOf(const IntArray &bNodes, EquationID eid, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     /**
      * Returns local vector of unknowns. Local vector of unknowns is extracted from
      * given field and from boundary conditions (if dof has active boundary
@@ -407,10 +408,11 @@ public:
      * @note Function does most likely NOT need to be overridden.
      * @param answer Computed rotation matrix.
      * @param nodes Nodes to include in element local ordering.
+     * @param includeInternal Determines whether or not to include internal dof managers.
      * @param eid Equation ID.
      * @return True if transformation is necessary, false otherwise.
      */
-    virtual bool computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &nodes, EquationID eid);
+    virtual bool computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &nodes, bool includeInternal, EquationID eid);
     /**
      * Returns dofmanager dof mask for node. This mask defines the dofs which are used by element
      * in node. Mask influences the code number ordering for particular node. Code numbers are
@@ -445,6 +447,10 @@ public:
      */
     virtual void giveInternalDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
     { answer.resize(0); }
+    /**
+     * Calls giveInternalDofManDofIDMask with the default equation id for the type of problem.
+     */
+    virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { answer.resize(0); }
     /**
      * Returns element dof mask for node. This mask defines the dof ordering of the element interpolation.
      * Must be defined by particular element.
@@ -768,6 +774,11 @@ public:
      * @return Characteristic length of element in given integration point and direction.
      */
     virtual double giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method) { return giveCharacteristicLenght(gp, normalToCrackPlane); }
+    /**
+     * Returns the size (length, area or volume depending on element type) of the parent
+     * element. E.g. 4.0 for a quadrilateral.
+     */
+    virtual double giveParentElSize() const {return 0.0;}
     /**
      * Updates internal element state (in all integration points of receiver)
      * before nonlocal averaging takes place. Used by so nonlocal materials,

@@ -134,7 +134,6 @@ public:
  *
  * @author Vit Smilauer
  *
- * @todo This class should overload giveRealStressVector_3d and _1d.
  * @todo This class should overload give1dMaterialStiffMtrx
  */
 class CompoDamageMat : public StructuralMaterial
@@ -161,6 +160,11 @@ public:
 
     virtual void giveRealStressVector(FloatArray & answer, GaussPoint *gp,
                               const FloatArray &, TimeStep *tStep);
+
+    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);

@@ -48,8 +48,11 @@ class GaussPoint;
 class Element;
 class XfemManager;
 
+//#define XFEM_DEBUG_VTK 1
+
 /**
  * Provides Xfem interface for an element.
+ * @author Erik Svenning
  */
 class XfemElementInterface : public Interface
 {
@@ -59,15 +62,26 @@ protected:
 
 public:
     /// Constructor.
-    XfemElementInterface(Element *e) : Interface() { this->element = e; }
+    XfemElementInterface(Element *e) : Interface(), xMan(NULL) { this->element = e; }
+
+    virtual ~XfemElementInterface() {}
+
     /// Creates enriched part of B matrix.
-    void XfemElementInterface_createEnrBmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    void XfemElementInterface_createEnrBmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl);
     /// Partitions the element into patches by a triangulation.
-    void XfemElementInterface_partitionElement(AList< Triangle > *answer, AList< FloatArray > *together);
+    virtual void XfemElementInterface_partitionElement(std::vector< Triangle > &oTriangles, const std :: vector< FloatArray > &iPoints);
     /// Updates integration rule based on the triangulation.
-    void XfemElementInterface_updateIntegrationRule();
+    virtual void XfemElementInterface_updateIntegrationRule();
+
     /// Helpful routine to put the nodes for triangulation together, should be in protected members probably.
-    void XfemElementInterface_prepareNodesForDelaunay(AList< FloatArray > *answer1, AList< FloatArray > *answer2);
+    /// Returns an array of array of points. Each array of points defines the points of a subregion of the element.
+    virtual void XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions);
+
+    /**
+     * If the enrichment evolves in time, the element subdivision
+     * need to be updated. That is done by recomputeGaussPoints.
+     */
+    virtual void recomputeGaussPoints();
 };
 } // end namespace oofem
 #endif // xfemelementinterface_h

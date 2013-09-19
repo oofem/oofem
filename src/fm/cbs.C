@@ -260,7 +260,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
             _error("solveYourselfAt: sparse matrix creation failed");
         }
 
-        lhs->buildInternalStructure( this, 1, EID_ConservationEquation, pnum );
+        lhs->buildInternalStructure( this, 1, EID_MomentumBalance_ConservationEquation, pnum );
 
         this->assemble( lhs, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, PressureLhs,
                         pnum, this->giveDomain(1) );

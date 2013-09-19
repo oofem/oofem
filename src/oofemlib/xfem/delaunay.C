@@ -48,8 +48,8 @@ bool Delaunay :: colinear(FloatArray *p1, FloatArray *p2, FloatArray *p3)
 {
     double dist = p1->at(1) * ( p2->at(2) - p3->at(2) ) + p2->at(1) * ( p3->at(2) - p1->at(2) ) +
                   p3->at(1) * ( p1->at(2) - p2->at(2) );
-    // the tolerance probably needs a setter
-    if ( dist < 0.0001 && dist > -0.0001 ) {
+
+    if ( dist < mTol && dist > -mTol ) {
         return true;
     } else {
         return false;
@@ -81,40 +81,33 @@ bool Delaunay :: isInsideCC(FloatArray *p, FloatArray *p1,  FloatArray *p2,  Flo
     }
 }
 
-void Delaunay :: triangulate(AList< FloatArray > *overtices, AList< Triangle > *triangles)
+void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, std::vector< Triangle > &oTriangles)
 {
     // 4th order algorithm - four loops, only for testing purposes
-    int n = overtices->giveSize();
-    int count = 0;
+
+    int n = iVertices.size();
+
     // copy of vertices, since they will be shifted
-    AList< FloatArray > *vertices = new AList< FloatArray >();
-    std :: map< FloatArray *, FloatArray * >backToOld; // map for putting the shifted vertices into the old position
-    for ( int i = 1; i <= overtices->giveSize(); i++ ) {
-        FloatArray *ip = overtices->at(i);
-        FloatArray *ipCopy = new FloatArray(*ip);
-        vertices->put(i, ipCopy);
-        backToOld [ ipCopy ] = ip;
-    }
+    std :: vector< FloatArray >vertices(iVertices);
 
     // small shift of vertices
     for ( int i = 1; i <= n; i++ ) {
-        vertices->at(i)->at(1) += vertices->at(i)->at(1) * 0.000001 * double ( rand() ) / RAND_MAX;
-        vertices->at(i)->at(2) += vertices->at(i)->at(2) * 0.000001 * double ( rand() ) / RAND_MAX;
+        vertices [ i - 1 ].at(1) += vertices [ i - 1 ].at(1) * 0.000001 * double ( rand() ) / RAND_MAX;
+        vertices [ i - 1 ].at(2) += vertices [ i - 1 ].at(2) * 0.000001 * double ( rand() ) / RAND_MAX;
     }
 
     for ( int i = 1; i <= n; i++ ) {
         for ( int j = i + 1; j <= n; j++ ) {
             for ( int k = j + 1; k <= n; k++ ) {
                 bool isTriangle = true;
-                if ( colinear( vertices->at(i), vertices->at(j),
-                              vertices->at(k) ) ) {
+                if ( colinear(& vertices [ i - 1 ], & vertices [ j - 1 ], & vertices [ k - 1 ]) ) {
                     isTriangle = false;
-                } else {
+                } else   {
                     for ( int a = 1; a <= n; a++ ) {
                         if ( a != i && a != j && a != k ) {
                             // checks whether a point a is inside a circumcircle of a triangle ijk
-                            if ( isInsideCC( vertices->at(a), vertices->at(i), vertices->at(j),
-                                            vertices->at(k) ) ) {
+                            if ( isInsideCC(& vertices [ a - 1 ], & vertices [ i - 1 ], & vertices [ j - 1 ],
+                                            & vertices [ k - 1 ]) ) {
                                 isTriangle = false;
                                 break;
                             }
@@ -123,25 +116,25 @@ void Delaunay :: triangulate(AList< FloatArray > *overtices, AList< Triangle > *
                 }
 
                 if ( isTriangle ) {
-                    count++;
+
                     // here we switch to old vertices
                     FloatArray *p1 = new FloatArray();
-                    * p1 = * ( backToOld [ vertices->at(i) ] );
+                    * p1 =  iVertices [ i - 1 ];
                     FloatArray *p2 = new FloatArray();
-                    * p2 = * ( backToOld [ vertices->at(j) ] );
+                    * p2 =  iVertices [ j - 1 ];
                     FloatArray *p3 = new FloatArray();
-                    * p3 = * ( backToOld [ vertices->at(k) ] );
-                    Triangle *triangle = new Triangle(p1, p2, p3);
-                    if ( !triangle->isOrientedAnticlockwise() ) {
-                        triangle->changeToAnticlockwise();
+                    * p3 =  iVertices [ k - 1 ];
+
+
+                    Triangle tri(p1, p2, p3);
+                    if ( !tri.isOrientedAnticlockwise() ) {
+                        tri.changeToAnticlockwise();
                     }
 
-                    triangles->put(count, triangle);
+                    oTriangles.push_back(tri);
                 }
             }
         }
     }
-
-    delete vertices;
 }
 } // end namespace oofem

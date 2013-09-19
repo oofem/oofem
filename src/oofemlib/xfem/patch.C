@@ -31,7 +31,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
+#if 0
 #include "floatarray.h"
 #include "gausspoint.h"
 #include "integrationrule.h"
@@ -138,8 +138,8 @@ void TrianglePatch :: convertGPIntoParental(GaussPoint *gp)
         coords [ i - 1 ] = new FloatArray( *this->giveVertex(i) );
     }
 
-    this->interpolation.local2global(global, * gp->giveCoordinates(),
-                                     FEIVertexListGeometryWrapper(this->giveNrVertices(), coords));
+    this->interpolation.local2global( global, * gp->giveCoordinates(),
+                                      FEIVertexListGeometryWrapper(this->giveNrVertices(), coords) );
     for ( int i = 1; i <= this->giveNrVertices(); i++ ) {
         delete coords [ i - 1 ];
     }
@@ -212,3 +212,4 @@ TrianglePatch :: drawWD(oofegGraphicContext &gc, FloatArray &vd)
 
 #endif
 } // end namespace oofem
+#endif

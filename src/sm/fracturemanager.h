@@ -74,14 +74,14 @@ enum FailureCriteriaType {
     FailureCriteria_DEF
 };
 
-class Crack
-{
-protected:
-    int numFronts; //will be tips in 2D, curves in 3D
-    //PropagationLaw propLaw //Associated propagation law - should maybe be several
-    //geometryDescription //Explicit -> list of nodes, EnrichmentDomain, …
-    //updateGeometryDescription(){};
-};
+//class Crack
+//{
+//protected:
+//    int numFronts; //will be tips in 2D, curves in 3D
+//    //PropagationLaw propLaw //Associated propagation law - should maybe be several
+//    //geometryDescription //Explicit -> list of nodes, EnrichmentDomain, …
+//    //updateGeometryDescription(){};
+//};
 
 
 class FailureCriteria
@@ -130,10 +130,10 @@ J-integral, G, K
 */
 };
 
-class PropagationLaw
-{
+//class PropagationLaw
+//{
     //evaluatePropLaw(TimeStep *tStep){}; //Should update geometry, give direction and rate
-};
+//};
 
 
 class FailureModuleElementInterface : public Interface

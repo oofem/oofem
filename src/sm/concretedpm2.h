@@ -61,11 +61,11 @@
 #define _IFT_ConcreteDPM2_dhard "dhard"
 #define _IFT_ConcreteDPM2_dilation "dilation"
 #define _IFT_ConcreteDPM2_asoft "asoft"
-#define _IFT_ConcreteDPM2_bsoft "bsoft"
 #define _IFT_ConcreteDPM2_hp "hp"
 #define _IFT_ConcreteDPM2_yieldtol "yieldtol"
 #define _IFT_ConcreteDPM2_newtoniter "newtoniter"
 #define _IFT_ConcreteDPM2_wf "wf"
+#define _IFT_ConcreteDPM2_efc "efc"
 #define _IFT_ConcreteDPM2_softeningType "stype"
 #define _IFT_ConcreteDPM2_ftOne "ft1"
 #define _IFT_ConcreteDPM2_wfOne "wf1"
@@ -593,7 +593,7 @@ protected:
     double hardeningModulus;
 
     /// Parameter of the ductilityMeasure of the damage model.
-    double ASoft, BSoft;
+    double ASoft;
 
     /// Parameter of the hardening law of the plasticity model.
     double yieldHardPrimePeak;
@@ -635,12 +635,15 @@ protected:
     double nu;
 
     /// Control parameter for the exponential softening law.
+    double efCompression;
+
+    /// Control parameter for the linear/bilinear softening law in tension.
     double wf;
 
-    /// Control parameter for the exponential softening law.
+    /// Control parameter for the bilinear softening law in tension.
     double wfOne;
 
-    /// Control parameter for the exponential softening law.
+    /// Control parameter for the bilinear softening law.
     double ftOne;
 
     /// yield tolerance for the plasticity model.
@@ -692,6 +695,11 @@ public:
                                       const FloatArray &strainVector,
                                       TimeStep *atTime);
 
+    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+
     /** 
      * Perform stress return of the plasticity model and compute history variables.
      * @param gp Gauss point.
@@ -708,7 +716,7 @@ public:
      * @param tempKappa Hardening variable.
      */
 
-    bool checkForVertexCase(double answer,
+    bool checkForVertexCase(double &answer,
                             const double sig,
                             const double tempKappa);
 
@@ -913,7 +921,9 @@ public:
     double computeAlpha(StressVector &effectiveStressTension, StressVector &effectiveStressCompression, StressVector &effectiveStress);
 
     /// Compute damage parameter.
-    virtual double computeDamageParam(double equivStrain, double kappaOne, double kappaTwo, GaussPoint *gp);
+    virtual double computeDamageParamTension(double equivStrain, double kappaOne, double kappaTwo, double le);
+
+    virtual double computeDamageParamCompression(double equivStrain, double kappaOne, double kappaTwo);
 
     /// Compute equivalent strain value.
     double computeDeltaPlasticStrainNormTension(double tempKappaD, double kappaD, GaussPoint *gp);

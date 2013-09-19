@@ -49,68 +49,43 @@ namespace oofem {
  * and returns result. If passed CharType value is of unsupported value, error is generated.
  * @see ValueModeType type.
  */
-#define CharType_DEF                            \
-    ENUM_ITEM(UnknownCharType)                    \
-    ENUM_ITEM(StiffnessMatrix)                    \
-    ENUM_ITEM(TangentStiffnessMatrix)             \
-    ENUM_ITEM(SecantStiffnessMatrix)              \
-    ENUM_ITEM(ElasticStiffnessMatrix)             \
-    ENUM_ITEM(MassMatrix)                         \
-    ENUM_ITEM(LumpedMassMatrix)                   \
-    ENUM_ITEM(EffectiveStiffnessMatrix)           \
-    ENUM_ITEM(EffectiveMassMatrix)           \
-    ENUM_ITEM(ConductivityMatrix)                 \
-    ENUM_ITEM(CapacityMatrix)                     \
-    ENUM_ITEM(InitialStressMatrix)                \
-    ENUM_ITEM(HeatAndMoistureCharMatrix)          \
-    /* CBS */ \
-    ENUM_ITEM(IntermediateConvectionTerm)         \
-    ENUM_ITEM(IntermediateDiffusionTerm)          \
-    ENUM_ITEM(DensityRhsVelocityTerms)            \
-    ENUM_ITEM(DensityRhsPressureTerms)            \
-    ENUM_ITEM(DensityPrescribedTractionPressure)          \
-    ENUM_ITEM(NumberOfNodalPrescribedTractionPressureContributions)       \
-    ENUM_ITEM(PressureLhs)                                                \
-    ENUM_ITEM(CorrectionRhs)                                              \
-    ENUM_ITEM(CriticalTimeStep)                                           \
-    ENUM_ITEM(PrescribedVelocityRhsVector)                                \
-    ENUM_ITEM(PrescribedDensityRhsVector)                                 \
-    /* SUPG/PSPG */ \
-    ENUM_ITEM(AccelerationTerm_MB)                                        \
-    ENUM_ITEM(AdvectionDerivativeTerm_MB)                                 \
-    ENUM_ITEM(DiffusionDerivativeTerm_MB)                                 \
-    ENUM_ITEM(SecantDiffusionDerivativeTerm_MB)                           \
-    ENUM_ITEM(TangentDiffusionDerivativeTerm_MB)                          \
-    ENUM_ITEM(InitialDiffusionDerivativeTerm_MB)                          \
-    ENUM_ITEM(PressureTerm_MB)                                            \
-    ENUM_ITEM(LSICStabilizationTerm_MB)                                   \
-    ENUM_ITEM(LinearAdvectionTerm_MC)                                     \
-    ENUM_ITEM(AdvectionTerm_MC)                                           \
-    ENUM_ITEM(AdvectionDerivativeTerm_MC)                                 \
-    ENUM_ITEM(AccelerationTerm_MC)                                        \
-    ENUM_ITEM(DiffusionDerivativeTerm_MC)                                 \
-    ENUM_ITEM(DiffusionTerm_MC)                                           \
-    ENUM_ITEM(PressureTerm_MC)                                            \
-    ENUM_ITEM(BCLhsTerm_MB)                                               \
-    ENUM_ITEM(BCLhsPressureTerm_MB)                                       \
-    ENUM_ITEM(BCLhsPressureTerm_MC)                                       \
-    ENUM_ITEM(BCRhsTerm_MB)                                               \
-    ENUM_ITEM(BCRhsTerm_MC)                                               \
-    ENUM_ITEM(AlgorithmicRhsTerm_MB)                                      \
-    ENUM_ITEM(AlgorithmicRhsTerm_MC)                                      \
-    ENUM_ITEM(AdvectionTerm_MB)                                           \
-    ENUM_ITEM(DiffusionTerm_MB)                                           \
-    /* characteristic vectors */ \
-    ENUM_ITEM(ExternalForcesVector)                                       \
-    ENUM_ITEM(InternalForcesVector)                                       \
-    ENUM_ITEM(LastEquilibratedInternalForcesVector)                       \
-    ENUM_ITEM(ElementBCTransportVector)                                   \
-    ENUM_ITEM(ElementInternalSourceVector)                                \
-    ENUM_ITEM(LHSBCMatrix) /* LHS due to Boundary Conditions (Transport problems) */  \
-    ENUM_ITEM(NSTP_MidpointLhs) /* NonStationaryTransportProblem - LHS for midpoint discretization alg. */ \
-    ENUM_ITEM(NSTP_MidpointRhs) /* NonStationaryTransportProblem - RHS for midpoint discretization alg. */ \
-    ENUM_ITEM(IntSourceLHSMatrix) /* LHS due to material internal source (Transport problems) */  \
-    ENUM_ITEM(PrescribedRhsVector)
+#define CharType_DEF                              \
+    ENUM_ITEM_WITH_VALUE(UnknownCharType,0)                    \
+    ENUM_ITEM_WITH_VALUE(StiffnessMatrix,1)                    \
+    ENUM_ITEM_WITH_VALUE(TangentStiffnessMatrix,2)             \
+    ENUM_ITEM_WITH_VALUE(SecantStiffnessMatrix,3)              \
+    ENUM_ITEM_WITH_VALUE(ElasticStiffnessMatrix,4)             \
+    ENUM_ITEM_WITH_VALUE(MassMatrix,5)                         \
+    ENUM_ITEM_WITH_VALUE(LumpedMassMatrix,6)                   \
+    ENUM_ITEM_WITH_VALUE(EffectiveStiffnessMatrix,7)           \
+    ENUM_ITEM_WITH_VALUE(EffectiveMassMatrix,8)                \
+    ENUM_ITEM_WITH_VALUE(ConductivityMatrix,9)                 \
+    ENUM_ITEM_WITH_VALUE(CapacityMatrix,10)                    \
+    ENUM_ITEM_WITH_VALUE(InitialStressMatrix,11)               \
+    ENUM_ITEM_WITH_VALUE(HeatAndMoistureCharMatrix,12)         \
+    /* CBS */                                                  \
+    ENUM_ITEM_WITH_VALUE(IntermediateConvectionTerm,50)        \
+    ENUM_ITEM_WITH_VALUE(IntermediateDiffusionTerm,51)         \
+    ENUM_ITEM_WITH_VALUE(DensityRhsVelocityTerms,52)           \
+    ENUM_ITEM_WITH_VALUE(DensityRhsPressureTerms,53)           \
+    ENUM_ITEM_WITH_VALUE(DensityPrescribedTractionPressure,54) \
+    ENUM_ITEM_WITH_VALUE(NumberOfNodalPrescribedTractionPressureContributions,55)   \
+    ENUM_ITEM_WITH_VALUE(PressureLhs,56)                                            \
+    ENUM_ITEM_WITH_VALUE(CorrectionRhs,57)                                          \
+    ENUM_ITEM_WITH_VALUE(CriticalTimeStep,58)                                       \
+    ENUM_ITEM_WITH_VALUE(PrescribedVelocityRhsVector,59)                            \
+    ENUM_ITEM_WITH_VALUE(PrescribedDensityRhsVector,60)                             \
+    /* characteristic vectors */                                                         \
+    ENUM_ITEM_WITH_VALUE(ExternalForcesVector,150)                                       \
+    ENUM_ITEM_WITH_VALUE(InternalForcesVector,151)                                       \
+    ENUM_ITEM_WITH_VALUE(LastEquilibratedInternalForcesVector,152)                       \
+    ENUM_ITEM_WITH_VALUE(ElementBCTransportVector,153)                                   \
+    ENUM_ITEM_WITH_VALUE(ElementInternalSourceVector,154)                                \
+    ENUM_ITEM_WITH_VALUE(LHSBCMatrix,155) /* LHS due to Boundary Conditions (Transport problems) */                       \
+    ENUM_ITEM_WITH_VALUE(NSTP_MidpointLhs,156) /* NonStationaryTransportProblem - LHS for midpoint discretization alg. */ \
+    ENUM_ITEM_WITH_VALUE(NSTP_MidpointRhs,157) /* NonStationaryTransportProblem - RHS for midpoint discretization alg. */ \
+    ENUM_ITEM_WITH_VALUE(IntSourceLHSMatrix,158) /* LHS due to material internal source (Transport problems) */           \
+    ENUM_ITEM_WITH_VALUE(PrescribedRhsVector,159)
 
 enum CharType {
     CharType_DEF

@@ -20,6 +20,7 @@ set (sm_element
     quad1planestrain.C rershell.C tr_shell01.C qplanstrss.C q9planstrss.C qtrplstr.C q4axisymm.C
     planstrss.C
     planstrssxfem.C
+    trplanstrssxfem.C
     axisymm3d.C l4axisymm.C
     macrolspace.C
     cct.C
@@ -51,6 +52,7 @@ set (sm_emodel
     structengngmodel.C
     linearstatic.C
     nlinearstatic.C
+    xfemstatic.C
     nlineardynamic.C
     eigenvaluedynamic.C
     linearstability.C
@@ -93,6 +95,7 @@ set (sm_material
     druckerpragercutmat.C
     masonry02.C
     isointerfacedamage01.C
+    isointerfacedamage02.C
     j2mat.C
     mat_cebfip90.C
     hellmat.C

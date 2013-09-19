@@ -64,10 +64,24 @@ public:
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
     virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_ConservationEquation, answer); }
+    virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { this->giveInternalDofManDofIDMask(inode, EID_ConservationEquation, answer); }
     virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
 
     virtual void computeInternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual void computeExternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+
+    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep);
+
+    /**
+     * Gives the thickness at some global coordinate.
+     * For solid elements, the value returned is 1.0 (which is the default implementation).
+     * @param gcoords Global coordinates.
+     * @return Thickness of element at given coordinate.
+     * @todo Move this into the base element?
+     */
+    virtual double giveThicknessAt(const FloatArray &gcoords) { return 1.0; }
 
     /** Computes the capacity matrix of the receiver */
     virtual void computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep);
@@ -97,7 +111,6 @@ public:
     virtual int checkConsistency();
 
     virtual const char *giveClassName() const { return "TransportElement"; }
-    virtual classType giveClassID() const { return TransportElementClass; }
 
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
 

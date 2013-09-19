@@ -39,6 +39,10 @@
 #include "dofmanager.h"
 #include "classfactory.h"
 
+
+#include <fstream>
+#include <limits>
+
 namespace oofem {
 
 REGISTER_Geometry(Line)
@@ -47,23 +51,40 @@ REGISTER_Geometry(PointSwarm)
 
 BasicGeometry :: BasicGeometry()
 {
-    this->vertices = new AList< FloatArray >(0);
+//    this->vertices = new AList< FloatArray >(0);
+}
+
+BasicGeometry :: BasicGeometry(const BasicGeometry &iBasicGeometry):
+mVertices(iBasicGeometry.mVertices)
+{
+/*
+	this->vertices = new AList< FloatArray >(iBasicGeometry.giveNrVertices());
+
+	for(int i = 1; i <= this->vertices->giveSize(); i++)
+	{
+		this->vertices->put(i, new FloatArray((iBasicGeometry.giveVertex(i))) );
+	}
+*/
 }
 
 BasicGeometry :: ~BasicGeometry()
 {
-    delete vertices;
+//    delete vertices;
 }
-
+/*
 FloatArray *BasicGeometry :: giveVertex(int n)
 {
     return this->vertices->at(n);
 }
+*/
 
+// TODO: change to const FloatArray &iVertex
 void BasicGeometry :: setVertex(FloatArray *vertex)
 {
-    int sz = this->vertices->giveSize();
-    this->vertices->put(sz + 1, vertex);
+//    int sz = this->vertices->giveSize();
+//    this->vertices->put(sz + 1, vertex);
+	mVertices.push_back(*vertex);
+	delete vertex;
 }
 
 bool Line :: intersects(Element *element)
@@ -74,24 +95,29 @@ bool Line :: intersects(Element *element)
 
 Line :: Line(FloatArray *pointA, FloatArray *pointB) : BasicGeometry()
 {
-    this->vertices->put(1, pointA);
-    this->vertices->put(2, pointB);
+//    this->vertices->put(1, pointA);
+//    this->vertices->put(2, pointB);
+
+	mVertices.push_back(*pointA);
+	delete pointA;
+	mVertices.push_back(*pointB);
+	delete pointB;
 }
 
-double Line :: computeDistanceTo(FloatArray *point)
+double Line :: computeDistanceTo(const FloatArray *point)
 {
-    FloatArray *pointA = this->vertices->at(1);
-    FloatArray *pointB = this->vertices->at(2);
-    double a = pointA->at(2) - pointB->at(2);
-    double b = pointB->at(1) - pointA->at(1);
-    double c = pointA->at(1) * pointB->at(2) - pointB->at(1) * pointA->at(2);
-    double l = pointA->distance(pointB);
+	const FloatArray &pointA = mVertices[0];
+	const FloatArray &pointB = mVertices[1];
+    double a = pointA.at(2) - pointB.at(2);
+    double b = pointB.at(1) - pointA.at(1);
+    double c = pointA.at(1) * pointB.at(2) - pointB.at(1) * pointA.at(2);
+    double l = pointA.distance(pointB);
     return ( a * point->at(1) + b * point->at(2) + c ) / l;
 }
 
 void Line :: computeProjection(FloatArray &answer)
 {
-    answer.beDifferenceOf(*vertices->at(2), *vertices->at(1));
+    answer.beDifferenceOf( mVertices[1], mVertices[0]);
 }
 
 double Line :: computeTangentialDistanceToEnd(FloatArray *point)
@@ -99,7 +125,7 @@ double Line :: computeTangentialDistanceToEnd(FloatArray *point)
     FloatArray projection;
     this->computeProjection(projection);
     FloatArray tmp;
-    tmp.beDifferenceOf(*point, *vertices->at(2));
+    tmp.beDifferenceOf(*point, mVertices[1]);
     return tmp.dotProduct(projection)/projection.computeNorm();
 }
 
@@ -152,7 +178,7 @@ int Line :: computeNumberOfIntersectionPoints(Element *element)
     return count;
 }
 
-void Line :: computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints)
+void Line :: computeIntersectionPoints(Element *element, std::vector< FloatArray > &oIntersectionPoints)
 {
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
         int n1 = i;
@@ -170,14 +196,15 @@ void Line :: computeIntersectionPoints(Element *element, AList< FloatArray > *in
         if ( lsn1 * lsn2 <= 0 && lst1 <= 0 && lst2 <= 0 ) {
             double r = lsn1 / ( lsn1 - lsn2 );
             if ( i <= element->giveNumberOfDofManagers() ) {
-                FloatArray *answer = new FloatArray(2);
-                for ( int j = 1; j <= answer->giveSize(); j++ ) {
-                    answer->at(j) = ( 1 - r ) * element->giveDofManager(n1)->giveCoordinate(j)
+                FloatArray answer(2);
+                for ( int j = 1; j <= answer.giveSize(); j++ ) {
+                    answer.at(j) = ( 1 - r ) * element->giveDofManager(n1)->giveCoordinate(j)
                                     + r *element->giveDofManager(n2)->giveCoordinate(j);
                 }
 
-                int sz = intersecPoints->giveSize();
-                intersecPoints->put(sz + 1, answer);
+//                int sz = intersecPoints->giveSize();
+//                intersecPoints->put(sz + 1, answer);
+                oIntersectionPoints.push_back(answer);
             }
         }
     }
@@ -185,10 +212,10 @@ void Line :: computeIntersectionPoints(Element *element, AList< FloatArray > *in
 
 double Line :: computeInclinationAngle()
 {
-    FloatArray *pointA = this->vertices->at(1);
-    FloatArray *pointB = this->vertices->at(2);
-    double y = pointB->at(2) - pointA->at(2);
-    double x = pointB->at(1) - pointA->at(1);
+	const FloatArray &pointA = mVertices[0];
+    const FloatArray &pointB = mVertices[1];
+    double y = pointB.at(2) - pointA.at(2);
+    double x = pointB.at(1) - pointA.at(1);
     return atan2(y, x);
 }
 
@@ -208,7 +235,7 @@ void Line :: transformIntoPolar(FloatArray *point, FloatArray &answer)
     FloatMatrix Qt;
     FloatArray help;
     this->computeTransformationMatrix(Qt);
-    help.beDifferenceOf(* point, * vertices->at(2));
+    help.beDifferenceOf(* point, mVertices[1]);
     xp.beProductOf(Qt,help);
     answer.resize(2);
     answer.at(1) = xp.computeNorm();
@@ -224,28 +251,31 @@ IRResultType Line :: initializeFrom(InputRecord *ir)
     FloatArray *end = new FloatArray(2);
     IR_GIVE_FIELD(ir, * start, _IFT_Line_start);
     IR_GIVE_FIELD(ir, * end, _IFT_Line_end);
-    vertices->put(1, start);
-    vertices->put(2, end);
+
+    mVertices.push_back(*start);
+    delete start;
+    mVertices.push_back(*end);
+    delete end;
     return IRRT_OK;
 }
 
 bool Line :: isPointInside(FloatArray *point)
 {
     double maxX, minX, maxY, minY;
-    if ( vertices->at(1)->at(1) > vertices->at(2)->at(1) ) {
-        maxX = vertices->at(1)->at(1);
-        minX = vertices->at(2)->at(1);
+    if ( mVertices[0].at(1) > mVertices[1].at(1) ) {
+        maxX = mVertices[0].at(1);
+        minX = mVertices[1].at(1);
     } else {
-        minX = vertices->at(1)->at(1);
-        maxX = vertices->at(2)->at(1);
+        minX = mVertices[0].at(1);
+        maxX = mVertices[1].at(1);
     }
 
-    if ( vertices->at(1)->at(2) > vertices->at(2)->at(2) ) {
-        maxY = vertices->at(1)->at(2);
-        minY = vertices->at(2)->at(2);
+    if ( mVertices[0].at(2) > mVertices[1].at(2) ) {
+        maxY = mVertices[0].at(2);
+        minY = mVertices[1].at(2);
     } else {
-        minY = vertices->at(1)->at(2);
-        maxY = vertices->at(2)->at(2);
+        minY = mVertices[0].at(2);
+        maxY = mVertices[1].at(2);
     }
 
     if ( point->at(1) >= minX && point->at(1) <= maxX &&
@@ -267,7 +297,7 @@ bool Line :: isOutside(BasicGeometry *bg)
 { // equivalent to up
     int count = 0;
     for ( int i = 1; i <= bg->giveNrVertices(); i++ ) {
-        if ( this->computeDistanceTo( bg->giveVertex(i) ) > 0.1 ) {
+        if ( this->computeDistanceTo( &(bg->giveVertex(i)) ) > 0.1 ) {
             count++;
         }
     }
@@ -277,33 +307,37 @@ bool Line :: isOutside(BasicGeometry *bg)
 
 Triangle :: Triangle(FloatArray *p1, FloatArray *p2, FloatArray *p3) : BasicGeometry()
 {
-    this->vertices->growTo(3);
-    this->vertices->put(1, p1);
-    this->vertices->put(2, p2);
-    this->vertices->put(3, p3);
+	mVertices.push_back(*p1);
+	delete p1;
+
+	mVertices.push_back(*p2);
+	delete p2;
+
+	mVertices.push_back(*p3);
+	delete p3;
 }
 
 double Triangle :: getArea()
 {
-    return fabs( 0.5 * ( vertices->at(1)->at(1) * ( vertices->at(2)->at(2) - vertices->at(3)->at(2) )
-                        + vertices->at(2)->at(1) * ( vertices->at(3)->at(2) - vertices->at(1)->at(2) ) +
-                        vertices->at(3)->at(1) * ( vertices->at(1)->at(2) - vertices->at(2)->at(2) ) ) );
+    return fabs( 0.5 * ( mVertices[0].at(1) * ( mVertices[1].at(2) - mVertices[2].at(2) )
+                        + mVertices[1].at(1) * ( mVertices[2].at(2) - mVertices[0].at(2) ) +
+                        mVertices[2].at(1) * ( mVertices[0].at(2) - mVertices[1].at(2) ) ) );
 }
 
 double Triangle :: getRadiusOfCircumCircle()
 {
-    return 0.25 * vertices->at(1)->distance( vertices->at(2) ) *
-           vertices->at(2)->distance( vertices->at(3) ) *
-           vertices->at(1)->distance( vertices->at(3) ) / this->getArea();
+    return 0.25 * mVertices[0].distance( mVertices[1] ) *
+           mVertices[1].distance( mVertices[2] ) *
+           mVertices[0].distance( mVertices[2] ) / this->getArea();
 }
 
 void Triangle :: computeBarycentrCoor(FloatArray &answer)
 {
-    double c = vertices->at(1)->distance( vertices->at(2) );
-    double a = vertices->at(2)->distance( vertices->at(3) );
-    double b = vertices->at(1)->distance( vertices->at(3) );
+    double c = mVertices[0].distance( mVertices[1] );
+    double a = mVertices[1].distance( mVertices[2] );
+    double b = mVertices[0].distance( mVertices[2] );
 
-    // just to avoid mutliple multiplication
+    // just to avoid multiple multiplication
     double aPow = a * a;
     double bPow = b * b;
     double cPow = c * c;
@@ -322,15 +356,15 @@ void Triangle :: computeCenterOfCircumCircle(FloatArray &answer)
     // center of the circumcircle
     answer.resize(2);
     for ( int i = 1; i <= answer.giveSize(); i++ ) {
-        answer.at(i) = ( bar.at(1) * vertices->at(1)->at(i) + bar.at(2) * vertices->at(2)->at(i) + bar.at(3) * vertices->at(3)->at(i) ) / sum;
+        answer.at(i) = ( bar.at(1) * mVertices[0].at(i) + bar.at(2) * mVertices[1].at(i) + bar.at(3) * mVertices[2].at(i) ) / sum;
     }
 }
 
 void Triangle :: printYourself()
 {
     printf("Triangle: ");
-    for ( int i = 1; i <= vertices->giveSize(); i++ ) {
-        vertices->at(i)->printYourself();
+    for ( size_t i = 0; i < mVertices.size(); i++ ) {
+        mVertices[i].printYourself();
     }
 
     printf("\n");
@@ -341,7 +375,7 @@ bool Triangle :: isOrientedAnticlockwise()
     FloatMatrix fm(3, 3);
     for ( int i = 1; i <= 3; i++ ) {
         for ( int j = 1; j <= 2; j++ ) {
-            fm.at(i, j) = this->giveVertex(i)->at(j);
+            fm.at(i, j) = this->giveVertex(i).at(j);
         }
         fm.at(i, 3) = 1.;
     }
@@ -355,23 +389,34 @@ bool Triangle :: isOrientedAnticlockwise()
 
 void Triangle :: changeToAnticlockwise()
 {
-    FloatArray *p2e = new FloatArray( *this->giveVertex(3) );
-    FloatArray *p3e = new FloatArray( *this->giveVertex(2) );
-    this->vertices->remove(2);
-    this->vertices->remove(3);
-    this->vertices->put(2, p2e);
-    this->vertices->put(3, p3e);
+	std::swap( mVertices[1], mVertices[2] );
+
+//    FloatArray *p2e = new FloatArray( *this->giveVertex(3) );
+//    FloatArray *p3e = new FloatArray( *this->giveVertex(2) );
+//    this->vertices->remove(2);
+//    this->vertices->remove(3);
+//    this->vertices->put(2, p2e);
+//    this->vertices->put(3, p3e);
 }
 
-Circle :: Circle(FloatArray *center, double radius)
+Circle :: Circle(FloatArray *center, double radius):
+mTangSignDist(1.0)
 {
-    this->vertices->put(1, center);
+	mVertices.push_back(*center);
+	delete center;
+
+//    this->vertices->put(1, center);
     this->radius = radius;
 }
 
-double Circle :: computeDistanceTo(FloatArray *point)
+double Circle :: computeDistanceTo(const FloatArray *point)
 {
-    return vertices->at(1)->distance(point) - radius;
+    return mVertices[0].distance(point) - radius;
+}
+
+void Circle :: computeNormalSignDist(double &oDist, const FloatArray &iPoint) const
+{
+	oDist = mVertices[0].distance(iPoint) - radius;
 }
 
 IRResultType Circle :: initializeFrom(InputRecord *ir)
@@ -382,7 +427,9 @@ IRResultType Circle :: initializeFrom(InputRecord *ir)
     FloatArray *center = new FloatArray(2);
     IR_GIVE_FIELD(ir, * center, _IFT_Circle_center);
     IR_GIVE_FIELD(ir, radius, _IFT_Circle_radius);
-    vertices->put(1, center);
+//    vertices->put(1, center);
+	mVertices.push_back(*center);
+	delete center;
     return IRRT_OK;
 }
 
@@ -392,7 +439,7 @@ bool Circle :: intersects(Element *element)
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
         FloatArray *nodeCoor = element->giveDofManager(i)->giveCoordinates();
         // distance from the node to the center of the circle
-        double dist = nodeCoor->distance( vertices->at(1) );
+        double dist = nodeCoor->distance( mVertices[0] );
         if ( dist > this->radius ) {
             count++;
         }
@@ -410,7 +457,7 @@ bool Circle :: intersects(Element *element)
 bool 
 Circle :: isInside(FloatArray &point)
 {
-    double dist = this->giveVertex(1)->distance(point);
+    double dist = this->giveVertex(1).distance(point);
     if ( dist < this->radius ) {
         return true;
     }
@@ -432,11 +479,11 @@ bool Circle :: isInside(Element *element)
 
 
 
-void Circle :: computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints)
+void Circle :: computeIntersectionPoints(Element *element, std::vector< FloatArray > &oIntersectionPoints)
 {
     if ( intersects(element) ) {
         for ( int i = 1; i <= element->giveNumberOfBoundarySides(); i++ ) {
-            AList< FloatArray >oneLineIntersects;
+        	std::vector< FloatArray > oneLineIntersects;
             FloatArray *a = new FloatArray( *( element->giveDofManager(i)->giveCoordinates() ) );
             FloatArray *b = NULL;
             if ( i != element->giveNumberOfBoundarySides() ) {
@@ -445,27 +492,27 @@ void Circle :: computeIntersectionPoints(Element *element, AList< FloatArray > *
                 b = new FloatArray( *( element->giveDofManager(1)->giveCoordinates() ) );
             }
 
-            Line *l = new Line(a, b);
-            computeIntersectionPoints(l, & oneLineIntersects);
-            for ( int j = 1; j <= oneLineIntersects.giveSize(); j++ ) {
-                int sz = intersecPoints->giveSize();
-                intersecPoints->put( sz + 1, oneLineIntersects.at(j) );
-                oneLineIntersects.unlink(j);
+            Line l(a, b);
+            computeIntersectionPoints(&l, oneLineIntersects);
+            for ( int j = 1; j <= int(oneLineIntersects.size()); j++ ) {
+//                int sz = intersecPoints->giveSize();
+//                intersecPoints->put( sz + 1, oneLineIntersects.at(j) );
+//                oneLineIntersects.unlink(j);
+            	oIntersectionPoints.push_back( oneLineIntersects[j-1] );
             }
 
-            delete l;
         }
     }
 }
 
-void Circle :: computeIntersectionPoints(Line *l, AList< FloatArray > *intersecPoints)
+void Circle :: computeIntersectionPoints(Line *l, std::vector< FloatArray > &oIntersectionPoints)
 {
-    double x1 = l->giveVertex(1)->at(1);
-    double y1 = l->giveVertex(1)->at(2);
-    double x2 = l->giveVertex(2)->at(1);
-    double y2 = l->giveVertex(2)->at(2);
-    double c1 = vertices->at(1)->at(1);
-    double c2 = vertices->at(1)->at(2);
+    double x1 = l->giveVertex(1).at(1);
+    double y1 = l->giveVertex(1).at(2);
+    double x2 = l->giveVertex(2).at(1);
+    double y2 = l->giveVertex(2).at(2);
+    double c1 = mVertices[0].at(1);
+    double c2 = mVertices[0].at(2);
     double distX = x2 - x1;
     double distY = y2 - y1;
     double a = 0., b = 0., A, B, C;
@@ -492,7 +539,7 @@ void Circle :: computeIntersectionPoints(Line *l, AList< FloatArray > *intersecP
     }
 
     for ( int i = 1; i <= sz; i++ ) {
-        FloatArray *point = new FloatArray(2);
+        FloatArray point(2);
         double fn;
         if ( i == 1 ) {
             fn = sqrt(D);
@@ -501,36 +548,37 @@ void Circle :: computeIntersectionPoints(Line *l, AList< FloatArray > *intersecP
         }
 
         if ( distX != 0.0 ) {
-            point->at(1) = ( ( -1 ) * B + fn ) / ( 2 * A );
-            point->at(2) = a * point->at(1) + b;
+            point.at(1) = ( ( -1 ) * B + fn ) / ( 2 * A );
+            point.at(2) = a * point.at(1) + b;
         } else {
-            point->at(1) = x1;
-            point->at(2) = ( ( -1 ) * B + fn ) / ( 2 * A );
+            point.at(1) = x1;
+            point.at(2) = ( ( -1 ) * B + fn ) / ( 2 * A );
         }
 
-        int sez = intersecPoints->giveSize();
-        if ( l->isPointInside(point) ) {
-            intersecPoints->put(sez + 1, point);
-        } else {
-            delete point;
-        }
+//        int sez = oIntersectionPoints.size();
+        if ( l->isPointInside(&point) ) {
+//            intersecPoints->put(sez + 1, point);
+        	oIntersectionPoints.push_back(point);
+        } //else {
+//            delete point;
+//        }
     }
 }
 
 int 
 Circle :: computeNumberOfIntersectionPoints(Element *element)
 { 
-    AList< FloatArray > intersecPoints;
+	std::vector< FloatArray > intersecPoints;
 
-    this->computeIntersectionPoints(element, &intersecPoints);
-    return intersecPoints.giveSize();
+    this->computeIntersectionPoints(element, intersecPoints);
+    return intersecPoints.size();
 }
 
 bool Circle :: isOutside(BasicGeometry *bg)
 {
     int count = 0;
     for ( int i = 1; i <= bg->giveNrVertices(); i++ ) {
-        if ( 0.9999 * bg->giveVertex(i)->distance( this->vertices->at(1) ) > this->radius ) {
+        if ( 0.9999 * bg->giveVertex(i).distance( mVertices[0] ) > this->radius ) {
             count++;
         }
     }
@@ -545,8 +593,787 @@ bool Circle :: isOutside(BasicGeometry *bg)
 void Circle :: printYourself()
 {
     printf("Circle: radius = %e, center = ",this->radius);
-    vertices->at(1)->printYourself();
+    mVertices[0].printYourself();
     printf("\n");
+}
+
+
+
+
+int PolygonLine::nextLineIdNumber = 0;
+
+PolygonLine :: PolygonLine() : BasicGeometry()
+{
+	stepInd = 0;
+#ifdef __BOOST_MODULE
+	LC.x(0.0);
+	LC.y(0.0);
+
+	UC.x(0.0);
+	UC.y(0.0);
+#endif
+
+	lineIdNumber = nextLineIdNumber;
+	nextLineIdNumber++;
+}
+
+
+
+
+double PolygonLine :: computeDistanceTo(const FloatArray *point)
+{
+	printf("Warning: entering PolygonLine :: computeDistanceTo(FloatArray *point).\n");
+	double minDist = 1.0e9;
+#ifdef __BOOST_MODULE
+	int numSeg = this->giveNrVertices()-1;
+
+	bPoint2 p( point->at(1), point->at(2) );
+
+	for( int segId = 1; segId <= numSeg; segId++ )
+	{
+		// Crack segment
+		bPoint2 crackP1( this->giveVertex(segId)->at(1), this->giveVertex(segId)->at(2) );
+		bPoint2 crackP2( this->giveVertex(segId+1)->at(1), this->giveVertex(segId+1)->at(2) );
+		bSeg2 crackSeg( crackP1, crackP2 );
+
+		double dist = bDist(p, crackSeg);
+
+		bPoint2 t( crackP2.x() - crackP1.x(), crackP2.y() - crackP1.y() );
+		bPoint2 n( -t.y(), t.x() );
+
+		bPoint2 lineToP( point->at(1) - crackP1.x(), point->at(2) - crackP1.y() );
+
+
+		double sign = sgn( bDot( lineToP, n ) );
+
+		if(dist < fabs(minDist) )
+		{
+			minDist = sign*dist;
+		}
+	}
+#endif
+	return minDist;
+}
+
+double PolygonLine :: computeTangentialSignDist(FloatArray *point)
+{
+//	printf("Entering PolygonLine :: computeTangentialSignDist.\n");
+
+	double minDist = 1.0e9;
+
+	int numSeg = this->giveNrVertices()-1;
+
+//	bPoint2 crackPS( this->giveVertex(1)->at(1), this->giveVertex(1)->at(2) );
+//	bPoint2 crackPE( this->giveVertex(numSeg+1)->at(1), this->giveVertex(numSeg+1)->at(2) );
+
+	FloatArray crackPS;
+	crackPS.setValues(2, this->giveVertex(1).at(1), this->giveVertex(1).at(2) );
+
+	FloatArray crackPE;
+	crackPE.setValues(2, this->giveVertex(numSeg+1).at(1), this->giveVertex(numSeg+1).at(2) );
+
+//	bPoint2 x( point->at(1), point->at(2) );
+
+	FloatArray x;
+	x.setValues(2, point->at(1), point->at(2) );
+
+//	minDist = min( bDist(crackPS,x), bDist(crackPE,x) );
+	minDist = min( x.distance(crackPS), x.distance(crackPE) );
+
+
+	// Find the closest segment to determine the sign of the distance
+	double minDistSeg = 1.0e9;
+	int minDistSegIndex = 0;
+	for( int segId = 1; segId <= numSeg; segId++ )
+	{
+		// Crack segment
+//		bPoint2 crackP1( this->giveVertex(segId)->at(1), this->giveVertex(segId)->at(2) );
+		FloatArray crackP1;
+		crackP1.setValues( 2, this->giveVertex(segId).at(1), this->giveVertex(segId).at(2) );
+
+//		bPoint2 crackP2( this->giveVertex(segId+1)->at(1), this->giveVertex(segId+1)->at(2) );
+		FloatArray crackP2;
+		crackP2.setValues( 2, this->giveVertex(segId+1).at(1), this->giveVertex(segId+1).at(2) );
+
+//		bSeg2 crackSeg( crackP1, crackP2 );
+
+//		double distSeg = bDist(x, crackSeg);
+		double distSeg = x.distance(crackP1, crackP2);
+
+		if( distSeg < minDistSeg )
+		{
+			minDistSeg = distSeg;
+			minDistSegIndex = segId;
+		}
+	}
+
+	if( minDistSegIndex > 1 && minDistSegIndex < numSeg)
+	{
+		// Interior segment is closest -> gamma is positive
+		return minDist;
+	}
+	else
+	{
+		if(minDistSegIndex == 1)
+		{
+//			bPoint2 P1( this->giveVertex(1)->at(1), this->giveVertex(1)->at(2) );
+			FloatArray P1;
+			P1.setValues(2, this->giveVertex(1).at(1), this->giveVertex(1).at(2) );
+
+
+//			bPoint2 P2( this->giveVertex(2)->at(1), this->giveVertex(2)->at(2) );
+			FloatArray P2;
+			P2.setValues(2, this->giveVertex(2).at(1), this->giveVertex(2).at(2));
+
+//			bPoint2 t( P1.x() - P2.x(), P1.y() - P2.y() );
+			FloatArray t;
+			t.beDifferenceOf(P2, P1);
+			t.normalize();
+
+
+//			bPoint2 x_P1( x.x() - P1.x(), x.y() - P1.y() );
+			FloatArray x_P1;
+			x_P1.beDifferenceOf(x, P1);
+
+//			double sign = -bDot( x_P1, t );
+			double sign = -x_P1.dotProduct(t);
+
+			return sign*minDist;
+		}
+		else if(minDistSegIndex == numSeg)
+		{
+//			bPoint2 P1( this->giveVertex(minDistSegIndex)->at(1), this->giveVertex(minDistSegIndex)->at(2) );
+			FloatArray P1;
+			P1.setValues(2, this->giveVertex(minDistSegIndex).at(1), this->giveVertex(minDistSegIndex).at(2) );
+
+//			bPoint2 P2( this->giveVertex(minDistSegIndex+1)->at(1), this->giveVertex(minDistSegIndex+1)->at(2) );
+			FloatArray P2;
+			P2.setValues(2, this->giveVertex(minDistSegIndex+1).at(1), this->giveVertex(minDistSegIndex+1).at(2) );
+
+//			bPoint2 t( P2.x() - P1.x(), P2.y() - P1.y() );
+			FloatArray t;
+			t.beDifferenceOf(P2, P1);
+
+			t.normalize();
+
+//			bPoint2 x_P2( x.x() - P2.x(), x.y() - P2.y() );
+			FloatArray x_P2;
+			x_P2.beDifferenceOf(x, P2);
+
+//			double sign = -bDot( x_P2, t );
+			double sign = -x_P2.dotProduct(t);
+
+			return sign*minDist;
+		}
+		else
+		{
+            OOFEM_ERROR2( "PolygonLine :: computeTangentialSignDist: Index of minDistSegIndex not covered in loop: %d\n", minDistSegIndex );
+		}
+
+		return minDist;
+	}
+
+}
+
+void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoint) const
+{
+	oDist = std::numeric_limits<double>::max();
+	int numSeg = this->giveNrVertices()-1;
+
+	// TODO: This can probably be done in a nicer way.
+	// Ensure that we work in 2d.
+	FloatArray point;
+	point.setValues(2, iPoint.at(1), iPoint.at(2) );
+
+	for( int segId = 1; segId <= numSeg; segId++ )
+	{
+		// Crack segment
+		const FloatArray &crackP1(this->giveVertex(segId));
+
+		const FloatArray &crackP2(this->giveVertex(segId+1));
+
+		double dist = 0.0;
+		if(segId == 1)
+		{
+			// Vector from start P1 to point X
+			FloatArray u;
+			u.beDifferenceOf(point, crackP1);
+
+			// Line tangent vector
+			FloatArray t;
+			t.beDifferenceOf(crackP2, crackP1);
+			double l = norm(t);
+
+			if( l > 0.0) {
+				t.normalize();
+				double s = dot(u, t);
+
+//				if( s < 0.0 ) {
+//					// X is closest to P1
+//					dist = point.distance(crackP1);
+//				}
+//				else {
+					if( s > l ) {
+						// X is closest to P2
+						dist = point.distance(crackP2);
+					}
+					else {
+						double xi = s/l;
+						FloatArray q = (1.0-xi)*crackP1 + xi*crackP2;
+						dist = point.distance(q);
+					}
+//				}
+			}
+			else
+			{
+				// If the points P1 and P2 coincide,
+				// we can compute the distance to any
+				// of these points.
+				dist = point.distance(crackP1);
+			}
+
+		}
+		else if(segId == numSeg)
+		{
+			// Vector from start P1 to point X
+			FloatArray u;
+			u.beDifferenceOf(point, crackP1);
+
+			// Line tangent vector
+			FloatArray t;
+			t.beDifferenceOf(crackP2, crackP1);
+			double l = norm(t);
+
+			if( l > 0.0) {
+				t.normalize();
+				double s = dot(u, t);
+
+				if( s < 0.0 ) {
+					// X is closest to P1
+					dist = point.distance(crackP1);
+				}
+				else {
+//					if( s > l ) {
+//						// X is closest to P2
+//						dist = point.distance(crackP2);
+//					}
+//					else {
+						double xi = s/l;
+						FloatArray q = (1.0-xi)*crackP1 + xi*crackP2;
+						dist = point.distance(q);
+//					}
+				}
+			}
+			else
+			{
+				// If the points P1 and P2 coincide,
+				// we can compute the distance to any
+				// of these points.
+				dist = point.distance(crackP1);
+			}
+		}
+		else
+		{
+			dist = point.distance(crackP1, crackP2);
+		}
+
+
+		FloatArray t;
+		t.beDifferenceOf(crackP2, crackP1);
+
+		FloatArray n;
+		n.setValues(2, -t.at(2), t.at(1) );
+
+		FloatArray lineToP;
+		lineToP.beDifferenceOf( point, crackP1 );
+
+		double sign = sgn( lineToP.dotProduct(n) );
+
+		if(dist < fabs(oDist) )
+		{
+			oDist = sign*dist;
+		}
+	}
+}
+
+
+void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const
+{
+	int numSeg = this->giveNrVertices()-1;
+
+	// TODO: This can probably be done in a nicer way.
+	// Ensure that we work in 2d.
+	FloatArray point;
+	point.setValues(2, iPoint.at(1), iPoint.at(2) );
+
+
+	const FloatArray &crackPS(this->giveVertex(1));
+	const FloatArray &crackPE(this->giveVertex(numSeg+1));
+
+	double minDist = min( point.distance(crackPS), point.distance(crackPE) );
+
+
+	// Find the closest segment to determine the sign of the distance
+	double minDistSeg = std::numeric_limits<double>::max();
+	int minDistSegIndex = 0;
+	for( int segId = 1; segId <= numSeg; segId++ )
+	{
+		// Crack segment
+		const FloatArray &crackP1(this->giveVertex(segId));
+
+		const FloatArray &crackP2(this->giveVertex(segId+1));
+
+		double distSeg = point.distance(crackP1, crackP2);
+
+		if( distSeg < minDistSeg )
+		{
+			minDistSeg = distSeg;
+			minDistSegIndex = segId;
+		}
+	}
+
+	if( minDistSegIndex > 1 && minDistSegIndex < numSeg)
+	{
+		// Interior segment is closest -> gamma is positive
+		oDist = minDist;
+//		printf("minDistSegIndex > 1 && minDistSegIndex < numSeg, oDist: %e\n", oDist);
+		return;
+	}
+	else
+	{
+		if(minDistSegIndex == 1)
+		{
+			const FloatArray &P1(this->giveVertex(1));
+			const FloatArray &P2(this->giveVertex(2));
+
+			FloatArray t;
+			t.beDifferenceOf(P1, P2);
+
+			t.normalize();
+
+			FloatArray x_P1;
+			x_P1.beDifferenceOf(point, P1);
+
+			double sign = -x_P1.dotProduct(t);
+
+			oDist = sign*minDist;
+			return;
+		}
+		else if(minDistSegIndex == numSeg)
+		{
+			const FloatArray &P1(this->giveVertex(minDistSegIndex));
+			const FloatArray &P2(this->giveVertex(minDistSegIndex+1));
+
+			FloatArray t;
+			t.beDifferenceOf(P2, P1);
+
+			t.normalize();
+
+			FloatArray x_P2;
+			x_P2.beDifferenceOf(point, P2);
+
+			double sign = -x_P2.dotProduct(t);
+
+			oDist = sign*minDist;
+
+			return;
+		}
+		else
+		{
+            OOFEM_ERROR2( "PolygonLine :: computeTangentialSignDist: Index of minDistSegIndex not covered in loop: %d\n", minDistSegIndex );
+		}
+
+	}
+
+}
+
+
+IRResultType PolygonLine :: initializeFrom(InputRecord *ir)
+{
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result; // Required by IR_GIVE_FIELD macro
+
+
+    FloatArray *points = new FloatArray();
+    IR_GIVE_FIELD(ir, * points, _IFT_PolygonLine_points);
+
+    int numPoints = points->giveSize()/2;
+
+    for( int i = 1; i <= numPoints; i++)
+    {
+        FloatArray *pos = new FloatArray(2);
+    	pos->at(1) = points->at( 2*(i-1	) + 1	);
+    	pos->at(2) = points->at( 2*(i	)		);
+//        vertices->put(i, pos);
+    	mVertices.push_back(*pos);
+    	delete pos;
+
+//        printf("Setting point %d with coordinates (%e, %e)\n", i, pos->at(1), pos->at(2) );
+    }
+
+
+#ifdef __BOOST_MODULE
+    // Precompute bounding box to speed up calculation of intersection points.
+    calcBoundingBox(LC, UC);
+#endif
+
+    delete points;
+
+    printVTK();
+
+    return IRRT_OK;
+}
+
+#ifdef __BOOST_MODULE
+bool PolygonLine :: boundingBoxIntersects(Element *element)
+{
+	// Compute element bounding box
+	bPoint2 eLC, eUC;
+	eLC.x( element->giveNode(1)->giveCoordinate(1) );
+	eLC.y( element->giveNode(1)->giveCoordinate(2) );
+
+	eUC.x( element->giveNode(1)->giveCoordinate(1) );
+	eUC.y( element->giveNode(1)->giveCoordinate(2) );
+
+	int numNodes = element->giveNumberOfNodes();
+	for(int i = 2; i <= numNodes; i++)
+	{
+		eLC.x( min( eLC.x(), element->giveNode(i)->giveCoordinate(1) ) );
+		eLC.y( min( eLC.y(), element->giveNode(i)->giveCoordinate(2) ) );
+
+		eUC.x( max( eUC.x(), element->giveNode(i)->giveCoordinate(1) ) );
+		eUC.y( max( eUC.y(), element->giveNode(i)->giveCoordinate(2) ) );
+	}
+
+//	printf("eLC: (%e, %e) eUC: (%e, %e) ", eLC.x(), eLC.y(), eUC.x(), eUC.y() );
+//	printf(" LC: (%e, %e)  UC: (%e, %e)\n",  LC.x(),  LC.y(),  UC.x(),  UC.y() );
+
+
+	// Check if there is any chance of overlap
+	if( !bOverlap( eLC, eUC, LC, UC ) )
+	{
+		// If the bounding boxes do not overlap,
+		// there will certainly not be any intersections
+		return false;
+	}
+
+
+	return true;
+}
+#endif
+
+bool PolygonLine :: intersects(Element *element)
+{
+	printf("Warning: entering PolygonLine :: intersects(Element *element).\n");
+
+#ifdef __BOOST_MODULE
+	if( !boundingBoxIntersects(element) )
+	{
+		return false;
+	}
+
+	double distTol = 1.0e-9;
+
+	int numSeg = this->giveNrVertices()-1;
+
+
+	// Loop over the crack segments and test each segment for
+	// overlap with the element
+	for( int segId = 1; segId <= numSeg; segId++ )
+	{
+		if( element->giveClassID() == TrPlaneStress2dXFEMClass )
+		{
+			// Crack segment
+			bPoint2 crackP1( this->giveVertex(segId)->at(1), this->giveVertex(segId)->at(2) );
+			bPoint2 crackP2( this->giveVertex(segId+1)->at(1), this->giveVertex(segId+1)->at(2) );
+			bSeg2 crackSeg( crackP1, crackP2 );
+
+
+			// Triangle vertices
+			bPoint2 x1( element->giveNode(1)->giveCoordinate(1), element->giveNode(1)->giveCoordinate(2) );
+			bPoint2 x2( element->giveNode(2)->giveCoordinate(1), element->giveNode(2)->giveCoordinate(2) );
+			bPoint2 x3( element->giveNode(3)->giveCoordinate(1), element->giveNode(3)->giveCoordinate(2) );
+
+			bSeg2 edge1( x1, x2 );
+			bSeg2 edge2( x2, x3 );
+			bSeg2 edge3( x3, x1 );
+
+			double d1 = bDist( crackSeg, edge1 );
+			if( d1 < distTol)
+			{
+				return true;
+			}
+
+			double d2 = bDist( crackSeg, edge2 );
+			if( d2 < distTol)
+			{
+				return true;
+			}
+
+			double d3 = bDist( crackSeg, edge3 );
+			if( d3 < distTol)
+			{
+				return true;
+			}
+
+		}
+
+	}
+
+
+
+#endif
+
+	return false;
+
+}
+
+
+bool PolygonLine :: isInside(Element *element)
+{
+	return false;
+}
+
+bool
+PolygonLine :: isInside(FloatArray &point)
+{
+    return false;
+}
+
+
+
+#ifdef __BOOST_MODULE
+void PolygonLine :: calcBoundingBox(bPoint2 &oLC, bPoint2 &oUC)
+{
+	oLC.x(vertices->at(1)->at(1));
+	oLC.y(vertices->at(1)->at(2));
+
+	oUC.x(vertices->at(1)->at(1));
+	oUC.y(vertices->at(1)->at(2));
+
+	int numPoints = vertices->giveSize();
+	for(int i = 2; i <= numPoints; i++)
+	{
+		oLC.x( min( oLC.x(), vertices->at(i)->at(1) ) );
+		oLC.y( min( oLC.y(), vertices->at(i)->at(2) ) );
+
+		oUC.x( max( oUC.x(), vertices->at(i)->at(1) ) );
+		oUC.y( max( oUC.y(), vertices->at(i)->at(2) ) );
+	}
+
+}
+#endif
+
+
+void PolygonLine :: computeIntersectionPoints(Element *element, std::vector< FloatArray > &oIntersectionPoints)
+{
+	printf("Warning: entering  PolygonLine :: computeIntersectionPoints(Element *element, std::vector< FloatArray > &oIntersectionPoints).\n");
+#ifdef __BOOST_MODULE
+
+	if( !boundingBoxIntersects(element) )
+	{
+		return;
+	}
+
+
+	for ( int i = 1; i <= element->giveNumberOfBoundarySides(); i++ ) {
+		std::vector< FloatArray > oneLineIntersects;
+		FloatArray *a = new FloatArray( *( element->giveDofManager(i)->giveCoordinates() ) );
+		FloatArray *b = NULL;
+		if ( i != element->giveNumberOfBoundarySides() ) {
+			b = new FloatArray( *( element->giveDofManager(i + 1)->giveCoordinates() ) );
+		} else {
+			b = new FloatArray( *( element->giveDofManager(1)->giveCoordinates() ) );
+		}
+
+		Line l(a, b);
+
+		computeIntersectionPoints(&l, oneLineIntersects);
+		for ( int j = 1; j <= int(oneLineIntersects.size()); j++ ) {
+
+			// Check that the intersection point has not already been identified.
+			// This may happen if the crack intersects the element exactly at a node,
+			// so that intersection is detected for both element edges in that node.
+
+			// TODO: Set tolerance in a more transparent way.
+			double distTol = 1.0e-9;
+
+			bool alreadyFound = false;
+
+			bPoint2 pNew( oneLineIntersects[j-1].at(1), oneLineIntersects[j-1].at(2) );
+
+			int numPointsOld = oIntersectionPoints.size();
+			for(int k = 1; k <= numPointsOld; k++)
+			{
+				bPoint2 pOld( oIntersectionPoints[k-1].at(1), oIntersectionPoints[k-1].at(2) );
+
+				if( bDist(pOld, pNew) < distTol )
+				{
+					alreadyFound = true;
+					break;
+				}
+
+			}
+
+			if(!alreadyFound)
+			{
+//				int sz = intersecPoints->giveSize();
+//				intersecPoints->put( sz + 1, oneLineIntersects.at(j) );
+//				oneLineIntersects.unlink(j);
+				oIntersectionPoints.push_back( oneLineIntersects[j-1] );
+			}
+
+		}
+
+	}
+#endif
+}
+
+void PolygonLine :: computeIntersectionPoints(Line *l, std::vector< FloatArray > &oIntersectionPoints)
+{
+	printf("Warning: entering  PolygonLine :: computeIntersectionPoints(Line *l, std::vector< FloatArray > &oIntersectionPoints).\n");
+
+#ifdef __BOOST_MODULE
+
+
+	int numSeg = this->giveNrVertices()-1;
+
+
+	// Segment
+	bPoint2 lineP1( l->giveVertex(1)->at(1), l->giveVertex(1)->at(2) );
+	bPoint2 lineP2( l->giveVertex(2)->at(1), l->giveVertex(2)->at(2) );
+	bSeg2 lineSeg( lineP1, lineP2 );
+
+
+	double distTol = 1.0e-9;
+
+	bool foundOverlap = false;
+
+	// Loop over the crack segments and test each segment for
+	// overlap with the element
+	for( int segId = 1; segId <= numSeg; segId++ )
+	{
+
+		// Crack segment
+		bPoint2 crackP1( this->giveVertex(segId)->at(1), this->giveVertex(segId)->at(2) );
+		bPoint2 crackP2( this->giveVertex(segId+1)->at(1), this->giveVertex(segId+1)->at(2) );
+		bSeg2 crackSeg( crackP1, crackP2 );
+
+		bPoint2 intersectionPoint(0.0, 0.0);
+		double d = bDist( crackSeg, lineSeg, &intersectionPoint );
+		if( d < distTol)
+		{
+			if(!foundOverlap)
+			{
+				foundOverlap = true;
+
+
+//				int sz = intersecPoints->giveSize();
+//				FloatArray *pos = new FloatArray(2);
+//				pos->at(1) = intersectionPoint.x();
+//				pos->at(2) = intersectionPoint.y();
+//				intersecPoints->put( sz + 1, pos );
+
+				FloatArray pos(2);
+				pos.at(1) = intersectionPoint.x();
+				pos.at(2) = intersectionPoint.y();
+				oIntersectionPoints.push_back(pos);
+			}
+		}
+
+
+	}
+
+#endif
+
+}
+
+int
+PolygonLine :: computeNumberOfIntersectionPoints(Element *element)
+{
+	std::vector< FloatArray > intersecPoints;
+    this->computeIntersectionPoints(element, intersecPoints);
+    return intersecPoints.size();
+}
+
+bool PolygonLine :: isOutside(BasicGeometry *bg)
+{
+	return true;
+}
+
+void PolygonLine :: printYourself()
+{
+	printf("PolygonLine: start: ");
+    mVertices[0].printYourself();
+	printf(" end: ");
+    mVertices[1].printYourself();
+    printf("\n");
+}
+
+void PolygonLine :: printVTK()
+{
+	// Debugging function: write crack geometry to vtk.
+
+	// Write crack geometry to vtk
+	std::string vtkFileName;
+	vtkFileName.append("crack");
+	char lineIdNumberString[100];
+	sprintf(lineIdNumberString, "%d", lineIdNumber);
+	vtkFileName.append(lineIdNumberString);
+
+	vtkFileName.append("Step");
+	char stepString[100];
+	sprintf(stepString, "%d", stepInd);
+	vtkFileName.append(stepString);
+
+	vtkFileName.append(".vtk");
+
+
+	int numPoints = this->giveNrVertices();
+
+
+	std::ofstream file;
+	file.open (vtkFileName.data());
+
+	// Write header
+	file << "# vtk DataFile Version 2.0\n";
+	file << "Geometry of a PolygonLine\n";
+	file << "ASCII\n";
+
+	file << "DATASET UNSTRUCTURED_GRID\n";
+
+
+	// Write points
+	file << "POINTS " << numPoints << "double\n";
+
+	for(int i = 1; i <= numPoints; i++)
+	{
+		file << this->giveVertex(i).at(1) << " " << this->giveVertex(i).at(2) << " 0.0\n";
+	}
+
+
+	// Write segments
+	int numSeg = numPoints-1;
+	file << "CELLS " << numSeg << " " << numSeg*3 << "\n";
+
+	int numPointsPerSeg = 2;
+	for(int i = 0; i < numSeg; i++)
+	{
+		file << numPointsPerSeg << " " << i << " " << i+1 << "\n";
+	}
+
+
+	// Write cell types
+	file << "CELL_TYPES " << numSeg << "\n";
+	int vtkCellType = 3; // line segment
+	for(int i = 0; i < numSeg; i++)
+	{
+		file << vtkCellType << "\n";
+	}
+
+	file.close();
+
+	stepInd++;
 }
 
 

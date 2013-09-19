@@ -44,11 +44,12 @@
 #define _IFT_IsotropicHeatTransferMaterial_Name "isoheat"
 #define _IFT_IsotropicHeatTransferMaterial_k "k" ///< Conductivity
 #define _IFT_IsotropicHeatTransferMaterial_c "c" ///< Specific heat
+#define _IFT_IsotropicHeatTransferMaterial_maturityT0 "maturityt0" ///< Baseline for maturity method
 //@}
 
 namespace oofem {
 /**
- * This class implements a isotropic linear heat  material. A material
+ * This class implements an isotropic linear heat  material. A material
  * is an attribute of a domain. It is usually also attribute of many elements.
  */
 class IsotropicHeatTransferMaterial : public TransportMaterial
@@ -56,10 +57,11 @@ class IsotropicHeatTransferMaterial : public TransportMaterial
 protected:
     double conductivity; ///< Conductivity (k in input file).
     double capacity;     ///< Capacity (c in input file).
+    double maturityT0;   ///< Baseline for maturity mathod
 
 public:
-    IsotropicHeatTransferMaterial(int n, Domain *d) : TransportMaterial(n, d) { }
-    virtual ~IsotropicHeatTransferMaterial() { }
+    IsotropicHeatTransferMaterial(int n, Domain *d);
+    virtual ~IsotropicHeatTransferMaterial();
 
     virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
 
@@ -74,6 +76,7 @@ public:
                                            GaussPoint *gp,
                                            TimeStep *atTime);
 
+    virtual double  giveMaturityT0() {return maturityT0; }
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 

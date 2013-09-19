@@ -70,43 +70,14 @@ SUPGElement2 :: initializeFrom(InputRecord *ir)
 
 
 void
-SUPGElement2 ::  giveCharacteristicMatrix(FloatMatrix &answer,
+SUPGElement2 :: giveCharacteristicMatrix(FloatMatrix &answer,
                                           CharType mtrx, TimeStep *tStep)
 //
 // returns characteristics matrix of receiver according to mtrx
 //
 {
-    if ( mtrx == AccelerationTerm_MB ) {
-        this->computeAccelerationTerm_MB(answer, tStep);
-    } else if ( mtrx == AdvectionDerivativeTerm_MB ) {
-        this->computeAdvectionDerivativeTerm_MB(answer, tStep);
-    } else if ( mtrx == DiffusionDerivativeTerm_MB ) {
-        this->computeDiffusionDerivativeTerm_MB(answer, TangentStiffness, tStep);
-    } else if ( mtrx == SecantDiffusionDerivativeTerm_MB ) {
-        this->computeDiffusionDerivativeTerm_MB(answer, SecantStiffness, tStep);
-    } else if ( mtrx == TangentDiffusionDerivativeTerm_MB ) {
-        this->computeDiffusionDerivativeTerm_MB(answer, TangentStiffness, tStep);
-    } else if ( mtrx == InitialDiffusionDerivativeTerm_MB ) {
-        this->computeDiffusionDerivativeTerm_MB(answer, ElasticStiffness, tStep);
-    } else if ( mtrx == PressureTerm_MB ) {
-        this->computePressureTerm_MB(answer, tStep);
-    } else if ( mtrx == LinearAdvectionTerm_MC ) {
-        this->computeLinearAdvectionTerm_MC(answer, tStep);
-    } else if ( mtrx == AdvectionDerivativeTerm_MC ) {
-        this->computeAdvectionDerivativeTerm_MC(answer, tStep);
-    } else if ( mtrx == DiffusionDerivativeTerm_MC ) {
-        this->computeDiffusionDerivativeTerm_MC(answer, tStep);
-    } else if ( mtrx == AccelerationTerm_MC ) {
-        this->computeAccelerationTerm_MC(answer, tStep);
-    } else if ( mtrx == PressureTerm_MC ) {
-        this->computePressureTerm_MC(answer, tStep);
-    } else if ( mtrx == BCLhsTerm_MB ) {
-      this->computeBCLhsTerm_MB(answer, tStep);
-    } else if ( mtrx == BCLhsPressureTerm_MB ) {
-      this->computeBCLhsPressureTerm_MB(answer, tStep);
-    } else if ( mtrx == LSICStabilizationTerm_MB ) {
-        this->computeLSICStabilizationTerm_MB(answer, tStep);
-    } else if ( mtrx == StiffnessMatrix ) {
+#if 0
+    if ( mtrx == StiffnessMatrix ) {
         // support for stokes solver
         IntArray vloc, ploc;
         FloatMatrix h;
@@ -131,32 +102,22 @@ SUPGElement2 ::  giveCharacteristicMatrix(FloatMatrix &answer,
         answer.assemble(h, ploc);
         this->computeLSICStabilizationTerm_MB(h, tStep);
         answer.assemble(h, vloc);
-    } else {
+    } else
+#endif
+    {
         _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
     }
 }
 
 
 void
-SUPGElement2 ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
+SUPGElement2 :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
                                           TimeStep *tStep)
 //
 // returns characteristics vector of receiver according to requested type
 //
 {
-    if ( mtrx == AdvectionTerm_MB ) {
-        this->computeAdvectionTerm_MB(answer, tStep);
-    } else if ( mtrx == DiffusionTerm_MB ) {
-        this->computeDiffusionTerm_MB(answer, tStep);
-    } else if ( mtrx == AdvectionTerm_MC ) {
-        this->computeAdvectionTerm_MC(answer, tStep);
-    } else if ( mtrx == BCRhsTerm_MB ) {
-        this->computeBCRhsTerm_MB(answer, tStep);
-    } else if ( mtrx == BCRhsTerm_MC ) {
-        this->computeBCRhsTerm_MC(answer, tStep);
-    } else if ( mtrx == DiffusionTerm_MC ) {
-        this->computeDiffusionTerm_MC(answer, tStep);
-    } else if ( mtrx == ExternalForcesVector ) {
+    if ( mtrx == ExternalForcesVector ) {
         // stokes flow
         IntArray vloc, ploc;
         FloatArray h;
@@ -169,7 +130,9 @@ SUPGElement2 ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Val
         answer.assemble(h, vloc);
         this->computeBCRhsTerm_MC(h, tStep);
         answer.assemble(h, ploc);
-    } else if ( mtrx == InternalForcesVector ) {
+    } else
+#if 0
+        if ( mtrx == InternalForcesVector ) {
         // stokes flow
         IntArray vloc, ploc;
         FloatArray h;
@@ -212,7 +175,9 @@ SUPGElement2 ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Val
         this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
         h.beProductOf(m1, v);
         answer.assemble(h, ploc);
-    } else {
+    } else
+#endif
+    {
         _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }
 }
@@ -333,7 +298,7 @@ SUPGElement2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime
     answer.resize(undofs, undofs);
     answer.zero();
 
-    int rule = this->giveTermIntergationRuleIndex(AccelerationTerm_MB);
+    int rule = 2;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     /* consistent part + supg stabilization term */
     for ( k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
@@ -364,7 +329,7 @@ SUPGElement2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
-    int rule = this->giveTermIntergationRuleIndex(AdvectionTerm_MB);
+    int rule = 2;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     /* consistent part + supg stabilization term */
     for ( k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
@@ -408,7 +373,7 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep 
     answer.resize(undofs, undofs);
     answer.zero();
 
-    int rule = this->giveTermIntergationRuleIndex(AdvectionDerivativeTerm_MB);
+    int rule = 2;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     /* consistent part + supg stabilization term */
     for ( k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
@@ -449,7 +414,7 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
     nsd = this->giveNumberOfSpatialDimensions();
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
-    int rule = this->giveTermIntergationRuleIndex(DiffusionTerm_MB);
+    int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
@@ -489,7 +454,7 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
     GaussPoint *gp;
     FloatArray dDB_u;
 
-    int rule = this->giveTermIntergationRuleIndex(DiffusionDerivativeTerm_MB);
+    int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
@@ -522,7 +487,7 @@ SUPGElement2 :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
     answer.resize(undofs, pndofs);
     answer.zero();
 
-    int rule = this->giveTermIntergationRuleIndex(PressureTerm_MB);
+    int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
@@ -562,7 +527,7 @@ SUPGElement2 :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *a
     answer.resize(undofs, undofs);
     answer.zero();
 
-    int rule = this->giveTermIntergationRuleIndex(LSICStabilizationTerm_MB);
+    int rule = 0;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
@@ -588,7 +553,7 @@ SUPGElement2 :: computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atT
     answer.resize(pndofs, undofs);
     answer.zero();
 
-    int rule = this->giveTermIntergationRuleIndex(LinearAdvectionTerm_MC);
+    int rule = 0;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
@@ -616,7 +581,7 @@ SUPGElement2 :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime)
     answer.resize(pndofs);
     answer.zero();
 
-    int rule = this->giveTermIntergationRuleIndex(AdvectionTerm_MC);
+    int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
@@ -651,7 +616,7 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
     answer.resize(pndofs, undofs);
     answer.zero();
 
-    int rule = this->giveTermIntergationRuleIndex(AdvectionDerivativeTerm_MC);
+    int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     /* pspg stabilization term */
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
@@ -675,7 +640,7 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
     double dV, coeff, rho;
     GaussPoint *gp;
 
-    int rule = this->giveTermIntergationRuleIndex(DiffusionDerivativeTerm_MC);
+    int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
 
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
@@ -755,7 +720,7 @@ SUPGElement2 :: computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime
     // pspg stabilization term: M_\epsilon term
 
 
-    int rule = this->giveTermIntergationRuleIndex(AccelerationTerm_MC);
+    int rule = 0;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
 
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
@@ -778,7 +743,7 @@ SUPGElement2 :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime)
 
     answer.resize(pndofs, pndofs);
     answer.zero();
-    int rule = this->giveTermIntergationRuleIndex(PressureTerm_MC);
+    int rule = 0;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
 
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
@@ -807,7 +772,7 @@ SUPGElement2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
     Load *load;
     bcGeomType ltype;
 
-    int rule = this->giveTermIntergationRuleIndex(BCRhsTerm_MB);
+    int rule = 0;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     GaussPoint *gp;
     FloatArray un, gVector, s, helpLoadVector;
@@ -874,7 +839,7 @@ SUPGElement2 :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime)
     FloatMatrix g;
     int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
 
-    int rule = this->giveTermIntergationRuleIndex(BCRhsTerm_MC);
+    int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     GaussPoint *gp;
 

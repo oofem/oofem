@@ -38,48 +38,6 @@
 #include "structuralms.h"
 
 namespace oofem {
-int
-LinearElasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
-{
-    return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain || mode == _1dMat ||
-           mode == _PlateLayer || mode == _2dBeamLayer || mode == _Fiber ||
-           mode == _PlaneStressRot;
-}
-
-
-void
-LinearElasticMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
-                                                  MatResponseMode rMode,
-                                                  GaussPoint *gp,
-                                                  TimeStep *atTime)
-{
-    if ( gp->giveMaterialMode() == _PlaneStressRot ) {
-        this->givePlaneStressRotStiffMtrx(answer, rMode, gp, atTime);
-    } else {
-        StructuralMaterial :: giveStiffnessMatrix(answer, rMode, gp, atTime);
-    }
-}
-
-
-void
-LinearElasticMaterial :: givePlaneStressRotStiffMtrx(FloatMatrix &answer,
-                                                     MatResponseMode rMode,
-                                                     GaussPoint *gp,
-                                                     TimeStep *tStep)
-{
-    FloatMatrix mat;
-
-    this->givePlaneStressStiffMtrx(mat, rMode, gp, tStep);
-
-    answer.resize(4, 4);
-    answer.zero();
-    answer.setSubMatrix(mat, 1, 1);
-    answer.at(4, 4) = mat.at(3, 3);
-}
-
 
 void
 LinearElasticMaterial :: giveRealStressVector(FloatArray &answer,
@@ -114,7 +72,6 @@ LinearElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint 
     FloatMatrix d;
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
-    reducedStrain.printYourself();
     this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
 
     this->give3dMaterialStiffnessMatrix(d, TangentStiffness, gp, tStep);
@@ -172,6 +129,60 @@ LinearElasticMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint 
     this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
 
     this->give1dStressStiffMtrx(d, TangentStiffness, gp, tStep);
+    answer.beProductOf(d, strainVector);
+
+    // update gp
+    status->letTempStrainVectorBe(reducedStrain);
+    status->letTempStressVectorBe(answer);
+}
+
+
+void
+LinearElasticMaterial :: giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    FloatArray strainVector;
+    FloatMatrix d;
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
+
+    this->give2dBeamLayerStiffMtrx(d, TangentStiffness, gp, tStep);
+    answer.beProductOf(d, strainVector);
+
+    // update gp
+    status->letTempStrainVectorBe(reducedStrain);
+    status->letTempStressVectorBe(answer);
+}
+
+
+void
+LinearElasticMaterial :: giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    FloatArray strainVector;
+    FloatMatrix d;
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
+
+    this->givePlateLayerStiffMtrx(d, TangentStiffness, gp, tStep);
+    answer.beProductOf(d, strainVector);
+
+    // update gp
+    status->letTempStrainVectorBe(reducedStrain);
+    status->letTempStressVectorBe(answer);
+}
+
+
+void
+LinearElasticMaterial :: giveRealStressVector_Fiber(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    FloatArray strainVector;
+    FloatMatrix d;
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
+
+    this->giveFiberStiffMtrx(d, TangentStiffness, gp, tStep);
     answer.beProductOf(d, strainVector);
 
     // update gp

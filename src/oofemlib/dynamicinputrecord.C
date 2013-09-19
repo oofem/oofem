@@ -60,7 +60,7 @@ DynamicInputRecord :: DynamicInputRecord() : InputRecord(),
 {
 }
 
-DynamicInputRecord :: DynamicInputRecord(const DynamicInputRecord &src) :
+DynamicInputRecord :: DynamicInputRecord(const DynamicInputRecord &src) : InputRecord(src),
     recordKeyword(src.recordKeyword),
     recordNumber(src.recordNumber),
     emptyRecord(src.emptyRecord),

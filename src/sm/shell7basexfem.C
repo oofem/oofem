@@ -61,7 +61,7 @@ Shell7BaseXFEM :: checkConsistency()
 
     // check if defined xi-coords in delamination EI corresponds to actual layer boundaries
     //@todo should be improved
-#if 1
+#if 0
     int numLayers = this->layeredCS->giveNumberOfLayers();
     FloatArray interfaceXi(numLayers-1), delamXiCoords;
     this->layeredCS->giveInterfaceXiCoords(interfaceXi);
@@ -245,16 +245,17 @@ Interface
 double 
 Shell7BaseXFEM :: giveGlobalZcoord(double xi) 
 {
-    
-    this->setupDelaminationXiCoordList();
-    //this->setupGPDelaminationGroupList();
-
-    //double xiRef = gp->giveCoordinate(3);
     double xiRef = xi;
-    int dGroup   = this->giveDelaminationGroupAt( xiRef );
-    double xiMid = this->giveDelaminationGroupMidXi(dGroup);
+    //
+    //this->setupDelaminationXiCoordList();
+    ////this->setupGPDelaminationGroupList();
+
+    ////double xiRef = gp->giveCoordinate(3);
     
-    //return (xiRef - xiMid)*layeredCS->computeIntegralThick()*0.5; // new xi-coord measured from dGroup c.s. 
+    //int dGroup   = this->giveDelaminationGroupAt( xiRef );
+    //double xiMid = this->giveDelaminationGroupMidXi(dGroup);
+    //
+    ////return (xiRef - xiMid)*layeredCS->computeIntegralThick()*0.5; // new xi-coord measured from dGroup c.s. 
     return (xiRef+0. )*this->layeredCS->computeIntegralThick()*0.5; // new xi-coord measured from dGroup c.s. 
     
 }
@@ -268,20 +269,17 @@ Shell7BaseXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer
     // Continuous part
     Shell7Base ::giveDofManDofIDMask(inode, ut, answer);
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
+
     // Discontinuous part
     DofManager *dMan = this->giveDofManager(inode);
-    //for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
-    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
-        //EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
+    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { 
         EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-        for ( int j = 1; j <= ei->giveNumberOfEnrichmentDomains(); j++ ) {
-            if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,j) ) {
-                IntArray eiDofIdArray;
-                ei->giveEIDofIdArray(eiDofIdArray, j);
-                answer.followedBy(eiDofIdArray);
-            }
+        if ( ei->isDofManEnriched(*dMan) ) {
+            IntArray eiDofIdArray;
+            ei->giveEIDofIdArray(eiDofIdArray); 
+            answer.followedBy(eiDofIdArray);
         }
-    }
+     }
 }
 
 
@@ -294,34 +292,38 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov,
 
     // Discontinuous part - ///@todo bad implementation regarding enr. functions - should be changed
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
+    FloatArray N, dGenEps;
+    FloatMatrix gcovd; 
+    std :: vector< double > ef;
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
         Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
-        //EnrichmentFunction *ef = dei->giveEnrichmentFunction(1);
 
-        for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
-            if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
-                double xi0 = dei->enrichmentDomainXiCoords.at(j);
-                double H   = dei->heaviside(lCoords.at(3), xi0);        
-                if ( H > 0.1 ) {
-                    FloatArray dGenEps;
-                    computeDiscGeneralizedStrainVector(dGenEps, lCoords, dei, j, tStep);
-                    FloatMatrix gcovd; 
-                    Shell7Base :: evalCovarBaseVectorsAt(lCoords, gcovd, dGenEps);
-                    gcov.add(H,gcovd); 
-                }
+        if ( dei->isElementEnriched(this) ) {
 
+            this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
+            const IntArray &elNodes = this->giveDofManArray();
+            double levelSet = 0.0;
+            dei->interpSurfaceLevelSet(levelSet, N, elNodes, lCoords.at(3)); // distance from delamination to xi coord
+            dei->evaluateEnrFuncAt(ef, lCoords, levelSet);  
+            
+            if ( ef[0] > 0.1 ) {           
+                computeDiscGeneralizedStrainVector(dGenEps, lCoords, dei, tStep); 
+                Shell7Base :: evalCovarBaseVectorsAt(lCoords, gcovd, dGenEps);
+                gcov.add(ef[0],gcovd); 
             }
+
+   
         }
     }
 }
 
 
 void
-Shell7BaseXFEM :: computeDiscGeneralizedStrainVector(FloatArray &answer, FloatArray &lCoords, EnrichmentItem *ei, int enrichmentDomainNumber, TimeStep *tStep)
+Shell7BaseXFEM :: computeDiscGeneralizedStrainVector(FloatArray &answer, FloatArray &lCoords, EnrichmentItem *ei, TimeStep *tStep)
 {
     FloatArray solVecD;
     IntArray eiDofIdArray;
-    ei->giveEIDofIdArray(eiDofIdArray, enrichmentDomainNumber);
+    ei->giveEIDofIdArray(eiDofIdArray); 
     this->giveSolutionVector(solVecD, eiDofIdArray, tStep);  
     FloatMatrix B;
     Shell7Base :: computeBmatrixAt(lCoords, B, 0, 0);
@@ -339,12 +341,10 @@ Shell7BaseXFEM :: giveNumberOfDofs()
         DofManager *dMan = this->giveDofManager(i);
         for ( int j = 1; j <= this->xMan->giveNumberOfEnrichmentItems(); j++ ) {
             EnrichmentItem *ei = this->xMan->giveEnrichmentItem(j);
-            for ( int k = 1; k <= ei->giveNumberOfEnrichmentDomains(); k++ ) {
-                if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,k) ) {
-                    IntArray eiDofIdArray;
-                    ei->giveEIDofIdArray(eiDofIdArray, k);
-                    nDofs += eiDofIdArray.giveSize();
-                }
+            if ( ei->isDofManEnriched(*dMan) ) {
+                IntArray eiDofIdArray;
+                ei->giveEIDofIdArray(eiDofIdArray); 
+                nDofs += eiDofIdArray.giveSize();
             }
         }
     }
@@ -352,14 +352,18 @@ Shell7BaseXFEM :: giveNumberOfDofs()
 }
 
 
+
+
 void 
-Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activeDofsArray,  int enrichmentDomainNumber, SolutionField field)
+Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activeDofsArray,  EnrichmentItem *ei)
 {
     // Routine to extract vector given an array of dofid items
     // If a certain dofId does not exist a zero is used as value
 
-    const IntArray &ordering_cont = this->giveOrdering(field);
-    const IntArray &fieldDofId    = this->giveFieldDofId(field);
+    const IntArray &ordering_cont = this->giveOrdering(All);
+    IntArray fieldDofId; 
+    Shell7Base::giveDofManDofIDMask(0, EID_MomentumBalance, fieldDofId);
+
 
     IntArray ordering_temp, activeDofsArrayTemp;
     ordering_temp.resize(ordering_cont.giveSize());
@@ -367,16 +371,17 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
 
 
     int activeDofPos = 0, activeDofIndex = 0, orderingDofIndex = 0;
+    
+    IntArray dofManDofIdMask, dofManDofIdMaskAll;
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
         DofManager *dMan = this->giveDofManager(i);
-        IntArray dofManDofIdMask, dofManDofIdMaskAll; 
+        
 
-        if ( enrichmentDomainNumber == 0 ) { // return mask corresponding to the regular id's
+        if ( ei == NULL) { // return mask corresponding to the regular id's
            Shell7Base ::giveDofManDofIDMask(i, EID_MomentumBalance, dofManDofIdMask);
         } else {
-            EnrichmentItem *ei = this->xMan->giveEnrichmentItem(1); ///@todo: *ei should be input
-            if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,enrichmentDomainNumber) ) {
-                ei->giveEIDofIdArray(dofManDofIdMask, enrichmentDomainNumber);
+            if ( ei->isDofManEnriched(*dMan) ) {
+                ei->giveEIDofIdArray(dofManDofIdMask); 
             }
         }
     
@@ -390,6 +395,7 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
         orderingDofIndex += dofManDofIdMaskAll.giveSize();
         activeDofIndex   += fieldDofId.giveSize();
 
+        dofManDofIdMask.resize(0);
     }
     
     // Reduce arrays to actual size 
@@ -402,7 +408,6 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
         activeDofsArray.at(i) = activeDofsArrayTemp.at(i);
     }
 }
-
 
 void
 Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
@@ -417,34 +422,30 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
     this->giveUpdatedSolutionVector(solVec, tStep);
     this->computeSectionalForces(temp, tStep, solVec, useUpdatedGpRecord);
     IntArray activeDofs, ordering; 
-    this->computeOrderingArray(ordering, activeDofs, 0, All);
+    this->computeOrderingArray(ordering, activeDofs, NULL); 
     answer.assemble(temp, ordering);
 
     // Disccontinuous part
-    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
+    IntArray eiDofIdArray;
+    FloatArray solVecD, tempRed, fCZ;
+    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
         Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
 
-        for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
-            if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
-                IntArray eiDofIdArray;
-                dei->giveEIDofIdArray(eiDofIdArray, j);
-                FloatArray solVecD;
-                this->giveSolutionVector(solVecD, eiDofIdArray, tStep);  
-                this->discComputeSectionalForces(temp, tStep, solVec, solVecD, useUpdatedGpRecord, dei, j);                      
+        if ( dei->isElementEnriched(this) ) {
+            
+            dei->giveEIDofIdArray(eiDofIdArray); 
+            this->giveSolutionVector(solVecD, eiDofIdArray, tStep);  
+            this->discComputeSectionalForces(temp, tStep, solVec, solVecD, dei);
 
-                // Assemble
-                this->computeOrderingArray(ordering, activeDofs,  j, All);
-                FloatArray tempRed;
-                tempRed.beSubArrayOf(temp, activeDofs);
+            this->computeOrderingArray(ordering, activeDofs, dei);
+            tempRed.beSubArrayOf(temp, activeDofs);
+            answer.assemble(tempRed, ordering);
+
+            // Cohesive zone model
+            if ( this->hasCohesiveZone() ) {
+                this->computeCohesiveForces( fCZ, tStep, solVec, solVecD, dei); 
+                tempRed.beSubArrayOf(fCZ, activeDofs);
                 answer.assemble(tempRed, ordering);
-
-                // Cohesive zone model
-                if ( this->hasCohesiveZone() ) {
-                    FloatArray fCZ;
-                    this->computeCohesiveForces( fCZ, tStep, solVec, solVecD, useUpdatedGpRecord, dei, j);
-                    tempRed.beSubArrayOf(fCZ, activeDofs);
-                    answer.assemble(tempRed, ordering);
-                }
             }
         }
     }
@@ -452,26 +453,22 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
 }
 
 void
-Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, int useUpdatedGpRecord, 
-                     EnrichmentItem *ei, int enrichmentDomainNumber)
+Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, Delamination *dei)
 //
 {
-    Delamination *dei =  dynamic_cast< Delamination * >( ei );
-    double xi0 = 0.0;
-    if( enrichmentDomainNumber == 0 ) {
-        xi0 = -1.0e6;
-    } else {
-        xi0 = dei->enrichmentDomainXiCoords.at(enrichmentDomainNumber);
-    }
+    //double xi0 = 0.0;
+    //if( dei == NULL ) {
+    //    xi0 = -1.0e6;
+    //} else {
+      double   xi0 = dei->delamXiCoord;
+    //}
 
     int ndofs = Shell7Base :: giveNumberOfDofs();
-    int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of types
-    FloatArray f(ndofs);
-    FloatArray genEps, genEpsD;
+    int numberOfLayers = this->layeredCS->giveNumberOfLayers(); 
+    FloatArray f(ndofs), genEps, genEpsD, ftemp, lCoords, sectionalForces;
     FloatMatrix B;
-    FloatArray ftemp, lCoords;
-
     f.zero();
+
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
@@ -487,8 +484,6 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
                 this->computeGeneralizedStrainVectorNew(genEpsD, solVecD, B);
 
                 double zeta = giveGlobalZcoord(gp->giveCoordinate(3));
-
-                FloatArray sectionalForces;
                 this->computeSectionalForcesAt(sectionalForces, gp, mat, tStep, genEps, genEpsD, zeta);
 
                 // Computation of nodal forces: f = B^t*[N M T Ms Ts]^t
@@ -501,7 +496,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
         }
     }
 
-    answer.resize(ndofs);  answer.zero();
+    answer.resize(ndofs); answer.zero();
     const IntArray &ordering_all = this->giveOrdering(All);
     answer.assemble(f, ordering_all);
 
@@ -540,42 +535,37 @@ Shell7BaseXFEM :: giveMaxCZDamages(FloatArray &answer, TimeStep *tStep)
 
 
 void
-Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVecC, FloatArray &solVecD, int useUpdatedGpRecord, 
-                     Delamination *dei, int enrichmentDomainNumber)
+Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVecC, FloatArray &solVecD, Delamination *dei)
 {
     //Computes the cohesive nodal forces for a given interface
     FloatArray answerTemp, lCoords(3);
     answerTemp.resize(Shell7Base :: giveNumberOfDofs() ); 
-    answerTemp.zero();
 
     FloatMatrix N, B, F;  
+    //IntegrationRule *iRuleL = czIntegrationRulesArray [ enrichmentDomainNumber - 1 ];
+    IntegrationRule *iRuleL = czIntegrationRulesArray [ dei->giveNumber() - 1 ]; ///@ todo does this work with giveNumber?
 
-    IntegrationRule *iRuleL = czIntegrationRulesArray [ enrichmentDomainNumber - 1 ];
-//    StructuralMaterial *mat = static_cast < StructuralMaterial * > (this->czMat);
     StructuralInterfaceMaterial *intMat = static_cast < StructuralInterfaceMaterial * > (this->czMat);
-    FloatMatrix lambdaN, Q;
-    FloatArray Fp, T, vF, interfaceXiCoords, nCov, xdLoc;
-    FloatArray xd, unknowns, genEpsC;
+    FloatMatrix lambda, lambdaN, Q;
+    FloatArray Fp, T, vF, interfaceXiCoords, nCov, xdLoc, xd, unknowns, genEpsC, genEpsD;
     this->layeredCS->giveInterfaceXiCoords(interfaceXiCoords);
+
     for ( int i = 1; i <= iRuleL->giveNumberOfIntegrationPoints(); i++ ) {
         IntegrationPoint *ip = iRuleL->getIntegrationPoint(i - 1);
         lCoords.at(1) = ip->giveCoordinate(1);
         lCoords.at(2) = ip->giveCoordinate(2);
-        lCoords.at(3) = interfaceXiCoords.at(enrichmentDomainNumber);
+        lCoords.at(3) = dei->delamXiCoord; 
 
         this->computeBmatrixAt(lCoords, B);
         this->computeNmatrixAt(lCoords, N);
 
         // Lambda matrix
-        FloatArray genEpsD;
         genEpsD.beProductOf(B, solVecD);
-        double xi = dei->enrichmentDomainXiCoords.at(enrichmentDomainNumber);
+        double xi = dei->delamXiCoord;
         double zeta = xi * this->layeredCS->computeIntegralThick() * 0.5;
-        FloatMatrix lambda;
         this->computeLambdaNMatrix(lambda, genEpsD, zeta);
         
         // Compute jump vector
-        
         unknowns.beProductOf(N, solVecD);
         xd.beProductOf(lambda,unknowns); // spatial jump
 		
@@ -590,30 +580,19 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
 
         // Compute cohesive traction based on jump
         intMat->giveFirstPKTraction_3d(T, ip, xd, F, tStep);
-		//T.printYourself();
-		// lambda.printYourself();
-		// N.printYourself();
         lambdaN.beProductOf(lambda,N);
-		 // lambdaN.printYourself();
-		
         T.rotatedWith(Q,'t'); // transform back to global coord system
 
         Fp.beTProductOf(lambdaN, T);
         double dA = this->computeAreaAround(ip,xi);
         answerTemp.add(dA,Fp);
-//		answerTemp.printYourself();
     }
+
     int ndofs = Shell7Base :: giveNumberOfDofs();
-    answer.resize(ndofs);
-    answer.zero();
+    answer.resize(ndofs); answer.zero();
     const IntArray &ordering = this->giveOrdering(All);
-	//ordering.printYourself();
-    answer.assemble(answerTemp, ordering);
-//	T.printYourself();
-//	 answer.printYourself();
-
-
-
+	answer.assemble(answerTemp, ordering);
+    
 }
 
 void
@@ -645,45 +624,42 @@ Shell7BaseXFEM :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
     FloatMatrix temp;
     int ndofs = this->giveNumberOfDofs();
     answer.resize(ndofs, ndofs);
-    answer.zero();
 
+
+    // Disccontinuous part (continuous part does not contribute)
     IntArray eiDofIdArray, orderingJ, activeDofsJ;
     FloatMatrix tempRed;
-    // Disccontinuous part (continuous part does not contribute)
-    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
-        if ( Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ) ) {
-            for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
-                if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
-                    dei->giveEIDofIdArray(eiDofIdArray, j);
-                    this->giveSolutionVector(solVecD, eiDofIdArray, tStep);  
-                    this->computeCohesiveTangentAt(temp, tStep, solVecD, dei, j);
-                    // Assemble part correpsonding to active dofs
-                    computeOrderingArray(orderingJ, activeDofsJ, j, All);
-                    tempRed.beSubMatrixOf(temp, activeDofsJ, activeDofsJ);
-                    answer.assemble(tempRed, orderingJ, orderingJ);
-                }
-            }
+    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) {
+        Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) );
+        if ( dei != NULL && dei->isElementEnriched(this) ) {
+            dei->giveEIDofIdArray(eiDofIdArray); 
+            this->giveSolutionVector(solVecD, eiDofIdArray, tStep);  
+            this->computeCohesiveTangentAt(temp, tStep, solVecD, dei);
+            // Assemble part correpsonding to active dofs
+            this->computeOrderingArray(orderingJ, activeDofsJ, dei); //
+            tempRed.beSubMatrixOf(temp, activeDofsJ, activeDofsJ);
+            answer.assemble(tempRed, orderingJ, orderingJ);
         }
     }
+    
 }
 
 
 
 void
 Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep, FloatArray &solVecD, 
-    Delamination *dei, int enrichmentDomainNumber)
+    Delamination *dei)
 {
     //Computes the cohesive tangent for a given interface
     FloatArray lCoords(3);
-    FloatMatrix answerTemp, N, B, lambda, K, lambdaN, temp, tangent;
+    FloatMatrix answerTemp, N, lambda, K, lambdaN, temp, tangent;
     int nDofs = Shell7Base :: giveNumberOfDofs();
     answerTemp.resize(nDofs, nDofs); 
-    answerTemp.zero();
 
-    IntegrationRule *iRuleL = czIntegrationRulesArray [ enrichmentDomainNumber - 1 ];
+    IntegrationRule *iRuleL = czIntegrationRulesArray [ dei->giveNumber() - 1 ];
     StructuralInterfaceMaterial *intMat = static_cast < StructuralInterfaceMaterial * > (this->czMat);
 
-    double xi = dei->enrichmentDomainXiCoords.at(enrichmentDomainNumber);
+    double xi = dei->delamXiCoord;
     double zeta = this->giveGlobalZcoord(xi);
     this->computeLambdaNMatrixDis(lambda, zeta);
 	FloatMatrix Q;
@@ -694,8 +670,7 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
         IntegrationPoint *ip = iRuleL->getIntegrationPoint(i - 1);
         lCoords.at(1) = ip->giveCoordinate(1);
         lCoords.at(2) = ip->giveCoordinate(2);
-        lCoords.at(3) = interfaceXiCoords.at(enrichmentDomainNumber);
-        this->computeBmatrixAt(lCoords, B);
+        lCoords.at(3) = dei->delamXiCoord;
         this->computeNmatrixAt(lCoords, N);
                 
         intMat->give3dStiffnessMatrix_dTdj(K, TangentStiffness, ip, tStep);
@@ -731,7 +706,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
     FloatMatrix tempRed, tempRedT;
     FloatMatrix KCC, KCD, KDD;
     IntArray orderingC, activeDofsC;
-    this->computeOrderingArray(orderingC, activeDofsC, 0, All);
+    this->computeOrderingArray(orderingC, activeDofsC, NULL); //
     std::vector<IntArray> orderingArrays;
     std::vector<IntArray> activeDofsArrays;
 
@@ -748,43 +723,40 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
             answer.assemble(KCC, orderingC, orderingC);
 
             // Discontinuous part
-            for ( int m = 1; m <= this->xMan->giveNumberOfEnrichmentItems(); m++ ) { // Only one is supported at the moment
-                if ( Delamination *dei = dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(m) ) ) {
-                    int numED = dei->giveNumberOfEnrichmentDomains();
-                    if ( orderingArrays.size() == 0 ) {
-                        orderingArrays.resize(numED);
-                        activeDofsArrays.resize(numED);
+            int numEI = this->xMan->giveNumberOfEnrichmentItems();
+            for ( int m = 1; m <= numEI; m++ ) { // Only one is supported at the moment
+                Delamination *deiM = dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(m) );
+
+                if ( orderingArrays.size() == 0 ) {
+                    orderingArrays.resize(numEI);
+                    activeDofsArrays.resize(numEI);
+                }
+
+
+                if ( deiM != NULL && deiM->isElementEnriched(this) ) {
+                    double xi0J = deiM->delamXiCoord;
+                    if( orderingArrays[m-1].giveSize() == 0 ) {
+                        this->computeOrderingArray( orderingArrays[m-1], activeDofsArrays[m-1], deiM); 
                     }
 
-                    for ( int j = 1; j <= numED; j++ ) {
-                        if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
-                            double xi0J = dei->enrichmentDomainXiCoords.at(j);
-                            if( orderingArrays[j-1].giveSize() == 0 ) {
-                                this->computeOrderingArray( orderingArrays[j-1], activeDofsArrays[j-1], j, All);
-                            }
-                            
-                            // K_{c,dk} & K_{dk,c}
-                            if ( xi > xi0J ) {
-                                tempRed.beSubMatrixOf(KCD, activeDofsC, activeDofsArrays[j-1]);
-                                answer.assemble(tempRed, orderingC, orderingArrays[j-1]);
-                                tempRedT.beTranspositionOf(tempRed);
-                                answer.assemble(tempRedT, orderingArrays[j-1], orderingC);
-                            }
+                    // K_{c,dk} & K_{dk,c}
+                    if ( xi > xi0J ) {
+                        tempRed.beSubMatrixOf(KCD, activeDofsC, activeDofsArrays[m-1]);
+                        answer.assemble(tempRed, orderingC, orderingArrays[m-1]);
+                        tempRedT.beTranspositionOf(tempRed);
+                        answer.assemble(tempRedT, orderingArrays[m-1], orderingC);
+                    }
 
-                            // K_{dk,dl}
-                            for ( int k = 1; k <= numED; k++ ) {
-                                if ( dei->isElementEnrichedByEnrichmentDomain(this, k) ) {
-                                    double xi0K = dei->enrichmentDomainXiCoords.at(k);
-                                    if ( xi > xi0J  &&  xi > xi0K  ) {
-                                        tempRed.beSubMatrixOf(KDD, activeDofsArrays[j-1], activeDofsArrays[k-1]);
-                                        answer.assemble(tempRed, orderingArrays[j-1], orderingArrays[k-1]);
-                                    }
-                                }
+                    // K_{dk,dl}
+                    for ( int k = 1; k <= numEI; k++ ) {
+                        Delamination *deiK = dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(k) );
+                        if ( deiK != NULL && deiK->isElementEnriched(this) ) {
+                            double xi0K = deiK->delamXiCoord;
+                            if ( xi > xi0J  &&  xi > xi0K  ) {
+                                tempRed.beSubMatrixOf(KDD, activeDofsArrays[m-1], activeDofsArrays[k-1]);
+                                answer.assemble(tempRed, orderingArrays[m-1], orderingArrays[k-1]);
                             }
-
-
                         }
-
                     }
                 }
             }
@@ -821,48 +793,44 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
 
             for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
                 IntegrationPoint *ip = iRule->getIntegrationPoint(i);
-                //this->discComputeBulkTangentMatrix(KCC, KCD, KDD, ip, mat, layer, tStep);
                 this->computePressureTangentMatrixDis(KCC, KCD, KDD, ip, load, iSurf, tStep);
                 // Continuous part
                 answer.assemble(KCC, orderingC, orderingC);
 
                 // Discontinuous part
-                for ( int m = 1; m <= this->xMan->giveNumberOfEnrichmentItems(); m++ ) { // Only one is supported at the moment
-                    if ( Delamination *dei = dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(m) ) ) {
-                        int numED = dei->giveNumberOfEnrichmentDomains();
+                int numEI = this->xMan->giveNumberOfEnrichmentItems();
+                for ( int m = 1; m <= numEI; m++ ) { 
+                    Delamination *deiM = dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(m) );
 
-                        for ( int j = 1; j <= numED; j++ ) {
-                            if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
-                                double xi0J = dei->enrichmentDomainXiCoords.at(j);
-                                IntArray &orderingJ = orderingArrays[j-1];
-                                IntArray &activeDofsJ = activeDofsArrays[j-1];
+                        if ( deiM !=NULL && deiM->isElementEnriched(this) ) {
+                            double xi0J = deiM->delamXiCoord;
+                            IntArray &orderingJ = orderingArrays[m-1];
+                            IntArray &activeDofsJ = activeDofsArrays[m-1];
 
-                                // con-dis & dis-con
-                                if ( pLoad->giveLoadOffset() > xi0J ) {
-                                    tempRed.beSubMatrixOf(KCD, activeDofsC, activeDofsJ);
-                                    answer.assemble(tempRed, orderingC, orderingJ);
-                                    tempRedT.beTranspositionOf(tempRed);
-                                    answer.assemble(tempRedT, orderingJ, orderingC);
-                                }
-
-                                // dis-dis
-                                for ( int k = 1; k <= dei->giveNumberOfEnrichmentDomains(); k++ ) {
-                                    if ( dei->isElementEnrichedByEnrichmentDomain(this, k) ) {
-                                        double xi0K = dei->enrichmentDomainXiCoords.at(k);
-                                        if ( pLoad->giveLoadOffset() > xi0J  &&   pLoad->giveLoadOffset() > xi0K  ) {
-                                            IntArray &orderingK = orderingArrays[k-1];
-                                            IntArray &activeDofsK = activeDofsArrays[k-1];
-                                            tempRed.beSubMatrixOf(KDD, activeDofsJ, activeDofsK);
-                                            answer.assemble(tempRed, orderingJ, orderingK);
-                                        }
-                                    }
-                                }
-
-
+                            // con-dis & dis-con
+                            if ( pLoad->giveLoadOffset() > xi0J ) {
+                                tempRed.beSubMatrixOf(KCD, activeDofsC, activeDofsJ);
+                                answer.assemble(tempRed, orderingC, orderingJ);
+                                tempRedT.beTranspositionOf(tempRed);
+                                answer.assemble(tempRedT, orderingJ, orderingC);
                             }
 
+                            // dis-dis
+                            for ( int k = 1; k <= numEI; k++ ) {
+                                Delamination *deiK = dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(k) );
+                                if ( deiK != NULL && deiK->isElementEnriched(this) ) {
+                                    double xi0K = deiK->delamXiCoord;
+                                    if ( pLoad->giveLoadOffset() > xi0J  &&   pLoad->giveLoadOffset() > xi0K  ) {
+                                        IntArray &orderingK = orderingArrays[k-1];
+                                        IntArray &activeDofsK = activeDofsArrays[k-1];
+                                        tempRed.beSubMatrixOf(KDD, activeDofsJ, activeDofsK);
+                                        answer.assemble(tempRed, orderingJ, orderingK);
+                                    }
+                                }
+                                
+                            }
                         }
-                    }
+                    
                 }
 
             }
@@ -1049,8 +1017,9 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
 {
     // Num refers in this case to  numerical integration in both in-plane and through the thickness.
     // For analytically integrated throught he thickness, see computeMassMatrix
+    ///@todo broken!
 
-
+#if 0
     FloatMatrix mass, temp;
     FloatArray solVec;
     this->giveUpdatedSolutionVector(solVec, tStep);
@@ -1175,27 +1144,9 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
         answer.symmetrized();
 
     }
+#endif
 }
 
-
-IntArray
-Shell7BaseXFEM :: giveFieldDofId(SolutionField fieldType) const
-{
-    if ( fieldType == Midplane ) {
-        return this->dofId_Midplane;
-    } else if ( fieldType == Director  )   {
-        return this->dofId_Director;
-    } else if ( fieldType == InhomStrain  )   {
-        return this->dofId_InhomStrain;
-    } else if ( fieldType == All  )   {
-        IntArray dofId;
-        Shell7Base::giveDofManDofIDMask(0, EID_MomentumBalance, dofId);
-        return dofId;
-    } else {
-        _error("giveFieldDofId: unknown fieldType");
-        return 0;
-    }
-}
 
 
 void
@@ -1211,10 +1162,9 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
         this->computeTractionForce(fT, iEdge, edgeLoad, tStep);
 
         IntArray activeDofs, ordering; 
-        this->computeOrderingArray(ordering, activeDofs, 0, All);
+        this->computeOrderingArray(ordering, activeDofs, NULL); 
         answer.assemble(fT, ordering);        
 
-        
         //@todo assumes no variation i xi1-dir
         FloatArray componentsTemp, coordsTemp(1);
         coordsTemp.at(1) = 0.0; // 
@@ -1225,21 +1175,17 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
         }
 
         // Disccontinuous part
-        FloatArray temp;
+        FloatArray temp, tempRed;
         for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
             Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
-
-            for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
-                if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
-                    double xi0 = dei->enrichmentDomainXiCoords.at(j);
-                    if ( xi > xi0 ) {
-                        this->computeTractionForce(temp, iEdge, edgeLoad, tStep);
-                        // Assemble
-                        this->computeOrderingArray(ordering, activeDofs,  j, All);
-                        FloatArray tempRed;
-                        tempRed.beSubArrayOf(temp, activeDofs);
-                        answer.assemble(tempRed, ordering);
-                    }
+            if ( dei != NULL && dei->isElementEnriched(this) ) {
+                double xi0 = dei->delamXiCoord;
+                if ( xi > xi0 ) {
+                    this->computeTractionForce(temp, iEdge, edgeLoad, tStep);
+                    // Assemble
+                    this->computeOrderingArray(ordering, activeDofs, dei); 
+                    tempRed.beSubArrayOf(temp, activeDofs);
+                    answer.assemble(tempRed, ordering);                    
                 }
             }
         }
@@ -1269,37 +1215,32 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         this->computePressureForce(force, solVec, iSurf, surfLoad, tStep);
 
         IntArray activeDofs, ordering, eiDofIdArray;
-        this->computeOrderingArray(ordering, activeDofs, 0, All);
+        this->computeOrderingArray(ordering, activeDofs, NULL); 
         answer.assemble(force, ordering);     
        
         // Disccontinuous part
 #if 1
         FloatArray componentsTemp, solVecD;
-
         double xi = 0.0; // defaults to geometric midplane
         if ( ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( load ) ) {
             xi = pLoad->giveLoadOffset();
         }
         
-        FloatArray temp;
-        for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
-            Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
-
-            for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
-                if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
-                    double xi0 = dei->enrichmentDomainXiCoords.at(j);
-                    if ( xi > xi0 ) {
-                        dei->giveEIDofIdArray(eiDofIdArray, j);
-                        this->giveSolutionVector(solVecD, eiDofIdArray, tStep);  
-                        
-                        this->computePressureForce(temp, solVecD, iSurf, surfLoad, tStep);
-                        // Assemble
-                        this->computeOrderingArray(ordering, activeDofs,  j, All);
-                        FloatArray tempRed;
-                        tempRed.beSubArrayOf(temp, activeDofs);
-                        answer.assemble(tempRed, ordering);
-                    }
+        FloatArray temp, tempRed;
+        for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) {
+            Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
+            if ( dei != NULL && dei->isElementEnriched(this) ) {
+                double xi0 = dei->delamXiCoord;
+                if ( xi > xi0 ) {
+                   dei->giveEIDofIdArray(eiDofIdArray); 
+                   this->giveSolutionVector(solVecD, eiDofIdArray, tStep);  
+                   this->computePressureForce(temp, solVecD, iSurf, surfLoad, tStep);
+                   // Assemble
+                   this->computeOrderingArray(ordering, activeDofs, dei);
+                   tempRed.beSubArrayOf(temp, activeDofs);
+                   answer.assemble(tempRed, ordering);
                 }
+   
             }
         }
 #endif
@@ -1316,8 +1257,8 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 
 // Delamination specific
 
-#if 1
 
+#if 0
 void
 Shell7BaseXFEM :: setupDelaminationXiCoordList()
 {
@@ -1329,15 +1270,14 @@ Shell7BaseXFEM :: setupDelaminationXiCoordList()
             if ( dei ) {
                 int numED = dei->giveNumberOfEnrichmentDomains(); // numEnrDomains max possible number
                 int pos = 1;
-                for ( int j = 1; j <= numED; j++ ) {
-                    if( dei->isElementEnrichedByEnrichmentDomain(this->element, j) ) { 
+                    if ( dei->isElementEnriched(this) ) {
                         std::pair<int, double> pid;
                         pid.first  = pos;
-                        pid.second = dei->enrichmentDomainXiCoords.at(j); 
+                        //pid.second = dei->enrichmentDomainXiCoords.at(1); // generalize - JB
+                        pid.second = dei->delamXiCoord;
                         this->delaminationXiCoordList.push_back(pid); 
                         pos++;
                     }
-                }
             } 
         }
 
@@ -1435,8 +1375,9 @@ Shell7BaseXFEM :: giveDelaminationGroupMidXi(int dGroup)
 void
 Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep)
 {
-    //double zeta = localCoords.at(3)*this->layeredCS->giveLayerThickness(layer)*0.5 + this->layeredCS->giveLayerMidZ(layer);
-    double zeta = this->giveGlobalZcoordInLayer(localCoords.at(3), layer); //@todo should probably be giveGlobalZetaCoord
+    double zeta = giveGlobalZcoord(localCoords.at(3));
+    zeta = this->giveGlobalZcoordInLayer(localCoords.at(3), layer); //@todo should probably be giveGlobalZetaCoord
+
     // Continuous part
     FloatArray solVec;
     this->giveUpdatedSolutionVector(solVec, tStep);
@@ -1448,31 +1389,27 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int 
     globalCoords.add(fac,mc);
 
     // Discontinuous part
-    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
+    FloatArray solVecD, xd, md, xtemp(3); double gamd=0;
+    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
         Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
-        //EnrichmentFunction *ef = dei->giveEnrichmentFunction(1);
+        if ( dei != NULL && dei->isElementEnriched(this) ) {
 
-        for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
-            if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
-                double zeta0 = dei->enrichmentDomainXiCoords.at(j)*this->layeredCS->computeIntegralThick()*0.5;
-                double H = dei->heaviside(zeta, zeta0);
+            double zeta0 = dei->delamXiCoord*this->layeredCS->computeIntegralThick()*0.5;
+            double H = dei->heaviside(zeta, zeta0);
 
-                if ( H > 0.1 ) {
-                    FloatArray solVecD;
-                    IntArray eiDofIdArray;
-                    dei->giveEIDofIdArray(eiDofIdArray, j);
-                    this->giveSolutionVector(solVecD, eiDofIdArray, tStep); 
-                    FloatArray xd, md; double gamd=0;
-                    this->giveUnknownsAt(localCoords, solVecD, xd, md, gamd, tStep);
-                    double fac = ( zeta + 0.5 * gamd * zeta * zeta );
-                    FloatArray xtemp(3);
-                    xtemp = xd;
-                    xtemp.add(fac,md);
-                    globalCoords.add(xtemp); 
-                }
-
+            if ( H > 0.1 ) {  
+                IntArray eiDofIdArray;
+                dei->giveEIDofIdArray(eiDofIdArray); 
+                this->giveSolutionVector(solVecD, eiDofIdArray, tStep); 
+                this->giveUnknownsAt(localCoords, solVecD, xd, md, gamd, tStep);
+                double fac = ( zeta + 0.5 * gamd * zeta * zeta );
+                xtemp = xd;
+                xtemp.add(fac,md);
+                globalCoords.add(xtemp); 
             }
+
         }
+        
     }
 
 }

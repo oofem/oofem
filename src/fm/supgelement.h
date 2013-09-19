@@ -210,10 +210,10 @@ public:
     //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
 #endif
 
-protected:
     virtual void giveLocalVelocityDofMap(IntArray &map) {}
     virtual void giveLocalPressureDofMap(IntArray &map) {}
 
+protected:
     virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) = 0;
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 };

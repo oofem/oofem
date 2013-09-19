@@ -175,8 +175,6 @@ public:
     {
         return young / ( 2. * ( 1. + nu ) );
     }
-
-    friend class CrossSection;
 };
 } // end namespace oofem
 #endif // isolinearelasticmaterial_h

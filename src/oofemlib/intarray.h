@@ -45,6 +45,9 @@
 #include "contextmode.h"
 
 #include <iosfwd>
+#if __cplusplus > 199711L
+#include <initializer_list>
+#endif
 
 namespace oofem {
 class DataStream;
@@ -86,6 +89,12 @@ public:
     IntArray(int n);
     /// Copy constructor. Creates the array from another array.
     IntArray(const IntArray &);
+#if __cplusplus > 199711L
+    /// Initializer list constructor.
+    IntArray(std::initializer_list<int> list);
+    /// Assignment operator.
+    IntArray & operator=(std::initializer_list<int> list);
+#endif
     /// Destructor.
     ~IntArray();
 
@@ -135,6 +144,18 @@ public:
     const int &operator()(int i) const;
 #else
     inline const int &operator()(int i) const { return values [ i ]; }
+#endif
+
+#ifdef DEBUG
+    int &operator[](int i);
+#else
+    inline int &operator[](int i) { return values [ i ]; }
+#endif
+
+#ifdef DEBUG
+    const int &operator[](int i) const;
+#else
+    inline const int &operator[](int i) const { return values [ i ]; }
 #endif
 
 #ifdef DEBUG

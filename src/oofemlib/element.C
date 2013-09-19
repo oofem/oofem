@@ -53,6 +53,8 @@
 #include "feinterpol2d.h"
 #include "feinterpol3d.h"
 #include "loadtimefunction.h"
+#include "dofmanager.h"
+#include "node.h"
 
 #include <cstdio>
 
@@ -148,17 +150,14 @@ Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, Fl
 
 
 void
-Element :: computeBoundaryVectorOf(int boundary, EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+Element :: computeBoundaryVectorOf(const IntArray &bNodes, EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer)
 // Forms the vector containing the values of the unknown 'u' (e.g., the
 // Total value) of the dofs of the callers local cs.
 {
     int k;
-    IntArray bNodes;
     IntArray dofIDMask;
     FloatMatrix G2L;
     FloatArray vec;
-
-    this->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
 
     k = 0;
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
@@ -280,7 +279,7 @@ Element :: computeNumberOfPrimaryMasterDofs(EquationID ut)
     for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
         this->giveInternalDofManDofIDMask(i, ut, nodeDofIDMask);
         this->giveInternalDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
-        answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
+        answer += this->giveInternalDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
     }
     return answer;
 }
@@ -295,23 +294,23 @@ Element :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
     nodes.enumerate(this->giveNumberOfDofManagers());
 
     is_GtoL = this->computeGtoLRotationMatrix(GtoL);
-    is_NtoG = this->computeDofTransformationMatrix(NtoG, nodes, eid);
+    is_NtoG = this->computeDofTransformationMatrix(NtoG, nodes, true, eid);
 
 #ifdef DEBUG
     if ( is_GtoL ) {
         if ( GtoL.giveNumberOfColumns() != this->computeNumberOfGlobalDofs(eid) ) {
-            _error("StructuralElement :: updateRotationMatrix - GtoL transformation matrix size mismatch in columns");
+            _error("Element :: updateRotationMatrix - GtoL transformation matrix size mismatch in columns");
         }
         if ( GtoL.giveNumberOfRows() != this->computeNumberOfDofs(eid) ) {
-            _error("StructuralElement :: updateRotationMatrix - GtoL transformation matrix size mismatch in rows");
+            _error("Element :: updateRotationMatrix - GtoL transformation matrix size mismatch in rows");
         }
     }
     if ( is_NtoG ) {
         if ( NtoG.giveNumberOfColumns() != this->computeNumberOfPrimaryMasterDofs(eid) ) {
-            _error("StructuralElement :: updateRotationMatrix - NtoG transformation matrix size mismatch in columns");
+            _error("Element :: updateRotationMatrix - NtoG transformation matrix size mismatch in columns");
         }
         if ( NtoG.giveNumberOfRows() != this->computeNumberOfGlobalDofs(eid) ) {
-            _error("StructuralElement :: updateRotationMatrix - NtoG transformation matrix size mismatch in rows");
+            _error("Element :: updateRotationMatrix - NtoG transformation matrix size mismatch in rows");
         }
     }
 #endif
@@ -331,7 +330,7 @@ Element :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
 
 
 bool
-Element :: computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &nodes, EquationID eid)
+Element :: computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &nodes, bool includeInternal, EquationID eid)
 {
     bool flag = false;
     int numberOfDofMans = nodes.giveSize();
@@ -374,6 +373,27 @@ Element :: computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &n
         lastRowPos += nr;
         lastColPos += nc;
     }
+    if ( includeInternal ) {
+        for (int i = 1; i <= this->giveNumberOfInternalDofManagers(); i++ ) {
+            this->giveInternalDofManDofIDMask(i, eid, dofIDmask);
+            if (!this->giveInternalDofManager(nodes.at(i))->computeM2GTransformation(dofManT, dofIDmask)) {
+                dofManT.resize(dofIDmask.giveSize(), dofIDmask.giveSize());
+                dofManT.zero();
+                dofManT.beUnitMatrix();
+            }
+            nc = dofManT.giveNumberOfColumns();
+            nr = dofManT.giveNumberOfRows();
+            for (int j = 1; j <= nr; j++ ) {
+                for (int k = 1; k <= nc; k++ ) {
+                    // localize node contributions
+                    answer.at(lastRowPos + j, lastColPos + k) = dofManT.at(j, k);
+                }
+            }
+
+            lastRowPos += nr;
+            lastColPos += nc;
+        }
+    }
     answer.resizeWithData(answer.giveNumberOfRows(), lastColPos);
     return true;
 }
@@ -402,8 +422,7 @@ Element :: giveLocationArray(IntArray &locationArray, EquationID eid, const Unkn
 // Returns the location array of the receiver. This array is obtained by
 // simply appending the location array of every node of the receiver.
 {
-    IntArray dofIDMask, masterDofIDs;
-    IntArray nodalArray;
+    IntArray masterDofIDs, nodalArray, dofIDMask;
     locationArray.resize(0);
     if (dofIdArray) dofIdArray->resize(0);
     for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
@@ -420,7 +439,7 @@ Element :: giveLocationArray(IntArray &locationArray, EquationID eid, const Unkn
         this->giveInternalDofManager(i)->giveLocationArray(dofIDMask, nodalArray, s);
         locationArray.followedBy(nodalArray);
         if (dofIdArray) {
-            this->giveDofManager(i)->giveMasterDofIDArray(dofIDMask, masterDofIDs);
+            this->giveInternalDofManager(i)->giveMasterDofIDArray(dofIDMask, masterDofIDs);
             dofIdArray->followedBy(masterDofIDs);
         }
     }
@@ -428,13 +447,40 @@ Element :: giveLocationArray(IntArray &locationArray, EquationID eid, const Unkn
 
 
 void
-Element :: giveBoundaryLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIdArray)
+Element :: giveLocationArray(IntArray &locationArray, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIdArray) const
 {
-    IntArray bNodes;
-    IntArray dofIDMask, masterDofIDs;
-    IntArray nodalArray;
+    IntArray masterDofIDs, nodalArray, ids = dofIDMask;
+    locationArray.resize(0);
+    if (dofIdArray) dofIdArray->resize(0);
+    for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
+        if ( dofIDMask.giveSize() == 0 ) {
+            this->giveDefaultDofManDofIDMask(i, ids);
+        }
+        this->giveDofManager(i)->giveLocationArray(ids, nodalArray, s);
+        locationArray.followedBy(nodalArray);
+        if (dofIdArray) {
+            this->giveDofManager(i)->giveMasterDofIDArray(ids, masterDofIDs);
+            dofIdArray->followedBy(masterDofIDs);
+        }
+    }
+    for ( int i = 1; i <= this->giveNumberOfInternalDofManagers(); i++ ) {
+        if ( dofIDMask.giveSize() == 0 ) {
+            this->giveDefaultInternalDofManDofIDMask(i, ids);
+        }
+        this->giveInternalDofManager(i)->giveLocationArray(ids, nodalArray, s);
+        locationArray.followedBy(nodalArray);
+        if (dofIdArray) {
+            this->giveInternalDofManager(i)->giveMasterDofIDArray(ids, masterDofIDs);
+            dofIdArray->followedBy(masterDofIDs);
+        }
+    }
+}
 
-    this->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+
+void
+Element :: giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIdArray)
+{
+    IntArray masterDofIDs, nodalArray, dofIDMask;
     locationArray.resize(0);
     if (dofIdArray) dofIdArray->resize(0);
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
@@ -443,6 +489,26 @@ Element :: giveBoundaryLocationArray(IntArray &locationArray, int boundary, Equa
         locationArray.followedBy(nodalArray);
         if (dofIdArray) {
             this->giveDofManager(bNodes.at(i))->giveMasterDofIDArray(dofIDMask, masterDofIDs);
+            dofIdArray->followedBy(masterDofIDs);
+        }
+    }
+}
+
+
+void
+Element :: giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIdArray)
+{
+    IntArray masterDofIDs, nodalArray, ids = dofIDMask;
+    locationArray.resize(0);
+    if (dofIdArray) dofIdArray->resize(0);
+    for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
+        if ( dofIDMask.giveSize() == 0 ) {
+            this->giveDefaultDofManDofIDMask(bNodes.at(i), ids);
+        }
+        this->giveDofManager(bNodes.at(i))->giveLocationArray(ids, nodalArray, s);
+        locationArray.followedBy(nodalArray);
+        if (dofIdArray) {
+            this->giveDofManager(bNodes.at(i))->giveMasterDofIDArray(ids, masterDofIDs);
             dofIdArray->followedBy(masterDofIDs);
         }
     }
@@ -584,9 +650,10 @@ Element :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int
 
 
 void
-Element :: computeEdgeLoadVector(FloatArray &answer, Load *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
+Element :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
 {
-    _error("computeEdgeLoadVector: Unknown load type.");
+    ///@todo Change the load type to "BoundaryEdgeLoad" maybe?
+    _error("computeBoundaryEdgeLoadVector: Unknown load type.");
 }
 
 

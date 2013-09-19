@@ -176,7 +176,7 @@ Node :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeSte
 
     loadN->computeComponentArrayAt(answer, stepN, mode); // can be NULL
     // Transform from Global to Local c.s.
-    if ( loadN->giveCoordSystMode() == NodalLoad :: BL_GlobalMode ) {
+    if ( loadN->giveCoordSystMode() == NodalLoad :: CST_Global ) {
         IntArray dofIDarry(0);
         FloatMatrix L2G;
         if ( this->computeL2GTransformation(L2G, dofIDarry) ) {
@@ -646,7 +646,7 @@ Node :: drawYourself(oofegGraphicContext &gc)
         if ( this->giveDomain()->hasXfemManager() ) {
             XfemManager *xf = this->giveDomain()->giveXfemManager();
             for ( int i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
-                if ( xf->giveEnrichmentItem(i)->isDofManEnriched(this) ) {
+                if ( xf->giveEnrichmentItem(i)->isDofManEnriched( *this ) ) {
                     EASValsSetMType(SQUARE_MARKER);
                 }
             }

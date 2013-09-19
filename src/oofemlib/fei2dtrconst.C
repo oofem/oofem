@@ -45,11 +45,13 @@ FEI2dTrConst :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICe
     answer.at(1) = 1.;
 }
 
-void
+double
 FEI2dTrConst :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     answer.resize(1, 2);
     answer.zero();
+
+    return 0.0;
 }
 
 void
@@ -201,4 +203,15 @@ FEI2dTrConst :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &ce
     dy = cellgeo.giveVertexCoordinates(nodeB)->at(yind) - cellgeo.giveVertexCoordinates(nodeA)->at(yind);
     return sqrt(dx * dx + dy * dy);
 }
+
+IntegrationRule *
+FEI2dTrConst :: giveIntegrationRule(int order)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 0);
+    iRule->SetUpPointsOnTriangle(points, mode);
+    return iRule;
+}
+
+
 } // end namespace oofem

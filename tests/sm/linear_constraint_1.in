@@ -14,7 +14,7 @@ BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
 # LinearConstraintBC contributes to the following characteristic terms:
 # lhstype 4 1 2 3 4  - StiffnessMatrix, TangentStiffnessMatrix, SecantStiffnessMatrix, ElasticStiffnessMatrix
 # rhsType 48 - ExternalForcesVector
-LinearConstraintBC 2 loadTimeFunction 1 dofmans 1 2 dofs 1 1 weights 1 1 weightsLtf 1 2 rhs -0.15 rhsLtf 1  lhstype 4 1 2 3 4 rhsType 2 48 49
+LinearConstraintBC 2 loadTimeFunction 1 dofmans 1 2 dofs 1 1 weights 1 1 weightsLtf 1 2 rhs -0.15 rhsLtf 1  lhstype 4 1 2 3 4 rhsType 2 150 151
 ConstantFunction 1 f(t) 1.0
 ConstantFunction 2 f(t) 0.5
 #%BEGIN_CHECK% tolerance 1.e-6

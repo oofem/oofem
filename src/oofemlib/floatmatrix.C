@@ -162,6 +162,53 @@ FloatMatrix :: FloatMatrix(const FloatMatrix &src) :
     memcpy(values, src.values, allocatedSize * sizeof(double) );
 }
 
+#if __cplusplus > 199711L
+FloatMatrix :: FloatMatrix(std::initializer_list<std::initializer_list<double> > mat)
+{
+    this->nColumns = mat.size();
+    this->nRows = mat.begin()->size();
+    this->allocatedSize = this->nRows * this->nColumns;
+    if ( this->allocatedSize ) {
+        this->values = ALLOC(this->allocatedSize);
+        double *p = this->values;
+        for (auto col: mat) {
+#if DEBUG
+            if ( this->nRows != col.size() ) {
+                OOFEM_ERROR("FloatMatrix :: FloatMatrix - Initializer list has inconsistent column sizes.");
+            }
+#endif
+            for (auto x: col) {
+                *p = x;
+                p++;
+            }
+        }
+    } else {
+        this->values = NULL;
+    }
+}
+
+
+FloatMatrix &FloatMatrix :: operator=(std::initializer_list<std::initializer_list<double> > mat)
+{
+    RESIZE(mat.begin()->size(), mat.size());
+    double *p = this->values;
+    for (auto col: mat) {
+        for (auto x: col) {
+#if DEBUG
+            if ( this->nRows != col.size() ) {
+                OOFEM_ERROR("FloatMatrix :: FloatMatrix - Initializer list has inconsistent column sizes.");
+            }
+#endif
+            *p = x;
+            p++;
+        }
+    }
+
+    return * this;
+}
+
+#endif
+
 
 FloatMatrix :: ~FloatMatrix()
 {
@@ -637,7 +684,7 @@ void FloatMatrix :: setColumn(const FloatArray &src, int c)
     int nr = src.giveSize();
 #ifdef DEBUG
     if ( this->giveNumberOfRows() != nr || c < 1 || c > this->giveNumberOfColumns()) {
-        OOFEM_ERROR("FloatMatrix  :: setColumn - Size mismatch");
+        OOFEM_ERROR("FloatMatrix :: setColumn - Size mismatch");
     }
 #endif
 
@@ -652,7 +699,7 @@ void FloatMatrix :: copyColumn(FloatArray &dest, int c) const
     int nr = this->giveNumberOfRows();
 #ifdef DEBUG
     if ( c < 1 || c > this->giveNumberOfColumns()) {
-        OOFEM_ERROR2("FloatMatrix  :: copyColumn - Column outside range (%d)", c);
+        OOFEM_ERROR2("FloatMatrix :: copyColumn - Column outside range (%d)", c);
     }
 #endif
 
@@ -1380,8 +1427,8 @@ void FloatMatrix :: resizeWithData(int rows, int columns)
 
         allocatedSize = rows * columns; // REMEMBER NEW ALLOCATED SIZE
         values = ALLOC(allocatedSize);
-        memset(values, 0, allocatedSize*sizeof(double) );
     }
+    memset(values, 0, allocatedSize*sizeof(double) );
 
     this->nRows = rows;
     this->nColumns = columns;

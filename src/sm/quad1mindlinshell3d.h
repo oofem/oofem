@@ -40,7 +40,6 @@
 ///@name Input fields for Quad1MindlinShell3D element
 //@{
 #define _IFT_Quad1MindlinShell3D_Name "quad1mindlinshell3d"
-#define _IFT_Quad1MindlinShell3D_alpha "alpha"
 //@}
 
 namespace oofem {
@@ -76,9 +75,6 @@ protected:
     static FEI2dQuadLin interp;
     int numberOfGaussPoints;
 
-    /// Coefficient for the drilling stiffness.
-    double alpha;
-
     /// Ordering for the normal shell stiffness (everything but the out-of-plane rotations)
     static IntArray shellOrdering;
     /// Ordering for the drilling dofs (the out-of-plane rotations)
@@ -106,6 +102,8 @@ public:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
 
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Quad1MindlinShell3D_Name; }
     virtual const char *giveClassName() const { return "Quad1MindlinShell3D"; }
@@ -126,10 +124,6 @@ public:
     { computeLumpedMassMatrix(answer, tStep); }
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-
-    // layered cross section support functions
-    virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
-                                            GaussPoint *slaveGp, TimeStep *tStep);
 
     virtual void computeLCS();
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);

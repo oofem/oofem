@@ -108,11 +108,6 @@ public:
 #endif
 
 protected:
-    /**
-     * Returns index of integration rule used to evaluate given characteristic term.
-     */
-    virtual int giveTermIntergationRuleIndex(CharType termType) = 0;
-
     virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *atTime);
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *atTime);
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
@@ -126,10 +121,10 @@ protected:
     virtual int giveNumberOfSpatialDimensions() = 0;
 
     //virtual void computeEdgeNuMatrix (FloatMatrix& answer, GaussPoint* gp) = 0;
-    //virtual double computeEdgeVolumeAround (GaussPoint*, int iedge) = 0;
+    //virtual double computeSurfaceVolumeAround (GaussPoint*, int iedge) = 0;
     //virtual void computeEdgeIpGlobalCoords (FloatArray& answer, GaussPoint* gp, int iedge) = 0;
     //virtual int computeLoadGToLRotationMtrx (FloatMatrix& answer) = 0;
-    //virtual int computeLoadLEToLRotationMatrix (FloatMatrix& answer, int iedge, GaussPoint* gp) = 0;
+    //virtual int computeLoadLBToLRotationMatrix (FloatMatrix& answer, int iedge, GaussPoint* gp) = 0;
     //virtual void giveEdgeUDofMapping (IntArray& answer, int iedge) = 0;
     //virtual int giveUApproxOrder () = 0;
     virtual void computeEdgeLoadVector_MB(FloatArray &answer, Load *load, int id, TimeStep *atTime);

@@ -36,6 +36,7 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "intarray.h"
+#include "gaussintegrationrule.h"
 
 namespace oofem {
 
@@ -266,6 +267,8 @@ FEI3dWedgeQuad :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &
     double eta = lcoords.at(2);
 
     if ( isurf <= 2 ) {
+        ///@todo Definitely wrong: There should be 6 basis functions!
+        OOFEM_ERROR("FIXME: Code likely buggy here");
         answer.resize(3);
         answer.at(1) = ksi;
         answer.at(2) = eta;
@@ -325,6 +328,35 @@ FEI3dWedgeQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray 
 {
     OOFEM_ERROR("FEI3dWedgeQuad :: surfaceGiveTransformationJacobian not implemented");
     return 0;
+}
+
+
+IntegrationRule *
+FEI3dWedgeQuad :: giveIntegrationRule(int order)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    ///@todo This function below isn't supported. We must decide on how to deal with wedges.
+    //int points = iRule->getRequiredNumberOfIntegrationPoints(_Wedge, order);
+    OOFEM_WARNING("Warning.. ignoring 'order' argument: FIXME");
+    int pointsZeta = 1;
+    int pointsTriangle = 1;
+    iRule->SetUpPointsOnWedge(pointsTriangle, pointsZeta, _Unknown);
+    return iRule;
+}
+
+IntegrationRule *
+FEI3dWedgeQuad :: giveBoundaryIntegrationRule(int order, int boundary)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    if ( boundary <= 2 ) {
+        int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 2);
+        iRule->SetUpPointsOnTriangle(points, _Unknown);
+    } else {
+        ///@todo Is +2 correct for dealing with "detJ" on this surface?
+        int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 2);
+        iRule->SetUpPointsOnSquare(points, _Unknown);
+    }
+    return iRule;
 }
 
 } // end namespace oofem

@@ -187,22 +187,6 @@ CBSElement :: updateInternalState(TimeStep *stepN)
 }
 
 
-void
-CBSElement :: printOutputAt(FILE *file, TimeStep *stepN)
-// Performs end-of-step operations.
-{
-#ifdef __PARALLEL_MODE
-    fprintf( file, "element %d [%8d] :\n", this->giveNumber(), this->giveGlobalNumber() );
-#else
-    fprintf(file, "element %d :\n", number);
-#endif
-
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        integrationRulesArray [ i ]->printOutputAt(file, stepN);
-    }
-}
-
-
 #ifdef __OOFEG
 int
 CBSElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,

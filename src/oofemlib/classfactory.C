@@ -153,6 +153,7 @@ InitialCondition * ClassFactory :: createInitialCondition(const char *name, int 
     return NULL;
 }
 
+/*
 Patch * ClassFactory :: createPatch(Patch :: PatchType type, Element *e)
 {
     if ( type == Patch :: PT_TrianglePatch ) {
@@ -160,7 +161,7 @@ Patch * ClassFactory :: createPatch(Patch :: PatchType type, Element *e)
     }
     return NULL;
 }
-
+*/
 NodalRecoveryModel * ClassFactory :: createNodalRecoveryModel(NodalRecoveryModel :: NodalRecoveryModelType type, Domain *d)
 {
     if ( type == NodalRecoveryModel :: NRM_NodalAveraging ) {
@@ -349,6 +350,28 @@ EnrichmentDomain* ClassFactory :: createEnrichmentDomain(const char *name)
 bool ClassFactory :: registerEnrichmentDomain(const char *name, EnrichmentDomain * ( *creator )())
 {
     enrichmentDomainList[name] = creator;
+    return true;
+}
+
+EnrichmentFront* ClassFactory :: createEnrichmentFront(const char *name)
+{
+    return ( enrichmentFrontList.count(name) == 1 ) ? enrichmentFrontList [ name ]() : NULL;
+}
+
+bool ClassFactory :: registerEnrichmentFront(const char *name, EnrichmentFront * ( *creator )())
+{
+    enrichmentFrontList[name] = creator;
+    return true;
+}
+
+PropagationLaw* ClassFactory :: createPropagationLaw(const char *name)
+{
+    return ( propagationLawList.count(name) == 1 ) ? propagationLawList [ name ]() : NULL;
+}
+
+bool ClassFactory :: registerPropagationLaw(const char *name, PropagationLaw * ( *creator )())
+{
+    propagationLawList[name] = creator;
     return true;
 }
 
