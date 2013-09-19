@@ -28,8 +28,7 @@ ConstantFunction 1 f(t) 1.0
 XfemManager 1 numberofenrichmentitems 1
 crack 1 enrichmentdomains 1 1 enrichmentfunction 1 enrichmentdomain 1 enrichmentfront 1 propagationlaw 1
 DiscontinuousFunction 1
-#polygoncrack 1 points 6 0.0 -0.5 1.2 -0.1 2.0 -1.0
-polygoncrack 1 points 6 1.2  2.5 1.2  2.0 1.3 1.1
+polygoncrack 1 points 8 1.2  2.5 1.2  2.0 1.3 1.1 1.65 0.59378
 EnrFrontDoNothing 1
 PropagationLawCrackPrescribedDir 1 angle -60.0 incrementLength 0.7
 #%BEGIN_CHECK% tolerance 1.e-8

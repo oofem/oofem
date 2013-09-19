@@ -91,9 +91,10 @@ void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, std::
     std :: vector< FloatArray >vertices(iVertices);
 
     // small shift of vertices
+    const double shift = 1.0e-12;
     for ( int i = 1; i <= n; i++ ) {
-        vertices [ i - 1 ].at(1) += vertices [ i - 1 ].at(1) * 0.000001 * double ( rand() ) / RAND_MAX;
-        vertices [ i - 1 ].at(2) += vertices [ i - 1 ].at(2) * 0.000001 * double ( rand() ) / RAND_MAX;
+        vertices [ i - 1 ].at(1) += vertices [ i - 1 ].at(1) * shift * double ( rand() ) / RAND_MAX;
+        vertices [ i - 1 ].at(2) += vertices [ i - 1 ].at(2) * shift * double ( rand() ) / RAND_MAX;
     }
 
     for ( int i = 1; i <= n; i++ ) {

@@ -65,6 +65,7 @@ public:
     virtual bool requiresEquationRenumbering(TimeStep *) { return updateStructureFlag; }
 
     virtual void solveYourselfAt(TimeStep *tStep);
+    virtual void terminate(TimeStep *tStep);
     virtual void updateLoadVectors(TimeStep *tStep);
 
     virtual void updateYourself(TimeStep *tStep);

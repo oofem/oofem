@@ -212,10 +212,11 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 
 #if XFEM_DEBUG_VTK > 0
         std :: stringstream str3;
+        int elIndex = this->element->giveGlobalNumber();
         str3 << "TriEl" << elIndex << ".vtk";
         std :: string name3 = str3.str();
 
-        XFEMDebugTools :: WriteTrianglesToVTK(name3, triangles);
+        XFEMDebugTools :: WriteTrianglesToVTK(name3, allTri);
 #endif
 
 
