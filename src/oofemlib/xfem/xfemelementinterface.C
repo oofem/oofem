@@ -188,6 +188,120 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
     }
 }
 
+void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl)
+{
+
+    const int dim = 2;
+    const int nDofMan = iEl.giveNumberOfDofManagers();
+
+    FloatArray Nc;
+    FEInterpolation *interp = iEl.giveInterpolation();
+    interp->evalN( Nc, iLocCoord, FEIElementGeometryWrapper(& iEl) );
+
+    const IntArray &elNodes = iEl.giveDofManArray();
+
+    // Compute global coordinates of Gauss point
+    FloatArray globalCoord;
+    globalCoord.setValues(2, 0.0, 0.0);
+
+    for ( int i = 1; i <= nDofMan; i++ ) {
+        DofManager *dMan = iEl.giveDofManager(i);
+        globalCoord.at(1) += Nc.at(i) * dMan->giveCoordinate(1);
+        globalCoord.at(2) += Nc.at(i) * dMan->giveCoordinate(2);
+    }
+
+
+    // XFEM part of N-matrix
+    XfemManager *xMan = iEl.giveDomain()->giveXfemManager();
+
+
+    std :: vector< FloatMatrix > Bd(nDofMan); // One Bd per node
+
+    int counter = nDofMan * dim;
+
+    std::vector< std::vector<double> > Nd(nDofMan);
+
+    for ( int j = 1; j <= nDofMan; j++ ) {
+
+        DofManager *dMan = iEl.giveDofManager(j);
+
+    	// Compute the total number of enrichments for node j
+    	int numEnrNode = 0;
+        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+            EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+            if ( ei->isDofManEnriched(* dMan) ) {
+            	numEnrNode += ei->giveNumDofManEnrichments(* dMan);
+            }
+        }
+
+        std::vector<double> &NdNode = Nd [ j - 1 ];
+        NdNode.assign(numEnrNode, 0.0);
+
+
+        int globalNodeInd = dMan->giveGlobalNumber();
+
+
+        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+        	EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+
+        	double levelSetGP = 0.0;
+        	ei->interpLevelSet(levelSetGP, Nc, elNodes);
+
+
+
+        	if ( ei->isDofManEnriched(* dMan) ) {
+
+                int numEnr = ei->giveNumDofManEnrichments(* dMan);
+
+
+                // Enrichment function in Gauss Point
+                std :: vector< double >efGP;
+                ei->evaluateEnrFuncAt(efGP, globalCoord, levelSetGP, globalNodeInd);
+
+
+                const FloatArray &nodePos = * ( dMan->giveCoordinates() );
+
+                double levelSetNode  = 0.0;
+                ei->evalLevelSetNormalInNode( levelSetNode, dMan->giveGlobalNumber() );
+
+                std :: vector< double >efNode;
+                ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode, globalNodeInd);
+
+
+				for(int k = 0; k < numEnr; k++) {
+					NdNode[k] = ( efGP[k] - efNode[k] ) * Nc.at(j) ;
+					counter ++;
+				}
+			}
+
+		}
+    }
+
+    int numN = nDofMan;
+
+    for ( int j = 1; j <= nDofMan; j++ ) {
+    	numN += Nd[j-1].size();
+    }
+
+    FloatArray NTot;
+    NTot.resize(numN);
+    NTot.zero();
+    int column = 1;
+
+    for(int i = 1; i <= nDofMan; i++) {
+        NTot.at(column) = Nc.at(i);
+        column++;
+
+        const std::vector<double> &NdNode = Nd[i-1];
+        for(size_t j = 1; j <= NdNode.size(); j++) {
+        	NTot.at(column) = NdNode[j-1];
+        	column++;
+        }
+    }
+
+    oAnswer.beNMatrixOf(NTot,2);
+}
+
 void XfemElementInterface :: XfemElementInterface_partitionElement(std::vector< Triangle > &oTriangles, const std :: vector< FloatArray > &iPoints)
 {
     Delaunay dl;

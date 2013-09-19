@@ -63,6 +63,16 @@ void EnrichmentDomain_BG :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, Xf
     iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
 }
 
+EDBGCircle :: EDBGCircle(const EDBGCircle &iEDBGCircle)
+{
+	bg = iEDBGCircle.bg->Clone();
+}
+
+EDCrack :: EDCrack(const EDCrack &iEDCrack)
+{
+	bg = iEDCrack.bg->Clone();
+}
+
 bool EDCrack :: giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const
 {
 	int nVert = bg->giveNrVertices();

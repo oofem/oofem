@@ -72,6 +72,7 @@ public:
     virtual ~EnrichmentDomain() { }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
+    virtual EnrichmentDomain* Clone() = 0;
 
     virtual const char *giveInputRecordName() const = 0;
     virtual const char *giveClassName() const = 0;
@@ -106,6 +107,9 @@ public:
     BasicGeometry *bg;
     EnrichmentDomain_BG() { }
     virtual ~EnrichmentDomain_BG() { }
+
+    virtual EnrichmentDomain* Clone() = 0;
+
     virtual IRResultType initializeFrom(InputRecord *ir) { return this->bg->initializeFrom(ir); }
 
     /**
@@ -123,7 +127,11 @@ class EDBGCircle : public EnrichmentDomain_BG
 {
 public:
     EDBGCircle() { bg = new Circle; };
+    EDBGCircle(const EDBGCircle &iEDBGCircle);
     virtual ~EDBGCircle() { delete bg; }
+
+    virtual EnrichmentDomain* Clone() {return new EDBGCircle(*this);}
+
     virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir); }
 
     virtual const char *giveInputRecordName() const { return _IFT_EDBGCircle_Name; }
@@ -137,7 +145,11 @@ class EDCrack : public EnrichmentDomain_BG
 {
 public:
     EDCrack() { bg = new PolygonLine; }
+    EDCrack(const EDCrack &iEDCrack);
     virtual ~EDCrack() { delete bg; }
+
+    virtual EnrichmentDomain* Clone() {return new EDCrack(*this);}
+
     virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir); }
 
     virtual const char *giveInputRecordName() const { return _IFT_EDCrack_Name; }
@@ -161,6 +173,9 @@ protected:
 public:
     DofManList() { }
     virtual ~DofManList() { }
+
+    virtual EnrichmentDomain* Clone() {return new DofManList(*this);}
+
 
     const std :: vector< int > &giveDofManList() const { return dofManList; }
 
@@ -186,6 +201,8 @@ class WholeDomain : public EnrichmentDomain
 public:
     WholeDomain() { }
     virtual ~WholeDomain() { }
+
+    virtual EnrichmentDomain* Clone() {return new WholeDomain(*this);}
 
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("WholeDomain::computeNormalSignDist -- not implemented"); };
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("WholeDomain::computeTangentialSignDist -- not implemented"); };

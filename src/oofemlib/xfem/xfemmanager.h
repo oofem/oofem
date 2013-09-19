@@ -84,6 +84,7 @@ protected:
 public:
     /// Constructor.
     XfemManager(Domain *domain);
+    XfemManager(const XfemManager &iXMan);
     /// Destructor.
     ~XfemManager();
 
@@ -105,6 +106,7 @@ public:
     const char *giveInputRecordName() const { return _IFT_XfemManager_Name; }
 
     Domain *giveDomain() { return this->domain; }
+    void setDomain(Domain *ipDomain);
 
     /// Clear the receiver
     void clear();

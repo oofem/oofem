@@ -60,6 +60,21 @@ XfemManager :: XfemManager(Domain *domain)
     mNumGpPerTri = 12;
 }
 
+XfemManager :: XfemManager(const XfemManager &iXMan):
+enrichmentItemList(NULL),
+mNumGpPerTri(iXMan.mNumGpPerTri),
+numberOfEnrichmentItems(iXMan.numberOfEnrichmentItems),
+domain(NULL)
+{
+	int numEI = iXMan.enrichmentItemList->giveSize();
+	enrichmentItemList = new AList< EnrichmentItem >(0);
+	enrichmentItemList->growTo(numEI);
+	for(int i = 1; i <= numEI; i++) {
+		enrichmentItemList->put(i, iXMan.enrichmentItemList->at(i)->Clone() );
+	}
+
+}
+
 XfemManager :: ~XfemManager()
 {
     delete enrichmentItemList;
@@ -163,6 +178,17 @@ int XfemManager :: instanciateYourself(DataReader *dr)
     return 1;
 }
 
+void XfemManager :: setDomain(Domain *ipDomain)
+{
+	domain = ipDomain;
+
+	int numEI = enrichmentItemList->giveSize();
+
+	for(int i = 1; i <= numEI; i++) {
+		enrichmentItemList->at(i)->setDomain(ipDomain);
+	}
+
+}
 
 contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {

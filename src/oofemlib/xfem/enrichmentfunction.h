@@ -70,6 +70,8 @@ public:
     /// Destructor
     virtual ~EnrichmentFunction() { };
 
+    virtual EnrichmentFunction* Clone() = 0;
+
     // New interface
     virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const = 0;
     virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const = 0;
@@ -90,6 +92,8 @@ public:
     DiscontinuousFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
         this->numberOfDofs = 1;
     }
+
+    virtual EnrichmentFunction* Clone() {return new DiscontinuousFunction(*this);}
 
     virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const;
     virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const;
@@ -117,6 +121,8 @@ public:
     RampFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
         this->numberOfDofs = 1;
     }
+
+    virtual EnrichmentFunction* Clone() {return new RampFunction(*this);}
 
     virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const;
     virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const;

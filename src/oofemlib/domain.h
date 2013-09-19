@@ -426,7 +426,7 @@ public:
     void setSet(int i, Set *obj);
     
     /// Temporary function, sets xfemManager.
-    void setXfemManager(XfemManager *xfemManager);
+    void setXfemManager(XfemManager *ipXfemManager) {xfemManager = ipXfemManager;}
 
     XfemManager *giveXfemManager();
     bool hasXfemManager();

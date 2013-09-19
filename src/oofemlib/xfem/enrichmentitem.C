@@ -68,7 +68,7 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FE
     mLevelSetsNeedUpdate(true),
     mLevelSetTol(1.0e-12), mLevelSetTol2(1.0e-12)
 {
-    this->xMan = xMan;
+//    this->xMan = xMan;
     this->enrichmentFunctionList = new AList< EnrichmentFunction >(0);
     this->enrichmentDomainList = new AList< EnrichmentDomain >(0);
     this->numberOfEnrichmentFunctions = 1;
@@ -76,6 +76,60 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FE
     this->startOfDofIdPool = -1;
     this->endOfDofIdPool = -1;
     this->mpEnrichesDofsWithIdArray = new IntArray;
+}
+
+EnrichmentItem :: EnrichmentItem(const EnrichmentItem &iEI):
+FEMComponent(iEI.number, iEI.domain),
+startOfDofIdPool(iEI.startOfDofIdPool),
+endOfDofIdPool(iEI.endOfDofIdPool),
+enrichmentFunctionList(NULL),
+mLevelSetsNeedUpdate(iEI.mLevelSetsNeedUpdate),
+mLevelSetTol(iEI.mLevelSetTol), mLevelSetTol2(iEI.mLevelSetTol2),
+mpEnrichesDofsWithIdArray(NULL),
+numberOfEnrichmentFunctions(iEI.numberOfEnrichmentFunctions),
+mPropLawIndex(iEI.mPropLawIndex),
+mpEnrichmentFunc(NULL),
+mpEnrichmentFront(NULL),
+enrichmentFunction(iEI.enrichmentFunction),
+enrichmentDomainList(NULL),
+mpPropagationLaw(NULL),
+mEnrFuncIndex(iEI.mEnrFuncIndex),
+mEnrFrontIndex(iEI.mEnrFrontIndex),
+mEnrDomainIndex(iEI.mEnrDomainIndex),
+mpEnrichmentDomain(NULL),
+numberOfEnrichmentDomains(iEI.numberOfEnrichmentDomains),
+mEnrNodeIndices(iEI.mEnrNodeIndices)
+{
+	// Enrichment function list
+	int numEnrFunc = iEI.enrichmentFunctionList->giveSize();
+	enrichmentFunctionList = new AList< EnrichmentFunction >;
+	enrichmentFunctionList->growTo( numEnrFunc );
+
+	for(int i = 1; i <= numEnrFunc; i++) {
+		enrichmentFunctionList->put(i, iEI.enrichmentFunctionList->at(i)->Clone() );
+	}
+
+
+	mpEnrichmentFunc = iEI.mpEnrichmentFunc->Clone();
+
+	mpEnrichesDofsWithIdArray = new IntArray( *(iEI.mpEnrichesDofsWithIdArray) );
+
+
+	// Enrichment domain list
+	int numEnrDom = iEI.enrichmentDomainList->giveSize();
+	enrichmentDomainList = new AList< EnrichmentDomain >;
+	enrichmentDomainList->growTo( numEnrDom );
+
+	for(int i = 1; i <= numEnrDom; i++) {
+		enrichmentDomainList->put(i, iEI.enrichmentDomainList->at(i)->Clone() );
+	}
+
+	mpPropagationLaw = iEI.mpPropagationLaw->Clone();
+
+	mpEnrichmentDomain = iEI.mpEnrichmentDomain->Clone();
+
+	mpEnrichmentFront = iEI.mpEnrichmentFront->Clone();
+
 }
 
 EnrichmentItem :: ~EnrichmentItem()
@@ -146,8 +200,8 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
             IR_IOERR(giveClassName(), __proc, "", mir, result);
         }
 
-        EnrichmentFunction *ef = classFactory.createEnrichmentFunction( name.c_str(), i, this->xMan->giveDomain() );
-        mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), i, this->xMan->giveDomain() );
+        EnrichmentFunction *ef = classFactory.createEnrichmentFunction( name.c_str(), i, this->giveDomain() );
+        mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), i, this->giveDomain() );
         if(mpEnrichmentFunc != NULL) {
         	mpEnrichmentFunc->initializeFrom(mir);
         }
@@ -233,6 +287,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     this->endOfDofIdPool = this->startOfDofIdPool + xDofPoolAllocSize;
 
 
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
 
     return 1;
@@ -350,6 +405,7 @@ bool EnrichmentItem :: isMaterialModified(GaussPoint &iGP, Element &iEl, Structu
 void EnrichmentItem :: updateGeometry()
 {
     // Update enrichments ...
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
 
     // ... and create new dofs if necessary.
@@ -608,6 +664,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 	}
 
 	// Mark tip nodes for special treatment.
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
 	mpEnrichmentFront->MarkNodesAsFront(mNodeEnrMarker, *xMan, mLevelSetNormalDir, mLevelSetTangDir, tipInfoArray);
 
 
@@ -1242,6 +1299,13 @@ EnrFrontLinearBranchFuncRadius :: EnrFrontLinearBranchFuncRadius():
 mEnrichmentRadius(0.0)
 {
 	mpBranchFunc = new LinElBranchFunction();
+}
+
+EnrFrontLinearBranchFuncRadius :: EnrFrontLinearBranchFuncRadius(const EnrFrontLinearBranchFuncRadius &iEnrFront):
+EnrichmentFront(iEnrFront),
+mEnrichmentRadius(iEnrFront.mEnrichmentRadius)
+{
+	mpBranchFunc = new LinElBranchFunction( *(iEnrFront.mpBranchFunc) );
 }
 
 EnrFrontLinearBranchFuncRadius :: ~EnrFrontLinearBranchFuncRadius()
