@@ -1545,6 +1545,7 @@ void FloatMatrix :: rotatedWith(const FloatMatrix &r, char mode)
 }
 
 
+
 void FloatMatrix :: symmetrized()
 // Initializes the lower half of the receiver to the upper half.
 {
