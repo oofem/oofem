@@ -68,30 +68,54 @@ class FractureManager;
 #define FailureCriteria_DEF \
     ENUM_ITEM_WITH_VALUE(FC_Undefined, 0) \
     ENUM_ITEM_WITH_VALUE(FC_MaxShearStress, 1) \
-    ENUM_ITEM_WITH_VALUE(FC_DamagedNeighborCZ, 2) 
+    ENUM_ITEM_WITH_VALUE(FC_DamagedNeighborCZ, 2) \
+    ENUM_ITEM_WITH_VALUE(Local, 3) \
+    ENUM_ITEM_WITH_VALUE(Nonlocal, 4) 
 
 enum FailureCriteriaType {
     FailureCriteria_DEF
 };
 
-//class Crack
-//{
-//protected:
-//    int numFronts; //will be tips in 2D, curves in 3D
-//    //PropagationLaw propLaw //Associated propagation law - should maybe be several
-//    //geometryDescription //Explicit -> list of nodes, EnrichmentDomain, …
-//    //updateGeometryDescription(){};
+//enum QuantityType {
+//    FailureCriteria_DEF
 //};
+
+
+
+
+class FailureCriteriaQuantity
+{
+private:    
+    
+    //QuantityType type;       // local, nonlocal
+
+    std::vector < std::vector < FloatArray > > quantities;
+
+public:
+    //FailureCriteriaQuantity( QuantityType type)
+    //{ 
+      //  this->type = type;
+    //};
+    ~FailureCriteriaQuantity(){}; 
+};
+
+
+
 
 
 class FailureCriteria
 {
+    // abstract class from all the different failure criterias should be derived
 private:    
     
-    FractureManager *fMan;
-    FailureCriteriaType type; 
-    bool failedFlag;
-    std::vector<bool> failedFlags;
+    FractureManager *fMan;          // pointer to its corresponding manager
+    FailureCriteriaType type;       // local, nonlocal
+    //FailureCriteriaName name;     // max strain, von Mises, effectivePlasticStrain, tsaiHill, J-integral, G, K etc.
+    bool failedFlag;                // is the criteria fulfilled?
+
+    std :: vector< bool > failedFlags; // remove
+    
+
 public:
     FailureCriteria(FailureCriteriaType type, FractureManager *fMan)
     { 
@@ -99,41 +123,61 @@ public:
         this->failedFlag = false;
         this->fMan = fMan;
     };
+    FailureCriteria(){};
     ~FailureCriteria(){}; // must destroy object correctly
 
+    int instanciateYourself(DataReader *dr);
 
     // list of all the quantities for each layer - quantities[layer][ip].arrayOfValues
     std::vector < std::vector < FloatArray > > quantities;
     FloatArray thresholds;
+    
+    //New
+    std::vector < FailureCriteriaQuantity > elQuantities;
+    //bool evaluateFCQuantities(FailureCriteriaQuantity *quantity, TimeStep *tStep){}; 
 
 
     FailureCriteriaType giveType() { return this->type; }
-    bool evaluateFailureCriteria();
+    virtual bool evaluateFailureCriteria(TimeStep *tStep);
     bool evaluateFCQuantities(Element *el, TimeStep *tStep); 
 
     bool hasFailed() { return failedFlag; }
     bool hasFailed( int i) { return failedFlags.at(i-1); }
 
 
-
-
-/*
-class LocalFailureCriteria : public FalureCriteria
-{
-maxStress, effectivePlasticStrain, tsaiHill, etc.
-}
-
-class NonLocalFailureCriteria : public FalureCriteria
-{
-J-integral, G, K
-}
-*/
 };
 
-//class PropagationLaw
-//{
-    //evaluatePropLaw(TimeStep *tStep){}; //Should update geometry, give direction and rate
-//};
+
+
+class DamagedNeighborLayered : public FailureCriteria
+{
+
+public:
+    DamagedNeighborLayered(FailureCriteriaType type, FractureManager *fMan);
+
+    std::vector < std::vector < FloatArray > > layerDamageValues;
+    //{ 
+        //this->failedFlag = false;
+        //elQuantities.resize( fMan->giveDomain()->giveNumberOfElements() );
+    //};
+
+};
+
+class FailureCriteriaManager
+{
+    // stores all the data for a given type o failure criteria
+private:    
+    
+    //FractureManager *fMan;          // pointer to its corresponding manager
+
+public:
+    FailureCriteriaManager()
+    { 
+    };
+    ~FailureCriteriaManager(){}; // must destroy object correctly
+
+    std :: vector< FailureCriteria *> list;
+};
 
 
 class FailureModuleElementInterface : public Interface
@@ -142,6 +186,7 @@ public:
     FailureModuleElementInterface() : Interface() {}
     virtual const char *giveClassName() const { return "FailureModuleElementInterface"; }
     virtual void computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep) {};
+    virtual void computeFailureCriteriaQuantities(FailureCriteria *fc, FailureCriteriaQuantity quantities, FailureCriteriaType type,  TimeStep *tStep){}; 
 };
 
 
@@ -158,16 +203,13 @@ public:
     //AList < PropagationLaw  > *propagationLaws;
     void setUpdateFlag(bool flag) { this->updateFlag = flag; };
     bool giveUpdateFlag() { return this->updateFlag; };
-    
-    //createCrack(){}; //Should be able to create a new crack based on failure criterias?
-    //removeCrack(int number){};
-    
+      
     void evaluateFailureCriterias(TimeStep *tStep); //Loop through all elements and evaluate criteria (if supported)
-    virtual void evaluateFailureCriteria(FailureCriteria *fc, Element *el, TimeStep *tStep);
+    
     
     void update(TimeStep *tStep);
     void updateXFEM(TimeStep *tStep);
-    //evaluatePropagationLaws(){};
+    void updateXFEM(FailureCriteria *fc, TimeStep *tStep);
 
     /// Constructor.
     FractureManager(Domain *domain);
@@ -181,6 +223,11 @@ public:
     const char *giveInputRecordName() const { return "FractureManager"; }
     void clear();
     Domain *giveDomain() { return this->domain; }
+
+
+    std :: vector< FailureCriteriaManager* > criteriaManagers;
+
+
     
 };
 

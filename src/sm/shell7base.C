@@ -2437,7 +2437,7 @@ Shell7Base :: giveCompositeExportData(CompositeCell &compositeCell, IntArray &pr
         for ( int i = 1; i <= numCellNodes; i++ ) {
             el.connectivity.at(i) = val++;
         }
-        ConnectivityTable *ct =this->giveDomain()->giveConnectivityTable();
+        //ConnectivityTable *ct =this->giveDomain()->giveConnectivityTable();
         
         // Offset
         offset += numCellNodes;
@@ -2518,7 +2518,7 @@ Shell7Base :: recoverValuesFromIP(std::vector<FloatArray> &recoveredValues, int 
 {
     // recover nodal values by coosing the ip closest to the node
 
-    FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
+    //FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
 
     // composite element interpolator
 
@@ -2653,7 +2653,7 @@ Shell7Base :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &ans
     
     FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
     FloatMatrix dNdx;
-    double detJ = interpol->evaldNdx( dNdx, lcoords, FEIVertexListGeometryWrapper(numNodes, (const FloatArray **)coords ) );
+    //double detJ = interpol->evaldNdx( dNdx, lcoords, FEIVertexListGeometryWrapper(numNodes, (const FloatArray **)coords ) );
     
 
 
@@ -2821,29 +2821,29 @@ Shell7Base :: computeInterLaminarStressesAt(int interfaceNum, TimeStep *tStep, s
 void
 Shell7Base :: evaluateFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep) 
 {
-    switch ( fc->giveType() ) {
+    //switch ( fc->giveType() ) {
 
-    case FC_MaxShearStress:
-        // Stress ordering (1, 5, 9, 6, 3, 2) = (xx, yy, zz, yz, xz, xy)
-        int numInterfaces = this->layeredCS->giveNumberOfLayers() - 1;
-        std::vector < FloatArray > interLamStresses;
-        fc->quantities.resize(numInterfaces); // will overwrite this every time
-        for (int i = 1; i <= numInterfaces; i++ ) {    
-            this->computeInterLaminarStressesAt(i, tStep, interLamStresses); // all 6 components in each evaluation point (ip)
-            int numEvalPoints = interLamStresses.size();
-            fc->quantities[i-1].resize(numEvalPoints); // most often = numIP
-            
-            for ( int j = 1; j <= numEvalPoints; j++) {
-                FloatArray &values = fc->quantities[i-1][j-1]; // one resulting shear stress
-                FloatArray &vS = interLamStresses[j-1];        // Stress in eval point
-                values.resize(1);                              // scalar measure in this case
-                 
-                values.at(1) = sqrt( vS.at(2)*vS.at(2) + vS.at(3)*vS.at(3) ); // components can't be right here? shouldn't it be a traction vector?
+    //case FC_MaxShearStress:
+    //    // Stress ordering (1, 5, 9, 6, 3, 2) = (xx, yy, zz, yz, xz, xy)
+    //    int numInterfaces = this->layeredCS->giveNumberOfLayers() - 1;
+    //    std::vector < FloatArray > interLamStresses;
+    //    fc->quantities.resize(numInterfaces); // will overwrite this every time
+    //    for (int i = 1; i <= numInterfaces; i++ ) {    
+    //        this->computeInterLaminarStressesAt(i, tStep, interLamStresses); // all 6 components in each evaluation point (ip)
+    //        int numEvalPoints = interLamStresses.size();
+    //        fc->quantities[i-1].resize(numEvalPoints); // most often = numIP
+    //        
+    //        for ( int j = 1; j <= numEvalPoints; j++) {
+    //            FloatArray &values = fc->quantities[i-1][j-1]; // one resulting shear stress
+    //            FloatArray &vS = interLamStresses[j-1];        // Stress in eval point
+    //            values.resize(1);                              // scalar measure in this case
+    //             
+    //            values.at(1) = sqrt( vS.at(2)*vS.at(2) + vS.at(3)*vS.at(3) ); // components can't be right here? shouldn't it be a traction vector?
 
-            }
-        }
+    //        }
+    //    }
 
-    };
+    //};
 }
 
 

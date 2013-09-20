@@ -72,19 +72,44 @@ StaticFracture :: solveYourselfAt(TimeStep *tStep)
     }
     
     // Instanciate fracture manager
-    // should be made in a more proper way with input and the like
+    // should be made in a more proper way with input and the like and moved to another part
     if ( tStep->isTheFirstStep() ) {
-    
+        IntArray criteriaList(1);
+        criteriaList.at(1) = 1;
+
         this->fMan = new FractureManager( this->giveDomain(1) );
         this->fMan->failureCriterias = new AList< FailureCriteria >(1); // list of all the criterias to evaluate
+        
+        
+        // initialize failure criteria managers
+        Domain *domain= this->fMan->giveDomain();
+        int numEl = domain->giveNumberOfElements();
+        
+        this->fMan->criteriaManagers.resize( criteriaList.giveSize() );
+
+        for ( int i = 1; i <= criteriaList.giveSize(); i++ ) {
+            // if local
+            this->fMan->criteriaManagers.at(i-1) = new FailureCriteriaManager;
+            FailureCriteriaManager *cMan = this->fMan->criteriaManagers.at(i-1);
+            cMan->list.resize(numEl);
+            for ( int j = 1; j <= numEl; j++ ) { 
+                cMan->list.at(j - 1) = new DamagedNeighborLayered(Local, this->fMan);
+                cMan->list.at(j - 1)->thresholds.resize(1);
+                cMan->list.at(j - 1)->thresholds.at(1) = -10.0;
+            }
+
+        }
+        // Loop over and initialize all the fc's
         //FailureCriteria *fc = new FailureCriteria(FC_MaxShearStress);
         //FailureCriteria *fc = new FailureCriteria(FC_DamagedNeighborCZ);
         
-        FailureCriteria *fc = new FailureCriteria(FC_DamagedNeighborCZ, this->fMan);
-        
-        
+        //FailureCriteria *fc = new FailureCriteria(FC_DamagedNeighborCZ, this->fMan);
+
+        FailureCriteria *fc = new DamagedNeighborLayered(Local, this->fMan);
+        // Define all the necessary parameters needed for evaluation of the fc
         fc->thresholds.resize(1);
         fc->thresholds.at(1) = -10.0;
+
         this->fMan->failureCriterias->put(1, fc);
     }
 

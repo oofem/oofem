@@ -140,54 +140,106 @@ void
 void
 Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep) 
 {
+    //// Compute necessary quantities for evaluation of failure criterias
+    //
+    //std::vector < FloatArray > interLamStresses;
+    //int numInterfaces = this->layeredCS->giveNumberOfLayers() - 1;
+    //IntArray delaminatedInterfaceList;
+
+    //switch ( fc->giveType() ) {
+
+    //case FC_MaxShearStress:
+    //    
+    //    this->computeDelaminatedInterfaceList(delaminatedInterfaceList); ///@todo remove the need for this method - JB
+    //    
+    //    fc->quantities.resize(numInterfaces); // will overwrite this every time
+    //    //fc->elQuantities[ this->giveNumber() - 1 ].
+    //    for (int intface = 1; intface <= numInterfaces; intface++ ) { 
+    //        
+    //        if ( ! delaminatedInterfaceList.contains(intface) ) { // interface is whole
+    //            this->computeInterLaminarStressesAt(intface, tStep, interLamStresses); // all 6 components in each evaluation point (ip)
+    //            int numEvalPoints = interLamStresses.size();
+    //            fc->quantities[intface-1].resize(numEvalPoints); // most often = numIP
+    //        
+    //            for ( int evalPoint = 1; evalPoint <= numEvalPoints; evalPoint++) {
+    //                FloatArray &values = fc->quantities[intface-1][evalPoint-1];  // one resulting shear stress
+    //                FloatArray &vS = interLamStresses[evalPoint-1];               // Stress in eval point
+    //                values.resize(1);                                             // scalar measure in this case
+    //                values.at(1) = sqrt( vS.at(2)*vS.at(2) + vS.at(3)*vS.at(3) ); // components can't be right here? shouldn't it be a traction vector?
+
+    //            }
+    //        }
+    //    }
+    //    break;
+
+    //case FC_DamagedNeighborCZ:
+    //    /*
+    //    Go through the neighbors of the element and check for each layer if the 
+    //    corresponding cz is damaged (if applicable)
+
+    //    */
+    //    IntArray neighbors;
+    //    IntArray elements(1);
+    //    ConnectivityTable *conTable = this->giveDomain()->giveConnectivityTable();
+    //    elements.at(1) = this->giveNumber();
+    //    conTable->giveElementNeighbourList(neighbors, elements); 
+    //    FloatArray damageArray;
+    //    fc->quantities.resize( neighbors.giveSize() );
+
+    //    for ( int i = 1; i <= neighbors.giveSize(); i++ ) {
+
+    //        fc->quantities[ i-1 ].resize(1);
+
+    //        Shell7BaseXFEM *neighbor = 
+    //            dynamic_cast< Shell7BaseXFEM * > (this->giveDomain()->giveElement( neighbors.at(i) ));
+    //        if ( neighbor ) {
+    //             if ( neighbor->hasCohesiveZone() ) {
+
+    //                 neighbor->giveMaxCZDamages(damageArray, tStep); // damage parameter for each interface
+    //                 fc->quantities[ i-1 ][0] = damageArray;
+
+    //             }
+    //        }
+
+    //    }
+
+    //};
+}
+
+
+void
+Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteria *fc, FailureCriteriaQuantity quantities, FailureCriteriaType type,  TimeStep *tStep) 
+{
     // Compute necessary quantities for evaluation of failure criterias
     
     std::vector < FloatArray > interLamStresses;
     int numInterfaces = this->layeredCS->giveNumberOfLayers() - 1;
     IntArray delaminatedInterfaceList;
 
-    switch ( fc->giveType() ) {
+    //switch ( type ) {
 
-    case FC_MaxShearStress:
-        
-        this->computeDelaminatedInterfaceList(delaminatedInterfaceList);
-        
-        fc->quantities.resize(numInterfaces); // will overwrite this every time
-        for (int intface = 1; intface <= numInterfaces; intface++ ) { 
-            
-            if ( ! delaminatedInterfaceList.contains(intface) ) { // interface is whole
-                this->computeInterLaminarStressesAt(intface, tStep, interLamStresses); // all 6 components in each evaluation point (ip)
-                int numEvalPoints = interLamStresses.size();
-                fc->quantities[intface-1].resize(numEvalPoints); // most often = numIP
-            
-                for ( int evalPoint = 1; evalPoint <= numEvalPoints; evalPoint++) {
-                    FloatArray &values = fc->quantities[intface-1][evalPoint-1];  // one resulting shear stress
-                    FloatArray &vS = interLamStresses[evalPoint-1];               // Stress in eval point
-                    values.resize(1);                                             // scalar measure in this case
-                    values.at(1) = sqrt( vS.at(2)*vS.at(2) + vS.at(3)*vS.at(3) ); // components can't be right here? shouldn't it be a traction vector?
-
-                }
-            }
-        }
-        break;
-
-    case FC_DamagedNeighborCZ:
+    //case FC_MaxShearStress:
+    //case FC_DamagedNeighborCZ:
         /*
         Go through the neighbors of the element and check for each layer if the 
         corresponding cz is damaged (if applicable)
 
+
         */
+
+    DamagedNeighborLayered *dfc = dynamic_cast< DamagedNeighborLayered * > (fc);
+
         IntArray neighbors;
         IntArray elements(1);
         ConnectivityTable *conTable = this->giveDomain()->giveConnectivityTable();
         elements.at(1) = this->giveNumber();
         conTable->giveElementNeighbourList(neighbors, elements); 
         FloatArray damageArray;
-        fc->quantities.resize( neighbors.giveSize() );
+        //fc->quantities.resize( neighbors.giveSize() );
 
         for ( int i = 1; i <= neighbors.giveSize(); i++ ) {
 
-            fc->quantities[ i-1 ].resize(1);
+            //fc->quantities[ i-1 ].resize(1);
 
             Shell7BaseXFEM *neighbor = 
                 dynamic_cast< Shell7BaseXFEM * > (this->giveDomain()->giveElement( neighbors.at(i) ));
@@ -195,15 +247,16 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep
                  if ( neighbor->hasCohesiveZone() ) {
 
                      neighbor->giveMaxCZDamages(damageArray, tStep); // damage parameter for each interface
-                     fc->quantities[ i-1 ][0] = damageArray;
+                     //fc->quantities[ i-1 ][0] = damageArray;
 
                  }
             }
 
         }
 
-    };
+    //};
 }
+
 
 
 IRResultType Shell7BaseXFEM :: initializeFrom(InputRecord *ir)
@@ -456,13 +509,6 @@ void
 Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, Delamination *dei)
 //
 {
-    //double xi0 = 0.0;
-    //if( dei == NULL ) {
-    //    xi0 = -1.0e6;
-    //} else {
-      double   xi0 = dei->delamXiCoord;
-    //}
-
     int ndofs = Shell7Base :: giveNumberOfDofs();
     int numberOfLayers = this->layeredCS->giveNumberOfLayers(); 
     FloatArray f(ndofs), genEps, genEpsD, ftemp, lCoords, sectionalForces;
@@ -477,7 +523,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
             GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
             lCoords = *gp->giveCoordinates();
 
-            if ( gp->giveCoordinate(3) > xi0 ) { // Should be enriched ///@todo not general!
+            if ( gp->giveCoordinate(3) > dei->delamXiCoord ) { // Should be enriched ///@todo not general!
 
                 this->computeBmatrixAt(lCoords, B);
                 this->computeGeneralizedStrainVectorNew(genEps,  solVec,  B);
@@ -506,7 +552,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
 void
 Shell7BaseXFEM :: giveMaxCZDamages(FloatArray &answer, TimeStep *tStep)
 {
-    // for each interface get maximum interface damage
+    // for each interface get maximum interface damage of all the ip's
     int numZones = this->layeredCS->giveNumberOfLayers() - 1;
     answer.resize(numZones);
     StructuralInterfaceMaterial *mat;
@@ -624,7 +670,6 @@ Shell7BaseXFEM :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
     FloatMatrix temp;
     int ndofs = this->giveNumberOfDofs();
     answer.resize(ndofs, ndofs);
-
 
     // Disccontinuous part (continuous part does not contribute)
     IntArray eiDofIdArray, orderingJ, activeDofsJ;
@@ -802,34 +847,34 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
                 for ( int m = 1; m <= numEI; m++ ) { 
                     Delamination *deiM = dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(m) );
 
-                        if ( deiM !=NULL && deiM->isElementEnriched(this) ) {
-                            double xi0J = deiM->delamXiCoord;
-                            IntArray &orderingJ = orderingArrays[m-1];
-                            IntArray &activeDofsJ = activeDofsArrays[m-1];
+                    if ( deiM !=NULL && deiM->isElementEnriched(this) ) {
+                        double xi0J = deiM->delamXiCoord;
+                        IntArray &orderingJ = orderingArrays[m-1];
+                        IntArray &activeDofsJ = activeDofsArrays[m-1];
 
-                            // con-dis & dis-con
-                            if ( pLoad->giveLoadOffset() > xi0J ) {
-                                tempRed.beSubMatrixOf(KCD, activeDofsC, activeDofsJ);
-                                answer.assemble(tempRed, orderingC, orderingJ);
-                                tempRedT.beTranspositionOf(tempRed);
-                                answer.assemble(tempRedT, orderingJ, orderingC);
-                            }
-
-                            // dis-dis
-                            for ( int k = 1; k <= numEI; k++ ) {
-                                Delamination *deiK = dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(k) );
-                                if ( deiK != NULL && deiK->isElementEnriched(this) ) {
-                                    double xi0K = deiK->delamXiCoord;
-                                    if ( pLoad->giveLoadOffset() > xi0J  &&   pLoad->giveLoadOffset() > xi0K  ) {
-                                        IntArray &orderingK = orderingArrays[k-1];
-                                        IntArray &activeDofsK = activeDofsArrays[k-1];
-                                        tempRed.beSubMatrixOf(KDD, activeDofsJ, activeDofsK);
-                                        answer.assemble(tempRed, orderingJ, orderingK);
-                                    }
-                                }
-                                
-                            }
+                        // con-dis & dis-con
+                        if ( pLoad->giveLoadOffset() > xi0J ) {
+                            tempRed.beSubMatrixOf(KCD, activeDofsC, activeDofsJ);
+                            answer.assemble(tempRed, orderingC, orderingJ);
+                            tempRedT.beTranspositionOf(tempRed);
+                            answer.assemble(tempRedT, orderingJ, orderingC);
                         }
+
+                        // dis-dis
+                        for ( int k = 1; k <= numEI; k++ ) {
+                            Delamination *deiK = dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(k) );
+                            if ( deiK != NULL && deiK->isElementEnriched(this) ) {
+                                double xi0K = deiK->delamXiCoord;
+                                if ( pLoad->giveLoadOffset() > xi0J  &&   pLoad->giveLoadOffset() > xi0K  ) {
+                                    IntArray &orderingK = orderingArrays[k-1];
+                                    IntArray &activeDofsK = activeDofsArrays[k-1];
+                                    tempRed.beSubMatrixOf(KDD, activeDofsJ, activeDofsK);
+                                    answer.assemble(tempRed, orderingJ, orderingK);
+                                }
+                            }
+                                
+                        }
+                    }
                     
                 }
 

@@ -118,68 +118,10 @@ int FractureManager :: instanciateYourself(DataReader *dr)
 }
 
 
-// remove?
-void 
-FractureManager :: evaluateFailureCriterias(TimeStep *tStep)
-{
-    // For element wise evaluation of failure criteria
-    /* Go through all elements and evaluate all failure criterias that are applicable to the given element.
-       Should maybe be applied to element sets instead  
-
-       How to know if a certain fc should be evaluated? what if the element has already failed? 
-    */
-    Domain *domain= this->giveDomain();   
-
-    for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) { 
-        printf( "\n -------------------------------\n");
-        Element *el = domain->giveElement(i);
-        for ( int j = 1; j <= this->failureCriterias->giveSize(); j++ ) {
-            FailureCriteria *fc = this->failureCriterias->at(j);
-            this->evaluateFailureCriteria(fc, el, tStep);
-
-            if( fc->hasFailed() ) {
-                printf( "Element %d fails \n", el->giveNumber() );
-                this->setUpdateFlag(true);
-            }
-        }
-
-    }
-
-}
-
-
-void 
-FractureManager :: evaluateFailureCriteria(FailureCriteria *fc, Element *el, TimeStep *tStep) 
-{
-    // 1. compute quantities necessary for evaluation of fc
-    // 2. evaluate fc
-    // 3. if failure, update necessary geometry
-
-    // If we have a layered cross section it needs special treatment
-    // or only check CS when a special quantity is asked for, e.g interlam eval.
-    // Probably must separate FC into 2 groups: regular and layered CS
-
-    // reset fc
-    fc->quantities.clear();
 
 
 
 
-
-    // Compute fc quantities
-    if ( ! fc->evaluateFCQuantities(el, tStep) ) { // cannot evaluate on its own, ask element for implementation through an interface
-        FailureModuleElementInterface *fmInterface =
-            dynamic_cast< FailureModuleElementInterface * >( el->giveInterface(FailureModuleElementInterfaceType) );
-        if ( fmInterface ) { // if element supports the failure module interface
-            fmInterface->computeFailureCriteriaQuantities(fc, tStep); // compute quantities
-        }
-    }
-
-    // Compare quantity with thresholds
-    fc->evaluateFailureCriteria();
-
-     
-}
 
 
 bool
@@ -198,6 +140,7 @@ FractureManager :: updateXFEM(TimeStep *tStep)
 { 
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
     EnrichmentItem *ei;
+    printf( "\n Updating enrichment item geometries... \n");
     for ( int k = 1; k <= xMan->giveNumberOfEnrichmentItems(); k++ ) {    
         ei = xMan->giveEnrichmentItem(k);
         ei->updateGeometry(tStep, this);
@@ -208,21 +151,113 @@ FractureManager :: updateXFEM(TimeStep *tStep)
 }
 
 
+
+
+
 void
 FractureManager :: update(TimeStep *tStep)
 {
+    // Eval all the failure criterias and store the output
+    // Eval bulk criterias
+    // Eval interface criterias
+
+
     this->setUpdateFlag(false);
-    this->updateXFEM(tStep);
+
+    this->evaluateFailureCriterias(tStep);
+
 
 }
 
 
+
+void 
+FractureManager :: evaluateFailureCriterias(TimeStep *tStep) 
+{
+    // Go through all the failure criterias. They are responsible for their own evaluation
+    this->setUpdateFlag(false);
+
+    for ( int i = 1; i <= this->criteriaManagers.size(); i++ ) {
+
+        printf( "\n  Evaluating failure criteria %i \n", i);
+        FailureCriteriaManager *cMan = this->criteriaManagers.at(i-1);
+        for ( int j = 1; j <= cMan->list.size(); j++ ) {
+
+            printf( "\n    Evaluating for element %i \n", j);
+
+            //FailureCriteria *fc = this->failureCriterias->at(i);
+            FailureCriteria *fc = cMan->list.at(j-1);
+
+            fc->evaluateFailureCriteria(tStep);
+        }
+
+
+        //this->updateXFEM(fc, tStep); // update geometries
+
+
+    }
+
+
+
+    
+}
+
 //---------------------------------------------------
 
 bool 
-FailureCriteria :: evaluateFailureCriteria() 
+FailureCriteria :: evaluateFailureCriteria(TimeStep *tStep) 
 {
-    // Compare quantity with threshold    
+    
+    // 1. compute quantities necessary for evaluation of fc
+    // 2. evaluate fc
+
+    // How to know if a certain fc should be evaluated? what if the element has already failed? 
+    // If we have a layered cross section it needs special treatment
+    // or only check CS when a special quantity is asked for, e.g interlam eval.
+    // Probably must separate FC into 2 groups: regular and layered CS
+
+    // reset fc
+    //fc->quantities.clear();
+
+    // Compute fc quantities
+    Domain *domain= this->fMan->giveDomain();
+
+    if ( this->giveType() == Local ) { // --Element wise evaluation--
+
+
+        // if the quantity cannot be evaluated ask element for implementation through an interface
+        //if ( ! this->evaluateFCQuantities(el, tStep) ) { 
+//            FailureModuleElementInterface *fmInterface =
+//                dynamic_cast< FailureModuleElementInterface * >( el->giveInterface(FailureModuleElementInterfaceType) );
+//            if ( fmInterface ) { // if element supports the failure module interface
+//                fmInterface->computeFailureCriteriaQuantities(this, tStep); // compute quantities
+ 
+        ////fmInterface->computeFailureCriteriaQuantities(fc, fc->elQuantities[j-1], fc->giveType(), tStep); // compute quantities
+            //}
+        //}
+
+    
+        // Compare quantity with thresholds
+        //this->evaluateFailureCriteria();
+
+        
+    } else if (this->giveType() == Nonlocal ) {
+        OOFEM_ERROR1("FractureManager :: evaluateFailureCriteria -Nonlocal criteria not supported yet");
+    } else {
+        OOFEM_ERROR1("FractureManager :: evaluateFailureCriteria - Unknown failure criteria");
+    }
+
+
+
+
+
+
+
+
+
+
+
+    // Compare quantities with thresholds    
     failedFlags.resize(this->quantities.size());
     for ( int i = 1; i <= this->quantities.size(); i++ ) { // if there are several quantities like interfaces
 
@@ -244,5 +279,29 @@ FailureCriteria :: evaluateFailureCriteria()
     return false;
 }
 
+void 
+FractureManager :: updateXFEM(FailureCriteria *fc, TimeStep *tStep)
+{ 
+    // Update enrichment domains based on fc's
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
+    EnrichmentItem *ei;
+    printf( "\n Updating enrichment item geometries... \n");
+    for ( int k = 1; k <= xMan->giveNumberOfEnrichmentItems(); k++ ) {    
+        ei = xMan->giveEnrichmentItem(k);
+        ei->updateGeometry(fc, tStep);
+    }
+    //if ( this->requiresUnknownsDictionaryUpdate() ) {
+        xMan->createEnrichedDofs();
+    //}
+}
+
+
+
+
+DamagedNeighborLayered :: DamagedNeighborLayered(FailureCriteriaType type, FractureManager *fMan) 
+    : FailureCriteria(type,  fMan)
+{
+
+}
 
 } // end namespace oofem

@@ -243,7 +243,6 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     }
 
     // Set start of the enrichment dof pool for the given EI
-//    int xDofPoolAllocSize = this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs() * this->giveNumberOfEnrichmentDomains(); 
     int xDofPoolAllocSize = this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs() * 1; 
     this->startOfDofIdPool = this->giveDomain()->giveNextFreeDofID(xDofPoolAllocSize);
     this->endOfDofIdPool = this->startOfDofIdPool + xDofPoolAllocSize - 1;
@@ -271,17 +270,10 @@ EnrichmentItem :: giveNumberOfEnrDofs() const
 
 bool EnrichmentItem :: isDofManEnrichedByEnrichmentDomain(DofManager *dMan, int edNumber) const
 {
-    EnrichmentDomain *ed = this->enrichmentDomainList->at(edNumber);
-    //return ed->isDofManagerEnriched(dMan);
     return this->isDofManEnriched(*dMan);
 
 }
 
-//{
-//    return isDofManEnriched(* dMan);
-//}
-    // Note: the dof managers may not support all/any of these new potential dof id's. Eg. a 
-    // beam will not be able to account for a pressure dof. 
 
 bool EnrichmentItem :: isElementEnriched(const Element *element) const
 {
@@ -293,20 +285,6 @@ bool EnrichmentItem :: isElementEnriched(const Element *element) const
 
     return false;
 }
-
-/*
-bool EnrichmentItem :: isElementEnrichedByEnrichmentDomain(const Element *element, int edNumber) const
-{
-    for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
-        DofManager *dMan = element->giveDofManager(i);
-        if ( isDofManEnrichedByEnrichmentDomain(dMan, edNumber) ) {
-            return true;
-        }
-    }
-
-    return false;
-}
-*/
 
 
 bool EnrichmentItem :: isDofManEnriched(const DofManager &iDMan) const
@@ -439,50 +417,7 @@ EnrichmentItem :: computeDofManDofIdArray(IntArray &answer, DofManager *dMan)
 }
 
 
-// Old - JB
-void
-EnrichmentItem :: computeDofManDofIdArray(IntArray &answer, DofManager *dMan, int enrichmentDomainNumber)
-{
 
-	// Gives an array containing the dofId's that should be created as new dofs (what dofs to enrich).
-    const IntArray *enrichesDofsWithIdArray = this->giveEnrichesDofsWithIdArray();
-    int eiEnrSize = enrichesDofsWithIdArray->giveSize();
-
-    // Go through the list of dofs that the EI supports and compare with the available dofs in the dofMan.
-    // If the dofMan has support for the particular dof add it to the list.
-    // Store matches in dofMask
-    IntArray dofMask(eiEnrSize); dofMask.zero();
-    int count = 0;
-    for ( int i = 1; i <= eiEnrSize; i++ ) {
-        if ( dMan->hasDofID( (DofIDItem) enrichesDofsWithIdArray->at(i) ) ) {
-            count++;
-            dofMask.at(count) = dMan->giveDofWithID( enrichesDofsWithIdArray->at(i) )->giveNumber();
-        }
-    }
-
-    answer.resize(count);
-    int xDofAllocSize = eiEnrSize * this->giveNumberOfEnrDofs(); // number of new dof id's the ei will allocate
-    for ( int i = 1; i <= count; i++ ) {
-        answer.at(i) = this->giveStartOfDofIdPool() + (enrichmentDomainNumber-1)*xDofAllocSize + dofMask.at(i)-1 ;
-    }
-
-}
-
-
-void
-EnrichmentItem :: giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber) const
-{
-    // Returns an array containing the dof Id's of the new enrichment dofs pertinent to the ei.
-    // Note: the dof managers may not support these dofs/all potential dof id's
-	const IntArray *enrichesDofsWithIdArray = this->giveEnrichesDofsWithIdArray();
-    int eiEnrSize = enrichesDofsWithIdArray->giveSize();
-
-    answer.resize(eiEnrSize);
-    int xDofAllocSize = eiEnrSize * this->giveNumberOfEnrDofs(); // number of new dof id's the ei will allocate
-    for ( int i = 1; i <= eiEnrSize; i++ ) {
-        answer.at(i) = this->giveStartOfDofIdPool() + ( enrichmentDomainNumber - 1 ) * xDofAllocSize + ( i - 1 );
-    }
-}
 
 
 void
@@ -494,7 +429,6 @@ EnrichmentItem :: giveEIDofIdArray(IntArray &answer) const
     int eiEnrSize = enrichesDofsWithIdArray->giveSize();
 
     answer.resize(eiEnrSize);
-    int xDofAllocSize = eiEnrSize * this->giveNumberOfEnrDofs(); // number of new dof id's the ei will allocate
     for ( int i = 1; i <= eiEnrSize; i++ ) {
         answer.at(i) = this->giveStartOfDofIdPool() + i - 1;
     }
@@ -523,12 +457,6 @@ void EnrichmentItem :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, cons
 }
 
 
-//void EnrichmentItem :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet) const
-//{
-//	// Bulk enrichment
-//	oEnrFunc.resize(1, 0.0);
-//	mpEnrichmentFunc->evaluateEnrFuncAt(oEnrFunc[0], iPos, iLevelSet, mpEnrichmentDomain);
-//}
 
 
 void EnrichmentItem :: evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const
@@ -546,25 +474,40 @@ void EnrichmentItem :: evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncD
 	}
 }
 
+
+// OLD - JB
 void 
 EnrichmentItem :: updateGeometry(TimeStep *tStep, FractureManager *fMan)
 {
 
-    //this->needsUpdate = false;
     Domain *domain= this->giveDomain();   
 
     for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) { 
-        printf( "\n -------------------------------\n");
+        printf( "\n   Updating element %i \n", i);
         Element *el = domain->giveElement(i);
 
+        // Evaluate all the fc's - should maybe change the order: el-criteria
         for ( int j = 1; j <= fMan->failureCriterias->giveSize(); j++ ) {
             FailureCriteria *fc = fMan->failureCriterias->at(j);
-            fMan->evaluateFailureCriteria(fc, el, tStep);
+//            fMan->evaluateFailureCriteria(fc, tStep);
 
             if ( Delamination *dei = dynamic_cast< Delamination * > (this) )  {
                 dei->updateGeometry(tStep, fMan, el, fc); //not an overloaded function, change the name
             }
         }
+    }
+
+}
+
+
+void 
+EnrichmentItem :: updateGeometry(FailureCriteria *fc, TimeStep *tStep)
+{
+
+//    Domain *domain= this->giveDomain();   
+
+    if ( Delamination *dei = dynamic_cast< Delamination * > (this) )  {
+//        dei->updateGeometry(tStep, el, fc); //not an overloaded function, change the name
     }
 
 }
@@ -615,13 +558,13 @@ void Delamination :: updateLevelSets(XfemManager &ixFemMan)
 		Node *node = ixFemMan.giveDomain()->giveNode(n);
 
 		// Extract node coord
-		const FloatArray &pos( *node->giveCoordinates() );
+		// const FloatArray &pos( *node->giveCoordinates() );
 
 		// Calc sign dist to normal surface // New -JB
-		double delta = 0.0;
+		// double delta = 0.0;
 
+        // level set wrt mid surface
         //mpEnrichmentDomain->computeSurfaceNormalSignDist(delta, pos);
-        //mLevelSetSurfaceNormalDir[n-1] = delta;
         mLevelSetSurfaceNormalDir[n-1] = this->delamXiCoord;
 	}
 
@@ -1129,68 +1072,140 @@ Delamination :: updateGeometry(TimeStep *tStep, FractureManager *fMan, Element *
 {
     // This method needs to be updated wrt new implementation!!
 
-    for ( int i = 1; i <= fc->quantities.size(); i++ ) {
-        if ( fc->hasFailed(i) ) { // interface has failed
-            printf( "Element %d fails in interface %d \n", el->giveNumber(), i );
-            fMan->setUpdateFlag(true);
+    //for ( int i = 1; i <= fc->quantities.size(); i++ ) {
+    //    if ( fc->hasFailed(i) ) { // interface has failed
+    //        printf( "Element %d fails in interface %d \n", el->giveNumber(), i );
+    //        fMan->setUpdateFlag(true);
 
-            // should create a new *ed at the level given by interface i iff it does not already exist
-            // add coord
-            FloatArray xiCoords;
-            dynamic_cast <LayeredCrossSection * > ( el->giveCrossSection() )->giveInterfaceXiCoords(xiCoords);
-            double xi = xiCoords.at(i); // current xi-coord
-            // find if xi is in this->enrichmentDomainXiCoords
-            bool flag=false;
-            int num = 0;
-            /*for ( int j = 1; j <= this->enrichmentDomainXiCoords.giveSize(); j++ ) {
-                if ( abs(xi-this->enrichmentDomainXiCoords.at(j)) < 1.0e-6 ) {
-                    flag = true;
-                    num = j;
-                }
-            }*/
+    //        // should create a new *ed at the level given by interface i iff it does not already exist
+    //        // add coord
+    //        FloatArray xiCoords;
+    //        dynamic_cast <LayeredCrossSection * > ( el->giveCrossSection() )->giveInterfaceXiCoords(xiCoords);
+    //        double xi = xiCoords.at(i); // current xi-coord
+    //        // find if xi is in this->enrichmentDomainXiCoords
+    //        bool flag=false;
+    //        int num = 0;
+    //        /*for ( int j = 1; j <= this->enrichmentDomainXiCoords.giveSize(); j++ ) {
+    //            if ( abs(xi-this->enrichmentDomainXiCoords.at(j)) < 1.0e-6 ) {
+    //                flag = true;
+    //                num = j;
+    //            }
+    //        }*/
 
 
-            IntArray dofManNumbers, elDofMans;
-            elDofMans = el->giveDofManArray();
-            for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {  
-                // ugly piece of code that will skip enrichment of dofmans that have any bc's
-                // which is not generally what you want
-                #if 1
-                bool hasBc= false;
-                for ( int j = 1; j <= el->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
-                    if ( el->giveDofManager(i)->giveDof(j)->hasBc(tStep) ) {
-                        hasBc = true;
-                        continue;
-                    }
-                }
-                #endif
-                if ( !hasBc) {
-                    dofManNumbers.followedBy(elDofMans.at(i));
-                }
-            }
-            
+    //        IntArray dofManNumbers, elDofMans;
+    //        elDofMans = el->giveDofManArray();
+    //        for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {  
+    //            // ugly piece of code that will skip enrichment of dofmans that have any bc's
+    //            // which is not generally what you want
+    //            #if 1
+    //            bool hasBc= false;
+    //            for ( int j = 1; j <= el->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
+    //                if ( el->giveDofManager(i)->giveDof(j)->hasBc(tStep) ) {
+    //                    hasBc = true;
+    //                    continue;
+    //                }
+    //            }
+    //            #endif
+    //            if ( !hasBc) {
+    //                dofManNumbers.followedBy(elDofMans.at(i));
+    //            }
+    //        }
+    //        
 
-            //dofManNumbers.printYourself();
+    //        //dofManNumbers.printYourself();
 
-            if ( flag ) { //in list only add dofmans
-                dynamic_cast< DofManList * > ( this->giveEnrichmentDomain(num) )->addDofManagers( dofManNumbers );
-                //dynamic_cast< DofManList * > ( this->giveEnrichmentDomain(num) )->updateEnrichmentDomain(dofManNumbers);
-            } else { //create ed
-                int numED = this->giveNumberOfEnrichmentDomains();
-                EnrichmentDomain *ed = classFactory.createEnrichmentDomain( "DofManList" ); 
-                DofManList *dml = dynamic_cast< DofManList * > ( ed );
-                dml->addDofManagers( dofManNumbers ); // add the dofmans of the el to the list
-                this->addEnrichmentDomain(ed);
-                //this->enrichmentDomainXiCoords.resizeWithValues(numED+1);
-                //this->enrichmentDomainXiCoords.at(numED+1) = xiCoords.at(i);
+    //        if ( flag ) { //in list only add dofmans
+    //            dynamic_cast< DofManList * > ( this->giveEnrichmentDomain(num) )->addDofManagers( dofManNumbers );
+    //            //dynamic_cast< DofManList * > ( this->giveEnrichmentDomain(num) )->updateEnrichmentDomain(dofManNumbers);
+    //        } else { //create ed
+    //            int numED = this->giveNumberOfEnrichmentDomains();
+    //            EnrichmentDomain *ed = classFactory.createEnrichmentDomain( "DofManList" ); 
+    //            DofManList *dml = dynamic_cast< DofManList * > ( ed );
+    //            dml->addDofManagers( dofManNumbers ); // add the dofmans of the el to the list
+    //            this->addEnrichmentDomain(ed);
+    //            //this->enrichmentDomainXiCoords.resizeWithValues(numED+1);
+    //            //this->enrichmentDomainXiCoords.at(numED+1) = xiCoords.at(i);
 
-            }                        
+    //        }                        
 
-        }
-    }
+    //    }
+    //}
 
 
 }
+
+// NEW
+void 
+Delamination :: updateGeometry(TimeStep *tStep, Element *el, FailureCriteria *fc)
+{
+    // This method needs to be updated wrt new implementation!!
+
+    //for ( int i = 1; i <= fc->quantities.size(); i++ ) {
+    //    if ( fc->hasFailed(i) ) { // interface has failed
+    //        printf( "Element %d fails in interface %d \n", el->giveNumber(), i );
+    //        //fMan->setUpdateFlag(true);
+
+    //        // should create a new *ed at the level given by interface i iff it does not already exist
+    //        // add coord
+    //        FloatArray xiCoords;
+    //        dynamic_cast <LayeredCrossSection * > ( el->giveCrossSection() )->giveInterfaceXiCoords(xiCoords);
+    //        double xi = xiCoords.at(i); // current xi-coord
+    //        // find if xi is in this->enrichmentDomainXiCoords
+    //        bool flag=false;
+    //        int num = 0;
+    //        /*for ( int j = 1; j <= this->enrichmentDomainXiCoords.giveSize(); j++ ) {
+    //            if ( abs(xi-this->enrichmentDomainXiCoords.at(j)) < 1.0e-6 ) {
+    //                flag = true;
+    //                num = j;
+    //            }
+    //        }*/
+
+
+    //        IntArray dofManNumbers, elDofMans;
+    //        elDofMans = el->giveDofManArray();
+    //        for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {  
+    //            // ugly piece of code that will skip enrichment of dofmans that have any bc's
+    //            // which is not generally what you want
+    //            #if 1
+    //            bool hasBc= false;
+    //            for ( int j = 1; j <= el->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
+    //                if ( el->giveDofManager(i)->giveDof(j)->hasBc(tStep) ) {
+    //                    hasBc = true;
+    //                    continue;
+    //                }
+    //            }
+    //            #endif
+    //            if ( !hasBc) {
+    //                dofManNumbers.followedBy(elDofMans.at(i));
+    //            }
+    //        }
+    //        
+
+    //        //dofManNumbers.printYourself();
+
+    //        if ( flag ) { //in list only add dofmans
+    //            dynamic_cast< DofManList * > ( this->giveEnrichmentDomain(num) )->addDofManagers( dofManNumbers );
+    //            //dynamic_cast< DofManList * > ( this->giveEnrichmentDomain(num) )->updateEnrichmentDomain(dofManNumbers);
+    //        } else { //create ed
+    //            int numED = this->giveNumberOfEnrichmentDomains();
+    //            EnrichmentDomain *ed = classFactory.createEnrichmentDomain( "DofManList" ); 
+    //            DofManList *dml = dynamic_cast< DofManList * > ( ed );
+    //            dml->addDofManagers( dofManNumbers ); // add the dofmans of the el to the list
+    //            this->addEnrichmentDomain(ed);
+    //            //this->enrichmentDomainXiCoords.resizeWithValues(numED+1);
+    //            //this->enrichmentDomainXiCoords.at(numED+1) = xiCoords.at(i);
+
+    //        }                        
+
+    //    }
+    //}
+
+
+}
+
+
+
 
 Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
 {

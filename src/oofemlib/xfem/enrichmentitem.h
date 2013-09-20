@@ -135,6 +135,7 @@ public:
     // Should update receiver geometry to the state reached at given time step.
     virtual void updateGeometry(TimeStep *tStep) {};
     virtual void updateGeometry(TimeStep *tStep, FractureManager *fMan);
+    virtual void updateGeometry(FailureCriteria *fc, TimeStep *tStep);
     virtual void updateGeometry();
     virtual void propagateFronts();
 
@@ -142,9 +143,6 @@ public:
     int giveStartOfDofIdPool() const { return this->startOfDofIdPool; };
     int giveEndOfDofIdPool() const { return this->endOfDofIdPool; };
     void computeDofManDofIdArray(IntArray &DofIdArray, DofManager *dMan); // list of id's a particular dof manager supports
-    void computeDofManDofIdArray(IntArray &DofIdArray, DofManager *dMan, int enrichmentDomainNumber); // temp
-
-    void giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber) const; // list of id's for the enrichment dofs OLD-JB
     void giveEIDofIdArray(IntArray &answer) const; // list of id's for the enrichment dofs
 
 
@@ -165,8 +163,8 @@ public:
     template< typename T >
     void interpGradLevelSet(FloatArray &oGradLevelSet, const FloatMatrix &idNdX, const T &iNodeInd) const;
 
+    // JB - temporary
     template< typename T >
-    //void interpSurfaceLevelSet(double &oLevelSet, const T &iNodeInd) const;
     void interpSurfaceLevelSet(double &oLevelSet, const FloatArray &iN, const T &iNodeInd, double iXi) const;
 
     // Level set routines
@@ -311,6 +309,7 @@ public:
     double heaviside(double xi, double xi0);
     virtual Material *giveMaterial() { return mat; }
     void updateGeometry(TimeStep *tStep, FractureManager *fMan, Element *el, FailureCriteria *fc);
+    void updateGeometry(TimeStep *tStep, Element *el, FailureCriteria *fc);
     virtual void updateLevelSets(XfemManager &ixFemMan);
 };
 
