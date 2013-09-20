@@ -1538,11 +1538,12 @@ void FloatMatrix :: rotatedWith(const FloatMatrix &r, char mode)
         this->beProductOf(rta, r);       //  r^T . a . r
     } else if ( mode == 't' ) {
         rta.beProductOf(r, * this);      //  r . a
-        this->beTProductOf(rta, r);      //  r . a . r^T
+        this->beProductTOf(rta, r);      //  r . a . r^T
     } else {
         OOFEM_ERROR("FloatMatrix :: rotatedWith: unsupported mode");
     }
 }
+
 
 
 void FloatMatrix :: symmetrized()
