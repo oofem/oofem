@@ -166,6 +166,7 @@ FractureManager :: update(TimeStep *tStep)
 
     this->evaluateFailureCriterias(tStep);
 
+    //this->updateXFEM(this, tStep);
 
 }
 
@@ -188,18 +189,14 @@ FractureManager :: evaluateFailureCriterias(TimeStep *tStep)
             //FailureCriteria *fc = this->failureCriterias->at(i);
             FailureCriteria *fc = cMan->list.at(j-1);
 
-            fc->evaluateFailureCriteria(tStep);
+            //fc->evaluateFailureCriteria(tStep);
+            fc->computeFailureCriteriaQuantities(tStep);
+            DamagedNeighborLayered *dfc = dynamic_cast<DamagedNeighborLayered *>(fc);
+            dfc->evaluateFailureCriteria();
         }
 
-
         //this->updateXFEM(fc, tStep); // update geometries
-
-
     }
-
-
-
-    
 }
 
 //---------------------------------------------------
@@ -220,21 +217,18 @@ FailureCriteria :: evaluateFailureCriteria(TimeStep *tStep)
     //fc->quantities.clear();
 
     // Compute fc quantities
-    Domain *domain= this->fMan->giveDomain();
-
     if ( this->giveType() == Local ) { // --Element wise evaluation--
 
-
+        Element *el = this->el;
         // if the quantity cannot be evaluated ask element for implementation through an interface
-        //if ( ! this->evaluateFCQuantities(el, tStep) ) { 
-//            FailureModuleElementInterface *fmInterface =
-//                dynamic_cast< FailureModuleElementInterface * >( el->giveInterface(FailureModuleElementInterfaceType) );
-//            if ( fmInterface ) { // if element supports the failure module interface
-//                fmInterface->computeFailureCriteriaQuantities(this, tStep); // compute quantities
+        if ( ! this->evaluateFCQuantities(el, tStep) ) { 
+            FailureModuleElementInterface *fmInterface =
+                dynamic_cast< FailureModuleElementInterface * >( el->giveInterface(FailureModuleElementInterfaceType) );
+            if ( fmInterface ) { // if element supports the failure module interface
+                fmInterface->computeFailureCriteriaQuantities(this, tStep); // compute quantities
  
-        ////fmInterface->computeFailureCriteriaQuantities(fc, fc->elQuantities[j-1], fc->giveType(), tStep); // compute quantities
-            //}
-        //}
+            }
+        }
 
     
         // Compare quantity with thresholds
@@ -249,13 +243,33 @@ FailureCriteria :: evaluateFailureCriteria(TimeStep *tStep)
 
 
 
+    //// Compare quantities with thresholds    
+    //failedFlags.resize(this->quantities.size());
+    //for ( int i = 1; i <= this->quantities.size(); i++ ) { // if there are several quantities like interfaces
+
+    //    failedFlags.at(i-1) = false;
+    //    for ( int j = 1; j <= this->quantities[i-1].size(); j++ ) { // all the evaluation points (often the integration points)
+    //        FloatArray &values = this->quantities[i-1][j-1];        // quantities in each evaluation point (e.g. max stress will check stress components in different directions)
+    //        for ( int k = 1; k <= values.giveSize(); k++ ) {
+    //            // assumes there is only one value to compare against which is generally 
+    //            // not true, e.g. tension/compression thresholds
+    //            //if ( values.at(k) >= this->thresholds.at(k) ) {
+    //            if ( values.at(k) > this->thresholds.at(1) ) {
+    //                //this->failedFlag = true;
+    //                failedFlags.at(i-1) = true;
+    //            }
+    //        }
+    //    }
+    //}
+
+    return false;
+}
 
 
 
-
-
-
-
+bool 
+FailureCriteria :: evaluateFailureCriteria() 
+{
 
     // Compare quantities with thresholds    
     failedFlags.resize(this->quantities.size());
@@ -279,6 +293,7 @@ FailureCriteria :: evaluateFailureCriteria(TimeStep *tStep)
     return false;
 }
 
+
 void 
 FractureManager :: updateXFEM(FailureCriteria *fc, TimeStep *tStep)
 { 
@@ -296,12 +311,45 @@ FractureManager :: updateXFEM(FailureCriteria *fc, TimeStep *tStep)
 }
 
 
+void 
+FractureManager :: updateXFEM(FractureManager *fMan, TimeStep *tStep)
+{ 
+    // Update enrichment domains based on fc's
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
+    EnrichmentItem *ei;
+    printf( "\n Updating enrichment item geometries... \n");
+    for ( int k = 1; k <= xMan->giveNumberOfEnrichmentItems(); k++ ) {    
+        ei = xMan->giveEnrichmentItem(k);
+        ei->updateGeometry(tStep, this); 
+    }
+    //if ( this->requiresUnknownsDictionaryUpdate() ) {
+        xMan->createEnrichedDofs();
+    //}
+}
 
 
 DamagedNeighborLayered :: DamagedNeighborLayered(FailureCriteriaType type, FractureManager *fMan) 
     : FailureCriteria(type,  fMan)
 {
-
+//
 }
+
+
+bool
+DamagedNeighborLayered :: evaluateFailureCriteria() 
+{
+    
+    // Compare quantities with thresholds    
+    // go through all the layers and compare against threshold value
+    failedFlags.resize(this->layerDamageValues.giveSize());
+    for ( int i = 1; i <= this->failedFlags.size(); i++ ) { // if there are several quantities like interfaces
+
+        failedFlags.at(i-1) = false;
+        if ( this->layerDamageValues.at(i) > this->thresholds.at(1) ) {
+            failedFlags.at(i-1) = true;
+        }
+    }
+    return true;
+};
 
 } // end namespace oofem

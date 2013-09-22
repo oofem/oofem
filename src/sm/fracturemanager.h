@@ -113,7 +113,7 @@ private:
     //FailureCriteriaName name;     // max strain, von Mises, effectivePlasticStrain, tsaiHill, J-integral, G, K etc.
     bool failedFlag;                // is the criteria fulfilled?
 
-    std :: vector< bool > failedFlags; // remove
+     
     
 
 public:
@@ -125,7 +125,7 @@ public:
     };
     FailureCriteria(){};
     ~FailureCriteria(){}; // must destroy object correctly
-
+    Element *el;
     int instanciateYourself(DataReader *dr);
 
     // list of all the quantities for each layer - quantities[layer][ip].arrayOfValues
@@ -135,10 +135,13 @@ public:
     //New
     std::vector < FailureCriteriaQuantity > elQuantities;
     //bool evaluateFCQuantities(FailureCriteriaQuantity *quantity, TimeStep *tStep){}; 
-
+    std :: vector< bool > failedFlags;
 
     FailureCriteriaType giveType() { return this->type; }
     virtual bool evaluateFailureCriteria(TimeStep *tStep);
+    virtual bool computeFailureCriteriaQuantities(TimeStep *tStep)
+        { return evaluateFailureCriteria(tStep); };
+    virtual bool evaluateFailureCriteria();
     bool evaluateFCQuantities(Element *el, TimeStep *tStep); 
 
     bool hasFailed() { return failedFlag; }
@@ -154,8 +157,9 @@ class DamagedNeighborLayered : public FailureCriteria
 
 public:
     DamagedNeighborLayered(FailureCriteriaType type, FractureManager *fMan);
-
-    std::vector < std::vector < FloatArray > > layerDamageValues;
+    virtual bool evaluateFailureCriteria();
+    //std::vector < std::vector < FloatArray > > layerDamageValues;
+    FloatArray layerDamageValues;
     //{ 
         //this->failedFlag = false;
         //elQuantities.resize( fMan->giveDomain()->giveNumberOfElements() );
@@ -210,6 +214,8 @@ public:
     void update(TimeStep *tStep);
     void updateXFEM(TimeStep *tStep);
     void updateXFEM(FailureCriteria *fc, TimeStep *tStep);
+
+    void updateXFEM(FractureManager *fMan, TimeStep *tStep);//new
 
     /// Constructor.
     FractureManager(Domain *domain);

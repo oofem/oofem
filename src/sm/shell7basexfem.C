@@ -140,6 +140,8 @@ void
 void
 Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep) 
 {
+    DamagedNeighborLayered *dfc = dynamic_cast<DamagedNeighborLayered *>(fc);
+
     //// Compute necessary quantities for evaluation of failure criterias
     //
     //std::vector < FloatArray > interLamStresses;
@@ -171,38 +173,45 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep
     //        }
     //    }
     //    break;
+    if (dfc) {
+        /*
+        Go through the neighbors of the element and check for each layer if the 
+        corresponding cz is damaged (if applicable)
 
+        */
+        IntArray neighbors;
+        IntArray elements(1);
+        ConnectivityTable *conTable = this->giveDomain()->giveConnectivityTable();
+        elements.at(1) = dfc->el->giveNumber();
+        conTable->giveElementNeighbourList(neighbors, elements); 
+        FloatArray damageArray(this->layeredCS->giveNumberOfLayers() - 1), damageArrayNeigh;
+        fc->quantities.resize( neighbors.giveSize() );
+
+        for ( int i = 1; i <= neighbors.giveSize(); i++ ) {
+
+            //fc->quantities[ i-1 ].resize(1);
+
+            Shell7BaseXFEM *neighbor = 
+                dynamic_cast< Shell7BaseXFEM * > (this->giveDomain()->giveElement( neighbors.at(i) ));
+            if ( neighbor && neighbor->hasCohesiveZone() ) {
+                neighbor->giveMaxCZDamages(damageArrayNeigh, tStep); // damage parameter for each interface
+                //fc->quantities[ i-1 ][0] = damageArray;
+
+                // store maximum damage from neighbors
+                for ( int j = 1; j <= damageArray.giveSize(); j++ ) {
+                    if (damageArrayNeigh.at(j) > damageArray.at(j) ) {
+                        damageArray.at(j) = damageArrayNeigh.at(j);
+                    }
+                }
+            }
+
+        }
+
+        dfc->layerDamageValues = damageArray;
+    }
     //case FC_DamagedNeighborCZ:
-    //    /*
-    //    Go through the neighbors of the element and check for each layer if the 
-    //    corresponding cz is damaged (if applicable)
 
-    //    */
-    //    IntArray neighbors;
-    //    IntArray elements(1);
-    //    ConnectivityTable *conTable = this->giveDomain()->giveConnectivityTable();
-    //    elements.at(1) = this->giveNumber();
-    //    conTable->giveElementNeighbourList(neighbors, elements); 
-    //    FloatArray damageArray;
-    //    fc->quantities.resize( neighbors.giveSize() );
-
-    //    for ( int i = 1; i <= neighbors.giveSize(); i++ ) {
-
-    //        fc->quantities[ i-1 ].resize(1);
-
-    //        Shell7BaseXFEM *neighbor = 
-    //            dynamic_cast< Shell7BaseXFEM * > (this->giveDomain()->giveElement( neighbors.at(i) ));
-    //        if ( neighbor ) {
-    //             if ( neighbor->hasCohesiveZone() ) {
-
-    //                 neighbor->giveMaxCZDamages(damageArray, tStep); // damage parameter for each interface
-    //                 fc->quantities[ i-1 ][0] = damageArray;
-
-    //             }
-    //        }
-
-    //    }
-
+    
     //};
 }
 

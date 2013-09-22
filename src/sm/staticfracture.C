@@ -96,6 +96,7 @@ StaticFracture :: solveYourselfAt(TimeStep *tStep)
                 cMan->list.at(j - 1) = new DamagedNeighborLayered(Local, this->fMan);
                 cMan->list.at(j - 1)->thresholds.resize(1);
                 cMan->list.at(j - 1)->thresholds.at(1) = -10.0;
+                cMan->list.at(j - 1)->el = domain->giveElement(j);
             }
 
         }
