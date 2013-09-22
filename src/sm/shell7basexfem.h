@@ -133,7 +133,7 @@ protected:
 
     IntArray DelaminatedInterfaceList;
     void computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep);
-    void computeFailureCriteriaQuantities(FailureCriteria *fc, FailureCriteriaQuantity quantities, FailureCriteriaType type,  TimeStep *tStep); 
+    //void computeFailureCriteriaQuantities(FailureCriteria *fc, FailureCriteriaQuantity quantities, FailureCriteriaType type,  TimeStep *tStep); 
 
 public:
     Shell7BaseXFEM(int n, Domain *d);   

@@ -126,23 +126,20 @@ public:
     FailureCriteria(){};
     ~FailureCriteria(){}; // must destroy object correctly
     Element *el;
-    int instanciateYourself(DataReader *dr);
 
-    // list of all the quantities for each layer - quantities[layer][ip].arrayOfValues
+    virtual int instanciateYourself(DataReader *dr){ return 1;};
+    bool evaluateFCQuantities(Element *el, TimeStep *tStep);
+    
     std::vector < std::vector < FloatArray > > quantities;
     FloatArray thresholds;
     
     //New
-    std::vector < FailureCriteriaQuantity > elQuantities;
-    //bool evaluateFCQuantities(FailureCriteriaQuantity *quantity, TimeStep *tStep){}; 
     std :: vector< bool > failedFlags;
 
     FailureCriteriaType giveType() { return this->type; }
-    virtual bool evaluateFailureCriteria(TimeStep *tStep);
-    virtual bool computeFailureCriteriaQuantities(TimeStep *tStep)
-        { return evaluateFailureCriteria(tStep); };
+
+    virtual bool computeFailureCriteriaQuantities(TimeStep *tStep);
     virtual bool evaluateFailureCriteria();
-    bool evaluateFCQuantities(Element *el, TimeStep *tStep); 
 
     bool hasFailed() { return failedFlag; }
     bool hasFailed( int i) { return failedFlags.at(i-1); }
@@ -158,14 +155,10 @@ class DamagedNeighborLayered : public FailureCriteria
 public:
     DamagedNeighborLayered(FailureCriteriaType type, FractureManager *fMan);
     virtual bool evaluateFailureCriteria();
-    //std::vector < std::vector < FloatArray > > layerDamageValues;
-    FloatArray layerDamageValues;
-    //{ 
-        //this->failedFlag = false;
-        //elQuantities.resize( fMan->giveDomain()->giveNumberOfElements() );
-    //};
 
+    FloatArray layerDamageValues;
 };
+
 
 class FailureCriteriaManager
 {
@@ -214,8 +207,6 @@ public:
     void update(TimeStep *tStep);
     void updateXFEM(TimeStep *tStep);
     void updateXFEM(FailureCriteria *fc, TimeStep *tStep);
-
-    void updateXFEM(FractureManager *fMan, TimeStep *tStep);//new
 
     /// Constructor.
     FractureManager(Domain *domain);

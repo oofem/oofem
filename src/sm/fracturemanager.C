@@ -77,43 +77,15 @@ FractureManager :: clear()
 
 IRResultType FractureManager :: initializeFrom(InputRecord *ir)
 {
-    /*
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-
-    IR_GIVE_FIELD(ir, numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
-    */
+    ///@todo Write proper method
+    
     return IRRT_OK;
 }
 
 
 int FractureManager :: instanciateYourself(DataReader *dr)
 {
-    /*
-    const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-    std :: string name;
-
-    enrichmentItemList->growTo(numberOfEnrichmentItems);
-    for ( int i = 1; i <= numberOfEnrichmentItems; i++ ) {
-        InputRecord *mir = dr->giveInputRecord(DataReader :: IR_enrichItemRec, i);
-        result = mir->giveRecordKeywordField(name);
-
-        if ( result != IRRT_OK ) {
-            IR_IOERR(giveClassName(), __proc, "", mir, result);
-        }
-
-        EnrichmentItem *ei = CreateUsrDefEnrichmentItem( name.c_str(), i, this, this->giveDomain() );
-        if ( ei == NULL ) {
-            OOFEM_ERROR2( "XfemManager::instanciateYourself: unknown enrichment item (%s)", name.c_str() );
-        }
-
-        ei->initializeFrom(mir);
-        ei->instanciateYourself(dr);
-        this->enrichmentItemList->put(i, ei);
-        this->createEnrichedDofs();
-    }
-    */
+    ///@todo Write proper method
     return 1;
 }
 
@@ -127,7 +99,7 @@ int FractureManager :: instanciateYourself(DataReader *dr)
 bool
 FailureCriteria :: evaluateFCQuantities(Element *el, TimeStep *tStep)
 {
-
+    // Should be default implementation
     switch ( this->giveType() ) {
 
     default:
@@ -135,20 +107,6 @@ FailureCriteria :: evaluateFCQuantities(Element *el, TimeStep *tStep)
     }
 }
 
-void 
-FractureManager :: updateXFEM(TimeStep *tStep)
-{ 
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
-    EnrichmentItem *ei;
-    printf( "\n Updating enrichment item geometries... \n");
-    for ( int k = 1; k <= xMan->giveNumberOfEnrichmentItems(); k++ ) {    
-        ei = xMan->giveEnrichmentItem(k);
-        ei->updateGeometry(tStep, this);
-    }
-    //if ( this->requiresUnknownsDictionaryUpdate() ) {
-        xMan->createEnrichedDofs();
-    //}
-}
 
 
 
@@ -157,16 +115,13 @@ FractureManager :: updateXFEM(TimeStep *tStep)
 void
 FractureManager :: update(TimeStep *tStep)
 {
-    // Eval all the failure criterias and store the output
-    // Eval bulk criterias
-    // Eval interface criterias
 
 
     this->setUpdateFlag(false);
 
     this->evaluateFailureCriterias(tStep);
 
-    //this->updateXFEM(this, tStep);
+    this->updateXFEM(tStep);
 
 }
 
@@ -182,87 +137,47 @@ FractureManager :: evaluateFailureCriterias(TimeStep *tStep)
 
         printf( "\n  Evaluating failure criteria %i \n", i);
         FailureCriteriaManager *cMan = this->criteriaManagers.at(i-1);
-        for ( int j = 1; j <= cMan->list.size(); j++ ) {
+        //if ( this->giveType() == Local ) { 
 
-            printf( "\n    Evaluating for element %i \n", j);
+            for ( int j = 1; j <= cMan->list.size(); j++ ) {
 
-            //FailureCriteria *fc = this->failureCriterias->at(i);
-            FailureCriteria *fc = cMan->list.at(j-1);
+                printf( "\n    Evaluating for element %i \n", j);
 
-            //fc->evaluateFailureCriteria(tStep);
-            fc->computeFailureCriteriaQuantities(tStep);
-            DamagedNeighborLayered *dfc = dynamic_cast<DamagedNeighborLayered *>(fc);
-            dfc->evaluateFailureCriteria();
-        }
+                FailureCriteria *fc = cMan->list.at(j-1);
+                fc->computeFailureCriteriaQuantities(tStep);
 
-        //this->updateXFEM(fc, tStep); // update geometries
+                // temporary
+                DamagedNeighborLayered *dfc = dynamic_cast<DamagedNeighborLayered *>(fc);
+                dfc->evaluateFailureCriteria();
+            }
+        //} else if (this->giveType() == Nonlocal ) {
+        //OOFEM_ERROR1("FractureManager :: evaluateFailureCriterias -Nonlocal criteria not supported yet");
+        //} else {
+        //OOFEM_ERROR1("FractureManager :: evaluateFailureCriterias - Unknown failure criteria");
+        //}
     }
 }
 
 //---------------------------------------------------
 
 bool 
-FailureCriteria :: evaluateFailureCriteria(TimeStep *tStep) 
+FailureCriteria :: computeFailureCriteriaQuantities(TimeStep *tStep) 
 {
     
-    // 1. compute quantities necessary for evaluation of fc
-    // 2. evaluate fc
+    Element *el = this->el;
 
-    // How to know if a certain fc should be evaluated? what if the element has already failed? 
-    // If we have a layered cross section it needs special treatment
-    // or only check CS when a special quantity is asked for, e.g interlam eval.
-    // Probably must separate FC into 2 groups: regular and layered CS
-
-    // reset fc
-    //fc->quantities.clear();
-
-    // Compute fc quantities
-    if ( this->giveType() == Local ) { // --Element wise evaluation--
-
-        Element *el = this->el;
-        // if the quantity cannot be evaluated ask element for implementation through an interface
-        if ( ! this->evaluateFCQuantities(el, tStep) ) { 
-            FailureModuleElementInterface *fmInterface =
-                dynamic_cast< FailureModuleElementInterface * >( el->giveInterface(FailureModuleElementInterfaceType) );
-            if ( fmInterface ) { // if element supports the failure module interface
-                fmInterface->computeFailureCriteriaQuantities(this, tStep); // compute quantities
- 
-            }
-        }
-
+    // If the quantity cannot be evaluated ask element for implementation through an interface
+    if ( ! this->evaluateFCQuantities(el, tStep) ) { 
+        FailureModuleElementInterface *fmInterface =
+            dynamic_cast< FailureModuleElementInterface * >( el->giveInterface(FailureModuleElementInterfaceType) );
     
-        // Compare quantity with thresholds
-        //this->evaluateFailureCriteria();
-
-        
-    } else if (this->giveType() == Nonlocal ) {
-        OOFEM_ERROR1("FractureManager :: evaluateFailureCriteria -Nonlocal criteria not supported yet");
-    } else {
-        OOFEM_ERROR1("FractureManager :: evaluateFailureCriteria - Unknown failure criteria");
+        if ( fmInterface ) { // if element supports the failure module interface
+            fmInterface->computeFailureCriteriaQuantities(this, tStep); // compute quantities
+ 
+        }
     }
 
-
-
-    //// Compare quantities with thresholds    
-    //failedFlags.resize(this->quantities.size());
-    //for ( int i = 1; i <= this->quantities.size(); i++ ) { // if there are several quantities like interfaces
-
-    //    failedFlags.at(i-1) = false;
-    //    for ( int j = 1; j <= this->quantities[i-1].size(); j++ ) { // all the evaluation points (often the integration points)
-    //        FloatArray &values = this->quantities[i-1][j-1];        // quantities in each evaluation point (e.g. max stress will check stress components in different directions)
-    //        for ( int k = 1; k <= values.giveSize(); k++ ) {
-    //            // assumes there is only one value to compare against which is generally 
-    //            // not true, e.g. tension/compression thresholds
-    //            //if ( values.at(k) >= this->thresholds.at(k) ) {
-    //            if ( values.at(k) > this->thresholds.at(1) ) {
-    //                //this->failedFlag = true;
-    //                failedFlags.at(i-1) = true;
-    //            }
-    //        }
-    //    }
-    //}
-
-    return false;
+    return true;
 }
 
 
@@ -270,8 +185,9 @@ FailureCriteria :: evaluateFailureCriteria(TimeStep *tStep)
 bool 
 FailureCriteria :: evaluateFailureCriteria() 
 {
+    // Should be standard implementation to check threshold values
+    // Or should a criterias overload this method?
 
-    // Compare quantities with thresholds    
     failedFlags.resize(this->quantities.size());
     for ( int i = 1; i <= this->quantities.size(); i++ ) { // if there are several quantities like interfaces
 
@@ -283,14 +199,13 @@ FailureCriteria :: evaluateFailureCriteria()
                 // not true, e.g. tension/compression thresholds
                 //if ( values.at(k) >= this->thresholds.at(k) ) {
                 if ( values.at(k) > this->thresholds.at(1) ) {
-                    //this->failedFlag = true;
                     failedFlags.at(i-1) = true;
                 }
             }
         }
     }
 
-    return false;
+    return true;
 }
 
 
@@ -312,19 +227,47 @@ FractureManager :: updateXFEM(FailureCriteria *fc, TimeStep *tStep)
 
 
 void 
-FractureManager :: updateXFEM(FractureManager *fMan, TimeStep *tStep)
+FractureManager :: updateXFEM(TimeStep *tStep)
 { 
-    // Update enrichment domains based on fc's
+    //// Update enrichment domains based on fc's
+    //XfemManager *xMan = this->giveDomain()->giveXfemManager();
+    //EnrichmentItem *ei;
+    //printf( "\n Updating enrichment item geometries... \n");
+    //for ( int k = 1; k <= xMan->giveNumberOfEnrichmentItems(); k++ ) {    
+    //    ei = xMan->giveEnrichmentItem(k);
+    //    ei->updateGeometry(tStep, this); 
+    //}
+    ////if ( this->requiresUnknownsDictionaryUpdate() ) {
+    //    xMan->createEnrichedDofs();
+    ////}
+
+
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
     EnrichmentItem *ei;
-    printf( "\n Updating enrichment item geometries... \n");
+    
     for ( int k = 1; k <= xMan->giveNumberOfEnrichmentItems(); k++ ) {    
+        printf( "\n Updating geometry of enrichment item %i ", k);
         ei = xMan->giveEnrichmentItem(k);
-        ei->updateGeometry(tStep, this); 
+
+        for ( int i = 1; i <= this->criteriaManagers.size(); i++ ) {
+
+            printf( "based on failure criteria %i \n", i);
+            FailureCriteriaManager *cMan = this->criteriaManagers.at(i-1);
+
+            for ( int j = 1; j <= cMan->list.size(); j++ ) { // each element
+
+                printf( "\n  Element %i ", j);
+
+                FailureCriteria *fc = cMan->list.at(j-1);
+                ei->updateGeometry(fc, tStep);
+            }
+        }    
     }
+    
     //if ( this->requiresUnknownsDictionaryUpdate() ) {
         xMan->createEnrichedDofs();
     //}
+
 }
 
 
@@ -347,6 +290,7 @@ DamagedNeighborLayered :: evaluateFailureCriteria()
         failedFlags.at(i-1) = false;
         if ( this->layerDamageValues.at(i) > this->thresholds.at(1) ) {
             failedFlags.at(i-1) = true;
+            //fMan->setUpdateFlag(true);
         }
     }
     return true;

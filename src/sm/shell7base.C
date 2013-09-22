@@ -1474,7 +1474,7 @@ Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const 
         Fp.beTProductOf(N, fp);
         Fp.times(dA);
         answer.assemble(Fp, this->giveOrdering(All));
-		
+        
     }
 }
 
@@ -2331,8 +2331,8 @@ Shell7Base :: computeNmatrixAt(FloatArray &lcoords, FloatMatrix &answer)
     answer.zero();
     FloatArray N;
     this->fei->evalN( N, lcoords, FEIElementGeometryWrapper(this) );
-	//N.printYourself();
-	//lcoords.printYourself();
+    //N.printYourself();
+    //lcoords.printYourself();
     /*   nno*3 nno*3 nno
      * 3 [N_x   0    0
      * 3   0   N_m   0
@@ -2648,12 +2648,12 @@ Shell7Base :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &ans
         int pos = VTKWedge2EL[ i-1 ];
         //coords[ i - 1 ] = new FloatArray();
         coords[ i - 1 ] = &nodes[ pos - 1];
-		
+        
     }
     
     FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
     FloatMatrix dNdx;
-    //double detJ = interpol->evaldNdx( dNdx, lcoords, FEIVertexListGeometryWrapper(numNodes, (const FloatArray **)coords ) );
+    double detJ = interpol->evaldNdx( dNdx, lcoords, FEIVertexListGeometryWrapper(numNodes, (const FloatArray **)coords ) );
     
 
 
@@ -2674,9 +2674,9 @@ Shell7Base :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &ans
     
     // how to destruct?
     for ( int i = 1; i <= numNodes; i++ ) {
-		//coords [ i - 1 ]->~FloatArray(); 
+        //coords [ i - 1 ]->~FloatArray(); 
     }
-	
+    
 }
 
 

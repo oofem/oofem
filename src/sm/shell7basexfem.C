@@ -216,55 +216,6 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep
 }
 
 
-void
-Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteria *fc, FailureCriteriaQuantity quantities, FailureCriteriaType type,  TimeStep *tStep) 
-{
-    // Compute necessary quantities for evaluation of failure criterias
-    
-    std::vector < FloatArray > interLamStresses;
-    int numInterfaces = this->layeredCS->giveNumberOfLayers() - 1;
-    IntArray delaminatedInterfaceList;
-
-    //switch ( type ) {
-
-    //case FC_MaxShearStress:
-    //case FC_DamagedNeighborCZ:
-        /*
-        Go through the neighbors of the element and check for each layer if the 
-        corresponding cz is damaged (if applicable)
-
-
-        */
-
-    DamagedNeighborLayered *dfc = dynamic_cast< DamagedNeighborLayered * > (fc);
-
-        IntArray neighbors;
-        IntArray elements(1);
-        ConnectivityTable *conTable = this->giveDomain()->giveConnectivityTable();
-        elements.at(1) = this->giveNumber();
-        conTable->giveElementNeighbourList(neighbors, elements); 
-        FloatArray damageArray;
-        //fc->quantities.resize( neighbors.giveSize() );
-
-        for ( int i = 1; i <= neighbors.giveSize(); i++ ) {
-
-            //fc->quantities[ i-1 ].resize(1);
-
-            Shell7BaseXFEM *neighbor = 
-                dynamic_cast< Shell7BaseXFEM * > (this->giveDomain()->giveElement( neighbors.at(i) ));
-            if ( neighbor ) {
-                 if ( neighbor->hasCohesiveZone() ) {
-
-                     neighbor->giveMaxCZDamages(damageArray, tStep); // damage parameter for each interface
-                     //fc->quantities[ i-1 ][0] = damageArray;
-
-                 }
-            }
-
-        }
-
-    //};
-}
 
 
 

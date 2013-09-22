@@ -136,6 +136,7 @@ public:
     virtual void updateGeometry(TimeStep *tStep) {};
     virtual void updateGeometry(TimeStep *tStep, FractureManager *fMan);
     virtual void updateGeometry(FailureCriteria *fc, TimeStep *tStep);
+    //virtual void updateGeometry(FailureCriteriaManager *cMan, TimeStep *tStep);
     virtual void updateGeometry();
     virtual void propagateFronts();
 
@@ -309,7 +310,7 @@ public:
     double heaviside(double xi, double xi0);
     virtual Material *giveMaterial() { return mat; }
     void updateGeometry(TimeStep *tStep, FractureManager *fMan, Element *el, FailureCriteria *fc);
-    void updateGeometry(TimeStep *tStep, Element *el, FailureCriteria *fc);
+    void updateGeometry(TimeStep *tStep, FailureCriteria *fc);
     virtual void updateLevelSets(XfemManager &ixFemMan);
 };
 
