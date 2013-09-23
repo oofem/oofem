@@ -63,36 +63,9 @@ class Shell7BaseXFEM : public Shell7Base, public XfemElementInterface
 {
 protected:
     Material *czMat; // cohesive zone material
+    //StructuralInterfaceMaterial *mat; // should replace with this
     int czMatNum;
-    virtual double giveGlobalZcoord(double xi);
-    std::list< std::pair<int, double> > delaminationXiCoordList;
-    void setupDelaminationXiCoordList();
-    void setupDelaminationXiCoordsAtGP();
-
-    std::list<std::pair<int, int> > gpDelaminationGroupList; // (gp#, dGroup#)
-    void setupGPDelaminationGroupList();
-    int giveDelaminationGroupAt(double zeta); 
-    void giveDelaminationGroupXiLimits(int &dGroup, double &zTop, double &zBottom);
-    double giveDelaminationGroupMidXi(int dGroup);
-    void computeDelaminatedInterfaceList(IntArray &list);
     XfemManager *xMan;
-    
-    // remove
-    static bool __initializedFieldDofId;
-    static IntArray dofId_Midplane;
-    static IntArray dofId_Director;
-    static IntArray dofId_InhomStrain;
-    static bool initDofId() {
-        dofId_Midplane.setValues(3, D_u, D_v, D_w);
-        dofId_Director.setValues(3,W_u, W_v, W_w);
-        dofId_InhomStrain.setValues(1, Gamma);
-        return true;
-    }
-
-
-    static bool sortFunc(std::pair<int, double> a, std::pair<int, double> b) {
-        return a.second < b.second;
-    }
 
     virtual void updateYourself(TimeStep *tStep);
     virtual void postInitialize();
@@ -133,13 +106,12 @@ protected:
 
     IntArray DelaminatedInterfaceList;
     void computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep);
-    //void computeFailureCriteriaQuantities(FailureCriteria *fc, FailureCriteriaQuantity quantities, FailureCriteriaType type,  TimeStep *tStep); 
 
 public:
     Shell7BaseXFEM(int n, Domain *d);   
     virtual ~Shell7BaseXFEM() {};		
     virtual int checkConsistency();
-    IntegrationRule **czIntegrationRulesArray;
+    
     void giveMaxCZDamages(FloatArray &answer, TimeStep *tStep);
     virtual const char *giveClassName()  const { return "Shell7BaseXFEM"; }
     //virtual classType giveClassID()      const { return Shell7BaseXFEMClass; }
@@ -147,9 +119,10 @@ public:
     
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
-    void discGiveDofManDofIDMask(int inode,  int enrichmentdomainNumber, IntArray &answer) const;
     virtual int giveNumberOfDofs();
+
     bool hasCohesiveZone();
+    IntegrationRule **czIntegrationRulesArray;
     IntegrationRule giveCZIntegrationRulesArray() { return **czIntegrationRulesArray; };
 };
 

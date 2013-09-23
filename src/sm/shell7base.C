@@ -516,7 +516,7 @@ Shell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solV
     answer.zero(); tempAnswer.zero();
 
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     
-    FloatMatrix temp, Ktemp;
+    FloatMatrix temp;
     FloatArray genEpsI, genEpsJ, genEps, lCoords;
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
@@ -1800,7 +1800,7 @@ Shell7Base :: ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, int laye
 {  // evaluates N^T sigma over element volume
    // N(nsigma, nsigma*nnodes)
    // Definition : sigmaVector = N * nodalSigmaVector
-    FloatArray stressVector, help, n;
+    FloatArray stressVector, n;
     Element *elem  = this->ZZNodalRecoveryMI_giveElement();
     IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
     GaussPoint *gp;
@@ -1838,7 +1838,7 @@ Shell7Base :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, int layer, I
     // The size of N mtrx is (nstresses, nnodes*nstreses)
     // Definition : sigmaVector = N * nodalSigmaVector
     //
-    double volume = 0.0;
+    //double volume = 0.0;
     FloatMatrix fullAnswer;
     FloatArray n;
     IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
@@ -1853,7 +1853,7 @@ Shell7Base :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, int layer, I
         this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(n, gp, type);
         //fullAnswer.plusDyadSymmUpper(n, n, dV);
         fullAnswer.plusDyadSymmUpper(n, dV);
-        volume += dV;
+        //volume += dV;
     }
 
 
@@ -2530,7 +2530,7 @@ Shell7Base :: recoverValuesFromIP(std::vector<FloatArray> &recoveredValues, int 
 
     // Find closest ip to the nodes
     IntArray closestIPArray(numNodes);
-    FloatArray nodeCoords, ipCoords, distVec, ipValues, n;
+    FloatArray nodeCoords, ipCoords, ipValues;
     FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords;
     giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords);   
 
@@ -2566,7 +2566,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
     std::vector<FloatArray> recoveredValues;
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of types
     IntegrationRule *iRuleThickness = specialIntegrationRulesArray[ 0 ];
-    FloatArray lCoords, dS, Sold;
+    FloatArray dS, Sold;
     FloatMatrix B, Smat(2,6); // 2 stress components * num of in plane ip
     Smat.zero();
     FloatArray Tcon(6), Trec(6);  Tcon.zero(); Trec.zero();
@@ -2727,7 +2727,7 @@ Shell7Base :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &no
 void
 Shell7Base :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords) {
     // Local coords for a quadratic wedge element (VTK cell type 26)
-    double z = 0.99;
+    double z = 0.999;
     nodeLocalXi1Coords.setValues(15, 1., 0., 0., 1., 0., 0., .5, 0., .5, .5, 0., .5, 1., 0., 0.);      
     nodeLocalXi2Coords.setValues(15, 0., 1., 0., 0., 1., 0., .5, .5, 0., .5, .5, 0., 0., 1., 0.);
     nodeLocalXi3Coords.setValues(15, -z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.);

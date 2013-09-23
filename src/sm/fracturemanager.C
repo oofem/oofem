@@ -62,6 +62,7 @@ namespace oofem {
 FractureManager :: FractureManager(Domain *domain)
 {
     this->domain = domain;
+    this->updateFlag = false;
 }
 
 FractureManager :: ~FractureManager()
@@ -90,21 +91,11 @@ int FractureManager :: instanciateYourself(DataReader *dr)
 }
 
 
-
-
-
-
-
-
 bool
 FailureCriteria :: evaluateFCQuantities(Element *el, TimeStep *tStep)
 {
-    // Should be default implementation
-    switch ( this->giveType() ) {
-
-    default:
-        return false;
-    }
+    // Should contain calls to default implementations for evaluation of failure criteria quantities
+    return false;
 }
 
 
@@ -113,15 +104,11 @@ FailureCriteria :: evaluateFCQuantities(Element *el, TimeStep *tStep)
 
 
 void
-FractureManager :: update(TimeStep *tStep)
+FractureManager :: evaluateYourself(TimeStep *tStep)
 {
-
-
+    
     this->setUpdateFlag(false);
-
     this->evaluateFailureCriterias(tStep);
-
-    this->updateXFEM(tStep);
 
 }
 
@@ -130,14 +117,14 @@ FractureManager :: update(TimeStep *tStep)
 void 
 FractureManager :: evaluateFailureCriterias(TimeStep *tStep) 
 {
-    // Go through all the failure criterias. They are responsible for their own evaluation
-    this->setUpdateFlag(false);
+    // Go through all the failure criteria managers. These in turn keep track of the failure criterias 
+    // which are responsible for their own evaluation
 
     for ( int i = 1; i <= this->criteriaManagers.size(); i++ ) {
 
         printf( "\n  Evaluating failure criteria %i \n", i);
         FailureCriteriaManager *cMan = this->criteriaManagers.at(i-1);
-        //if ( this->giveType() == Local ) { 
+        if ( cMan->giveType() == Local ) { 
 
             for ( int j = 1; j <= cMan->list.size(); j++ ) {
 
@@ -147,14 +134,18 @@ FractureManager :: evaluateFailureCriterias(TimeStep *tStep)
                 fc->computeFailureCriteriaQuantities(tStep);
 
                 // temporary
-                DamagedNeighborLayered *dfc = dynamic_cast<DamagedNeighborLayered *>(fc);
-                dfc->evaluateFailureCriteria();
+                //if ( fc->giveClassName() == "DamagedNeighborLayered") {
+                if ( DamagedNeighborLayered *dfc = dynamic_cast<DamagedNeighborLayered *>(fc) ) {
+                    this->setUpdateFlag( dfc->evaluateFailureCriteria() );
+                }
+
             }
-        //} else if (this->giveType() == Nonlocal ) {
-        //OOFEM_ERROR1("FractureManager :: evaluateFailureCriterias -Nonlocal criteria not supported yet");
-        //} else {
-        //OOFEM_ERROR1("FractureManager :: evaluateFailureCriterias - Unknown failure criteria");
-        //}
+
+        } else if (cMan->giveType() == Nonlocal ) {
+            OOFEM_ERROR1("FractureManager :: evaluateFailureCriterias - Nonlocal criteria not supported yet");
+        } else {
+            OOFEM_ERROR1("FractureManager :: evaluateFailureCriterias - Unknown failure criteria");
+        }
     }
 }
 
@@ -182,118 +173,60 @@ FailureCriteria :: computeFailureCriteriaQuantities(TimeStep *tStep)
 
 
 
-bool 
-FailureCriteria :: evaluateFailureCriteria() 
-{
-    // Should be standard implementation to check threshold values
-    // Or should a criterias overload this method?
-
-    failedFlags.resize(this->quantities.size());
-    for ( int i = 1; i <= this->quantities.size(); i++ ) { // if there are several quantities like interfaces
-
-        failedFlags.at(i-1) = false;
-        for ( int j = 1; j <= this->quantities[i-1].size(); j++ ) { // all the evaluation points (often the integration points)
-            FloatArray &values = this->quantities[i-1][j-1];        // quantities in each evaluation point (e.g. max stress will check stress components in different directions)
-            for ( int k = 1; k <= values.giveSize(); k++ ) {
-                // assumes there is only one value to compare against which is generally 
-                // not true, e.g. tension/compression thresholds
-                //if ( values.at(k) >= this->thresholds.at(k) ) {
-                if ( values.at(k) > this->thresholds.at(1) ) {
-                    failedFlags.at(i-1) = true;
-                }
-            }
-        }
-    }
-
-    return true;
-}
-
-
-void 
-FractureManager :: updateXFEM(FailureCriteria *fc, TimeStep *tStep)
-{ 
-    // Update enrichment domains based on fc's
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
-    EnrichmentItem *ei;
-    printf( "\n Updating enrichment item geometries... \n");
-    for ( int k = 1; k <= xMan->giveNumberOfEnrichmentItems(); k++ ) {    
-        ei = xMan->giveEnrichmentItem(k);
-        ei->updateGeometry(fc, tStep);
-    }
-    //if ( this->requiresUnknownsDictionaryUpdate() ) {
-        xMan->createEnrichedDofs();
-    //}
-}
-
-
 void 
 FractureManager :: updateXFEM(TimeStep *tStep)
 { 
-    //// Update enrichment domains based on fc's
-    //XfemManager *xMan = this->giveDomain()->giveXfemManager();
-    //EnrichmentItem *ei;
-    //printf( "\n Updating enrichment item geometries... \n");
-    //for ( int k = 1; k <= xMan->giveNumberOfEnrichmentItems(); k++ ) {    
-    //    ei = xMan->giveEnrichmentItem(k);
-    //    ei->updateGeometry(tStep, this); 
-    //}
-    ////if ( this->requiresUnknownsDictionaryUpdate() ) {
-    //    xMan->createEnrichedDofs();
-    ////}
-
-
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
-    EnrichmentItem *ei;
+    if ( this->giveUpdateFlag() ) {
+        XfemManager *xMan = this->giveDomain()->giveXfemManager();
+        EnrichmentItem *ei;
     
-    for ( int k = 1; k <= xMan->giveNumberOfEnrichmentItems(); k++ ) {    
-        printf( "\n Updating geometry of enrichment item %i ", k);
-        ei = xMan->giveEnrichmentItem(k);
+        for ( int k = 1; k <= xMan->giveNumberOfEnrichmentItems(); k++ ) {    
+            printf( "\n Updating geometry of enrichment item %i ", k);
+            ei = xMan->giveEnrichmentItem(k);
 
-        for ( int i = 1; i <= this->criteriaManagers.size(); i++ ) {
+            for ( int i = 1; i <= this->criteriaManagers.size(); i++ ) {
 
-            printf( "based on failure criteria %i \n", i);
-            FailureCriteriaManager *cMan = this->criteriaManagers.at(i-1);
+                printf( "based on failure criteria %i \n", i);
+                FailureCriteriaManager *cMan = this->criteriaManagers.at(i-1);
 
-            for ( int j = 1; j <= cMan->list.size(); j++ ) { // each element
+                for ( int j = 1; j <= cMan->list.size(); j++ ) { // each criteria (often each element)
 
-                printf( "\n  Element %i ", j);
+                    printf( "\n  Element %i ", j);
 
-                FailureCriteria *fc = cMan->list.at(j-1);
-                ei->updateGeometry(fc, tStep);
-            }
-        }    
+                    FailureCriteria *fc = cMan->list.at(j-1);
+                    ei->updateGeometry(fc, tStep);
+                }
+            }    
+        }
+    
+        //xMan->createEnrichedDofs();
+        //xMan->updateYourself();
     }
-    
-    //if ( this->requiresUnknownsDictionaryUpdate() ) {
-        xMan->createEnrichedDofs();
-    //}
 
 }
 
 
-DamagedNeighborLayered :: DamagedNeighborLayered(FailureCriteriaType type, FractureManager *fMan) 
-    : FailureCriteria(type,  fMan)
-{
-//
-}
 
+
+//=======================
+// DamagedNeighborLayered
+//=======================
 
 bool
 DamagedNeighborLayered :: evaluateFailureCriteria() 
 {
-    
-    // Compare quantities with thresholds    
-    // go through all the layers and compare against threshold value
+    // Go through all the layers and compare against threshold value
+    bool criteriaFulfilled = false;
     failedFlags.resize(this->layerDamageValues.giveSize());
     for ( int i = 1; i <= this->failedFlags.size(); i++ ) { // if there are several quantities like interfaces
 
         failedFlags.at(i-1) = false;
         if ( this->layerDamageValues.at(i) > this->thresholds.at(1) ) {
-            failedFlags.at(i-1) = true;
-            //fMan->setUpdateFlag(true);
+            this->failedFlags.at(i-1) = true;
+            criteriaFulfilled = true;
         }
     }
-    return true;
+    return criteriaFulfilled;
 };
 
 } // end namespace oofem

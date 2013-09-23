@@ -129,7 +129,7 @@ DofManList :: addDofManagers(IntArray &dofManNumbers)
     int sz = dofManList.size();
 }
 
-
+// remove?
 void
 DofManList :: updateEnrichmentDomain(IntArray &dofManNumbers)
 {

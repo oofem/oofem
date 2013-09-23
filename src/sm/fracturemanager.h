@@ -67,10 +67,8 @@ class FractureManager;
 #include "enumitem.h"
 #define FailureCriteria_DEF \
     ENUM_ITEM_WITH_VALUE(FC_Undefined, 0) \
-    ENUM_ITEM_WITH_VALUE(FC_MaxShearStress, 1) \
-    ENUM_ITEM_WITH_VALUE(FC_DamagedNeighborCZ, 2) \
-    ENUM_ITEM_WITH_VALUE(Local, 3) \
-    ENUM_ITEM_WITH_VALUE(Nonlocal, 4) 
+    ENUM_ITEM_WITH_VALUE(Local, 1) \
+    ENUM_ITEM_WITH_VALUE(Nonlocal, 2) 
 
 enum FailureCriteriaType {
     FailureCriteria_DEF
@@ -120,7 +118,7 @@ public:
     FailureCriteria(FailureCriteriaType type, FractureManager *fMan)
     { 
         this->type = type;
-        this->failedFlag = false;
+        //this->failedFlag = false;
         this->fMan = fMan;
     };
     FailureCriteria(){};
@@ -137,11 +135,11 @@ public:
     std :: vector< bool > failedFlags;
 
     FailureCriteriaType giveType() { return this->type; }
+    virtual const char *giveClassName() const = 0; //{ return FractureManagerClass; }
 
     virtual bool computeFailureCriteriaQuantities(TimeStep *tStep);
-    virtual bool evaluateFailureCriteria();
+    virtual bool evaluateFailureCriteria() = 0;
 
-    bool hasFailed() { return failedFlag; }
     bool hasFailed( int i) { return failedFlags.at(i-1); }
 
 
@@ -153,27 +151,35 @@ class DamagedNeighborLayered : public FailureCriteria
 {
 
 public:
-    DamagedNeighborLayered(FailureCriteriaType type, FractureManager *fMan);
-    virtual bool evaluateFailureCriteria();
+    DamagedNeighborLayered(FailureCriteriaType type, FractureManager *fMan) 
+    : FailureCriteria(type,  fMan) {}
 
+    virtual bool evaluateFailureCriteria();
+    virtual const char *giveClassName() const { return "DamagedNeighborLayered"; }
     FloatArray layerDamageValues;
 };
 
 
 class FailureCriteriaManager
 {
-    // stores all the data for a given type o failure criteria
+    // stores all the data for a given type of failure criteria
+
 private:    
-    
-    //FractureManager *fMan;          // pointer to its corresponding manager
+    FailureCriteriaType type;       // local, nonlocal 
+    FractureManager *fMan;          // pointer to its corresponding manager
 
 public:
-    FailureCriteriaManager()
-    { 
-    };
+    FailureCriteriaManager(FailureCriteriaType type, FractureManager *fMan)
+        {
+            this->type = type;
+            this->fMan = fMan;
+        };
     ~FailureCriteriaManager(){}; // must destroy object correctly
 
     std :: vector< FailureCriteria *> list;
+    FailureCriteriaType giveType() { return this->type; }
+    //FractureManager *giveFractureManager() { return this->fMan; }
+    //FailureCriteriaType setType(FailureCriteriaType type) { return this->type = type; }
 };
 
 
@@ -182,9 +188,10 @@ class FailureModuleElementInterface : public Interface
 public:
     FailureModuleElementInterface() : Interface() {}
     virtual const char *giveClassName() const { return "FailureModuleElementInterface"; }
-    virtual void computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep) {};
-    virtual void computeFailureCriteriaQuantities(FailureCriteria *fc, FailureCriteriaQuantity quantities, FailureCriteriaType type,  TimeStep *tStep){}; 
+    virtual void computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep) {};  
 };
+
+
 
 
 class FractureManager
@@ -195,16 +202,13 @@ private:
 
 public:
 
-    //AList < Crack           > *crackList;        // Keep track of all cracks - each crack may have several fronts/tips
-    AList < FailureCriteria > *failureCriterias; // All failure criterias to evaluate
-    //AList < PropagationLaw  > *propagationLaws;
     void setUpdateFlag(bool flag) { this->updateFlag = flag; };
     bool giveUpdateFlag() { return this->updateFlag; };
       
     void evaluateFailureCriterias(TimeStep *tStep); //Loop through all elements and evaluate criteria (if supported)
     
     
-    void update(TimeStep *tStep);
+    void evaluateYourself(TimeStep *tStep);
     void updateXFEM(TimeStep *tStep);
     void updateXFEM(FailureCriteria *fc, TimeStep *tStep);
 
@@ -223,7 +227,8 @@ public:
 
 
     std :: vector< FailureCriteriaManager* > criteriaManagers;
-
+  //std :: vector< CrackManager*           > crackManagers;   // Keep track of all cracks - each crack may have several fronts/tips
+  //std :: vector< PropagationLawManager*  > propagationLawManagers;
 
     
 };

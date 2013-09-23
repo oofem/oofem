@@ -75,43 +75,27 @@ StaticFracture :: solveYourselfAt(TimeStep *tStep)
     // should be made in a more proper way with input and the like and moved to another part
     if ( tStep->isTheFirstStep() ) {
         IntArray criteriaList(1);
-        criteriaList.at(1) = 1;
-
-        this->fMan = new FractureManager( this->giveDomain(1) );
-        this->fMan->failureCriterias = new AList< FailureCriteria >(1); // list of all the criterias to evaluate
-        
+        criteriaList.at(1) = 1; // criteria 1 (only one supported)
+        Domain *domain= this->giveDomain(1);
+        this->fMan = new FractureManager( domain );
         
         // initialize failure criteria managers
-        Domain *domain= this->fMan->giveDomain();
         int numEl = domain->giveNumberOfElements();
         
         this->fMan->criteriaManagers.resize( criteriaList.giveSize() );
 
         for ( int i = 1; i <= criteriaList.giveSize(); i++ ) {
             // if local
-            this->fMan->criteriaManagers.at(i-1) = new FailureCriteriaManager;
+            this->fMan->criteriaManagers.at(i-1) = new FailureCriteriaManager(Local, this->fMan);
             FailureCriteriaManager *cMan = this->fMan->criteriaManagers.at(i-1);
             cMan->list.resize(numEl);
             for ( int j = 1; j <= numEl; j++ ) { 
                 cMan->list.at(j - 1) = new DamagedNeighborLayered(Local, this->fMan);
                 cMan->list.at(j - 1)->thresholds.resize(1);
                 cMan->list.at(j - 1)->thresholds.at(1) = -10.0;
-                cMan->list.at(j - 1)->el = domain->giveElement(j);
+                cMan->list.at(j - 1)->el = domain->giveElement(j);           
             }
-
         }
-        // Loop over and initialize all the fc's
-        //FailureCriteria *fc = new FailureCriteria(FC_MaxShearStress);
-        //FailureCriteria *fc = new FailureCriteria(FC_DamagedNeighborCZ);
-        
-        //FailureCriteria *fc = new FailureCriteria(FC_DamagedNeighborCZ, this->fMan);
-
-        FailureCriteria *fc = new DamagedNeighborLayered(Local, this->fMan);
-        // Define all the necessary parameters needed for evaluation of the fc
-        fc->thresholds.resize(1);
-        fc->thresholds.at(1) = -10.0;
-
-        this->fMan->failureCriterias->put(1, fc);
     }
 
 
@@ -123,14 +107,15 @@ StaticFracture :: solveYourselfAt(TimeStep *tStep)
 void 
 StaticFracture :: updateYourself(TimeStep *tStep)
 {
-    
+#if 1
+    this->fMan->evaluateYourself(tStep);
+
+    // Update XFEM structure based on the fracture manager
+    this->fMan->updateXFEM(tStep); 
+#endif    
     NonLinearStatic :: updateYourself(tStep);
 
     // Fracture/failure mechanics evaluation
-    // Upadate components like the XFEM manager and its sub-components
-    this->fMan->update(tStep);
-
-
 
     this->setUpdateStructureFlag( this->fMan->giveUpdateFlag() ); // if the internal structure need to be updated
 
@@ -165,6 +150,7 @@ StaticFracture :: updateLoadVectors(TimeStep *tStep)
     bool isLastMetaStep = ( tStep->giveNumber() == mstep->giveLastStepNumber() );
 
     if ( controlMode == nls_indirectControl ) { //todo@: not checked 
+        #if 0
         //if ((tStep->giveNumber() == mstep->giveLastStepNumber()) && ir->hasField("fixload")) {
         if ( isLastMetaStep ) {
             if ( !mstep->giveAttributesRecord()->hasField(_IFT_NonLinearStatic_donotfixload) ) {
@@ -189,25 +175,24 @@ StaticFracture :: updateLoadVectors(TimeStep *tStep)
 
             //if (!mstep->giveAttributesRecord()->hasField("keepll")) this->loadLevelInitFlag = 1;
         }
+        #endif
+
     } else { // direct control
         //update initialLoadVector after each step of direct control
         //(here the loading is not proportional)
-        
-        /*if ( initialLoadVector.isEmpty() ) {
-            initialLoadVector.resize( incrementalLoadVector.giveSize() );
-        }
-        */
+
         OOFEM_LOG_DEBUG("Fixed load level\n");
 
         incrementalLoadVector.times(loadLevel);
         if ( initialLoadVector.giveSize() != incrementalLoadVector.giveSize() ) {
-            //initialLoadVector.resize( incrementalLoadVector.giveSize() );
             initialLoadVector.resize( 0 );
         }
-        //initialLoadVector.add(incrementalLoadVector);
 
         incrementalLoadVectorOfPrescribed.times(loadLevel);
+        
+        //initialLoadVectorOfPrescribed.zero();
         initialLoadVectorOfPrescribed.add(incrementalLoadVectorOfPrescribed);
+
 
         incrementalLoadVector.zero();
         incrementalLoadVectorOfPrescribed.zero();

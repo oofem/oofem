@@ -475,39 +475,11 @@ void EnrichmentItem :: evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncD
 }
 
 
-// OLD - JB
-void 
-EnrichmentItem :: updateGeometry(TimeStep *tStep, FractureManager *fMan)
-{
-
-    Domain *domain= this->giveDomain();   
-
-    for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) { 
-        printf( "\n   Updating element %i \n", i);
-        Element *el = domain->giveElement(i);
-
-        // Evaluate all the fc's - should maybe change the order: el-criteria
-        for ( int j = 1; j <= fMan->failureCriterias->giveSize(); j++ ) {
-            FailureCriteria *fc = fMan->failureCriterias->at(j);
-//            fMan->evaluateFailureCriteria(fc, tStep);
-
-            if ( Delamination *dei = dynamic_cast< Delamination * > (this) )  {
-                dei->updateGeometry(tStep, fMan, el, fc); //not an overloaded function, change the name
-            }
-        }
-    }
-
-}
-
-
 void 
 EnrichmentItem :: updateGeometry(FailureCriteria *fc, TimeStep *tStep)
 {
-
-//    Domain *domain= this->giveDomain();   
-
     if ( Delamination *dei = dynamic_cast< Delamination * > (this) )  {
-        dei->updateGeometry(tStep, fc); //not an overloaded function, change the name
+        dei->updateGeometry(fc, tStep); //not an overloaded function, change the name
     }
 
 }
@@ -558,16 +530,6 @@ void Delamination :: updateLevelSets(XfemManager &ixFemMan)
 
     for ( int n = 1; n <= nNodes; n++ )
     {
-        Node *node = ixFemMan.giveDomain()->giveNode(n);
-
-        // Extract node coord
-        // const FloatArray &pos( *node->giveCoordinates() );
-
-        // Calc sign dist to normal surface // New -JB
-        // double delta = 0.0;
-
-        // level set wrt mid surface
-        //mpEnrichmentDomain->computeSurfaceNormalSignDist(delta, pos);
         mLevelSetSurfaceNormalDir[n-1] = this->delamXiCoord;
     }
 
@@ -1071,83 +1033,11 @@ IRResultType Inclusion :: initializeFrom(InputRecord *ir)
 //------------------
 
 void 
-Delamination :: updateGeometry(TimeStep *tStep, FractureManager *fMan, Element *el, FailureCriteria *fc)
-{
-    // This method needs to be updated wrt new implementation!!
-
-    //for ( int i = 1; i <= fc->quantities.size(); i++ ) {
-    //    if ( fc->hasFailed(i) ) { // interface has failed
-    //        printf( "Element %d fails in interface %d \n", el->giveNumber(), i );
-    //        fMan->setUpdateFlag(true);
-
-    //        // should create a new *ed at the level given by interface i iff it does not already exist
-    //        // add coord
-    //        FloatArray xiCoords;
-    //        dynamic_cast <LayeredCrossSection * > ( el->giveCrossSection() )->giveInterfaceXiCoords(xiCoords);
-    //        double xi = xiCoords.at(i); // current xi-coord
-    //        // find if xi is in this->enrichmentDomainXiCoords
-    //        bool flag=false;
-    //        int num = 0;
-    //        /*for ( int j = 1; j <= this->enrichmentDomainXiCoords.giveSize(); j++ ) {
-    //            if ( abs(xi-this->enrichmentDomainXiCoords.at(j)) < 1.0e-6 ) {
-    //                flag = true;
-    //                num = j;
-    //            }
-    //        }*/
-
-
-    //        IntArray dofManNumbers, elDofMans;
-    //        elDofMans = el->giveDofManArray();
-    //        for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {  
-    //            // ugly piece of code that will skip enrichment of dofmans that have any bc's
-    //            // which is not generally what you want
-    //            #if 1
-    //            bool hasBc= false;
-    //            for ( int j = 1; j <= el->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
-    //                if ( el->giveDofManager(i)->giveDof(j)->hasBc(tStep) ) {
-    //                    hasBc = true;
-    //                    continue;
-    //                }
-    //            }
-    //            #endif
-    //            if ( !hasBc) {
-    //                dofManNumbers.followedBy(elDofMans.at(i));
-    //            }
-    //        }
-    //        
-
-    //        //dofManNumbers.printYourself();
-
-    //        if ( flag ) { //in list only add dofmans
-    //            dynamic_cast< DofManList * > ( this->giveEnrichmentDomain(num) )->addDofManagers( dofManNumbers );
-    //            //dynamic_cast< DofManList * > ( this->giveEnrichmentDomain(num) )->updateEnrichmentDomain(dofManNumbers);
-    //        } else { //create ed
-    //            int numED = this->giveNumberOfEnrichmentDomains();
-    //            EnrichmentDomain *ed = classFactory.createEnrichmentDomain( "DofManList" ); 
-    //            DofManList *dml = dynamic_cast< DofManList * > ( ed );
-    //            dml->addDofManagers( dofManNumbers ); // add the dofmans of the el to the list
-    //            this->addEnrichmentDomain(ed);
-    //            //this->enrichmentDomainXiCoords.resizeWithValues(numED+1);
-    //            //this->enrichmentDomainXiCoords.at(numED+1) = xiCoords.at(i);
-
-    //        }                        
-
-    //    }
-    //}
-
-
-}
-
-// NEW
-void 
-Delamination :: updateGeometry(TimeStep *tStep, FailureCriteria *fc)
+Delamination :: updateGeometry(FailureCriteria *fc, TimeStep *tStep)
 {
 
     if ( fc->hasFailed(this->giveNumber()) ) { // interface has failed
         printf( "...fails in interface %d \n", this->giveNumber() );
-
-        double xi = this->delamXiCoord;
-
         IntArray dofManNumbers, elDofMans;
         Element *el = fc->el;
         elDofMans = el->giveDofManArray();
@@ -1169,7 +1059,7 @@ Delamination :: updateGeometry(TimeStep *tStep, FailureCriteria *fc)
              }
         }
             
-         //dofManNumbers.printYourself();
+         dofManNumbers.printYourself();
          dynamic_cast< DofManList * > ( this->giveEnrichmentDomain(1) )->addDofManagers( dofManNumbers ); // fix JB
 
     }
@@ -1207,7 +1097,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-
+#if 0
 void 
 Delamination :: giveActiveDelaminationXiCoords(FloatArray &xiCoords, Element *element) 
 {
@@ -1313,6 +1203,7 @@ Delamination :: giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &
 #endif
 }
 
+#endif
 
 Crack :: Crack(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
 {
