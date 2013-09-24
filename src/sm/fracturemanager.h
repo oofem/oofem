@@ -65,6 +65,13 @@ class FractureManager;
  * @author Jim Brouzoulis
  */
 #include "enumitem.h"
+
+///@name Input fields for FractureManager
+//@{
+#define _IFT_FracManager_Name "fracmanager"
+#define _IFT_fracManager_criteriaList "criterialist"  
+//@}
+
 #define FailureCriteria_DEF \
     ENUM_ITEM_WITH_VALUE(FC_Undefined, 0) \
     ENUM_ITEM_WITH_VALUE(Local, 1) \
@@ -72,29 +79,6 @@ class FractureManager;
 
 enum FailureCriteriaType {
     FailureCriteria_DEF
-};
-
-//enum QuantityType {
-//    FailureCriteria_DEF
-//};
-
-
-
-
-class FailureCriteriaQuantity
-{
-private:    
-    
-    //QuantityType type;       // local, nonlocal
-
-    std::vector < std::vector < FloatArray > > quantities;
-
-public:
-    //FailureCriteriaQuantity( QuantityType type)
-    //{ 
-      //  this->type = type;
-    //};
-    ~FailureCriteriaQuantity(){}; 
 };
 
 

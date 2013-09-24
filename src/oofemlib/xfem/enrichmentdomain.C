@@ -126,6 +126,9 @@ DofManList :: addDofManagers(IntArray &dofManNumbers)
             this->dofManList.push_back( dofManNumbers.at(i) );
         }       
     }
+
+    std::sort(dofManList.begin( ), this->dofManList.end( ));
+
     int sz = dofManList.size();
 }
 
@@ -239,7 +242,7 @@ IRResultType DofManList :: initializeFrom(InputRecord *ir)
     for ( int i = 1; i <= idList.giveSize(); i++ ) {
         this->dofManList.push_back( idList.at(i) );
     }
-    
+    std::sort(dofManList.begin( ), this->dofManList.end( ));
     //IR_GIVE_FIELD(ir, this->xi, _IFT_DofManList_DelaminationLevel);
     
     return IRRT_OK;

@@ -2405,7 +2405,6 @@ Shell7Base :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int laye
     this->giveUpdatedSolutionVector(solVec, tStep);
     FloatArray x, m; double gam=0;
     this->giveUnknownsAt(localCoords, solVec, x, m, gam, tStep); 
-
     double zeta = giveGlobalZcoordInLayer(localCoords.at(3), layer);
     double fac = ( zeta + 0.5 * gam * zeta * zeta );
     globalCoords = x + fac*m;
@@ -2463,6 +2462,7 @@ Shell7Base :: giveCompositeExportData(CompositeCell &compositeCell, IntArray &pr
                     u.subtract(el.nodeCoords[j-1]);
                     el.nodeVars[nodeVarNum][j-1].resize(3);
                     el.nodeVars[nodeVarNum][j-1] = u;
+                    
                 }
             } else {
                 ZZNodalRecoveryMI_recoverValues(el.nodeVars[i-1], layer, ( InternalStateType ) 1, tStep);
@@ -2653,7 +2653,7 @@ Shell7Base :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &ans
     
     FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
     FloatMatrix dNdx;
-    double detJ = interpol->evaldNdx( dNdx, lcoords, FEIVertexListGeometryWrapper(numNodes, (const FloatArray **)coords ) );
+    interpol->evaldNdx( dNdx, lcoords, FEIVertexListGeometryWrapper(numNodes, (const FloatArray **)coords ) );
     
 
 

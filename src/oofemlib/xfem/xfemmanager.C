@@ -73,16 +73,6 @@ XfemManager :: clear()
     numberOfEnrichmentItems = -1;
 }
 
-#if 0
-void XfemManager :: giveActiveEIsFor(IntArray &answer, const Element *elem)
-{
-    for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ) {
-        if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ) {
-            answer.followedBy( enrichmentItemList->at(i)->giveNumber() );
-        }
-    }
-}
-#endif
 
 bool XfemManager :: isElementEnriched(const Element *elem)
 {

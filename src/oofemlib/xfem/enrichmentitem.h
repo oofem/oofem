@@ -134,7 +134,7 @@ public:
 
     // Should update receiver geometry to the state reached at given time step.
     virtual void updateGeometry(TimeStep *tStep) {};
-    virtual void updateGeometry(FailureCriteria *fc, TimeStep *tStep);
+    virtual void updateGeometry(FailureCriteria *fc, TimeStep *tStep){};
     virtual void updateGeometry();
     virtual void propagateFronts();
 
@@ -288,27 +288,10 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Delamination_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    //FloatArray enrichmentDomainXiCoords; // old
-    double delamXiCoord;
-    //IntArray enrichmentDomainInterfaceList; // list of what interface each delam corresponds to
-    //double giveDelaminationXiCoord(int delamNum){
-    //    return this->enrichmentDomainXiCoords.at(delamNum);
-    //}
-    //void giveActiveDelaminationXiCoords(FloatArray &xiCoords, Element *element);
-    //std :: list< std :: pair< int, double > >delaminationXiCoordList;
-    //double giveDelaminationZCoord(int n, Element *element);
+    double delamXiCoord;    // defines at what local xi-coord the delamination is defined
 
-    //int giveDelaminationGroupAt(double z);
-    //FloatArray delaminationGroupMidZ(int dGroup);
-    //double giveDelaminationGroupMidZ(int dGroup, Element *e);
-
-    //FloatArray delaimnationGroupThickness;
-    //double giveDelaminationGroupThickness(int dGroup, Element *e);
-
-    //void giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &zBottom, Element *e);
-    //double heaviside(double xi, double xi0);
     virtual Material *giveMaterial() { return mat; }
-    void updateGeometry(FailureCriteria *fc, TimeStep *tStep);
+    virtual void updateGeometry(FailureCriteria *fc, TimeStep *tStep);
     virtual void updateLevelSets(XfemManager &ixFemMan);
 };
 

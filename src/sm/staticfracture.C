@@ -63,6 +63,9 @@ StaticFracture :: solveYourselfAt(TimeStep *tStep)
     
     // Initialization
     int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()); // 1 stands for domain?
+    
+    printf("numdofs % i",neq);
+
     if ( totalDisplacement.giveSize() != neq ) {
         totalDisplacement.resize(neq);
         totalDisplacement.zero();
@@ -107,15 +110,8 @@ StaticFracture :: solveYourselfAt(TimeStep *tStep)
 void 
 StaticFracture :: updateYourself(TimeStep *tStep)
 {
-#if 1
-    this->fMan->evaluateYourself(tStep);
 
-    // Update XFEM structure based on the fracture manager
-    this->fMan->updateXFEM(tStep); 
-#endif    
     NonLinearStatic :: updateYourself(tStep);
-
-    // Fracture/failure mechanics evaluation
 
     this->setUpdateStructureFlag( this->fMan->giveUpdateFlag() ); // if the internal structure need to be updated
 
@@ -130,7 +126,7 @@ StaticFracture :: updateYourself(TimeStep *tStep)
             }
         }
     }
-
+    
 
 }
 
@@ -139,6 +135,13 @@ void
 StaticFracture :: terminate(TimeStep *tStep)
 {
     NonLinearStatic :: terminate(tStep);
+
+
+    // Fracture/failure mechanics evaluation
+    this->fMan->evaluateYourself(tStep);
+    this->fMan->updateXFEM(tStep); // Update XFEM structure based on the fracture manager
+
+ 
 }
 
 
@@ -201,7 +204,6 @@ StaticFracture :: updateLoadVectors(TimeStep *tStep)
     }
 
 
-    // if (isLastMetaStep) {
     if ( isLastMetaStep && !mstep->giveAttributesRecord()->hasField(_IFT_NonLinearStatic_donotfixload) ) {
 #ifdef VERBOSE
         OOFEM_LOG_INFO("Reseting load level\n");

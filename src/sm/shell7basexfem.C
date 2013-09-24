@@ -110,6 +110,12 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep
 
         }
 
+
+        // debugging
+        for ( int j = 1; j <= damageArray.giveSize(); j++ ) {
+            damageArray.at(j) = 1.0;                    
+        }
+
         dfc->layerDamageValues = damageArray;
     }
     //case FC_DamagedNeighborCZ:
@@ -1106,7 +1112,6 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
                 }
             }
         }
-
         return;
     } else {
         _error("Shell7BaseXFEM :: computeEdgeLoadVectorAt: load type not supported");
@@ -1180,8 +1185,7 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 void
 Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep)
 {
-    //double zeta = giveGlobalZcoord(localCoords.at(3));
-    double zeta = this->giveGlobalZcoordInLayer(localCoords.at(3), layer); //@todo should probably be giveGlobalZetaCoord
+    double zeta = this->giveGlobalZcoordInLayer(localCoords.at(3), layer); 
 
     // Continuous part
     FloatArray solVec;
@@ -1189,26 +1193,23 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int 
     FloatArray xc, mc; double gamc=0;
     this->giveUnknownsAt(localCoords, solVec, xc, mc, gamc, tStep); 
     double fac = ( zeta + 0.5 * gamc * zeta * zeta );
-    
     globalCoords = xc;    
     globalCoords.add(fac,mc);
+
+#if 1
+    // Discontinuous part
     FloatArray lCoords(3);
     lCoords.zero();
     std :: vector< double > ef;
-
-    // Discontinuous part
     FloatArray solVecD, xd, md, xtemp(3); double gamd=0;
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
         Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
         if ( dei != NULL && dei->isElementEnriched(this) ) {
 
-            double zeta0 = dei->delamXiCoord*this->layeredCS->computeIntegralThick()*0.5;
-            //double H = dei->heaviside(zeta, zeta0);
-            
+            double zeta0 = giveGlobalZcoord(dei->delamXiCoord);
             double levelSet = zeta - zeta0;
             dei->evaluateEnrFuncAt(ef, lCoords, levelSet); 
             if ( ef[0] > 0.1 ) {
-            //if ( H > 0.1 ) {  
                 IntArray eiDofIdArray;
                 dei->giveEIDofIdArray(eiDofIdArray); 
                 this->giveSolutionVector(solVecD, eiDofIdArray, tStep); 
@@ -1222,7 +1223,7 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int 
         }
         
     }
-
+#endif
 }
 
 } // end namespace oofem

@@ -475,14 +475,6 @@ void EnrichmentItem :: evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncD
 }
 
 
-void 
-EnrichmentItem :: updateGeometry(FailureCriteria *fc, TimeStep *tStep)
-{
-    if ( Delamination *dei = dynamic_cast< Delamination * > (this) )  {
-        dei->updateGeometry(fc, tStep); //not an overloaded function, change the name
-    }
-
-}
 
 
 
@@ -676,12 +668,19 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const DofManLi
     int nNodes = d->giveNumberOfDofManagers();
     mNodeEnrMarker.resize(nNodes, 0);
 
+    //printf("\n The following nodes are enriched ");
     // Loop over nodes in the DofManList and mark nodes as enriched.
     const std :: vector< int > &dofList = iDofManList.giveDofManList();
     for ( int i = 0; i < int( dofList.size() ); i++ ) {
         mNodeEnrMarker [ dofList [ i ] - 1 ] = 1;
-        mEnrNodeIndices.push_back(dofList[i]); // new /JB
+        mEnrNodeIndices.push_back(dofList[i]); 
+      //  printf(" %i", dofList [ i ]);
     }
+    //printf("\n \n");
+
+    // test
+    std::sort(mEnrNodeIndices.begin( ), mEnrNodeIndices.end( ));
+
 
     // Set level set fields to zero
     mLevelSetNormalDir.resize(nNodes, 0.0);
@@ -714,12 +713,14 @@ void EnrichmentItem :: createEnrichedDofs()
         DofManager *dMan = this->giveDomain()->giveDofManager(i);
 
         if ( isDofManEnriched(* dMan) ) {
+            //printf("dofMan %i is enriched \n", dMan->giveNumber());
             computeDofManDofIdArray(dofIdArray, dMan);
             int nDofs = dMan->giveNumberOfDofs();
             for ( int m = 1; m <= dofIdArray.giveSize(); m++ ) {
 
                 if ( !dMan->hasDofID( ( DofIDItem ) ( dofIdArray.at(m) ) ) ) {
                     dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
+                    //printf("appending dof number %i \n", nDofs + m);
                 }
             }
         }
@@ -1037,7 +1038,7 @@ Delamination :: updateGeometry(FailureCriteria *fc, TimeStep *tStep)
 {
 
     if ( fc->hasFailed(this->giveNumber()) ) { // interface has failed
-        printf( "...fails in interface %d \n", this->giveNumber() );
+        //printf( "...fails in interface %d \n", this->giveNumber() );
         IntArray dofManNumbers, elDofMans;
         Element *el = fc->el;
         elDofMans = el->giveDofManArray();
@@ -1059,7 +1060,6 @@ Delamination :: updateGeometry(FailureCriteria *fc, TimeStep *tStep)
              }
         }
             
-         dofManNumbers.printYourself();
          dynamic_cast< DofManList * > ( this->giveEnrichmentDomain(1) )->addDofManagers( dofManNumbers ); // fix JB
 
     }
