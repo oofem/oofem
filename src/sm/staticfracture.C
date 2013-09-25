@@ -74,6 +74,7 @@ StaticFracture :: solveYourselfAt(TimeStep *tStep)
         this->setTotalDisplacementFromUnknownsInDictionary(EID_MomentumBalance, VM_Total, tStep);
     }
     
+#if 0
     // Instanciate fracture manager
     // should be made in a more proper way with input and the like and moved to another part
     if ( tStep->isTheFirstStep() ) {
@@ -100,7 +101,7 @@ StaticFracture :: solveYourselfAt(TimeStep *tStep)
             }
         }
     }
-
+#endif
 
     this->setUpdateStructureFlag(false);
     NonLinearStatic :: solveYourselfAt(tStep);

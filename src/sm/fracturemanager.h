@@ -58,7 +58,7 @@ class IntArray;
 class Element;
 
 class FractureManager;
-
+class FailureCriteriaManager;
 /**
  * This class manages the fracture mechanics part
  *
@@ -69,7 +69,12 @@ class FractureManager;
 ///@name Input fields for FractureManager
 //@{
 #define _IFT_FracManager_Name "fracmanager"
-#define _IFT_fracManager_criteriaList "criterialist"  
+#define _IFT_FracManager_numcriterias "numcriterias"
+#define _IFT_FracManager_criteriaList "criterialist" // deprecated
+
+// Failure criterias
+#define _IFT_DamagedNeighborLayered_Name "damagedneighborlayered"
+#define _IFT_DamagedNeighborLayered_DamagedThreshold "damagethreshold"
 //@}
 
 #define FailureCriteria_DEF \
@@ -90,42 +95,44 @@ class FailureCriteria
     // abstract class from all the different failure criterias should be derived
 private:    
     
-    FractureManager *fMan;          // pointer to its corresponding manager
+    //FractureManager *fMan;         
+    FailureCriteriaManager *cMan;   // pointer to its corresponding manager
     FailureCriteriaType type;       // local, nonlocal
     //FailureCriteriaName name;     // max strain, von Mises, effectivePlasticStrain, tsaiHill, J-integral, G, K etc.
     bool failedFlag;                // is the criteria fulfilled?
-
+    int number;
      
     
 
 public:
-    FailureCriteria(FailureCriteriaType type, FractureManager *fMan)
+    FailureCriteria(int number, FailureCriteriaManager *cMan)
     { 
-        this->type = type;
+        this->number = number;
+        //this->type = type;
         //this->failedFlag = false;
-        this->fMan = fMan;
+        this->cMan = cMan;
     };
     FailureCriteria(){};
     ~FailureCriteria(){}; // must destroy object correctly
     Element *el;
 
-    virtual int instanciateYourself(DataReader *dr){ return 1;};
+    
     bool evaluateFCQuantities(Element *el, TimeStep *tStep);
     
     std::vector < std::vector < FloatArray > > quantities;
     FloatArray thresholds;
     
-    //New
     std :: vector< bool > failedFlags;
-
-    FailureCriteriaType giveType() { return this->type; }
-    virtual const char *giveClassName() const = 0; //{ return FractureManagerClass; }
-
+    FailureCriteriaType giveType() { return this->type; };
+    void setType(FailureCriteriaType type) { this->type; };
     virtual bool computeFailureCriteriaQuantities(TimeStep *tStep);
     virtual bool evaluateFailureCriteria() = 0;
 
     bool hasFailed( int i) { return failedFlags.at(i-1); }
 
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int instanciateYourself(DataReader *dr){ return 1;};
+    virtual const char *giveClassName() const { return "FailureCriteria"; }
 
 };
 
@@ -135,12 +142,16 @@ class DamagedNeighborLayered : public FailureCriteria
 {
 
 public:
-    DamagedNeighborLayered(FailureCriteriaType type, FractureManager *fMan) 
-    : FailureCriteria(type,  fMan) {}
+    DamagedNeighborLayered(int number, FailureCriteriaManager *cMan) 
+    : FailureCriteria(number,  cMan) {}
 
     virtual bool evaluateFailureCriteria();
     virtual const char *giveClassName() const { return "DamagedNeighborLayered"; }
+    virtual const char *giveInputRecordName() const { return _IFT_DamagedNeighborLayered_Name; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+
     FloatArray layerDamageValues;
+
 };
 
 
@@ -162,8 +173,11 @@ public:
 
     std :: vector< FailureCriteria *> list;
     FailureCriteriaType giveType() { return this->type; }
-    //FractureManager *giveFractureManager() { return this->fMan; }
-    //FailureCriteriaType setType(FailureCriteriaType type) { return this->type = type; }
+    FractureManager *giveFractureManager() { return this->fMan; }
+
+    IRResultType initializeFrom(InputRecord *ir);
+    int instanciateYourself(DataReader *dr);
+    virtual const char *giveClassName() const { return "FailureCriteriaManager"; }
 };
 
 

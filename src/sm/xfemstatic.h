@@ -82,8 +82,6 @@ public:
     void buildDofMap();
     void setValsFromDofMap(FloatArray &oArray, const FloatArray &iArray);
 
-    // Jim
-    bool hasFractureManager() { return fMan != NULL; };
 protected:
     bool updateStructureFlag;
 

@@ -62,20 +62,23 @@
 //#define VERBOSE
 
 namespace oofem {
+REGISTER_FailureCriteria(DamagedNeighborLayered)
+
+
+
+//===================================================
+//  Fracture Manager
+//===================================================
 FractureManager :: FractureManager(Domain *domain)
 {
     this->domain = domain;
     this->updateFlag = false;
 }
 
-FractureManager :: ~FractureManager()
-{
-}
+FractureManager :: ~FractureManager(){}
 
 void
-FractureManager :: clear()
-{
-}
+FractureManager :: clear(){}
 
 
 
@@ -85,15 +88,9 @@ IRResultType FractureManager :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
-    // list of the failure criterias to evaluate
-    IntArray criteriaList; 
-    IR_GIVE_FIELD(ir, criteriaList, _IFT_fracManager_criteriaList);
-
-    
-    this->criteriaManagers.resize( criteriaList.giveSize() );
-    
-
-    //IR_GIVE_OPTIONAL_FIELD(ir, mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
+    int numCriterias;
+    IR_GIVE_FIELD(ir, numCriterias, _IFT_FracManager_numcriterias);
+    this->criteriaManagers.resize( numCriterias );
 
     return IRRT_OK;
 }
@@ -102,23 +99,50 @@ IRResultType FractureManager :: initializeFrom(InputRecord *ir)
 int FractureManager :: instanciateYourself(DataReader *dr)
 {
     ///@todo Write proper method
-    
+
+    const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
+    IRResultType result; // Required by IR_GIVE_FIELD macro
+    std :: string name;
+
     // initialize failure criteria managers
-    int numEl = this->domain->giveNumberOfElements();
+    
     for ( int i = 1; i <= this->criteriaManagers.size(); i++ ) {
-        // if local
+        
+        InputRecord *mir = dr->giveInputRecord(DataReader :: IR_failCritRec, i);
+        result = mir->giveRecordKeywordField(name);
+
+        if ( result != IRRT_OK ) {
+            IR_IOERR(giveClassName(), __proc, "", mir, result);
+        }
+
+
         this->criteriaManagers.at(i-1) = new FailureCriteriaManager(Local, this);
         FailureCriteriaManager *cMan = this->criteriaManagers.at(i-1);
-        cMan->list.resize(numEl);
-        for ( int j = 1; j <= numEl; j++ ) { 
-            cMan->list.at(j - 1) = new DamagedNeighborLayered(Local, this);
-            cMan->list.at(j - 1)->thresholds.resize(1);
-            cMan->list.at(j - 1)->thresholds.at(1) = -10.0;
-            cMan->list.at(j - 1)->el = domain->giveElement(j);           
+
+        //FailureCriteria *failCriteria = classFactory.createFailureCriteria( name.c_str(), i, cMan );
+
+        //if ( failCriteria == NULL ) {
+        //    OOFEM_ERROR2( "FractureManager :: instanciateYourself: unknown failure criteria (%s)", name.c_str() );
+        //}
+
+
+        if( cMan->giveType() == Local ) { // if loca, allocate one failure criteria for each element
+
+            int numEl = this->domain->giveNumberOfElements();
+            cMan->list.resize(numEl);
+            for ( int j = 1; j <= numEl; j++ ) { 
+                cMan->list.at(j - 1) = classFactory.createFailureCriteria( name.c_str(), j, cMan );
+                if ( cMan->list.at(j - 1) == NULL ) {
+                    OOFEM_ERROR2( "FractureManager :: instanciateYourself: unknown failure criteria (%s)", name.c_str() );
+                }
+                cMan->list.at(j - 1)->initializeFrom(mir); 
+                cMan->list.at(j - 1)->el = domain->giveElement(j);           
+            }
         }
     }
 
     return 1;
+
 }
 
 
@@ -128,10 +152,6 @@ FailureCriteria :: evaluateFCQuantities(Element *el, TimeStep *tStep)
     // Should contain calls to default implementations for evaluation of failure criteria quantities
     return false;
 }
-
-
-
-
 
 
 void
@@ -247,7 +267,6 @@ FractureManager :: updateXFEM(TimeStep *tStep)
 //=======================
 // DamagedNeighborLayered
 //=======================
-
 bool
 DamagedNeighborLayered :: evaluateFailureCriteria() 
 {
@@ -264,5 +283,44 @@ DamagedNeighborLayered :: evaluateFailureCriteria()
     }
     return criteriaFulfilled;
 };
+
+
+
+//=======================
+// Failure Criteria Manager
+//=======================
+
+IRResultType FailureCriteriaManager :: initializeFrom(InputRecord *ir)
+{
+    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    //IRResultType result; // Required by IR_GIVE_FIELD macro
+
+    return IRRT_OK;
+}
+
+
+
+
+IRResultType FailureCriteria :: initializeFrom(InputRecord *ir)
+{
+    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    //IRResultType result; // Required by IR_GIVE_FIELD macro
+
+    return IRRT_OK;
+}
+
+IRResultType DamagedNeighborLayered :: initializeFrom(InputRecord *ir)
+{
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result; // Required by IR_GIVE_FIELD macro
+
+    // Read damage threshold value
+    this->thresholds.resize(1);
+    IR_GIVE_FIELD(ir, this->thresholds.at(1), _IFT_DamagedNeighborLayered_DamagedThreshold);
+
+    this->setType(Local);
+
+    return IRRT_OK;
+}
 
 } // end namespace oofem

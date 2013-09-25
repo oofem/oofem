@@ -435,6 +435,9 @@ public:
 
     XfemManager *giveXfemManager();
     bool hasXfemManager();
+    
+    bool hasFractureManager();
+
     /// List of Xfemmanagers.
     /**
      * Sets receiver's associated topology description.

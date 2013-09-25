@@ -111,6 +111,7 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
     outputManager         = new OutputManager(this);
     smoother              = NULL;
     topology              = NULL;
+    fracManager           = NULL;
 
     nonlocalUpdateStateCounter = 0;
 
@@ -419,6 +420,12 @@ Domain :: hasXfemManager()
     return xfemManager != NULL;
 }
 
+
+bool
+Domain :: hasFractureManager()
+{
+    return fracManager != NULL;
+}
 
 EngngModel *
 Domain :: giveEngngModel()
