@@ -1034,6 +1034,13 @@ bool DofManager :: requiresTransformation()
 
 void DofManager :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
+  //update masterNode numbering
+	if (this->dofMastermap) {
+		std::map<int,int>::iterator it = this->dofMastermap->begin();
+		for (; it != this->dofMastermap->end(); it++) {
+				(*it).second = f((*it).second, ERS_DofManager);
+		}
+	}
     for ( int i = 1; i <= numberOfDofs; i++ ) {
         this->giveDof(i)->updateLocalNumbering(f);
     }
