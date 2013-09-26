@@ -53,7 +53,6 @@ class Tetrah1_ht : public TransportElement, public SpatialLocalizerInterface, pu
 {
 protected:
     static FEI3dTetLin interpolation;
-    int numberOfGaussPoints;
 
 public:
     Tetrah1_ht(int n, Domain *d);

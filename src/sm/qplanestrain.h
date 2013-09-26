@@ -50,7 +50,6 @@ namespace oofem {
 class QPlaneStrain : public NLStructuralElement, public ZZNodalRecoveryModelInterface
 {
 protected:
-    int numberOfGaussPoints;
     static FEI2dQuadQuad interpolation;
 
 public:

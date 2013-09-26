@@ -126,6 +126,7 @@ public:
 //    AList< FloatArray > *giveVertices() { return this->vertices; }
     /// Initializes the Geometry from the InputRecord.
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual void giveInputRecord(DynamicInputRecord &input) {OOFEM_ERROR("giveInputRecord is not implemented for this subclass of BasicGeometry.");}
     /// Gives class name.
     virtual const char *giveClassName() const { return NULL; }
     /**
@@ -267,6 +268,7 @@ public:
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     virtual const char *giveClassName() const { return "PolygonLine"; }
 
 #ifdef __BOOST_MODULE

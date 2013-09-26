@@ -46,6 +46,7 @@
 #include "feinterpol.h"
 #include "masterdof.h"
 #include "propagationlaw.h"
+#include "dynamicinputrecord.h"
 
 #include <algorithm>
 #include <limits>
@@ -184,6 +185,18 @@ IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+void EnrichmentItem :: giveInputRecord(DynamicInputRecord &input)
+{
+	FEMComponent::giveInputRecord(input);
+
+	input.setField(enrichmentDomainNumbers, _IFT_EnrichmentItem_domains);
+	input.setField(enrichmentFunction, 		_IFT_EnrichmentItem_function);
+	input.setField(mEnrDomainIndex,			_IFT_EnrichmentItem_domain);
+	input.setField(mEnrFrontIndex,			_IFT_EnrichmentItem_front);
+	input.setField(mPropLawIndex,			_IFT_EnrichmentItem_propagationlaw);
+}
+
+
 int EnrichmentItem :: instanciateYourself(DataReader *dr)
 {
     const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
@@ -228,8 +241,8 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
             IR_IOERR(giveClassName(), __proc, "", mir, result);
         }
 
-        EnrichmentDomain *ed = classFactory.createEnrichmentDomain( name.c_str() );
-        mpEnrichmentDomain = classFactory.createEnrichmentDomain( name.c_str() );
+        EnrichmentDomain *ed = classFactory.createEnrichmentDomain( name.c_str(), mEnrDomainIndex );
+        mpEnrichmentDomain = classFactory.createEnrichmentDomain( name.c_str(), mEnrDomainIndex );
         if ( ed == NULL ) {
             OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment domain (%s)", name.c_str() );
         }
@@ -1223,6 +1236,13 @@ void EnrichmentFront :: giveNodeTipIndices(int iNodeInd, std::vector<int> &oTipI
 	}
 }
 
+void EnrFrontDoNothing :: giveInputRecord(DynamicInputRecord &input)
+{
+	int number = 1;
+	input.setRecordKeywordField(this->giveInputRecordName(), number);
+}
+
+
 void EnrFrontExtend :: MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemManager &ixFemMan, const std::vector<double> &iLevelSetNormalDir, const std::vector<double> &iLevelSetTangDir, const std::vector<TipInfo> &iTipInfo)
 {
 
@@ -1293,6 +1313,12 @@ void EnrFrontExtend :: MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemM
 	{
 		ioNodeEnrMarker[ newEnrNodes[i]-1 ] = 1;
 	}
+}
+
+void EnrFrontExtend :: giveInputRecord(DynamicInputRecord &input)
+{
+	int number = 1;
+	input.setRecordKeywordField(this->giveInputRecordName(), number);
 }
 
 EnrFrontLinearBranchFuncRadius :: EnrFrontLinearBranchFuncRadius():
@@ -1436,6 +1462,14 @@ IRResultType EnrFrontLinearBranchFuncRadius :: initializeFrom(InputRecord *ir)
     printf("In EnrFrontLinearBranchFuncRadius :: initializeFrom(): mEnrichmentRadius: %e\n", mEnrichmentRadius );
 
 	return IRRT_OK;
+}
+
+void EnrFrontLinearBranchFuncRadius :: giveInputRecord(DynamicInputRecord &input)
+{
+	int number = 1;
+    input.setRecordKeywordField(this->giveInputRecordName(), number);
+
+	input.setField(mEnrichmentRadius, _IFT_EnrFrontLinearBranchFuncRadius_Radius);
 }
 
 

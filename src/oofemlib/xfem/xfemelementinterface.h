@@ -58,11 +58,10 @@ class XfemElementInterface : public Interface
 {
 protected:
     Element *element;
-    XfemManager *xMan;
 
 public:
     /// Constructor.
-    XfemElementInterface(Element *e) : Interface(), xMan(NULL) { this->element = e; }
+    XfemElementInterface(Element *e) : Interface() { this->element = e; }
 
     virtual ~XfemElementInterface() {}
 

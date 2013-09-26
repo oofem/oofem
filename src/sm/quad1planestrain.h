@@ -61,7 +61,6 @@ class Quad1PlaneStrain : public StructuralElement, public ZZNodalRecoveryModelIn
 {
 protected:
     static FEI2dQuadLin interp;
-    int numberOfGaussPoints;
 
 public:
     Quad1PlaneStrain(int n, Domain *d);

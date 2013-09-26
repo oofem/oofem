@@ -60,7 +60,6 @@ namespace oofem {
 class QSpace : public NLStructuralElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 {
 protected:
-    int numberOfGaussPoints;
     static FEI3dHexaQuad interpolation;
 
 public:

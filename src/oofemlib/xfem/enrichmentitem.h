@@ -106,6 +106,8 @@ public:
     virtual EnrichmentItem* Clone() = 0;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
+
     int instanciateYourself(DataReader *dr);
     virtual const char *giveClassName() const = 0;
     const IntArray *giveEnrichesDofsWithIdArray() const { return mpEnrichesDofsWithIdArray; }
@@ -175,6 +177,13 @@ public:
     // Return the coordinates of the tip in element iElIndex,
     // if the element contains a tip.
     bool giveElementTipCoord(FloatArray &oCoord, int iElIndex) const;
+
+
+    // TODO: remove
+    EnrichmentFunction *giveEnrichmentFunction() {return mpEnrichmentFunc;}
+    EnrichmentDomain *giveEnrichmentDomain() {return mpEnrichmentDomain;}
+    EnrichmentFront *giveEnrichmentFront() {return mpEnrichmentFront;}
+    PropagationLaw *givePropagationLaw() {return mpPropagationLaw;}
 
     // Help functions
     double calcXiZeroLevel(const double &iQ1, const double &iQ2) const;
@@ -383,6 +392,7 @@ public:
     virtual const char *giveInputRecordName() const = 0;
 
     virtual IRResultType initializeFrom(InputRecord *ir) = 0;
+    virtual void giveInputRecord(DynamicInputRecord &input) = 0;
 
     virtual bool giveElementTipCoord(FloatArray &oCoord, int iElIndex) const;
 
@@ -421,6 +431,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_EnrFrontDoNothing_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
 };
 
@@ -447,6 +458,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_EnrFrontExtend_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
+    virtual void giveInputRecord(DynamicInputRecord &input);
 };
 
 class EnrFrontLinearBranchFuncRadius: public EnrichmentFront{
@@ -470,6 +482,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_EnrFrontLinearBranchFuncRadius_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
 private:
 	double mEnrichmentRadius;

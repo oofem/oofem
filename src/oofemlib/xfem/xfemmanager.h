@@ -58,6 +58,7 @@ class EnrichmentItem;
 class IntArray;
 class Element;
 class DataStream;
+class DynamicInputRecord;
 
 /**
  * This class manages the xfem part
@@ -86,7 +87,7 @@ public:
     XfemManager(Domain *domain);
     XfemManager(const XfemManager &iXMan);
     /// Destructor.
-    ~XfemManager();
+    virtual ~XfemManager();
 
     int giveNumGpPerTri() const {return mNumGpPerTri;} /// Number of Gauss points per sub-triangle in cut elements.
 
@@ -100,6 +101,7 @@ public:
 
     /// Initializes receiver according to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     int instanciateYourself(DataReader *dr);
     const char *giveClassName() const { return "XfemManager"; }

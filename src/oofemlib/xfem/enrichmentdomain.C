@@ -42,6 +42,7 @@
 #include "classfactory.h"
 #include "enrichmentfunction.h"
 #include "xfemmanager.h"
+#include "dynamicinputrecord.h"
 
 #include <algorithm>
 
@@ -55,20 +56,30 @@ REGISTER_EnrichmentDomain(EDBGCircle)
 REGISTER_EnrichmentDomain(EDCrack)
 
 
-EnrichmentDomain :: EnrichmentDomain()
+EnrichmentDomain :: EnrichmentDomain(int iNumber):
+mNumber(iNumber)
 {}
+
+void EnrichmentDomain_BG :: giveInputRecord(DynamicInputRecord &input)
+{
+    input.setRecordKeywordField(this->giveInputRecordName(), mNumber);
+
+    bg->giveInputRecord(input);
+}
 
 void EnrichmentDomain_BG :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
     iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
 }
 
-EDBGCircle :: EDBGCircle(const EDBGCircle &iEDBGCircle)
+EDBGCircle :: EDBGCircle(const EDBGCircle &iEDBGCircle):
+EnrichmentDomain_BG(0)
 {
 	bg = iEDBGCircle.bg->Clone();
 }
 
-EDCrack :: EDCrack(const EDCrack &iEDCrack)
+EDCrack :: EDCrack(const EDCrack &iEDCrack):
+EnrichmentDomain_BG(0)
 {
 	bg = iEDCrack.bg->Clone();
 }
@@ -224,8 +235,28 @@ IRResultType DofManList :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+void DofManList :: giveInputRecord(DynamicInputRecord &input)
+{
+    input.setRecordKeywordField(this->giveInputRecordName(), mNumber);
+
+	IntArray idList;
+	idList.resize(dofManList.size());
+    for ( int i = 0; i < dofManList.size(); i++ ) {
+    	idList.at(i+1) = dofManList[i];
+    }
+
+    input.setField(idList, _IFT_DofManList_list);
+}
+
 void WholeDomain :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
     iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
 }
+
+void WholeDomain :: giveInputRecord(DynamicInputRecord &input)
+{
+    input.setRecordKeywordField(this->giveInputRecordName(), mNumber);
+
+}
+
 } // end namespace oofem

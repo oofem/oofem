@@ -42,6 +42,7 @@
 #include "equationid.h"
 
 #include <map>
+#include <string>
 #ifdef __PARALLEL_MODE
  #include <list>
  #include "entityrenumberingscheme.h"
@@ -173,6 +174,8 @@ private:
     int nsd;
     /// nodal recovery object associated to receiver.
     NodalRecoveryModel *smoother;
+
+    std::string mDomainType;
     /**
      * For nonlocal models of integral type
      * it is necessary, mainly due to resulting efficiency, to compute variable(s)
@@ -225,6 +228,10 @@ public:
      * @see giveSerialNumber
      */
     Domain(int n, int serNum, EngngModel *e);
+
+	/// Create a copy of the domain using the dynamic data reader.
+    Domain *Clone();
+
     /// Destructor.
     ~Domain();
 
@@ -356,25 +363,25 @@ public:
     //int giveNumberOfNodes () {return nodeList->giveSize();}
     //int giveNumberOfSides () {return elementSideList->giveSize();}
     /// Returns number of dof managers in domain.
-    int giveNumberOfDofManagers() { return dofManagerList->giveSize(); }
+    int giveNumberOfDofManagers() const { return dofManagerList->giveSize(); }
     /// Returns number of elements in domain.
-    int giveNumberOfElements() { return elementList->giveSize(); }
+    int giveNumberOfElements() const { return elementList->giveSize(); }
     /// Returns number of material models in domain.
-    int giveNumberOfMaterialModels() { return materialList->giveSize(); }
+    int giveNumberOfMaterialModels() const { return materialList->giveSize(); }
     /// Returns number of cross section models in domain.
-    int giveNumberOfCrossSectionModels() { return crossSectionList->giveSize(); }
+    int giveNumberOfCrossSectionModels() const { return crossSectionList->giveSize(); }
     /// Returns number of boundary conditions in domain.
-    int giveNumberOfBoundaryConditions() { return bcList->giveSize(); }
+    int giveNumberOfBoundaryConditions() const { return bcList->giveSize(); }
     /// Returns number of initial conditions in domain.
-    int giveNumberOfInitialConditions() { return icList->giveSize(); }
+    int giveNumberOfInitialConditions() const { return icList->giveSize(); }
     /// Returns number of load time functions in domain.
-    int giveNumberOfLoadTimeFunctions() { return loadTimeFunctionList->giveSize(); }
+    int giveNumberOfLoadTimeFunctions() const { return loadTimeFunctionList->giveSize(); }
     /// Returns number of regions. Currently regions corresponds to cross section models.
-    int giveNumberOfRegions() { return this->giveNumberOfCrossSectionModels(); }
+    int giveNumberOfRegions() const { return this->giveNumberOfCrossSectionModels(); }
     /// Returns number of nonlocal integration barriers
-    int giveNumberOfNonlocalBarriers() { return nonlocalBarierList->giveSize(); }
+    int giveNumberOfNonlocalBarriers() const { return nonlocalBarierList->giveSize(); }
     /// Returns number of random field generators
-    int giveNumberOfRandomFieldGenerators() { return randomFieldGeneratorList->giveSize(); }
+    int giveNumberOfRandomFieldGenerators() const { return randomFieldGeneratorList->giveSize(); }
     
     int giveCorrespondingCoordinateIndex(int);
     /// Returns number of spatial dimensions.

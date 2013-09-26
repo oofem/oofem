@@ -50,6 +50,7 @@
 #include "datareader.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 XfemManager :: XfemManager(Domain *domain)
@@ -149,6 +150,13 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+
+void XfemManager :: giveInputRecord(DynamicInputRecord &input)
+{
+    input.setRecordKeywordField(_IFT_XfemManager_Name, 1);
+	input.setField(numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
+	input.setField(mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
+}
 
 int XfemManager :: instanciateYourself(DataReader *dr)
 {

@@ -52,7 +52,6 @@ namespace oofem {
 class Tr1_ht : public TransportElement, public SpatialLocalizerInterface, public ZZNodalRecoveryModelInterface
 {
 protected:
-    int numberOfGaussPoints;
     static FEI2dTrLin interp;
 
 public:

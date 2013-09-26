@@ -53,7 +53,6 @@ TrPlaneStress2dXFEM::~TrPlaneStress2dXFEM() {
 int TrPlaneStress2dXFEM::checkConsistency()
 {
 	TrPlaneStress2d :: checkConsistency();
-    this->xMan =  this->giveDomain()->giveXfemManager();
     return 1;
 }
 #if 0
@@ -564,7 +563,8 @@ TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &a
 {
     // Returns the total id mask of the dof manager = regular id's + enriched id's
 
-	if( this->xMan != NULL )
+	XfemManager *xMan = this->domain->giveXfemManager();
+	if( xMan != NULL )
 	{
 		this->giveDofManager(inode)->giveCompleteMasterDofIDArray(answer);
 	}
