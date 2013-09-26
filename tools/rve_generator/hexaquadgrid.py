@@ -4,12 +4,33 @@
 # Author: Mikael Öhman
 # License: CC0
 
+import rveToolbox
 from numpy import *
 
-nelem = 5;
-n = nelem*2 + 1;
+# Controlled randomness, specify the seed value
+seed = 0
+# Generate inclusions:
+density = 0.1 # Minimum density
+averageRadius = 0.5 # Average inclusion radius
+boxSize = 30 # Max size of the domain with randomized particles. Computationally expensive to set it high.
+inclusions = rveToolbox.generateSphericalInclusions(density, boxSize, averageRadius*2/3, averageRadius*4/3, averageRadius*0.05, 3, seed)
 
-X, Y, Z = mgrid[0:nelem:n*1j, 0:nelem:n*1j, 0:nelem:n*1j ]
+sys.exit()
+# Debugging code (testing to see that chosen sizes work well):
+#rveToolbox.plotSphericalInclusions(inclusions, boxSize, 3, True)
+#rveSize = 10;
+#rvePosition = array([0,0,0])
+#rveInclusions = rveToolbox.getInclusionsInBox(rvePosition, rveSize, inclusions)
+#rveToolbox.plotSphericalInclusions(rveInclusions, boxSize, 3, True)
+
+rvePosition = array([0,0,0])
+rveSize = 1;
+nelem = 5*rveSize; # 5 elements per unit cell
+
+rveInclusions = rveToolbox.getInclusionsInBox(rvePosition, rveSize, inclusions)
+
+n = nelem*2 + 1;
+X, Y, Z = mgrid[0:rveSize:n*1j, 0:rveSize:n*1j, 0:rveSize:n*1j ]
 
 # Convenient numbering of nodes (keeping track of all 27 nodes for the fixed grid is almost impossible otherwise).
 nX, nY, nZ = mgrid[0:n, 0:n, 0:n ].astype(int)
@@ -58,17 +79,16 @@ for ez in range(0,nelem):
             elem[e,26] = nC[1+ex*2,1+ey*2,1+ez*2]
 
             # Check if center coordinate is within some sphere:
+            emat[e] = 1
             ccoord = array([
                     X[1+ex*2,1+ey*2,1+ez*2],
                     Y[1+ex*2,1+ey*2,1+ez*2],
                     Z[1+ex*2,1+ey*2,1+ez*2]
-                    ]) - nelem*0.5
-            dist = linalg.norm(ccoord)
-            if dist <= nelem*0.5:
-                emat[e] = 2
-            else:
-                emat[e] = 1
-
+                    ])
+            for inc in rveInclusions:
+                if linalg.norm(ccoord - inc[1]) <= inc[0]:
+                    emat[e] = 2
+                    break
 
 
 # Write the input file
