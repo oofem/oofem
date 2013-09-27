@@ -311,19 +311,17 @@ PlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 IRResultType
 PlaneStress2d :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    this->NLStructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 4;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
+    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
+	if(result != IRRT_OK) {
+		return result;
+	}
 
     if ( numberOfGaussPoints != 1 && numberOfGaussPoints != 4 && numberOfGaussPoints != 9 && numberOfGaussPoints != 16 ) {
         numberOfGaussPoints = 4;
         OOFEM_WARNING1("Number of Gauss points enforced to 4");
     }
 
-    //this->computeGaussPoints(); // called by postInitialize and must be in this order for planstrssxfem to work
     return IRRT_OK;
 }
 

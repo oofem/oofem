@@ -67,7 +67,6 @@ class TrPlaneStress2d : public NLStructuralElement, public ZZNodalRecoveryModelI
 protected:
     static FEI2dTrLin interp;
     double area;
-    int numberOfGaussPoints;
 
 public:
     TrPlaneStress2d(int n, Domain *d);

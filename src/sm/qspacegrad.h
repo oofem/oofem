@@ -55,7 +55,6 @@ namespace oofem {
 class QSpaceGrad : public QSpace, public GradDpElement
 {
 protected:
-    int numberOfGaussPoints;
     static FEI3dHexaLin interpolation;
 
 public:

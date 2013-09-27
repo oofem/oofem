@@ -105,6 +105,14 @@ public:
     //void drawInternalState(oofegGraphicContext&);
 #endif
 
+
+    // For mapping of primary unknowns
+    virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
+                                                                 TimeStep *stepN, const FloatArray &coords,
+                                                                 FloatArray &answer);
+    virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
+
+
 };
 
 } /* namespace oofem */

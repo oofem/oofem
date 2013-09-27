@@ -186,6 +186,12 @@ protected:
      * local domain number.
      */
     int globalNumber;
+
+    /**
+     * Number of integration points as specified by nip.
+     */
+    int numberOfGaussPoints;
+
 #ifdef __PARALLEL_MODE
     elementParallelMode parallel_mode;
     /**
@@ -1011,6 +1017,7 @@ public:
 
     // Overloaded methods:
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual void printOutputAt(FILE *file, TimeStep *tStep);

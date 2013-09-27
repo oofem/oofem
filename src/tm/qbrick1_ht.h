@@ -55,7 +55,6 @@ class QBrick1_ht : public TransportElement, public SpatialLocalizerInterface, pu
 {
 protected:
     static FEI3dHexaQuad interpolation;
-    int numberOfGaussPoints;
 
 public:
     QBrick1_ht(int n, Domain *d);

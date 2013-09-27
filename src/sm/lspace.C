@@ -209,12 +209,11 @@ double LSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
 IRResultType
 LSpace :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    this->NLStructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 8;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
+	IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
+	if(result != IRRT_OK) {
+		return result;
+	}
 
     if ( !( ( numberOfGaussPoints == 1 ) || ( numberOfGaussPoints == 8 ) || ( numberOfGaussPoints == 27 ) ) ) {
         numberOfGaussPoints = 8;

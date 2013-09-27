@@ -44,9 +44,7 @@
 ///@name Input fields for XfemManager
 //@{
 #define _IFT_XfemManager_Name "xfemmanager"
-#define _IFT_XfemManager_numberOfGeometryItems "numberofgeometryitems"  // -> numberOfEnrichmentDomains
 #define _IFT_XfemManager_numberOfEnrichmentItems "numberofenrichmentitems"
-#define _IFT_XfemManager_numberOfEnrichmentFunctions "numberofenrichmentfunctions"
 #define _IFT_XfemManager_numberOfGpPerTri "numberofgppertri"
 //@}
 
@@ -58,6 +56,7 @@ class EnrichmentItem;
 class IntArray;
 class Element;
 class DataStream;
+class DynamicInputRecord;
 
 /**
  * This class manages the xfem part
@@ -85,7 +84,7 @@ public:
     /// Constructor.
     XfemManager(Domain *domain);
     /// Destructor.
-    ~XfemManager();
+    virtual ~XfemManager();
 
     int giveNumGpPerTri() const {return mNumGpPerTri;} /// Number of Gauss points per sub-triangle in cut elements.
 
@@ -99,12 +98,14 @@ public:
 
     /// Initializes receiver according to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     int instanciateYourself(DataReader *dr);
     const char *giveClassName() const { return "XfemManager"; }
     const char *giveInputRecordName() const { return _IFT_XfemManager_Name; }
 
     Domain *giveDomain() { return this->domain; }
+    void setDomain(Domain *ipDomain);
 
     /// Clear the receiver
     void clear();

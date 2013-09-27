@@ -53,7 +53,6 @@ class QTruss1dGrad : public QTruss1d, public GradDpElement
 protected:
     double length;
     static FEI1dLin interpolation;
-    int numberOfGaussPoints;
 
 public:
     QTruss1dGrad(int n, Domain *d);

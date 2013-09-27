@@ -96,58 +96,7 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
 
 void PlaneStress2dXfem :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
-	OOFEM_ERROR("PlaneStress2dXfem :: computeNmatrixAt is not yet implemented.");
-/*
-    FloatArray Nc;
-    interpolation.evalN( Nc, *gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    // assemble xfem part of strain-displacement matrix
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
-    FloatArray Nd;
-    Nd.resize(4);
-    IntArray mask(4);
-    int counter = 4;
-    FloatArray N, coords;
-    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-        EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-        EnrichmentDomain *ed = ei->giveEnrichmentDomain(1);    
-
-        // Enrichment function and its gradient evaluated at the gauss point     
-        EnrichmentFunction *ef = ei->giveEnrichmentFunction(1);
-        this->computeGlobalCoordinates(coords, *gp->giveCoordinates());
-        double efgp = ef->evaluateFunctionAt(&coords, ed);
-
-        // adds up the number of the dofs from an enrichment item
-        // this part is used for the construction of a shifted enrichment
-        for ( int j = 1; j <= this->giveNumberOfDofManagers(); j++ ) {
-            DofManager *dMan = this->giveDofManager(j);
-            if ( ei->isDofManEnriched( dMan ) ) {
-                
-                FloatArray *nodecoords = dMan->giveCoordinates();
-                double efnode = ef->evaluateFunctionAt(nodecoords, ed);
-                Nd.at(j) = ( efgp - efnode ) * Nc.at(j) ;
-                
-                counter++;
-                mask.at(j) = 1;
-            } else {
-                mask.at(j) = 0;
-            }
-        }
-
-        // Create the total B-matrix by appending each contribution to B after one another.
-        N.resize(counter);
-        int column = 1;
-
-        for ( int i = 1; i <= 4; i++ ) {
-            N.at(column) = Nc.at(i);
-            column ++;
-            if ( mask.at(i) ) {
-                N.at(column) = Nd.at(i);
-                column++;
-            }
-        }
-    }
-    answer.beNMatrixOf(N,2);
-*/
+	XfemElementInterface_createEnrNmatrixAt(answer, *(gp->giveLocalCoordinates()), *this);
 }
 
 

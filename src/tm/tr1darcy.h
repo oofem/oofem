@@ -51,7 +51,6 @@ namespace oofem {
 class Tr1Darcy : public TransportElement, public NodalAveragingRecoveryModelInterface
 {
 protected:
-    int numberOfGaussPoints;
     static FEI2dTrLin interpolation_lin;
 
 public:
