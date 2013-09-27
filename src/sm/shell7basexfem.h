@@ -105,7 +105,7 @@ protected:
     virtual void vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
 
     IntArray DelaminatedInterfaceList;
-    void computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep);
+    void computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep);
 
 public:
     Shell7BaseXFEM(int n, Domain *d);   

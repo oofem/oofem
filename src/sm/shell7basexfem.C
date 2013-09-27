@@ -74,7 +74,7 @@ Shell7BaseXFEM :: postInitialize()
 }
 
 void
-Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep) 
+Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep) 
 {
     
     // Compute necessary quantities for evaluation of failure criterias

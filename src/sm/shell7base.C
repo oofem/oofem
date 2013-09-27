@@ -2567,7 +2567,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of types
     IntegrationRule *iRuleThickness = specialIntegrationRulesArray[ 0 ];
     FloatArray dS, Sold;
-    FloatMatrix B, Smat(2,6); // 2 stress components * num of in plane ip
+    FloatMatrix B, Smat(2,6); // 2 stress components * num of in plane ip ///@todo generalize
     Smat.zero();
     FloatArray Tcon(6), Trec(6);  Tcon.zero(); Trec.zero();
     
@@ -2819,7 +2819,7 @@ Shell7Base :: computeInterLaminarStressesAt(int interfaceNum, TimeStep *tStep, s
 
 
 void
-Shell7Base :: evaluateFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep) 
+Shell7Base :: evaluateFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep) 
 {
     //switch ( fc->giveType() ) {
 

@@ -1034,7 +1034,7 @@ IRResultType Inclusion :: initializeFrom(InputRecord *ir)
 //------------------
 
 void 
-Delamination :: updateGeometry(FailureCriteria *fc, TimeStep *tStep)
+Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
 {
 
     if ( fc->hasFailed(this->giveNumber()) ) { // interface has failed

@@ -58,7 +58,7 @@ class IntArray;
 class Element;
 
 class FractureManager;
-class FailureCriteriaManager;
+class FailureCriteria;
 /**
  * This class manages the fracture mechanics part
  *
@@ -90,13 +90,13 @@ enum FailureCriteriaType {
 
 
 
-class FailureCriteria
+class FailureCriteriaStatus
 {
     // abstract class from all the different failure criterias should be derived
 private:    
     
     //FractureManager *fMan;         
-    FailureCriteriaManager *cMan;   // pointer to its corresponding manager
+    FailureCriteria *cMan;   // pointer to its corresponding manager
     FailureCriteriaType type;       // local, nonlocal
     //FailureCriteriaName name;     // max strain, von Mises, effectivePlasticStrain, tsaiHill, J-integral, G, K etc.
     bool failedFlag;                // is the criteria fulfilled?
@@ -105,15 +105,15 @@ private:
     
 
 public:
-    FailureCriteria(int number, FailureCriteriaManager *cMan)
+    FailureCriteriaStatus(int number, FailureCriteria *cMan)
     { 
         this->number = number;
         //this->type = type;
         //this->failedFlag = false;
         this->cMan = cMan;
     };
-    FailureCriteria(){};
-    ~FailureCriteria(){}; // must destroy object correctly
+    FailureCriteriaStatus(){};
+    ~FailureCriteriaStatus(){}; // must destroy object correctly
     Element *el;
 
     
@@ -132,18 +132,18 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int instanciateYourself(DataReader *dr){ return 1;};
-    virtual const char *giveClassName() const { return "FailureCriteria"; }
+    virtual const char *giveClassName() const { return "FailureCriteriaStatus"; }
 
 };
 
 
 
-class DamagedNeighborLayered : public FailureCriteria
+class DamagedNeighborLayered : public FailureCriteriaStatus
 {
 
 public:
-    DamagedNeighborLayered(int number, FailureCriteriaManager *cMan) 
-    : FailureCriteria(number,  cMan) {}
+    DamagedNeighborLayered(int number, FailureCriteria *cMan) 
+    : FailureCriteriaStatus(number,  cMan) {}
 
     virtual bool evaluateFailureCriteria();
     virtual const char *giveClassName() const { return "DamagedNeighborLayered"; }
@@ -155,7 +155,7 @@ public:
 };
 
 
-class FailureCriteriaManager
+class FailureCriteria
 {
     // stores all the data for a given type of failure criteria
 
@@ -164,20 +164,20 @@ private:
     FractureManager *fMan;          // pointer to its corresponding manager
 
 public:
-    FailureCriteriaManager(FailureCriteriaType type, FractureManager *fMan)
+    FailureCriteria(FailureCriteriaType type, FractureManager *fMan)
         {
             this->type = type;
             this->fMan = fMan;
         };
-    ~FailureCriteriaManager(){}; // must destroy object correctly
+    ~FailureCriteria(){}; // must destroy object correctly
 
-    std :: vector< FailureCriteria *> list;
+    std :: vector< FailureCriteriaStatus *> list;
     FailureCriteriaType giveType() { return this->type; }
     FractureManager *giveFractureManager() { return this->fMan; }
 
     IRResultType initializeFrom(InputRecord *ir);
     int instanciateYourself(DataReader *dr);
-    virtual const char *giveClassName() const { return "FailureCriteriaManager"; }
+    virtual const char *giveClassName() const { return "FailureCriteria"; }
 };
 
 
@@ -186,7 +186,7 @@ class FailureModuleElementInterface : public Interface
 public:
     FailureModuleElementInterface() : Interface() {}
     virtual const char *giveClassName() const { return "FailureModuleElementInterface"; }
-    virtual void computeFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep) {};  
+    virtual void computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep) {};  
 };
 
 
@@ -208,7 +208,7 @@ public:
     
     void evaluateYourself(TimeStep *tStep);
     void updateXFEM(TimeStep *tStep);
-    void updateXFEM(FailureCriteria *fc, TimeStep *tStep);
+    void updateXFEM(FailureCriteriaStatus *fc, TimeStep *tStep);
 
     /// Constructor.
     FractureManager(Domain *domain);
@@ -224,7 +224,7 @@ public:
     Domain *giveDomain() { return this->domain; }
 
 
-    std :: vector< FailureCriteriaManager* > criteriaManagers;
+    std :: vector< FailureCriteria* > criteriaList;
   //std :: vector< CrackManager*           > crackManagers;   // Keep track of all cracks - each crack may have several fronts/tips
   //std :: vector< PropagationLawManager*  > propagationLawManagers;
 

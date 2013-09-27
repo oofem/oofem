@@ -74,34 +74,6 @@ StaticFracture :: solveYourselfAt(TimeStep *tStep)
         this->setTotalDisplacementFromUnknownsInDictionary(EID_MomentumBalance, VM_Total, tStep);
     }
     
-#if 0
-    // Instanciate fracture manager
-    // should be made in a more proper way with input and the like and moved to another part
-    if ( tStep->isTheFirstStep() ) {
-        IntArray criteriaList(1);
-        criteriaList.at(1) = 1; // criteria 1 (only one supported)
-        Domain *domain= this->giveDomain(1);
-        this->fMan = new FractureManager( domain );
-        
-        // initialize failure criteria managers
-        int numEl = domain->giveNumberOfElements();
-        
-        this->fMan->criteriaManagers.resize( criteriaList.giveSize() );
-
-        for ( int i = 1; i <= criteriaList.giveSize(); i++ ) {
-            // if local
-            this->fMan->criteriaManagers.at(i-1) = new FailureCriteriaManager(Local, this->fMan);
-            FailureCriteriaManager *cMan = this->fMan->criteriaManagers.at(i-1);
-            cMan->list.resize(numEl);
-            for ( int j = 1; j <= numEl; j++ ) { 
-                cMan->list.at(j - 1) = new DamagedNeighborLayered(Local, this->fMan);
-                cMan->list.at(j - 1)->thresholds.resize(1);
-                cMan->list.at(j - 1)->thresholds.at(1) = -10.0;
-                cMan->list.at(j - 1)->el = domain->giveElement(j);           
-            }
-        }
-    }
-#endif
 
     this->setUpdateStructureFlag(false);
     NonLinearStatic :: solveYourselfAt(tStep);
