@@ -58,191 +58,269 @@
 
 #include "shell7basexfem.h"
 
+
+//#define VERBOSE
+
 namespace oofem {
+REGISTER_FailureCriteria(DamagedNeighborLayered)
+
+
+
+//===================================================
+//  Fracture Manager
+//===================================================
 FractureManager :: FractureManager(Domain *domain)
 {
     this->domain = domain;
+    this->updateFlag = false;
 }
 
-FractureManager :: ~FractureManager()
-{
-}
+FractureManager :: ~FractureManager(){}
 
 void
-FractureManager :: clear()
-{
-}
+FractureManager :: clear(){}
 
 
 
 IRResultType FractureManager :: initializeFrom(InputRecord *ir)
 {
-    /*
+    ///@todo Write proper method
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
-    */
+    int numCriterias;
+    IR_GIVE_FIELD(ir, numCriterias, _IFT_FracManager_numcriterias);
+    this->criteriaManagers.resize( numCriterias );
+
     return IRRT_OK;
 }
 
 
 int FractureManager :: instanciateYourself(DataReader *dr)
 {
-    /*
+    ///@todo Write proper method
+
     const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
     std :: string name;
 
-    enrichmentItemList->growTo(numberOfEnrichmentItems);
-    for ( int i = 1; i <= numberOfEnrichmentItems; i++ ) {
-        InputRecord *mir = dr->giveInputRecord(DataReader :: IR_enrichItemRec, i);
+    // initialize failure criteria managers
+    
+    for ( int i = 1; i <= this->criteriaManagers.size(); i++ ) {
+        
+        InputRecord *mir = dr->giveInputRecord(DataReader :: IR_failCritRec, i);
         result = mir->giveRecordKeywordField(name);
 
         if ( result != IRRT_OK ) {
             IR_IOERR(giveClassName(), __proc, "", mir, result);
         }
 
-        EnrichmentItem *ei = CreateUsrDefEnrichmentItem( name.c_str(), i, this, this->giveDomain() );
-        if ( ei == NULL ) {
-            OOFEM_ERROR2( "XfemManager::instanciateYourself: unknown enrichment item (%s)", name.c_str() );
-        }
 
-        ei->initializeFrom(mir);
-        ei->instanciateYourself(dr);
-        this->enrichmentItemList->put(i, ei);
-        this->createEnrichedDofs();
-    }
-    */
-    return 1;
-}
+        this->criteriaManagers.at(i-1) = new FailureCriteriaManager(Local, this);
+        FailureCriteriaManager *cMan = this->criteriaManagers.at(i-1);
+
+        //FailureCriteria *failCriteria = classFactory.createFailureCriteria( name.c_str(), i, cMan );
+
+        //if ( failCriteria == NULL ) {
+        //    OOFEM_ERROR2( "FractureManager :: instanciateYourself: unknown failure criteria (%s)", name.c_str() );
+        //}
 
 
-// remove?
-void 
-FractureManager :: evaluateFailureCriterias(TimeStep *tStep)
-{
-    // For element wise evaluation of failure criteria
-    /* Go through all elements and evaluate all failure criterias that are applicable to the given element.
-       Should maybe be applied to element sets instead  
+        if( cMan->giveType() == Local ) { // if loca, allocate one failure criteria for each element
 
-       How to know if a certain fc should be evaluated? what if the element has already failed? 
-    */
-    Domain *domain= this->giveDomain();   
-
-    for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) { 
-        printf( "\n -------------------------------\n");
-        Element *el = domain->giveElement(i);
-        for ( int j = 1; j <= this->failureCriterias->giveSize(); j++ ) {
-            FailureCriteria *fc = this->failureCriterias->at(j);
-            this->evaluateFailureCriteria(fc, el, tStep);
-
-            if( fc->hasFailed() ) {
-                printf( "Element %d fails \n", el->giveNumber() );
-                this->setUpdateFlag(true);
+            int numEl = this->domain->giveNumberOfElements();
+            cMan->list.resize(numEl);
+            for ( int j = 1; j <= numEl; j++ ) { 
+                cMan->list.at(j - 1) = classFactory.createFailureCriteria( name.c_str(), j, cMan );
+                if ( cMan->list.at(j - 1) == NULL ) {
+                    OOFEM_ERROR2( "FractureManager :: instanciateYourself: unknown failure criteria (%s)", name.c_str() );
+                }
+                cMan->list.at(j - 1)->initializeFrom(mir); 
+                cMan->list.at(j - 1)->el = domain->giveElement(j);           
             }
         }
-
     }
 
-}
+    return 1;
 
-
-void 
-FractureManager :: evaluateFailureCriteria(FailureCriteria *fc, Element *el, TimeStep *tStep) 
-{
-    // 1. compute quantities necessary for evaluation of fc
-    // 2. evaluate fc
-    // 3. if failure, update necessary geometry
-
-    // If we have a layered cross section it needs special treatment
-    // or only check CS when a special quantity is asked for, e.g interlam eval.
-    // Probably must separate FC into 2 groups: regular and layered CS
-
-    // reset fc
-    fc->quantities.clear();
-
-
-
-
-
-    // Compute fc quantities
-    if ( ! fc->evaluateFCQuantities(el, tStep) ) { // cannot evaluate on its own, ask element for implementation through an interface
-        FailureModuleElementInterface *fmInterface =
-            dynamic_cast< FailureModuleElementInterface * >( el->giveInterface(FailureModuleElementInterfaceType) );
-        if ( fmInterface ) { // if element supports the failure module interface
-            fmInterface->computeFailureCriteriaQuantities(fc, tStep); // compute quantities
-        }
-    }
-
-    // Compare quantity with thresholds
-    fc->evaluateFailureCriteria();
-
-     
 }
 
 
 bool
 FailureCriteria :: evaluateFCQuantities(Element *el, TimeStep *tStep)
 {
-
-    switch ( this->giveType() ) {
-
-    default:
-        return false;
-    }
-}
-
-void 
-FractureManager :: updateXFEM(TimeStep *tStep)
-{ 
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
-    EnrichmentItem *ei;
-    for ( int k = 1; k <= xMan->giveNumberOfEnrichmentItems(); k++ ) {    
-        ei = xMan->giveEnrichmentItem(k);
-        ei->updateGeometry(tStep, this);
-    }
-    //if ( this->requiresUnknownsDictionaryUpdate() ) {
-        xMan->createEnrichedDofs();
-    //}
+    // Should contain calls to default implementations for evaluation of failure criteria quantities
+    return false;
 }
 
 
 void
-FractureManager :: update(TimeStep *tStep)
+FractureManager :: evaluateYourself(TimeStep *tStep)
 {
+    
     this->setUpdateFlag(false);
-    this->updateXFEM(tStep);
+    this->evaluateFailureCriterias(tStep);
 
 }
 
+
+
+void 
+FractureManager :: evaluateFailureCriterias(TimeStep *tStep) 
+{
+    // Go through all the failure criteria managers. These in turn keep track of the failure criterias 
+    // which are responsible for their own evaluation
+
+    for ( int i = 1; i <= this->criteriaManagers.size(); i++ ) {
+
+#ifdef VERBOSE
+        printf( "\n  Evaluating failure criteria %i \n", i);
+#endif
+        FailureCriteriaManager *cMan = this->criteriaManagers.at(i-1);
+        if ( cMan->giveType() == Local ) { 
+
+            for ( int j = 1; j <= cMan->list.size(); j++ ) {
+#ifdef VERBOSE
+                printf( "\n    Evaluating for element %i \n", j);
+#endif
+                FailureCriteria *fc = cMan->list.at(j-1);
+                fc->computeFailureCriteriaQuantities(tStep);
+
+                // temporary
+                //if ( fc->giveClassName() == "DamagedNeighborLayered") {
+                if ( DamagedNeighborLayered *dfc = dynamic_cast<DamagedNeighborLayered *>(fc) ) {
+                    this->setUpdateFlag( dfc->evaluateFailureCriteria() );
+                }
+
+            }
+
+        } else if (cMan->giveType() == Nonlocal ) {
+            OOFEM_ERROR1("FractureManager :: evaluateFailureCriterias - Nonlocal criteria not supported yet");
+        } else {
+            OOFEM_ERROR1("FractureManager :: evaluateFailureCriterias - Unknown failure criteria");
+        }
+    }
+}
 
 //---------------------------------------------------
 
 bool 
-FailureCriteria :: evaluateFailureCriteria() 
+FailureCriteria :: computeFailureCriteriaQuantities(TimeStep *tStep) 
 {
-    // Compare quantity with threshold    
-    failedFlags.resize(this->quantities.size());
-    for ( int i = 1; i <= this->quantities.size(); i++ ) { // if there are several quantities like interfaces
+    
+    Element *el = this->el;
 
-        failedFlags.at(i-1) = false;
-        for ( int j = 1; j <= this->quantities[i-1].size(); j++ ) { // all the evaluation points (often the integration points)
-            FloatArray &values = this->quantities[i-1][j-1];        // quantities in each evaluation point (e.g. max stress will check stress components in different directions)
-            for ( int k = 1; k <= values.giveSize(); k++ ) {
-                // assumes there is only one value to compare against which is generally 
-                // not true, e.g. tension/compression thresholds
-                //if ( values.at(k) >= this->thresholds.at(k) ) {
-                if ( values.at(k) > this->thresholds.at(1) ) {
-                    //this->failedFlag = true;
-                    failedFlags.at(i-1) = true;
-                }
-            }
+    // If the quantity cannot be evaluated ask element for implementation through an interface
+    if ( ! this->evaluateFCQuantities(el, tStep) ) { 
+        FailureModuleElementInterface *fmInterface =
+            dynamic_cast< FailureModuleElementInterface * >( el->giveInterface(FailureModuleElementInterfaceType) );
+    
+        if ( fmInterface ) { // if element supports the failure module interface
+            fmInterface->computeFailureCriteriaQuantities(this, tStep); // compute quantities
+ 
         }
     }
 
-    return false;
+    return true;
 }
 
+
+
+void 
+FractureManager :: updateXFEM(TimeStep *tStep)
+{ 
+    if ( this->giveUpdateFlag() ) {
+        XfemManager *xMan = this->giveDomain()->giveXfemManager();
+        EnrichmentItem *ei;
+    
+        for ( int k = 1; k <= xMan->giveNumberOfEnrichmentItems(); k++ ) {    
+#ifdef VERBOSE
+            printf( "\n Updating geometry of enrichment item %i ", k);
+#endif
+            ei = xMan->giveEnrichmentItem(k);
+
+            for ( int i = 1; i <= this->criteriaManagers.size(); i++ ) {
+#ifdef VERBOSE
+                printf( "based on failure criteria %i \n", i);
+#endif
+                FailureCriteriaManager *cMan = this->criteriaManagers.at(i-1);
+
+                for ( int j = 1; j <= cMan->list.size(); j++ ) { // each criteria (often each element)
+#ifdef VERBOSE
+                    printf( "\n  Element %i ", j);
+#endif
+                    FailureCriteria *fc = cMan->list.at(j-1);
+                    ei->updateGeometry(fc, tStep);
+                }
+            }    
+        }
+    
+        //xMan->createEnrichedDofs();
+        //xMan->updateYourself();
+    }
+
+}
+
+
+
+
+//=======================
+// DamagedNeighborLayered
+//=======================
+bool
+DamagedNeighborLayered :: evaluateFailureCriteria() 
+{
+    // Go through all the layers and compare against threshold value
+    bool criteriaFulfilled = false;
+    failedFlags.resize(this->layerDamageValues.giveSize());
+    for ( int i = 1; i <= this->failedFlags.size(); i++ ) { // if there are several quantities like interfaces
+
+        failedFlags.at(i-1) = false;
+        if ( this->layerDamageValues.at(i) > this->thresholds.at(1) ) {
+            this->failedFlags.at(i-1) = true;
+            criteriaFulfilled = true;
+        }
+    }
+    return criteriaFulfilled;
+};
+
+
+
+//=======================
+// Failure Criteria Manager
+//=======================
+
+IRResultType FailureCriteriaManager :: initializeFrom(InputRecord *ir)
+{
+    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    //IRResultType result; // Required by IR_GIVE_FIELD macro
+
+    return IRRT_OK;
+}
+
+
+
+
+IRResultType FailureCriteria :: initializeFrom(InputRecord *ir)
+{
+    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    //IRResultType result; // Required by IR_GIVE_FIELD macro
+
+    return IRRT_OK;
+}
+
+IRResultType DamagedNeighborLayered :: initializeFrom(InputRecord *ir)
+{
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result; // Required by IR_GIVE_FIELD macro
+
+    // Read damage threshold value
+    this->thresholds.resize(1);
+    IR_GIVE_FIELD(ir, this->thresholds.at(1), _IFT_DamagedNeighborLayered_DamagedThreshold);
+
+    this->setType(Local);
+
+    return IRRT_OK;
+}
 
 } // end namespace oofem

@@ -99,6 +99,7 @@ XFEMStatic :: solveYourselfAt(TimeStep *tStep)
 
         if ( incrementalLoadVector.giveSize() != neq ) {
         	FloatArray incrementalLoadVectorNew;
+            incrementalLoadVector.zero(); // temp JB - load vector needs to be recomputed if xfem dofs are introduced 
             setValsFromDofMap(incrementalLoadVectorNew, incrementalLoadVector);
             incrementalLoadVector = incrementalLoadVectorNew;
         }
@@ -107,6 +108,7 @@ XFEMStatic :: solveYourselfAt(TimeStep *tStep)
         // Map values in the old initialLoadVector to the new initialLoadVector
         if ( initialLoadVector.giveSize() != neq ) {
         	FloatArray initialLoadVectorNew;
+            initialLoadVector.zero(); // temp JB - load vector needs to be recomputed if xfem dofs are introduced
             setValsFromDofMap(initialLoadVectorNew, initialLoadVector);
             initialLoadVector = initialLoadVectorNew;
         }
@@ -116,29 +118,62 @@ XFEMStatic :: solveYourselfAt(TimeStep *tStep)
 //    printf("After: ");
 //    initialLoadVector.printYourself();
 
-#ifdef USE_FRACTURE_MANAGER
-    // Instanciate fracture manager
-    // should be made in a more proper way with input and the like
-    if ( tStep->isTheFirstStep() ) {
 
-        this->fMan = new FractureManager( this->giveDomain(1) );
-        this->fMan->failureCriterias = new AList< FailureCriteria >(1); // list of all the criterias to evaluate
-        //FailureCriteria *fc = new FailureCriteria(FC_MaxShearStress);
-        //FailureCriteria *fc = new FailureCriteria(FC_DamagedNeighborCZ);
-
-        FailureCriteria *fc = new FailureCriteria(FC_DamagedNeighborCZ, this->fMan);
-
-
-        fc->thresholds.resize(1);
-        fc->thresholds.at(1) = -10.0;
-        this->fMan->failureCriterias->put(1, fc);
-    }
-
-
-#endif
 
     this->setUpdateStructureFlag(false);
     NonLinearStatic :: solveYourselfAt(tStep);
+
+}
+
+void
+XFEMStatic :: terminate(TimeStep *tStep)
+{
+    this->doStepOutput(tStep);
+    this->printReactionForces(tStep, 1);
+    // update load vectors before storing context
+    fflush(this->giveOutputStream());
+    this->updateLoadVectors(tStep);
+    this->saveStepContext(tStep);
+
+    // Propagate fronts
+    int numDom = this->giveNumberOfDomains();
+    for( int i = 1; i <= numDom; i++ ) {
+    	Domain *domain = this->giveDomain(i);
+    	XfemManager *xMan = domain->giveXfemManager();
+    	xMan->propagateFronts();
+    }
+
+    // Update element subdivisions if necessary
+    // (e.g. if a crack has moved and cut a new element)
+    for( int domInd = 1; domInd <= this->giveNumberOfDomains(); domInd++ ) {
+
+        Domain *domain = this->giveDomain(domInd);
+    	int numEl = domain->giveNumberOfElements();
+
+    	for(int i = 1; i <= numEl; i++) {
+    		Element *el = domain->giveElement(i);
+
+    		XfemElementInterface *xfemEl = dynamic_cast<XfemElementInterface*> (el);
+
+    		if( xfemEl != NULL ) {
+    			xfemEl->recomputeGaussPoints();
+    		}
+
+    	}
+
+    }
+    
+    // Fracture/failure mechanics evaluation    
+    for( int i = 1; i <= numDom; i++ ) {
+        if ( this->giveDomain(i)->hasFractureManager() ) { // Will most likely fail if numDom > 1
+    
+        this->fMan->evaluateYourself(tStep);
+        this->fMan->updateXFEM(tStep); // Update XFEM structure based on the fracture manager
+
+        this->setUpdateStructureFlag( this->fMan->giveUpdateFlag() ); // if the internal structure need to be updated
+        }
+    }
+
 
 }
 
@@ -251,16 +286,7 @@ XFEMStatic :: updateYourself(TimeStep *tStep)
 {
     NonLinearStatic :: updateYourself(tStep);
 
-    #ifdef USE_FRACTURE_MANAGER
 
-    // Fracture/failure mechanics evaluation
-    // Upadate components like the XFEM manager and its sub-components
-    this->fMan->update(tStep);
-
-
-
-    this->setUpdateStructureFlag( this->fMan->giveUpdateFlag() ); // if the internal structure need to be updated
-#endif
 
 
     // TODO: Check if update is actually needed
@@ -282,25 +308,6 @@ XFEMStatic :: updateYourself(TimeStep *tStep)
     }
 
 
-    // Update element subdivisions if necessary
-    // (e.g. if a crack has moved and cut a new element)
-    for( int domInd = 1; domInd <= this->giveNumberOfDomains(); domInd++ ) {
-
-        Domain *domain = this->giveDomain(domInd);
-    	int numEl = domain->giveNumberOfElements();
-
-    	for(int i = 1; i <= numEl; i++) {
-    		Element *el = domain->giveElement(i);
-
-    		XfemElementInterface *xfemEl = dynamic_cast<XfemElementInterface*> (el);
-
-    		if( xfemEl != NULL ) {
-    			xfemEl->recomputeGaussPoints();
-    		}
-
-    	}
-
-    }
 
 }
 

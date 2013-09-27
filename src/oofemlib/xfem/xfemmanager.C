@@ -73,16 +73,6 @@ XfemManager :: clear()
     numberOfEnrichmentItems = -1;
 }
 
-#if 0
-void XfemManager :: giveActiveEIsFor(IntArray &answer, const Element *elem)
-{
-    for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ) {
-        if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ) {
-            answer.followedBy( enrichmentItemList->at(i)->giveNumber() );
-        }
-    }
-}
-#endif
 
 bool XfemManager :: isElementEnriched(const Element *elem)
 {
@@ -108,34 +98,6 @@ EnrichmentItem *XfemManager :: giveEnrichmentItem(int n)
     return NULL;
 }
 
-
-/* Jim
-void 
-XfemManager :: createEnrichedDofs()
-{
-    // Creates new dofs due to enrichment and appends them to the dof managers
-    ///@todo: need to add check if dof already exists in the dofmanager
-    int nrDofMan = this->giveDomain()->giveNumberOfDofManagers();
-    IntArray dofIdArray;
- 
-    for (int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ ) {
-        EnrichmentItem *ei = this->giveEnrichmentItem(j);
-        for ( int k = 1; k <= ei->giveNumberOfEnrichmentDomains(); k++ ) {
-            for ( int i = 1; i <= nrDofMan; i++ ) {
-                DofManager *dMan = this->giveDomain()->giveDofManager(i); 
-                if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,k) ) {
-                    ei->computeDofManDofIdArray(dofIdArray, dMan, k);
-                    int nDofs = dMan->giveNumberOfDofs();
-                    for ( int m = 1; m<= dofIdArray.giveSize(); m++ ) {
-                        dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );   
-                    }
-                }
-            }
-        }
-    }
-
-}
-*/
 
 void
 XfemManager :: createEnrichedDofs()
@@ -275,4 +237,12 @@ void XfemManager :: updateYourself()
         enrichmentItemList->at(i)->updateGeometry();
     }
 }
+
+void XfemManager :: propagateFronts()
+{
+    for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
+        enrichmentItemList->at(i)->propagateFronts();
+    }
+}
+
 } // end namespace oofem

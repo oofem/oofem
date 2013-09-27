@@ -63,6 +63,7 @@
 #include "errorestimator.h"
 #include "range.h"
 #include "compiler.h"
+#include "fracturemanager.h"
 
  // For automatic dof creation, (should try to do without this) (move that stuff into DofManager class)
 #include "boundarycondition.h"
@@ -110,6 +111,7 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
     outputManager         = new OutputManager(this);
     smoother              = NULL;
     topology              = NULL;
+    fracManager           = NULL;
 
     nonlocalUpdateStateCounter = 0;
 
@@ -419,6 +421,12 @@ Domain :: hasXfemManager()
 }
 
 
+bool
+Domain :: hasFractureManager()
+{
+    return fracManager != NULL;
+}
+
 EngngModel *
 Domain :: giveEngngModel()
 // Returns the time integration algorithm. Creates it if it does not
@@ -468,6 +476,7 @@ Domain :: instanciateYourself(DataReader *dr)
     std :: string name, topologytype;
     int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg, nset=0;
     bool nxfemman = false;
+    bool nfracman = false;
     RandomFieldGenerator *rfg;
     //XfemManager *xMan;
     // mapping from label to local numbers for dofmans and elements
@@ -508,6 +517,8 @@ Domain :: instanciateYourself(DataReader *dr)
     IR_GIVE_OPTIONAL_FIELD(ir, topologytype, _IFT_Domain_topology);
     this->nsd = -1; ///@todo Change this to default 0 when the domaintype record has been removed.
     IR_GIVE_OPTIONAL_FIELD(ir, this->nsd, _IFT_Domain_numberOfSpatialDimensions);
+    IR_GIVE_OPTIONAL_FIELD(ir, nfracman, _IFT_Domain_nfracman);
+
 
     // read optional number of nonlocalBarriers
     nbarrier = 0;
@@ -861,6 +872,16 @@ Domain :: instanciateYourself(DataReader *dr)
     if ( topologytype.length() > 0 ) VERBOSE_PRINT0("Instanciated topologies ", topologytype.length());
 #  endif
 
+
+    if ( nfracman ) {
+        fracManager = new FractureManager(this);
+        ir = dr->giveInputRecord(DataReader ::IR_fracManRec, 1);
+        fracManager->initializeFrom(ir);
+        fracManager->instanciateYourself(dr);
+    }
+#  ifdef VERBOSE
+    if ( nfracman ) VERBOSE_PRINT0("Instanciated fracture manager ", nxfemman);
+#  endif
 
     // change internal component references from labels to assigned local numbers
     MapBasedEntityRenumberingFunctor labelToLocNumFunctor(dofManLabelMap, elemLabelMap);

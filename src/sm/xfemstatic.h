@@ -36,7 +36,7 @@
 #define XFEMSTATIC_H_
 
 #include "nlinearstatic.h"
-
+#include "fracturemanager.h" // JB
 #include <map>
 
 ///@name Input fields for XFEMStatic
@@ -65,6 +65,7 @@ public:
     virtual bool requiresEquationRenumbering(TimeStep *) { return updateStructureFlag; }
 
     virtual void solveYourselfAt(TimeStep *tStep);
+    virtual void terminate(TimeStep *tStep);
     virtual void updateLoadVectors(TimeStep *tStep);
 
     virtual void updateYourself(TimeStep *tStep);
@@ -87,6 +88,10 @@ protected:
     // Map for updating initialLoadVector after resize
     // Maps <domain index, node index, local dof index> to global equation number
     std::map< std::vector<int>, int > mDofEqnNumMap;
+
+    // Jim
+    FractureManager *fMan;
+    
 };
 
 } /* namespace oofem */

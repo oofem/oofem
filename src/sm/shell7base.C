@@ -516,7 +516,7 @@ Shell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solV
     answer.zero(); tempAnswer.zero();
 
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     
-    FloatMatrix temp, Ktemp;
+    FloatMatrix temp;
     FloatArray genEpsI, genEpsJ, genEps, lCoords;
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
@@ -1474,7 +1474,7 @@ Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const 
         Fp.beTProductOf(N, fp);
         Fp.times(dA);
         answer.assemble(Fp, this->giveOrdering(All));
-		
+        
     }
 }
 
@@ -1800,7 +1800,7 @@ Shell7Base :: ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, int laye
 {  // evaluates N^T sigma over element volume
    // N(nsigma, nsigma*nnodes)
    // Definition : sigmaVector = N * nodalSigmaVector
-    FloatArray stressVector, help, n;
+    FloatArray stressVector, n;
     Element *elem  = this->ZZNodalRecoveryMI_giveElement();
     IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
     GaussPoint *gp;
@@ -1838,7 +1838,7 @@ Shell7Base :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, int layer, I
     // The size of N mtrx is (nstresses, nnodes*nstreses)
     // Definition : sigmaVector = N * nodalSigmaVector
     //
-    double volume = 0.0;
+    //double volume = 0.0;
     FloatMatrix fullAnswer;
     FloatArray n;
     IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
@@ -1853,7 +1853,7 @@ Shell7Base :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, int layer, I
         this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(n, gp, type);
         //fullAnswer.plusDyadSymmUpper(n, n, dV);
         fullAnswer.plusDyadSymmUpper(n, dV);
-        volume += dV;
+        //volume += dV;
     }
 
 
@@ -2331,8 +2331,8 @@ Shell7Base :: computeNmatrixAt(FloatArray &lcoords, FloatMatrix &answer)
     answer.zero();
     FloatArray N;
     this->fei->evalN( N, lcoords, FEIElementGeometryWrapper(this) );
-	//N.printYourself();
-	//lcoords.printYourself();
+    //N.printYourself();
+    //lcoords.printYourself();
     /*   nno*3 nno*3 nno
      * 3 [N_x   0    0
      * 3   0   N_m   0
@@ -2405,7 +2405,6 @@ Shell7Base :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int laye
     this->giveUpdatedSolutionVector(solVec, tStep);
     FloatArray x, m; double gam=0;
     this->giveUnknownsAt(localCoords, solVec, x, m, gam, tStep); 
-
     double zeta = giveGlobalZcoordInLayer(localCoords.at(3), layer);
     double fac = ( zeta + 0.5 * gam * zeta * zeta );
     globalCoords = x + fac*m;
@@ -2437,7 +2436,7 @@ Shell7Base :: giveCompositeExportData(CompositeCell &compositeCell, IntArray &pr
         for ( int i = 1; i <= numCellNodes; i++ ) {
             el.connectivity.at(i) = val++;
         }
-        ConnectivityTable *ct =this->giveDomain()->giveConnectivityTable();
+        //ConnectivityTable *ct =this->giveDomain()->giveConnectivityTable();
         
         // Offset
         offset += numCellNodes;
@@ -2463,6 +2462,7 @@ Shell7Base :: giveCompositeExportData(CompositeCell &compositeCell, IntArray &pr
                     u.subtract(el.nodeCoords[j-1]);
                     el.nodeVars[nodeVarNum][j-1].resize(3);
                     el.nodeVars[nodeVarNum][j-1] = u;
+                    
                 }
             } else {
                 ZZNodalRecoveryMI_recoverValues(el.nodeVars[i-1], layer, ( InternalStateType ) 1, tStep);
@@ -2518,7 +2518,7 @@ Shell7Base :: recoverValuesFromIP(std::vector<FloatArray> &recoveredValues, int 
 {
     // recover nodal values by coosing the ip closest to the node
 
-    FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
+    //FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
 
     // composite element interpolator
 
@@ -2530,7 +2530,7 @@ Shell7Base :: recoverValuesFromIP(std::vector<FloatArray> &recoveredValues, int 
 
     // Find closest ip to the nodes
     IntArray closestIPArray(numNodes);
-    FloatArray nodeCoords, ipCoords, distVec, ipValues, n;
+    FloatArray nodeCoords, ipCoords, ipValues;
     FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords;
     giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords);   
 
@@ -2566,7 +2566,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
     std::vector<FloatArray> recoveredValues;
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of types
     IntegrationRule *iRuleThickness = specialIntegrationRulesArray[ 0 ];
-    FloatArray lCoords, dS, Sold;
+    FloatArray dS, Sold;
     FloatMatrix B, Smat(2,6); // 2 stress components * num of in plane ip
     Smat.zero();
     FloatArray Tcon(6), Trec(6);  Tcon.zero(); Trec.zero();
@@ -2648,12 +2648,12 @@ Shell7Base :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &ans
         int pos = VTKWedge2EL[ i-1 ];
         //coords[ i - 1 ] = new FloatArray();
         coords[ i - 1 ] = &nodes[ pos - 1];
-		
+        
     }
     
     FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
     FloatMatrix dNdx;
-    double detJ = interpol->evaldNdx( dNdx, lcoords, FEIVertexListGeometryWrapper(numNodes, (const FloatArray **)coords ) );
+    interpol->evaldNdx( dNdx, lcoords, FEIVertexListGeometryWrapper(numNodes, (const FloatArray **)coords ) );
     
 
 
@@ -2674,9 +2674,9 @@ Shell7Base :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &ans
     
     // how to destruct?
     for ( int i = 1; i <= numNodes; i++ ) {
-		//coords [ i - 1 ]->~FloatArray(); 
+        //coords [ i - 1 ]->~FloatArray(); 
     }
-	
+    
 }
 
 
@@ -2727,7 +2727,7 @@ Shell7Base :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &no
 void
 Shell7Base :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords) {
     // Local coords for a quadratic wedge element (VTK cell type 26)
-    double z = 0.99;
+    double z = 0.999;
     nodeLocalXi1Coords.setValues(15, 1., 0., 0., 1., 0., 0., .5, 0., .5, .5, 0., .5, 1., 0., 0.);      
     nodeLocalXi2Coords.setValues(15, 0., 1., 0., 0., 1., 0., .5, .5, 0., .5, .5, 0., 0., 1., 0.);
     nodeLocalXi3Coords.setValues(15, -z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.);
@@ -2821,29 +2821,29 @@ Shell7Base :: computeInterLaminarStressesAt(int interfaceNum, TimeStep *tStep, s
 void
 Shell7Base :: evaluateFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep) 
 {
-    switch ( fc->giveType() ) {
+    //switch ( fc->giveType() ) {
 
-    case FC_MaxShearStress:
-        // Stress ordering (1, 5, 9, 6, 3, 2) = (xx, yy, zz, yz, xz, xy)
-        int numInterfaces = this->layeredCS->giveNumberOfLayers() - 1;
-        std::vector < FloatArray > interLamStresses;
-        fc->quantities.resize(numInterfaces); // will overwrite this every time
-        for (int i = 1; i <= numInterfaces; i++ ) {    
-            this->computeInterLaminarStressesAt(i, tStep, interLamStresses); // all 6 components in each evaluation point (ip)
-            int numEvalPoints = interLamStresses.size();
-            fc->quantities[i-1].resize(numEvalPoints); // most often = numIP
-            
-            for ( int j = 1; j <= numEvalPoints; j++) {
-                FloatArray &values = fc->quantities[i-1][j-1]; // one resulting shear stress
-                FloatArray &vS = interLamStresses[j-1];        // Stress in eval point
-                values.resize(1);                              // scalar measure in this case
-                 
-                values.at(1) = sqrt( vS.at(2)*vS.at(2) + vS.at(3)*vS.at(3) ); // components can't be right here? shouldn't it be a traction vector?
+    //case FC_MaxShearStress:
+    //    // Stress ordering (1, 5, 9, 6, 3, 2) = (xx, yy, zz, yz, xz, xy)
+    //    int numInterfaces = this->layeredCS->giveNumberOfLayers() - 1;
+    //    std::vector < FloatArray > interLamStresses;
+    //    fc->quantities.resize(numInterfaces); // will overwrite this every time
+    //    for (int i = 1; i <= numInterfaces; i++ ) {    
+    //        this->computeInterLaminarStressesAt(i, tStep, interLamStresses); // all 6 components in each evaluation point (ip)
+    //        int numEvalPoints = interLamStresses.size();
+    //        fc->quantities[i-1].resize(numEvalPoints); // most often = numIP
+    //        
+    //        for ( int j = 1; j <= numEvalPoints; j++) {
+    //            FloatArray &values = fc->quantities[i-1][j-1]; // one resulting shear stress
+    //            FloatArray &vS = interLamStresses[j-1];        // Stress in eval point
+    //            values.resize(1);                              // scalar measure in this case
+    //             
+    //            values.at(1) = sqrt( vS.at(2)*vS.at(2) + vS.at(3)*vS.at(3) ); // components can't be right here? shouldn't it be a traction vector?
 
-            }
-        }
+    //        }
+    //    }
 
-    };
+    //};
 }
 
 

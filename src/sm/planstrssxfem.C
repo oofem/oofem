@@ -69,7 +69,6 @@ PlaneStress2dXfem :: computeGaussPoints()
     for(int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++)
     {
     	std::vector<FloatArray> intersecPoints;
-    int counter = 8; // 8 continuous dofs
     	EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
         // Compute the value of the enrichment function in the nodes 
         // in order to construction a shifted enrichment

@@ -134,15 +134,14 @@ public:
 
     // Should update receiver geometry to the state reached at given time step.
     virtual void updateGeometry(TimeStep *tStep) {};
-    virtual void updateGeometry(TimeStep *tStep, FractureManager *fMan);
+    virtual void updateGeometry(FailureCriteria *fc, TimeStep *tStep){};
     virtual void updateGeometry();
+    virtual void propagateFronts();
 
 
     int giveStartOfDofIdPool() const { return this->startOfDofIdPool; };
+    int giveEndOfDofIdPool() const { return this->endOfDofIdPool; };
     void computeDofManDofIdArray(IntArray &DofIdArray, DofManager *dMan); // list of id's a particular dof manager supports
-    void computeDofManDofIdArray(IntArray &DofIdArray, DofManager *dMan, int enrichmentDomainNumber); // temp
-
-    void giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber) const; // list of id's for the enrichment dofs OLD-JB
     void giveEIDofIdArray(IntArray &answer) const; // list of id's for the enrichment dofs
 
 
@@ -163,9 +162,10 @@ public:
     template< typename T >
     void interpGradLevelSet(FloatArray &oGradLevelSet, const FloatMatrix &idNdX, const T &iNodeInd) const;
 
+    // JB - temporary
     template< typename T >
-    //void interpSurfaceLevelSet(double &oLevelSet, const T &iNodeInd) const;
     void interpSurfaceLevelSet(double &oLevelSet, const FloatArray &iN, const T &iNodeInd, double iXi) const;
+    void interpSurfaceLevelSet(double &oLevelSet, double iXi) const;
 
     // Level set routines
     bool giveLevelSetsNeedUpdate() const { return mLevelSetsNeedUpdate; }
@@ -206,6 +206,7 @@ protected:
     /// Link to associated Xfem manager.
     XfemManager *xMan;
     int startOfDofIdPool; // points to the first available dofId number associated with the ei
+    int endOfDofIdPool;
 
     /// Geometry associated with EnrichmentItem.
     IntArray enrichmentDomainNumbers;
@@ -287,27 +288,10 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Delamination_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    FloatArray enrichmentDomainXiCoords; // old
-    double delamXiCoord;
-    IntArray enrichmentDomainInterfaceList; // list of what interface each delam corresponds to
-    double giveDelaminationXiCoord(int delamNum){
-        return this->enrichmentDomainXiCoords.at(delamNum);
-    }
-    void giveActiveDelaminationXiCoords(FloatArray &xiCoords, Element *element);
-    std :: list< std :: pair< int, double > >delaminationXiCoordList;
-    double giveDelaminationZCoord(int n, Element *element);
+    double delamXiCoord;    // defines at what local xi-coord the delamination is defined
 
-    int giveDelaminationGroupAt(double z);
-    FloatArray delaminationGroupMidZ(int dGroup);
-    double giveDelaminationGroupMidZ(int dGroup, Element *e);
-
-    FloatArray delaimnationGroupThickness;
-    double giveDelaminationGroupThickness(int dGroup, Element *e);
-
-    void giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &zBottom, Element *e);
-    double heaviside(double xi, double xi0);
     virtual Material *giveMaterial() { return mat; }
-    void updateGeometry(TimeStep *tStep, FractureManager *fMan, Element *el, FailureCriteria *fc);
+    virtual void updateGeometry(FailureCriteria *fc, TimeStep *tStep);
     virtual void updateLevelSets(XfemManager &ixFemMan);
 };
 
@@ -363,6 +347,7 @@ void EnrichmentItem :: interpSurfaceLevelSet(double &oLevelSet, const FloatArray
         oLevelSet -= iN.at(i) * mLevelSetSurfaceNormalDir [ iNodeInd [ i - 1 ] - 1 ];
     }
 }
+
 
 
 
