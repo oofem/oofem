@@ -53,7 +53,6 @@ TrPlaneStress2dXFEM::~TrPlaneStress2dXFEM() {
 int TrPlaneStress2dXFEM::checkConsistency()
 {
 	TrPlaneStress2d :: checkConsistency();
-    this->xMan =  this->giveDomain()->giveXfemManager();
     return 1;
 }
 #if 0
@@ -554,77 +553,7 @@ void TrPlaneStress2dXFEM :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer
 
 void TrPlaneStress2dXFEM :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
-	printf("Entering TrPlaneStress2dXFEM :: computeNmatrixAt().\n");
-
-	// TODO: Implement for new interface.
-
-/*
-	// TODO: Check numbering
-
-    FloatArray Nc;
-    interp.evalN( Nc, *gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    // assemble xfem part of strain-displacement matrix
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
-    FloatArray Nd;
-    Nd.resize(3);
-    IntArray mask(3);
-
-    mask.at(1) = 0;
-    mask.at(2) = 0;
-    mask.at(3) = 0;
-
-	int counter = 3;
-    FloatArray N, coords;
-    N.resize(counter);
-    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-    	EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-
-		// Loop over enrichment domains
-		for ( int m = 1; m <=  ei->giveNumberOfEnrichmentDomains(); m++)
-		{
-
-			EnrichmentDomain *ed = ei->giveEnrichmentDomain(m);
-
-			// Enrichment function and its gradient evaluated at the gauss point
-			EnrichmentFunction *ef = ei->giveEnrichmentFunction(1);
-			this->computeGlobalCoordinates(coords, *gp->giveCoordinates());
-			double efgp = ef->evaluateFunctionAt(&coords, ed);
-
-			// adds up the number of the dofs from an enrichment item
-			// this part is used for the construction of a shifted enrichment
-			for ( int j = 1; j <= this->giveNumberOfDofManagers(); j++ ) {
-				DofManager *dMan = this->giveDofManager(j);
-
-				if ( ei->isDofManEnrichedByEnrichmentDomain( dMan, m ) ) {
-
-					FloatArray *nodecoords = dMan->giveCoordinates();
-					double efnode = ef->evaluateFunctionAt(nodecoords, ed);
-					Nd.at(j) = ( efgp - efnode ) * Nc.at(j) ;
-
-					counter++;
-					mask.at(j) = 1;
-				}
-
-			}
-
-		} // Loop over enrichment domains
-    } // Loop over enrichment items
-
-    // Create the total B-matrix by appending each contribution to B after one another.
-    N.resize(counter);
-    int column = 1;
-
-    for ( int i = 1; i <= 3; i++ ) {
-        N.at(column) = Nc.at(i);
-        column ++;
-        if ( mask.at(i) ) {
-            N.at(column) = Nd.at(i);
-            column++;
-        }
-    }
-
-    answer.beNMatrixOf(N,2);
-*/
+	XfemElementInterface_createEnrNmatrixAt(answer, *(gp->giveLocalCoordinates()), *this);
 }
 
 
@@ -634,7 +563,8 @@ TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &a
 {
     // Returns the total id mask of the dof manager = regular id's + enriched id's
 
-	if( this->xMan != NULL )
+	XfemManager *xMan = this->domain->giveXfemManager();
+	if( xMan != NULL )
 	{
 		this->giveDofManager(inode)->giveCompleteMasterDofIDArray(answer);
 	}
@@ -737,6 +667,63 @@ void TrPlaneStress2dXFEM :: drawScalar(oofegGraphicContext &context)
 }
 #endif
 
+
+
+int
+TrPlaneStress2dXFEM :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
+                                                                    TimeStep *stepN, const FloatArray &coords,
+                                                                    FloatArray &answer)
+{
+	// TODO: Validate implementation.
+
+    FloatArray lcoords, u;
+    FloatMatrix n;
+    int result;
+
+    result = this->computeLocalCoordinates(lcoords, coords);
+
+	XfemElementInterface_createEnrNmatrixAt(n, lcoords, *this);
+
+    this->computeVectorOf(EID_MomentumBalance, mode, stepN, u);
+    answer.beProductOf(n, u);
+
+    return result;
+
+
+
+/*
+    FloatArray lcoords, u;
+    FloatMatrix n;
+    int result;
+
+    result = this->computeLocalCoordinates(lcoords, coords);
+
+    n.resize(2, 6);
+    n.zero();
+
+    n.at(1, 1) = lcoords.at(1);
+    n.at(1, 3) = lcoords.at(2);
+    n.at(1, 5) = lcoords.at(3);
+
+    n.at(2, 2) = lcoords.at(1);
+    n.at(2, 4) = lcoords.at(2);
+    n.at(2, 6) = lcoords.at(3);
+
+    this->computeVectorOf(EID_MomentumBalance, mode, stepN, u);
+    answer.beProductOf(n, u);
+
+    return result;
+*/
+}
+
+void
+TrPlaneStress2dXFEM :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
+{
+//    giveDofManDofIDMask(1, EID_MomentumBalance, answer);
+	// TODO: For now, take only the continuous part
+	int nodeInd = 1;
+	TrPlaneStress2d ::giveDofManDofIDMask(nodeInd, EID_MomentumBalance, answer);
+}
 
 
 } /* namespace oofem */

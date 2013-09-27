@@ -236,7 +236,6 @@ if (USE_VTK)
     add_definitions (-D__VTK_MODULE)
     list (APPEND EXT_LIBS ${VTK_LIBRARIES})
     list (APPEND MODULE_LIST "VTK")
-    message (FATAL_ERROR "${VTK_LIBRARIES}")
 endif ()
 
 if (USE_PARMETIS)

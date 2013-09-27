@@ -65,7 +65,6 @@ class LSpace  : public NLStructuralElement, public ZZNodalRecoveryModelInterface
 {
 protected:
     static FEI3dHexaLin interpolation;
-    int numberOfGaussPoints;
 
 public:
     LSpace(int n, Domain *d);

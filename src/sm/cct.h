@@ -65,7 +65,6 @@ protected:
     //static FEI2dTrRot interp_rot;
 
     double area;
-    int numberOfGaussPoints;
 
 public:
     CCTPlate(int n, Domain *d);

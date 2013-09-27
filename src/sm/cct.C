@@ -285,16 +285,8 @@ CCTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3,
 IRResultType
 CCTPlate :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
-    this->NLStructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
-    //if ( numberOfGaussPoints != 1 ) {
-    //    numberOfGaussPoints = 1;
-    //}
-    return IRRT_OK;
+	return this->NLStructuralElement :: initializeFrom(ir);
 }
 
 

@@ -61,7 +61,6 @@ class QWedge : public NLStructuralElement, public SPRNodalRecoveryModelInterface
 
 {
 protected:
-    int numberOfGaussPoints;
     static FEI3dWedgeQuad interpolation;
 
 public:

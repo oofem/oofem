@@ -46,9 +46,6 @@
 
 ///@name Input fields for XFEM
 //@{
-//#define _IFT_CrackTip_Name "cracktip"
-//#define _IFT_CrackInterior_Name "crackinterior"
-
 #define _IFT_Inclusion_Name "inclusion"
 #define _IFT_Inclusion_material "material"
 
@@ -82,6 +79,7 @@ class WholeDomain;
 class EnrichmentFront;
 class LinElBranchFunction;
 class PropagationLaw;
+class DynamicDataReader;
 
 /**
  * Abstract class representing entity, which is included in the FE model using one (or more)
@@ -101,22 +99,29 @@ public:
     /// Constructor.
     EnrichmentItem(int n, XfemManager *xm, Domain *aDomain);
     virtual ~EnrichmentItem();
+
     virtual IRResultType initializeFrom(InputRecord *ir);
+
+    /**
+     * Note the special treatment here, the "normal" syntax
+     * would be giveInputRecord(DynamicInputRecord &input).
+     * Passing the entire DataReader instead allows us
+     * to have separate InputRecords for the
+     * EnrichmentDomain, EnrichmentFront and PropagationLaw
+     * without have to keep track of them globally.
+     */
+    virtual void giveInputRecord(DynamicDataReader &oDR);
+
     int instanciateYourself(DataReader *dr);
     virtual const char *giveClassName() const = 0;
     const IntArray *giveEnrichesDofsWithIdArray() const { return mpEnrichesDofsWithIdArray; }
     int giveNumberOfEnrDofs() const;
 
     // Enrichment domains
-//    EnrichmentDomain *giveEnrichmentDomain(int i) { return mpEnrichmentDomain; }
     int giveNumberOfEnrichmentDomains() const { return 1; /*this->numberOfEnrichmentDomains;*/ }
 
-    // Enrichment functions
-//    EnrichmentFunction *giveEnrichmentFunction(int n);
-//    int giveNumberOfEnrichmentfunctions() { return this->numberOfEnrichmentFunctions; }
 
     // Spatial query
-//    bool isDofManEnriched(DofManager *dMan);
     bool isDofManEnrichedByEnrichmentDomain(DofManager *dMan, int edNumber) const;
     bool isElementEnriched(const Element *element) const;
     bool isElementEnrichedByEnrichmentDomain(const Element *element, int edNumber) const;
@@ -178,40 +183,31 @@ public:
 
 protected:
 
-    /////////////////////////
-    // New objects
     EnrichmentDomain *mpEnrichmentDomain;
-    int mEnrDomainIndex;
 
     EnrichmentFunction *mpEnrichmentFunc;
-    int mEnrFuncIndex;
 
     EnrichmentFront *mpEnrichmentFront;
+
+    /// mEnrFrontIndex: nonzero if an enrichment front is present, zero otherwise.
     int mEnrFrontIndex;
 
     PropagationLaw *mpPropagationLaw;
+
+    /// mPropLawIndex: nonzero if a propagation law is present, zero otherwise.
     int mPropLawIndex;
 
-    /// Link to associated Xfem manager.
-    XfemManager *xMan;
     int startOfDofIdPool; // points to the first available dofId number associated with the ei
     int endOfDofIdPool;
 
     /// Geometry associated with EnrichmentItem.
-    IntArray enrichmentDomainNumbers;
     IntArray *mpEnrichesDofsWithIdArray;
 
-    /// EnrichmentFunction associated with the EnrichmentItem. - should generally be a list of functions
-    int enrichmentFunction;
 
     // TODO: Remove and allow only one EnrichmentDomain per EnrichmentItem
-    /// Geometry object
-    AList< EnrichmentDomain > *enrichmentDomainList;
     int numberOfEnrichmentDomains;
 
     // TODO: Remove and allow only one EnrichmentFunction per EnrichmentItem
-    /// Enrichment function list.
-    AList< EnrichmentFunction > *enrichmentFunctionList;
     int numberOfEnrichmentFunctions;
 
 
@@ -268,6 +264,7 @@ class Delamination : public EnrichmentItem
 {
 public:
     Delamination(int n, XfemManager *xm, Domain *aDomain);
+
     virtual const char *giveClassName() const { return "Delamination"; }
     virtual const char *giveInputRecordName() const { return _IFT_Delamination_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -292,6 +289,7 @@ class Crack : public EnrichmentItem
 {
 public:
     Crack(int n, XfemManager *xm, Domain *aDomain);
+
     virtual const char *giveClassName() const { return "Crack"; }
     virtual const char *giveInputRecordName() const { return _IFT_Crack_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -369,6 +367,7 @@ public:
     virtual const char *giveInputRecordName() const = 0;
 
     virtual IRResultType initializeFrom(InputRecord *ir) = 0;
+    virtual void giveInputRecord(DynamicInputRecord &input) = 0;
 
     virtual bool giveElementTipCoord(FloatArray &oCoord, int iElIndex) const;
 
@@ -405,6 +404,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_EnrFrontDoNothing_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
 };
 
@@ -429,6 +429,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_EnrFrontExtend_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
+    virtual void giveInputRecord(DynamicInputRecord &input);
 };
 
 class EnrFrontLinearBranchFuncRadius: public EnrichmentFront{
@@ -449,6 +450,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_EnrFrontLinearBranchFuncRadius_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
 private:
 	double mEnrichmentRadius;

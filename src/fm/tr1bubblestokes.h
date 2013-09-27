@@ -62,8 +62,6 @@ class Tr1BubbleStokes : public FMElement,
     public EIPrimaryUnknownMapperInterface
 {
 protected:
-    /// Number of gauss points. Same for pressure and velocity.
-    int numberOfGaussPoints;
     /// Interpolation for pressure
     static FEI2dTrLin interp;
     /// Ordering of dofs in element. Used to assemble the element stiffness

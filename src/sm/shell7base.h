@@ -76,7 +76,6 @@ public:
 
 protected:
     virtual Interface *giveInterface(InterfaceType it);
-    int numberOfGaussPoints;
     IntegrationRule **layerIntegrationRulesArray;
     LayeredCrossSection *layeredCS;
 
