@@ -342,7 +342,6 @@ IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, Ma
 
     IntMatBilinearCZFagerstromStatus *status = static_cast< IntMatBilinearCZFagerstromStatus * >( this->giveStatus(gp) );
 
-
     double damage = status->giveTempDamage();
     FloatMatrix Finv = status->giveTempInverseDefGrad();
     FloatMatrix help;
@@ -380,8 +379,9 @@ IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, Ma
             answer.beTProductOf(Finv,help);
             answer.times(1-damage);						// Ea=(1-new_alpha)*MATMUL(TRANSPOSE(Fci),MATMUL(Keye3,Fci))
         } else {
-
             FloatMatrix Iep = status->giveTempIep();
+			
+			//Iep.printYourself();
 			
 			if (J.at(3)<0) {
 				Kstiff.at(1,1) = (1-damage)*Kstiff.at(1,1);

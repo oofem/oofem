@@ -529,6 +529,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
                                       & totalDisplacement, & incrementOfDisplacement, & internalForces,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     }
+	//this->updateComponent(tStep, NonLinearLhs, this->giveDomain(di));	//@todo Martin: ta bort!!!
 
     ///@todo Use temporary variables. updateYourself() should set the final values, while proceedStep should be callable multiple times for each step (if necessary). / Mikael
     OOFEM_LOG_RELEVANT("Equilibrium reached at load level = %f in %d iterations\n", cumulatedLoadLevel + loadLevel, currentIterations);
