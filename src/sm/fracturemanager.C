@@ -62,7 +62,7 @@
 //#define VERBOSE
 
 namespace oofem {
-REGISTER_FailureCriteria(DamagedNeighborLayered)
+REGISTER_FailureCriteriaStatus(DamagedNeighborLayered)
 
 
 
@@ -90,7 +90,7 @@ IRResultType FractureManager :: initializeFrom(InputRecord *ir)
 
     int numCriterias;
     IR_GIVE_FIELD(ir, numCriterias, _IFT_FracManager_numcriterias);
-    this->criteriaManagers.resize( numCriterias );
+    this->criteriaList.resize( numCriterias );
 
     return IRRT_OK;
 }
@@ -106,7 +106,7 @@ int FractureManager :: instanciateYourself(DataReader *dr)
 
     // initialize failure criteria managers
     
-    for ( int i = 1; i <= this->criteriaManagers.size(); i++ ) {
+    for ( int i = 1; i <= this->criteriaList.size(); i++ ) {
         
         InputRecord *mir = dr->giveInputRecord(DataReader :: IR_failCritRec, i);
         result = mir->giveRecordKeywordField(name);
@@ -116,8 +116,9 @@ int FractureManager :: instanciateYourself(DataReader *dr)
         }
 
 
-        this->criteriaManagers.at(i-1) = new FailureCriteriaManager(Local, this);
-        FailureCriteriaManager *cMan = this->criteriaManagers.at(i-1);
+        this->criteriaList.at(i-1) = new FailureCriteria(Local, this);
+        FailureCriteria *cMan = this->criteriaList.at(i-1);
+        cMan->initializeFrom(mir);
 
         //FailureCriteria *failCriteria = classFactory.createFailureCriteria( name.c_str(), i, cMan );
 
@@ -126,12 +127,12 @@ int FractureManager :: instanciateYourself(DataReader *dr)
         //}
 
 
-        if( cMan->giveType() == Local ) { // if loca, allocate one failure criteria for each element
+        if( cMan->giveType() == Local ) { // if local, allocate one failure criteria for each element - should be per gp
 
             int numEl = this->domain->giveNumberOfElements();
             cMan->list.resize(numEl);
             for ( int j = 1; j <= numEl; j++ ) { 
-                cMan->list.at(j - 1) = classFactory.createFailureCriteria( name.c_str(), j, cMan );
+                cMan->list.at(j - 1) = classFactory.createFailureCriteriaStatus( name.c_str(), j, cMan );
                 if ( cMan->list.at(j - 1) == NULL ) {
                     OOFEM_ERROR2( "FractureManager :: instanciateYourself: unknown failure criteria (%s)", name.c_str() );
                 }
@@ -147,7 +148,7 @@ int FractureManager :: instanciateYourself(DataReader *dr)
 
 
 bool
-FailureCriteria :: evaluateFCQuantities(Element *el, TimeStep *tStep)
+FailureCriteriaStatus :: evaluateFCQuantities(Element *el, TimeStep *tStep)
 {
     // Should contain calls to default implementations for evaluation of failure criteria quantities
     return false;
@@ -171,19 +172,19 @@ FractureManager :: evaluateFailureCriterias(TimeStep *tStep)
     // Go through all the failure criteria managers. These in turn keep track of the failure criterias 
     // which are responsible for their own evaluation
 
-    for ( int i = 1; i <= this->criteriaManagers.size(); i++ ) {
+    for ( int i = 1; i <= this->criteriaList.size(); i++ ) {
 
 #ifdef VERBOSE
         printf( "\n  Evaluating failure criteria %i \n", i);
 #endif
-        FailureCriteriaManager *cMan = this->criteriaManagers.at(i-1);
+        FailureCriteria *cMan = this->criteriaList.at(i-1);
         if ( cMan->giveType() == Local ) { 
 
             for ( int j = 1; j <= cMan->list.size(); j++ ) {
 #ifdef VERBOSE
                 printf( "\n    Evaluating for element %i \n", j);
 #endif
-                FailureCriteria *fc = cMan->list.at(j-1);
+                FailureCriteriaStatus *fc = cMan->list.at(j-1);
                 fc->computeFailureCriteriaQuantities(tStep);
 
                 // temporary
@@ -205,7 +206,7 @@ FractureManager :: evaluateFailureCriterias(TimeStep *tStep)
 //---------------------------------------------------
 
 bool 
-FailureCriteria :: computeFailureCriteriaQuantities(TimeStep *tStep) 
+FailureCriteriaStatus :: computeFailureCriteriaQuantities(TimeStep *tStep) 
 {
     
     Element *el = this->el;
@@ -239,17 +240,17 @@ FractureManager :: updateXFEM(TimeStep *tStep)
 #endif
             ei = xMan->giveEnrichmentItem(k);
 
-            for ( int i = 1; i <= this->criteriaManagers.size(); i++ ) {
+            for ( int i = 1; i <= this->criteriaList.size(); i++ ) {
 #ifdef VERBOSE
                 printf( "based on failure criteria %i \n", i);
 #endif
-                FailureCriteriaManager *cMan = this->criteriaManagers.at(i-1);
+                FailureCriteria *cMan = this->criteriaList.at(i-1);
 
                 for ( int j = 1; j <= cMan->list.size(); j++ ) { // each criteria (often each element)
 #ifdef VERBOSE
                     printf( "\n  Element %i ", j);
 #endif
-                    FailureCriteria *fc = cMan->list.at(j-1);
+                    FailureCriteriaStatus *fc = cMan->list.at(j-1);
                     ei->updateGeometry(fc, tStep);
                 }
             }    
@@ -287,10 +288,10 @@ DamagedNeighborLayered :: evaluateFailureCriteria()
 
 
 //=======================
-// Failure Criteria Manager
+// Failure Criteria
 //=======================
 
-IRResultType FailureCriteriaManager :: initializeFrom(InputRecord *ir)
+IRResultType FailureCriteria :: initializeFrom(InputRecord *ir)
 {
     //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result; // Required by IR_GIVE_FIELD macro
@@ -301,7 +302,7 @@ IRResultType FailureCriteriaManager :: initializeFrom(InputRecord *ir)
 
 
 
-IRResultType FailureCriteria :: initializeFrom(InputRecord *ir)
+IRResultType FailureCriteriaStatus :: initializeFrom(InputRecord *ir)
 {
     //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result; // Required by IR_GIVE_FIELD macro

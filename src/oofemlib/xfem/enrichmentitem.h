@@ -79,7 +79,7 @@ class BasicGeometry;
 class EnrichmentFunction;
 class EnrichmentDomain;
 class FractureManager;
-class FailureCriteria;
+class FailureCriteriaStatus;
 class EnrichmentDomain_BG;
 class DofManList;
 class WholeDomain;
@@ -134,7 +134,7 @@ public:
 
     // Should update receiver geometry to the state reached at given time step.
     virtual void updateGeometry(TimeStep *tStep) {};
-    virtual void updateGeometry(FailureCriteria *fc, TimeStep *tStep){};
+    virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep){};
     virtual void updateGeometry();
     virtual void propagateFronts();
 
@@ -291,7 +291,7 @@ public:
     double delamXiCoord;    // defines at what local xi-coord the delamination is defined
 
     virtual Material *giveMaterial() { return mat; }
-    virtual void updateGeometry(FailureCriteria *fc, TimeStep *tStep);
+    virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep);
     virtual void updateLevelSets(XfemManager &ixFemMan);
 };
 

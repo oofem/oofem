@@ -90,8 +90,8 @@ class BasicGeometry;
 class EnrichmentFront;
 class PropagationLaw;
 
+class FailureCriteriaStatus;
 class FailureCriteria;
-class FailureCriteriaManager;
 
 // Templates to wrap constructors into functions
 template< typename T > Element *elemCreator(int n, Domain *d) { return new T(n, d); }
@@ -125,7 +125,7 @@ template< typename T > EnrichmentFront *enrichFrontCreator() { return new T(); }
 template< typename T > PropagationLaw *propagationLawCreator() { return new T(); }
 
 
-template< typename T > FailureCriteria *failureCriteriaCreator(int n, FailureCriteriaManager *x) { return new T(n, x); }
+template< typename T > FailureCriteriaStatus *failureCriteriaCreator(int n, FailureCriteria *x) { return new T(n, x); }
 
 ///@name Macros for registering new components. Unique dummy variables must be created as a result (design flaw in C++).
 //@{
@@ -157,7 +157,7 @@ template< typename T > FailureCriteria *failureCriteriaCreator(int n, FailureCri
 #define REGISTER_EnrichmentFront(class) static bool __dummy_##class = GiveClassFactory().registerEnrichmentFront(_IFT_##class##_Name, enrichFrontCreator< class >);
 #define REGISTER_PropagationLaw(class) static bool __dummy_##class = GiveClassFactory().registerPropagationLaw(_IFT_##class##_Name, propagationLawCreator< class >);
 
-#define REGISTER_FailureCriteria(class) static bool __dummy_##class = GiveClassFactory().registerFailureCriteria(_IFT_##class##_Name, failureCriteriaCreator< class >);
+#define REGISTER_FailureCriteriaStatus(class) static bool __dummy_##class = GiveClassFactory().registerFailureCriteriaStatus(_IFT_##class##_Name, failureCriteriaCreator< class >);
 //@}
 
 /**
@@ -234,7 +234,7 @@ protected:
 
 
     /// Associative container containing failure criteria creators
-    std :: map < std :: string, FailureCriteria * ( * )(int, FailureCriteriaManager *), CaseComp > failureCriteriaList;
+    std :: map < std :: string, FailureCriteriaStatus * ( * )(int, FailureCriteria *), CaseComp > failureCriteriaList;
 
 public:
     /// Constructor, registers all classes
@@ -503,8 +503,8 @@ public:
 
     
     // Failure module (in development!)
-    FailureCriteria *createFailureCriteria(const char *name, int num, FailureCriteriaManager *critManager);
-    bool registerFailureCriteria(const char *name, FailureCriteria * ( *creator )(int, FailureCriteriaManager *));
+    FailureCriteriaStatus *createFailureCriteriaStatus(const char *name, int num, FailureCriteria *critManager);
+    bool registerFailureCriteriaStatus(const char *name, FailureCriteriaStatus * ( *creator )(int, FailureCriteria *));
 
 
     SparseGeneralEigenValueSystemNM *createGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *d, EngngModel *m);

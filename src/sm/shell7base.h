@@ -282,7 +282,7 @@ protected:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     void computeInterLaminarStressesAt(int interfaceNum, TimeStep *tStep, std::vector < FloatArray > &interLamStresses);
-    virtual void evaluateFailureCriteriaQuantities(FailureCriteria *fc, TimeStep *tStep);
+    virtual void evaluateFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep);
 
 };
 } // end namespace oofem
