@@ -64,7 +64,7 @@ IRResultType LinearConstraintBC :: initializeFrom(InputRecord *ir)
     ActiveBoundaryCondition :: initializeFrom(ir);
     const char *__proc = "initializeFrom";
     IRResultType result;
-    rhsLtf = 0.;
+    rhsLtf = 0;
     
     IR_GIVE_FIELD(ir, weights, _IFT_LinearConstraintBC_weights);
     IR_GIVE_FIELD(ir, rhs, _IFT_LinearConstraintBC_rhs);
@@ -118,7 +118,7 @@ void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep, Equatio
       for ( int _i = 1; _i <= size; _i++ ) { // loop over dofs
         double factor=1.;
         if(weightsLtf.giveSize()){
-	  factor = domain->giveLoadTimeFunction(weightsLtf.at(_i))->__at(tStep->giveIntrinsicTime());
+            factor = domain->giveLoadTimeFunction(weightsLtf.at(_i))->__at(tStep->giveIntrinsicTime());
         }
         contrib.at(_i, 1) = this->weights.at(_i)*factor;
       }
@@ -159,8 +159,8 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
             factor = domain->giveLoadTimeFunction(weightsLtf.at(_i))->__at(tStep->giveIntrinsicTime());
         }
         idof = this->domain->giveDofManager( this->dofmans.at(_i) )->giveDof( this->dofs.at(_i) );
-	answer.at(s.giveDofEquationNumber(idof)) += md->giveDof(1)->giveUnknown(mode, tStep) * this->weights.at(_i)*factor;
-	answer.at(s.giveDofEquationNumber( md->giveDof(1) )) += idof->giveUnknown(mode, tStep) * this->weights.at(_i)*factor;
+        answer.at(s.giveDofEquationNumber(idof)) += md->giveDof(1)->giveUnknown(mode, tStep) * this->weights.at(_i)*factor;
+        answer.at(s.giveDofEquationNumber( md->giveDof(1) )) += idof->giveUnknown(mode, tStep) * this->weights.at(_i)*factor;
     }
 
   } else {

@@ -126,7 +126,7 @@ CCTPlate3d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
     FEI2dTrLin _interp(1,2);
     bool inplane = _interp.global2local(llc, inputCoords_ElCS, wr);
     // now check if the thid local coordinate is within the thickness of element
-    bool outofplane = (abs(inputCoords_ElCS.at(3)) <= this->giveCrossSection()->give(CS_Thickness)/2.); 
+    bool outofplane = (fabs(inputCoords_ElCS.at(3)) <= this->giveCrossSection()->give(CS_Thickness)/2.); 
     return inplane && outofplane;
 }
 
