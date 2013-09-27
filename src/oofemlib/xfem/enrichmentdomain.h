@@ -68,12 +68,10 @@ class EnrichmentItem;
 class EnrichmentDomain
 {
 public:
-    EnrichmentDomain(int iNumber);
+    EnrichmentDomain();
     virtual ~EnrichmentDomain() { }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     virtual void giveInputRecord(DynamicInputRecord &input) = 0;
-
-    virtual EnrichmentDomain* Clone() = 0;
 
     virtual const char *giveInputRecordName() const = 0;
     virtual const char *giveClassName() const = 0;
@@ -95,8 +93,6 @@ public:
 
     /// Propagate tips
     virtual bool propagateTips(const std::vector<TipPropagation> &iTipProp) {return false;}
-
-    int mNumber;
 };
 
 
@@ -108,10 +104,8 @@ class EnrichmentDomain_BG : public EnrichmentDomain
 {
 public:
     BasicGeometry *bg;
-    EnrichmentDomain_BG(int iNumber):EnrichmentDomain(iNumber) { }
+    EnrichmentDomain_BG() { }
     virtual ~EnrichmentDomain_BG() { }
-
-    virtual EnrichmentDomain* Clone() = 0;
 
     virtual IRResultType initializeFrom(InputRecord *ir) { return this->bg->initializeFrom(ir); }
     virtual void giveInputRecord(DynamicInputRecord &input);
@@ -130,11 +124,8 @@ public:
 class EDBGCircle : public EnrichmentDomain_BG
 {
 public:
-    EDBGCircle(int iNumber):EnrichmentDomain_BG(iNumber) { bg = new Circle; };
-    EDBGCircle(const EDBGCircle &iEDBGCircle);
+    EDBGCircle() { bg = new Circle; };
     virtual ~EDBGCircle() { delete bg; }
-
-    virtual EnrichmentDomain* Clone() {return new EDBGCircle(*this);}
 
     virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir); }
 
@@ -148,11 +139,8 @@ public:
 class EDCrack : public EnrichmentDomain_BG
 {
 public:
-    EDCrack(int iNumber):EnrichmentDomain_BG(iNumber) { bg = new PolygonLine; }
-    EDCrack(const EDCrack &iEDCrack);
+    EDCrack() { bg = new PolygonLine; }
     virtual ~EDCrack() { delete bg; }
-
-    virtual EnrichmentDomain* Clone() {return new EDCrack(*this);}
 
     virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir); }
 
@@ -175,11 +163,8 @@ class DofManList : public EnrichmentDomain
 protected:
     std::vector< int > dofManList;
 public:
-    DofManList(int iNumber):EnrichmentDomain(iNumber) { }
+    DofManList() { }
     virtual ~DofManList() { }
-
-    virtual EnrichmentDomain* Clone() {return NULL;/*new DofManList(*this);*/}
-
 
     const std :: vector< int > &giveDofManList() const { return dofManList; }
 
@@ -204,10 +189,8 @@ public:
 class WholeDomain : public EnrichmentDomain
 {
 public:
-    WholeDomain(int iNumber):EnrichmentDomain(iNumber) { }
+    WholeDomain() { }
     virtual ~WholeDomain() { }
-
-    virtual EnrichmentDomain* Clone() {return NULL; /*new WholeDomain(*this);*/}
 
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("WholeDomain::computeNormalSignDist -- not implemented"); };
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("WholeDomain::computeTangentialSignDist -- not implemented"); };

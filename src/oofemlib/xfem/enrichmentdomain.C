@@ -56,13 +56,12 @@ REGISTER_EnrichmentDomain(EDBGCircle)
 REGISTER_EnrichmentDomain(EDCrack)
 
 
-EnrichmentDomain :: EnrichmentDomain(int iNumber):
-mNumber(iNumber)
+EnrichmentDomain :: EnrichmentDomain()
 {}
 
 void EnrichmentDomain_BG :: giveInputRecord(DynamicInputRecord &input)
 {
-    input.setRecordKeywordField(this->giveInputRecordName(), mNumber);
+    input.setRecordKeywordField(this->giveInputRecordName(), 1);
 
     bg->giveInputRecord(input);
 }
@@ -70,18 +69,6 @@ void EnrichmentDomain_BG :: giveInputRecord(DynamicInputRecord &input)
 void EnrichmentDomain_BG :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
     iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
-}
-
-EDBGCircle :: EDBGCircle(const EDBGCircle &iEDBGCircle):
-EnrichmentDomain_BG(0)
-{
-	bg = iEDBGCircle.bg->Clone();
-}
-
-EDCrack :: EDCrack(const EDCrack &iEDCrack):
-EnrichmentDomain_BG(0)
-{
-	bg = iEDCrack.bg->Clone();
 }
 
 bool EDCrack :: giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const
@@ -209,7 +196,9 @@ bool EDCrack :: propagateTips(const std::vector<TipPropagation> &iTipProp) {
 
 	// For debugging only
 	PolygonLine *pl = dynamic_cast<PolygonLine*>(bg);
-	pl->printVTK();
+	if( pl != NULL ) {
+		pl->printVTK();
+	}
 
 	return true;
 }
@@ -237,11 +226,11 @@ IRResultType DofManList :: initializeFrom(InputRecord *ir)
 
 void DofManList :: giveInputRecord(DynamicInputRecord &input)
 {
-    input.setRecordKeywordField(this->giveInputRecordName(), mNumber);
+    input.setRecordKeywordField(this->giveInputRecordName(), 1);
 
 	IntArray idList;
 	idList.resize(dofManList.size());
-    for ( int i = 0; i < dofManList.size(); i++ ) {
+    for ( size_t i = 0; i < dofManList.size(); i++ ) {
     	idList.at(i+1) = dofManList[i];
     }
 
@@ -255,7 +244,7 @@ void WholeDomain :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManage
 
 void WholeDomain :: giveInputRecord(DynamicInputRecord &input)
 {
-    input.setRecordKeywordField(this->giveInputRecordName(), mNumber);
+    input.setRecordKeywordField(this->giveInputRecordName(), 1);
 
 }
 

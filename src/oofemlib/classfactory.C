@@ -342,12 +342,12 @@ bool ClassFactory :: registerEnrichmentFunction(const char *name, EnrichmentFunc
     return true;
 }
 
-EnrichmentDomain* ClassFactory :: createEnrichmentDomain(const char *name, int num)
+EnrichmentDomain* ClassFactory :: createEnrichmentDomain(const char *name)
 {
-    return ( enrichmentDomainList.count(name) == 1 ) ? enrichmentDomainList [ name ](num) : NULL;
+    return ( enrichmentDomainList.count(name) == 1 ) ? enrichmentDomainList [ name ]() : NULL;
 }
 
-bool ClassFactory :: registerEnrichmentDomain(const char *name, EnrichmentDomain * ( *creator )(int))
+bool ClassFactory :: registerEnrichmentDomain(const char *name, EnrichmentDomain * ( *creator )())
 {
     enrichmentDomainList[name] = creator;
     return true;

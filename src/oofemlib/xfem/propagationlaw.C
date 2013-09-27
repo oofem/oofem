@@ -88,7 +88,6 @@ void PLCrackPrescribedDir::propagateInterfaces(EnrichmentDomain &ioEnrDom) {
 	// Fetch crack tip data
 	std::vector<TipInfo> tipInfo;
 	ioEnrDom.giveTipInfos(tipInfo);
-//	printf("tipInfo.size(): %lu\n", tipInfo.size());
 
 	int tipIndex = 1;
 	FloatArray dir;

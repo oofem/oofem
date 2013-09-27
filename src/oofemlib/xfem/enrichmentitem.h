@@ -46,9 +46,6 @@
 
 ///@name Input fields for XFEM
 //@{
-//#define _IFT_CrackTip_Name "cracktip"
-//#define _IFT_CrackInterior_Name "crackinterior"
-
 #define _IFT_Inclusion_Name "inclusion"
 #define _IFT_Inclusion_material "material"
 
@@ -82,6 +79,7 @@ class WholeDomain;
 class EnrichmentFront;
 class LinElBranchFunction;
 class PropagationLaw;
+class DynamicDataReader;
 
 /**
  * Abstract class representing entity, which is included in the FE model using one (or more)
@@ -100,13 +98,19 @@ class EnrichmentItem : public FEMComponent
 public:
     /// Constructor.
     EnrichmentItem(int n, XfemManager *xm, Domain *aDomain);
-    EnrichmentItem(const EnrichmentItem &iEI);
     virtual ~EnrichmentItem();
 
-    virtual EnrichmentItem* Clone() = 0;
-
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+
+    /**
+     * Note the special treatment here, the "normal" syntax
+     * would be giveInputRecord(DynamicInputRecord &input).
+     * Passing the entire DataReader instead allows us
+     * to have separate InputRecords for the
+     * EnrichmentDomain, EnrichmentFront and PropagationLaw
+     * without have to keep track of them globally.
+     */
+    virtual void giveInputRecord(DynamicDataReader &oDR);
 
     int instanciateYourself(DataReader *dr);
     virtual const char *giveClassName() const = 0;
@@ -114,15 +118,10 @@ public:
     int giveNumberOfEnrDofs() const;
 
     // Enrichment domains
-//    EnrichmentDomain *giveEnrichmentDomain(int i) { return mpEnrichmentDomain; }
     int giveNumberOfEnrichmentDomains() const { return 1; /*this->numberOfEnrichmentDomains;*/ }
 
-    // Enrichment functions
-//    EnrichmentFunction *giveEnrichmentFunction(int n);
-//    int giveNumberOfEnrichmentfunctions() { return this->numberOfEnrichmentFunctions; }
 
     // Spatial query
-//    bool isDofManEnriched(DofManager *dMan);
     bool isDofManEnrichedByEnrichmentDomain(DofManager *dMan, int edNumber) const;
     bool isElementEnriched(const Element *element) const;
     bool isElementEnrichedByEnrichmentDomain(const Element *element, int edNumber) const;
@@ -178,53 +177,37 @@ public:
     // if the element contains a tip.
     bool giveElementTipCoord(FloatArray &oCoord, int iElIndex) const;
 
-
-    // TODO: remove
-    EnrichmentFunction *giveEnrichmentFunction() {return mpEnrichmentFunc;}
-    EnrichmentDomain *giveEnrichmentDomain() {return mpEnrichmentDomain;}
-    EnrichmentFront *giveEnrichmentFront() {return mpEnrichmentFront;}
-    PropagationLaw *givePropagationLaw() {return mpPropagationLaw;}
-
     // Help functions
     double calcXiZeroLevel(const double &iQ1, const double &iQ2) const;
     static void calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT);
 
 protected:
 
-    /////////////////////////
-    // New objects
     EnrichmentDomain *mpEnrichmentDomain;
-    int mEnrDomainIndex;
 
     EnrichmentFunction *mpEnrichmentFunc;
-    int mEnrFuncIndex;
 
     EnrichmentFront *mpEnrichmentFront;
+
+    /// mEnrFrontIndex: nonzero if an enrichment front is present, zero otherwise.
     int mEnrFrontIndex;
 
     PropagationLaw *mpPropagationLaw;
+
+    /// mPropLawIndex: nonzero if a propagation law is present, zero otherwise.
     int mPropLawIndex;
 
-    /// Link to associated Xfem manager.
-//    XfemManager *xMan;
     int startOfDofIdPool; // points to the first available dofId number associated with the ei
     int endOfDofIdPool;
 
     /// Geometry associated with EnrichmentItem.
-    IntArray enrichmentDomainNumbers;
     IntArray *mpEnrichesDofsWithIdArray;
 
-    /// EnrichmentFunction associated with the EnrichmentItem. - should generally be a list of functions
-    int enrichmentFunction;
 
     // TODO: Remove and allow only one EnrichmentDomain per EnrichmentItem
-    /// Geometry object
-    AList< EnrichmentDomain > *enrichmentDomainList;
     int numberOfEnrichmentDomains;
 
     // TODO: Remove and allow only one EnrichmentFunction per EnrichmentItem
-    /// Enrichment function list.
-    AList< EnrichmentFunction > *enrichmentFunctionList;
     int numberOfEnrichmentFunctions;
 
 
@@ -265,8 +248,6 @@ public:
     Inclusion(int n, XfemManager *xm, Domain *aDomain);
     virtual ~Inclusion();
 
-    virtual EnrichmentItem* Clone() {return new Inclusion(*this);}
-
     // Returns true if the enrichment item assigns a different material to the Gauss point
     virtual bool isMaterialModified(GaussPoint &iGP, Element &iEl, StructuralMaterial * &opSM) const;
 
@@ -283,8 +264,6 @@ class Delamination : public EnrichmentItem
 {
 public:
     Delamination(int n, XfemManager *xm, Domain *aDomain);
-
-    virtual EnrichmentItem* Clone() {return new Delamination(*this);}
 
     virtual const char *giveClassName() const { return "Delamination"; }
     virtual const char *giveInputRecordName() const { return _IFT_Delamination_Name; }
@@ -310,8 +289,6 @@ class Crack : public EnrichmentItem
 {
 public:
     Crack(int n, XfemManager *xm, Domain *aDomain);
-
-    virtual EnrichmentItem* Clone() {return new Crack(*this);}
 
     virtual const char *giveClassName() const { return "Crack"; }
     virtual const char *giveInputRecordName() const { return _IFT_Crack_Name; }
@@ -363,8 +340,6 @@ public:
     EnrichmentFront() {};
     virtual ~EnrichmentFront() {};
 
-    virtual EnrichmentFront* Clone() = 0;
-
 	/*
 	 * 	MarkNodesAsFront:
 	 * 	Intput:
@@ -415,8 +390,6 @@ public:
 	EnrFrontDoNothing() {};
 	virtual ~EnrFrontDoNothing() {};
 
-    virtual EnrichmentFront* Clone() {return new EnrFrontDoNothing(*this);}
-
 	virtual void MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemManager &ixFemMan, const std::vector<double> &iLevelSetNormalDir, const std::vector<double> &iLevelSetTangDir, const std::vector<TipInfo> &iTipInfo) {printf("Entering EnrFrontDoNothing::MarkNodesAsFront().\n"); }
 
 	// No special tip enrichments are applied with this model.
@@ -440,8 +413,6 @@ public:
 	EnrFrontExtend() {};
 	virtual ~EnrFrontExtend() {};
 
-    virtual EnrichmentFront* Clone() {return new EnrFrontExtend(*this);}
-
 	virtual void MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemManager &ixFemMan, const std::vector<double> &iLevelSetNormalDir, const std::vector<double> &iLevelSetTangDir, const std::vector<TipInfo> &iTipInfo);
 
 	// No special tip enrichments are applied with this model,
@@ -464,10 +435,7 @@ public:
 class EnrFrontLinearBranchFuncRadius: public EnrichmentFront{
 public:
 	EnrFrontLinearBranchFuncRadius();
-	EnrFrontLinearBranchFuncRadius(const EnrFrontLinearBranchFuncRadius &iEnrFront);
 	virtual ~EnrFrontLinearBranchFuncRadius();
-
-    virtual EnrichmentFront* Clone() {return new EnrFrontLinearBranchFuncRadius(*this);}
 
 	virtual void MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemManager &ixFemMan, const std::vector<double> &iLevelSetNormalDir, const std::vector<double> &iLevelSetTangDir, const std::vector<TipInfo> &iTipInfo);
 

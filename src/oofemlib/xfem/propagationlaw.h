@@ -61,8 +61,6 @@ public:
 	PropagationLaw();
 	virtual ~PropagationLaw();
 
-	virtual PropagationLaw* Clone() = 0;
-
     virtual const char *giveClassName() const = 0;
     virtual const char *giveInputRecordName() const = 0;
 
@@ -77,8 +75,6 @@ public:
 	PLDoNothing() {};
 	virtual ~PLDoNothing() {};
 
-	virtual PropagationLaw* Clone() {return new PLDoNothing(*this);}
-
     virtual const char *giveClassName() const { return "PLDoNothing"; }
     virtual const char *giveInputRecordName() const { return _IFT_PLDoNothing_Name; }
 
@@ -92,8 +88,6 @@ class PLCrackPrescribedDir: public PropagationLaw {
 public:
 	PLCrackPrescribedDir():mAngle(0.0), mIncrementLength(0.0) {};
 	virtual ~PLCrackPrescribedDir() {};
-
-	virtual PropagationLaw* Clone() {return new PLCrackPrescribedDir(*this);}
 
     virtual const char *giveClassName() const { return "PLCrackPrescribedDir"; }
     virtual const char *giveInputRecordName() const { return _IFT_PLCrackPrescribedDir_Name; }

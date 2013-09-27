@@ -44,9 +44,7 @@
 ///@name Input fields for XfemManager
 //@{
 #define _IFT_XfemManager_Name "xfemmanager"
-#define _IFT_XfemManager_numberOfGeometryItems "numberofgeometryitems"  // -> numberOfEnrichmentDomains
 #define _IFT_XfemManager_numberOfEnrichmentItems "numberofenrichmentitems"
-#define _IFT_XfemManager_numberOfEnrichmentFunctions "numberofenrichmentfunctions"
 #define _IFT_XfemManager_numberOfGpPerTri "numberofgppertri"
 //@}
 
@@ -85,7 +83,6 @@ protected:
 public:
     /// Constructor.
     XfemManager(Domain *domain);
-    XfemManager(const XfemManager &iXMan);
     /// Destructor.
     virtual ~XfemManager();
 

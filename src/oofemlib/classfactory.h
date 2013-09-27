@@ -116,7 +116,7 @@ template< typename T > LoadBalancerMonitor* loadMonitorCreator(EngngModel *e) { 
 // XFEM stuff
 template< typename T > EnrichmentItem *enrichItemCreator(int n, XfemManager *x, Domain *d) { return new T(n, x, d); }
 template< typename T > EnrichmentFunction *enrichFuncCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > EnrichmentDomain *enrichmentDomainCreator(int n) { return new T(n); }
+template< typename T > EnrichmentDomain *enrichmentDomainCreator() { return new T(); }
 template< typename T > BasicGeometry *geometryCreator() { return new T(); }
 template< typename T > EnrichmentFront *enrichFrontCreator() { return new T(); }
 template< typename T > PropagationLaw *propagationLawCreator() { return new T(); }
@@ -218,7 +218,7 @@ protected:
     /// Associative container containing geometry creators
     std :: map < std :: string, BasicGeometry * ( * )(), CaseComp > geometryList;
     /// Associative container containing enrichment-domain creators
-    std :: map < std :: string, EnrichmentDomain * ( * )(int), CaseComp > enrichmentDomainList;
+    std :: map < std :: string, EnrichmentDomain * ( * )(), CaseComp > enrichmentDomainList;
     /// Associative container containing enrichment front creators
     std :: map < std :: string, EnrichmentFront * ( * )(), CaseComp > enrichmentFrontList;
     /// Associative container containing propagation law creators
@@ -477,8 +477,8 @@ public:
     EnrichmentFunction *createEnrichmentFunction(const char *name, int num, Domain *domain);
     bool registerEnrichmentFunction(const char *name, EnrichmentFunction * ( *creator )(int, Domain *));
 
-    EnrichmentDomain *createEnrichmentDomain(const char *name, int num);
-    bool registerEnrichmentDomain(const char *name, EnrichmentDomain * ( *creator )(int));
+    EnrichmentDomain *createEnrichmentDomain(const char *name);
+    bool registerEnrichmentDomain(const char *name, EnrichmentDomain * ( *creator )());
 
     EnrichmentFront *createEnrichmentFront(const char *name);
     bool registerEnrichmentFront(const char *name, EnrichmentFront * ( *creator )());

@@ -282,69 +282,8 @@ Domain* Domain :: Clone()
 		for(int i = 1; i <= nEI; i++) {
 
 			EnrichmentItem *ei = xfemManager->giveEnrichmentItem(i);
-
-	        DynamicInputRecord* eiRec = new DynamicInputRecord();
-	        ei->giveInputRecord(*eiRec);
-
-	   	    dataReader.insertInputRecord(DataReader::IR_enrichItemRec, eiRec);
+			ei->giveInputRecord(dataReader);
 		}
-
-		// Enrichment functions
-		int nEF = 1;
-		if(nEI > 0) {
-			EnrichmentItem *ei = xfemManager->giveEnrichmentItem(1);
-
-	        DynamicInputRecord* efRec = new DynamicInputRecord();
-	        EnrichmentFunction *ef = ei->giveEnrichmentFunction();
-	        if(ef != NULL) {
-	        	ef->giveInputRecord(*efRec);
-	        	printf("\n\nefRec:\n");
-	        	efRec->printYourself();
-	        	printf("\n\n");
-		   	    dataReader.insertInputRecord(DataReader::IR_enrichFuncRec, efRec);
-	        }
-
-		}
-
-		// Enrichment domains
-		int nED = nEI;
-		for(int i = 1; i <= nED; i++) {
-			EnrichmentItem *ei = xfemManager->giveEnrichmentItem(i);
-			EnrichmentDomain *ed = ei->giveEnrichmentDomain();
-
-	        DynamicInputRecord* edRec = new DynamicInputRecord();
-	        ed->giveInputRecord(*edRec);
-
-	   	    dataReader.insertInputRecord(DataReader::IR_geoRec, edRec);
-
-		}
-
-		// Enrichment fronts
-		int nEFr = nED;
-		for(int i = 1; i <= nEFr; i++) {
-			EnrichmentItem *ei = xfemManager->giveEnrichmentItem(i);
-			EnrichmentFront *ef = ei->giveEnrichmentFront();
-
-	        DynamicInputRecord* efRec = new DynamicInputRecord();
-	        ef->giveInputRecord(*efRec);
-
-	   	    dataReader.insertInputRecord(DataReader::IR_enrichFrontRec, efRec);
-
-		}
-
-		// Propagation laws
-		int nPl = nED;
-		for(int i = 1; i <= nPl; i++) {
-			EnrichmentItem *ei = xfemManager->giveEnrichmentItem(i);
-			PropagationLaw *pl = ei->givePropagationLaw();
-
-	        DynamicInputRecord* plRec = new DynamicInputRecord();
-	        pl->giveInputRecord(*plRec);
-
-	   	    dataReader.insertInputRecord(DataReader::IR_propagationLawRec, plRec);
-
-		}
-
     }
 
     dNew->instanciateYourself(&dataReader);

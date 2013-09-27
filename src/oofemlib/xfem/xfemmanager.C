@@ -61,21 +61,6 @@ XfemManager :: XfemManager(Domain *domain)
     mNumGpPerTri = 12;
 }
 
-XfemManager :: XfemManager(const XfemManager &iXMan):
-enrichmentItemList(NULL),
-mNumGpPerTri(iXMan.mNumGpPerTri),
-numberOfEnrichmentItems(iXMan.numberOfEnrichmentItems),
-domain(NULL)
-{
-	int numEI = iXMan.enrichmentItemList->giveSize();
-	enrichmentItemList = new AList< EnrichmentItem >(0);
-	enrichmentItemList->growTo(numEI);
-	for(int i = 1; i <= numEI; i++) {
-		enrichmentItemList->put(i, iXMan.enrichmentItemList->at(i)->Clone() );
-	}
-
-}
-
 XfemManager :: ~XfemManager()
 {
     delete enrichmentItemList;
@@ -88,17 +73,6 @@ XfemManager :: clear()
     enrichmentItemList = NULL;
     numberOfEnrichmentItems = -1;
 }
-
-#if 0
-void XfemManager :: giveActiveEIsFor(IntArray &answer, const Element *elem)
-{
-    for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ) {
-        if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ) {
-            answer.followedBy( enrichmentItemList->at(i)->giveNumber() );
-        }
-    }
-}
-#endif
 
 bool XfemManager :: isElementEnriched(const Element *elem)
 {
