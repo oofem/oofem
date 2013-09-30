@@ -388,14 +388,26 @@ bool ClassFactory :: registerGeometry(const char *name, BasicGeometry * ( *creat
 
 
 // Failure module:
-FailureCriteriaStatus* ClassFactory :: createFailureCriteriaStatus(const char *name, int number, FailureCriteria *critManager)
+
+FailureCriteria* ClassFactory :: createFailureCriteria(const char *name, int number, FractureManager *fracManager)
 {
-    return ( failureCriteriaList.count(name) == 1 ) ? failureCriteriaList [ name ](number, critManager) : NULL;
+    return ( failureCriteriaList.count(name) == 1 ) ? failureCriteriaList [ name ](number, fracManager) : NULL;
+}
+
+bool ClassFactory :: registerFailureCriteria(const char *name, FailureCriteria * ( *creator )(int, FractureManager *))
+{
+    failureCriteriaList[name] = creator;
+    return true;
+}
+
+FailureCriteriaStatus* ClassFactory :: createFailureCriteriaStatus(const char *name, int number, FailureCriteria *fc)
+{
+    return ( failureCriteriaList.count(name) == 1 ) ? failureCriteriaStatusList [ name ](number, fc) : NULL;
 }
 
 bool ClassFactory :: registerFailureCriteriaStatus(const char *name, FailureCriteriaStatus * ( *creator )(int, FailureCriteria *))
 {
-    failureCriteriaList[name] = creator;
+    failureCriteriaStatusList[name] = creator;
     return true;
 }
 

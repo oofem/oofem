@@ -166,11 +166,11 @@ XFEMStatic :: terminate(TimeStep *tStep)
     // Fracture/failure mechanics evaluation    
     for( int i = 1; i <= numDom; i++ ) {
         if ( this->giveDomain(i)->hasFractureManager() ) { // Will most likely fail if numDom > 1
-    
-        this->fMan->evaluateYourself(tStep);
-        this->fMan->updateXFEM(tStep); // Update XFEM structure based on the fracture manager
+            FractureManager *fracMan  = this->giveDomain(i)->giveFractureManager();
+            fracMan->evaluateYourself(tStep);
+            fracMan->updateXFEM(tStep); // Update XFEM structure based on the fracture manager
 
-        this->setUpdateStructureFlag( this->fMan->giveUpdateFlag() ); // if the internal structure need to be updated
+            this->setUpdateStructureFlag( fracMan->giveUpdateFlag() ); // if the internal structure need to be updated
         }
     }
 

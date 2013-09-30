@@ -59,8 +59,9 @@
 #define _IFT_EnrichmentItem_propagationlaw "propagationlaw"
 
 #define _IFT_Delamination_Name "delamination"
-#define _IFT_Delamination_xiCoords "delaminationxicoords" // old
 #define _IFT_Delamination_xiCoord "delaminationxicoord"
+#define _IFT_Delamination_interfacenum "interfacenum"
+#define _IFT_Delamination_csnum "csnum"
 #define _IFT_Delamination_CohesiveZoneMaterial "czmaterial"
 //#define _IFT_MultipleDelamination_Name "multipledelamination"
 //@}

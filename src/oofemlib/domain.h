@@ -436,6 +436,7 @@ public:
     XfemManager *giveXfemManager();
     bool hasXfemManager();
     
+    FractureManager *giveFractureManager(); 
     bool hasFractureManager();
 
     /// List of Xfemmanagers.

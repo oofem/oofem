@@ -74,12 +74,12 @@ Shell7BaseXFEM :: postInitialize()
 }
 
 void
-Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep) 
+Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fcStatus, TimeStep *tStep) 
 {
     
     // Compute necessary quantities for evaluation of failure criterias
-
-    if ( DamagedNeighborLayered *dfc = dynamic_cast<DamagedNeighborLayered *>(fc) ) {
+#if 1
+    if ( DamagedNeighborLayeredStatus *status = dynamic_cast<DamagedNeighborLayeredStatus *>(fcStatus) ) {
         /*
         Go through the neighbors of the element and check for each layer if the 
         corresponding cz is damaged (if applicable)
@@ -88,10 +88,10 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, Ti
         IntArray neighbors;
         IntArray elements(1);
         ConnectivityTable *conTable = this->giveDomain()->giveConnectivityTable();
-        elements.at(1) = dfc->el->giveNumber();
+        elements.at(1) = fcStatus->el->giveNumber();
         conTable->giveElementNeighbourList(neighbors, elements); 
         FloatArray damageArray(this->layeredCS->giveNumberOfLayers() - 1), damageArrayNeigh;
-        fc->quantities.resize( neighbors.giveSize() );
+        fcStatus->quantities.resize( neighbors.giveSize() );
 
         for ( int i = 1; i <= neighbors.giveSize(); i++ ) {
 
@@ -116,7 +116,7 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, Ti
             damageArray.at(j) = 1.0;                    
         }
 
-        dfc->layerDamageValues = damageArray;
+        status->layerDamageValues = damageArray;
     }
     //case FC_DamagedNeighborCZ:
     //std::vector < FloatArray > interLamStresses;
@@ -146,7 +146,7 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, Ti
     //    }
     //    break;
     
-    
+#endif  
 }
 
 

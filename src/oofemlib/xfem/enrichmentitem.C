@@ -1083,127 +1083,34 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, this->delamXiCoord, _IFT_Delamination_xiCoord);
+    // Compute the delamination xi-coord
+    int interfaceNum; // interface number from the bottom
+    IR_GIVE_FIELD(ir, interfaceNum, _IFT_Delamination_interfacenum);
+    int csNum = 1;
+    IR_GIVE_OPTIONAL_FIELD(ir, csNum, _IFT_Delamination_csnum);
+
+    LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * > ( this->giveDomain()->giveCrossSection(csNum) );
+    if (layeredCS == NULL ) {
+        OOFEM_ERROR( "Delamination :: initializeFrom - requires a layered cross section reference as input" );
+    }
+    this->delamXiCoord = -1.0;
+    double totalThickness = layeredCS->give(CS_Thickness);
+    for ( int i = 1; i <= interfaceNum; i++ ) {
+        this->delamXiCoord += layeredCS->giveLayerThickness(i)/totalThickness*2.0;
+    }
+    
+
 
     int material = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, material, _IFT_Delamination_CohesiveZoneMaterial);
     if ( material > 0 ) {
         this->mat = this->giveDomain()->giveMaterial(material);
     }
-    //write an instanciate method
 
-    //enrichmentDomainInterfaceList
 
     return IRRT_OK;
 }
 
-#if 0
-void 
-Delamination :: giveActiveDelaminationXiCoords(FloatArray &xiCoords, Element *element) 
-{
-    // Goes through the list of delaminations and checks which are active for a given element
-    int nDelam = this->giveNumberOfEnrichmentDomains(); // max possible number
-    int pos = 1;
-    xiCoords.resize(0);
-    for ( int i = 1; i <= nDelam; i++ ) {
-        if( this->isElementFullyEnrichedByEnrichmentDomain(element, i) ) {
-            xiCoords.resizeWithValues(pos);
-            xiCoords.at(pos) = this->giveDelaminationXiCoord(i);
-            pos++;
-        } 
-    }
-};
-
-
-// remove???
-double
-Delamination :: giveDelaminationZCoord(int n, Element *element)
-{
-    //AList<double> *xiCoordList;
-    int nDelam = this->giveNumberOfEnrichmentDomains(); // max possible number
-    int pos = 1;
-    for ( int i = 1; i <= nDelam; i++ ) {
-        if ( this->isElementEnriched(element) ) {
-            //xiCoordList.put( pos, this->delaminationZCoords.at(i) );
-            pos++;
-        }
-    }
-
-    return 0.;
-}
-
-// Remove!
-int
-Delamination :: giveDelaminationGroupAt(double zeta)
-{
-    //double zRef = Shell7Base :: giveLocalZetaCoord(gp);
-    int nDelam = this->giveNumberOfEnrichmentDomains();
-    for ( int j = 1; j <= nDelam; j++ ) {
-        //double zDelam = this->giveDelaminationZCoord(j);
-        double zDelam = 0.;
-        if ( zeta  < zDelam ) { //belong to the delamination group just below delamination #j. How to deal with poins that lie onthe boundary?
-            return j;
-        }
-    }
-
-    return nDelam + 1;
-}
-
-double
-Delamination :: heaviside(double xi, double xi0)
-{
-    if ( xi < xi0 ) {
-        return 0.0;
-    } else {
-        return 1.0;
-    }
-}
-
-
-double
-Delamination :: giveDelaminationGroupMidZ(int dGroup, Element *e)
-{
-    double zTop = 0., zBottom = 0.;
-    this->giveDelaminationGroupZLimits(dGroup, zTop, zBottom, e);
-    return 0.5 * ( zTop + zBottom );
-}
-
-
-double
-Delamination :: giveDelaminationGroupThickness(int dGroup, Element *e)
-{
-    double zTop, zBottom;
-    this->giveDelaminationGroupZLimits(dGroup, zTop, zBottom, e);
-    return zTop - zBottom;
-}
-
-// unneccesary??
-void
-Delamination :: giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &zBottom, Element *e)
-{
-    int nDelam = this->giveNumberOfEnrichmentDomains();
-    LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( e->giveCrossSection() );
-
-    if ( dGroup == 1 ) {
-        zBottom = -layeredCS->giveMidSurfaceZcoordFromBottom();
-        zTop    =  0.; //this->giveDelaminationZCoord(dGroup);
-    } else if ( dGroup == nDelam + 1 ) {
-        zBottom =  0.; //this->giveDelaminationZCoord(dGroup-1);
-        zTop    = -layeredCS->giveMidSurfaceZcoordFromBottom() + layeredCS->computeIntegralThick();
-    } else {
-        zBottom =  0.; //this->giveDelaminationZCoord(dGroup-1);
-        zTop    =  0.; //this->giveDelaminationZCoord(dGroup);
-    }
-
-#ifdef DEBUG
-    if ( zBottom > zTop ) {
-        OOFEM_ERROR2("giveDelaminationGroupZLimits: Bottom z-coord is larger than top z-coord in dGroup. (%i)", dGroup);
-    }
-
-#endif
-}
-
-#endif
 
 Crack :: Crack(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
 {

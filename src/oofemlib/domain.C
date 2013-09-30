@@ -427,6 +427,17 @@ Domain :: hasFractureManager()
     return fracManager != NULL;
 }
 
+FractureManager *
+Domain :: giveFractureManager()
+{
+#ifdef DEBUG
+    if ( !fracManager ) {
+        _error("giveFractureManager: undefined fracture manager");
+    }
+#endif
+    return fracManager;
+}
+
 EngngModel *
 Domain :: giveEngngModel()
 // Returns the time integration algorithm. Creates it if it does not

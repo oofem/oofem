@@ -59,6 +59,7 @@ class Element;
 
 class FractureManager;
 class FailureCriteria;
+class FailureCriteriaStatus;
 /**
  * This class manages the fracture mechanics part
  *
@@ -70,17 +71,19 @@ class FailureCriteria;
 //@{
 #define _IFT_FracManager_Name "fracmanager"
 #define _IFT_FracManager_numcriterias "numcriterias"
-#define _IFT_FracManager_criteriaList "criterialist" // deprecated
+#define _IFT_FracManager_verbose "verbose"
 
 // Failure criterias
 #define _IFT_DamagedNeighborLayered_Name "damagedneighborlayered"
-#define _IFT_DamagedNeighborLayered_DamagedThreshold "damagethreshold"
+#define _IFT_DamagedNeighborLayered_DamageThreshold "damagethreshold"
 //@}
 
+// IPLocal - each integration point, ELLocal - one per element
 #define FailureCriteria_DEF \
     ENUM_ITEM_WITH_VALUE(FC_Undefined, 0) \
-    ENUM_ITEM_WITH_VALUE(Local, 1) \
-    ENUM_ITEM_WITH_VALUE(Nonlocal, 2) 
+    ENUM_ITEM_WITH_VALUE(IPLocal, 1) \
+    ENUM_ITEM_WITH_VALUE(ELLocal, 2) \
+    ENUM_ITEM_WITH_VALUE(Nonlocal, 3) 
 
 enum FailureCriteriaType {
     FailureCriteria_DEF
@@ -96,7 +99,7 @@ class FailureCriteriaStatus
 private:    
     
     //FractureManager *fMan;         
-    FailureCriteria *cMan;   // pointer to its corresponding manager
+    FailureCriteria *failCrit;      // pointer to the corresponding failure criteria
     FailureCriteriaType type;       // local, nonlocal
     //FailureCriteriaName name;     // max strain, von Mises, effectivePlasticStrain, tsaiHill, J-integral, G, K etc.
     bool failedFlag;                // is the criteria fulfilled?
@@ -105,28 +108,30 @@ private:
     
 
 public:
-    FailureCriteriaStatus(int number, FailureCriteria *cMan)
+    FailureCriteriaStatus(int number, FailureCriteria *failCrit)
     { 
         this->number = number;
-        //this->type = type;
-        //this->failedFlag = false;
-        this->cMan = cMan;
+        this->failCrit = failCrit;
     };
+
+    FailureCriteriaStatus(Element *el, FailureCriteria *failCrit)
+    { 
+        this->el = el;
+        this->failCrit = failCrit;
+    };
+
     FailureCriteriaStatus(){};
     ~FailureCriteriaStatus(){}; // must destroy object correctly
     Element *el;
 
-    
-    bool evaluateFCQuantities(Element *el, TimeStep *tStep);
-    
     std::vector < std::vector < FloatArray > > quantities;
     FloatArray thresholds;
-    
     std :: vector< bool > failedFlags;
-    FailureCriteriaType giveType() { return this->type; };
-    void setType(FailureCriteriaType type) { this->type; };
-    virtual bool computeFailureCriteriaQuantities(TimeStep *tStep);
-    virtual bool evaluateFailureCriteria() = 0;
+
+
+    //FailureCriteriaType giveType() { return this->giveFailureCriteria().giveType(); };
+    FailureCriteria *giveFailureCriteria() { return this->failCrit; };
+
 
     bool hasFailed( int i) { return failedFlags.at(i-1); }
 
@@ -138,47 +143,74 @@ public:
 
 
 
-class DamagedNeighborLayered : public FailureCriteriaStatus
-{
-
-public:
-    DamagedNeighborLayered(int number, FailureCriteria *cMan) 
-    : FailureCriteriaStatus(number,  cMan) {}
-
-    virtual bool evaluateFailureCriteria();
-    virtual const char *giveClassName() const { return "DamagedNeighborLayered"; }
-    virtual const char *giveInputRecordName() const { return _IFT_DamagedNeighborLayered_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
-    FloatArray layerDamageValues;
-
-};
 
 
 class FailureCriteria
 {
-    // stores all the data for a given type of failure criteria
-
 private:    
     FailureCriteriaType type;       // local, nonlocal 
     FractureManager *fMan;          // pointer to its corresponding manager
-
+    int number;
 public:
-    FailureCriteria(FailureCriteriaType type, FractureManager *fMan)
+
+    FailureCriteria(int number, FractureManager *fMan)
         {
-            this->type = type;
+            this->number = number;
             this->fMan = fMan;
         };
     ~FailureCriteria(){}; // must destroy object correctly
 
     std :: vector< FailureCriteriaStatus *> list;
+
     FailureCriteriaType giveType() { return this->type; }
     FractureManager *giveFractureManager() { return this->fMan; }
+    void setType(FailureCriteriaType type) { this->type = type; };
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     int instanciateYourself(DataReader *dr);
     virtual const char *giveClassName() const { return "FailureCriteria"; }
+
+
+    virtual FailureCriteriaStatus *CreateStatus(Element *el, FailureCriteria *failCrit) const = 0;
+    virtual bool computeFailureCriteriaQuantities(FailureCriteriaStatus *fcStatus, TimeStep *tStep);
+    virtual bool evaluateFCQuantities(Element *el, TimeStep *tStep) { return false; }; // defaults to no implementation
+    virtual bool evaluateFailureCriteria(FailureCriteriaStatus *fcStatus) = 0;
 };
+
+
+
+
+class DamagedNeighborLayeredStatus : public FailureCriteriaStatus
+{
+
+public:
+    DamagedNeighborLayeredStatus(Element *el, FailureCriteria *failCrit) 
+    : FailureCriteriaStatus(el, failCrit) {}
+
+    FloatArray layerDamageValues; 
+};
+
+
+class DamagedNeighborLayered : public FailureCriteria
+{
+private:
+    double DamageThreshold;
+
+public:
+    DamagedNeighborLayered(int number, FractureManager *fracMan) 
+    : FailureCriteria(number,  fracMan) {}
+
+    virtual bool evaluateFailureCriteria(FailureCriteriaStatus *fcStatus);
+    virtual const char *giveClassName() const { return "DamagedNeighborLayered"; }
+    virtual const char *giveInputRecordName() const { return _IFT_DamagedNeighborLayered_Name; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+
+    virtual FailureCriteriaStatus *CreateStatus(Element *el, FailureCriteria *failCrit) const
+        { return new DamagedNeighborLayeredStatus(el, failCrit); };
+
+
+};
+
 
 
 class FailureModuleElementInterface : public Interface
@@ -199,6 +231,10 @@ private:
     Domain *domain;
 
 public:
+    /// Constructor.
+    FractureManager(Domain *domain);
+    /// Destructor.
+    ~FractureManager();
 
     void setUpdateFlag(bool flag) { this->updateFlag = flag; };
     bool giveUpdateFlag() { return this->updateFlag; };
@@ -210,10 +246,7 @@ public:
     void updateXFEM(TimeStep *tStep);
     void updateXFEM(FailureCriteriaStatus *fc, TimeStep *tStep);
 
-    /// Constructor.
-    FractureManager(Domain *domain);
-    /// Destructor.
-    ~FractureManager();
+
     
     IRResultType initializeFrom(InputRecord *ir);
     int instanciateYourself(DataReader *dr);
@@ -223,6 +256,7 @@ public:
     void clear();
     Domain *giveDomain() { return this->domain; }
 
+    
 
     std :: vector< FailureCriteria* > criteriaList;
   //std :: vector< CrackManager*           > crackManagers;   // Keep track of all cracks - each crack may have several fronts/tips
