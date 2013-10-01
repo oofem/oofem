@@ -372,38 +372,6 @@ StationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep
     iDof->printSingleOutputAt(stream, atTime, 'f', VM_Total);
 }
 
-void
-StationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, EquationID ut,
-                                                           ValueModeType mode, CharType lhsType,
-                                                           const UnknownNumberingScheme &ns, Domain *d)
-{
-    int ielem;
-    IntArray loc;
-    Element *element;
-    FloatArray rp, charVec;
-    FloatMatrix s;
-
-    int nelem = d->giveNumberOfElements();
-
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        element = d->giveElement(ielem);
-
-        element->computeVectorOfPrescribed(EID_ConservationEquation, mode, tStep, rp);
-        if ( rp.containsOnlyZeroes() ) {
-            continue;
-        } else {
-            this->giveElementCharacteristicMatrix(s, ielem, lhsType, tStep, d);
-            charVec.beProductOf(s, rp);
-            charVec.negated();
-
-            element->giveLocationArray(loc, ut, ns);
-            answer.assemble(charVec, loc);
-        }
-    }
-
-    // end element loop
-}
-
 
 void
 StationaryTransportProblem :: updateInternalState(TimeStep *stepN)
