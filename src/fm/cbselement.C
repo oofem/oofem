@@ -139,24 +139,23 @@ CBSElement :: computePrescribedTermsI(FloatArray &answer, ValueModeType mode, Ti
     FloatMatrix mass;
     FloatArray usp;
     this->computeConsistentMassMtrx(mass, tStep);
-    this->computeVectorOfPrescribed(EID_MomentumBalance, mode, tStep, usp);
+    this->computeVectorOf(EID_MomentumBalance, mode, tStep, usp);
     answer.beProductOf(mass, usp);
     answer.negated();
 }
 
-/*
- * void
- * CBSElement :: computePrescribedTermsII (FloatArray& answer, ValueModeType mode, TimeStep* tStep)
- * {
- * FloatMatrix lhs;
- * FloatArray usp;
- * this->computePressureLhs (lhs, tStep);
- * this->computeVectorOfPrescribed (EID_ConservationEquation, mode, tStep, usp);
- * answer.beProductOf (lhs, usp);
- * answer.negated();
- * }
- */
-
+#if 0
+void
+CBSElement :: computePrescribedTermsII (FloatArray& answer, ValueModeType mode, TimeStep* tStep)
+{
+    FloatMatrix lhs;
+    FloatArray usp;
+    this->computePressureLhs (lhs, tStep);
+    this->computeVectorOf(EID_ConservationEquation, mode, tStep, usp);
+    answer.beProductOf (lhs, usp);
+    answer.negated();
+}
+#endif
 
 int
 CBSElement :: checkConsistency()
