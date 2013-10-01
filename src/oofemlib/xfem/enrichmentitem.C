@@ -139,10 +139,6 @@ void EnrichmentItem :: giveInputRecord(DynamicDataReader &oDR)
 	eiRec->setField(mEnrFrontIndex,			_IFT_EnrichmentItem_front);
 	eiRec->setField(mPropLawIndex,			_IFT_EnrichmentItem_propagationlaw);
 
-    int interfaceNum;
-    eiRec->setField(interfaceNum,			_IFT_Delamination_interfacenum);
-    
-//    input.setField(interfaceNum, _IFT_Delamination_interfacenum);
 	oDR.insertInputRecord(DataReader::IR_enrichItemRec, eiRec);
 
 
@@ -159,14 +155,18 @@ void EnrichmentItem :: giveInputRecord(DynamicDataReader &oDR)
 
 
 	// Enrichment front
-	DynamicInputRecord *efrRec = new DynamicInputRecord();
-	mpEnrichmentFront->giveInputRecord(*efrRec);
-	oDR.insertInputRecord(DataReader::IR_enrichFrontRec, efrRec);
+    if (mEnrFrontIndex != 0 ) {
+	    DynamicInputRecord *efrRec = new DynamicInputRecord();
+	    mpEnrichmentFront->giveInputRecord(*efrRec);
+	    oDR.insertInputRecord(DataReader::IR_enrichFrontRec, efrRec);
+    }
 
 	// Propagation law
-	DynamicInputRecord *plRec = new DynamicInputRecord();
-	this->mpPropagationLaw->giveInputRecord(*plRec);
-	oDR.insertInputRecord(DataReader::IR_propagationLawRec, plRec);
+    if( mPropLawIndex != 0 ) {
+	    DynamicInputRecord *plRec = new DynamicInputRecord();
+	    this->mpPropagationLaw->giveInputRecord(*plRec);
+	    oDR.insertInputRecord(DataReader::IR_propagationLawRec, plRec);
+    }
 
 }
 
@@ -1059,17 +1059,19 @@ Delamination :: giveInputRecord(DynamicDataReader &oDR)
 	mpEnrichmentDomain->giveInputRecord(*edRec);
 	oDR.insertInputRecord(DataReader::IR_geoRec, edRec);
 
+    if (mEnrFrontIndex != 0 ) {
+	    // Enrichment front
+	    DynamicInputRecord *efrRec = new DynamicInputRecord();
+	    mpEnrichmentFront->giveInputRecord(*efrRec);
+	    oDR.insertInputRecord(DataReader::IR_enrichFrontRec, efrRec);
+    }
 
-	// Enrichment front
-	DynamicInputRecord *efrRec = new DynamicInputRecord();
-	mpEnrichmentFront->giveInputRecord(*efrRec);
-	oDR.insertInputRecord(DataReader::IR_enrichFrontRec, efrRec);
-
-	// Propagation law
-	DynamicInputRecord *plRec = new DynamicInputRecord();
-	this->mpPropagationLaw->giveInputRecord(*plRec);
-	oDR.insertInputRecord(DataReader::IR_propagationLawRec, plRec);
-
+    if( mPropLawIndex != 0 ) {
+	    // Propagation law
+	    DynamicInputRecord *plRec = new DynamicInputRecord();
+	    this->mpPropagationLaw->giveInputRecord(*plRec);
+	    oDR.insertInputRecord(DataReader::IR_propagationLawRec, plRec);
+    }
 }
 
 
