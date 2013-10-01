@@ -47,6 +47,8 @@
 #include "feinterpol.h"
 #include "masterdof.h"
 #include "propagationlaw.h"
+#include "dynamicinputrecord.h"
+#include "dynamicdatareader.h"
 #include <algorithm>
 #include <limits>
 
@@ -58,9 +60,7 @@ REGISTER_EnrichmentItem(Crack)
 
 EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FEMComponent(n, aDomain),
     mpEnrichmentDomain(NULL),
-    mEnrDomainIndex(0),
     mpEnrichmentFunc(NULL),
-    mEnrFuncIndex(0),
     mpEnrichmentFront(NULL),
     mEnrFrontIndex(0),
     mpPropagationLaw(NULL),
@@ -68,11 +68,6 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FE
     mLevelSetsNeedUpdate(true),
     mLevelSetTol(1.0e-12), mLevelSetTol2(1.0e-12)
 {
-    this->xMan = xMan;
-    this->enrichmentFunctionList = new AList< EnrichmentFunction >(0);
-    this->enrichmentDomainList = new AList< EnrichmentDomain >(0);
-    this->numberOfEnrichmentFunctions = 1;
-    this->numberOfEnrichmentDomains = 1;
     this->startOfDofIdPool = -1;
     this->endOfDofIdPool = -1;
     this->mpEnrichesDofsWithIdArray = new IntArray;
@@ -80,9 +75,6 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FE
 
 EnrichmentItem :: ~EnrichmentItem()
 {
-    delete this->enrichmentFunctionList;
-    delete this->enrichmentDomainList;
-
     delete this->mpEnrichesDofsWithIdArray;
 
     if ( mpEnrichmentDomain != NULL ) {
@@ -128,23 +120,56 @@ IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, this->enrichmentDomainNumbers, _IFT_EnrichmentItem_domains);
-    this->numberOfEnrichmentDomains = this->enrichmentDomainNumbers.giveSize();
-
-    IR_GIVE_OPTIONAL_FIELD(ir, enrichmentFunction, _IFT_EnrichmentItem_function);
-    IR_GIVE_FIELD(ir, mEnrDomainIndex, _IFT_EnrichmentItem_domain);
-
-    IR_GIVE_FIELD(ir, mEnrFrontIndex, _IFT_EnrichmentItem_front);
+    mEnrFrontIndex = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, mEnrFrontIndex, _IFT_EnrichmentItem_front);
 
 
-    mEnrFuncIndex = enrichmentFunction;
-
-
+    mPropLawIndex = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, mPropLawIndex, _IFT_EnrichmentItem_propagationlaw);
 
 
     return IRRT_OK;
 }
+
+void EnrichmentItem :: giveInputRecord(DynamicDataReader &oDR)
+{
+	DynamicInputRecord *eiRec = new DynamicInputRecord();
+	FEMComponent::giveInputRecord(*eiRec);
+
+	eiRec->setField(mEnrFrontIndex,			_IFT_EnrichmentItem_front);
+	eiRec->setField(mPropLawIndex,			_IFT_EnrichmentItem_propagationlaw);
+
+    int interfaceNum;
+    eiRec->setField(interfaceNum,			_IFT_Delamination_interfacenum);
+    
+//    input.setField(interfaceNum, _IFT_Delamination_interfacenum);
+	oDR.insertInputRecord(DataReader::IR_enrichItemRec, eiRec);
+
+
+	// Enrichment function
+	DynamicInputRecord *efRec = new DynamicInputRecord();
+	mpEnrichmentFunc->giveInputRecord(*efRec);
+	oDR.insertInputRecord(DataReader::IR_enrichFuncRec, efRec);
+
+
+	// Enrichment domain
+	DynamicInputRecord *edRec = new DynamicInputRecord();
+	mpEnrichmentDomain->giveInputRecord(*edRec);
+	oDR.insertInputRecord(DataReader::IR_geoRec, edRec);
+
+
+	// Enrichment front
+	DynamicInputRecord *efrRec = new DynamicInputRecord();
+	mpEnrichmentFront->giveInputRecord(*efrRec);
+	oDR.insertInputRecord(DataReader::IR_enrichFrontRec, efrRec);
+
+	// Propagation law
+	DynamicInputRecord *plRec = new DynamicInputRecord();
+	this->mpPropagationLaw->giveInputRecord(*plRec);
+	oDR.insertInputRecord(DataReader::IR_propagationLawRec, plRec);
+
+}
+
 
 int EnrichmentItem :: instanciateYourself(DataReader *dr)
 {
@@ -152,86 +177,68 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     IRResultType result; // Required by IR_GIVE_FIELD macro
     std :: string name;
 
-    // Instanciate enrichment functions
-    this->enrichmentFunctionList->growTo(numberOfEnrichmentFunctions);
-    for ( int i = 1; i <= this->numberOfEnrichmentFunctions; i++ ) {
-        InputRecord *mir = dr->giveInputRecord(DataReader :: IR_enrichFuncRec, i);
-        result = mir->giveRecordKeywordField(name);
+    // Instantiate enrichment function
+    InputRecord *mir = dr->giveInputRecord(DataReader :: IR_enrichFuncRec, 1);
+    result = mir->giveRecordKeywordField(name);
 
-        if ( result != IRRT_OK ) {
-            IR_IOERR(giveClassName(), __proc, "", mir, result);
-        }
+    if ( result != IRRT_OK ) {
+        IR_IOERR(giveClassName(), __proc, "", mir, result);
+    }
 
-        EnrichmentFunction *ef = classFactory.createEnrichmentFunction( name.c_str(), i, this->xMan->giveDomain() );
-        mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), i, this->xMan->giveDomain() );
-        if(mpEnrichmentFunc != NULL) {
-            mpEnrichmentFunc->initializeFrom(mir);
-        }
-        else {
-            OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: failed to create enrichment function (%s)", name.c_str() );
-        }
-
-        if ( ef == NULL ) {
-            OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment function (%s)", name.c_str() );
-        }
-
-        enrichmentFunctionList->put(i, ef);
-        ef->initializeFrom(mir);
+    mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), 1, this->giveDomain() );
+    if(mpEnrichmentFunc != NULL) {
+        mpEnrichmentFunc->initializeFrom(mir);
+    }
+    else {
+        OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: failed to create enrichment function (%s)", name.c_str() );
     }
 
 
-    // Instanciate enrichment domains
-    enrichmentDomainList->growTo(numberOfEnrichmentDomains);
-
-    for ( int i = 1; i <= numberOfEnrichmentDomains; i++ ) {
-        InputRecord *mir = dr->giveInputRecord(DataReader :: IR_geoRec, i);
-        result = mir->giveRecordKeywordField(name);
-        if ( result != IRRT_OK ) {
-            IR_IOERR(giveClassName(), __proc, "", mir, result);
-        }
-
-        EnrichmentDomain *ed = classFactory.createEnrichmentDomain( name.c_str() );
-        mpEnrichmentDomain = classFactory.createEnrichmentDomain( name.c_str() );
-        if ( ed == NULL ) {
-            OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment domain (%s)", name.c_str() );
-        }
-
-        this->enrichmentDomainList->put(i, ed);
-        ed->initializeFrom(mir);
-        mpEnrichmentDomain->initializeFrom(mir);
+    // Instantiate enrichment domain
+    mir = dr->giveInputRecord(DataReader :: IR_geoRec, 1);
+    result = mir->giveRecordKeywordField(name);
+    if ( result != IRRT_OK ) {
+    	IR_IOERR(giveClassName(), __proc, "", mir, result);
     }
+
+    mpEnrichmentDomain = classFactory.createEnrichmentDomain( name.c_str() );
+    if ( mpEnrichmentDomain == NULL ) {
+    	OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment domain (%s)", name.c_str() );
+    }
+
+    mpEnrichmentDomain->initializeFrom(mir);
 
 
     // Instantiate EnrichmentFront
-    std::string enrFrontName;
-
-    InputRecord *enrFrontir = dr->giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
-    result = enrFrontir->giveRecordKeywordField(enrFrontName);
-
-    mpEnrichmentFront = classFactory.createEnrichmentFront( enrFrontName.c_str() );
-    if(mpEnrichmentFront != NULL) {
-        mpEnrichmentFront->initializeFrom(enrFrontir);
+    if(mEnrFrontIndex == 0) {
+		mpEnrichmentFront = new EnrFrontDoNothing();
     }
     else {
-        OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: Failed to create enrichment front (%s)", enrFrontName.c_str() );
+		std::string enrFrontName;
+
+		InputRecord *enrFrontir = dr->giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
+		result = enrFrontir->giveRecordKeywordField(enrFrontName);
+
+		mpEnrichmentFront = classFactory.createEnrichmentFront( enrFrontName.c_str() );
+		if(mpEnrichmentFront != NULL) {
+			mpEnrichmentFront->initializeFrom(enrFrontir);
+		}
+		else {
+			OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: Failed to create enrichment front (%s)", enrFrontName.c_str() );
+		}
     }
 
 
-
-    // Instantiate PropagationLaw
-    std::string propLawName;
+	// Instantiate PropagationLaw
+    if(mPropLawIndex == 0) {
+		mpPropagationLaw = new PLDoNothing();
+    }
+    else {
+		std::string propLawName;
     
-    InputRecord *propLawir = dr->giveInputRecord(DataReader :: IR_propagationLawRec, mPropLawIndex);
-    result = propLawir->giveRecordKeywordField(propLawName);
+		InputRecord *propLawir = dr->giveInputRecord(DataReader :: IR_propagationLawRec, mPropLawIndex);
+		result = propLawir->giveRecordKeywordField(propLawName);
 
-    if( mPropLawIndex == 0 ) {
-        // Dummy propagation law
-        printf("Creating dummy propagation law.\n");
-        mpPropagationLaw = new PLDoNothing();
-    }
-    else {
-        // Propagation law from input record
-        printf("Creating propagation law from input record. propLawName.c_str(): %s \n", propLawName.c_str() );
         mpPropagationLaw = classFactory.createPropagationLaw( propLawName.c_str() );
         if(mpPropagationLaw != NULL) {
             mpPropagationLaw->initializeFrom(propLawir);
@@ -239,7 +246,6 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
         else {
             OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: Failed to create propagation law (%s)", propLawName.c_str() );
         }
-
     }
 
     // Set start of the enrichment dof pool for the given EI
@@ -248,6 +254,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     this->endOfDofIdPool = this->startOfDofIdPool + xDofPoolAllocSize - 1;
 
 
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
 
     return 1;
@@ -256,9 +263,6 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
 int
 EnrichmentItem :: giveNumberOfEnrDofs() const
 {
-    // TODO: Take branch functions into account when computing the total number of dofs.
-    // returns the array of dofs a particular EI s
-
     int numEnrDofs = mpEnrichmentFunc->giveNumberOfDofs();
 
     if(mpEnrichmentFront != NULL) {
@@ -289,42 +293,12 @@ bool EnrichmentItem :: isElementEnriched(const Element *element) const
 
 bool EnrichmentItem :: isDofManEnriched(const DofManager &iDMan) const
 {
-#if defined( ENABLE_XFEM_CPP11 )
-    auto begin      = mEnrNodeIndices.begin();
-    auto end        = mEnrNodeIndices.end();
-    int nodeInd     = iDMan.giveGlobalNumber();
-
-    return std :: binary_search(begin, end, nodeInd);
-
-#else
     int nodeInd     = iDMan.giveGlobalNumber();
     return std :: binary_search(mEnrNodeIndices.begin(), mEnrNodeIndices.end(), nodeInd);
-
-#endif
 }
 
 int EnrichmentItem :: giveNumDofManEnrichments(const DofManager &iDMan) const
 {
-#if defined( ENABLE_XFEM_CPP11 )
-    auto begin      = mEnrNodeIndices.begin();
-    auto end        = mEnrNodeIndices.end();
-    int nodeInd     = iDMan.giveGlobalNumber();
-
-    auto it         = std :: find(begin, end, nodeInd);
-
-    if ( it != end ) {
-        int enrichmentType = mNodeEnrMarker [ * it - 1 ];
-
-        if ( enrichmentType == 1 ) {
-            // Bulk enrichment
-            return 1;
-        } else   {
-            // Front enrichment
-            return mpEnrichmentFront->giveNumEnrichments();
-        }
-    }
-
-#else
     std :: vector< int > :: const_iterator begin = mEnrNodeIndices.begin();
     std :: vector< int > :: const_iterator end    = mEnrNodeIndices.end();
     int nodeInd     = iDMan.giveGlobalNumber();
@@ -343,8 +317,6 @@ int EnrichmentItem :: giveNumDofManEnrichments(const DofManager &iDMan) const
         }
     }
 
-#endif
-
     return 0;
 }
 
@@ -356,6 +328,7 @@ bool EnrichmentItem :: isMaterialModified(GaussPoint &iGP, Element &iEl, Structu
 void EnrichmentItem :: updateGeometry()
 {
     // Update enrichments ...
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
 
     // ... and create new dofs if necessary.
@@ -368,18 +341,6 @@ void EnrichmentItem :: propagateFronts()
     mpPropagationLaw->propagateInterfaces(*mpEnrichmentDomain);
 
     updateGeometry();
-}
-
-void 
-EnrichmentItem :: addEnrichmentDomain( EnrichmentDomain *ed )
-{
-    // Appends the enrichment domain ed to the list
-    // Does not check if there is a duplicate in the list
-    this->numberOfEnrichmentDomains++;
-    enrichmentDomainList->growTo(numberOfEnrichmentDomains);
-
-    ed->setNumber(this->numberOfEnrichmentDomains);
-    this->enrichmentDomainList->put(this->numberOfEnrichmentDomains, ed);
 }
 
 void
@@ -413,12 +374,7 @@ EnrichmentItem :: computeDofManDofIdArray(IntArray &answer, DofManager *dMan)
     for ( int i = 1; i <= count; i++ ) {
         answer.at(i) = this->giveStartOfDofIdPool() + i - 1;
     }
-
 }
-
-
-
-
 
 void
 EnrichmentItem :: giveEIDofIdArray(IntArray &answer) const
@@ -475,10 +431,6 @@ void EnrichmentItem :: evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncD
 }
 
 
-
-
-
-
 void EnrichmentItem :: updateLevelSets(XfemManager &ixFemMan)
 {
     int nNodes = ixFemMan.giveDomain()->giveNumberOfDofManagers();
@@ -511,23 +463,6 @@ void EnrichmentItem :: updateLevelSets(XfemManager &ixFemMan)
 
 }
 
-
-void Delamination :: updateLevelSets(XfemManager &ixFemMan)
-{
-    EnrichmentItem ::updateLevelSets(ixFemMan);
-
-    int nNodes = ixFemMan.giveDomain()->giveNumberOfDofManagers();
-
-    mLevelSetSurfaceNormalDir.resize(nNodes, 0.0);
-
-    for ( int n = 1; n <= nNodes; n++ )
-    {
-        mLevelSetSurfaceNormalDir[n-1] = this->delamXiCoord;
-    }
-
-    mLevelSetsNeedUpdate = false;
-
-}
 
 
 
@@ -643,6 +578,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
     }
 
     // Mark tip nodes for special treatment.
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
     mpEnrichmentFront->MarkNodesAsFront(mNodeEnrMarker, *xMan, mLevelSetNormalDir, mLevelSetTangDir, tipInfoArray);
 
 
@@ -766,21 +702,7 @@ void EnrichmentItem :: createEnrichedDofs()
         for(size_t j = 0; j < dofsToRemove.size(); j++) {
             dMan->removeDof(dofsToRemove[j]);
         }
-
-//    	if(dofsToRemove.size() > 0) {
-//    		printf("Node: %d Number of dofs: %d\n", i, dMan->giveNumberOfDofs() );
-//    	}
-
-/*
-        if( dMan->giveNumberOfDofs() > 2 ) {
-            printf("dMan->giveNumberOfDofs(): %d dofs: ", dMan->giveNumberOfDofs() );
-            computeDofManDofIdArray(dofIdArray, dMan);
-            dofIdArray.printYourself();
-        }
-*/
     }
-
-
 }
 
 void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element)
@@ -1022,9 +944,6 @@ IRResultType Inclusion :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, material, _IFT_Inclusion_material);
     this->mat = this->giveDomain()->giveMaterial(material);
 
-    this->numberOfEnrichmentFunctions = 1;
-    // Not sure this should be input at but instead be determined by the ei which describes the physical model /JB
-    //IR_GIVE_OPTIONAL_FIELD(ir, numberOfEnrichmentFunctions, _IFT_XfemManager_numberOfEnrichmentFunctions, "numberofenrichmentfunctions");
     return IRRT_OK;
 }
 
@@ -1060,7 +979,7 @@ Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
              }
         }
             
-         dynamic_cast< DofManList * > ( this->giveEnrichmentDomain(1) )->addDofManagers( dofManNumbers ); // fix JB
+         dynamic_cast< DofManList * > ( this->mpEnrichmentDomain )->addDofManagers( dofManNumbers ); // fix JB
 
     }
 
@@ -1073,43 +992,86 @@ Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
 Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
 {
     mpEnrichesDofsWithIdArray->setValues(6, D_u, D_v, D_w, W_u, W_v, W_w);
+    this->interfaceNum = -1;
+    this->crossSectionNum = -1;
+    this->matNum = 0;
 }
 
 
 IRResultType Delamination :: initializeFrom(InputRecord *ir)
 {
-    this->numberOfEnrichmentFunctions = 1; // must be set before EnrichmentItem :: initializeFrom(ir) is called
     EnrichmentItem :: initializeFrom(ir);
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     // Compute the delamination xi-coord
-    int interfaceNum; // interface number from the bottom
-    IR_GIVE_FIELD(ir, interfaceNum, _IFT_Delamination_interfacenum);
-    int csNum = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, csNum, _IFT_Delamination_csnum);
+    IR_GIVE_FIELD(ir, this->interfaceNum, _IFT_Delamination_interfacenum); // interface number from the bottom
+    IR_GIVE_FIELD(ir, this->crossSectionNum, _IFT_Delamination_csnum);
 
-    LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * > ( this->giveDomain()->giveCrossSection(csNum) );
+    LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * > ( this->giveDomain()->giveCrossSection(this->crossSectionNum) );
     if (layeredCS == NULL ) {
         OOFEM_ERROR( "Delamination :: initializeFrom - requires a layered cross section reference as input" );
     }
     this->delamXiCoord = -1.0;
     double totalThickness = layeredCS->give(CS_Thickness);
-    for ( int i = 1; i <= interfaceNum; i++ ) {
+    for ( int i = 1; i <= this->interfaceNum; i++ ) {
         this->delamXiCoord += layeredCS->giveLayerThickness(i)/totalThickness*2.0;
     }
     
 
-
-    int material = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, material, _IFT_Delamination_CohesiveZoneMaterial);
-    if ( material > 0 ) {
-        this->mat = this->giveDomain()->giveMaterial(material);
+    IR_GIVE_OPTIONAL_FIELD(ir, this->matNum, _IFT_Delamination_CohesiveZoneMaterial);
+    if ( this->matNum > 0 ) {
+        this->mat = this->giveDomain()->giveMaterial(this->matNum);
     }
 
 
     return IRRT_OK;
 }
+
+
+
+void 
+Delamination :: giveInputRecord(DynamicDataReader &oDR)
+{
+    ///@todo everything is copied from EnrichmentItem :: giveInputRecord, should be written in a better way
+    DynamicInputRecord *eiRec = new DynamicInputRecord();
+	FEMComponent::giveInputRecord(*eiRec);
+
+	eiRec->setField(mEnrFrontIndex,			_IFT_EnrichmentItem_front);
+	eiRec->setField(mPropLawIndex,			_IFT_EnrichmentItem_propagationlaw);
+
+    // Delamination specific records
+    eiRec->setField(this->interfaceNum, _IFT_Delamination_interfacenum);
+    eiRec->setField(this->crossSectionNum, _IFT_Delamination_csnum);
+    eiRec->setField(this->matNum, _IFT_Delamination_CohesiveZoneMaterial);
+
+
+	oDR.insertInputRecord(DataReader::IR_enrichItemRec, eiRec);
+
+	// Enrichment function
+	DynamicInputRecord *efRec = new DynamicInputRecord();
+	mpEnrichmentFunc->giveInputRecord(*efRec);
+	oDR.insertInputRecord(DataReader::IR_enrichFuncRec, efRec);
+
+
+	// Enrichment domain
+	DynamicInputRecord *edRec = new DynamicInputRecord();
+	mpEnrichmentDomain->giveInputRecord(*edRec);
+	oDR.insertInputRecord(DataReader::IR_geoRec, edRec);
+
+
+	// Enrichment front
+	DynamicInputRecord *efrRec = new DynamicInputRecord();
+	mpEnrichmentFront->giveInputRecord(*efrRec);
+	oDR.insertInputRecord(DataReader::IR_enrichFrontRec, efrRec);
+
+	// Propagation law
+	DynamicInputRecord *plRec = new DynamicInputRecord();
+	this->mpPropagationLaw->giveInputRecord(*plRec);
+	oDR.insertInputRecord(DataReader::IR_propagationLawRec, plRec);
+
+}
+
 
 
 Crack :: Crack(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
@@ -1119,7 +1081,6 @@ Crack :: Crack(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, 
 
 IRResultType Crack :: initializeFrom(InputRecord *ir)
 {
-    this->numberOfEnrichmentFunctions = 1;
     EnrichmentItem :: initializeFrom(ir);
 
     return IRRT_OK;
@@ -1178,6 +1139,13 @@ void EnrichmentFront :: giveNodeTipIndices(int iNodeInd, std::vector<int> &oTipI
         }
     }
 }
+
+void EnrFrontDoNothing :: giveInputRecord(DynamicInputRecord &input)
+{
+	int number = 1;
+	input.setRecordKeywordField(this->giveInputRecordName(), number);
+}
+
 
 void EnrFrontExtend :: MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemManager &ixFemMan, const std::vector<double> &iLevelSetNormalDir, const std::vector<double> &iLevelSetTangDir, const std::vector<TipInfo> &iTipInfo)
 {
@@ -1249,6 +1217,12 @@ void EnrFrontExtend :: MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemM
     {
         ioNodeEnrMarker[ newEnrNodes[i]-1 ] = 1;
     }
+}
+
+void EnrFrontExtend :: giveInputRecord(DynamicInputRecord &input)
+{
+	int number = 1;
+	input.setRecordKeywordField(this->giveInputRecordName(), number);
 }
 
 EnrFrontLinearBranchFuncRadius :: EnrFrontLinearBranchFuncRadius():
@@ -1385,6 +1359,14 @@ IRResultType EnrFrontLinearBranchFuncRadius :: initializeFrom(InputRecord *ir)
     printf("In EnrFrontLinearBranchFuncRadius :: initializeFrom(): mEnrichmentRadius: %e\n", mEnrichmentRadius );
 
     return IRRT_OK;
+}
+
+void EnrFrontLinearBranchFuncRadius :: giveInputRecord(DynamicInputRecord &input)
+{
+	int number = 1;
+    input.setRecordKeywordField(this->giveInputRecordName(), number);
+
+	input.setField(mEnrichmentRadius, _IFT_EnrFrontLinearBranchFuncRadius_Radius);
 }
 
 

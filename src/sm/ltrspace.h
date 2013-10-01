@@ -65,7 +65,6 @@ class LTRSpace : public NLStructuralElement, public ZZNodalRecoveryModelInterfac
 {
 protected:
     static FEI3dTetLin interpolation;
-    int numberOfGaussPoints;
 
 public:
     LTRSpace(int n, Domain *d);

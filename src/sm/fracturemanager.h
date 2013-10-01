@@ -43,15 +43,7 @@
 #include "contextmode.h"
 #include "timestep.h"
 #include "interface.h"
-/*
-///@name Input fields for XfemManager
-//@{
-#define _IFT_XfemManager_numberOfGeometryItems "numberofgeometryitems"  // -> numberOfEnrichmentDomains
-#define _IFT_XfemManager_numberOfEnrichmentItems "numberofenrichmentitems"
-#define _IFT_XfemManager_numberOfEnrichmentFunctions "numberofenrichmentfunctions"
-#define _IFT_XfemManager_name "xfemmanagername" ///< @todo Should this exist? / Mikael - No /JB
-//@}
-*/
+
 namespace oofem {
 class Domain;
 class IntArray;

@@ -226,7 +226,7 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov,
 
             this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
             //dei->interpSurfaceLevelSet(levelSet, N, elNodes, lCoords.at(3)); // distance from delamination to xi coord
-            double levelSet = lCoords.at(3) - dei->delamXiCoord; 
+            double levelSet = lCoords.at(3) - dei->giveDelamXiCoord(); 
             dei->evaluateEnrFuncAt(ef, lCoords, levelSet);  
             
             if ( ef[0] > 0.1 ) {           
@@ -390,7 +390,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
         for ( int j = 1; j <= iRuleL->giveNumberOfIntegrationPoints(); j++ ) {
             GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
             lCoords = *gp->giveCoordinates();
-            double levelSet = lCoords.at(3) - dei->delamXiCoord;
+            double levelSet = lCoords.at(3) - dei->giveDelamXiCoord();
             dei->evaluateEnrFuncAt(ef, lCoords, levelSet);  
             
             if ( ef[0] > 0.1 ) {  
@@ -468,14 +468,14 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         IntegrationPoint *ip = iRuleL->getIntegrationPoint(i - 1);
         lCoords.at(1) = ip->giveCoordinate(1);
         lCoords.at(2) = ip->giveCoordinate(2);
-        lCoords.at(3) = dei->delamXiCoord; 
+        lCoords.at(3) = dei->giveDelamXiCoord();
 
         this->computeBmatrixAt(lCoords, B);
         this->computeNmatrixAt(lCoords, N);
 
         // Lambda matrix
         genEpsD.beProductOf(B, solVecD);
-        double xi = dei->delamXiCoord;
+        double xi = dei->giveDelamXiCoord();
         double zeta = xi * this->layeredCS->computeIntegralThick() * 0.5;
         this->computeLambdaNMatrix(lambda, genEpsD, zeta);
         
@@ -574,7 +574,7 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
     IntegrationRule *iRuleL = czIntegrationRulesArray [ dei->giveNumber() - 1 ];
     StructuralInterfaceMaterial *intMat = static_cast < StructuralInterfaceMaterial * > (this->czMat);
 
-    double xi = dei->delamXiCoord;
+    double xi = dei->giveDelamXiCoord();
     double zeta = this->giveGlobalZcoord(xi);
     this->computeLambdaNMatrixDis(lambda, zeta);
 	FloatMatrix Q;
@@ -585,7 +585,7 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
         IntegrationPoint *ip = iRuleL->getIntegrationPoint(i - 1);
         lCoords.at(1) = ip->giveCoordinate(1);
         lCoords.at(2) = ip->giveCoordinate(2);
-        lCoords.at(3) = dei->delamXiCoord;
+        lCoords.at(3) = dei->giveDelamXiCoord();
         this->computeNmatrixAt(lCoords, N);
                 
         intMat->give3dStiffnessMatrix_dTdj(K, TangentStiffness, ip, tStep);
@@ -660,7 +660,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
                     }
 
                     // K_{c,dk} & K_{dk,c}
-                    double levelSetM = lCoords.at(3) - deiM->delamXiCoord;
+                    double levelSetM = lCoords.at(3) - deiM->giveDelamXiCoord();
                     deiM->evaluateEnrFuncAt(efM, lCoords, levelSetM); 
                     if ( efM[0] > 0.1 ) {
                         tempRed.beSubMatrixOf(KCD, activeDofsC, activeDofsArrays[m-1]);
@@ -673,7 +673,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
                     for ( int k = 1; k <= numEI; k++ ) {
                         Delamination *deiK = dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(k) );
                         if ( deiK != NULL && deiK->isElementEnriched(this) ) {
-                            double levelSetK = lCoords.at(3) - deiK->delamXiCoord;
+                            double levelSetK = lCoords.at(3) - deiK->giveDelamXiCoord();
                             deiK->evaluateEnrFuncAt(efK, lCoords, levelSetK);   
                             
                             if ( efM[0] > 0.1 && efK[0] > 0.1 ) {
@@ -726,7 +726,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
                     Delamination *deiM = dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(m) );
 
                     if ( deiM !=NULL && deiM->isElementEnriched(this) ) {
-                        double levelSetM = pLoad->giveLoadOffset() - deiM->delamXiCoord;
+                        double levelSetM = pLoad->giveLoadOffset() - deiM->giveDelamXiCoord();
                         deiM->evaluateEnrFuncAt(efM, lCoords, levelSetM); 
                         
                         IntArray &orderingJ = orderingArrays[m-1];
@@ -744,7 +744,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
                         for ( int k = 1; k <= numEI; k++ ) {
                             Delamination *deiK = dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(k) );
                             if ( deiK != NULL && deiK->isElementEnriched(this) ) {
-                                double levelSetK = pLoad->giveLoadOffset() - deiK->delamXiCoord;
+                                double levelSetK = pLoad->giveLoadOffset() - deiK->giveDelamXiCoord();
                                 deiK->evaluateEnrFuncAt(efK, lCoords, levelSetK);   
                                 if ( efM[0] > 0.1 && efK[0] > 0.1 ) {
                                     IntArray &orderingK = orderingArrays[k-1];
@@ -1103,7 +1103,7 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
         for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
             Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
             if ( dei != NULL && dei->isElementEnriched(this) ) {
-                double xi0 = dei->delamXiCoord;
+                double xi0 = dei->giveDelamXiCoord();
                 if ( xi > xi0 ) {
                     this->computeTractionForce(temp, iEdge, edgeLoad, tStep);
                     // Assemble
@@ -1154,7 +1154,7 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) {
             Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
             if ( dei != NULL && dei->isElementEnriched(this) ) {
-                double levelSet = xi - dei->delamXiCoord;
+                double levelSet = xi - dei->giveDelamXiCoord();
                 dei->evaluateEnrFuncAt(ef, lCoords, levelSet); 
                 if ( ef[0] > 0.1 ) {
                    dei->giveEIDofIdArray(eiDofIdArray); 
@@ -1207,7 +1207,7 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int 
         Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
         if ( dei != NULL && dei->isElementEnriched(this) ) {
 
-            double zeta0 = giveGlobalZcoord(dei->delamXiCoord);
+            double zeta0 = giveGlobalZcoord(dei->giveDelamXiCoord());
             double levelSet = zeta - zeta0;
             dei->evaluateEnrFuncAt(ef, lCoords, levelSet); 
             if ( ef[0] > 0.1 ) {

@@ -698,7 +698,7 @@ void FloatArray :: resizeWithValues(int n, int allocChunk)
 {
 #ifdef DEBUG
     if ( allocChunk < 0 ) {
-        OOFEM_FATAL2("FloatArray :: resize - allocChunk must be non-negative; %d", allocChunk);
+        OOFEM_FATAL2("FloatArray :: resizeWithValues - allocChunk must be non-negative; %d", allocChunk);
     }
 
 #endif

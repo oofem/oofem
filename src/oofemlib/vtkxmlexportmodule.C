@@ -1473,13 +1473,6 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region,
             				enrItem->computeIntersectionPoints(intersecPoints, intersecEdgeInd, elem);
             				numPoints += intersecPoints.size();
 
-//            				for( int k = 1; k <= enrItem->giveNumberOfEnrichmentDomains(); k++ )
-//            				{
-//            					EnrichmentDomain *enrDomain = enrItem->giveEnrichmentDomain(k);
-
-//            					numPoints += enrDomain->computeNumberOfIntersectionPoints(elem);
-//            				}
-
             		}
             	}
 

@@ -953,7 +953,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         rtold.at(1) = _rtol;
     }
 
-
+	this->giveLinearSolver()->initializeFrom(ir);
     //refLoadInputMode = (calm_referenceLoadInputModeType) readInteger  (initString, "refloadmode");
     return IRRT_OK;
 }

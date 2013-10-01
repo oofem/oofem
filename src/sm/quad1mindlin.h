@@ -62,7 +62,6 @@ class Quad1Mindlin : public NLStructuralElement
 {
 protected:
     static FEI2dQuadLin interp_lin;
-    int numberOfGaussPoints;
 
 public:
     Quad1Mindlin(int n, Domain *d);

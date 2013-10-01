@@ -83,7 +83,6 @@ public:
 
 protected:
     virtual Interface *giveInterface(InterfaceType it);
-    int numberOfGaussPoints;
     IntegrationRule **specialIntegrationRulesArray;
     LayeredCrossSection *layeredCS;
     static FEI3dWedgeQuad interpolationForExport;

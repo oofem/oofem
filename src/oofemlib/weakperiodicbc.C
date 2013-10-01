@@ -265,7 +265,7 @@ void WeakPeriodicBoundaryCondition :: addElementSide(int newElement, int newSide
 		//normalNew.printYourself();
 		giveEdgeNormal( normal0, element [ 0 ].at(0), side [ 0 ].at(0) );
 		double d = sqrt( pow(normalNew.at(1) - normal0.at(1), 2) + pow(normalNew.at(2) - normal0.at(2), 2) );
-		if ( abs(d) < 0.001 ) {
+		if ( fabs(d) < 0.001 ) {
 			addToList = 0;
 		} else {
 			addToList = 1;
@@ -273,7 +273,7 @@ void WeakPeriodicBoundaryCondition :: addElementSide(int newElement, int newSide
 	} else {
 		// Otherwise, check the normal in order to decide upon which direction the parameter runs (x or y)
 		giveEdgeNormal(normalNew, newElement, newSide);
-		if ( abs(abs( normalNew.at(1) ) - 1) < 0.0001 ) {               // Normal point in x direction, thus set direction to y
+		if ( fabs(fabs( normalNew.at(1) ) - 1.) < 0.0001 ) {               // Normal point in x direction, thus set direction to y
 			direction = 2;
 		} else {
 			direction = 1;

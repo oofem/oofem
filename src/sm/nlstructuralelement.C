@@ -43,6 +43,7 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "structuralcrosssection.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 NLStructuralElement :: NLStructuralElement(int n, Domain *aDomain) :
@@ -529,6 +530,13 @@ NLStructuralElement :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, nlGeometry, _IFT_NLStructuralElement_nlgeoflag);
 
     return IRRT_OK;
+}
+
+void NLStructuralElement :: giveInputRecord(DynamicInputRecord &input)
+{
+	StructuralElement::giveInputRecord(input);
+
+	input.setField(nlGeometry, _IFT_NLStructuralElement_nlgeoflag);
 }
 
 int

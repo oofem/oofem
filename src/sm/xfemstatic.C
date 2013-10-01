@@ -42,6 +42,11 @@
 #include "xfemelementinterface.h"
 #include "element.h"
 
+#include "exportmodulemanager.h"
+#include "vtkxmlexportmodule.h"
+
+#include "gausspoint.h"
+
 namespace oofem {
 
 REGISTER_EngngModel( XFEMStatic );
@@ -146,21 +151,53 @@ XFEMStatic :: terminate(TimeStep *tStep)
     // Update element subdivisions if necessary
     // (e.g. if a crack has moved and cut a new element)
     for( int domInd = 1; domInd <= this->giveNumberOfDomains(); domInd++ ) {
+#if 1
+    	Domain *domain = this->giveDomain(domInd);
 
-        Domain *domain = this->giveDomain(domInd);
-    	int numEl = domain->giveNumberOfElements();
+
+        // Take copy of the domain to allow mapping of state variables
+        // to the new Gauss points.
+        Domain *dNew = domain->Clone();
+
+        this->domainList->put(1, dNew); 
+        //this->domainList->at(1)->giveXfemManager()->updateYourself();
+
+
+        domain = this->giveDomain(1);
+
+        // Set domain pointer to various components ...
+        this->nMethod->setDomain(domain);
+
+        int numExpModules = this->exportModuleManager->giveNumberOfModules();
+        for(int i = 1; i <= numExpModules; i++) {
+
+        	//  ... by diving deep into the hierarchies ... :-/
+        	VTKXMLExportModule *vtkxmlMod = dynamic_cast<VTKXMLExportModule*> (this->exportModuleManager->giveModule(i) );
+        	if(vtkxmlMod != NULL) {
+        		vtkxmlMod->giveSmoother()->setDomain(domain);
+        		vtkxmlMod->givePrimVarSmoother()->setDomain(domain);
+        	}
+
+        }
+
+
+        int numEl = domain->giveNumberOfElements();
 
     	for(int i = 1; i <= numEl; i++) {
     		Element *el = domain->giveElement(i);
 
+    		// Compute new distribution of Gauss points ...
     		XfemElementInterface *xfemEl = dynamic_cast<XfemElementInterface*> (el);
 
     		if( xfemEl != NULL ) {
     			xfemEl->recomputeGaussPoints();
+
+    			// ... and map state variables to the new Gauss points
+//    			el->adaptiveMap(dNew, tStep);
     		}
 
     	}
-
+#endif
     }
     
     // Fracture/failure mechanics evaluation    

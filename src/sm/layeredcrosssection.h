@@ -106,6 +106,7 @@ public:
     virtual ~LayeredCrossSection() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element);
 

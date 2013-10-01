@@ -42,6 +42,7 @@
 #include "classfactory.h"
 #include "enrichmentfunction.h"
 #include "xfemmanager.h"
+#include "dynamicinputrecord.h"
 
 #include <algorithm>
 
@@ -57,6 +58,13 @@ REGISTER_EnrichmentDomain(EDCrack)
 
 EnrichmentDomain :: EnrichmentDomain()
 {}
+
+void EnrichmentDomain_BG :: giveInputRecord(DynamicInputRecord &input)
+{
+    input.setRecordKeywordField(this->giveInputRecordName(), 1);
+
+    bg->giveInputRecord(input);
+}
 
 void EnrichmentDomain_BG :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
@@ -216,7 +224,9 @@ bool EDCrack :: propagateTips(const std::vector<TipPropagation> &iTipProp) {
 
 	// For debugging only
 	PolygonLine *pl = dynamic_cast<PolygonLine*>(bg);
-	pl->printVTK();
+	if( pl != NULL ) {
+		pl->printVTK();
+	}
 
 	return true;
 }
@@ -248,8 +258,28 @@ IRResultType DofManList :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+void DofManList :: giveInputRecord(DynamicInputRecord &input)
+{
+    input.setRecordKeywordField(this->giveInputRecordName(), 1);
+
+	IntArray idList;
+	idList.resize(dofManList.size());
+    for ( size_t i = 0; i < dofManList.size(); i++ ) {
+    	idList.at(i+1) = dofManList[i];
+    }
+
+    input.setField(idList, _IFT_DofManList_list);
+}
+
 void WholeDomain :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
     iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
 }
+
+void WholeDomain :: giveInputRecord(DynamicInputRecord &input)
+{
+    input.setRecordKeywordField(this->giveInputRecordName(), 1);
+
+}
+
 } // end namespace oofem

@@ -45,7 +45,6 @@ class HTSelement : public StructuralElement
 {
 protected:
     int numberOfEdges;
-    int numberOfGaussPoints;
     //debug
     double lambda, mu;
     double cgX,cgY;

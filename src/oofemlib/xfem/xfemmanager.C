@@ -50,6 +50,7 @@
 #include "datareader.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 XfemManager :: XfemManager(Domain *domain)
@@ -72,7 +73,6 @@ XfemManager :: clear()
     enrichmentItemList = NULL;
     numberOfEnrichmentItems = -1;
 }
-
 
 bool XfemManager :: isElementEnriched(const Element *elem)
 {
@@ -138,6 +138,13 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
 }
 
 
+void XfemManager :: giveInputRecord(DynamicInputRecord &input)
+{
+    input.setRecordKeywordField(_IFT_XfemManager_Name, 1);
+	input.setField(numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
+	input.setField(mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
+}
+
 int XfemManager :: instanciateYourself(DataReader *dr)
 {
     const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
@@ -166,6 +173,17 @@ int XfemManager :: instanciateYourself(DataReader *dr)
     return 1;
 }
 
+void XfemManager :: setDomain(Domain *ipDomain)
+{
+	domain = ipDomain;
+
+	int numEI = enrichmentItemList->giveSize();
+
+	for(int i = 1; i <= numEI; i++) {
+		enrichmentItemList->at(i)->setDomain(ipDomain);
+	}
+
+}
 
 contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {

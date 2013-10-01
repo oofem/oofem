@@ -44,6 +44,7 @@
 #include "mathfem.h"
 #include "classfactory.h"
 #include "lobattoir.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 
@@ -611,6 +612,22 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
+
+void LayeredCrossSection :: giveInputRecord(DynamicInputRecord &input)
+{
+    StructuralCrossSection :: giveInputRecord(input);
+
+    input.setField(this->numberOfLayers, _IFT_LayeredCrossSection_nlayers);
+    input.setField(this->layerMaterials, _IFT_LayeredCrossSection_layermaterials);
+    input.setField(this->layerThicks, _IFT_LayeredCrossSection_thicks);
+    input.setField(this->layerWidths, _IFT_LayeredCrossSection_widths);
+
+    input.setField(this->numberOfIntegrationPoints, _IFT_LayeredCrossSection_nintegrationpoints);
+
+    input.setField(this->midSurfaceZcoordFromBottom, _IFT_LayeredCrossSection_midsurf);
+
+}
+
 
 
 void

@@ -60,7 +60,6 @@ class BoundaryLoad;
 class Tr2Shell7XFEM : public Shell7BaseXFEM
 {
 protected:
-    int numberOfGaussPoints;
     static FEI3dTrQuad interpolation;
     static bool __initialized;
     static IntArray ordering_all;
