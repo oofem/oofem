@@ -152,7 +152,7 @@ void PlaneStress2dXfem :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
 
 
-int PlaneStress2dXfem :: computeNumberOfDofs(EquationID ut)
+int PlaneStress2dXfem :: computeNumberOfDofs()
 {
     int ndofs = 0;
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {

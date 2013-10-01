@@ -61,7 +61,7 @@ public:
     virtual classType giveClassID() const { return QTrPlaneStressGradClass; }
 
     virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
-    virtual int computeNumberOfDofs(EquationID ut) { return 15; }
+    virtual int computeNumberOfDofs() { return 15; }
 
 protected:
     virtual void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);

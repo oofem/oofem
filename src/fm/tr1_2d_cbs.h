@@ -109,7 +109,7 @@ public:
 
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
-    virtual int computeNumberOfDofs(EquationID ut);
+    virtual int computeNumberOfDofs();
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void updateYourself(TimeStep *tStep);
     /// Used to check consistency and initialize some element geometry data (area,b,c)

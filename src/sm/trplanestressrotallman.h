@@ -89,7 +89,7 @@ public:
     /** Computes the stiffness matrix of receiver. Overloaded to add stabilization of zero-energy mode (equal rotations) */
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 9; }
+    virtual int computeNumberOfDofs() { return 9; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     Interface* giveInterface(InterfaceType interface);

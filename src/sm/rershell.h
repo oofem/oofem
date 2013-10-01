@@ -89,7 +89,7 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 18; }
+    virtual int computeNumberOfDofs() { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);

@@ -346,8 +346,7 @@ LIBeam3dNL2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
 
-    answer.resize( this->computeNumberOfDofs(EID_MomentumBalance), this->computeNumberOfDofs(EID_MomentumBalance) );
-    answer.zero();
+    answer.resize(0, 0);
 
     // linear part
 

@@ -1055,6 +1055,10 @@ void FloatMatrix :: add(const FloatMatrix &aMatrix)
 // Adds aMatrix to the receiver. If the receiver has a null size,
 // adjusts its size to that of aMatrix. Returns the modified receiver.
 {
+    if ( aMatrix.nRows == 0 || aMatrix.nColumns == 0 ) {
+        return;
+    }
+
     if ( nRows * nColumns == 0 ) {
         this->operator = ( aMatrix );
         return;
@@ -1087,6 +1091,10 @@ void FloatMatrix :: add(double s, const FloatMatrix &aMatrix)
 // Adds aMatrix to the receiver. If the receiver has a null size,
 // adjusts its size to that of aMatrix. Returns the modified receiver.
 {
+    if ( aMatrix.nRows == 0 || aMatrix.nColumns == 0 ) {
+        return;
+    }
+
     if ( !this->isNotEmpty() ) {
         this->operator = ( aMatrix );
         this->times(s);

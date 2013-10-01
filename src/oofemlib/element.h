@@ -369,14 +369,14 @@ public:
      * @param eid Id of equation that DOFs belong to.
      * @return Number of DOFs belonging to ut.
      */
-    virtual int computeNumberOfDofs(EquationID eid) { return 0; }
+    virtual int computeNumberOfDofs() { return 0; }
     /**
      * Computes the total number of element's global dofs.
      * The transitions from global c.s. to nodal c.s. should NOT be included.
      * @param eid Id of equation that DOFs belong to.
      * @return Total number of DOFs belonging to ut.
      */
-    virtual int computeNumberOfGlobalDofs(EquationID eid);
+    virtual int computeNumberOfGlobalDofs();
     /**
      * Computes the total number of element's primary master DOFs.
      * @param eid ID of equation that DOFs belong to.

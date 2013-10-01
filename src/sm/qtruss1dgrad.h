@@ -65,7 +65,7 @@ public:
 
     virtual MaterialMode giveMaterialMode() { return _1dMat; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int computeNumberOfDofs(EquationID ut) { return 5; }
+    virtual int computeNumberOfDofs() { return 5; }
     int getNprimNodes() { return 3; }
     int getNprimVars() { return 1; }
     int getNsecNodes() { return 2; }

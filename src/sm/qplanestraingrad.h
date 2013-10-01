@@ -60,7 +60,7 @@ public:
     virtual classType giveClassID() const { return QPlaneStrainGradClass; }
 
     virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
-    virtual int computeNumberOfDofs(EquationID ut) { return 20; }
+    virtual int computeNumberOfDofs() { return 20; }
 
 protected:
     virtual void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);

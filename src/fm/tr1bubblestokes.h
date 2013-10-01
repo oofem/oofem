@@ -112,7 +112,7 @@ public:
     virtual classType giveClassID() const { return Tr1BubbleStokesElementClass; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
-    virtual int computeNumberOfDofs(EquationID ut);
+    virtual int computeNumberOfDofs();
 
     virtual int giveNumberOfInternalDofManagers() const { return 1; }
     virtual DofManager *giveInternalDofManager(int i) const { return bubble; }

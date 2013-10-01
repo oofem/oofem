@@ -85,7 +85,7 @@ public:
     virtual FEInterpolation *giveInterpolation() const { return &interp_geom; }
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const { return NULL; }
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 6; }
+    virtual int computeNumberOfDofs() { return 6; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual void  printOutputAt(FILE *file, TimeStep *tStep);

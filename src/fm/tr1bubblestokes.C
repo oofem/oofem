@@ -91,16 +91,9 @@ void Tr1BubbleStokes :: computeGaussPoints()
     }
 }
 
-int Tr1BubbleStokes :: computeNumberOfDofs(EquationID ut)
+int Tr1BubbleStokes :: computeNumberOfDofs()
 {
-    if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        return 11;
-    } else if ( ut == EID_MomentumBalance ) {
-        return 8;
-    } else if ( ut == EID_ConservationEquation ) {
-        return 3;
-    }
-    return 0;
+    return 11;
 }
 
 void Tr1BubbleStokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const

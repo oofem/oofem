@@ -68,7 +68,7 @@ public:
     virtual const char *giveClassName() const { return "Tetrah1_ht"; }
     virtual classType giveClassID() const { return Tetrah1_htClass; }
 
-    virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 4 : 8; }
+    virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 4 : 8; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _3dHeat; }
 

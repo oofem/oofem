@@ -69,7 +69,7 @@ public:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *atTime);
     virtual void computeLoadVector(FloatArray &answer, TimeStep *atTime);
     virtual void computeGaussPoints();
-    virtual int computeNumberOfDofs(EquationID ut);
+    virtual int computeNumberOfDofs();
 
     void computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep);
     void computeInternalForcesVector(FloatArray &answer, TimeStep *atTime);

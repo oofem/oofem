@@ -97,19 +97,9 @@ Quad10_2D_SUPG :: giveInternalDofManager(int i) const
 
 
 int
-Quad10_2D_SUPG :: computeNumberOfDofs(EquationID ut)
+Quad10_2D_SUPG :: computeNumberOfDofs()
 {
-    if ( ut == EID_MomentumBalance ) {
-        return 8;
-    } else if ( ut == EID_ConservationEquation ) {
-        return 1;
-    } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        return 9;
-    } else {
-        _error("computeNumberOfDofs: Unknown equation id encountered");
-    }
-
-    return 0;
+    return 9;
 }
 
 
@@ -302,15 +292,12 @@ Quad10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     double Re, norm_un, mu, mu_min, nu, norm_N, norm_N_d, norm_M_d, norm_LSIC, norm_G_c, norm_M_c, norm_N_c, t_p1, t_p2, t_p3, t_s1, t_s2, t_s3, rho;
     FloatMatrix dn, N, N_d, M_d, LSIC, G_c, M_c, N_c;
     FloatArray dN, s, lcoords_nodes, u, lcn, dn_a(2), n, u1(8), u2(8);
-    GaussPoint *gp;
-    IntegrationRule *iRule;
 
-
-    iRule = integrationRulesArray [ 1 ];
+    IntegrationRule *iRule = integrationRulesArray [ 1 ];
     mu_min = 1;
     rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
     for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-        gp = iRule->getIntegrationPoint(j);
+        GaussPoint *gp = iRule->getIntegrationPoint(j);
         mu = static_cast< FluidDynamicMaterial* >(this->giveMaterial())->giveEffectiveViscosity(gp, atTime);
         if ( mu_min > mu ) {
             mu_min = mu;
@@ -389,21 +376,17 @@ void
 Quad10_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *atTime)
 {
     FloatMatrix n, b;
-    double dV, rho;
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    GaussPoint *gp;
 
-    answer.resize(undofs, undofs);
-    answer.zero();
+    answer.resize(0, 0);
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* consistent part + supg stabilization term */
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
-        dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->give('d', gp);
+        double dV  = this->computeVolumeAround(gp);
+        double rho = this->giveMaterial()->give('d', gp);
         answer.plusProductUnsym(n, b, rho * dV);
     }
 }
@@ -413,21 +396,17 @@ void
 Quad10_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
 {
     FloatMatrix n, b;
-    double dV, rho;
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    GaussPoint *gp;
 
-    answer.resize(undofs, undofs);
-    answer.zero();
+    answer.resize(0, 0);
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* consistent part + supg stabilization term */
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
-        dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->give('d', gp);
+        double dV  = this->computeVolumeAround(gp);
+        double rho = this->giveMaterial()->give('d', gp);
 
         answer.plusProductUnsym(b, b, rho * dV);
     }
@@ -438,20 +417,17 @@ void
 Quad10_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
 {
     FloatMatrix n, b;
-    double dV, rho;
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    GaussPoint *gp;
 
-    answer.resize(undofs, undofs);
-    answer.zero();
+    answer.resize(0, 0);
+
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* mtrx for computing t_supg, norm of this mtrx is computed */
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
-        dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->give('d', gp);
+        double dV  = this->computeVolumeAround(gp);
+        double rho = this->giveMaterial()->give('d', gp);
 
         answer.plusProductUnsym(b, n, rho * dV);
     }
@@ -460,19 +436,15 @@ Quad10_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
 void
 Quad10_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *atTime)
 {
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    double dV, rho;
-    GaussPoint *gp;
     FloatMatrix b;
 
-    answer.resize(undofs, undofs);
-    answer.zero();
+    answer.resize(0, 0);
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
-        dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->give('d', gp);
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
+        double dV  = this->computeVolumeAround(gp);
+        double rho = this->giveMaterial()->give('d', gp);
         this->computeDivUMatrix(b, gp);
 
         answer.plusProductSymmUpper(b, b, dV * rho);
@@ -486,22 +458,17 @@ void
 Quad10_2D_SUPG :: computeAdvectionEpsilonTerm(FloatMatrix &answer, TimeStep *atTime)
 {
     //  to compute t_pspg
-    int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    GaussPoint *gp;
     FloatMatrix g, b;
-    double dV;
 
-    answer.resize(pndofs, undofs);
-    answer.zero();
+    answer.resize(0,0);
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
 
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
         this->computeGradPMatrix(g, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
-        dV  = this->computeVolumeAround(gp);
+        double dV = this->computeVolumeAround(gp);
 
         answer.plusProductUnsym(g, b, dV);
     }
@@ -511,22 +478,17 @@ void
 Quad10_2D_SUPG :: computeMassEpsilonTerm(FloatMatrix &answer, TimeStep *atTime)
 {
     // to compute t_pspg
-    int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    double dV;
     FloatMatrix g, n;
-    GaussPoint *gp;
 
-    answer.resize(pndofs, undofs);
-    answer.zero();
+    answer.resize(0, 0);
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
 
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
         this->computeGradPMatrix(g, gp);
         this->computeNuMatrix(n, gp);
-        dV  = this->computeVolumeAround(gp);
+        double dV = this->computeVolumeAround(gp);
 
         answer.plusProductUnsym(g, n, dV);
     }
@@ -590,8 +552,7 @@ void
 Quad10_2D_SUPG :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                           InternalStateType type, TimeStep *tStep)
 {
-    GaussPoint *gp;
-    gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     this->giveIPValue(answer, gp, type, tStep);
 }
 

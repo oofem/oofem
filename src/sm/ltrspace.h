@@ -76,7 +76,7 @@ public:
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 12; }
+    virtual int computeNumberOfDofs() { return 12; }
     virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
     virtual double computeVolumeAround(GaussPoint *gp);
 

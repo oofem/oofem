@@ -87,7 +87,7 @@ public:
 
     virtual double giveArea() { return this->width * this->thickness; }
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 6; }
+    virtual int computeNumberOfDofs() { return 6; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
 

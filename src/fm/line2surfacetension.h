@@ -79,7 +79,7 @@ public:
                                                                  TimeStep *tStep, const FloatArray &lcoords,
                                                                  FloatArray &answer);
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 6; }
+    virtual int computeNumberOfDofs() { return 6; }
 
     virtual const char *giveClassName() const { return "Line2SurfaceTension"; }
     virtual const char *giveInputRecordName() const { return _IFT_Line2SurfaceTension_Name; }

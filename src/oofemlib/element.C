@@ -122,7 +122,7 @@ Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, Fl
     IntArray dofIDMask;
     FloatMatrix G2L;
     FloatArray vec;
-    answer.resize( this->computeNumberOfGlobalDofs(type) );
+    answer.resize( this->computeNumberOfGlobalDofs() );
 
     k = 0;
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
@@ -142,6 +142,7 @@ Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, Fl
             answer.at(++k) = vec.at(j);
         }
     }
+    answer.resizeWithValues(k);
 
     if (this->computeGtoLRotationMatrix(G2L)) {
         answer.rotatedWith(G2L, 'n');
@@ -174,7 +175,7 @@ Element :: computeBoundaryVectorOf(const IntArray &bNodes, EquationID type, Valu
             answer.at(++k) = vec.at(j);
         }
     }
-    
+
     if (this->computeGtoLRotationMatrix(G2L)) {
         OOFEM_ERROR("Element :: computeBoundaryVector - Local coordinate system is not implemented yet");
     }
@@ -192,7 +193,7 @@ Element :: computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN
     IntArray dofIDMask;
     FloatMatrix G2L;
     FloatArray vec;
-    answer.resize( this->computeNumberOfGlobalDofs( field.giveEquationID() ) );
+    answer.resize( this->computeNumberOfGlobalDofs() );
 
     k = 0;
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
@@ -212,6 +213,7 @@ Element :: computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN
             answer.at(++k) = vec.at(j);
         }
     }
+    answer.resizeWithValues(k);
 
     if (this->computeGtoLRotationMatrix(G2L)) {
         answer.rotatedWith(G2L, 'n');
@@ -230,7 +232,7 @@ Element :: computeVectorOfPrescribed(EquationID ut, ValueModeType mode, TimeStep
     FloatMatrix G2L;
     FloatArray vec;
 
-    answer.resize( this->computeNumberOfGlobalDofs(ut) );
+    answer.resize( this->computeNumberOfGlobalDofs() );
 
     k = 0;
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
@@ -250,6 +252,7 @@ Element :: computeVectorOfPrescribed(EquationID ut, ValueModeType mode, TimeStep
             answer.at(++k) = vec.at(j);
         }
     }
+    answer.resizeWithValues(k);
 
     if (this->computeGtoLRotationMatrix(G2L)) {
         answer.rotatedWith(G2L, 'n');
@@ -258,9 +261,9 @@ Element :: computeVectorOfPrescribed(EquationID ut, ValueModeType mode, TimeStep
 
 
 int
-Element :: computeNumberOfGlobalDofs(EquationID eid)
+Element :: computeNumberOfGlobalDofs()
 {
-    return this->computeNumberOfDofs(eid);
+    return this->computeNumberOfDofs();
 }
 
 
@@ -298,10 +301,10 @@ Element :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
 
 #ifdef DEBUG
     if ( is_GtoL ) {
-        if ( GtoL.giveNumberOfColumns() != this->computeNumberOfGlobalDofs(eid) ) {
+        if ( GtoL.giveNumberOfColumns() != this->computeNumberOfGlobalDofs() ) {
             _error("Element :: updateRotationMatrix - GtoL transformation matrix size mismatch in columns");
         }
-        if ( GtoL.giveNumberOfRows() != this->computeNumberOfDofs(eid) ) {
+        if ( GtoL.giveNumberOfRows() != this->computeNumberOfDofs() ) {
             _error("Element :: updateRotationMatrix - GtoL transformation matrix size mismatch in rows");
         }
     }
@@ -309,7 +312,7 @@ Element :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
         if ( NtoG.giveNumberOfColumns() != this->computeNumberOfPrimaryMasterDofs(eid) ) {
             _error("Element :: updateRotationMatrix - NtoG transformation matrix size mismatch in columns");
         }
-        if ( NtoG.giveNumberOfRows() != this->computeNumberOfGlobalDofs(eid) ) {
+        if ( NtoG.giveNumberOfRows() != this->computeNumberOfGlobalDofs() ) {
             _error("Element :: updateRotationMatrix - NtoG transformation matrix size mismatch in rows");
         }
     }
@@ -347,7 +350,7 @@ Element :: computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &n
 
     // initialize answer
     int gsize = this->computeNumberOfPrimaryMasterDofs(eid);
-    answer.resize(this->computeNumberOfGlobalDofs(eid), gsize);
+    answer.resize(this->computeNumberOfGlobalDofs(), gsize);
     answer.zero();
 
     FloatMatrix dofManT;

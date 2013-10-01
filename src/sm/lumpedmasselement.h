@@ -74,7 +74,7 @@ public:
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0)
     { answer.resize(0); }
 
-    virtual int computeNumberOfDofs(EquationID ut);
+    virtual int computeNumberOfDofs();
     virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
 
     virtual void updateInternalState(TimeStep *tStep) {}

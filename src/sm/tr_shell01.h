@@ -79,7 +79,7 @@ public:
 
     virtual FEInterpolation *giveInterpolation() const { return plate->giveInterpolation(); }
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 18; }
+    virtual int computeNumberOfDofs() { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
     { plate->giveDofManDofIDMask(inode, ut, answer); }
     // definition & identification

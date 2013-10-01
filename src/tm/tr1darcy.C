@@ -306,18 +306,8 @@ Tr1Darcy :: giveInterface(InterfaceType interface)
 }
 
 int
-Tr1Darcy :: computeNumberOfDofs(EquationID ut)
+Tr1Darcy :: computeNumberOfDofs()
 {
-    if ( ut == EID_MomentumBalance ) {
-        return 6;
-    } else if ( ut == EID_ConservationEquation ) {
-        return 3;
-    } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        return 9;
-    } else {
-        _error("computeNumberOfDofs: Unknown equation id encountered");
-    }
-
-    return 0;
+    return 3;
 }
 }

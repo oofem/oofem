@@ -110,8 +110,8 @@ public:
     virtual classType giveClassID() const { return Quad1MindlinShell3DClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 24; }
-    virtual int computeNumberOfGlobalDofs(EquationID ut) { return 24; }
+    virtual int computeNumberOfDofs() { return 24; }
+    virtual int computeNumberOfGlobalDofs() { return 24; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     virtual void computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp);

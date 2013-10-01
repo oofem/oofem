@@ -94,7 +94,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_QWedge_Name; }
     virtual const char *giveClassName() const { return "QWedge"; }
     virtual classType giveClassID() const { return QWedgeClass; }
-    virtual int computeNumberOfDofs(EquationID ut) { return 45; }
+    virtual int computeNumberOfDofs() { return 45; }
     virtual MaterialMode giveMaterialMode();
 
 protected:

@@ -72,7 +72,7 @@ public:
 
     virtual void computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui);
     virtual double computeVolumeAround(GaussPoint *gp);
-    virtual int computeNumberOfDofs(EquationID ut) { return 6 * giveNumberOfNodes(); }
+    virtual int computeNumberOfDofs() { return 6 * giveNumberOfNodes(); }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     double giveLength();
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) {};

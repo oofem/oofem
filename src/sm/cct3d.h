@@ -100,8 +100,8 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_CCTPlate3d_Name; }
     virtual classType giveClassID() const { return CCTPlate3dClass; }
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 9; }
-    virtual int computeNumberOfGlobalDofs(EquationID ut) { return 18; }
+    virtual int computeNumberOfDofs() { return 9; }
+    virtual int computeNumberOfGlobalDofs() { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     virtual const FloatMatrix *computeGtoLRotationMatrix();

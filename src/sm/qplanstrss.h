@@ -57,7 +57,7 @@ public:
     QPlaneStress2d(int n, Domain *d);
     virtual ~QPlaneStress2d() { }
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 16; }
+    virtual int computeNumberOfDofs() { return 16; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     // definition & identification

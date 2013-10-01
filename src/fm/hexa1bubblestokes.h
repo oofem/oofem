@@ -108,7 +108,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Hexa1BubbleStokes_Name; }
     virtual MaterialMode giveMaterialMode() { return _3dFlow; }
 
-    virtual int computeNumberOfDofs(EquationID ut);
+    virtual int computeNumberOfDofs();
     
     virtual int giveNumberOfInternalDofManagers() const { return 1; }
     virtual DofManager *giveInternalDofManager(int i) const { return bubble; }

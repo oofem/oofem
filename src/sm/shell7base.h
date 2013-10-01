@@ -60,7 +60,7 @@ public:
     virtual ~Shell7Base() {}    // destructor -> declaring as virtual will make each subclass call their respective destr.
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    virtual int computeNumberOfDofs(EquationID ut) { return this->giveNumberOfDofs(); }
+    virtual int computeNumberOfDofs() { return this->giveNumberOfDofs(); }
     virtual int checkConsistency();
 
     // Definition & identification

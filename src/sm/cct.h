@@ -107,7 +107,7 @@ public:
     virtual classType giveClassID() const { return CCTPlateClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 9; }
+    virtual int computeNumberOfDofs() { return 9; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     virtual void computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp);

@@ -69,7 +69,7 @@ protected:
     virtual double computeVolumeAround(GaussPoint *gp, int elemSideNumber);    
     Node* giveSideNode(int elementSideNumber, int nodeNumber);
     double  giveSideLength(int sideNumber);
-    virtual int computeNumberOfDofs(EquationID ut) { return 4*numberOfEdges; }
+    virtual int computeNumberOfDofs() { return 4*numberOfEdges; }
     virtual void computeGaussPoints();
     virtual void giveDofManDofIDMask(int inode, EquationID,IntArray &) const;
     virtual StructuralElement* giveStructuralElement() { return this; }

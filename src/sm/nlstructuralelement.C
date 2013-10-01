@@ -128,8 +128,6 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
         u.subtract(*initialDisplacements);
     }
 
-    // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
-    // as this is valid only if receiver has no nodes with slaves
     // zero answer will resize accordingly when adding first contribution
     answer.resize(0);
 
@@ -214,8 +212,6 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
         m = & temp;
     }
 
-    // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
-    // as this is valid only if receiver has no nodes with slaves
     // zero answer will resize accordingly when adding first contribution
     answer.resize(0);
 
@@ -289,7 +285,8 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
     bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode, this->material);
 
-    answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
+    answer.resize(0, 0);
+
     if ( !this->isActivated(tStep) ) {
         return;
     }
@@ -471,8 +468,7 @@ NLStructuralElement :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep 
     FloatMatrix B, stress_ident, stress_identFull;
     IntArray indx;
 
-    answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
-    answer.zero();
+    answer.resize(0, 0);
 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     // assemble initial stress matrix

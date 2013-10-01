@@ -74,7 +74,7 @@ public:
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 2; }
+    virtual int computeNumberOfDofs() { return 2; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     // characteristic length in gp (for some material models)

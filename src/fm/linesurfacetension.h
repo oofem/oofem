@@ -89,7 +89,7 @@ public:
      */
     virtual void computeTangent(FloatMatrix &answer, TimeStep *tStep);
 
-    virtual int computeNumberOfDofs(EquationID ut) { return ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ? 4 : 0;}
+    virtual int computeNumberOfDofs() { return 4;}
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
     Interface *giveInterface(InterfaceType it);

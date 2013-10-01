@@ -175,7 +175,7 @@ TransportElement :: printOutputAt(FILE *file, TimeStep *tStep)
 void
 TransportElement :: computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
-    answer.resize( computeNumberOfDofs(EID_ConservationEquation), computeNumberOfDofs(EID_ConservationEquation) );
+    answer.resize( this->computeNumberOfDofs(), this->computeNumberOfDofs() );
     answer.zero();
 
     if ( emode == HeatTransferEM || emode == Mass1TransferEM ) {
@@ -199,7 +199,7 @@ TransportElement :: computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep)
 void
 TransportElement :: computeConductivityMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-    answer.resize( computeNumberOfDofs(EID_ConservationEquation), computeNumberOfDofs(EID_ConservationEquation) );
+    answer.resize( this->computeNumberOfDofs(), this->computeNumberOfDofs() );
     answer.zero();
     if ( emode == HeatTransferEM || emode == Mass1TransferEM ) {
         this->computeConductivitySubMatrix(answer, 2, 0, Conductivity_hh, tStep);
@@ -450,7 +450,7 @@ TransportElement :: computeIntSourceLHSMatrix(FloatMatrix &answer, TimeStep *tSt
 {
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
     if ( mat->hasInternalSource() ) {
-        answer.resize( computeNumberOfDofs(EID_ConservationEquation), computeNumberOfDofs(EID_ConservationEquation) );
+        answer.resize( this->computeNumberOfDofs(), this->computeNumberOfDofs() );
         answer.zero();
 
         if ( emode == HeatTransferEM || emode == Mass1TransferEM ) {
@@ -721,7 +721,7 @@ TransportElement :: computeExternalForcesVectorAt(FloatArray &answer, TimeStep *
 void
 TransportElement :: computeBCVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
-    answer.resize( computeNumberOfDofs(EID_ConservationEquation) );
+    answer.resize( this->computeNumberOfDofs() );
     answer.zero();
 
     if ( emode == HeatTransferEM || emode == Mass1TransferEM ) {
@@ -742,7 +742,7 @@ TransportElement :: computeBCVectorAt(FloatArray &answer, TimeStep *tStep, Value
 void
 TransportElement :: computeBCMtrxAt(FloatMatrix &answer, TimeStep *tStep, ValueModeType mode)
 {
-    int ndofs = computeNumberOfDofs(EID_ConservationEquation);
+    int ndofs = this->computeNumberOfDofs();
     answer.resize(ndofs, ndofs);
     answer.zero();
 

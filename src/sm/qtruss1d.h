@@ -58,7 +58,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 3; }
+    virtual int computeNumberOfDofs() { return 3; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)

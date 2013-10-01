@@ -259,8 +259,7 @@ LIBeam3dNL :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
 
-    answer.resize( this->computeNumberOfDofs(EID_MomentumBalance), this->computeNumberOfDofs(EID_MomentumBalance) );
-    answer.zero();
+    answer.resize(0, 0);
 
     // linear part
 
@@ -325,14 +324,14 @@ LIBeam3dNL :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     for ( int i = 1; i <= 3; i++ ) {
         for ( int j = 1; j <= 3; j++ ) {
             answer.at(i + 3, j)     -= sn.at(i, j);
-            answer.at(i + 3, j + 3)   += y.at(i, j);
-            answer.at(i + 3, j + 6)   += sn.at(i, j);
-            answer.at(i + 3, j + 9)   += y.at(i, j);
+            answer.at(i + 3, j + 3) += y.at(i, j);
+            answer.at(i + 3, j + 6) += sn.at(i, j);
+            answer.at(i + 3, j + 9) += y.at(i, j);
 
             answer.at(i + 9, j)     -= sn.at(i, j);
-            answer.at(i + 9, j + 3)   += y.at(i, j);
-            answer.at(i + 9, j + 6)   += sn.at(i, j);
-            answer.at(i + 9, j + 9)   += y.at(i, j);
+            answer.at(i + 9, j + 3) += y.at(i, j);
+            answer.at(i + 9, j + 6) += sn.at(i, j);
+            answer.at(i + 9, j + 9) += y.at(i, j);
         }
     }
 }

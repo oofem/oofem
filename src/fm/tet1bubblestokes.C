@@ -91,16 +91,9 @@ void Tet1BubbleStokes :: computeGaussPoints()
     }
 }
 
-int Tet1BubbleStokes :: computeNumberOfDofs(EquationID ut)
+int Tet1BubbleStokes :: computeNumberOfDofs()
 {
-    if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        return 19;
-    } else if ( ut == EID_MomentumBalance ) {
-        return 15;
-    } else if ( ut == EID_ConservationEquation ) {
-        return 4;
-    }
-    return 0;
+    return 19;
 }
 
 void Tet1BubbleStokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const

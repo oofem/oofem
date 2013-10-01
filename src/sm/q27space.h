@@ -86,7 +86,7 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Q27Space_Name; }
     virtual const char *giveClassName() const { return "Q27Space"; }
-    virtual int computeNumberOfDofs(EquationID ut) { return 81; }
+    virtual int computeNumberOfDofs() { return 81; }
     virtual MaterialMode giveMaterialMode();
 
 protected:

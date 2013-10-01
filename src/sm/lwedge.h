@@ -94,7 +94,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_LWedge_Name; }
     virtual const char *giveClassName() const { return "LWedge"; }
     virtual classType giveClassID() const { return LWedgeClass; }
-    virtual int computeNumberOfDofs(EquationID ut) { return 18; }
+    virtual int computeNumberOfDofs() { return 18; }
     virtual MaterialMode giveMaterialMode();
 
 protected:

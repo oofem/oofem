@@ -62,7 +62,7 @@ public:
     QTrPlaneStress2d(int n, Domain *d);
     virtual ~QTrPlaneStress2d() { }
 
-    virtual int  computeNumberOfDofs(EquationID ut) { return 12; }
+    virtual int  computeNumberOfDofs() { return 12; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 

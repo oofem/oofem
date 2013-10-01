@@ -234,15 +234,18 @@ void MixedGradientPressureNeumann :: setPrescribedDeviatoricGradientFromVoigt(co
 void MixedGradientPressureNeumann :: giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    if (eid == EID_MomentumBalance_ConservationEquation)
-        eid = EID_MomentumBalance;
-
-    if (eid != EID_MomentumBalance || type != TangentStiffnessMatrix) {
+    if ( type != TangentStiffnessMatrix ) {
         return;
     }
 
-    IntArray bNodes;
+    IntArray bNodes, dofids;
     IntArray loc_r, loc_c, sigma_loc_r, sigma_loc_c;
+    int nsd = this->domain->giveNumberOfSpatialDimensions();
+    DofIDItem id0 = this->domain->giveDofManager(1)->hasDofID(V_u) ? V_u : D_u; // Just check the first node if it has V_u or D_u.
+    dofids.resize(nsd);
+    for ( int i = 1; i <= nsd; ++i ) {
+        dofids.at(i) = id0 + i;
+    }
 
     // Fetch the columns/rows for the stress contributions;
     this->sigmaDev->giveCompleteLocationArray(sigma_loc_r, r_s);
@@ -259,8 +262,8 @@ void MixedGradientPressureNeumann :: giveLocationArrays(std::vector<IntArray> &r
         int boundary = boundaries.at(pos*2);
 
         e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-        e->giveBoundaryLocationArray(loc_r, bNodes, eid, r_s);
-        e->giveBoundaryLocationArray(loc_c, bNodes, eid, c_s);
+        e->giveBoundaryLocationArray(loc_r, bNodes, dofids, r_s);
+        e->giveBoundaryLocationArray(loc_c, bNodes, dofids, c_s);
         // For most uses, loc_r == loc_c, and sigma_loc_r == sigma_loc_c.
         rows[i] = loc_r;
         cols[i] = sigma_loc_c;

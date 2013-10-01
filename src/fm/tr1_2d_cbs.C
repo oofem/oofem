@@ -82,17 +82,9 @@ TR1_2D_CBS :: ~TR1_2D_CBS()
 
 
 int
-TR1_2D_CBS :: computeNumberOfDofs(EquationID ut)
+TR1_2D_CBS :: computeNumberOfDofs()
 {
-    if ( ut == EID_MomentumBalance ) {
-        return 6;
-    } else if ( ut == EID_ConservationEquation ) {
-        return 3;
-    } else {
-        _error("computeNumberOfDofs: Unknown equation id encountered");
-    }
-
-    return 0;
+    return 9;
 }
 
 void

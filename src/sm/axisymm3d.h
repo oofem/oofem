@@ -70,7 +70,7 @@ public:
     Axisymm3d(int n, Domain *d);
     virtual ~Axisymm3d();
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 6; }
+    virtual int computeNumberOfDofs() { return 6; }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
     // characteristic length in gp (for some material models)

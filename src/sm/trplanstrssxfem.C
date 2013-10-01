@@ -507,7 +507,7 @@ TrPlaneStress2dXFEM :: giveInterface(InterfaceType it)
     }
 }
 
-int TrPlaneStress2dXFEM :: computeNumberOfDofs(EquationID ut)
+int TrPlaneStress2dXFEM :: computeNumberOfDofs()
 {
     int ndofs = 0;
 

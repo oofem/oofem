@@ -80,7 +80,7 @@ public:
     //int computeGtoLRotationMatrix(FloatMatrix &answer);
     //void computeInitialStressMatrix(FloatMatrix& answer, TimeStep* tStep);
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 12; }
+    virtual int computeNumberOfDofs() { return 12; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);

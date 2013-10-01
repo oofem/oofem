@@ -90,19 +90,9 @@ void Tet21Stokes :: computeGaussPoints()
     }
 }
 
-int Tet21Stokes :: computeNumberOfDofs(EquationID ut)
+int Tet21Stokes :: computeNumberOfDofs()
 {
-    if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        return 34;
-    } else if ( ut == EID_MomentumBalance ) {
-        return 30;
-    } else if ( ut == EID_ConservationEquation ) {
-        return 4;
-    } else {
-        OOFEM_ERROR("Tet21Stokes :: computeNumberOfDofs: Unknown equation id encountered");
-    }
-
-    return 0;
+    return 34;
 }
 
 void Tet21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const

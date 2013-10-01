@@ -67,7 +67,7 @@ public:
     Quad1PlaneStrain(int n, Domain *d);
     virtual ~Quad1PlaneStrain();
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 8; }
+    virtual int computeNumberOfDofs() { return 8; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     virtual FEInterpolation *giveInterpolation() const { return &interp; }

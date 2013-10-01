@@ -921,7 +921,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
                             Domain *domain)
 // Same as assemble, but with different numbering for rows and columns
 {
-    IntArray r_loc, c_loc;
+    IntArray r_loc, c_loc, dofids(0);
     FloatMatrix mat, R;
     Element *element;
     if ( answer == NULL ) {

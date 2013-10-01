@@ -57,7 +57,7 @@ public:
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 18; }
+    virtual int computeNumberOfDofs() { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
     virtual double computeVolumeAround(GaussPoint *gp);

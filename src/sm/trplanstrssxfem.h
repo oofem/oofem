@@ -83,7 +83,7 @@ public:
     virtual const char *giveClassName() const { return "TrPlaneStress2dXFEM"; }
     virtual classType giveClassID() const { return TrPlaneStress2dXFEMClass; }
 
-    virtual int computeNumberOfDofs(EquationID ut);
+    virtual int computeNumberOfDofs();
     virtual void computeGaussPoints();
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,

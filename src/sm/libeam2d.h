@@ -71,7 +71,7 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 6; }
+    virtual int computeNumberOfDofs() { return 6; }
     virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
 

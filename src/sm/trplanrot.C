@@ -567,8 +567,6 @@ TrPlaneStrRot :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, i
         u.subtract(*initialDisplacements);
     }
 
-    // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
-    // as this is valid only if receiver has no nodes with slaves
     // zero answer will resize accordingly when adding first contribution
     answer.resize(0);
 

@@ -90,19 +90,9 @@ void Tr21Stokes :: computeGaussPoints()
     }
 }
 
-int Tr21Stokes :: computeNumberOfDofs(EquationID ut)
+int Tr21Stokes :: computeNumberOfDofs()
 {
-    if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        return 15;
-    } else if ( ut == EID_MomentumBalance ) {
-        return 12;
-    } else if ( ut == EID_ConservationEquation ) {
-        return 3;
-    } else {
-        OOFEM_ERROR("computeNumberOfDofs: Unknown equation id encountered");
-    }
-
-    return 0;
+    return 15;
 }
 
 void Tr21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const

@@ -70,17 +70,9 @@ Tet1_3D_SUPG :: ~Tet1_3D_SUPG()
 { }
 
 int
-Tet1_3D_SUPG :: computeNumberOfDofs(EquationID ut)
+Tet1_3D_SUPG :: computeNumberOfDofs()
 {
-    if ( ut == EID_MomentumBalance ) {
-        return 12;
-    } else if ( ut == EID_ConservationEquation ) {
-        return 4;
-    } else {
-        _error("computeNumberOfDofs: Unknown equation id encountered");
-    }
-
-    return 0;
+    return 16;
 }
 
 void

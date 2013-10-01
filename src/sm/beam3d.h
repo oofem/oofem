@@ -83,7 +83,7 @@ public:
     }
     //int hasLayeredSupport () {return 1;}
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 12; }
+    virtual int computeNumberOfDofs() { return 12; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
 

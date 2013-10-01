@@ -95,19 +95,9 @@ TR1_2D_SUPG2 :: computeNVector(FloatArray &answer, GaussPoint *gp)
 
 
 int
-TR1_2D_SUPG2 :: computeNumberOfDofs(EquationID ut)
+TR1_2D_SUPG2 :: computeNumberOfDofs()
 {
-    if ( ut == EID_MomentumBalance ) {
-        return 6;
-    } else if ( ut == EID_ConservationEquation ) {
-        return 3;
-    } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        return 9;
-    } else {
-        _error("computeNumberOfDofs: Unknown equation id encountered");
-    }
-
-    return 0;
+    return 9;
 }
 
 void

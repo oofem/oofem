@@ -116,7 +116,7 @@ InterfaceElem1d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix (which is zero matrix) of the receiver. This expression is
 // valid in both local and global axes.
 {
-    int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    int ndofs = this->computeNumberOfDofs();
     answer.resize(ndofs, ndofs);
     answer.zero();
 }
@@ -282,7 +282,7 @@ InterfaceElem1d :: initializeFrom(InputRecord *ir)
 
 
 int
-InterfaceElem1d :: computeNumberOfDofs(EquationID)
+InterfaceElem1d :: computeNumberOfDofs()
 {
     setCoordMode();
     switch (mode) {

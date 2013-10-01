@@ -60,7 +60,7 @@ LumpedMassElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
 // Returns the lumped mass matrix of the receiver. This expression is
 // valid in both local and global axes.
 {
-    int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    int ndofs = this->computeNumberOfDofs();
     answer.resize(ndofs, ndofs);
     answer.zero();
 
@@ -90,7 +90,7 @@ LumpedMassElement :: checkConsistency()
 //
 {
     int _result = StructuralElement :: checkConsistency();
-    int _ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    int _ndofs = this->computeNumberOfDofs();
     if ( _ndofs != this->components.giveSize() ) {
         _warning("checkConsistency : component array size mismatch");
         _result = 0;
@@ -101,7 +101,7 @@ LumpedMassElement :: checkConsistency()
 
 
 int
-LumpedMassElement :: computeNumberOfDofs(EquationID ut)
+LumpedMassElement :: computeNumberOfDofs()
 {
     DofManager *dman = this->giveDofManager(1);
     int _i, _ndof = dman->giveNumberOfDofs();

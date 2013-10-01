@@ -116,7 +116,7 @@ public:
     virtual classType giveClassID() const { return Tr21StokesElementClass; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
-    virtual int computeNumberOfDofs(EquationID ut);
+    virtual int computeNumberOfDofs();
 
     virtual FEInterpolation *giveInterpolation() const;
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const;

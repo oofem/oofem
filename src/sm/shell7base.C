@@ -1556,7 +1556,7 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
         temp.add(NtmN);
     }
 
-    int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    int ndofs = this->computeNumberOfDofs();
     answer.resize(ndofs, ndofs);
     answer.zero();
     const IntArray &ordering_all = this->giveOrdering(All);
@@ -1855,7 +1855,7 @@ Shell7Base :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge,
         this->computeTractionForce(fT, iEdge, edgeLoad, tStep);
         IntArray mask;
         this->giveEdgeDofMapping(mask, iEdge);
-        answer.resize( this->computeNumberOfDofs(EID_MomentumBalance) );
+        answer.resize( this->computeNumberOfDofs() );
         answer.zero();
         answer.assemble(fT, mask);
         return;
@@ -1879,7 +1879,7 @@ Shell7Base :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 
         IntArray mask;
         this->giveSurfaceDofMapping(mask, 1);         // same dofs regardless of iSurf
-        answer.resize( this->computeNumberOfDofs(EID_MomentumBalance) );
+        answer.resize( this->computeNumberOfDofs() );
         answer.zero();
         answer.assemble(force, this->giveOrdering(All));
 

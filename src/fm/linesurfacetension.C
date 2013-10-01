@@ -192,7 +192,6 @@ void LineSurfaceTension :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
     answer.zero();
 #else
     domainType dt = this->giveDomain()->giveDomainType();
-    int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
     Node *node1, *node2;
     double x1, x2, y1, y2, dx, dy, vx, vy, length, width, gamma_s;
 
@@ -232,8 +231,6 @@ void LineSurfaceTension :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
     NpTNp.at(3,1) = -1;
     NpTNp.at(4,2) = -1;
 
-    answer.resize(ndofs,ndofs);
-    answer.zero();
     if (dt == _3dAxisymmMode) {
         OOFEM_WARNING("Not tested");
         FloatArray Bh(4);
@@ -243,8 +240,9 @@ void LineSurfaceTension :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
 
         // It was simpler to write this in index notation.
         // Also using 0-based, to reduce typing
-        double rJinv = (x1+x2)/length;
+        answer.resize(4, 4);
         answer.zero();
+        double rJinv = (x1+x2)/length;
         for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++) {
             answer(i,j) = M_PI*(Ah(i)*Bh(j) + Bh(i)*Ah(j)+ rJinv*(NpTNp(i,j) - Ah(i)*Ah(j)));
         }

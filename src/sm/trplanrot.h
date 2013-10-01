@@ -83,7 +83,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _PlaneStressRot; }
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 9; }
+    virtual int computeNumberOfDofs() { return 9; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) { return 0.; }

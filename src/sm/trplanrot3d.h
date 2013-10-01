@@ -96,8 +96,8 @@ public:
     virtual const char *giveClassName() const { return "TrPlaneStrRot3d"; }
     virtual classType giveClassID() const { return TrPlaneStrRot3dClass; }
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 9; }
-    virtual int computeNumberOfGlobalDofs(EquationID ut) { return 18; }
+    virtual int computeNumberOfDofs() { return 9; }
+    virtual int computeNumberOfGlobalDofs() { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     const FloatMatrix *computeGtoLRotationMatrix();

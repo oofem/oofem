@@ -96,10 +96,11 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         // stokes flow
         IntArray vloc, ploc;
         FloatArray h;
-        int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
+        int size = this->computeNumberOfDofs();
         this->giveLocalVelocityDofMap(vloc);
         this->giveLocalPressureDofMap(ploc);
-        answer.resize(size); answer.zero();
+        answer.resize(size);
+        answer.zero();
         this->computeBCRhsTerm_MB(h, tStep); answer.assemble(h, vloc);
         this->computeBCRhsTerm_MC(h, tStep); answer.assemble(h, ploc);
     }
@@ -108,7 +109,7 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         // stokes flow
         IntArray vloc, ploc;
         FloatArray h;
-        int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
+        int size = this->computeNumberOfDofs();
         this->giveLocalVelocityDofMap(vloc);
         this->giveLocalPressureDofMap(ploc);
         answer.resize(size); answer.zero();
@@ -171,35 +172,28 @@ SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 {
     bcType boundarytype;
     int nLoads = 0;
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    Load *load;
     //bcType loadtype;
     FloatMatrix helpMatrix;
     // loop over boundary load array
-    helpMatrix.resize(undofs, undofs);
-    helpMatrix.zero();
 
-    answer.resize(undofs, undofs);
-    answer.zero();
+    answer.resize(0, 0);
 
     nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
     if ( nLoads ) {
         for ( int i = 1; i <= nLoads; i++ ) {
             int n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
             int side = boundaryLoadArray.at(i * 2);
-            load = domain->giveLoad(n);
+            Load *load = domain->giveLoad(n);
             boundarytype = load->giveType();
             if ( boundarytype == SlipWithFriction ) {
                 this->computeSlipWithFrictionBCTerm_MB(helpMatrix, load, side, atTime);
+                answer.add(helpMatrix);
             } else if ( boundarytype == PenetrationWithResistance ) {
                 this->computePenetrationWithResistanceBCTerm_MB(helpMatrix, load, side, atTime);
+                answer.add(helpMatrix);
             } else {
-                helpMatrix.resize(undofs, undofs);
-                helpMatrix.zero();
                 // _error("computeForceLoadVector : unsupported load type class");
             }
-
-            answer.add(helpMatrix);
         }
     }
     nLoads = this->giveBodyLoadArray()->giveSize();
@@ -207,10 +201,11 @@ SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
     if ( nLoads ) { 
         bcGeomType ltype;
         for ( int i = 1; i <= nLoads; i++ ) {
-            load  = domain->giveLoad( bodyLoadArray.at(i) );
+            Load *load = domain->giveLoad( bodyLoadArray.at(i) );
             ltype = load->giveBCGeoType();
             if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
                 this->computeHomogenizedReinforceTerm_MB(helpMatrix, load, atTime);
+                answer.add(helpMatrix);
             }
         }
     }
@@ -221,17 +216,10 @@ SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime
 {
     bcType boundarytype;
     int nLoads = 0;
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
-    Load *load;
     //bcType loadtype;
     FloatMatrix helpMatrix;
     // loop over boundary load array
-    helpMatrix.resize(undofs, pndofs);
-    helpMatrix.zero();
-
-    answer.resize(undofs, pndofs);
-    answer.zero();
+    answer.resize(0, 0);
 
     nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
 
@@ -239,17 +227,14 @@ SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime
         for ( int i = 1; i <= nLoads; i++ ) {
             int n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
             int side = boundaryLoadArray.at(i * 2);
-            load = domain->giveLoad(n);
+            Load *load = domain->giveLoad(n);
             boundarytype = load->giveType();
             if ( boundarytype == OutFlowBC ) {
                 this->computeOutFlowBCTerm_MB(helpMatrix, side, atTime);
+                answer.add(helpMatrix);
             } else {
-                helpMatrix.resize(undofs, pndofs);
-                helpMatrix.zero();
                 //_warning("computeForceLoadVector : unsupported load type class");
             }
-
-            answer.add(helpMatrix);
         }
     }
 }
@@ -257,28 +242,21 @@ SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime
 void
 SUPGElement :: computeBCLhsPressureTerm_MC(FloatMatrix &answer, TimeStep *atTime)
 {
- 
     int nLoads = 0;
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
-    Load *load;
     //bcType loadtype;
     FloatMatrix helpMatrix;
 
     nLoads = this->giveBodyLoadArray()->giveSize();
-    answer.resize(pndofs, undofs);
-    answer.zero();
-    helpMatrix.resize(pndofs, undofs);
-    helpMatrix.zero();
+    answer.resize(0, 0);
     if ( nLoads ) { 
         bcGeomType ltype;
         for ( int i = 1; i <= nLoads; i++ ) {
-            load  = domain->giveLoad( bodyLoadArray.at(i) );
+            Load *load  = domain->giveLoad( bodyLoadArray.at(i) );
             ltype = load->giveBCGeoType();
             if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
                 this->computeHomogenizedReinforceTerm_MC(helpMatrix, load, atTime);
+                answer.add(helpMatrix);
             }
-            answer.add(helpMatrix);
         }
     }
 }

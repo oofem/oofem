@@ -89,8 +89,8 @@ public:
     { answer.resize(0); }
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 2; }
-    virtual int computeNumberOfGlobalDofs(EquationID ut);
+    virtual int computeNumberOfDofs() { return 2; }
+    virtual int computeNumberOfGlobalDofs();
 
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 

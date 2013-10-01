@@ -88,19 +88,9 @@ void Hexa21Stokes :: computeGaussPoints()
     }
 }
 
-int Hexa21Stokes :: computeNumberOfDofs(EquationID ut)
+int Hexa21Stokes :: computeNumberOfDofs()
 {
-    if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        return 89;
-    } else if ( ut == EID_MomentumBalance ) {
-        return 81;
-    } else if ( ut == EID_ConservationEquation ) {
-        return 8;
-    } else {
-        OOFEM_ERROR("Hexa21Stokes :: computeNumberOfDofs: Unknown equation id encountered");
-    }
-
-    return 0;
+    return 89;
 }
 
 void Hexa21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const

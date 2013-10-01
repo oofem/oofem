@@ -71,7 +71,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_QTRSpaceGrad_Name; }
     virtual const char* giveClassName() const { return "QTRSpaceGrad"; }
     virtual classType giveClassID() const { return QTRSpaceClass; }
-    virtual int computeNumberOfDofs(EquationID ut) { return 34; }
+    virtual int computeNumberOfDofs() { return 34; }
   
 protected:
     ///////////////////////////////////////////////////////////////////////////////

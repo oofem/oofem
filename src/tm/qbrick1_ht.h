@@ -68,7 +68,7 @@ public:
     virtual const char *giveClassName() const { return "QBrick1_ht"; }
     virtual classType giveClassID() const { return QBrick1_htClass; }
 
-    virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 20 : 40; }
+    virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 20 : 40; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _3dHeat; }
 

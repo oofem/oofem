@@ -64,8 +64,8 @@ public:
     virtual const char *giveClassName() const { return "Quad1_ht"; }
     virtual classType giveClassID() const { return Quad1_htClass; }
 
-    //    virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 4 : 8; }    
-    virtual int computeNumberOfDofs(EquationID ut) { return 4; }
+    //    virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 4 : 8; }    
+    virtual int computeNumberOfDofs() { return 4; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
     virtual MaterialMode giveMaterialMode() { return _2dHeat; }
@@ -104,7 +104,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Quad1_hmt_Name; }
     virtual const char *giveClassName() const { return "Quad1_hmt"; }
     virtual classType giveClassID() const { return Quad1_hmtClass; }
-    virtual int computeNumberOfDofs(EquationID ut) { return 8; }
+    virtual int computeNumberOfDofs() { return 8; }
     virtual MaterialMode giveMaterialMode() { return _2dHeMo; }
 };
 
@@ -119,7 +119,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Quad1_mt_Name; }
     virtual const char *giveClassName() const { return "Quad1_mt"; }
     virtual classType giveClassID() const { return Quad1_mtClass; }
-    virtual int computeNumberOfDofs(EquationID ut) { return 4; }
+    virtual int computeNumberOfDofs() { return 4; }
     virtual MaterialMode giveMaterialMode() { return _2dHeat; }
 };
 } // end namespace oofem

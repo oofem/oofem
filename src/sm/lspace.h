@@ -71,7 +71,7 @@ public:
     LSpace(int n, Domain *d);
     virtual ~LSpace() { }
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 24; }
+    virtual int computeNumberOfDofs() { return 24; }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
