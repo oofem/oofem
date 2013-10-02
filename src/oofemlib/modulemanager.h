@@ -146,6 +146,8 @@ public:
 
         return elem;
     }
+
+    int giveNumberOfModules() const {return moduleList->giveSize();}
 };
 } // end namespace oofem
 #endif // modulemanager_h

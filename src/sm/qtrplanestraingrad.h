@@ -44,7 +44,6 @@ namespace oofem {
 class QTrPlaneStrainGrad : public QTrPlaneStrain, public GradDpElement
 {
 protected:
-    int numberOfGaussPoints;
 
 public:
     QTrPlaneStrainGrad(int n, Domain *d);

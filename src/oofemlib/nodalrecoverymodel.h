@@ -114,6 +114,9 @@ public:
     NodalRecoveryModel(Domain *d);
     /// Destructor
     virtual ~NodalRecoveryModel();
+
+    void setDomain(Domain *ipDomain) {domain = ipDomain;}
+
     /**
      * Recovers the nodal values for all regions.
      * @param type Determines the type of internal variable to be recovered.

@@ -51,10 +51,8 @@ namespace oofem {
 
 IRResultType IGAElement :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
-    int indx = 0, nsd, numberOfGaussPoints = 1;
+    int indx = 0, nsd;
+    numberOfGaussPoints = 1;
     double du, dv, dw;
     const FloatArray *gpcoords;
     FloatArray newgpcoords;
@@ -63,12 +61,13 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
     int numberOfKnotSpans = 0;
 #endif
 
-    Element :: initializeFrom(ir); // read nodes , material, cross section
+    IRResultType result = Element :: initializeFrom(ir); // read nodes , material, cross section
+	if(result != IRRT_OK) {
+		return result;
+	}
     // set number of dofmanagers
     this->numberOfDofMans = dofManArray.giveSize();
     this->giveInterpolation()->initializeFrom(ir); // read geometry
-
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
 
     // generate individual IntegrationElements; one for each nonzero knot span
     nsd = this->giveNsd();
@@ -210,8 +209,6 @@ IGAElement::giveKnotSpanParallelMode(int knotSpanIndex) const
 
 IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
     TSplineInterpolation *interpol = static_cast< TSplineInterpolation * >( this->giveInterpolation() );
 
     int indx = 0, ui, vi, i, nsd, numberOfGaussPoints = 1;
@@ -220,14 +217,19 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
     FloatArray newgpcoords;
     IntArray knotSpan;
 
-    Element :: initializeFrom(ir); // read nodes , material, cross section
+    IRResultType result = Element :: initializeFrom(ir); // read nodes , material, cross section
+	if(result != IRRT_OK) {
+		return result;
+	}
     // set number of dofmanagers
     this->numberOfDofMans = dofManArray.giveSize();
     // set number of control points before initialization HUHU HAHA
     interpol->setNumberOfControlPoints(this->numberOfDofMans);
-    this->giveInterpolation()->initializeFrom(ir); // read geometry
+    result = this->giveInterpolation()->initializeFrom(ir); // read geometry
+	if(result != IRRT_OK) {
+		return result;
+	}
 
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
 
     // generate individual IntegrationElements; one for each nonzero knot span
     nsd = giveNsd();

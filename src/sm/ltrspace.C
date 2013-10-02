@@ -217,8 +217,8 @@ LTRSpace :: initializeFrom(InputRecord *ir)
     //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                            // Required by IR_GIVE_FIELD macro
 
-    this->NLStructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 1;
+    this->NLStructuralElement :: initializeFrom(ir);
     return IRRT_OK;
 }
 

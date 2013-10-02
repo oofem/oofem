@@ -51,7 +51,6 @@ namespace oofem {
 class Quad1_ht : public TransportElement, public SpatialLocalizerInterface, public ZZNodalRecoveryModelInterface
 {
 protected:
-    int numberOfGaussPoints;
     static FEI2dQuadLin interpolation;
 
 public:

@@ -66,7 +66,7 @@ BoundaryCondition 24 loadTimeFunction 1 prescribedvalue -0.000205723733501
 #
 ConstantFunction 1 f(t) 1.0
 XfemManager 1 numberofenrichmentitems 1
-crack 1 enrichmentdomains 1 1 enrichmentfunction 1 enrichmentdomain 1 enrichmentfront 1 propagationlaw 1
+crack 1 enrichmentfront 1 propagationlaw 1
 DiscontinuousFunction 1
 polygoncrack 1 points 6 -0.05 1.0 0.333333333333333 1.0 0.56666666666667 1.0
 EnrFrontLinearBranchFuncRadius radius 0.5

@@ -47,7 +47,6 @@ namespace oofem {
 class QTrPlaneStressGrad : public QTrPlaneStress2d, public GradDpElement
 {
 protected:
-    int numberOfGaussPoints;
     static FEI2dQuadLin interpolation;
 
 public:

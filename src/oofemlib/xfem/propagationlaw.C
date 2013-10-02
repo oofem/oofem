@@ -39,6 +39,7 @@
 #include "tipinfo.h"
 #include "classfactory.h"
 #include "mathfem.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 
@@ -51,6 +52,12 @@ PropagationLaw::PropagationLaw() {
 
 PropagationLaw::~PropagationLaw() {
 
+}
+
+void PLDoNothing :: giveInputRecord(DynamicInputRecord &input)
+{
+	int number = 1;
+    input.setRecordKeywordField(this->giveInputRecordName(), number);
 }
 
 IRResultType PLCrackPrescribedDir :: initializeFrom(InputRecord *ir) {
@@ -66,14 +73,21 @@ IRResultType PLCrackPrescribedDir :: initializeFrom(InputRecord *ir) {
 	return IRRT_OK;
 }
 
+void PLCrackPrescribedDir :: giveInputRecord(DynamicInputRecord &input)
+{
+	int number = 1;
+    input.setRecordKeywordField(this->giveInputRecordName(), number);
+
+    input.setField(mAngle			, _IFT_PLCrackPrescribedDir_Dir);
+    input.setField(mIncrementLength	, _IFT_PLCrackPrescribedDir_IncLength);
+}
+
 void PLCrackPrescribedDir::propagateInterfaces(EnrichmentDomain &ioEnrDom) {
 	printf("Entering PLCrackPrescribedDir::propagateInterfaces().\n");
 
 	// Fetch crack tip data
 	std::vector<TipInfo> tipInfo;
 	ioEnrDom.giveTipInfos(tipInfo);
-//	printf("tipInfo.size(): %lu\n", tipInfo.size());
-
 
 	int tipIndex = 1;
 	FloatArray dir;

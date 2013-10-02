@@ -55,6 +55,7 @@
 #include "loadtimefunction.h"
 #include "dofmanager.h"
 #include "node.h"
+#include "dynamicinputrecord.h"
 
 #include <cstdio>
 
@@ -735,7 +736,55 @@ Element :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, activityLtf, _IFT_Element_activityltf);
 
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
+
     return IRRT_OK;
+}
+
+void Element :: giveInputRecord(DynamicInputRecord &input) {
+
+    FEMComponent :: giveInputRecord(input);
+
+	input.setField(material, _IFT_Element_mat);
+
+	input.setField(crossSection, _IFT_Element_crosssect);
+
+	input.setField(dofManArray, _IFT_Element_nodes);
+
+	if(bodyLoadArray.giveSize() > 0) {
+		input.setField(bodyLoadArray, _IFT_Element_bodyload);
+	}
+
+
+	if(boundaryLoadArray.giveSize() > 0) {
+		input.setField(boundaryLoadArray, _IFT_Element_boundaryload);
+	}
+
+
+	if( elemLocalCS.giveNumberOfRows() > 0 ){
+		OOFEM_ERROR("Element :: giveInputRecord(): support for local coordinate systems is not yet implemented.");
+	}
+
+
+#ifdef __PARALLEL_MODE
+	OOFEM_ERROR("Element :: giveInputRecord(): parallel support is not yet implemented.");
+/*
+    partitions.resize(0);
+    IR_GIVE_OPTIONAL_FIELD(ir, partitions, _IFT_Element_partitions);
+    if ( ir->hasField(_IFT_Element_remote) ) {
+        parallel_mode = Element_remote;
+    } else {
+        parallel_mode = Element_local;
+    }
+*/
+#endif
+
+
+	if( activityLtf > 0 ) {
+		input.setField(activityLtf, _IFT_Element_activityltf);
+	}
+
+	input.setField(numberOfGaussPoints, _IFT_Element_nip);
 }
 
 

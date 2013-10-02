@@ -90,6 +90,9 @@ public:
 
     /// Destructor.
     virtual ~BasicGeometry();
+
+    virtual BasicGeometry* Clone() = 0;
+
     /// Computes normal signed distance between this object and a point.
     virtual double computeDistanceTo(const FloatArray *point) { return 0; }
 
@@ -123,6 +126,7 @@ public:
 //    AList< FloatArray > *giveVertices() { return this->vertices; }
     /// Initializes the Geometry from the InputRecord.
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual void giveInputRecord(DynamicInputRecord &input) {OOFEM_ERROR("giveInputRecord is not implemented for this subclass of BasicGeometry.");}
     /// Gives class name.
     virtual const char *giveClassName() const { return NULL; }
     /**
@@ -169,6 +173,8 @@ public:
     virtual ~Line() { }
     Line(FloatArray *pointA, FloatArray *pointB);
 
+    virtual BasicGeometry* Clone() {return new Line(*this);}
+
     virtual double computeDistanceTo(const FloatArray *point);
     /// Computes tangential distance to a point
 
@@ -195,6 +201,8 @@ public:
     Triangle(FloatArray *p1, FloatArray *p2, FloatArray *p3);
     virtual ~Triangle() { }
 
+    virtual BasicGeometry* Clone() {return new Triangle(*this);}
+
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const {OOFEM_ERROR("Triangle::computeNormalSignDist -- not implemented");};
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const {OOFEM_ERROR("Triangle::computeTangentialSignDist -- not implemented");};
 
@@ -217,6 +225,9 @@ public:
     Circle() : BasicGeometry(), radius(0.0), mTangSignDist(1.0) { }
     virtual ~Circle() { }
     Circle(FloatArray *center, double radius);
+
+    virtual BasicGeometry* Clone() {return new Circle(*this);}
+
     /// Computes the normal distance to the surface not to the center.
     virtual double computeDistanceTo(const FloatArray *point);
 
@@ -245,6 +256,9 @@ class PolygonLine : public BasicGeometry
 public:
 	PolygonLine();
     virtual ~PolygonLine() { }
+
+    virtual BasicGeometry* Clone() {return new PolygonLine(*this);}
+
     /// Computes the normal distance to the surface not to the center.
     virtual double computeDistanceTo(const FloatArray *point);
 
@@ -254,6 +268,7 @@ public:
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     virtual const char *giveClassName() const { return "PolygonLine"; }
 
 #ifdef __BOOST_MODULE
@@ -296,6 +311,8 @@ public:
     PointSwarm() : BasicGeometry() { }
     virtual ~PointSwarm() { }
     PointSwarm(std::list<int> pointsID);
+
+    virtual BasicGeometry* Clone() {return new PointSwarm(*this);}
 
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const {OOFEM_ERROR("PointSwarm::computeNormalSignDist -- not implemented");};
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const {OOFEM_ERROR("PointSwarm::computeTangentialSignDist -- not implemented");};

@@ -1354,12 +1354,14 @@ StructuralElement :: adaptiveUpdate(TimeStep *tStep)
 IRResultType
 StructuralElement :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    return Element :: initializeFrom(ir);
+}
 
-    result = Element :: initializeFrom(ir);
+void StructuralElement :: giveInputRecord(DynamicInputRecord &input)
+{
+	Element :: giveInputRecord(input);
 
-    return result;
+	/// TODO: Should initialDisplacements be stored? /ES
 }
 
 

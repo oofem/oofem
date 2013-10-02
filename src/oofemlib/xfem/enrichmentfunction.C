@@ -38,6 +38,7 @@
 #include "feinterpol.h"
 #include "enrichmentdomain.h"
 #include "classfactory.h"
+#include "dynamicdatareader.h"
 
 namespace oofem {
 REGISTER_EnrichmentFunction(DiscontinuousFunction)
@@ -46,6 +47,11 @@ REGISTER_EnrichmentFunction(RampFunction)
 IRResultType EnrichmentFunction :: initializeFrom(InputRecord *ir)
 {
     return IRRT_OK;
+}
+
+void EnrichmentFunction :: giveInputRecord(DynamicInputRecord &input)
+{
+	FEMComponent::giveInputRecord(input);
 }
 
 void DiscontinuousFunction :: evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const

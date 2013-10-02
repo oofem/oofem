@@ -62,11 +62,10 @@ QSpaceGrad :: QSpaceGrad(int n, Domain *aDomain) :  QSpace(n, aDomain), GradDpEl
 IRResultType
 QSpaceGrad :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
-    this->StructuralElement :: initializeFrom(ir);
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
+    IRResultType result = this->StructuralElement :: initializeFrom(ir);
+	if(result != IRRT_OK) {
+		return result;
+	}
 
     if ( ( numberOfGaussPoints != 8 ) && ( numberOfGaussPoints != 14 ) && ( numberOfGaussPoints != 27 ) && ( numberOfGaussPoints != 64 ) ) {
         numberOfGaussPoints = 27;

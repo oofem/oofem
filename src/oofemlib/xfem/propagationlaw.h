@@ -49,6 +49,7 @@
 namespace oofem {
 
 class EnrichmentDomain;
+class DynamicInputRecord;
 
 /**
  * Updates the geometry of evolving XFEM interfaces.
@@ -64,6 +65,7 @@ public:
     virtual const char *giveInputRecordName() const = 0;
 
     virtual IRResultType initializeFrom(InputRecord *ir) = 0;
+    virtual void giveInputRecord(DynamicInputRecord &input) = 0;
 
 	virtual void propagateInterfaces(EnrichmentDomain &iEnrDom) = 0;
 };
@@ -77,6 +79,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_PLDoNothing_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
 	virtual void propagateInterfaces(EnrichmentDomain &ioEnrDom) {};
 };
@@ -90,6 +93,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_PLCrackPrescribedDir_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
 	virtual void propagateInterfaces(EnrichmentDomain &ioEnrDom);
 

@@ -56,7 +56,6 @@ class QTrPlaneStress2d : public NLStructuralElement, public SpatialLocalizerInte
 {
 protected:
     static FEI2dTrQuad interpolation;
-    int numberOfGaussPoints;
 
 public:
     QTrPlaneStress2d(int n, Domain *d);

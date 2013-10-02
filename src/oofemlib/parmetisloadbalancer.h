@@ -61,10 +61,10 @@ protected:
  #ifdef __PARMETIS_MODULE
     /// Element numbering maps.
     IntArray gToLMap, lToGMap;
-    idxtype *elmdist;
+    idx_t *elmdist;
     int myGlobNumOffset;
     /// Partition weights (user input).
-    float *tpwgts;
+    real_t *tpwgts;
     /// Array of DofManMode(s).
     IntArray dofManState;
     /// Array of dof man partitions.

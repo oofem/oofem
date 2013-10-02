@@ -171,6 +171,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Node_Name; }
     virtual classType giveClassID() const { return NodeClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     virtual void printYourself();
     virtual int checkConsistency();
     virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_simpleSlave || type == DT_active ); }

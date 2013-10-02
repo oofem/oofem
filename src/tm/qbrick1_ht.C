@@ -83,12 +83,11 @@ QBrick1_ht :: computeGaussPoints()
 IRResultType
 QBrick1_ht :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    this->TransportElement :: initializeFrom(ir);
     numberOfGaussPoints = 27;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
+    IRResultType result = this->TransportElement :: initializeFrom(ir);
+	if(result != IRRT_OK) {
+		return result;
+	}
 
     if ( ( numberOfGaussPoints != 8 ) && ( numberOfGaussPoints != 27 ) && ( numberOfGaussPoints != 64 ) ) {
         numberOfGaussPoints = 27;

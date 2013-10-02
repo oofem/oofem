@@ -46,7 +46,6 @@ namespace oofem {
 class QPlaneStrainGrad : public QPlaneStrain, public GradDpElement
 {
 protected:
-    int numberOfGaussPoints;
     static FEI2dQuadLin interpolation;
 
 public:

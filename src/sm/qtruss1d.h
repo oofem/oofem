@@ -50,7 +50,6 @@ class QTruss1d : public NLStructuralElement
 {
 protected:
     static FEI1dQuad interpolation;
-    int numberOfGaussPoints;
 
 public:
     QTruss1d(int n, Domain *d);

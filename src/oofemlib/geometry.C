@@ -38,6 +38,7 @@
 #include "element.h"
 #include "dofmanager.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 
 #include <fstream>
@@ -1022,6 +1023,21 @@ IRResultType PolygonLine :: initializeFrom(InputRecord *ir)
     printVTK();
 
     return IRRT_OK;
+}
+
+void PolygonLine :: giveInputRecord(DynamicInputRecord &input)
+{
+	FloatArray points;
+	int nVert = mVertices.size();
+	points.resize( nVert*2 );
+
+	for(int i = 0; i < nVert; i++) {
+		points.at(2*i+1) = mVertices[i].at(1);
+		points.at(2*i+2) = mVertices[i].at(2);
+	}
+
+	input.setField(points, _IFT_PolygonLine_points);
+
 }
 
 #ifdef __BOOST_MODULE

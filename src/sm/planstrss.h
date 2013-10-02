@@ -61,7 +61,6 @@ class PlaneStress2d : public NLStructuralElement, public ZZNodalRecoveryModelInt
 {
 protected:
     static FEI2dQuadLin interpolation;
-    int numberOfGaussPoints;
 
 public:
     PlaneStress2d(int n, Domain *d);

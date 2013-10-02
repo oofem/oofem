@@ -126,14 +126,15 @@ public:
      */
     void exportPointDataHeader(FILE *stream, TimeStep *tStep);
 #endif
-protected:
-    /// Gives the full form of given symmetrically stored tensors, missing components are filled with zeros.
-    void makeFullForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType type);
-
     /// Returns the internal smoother.
     NodalRecoveryModel *giveSmoother();
     /// Returns the smoother for primary variables (nodal averaging).
     NodalRecoveryModel *givePrimVarSmoother();
+
+protected:
+    /// Gives the full form of given symmetrically stored tensors, missing components are filled with zeros.
+    void makeFullForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType type);
+
 
     /// Returns the filename for the given time step.
     std::string giveOutputFileName(TimeStep *tStep);

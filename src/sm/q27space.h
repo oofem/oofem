@@ -55,7 +55,6 @@ class FEI3dHexaTriQuad;
 class Q27Space : public NLStructuralElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 {
 protected:
-    int numberOfGaussPoints;
     static FEI3dHexaTriQuad interpolation;
 
 public:

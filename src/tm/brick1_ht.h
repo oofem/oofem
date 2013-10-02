@@ -55,7 +55,6 @@ class Brick1_ht : public TransportElement, public SpatialLocalizerInterface, pub
 {
 protected:
     static FEI3dHexaLin interpolation;
-    int numberOfGaussPoints;
 
 public:
     Brick1_ht(int n, Domain *d);

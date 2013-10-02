@@ -122,12 +122,11 @@ QTrPlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &n
 IRResultType
 QTrPlaneStress2d :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    this->StructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 4;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
+    IRResultType result = this->StructuralElement :: initializeFrom(ir);
+	if(result != IRRT_OK) {
+		return result;
+	}
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
            ( numberOfGaussPoints == 3 ) ||

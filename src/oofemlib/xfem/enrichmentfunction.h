@@ -40,7 +40,6 @@
 #include "femcmpnn.h"
 
 #define _IFT_DiscontinuousFunction_Name "discontinuousfunction"
-//#define _IFT_BranchFunction_Name "branchfunction"
 #define _IFT_RampFunction_Name "rampfunction"
 
 namespace oofem {
@@ -75,6 +74,8 @@ public:
     virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const = 0;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
+    virtual const char *giveClassName() const { return "EnrichmentFunction"; }
     /// Accessor.
     int giveNumberOfDofs() const { return numberOfDofs; }
 

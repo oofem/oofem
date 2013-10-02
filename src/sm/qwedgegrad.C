@@ -70,11 +70,10 @@ QWedgeGrad :: QWedgeGrad(int n, Domain *aDomain) :  QWedge(n, aDomain), GradDpEl
 IRResultType
 QWedgeGrad :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
-    this->NLStructuralElement :: initializeFrom(ir);
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
+    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
+	if(result != IRRT_OK) {
+		return result;
+	}
 
     if ( ( numberOfGaussPoints != 2 ) && ( numberOfGaussPoints != 9 ) ) {
         numberOfGaussPoints = 9;

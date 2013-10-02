@@ -50,7 +50,6 @@ namespace oofem {
 class QPlaneStress2d : public NLStructuralElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 {
 protected:
-    int numberOfGaussPoints;
     static FEI2dQuadQuad interpolation;
 
 public:

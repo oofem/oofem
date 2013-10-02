@@ -72,12 +72,11 @@ QTRSpaceGrad :: QTRSpaceGrad (int n, Domain* aDomain) :  QTRSpace(n, aDomain),Gr
 IRResultType
 QTRSpaceGrad :: initializeFrom (InputRecord* ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
-    this->NLStructuralElement :: initializeFrom (ir);
-    IR_GIVE_OPTIONAL_FIELD (ir, numberOfGaussPoints, _IFT_Element_nip);
-        numberOfGaussPoints = 4;
+	numberOfGaussPoints = 4;
+    IRResultType result = this->NLStructuralElement :: initializeFrom (ir);
+	if(result != IRRT_OK) {
+		return result;
+	}
 
     return IRRT_OK;
 }

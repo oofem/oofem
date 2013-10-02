@@ -71,7 +71,7 @@ public:
     EnrichmentDomain();
     virtual ~EnrichmentDomain() { }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
-
+    virtual void giveInputRecord(DynamicInputRecord &input) = 0;
 
     virtual const char *giveInputRecordName() const = 0;
     virtual const char *giveClassName() const = 0;
@@ -106,7 +106,9 @@ public:
     BasicGeometry *bg;
     EnrichmentDomain_BG() { }
     virtual ~EnrichmentDomain_BG() { }
+
     virtual IRResultType initializeFrom(InputRecord *ir) { return this->bg->initializeFrom(ir); }
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     /**
      * Functions for computing signed distance in normal and tangential direction.
@@ -124,6 +126,7 @@ class EDBGCircle : public EnrichmentDomain_BG
 public:
     EDBGCircle() { bg = new Circle; };
     virtual ~EDBGCircle() { delete bg; }
+
     virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir); }
 
     virtual const char *giveInputRecordName() const { return _IFT_EDBGCircle_Name; }
@@ -138,6 +141,7 @@ class EDCrack : public EnrichmentDomain_BG
 public:
     EDCrack() { bg = new PolygonLine; }
     virtual ~EDCrack() { delete bg; }
+
     virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir); }
 
     virtual const char *giveInputRecordName() const { return _IFT_EDCrack_Name; }
@@ -171,6 +175,7 @@ public:
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual const char *giveInputRecordName() const { return _IFT_DofManList_Name; }
     virtual const char *giveClassName() const { return "DofManList"; }
@@ -194,6 +199,7 @@ public:
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;
 
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual const char *giveInputRecordName() const { return _IFT_WholeDomain_Name; }
     virtual const char *giveClassName() const { return "WholeDomain"; }

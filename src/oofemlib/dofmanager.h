@@ -160,6 +160,9 @@ protected:
     /// Map from DofIDItem to ic (to be removed).
     std::map< int, int > *dofICmap;
 
+    // List of BCs (to enable writing to DynamicInputRecord)
+    IntArray mBC;
+
 public:
     /**
      * Constructor. Creates DofManager with given number belonging to domain aDomain.

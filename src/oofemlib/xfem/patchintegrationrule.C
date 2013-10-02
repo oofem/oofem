@@ -97,8 +97,6 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
     	}
     }
 
-//    printf("mTriangles.size(): %d triToKeep.size(): %d\n", mTriangles.size(), triToKeep.size() );
-
     int nPointsTot = nPoints * triToKeep.size();
     FloatArray coords_xi1, coords_xi2, weights;
     this->giveTriCoordsAndWeights(nPoints, coords_xi1, coords_xi2, weights);

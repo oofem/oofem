@@ -58,16 +58,19 @@ class XfemElementInterface : public Interface
 {
 protected:
     Element *element;
-    XfemManager *xMan;
 
 public:
     /// Constructor.
-    XfemElementInterface(Element *e) : Interface(), xMan(NULL) { this->element = e; }
+    XfemElementInterface(Element *e) : Interface() { this->element = e; }
 
     virtual ~XfemElementInterface() {}
 
-    /// Creates enriched part of B matrix.
+    /// Creates enriched B-matrix.
     void XfemElementInterface_createEnrBmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl);
+
+    /// Creates enriched N-matrix.
+    void XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl);
+
     /// Partitions the element into patches by a triangulation.
     virtual void XfemElementInterface_partitionElement(std::vector< Triangle > &oTriangles, const std :: vector< FloatArray > &iPoints);
     /// Updates integration rule based on the triangulation.

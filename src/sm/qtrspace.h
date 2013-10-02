@@ -63,7 +63,6 @@ class QTRSpace : public NLStructuralElement, public SPRNodalRecoveryModelInterfa
 
 {
 protected:
-    int numberOfGaussPoints;
     static FEI3dTetQuad interpolation;
 
 public:

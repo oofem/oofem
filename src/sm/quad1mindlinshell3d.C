@@ -59,9 +59,9 @@ IntArray Quad1MindlinShell3D :: drillOrdering(4);
 bool Quad1MindlinShell3D :: __initialized = Quad1MindlinShell3D :: initOrdering();
 
 Quad1MindlinShell3D :: Quad1MindlinShell3D(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain),
-    numberOfGaussPoints(4)
+    NLStructuralElement(n, aDomain)
 {
+	numberOfGaussPoints = 4;
     this->numberOfDofMans = 4;
     this->lnodes[0] = new FloatArray();
     this->lnodes[1] = new FloatArray();

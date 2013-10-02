@@ -48,7 +48,6 @@ namespace oofem {
 class GradDpElement
 {
 protected:
-    int numberOfGaussPoints;
     int nPrimNodes, nPrimVars, nSecNodes, nSecVars;
     IntArray locU, locK;
     int totalSize, nlSize, locSize;

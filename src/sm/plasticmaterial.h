@@ -99,6 +99,10 @@ public:
     // definition
     virtual const char *giveClassName() const { return "PlasticMaterialStatus"; }
     virtual classType giveClassID() const { return PerfectlyPlasticMaterialStatusClass; }
+
+//    virtual void printYourself() {printf("I am a PlasticMaterialStatus. plasticStrainVector: \n"); plasticStrainVector.printYourself(); }
+    virtual void printYourself() { }
+
 };
 
 /**

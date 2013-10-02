@@ -58,7 +58,6 @@ namespace oofem {
 class LWedge : public NLStructuralElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 {
 protected:
-    int numberOfGaussPoints;
     static FEI3dWedgeLin interpolation;
 
 public:

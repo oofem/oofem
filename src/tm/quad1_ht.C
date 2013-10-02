@@ -92,13 +92,12 @@ Quad1_ht :: computeGaussPoints()
 IRResultType
 Quad1_ht :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    this->TransportElement :: initializeFrom(ir);
     numberOfGaussPoints = 4;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
-
+    IRResultType result = this->TransportElement :: initializeFrom(ir);
+ 	if(result != IRRT_OK) {
+		return result;
+	}
+ 
     if ( !( ( numberOfGaussPoints == 4 ) ||
            ( numberOfGaussPoints == 9 ) ||
            ( numberOfGaussPoints == 16 ) ) ) {

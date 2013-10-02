@@ -59,7 +59,6 @@ class BoundaryLoad;
 class Tr2Shell7 : public Shell7Base
 {
 protected:
-    int numberOfGaussPoints;
     static FEI3dTrQuad interpolation;
     static bool __initialized;
     static IntArray ordering_phibar;

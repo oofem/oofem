@@ -73,7 +73,6 @@ protected:
     FloatMatrix lcsMatrix;
 
     static FEI2dQuadLin interp;
-    int numberOfGaussPoints;
 
     /// Ordering for the normal shell stiffness (everything but the out-of-plane rotations)
     static IntArray shellOrdering;

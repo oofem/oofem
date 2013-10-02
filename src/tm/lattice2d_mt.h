@@ -59,7 +59,6 @@ namespace oofem {
 class Lattice2d_mt : public LatticeTransportElement
 {
 protected:
-    int numberOfGaussPoints;
     double area;
     double length;
 

@@ -209,6 +209,7 @@ public:
 
     // data management
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     // definition
     virtual const char *giveClassName() const { return "NLStructuralElement"; }

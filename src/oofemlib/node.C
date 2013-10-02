@@ -52,6 +52,7 @@
 #include "contextioerr.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -156,6 +157,19 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
+
+void Node :: giveInputRecord(DynamicInputRecord &input)
+{
+	DofManager::giveInputRecord(input);
+
+    input.setField(coordinates, _IFT_Node_coords);
+
+    if(localCoordinateSystem != NULL) {
+        input.setField(*localCoordinateSystem, _IFT_Node_lcs);
+    }
+
+}
+
 
 void
 Node :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *stepN, ValueModeType mode)

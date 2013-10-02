@@ -54,9 +54,9 @@ REGISTER_Element( Quad1Mindlin );
 FEI2dQuadLin Quad1Mindlin :: interp_lin(1, 2);
 
 Quad1Mindlin :: Quad1Mindlin(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain),
-    numberOfGaussPoints(4)
+    NLStructuralElement(n, aDomain)
 {
+	numberOfGaussPoints = 4;
     numberOfDofMans = 4;
 }
 
@@ -166,11 +166,7 @@ Quad1Mindlin :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 IRResultType
 Quad1Mindlin :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
     this->numberOfGaussPoints = 4;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
     return this->NLStructuralElement :: initializeFrom(ir);
 }
 
