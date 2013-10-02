@@ -178,11 +178,11 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
 }
 
 
-int giveInternalStateTypeSize(InternalStateType type)
+int giveInternalStateTypeSize(InternalStateValueType valType)
 {
-    InternalStateValueType valueType = giveInternalStateValueType(type);
-    switch ( valueType ) {
+    switch ( valType ) {
     case ISVT_TENSOR_S3:
+    case ISVT_TENSOR_S3E:
     case ISVT_TENSOR_G:
         return 9;
 
@@ -196,6 +196,20 @@ int giveInternalStateTypeSize(InternalStateType type)
         return 0;
     }
 }
+
+// New /JB
+InternalStateValueType giveInternalStateValueType(UnknownType type)
+{
+    if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) || ( type == DirectorField ) ) {
+        return ISVT_VECTOR;
+    } else if ( ( type == FluxVector ) || ( type == PressureVector ) || ( type == Temperature ) ) {
+        return ISVT_SCALAR;
+    } else {
+        OOFEM_ERROR2( "giveInternalStateValueType: unsupported UnknownType %s", __UnknownTypeToString(type) );
+    }
+
+}
+
 
 
 ContextIOERR :: ContextIOERR(contextIOResultType e, const char *file, int line)
