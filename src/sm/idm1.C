@@ -310,29 +310,29 @@ void
 IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
 {
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-
+    FloatArray fullStrain;
+    
     if ( strain.isEmpty() ) {
         kappa = 0.;
         return;
     }
 
+    StructuralMaterial :: giveFullSymVectorForm( fullStrain, strain, gp->giveMaterialMode() );
+    // if plane stress mode -> compute strain in z-direction from condition of zero stress in corresponding direction
+    if ( gp->giveMaterialMode() == _PlaneStress ) {
+        double nu = lmat->give(NYxz, gp);
+        fullStrain.at(3) = -nu * ( fullStrain.at(1) + fullStrain.at(2) ) / ( 1. - nu );
+    } else if ( gp->giveMaterialMode() == _1dMat ) {
+        double nu = lmat->give(NYxz, gp);
+        fullStrain.at(2) = -nu *fullStrain.at(1);
+        fullStrain.at(3) = -nu *fullStrain.at(1);
+    }
+    
     if ( this->equivStrainType == EST_Mazars ) {
         double posNorm = 0.0;
-        FloatArray principalStrains, fullstrain;
+        FloatArray principalStrains;
 
-        StructuralMaterial :: giveFullSymVectorForm( fullstrain, strain, gp->giveMaterialMode() );
-
-        // if plane stress mode -> compute strain in z-direction from condition of zero stress in corresponding direction
-        if ( gp->giveMaterialMode() == _PlaneStress ) {
-            double nu = lmat->give(NYxz, gp);
-            fullstrain.at(3) = -nu * ( fullstrain.at(1) + fullstrain.at(2) ) / ( 1. - nu );
-        } else if ( gp->giveMaterialMode() == _1dMat ) {
-            double nu = lmat->give(NYxz, gp);
-            fullstrain.at(2) = -nu *fullstrain.at(1);
-            fullstrain.at(3) = -nu *fullstrain.at(1);
-        }
-
-        this->computePrincipalValues(principalStrains, fullstrain, principal_strain);
+        this->computePrincipalValues(principalStrains, fullStrain, principal_strain);
 
         for ( int i = 1; i <= 3; i++ ) {
             if ( principalStrains.at(i) > 0.0 ) {
@@ -397,16 +397,9 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         kappa = sqrt( sum / lmat->give('E', gp) );
     } else if ( this->equivStrainType == EST_Mises ) {
         double nu = lmat->give(NYxz, NULL);
-        FloatArray principalStrains, fullstrain;
-        StructuralMaterial :: giveFullSymVectorForm( fullstrain, strain, gp->giveMaterialMode() );
-        if ( gp->giveMaterialMode() == _PlaneStress ) {
-            fullstrain.at(3) = -nu * ( fullstrain.at(1) + fullstrain.at(2) ) / ( 1. - nu );
-        } else if ( gp->giveMaterialMode() == _1dMat ) {
-            fullstrain.at(2) = -nu *fullstrain.at(1);
-            fullstrain.at(3) = -nu *fullstrain.at(1);
-        }
-
-        this->computePrincipalValues(principalStrains, fullstrain, principal_strain);
+        FloatArray principalStrains;
+        
+        this->computePrincipalValues(principalStrains, fullStrain, principal_strain);
         double I1e, J2e;
         this->computeStrainInvariants(principalStrains, I1e, J2e);
         double a, b, c;
@@ -418,23 +411,24 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         double sum = 0.;
         FloatArray stress, fullStress, principalStress;
         FloatMatrix de;
-
+        
         lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
         stress.beProductOf(de, strain);
         StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
         this->computePrincipalValues(principalStress, fullStress, principal_stress);
-        for ( int i = 1; i <= 3; i++ ) {
-            if ( principalStress.at(i) > 0.0 && sum < principalStress.at(i) ) {
-                sum = principalStress.at(i);
-            }
+        //Rankine - causes bad convergence when coupled with Griffith
+//         for ( int i = 1; i <= 3; i++ ) {
+//             if ( principalStress.at(i) > 0.0 && sum < principalStress.at(i) ) {
+//                  sum = principalStress.at(i);
+//             }
+//         }
+
+//         Use Griffith criterion if Rankine not applied
+         if ( sum == 0. && principalStress.at(1)/principalStress.at(3) >= -0.33333 ) {
+            sum = -(principalStress.at(1) - principalStress.at(3))*(principalStress.at(1) - principalStress.at(3)) / this->griff_n / ( principalStress.at(1) + principalStress.at(3) );
         }
 
-        //Use Griffith criterion if Rankine not applied
-        if ( sum == 0. ) {
-            sum = -pow(principalStress.at(1) - principalStress.at(3), 2.) / this->griff_n / ( principalStress.at(1) + principalStress.at(3) );
-        }
-
-        sum = max(sum, 0.);
+        sum = max(sum, 0.0);
         kappa = sum / lmat->give('E', gp);
     } else {
         _error("computeEquivalentStrain: unknown EquivStrainType");
@@ -456,7 +450,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         int dim = 0;
         double posNorm = 0.0;
         double nu = lmat->give(NYxz, gp);
-        FloatArray principalStrains, fullstrain;
+        FloatArray principalStrains, fullStrain;
         FloatMatrix N, m;
 
         if ( gp->giveMaterialMode() == _1dMat ) {
@@ -944,7 +938,7 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
     int i, indx = 1;
     double le = 0.;
     double E = this->giveLinearElasticMaterial()->give('E', gp);
-    FloatArray principalStrains, crackPlaneNormal(3), fullstrain, crackVect(3);
+    FloatArray principalStrains, crackPlaneNormal(3), fullStrain, crackVect(3);
     FloatMatrix principalDir(3, 3);
     IsotropicDamageMaterial1Status *status = static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) );
 
@@ -968,10 +962,10 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         }
     }
 
-    StructuralMaterial :: giveFullSymVectorForm( fullstrain, strainVector, gp->giveMaterialMode() );
+    StructuralMaterial :: giveFullSymVectorForm( fullStrain, strainVector, gp->giveMaterialMode() );
 
     if ( ( kappa > e0 ) && ( status->giveDamage() == 0. ) ) {
-        this->computePrincipalValDir(principalStrains, principalDir, fullstrain, principal_strain);
+        this->computePrincipalValDir(principalStrains, principalDir, fullStrain, principal_strain);
         // find index of max positive principal strain
         for ( i = 2; i <= 3; i++ ) {
             if ( principalStrains.at(i) > principalStrains.at(indx) ) {
@@ -991,7 +985,7 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
             }
         }
 
-        // Use orientation of a worst inclusion for Griffith criterion in compression.
+        // Use orientation of the worst inclusion for Griffith criterion in compression.
         if ( this->equivStrainType == EST_Griffith ) {
             FloatArray stress, fullStress, principalStress, crackV(3), crackPlaneN(3);
             FloatMatrix de;
@@ -1000,7 +994,7 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
             stress.beProductOf(de, strainVector);
             StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
             this->computePrincipalValDir(principalStress, principalDir, fullStress, principal_stress);
-            //             this->computePrincipalValDir(principalStrains, principalDir, fullstrain, principal_strain);
+            //             this->computePrincipalValDir(principalStrains, principalDir, fullStrain, principal_strain);
             if (  principalStress.at(1) <= 1.e-10 && principalStress.at(2) <= 1.e-10 && principalStress.at(3) <= 1.e-10 ) {
                 int indexMax = principalStress.giveIndexMaxElem();
                 int indexMin = principalStress.giveIndexMinElem();

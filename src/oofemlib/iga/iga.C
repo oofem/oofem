@@ -59,6 +59,8 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
     IntArray knotSpan;
 #ifdef __PARALLEL_MODE
     int numberOfKnotSpans = 0;
+
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
 #endif
 
     IRResultType result = Element :: initializeFrom(ir); // read nodes , material, cross section
