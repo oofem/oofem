@@ -42,7 +42,7 @@
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 #include "internalstatevaluetype.h"
-//#include "elementgeometrytype.h"
+#include "integrationrule.h"
 
 #ifdef __VTK_MODULE
  #include <vtkUnstructuredGrid.h>
@@ -143,6 +143,7 @@ public:
      * Prints point data header.
      */
     void exportPointDataHeader(FILE *stream, TimeStep *tStep);
+    void giveDataHeaders(std :: string &pointHeader, std :: string &cellHeader, TimeStep *tStep); // returns the headers
     /// Returns the internal smoother.
     NodalRecoveryModel *giveSmoother();
     /// Returns the smoother for primary variables (nodal averaging).
@@ -217,7 +218,7 @@ void exportIntVarAs(InternalStateType valID, IntArray &mapG2L, IntArray &mapL2G,
 #else
                         FILE *stream,
 #endif
-                        TimeStep *tStep);
+                        TimeStep *tStep, int instanceNum=0);
 void getNodalVariableFromIS(FloatArray &answer, Node *node, IntArray &regionVarMap, TimeStep *tStep, InternalStateType type, int ireg); 
 
 
@@ -257,6 +258,16 @@ void exportCellVarAs(InternalStateType type, int region,
                          FILE *stream,
 #endif
                          TimeStep *tStep);
+
+
+
+    /**
+     * Computes a cell average of an InternalStateType varible based on the weights 
+     * in the integrationpoints (=> volume/area/length average)
+     */
+    void computeIPAverage(FloatArray &answer, IntegrationRule *iRule, Element *elem,  InternalStateType isType, TimeStep *tStep);
+
+
     /**
      * Assembles the region node map. Also computes the total number of nodes in region.
      * The region are numbered starting from offset+1.
@@ -281,11 +292,12 @@ void exportCellVarAs(InternalStateType type, int region,
     bool isElementComposite(Element *elem); /// Returns true if element geometry type is composite (not a single cell).
 
     void exportCompositeElement(FILE *stream, VTKXMLExportModule *expModule, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep);
-    void exportCompositeElement(FILE *stream, Element *el,  IntArray &primaryVarsToExport,  IntArray &internalVarsToExport, TimeStep *tStep);
+    void exportCompositeElement(FILE *stream, Element *el, TimeStep *tStep);
     void exportNodalVarAs(InternalStateType type, int nodeVarNum, FILE *stream, TimeStep *tStep);
 
     void exportCellVarAs(InternalStateType type, std::vector<FloatArray> &cellVars, FILE *stream, TimeStep *tStep);
 
+    void giveCompositeExportData();
 
 };
 
