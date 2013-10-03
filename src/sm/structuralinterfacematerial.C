@@ -37,16 +37,6 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-int
-StructuralInterfaceMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//  
-// returns whether receiver supports given mode
-//
-{
-    return mode == _1dInterface  ||  mode == _2dInterface ||
-           mode == _3dInterface;
-}
-
 
 int
 StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
@@ -87,21 +77,6 @@ StructuralInterfaceMaterial :: giveIPValueType(InternalStateType type)
     }
 }
 
-///@todo remove - not necessary anymore
-int
-StructuralInterfaceMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-{
-    if ( ( type == IST_InterfaceJump ) || ( type == IST_InterfaceTraction ) ||
-        ( type == IST_InterfaceFirstPKTraction ) ) {
-            answer.setValues(3, 1, 2, 3);
-
-    } else if ( type == IST_DeformationGradientTensor ) {
-        answer.setValues(9, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-        return 1;
-    } else {
-        //return Material :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
-}
 
 // Currently not in use
 IRResultType

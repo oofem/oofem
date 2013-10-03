@@ -39,7 +39,6 @@
 #include "floatarray.h"
 #include "alist.h"
 #include "domain.h"
-//#include "enrichmentitem.h"
 #include "enrichmentdomain.h"
 #include "element.h"
 #include "dofmanager.h"
@@ -51,14 +50,18 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "dynamicinputrecord.h"
+#include "internalstatevaluetype.h"
 
 namespace oofem {
+
 XfemManager :: XfemManager(Domain *domain)
 {
     this->domain = domain;
     this->enrichmentItemList = new AList< EnrichmentItem >(0);
     numberOfEnrichmentItems = -1;
     mNumGpPerTri = 12;
+    doVTKExport = false;
+    vtkExportFields.resize(0);
 }
 
 XfemManager :: ~XfemManager()
@@ -73,6 +76,23 @@ XfemManager :: clear()
     enrichmentItemList = NULL;
     numberOfEnrichmentItems = -1;
 }
+
+InternalStateValueType 
+XfemManager :: giveXFEMStateValueType(XFEMStateType type)
+{
+    switch ( type ) {
+    case XFEMST_Enrichment:
+    case XFEMST_LevelSetPhi:
+    case XFEMST_LevelSetGamma:
+    case XFEMST_NumIntersecPoints:
+    case XFEMST_NodeEnrMarker:
+        return ISVT_SCALAR;
+    default:
+        return ISVT_UNDEFINED;
+
+    }
+}
+
 
 bool XfemManager :: isElementEnriched(const Element *elem)
 {
@@ -134,6 +154,14 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
 
+    IR_GIVE_OPTIONAL_FIELD(ir, doVTKExport, _IFT_XfemManager_VTKExport);
+    if ( doVTKExport ) {
+        int numFields;
+        IntArray exportFields;
+        IR_GIVE_FIELD(ir, this->vtkExportFields, _IFT_XfemManager_VTKExportFields);
+
+    }
+
     return IRRT_OK;
 }
 
@@ -143,6 +171,9 @@ void XfemManager :: giveInputRecord(DynamicInputRecord &input)
     input.setRecordKeywordField(_IFT_XfemManager_Name, 1);
 	input.setField(numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
 	input.setField(mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
+    input.setField(doVTKExport, _IFT_XfemManager_VTKExport);
+    input.setField(vtkExportFields, _IFT_XfemManager_VTKExportFields);
+
 }
 
 int XfemManager :: instanciateYourself(DataReader *dr)

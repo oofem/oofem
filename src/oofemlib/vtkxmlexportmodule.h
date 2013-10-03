@@ -42,7 +42,10 @@
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 #include "internalstatevaluetype.h"
-//#include "elementgeometrytype.h"
+#include "integrationrule.h"
+#include "xfemmanager.h"
+
+
 
 #ifdef __VTK_MODULE
  #include <vtkUnstructuredGrid.h>
@@ -142,16 +145,25 @@ public:
     /**
      * Prints point data header.
      */
-    void exportPointDataHeader(FILE *stream, TimeStep *tStep);
+    void exportPointDataHeader(FILE *fileStream, TimeStep *tStep);
+    void giveDataHeaders(std :: string &pointHeader, std :: string &cellHeader, TimeStep *tStep); // returns the headers
     /// Returns the internal smoother.
     NodalRecoveryModel *giveSmoother();
     /// Returns the smoother for primary variables (nodal averaging).
     NodalRecoveryModel *givePrimVarSmoother();
 
+    //Experimental // JB
+    #ifdef __VTK_MODULE
+        vtkSmartPointer<vtkUnstructuredGrid> fileStream;
+    #else
+        FILE *fileStream;
+    #endif
+
+
 protected:
     /// Gives the full form of given symmetrically stored tensors, missing components are filled with zeros.
     void makeFullForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType type);
-
+    void makeFullForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType type, const IntArray &redIndx);
 
     /// Returns the filename for the given time step.
     std::string giveOutputFileName(TimeStep *tStep);
@@ -185,69 +197,111 @@ protected:
      */
     void exportIntVars(
 #ifdef __VTK_MODULE
-        vtkSmartPointer<vtkUnstructuredGrid> &stream,
+        vtkSmartPointer<vtkUnstructuredGrid> &this->fileStream,
 #else
-        FILE *stream,
+        FILE *fileStream,
 #endif
         IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int ireg, TimeStep *tStep);
+
+    void exportIntVars(IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int ireg, TimeStep *tStep);
+
+
     /**
      * Export primary variables.
      */
     void exportPrimaryVars(
 #ifdef __VTK_MODULE
-        vtkSmartPointer<vtkUnstructuredGrid> &stream,
+        vtkSmartPointer<vtkUnstructuredGrid> &this->fileStream,
 #else
-        FILE *stream,
+        FILE *fileStream,
 #endif
         IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int region, TimeStep *tStep);
-    /**
-     * Tries to find the value of a primary field on the given DofManager.
-     * Some elements have different interpolation of some fields, and requires some additional code to compute node values (if available).
-     */
+
+    void exportPrimaryVars(IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int region, TimeStep *tStep);
+
+
+//  Tries to find the value of a primary field on the given DofManager.
+//  Some elements have different interpolation of some fields, and requires some additional code to compute node values (if available).
+//
     void getPrimaryVariable(FloatArray &answer, DofManager *dman, TimeStep *tStep, UnknownType type, int ireg);
-    /**
-     * Exports single internal variable by smoothing.
-     */
-    void exportIntVarAs(InternalStateType valID, InternalStateValueType type, IntArray &mapG2L, IntArray &mapL2G,
-                        int regionDofMans, int ireg,
+
+
+// 
+//  Exports single internal variable by smoothing.
+//  
+void exportIntVarAs(InternalStateType valID, IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int ireg,
 #ifdef __VTK_MODULE
-                        vtkSmartPointer<vtkUnstructuredGrid> &stream,
+                        vtkSmartPointer<vtkUnstructuredGrid> &this->fileStream,
 #else
-                        FILE *stream,
+                        FILE *fileStream,
 #endif
                         TimeStep *tStep);
-    /**
-     * Exports single primary variable.
-     */
-    void exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntArray &mapL2G,
+
+void exportIntVarAs(InternalStateType valID, IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int ireg, TimeStep *tStep);
+
+
+void exportXFEMVarAs(XFEMStateType xfemstype, IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int ireg,
+#ifdef __VTK_MODULE
+                        vtkSmartPointer<vtkUnstructuredGrid> &this->fileStream,
+#else
+                        FILE *fileStream,
+#endif
+                        TimeStep *tStep, EnrichmentItem *ei);
+
+void exportXFEMVarAs(XFEMStateType xfemstype, IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int ireg, TimeStep *tStep, EnrichmentItem *ei);
+
+void getNodalVariableFromIS(FloatArray &answer, Node *node, IntArray &regionVarMap, TimeStep *tStep, InternalStateType type, int ireg); 
+
+void getNodalVariableFromXFEMST(FloatArray &answer, Node *node, TimeStep *tStep, XFEMStateType xfemstype, int ireg, EnrichmentItem *ei); 
+
+//
+//  Exports single primary variable.
+// 
+void exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntArray &mapL2G,
                          int regionDofMans, int region,
 #ifdef __VTK_MODULE
-                         vtkSmartPointer<vtkUnstructuredGrid> &stream,
+                         vtkSmartPointer<vtkUnstructuredGrid> &this->fileStream,
 #else
-                         FILE *stream,
+                         FILE *fileStream,
 #endif
                          TimeStep *tStep);
 
-    /**
-     * Exports cell variables (typically internal variables).
-     */
-    void exportCellVars(
+void exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntArray &mapL2G,
+                         int regionDofMans, int region, TimeStep *tStep);
+
+
+// 
+//  Exports cell variables (typically internal variables).
+//
+void exportCellVars(
 #ifdef __VTK_MODULE
-        vtkSmartPointer<vtkUnstructuredGrid> &stream,
+        vtkSmartPointer<vtkUnstructuredGrid> &this->fileStream,
 #else
-        FILE *stream,
+        FILE *fileStream,
 #endif
         int region, TimeStep *tStep);
-    /**
-     * Exports a single cell variable (typically an internal variable).
-     */
-    void exportCellVarAs(InternalStateType type, int region,
+
+void exportCellVars(int region, TimeStep *tStep);
+
+//
+//  Exports a single cell variable (typically an internal variable).
+//
+void exportCellVarAs(InternalStateType type, int region,
 #ifdef __VTK_MODULE
-                         vtkSmartPointer<vtkUnstructuredGrid> &stream,
+                         vtkSmartPointer<vtkUnstructuredGrid> &this->fileStream,
 #else
-                         FILE *stream,
+                         FILE *fileStream,
 #endif
                          TimeStep *tStep);
+
+void exportCellVarAs(InternalStateType type, int region, TimeStep *tStep);
+
+    /**
+     * Computes a cell average of an InternalStateType varible based on the weights 
+     * in the integrationpoints (=> volume/area/length average)
+     */
+    void computeIPAverage(FloatArray &answer, IntegrationRule *iRule, Element *elem,  InternalStateType isType, TimeStep *tStep);
+
 
     /**
      * Assembles the region node map. Also computes the total number of nodes in region.
@@ -260,21 +314,29 @@ protected:
     int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
                                 int &regionDofMans, int &totalcells,
                                 Domain *domain, int reg);
-
-    /// Returns true if element geometry type is composite (not a single cell).
-    CompositeCell compositeCell;
-    bool isElementComposite(Element *elem);
-
-    void exportCompositeElement(FILE *stream, VTKXMLExportModule *expModule, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep);
-    void exportCompositeElement(FILE *stream, Element *el,  IntArray &primaryVarsToExport,  IntArray &internalVarsToExport, TimeStep *tStep);
-    void exportNodalVarAs(InternalStateType type, int nodeVarNum, FILE *stream, TimeStep *tStep);
-
-    void exportCellVarAs(InternalStateType type, std::vector<FloatArray> &cellVars, FILE *stream, TimeStep *tStep);
-
     /**
      * Writes a VTK collection file where time step data is stored.
      */
     void writeVTKCollection();
+
+
+
+    // Export of composite elements (built up from several subcells)
+    
+    CompositeCell compositeCell;
+    bool isElementComposite(Element *elem); /// Returns true if element geometry type is composite (not a single cell).
+
+    void exportCompositeElement(FILE *fileStream, VTKXMLExportModule *expModule, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep);
+    void exportCompositeElement(FILE *fileStream, Element *el, TimeStep *tStep);
+    void exportCompositeElement(Element *el, TimeStep *tStep);
+
+    void exportNodalVarAs(InternalStateType type, int nodeVarNum, FILE *fileStream, TimeStep *tStep);
+    void exportNodalVarAs(InternalStateType type, int nodeVarNum, TimeStep *tStep);
+
+    void exportCellVarAs(InternalStateType type, std::vector<FloatArray> &cellVars, FILE *fileStream, TimeStep *tStep);
+
+    void giveCompositeExportData();
+
 };
 
 

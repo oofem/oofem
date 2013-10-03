@@ -225,7 +225,6 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov,
         if ( dei->isElementEnriched(this) ) {
 
             this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
-            //dei->interpSurfaceLevelSet(levelSet, N, elNodes, lCoords.at(3)); // distance from delamination to xi coord
             double levelSet = lCoords.at(3) - dei->giveDelamXiCoord(); 
             dei->evaluateEnrFuncAt(ef, lCoords, levelSet);  
             
@@ -404,7 +403,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
                 // Computation of nodal forces: f = B^t*[N M T Ms Ts]^t
                 ftemp.beTProductOf(B,sectionalForces);
                 double dV = this->computeVolumeAroundLayer(gp, layer);
-                f.add(dV, ftemp);            
+                f.add(dV*ef[0], ftemp);            
             }
 
         }
@@ -592,7 +591,6 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
         this->evalInitialCovarNormalAt(nCov, lCoords);
         Q.beLocalCoordSys(nCov);
 		K.rotatedWith(Q,'t');   // rotate back to global coord system
-		//K.printYourself();
 
         this->computeTripleProduct(temp, lambda, K, lambda);
         this->computeTripleProduct(tangent, N, temp, N);
@@ -1204,7 +1202,7 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int 
     std :: vector< double > ef;
     FloatArray solVecD, xd, md, xtemp(3); double gamd=0;
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
-        Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
+        Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
         if ( dei != NULL && dei->isElementEnriched(this) ) {
 
             double zeta0 = giveGlobalZcoord(dei->giveDelamXiCoord());
@@ -1218,7 +1216,7 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int 
                 double fac = ( zeta + 0.5 * gamd * zeta * zeta );
                 xtemp = xd;
                 xtemp.add(fac,md);
-                globalCoords.add(xtemp); 
+                globalCoords.add(ef[0]*xtemp); 
             }
 
         }

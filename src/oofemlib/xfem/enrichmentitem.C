@@ -133,35 +133,35 @@ IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
 
 void EnrichmentItem :: giveInputRecord(DynamicDataReader &oDR)
 {
-	DynamicInputRecord *eiRec = new DynamicInputRecord();
-	FEMComponent::giveInputRecord(*eiRec);
+    DynamicInputRecord *eiRec = new DynamicInputRecord();
+    FEMComponent::giveInputRecord(*eiRec);
 
-	eiRec->setField(mEnrFrontIndex,			_IFT_EnrichmentItem_front);
-	eiRec->setField(mPropLawIndex,			_IFT_EnrichmentItem_propagationlaw);
-
-	oDR.insertInputRecord(DataReader::IR_enrichItemRec, eiRec);
-
-
-	// Enrichment function
-	DynamicInputRecord *efRec = new DynamicInputRecord();
-	mpEnrichmentFunc->giveInputRecord(*efRec);
-	oDR.insertInputRecord(DataReader::IR_enrichFuncRec, efRec);
+    eiRec->setField(mEnrFrontIndex,			_IFT_EnrichmentItem_front);
+    eiRec->setField(mPropLawIndex,			_IFT_EnrichmentItem_propagationlaw);
+    
+    oDR.insertInputRecord(DataReader::IR_enrichItemRec, eiRec);
 
 
-	// Enrichment domain
-	DynamicInputRecord *edRec = new DynamicInputRecord();
-	mpEnrichmentDomain->giveInputRecord(*edRec);
-	oDR.insertInputRecord(DataReader::IR_geoRec, edRec);
+    // Enrichment function
+    DynamicInputRecord *efRec = new DynamicInputRecord();
+    mpEnrichmentFunc->giveInputRecord(*efRec);
+    oDR.insertInputRecord(DataReader::IR_enrichFuncRec, efRec);
 
 
-	// Enrichment front
+    // Enrichment domain
+    DynamicInputRecord *edRec = new DynamicInputRecord();
+    mpEnrichmentDomain->giveInputRecord(*edRec);
+    oDR.insertInputRecord(DataReader::IR_geoRec, edRec);
+
+
+    // Enrichment front
     if (mEnrFrontIndex != 0 ) {
 	    DynamicInputRecord *efrRec = new DynamicInputRecord();
 	    mpEnrichmentFront->giveInputRecord(*efrRec);
 	    oDR.insertInputRecord(DataReader::IR_enrichFrontRec, efrRec);
     }
 
-	// Propagation law
+    // Propagation law
     if( mPropLawIndex != 0 ) {
 	    DynamicInputRecord *plRec = new DynamicInputRecord();
 	    this->mpPropagationLaw->giveInputRecord(*plRec);
@@ -198,12 +198,12 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     mir = dr->giveInputRecord(DataReader :: IR_geoRec, 1);
     result = mir->giveRecordKeywordField(name);
     if ( result != IRRT_OK ) {
-    	IR_IOERR(giveClassName(), __proc, "", mir, result);
+        IR_IOERR(giveClassName(), __proc, "", mir, result);
     }
 
     mpEnrichmentDomain = classFactory.createEnrichmentDomain( name.c_str() );
     if ( mpEnrichmentDomain == NULL ) {
-    	OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment domain (%s)", name.c_str() );
+        OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment domain (%s)", name.c_str() );
     }
 
     mpEnrichmentDomain->initializeFrom(mir);
@@ -211,33 +211,33 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
 
     // Instantiate EnrichmentFront
     if(mEnrFrontIndex == 0) {
-		mpEnrichmentFront = new EnrFrontDoNothing();
+        mpEnrichmentFront = new EnrFrontDoNothing();
     }
     else {
-		std::string enrFrontName;
+        std::string enrFrontName;
 
-		InputRecord *enrFrontir = dr->giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
-		result = enrFrontir->giveRecordKeywordField(enrFrontName);
+        InputRecord *enrFrontir = dr->giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
+        result = enrFrontir->giveRecordKeywordField(enrFrontName);
 
-		mpEnrichmentFront = classFactory.createEnrichmentFront( enrFrontName.c_str() );
-		if(mpEnrichmentFront != NULL) {
-			mpEnrichmentFront->initializeFrom(enrFrontir);
-		}
-		else {
-			OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: Failed to create enrichment front (%s)", enrFrontName.c_str() );
-		}
+        mpEnrichmentFront = classFactory.createEnrichmentFront( enrFrontName.c_str() );
+        if(mpEnrichmentFront != NULL) {
+            mpEnrichmentFront->initializeFrom(enrFrontir);
+        }
+        else {
+            OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: Failed to create enrichment front (%s)", enrFrontName.c_str() );
+        }
     }
 
 
-	// Instantiate PropagationLaw
+    // Instantiate PropagationLaw
     if(mPropLawIndex == 0) {
-		mpPropagationLaw = new PLDoNothing();
+        mpPropagationLaw = new PLDoNothing();
     }
     else {
-		std::string propLawName;
+        std::string propLawName;
     
-		InputRecord *propLawir = dr->giveInputRecord(DataReader :: IR_propagationLawRec, mPropLawIndex);
-		result = propLawir->giveRecordKeywordField(propLawName);
+        InputRecord *propLawir = dr->giveInputRecord(DataReader :: IR_propagationLawRec, mPropLawIndex);
+        result = propLawir->giveRecordKeywordField(propLawName);
 
         mpPropagationLaw = classFactory.createPropagationLaw( propLawName.c_str() );
         if(mpPropagationLaw != NULL) {
@@ -1035,10 +1035,10 @@ Delamination :: giveInputRecord(DynamicDataReader &oDR)
 {
     ///@todo everything is copied from EnrichmentItem :: giveInputRecord, should be written in a better way
     DynamicInputRecord *eiRec = new DynamicInputRecord();
-	FEMComponent::giveInputRecord(*eiRec);
+    FEMComponent::giveInputRecord(*eiRec);
 
-	eiRec->setField(mEnrFrontIndex,			_IFT_EnrichmentItem_front);
-	eiRec->setField(mPropLawIndex,			_IFT_EnrichmentItem_propagationlaw);
+    eiRec->setField(mEnrFrontIndex,			_IFT_EnrichmentItem_front);
+    eiRec->setField(mPropLawIndex,			_IFT_EnrichmentItem_propagationlaw);
 
     // Delamination specific records
     eiRec->setField(this->interfaceNum, _IFT_Delamination_interfacenum);
@@ -1046,18 +1046,18 @@ Delamination :: giveInputRecord(DynamicDataReader &oDR)
     eiRec->setField(this->matNum, _IFT_Delamination_CohesiveZoneMaterial);
 
 
-	oDR.insertInputRecord(DataReader::IR_enrichItemRec, eiRec);
+    oDR.insertInputRecord(DataReader::IR_enrichItemRec, eiRec);
 
-	// Enrichment function
-	DynamicInputRecord *efRec = new DynamicInputRecord();
-	mpEnrichmentFunc->giveInputRecord(*efRec);
-	oDR.insertInputRecord(DataReader::IR_enrichFuncRec, efRec);
+    // Enrichment function
+    DynamicInputRecord *efRec = new DynamicInputRecord();
+    mpEnrichmentFunc->giveInputRecord(*efRec);
+    oDR.insertInputRecord(DataReader::IR_enrichFuncRec, efRec);
 
 
-	// Enrichment domain
-	DynamicInputRecord *edRec = new DynamicInputRecord();
-	mpEnrichmentDomain->giveInputRecord(*edRec);
-	oDR.insertInputRecord(DataReader::IR_geoRec, edRec);
+    // Enrichment domain
+    DynamicInputRecord *edRec = new DynamicInputRecord();
+    mpEnrichmentDomain->giveInputRecord(*edRec);
+    oDR.insertInputRecord(DataReader::IR_geoRec, edRec);
 
     if (mEnrFrontIndex != 0 ) {
 	    // Enrichment front
@@ -1144,8 +1144,8 @@ void EnrichmentFront :: giveNodeTipIndices(int iNodeInd, std::vector<int> &oTipI
 
 void EnrFrontDoNothing :: giveInputRecord(DynamicInputRecord &input)
 {
-	int number = 1;
-	input.setRecordKeywordField(this->giveInputRecordName(), number);
+    int number = 1;
+    input.setRecordKeywordField(this->giveInputRecordName(), number);
 }
 
 
@@ -1223,8 +1223,8 @@ void EnrFrontExtend :: MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemM
 
 void EnrFrontExtend :: giveInputRecord(DynamicInputRecord &input)
 {
-	int number = 1;
-	input.setRecordKeywordField(this->giveInputRecordName(), number);
+    int number = 1;
+    input.setRecordKeywordField(this->giveInputRecordName(), number);
 }
 
 EnrFrontLinearBranchFuncRadius :: EnrFrontLinearBranchFuncRadius():
@@ -1365,10 +1365,10 @@ IRResultType EnrFrontLinearBranchFuncRadius :: initializeFrom(InputRecord *ir)
 
 void EnrFrontLinearBranchFuncRadius :: giveInputRecord(DynamicInputRecord &input)
 {
-	int number = 1;
+    int number = 1;
     input.setRecordKeywordField(this->giveInputRecordName(), number);
 
-	input.setField(mEnrichmentRadius, _IFT_EnrFrontLinearBranchFuncRadius_Radius);
+    input.setField(mEnrichmentRadius, _IFT_EnrFrontLinearBranchFuncRadius_Radius);
 }
 
 
