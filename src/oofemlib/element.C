@@ -697,12 +697,11 @@ Element :: initializeFrom(InputRecord *ir)
 
     if ( ir->hasField(_IFT_Element_lcs) ) { //local coordinate system
         double n1 = 0.0, n2 = 0.0;
-        int j;
         FloatArray triplets;
         triplets.resize(0);
         IR_GIVE_OPTIONAL_FIELD(ir, triplets, _IFT_Element_lcs);
         elemLocalCS.resize(3, 3);
-        for ( j = 1; j <= 3; j++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             elemLocalCS.at(j, 1) = triplets.at(j);
             n1 += triplets.at(j) * triplets.at(j);
             elemLocalCS.at(j, 2) = triplets.at(j + 3);
@@ -711,7 +710,7 @@ Element :: initializeFrom(InputRecord *ir)
 
         n1 = sqrt(n1);
         n2 = sqrt(n2);
-        for ( j = 1; j <= 3; j++ ) { // normalize e1' e2'
+        for ( int j = 1; j <= 3; j++ ) { // normalize e1' e2'
             elemLocalCS.at(j, 1) /= n1;
             elemLocalCS.at(j, 2) /= n2;
         }
@@ -741,50 +740,52 @@ Element :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-void Element :: giveInputRecord(DynamicInputRecord &input) {
 
+void
+Element :: giveInputRecord(DynamicInputRecord &input)
+{
     FEMComponent :: giveInputRecord(input);
 
-	input.setField(material, _IFT_Element_mat);
+    input.setField(material, _IFT_Element_mat);
 
-	input.setField(crossSection, _IFT_Element_crosssect);
+    input.setField(crossSection, _IFT_Element_crosssect);
 
-	input.setField(dofManArray, _IFT_Element_nodes);
+    input.setField(dofManArray, _IFT_Element_nodes);
 
-	if(bodyLoadArray.giveSize() > 0) {
-		input.setField(bodyLoadArray, _IFT_Element_bodyload);
-	}
-
-
-	if(boundaryLoadArray.giveSize() > 0) {
-		input.setField(boundaryLoadArray, _IFT_Element_boundaryload);
-	}
+    if(bodyLoadArray.giveSize() > 0) {
+        input.setField(bodyLoadArray, _IFT_Element_bodyload);
+    }
 
 
-	if( elemLocalCS.giveNumberOfRows() > 0 ){
-		OOFEM_ERROR("Element :: giveInputRecord(): support for local coordinate systems is not yet implemented.");
-	}
+    if(boundaryLoadArray.giveSize() > 0) {
+        input.setField(boundaryLoadArray, _IFT_Element_boundaryload);
+    }
+
+
+    if( elemLocalCS.giveNumberOfRows() > 0 ) {
+        FloatArray triplets(6);
+        for ( int j = 1; j <= 3; j++ ) {
+            triplets.at(j) = elemLocalCS.at(j, 1);
+            triplets.at(j + 3) = elemLocalCS.at(j, 2);
+        }
+        input.setField(triplets, _IFT_Element_lcs);
+    }
 
 
 #ifdef __PARALLEL_MODE
-	OOFEM_ERROR("Element :: giveInputRecord(): parallel support is not yet implemented.");
-/*
-    partitions.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, partitions, _IFT_Element_partitions);
-    if ( ir->hasField(_IFT_Element_remote) ) {
-        parallel_mode = Element_remote;
-    } else {
-        parallel_mode = Element_local;
+    if ( this->giveDomain()->giveEngngModel()->isParallel() && partitions.giveSize() > 0 ) {
+        input.setField(this->partitions, _IFT_Element_partitions);
+        if ( this->parallel_mode == Element_remote ) {
+            input.setField(_IFT_Element_remote);
+        }
     }
-*/
 #endif
 
+    if( activityLtf > 0 ) {
+        input.setField(activityLtf, _IFT_Element_activityltf);
+    }
 
-	if( activityLtf > 0 ) {
-		input.setField(activityLtf, _IFT_Element_activityltf);
-	}
-
-	input.setField(numberOfGaussPoints, _IFT_Element_nip);
+    input.setField(numberOfGaussPoints, _IFT_Element_nip);
 }
 
 
@@ -795,7 +796,8 @@ Element :: postInitialize()
 }
 
 
-void Element :: printOutputAt(FILE *file, TimeStep *stepN)
+void
+Element :: printOutputAt(FILE *file, TimeStep *stepN)
 // Performs end-of-step operations.
 {
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
@@ -817,6 +819,7 @@ Element :: updateYourself(TimeStep *tStep)
         integrationRulesArray [ i ]->updateYourself(tStep);
     }
 }
+
 
 bool 
 Element :: isActivated(TimeStep *tStep)
