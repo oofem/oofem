@@ -235,7 +235,6 @@ protected:
      */
     void updateInternalState(TimeStep *tStep);
     void applyIC(TimeStep *tStep);
-    void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut, TimeStep *tStep, int nite);
 };
 } // end namespace oofem
 #endif // cbs_h
