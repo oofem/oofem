@@ -2411,47 +2411,65 @@ Shell7Base :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int laye
 }
 
 
-
+#if 0
 void 
-Shell7Base :: giveCompositeExportData(CompositeCell &compositeCell, IntArray &primaryVarsToExport, IntArray &cellVarsToExport, TimeStep *tStep  )
+Shell7Base :: giveCompositeExportData(CompositeCell &compositeCell, IntArray &primaryVarsToExport, IntArray &cellVarsToExport, VTKPiece &vtkPiece, TimeStep *tStep  )
 {   
     int numCells = this->layeredCS->giveNumberOfLayers();
     const int numCellNodes  = 15; // quadratic wedge
+    int numTotalNodes = numCellNodes*numCells;
+    vtkPiece.elCellTypes.resize(numCells);
+    vtkPiece.elOffsets.resize(numCells);
+    vtkPiece.nodeCoords.resize(numTotalNodes);
+
 
     compositeCell.elements.resize(numCells);
     compositeCell.numSubEl = numCells;   
-    compositeCell.numTotalNodes = numCellNodes*numCells;
+    compositeCell.numTotalNodes = numTotalNodes;
 
     int val    = 0;
     int offset = 0;
     // Compute fictious node coords
+    int nodeNum = 0;
     for ( int layer = 1; layer <= numCells; layer++ ) {
         Cell &el = compositeCell.elements[layer-1];
 
         // Node coordinates
         this->giveFictiousNodeCoordsForExport(el.nodeCoords, layer);       
         
+        for ( int node = 1; node <= numCellNodes; node++ ) {    
+        vtkPiece.nodeCoords[nodeNum] = el.nodeCoords[node-1];
+        nodeNum += 1;
+        }
+
         // Connectivity
         el.connectivity.resize(numCellNodes);
+        vtkPiece.connectivity.resize(numTotalNodes);
         for ( int i = 1; i <= numCellNodes; i++ ) {
             el.connectivity.at(i) = val++;
+            vtkPiece.connectivity.at(i) = val++;
         }
-        //ConnectivityTable *ct =this->giveDomain()->giveConnectivityTable();
         
         // Offset
         offset += numCellNodes;
         el.offset = offset;
+        vtkPiece.elOffsets.at(layer) = offset;
 
         // Cell types
         el.cellType = 26; // Quadratic wedge
+        vtkPiece.elCellTypes.at(layer) = 26;
 
         // Export nodal variables
         el.nodeVars.resize( primaryVarsToExport.giveSize() + cellVarsToExport.giveSize() );
 
 
+        
+        vtkPiece.nodeVars.resize(primaryVarsToExport.giveSize());
         int nodeVarNum = 0;
         for ( int i = 1; i <= primaryVarsToExport.giveSize(); i++ ) {
             UnknownType type = ( UnknownType ) primaryVarsToExport.at(i);
+
+            vtkPiece.nodeVars[i-1].resize(numTotalNodes);
             if ( type == DisplacementVector ) {
                 std::vector<FloatArray> updatedNodeCoords;
                 giveFictiousUpdatedNodeCoordsForExport(updatedNodeCoords, layer, tStep);
@@ -2462,7 +2480,8 @@ Shell7Base :: giveCompositeExportData(CompositeCell &compositeCell, IntArray &pr
                     u.subtract(el.nodeCoords[j-1]);
                     el.nodeVars[nodeVarNum][j-1].resize(3);
                     el.nodeVars[nodeVarNum][j-1] = u;
-                    
+
+                    //vtkPiece.nodeVars[i-1][inode-1] = valueArray;
                 }
             } else {
                 ZZNodalRecoveryMI_recoverValues(el.nodeVars[i-1], layer, ( InternalStateType ) 1, tStep);
@@ -2470,7 +2489,7 @@ Shell7Base :: giveCompositeExportData(CompositeCell &compositeCell, IntArray &pr
             nodeVarNum++;
         }
 
-
+        vtkPiece.nodeVarsFromIS.resize(cellVarsToExport.giveSize());
         for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
             InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);;
 
@@ -2509,6 +2528,124 @@ Shell7Base :: giveCompositeExportData(CompositeCell &compositeCell, IntArray &pr
     }
 }
 
+#else
+
+void 
+Shell7Base :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )            
+{   
+
+    int numCells = this->layeredCS->giveNumberOfLayers();
+    const int numCellNodes  = 15; // quadratic wedge
+    int numTotalNodes = numCellNodes*numCells;
+
+    //int numCells = this->layeredCS->giveNumberOfLayers();
+    //const int numCellNodes  = 15; // quadratic wedge
+    //int numTotalNodes = numCellNodes*numCells;
+    vtkPiece.elCellTypes.resize(numCells);
+    vtkPiece.elOffsets.resize(numCells);
+    vtkPiece.nodeCoords.resize(numTotalNodes);
+    vtkPiece.connectivity.resize(numCells);
+
+    std::vector <FloatArray> nodeCoords;
+    int val    = 1;
+    int offset = 0;
+
+    // Compute fictious node coords
+    int nodeNum = 0;
+    for ( int layer = 1; layer <= numCells; layer++ ) {
+        
+
+        // Node coordinates
+        this->giveFictiousNodeCoordsForExport(nodeCoords, layer);       
+        
+        for ( int node = 1; node <= numCellNodes; node++ ) {    
+            vtkPiece.nodeCoords[nodeNum] = nodeCoords[node-1];
+            nodeNum += 1;
+        }
+
+        // Connectivity       
+        vtkPiece.connectivity[layer-1].resize(numCellNodes);
+        for ( int i = 1; i <= numCellNodes; i++ ) {            
+            vtkPiece.connectivity[layer-1].at(i) = val++;
+        }
+        
+        // Offset
+        offset += numCellNodes;
+        vtkPiece.elOffsets.at(layer) = offset;
+
+        // Cell types
+        vtkPiece.elCellTypes.at(layer) = 26;  // Quadratic wedge
+    }
+
+    // Export nodal variables from primary fields        
+    vtkPiece.nodeVars.resize(primaryVarsToExport.giveSize());
+    std::vector<FloatArray> updatedNodeCoords;
+    FloatArray u(3);
+    std::vector<FloatArray> values;
+    for ( int fieldNum = 1; fieldNum <= primaryVarsToExport.giveSize(); fieldNum++ ) {
+        UnknownType type = ( UnknownType ) primaryVarsToExport.at(fieldNum);
+        nodeNum = 0;
+        vtkPiece.nodeVars[fieldNum-1].resize(numTotalNodes);
+        for ( int layer = 1; layer <= numCells; layer++ ) {            
+            
+            if ( type == DisplacementVector ) {
+                this->giveFictiousNodeCoordsForExport(nodeCoords, layer);
+                this->giveFictiousUpdatedNodeCoordsForExport(updatedNodeCoords, layer, tStep);
+                for ( int j = 1; j <= numCellNodes; j++ ) {
+                    u = updatedNodeCoords[j-1];
+                    u.subtract(nodeCoords[j-1]);
+
+                    vtkPiece.nodeVars[fieldNum-1][nodeNum] = u;
+                    nodeNum += 1;        
+                }
+            } else {
+               
+                ZZNodalRecoveryMI_recoverValues(values, layer, ( InternalStateType ) 1, tStep);
+                for ( int j = 1; j <= numCellNodes; j++ ) {
+                    vtkPiece.nodeVars[fieldNum-1][nodeNum] = values[j-1];
+                    nodeNum += 1;
+                }
+            }
+        }
+    }
+
+    // Export nodal variables from internal fields
+    vtkPiece.nodeVarsFromIS.resize(internalVarsToExport.giveSize());
+    for ( int fieldNum = 1; fieldNum <= internalVarsToExport.giveSize(); fieldNum++ ) {
+        InternalStateType type = ( InternalStateType ) internalVarsToExport.at(fieldNum);
+        nodeNum = 0;
+        vtkPiece.nodeVarsFromIS[fieldNum-1].resize(numTotalNodes);
+        this->recoverShearStress(tStep);
+        for ( int layer = 1; layer <= numCells; layer++ ) {            
+            recoverValuesFromIP(values, layer, type, tStep);        
+            for ( int j = 1; j <= numCellNodes; j++ ) {
+                vtkPiece.nodeVarsFromIS[fieldNum-1][nodeNum] = values[j-1];
+                //ZZNodalRecoveryMI_recoverValues(el.nodeVars[fieldNum], layer, type, tStep);          
+                nodeNum += 1;        
+            }                                
+        }  
+    }
+
+
+    // Export cell variables
+    FloatArray average;
+    vtkPiece.elVars.resize(cellVarsToExport.giveSize());
+    for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
+        InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);;
+        vtkPiece.elVars[i-1].resize(numCells);
+        
+        for ( int layer = 1; layer <= numCells; layer++ ) {     
+            IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
+            VTKXMLExportModule::computeIPAverage(average, iRuleL, this, type, tStep);
+            vtkPiece.elVars[i-1][layer-1] = convV6ToV9Stress(average);
+ 
+        }
+    }
+
+
+}
+
+#endif
 
 
 
