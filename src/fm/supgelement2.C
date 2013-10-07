@@ -376,11 +376,9 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
     FloatArray u, eps, stress, bs, dDB_u;
     FloatMatrix b, un_gu, dDB;
     double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
-    int nsd;
 
     answer.resize(0);
 
-    nsd = this->giveNumberOfSpatialDimensions();
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
     int rule = 1;

@@ -178,7 +178,6 @@ public:
 protected:
     void updateInternalState(TimeStep *tStep);
     void applyIC(TimeStep *tStep);
-    void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut, TimeStep *tStep, int nite);
     void evaluateElementStabilizationCoeffs(TimeStep *tStep);
     void updateElementsForNewInterfacePosition(TimeStep *tStep);
 
