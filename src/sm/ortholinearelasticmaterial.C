@@ -41,6 +41,7 @@
 #include "gausspoint.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 #define ZERO_LENGTH 1.e-6
@@ -206,6 +207,54 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+
+void
+OrthotropicLinearElasticMaterial :: giveInputRecord(DynamicInputRecord &input)
+{
+    Material :: giveInputRecord(input);
+
+
+    input.setField(propertyDictionary->at(Ex), _IFT_OrthotropicLinearElasticMaterial_ex);
+
+
+    input.setField(propertyDictionary->at(Ey), _IFT_OrthotropicLinearElasticMaterial_ey);
+
+
+    input.setField(propertyDictionary->at(Ez), _IFT_OrthotropicLinearElasticMaterial_ez);
+
+
+    input.setField(propertyDictionary->at(NYyz), _IFT_OrthotropicLinearElasticMaterial_nyyz);
+
+
+    input.setField(propertyDictionary->at(NYxz), _IFT_OrthotropicLinearElasticMaterial_nyxz);
+
+
+    input.setField(propertyDictionary->at(NYxy), _IFT_OrthotropicLinearElasticMaterial_nyxy);
+
+
+    input.setField(propertyDictionary->at(Gyz), _IFT_OrthotropicLinearElasticMaterial_gyz);
+
+
+    input.setField(propertyDictionary->at(Gxz), _IFT_OrthotropicLinearElasticMaterial_gxz);
+
+
+    input.setField(propertyDictionary->at(Gxy), _IFT_OrthotropicLinearElasticMaterial_gxy);
+
+
+    input.setField(propertyDictionary->at(tAlphax), _IFT_OrthotropicLinearElasticMaterial_talphax);
+
+
+    input.setField(propertyDictionary->at(tAlphay), _IFT_OrthotropicLinearElasticMaterial_talphay);
+
+
+    input.setField(propertyDictionary->at(tAlphaz), _IFT_OrthotropicLinearElasticMaterial_talphaz);
+
+
+    ///@todo Should add optional arguments:
+    // _IFT_OrthotropicLinearElasticMaterial_lcs
+    // _IFT_OrthotropicLinearElasticMaterial_scs
+
+}
 
 double
 OrthotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp)
