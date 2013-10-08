@@ -70,49 +70,70 @@
 namespace oofem {
 
 
-    // New 
-class Cell 
-{
-public:
-    Cell(){};
-    int cellType;
-    std::vector<FloatArray> nodeCoords;
-    IntArray connectivity;
-    IntArray primVarsToExport;
-    std::vector< std::vector<FloatArray> > nodeVars;
-    std::vector<FloatArray> elVars;
-    int offset;
-};
-
-class CompositeCell 
-{
-public:
-    CompositeCell(){}; 
-    int numSubEl;
-    int numTotalNodes;
-    std::vector<Cell> elements;
-};
-
 class VTKPiece
 {
 public:
-    VTKPiece(){};
+    VTKPiece()
+    {
+        numCells = 0;
+        numNodes = 0;
+    };
+    
+    void clear();
+
+    void setNumberOfNodes( int numNodes );
+    int giveNumberOfNodes() { return this->numNodes; };
+    
+    void setNumberOfCells( int numCells );
+    int giveNumberOfCells() { return this->numCells; };
+    
+    void setConnectivity( int cellNum, IntArray &nodes);
+    IntArray &giveCellConnectivity( int cellNum ) { return this->connectivity[cellNum-1]; };
+
+    void setCellType( int cellNum, int type ) { this->elCellTypes.at(cellNum) = type; };
+    int giveCellType( int cellNum ) { return this->elCellTypes.at(cellNum); };
+    
+    void setOffset( int cellNum, int offset ) { this->elOffsets.at(cellNum) = offset; };
+    int giveCellOffset( int cellNum ) { return this->elOffsets.at(cellNum); };
+    
+    void setNodeCoords ( int nodeNum, FloatArray &coords);
+    FloatArray &giveNodeCoords( int nodeNum ) { return this->nodeCoords[nodeNum-1]; };
+
+    void setNumberOfPrimaryVarsToExport ( int numVars, int numNodes );
+    void setNumberOfInternalVarsToExport ( int numVars, int numNodes );
+    void setNumberOfInternalXFEMVarsToExport ( int numVars, int numEnrichmentItems, int numNodes );
+    void setNumberOfCellVarsToExport ( int numVars, int numCells );
+    
+    void setPrimaryVarInNode( int varNum, int nodeNum, FloatArray valueArray );
+    FloatArray &givePrimaryVarInNode( int varNum, int nodeNum ) { return this->nodeVars[varNum-1][nodeNum-1]; };
+    
+    void setInternalVarInNode( int varNum, int nodeNum, FloatArray valueArray );
+    FloatArray &giveInternalVarInNode( int varNum, int nodeNum ) { return this->nodeVarsFromIS[varNum-1][nodeNum-1]; };
+    
+    void setInternalXFEMVarInNode( int varNum, int eiNum, int nodeNum, FloatArray valueArray );
+    FloatArray &giveInternalXFEMVarInNode( int varNum, int eiNum, int nodeNum ) { return this->nodeVarsFromXFEMIS[varNum-1][eiNum-1][nodeNum-1]; };
+    
+    void setCellVar( int varNum, int cellNum, FloatArray valueArray );
+    FloatArray& giveCellVar( int field, int cellNum ) { return this->elVars[field-1][cellNum-1]; };
+    
+   
+private:
+    int numCells;
+    int numNodes;
+    IntArray elCellTypes;
+    IntArray elOffsets;
     std :: vector< FloatArray> nodeCoords; // all the nodes in the piece [node][coords]
-    std :: vector< IntArray > connectivity;
+    std :: vector< IntArray > connectivity; // cell connectivity [cell][nodes]
     std :: vector< std::vector<FloatArray> > nodeVars; // [field][node][valArray]
     std :: vector< std::vector<FloatArray> > nodeVarsFromIS; // [field][node][valArray]
     std :: vector< std :: vector< std::vector<FloatArray> > > nodeVarsFromXFEMIS; // [field][ei][node][valArray]
-    void setNodeVar(int nodeNum, int field, FloatArray valArray);
-    const FloatArray& giveNodeVar(int nodeNum, int field);
     std :: vector< std::vector<FloatArray> >elVars; // [el][field][valArray]
-    void setElVar(int elNum, int field, FloatArray valArray);
-    const FloatArray& giveElVar(int elNum, int field);
-    IntArray elCellTypes;
-    
-    IntArray elOffsets;
-    void clear();
+
+
 
 };
+
+
 /**
  * Represents VTK (Visualization Toolkit) export module. It uses VTK (.vtu) file format, Unstructured grid dataset.
  * The export of data is done on Region By Region basis, possibly taking care about possible nonsmooth character of
@@ -264,13 +285,11 @@ void getNodalVariableFromXFEMST(FloatArray &answer, Node *node, TimeStep *tStep,
 //  Exports cell variables (typically internal variables).
 //
 
-void exportCellVars(VTKPiece &piece, int region, TimeStep *tStep);
+void exportCellVars(VTKPiece &piece, int numCells, TimeStep *tStep);
 
 //
 //  Exports a single cell variable (typically an internal variable).
 //
-
-
 void getCellVariableFromIS(FloatArray &answer, Element *el, InternalStateType type, TimeStep *tStep);
     
 
@@ -295,20 +314,10 @@ void getCellVariableFromIS(FloatArray &answer, Element *el, InternalStateType ty
     void writeVTKCellData(FloatArray &valueArray, const char *name);
 
     // Export of composite elements (built up from several subcells)
-    
-    CompositeCell compositeCell;
+   
     bool isElementComposite(Element *elem); /// Returns true if element geometry type is composite (not a single cell).
+    void exportCompositeElement(VTKPiece &vtkPiece, Element *el, TimeStep *tStep);
 
-    void exportCompositeElement(FILE *fileStream, VTKXMLExportModule *expModule, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep);
-    void exportCompositeElement(FILE *fileStream, Element *el, TimeStep *tStep);
-    void exportCompositeElement(Element *el, TimeStep *tStep);
-
-    void exportNodalVarAs(InternalStateType type, int nodeVarNum, FILE *fileStream, TimeStep *tStep);
-    void exportNodalVarAs(InternalStateType type, int nodeVarNum, TimeStep *tStep);
-
-    void exportCellVarAs(InternalStateType type, std::vector<FloatArray> &cellVars, FILE *fileStream, TimeStep *tStep);
-
-    void giveCompositeExportData();
 
 };
 

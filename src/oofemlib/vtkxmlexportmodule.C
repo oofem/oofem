@@ -420,7 +420,8 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         
         if ( this->isElementComposite(el) ) {
             #ifndef __VTK_MODULE
-                this->exportCompositeElement(el, tStep);
+                this->exportCompositeElement(this->defaultVTKPiece, el, tStep);
+                this->writeVTKPiece(this->defaultVTKPiece, tStep);
             #else
                 // No support for binary export yet
             #endif
@@ -491,6 +492,99 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
 
 void
+VTKPiece :: setNumberOfNodes( int numNodes )
+{
+    this->numNodes = numNodes;
+    this->nodeCoords.resize(numNodes);
+}
+
+void
+VTKPiece :: setNumberOfCells( int numCells )
+{
+    this->numCells = numCells;
+    this->connectivity.resize(numCells);
+    this->elCellTypes.resize(numCells);
+    this->elOffsets.resize(numCells);
+}
+
+void
+VTKPiece :: setConnectivity( int cellNum, IntArray &nodes )
+{
+    this->connectivity[cellNum-1] = nodes;
+}
+
+void
+VTKPiece :: setNodeCoords( int nodeNum, FloatArray &coords )
+{
+    this->nodeCoords[nodeNum-1] = coords;
+}
+
+void
+VTKPiece :: setNumberOfPrimaryVarsToExport( int numVars, int numNodes )
+{
+    this->nodeVars.resize(numVars);
+    for (int i = 1; i <= numVars; i++ ) {
+        this->nodeVars[i-1].resize(numNodes);
+    }
+}
+
+void
+VTKPiece :: setNumberOfInternalVarsToExport( int numVars, int numNodes )
+{
+    this->nodeVarsFromIS.resize(numVars);
+    for (int i = 1; i <= numVars; i++ ) {
+        this->nodeVarsFromIS[i-1].resize(numNodes);
+    }
+}
+
+void
+VTKPiece :: setNumberOfInternalXFEMVarsToExport( int numVars, int numEnrichmentItems, int numNodes )
+{
+    this->nodeVarsFromXFEMIS.resize(numVars);
+    for (int i = 1; i <= numVars; i++ ) {
+        this->nodeVarsFromXFEMIS[i-1].resize(numEnrichmentItems);
+        for (int j = 1; j <= numEnrichmentItems; j++ ) {
+            this->nodeVarsFromXFEMIS[i-1][j-1].resize(numNodes);
+        }
+    }
+}
+
+void
+VTKPiece :: setNumberOfCellVarsToExport( int numVars, int numCells )
+{
+    this->elVars.resize(numVars);
+    for (int i = 1; i <= numVars; i++ ) {
+        this->elVars[i-1].resize(numCells);
+    }
+}
+
+void
+VTKPiece :: setPrimaryVarInNode( int varNum, int nodeNum, FloatArray valueArray )
+{
+     this->nodeVars[varNum-1][nodeNum-1] = valueArray;
+}
+
+void
+VTKPiece :: setInternalVarInNode( int varNum, int nodeNum, FloatArray valueArray )
+{
+     this->nodeVarsFromIS[varNum-1][nodeNum-1] = valueArray;
+}
+
+void
+VTKPiece :: setInternalXFEMVarInNode( int varNum, int eiNum, int nodeNum, FloatArray valueArray )
+{
+     this->nodeVarsFromXFEMIS[varNum-1][eiNum-1][nodeNum-1] = valueArray;
+}
+
+
+void
+VTKPiece :: setCellVar( int varNum, int cellNum, FloatArray valueArray )
+{
+     this->elVars[varNum-1][cellNum-1] = valueArray;
+}
+
+
+void
 VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int region)
 {
     // Stores all neccessary data (of a region) in a VTKPiece so it can be exported later.
@@ -514,11 +608,11 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
     if ( 1 ) {
     #endif
 
-        // Export nodes in as vtk vertices
-        vtkPiece.nodeCoords.resize(numNodes);
+        // Export nodes as vtk vertices
+        vtkPiece.setNumberOfNodes( numNodes );
         for ( int inode = 1; inode <= numNodes; inode++ ) {
             coords = d->giveNode( mapL2G.at(inode) )->giveCoordinates();                
-            vtkPiece.nodeCoords[inode-1] = *coords;
+            vtkPiece.setNodeCoords(inode, *coords);
         }
 
 
@@ -526,13 +620,11 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
         // Export all the cell data for the piece
         //-------------------------------------------           
         IntArray cellNodes;
-        vtkPiece.connectivity.resize(numRegionEl);
-        vtkPiece.elCellTypes.resize(numRegionEl);
-        vtkPiece.elOffsets.resize(numRegionEl);
+        vtkPiece.setNumberOfCells(numRegionEl);
 
         int offset = 0;
-        for ( int ielem = 1; ielem <= numRegionEl; ielem++ ) {
-            elem = d->giveElement( mapL2G.at(ielem) );
+        for ( int cellNum = 1; cellNum <= numRegionEl; cellNum++ ) {
+            elem = d->giveElement( mapL2G.at(cellNum) );
 
             // Skip elements that: 
             // are inactivated or of composite type ( these are exported individually later)
@@ -546,20 +638,21 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
                 }
             #endif
 
-            int numElNodes = elem->giveNumberOfNodes();
-            // Give the node numbering of the cell with according to the VTK format
-            this->giveElementCell(cellNodes, elem);  
-            vtkPiece.connectivity[ielem-1].resize(numElNodes);
+            // Set the connectivity
+            this->giveElementCell(cellNodes, elem);  // node numbering of the cell with according to the VTK format
+  
             // Map from global to local node numbers for the current piece
+            int numElNodes = elem->giveNumberOfNodes();
+            IntArray connectivity(numElNodes);
             for ( int i = 1; i <= numElNodes; i++ ) {
-                vtkPiece.connectivity[ielem-1].at(i) = mapG2L.at( cellNodes.at(i) );
+                connectivity.at(i) = mapG2L.at( cellNodes.at(i) );
             }                                        
+            vtkPiece.setConnectivity(cellNum, connectivity);
 
-            vtkPiece.elCellTypes.at(ielem) = this->giveCellType(elem);
+            vtkPiece.setCellType(cellNum, this->giveCellType(elem)); // VTK cell type
 
             offset += elem->giveNumberOfNodes();
-            vtkPiece.elOffsets.at(ielem) = offset;
-
+            vtkPiece.setOffset(cellNum, offset);
         }
 
 
@@ -567,7 +660,7 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
         this->exportPrimaryVars(vtkPiece, mapG2L, mapL2G, numNodes, region, tStep);
         this->exportIntVars(vtkPiece, mapG2L, mapL2G, numNodes, region, tStep);
 
-        this->exportCellVars(vtkPiece, region, tStep);
+        this->exportCellVars(vtkPiece, numRegionEl, tStep);
 
     } // end of default piece for simple geometry elements
 
@@ -581,12 +674,12 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
     // Write a VTK piece to file. This could be the whole domain (most common case) or it can be a
     // (so-called) composite element consisting of several VTK cells (layered structures, XFEM, etc.).
     
-    if ( !vtkPiece.elCellTypes.giveSize() ) return; //{ // if there are no elements to output
+    if ( !vtkPiece.giveNumberOfCells() ) return; //{ // if there are no elements to output
         
     // Write output: node coords
-    int numNodes = vtkPiece.nodeCoords.size();
-    int numEl = vtkPiece.elCellTypes.giveSize();
-    FloatArray *coords;
+    int numNodes = vtkPiece.giveNumberOfNodes();
+    int numEl = vtkPiece.giveNumberOfCells();
+    FloatArray coords;
     #ifdef __VTK_MODULE
         for ( int inode = 1; inode <= numNodes; inode++ ) {
             coords = &vtkPiece.nodeCoords[inode-1];
@@ -599,12 +692,13 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
         fprintf(this->fileStream, "<Points>\n <DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\"> ");
                         
         for ( int inode = 1; inode <= numNodes; inode++ ) {
-            coords = &vtkPiece.nodeCoords[inode-1]; 
-            for ( int i = 1; i <= coords->giveSize(); i++ ) {
-                fprintf( this->fileStream, "%e ", coords->at(i) );
+            coords = vtkPiece.giveNodeCoords(inode);
+            ///@todo move this below into setNodeCoords since it should alwas be 3 components anyway
+            for ( int i = 1; i <= coords.giveSize(); i++ ) {
+                fprintf( this->fileStream, "%e ", coords.at(i) );
             }
 
-            for ( int i = coords->giveSize() + 1; i <= 3; i++ ) {
+            for ( int i = coords.giveSize() + 1; i <= 3; i++ ) {
                 fprintf(this->fileStream, "%e ", 0.0);
             }
         }
@@ -621,10 +715,9 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
         fprintf(this->fileStream, "<Cells>\n");
         fprintf(this->fileStream, " <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> ");
     #endif
-        //Element *elem;
         IntArray cellNodes;
         for ( int ielem = 1; ielem <= numEl; ielem++ ) {
-            cellNodes = vtkPiece.connectivity[ielem-1];
+            cellNodes = vtkPiece.giveCellConnectivity(ielem);
 
             #ifdef __VTK_MODULE
                 elemNodeArray->Reset();
@@ -639,7 +732,7 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
             }
 
             #ifdef __VTK_MODULE
-                this->fileStream->InsertNextCell(vtkPiece.elCellTypes.at(ielem), elemNodeArray);
+                this->fileStream->InsertNextCell(vtkPiece.giveCellType(ielem), elemNodeArray);
             #else
                 fprintf(this->fileStream, " ");
             #endif
@@ -652,7 +745,7 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
             fprintf(this->fileStream, " <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\"> ");
 
             for ( int ielem = 1; ielem <= numEl; ielem++ ) {
-                fprintf( this->fileStream, "%d ", vtkPiece.elOffsets.at(ielem) );
+                fprintf( this->fileStream, "%d ", vtkPiece.giveCellOffset(ielem) );
             }
             fprintf(this->fileStream, "</DataArray>\n");
             
@@ -660,7 +753,7 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
             // output cell (element) types
             fprintf(this->fileStream, " <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\"> ");
             for ( int ielem = 1; ielem <= numEl; ielem++ ) {
-                fprintf( this->fileStream, "%d ", vtkPiece.elCellTypes.at(ielem) );
+                fprintf( this->fileStream, "%d ", vtkPiece.giveCellType(ielem) );
             }
 
             fprintf(this->fileStream, "</DataArray>\n");
@@ -697,7 +790,6 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
          
 
       // Clear object so it can be filled with new data for the next piece
-      ///@todo Check if this is done in a proper way not leading to memory leaks /JB
       vtkPiece.clear();
 
 }
@@ -806,7 +898,7 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
 // Internal variables and XFEM realted fields (keyword "vars" in OOFEM input file)
 //----------------------------------------------------
 void
-VTKXMLExportModule :: exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int region, TimeStep *tStep)
+VTKXMLExportModule :: exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int numNodes, int region, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     InternalStateType isType;
@@ -815,15 +907,14 @@ VTKXMLExportModule :: exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArr
     this->giveSmoother()->init(); // Makes sure smoother is up-to-date with potentially new mesh.
 
     // Export of Internal State Type fields
-    vtkPiece.nodeVarsFromIS.resize(internalVarsToExport.giveSize());
-    for ( int field = 0; field < internalVarsToExport.giveSize(); field++ ) {
-        isType = ( InternalStateType ) internalVarsToExport[field];
+    vtkPiece.setNumberOfInternalVarsToExport(internalVarsToExport.giveSize(), numNodes);
+    for ( int field = 1; field <= internalVarsToExport.giveSize(); field++ ) {
+        isType = ( InternalStateType ) internalVarsToExport.at(field);
 
-        vtkPiece.nodeVarsFromIS[field].resize(regionDofMans);
-        for ( int j = 0; j < regionDofMans; j++ ) {
-            Node *node = d->giveNode( mapL2G[j] );
+        for ( int nodeNum = 1; nodeNum <= numNodes; nodeNum++ ) {
+            Node *node = d->giveNode( mapL2G.at(nodeNum) );
             this->getNodalVariableFromIS(answer, node, tStep, isType, region);
-            vtkPiece.nodeVarsFromIS[field][j] = answer;
+            vtkPiece.setInternalVarInNode(field, nodeNum, answer);
         }
     }
 
@@ -832,18 +923,15 @@ VTKXMLExportModule :: exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArr
         XfemManager *xFemMan = d->giveXfemManager();
         int nEnrIt = xFemMan->giveNumberOfEnrichmentItems();
 
-        vtkPiece.nodeVarsFromXFEMIS.resize(xFemMan->vtkExportFields.giveSize());
-        for( int field = 0; field < xFemMan->vtkExportFields.giveSize(); field++ ) {
-            XFEMStateType xfemstype = ( XFEMStateType ) xFemMan->vtkExportFields[field];
+        vtkPiece.setNumberOfInternalXFEMVarsToExport(xFemMan->vtkExportFields.giveSize(), nEnrIt, numNodes);
+        for( int field = 1; field <= xFemMan->vtkExportFields.giveSize(); field++ ) {
+            XFEMStateType xfemstype = ( XFEMStateType ) xFemMan->vtkExportFields[field-1];
             
-            vtkPiece.nodeVarsFromXFEMIS[field].resize(nEnrIt);
             for( int enrItIndex = 1; enrItIndex <= nEnrIt; enrItIndex++ ) {  
-                vtkPiece.nodeVarsFromXFEMIS[field][enrItIndex-1].resize(regionDofMans);
-                for ( int nodeIndx = 1; nodeIndx <= regionDofMans; nodeIndx++ ) {
-                    Node *node = d->giveNode( mapL2G.at(nodeIndx) );
-                    
+                for ( int nodeIndx = 1; nodeIndx <= numNodes; nodeIndx++ ) {
+                    Node *node = d->giveNode( mapL2G.at(nodeIndx) );                    
                     getNodalVariableFromXFEMST(answer, node, tStep, xfemstype, region, xFemMan->giveEnrichmentItem(enrItIndex)) ;
-                    vtkPiece.nodeVarsFromXFEMIS[field][enrItIndex-1][nodeIndx-1] = answer;
+                    vtkPiece.setInternalXFEMVarInNode(field, enrItIndex, nodeIndx, answer);
                 }
             }
 
@@ -998,26 +1086,23 @@ VTKXMLExportModule :: writeIntVars(VTKPiece &vtkPiece)
         InternalStateValueType valType = giveInternalStateValueType(type);
         int ncomponents = giveInternalStateTypeSize(valType);
         const char *name = __InternalStateTypeToString(type);
-        int numNodes = vtkPiece.nodeCoords.size(); // temp
+        int numNodes = vtkPiece.giveNumberOfNodes();
 
         // Header  
         #ifdef __VTK_MODULE
-    vtkSmartPointer<vtkDoubleArray> intVarArray = vtkSmartPointer<vtkDoubleArray>::New();
-    intVarArray->SetName(name);
-    intVarArray->SetNumberOfComponents(ncomponents);
-    intVarArray->SetNumberOfTuples(numNodes);
+            vtkSmartPointer<vtkDoubleArray> intVarArray = vtkSmartPointer<vtkDoubleArray>::New();
+            intVarArray->SetName(name);
+            intVarArray->SetNumberOfComponents(ncomponents);
+            intVarArray->SetNumberOfTuples(numNodes);
     
         #else
             fprintf( this->fileStream, " <DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\"> ", name, ncomponents );    
         #endif
 
         FloatArray valueArray;
-        
         for ( int inode = 1; inode <= numNodes; inode++ ) {
-
-            valueArray = vtkPiece.nodeVarsFromIS[i-1][inode-1];      
+            valueArray = vtkPiece.giveInternalVarInNode(i, inode);
             this->writeVTKPointData(valueArray, name);
-
         } 
 
         // Footer
@@ -1040,13 +1125,10 @@ VTKXMLExportModule :: writeXFEMVars(VTKPiece &vtkPiece)
     for( int field = 1; field <= xFemMan->vtkExportFields.giveSize(); field++ ) {
         XFEMStateType xfemstype = ( XFEMStateType ) xFemMan->vtkExportFields.at(field);
         const char *namePart = __XFEMStateTypeToString(xfemstype);    
-        InternalStateType type = ( InternalStateType ) xFemMan->vtkExportFields.at(field); // temporary
-        //InternalStateValueType valType = giveInternalStateValueType(type);
-        //int ncomponents = giveInternalStateTypeSize(valType);
-        ///@todo This part is broken must define corresponding methods for XFEMStateType which returns ncomponents
-        int ncomponents = 1;
-        int numNodes = vtkPiece.nodeCoords.size(); // temp
-
+        InternalStateValueType valType = xFemMan->giveXFEMStateValueType(xfemstype);
+        int ncomponents = giveInternalStateTypeSize(valType);
+        
+        int numNodes = vtkPiece.giveNumberOfNodes();
         for( int enrItIndex = 1; enrItIndex <= nEnrIt; enrItIndex++ ) { 
             // Header
             char name[100];   // Must I define a fixed size? /JB
@@ -1060,13 +1142,10 @@ VTKXMLExportModule :: writeXFEMVars(VTKPiece &vtkPiece)
             #else
                 fprintf( this->fileStream, " <DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\"> ", name, ncomponents );    
             #endif
-        
             
-            for ( int inode = 1; inode <= numNodes; inode++ ) {
-            
-                valueArray = vtkPiece.nodeVarsFromXFEMIS[field-1][enrItIndex-1][inode-1];
+            for ( int inode = 1; inode <= numNodes; inode++ ) {            
+                valueArray = vtkPiece.giveInternalXFEMVarInNode(field, enrItIndex, inode);
                 this->writeVTKPointData(valueArray, name);
-
             } 
 
             // Footer
@@ -1075,10 +1154,6 @@ VTKXMLExportModule :: writeXFEMVars(VTKPiece &vtkPiece)
             #endif
         }
     }
-
-
-
-
 
 }
 
@@ -1129,7 +1204,7 @@ VTKXMLExportModule :: writeVTKCellData(FloatArray &valueArray, const char *name)
 #ifdef __VTK_MODULE
         switch ( ncomponents ) {
         case 1:
-            cellVarsArray->SetTuple1(ielem-1, valueArray.at(1) ); // Should be integer..
+            cellVarsArray->SetTuple1(ielem-1, valueArray.at(1) ); 
             this->fileStream->GetCellData()->SetActiveScalars(name);
             this->fileStream->GetCellData()->SetScalars(cellVarsArray);
             break;
@@ -1242,23 +1317,21 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
 // Primary variables - readily available in the nodes
 //----------------------------------------------------
 void
-VTKXMLExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int region, TimeStep *tStep)
+VTKXMLExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int numNodes, int region, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     FloatArray valueArray;
     this->givePrimVarSmoother()->init(); // Makes sure primary smoother is up-to-date with potentially new mesh.
     
-    vtkPiece.nodeVars.resize(primaryVarsToExport.giveSize());
+    vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numNodes);
     for (int i = 1, n = primaryVarsToExport.giveSize(); i <= n; i++ ) {
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(i);
 
-        vtkPiece.nodeVars[i-1].resize(regionDofMans);
-        for ( int inode = 1; inode <= regionDofMans; inode++ ) {
+        for ( int inode = 1; inode <= numNodes; inode++ ) {
             DofManager *dman = d->giveNode( mapL2G.at(inode) );
 
             this->getNodalVariableFromPrimaryField(valueArray, dman, tStep, type, region);
-            vtkPiece.nodeVars[i-1][inode-1] = valueArray;
-
+            vtkPiece.setPrimaryVarInNode(i, inode, valueArray);
         } 
     }
 
@@ -1384,7 +1457,7 @@ VTKXMLExportModule :: writePrimaryVars(VTKPiece &vtkPiece)
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(i);
         InternalStateValueType valType = giveInternalStateValueType(type);
         int ncomponents = giveInternalStateTypeSize(valType);
-        int numNodes = vtkPiece.nodeCoords.size(); // temp
+        int numNodes = vtkPiece.giveNumberOfNodes();
         const char *name = __UnknownTypeToString(type);
 
         // Header
@@ -1399,13 +1472,11 @@ VTKXMLExportModule :: writePrimaryVars(VTKPiece &vtkPiece)
         fprintf( this->fileStream, " <DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\"> ", name, ncomponents );    
     #endif
 
-        FloatArray valueArray;
-        
+        FloatArray valueArray;        
         for ( int inode = 1; inode <= numNodes; inode++ ) {
-            valueArray = vtkPiece.nodeVars[i-1][inode-1];      
+            valueArray = vtkPiece.givePrimaryVarInNode(i, inode);
             this->writeVTKPointData(valueArray, name);
         }
-
 
         // Footer
         #ifndef __VTK_MODULE
@@ -1423,24 +1494,21 @@ VTKXMLExportModule :: writePrimaryVars(VTKPiece &vtkPiece)
 //----------------------------------------------------
 
 void 
-VTKXMLExportModule :: exportCellVars(VTKPiece &vtkPiece, int region, TimeStep *tStep) 
+VTKXMLExportModule :: exportCellVars(VTKPiece &vtkPiece, int numCells, TimeStep *tStep) 
 {
     Domain *d = emodel->giveDomain(1);
-    int nelem = d->giveNumberOfElements();
     FloatArray valueArray;
     InternalStateType type;
 
     int n = cellVarsToExport.giveSize();
-    vtkPiece.elVars.resize(n);
-    for ( int i = 1; i <= n; i++ ) {
-        type = ( InternalStateType ) cellVarsToExport.at(i);
-        
-        vtkPiece.elVars[i-1].resize(nelem);
-        
-        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-            Element *el = d->giveElement(ielem);
+    vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), numCells);
+    for ( int field = 1; field <= n; field++ ) {
+        type = ( InternalStateType ) cellVarsToExport.at(field);
+               
+        for ( int ielem = 1; ielem <= numCells; ielem++ ) {
+            Element *el = d->giveElement(ielem); ///@todo WRONG! should be a pointer ta an element in the region /JB
             this->getCellVariableFromIS(valueArray, el, type, tStep);
-            vtkPiece.elVars[i-1][ielem-1] = valueArray;
+            vtkPiece.setCellVar(field, ielem, valueArray);
         }
     }
 
@@ -1534,8 +1602,8 @@ VTKXMLExportModule :: writeCellVars(VTKPiece &vtkPiece)
 {
     
     FloatArray valueArray;
-    for ( int i = 1; i <= vtkPiece.elVars.size(); i++ ) {
-        int numEl = vtkPiece.elVars[i-1].size();
+    int numCells = vtkPiece.giveNumberOfCells();
+    for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
         InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
         InternalStateValueType valType = giveInternalStateValueType(type);
         int ncomponents = giveInternalStateTypeSize(valType);
@@ -1546,15 +1614,15 @@ VTKXMLExportModule :: writeCellVars(VTKPiece &vtkPiece)
             vtkSmartPointer<vtkDoubleArray> cellVarsArray = vtkSmartPointer<vtkDoubleArray>::New();
             cellVarsArray->SetName(name);
             cellVarsArray->SetNumberOfComponents(ncomponents);
-            cellVarsArray->SetNumberOfTuples(numEl);
+            cellVarsArray->SetNumberOfTuples(numCells);
         #else
             fprintf( this->fileStream, " <DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\"> ", name, ncomponents );    
         #endif
 
 
         valueArray.resize(ncomponents);
-        for ( int ielem = 1; ielem <= numEl; ielem++ ) {
-            valueArray = vtkPiece.elVars[i-1][ielem-1];
+        for ( int ielem = 1; ielem <= numCells; ielem++ ) {
+            valueArray = vtkPiece.giveCellVar(i, ielem);
             this->writeVTKCellData(valueArray, name);
         }
 
@@ -1623,15 +1691,15 @@ VTKXMLExportModule :: writeVTKCollection()
 
 // Export of composite elements
 
-void VTKXMLExportModule :: exportCompositeElement(Element *el, TimeStep *tStep)
+void VTKXMLExportModule :: exportCompositeElement(VTKPiece &vtkPiece, Element *el, TimeStep *tStep)
 {
 
     VTKXMLExportModuleElementInterface *interface =
     static_cast< VTKXMLExportModuleElementInterface * >( el->giveInterface(VTKXMLExportModuleElementInterfaceType) );
     if ( interface ) {
-        interface->giveCompositeExportData(this->defaultVTKPiece, this->primaryVarsToExport, this->internalVarsToExport, this->cellVarsToExport, tStep);
+        interface->giveCompositeExportData(vtkPiece, this->primaryVarsToExport, this->internalVarsToExport, this->cellVarsToExport, tStep);
         
-        this->writeVTKPiece(this->defaultVTKPiece, tStep);
+        //this->writeVTKPiece(this->defaultVTKPiece, tStep);
     }
 }
 
@@ -1640,6 +1708,8 @@ void
 VTKPiece :: clear()
 {
     ///@todo Will this give a memory leak? / JB
+    numCells = 0;
+    numNodes = 0;
     this->connectivity.resize(0);
     this->elCellTypes.resize(0);
     this->elOffsets.resize(0);
