@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "shell7base.h"
@@ -1093,7 +1093,7 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
         temp.add(NtmN);
     }
 
-    int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    int ndofs = this->computeNumberOfDofs();
     answer.resize(ndofs, ndofs);
     answer.zero();
     const IntArray &ordering_all = this->giveOrdering(All);
@@ -1432,7 +1432,7 @@ Shell7Base :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         this->computePressureForce(force, solVec, iSurf, surfLoad, tStep);
         IntArray mask;
         this->giveSurfaceDofMapping(mask, 1);         // same dofs regardless of iSurf->1
-        answer.resize( this->computeNumberOfDofs(EID_MomentumBalance) );
+        answer.resize( this->computeNumberOfDofs() );
         answer.zero();
         answer.assemble(force, mask);
 

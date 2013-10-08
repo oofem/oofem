@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "structuralelementevaluator.h"
@@ -156,7 +156,7 @@ void StructuralElementEvaluator :: computeLumpedMassMatrix(FloatMatrix &answer, 
     double summ;
 
     if ( !this->isActivated(tStep) ) {
-        int ndofs = elem->computeNumberOfDofs(EID_MomentumBalance);
+        int ndofs = elem->computeNumberOfDofs();
         answer.resize(ndofs, ndofs);
         answer.zero();
         return;
@@ -208,10 +208,8 @@ void StructuralElementEvaluator :: computeConsistentMassMatrix(FloatMatrix &answ
 // Computes numerically the consistent (full) mass matrix of the receiver.
 {
     Element *elem = this->giveElement();
-    int ndofs = elem->computeNumberOfDofs(EID_MomentumBalance);
-    double density, dV;
+    int ndofs = elem->computeNumberOfDofs();
     FloatMatrix n;
-    GaussPoint *gp;
     IntegrationRule *iRule;
     IntArray mask;
 
@@ -230,20 +228,18 @@ void StructuralElementEvaluator :: computeConsistentMassMatrix(FloatMatrix &answ
     mass = 0.;
 
     for ( int ip = 0; ip < iRule->giveNumberOfIntegrationPoints(); ip++ ) {
-        gp      = iRule->getIntegrationPoint(ip);
-        density = elem->giveMaterial()->give('d', gp);
-        dV      = this->computeVolumeAround(gp);
+        GaussPoint *gp = iRule->getIntegrationPoint(ip);
+        double density = elem->giveMaterial()->give('d', gp);
+        double dV      = this->computeVolumeAround(gp);
         mass   += density * dV;
         this->computeNMatrixAt(n, gp);
 
         if ( mask.isEmpty() ) {
             answer.plusProductSymmUpper(n, n, density * dV);
         } else {
-            double summ;
-
             for ( int i = 1; i <= ndofs; i++ ) {
                 for ( int j = i; j <= ndofs; j++ ) {
-                    summ = 0.;
+                    double summ = 0.;
                     for ( int k = 1; k <= n.giveNumberOfRows(); k++ ) {
                         if ( mask.at(k) == 0 ) {
                             continue;
@@ -267,7 +263,7 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
     Element *elem = this->giveElement();
     StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( elem->giveCrossSection() );
     Material *mat = elem->giveMaterial();
-    int ndofs = elem->computeNumberOfDofs(EID_MomentumBalance);
+    int ndofs = elem->computeNumberOfDofs();
     FloatMatrix b;
     FloatArray strain, stress, u, temp;
     IntArray irlocnum;
@@ -403,16 +399,13 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
 
 void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-    int ir, j, numberOfIntegrationRules;
+    int numberOfIntegrationRules;
     FloatMatrix temp, bj, d, dbj;
-    IntegrationRule *iRule;
-    GaussPoint *gp;
     Element *elem = this->giveElement();
     StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( elem->giveCrossSection() );
-    int ndofs = elem->computeNumberOfDofs(EID_MomentumBalance);
+    int ndofs = elem->computeNumberOfDofs();
     bool matStiffSymmFlag = elem->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode, elem->giveMaterial()->giveNumber() );
     IntArray irlocnum;
-    double dV;
 
     answer.resize(ndofs, ndofs);
     answer.zero();
@@ -424,22 +417,22 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
 
     numberOfIntegrationRules = elem->giveNumberOfIntegrationRules();
     // loop over individual integration rules
-    for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
+    for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
 
 #ifdef __PARALLEL_MODE
         if (this->giveElement()->giveKnotSpanParallelMode(ir) == Element_remote) continue;
         //fprintf (stderr, "[%d] Computing element.knotspan %d.%d\n", elem->giveDomain()->giveEngngModel()->giveRank(), elem->giveNumber(), ir);
 #endif
         m->resize(0, 0);
-        iRule = elem->giveIntegrationRule(ir);
+        IntegrationRule *iRule = elem->giveIntegrationRule(ir);
         // loop over individual integration points
-        for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            gp = iRule->getIntegrationPoint(j);
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
+            GaussPoint *gp = iRule->getIntegrationPoint(j);
+            double dV = this->computeVolumeAround(gp);
             this->computeBMatrixAt(bj, gp);
             //elem->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
             cs->giveCharMaterialStiffnessMatrix(d, rMode, gp, tStep);
 
-            dV = this->computeVolumeAround(gp);
             dbj.beProductOf(d, bj);
             if ( matStiffSymmFlag ) {
                 m->plusProductSymmUpper(bj, dbj, dV);
