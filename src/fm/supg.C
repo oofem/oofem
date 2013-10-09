@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "supg.h"
@@ -922,10 +922,11 @@ SUPG :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType t
         SUPGElement *element = static_cast< SUPGElement* >( domain->giveElement(num) );
         IntArray vloc, ploc;
         FloatMatrix h;
-        int size = element->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
+        int size = element->computeNumberOfDofs();
         element->giveLocalVelocityDofMap(vloc);
         element->giveLocalPressureDofMap(ploc);
-        answer.resize(size,size); answer.zero();
+        answer.resize(size,size);
+        answer.zero();
 
         element->computeAccelerationTerm_MB(h, tStep); answer.assemble(h, vloc);
         element->computeAdvectionDerivativeTerm_MB(h, tStep);
@@ -947,9 +948,11 @@ SUPG :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType t
         h.times( alpha * tStep->giveTimeIncrement() * lscale / ( dscale * uscale * uscale ) );
         answer.assemble(h, vloc);
         element->computeBCLhsTerm_MB(h, tStep);
-        h.times( alpha * tStep->giveTimeIncrement() );
-        answer.assemble(h, vloc);
-        element->computeBCLhsPressureTerm_MB(h, tStep); answer.assemble(h, vloc, ploc);
+        if ( h.isNotEmpty() ) {
+            h.times( alpha * tStep->giveTimeIncrement() );
+            answer.assemble(h, vloc);
+        }
+        element->computeBCLhsPressureTerm_MB(h, tStep); if ( h.isNotEmpty() ) answer.assemble(h, vloc, ploc);
         // conservation eq part
         element->computeLinearAdvectionTerm_MC(h, tStep);
         h.times( alpha * tStep->giveTimeIncrement() * 1.0 / ( dscale * uscale ) );
@@ -958,7 +961,7 @@ SUPG :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType t
         h.times( alpha * tStep->giveTimeIncrement() );
         answer.assemble(h, ploc, vloc);
         element->computeAccelerationTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
-        element->computeBCLhsPressureTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
+        element->computeBCLhsPressureTerm_MC(h, tStep); if ( h.isNotEmpty() ) answer.assemble(h, ploc, vloc);
         element->computeDiffusionDerivativeTerm_MC(h, tStep);
         h.times( alpha * tStep->giveTimeIncrement() );
         answer.assemble(h, ploc, vloc);
@@ -978,7 +981,7 @@ SUPG :: giveElementCharacteristicVector(FloatArray &answer, int num, CharType ty
         FloatArray vacc, vtot, ptot, h;
         IntArray vloc, ploc;
 
-        int size = eptr->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
+        int size = eptr->computeNumberOfDofs();
         eptr->giveLocalVelocityDofMap(vloc);
         eptr->giveLocalPressureDofMap(ploc);
         answer.resize(size); answer.zero();
@@ -1004,8 +1007,10 @@ SUPG :: giveElementCharacteristicVector(FloatArray &answer, int num, CharType ty
         h.beProductOf(m1, vtot);
         answer.assemble(h, vloc);
         eptr->computeBCLhsTerm_MB(m1, tStep);
-        h.beProductOf(m1, vtot);
-        answer.assemble(h, vloc);
+        if ( m1.isNotEmpty() ) {
+            h.beProductOf(m1, vtot);
+            answer.assemble(h, vloc);
+        }
         // add pressure term
         eptr->computePressureTerm_MB(m1, tStep);
         h.beProductOf(m1, ptot);
@@ -1013,8 +1018,10 @@ SUPG :: giveElementCharacteristicVector(FloatArray &answer, int num, CharType ty
         //h.beProductOf(m1,vp); // term due to prescribed pressure
         answer.assemble(h, vloc);
         eptr->computeBCLhsPressureTerm_MB(m1, tStep);
-        h.beProductOf(m1, ptot);
-        answer.assemble(h, vloc);
+        if ( m1.isNotEmpty() ) {
+            h.beProductOf(m1, ptot);
+            answer.assemble(h, vloc);
+        }
 
         // MC contributions:
         // G^T term - linear advection term
@@ -1037,8 +1044,10 @@ SUPG :: giveElementCharacteristicVector(FloatArray &answer, int num, CharType ty
         h.beProductOf(m1, vacc);
         answer.assemble(h, ploc);
         eptr->computeBCLhsPressureTerm_MC(m1, tStep);
-        h.beProductOf(m1, vacc);
-        answer.assemble(h, ploc);
+        if ( m1.isNotEmpty() ) {
+            h.beProductOf(m1, vacc);
+            answer.assemble(h, ploc);
+        }
         // advection N term (nonlinear)
         eptr->computeAdvectionTerm_MC(h, tStep);
         answer.assemble(h, ploc);

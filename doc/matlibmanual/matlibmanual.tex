@@ -1395,17 +1395,18 @@ $$
 is the second deviatoric strain invariant,
 and $k$ is a model parameter that corresponds to the ratio between the uniaxial
 compressive strength $f_c$ and uniaxial tensile strength $f_t$.
-\item {\bf Griffith} definition, combining Rankine criterion in tension and 
-Griffith's solution on inclined elipsoidal inclusion. This definition
+\item {\bf Griffith} definition with a solution on inclined elipsoidal inclusion. This definition
 handles materials in pure tension and also in compression, where
 tensile stresses usually appear on specifically oriented elipsoidal inclusion.
 The derivation of Griffith's criterion is summarized in \cite{Hoek}.
-In impementation, first check if Rankine criterion exists
-\begin{eqnarray}
-\label{griffith1}
-\tilde\varepsilon&=&{\del{1}{E}}\max_{I=1}^{3}\bar{\sigma}_I
-\end{eqnarray}
-and if not, use Griffith's solution with ordered principal stresses $\sigma_1>\sigma_3$.
+In impementation, 
+% first check if Rankine criterion exists
+% \begin{eqnarray}
+% \label{griffith1}
+% \tilde\varepsilon&=&{\del{1}{E}}\max_{I=1}^{3}\bar{\sigma}_I
+% \end{eqnarray}
+% and if not, 
+use Griffith's solution with ordered principal stresses $\sigma_1>\sigma_3$.
 The optional parameter \param{griff\_n} is by default 8 and represents the uniaxial compression/tensile strength ratio.
 
 \begin{eqnarray}
@@ -1679,7 +1680,7 @@ of equivalent strain:
 \item[4 -] standard Rankine, eq.~(\ref{rankinestandard})
 \item[5 -] elestic energy based on positive stress
 \item[6 -] elestic energy based on positive strain
-\item[7 -] Rankine and Griffith criterion eqs.~(\ref{griffith1})(\ref{griffith2})
+\item[7 -] Griffith criterion eq.~(\ref{griffith2})
 
 \end{itemize}\\
 &- \param{k} ratio between uniaxial compressive and tensile strength, needed only if equivstraintype=3, default value 1\\
