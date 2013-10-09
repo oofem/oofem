@@ -486,7 +486,9 @@ endif ()
 
 # TODO: Consider this when we have all the necessary macros in place:
 #add_compiler_export_flags()
-generate_export_header(liboofem)
+generate_export_header (liboofem
+    BASE_NAME OOFEM
+    )
 
 # OOFEM target
 if (USE_SHARED_LIB) # Prefer dynamic lib if available.
