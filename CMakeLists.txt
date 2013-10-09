@@ -4,6 +4,7 @@ include (CheckCXXSymbolExists)
 include (CheckIncludeFiles)
 include (CheckIncludeFileCXX)
 include (CheckCXXSourceCompiles)
+include (GenerateExportHeader)
 include (UsePkgConfig)
 
 project (oofem)
@@ -206,7 +207,7 @@ if (USE_OOFEG)
 endif ()
 
 #######################################################################
-######################## External libaries ############################
+######################## External libraries ###########################
 #######################################################################
 
 #if (USE_BOOST) 
@@ -483,6 +484,10 @@ if (USE_SHARED_LIB)
     install (TARGETS liboofem DESTINATION lib)
 endif ()
 
+# TODO: Consider this when we have all the necessary macros in place:
+#add_compiler_export_flags()
+generate_export_header(liboofem)
+
 # OOFEM target
 if (USE_SHARED_LIB) # Prefer dynamic lib if available.
     add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
@@ -511,6 +516,7 @@ if (USE_OOFEG)
     install(TARGETS oofeg DESTINATION bin)
 endif ()
 
+
 # CppCheck target (not built by default)
 add_custom_target(cppcheck)
 set_target_properties(cppcheck PROPERTIES EXCLUDE_FROM_ALL TRUE)
@@ -531,6 +537,7 @@ add_custom_command(TARGET cppcheck
     "cppcheck.xml"
     COMMENT "Running cppcheck on entire source"
     )
+
 
 #######################################################################
 ######################## Documentation ################################
