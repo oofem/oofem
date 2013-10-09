@@ -647,6 +647,8 @@ if (USE_PARALLEL)
         #set_tests_properties ("parextr_${case}" PROPERTIES DEPENDS "partest_${case}")
         #list (APPEND CTEST_CUSTOM_MEMCHECK_IGNORE "parextr_${case}")
     endforeach (case)
+    # partest_brazil_2d_nl7 requires more time on testing server than default 1500
+    set_tests_properties(partest_brazil_2d_nl7 PROPERTIES TIMEOUT 2500)
 endif ()
 # Sequential test cases
 file (GLOB sm_tests RELATIVE "${oofem_TEST_DIR}/sm" "${oofem_TEST_DIR}/sm/*.in")
