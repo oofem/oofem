@@ -52,7 +52,7 @@ class Element;
  * It possess degrees of freedom (see base class DofManager).
  * This class is usually attribute only of a single element, as its DOFs are internal element degrees of freedom.
  */
-class ElementDofManager : public DofManager
+class OOFEM_EXPORT ElementDofManager : public DofManager
 {
 private:
     Element* element;

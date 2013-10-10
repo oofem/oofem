@@ -75,7 +75,7 @@ enum EE_ErrorMode { equilibratedEM, temporaryEM };
  * This estimator should also provide the compatible Remeshing Criteria class, which
  * based on various error measures will evaluate the required mesh density of a new domain.
  */
-class ErrorEstimator : public FEMComponent
+class OOFEM_EXPORT ErrorEstimator : public FEMComponent
 {
 protected:
     ErrorEstimatorType eeType;

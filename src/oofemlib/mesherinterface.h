@@ -32,13 +32,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-//   ******************************
-//   *** CLASS MESHER INTERFACE ***
-//   ******************************
-
 #ifndef mesherinterface_h
 #define mesherinterface_h
 
+#include "oofemcfg.h"
 #include "inputrecord.h"
 
 namespace oofem {
@@ -52,7 +49,7 @@ class TimeStep;
  *   based on informations from remeshing criteria.
  * - possibly to launch the mesher and transform its output to oofem input
  */
-class MesherInterface
+class OOFEM_EXPORT MesherInterface
 {
 protected:
     Domain *domain;

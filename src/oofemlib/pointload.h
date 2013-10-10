@@ -60,7 +60,7 @@ class TimeStep;
  * This class is not restricted to structural problems. For example, in thermal
  * analysis, a point load load could be a point heat source.
  */
-class PointLoad : public BodyLoad
+class OOFEM_EXPORT PointLoad : public BodyLoad
 {
 protected:
     /// Number of "DOFs" which represent load geometry.

@@ -57,7 +57,7 @@ namespace oofem {
  *
  * @author Vit Smilauer
  */
-class HOMExportModule : public ExportModule
+class OOFEM_EXPORT HOMExportModule : public ExportModule
 {
 protected:
     /// Scale of all homogenized values.

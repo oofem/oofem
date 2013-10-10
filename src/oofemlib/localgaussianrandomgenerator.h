@@ -51,7 +51,7 @@ namespace oofem {
  * This class implements a local (no spatial correlation) random generator using Gaussian distribution.
  * @author Peter Grassl
  */
-class LocalGaussianRandomGenerator : public RandomFieldGenerator
+class OOFEM_EXPORT LocalGaussianRandomGenerator : public RandomFieldGenerator
 {
 protected:
     /// Integer which is the input of the pseudo-random number generator.

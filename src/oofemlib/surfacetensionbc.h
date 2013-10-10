@@ -55,7 +55,7 @@ class ElementSide;
  * Computes the load (and possibly tangent) for surface tension. This boundary condition applicable to both solid and flow problems.
  * Computing this load and tangent is involves some fairly complicated expression with lengthy derivations, especially for 3D surfaces.
  */
-class SurfaceTensionBoundaryCondition : public ActiveBoundaryCondition
+class OOFEM_EXPORT SurfaceTensionBoundaryCondition : public ActiveBoundaryCondition
 {
     double gamma; ///< Surface tension.
     bool useTangent; ///< Determines if tangent should be used.

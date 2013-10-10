@@ -49,7 +49,7 @@ namespace oofem {
  * The communicator provides all services for communication with
  * associated remote partitions. It manages several process communicators.
  */
-class ProblemCommunicator : public Communicator
+class OOFEM_EXPORT ProblemCommunicator : public Communicator
 {
 protected:
     // Setup mode.

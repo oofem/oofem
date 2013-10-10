@@ -41,6 +41,7 @@
 #ifndef floatarray_h
 #define floatarray_h
 
+#include "oofemcfg.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
@@ -85,7 +86,7 @@ class CommunicationBuffer;
  *   speeding up method 'dot' of class RowColumn and for speeding method
  *   initialize.
  */
-class FloatArray
+class OOFEM_EXPORT FloatArray
 {
 protected:
     /// Size of array.

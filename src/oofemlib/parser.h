@@ -35,6 +35,8 @@
 #ifndef parser_h
 #define parser_h
 
+#include "oofemcfg.h"
+
 namespace oofem {
 #define Parser_CMD_LENGTH 1024
 #define Parser_TBLSZ 23
@@ -49,7 +51,7 @@ namespace oofem {
  * Example string:
  * x=3;y=7;sqrt(x*(x/y+3))
  */
-class Parser
+class OOFEM_EXPORT Parser
 {
 public:
     Parser() {

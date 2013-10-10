@@ -139,7 +139,7 @@ class PetscContext;
  * - nite = Number of iterations required to fulfill balance
  * - status = NM_status with flags set to reached state
  */
-class CylindricalALM : public SparseNonLinearSystemNM
+class OOFEM_EXPORT CylindricalALM : public SparseNonLinearSystemNM
 {
 protected:
     /// CALM mode type; determines the calm step length control.

@@ -37,6 +37,8 @@
 
 #include <list>
 
+#include "oofemcfg.h"
+
 namespace oofem {
 class SloanGraph;
 
@@ -47,7 +49,7 @@ class SloanGraph;
  * @author Milan Jirasek
  * @author Borek Patzak
  */
-class SloanGraphNode
+class OOFEM_EXPORT SloanGraphNode
 {
 public:
     /// Status type definition.

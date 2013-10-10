@@ -37,6 +37,7 @@
 
 #include <map>
 
+#include "oofemcfg.h"
 
 namespace oofem {
 /**
@@ -50,7 +51,7 @@ enum EntityRenumberingScheme {
 };
 
 
-class EntityRenumberingFunctor
+class OOFEM_EXPORT EntityRenumberingFunctor
 {
 public:
     virtual ~EntityRenumberingFunctor() {}
@@ -89,7 +90,7 @@ public:
 
 
 /// Renumbering functor based on provided maps.
-class MapBasedEntityRenumberingFunctor : public EntityRenumberingFunctor
+class OOFEM_EXPORT MapBasedEntityRenumberingFunctor : public EntityRenumberingFunctor
 {
 private:
     std :: map< int, int > &dofmanMap, &elemMap;

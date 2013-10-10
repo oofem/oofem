@@ -87,7 +87,7 @@ class EngngModel;
  *      R(NN,NROOT)  -  VLASTNI VEKTORY
  */
 
-class SubspaceIteration : public SparseGeneralEigenValueSystemNM
+class OOFEM_EXPORT SubspaceIteration : public SparseGeneralEigenValueSystemNM
 {
 private:
     int n, nc, nitem;

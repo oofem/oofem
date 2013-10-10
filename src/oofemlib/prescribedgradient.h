@@ -58,7 +58,7 @@ namespace oofem {
  * It is also convenient to use when one wants to test a arbitrary specimen for shear.
  * @author Mikael Öhman
  */
-class PrescribedGradient : public BoundaryCondition
+class OOFEM_EXPORT PrescribedGradient : public BoundaryCondition
 {
 protected:
     /// Prescribed gradient @f$ d_{ij} @f$

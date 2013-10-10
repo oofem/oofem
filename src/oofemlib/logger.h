@@ -44,7 +44,7 @@
 #include <cstdio>
 
 namespace oofem {
-class Logger
+class OOFEM_EXPORT Logger
 {
 public:
     /// Type defining basic log levels.

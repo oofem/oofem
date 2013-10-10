@@ -48,7 +48,7 @@ namespace oofem {
  * This is intended for internal usage, where new input records and such are created dynamically.
  * @author Mikael Öhman
  */
-class DynamicInputRecord : public InputRecord
+class OOFEM_EXPORT DynamicInputRecord : public InputRecord
 {
 protected:
     std::string recordKeyword;

@@ -85,7 +85,7 @@ class SparseLinearSystemNM;
  * 
  * @author Mikael Öhman
  */
-class MixedGradientPressureNeumann : public MixedGradientPressureBC
+class OOFEM_EXPORT MixedGradientPressureNeumann : public MixedGradientPressureBC
 {
 protected:
     /// Prescribed gradient @f$ d_{\mathrm{dev},ij} @f$ in Voigt form.

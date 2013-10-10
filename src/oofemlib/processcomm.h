@@ -37,6 +37,7 @@
 
 #ifdef __PARALLEL_MODE
 
+ #include "oofemcfg.h"
  #include "combuff.h"
  #include "commbufftype.h"
  #include "communicatormode.h"
@@ -62,7 +63,7 @@ namespace oofem {
  * When comBuff will be registered, resize is needed only when maps change, and this will not occur frequently
  * (its even quite rare).
  */
-class ProcessCommunicatorBuff
+class OOFEM_EXPORT ProcessCommunicatorBuff
 {
 protected:
     /// Send buffer.
@@ -285,7 +286,7 @@ public:
  * Process communicator provides all services for communication with
  * associated remote process (problem or task).
  */
-class ProcessCommunicator
+class OOFEM_EXPORT ProcessCommunicator
 {
 protected:
     /// Associated partition (problem) number (rank)

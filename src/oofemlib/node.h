@@ -85,7 +85,7 @@ class IntArray;
  * - Printing and updating at end of step ;
  * - Managing its swapping to and from disk.
  */
-class Node : public DofManager
+class OOFEM_EXPORT Node : public DofManager
 {
 protected:
     /// Array storing nodal coordinates.

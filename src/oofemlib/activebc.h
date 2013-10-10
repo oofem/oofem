@@ -60,7 +60,7 @@ class PrimaryField;
  * Abstract base class for all active boundary conditions.
  * Design of active boundary conditions are subject to change.
  */
-class ActiveBoundaryCondition : public GeneralBoundaryCondition
+class OOFEM_EXPORT ActiveBoundaryCondition : public GeneralBoundaryCondition
 {
 public:
     /**

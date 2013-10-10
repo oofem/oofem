@@ -55,7 +55,7 @@ class Element;
  *
  * @see GaussPoint
  */
-class GaussIntegrationRule : public IntegrationRule
+class OOFEM_EXPORT GaussIntegrationRule : public IntegrationRule
 {
 public:
     /**

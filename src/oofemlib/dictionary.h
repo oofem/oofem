@@ -35,6 +35,7 @@
 #ifndef dictionr_h
 #define dictionr_h
 
+#include "oofemcfg.h"
 #include "pair.h"
 #include "error.h"
 #include "contextioresulttype.h"
@@ -54,7 +55,7 @@ class DataStream;
  * pair (attribute 'first') of the list. It also knows the last one (attribute
  * 'last') in order to append an additional pair fast.
  */
-class Dictionary
+class OOFEM_EXPORT Dictionary
 {
 protected:
     /// First pair

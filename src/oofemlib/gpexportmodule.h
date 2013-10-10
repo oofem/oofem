@@ -53,7 +53,7 @@ namespace oofem {
  * along with the values of certain internal variables
  * for further processing.
  */
-class GPExportModule : public ExportModule
+class OOFEM_EXPORT GPExportModule : public ExportModule
 {
 protected:
     /// Identification numbers of variables to be exported

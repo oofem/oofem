@@ -35,6 +35,7 @@
 #ifndef util_h
 #define util_h
 
+#include "oofemcfg.h"
 #include "problemmode.h"
 
 namespace oofem {
@@ -49,7 +50,7 @@ class EngngModel;
  * @param parallelFlag Determines if the problem should be run in parallel or not.
  * @param contextFlag When set, turns on context output after each step.
  */
-EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *master = 0, bool parallelFlag = false);
+OOFEM_EXPORT EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *master = 0, bool parallelFlag = false);
 
 } // end namespace oofem
 #endif // util_h

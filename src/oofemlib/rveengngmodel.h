@@ -35,6 +35,7 @@
 #ifndef rveengngmodel_h
 #define rveengngmodel_h
 
+#include "oofemcfg.h"
 #include "floatarray.h"
 #include "timestep.h"
 
@@ -46,7 +47,7 @@ namespace oofem {
  *
  * @author Carl Sandström
  */
-class rveEngngModel
+class OOFEM_EXPORT rveEngngModel
 {
 public:
 

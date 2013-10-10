@@ -59,7 +59,7 @@ class FloatMatrix;
  * of each packet.
  */
 
-class CommunicationPacket : public MPIBuffer
+class OOFEM_EXPORT CommunicationPacket : public MPIBuffer
 {
 protected:
     int number;
@@ -132,7 +132,7 @@ public:
     int unpackHeader(MPI_Comm);
 };
 
-class CommunicationPacketPool
+class OOFEM_EXPORT CommunicationPacketPool
 {
 private:
     std :: list< CommunicationPacket * >available_packets;
@@ -153,7 +153,7 @@ private:
 };
 
 
-class DynamicCommunicationBuffer : public CommunicationBuffer
+class OOFEM_EXPORT DynamicCommunicationBuffer : public CommunicationBuffer
 {
 protected:
     std :: list< CommunicationPacket * >packet_list;

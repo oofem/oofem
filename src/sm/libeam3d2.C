@@ -52,7 +52,6 @@
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
  #include "connectivitytable.h"
- #include "util.h"
 #endif
 
 namespace oofem {

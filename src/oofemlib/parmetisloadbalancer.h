@@ -54,7 +54,7 @@ namespace oofem {
 /**
  * ParMetis load balancer.
  */
-class ParmetisLoadBalancer : public LoadBalancer
+class OOFEM_EXPORT ParmetisLoadBalancer : public LoadBalancer
 {
 protected:
 

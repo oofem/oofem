@@ -53,7 +53,7 @@ namespace oofem {
  *
  * @see NonlocalMaterialStatusExtensionInterface class.
  */
-class NonlocalBarrier : public FEMComponent
+class OOFEM_EXPORT NonlocalBarrier : public FEMComponent
 {
 public:
     /**

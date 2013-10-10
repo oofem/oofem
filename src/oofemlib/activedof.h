@@ -46,7 +46,7 @@ class ActiveBoundaryCondition;
  * It is similar to SlaveDof, but its actual value is controlled by an active boundary condition.
  * The code is simple, the functions just pass on the evaluation to the corresponding active boundary condition.
  */
-class ActiveDof : public Dof
+class OOFEM_EXPORT ActiveDof : public Dof
 {
 protected:
     /// Corresponding equation number (positive value) or prescribed equation number (negative value).

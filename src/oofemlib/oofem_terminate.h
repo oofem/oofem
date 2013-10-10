@@ -37,7 +37,7 @@
 
 namespace oofem {
 /// OOFEM terminate exception class.
-class OOFEM_Terminate
+class OOFEM_EXPORT OOFEM_Terminate
 {
 public:
     enum OOFEM_exit_status {

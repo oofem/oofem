@@ -43,7 +43,7 @@ namespace oofem {
  * @todo Some more routines to be implemented here.
  * @author Mikael Öhman
  */
-class FEI2dLineQuad : public FEInterpolation2d
+class OOFEM_EXPORT FEI2dLineQuad : public FEInterpolation2d
 {
 public:
     FEI2dLineQuad(int ind1, int ind2) : FEInterpolation2d(2, ind1, ind2) {}

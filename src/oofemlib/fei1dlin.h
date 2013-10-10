@@ -41,7 +41,7 @@ namespace oofem {
 /**
  * Class representing a 1d linear isoparametric interpolation.
  */
-class FEI1dLin : public FEInterpolation1d
+class OOFEM_EXPORT FEI1dLin : public FEInterpolation1d
 {
 protected:
     int cindx;

@@ -54,7 +54,7 @@ namespace oofem {
  * The function is defined by 'numberOfPoints' points. 'dates' and 'values'
  * store respectively the abscissas (t) and the values (f(t)) of the points
  */
-class PiecewiseLinFunction : public LoadTimeFunction
+class OOFEM_EXPORT PiecewiseLinFunction : public LoadTimeFunction
 {
 protected:
     FloatArray dates;

@@ -37,6 +37,7 @@
 
 #include <cstdio>
 
+#include "oofemcfg.h"
 #include "floatarray.h"
 #include "intarray.h"
 #include "unknowntype.h"
@@ -94,7 +95,7 @@ class EntityRenumberingFunctor;
  * automatically (if EngngModel supports changes of static system) after finishing time
  * step.
  */
-class Dof
+class OOFEM_EXPORT Dof
 {
 protected:
     /// Dof number.

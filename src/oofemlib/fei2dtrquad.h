@@ -41,7 +41,7 @@ namespace oofem {
 /**
  * Second order triangular interpolation in 2D (6 nodes).
  */
-class FEI2dTrQuad : public FEInterpolation2d
+class OOFEM_EXPORT FEI2dTrQuad : public FEInterpolation2d
 {
 public:
     FEI2dTrQuad(int ind1, int ind2) : FEInterpolation2d(2, ind1, ind2) {}

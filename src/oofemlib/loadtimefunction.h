@@ -59,7 +59,7 @@ namespace oofem {
  *
  * See TJR Hughes, "The Finite Element Method", p 677.
  */
-class LoadTimeFunction : public FEMComponent
+class OOFEM_EXPORT LoadTimeFunction : public FEMComponent
 {
 protected:
     /**

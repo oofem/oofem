@@ -35,6 +35,7 @@
 #ifndef engngm_h
 #define engngm_h
 
+#include "oofemcfg.h"
 #include "inputrecord.h"
 #include "alist.h"
 #include "intarray.h"
@@ -125,7 +126,7 @@ class CommunicatorBuff;
  * master problem (the class representing staggered problem, for example). The subproblems are
  * then created in so-called maintained (or slave) mode and they request the context from master.
  */
-class EngngModelContext
+class OOFEM_EXPORT EngngModelContext
 {
 protected:
     /// Common fieldManager providing shared field register for the problem.
@@ -183,7 +184,7 @@ public:
  *   instead of requesting EngngModel. The EngngModel is fully responsible to update this
  *   dictionary for each dof with all necessary unknowns (see updateDofUnknownsDictionary function).
  */
-class EngngModel
+class OOFEM_EXPORT EngngModel
 {
 public:
 #ifdef __PARALLEL_MODE

@@ -55,7 +55,7 @@ class Triangle;
  *  * @author Erik Svenning (Major modifications)
  *
  */
-class PatchIntegrationRule : public GaussIntegrationRule
+class OOFEM_EXPORT PatchIntegrationRule : public GaussIntegrationRule
 {
 protected:
     std :: vector< Triangle >mTriangles;

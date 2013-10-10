@@ -55,7 +55,7 @@ class FloatMatrix;
  * Can work with any sparse matrix implementation. However, the sparse matrix implementation have to support
  * its factorization (canBeFactorized method).
  */
-class LDLTFactorization : public SparseLinearSystemNM
+class OOFEM_EXPORT LDLTFactorization : public SparseLinearSystemNM
 {
 private:
 

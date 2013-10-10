@@ -48,7 +48,7 @@ class IntArray;
  * Typical services include searching the closes node to give position, searching of an element containing given point, etc.
  * If special element algorithms required, these should be included using interface concept.
  */
-class DummySpatialLocalizer : public SpatialLocalizer
+class OOFEM_EXPORT DummySpatialLocalizer : public SpatialLocalizer
 {
 protected:
     std::vector<IntArray> region_elements;

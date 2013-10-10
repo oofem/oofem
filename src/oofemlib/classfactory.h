@@ -35,6 +35,7 @@
 #ifndef classfactory_h
 #define classfactory_h
 
+#include "oofemcfg.h"
 #include "sparsemtrxtype.h"
 #include "errorestimatortype.h"
 #include "doftype.h"
@@ -160,7 +161,7 @@ template< typename T > PropagationLaw *propagationLawCreator() { return new T();
  * 
  * @note To register new elements on startup, you must call GiveClassFactory to ensure that the global class factory is created first. This is ensured if you use the corresponding macro.
  */
-class ClassFactory
+class OOFEM_EXPORT ClassFactory
 {
     struct CaseComp
     {

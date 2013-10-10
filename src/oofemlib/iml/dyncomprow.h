@@ -52,7 +52,7 @@ namespace oofem {
  * Implementation of sparse matrix stored in compressed column storage.
  * Designed to allow simple dynamic runtime grow of receiver.
  */
-class DynCompRow : public SparseMtrx
+class OOFEM_EXPORT DynCompRow : public SparseMtrx
 {
 protected:
 

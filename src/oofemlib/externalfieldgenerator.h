@@ -52,7 +52,7 @@ namespace oofem {
  * an externally generated field interpolates to determine 
  * at Gausspoints.
  */
-class ExternalFieldGenerator : public RandomFieldGenerator
+class OOFEM_EXPORT ExternalFieldGenerator : public RandomFieldGenerator
 {
 protected:
     Domain *domain;

@@ -47,7 +47,7 @@ namespace oofem {
 /**
  * Empty cross section model, passes all requests to material driver.
  */
-class EmptyCS : public CrossSection
+class OOFEM_EXPORT EmptyCS : public CrossSection
 {
 public:
     /**

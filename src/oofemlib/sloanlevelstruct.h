@@ -35,6 +35,7 @@
 #ifndef sloanlevelstruct_h
 #define sloanlevelstruct_h
 
+#include "oofemcfg.h"
 #include "alist.h"
 #include "intarray.h"
 
@@ -48,7 +49,7 @@ class SloanGraph;
  * @author Milan Jirasek
  * @author Borek Patzak
  */
-class SloanLevelStructure
+class OOFEM_EXPORT SloanLevelStructure
 {
 private:
     /// Reference to corresponding graph

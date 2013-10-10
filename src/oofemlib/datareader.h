@@ -35,7 +35,7 @@
 #ifndef datareader_h
 #define datareader_h
 
-
+#include "oofemcfg.h"
 #include "inputrecord.h"
 
 namespace oofem {
@@ -47,7 +47,7 @@ namespace oofem {
  * component initialization. The input record identification facilitates the
  * implementation of database readers with direct or random access.
  */
-class DataReader
+class OOFEM_EXPORT DataReader
 {
 protected:
     /// Output file name (first line in OOFEM input files).

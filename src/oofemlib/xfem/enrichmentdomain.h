@@ -35,6 +35,7 @@
 #ifndef enrichmentdomain_h
 #define enrichmentdomain_h
 
+#include "oofemcfg.h"
 #include "domain.h"
 #include "floatarray.h"
 #include "node.h"
@@ -65,7 +66,7 @@ class EnrichmentItem;
  * @author Jim Brouzoulis
  * @author Erik Svenning
  */
-class EnrichmentDomain
+class OOFEM_EXPORT EnrichmentDomain
 {
 public:
     EnrichmentDomain();
@@ -100,7 +101,7 @@ public:
  * Base class for EnrichmentDomains that derive from BasicGeometry
  * @todo: Add additional basic geometry descriptions like polygon
  */
-class EnrichmentDomain_BG : public EnrichmentDomain
+class OOFEM_EXPORT EnrichmentDomain_BG : public EnrichmentDomain
 {
 public:
     BasicGeometry *bg;
@@ -121,7 +122,7 @@ public:
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;
 };
 
-class EDBGCircle : public EnrichmentDomain_BG
+class OOFEM_EXPORT EDBGCircle : public EnrichmentDomain_BG
 {
 public:
     EDBGCircle() { bg = new Circle; };
@@ -136,7 +137,7 @@ public:
 /**
  * EDCrack: Enrichment geometry described by a piecewise linear polygon.
  */
-class EDCrack : public EnrichmentDomain_BG
+class OOFEM_EXPORT EDCrack : public EnrichmentDomain_BG
 {
 public:
     EDCrack() { bg = new PolygonLine; }
@@ -158,7 +159,7 @@ public:
  * List of DofManagers
  * ///@todo: Add additional basic geometry descriptions like polygon
  */
-class DofManList : public EnrichmentDomain
+class OOFEM_EXPORT DofManList : public EnrichmentDomain
 {
 protected:
     std::vector< int > dofManList;
@@ -186,7 +187,7 @@ public:
  * Mostly intended for debugging but may easily lead to a singular problem if the
  * solution is enriched with strong discontinuities.
  */
-class WholeDomain : public EnrichmentDomain
+class OOFEM_EXPORT WholeDomain : public EnrichmentDomain
 {
 public:
     WholeDomain() { }

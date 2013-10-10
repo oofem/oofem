@@ -39,6 +39,8 @@
 #include <list>
 #include <string>
 
+#include "oofemcfg.h"
+
 namespace oofem {
 class IntArray;
 class FloatArray;
@@ -102,7 +104,7 @@ typedef const char * InputFieldType;
  * resolve all dependencies. This allows to create a copy of input record instance for later use
  * without the need to re-open input files (used for metasteps).
  */
-class InputRecord
+class OOFEM_EXPORT InputRecord
 {
 public:
     /// Constructor. Creates an empty input record.

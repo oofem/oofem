@@ -35,6 +35,7 @@
 #ifndef outputmanager_h
 #define outputmanager_h
 
+#include "oofemcfg.h"
 #include "domain.h"
 #include "engngm.h"
 #include "intarray.h"
@@ -77,7 +78,7 @@ class Range;
  * described method. The output for dofmanagers and elements in given step is done only if
  * particular time step is selected and if particular dofmanager or element is selected.
  */
-class OutputManager
+class OOFEM_EXPORT OutputManager
 {
 protected:
     /// Domain pointer.

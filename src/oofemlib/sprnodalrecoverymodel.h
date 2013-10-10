@@ -57,7 +57,7 @@ enum SPRPatchType {
  * The recovery uses local discrete least square smoothing over an element patch surrounding the particular
  * node considered.
  */
-class SPRNodalRecoveryModel : public NodalRecoveryModel
+class OOFEM_EXPORT SPRNodalRecoveryModel : public NodalRecoveryModel
 {
 protected:
     /**
@@ -114,7 +114,7 @@ private:
 /**
  * The element interface required by ZZNodalRecoveryModel.
  */
-class SPRNodalRecoveryModelInterface : public Interface
+class OOFEM_EXPORT SPRNodalRecoveryModelInterface : public Interface
 {
 public:
     /// Constructor.

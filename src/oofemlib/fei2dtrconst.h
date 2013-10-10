@@ -41,7 +41,7 @@ namespace oofem {
 /**
  * Class representing a 2d triangular linear interpolation based on area coordinates.
  */
-class FEI2dTrConst : public FEInterpolation2d
+class OOFEM_EXPORT FEI2dTrConst : public FEInterpolation2d
 {
 public:
     FEI2dTrConst(int ind1, int ind2) : FEInterpolation2d(0) {

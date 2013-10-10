@@ -40,7 +40,7 @@
 
 namespace oofem {
 
-class RandomFieldGenerator : public FEMComponent
+class OOFEM_EXPORT RandomFieldGenerator : public FEMComponent
 {
 public:
     /// Constructor. Creates empty RandomFieldGenerator.

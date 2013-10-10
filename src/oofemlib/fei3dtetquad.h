@@ -43,7 +43,7 @@ namespace oofem {
  * @author Mikael Öhman
  * @todo This class is entirely unchecked.
  */
-class FEI3dTetQuad : public FEInterpolation3d
+class OOFEM_EXPORT FEI3dTetQuad : public FEInterpolation3d
 {
 public:
     FEI3dTetQuad() : FEInterpolation3d(2) { }

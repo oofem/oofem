@@ -51,7 +51,7 @@ namespace oofem {
  * Note, that some classes implementing MaterialMappingAlgorithm may require
  * that elements implement corresponding interface.
  */
-class InternalVariableField : public Field
+class OOFEM_EXPORT InternalVariableField : public Field
 {
 protected:
     /// Material mapping algorithm used.

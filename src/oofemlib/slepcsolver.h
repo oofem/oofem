@@ -47,7 +47,7 @@ class EngngModel;
 class FloatMatrix;
 class PetscSparseMtrx;
 
-class SLEPcSolver : public SparseGeneralEigenValueSystemNM
+class OOFEM_EXPORT SLEPcSolver : public SparseGeneralEigenValueSystemNM
 {
 private:
     PetscSparseMtrx *A;

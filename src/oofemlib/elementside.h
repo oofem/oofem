@@ -58,7 +58,7 @@ class IntArray;
  * - printing and updating at end of step.
  * - managing its swapping to and from disk.
  */
-class ElementSide : public DofManager
+class OOFEM_EXPORT ElementSide : public DofManager
 {
 public:
     /**

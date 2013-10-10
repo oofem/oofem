@@ -77,7 +77,7 @@ namespace oofem {
  * Each region is usually exported as a single piece. When region contains composite cells, these are assumed to be
  * exported in individual subsequent pieces after the default one for the particular region.
  */
-class VTKXMLExportModule : public ExportModule
+class OOFEM_EXPORT VTKXMLExportModule : public ExportModule
 {
 protected:
     /// List of InternalStateType values, identifying the selected vars for export.
@@ -220,7 +220,7 @@ protected:
  * export method, responsible for exporting individual element piece in xml vtk syntax.
  * Elements with geometry defined as EGT_Composite should implement this interface.
  */
-class VTKXMLExportModuleElementInterface : public Interface
+class OOFEM_EXPORT VTKXMLExportModuleElementInterface : public Interface
 {
 public:
     VTKXMLExportModuleElementInterface() : Interface() {}

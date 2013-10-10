@@ -57,7 +57,7 @@ class GaussPoint;
  * @author Jim Brouzoulis
  * @author Erik Svenning
  */
-class EnrichmentFunction : public FEMComponent
+class OOFEM_EXPORT EnrichmentFunction : public FEMComponent
 {
 public:
     /**
@@ -85,7 +85,7 @@ protected:
 };
 
 /** Class representing Heaviside EnrichmentFunction. */
-class DiscontinuousFunction : public EnrichmentFunction
+class OOFEM_EXPORT DiscontinuousFunction : public EnrichmentFunction
 {
 public:
     DiscontinuousFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
@@ -100,7 +100,7 @@ public:
 };
 
 /** Class representing the four classical linear elastic branch functions. */
-class LinElBranchFunction
+class OOFEM_EXPORT LinElBranchFunction
 {
 public:
     LinElBranchFunction() {}
@@ -111,7 +111,7 @@ public:
 };
 
 /** Class representing bimaterial interface. */
-class RampFunction : public EnrichmentFunction
+class OOFEM_EXPORT RampFunction : public EnrichmentFunction
 {
 public:
 

@@ -44,7 +44,7 @@
 
 
 namespace oofem {
-class SolutionbasedShapeFunction : public ActiveBoundaryCondition {
+class OOFEM_EXPORT SolutionbasedShapeFunction : public ActiveBoundaryCondition {
 private:
 	Node *myNode;
 	int set;

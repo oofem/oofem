@@ -40,7 +40,6 @@
 #include "mmashapefunctprojection.h"
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
-#include "util.h"
 #include "internalstatevaluetype.h"
 #include "element.h"
 #include "classfactory.h"

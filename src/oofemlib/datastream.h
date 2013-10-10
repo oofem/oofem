@@ -35,6 +35,8 @@
 #ifndef datastream_h
 #define datastream_h
 
+#include "oofemcfg.h"
+
 #include <sstream>
 #include <cstdio>
 
@@ -50,7 +52,7 @@ class ProcessCommunicatorBuff;
  * (such as load balancing), without writing new (and very similar) routines.
  * This  will lead to a  better consistency of code.
  */
-class DataStream
+class OOFEM_EXPORT DataStream
 {
 public:
     /// Destructor
@@ -108,7 +110,7 @@ public:
  * not provide any methods for opening/closing file. This is the responsibility of user.
  * @see DataStream class.
  */
-class FileDataStream : public DataStream
+class OOFEM_EXPORT FileDataStream : public DataStream
 {
 private:
     /// FILE pointer of associated stream
@@ -141,7 +143,7 @@ public:
  * This class creates a DataStream shell around communication buffer routines.
  * @see DataStream class.
  */
-class ComBuffDataStream : public DataStream
+class OOFEM_EXPORT ComBuffDataStream : public DataStream
 {
 private:
     /// Associated communication buffer
@@ -174,7 +176,7 @@ public:
  * This class creates a DataStream shell around process communicator routines.
  * @see DataStream class.
  */
-class ProcessCommDataStream : public DataStream
+class OOFEM_EXPORT ProcessCommDataStream : public DataStream
 {
 private:
     /// Associated process communicator buffer

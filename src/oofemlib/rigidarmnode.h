@@ -66,7 +66,7 @@ class IntArray;
  * not be constructed by transposition. Because of time consuming inversion, methods
  * can generally compute both transformations for dofs as well as loads.
  */
-class RigidArmNode : public Node
+class OOFEM_EXPORT RigidArmNode : public Node
 {
 protected:
     ///

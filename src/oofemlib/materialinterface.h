@@ -44,7 +44,7 @@ namespace oofem {
  * in a fixed-grid methods (as typically used in CFD).
  * The basic tasks are representation of interface and its updating.
  */
-class MaterialInterface : public FEMComponent
+class OOFEM_EXPORT MaterialInterface : public FEMComponent
 {
 public:
     /**

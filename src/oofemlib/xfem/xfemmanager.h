@@ -35,6 +35,7 @@
 #ifndef xfemmanager_h
 #define xfemmanager_h
 
+#include "oofemcfg.h"
 #include "alist.h"
 #include "datareader.h"
 #include "inputrecord.h"
@@ -65,7 +66,7 @@ class DynamicInputRecord;
  * @author Jim Brouzoulis
  * @author Erik Svenning
  */
-class XfemManager
+class OOFEM_EXPORT XfemManager
 {
 protected:
     Domain *domain;

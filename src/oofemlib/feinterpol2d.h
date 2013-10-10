@@ -41,7 +41,7 @@ namespace oofem {
 /**
  * Class representing a general abstraction for surface finite element interpolation class.
  */
-class FEInterpolation2d : public FEInterpolation
+class OOFEM_EXPORT FEInterpolation2d : public FEInterpolation
 {
 protected:
     int xind, yind;

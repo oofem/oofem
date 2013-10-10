@@ -35,6 +35,7 @@
 #ifndef primaryunknownmapper_h
 #define primaryunknownmapper_h
 
+#include "oofemcfg.h"
 #include "interface.h"
 #include "equationid.h"
 #include "valuemodetype.h"
@@ -52,7 +53,7 @@ class IntArray;
  * If this task requires the special element algorithms, these should be included using interface concept.
  *
  */
-class PrimaryUnknownMapper
+class OOFEM_EXPORT PrimaryUnknownMapper
 {
 public:
     /// Constructor

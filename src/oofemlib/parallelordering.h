@@ -37,6 +37,7 @@
 
 #ifdef __PARALLEL_MODE
 
+ #include "oofemcfg.h"
  #include "intarray.h"
  #include "dofmanager.h"
 
@@ -48,7 +49,7 @@ class EngngModel;
 class IntArray;
 class UnknownNumberingScheme;
 
-class ParallelOrdering
+class OOFEM_EXPORT ParallelOrdering
 {
 public:
     ParallelOrdering() { }
@@ -100,7 +101,7 @@ public:
  * Ordering from oofem natural ordering (includes all local and shared eqs)
  * to global ordering.
  */
-class Natural2GlobalOrdering : public ParallelOrdering
+class OOFEM_EXPORT Natural2GlobalOrdering : public ParallelOrdering
 {
 protected:
     /// Old to new mapping; uses 0-based global eq ordering; 1-based local ordering.
@@ -133,7 +134,7 @@ public:
  * Ordering from oofem natural ordering (includes all local and shared eqs)
  * to local ordering, where only locally maintained eqs are considered.
  */
-class Natural2LocalOrdering : public ParallelOrdering
+class OOFEM_EXPORT Natural2LocalOrdering : public ParallelOrdering
 {
 protected:
     /// Natural to local

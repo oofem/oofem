@@ -35,6 +35,7 @@
 #ifndef feinterpol_h
 #define feinterpol_h
 
+#include "oofemcfg.h"
 #include "error.h"
 #include "inputrecord.h"
 #include "intarray.h"
@@ -56,7 +57,7 @@ class IntegrationRule;
  * elements describe its geometry using nodes, which are independent objects, some cells may be
  * directly specified using vertices, etc.
  */
-class FEICellGeometry
+class OOFEM_EXPORT FEICellGeometry
 {
 public:
     FEICellGeometry() {}
@@ -70,7 +71,7 @@ public:
  * Void cell geometry wrapper.
  * Allows to use some interpolation services not needing the reference to cell geometry.
  */
-class FEIVoidCellGeometry : public FEICellGeometry
+class OOFEM_EXPORT FEIVoidCellGeometry : public FEICellGeometry
 {
 public:
     FEIVoidCellGeometry() : FEICellGeometry() {}
@@ -86,7 +87,7 @@ public:
 /**
  * Wrapper around element definition to provide FEICellGeometry interface.
  */
-class FEIElementGeometryWrapper : public FEICellGeometry
+class OOFEM_EXPORT FEIElementGeometryWrapper : public FEICellGeometry
 {
 protected:
     const Element *elem;
@@ -101,7 +102,7 @@ public:
 /**
  * Wrapper around cell with vertex coordinates stored in FloatArray**.
  */
-class FEIVertexListGeometryWrapper : public FEICellGeometry
+class OOFEM_EXPORT FEIVertexListGeometryWrapper : public FEICellGeometry
 {
 protected:
     const FloatArray **coords;
@@ -120,7 +121,7 @@ public:
  * The boundary functions denote the (numbered) region that is 1 spatial dimension less (i.e. edges for 2D interpolators, surfaces for 3D).
  * The boundaryEdge functions denote the (numbered) regions that is 2 spatial dimensions less (i.e. corners for 2D interpolators, edges for 3D).
  */
-class FEInterpolation
+class OOFEM_EXPORT FEInterpolation
 {
 protected:
     int order;

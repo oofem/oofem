@@ -48,7 +48,7 @@ class TimeStep;
  * This task requires the special element algorithms, these are to be included using interface concept.
  * Requires the element support via EIPrimaryUnknownMapperInterface.
  */
-class EIPrimaryUnknownMapper : public PrimaryUnknownMapper
+class OOFEM_EXPORT EIPrimaryUnknownMapper : public PrimaryUnknownMapper
 {
 public:
     /// Constructor

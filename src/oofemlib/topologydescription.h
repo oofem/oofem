@@ -38,6 +38,7 @@
 
 #include "domain.h"
 #include "error.h"
+#include "oofemcfg.h"
 
 namespace oofem {
 class SpatialLocalizer;
@@ -57,7 +58,7 @@ enum TopologyState {
  *
  * @author Mikael Öhman
  */
-class TopologyDescription
+class OOFEM_EXPORT TopologyDescription
 {
 protected:
     /// Domain which topology belongs to.

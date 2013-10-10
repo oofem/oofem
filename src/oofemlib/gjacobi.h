@@ -50,7 +50,7 @@ class EngngModel;
  *  K\cdot x = \omega^2 M\cdot x
  * @f]
  */
-class GJacobi : public NumericalMethod
+class OOFEM_EXPORT GJacobi : public NumericalMethod
 {
 private:
     int n, nsmax;

@@ -48,7 +48,7 @@ class TimeStep;
 /**
  * The element interface class related to Element Interpolation Mappers.
  */
-class EIPrimaryUnknownMapperInterface : public Interface
+class OOFEM_EXPORT EIPrimaryUnknownMapperInterface : public Interface
 {
 public:
     EIPrimaryUnknownMapperInterface() : Interface() { }

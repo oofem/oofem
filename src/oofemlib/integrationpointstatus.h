@@ -51,7 +51,7 @@ class GaussPoint;
  * Any object that stores its status in integration point is responsible for its creation, 
  * initialization, and serialization.
  */
-class IntegrationPointStatus : public FEMComponent
+class OOFEM_EXPORT IntegrationPointStatus : public FEMComponent
 {
 protected:
     /// Associated integration point.

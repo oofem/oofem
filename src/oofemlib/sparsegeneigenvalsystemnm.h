@@ -53,7 +53,7 @@ class FloatArray;
  * including mapping, unchanged, because all instances of this class
  * provide the common interface.
  */
-class SparseGeneralEigenValueSystemNM : public NumericalMethod
+class OOFEM_EXPORT SparseGeneralEigenValueSystemNM : public NumericalMethod
 {
 public:
     /// Constructor.

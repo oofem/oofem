@@ -47,7 +47,7 @@ class TimeStep;
  * The element containing the receiving Gauss point is localized and its closest Gauss point
  * is used as a source Gauss point that determines the values of receiver.
  */
-class MMAContainingElementProjection : public MaterialMappingAlgorithm
+class OOFEM_EXPORT MMAContainingElementProjection : public MaterialMappingAlgorithm
 {
 protected:
     GaussPoint *source;

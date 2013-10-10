@@ -69,7 +69,7 @@ namespace oofem {
  * functional using Lagrange multiplier, which is an additional degree of freedom introduced 
  * by this boundary condition. 
  */
-class LinearConstraintBC : public ActiveBoundaryCondition
+class OOFEM_EXPORT LinearConstraintBC : public ActiveBoundaryCondition
 {
 protected:
     FloatArray weights;

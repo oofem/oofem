@@ -35,6 +35,7 @@
 #ifndef initmodule_h
 #define initmodule_h
 
+#include "oofemcfg.h"
 #include "inputrecord.h"
 
 #include <cstdio>
@@ -57,7 +58,7 @@ class TimeStep;
  * The initialization for is done only once, at simulation startup by one of above
  * described method.
  */
-class InitModule
+class OOFEM_EXPORT InitModule
 {
 protected:
     /// Number.

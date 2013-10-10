@@ -41,7 +41,7 @@ namespace oofem {
 /**
  * Class representing a general abstraction for finite element interpolation class.
  */
-class FEInterpolation1d : public FEInterpolation
+class OOFEM_EXPORT FEInterpolation1d : public FEInterpolation
 {
 public:
     FEInterpolation1d(int o) : FEInterpolation(o) { }

@@ -47,7 +47,7 @@ class TimeStep;
  * The basic task is to define the algorithm for mapping of the internal material model
  * variables from one (old) mesh to the given IP of new mesh.
  */
-class MaterialModelMapperInterface : public Interface
+class OOFEM_EXPORT MaterialModelMapperInterface : public Interface
 {
 protected:
 

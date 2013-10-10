@@ -35,6 +35,7 @@
 #ifndef domain_h
 #define domain_h
 
+#include "oofemcfg.h"
 #include "alist.h"
 #include "domaintype.h"
 #include "statecountertype.h"
@@ -113,7 +114,7 @@ class LoadBalancer;
  * - Provides services for accessing its particular components.
  * - Checking yourself.
  */
-class Domain
+class OOFEM_EXPORT Domain
 {
 private:
     /// Element list.

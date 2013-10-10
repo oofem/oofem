@@ -58,7 +58,7 @@ namespace oofem {
 /**
  * Interpolation for T-splines.
  */
-class TSplineInterpolation : public BSplineInterpolation
+class OOFEM_EXPORT TSplineInterpolation : public BSplineInterpolation
 {
 protected:
     /// Local index knot vector of the dimensions [totalNumberOfControlPoints][nsd][degree+2].

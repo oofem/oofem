@@ -38,6 +38,8 @@
 //#include <iosfwd>
 #include <ostream>
 
+#include "oofemcfg.h"
+
 namespace oofem {
 
 /**
@@ -46,7 +48,7 @@ namespace oofem {
  * Function for testing if number is in interval is provided. Used by OutputManager
  * to efficiently maintain intervals.
  */
-class Range
+class OOFEM_EXPORT Range
 {
 protected:
     /// Interval start value.

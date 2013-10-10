@@ -45,7 +45,7 @@ class EngngModel;
  * Class representing and implementing ExportModuleManager. It is attribute of EngngModel.
  * It manages the export output modules, which perform module - specific output operations.
  */
-class ExportModuleManager : public ModuleManager< ExportModule >
+class OOFEM_EXPORT ExportModuleManager : public ModuleManager< ExportModule >
 {
 public:
     ExportModuleManager(EngngModel *emodel);

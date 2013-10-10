@@ -56,7 +56,7 @@ class FEInterpolation;
  *
  * @author Mikael Öhman
  */
-class MeshQualityErrorEstimator : public ErrorEstimator
+class OOFEM_EXPORT MeshQualityErrorEstimator : public ErrorEstimator
 {
 protected:
     /**

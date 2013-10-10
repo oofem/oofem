@@ -51,7 +51,7 @@ class EngngModel;
  * It manages the modules of given type.
  */
 template< class M >
-class ModuleManager
+class OOFEM_EXPORT ModuleManager
 {
 protected:
     /// Module list.

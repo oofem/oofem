@@ -54,7 +54,7 @@ namespace oofem {
  * @note Untested.
  * @author Mikael Öhman
  */
-class FEI2dQuadBiQuad : public FEI2dQuadQuad
+class OOFEM_EXPORT FEI2dQuadBiQuad : public FEI2dQuadQuad
 {
 public:
     FEI2dQuadBiQuad(int ind1, int ind2) : FEI2dQuadQuad(ind1,ind2) { }

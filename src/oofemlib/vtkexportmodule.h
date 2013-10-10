@@ -59,7 +59,7 @@ namespace oofem {
  * some internal variables at region boundaries. This, however, is rather complication and since application
  * of VTK is naturally in 3D, the corresponding sections are commented out.
  */
-class VTKExportModule : public ExportModule
+class OOFEM_EXPORT VTKExportModule : public ExportModule
 {
 protected:
     /// List of InternalStateType values, identifying the selected vars for export.

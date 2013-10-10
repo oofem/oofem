@@ -58,7 +58,7 @@ class EntityRenumberingFunction;
  * Describes a collection of components which are given easy access to for example boundary conditions.
  * @author Mikael Öhman
  */
-class Set : public FEMComponent
+class OOFEM_EXPORT Set : public FEMComponent
 {
 protected:
     IntArray elements; ///< Element numbers.

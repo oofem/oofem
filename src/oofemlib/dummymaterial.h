@@ -48,7 +48,7 @@ class InputRecord;
  * Dummy material model, no functionality. Convenient for special-purpose elements not
  * requiring real material.
  */
-class DummyMaterial : public Material
+class OOFEM_EXPORT DummyMaterial : public Material
 {
 public:
     DummyMaterial (int n, Domain* d) : Material(n,d) {};

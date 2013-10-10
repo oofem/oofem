@@ -43,7 +43,7 @@ namespace oofem {
 /**
  * Class implementing void preconditioner.
  */
-class VoidPreconditioner : public Preconditioner
+class OOFEM_EXPORT VoidPreconditioner : public Preconditioner
 {
 private:
 

@@ -48,7 +48,7 @@ namespace oofem {
  * This base body load class only defines the common services common to all derived classes.
  * Derived classes need to implement services declared by base Load class.
  */
-class BodyLoad : public Load
+class OOFEM_EXPORT BodyLoad : public Load
 {
 public:
     /**

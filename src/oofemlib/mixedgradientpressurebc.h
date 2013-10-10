@@ -56,7 +56,7 @@ namespace oofem {
  * 
  * @author Mikael Öhman
  */
-class MixedGradientPressureBC : public ActiveBoundaryCondition
+class OOFEM_EXPORT MixedGradientPressureBC : public ActiveBoundaryCondition
 {
 public:
     /**

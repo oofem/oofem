@@ -60,7 +60,7 @@ void drawIGAPatchDeformedGeometry(Element * elem, StructuralElementEvaluator * s
 /**
  * Geometry wrapper for IGA elements.
  */
-class FEIIGAElementGeometryWrapper : public FEICellGeometry
+class OOFEM_EXPORT FEIIGAElementGeometryWrapper : public FEICellGeometry
 {
 public:
     const IntArray *knotSpan;
@@ -83,7 +83,7 @@ public:
 /**
  * IntegrationElement represent nonzero knot span, derived from Integration Rule.
  */
-class IGAIntegrationElement : public GaussIntegrationRule
+class OOFEM_EXPORT IGAIntegrationElement : public GaussIntegrationRule
 {
 protected:
     IntArray knotSpan;     // knot_span(nsd)
@@ -99,7 +99,7 @@ public:
 /**
  * Implements base IGAElement, supposed to be a parent class of all elements with B-spline or NURBS based interpolation.
  */
-class IGAElement : public Element
+class OOFEM_EXPORT IGAElement : public Element
 {
 protected:
     // FEInterpolation interpolation;
@@ -126,7 +126,7 @@ protected:
 /**
  * IGATSplineElement setups integration rules differently from IGAElement.
  */
-class IGATSplineElement : public IGAElement
+class OOFEM_EXPORT IGATSplineElement : public IGAElement
 {
 public:
     IGATSplineElement(int n, Domain *aDomain) : IGAElement(n, aDomain) { }

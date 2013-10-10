@@ -52,7 +52,7 @@ namespace oofem {
  * strongly coupled problems). Then masked primary field can be used to select only certain DOFs
  * (based on DofID) from its master PrimaryField.
  */
-class MaskedPrimaryField : public Field
+class OOFEM_EXPORT MaskedPrimaryField : public Field
 {
 protected:
     PrimaryField* master;

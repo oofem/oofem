@@ -37,6 +37,7 @@
 
 #ifdef __PARALLEL_MODE
 
+ #include "oofemcfg.h"
  #include "processcomm.h"
  #include "commbufftype.h"
  #include "communicatormode.h"
@@ -61,7 +62,7 @@ namespace oofem {
  * When comBuff will be registered, resize is needed only when maps change, and this will not occur frequently
  * (its even quite rare).
  */
-class CommunicatorBuff
+class OOFEM_EXPORT CommunicatorBuff
 {
 protected:
     /// Number of processes.
@@ -100,7 +101,7 @@ public:
  * not known in advance. This requires to use dynamic (packeted) buffering.
  *
  */
-class Communicator
+class OOFEM_EXPORT Communicator
 {
 protected:
     /// Rank of process.

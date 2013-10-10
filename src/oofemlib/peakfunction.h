@@ -49,7 +49,7 @@ namespace oofem {
  * This class implements a function that is 0 everywhere, except in a single
  * point.
  */
-class PeakFunction : public LoadTimeFunction
+class OOFEM_EXPORT PeakFunction : public LoadTimeFunction
 {
 private:
     /// Specific time when function is nonzero.

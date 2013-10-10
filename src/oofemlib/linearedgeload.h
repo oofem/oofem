@@ -66,7 +66,7 @@ class TimeStep;
  * @note{This class is not restricted to structural problems. For example, in thermal analysis,
  * a boundary load load would be a  heat source.}
  */
-class LinearEdgeLoad : public BoundaryLoad
+class OOFEM_EXPORT LinearEdgeLoad : public BoundaryLoad
 {
 protected:
     /// Coordinates of start and end point

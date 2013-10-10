@@ -42,7 +42,6 @@
 #include "oofemtxtinputrecord.h"
 // for Range class definition outputmanager.h included
 #include "outputmanager.h"
-#include "util.h"
 
 namespace oofem {
 EngngModel *oofegGraphicContext :: emodel = NULL;

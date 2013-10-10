@@ -49,7 +49,7 @@ class ProcessCommunicator;
  * on nodal averaging or projection process in which it is assumed that the stress @f$ \sigma_\star @f$ is
  * interpolated by the same function as the displacement.
  */
-class ZZNodalRecoveryModel : public NodalRecoveryModel
+class OOFEM_EXPORT ZZNodalRecoveryModel : public NodalRecoveryModel
 {
 protected:
     /**
@@ -92,7 +92,7 @@ private:
 /**
  * The element interface required by ZZNodalRecoveryModel.
  */
-class ZZNodalRecoveryModelInterface : public Interface
+class OOFEM_EXPORT ZZNodalRecoveryModelInterface : public Interface
 {
 public:
     /// Constructor

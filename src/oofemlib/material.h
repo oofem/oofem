@@ -90,7 +90,7 @@ class FloatMatrix;
  * @see MaterialStatus class
  * @see GaussPoint class
  */
-class Material : public FEMComponent
+class OOFEM_EXPORT Material : public FEMComponent
 {
 protected:
     /**

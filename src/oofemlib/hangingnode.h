@@ -62,7 +62,7 @@ namespace oofem {
  * If no master element number is supplied (or negative) then it will locate it using the global coordinates.
  * and if no master region number is supplied (or zero), it will look for elements in all regions.
  */
-class HangingNode : public Node
+class OOFEM_EXPORT HangingNode : public Node
 {
 protected:
     /// Number of the master element.

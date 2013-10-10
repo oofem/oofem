@@ -42,7 +42,7 @@ namespace oofem {
  * Class representing a 1d Hermitian cubic isoparametric interpolation.
  * @author Mikael Öhman
  */
-class FEI1dHermite : public FEInterpolation1d
+class OOFEM_EXPORT FEI1dHermite : public FEInterpolation1d
 {
 protected:
     int cindx;

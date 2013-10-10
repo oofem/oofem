@@ -74,7 +74,7 @@ namespace oofem {
 
 class PythonInitializer;
 
-class UserDefDirichletBC : public BoundaryCondition
+class OOFEM_EXPORT UserDefDirichletBC : public BoundaryCondition
 {
 protected:
     /// Prescribed values for each resp. dof
