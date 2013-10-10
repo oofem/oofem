@@ -109,7 +109,22 @@ GeneralBoundaryCondition :: giveInputRecord(DynamicInputRecord &input)
 {
     FEMComponent :: giveInputRecord(input);
     input.setField(this->loadTimeFunction, _IFT_GeneralBoundaryCondition_LoadTimeFunct);
-    input.setField(this->isImposedTimeFunction, _IFT_GeneralBoundaryCondition_IsImposedTimeFunct);
+
+    if ( (int) this->giveBCValType() > 0 ) {
+        input.setField(this->giveBCValType(), _IFT_GeneralBoundaryCondition_valType);   
+    }
+
+    if ( this->giveDofIDs().giveSize() > 0 ) {
+        input.setField(this->giveDofIDs(), _IFT_GeneralBoundaryCondition_dofs);   
+    }
+
+    if ( this->isImposedTimeFunction > 0 ) {
+        input.setField(this->isImposedTimeFunction, _IFT_GeneralBoundaryCondition_IsImposedTimeFunct);
+    }
+
+    if ( this->giveSetNumber() > 0 ) {
+        input.setField(this->giveSetNumber(), _IFT_GeneralBoundaryCondition_set);
+    }
 }
 
 contextIOResultType

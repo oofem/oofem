@@ -77,7 +77,7 @@ public:
     virtual ~Set() {}
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-
+    virtual void giveInputRecord(DynamicInputRecord &input);
     /**
      * Returns list of elements within set. 
      * @return List of element numbers.

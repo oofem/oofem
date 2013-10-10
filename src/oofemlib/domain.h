@@ -387,7 +387,9 @@ public:
     int giveNumberOfNonlocalBarriers() const { return nonlocalBarierList->giveSize(); }
     /// Returns number of random field generators
     int giveNumberOfRandomFieldGenerators() const { return randomFieldGeneratorList->giveSize(); }
-    
+    /// Returns number of sets
+    int giveNumberOfSets() const { return setList->giveSize(); }    
+
     int giveCorrespondingCoordinateIndex(int);
     /// Returns number of spatial dimensions.
     int giveNumberOfSpatialDimensions();

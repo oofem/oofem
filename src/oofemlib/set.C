@@ -44,7 +44,7 @@
 #include "feinterpol2d.h"
 #include "feinterpol3d.h"
 #include "contextioerr.h"
-
+#include "dynamicinputrecord.h"
 #include <list>
 
 namespace oofem {
@@ -76,6 +76,26 @@ IRResultType Set :: initializeFrom(InputRecord* ir)
 
     return IRRT_OK;
 }
+
+
+void Set :: giveInputRecord(DynamicInputRecord &input)
+{
+    input.setRecordKeywordField(_IFT_Set_Name, this->giveNumber());
+
+    if ( this->giveNodeList().giveSize() ) {
+        input.setField(this->nodes, _IFT_Set_nodes);
+    }
+    if ( this->giveElementList().giveSize() ) {
+        input.setField(this->elements, _IFT_Set_elements);
+    }
+    if ( this->giveBoundaryList().giveSize() ) {
+        input.setField(this->elementBoundaries, _IFT_Set_elementBoundaries);
+    }
+    if ( this->giveEdgeList().giveSize() ) {
+        input.setField(this->elementEdges, _IFT_Set_elementEdges);
+    }
+}
+
 
 void Set :: computeIntArray(IntArray& answer, const IntArray& specified, std::list< Range > ranges)
 {

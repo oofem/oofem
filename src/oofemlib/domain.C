@@ -174,6 +174,16 @@ Domain* Domain :: Clone()
     inputRec->setField(this->giveNumberOfBoundaryConditions(), 	_IFT_Domain_nbc);
     inputRec->setField(this->giveNumberOfInitialConditions(), 	_IFT_Domain_nic);
     inputRec->setField(this->giveNumberOfLoadTimeFunctions(), 	_IFT_Domain_nloadtimefunct);
+    inputRec->setField(this->giveNumberOfSets(),            	_IFT_Domain_nset);
+
+
+    // fields to add:
+    // inputRec->setField( , _IFT_Domain_nbarrier);
+    // inputRec->setField( , _IFT_Domain_nrandgen);
+    // inputRec->setField( , _IFT_Domain_topology);
+    // inputRec->setField( , _IFT_Domain_numberOfSpatialDimensions);
+    // inputRec->setField( , _IFT_Domain_nfracman);
+
 
     bool nxfemMan = 0;
     if(this->hasXfemManager()) {
@@ -271,6 +281,18 @@ Domain* Domain :: Clone()
    	    dataReader.insertInputRecord(DataReader::IR_ltfRec, ltfRec);
     }
 
+
+    //Sets
+    int nSets = this->giveNumberOfSets();
+    for(int i = 1; i <= nSets; i++) {
+
+    	Set *set = this->giveSet(i);
+
+        DynamicInputRecord* ltfRec = new DynamicInputRecord();
+        set->giveInputRecord(*ltfRec);
+
+   	    dataReader.insertInputRecord(DataReader::IR_ltfRec, ltfRec);
+    }
 
     //XFEM manager
     if(this->xfemManager != NULL) {

@@ -57,7 +57,7 @@ Shell7BaseXFEM :: checkConsistency()
 
     // check if defined xi-coords in delamination EI corresponds to actual layer boundaries
     ///@todo remove the need for this by defining which interfaces that can delaminate instead.
-
+    // check if xman is defined otherwise quit
     return 1;
 }
 
