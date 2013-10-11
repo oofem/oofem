@@ -168,7 +168,7 @@ class OOFEM_EXPORT ClassFactory
         int operator()(const std :: string &a, const std :: string &b) const;
     };
 
-protected:
+private:
     /// Associative container containing element creators with element name as key.
     std :: map < std :: string, Element * ( * )(int, Domain *), CaseComp > elemList;
     /// Associative container containing dofmanager creators with dofmanager  name as key.
