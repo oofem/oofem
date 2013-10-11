@@ -61,7 +61,10 @@ if (${CMAKE_VERSION} VERSION_GREATER "2.8.7") # Compability with older version o
     else ()
         option (USE_SHARED_LIB "Build shared library" ON)
     endif ()
+else ()
+    set (USE_SHARED_LIB OFF)
 endif ()
+
 # Parallel stuff
 option (USE_PARALLEL "Enable parallel support" OFF)
 option (USE_METIS "Enable metis support" OFF)
@@ -451,12 +454,17 @@ check_cxx_source_compiles ("
 #include <stdio.h>
 #define LOG_FATAL(file,...) fprintf (file, __VA_ARGS__)
 int main(void) { return 0; }" HAVE_MACRO_VA_ARGS)
-
+if (USE_SHARED_LIB)
+    set (OOFEM_EXPORT_HEADER "#include \"oofem_export.h\"")
+    # For consistant library on linux and windows platforms.
+    #add_compiler_export_flags ()
+else ()
+    set (OOFEM_EXPORT_HEADER "#define OOFEM_EXPORT\n#define OOFEM_NO_EXPORT")
+endif ()
 configure_file (
   "${oofem_SOURCE_DIR}/src/oofemcfg.h.in"
   "${oofem_BINARY_DIR}/oofemcfg.h"
   )
-
 
 #######################################################################
 ######################## Targets ######################################
@@ -487,9 +495,6 @@ if (USE_PYTHON_BINDINGS)
 endif ()
 
 # Main targets
-if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
-    set (USE_SHARED_LIB OFF)
-endif ()
 if (USE_SHARED_LIB)
     add_library (liboofem
         SHARED
@@ -499,13 +504,17 @@ if (USE_SHARED_LIB)
     target_link_libraries (liboofem ${EXT_LIBS})
     set_target_properties (liboofem PROPERTIES OUTPUT_NAME oofem)
     install (TARGETS liboofem DESTINATION lib)
-endif ()
 
-# TODO: Consider this when we have all the necessary macros in place:
-#add_compiler_export_flags()
-generate_export_header (liboofem
-    BASE_NAME OOFEM
-    )
+    # This should be set automatically, but I think TARGET:objs confuses cmake:
+    set_target_properties (core PROPERTIES DEFINES liboofem_EXPORTS)
+    set_target_properties (fm PROPERTIES DEFINES liboofem_EXPORTS)
+    set_target_properties (sm PROPERTIES DEFINES liboofem_EXPORTS)
+    set_target_properties (tm PROPERTIES DEFINES liboofem_EXPORTS)
+
+    generate_export_header (liboofem
+        BASE_NAME OOFEM
+        )
+endif ()
 
 # OOFEM target
 if (USE_SHARED_LIB) # Prefer dynamic lib if available.
