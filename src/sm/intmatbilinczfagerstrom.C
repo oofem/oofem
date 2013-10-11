@@ -217,7 +217,7 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
             const double errorTol = 0.0001;
             for( int iter = 1; fabs(loadFun)/sigf > errorTol; iter++) {
                 if (iter>40) {
-                    //OOFEM_ERROR("BilinearCZMaterialFagerstrom :: giveRealStressVector - no convergence in constitutive driver");
+                    OOFEM_ERROR("BilinearCZMaterialFagerstrom :: giveRealStressVector - no convergence in constitutive driver");
                     }
                 Smat.zero();	// S_mat=0.d0
 
