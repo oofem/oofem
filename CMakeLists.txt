@@ -697,7 +697,9 @@ endforeach (case)
 
 # Custom targets for test and benchmarks (which can conveniently be accessed from IDEs)
 add_custom_target (tests
-    COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "test"
+#   "-j 2" option can fail on production machine doing nightly test`
+#   COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "test"
+    COMMAND ${CMAKE_CTEST_COMMAND} "-R" "test"
     WORKING_DIRECTORY ${oofem_BINARY_DIR}
     )
 add_custom_target (benchmarks
