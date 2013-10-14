@@ -39,7 +39,7 @@ namespace oofem {
 /**
  * Implementation of diagonal preconditioner
  */
-class DiagPreconditioner : public Preconditioner
+class OOFEM_EXPORT DiagPreconditioner : public Preconditioner
 {
 private:
     FloatArray diag_;

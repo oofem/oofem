@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef enrichmentitem_h
@@ -93,7 +93,7 @@ class DynamicDataReader;
  * @author Jim Brouzoulis
  * @author Erik Svenning
  */
-class EnrichmentItem : public FEMComponent
+class OOFEM_EXPORT EnrichmentItem : public FEMComponent
 {
 public:
     /// Constructor.
@@ -240,7 +240,7 @@ protected:
 
 
 /** Inclusion. */
-class Inclusion : public EnrichmentItem
+class OOFEM_EXPORT Inclusion : public EnrichmentItem
 {
 protected:
     Material *mat;
@@ -260,7 +260,7 @@ public:
 
 
 /** Delamination. */
-class Delamination : public EnrichmentItem
+class OOFEM_EXPORT Delamination : public EnrichmentItem
 {
 public:
     Delamination(int n, XfemManager *xm, Domain *aDomain);
@@ -285,7 +285,7 @@ public:
 };
 
 /** Concrete representation of Crack. */
-class Crack : public EnrichmentItem
+class OOFEM_EXPORT Crack : public EnrichmentItem
 {
 public:
     Crack(int n, XfemManager *xm, Domain *aDomain);
@@ -334,7 +334,7 @@ void EnrichmentItem :: interpGradLevelSet(FloatArray &oGradLevelSet, const Float
  *
  * 	Erik Svenning - August 2013
  */
-class EnrichmentFront
+class OOFEM_EXPORT EnrichmentFront
 {
 public:
     EnrichmentFront() {};
@@ -385,7 +385,7 @@ protected:
     void giveNodeTipIndices(int iNodeInd, std::vector<int> &oTipIndices) const;
 };
 
-class EnrFrontDoNothing: public EnrichmentFront{
+class OOFEM_EXPORT EnrFrontDoNothing: public EnrichmentFront{
 public:
 	EnrFrontDoNothing() {};
 	virtual ~EnrFrontDoNothing() {};
@@ -408,7 +408,7 @@ public:
 
 };
 
-class EnrFrontExtend: public EnrichmentFront{
+class OOFEM_EXPORT EnrFrontExtend: public EnrichmentFront{
 public:
 	EnrFrontExtend() {};
 	virtual ~EnrFrontExtend() {};
@@ -432,7 +432,7 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 };
 
-class EnrFrontLinearBranchFuncRadius: public EnrichmentFront{
+class OOFEM_EXPORT EnrFrontLinearBranchFuncRadius: public EnrichmentFront{
 public:
 	EnrFrontLinearBranchFuncRadius();
 	virtual ~EnrFrontLinearBranchFuncRadius();

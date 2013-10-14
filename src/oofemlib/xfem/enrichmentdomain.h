@@ -17,24 +17,25 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef enrichmentdomain_h
 #define enrichmentdomain_h
 
+#include "oofemcfg.h"
 #include "domain.h"
 #include "floatarray.h"
 #include "node.h"
@@ -65,7 +66,7 @@ class EnrichmentItem;
  * @author Jim Brouzoulis
  * @author Erik Svenning
  */
-class EnrichmentDomain
+class OOFEM_EXPORT EnrichmentDomain
 {
 public:
     EnrichmentDomain();
@@ -100,7 +101,7 @@ public:
  * Base class for EnrichmentDomains that derive from BasicGeometry
  * @todo: Add additional basic geometry descriptions like polygon
  */
-class EnrichmentDomain_BG : public EnrichmentDomain
+class OOFEM_EXPORT EnrichmentDomain_BG : public EnrichmentDomain
 {
 public:
     BasicGeometry *bg;
@@ -121,7 +122,7 @@ public:
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;
 };
 
-class EDBGCircle : public EnrichmentDomain_BG
+class OOFEM_EXPORT EDBGCircle : public EnrichmentDomain_BG
 {
 public:
     EDBGCircle() { bg = new Circle; };
@@ -136,7 +137,7 @@ public:
 /**
  * EDCrack: Enrichment geometry described by a piecewise linear polygon.
  */
-class EDCrack : public EnrichmentDomain_BG
+class OOFEM_EXPORT EDCrack : public EnrichmentDomain_BG
 {
 public:
     EDCrack() { bg = new PolygonLine; }
@@ -158,7 +159,7 @@ public:
  * List of DofManagers
  * ///@todo: Add additional basic geometry descriptions like polygon
  */
-class DofManList : public EnrichmentDomain
+class OOFEM_EXPORT DofManList : public EnrichmentDomain
 {
 protected:
     std::vector< int > dofManList;
@@ -186,7 +187,7 @@ public:
  * Mostly intended for debugging but may easily lead to a singular problem if the
  * solution is enriched with strong discontinuities.
  */
-class WholeDomain : public EnrichmentDomain
+class OOFEM_EXPORT WholeDomain : public EnrichmentDomain
 {
 public:
     WholeDomain() { }

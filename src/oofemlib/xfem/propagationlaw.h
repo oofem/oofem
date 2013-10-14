@@ -17,25 +17,26 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 
 #ifndef PROPAGATIONLAW_H_
 #define PROPAGATIONLAW_H_
 
+#include "oofemcfg.h"
 #include "inputrecord.h"
 
 #define _IFT_PLDoNothing_Name "propagationlawdonothing"
@@ -56,10 +57,11 @@ class DynamicInputRecord;
  * @author Erik Svenning
  */
 
-class PropagationLaw {
+class OOFEM_EXPORT PropagationLaw
+{
 public:
-	PropagationLaw();
-	virtual ~PropagationLaw();
+    PropagationLaw();
+    virtual ~PropagationLaw();
 
     virtual const char *giveClassName() const = 0;
     virtual const char *giveInputRecordName() const = 0;
@@ -70,10 +72,10 @@ public:
 	virtual void propagateInterfaces(EnrichmentDomain &iEnrDom) = 0;
 };
 
-class PLDoNothing: public PropagationLaw {
+class OOFEM_EXPORT PLDoNothing: public PropagationLaw {
 public:
-	PLDoNothing() {};
-	virtual ~PLDoNothing() {};
+    PLDoNothing() {};
+    virtual ~PLDoNothing() {};
 
     virtual const char *giveClassName() const { return "PLDoNothing"; }
     virtual const char *giveInputRecordName() const { return _IFT_PLDoNothing_Name; }
@@ -84,10 +86,10 @@ public:
 	virtual void propagateInterfaces(EnrichmentDomain &ioEnrDom) {};
 };
 
-class PLCrackPrescribedDir: public PropagationLaw {
+class OOFEM_EXPORT PLCrackPrescribedDir: public PropagationLaw {
 public:
-	PLCrackPrescribedDir():mAngle(0.0), mIncrementLength(0.0) {};
-	virtual ~PLCrackPrescribedDir() {};
+    PLCrackPrescribedDir():mAngle(0.0), mIncrementLength(0.0) {};
+    virtual ~PLCrackPrescribedDir() {};
 
     virtual const char *giveClassName() const { return "PLCrackPrescribedDir"; }
     virtual const char *giveInputRecordName() const { return _IFT_PLCrackPrescribedDir_Name; }
@@ -95,10 +97,10 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-	virtual void propagateInterfaces(EnrichmentDomain &ioEnrDom);
+    virtual void propagateInterfaces(EnrichmentDomain &ioEnrDom);
 
 protected:
-	double mAngle, mIncrementLength;
+    double mAngle, mIncrementLength;
 };
 
 } // end namespace oofem

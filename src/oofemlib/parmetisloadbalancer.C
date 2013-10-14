@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifdef __PARALLEL_MODE
@@ -575,7 +575,7 @@ void ParmetisLoadBalancer :: addSharedDofmanPartitions(int _locnum, IntArray _pa
 void ParmetisLoadBalancer :: handleMasterSlaveDofManLinks()
 {
     int idofman, ndofman = domain->giveNumberOfDofManagers();
-    DofManager *dofman, *_masterPtr;
+    DofManager *dofman;
     //int myrank = domain->giveEngngModel()->giveRank();
     int __i, __j, __partition, _master;
     bool isSlave;
@@ -601,7 +601,6 @@ void ParmetisLoadBalancer :: handleMasterSlaveDofManLinks()
             for ( __i = 1; __i <= slaveMastersDofMans.giveSize(); __i++ ) {
                 // loop over all slave masters
                 _master = slaveMastersDofMans.at(__i);
-                _masterPtr = domain->giveDofManager(_master);
 
                 // now loop over all slave new partitions and annd then to master's partitions
                 for ( __j = 1; __j <= dofManPartitions [ idofman - 1 ].giveSize(); __j++ ) {

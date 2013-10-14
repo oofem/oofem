@@ -4,6 +4,7 @@ include (CheckCXXSymbolExists)
 include (CheckIncludeFiles)
 include (CheckIncludeFileCXX)
 include (CheckCXXSourceCompiles)
+include (GenerateExportHeader)
 include (UsePkgConfig)
 
 project (oofem)
@@ -60,7 +61,10 @@ if (${CMAKE_VERSION} VERSION_GREATER "2.8.7") # Compability with older version o
     else ()
         option (USE_SHARED_LIB "Build shared library" ON)
     endif ()
+else ()
+    set (USE_SHARED_LIB OFF)
 endif ()
+
 # Parallel stuff
 option (USE_PARALLEL "Enable parallel support" OFF)
 option (USE_METIS "Enable metis support" OFF)
@@ -208,7 +212,7 @@ if (USE_OOFEG)
 endif ()
 
 #######################################################################
-######################## External libaries ############################
+######################## External libraries ###########################
 #######################################################################
 
 #if (USE_BOOST) 
@@ -450,12 +454,17 @@ check_cxx_source_compiles ("
 #include <stdio.h>
 #define LOG_FATAL(file,...) fprintf (file, __VA_ARGS__)
 int main(void) { return 0; }" HAVE_MACRO_VA_ARGS)
-
+if (USE_SHARED_LIB)
+    set (OOFEM_EXPORT_HEADER "#include \"oofem_export.h\"")
+    # For consistant library on linux and windows platforms.
+    #add_compiler_export_flags ()
+else ()
+    set (OOFEM_EXPORT_HEADER "#define OOFEM_EXPORT\n#define OOFEM_NO_EXPORT")
+endif ()
 configure_file (
   "${oofem_SOURCE_DIR}/src/oofemcfg.h.in"
   "${oofem_BINARY_DIR}/oofemcfg.h"
   )
-
 
 #######################################################################
 ######################## Targets ######################################
@@ -486,9 +495,6 @@ if (USE_PYTHON_BINDINGS)
 endif ()
 
 # Main targets
-if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
-    set (USE_SHARED_LIB OFF)
-endif ()
 if (USE_SHARED_LIB)
     add_library (liboofem
         SHARED
@@ -498,6 +504,16 @@ if (USE_SHARED_LIB)
     target_link_libraries (liboofem ${EXT_LIBS})
     set_target_properties (liboofem PROPERTIES OUTPUT_NAME oofem)
     install (TARGETS liboofem DESTINATION lib)
+
+    # This should be set automatically, but I think TARGET:objs confuses cmake:
+    set_target_properties (core PROPERTIES DEFINES liboofem_EXPORTS)
+    set_target_properties (fm PROPERTIES DEFINES liboofem_EXPORTS)
+    set_target_properties (sm PROPERTIES DEFINES liboofem_EXPORTS)
+    set_target_properties (tm PROPERTIES DEFINES liboofem_EXPORTS)
+
+    generate_export_header (liboofem
+        BASE_NAME OOFEM
+        )
 endif ()
 
 # OOFEM target
@@ -528,6 +544,7 @@ if (USE_OOFEG)
     install(TARGETS oofeg DESTINATION bin)
 endif ()
 
+
 # CppCheck target (not built by default)
 add_custom_target(cppcheck)
 set_target_properties(cppcheck PROPERTIES EXCLUDE_FROM_ALL TRUE)
@@ -548,6 +565,7 @@ add_custom_command(TARGET cppcheck
     "cppcheck.xml"
     COMMENT "Running cppcheck on entire source"
     )
+
 
 #######################################################################
 ######################## Documentation ################################
@@ -638,6 +656,8 @@ if (USE_PARALLEL)
         #set_tests_properties ("parextr_${case}" PROPERTIES DEPENDS "partest_${case}")
         #list (APPEND CTEST_CUSTOM_MEMCHECK_IGNORE "parextr_${case}")
     endforeach (case)
+    # partest_brazil_2d_nl7 requires more time on testing server than default 1500
+    set_tests_properties(partest_brazil_2d_nl7 PROPERTIES TIMEOUT 2500)
 endif ()
 # Sequential test cases
 file (GLOB sm_tests RELATIVE "${oofem_TEST_DIR}/sm" "${oofem_TEST_DIR}/sm/*.in")
@@ -677,7 +697,9 @@ endforeach (case)
 
 # Custom targets for test and benchmarks (which can conveniently be accessed from IDEs)
 add_custom_target (tests
-    COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "test"
+#   "-j 2" option can fail on production machine doing nightly test`
+#   COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "test"
+    COMMAND ${CMAKE_CTEST_COMMAND} "-R" "test"
     WORKING_DIRECTORY ${oofem_BINARY_DIR}
     )
 add_custom_target (benchmarks
@@ -700,7 +722,7 @@ set (CPACK_PACKAGE_VENDOR "OOFEM development team")
 set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Object Oriented Finite Element")
 #set (CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README")
 set (CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README")
-set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/gpl.txt")
+set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING.LGPLv2.1")
 set (CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
 set (CPACK_PACKAGE_EXECUTABLES "oofem")
 set (CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${CMAKE_SYSTEM_PROCESSOR})
