@@ -49,6 +49,7 @@
 #define _IFT_CylindricalALM_Name "calm"
 #define _IFT_CylindricalALM_psi "psi"
 #define _IFT_CylindricalALM_maxiter "maxiter"
+#define _IFT_CylindricalALM_maxrestarts "maxrestarts"
 #define _IFT_CylindricalALM_minsteplength "minsteplength"
 #define _IFT_CylindricalALM_steplength "steplength"
 #define _IFT_CylindricalALM_initialsteplength "initialsteplength"
@@ -159,6 +160,7 @@ protected:
     typedef std :: set< DofIDItem >__DofIDSet;
 
     int nsmax;
+    int maxRestarts;
     double Psi;
     double deltaL, minStepLength, maxStepLength;
     int solved, numberOfRequiredIterations;

@@ -47,7 +47,6 @@
 
 namespace oofem {
 #define CALM_RESET_STEP_REDUCE 0.25
-#define CALM_MAX_RESTARTS 4
 #define CALM_TANGENT_STIFF_TRESHOLD 0.1
 #define CALM_DEFAULT_NRM_TICKS 2
 #define CALM_MAX_REL_ERROR_BOUND 1.e10
@@ -94,6 +93,9 @@ CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m) :
     minIterations = 0;
 
     calm_hpc_init = 0;
+    
+    // Maximum number of restarts when convergence not reached during maxiter
+    maxRestarts = 4;
 
 #ifdef __PARALLEL_MODE
 #ifdef __PETSC_MODULE
@@ -324,7 +326,7 @@ restart:
         //
         if ( this->computeDeltaLambda(deltaLambda, * dX, deltaXt, deltaX_, * R, RR, eta, deltaL, DeltaLambda, neq) ) {
             irest++;
-            if ( irest <= CALM_MAX_RESTARTS ) {
+            if ( irest <= maxRestarts ) {
                 // convergence problems
                 // there must be step restart followed by decrease of step length
                 // status |= NM_ForceRestart;
@@ -406,7 +408,7 @@ restart:
                                            internalForcesEBENorm, nite, errorOutOfRangeFlag);
         if ( ( nite >= nsmax ) || errorOutOfRangeFlag ) {
             irest++;
-            if ( irest <= CALM_MAX_RESTARTS ) {
+            if ( irest <= maxRestarts ) {
                 // convergence problems
                 // there must be step restart followed by decrease of step length
                 // status |= NM_ForceRestart;
@@ -770,6 +772,8 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         nsmax = 30;
     }
 
+    IR_GIVE_OPTIONAL_FIELD(ir, maxRestarts, _IFT_CylindricalALM_maxrestarts);
+    
     minStepLength = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, _IFT_CylindricalALM_minsteplength);
 
