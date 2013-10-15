@@ -54,12 +54,25 @@
 #include "stokesflow.h"
 #endif
 
+#ifdef __SM_MODULE
+#include "structengngmodel.h"
+#endif
+
+#include "unknownnumberingscheme.h"
+
 namespace oofem {
 
 REGISTER_ExportModule( MatlabExportModule )
 
 				MatlabExportModule :: MatlabExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
-{}
+{
+    exportMesh = false;
+    exportData = false;
+    exportArea = false;
+    exportSpecials = false;
+    exportReactionForces = false;
+    reactionForcesDofManList.resize(0);
+}
 
 
 MatlabExportModule :: ~MatlabExportModule()
@@ -69,11 +82,18 @@ MatlabExportModule :: ~MatlabExportModule()
 IRResultType
 MatlabExportModule :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
+    IRResultType result;                    // Required by IR_GIVE_FIELD macro
+
 	exportMesh = ir->hasField(_IFT_MatlabExportModule_mesh);
 	exportData = ir->hasField(_IFT_MatlabExportModule_data);
 	exportArea = ir->hasField(_IFT_MatlabExportModule_area);
 	exportSpecials = ir->hasField(_IFT_MatlabExportModule_specials);
 
+    exportReactionForces = ir->hasField(_IFT_MatlabExportModule_ReactionForces);
+    if ( exportReactionForces ) {
+       IR_GIVE_OPTIONAL_FIELD(ir, reactionForcesDofManList, _IFT_MatlabExportModule_DofManList);
+    }
 	return IRRT_OK;
 }
 
@@ -125,7 +145,7 @@ MatlabExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 	Domain *domain  = emodel->giveDomain(1);
 	ndim=domain->giveNumberOfSpatialDimensions();
 
-	fprintf( FID, "function [mesh area data specials]=%s\n\n", functionname.c_str() );
+	fprintf( FID, "function [mesh area data specials ReactionForces]=%s\n\n", functionname.c_str() );
 
 	if ( exportMesh ) {
 		doOutputMesh(tStep, FID);
@@ -167,6 +187,13 @@ MatlabExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 		doOutputSpecials(tStep, FID);
 	} else {
 		fprintf(FID, "\tspecials=[];\n");
+	}
+
+
+	if ( exportReactionForces ) {
+		doOutputReactionForces(tStep, FID);
+	} else {
+		fprintf(FID, "\tReactionForces=[];\n");
 	}
 
 	fprintf(FID, "\nend\n");
@@ -317,6 +344,101 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 		}
 	}
 }
+
+
+
+
+void
+MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
+{
+
+    int domainIndex = 1;
+    Domain *domain  = emodel->giveDomain( domainIndex );
+
+    FloatArray reactions;    
+    IntArray dofManMap, dofMap, eqnMap;
+    StructuralEngngModel *strEngMod = dynamic_cast<StructuralEngngModel*>(emodel); 
+    int numRestrDofs = 0;
+    if ( strEngMod ) {
+        strEngMod->buildReactionTable(dofManMap, dofMap, eqnMap, tStep, domainIndex);
+        strEngMod->computeReaction(reactions, tStep, 1);
+        numRestrDofs = strEngMod->giveNumberOfDomainEquations(domainIndex, EModelDefaultPrescribedEquationNumbering());
+    } else {
+        OOFEM_ERROR("MatlabExportModule :: doOutputReactionForces - Cannot export reaction forces - only implemented for structural problems.");
+    }
+
+    int numDofManToExport = this->reactionForcesDofManList.giveSize();
+    if ( numDofManToExport == 0 ) { // No dofMan's given - export every dMan with reaction forces
+
+        for (int i = 1; i <= domain->giveNumberOfDofManagers(); i++) {
+            if ( dofManMap.contains(i) ) {
+                this->reactionForcesDofManList.followedBy(i);
+            }
+        }
+        numDofManToExport = this->reactionForcesDofManList.giveSize();
+    }
+
+
+    
+
+
+    // Output header
+    fprintf( FID, "\n \%%\%% Export of reaction forces \n\n" );
+
+    // Output the dofMan numbers that are exported
+    fprintf( FID, "\tReactionForces.DofManNumbers = [" );
+    for ( int i = 1; i <= numDofManToExport; i++ ) {
+        fprintf( FID, "%i ", this->reactionForcesDofManList.at(i) );
+    }
+    fprintf( FID, "];\n" );
+
+
+    // Define the reaction forces as a cell object
+    fprintf( FID, "\tReactionForces.ReactionForces = cell(%i,1); \n", numDofManToExport );
+    fprintf( FID, "\tReactionForces.DofIDs = cell(%i,1); \n", numDofManToExport );
+
+
+    // Output the reaction forces for each dofMan. If a certain dof is not prescribed zero is exported.
+    IntArray dofIDs;
+    for ( int i = 1; i <= numDofManToExport; i++ ) {
+        int dManNum = this->reactionForcesDofManList.at(i);
+        
+
+        fprintf(FID, "\tReactionForces.ReactionForces{%i} = [", i);
+        if ( dofManMap.contains( dManNum ) ) {
+
+            DofManager *dofMan = domain->giveDofManager( dManNum );
+            dofIDs.resize( dofMan->giveNumberOfDofs() );
+            dofIDs.zero();
+
+            for ( int j = 1; j <= dofMan->giveNumberOfDofs(); j++ ) {
+                Dof *dof = dofMan->giveDof(j);
+                int num = dof->giveEquationNumber( EModelDefaultPrescribedEquationNumbering() );
+                int pos = eqnMap.findFirstIndexOf( num );
+                dofIDs.at(j) = (int) dof->giveDofID();
+                if ( pos > 0 ) {
+                    fprintf( FID, "%e ", reactions.at( pos ) );
+                } else {
+                    fprintf( FID, "%e ", 0.0 ); // if not prescibed output zero
+                }
+            }
+        }
+        fprintf(FID, "];\n");
+    
+
+        // Output dof ID's
+        
+        fprintf( FID, "\tReactionForces.DofIDs{%i} = [", i);
+        if ( dofManMap.contains( dManNum ) ) {
+            for ( int j = 1; j <= dofIDs.giveSize(); j++ ) {
+                fprintf( FID, "%i ", dofIDs.at( j ) );
+            }  
+        }
+        fprintf(FID, "];\n");
+        
+    }
+}
+
 
 
 void
