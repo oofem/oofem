@@ -23,13 +23,14 @@ Job description record
 Analysis record
 Domain record
 Output manager record
-ncrosssect # nmat # nbc # nic # nltf # nxfemman #
+ncrosssect # nmat # nbc # nic # nltf # nset # nxfemman #
 cross section records
 material records
 boundary condition records
 initial condition records
 load time function records
 extractor records
+set records
 
 Assignment of properties to nodes and elements is based on association with some unv group. The same mechanism
 is valid for assignment of boundary conditions (edge, surface) load. The syntax is following:
@@ -184,11 +185,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                                 print "Can not assign edge/face load \"%s\" to unv element %d" % (bel.name, elem.id)
 
         #write component record
-<<<<<<< HEAD
-        of.write('ndofman %d nelem %d ncrosssect %d nmat %d nbc %d nic %d nltf %d nset %d\n' % (FEM.nnodes, len(elemNotBoundary), CTRL.ncrosssect, CTRL.nmat, CTRL.nbc, CTRL.nic, CTRL.nltf, CTRL.nset))
-=======
-        of.write('ndofman %d nelem %d ncrosssect %d nmat %d nbc %d nic %d nltf %d nxfemman %d\n' % (FEM.nnodes, len(elemNotBoundary), CTRL.ncrosssect, CTRL.nmat, CTRL.nbc, CTRL.nic, CTRL.nltf, CTRL.nxfemman))
->>>>>>> cb6c6e5a05f1e54eb8d6b84ae4189e34e83eaa22
+        of.write('ndofman %d nelem %d ncrosssect %d nmat %d nbc %d nic %d nltf %d nset %d nxfemman %d\n' % (FEM.nnodes, len(elemNotBoundary), CTRL.ncrosssect, CTRL.nmat, CTRL.nbc, CTRL.nic, CTRL.nltf, CTRL.nset, CTRL.nxfemman))
         #write nodes
         for node in FEM.nodes:
             #resolve nodal properties

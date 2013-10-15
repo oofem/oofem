@@ -235,7 +235,9 @@ class CTRLParser:
         self.nic=int(dataline[7])
         self.nltf=int(dataline[9])
         
-	if len(dataline)>=10:
+	print dataline
+
+	if len(dataline)>=11:
 		if dataline[10].lower()=="nxfemman":
 			self.nxfemman=int(dataline[11])
 
