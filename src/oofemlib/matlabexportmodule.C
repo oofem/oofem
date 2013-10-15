@@ -145,6 +145,11 @@ MatlabExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 	Domain *domain  = emodel->giveDomain(1);
 	ndim=domain->giveNumberOfSpatialDimensions();
 
+    // Output header
+    fprintf( FID, "%%%% OOFEM generated export file \n"); 
+    fprintf( FID, "%% Output for time %f\n", tStep->giveTargetTime() );
+
+
 	fprintf( FID, "function [mesh area data specials ReactionForces]=%s\n\n", functionname.c_str() );
 
 	if ( exportMesh ) {
@@ -383,7 +388,7 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
 
 
     // Output header
-    fprintf( FID, "\n \%%\%% Export of reaction forces \n\n" );
+    fprintf( FID, "\n %%%% Export of reaction forces \n\n" );
 
     // Output the dofMan numbers that are exported
     fprintf( FID, "\tReactionForces.DofManNumbers = [" );
@@ -464,6 +469,10 @@ MatlabExportModule :: giveOutputStream(TimeStep *tStep)
 	size_t foundDot;
 	foundDot = fileName.rfind(".");
 	fileName.erase(foundDot);
+
+    char fext[100];
+    sprintf( fext, "_m%d_%d", this->number, tStep->giveNumber() );
+    fileName += fext;
 
 	functionname = fileName;
 
